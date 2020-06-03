@@ -65,7 +65,11 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url(this.getVideoIframeSrc_(), opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      this.getVideoIframeSrc_(),
+      opt_onLayout
+    );
   }
 
   /** @override */
@@ -143,7 +147,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
-    this.unlistenMessage_ = listen(this.win, 'message', event => {
+    this.unlistenMessage_ = listen(this.win, 'message', (event) => {
       this.handleNexxMessage_(event);
     });
 
@@ -213,7 +217,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     }
 
     const data = objOrParseJson(eventData);
-    if (!data) {
+    if (data == null) {
       return;
     }
 
@@ -330,6 +334,6 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpNexxtvPlayer);
 });

@@ -221,6 +221,19 @@ export class BindValidator {
 function createElementRules_() {
   // Initialize `rules` with tag-specific constraints.
   const rules = {
+    'AMP-AUDIO': {
+      'album': null,
+      'artist': null,
+      'artwork': null,
+      'controlsList': null,
+      'loop': null,
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
+      'title': null,
+    },
     'AMP-AUTOCOMPLETE': {
       'src': {
         'allowedProtocols': {
@@ -271,6 +284,7 @@ function createElementRules_() {
     },
     'AMP-IFRAME': {
       'src': null,
+      'title': null,
     },
     'AMP-IMG': {
       'alt': null,
@@ -317,9 +331,13 @@ function createElementRules_() {
       'data-tweetid': null,
     },
     'AMP-VIDEO': {
+      'album': null,
       'alt': null,
+      'artist': null,
+      'artwork': null,
       'attribution': null,
       'controls': null,
+      'controlslist': null,
       'loop': null,
       'poster': null,
       'preload': null,
@@ -328,19 +346,31 @@ function createElementRules_() {
           'https': true,
         },
       },
+      'title': null,
     },
     'AMP-YOUTUBE': {
       'data-videoid': null,
     },
     'A': {
       'href': {
+        // This should be kept in sync with validator-main.protoascii.
         'allowedProtocols': {
           'ftp': true,
+          'geo': true,
           'http': true,
           'https': true,
           'mailto': true,
+          'maps': true,
+          // 3rd Party Protocols
+          'bip': true,
+          'bbmi': true,
+          'chrome': true,
+          'itms-services': true,
+          'facetime': true,
+          'fb-me': true,
           'fb-messenger': true,
           'intent': true,
+          'line': true,
           'skype': true,
           'sms': true,
           'snapchat': true,
@@ -349,6 +379,9 @@ function createElementRules_() {
           'threema': true,
           'twitter': true,
           'viber': true,
+          'webcal': true,
+          'web+mastodon': true,
+          'wh': true,
           'whatsapp': true,
         },
       },

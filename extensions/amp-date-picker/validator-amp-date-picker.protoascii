@@ -171,6 +171,10 @@ attr_lists: {
     value: ""
   }
   attrs: {
+    name: "hide-keyboard-shortcuts-panel"
+    value: ""
+  }
+  attrs: {
     name: "src"
     value_url: {
       protocol: "https"

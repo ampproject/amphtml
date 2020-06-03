@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-imgur'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -53,21 +53,21 @@ describes.realWin(
     }
 
     it('renders', () => {
-      return getImgur('2CnX7').then(imgur => {
+      return getImgur('2CnX7').then((imgur) => {
         testIframe(imgur.querySelector('iframe'), '2CnX7');
       });
     });
 
     it('renders a/ type urls', () => {
-      return getImgur('a/ZF7NS3V').then(imgur => {
+      return getImgur('a/ZF7NS3V').then((imgur) => {
         testIframe(imgur.querySelector('iframe'), 'a/ZF7NS3V');
       });
     });
 
     it('resizes with JSON String message', () => {
-      return getImgur('2CnX7').then(imgur => {
+      return getImgur('2CnX7').then((imgur) => {
         const impl = imgur.implementation_;
-        const changeHeightSpy = sandbox.spy(impl, 'attemptChangeHeight');
+        const changeHeightSpy = env.sandbox.spy(impl, 'attemptChangeHeight');
         expect(changeHeightSpy).not.to.have.been.called;
         const event = {
           origin: 'https://imgur.com',
@@ -81,9 +81,9 @@ describes.realWin(
     });
 
     it('resizes with JSON Object message', () => {
-      return getImgur('2CnX7').then(imgur => {
+      return getImgur('2CnX7').then((imgur) => {
         const impl = imgur.implementation_;
-        const changeHeightSpy = sandbox.spy(impl, 'attemptChangeHeight');
+        const changeHeightSpy = env.sandbox.spy(impl, 'attemptChangeHeight');
         expect(changeHeightSpy).not.to.have.been.called;
         const event = {
           origin: 'https://imgur.com',

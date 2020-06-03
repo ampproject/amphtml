@@ -20,7 +20,7 @@ import {AnalyticsEventType, CustomEventTracker} from '../events';
 import {InstrumentationService} from '../instrumentation.js';
 import {Services} from '../../../../src/services';
 
-describes.realWin('InstrumentationService', {amp: 1}, env => {
+describes.realWin('InstrumentationService', {amp: 1}, (env) => {
   let win;
   let ampdoc;
   let service;
@@ -46,7 +46,7 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
     expect(root.ampdoc).to.equal(ampdoc);
     expect(root).to.be.instanceof(AmpdocAnalyticsRoot);
 
-    const stub = sandbox.stub(root, 'dispose');
+    const stub = env.sandbox.stub(root, 'dispose');
     service.dispose();
     expect(stub).to.be.calledOnce;
   });
@@ -56,7 +56,7 @@ describes.realWin('InstrumentationService', {amp: 1}, env => {
       AnalyticsEventType.CUSTOM,
       CustomEventTracker
     );
-    const triggerStub = sandbox.stub(tracker, 'trigger');
+    const triggerStub = env.sandbox.stub(tracker, 'trigger');
     service.triggerEventForTarget(target, 'test-event', {foo: 'bar'});
     expect(triggerStub).to.be.calledOnce;
 
@@ -72,7 +72,7 @@ describes.realWin(
   {
     amp: {ampdoc: 'fie'},
   },
-  env => {
+  (env) => {
     let win;
     let embed;
     let ampdoc;
@@ -115,7 +115,7 @@ describes.realWin(
     it('should create embed root for ampdoc-fie', () => {
       const parentAmpdoc = ampdoc;
       ampdoc = new AmpDocFie(win, 'https://example.org', parentAmpdoc);
-      sandbox.stub(Services, 'ampdoc').callsFake(context => {
+      env.sandbox.stub(Services, 'ampdoc').callsFake((context) => {
         if (context == win.document) {
           return ampdoc;
         }

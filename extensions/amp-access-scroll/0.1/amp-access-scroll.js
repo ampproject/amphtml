@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,16 @@
 import {ScrollAccessVendor} from './scroll-impl';
 import {Services} from '../../../src/services';
 
-AMP.extension('amp-access-scroll', '0.1', function(AMP) {
+AMP.extension('amp-access-scroll', '0.1', function (AMP) {
   AMP.registerServiceForDoc(
     'scroll',
     /**
      * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
      * @return {*} TODO(#23582): Specify return type
      */
-    function(ampdoc) {
+    function (ampdoc) {
       const element = ampdoc.getHeadNode();
-      return Services.accessServiceForDoc(element).then(accessService => {
+      return Services.accessServiceForDoc(element).then((accessService) => {
         const source = accessService.getVendorSource('scroll');
         const vendor = new ScrollAccessVendor(ampdoc, source);
         const adapter = /** @type {

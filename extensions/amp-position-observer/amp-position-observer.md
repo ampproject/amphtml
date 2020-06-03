@@ -4,8 +4,9 @@ formats:
   - websites
   - ads
 teaser:
-  text: Monitors the orientation of an element within the viewport as a user scrolls, and dispatches events that can be used with other AMP components.
+  text: Monitors the position of an element within the viewport as a user scrolls, and dispatches events that can be used with other AMP components.
 ---
+
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -23,31 +24,6 @@ limitations under the License.
 -->
 
 # amp-position-observer
-
-Monitors the position of an element within the viewport as a user scrolls, and dispatches events that can be used with
-other AMP components.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>
-      <ul>
-        <li><a href="https://amp.dev/documentation/examples/visual-effects/basics_of_scrollbound_effects/">Basics of scrollbound effects tutorial</a></li>
-        <li><a href="https://codepen.io/collection/nMJYrv/">CodePen collection with samples</a></li>
-      </ul>
-    </td>
-  </tr>
-</table>
-
-[TOC]
 
 ## Overview
 
@@ -67,10 +43,12 @@ to trigger their actions (e.g., starting an animation, seeking to a position
 within the animation, pausing a video, etc.).
 
 ### Scroll-bound animations
+
 The `amp-animation` component exposes a `seekTo` action that can be tied to the `scroll` event
 of `amp-position-observer` to implement scroll-bound animations.
 
 #### Example: Animation rotates as user scrolls
+
 Imagine an animation where the hour hand of a clock rotates as the user scrolls
 the page.
 
@@ -89,19 +67,19 @@ the page.
 <amp-animation id="clockAnim" layout="nodisplay">
   <script type="application/json">
     {
-    "duration": "3s",
-    "fill": "both",
-    "direction": "alternate",
-    "animations": [
-      {
-        "selector": "#clock-scene .clock-hand",
-        "keyframes": [
-          { "transform": "rotate(-180deg)" },
-          { "transform": "rotate(0deg)" }
-        ]
-      }
-    ]
-  }
+      "duration": "3s",
+      "fill": "both",
+      "direction": "alternate",
+      "animations": [
+        {
+          "selector": "#clock-scene .clock-hand",
+          "keyframes": [
+            {"transform": "rotate(-180deg)"},
+            {"transform": "rotate(0deg)"}
+          ]
+        }
+      ]
+    }
   </script>
 </amp-animation>
 
@@ -114,13 +92,13 @@ the page.
   <amp-position-observer
     intersection-ratios="1"
     on="scroll:clockAnim.seekTo(percent=event.percent)"
-    layout="nodisplay">
+    layout="nodisplay"
+  >
   </amp-position-observer>
-  <amp-img layout="responsive" width=2 height=1.5 src="./img/clock.jpg">
+  <amp-img layout="responsive" width="2" height="1.5" src="./img/clock.jpg">
     <div class="clock-hand"></div>
   </amp-img>
 </div>
-
 ```
 
 ### Animation scenes that start/pause based on visibility in the viewport
@@ -134,6 +112,7 @@ The `amp-position-observer` component exposes various visibility configurations 
 can be used to fine-tune when the target is considered visible.
 
 #### Example: Animation starts and pauses based on visibility
+
 Consider the same clock animation, but this time the hand animates with time, except
 we like the animation to start when clock is at least 50% visible and pause as soon
 as clock becomes less than 50% visible.
@@ -143,7 +122,6 @@ as clock becomes less than 50% visible.
     <img alt="visibility demo" src="https://user-images.githubusercontent.com/2099009/29105727-a7d9a80a-7c84-11e7-8d4a-794f38ea5a5c.gif" />
   </noscript>
 </amp-img>
-
 
 ```html
 <!-- An animation that rotates a clock hand 180 degrees. -->
@@ -159,19 +137,19 @@ as clock becomes less than 50% visible.
 <amp-animation id="clockAnim" layout="nodisplay">
   <script type="application/json">
     {
-    "duration": "3s",
-    "fill": "both",
-    "direction": "alternate",
-    "animations": [
-      {
-        "selector": "#clock-scene .clock-hand",
-        "keyframes": [
-          { "transform": "rotate(-180deg)" },
-          { "transform": "rotate(0deg)" }
-        ]
-      }
-    ]
-  }
+      "duration": "3s",
+      "fill": "both",
+      "direction": "alternate",
+      "animations": [
+        {
+          "selector": "#clock-scene .clock-hand",
+          "keyframes": [
+            {"transform": "rotate(-180deg)"},
+            {"transform": "rotate(0deg)"}
+          ]
+        }
+      ]
+    }
   </script>
 </amp-animation>
 
@@ -184,10 +162,11 @@ as clock becomes less than 50% visible.
   <amp-position-observer
     intersection-ratios="0.5"
     on="enter:clockAnim.start;exit:clockAnim.pause"
-    layout="nodisplay">
+    layout="nodisplay"
+  >
   </amp-position-observer>
 
-  <amp-img layout="responsive" width=2 height=1.5 src="./img/clock.jpg">
+  <amp-img layout="responsive" width="2" height="1.5" src="./img/clock.jpg">
     <div class="clock-hand"></div>
   </amp-img>
 </div>

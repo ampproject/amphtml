@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-truncate-text-0.1.css';
 import {Services} from '../../../src/services';
 import {CSS as ShadowCSS} from '../../../build/amp-truncate-text-shadow-0.1.css';
@@ -23,7 +22,7 @@ import {
   iterateCursor,
 } from '../../../src/dom';
 import {createShadowRoot} from './shadow-utils';
-import {dev, userAssert} from '../../../src/log';
+import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {toArray} from '../../../src/types';
@@ -51,8 +50,8 @@ export class AmpTruncateText extends AMP.BaseElement {
    * @private
    */
   setupActions_() {
-    this.registerAction('expand', () => this.expand_(), ActionTrust.HIGH);
-    this.registerAction('collapse', () => this.collapse_(), ActionTrust.HIGH);
+    this.registerAction('expand', () => this.expand_());
+    this.registerAction('collapse', () => this.collapse_());
   }
 
   /** @param {!AmpElement} element */
@@ -82,12 +81,6 @@ export class AmpTruncateText extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    userAssert(
-      isExperimentOn(this.win, 'amp-truncate-text'),
-      'The amp-truncate-text experiment must be enabled to use this ' +
-        'component.'
-    );
-
     this.useShadow_ =
       !!this.element.attachShadow &&
       isExperimentOn(this.win, 'amp-truncate-text-shadow');
@@ -99,10 +92,10 @@ export class AmpTruncateText extends AMP.BaseElement {
     }
 
     this.setupActions_();
-    this.collapsedSlot_.addEventListener('click', event => {
+    this.collapsedSlot_.addEventListener('click', (event) => {
       this.maybeExpand_(event);
     });
-    this.expandedSlot_.addEventListener('click', event => {
+    this.expandedSlot_.addEventListener('click', (event) => {
       this.maybeCollapse_(event);
     });
   }
@@ -136,16 +129,19 @@ export class AmpTruncateText extends AMP.BaseElement {
       '.i-amphtml-truncate-persistent-slot'
     );
 
-    iterateCursor(this.element.querySelectorAll('[slot="collapsed"]'), el => {
+    iterateCursor(this.element.querySelectorAll('[slot="collapsed"]'), (el) => {
       this.collapsedSlot_.appendChild(el);
     });
-    iterateCursor(this.element.querySelectorAll('[slot="expanded"]'), el => {
+    iterateCursor(this.element.querySelectorAll('[slot="expanded"]'), (el) => {
       this.expandedSlot_.appendChild(el);
     });
-    iterateCursor(this.element.querySelectorAll('[slot="persistent"]'), el => {
-      this.persistentSlot_.appendChild(el);
-    });
-    this.getRealChildNodes().forEach(node => {
+    iterateCursor(
+      this.element.querySelectorAll('[slot="persistent"]'),
+      (el) => {
+        this.persistentSlot_.appendChild(el);
+      }
+    );
+    this.getRealChildNodes().forEach((node) => {
       defaultSlot.appendChild(node);
     });
 
@@ -300,6 +296,6 @@ export class AmpTruncateText extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-truncate-text', '0.1', AMP => {
+AMP.extension('amp-truncate-text', '0.1', (AMP) => {
   AMP.registerElement('amp-truncate-text', AmpTruncateText, CSS);
 });

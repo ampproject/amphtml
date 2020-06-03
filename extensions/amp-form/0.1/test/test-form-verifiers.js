@@ -20,14 +20,9 @@ import {
   getFormVerifier,
 } from '../form-verifiers';
 
-describes.fakeWin('amp-form async verification', {}, env => {
-  let sandbox;
-  beforeEach(() => {
-    sandbox = env.sandbox;
-  });
-
+describes.fakeWin('amp-form async verification', {}, (env) => {
   function stubValidationMessage(input) {
-    sandbox.defineProperty(input, 'validationMessage', {
+    env.sandbox.defineProperty(input, 'validationMessage', {
       get() {
         return this.fakeValidationMessage_;
       },
@@ -37,7 +32,7 @@ describes.fakeWin('amp-form async verification', {}, env => {
     });
 
     const originalSetCustomValidity = input.setCustomValidity.bind(input);
-    sandbox.defineProperty(input, 'setCustomValidity', {
+    env.sandbox.defineProperty(input, 'setCustomValidity', {
       value(message) {
         this.validationMessage = message;
         originalSetCustomValidity(message);
@@ -116,7 +111,7 @@ describes.fakeWin('amp-form async verification', {}, env => {
 
   describe('AsyncVerifier', () => {
     it('should not submit when no element has a value', () => {
-      const xhrSpy = sandbox.spy(() => Promise.resolve());
+      const xhrSpy = env.sandbox.spy(() => Promise.resolve());
       const form = getForm(env.win.document);
       const verifier = getFormVerifier(form, xhrSpy);
       return verifier.onCommit().then(() => {
@@ -128,7 +123,7 @@ describes.fakeWin('amp-form async verification', {}, env => {
       'should submit when an element is filled out, mutated, ' +
         'and committed',
       () => {
-        const xhrSpy = sandbox.spy(() => Promise.resolve());
+        const xhrSpy = env.sandbox.spy(() => Promise.resolve());
         const form = getForm(env.win.document);
         const verifier = getFormVerifier(form, xhrSpy);
 
@@ -154,7 +149,7 @@ describes.fakeWin('amp-form async verification', {}, env => {
           });
         },
       };
-      const xhrSpy = sandbox.spy(() =>
+      const xhrSpy = env.sandbox.spy(() =>
         Promise.reject({
           response: errorResponse,
         })
@@ -187,7 +182,7 @@ describes.fakeWin('amp-form async verification', {}, env => {
             });
           },
         };
-        const xhrStub = sandbox.stub();
+        const xhrStub = env.sandbox.stub();
         xhrStub.onCall(0).returns(Promise.reject({response: errorResponse}));
         xhrStub.onCall(1).returns(Promise.resolve());
 
@@ -233,7 +228,7 @@ describes.fakeWin('amp-form async verification', {}, env => {
             });
           },
         };
-        const xhrSpy = sandbox.spy(() =>
+        const xhrSpy = env.sandbox.spy(() =>
           Promise.reject({
             response: errorResponse,
           })

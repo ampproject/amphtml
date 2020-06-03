@@ -53,6 +53,16 @@
   <amp-video rotate-to-fullscreen layout=fill width=300 height=500
     loop preload="metadata" controls></amp-video>
 
+  <!-- Valid: Media Session Attributes -->
+  <amp-video layout=fill width=300 height=500 
+    title="Hello" artist="World" artwork="example.jpg" poster="example.jpg"
+    ></amp-video>
+
+  <!-- Valid: Most attributes are bindable -->
+  <amp-video layout=fill width=300 height=500 
+    [title]="Hello" [artist]="World" [artwork]="example.jpg" [poster]="example.jpg"
+    ></amp-video>
+
   <!-- Invalid: `dock` without `amp-video-docking` extension. -->
   <amp-video dock layout=fill width=300 height=500 controls></amp-video>
 

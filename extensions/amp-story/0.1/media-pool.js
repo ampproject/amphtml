@@ -191,7 +191,7 @@ export class MediaPool {
    * @private
    */
   initializeMediaPool_(maxCounts) {
-    this.forEachMediaType_(key => {
+    this.forEachMediaType_((key) => {
       const type = MediaType[key];
       const count = maxCounts[type] || 0;
 
@@ -216,10 +216,9 @@ export class MediaPool {
       // comparison with the itervar below, so we have to roll it by hand.
       for (let i = count; i > 0; i--) {
         // Use seed element at end of set to prevent wasting it.
-        const mediaEl =
-          /** @type {!HTMLMediaElement} */ (i == 1
-            ? mediaElSeed
-            : mediaElSeed.cloneNode(/* deep */ true));
+        const mediaEl = /** @type {!HTMLMediaElement} */ (i == 1
+          ? mediaElSeed
+          : mediaElSeed.cloneNode(/* deep */ true));
         const sources = this.getDefaultSource_(type);
         mediaEl.setAttribute('pool-element', elId++);
         this.enqueueMediaElementTask_(mediaEl, new UpdateSourcesTask(sources));
@@ -315,7 +314,7 @@ export class MediaPool {
     }
 
     const allocatedEls = this.allocated[mediaType];
-    const index = findIndex(allocatedEls, poolMediaEl => {
+    const index = findIndex(allocatedEls, (poolMediaEl) => {
       return poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] === domMediaEl.id;
     });
 
@@ -479,7 +478,7 @@ export class MediaPool {
       return;
     }
 
-    componentEl.getImpl().then(impl => {
+    componentEl.getImpl().then((impl) => {
       if (impl.resetOnDomChange) {
         impl.resetOnDomChange();
       }
@@ -544,10 +543,10 @@ export class MediaPool {
    * @private
    */
   forEachMediaElement_(callbackFn) {
-    [this.allocated, this.unallocated].forEach(mediaSet => {
-      this.forEachMediaType_(key => {
+    [this.allocated, this.unallocated].forEach((mediaSet) => {
+      this.forEachMediaType_((key) => {
         const type = MediaType[key];
-        const els = mediaSet[type];
+        const els = /** @type {!Array} */ (mediaSet[type]);
         if (!els) {
           return;
         }
@@ -561,7 +560,7 @@ export class MediaPool {
    * a media element that can be used in its stead for playback.
    * @param {!HTMLMediaElement} domMediaEl The media element, found in the DOM,
    *     whose content should be loaded.
-   * @return {Promise<!HTMLMediaElement>} A media element from the pool that can be used
+   * @return {Promise<!HTMLMediaElement|undefined>} A media element from the pool that can be used
    *     to replace the specified element.
    */
   loadInternal_(domMediaEl) {
@@ -676,9 +675,9 @@ export class MediaPool {
    *     element has been successfully played.
    */
   play(domMediaEl) {
-    return this.loadInternal_(domMediaEl).then(poolMediaEl => {
+    return this.loadInternal_(domMediaEl).then((poolMediaEl) => {
       if (!poolMediaEl) {
-        return Promise.resolve();
+        return;
       }
 
       return this.enqueueMediaElementTask_(poolMediaEl, new PlayTask());
@@ -789,7 +788,7 @@ export class MediaPool {
     }
 
     const blessPromises = [];
-    this.forEachMediaElement_(mediaEl => {
+    this.forEachMediaElement_((mediaEl) => {
       blessPromises.push(this.bless_(mediaEl));
     });
 
@@ -797,7 +796,7 @@ export class MediaPool {
       .then(() => {
         this.blessed_ = true;
       })
-      .catch(reason => {
+      .catch((reason) => {
         dev().expectedError('AMP-STORY', 'Blessing all media failed: ', reason);
       });
   }
@@ -818,7 +817,7 @@ export class MediaPool {
     const executionFn = () => {
       task
         .execute(mediaEl)
-        .catch(reason => dev().error('AMP-STORY', reason))
+        .catch((reason) => dev().error('AMP-STORY', reason))
         .then(() => {
           // Run regardless of success or failure of task execution.
           queue.shift();
@@ -876,7 +875,7 @@ export class MediaPool {
     instances[newId] = new MediaPool(
       toWin(root.getElement().ownerDocument.defaultView),
       root.getMaxMediaElementCounts(),
-      element => root.getElementDistance(element)
+      (element) => root.getElementDistance(element)
     );
 
     return instances[newId];

@@ -20,7 +20,7 @@ import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {installStylesForDoc} from '../../../../src/style-installer';
 
-describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
+describes.realWin('AmpSubscriptions Dialog', {amp: true}, (env) => {
   let win, doc, ampdoc;
   let dialog;
   let content;
@@ -35,8 +35,8 @@ describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
     installStylesForDoc(ampdoc, CSS, () => {}, false, 'amp-subscriptions');
     vsync = Services.vsyncFor(ampdoc.win);
     viewport = Services.viewportForDoc(ampdoc);
-    addToFixedLayerSpy = sandbox.stub(viewport, 'addToFixedLayer');
-    updatePaddingSpy = sandbox.stub(viewport, 'updatePaddingBottom');
+    addToFixedLayerSpy = env.sandbox.stub(viewport, 'addToFixedLayer');
+    updatePaddingSpy = env.sandbox.stub(viewport, 'updatePaddingBottom');
     dialog = new Dialog(ampdoc);
     content = createElementWithAttributes(doc, 'div', {
       style: 'height:17px',
@@ -56,97 +56,79 @@ describes.realWin('AmpSubscriptions Dialog', {amp: true}, env => {
     expect(styles.position).to.equal('fixed');
   });
 
-  it('should open content when invisible', () => {
+  it('should open content when invisible', async () => {
+    let styles;
+
     const promise = dialog.open(content, false);
     expect(dialog.getRoot()).to.have.display('none');
-    return vsync
-      .mutatePromise(() => {})
-      .then(() => {
-        // First vsync displays the dialog.
-        expect(content.parentNode).to.equal(dialog.getRoot());
-        expect(dialog.isVisible()).to.be.true;
-        expect(dialog.getRoot()).to.have.display('block');
-        const styles = getComputedStyle(dialog.getRoot());
-        expect(styles.transform).to.contain('17');
-        return promise;
-      })
-      .then(() => vsync.mutatePromise(() => {}))
-      .then(() => {
-        expect(dialog.getRoot()).to.have.display('block');
-        const styles = getComputedStyle(dialog.getRoot());
-        expect(styles.transform).to.not.contain('17');
-        expect(dialog.closeButton_).to.have.display('none');
-        expect(updatePaddingSpy).to.be.calledOnce.calledWith(17);
-        expect(addToFixedLayerSpy).to.be.calledOnce.calledWith(
-          dialog.getRoot()
-        );
-        expect(dialog.isVisible()).to.be.true;
-      });
+
+    await vsync.mutatePromise(() => {});
+    // First vsync displays the dialog.
+    expect(content.parentNode).to.equal(dialog.getRoot());
+    expect(dialog.isVisible()).to.be.true;
+    expect(dialog.getRoot()).to.have.display('block');
+    styles = getComputedStyle(dialog.getRoot());
+    expect(styles.transform).to.contain('17');
+
+    await promise;
+    await vsync.mutatePromise(() => {});
+    expect(dialog.getRoot()).to.have.display('block');
+    styles = getComputedStyle(dialog.getRoot());
+    expect(styles.transform).to.not.contain('17');
+    expect(dialog.closeButton_).to.have.display('none');
+    expect(updatePaddingSpy).to.be.calledOnce.calledWith(17);
+    expect(addToFixedLayerSpy).to.be.calledOnce.calledWith(dialog.getRoot());
+    expect(dialog.isVisible()).to.be.true;
   });
 
-  it('should re-open content when visible', () => {
+  it('should re-open content when visible', async () => {
     const content2 = createElementWithAttributes(doc, 'div', {
       style: 'height:21px',
     });
     const promise = dialog.open(content2, false);
-    return vsync
-      .mutatePromise(() => {})
-      .then(() => {
-        expect(content2.parentNode).to.equal(dialog.getRoot());
-        return promise;
-      })
-      .then(() => {
-        expect(content2.parentNode).to.equal(dialog.getRoot());
-        expect(content.parentNode).to.be.null;
-        expect(dialog.getRoot()).to.have.display('block');
-        const styles = getComputedStyle(dialog.getRoot());
-        expect(styles.transform).to.not.contain('21');
-      });
+    await vsync.mutatePromise(() => {});
+    expect(content2.parentNode).to.equal(dialog.getRoot());
+
+    await promise;
+    expect(content2.parentNode).to.equal(dialog.getRoot());
+    expect(content.parentNode).to.be.null;
+    expect(dialog.getRoot()).to.have.display('block');
+    const styles = getComputedStyle(dialog.getRoot());
+    expect(styles.transform).to.not.contain('21');
   });
 
-  it('should close', () => {
-    return dialog
-      .open(content, false)
-      .then(() => {
-        expect(content.parentNode).to.equal(dialog.getRoot());
-        expect(dialog.getRoot()).to.have.display('block');
-        return dialog.close();
-      })
-      .then(() => {
-        expect(dialog.getRoot()).to.have.display('none');
-        expect(dialog.isVisible()).to.be.false;
-        expect(content.parentNode).to.equal(dialog.getRoot());
-        expect(dialog.getRoot().parentNode).to.equal(doc.body);
-      });
+  it('should close', async () => {
+    await dialog.open(content, false);
+    expect(content.parentNode).to.equal(dialog.getRoot());
+    expect(dialog.getRoot()).to.have.display('block');
+
+    await dialog.close();
+    expect(dialog.getRoot()).to.have.display('none');
+    expect(dialog.isVisible()).to.be.false;
+    expect(content.parentNode).to.equal(dialog.getRoot());
+    expect(dialog.getRoot().parentNode).to.equal(doc.body);
   });
 
-  it('should re-open after close', () => {
-    return dialog
-      .open(content, false)
-      .then(() => {
-        expect(dialog.isVisible()).to.be.true;
-        return dialog.close();
-      })
-      .then(() => {
-        expect(dialog.isVisible()).to.be.false;
-        return dialog.open(content, false);
-      })
-      .then(() => {
-        expect(dialog.isVisible()).to.be.true;
-      });
+  it('should re-open after close', async () => {
+    await dialog.open(content, false);
+    expect(dialog.isVisible()).to.be.true;
+
+    await dialog.close();
+    expect(dialog.isVisible()).to.be.false;
+
+    await dialog.open(content, false);
+    expect(dialog.isVisible()).to.be.true;
   });
 
-  it('should show close button', () => {
+  it('should show close button', async () => {
     doc.body.classList.add('i-amphtml-subs-grant-yes');
-    return dialog.open(content, true).then(() => {
-      expect(dialog.closeButton_).to.have.display('block');
-    });
+    await dialog.open(content, true);
+    expect(dialog.closeButton_).to.have.display('block');
   });
 
-  it('should not show close button if content is not granted', () => {
+  it('should not show close button if content is not granted', async () => {
     doc.body.classList.remove('i-amphtml-subs-grant-yes');
-    return dialog.open(content, true).then(() => {
-      expect(dialog.closeButton_).to.have.display('none');
-    });
+    await dialog.open(content, true);
+    expect(dialog.closeButton_).to.have.display('none');
   });
 });

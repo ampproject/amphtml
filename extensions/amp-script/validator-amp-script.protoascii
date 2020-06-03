@@ -33,6 +33,9 @@ tags: {  # <amp-script> (local script)
     name: "id"
     add_value_to_set: AMP_SCRIPT_IDS
     mandatory: true
+    # When updating this blacklisted_value_regex, also update for
+    # mandatory-id-attr and $GLOBAL_ATTRS in validator-main.protoascii, and
+    # validator-amp-mustache.protoascii.
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
@@ -189,6 +192,12 @@ tags: {  # <amp-script>
       also_requires_attr: "script"
     }
   }
+  attrs: {
+    # This attribute should always be invalid. See https://github.com/ampproject/amphtml/pull/27076
+    name: "data-ampdevmode"
+    value: "false"
+    blacklisted_value_regex: "false"
+  }
   attrs: { name: "sandbox" }
   attrs: {
     name: "script"
@@ -211,6 +220,7 @@ tags: {  # <amp-script>
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }

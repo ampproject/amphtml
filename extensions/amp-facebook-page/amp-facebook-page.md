@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Embeds the Facebook page plugin.
 ---
+
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -23,27 +24,6 @@ limitations under the License.
 
 # amp-facebook-page
 
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Embeds the <a href="https://developers.facebook.com/docs/plugins/page-plugin">Facebook page plugin</a>.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-facebook-page" src="https://cdn.ampproject.org/v0/amp-facebook-page-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-facebook-page/">amp-facebook-page example</a>.</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Overview
 
 You can use the `amp-facebook-page` component to embed the [Facebook page plugin](https://developers.facebook.com/docs/plugins/page-plugin).
@@ -51,13 +31,18 @@ You can use the `amp-facebook-page` component to embed the [Facebook page plugin
 **Example**
 
 ```html
-<amp-facebook-page width="340" height="130"
-    layout="fixed"
-    data-hide-cover="true"
-    data-href="https://www.facebook.com/imdb/">
+<amp-facebook-page
+  width="340"
+  height="130"
+  layout="fixed"
+  data-hide-cover="true"
+  data-href="https://www.facebook.com/imdb/"
+>
 </amp-facebook-page>
 ```
+
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>data-href (required)</strong></td>
@@ -92,7 +77,6 @@ You can use the `amp-facebook-page` component to embed the [Facebook page plugin
     <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
-
 
 ## Validation
 

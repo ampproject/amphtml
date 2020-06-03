@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * @license
  * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
@@ -18,7 +17,7 @@
 
 'use strict';
 
-const colors = require('colors');
+const colors = require('colors/safe');
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
@@ -196,14 +195,6 @@ function ValidationError() {
    */
   this.specUrl = null;
   /**
-   * Categorizes error messages into higher-level groups. This makes it
-   * easier to create error statistics across a site and give advice based
-   * on the most common problems for a set of pages.
-   * See the ErrorCategory.Code enum in validator.proto for possible values.
-   * @type {string}
-   */
-  this.category = 'UNKNOWN';
-  /**
    * This field is only useful when scripting against the validator,
    * it should not be displayed in a user interface as it adds nothing
    * for humans to read over the message field (see above).
@@ -276,7 +267,6 @@ Validator.prototype.validateString = function(inputString, htmlFormat) {
     error.specUrl = internalError.specUrl;
     error.code = internalError.code;
     error.params = internalError.params;
-    error.category = this.sandbox.amp.validator.categorizeError(internalError);
     result.errors.push(error);
   }
   return result;
@@ -507,6 +497,4 @@ function main() {
       });
 }
 
-if (require.main === module) {
-  main();
-}
+exports.main = main;

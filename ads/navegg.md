@@ -18,8 +18,8 @@ limitations under the License.
 
 Serves ads to AMP pages using Navegg data.
 
-
 ## Example
+
 To get Navegg integration working you only need to specify the `rtc-config` parameter with your Navegg Account ID:
 
 ```html
@@ -28,7 +28,6 @@ To get Navegg integration working you only need to specify the `rtc-config` para
   data-slot="/4119129/mobile_ad_banner"
   rtc-config="{"vendors": {"navegg": {"NVG_ACC": "NAVEGG_ACCOUNT_ID"}}}">
 </amp-ad>
-
 ```
 
 ### Configuration

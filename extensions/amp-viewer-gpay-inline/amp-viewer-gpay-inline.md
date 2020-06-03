@@ -1,17 +1,3 @@
-<!--
-  1. Change "category" below to one of:
-       ads-analytics
-       dynamic-content
-       layout
-       media
-       presentation
-       social
-
-  2. Remove any of the "formats" that don't apply.
-     You can also add the "ads" and "stories" formats if they apply.
-
-  3. And remove this comment! (no empty lines before "---")
--->
 ---
 $category: presentation
 formats:
@@ -20,6 +6,7 @@ formats:
 teaser:
   text: FILL THIS IN.
 ---
+
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -36,30 +23,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# `amp-viewer-gpay-inline`
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>FILL THIS IN</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>FILL THIS IN</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-viewer-gpay-inline" src="https://cdn.ampproject.org/v0/amp-viewer-gpay-inline-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>FILL THIS IN</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>FILL THIS IN</td>
-  </tr>
-</table>
+# amp-viewer-gpay-inline
 
 ## Behavior
 
@@ -77,4 +41,5 @@ FILL THIS IN. Does this extension allow for properties to configure?
 </table>
 
 ## Validation
+
 See [amp-viewer-gpay-inline rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-viewer-gpay-inline/validator-amp-viewer-gpay-inline.protoascii) in the AMP validator specification.

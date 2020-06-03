@@ -118,12 +118,13 @@ class AmpYoutube extends AMP.BaseElement {
     // we can switch to preloading the full source. For now this doesn't
     // work, because we preload with a different type and in that case
     // responses are only picked up if they are cacheable.
-    const {preconnect} = this;
-    preconnect.url(this.getVideoIframeSrc_());
+    const preconnect = Services.preconnectFor(this.win);
+    const ampdoc = this.getAmpDoc();
+    preconnect.url(ampdoc, this.getVideoIframeSrc_());
     // Host that YT uses to serve JS needed by player.
-    preconnect.url('https://s.ytimg.com', opt_onLayout);
+    preconnect.url(ampdoc, 'https://s.ytimg.com', opt_onLayout);
     // Load high resolution placeholder images for videos in prerender mode.
-    preconnect.url('https://i.ytimg.com', opt_onLayout);
+    preconnect.url(ampdoc, 'https://i.ytimg.com', opt_onLayout);
   }
 
   /** @override */
@@ -147,12 +148,6 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    if (this.element.isInA4A()) {
-      this.user().error(
-        TAG,
-        'amp-youtube is deprecated in AMPHTML ads. See https://github.com/ampproject/amphtml/issues/21340'
-      );
-    }
     this.videoid_ = this.getVideoId_();
     this.liveChannelid_ = this.getLiveChannelId_();
     this.assertDatasourceExists_();
@@ -291,7 +286,7 @@ class AmpYoutube extends AMP.BaseElement {
       this.unlistenLooping_ = listen(
         this.element,
         VideoEvents.ENDED,
-        unusedEvent => this.play(false /** unusedIsAutoplay */)
+        (unusedEvent) => this.play(false /** unusedIsAutoplay */)
       );
     }
 
@@ -666,6 +661,6 @@ class AmpYoutube extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpYoutube);
 });

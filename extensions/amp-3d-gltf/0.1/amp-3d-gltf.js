@@ -15,6 +15,7 @@
  */
 import {ActionTrust} from '../../../src/action-constants';
 import {Deferred} from '../../../src/utils/promise';
+import {Services} from '../../../src/services';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -58,16 +59,20 @@ export class Amp3dGltf extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    preloadBootstrap(this.win, this.preconnect);
-    this.preconnect.url(
+    const preconnect = Services.preconnectFor(this.win);
+    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
+    preconnect.url(
+      this.getAmpDoc(),
       'https://cdnjs.cloudflare.com/ajax/libs/three.js/91/three.js',
       opt_onLayout
     );
-    this.preconnect.url(
+    preconnect.url(
+      this.getAmpDoc(),
       'https://cdn.jsdelivr.net/npm/three@0.91/examples/js/loaders/GLTFLoader.js',
       opt_onLayout
     );
-    this.preconnect.url(
+    preconnect.url(
+      this.getAmpDoc(),
       'https://cdn.jsdelivr.net/npm/three@0.91/examples/js/controls/OrbitControls.js',
       opt_onLayout
     );
@@ -96,9 +101,9 @@ export class Amp3dGltf extends AMP.BaseElement {
         ? fmt(this.element.getAttribute(name))
         : dflt;
 
-    const bool = x => x !== 'false';
-    const string = x => x;
-    const number = x => parseFloat(x);
+    const bool = (x) => x !== 'false';
+    const string = (x) => x;
+    const number = (x) => parseFloat(x);
 
     const src = assertHttpsUrl(getOption('src', string, ''), this.element);
 
@@ -126,9 +131,12 @@ export class Amp3dGltf extends AMP.BaseElement {
     });
     this.registerAction(
       'setModelRotation',
-      invocation => {
-        this.sendCommandWhenReady_('setModelRotation', invocation.args).catch(
-          e => dev().error('AMP-3D-GLTF', 'setModelRotation failed: %s', e)
+      (invocation) => {
+        this.sendCommandWhenReady_(
+          'setModelRotation',
+          invocation.args
+        ).catch((e) =>
+          dev().error('AMP-3D-GLTF', 'setModelRotation failed: %s', e)
         );
       },
       ActionTrust.LOW
@@ -172,7 +180,7 @@ export class Amp3dGltf extends AMP.BaseElement {
         this.toggleFallback(true);
       }),
     ];
-    return () => disposers.forEach(d => d());
+    return () => disposers.forEach((d) => d());
   }
 
   /**
@@ -241,6 +249,6 @@ export class Amp3dGltf extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, Amp3dGltf);
 });

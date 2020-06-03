@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a Dailymotion video.
 ---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -23,34 +24,17 @@ limitations under the License.
 
 # amp-dailymotion
 
-Displays a <a href="http://www.dailymotion.com/">Dailymotion</a> video.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-dailymotion" src="https://cdn.ampproject.org/v0/amp-dailymotion-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-dailymotion/">Annotated code example for amp-dailymotion</a></td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Example
 
 With responsive layout, the width and height from the example should yield correct layouts for 16:9 aspect ratio videos.
 
 ```html
 <amp-dailymotion
-    data-videoid="x2m8jpp"
-    layout="responsive"
-    width="480" height="270"></amp-dailymotion>
+  data-videoid="x2m8jpp"
+  layout="responsive"
+  width="480"
+  height="270"
+></amp-dailymotion>
 ```
 
 ## Attributes

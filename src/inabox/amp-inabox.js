@@ -21,7 +21,9 @@
 import '../polyfills';
 import {Navigation} from '../service/navigation';
 import {Services} from '../services';
+import {TickLabel} from '../enums';
 import {adopt} from '../runtime';
+import {allowLongTasksInChunking, startupChunk} from '../chunk';
 import {cssText as ampSharedCss} from '../../build/ampshared.css';
 import {doNotTrackImpression} from '../impression';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
@@ -35,6 +37,7 @@ import {
 import {installDocService} from '../service/ampdoc-impl';
 import {installErrorReporting} from '../error';
 import {installPerformanceService} from '../service/performance-impl';
+import {installPlatformService} from '../service/platform-impl';
 import {
   installStylesForDoc,
   makeBodyVisible,
@@ -42,7 +45,6 @@ import {
 } from '../style-installer';
 import {internalRuntimeVersion} from '../internal-version';
 import {maybeValidate} from '../validator-integration';
-import {startupChunk} from '../chunk';
 import {stubElementsForDoc} from '../service/custom-element-registry';
 
 getMode(self).runtime = 'inabox';
@@ -68,13 +70,15 @@ try {
   makeBodyVisibleRecovery(self.document);
   throw e;
 }
+allowLongTasksInChunking();
 startupChunk(self.document, function initial() {
   /** @const {!../service/ampdoc-impl.AmpDoc} */
   const ampdoc = ampdocService.getAmpDoc(self.document);
+  installPlatformService(self);
   installPerformanceService(self);
   /** @const {!../service/performance-impl.Performance} */
   const perf = Services.performanceFor(self);
-  perf.tick('is');
+  perf.tick(TickLabel.INSTALL_STYLES);
 
   self.document.documentElement.classList.add('i-amphtml-inabox');
   installStylesForDoc(
@@ -113,7 +117,7 @@ startupChunk(self.document, function initial() {
         /* makes the body visible */ true
       );
       startupChunk(self.document, function finalTick() {
-        perf.tick('e_is');
+        perf.tick(TickLabel.END_INSTALL_STYLES);
         Services.resourcesForDoc(ampdoc).ampInitComplete();
         // TODO(erwinm): move invocation of the `flush` method when we have the
         // new ticks in place to batch the ticks properly.

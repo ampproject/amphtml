@@ -24,17 +24,14 @@ import {
 } from '../../3p/3p';
 
 describe('3p', () => {
-  let sandbox;
   let clock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
+    clock = window.sandbox.useFakeTimers();
   });
 
   afterEach(() => {
     clock.tick(1000);
-    sandbox.restore();
   });
 
   describe('validateSrcPrefix()', () => {
@@ -129,6 +126,17 @@ describe('3p', () => {
       });
     });
 
+    it('should allow mandatory fields to have 0 as a value', () => {
+      validateData(
+        {
+          width: 0,
+          height: 0,
+          type: 'cats',
+        },
+        ['height', 'width']
+      );
+    });
+
     it('should check mandatory fields with alternative options', () => {
       validateData(
         {
@@ -211,7 +219,7 @@ describe('3p', () => {
     let called = 0;
     nextTick(
       {
-        setTimeout: fn => {
+        setTimeout: (fn) => {
           fn();
         },
       },
@@ -250,13 +258,13 @@ describe('3p', () => {
     };
     let done;
     let workCalls = 0;
-    const work = d => {
+    const work = (d) => {
       workCalls++;
       done = d;
     };
     let progress = '';
-    const frame = id => {
-      return result => {
+    const frame = (id) => {
+      return (result) => {
         progress += result + id;
       };
     };
@@ -283,7 +291,7 @@ describe('3p', () => {
       expect(s.src).to.equal(url);
     });
 
-    it('should handle onSuccess callback', done => {
+    it('should handle onSuccess callback', (done) => {
       loadScript(
         window,
         'http://localhost:9876/test/unit/test-3p.js',
@@ -296,7 +304,7 @@ describe('3p', () => {
       );
     });
 
-    it('should handle onFailure callback', done => {
+    it('should handle onFailure callback', (done) => {
       loadScript(
         window,
         'http://localhost:9876/404',

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-module.exports = function({template, types: t}) {
+module.exports = function ({template, types: t}) {
   /**
    * Produces a random number that is guaranteed not to be present in str.
    * @param {string} str
@@ -98,7 +98,7 @@ module.exports = function({template, types: t}) {
             // must return a function.  We want to propagate its argument, so
             // we return that in the function.
             if (prop === 'includeJsonLiteral') {
-              return s => s;
+              return (s) => s;
             }
 
             // The argument to `includeJsonLiteral`. We'll create a new
@@ -160,7 +160,7 @@ module.exports = function({template, types: t}) {
         // interpolation strings) to generate the raw value (this is an AST
         // requirement).
         if (cooked || !endOfString) {
-          const raw = cooked.replace(/\${|\\/g, '\\$&');
+          const raw = cooked.replace(/\${|\\|`/g, '\\$&');
           quasis.push(t.templateElement({cooked, raw}));
         }
 

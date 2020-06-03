@@ -118,6 +118,9 @@ export class ViewportImpl {
     /** @private {boolean} */
     this.scrollTracking_ = false;
 
+    /** @private {Element} */
+    this.scrollingElement_ = null;
+
     /** @private {number} */
     this.scrollCount_ = 0;
 
@@ -136,15 +139,12 @@ export class ViewportImpl {
     /** @private {string|undefined} */
     this.originalViewportMetaString_ = undefined;
 
-    /** @private @const {!FixedLayer} */
-    this.fixedLayer_ = new FixedLayer(
-      ampdoc,
-      this.vsync_,
-      this.binding_.getBorderTop(),
-      this.paddingTop_,
-      this.binding_.requiresFixedLayerTransfer()
-    );
-    ampdoc.whenReady().then(() => this.fixedLayer_.setup());
+    /** @private {?FixedLayer} */
+    this.fixedLayer_ = null;
+
+    if (!MOVE_FIXED_LAYER) {
+      this.createFixedLayer(FixedLayer);
+    }
 
     this.viewer_.onMessage('viewport', this.updateOnViewportEvent_.bind(this));
     this.viewer_.onMessage('scroll', this.viewerSetScrollTop_.bind(this));
@@ -152,7 +152,9 @@ export class ViewportImpl {
       'disableScroll',
       this.disableScrollEventHandler_.bind(this)
     );
-    this.binding_.updatePaddingTop(this.paddingTop_);
+    if (this.viewer_.isEmbedded()) {
+      this.binding_.updatePaddingTop(this.paddingTop_);
+    }
 
     this.binding_.onScroll(this.scroll_.bind(this));
     this.binding_.onResize(this.resize_.bind(this));
@@ -192,7 +194,7 @@ export class ViewportImpl {
         Object.defineProperty(win, 'scrollTo', {
           value: (x, y) => this.setScrollTop(y),
         });
-        ['pageYOffset', 'scrollY'].forEach(prop => {
+        ['pageYOffset', 'scrollY'].forEach((prop) => {
           Object.defineProperty(win, prop, {
             get: () => this.getScrollTop(),
           });
@@ -224,6 +226,11 @@ export class ViewportImpl {
           // If the size has already been intialized, check it again in case
           // the size has changed between `disconnect` and `connect`.
           this.resize_();
+        }
+        if (this.scrollTop_) {
+          // Remeasure scrollTop when resource becomes visible to fix #11983
+          this./*OK*/ scrollTop_ = null;
+          this.getScrollTop();
         }
       } else {
         this.binding_.disconnect();
@@ -260,7 +267,7 @@ export class ViewportImpl {
 
   /** @override */
   updatePaddingBottom(paddingBottom) {
-    this.ampdoc.waitForBodyOpen().then(body => {
+    this.ampdoc.waitForBodyOpen().then((body) => {
       setStyle(body, 'borderBottom', `${paddingBottom}px solid transparent`);
     });
   }
@@ -333,14 +340,14 @@ export class ViewportImpl {
   }
 
   /** @override */
-  getLayoutRect(el) {
+  getLayoutRect(el, opt_premeasuredRect) {
     const scrollLeft = this.getScrollLeft();
     const scrollTop = this.getScrollTop();
 
     // Go up the window hierarchy through friendly iframes.
     const frameElement = getParentWindowFrameElement(el, this.ampdoc.win);
     if (frameElement) {
-      const b = this.binding_.getLayoutRect(el, 0, 0);
+      const b = this.binding_.getLayoutRect(el, 0, 0, opt_premeasuredRect);
       const c = this.binding_.getLayoutRect(
         frameElement,
         scrollLeft,
@@ -354,7 +361,12 @@ export class ViewportImpl {
       );
     }
 
-    return this.binding_.getLayoutRect(el, scrollLeft, scrollTop);
+    return this.binding_.getLayoutRect(
+      el,
+      scrollLeft,
+      scrollTop,
+      opt_premeasuredRect
+    );
   }
 
   /** @override */
@@ -371,7 +383,7 @@ export class ViewportImpl {
       });
     }
 
-    return Promise.all([local, root]).then(values => {
+    return Promise.all([local, root]).then((values) => {
       const l = values[0];
       const r = values[1];
       if (!r) {
@@ -388,12 +400,15 @@ export class ViewportImpl {
 
   /** @override */
   isDeclaredFixed(element) {
+    if (!this.fixedLayer_) {
+      return false;
+    }
     return this.fixedLayer_.isDeclaredFixed(element);
   }
 
   /** @override */
   scrollIntoView(element) {
-    return this.getScrollingContainerFor_(element).then(parent =>
+    return this.getScrollingContainerFor_(element).then((parent) =>
       this.scrollIntoViewInternal_(element, parent)
     );
   }
@@ -408,7 +423,7 @@ export class ViewportImpl {
       Math.max(0, elementTop - this.paddingTop_)
     );
 
-    newScrollTopPromise.then(newScrollTop =>
+    newScrollTopPromise.then((newScrollTop) =>
       this.setElementScrollTop_(parent, newScrollTop)
     );
   }
@@ -420,7 +435,7 @@ export class ViewportImpl {
       "Curve without duration doesn't make sense."
     );
 
-    return this.getScrollingContainerFor_(element).then(parent =>
+    return this.getScrollingContainerFor_(element).then((parent) =>
       this.animateScrollWithinParent(
         element,
         parent,
@@ -457,7 +472,7 @@ export class ViewportImpl {
         break;
     }
 
-    return this.getElementScrollTop_(parent).then(curScrollTop => {
+    return this.getElementScrollTop_(parent).then((curScrollTop) => {
       const calculatedScrollTop = elementRect.top - this.paddingTop_ + offset;
       const newScrollTop = Math.max(0, calculatedScrollTop);
       if (newScrollTop == curScrollTop) {
@@ -497,7 +512,7 @@ export class ViewportImpl {
     const interpolate = numeric(curScrollTop, newScrollTop);
     return Animation.animate(
       parent,
-      position => {
+      (position) => {
         this.setElementScrollTop_(parent, interpolate(position));
       },
       duration,
@@ -554,7 +569,10 @@ export class ViewportImpl {
 
   /** @override */
   getScrollingElement() {
-    return this.binding_.getScrollingElement();
+    if (this.scrollingElement_) {
+      return this.scrollingElement_;
+    }
+    return (this.scrollingElement_ = this.binding_.getScrollingElement());
   }
 
   /** @override */
@@ -581,7 +599,9 @@ export class ViewportImpl {
     );
 
     this.enterOverlayMode();
-    this.fixedLayer_.enterLightbox(opt_requestingElement, opt_onComplete);
+    if (this.fixedLayer_) {
+      this.fixedLayer_.enterLightbox(opt_requestingElement, opt_onComplete);
+    }
 
     if (opt_requestingElement) {
       this.maybeEnterFieLightboxMode(
@@ -600,7 +620,9 @@ export class ViewportImpl {
       /* cancelUnsent */ true
     );
 
-    this.fixedLayer_.leaveLightbox();
+    if (this.fixedLayer_) {
+      this.fixedLayer_.leaveLightbox();
+    }
     this.leaveOverlayMode();
 
     if (opt_requestingElement) {
@@ -761,17 +783,38 @@ export class ViewportImpl {
 
   /** @override */
   updateFixedLayer() {
-    this.fixedLayer_.update();
+    if (!this.fixedLayer_) {
+      return Promise.resolve();
+    }
+    return this.fixedLayer_.update();
   }
 
   /** @override */
   addToFixedLayer(element, opt_forceTransfer) {
+    if (!this.fixedLayer_) {
+      return Promise.resolve();
+    }
     return this.fixedLayer_.addElement(element, opt_forceTransfer);
   }
 
   /** @override */
   removeFromFixedLayer(element) {
+    if (!this.fixedLayer_) {
+      return;
+    }
     this.fixedLayer_.removeElement(element);
+  }
+
+  /** @override */
+  createFixedLayer(constructor) {
+    this.fixedLayer_ = new constructor(
+      this.ampdoc,
+      this.vsync_,
+      this.binding_.getBorderTop(),
+      this.paddingTop_,
+      this.binding_.requiresFixedLayerTransfer()
+    );
+    this.ampdoc.whenReady().then(() => this.fixedLayer_.setup());
   }
 
   /**
@@ -875,7 +918,7 @@ export class ViewportImpl {
     const tr = numeric(this.lastPaddingTop_ - this.paddingTop_, 0);
     return Animation.animate(
       this.ampdoc.getRootNode(),
-      time => {
+      (time) => {
         const p = tr(time);
         this.fixedLayer_.transformMutate(`translateY(${p}px)`);
       },
@@ -1004,7 +1047,7 @@ export class ViewportImpl {
     const oldSize = this.size_;
     this.size_ = null; // Need to recalc.
     const newSize = this.getSize();
-    this.fixedLayer_.update().then(() => {
+    this.updateFixedLayer().then(() => {
       const widthChanged = !oldSize || oldSize.width != newSize.width;
       this.changed_(/*relayoutAll*/ widthChanged, 0);
       const sizeChanged = widthChanged || oldSize.height != newSize.height;
@@ -1161,34 +1204,22 @@ const ViewportType = {
  * @return {string}
  */
 function getViewportType(win, viewer) {
-  const viewportType = viewer.getParam('viewportType') || ViewportType.NATURAL;
-  if (
-    !Services.platformFor(win).isIos() ||
-    viewportType != ViewportType.NATURAL
-  ) {
-    return viewportType;
-  }
-  const isIosIframeScrollableOn = isExperimentOn(win, 'ios-scrollable-iframe');
-  // Enable iOS Embedded mode so that it's easy to test against a more
-  // realistic iOS environment w/o an iframe.
-  if (
-    !isIframed(win) &&
-    (getMode(win).localDev || getMode(win).development) &&
-    !isIosIframeScrollableOn
-  ) {
-    return ViewportType.NATURAL_IOS_EMBED;
-  }
+  const isIframedIos = Services.platformFor(win).isIos() && isIframed(win);
 
   // Enable iOS Embedded mode for iframed tests (e.g. integration tests).
-  if (isIframed(win) && getMode(win).test) {
+  if (getMode(win).test && isIframedIos) {
     return ViewportType.NATURAL_IOS_EMBED;
   }
 
   // Override to ios-embed for iframe-viewer mode.
-  if (isIframed(win) && viewer.isEmbedded() && !isIosIframeScrollableOn) {
+  if (
+    isIframedIos &&
+    viewer.isEmbedded() &&
+    !viewer.hasCapability('iframeScroll')
+  ) {
     return ViewportType.NATURAL_IOS_EMBED;
   }
-  return viewportType;
+  return ViewportType.NATURAL;
 }
 
 /**

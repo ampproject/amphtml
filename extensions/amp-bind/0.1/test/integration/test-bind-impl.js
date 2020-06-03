@@ -23,6 +23,7 @@ import * as lolex from 'lolex';
 import {AmpEvents} from '../../../../../src/amp-events';
 import {Bind} from '../../bind-impl';
 import {BindEvents} from '../../bind-events';
+import {Deferred} from '../../../../../src/utils/promise';
 import {RAW_OBJECT_ARGS_KEY} from '../../../../../src/action-constants';
 import {Services} from '../../../../../src/services';
 import {chunkInstanceForTesting} from '../../../../../src/chunk';
@@ -57,6 +58,28 @@ function createElement(env, container, binding, opt_tag, opt_amp, opt_head) {
 
 /**
  * @param {!Object} env
+ * @param {?Element} container
+ * @param {string} id
+ * @param {!Promise} valuePromise
+ */
+function addAmpState(env, container, id, fetchingPromise) {
+  const ampState = env.win.document.createElement('amp-state');
+  ampState.setAttribute('id', id);
+  ampState.createdCallback = () => {};
+  ampState.getImpl = () =>
+    Promise.resolve({
+      getFetchingPromise() {
+        return fetchingPromise;
+      },
+      parseAndUpdate: () => {},
+      element: ampState,
+    });
+
+  container.appendChild(ampState);
+}
+
+/**
+ * @param {!Object} env
  * @param {!Bind} bind
  * @return {!Promise}
  */
@@ -70,18 +93,14 @@ function onBindReady(env, bind) {
  * @param {!Object} env
  * @param {!Bind} bind
  * @param {!Object} state
- * @param {boolean=} opt_isAmpStateMutation
+ * @param {boolean=} skipAmpState
  * @return {!Promise}
  */
-function onBindReadyAndSetState(env, bind, state, opt_isAmpStateMutation) {
+function onBindReadyAndSetState(env, bind, state, skipAmpState) {
   return bind
     .initializePromiseForTesting()
     .then(() => {
-      return bind.setState(
-        state,
-        /* opt_skipEval */ undefined,
-        opt_isAmpStateMutation
-      );
+      return bind.setState(state, {skipAmpState});
     })
     .then(() => {
       env.flushVsync();
@@ -111,6 +130,37 @@ function onBindReadyAndSetStateWithExpression(env, bind, expression, scope) {
 /**
  * @param {!Object} env
  * @param {!Bind} bind
+ * @param {!JsonObject} state
+ * @return {!Promise}
+ */
+function onBindReadyAndSetStateWithObject(env, bind, state) {
+  return bind
+    .initializePromiseForTesting()
+    .then(() => {
+      return bind.setStateWithObject(state);
+    })
+    .then(() => {
+      env.flushVsync();
+      return bind.setStatePromiseForTesting();
+    });
+}
+
+/**
+ * @param {!Object} env
+ * @param {!Bind} bind
+ * @param {string} name
+ * @return {!Promise}
+ */
+function onBindReadyAndGetState(env, bind, name) {
+  return bind.initializePromiseForTesting().then(() => {
+    env.flushVsync();
+    return bind.getState(name);
+  });
+}
+
+/**
+ * @param {!Object} env
+ * @param {!Bind} bind
  * @param {!Array<!Element>} added
  * @param {!Array<!Element>} removed
  * @param {!BindRescanOptions=} options
@@ -133,7 +183,7 @@ function onBindReadyAndRescan(env, bind, added, removed, options) {
  * @return {!Promise}
  */
 function waitForEvent(env, name) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const callback = () => {
       resolve();
       env.win.removeEventListener(name, callback);
@@ -150,7 +200,7 @@ const FORM_VALUE_CHANGE_EVENT_ARGUMENTS = {
 describe
   .configure()
   .ifChrome()
-  .run('Bind', function() {
+  .run('Bind', function () {
     // Give more than default 2000ms timeout for local testing.
     const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
     this.timeout(TIMEOUT);
@@ -164,7 +214,7 @@ describe
         },
         mockFetch: false,
       },
-      env => {
+      (env) => {
         let fieBind;
         let fieBody;
         let fieWindow;
@@ -259,7 +309,7 @@ describe
         },
         mockFetch: false,
       },
-      env => {
+      (env) => {
         let bind;
         let container;
 
@@ -306,23 +356,21 @@ describe
         },
         mockFetch: false,
       },
-      env => {
+      (env) => {
         let bind;
         let clock;
         let container;
         let history;
         let viewer;
-        let sandbox;
 
         beforeEach(() => {
           const {ampdoc, win} = env;
-          sandbox = env.sandbox;
 
           // Make sure we have a chunk instance for testing.
           chunkInstanceForTesting(ampdoc);
 
           viewer = Services.viewerForDoc(ampdoc);
-          sandbox.stub(viewer, 'sendMessage');
+          env.sandbox.stub(viewer, 'sendMessage');
 
           bind = new Bind(ampdoc);
 
@@ -351,7 +399,7 @@ describe
           const element = createElement(env, container, '', 'amp-state', true);
           // Makes dom.whenUpgradedToCustomElement() resolve immediately.
           element.createdCallback = () => {};
-          const parseAndUpdate = sandbox.spy();
+          const parseAndUpdate = env.sandbox.spy();
           element.getImpl = () => {
             expect(viewer.sendMessage).to.not.be.called;
             return Promise.resolve({parseAndUpdate});
@@ -454,7 +502,7 @@ describe
         });
 
         it('should call createTreeWalker() with all params', () => {
-          const spy = sandbox.spy(env.win.document, 'createTreeWalker');
+          const spy = env.sandbox.spy(env.win.document, 'createTreeWalker');
           createElement(env, container, '[text]="1+1"');
           return onBindReady(env, bind).then(() => {
             // createTreeWalker() on IE does not support optional arguments.
@@ -515,7 +563,7 @@ describe
           createElement(env, container, '[class]="\'foo\'" class=" foo "');
           createElement(env, container, '[class]="\'\'"');
           createElement(env, container, '[class]="\'bar\'" class="qux"'); // Error
-          const warnSpy = sandbox.spy(user(), 'warn');
+          const warnSpy = env.sandbox.spy(user(), 'warn');
           return onBindReady(env, bind).then(() => {
             expect(warnSpy).to.be.calledOnce;
             expect(warnSpy).calledWithMatch('amp-bind', /\[class\]/);
@@ -530,7 +578,7 @@ describe
             container,
             '[text]="\'a\'" [class]="\'b\'" class="b"'
           );
-          const warnSpy = sandbox.spy(user(), 'warn');
+          const warnSpy = env.sandbox.spy(user(), 'warn');
           return onBindReady(env, bind).then(() => {
             expect(warnSpy).to.be.calledOnce;
             expect(warnSpy).calledWithMatch('amp-bind', /\[text\]/);
@@ -542,7 +590,7 @@ describe
           createElement(env, container, '[disabled]="true" disabled', 'button');
           createElement(env, container, '[disabled]="false"', 'button');
           createElement(env, container, '[disabled]="true"', 'button'); // Mismatch.
-          const warnSpy = sandbox.spy(user(), 'warn');
+          const warnSpy = env.sandbox.spy(user(), 'warn');
           return onBindReady(env, bind).then(() => {
             expect(warnSpy).to.be.calledOnce;
             expect(warnSpy).calledWithMatch('amp-bind', /\[disabled\]/);
@@ -583,16 +631,15 @@ describe
         });
 
         it('should update values first, then attributes', () => {
-          const {sandbox} = env;
-          const spy = sandbox.spy();
+          const spy = env.sandbox.spy();
           const element = createElement(
             env,
             container,
             '[value]="foo"',
             'input'
           );
-          sandbox.stub(element, 'value').set(spy);
-          sandbox.stub(element, 'setAttribute').callsFake(spy);
+          env.sandbox.stub(element, 'value').set(spy);
+          env.sandbox.stub(element, 'setAttribute').callsFake(spy);
           return onBindReadyAndSetState(env, bind, {'foo': '2'}).then(() => {
             // Note: This tests a workaround for a browser bug. There is nothing
             // about the element itself we can verify. Only the order of operations
@@ -602,7 +649,7 @@ describe
           });
         });
 
-        it('should update properties for empty strings', function*() {
+        it('should update properties for empty strings', function* () {
           const element = createElement(
             env,
             container,
@@ -741,9 +788,8 @@ describe
         });
 
         it('should support handling actions with invoke()', () => {
-          const {sandbox} = env;
-          sandbox.stub(bind, 'setStateWithExpression');
-          sandbox.stub(bind, 'pushStateWithExpression');
+          env.sandbox.stub(bind, 'setStateWithExpression');
+          env.sandbox.stub(bind, 'pushStateWithExpression');
 
           const invocation = {
             method: 'setState',
@@ -760,7 +806,7 @@ describe
           expect(bind.setStateWithExpression).to.be.calledOnce;
           expect(bind.setStateWithExpression).to.be.calledWithExactly(
             '{foo: bar}',
-            sinon.match({event: {bar: 123}})
+            env.sandbox.match({event: {bar: 123}})
           );
 
           invocation.method = 'pushState';
@@ -769,15 +815,14 @@ describe
           expect(bind.pushStateWithExpression).to.be.calledOnce;
           expect(bind.pushStateWithExpression).to.be.calledWithExactly(
             '{foo: bar}',
-            sinon.match({event: {bar: 123}})
+            env.sandbox.match({event: {bar: 123}})
           );
         });
 
         // TODO(choumx, #16721): Causes browser crash for some reason.
         it.skip('should only allow one action per event in invoke()', () => {
-          const {sandbox} = env;
-          sandbox.stub(bind, 'setStateWithExpression');
-          const userError = sandbox.stub(user(), 'error');
+          env.sandbox.stub(bind, 'setStateWithExpression');
+          const userError = env.sandbox.stub(user(), 'error');
 
           const invocation = {
             method: 'setState',
@@ -794,7 +839,7 @@ describe
           expect(bind.setStateWithExpression).to.be.calledOnce;
           expect(bind.setStateWithExpression).to.be.calledWithExactly(
             '{foo: bar}',
-            sinon.match({event: {bar: 123}})
+            env.sandbox.match({event: {bar: 123}})
           );
 
           // Second invocation with the same sequenceId should fail.
@@ -828,9 +873,9 @@ describe
 
         describe('history', () => {
           beforeEach(() => {
-            sandbox.spy(history, 'replace');
-            sandbox.spy(history, 'push');
-            sandbox.stub(viewer, 'isEmbedded').returns(true);
+            env.sandbox.spy(history, 'replace');
+            env.sandbox.spy(history, 'push');
+            env.sandbox.stub(viewer, 'isEmbedded').returns(true);
           });
 
           describe('with untrusted viewer', () => {
@@ -855,14 +900,17 @@ describe
               return promise.then(() => {
                 expect(history.push).to.be.called;
                 // `data` param should be null on untrusted viewers.
-                expect(history.push).to.be.calledWith(sinon.match.func, null);
+                expect(history.push).to.be.calledWith(
+                  env.sandbox.match.func,
+                  null
+                );
               });
             });
           });
 
           describe('with trusted viewer', () => {
             beforeEach(() => {
-              sandbox
+              window.sandbox
                 .stub(viewer, 'isTrustedViewer')
                 .returns(Promise.resolve(true));
             });
@@ -892,7 +940,7 @@ describe
               return promise.then(() => {
                 expect(history.push).calledOnce;
                 // `data` param should exist on trusted viewers.
-                expect(history.push).calledWith(sinon.match.func, {
+                expect(history.push).calledWith(env.sandbox.match.func, {
                   data: {'amp-bind': {foo: 'bar'}},
                   title: '',
                 });
@@ -901,8 +949,86 @@ describe
           });
         });
 
+        it('should support setting object state in setStateWithObject()', () => {
+          const element = createElement(
+            env,
+            container,
+            '[text]="mystate.mykey"'
+          );
+          expect(element.textContent).to.equal('');
+          const promise = onBindReadyAndSetStateWithObject(env, bind, {
+            mystate: {mykey: 'myval'},
+          });
+          return promise.then(() => {
+            expect(element.textContent).to.equal('myval');
+          });
+        });
+
+        it('should support getting state with getState()', () => {
+          const promise = onBindReadyAndSetStateWithObject(env, bind, {
+            mystate: {mykey: 'myval'},
+          });
+          return promise.then(() => {
+            return onBindReadyAndGetState(env, bind, 'mystate.mykey').then(
+              (result) => {
+                expect(result).to.equal('myval');
+              }
+            );
+          });
+        });
+
+        describe('getStateAsync', () => {
+          it('should reject if there is no associated "amp-state"', async () => {
+            await onBindReadyAndSetState(env, bind, {
+              mystate: {mykey: 'myval'},
+            });
+
+            const state = bind.getStateAsync('mystate.mykey');
+            return expect(state).to.eventually.rejectedWith(/#mystate/);
+          });
+
+          it('should not wait if the still-loading state is irrelevant', async () => {
+            await onBindReadyAndSetState(env, bind, {
+              mystate: {myKey: 'myval'},
+            });
+            addAmpState(env, container, 'mystate', Promise.resolve());
+            addAmpState(
+              // never resolves
+              env,
+              container,
+              'irrelevant',
+              new Promise((unused) => {})
+            );
+
+            const state = await bind.getStateAsync('mystate.myKey');
+            expect(state).to.equal('myval');
+          });
+
+          it('should wait for a relevant key', async () => {
+            const {promise, resolve} = new Deferred();
+            addAmpState(env, container, 'mystate', promise);
+
+            await onBindReady(env, bind);
+            const statePromise = bind.getStateAsync('mystate.mykey');
+
+            await bind.setState({mystate: {mykey: 'myval'}}).then(resolve);
+            expect(await statePromise).to.equal('myval');
+          });
+
+          it('should stop waiting for a key if its fetch rejects', async () => {
+            const {promise, reject} = new Deferred();
+            addAmpState(env, container, 'mystate', promise);
+
+            await onBindReady(env, bind);
+            const statePromise = bind.getStateAsync('mystate.mykey');
+            reject();
+
+            expect(await statePromise).to.equal(undefined);
+          });
+        });
+
         it('should support pushStateWithExpression()', () => {
-          sandbox.spy(history, 'push');
+          env.sandbox.spy(history, 'push');
 
           const element = createElement(env, container, '[text]="foo"');
           expect(element.textContent).to.equal('');
@@ -923,7 +1049,7 @@ describe
         });
 
         it('pushStateWithExpression() should work with nested objects', () => {
-          sandbox.spy(history, 'push');
+          env.sandbox.spy(history, 'push');
 
           const element = createElement(env, container, '[text]="foo.bar"');
           expect(element.textContent).to.equal('');
@@ -959,7 +1085,7 @@ describe
           // Makes dom.whenUpgradedToCustomElement() resolve immediately.
           element.createdCallback = () => {};
           element.getImpl = () =>
-            Promise.resolve({parseAndUpdate: sandbox.spy()});
+            Promise.resolve({parseAndUpdate: env.sandbox.spy()});
           expect(element.getAttribute('src')).to.be.null;
 
           const promise = onBindReadyAndSetState(
@@ -1008,7 +1134,7 @@ describe
             /* opt_tagName */ 'input',
             /* opt_amp */ true
           );
-          const spy = sandbox.spy(element, 'mutatedAttributesCallback');
+          const spy = env.sandbox.spy(element, 'mutatedAttributesCallback');
           return onBindReadyAndSetState(env, bind, {}).then(() => {
             expect(spy).calledWithMatch({
               checked: false,
@@ -1045,7 +1171,7 @@ describe
           const binding =
             '[value]="foo" [class]="\'abc\'" [text]="\'a\'+\'b\'"';
           const element = createElement(env, container, binding, 'input');
-          element.mutatedAttributesCallback = sandbox.spy();
+          element.mutatedAttributesCallback = env.sandbox.spy();
           return onBindReadyAndSetState(env, bind, {foo: {bar: [1]}})
             .then(() => {
               expect(element.textContent.length).to.not.equal(0);
@@ -1096,7 +1222,7 @@ describe
 
         it('should stop scanning once max number of bindings is reached', () => {
           bind.setMaxNumberOfBindingsForTesting(2);
-          const errorStub = sandbox.stub(dev(), 'expectedError');
+          const errorStub = env.sandbox.stub(dev(), 'expectedError');
 
           const foo = createElement(env, container, '[text]="foo"');
           const bar = createElement(
@@ -1120,7 +1246,7 @@ describe
 
             expect(errorStub).to.have.been.calledWith(
               'amp-bind',
-              sinon.match(/Maximum number of bindings reached/)
+              env.sandbox.match(/Maximum number of bindings reached/)
             );
           });
         });
@@ -1237,6 +1363,31 @@ describe
             // The `toRemove` element's bindings should have been removed.
             expect(toRemove.textContent).to.not.equal('bar');
           });
+
+          it('{update: "evaluate"}', async () => {
+            toAdd = createElement(env, /* container */ null, '[text]="x"');
+            const options = {update: 'evaluate', fast: false};
+
+            // `toRemove` is updated normally before removal.
+            await onBindReadyAndSetState(env, bind, {foo: 'foo', x: '1'});
+            expect(toRemove.textContent).to.equal('foo');
+
+            // `toAdd` should be scanned but not updated. With {update: 'evaluate'},
+            // its expression "x" is now cached on the element.
+            await onBindReadyAndRescan(env, bind, [toAdd], [toRemove], options);
+            expect(toAdd.textContent).to.equal('');
+
+            await onBindReadyAndSetState(env, bind, {foo: 'bar', x: '1'});
+            // `toAdd` should _not_ update since the value of its expression "x"
+            // hasn't changed (due to caching).
+            expect(toAdd.textContent).to.equal('');
+            // `toRemove`'s bindings have been removed and remains unchanged.
+            expect(toRemove.textContent).to.equal('foo');
+
+            await onBindReadyAndSetState(env, bind, {x: '2'});
+            // toAdd changes now that its expression "x"'s value has changed.
+            expect(toAdd.textContent).to.equal('2');
+          });
         });
 
         describe('AmpEvents.FORM_VALUE_CHANGE', () => {
@@ -1247,7 +1398,7 @@ describe
               '[value]="foo"',
               'input'
             );
-            const spy = sandbox.spy(element, 'dispatchEvent');
+            const spy = env.sandbox.spy(element, 'dispatchEvent');
 
             return onBindReadyAndSetState(env, bind, {foo: 'bar'}).then(() => {
               expect(spy).to.have.been.calledOnce;
@@ -1262,7 +1413,7 @@ describe
               '[checked]="foo"',
               'input'
             );
-            const spy = sandbox.spy(element, 'dispatchEvent');
+            const spy = env.sandbox.spy(element, 'dispatchEvent');
 
             return onBindReadyAndSetState(env, bind, {foo: 'checked'}).then(
               () => {
@@ -1281,7 +1432,7 @@ describe
             `;
             container.appendChild(select);
 
-            const spy = sandbox.spy(select, 'dispatchEvent');
+            const spy = env.sandbox.spy(select, 'dispatchEvent');
 
             return onBindReadyAndSetState(env, bind, {foo: 'selected'}).then(
               () => {
@@ -1301,7 +1452,7 @@ describe
               '[text]="foo"',
               'textarea'
             );
-            const spy = sandbox.spy(element, 'dispatchEvent');
+            const spy = env.sandbox.spy(element, 'dispatchEvent');
 
             return onBindReadyAndSetState(env, bind, {foo: 'bar'}).then(() => {
               expect(spy).to.have.been.calledOnce;
@@ -1319,7 +1470,7 @@ describe
               '[name]="foo"',
               'input'
             );
-            const spy = sandbox.spy(element, 'dispatchEvent');
+            const spy = env.sandbox.spy(element, 'dispatchEvent');
 
             return onBindReadyAndSetState(env, bind, {foo: 'name'}).then(() => {
               expect(spy).to.not.have.been.called;
@@ -1328,7 +1479,7 @@ describe
 
           it('should NOT dispatch FORM_VALUE_CHANGE on other element changes', () => {
             const element = createElement(env, container, '[text]="foo"', 'p');
-            const spy = sandbox.spy(element, 'dispatchEvent');
+            const spy = env.sandbox.spy(element, 'dispatchEvent');
 
             return onBindReadyAndSetState(env, bind, {foo: 'selected'}).then(
               () => {

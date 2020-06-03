@@ -37,9 +37,9 @@ const PATHS_TO_IGNORE = [
   path.resolve(ROOT_DIR, 'test/'),
 ];
 
-const WINDOW_PROPERTIES = ['win', 'window', 'global', 'self'];
+const WINDOW_PROPERTIES = ['win', 'window', 'global', 'self', 'globalThis'];
 
-module.exports = function(context) {
+module.exports = function (context) {
   /**
    * Looks up value of an identifier property.
    * E.g. given `window[FOO]`, finds `FOO = 'abc'` in code and returns `'abc'`.
@@ -84,11 +84,11 @@ module.exports = function(context) {
     AssignmentExpression(node) {
       const filePath = context.getFilename();
       // Only check source paths.
-      if (!PATHS_TO_INCLUDE.some(path => filePath.includes(path))) {
+      if (!PATHS_TO_INCLUDE.some((path) => filePath.includes(path))) {
         return;
       }
       // Ignore polyfills etc.
-      if (PATHS_TO_IGNORE.some(path => filePath.includes(path))) {
+      if (PATHS_TO_IGNORE.some((path) => filePath.includes(path))) {
         return;
       }
       // Ignore test files.

@@ -21,17 +21,15 @@ import {
 import {mockWindowInterface} from '../../../../testing/test-helper';
 
 describe('LinkerReader', () => {
-  let sandbox;
   let linkerReader;
   let mockWin;
 
   beforeEach(() => {
     // Can not import from test-linker.js because all test in test-liner.js
     // will be run with the test-linker-reader if we do so.
-    sandbox = sinon.sandbox;
-    sandbox.useFakeTimers(1533329483292);
-    sandbox.stub(Date.prototype, 'getTimezoneOffset').returns(420);
-    mockWin = mockWindowInterface(sandbox);
+    window.sandbox.useFakeTimers(1533329483292);
+    window.sandbox.stub(Date.prototype, 'getTimezoneOffset').returns(420);
+    mockWin = mockWindowInterface(window.sandbox);
     mockWin.getUserAgent.returns(
       'Mozilla/5.0 (X11; Linux x86_64) ' +
         'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 ' +
@@ -48,10 +46,6 @@ describe('LinkerReader', () => {
     };
     installLinkerReaderService(mockWin);
     linkerReader = linkerReaderServiceFor(mockWin);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   describe('LinkerReader Service', () => {

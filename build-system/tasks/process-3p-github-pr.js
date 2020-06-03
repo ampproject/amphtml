@@ -23,11 +23,12 @@
 'use strict';
 const argv = require('minimist')(process.argv.slice(2));
 const assert = require('assert');
-const BBPromise = require('bluebird');
 const colors = require('ansi-colors');
 const extend = require('util')._extend;
 const log = require('fancy-log');
-const request = BBPromise.promisify(require('request'));
+const util = require('util');
+
+const request = util.promisify(require('request'));
 
 const {GITHUB_ACCESS_TOKEN} = process.env;
 
@@ -140,12 +141,12 @@ function process3pGithubPr() {
   for (let batch = 1; batch < NUM_BATCHES; batch++) {
     arrayPromises.push(getIssues(batch));
   }
-  return BBPromise.all(arrayPromises)
-    .then(requests => [].concat.apply([], requests))
-    .then(issues => {
+  return Promise.all(arrayPromises)
+    .then((requests) => [].concat.apply([], requests))
+    .then((issues) => {
       const allIssues = issues;
       const allTasks = [];
-      allIssues.forEach(function(issue) {
+      allIssues.forEach(function (issue) {
         allTasks.push(handleIssue(issue));
       });
       return Promise.all(allTasks);
@@ -156,7 +157,7 @@ function process3pGithubPr() {
 }
 
 function handleIssue(issue) {
-  return isQualifiedPR(issue).then(outcome => {
+  return isQualifiedPR(issue).then((outcome) => {
     return replyToPR(issue, outcome);
   });
 }
@@ -178,7 +179,7 @@ function getIssues(opt_page) {
     'per_page': 100,
     'access_token': GITHUB_ACCESS_TOKEN,
   };
-  return request(options).then(res => {
+  return request(options).then((res) => {
     const issues = JSON.parse(res.body);
     assert(Array.isArray(issues), 'issues must be an array.');
     return issues;
@@ -196,7 +197,7 @@ function getPullRequestFiles(pr) {
   options.url =
     'https://api.github.com/repos/ampproject/amphtml/pulls/' +
     `${number}/files`;
-  return request(options).then(res => {
+  return request(options).then((res) => {
     const files = JSON.parse(res.body);
     if (!Array.isArray(files)) {
       return null;
@@ -258,7 +259,7 @@ function isQualifiedPR(issue) {
   // get pull request reviewer API is not working as expected. Skip
 
   // Get changed files of this PR
-  return getPullRequestFiles(issue).then(files => {
+  return getPullRequestFiles(issue).then((files) => {
     return analyzeChangedFiles(files);
   });
 }
@@ -339,6 +340,10 @@ function assignIssue(issue, assignees) {
   }
   return request(options);
 }
+
+module.exports = {
+  process3pGithubPr,
+};
 
 process3pGithubPr.description = 'Automatically triage 3P integration PRs';
 process3pGithubPr.flags = {

@@ -34,13 +34,11 @@ export function blade(global, data) {
   const marcosObj = tryParseJson(data['blade_macros']) || {};
   marcosObj['rand'] = Math.random().toString();
   marcosObj['page_url'] = marcosObj['page_url'] || global.context.canonicalUrl;
-  const macros = Object.assign({}, marcosObj);
+  const macros = {...marcosObj};
   macros.width = data.width;
   macros.height = data.height;
 
-  const containerId = `player-${data['blade_api_key']}-${
-    data['blade_player_id']
-  }`;
+  const containerId = `player-${data['blade_api_key']}-${data['blade_player_id']}`;
   createContainer(containerId);
 
   const bladeConfig = `_bladeConfig-${containerId}`;
@@ -53,7 +51,7 @@ export function blade(global, data) {
   const ctx = global.context;
 
   const bladeOnLoad = `_bladeOnLoad-${containerId}`;
-  global[bladeOnLoad] = function(error, player) {
+  global[bladeOnLoad] = function (error, player) {
     if (error) {
       global.context.noContentAvailable();
       return;
@@ -71,24 +69,19 @@ export function blade(global, data) {
 
   loadScript(
     global,
-    `https://${servingDomain}/js/${data['blade_api_key']}/${
-      data['blade_player_id']
-    }/player.js?t=${
-      data['blade_player_type']
-    }&callback=${bladeOnLoad}&config=${bladeConfig}&c=${containerId}`,
+    `https://${servingDomain}/js/${data['blade_api_key']}/${data['blade_player_id']}/player.js?t=${data['blade_player_type']}&callback=${bladeOnLoad}&config=${bladeConfig}&c=${containerId}`,
     undefined,
     () => {
       global.context.noContentAvailable();
     }
   );
-}
-
-/**
- * @param {string} elemId
- */
-function createContainer(elemId) {
-  const d = global.document.createElement('div');
-  d.id = elemId;
-  d.classList.add('blade');
-  global.document.getElementById('c').appendChild(d);
+  /**
+   * @param {string} elemId
+   */
+  function createContainer(elemId) {
+    const d = global.document.createElement('div');
+    d.id = elemId;
+    d.classList.add('blade');
+    global.document.getElementById('c').appendChild(d);
+  }
 }

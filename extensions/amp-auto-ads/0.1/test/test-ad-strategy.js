@@ -27,7 +27,7 @@ describes.realWin(
       extensions: ['amp-ad'],
     },
   },
-  env => {
+  (env) => {
     let win, doc, ampdoc;
     let container;
 
@@ -46,7 +46,7 @@ describes.realWin(
       doc.body.appendChild(container);
       // Stub whenBuilt to resolve immediately to handle upgrade for AdSense
       // to FF impl.
-      sinon
+      env.sandbox
         .stub(win.__AMP_BASE_CE_CLASS.prototype, 'whenBuilt')
         .callsFake(() => Promise.resolve());
     });
@@ -70,7 +70,7 @@ describes.realWin(
       const placements = getPlacementsFromConfigObj(ampdoc, configObj);
       expect(placements).to.have.lengthOf(1);
 
-      const placeAdSpy = sandbox.spy(placements[0], 'placeAd');
+      const placeAdSpy = env.sandbox.spy(placements[0], 'placeAd');
 
       const attributes = {
         'type': 'adsense',
@@ -93,7 +93,7 @@ describes.realWin(
         true
       );
 
-      return adStrategy.run().then(unused => {
+      return adStrategy.run().then((unused) => {
         expect(placeAdSpy).to.be.calledWith(
           attributes,
           sizing,
@@ -153,7 +153,7 @@ describes.realWin(
         adTracker
       );
 
-      return adStrategy.run().then(result => {
+      return adStrategy.run().then((result) => {
         expect(result).to.deep.equal({adsPlaced: 1, totalAdsOnPage: 1});
         expect(anchor1.childNodes).to.have.lengthOf(1);
         expect(anchor2.childNodes).to.have.lengthOf(0);
@@ -195,7 +195,7 @@ describes.realWin(
       const placements = getPlacementsFromConfigObj(ampdoc, configObj);
 
       expect(placements).to.have.lengthOf(2);
-      sandbox.stub(placements[0], 'placeAd').callsFake(() => {
+      env.sandbox.stub(placements[0], 'placeAd').callsFake(() => {
         return Promise.resolve(PlacementState.REIZE_FAILED);
       });
 
@@ -219,7 +219,7 @@ describes.realWin(
         adTracker
       );
 
-      return adStrategy.run().then(result => {
+      return adStrategy.run().then((result) => {
         expect(result).to.deep.equal({adsPlaced: 1, totalAdsOnPage: 1});
         expect(anchor1.childNodes).to.have.lengthOf(0);
         expect(anchor2.childNodes).to.have.lengthOf(1);
@@ -292,7 +292,7 @@ describes.realWin(
           adTracker
         );
 
-        return adStrategy.run().then(result => {
+        return adStrategy.run().then((result) => {
           expect(result).to.deep.equal({adsPlaced: 1, totalAdsOnPage: 1});
           expect(anchor1.childNodes).to.have.lengthOf(1);
           expect(anchor2.childNodes).to.have.lengthOf(0);
@@ -366,7 +366,7 @@ describes.realWin(
           adTracker
         );
 
-        return adStrategy.run().then(result => {
+        return adStrategy.run().then((result) => {
           expect(result).to.deep.equal({adsPlaced: 2, totalAdsOnPage: 2});
           expect(anchor1.childNodes).to.have.lengthOf(1);
           expect(anchor2.childNodes).to.have.lengthOf(1);
@@ -456,7 +456,7 @@ describes.realWin(
           adTracker
         );
 
-        return adStrategy.run().then(result => {
+        return adStrategy.run().then((result) => {
           expect(result).to.deep.equal({adsPlaced: 1, totalAdsOnPage: 2});
           expect(anchor1.childNodes).to.have.lengthOf(1);
           expect(anchor2.childNodes).to.have.lengthOf(0);
@@ -503,10 +503,10 @@ describes.realWin(
       const placements = getPlacementsFromConfigObj(ampdoc, configObj);
 
       expect(placements).to.have.lengthOf(2);
-      sandbox.stub(placements[0], 'placeAd').callsFake(() => {
+      env.sandbox.stub(placements[0], 'placeAd').callsFake(() => {
         return Promise.resolve(PlacementState.REIZE_FAILED);
       });
-      sandbox.stub(placements[1], 'placeAd').callsFake(() => {
+      env.sandbox.stub(placements[1], 'placeAd').callsFake(() => {
         return Promise.resolve(PlacementState.REIZE_FAILED);
       });
 
@@ -528,7 +528,7 @@ describes.realWin(
         adTracker
       );
 
-      return adStrategy.run().then(result => {
+      return adStrategy.run().then((result) => {
         expect(result).to.deep.equal({adsPlaced: 0, totalAdsOnPage: 0});
         expect(anchor1.childNodes).to.have.lengthOf(0);
         expect(anchor2.childNodes).to.have.lengthOf(0);

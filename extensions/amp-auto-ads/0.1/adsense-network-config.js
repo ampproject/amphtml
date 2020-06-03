@@ -18,6 +18,7 @@ import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
 import {dict} from '../../../src/utils/object';
 import {parseUrlDeprecated} from '../../../src/url';
+import {toWin} from '../../../src/types';
 
 /**
  * @implements {./ad-network-config.AdNetworkConfigDef}
@@ -46,6 +47,7 @@ export class AdSenseNetworkConfig {
   getConfigUrl() {
     const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
     const canonicalHostname = parseUrlDeprecated(docInfo.canonicalUrl).hostname;
+    const win = toWin(this.autoAmpAdsElement_.ownerDocument.defaultView);
     return buildUrl(
       '//pagead2.googlesyndication.com/getconfig/ama',
       {
@@ -53,6 +55,8 @@ export class AdSenseNetworkConfig {
         'plah': canonicalHostname,
         'ama_t': 'amp',
         'url': docInfo.canonicalUrl,
+        'debug_experiment_id':
+          (/(?:#|,)deid=([\d,]+)/i.exec(win.location.hash) || [])[1] || null,
       },
       4096
     );
@@ -65,8 +69,14 @@ export class AdSenseNetworkConfig {
       'data-ad-client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
     });
     const dataAdHost = this.autoAmpAdsElement_.getAttribute('data-ad-host');
+    const dataAdHostChannel = this.autoAmpAdsElement_.getAttribute(
+      'data-ad-host-channel'
+    );
     if (dataAdHost) {
       attributesObj['data-ad-host'] = dataAdHost;
+      if (dataAdHostChannel) {
+        attributesObj['data-ad-host-channel'] = dataAdHostChannel;
+      }
     }
     return attributesObj;
   }

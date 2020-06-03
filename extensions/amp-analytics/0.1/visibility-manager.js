@@ -18,7 +18,7 @@ import {
   DEFAULT_THRESHOLD,
   IntersectionObserverPolyfill,
   nativeIntersectionObserverSupported,
-} from '../../../src/intersection-observer-polyfill';
+} from '../../../src/utils/intersection-observer-polyfill';
 import {Services} from '../../../src/services';
 import {VisibilityModel} from './visibility-model';
 import {dev, user} from '../../../src/log';
@@ -32,6 +32,7 @@ import {
   layoutPositionRelativeToScrolledViewport,
   layoutRectLtwh,
 } from '../../../src/layout-rect';
+import {rootNodeFor} from '../../../src/dom';
 
 const TAG = 'amp-analytics/visibility-manager';
 
@@ -74,9 +75,10 @@ function createVisibilityManager(rootNode) {
   const ampdoc = Services.ampdoc(rootNode);
   const frame = getParentWindowFrameElement(rootNode);
   const embed = frame && getFriendlyIframeEmbedOptional(frame);
-  if (embed && frame && frame.ownerDocument) {
+  const frameRootNode = frame && rootNodeFor(frame);
+  if (embed && frameRootNode) {
     return new VisibilityManagerForEmbed(
-      provideVisibilityManager(frame.ownerDocument),
+      provideVisibilityManager(frameRootNode),
       embed
     );
   }
@@ -165,7 +167,7 @@ export class VisibilityManager {
     }
 
     // Unsubscribe everything else.
-    this.unsubscribe_.forEach(unsubscribe => {
+    this.unsubscribe_.forEach((unsubscribe) => {
       unsubscribe();
     });
     this.unsubscribe_.length = 0;
@@ -402,7 +404,7 @@ export class VisibilityManager {
         );
       }
       return () => {
-        unlisteners.forEach(unlistener => unlistener());
+        unlisteners.forEach((unlistener) => unlistener());
       };
     }
     const model = new VisibilityModel(spec, calcVisibility);
@@ -466,6 +468,7 @@ export class VisibilityManager {
       // Optionally, element-level state.
       let layoutBox;
       if (opt_element) {
+        state['elementId'] = opt_element.id;
         state['opacity'] = getMinOpacity(opt_element);
         const resource = this.resources_.getResourceForElementOptional(
           opt_element
@@ -532,7 +535,7 @@ export class VisibilityManager {
 
     // Start update.
     model.update();
-    return function() {
+    return function () {
       model.dispose();
     };
   }
@@ -790,7 +793,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
    * @private
    */
   onIntersectionChanges_(entries) {
-    entries.forEach(change => {
+    entries.forEach((change) => {
       let intersection = change.intersectionRect;
       // IntersectionRect type now changed from ClientRect to DOMRectReadOnly.
       // TODO(@zhouyx): Fix all InOb related type.

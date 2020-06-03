@@ -19,11 +19,14 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="320" height="200"
-    type="bidtellect"
-    data-t="20bc0442-8vec-41f8-9892-04be6e6c3521"
-    data-pid="815676411"
-    data-sid="234022">
+<amp-ad
+  width="320"
+  height="200"
+  type="bidtellect"
+  data-t="20bc0442-8vec-41f8-9892-04be6e6c3521"
+  data-pid="815676411"
+  data-sid="234022"
+>
 </amp-ad>
 ```
 

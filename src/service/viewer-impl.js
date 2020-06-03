@@ -19,7 +19,13 @@ import {Observable} from '../observable';
 import {Services} from '../services';
 import {ViewerInterface} from './viewer-interface';
 import {VisibilityState} from '../visibility-state';
-import {dev, devAssert, duplicateErrorIfNecessary} from '../log';
+import {
+  dev,
+  devAssert,
+  duplicateErrorIfNecessary,
+  stripUserError,
+} from '../log';
+import {endsWith, startsWith} from '../string';
 import {findIndex} from '../utils/array';
 import {
   getSourceOrigin,
@@ -33,7 +39,6 @@ import {isIframed} from '../dom';
 import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
-import {startsWith} from '../string';
 import {urls} from '../config';
 
 const TAG_ = 'Viewer';
@@ -145,6 +150,7 @@ export class ViewerImpl {
     this.prerenderSize_ =
       parseInt(ampdoc.getParam('prerenderSize'), 10) || this.prerenderSize_;
     dev().fine(TAG_, '- prerenderSize:', this.prerenderSize_);
+    this.prerenderSizeDeprecation_();
 
     /**
      * Whether the AMP document is embedded in a Chrome Custom Tab.
@@ -184,11 +190,11 @@ export class ViewerImpl {
         : this.win.document.referrer;
 
     /** @const @private {!Promise<string>} */
-    this.referrerUrl_ = new Promise(resolve => {
+    this.referrerUrl_ = new Promise((resolve) => {
       if (this.isEmbedded() && ampdoc.getParam('referrer') != null) {
         // Viewer override, but only for whitelisted viewers. Only allowed for
         // iframed documents.
-        this.isTrustedViewer().then(isTrusted => {
+        this.isTrustedViewer().then((isTrusted) => {
           if (isTrusted) {
             resolve(ampdoc.getParam('referrer'));
           } else {
@@ -214,13 +220,13 @@ export class ViewerImpl {
     this.resolvedViewerUrl_ = removeFragment(this.win.location.href || '');
 
     /** @const @private {!Promise<string>} */
-    this.viewerUrl_ = new Promise(resolve => {
+    this.viewerUrl_ = new Promise((resolve) => {
       /** @const {?string} */
       const viewerUrlOverride = ampdoc.getParam('viewerUrl');
       if (this.isEmbedded() && viewerUrlOverride) {
         // Viewer override, but only for whitelisted viewers. Only allowed for
         // iframed documents.
-        this.isTrustedViewer().then(isTrusted => {
+        this.isTrustedViewer().then((isTrusted) => {
           if (isTrusted) {
             this.resolvedViewerUrl_ = devAssert(viewerUrlOverride);
           } else {
@@ -262,6 +268,16 @@ export class ViewerImpl {
     });
   }
 
+  /** @private */
+  prerenderSizeDeprecation_() {
+    if (this.prerenderSize_ !== 1) {
+      dev().expectedError(
+        TAG_,
+        `prerenderSize (${this.prerenderSize_}) is deprecated (#27167)`
+      );
+    }
+  }
+
   /**
    * Initialize messaging channel with Viewer host.
    * This promise will resolve when communications channel has been
@@ -297,12 +313,16 @@ export class ViewerImpl {
     if (!isEmbedded) {
       return null;
     }
+    const timeoutMessage = 'initMessagingChannel timeout';
     return Services.timerFor(this.win)
-      .timeoutPromise(20000, messagingPromise, 'initMessagingChannel')
-      .catch(reason => {
-        const error = getChannelError(
+      .timeoutPromise(20000, messagingPromise, timeoutMessage)
+      .catch((reason) => {
+        let error = getChannelError(
           /** @type {!Error|string|undefined} */ (reason)
         );
+        if (error && endsWith(error.message, timeoutMessage)) {
+          error = dev().createExpectedError(error);
+        }
         reportError(error);
         throw error;
       });
@@ -390,7 +410,7 @@ export class ViewerImpl {
    * @private
    */
   hasRoughlySameOrigin_(first, second) {
-    const trimOrigin = origin => {
+    const trimOrigin = (origin) => {
       if (origin.split('.').length > 2) {
         return origin.replace(TRIM_ORIGIN_PATTERN_, '$1');
       }
@@ -574,7 +594,7 @@ export class ViewerImpl {
       this.isTrustedViewer_ =
         isTrustedAncestorOrigins !== undefined
           ? Promise.resolve(isTrustedAncestorOrigins)
-          : this.messagingReadyPromise_.then(origin => {
+          : this.messagingReadyPromise_.then((origin) => {
               return origin ? this.isTrustedViewerOrigin_(origin) : false;
             });
     }
@@ -648,7 +668,7 @@ export class ViewerImpl {
       // Non-https origins are never trusted.
       return false;
     }
-    return urls.trustedViewerHosts.some(th => th.test(url.hostname));
+    return urls.trustedViewerHosts.some((th) => th.test(url.hostname));
   }
 
   /** @override */
@@ -677,6 +697,7 @@ export class ViewerImpl {
       if (data['prerenderSize'] !== undefined) {
         this.prerenderSize_ = data['prerenderSize'];
         dev().fine(TAG_, '- prerenderSize change:', this.prerenderSize_);
+        this.prerenderSizeDeprecation_();
       }
       this.setVisibilityState_(data['state']);
       return Promise.resolve();
@@ -717,7 +738,7 @@ export class ViewerImpl {
     if (this.messageQueue_.length > 0) {
       const queue = this.messageQueue_.slice(0);
       this.messageQueue_ = [];
-      queue.forEach(message => {
+      queue.forEach((message) => {
         const responsePromise = this.messageDeliverer_(
           message.eventType,
           message.data,
@@ -779,7 +800,10 @@ export class ViewerImpl {
       });
     }
 
-    const found = findIndex(this.messageQueue_, m => m.eventType == eventType);
+    const found = findIndex(
+      this.messageQueue_,
+      (m) => m.eventType == eventType
+    );
 
     let message;
     if (found != -1) {
@@ -856,17 +880,22 @@ export class ViewerImpl {
 }
 
 /**
- * Creates an error for the case where a channel cannot be established.
+ * Creates a dev error for the case where a channel cannot be established.
  * @param {*=} opt_reason
  * @return {!Error}
  */
 function getChannelError(opt_reason) {
+  let channelError;
   if (opt_reason instanceof Error) {
     opt_reason = duplicateErrorIfNecessary(opt_reason);
     opt_reason.message = 'No messaging channel: ' + opt_reason.message;
-    return opt_reason;
+    channelError = opt_reason;
+  } else {
+    channelError = new Error('No messaging channel: ' + opt_reason);
   }
-  return new Error('No messaging channel: ' + opt_reason);
+  // Force convert user error to dev error
+  channelError.message = stripUserError(channelError.message);
+  return channelError;
 }
 
 /**

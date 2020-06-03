@@ -1,0 +1,37 @@
+{
+  "vars": {
+    "clientId": "CLIENT_ID(ken_amp_id)",
+    "channelClickId": "QUERY_PARAM(gclid)"
+  },
+  "requests": {
+    "host": "https://amp.xg4ken.com",
+    "parameters": "ampcid=${clientId}&chcid=${channelClickId}&tid=${tid}&uid=${userId}&domain=${canonicalHostname}",
+    "landingPage": "${host}/amp/v1/match?${parameters}"
+  },
+  "triggers": {
+    "trackLandingPage": {
+      "enabled": "QUERY_PARAM(gclid)",
+      "on": "visible",
+      "request": "landingPage"
+    }
+  },
+  "linkers": {
+    "linker": {
+      "ids": {
+        "clientId": "${clientId}",
+        "channelClickId": "${channelClickId}"
+      },
+      "proxyOnly": false,
+      "enabled": true
+    }
+  },
+  "cookies": {
+    "enabled": true,
+    "ken_gclid": {
+      "value": "QUERY_PARAM(gclid)"
+    },
+    "ken_amp_gclid": {
+      "value": "QUERY_PARAM(gclid)"
+    }
+  }
+}

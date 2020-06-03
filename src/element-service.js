@@ -43,9 +43,12 @@ import {userAssert} from './log';
  * @return {!Promise<*>}
  */
 export function getElementService(win, id, extension, opt_element) {
-  return getElementServiceIfAvailable(win, id, extension, opt_element).then(
-    service => assertService(service, id, extension)
-  );
+  return getElementServiceIfAvailable(
+    win,
+    id,
+    extension,
+    opt_element
+  ).then((service) => assertService(service, id, extension));
 }
 
 /**
@@ -100,7 +103,7 @@ export function getElementServiceForDoc(element, id, extension, opt_element) {
     id,
     extension,
     opt_element
-  ).then(service => assertService(service, id, extension));
+  ).then((service) => assertService(service, id, extension));
 }
 
 /**

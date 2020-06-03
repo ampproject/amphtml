@@ -16,6 +16,7 @@
 
 import {CommonSignals} from './common-signals';
 import {Services} from './services';
+import {TickLabel} from './enums';
 import {dev, devAssert, rethrowAsync} from './log';
 import {getAmpdoc} from './service';
 import {insertAfterOrAtStart, waitForBodyOpenPromise} from './dom';
@@ -147,7 +148,7 @@ function insertStyleElement(cssRoot, cssText, isRuntimeCss, ext) {
   }
 
   const isExtCss =
-    !isRuntimeCss && (ext && ext != 'amp-custom' && ext != 'amp-keyframes');
+    !isRuntimeCss && ext && ext != 'amp-custom' && ext != 'amp-keyframes';
   const key = isRuntimeCss
     ? 'amp-runtime'
     : isExtCss
@@ -257,11 +258,11 @@ export function makeBodyVisible(doc) {
     .then(() => {
       return waitForServices(win);
     })
-    .catch(reason => {
+    .catch((reason) => {
       rethrowAsync(reason);
       return [];
     })
-    .then(services => {
+    .then((services) => {
       bodyMadeVisible = true;
       setBodyVisibleStyles(doc);
       const ampdoc = getAmpdoc(doc);
@@ -272,7 +273,7 @@ export function makeBodyVisible(doc) {
       }
       try {
         const perf = Services.performanceFor(win);
-        perf.tick('mbv');
+        perf.tick(TickLabel.MAKE_BODY_VISIBLE);
         perf.flush();
       } catch (e) {}
     });

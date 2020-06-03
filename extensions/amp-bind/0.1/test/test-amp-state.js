@@ -28,9 +28,8 @@ describes.realWin(
       extensions: ['amp-bind:0.1'],
     },
   },
-  env => {
+  (env) => {
     let win;
-    let sandbox;
     let ampdoc;
 
     let element;
@@ -50,30 +49,32 @@ describes.realWin(
     }
 
     beforeEach(() => {
-      ({win, sandbox, ampdoc} = env);
+      ({win, ampdoc} = env);
 
       whenFirstVisiblePromise = new Promise((resolve, reject) => {
         whenFirstVisiblePromiseResolve = resolve;
         whenFirstVisiblePromiseReject = reject;
       });
-      sandbox.stub(ampdoc, 'whenFirstVisible').returns(whenFirstVisiblePromise);
-      sandbox.stub(ampdoc, 'hasBeenVisible').returns(false);
+      env.sandbox
+        .stub(ampdoc, 'whenFirstVisible')
+        .returns(whenFirstVisiblePromise);
+      env.sandbox.stub(ampdoc, 'hasBeenVisible').returns(false);
 
       element = getAmpState();
       ampState = element.implementation_;
 
-      sandbox
+      env.sandbox
         .stub(xhrUtils, 'getViewerAuthTokenIfAvailable')
         .returns(Promise.resolve());
 
       // TODO(choumx): Remove stubbing of private function fetch_() once
       // batchFetchJsonFor() is easily stub-able.
-      sandbox
+      env.sandbox
         .stub(ampState, 'fetch_')
         .returns(Promise.resolve({remote: 'data'}));
 
-      bind = {setState: sandbox.stub()};
-      sandbox.stub(Services, 'bindForDocOrNull').resolves(bind);
+      bind = {setState: env.sandbox.stub()};
+      env.sandbox.stub(Services, 'bindForDocOrNull').resolves(bind);
     });
 
     it('should not fetch until doc is visible', async () => {
@@ -95,28 +96,27 @@ describes.realWin(
       await whenFirstVisiblePromise;
 
       // await one macro-task to let viewer/fetch promise chains resolve.
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(ampState.fetch_).to.have.been.calledOnce;
       expect(ampState.fetch_).to.have.been.calledWithExactly(
-        /* ampdoc */ sinon.match.any,
+        /* ampdoc */ env.sandbox.match.any,
         UrlReplacementPolicy.ALL,
-        /* refresh */ sinon.match.falsy,
-        /* token */ sinon.match.falsy
+        /* refresh */ env.sandbox.match.falsy,
+        /* token */ env.sandbox.match.falsy
       );
 
       expect(bind.setState).calledWithMatch(
         {myAmpState: {remote: 'data'}},
-        true,
-        false
+        {skipEval: true, skipAmpState: false}
       );
     });
 
     it('should trigger "fetch-error" if fetch fails', async () => {
       ampState.fetch_.returns(Promise.reject());
 
-      const actions = {trigger: sandbox.spy()};
-      sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
+      const actions = {trigger: env.sandbox.spy()};
+      env.sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
 
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
       element.build();
@@ -127,7 +127,7 @@ describes.realWin(
       await whenFirstVisiblePromise;
 
       // await one macro-task to let viewer/fetch promise chains resolve.
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(actions.trigger).to.have.been.calledWithExactly(
         element,
@@ -138,20 +138,19 @@ describes.realWin(
     });
 
     it('should register "refresh" action', async () => {
-      sandbox.spy(ampState, 'registerAction');
+      env.sandbox.spy(ampState, 'registerAction');
 
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
       element.build();
 
       expect(ampState.registerAction).calledWithExactly(
         'refresh',
-        sinon.match.any,
-        ActionTrust.HIGH
+        env.sandbox.match.any
       );
     });
 
     it('should fetch on "refresh"', async () => {
-      sandbox.spy(ampState, 'registerAction');
+      env.sandbox.spy(ampState, 'registerAction');
 
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
       element.build();
@@ -167,7 +166,7 @@ describes.realWin(
       await whenFirstVisiblePromise;
 
       // await one macro-task to let viewer/fetch promise chains resolve.
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       // One call from build(), one call from "refresh" action.
       expect(ampState.fetch_).to.have.been.calledTwice;
@@ -180,12 +179,11 @@ describes.realWin(
 
       expect(bind.setState).calledWithMatch(
         {myAmpState: {local: 'data'}},
-        true,
-        false
+        {skipEval: true, skipAmpState: false}
       );
 
       // await one macro-task to let viewer/fetch promise chains resolve.
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(ampState.fetch_).to.not.have.been.called;
     });
@@ -200,20 +198,18 @@ describes.realWin(
       expect(ampState.fetch_).to.not.have.been.called;
       expect(bind.setState).calledWithMatch(
         {myAmpState: {local: 'data'}},
-        true,
-        false
+        {skipEval: true, skipAmpState: false}
       );
 
       whenFirstVisiblePromiseResolve();
       await whenFirstVisiblePromise;
 
       // await a single macro-task to let promise chains resolve.
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(bind.setState).calledWithMatch(
         {myAmpState: {remote: 'data'}},
-        true,
-        false
+        {skipEval: true, skipAmpState: false}
       );
     });
 
@@ -247,13 +243,12 @@ describes.realWin(
       await whenFirstVisiblePromise;
 
       // await a single macro-task to let promise chains resolve.
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(ampState.fetch_).to.have.been.called;
       expect(bind.setState).calledWithMatch(
         {myAmpState: {remote: 'data'}},
-        false,
-        true
+        {skipEval: false, skipAmpState: true}
       );
     });
 
@@ -270,20 +265,19 @@ describes.realWin(
       await whenFirstVisiblePromise;
 
       // await a single macro-task to let promise chains resolve.
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(ampState.fetch_).to.have.been.calledOnce;
       expect(ampState.fetch_).to.have.been.calledWithExactly(
-        /* ampdoc */ sinon.match.any,
+        /* ampdoc */ env.sandbox.match.any,
         UrlReplacementPolicy.ALL,
-        /* refresh */ sinon.match.falsy,
+        /* refresh */ env.sandbox.match.falsy,
         'idToken'
       );
 
       expect(bind.setState).calledWithMatch(
         {myAmpState: {remote: 'data'}},
-        true,
-        false
+        {skipEval: true, skipAmpState: false}
       );
     });
   }

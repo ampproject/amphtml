@@ -56,12 +56,18 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
      */
     this.container_ = null;
 
-    this.firstLayoutCompleted_ = false;
+    /** @private {boolean} */
+    this.initialPositionChecked_ = false;
   }
 
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.FIXED_HEIGHT;
+  }
+
+  /** @override */
+  isRelayoutNeeded() {
+    return true;
   }
 
   /** @override */
@@ -76,13 +82,13 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     this.totalChildren_ = this.visibileChildren_(childNodes).length;
 
     const owners = Services.ownersForDoc(this.element);
-    this.children_.forEach(child => owners.setOwner(child, this.element));
+    this.children_.forEach((child) => owners.setOwner(child, this.element));
 
     const clip = doc.createElement('div');
     clip.setAttribute('class', 'i-amphtml-fx-flying-carpet-clip');
     container.setAttribute('class', 'i-amphtml-fx-flying-carpet-container');
 
-    childNodes.forEach(child => container.appendChild(child));
+    childNodes.forEach((child) => container.appendChild(child));
     clip.appendChild(container);
     this.element.appendChild(clip);
 
@@ -93,21 +99,6 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
       container,
       /* opt_forceTransfer */ false
     );
-  }
-
-  /** @override */
-  onMeasureChanged() {
-    const width = this.getLayoutWidth();
-    this.mutateElement(() => {
-      setStyle(this.container_, 'width', width, 'px');
-    });
-    if (this.firstLayoutCompleted_) {
-      Services.ownersForDoc(this.element).scheduleLayout(
-        this.element,
-        this.children_
-      );
-      this.observeNewChildren_();
-    }
   }
 
   /** @override */
@@ -155,19 +146,24 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    try {
-      this.assertPosition_();
-    } catch (e) {
-      // Collapse the element if the effect is broken by the viewport location.
-      this./*OK*/ collapse();
-      throw e;
+    if (!this.initialPositionChecked_) {
+      try {
+        this.assertPosition_();
+      } catch (e) {
+        // Collapse the element if the effect is broken by the viewport location.
+        this./*OK*/ collapse();
+        throw e;
+      }
+      this.initialPositionChecked_ = true;
     }
+
+    const width = this.element.getLayoutWidth();
+    setStyle(this.container_, 'width', width, 'px');
     Services.ownersForDoc(this.element).scheduleLayout(
       this.element,
       this.children_
     );
     this.observeNewChildren_();
-    this.firstLayoutCompleted_ = true;
     return Promise.resolve();
   }
 
@@ -177,7 +173,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
    * @private
    */
   observeNewChildren_() {
-    const observer = new MutationObserver(changes => {
+    const observer = new MutationObserver((changes) => {
       for (let i = 0; i < changes.length; i++) {
         const {addedNodes} = changes[i];
         if (!addedNodes) {
@@ -244,7 +240,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
    * @private
    */
   visibileChildren_(nodes) {
-    return nodes.filter(node => {
+    return nodes.filter((node) => {
       if (node.nodeType === /* Element */ 1) {
         return true;
       }
@@ -259,6 +255,6 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpFlyingCarpet, CSS);
 });

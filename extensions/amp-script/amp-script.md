@@ -6,9 +6,6 @@ teaser:
   text: Allows running custom JavaScript to render UI.
 experimental: true
 ---
-# amp-script
-
-Allows running custom JavaScript to render UI.
 
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
@@ -26,35 +23,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-[TOC]
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td>
-      <div>
-        <code>&lt;script async custom-element="amp-script" src="https://cdn.ampproject.org/v0/amp-script-0.1.js">&lt;/script&gt;</code>
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td>
-      <ul>
-        <li><a href="https://github.com/ampproject/amphtml/tree/master/examples/amp-script">Unannotated code samples</a></li>
-      </ul>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Tutorials</strong></td>
-    <td>
-      <ul>
-        <li><a href="https://amp.dev/documentation/guides-and-tutorials/develop/custom-javascript">Getting started with amp-script</a></li>
-        <li><a href="https://amp.dev/documentation/guides-and-tutorials/develop/custom-javascript-tutorial?format=websites">Custom password requirements with amp-script</a></li>
-      </ul>
-    </td>
-  </tr>
-</table>
+# amp-script
 
 ## Overview
 
@@ -63,6 +32,7 @@ The `amp-script` component allows you run custom JavaScript to render UI element
 ### A simple example
 
 An `amp-script` element can load JavaScript in two ways:
+
 - Remotely, from a URL to a JavaScript file.
 - Locally, from a `script[type=text/plain][target=amp-script]` element on the page.
 
@@ -87,12 +57,13 @@ Use the `script` attribute to reference a local `script` element by `id`.
 <head>
   <meta
     name="amp-script-src"
-    content="sha384-YCFs8k-ouELcBTgzKzNAujZFxygwiqimSqKK7JqeKaGNflwDxaC3g2toj7s_kxWG">
+    content="sha384-YCFs8k-ouELcBTgzKzNAujZFxygwiqimSqKK7JqeKaGNflwDxaC3g2toj7s_kxWG"
+  />
 </head>
 
 ...
 
-<amp-script width=200 height=50 script="hello-world">
+<amp-script width="200" height="50" script="hello-world">
   <button>Hello amp-script!</button>
 </amp-script>
 
@@ -127,7 +98,7 @@ document.body.appendChild(p);
 Will be reflected on the page as a new child of the `amp-script` element:
 
 ```html
-<amp-script src="http://example.com/my-script.js" width=300 height=100>
+<amp-script src="http://example.com/my-script.js" width="300" height="100">
   <p>I am added to the body!</p>
 </amp-script>
 ```
@@ -138,7 +109,7 @@ Under the hood, `amp-script` uses [@ampproject/worker-dom](https://github.com/am
 
 `amp-script` supports getting and setting [`amp-state`](https://amp.dev/documentation/components/amp-bind/#initializing-state-with-amp-state) JSON via JavaScript.
 
-This enables advanced interactions between `amp-script` and other AMP elements on the page via `amp-bind` [bindings](https://amp.dev/documentation/components/amp-bind/#bindings). These elements can be inside (descendants) or outside (non-descendants) of the `amp-script` element.
+This enables advanced interactions between `amp-script` and other AMP elements on the page via `amp-bind` [bindings](https://amp.dev/documentation/components/amp-bind/#bindings). Invoking `AMP.setState()` from `amp-script` may cause mutations to the DOM as long as it was triggered by user gesture, otherwise it will only implicitly set state (similar to [`amp-state` initialization](https://amp.dev/documentation/examples/components/amp-bind/?referrer=ampbyexample.com#initializing-state)).
 
 [tip type="default"]
 `AMP.setState()` requires the [`amp-bind`](https://amp.dev/documentation/components/amp-bind) extension script to be included in the document head.
@@ -162,8 +133,7 @@ AMP.getState(expr) {}
 ##### Example with WebSocket and AMP.setState()
 
 ```html
-<amp-script width=1 height=1 script="webSocketDemo">
-</amp-script>
+<amp-script width="1" height="1" script="webSocketDemo"> </amp-script>
 
 <!--
   <amp-state> doesn't support WebSocket URLs in its "src" attribute,
@@ -171,7 +141,7 @@ AMP.getState(expr) {}
 -->
 <script type="text/plain" target="amp-script" id="webSocketDemo">
   const socket = new WebSocket('wss://websocket.example');
-  socket.onmessage = e => {
+  socket.onmessage = event => {
     AMP.setState({socketData: event.data});
   };
 </script>
@@ -194,19 +164,22 @@ If there's an API you'd like to see supported, please [file an issue](https://gi
 
 #### User gestures
 
-`amp-script` generally requires a user gesture to apply changes triggered by your JavaScript code to the page (we call these "mutations"). This requirement helps avoid poor user experience from unexpected content jumping.
+In some cases, `amp-script` requires a user gesture to apply changes triggered by your JavaScript code (we call these "mutations") to the `amp-script`'s DOM children. This helps avoid poor user experience from unexpected content jumping.
 
 The rules for mutations are as follows:
 
-1. Mutations are always accepted for five seconds after a user gesture.
-2. The five second interval is extended if the author script performs a `fetch()` as a result of the user gesture.
-3. Mutations are always accepted for `amp-script` elements with [`[layout!="container"]`](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#supported-values-for-the-layout-attribute) and `height < 300px`.
+1. For `amp-script` elements with [non-container layout](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#supported-values-for-the-layout-attribute), mutations are always allowed.
+2. For `amp-script` elements with container layout, mutations are allowed for five seconds following a user gesture. This five second window is extended once if a `fetch()` is triggered.
+
+#### Creating AMP elements
+
+With regard to dynamic creation of AMP elements (e.g. via `document.createElement()`), only `amp-img` and `amp-layout` are currently allowed. Please upvote or comment on [#25344](https://github.com/ampproject/amphtml/issues/25344) with your use case.
 
 #### Security features
 
 Since custom JS run in `amp-script` is not subject to normal [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP), we've included some additional measures that are checked at runtime:
 
-1. Same-origin `src` must have [`Content-Type: application/javascript`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type).
+1. Same-origin `src` must have [`Content-Type`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type): `application/javascript` or `text/javascript`.
 2. Cross-origin `src` and `script` must have matching script hashes in a `meta[name=amp-script-src]` element in the document head. A console error will be emitted with the expected hash string.
 
 Example of script hashes:
@@ -249,7 +222,7 @@ Example of script hashes:
 ```
 
 [tip type="default"]
-The JavaScript size and script hash requirements can be disabled during development by adding a `development` attribute to an `amp-script` element.
+The JavaScript size and script hash requirements can be disabled during development by adding a `data-ampdevmode` attribute to either the `amp-script` element or the root html node.
 [/tip]
 
 ## Attributes
@@ -258,7 +231,7 @@ The JavaScript size and script hash requirements can be disabled during developm
 
 For executing remote scripts.
 
-The URL of a JS file that will be executed in the context of this `<amp-script>`. The URL's protocol must be HTTPS and the HTTP response's `Content-Type` must be `application/javascript`.
+The URL of a JS file that will be executed in the context of this `<amp-script>`. The URL's protocol must be HTTPS and the HTTP response's `Content-Type` must be `application/javascript` or `text/javascript`.
 
 **script**
 
@@ -272,25 +245,19 @@ Applies extra restrictions to DOM that may be mutated by this `<amp-script>`. Si
 
 - `allow-forms`: Allows [form elements](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/elements) to be created and modified. AMP requires special handling to prevent unauthorized state changing requests from user input. See amp-form's [security considerations](https://amp.dev/documentation/components/amp-form#security-considerations) for more detail.
 
-**max-age (optional)**
+**max-age (optional, but required for signed exchanges if `script` is specified)**
 
 Requires the `script` attribute.
 
-The `max-age` attribute specifies the maximum lifetime in seconds the local script is allowed to be served from the time of [signed exchange (SXG)](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/signed-exchange/) publishing.
+The `max-age` attribute specifies the maximum lifetime in seconds the local script is allowed to be served from the time of [signed exchange (SXG)](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/signed-exchange/) publishing. [AMP Packager](https://github.com/ampproject/amppackager) uses this value to compute the SXG `expires` time.
 
 The value of `max-age` should be chosen carefully:
 
 - A longer `max-age` increases the potential security impact of a [SXG downgrade](https://wicg.github.io/webpackage/draft-yasskin-http-origin-signed-responses.html#seccons-downgrades).
 
-- A shorter `max-age` may prevent inclusion in AMP Caches that have a [minimum SXG lifetime](https://github.com/ampproject/amppackager/blob/releases/docs/cache_requirements.md#google-amp-cache).
+- A shorter `max-age` may prevent inclusion in AMP Caches that have a minimum SXG lifetime. For instance, the Google AMP Cache requires at least [4 days](https://github.com/ampproject/amppackager/blob/releases/docs/cache_requirements.md#google-amp-cache) (345600 seconds). Note that there's currently no reason to select `max-age` longer than 7 days (604800 seconds), due to the [maximum](https://wicg.github.io/webpackage/draft-yasskin-http-origin-signed-responses.html#name-signature-validity) set by the SXG spec.
 
 If you don't publish signed exchanges, `max-age` does nothing.
-
-**development (optional, invalid)**
-
-A boolean attribute that disables the JS size and security constraints for a more convenient development experience.
-
-This attribute is not allowed by the AMP Validator and should not be used on pages in production.
 
 **common attributes**
 

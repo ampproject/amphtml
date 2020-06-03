@@ -24,10 +24,11 @@ An example slot might look like:
 
 ```html
 <amp-ad
-    type="doubleclick"
-    data-slot="/6355419/Travel"
-    layout="fluid"
-    height="fluid">
+  type="doubleclick"
+  data-slot="/6355419/Travel"
+  layout="fluid"
+  height="fluid"
+>
 </amp-ad>
 ```
 

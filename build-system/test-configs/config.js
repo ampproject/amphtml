@@ -73,8 +73,6 @@ const a4aTestPaths = initTestsPath.concat([
   'ads/google/a4a/test/*.js',
 ]);
 
-const chaiAsPromised = ['test/chai-as-promised/chai-as-promised.js'];
-
 const unitTestPaths = [
   'test/unit/**/*.js',
   'ads/**/test/test-*.js',
@@ -116,11 +114,14 @@ const presubmitGlobs = [
   '!dist.3p/current/**/iframe-transport-client-lib.js',
   '!out/**/*.*',
   '!validator/validator.pb.go',
+  '!validator/chromeextension/*.*',
   '!validator/dist/**/*.*',
+  '!validator/htmlparser/**/*.*',
   '!validator/node_modules/**/*.*',
   '!validator/nodejs/node_modules/**/*.*',
   '!validator/webui/dist/**/*.*',
   '!validator/webui/node_modules/**/*.*',
+  '!build-system/server/new-server/transforms/dist/**/*.*',
   '!build-system/tasks/e2e/node_modules/**/*.*',
   '!build-system/tasks/presubmit-checks.js',
   '!build-system/runner/build/**/*.*',
@@ -129,7 +130,7 @@ const presubmitGlobs = [
   '!build/polyfills.js',
   '!build/polyfills/*.js',
   '!third_party/**/*.*',
-  '!validator/chromeextension/*.*',
+  '!src/purifier/node_modules/**/*.*',
   // Files in this testdata dir are machine-generated and are not part
   // of the AMP runtime, so shouldn't be checked.
   '!extensions/amp-a4a/*/test/testdata/*.js',
@@ -139,10 +140,35 @@ const presubmitGlobs = [
   '!firebase/**/*.*',
 ];
 
-const jsonGlobs = [
+/**
+ * List of non-JS files to be checked by `gulp prettify` (using prettier).
+ * NOTE: When you add a new filename / glob to this list:
+ * 1. Make sure its formatting options are specified in .prettierrc
+ * 2. Make sure it is listed in .vscode/settings.json (for auto-fix-on-save)
+ */
+const prettifyGlobs = [
+  '.codecov.yml',
+  '.lando.yml',
+  '.lgtm.yml',
+  '.travis.yml',
+  '**/.eslintrc',
+  '.prettierrc',
+  '.renovaterc.json',
+  '.vscode/settings.json',
   '**/*.json',
-  '!{node_modules,build,dist,dist.3p,dist.tools,' +
-    'third_party,build-system}/**/*.*',
+  '**/OWNERS',
+  '**/*.md',
+  '!.github/ISSUE_TEMPLATE/**',
+  '!**/{node_modules,build,dist,dist.3p,dist.tools,.karma-cache}/**',
+];
+
+/**
+ * List of markdown files that may be checked by `gulp check-links` (using
+ * markdown-link-check).
+ */
+const linkCheckGlobs = [
+  '**/*.md',
+  '!**/{examples,node_modules,build,dist,dist.3p,dist.tools,.karma-cache}/**',
 ];
 
 /**
@@ -170,22 +196,27 @@ const thirdPartyFrames = [
   },
 ];
 
+/**
+ * File types to ignore while auto-generating a changelog for a new release.
+ */
+const changelogIgnoreFileTypes = /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/;
+
 /** @const  */
 module.exports = {
-  testPaths,
   a4aTestPaths,
-  chaiAsPromised,
-  commonUnitTestPaths,
+  changelogIgnoreFileTypes,
   commonIntegrationTestPaths,
-  unitTestPaths,
-  unitTestOnSaucePaths,
-  integrationTestPaths,
-  e2eTestPaths,
-  lintGlobs,
+  commonUnitTestPaths,
   devDashboardTestPaths,
+  e2eTestPaths,
+  integrationTestPaths,
   jisonPaths,
-  thirdPartyFrames,
-  jsonGlobs,
+  linkCheckGlobs,
+  lintGlobs,
   presubmitGlobs,
-  changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/,
+  prettifyGlobs,
+  testPaths,
+  thirdPartyFrames,
+  unitTestOnSaucePaths,
+  unitTestPaths,
 };

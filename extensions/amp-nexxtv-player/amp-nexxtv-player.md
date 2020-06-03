@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a media stream from the nexxOMNIA platform.
 ---
+
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -23,37 +24,24 @@ limitations under the License.
 
 # amp-nexxtv-player
 
-Displays a media stream from the nexxOMNIA platform.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-nexxtv-player" src="https://cdn.ampproject.org/v0/amp-nexxtv-player-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Example
 
 With the responsive layout, the width and height from the example should yield correct layouts for 16:9 aspect ratio videos:
 
 ```html
 <amp-nexxtv-player
-    data-mediaid="71QQG852413DU7J"
-    data-client="761"
-    data-streamtype="video"
-    data-seek-to="2"
-    data-mode="static"
-    data-origin="https://embed.nexx.cloud/"
-    data-disable-ads="1"
-    data-streaming-filter="nxp-bitrate-2500"
-    layout="responsive"
-    width="480" height="270"></amp-nexxtv-player>
+  data-mediaid="71QQG852413DU7J"
+  data-client="761"
+  data-streamtype="video"
+  data-seek-to="2"
+  data-mode="static"
+  data-origin="https://embed.nexx.cloud/"
+  data-disable-ads="1"
+  data-streaming-filter="nxp-bitrate-2500"
+  layout="responsive"
+  width="480"
+  height="270"
+></amp-nexxtv-player>
 ```
 
 ## Attributes

@@ -38,7 +38,7 @@ describes.realWin(
       extensions: ['amp-truncate-text'],
     },
   },
-  env => {
+  (env) => {
     let doc;
     let win;
 
@@ -54,7 +54,6 @@ describes.realWin(
      */
     function createTests({useShadow}) {
       beforeEach(() => {
-        toggleExperiment(win, 'amp-truncate-text', true);
         if (useShadow) {
           toggleExperiment(win, 'amp-truncate-text-shadow', true);
         }
@@ -65,7 +64,7 @@ describes.realWin(
        *    run and we have re-truncateed.
        */
       function afterMutationAndClamp() {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           setTimeout(resolve);
         });
       }
@@ -97,7 +96,7 @@ describes.realWin(
         }
 
         return toArray(element.querySelectorAll('[class$="-slot"]'))
-          .map(c => toArray(c.childNodes))
+          .map((c) => toArray(c.childNodes))
           .reduce((acc, c) => acc.concat(c), []);
       }
 

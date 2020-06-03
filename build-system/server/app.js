@@ -22,18 +22,24 @@
 const app = require('express')();
 const argv = require('minimist')(process.argv.slice(2));
 const bacon = require('baconipsum');
-const BBPromise = require('bluebird');
 const bodyParser = require('body-parser');
 const cors = require('./amp-cors');
 const devDashboard = require('./app-index/index');
 const formidable = require('formidable');
-const fs = BBPromise.promisifyAll(require('fs'));
+const fs = require('fs');
 const jsdom = require('jsdom');
 const path = require('path');
 const request = require('request');
 const upload = require('multer')();
 const pc = process;
+const autocompleteEmailData = require('./autocomplete-test-data');
 const runVideoTestBench = require('./app-video-testbench');
+const {
+  getVariableRequest,
+  runVariableSubstitution,
+  saveVariableRequest,
+  saveVariables,
+} = require('./variable-substitution');
 const {
   recaptchaFrameRequestHandler,
   recaptchaRouter,
@@ -46,11 +52,18 @@ const TEST_SERVER_PORT = argv.port || 8000;
 let SERVE_MODE = getServeMode();
 
 app.use(bodyParser.text());
+
+// Middleware is executed in order, so this must be at the top.
+// TODO(#24333): Migrate all server URL handlers to new-server/router and
+// deprecate this file.
+if (argv.new_server) {
+  app.use(require('./new-server/router'));
+}
+
 app.use(require('./routes/a4a-envelopes'));
 app.use('/amp4test', require('./amp4test').app);
 app.use('/analytics', require('./routes/analytics'));
 app.use('/list/', require('./routes/list'));
-app.use('/user-location/', require('./routes/user-location'));
 app.use('/test', require('./routes/test'));
 
 // Append ?csp=1 to the URL to turn on the CSP header.
@@ -67,7 +80,8 @@ app.use((req, res, next) => {
 
 function isValidServeMode(serveMode) {
   return (
-    ['default', 'compiled', 'cdn'].includes(serveMode) || isRtvMode(serveMode)
+    ['default', 'compiled', 'cdn', 'esm'].includes(serveMode) ||
+    isRtvMode(serveMode)
   );
 }
 
@@ -229,7 +243,7 @@ app.use('/pwa', (req, res) => {
   }
   res.statusCode = 200;
   res.setHeader('Content-Type', contentType);
-  fs.readFileAsync(pc.cwd() + file).then(file => {
+  fs.promises.readFile(pc.cwd() + file).then((file) => {
     res.end(file);
   });
 });
@@ -290,7 +304,7 @@ app.use('/form/echo-json/post', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   const form = new formidable.IncomingForm();
   const fields = Object.create(null);
-  form.on('field', function(name, value) {
+  form.on('field', function (name, value) {
     if (!(name in fields)) {
       fields[name] = value;
       return;
@@ -306,7 +320,7 @@ app.use('/form/echo-json/post', (req, res) => {
     }
     fields[realName].push(value);
   });
-  form.parse(req, unusedErr => {
+  form.parse(req, (unusedErr) => {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     if (fields['email'] == 'already@subscribed.com') {
       res.statusCode = 500;
@@ -400,7 +414,7 @@ app.use('/form/autocomplete/query', (req, res) => {
     res.json({items: autocompleteColors});
   } else {
     const lowerCaseQuery = query.toLowerCase();
-    const filtered = autocompleteColors.filter(l =>
+    const filtered = autocompleteColors.filter((l) =>
       l.toLowerCase().includes(lowerCaseQuery)
     );
     res.json({items: filtered});
@@ -408,7 +422,20 @@ app.use('/form/autocomplete/query', (req, res) => {
 });
 
 app.use('/form/autocomplete/error', (req, res) => {
-  res(500);
+  res.status(500).end();
+});
+
+app.use('/form/mention/query', (req, res) => {
+  const query = req.query.q;
+  if (!query) {
+    res.json({items: autocompleteEmailData});
+    return;
+  }
+  const lowerCaseQuery = query.toLowerCase().trim();
+  const filtered = autocompleteEmailData.filter((l) =>
+    l.toLowerCase().startsWith(lowerCaseQuery)
+  );
+  res.json({items: filtered});
 });
 
 app.use('/form/verify-search-json/post', (req, res) => {
@@ -466,7 +493,7 @@ function proxyToAmpProxy(req, res, mode) {
     (req.query['amp_js_v'] ? 'v' : 'c') +
     req.url;
   console.log('Fetching URL: ' + url);
-  request(url, function(error, response, body) {
+  request(url, function (error, response, body) {
     body = body
       // Unversion URLs.
       .replace(
@@ -479,6 +506,27 @@ function proxyToAmpProxy(req, res, mode) {
     // TODO(ccordry): Remove this when story v01 is depricated.
     const storyV1 = req.query['story_v'] === '1';
     const urlPrefix = getUrlPrefix(req);
+    if (req.query['mraid']) {
+      body = body
+        .replace(
+          '</head>',
+          '<script async host-service="amp-mraid" src="https://cdn.ampproject.org/v0/amp-mraid-0.1.js">' +
+            '</script>' +
+            '</head>'
+        )
+        // Change cdnUrl from the default so amp-mraid requests the (mock)
+        // mraid.js from the local server. In a real environment this doesn't
+        // matter as the local environment would intercept this request.
+        .replace(
+          '<head>',
+          ' <head>' +
+            ' <script>' +
+            ' window.AMP_CONFIG = {' +
+            `   cdnUrl: "${urlPrefix}",` +
+            ' };' +
+            ' </script>'
+        );
+    }
     body = replaceUrls(mode, body, urlPrefix, inabox, storyV1);
     if (inabox) {
       // Allow CORS requests for A4A.
@@ -537,7 +585,7 @@ app.use('/examples/live-list-update(-reverse)?.amp.html', (req, res, next) => {
       pagination.textContent = '';
       const liveChildren = [].slice
         .call(items.children)
-        .filter(x => !x.hasAttribute('data-tombstone'));
+        .filter((x) => !x.hasAttribute('data-tombstone'));
 
       const pageCount = Math.ceil(liveChildren.length / perPage);
       const pageListItems = Array.apply(null, Array(pageCount))
@@ -651,7 +699,7 @@ function getLiveBlogItem() {
         <div class="social-box">
           <amp-social-share type="facebook"
               data-param-text="Hello world"
-              data-param-href="https://example.com/?ref=URL"
+              data-param-href="https://example.test/?ref=URL"
               data-param-app_id="145634995501895"></amp-social-share>
           <amp-social-share type="twitter"></amp-social-share>
         </div>
@@ -722,6 +770,26 @@ app.use('/impression-proxy/', (req, res) => {
   // Or fake response with status 204 if viewer replaceUrl is provided
 });
 
+/**
+ * Acts in a similar fashion to /serve_mode_change. Saves
+ * analytics requests via /run-variable-substitution, and
+ * then returns the encoded/substituted/replaced request
+ * via /get-variable-request.
+ */
+
+// Saves the variables input to be used in run-variable-substitution
+app.get('/save-variables', saveVariables);
+
+// Creates an iframe with amp-analytics. Analytics request
+// uses save-variable-request as its endpoint.
+app.get('/run-variable-substitution', runVariableSubstitution);
+
+// Saves the analytics request to the dev server.
+app.get('/save-variable-request', saveVariableRequest);
+
+// Returns the saved analytics request.
+app.get('/get-variable-request', getVariableRequest);
+
 let forcePromptOnNext = false;
 app.post('/get-consent-v1/', (req, res) => {
   cors.assertCors(req, res, ['POST']);
@@ -752,6 +820,15 @@ app.post('/get-consent-no-prompt/', (req, res) => {
   cors.assertCors(req, res, ['POST']);
   const body = {};
   res.json(body);
+});
+
+app.post('/check-consent', (req, res) => {
+  cors.assertCors(req, res, ['POST']);
+  res.json({
+    'consentRequired': req.query.consentRequired === 'true',
+    'consentStateValue': req.query.consentStateValue,
+    'expireCache': req.query.expireCache === 'true',
+  });
 });
 
 // Proxy with local JS.
@@ -788,13 +865,14 @@ app.get('/a4a_template/*', (req, res) => {
   const filePath =
     `${pc.cwd()}/extensions/amp-ad-network-${match[1]}-impl/` +
     `0.1/data/${match[2]}.template`;
-  fs.readFileAsync(filePath)
-    .then(file => {
+  fs.promises
+    .readFile(filePath)
+    .then((file) => {
       res.setHeader('Content-Type', 'application/json');
       res.setHeader('AMP-template-amp-creative', 'amp-mustache');
       res.end(file);
     })
-    .error(() => {
+    .catch(() => {
       res.status(404);
       res.end('Not found: ' + filePath);
     });
@@ -857,16 +935,41 @@ app.get(['/dist/v0/amp-*.js'], (req, res, next) => {
 app.get('/test/manual/amp-video.amp.html', runVideoTestBench);
 
 app.get(
-  ['/examples/*.html', '/test/manual/*.html', '/test/fixtures/e2e/*/*.html'],
+  [
+    '/examples/(**/)?*.html',
+    '/test/manual/(**/)?*.html',
+    '/test/fixtures/e2e/(**/)?*.html',
+    '/test/fixtures/performance/(**/)?*.html',
+  ],
   (req, res, next) => {
     const filePath = req.path;
     const mode = SERVE_MODE;
     const inabox = req.query['inabox'];
     const stream = Number(req.query['stream']);
-    fs.readFileAsync(pc.cwd() + filePath, 'utf8')
-      .then(file => {
+    const urlPrefix = getUrlPrefix(req);
+    fs.promises
+      .readFile(pc.cwd() + filePath, 'utf8')
+      .then((file) => {
         if (req.query['amp_js_v']) {
           file = addViewerIntegrationScript(req.query['amp_js_v'], file);
+        }
+        if (req.query['mraid']) {
+          file = file
+            .replace(
+              '</head>',
+              '<script async host-service="amp-mraid" src="https://cdn.ampproject.org/v0/amp-mraid-0.1.js">' +
+                '</script>' +
+                '</head>'
+            )
+            .replace(
+              '<head>',
+              ' <head>' +
+                ' <script>' +
+                ' window.AMP_CONFIG = {' +
+                `   cdnUrl: "${urlPrefix}",` +
+                ' };' +
+                ' </script>'
+            );
         }
         file = file.replace(/__TEST_SERVER_PORT__/g, TEST_SERVER_PORT);
 
@@ -912,7 +1015,7 @@ app.get(
 
         // Extract amp-consent for the given 'type' specified in URL query.
         if (
-          req.path.indexOf('/examples/cmp-vendors.amp.html') == 0 &&
+          req.path.indexOf('/examples/amp-consent/cmp-vendors.amp.html') == 0 &&
           req.query.type
         ) {
           const consent = file.match(
@@ -927,7 +1030,7 @@ app.get(
         if (stream > 0) {
           res.writeHead(200, {'Content-Type': 'text/html'});
           let pos = 0;
-          const writeChunk = function() {
+          const writeChunk = function () {
             const chunk = file.substring(
               pos,
               Math.min(pos + stream, file.length)
@@ -1068,14 +1171,15 @@ app.get('/adzerk/*', (req, res) => {
   }
   const filePath =
     pc.cwd() + '/extensions/amp-ad-network-adzerk-impl/0.1/data/' + match[1];
-  fs.readFileAsync(filePath)
-    .then(file => {
+  fs.promises
+    .readFile(filePath)
+    .then((file) => {
       res.setHeader('Content-Type', 'application/json');
       res.setHeader('AMP-Ad-Template-Extension', 'amp-mustache');
       res.setHeader('AMP-Ad-Response-Type', 'template');
       res.end(file);
     })
-    .error(() => {
+    .catch(() => {
       res.status(404);
       res.end('Not found: ' + filePath);
     });
@@ -1126,7 +1230,7 @@ app.get(
       // This will not be useful until extension-location.js change in prod
       // Require url from cdn
       const filePath = 'https://cdn.ampproject.org/' + fileName;
-      request(filePath, function(error, response) {
+      request(filePath, function (error, response) {
         if (error) {
           res.status(404);
           res.end();
@@ -1150,7 +1254,7 @@ app.get('/dist/iframe-transport-client-lib.js', (req, res, next) => {
 
 app.get('/dist/amp-inabox-host.js', (req, res, next) => {
   const mode = SERVE_MODE;
-  if (mode == 'compiled') {
+  if (mode != 'default') {
     req.url = req.url.replace('amp-inabox-host', 'amp4ads-host-v0');
   }
   next();
@@ -1161,8 +1265,9 @@ app.get('/dist/amp-inabox-host.js', (req, res, next) => {
  */
 app.get('/dist/sw(.max)?.js', (req, res, next) => {
   const filePath = req.path;
-  fs.readFileAsync(pc.cwd() + filePath, 'utf8')
-    .then(file => {
+  fs.promises
+    .readFile(pc.cwd() + filePath, 'utf8')
+    .then((file) => {
       let n = new Date();
       // Round down to the nearest 5 minutes.
       n -=
@@ -1192,9 +1297,9 @@ app.get('/dist/rtv/9[89]*/*.js', (req, res, next) => {
     // Cause a delay, to show the "stale-while-revalidate"
     if (req.path.includes('v0.js')) {
       const path = req.path.replace(/rtv\/\d+/, '');
-      return fs
-        .readFileAsync(pc.cwd() + path, 'utf8')
-        .then(file => {
+      return fs.promises
+        .readFile(pc.cwd() + path, 'utf8')
+        .then((file) => {
           res.end(file);
         })
         .catch(next);
@@ -1210,8 +1315,9 @@ app.get('/dist/rtv/9[89]*/*.js', (req, res, next) => {
 
 app.get(['/dist/cache-sw.html'], (req, res, next) => {
   const filePath = '/test/manual/cache-sw.html';
-  fs.readFileAsync(pc.cwd() + filePath, 'utf8')
-    .then(file => {
+  fs.promises
+    .readFile(pc.cwd() + filePath, 'utf8')
+    .then((file) => {
       let n = new Date();
       // Round down to the nearest 5 minutes.
       n -=
@@ -1255,11 +1361,16 @@ app.get('/dist/diversions', (req, res) => {
  * Web worker binary.
  */
 app.get('/dist/ww(.max)?.js', (req, res) => {
-  fs.readFileAsync(pc.cwd() + req.path).then(file => {
+  fs.promises.readFile(pc.cwd() + req.path).then((file) => {
     res.setHeader('Content-Type', 'text/javascript');
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.end(file);
   });
+});
+
+app.get('/mraid.js', (req, res, next) => {
+  req.url = req.url.replace('mraid.js', 'examples/mraid/mraid.js');
+  next();
 });
 
 /**
@@ -1284,6 +1395,10 @@ app.use('/shadow/', (req, res) => {
     return;
   }
   res.end(replaceUrls(SERVE_MODE, viewerHtml));
+});
+
+app.use('/mraid/', (req, res) => {
+  res.redirect(req.url + '?inabox=1&mraid=1');
 });
 
 /**
@@ -1382,12 +1497,13 @@ app.use('(/dist)?/rtv/*/v0/analytics-vendors/:vendor.json', (req, res) => {
   const max = serveMode === 'default' ? '.max' : '';
   const localVendorConfigPath = `${pc.cwd()}/dist/v0/analytics-vendors/${vendor}${max}.json`;
 
-  fs.readFileAsync(localVendorConfigPath)
-    .then(file => {
+  fs.promises
+    .readFile(localVendorConfigPath)
+    .then((file) => {
       res.setHeader('Content-Type', 'application/json');
       res.end(file);
     })
-    .error(() => {
+    .catch(() => {
       res.status(404);
       res.end('Not found: ' + localVendorConfigPath);
     });

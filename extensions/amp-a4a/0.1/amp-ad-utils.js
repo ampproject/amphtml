@@ -127,16 +127,18 @@ export function getAmpAdMetadata(creative) {
       if (!isArray(metaData.customStylesheets)) {
         throw new Error(errorMsg);
       }
-      metaData.customStylesheets.forEach(stylesheet => {
-        if (
-          !isObject(stylesheet) ||
-          !stylesheet['href'] ||
-          typeof stylesheet['href'] !== 'string' ||
-          !isSecureUrlDeprecated(stylesheet['href'])
-        ) {
-          throw new Error(errorMsg);
+      /** @type {!Array} */ (metaData.customStylesheets).forEach(
+        (stylesheet) => {
+          if (
+            !isObject(stylesheet) ||
+            !stylesheet['href'] ||
+            typeof stylesheet['href'] !== 'string' ||
+            !isSecureUrlDeprecated(stylesheet['href'])
+          ) {
+            throw new Error(errorMsg);
+          }
         }
-      });
+      );
     }
     if (isArray(metaDataObj['images'])) {
       // Load maximum of 5 images.

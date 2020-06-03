@@ -25,7 +25,7 @@ describes.realWin(
       extensions: ['amp-fx-flying-carpet'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let viewport;
 
@@ -54,7 +54,7 @@ describes.realWin(
       flyingCarpet.setAttribute('height', '10px');
       if (opt_childrenCallback) {
         const children = opt_childrenCallback(flyingCarpet);
-        children.forEach(child => {
+        children.forEach((child) => {
           flyingCarpet.appendChild(child);
         });
       }
@@ -72,7 +72,7 @@ describes.realWin(
             viewport.setScrollTop(parseInt(top, 10));
             return flyingCarpet;
           },
-          error => {
+          (error) => {
             return Promise.reject({error, flyingCarpet});
           }
         );
@@ -86,7 +86,7 @@ describes.realWin(
         img.setAttribute('width', 300);
         img.setAttribute('height', 200);
         return [img];
-      }).then(flyingCarpet => {
+      }).then((flyingCarpet) => {
         const clip = flyingCarpet.firstChild;
         expect(clip.tagName).to.equal('DIV');
         expect(clip).to.have.class('i-amphtml-fx-flying-carpet-clip');
@@ -104,7 +104,7 @@ describes.realWin(
       return getAmpFlyingCarpet(() => {
         text = doc.createTextNode('test');
         return [text];
-      }).then(flyingCarpet => {
+      }).then((flyingCarpet) => {
         const clip = flyingCarpet.firstChild;
         expect(clip.tagName).to.equal('DIV');
         expect(clip).to.have.class('i-amphtml-fx-flying-carpet-clip');
@@ -118,12 +118,12 @@ describes.realWin(
     });
 
     it('should listen to build callback of children', () => {
-      const scheduleLayoutStub = sandbox.stub(
+      const scheduleLayoutStub = env.sandbox.stub(
         Services.ownersForDoc(doc),
         'scheduleLayout'
       );
       let img, flyingCarpet;
-      return getAmpFlyingCarpet(flyingCarpetArg => {
+      return getAmpFlyingCarpet((flyingCarpetArg) => {
         flyingCarpet = flyingCarpetArg;
         // Add the image
         img = doc.createElement('amp-img');
@@ -138,21 +138,21 @@ describes.realWin(
     });
 
     it('should sync width of fixed container', () => {
-      return getAmpFlyingCarpet().then(flyingCarpet => {
+      return getAmpFlyingCarpet().then((flyingCarpet) => {
         const impl = flyingCarpet.implementation_;
         const container = flyingCarpet.firstChild.firstChild;
         let width = 10;
 
-        impl.mutateElement = function(callback) {
+        impl.mutateElement = function (callback) {
           callback();
         };
-        impl.getLayoutWidth = () => width;
+        flyingCarpet.getLayoutWidth = () => width;
 
-        impl.onMeasureChanged();
+        impl.layoutCallback();
         expect(container.style.width).to.equal(width + 'px');
 
         width++;
-        impl.onMeasureChanged();
+        impl.layoutCallback();
         expect(container.style.width).to.equal(width + 'px');
       });
     });
@@ -162,18 +162,18 @@ describes.realWin(
         () => {
           throw new Error('should never reach this');
         },
-        ref => {
+        (ref) => {
           expect(ref.error.message).to.have.string(
             'elements must be positioned after the 75% of first viewport'
           );
-          expect(ref.flyingCarpet).to.not.display;
+          expect(ref.flyingCarpet).to.display('none');
         }
       );
     });
 
     it('should render past 75% of first viewport', () => {
-      return getAmpFlyingCarpet(null, '80vh').then(flyingCarpet => {
-        expect(flyingCarpet).to.display;
+      return getAmpFlyingCarpet(null, '80vh').then((flyingCarpet) => {
+        expect(flyingCarpet).to.display('block');
       });
     });
 
@@ -184,11 +184,11 @@ describes.realWin(
         () => {
           throw new Error('should never reach this');
         },
-        ref => {
+        (ref) => {
           expect(ref.error.message).to.have.string(
             'elements must be positioned before the last viewport'
           );
-          expect(ref.flyingCarpet).to.not.display;
+          expect(ref.flyingCarpet).to.display('none');
         }
       );
     });
@@ -196,8 +196,8 @@ describes.realWin(
     it('should render close to the last viewport', () => {
       // Doc: 600px
       // Viewport: 150px
-      return getAmpFlyingCarpet(null, '455px').then(flyingCarpet => {
-        expect(flyingCarpet).to.display;
+      return getAmpFlyingCarpet(null, '455px').then((flyingCarpet) => {
+        expect(flyingCarpet).to.display('block');
       });
     });
 
@@ -213,8 +213,8 @@ describes.realWin(
         // Usually, the closing node appears on a new line
         const posttext = doc.createTextNode('\n');
         return [pretext, img, posttext];
-      }).then(flyingCarpet => {
-        const attemptCollapse = sandbox
+      }).then((flyingCarpet) => {
+        const attemptCollapse = env.sandbox
           .stub(flyingCarpet.implementation_, 'attemptCollapse')
           .callsFake(() => {
             return Promise.resolve();
@@ -225,18 +225,18 @@ describes.realWin(
       });
     });
 
-    it('should relayout the content on onMeasureChanged', () => {
-      return getAmpFlyingCarpet().then(flyingCarpet => {
+    it('should relayout the content', () => {
+      return getAmpFlyingCarpet().then((flyingCarpet) => {
         const impl = flyingCarpet.implementation_;
-        const scheduleLayoutSpy_ = sandbox.spy(
+        const scheduleLayoutSpy_ = env.sandbox.spy(
           Services.ownersForDoc(impl.element),
           'scheduleLayout'
         );
 
-        impl.mutateElement = function(callback) {
+        impl.mutateElement = function (callback) {
           callback();
         };
-        impl.onMeasureChanged();
+        impl.layoutCallback();
         expect(scheduleLayoutSpy_).to.have.been.calledWith(
           impl.element,
           impl.children_

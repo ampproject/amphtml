@@ -5,6 +5,7 @@ formats:
 teaser:
   text: A single layer of a single page of an AMP story that positions its content in a grid-based layout.
 ---
+
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -21,27 +22,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+# amp-story-grid-layer
 
-# `amp-story-grid-layer`
-
-The `<amp-story-grid-layer>` component lays its children out into a grid.  Its implementation is based off of the [CSS Grid Spec](https://www.w3.org/TR/css-grid-1/).
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>container</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/introduction/stories_in_amp">Annotated code example for stories</a></td>
-  </tr>
-</table>
-
-[TOC]
+The `<amp-story-grid-layer>` component lays its children out into a grid. Its implementation is based off of the [CSS Grid Spec](https://www.w3.org/TR/css-grid-1/).
 
 <div class="flex-images">
   <amp-img alt="Layer 1" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-1.gif" width="200" height="355">
@@ -59,15 +42,13 @@ The `<amp-story-grid-layer>` component lays its children out into a grid.  Its i
 
 ## Attributes
 
-
 ### template [required]
 
 The `template` attribute determines the layout of the grid layer. Available templates are described in the [Templates](#templates) section below.
 
-
 ### grid-area [optional]
 
-This attribute is specified on children of `<amp-story-grid-layer>`.  `grid-area` specifies the named area (from using a `template` that defines them) in which the element containing this attribute should appear.
+This attribute is specified on children of `<amp-story-grid-layer>`. `grid-area` specifies the named area (from using a `template` that defines them) in which the element containing this attribute should appear.
 
 Example:
 
@@ -76,6 +57,21 @@ Example:
   <p grid-area="middle-third">Element 1</p>
   <p grid-area="lower-third">Element 2</p>
   <p grid-area="upper-third">Element 3</p>
+</amp-story-grid-layer>
+```
+
+### aspect-ratio [optional]
+
+The value specifies an aspect ratio in the "horizontal:vertical" format, where both "horizontal" and "vertical" are integer numbers. If this attribute is specified, the layout of the grid layer is set to conform to the specified proportions. The font size, in this case, is automatically set to the 1/10th of the resulting height to enable proportional content scaling.
+
+Example:
+
+```html
+<amp-story-grid-layer aspect-ratio="9:16" template="vertical">
+  <div style="width: 10%; height: 10%; font-size: 2em;">
+    This block will be in 9:16 aspect ratio and font size will be set at the 20%
+    of the layer's height.
+  </div>
 </amp-story-grid-layer>
 ```
 
@@ -109,7 +105,7 @@ Example:
 
 ### vertical
 
-The `vertical` template lays its elements out along the y-axis.  By default, its elements are aligned to the top, and can take up the entirety of the screen along the x-axis.
+The `vertical` template lays its elements out along the y-axis. By default, its elements are aligned to the top, and can take up the entirety of the screen along the x-axis.
 
 Names Areas: (none)
 
@@ -129,7 +125,7 @@ Names Areas: (none)
 
 ### horizontal
 
-The `horizontal` template lays its elements out along the x-axis.  By default, its elements are aligned to the start of the line and can take up the entirety of the screen along the y-axis.
+The `horizontal` template lays its elements out along the x-axis. By default, its elements are aligned to the start of the line and can take up the entirety of the screen along the y-axis.
 
 Names Areas: (none)
 
@@ -153,9 +149,9 @@ The `thirds` template divides the screen into three equally-sized rows, and allo
 
 Named Areas:
 
-  * `upper-third`
-  * `middle-third`
-  * `lower-third`
+- `upper-third`
+- `middle-third`
+- `lower-third`
 
 <amp-img alt="Horizontal template example" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-thirds.png" width="145" height="255">
   <noscript>
@@ -187,7 +183,6 @@ An `amp-story-grid-layer` can contain any of the following elements:
     <td>
       <ul>
         <li><code>&lt;amp-audio></code></li>
-        <li><code>&lt;amp-gfycat></code></li>
         <li><code>&lt;amp-google-vrview-image></code></li>
         <li><code>&lt;amp-img></code></li>
         <li><code>&lt;amp-video></code></li>
@@ -201,7 +196,6 @@ An `amp-story-grid-layer` can contain any of the following elements:
     <td>Analytics & Measurement</td>
     <td>
       <ul>
-        <li><code>&lt;amp-analytics></code></li>
         <li><code>&lt;amp-experiment></code></li>
         <li><code>&lt;amp-pixel></code></li>
       </ul>

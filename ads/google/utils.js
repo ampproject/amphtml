@@ -86,12 +86,12 @@ export function getMultiSizeDimensions(
       !validateDimensions(
         width,
         height,
-        w => isNaN(w) || w <= 0,
-        h => isNaN(h) || h <= 0,
-        badParams =>
+        (w) => isNaN(w) || w <= 0,
+        (h) => isNaN(h) || h <= 0,
+        (badParams) =>
           badParams
             .map(
-              badParam =>
+              (badParam) =>
                 `Invalid ${badParam.dim} of ${badParam.val} ` +
                 'given for secondary size.'
             )
@@ -107,12 +107,12 @@ export function getMultiSizeDimensions(
       !validateDimensions(
         width,
         height,
-        w => w > primaryWidth,
-        h => h > primaryHeight,
-        badParams =>
+        (w) => w > primaryWidth,
+        (h) => h > primaryHeight,
+        (badParams) =>
           badParams
             .map(
-              badParam =>
+              (badParam) =>
                 `Secondary ${badParam.dim} ${badParam.val} ` +
                 `can't be larger than the primary ${badParam.dim}.`
             )
@@ -134,12 +134,12 @@ export function getMultiSizeDimensions(
         !validateDimensions(
           width,
           height,
-          w => w < minWidth,
-          h => h < minHeight,
-          badParams =>
+          (w) => w < minWidth,
+          (h) => h < minHeight,
+          (badParams) =>
             badParams
               .map(
-                badParam =>
+                (badParam) =>
                   `Secondary ${badParam.dim} ${badParam.val} is ` +
                   `smaller than 2/3rds of the primary ${badParam.dim}.`
               )

@@ -17,7 +17,7 @@
 // Global typedef map typedefName: typedef comment
 const TYPEDEFS = new Map();
 
-const buildTypedefs = t => {
+const buildTypedefs = (t) => {
   const typedefs = [];
   for (const [typedefName, typedefComment] of TYPEDEFS) {
     const ast = buildVarDeclAndComment(t, typedefName, typedefComment);
@@ -35,7 +35,7 @@ const buildVarDeclAndComment = (t, name, comment) => {
   return decl;
 };
 
-module.exports = function(babel) {
+module.exports = function (babel) {
   const {types: t} = babel;
   // `shouldWriteToFile` should only be true in the production pipeline.
   let shouldWriteToFile;
@@ -64,7 +64,7 @@ module.exports = function(babel) {
           // extern would look like.
           if (shouldEmitTypedefs) {
             const typedefs = buildTypedefs(t);
-            typedefs.forEach(typedef => {
+            typedefs.forEach((typedef) => {
               path.pushContainer('body', typedef);
             });
             path.stop();
@@ -78,7 +78,7 @@ module.exports = function(babel) {
           return;
         }
 
-        const typedefComment = node.leadingComments.find(comment => {
+        const typedefComment = node.leadingComments.find((comment) => {
           return (
             comment.type === 'CommentBlock' && /@typedef/.test(comment.value)
           );

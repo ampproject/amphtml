@@ -28,6 +28,9 @@ export const AnalyticsVariable = {
   BOOKEND_COMPONENT_POSITION: 'storyBookendComponentPosition',
   BOOKEND_COMPONENT_TYPE: 'storyBookendComponentType',
   BOOKEND_TARGET_HREF: 'storyBookendTargetHref',
+  STORY_REACTION_ID: 'storyReactionId',
+  STORY_REACTION_RESPONSE: 'storyReactionResponse',
+  STORY_REACTION_TYPE: 'storyReactionType',
   STORY_PAGE_ID: 'storyPageId',
   STORY_PAGE_INDEX: 'storyPageIndex',
   STORY_PAGE_COUNT: 'storyPageCount',
@@ -44,12 +47,14 @@ export const AnalyticsVariable = {
  * @param {!Window} win
  * @return {!AmpStoryVariableService}
  */
-export const getVariableService = win => {
+export const getVariableService = (win) => {
   let service = Services.storyVariableService(win);
 
   if (!service) {
     service = new AmpStoryVariableService(win);
-    registerServiceBuilder(win, 'story-variable', () => service);
+    registerServiceBuilder(win, 'story-variable', function () {
+      return service;
+    });
   }
 
   return service;
@@ -70,6 +75,9 @@ export class AmpStoryVariableService {
       [AnalyticsVariable.BOOKEND_COMPONENT_POSITION]: null,
       [AnalyticsVariable.BOOKEND_COMPONENT_TYPE]: null,
       [AnalyticsVariable.BOOKEND_TARGET_HREF]: null,
+      [AnalyticsVariable.STORY_REACTION_ID]: null,
+      [AnalyticsVariable.STORY_REACTION_RESPONSE]: null,
+      [AnalyticsVariable.STORY_REACTION_TYPE]: null,
       [AnalyticsVariable.STORY_PAGE_INDEX]: null,
       [AnalyticsVariable.STORY_PAGE_ID]: null,
       [AnalyticsVariable.STORY_PAGE_COUNT]: null,
@@ -87,13 +95,13 @@ export class AmpStoryVariableService {
 
   /** @private */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.PAGE_IDS, pageIds => {
+    this.storeService_.subscribe(StateProperty.PAGE_IDS, (pageIds) => {
       this.variables_[AnalyticsVariable.STORY_PAGE_COUNT] = pageIds.length;
     });
 
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_ID,
-      pageId => {
+      (pageId) => {
         if (!pageId) {
           return;
         }

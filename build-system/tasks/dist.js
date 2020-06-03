@@ -15,17 +15,17 @@
  */
 
 const colors = require('ansi-colors');
-const conf = require('../compile/build.conf');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
 const log = require('fancy-log');
 const {
   bootstrapThirdPartyFrames,
-  compileAllMinifiedJs,
+  compileAllJs,
+  compileCoreRuntime,
   compileJs,
   endBuildStep,
-  hostname,
+  maybeToEsmName,
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,
@@ -36,14 +36,13 @@ const {
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
 const {
-  createModuleCompatibleES5Bundle,
-} = require('./create-module-compatible-es5-bundle');
+  displayLifecycleDebugging,
+} = require('../compile/debug-compilation-lifecycle');
 const {
   distNailgunPort,
   startNailgunServer,
   stopNailgunServer,
 } = require('./nailgun');
-const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../compile/sources');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
@@ -55,56 +54,42 @@ const {VERSION} = require('../compile/internal-version');
 const {green, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
 
-const babel = require('@babel/core');
-const deglob = require('globs-to-files');
-
+/**
+ * Files that must be built for amp-web-push
+ */
 const WEB_PUSH_PUBLISHER_FILES = [
   'amp-web-push-helper-frame',
   'amp-web-push-permission-dialog',
 ];
 
+/**
+ * Versions that must be built for amp-web-push
+ */
 const WEB_PUSH_PUBLISHER_VERSIONS = ['0.1'];
 
-function transferSrcsToTempDir() {
-  log(
-    'Performing multi-pass',
-    colors.cyan('babel'),
-    'transforms in',
-    colors.cyan(SRC_TEMP_DIR)
-  );
-  const files = deglob.sync(BABEL_SRC_GLOBS);
-  files.forEach(file => {
-    if (file.startsWith('node_modules/') || file.startsWith('third_party/')) {
-      fs.copySync(file, `${SRC_TEMP_DIR}/${file}`);
-      return;
-    }
-
-    const {code} = babel.transformFileSync(file, {
-      plugins: conf.plugins({
-        isEsmBuild: argv.esm,
-        isForTesting: argv.fortesting,
-      }),
-      retainLines: true,
-      compact: false,
-    });
-    const name = `${SRC_TEMP_DIR}${file.replace(process.cwd(), '')}`;
-    fs.outputFileSync(name, code);
-    process.stdout.write('.');
-  });
-  console.log('\n');
-}
+/**
+ * Used while building the experiments page.
+ */
+const hostname = argv.hostname || 'cdn.ampproject.org';
 
 /**
  * Prints a useful help message prior to the gulp dist task
+ *
+ * @param {!Object} options
  */
-function printDistHelp() {
-  if (argv.fortesting) {
-    let cmd = 'gulp dist --fortesting';
-    if (argv.single_pass) {
-      cmd = cmd + ' --single_pass';
-    }
-    printConfigHelp(cmd);
+function printDistHelp(options) {
+  if (argv.sanitize_vars_for_diff && !argv.pseudo_names) {
+    throw new Error('--sanitize_vars_for_diff requires --pseudo_names');
   }
+
+  let cmd = 'gulp dist';
+  if (options.fortesting) {
+    cmd = cmd + ' --fortesting';
+  }
+  if (argv.single_pass) {
+    cmd = cmd + ' --single_pass';
+  }
+  printConfigHelp(cmd);
   if (argv.single_pass) {
     log(
       green('Building all AMP extensions in'),
@@ -114,74 +99,97 @@ function printDistHelp() {
   } else {
     parseExtensionFlags();
   }
+  if (argv.define_experiment_constant) {
+    log(
+      green('Enabling the'),
+      cyan(argv.define_experiment_constant),
+      green('experiment.')
+    );
+  }
 }
 
 /**
- * Dist Build
- * @return {!Promise}
+ * Perform the prerequisite steps before starting the minified build.
+ * Used by `gulp` and `gulp dist`.
+ *
+ * @param {!Object} options
+ */
+async function runPreDistSteps(options) {
+  cleanupBuildDir();
+  await prebuild();
+  await compileCss(options);
+  await compileJison();
+  await copyCss();
+  await copyParsers();
+  await bootstrapThirdPartyFrames(options);
+  await startNailgunServer(distNailgunPort, /* detached */ false);
+  displayLifecycleDebugging();
+}
+
+/**
+ * Minified build. Entry point for `gulp dist`.
  */
 async function dist() {
+  await doDist();
+}
+
+/**
+ * Performs a minified build with the given extra args.
+ *
+ * @param {Object=} extraArgs
+ */
+async function doDist(extraArgs = {}) {
   maybeUpdatePackages();
   const handlerProcess = createCtrlcHandler('dist');
   process.env.NODE_ENV = 'production';
+  const options = {
+    fortesting: extraArgs.fortesting || argv.fortesting,
+    minify: true,
+    watch: argv.watch,
+  };
   printNobuildHelp();
-  printDistHelp();
-
-  cleanupBuildDir();
-  await prebuild();
-  await compileCss();
-  await compileJison();
-
-  // This is the temp directory processing for multi-pass (single-pass does its
-  // own processing). Executed after `compileCss` and `compileJison` so their
-  // results can be copied too.
-  if (!argv.single_pass) {
-    transferSrcsToTempDir();
-  }
-
-  await copyCss();
-  await copyParsers();
-  await bootstrapThirdPartyFrames(/* watch */ false, /* minify */ true);
+  printDistHelp(options);
+  await runPreDistSteps(options);
 
   // Steps that use closure compiler. Small ones before large (parallel) ones.
-  await startNailgunServer(distNailgunPort, /* detached */ false);
-  await buildExperiments({minify: true, watch: false});
-  await buildLoginDone('0.1', {minify: true, watch: false});
-  await buildWebPushPublisherFiles({minify: true, watch: false});
-  await compileAllMinifiedJs();
-  await buildExtensions({minify: true, watch: false});
-  await stopNailgunServer(distNailgunPort);
-
-  if (argv.esm) {
-    await Promise.all([
-      createModuleCompatibleES5Bundle('v0.js'),
-      createModuleCompatibleES5Bundle('amp4ads-v0.js'),
-      createModuleCompatibleES5Bundle('shadow-v0.js'),
-    ]);
+  if (argv.core_runtime_only) {
+    await compileCoreRuntime(options);
+  } else {
+    await buildExperiments();
+    await buildLoginDone('0.1');
+    await buildWebPushPublisherFiles();
+    await compileAllJs(options);
+    await buildExtensions(options);
+  }
+  if (!argv.watch) {
+    await stopNailgunServer(distNailgunPort);
   }
 
-  await formatExtractedMessages();
-  await generateFileListing();
-
-  return exitCtrlcHandler(handlerProcess);
+  if (!argv.core_runtime_only) {
+    await formatExtractedMessages();
+    await generateFileListing();
+  }
+  if (!argv.watch) {
+    exitCtrlcHandler(handlerProcess);
+  }
 }
 
 /**
  * Build AMP experiments.js.
  *
- * @param {!Object} options
  * @return {!Promise}
  */
-function buildExperiments(options) {
+function buildExperiments() {
   return compileJs(
     './build/experiments/',
     'experiments.max.js',
     './dist.tools/experiments/',
     {
-      watch: false,
-      minify: options.minify || argv.minify,
+      watch: argv.watch,
+      minify: true,
       includePolyfills: true,
-      minifiedName: 'experiments.js',
+      minifiedName: maybeToEsmName('experiments.js'),
+      esmPassCompilation: argv.esm || false,
     }
   );
 }
@@ -190,20 +198,20 @@ function buildExperiments(options) {
  * Build amp-login-done-${version}.js file.
  *
  * @param {string} version
- * @param {!Object} options
  * @return {!Promise}
  */
-function buildLoginDone(version, options) {
+function buildLoginDone(version) {
   const buildDir = `build/all/amp-access-${version}/`;
   const builtName = `amp-login-done-${version}.max.js`;
   const minifiedName = `amp-login-done-${version}.js`;
   const latestName = 'amp-login-done-latest.js';
   return compileJs('./' + buildDir, builtName, './dist/v0/', {
-    watch: false,
+    watch: argv.watch,
     includePolyfills: true,
-    minify: options.minify || argv.minify,
+    minify: true,
     minifiedName,
     latestName,
+    esmPassCompilation: argv.esm || false,
     extraGlobs: [
       buildDir + 'amp-login-done-0.1.max.js',
       buildDir + 'amp-login-done-dialog.js',
@@ -213,21 +221,20 @@ function buildLoginDone(version, options) {
 
 /**
  * Build amp-web-push publisher files HTML page.
- *
- * @param {!Object} options
  */
-async function buildWebPushPublisherFiles(options) {
+async function buildWebPushPublisherFiles() {
   const distDir = 'dist/v0';
   const promises = [];
-  WEB_PUSH_PUBLISHER_VERSIONS.forEach(version => {
-    WEB_PUSH_PUBLISHER_FILES.forEach(fileName => {
+  WEB_PUSH_PUBLISHER_VERSIONS.forEach((version) => {
+    WEB_PUSH_PUBLISHER_FILES.forEach((fileName) => {
       const tempBuildDir = `build/all/amp-web-push-${version}/`;
       const builtName = fileName + '.js';
-      const minifiedName = fileName + '.js';
+      const minifiedName = maybeToEsmName(fileName + '.js');
       const p = compileJs('./' + tempBuildDir, builtName, './' + distDir, {
-        watch: options.watch,
+        watch: argv.watch,
         includePolyfills: true,
-        minify: options.minify || argv.minify,
+        minify: true,
+        esmPassCompilation: argv.esm || false,
         minifiedName,
         extraGlobs: [tempBuildDir + '*.js'],
       });
@@ -303,8 +310,8 @@ async function generateFileListing() {
   const distDir = 'dist';
   const filesOut = `${distDir}/files.txt`;
   fs.writeFileSync(filesOut, '');
-  const files = (await walk(distDir)).map(f => f.replace(`${distDir}/`, ''));
-  fs.writeFileSync(filesOut, files.join('\n'));
+  const files = (await walk(distDir)).map((f) => f.replace(`${distDir}/`, ''));
+  fs.writeFileSync(filesOut, files.join('\n') + '\n');
   endBuildStep('Generated', filesOut, startTime);
 }
 
@@ -318,8 +325,8 @@ async function preBuildWebPushPublisherFiles() {
   mkdirSync('dist/v0');
   const promises = [];
 
-  WEB_PUSH_PUBLISHER_VERSIONS.forEach(version => {
-    WEB_PUSH_PUBLISHER_FILES.forEach(fileName => {
+  WEB_PUSH_PUBLISHER_VERSIONS.forEach((version) => {
+    WEB_PUSH_PUBLISHER_FILES.forEach((fileName) => {
       const basePath = `extensions/amp-web-push/${version}/`;
       const tempBuildDir = `build/all/amp-web-push-${version}/`;
 
@@ -343,10 +350,10 @@ async function preBuildWebPushPublisherFiles() {
  */
 function postBuildWebPushPublisherFilesVersion() {
   const distDir = 'dist/v0';
-  WEB_PUSH_PUBLISHER_VERSIONS.forEach(version => {
+  WEB_PUSH_PUBLISHER_VERSIONS.forEach((version) => {
     const basePath = `extensions/amp-web-push/${version}/`;
-    WEB_PUSH_PUBLISHER_FILES.forEach(fileName => {
-      const minifiedName = fileName + '.js';
+    WEB_PUSH_PUBLISHER_FILES.forEach((fileName) => {
+      const minifiedName = maybeToEsmName(fileName + '.js');
       if (!fs.existsSync(distDir + '/' + minifiedName)) {
         throw new Error(`Cannot find ${distDir}/${minifiedName}`);
       }
@@ -449,11 +456,14 @@ function preBuildLoginDoneVersion(version) {
 
 module.exports = {
   dist,
+  doDist,
+  runPreDistSteps,
 };
 
 /* eslint "google-camelcase/google-camelcase": 0 */
 
-dist.description = 'Build production binaries';
+dist.description =
+  'Compiles AMP production binaries and applies AMP_CONFIG to runtime files';
 dist.flags = {
   pseudo_names:
     '  Compiles with readable names. ' +
@@ -462,15 +472,28 @@ dist.flags = {
     '  Outputs compiled code with whitespace. ' +
     'Great for debugging production code.',
   fortesting: '  Compiles production binaries for local testing',
+  noconfig: '  Compiles production binaries without applying AMP_CONFIG',
   config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   single_pass: "Compile AMP's primary JS bundles in a single invocation",
   extensions: '  Builds only the listed extensions.',
   extensions_from: '  Builds only the extensions from the listed AMP(s).',
   noextensions: '  Builds with no extensions.',
+  core_runtime_only: '  Builds only the core runtime.',
   single_pass_dest:
     '  The directory closure compiler will write out to ' +
     'with --single_pass mode. The default directory is `dist`',
   full_sourcemaps: '  Includes source code content in sourcemaps',
   disable_nailgun:
     "  Doesn't use nailgun to invoke closure compiler (much slower)",
+  sourcemap_url: '  Sets a custom sourcemap URL with placeholder {version}',
+  type: '  Points sourcemap to fetch files from the correct GitHub tag',
+  esm: '  Does not transpile down to ES5',
+  version_override: '  Override the version written to AMP_CONFIG',
+  watch: '  Watches for changes in files, re-compiles when detected',
+  closure_concurrency: '  Sets the number of concurrent invocations of closure',
+  debug: '  Outputs the file contents during compilation lifecycles',
+  define_experiment_constant:
+    '  Builds runtime with the EXPERIMENT constant set to true',
+  sanitize_vars_for_diff:
+    '  Sanitize the output to diff build results. Requires --pseudo_names',
 };

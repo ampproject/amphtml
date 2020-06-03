@@ -77,10 +77,9 @@ const allowedJsonBodyTypes_ = [isArray, isObject];
  *     cloneable.
  * @return {{input: string, init: !FetchInitDef}} The serialized structurally-
  *     cloneable request.
- * @private
  */
 export function toStructuredCloneable(input, init) {
-  const newInit = Object.assign({}, init);
+  const newInit = {...init};
   if (isFormDataWrapper(init.body)) {
     const wrapper = /** @type {!FormDataWrapperInterface} */ (init.body);
     newInit.headers['Content-Type'] = 'multipart/form-data;charset=utf-8';
@@ -155,7 +154,7 @@ export function fromStructuredCloneable(response, responseType) {
   if (response['init']) {
     const init = response['init'];
     if (isArray(init.headers)) {
-      init.headers.forEach(entry => {
+      /** @type {!Array} */ (init.headers).forEach((entry) => {
         const headerName = entry[0];
         const headerValue = entry[1];
         lowercasedHeaders[String(headerName).toLowerCase()] = String(
@@ -193,7 +192,6 @@ export function fromStructuredCloneable(response, responseType) {
  * @return {!Promise<!Response|undefined>}
  *     A response returned by the interceptor if XHR is intercepted or
  *     `Promise<undefined>` otherwise.
- * @private
  */
 export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
   if (!ampdocSingle) {
@@ -220,7 +218,7 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
 
   return whenUnblocked
     .then(() => viewer.isTrustedViewer())
-    .then(viewerTrusted => {
+    .then((viewerTrusted) => {
       if (
         !(
           viewerTrusted ||
@@ -235,7 +233,9 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
       });
       return viewer
         .sendMessageAwaitResponse('xhr', messagePayload)
-        .then(response => fromStructuredCloneable(response, init.responseType));
+        .then((response) =>
+          fromStructuredCloneable(response, init.responseType)
+        );
     });
 }
 
@@ -317,7 +317,7 @@ export function setupJsonFetchInit(init) {
     // Assume JSON strict mode where only objects or arrays are allowed
     // as body.
     devAssert(
-      allowedJsonBodyTypes_.some(test => test(fetchInit.body)),
+      allowedJsonBodyTypes_.some((test) => test(fetchInit.body)),
       'body must be of type object or array. %s',
       fetchInit.body
     );
@@ -373,10 +373,9 @@ function isRetriable(status) {
  * Returns the response if successful or otherwise throws an error.
  * @param {!Response} response
  * @return {!Promise<!Response>}
- * @private Visible for testing
  */
 export function assertSuccess(response) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     if (response.ok) {
       return resolve(response);
     }
@@ -406,7 +405,7 @@ export function getViewerAuthTokenIfAvailable(element) {
   ) {
     return (
       Services.viewerAssistanceForDocOrNull(element)
-        .then(va => {
+        .then((va) => {
           userAssert(
             va,
             'crossorigin="amp-viewer-auth-token-post" ' +
@@ -415,7 +414,7 @@ export function getViewerAuthTokenIfAvailable(element) {
           return va.getIdTokenPromise();
         })
         // If crossorigin attr is present, resolve with token or empty string.
-        .then(token => token || '')
+        .then((token) => token || '')
         .catch(() => '')
     );
   }

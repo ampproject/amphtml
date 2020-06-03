@@ -63,13 +63,13 @@ export class AmpOrientationObserver extends AMP.BaseElement {
     this.action_ = null;
 
     /** @private {Object<string, !Array<number>>} */
-    this.range_ = Object.assign({}, DEFAULT_RANGES);
+    this.range_ = {...DEFAULT_RANGES};
 
     /** @private {Object<string, number>} */
-    this.computedValue_ = Object.assign({}, DEFAULT_REST_VALUES);
+    this.computedValue_ = {...DEFAULT_REST_VALUES};
 
     /** @private {Object<string, number>} */
-    this.restValues_ = Object.assign({}, DEFAULT_REST_VALUES);
+    this.restValues_ = {...DEFAULT_REST_VALUES};
 
     /** @private {Object<string, !Array<number>>} */
     this.smoothingPoints_ = {beta: [], alpha: [], gamma: []};
@@ -97,7 +97,7 @@ export class AmpOrientationObserver extends AMP.BaseElement {
         '`window.DeviceOrientationEvent`'
     );
 
-    AXES.forEach(axis => {
+    AXES.forEach((axis) => {
       this.range_[axis] = this.parseAttributes_(
         `${axis}-range`,
         this.range_[axis]
@@ -110,7 +110,7 @@ export class AmpOrientationObserver extends AMP.BaseElement {
 
     this.win.addEventListener(
       'deviceorientation',
-      event => {
+      (event) => {
         this.deviceOrientationHandler_(event);
       },
       true
@@ -168,7 +168,7 @@ export class AmpOrientationObserver extends AMP.BaseElement {
         gamma,
       };
 
-      AXES.forEach(axis => {
+      AXES.forEach((axis) => {
         if (
           Math.abs(currentValue[axis] - this.computedValue_[axis]) > DELTA_CONST
         ) {
@@ -178,8 +178,9 @@ export class AmpOrientationObserver extends AMP.BaseElement {
               /** @type {number} */ (currentValue[axis])
             );
           } else {
-            this.computedValue_[axis] =
-              /** @type {number} */ (currentValue[axis]);
+            this.computedValue_[axis] = /** @type {number} */ (currentValue[
+              axis
+            ]);
           }
           this.triggerEvent_(
             axis,
@@ -236,6 +237,6 @@ export class AmpOrientationObserver extends AMP.BaseElement {
     this.action_.trigger(this.element, eventName, event, ActionTrust.LOW);
   }
 }
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpOrientationObserver);
 });

@@ -31,46 +31,46 @@ FAIL
 |  These tags are not allowed:
 |  <ACRONYM></ACRONYM>
 >> ^~~~~~~~~
-amp4ads_feature_tests/obsolete_tags.html:31:0 The tag 'acronym' is disallowed. [DISALLOWED_HTML]
+amp4ads_feature_tests/obsolete_tags.html:31:0 The tag 'acronym' is disallowed.
 |  <BIG></BIG>
 >> ^~~~~~~~~
-amp4ads_feature_tests/obsolete_tags.html:32:0 The tag 'big' is disallowed. [DISALLOWED_HTML]
+amp4ads_feature_tests/obsolete_tags.html:32:0 The tag 'big' is disallowed.
 |  <CENTER></CENTER>
 >> ^~~~~~~~~
-amp4ads_feature_tests/obsolete_tags.html:33:0 The tag 'center' is disallowed. [DISALLOWED_HTML]
+amp4ads_feature_tests/obsolete_tags.html:33:0 The tag 'center' is disallowed.
 |  <DIR></DIR>
 >> ^~~~~~~~~
-amp4ads_feature_tests/obsolete_tags.html:34:0 The tag 'dir' is disallowed. [DISALLOWED_HTML]
+amp4ads_feature_tests/obsolete_tags.html:34:0 The tag 'dir' is disallowed.
 |  <HGROUP></HGROUP>
 >> ^~~~~~~~~
-amp4ads_feature_tests/obsolete_tags.html:35:0 The tag 'hgroup' is disallowed. [DISALLOWED_HTML]
+amp4ads_feature_tests/obsolete_tags.html:35:0 The tag 'hgroup' is disallowed.
 |  <LISTING></LISTING>
 >> ^~~~~~~~~
-amp4ads_feature_tests/obsolete_tags.html:36:0 The tag 'listing' is disallowed. [DISALLOWED_HTML]
+amp4ads_feature_tests/obsolete_tags.html:36:0 The tag 'listing' is disallowed.
 |  <MULTICOL></MULTICOL>
 >> ^~~~~~~~~
-amp4ads_feature_tests/obsolete_tags.html:37:0 The tag 'multicol' is disallowed. [DISALLOWED_HTML]
+amp4ads_feature_tests/obsolete_tags.html:37:0 The tag 'multicol' is disallowed.
 |  <NEXTID></NEXTID>
 >> ^~~~~~~~~
-amp4ads_feature_tests/obsolete_tags.html:38:0 The tag 'nextid' is disallowed. [DISALLOWED_HTML]
+amp4ads_feature_tests/obsolete_tags.html:38:0 The tag 'nextid' is disallowed.
 |  <NOBR></NOBR>
 >> ^~~~~~~~~
-amp4ads_feature_tests/obsolete_tags.html:39:0 The tag 'nobr' is disallowed. [DISALLOWED_HTML]
+amp4ads_feature_tests/obsolete_tags.html:39:0 The tag 'nobr' is disallowed.
 |  <SPACER></SPACER>
 >> ^~~~~~~~~
-amp4ads_feature_tests/obsolete_tags.html:40:0 The tag 'spacer' is disallowed. [DISALLOWED_HTML]
+amp4ads_feature_tests/obsolete_tags.html:40:0 The tag 'spacer' is disallowed.
 |  <STRIKE></STRIKE>
 >> ^~~~~~~~~
-amp4ads_feature_tests/obsolete_tags.html:41:0 The tag 'strike' is disallowed. [DISALLOWED_HTML]
+amp4ads_feature_tests/obsolete_tags.html:41:0 The tag 'strike' is disallowed.
 |  <TT></TT>
 >> ^~~~~~~~~
-amp4ads_feature_tests/obsolete_tags.html:42:0 The tag 'tt' is disallowed. [DISALLOWED_HTML]
+amp4ads_feature_tests/obsolete_tags.html:42:0 The tag 'tt' is disallowed.
 |  <XMP></XMP>
 >> ^~~~~~~~~
-amp4ads_feature_tests/obsolete_tags.html:43:0 The tag 'xmp' is disallowed. [DISALLOWED_HTML]
+amp4ads_feature_tests/obsolete_tags.html:43:0 The tag 'xmp' is disallowed.
 |  <o:p></o:p>
 >> ^~~~~~~~~
-amp4ads_feature_tests/obsolete_tags.html:44:0 The tag 'o:p' is disallowed. [DISALLOWED_HTML]
+amp4ads_feature_tests/obsolete_tags.html:44:0 The tag 'o:p' is disallowed.
 |
 |
 |  </body>

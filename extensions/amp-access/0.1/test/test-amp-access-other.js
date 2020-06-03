@@ -16,7 +16,7 @@
 
 import {AccessOtherAdapter} from '../amp-access-other';
 
-describes.realWin('AccessOtherAdapter', {amp: true}, env => {
+describes.realWin('AccessOtherAdapter', {amp: true}, (env) => {
   let ampdoc;
   let validConfig;
   let context;
@@ -30,12 +30,11 @@ describes.realWin('AccessOtherAdapter', {amp: true}, env => {
     context = {
       buildUrl: () => {},
     };
-    contextMock = sandbox.mock(context);
+    contextMock = env.sandbox.mock(context);
   });
 
   afterEach(() => {
     contextMock.verify();
-    sandbox.restore();
   });
 
   describe('config', () => {
@@ -67,8 +66,6 @@ describes.realWin('AccessOtherAdapter', {amp: true}, env => {
     beforeEach(() => {
       adapter = new AccessOtherAdapter(ampdoc, {}, context);
     });
-
-    afterEach(() => {});
 
     it('should disable authorization without fallback object', () => {
       adapter.authorizationResponse_ = null;
@@ -112,7 +109,7 @@ describes.realWin('AccessOtherAdapter', {amp: true}, env => {
       const obj = {'access': 'A'};
       adapter.authorizationResponse_ = obj;
       contextMock.expects('buildUrl').never();
-      return adapter.authorize().then(response => {
+      return adapter.authorize().then((response) => {
         expect(response).to.equal(obj);
       });
     });

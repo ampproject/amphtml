@@ -18,7 +18,7 @@ import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {Services} from '../../../../src/services';
 import {allocateVariant} from '../variant';
 
-describes.sandboxed('allocateVariant', {}, env => {
+describes.sandboxed('allocateVariant', {}, (env) => {
   let fakeHead;
   let fakeWin;
   let ampdoc;
@@ -28,8 +28,6 @@ describes.sandboxed('allocateVariant', {}, env => {
   let getNotificationStub;
 
   beforeEach(() => {
-    const {sandbox} = env;
-
     fakeWin = {
       Math: {
         random: () => {
@@ -46,8 +44,8 @@ describes.sandboxed('allocateVariant', {}, env => {
 
     fakeHead = {};
 
-    getCidStub = sandbox.stub();
-    sandbox
+    getCidStub = env.sandbox.stub();
+    env.sandbox
       .stub(Services, 'cidForDoc')
       .withArgs(ampdoc)
       .returns(
@@ -56,16 +54,13 @@ describes.sandboxed('allocateVariant', {}, env => {
         })
       );
 
-    uniformStub = sandbox.stub();
-    sandbox
-      .stub(Services, 'cryptoFor')
-      .withArgs(fakeWin)
-      .returns({
-        uniform: uniformStub,
-      });
+    uniformStub = env.sandbox.stub();
+    env.sandbox.stub(Services, 'cryptoFor').withArgs(fakeWin).returns({
+      uniform: uniformStub,
+    });
 
-    getNotificationStub = sandbox.stub();
-    sandbox
+    getNotificationStub = env.sandbox.stub();
+    env.sandbox
       .stub(Services, 'userNotificationManagerForDoc')
       .withArgs(fakeHead)
       .returns(
@@ -74,13 +69,10 @@ describes.sandboxed('allocateVariant', {}, env => {
         })
       );
 
-    sandbox
-      .stub(Services, 'viewerForDoc')
-      .withArgs(ampdoc)
-      .returns({});
+    env.sandbox.stub(Services, 'viewerForDoc').withArgs(ampdoc).returns({});
 
-    sandbox.stub(ampdoc, 'getHeadNode').returns(fakeHead);
-    getParamStub = sandbox.stub(ampdoc, 'getParam').returns(null);
+    env.sandbox.stub(ampdoc, 'getHeadNode').returns(fakeHead);
+    getParamStub = env.sandbox.stub(ampdoc, 'getParam').returns(null);
   });
 
   it('should throw for invalid config', () => {

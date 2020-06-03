@@ -66,8 +66,14 @@ ident     \-?[a-zA-Z_][\-a-zA-Z0-9_]*
 
 "#"{hex}                            return 'HEXCOLOR';
 
+{A}{T}                              return 'AT'
+{R}{O}{U}{N}{D}                     return 'ROUND'
+
 {U}{R}{L}\(                         return 'URL_START'
 {C}{A}{L}{C}\(                      return 'CALC_START'
+{M}{I}{N}\(                         return 'MIN_START'
+{M}{A}{X}\(                         return 'MAX_START'
+{C}{L}{A}{M}{P}\(                   return 'CLAMP_START'
 {V}{A}{R}\(                         return 'VAR_START'
 {T}{R}{A}{N}{S}{L}{A}{T}{E}\(       return 'TRANSLATE_START'
 {T}{R}{A}{N}{S}{L}{A}{T}{E}{X}\(    return 'TRANSLATE_X_START'
@@ -81,6 +87,12 @@ ident     \-?[a-zA-Z_][\-a-zA-Z0-9_]*
 {H}{E}{I}{G}{H}{T}\(                return 'HEIGHT_START'
 {C}{L}{O}{S}{E}{S}{T}\(             return 'CLOSEST_START'
 {N}{U}{M}\(                         return 'NUM_START'
+{I}{N}{S}{E}{T}\(                   return 'INSET_START'
+{C}{I}{R}{C}{L}{E}\(                return 'CIRCLE_START'
+{E}{L}{L}{I}{P}{S}{E}\(             return 'ELLIPSE_START'
+{P}{O}{L}{Y}{G}{O}{N}\(             return 'POLYGON_START'
+{X}\(                               return 'X_START'
+{Y}\(                               return 'Y_START'
 {ident}\(                           return 'FUNCTION_START'
 {ident}                             return 'IDENT'
 \-\-{ident}                         return 'VAR_NAME';
@@ -250,7 +262,7 @@ function:
       {$$ = $1;}
   | translate_function
       {$$ = $1;}
-  | dim_function
+  | rect_function
       {$$ = $1;}
   | num_function
       {$$ = $1;}
@@ -259,6 +271,20 @@ function:
   | index_function
       {$$ = $1;}
   | length_function
+      {$$ = $1;}
+  | inset_function
+      {$$ = $1;}
+  | circle_function
+      {$$ = $1;}
+  | ellipse_function
+      {$$ = $1;}
+  | polygon_function
+      {$$ = $1;}
+  | min_function
+      {$$ = $1;}
+  | max_function
+      {$$ = $1;}
+  | clamp_function
       {$$ = $1;}
   | any_function
       {$$ = $1;}
@@ -285,6 +311,41 @@ args:
         const args = $1;
         args.push($3);
         $$ = args;
+      %}
+  ;
+
+
+/**
+ * Border radius.
+ * See https://developer.mozilla.org/en-US/docs/Web/CSS/border-radius
+ *
+ * Variants:
+ * - `10px` - all 4 sides.
+ * - `10px 5%` - top-left-and-bottom-right | top-right-and-bottom-left.
+ * - `2px 4px 2px` - top-left | top-right-and-bottom-left | bottom-right
+ * - `1px 0 3px 4px` - top-left | top-right | bottom-right | bottom-left
+ * - `1px / 2px` - first-radius / second-radius
+ */
+border_radius:
+    value
+      {$$ = ast.createBorderRadiusNode($1);}
+  | value '/' value
+      {$$ = ast.createBorderRadiusNode($1, $3);}
+  ;
+
+
+/**
+ * Polygon tuples.
+ * See https://developer.mozilla.org/en-US/docs/Web/CSS/clip-path#polygon()
+ */
+tuples:
+    literal_or_function literal_or_function
+      {$$ = [ast.CssConcatNode.concat($1, $2)];}
+  | tuples ',' literal_or_function literal_or_function
+      %{
+        const tuples = $1;
+        tuples.push(ast.CssConcatNode.concat($3, $4));
+        $$ = tuples;
       %}
   ;
 
@@ -325,25 +386,110 @@ translate_function:
 
 
 /**
- * AMP-specific `width()` and `height()` functions:
+ * https://developer.mozilla.org/en-US/docs/Web/CSS/clip-path#inset()
+ * - `inset(a)`
+ * - `inset(v h)`
+ * - `inset(t r b)`
+ * - `inset(t r b l)`
+ * - `inset(a round <border_radius>)`
+ *
+ * The grammar is:
+ * <inset()> = inset( <length-percentage>{1,4} [ round <'border-radius'> ]? )
+ */
+inset_function:
+    INSET_START value ROUND border_radius ')'
+      {$$ = ast.createInsetNode($2, $4);}
+  | INSET_START value ')'
+      {$$ = ast.createInsetNode($2);}
+  ;
+
+/**
+ * https://developer.mozilla.org/en-US/docs/Web/CSS/clip-path#circle()
+ * - `circle()`
+ * - `circle(50%)`
+ * - `circle(50% at 10% 20%)`
+ * - `circle(at 10% 20%)`
+ *
+ * The grammar is:
+ * <circle()> = circle( [ <shape-radius> ]? [ at <position> ]? )
+ */
+circle_function:
+    CIRCLE_START ')'
+      {$$ = ast.createCircleNode();}
+  | CIRCLE_START AT value ')'
+      {$$ = ast.createCircleNode(null, $3);}
+  | CIRCLE_START literal_or_function AT value ')'
+      {$$ = ast.createCircleNode($2, $4);}
+  | CIRCLE_START literal_or_function ')'
+      {$$ = ast.createCircleNode($2);}
+  ;
+
+/**
+ * https://developer.mozilla.org/en-US/docs/Web/CSS/clip-path#ellipse()
+ * - `ellipse()`
+ * - `ellipse(30% 40%)`
+ * - `ellipse(30% 40% at 10% 20%)`
+ * - `ellipse(at 10% 20%)`
+ *
+ * The grammar is:
+ * <ellipse()> = ellipse( [ <shape-radius>{2} ]? [ at <position> ]? )
+ */
+ellipse_function:
+    ELLIPSE_START ')'
+      {$$ = ast.createEllipseNode();}
+  | ELLIPSE_START AT value ')'
+      {$$ = ast.createEllipseNode(null, $3);}
+  | ELLIPSE_START value AT value ')'
+      {$$ = ast.createEllipseNode($2, $4);}
+  | ELLIPSE_START value ')'
+      {$$ = ast.createEllipseNode($2);}
+  ;
+
+/**
+ * https://developer.mozilla.org/en-US/docs/Web/CSS/clip-path#polygon()
+ * - `polygon(30% 40%, 10px 20px, ...)`
+ *
+ * The grammar is:
+ * <polygon()> = polygon( [ <length-percentage> <length-percentage> ]# )
+ */
+polygon_function:
+    POLYGON_START tuples ')'
+      {$$ = ast.createPolygonNode($2);}
+  ;
+
+
+/**
+ * AMP-specific `width()`, `height()`, `x()` and `y()` functions:
  * - `width(".selector")`
  * - `height(".selector")`
  * - `width(closest(".selector"))`
  * - `height(closest(".selector"))`
  */
-dim_function:
+rect_function:
     WIDTH_START ')'
-      {$$ = new ast.CssDimSizeNode('w');}
+      {$$ = new ast.CssRectNode('w');}
   | HEIGHT_START ')'
-      {$$ = new ast.CssDimSizeNode('h');}
+      {$$ = new ast.CssRectNode('h');}
+  | X_START ')'
+      {$$ = new ast.CssRectNode('x');}
+  | Y_START ')'
+      {$$ = new ast.CssRectNode('y');}
   | WIDTH_START STRING ')'
-      {$$ = new ast.CssDimSizeNode('w', $2.slice(1, -1));}
+      {$$ = new ast.CssRectNode('w', $2.slice(1, -1));}
   | HEIGHT_START STRING ')'
-      {$$ = new ast.CssDimSizeNode('h', $2.slice(1, -1));}
+      {$$ = new ast.CssRectNode('h', $2.slice(1, -1));}
+  | X_START STRING ')'
+      {$$ = new ast.CssRectNode('x', $2.slice(1, -1));}
+  | Y_START STRING ')'
+      {$$ = new ast.CssRectNode('y', $2.slice(1, -1));}
   | WIDTH_START CLOSEST_START STRING ')' ')'
-      {$$ = new ast.CssDimSizeNode('w', $3.slice(1, -1), 'closest');}
+      {$$ = new ast.CssRectNode('w', $3.slice(1, -1), 'closest');}
   | HEIGHT_START CLOSEST_START STRING ')' ')'
-      {$$ = new ast.CssDimSizeNode('h', $3.slice(1, -1), 'closest');}
+      {$$ = new ast.CssRectNode('h', $3.slice(1, -1), 'closest');}
+  | X_START CLOSEST_START STRING ')' ')'
+      {$$ = new ast.CssRectNode('x', $3.slice(1, -1), 'closest');}
+  | Y_START CLOSEST_START STRING ')' ')'
+      {$$ = new ast.CssRectNode('y', $3.slice(1, -1), 'closest');}
   ;
 
 
@@ -419,6 +565,44 @@ var_function:
 calc_function:
     CALC_START calc_expr ')'
       {$$ = new ast.CssCalcNode($2);}
+  ;
+
+/**
+ * Used for min/max/clamp.
+ */
+calc_expr_list:
+    calc_expr
+      {$$ = [$1];}
+  | calc_expr_list ',' calc_expr
+      %{
+        const calc_expr_list = $1;
+        calc_expr_list.push($3);
+        $$ = calc_expr_list;
+      %}
+  ;
+
+/**
+ * See https://developer.mozilla.org/en-US/docs/Web/CSS/min
+ */
+min_function:
+    MIN_START calc_expr_list ')'
+      {$$ = new ast.CssMinMaxNode('min', $2);}
+  ;
+
+/**
+ * See https://developer.mozilla.org/en-US/docs/Web/CSS/max
+ */
+max_function:
+    MAX_START calc_expr_list ')'
+      {$$ = new ast.CssMinMaxNode('max', $2);}
+  ;
+
+/**
+ * See https://developer.mozilla.org/en-US/docs/Web/CSS/clamp
+ */
+clamp_function:
+    CLAMP_START calc_expr_list ')'
+      {$$ = new ast.CssMinMaxNode('clamp', $2);}
   ;
 
 /**

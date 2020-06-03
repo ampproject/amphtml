@@ -27,9 +27,11 @@ import {installHistoryServiceForDoc} from './history-impl';
 import {installImg} from '../../builtins/amp-img';
 import {installInputService} from '../input';
 import {installLayout} from '../../builtins/amp-layout';
+import {installMutatorServiceForDoc} from './mutator-impl';
 import {installOwnersServiceForDoc} from './owners-impl';
 import {installPixel} from '../../builtins/amp-pixel';
 import {installPlatformService} from './platform-impl';
+import {installPreconnectService} from '../preconnect';
 import {installResourcesServiceForDoc} from './resources-impl';
 import {installStandardActionsForDoc} from './standard-actions-impl';
 import {installStorageServiceForDoc} from './storage-impl';
@@ -67,6 +69,7 @@ export function installRuntimeServices(global) {
   installVsyncService(global);
   installXhrService(global);
   installInputService(global);
+  installPreconnectService(global);
 }
 
 /**
@@ -104,6 +107,9 @@ export function installAmpdocServices(ampdoc) {
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'owners')
     : installOwnersServiceForDoc(ampdoc);
+  isEmbedded
+    ? adoptServiceForEmbedDoc(ampdoc, 'mutator')
+    : installMutatorServiceForDoc(ampdoc);
   isEmbedded
     ? adoptServiceForEmbedDoc(ampdoc, 'url-replace')
     : installUrlReplacementsServiceForDoc(ampdoc);

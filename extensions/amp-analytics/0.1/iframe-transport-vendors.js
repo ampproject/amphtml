@@ -33,9 +33,10 @@ const prodConfig = {
  *
  * @const {!Object}
  */
-const canaryConfig = Object.assign({}, prodConfig, {
+const canaryConfig = {
+  ...prodConfig,
   'bg': 'https://tpc.googlesyndication.com/b4a/experimental/b4a-runner.html',
-});
+};
 
 export const IFRAME_TRANSPORTS = /** @type {!JsonObject} */ (prodConfig);
 export const IFRAME_TRANSPORTS_CANARY = /** @type {!JsonObject} */ (canaryConfig);

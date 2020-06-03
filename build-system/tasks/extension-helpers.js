@@ -15,6 +15,7 @@
  */
 
 const colors = require('ansi-colors');
+const debounce = require('debounce');
 const fs = require('fs-extra');
 const log = require('fancy-log');
 const watch = require('gulp-watch');
@@ -24,10 +25,10 @@ const {
   extensionBundles,
   verifyExtensionBundles,
 } = require('../compile/bundles.config');
-const {compileJs, mkdirSync} = require('./helpers');
-const {endBuildStep} = require('./helpers');
+const {endBuildStep, watchDebounceDelay} = require('./helpers');
 const {isTravisBuild} = require('../common/travis');
 const {jsifyCssAsync} = require('./jsify-css');
+const {maybeToEsmName, compileJs, mkdirSync} = require('./helpers');
 const {vendorConfigs} = require('./vendor-configs');
 
 const {green, red, cyan} = colors;
@@ -108,12 +109,14 @@ function declareExtension(
 ) {
   const defaultOptions = {hasCss: false};
   const versions = Array.isArray(version) ? version : [version];
-  versions.forEach(v => {
-    extensionsObject[`${name}-${v}`] = Object.assign(
-      {name, version: v, latestVersion},
-      defaultOptions,
-      options
-    );
+  versions.forEach((v) => {
+    extensionsObject[`${name}-${v}`] = {
+      name,
+      version: v,
+      latestVersion,
+      ...defaultOptions,
+      ...options,
+    };
     if (includeLatest && v == latestVersion) {
       extensionsObject[`${name}-latest`] = extensionsObject[`${name}-${v}`];
     }
@@ -138,7 +141,7 @@ function maybeInitializeExtensions(
 ) {
   if (Object.keys(extensionsObject).length === 0) {
     verifyExtensionBundles();
-    extensionBundles.forEach(c => {
+    extensionBundles.forEach((c) => {
       declareExtension(
         c.name,
         c.version,
@@ -152,11 +155,26 @@ function maybeInitializeExtensions(
 }
 
 /**
+ * Set the extensions to build from example documents
+ * (for internal use by `gulp performance`)
+ *
+ * @param {Array<string>} examples Path to example documents
+ */
+function setExtensionsToBuildFromDocuments(examples) {
+  extensionsToBuild = dedupe([
+    ...DEFAULT_EXTENSION_SET,
+    ...getExtensionsFromArg(examples.join(',')),
+  ]);
+}
+
+/**
  * Process the command line arguments --noextensions, --extensions, and
  * --extensions_from and return a list of the referenced extensions.
+ *
+ * @param {boolean=} preBuild
  * @return {!Array<string>}
  */
-function getExtensionsToBuild() {
+function getExtensionsToBuild(preBuild = false) {
   if (extensionsToBuild) {
     return extensionsToBuild;
   }
@@ -175,7 +193,9 @@ function getExtensionsToBuild() {
     const extensionsFrom = getExtensionsFromArg(argv.extensions_from);
     extensionsToBuild = dedupe(extensionsToBuild.concat(extensionsFrom));
   }
-  if (!argv.noextensions && !argv.extensions && !argv.extensions_from) {
+  if (
+    !(preBuild || argv.noextensions || argv.extensions || argv.extensions_from)
+  ) {
     const allExtensions = [];
     for (const extension in extensions) {
       allExtensions.push(extensions[extension].name);
@@ -198,6 +218,10 @@ function parseExtensionFlags(preBuild = false) {
   }
 
   const buildOrPreBuild = preBuild ? 'pre-build' : 'build';
+  const coreRuntimeOnlyMessage =
+    green('⤷ Use ') +
+    cyan('--core_runtime_only ') +
+    green('to build just the core runtime.');
   const noExtensionsMessage =
     green('⤷ Use ') +
     cyan('--noextensions ') +
@@ -217,15 +241,13 @@ function parseExtensionFlags(preBuild = false) {
     cyan('foo.amp.html') +
     green('.');
 
-  if (preBuild) {
-    if (argv.extensions || argv.extensions_from) {
-      log(
-        green('Pre-building extension(s):'),
-        cyan(getExtensionsToBuild().join(', '))
-      );
-    } else {
-      log(green('Not pre-building any AMP extensions.'));
-    }
+  if (argv.core_runtime_only) {
+    log(green('Building just the core runtime.'));
+  } else if (preBuild) {
+    log(
+      green('Pre-building extension(s):'),
+      cyan(getExtensionsToBuild(preBuild).join(', '))
+    );
     log(extensionsMessage);
     log(inaboxSetMessage);
     log(extensionsFromMessage);
@@ -240,6 +262,7 @@ function parseExtensionFlags(preBuild = false) {
     } else {
       log(green('Building all AMP extensions.'));
     }
+    log(coreRuntimeOnlyMessage);
     log(noExtensionsMessage);
     log(extensionsMessage);
     log(inaboxSetMessage);
@@ -260,7 +283,7 @@ function getExtensionsFromArg(examples) {
 
   const extensions = [];
 
-  examples.split(',').forEach(example => {
+  examples.split(',').forEach((example) => {
     const html = fs.readFileSync(example, 'utf8');
     const customElementTemplateRe = /custom-(element|template)="([^"]+)"/g;
     const extensionNameMatchIndex = 2;
@@ -292,7 +315,7 @@ function getExtensionsFromArg(examples) {
  */
 function dedupe(arr) {
   const map = Object.create(null);
-  arr.forEach(item => (map[item] = true));
+  arr.forEach((item) => (map[item] = true));
   return Object.keys(map);
 }
 
@@ -334,7 +357,7 @@ async function buildExtensions(options) {
  */
 async function doBuildExtension(extensions, extension, options) {
   const e = extensions[extension];
-  let o = Object.assign({}, options);
+  let o = {...options};
   o = Object.assign(o, e);
   await buildExtension(
     e.name,
@@ -344,6 +367,33 @@ async function doBuildExtension(extensions, extension, options) {
     o,
     e.extraGlobs
   );
+}
+
+/**
+ * Watches the contents of an extension directory. When a file in the given path
+ * changes, the extension is rebuilt.
+ *
+ * @param {string} path
+ * @param {string} name
+ * @param {string} version
+ * @param {string} latestVersion
+ * @param {boolean} hasCss
+ * @param {?Object} options
+ */
+function watchExtension(path, name, version, latestVersion, hasCss, options) {
+  const watchFunc = function () {
+    const bundleComplete = buildExtension(
+      name,
+      version,
+      latestVersion,
+      hasCss,
+      {...options, continueOnError: true}
+    );
+    if (options.onWatchBuild) {
+      options.onWatchBuild(bundleComplete);
+    }
+  };
+  watch(path + '/**/*', debounce(watchFunc, watchDebounceDelay));
 }
 
 /**
@@ -382,22 +432,16 @@ async function buildExtension(
   const path = 'extensions/' + name + '/' + version;
 
   // Use a separate watcher for extensions to copy / inline CSS and compile JS
-  // instead of relying on the watcher used by compileUnminifiedJs, which only
-  // recompiles JS.
+  // instead of relying on the watchers used by compileUnminifiedJs and
+  // compileMinifiedJs, which only recompile JS.
   if (options.watch) {
     options.watch = false;
-    watch(path + '/**/*', function() {
-      const bundleComplete = buildExtension(
-        name,
-        version,
-        latestVersion,
-        hasCss,
-        Object.assign({}, options, {continueOnError: true})
-      );
-      if (options.onWatchBuild) {
-        options.onWatchBuild(bundleComplete);
-      }
-    });
+    watchExtension(path, name, version, latestVersion, hasCss, options);
+    // When an ad network extension is being watched, also watch amp-a4a.
+    if (name.match(/amp-ad-network-.*-impl/)) {
+      const a4aPath = `extensions/amp-a4a/${version}`;
+      watchExtension(a4aPath, name, version, latestVersion, hasCss, options);
+    }
   }
   if (hasCss) {
     mkdirSync('build');
@@ -407,13 +451,11 @@ async function buildExtension(
       return;
     }
   }
-  if (argv.single_pass) {
-    return;
-  } else {
-    await buildExtensionJs(path, name, version, latestVersion, options);
-  }
   if (name === 'amp-analytics') {
     await vendorConfigs(options);
+  }
+  if (!argv.single_pass) {
+    await buildExtensionJs(path, name, version, latestVersion, options);
   }
 }
 
@@ -443,7 +485,7 @@ function buildExtensionCss(path, name, version, options) {
 
   const promises = [];
   const mainCssBinary = jsifyCssAsync(path + '/' + name + '.css').then(
-    mainCss => {
+    (mainCss) => {
       writeCssBinaries(`${name}-${version}.css`, mainCss);
       if (isAliased) {
         writeCssBinaries(`${name}-${aliasBundle.aliasedVersion}.css`, mainCss);
@@ -454,8 +496,8 @@ function buildExtensionCss(path, name, version, options) {
   if (Array.isArray(options.cssBinaries)) {
     promises.push.apply(
       promises,
-      options.cssBinaries.map(function(name) {
-        return jsifyCssAsync(`${path}/${name}.css`).then(css => {
+      options.cssBinaries.map(function (name) {
+        return jsifyCssAsync(`${path}/${name}.css`).then((css) => {
           writeCssBinaries(`${name}-${version}.css`, css);
           if (isAliased) {
             writeCssBinaries(`${name}-${aliasBundle.aliasedVersion}.css`, css);
@@ -490,6 +532,7 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
       toName: `${name}-${version}.max.js`,
       minifiedName: `${name}-${version}.js`,
       latestName: version === latestVersion ? `${name}-latest.js` : '',
+      esmPassCompilation: argv.esm || false,
       // Wrapper that either registers the extension or schedules it for
       // execution after the main binary comes back.
       // The `function` is wrapped in `()` to avoid lazy parsing it,
@@ -501,13 +544,20 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
     })
   );
 
+  // If an incremental watch build fails, simply return.
+  if (options.errored) {
+    return;
+  }
+
   const aliasBundle = extensionAliasBundles[name];
   const isAliased = aliasBundle && aliasBundle.version == version;
   if (isAliased) {
-    const src = `${name}-${version}${options.minify ? '' : '.max'}.js`;
-    const dest = `${name}-${aliasBundle.aliasedVersion}${
-      options.minify ? '' : '.max'
-    }.js`;
+    const src = maybeToEsmName(
+      `${name}-${version}${options.minify ? '' : '.max'}.js`
+    );
+    const dest = maybeToEsmName(
+      `${name}-${aliasBundle.aliasedVersion}${options.minify ? '' : '.max'}.js`
+    );
     fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
     fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);
   }
@@ -530,4 +580,5 @@ module.exports = {
   getExtensionsToBuild,
   maybeInitializeExtensions,
   parseExtensionFlags,
+  setExtensionsToBuildFromDocuments,
 };

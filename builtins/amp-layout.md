@@ -1,3 +1,14 @@
+---
+$category: layout
+formats:
+  - websites
+  - email
+  - ads
+  - stories
+teaser:
+  text: A generic, multi-purpose container element that brings AMP's powerful layouts to any element.
+---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -43,6 +54,7 @@ This example uses `amp-layout` to create a responsive container around a circle 
   </svg>
 </amp-layout>
 ```
+
 ## Attributes
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.

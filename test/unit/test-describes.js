@@ -23,10 +23,10 @@ describe('fetch-mock', () => {
 
       return env.win
         .fetch('fake.com')
-        .then(response => {
+        .then((response) => {
           return response.json();
         })
-        .then(data => {
+        .then((data) => {
           expect(data.payload).to.equal('foo');
           expect(mock.called('fake.com')).to.be.true;
         });
@@ -38,7 +38,7 @@ describe('fetch-mock', () => {
     {
       mockFetch: true,
     },
-    env => {
+    (env) => {
       runTests(env);
     }
   );
@@ -48,7 +48,7 @@ describe('fetch-mock', () => {
     {
       mockFetch: true,
     },
-    env => {
+    (env) => {
       runTests(env);
     }
   );

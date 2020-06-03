@@ -7,6 +7,7 @@ formats:
 teaser:
   text: Replaces the HTML5 video tag.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -25,26 +26,7 @@ limitations under the License.
 
 # amp-video
 
-[TOC]
-
-A replacement for the HTML5 <code>video</code> tag; only to be used for direct HTML5 video file embeds.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>AMP By Example's:<ul>
-      <li><a href="https://amp.dev/documentation/examples/components/amp-video/">amp-video example</a></li>
-      <li><a href="https://amp.dev/documentation/examples/multimedia-animations/click-to-play_overlay_for_amp-video/">Click-to-play overlay for amp-video</a></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-</table>
+A replacement for the HTML5 `video` tag; only to be used for direct HTML5 video file embeds.
 
 ## Behavior
 
@@ -54,12 +36,13 @@ The `amp-video` component accepts up to four unique types of HTML nodes as child
 
 - `source` tags: Just like in the HTML `<video>` tag, you can add `<source>` tag children to specify different source media files to play.
 - `track` tags to enable subtitles in the video. If the track is hosted on a different origin than the document, you must add the `crossorigin` attribute to the `<amp-video>` tag.
--  a placeholder for before the video starts
--  a fallback if the browser doesn’t support HTML5 video: One or zero immediate child nodes can have the `fallback` attribute. If present, this node and its children form the content that displays if HTML5 video is not supported on the user’s browser.
+- a placeholder for before the video starts
+- a fallback if the browser doesn’t support HTML5 video: One or zero immediate child nodes can have the `fallback` attribute. If present, this node and its children form the content that displays if HTML5 video is not supported on the user’s browser.
 
 #### Example
 
 [example preview="inline" playground="true" imports="amp-video"]
+
 ```html
 <amp-video {% if format=='stories'%}autoplay {% endif %}controls
   width="640"
@@ -75,6 +58,7 @@ The `amp-video` component accepts up to four unique types of HTML nodes as child
   </div>
 </amp-video>
 ```
+
 [/example]
 
 ## Analytics
@@ -173,20 +157,25 @@ Example:
 This example contains both the `poster` and `artwork` attributes. The `poster` serves as the placeholder image before the video plays, while `artwork` is the image that displays in the notification via the MediaSession API.
 
 ```html
-<amp-video width="720" height="305" layout="responsive"
+<amp-video
+  width="720"
+  height="305"
+  layout="responsive"
   src="https://yourhost.com/videos/myvideo.mp4"
   poster="https://yourhost.com/posters/poster.png"
   artwork="https://yourhost.com/artworks/artwork.png"
-  title="Awesome video" artist="Awesome artist"
-  album="Amazing album">
+  title="Awesome video"
+  artist="Awesome artist"
+  album="Amazing album"
+>
 </amp-video>
 ```
 
 ## Click-to-Play overlay
 
-Providing a click-to-play overlay is a common UX feature for video players on the web.  For example, you could display a custom play icon that the user can click, as well as include the title of the video, different sized poster images, and so on.  Because the `amp-video` component supports the standard `play` AMP action, you can easily implement click-to-play.
+Providing a click-to-play overlay is a common UX feature for video players on the web. For example, you could display a custom play icon that the user can click, as well as include the title of the video, different sized poster images, and so on. Because the `amp-video` component supports the standard `play` AMP action, you can easily implement click-to-play.
 
-For a detailed example, visit AMP By Example's  [Click-to-play overlay for amp-video](https://amp.dev/documentation/examples/multimedia-animations/click-to-play_overlay_for_amp-video/).
+For a detailed example, visit AMP By Example's [Click-to-play overlay for amp-video](https://amp.dev/documentation/examples/multimedia-animations/click-to-play_overlay_for_amp-video/).
 
 ## Validation
 

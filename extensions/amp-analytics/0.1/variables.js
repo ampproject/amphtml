@@ -15,6 +15,8 @@
  */
 
 import {Services} from '../../../src/services';
+import {TickLabel} from '../../../src/enums';
+import {asyncStringReplace} from '../../../src/string';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {cookieReader} from './cookie-reader';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
@@ -26,8 +28,8 @@ import {
   registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
+import {isInFie} from '../../../src/iframe-helper';
 import {linkerReaderServiceFor} from './linker-reader';
-import {tryResolve} from '../../../src/utils/promise';
 
 /** @const {string} */
 const TAG = 'amp-analytics/variables';
@@ -191,11 +193,11 @@ export class VariableService {
 
     this.register_('$DEFAULT', defaultMacro);
     this.register_('$SUBSTR', substrMacro);
-    this.register_('$TRIM', value => value.trim());
-    this.register_('$TOLOWERCASE', value => value.toLowerCase());
-    this.register_('$TOUPPERCASE', value => value.toUpperCase());
-    this.register_('$NOT', value => String(!value));
-    this.register_('$BASE64', value => base64UrlEncodeFromString(value));
+    this.register_('$TRIM', (value) => value.trim());
+    this.register_('$TOLOWERCASE', (value) => value.toLowerCase());
+    this.register_('$TOUPPERCASE', (value) => value.toUpperCase());
+    this.register_('$NOT', (value) => String(!value));
+    this.register_('$BASE64', (value) => base64UrlEncodeFromString(value));
     this.register_('$HASH', this.hashMacro_.bind(this));
     this.register_('$IF', (value, thenValue, elseValue) =>
       stringToBool(value) ? thenValue : elseValue
@@ -206,10 +208,33 @@ export class VariableService {
       '$EQUALS',
       (firstValue, secValue) => firstValue === secValue
     );
-    // TODO(ccordry): Make sure this stays a window level service when this
-    // VariableService is migrated to document level.
     this.register_('LINKER_PARAM', (name, id) =>
       this.linkerReader_.get(name, id)
+    );
+
+    // Returns the IANA timezone code
+    this.register_('TIMEZONE_CODE', () => {
+      let tzCode = '';
+      if (
+        'Intl' in this.ampdoc_.win &&
+        'DateTimeFormat' in this.ampdoc_.win.Intl
+      ) {
+        // It could be undefined (i.e. IE11)
+        tzCode = new this.ampdoc_.win.Intl.DateTimeFormat().resolvedOptions()
+          .timeZone;
+      }
+
+      return tzCode;
+    });
+
+    // Returns a promise resolving to viewport.getScrollTop.
+    this.register_('SCROLL_TOP', () =>
+      Services.viewportForDoc(this.ampdoc_).getScrollTop()
+    );
+
+    // Returns a promise resolving to viewport.getScrollLeft.
+    this.register_('SCROLL_LEFT', () =>
+      Services.viewportForDoc(this.ampdoc_).getScrollLeft()
     );
   }
 
@@ -219,15 +244,46 @@ export class VariableService {
    */
   getMacros(element) {
     const elementMacros = {
-      'COOKIE': name =>
+      'COOKIE': (name) =>
         cookieReader(this.ampdoc_.win, dev().assertElement(element), name),
       'CONSENT_STATE': getConsentStateStr(element),
     };
-    const merged = Object.assign({}, this.macros_, elementMacros);
+    const perfMacros = isInFie(element)
+      ? {}
+      : {
+          'FIRST_CONTENTFUL_PAINT': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE
+            ),
+          'FIRST_VIEWPORT_READY': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.FIRST_VIEWPORT_READY
+            ),
+          'MAKE_BODY_VISIBLE': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.MAKE_BODY_VISIBLE
+            ),
+          'LARGEST_CONTENTFUL_PAINT': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE
+            ),
+          'FIRST_INPUT_DELAY': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.FIRST_INPUT_DELAY_VISIBLE
+            ),
+          'CUMULATIVE_LAYOUT_SHIFT': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.CUMULATIVE_LAYOUT_SHIFT
+            ),
+        };
+    const merged = {...this.macros_, ...elementMacros, ...perfMacros};
     return /** @type {!JsonObject} */ (merged);
   }
 
   /**
+   * TODO (micajuineho): If we add new synchronous macros, we
+   * will need to split this method and getMacros into sync and
+   * async version (currently all macros are async).
    * @param {string} name
    * @param {*} macro
    */
@@ -237,22 +293,17 @@ export class VariableService {
   }
 
   /**
-   * @param {string} template The template to expand
-   * @param {!ExpansionOptions} options configuration to use for expansion
-   * @return {!Promise<string>} The expanded string
+   * Converts templates from ${} format to MACRO() and resolves any platform
+   * level macros when encountered.
+   * @param {string} template The template to expand.
+   * @param {!ExpansionOptions} options configuration to use for expansion.
+   * @param {!Element} element amp-analytics element.
+   * @param {!JsonObject=} opt_bindings
+   * @param {!Object=} opt_whitelist
+   * @return {!Promise<string>} The expanded string.
    */
-  expandTemplate(template, options) {
-    return tryResolve(this.expandTemplateSync.bind(this, template, options));
-  }
-
-  /**
-   * @param {string} template The template to expand
-   * @param {!ExpansionOptions} options configuration to use for expansion
-   * @return {string} The expanded string
-   * @visibleForTesting
-   */
-  expandTemplateSync(template, options) {
-    return template.replace(/\${([^}]*)}/g, (match, key) => {
+  expandTemplate(template, options, element, opt_bindings, opt_whitelist) {
+    return asyncStringReplace(template, /\${([^}]*)}/g, (match, key) => {
       if (options.iterations < 0) {
         user().error(
           TAG,
@@ -275,26 +326,80 @@ export class VariableService {
       }
 
       let value = options.getVar(name);
+      const urlReplacements = Services.urlReplacementsForDoc(element);
 
       if (typeof value == 'string') {
-        value = this.expandTemplateSync(
+        value = this.expandValueAndReplaceAsync_(
           value,
-          new ExpansionOptions(
-            options.vars,
-            options.iterations - 1,
-            true /* noEncode */
-          )
+          options,
+          element,
+          urlReplacements,
+          opt_bindings,
+          opt_whitelist,
+          argList
         );
+      } else if (isArray(value)) {
+        // Treat each value as a template and expand
+        for (let i = 0; i < value.length; i++) {
+          value[i] =
+            typeof value[i] == 'string'
+              ? this.expandValueAndReplaceAsync_(
+                  value[i],
+                  options,
+                  element,
+                  urlReplacements,
+                  opt_bindings,
+                  opt_whitelist
+                )
+              : value[i];
+        }
+        value = Promise.all(/** @type {!Array<string>} */ (value));
       }
 
-      if (!options.noEncode) {
-        value = encodeVars(/** @type {string|?Array<string>} */ (value));
-      }
-      if (value) {
-        value += argList;
-      }
-      return value;
+      return Promise.resolve(value).then((value) =>
+        !options.noEncode
+          ? encodeVars(/** @type {string|?Array<string>} */ (value))
+          : value
+      );
     });
+  }
+
+  /**
+   * @param {string} value
+   * @param {!ExpansionOptions} options
+   * @param {!Element} element amp-analytics element.
+   * @param {!../../../src/service/url-replacements-impl.UrlReplacements} urlReplacements
+   * @param {!JsonObject=} opt_bindings
+   * @param {!Object=} opt_whitelist
+   * @param {string=} opt_argList
+   * @return {Promise<string>}
+   */
+  expandValueAndReplaceAsync_(
+    value,
+    options,
+    element,
+    urlReplacements,
+    opt_bindings,
+    opt_whitelist,
+    opt_argList
+  ) {
+    return this.expandTemplate(
+      value,
+      new ExpansionOptions(
+        options.vars,
+        options.iterations - 1,
+        true /* noEncode */
+      ),
+      element,
+      opt_bindings,
+      opt_whitelist
+    ).then((val) =>
+      urlReplacements.expandStringAsync(
+        opt_argList ? val + opt_argList : val,
+        opt_bindings || this.getMacros(element),
+        opt_whitelist
+      )
+    );
   }
 
   /**
@@ -386,7 +491,7 @@ export function getNameArgsForTesting(key) {
  * @return {!Promise<?string>}
  */
 function getConsentStateStr(element) {
-  return getConsentPolicyState(element).then(consent => {
+  return getConsentPolicyState(element).then((consent) => {
     if (!consent) {
       return null;
     }

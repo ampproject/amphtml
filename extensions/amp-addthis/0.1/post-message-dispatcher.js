@@ -50,7 +50,9 @@ export class PostMessageDispatcher {
     if (!this.listeners_[eventType]) {
       return;
     }
-    this.listeners_[eventType].forEach(listener => listener(eventData));
+    /** @type {!Array} */ (this.listeners_[eventType]).forEach((listener) =>
+      listener(eventData)
+    );
   }
 
   /**
@@ -89,9 +91,10 @@ export class PostMessageDispatcher {
       case CONFIGURATION_EVENT: {
         this.emit_(
           CONFIGURATION_EVENT,
-          /** @type {!JsonObject} */ (Object.assign({}, data, {
+          /** @type {!JsonObject} */ ({
+            ...data,
             'source': event.source,
-          }))
+          })
         );
         break;
       }

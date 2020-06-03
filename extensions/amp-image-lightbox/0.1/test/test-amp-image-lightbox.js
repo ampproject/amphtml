@@ -17,6 +17,8 @@
 import '../amp-image-lightbox';
 import * as dom from '../../../../src/dom';
 import * as lolex from 'lolex';
+import {ActionService} from '../../../../src/service/action-impl';
+import {ActionTrust} from '../../../../src/action-constants';
 import {ImageViewer} from '../amp-image-lightbox';
 import {Keys} from '../../../../src/utils/key-codes';
 import {Services} from '../../../../src/services';
@@ -28,9 +30,10 @@ describes.realWin(
   {
     amp: {
       extensions: ['amp-image-lightbox'],
+      runtimeOn: true,
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -49,7 +52,7 @@ describes.realWin(
     }
 
     it('should not render if not activated', () => {
-      return getImageLightbox().then(lightbox => {
+      return getImageLightbox().then((lightbox) => {
         const container = lightbox.querySelector(
           '.i-amphtml-image-lightbox-container'
         );
@@ -58,7 +61,7 @@ describes.realWin(
     });
 
     it('should render correctly', () => {
-      return getImageLightbox().then(lightbox => {
+      return getImageLightbox().then((lightbox) => {
         const impl = lightbox.implementation_;
         const noop = () => {};
         impl.getViewport = () => {
@@ -110,11 +113,11 @@ describes.realWin(
     });
 
     it('should activate all steps', () => {
-      return getImageLightbox().then(lightbox => {
+      return getImageLightbox().then((lightbox) => {
         const impl = lightbox.implementation_;
-        const viewportOnChanged = sandbox.spy();
-        const enterLightboxMode = sandbox.spy();
-        const leaveLightboxMode = sandbox.spy();
+        const viewportOnChanged = env.sandbox.spy();
+        const enterLightboxMode = env.sandbox.spy();
+        const leaveLightboxMode = env.sandbox.spy();
         impl.getViewport = () => {
           return {
             onChanged: viewportOnChanged,
@@ -122,7 +125,7 @@ describes.realWin(
             leaveLightboxMode,
           };
         };
-        const historyPush = sandbox.spy();
+        const historyPush = env.sandbox.spy();
         impl.getHistory_ = () => {
           return {
             push: () => {
@@ -131,7 +134,7 @@ describes.realWin(
             },
           };
         };
-        const enter = sandbox.spy();
+        const enter = env.sandbox.spy();
         impl.enter_ = enter;
 
         const ampImage = doc.createElement('amp-img');
@@ -149,22 +152,22 @@ describes.realWin(
     });
 
     it('should deactivate all steps', () => {
-      return getImageLightbox().then(lightbox => {
+      return getImageLightbox().then((lightbox) => {
         const impl = lightbox.implementation_;
         impl.active_ = true;
         impl.historyId_ = 11;
-        const viewportOnChangedUnsubscribed = sandbox.spy();
+        const viewportOnChangedUnsubscribed = env.sandbox.spy();
         impl.unlistenViewport_ = viewportOnChangedUnsubscribed;
-        const enterLightboxMode = sandbox.spy();
-        const leaveLightboxMode = sandbox.spy();
+        const enterLightboxMode = env.sandbox.spy();
+        const leaveLightboxMode = env.sandbox.spy();
         impl.getViewport = () => {
           return {enterLightboxMode, leaveLightboxMode};
         };
-        const historyPop = sandbox.spy();
+        const historyPop = env.sandbox.spy();
         impl.getHistory_ = () => {
           return {pop: historyPop};
         };
-        const exit = sandbox.spy();
+        const exit = env.sandbox.spy();
         impl.exit_ = exit;
 
         impl.close();
@@ -180,15 +183,15 @@ describes.realWin(
     });
 
     it('should close on ESC', () => {
-      return getImageLightbox().then(lightbox => {
+      return getImageLightbox().then((lightbox) => {
         const impl = lightbox.implementation_;
-        const setupCloseSpy = sandbox.spy(impl, 'close');
-        const nullAddEventListenerSpy = sandbox
+        const setupCloseSpy = env.sandbox.spy(impl, 'close');
+        const nullAddEventListenerSpy = env.sandbox
           .spy(impl.win.document.documentElement, 'addEventListener')
           .withArgs('keydown', null);
-        const viewportOnChanged = sandbox.spy();
-        const enterLightboxMode = sandbox.spy();
-        const leaveLightboxMode = sandbox.spy();
+        const viewportOnChanged = env.sandbox.spy();
+        const enterLightboxMode = env.sandbox.spy();
+        const leaveLightboxMode = env.sandbox.spy();
         impl.getViewport = () => {
           return {
             onChanged: viewportOnChanged,
@@ -196,7 +199,7 @@ describes.realWin(
             leaveLightboxMode,
           };
         };
-        const historyPush = sandbox.spy();
+        const historyPush = env.sandbox.spy();
         impl.getHistory_ = () => {
           return {
             push: () => {
@@ -205,7 +208,7 @@ describes.realWin(
             },
           };
         };
-        const enter = sandbox.spy();
+        const enter = env.sandbox.spy();
         impl.enter_ = enter;
 
         const ampImage = doc.createElement('amp-img');
@@ -225,7 +228,7 @@ describes.realWin(
 
     // Accessibility
     it('should return focus to source element after close', () => {
-      return getImageLightbox().then(lightbox => {
+      return getImageLightbox().then((lightbox) => {
         const impl = lightbox.implementation_;
         impl.enter_ = () => {};
         impl.getHistory_ = () => {
@@ -235,7 +238,7 @@ describes.realWin(
           };
         };
 
-        const tryFocus = sandbox.spy(dom, 'tryFocus');
+        const tryFocus = env.sandbox.spy(dom, 'tryFocus');
 
         const sourceElement = doc.createElement('amp-img');
         sourceElement.setAttribute('src', 'data:');
@@ -245,6 +248,47 @@ describes.realWin(
 
         expect(tryFocus).to.be.calledOnce;
       });
+    });
+
+    it('should allow default actions in email documents', async () => {
+      env.win.document.documentElement.setAttribute('amp4email', '');
+      const action = new ActionService(env.ampdoc, env.win.document);
+      env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
+
+      const element = dom.createElementWithAttributes(
+        env.win.document,
+        'amp-image-lightbox',
+        {'layout': 'nodisplay'}
+      );
+      env.win.document.body.appendChild(element);
+      env.sandbox.spy(element, 'enqueAction');
+      env.sandbox.stub(element, 'getDefaultActionAlias');
+      await dom.whenUpgradedToCustomElement(element);
+
+      const impl = await element.getImpl();
+      env.sandbox.stub(impl, 'open_');
+      action.execute(
+        element,
+        'open',
+        null,
+        'source',
+        'caller',
+        'event',
+        ActionTrust.HIGH
+      );
+      expect(element.enqueAction).to.be.calledWith(
+        env.sandbox.match({
+          actionEventType: '?',
+          args: null,
+          caller: 'caller',
+          event: 'event',
+          method: 'open',
+          node: element,
+          source: 'source',
+          trust: ActionTrust.HIGH,
+        })
+      );
+      expect(impl.open_).to.be.calledOnce;
     });
   }
 );
@@ -256,7 +300,7 @@ describes.realWin(
       extensions: ['amp-image-lightbox'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let clock;
     let lightbox;
@@ -267,7 +311,7 @@ describes.realWin(
     const sourceElement = {
       offsetWidth: 101,
       offsetHeight: 201,
-      getAttribute: name => {
+      getAttribute: (name) => {
         if (name == 'src') {
           return 'image1';
         }
@@ -282,16 +326,16 @@ describes.realWin(
       doc = win.document;
       clock = lolex.install();
 
-      sandbox.stub(WindowInterface, 'getDevicePixelRatio').returns(1);
+      env.sandbox.stub(WindowInterface, 'getDevicePixelRatio').returns(1);
       lightbox = {
         element: {
           ownerDocument: doc,
         },
       };
-      lightboxMock = sandbox.mock(lightbox);
-      loadPromiseStub = sandbox.stub().returns(Promise.resolve());
+      lightboxMock = env.sandbox.mock(lightbox);
+      loadPromiseStub = env.sandbox.stub().returns(Promise.resolve());
 
-      sandbox
+      env.sandbox
         .stub(Services.timerFor(win), 'promise')
         .returns(Promise.resolve());
       imageViewer = new ImageViewer(lightbox, win, loadPromiseStub);
@@ -433,7 +477,7 @@ describes.realWin(
       extensions: ['amp-image-lightbox'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let lightbox;
     let lightboxMock;
@@ -442,7 +486,7 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      sandbox.stub(WindowInterface, 'getDevicePixelRatio').returns(1);
+      env.sandbox.stub(WindowInterface, 'getDevicePixelRatio').returns(1);
       lightbox = {
         close: () => {},
         toggleViewMode: () => {},
@@ -450,7 +494,7 @@ describes.realWin(
           ownerDocument: doc,
         },
       };
-      lightboxMock = sandbox.mock(lightbox);
+      lightboxMock = env.sandbox.mock(lightbox);
 
       imageViewer = new ImageViewer(lightbox, win);
       doc.body.appendChild(imageViewer.getElement());
@@ -533,7 +577,7 @@ describes.realWin(
     });
 
     it('should zoom release', () => {
-      const updateSrc = sandbox.spy();
+      const updateSrc = env.sandbox.spy();
       imageViewer.updateSrc_ = updateSrc;
       imageViewer.onZoomInc_(10, 10, -10, -10);
       return imageViewer.onZoomRelease_(10, 10, -10, -10, 0, 0).then(() => {

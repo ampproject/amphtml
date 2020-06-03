@@ -23,6 +23,15 @@ export class WindowInterface {
   /**
    * @static
    * @param {!Window} win
+   * @return {!Window}
+   */
+  static getTop(win) {
+    return win.top;
+  }
+
+  /**
+   * @static
+   * @param {!Window} win
    * @return {!Location}
    */
   static getLocation(win) {
@@ -89,7 +98,7 @@ export class WindowInterface {
   /**
    * @static
    * @param {!Window} win
-   * @return {function(new:XMLHttpRequest)}
+   * @return {typeof XMLHttpRequest}
    */
   static getXMLHttpRequest(win) {
     return win.XMLHttpRequest;
@@ -98,7 +107,7 @@ export class WindowInterface {
   /**
    * @static
    * @param {!Window} win
-   * @return {function(new:Image)}
+   * @return {typeof Image}
    */
   static getImage(win) {
     return win.Image;

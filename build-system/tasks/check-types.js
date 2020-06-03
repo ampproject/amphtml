@@ -47,14 +47,14 @@ async function checkTypes() {
     './ads/inabox/inabox-host.js',
     './src/web-worker/web-worker.js',
   ];
-  const extensionValues = Object.keys(extensions).map(function(key) {
+  const extensionValues = Object.keys(extensions).map(function (key) {
     return extensions[key];
   });
   const extensionSrcs = extensionValues
-    .filter(function(extension) {
+    .filter(function (extension) {
       return !extension.noTypeCheck;
     })
-    .map(function(extension) {
+    .map(function (extension) {
       return (
         './extensions/' +
         extension.name +
@@ -80,7 +80,7 @@ async function checkTypes() {
           {
             include3pDirectories: true,
             includePolyfills: true,
-            extraGlobs: ['src/inabox/*.js'],
+            extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
             typeCheckOnly: true,
           }
         ),
@@ -134,6 +134,7 @@ module.exports = {
 
 checkTypes.description = 'Check source code for JS type errors';
 checkTypes.flags = {
+  closure_concurrency: '  Sets the number of concurrent invocations of closure',
   disable_nailgun:
     "  Doesn't use nailgun to invoke closure compiler (much slower)",
 };

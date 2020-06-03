@@ -20,10 +20,7 @@ import {createCustomEvent} from '../../src/event-helper';
 import {getVendorJsPropertyName} from '../../src/style';
 import {whenUpgradedToCustomElement} from '../../src/dom';
 
-const t = describe
-  .configure()
-  .skipIfPropertiesObfuscated()
-  .ifChrome();
+const t = describe.configure().skipIfPropertiesObfuscated().ifChrome();
 
 t.run('Viewer Visibility State', () => {
   function noop() {}
@@ -34,9 +31,8 @@ t.run('Viewer Visibility State', () => {
       body: '',
       hash: 'visibilityState=prerender',
     },
-    env => {
+    (env) => {
       let win;
-      let sandbox;
 
       let resources;
       let viewer;
@@ -85,7 +81,7 @@ t.run('Viewer Visibility State', () => {
       }
 
       function waitForNextPass() {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           shouldPass = true;
           notifyPass = resolve;
           resources.schedulePass();
@@ -102,31 +98,30 @@ t.run('Viewer Visibility State', () => {
 
       beforeEach(() => {
         win = env.win;
-        sandbox = env.sandbox;
         notifyPass = noop;
         shouldPass = false;
 
         const vsync = Services.vsyncFor(win);
-        sandbox.stub(vsync, 'mutate').callsFake(mutator => {
+        env.sandbox.stub(vsync, 'mutate').callsFake((mutator) => {
           mutator();
         });
 
         return Services.viewerPromiseForDoc(win.document)
-          .then(v => {
+          .then((v) => {
             viewer = v;
 
-            docHidden = sandbox.stub(win.document, 'hidden').value(false);
+            docHidden = env.sandbox.stub(win.document, 'hidden').value(false);
             if ('visibilityState' in win.document) {
-              docVisibilityState = sandbox
+              docVisibilityState = env.sandbox
                 .stub(win.document, 'visibilityState')
                 .value('visible');
             }
 
             resources = Services.resourcesForDoc(win.document);
             doPass_ = resources.doPass;
-            sandbox.stub(resources, 'doPass').callsFake(doPass);
+            env.sandbox.stub(resources, 'doPass').callsFake(doPass);
             // TODO(jridgewell@): Do not stub private method
-            //unselect = sandbox.stub(resources, 'unselectText_');
+            //unselect = env.sandbox.stub(resources, 'unselectText_');
 
             const img = win.document.createElement('amp-img');
             img.setAttribute('width', 100);
@@ -136,28 +131,31 @@ t.run('Viewer Visibility State', () => {
 
             return whenUpgradedToCustomElement(img);
           })
-          .then(img => {
-            layoutCallback = sandbox.stub(
+          .then((img) => {
+            layoutCallback = env.sandbox.stub(
               img.implementation_,
               'layoutCallback'
             );
-            unlayoutCallback = sandbox.stub(
+            unlayoutCallback = env.sandbox.stub(
               img.implementation_,
               'unlayoutCallback'
             );
-            pauseCallback = sandbox.stub(img.implementation_, 'pauseCallback');
-            resumeCallback = sandbox.stub(
+            pauseCallback = env.sandbox.stub(
+              img.implementation_,
+              'pauseCallback'
+            );
+            resumeCallback = env.sandbox.stub(
               img.implementation_,
               'resumeCallback'
             );
-            prerenderAllowed = sandbox.stub(
+            prerenderAllowed = env.sandbox.stub(
               img.implementation_,
               'prerenderAllowed'
             );
-            sandbox
+            env.sandbox
               .stub(img.implementation_, 'isRelayoutNeeded')
               .callsFake(() => true);
-            sandbox
+            env.sandbox
               .stub(img.implementation_, 'isLayoutSupported')
               .callsFake(() => true);
 

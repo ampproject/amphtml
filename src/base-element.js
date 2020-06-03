@@ -21,7 +21,6 @@ import {devAssert, user, userAssert} from './log';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray, toWin} from './types';
-import {preconnectForElement} from './preconnect';
 
 /**
  * Base class for all custom element implementations. Instead of inheriting
@@ -137,9 +136,6 @@ export class BaseElement {
     /** @package {!Layout} */
     this.layout_ = Layout.NODISPLAY;
 
-    /** @package {number} */
-    this.layoutWidth_ = -1;
-
     /** @package {boolean} */
     this.inViewport_ = false;
 
@@ -157,9 +153,6 @@ export class BaseElement {
 
     /** @private {?string} */
     this.defaultActionAlias_ = null;
-
-    /** @public {!./preconnect.Preconnect} */
-    this.preconnect = preconnectForElement(this.element);
   }
 
   /**
@@ -257,17 +250,6 @@ export class BaseElement {
    */
   getVsync() {
     return Services.vsyncFor(this.win);
-  }
-
-  /**
-   * Returns the layout width for this element. A `-1` value indicates that the
-   * layout is not yet known. A `0` value indicates that the element is not
-   * visible.
-   * @return {number}
-   * @public
-   */
-  getLayoutWidth() {
-    return this.layoutWidth_;
   }
 
   /**
@@ -587,7 +569,7 @@ export class BaseElement {
    * @param {ActionTrust} minTrust
    * @public
    */
-  registerAction(alias, handler, minTrust = ActionTrust.HIGH) {
+  registerAction(alias, handler, minTrust = ActionTrust.DEFAULT) {
     this.initActionMap_();
     this.actionMap_[alias] = {handler, minTrust};
   }
@@ -602,7 +584,7 @@ export class BaseElement {
   registerDefaultAction(
     handler,
     alias = DEFAULT_ACTION,
-    minTrust = ActionTrust.HIGH
+    minTrust = ActionTrust.DEFAULT
   ) {
     devAssert(
       !this.defaultActionAlias_,
@@ -664,6 +646,27 @@ export class BaseElement {
   }
 
   /**
+   * Utility method to propagate all data attributes from this element
+   * to the target element. (For use with arbitrary data attributes.)
+   * Removes any data attributes that are missing on this element from
+   * the target element.
+   * @param {!Element} targetElement
+   */
+  propagateDataset(targetElement) {
+    for (const key in targetElement.dataset) {
+      if (!(key in this.element.dataset)) {
+        delete targetElement.dataset[key];
+      }
+    }
+
+    for (const key in this.element.dataset) {
+      if (targetElement.dataset[key] !== this.element.dataset[key]) {
+        targetElement.dataset[key] = this.element.dataset[key];
+      }
+    }
+  }
+
+  /**
    * Utility method that forwards the given list of non-bubbling events
    * from the given element to this element as custom events with the same name.
    * @param  {string|!Array<string>} events
@@ -672,13 +675,13 @@ export class BaseElement {
    * @return {!UnlistenDef}
    */
   forwardEvents(events, element) {
-    const unlisteners = (isArray(events) ? events : [events]).map(eventType =>
-      listen(element, eventType, event => {
+    const unlisteners = (isArray(events) ? events : [events]).map((eventType) =>
+      listen(element, eventType, (event) => {
         this.element.dispatchCustomEvent(eventType, getData(event) || {});
       })
     );
 
-    return () => unlisteners.forEach(unlisten => unlisten());
+    return () => unlisteners.forEach((unlisten) => unlisten());
   }
 
   /**
@@ -719,14 +722,12 @@ export class BaseElement {
   }
 
   /**
-   * Hides or shows the loading indicator. This function must only
-   * be called inside a mutate context.
+   * Hides or shows the loading indicator.
    * @param {boolean} state
-   * @param {boolean=} opt_force
    * @public @final
    */
-  toggleLoading(state, opt_force) {
-    this.element.toggleLoading(state, {force: !!opt_force});
+  toggleLoading(state) {
+    this.element.toggleLoading(state);
   }
 
   /**
@@ -814,25 +815,12 @@ export class BaseElement {
   }
 
   /**
-   * Requests the runtime to update the height of this element to the specified
-   * value. The runtime will schedule this request and attempt to process it
-   * as soon as possible.
-   * @param {number} newHeight
-   * @public
-   */
-  changeHeight(newHeight) {
-    this.element
-      .getResources()
-      ./*OK*/ changeSize(this.element, newHeight, /* newWidth */ undefined);
-  }
-
-  /**
    * Collapses the element, setting it to `display: none`, and notifies its
    * owner (if there is one) through {@link collapsedCallback} that the element
    * is no longer visible.
    */
   collapse() {
-    this.element.getResources().collapseElement(this.element);
+    Services.mutatorForDoc(this.getAmpDoc()).collapseElement(this.element);
   }
 
   /**
@@ -840,14 +828,31 @@ export class BaseElement {
    * @return {!Promise}
    */
   attemptCollapse() {
-    return this.element.getResources().attemptCollapse(this.element);
+    return Services.mutatorForDoc(this.getAmpDoc()).attemptCollapse(
+      this.element
+    );
+  }
+
+  /**
+   * Requests the runtime to update the height of this element to the specified
+   * value. The runtime will schedule this request and attempt to process it
+   * as soon as possible.
+   * @param {number} newHeight
+   * @public
+   */
+  forceChangeHeight(newHeight) {
+    Services.mutatorForDoc(this.getAmpDoc()).forceChangeSize(
+      this.element,
+      newHeight,
+      /* newWidth */ undefined
+    );
   }
 
   /**
    * Return a promise that requests the runtime to update
    * the height of this element to the specified value.
    * The runtime will schedule this request and attempt to process it
-   * as soon as possible. However, unlike in {@link changeHeight}, the runtime
+   * as soon as possible. However, unlike in {@link forceChangeHeight}, the runtime
    * may refuse to make a change in which case it will show the element's
    * overflow element if provided, which is supposed to provide the reader with
    * the necessary user action. (The overflow element is shown only if the
@@ -858,9 +863,11 @@ export class BaseElement {
    * @public
    */
   attemptChangeHeight(newHeight) {
-    return this.element
-      .getResources()
-      .attemptChangeSize(this.element, newHeight, /* newWidth */ undefined);
+    return Services.mutatorForDoc(this.getAmpDoc()).requestChangeSize(
+      this.element,
+      newHeight,
+      /* newWidth */ undefined
+    );
   }
 
   /**
@@ -880,15 +887,13 @@ export class BaseElement {
    * @public
    */
   attemptChangeSize(newHeight, newWidth, opt_event) {
-    return this.element
-      .getResources()
-      .attemptChangeSize(
-        this.element,
-        newHeight,
-        newWidth,
-        /* newMargin */ undefined,
-        opt_event
-      );
+    return Services.mutatorForDoc(this.getAmpDoc()).requestChangeSize(
+      this.element,
+      newHeight,
+      newWidth,
+      /* newMargin */ undefined,
+      opt_event
+    );
   }
 
   /**
@@ -899,7 +904,7 @@ export class BaseElement {
    * @return {!Promise}
    */
   measureElement(measurer) {
-    return this.element.getResources().measureElement(measurer);
+    return Services.mutatorForDoc(this.getAmpDoc()).measureElement(measurer);
   }
 
   /**
@@ -937,9 +942,26 @@ export class BaseElement {
    * @return {!Promise}
    */
   measureMutateElement(measurer, mutator, opt_element) {
-    return this.element
-      .getResources()
-      .measureMutateElement(opt_element || this.element, measurer, mutator);
+    return Services.mutatorForDoc(this.getAmpDoc()).measureMutateElement(
+      opt_element || this.element,
+      measurer,
+      mutator
+    );
+  }
+
+  /**
+   * Runs the specified mutation on the element. Will not cause remeasurements.
+   * Only use this function when the mutations will not affect any resource sizes.
+   *
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  mutateElementSkipRemeasure(mutator) {
+    return Services.mutatorForDoc(this.getAmpDoc()).mutateElement(
+      this.element,
+      mutator,
+      /* skipRemeasure */ true
+    );
   }
 
   /**
@@ -957,7 +979,7 @@ export class BaseElement {
    * is no longer visible.
    */
   expand() {
-    this.element.getResources().expandElement(this.element);
+    Services.mutatorForDoc(this.getAmpDoc()).expandElement(this.element);
   }
 
   /**

@@ -84,7 +84,7 @@ export class ShareMenu {
     this.isSystemShareSupported_ = false;
 
     /** @private @const {!ShareWidget} */
-    this.shareWidget_ = ShareWidget.create(this.win_);
+    this.shareWidget_ = ShareWidget.create(this.win_, parentEl);
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = Services.storyStoreServiceV01(this.win_);
@@ -176,14 +176,14 @@ export class ShareMenu {
    * @private
    */
   initializeListeners_() {
-    this.storeService_.subscribe(StateProperty.SHARE_MENU_STATE, isOpen => {
+    this.storeService_.subscribe(StateProperty.SHARE_MENU_STATE, (isOpen) => {
       this.onShareMenuStateUpdate_(isOpen);
     });
 
     // Don't listen to click events if the system share is supported, since the
     // native layer handles all the UI interactions.
     if (!this.isSystemShareSupported_) {
-      this.element_.addEventListener('click', event =>
+      this.element_.addEventListener('click', (event) =>
         this.onShareMenuClick_(event)
       );
     }
@@ -221,7 +221,7 @@ export class ShareMenu {
   onShareMenuClick_(event) {
     const el = dev().assertElement(event.target);
     // Closes the menu if click happened outside of the menu main container.
-    if (!closest(el, el => el === this.innerContainerEl_, this.element_)) {
+    if (!closest(el, (el) => el === this.innerContainerEl_, this.element_)) {
       this.close_();
     }
   }

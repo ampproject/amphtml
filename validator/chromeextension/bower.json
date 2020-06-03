@@ -6,6 +6,7 @@
     "paper-item": "PolymerElements/paper-item#^1.0.0",
     "paper-spinner": "PolymerElements/paper-spinner#^1.0.0",
     "paper-tabs": "PolymerElements/paper-tabs#^1.0.0",
-    "paper-toolbar": "PolymerElements/paper-toolbar#^1.0.0"
+    "paper-toolbar": "PolymerElements/paper-toolbar#^1.0.0",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
   }
 }

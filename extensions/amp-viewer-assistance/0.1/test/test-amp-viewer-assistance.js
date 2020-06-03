@@ -25,7 +25,7 @@ describes.fakeWin(
     amp: true,
     location: 'https://pub.com/doc1',
   },
-  env => {
+  (env) => {
     let document;
     let ampdoc;
     let element;
@@ -318,7 +318,7 @@ describes.fakeWin(
       return service
         .start_()
         .then(() => service.getIdTokenPromise())
-        .then(token => expect(token).to.equal('idToken'));
+        .then((token) => expect(token).to.equal('idToken'));
     });
 
     it('should set a css class if IDENTITY_TOKEN is available', () => {
@@ -328,7 +328,7 @@ describes.fakeWin(
       element.textContent = JSON.stringify(config);
       const service = new AmpViewerAssistance(ampdoc);
       service.vsync_ = {
-        mutate: callback => {
+        mutate: (callback) => {
           callback();
         },
       };

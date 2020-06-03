@@ -27,10 +27,10 @@ import {dev, devAssert} from '../log';
 import {getParentWindowFrameElement, registerServiceBuilder} from '../service';
 import {getShadowRootNode} from '../shadow-embed';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
-import {isExperimentOn} from '../experiments';
+import {isInAmpdocFieExperiment} from '../ampdoc-fie';
+import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '../dom';
 import {map} from '../utils/object';
 import {parseQueryString} from '../url';
-import {rootNodeFor, waitForBodyOpenPromise} from '../dom';
 
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';
@@ -88,7 +88,7 @@ export class AmpDocService {
     }
 
     /** @private {boolean} */
-    this.ampdocFieExperimentOn_ = isExperimentOn(win, 'ampdoc-fie');
+    this.ampdocFieExperimentOn_ = isInAmpdocFieExperiment(win);
 
     /** @private {boolean} */
     this.mightHaveShadowRoots_ = !isSingleDoc;
@@ -116,6 +116,22 @@ export class AmpDocService {
   }
 
   /**
+   * If the node is an AMP custom element, retrieves the AmpDoc reference.
+   * @param {!Node} node
+   * @return {?AmpDoc} The AmpDoc reference, if one exists.
+   */
+  getCustomElementAmpDocReference_(node) {
+    // We can only look up the AmpDoc from a custom element if it has been
+    // attached at some point. If it is not a custom element, one or both of
+    // these checks should fail.
+    if (!node.everAttached || typeof node.getAmpDoc !== 'function') {
+      return null;
+    }
+
+    return node.getAmpDoc();
+  }
+
+  /**
    * Returns the instance of the ampdoc (`AmpDoc`) that contains the specified
    * node. If the runtime is in the single-doc mode, the one global `AmpDoc`
    * instance is returned, unless specfically looking for a closer `AmpDoc`.
@@ -135,8 +151,10 @@ export class AmpDocService {
         // for the closest AmpDoc, the element might have a reference to the
         // global AmpDoc, which we do not want. This occurs when using
         // <amp-next-page>.
-        if (n.ampdoc_) {
-          return n.ampdoc_;
+
+        const cachedAmpDoc = this.getCustomElementAmpDocReference_(node);
+        if (cachedAmpDoc) {
+          return cachedAmpDoc;
         }
 
         // Root note: it's either a document, or a shadow document.
@@ -169,8 +187,9 @@ export class AmpDocService {
       // for the closest AmpDoc, the element might have a reference to the
       // global AmpDoc, which we do not want. This occurs when using
       // <amp-next-page>.
-      if (n.ampdoc_) {
-        return n.ampdoc_;
+      const cachedAmpDoc = this.getCustomElementAmpDocReference_(node);
+      if (cachedAmpDoc) {
+        return cachedAmpDoc;
       }
 
       // Traverse the boundary of a friendly iframe.
@@ -289,6 +308,9 @@ export class AmpDoc {
     /** @public @const {!Window} */
     this.win = win;
 
+    /** @private {!Object<../enums.AMPDOC_SINGLETON_NAME, boolean>} */
+    this.registeredSingleton_ = map();
+
     /** @public @const {?AmpDoc} */
     this.parent_ = parent;
 
@@ -297,6 +319,9 @@ export class AmpDoc {
 
     /** @private {!Object<string, string>} */
     this.params_ = (opt_options && opt_options.params) || map();
+
+    /** @protected {?Object<string, string>} */
+    this.meta_ = null;
 
     /** @private @const {!Array<string>} */
     this.declaredExtensions_ = [];
@@ -350,7 +375,7 @@ export class AmpDoc {
    * Dispose the document.
    */
   dispose() {
-    this.unsubsribes_.forEach(unsubsribe => unsubsribe());
+    this.unsubsribes_.forEach((unsubsribe) => unsubsribe());
   }
 
   /**
@@ -393,6 +418,64 @@ export class AmpDoc {
   getParam(name) {
     const v = this.params_[name];
     return v == null ? null : v;
+  }
+
+  /**
+   * Initializes (if necessary) cached map of an ampdoc's meta name values to
+   * their associated content values and returns the map.
+   * @return {!Object<string, string>}
+   */
+  getMeta() {
+    if (this.meta_) {
+      return map(this.meta_);
+    }
+
+    this.meta_ = map();
+    const metaEls = dev()
+      .assertElement(this.win.document.head)
+      .querySelectorAll('meta[name]');
+    iterateCursor(metaEls, (metaEl) => {
+      const name = metaEl.getAttribute('name');
+      const content = metaEl.getAttribute('content');
+      if (!name || content === null) {
+        return;
+      }
+
+      // Retain only the first meta content value for a given name
+      if (this.meta_[name] === undefined) {
+        this.meta_[name] = content;
+      }
+    });
+    return map(this.meta_);
+  }
+
+  /**
+   * Returns the value of an ampdoc's meta tag content for a given name, or
+   * `null` if the meta tag does not exist.
+   * @param {string} name
+   * @return {?string}
+   */
+  getMetaByName(name) {
+    if (!name) {
+      return null;
+    }
+
+    const content = this.getMeta()[name];
+    return content !== undefined ? content : null;
+  }
+
+  /**
+   * Stores the value of an ampdoc's meta tag content for a given name. To be
+   * implemented by subclasses.
+   * @param {string} unusedName
+   * @param {string} unusedContent
+   *
+   * Avoid using this method in components. It is only meant to be used by the
+   * runtime for AmpDoc subclasses where <meta> elements do not exist and name/
+   * content pairs must be stored in this.meta_.
+   */
+  setMetaByName(unusedName, unusedContent) {
+    devAssert(null, 'not implemented');
   }
 
   /**
@@ -450,7 +533,7 @@ export class AmpDoc {
    * @return {!Element}
    */
   getBody() {
-    return dev().assertElement(null, 'not implemented');
+    return /** @type {?} */ (devAssert(null, 'not implemented'));
   }
 
   /**
@@ -487,7 +570,7 @@ export class AmpDoc {
    * @return {string}
    */
   getUrl() {
-    return dev().assertString(null, 'not implemented');
+    return /** @type {?} */ (devAssert(null, 'not implemented'));
   }
 
   /**
@@ -669,6 +752,20 @@ export class AmpDoc {
   onVisibilityChanged(handler) {
     return this.visibilityStateHandlers_.add(handler);
   }
+
+  /**
+   * Attempt to register a singleton for each ampdoc.
+   * Caller need to handle user error when registration returns false.
+   * @param {!../enums.AMPDOC_SINGLETON_NAME} name
+   * @return {boolean}
+   */
+  registerSingleton(name) {
+    if (!this.registeredSingleton_[name]) {
+      this.registeredSingleton_[name] = true;
+      return true;
+    }
+    return false;
+  }
 }
 
 /**
@@ -848,6 +945,20 @@ export class AmpDocShadow extends AmpDoc {
   whenReady() {
     return this.readyPromise_;
   }
+
+  /** @override */
+  getMeta() {
+    return /** @type {!Object<string,string>} */ (map(this.meta_));
+  }
+
+  /** @override */
+  setMetaByName(name, content) {
+    devAssert(name, 'Attempted to store invalid meta name/content pair');
+    if (!this.meta_) {
+      this.meta_ = map();
+    }
+    this.meta_[name] = content;
+  }
 }
 
 /**
@@ -973,7 +1084,7 @@ function extractSingleDocParams(win, initParams) {
  * @param {!Object<string, string>=} opt_initParams
  */
 export function installDocService(win, isSingleDoc, opt_initParams) {
-  registerServiceBuilder(win, 'ampdoc', function() {
+  registerServiceBuilder(win, 'ampdoc', function () {
     return new AmpDocService(win, isSingleDoc, opt_initParams);
   });
 }

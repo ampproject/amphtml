@@ -30,7 +30,6 @@ import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
-import {Preconnect} from '../../../../src/preconnect';
 import {Services} from '../../../../src/services';
 import {
   addAttributesToElement,
@@ -55,10 +54,9 @@ describes.realWin(
   {
     amp: {
       extensions: ['amp-ad', 'amp-ad-network-adsense-impl'],
-      // runtimeOn: true,
     },
   },
-  env => {
+  (env) => {
     let win, doc, ampdoc, viewer;
     let impl;
     let element;
@@ -67,13 +65,13 @@ describes.realWin(
       win = env.win;
       doc = win.document;
       ampdoc = env.ampdoc;
-      sandbox
+      env.sandbox
         .stub(AmpAdNetworkAdsenseImpl.prototype, 'getSigningServiceNames')
         .callsFake(() => {
           return ['google'];
         });
       viewer = win.__AMP_SERVICES.viewer.obj;
-      sandbox
+      env.sandbox
         .stub(viewer, 'getReferrerUrl')
         .callsFake(() => Promise.resolve('https://acme.org/'));
       element = createAdsenseImplElement(
@@ -85,11 +83,11 @@ describes.realWin(
         },
         doc
       );
-      sandbox.stub(element, 'tryUpgrade_').callsFake(() => {});
+      env.sandbox.stub(element, 'tryUpgrade_').callsFake(() => {});
       doc.body.appendChild(element);
       impl = new AmpAdNetworkAdsenseImpl(element);
       impl.win['goog_identity_prom'] = Promise.resolve({});
-      sandbox.stub(Services, 'timerFor').returns({
+      env.sandbox.stub(Services, 'timerFor').returns({
         timeoutPromise: (unused, promise) => {
           if (promise) {
             return promise;
@@ -116,7 +114,7 @@ describes.realWin(
       // amp-ad.
       const iframe = doc.createElement('iframe');
       element.appendChild(iframe);
-      sandbox.stub(element, 'tryUpgrade_').callsFake(() => {});
+      env.sandbox.stub(element, 'tryUpgrade_').callsFake(() => {});
       doc.body.appendChild(element);
       impl = new AmpAdNetworkAdsenseImpl(element);
       impl.buildCallback();
@@ -201,9 +199,9 @@ describes.realWin(
           'layout': 'fixed',
         });
         impl = new AmpAdNetworkAdsenseImpl(element);
-        sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
+        env.sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
         const extensions = Services.extensionsFor(impl.win);
-        preloadExtensionSpy = sandbox.spy(extensions, 'preloadExtension');
+        preloadExtensionSpy = env.sandbox.spy(extensions, 'preloadExtension');
       });
 
       it('without analytics', () => {
@@ -276,11 +274,13 @@ describes.realWin(
         impl = new AmpAdNetworkAdsenseImpl(element);
         impl.getA4aAnalyticsConfig = () => {};
         impl.buildCallback();
-        sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
-        sandbox.stub(env.ampdocService, 'getAmpDoc').callsFake(() => ampdoc);
+        env.sandbox.stub(impl, 'getAmpDoc').callsFake(() => ampdoc);
+        env.sandbox
+          .stub(env.ampdocService, 'getAmpDoc')
+          .callsFake(() => ampdoc);
       });
 
-      [true, false].forEach(exp => {
+      [true, false].forEach((exp) => {
         it(
           'injects amp analytics' +
             (exp ? ', trigger immediate disable exp' : ''),
@@ -316,12 +316,12 @@ describes.realWin(
             };
             // To placate assertion.
             impl.responseHeaders_ = {
-              get: function(name) {
+              get: function (name) {
                 if (name == 'X-QQID') {
                   return 'qqid_string';
                 }
               },
-              has: function(name) {
+              has: function (name) {
                 if (name == 'X-QQID') {
                   return true;
                 }
@@ -363,7 +363,7 @@ describes.realWin(
         const adBody = impl.iframe.contentDocument.body;
         let clickHandlerCalled = 0;
 
-        adBody.onclick = function(e) {
+        adBody.onclick = function (e) {
           expect(e.defaultPrevented).to.be.false;
           e.preventDefault(); // Make the test not actually navigate.
           clickHandlerCalled++;
@@ -377,13 +377,13 @@ describes.realWin(
         const ev1 = new Event('click', {bubbles: true});
         ev1.pageX = 10;
         ev1.pageY = 20;
-        sandbox.stub(impl, 'getResource').returns({
+        env.sandbox.stub(impl, 'getResource').returns({
           getUpgradeDelayMs: () => 1,
         });
 
         // Make sure the ad iframe (FIE) has a local URL replacements service.
         const urlReplacements = Services.urlReplacementsForDoc(element);
-        sandbox
+        env.sandbox
           .stub(Services, 'urlReplacementsForDoc')
           .withArgs(a)
           .returns(urlReplacements);
@@ -402,7 +402,7 @@ describes.realWin(
         const adBody = impl.iframe.contentDocument.body;
         let clickHandlerCalled = 0;
 
-        adBody.onclick = function(e) {
+        adBody.onclick = function (e) {
           expect(e.defaultPrevented).to.be.false;
           e.preventDefault(); // Make the test not actually navigate.
           clickHandlerCalled++;
@@ -416,7 +416,7 @@ describes.realWin(
         const ev1 = new Event('click', {bubbles: true});
         ev1.pageX = 10;
         ev1.pageY = 20;
-        sandbox.stub(impl, 'getResource').returns({
+        env.sandbox.stub(impl, 'getResource').returns({
           getUpgradeDelayMs: () => 1,
         });
         impl.buildCallback();
@@ -443,11 +443,11 @@ describes.realWin(
       it('should write auto ad size data to localstorage', async () => {
         const storage = await Services.storageForDoc(doc);
         let promiseResolver;
-        const savePromise = new Promise(resolve => {
+        const savePromise = new Promise((resolve) => {
           promiseResolver = resolve;
         });
         const storageContent = {};
-        sandbox.stub(storage, 'set').callsFake((key, value) => {
+        env.sandbox.stub(storage, 'set').callsFake((key, value) => {
           storageContent[key] = value;
           promiseResolver();
           return Promise.resolve();
@@ -475,7 +475,7 @@ describes.realWin(
           'enableAutoAdSize': '1',
         };
 
-        win.postMessage(data, '*');
+        win.postMessage(JSON.stringify(data), '*');
 
         await savePromise;
 
@@ -487,8 +487,6 @@ describes.realWin(
       function verifyCss(iframe) {
         expect(iframe).to.be.ok;
         const style = win.getComputedStyle(iframe);
-        expect(style.top).to.equal('50%');
-        expect(style.left).to.equal('50%');
         // We expect these set, but the exact dimensions will be determined by the
         // IOb.
         expect(style.width).to.be.ok;
@@ -497,9 +495,7 @@ describes.realWin(
         // as this can vary depending on whether we use the height/width
         // attributes, or the actual size of the frame. To make this less of a
         // hassle, we'll just match against regexp.
-        expect(style.transform).to.match(
-          new RegExp('matrix\\(1, 0, 0, 1, -[0-9]+, -[0-9]+\\)')
-        );
+        expect(style.transform).to.equal('none');
       }
 
       it('centers iframe in slot when height && width', () => {
@@ -579,7 +575,7 @@ describes.realWin(
         });
         ampStickyAd.appendChild(element);
         doc.body.appendChild(ampStickyAd);
-        return impl.getAdUrl().then(adUrl => {
+        return impl.getAdUrl().then((adUrl) => {
           expect(adUrl).to.contain('act=sa');
         });
       });
@@ -604,7 +600,7 @@ describes.realWin(
             element.setAttribute('data-no-fill', `${noFill}`);
             ampStickyAd.appendChild(element);
             doc.body.appendChild(ampStickyAd);
-            return impl.getAdUrl().then(url => {
+            return impl.getAdUrl().then((url) => {
               if (notPresent) {
                 expect(url).to.not.match(
                   new RegExp(`(\\?|&)aanf=${noFill}(&|$)`)
@@ -619,14 +615,14 @@ describes.realWin(
 
       it('formats client properly', () => {
         element.setAttribute('data-ad-client', 'SoMeClient');
-        return impl.getAdUrl().then(url => {
+        return impl.getAdUrl().then((url) => {
           expect(url).to.match(/\\?client=ca-someclient/);
         });
       });
       it('has correct format when width == "auto"', () => {
         element.setAttribute('width', 'auto');
         expect(impl.element.getAttribute('width')).to.equal('auto');
-        return impl.getAdUrl().then(url =>
+        return impl.getAdUrl().then((url) =>
           // With exp as-use-attr-for-format off, we can't test for specific
           // numbers, but we know that the values should be numeric.
           expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/)
@@ -635,7 +631,7 @@ describes.realWin(
       it('has correct format when height == "auto"', () => {
         element.setAttribute('height', 'auto');
         expect(impl.element.getAttribute('height')).to.equal('auto');
-        return impl.getAdUrl().then(url =>
+        return impl.getAdUrl().then((url) =>
           // With exp as-use-attr-for-format off, we can't test for specific
           // numbers, but we know that the values should be numeric.
           expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/)
@@ -648,7 +644,7 @@ describes.realWin(
         const height = element.getAttribute('height');
         return impl
           .getAdUrl()
-          .then(url =>
+          .then((url) =>
             expect(url).to.match(
               new RegExp(`format=${width}x${height}&w=${width}&h=${height}`)
             )
@@ -659,20 +655,20 @@ describes.realWin(
         impl.divertExperiments();
         return impl
           .getAdUrl()
-          .then(url => expect(url).to.match(/eid=[^&]*21062004/));
+          .then((url) => expect(url).to.match(/eid=[^&]*21062004/));
       });
       it('has control eid in adsense frmt exp and width/height numeric', () => {
         forceExperimentBranch(impl.win, adsenseFormatExpName, '21062003');
         impl.divertExperiments();
         return impl
           .getAdUrl()
-          .then(url => expect(url).to.match(/eid=[^&]*21062003/));
+          .then((url) => expect(url).to.match(/eid=[^&]*21062003/));
       });
       it('returns the right URL', () => {
-        sandbox.stub(impl, 'isXhrAllowed').returns(true);
+        env.sandbox.stub(impl, 'isXhrAllowed').returns(true);
         element.setAttribute('data-ad-slot', 'some_slot');
         element.setAttribute('data-language', 'lxz');
-        return impl.getAdUrl().then(url => {
+        return impl.getAdUrl().then((url) => {
           [
             /^https:\/\/googleads\.g\.doubleclick\.net\/pagead\/ads/,
             /(\?|&)adk=\d+(&|$)/,
@@ -695,7 +691,7 @@ describes.realWin(
             /(\?|&)ady=-?\d+(&|$)/,
             /(\?|&)u_aw=\d+(&|$)/,
             /(\?|&)u_ah=\d+(&|$)/,
-            /(\?|&)u_cd=24(&|$)/,
+            /(\?|&)u_cd=(24|30)(&|$)/,
             /(\?|&)u_w=\d+(&|$)/,
             /(\?|&)u_h=\d+(&|$)/,
             /(\?|&)u_tz=-?\d+(&|$)/,
@@ -709,19 +705,19 @@ describes.realWin(
             /(\?|&)top=localhost(&|$)/,
             /(\?|&)ref=https%3A%2F%2Facme.org%2F(&|$)/,
             /(\?|&)dtd=\d+(&|$)/,
-          ].forEach(regexp => expect(url).to.match(regexp));
+          ].forEach((regexp) => expect(url).to.match(regexp));
         });
         it('sets rafmt for responsive', () => {
           element.setAttribute('data-ad-slot', 'some_slot');
           element.setAttribute('data-auto-format', 'rspv');
-          return impl.getAdUrl().then(url => {
+          return impl.getAdUrl().then((url) => {
             expect(url).to.match(/(\?|&)ramft=13(&|$)/);
           });
         });
         it('sets rafmt for matched content responsive', () => {
           element.setAttribute('data-ad-slot', 'some_slot');
           element.setAttribute('data-auto-format', 'mcrspv');
-          return impl.getAdUrl().then(url => {
+          return impl.getAdUrl().then((url) => {
             expect(url).to.match(/(\?|&)ramft=15(&|$)/);
           });
         });
@@ -729,14 +725,14 @@ describes.realWin(
           element.setAttribute('data-matched-content-ui-type', 'ui');
           element.setAttribute('data-matched-content-rows-num', 'rows');
           element.setAttribute('data-matched-content-columns-num', 'cols');
-          return impl.getAdUrl().then(url => {
+          return impl.getAdUrl().then((url) => {
             expect(url).to.match(/(\?|&)crui=ui(&|$)/);
             expect(url).to.match(/(\?|&)cr_row=rows(&|$)/);
             expect(url).to.match(/(\?|&)cr_col=cols(&|$)/);
           });
         });
         it('sets appropriate is_amp for canonical', () => {
-          sandbox.stub(impl, 'isXhrAllowed').returns(false);
+          env.sandbox.stub(impl, 'isXhrAllowed').returns(false);
           return expect(impl.getAdUrl()).to.eventually.match(
             /(\?|&)is_amp=5(&|$)/
           );
@@ -745,7 +741,7 @@ describes.realWin(
 
       // Not using arrow function here because otherwise the way closure behaves
       // prevents me from calling this.timeout(5000).
-      it('with multiple slots', function() {
+      it('with multiple slots', function () {
         // When run locally, this test tends to exceed 2000ms timeout.
         this.timeout(10000);
         // Reset counter for purpose of this test.
@@ -787,17 +783,17 @@ describes.realWin(
         const impl2 = new AmpAdNetworkAdsenseImpl(elem2);
         const impl3 = new AmpAdNetworkAdsenseImpl(elem3);
         toggleExperiment(impl1.win, 'as-use-attr-for-format', true);
-        return impl1.getAdUrl().then(adUrl1 => {
+        return impl1.getAdUrl().then((adUrl1) => {
           expect(adUrl1).to.match(/pv=2/);
           expect(adUrl1).to.not.match(/prev_fmts/);
           expect(adUrl1).to.not.match(/prev_slotnames/);
           expect(adUrl1).to.match(/ifi=1/);
-          return impl2.getAdUrl().then(adUrl2 => {
+          return impl2.getAdUrl().then((adUrl2) => {
             expect(adUrl2).to.match(/pv=1/);
             expect(adUrl2).to.match(/prev_fmts=\d+?x\d+?/);
             expect(adUrl2).to.not.match(/prev_slotnames/);
             expect(adUrl2).to.match(/ifi=2/);
-            return impl3.getAdUrl().then(adUrl3 => {
+            return impl3.getAdUrl().then((adUrl3) => {
               expect(adUrl3).to.match(/pv=2/);
               // By some quirk of the test infrastructure, when this test
               // is ran individually, each added slot after the first one
@@ -822,12 +818,12 @@ describes.realWin(
         });
         impl.win['goog_identity_prom'] = Promise.resolve(token);
         impl.buildCallback();
-        return impl.getAdUrl().then(url => {
+        return impl.getAdUrl().then((url) => {
           [
             /(\?|&)adsid=abcdef(&|$)/,
             /(\?|&)jar=some_jar(&|$)/,
             /(\?|&)pucrd=some_pucrd(&|$)/,
-          ].forEach(regexp => expect(url).to.match(regexp));
+          ].forEach((regexp) => expect(url).to.match(regexp));
         });
       });
 
@@ -839,34 +835,63 @@ describes.realWin(
       });
 
       it('should return empty string if unknown consentState', () =>
-        expect(impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN)).to.eventually.equal(
-          ''
-        ));
+        expect(
+          impl.getAdUrl({consentState: CONSENT_POLICY_STATE.UNKNOWN})
+        ).to.eventually.equal(''));
 
       it('should include npa=1 if unknown consent & explicit npa', () => {
         impl.element.setAttribute('data-npa-on-unknown-consent', 'true');
-        return impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN).then(url => {
-          expect(url).to.match(/(\?|&)npa=1(&|$)/);
-        });
+        return impl
+          .getAdUrl({consentState: CONSENT_POLICY_STATE.UNKNOWN})
+          .then((url) => {
+            expect(url).to.match(/(\?|&)npa=1(&|$)/);
+          });
       });
 
       it('should include npa=1 if insufficient consent', () =>
-        impl.getAdUrl(CONSENT_POLICY_STATE.INSUFFICIENT).then(url => {
-          expect(url).to.match(/(\?|&)npa=1(&|$)/);
-        }));
+        impl
+          .getAdUrl({consentState: CONSENT_POLICY_STATE.INSUFFICIENT})
+          .then((url) => {
+            expect(url).to.match(/(\?|&)npa=1(&|$)/);
+          }));
 
       it('should not include not npa, if sufficient consent', () =>
-        impl.getAdUrl(CONSENT_POLICY_STATE.SUFFICIENT).then(url => {
-          expect(url).to.not.match(/(\?|&)npa=(&|$)/);
-        }));
+        impl
+          .getAdUrl({consentState: CONSENT_POLICY_STATE.SUFFICIENT})
+          .then((url) => {
+            expect(url).to.not.match(/(\?|&)npa=(&|$)/);
+          }));
 
       it('should not include npa, if not required consent', () =>
-        impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED).then(url => {
-          expect(url).to.not.match(/(\?|&)npa=(&|$)/);
+        impl
+          .getAdUrl({consentState: CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED})
+          .then((url) => {
+            expect(url).to.not.match(/(\?|&)npa=(&|$)/);
+          }));
+
+      it('should include gdpr_consent, if TC String is provided', () =>
+        impl.getAdUrl({consentString: 'tcstring'}).then((url) => {
+          expect(url).to.match(/(\?|&)gdpr_consent=tcstring(&|$)/);
         }));
+
+      it('should include gdpr=1, if gdprApplies is true', () =>
+        impl.getAdUrl({gdprApplies: true}).then((url) => {
+          expect(url).to.match(/(\?|&)gdpr=1(&|$)/);
+        }));
+
+      it('should include gdpr=0, if gdprApplies is false', () =>
+        impl.getAdUrl({gdprApplies: false}).then((url) => {
+          expect(url).to.match(/(\?|&)gdpr=0(&|$)/);
+        }));
+
+      it('should not include gdpr, if gdprApplies is missing', () =>
+        impl.getAdUrl({}).then((url) => {
+          expect(url).to.not.match(/(\?|&)gdpr=(&|$)/);
+        }));
+
       it('should have spsa and size 1x1 when single page story ad', () => {
         impl.isSinglePageStoryAd = true;
-        return impl.getAdUrl().then(url => {
+        return impl.getAdUrl().then((url) => {
           expect(url).to.match(/format=1x1/);
           expect(url).to.match(/h=1/);
           expect(url).to.match(/w=1/);
@@ -1009,7 +1034,7 @@ describes.realWin(
           const storage = await Services.storageForDoc(doc);
           const storageContent = {'aas-ca-adsense': true};
 
-          sandbox.stub(storage, 'get').callsFake(key => {
+          env.sandbox.stub(storage, 'get').callsFake((key) => {
             return Promise.resolve(storageContent[key]);
           });
         });
@@ -1083,7 +1108,7 @@ describes.realWin(
           const storage = await Services.storageForDoc(doc);
           const storageContent = {'aas-ca-adsense': false};
 
-          sandbox.stub(storage, 'get').callsFake(key => {
+          env.sandbox.stub(storage, 'get').callsFake((key) => {
             return Promise.resolve(storageContent[key]);
           });
         });
@@ -1234,12 +1259,16 @@ describes.realWin(
 
     describe('#preconnect', () => {
       it('should preload nameframe', () => {
-        const preloadSpy = sandbox.spy(Preconnect.prototype, 'preload');
+        const preconnect = Services.preconnectFor(win);
+        env.sandbox.spy(preconnect, 'preload');
         expect(impl.getPreconnectUrls()).to.deep.equal([
           'https://googleads.g.doubleclick.net',
         ]);
-        expect(preloadSpy).to.be.calledOnce;
-        expect(preloadSpy.args[0]).to.match(/nameframe/);
+        expect(preconnect.preload).to.be.calledOnce;
+        expect(preconnect.preload).to.be.calledWithMatch(
+          env.sandbox.match.object,
+          /nameframe/
+        );
       });
     });
 
@@ -1269,12 +1298,12 @@ describes.realWin(
 
     describe('#checksumVerification', () => {
       it('should call super if missing Algorithm header', () => {
-        sandbox
+        env.sandbox
           .stub(AmpA4A.prototype, 'maybeValidateAmpCreative')
           .returns(Promise.resolve('foo'));
         const creative = '<html><body>This is some text</body></html>';
         const mockHeaders = {
-          get: key => {
+          get: (key) => {
             switch (key) {
               case 'AMP-Verification-Checksum-Algorithm':
                 return 'unknown';
@@ -1296,7 +1325,7 @@ describes.realWin(
       it('should properly validate checksum', () => {
         const creative = '<html><body>This is some text</body></html>';
         const mockHeaders = {
-          get: key => {
+          get: (key) => {
             switch (key) {
               case 'AMP-Verification-Checksum-Algorithm':
                 return 'djb2a-32';
@@ -1309,7 +1338,7 @@ describes.realWin(
         };
         return AmpAdNetworkAdsenseImpl.prototype
           .maybeValidateAmpCreative(utf8Encode(creative), mockHeaders)
-          .then(result => {
+          .then((result) => {
             expect(result).to.be.ok;
             expect(utf8Decode(result)).to.equal(creative);
           });
@@ -1318,7 +1347,7 @@ describes.realWin(
       it('should fail validation if invalid checksum', () => {
         const creative = '<html><body>This is some text</body></html>';
         const mockHeaders = {
-          get: key => {
+          get: (key) => {
             switch (key) {
               case 'AMP-Verification-Checksum-Algorithm':
                 return 'djb2a-32';
@@ -1354,7 +1383,7 @@ describes.realWin(
           'layout': 'nodisplay',
         });
         let promiseResolver;
-        const renderPromise = new Promise(resolve => {
+        const renderPromise = new Promise((resolve) => {
           promiseResolver = resolve;
         });
         ampStickyAd.appendChild(element);
@@ -1363,18 +1392,13 @@ describes.realWin(
         impl.renderStarted = () => {
           promiseResolver();
         };
-        let key, val;
         impl.iframe = {
           contentWindow: window,
-          setAttribute: (k, v) => {
-            key = k;
-            val = v;
-          },
+          style: {'visibility': 'hidden'},
         };
         win.postMessage('fill_sticky', '*');
         return renderPromise.then(() => {
-          expect(key).to.equal('visible');
-          expect(val).to.equal('');
+          expect(impl.iframe.style['visibility']).to.equal('');
         });
       });
 

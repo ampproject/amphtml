@@ -61,9 +61,6 @@ export const SERVICE = {
 /** @private {string} */
 const TAG = 'AMP-DOUBLECLICK-SAFEFRAME';
 
-/** @const {string} */
-export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
-
 /**
  * Event listener callback for message events. If message is a Safeframe
  * message, handles the message. This listener is registered within
@@ -72,8 +69,7 @@ export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
  */
 export function safeframeListener(event) {
   const data = tryParseJson(getData(event));
-  /** Only process messages that are valid Safeframe messages */
-  if (event.origin != SAFEFRAME_ORIGIN || !data) {
+  if (!data) {
     return;
   }
   const payload = tryParseJson(data[MESSAGE_FIELDS.PAYLOAD]) || {};
@@ -85,6 +81,10 @@ export function safeframeListener(event) {
   const safeframeHost = safeframeHosts[sentinel];
   if (!safeframeHost) {
     dev().warn(TAG, `Safeframe Host for sentinel: ${sentinel} not found.`);
+    return;
+  }
+  if (!safeframeHost.equalsSafeframeContentWindow(event.source)) {
+    dev().warn(TAG, `Safeframe source did not match event.source.`);
     return;
   }
   if (!safeframeHost.channel) {
@@ -161,10 +161,9 @@ export class SafeframeHostApi {
     this.creativeSize_ = creativeSize;
 
     /** @private {{width:number, height:number}} */
-    this.initialCreativeSize_ = /** @type {{width:number, height:number}} */ (Object.assign(
-      {},
-      creativeSize
-    ));
+    this.initialCreativeSize_ = /** @type {{width:number, height:number}} */ ({
+      ...creativeSize,
+    });
 
     /** @protected {?Promise} */
     this.delay_ = null;
@@ -198,6 +197,19 @@ export class SafeframeHostApi {
     this.unlisten_ = null;
 
     this.registerSafeframeHost();
+  }
+
+  /**
+   * Returns true if the given window matches the Safeframe's content window.
+   * Comparing to a null window will always return false.
+   *
+   * @param {Window|null} otherWindow
+   * @return {boolean}
+   */
+  equalsSafeframeContentWindow(otherWindow) {
+    return (
+      !!otherWindow && otherWindow === this.baseInstance_.iframe.contentWindow
+    );
   }
 
   /**
@@ -249,16 +261,13 @@ export class SafeframeHostApi {
     // Don't allow for referrer policy same-origin,
     // as Safeframe will always be a different origin.
     // Don't allow for no-referrer.
-    const {canonicalUrl} = Services.documentInfoForDoc(
-      this.baseInstance_.getAmpDoc()
-    );
-    const metaReferrer = this.win_.document.querySelector(
-      "meta[name='referrer']"
-    );
+    const ampdoc = this.baseInstance_.getAmpDoc();
+    const {canonicalUrl} = Services.documentInfoForDoc(ampdoc);
+    const metaReferrer = ampdoc.getMetaByName('referrer');
     if (!metaReferrer) {
       return canonicalUrl;
     }
-    switch (metaReferrer.getAttribute('content')) {
+    switch (metaReferrer) {
       case 'same-origin':
         return;
       case 'no-referrer':
@@ -365,7 +374,7 @@ export class SafeframeHostApi {
     }
     this.viewport_
       .getClientRectAsync(this.iframe_)
-      .then(iframeBox => {
+      .then((iframeBox) => {
         this.checkStillCurrent_();
         const formattedGeom = this.formatGeom_(iframeBox);
         this.sendMessage_(
@@ -376,7 +385,7 @@ export class SafeframeHostApi {
           SERVICE.GEOMETRY_UPDATE
         );
       })
-      .catch(err => dev().error(TAG, err));
+      .catch((err) => dev().error(TAG, err));
   }
 
   /**
@@ -452,8 +461,8 @@ export class SafeframeHostApi {
    * @private
    */
   sendMessage_(payload, serviceName) {
-    if (!this.iframe_.contentWindow) {
-      dev().error(TAG, 'Frame contentWindow unavailable.');
+    if (!this.iframe_ || !this.iframe_.contentWindow) {
+      dev().expectedError(TAG, 'Frame contentWindow unavailable.');
       return;
     }
     const message = dict();
@@ -464,10 +473,7 @@ export class SafeframeHostApi {
     message[MESSAGE_FIELDS.SERVICE] = serviceName;
     message[MESSAGE_FIELDS.SENTINEL] = this.sentinel_;
     message[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = this.endpointIdentity_;
-    this.iframe_.contentWindow./*OK*/ postMessage(
-      JSON.stringify(message),
-      SAFEFRAME_ORIGIN
-    );
+    this.iframe_.contentWindow./*OK*/ postMessage(JSON.stringify(message), '*');
   }
 
   /**
@@ -605,7 +611,7 @@ export class SafeframeHostApi {
   handleSizeChange(height, width, messageType, optIsCollapse) {
     return this.viewport_
       .getClientRectAsync(this.baseInstance_.element)
-      .then(box => {
+      .then((box) => {
         if (!optIsCollapse && width <= box.width && height <= box.height) {
           this.resizeSafeframe(height, width, messageType);
         } else {
@@ -658,7 +664,7 @@ export class SafeframeHostApi {
     }
     this.viewport_
       .getClientRectAsync(this.iframe_)
-      .then(iframeBox => {
+      .then((iframeBox) => {
         this.checkStillCurrent_();
         const formattedGeom = this.formatGeom_(iframeBox);
         this.sendMessage_(
@@ -675,7 +681,7 @@ export class SafeframeHostApi {
           messageType
         );
       })
-      .catch(err => dev().error(TAG, err));
+      .catch((err) => dev().error(TAG, err));
   }
 
   /**
@@ -720,7 +726,7 @@ export class SafeframeHostApi {
           }
         }
       )
-      .catch(err => {
+      .catch((err) => {
         if (err.message == 'CANCELLED') {
           dev().error(TAG, err);
           return;
@@ -746,7 +752,13 @@ export class SafeframeHostApi {
         this.checkStillCurrent_();
         this.onFluidResize_(newHeight);
       })
-      .catch(err => user().warn(TAG, err));
+      .catch((err) => {
+        user().warn(TAG, err);
+        const {width, height} = this.baseInstance_.getSlotSize();
+        if (width && height) {
+          this.onFluidResize_(height);
+        }
+      });
   }
 
   /**
@@ -764,7 +776,7 @@ export class SafeframeHostApi {
     this.baseInstance_.fireFluidDelayedImpression();
     this.iframe_.contentWindow./*OK*/ postMessage(
       JSON.stringify(dict({'message': 'resize-complete', 'c': this.channel})),
-      SAFEFRAME_ORIGIN
+      '*'
     );
   }
 

@@ -87,7 +87,10 @@ class AmpPowrPlayer extends AMP.BaseElement {
 
   /** @override */
   preconnectCallback() {
-    this.preconnect.url('https://player.powr.com');
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://player.powr.com'
+    );
   }
 
   /** @override */
@@ -117,7 +120,7 @@ class AmpPowrPlayer extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
-    this.unlistenMessage_ = listen(this.win, 'message', e =>
+    this.unlistenMessage_ = listen(this.win, 'message', (e) =>
       this.handlePlayerMessage_(e)
     );
 
@@ -165,7 +168,7 @@ class AmpPowrPlayer extends AMP.BaseElement {
     }
 
     const data = objOrParseJson(eventData);
-    if (data === undefined) {
+    if (data == null) {
       return; // We only process valid JSON.
     }
 
@@ -440,6 +443,6 @@ class AmpPowrPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpPowrPlayer);
 });

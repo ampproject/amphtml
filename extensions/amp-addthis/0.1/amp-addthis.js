@@ -52,7 +52,6 @@ import {DwellMonitor} from './addthis-utils/monitors/dwell-monitor';
 import {PostMessageDispatcher} from './post-message-dispatcher';
 import {ScrollMonitor} from './addthis-utils/monitors/scroll-monitor';
 import {Services} from '../../../src/services';
-
 import {callEng} from './addthis-utils/eng';
 import {callLojson} from './addthis-utils/lojson';
 import {callPjson} from './addthis-utils/pjson';
@@ -66,6 +65,7 @@ import {
 } from './addthis-utils/mode';
 import {getOgImage} from './addthis-utils/meta';
 import {getWidgetOverload} from './addthis-utils/get-widget-id-overloaded-with-json-for-anonymous-mode';
+import {internalRuntimeVersion} from '../../../src/internal-version';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../src/url';
@@ -123,7 +123,7 @@ class AmpAddThis extends AMP.BaseElement {
     /** @private {(?JsonObject<string, string>|null)} */
     this.shareConfig_ = null;
 
-    /** @private {(?JsonObject<AtConfigDef>)} */
+    /** @private {(?JsonObject)} */
     this.atConfig_ = null;
 
     /** @private {string} */
@@ -204,7 +204,7 @@ class AmpAddThis extends AMP.BaseElement {
       ampDoc
         .whenFirstVisible()
         .then(() => viewer.getReferrerUrl())
-        .then(referrer => {
+        .then((referrer) => {
           this.referrer_ = referrer;
 
           callLojson({
@@ -245,13 +245,15 @@ class AmpAddThis extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url(ORIGIN, opt_onLayout);
-    this.preconnect.url(API_SERVER, opt_onLayout);
-    this.preconnect.url(COOKIELESS_API_SERVER, opt_onLayout);
-    this.preconnect.url(SHARECOUNTER_SERVER, opt_onLayout);
+    const preconnect = Services.preconnectFor(this.win);
+    const ampdoc = this.getAmpDoc();
+    preconnect.url(ampdoc, ORIGIN, opt_onLayout);
+    preconnect.url(ampdoc, API_SERVER, opt_onLayout);
+    preconnect.url(ampdoc, COOKIELESS_API_SERVER, opt_onLayout);
+    preconnect.url(ampdoc, SHARECOUNTER_SERVER, opt_onLayout);
     // Images, etc.:
-    this.preconnect.url('https://cache.addthiscdn.com', opt_onLayout);
-    this.preconnect.url('https://su.addthis.com', opt_onLayout);
+    preconnect.url(ampdoc, 'https://cache.addthiscdn.com', opt_onLayout);
+    preconnect.url(ampdoc, 'https://su.addthis.com', opt_onLayout);
   }
 
   /** @override */
@@ -297,7 +299,10 @@ class AmpAddThis extends AMP.BaseElement {
       dict({
         'frameborder': 0,
         'title': ALT_TEXT,
-        'src': `${ORIGIN}/dc/amp-addthis.html`,
+        // Document has overly long cache age: go.amp.dev/issue/24848
+        // Adding AMP runtime version as a meaningless query param to force bust
+        // cached versions.
+        'src': `${ORIGIN}/dc/amp-addthis.html?_amp_=${internalRuntimeVersion()}`,
         'id': this.widgetId_,
         'pco': this.productCode_,
         'containerClassName': this.containerClassName_,
@@ -355,7 +360,7 @@ class AmpAddThis extends AMP.BaseElement {
    */
   getShareConfigAsJsonObject_() {
     const params = dict();
-    SHARE_CONFIG_KEYS.map(key => {
+    SHARE_CONFIG_KEYS.map((key) => {
       const value = this.element.getAttribute(`data-${key}`);
       if (value) {
         params[key] = value;
@@ -407,7 +412,8 @@ class AmpAddThis extends AMP.BaseElement {
    * @param {*} [input.pubId]
    * @memberof AmpAddThis
    */
-  setupListeners_({ampDoc, loc, pubId}) {
+  setupListeners_(input) {
+    const {ampDoc, loc, pubId} = input;
     // Send "engagement" analytics on page hide.
     listen(ampDoc.win, 'pagehide', () =>
       callEng({
@@ -431,7 +437,7 @@ class AmpAddThis extends AMP.BaseElement {
     listen(ampDoc.win, 'message', pmHandler);
 
     // Trigger "pjson" call when a share occurs.
-    postMessageDispatcher.on(SHARE_EVENT, data =>
+    postMessageDispatcher.on(SHARE_EVENT, (data) =>
       callPjson({
         data,
         loc,
@@ -452,6 +458,6 @@ class AmpAddThis extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-addthis', '0.1', AMP => {
+AMP.extension('amp-addthis', '0.1', (AMP) => {
   AMP.registerElement('amp-addthis', AmpAddThis, CSS);
 });

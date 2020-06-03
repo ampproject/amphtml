@@ -23,11 +23,11 @@ import {install as installDOMTokenList} from './polyfills/domtokenlist';
 import {install as installDocContains} from './polyfills/document-contains';
 import {install as installFetch} from './polyfills/fetch';
 import {install as installGetBoundingClientRect} from './get-bounding-client-rect';
+import {install as installIntersectionObserver} from './polyfills/intersection-observer';
 import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installObjectValues} from './polyfills/object-values';
 import {install as installPromise} from './polyfills/promise';
-import {installCustomElements as installRegisterElement} from 'document-register-element/build/document-register-element.patched';
 
 installFetch(self);
 installMathSign(self);
@@ -41,16 +41,20 @@ if (self.document) {
   installDOMTokenList(self);
   installDocContains(self);
   installGetBoundingClientRect(self);
-
-  // TODO(jridgewell, estherkim): Find out why CE isn't being polyfilled for IE.
+  // The anonymous class parameter allows us to detect native classes vs
+  // transpiled classes.
+  installCustomElements(self, class {});
+  // The AMP and Inabox are launched separately and so there are two
+  // experiment constants.
   if (
     // eslint-disable-next-line no-undef
-    CUSTOM_ELEMENTS_V1 ||
-    (getMode().test && !getMode().testIe)
+    INTERSECTION_OBSERVER_POLYFILL ||
+    // eslint-disable-next-line no-undef
+    INTERSECTION_OBSERVER_POLYFILL_INABOX ||
+    getMode().localDev ||
+    getMode().test
   ) {
-    installCustomElements(self);
-  } else {
-    installRegisterElement(self, 'auto');
+    installIntersectionObserver(self);
   }
 }
 

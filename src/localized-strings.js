@@ -24,7 +24,7 @@ import {parseJson} from './json';
  *   - NOT be reused; to deprecate an ID, comment it out and prefix its key with
  *     the string "DEPRECATED_"
  *
- * Next ID: 71
+ * Next ID: 82
  *
  * @const @enum {string}
  */
@@ -43,6 +43,13 @@ export const LocalizedStringId = {
   AMP_STORY_CONTINUE_ANYWAY_BUTTON_LABEL: '27',
   AMP_STORY_DOMAIN_DIALOG_HEADING_LABEL: '25',
   AMP_STORY_DOMAIN_DIALOG_HEADING_LINK: '26',
+  AMP_STORY_EDUCATION_NAVIGATION_SWIPE_PROGRESS: '78',
+  AMP_STORY_EDUCATION_NAVIGATION_SWIPE_INSTRUCTIONS: '79',
+  AMP_STORY_EDUCATION_NAVIGATION_SWIPE_DISMISS: '80',
+  AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS: '75',
+  AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS_SINGLE: '81',
+  AMP_STORY_EDUCATION_NAVIGATION_TAP_INSTRUCTIONS: '76',
+  AMP_STORY_EDUCATION_NAVIGATION_TAP_DISMISS: '77',
   AMP_STORY_HAS_NEW_PAGE_TEXT: '64',
   AMP_STORY_HINT_UI_NEXT_LABEL: '2',
   AMP_STORY_HINT_UI_PREVIOUS_LABEL: '3',
@@ -50,6 +57,10 @@ export const LocalizedStringId = {
   AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL: '35',
   AMP_STORY_PAGE_ERROR_VIDEO: '65',
   AMP_STORY_PAGE_PLAY_VIDEO: '34',
+  AMP_STORY_QUIZ_ANSWER_CHOICE_A: '71',
+  AMP_STORY_QUIZ_ANSWER_CHOICE_B: '72',
+  AMP_STORY_QUIZ_ANSWER_CHOICE_C: '73',
+  AMP_STORY_QUIZ_ANSWER_CHOICE_D: '74',
   AMP_STORY_SHARE_BUTTON_LABEL: '69',
   AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT: '4',
   AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT: '5',
@@ -147,7 +158,7 @@ export function createPseudoLocale(localizedStringBundle, localizationFn) {
     localizedStringBundle
   );
 
-  Object.keys(pseudoLocaleStringBundle).forEach(localizedStringIdAsStr => {
+  Object.keys(pseudoLocaleStringBundle).forEach((localizedStringIdAsStr) => {
     const localizedStringId = /** @type {!LocalizedStringId} */ (localizedStringIdAsStr);
     pseudoLocaleStringBundle[localizedStringId].string = localizationFn(
       localizedStringBundle[localizedStringId].string

@@ -23,8 +23,8 @@ import {isBlockedByConsent} from '../error';
 import {
   layoutRectLtwh,
   layoutRectSizeEquals,
-  layoutRectsOverlap,
   moveLayoutRect,
+  rectsOverlap,
 } from '../layout-rect';
 import {startsWith} from '../string';
 import {toWin} from '../types';
@@ -81,7 +81,6 @@ let ViewportRatioDef;
 
 /**
  * A Resource binding for an AmpElement.
- * @package
  */
 export class Resource {
   /**
@@ -164,6 +163,13 @@ export class Resource {
       ? ResourceState.NOT_LAID_OUT
       : ResourceState.NOT_BUILT;
 
+    // Race condition: if an element is reparented while building, it'll
+    // receive a newly constructed Resource. Make sure this Resource's
+    // internal state is also "building".
+    if (this.state_ == ResourceState.NOT_BUILT && element.isBuilding()) {
+      this.build();
+    }
+
     /** @private {number} */
     this.priorityOverride_ = -1;
 
@@ -211,6 +217,15 @@ export class Resource {
 
     /** @private {?Function} */
     this.loadPromiseResolve_ = deferred.resolve;
+
+    /** @const @private {boolean} */
+    this.intersect_ = resources.isIntersectionExperimentOn();
+
+    /**
+     * A client rect that was "premeasured" by an IntersectionObserver.
+     * @private {?ClientRect}
+     */
+    this.premeasuredRect_ = null;
   }
 
   /**
@@ -321,11 +336,18 @@ export class Resource {
     return this.element.build().then(
       () => {
         this.isBuilding_ = false;
-        this.state_ = ResourceState.NOT_LAID_OUT;
+        // With IntersectionObserver, measure can happen before build
+        // so check if we're "ready for layout" (measured and built) here.
+        if (this.intersect_ && this.hasBeenMeasured()) {
+          this.state_ = ResourceState.READY_FOR_LAYOUT;
+          this.element.onMeasure(/* sizeChanged */ true);
+        } else {
+          this.state_ = ResourceState.NOT_LAID_OUT;
+        }
         // TODO(dvoytenko): merge with the standard BUILT signal.
         this.element.signals().signal('res-built');
       },
-      reason => {
+      (reason) => {
         this.maybeReportErrorOnBuildFailure(reason);
         this.isBuilding_ = false;
         this.element.signals().rejectSignal('res-built', reason);
@@ -359,7 +381,7 @@ export class Resource {
    * @param {!../layout-rect.LayoutMarginsChangeDef=} opt_newMargins
    */
   changeSize(newHeight, newWidth, opt_newMargins) {
-    this.element./*OK*/ changeSize(newHeight, newWidth, opt_newMargins);
+    this.element./*OK*/ applySize(newHeight, newWidth, opt_newMargins);
 
     // Schedule for re-measure and possible re-layout.
     this.requestMeasure();
@@ -415,10 +437,22 @@ export class Resource {
   }
 
   /**
+   * Stores a client rect that was "premeasured" by an IntersectionObserver.
+   * Should only be used in IntersectionObserver mode.
+   * @param {!ClientRect} clientRect
+   */
+  premeasure(clientRect) {
+    devAssert(this.intersect_);
+    this.premeasuredRect_ = clientRect;
+  }
+
+  /**
    * Measures the resource's boundaries. An upgraded element will be
    * transitioned to the "ready for layout" state.
+   * @param {boolean} usePremeasuredRect If true, consumes the previously
+   *    premeasured ClientRect instead of calling getBoundingClientRect().
    */
-  measure() {
+  measure(usePremeasuredRect = false) {
     // Check if the element is ready to be measured.
     // Placeholders are special. They are technically "owned" by parent AMP
     // elements, sized by parents, but laid out independently. This means
@@ -435,19 +469,33 @@ export class Resource {
     ) {
       return;
     }
+    if (
+      !this.element.ownerDocument ||
+      !this.element.ownerDocument.defaultView
+    ) {
+      // Most likely this is an element who's window has just been destroyed.
+      // This is an issue with FIE embeds destruction. Such elements will be
+      // considered "not displayable" until they are GC'ed.
+      this.state_ = ResourceState.NOT_LAID_OUT;
+      return;
+    }
 
     this.isMeasureRequested_ = false;
 
-    // TODO
     const oldBox = this.layoutBox_;
-    this.measureViaResources_();
-    const box = this.layoutBox_;
+    if (usePremeasuredRect) {
+      this.computeMeasurements_(devAssert(this.premeasuredRect_));
+      this.premeasuredRect_ = null;
+    } else {
+      this.computeMeasurements_();
+    }
+    const newBox = this.layoutBox_;
 
     // Note that "left" doesn't affect readiness for the layout.
-    const sizeChanges = !layoutRectSizeEquals(oldBox, box);
+    const sizeChanges = !layoutRectSizeEquals(oldBox, newBox);
     if (
       this.state_ == ResourceState.NOT_LAID_OUT ||
-      oldBox.top != box.top ||
+      oldBox.top != newBox.top ||
       sizeChanges
     ) {
       if (
@@ -461,17 +509,20 @@ export class Resource {
     }
 
     if (!this.hasBeenMeasured()) {
-      this.initialLayoutBox_ = box;
+      this.initialLayoutBox_ = newBox;
     }
 
-    this.element.updateLayoutBox(box, sizeChanges);
+    this.element.updateLayoutBox(newBox, sizeChanges);
   }
 
-  /** Use resources for measurement */
-  measureViaResources_() {
+  /**
+   * Computes the current layout box and position-fixed state of the element.
+   * @param {!ClientRect=} opt_premeasuredRect
+   * @private
+   */
+  computeMeasurements_(opt_premeasuredRect) {
     const viewport = Services.viewportForDoc(this.element);
-    const box = viewport.getLayoutRect(this.element);
-    this.layoutBox_ = box;
+    this.layoutBox_ = viewport.getLayoutRect(this.element, opt_premeasuredRect);
 
     // Calculate whether the element is currently is or in `position:fixed`.
     let isFixed = false;
@@ -499,7 +550,7 @@ export class Resource {
       // viewport. When accessing the layoutBox through #getLayoutBox, we'll
       // return the new absolute position.
       this.layoutBox_ = moveLayoutRect(
-        box,
+        this.layoutBox_,
         -viewport.getScrollLeft(),
         -viewport.getScrollTop()
       );
@@ -548,6 +599,14 @@ export class Resource {
    */
   hasBeenMeasured() {
     return !!this.initialLayoutBox_;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasBeenPremeasured() {
+    devAssert(this.intersect_);
+    return !!this.premeasuredRect_;
   }
 
   /**
@@ -613,12 +672,16 @@ export class Resource {
   /**
    * Whether the resource is displayed, i.e. if it has non-zero width and
    * height.
+   * @param {boolean} usePremeasuredRect If true and a premeasured rect is
+   *     available, use it. Otherwise, use the cached layout box.
    * @return {boolean}
    */
-  isDisplayed() {
+  isDisplayed(usePremeasuredRect = false) {
+    devAssert(!usePremeasuredRect || this.intersect_);
     const isFluid = this.element.getLayout() == Layout.FLUID;
-    // TODO(jridgewell): #getSize
-    const box = this.getLayoutBox();
+    const box = usePremeasuredRect
+      ? devAssert(this.premeasuredRect_)
+      : this.getLayoutBox();
     const hasNonZeroSize = box.height > 0 && box.width > 0;
     return (
       (isFluid || hasNonZeroSize) &&
@@ -641,7 +704,7 @@ export class Resource {
    * @return {boolean}
    */
   overlaps(rect) {
-    return layoutRectsOverlap(this.getLayoutBox(), rect);
+    return rectsOverlap(this.getLayoutBox(), rect);
   }
 
   /**
@@ -812,7 +875,6 @@ export class Resource {
    * once layout is complete. Only allowed to be called on a upgraded, built
    * and displayed element.
    * @return {!Promise}
-   * @package
    */
   startLayout() {
     if (this.layoutPromise_) {
@@ -861,7 +923,7 @@ export class Resource {
 
     this.layoutPromise_ = promise.then(
       () => this.layoutComplete_(true),
-      reason => this.layoutComplete_(false, reason)
+      (reason) => this.layoutComplete_(false, reason)
     );
     return this.layoutPromise_;
   }

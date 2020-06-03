@@ -54,13 +54,34 @@
       filter="prefix" filter-value="countryName" min-characters="0">
       <input type="search" id="input2">
       <template type="amp-mustache">
-        <div value="{{countryName}}">
+        <div data-value="{{countryName}}">
           <h3>{{countryName}} ({{countryCode}})</h3>
           <div class="country-info">
             The population is <b>{{population}}</b>, and the capital is <b>{{capital}}</b>. The local currency is <b>{{currencyCode}}</b>.
           </div>
         </div>
       </template>
+    </amp-autocomplete>
+    <input type="submit" value="Submit">
+    <div submit-success>
+      <template type="amp-mustache">
+        Success!
+      </template>
+    </div>
+  </form>
+
+  <h2>Inline autocomplete</h2>
+  <form
+    id="form2"
+    method="get"
+    action="/form/search-html/get"
+    action-xhr="/form/search-json/get"
+    target="_blank">
+    <amp-autocomplete id="autocompleteInline" inline="@" filter="prefix" min-characters="0">
+      <input type="search" id="inputInline">
+      <script type="application/json">
+        { "items" : ["apple", "banana", "orange"] }
+      </script>
     </amp-autocomplete>
     <input type="submit" value="Submit">
     <div submit-success>

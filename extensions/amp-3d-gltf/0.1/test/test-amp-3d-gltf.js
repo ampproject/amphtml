@@ -25,7 +25,7 @@ describes.realWin(
     },
     allowExternalResources: true,
   },
-  env => {
+  (env) => {
     let win;
     let doc;
     let iframe;
@@ -41,8 +41,8 @@ describes.realWin(
       iframe.setAttribute('data-amp-3p-sentinel', sentinel);
       iframe.name = 'test_nomaster';
 
-      sendFakeMessage = type => {
-        return new Promise(resolve => {
+      sendFakeMessage = (type) => {
+        return new Promise((resolve) => {
           iframe.postMessageToParent({sentinel, type});
           setTimeout(resolve, 100);
         });
@@ -60,7 +60,7 @@ describes.realWin(
       await amp3dGltfEl.build();
 
       const amp3dGltf = amp3dGltfEl.implementation_;
-      sandbox
+      env.sandbox
         .stub(amp3dGltf, 'iframe_')
         .get(() => iframe)
         .set(() => {});
@@ -84,7 +84,7 @@ describes.realWin(
     it.skip('sends toggleAmpViewport(false) when exiting viewport', async () => {
       const amp3dGltf = await createElement();
 
-      const postMessageSpy = sandbox.spy(amp3dGltf, 'postMessage_');
+      const postMessageSpy = env.sandbox.spy(amp3dGltf, 'postMessage_');
       await amp3dGltf.viewportCallback(false);
       expect(postMessageSpy.calledOnce).to.be.true;
       expect(postMessageSpy.firstCall.args[0]).to.equal('action');
@@ -97,7 +97,7 @@ describes.realWin(
     // TODO (#16080): this test times out on Travis. Re-enable when fixed.
     it.skip('sends toggleAmpViewport(true) when entering viewport', async () => {
       const amp3dGltf = await createElement();
-      const postMessageSpy = sandbox.spy(amp3dGltf, 'postMessage_');
+      const postMessageSpy = env.sandbox.spy(amp3dGltf, 'postMessage_');
       await amp3dGltf.viewportCallback(true);
       expect(postMessageSpy.calledOnce).to.be.true;
       expect(postMessageSpy.firstCall.args[0]).to.equal('action');

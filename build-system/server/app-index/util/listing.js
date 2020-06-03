@@ -15,8 +15,7 @@
  */
 'use strict';
 
-const BBPromise = require('bluebird');
-const fs = BBPromise.promisifyAll(require('fs'));
+const fs = require('fs');
 const {join, normalize, sep} = require('path');
 
 function isMaliciousPath(path, rootPath) {
@@ -35,8 +34,8 @@ async function getListing(rootPath, basepath) {
   }
 
   try {
-    if ((await fs.statAsync(path)).isDirectory()) {
-      return fs.readdirAsync(path);
+    if (fs.statSync(path).isDirectory()) {
+      return fs.promises.readdir(path);
     }
   } catch (unusedE) {
     /* empty catch for fallbacks */
@@ -54,7 +53,7 @@ function isMainPageFromUrl(url) {
  * @return {string}
  */
 function formatBasepath(basepath) {
-  return basepath.replace(/[^\/]$/, lastChar => `${lastChar}/`);
+  return basepath.replace(/[^\/]$/, (lastChar) => `${lastChar}/`);
 }
 
 module.exports = {

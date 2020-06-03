@@ -26,11 +26,13 @@
   z-index: 100003 !important; /** Above pagination-buttons. */
   transform: translate3d(0, 100vh, 0) !important;
   transition-delay: 0.15s !important;
+  pointer-events: none !important;
 }
 
 .i-amphtml-story-share-menu-visible {
   transform: translate3d(0, 0, 0) !important;
   transition-delay: 0s !important;
+  pointer-events: auto !important;
 }
 
 /** Black opacity overlay. */
@@ -72,6 +74,10 @@
   display: none !important;
 }
 
+.i-amphtml-story-share-menu .i-amphtml-story-share-item {
+  height: 72px !important;
+}
+
 [desktop].i-amphtml-story-share-menu {
   display: flex !important;
   align-items: center !important;
@@ -108,7 +114,8 @@
   text-align: center !important;
 }
 
-[desktop] .i-amphtml-story-share-item {
+[desktop].i-amphtml-story-share-menu .i-amphtml-story-share-item {
   padding: 0 !important;
+  height: 66px !important;
   margin: 12px !important;
 }

@@ -25,8 +25,7 @@ import mustache from '../../../third_party/mustache/mustache';
 
 const TAG = 'amp-mustache';
 
-const BaseTemplate =
-  /** @type {function(new:../../../src/service/template-impl.BaseTemplate)} */ (AMP.BaseTemplate);
+const BaseTemplate = /** @type {typeof ../../../src/service/template-impl.BaseTemplate} */ (AMP.BaseTemplate);
 
 /**
  * Implements an AMP template for Mustache.js.
@@ -121,7 +120,7 @@ export class AmpMustache extends BaseTemplate {
   render(data) {
     let mustacheData = data;
     if (typeof data === 'object') {
-      mustacheData = Object.assign({}, data, this.nestedTemplates_);
+      mustacheData = {...data, ...this.nestedTemplates_};
     }
     const html = mustache.render(
       this.template_,
@@ -146,6 +145,6 @@ export class AmpMustache extends BaseTemplate {
   }
 }
 
-AMP.extension(TAG, '0.1', function(AMP) {
+AMP.extension(TAG, '0.1', function (AMP) {
   AMP.registerTemplate(TAG, AmpMustache);
 });

@@ -99,7 +99,7 @@ def CheckPrereqs():
 
   # Ensure that yarn is installed.
   try:
-    subprocess.check_output(['yarn', '--version'])
+    subprocess.check_output(['npx', 'yarn', '--version'])
   except (subprocess.CalledProcessError, OSError):
     Die('Yarn package manager not found. Run '
         '"curl -o- -L https://yarnpkg.com/install.sh | bash" '
@@ -136,11 +136,11 @@ def InstallNodeDependencies():
   # node_modules.
   logging.info('installing AMP Validator engine dependencies ...')
   subprocess.check_call(
-      ['yarn', 'install'],
+      ['npx', 'yarn', 'install'],
       stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
   logging.info('installing AMP Validator nodejs dependencies ...')
   subprocess.check_call(
-      ['yarn', 'install'],
+      ['npx', 'yarn', 'install'],
       cwd='nodejs',
       stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
   logging.info('... done')
@@ -173,6 +173,7 @@ def GenValidatorProtoascii(out_dir):
   assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
 
   protoascii_segments = [open('validator-main.protoascii').read()]
+  protoascii_segments.append(open('validator-css.protoascii').read())
   extensions = glob.glob('extensions/*/validator-*.protoascii')
   # In the Github project, the extensions are located in a sibling directory
   # to the validator rather than a child directory.
@@ -284,7 +285,7 @@ def CompileWithClosure(js_files, definitions, entry_points, output_file):
 
   cmd = [
       'java', '-jar', 'node_modules/google-closure-compiler-java/compiler.jar',
-      '--language_out=ES5_STRICT', '--dependency_mode=STRICT',
+      '--language_out=ES5_STRICT', '--dependency_mode=PRUNE',
       '--js_output_file=%s' % output_file
   ]
   cmd += ['--entry_point=%s' % e for e in entry_points]
@@ -320,9 +321,7 @@ def CompileValidatorMinified(out_dir):
       ],
       definitions=[],
       entry_points=[
-          'amp.validator.validateString',
-          'amp.validator.renderValidationResult',
-          'amp.validator.renderErrorMessage'
+          'amp.validator',
       ],
       output_file='%s/validator_minified.js' % out_dir)
   logging.info('... done')
@@ -335,10 +334,10 @@ def RunSmokeTest(out_dir):
     out_dir: output directory
   """
   logging.info('entering ...')
-  # Run index.js on the minimum valid amp and observe that it passes.
+  # Run cli.js on the minimum valid amp and observe that it passes.
   p = subprocess.Popen(
       [
-          'node', 'nodejs/index.js', '--validator_js',
+          'node', 'nodejs/cli.js', '--validator_js',
           '%s/validator_minified.js' % out_dir,
           'testdata/feature_tests/minimum_valid_amp.html', '--format=text'
       ],
@@ -350,10 +349,10 @@ def RunSmokeTest(out_dir):
     Die('Smoke test failed. returncode=%d stdout="%s" stderr="%s"' %
         (p.returncode, stdout, stderr))
 
-  # Run index.js on an empty file and observe that it fails.
+  # Run cli.js on an empty file and observe that it fails.
   p = subprocess.Popen(
       [
-          'node', 'nodejs/index.js', '--validator_js',
+          'node', 'nodejs/cli.js', '--validator_js',
           '%s/validator_minified.js' % out_dir,
           'testdata/feature_tests/empty.html', '--format=text'
       ],
@@ -439,9 +438,8 @@ def CompileParseCssTestMinified(out_dir):
   CompileWithClosure(
       js_files=[
           'engine/definitions.js', 'engine/parse-css.js', 'engine/parse-url.js',
-          'engine/tokenize-css.js', 'engine/css-selectors.js',
-          'engine/json-testutil.js', 'engine/parse-css_test.js',
-          '%s/validator-generated.js' % out_dir,
+          'engine/tokenize-css.js', 'engine/json-testutil.js',
+          'engine/parse-css_test.js', '%s/validator-generated.js' % out_dir,
           '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],
@@ -461,9 +459,8 @@ def CompileParseUrlTestMinified(out_dir):
   CompileWithClosure(
       js_files=[
           'engine/definitions.js', 'engine/parse-url.js', 'engine/parse-css.js',
-          'engine/tokenize-css.js', 'engine/css-selectors.js',
-          'engine/json-testutil.js', 'engine/parse-url_test.js',
-          '%s/validator-generated.js' % out_dir,
+          'engine/tokenize-css.js', 'engine/json-testutil.js',
+          'engine/parse-url_test.js', '%s/validator-generated.js' % out_dir,
           '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],
@@ -485,8 +482,7 @@ def CompileAmp4AdsParseCssTestMinified(out_dir):
           'engine/definitions.js', 'engine/amp4ads-parse-css_test.js',
           'engine/parse-css.js', 'engine/parse-url.js',
           'engine/amp4ads-parse-css.js', 'engine/tokenize-css.js',
-          'engine/css-selectors.js', 'engine/json-testutil.js',
-          '%s/validator-generated.js' % out_dir,
+          'engine/json-testutil.js', '%s/validator-generated.js' % out_dir,
           '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],
@@ -508,8 +504,7 @@ def CompileKeyframesParseCssTestMinified(out_dir):
           'engine/definitions.js', 'engine/keyframes-parse-css_test.js',
           'engine/parse-css.js', 'engine/parse-url.js',
           'engine/keyframes-parse-css.js', 'engine/tokenize-css.js',
-          'engine/css-selectors.js', 'engine/json-testutil.js',
-          '%s/validator-generated.js' % out_dir,
+          'engine/json-testutil.js', '%s/validator-generated.js' % out_dir,
           '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],

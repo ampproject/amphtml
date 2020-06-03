@@ -54,7 +54,9 @@ const forbiddenTerms = {
     whitelist: [
       'build-system/server/amp4test.js',
       'build-system/server/app-index/boilerplate.js',
+      'build-system/server/variable-substitution.js',
       'build-system/tasks/extension-generator/index.js',
+      'build-system/tasks/storybook/amp-env/decorator.js',
       'css/ampdoc.css',
       'css/ampshared.css',
       'extensions/amp-pinterest/0.1/amp-pinterest.css',
@@ -67,8 +69,9 @@ const forbiddenTerms = {
   '(^i-amp-|\\Wi-amp-)': {
     message: 'Switch to new internal ID form',
     whitelist: [
-      'build-system/tasks/extension-generator/index.js',
       'build-system/tasks/create-golden-css/css/main.css',
+      'build-system/tasks/extension-generator/index.js',
+      'build-system/tasks/storybook/amp-env/decorator.js',
       'css/ampdoc.css',
       'css/ampshared.css',
     ],
@@ -84,10 +87,6 @@ const forbiddenTerms = {
       '`gulp-util` will be deprecated soon. See ' +
       'https://medium.com/gulpjs/gulp-util-ca3b1f9f9ac5 ' +
       'for a list of alternatives.',
-  },
-  'document-register-element.node': {
-    message: 'Use `document-register-element.patched` instead',
-    whitelist: ['build-system/tasks/update-packages.js'],
   },
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
@@ -115,9 +114,12 @@ const forbiddenTerms = {
       'build-system/pr-check/build-targets.js',
       'build-system/pr-check/checks.js',
       'build-system/pr-check/dist-bundle-size.js',
+      'build-system/pr-check/dist-tests.js',
+      'build-system/pr-check/module-dist-bundle-size.js',
       'build-system/pr-check/experiment-tests.js',
       'build-system/pr-check/e2e-tests.js',
       'build-system/pr-check/local-tests.js',
+      'build-system/pr-check/performance-tests.js',
       'build-system/pr-check/remote-tests.js',
       'build-system/pr-check/single-pass-tests.js',
       'build-system/pr-check/utils.js',
@@ -128,10 +130,15 @@ const forbiddenTerms = {
       'build-system/server/amp4test.js',
       'build-system/tasks/build.js',
       'build-system/tasks/check-exact-versions.js',
+      'build-system/tasks/check-owners.js',
       'build-system/tasks/check-types.js',
       'build-system/tasks/dist.js',
+      'build-system/tasks/dns-monitor.js',
       'build-system/tasks/generate-runner.js',
       'build-system/tasks/helpers.js',
+      'build-system/tasks/prettify.js',
+      'build-system/tasks/server-tests.js',
+      'src/purifier/noop.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
@@ -139,21 +146,11 @@ const forbiddenTerms = {
     ],
     checkInTestFolder: true,
   },
-  // Match `getMode` that is not followed by a "()." and is assigned
-  // as a variable.
-  '\\bgetMode\\([^)]*\\)(?!\\.)': {
-    message: realiasGetMode,
-    whitelist: ['src/mode.js', 'dist.3p/current/integration.js'],
-  },
-  'import[^}]*\\bgetMode as': {
-    message: realiasGetMode,
-  },
   '\\bgetModeObject\\(': {
     message: realiasGetMode,
     whitelist: [
       'src/mode-object.js',
       'src/iframe-attributes.js',
-      'src/log.js',
       'dist.3p/current/integration.js',
     ],
   },
@@ -173,7 +170,6 @@ const forbiddenTerms = {
       'build-system/server/routes/analytics.js',
       'extensions/amp-analytics/0.1/config.js',
       'extensions/amp-analytics/0.1/requests.js',
-      'extensions/amp-analytics/0.1/vendors.js',
     ],
   },
   // Service factories that should only be installed once.
@@ -225,6 +221,14 @@ const forbiddenTerms = {
       'testing/iframe.js',
     ],
   },
+  'installMutatorServiceForDoc': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/inabox/inabox-services.js',
+      'src/service/core-services.js',
+      'src/service/mutator-impl.js',
+    ],
+  },
   'installPerformanceService': {
     message: privateServiceFactory,
     whitelist: [
@@ -232,6 +236,14 @@ const forbiddenTerms = {
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
       'src/service/performance-impl.js',
+    ],
+  },
+  'installResourcesServiceForDoc': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/inabox/inabox-services.js',
+      'src/service/core-services.js',
+      'src/service/resources-impl.js',
     ],
   },
   'installStorageServiceForDoc': {
@@ -285,15 +297,6 @@ const forbiddenTerms = {
       'src/service/vsync-impl.js',
     ],
   },
-  'installResourcesServiceForDoc': {
-    message: privateServiceFactory,
-    whitelist: [
-      'src/inabox/inabox-services.js',
-      'src/service/core-services.js',
-      'src/service/resources-impl.js',
-      'src/service/standard-actions-impl.js',
-    ],
-  },
   'installXhrService': {
     message: privateServiceFactory,
     whitelist: [
@@ -309,6 +312,7 @@ const forbiddenTerms = {
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
       'extensions/amp-list/0.1/amp-list.js',
       'extensions/amp-next-page/0.1/next-page-service.js',
+      'extensions/amp-next-page/1.0/visibility-observer.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js',
       'extensions/amp-video-docking/0.1/amp-video-docking.js',
       'src/service/position-observer/position-observer-impl.js',
@@ -346,6 +350,7 @@ const forbiddenTerms = {
       'dist.3p/current/integration.js',
       'extensions/amp-access/0.1/amp-login-done.js',
       'extensions/amp-viewer-integration/0.1/examples/amp-viewer-host.js',
+      'src/amp-story-player/amp-story-player-manager.js',
       'src/runtime.js',
       'src/log.js',
       'src/web-worker/web-worker.js',
@@ -359,6 +364,7 @@ const forbiddenTerms = {
       'src/service/navigation.js',
       'src/service/url-impl.js',
       'dist.3p/current/integration.js',
+      'src/amp-story-player/amp-story-player-impl.js',
     ],
   },
   '\\.sendMessage\\(': {
@@ -376,6 +382,7 @@ const forbiddenTerms = {
       'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'extensions/amp-viewer-integration/0.1/highlight-handler.js',
       'extensions/amp-consent/0.1/consent-ui.js',
+      'extensions/amp-story/1.0/amp-story-viewer-messaging-handler.js',
 
       // iframe-messaging-client.sendMessage
       '3p/iframe-messaging-client.js',
@@ -390,6 +397,7 @@ const forbiddenTerms = {
     whitelist: [
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
+      'extensions/amp-story-education/0.1/amp-story-education.js',
       'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'src/impression.js',
       'src/service/cid-impl.js',
@@ -419,6 +427,7 @@ const forbiddenTerms = {
       'extensions/amp-experiment/1.0/variant.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
+      'extensions/amp-story/1.0/amp-story-reaction.js',
     ],
   },
   'getBaseCid': {
@@ -431,12 +440,14 @@ const forbiddenTerms = {
       'extensions/amp-bind/0.1/bind-impl.js',
       'src/error.js',
       'src/utils/xhr-utils.js',
+      'src/service/navigation.js',
       'src/service/viewer-impl.js',
       'src/service/viewer-interface.js',
       'src/service/viewer-cid-api.js',
       'src/inabox/inabox-viewer.js',
       'src/service/cid-impl.js',
       'src/impression.js',
+      'src/ssr-template-helper.js',
       'extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.js',
     ],
   },
@@ -569,7 +580,7 @@ const forbiddenTerms = {
   },
   '\\.schedulePass\\(': {
     message: 'schedulePass is heavy, think twice before using it',
-    whitelist: ['src/service/resources-impl.js'],
+    whitelist: ['src/service/mutator-impl.js', 'src/service/resources-impl.js'],
   },
   '\\.requireLayout\\(': {
     message:
@@ -591,7 +602,7 @@ const forbiddenTerms = {
   'overrideVisibilityState': {
     message: 'overrideVisibilityState is a restricted API.',
     whitelist: [
-      'src/runtime.js',
+      'src/multidoc-manager.js',
       'src/service/ampdoc-impl.js',
       'src/service/viewer-impl.js',
     ],
@@ -615,6 +626,7 @@ const forbiddenTerms = {
       'dist.3p/current/integration.js', // Includes the previous.
       'src/polyfills/custom-elements.js',
       'ads/google/imaVideo.js', // Required until #22277 is fixed.
+      '3p/twitter.js', // Runs in a 3p window context, so cannot import log.js.
     ],
   },
   'startupChunk\\(': {
@@ -642,6 +654,7 @@ const forbiddenTerms = {
       'build-system/tasks/prepend-global/test.js',
       'build-system/tasks/visual-diff/index.js',
       'build-system/tasks/build.js',
+      'build-system/tasks/default-task.js',
       'build-system/tasks/dist.js',
       'build-system/tasks/helpers.js',
       'dist.3p/current/integration.js',
@@ -651,8 +664,6 @@ const forbiddenTerms = {
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
       'tools/experiments/experiments.js',
       'build-system/server/amp4test.js',
-      // TODO: @jonathantyng cleanup #22757
-      'build-system/tasks/generate-vendor-jsons.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
@@ -846,6 +857,7 @@ const forbiddenTerms = {
       'test/unit/test-mode.js',
       'test/unit/test-motion.js',
       'test/unit/test-mustache.js',
+      'test/unit/test-mutator.js',
       'test/unit/test-object.js',
       'test/unit/test-observable.js',
       'test/unit/test-pass.js',
@@ -943,8 +955,7 @@ const forbiddenTermsSrcInclusive = {
   '\\.scrollingElement(?!_)': bannedTermsHelpString,
   '\\.computeCTM(?!_)': bannedTermsHelpString,
   // Functions
-  '\\.changeHeight\\(': bannedTermsHelpString,
-  '\\.changeSize\\(': bannedTermsHelpString,
+  '\\.applySize\\(': bannedTermsHelpString,
   '\\.attemptChangeHeight\\(0\\)': 'please consider using `attemptCollapse()`',
   '\\.collapse\\(': bannedTermsHelpString,
   '\\.expand\\(': bannedTermsHelpString,
@@ -1016,6 +1027,7 @@ const forbiddenTermsSrcInclusive = {
     whitelist: [
       'src/element-stub.js',
       'src/friendly-iframe-embed.js',
+      'src/polyfillstub/intersection-observer-stub.js',
       'src/runtime.js',
       'src/service/extensions-impl.js',
       'src/service/lightbox-manager-discovery.js',
@@ -1068,10 +1080,10 @@ const forbiddenTermsSrcInclusive = {
     ],
   },
   '\\.getTime\\(\\)': {
-    message: 'Unless you do weird date math (whitelist), use Date.now().',
+    message: 'Unless you do weird date math (allowlist), use Date.now().',
     whitelist: [
       'extensions/amp-timeago/0.1/amp-timeago.js',
-      'build-system/compile/build.conf.js',
+      'extensions/amp-timeago/1.0/timeago.js',
     ],
   },
   '\\.expandStringSync\\(': {
@@ -1089,6 +1101,7 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-analytics/0.1/config.js',
       'extensions/amp-analytics/0.1/cookie-writer.js',
       'extensions/amp-analytics/0.1/requests.js',
+      'extensions/amp-analytics/0.1/variables.js',
     ],
   },
   '\\.expandInputValueSync\\(': {
@@ -1120,21 +1133,27 @@ const forbiddenTermsSrcInclusive = {
       'ads/_a4a-config.js',
       'build-system/server/amp4test.js',
       'build-system/server/app-index/amphtml-helpers.js',
+      'build-system/server/app-utils.js',
       'build-system/server/app-video-testbench.js',
       'build-system/server/app.js',
-      'build-system/server/app-utils.js',
       'build-system/server/shadow-viewer.js',
+      'build-system/server/variable-substitution.js',
       'build-system/tasks/check-links.js',
+      'build-system/tasks/dist.js',
       'build-system/tasks/extension-generator/index.js',
       'build-system/tasks/helpers.js',
+      'build-system/tasks/performance/helpers.js',
+      'build-system/tasks/storybook/amp-env/decorator.js',
       'dist.3p/current/integration.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'src/3p-frame.js',
+      'src/amp-story-player/amp-story-player-impl.js',
       'src/config.js',
       'testing/local-amp-chrome-extension/background.js',
       'tools/errortracker/errortracker.go',
       'tools/experiments/experiments.js',
       'validator/engine/validator-in-browser.js',
+      'validator/engine/validator.js',
       'validator/nodejs/index.js',
       'validator/webui/serve-standalone.go',
     ],
@@ -1172,7 +1191,7 @@ const forbiddenTermsSrcInclusive = {
 
 // Terms that must appear in a source file.
 const requiredTerms = {
-  'Copyright 20(15|16|17|18|19) The AMP HTML Authors\\.': dedicatedCopyrightNoteSources,
+  'Copyright 20(15|16|17|18|19|20) The AMP HTML Authors\\.': dedicatedCopyrightNoteSources,
   'Licensed under the Apache License, Version 2\\.0': dedicatedCopyrightNoteSources,
   'http\\://www\\.apache\\.org/licenses/LICENSE-2\\.0': dedicatedCopyrightNoteSources,
 };
@@ -1207,7 +1226,7 @@ function isInBuildSystemFixtureFolder(filePath) {
  */
 function stripComments(contents) {
   // Multi-line comments
-  contents = contents.replace(/\/\*(?!.*\*\/)(.|\n)*?\*\//g, function(match) {
+  contents = contents.replace(/\/\*(?!.*\*\/)(.|\n)*?\*\//g, function (match) {
     // Preserve the newlines
     const newlines = [];
     for (let i = 0; i < match.length; i++) {
@@ -1237,7 +1256,7 @@ function matchTerms(file, terms) {
   const contents = stripComments(file.contents.toString());
   const {relative} = file;
   return Object.keys(terms)
-    .map(function(term) {
+    .map(function (term) {
       let fix;
       const {whitelist, checkInTestFolder} = terms[term];
       // NOTE: we could do a glob test instead of exact check in the future
@@ -1300,7 +1319,7 @@ function matchTerms(file, terms) {
 
       return hasTerm;
     })
-    .some(function(hasAnyTerm) {
+    .some(function (hasAnyTerm) {
       return hasAnyTerm;
     });
 }
@@ -1355,7 +1374,7 @@ function hasAnyTerms(file) {
 function isMissingTerms(file) {
   const contents = file.contents.toString();
   return Object.keys(requiredTerms)
-    .map(function(term) {
+    .map(function (term) {
       const filter = requiredTerms[term];
       if (!filter.test(file.path)) {
         return false;
@@ -1373,7 +1392,7 @@ function isMissingTerms(file) {
       }
       return false;
     })
-    .some(function(hasMissingTerm) {
+    .some(function (hasMissingTerm) {
       return hasMissingTerm;
     });
 }
@@ -1389,13 +1408,13 @@ function presubmit() {
   return gulp
     .src(srcGlobs)
     .pipe(
-      through2.obj(function(file, enc, cb) {
+      through2.obj(function (file, enc, cb) {
         forbiddenFound = hasAnyTerms(file) || forbiddenFound;
         missingRequirements = isMissingTerms(file) || missingRequirements;
         cb();
       })
     )
-    .on('end', function() {
+    .on('end', function () {
       if (forbiddenFound) {
         log(
           colors.blue(

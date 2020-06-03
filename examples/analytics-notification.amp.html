@@ -15,6 +15,10 @@
       padding: 8px;
       background: #46b6ac;
     }
+    
+    .analytic-notification-demo-text{
+      padding:16px;
+    }
 
     amp-user-notification .btn {
       border: none;
@@ -62,14 +66,19 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-
+  <div  class="analytic-notification-demo-text">
+    <h3>AMP Analytics Notification Demo</h3>
+    <p>This page uses the <a href="https://amp.dev/documentation/components/amp-user-notification/">amp-user-notification</a> to display a cookie concent banner at the bottom of the page.</p>
+    <p>When user dismisses the notification, the <a href="https://amp.dev/documentation/components/amp-analytics/">amp-analytics</a> component is used to post a 'cookie-concent-ping' request to an analytics server.</p>
+    <p>The analytics server doesn't exist so you will see an error in developer console.</p>
+  </div>
   <amp-user-notification
       layout=nodisplay
       id="amp-user-notification1"
-      data-show-if-href="https://example.com/api/show?timestamp=TIMESTAMP"
-      data-dismiss-href="https://example.com/api/echo/post">
-      This site uses cookies to personalize content.
-     <a class="btn" on="tap:amp-user-notification1.dismiss">I accept</a>
+      data-persist-dismissal="false">
+      This notification should ALWAYS show on every page visit.
+    <a href="#learn-more">Learn more.</a>
+    <button on="tap:amp-user-notification1.dismiss">Dismiss</button>
   </amp-user-notification>
 
   <amp-analytics data-consent-notification-id="amp-user-notification1">

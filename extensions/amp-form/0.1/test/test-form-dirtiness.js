@@ -72,7 +72,7 @@ function dispatchFormValueChangeEvent(element, win) {
 function captureEventDispatched(eventName, element, dispatchEventFunction) {
   let eventCaptured = null;
 
-  const handlerToCaptureEvent = e => {
+  const handlerToCaptureEvent = (e) => {
     eventCaptured = e;
   };
 
@@ -83,13 +83,13 @@ function captureEventDispatched(eventName, element, dispatchEventFunction) {
   return eventCaptured;
 }
 
-describes.realWin('form-dirtiness', {}, env => {
+describes.realWin('form-dirtiness', {}, (env) => {
   let doc, form, dirtinessHandler;
 
   beforeEach(() => {
     doc = env.win.document;
     form = getForm(doc);
-    sandbox.stub(Services, 'platformFor').returns({
+    env.sandbox.stub(Services, 'platformFor').returns({
       isIos() {
         return false;
       },

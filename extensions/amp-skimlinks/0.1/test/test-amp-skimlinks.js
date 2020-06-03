@@ -30,7 +30,7 @@ describes.fakeWin(
       extensions: ['amp-skimlinks'],
     },
   },
-  env => {
+  (env) => {
     let ampSkimlinks, helpers, ampdoc;
 
     beforeEach(() => {
@@ -309,7 +309,7 @@ describes.fakeWin(
 
         it('Should wait until visible to send the impression tracking', () => {
           const isVisibleDefer = new Deferred();
-          sandbox
+          window.sandbox
             .stub(ampdoc, 'whenFirstVisible')
             .returns(isVisibleDefer.promise);
 
@@ -369,7 +369,7 @@ describes.fakeWin(
 
         it('Should wait until visible to send the impression tracking', () => {
           const isVisibleDefer = new Deferred();
-          sandbox
+          window.sandbox
             .stub(ampdoc, 'whenFirstVisible')
             .returns(isVisibleDefer.promise);
 

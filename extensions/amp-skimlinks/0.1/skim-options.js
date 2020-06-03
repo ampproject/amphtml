@@ -69,7 +69,7 @@ function getExcludedDomains_(element, internalDomains) {
       excludedDomainsAttr
         .trim()
         .split(/\s+/)
-        .map(domain => domain.replace(/^www\./, ''))
+        .map((domain) => domain.replace(/^www\./, ''))
     );
   }
 

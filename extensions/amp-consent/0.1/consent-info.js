@@ -14,22 +14,39 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
+import {CONSENT_STRING_TYPE} from '../../../src/consent-state';
+import {deepEquals} from '../../../src/json';
+import {dev, user} from '../../../src/log';
 import {hasOwn, map} from '../../../src/utils/object';
 import {isEnumValue, isObject} from '../../../src/types';
+
+const TAG = 'amp-consent';
 
 /**
  * Key values for retriving/storing consent info object.
  * STATE: Set when user accept or reject consent.
  * STRING: Set when a consent string is used to store more granular consent info
  * on vendors.
+ * METADATA: set when consent metadata is passed in to store more granular consent info
+ * on vendors.
  * DITRYBIT: Set when the stored consent info need to be revoked next time.
  * @enum {string}
  */
-const STORAGE_KEY = {
+export const STORAGE_KEY = {
   STATE: 's',
   STRING: 'r',
   IS_DIRTY: 'd',
+  METADATA: 'm',
+};
+
+/**
+ * Key values for retriving/storing metadata values within consent info
+ * TODO(micajuineho)
+ * GDPR_APPLIES: 'ga'
+ * @enum {string}
+ */
+export const METADATA_STORAGE_KEY = {
+  CONSENT_STRING_TYPE: 'cst',
 };
 
 /**
@@ -50,10 +67,19 @@ export const CONSENT_ITEM_STATE = {
  * @typedef {{
  *  consentState: CONSENT_ITEM_STATE,
  *  consentString: (string|undefined),
+ *  consentMetadata: (ConsentMetadataDef|undefined),
  *  isDirty: (boolean|undefined),
  * }}
  */
 export let ConsentInfoDef;
+
+/**
+ * Used in ConsentInfoDef
+ * @typedef {{
+ *  consentStringType: (CONSENT_STRING_TYPE|undefined),
+ * }}
+ */
+export let ConsentMetadataDef;
 
 /**
  * Convert the legacy storage value to Consent Info
@@ -64,6 +90,7 @@ export function getStoredConsentInfo(value) {
   if (value === undefined) {
     return constructConsentInfo(
       CONSENT_ITEM_STATE.UNKNOWN,
+      undefined,
       undefined,
       undefined
     );
@@ -80,6 +107,7 @@ export function getStoredConsentInfo(value) {
   return constructConsentInfo(
     consentState,
     value[STORAGE_KEY.STRING],
+    convertStorageMetadata(value[STORAGE_KEY.METADATA]),
     value[STORAGE_KEY.IS_DIRTY] && value[STORAGE_KEY.IS_DIRTY] === 1
   );
 }
@@ -109,10 +137,7 @@ export function recalculateConsentStateValue(newState, previousState) {
   if (!isEnumValue(CONSENT_ITEM_STATE, newState)) {
     newState = CONSENT_ITEM_STATE.UNKNOWN;
   }
-  if (
-    newState == CONSENT_ITEM_STATE.DISMISSED ||
-    newState == CONSENT_ITEM_STATE.UNKNOWN
-  ) {
+  if (newState == CONSENT_ITEM_STATE.DISMISSED) {
     return previousState || CONSENT_ITEM_STATE.UNKNOWN;
   }
   if (newState == CONSENT_ITEM_STATE.NOT_REQUIRED) {
@@ -126,18 +151,9 @@ export function recalculateConsentStateValue(newState, previousState) {
 /**
  * Compose the value to store to localStorage based on the consentInfo
  * @param {!ConsentInfoDef} consentInfo
- * @param {boolean=} opt_forceNew
  * @return {?boolean|Object}
  */
-export function composeStoreValue(consentInfo, opt_forceNew) {
-  if (
-    !opt_forceNew &&
-    !consentInfo['consentString'] &&
-    consentInfo['isDirty'] === undefined
-  ) {
-    // TODO: Remove after turn on amp-consent-v2
-    return calculateLegacyStateValue(consentInfo['consentState']);
-  }
+export function composeStoreValue(consentInfo) {
   const obj = map();
   const consentState = consentInfo['consentState'];
   if (consentState == CONSENT_ITEM_STATE.ACCEPTED) {
@@ -155,6 +171,12 @@ export function composeStoreValue(consentInfo, opt_forceNew) {
 
   if (consentInfo['isDirty'] === true) {
     obj[STORAGE_KEY.IS_DIRTY] = 1;
+  }
+
+  if (consentInfo['consentMetadata']) {
+    obj[STORAGE_KEY.METADATA] = composeMetadataStoreValue(
+      consentInfo['consentMetadata']
+    );
   }
 
   if (Object.keys(obj) == 0) {
@@ -203,7 +225,11 @@ export function isConsentInfoStoredValueSame(infoA, infoB, opt_isDirty) {
     } else {
       isDirtyEqual = !!infoA['isDirty'] === !!infoB['isDirty'];
     }
-    return stateEqual && stringEqual && isDirtyEqual;
+    const metadataEqual = deepEquals(
+      infoA['consentMetadata'],
+      infoB['consentMetadata']
+    );
+    return stateEqual && stringEqual && metadataEqual && isDirtyEqual;
   }
   return false;
 }
@@ -215,25 +241,41 @@ export function isConsentInfoStoredValueSame(infoA, infoB, opt_isDirty) {
  */
 function getLegacyStoredConsentInfo(value) {
   const state = convertValueToState(value);
-  return constructConsentInfo(state, undefined, undefined);
+  return constructConsentInfo(state);
 }
 
 /**
  * Construct the consentInfo object from values
+ *
  * @param {CONSENT_ITEM_STATE} consentState
  * @param {string=} opt_consentString
+ * @param {ConsentMetadataDef=} opt_consentMetadata
  * @param {boolean=} opt_isDirty
  * @return {!ConsentInfoDef}
  */
 export function constructConsentInfo(
   consentState,
   opt_consentString,
+  opt_consentMetadata,
   opt_isDirty
 ) {
   return {
     'consentState': consentState,
     'consentString': opt_consentString,
+    'consentMetadata': opt_consentMetadata,
     'isDirty': opt_isDirty,
+  };
+}
+
+/**
+ * Construct the consentMetadataDef object from values
+ *
+ * @param {CONSENT_STRING_TYPE=} opt_consentStringType
+ * @return {!ConsentMetadataDef}
+ */
+export function constructMetadata(opt_consentStringType) {
+  return {
+    'consentStringType': opt_consentStringType,
   };
 }
 
@@ -242,13 +284,29 @@ export function constructConsentInfo(
  * @param {*} value
  * @return {!CONSENT_ITEM_STATE}
  */
-function convertValueToState(value) {
+export function convertValueToState(value) {
   if (value === true || value === 1) {
     return CONSENT_ITEM_STATE.ACCEPTED;
   } else if (value === false || value === 0) {
     return CONSENT_ITEM_STATE.REJECTED;
   }
   return CONSENT_ITEM_STATE.UNKNOWN;
+}
+
+/**
+ * Helper function to convert response enum value to CONSENT_ITEM_STATE value
+ * @param {*} value
+ * @return {?CONSENT_ITEM_STATE}
+ */
+export function convertEnumValueToState(value) {
+  if (value === 'accepted') {
+    return CONSENT_ITEM_STATE.ACCEPTED;
+  } else if (value === 'rejected') {
+    return CONSENT_ITEM_STATE.REJECTED;
+  } else if (value === 'unknown') {
+    return CONSENT_ITEM_STATE.UNKNOWN;
+  }
+  return null;
 }
 
 /**
@@ -281,4 +339,51 @@ export function getConsentStateValue(enumState) {
   }
 
   return 'unknown';
+}
+
+/**
+ * Converts ConsentMetadataDef to stroage value:
+ * {'gdprApplies': true, 'consentStringType': 2} =>
+ * {'ga': true, 'cst': 2}
+ *
+ * @param {ConsentMetadataDef=} consentInfoMetadata
+ * @return {Object}
+ */
+export function composeMetadataStoreValue(consentInfoMetadata) {
+  const storageMetadata = map();
+  if (consentInfoMetadata['consentStringType']) {
+    storageMetadata[METADATA_STORAGE_KEY.CONSENT_STRING_TYPE] =
+      consentInfoMetadata['consentStringType'];
+  }
+  return storageMetadata;
+}
+
+/**
+ * TODO(micajuineho) Converts stroage metadata to ConsentMetadataDef:
+ * {'ga': true, 'cst': 2} =>
+ * {'gdprApplies': true, 'consentStringType': 2}
+ *
+ * @param {Object|null|undefined} storageMetadata
+ * @return {ConsentMetadataDef}
+ */
+export function convertStorageMetadata(storageMetadata) {
+  const consentStringType =
+    storageMetadata &&
+    storageMetadata[METADATA_STORAGE_KEY.CONSENT_STRING_TYPE];
+  return constructMetadata(consentStringType);
+}
+
+/**
+ * Confirm that the metadata values are valid. Remove otherwise.
+ * @param {JsonObject} metadata
+ */
+export function assertMetadataValues(metadata) {
+  const consentStringType = metadata['consentStringType'];
+  if (
+    consentStringType &&
+    !isEnumValue(CONSENT_STRING_TYPE, consentStringType)
+  ) {
+    delete metadata['consentStringType'];
+    user().error(TAG, 'CMP metadata consent string type is invalid.');
+  }
 }

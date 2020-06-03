@@ -50,9 +50,24 @@ const RTC_VENDORS = jsonConfiguration({
   ////////////////////////////////////////////////////////////////////
 
   // Add vendors here
+  ozone: {
+    url:
+      'https://elb.the-ozone-project.com/openrtb2/amp?tag_id=TAG_ID&placement_id=PLACEMENT_ID&gdpr_consent=CONSENT_STRING&ad_unit_code=AD_UNIT_CODE&site_id=SITE_ID&publisher_id=PUBLISHER_ID&custom_data=TGT&pubcid=PUBCID&adcid=ADCID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&curl=CANONICAL_URL&timeout=TIMEOUT&purl=HREF',
+    macros: [
+      'TAG_ID',
+      'PLACEMENT_ID',
+      'SITE_ID',
+      'PUBLISHER_ID',
+      'AD_UNIT_CODE',
+      'PUBCID',
+    ],
+    errorReportingUrl:
+      'https://elb.the-ozone-project.com/amp_error?err=ERROR_TYPE&url=HREF',
+    disableKeyAppend: true,
+  },
   medianet: {
     url:
-      'https://amprtc.media.net/rtb/getrtc?cid=CID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&tgt=TGT&curl=CANONICAL_URL&to=TIMEOUT&purl=HREF',
+      'https://amprtc.media.net/rtb/getrtc?cid=CID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&tgt=TGT&curl=CANONICAL_URL&to=TIMEOUT&purl=HREF&cste=CONSENT_STATE&cstr=CONSENT_STRING',
     macros: ['CID'],
     errorReportingUrl:
       'https://qsearch-a.akamaihd.net/log?logid=kfk&evtid=projectevents&project=amprtc_error&error=ERROR_TYPE&rd=HREF',
@@ -72,8 +87,8 @@ const RTC_VENDORS = jsonConfiguration({
   },
   indexexchange: {
     url:
-      'https://amp.casalemedia.com/amprtc?v=1&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&s=SITE_ID&p=CANONICAL_URL',
-    macros: ['SITE_ID'],
+      'https://amp.casalemedia.com/amprtc?v=1&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&s=SITE_ID&p=CANONICAL_URL&consent_state=CONSENT_STATE&consent_string=CONSENT_STRING',
+    macros: ['SITE_ID', 'CONSENT_STATE', 'CONSENT_STRING'],
     disableKeyAppend: true,
   },
   lotame: {
@@ -97,6 +112,12 @@ const RTC_VENDORS = jsonConfiguration({
     url:
       'https://ads.servebom.com/tmntag.js?v=1.2&fmt=amp&o={%22p%22%3APLACEMENT_ID}&div_id=DIV_ID',
     macros: ['PLACEMENT_ID', 'DIV_ID'],
+    disableKeyAppend: true,
+  },
+  glxm: {
+    url:
+      'https://pbserver.galaxiemedia.fr/openrtb2/amp?tag_id=REQUEST_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adc=ADCID&purl=HREF&gdpr_consent=CONSENT_STRING&account=ACCOUNT_ID',
+    macros: ['REQUEST_ID', 'CONSENT_STRING', 'ACCOUNT_ID'],
     disableKeyAppend: true,
   },
   aps: {
@@ -148,6 +169,24 @@ const RTC_VENDORS = jsonConfiguration({
   yieldlab: {
     url: 'https://ad.yieldlab.net/yp/ADSLOT_ID?content=amp&t=amp%3D1',
     macros: ['ADSLOT_ID'],
+    disableKeyAppend: true,
+  },
+  automatad: {
+    url: 'https://pbs01.automatad.com/openrtb2/amp?tag_id=TAG_ID',
+    macros: ['TAG_ID'],
+    disableKeyAppend: true,
+  },
+  prebidflux: {
+    url: 'https://prebid-server.flux-adserver.com/openrtb2/amp?tag_id=TAG_ID',
+    macros: ['TAG_ID'],
+    disableKeyAppend: true,
+  },
+  browsi: {
+    url:
+      'https://amp.browsiprod.com/predict?pvid=PAGEVIEWID_64&ot=ELEMENT_POS&ul=SCROLL_TOP&pl=PAGE_HEIGHT&bks=BKG_STATE&pk=PUB_KEY&sk=SITE_KEY&h=ATTR(height)&adix=ATTR(data-amp-slot-index)&ref=REFERRER&url=HREF',
+    macros: ['PUB_KEY', 'SITE_KEY'],
+    errorReportingUrl:
+      'https://events.browsiprod.com/events/amp?e=ERROR_TYPE&h=HREF&et=predict_error',
     disableKeyAppend: true,
   },
 });

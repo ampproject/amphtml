@@ -20,6 +20,7 @@
 
 import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
+import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {getAmpdoc} from '../../../src/service';
 import {htmlFor} from '../../../src/static-template';
 
@@ -59,8 +60,11 @@ export class AmpStoryAffiliateLink {
     /** @private {string} */
     this.text_ = this.element_.textContent;
 
-    /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win_.document));
+    /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.win_.document));
+
+    /** @private @const {!./story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = getAnalyticsService(this.win_, element);
   }
 
   /**
@@ -71,36 +75,56 @@ export class AmpStoryAffiliateLink {
       return;
     }
 
-    this.resources_.mutateElement(this.element_, () => {
+    this.mutator_.mutateElement(this.element_, () => {
       this.element_.textContent = '';
-      this.element_.toggleAttribute('pristine', true);
+      this.element_.setAttribute('pristine', '');
       this.addPulseElement_();
       this.addIconElement_();
       this.addText_();
       this.addLaunchElement_();
     });
 
-    this.initializeListener_();
+    this.initializeListeners_();
     this.element_[AFFILIATE_LINK_BUILT] = true;
   }
 
   /**
-   * Initialize listener to toggle expanded state.
+   * Initializes listeners.
    * @private
    */
-  initializeListener_() {
+  initializeListeners_() {
     this.storeService_.subscribe(
       StateProperty.AFFILIATE_LINK_STATE,
-      elementToToggleExpand => {
+      (elementToToggleExpand) => {
         const expand = this.element_ === elementToToggleExpand;
-        this.element_.toggleAttribute('expanded', expand);
-        this.textEl_.toggleAttribute('hidden', !expand);
-        this.launchEl_.toggleAttribute('hidden', !expand);
         if (expand) {
-          this.element_.toggleAttribute('pristine', false);
+          this.element_.setAttribute('expanded', '');
+          this.textEl_.removeAttribute('hidden');
+          this.launchEl_.removeAttribute('hidden');
+        } else {
+          this.element_.removeAttribute('expanded');
+          this.textEl_.setAttribute('hidden', '');
+          this.launchEl_.setAttribute('hidden', '');
+        }
+        if (expand) {
+          this.element_.removeAttribute('pristine');
+          this.analyticsService_.triggerEvent(
+            StoryAnalyticsEvent.FOCUS,
+            this.element_
+          );
         }
       }
     );
+
+    this.element_.addEventListener('click', (event) => {
+      if (this.element_.hasAttribute('expanded')) {
+        event.stopPropagation();
+        this.analyticsService_.triggerEvent(
+          StoryAnalyticsEvent.CLICK_THROUGH,
+          this.element_
+        );
+      }
+    });
   }
 
   /**
@@ -114,7 +138,7 @@ export class AmpStoryAffiliateLink {
         <div class="i-amphtml-story-reset i-amphtml-hidden">
           <span class="i-amphtml-story-affiliate-link-text" hidden></span>
           <i class="i-amphtml-story-affiliate-link-launch" hidden></i>
-        </div>        
+        </div>
       </div>`;
     this.element_.appendChild(iconEl);
   }
@@ -129,7 +153,7 @@ export class AmpStoryAffiliateLink {
     );
 
     this.textEl_.textContent = this.text_;
-    this.textEl_.toggleAttribute('hidden', true);
+    this.textEl_.setAttribute('hidden', '');
   }
 
   /**
@@ -141,7 +165,7 @@ export class AmpStoryAffiliateLink {
       '.i-amphtml-story-affiliate-link-launch'
     );
 
-    this.launchEl_.toggleAttribute('hidden', true);
+    this.launchEl_.setAttribute('hidden', '');
   }
 
   /**

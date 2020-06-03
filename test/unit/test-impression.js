@@ -28,7 +28,6 @@ import {toggleExperiment} from '../../src/experiments';
 import {user} from '../../src/log';
 
 describe('impression', () => {
-  let sandbox;
   let ampdoc;
   let viewer;
   let xhr;
@@ -37,15 +36,14 @@ describe('impression', () => {
   let warnStub;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     ampdoc = Services.ampdoc(window.document);
     viewer = Services.viewerForDoc(window.document);
-    sandbox.stub(viewer, 'getParam');
-    sandbox.stub(viewer, 'hasCapability');
+    window.sandbox.stub(viewer, 'getParam');
+    window.sandbox.stub(viewer, 'hasCapability');
     xhr = Services.xhrFor(window);
     expect(xhr.fetchJson).to.exist;
-    const stub = sandbox.stub(xhr, 'fetchJson');
-    warnStub = sandbox.stub(user(), 'warn');
+    const stub = window.sandbox.stub(xhr, 'fetchJson');
+    warnStub = window.sandbox.stub(user(), 'warn');
     stub.returns(
       Promise.resolve({
         json() {
@@ -53,12 +51,12 @@ describe('impression', () => {
         },
       })
     );
-    sandbox.stub(ampdoc, 'whenFirstVisible').returns(Promise.resolve());
+    window.sandbox.stub(ampdoc, 'whenFirstVisible').returns(Promise.resolve());
     isTrustedViewer = false;
-    sandbox.stub(viewer, 'isTrustedViewer').callsFake(() => {
+    window.sandbox.stub(viewer, 'isTrustedViewer').callsFake(() => {
       return Promise.resolve(isTrustedViewer);
     });
-    sandbox.stub(viewer, 'getReferrerUrl').callsFake(() => {
+    window.sandbox.stub(viewer, 'getReferrerUrl').callsFake(() => {
       return Promise.resolve(referrer);
     });
     resetTrackImpressionPromiseForTesting();
@@ -66,7 +64,6 @@ describe('impression', () => {
 
   afterEach(() => {
     toggleExperiment(window, 'alp', false);
-    sandbox.restore();
   });
 
   it('should do nothing if the experiment is off', () => {
@@ -88,7 +85,7 @@ describe('impression', () => {
     viewer.hasCapability.withArgs('replaceUrl').returns(true);
     viewer.getParam.withArgs('replaceUrl').returns('https://www.example.com');
     viewer.getParam.withArgs('click').returns('https://www.example.com');
-    const clock = sandbox.useFakeTimers();
+    const clock = window.sandbox.useFakeTimers();
     maybeTrackImpression(window);
     clock.tick(8001);
     return getTrackImpressionPromise();
@@ -99,11 +96,13 @@ describe('impression', () => {
     viewer.hasCapability.withArgs('replaceUrl').returns(true);
     viewer.getParam.withArgs('replaceUrl').returns('https://www.example.com');
     viewer.getParam.withArgs('click').returns('https://www.example.com');
-    sandbox.stub(viewer, 'sendMessageAwaitResponse').callsFake(message => {
-      if (message == 'getReplaceUrl') {
-        return Promise.resolve({'replaceUrl': undefined});
-      }
-    });
+    window.sandbox
+      .stub(viewer, 'sendMessageAwaitResponse')
+      .callsFake((message) => {
+        if (message == 'getReplaceUrl') {
+          return Promise.resolve({'replaceUrl': undefined});
+        }
+      });
     xhr.fetchJson.returns(
       Promise.resolve({
         json() {
@@ -134,8 +133,8 @@ describe('impression', () => {
       return getTrackImpressionPromise().should.be.fulfilled;
     });
 
-    it('should invoke click URL with experiment on', function*() {
-      sandbox.spy(viewer, 'sendMessageAwaitResponse');
+    it('should invoke click URL with experiment on', function* () {
+      window.sandbox.spy(viewer, 'sendMessageAwaitResponse');
       toggleExperiment(window, 'alp', true);
       isTrustedViewer = false;
       viewer.getParam.withArgs('click').returns('https://www.example.com');
@@ -151,7 +150,7 @@ describe('impression', () => {
       });
     });
 
-    it('should invoke click URL in trusted viewer', function*() {
+    it('should invoke click URL in trusted viewer', function* () {
       toggleExperiment(window, 'alp', false);
       isTrustedViewer = true;
       viewer.getParam.withArgs('click').returns('https://www.example.com');
@@ -167,7 +166,7 @@ describe('impression', () => {
       });
     });
 
-    it('should invoke click URL for trusted referrer', function*() {
+    it('should invoke click URL for trusted referrer', function* () {
       toggleExperiment(window, 'alp', false);
       isTrustedViewer = false;
       referrer = 'https://t.co/docref';
@@ -193,7 +192,7 @@ describe('impression', () => {
         })
       );
       const {href} = window.location;
-      const clock = sandbox.useFakeTimers();
+      const clock = window.sandbox.useFakeTimers();
       maybeTrackImpression(window);
       clock.tick(8001);
       return getTrackImpressionPromise().then(() => {
@@ -201,7 +200,7 @@ describe('impression', () => {
       });
     });
 
-    it('should do nothing if get empty response', function*() {
+    it('should do nothing if get empty response', function* () {
       toggleExperiment(window, 'alp', true);
       viewer.getParam.withArgs('click').returns('https://www.example.com');
       const prevHref = window.location.href;
@@ -210,7 +209,7 @@ describe('impression', () => {
       expect(window.location.href).to.equal(prevHref);
     });
 
-    it('should resolve if get no content response', function*() {
+    it('should resolve if get no content response', function* () {
       toggleExperiment(window, 'alp', true);
       viewer.getParam.withArgs('click').returns('https://www.example.com');
       xhr.fetchJson.returns(
@@ -225,7 +224,7 @@ describe('impression', () => {
       });
     });
 
-    it('should still resolve on request error', function*() {
+    it('should still resolve on request error', function* () {
       toggleExperiment(window, 'alp', true);
       viewer.getParam.withArgs('click').returns('https://www.example.com');
       xhr.fetchJson.returns(
@@ -283,9 +282,9 @@ describe('impression', () => {
   });
 
   describe('replaceUrl', () => {
-    it('do nothing if no init replaceUrl param', function*() {
+    it('do nothing if no init replaceUrl param', function* () {
       toggleExperiment(window, 'alp', true);
-      sandbox.spy(viewer, 'replaceUrl');
+      window.sandbox.spy(viewer, 'replaceUrl');
       viewer.hasCapability.withArgs('replaceUrl').returns(true);
       maybeTrackImpression(window);
       yield macroTask();
@@ -309,9 +308,9 @@ describe('impression', () => {
       });
     });
 
-    it('should request replaceUrl if viewer signals', function*() {
+    it('should request replaceUrl if viewer signals', function* () {
       toggleExperiment(window, 'alp', true);
-      sandbox.spy(viewer, 'sendMessageAwaitResponse');
+      window.sandbox.spy(viewer, 'sendMessageAwaitResponse');
       viewer.getParam.withArgs('replaceUrl').returns('http://www.example.com');
       viewer.hasCapability.withArgs('replaceUrl').returns(true);
       maybeTrackImpression(window);
@@ -324,11 +323,13 @@ describe('impression', () => {
       viewer.getParam.withArgs('click').returns(undefined);
       viewer.getParam.withArgs('replaceUrl').returns('http://www.example.com');
       viewer.hasCapability.withArgs('replaceUrl').returns(true);
-      sandbox.stub(viewer, 'sendMessageAwaitResponse').callsFake(message => {
-        if (message == 'getReplaceUrl') {
-          return Promise.resolve({'replaceUrl': undefined});
-        }
-      });
+      window.sandbox
+        .stub(viewer, 'sendMessageAwaitResponse')
+        .callsFake((message) => {
+          if (message == 'getReplaceUrl') {
+            return Promise.resolve({'replaceUrl': undefined});
+          }
+        });
       maybeTrackImpression(window);
       return getTrackImpressionPromise();
     });
@@ -337,14 +338,16 @@ describe('impression', () => {
       toggleExperiment(window, 'alp', true);
       viewer.getParam.withArgs('replaceUrl').returns('http://www.example.com');
       viewer.hasCapability.withArgs('replaceUrl').returns(true);
-      sandbox.stub(viewer, 'sendMessageAwaitResponse').callsFake(message => {
-        if (message == 'getReplaceUrl') {
-          return Promise.resolve({
-            'replaceUrl':
-              'http://localhost:9876/v/s/f.com/?gclid=1234&amp_js_v=1',
-          });
-        }
-      });
+      window.sandbox
+        .stub(viewer, 'sendMessageAwaitResponse')
+        .callsFake((message) => {
+          if (message == 'getReplaceUrl') {
+            return Promise.resolve({
+              'replaceUrl':
+                'http://localhost:9876/v/s/f.com/?gclid=1234&amp_js_v=1',
+            });
+          }
+        });
       const prevHref = window.location.href;
       window.history.replaceState(
         null,
@@ -373,12 +376,12 @@ describe('impression', () => {
       },
     };
     window.document.body.appendChild(div);
-    return shouldAppendExtraParams(ampdocApi).then(res => {
+    return shouldAppendExtraParams(ampdocApi).then((res) => {
       expect(res).to.be.false;
       const div2 = window.document.createElement('amp-analytics');
       div2.setAttribute('type', 'googleanalytics');
       window.document.body.appendChild(div2);
-      return shouldAppendExtraParams(ampdocApi).then(res => {
+      return shouldAppendExtraParams(ampdocApi).then((res) => {
         expect(res).to.be.true;
       });
     });
@@ -388,12 +391,10 @@ describe('impression', () => {
     let windowApi;
 
     beforeEach(() => {
-      const WindowApi = function() {};
+      const WindowApi = function () {};
       windowApi = new WindowApi();
       windowApi.location = {};
     });
-
-    afterEach(() => {});
 
     it('should append gclid and gclsrc from window href', () => {
       const target = window.document.createElement('a');

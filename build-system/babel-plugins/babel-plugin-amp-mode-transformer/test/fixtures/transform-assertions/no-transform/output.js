@@ -16,6 +16,7 @@
 const test = getMode().test;
 const localDev = getMode().localDev;
 const minified = getMode().minified;
+const development = getMode().development;
 
 function getMode() {
   return {};

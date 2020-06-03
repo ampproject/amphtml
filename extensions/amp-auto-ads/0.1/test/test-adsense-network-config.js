@@ -26,7 +26,7 @@ describes.realWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     let ampAutoAdsElem;
     let document;
 
@@ -43,6 +43,7 @@ describes.realWin(
     describe('AdSense', () => {
       const AD_CLIENT = 'ca-pub-1234';
       const AD_HOST = 'ca-pub-5678';
+      const AD_HOST_CHANNEL = '987654';
 
       beforeEach(() => {
         ampAutoAdsElem.setAttribute('data-ad-client', AD_CLIENT);
@@ -71,7 +72,7 @@ describes.realWin(
           'http://foo.bar/a'.repeat(4050) + 'shouldnt_be_included';
 
         const docInfo = Services.documentInfoForDoc(ampAutoAdsElem);
-        sandbox.stub(docInfo, 'canonicalUrl').callsFake(canonicalUrl);
+        env.sandbox.stub(docInfo, 'canonicalUrl').callsFake(canonicalUrl);
 
         const url = adNetwork.getConfigUrl();
         expect(url).to.contain('ama_t=amp');
@@ -98,8 +99,28 @@ describes.realWin(
         ampAutoAdsElem.removeAttribute('data-ad-host');
       });
 
+      it('should add data-ad-host-channel to attributes if set on ampAutoAdsElem', () => {
+        ampAutoAdsElem.setAttribute('data-ad-host', AD_HOST);
+        ampAutoAdsElem.setAttribute('data-ad-host-channel', AD_HOST_CHANNEL);
+        const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+        expect(adNetwork.getAttributes()).to.deep.equal({
+          'type': 'adsense',
+          'data-ad-client': AD_CLIENT,
+          'data-ad-host': AD_HOST,
+          'data-ad-host-channel': AD_HOST_CHANNEL,
+        });
+      });
+
+      it('should add data-ad-host-channel to attributes only if also data-ad-host is present', () => {
+        ampAutoAdsElem.setAttribute('data-ad-host-channel', AD_HOST_CHANNEL);
+        const adNetwork = getAdNetworkConfig('adsense', ampAutoAdsElem);
+        expect(adNetwork.getAttributes()).to.not.have.property(
+          'data-ad-host-channel'
+        );
+      });
+
       it('should get the default ad constraints', () => {
-        const viewportMock = sandbox.mock(
+        const viewportMock = env.sandbox.mock(
           Services.viewportForDoc(env.win.document)
         );
         viewportMock

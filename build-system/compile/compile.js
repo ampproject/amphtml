@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 'use strict';
-
 const argv = require('minimist')(process.argv.slice(2));
 const del = require('del');
 const fs = require('fs-extra');
+const gap = require('gulp-append-prepend');
 const gulp = require('gulp');
 const gulpIf = require('gulp-if');
 const nop = require('gulp-nop');
+const pathModule = require('path');
 const rename = require('gulp-rename');
 const sourcemaps = require('gulp-sourcemaps');
 const {
@@ -28,38 +29,31 @@ const {
   handleCompilerError,
   handleTypeCheckError,
 } = require('./closure-compile');
+const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {checkTypesNailgunPort, distNailgunPort} = require('../tasks/nailgun');
-const {CLOSURE_SRC_GLOBS, SRC_TEMP_DIR} = require('./sources');
+const {CLOSURE_SRC_GLOBS} = require('./sources');
 const {isTravisBuild} = require('../common/travis');
-const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
+const {postClosureBabel} = require('./post-closure-babel');
+const {preClosureBabel, handlePreClosureError} = require('./pre-closure-babel');
+const {sanitize} = require('./sanitize');
 const {singlePassCompile} = require('./single-pass');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
+const {writeSourcemaps} = require('./helpers');
 
-const isProdBuild = !!argv.type;
 const queue = [];
 let inProgress = 0;
 
 // There's a race in the gulp plugin of closure compiler that gets exposed
 // during various local development scenarios.
 // See https://github.com/google/closure-compiler-npm/issues/9
-const MAX_PARALLEL_CLOSURE_INVOCATIONS =
-  isTravisBuild() && argv.single_pass ? 4 : 1;
-
-/**
- * Prefixes the the tmp directory if we need to shadow files that have been
- * preprocess by babel in the `dist` task.
- *
- * @param {!Array<string>} paths
- * @return {!Array<string>}
- */
-function convertPathsToTmpRoot(paths) {
-  return paths.map(path => path.replace(/^(\!?)(.*)$/, `$1${SRC_TEMP_DIR}/$2`));
-}
+const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild()
+  ? 2
+  : parseInt(argv.closure_concurrency, 10) || 1;
 
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
 // babel, as it has much faster incremental compilation.
-exports.closureCompile = async function(
+exports.closureCompile = async function (
   entryModuleFilename,
   outputDir,
   outputFilename,
@@ -68,7 +62,7 @@ exports.closureCompile = async function(
 ) {
   // Rate limit closure compilation to MAX_PARALLEL_CLOSURE_INVOCATIONS
   // concurrent processes.
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     function start() {
       inProgress++;
       compile(
@@ -78,12 +72,12 @@ exports.closureCompile = async function(
         options,
         timeInfo
       ).then(
-        function() {
+        function () {
           inProgress--;
           next();
           resolve();
         },
-        reason => reject(reason)
+        (reason) => reject(reason)
       );
     }
     function next() {
@@ -103,7 +97,6 @@ function cleanupBuildDir() {
   del.sync('build/fake-module');
   del.sync('build/patched-module');
   del.sync('build/parsers');
-  fs.mkdirsSync('build/patched-module/document-register-element/build');
   fs.mkdirsSync('build/fake-module/third_party/babel');
   fs.mkdirsSync('build/fake-module/src/polyfills/');
   fs.mkdirsSync('build/fake-polyfills/src/polyfills');
@@ -117,6 +110,13 @@ function compile(
   options,
   timeInfo
 ) {
+  function shouldAppendSourcemappingURLText(file) {
+    // Do not append sourceMappingURL if its a sourcemap
+    return (
+      pathModule.extname(file.path) !== '.map' && options.esmPassCompilation
+    );
+  }
+
   const hideWarningsFor = [
     'third_party/amp-toolbox-cache-url/',
     'third_party/caja/',
@@ -140,13 +140,11 @@ function compile(
     'third_party/web-animations-externs/web_animations.js',
     'third_party/moment/moment.extern.js',
     'third_party/react-externs/externs.js',
+    'build-system/externs/preact.extern.js',
   ];
   const define = [`VERSION=${internalRuntimeVersion}`];
   if (argv.pseudo_names) {
     define.push('PSEUDO_NAMES=true');
-  }
-  if (argv.fortesting) {
-    define.push('FORTESTING=true');
   }
   if (options.singlePassCompilation) {
     const compilationOptions = {
@@ -170,7 +168,7 @@ function compile(
     );
   }
 
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     if (!(entryModuleFilenames instanceof Array)) {
       entryModuleFilenames = [entryModuleFilenames];
     }
@@ -181,19 +179,11 @@ function compile(
     if (options.wrapper) {
       wrapper = options.wrapper.replace('<%= contents %>', '%output%');
     }
-    let sourceMapBase = 'http://localhost:8000/';
-    if (isProdBuild) {
-      // Point sourcemap to fetch files from correct GitHub tag.
-      sourceMapBase =
-        'https://raw.githubusercontent.com/ampproject/amphtml/' +
-        internalRuntimeVersion +
-        '/';
-    }
     const srcs = [...CLOSURE_SRC_GLOBS];
     // Add needed path for extensions.
     // Instead of globbing all extensions, this will only add the actual
     // extension path for much quicker build times.
-    entryModuleFilenames.forEach(function(filename) {
+    entryModuleFilenames.forEach(function (filename) {
       if (!filename.includes('extensions/')) {
         return;
       }
@@ -206,12 +196,17 @@ function compile(
     if (options.include3pDirectories) {
       srcs.push('3p/**/*.js', 'ads/**/*.js');
     }
+    // For ESM Builds, exclude ampdoc and ampshared css from inclusion.
+    // These styles are guaranteed to already be present on elgible documents.
+    if (options.esmPassCompilation) {
+      srcs.push('!build/ampdoc.css.js', '!build/ampshared.css.js');
+    }
     // Many files include the polyfills, but we only want to deliver them
     // once. Since all files automatically wait for the main binary to load
     // this works fine.
     if (options.includeOnlyESMLevelPolyfills) {
       const polyfills = fs.readdirSync('src/polyfills');
-      const polyfillsShadowList = polyfills.filter(p => {
+      const polyfillsShadowList = polyfills.filter((p) => {
         // custom-elements polyfill must be included.
         return p !== 'custom-elements.js';
       });
@@ -222,7 +217,7 @@ function compile(
         'src/polyfills/custom-elements.js',
         'build/fake-polyfills/**/*.js'
       );
-      polyfillsShadowList.forEach(polyfillFile => {
+      polyfillsShadowList.forEach((polyfillFile) => {
         srcs.push(`!src/polyfills/${polyfillFile}`);
         fs.writeFileSync(
           'build/fake-polyfills/src/polyfills/' + polyfillFile,
@@ -250,7 +245,7 @@ function compile(
       // Don't include externs.
       '!**/*.extern.js'
     );
-    unneededFiles.forEach(function(fake) {
+    unneededFiles.forEach(function (fake) {
       if (!fs.existsSync(fake)) {
         fs.writeFileSync(
           fake,
@@ -271,9 +266,9 @@ function compile(
       compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
       // Turns on more optimizations.
       assume_function_wrapper: true,
-      // Transpile from ES6 to ES5 if not running with `--esm`
-      // otherwise transpilation is done by Babel
-      language_in: argv.esm ? 'ECMASCRIPT_2017' : 'ECMASCRIPT6',
+      language_in: 'ECMASCRIPT_2020',
+      // Do not transpile down to ES5 if running with `--esm`, since we do
+      // limited transpilation in Babel.
       language_out: argv.esm ? 'NO_TRANSPILE' : 'ECMASCRIPT5',
       // We do not use the polyfills provided by closure compiler.
       // If you need a polyfill. Manually include them in the
@@ -289,13 +284,13 @@ function compile(
       ],
       entry_point: entryModuleFilenames,
       module_resolution: 'NODE',
+      package_json_entry_names: 'module,main',
       process_common_js_modules: true,
       // This strips all files from the input set that aren't explicitly
       // required.
       dependency_mode: 'PRUNE',
       output_wrapper: wrapper,
       source_map_include_content: !!argv.full_sourcemaps,
-      source_map_location_mapping: '|' + sourceMapBase,
       warning_level: options.verboseLogging ? 'VERBOSE' : 'DEFAULT',
       // These arrays are filled in below.
       jscomp_error: [],
@@ -320,21 +315,21 @@ function compile(
     // See https://github.com/google/closure-compiler/wiki/Warnings#warnings-categories
     // for a full list of closure's default error / warning levels.
     if (options.typeCheckOnly) {
+      compilerOptions.checks_only = true;
+
       // Don't modify compilation_level to a lower level since
       // it won't do strict type checking if its whitespace only.
       compilerOptions.define.push('TYPECHECK_ONLY=true');
       compilerOptions.jscomp_error.push(
+        'accessControls',
         'conformanceViolations',
         'checkTypes',
         'const',
         'constantProperty',
-        'globalThis'
+        'globalThis',
+        'misplacedTypeAnnotation'
       );
-      compilerOptions.jscomp_off.push(
-        'accessControls',
-        'moduleLoad',
-        'unknownDefines'
-      );
+      compilerOptions.jscomp_off.push('moduleLoad', 'unknownDefines');
       compilerOptions.conformance_configs =
         'build-system/test-configs/conformance-config.textproto';
     } else {
@@ -346,15 +341,11 @@ function compile(
       delete compilerOptions.define;
     }
 
-    if (!argv.single_pass && !options.typeCheckOnly) {
-      compilerOptions.js_module_root.push(SRC_TEMP_DIR);
-    }
-
     const compilerOptionsArray = [];
-    Object.keys(compilerOptions).forEach(function(option) {
+    Object.keys(compilerOptions).forEach(function (option) {
       const value = compilerOptions[option];
       if (value instanceof Array) {
-        value.forEach(function(item) {
+        value.forEach(function (item) {
           compilerOptionsArray.push('--' + option + '=' + item);
         });
       } else {
@@ -369,29 +360,44 @@ function compile(
     if (options.typeCheckOnly) {
       return gulp
         .src(srcs, {base: '.'})
+        .pipe(sourcemaps.init())
+        .pipe(preClosureBabel())
+        .on('error', (err) => handlePreClosureError(err, outputFilename))
         .pipe(gulpClosureCompile(compilerOptionsArray, checkTypesNailgunPort))
-        .on('error', err => {
-          handleTypeCheckError();
-          reject(err);
-        })
+        .on('error', (err) => handleTypeCheckError(err))
         .pipe(nop())
         .on('end', resolve);
     } else {
-      const gulpSrcs = argv.single_pass ? srcs : convertPathsToTmpRoot(srcs);
-      const gulpBase = argv.single_pass ? '.' : SRC_TEMP_DIR;
       timeInfo.startTime = Date.now();
       return gulp
-        .src(gulpSrcs, {base: gulpBase})
-        .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
-        .pipe(sourcemaps.init({loadMaps: true}))
+        .src(srcs, {base: '.'})
+        .pipe(sourcemaps.init())
+        .pipe(preClosureBabel())
+        .on('error', (err) =>
+          handlePreClosureError(err, outputFilename, options, resolve)
+        )
         .pipe(gulpClosureCompile(compilerOptionsArray, distNailgunPort))
-        .on('error', err => {
-          handleCompilerError(outputFilename);
-          reject(err);
-        })
-        .pipe(rename(outputFilename))
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest(outputDir))
+        .on('error', (err) =>
+          handleCompilerError(err, outputFilename, options, resolve)
+        )
+        .pipe(rename(`${outputDir}/${outputFilename}`))
+        .pipe(
+          gulpIf(
+            !argv.pseudo_names && !options.skipUnknownDepsCheck,
+            checkForUnknownDeps()
+          )
+        )
+        .on('error', reject)
+        .pipe(
+          gulpIf(
+            shouldAppendSourcemappingURLText,
+            gap.appendText(`\n//# sourceMappingURL=${outputFilename}.map`)
+          )
+        )
+        .pipe(postClosureBabel())
+        .pipe(sanitize())
+        .pipe(writeSourcemaps(options))
+        .pipe(gulp.dest('.'))
         .on('end', resolve);
     }
   });

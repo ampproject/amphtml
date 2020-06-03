@@ -28,7 +28,7 @@ describes.endtoend(
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
   },
-  async env => {
+  async (env) => {
     /** The total number of slides in the carousel */
     const SLIDE_COUNT = 4;
     let controller;

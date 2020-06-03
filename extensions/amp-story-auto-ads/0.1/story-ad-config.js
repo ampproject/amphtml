@@ -32,6 +32,7 @@ const DisallowedAdAttributes = {
 
 /** @enum {boolean} */
 const AllowedAdTypes = {
+  'adsense': true,
   'custom': true,
   'doubleclick': true,
   'fake': true,
@@ -86,11 +87,7 @@ export class StoryAdConfig {
       }
     }
 
-    return /** @type {!JsonObject} */ (Object.assign(
-      {},
-      adAttributes,
-      requiredAttrs
-    ));
+    return /** @type {!JsonObject} */ ({...adAttributes, ...requiredAttrs});
   }
 
   /**
