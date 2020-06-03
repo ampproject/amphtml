@@ -40,6 +40,8 @@ export function lentainform(global, data) {
   global.uniqId = (
     '00000' + Math.round(Math.random() * 100000).toString(16)
   ).slice(-5);
+  window['ampOptions' + data.widget + '_' + global.uniqId] =
+    data.options;
 
   global.context.observeIntersection(function (changes) {
     /** @type {!Array} */ (changes).forEach(function (c) {
@@ -47,8 +49,6 @@ export function lentainform(global, data) {
         c.intersectionRect;
       window['boundingClientRect' + data.widget + '_' + global.uniqId] =
         c.boundingClientRect;
-      window['ampOptions' + data.widget + '_' + global.uniqId] =
-        data.options;
     });
   });
 
