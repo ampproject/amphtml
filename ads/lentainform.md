@@ -23,7 +23,7 @@ limitations under the License.
        data-publisher="amp-demo"
        data-widget="12345"
        data-container="demo-container"
-       data-src="12345">
+       data-options="{'src_id' : 12345}">
   </amp-embed>
 ```
 
@@ -36,8 +36,8 @@ For details on the configuration semantics, please contact the ad network or ref
 - `data-publisher`
 - `data-widget`
 - `data-container`
-- `data-src`
 
 ### Optional parameters
 
 - `data-url`
+- `data-options`
