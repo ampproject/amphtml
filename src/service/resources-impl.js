@@ -26,12 +26,16 @@ import {VisibilityState} from '../visibility-state';
 import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
 import {expandLayoutRect} from '../layout-rect';
+import {
+  getExperimentBranch,
+  isExperimentOn,
+  randomlySelectUnsetExperiments,
+} from '../experiments';
 import {getMode} from '../mode';
 import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error';
-import {isExperimentOn} from '../experiments';
 import {listen, loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
@@ -49,6 +53,13 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min
 const FOUR_FRAME_DELAY_ = 70;
+
+/** @const {!{id: string, control: string, experiment: string}} */
+const RENDER_ON_IDLE_FIX_EXP = {
+  id: 'render-on-idle-fix',
+  control: '21066311',
+  experiment: '21066312',
+};
 
 /**
  * @implements {ResourcesInterface}
@@ -1147,6 +1158,21 @@ export class ResourcesImpl {
   }
 
   /**
+   * Selects into an experiment for render-on-idle-fix.
+   * @private
+   */
+  divertRenderOnIdleFixExperiment_() {
+    const experimentInfoMap = /** @type {!Object<string,
+        !../experiments.ExperimentInfo>} */ ({
+      [RENDER_ON_IDLE_FIX_EXP.experiment]: {
+        isTrafficEligible: () => true,
+        branches: [RENDER_ON_IDLE_FIX_EXP.control, RENDER_ON_IDLE_FIX_EXP],
+      },
+    });
+    randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+  }
+
+  /**
    * Discovers work that needs to be done since the last pass. If viewport
    * has changed, it will try to build new elements, measure changed elements,
    * and schedule layouts and preloads within a reasonable distance of the
@@ -1359,11 +1385,18 @@ export class ResourcesImpl {
       }
     }
 
+    this.divertRenderOnIdleFixExperiment_();
+    const lastDequeueTime = this.exec_.getLastDequeueTime();
+    // TODO(powerivq): add tests for this fix once ready to launch
     if (
       this.visible_ &&
       this.exec_.getSize() == 0 &&
       this.queue_.getSize() == 0 &&
-      now > this.exec_.getLastDequeueTime() + 5000
+      now > lastDequeueTime + 5000 &&
+      (!isExperimentOn(this.win, 'render-on-idle-fix') ||
+        getExperimentBranch(this.win, RENDER_ON_IDLE_FIX_EXP.id) ===
+          RENDER_ON_IDLE_FIX_EXP.control ||
+        lastDequeueTime > 0)
     ) {
       // Phase 5: Idle Render Outside Viewport layout: layout up to 4 items
       // with idleRenderOutsideViewport true

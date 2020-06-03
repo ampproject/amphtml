@@ -54,6 +54,13 @@ export const AMP_AD_NO_CENTER_CSS_EXP = {
   experiment: '21065898',
 };
 
+/** @const {!{id: string, control: string, experiment: string}} */
+export const RENDER_ON_IDLE_FIX_EXP = {
+  id: 'render-on-idle-fix',
+  control: '21066311',
+  experiment: '21066312',
+};
+
 /** @const {!Object} */
 export const ValidAdContainerTypes = {
   'AMP-CAROUSEL': 'ac',

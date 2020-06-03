@@ -26,6 +26,7 @@ import {
   AMP_AD_NO_CENTER_CSS_EXP,
   AmpAnalyticsConfigDef,
   QQID_HEADER,
+  RENDER_ON_IDLE_FIX_EXP,
   SANDBOX_HEADER,
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
@@ -478,6 +479,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         branches: [
           [EXPAND_JSON_TARGETING_EXP.CONTROL],
           [EXPAND_JSON_TARGETING_EXP.EXPERIMENT],
+        ],
+      },
+      [[RENDER_ON_IDLE_FIX_EXP.id]]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [RENDER_ON_IDLE_FIX_EXP.control],
+          [RENDER_ON_IDLE_FIX_EXP.experiment],
         ],
       },
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
