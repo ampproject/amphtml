@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Entitlement} from './entitlement';
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {evaluateExpr} from './expr';

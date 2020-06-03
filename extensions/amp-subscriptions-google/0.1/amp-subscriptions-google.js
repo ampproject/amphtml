@@ -23,9 +23,9 @@ import {
   AnalyticsEvent,
   ConfiguredRuntime,
   EventOriginator,
-  Fetcher,
+  Fetcher as FetcherDef,
   FilterResult,
-  SubscribeResponse,
+  SubscribeResponse as SubscribeResponseDef,
 } from '../../../third_party/subscriptions-project/swg';
 import {CSS} from '../../../build/amp-subscriptions-google-0.1.css';
 import {DocImpl} from '../../amp-subscriptions/0.1/doc-impl';
@@ -33,7 +33,6 @@ import {
   Entitlement,
   GrantReason,
 } from '../../amp-subscriptions/0.1/entitlement';
-import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/constants.js';
 import {WindowInterface} from '../../../src/window-interface';
@@ -351,7 +350,7 @@ export class GoogleSubscriptionsPlatform {
   }
 
   /**
-   * @param {!SubscribeResponse} response
+   * @param {!SubscribeResponseDef} response
    * @param {string} eventType
    * @private
    */
@@ -595,7 +594,7 @@ export class GoogleSubscriptionsPlatform {
 
 /**
  * Adopts fetcher protocol required for SwG to AMP fetching rules.
- * @implements {Fetcher}
+ * @implements {FetcherDef}
  * @visibleForTesting
  */
 export class AmpFetcher {

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {PageConfig} from '../../../third_party/subscriptions-project/config';
-
 /**
  * This interface is intended to be implemented by Subscription platforms to
  * provide method of getting entitlements.
