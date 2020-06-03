@@ -304,7 +304,7 @@ h3.i-amphtml-story-reaction-quiz-prompt {
  * https://codepen.io/jackbsteinberg/pen/ExaZpjZ
  * https://medium.com/@dtinth/spring-animation-in-css-2039de6e1a03
  */
-@keyframes answer-choice-bounce {
+ @keyframes answer-choice-bounce {
     0% {
         visibility: hidden;
         border: solid 2px var(--reaction-answer-choice-background);
@@ -317,83 +317,9 @@ h3.i-amphtml-story-reaction-quiz-prompt {
         visibility: visible;
         transform: scale(0.01); 
     }
-    22% { transform: scale(0.013); }
-    23% { transform: scale(0.051); }
-    24% { transform: scale(0.109); }
-    25% { transform: scale(0.183); }
-    26% { transform: scale(0.268); }
-    27% { transform: scale(0.361); }
-    28% { transform: scale(0.457); }
-    29% { transform: scale(0.555); }
-    30% { transform: scale(0.650); }
-    31% { transform: scale(0.742); }
-    32% { transform: scale(0.827); }
-    33% { transform: scale(0.905); }
-    34% { transform: scale(0.975); }
-    35% { transform: scale(1.035); }
-    36% { transform: scale(1.086); }
-    37% { transform: scale(1.127); }
-    38% { transform: scale(1.160); }
-    39% { transform: scale(1.183); }
-    40% { transform: scale(1.198); }
-    41% { transform: scale(1.206); }
     42% { transform: scale(1.207); }
-    43% { transform: scale(1.203); }
-    44% { transform: scale(1.193); }
-    45% { transform: scale(1.180); }
-    46% { transform: scale(1.164); }
-    47% { transform: scale(1.146); }
-    48% { transform: scale(1.126); }
-    49% { transform: scale(1.106); }
-    50% { transform: scale(1.086); }
-    51% { transform: scale(1.066); }
-    52% { transform: scale(1.047); }
-    53% { transform: scale(1.030); }
-    54% { transform: scale(1.014); }
-    55% { transform: scale(1.000); }
-    56% { transform: scale(0.989); }
-    57% { transform: scale(0.979); }
-    58% { transform: scale(0.971); }
-    59% { transform: scale(0.964); }
-    60% { transform: scale(0.960); }
-    61% { transform: scale(0.958); }
     62% { transform: scale(0.956); }
-    63% { transform: scale(0.957); }
-    64% { transform: scale(0.958); }
-    65% { transform: scale(0.960); }
-    66% { transform: scale(0.963); }
-    67% { transform: scale(0.967); }
-    68% { transform: scale(0.970); }
-    69% { transform: scale(0.975); }
-    70% { transform: scale(0.979); }
-    71% { transform: scale(0.983); }
-    72% { transform: scale(0.987); }
-    73% { transform: scale(0.991); }
-    74% { transform: scale(0.994); }
-    75% { transform: scale(0.997); }
-    76% { transform: scale(1.000); }
-    77% { transform: scale(1.002); }
-    78% { transform: scale(1.004); }
-    79% { transform: scale(1.006); }
-    80% { transform: scale(1.007); }
-    81% { transform: scale(1.008); }
-    82% { transform: scale(1.008); }
-    83% { transform: scale(1.008); }
     84% { transform: scale(1.008); }
-    85% { transform: scale(1.008); }
-    86% { transform: scale(1.008); }
-    87% { transform: scale(1.007); }
-    88% { transform: scale(1.006); }
-    89% { transform: scale(1.005); }
-    90% { transform: scale(1.004); }
-    91% { transform: scale(1.004); }
-    92% { transform: scale(1.003); }
-    93% { transform: scale(1.002); }
-    94% { transform: scale(1.001); }
-    95% { transform: scale(1.000); }
-    96% { transform: scale(1.000); }
-    97% { transform: scale(0.999); }
-    98% { transform: scale(0.999); }
     99% { transform: scale(0.998); }
     100% { 
         border: solid 2px var(--reaction-answer-choice-background);
