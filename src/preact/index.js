@@ -31,6 +31,16 @@ export function createElement(unusedType, unusedProps, var_args) {
 }
 
 /**
+ * @param {!PreactDef.VNode} unusedElement
+ * @param {(!Object|null)=} unusedProps
+ * @param {...PreactDef.Renderable} unusedChildren
+ * @return {!PreactDef.VNode}
+ */
+export function cloneElement(unusedElement, unusedProps, unusedChildren) {
+  return preact.cloneElement.apply(undefined, arguments);
+}
+
+/**
  * @param {!PreactDef.VNode} vnode
  * @param {Node} container
  */

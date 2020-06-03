@@ -15,7 +15,13 @@
  */
 
 import {getAmpContext} from './context';
-import {useContext, useEffect, useLayoutEffect} from './index';
+import {
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from './index';
 
 /**
  * @param {function()} callback
@@ -48,4 +54,34 @@ export function useResourcesNotify() {
       notify();
     }
   });
+}
+
+/**
+ * Experimental hook to sync a state based on a property. The state is:
+ * - Initialized from the property;
+ * - Updated independently of the property when property is unchaged;
+ * - Reset to the new property value when the property is updated.
+ * @param {S|function():S} prop
+ * @return {{0: S, 1: function((S|function(S):S)):undefined}}
+ * @template S
+ */
+export function useStateFromProp(prop) {
+  const valueRef = useRef(prop);
+  const prevPropRef = useRef(prop);
+  const [, setCounter] = useState(0);
+  if (!Object.is(prop, prevPropRef.current)) {
+    valueRef.current = prevPropRef.current = prop;
+  }
+  return {
+    0: valueRef.current,
+    // TBD/TODO: make a stable function. Per React's docs:
+    // "React guarantees that setState function identity is stable and won't
+    // change on re-renders."
+    1: function set(value) {
+      if (!Object.is(value, valueRef.current)) {
+        valueRef.current = value;
+        setCounter((state) => state + 1);
+      }
+    },
+  };
 }
