@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {PageConfig as PageConfigDef} from '../../../third_party/subscriptions-project/config';
+import {PageConfig as PageConfigInterface} from '../../../third_party/subscriptions-project/config';
 
 export class ServiceAdapter {
   /**
@@ -51,7 +51,7 @@ export class ServiceAdapter {
 
   /**
    * Returns the page config.
-   * @return {!PageConfigDef}
+   * @return {!PageConfigInterface}
    */
   getPageConfig() {
     return this.subscriptionService_.getPageConfig();
