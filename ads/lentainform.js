@@ -47,6 +47,8 @@ export function lentainform(global, data) {
         c.intersectionRect;
       window['boundingClientRect' + data.widget + '_' + global.uniqId] =
         c.boundingClientRect;
+      window['ampOptions' + data.widget + '_' + global.uniqId] =
+        data.options;
     });
   });
 
