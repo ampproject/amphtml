@@ -50,6 +50,10 @@ function loadConfig() {
   if (Object.keys(config.urlToHandlers).length < 1) {
     throw new Error('No URLs found in config.');
   }
+  if (argv.debug) {
+    config.headless = false;
+    config.devtools = true;
+  }
 
   maybeExtractAdsUrls(config);
   return config;

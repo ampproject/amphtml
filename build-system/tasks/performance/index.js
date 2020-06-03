@@ -54,6 +54,7 @@ performance.flags = {
   'threshold':
     '  Fraction by which metrics are allowed to increase. Number between 0.0 and 1.0',
   'quiet': '  Does not log progress per page',
+  'debug': '  Runs the task devtools enabled and with the head.',
   'url': '  Page to test. Overrides urls set in config.json',
 };
 
