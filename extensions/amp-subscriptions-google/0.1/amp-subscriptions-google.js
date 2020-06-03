@@ -596,8 +596,9 @@ export class GoogleSubscriptionsPlatform {
 /**
  * Adopts fetcher protocol required for SwG to AMP fetching rules.
  * @implements {Fetcher}
+ * @visibleForTesting
  */
-class AmpFetcher {
+export class AmpFetcher {
   /**
    * @param {!Window} win
    */
@@ -679,43 +680,3 @@ AMP.extension(TAG, '0.1', function (AMP) {
     }
   );
 });
-
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package
- * @visibleForTesting
- * @return {typeof Fetcher}
- */
-export function getFetcherClassForTesting() {
-  return Fetcher;
-}
-
-/**
- * TODO(mborof): remove once not required by test-amp-subscriptions-google.js
- * @package
- * @visibleForTesting
- * @return {typeof AmpFetcher}
- */
-export function getAmpFetcherClassForTesting() {
-  return AmpFetcher;
-}
-
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package
- * @visibleForTesting
- * @return {typeof PageConfig}
- */
-export function getPageConfigClassForTesting() {
-  return PageConfig;
-}
-
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package
- * @visibleForTesting
- * @return {typeof SubscribeResponse}
- */
-export function getSubscribeResponseClassForTesting() {
-  return SubscribeResponse;
-}

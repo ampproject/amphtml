@@ -732,25 +732,6 @@ export class SubscriptionService {
   }
 }
 
-/**
- * @package
- * @visibleForTesting
- * @return {typeof SubscriptionPlatform}
- */
-export function getPlatformClassForTesting() {
-  return SubscriptionPlatform;
-}
-
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package
- * @visibleForTesting
- * @return {typeof PageConfig}
- */
-export function getPageConfigClassForTesting() {
-  return PageConfig;
-}
-
 // Register the `amp-subscriptions` extension.
 AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerServiceForDoc('subscriptions', function (ampdoc) {

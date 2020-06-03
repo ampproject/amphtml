@@ -104,13 +104,3 @@ export class SubscriptionPlatform {
    */
   decorateUI(unusedElement, unusedAction, unusedOptions) {}
 }
-
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package
- * @visibleForTesting
- * @return {typeof PageConfig}
- */
-export function getPageConfigClassForTesting() {
-  return PageConfig;
-}

@@ -172,13 +172,3 @@ export class LocalSubscriptionPlatformRenderer {
     });
   }
 }
-
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package
- * @visibleForTesting
- * @return {typeof Entitlement}
- */
-export function getEntitlementClassForTesting() {
-  return Entitlement;
-}

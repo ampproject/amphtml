@@ -125,12 +125,3 @@ export class ServiceAdapter {
     return this.subscriptionService_.selectPlatformForLogin();
   }
 }
-
-/**
- * @package
- * @visibleForTesting
- * @return {typeof PageConfig}
- */
-export function getPageConfigForTesting() {
-  return PageConfig;
-}
