@@ -14,10 +14,25 @@
  * limitations under the License.
  */
 
-const {CONTROL, downloadToDisk, EXPERIMENT} = require('./helpers');
+const {
+  CONTROL,
+  copyImageToCache,
+  downloadToDisk,
+  EXPERIMENT,
+} = require('./helpers');
 const {startServer, stopServer} = require('../serve');
 const HOST = 'localhost';
 const PORT = 8000;
+
+// To be updated with local images in the documents in config.json
+const imageUrls = [
+  'sample.jpg',
+  'hero@1x.jpg',
+  'hero@2x.jpg',
+  'sea@1x.jpg',
+  'sea@2x.jpg',
+  'bigbuckbunny.jpg',
+];
 
 /**
  * Download sites specified in config in order to serve them
@@ -38,6 +53,8 @@ async function cacheDocuments(urls) {
   );
 
   await stopServer();
+
+  imageUrls.map(copyImageToCache);
 }
 
 module.exports = cacheDocuments;

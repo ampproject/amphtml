@@ -28,6 +28,7 @@ const EXPERIMENT = 'experiment';
 const CACHE_PATH = path.join(__dirname, './cache');
 const CONTROL_CACHE_PATH = path.join(CACHE_PATH, `./${CONTROL}`);
 const EXPERIMENT_CACHE_PATH = path.join(CACHE_PATH, `./${EXPERIMENT}`);
+const IMG_CACHE_PATH = path.join(CACHE_PATH, './img');
 const RESULTS_PATH = path.join(__dirname, './results.json');
 const DEFAULT_EXTENSIONS = ['amp-auto-lightbox-0.1.js', 'amp-loader-0.1.js'];
 
@@ -37,6 +38,7 @@ const DEFAULT_EXTENSIONS = ['amp-auto-lightbox-0.1.js', 'amp-loader-0.1.js'];
 function touchDirs() {
   [
     CACHE_PATH,
+    IMG_CACHE_PATH,
     CONTROL_CACHE_PATH,
     path.join(CONTROL_CACHE_PATH, 'v0'),
     EXPERIMENT_CACHE_PATH,
@@ -124,6 +126,21 @@ function copyToCache(filePath, version = EXPERIMENT) {
 }
 
 /**
+ * Copy an image file from example/img to cache/img from filePath,
+ * to be used by both control and experiment
+ *
+ * @param {string} filePath
+ */
+function copyImageToCache(filePath) {
+  touchDirs();
+
+  const fromPath = path.join(__dirname, '../../../examples/img', filePath);
+  const destPath = path.join(IMG_CACHE_PATH, filePath);
+
+  fs.copyFileSync(fromPath, destPath);
+}
+
+/**
  * Returns absolute path to vendor config.
  *
  * @param {string} vendor
@@ -158,6 +175,7 @@ module.exports = {
   RESULTS_PATH,
   V0_PATH,
   copyToCache,
+  copyImageToCache,
   downloadToDisk,
   getFileFromAbsolutePath,
   getLocalPathFromExtension,
