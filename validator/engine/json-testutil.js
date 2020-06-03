@@ -45,7 +45,7 @@ function objToJsonSegments(obj, out, cmpFn) {
     obj = obj.toJSON();
   }
   if (typeof obj === 'object') {
-    if (goog.isArray(obj)) {
+    if (Array.isArray(obj)) {
       out.push('[');
       for (let i = 0; i < obj.length; i++) {
         if (i > 0) {
