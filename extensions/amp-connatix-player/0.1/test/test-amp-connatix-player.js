@@ -56,7 +56,7 @@ describes.realWin(
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-        'https://cds.connatix.com/embed/index.html?playerId=f721b0d8-7a79-42b6-b637-fa4e86138ed9'
+        'https://cdm.connatix.com/amp-embed/index.html?playerId=f721b0d8-7a79-42b6-b637-fa4e86138ed9'
       );
       expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
@@ -70,7 +70,7 @@ describes.realWin(
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-        'https://cds.connatix.com/embed/index.html?playerId=f721b0d8-7a79-42b6-b637-fa4e86138ed9&mediaId=527207df-2007-43c4-b87a-f90814bafd2e'
+        'https://cdm.connatix.com/amp-embed/index.html?playerId=f721b0d8-7a79-42b6-b637-fa4e86138ed9&mediaId=527207df-2007-43c4-b87a-f90814bafd2e'
       );
     });
 
