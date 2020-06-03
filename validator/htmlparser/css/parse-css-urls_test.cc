@@ -40,9 +40,7 @@ std::string CssSegment_Type_Name(url::CssSegment::Type type) {
 }
 
 // This is so that gunit/gmock print reasonable errors in case a
-// CssSegmentEq match fails. Must be defined in the
-// quality_dni::parse_css_urls namespace, like url::CssSegment itself. See
-// go/gunitadvanced#teaching-googletest-how-to-print-your-values
+// CssSegmentEq match fails.
 ::std::ostream& operator<<(::std::ostream& os, const url::CssSegment& segment) {
   std::string seg_str = segment.utf8_data;
   htmlparser::Strings::Replace(&seg_str, "\"", "\\\"");
