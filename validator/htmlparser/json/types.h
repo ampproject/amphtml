@@ -89,6 +89,8 @@
 #ifndef HTMLPARSER__JSON_JSON_H_
 #define HTMLPARSER__JSON_JSON_H_
 
+#include <functional>
+#include <memory>
 #include <optional>
 #include <sstream>
 #include <string>
