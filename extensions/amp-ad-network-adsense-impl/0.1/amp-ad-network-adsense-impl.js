@@ -40,7 +40,7 @@ import {
   maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
 import {AdsenseSharedState} from './adsense-shared-state';
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {AmpA4A, NO_SIGNING_EXP} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {FIE_INIT_CHUNKING_EXP} from '../../../src/friendly-iframe-embed';
 import {Navigation} from '../../../src/service/navigation';
@@ -248,6 +248,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           [RENDER_ON_IDLE_FIX_EXP.control],
           [RENDER_ON_IDLE_FIX_EXP.experiment],
         ],
+      },
+      [NO_SIGNING_EXP.id]: {
+        isTrafficEligible: () => true,
+        branches: [[NO_SIGNING_EXP.control], [NO_SIGNING_EXP.experiment]],
       },
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
     });

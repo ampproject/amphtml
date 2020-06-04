@@ -51,6 +51,7 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
+import {getExperimentBranch} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
@@ -174,6 +175,15 @@ const LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER = {
   'renderCrossDomainEnd': AnalyticsTrigger.AD_RENDER_END,
   'friendlyIframeIniLoad': AnalyticsTrigger.AD_IFRAME_LOADED,
   'crossDomainIframeLoaded': AnalyticsTrigger.AD_IFRAME_LOADED,
+};
+
+/**
+ * @const @enum {string}
+ */
+export const NO_SIGNING_EXP = {
+  id: 'a4a-no-signing',
+  control: '21066324',
+  experiment: '21066325',
 };
 
 /**
@@ -810,7 +820,10 @@ export class AmpA4A extends AMP.BaseElement {
         return fetchResponse;
       })
       .then((fetchResponse) =>
-        this.startValidationFlow_(fetchResponse, checkStillCurrent)
+        getExperimentBranch(this.win, NO_SIGNING_EXP.id) ===
+        NO_SIGNING_EXP.experiment
+          ? this.streamResponse_(fetchResponse)
+          : this.startValidationFlow_(fetchResponse, checkStillCurrent)
       )
       .catch((error) => {
         switch (error.message || error) {
@@ -831,6 +844,14 @@ export class AmpA4A extends AMP.BaseElement {
         this.promiseErrorHandler_(error);
         return null;
       });
+  }
+
+  /**
+   * @param {!Response} unusedResponse
+   */
+  streamResponse_(unusedResponse) {
+    // TODO(ccordry): implement
+    dev().error(TAG, 'unsigned path not yet implemented');
   }
 
   /**

@@ -329,4 +329,9 @@ export const EXPERIMENTS = [
     name: 'More chunking for friendly iframe initialization',
     spec: 'https://github.com/ampproject/amphtml/issues/27584',
   },
+  {
+    id: 'a4a-no-signing',
+    name: 'Remove signing requirement for AMPHTML ads',
+    spec: 'https://github.com/ampproject/amphtml/issues/27189',
+  },
 ];
