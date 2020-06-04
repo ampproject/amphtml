@@ -821,7 +821,7 @@ export class AmpA4A extends AMP.BaseElement {
       })
       .then((fetchResponse) =>
         getExperimentBranch(this.win, NO_SIGNING_EXP.id) ===
-        NO_SIGNING_EXP.control
+        NO_SIGNING_EXP.experiment
           ? this.streamResponse_(fetchResponse)
           : this.startValidationFlow_(fetchResponse, checkStillCurrent)
       )
