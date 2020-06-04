@@ -1311,14 +1311,14 @@ function attrRuleShouldMakeSense(attrSpec, tagSpec, rules) {
       expect(isMissingUnicodeGroup(regex)).toBe(false);
     });
   }
-  if (attrSpec.blacklistedValueRegex !== null) {
-    it('blacklisted_value_regex valid', () => {
-      const regex = rules.internedStrings[-1 - attrSpec.blacklistedValueRegex];
+  if (attrSpec.denylistedValueRegex !== null) {
+    it('denylisted_value_regex valid', () => {
+      const regex = rules.internedStrings[-1 - attrSpec.denylistedValueRegex];
 
       expect(isValidRegex(regex)).toBe(true);
     });
-    it('blacklisted_value_regex must have unicode named groups', () => {
-      const regex = rules.internedStrings[-1 - attrSpec.blacklistedValueRegex];
+    it('denylisted_value_regex must have unicode named groups', () => {
+      const regex = rules.internedStrings[-1 - attrSpec.denylistedValueRegex];
 
       expect(isMissingUnicodeGroup(regex)).toBe(false);
     });
@@ -1352,17 +1352,17 @@ function attrRuleShouldMakeSense(attrSpec, tagSpec, rules) {
   it('attr_spec only has one value set', () => {
     expect(numValues).toBeLessThan(2);
   });
-  // `id` attribute must have blacklisted_value_regex set if no explicit values.
+  // `id` attribute must have denylisted_value_regex set if no explicit values.
   if ((attrSpec.name === 'id') && (numValues === 0)) {
-    it('"id" attribute must have blacklisted_value_regex set', () => {
-      expect(attrSpec.blacklistedValueRegex !== null).toBe(true);
+    it('"id" attribute must have denylisted_value_regex set', () => {
+      expect(attrSpec.denylistedValueRegex !== null).toBe(true);
     });
   }
-  // `name` attribute must have blacklisted_value_regex set if no explicit
+  // `name` attribute must have denylisted_value_regex set if no explicit
   // values.
   if ((attrSpec.name === 'name') && (numValues === 0)) {
-    it('"name" attribute must have blacklisted_value_regex set', () => {
-      expect(attrSpec.blacklistedValueRegex !== null).toBe(true);
+    it('"name" attribute must have denylisted_value_regex set', () => {
+      expect(attrSpec.denylistedValueRegex !== null).toBe(true);
     });
   }
   // deprecation
@@ -1822,17 +1822,17 @@ describe('ValidatorRulesMakeSense', () => {
           expect(tagSpec.cdata.maxBytesSpecUrl).toBeDefined();
         });
       }
-      // blacklisted_cdata_regex
-      for (const blacklistedCdataRegex of tagSpec.cdata.blacklistedCdataRegex) {
-        it('blacklisted_cdata_regex valid and error_message defined', () => {
+      // denylisted_cdata_regex
+      for (const denylistedCdataRegex of tagSpec.cdata.denylistedCdataRegex) {
+        it('denylisted_cdata_regex valid and error_message defined', () => {
           usefulCdataSpec = true;
 
-          expect(blacklistedCdataRegex.regex).toBeDefined();
-          expect(isValidRegex(blacklistedCdataRegex.regex)).toBe(true);
-          expect(blacklistedCdataRegex.errorMessage).toBeDefined();
+          expect(denylistedCdataRegex.regex).toBeDefined();
+          expect(isValidRegex(denylistedCdataRegex.regex)).toBe(true);
+          expect(denylistedCdataRegex.errorMessage).toBeDefined();
         });
-        it('blacklisted_cdata_regex must have unicode named groups', () => {
-          const regex = rules.internedStrings[-1 - blacklistedCdataRegex.regex];
+        it('denylisted_cdata_regex must have unicode named groups', () => {
+          const regex = rules.internedStrings[-1 - denylistedCdataRegex.regex];
 
           expect(isMissingUnicodeGroup(regex)).toBe(false);
         });
@@ -1870,7 +1870,7 @@ describe('ValidatorRulesMakeSense', () => {
       if (tagSpec.tagName === 'SCRIPT' || tagSpec.tagName === 'STYLE') {
         it('script and style tags must have cdata rules', () => {
           expect(
-              (tagSpec.cdata.blacklistedCdataRegex.length > 0) ||
+              (tagSpec.cdata.denylistedCdataRegex.length > 0) ||
               tagSpec.cdata.cdataRegex !== null ||
               tagSpec.cdata.mandatoryCdata !== null ||
               tagSpec.cdata.maxBytes === -1 ||

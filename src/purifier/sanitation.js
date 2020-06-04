@@ -75,7 +75,7 @@ export function markElementForDiffing(element, generateKey) {
  * @const {!Object<string, boolean>}
  * @see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md
  */
-export const BLACKLISTED_TAGS = {
+export const denylistED_TAGS = {
   'applet': true,
   'audio': true,
   'base': true,
@@ -215,16 +215,16 @@ export const WHITELISTED_ATTRS_BY_TAGS = {
 export const WHITELISTED_TARGETS = ['_top', '_blank'];
 
 // Extended from IS_SCRIPT_OR_DATA in https://github.com/cure53/DOMPurify/blob/master/src/regexp.js.
-const BLACKLISTED_PROTOCOLS = /^(?:\w+script|data|blob):/i;
+const denylistED_PROTOCOLS = /^(?:\w+script|data|blob):/i;
 
-// Same as BLACKLISTED_PROTOCOLS modulo those handled by DOMPurify.
-const EXTENDED_BLACKLISTED_PROTOCOLS = /^(?:blob):/i;
+// Same as denylistED_PROTOCOLS modulo those handled by DOMPurify.
+const EXTENDED_denylistED_PROTOCOLS = /^(?:blob):/i;
 
 // From https://github.com/cure53/DOMPurify/blob/master/src/regexp.js.
 const ATTR_WHITESPACE = /[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205f\u3000]/g;
 
 /** @const {!Object<string, !Object<string, !RegExp>>} */
-const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze(
+const denylistED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze(
   dict({
     'input': {
       'type': /(?:image|button)/i,
@@ -233,10 +233,10 @@ const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze(
 );
 
 /**
- * Rules in addition to BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES for AMP4EMAIL.
+ * Rules in addition to denylistED_TAG_SPECIFIC_ATTR_VALUES for AMP4EMAIL.
  * @const {!Object<string, !Object<string, !RegExp>>}
  */
-const EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze(
+const EMAIL_denylistED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze(
   dict({
     'input': {
       'type': /(?:button|file|image|password)/i,
@@ -245,7 +245,7 @@ const EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze(
 );
 
 /** @const {!Array<string>} */
-const BLACKLISTED_FIELDS_ATTR = Object.freeze([
+const denylistED_FIELDS_ATTR = Object.freeze([
   'form',
   'formaction',
   'formmethod',
@@ -255,19 +255,19 @@ const BLACKLISTED_FIELDS_ATTR = Object.freeze([
 ]);
 
 /** @const {!Object<string, !Array<string>>} */
-const BLACKLISTED_TAG_SPECIFIC_ATTRS = Object.freeze(
+const denylistED_TAG_SPECIFIC_ATTRS = Object.freeze(
   dict({
-    'input': BLACKLISTED_FIELDS_ATTR,
-    'textarea': BLACKLISTED_FIELDS_ATTR,
-    'select': BLACKLISTED_FIELDS_ATTR,
+    'input': denylistED_FIELDS_ATTR,
+    'textarea': denylistED_FIELDS_ATTR,
+    'select': denylistED_FIELDS_ATTR,
   })
 );
 
 /**
- * Rules in addition to BLACKLISTED_TAG_SPECIFIC_ATTRS for AMP4EMAIL.
+ * Rules in addition to denylistED_TAG_SPECIFIC_ATTRS for AMP4EMAIL.
  * @const {!Object<string, !Array<string>>}
  */
-const EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTRS = Object.freeze(
+const EMAIL_denylistED_TAG_SPECIFIC_ATTRS = Object.freeze(
   dict({
     'amp-anim': ['controls'],
     'form': ['name'],
@@ -323,7 +323,7 @@ export function isValidAttr(
     }
 
     // Don't allow protocols like "javascript:".
-    if (BLACKLISTED_PROTOCOLS.test(attrValueWithoutWhitespace)) {
+    if (denylistED_PROTOCOLS.test(attrValueWithoutWhitespace)) {
       return false;
     }
   }
@@ -333,7 +333,7 @@ export function isValidAttr(
   // allows them in special cases (data URIs in images, data-* attrs).
   // So, just handle the other "extended" protocols here to avoid
   // banning "javascript:" in known-safe ARIA attributes, for example.
-  if (EXTENDED_BLACKLISTED_PROTOCOLS.test(attrValueWithoutWhitespace)) {
+  if (EXTENDED_denylistED_PROTOCOLS.test(attrValueWithoutWhitespace)) {
     return false;
   }
 
@@ -354,28 +354,28 @@ export function isValidAttr(
 
   const isEmail = isAmp4Email(doc);
 
-  // Remove blacklisted attributes from specific tags e.g. input[formaction].
-  const attrBlacklist = Object.assign(
+  // Remove denylisted attributes from specific tags e.g. input[formaction].
+  const attrdenylist = Object.assign(
     map(),
-    BLACKLISTED_TAG_SPECIFIC_ATTRS,
-    isEmail ? EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTRS : {}
+    denylistED_TAG_SPECIFIC_ATTRS,
+    isEmail ? EMAIL_denylistED_TAG_SPECIFIC_ATTRS : {}
   )[tagName];
-  if (attrBlacklist && attrBlacklist.indexOf(attrName) != -1) {
+  if (attrdenylist && attrdenylist.indexOf(attrName) != -1) {
     return false;
   }
 
-  // Remove blacklisted values for specific attributes for specific tags
+  // Remove denylisted values for specific attributes for specific tags
   // e.g. input[type=image].
-  const attrValueBlacklist = Object.assign(
+  const attrValuedenylist = Object.assign(
     map(),
-    BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES,
-    isEmail ? EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES : {}
+    denylistED_TAG_SPECIFIC_ATTR_VALUES,
+    isEmail ? EMAIL_denylistED_TAG_SPECIFIC_ATTR_VALUES : {}
   )[tagName];
-  if (attrValueBlacklist) {
-    const blacklistedValuesRegex = attrValueBlacklist[attrName];
+  if (attrValuedenylist) {
+    const denylistedValuesRegex = attrValuedenylist[attrName];
     if (
-      blacklistedValuesRegex &&
-      attrValue.search(blacklistedValuesRegex) != -1
+      denylistedValuesRegex &&
+      attrValue.search(denylistedValuesRegex) != -1
     ) {
       return false;
     }

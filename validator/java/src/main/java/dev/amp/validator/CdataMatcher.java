@@ -164,28 +164,28 @@ public class CdataMatcher {
             context.addStyleTagByteSize(adjustedCdataLength);
         }
 
-        // Blacklisted CDATA Regular Expressions
+        // denylisted CDATA Regular Expressions
         // We use a combined regex as a fast test. If it matches, we re-match
         // against each individual regex so that we can generate better error
         // messages.
-        final String combinedBlacklistedCdataRegex =
-                context.getRules().getCombinedBlacklistedCdataRegex(parsedTagSpec.getId());
-        if (combinedBlacklistedCdataRegex == null) {
+        final String combineddenylistedCdataRegex =
+                context.getRules().getCombineddenylistedCdataRegex(parsedTagSpec.getId());
+        if (combineddenylistedCdataRegex == null) {
             return;
         }
 
         if (!context.getRules()
-                .getPartialMatchCaseiRegex(combinedBlacklistedCdataRegex)
+                .getPartialMatchCaseiRegex(combineddenylistedCdataRegex)
                 .matcher(cdata).find()) {
             return;
         }
 
-        for (ValidatorProtos.BlackListedCDataRegex blacklist : cdataSpec.getBlacklistedCdataRegexList()) {
-            final Pattern p = Pattern.compile(blacklist.getRegex(), Pattern.CASE_INSENSITIVE);
+        for (ValidatorProtos.denylistedCDataRegex denylist : cdataSpec.getdenylistedCdataRegexList()) {
+            final Pattern p = Pattern.compile(denylist.getRegex(), Pattern.CASE_INSENSITIVE);
             if (p.matcher(cdata).find()) {
-                params.add(blacklist.getErrorMessage());
+                params.add(denylist.getErrorMessage());
                 context.addError(
-                        ValidatorProtos.ValidationError.Code.CDATA_VIOLATES_BLACKLIST,
+                        ValidatorProtos.ValidationError.Code.CDATA_VIOLATES_denylist,
                         context.getLineCol(),
                         /* params */
                         params,
@@ -291,7 +291,7 @@ public class CdataMatcher {
                 params.add(TagSpecUtils.getTagSpecName(this.getTagSpec()));
                 params.add("CSS !important");
                 context.addError(
-                        ValidatorProtos.ValidationError.Code.CDATA_VIOLATES_BLACKLIST,
+                        ValidatorProtos.ValidationError.Code.CDATA_VIOLATES_denylist,
                         context.getLineCol().getLineNumber() + decl.getLine(),
                         context.getLineCol().getColumnNumber() + decl.getCol(),
                         params,

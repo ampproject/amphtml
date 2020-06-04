@@ -74,7 +74,7 @@ const Position = {
  * extensions/amp-ad/.../validator-amp-ad.protoascii.
  * @const {!Array<string>}
  */
-const BLACKLISTED_ANCESTOR_TAGS = ['AMP-SIDEBAR', 'AMP-APP-BANNER'];
+const denylistED_ANCESTOR_TAGS = ['AMP-SIDEBAR', 'AMP-APP-BANNER'];
 
 /**
  * @const {!Object<!Position, function(!Element, !Element)>}
@@ -466,9 +466,9 @@ function isPositionValid(anchorElement, position) {
     return false;
   }
   const elementToCheck = dev().assertElement(elementToCheckOrNull);
-  return !BLACKLISTED_ANCESTOR_TAGS.some((tagName) => {
+  return !denylistED_ANCESTOR_TAGS.some((tagName) => {
     if (closestAncestorElementBySelector(elementToCheck, tagName)) {
-      user().warn(TAG, 'Placement inside blacklisted ancestor: ' + tagName);
+      user().warn(TAG, 'Placement inside denylisted ancestor: ' + tagName);
       return true;
     }
     return false;

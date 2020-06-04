@@ -38,7 +38,7 @@ tags: {
     name: "mask"
     mandatory: true
     dispatch_key: NAME_DISPATCH
-    denylisted_value_regex: "(payment-card"
+    blacklisted_value_regex: "(payment-card"
         "|date-dd-mm-yyyy"
         "|date-mm-dd-yyyy"
         "|date-mm-yy"

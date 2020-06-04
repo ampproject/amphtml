@@ -101,7 +101,7 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
       protocol: "amp-state"
       allow_relative: true  # Will be set to false at a future date.
     }
-    denylisted_value_regex: "__amp_source_origin"
+    blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: {
     name: "template"
@@ -229,7 +229,7 @@ tags: {  # <amp-list>
       protocol: "https"
       allow_relative: false
     }
-    denylisted_value_regex: "__amp_source_origin|"
+    blacklisted_value_regex: "__amp_source_origin|"
         "{{|}}"    # Mustache is disallowed in src.
   }
   attrs: {
@@ -294,7 +294,7 @@ tags: {  # <amp-list>
       protocol: "https"
       allow_relative: true
     }
-    denylisted_value_regex: "__amp_source_origin"
+    blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: { name: "template" }
   # <amp-bind>

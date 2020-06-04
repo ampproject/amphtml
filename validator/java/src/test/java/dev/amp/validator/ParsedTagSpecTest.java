@@ -69,7 +69,7 @@ public class ParsedTagSpecTest {
         tagSpecBuilder.addAttrs(attrSpecBuilder3.build());
 
         final ValidatorProtos.CdataSpec.Builder cDataBuilder = ValidatorProtos.CdataSpec.newBuilder();
-        cDataBuilder.addBlacklistedCdataRegex(ValidatorProtos.BlackListedCDataRegex.newBuilder().setRegex("4").build());
+        cDataBuilder.adddenylistedCdataRegex(ValidatorProtos.denylistedCDataRegex.newBuilder().setRegex("4").build());
         final ValidatorProtos.CdataSpec cDataSpec = cDataBuilder.build();
 
         tagSpecBuilder.setCdata(cDataSpec);

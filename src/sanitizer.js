@@ -16,12 +16,12 @@
 
 import {
   BIND_PREFIX,
-  BLACKLISTED_TAGS,
   EMAIL_WHITELISTED_AMP_TAGS,
   TRIPLE_MUSTACHE_WHITELISTED_TAGS,
   WHITELISTED_ATTRS,
   WHITELISTED_ATTRS_BY_TAGS,
   WHITELISTED_TARGETS,
+  denylistED_TAGS,
   isValidAttr,
 } from './purifier/sanitation';
 import {dict} from './utils/object';
@@ -91,10 +91,10 @@ export function sanitizeHtml(html, doc) {
   };
 
   // No Caja support for <script> or <svg>.
-  const cajaBlacklistedTags = {
+  const cajadenylistedTags = {
     'script': true,
     'svg': true,
-    ...BLACKLISTED_TAGS,
+    ...denylistED_TAGS,
   };
 
   const parser = htmlSanitizer.makeSaxParser({
@@ -124,7 +124,7 @@ export function sanitizeHtml(html, doc) {
         }
       }
 
-      if (cajaBlacklistedTags[tagName]) {
+      if (cajadenylistedTags[tagName]) {
         ignore++;
       } else if (isAmpElement) {
         // Enforce AMP4EMAIL tag whitelist at runtime.

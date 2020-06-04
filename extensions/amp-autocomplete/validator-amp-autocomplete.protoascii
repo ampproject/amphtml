@@ -123,7 +123,7 @@ tags: {  # <amp-autocomplete>
       protocol: "https"
       allow_relative: false
     }
-    denylisted_value_regex: "__amp_source_origin|"
+    blacklisted_value_regex: "__amp_source_origin|"
         "{{|}}"    # Mustache is disallowed in src.
   }
   attrs: {
@@ -163,7 +163,7 @@ tags: {  # amp-autocomplete JSON
   }
   attr_lists: "nonce-attr"
   cdata: {
-    denylisted_cdata_regex: {
+    blacklisted_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }

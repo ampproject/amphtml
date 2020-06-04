@@ -372,13 +372,13 @@ public class CdataMatcherTest {
     }
 
     @Test
-    public void testMatchViolateBlacklist() throws TagValidationException, CssValidationException, IOException {
+    public void testMatchViolatedenylist() throws TagValidationException, CssValidationException, IOException {
         final ValidatorProtos.TagSpec.Builder tagSpecBuilder = ValidatorProtos.TagSpec.newBuilder();
         tagSpecBuilder.setSpecName("title");
 
         final ValidatorProtos.CdataSpec.Builder cDataBuilder = ValidatorProtos.CdataSpec.newBuilder();
         cDataBuilder.setMaxBytes(6);
-        cDataBuilder.addBlacklistedCdataRegex(ValidatorProtos.BlackListedCDataRegex.newBuilder().setRegex("cdata").build());
+        cDataBuilder.adddenylistedCdataRegex(ValidatorProtos.denylistedCDataRegex.newBuilder().setRegex("cdata").build());
 
         tagSpecBuilder.setCdata(cDataBuilder.build());
 
@@ -413,7 +413,7 @@ public class CdataMatcherTest {
         Mockito.when(mockContext.getTagStack()).thenReturn(mockTagStack);
 
         final ParsedValidatorRules mockParsedValidatorRules = Mockito.mock(ParsedValidatorRules.class);
-        Mockito.when(mockParsedValidatorRules.getCombinedBlacklistedCdataRegex(Mockito.anyInt())).thenReturn("cdata");
+        Mockito.when(mockParsedValidatorRules.getCombineddenylistedCdataRegex(Mockito.anyInt())).thenReturn("cdata");
         String partialMatchRegex = "cdata";
         Pattern pattern = Pattern.compile(partialMatchRegex);
 
@@ -439,7 +439,7 @@ public class CdataMatcherTest {
         Assert.assertEquals(params.size(), 2);
         Assert.assertEquals(params.get(0), "title");
 
-        Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.CDATA_VIOLATES_BLACKLIST);
+        Assert.assertEquals(errorCodeCapture.getValue(), ValidatorProtos.ValidationError.Code.CDATA_VIOLATES_denylist);
 
     }
 
@@ -450,7 +450,7 @@ public class CdataMatcherTest {
 
         final ValidatorProtos.CdataSpec.Builder cDataBuilder = ValidatorProtos.CdataSpec.newBuilder();
         cDataBuilder.setMaxBytes(6);
-        cDataBuilder.addBlacklistedCdataRegex(ValidatorProtos.BlackListedCDataRegex.newBuilder().setRegex("cdata1").build());
+        cDataBuilder.adddenylistedCdataRegex(ValidatorProtos.denylistedCDataRegex.newBuilder().setRegex("cdata1").build());
 
         tagSpecBuilder.setCdata(cDataBuilder.build());
 
@@ -485,7 +485,7 @@ public class CdataMatcherTest {
         Mockito.when(mockContext.getTagStack()).thenReturn(mockTagStack);
 
         final ParsedValidatorRules mockParsedValidatorRules = Mockito.mock(ParsedValidatorRules.class);
-        Mockito.when(mockParsedValidatorRules.getCombinedBlacklistedCdataRegex(Mockito.anyInt())).thenReturn("xyz");
+        Mockito.when(mockParsedValidatorRules.getCombineddenylistedCdataRegex(Mockito.anyInt())).thenReturn("xyz");
         String partialMatchRegex = "[0-9]";
         Pattern pattern = Pattern.compile(partialMatchRegex);
 
@@ -513,7 +513,7 @@ public class CdataMatcherTest {
 
         final ValidatorProtos.CdataSpec.Builder cDataBuilder = ValidatorProtos.CdataSpec.newBuilder();
         cDataBuilder.setMaxBytes(6);
-        cDataBuilder.addBlacklistedCdataRegex(ValidatorProtos.BlackListedCDataRegex.newBuilder().setRegex("cdata1").build());
+        cDataBuilder.adddenylistedCdataRegex(ValidatorProtos.denylistedCDataRegex.newBuilder().setRegex("cdata1").build());
         cDataBuilder.setCssSpec(ValidatorProtos.CssSpec.newBuilder()
                 .addAtRuleSpec(ValidatorProtos.AtRuleSpec.newBuilder()
                         .setName("font-face").setMediaQuerySpec(ValidatorProtos.MediaQuerySpec.newBuilder()
@@ -552,7 +552,7 @@ public class CdataMatcherTest {
         Mockito.when(mockContext.getTagStack()).thenReturn(mockTagStack);
 
         final ParsedValidatorRules mockParsedValidatorRules = Mockito.mock(ParsedValidatorRules.class);
-        Mockito.when(mockParsedValidatorRules.getCombinedBlacklistedCdataRegex(Mockito.anyInt())).thenReturn("xyz");
+        Mockito.when(mockParsedValidatorRules.getCombineddenylistedCdataRegex(Mockito.anyInt())).thenReturn("xyz");
         String partialMatchRegex = "[0-9]";
         Pattern pattern = Pattern.compile(partialMatchRegex);
 
@@ -585,7 +585,7 @@ public class CdataMatcherTest {
                 .setValidateAmp4Ads(true).setValidateKeyframes(true).build();
         final ValidatorProtos.CdataSpec.Builder cDataBuilder = ValidatorProtos.CdataSpec.newBuilder();
         cDataBuilder.setMaxBytes(6);
-        cDataBuilder.addBlacklistedCdataRegex(ValidatorProtos.BlackListedCDataRegex.newBuilder().setRegex("cdata1").build());
+        cDataBuilder.adddenylistedCdataRegex(ValidatorProtos.denylistedCDataRegex.newBuilder().setRegex("cdata1").build());
         cDataBuilder.setCssSpec(cssSpec);
         tagSpecBuilder.setCdata(cDataBuilder.build());
 
@@ -623,7 +623,7 @@ public class CdataMatcherTest {
         Mockito.when(mockContext.getTagStack()).thenReturn(mockTagStack);
 
         final ParsedValidatorRules mockParsedValidatorRules = Mockito.mock(ParsedValidatorRules.class);
-        Mockito.when(mockParsedValidatorRules.getCombinedBlacklistedCdataRegex(Mockito.anyInt())).thenReturn("xyz");
+        Mockito.when(mockParsedValidatorRules.getCombineddenylistedCdataRegex(Mockito.anyInt())).thenReturn("xyz");
         String partialMatchRegex = "[0-9]";
         Pattern pattern = Pattern.compile(partialMatchRegex);
 
@@ -663,7 +663,7 @@ public class CdataMatcherTest {
                 .setValidateAmp4Ads(false).setValidateKeyframes(false).build();
         final ValidatorProtos.CdataSpec.Builder cDataBuilder = ValidatorProtos.CdataSpec.newBuilder();
         cDataBuilder.setMaxBytes(6);
-        cDataBuilder.addBlacklistedCdataRegex(ValidatorProtos.BlackListedCDataRegex.newBuilder().setRegex("cdata1").build());
+        cDataBuilder.adddenylistedCdataRegex(ValidatorProtos.denylistedCDataRegex.newBuilder().setRegex("cdata1").build());
         cDataBuilder.setCssSpec(cssSpec);
         tagSpecBuilder.setCdata(cDataBuilder.build());
 
@@ -701,7 +701,7 @@ public class CdataMatcherTest {
         Mockito.when(mockContext.getTagStack()).thenReturn(mockTagStack);
 
         final ParsedValidatorRules mockParsedValidatorRules = Mockito.mock(ParsedValidatorRules.class);
-        Mockito.when(mockParsedValidatorRules.getCombinedBlacklistedCdataRegex(Mockito.anyInt())).thenReturn("xyz");
+        Mockito.when(mockParsedValidatorRules.getCombineddenylistedCdataRegex(Mockito.anyInt())).thenReturn("xyz");
         String partialMatchRegex = "[0-9]";
         Pattern pattern = Pattern.compile(partialMatchRegex);
 

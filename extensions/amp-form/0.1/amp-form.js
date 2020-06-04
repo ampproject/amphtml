@@ -304,18 +304,18 @@ export class AmpForm {
    * @param {string} url
    * @param {string} method
    * @param {!Object<string, string>=} opt_extraFields
-   * @param {!Array<string>=} opt_fieldBlacklist
+   * @param {!Array<string>=} opt_fielddenylist
    * @return {!Promise<!FetchRequestDef>}
    */
-  requestForFormFetch(url, method, opt_extraFields, opt_fieldBlacklist) {
+  requestForFormFetch(url, method, opt_extraFields, opt_fielddenylist) {
     let xhrUrl, body;
     let headers = dict({'Accept': 'application/json'});
     const isHeadOrGet = method == 'GET' || method == 'HEAD';
     if (isHeadOrGet) {
       this.assertNoSensitiveFields_();
       const values = this.getFormAsObject_();
-      if (opt_fieldBlacklist) {
-        opt_fieldBlacklist.forEach((name) => {
+      if (opt_fielddenylist) {
+        opt_fielddenylist.forEach((name) => {
           delete values[name];
         });
       }
@@ -337,8 +337,8 @@ export class AmpForm {
         devAssert(this.encType_ === 'multipart/form-data');
         body = createFormDataWrapper(this.win_, this.form_);
       }
-      if (opt_fieldBlacklist) {
-        opt_fieldBlacklist.forEach((name) => {
+      if (opt_fielddenylist) {
+        opt_fielddenylist.forEach((name) => {
           body.delete(name);
         });
       }
@@ -956,13 +956,13 @@ export class AmpForm {
         `[${escapeCssSelectorIdent(FORM_VERIFY_OPTOUT)}]`
       )
     );
-    const blacklist = noVerifyFields.map((field) => field.name || field.id);
+    const denylist = noVerifyFields.map((field) => field.name || field.id);
 
     return this.doXhr_(
       dev().assertString(this.xhrVerify_),
       this.method_,
       /**opt_extraFields*/ {[FORM_VERIFY_PARAM]: true},
-      /**opt_fieldBlacklist*/ blacklist
+      /**opt_fielddenylist*/ denylist
     );
   }
 
@@ -971,17 +971,17 @@ export class AmpForm {
    * @param {string} url
    * @param {string} method
    * @param {!Object<string, string>=} opt_extraFields
-   * @param {!Array<string>=} opt_fieldBlacklist
+   * @param {!Array<string>=} opt_fielddenylist
    * @return {!Promise<!Response>}
    * @private
    */
-  doXhr_(url, method, opt_extraFields, opt_fieldBlacklist) {
+  doXhr_(url, method, opt_extraFields, opt_fielddenylist) {
     this.assertSsrTemplate_(false, 'XHRs should be proxied.');
     return this.requestForFormFetch(
       url,
       method,
       opt_extraFields,
-      opt_fieldBlacklist
+      opt_fielddenylist
     ).then((request) => this.xhr_.fetch(request.xhrUrl, request.fetchOpt));
   }
 

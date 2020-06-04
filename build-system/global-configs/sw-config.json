@@ -1,5 +1,5 @@
 {
-  "cache-service-worker-blacklist": [
+  "cache-service-worker-denylist": [
     1473441896765,
     1473791909894,
     1473894434081,

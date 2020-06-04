@@ -50,7 +50,7 @@ tags: {  # amp-story-auto-ads (json config)
   }
   attr_lists: "nonce-attr"
   cdata: {
-    denylisted_cdata_regex: {
+    blacklisted_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }

@@ -39,7 +39,7 @@ tags: {  # <amp-ima-video>
       protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
-    denylisted_value_regex: "__amp_source_origin"
+    blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: {
     name: "data-tag"

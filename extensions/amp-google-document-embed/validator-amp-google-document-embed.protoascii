@@ -35,7 +35,7 @@ tags: {  # <amp-google-document-embed>
       protocol: "https"
       allow_relative: false
     }
-    denylisted_value_regex: "__amp_source_origin"
+    blacklisted_value_regex: "__amp_source_origin"
   }
   # <amp-bind>
   attrs: { name: "[src]" }

@@ -535,13 +535,13 @@ tags: {  # <style amp-custom>, [AMP, ACTIONS]
       at_rule_spec: { name: 'page' }
       at_rule_spec: { name: 'supports' }
     }
-    denylisted_cdata_regex: {
+    blacklisted_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
-    # These regex denylists are temporary hacks to validate essential CSS
+    # These regex blacklists are temporary hacks to validate essential CSS
     # rules. They will be replaced later with more principled solutions.
-    denylisted_cdata_regex: {
+    blacklisted_cdata_regex: {
       regex: "(^|\\W)i-amphtml-"
       error_message: "CSS i-amphtml- name prefix"
     }
@@ -596,13 +596,13 @@ tags: {  # <style amp-custom>, AMP4ADS
       at_rule_spec: { name: 'supports' }
       validate_amp4ads: true
     }
-    denylisted_cdata_regex: {
+    blacklisted_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
-    # These regex denylists are temporary hacks to validate essential CSS
+    # These regex blacklists are temporary hacks to validate essential CSS
     # rules. They will be replaced later with more principled solutions.
-    denylisted_cdata_regex: {
+    blacklisted_cdata_regex: {
       regex: "(^|\\W)i-amphtml-"
       error_message: "CSS i-amphtml- name prefix"
     }
@@ -653,13 +653,13 @@ tags: {  # <style amp-custom>, AMP4EMAIL
       }
       at_rule_spec: { name: 'page' }
     }
-    denylisted_cdata_regex: {
+    blacklisted_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
-    # These regex denylists are temporary hacks to validate essential CSS
+    # These regex blacklists are temporary hacks to validate essential CSS
     # rules. They will be replaced later with more principled solutions.
-    denylisted_cdata_regex: {
+    blacklisted_cdata_regex: {
       regex: "(^|\\W)i-amphtml-"
       error_message: "CSS i-amphtml- name prefix"
     }

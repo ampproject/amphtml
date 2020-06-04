@@ -38,7 +38,7 @@ tags: {  # amp-payment-google-inline-async (json)
   attr_lists: "name-attr"
   attr_lists: "nonce-attr"
   cdata: {
-    denylisted_cdata_regex: {
+    blacklisted_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }

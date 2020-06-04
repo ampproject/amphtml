@@ -16,12 +16,12 @@
 
 import {
   BIND_PREFIX,
-  BLACKLISTED_TAGS,
   EMAIL_WHITELISTED_AMP_TAGS,
   TRIPLE_MUSTACHE_WHITELISTED_TAGS,
   WHITELISTED_ATTRS,
   WHITELISTED_ATTRS_BY_TAGS,
   WHITELISTED_TARGETS,
+  denylistED_TAGS,
   isValidAttr,
   markElementForDiffing,
 } from './sanitation';
@@ -140,7 +140,7 @@ export class Purifier {
     // Sanitize dummy markup so that the hook is invoked.
     const p = this.doc_.createElement('p');
     this.domPurify_.sanitize(p);
-    Object.keys(BLACKLISTED_TAGS).forEach((tag) => {
+    Object.keys(denylistED_TAGS).forEach((tag) => {
       allowedTags[tag] = false;
     });
     // Pops the last hook added.
@@ -458,7 +458,7 @@ function standardPurifyConfig() {
     ...PURIFY_PROFILES,
     ADD_ATTR: WHITELISTED_ATTRS,
     ADD_TAGS: ['use'],
-    FORBID_TAGS: Object.keys(BLACKLISTED_TAGS),
+    FORBID_TAGS: Object.keys(denylistED_TAGS),
     FORCE_BODY: true,
     RETURN_DOM: true,
     ALLOW_UNKNOWN_PROTOCOLS: true,

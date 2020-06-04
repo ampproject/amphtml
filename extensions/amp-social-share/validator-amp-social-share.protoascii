@@ -60,7 +60,7 @@ tags: {  # <amp-social-share>
       protocol: "whatsapp"
       allow_relative: false
     }
-    denylisted_value_regex: "__amp_source_origin"
+    blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: {
     name: "type"
