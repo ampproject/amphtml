@@ -42,7 +42,7 @@ export function teads(global, data) {
 
     loadScript(
       global,
-      'https://a.teads.tv/media/format/' +
+      'https://s8t.teads.tv/media/format/' +
         encodeURI(data.tag.js || 'v3/teads-format.min.js')
     );
   } else {
