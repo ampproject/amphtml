@@ -50,6 +50,8 @@ async function performance() {
 performance.description = 'Runs web performance test on current branch';
 
 performance.flags = {
+  'devtools': '  Run with devtools open',
+  'headless': '  Run chromium headless',
   'nobuild': '  Does not compile minified runtime before running tests',
   'threshold':
     '  Fraction by which metrics are allowed to increase. Number between 0.0 and 1.0',
