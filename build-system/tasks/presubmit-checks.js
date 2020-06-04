@@ -577,6 +577,9 @@ const forbiddenTerms = {
     message:
       'Logging message require explicitly `TAG`, or an all uppercase' +
       ' string as the first parameter',
+    whitelist: [
+      'build-system/babel-plugins/babel-plugin-transform-dev-methods/index.js',
+    ],
   },
   '\\.schedulePass\\(': {
     message: 'schedulePass is heavy, think twice before using it',
