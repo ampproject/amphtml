@@ -20,6 +20,10 @@ import {
   SubscriptionAnalytics,
 } from '../../../amp-subscriptions/0.1/analytics';
 import {
+  AmpFetcher,
+  GoogleSubscriptionsPlatform,
+} from '../amp-subscriptions-google';
+import {
   ConfiguredRuntime,
   Entitlements,
   SubscribeResponse,
@@ -29,10 +33,6 @@ import {
   Entitlement,
   GrantReason,
 } from '../../../amp-subscriptions/0.1/entitlement';
-import {
-  GoogleSubscriptionsPlatform,
-  getAmpFetcherClassForTesting,
-} from '../amp-subscriptions-google';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../../src/services';
@@ -68,7 +68,6 @@ describes.realWin('AmpFetcher', {amp: true}, (env) => {
   };
   const contentType = 'application/x-www-form-urlencoded;charset=UTF-8';
   const expectedBodyString = 'f.req=' + JSON.stringify(sentArray);
-  const AmpFetcher = getAmpFetcherClassForTesting();
 
   beforeEach(() => {
     const {win} = env.ampdoc;
