@@ -1007,6 +1007,7 @@ const forbiddenTermsSrcInclusive = {
     whitelist: [
       'ads/google/a4a/line-delimited-response-handler.js',
       'examples/pwa/pwa.js',
+      'extensions/amp-a4a/0.1/streaming-utils.js',
       'src/utils/bytes.js',
     ],
   },
