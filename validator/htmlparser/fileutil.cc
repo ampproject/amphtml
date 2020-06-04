@@ -29,6 +29,14 @@
 
 namespace htmlparser {
 
+std::string ReadFile(std::string_view filepath) {
+  auto str = std::ostringstream{};
+  std::ifstream fd(filepath);
+  defer(fd.close());
+  str << fd.rdbuf();
+  return str.str();
+}
+
 bool ReadFileLinesInternal(const FileReadOptions& options,
                            std::istream& fd,
                            LineCallback callback);
