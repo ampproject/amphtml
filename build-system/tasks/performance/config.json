@@ -1,5 +1,4 @@
 {
-  "headless": true,
   "runs": 50,
   "handlers": [
     {
