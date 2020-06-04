@@ -52,7 +52,7 @@ tags: {  # amp-geo (json)
   }
   attr_lists: "nonce-attr"
   cdata: {
-    blacklisted_cdata_regex: {
+    denylisted_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }

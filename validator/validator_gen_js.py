@@ -339,8 +339,8 @@ CONSTRUCTOR_ARG_FIELDS = [
     'amp.validator.AtRuleSpec.type',
     'amp.validator.AttrSpec.name',
     'amp.validator.AttrTriggerSpec.also_requires_attr',
-    'amp.validator.BlackListedCDataRegex.error_message',
-    'amp.validator.BlackListedCDataRegex.regex',
+    'amp.validator.denylistedCDataRegex.error_message',
+    'amp.validator.denylistedCDataRegex.regex',
     'amp.validator.ErrorFormat.code',
     'amp.validator.ErrorFormat.format',
     'amp.validator.PropertySpec.name',
@@ -370,7 +370,7 @@ ATTR_LIST_NAME_REFERENCE_FIELD = ['amp.validator.TagSpec.attr_lists']
 # the AttrSpecs.
 SYNTHETIC_REFERENCE_FIELD = [
     'amp.validator.AttrList.attrs',
-    'amp.validator.AttrSpec.blacklisted_value_regex',
+    'amp.validator.AttrSpec.denylisted_value_regex',
     'amp.validator.AttrSpec.mandatory_anyof',
     'amp.validator.AttrSpec.mandatory_oneof',
     'amp.validator.AttrSpec.value_regex',
@@ -448,7 +448,7 @@ def PrintClassFor(descriptor, msg_desc, out):
         'this.%s = %s;' % (UnderscoreToCamelCase(field.name), assigned_value))
   if msg_desc.full_name == 'amp.validator.CdataSpec':
     out.Line('/** @type {?number} */')
-    out.Line('this.combinedBlacklistedCdataRegex = null;')
+    out.Line('this.combineddenylistedCdataRegex = null;')
   if msg_desc.full_name == 'amp.validator.ValidatorRules':
     out.Line('/** @type {!Array<!string>} */')
     out.Line('this.dispatchKeyByTagSpecId = Array(tags.length);')
@@ -667,13 +667,13 @@ def PrintObject(descriptor, msg, registry, out):
                  msg.DESCRIPTOR.full_name), ','.join(constructor_arg_values)))
 
   if (msg.DESCRIPTOR.full_name == 'amp.validator.CdataSpec' and
-      msg.blacklisted_cdata_regex):
-    combined_blacklisted_cdata_regex = '(%s)' % '|'.join([
-        r.regex for r in msg.blacklisted_cdata_regex])
+      msg.denylisted_cdata_regex):
+    combined_denylisted_cdata_regex = '(%s)' % '|'.join([
+        r.regex for r in msg.denylisted_cdata_regex])
     out.Line('%s.%s = %d;' % (
         this_message_reference,
-        'combinedBlacklistedCdataRegex',
-        registry.InternString(combined_blacklisted_cdata_regex)))
+        'combineddenylistedCdataRegex',
+        registry.InternString(combined_denylisted_cdata_regex)))
 
 
 def DispatchKeyForTagSpecOrNone(tag_spec):
