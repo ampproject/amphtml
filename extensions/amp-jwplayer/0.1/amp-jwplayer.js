@@ -449,14 +449,6 @@ class AmpJWPlayer extends AMP.BaseElement {
           this.playlistItem_ = playlistItem;
           this.sendCommand_('getPlayedRanges');
           break;
-        case 'resize':
-          const {width, height} = detail;
-          Services.mutatorForDoc(this.getAmpDoc()).forceChangeSize(
-            this.element,
-            height,
-            width
-          );
-          break;
         case 'time':
           const {currentTime} = detail;
           this.currentTime_ = currentTime;
