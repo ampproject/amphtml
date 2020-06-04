@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {PageConfig} from '../../../third_party/subscriptions-project/config';
+import {PageConfig as PageConfigInterface} from '../../../third_party/subscriptions-project/config';
 
 export class ServiceAdapter {
   /**
@@ -51,7 +51,7 @@ export class ServiceAdapter {
 
   /**
    * Returns the page config.
-   * @return {!PageConfig}
+   * @return {!PageConfigInterface}
    */
   getPageConfig() {
     return this.subscriptionService_.getPageConfig();
@@ -124,13 +124,4 @@ export class ServiceAdapter {
   selectPlatformForLogin() {
     return this.subscriptionService_.selectPlatformForLogin();
   }
-}
-
-/**
- * @package
- * @visibleForTesting
- * @return {typeof PageConfig}
- */
-export function getPageConfigForTesting() {
-  return PageConfig;
 }
