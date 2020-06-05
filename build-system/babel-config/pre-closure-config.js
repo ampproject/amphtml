@@ -90,9 +90,10 @@ function getPreClosureConfig() {
     replacePlugin,
     './build-system/babel-plugins/babel-plugin-transform-amp-asserts',
     argv.esm ? filterImportsPlugin : null,
-    argv.esm
-      ? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
-      : null,
+    // TODO(erwinm, #28698): fix this in fixit week
+    //argv.esm
+    //? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
+    //: null,
     !isCheckTypes
       ? './build-system/babel-plugins/babel-plugin-transform-json-configuration'
       : null,
