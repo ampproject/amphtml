@@ -1652,7 +1652,7 @@ func (m *DeclarationList) GetDeclaration() []*CssDeclaration {
 // Regex which, if matches the cdata of a tag, causes the tag validation to
 // fail.
 // NEXT AVAILABLE TAG: 3
-type BlacklistedCDataRegex struct {
+type BlackListedCDataRegex struct {
 	// Syntax is partial match, use ^ and $ if you want global match.
 	Regex                *string  `protobuf:"bytes,1,opt,name=regex" json:"regex,omitempty"`
 	ErrorMessage         *string  `protobuf:"bytes,2,opt,name=error_message,json=errorMessage" json:"error_message,omitempty"`
@@ -1669,31 +1669,31 @@ func (*BlackListedCDataRegex) Descriptor() ([]byte, []int) {
 }
 
 func (m *BlackListedCDataRegex) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_BlacklistedCDataRegex.Unmarshal(m, b)
+	return xxx_messageInfo_BlackListedCDataRegex.Unmarshal(m, b)
 }
 func (m *BlackListedCDataRegex) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_BlacklistedCDataRegex.Marshal(b, m, deterministic)
 }
 func (m *BlackListedCDataRegex) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_BlacklistedCDataRegex.Merge(m, src)
+	xxx_messageInfo_BlackListedCDataRegex.Merge(m, src)
 }
 func (m *BlackListedCDataRegex) XXX_Size() int {
-	return xxx_messageInfo_BlacklistedCDataRegex.Size(m)
+	return xxx_messageInfo_BlackListedCDataRegex.Size(m)
 }
 func (m *BlackListedCDataRegex) XXX_DiscardUnknown() {
-	xxx_messageInfo_BlacklistedCDataRegex.DiscardUnknown(m)
+	xxx_messageInfo_BlackListedCDataRegex.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_BlacklistedCDataRegex proto.InternalMessageInfo
+var xxx_messageInfo_BlackListedCDataRegex proto.InternalMessageInfo
 
-func (m *BlacklistedCDataRegex) GetRegex() string {
+func (m *BlackListedCDataRegex) GetRegex() string {
 	if m != nil && m.Regex != nil {
 		return *m.Regex
 	}
 	return ""
 }
 
-func (m *BlacklistedCDataRegex) GetErrorMessage() string {
+func (m *BlackListedCDataRegex) GetErrorMessage() string {
 	if m != nil && m.ErrorMessage != nil {
 		return *m.ErrorMessage
 	}
@@ -1925,7 +1925,7 @@ type CdataSpec struct {
 	// This is useful for script tags that reference extensions etc.
 	WhitespaceOnly *bool `protobuf:"varint,8,opt,name=whitespace_only,json=whitespaceOnly" json:"whitespace_only,omitempty"`
 	// If any of these regexes match, then this cdata spec does not validate.
-	BlacklistedCdataRegex []*BlacklistedCdataRegex `protobuf:"bytes,4,rep,name=blacklisted_cdata_regex,json=blacklistedCdataRegex" json:"blacklisted_cdata_regex,omitempty"`
+	BlacklistedCdataRegex []*BlackListedCDataRegex `protobuf:"bytes,4,rep,name=blacklisted_cdata_regex,json=blacklistedCdataRegex" json:"blacklisted_cdata_regex,omitempty"`
 	// If true, the contents of this tag's CDATA text will be counted against the
 	// document level DocCssSpec CSS lengths.
 	DocCssBytes          *bool    `protobuf:"varint,11,opt,name=doc_css_bytes,json=docCssBytes" json:"doc_css_bytes,omitempty"`
@@ -2003,9 +2003,9 @@ func (m *CdataSpec) GetWhitespaceOnly() bool {
 	return false
 }
 
-func (m *CdataSpec) GetBlacklistedCdataRegex() []*BlacklistedCDataRegex {
+func (m *CdataSpec) GetBlacklistedCdataRegex() []*BlackListedCDataRegex {
 	if m != nil {
-		return m.BlacklistedCDataRegex
+		return m.BlacklistedCdataRegex
 	}
 	return nil
 }
@@ -3745,7 +3745,7 @@ func init() {
 	proto.RegisterType((*AttrList)(nil), "amp.validator.AttrList")
 	proto.RegisterType((*DescendantTagList)(nil), "amp.validator.DescendantTagList")
 	proto.RegisterType((*DeclarationList)(nil), "amp.validator.DeclarationList")
-	proto.RegisterType((*BlackListedCDataRegex)(nil), "amp.validator.BlacklistedCDataRegex")
+	proto.RegisterType((*BlackListedCDataRegex)(nil), "amp.validator.BlackListedCDataRegex")
 	proto.RegisterType((*MediaQuerySpec)(nil), "amp.validator.MediaQuerySpec")
 	proto.RegisterType((*AtRuleSpec)(nil), "amp.validator.AtRuleSpec")
 	proto.RegisterType((*CssSpec)(nil), "amp.validator.CssSpec")

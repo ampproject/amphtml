@@ -222,7 +222,7 @@ message DeclarationList {
 // Regex which, if matches the cdata of a tag, causes the tag validation to
 // fail.
 // NEXT AVAILABLE TAG: 3
-message blacklistedCDataRegex {
+message BlackListedCDataRegex {
   // Syntax is partial match, use ^ and $ if you want global match.
   optional string regex = 1;
   optional string error_message = 2;
@@ -309,7 +309,7 @@ message CdataSpec {
   // } end oneof
 
   // If any of these regexes match, then this cdata spec does not validate.
-  repeated blacklistedCDataRegex blacklisted_cdata_regex = 4;
+  repeated BlackListedCDataRegex blacklisted_cdata_regex = 4;
 
   // If true, the contents of this tag's CDATA text will be counted against the
   // document level DocCssSpec CSS lengths.
@@ -826,7 +826,7 @@ message ValidationError {
     STYLESHEET_AND_INLINE_STYLE_TOO_LONG = 102;
     INLINE_STYLE_TOO_LONG = 103;
     MANDATORY_CDATA_MISSING_OR_INCORRECT = 9;
-    CDATA_VIOLATES_blacklist = 30;
+    CDATA_VIOLATES_BLACKLIST = 30;
     NON_WHITESPACE_CDATA_ENCOUNTERED = 82;
     INVALID_JSON_CDATA = 106;
     DEPRECATED_ATTR = 11;
