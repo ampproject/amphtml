@@ -44,7 +44,17 @@ function getSinglePassPostConfig() {
  */
 function getSinglePassDepsConfig() {
   const singlePassDepsConfig = getPreClosureConfig();
-  singlePassDepsConfig.plugins.push('transform-es2015-modules-commonjs');
+  singlePassDepsConfig.presets = [
+    [
+      '@babel/preset-env',
+      {
+        'targets': {
+          'esmodules': true,
+        },
+        'modules': 'commonjs',
+      },
+    ],
+  ];
   return singlePassDepsConfig;
 }
 
