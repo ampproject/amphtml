@@ -2208,26 +2208,26 @@ class CdataMatcher {
       context.addStyleTagByteSize(adjustedCdataLength);
     }
 
-    // denylisted CDATA Regular Expressions
+    // Blacklisted CDATA Regular Expressions
     // We use a combined regex as a fast test. If it matches, we re-match
     // against each individual regex so that we can generate better error
     // messages.
-    if (cdataSpec.combineddenylistedCdataRegex === null) {
+    if (cdataSpec.combinedBlacklistedCdataRegex === null) {
       return;
     }
     if (!context.getRules()
-             .getPartialMatchCaseiRegex(cdataSpec.combineddenylistedCdataRegex)
+             .getPartialMatchCaseiRegex(cdataSpec.combinedBlacklistedCdataRegex)
              .test(cdata)) {
       return;
     }
-    for (const denylist of cdataSpec.denylistedCdataRegex) {
-      const denylistRegex = new RegExp(denylist.regex, 'i');
-      if (denylistRegex.test(cdata)) {
+    for (const blacklist of cdataSpec.blacklistedCdataRegex) {
+      const blacklistRegex = new RegExp(blacklist.regex, 'i');
+      if (blacklistRegex.test(cdata)) {
         context.addError(
-            generated.ValidationError.Code.CDATA_VIOLATES_denylist,
+            generated.ValidationError.Code.CDATA_VIOLATES_BLACKLIST,
             context.getLineCol(),
             /* params */
-            [getTagSpecName(this.tagSpec_), denylist.errorMessage],
+            [getTagSpecName(this.tagSpec_), blacklist.errorMessage],
             getTagSpecUrl(this.tagSpec_), validationResult);
       }
     }
@@ -2358,7 +2358,7 @@ class CdataMatcher {
       parse_css.extractImportantDeclarations(stylesheet, important);
       for (const decl of important) {
         context.addError(
-            generated.ValidationError.Code.CDATA_VIOLATES_denylist,
+            generated.ValidationError.Code.CDATA_VIOLATES_BLACKLIST,
             new LineCol(decl.important_line, decl.important_col),
             /* params */
             [getTagSpecName(this.tagSpec_), 'CSS !important'],
@@ -5059,9 +5059,9 @@ function validateAttributes(
         continue;
       }
     }
-    if (attrSpec.denylistedValueRegex !== null) {
+    if (attrSpec.blacklistedValueRegex !== null) {
       const regex = context.getRules().getPartialMatchCaseiRegex(
-          attrSpec.denylistedValueRegex);
+          attrSpec.blacklistedValueRegex);
       if (regex.test(attr.value)) {
         context.addError(
             generated.ValidationError.Code.INVALID_ATTR_VALUE,
