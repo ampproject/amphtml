@@ -16,7 +16,7 @@
 import {Services} from '../../../../src/services';
 import {
   installFormProxy,
-  setdenylistedPropertiesForTesting,
+  setDenylistedPropertiesForTesting,
 } from '../form-proxy';
 import {parseUrlDeprecated} from '../../../../src/url';
 
@@ -78,7 +78,7 @@ describes.repeated(
 
       // Test denylist.
       if (variant.denylist) {
-        setdenylistedPropertiesForTesting(PROPS);
+        setDenylistedPropertiesForTesting(PROPS);
       }
 
       const eventTarget = window.EventTarget;
@@ -96,7 +96,7 @@ describes.repeated(
 
     afterEach(() => {
       delete window.FormProxy;
-      setdenylistedPropertiesForTesting(null);
+      setDenylistedPropertiesForTesting(null);
     });
 
     it('should initialize correctly', () => {

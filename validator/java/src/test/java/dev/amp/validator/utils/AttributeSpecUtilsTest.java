@@ -222,7 +222,7 @@ public class AttributeSpecUtilsTest {
     tagSpecBuilder = ValidatorProtos.TagSpec.newBuilder();
 
     attrSpecBuilder = ValidatorProtos.AttrSpec.newBuilder();
-    attrSpecBuilder.setdenylistedValueRegex("");
+    attrSpecBuilder.setBlacklistedValueRegex("");
     attrSpecs = new ArrayList<>();
     attrSpecs.add(attrSpecBuilder.build());
 

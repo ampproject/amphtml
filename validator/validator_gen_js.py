@@ -339,8 +339,8 @@ CONSTRUCTOR_ARG_FIELDS = [
     'amp.validator.AtRuleSpec.type',
     'amp.validator.AttrSpec.name',
     'amp.validator.AttrTriggerSpec.also_requires_attr',
-    'amp.validator.blacklistedCDataRegex.error_message',
-    'amp.validator.blacklistedCDataRegex.regex',
+    'amp.validator.BlackListedCDataRegex.error_message',
+    'amp.validator.BlackListedCDataRegex.regex',
     'amp.validator.ErrorFormat.code',
     'amp.validator.ErrorFormat.format',
     'amp.validator.PropertySpec.name',
@@ -448,7 +448,7 @@ def PrintClassFor(descriptor, msg_desc, out):
         'this.%s = %s;' % (UnderscoreToCamelCase(field.name), assigned_value))
   if msg_desc.full_name == 'amp.validator.CdataSpec':
     out.Line('/** @type {?number} */')
-    out.Line('this.combinedblacklistedCdataRegex = null;')
+    out.Line('this.combinedBlacklistedCdataRegex = null;')
   if msg_desc.full_name == 'amp.validator.ValidatorRules':
     out.Line('/** @type {!Array<!string>} */')
     out.Line('this.dispatchKeyByTagSpecId = Array(tags.length);')
@@ -672,7 +672,7 @@ def PrintObject(descriptor, msg, registry, out):
         r.regex for r in msg.blacklisted_cdata_regex])
     out.Line('%s.%s = %d;' % (
         this_message_reference,
-        'combinedblacklistedCdataRegex',
+        'combinedBlacklistedCdataRegex',
         registry.InternString(combined_blacklisted_cdata_regex)))
 
 

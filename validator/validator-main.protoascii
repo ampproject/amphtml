@@ -5818,7 +5818,7 @@ attr_lists: {
 # error is more specific, ie: more helpful, preferred.
 error_specificity { code: UNKNOWN_CODE specificity: 0 }
 error_specificity { code: MANDATORY_CDATA_MISSING_OR_INCORRECT specificity: 1 }
-error_specificity { code: CDATA_VIOLATES_blacklist specificity: 2 }
+error_specificity { code: CDATA_VIOLATES_BLACKLIST specificity: 2 }
 error_specificity { code: NON_WHITESPACE_CDATA_ENCOUNTERED specificity: 3 }
 error_specificity { code: INVALID_JSON_CDATA specificity: 4 }
 error_specificity { code: DISALLOWED_TAG_ANCESTOR specificity: 5 }
@@ -6137,7 +6137,7 @@ error_formats {
   format: "The mandatory text inside tag '%1' is missing or incorrect."
 }
 error_formats {
-  code: CDATA_VIOLATES_blacklist
+  code: CDATA_VIOLATES_BLACKLIST
   format: "The text inside tag '%1' contains '%2', which is disallowed."
 }
 error_formats {

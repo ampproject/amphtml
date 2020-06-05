@@ -70,7 +70,7 @@ public class AMPValidatorManager {
         final AMPValidatorLoader ampValidatorLoader = new AMPValidatorLoader();
 
         this.builder = ampValidatorLoader.load(filePath);
-        this.combineddenylistedCdataRegexMap = new HashMap<>();
+        this.combinedBlacklistedCdataRegexMap = new HashMap<>();
 
         final List<ValidatorProtos.TagSpec> tagSpecs = builder.getTagsList();
 
@@ -97,7 +97,7 @@ public class AMPValidatorManager {
                 dispatchKeyByTagSpecId.put(tagSpecId, dispatchKey);
             }
 
-            final List<ValidatorProtos.denylistedCDataRegex> denylistedCDataRegexList =
+            final List<ValidatorProtos.BlacklistedCDataRegex> denylistedCDataRegexList =
                     tagSpec.getCdata().getdenylistedCdataRegexList();
             if (denylistedCDataRegexList != null) {
                 final List<String> combined = new ArrayList<>();
