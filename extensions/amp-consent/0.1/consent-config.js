@@ -301,7 +301,7 @@ export class ConsentConfig {
 
 /**
  * Expand consent endpoint url
- * @param {!Element} element
+ * @param {!Element|!ShadowRoot} element
  * @param {string} url
  * @return {!Promise<string>}
  */
@@ -317,7 +317,7 @@ export function expandConsentEndpointUrl(element, url) {
 
 /**
  * Return AMP CONSENT scoped CID
- * @param {!Element|!../../../src/service/ampdoc-impl.AmpDoc} node
+ * @param {!Element|!ShadowRoot|!../../../src/service/ampdoc-impl.AmpDoc} node
  * @return {!Promise<string>}
  */
 export function getConsentCID(node) {
