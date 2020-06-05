@@ -1672,7 +1672,7 @@ func (m *BlackListedCDataRegex) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BlackListedCDataRegex.Unmarshal(m, b)
 }
 func (m *BlackListedCDataRegex) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_BlacklistedCDataRegex.Marshal(b, m, deterministic)
+	return xxx_messageInfo_BlackListedCDataRegex.Marshal(b, m, deterministic)
 }
 func (m *BlackListedCDataRegex) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_BlackListedCDataRegex.Merge(m, src)

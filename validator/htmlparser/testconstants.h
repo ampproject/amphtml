@@ -33,7 +33,7 @@ inline constexpr std::array<std::string_view, 2> kTestDataDirs{
 // following the HTML5 recovery algorithms. Rendering and re-parsing such a
 // tree will not result in an exact clone of that tree. We blacklist such
 // inputs from the render test.
-inline constexpr std::array<std::string_view, 38> kRenderTestblacklist {
+inline constexpr std::array<std::string_view, 38> kRenderTestBlacklist {
     // The second <a> will be reparented to the first <table>'s parent. This
     // results in an <a> whose parent is an <a>, which is not 'well-formed'.
     "<a><table><td><a><table></table><a></tr><a></table><b>X</b>C<a>Y",

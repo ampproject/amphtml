@@ -97,17 +97,17 @@ public class AMPValidatorManager {
                 dispatchKeyByTagSpecId.put(tagSpecId, dispatchKey);
             }
 
-            final List<ValidatorProtos.BlacklistedCDataRegex> denylistedCDataRegexList =
-                    tagSpec.getCdata().getdenylistedCdataRegexList();
-            if (denylistedCDataRegexList != null) {
+            final List<ValidatorProtos.BlackListedCDataRegex> blackListedCDataRegexList =
+                    tagSpec.getCdata().getBlacklistedCdataRegexList();
+            if (blackListedCDataRegexList != null) {
                 final List<String> combined = new ArrayList<>();
-                for (final ValidatorProtos.denylistedCDataRegex denylistedCDataRegex : denylistedCDataRegexList) {
-                    combined.add(denylistedCDataRegex.getRegex());
+                for (final ValidatorProtos.BlackListedCDataRegex blackListedCDataRegex : blackListedCDataRegexList) {
+                    combined.add(blackListedCDataRegex.getRegex());
                 }
 
                 if (!combined.isEmpty()) {
-                    final String combineddenylistedCdataRegex = String.join("|", combined);
-                    this.combineddenylistedCdataRegexMap.put(String.valueOf(tagSpecId), combineddenylistedCdataRegex);
+                    final String combinedBlacklistedCdataRegex = String.join("|", combined);
+                    this.combinedBlacklistedCdataRegexMap.put(String.valueOf(tagSpecId), combinedBlacklistedCdataRegex);
                 }
             }
 
@@ -269,8 +269,8 @@ public class AMPValidatorManager {
      * @param tagSpecId tag spec id.
      * @return returns a combined black listed regex.
      */
-    public String getCombineddenylistedCdataRegex(final int tagSpecId) {
-        return combineddenylistedCdataRegexMap.get(Integer.toString(tagSpecId));
+    public String getCombinedBlacklistedCdataRegex(final int tagSpecId) {
+        return combinedBlacklistedCdataRegexMap.get(Integer.toString(tagSpecId));
     }
 
     /** Validator builder rules. */
@@ -292,5 +292,5 @@ public class AMPValidatorManager {
     private final Map<Integer, String> dispatchKeyByTagSpecId = new HashMap<>();
 
     /** Combined black listed Cdata regex per Cdataspec. */
-    private Map<String, String> combineddenylistedCdataRegexMap;
+    private Map<String, String> combinedBlacklistedCdataRegexMap;
 }

@@ -642,8 +642,8 @@ public class ParsedValidatorRules {
      * @param tagSpecId tag spec id.
      * @return returns a combined black listed regex.
      */
-    public String getCombineddenylistedCdataRegex(final int tagSpecId) {
-        return ampValidatorManager.getCombineddenylistedCdataRegex(tagSpecId);
+    public String getCombinedBlacklistedCdataRegex(final int tagSpecId) {
+        return ampValidatorManager.getCombinedBlacklistedCdataRegex(tagSpecId);
     }
 
     /**
