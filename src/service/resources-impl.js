@@ -53,6 +53,7 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min
 const FOUR_FRAME_DELAY_ = 70;
+const MAX_BUILD_CHUNK_SIZE = 10;
 
 /** @const {!{id: string, control: string, experiment: string}} */
 const RENDER_ON_IDLE_FIX_EXP = {
@@ -201,7 +202,7 @@ export class ResourcesImpl {
     this.elementsThatScrolled_ = [];
 
     /** @const @private {boolean} */
-    this.buildWhenCloseToViewport_ = isExperimentOn(
+    this.onlyBuildWhenCloseToViewport_ = isExperimentOn(
       this.win,
       'build-close-to-viewport'
     );
@@ -476,6 +477,9 @@ export class ResourcesImpl {
    * @return {boolean}
    */
   isUnderBuildQuota_() {
+    if (this.buildInChunks_ && this.buildsThisPass_ >= MAX_BUILD_CHUNK_SIZE) {
+      return false;
+    }
     // For pre-render we want to limit the amount of CPU used, so we limit
     // the number of elements build. For pre-render to "seem complete"
     // we only need to build elements in the first viewport. We can't know
@@ -484,9 +488,6 @@ export class ResourcesImpl {
     // Most documents have 10 or less AMP tags. By building 20 we should not
     // change the behavior for the vast majority of docs, and almost always
     // catch everything in the first viewport.
-    if (this.buildInChunks_ && this.buildsThisPass_ >= 10) {
-      return false;
-    }
     return this.buildAttemptsCount_ < 20 || this.ampdoc.hasBeenVisible();
   }
 
@@ -504,6 +505,9 @@ export class ResourcesImpl {
     ignoreQuota = false
   ) {
     const buildingEnabled = this.isRuntimeOn_ || this.isBuildOn_;
+    if (!buildingEnabled) {
+      return;
+    }
 
     // During prerender mode, don't build elements that aren't allowed to be
     // prerendered. This avoids wasting our prerender build quota.
@@ -511,24 +515,29 @@ export class ResourcesImpl {
     const shouldBuildResource =
       this.ampdoc.getVisibilityState() != VisibilityState.PRERENDER ||
       resource.prerenderAllowed();
+    if (!shouldBuildResource) {
+      return;
+    }
 
-    const isCloseEnoughToViewport = this.buildWhenCloseToViewport_
-      ? ignoreQuota ||
+    if (this.onlyBuildWhenCloseToViewport_) {
+      const isCloseEnoughToViewport =
+        ignoreQuota ||
         resource.isBuildRenderBlocking() ||
         resource.renderOutsideViewport() ||
-        (this.isIdle_() && resource.idleRenderOutsideViewport())
-      : true;
+        (this.isIdle_() && resource.idleRenderOutsideViewport());
+      if (!isCloseEnoughToViewport) {
+        return;
+      }
+    }
 
-    if (buildingEnabled && shouldBuildResource && isCloseEnoughToViewport) {
-      if (this.documentReady_) {
-        // Build resource immediately, the document has already been parsed.
-        this.buildResourceUnsafe_(resource, ignoreQuota);
-      } else if (!resource.isBuilt() && !resource.isBuilding()) {
-        if (!checkForDupes || !this.pendingBuildResources_.includes(resource)) {
-          // Otherwise add to pending resources and try to build any ready ones.
-          this.pendingBuildResources_.push(resource);
-          this.buildReadyResources_();
-        }
+    if (this.documentReady_) {
+      // Build resource immediately, the document has already been parsed.
+      this.buildResourceUnsafe_(resource, ignoreQuota);
+    } else if (!resource.isBuilt() && !resource.isBuilding()) {
+      if (!checkForDupes || !this.pendingBuildResources_.includes(resource)) {
+        // Otherwise add to pending resources and try to build any ready ones.
+        this.pendingBuildResources_.push(resource);
+        this.buildReadyResources_();
       }
     }
   }
