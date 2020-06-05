@@ -508,7 +508,7 @@ export class ConsentInstance {
       };
       this.ampdoc_.whenFirstVisible().then(() => {
         expandConsentEndpointUrl(
-          this.ampdoc_.getBody(),
+          this.ampdoc_.getHeadNode(),
           /** @type {string} */ (this.onUpdateHref_)
         ).then((expandedUpdateHref) => {
           Services.xhrFor(this.ampdoc_.win).fetchJson(expandedUpdateHref, init);
