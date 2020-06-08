@@ -16,7 +16,7 @@
 import {Services} from '../../../../src/services';
 import {
   installFormProxy,
-  setBlacklistedPropertiesForTesting,
+  setDenylistedPropertiesForTesting,
 } from '../form-proxy';
 import {parseUrlDeprecated} from '../../../../src/url';
 
@@ -39,8 +39,8 @@ describes.repeated(
   {
     'modern w/o inputs': {},
     'modern w/inputs': {inputs: true},
-    'legacy w/o inputs': {blacklist: true},
-    'legacy w/ inputs': {blacklist: true, inputs: true},
+    'legacy w/o inputs': {denylist: true},
+    'legacy w/ inputs': {denylist: true, inputs: true},
     'no EventTarget': {eventTarget: true},
   },
   (name, variant) => {
@@ -64,7 +64,7 @@ describes.repeated(
       // Inputs.
       if (variant.inputs) {
         const inputNames = PROPS.slice(0);
-        // Also, add some methods, which are never blacklisted.
+        // Also, add some methods, which are never denylisted.
         inputNames.push('getAttribute');
         inputNames.push('submit');
         inputs = {};
@@ -76,9 +76,9 @@ describes.repeated(
         });
       }
 
-      // Test blacklist.
-      if (variant.blacklist) {
-        setBlacklistedPropertiesForTesting(PROPS);
+      // Test denylist.
+      if (variant.denylist) {
+        setDenylistedPropertiesForTesting(PROPS);
       }
 
       const eventTarget = window.EventTarget;
@@ -96,7 +96,7 @@ describes.repeated(
 
     afterEach(() => {
       delete window.FormProxy;
-      setBlacklistedPropertiesForTesting(null);
+      setDenylistedPropertiesForTesting(null);
     });
 
     it('should initialize correctly', () => {

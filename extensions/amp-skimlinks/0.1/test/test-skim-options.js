@@ -69,7 +69,7 @@ describes.fakeWin(
         ]);
       });
 
-      it('Should exclude global domain blacklist', () => {
+      it('Should exclude global domain denylist', () => {
         const element = helpers.createAmpSkimlinksElement({
           'publisher-code': '123X123',
         });
@@ -80,7 +80,7 @@ describes.fakeWin(
         ]);
       });
 
-      it('Should not overwrite internal & global blacklist when using option', () => {
+      it('Should not overwrite internal & global denylist when using option', () => {
         const element = helpers.createAmpSkimlinksElement({
           'publisher-code': '123X123',
           'excluded-domains': 'www.merchant1.com',
@@ -89,7 +89,7 @@ describes.fakeWin(
         expect(options.excludedDomains).to.include.members([
           'merchant1.com', // from skim-option
           'mydomain.com', // from internal domains
-          'go.redirectingat.com', // from global blacklist
+          'go.redirectingat.com', // from global denylist
         ]);
       });
     });

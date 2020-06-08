@@ -40,7 +40,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       (content2 = resource(win, 'amp-video')),
       resource(win, 'amp-img', false), // resource outside rect
       resource(win, 'amp-img', true, false), // hidden resource
-      resource(win, 'amp-ad'), // blacklisted resource
+      resource(win, 'amp-ad'), // denylisted resource
     ]);
 
     let contentIniLoadComplete = false;

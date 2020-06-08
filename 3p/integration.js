@@ -695,7 +695,7 @@ window.draw3p = function (
     manageWin(window);
     installEmbedStateListener();
 
-    // Ugly type annotation is due to Event.prototype.data being blacklisted
+    // Ugly type annotation is due to Event.prototype.data being denylisted
     // and the compiler not being able to discern otherwise
     // TODO(alanorozco): Do this more elegantly once old impl is cleaned up.
     draw3p(

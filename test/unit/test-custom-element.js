@@ -1652,7 +1652,7 @@ describes.realWin('CustomElement Service Elements', {amp: true}, (env) => {
     expect(element.getPlaceholder()).to.equal(placeholder2);
   });
 
-  it('getPlaceholder should blacklist some tags', () => {
+  it('getPlaceholder should denylist some tags', () => {
     const placeholder1 = element.appendChild(createWithAttr('placeholder'));
     const input = doc.createElement('input');
     input.setAttribute('placeholder', '');
