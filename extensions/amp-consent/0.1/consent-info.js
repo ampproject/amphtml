@@ -393,17 +393,19 @@ export function convertStorageMetadata(storageMetadata) {
  * @param {JsonObject} metadata
  */
 export function assertMetadataValues(metadata) {
-  const {consentStringType, additionalConsent} = metadata;
+  const consentStringType = metadata['consentStringType'];
+  const additionalConsent = metadata['additionalConsent'];
   const errorFields = [];
+
   if (
     consentStringType &&
     !isEnumValue(CONSENT_STRING_TYPE, consentStringType)
   ) {
-    delete metadata.consentStringType;
+    delete metadata['consentStringType'];
     errorFields.push('consentStringType');
   }
   if (additionalConsent && typeof additionalConsent != 'string') {
-    delete metadata.additionalConsent;
+    delete metadata['additionalConsent'];
     errorFields.push('additionalConsent');
   }
   for (let i = 0; i < errorFields.length; i++) {

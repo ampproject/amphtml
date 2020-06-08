@@ -293,22 +293,8 @@ describes.realWin(
         consentUI.show(true);
         yield macroTask();
 
-        expect(consentUI.ui_.getAttribute('name')).to.deep.equal(
-          JSON.stringify({
-            'clientConfig': {
-              'test': 'ABC',
-            },
-            'consentState': 'accepted',
-            'consentStateValue': 'accepted',
-            'consentMetadata': constructMetadata(
-              CONSENT_STRING_TYPE.TCF_V2,
-              '1~1.10.12.103'
-            ),
-            'consentString': 'test',
-            'promptTrigger': 'action',
-            'isDirty': false,
-          })
-        );
+        const clientInfo = JSON.parse(consentUI.ui_.getAttribute('name'));
+        expect(clientInfo.promptTrigger).to.equal('action');
       });
 
       describe('fullscreen user interaction experiment', () => {
