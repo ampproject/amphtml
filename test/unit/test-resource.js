@@ -132,7 +132,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
     expect(r.isBuilding()).to.be.true;
   });
 
-  it('should blacklist on build failure', () => {
+  it('should denylist on build failure', () => {
     env.sandbox
       .stub(resource, 'maybeReportErrorOnBuildFailure')
       .callsFake(() => {});
