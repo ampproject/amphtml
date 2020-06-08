@@ -297,8 +297,8 @@ function writeMetrics(url, version, metrics) {
  */
 async function measureDocument(url, version, config) {
   const browser = await puppeteer.launch({
-    headless: config.headless,
-    devtools: config.devtools,
+    headless: !!config.headless,
+    devtools: !!config.devtools,
     args: [
       '--allow-file-access-from-files',
       '--enable-blink-features=LayoutInstabilityAPI',
