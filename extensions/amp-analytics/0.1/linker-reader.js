@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {hasOwn} from '../../../src/utils/object';
 import {parseLinker} from './linker';
-import {
-  parseQueryString,
-  parseUrlDeprecated,
-  removeParamsFromSearch,
-} from '../../../src/url';
+import {parseQueryString, removeParamsFromSearch} from '../../../src/url';
 
 import {user} from '../../../src/log';
 
@@ -69,7 +66,10 @@ export class LinkerReader {
    * @return {?Object<string, string>}
    */
   parseAndCleanQueryString_(name) {
-    const parsedUrl = parseUrlDeprecated(this.win_.location.href);
+    const service = Services.urlForDoc(this.win_.document.documentElement);
+    const parsedUrl = /** @type {!Location} */ (service.parse(
+      this.win_.location.href
+    ));
     const params = parseQueryString(parsedUrl.search);
     if (!hasOwn(params, name)) {
       // Linker param not found.

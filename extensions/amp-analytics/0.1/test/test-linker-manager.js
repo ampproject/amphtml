@@ -290,6 +290,7 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
 
       windowInterface.history = {replaceState: () => {}};
       windowInterface.location = {href: linkerUrl};
+      windowInterface.document = doc;
 
       installLinkerReaderService(windowInterface);
       const linkerReader = linkerReaderServiceFor(windowInterface);
