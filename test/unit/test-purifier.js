@@ -899,9 +899,9 @@ describe('validateAttributeChange', () => {
     expect(vac('p', 'class', 'i-amphtml-illegal')).to.be.false;
     // __amp_source_origin in URLs.
     expect(vac('amp-img', 'src', '?__amp_source_origin=evil')).to.be.false;
-    // denylistED_TAG_SPECIFIC_ATTRS.
+    // DENYLISTED_TAG_SPECIFIC_ATTRS.
     expect(vac('select', 'form', 'foo')).to.be.false;
-    // denylistED_TAG_SPECIFIC_ATTR_VALUES.
+    // DENYLISTED_TAG_SPECIFIC_ATTR_VALUES.
     expect(vac('input', 'type', 'image')).to.be.false;
   });
 });

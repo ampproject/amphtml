@@ -217,7 +217,7 @@ export const ALLOWLISTED_TARGETS = ['_top', '_blank'];
 // Extended from IS_SCRIPT_OR_DATA in https://github.com/cure53/DOMPurify/blob/master/src/regexp.js.
 const DENYLISTED_PROTOCOLS = /^(?:\w+script|data|blob):/i;
 
-// Same as denylistED_PROTOCOLS modulo those handled by DOMPurify.
+// Same as DENYLISTED_PROTOCOLS modulo those handled by DOMPurify.
 const EXTENDED_DENYLISTED_PROTOCOLS = /^(?:blob):/i;
 
 // From https://github.com/cure53/DOMPurify/blob/master/src/regexp.js.
@@ -233,7 +233,7 @@ const DENYLISTED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze(
 );
 
 /**
- * Rules in addition to denylistED_TAG_SPECIFIC_ATTR_VALUES for AMP4EMAIL.
+ * Rules in addition to DENYLISTED_TAG_SPECIFIC_ATTR_VALUES for AMP4EMAIL.
  * @const {!Object<string, !Object<string, !RegExp>>}
  */
 const EMAIL_DENYLISTED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze(
