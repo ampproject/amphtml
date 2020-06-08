@@ -144,8 +144,7 @@ export class History {
 
   /**
    * Requests navigation one step back. This first attempts to go back within
-   * the context of this document. If there is no history left, then attempt
-   * the window's history.back.
+   * the context of this document.
    *
    * @param {boolean=} canPerformWindowBack
    * @return {!Promise}
