@@ -1067,7 +1067,7 @@ function decodeAttrValue(attrValue) {
     // TODO(powdercloud): We're currently using this to prohibit
     // __amp_source_origin for URLs. We may want to introduce a
     // global bad url functionality with patterns or similar, as opposed
-    // to applying this to every attribute that has a denylisted value
+    // to applying this to every attribute that has a blacklisted value
     // regex.
     decodedAttrValue = unescape(attrValue);
   }
