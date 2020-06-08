@@ -18,7 +18,7 @@ import {Layout} from '../../../src/layout';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {SocialShare} from './social-share';
-import {addParamsToUrl} from '../../../src/url';
+import {addParamsToUrl, parseQueryString} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
@@ -113,9 +113,9 @@ class AmpSocialShare extends PreactBaseElement {
    * @param {!../../../src/service/platform-impl.Platform} platform
    */
   renderWithHrefAndTarget_(typeConfig, platform) {
+    const customEndpoint = this.element.getAttribute('data-share-endpoint');
     const shareEndpoint = user().assertString(
-      this.element.getAttribute('data-share-endpoint') ||
-        typeConfig['shareEndpointAmp'],
+      customEndpoint || typeConfig['shareEndpoint'],
       'The data-share-endpoint attribute is required. %s'
     );
     const urlParams = typeConfig['defaultParams'] || dict();
@@ -133,16 +133,31 @@ class AmpSocialShare extends PreactBaseElement {
     urlReplacements.expandUrlAsync(hrefWithVars, bindings).then((result) => {
       const href = result;
       // mailto:, sms: protocols breaks when opened in _blank on iOS Safari
-      const {protocol} = Services.urlForDoc(this.element).parse(href);
+      const {protocol, search} = Services.urlForDoc(this.element).parse(href);
+      console.log('amp', href, protocol, search, parseQueryString(search));
+
       const isMailTo = protocol === 'mailto:';
       const isSms = protocol === 'sms:';
       const target =
         platform.isIos() && (isMailTo || isSms)
           ? '_top'
           : this.element.getAttribute('data-target') || '_blank';
-      this.mutateProps(
-        dict({'endpoint': href, 'target': target, 'ignoreParams': true})
-      );
+
+      if (customEndpoint) {
+        this.mutateProps(
+          dict({
+            'endpoint': href,
+            'target': target,
+          })
+        );
+      } else {
+        this.mutateProps(
+          dict({
+            'params': parseQueryString(search),
+            'target': target,
+          })
+        );
+      }
     });
   }
 }

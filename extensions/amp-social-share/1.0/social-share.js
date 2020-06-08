@@ -33,12 +33,7 @@ const NAME = 'SocialShare';
  * @param {!JsonObject} props
  *  type: !string,
  *  endpoint: ?string,
- *  paramUrl: ?string,
- *  paramText: ?string,
- *  paramMini: ?boolean,
- *  paramRecipient: ?string,
- *  ignoreParams: ?boolean,
- *  additionalParams: ?JsonObject,
+ *  params: ?JsonObject,
  *  target: ?string,
  *  width: ?string,
  *  height: ?string,
@@ -48,17 +43,14 @@ const NAME = 'SocialShare';
  */
 export function SocialShare(props) {
   useResourcesNotify();
-  const {baseEndpoint, checkedWidth, checkedHeight, checkedTarget} = checkProps(
-    props
-  );
-  let combinedParams = dict();
-  if (!props['ignoreParams']) {
-    combinedParams = props['additionalParams'];
-  }
-  const finalEndpoint = addParamsToUrl(
-    /** @type {string} */ (baseEndpoint),
-    /** @type {!JsonObject} */ (combinedParams)
-  );
+  console.log('props', props);
+  const {
+    finalEndpoint,
+    checkedWidth,
+    checkedHeight,
+    checkedTarget,
+  } = checkProps(props);
+  console.log('fe', finalEndpoint);
 
   const type = props['type'].toUpperCase();
   const baseStyle = CSS.BASE_STYLE;
@@ -87,7 +79,7 @@ export function SocialShare(props) {
 /**
  * @param {!JsonObject} props
  * @return {{
- *   baseEndpoint: string,
+ *   finalEndpoint: string,
  *   checkedWidth: number,
  *   checkedHeight: number,
  *   checkedTarget: string,
@@ -100,6 +92,7 @@ function checkProps(props) {
     'target': target,
     'width': width,
     'height': height,
+    'params': params,
   } = props;
 
   // Verify type is provided
@@ -110,16 +103,23 @@ function checkProps(props) {
   // User must provide endpoint if they choose a type that is not
   // pre-configured
   const typeConfig = getSocialConfig(type) || dict();
-  const baseEndpoint =
-    endpoint ||
-    /** @type {function(!JsonObject):string} */ (typeConfig[
-      'shareEndpointPreact'
-    ])(props);
+  let baseEndpoint = endpoint || typeConfig['shareEndpoint'];
   if (baseEndpoint === undefined) {
     throw new Error(
       `An endpoint is required if not using a pre-configured type. ${NAME}`
     );
   }
+
+  // Special case when type is 'email'
+  if (type === 'email' && !endpoint) {
+    baseEndpoint = `mailto:${params['recipient'] || ''}`;
+  }
+
+  // Add params to baseEndpoint
+  const finalEndpoint = addParamsToUrl(
+    /** @type {string} */ (baseEndpoint),
+    /** @type {!JsonObject} */ (params)
+  );
 
   // Defaults
   const checkedWidth = width || DEFAULT_WIDTH;
@@ -127,7 +127,7 @@ function checkProps(props) {
   const checkedTarget = target || DEFAULT_TARGET;
 
   return {
-    baseEndpoint,
+    finalEndpoint,
     checkedWidth,
     checkedHeight,
     checkedTarget,
