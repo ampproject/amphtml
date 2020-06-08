@@ -26,7 +26,7 @@ min_validator_revision_required: 455
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 1048
+spec_file_revision: 1049
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
@@ -5972,24 +5972,37 @@ error_specificity {
   specificity: 119
 }
 error_specificity {
-  code: INVALID_UTF8
+  code: CSS_SYNTAX_DISALLOWED_ATTR_SELECTOR
   specificity: 120
 }
 error_specificity {
-  code: CSS_EXCESSIVELY_NESTED
+  code: CSS_SYNTAX_DISALLOWED_PSEUDO_CLASS
   specificity: 121
 }
 error_specificity {
-  code: DOCUMENT_SIZE_LIMIT_EXCEEDED
+  code: CSS_SYNTAX_DISALLOWED_PSEUDO_ELEMENT
   specificity: 122
 }
+
 error_specificity {
-  code: VALUE_SET_MISMATCH
+  code: INVALID_UTF8
   specificity: 123
 }
 error_specificity {
-  code: INVALID_DOCTYPE_HTML
+  code: CSS_EXCESSIVELY_NESTED
   specificity: 124
+}
+error_specificity {
+  code: DOCUMENT_SIZE_LIMIT_EXCEEDED
+  specificity: 125
+}
+error_specificity {
+  code: VALUE_SET_MISMATCH
+  specificity: 126
+}
+error_specificity {
+  code: INVALID_DOCTYPE_HTML
+  specificity: 127
 }
 error_specificity {
   code: DEV_MODE_ONLY
@@ -6470,6 +6483,18 @@ error_formats {
 error_formats {
   code: CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE
   format: "CSS syntax error in tag '%1' - disallowed media feature '%2'."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_ATTR_SELECTOR
+  format: "CSS error in tag '%1' - disallowed attribute selector '%2'."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_PSEUDO_CLASS
+  format: "CSS error in tag '%1' - disallowed pseudo class '%2'."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_PSEUDO_ELEMENT
+  format: "CSS error in tag '%1' - disallowed pseudo element '%2'."
 }
 error_formats {
   code: CSS_EXCESSIVELY_NESTED
