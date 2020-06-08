@@ -29,7 +29,7 @@ let denylistedProperties = null;
  * @param {?Array<string>} properties
  * @visibleForTesting
  */
-export function setdenylistedPropertiesForTesting(properties) {
+export function setDenylistedPropertiesForTesting(properties) {
   denylistedProperties = properties;
 }
 
