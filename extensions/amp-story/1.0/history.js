@@ -20,6 +20,7 @@ import {parseJson} from '../../../src/json';
 
 const EXPIRATION_DURATION_MILLIS = 10 * 60 * 1000; // 10 Minutes
 const CREATION_TIME = 'time';
+const STATE = 'state';
 /** @visibleForTesting */
 export const LOCAL_STORAGE_KEY = 'amp-story-state';
 
@@ -78,7 +79,8 @@ export function getHistoryState(win, stateName) {
  */
 function getLocalStorageState(win) {
   const container = getLocalStorageStateContainer(win);
-  return container && container[getDocumentKey(win)];
+  const holder = container && container[getDocumentKey(win)];
+  return holder && holder[STATE];
 }
 
 /**
@@ -89,8 +91,10 @@ function getLocalStorageState(win) {
  */
 function setLocalStorageState(win, state) {
   const container = getLocalStorageStateContainer(win);
-  state[CREATION_TIME] = Date.now();
-  container[getDocumentKey(win)] = state;
+  container[getDocumentKey(win)] = {
+    [STATE]: state,
+    [CREATION_TIME]: Date.now(),
+  };
   writeLocalStorage(win, container);
 }
 
