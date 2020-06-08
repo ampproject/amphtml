@@ -92,9 +92,15 @@ export class InstrumentationService {
    * @param {!Element} target
    * @param {string} eventType
    * @param {!JsonObject=} opt_vars A map of vars and their values.
+   * @param {boolean} enableDataVars
    */
-  triggerEventForTarget(target, eventType, opt_vars) {
-    const event = new AnalyticsEvent(target, eventType, opt_vars);
+  triggerEventForTarget(target, eventType, opt_vars, enableDataVars = true) {
+    const event = new AnalyticsEvent(
+      target,
+      eventType,
+      opt_vars,
+      enableDataVars
+    );
     const root = this.findRoot_(target);
     const trackerName = getTrackerKeyName(eventType);
     const tracker = /** @type {!CustomEventTracker|!AmpStoryEventTracker} */ (root.getTracker(

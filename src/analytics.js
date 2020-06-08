@@ -22,12 +22,23 @@ import {Services} from './services';
  * @param {!Element} target
  * @param {string} eventType
  * @param {!JsonObject=} opt_vars A map of vars and their values.
+ * @param {boolean} enableDataVars
  */
-export function triggerAnalyticsEvent(target, eventType, opt_vars) {
+export function triggerAnalyticsEvent(
+  target,
+  eventType,
+  opt_vars,
+  enableDataVars = true
+) {
   Services.analyticsForDocOrNull(target).then((analytics) => {
     if (!analytics) {
       return;
     }
-    analytics.triggerEventForTarget(target, eventType, opt_vars);
+    analytics.triggerEventForTarget(
+      target,
+      eventType,
+      opt_vars,
+      enableDataVars
+    );
   });
 }

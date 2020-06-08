@@ -278,7 +278,12 @@ export class AccessSource {
    * @private
    */
   analyticsEvent_(eventType) {
-    triggerAnalyticsEvent(this.getRootElement_(), eventType);
+    triggerAnalyticsEvent(
+      this.getRootElement_(),
+      eventType,
+      undefined,
+      /** enableDataVars */ false
+    );
   }
 
   /**

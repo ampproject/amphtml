@@ -22,8 +22,8 @@ import {
   VideoAnalyticsEvents,
   videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
+import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isArray, isEnumValue, isFiniteNumber} from '../../../src/types';
@@ -204,6 +204,22 @@ export function getTrackerTypesForParentType(parentType) {
 }
 
 /**
+ * Expand the event variables to include default data-vars
+ * @param {!Element} target
+ * @param {!JsonObject} eventVars
+ * @return {!JsonObject}
+ */
+function mergeDataVars(target, eventVars) {
+  const vars = getDataParamsFromAttributes(
+    target,
+    /* computeParamNameFunc */ undefined,
+    VARIABLE_DATA_ATTRIBUTE_KEY
+  );
+  deepMerge(vars, eventVars, 1);
+  return vars;
+}
+
+/**
  * @interface
  */
 class SignalTrackerDef {
@@ -230,14 +246,17 @@ export class AnalyticsEvent {
    * @param {!Element} target The most relevant target element.
    * @param {string} type The type of event.
    * @param {?JsonObject=} opt_vars A map of vars and their values.
+   * @param {boolean} enableDataVars
    */
-  constructor(target, type, opt_vars) {
+  constructor(target, type, opt_vars, enableDataVars = true) {
     /** @const */
     this['target'] = target;
     /** @const */
     this['type'] = type;
     /** @const */
-    this['vars'] = opt_vars || dict();
+    this['vars'] = enableDataVars
+      ? mergeDataVars(target, opt_vars || dict())
+      : opt_vars || dict();
   }
 }
 
@@ -544,12 +563,7 @@ export class ClickEventTracker extends EventTracker {
    * @private
    */
   handleClick_(listener, target, unusedEvent) {
-    const params = getDataParamsFromAttributes(
-      target,
-      /* computeParamNameFunc */ undefined,
-      VARIABLE_DATA_ATTRIBUTE_KEY
-    );
-    listener(new AnalyticsEvent(target, 'click', params));
+    listener(new AnalyticsEvent(target, 'click'));
   }
 }
 
@@ -709,7 +723,8 @@ export class ScrollEventTracker extends EventTracker {
         new AnalyticsEvent(
           this.root_.getRootElement(),
           AnalyticsEventType.SCROLL,
-          vars
+          vars,
+          /** enableDataVars */ false
         )
       );
     }
@@ -1206,7 +1221,8 @@ export class TimerEventTracker extends EventTracker {
     return new AnalyticsEvent(
       this.root.getRootElement(),
       eventType,
-      this.trackers_[timerId].getTimerVars()
+      this.trackers_[timerId].getTimerVars(),
+      /** enableDataVars */ false
     );
   }
 
@@ -1698,6 +1714,7 @@ export class VisibilityTracker extends EventTracker {
    * @private
    */
   onEvent_(eventType, listener, target, state) {
+    // TODO: Verify usage and change behavior to have state override data-vars
     const attr = getDataParamsFromAttributes(
       target,
       /* computeParamNameFunc */ undefined,
@@ -1706,6 +1723,8 @@ export class VisibilityTracker extends EventTracker {
     for (const key in attr) {
       state[key] = attr[key];
     }
-    listener(new AnalyticsEvent(target, eventType, state));
+    listener(
+      new AnalyticsEvent(target, eventType, state, /** enableDataVars */ false)
+    );
   }
 }
