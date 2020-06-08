@@ -18,7 +18,7 @@ const {resolve, dirname} = require('path');
 
 // Returns a new Map<string, {detected: boolean, removeable: Array<string>}
 // key is a valid callee name to potentially remove.
-// value.detected indicates if the callee name (key) was imported into this module.
+// value.detected indicates if the callee name (key) was imported into the current module.
 // value.removeable is the array of property names that can be removed.
 // Example: ['dev', {detected: false, removeable: ['fine']}] would mean ... `dev().fine(...)` can be removed.
 function defaultCalleeToPropertiesMap() {
