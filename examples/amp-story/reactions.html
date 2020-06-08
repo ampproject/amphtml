@@ -10,6 +10,9 @@
       body {
         font-family: 'Poppins', sans-serif;
       }
+      .i-amphtml-story-reaction-component {
+        justify-self: center;
+      }
     </style>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
@@ -49,13 +52,12 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
-            <h1 style="color: white">This is a quiz</h1>
             <amp-story-reaction-quiz
                 id="first-cup-dark"
                 endpoint="http://localhost:3000/reactions"
                 style="--reaction-accent-color: #20AC5E;"
                 theme="dark"
-                prompt-text="Who won the first soccer world cup?"
+                prompt-text="Is this a Latin quiz?"
                 option-1-text="France"
                 option-2-text="Spain"
                 option-3-text="Uruguay" option-3-correct
@@ -78,11 +80,11 @@
                 theme="dark"
                 style="--reaction-accent-color: rgb(0, 0, 0);"
                 chip-corner="sharp"
-                prompt-text="Who won the last soccer world cup?"
-                option-1-text="France" option-1-correct
-                option-2-text="Spain"
-                option-3-text="Uruguay"
-                option-4-text="Brazil">
+                prompt-text="Is this a Chinese quiz?"
+                option-1-text="法国是一个伟大的国家" option-1-correct
+                option-2-text="西班牙是一个了不起的国家"
+                option-3-text="乌拉圭是最好的国家"
+                option-4-text="巴西是一个好国家">
             </amp-story-reaction-quiz>
           </amp-story-grid-layer>
         </amp-story-page>
@@ -100,9 +102,9 @@
                 id="largest-mammal-light"
                 endpoint="http://localhost:3000/reactions"
                 chip-corner="sharp"
-                prompt-text="What is the largest mammal?"
-                option-1-text="Blue whale" option-1-correct
-                option-2-text="Etruscan shrew is the smallest animal on earth and I need a really long line here">
+                prompt-text="Is this an Arabic quiz?"
+                option-1-text="الحوت الأزرق" option-1-correct
+                option-2-text="الزبدة الأترورية">
             </amp-story-reaction-quiz>
           </amp-story-grid-layer>
         </amp-story-page>
@@ -119,9 +121,28 @@
             <amp-story-reaction-quiz
                 id="smallest-mammal-light"
                 chip-corner="sharp"
-                prompt-text="What is the smallest mammal?"
-                option-1-text="Blue whale"
-                option-2-text="Etruscan shrew" option-2-correct>
+                prompt-text="Is this a Hindi quiz?"
+                option-1-text="नमस्ते आप कैसे हैं"
+                option-2-text="मैं ठीक हूँ और आप" option-2-correct>
+            </amp-story-reaction-quiz>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="quiz-3b">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="img/blue-stuff.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-reaction-quiz
+                id="smallest-mammal-light"
+                chip-corner="sharp"
+                prompt-text="Is this a Hebrew quiz?"
+                option-1-text="דוקטור מוזר"
+                option-2-text="פנתר שחור" option-2-correct>
             </amp-story-reaction-quiz>
           </amp-story-grid-layer>
         </amp-story-page>

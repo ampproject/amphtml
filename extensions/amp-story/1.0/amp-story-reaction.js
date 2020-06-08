@@ -181,7 +181,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
   buildCallback(concreteCSS = '') {
     this.options_ = this.parseOptions_();
     this.rootEl_ = this.buildComponent();
-    this.rootEl_.classList.add('i-amphtml-story-reaction');
+    this.rootEl_.classList.add('i-amphtml-story-reaction-container');
     this.element.classList.add('i-amphtml-story-reaction-component');
     this.adjustGridLayer_();
     this.initializeListeners_();
