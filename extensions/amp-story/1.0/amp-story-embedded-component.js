@@ -32,7 +32,12 @@ import {EventType, dispatch} from './events';
 import {Keys} from '../../../src/utils/key-codes';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
-import {addAttributesToElement, closest, matches} from '../../../src/dom';
+import {
+  addAttributesToElement,
+  closest,
+  matches,
+  tryFocus,
+} from '../../../src/dom';
 import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
