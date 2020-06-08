@@ -63,12 +63,7 @@ export const _default = () => {
       <SocialShare
         type={type}
         endpoint={endpoint}
-        paramUrl={paramUrl}
-        paramText={paramText}
-        paramMini={paramMini}
-        paramRecipient={paramRecipient}
-        ignoreParams={ignoreParams}
-        additionalParams={additionalParams}
+        params={additionalParams}
         width={width}
         height={height}
       />
