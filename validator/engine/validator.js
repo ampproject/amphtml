@@ -5667,6 +5667,7 @@ class ParsedValidatorRules {
     this.typeIdentifiers_['actions'] = 0;
     this.typeIdentifiers_['transformed'] = 0;
     this.typeIdentifiers_['data-ampdevmode'] = 0;
+    this.typeIdentifiers_['data-css-strict'] = 0;
 
     // For every tagspec that contains an ExtensionSpec, we add several
     // TagSpec fields corresponding to the data found in the ExtensionSpec.
@@ -5917,7 +5918,8 @@ class ParsedValidatorRules {
           // considered mandatory unlike other type identifiers.
           if (typeIdentifier !== 'actions' &&
               typeIdentifier !== 'transformed' &&
-              typeIdentifier !== 'data-ampdevmode') {
+              typeIdentifier !== 'data-ampdevmode' &&
+              typeIdentifier !== 'data-css-strict') {
             hasMandatoryTypeIdentifier = true;
           }
           // The type identifier "transformed" has restrictions on it's value.
@@ -5991,7 +5993,7 @@ class ParsedValidatorRules {
             htmlTag.attrs(),
             [
               '\u26a14email', '\u26a1\ufe0f4email', 'amp4email',
-              'data-ampdevmode'
+              'data-ampdevmode', 'data-css-strict'
             ],
             context, validationResult);
         break;
