@@ -107,7 +107,7 @@
   <link rel="manifest accessibility">
 
   <!--
-  name blacklisted_value_regex: "(^|\\s)(viewport|content-disposition|revisit-after)($|\\s)"
+  name disallowed_value_regex: "(^|\\s)(viewport|content-disposition|revisit-after)($|\\s)"
   The first two examples are valid. The latter two examples are invalid.
   -->
   <meta name="valid" content="">
@@ -116,7 +116,7 @@
   <meta name="invalid content-disposition" content="">
 
   <!--
-  css selector blacklisted_value_regex: "(^|\\W)i-amphtml-"
+  css selector disallowed_value_regex: "(^|\\W)i-amphtml-"
   The first example is valid. The latter four are invalid.
   -->
   <style amp-custom>
@@ -133,7 +133,7 @@
 <body>
 
   <!--
-  class blacklisted_value_regex: "(^|\\W)i-amphtml-"
+  class disallowed_value_regex: "(^|\\W)i-amphtml-"
   The first example is valid. The latter two are invalid.
   -->
   <div class="example-amp-font"></div>
@@ -141,7 +141,7 @@
   <div class="i-amphtml-hidden example-amp-font"></div>
 
   <!--
-  id blacklisted_value_regex: lengthy, see protoascii
+  id disallowed_value_regex: lengthy, see protoascii
   The first example is valid. The latter two are invalid.
   -->
   <div id="exampe-amp-font"></div>
@@ -149,7 +149,7 @@
   <div id="AMP"></div>
 
   <!--
-  name blacklisted_value_regex: lengthy, see protoascii
+  name disallowed_value_regex: lengthy, see protoascii
   The first two examples are valid. The latter three are invalid.
   -->
   <input name="" />

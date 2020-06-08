@@ -132,7 +132,7 @@ feature_tests/regexps.html:106:2 The attribute 'rel' in tag 'link rel=' is set t
 feature_tests/regexps.html:107:2 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'manifest accessibility'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags)
 |
 |    <!--
-|    name blacklisted_value_regex: "(^|\\s)(viewport|content-disposition|revisit-after)($|\\s)"
+|    name disallowed_value_regex: "(^|\\s)(viewport|content-disposition|revisit-after)($|\\s)"
 |    The first two examples are valid. The latter two examples are invalid.
 |    -->
 |    <meta name="valid" content="">
@@ -145,7 +145,7 @@ feature_tests/regexps.html:115:2 The attribute 'name' in tag 'meta name= and con
 feature_tests/regexps.html:116:2 The attribute 'name' in tag 'meta name= and content=' is set to the invalid value 'invalid content-disposition'.
 |
 |    <!--
-|    css selector blacklisted_value_regex: "(^|\\W)i-amphtml-"
+|    css selector disallowed_value_regex: "(^|\\W)i-amphtml-"
 |    The first example is valid. The latter four are invalid.
 |    -->
 |    <style amp-custom>
@@ -164,7 +164,7 @@ feature_tests/regexps.html:122:2 The text inside tag 'style amp-custom' contains
 |  <body>
 |
 |    <!--
-|    class blacklisted_value_regex: "(^|\\W)i-amphtml-"
+|    class disallowed_value_regex: "(^|\\W)i-amphtml-"
 |    The first example is valid. The latter two are invalid.
 |    -->
 |    <div class="example-amp-font"></div>
@@ -176,7 +176,7 @@ feature_tests/regexps.html:140:2 The attribute 'class' in tag 'div' is set to th
 feature_tests/regexps.html:141:2 The attribute 'class' in tag 'div' is set to the invalid value 'i-amphtml-hidden example-amp-font'.
 |
 |    <!--
-|    id blacklisted_value_regex: lengthy, see protoascii
+|    id disallowed_value_regex: lengthy, see protoascii
 |    The first example is valid. The latter two are invalid.
 |    -->
 |    <div id="exampe-amp-font"></div>
@@ -188,7 +188,7 @@ feature_tests/regexps.html:148:2 The attribute 'id' in tag 'div' is set to the i
 feature_tests/regexps.html:149:2 The attribute 'id' in tag 'div' is set to the invalid value 'AMP'.
 |
 |    <!--
-|    name blacklisted_value_regex: lengthy, see protoascii
+|    name disallowed_value_regex: lengthy, see protoascii
 |    The first two examples are valid. The latter three are invalid.
 |    -->
 |    <input name="" />
