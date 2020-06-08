@@ -31,7 +31,7 @@ export function streamResponseToWriter(win, response, writer) {
     return reader.read().then(function handleChunk({value, done}) {
       // We need to close and flush the decoder on the last chunk even if
       // we have no more bytes and `decode` will throw if not given an
-      // array buffer,
+      // array buffer.
       value = value || new Uint8Array();
       const text = decoder.decode(value, {stream: !done});
 
