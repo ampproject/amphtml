@@ -76,7 +76,7 @@ tags: {  # <amp-inline-gallery-thumbnails>
     name: "aspect-ratio-height"
     # Non-zero number
     value_regex: "\\d+(\\.\\d+)?"
-    blacklisted_value_regex: "^0+(\\.0+)?$"
+    disallowed_value_regex: "^0+(\\.0+)?$"
     trigger: {
       also_requires_attr: "aspect-ratio-width"
     }
@@ -85,7 +85,7 @@ tags: {  # <amp-inline-gallery-thumbnails>
     name: "aspect-ratio-width"
     # Non-zero number
     value_regex: "\\d+(\\.\\d+)?"
-    blacklisted_value_regex: "^0+(\\.0+)?$"
+    disallowed_value_regex: "^0+(\\.0+)?$"
     trigger: {
       also_requires_attr: "aspect-ratio-height"
     }

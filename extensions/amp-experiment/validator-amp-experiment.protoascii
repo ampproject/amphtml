@@ -45,7 +45,7 @@ tags: {  # amp-experiment (json)
   cdata: {
     max_bytes: 15000
     max_bytes_spec_url: "https://amp.dev/documentation/components/amp-experiment#configuration"
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }

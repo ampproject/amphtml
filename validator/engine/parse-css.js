@@ -1089,7 +1089,7 @@ class UrlFunctionVisitor extends RuleVisitor {
 }
 
 /**
- * Helper class for implementing parse_css::ExtractImportantProperties.
+ * Helper class for implementing ExtractImportantProperties.
  * Iterates over all declarations and returns pointers to declarations
  * that were marked with `!important`.
  * @private
@@ -1387,3 +1387,894 @@ const parseMediaQueries = function(
   stylesheet.accept(visitor);
 };
 exports.parseMediaQueries = parseMediaQueries;
+
+/**
+ * Abstract super class for CSS Selectors. The Token class, which this
+ * class inherits from, has line, col, and tokenType fields.
+ */
+const Selector = class extends tokenize_css.Token {
+  /** @param {function(!Selector)} lambda */
+  forEachChild(lambda) {}
+
+  /** @param {!SelectorVisitor} visitor */
+  accept(visitor) {}
+};
+exports.Selector = Selector;
+
+/**
+ * A super class for making visitors (by overriding the types of interest).
+ * The traverseSelectros function can be used to visit nodes in a
+ * parsed CSS selector.
+ */
+const SelectorVisitor = class {
+  constructor() {}
+
+  /** @param {!TypeSelector} typeSelector */
+  visitTypeSelector(typeSelector) {}
+
+  /** @param {!IdSelector} idSelector */
+  visitIdSelector(idSelector) {}
+
+  /** @param {!AttrSelector} attrSelector */
+  visitAttrSelector(attrSelector) {}
+
+  /** @param {!PseudoSelector} pseudoSelector */
+  visitPseudoSelector(pseudoSelector) {}
+
+  /** @param {!ClassSelector} classSelector */
+  visitClassSelector(classSelector) {}
+
+  /** @param {!SimpleSelectorSequence} sequence */
+  visitSimpleSelectorSequence(sequence) {}
+
+  /** @param {!Combinator} combinator */
+  visitCombinator(combinator) {}
+
+  /** @param {!SelectorsGroup} group */
+  visitSelectorsGroup(group) {}
+};
+exports.SelectorVisitor = SelectorVisitor;
+
+/**
+ * Visits selectorNode and its children, recursively, by calling the
+ * appropriate methods on the provided visitor.
+ * @param {!Selector} selectorNode
+ * @param {!SelectorVisitor} visitor
+ */
+const traverseSelectors = function(selectorNode, visitor) {
+  /** @type {!Array<!Selector>} */
+  const toVisit = [selectorNode];
+  while (toVisit.length > 0) {
+    /** @type {!Selector} */
+    const node = toVisit.shift();
+    node.accept(visitor);
+    node.forEachChild(child => {
+      toVisit.push(child);
+    });
+  }
+};
+exports.traverseSelectors = traverseSelectors;
+
+/**
+ * This node models type selectors and universial selectors.
+ * http://www.w3.org/TR/css3-selectors/#type-selectors
+ * http://www.w3.org/TR/css3-selectors/#universal-selector
+ */
+const TypeSelector = class extends Selector {
+  /**
+   * Choices for namespacePrefix:
+   * - 'a specific namespace prefix' means 'just that specific namespace'.
+   * - '' means 'without a namespace'
+   * - '*' means 'any namespace including without a namespace'
+   * - null means the default namespace if one is declared, and '*' otherwise.
+   *
+   * The universal selector is covered by setting the elementName to '*'.
+   *
+   * @param {?string} namespacePrefix
+   * @param {string} elementName
+   */
+  constructor(namespacePrefix, elementName) {
+    super();
+    /** @type {?string} */
+    this.namespacePrefix = namespacePrefix;
+    /** @type {string} */
+    this.elementName = elementName;
+    /** @type {!tokenize_css.TokenType} */
+    this.tokenType = tokenize_css.TokenType.TYPE_SELECTOR;
+  }
+
+  /**
+   * Serializes the selector to a string (in this case CSS syntax that
+   * could be used to recreate it).
+   * @return {string}
+   */
+  toString() {
+    if (this.namespacePrefix === null) {
+      return this.elementName;
+    }
+    return this.namespacePrefix + '|' + this.elementName;
+  }
+
+  /** @inheritDoc */
+  accept(visitor) {
+    visitor.visitTypeSelector(this);
+  }
+};
+
+/** @inheritDoc */
+TypeSelector.prototype.toJSON = function() {
+  const json = Selector.prototype.toJSON.call(this);
+  json['namespacePrefix'] = this.namespacePrefix;
+  json['elementName'] = this.elementName;
+  return json;
+};
+
+/**
+ * Helper function for determining whether the provided token is a specific
+ * delimiter.
+ * @param {!tokenize_css.Token} token
+ * @param {string} delimChar
+ * @return {boolean}
+ */
+function isDelim(token, delimChar) {
+  return token.tokenType === tokenize_css.TokenType.DELIM &&
+      /** @type {!tokenize_css.DelimToken} */ (token).value === delimChar;
+}
+
+/**
+ * tokenStream.current() is the first token of the type selector.
+ * @param {!TokenStream} tokenStream
+ * @return {!TypeSelector}
+ */
+const parseATypeSelector = function(tokenStream) {
+  /** @type {?string} */
+  let namespacePrefix = null;
+  /** @type {string} */
+  let elementName = '*';
+  const start = tokenStream.current();
+
+  if (isDelim(tokenStream.current(), '|')) {
+    namespacePrefix = '';
+    tokenStream.consume();
+  } else if (
+      isDelim(tokenStream.current(), '*') && isDelim(tokenStream.next(), '|')) {
+    namespacePrefix = '*';
+    tokenStream.consume();
+    tokenStream.consume();
+  } else if (
+      tokenStream.current().tokenType === tokenize_css.TokenType.IDENT &&
+      isDelim(tokenStream.next(), '|')) {
+    const ident =
+        /** @type {!tokenize_css.IdentToken} */ (tokenStream.current());
+    namespacePrefix = ident.value;
+    tokenStream.consume();
+    tokenStream.consume();
+  }
+  if (isDelim(tokenStream.current(), '*')) {
+    elementName = '*';
+    tokenStream.consume();
+  } else if (tokenStream.current().tokenType === tokenize_css.TokenType.IDENT) {
+    const ident =
+        /** @type {!tokenize_css.IdentToken} */ (tokenStream.current());
+    elementName = ident.value;
+    tokenStream.consume();
+  }
+  return start.copyPosTo(new TypeSelector(namespacePrefix, elementName));
+};
+exports.parseATypeSelector = parseATypeSelector;
+
+/**
+ * An ID selector references some document id.
+ * http://www.w3.org/TR/css3-selectors/#id-selectors
+ * Typically written as '#foo'.
+ */
+const IdSelector = class extends Selector {
+  /**
+   * @param {string} value
+   */
+  constructor(value) {
+    super();
+    /** @type {string} */
+    this.value = value;
+    /** @type {!tokenize_css.TokenType} */
+    this.tokenType = tokenize_css.TokenType.ID_SELECTOR;
+  }
+
+  /** @return {string} */
+  toString() {
+    return '#' + this.value;
+  }
+
+  /** @inheritDoc */
+  accept(visitor) {
+    visitor.visitIdSelector(this);
+  }
+};
+/** @inheritDoc */
+IdSelector.prototype.toJSON = function() {
+  const json = Selector.prototype.toJSON.call(this);
+  json['value'] = this.value;
+  return json;
+};
+
+/**
+ * tokenStream.current() must be the hash token.
+ * @param {!TokenStream} tokenStream
+ * @return {!IdSelector}
+ */
+const parseAnIdSelector = function(tokenStream) {
+  asserts.assert(
+      tokenStream.current().tokenType === tokenize_css.TokenType.HASH,
+      'Precondition violated: must start with HashToken');
+  const hash = /** @type {!tokenize_css.HashToken} */ (tokenStream.current());
+  tokenStream.consume();
+  return hash.copyPosTo(new IdSelector(hash.value));
+};
+exports.parseAnIdSelector = parseAnIdSelector;
+
+/**
+ * An attribute selector matches document nodes based on their attributes.
+ * http://www.w3.org/TR/css3-selectors/#attribute-selectors
+ *
+ * Typically written as '[foo=bar]'.
+ */
+const AttrSelector = class extends Selector {
+  /**
+   * @param {?string} namespacePrefix
+   * @param {string} attrName
+   * @param {string} matchOperator is either the string
+   * representation of the match operator (e.g., '=' or '~=') or '',
+   * in which case the attribute selector is a check for the presence
+   * of the attribute.
+   * @param {string} value is the value to apply the match operator
+   * against, or if matchOperator is '', then this must be empty as
+   * well.
+   */
+  constructor(namespacePrefix, attrName, matchOperator, value) {
+    super();
+    /** @type {?string} */
+    this.namespacePrefix = namespacePrefix;
+    /** @type {string} */
+    this.attrName = attrName;
+    /** @type {string} */
+    this.matchOperator = matchOperator;
+    /** @type {string} */
+    this.value = value;
+    /** @type {!tokenize_css.TokenType} */
+    this.tokenType = tokenize_css.TokenType.ATTR_SELECTOR;
+  }
+
+  /** @inheritDoc */
+  accept(visitor) {
+    visitor.visitAttrSelector(this);
+  }
+};
+/** @inheritDoc */
+AttrSelector.prototype.toJSON = function() {
+  const json = Selector.prototype.toJSON.call(this);
+  json['namespacePrefix'] = this.namespacePrefix;
+  json['attrName'] = this.attrName;
+  json['matchOperator'] = this.matchOperator;
+  json['value'] = this.value;
+  return json;
+};
+
+/**
+ * Helper for parseAnAttrSelector.
+ * @private
+ * @param {!tokenize_css.Token} start
+ * @return {!tokenize_css.ErrorToken}
+ */
+function newInvalidAttrSelectorError(start) {
+  return start.copyPosTo(new tokenize_css.ErrorToken(
+      ValidationError.Code.CSS_SYNTAX_INVALID_ATTR_SELECTOR, ['style']));
+}
+
+/**
+ * tokenStream.current() must be the open square token.
+ * @param {!TokenStream} tokenStream
+ * @return {!AttrSelector|!tokenize_css.ErrorToken}
+ */
+function parseAnAttrSelector(tokenStream) {
+  asserts.assert(
+      tokenStream.current().tokenType === tokenize_css.TokenType.OPEN_SQUARE,
+      'Precondition violated: must be an OpenSquareToken');
+  const start = tokenStream.current();
+  tokenStream.consume();  // Consumes '['.
+  if (tokenStream.current().tokenType === tokenize_css.TokenType.WHITESPACE) {
+    tokenStream.consume();
+  }
+  // This part is defined in https://www.w3.org/TR/css3-selectors/#attrnmsp:
+  // Attribute selectors and namespaces. It is similar to parseATypeSelector.
+  let namespacePrefix = null;
+  if (isDelim(tokenStream.current(), '|')) {
+    namespacePrefix = '';
+    tokenStream.consume();
+  } else if (
+      isDelim(tokenStream.current(), '*') && isDelim(tokenStream.next(), '|')) {
+    namespacePrefix = '*';
+    tokenStream.consume();
+    tokenStream.consume();
+  } else if (
+      tokenStream.current().tokenType === tokenize_css.TokenType.IDENT &&
+      isDelim(tokenStream.next(), '|')) {
+    const ident =
+        /** @type {!tokenize_css.IdentToken} */ (tokenStream.current());
+    namespacePrefix = ident.value;
+    tokenStream.consume();
+    tokenStream.consume();
+  }
+  // Now parse the attribute name. This part is mandatory.
+  if (!(tokenStream.current().tokenType === tokenize_css.TokenType.IDENT)) {
+    return newInvalidAttrSelectorError(start);
+  }
+  const ident = /** @type {!tokenize_css.IdentToken} */ (tokenStream.current());
+  const attrName = ident.value;
+  tokenStream.consume();
+  if (tokenStream.current().tokenType === tokenize_css.TokenType.WHITESPACE) {
+    tokenStream.consume();
+  }
+
+  // After the attribute name, we may see an operator; if we do, then
+  // we must see either a string or an identifier. This covers
+  // 6.3.1 Attribute presence and value selectors
+  // (https://www.w3.org/TR/css3-selectors/#attribute-representation) and
+  // 6.3.2 Substring matching attribute selectors
+  // (https://www.w3.org/TR/css3-selectors/#attribute-substrings).
+
+  /** @type {string} */
+  let matchOperator = '';
+  const current = tokenStream.current().tokenType;
+  if (isDelim(tokenStream.current(), '=')) {
+    matchOperator = '=';
+    tokenStream.consume();
+  } else if (current === tokenize_css.TokenType.INCLUDE_MATCH) {
+    matchOperator = '~=';
+    tokenStream.consume();
+  } else if (current === tokenize_css.TokenType.DASH_MATCH) {
+    matchOperator = '|=';
+    tokenStream.consume();
+  } else if (current === tokenize_css.TokenType.PREFIX_MATCH) {
+    matchOperator = '^=';
+    tokenStream.consume();
+  } else if (current === tokenize_css.TokenType.SUFFIX_MATCH) {
+    matchOperator = '$=';
+    tokenStream.consume();
+  } else if (current === tokenize_css.TokenType.SUBSTRING_MATCH) {
+    matchOperator = '*=';
+    tokenStream.consume();
+  }
+  if (tokenStream.current().tokenType === tokenize_css.TokenType.WHITESPACE) {
+    tokenStream.consume();
+  }
+  /** @type {string} */
+  let value = '';
+  if (matchOperator !== '') {  // If we saw an operator, parse the value.
+    const current = tokenStream.current().tokenType;
+    if (current === tokenize_css.TokenType.IDENT) {
+      const ident =
+          /** @type {!tokenize_css.IdentToken} */ (tokenStream.current());
+      value = ident.value;
+      tokenStream.consume();
+    } else if (current === tokenize_css.TokenType.STRING) {
+      const str =
+          /** @type {!tokenize_css.StringToken} */ (tokenStream.current());
+      value = str.value;
+      tokenStream.consume();
+    }
+  }
+  if (tokenStream.current().tokenType === tokenize_css.TokenType.WHITESPACE) {
+    tokenStream.consume();
+  }
+  // The attribute selector must in any case terminate with a close square
+  // token.
+  if (tokenStream.current().tokenType !== tokenize_css.TokenType.CLOSE_SQUARE) {
+    return newInvalidAttrSelectorError(start);
+  }
+  tokenStream.consume();
+  const selector =
+      new AttrSelector(namespacePrefix, attrName, matchOperator, value);
+  return start.copyPosTo(selector);
+}
+
+/**
+ * @param {!Array<!Object>} array
+ * @return {!Array<string>}
+ */
+function recursiveArrayToJSON(array) {
+  const json = [];
+  for (const entry of array) {
+    json.push(entry.toJSON());
+  }
+  return json;
+}
+
+/**
+ * A pseudo selector can match either pseudo classes or pseudo elements.
+ * http://www.w3.org/TR/css3-selectors/#pseudo-classes
+ * http://www.w3.org/TR/css3-selectors/#pseudo-elements.
+ *
+ * Typically written as ':visited', ':lang(fr)', and '::first-line'.
+ *
+ * isClass: Pseudo selectors with a single colon (e.g., ':visited')
+ * are pseudo class selectors. Selectors with two colons (e.g.,
+ * '::first-line') are pseudo elements.
+ *
+ * func: If it's a function style pseudo selector, like lang(fr), then func
+ * the function tokens. TODO(powdercloud): parse this in more detail.
+ */
+const PseudoSelector = class extends Selector {
+  /**
+   * @param {boolean} isClass
+   * @param {string} name
+   * @param {!Array<!tokenize_css.Token>} func
+   */
+  constructor(isClass, name, func) {
+    super();
+    /** @type {boolean} */
+    this.isClass = isClass;
+    /** @type {string} */
+    this.name = name;
+    /** @type {!Array<!tokenize_css.Token>} */
+    this.func = func;
+    /** @type {!tokenize_css.TokenType} */
+    this.tokenType = tokenize_css.TokenType.PSEUDO_SELECTOR;
+  }
+
+  /** @inheritDoc */
+  accept(visitor) {
+    visitor.visitPseudoSelector(this);
+  }
+};
+/** @inheritDoc */
+PseudoSelector.prototype.toJSON = function() {
+  const json = Selector.prototype.toJSON.call(this);
+  json['isClass'] = this.isClass;
+  json['name'] = this.name;
+  if (this.func.length !== 0) {
+    json['func'] = recursiveArrayToJSON(this.func);
+  }
+  return json;
+};
+
+/**
+ * tokenStream.current() must be the ColonToken. Returns an error if
+ * the pseudo token can't be parsed (e.g., a lone ':').
+ * @param {!TokenStream} tokenStream
+ * @return {!PseudoSelector|!tokenize_css.ErrorToken}
+ */
+function parseAPseudoSelector(tokenStream) {
+  asserts.assert(
+      tokenStream.current().tokenType === tokenize_css.TokenType.COLON,
+      'Precondition violated: must be a ":"');
+  const firstColon = tokenStream.current();
+  tokenStream.consume();
+  let isClass = true;
+  if (tokenStream.current().tokenType === tokenize_css.TokenType.COLON) {
+    // '::' starts a pseudo element, ':' starts a pseudo class.
+    isClass = false;
+    tokenStream.consume();
+  }
+  if (tokenStream.current().tokenType === tokenize_css.TokenType.IDENT) {
+    const ident =
+        /** @type {!tokenize_css.IdentToken} */ (tokenStream.current());
+    const name = ident.value;
+    tokenStream.consume();
+    return firstColon.copyPosTo(new PseudoSelector(isClass, name, []));
+  } else if (
+      tokenStream.current().tokenType ===
+      tokenize_css.TokenType.FUNCTION_TOKEN) {
+    const funcToken =
+        /** @type {!tokenize_css.FunctionToken} */ (tokenStream.current());
+    /**  @type {!Array<!tokenize_css.ErrorToken>} */
+    const errors = [];
+    const func = extractAFunction(tokenStream, errors);
+    if (errors.length > 0) {
+      return errors[0];
+    }
+    tokenStream.consume();
+    return firstColon.copyPosTo(
+        new PseudoSelector(isClass, funcToken.value, func));
+  } else {
+    return firstColon.copyPosTo(new tokenize_css.ErrorToken(
+        ValidationError.Code.CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR, ['style']));
+  }
+}
+
+/**
+ * A class selector of the form '.value' is a shorthand notation for
+ * an attribute match of the form '[class~=value]'.
+ * http://www.w3.org/TR/css3-selectors/#class-html
+ */
+const ClassSelector = class extends Selector {
+  /**
+   * @param {string} value the class to match.
+   */
+  constructor(value) {
+    super();
+    /** @type {string} */
+    this.value = value;
+    /** @type {!tokenize_css.TokenType} */
+    this.tokenType = tokenize_css.TokenType.CLASS_SELECTOR;
+  }
+  /** @return {string} */
+  toString() {
+    return '.' + this.value;
+  }
+
+  /** @inheritDoc */
+  accept(visitor) {
+    visitor.visitClassSelector(this);
+  }
+};
+/** @inheritDoc */
+ClassSelector.prototype.toJSON = function() {
+  const json = Selector.prototype.toJSON.call(this);
+  json['value'] = this.value;
+  return json;
+};
+
+/**
+ * tokenStream.current() must be the '.' delimiter token.
+ * @param {!TokenStream} tokenStream
+ * @return {!ClassSelector}
+ */
+const parseAClassSelector = function(tokenStream) {
+  asserts.assert(
+      isDelim(tokenStream.current(), '.') &&
+          tokenStream.next().tokenType === tokenize_css.TokenType.IDENT,
+      'Precondition violated: must start with "." and follow with ident');
+  const dot = tokenStream.current();
+  tokenStream.consume();
+  const ident = /** @type {!tokenize_css.IdentToken} */ (tokenStream.current());
+  tokenStream.consume();
+  return dot.copyPosTo(new ClassSelector(ident.value));
+};
+exports.parseAClassSelector = parseAClassSelector;
+
+
+/**
+ * Models a simple selector sequence, e.g. '*|foo#id'.
+ */
+const SimpleSelectorSequence = class extends Selector {
+  /**
+   * @param {!TypeSelector} typeSelector
+   * @param {!Array<!Selector>} otherSelectors
+   */
+  constructor(typeSelector, otherSelectors) {
+    super();
+    /** @type {!TypeSelector} */
+    this.typeSelector = typeSelector;
+    /** @type {!Array<!Selector>} */
+    this.otherSelectors = otherSelectors;
+    /** @type {!tokenize_css.TokenType} */
+    this.tokenType = tokenize_css.TokenType.SIMPLE_SELECTOR_SEQUENCE;
+  }
+
+  /** @inheritDoc */
+  forEachChild(lambda) {
+    lambda(this.typeSelector);
+    for (const other of this.otherSelectors) {
+      lambda(other);
+    }
+  }
+
+  /** @inheritDoc */
+  accept(visitor) {
+    visitor.visitSimpleSelectorSequence(this);
+  }
+};
+/** @inheritDoc */
+SimpleSelectorSequence.prototype.toJSON = function() {
+  const json = Selector.prototype.toJSON.call(this);
+  json['typeSelector'] = this.typeSelector.toJSON();
+  json['otherSelectors'] = recursiveArrayToJSON(this.otherSelectors);
+  return json;
+};
+
+/**
+ * tokenStream.current must be the first token of the sequence.
+ * This function will return an error if no selector is found.
+ * @param {!TokenStream} tokenStream
+ * @return {!SimpleSelectorSequence|!tokenize_css.ErrorToken}
+ */
+const parseASimpleSelectorSequence = function(tokenStream) {
+  const start = tokenStream.current();
+  let typeSelector = null;
+  if (isDelim(tokenStream.current(), '*') ||
+      isDelim(tokenStream.current(), '|') ||
+      tokenStream.current().tokenType === tokenize_css.TokenType.IDENT) {
+    typeSelector = parseATypeSelector(tokenStream);
+  }
+  /** @type {!Array<!Selector>} */
+  const otherSelectors = [];
+  while (true) {
+    if (tokenStream.current().tokenType === tokenize_css.TokenType.HASH) {
+      otherSelectors.push(parseAnIdSelector(tokenStream));
+    } else if (
+        isDelim(tokenStream.current(), '.') &&
+        tokenStream.next().tokenType === tokenize_css.TokenType.IDENT) {
+      otherSelectors.push(parseAClassSelector(tokenStream));
+    } else if (
+        tokenStream.current().tokenType ===
+        tokenize_css.TokenType.OPEN_SQUARE) {
+      const maybeAttrSelector = parseAnAttrSelector(tokenStream);
+      if (maybeAttrSelector.tokenType === tokenize_css.TokenType.ERROR) {
+        return /** @type {!tokenize_css.ErrorToken} */ (maybeAttrSelector);
+      }
+      otherSelectors.push(
+          /** @type {!Selector} */ (maybeAttrSelector));
+    } else if (
+        tokenStream.current().tokenType === tokenize_css.TokenType.COLON) {
+      const maybePseudo = parseAPseudoSelector(tokenStream);
+      if (maybePseudo.tokenType === tokenize_css.TokenType.ERROR) {
+        return /** @type {!tokenize_css.ErrorToken} */ (maybePseudo);
+      }
+      otherSelectors.push(/** @type {!Selector} */ (maybePseudo));
+      // NOTE: If adding more 'else if' clauses here, be sure to udpate
+      // isSimpleSelectorSequenceStart accordingly.
+    } else {
+      if (typeSelector === null) {
+        if (otherSelectors.length == 0) {
+          return tokenStream.current().copyPosTo(new tokenize_css.ErrorToken(
+              ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR, ['style']));
+        }
+        // If no type selector is given then the universal selector is implied.
+        typeSelector = start.copyPosTo(new TypeSelector(
+            /*namespacePrefix=*/ null, /*elementName=*/ '*'));
+      }
+      return start.copyPosTo(
+          new SimpleSelectorSequence(typeSelector, otherSelectors));
+    }
+  }
+};
+exports.parseASimpleSelectorSequence = parseASimpleSelectorSequence;
+
+/**
+ * @enum {string}
+ */
+const CombinatorType = {
+  'DESCENDANT': 'DESCENDANT',
+  'CHILD': 'CHILD',
+  'ADJACENT_SIBLING': 'ADJACENT_SIBLING',
+  'GENERAL_SIBLING': 'GENERAL_SIBLING',
+};
+exports.CombinatorType = CombinatorType;
+
+/**
+ * Models a combinator, as described in
+ * http://www.w3.org/TR/css3-selectors/#combinators.
+ */
+const Combinator = class extends Selector {
+  /**
+   * @param {!CombinatorType} combinatorType
+   * @param {!SimpleSelectorSequence|!Combinator} left
+   * @param {!SimpleSelectorSequence} right
+   */
+  constructor(combinatorType, left, right) {
+    super();
+    /** @type {!CombinatorType} */
+    this.combinatorType = combinatorType;
+    /** @type {!SimpleSelectorSequence|!Combinator} */
+    this.left = left;
+    /** @type {!SimpleSelectorSequence} */
+    this.right = right;
+    /** @type {!tokenize_css.TokenType} */
+    this.tokenType = tokenize_css.TokenType.COMBINATOR;
+  }
+
+  /** @inheritDoc */
+  forEachChild(lambda) {
+    lambda(this.left);
+    lambda(this.right);
+  }
+
+  /** @inheritDoc */
+  accept(visitor) {
+    visitor.visitCombinator(this);
+  }
+};
+/** @inheritDoc */
+Combinator.prototype.toJSON = function() {
+  const json = Selector.prototype.toJSON.call(this);
+  json['combinatorType'] = this.combinatorType;
+  json['left'] = this.left.toJSON();
+  json['right'] = this.right.toJSON();
+  return json;
+};
+
+/**
+ * The CombinatorType for a given token; helper function used when
+ * constructing a Combinator instance.
+ * @param {!tokenize_css.Token} token
+ * @return {!CombinatorType}
+ */
+function combinatorTypeForToken(token) {
+  if (token.tokenType === tokenize_css.TokenType.WHITESPACE) {
+    return CombinatorType.DESCENDANT;
+  } else if (isDelim(token, '>')) {
+    return CombinatorType.CHILD;
+  } else if (isDelim(token, '+')) {
+    return CombinatorType.ADJACENT_SIBLING;
+  } else if (isDelim(token, '~')) {
+    return CombinatorType.GENERAL_SIBLING;
+  }
+  asserts.fail('Internal Error: not a combinator token');
+}
+
+/**
+ * Whether or not the provided token could be the start of a simple
+ * selector sequence. See the simple_selector_sequence production in
+ * http://www.w3.org/TR/css3-selectors/#grammar.
+ * @param {!tokenize_css.Token} token
+ * @return {boolean}
+ */
+function isSimpleSelectorSequenceStart(token) {
+  // Type selector start.
+  if (isDelim(token, '*') || isDelim(token, '|') ||
+      (token.tokenType === tokenize_css.TokenType.IDENT)) {
+    return true;
+  }
+  // Id selector start.
+  if (token.tokenType === tokenize_css.TokenType.HASH) {
+    return true;
+  }
+  // Class selector start.
+  if (isDelim(token, '.')) {
+    return true;
+  }
+  // Attr selector start.
+  if (token.tokenType === tokenize_css.TokenType.OPEN_SQUARE) {
+    return true;
+  }
+  // A pseudo selector.
+  if (token.tokenType === tokenize_css.TokenType.COLON) {
+    return true;
+  }
+  // TODO(johannes): add the others.
+  return false;
+}
+
+/**
+ * The selector production from
+ * http://www.w3.org/TR/css3-selectors/#grammar
+ * Returns an ErrorToken if no selector is found.
+ * @param {!TokenStream} tokenStream
+ * @return {!SimpleSelectorSequence|
+ *          !Combinator|!tokenize_css.ErrorToken}
+ */
+const parseASelector = function(tokenStream) {
+  if (!isSimpleSelectorSequenceStart(tokenStream.current())) {
+    return tokenStream.current().copyPosTo(new tokenize_css.ErrorToken(
+        ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START, ['style']));
+  }
+  const parsed = parseASimpleSelectorSequence(tokenStream);
+  if (parsed.tokenType === tokenize_css.TokenType.ERROR) {
+    return parsed;
+  }
+  let left = /** @type {!SimpleSelectorSequence}*/ (parsed);
+  while (true) {
+    // Consume whitespace in front of combinators, while being careful
+    // to not eat away the infamous "whitespace operator" (sigh, haha).
+    if ((tokenStream.current().tokenType ===
+         tokenize_css.TokenType.WHITESPACE) &&
+        !isSimpleSelectorSequenceStart(tokenStream.next())) {
+      tokenStream.consume();
+    }
+    // If present, grab the combinator token which we'll use for line
+    // / column info.
+    if (!(((tokenStream.current().tokenType ===
+            tokenize_css.TokenType.WHITESPACE) &&
+           isSimpleSelectorSequenceStart(tokenStream.next())) ||
+          isDelim(tokenStream.current(), '+') ||
+          isDelim(tokenStream.current(), '>') ||
+          isDelim(tokenStream.current(), '~'))) {
+      return left;
+    }
+    const combinatorToken = tokenStream.current();
+    tokenStream.consume();
+    if (tokenStream.current().tokenType === tokenize_css.TokenType.WHITESPACE) {
+      tokenStream.consume();
+    }
+    const right = parseASimpleSelectorSequence(tokenStream);
+    if (right.tokenType === tokenize_css.TokenType.ERROR) {
+      return right;  // TODO(johannes): more than one error / partial tree.
+    }
+    left = combinatorToken.copyPosTo(new Combinator(
+        combinatorTypeForToken(combinatorToken), left,
+        /** @type {!SimpleSelectorSequence} */ (right)));
+  }
+};
+exports.parseASelector = parseASelector;
+
+/**
+ * Models a selectors group, as described in
+ * http://www.w3.org/TR/css3-selectors/#grouping.
+ */
+const SelectorsGroup = class extends Selector {
+  /**
+   * @param {!Array<!SimpleSelectorSequence|
+   *         !Combinator>} elements
+   */
+  constructor(elements) {
+    super();
+    /**
+       @type {!Array<!SimpleSelectorSequence|
+        !Combinator>}
+     */
+    this.elements = elements;
+    /** @type {!tokenize_css.TokenType} */
+    this.tokenType = tokenize_css.TokenType.SELECTORS_GROUP;
+  }
+
+  /** @inheritDoc */
+  forEachChild(lambda) {
+    for (const child of this.elements) {
+      lambda(child);
+    }
+  }
+
+  /** @param {!SelectorVisitor} visitor */
+  accept(visitor) {
+    visitor.visitSelectorsGroup(this);
+  }
+};
+/** @inheritDoc */
+SelectorsGroup.prototype.toJSON = function() {
+  const json = Selector.prototype.toJSON.call(this);
+  json['elements'] = recursiveArrayToJSON(this.elements);
+  return json;
+};
+
+/**
+ * The selectors_group production from
+ * http://www.w3.org/TR/css3-selectors/#grammar.
+ * In addition, this parsing routine checks that no input remains,
+ * that is, after parsing the production we reached the end of |token_stream|.
+ * @param {!TokenStream} tokenStream
+ * @return {!SelectorsGroup|
+ *          !SimpleSelectorSequence|!Combinator|
+ *          !tokenize_css.ErrorToken}
+ */
+const parseASelectorsGroup = function(tokenStream) {
+  if (!isSimpleSelectorSequenceStart(tokenStream.current())) {
+    return tokenStream.current().copyPosTo(new tokenize_css.ErrorToken(
+        ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START, ['style']));
+  }
+  const start = tokenStream.current();
+  const elements = [parseASelector(tokenStream)];
+  if (elements[0].tokenType === tokenize_css.TokenType.ERROR) {
+    return elements[0];
+  }
+  while (true) {
+    if (tokenStream.current().tokenType === tokenize_css.TokenType.WHITESPACE) {
+      tokenStream.consume();
+    }
+    if (tokenStream.current().tokenType === tokenize_css.TokenType.COMMA) {
+      tokenStream.consume();
+      if (tokenStream.current().tokenType ===
+          tokenize_css.TokenType.WHITESPACE) {
+        tokenStream.consume();
+      }
+      elements.push(parseASelector(tokenStream));
+      if (elements[elements.length - 1].tokenType ===
+          tokenize_css.TokenType.ERROR) {
+        return elements[elements.length - 1];
+      }
+      continue;
+    }
+    // We're about to claim success and return a selector,
+    // but before we do, we check that no unparsed input remains.
+    if (!(tokenStream.current().tokenType ===
+          tokenize_css.TokenType.EOF_TOKEN)) {
+      return tokenStream.current().copyPosTo(new tokenize_css.ErrorToken(
+          ValidationError.Code.CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR,
+          ['style']));
+    }
+    if (elements.length == 1) {
+      return elements[0];
+    }
+    return start.copyPosTo(new SelectorsGroup(elements));
+  }
+};
+exports.parseASelectorsGroup = parseASelectorsGroup;
