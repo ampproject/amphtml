@@ -36,7 +36,7 @@ tags: {  # <amp-call-tracking>
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attr_lists: "extended-amp-global"
   child_tags: {

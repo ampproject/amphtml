@@ -38,7 +38,7 @@ tags: {  # <amp-payment-google-button> (json)
   attr_lists: "name-attr"
   attr_lists: "nonce-attr"
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }

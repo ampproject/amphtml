@@ -59,7 +59,7 @@ attr_lists: {
     value_url: {
       protocol: "https"
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   # <amp-bind>
   attrs: { name: "[src]" }
@@ -164,7 +164,7 @@ tags: {
   attrs: {
     name: "style"
     mandatory: true
-    blacklisted_value_regex: "!\\s*important"
+    disallowed_value_regex: "!\\s*important"
     css_declaration: {
       name: "display"
       value_casei: "block"

@@ -63,7 +63,7 @@ tags: {  # <amp-state> (json)
   cdata: {
     max_bytes: 100000
     max_bytes_spec_url: "https://amp.dev/documentation/components/amp-bind#state"
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
@@ -87,7 +87,7 @@ tags: {  # <amp-state>
       protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attr_lists: "mandatory-id-attr"
   # <amp-bind>
@@ -137,7 +137,7 @@ tags: { # <amp-state>
       protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attr_lists: "mandatory-id-attr"
   # <amp-bind>

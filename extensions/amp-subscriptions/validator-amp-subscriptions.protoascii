@@ -45,7 +45,7 @@ tags: {  # amp-subscriptions (json)
   }
   attr_lists: "nonce-attr"
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
@@ -124,7 +124,7 @@ tags: {  # <script type="application/octet-stream" ciphertext>
     mandatory: true
   }
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
