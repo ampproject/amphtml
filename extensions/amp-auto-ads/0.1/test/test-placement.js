@@ -1315,7 +1315,7 @@ describes.realWin(
       });
 
       it(
-        'should not return a placement that is a child of a blacklisted ' +
+        'should not return a placement that is a child of a denylisted ' +
           'ancestor.',
         () => {
           const parent = doc.createElement('amp-sidebar');
@@ -1340,7 +1340,7 @@ describes.realWin(
         }
       );
 
-      it('should get a placement when anchor parent of blacklisted ancestor.', () => {
+      it('should get a placement when anchor parent of denylisted ancestor.', () => {
         const anchor = doc.createElement('div');
         anchor.id = 'anId';
         container.appendChild(anchor);

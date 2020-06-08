@@ -293,7 +293,7 @@ describe
         });
       });
 
-      it('should NOT output blacklisted values for class attributes', () => {
+      it('should NOT output denylisted values for class attributes', () => {
         allowConsoleError(() => {
           expect(purify('<p class="i-amphtml-">hello</p>')).to.be.equal(
             '<p>hello</p>'
@@ -764,7 +764,7 @@ describe
     });
 
     describe('AMP formats', () => {
-      it('should blacklist input[type="image"] and input[type="button"] in AMP', () => {
+      it('should denylist input[type="image"] and input[type="button"] in AMP', () => {
         // Given the AMP format type.
         html.setAttribute('amp', '');
         allowConsoleError(() => {
@@ -774,7 +774,7 @@ describe
       });
 
       it('should allow input[type="file"] and input[type="password"]', () => {
-        // Given that the AMP format does not blacklist input types file and
+        // Given that the AMP format does not denylist input types file and
         // password.
         html.setAttribute('amp', '');
         expect(purify('<input type="file">')).to.equal('<input type="file">');
@@ -899,9 +899,9 @@ describe('validateAttributeChange', () => {
     expect(vac('p', 'class', 'i-amphtml-illegal')).to.be.false;
     // __amp_source_origin in URLs.
     expect(vac('amp-img', 'src', '?__amp_source_origin=evil')).to.be.false;
-    // BLACKLISTED_TAG_SPECIFIC_ATTRS.
+    // DENYLISTED_TAG_SPECIFIC_ATTRS.
     expect(vac('select', 'form', 'foo')).to.be.false;
-    // BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES.
+    // DENYLISTED_TAG_SPECIFIC_ATTR_VALUES.
     expect(vac('input', 'type', 'image')).to.be.false;
   });
 });
@@ -923,7 +923,7 @@ describe('getAllowedTags', () => {
     expect(allowedTags).to.have.property('feblend', true);
   });
 
-  it('should have blacklisted tags set to false', () => {
+  it('should have denylisted tags set to false', () => {
     // Tags allowed in DOMPurify but disallowed in AMP.
     expect(allowedTags).to.have.property('audio', false);
     expect(allowedTags).to.have.property('img', false);
