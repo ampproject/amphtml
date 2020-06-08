@@ -65,6 +65,12 @@ CMP_CONFIG['Ogury'] = {
   'promptUISrc': 'https://www.ogury.mgr.consensu.org/amp.html',
 };
 
+CMP_CONFIG['opencmp'] = {
+  'consentInstanceId': 'opencmp',
+  'checkConsentHref': 'https://amp.opencmp.net/consent/check',
+  'promptUISrc': 'https://cdn.opencmp.net/tcf-v2/amp/cmp.html',
+};
+
 CMP_CONFIG['SourcePoint'] = {
   'consentInstanceId': 'SourcePoint',
   'checkConsentHref': 'https://sourcepoint.mgr.consensu.org/consent/v2/amp',
