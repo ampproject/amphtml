@@ -55,6 +55,17 @@ const ActionIcon = {
 /** @private @const {number} */
 const TOOLTIP_CLOSE_ANIMATION_MS = 100;
 
+/** @const {string} */
+const DARK_THEME_CLASS = 'i-amphtml-story-tooltip-theme-dark';
+
+/**
+ * @enum {string}
+ */
+const AttachmentTheme = {
+  LIGHT: 'light', // default
+  DARK: 'dark',
+};
+
 /**
  * Since we don't know the actual width of the content inside the iframe
  * and in responsive environments the iframe takes the whole width, we
@@ -863,6 +874,11 @@ export class AmpStoryEmbeddedComponent {
       component.element
     ));
 
+    const theme = this.triggeringTarget_.getAttribute('theme');
+    if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
+      this.tooltip_.classList.add(DARK_THEME_CLASS);
+    }
+
     this.updateTooltipText_(component.element, embedConfig);
     this.updateTooltipComponentIcon_(component.element, embedConfig);
     this.updateTooltipActionIcon_(embedConfig);
@@ -1317,6 +1333,7 @@ export class AmpStoryEmbeddedComponent {
         this.expandComponentHandler_,
         true
       );
+      this.tooltip_.classList.remove(DARK_THEME_CLASS);
       this.tooltip_.removeAttribute('href');
     });
   }
