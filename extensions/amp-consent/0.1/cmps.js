@@ -82,4 +82,3 @@ CMP_CONFIG['Usercentrics'] = {
   'checkConsentHref': 'https://consents.usercentrics.eu/amp/checkConsent',
   'promptUISrc': 'https://amp.usercentrics.eu/amp.html',
 };
-
