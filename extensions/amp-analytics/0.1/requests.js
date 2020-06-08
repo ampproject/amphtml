@@ -455,7 +455,7 @@ export function expandPostMessage(
  * @param {!./variables.ExpansionOptions} expansionOption
  * @param {!Object} bindings
  * @param {!Element} element
- * @param {!Object=} opt_whitelist
+ * @param {!Object=} opt_allowedList
  * @return {!Promise<!Object>}
  * @private
  */
@@ -466,7 +466,7 @@ function expandExtraUrlParams(
   expansionOption,
   bindings,
   element,
-  opt_whitelist
+  opt_allowedList
 ) {
   const requestPromises = [];
   // Don't encode param values here,
@@ -484,7 +484,7 @@ function expandExtraUrlParams(
       const request = variableService
         .expandTemplate(value, option, element)
         .then((value) =>
-          urlReplacements.expandStringAsync(value, bindings, opt_whitelist)
+          urlReplacements.expandStringAsync(value, bindings, opt_allowedList)
         )
         .then((value) => (params[key] = value));
       requestPromises.push(request);
