@@ -275,5 +275,14 @@ describes.realWin(
 
       expect(percentages4).to.deep.equal([33, 33, 33]);
     });
+
+    it('should update store service when selecting option', () => {
+      const responseData4 = generateResponseDataFor([335, 335, 330]);
+      const percentages4 = ampStoryReaction.preprocessPercentages_(
+        responseData4
+      );
+
+      expect(percentages4).to.deep.equal([33, 33, 33]);
+    });
   }
 );

@@ -19,10 +19,14 @@ import {
   StoryAnalyticsEvent,
   getAnalyticsService,
 } from './story-analytics';
+import {
+  Action,
+  StateProperty,
+  getStoreService,
+} from './amp-story-store-service';
 import {AnalyticsVariable, getVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-reaction-1.0.css';
 import {Services} from '../../../src/services';
-import {StateProperty, getStoreService} from './amp-story-store-service';
 import {
   addParamsToUrl,
   appendPathToUrl,
@@ -44,6 +48,7 @@ const TAG = 'amp-story-reaction';
 export const ReactionType = {
   QUIZ: 0,
   POLL: 1,
+  CATEGORY: 2,
 };
 
 /** @const {string} */
@@ -70,7 +75,9 @@ export let ReactionResponseType;
  * @typedef {{
  *    optionIndex: number,
  *    text: string,
- *    correct: ?string
+ *    correct: ?string,
+ *    category: ?string,
+ *    image: ?string,
  * }}
  */
 export let OptionConfigType;
@@ -177,11 +184,25 @@ export class AmpStoryReaction extends AMP.BaseElement {
     return this.optionElements_;
   }
 
+  /**
+   * Gets the reaction ID
+   * @private
+   * @return {string}
+   */
+  getReactionId_() {
+    if (!this.reactionId_) {
+      const pageId = closest(dev().assertElement(this.element), (el) => {
+        return el.tagName.toLowerCase() === 'amp-story-page';
+      }).getAttribute('id');
+      this.reactionId_ = `CANONICAL_URL+${pageId}`;
+    }
+    return this.reactionId_;
+  }
+
   /** @override */
   buildCallback(concreteCSS = '') {
     this.options_ = this.parseOptions_();
     this.rootEl_ = this.buildComponent();
-    this.rootEl_.classList.add('i-amphtml-story-reaction');
     this.element.classList.add('i-amphtml-story-reaction-component');
     this.adjustGridLayer_();
     this.initializeListeners_();
@@ -328,7 +349,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
   /**
    * Handles a tap event on the quiz element.
    * @param {Event} e
-   * @private
+   * @protected
    */
   handleTap_(e) {
     if (this.hasUserSelection_) {
@@ -344,6 +365,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
     );
 
     if (optionEl) {
+      this.updateStoryStoreState_(optionEl.optionIndex_);
       this.handleOptionSelection_(optionEl);
     }
   }
@@ -538,23 +560,13 @@ export class AmpStoryReaction extends AMP.BaseElement {
       return Promise.reject(ENDPOINT_INVALID_ERROR);
     }
 
-    if (!this.reactionId_) {
-      const pageId = closest(dev().assertElement(this.element), (el) => {
-        return el.tagName.toLowerCase() === 'amp-story-page';
-      }).getAttribute('id');
-      this.reactionId_ = `CANONICAL_URL+${pageId}`;
-    }
-
     return this.getClientId_().then((clientId) => {
       const requestOptions = {'method': method};
       const requestParams = dict({
         'reactionType': this.reactionType_,
         'clientId': clientId,
       });
-      url = appendPathToUrl(
-        this.urlService_.parse(url),
-        dev().assertString(this.reactionId_)
-      );
+      url = appendPathToUrl(this.urlService_.parse(url), this.getReactionId_());
       if (requestOptions['method'] === 'POST') {
         requestOptions['body'] = {'optionSelected': optionSelected};
         requestOptions['headers'] = {'Content-Type': 'application/json'};
@@ -619,6 +631,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
     data.forEach((response, index) => {
       if (response.selectedByUser) {
         this.hasUserSelection_ = true;
+        this.updateStoryStoreState_(index);
         this.mutateElement(() => {
           this.updateOptionPercentages_(data);
           this.updateToPostSelectionState_(options[index]);
@@ -628,16 +641,29 @@ export class AmpStoryReaction extends AMP.BaseElement {
   }
 
   /**
-   * Updates the selected classes on option selected.
-   * @param {!Element} selectedOption
-   * @private
+   * Updates the selected classes on component and option selected.
+   * @param {?Element} selectedOption
+   * @protected
    */
-  updateToPostSelectionState_(selectedOption) {
+  updateToPostSelectionState_(selectedOption = null) {
     this.rootEl_.classList.add('i-amphtml-story-reaction-post-selection');
-    selectedOption.classList.add('i-amphtml-story-reaction-option-selected');
-
+    if (selectedOption) {
+      selectedOption.classList.add('i-amphtml-story-reaction-option-selected');
+    }
     if (this.optionsData_) {
       this.rootEl_.classList.add('i-amphtml-story-reaction-has-data');
     }
+  }
+
+  /**
+   * @public
+   * @param {?number} option
+   */
+  updateStoryStoreState_(option = null) {
+    const update = {
+      'option': option != null ? this.options_[option] : null,
+      'reactionId': this.getReactionId_(),
+    };
+    this.storeService_.dispatch(Action.ADD_INTERACTIVE_REACT, update);
   }
 }

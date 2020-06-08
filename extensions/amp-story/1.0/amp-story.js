@@ -54,6 +54,7 @@ import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
 import {AmpStoryReactionPoll} from './amp-story-reaction-poll';
 import {AmpStoryReactionQuiz} from './amp-story-reaction-quiz';
+import {AmpStoryReactionResultsCategory} from './amp-story-reaction-results-category';
 import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
 import {AnalyticsVariable, getVariableService} from './variable-service';
@@ -461,6 +462,8 @@ export class AmpStory extends AMP.BaseElement {
       });
     }
     this.element.setAttribute('aria-live', 'polite');
+
+    this.initializeInteractiveComponents_();
   }
 
   /**
@@ -1064,6 +1067,24 @@ export class AmpStory extends AMP.BaseElement {
         });
       });
     }
+  }
+
+  /**
+   * Parse doc for polls and quizzes, and initialize them.
+   */
+  initializeInteractiveComponents_() {
+    toArray(
+      this.element.querySelectorAll(
+        'amp-story-reaction-quiz, amp-story-reaction-poll'
+      )
+    ).forEach((element) => {
+      const tag = element.tagName.toLowerCase();
+      if (tag == 'amp-story-reaction-quiz') {
+        new AmpStoryReactionQuiz(element).updateStoryStoreState_();
+      } else if (tag == 'amp-story-reaction-poll') {
+        new AmpStoryReactionPoll(element).updateStoryStoreState_();
+      }
+    });
   }
 
   /**
@@ -2808,5 +2829,9 @@ AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment);
   AMP.registerElement('amp-story-reaction-quiz', AmpStoryReactionQuiz);
   AMP.registerElement('amp-story-reaction-poll', AmpStoryReactionPoll);
+  AMP.registerElement(
+    'amp-story-reaction-results-category',
+    AmpStoryReactionResultsCategory
+  );
   AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });
