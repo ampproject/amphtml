@@ -577,7 +577,7 @@ const forbiddenTerms = {
     message:
       'Logging message require explicitly `TAG`, or an all uppercase' +
       ' string as the first parameter',
-    whitelist: [
+    allowlist: [
       'build-system/babel-plugins/babel-plugin-transform-dev-methods/index.js',
     ],
   },
