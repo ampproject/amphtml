@@ -48,6 +48,7 @@ import {
   AmpA4A,
   ConsentTupleDef,
   DEFAULT_SAFEFRAME_VERSION,
+  NO_SIGNING_EXP,
   XORIGIN_MODE,
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
@@ -487,6 +488,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           [RENDER_ON_IDLE_FIX_EXP.control],
           [RENDER_ON_IDLE_FIX_EXP.experiment],
         ],
+      },
+      [NO_SIGNING_EXP.id]: {
+        isTrafficEligible: () => true,
+        branches: [[NO_SIGNING_EXP.control], [NO_SIGNING_EXP.experiment]],
       },
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
     });

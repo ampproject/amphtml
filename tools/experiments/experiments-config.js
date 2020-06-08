@@ -214,12 +214,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14263',
   },
   {
-    id: 'blurry-placeholder',
-    name: 'Enables a blurred image placeholder as an amp-img loads',
-    spec: 'https://github.com/ampproject/amphtml/issues/15146',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
-  },
-  {
     id: 'amp-carousel-chrome-scroll-snap',
     name: 'Enables scroll snap on carousel on Chrome browsers',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
@@ -328,5 +322,10 @@ export const EXPERIMENTS = [
     id: 'fie-init-chunking',
     name: 'More chunking for friendly iframe initialization',
     spec: 'https://github.com/ampproject/amphtml/issues/27584',
+  },
+  {
+    id: 'a4a-no-signing',
+    name: 'Remove signing requirement for AMPHTML ads',
+    spec: 'https://github.com/ampproject/amphtml/issues/27189',
   },
 ];
