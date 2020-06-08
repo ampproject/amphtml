@@ -1526,7 +1526,7 @@ function createBaseCustomElementClass(win) {
       return dom.lastChildElement(this, (el) => {
         return (
           el.hasAttribute('placeholder') &&
-          // Blacklist elements that has a native placeholder property
+          // Denylist elements that has a native placeholder property
           // like input and textarea. These are not allowed to be AMP
           // placeholders.
           !isInputPlaceholder(el)
