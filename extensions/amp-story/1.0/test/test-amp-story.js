@@ -747,6 +747,8 @@ describes.realWin(
 
         expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
 
+        story.pause_();
+
         // Calling resume should resume the paused state and system ui visibility.
         story.resume_();
 
