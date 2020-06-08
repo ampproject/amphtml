@@ -786,7 +786,9 @@ export class AmpStoryEmbeddedComponent {
       () => {
         this.focusedStateOverlay_.classList.toggle('i-amphtml-hidden', false);
         tryFocus(
-          this.focusedStateOverlay_.querySelector('a.i-amphtml-story-tooltip')
+          dev().assertElement(
+            this.focusedStateOverlay_.querySelector('a.i-amphtml-story-tooltip')
+          )
         );
       }
     );
