@@ -19,7 +19,7 @@
  * This function should be replaced with transform stream when well supported.
  * @param {!Window} win
  * @param {!Response} response
- * @param {!WritableStreamDefaultWriter} writer
+ * @param {!./detached-dom-stream.DetachedDomStream} writer
  * @return {!Promise}
  */
 export function streamResponseToWriter(win, response, writer) {
@@ -32,7 +32,7 @@ export function streamResponseToWriter(win, response, writer) {
       // We need to close and flush the decoder on the last chunk even if
       // we have no more bytes and `decode` will throw if not given an
       // array buffer.
-      value = value || new Uint8Array();
+      value = value || new Uint8Array(0);
       const text = decoder.decode(value, {stream: !done});
 
       if (text) {

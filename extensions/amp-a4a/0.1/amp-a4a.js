@@ -865,7 +865,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Start streaming response into the detached document.
    * @param {!Response} response
-   * @return {dunno}
+   * @return {boolean}
    */
   streamResponse_(response) {
     // TODO(ccordry): get size from headers equivalent to
@@ -887,7 +887,7 @@ export class AmpA4A extends AMP.BaseElement {
 
     this.sanitizedHeadPromise_ = transformStream
       .waitForHead()
-      .then(this.validateHead_);
+      .then((head) => this.validateHead_(head));
 
     this.transferBody_ = transformStream.transferBody;
 
