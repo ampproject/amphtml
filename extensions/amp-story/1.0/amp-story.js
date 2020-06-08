@@ -485,6 +485,8 @@ export class AmpStory extends AMP.BaseElement {
       Action.TOGGLE_PAUSED,
       this.pausedStateToRestore_
     );
+    // Simulate touch end (if paused with touchstart) to resume player swipe (#28425)
+    this.advancement_.onTouchend_();
   }
 
   /**

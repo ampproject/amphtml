@@ -84,6 +84,17 @@ describes.realWin(
       story = await element.getImpl();
     }
 
+    const getTouchOptions = (x, y) => {
+      const touch = new Touch({
+        target: story.element,
+        identifier: Date.now(),
+        clientX: x,
+        clientY: y,
+      });
+
+      return {touches: [touch], bubbles: true};
+    };
+
     /**
      * @param {string} eventType
      * @return {!Event}
@@ -718,6 +729,30 @@ describes.realWin(
         onVisibilityChangedStub.getCall(0).args[0]();
 
         // Paused state has been changed to false.
+        expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.false;
+      });
+
+      it('should show system UI and unpause on resume', async () => {
+        // Fix #28425, on player swipe doesn't get touchend so UI doesn't show.
+        await createStoryWithPages(2, ['cover', 'page-1']);
+
+        story.buildCallback();
+
+        await story.layoutCallback();
+
+        // Touchstarts will hide systemUI and pause story.
+        story.pages_[0].element.dispatchEvent(
+          new TouchEvent('touchstart', getTouchOptions(0, 0))
+        );
+
+        expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.true;
+
+        // Calling resume should resume the paused state and system ui visibility.
+        story.resume_();
+
+        expect(
+          story.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE)
+        ).to.be.true;
         expect(story.storeService_.get(StateProperty.PAUSED_STATE)).to.be.false;
       });
 
@@ -1554,17 +1589,6 @@ describes.realWin(
       });
 
       describe('touch events handlers', () => {
-        const getTouchOptions = (x, y) => {
-          const touch = new Touch({
-            target: story.element,
-            identifier: Date.now(),
-            clientX: x,
-            clientY: y,
-          });
-
-          return {touches: [touch], bubbles: true};
-        };
-
         const dispatchSwipeEvent = (deltaX, deltaY) => {
           story.element.dispatchEvent(
             new TouchEvent('touchstart', getTouchOptions(-10, -10))
