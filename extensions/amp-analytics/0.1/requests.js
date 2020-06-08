@@ -17,7 +17,7 @@
 import {AnalyticsEventType} from './events';
 import {BatchSegmentDef, defaultSerializer} from './transport-serializer';
 import {ExpansionOptions, variableServiceForDoc} from './variables';
-import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
+import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-allowedlist';
 import {Services} from '../../../src/services';
 import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -87,7 +87,7 @@ export class RequestHandler {
     this.transport_ = transport;
 
     /** @const @private {!Object|undefined} */
-    this.whiteList_ = isSandbox ? SANDBOX_AVAILABLE_VARS : undefined;
+    this.allowedList_ = isSandbox ? SANDBOX_AVAILABLE_VARS : undefined;
 
     /** @private {?number} */
     this.batchIntervalTimeoutId_ = null;
@@ -142,14 +142,14 @@ export class RequestHandler {
         expansionOption,
         this.element_,
         bindings,
-        this.whiteList_
+        this.allowedList_
       );
 
       this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then((baseUrl) => {
         return this.urlReplacementService_.expandUrlAsync(
           baseUrl,
           bindings,
-          this.whiteList_
+          this.allowedList_
         );
       });
     }
@@ -170,14 +170,14 @@ export class RequestHandler {
           requestOriginExpansionOpt,
           this.element_,
           bindings,
-          this.whiteList_
+          this.allowedList_
         )
         // substitute in URL values e.g. DOCUMENT_REFERRER -> https://example.com
         .then((expandedRequestOrigin) => {
           return this.urlReplacementService_.expandUrlAsync(
             expandedRequestOrigin,
             bindings,
-            this.whiteList_,
+            this.allowedList_,
             true // opt_noEncode
           );
         });
@@ -192,7 +192,7 @@ export class RequestHandler {
       expansionOption,
       bindings,
       this.element_,
-      this.whiteList_
+      this.allowedList_
     ).then((params) => {
       return dict({
         'trigger': trigger['on'],
