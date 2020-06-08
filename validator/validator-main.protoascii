@@ -20,13 +20,13 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii, etc) are always released together.
-min_validator_revision_required: 455
+min_validator_revision_required: 474
 
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 1048
+spec_file_revision: 1050
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
@@ -101,7 +101,7 @@ tags: {  # HTML tag for non-transformed AMP.
     # Because `data-*` attributes are always valid AMP, the following rules explicitly disallow usage.
     name: "data-amp-autocomplete-opt-in"
     value: "false"
-    blacklisted_value_regex: "false"
+    disallowed_value_regex: "false"
   }
   unique: true
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup"
@@ -211,11 +211,11 @@ tags: {
     # - http://microformats.org/wiki/existing-rel-values
     # - http://www.iana.org/assignments/link-relations/link-relations.xhtml
     # - https://html.spec.whatwg.org/#linkTypes
-    # We blacklist a few specific values which have browser behavior that could
+    # We denylist a few specific values which have browser behavior that could
     # negatively impact performance.
     # TODO(gregable): This could be improved such that the error message would
     # report which value in a list is the one causing problems.
-    blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
+    disallowed_value_regex: "(^|\\s)("  # Values are space separated.
         "canonical|"  # Handled separately below, has specific requirements.
         "components|"
         "import|"
@@ -248,7 +248,7 @@ tags: {
       protocol: "http"
       protocol: "https"
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: {
     name: "rel"
@@ -273,7 +273,7 @@ tags: {
     value_url: {
       protocol: "https"
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: {
     name: "rel"
@@ -712,7 +712,7 @@ tags: {
   # are altogether disallowed.
   attrs: {
     name: "name"
-    blacklisted_value_regex: "(^|\\s)("
+    disallowed_value_regex: "(^|\\s)("
         "amp-.*|"
         "amp4ads-.*|"
         "apple-itunes-app|"
@@ -1208,7 +1208,7 @@ attr_lists: {
       protocol: "https"
       allow_empty: true
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
 }
 tags: {
@@ -1369,7 +1369,7 @@ tags: {
       protocol: "whatsapp"
       allow_empty: true
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "hreflang" }
   attrs: { name: "media" }
@@ -1384,11 +1384,11 @@ tags: {
     # - http://microformats.org/wiki/existing-rel-values
     # - http://www.iana.org/assignments/link-relations/link-relations.xhtml
     # - https://html.spec.whatwg.org/#linkTypes
-    # We blacklist a few specific values which have browser behavior that could
+    # We denylist a few specific values which have browser behavior that could
     # negatively impact performance.
     # TODO(gregable): This could be improved such that the error message would
     # report which value in a list is the one causing problems.
-    blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
+    disallowed_value_regex: "(^|\\s)("  # Values are space separated.
         "components|"
         "dns-prefetch|"
         "import|"
@@ -1453,7 +1453,7 @@ tags: {
     # Furthermore unbalanced delimiters are not allowed.
     # Additionally section mustache delimiters, i.e., {{#, {{^, {{/ are
     # disallowed.
-    blacklisted_value_regex: "__amp_source_origin|"
+    disallowed_value_regex: "__amp_source_origin|"
         "(.|\\s){{|"    # Openning delimiter can only appear at the beginning.
         "}}(.|\\s)|"    # Closing delimiter can only appear at the end.
         "^{{.*[^}][^}]$|"    # Delimiters must be balanced.
@@ -1789,7 +1789,7 @@ tags: {
       protocol: "http"
       protocol: "https"
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "importance" }  # Not yet part of the html spec
   attrs: { name: "intrinsicsize" }  # Not yet part of the html spec
@@ -1804,7 +1804,7 @@ tags: {
       protocol: "https"
       allow_relative: true
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "sizes" }
   attrs: { name: "width" }  # Not valid html5 but commonly used and supported.
@@ -1844,7 +1844,7 @@ tags: {
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: {
     name: "srcdoc"
@@ -1881,7 +1881,7 @@ tags: {
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "width" }
   spec_url: "https://amp.dev/documentation/components/amp-video"
@@ -1905,7 +1905,7 @@ tags: {
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   spec_url: "https://amp.dev/documentation/components/amp-audio"
 }
@@ -1933,7 +1933,7 @@ tags: {
       protocol: "https"
       allow_relative: true
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "type" }
   spec_url: "https://amp.dev/documentation/components/amp-img"
@@ -1952,7 +1952,7 @@ tags: {
       protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "type" }
   # <amp-bind>
@@ -1974,7 +1974,7 @@ tags: {
       protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "type" }
   # <amp-bind>
@@ -1997,7 +1997,7 @@ tags: {
       protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: {
     name: "type"
@@ -2020,7 +2020,7 @@ tags: {
       protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: {
     name: "type"
@@ -2043,7 +2043,7 @@ tags: {
       protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "type" }
   # <amp-bind>
@@ -2077,7 +2077,7 @@ attr_lists: {
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "srclang" }
 }
@@ -2100,7 +2100,7 @@ attr_lists: {
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: {
     name: "srclang"
@@ -2428,7 +2428,7 @@ tags: {
       allow_empty: false
     }
     # Inline SVGs execute in a different context and can affect page elements.
-    blacklisted_value_regex: "(^|\\s)data:image\\/svg\\+xml"
+    disallowed_value_regex: "(^|\\s)data:image\\/svg\\+xml"
   }
   attrs: { name: "xlink:role" }
   attrs: { name: "xlink:show" }
@@ -3241,14 +3241,14 @@ tags {  # <form method=GET ...>
     value_url: {
       protocol: "https"
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: {
     name: "action-xhr"
     value_url: {
       protocol: "https"
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "autocomplete" }
   attrs: {
@@ -3277,7 +3277,7 @@ tags {  # <form method=GET ...>
     value_url: {
       protocol: "https"
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attr_lists: "form-name-attr"
 }
@@ -3297,7 +3297,7 @@ tags {  # <form method=POST ...>
     value_url: {
       protocol: "https"
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "autocomplete" }
   attrs: {
@@ -3328,7 +3328,7 @@ tags {  # <form method=POST ...>
     value_url: {
       protocol: "https"
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attr_lists: "form-name-attr"
 }
@@ -3349,7 +3349,7 @@ tags: {  # <form method=POST ...>
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin|"
+    disallowed_value_regex: "__amp_source_origin|"
         "{{|}}"    # Mustache is disallowed in action-xhr.
   }
   attrs: { name: "autocomplete" }
@@ -3388,7 +3388,7 @@ tags: {  # <form method=POST ...>
     value_url: {
       protocol: "https"
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attr_lists: "form-name-attr"
 }
@@ -3410,7 +3410,7 @@ tags {  # <form method=GET ...>
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin|"
+    disallowed_value_regex: "__amp_source_origin|"
         "{{|}}"    # Mustache is disallowed in action-xhr.
   }
   attrs: { name: "autocomplete" }
@@ -3445,7 +3445,7 @@ tags {  # <form method=POST ...>
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin|"
+    disallowed_value_regex: "__amp_source_origin|"
         "{{|}}"    # Mustache is disallowed in action-xhr.
   }
   attrs: { name: "autocomplete" }
@@ -3702,7 +3702,7 @@ tags: {
   }
   attrs: {
     name: "type"
-    blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
+    disallowed_value_regex: "(^|\\s)("  # Values are space separated.
         "file|"
         "image|"
         "password|"
@@ -4089,7 +4089,7 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "."
       error_message: "contents"
     }
@@ -4112,7 +4112,7 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "."
       error_message: "contents"
     }
@@ -4136,7 +4136,7 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "."
       error_message: "contents"
     }
@@ -4159,7 +4159,7 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "."
       error_message: "contents"
     }
@@ -4182,7 +4182,7 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
@@ -4209,7 +4209,7 @@ tags: {
     value_casei: "application/json"
   }
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
@@ -4229,7 +4229,7 @@ tags: {
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
@@ -4365,7 +4365,7 @@ attr_lists: {
       protocol: "http"
       protocol: "https"
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
 }
 # In AMP4EMAIL Custom elements require a "src" attribute. Unlike AMP-HTML,
@@ -4387,7 +4387,7 @@ attr_lists: {
     # Furthermore unbalanced delimiters are not allowed.
     # Additionally section mustache delimiters, i.e., {{#, {{^, {{/ are
     # disallowed.
-    blacklisted_value_regex: "__amp_source_origin|"
+    disallowed_value_regex: "__amp_source_origin|"
         "(.|\\s){{|"    # Openning delimiter can only appear at the beginning.
         "}}(.|\\s)|"    # Closing delimiter can only appear at the end.
         "^{{.*[^}][^}]$|"    # Delimiters must be balanced.
@@ -4414,7 +4414,7 @@ attr_lists: {
     # Furthermore unbalanced delimiters are not allowed.
     # Additionally section mustache delimiters, i.e., {{#, {{^, {{/ are
     # disallowed.
-    blacklisted_value_regex: "__amp_source_origin|"
+    disallowed_value_regex: "__amp_source_origin|"
         "(.|\\s){{|"    # Openning delimiter can only appear at the beginning.
         "}}(.|\\s)|"    # Closing delimiter can only appear at the end.
         "^{{.*[^}][^}]$|"    # Delimiters must be balanced.
@@ -4539,7 +4539,7 @@ tags: {  # <amp-pixel>
       allow_relative: true  # Will be set to false at a future date.
       allow_empty: true
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-pixel"
@@ -4563,7 +4563,7 @@ tags: {
     name: "style"
     dispatch_key: NAME_DISPATCH
     mandatory: true
-    blacklisted_value_regex: "!\\s*important"
+    disallowed_value_regex: "!\\s*important"
     css_declaration: {
       name: "display"
       value_casei: "block"
@@ -4678,10 +4678,10 @@ attr_lists: {
   attrs: {
     name: "id"
     mandatory: true
-    # When updating this blacklisted_value_regex, also update the entry for
+    # When updating this disallowed_value_regex, also update the entry for
     # "id" in $GLOBAL_ATTRS, and also validator-amp-script.protoascii and
     # validator-amp-mustache.protoascii.
-    blacklisted_value_regex: "(^|\\s)("  # Values are space separated
+    disallowed_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
         "__defineGetter__|"
@@ -4809,7 +4809,7 @@ attr_lists: {
   name: "form-name-attr"
   attrs: {
     name: "name"
-    blacklisted_value_regex: "(^|\\s)("
+    disallowed_value_regex: "(^|\\s)("
         "ATTRIBUTE_NODE|"
         "CDATA_SECTION_NODE|"
         "COMMENT_NODE|"
@@ -5161,9 +5161,9 @@ attr_lists: {
   name: "name-attr"
   attrs: {
     name: "name"
-    # When updating this blacklisted_value_regex, also update for
+    # When updating this disallowed_value_regex, also update for
     # mandatory-name-attr.
-    blacklisted_value_regex: "(^|\\s)("  # Values are space separated
+    disallowed_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
         "__defineGetter__|"
@@ -5289,8 +5289,8 @@ attr_lists: {
   attrs: {
     name: "name"
     mandatory: true
-    # When updating this blacklisted_value_regex, also update for name-attr.
-    blacklisted_value_regex: "(^|\\s)("  # Values are space separated
+    # When updating this disallowed_value_regex, also update for name-attr.
+    disallowed_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
         "__defineGetter__|"
@@ -5428,7 +5428,7 @@ attr_lists: {
   attrs: { name: "property" }
   attrs: {
     name: "rel"
-    blacklisted_value_regex: "(^|\\s)("  # Values are space separated
+    disallowed_value_regex: "(^|\\s)("  # Values are space separated
         "canonical|"
         "components|"
         "dns-prefetch|"
@@ -5460,7 +5460,7 @@ attr_lists: {
     # amp-experiment 1.0 implementation.
     disabled_by: "transformed"
     name: "class"
-    blacklisted_value_regex: "(^|\\W)i-amphtml-"
+    disallowed_value_regex: "(^|\\W)i-amphtml-"
   }
   attrs: { name: "dir" }
   attrs: { name: "draggable" }
@@ -5470,10 +5470,10 @@ attr_lists: {
   }
   attrs: {
     name: "id"
-    # When updating this blacklisted_value_regex, also update for
+    # When updating this disallowed_value_regex, also update for
     # mandatory-id-attr, validator-amp-script.protoascii, and
     # validator-amp-mustache.protoascii.
-    blacklisted_value_regex: "(^|\\s)("  # Values are space separated
+    disallowed_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
         "__defineGetter__|"
@@ -5818,7 +5818,7 @@ attr_lists: {
 # error is more specific, ie: more helpful, preferred.
 error_specificity { code: UNKNOWN_CODE specificity: 0 }
 error_specificity { code: MANDATORY_CDATA_MISSING_OR_INCORRECT specificity: 1 }
-error_specificity { code: CDATA_VIOLATES_BLACKLIST specificity: 2 }
+error_specificity { code: CDATA_VIOLATES_DENYLIST specificity: 2 }
 error_specificity { code: NON_WHITESPACE_CDATA_ENCOUNTERED specificity: 3 }
 error_specificity { code: INVALID_JSON_CDATA specificity: 4 }
 error_specificity { code: DISALLOWED_TAG_ANCESTOR specificity: 5 }
@@ -5972,24 +5972,37 @@ error_specificity {
   specificity: 119
 }
 error_specificity {
-  code: INVALID_UTF8
+  code: CSS_SYNTAX_DISALLOWED_ATTR_SELECTOR
   specificity: 120
 }
 error_specificity {
-  code: CSS_EXCESSIVELY_NESTED
+  code: CSS_SYNTAX_DISALLOWED_PSEUDO_CLASS
   specificity: 121
 }
 error_specificity {
-  code: DOCUMENT_SIZE_LIMIT_EXCEEDED
+  code: CSS_SYNTAX_DISALLOWED_PSEUDO_ELEMENT
   specificity: 122
 }
+
 error_specificity {
-  code: VALUE_SET_MISMATCH
+  code: INVALID_UTF8
   specificity: 123
 }
 error_specificity {
-  code: INVALID_DOCTYPE_HTML
+  code: CSS_EXCESSIVELY_NESTED
   specificity: 124
+}
+error_specificity {
+  code: DOCUMENT_SIZE_LIMIT_EXCEEDED
+  specificity: 125
+}
+error_specificity {
+  code: VALUE_SET_MISMATCH
+  specificity: 126
+}
+error_specificity {
+  code: INVALID_DOCTYPE_HTML
+  specificity: 127
 }
 error_specificity {
   code: DEV_MODE_ONLY
@@ -6137,7 +6150,7 @@ error_formats {
   format: "The mandatory text inside tag '%1' is missing or incorrect."
 }
 error_formats {
-  code: CDATA_VIOLATES_BLACKLIST
+  code: CDATA_VIOLATES_DENYLIST
   format: "The text inside tag '%1' contains '%2', which is disallowed."
 }
 error_formats {
@@ -6470,6 +6483,18 @@ error_formats {
 error_formats {
   code: CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE
   format: "CSS syntax error in tag '%1' - disallowed media feature '%2'."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_ATTR_SELECTOR
+  format: "CSS error in tag '%1' - disallowed attribute selector '%2'."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_PSEUDO_CLASS
+  format: "CSS error in tag '%1' - disallowed pseudo class '%2'."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_PSEUDO_ELEMENT
+  format: "CSS error in tag '%1' - disallowed pseudo element '%2'."
 }
 error_formats {
   code: CSS_EXCESSIVELY_NESTED

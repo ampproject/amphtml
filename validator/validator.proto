@@ -110,7 +110,7 @@ message AttrSpec {
   // begin oneof {
 
   // If none of these are set, any value is accepted unless
-  // blacklisted_value_regex is set. Note that prior to comparing, the
+  // disallowed_value_regex is set. Note that prior to comparing, the
   // attributes in a given HTML document will be unescaped.
 
   // The attribute value must be equal to the value in this field.
@@ -151,7 +151,7 @@ message AttrSpec {
 
   // If set, then the attribute value may not match this regex, which is
   // always applied case-insensitively and as a partial match.
-  optional string blacklisted_value_regex = 6;
+  optional string disallowed_value_regex = 6;
   // If set, generates a DEPRECATED_ATTR error with severity WARNING.
   // The value of the deprecation field indicates what to use instead,
   // e.g. the name of an attribute or tag.
@@ -219,7 +219,7 @@ message DeclarationList {
 // Regex which, if matches the cdata of a tag, causes the tag validation to
 // fail.
 // NEXT AVAILABLE TAG: 3
-message BlackListedCDataRegex {
+message DisallowedCDataRegex {
   // Syntax is partial match, use ^ and $ if you want global match.
   optional string regex = 1;
   optional string error_message = 2;
@@ -306,7 +306,7 @@ message CdataSpec {
   // } end oneof
 
   // If any of these regexes match, then this cdata spec does not validate.
-  repeated BlackListedCDataRegex blacklisted_cdata_regex = 4;
+  repeated DisallowedCDataRegex disallowed_cdata_regex = 4;
 
   // If true, the contents of this tag's CDATA text will be counted against the
   // document level DocCssSpec CSS lengths.
@@ -787,7 +787,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [default = ERROR];
-  // NEXT AVAILABLE TAG: 114
+  // NEXT AVAILABLE TAG: 117
   enum Code {
     UNKNOWN_CODE = 0;
     INVALID_DOCTYPE_HTML = 111;
@@ -823,7 +823,7 @@ message ValidationError {
     STYLESHEET_AND_INLINE_STYLE_TOO_LONG = 102;
     INLINE_STYLE_TOO_LONG = 103;
     MANDATORY_CDATA_MISSING_OR_INCORRECT = 9;
-    CDATA_VIOLATES_BLACKLIST = 30;
+    CDATA_VIOLATES_DENYLIST = 30;
     NON_WHITESPACE_CDATA_ENCOUNTERED = 82;
     INVALID_JSON_CDATA = 106;
     DEPRECATED_ATTR = 11;
@@ -894,6 +894,9 @@ message ValidationError {
     CSS_SYNTAX_MALFORMED_MEDIA_QUERY = 98;
     CSS_SYNTAX_DISALLOWED_MEDIA_TYPE = 99;
     CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE = 100;
+    CSS_SYNTAX_DISALLOWED_ATTR_SELECTOR = 114;
+    CSS_SYNTAX_DISALLOWED_PSEUDO_CLASS = 115;
+    CSS_SYNTAX_DISALLOWED_PSEUDO_ELEMENT = 116;
     CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE = 71;
     CSS_EXCESSIVELY_NESTED = 107;
 

@@ -1067,7 +1067,7 @@ function decodeAttrValue(attrValue) {
     // TODO(powdercloud): We're currently using this to prohibit
     // __amp_source_origin for URLs. We may want to introduce a
     // global bad url functionality with patterns or similar, as opposed
-    // to applying this to every attribute that has a blacklisted value
+    // to applying this to every attribute that has a denylisted value
     // regex.
     decodedAttrValue = unescape(attrValue);
   }
@@ -2208,26 +2208,26 @@ class CdataMatcher {
       context.addStyleTagByteSize(adjustedCdataLength);
     }
 
-    // Blacklisted CDATA Regular Expressions
+    // Disallowed CDATA Regular Expressions
     // We use a combined regex as a fast test. If it matches, we re-match
     // against each individual regex so that we can generate better error
     // messages.
-    if (cdataSpec.combinedBlacklistedCdataRegex === null) {
+    if (cdataSpec.combinedDenyListedCdataRegex === null) {
       return;
     }
     if (!context.getRules()
-             .getPartialMatchCaseiRegex(cdataSpec.combinedBlacklistedCdataRegex)
+             .getPartialMatchCaseiRegex(cdataSpec.combinedDenyListedCdataRegex)
              .test(cdata)) {
       return;
     }
-    for (const blacklist of cdataSpec.blacklistedCdataRegex) {
-      const blacklistRegex = new RegExp(blacklist.regex, 'i');
-      if (blacklistRegex.test(cdata)) {
+    for (const denylist of cdataSpec.disallowedCdataRegex) {
+      const disallowedRegex = new RegExp(denylist.regex, 'i');
+      if (disallowedRegex.test(cdata)) {
         context.addError(
-            generated.ValidationError.Code.CDATA_VIOLATES_BLACKLIST,
+            generated.ValidationError.Code.CDATA_VIOLATES_DENYLIST,
             context.getLineCol(),
             /* params */
-            [getTagSpecName(this.tagSpec_), blacklist.errorMessage],
+            [getTagSpecName(this.tagSpec_), denylist.errorMessage],
             getTagSpecUrl(this.tagSpec_), validationResult);
       }
     }
@@ -2358,7 +2358,7 @@ class CdataMatcher {
       parse_css.extractImportantDeclarations(stylesheet, important);
       for (const decl of important) {
         context.addError(
-            generated.ValidationError.Code.CDATA_VIOLATES_BLACKLIST,
+            generated.ValidationError.Code.CDATA_VIOLATES_DENYLIST,
             new LineCol(decl.important_line, decl.important_col),
             /* params */
             [getTagSpecName(this.tagSpec_), 'CSS !important'],
@@ -5059,9 +5059,9 @@ function validateAttributes(
         continue;
       }
     }
-    if (attrSpec.blacklistedValueRegex !== null) {
+    if (attrSpec.disallowedValueRegex !== null) {
       const regex = context.getRules().getPartialMatchCaseiRegex(
-          attrSpec.blacklistedValueRegex);
+          attrSpec.disallowedValueRegex);
       if (regex.test(attr.value)) {
         context.addError(
             generated.ValidationError.Code.INVALID_ATTR_VALUE,
@@ -5667,6 +5667,7 @@ class ParsedValidatorRules {
     this.typeIdentifiers_['actions'] = 0;
     this.typeIdentifiers_['transformed'] = 0;
     this.typeIdentifiers_['data-ampdevmode'] = 0;
+    this.typeIdentifiers_['data-css-strict'] = 0;
 
     // For every tagspec that contains an ExtensionSpec, we add several
     // TagSpec fields corresponding to the data found in the ExtensionSpec.
@@ -5917,7 +5918,8 @@ class ParsedValidatorRules {
           // considered mandatory unlike other type identifiers.
           if (typeIdentifier !== 'actions' &&
               typeIdentifier !== 'transformed' &&
-              typeIdentifier !== 'data-ampdevmode') {
+              typeIdentifier !== 'data-ampdevmode' &&
+              typeIdentifier !== 'data-css-strict') {
             hasMandatoryTypeIdentifier = true;
           }
           // The type identifier "transformed" has restrictions on it's value.
@@ -5991,7 +5993,7 @@ class ParsedValidatorRules {
             htmlTag.attrs(),
             [
               '\u26a14email', '\u26a1\ufe0f4email', 'amp4email',
-              'data-ampdevmode'
+              'data-ampdevmode', 'data-css-strict'
             ],
             context, validationResult);
         break;
