@@ -184,7 +184,7 @@ export class VariableSource {
     /** @private {boolean} */
     this.initialized_ = false;
 
-    this.getUrlMacroAllowedList_();
+    this.getUrlMacroAllowList_();
   }
 
   /**
@@ -271,36 +271,36 @@ export class VariableSource {
    * Returns a Regular expression that can be used to detect all the variables
    * in a template.
    * @param {!Object<string, *>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_allowedList Optional allowedList of names
+   * @param {!Object<string, boolean>=} opt_allowList Optional allowList of names
    *   that can be substituted.
    * @return {!RegExp}
    */
-  getExpr(opt_bindings, opt_allowedList) {
+  getExpr(opt_bindings, opt_allowList) {
     if (!this.initialized_) {
       this.initialize_();
     }
     const all = {...this.replacements_, ...opt_bindings};
-    return this.buildExpr_(Object.keys(all), opt_allowedList);
+    return this.buildExpr_(Object.keys(all), opt_allowList);
   }
 
   /**
    * @param {!Array<string>} keys
-   * @param {!Object<string, boolean>=} opt_allowedList Optional allowedList of names
+   * @param {!Object<string, boolean>=} opt_allowList Optional allowList of names
    *   that can be substituted.
    * @return {!RegExp}
    * @private
    */
-  buildExpr_(keys, opt_allowedList) {
-    // If an allowedList is present, the keys must belong to the allowedList.
-    // We filter the keys one last time to ensure no unallowedList key is
+  buildExpr_(keys, opt_allowList) {
+    // If an allowList is present, the keys must belong to the allowList.
+    // We filter the keys one last time to ensure no unallowList key is
     // allowed.
-    if (this.getUrlMacroAllowedList_()) {
-      keys = keys.filter((key) => this.getUrlMacroAllowedList_().includes(key));
+    if (this.getUrlMacroAllowList_()) {
+      keys = keys.filter((key) => this.getUrlMacroAllowList_().includes(key));
     }
-    // If a allowedList is passed into the call to GlobalVariableSource.expand_
-    // then we only resolve values contained in the allowedList.
-    if (opt_allowedList) {
-      keys = keys.filter((key) => opt_allowedList[key]);
+    // If a allowList is passed into the call to GlobalVariableSource.expand_
+    // then we only resolve values contained in the allowList.
+    if (opt_allowList) {
+      keys = keys.filter((key) => opt_allowList[key]);
     }
     if (keys.length === 0) {
       const regexThatMatchesNothing = /_^/g; // lgtm [js/regex/unmatchable-caret]
@@ -335,9 +335,9 @@ export class VariableSource {
    * @return {Array<string>|undefined} The allowlist of substitutable AMP variables
    * @private
    */
-  getUrlMacroAllowedList_() {
-    if (this.variableAllowedList_) {
-      return this.variableAllowedList_;
+  getUrlMacroAllowList_() {
+    if (this.variableAllowList_) {
+      return this.variableAllowList_;
     }
 
     // Disallow all URL macros for AMP4Email format documents.
@@ -345,11 +345,11 @@ export class VariableSource {
       const doc = /** @type {!Document} */ (this.ampdoc.getRootNode());
       if (isAmp4Email(doc)) {
         /**
-         * The allowedList of variables allowed for variable substitution.
+         * The allowList of variables allowed for variable substitution.
          * @private {?Array<string>}
          */
-        this.variableAllowedList_ = [''];
-        return this.variableAllowedList_;
+        this.variableAllowList_ = [''];
+        return this.variableAllowList_;
       }
     }
   }

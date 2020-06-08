@@ -207,7 +207,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         win.ampdoc = ampdoc;
         env.sandbox.stub(win.ampdoc, 'getMeta').returns({
           'amp-link-variable-allowed-origin':
-            'https://allowedlisted.com http://example.com',
+            'https://allowlisted.com http://example.com',
         });
         installUrlReplacementsServiceForDoc(ampdoc);
         return win;
@@ -1464,7 +1464,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           });
       });
 
-      it('should collect unallowedlisted vars', () => {
+      it('should collect unallowlisted vars', () => {
         const win = getFakeWindow();
         win.location = parseUrlDeprecated(
           'https://example.com/base?foo=bar&bar=abc&gclid=123'
@@ -1474,10 +1474,10 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         element.setAttribute('data-amp-replace', 'QUERY_PARAM');
         const {documentElement} = win.document;
         const urlReplacements = Services.urlReplacementsForDoc(documentElement);
-        const unallowedlisted = urlReplacements.collectNotAllowedVarsSync(
+        const unallowlisted = urlReplacements.collectNotAllowedVarsSync(
           element
         );
-        expect(unallowedlisted).to.deep.equal(['SOURCE_HOST', 'COUNTER']);
+        expect(unallowlisted).to.deep.equal(['SOURCE_HOST', 'COUNTER']);
       });
 
       it('should reject javascript protocol', () => {
@@ -1566,7 +1566,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         });
       });
 
-      it('should expand sync and respect allowedlisted', () => {
+      it('should expand sync and respect allowlisted', () => {
         const win = getFakeWindow();
         const {documentElement} = win.document;
         const urlReplacements = Services.urlReplacementsForDoc(documentElement);
@@ -1806,7 +1806,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           );
         });
 
-        it('should replace default append params regardless of allowedlist', () => {
+        it('should replace default append params regardless of allowlist', () => {
           a.href = 'https://example.com/link?out=QUERY_PARAM(foo)';
           urlReplacements.maybeExpandLink(a, 'gclid=QUERY_PARAM(gclid)');
           expect(a.href).to.equal(
@@ -1814,14 +1814,14 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           );
         });
 
-        it('should not replace unallowedlisted fields', () => {
+        it('should not replace unallowlisted fields', () => {
           a.href = 'https://example.com/link?out=RANDOM';
           a.setAttribute('data-amp-replace', 'RANDOM');
           urlReplacements.maybeExpandLink(a, null);
           expect(a.href).to.equal('https://example.com/link?out=RANDOM');
         });
 
-        it('should replace for http (non-secure) allowedlisted origin', () => {
+        it('should replace for http (non-secure) allowlisted origin', () => {
           canonical = 'http://example.com/link';
           a.href = 'http://example.com/link?out=QUERY_PARAM(foo)';
           a.setAttribute('data-amp-replace', 'QUERY_PARAM');
@@ -1836,11 +1836,11 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           expect(a.href).to.equal('https://canonical.com/link?out=bar');
         });
 
-        it('should replace with allowedlisted origin', () => {
-          a.href = 'https://allowedlisted.com/link?out=QUERY_PARAM(foo)';
+        it('should replace with allowlisted origin', () => {
+          a.href = 'https://allowlisted.com/link?out=QUERY_PARAM(foo)';
           a.setAttribute('data-amp-replace', 'QUERY_PARAM');
           urlReplacements.maybeExpandLink(a, null);
-          expect(a.href).to.equal('https://allowedlisted.com/link?out=bar');
+          expect(a.href).to.equal('https://allowlisted.com/link?out=bar');
         });
 
         it('should not replace to different origin', () => {
@@ -1861,7 +1861,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           );
         });
 
-        it('should replace allowedlisted fields', () => {
+        it('should replace allowlisted fields', () => {
           a.href =
             'https://canonical.com/link?' +
             'out=QUERY_PARAM(foo)' +
@@ -1892,15 +1892,15 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         });
 
         it("should add URL parameters for http URL's(non-secure)", () => {
-          a.href = 'http://allowedlisted.com/link?out=QUERY_PARAM(foo)';
+          a.href = 'http://allowlisted.com/link?out=QUERY_PARAM(foo)';
           a.setAttribute('data-amp-addparams', 'guid=123');
           urlReplacements.maybeExpandLink(a, null);
           expect(a.href).to.equal(
-            'http://allowedlisted.com/link?out=QUERY_PARAM(foo)&guid=123'
+            'http://allowlisted.com/link?out=QUERY_PARAM(foo)&guid=123'
           );
         });
 
-        it('should concatenate and expand additional params w/ allowedlist', () => {
+        it('should concatenate and expand additional params w/ allowlist', () => {
           a.href = 'http://example.com/link?first=QUERY_PARAM(src,YYYY)';
           a.setAttribute('data-amp-replace', 'QUERY_PARAM');
           a.setAttribute(
@@ -1916,8 +1916,8 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         });
 
         it(
-          'should add URL parameters and repalce allowedlisted' +
-            " values for http allowedlisted URL's(non-secure)",
+          'should add URL parameters and repalce allowlisted' +
+            " values for http allowlisted URL's(non-secure)",
           () => {
             a.href = 'http://example.com/link?out=QUERY_PARAM(foo)';
             a.setAttribute('data-amp-replace', 'CLIENT_ID');
@@ -1933,8 +1933,8 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         );
 
         it(
-          'should add URL parameters and not repalce allowedlisted' +
-            " values for non allowedlisted http URL's(non-secure)",
+          'should add URL parameters and not repalce allowlisted' +
+            " values for non allowlisted http URL's(non-secure)",
           () => {
             a.href = 'http://example2.com/link?out=QUERY_PARAM(foo)';
             a.setAttribute('data-amp-replace', 'CLIENT_ID');
@@ -1949,15 +1949,15 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           }
         );
 
-        it('should append query parameters and repalce allowedlisted values', () => {
-          a.href = 'https://allowedlisted.com/link?out=QUERY_PARAM(foo)';
+        it('should append query parameters and repalce allowlisted values', () => {
+          a.href = 'https://allowlisted.com/link?out=QUERY_PARAM(foo)';
           a.setAttribute('data-amp-replace', 'QUERY_PARAM CLIENT_ID');
           a.setAttribute('data-amp-addparams', 'guid=123&c=CLIENT_ID(abc)');
           // Get a cid, then proceed.
           return urlReplacements.expandUrlAsync('CLIENT_ID(abc)').then(() => {
             urlReplacements.maybeExpandLink(a, null);
             expect(a.href).to.equal(
-              'https://allowedlisted.com/link?out=bar&guid=123&c=test-cid(abc)'
+              'https://allowlisted.com/link?out=bar&guid=123&c=test-cid(abc)'
             );
           });
         });
@@ -2066,7 +2066,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           expect(input.value).to.equal('RANDOM');
         });
 
-        it('should not replace not allowedlisted vars', () => {
+        it('should not replace not allowlisted vars', () => {
           const win = getFakeWindow();
           const {documentElement} = win.document;
           const urlReplacements = Services.urlReplacementsForDoc(

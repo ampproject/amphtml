@@ -80,13 +80,11 @@ export class AnalyticsGroup {
   addTrigger(config, handler) {
     const eventType = dev().assertString(config['on']);
     const trackerKey = getTrackerKeyName(eventType);
-    const trackerAllowedList = getTrackerTypesForParentType(
-      this.root_.getType()
-    );
+    const trackerAllowList = getTrackerTypesForParentType(this.root_.getType());
 
-    const tracker = this.root_.getTrackerForAllowedList(
+    const tracker = this.root_.getTrackerForAllowList(
       trackerKey,
-      trackerAllowedList
+      trackerAllowList
     );
     userAssert(
       !!tracker,
