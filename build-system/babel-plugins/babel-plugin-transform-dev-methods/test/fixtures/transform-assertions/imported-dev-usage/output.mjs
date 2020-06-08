@@ -13,16 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-dev().info(
-  TAG,
-  'Removing iframe query string before navigation:',
-  fromLocation.search
-);
+import { dev } from '../../../../../../../src/log';
 dev().info;
-
-dev().fine(TAG, 'fine');
 dev().fine;
 
-user().fine(TAG, 'user fine');
-user().fine;
+function hello() {
+  return false;
+}
+
+export function helloAgain() {
+  return false;
+}
+
+class Foo {
+  method() {}
+
+}
