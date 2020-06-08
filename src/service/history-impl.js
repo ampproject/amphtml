@@ -147,18 +147,10 @@ export class History {
    * the context of this document. If there is no history left, then attempt
    * the window's history.back.
    *
-   * @param {boolean=} canPerformWindowBack
    * @return {!Promise}
    */
-  goBack(canPerformWindowBack) {
+  goBack() {
     return this.enque_(() => {
-      if (this.stackIndex_ <= 0) {
-        // Nothing left to pop.
-        if (canPerformWindowBack) {
-          this.ampdoc_.win.history.back();
-        }
-        return Promise.resolve();
-      }
       // Pop the current state. The binding will ignore the request if
       // it cannot satisfy it.
       return this.binding_.pop(this.stackIndex_).then((historyState) => {
