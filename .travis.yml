@@ -54,7 +54,6 @@ stages:
   - name: build
   - name: test
   - name: experiment
-    if: type = push
 jobs:
   include:
     - stage: build
@@ -102,12 +101,6 @@ jobs:
       after_script:
         - build-system/sauce_connect/stop_sauce_connect.sh
         - ps -ef
-    - stage: test
-      name: 'End to End Tests'
-      script:
-        - unbuffer node build-system/pr-check/e2e-tests.js
-      env:
-        - CACHE_NAME=E2EJOB
     - stage: experiment
       name: 'Experiment A Tests'
       script:

@@ -224,6 +224,13 @@ export class AmpAnalytics extends AMP.BaseElement {
         ])
       )
       .then((services) => {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            resolve(services);
+          }, 3000);
+        });
+      })
+      .then((services) => {
         this.instrumentation_ = services[0];
         this.variableService_ = services[1];
         const loadConfigDeferred = new Deferred();
