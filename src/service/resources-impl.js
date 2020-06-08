@@ -26,12 +26,16 @@ import {VisibilityState} from '../visibility-state';
 import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
 import {expandLayoutRect} from '../layout-rect';
+import {
+  getExperimentBranch,
+  isExperimentOn,
+  randomlySelectUnsetExperiments,
+} from '../experiments';
 import {getMode} from '../mode';
 import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error';
-import {isExperimentOn} from '../experiments';
 import {listen, loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
@@ -49,6 +53,14 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min
 const FOUR_FRAME_DELAY_ = 70;
+const MAX_BUILD_CHUNK_SIZE = 10;
+
+/** @const {!{id: string, control: string, experiment: string}} */
+const RENDER_ON_IDLE_FIX_EXP = {
+  id: 'render-on-idle-fix',
+  control: '21066311',
+  experiment: '21066312',
+};
 
 /**
  * @implements {ResourcesInterface}
@@ -87,6 +99,9 @@ export class ResourcesImpl {
 
     /** @private {number} */
     this.buildAttemptsCount_ = 0;
+
+    /** @private {number} */
+    this.buildsThisPass_ = 0;
 
     /** @private {boolean} */
     this.visible_ = this.ampdoc.isVisible();
@@ -148,7 +163,7 @@ export class ResourcesImpl {
     /** @const {!TaskQueue} */
     this.queue_ = new TaskQueue();
 
-    /** @const {!function(./task-queue.TaskDef, !Object<string, *>):number} */
+    /** @const {!function(./task-queue.TaskDef):number} */
     this.boundTaskScorer_ = this.calcTaskScore_.bind(this);
 
     /**
@@ -186,6 +201,21 @@ export class ResourcesImpl {
     /** @const @private {!Array<!Element>} */
     this.elementsThatScrolled_ = [];
 
+    /** @const @private {boolean} */
+    this.onlyBuildWhenCloseToViewport_ = isExperimentOn(
+      this.win,
+      'build-close-to-viewport'
+    );
+
+    /** @const @private {boolean} */
+    this.buildInChunks_ = isExperimentOn(this.win, 'build-in-chunks');
+
+    /** @const @private {boolean} */
+    this.renderOnIdleFix_ = isExperimentOn(this.win, 'render-on-idle-fix');
+
+    /** @private {boolean} */
+    this.divertedRenderOnIdleFixExperiment_ = false;
+
     /** @const @private {!Deferred} */
     this.firstPassDone_ = new Deferred();
 
@@ -193,6 +223,18 @@ export class ResourcesImpl {
     this.visibilityStateMachine_ = new FiniteStateMachine(
       this.ampdoc.getVisibilityState()
     );
+
+    /**
+     * Number of resources that were laid out after entering viewport.
+     * @private {number}
+     */
+    this.slowLayoutCount_ = 0;
+
+    /**
+     * Total number of laid out resources.
+     * @private {number}
+     */
+    this.totalLayoutCount_ = 0;
 
     /** @private {?IntersectionObserver} */
     this.intersectionObserver_ = null;
@@ -435,6 +477,9 @@ export class ResourcesImpl {
    * @return {boolean}
    */
   isUnderBuildQuota_() {
+    if (this.buildInChunks_ && this.buildsThisPass_ >= MAX_BUILD_CHUNK_SIZE) {
+      return false;
+    }
     // For pre-render we want to limit the amount of CPU used, so we limit
     // the number of elements build. For pre-render to "seem complete"
     // we only need to build elements in the first viewport. We can't know
@@ -460,6 +505,9 @@ export class ResourcesImpl {
     ignoreQuota = false
   ) {
     const buildingEnabled = this.isRuntimeOn_ || this.isBuildOn_;
+    if (!buildingEnabled) {
+      return;
+    }
 
     // During prerender mode, don't build elements that aren't allowed to be
     // prerendered. This avoids wasting our prerender build quota.
@@ -467,17 +515,29 @@ export class ResourcesImpl {
     const shouldBuildResource =
       this.ampdoc.getVisibilityState() != VisibilityState.PRERENDER ||
       resource.prerenderAllowed();
+    if (!shouldBuildResource) {
+      return;
+    }
 
-    if (buildingEnabled && shouldBuildResource) {
-      if (this.documentReady_) {
-        // Build resource immediately, the document has already been parsed.
-        this.buildResourceUnsafe_(resource, ignoreQuota);
-      } else if (!resource.isBuilt() && !resource.isBuilding()) {
-        if (!checkForDupes || !this.pendingBuildResources_.includes(resource)) {
-          // Otherwise add to pending resources and try to build any ready ones.
-          this.pendingBuildResources_.push(resource);
-          this.buildReadyResources_();
-        }
+    if (this.onlyBuildWhenCloseToViewport_) {
+      const isCloseEnoughToViewport =
+        ignoreQuota ||
+        resource.isBuildRenderBlocking() ||
+        resource.renderOutsideViewport() ||
+        (this.isIdle_() && resource.idleRenderOutsideViewport());
+      if (!isCloseEnoughToViewport) {
+        return;
+      }
+    }
+
+    if (this.documentReady_) {
+      // Build resource immediately, the document has already been parsed.
+      this.buildResourceUnsafe_(resource, ignoreQuota);
+    } else if (!resource.isBuilt() && !resource.isBuilding()) {
+      if (!checkForDupes || !this.pendingBuildResources_.includes(resource)) {
+        // Otherwise add to pending resources and try to build any ready ones.
+        this.pendingBuildResources_.push(resource);
+        this.buildReadyResources_();
       }
     }
   }
@@ -529,19 +589,21 @@ export class ResourcesImpl {
    */
   buildResourceUnsafe_(resource, ignoreQuota = false) {
     if (
-      !this.isUnderBuildQuota_() &&
       !ignoreQuota &&
+      !this.isUnderBuildQuota_() &&
       // Special case: amp-experiment is allowed to bypass prerender build quota.
       !resource.isBuildRenderBlocking()
     ) {
       return null;
     }
+
     const promise = resource.build();
     if (!promise) {
       return null;
     }
     dev().fine(TAG_, 'build resource:', resource.debugid);
     this.buildAttemptsCount_++;
+    this.buildsThisPass_++;
     return promise.then(
       () => this.schedulePass(),
       (error) => {
@@ -647,7 +709,6 @@ export class ResourcesImpl {
   /** @override */
   ampInitComplete() {
     this.ampInitialized_ = true;
-    this.maybeChangeHeight_ = true;
     dev().fine(TAG_, 'ampInitComplete');
     this.schedulePass();
   }
@@ -684,9 +745,12 @@ export class ResourcesImpl {
 
     this.visible_ = this.ampdoc.isVisible();
     this.prerenderSize_ = this.viewer_.getPrerenderSize();
+    this.buildsThisPass_ = 0;
 
     const firstPassAfterDocumentReady =
-      this.documentReady_ && this.firstPassAfterDocumentReady_;
+      this.documentReady_ &&
+      this.firstPassAfterDocumentReady_ &&
+      this.ampInitialized_;
     if (firstPassAfterDocumentReady) {
       this.firstPassAfterDocumentReady_ = false;
       const doc = this.win.document;
@@ -784,6 +848,14 @@ export class ResourcesImpl {
       this.ampdoc.signals().signal(READY_SCAN_SIGNAL);
       dev().fine(TAG_, 'signal: ready-scan');
     }
+  }
+
+  /** @override */
+  getSlowElementRatio() {
+    if (this.totalLayoutCount_ === 0) {
+      return 0;
+    }
+    return this.slowLayoutCount_ / this.totalLayoutCount_;
   }
 
   /**
@@ -1126,6 +1198,25 @@ export class ResourcesImpl {
   }
 
   /**
+   * Selects into an experiment for render-on-idle-fix.
+   * @private
+   */
+  divertRenderOnIdleFixExperiment_() {
+    if (this.divertedRenderOnIdleFixExperiment_) {
+      return;
+    }
+    this.divertedRenderOnIdleFixExperiment_ = true;
+    const experimentInfoMap = /** @type {!Object<string,
+        !../experiments.ExperimentInfo>} */ ({
+      [RENDER_ON_IDLE_FIX_EXP.experiment]: {
+        isTrafficEligible: () => true,
+        branches: [RENDER_ON_IDLE_FIX_EXP.control, RENDER_ON_IDLE_FIX_EXP],
+      },
+    });
+    randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+  }
+
+  /**
    * Discovers work that needs to be done since the last pass. If viewport
    * has changed, it will try to build new elements, measure changed elements,
    * and schedule layouts and preloads within a reasonable distance of the
@@ -1144,11 +1235,13 @@ export class ResourcesImpl {
 
     // Ensure all resources layout phase complete; when relayoutAll is requested
     // force re-layout.
-    const relayoutAll = this.relayoutAll_;
+    const {
+      relayoutAll_: relayoutAll,
+      relayoutTop_: relayoutTop,
+      elementsThatScrolled_: elementsThatScrolled,
+    } = this;
     this.relayoutAll_ = false;
-    const relayoutTop = this.relayoutTop_;
     this.relayoutTop_ = -1;
-    const elementsThatScrolled = this.elementsThatScrolled_;
 
     // Phase 1: Build and relayout as needed. All mutations happen here.
     let relayoutCount = 0;
@@ -1315,6 +1408,7 @@ export class ResourcesImpl {
         // Build all resources visible, measured, and in the viewport.
         if (
           !r.isBuilt() &&
+          !r.isBuilding() &&
           !r.hasOwner() &&
           r.hasBeenMeasured() &&
           r.isDisplayed() &&
@@ -1338,17 +1432,7 @@ export class ResourcesImpl {
       }
     }
 
-    // With IntersectionObserver, skip phases 5+.
-    if (this.intersectionObserver_) {
-      return;
-    }
-
-    if (
-      this.visible_ &&
-      this.exec_.getSize() == 0 &&
-      this.queue_.getSize() == 0 &&
-      now > this.exec_.getLastDequeueTime() + 5000
-    ) {
+    if (this.visible_ && this.isIdle_(now)) {
       // Phase 5: Idle Render Outside Viewport layout: layout up to 4 items
       // with idleRenderOutsideViewport true
       let idleScheduledCount = 0;
@@ -1391,6 +1475,29 @@ export class ResourcesImpl {
   }
 
   /**
+   * Whether the page is relatively "idle". For now, it's checking if it's been
+   * a while since the last element received a layoutCallback.
+   *
+   * @param {number} now
+   * @return {boolean}
+   * @private
+   */
+  isIdle_(now = Date.now()) {
+    this.divertRenderOnIdleFixExperiment_();
+    const lastDequeueTime = this.exec_.getLastDequeueTime();
+    return (
+      this.exec_.getSize() == 0 &&
+      this.queue_.getSize() == 0 &&
+      now > lastDequeueTime + 5000 &&
+      (lastDequeueTime > 0 ||
+        // TODO(powerivq): add tests for this fix once ready to launch
+        !this.renderOnIdleFix_ ||
+        getExperimentBranch(this.win, RENDER_ON_IDLE_FIX_EXP.id) ===
+          RENDER_ON_IDLE_FIX_EXP.control)
+    );
+  }
+
+  /**
    * Dequeues layout and preload tasks from the queue and initiates their
    * execution.
    *
@@ -1406,8 +1513,7 @@ export class ResourcesImpl {
     const now = Date.now();
 
     let timeout = -1;
-    const state = Object.create(null);
-    let task = this.queue_.peek(this.boundTaskScorer_, state);
+    let task = this.queue_.peek(this.boundTaskScorer_);
     while (task) {
       timeout = this.calcTaskTimeout_(task);
       dev().fine(
@@ -1417,7 +1523,7 @@ export class ResourcesImpl {
         'sched at',
         task.scheduleTime,
         'score',
-        this.boundTaskScorer_(task, state),
+        this.boundTaskScorer_(task),
         'timeout',
         timeout
       );
@@ -1473,7 +1579,7 @@ export class ResourcesImpl {
         }
       }
 
-      task = this.queue_.peek(this.boundTaskScorer_, state);
+      task = this.queue_.peek(this.boundTaskScorer_);
       timeout = -1;
     }
 
@@ -1518,11 +1624,10 @@ export class ResourcesImpl {
    * this element or away from it.
    *
    * @param {!./task-queue.TaskDef} task
-   * @param {!Object<string, *>} unusedCache
    * @return {number}
    * @private
    */
-  calcTaskScore_(task, unusedCache) {
+  calcTaskScore_(task) {
     // TODO(jridgewell): these should be taking into account the active
     // scroller, which may not be the root scroller. Maybe a weighted average
     // of "scroller scrolls necessary" to see the element.
@@ -1601,6 +1706,11 @@ export class ResourcesImpl {
    * @private
    */
   taskComplete_(task, success, opt_reason) {
+    this.totalLayoutCount_++;
+    if (task.resource.isInViewport() && this.firstVisibleTime_ >= 0) {
+      this.slowLayoutCount_++;
+    }
+
     this.exec_.dequeue(task);
     this.schedulePass(POST_TASK_PASS_DELAY_);
     if (!success) {

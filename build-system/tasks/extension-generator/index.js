@@ -120,7 +120,7 @@ describes.realWin(
       win.document.body.appendChild(element);
     });
 
-    it('should have hello world when built', () => {
+    it('should contain "hello world" when built', async () => {
       await element.whenBuilt();
       expect(element.querySelector('div').textContent).to.equal('hello world');
     });

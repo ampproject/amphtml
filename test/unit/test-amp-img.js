@@ -21,7 +21,6 @@ import {Layout, LayoutPriority} from '../../src/layout';
 import {Services} from '../../src/services';
 import {createCustomEvent} from '../../src/event-helper';
 import {createIframePromise} from '../../testing/iframe';
-import {toggleExperiment} from '../../src/experiments';
 
 describes.sandboxed('amp-img', {}, (env) => {
   let sandbox;
@@ -468,10 +467,6 @@ describes.sandboxed('amp-img', {}, (env) => {
   });
 
   describe('blurred image placeholder', () => {
-    beforeEach(() => {
-      toggleExperiment(window, 'blurry-placeholder', true, true);
-    });
-
     /**
      * Creates an amp-img with an image child that could potentially be a
      * blurry placeholder.

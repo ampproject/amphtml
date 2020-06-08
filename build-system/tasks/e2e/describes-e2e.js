@@ -510,6 +510,12 @@ class EndToEndFixture {
 
     try {
       await setUpTest(env, this.spec);
+      // Set env props that require the fixture to be set up.
+      if (env.environment === AmpdocEnvironment.VIEWER_DEMO) {
+        env.receivedMessages = await controller.evaluate(() => {
+          return window.parent.viewer.receivedMessages;
+        });
+      }
     } catch (ex) {
       if (retries > 0) {
         await this.setup(env, browserName, --retries);

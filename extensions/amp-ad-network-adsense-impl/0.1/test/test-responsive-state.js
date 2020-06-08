@@ -31,6 +31,7 @@ import {
 } from '../../../../src/dom';
 import {forceExperimentBranch} from '../../../../src/experiments';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {toWin} from '../../../../src/types';
 
 const AD_CLIENT_ID = 'ca-pub-123';
 
@@ -116,6 +117,11 @@ describes.realWin(
       return ResponsiveState.createIfResponsive(element);
     }
 
+    function createContainerWidthState(attributes) {
+      createElement(attributes);
+      return ResponsiveState.createContainerWidthState(element);
+    }
+
     describe('createIfResponsive', () => {
       it('should return non null for a responsive element', () => {
         const state = createState({'data-auto-format': [ADSENSE_RSPV_TAG]});
@@ -128,13 +134,12 @@ describes.realWin(
     });
 
     describe('isValidElement', () => {
-      it('should return false if there is no data-full-width attribute', () => {
-        const state = createState({
-          'data-auto-format': [ADSENSE_RSPV_TAG],
+      it('should return true if it is a container width state', () => {
+        const state = createContainerWidthState({
           'height': [ADSENSE_RSPV_WHITELISTED_HEIGHT],
-          'width': '100vw',
+          'width': '960',
         });
-        expect(state.isValidElement()).to.be.false;
+        expect(state.isValidElement()).to.be.true;
       });
 
       it('should return false if the height is not whitelisted', () => {
@@ -381,6 +386,48 @@ describes.realWin(
         expect(result).to.be.null;
       });
 
+      it('Fall back to container width state for full-width responsive user on desktop site', async () => {
+        const element = createElementWithNoStub({
+          'data-ad-client': AD_CLIENT_ID,
+          'data-auto-format': [ADSENSE_RSPV_TAG],
+          'data-full-width': '',
+          'height': '500px',
+          'width': '100vw',
+        });
+        const viewport = Services.viewportForDoc(element);
+        env.sandbox
+          .stub(viewport, 'getSize')
+          .returns({width: 1024, height: 500});
+
+        const mockContainerWith = '960';
+        const vsyncMock = Services.vsyncFor(
+          toWin(element.ownerDocument.defaultView)
+        );
+        env.sandbox.stub(vsyncMock, 'runPromise').returns({
+          then: () => {
+            element.setAttribute('height', ADSENSE_RSPV_WHITELISTED_HEIGHT);
+            element.setAttribute('width', mockContainerWith);
+            element.removeAttribute('data-full-width');
+            element.removeAttribute('data-auto-format');
+            return ResponsiveState.createContainerWidthState(element);
+          },
+        });
+
+        const result = await ResponsiveState.maybeUpgradeToResponsive(
+          element,
+          AD_CLIENT_ID
+        );
+
+        expect(result).to.not.be.null;
+        expect(result.isValidElement()).to.be.true;
+        expect(element.getAttribute('height')).to.be.equal(
+          `${ADSENSE_RSPV_WHITELISTED_HEIGHT}`
+        );
+        expect(element.getAttribute('width')).to.be.equal(mockContainerWith);
+        expect(element).to.not.have.attribute('data-full-width');
+        expect(element).to.not.have.attribute('data-auto-format');
+      });
+
       it('returns a valid responsive state and upgrades element when the ad unit is not responsive and ad size optimization is enabled', async () => {
         forceExperimentBranch(
           win,
@@ -410,29 +457,10 @@ describes.realWin(
       });
     });
     describe('maybeAttachSettingsListener', () => {
-      it("doesn't set up a listener if the experiment is not enabled", () => {
-        const element = createElement({
-          'data-ad-client': AD_CLIENT_ID,
-          'height': '200px',
-          'width': '50vw',
-        });
-        const promise = ResponsiveState.maybeAttachSettingsListener(
-          element,
-          fakeIframe,
-          AD_CLIENT_ID
-        );
-        expect(promise).to.be.null;
-      });
-
       describe('sets up a listener that', () => {
         let promise;
 
         beforeEach(() => {
-          forceExperimentBranch(
-            win,
-            AD_SIZE_OPTIMIZATION_EXP.branch,
-            AD_SIZE_OPTIMIZATION_EXP.experiment
-          );
           const element = createElement({
             'data-ad-client': AD_CLIENT_ID,
             'height': '200px',
@@ -452,7 +480,7 @@ describes.realWin(
             'adClient': AD_CLIENT_ID,
             'enableAutoAdSize': '1',
           };
-          win.postMessage(data, '*');
+          win.postMessage(JSON.stringify(data), '*');
 
           await promise;
 
@@ -465,7 +493,7 @@ describes.realWin(
             'adClient': AD_CLIENT_ID,
             'enableAutoAdSize': '0',
           };
-          win.postMessage(data, '*');
+          win.postMessage(JSON.stringify(data), '*');
 
           await promise;
 
@@ -480,13 +508,13 @@ describes.realWin(
             'adClient': AD_CLIENT_ID,
             'enableAutoAdSize': '1',
           };
-          win.postMessage(badData, '*');
+          win.postMessage(JSON.stringify(badData), '*');
           const goodData = {
             'googMsgType': 'adsense-settings',
             'adClient': AD_CLIENT_ID,
             'enableAutoAdSize': '0',
           };
-          win.postMessage(goodData, '*');
+          win.postMessage(JSON.stringify(goodData), '*');
 
           await promise;
 
@@ -501,13 +529,13 @@ describes.realWin(
             'adClient': AD_CLIENT_ID + 'i',
             'enableAutoAdSize': '1',
           };
-          win.postMessage(badData, '*');
+          win.postMessage(JSON.stringify(badData), '*');
           const goodData = {
             'googMsgType': 'adsense-settings',
             'adClient': AD_CLIENT_ID,
             'enableAutoAdSize': '0',
           };
-          win.postMessage(goodData, '*');
+          win.postMessage(JSON.stringify(goodData), '*');
 
           await promise;
 

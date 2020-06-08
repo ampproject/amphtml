@@ -19,7 +19,6 @@ import {Layout, isLayoutSizeDefined} from '../src/layout';
 import {Services} from '../src/services';
 import {dev} from '../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img';
-import {isExperimentOn} from '../src/experiments';
 import {listen} from '../src/event-helper';
 import {propagateObjectFitStyles, setImportantStyles} from '../src/style';
 import {registerElement} from '../src/service/custom-element-registry';
@@ -307,8 +306,7 @@ export class AmpImg extends BaseElement {
     const placeholder = this.getPlaceholder();
     if (
       placeholder &&
-      placeholder.classList.contains('i-amphtml-blurry-placeholder') &&
-      isExperimentOn(this.win, 'blurry-placeholder')
+      placeholder.classList.contains('i-amphtml-blurry-placeholder')
     ) {
       setImportantStyles(placeholder, {'opacity': 0});
     } else {

@@ -105,6 +105,7 @@ import {affiliateb} from '../ads/affiliateb';
 import {aja} from '../ads/aja';
 import {amoad} from '../ads/amoad';
 import {aniview} from '../ads/aniview';
+import {anyclip} from '../ads/anyclip';
 import {appnexus} from '../ads/appnexus';
 import {appvador} from '../ads/appvador';
 import {atomx} from '../ads/atomx';
@@ -163,6 +164,7 @@ import {inmobi} from '../ads/inmobi';
 import {innity} from '../ads/innity';
 import {insticator} from '../ads/insticator';
 import {invibes} from '../ads/invibes';
+import {iprom} from '../ads/iprom';
 import {ix} from '../ads/ix';
 import {jubna} from '../ads/jubna';
 import {kargo} from '../ads/kargo';
@@ -176,6 +178,8 @@ import {logly} from '../ads/logly';
 import {loka} from '../ads/loka';
 import {mads} from '../ads/mads';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
+import {marfeel} from '../ads/marfeel';
+import {mediaad} from '../ads/mediaad';
 import {medianet} from '../ads/medianet';
 import {mediavine} from '../ads/mediavine';
 import {medyanet} from '../ads/medyanet';
@@ -280,6 +284,7 @@ import {wisteria} from '../ads/wisteria';
 import {wpmedia} from '../ads/wpmedia';
 import {xlift} from '../ads/xlift';
 import {yahoo} from '../ads/yahoo';
+import {yahoofedads} from '../ads/yahoofedads';
 import {yahoojp} from '../ads/yahoojp';
 import {yahoonativeads} from '../ads/yahoonativeads';
 import {yandex} from '../ads/yandex';
@@ -313,6 +318,7 @@ const AMP_EMBED_ALLOWED = {
   jubna: true,
   kuadio: true,
   'mantis-recommend': true,
+  mediaad: true,
   mgid: true,
   miximedia: true,
   mywidget: true,
@@ -334,6 +340,7 @@ const AMP_EMBED_ALLOWED = {
   taboola: true,
   temedya: true,
   whopainfeed: true,
+  yahoofedads: true,
   yahoonativeads: true,
   zen: true,
   zergnet: true,
@@ -392,6 +399,7 @@ register('affiliateb', affiliateb);
 register('aja', aja);
 register('amoad', amoad);
 register('aniview', aniview);
+register('anyclip', anyclip);
 register('appnexus', appnexus);
 register('appvador', appvador);
 register('atomx', atomx);
@@ -456,6 +464,7 @@ register('inmobi', inmobi);
 register('innity', innity);
 register('insticator', insticator);
 register('invibes', invibes);
+register('iprom', iprom);
 register('ix', ix);
 register('jubna', jubna);
 register('kargo', kargo);
@@ -470,7 +479,9 @@ register('loka', loka);
 register('mads', mads);
 register('mantis-display', mantisDisplay);
 register('mantis-recommend', mantisRecommend);
+register('marfeel', marfeel);
 register('mathml', mathml);
+register('mediaad', mediaad);
 register('medianet', medianet);
 register('mediavine', mediavine);
 register('medyanet', medyanet);
@@ -578,6 +589,7 @@ register('wisteria', wisteria);
 register('wpmedia', wpmedia);
 register('xlift', xlift);
 register('yahoo', yahoo);
+register('yahoofedads', yahoofedads);
 register('yahoojp', yahoojp);
 register('yahoonativeads', yahoonativeads);
 register('yandex', yandex);
@@ -683,7 +695,7 @@ window.draw3p = function (
     manageWin(window);
     installEmbedStateListener();
 
-    // Ugly type annotation is due to Event.prototype.data being blacklisted
+    // Ugly type annotation is due to Event.prototype.data being denylisted
     // and the compiler not being able to discern otherwise
     // TODO(alanorozco): Do this more elegantly once old impl is cleaned up.
     draw3p(

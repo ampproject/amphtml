@@ -25,6 +25,9 @@ const {
   checkExactVersions,
 } = require('./build-system/tasks/check-exact-versions');
 const {
+  checkRenovateConfig,
+} = require('./build-system/tasks/check-renovate-config');
+const {
   process3pGithubPr,
 } = require('./build-system/tasks/process-3p-github-pr');
 const {
@@ -49,6 +52,7 @@ const {checkLinks} = require('./build-system/tasks/check-links');
 const {checkOwners} = require('./build-system/tasks/check-owners');
 const {checkSourcemaps} = require('./build-system/tasks/check-sourcemaps');
 const {checkTypes} = require('./build-system/tasks/check-types');
+const {cherryPick} = require('./build-system/tasks/cherry-pick');
 const {clean} = require('./build-system/tasks/clean');
 const {codecovUpload} = require('./build-system/tasks/codecov-upload');
 const {compileJison} = require('./build-system/tasks/compile-jison');
@@ -140,8 +144,10 @@ createTask('caches-json', cachesJson);
 createTask('check-exact-versions', checkExactVersions);
 createTask('check-links', checkLinks);
 createTask('check-owners', checkOwners);
+createTask('check-renovate-config', checkRenovateConfig);
 createTask('check-sourcemaps', checkSourcemaps);
 createTask('check-types', checkTypes);
+createTask('cherry-pick', cherryPick);
 createTask('clean', clean);
 createTask('codecov-upload', codecovUpload);
 createTask('compile-jison', compileJison);
