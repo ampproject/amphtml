@@ -91,21 +91,21 @@ describes.realWin(
       });
     });
 
-    describe('Whitelist of variables', () => {
+    describe('AllowedList of variables', () => {
       const mockBindings = {
         RANDOM: () => 0.1234,
         ABC: () => 'three',
         ABCD: () => 'four',
       };
 
-      function createExpanderWithWhitelist(whitelist, mockBindings) {
+      function createExpanderWithAllowedList(allowedList, mockBindings) {
         variableSource = new GlobalVariableSource(env.ampdoc);
-        variableSource.variableWhitelist_ = whitelist;
+        variableSource.variableAllowedlist_ = allowedList;
         return new Expander(variableSource, mockBindings);
       }
 
-      it('should not replace unwhitelisted RANDOM', () => {
-        const expander = createExpanderWithWhitelist(
+      it('should not replace not allowed RANDOM', () => {
+        const expander = createExpanderWithAllowedList(
           ['ABC', 'ABCD', 'CANONICAL'],
           mockBindings
         );
@@ -114,8 +114,8 @@ describes.realWin(
         return expect(expander.expand(url)).to.eventually.equal(expected);
       });
 
-      it('should replace whitelisted ABCD', () => {
-        const expander = createExpanderWithWhitelist(
+      it('should replace allowed ABCD', () => {
+        const expander = createExpanderWithAllowedList(
           ['ABC', 'ABCD', 'CANONICAL'],
           mockBindings
         );
@@ -124,8 +124,8 @@ describes.realWin(
         return expect(expander.expand(url)).to.eventually.equal(expected);
       });
 
-      it('should not replace anything with empty whitelist', () => {
-        const expander = createExpanderWithWhitelist([''], mockBindings);
+      it('should not replace anything with empty allowedList', () => {
+        const expander = createExpanderWithAllowedList([''], mockBindings);
         const url = 'http://www.google.com/?test=ABCD';
         const expected = 'http://www.google.com/?test=ABCD';
         return expect(expander.expand(url)).to.eventually.equal(expected);
@@ -493,17 +493,17 @@ describes.realWin(
         });
       });
 
-      describe('opt_whiteList', () => {
-        it('should only resolve values in the whitelist', () => {
+      describe('opt_allowedList', () => {
+        it('should only resolve values in the allowedList', () => {
           const url = 'UPPERCASE(foo)RANDOMLOWERCASE(BAR)';
-          const whitelist = {RANDOM: true};
+          const allowedList = {RANDOM: true};
           return expect(
             new Expander(
               variableSource,
               mockBindings,
               /* opt_collectVars */ undefined,
               /* opt_sync */ false,
-              /* opt_whiteList */ whitelist
+              /* opt_allowedList */ allowedList
             ).expand(url)
           ).to.eventually.equal('UPPERCASE(foo)123456LOWERCASE(BAR)');
         });
