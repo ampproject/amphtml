@@ -185,7 +185,7 @@ const srcsetWidthRe = /\s+([0-9]+)w(,|$)/g;
  * Parses srcset partially to get the maximum defined intrinsic width.
  * @param {!Element} img
  * @return {number} -1 if no srcset, or if srcset is defined by dpr instead of
- *   width.
+ *   width. (This value is useful for comparisons, see getMaxNaturalDimensions.)
  */
 export function getMaxWidthFromSrcset(img) {
   let max = -1;
