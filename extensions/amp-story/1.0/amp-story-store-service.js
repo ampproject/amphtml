@@ -78,6 +78,14 @@ export let InteractiveComponentDef;
 
 /**
  * @typedef {{
+ *    finished: boolean,
+ *    category: ?string,
+ * }}
+ */
+export let InteractionResultsDef;
+
+/**
+ * @typedef {{
  *    canInsertAutomaticAd: boolean,
  *    canShowBookend: boolean,
  *    canShowAudioUi: boolean,
@@ -560,6 +568,12 @@ export class AmpStoryStoreService {
       [StateProperty.EDUCATION_STATE]: false,
       [StateProperty.HAS_SIDEBAR_STATE]: false,
       [StateProperty.INFO_DIALOG_STATE]: false,
+      [StateProperty.INTERACTION_REACT_STATE]: {},
+      [StateProperty.INTERACTION_RESULTS_STATE]: {
+        finished: false,
+        category: '',
+        percentageCorrect: 0,
+      },
       [StateProperty.INTERACTIVE_COMPONENT_STATE]: {
         state: EmbeddedComponentState.HIDDEN,
       },

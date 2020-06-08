@@ -459,6 +459,9 @@ export class AmpStory extends AMP.BaseElement {
         );
       });
     }
+    this.element.setAttribute('aria-live', 'polite');
+
+    this.initializeInteractiveComponents_();
   }
 
   /**
@@ -1069,6 +1072,24 @@ export class AmpStory extends AMP.BaseElement {
         });
       });
     }
+  }
+
+  /**
+   * Parse doc for polls and quizzes, and initialize them.
+   */
+  initializeInteractiveComponents_() {
+    toArray(
+      this.element.querySelectorAll(
+        'amp-story-reaction-quiz, amp-story-reaction-poll'
+      )
+    ).forEach((element) => {
+      const tag = element.tagName.toLowerCase();
+      if (tag == 'amp-story-reaction-quiz') {
+        new AmpStoryReactionQuiz(element).updateStoryStoreState_();
+      } else if (tag == 'amp-story-reaction-poll') {
+        new AmpStoryReactionPoll(element).updateStoryStoreState_();
+      }
+    });
   }
 
   /**

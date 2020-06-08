@@ -435,7 +435,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   /**
    * Handles a tap event on the quiz element.
    * @param {Event} e
-   * @private
+   * @protected
    */
   handleTap_(e) {
     if (this.hasUserSelection_) {
@@ -726,14 +726,15 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   }
 
   /**
-   * Updates the selected classes on option selected.
-   * @param {!Element} selectedOption
-   * @private
+   * Updates the selected classes on component and option selected.
+   * @param {?Element} selectedOption
+   * @protected
    */
-  updateToPostSelectionState_(selectedOption) {
-    this.rootEl_.classList.add('i-amphtml-story-interactive-post-selection');
-    selectedOption.classList.add('i-amphtml-story-interactive-option-selected');
-
+  updateToPostSelectionState_(selectedOption = null) {
+    this.rootEl_.classList.add('i-amphtml-story-reaction-post-selection');
+    if (selectedOption) {
+      selectedOption.classList.add('i-amphtml-story-reaction-option-selected');
+    }
     if (this.optionsData_) {
       this.rootEl_.classList.add('i-amphtml-story-interactive-has-data');
       this.updateOptionPercentages_(this.optionsData_);

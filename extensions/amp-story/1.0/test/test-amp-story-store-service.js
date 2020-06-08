@@ -368,3 +368,85 @@ describes.fakeWin('amp-story-store-service actions', {}, (env) => {
     });
   });
 });
+
+describes.fakeWin('amp-story-store-service interaction reacts', {}, (env) => {
+  let storeService;
+
+  const makeReaction = (reactionId, answered = false, category = undefined) => {
+    return {
+      reactionId,
+      option: answered
+        ? {'optionIndex': 1, 'category': category, 'text': 'This is an option'}
+        : null,
+    };
+  };
+
+  beforeEach(() => {
+    // Making sure we always get a new instance to isolate each test.
+    storeService = new AmpStoryStoreService(env.win);
+  });
+
+  it('should not trigger the interaction subscription when initializing reaction', () => {
+    const actionsListenerSpy = env.sandbox.spy();
+    storeService.subscribe(
+      StateProperty.INTERACTION_RESULTS_STATE,
+      actionsListenerSpy
+    );
+
+    storeService.dispatch(Action.ADD_INTERACTIVE_REACT, makeReaction('foo'));
+    expect(actionsListenerSpy).to.have.not.been.called;
+  });
+
+  it('should trigger the interaction subscription when answering reaction ', () => {
+    const actionsListenerSpy = env.sandbox.spy();
+    storeService.subscribe(
+      StateProperty.INTERACTION_RESULTS_STATE,
+      actionsListenerSpy
+    );
+
+    storeService.dispatch(Action.ADD_INTERACTIVE_REACT, makeReaction('foo'));
+    storeService.dispatch(
+      Action.ADD_INTERACTIVE_REACT,
+      makeReaction('foo', true)
+    );
+    expect(actionsListenerSpy).to.have.been.calledOnce;
+  });
+
+  it('should not trigger the interaction subscription twice when updating the reaction', () => {
+    const actionsListenerSpy = env.sandbox.spy();
+    storeService.subscribe(
+      StateProperty.INTERACTION_RESULTS_STATE,
+      actionsListenerSpy
+    );
+
+    storeService.dispatch(Action.ADD_INTERACTIVE_REACT, makeReaction('foo'));
+    storeService.dispatch(
+      Action.ADD_INTERACTIVE_REACT,
+      makeReaction('foo', true)
+    );
+    storeService.dispatch(
+      Action.ADD_INTERACTIVE_REACT,
+      makeReaction('foo', true)
+    );
+    expect(actionsListenerSpy).to.have.been.calledOnce;
+  });
+
+  it('should trigger the interaction subscription when all reactions are completed', () => {
+    const actionsListenerSpy = env.sandbox.spy();
+    storeService.subscribe(
+      StateProperty.INTERACTION_RESULTS_STATE,
+      actionsListenerSpy
+    );
+
+    storeService.dispatch(Action.ADD_INTERACTIVE_REACT, makeReaction('bar'));
+    storeService.dispatch(
+      Action.ADD_INTERACTIVE_REACT,
+      makeReaction('foo', true)
+    );
+    storeService.dispatch(
+      Action.ADD_INTERACTIVE_REACT,
+      makeReaction('bar', true)
+    );
+    expect(actionsListenerSpy).to.have.been.calledOnce;
+  });
+});
