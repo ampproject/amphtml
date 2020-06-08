@@ -349,12 +349,12 @@ export class ManualAdvancement extends AdvancementConfig {
 
   /**
    * TouchEvent touchend events handler.
-   * @param {?Event} event
+   * @param {!Event} event
    * @private
    */
   onTouchend_(event) {
     // Ignores the event if there's still a user's finger holding the screen.
-    const touchesCount = event ? (event.touches || []).length : 0;
+    const touchesCount = (event.touches || []).length;
     if (!this.touchstartTimestamp_ || touchesCount > 0) {
       return;
     }
@@ -363,7 +363,7 @@ export class ManualAdvancement extends AdvancementConfig {
     // preventDefault on the touchend event ensures the click/tap event won't
     // fire.
     if (Date.now() - this.touchstartTimestamp_ > HOLD_TOUCH_THRESHOLD_MS) {
-      event ? event.preventDefault() : null;
+      event.preventDefault();
     }
 
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
