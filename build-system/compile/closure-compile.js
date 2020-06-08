@@ -76,16 +76,6 @@ function handleTypeCheckError(err) {
 }
 
 /**
- * Handles a closure error during single-pass compilation
- *
- * @param {Error} err
- */
-function handleSinglePassCompilerError(err) {
-  logError(red('Single pass compilation failed:'));
-  emitError(err);
-}
-
-/**
  * Emits an error to the caller
  *
  * @param {Error} err
@@ -138,7 +128,7 @@ function gulpClosureCompile(compilerOptions, nailgunPort) {
   };
 
   if (compilerOptions.includes('SINGLE_FILE_COMPILATION=true')) {
-    // For single-pass compilation, use the default compiler.jar
+    // For single file compilation, use the default compiler.jar
     closureCompiler.compiler.JAR_PATH = require.resolve(
       '../../node_modules/google-closure-compiler-java/compiler.jar'
     );
@@ -175,6 +165,5 @@ function gulpClosureCompile(compilerOptions, nailgunPort) {
 module.exports = {
   gulpClosureCompile,
   handleCompilerError,
-  handleSinglePassCompilerError,
   handleTypeCheckError,
 };
