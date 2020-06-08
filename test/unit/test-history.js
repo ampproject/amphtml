@@ -269,18 +269,18 @@ describes.fakeWin(
       });
     });
 
-    it('should call history.back() if stack is empty and passed true', () => {
-      env.win.history.back = env.sandbox.stub();
-      return history.goBack(true).then(() => {
-        expect(env.win.history.back.called).true;
-      });
+    it('should call pop if stack is empty and passed true', () => {
+      bindingMock
+        .expects('pop')
+        .once()
+        .returns(Promise.resolve({stackIndex: 0}));
+
+      return history.goBack(true);
     });
 
-    it('should not call history.back() if stack is empty and passed false', () => {
-      env.win.history.back = env.sandbox.stub();
-      return history.goBack(false).then(() => {
-        expect(env.win.history.back.called).false;
-      });
+    it('should not call pop() if stack is empty and passed false', () => {
+      bindingMock.expects('pop').never();
+      return history.goBack(false);
     });
 
     it('should get fragment', () => {
