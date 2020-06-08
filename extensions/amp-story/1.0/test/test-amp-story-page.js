@@ -21,13 +21,13 @@ import {Deferred} from '../../../../src/utils/promise';
 import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
 import {Services} from '../../../../src/services';
+import {Signals} from '../../../../src/utils/signals';
 import {
   createElementWithAttributes,
   scopedQuerySelectorAll,
 } from '../../../../src/dom';
 import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {registerServiceBuilder} from '../../../../src/service';
-import {Signals} from '../../../../src/utils/signals';
 
 describes.realWin('amp-story-page', {amp: true}, (env) => {
   let win;
