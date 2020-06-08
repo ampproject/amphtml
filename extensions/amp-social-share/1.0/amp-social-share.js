@@ -153,7 +153,7 @@ class AmpSocialShare extends PreactBaseElement {
       } else {
         this.mutateProps(
           dict({
-            'params': Object.assign(dict(), parseQueryString(search)),
+            'params': parseQueryString(search),
             'target': target,
           })
         );

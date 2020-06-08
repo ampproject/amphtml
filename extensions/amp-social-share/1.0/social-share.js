@@ -66,7 +66,6 @@ export function SocialShare(props) {
       onKeyDown={(e) => handleKeyPress(e, finalEndpoint, checkedTarget)}
       onClick={() => handleActivation(finalEndpoint, checkedTarget)}
       style={{...size, ...props['style']}}
-      {...props}
     >
       <SocialShareIcon
         style={{...backgroundStyle, ...baseStyle, ...size}}
