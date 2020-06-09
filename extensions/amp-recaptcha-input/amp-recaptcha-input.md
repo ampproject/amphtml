@@ -32,7 +32,7 @@ This extension adds a parameter containing a recaptcha response token when a par
 Like how you integrate reCaptcha on a regular web page, you will need go through steps as described in the [official documentation of reCAPTCHA v3](https://developers.google.com/recaptcha/docs/v3).
 High level, you will need to register a sitekey, and setup a server endpoint that can process the recaptcha signal sent from your AMP page.
 
-One caveat to be aware when registering a sitekey: you will need to provide all the hostnames that you plan to use this sitekey. `your.com` and `www.your.com` are treated as different host names.
+One caveat to be aware when registering a sitekey: you will need to provide all the hostnames that you plan to use this sitekey. For instance, `your.com` and `www.your.com` are treated as different hostnames.
 Please note that this is different than the configuration for general HTML documents. See this [issue](https://github.com/ampproject/amphtml/issues/22279) for more details.
 
 This doc will focus more on how recaptcha is configured on AMP.
