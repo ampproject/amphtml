@@ -2094,6 +2094,36 @@ function GenCssParsingConfig() {
 }
 exports.GenCssParsingConfig = GenCssParsingConfig;
 
+const SelectorSpecVisitor = class extends parse_css.SelectorVisitor {
+  /**
+   * @param {!generated.SelectorSpec} spec
+   * @param {!Array<!tokenize_css.ErrorToken>} errorBuffer
+   */
+  constructor(spec, errorBuffer) {
+    super(errorBuffer);
+    /** @private {!generated.SelectorSpec} */
+    this.selectorSpec_ = spec;
+
+    /** @private {!Array<!tokenize_css.ErrorToken>} */
+    this.errorBuffer_ = errorBuffer;
+  }
+
+  /**
+   * @override
+   * @param {!parse_css.AttrSelector} attrSelector
+   */
+  visitAttrSelector(attrSelector) {
+    for (const allowedName of this.selectorSpec_.attributeName) {
+      if (allowedName === '*' || allowedName === attrSelector.attrName) return;
+    }
+    const errorToken = new tokenize_css.ErrorToken(
+        generated.ValidationError.Code.CSS_SYNTAX_DISALLOWED_ATTR_SELECTOR,
+        ['', attrSelector.attrName]);
+    attrSelector.copyPosTo(errorToken);
+    this.errorBuffer_.push(errorToken);
+  }
+};
+
 /**
  * CdataMatcher maintains a constraint to check which an opening tag
  * introduces: a tag's cdata matches constraints set by it's cdata
@@ -2276,6 +2306,18 @@ class CdataMatcher {
   }
 
   /**
+   * Matches the provided stylesheet against a SelectorSpec
+   * @param {!parse_css.Stylesheet} stylesheet
+   * @param {!generated.SelectorSpec} spec
+   * @param {!Array<!tokenize_css.ErrorToken>} errorBuffer
+   * @private
+   */
+  matchSelectors_(stylesheet, spec, errorBuffer) {
+    let visitor = new SelectorSpecVisitor(spec, errorBuffer);
+    stylesheet.accept(visitor);
+  }
+
+  /**
    * Matches the provided cdata against a CSS specification. Helper
    * routine for match (see above). The return value is the number of
    * bytes in the CSS string which were measured as URLs. In some
@@ -2322,6 +2364,9 @@ class CdataMatcher {
         break;
       }
     }
+
+    if (cssSpec.selectorSpec !== null)
+      this.matchSelectors_(stylesheet, cssSpec.selectorSpec, cssErrors);
 
     if (cssSpec.validateAmp4Ads) {
       amp4ads.validateAmp4AdsCss(stylesheet, cssErrors);
@@ -4723,8 +4768,8 @@ function validateAttrCss(
       const cssDeclaration = parsedAttrSpec.getSpec().valueDocSvgCss === true ?
           maybeSpec.cssDeclarationSvgByName(declaration.name) :
           maybeSpec.cssDeclarationByName(declaration.name);
-      // If there is no matching declaration in the rules, then this declaration
-      // is not allowed.
+      // If there is no matching declaration in the rules, then this
+      // declaration is not allowed.
       if (cssDeclaration === null) {
         context.addError(
             generated.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE,
