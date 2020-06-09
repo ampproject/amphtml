@@ -15,7 +15,7 @@
  */
 
 import {VariableSource} from '../../src/service/variable-source';
-import {installUrlReplacementsForEmbed} from '../../src/service/url-replacements-impl';
+import {installUrlReplacementsForEmbed} from '../../src/service/url-replacements-for-embed';
 
 describes.realWin('amp-pixel', {amp: true}, (env) => {
   const urlErrorRegex = /src attribute must start with/;

@@ -1200,20 +1200,6 @@ export function installUrlReplacementsServiceForDoc(ampdoc) {
 }
 
 /**
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @param {!Window} embedWin
- * @param {!VariableSource} varSource
- */
-export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
-  const parentService = Services.urlReplacementsForDoc(ampdoc.getHeadNode());
-  installServiceInEmbedScope(
-    embedWin,
-    'url-replace',
-    new parentService.constructor(ampdoc, varSource)
-  );
-}
-
-/**
  * @typedef {{incomingFragment: string, outgoingFragment: string}}
  */
 let ShareTrackingFragmentsDef;
