@@ -25,7 +25,6 @@ const {
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
 const {buildRuntime} = require('../common/utils');
-const {buildNewServer} = require('./typescript-compile');
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -41,14 +40,15 @@ class Runner extends RuntimeTestRunner {
   }
 }
 
+async buildTransformedHtml() {
+
+}
+
 async function integration() {
   if (shouldNotRun()) {
     return;
   }
 
-  if (argv.new_server) {
-    buildNewServer();
-  }
   maybePrintArgvMessages();
 
   const config = new RuntimeTestConfig('integration');
@@ -71,6 +71,7 @@ integration.flags = {
   'config':
     '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'coverage': '  Run tests in code coverage mode',
+  'new_server': '  Compiles the typescript code',
   'debug':
     '  Allow debug statements by auto opening devtools. NOTE: This only ' +
     'works in non headless mode.',
