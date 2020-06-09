@@ -100,7 +100,7 @@ describes.realWin(
 
       function createExpanderWithAllowList(allowList, mockBindings) {
         variableSource = new GlobalVariableSource(env.ampdoc);
-        variableSource.variableAllowlist_ = allowList;
+        variableSource.variableAllowList_ = allowList;
         return new Expander(variableSource, mockBindings);
       }
 
