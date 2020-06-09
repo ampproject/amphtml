@@ -45,7 +45,11 @@ function log(queryParams) {
  * @return {string}
  */
 function filter(str) {
-  return new DOMParser().parseFromString(str, 'text/html').body.textContent;
+  try {
+    return new DOMParser().parseFromString(str, 'text/html').body.textContent;
+  } catch (e) {
+    return str;
+  }
 }
 
 /**
