@@ -463,24 +463,6 @@ describes.realWin(
         win.dispatchEvent(new Event('scroll'));
         await Promise.resolve();
         expect(service.pages_.length).to.equal(3);
-
-        /*await fetchDocuments(service, MOCK_NEXT_PAGE_WITH_RECOMMENDATIONS);
-
-        // Adds the two documents coming from Document 1's recommendations
-        expect(service.pages_.length).to.equal(5);
-        expect(service.pages_.some((page) => page.title == 'Title 3')).to.be
-          .true;
-        expect(service.pages_.some((page) => page.title == 'Title 4')).to.be
-          .true;
-        // Avoids loops (ignores previously inserted page)
-        expect(
-          service.pages_.filter((page) => page.title == 'Title 2').length
-        ).to.equal(1);
-
-        expect(
-          element.querySelectorAll('.i-amphtml-next-page-document-container')
-            .length
-        ).to.equal(0);*/
       });
     });
 
