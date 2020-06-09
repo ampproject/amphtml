@@ -1540,6 +1540,29 @@ describes.fakeWin('Core events', {amp: true}, (env) => {
       'change',
       env.sandbox.match((e) => e.detail.files.length == 0)
     );
+
+    element.setAttribute('multiple', '');
+    Object.defineProperty(element, 'files', {
+      value: {
+        0: new File(['foo'], 'foo.txt', {type: 'text/plain'}),
+        1: new File(['bar'], 'bar.txt', {type: 'text/plain'}),
+        length: 2,
+      },
+    });
+
+    handler({target: element});
+    expect(action.trigger).to.have.been.calledWith(
+      element,
+      'change',
+      env.sandbox.match({
+        detail: {
+          files: [
+            {name: 'foo.txt', size: 3, type: 'text/plain'},
+            {name: 'bar.txt', size: 3, type: 'text/plain'},
+          ],
+        },
+      })
+    );
   });
 
   it('should trigger change event with details for <select> elements', () => {
