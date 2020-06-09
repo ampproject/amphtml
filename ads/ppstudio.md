@@ -41,4 +41,3 @@ For configuration semantics, contact [TenMax](https://www.tenmax.io/en/).
 - `data-holderScript`
 
 ### Optional parameters
-
