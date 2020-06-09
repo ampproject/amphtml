@@ -4036,7 +4036,7 @@ function validateDescendantTags(
 
   for (let ii = 0; ii < tagStack.allowedDescendantsList().length; ++ii) {
     const allowedDescendantsList = tagStack.allowedDescendantsList()[ii];
-    // If the tag we're validating is not whitelisted for a specific ancestor,
+    // If the tag we're validating is not allowlisted for a specific ancestor,
     // then throw an error.
     if (!allowedDescendantsList.allowedTags.includes(
             encounteredTag.upperName())) {

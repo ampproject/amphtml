@@ -263,7 +263,7 @@ describe
       div.setAttribute('width', '50');
       div.setAttribute('height', '100');
       div.setAttribute('title', 'a_title');
-      div.setAttribute('not_whitelisted', 'shouldnt_be_in_iframe');
+      div.setAttribute('not_allowlisted', 'shouldnt_be_in_iframe');
       setupElementFunctions(div);
 
       container.appendChild(div);
@@ -273,7 +273,7 @@ describe
       expect(iframe.width).to.equal('50');
       expect(iframe.height).to.equal('100');
       expect(iframe.title).to.equal('a_title');
-      expect(iframe.not_whitelisted).to.equal(undefined);
+      expect(iframe.not_allowlisted).to.equal(undefined);
     });
 
     it('should set feature policy for sync-xhr', () => {

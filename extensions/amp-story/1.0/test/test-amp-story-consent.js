@@ -245,11 +245,11 @@ describes.realWin('amp-story-consent', {amp: true}, (env) => {
     expect(linkEl).not.to.have.display('none');
   });
 
-  it('should whitelist the <amp-consent> actions', () => {
+  it('should allowlist the <amp-consent> actions', () => {
     storyConsent.buildCallback();
 
     const actions = storyConsent.storeService_.get(
-      StateProperty.ACTIONS_WHITELIST
+      StateProperty.ACTIONS_ALLOWLIST
     );
     expect(actions).to.deep.contain({
       tagOrTarget: 'AMP-CONSENT',

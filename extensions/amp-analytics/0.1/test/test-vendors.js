@@ -54,7 +54,7 @@ describes.realWin(
       };
     });
 
-    describe('Should not contain iframe transport if not whitelisted', () => {
+    describe('Should not contain iframe transport if not allowlisted', () => {
       for (const vendor in VENDOR_REQUESTS) {
         it('test vendor: ' + vendor, () => {
           const el = doc.createElement('amp-analytics');

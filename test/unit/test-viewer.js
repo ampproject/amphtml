@@ -1412,7 +1412,7 @@ describes.sandboxed('Viewer', {}, (env) => {
       test('http://google.com', false);
     });
 
-    describe('should NOT trust wrong or non-whitelisted domain variations', () => {
+    describe('should NOT trust wrong or non-allowlisted domain variations', () => {
       test('https://google.net', false);
       test('https://google.other.com', false);
       test('https://www.google.other.com', false);
