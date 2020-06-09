@@ -771,13 +771,13 @@ export function validateAllowedTypes(window, type, allowedTypes) {
   }
   userAssert(
     allowedTypes && allowedTypes.indexOf(type) != -1,
-    'Non-allowlisted 3p type for custom iframe: %s',
+    '3p type for custom iframe not allowed: %s',
     type
   );
 }
 
 /**
- * Check that parent host name was allowlisted.
+ * Check that parent host name was allowed.
  * @param {!Window} window
  * @param {!Array<string>} allowedHostnames Suffixes of allowed host names.
  * @visibleForTesting
@@ -799,11 +799,11 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
       .hostname;
   }
   for (let i = 0; i < allowedHostnames.length; i++) {
-    // Either the hostname is exactly as allowlisted…
+    // Either the hostname is allowed
     if (allowedHostnames[i] == hostname) {
       return;
     }
-    // Or it ends in .$hostname (aka is a sub domain of the allowlisted domain.
+    // Or it ends in .$hostname (aka is a sub domain of an allowed domain.
     if (endsWith(hostname, '.' + allowedHostnames[i])) {
       return;
     }

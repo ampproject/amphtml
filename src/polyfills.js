@@ -57,8 +57,3 @@ if (self.document) {
     installIntersectionObserver(self);
   }
 }
-
-// TODO(#18268, erwinm): For whatever reason imports to modules that have no
-// export currently break for singlepass runs. This is a temporary workaround
-// until we figure the issue out.
-export const erwinmHack = 'this export is a temporary hack for single pass';

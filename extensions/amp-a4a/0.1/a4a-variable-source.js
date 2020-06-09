@@ -86,7 +86,7 @@ export class A4AVariableSource extends VariableSource {
 
   /** @override */
   initialize() {
-    // Initiate allowlisted varaibles first in case the resolver function needs
+    // Initiate allowed varaibles first in case the resolver function needs
     // to be overwritten.
     for (let v = 0; v < ALLOWLISTED_VARIABLES.length; v++) {
       const varName = ALLOWLISTED_VARIABLES[v];

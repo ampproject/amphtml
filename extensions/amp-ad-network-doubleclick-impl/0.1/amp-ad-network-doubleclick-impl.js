@@ -595,7 +595,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.isFluidRequest_ =
         !!multiSizeStr && multiSizeStr.indexOf('fluid') != -1;
     }
-    this.maybeAddSinglePassExperiment();
   }
 
   /** @override */
@@ -932,7 +931,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   getCustomRealTimeConfigMacros_() {
     /**
-     * This allowlist allow attributes on the amp-ad element to be used as
+     * This lists allowed attributes on the amp-ad element to be used as
      * macros for constructing the RTC URL. Add attributes here, in lowercase,
      * to make them available.
      */

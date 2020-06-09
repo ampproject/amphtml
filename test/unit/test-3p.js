@@ -182,12 +182,12 @@ describe('3p', () => {
             {
               type: 'TEST',
               foo: true,
-              'not-allowlisted': true,
+              'not-allowed': true,
             },
             [],
             ['foo']
           );
-        }).to.throw(/Unknown attribute for TEST: not-allowlisted./);
+        }).to.throw(/Unknown attribute for TEST: not-allowed./);
       });
     });
 
