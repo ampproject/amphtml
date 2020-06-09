@@ -37,7 +37,6 @@ import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex} from '../../../src/utils/array';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {listenOnce} from '../../../src/event-helper';
 import {
   parseFavicon,
   parseOgImage,
@@ -251,13 +250,12 @@ export class NextPageService {
    */
   whenFirstScroll_() {
     return new Promise((resolve) => {
-      console.log('INI', this.doc_.scrollingElement.scrollTop);
-      if (this.doc_.scrollingElement.scrollTop != 0) {
+      if (this.viewport_.getScrollTop() != 0) {
         return resolve();
       }
-      listenOnce(this.win_, 'scroll', () => {
-        console.log('SCROLL');
+      const unlisten = this.viewport_.onScroll(() => {
         resolve();
+        unlisten();
       });
     });
   }
