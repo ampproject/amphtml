@@ -610,8 +610,9 @@ tags: {  # <style amp-custom>, AMP4ADS
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec#css"
 }
 
-tags: {  # <style amp-custom>, AMP4EMAIL
+tags: {  # <style amp-custom>, AMP4EMAIL, not data-css-strict
   html_format: AMP4EMAIL
+  disabled_by: "data-css-strict"
   tag_name: "STYLE"
   spec_name: "style amp-custom (AMP4EMAIL)"
   unique: true
@@ -652,6 +653,105 @@ tags: {  # <style amp-custom>, AMP4EMAIL
         }
       }
       at_rule_spec: { name: 'page' }
+    }
+    disallowed_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+    # These regex denylists are temporary hacks to validate essential CSS
+    # rules. They will be replaced later with more principled solutions.
+    disallowed_cdata_regex: {
+      regex: "(^|\\W)i-amphtml-"
+      error_message: "CSS i-amphtml- name prefix"
+    }
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets"
+}
+
+tags: {  # <style amp-custom>, AMP4EMAIL, data-css-strict
+  html_format: AMP4EMAIL
+  enabled_by: "data-css-strict"
+  tag_name: "STYLE"
+  spec_name: "style amp-custom (css-strict)"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-custom"
+    mandatory: true
+    value: ""
+    # This is a fine dispatch key, but we would prefer that this tagspec
+    # is used for errors related to <style> tags missing the amp-custom
+    # attribute rather than the boilerplate tagspec which doesn't have an
+    # attribute and thus can't have a dispatch_key.
+    # dispatch_key: NAME_DISPATCH
+  }
+  attrs: {  # Allow the default.
+    name: "type"
+    value_casei: "text/css"
+  }
+  # TODO(b/68756045): Whitelist CSS properties allowed in Dynamic Mail.
+  cdata: {
+    doc_css_bytes: true
+    max_bytes: 75000
+    max_bytes_spec_url:
+    "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size"
+
+    css_spec: {
+      at_rule_spec: {
+        name: 'media'
+        media_query_spec: {
+          issues_as_error: true
+          type: 'all'
+          type: 'screen'
+          feature: 'device-width'
+          feature: 'orientation'
+          feature: 'pointer'
+          feature: 'resolution'
+          feature: 'width'
+        }
+      }
+      at_rule_spec: { name: 'page' }
+      selector_spec: {
+        attribute_name: "foo"
+        attribute_name: "active"
+        attribute_name: "alt"
+        attribute_name: "autocomplete"
+        attribute_name: "autoexpand"
+        attribute_name: "checked"
+        attribute_name: "class"
+        attribute_name: "controls"
+        attribute_name: "dir"
+        attribute_name: "disabled"
+        attribute_name: "expanded"
+        attribute_name: "fallback"
+        attribute_name: "fetch-error"
+        attribute_name: "height"
+        attribute_name: "hidden"
+        attribute_name: "id"
+        attribute_name: "items"
+        attribute_name: "layout"
+        attribute_name: "name"
+        attribute_name: "noloading"
+        attribute_name: "novalidate"
+        attribute_name: "open"
+        attribute_name: "option"
+        attribute_name: "overflow"
+        attribute_name: "placeholder"
+        attribute_name: "readonly"
+        attribute_name: "required"
+        attribute_name: "role"
+        attribute_name: "scrollable"
+        attribute_name: "selected"
+        attribute_name: "side"
+        attribute_name: "sizes"
+        attribute_name: "submit-error"
+        attribute_name: "submit-success"
+        attribute_name: "submitting"
+        attribute_name: "title"
+        attribute_name: "type"
+        attribute_name: "value"
+        attribute_name: "width"
+      }
     }
     disallowed_cdata_regex: {
       regex: "<!--"
