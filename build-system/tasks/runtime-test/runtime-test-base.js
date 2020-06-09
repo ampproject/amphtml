@@ -201,10 +201,8 @@ class RuntimeTestConfig {
     this.client.amp = {
       useCompiledJs: !!argv.compiled,
       saucelabs: !!argv.saucelabs,
-      singlePass: !!argv.single_pass,
       adTypes: getAdTypes(),
       mochaTimeout: this.client.mocha.timeout,
-      propertiesObfuscated: !!argv.single_pass,
       testServerPort: this.client.testServerPort,
     };
 

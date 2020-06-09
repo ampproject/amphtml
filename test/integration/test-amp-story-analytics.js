@@ -17,7 +17,7 @@
 import {BrowserController, RequestBank} from '../../testing/test-helper';
 import {parseQueryString} from '../../src/url';
 
-const config = describe.configure().skipEdge().skipSafari().skipSinglePass();
+const config = describe.configure().skipEdge().skipSafari();
 
 config.run('amp-story analytics', () => {
   const extensions = ['amp-story:1.0', 'amp-analytics', 'amp-social-share'];

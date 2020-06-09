@@ -86,19 +86,8 @@ function printDistHelp(options) {
   if (options.fortesting) {
     cmd = cmd + ' --fortesting';
   }
-  if (argv.single_pass) {
-    cmd = cmd + ' --single_pass';
-  }
   printConfigHelp(cmd);
-  if (argv.single_pass) {
-    log(
-      green('Building all AMP extensions in'),
-      cyan('single_pass'),
-      green('mode.')
-    );
-  } else {
-    parseExtensionFlags();
-  }
+  parseExtensionFlags();
   if (argv.define_experiment_constant) {
     log(
       green('Enabling the'),
@@ -474,14 +463,10 @@ dist.flags = {
   fortesting: '  Compiles production binaries for local testing',
   noconfig: '  Compiles production binaries without applying AMP_CONFIG',
   config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
-  single_pass: "Compile AMP's primary JS bundles in a single invocation",
   extensions: '  Builds only the listed extensions.',
   extensions_from: '  Builds only the extensions from the listed AMP(s).',
   noextensions: '  Builds with no extensions.',
   core_runtime_only: '  Builds only the core runtime.',
-  single_pass_dest:
-    '  The directory closure compiler will write out to ' +
-    'with --single_pass mode. The default directory is `dist`',
   full_sourcemaps: '  Includes source code content in sourcemaps',
   disable_nailgun:
     "  Doesn't use nailgun to invoke closure compiler (much slower)",
