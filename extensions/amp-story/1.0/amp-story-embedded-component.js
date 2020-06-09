@@ -32,7 +32,12 @@ import {EventType, dispatch} from './events';
 import {Keys} from '../../../src/utils/key-codes';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
-import {addAttributesToElement, closest, matches} from '../../../src/dom';
+import {
+  addAttributesToElement,
+  closest,
+  matches,
+  tryFocus,
+} from '../../../src/dom';
 import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -780,6 +785,11 @@ export class AmpStoryEmbeddedComponent {
       dev().assertElement(this.focusedStateOverlay_),
       () => {
         this.focusedStateOverlay_.classList.toggle('i-amphtml-hidden', false);
+        tryFocus(
+          dev().assertElement(
+            this.focusedStateOverlay_.querySelector('a.i-amphtml-story-tooltip')
+          )
+        );
       }
     );
   }
@@ -1356,7 +1366,12 @@ export class AmpStoryEmbeddedComponent {
                     i-amphtml-story-tooltip-nav-button-right"
           ></button>
         </div>
-        <a class="i-amphtml-story-tooltip" target="_blank" ref="tooltip">
+        <a
+          class="i-amphtml-story-tooltip"
+          target="_blank"
+          ref="tooltip"
+          role="tooltip"
+        >
           <div class="i-amphtml-story-tooltip-custom-icon"></div>
           <p class="i-amphtml-tooltip-text" ref="text"></p>
           <div class="i-amphtml-tooltip-action-icon"></div>
