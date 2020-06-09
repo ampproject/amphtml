@@ -36,9 +36,9 @@ describe('LinkerReader', () => {
         'Safari/537.36'
     );
     mockWin.getUserLanguage.returns('en-US');
-    mockWin.location = {
-      href: 'https://example.com?testlinker=1*1f66u1p*key1*dmFsdWUx',
-    };
+    mockWin.location = window.location;
+    window.location.href =
+      'https://example.com?testlinker=1*1f66u1p*key1*dmFsdWUx';
     mockWin.history = {
       replaceState: (unusedVar1, unusedVar2, newHref) => {
         mockWin.location.href = newHref;
