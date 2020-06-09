@@ -32,15 +32,15 @@ export function ppstudio(global, data) {
 
   const e = global.document.createElement('script');
   e.id = 'pps-script-' + data.crid;
-  e.dataset.width = data.width;
-  e.dataset.height = data.height;
-  e.dataset.clickUrl = '';
+  e.setAttribute('data-width', data.width);
+  e.setAttribute('data-height', data.height);
+  e.setAttribute('data-click-url', '');
   e.src = data.holderScript;
   global.document.getElementById('c').appendChild(e);
 
   const i = global.document.createElement('ins');
   i.classList.add('ppstudio');
-  i.dataset.ppsTargetId = 'cr-' + data.crid;
+  i.setAttribute('data-pps-target-id', 'cr-' + data.crid);
   global.document.getElementById('c').appendChild(i);
 
   loadScript(global, 'https://ads-cdn.tenmax.io/code/ppstudio.js');
