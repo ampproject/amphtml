@@ -1402,12 +1402,44 @@ const Selector = class extends tokenize_css.Token {
 exports.Selector = Selector;
 
 /**
- * A super class for making visitors (by overriding the types of interest).
- * The traverseSelectros function can be used to visit nodes in a
- * parsed CSS selector.
+ * A super class for making visitors (by overriding the types of interest). The
+ * standard RuleVisitor does not recursively parse the prelude of qualified
+ * rules for the components of a selector. This visitor re-parses these preludes
+ * and then visits the fields within. The parse step has the possibility of
+ * emitting new CSS ErrorTokens
  */
-const SelectorVisitor = class {
-  constructor() {}
+const SelectorVisitor = class extends RuleVisitor {
+  /**
+   * @param {!Array<!tokenize_css.ErrorToken>} errors
+   */
+  constructor(errors) {
+    super();
+    /**
+     * @type {!Array<!tokenize_css.ErrorToken>}
+     * @private
+     */
+    this.errors_ = errors;
+  }
+
+  /** @param {!QualifiedRule} qualifiedRule */
+  visitQualifiedRule(qualifiedRule) {
+    const tokenStream = new TokenStream(qualifiedRule.prelude);
+    tokenStream.consume();
+    const maybeSelector = parseASelectorsGroup(tokenStream);
+    if (maybeSelector instanceof tokenize_css.ErrorToken)
+      this.errors_.push(maybeSelector);
+
+    /** @type {!Array<!Selector>} */
+    const toVisit = [maybeSelector];
+    while (toVisit.length > 0) {
+      /** @type {!Selector} */
+      const node = toVisit.shift();
+      node.accept(this);
+      node.forEachChild(child => {
+        toVisit.push(child);
+      });
+    }
+  }
 
   /** @param {!TypeSelector} typeSelector */
   visitTypeSelector(typeSelector) {}
@@ -1434,26 +1466,6 @@ const SelectorVisitor = class {
   visitSelectorsGroup(group) {}
 };
 exports.SelectorVisitor = SelectorVisitor;
-
-/**
- * Visits selectorNode and its children, recursively, by calling the
- * appropriate methods on the provided visitor.
- * @param {!Selector} selectorNode
- * @param {!SelectorVisitor} visitor
- */
-const traverseSelectors = function(selectorNode, visitor) {
-  /** @type {!Array<!Selector>} */
-  const toVisit = [selectorNode];
-  while (toVisit.length > 0) {
-    /** @type {!Selector} */
-    const node = toVisit.shift();
-    node.accept(visitor);
-    node.forEachChild(child => {
-      toVisit.push(child);
-    });
-  }
-};
-exports.traverseSelectors = traverseSelectors;
 
 /**
  * This node models type selectors and universial selectors.
@@ -1649,6 +1661,8 @@ const AttrSelector = class extends Selector {
     visitor.visitAttrSelector(this);
   }
 };
+exports.AttrSelector = AttrSelector;
+
 /** @inheritDoc */
 AttrSelector.prototype.toJSON = function() {
   const json = Selector.prototype.toJSON.call(this);
@@ -1708,7 +1722,8 @@ function parseAnAttrSelector(tokenStream) {
   if (!(tokenStream.current().tokenType === tokenize_css.TokenType.IDENT)) {
     return newInvalidAttrSelectorError(start);
   }
-  const ident = /** @type {!tokenize_css.IdentToken} */ (tokenStream.current());
+  const ident =
+      /** @type {!tokenize_css.IdentToken} */ (tokenStream.current());
   const attrName = ident.value;
   tokenStream.consume();
   if (tokenStream.current().tokenType === tokenize_css.TokenType.WHITESPACE) {
@@ -1926,7 +1941,8 @@ const parseAClassSelector = function(tokenStream) {
       'Precondition violated: must start with "." and follow with ident');
   const dot = tokenStream.current();
   tokenStream.consume();
-  const ident = /** @type {!tokenize_css.IdentToken} */ (tokenStream.current());
+  const ident =
+      /** @type {!tokenize_css.IdentToken} */ (tokenStream.current());
   tokenStream.consume();
   return dot.copyPosTo(new ClassSelector(ident.value));
 };
@@ -2019,7 +2035,8 @@ const parseASimpleSelectorSequence = function(tokenStream) {
           return tokenStream.current().copyPosTo(new tokenize_css.ErrorToken(
               ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR, ['style']));
         }
-        // If no type selector is given then the universal selector is implied.
+        // If no type selector is given then the universal selector is
+        // implied.
         typeSelector = start.copyPosTo(new TypeSelector(
             /*namespacePrefix=*/ null, /*elementName=*/ '*'));
       }
@@ -2074,6 +2091,8 @@ const Combinator = class extends Selector {
     visitor.visitCombinator(this);
   }
 };
+exports.Combinator = Combinator;
+
 /** @inheritDoc */
 Combinator.prototype.toJSON = function() {
   const json = Selector.prototype.toJSON.call(this);
@@ -2232,9 +2251,7 @@ SelectorsGroup.prototype.toJSON = function() {
  * In addition, this parsing routine checks that no input remains,
  * that is, after parsing the production we reached the end of |token_stream|.
  * @param {!TokenStream} tokenStream
- * @return {!SelectorsGroup|
- *          !SimpleSelectorSequence|!Combinator|
- *          !tokenize_css.ErrorToken}
+ * @return {!SelectorsGroup|!tokenize_css.ErrorToken}
  */
 const parseASelectorsGroup = function(tokenStream) {
   if (!isSimpleSelectorSequenceStart(tokenStream.current())) {
