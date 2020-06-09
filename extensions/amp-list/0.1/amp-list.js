@@ -190,6 +190,9 @@ export class AmpList extends AMP.BaseElement {
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
+
+    /** @private {?../../../src/service/owners-impl.OwnersImpl} */
+    this.owners_ = null;
   }
 
   /** @override */
@@ -217,6 +220,7 @@ export class AmpList extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
+    this.owners_ = Services.ownersForDoc(this.element);
     /** If the element is in an email document,
      * allow its `changeToLayoutContainer` and `refresh` actions. */
     this.action_.addToWhitelist(
@@ -1055,6 +1059,9 @@ export class AmpList extends AMP.BaseElement {
         this.diff_(container, elements);
       } else {
         if (!opt_append) {
+          toArray(container.children).forEach((child) =>
+            this.owners_.scheduleUnlayout(this.element, child)
+          );
           removeChildren(container);
         }
         this.addElementsToContainer_(elements, container);
