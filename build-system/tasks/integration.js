@@ -64,7 +64,6 @@ integration.flags = {
   'chrome_canary': '  Runs tests on Chrome Canary',
   'chrome_flags': '  Uses the given flags to launch Chrome',
   'compiled': '  Runs tests against minified JS',
-  'single_pass': '  Run tests in Single Pass mode',
   'config':
     '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'coverage': '  Run tests in code coverage mode',
