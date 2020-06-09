@@ -179,7 +179,7 @@ export class Criteria {
  * general grammar: (URL [NUM[w|x]],)*, this should express "NUMw".
  * E.g. in "image1.png 100w, image2.png 50w", this matches "100w" and "50w"
  */
-const srcsetWidthRe = /\s+([0-9]+)w(,|$)/g;
+const srcsetWidthRe = /\s+([0-9]+)w(,|[\S\s]*$)/g;
 
 /**
  * Parses srcset partially to get the maximum defined intrinsic width.
