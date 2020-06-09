@@ -518,7 +518,7 @@ HTML-native `img` tag which will be out of AMP resource management.
 Consider showing a loading indicator if your element is expected to take
 a long time to load (for example, loading a GIF, video or iframe). AMP
 has a built-in mechanism to show a loading indicator simply by
-whitelisting your element to show it. You can do that inside layout.js
+allowlisting your element to show it. You can do that inside layout.js
 file in the `LOADING_ELEMENTS_` object.
 
 ```javascript
