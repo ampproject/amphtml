@@ -99,7 +99,6 @@ import {
   setImportantStyles,
   toggle,
 } from '../../../src/style';
-import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {createPseudoLocale} from '../../../src/localized-strings';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
@@ -108,6 +107,7 @@ import {endsWith} from '../../../src/string';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex, lastItem} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
+import {getDetail} from '../../../src/event-helper';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode} from '../../../src/mode';
