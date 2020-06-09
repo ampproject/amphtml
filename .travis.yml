@@ -25,9 +25,6 @@ before_install:
 branches:
   only:
     - master
-    - release
-    - canary
-    - nightly
     - /^amp-release-.*$/
 addons:
   apt:
