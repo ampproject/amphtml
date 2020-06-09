@@ -17,12 +17,12 @@
 import {BaseElement} from '../src/base-element';
 import {Layout, isLayoutSizeDefined} from '../src/layout';
 import {Services} from '../src/services';
+import {childElementByTag, removeElement} from '../src/dom';
 import {dev} from '../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img';
 import {listen} from '../src/event-helper';
 import {propagateObjectFitStyles, setImportantStyles} from '../src/style';
 import {registerElement} from '../src/service/custom-element-registry';
-import {removeElement} from '../src/dom';
 
 /** @const {string} */
 const TAG = 'amp-img';
@@ -161,7 +161,7 @@ export class AmpImg extends BaseElement {
     // For inabox SSR, image will have been written directly to DOM so no need
     // to recreate.  Calling appendChild again will have no effect.
     if (this.element.hasAttribute('i-amphtml-ssr')) {
-      this.img_ = this.element.querySelector('img');
+      this.img_ = childElementByTag(this.element, 'img');
     }
     this.img_ = this.img_ || new Image();
     this.img_.setAttribute('decoding', 'async');
