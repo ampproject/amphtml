@@ -248,19 +248,17 @@ export class AnalyticsEvent {
   /**
    * @param {!Element} target The most relevant target element.
    * @param {string} type The type of event.
-   * @param {?JsonObject=} opt_vars A map of vars and their values.
+   * @param {!JsonObject} vars A map of vars and their values.
    * @param {boolean} enableDataVars A boolean to indicate if data-vars-*
    * attribute value from target element should be included.
    */
-  constructor(target, type, opt_vars, enableDataVars = true) {
+  constructor(target, type, vars = dict(), enableDataVars = true) {
     /** @const */
     this['target'] = target;
     /** @const */
     this['type'] = type;
     /** @const */
-    this['vars'] = enableDataVars
-      ? mergeDataVars(target, opt_vars || dict())
-      : opt_vars || dict();
+    this['vars'] = enableDataVars ? mergeDataVars(target, vars) : vars;
   }
 }
 
@@ -1415,11 +1413,11 @@ function normalizeVideoEventType(type, details) {
 
 /**
  * @param {?JsonObject|undefined} details
- * @return {?JsonObject|undefined}
+ * @return {!JsonObject|undefined}
  */
 function removeInternalVars(details) {
   if (!details) {
-    return details;
+    return dict();
   }
   const clean = {...details};
   delete clean[videoAnalyticsCustomEventTypeKey];

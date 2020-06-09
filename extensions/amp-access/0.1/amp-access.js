@@ -301,7 +301,7 @@ export class AccessService {
     triggerAnalyticsEvent(
       this.getRootElement_(),
       eventType,
-      undefined,
+      /** vars */ undefined,
       /** enableDataVars */ false
     );
   }
