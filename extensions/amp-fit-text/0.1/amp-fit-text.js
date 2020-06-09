@@ -111,7 +111,6 @@ class AmpFitText extends AMP.BaseElement {
       this.minFontSize_,
       this.maxFontSize_
     );
-
     setStyle(this.contentWrapper_, 'fontSize', px(fontSize));
     updateOverflow_(this.contentWrapper_, this.measurer_, maxHeight, fontSize);
   }
