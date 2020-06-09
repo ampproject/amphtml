@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {macroTask} from '../../../../testing/yield';
-import {streamResponseToWriter} from '../streaming-utils';
+import {macroTask} from '../../../testing/yield';
+import {streamResponseToWriter} from '../../../src/utils/stream-response';
 
 const chunk1 = `
  <!doctype html>
