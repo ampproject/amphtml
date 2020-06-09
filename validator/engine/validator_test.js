@@ -1435,8 +1435,14 @@ function typeIdentifiersAreValidAndUnique(
  * @param {string} specName
  */
 function typeIdentifiersShouldMakeSense(spec, specType, specName) {
-  const typeIdentifiers =
-      {'amp': 0, 'amp4ads': 0, 'amp4email': 0, 'actions': 0, 'transformed': 0};
+  const typeIdentifiers = {
+    'amp': 0,
+    'amp4ads': 0,
+    'amp4email': 0,
+    'actions': 0,
+    'transformed': 0,
+    'data-css-strict': 0
+  };
   // both enabled_by and disabled_by must not be set on the same spec.
   it(specType + ' \'' + specName + '\' has both enabled_by and disabled_by' +
          ' set and it must be one or the other, not both.',
