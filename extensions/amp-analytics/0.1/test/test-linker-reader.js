@@ -44,7 +44,6 @@ describe('LinkerReader', () => {
         mockWin.location.href = newHref;
       },
     };
-    mockWin.document = document;
     installLinkerReaderService(mockWin);
     linkerReader = linkerReaderServiceFor(mockWin);
   });
