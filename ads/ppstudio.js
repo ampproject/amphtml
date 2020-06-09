@@ -36,8 +36,7 @@ export function ppstudio(global, data) {
   e.dataset.height = data.height;
   e.dataset.clickUrl = '';
   e.src = data.holderScript;
-  const scriptStr = e.outerHTML;
-  global.document.write(scriptStr);
+  global.document.getElementById('c').appendChild(e);
 
   const i = global.document.createElement('ins');
   i.classList.add('ppstudio');
