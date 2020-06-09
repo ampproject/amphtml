@@ -175,7 +175,6 @@ exports.jsBundles = {
       minifiedName: 'v0.js',
       includePolyfills: true,
       wrapper: wrappers.mainBinary,
-      singlePassCompilation: argv.single_pass,
       esmPassCompilation: argv.esm,
       includeOnlyESMLevelPolyfills: argv.esm,
     },
@@ -1196,24 +1195,6 @@ exports.extensionAliasBundles = {
     aliasedVersion: '0.1',
   },
 };
-
-/**
- * Used to generate alternative JS build targets
- */
-exports.altMainBundles = [
-  {
-    path: 'src/amp-shadow.js',
-    name: 'shadow-v0',
-    version: '0.1',
-    latestVersion: '0.1',
-  },
-  {
-    path: 'src/inabox/amp-inabox.js',
-    name: 'amp4ads-v0',
-    version: '0.1',
-    latestVersion: '0.1',
-  },
-];
 
 /**
  * @param {boolean} condition

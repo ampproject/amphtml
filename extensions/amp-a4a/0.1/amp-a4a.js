@@ -19,10 +19,6 @@ import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
 } from '../../../src/consent-state';
 import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
-import {
-  SINGLE_PASS_EXPERIMENT_IDS,
-  addExperimentIdToElement,
-} from '../../../ads/google/a4a/traffic-experiments';
 import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {
@@ -2039,25 +2035,6 @@ export class AmpA4A extends AMP.BaseElement {
    */
   isVerifiedAmpCreative() {
     return this.isVerifiedAmpCreative_;
-  }
-
-  /**
-   * Adds single pass experiment IDs if the javascript binary has
-   * "singlePassType" mode.
-   */
-  maybeAddSinglePassExperiment() {
-    const type = getMode().singlePassType;
-    if (type === 'sp') {
-      addExperimentIdToElement(
-        SINGLE_PASS_EXPERIMENT_IDS.SINGLE_PASS,
-        this.element
-      );
-    } else if (type === 'mp') {
-      addExperimentIdToElement(
-        SINGLE_PASS_EXPERIMENT_IDS.MULTI_PASS,
-        this.element
-      );
-    }
   }
 }
 

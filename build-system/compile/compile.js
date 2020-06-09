@@ -36,7 +36,6 @@ const {isTravisBuild} = require('../common/travis');
 const {postClosureBabel} = require('./post-closure-babel');
 const {preClosureBabel, handlePreClosureError} = require('./pre-closure-babel');
 const {sanitize} = require('./sanitize');
-const {singlePassCompile} = require('./single-pass');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
 const {writeSourcemaps} = require('./helpers');
 
@@ -145,27 +144,6 @@ function compile(
   const define = [`VERSION=${internalRuntimeVersion}`];
   if (argv.pseudo_names) {
     define.push('PSEUDO_NAMES=true');
-  }
-  if (options.singlePassCompilation) {
-    const compilationOptions = {
-      define,
-      externs: baseExterns,
-      hideWarningsFor,
-    };
-
-    // Add babel plugin to remove unwanted polyfills in esm build
-    if (options.esmPassCompilation) {
-      compilationOptions['dest'] = './dist/esm/';
-      define.push('ESM_BUILD=true');
-    }
-
-    console /*OK*/
-      .assert(typeof entryModuleFilenames == 'string');
-    return singlePassCompile(
-      entryModuleFilenames,
-      compilationOptions,
-      timeInfo
-    );
   }
 
   return new Promise(function (resolve, reject) {

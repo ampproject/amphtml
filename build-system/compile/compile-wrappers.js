@@ -36,11 +36,6 @@ exports.extension = function (
 ) {
   opt_splitMarker = opt_splitMarker || '';
 
-  // Single pass intermediate modules do not need an AMP.push wrapper.
-  if (name.startsWith('_base_')) {
-    return '(function() {<%= contents %>}());';
-  }
-
   let deps = '';
   if (intermediateDeps && intermediateDeps.length) {
     deps = 'i:';
