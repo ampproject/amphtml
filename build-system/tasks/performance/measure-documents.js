@@ -220,6 +220,7 @@ async function setupAdditionalHandlers(
       setupAnalyticsHandler(handlersList, handlerOptions, resolve);
       break;
     case 'defaultHandler':
+    default:
       await setupMeasurement(page);
       break;
   }
@@ -259,6 +260,7 @@ async function addHandlerMetric(handlerOptions, page) {
     case 'analyticsHandler':
       return getAnalyticsMetrics(handlerOptions);
     case 'defaultHandler':
+    default:
       return await readMetrics(page);
   }
 }

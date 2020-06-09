@@ -16,6 +16,7 @@
 
 const cacheDocuments = require('./cache-documents');
 const compileScripts = require('./compile-scripts');
+const copyLocalImages = require('./copy-images');
 const getMetrics = require('./measure-documents');
 const loadConfig = require('./load-config');
 const rewriteAnalyticsTags = require('./rewrite-analytics-tags');
@@ -39,6 +40,7 @@ async function performance() {
   const urlsAndAdsUrls = urls.concat(config.adsUrls || []);
   await cacheDocuments(urlsAndAdsUrls);
   await compileScripts(urlsAndAdsUrls);
+  copyLocalImages(urlsAndAdsUrls);
   await rewriteScriptTags(urlsAndAdsUrls);
   await rewriteAnalyticsTags(config.handlers);
   await getMetrics(urls, config);
