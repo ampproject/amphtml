@@ -1529,6 +1529,19 @@ describes.fakeWin('Core events', {amp: true}, (env) => {
     );
   });
 
+  it('should trigger change event for <input type="file"> elements', () => {
+    const handler = window.document.addEventListener.getCall(3).args[1];
+    const element = document.createElement('input');
+    element.setAttribute('type', 'file');
+    const event = {target: element};
+    handler(event);
+    expect(action.trigger).to.have.been.calledWith(
+      element,
+      'change',
+      env.sandbox.match((e) => e.detail.files.length == 0)
+    );
+  });
+
   it('should trigger change event with details for <select> elements', () => {
     const handler = window.document.addEventListener.getCall(3).args[1];
     const element = document.createElement('select');
