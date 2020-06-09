@@ -366,6 +366,17 @@ export class ManualAdvancement extends AdvancementConfig {
       event.preventDefault();
     }
 
+    this.resolveTouchstart();
+  }
+
+  /**
+   * Reverts the touchstart events' state (eg: when resuming from swipe in player)
+   * @public
+   */
+  resolveTouchstart() {
+    if (!this.touchstartTimestamp_) {
+      return;
+    }
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
     this.touchstartTimestamp_ = null;
     this.timer_.cancel(this.timeoutId_);
