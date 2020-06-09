@@ -25,14 +25,12 @@ const typeMap = {
 const REMOVABLE = {
   dev: [
     'assert',
-    'fine',
     'assertElement',
     'assertString',
     'assertNumber',
     'assertBoolean',
     'assertArray',
   ],
-  user: ['fine'],
 };
 
 module.exports = function (babel) {
@@ -44,9 +42,12 @@ module.exports = function (babel) {
    * @return {boolean}
    */
   function isRemovableMethod(path, names) {
-    return names.some((name) => {
-      return path.isIdentifier({name});
-    });
+    return (
+      names &&
+      names.some((name) => {
+        return path.isIdentifier({name});
+      })
+    );
   }
 
   /**
@@ -134,10 +135,7 @@ module.exports = function (babel) {
         const logCallee = callee.get('object.callee');
         let removable = [];
 
-        if (
-          logCallee.isIdentifier({name: 'dev'}) ||
-          logCallee.isIdentifier({name: 'user'})
-        ) {
+        if (logCallee.isIdentifier({name: 'dev'})) {
           removable = REMOVABLE[logCallee.node.name];
         }
 
