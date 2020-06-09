@@ -16,8 +16,8 @@
 
 import {
   ADSENSE_MCRSPV_TAG,
+  ADSENSE_RSPV_ALLOWED_HEIGHT,
   ADSENSE_RSPV_TAG,
-  ADSENSE_RSPV_WHITELISTED_HEIGHT,
   getMatchedContentResponsiveHeightAndUpdatePubParams,
 } from '../../../ads/google/utils';
 import {Services} from '../../../src/services';
@@ -174,7 +174,7 @@ export class ResponsiveState {
    * @private
    */
   static upgradeToResponsive_(element) {
-    element.setAttribute('height', ADSENSE_RSPV_WHITELISTED_HEIGHT);
+    element.setAttribute('height', ADSENSE_RSPV_ALLOWED_HEIGHT);
     element.setAttribute('width', '100vw');
     element.setAttribute('data-full-width', '');
     element.setAttribute('data-auto-format', 'rspv');
@@ -203,7 +203,7 @@ export class ResponsiveState {
             );
           },
           mutate: (state) => {
-            element.setAttribute('height', ADSENSE_RSPV_WHITELISTED_HEIGHT);
+            element.setAttribute('height', ADSENSE_RSPV_ALLOWED_HEIGHT);
             element.setAttribute('width', state./*OK*/ clientWidth);
             element.removeAttribute('data-full-width');
             element.removeAttribute('data-auto-format');
@@ -323,11 +323,11 @@ export class ResponsiveState {
     const height = this.element_.getAttribute('height');
     const width = this.element_.getAttribute('width');
     // height is set to 0 by amp-auto-ads to avoid reflow.
-    if (height != 0 && height != ADSENSE_RSPV_WHITELISTED_HEIGHT) {
+    if (height != 0 && height != ADSENSE_RSPV_ALLOWED_HEIGHT) {
       user().warn(
         TAG,
         `Specified height ${height} in <amp-ad> tag is not equal to the ` +
-          `required height of ${ADSENSE_RSPV_WHITELISTED_HEIGHT} for ` +
+          `required height of ${ADSENSE_RSPV_ALLOWED_HEIGHT} for ` +
           'responsive AdSense ad units.'
       );
       return false;

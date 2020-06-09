@@ -26,7 +26,7 @@ import {user} from '../../src/log';
  * Approved height for AdSense full-width responsive ads.
  * @const {number}
  */
-export const ADSENSE_RSPV_WHITELISTED_HEIGHT = 320;
+export const ADSENSE_RSPV_ALLOWED_HEIGHT = 320;
 
 /**
  * The attribute value for AdSense data-auto-format tag.

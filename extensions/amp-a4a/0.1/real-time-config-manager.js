@@ -134,13 +134,13 @@ export class RealTimeConfigManager {
     if (!ERROR_REPORTING_ENABLED) {
       return;
     }
-    const whitelist = {ERROR_TYPE: true, HREF: true};
+    const allowlist = {ERROR_TYPE: true, HREF: true};
     const macros = {
       ERROR_TYPE: errorType,
       HREF: this.win_.location.href,
     };
     const service = Services.urlReplacementsForDoc(this.a4aElement_.element);
-    const url = service.expandUrlSync(errorReportingUrl, macros, whitelist);
+    const url = service.expandUrlSync(errorReportingUrl, macros, allowlist);
     new this.win_.Image().src = url;
   }
 
@@ -407,8 +407,8 @@ export class RealTimeConfigManager {
       );
     };
 
-    const whitelist = {};
-    Object.keys(macros).forEach((key) => (whitelist[key] = true));
+    const allowlist = {};
+    Object.keys(macros).forEach((key) => (allowlist[key] = true));
     const urlReplacementStartTime = Date.now();
     this.promiseArray_.push(
       Services.timerFor(this.win_)
@@ -416,7 +416,7 @@ export class RealTimeConfigManager {
           timeoutMillis,
           Services.urlReplacementsForDoc(
             this.a4aElement_.element
-          ).expandUrlAsync(url, macros, whitelist)
+          ).expandUrlAsync(url, macros, allowlist)
         )
         .then((url) => {
           checkStillCurrent();

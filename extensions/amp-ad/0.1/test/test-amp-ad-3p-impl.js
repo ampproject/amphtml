@@ -200,7 +200,7 @@ describes.realWin(
         });
       });
 
-      it('should allow position:fixed with whitelisted ad container', () => {
+      it('should allow position:fixed with an allowed ad container', () => {
         const adContainerElement = win.document.createElement('amp-sticky-ad');
         adContainerElement.style.position = 'fixed';
         win.document.body.appendChild(adContainerElement);
