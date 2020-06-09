@@ -245,7 +245,7 @@ export function getA2AAncestor(win) {
   }
   const top = origins[origins.length - 1];
   // Not a security property. We just check whether the
-  // viewer might support A2A. More domains can be added to whitelist
+  // viewer might support A2A. More domains can be added to allowlist
   // as needed.
   if (top.indexOf('.google.') == -1) {
     return null;

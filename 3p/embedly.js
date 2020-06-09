@@ -37,7 +37,7 @@ const RESIZE_EVENT_NAME = 'card.resize';
 const CARD_CSS_CLASS = 'embedly-card';
 
 /**
- * Whitelisted card options.
+ * Allowed card options.
  *
  * - Key is in camel case as received in "data".
  * - The value is in the format expected by embedly.
@@ -81,7 +81,7 @@ export function embedly(global, data) {
   card.href = data.url;
   card.classList.add(CARD_CSS_CLASS);
 
-  // Add whitelisted data attributes and values to card
+  // Add permissible data attributes and values to card
   // when these are provided by component.
   for (const key in CardOptions) {
     if (hasOwn(CardOptions, key) && typeof data[key] !== 'undefined') {

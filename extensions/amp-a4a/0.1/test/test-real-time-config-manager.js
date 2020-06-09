@@ -977,7 +977,7 @@ describes.realWin('real-time-config-manager', {amp: true}, (env) => {
 
       errorType = RTC_ERROR_ENUM.TIMEOUT;
       errorReportingUrl = 'https://www.example.test?e=ERROR_TYPE&h=HREF';
-      const whitelist = {ERROR_TYPE: true, HREF: true};
+      const allowlist = {ERROR_TYPE: true, HREF: true};
       const macros = {
         ERROR_TYPE: errorType,
         HREF: env.win.location.href,
@@ -985,7 +985,7 @@ describes.realWin('real-time-config-manager', {amp: true}, (env) => {
 
       requestUrl = Services.urlReplacementsForDoc(
         a4aElement.element
-      ).expandUrlSync(errorReportingUrl, macros, whitelist);
+      ).expandUrlSync(errorReportingUrl, macros, allowlist);
     });
 
     it('should send error message pingback to correct url', () => {

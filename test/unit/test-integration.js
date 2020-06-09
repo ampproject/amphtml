@@ -250,7 +250,7 @@ describe('3p integration.js', () => {
     allowConsoleError(() => {
       expect(() => {
         validateAllowedTypes(get('d-124.ampproject.net.com'), 'not present');
-      }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+      }).to.throw(/3p type for custom iframe not allowed/);
     });
   });
 
@@ -266,12 +266,12 @@ describe('3p integration.js', () => {
     allowConsoleError(() => {
       expect(() => {
         validateAllowedTypes(defaultHost, 'not present');
-      }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+      }).to.throw(/3p type for custom iframe not allowed/);
     });
     allowConsoleError(() => {
       expect(() => {
         validateAllowedTypes(defaultHost, 'adtech');
-      }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+      }).to.throw(/3p type for custom iframe not allowed/);
     });
     validateAllowedTypes(defaultHost, 'adtech', ['adtech']);
   });

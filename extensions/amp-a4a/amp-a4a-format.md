@@ -297,7 +297,7 @@ is demonstrated desire for it.
 
 The following are _allowed_ tags in an AMPHTML ads creative. Tags not explicitly
 allowed are prohibited. This list is a subset of the general [AMP tag
-addendum whitelist](../../spec/amp-tag-addendum.md). Like that list, it is
+addendum allowlist](../../spec/amp-tag-addendum.md). Like that list, it is
 ordered consistent with HTML5 spec in section 4 [The Elements of HTML](http://www.w3.org/TR/html5/single-page.html#html-elements).
 
 Most of the omissions are either for performance or because the tags are not
