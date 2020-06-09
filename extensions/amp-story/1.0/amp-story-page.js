@@ -505,7 +505,13 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     if (this.isActive()) {
       registerAllPromise.then(() => {
-        this.advancement_.start();
+        this.signals()
+          .whenSignal(CommonSignals.LOAD_END)
+          .then(() => {
+            if (this.state_ == PageState.PLAYING) {
+              this.advancement_.start();
+            }
+          });
         this.startMeasuringVideoPerformance_();
         this.preloadAllMedia_()
           .then(() => this.startListeningToVideoEvents_())
