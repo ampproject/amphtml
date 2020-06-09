@@ -237,6 +237,27 @@ message MediaQuerySpec {
   repeated string feature = 3;
 }
 
+// This spec is used when parsing a CSS selector group as the prelude of a CSS
+// qualified rule. For example "div.foo span.bar". If no SelectorSpec is
+// provided, the selector groups are unconstrained.
+// NEXT AVAILABLE TAG: 4
+message SelectorSpec {
+  // For each SelectorSpec list provided a single list element value of "*"
+  // indicates that any value is allowed (ie: that feature is unconstrained).
+  // An empty list indicates that no value is allowed (ie: that feature is
+  // disallowed). Otherwise, the list values are the only allowed values.
+
+  // Allowed attribute selector names. For example `foo` in the selector
+  // `.a[foo=bar]`.
+  repeated string attribute_name = 1;
+
+  // Allowed pseudo class names. For example `checked` in `.a:checked`.
+  repeated string pseudo_class = 2;
+
+  // Allowed pseudo element names. For example `before` in `.a::before`.
+  repeated string pseudo_element = 3;
+}
+
 // This spec is used by our CSS parser to determine what AT rules are allowed
 // in the CSS spec. The term 'rule' here refers to the AT Rule in CSS, not a
 // validation rule.
@@ -252,7 +273,7 @@ message AtRuleSpec {
   optional MediaQuerySpec media_query_spec = 3;
 }
 
-// NEXT AVAILABLE TAG: 9
+// NEXT AVAILABLE TAG: 10
 message CssSpec {
   // Spec for how to parse CSS AT rules, one per AT rule. Must not contain
   // duplicate names, and must contain at least one entry for the default.
@@ -273,6 +294,8 @@ message CssSpec {
   // Most AMP stylesheets disallow `!important` to reserve this override
   // for AMP's own styles.
   optional bool allow_important = 8 [default = false];
+
+  optional SelectorSpec selector_spec = 9;
 
   // Deprecated fields, do not reuse.
   // reserved 3, 4;
