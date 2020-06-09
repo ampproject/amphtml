@@ -1205,7 +1205,7 @@ export function installUrlReplacementsServiceForDoc(ampdoc) {
  * @param {!VariableSource} varSource
  */
 export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
-  const parentService = Services.urlReplacementsForDoc(ampdoc);
+  const parentService = Services.urlReplacementsForDoc(ampdoc.getHeadNode());
   installServiceInEmbedScope(
     embedWin,
     'url-replace',
