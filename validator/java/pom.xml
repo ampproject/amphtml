@@ -331,12 +331,12 @@
           <dependency>
             <groupId>com.github.spotbugs</groupId>
             <artifactId>spotbugs</artifactId>
-            <version>4.0.3</version>
+            <version>4.0.4</version>
           </dependency>
           <dependency>
             <groupId>com.github.spotbugs</groupId>
             <artifactId>spotbugs-annotations</artifactId>
-            <version>4.0.3</version>
+            <version>4.0.4</version>
           </dependency>
           <dependency>
             <groupId>org.dom4j</groupId>
