@@ -151,8 +151,11 @@ const THIRD_PARTY_TRANSFORM_GLOBS = [
   'third_party/optimized-svg-icons/social-share-svgs.js',
 ];
 
+const SERVER_TRANSFORM_PATH = 'build-system/server/new-server/transforms';
+
 module.exports = {
   BABEL_SRC_GLOBS,
   CLOSURE_SRC_GLOBS,
   THIRD_PARTY_TRANSFORM_GLOBS,
+  SERVER_TRANSFORM_PATH,
 };

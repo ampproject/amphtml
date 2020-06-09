@@ -25,6 +25,7 @@ const {
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
 const {buildRuntime} = require('../common/utils');
+const {buildNewServer} = require('./typescript-compile');
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -45,6 +46,9 @@ async function integration() {
     return;
   }
 
+  if (argv.new_server) {
+    buildNewServer();
+  }
   maybePrintArgvMessages();
 
   const config = new RuntimeTestConfig('integration');
