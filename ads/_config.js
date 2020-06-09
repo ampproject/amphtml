@@ -1154,6 +1154,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'vlyby': {
+    prefetch: 'https://cdn.vlyby.com/qad/qad-outer2.js'
+  },
+
   'vmfive': {
     prefetch: 'https://man.vm5apis.com/dist/adn-web-sdk.js',
     preconnect: ['https://vawpro.vm5apis.com', 'https://vahfront.vm5apis.com'],

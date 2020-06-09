@@ -416,6 +416,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [video intelligence](../../ads/videointelligence.md)
 - [Videonow](../../ads/videonow.md)
 - [Viralize](../../ads/viralize.md)
+- [vlyby](../../ads/vlyby.md)
 - [UAS](../../ads/uas.md)
 - [ucfunnel](../../ads/ucfunnel.md)
 - [Unruly](../../ads/unruly.md)
