@@ -20,7 +20,7 @@ import {installServiceInEmbedScope} from '../service';
 /**
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!Window} embedWin
- * @param {!VariableSource} varSource
+ * @param {!./variable-source.VariableSource} varSource
  */
 export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
   const parentService = Services.urlReplacementsForDoc(ampdoc.getHeadNode());
