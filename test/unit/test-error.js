@@ -29,7 +29,7 @@ import {
   reportErrorToAnalytics,
   reportErrorToServerOrViewer,
 } from '../../src/error';
-import {getMode, getRtvVersionForTesting} from '../../src/mode';
+import {getRtvVersionForTesting} from '../../src/mode';
 import {
   resetExperimentTogglesForTesting,
   toggleExperiment,
