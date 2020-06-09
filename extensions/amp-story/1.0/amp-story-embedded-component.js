@@ -61,7 +61,7 @@ const DARK_THEME_CLASS = 'i-amphtml-story-tooltip-theme-dark';
 /**
  * @enum {string}
  */
-const AttachmentTheme = {
+const TooltipTheme = {
   LIGHT: 'light', // default
   DARK: 'dark',
 };
@@ -875,7 +875,7 @@ export class AmpStoryEmbeddedComponent {
     ));
 
     const theme = this.triggeringTarget_.getAttribute('theme');
-    if (theme && AttachmentTheme.DARK === theme.toLowerCase()) {
+    if (theme && TooltipTheme.DARK === theme.toLowerCase()) {
       this.tooltip_.classList.add(DARK_THEME_CLASS);
     }
 
