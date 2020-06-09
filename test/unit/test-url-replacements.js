@@ -1474,7 +1474,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         element.setAttribute('data-amp-replace', 'QUERY_PARAM');
         const {documentElement} = win.document;
         const urlReplacements = Services.urlReplacementsForDoc(documentElement);
-        const unallowlisted = urlReplacements.collectNotAllowedVarsSync(
+        const unallowlisted = urlReplacements.collectDisallowedVarsSync(
           element
         );
         expect(unallowlisted).to.deep.equal(['SOURCE_HOST', 'COUNTER']);
