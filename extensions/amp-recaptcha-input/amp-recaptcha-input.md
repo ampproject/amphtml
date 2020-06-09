@@ -29,6 +29,7 @@ limitations under the License.
 This extension adds a parameter containing a reCAPTCHA response token when a parent `<form>` element submits. `amp-recaptcha-input` does this by creating an iframe to load the reCAPTCHA v3 api script using the provided site key, and calling `grecaptcha.execute` with the provided site key and action.
 
 ### Prerequisite
+
 Integrating reCAPTCHA for any document on the internet requires several steps, as described in the [official documentation for reCATPCHA](https://developers.google.com/recaptcha/docs/v3).
 There are several steps, but generally this requires registering a sitekey, and setting up a server endpoint that can process the reCAPTCHA signal sent from an AMP or other HTML document.
 
