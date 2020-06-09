@@ -115,6 +115,9 @@ describes.realWin(
       }
 
       doc.body.appendChild(element);
+      // With this the document will start fetching more ASAP.
+      doc.scrollingElement.scrollTop =
+        options.scrollTop != undefined ? options.scrollTop : 1;
 
       if (waitForLayout) {
         await element.build();
@@ -432,6 +435,55 @@ describes.realWin(
       });
     });
 
+    describe('initial behavior', () => {
+      let element;
+      let service;
+
+      beforeEach(async () => {
+        element = await getAmpNextPage(
+          {
+            inlineConfig: VALID_CONFIG,
+            scrollTop: 0,
+          },
+          /* no awaiting */ false
+        );
+
+        service = Services.nextPageServiceForDoc(doc);
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
+      });
+
+      afterEach(async () => {
+        element.parentNode.removeChild(element);
+      });
+
+      it('awaits first scroll', async () => {
+        element.build();
+        await Promise.resolve();
+        expect(service.pages_.length).to.equal(1);
+        win.dispatchEvent(new Event('scroll'));
+        await Promise.resolve();
+        expect(service.pages_.length).to.equal(3);
+
+        /*await fetchDocuments(service, MOCK_NEXT_PAGE_WITH_RECOMMENDATIONS);
+
+        // Adds the two documents coming from Document 1's recommendations
+        expect(service.pages_.length).to.equal(5);
+        expect(service.pages_.some((page) => page.title == 'Title 3')).to.be
+          .true;
+        expect(service.pages_.some((page) => page.title == 'Title 4')).to.be
+          .true;
+        // Avoids loops (ignores previously inserted page)
+        expect(
+          service.pages_.filter((page) => page.title == 'Title 2').length
+        ).to.equal(1);
+
+        expect(
+          element.querySelectorAll('.i-amphtml-next-page-document-container')
+            .length
+        ).to.equal(0);*/
+      });
+    });
+
     describe('infinite loading', () => {
       let element;
       let service;
@@ -463,6 +515,11 @@ describes.realWin(
         // Avoids loops (ignores previously inserted page)
         expect(
           service.pages_.filter((page) => page.title == 'Title 2').length
+        ).to.equal(1);
+
+        expect(
+          element.querySelectorAll('.i-amphtml-next-page-document-container')
+            .length
         ).to.equal(1);
       });
 

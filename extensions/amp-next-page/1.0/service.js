@@ -37,6 +37,7 @@ import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex} from '../../../src/utils/array';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
+import {listenOnce} from '../../../src/event-helper';
 import {
   parseFavicon,
   parseOgImage,
@@ -233,11 +234,32 @@ export class NextPageService {
       // Mark the page as ready
       this.readyResolver_();
     };
-    this.initializePageQueue_().then(fin, fin);
+    this.whenFirstScroll_()
+      .then(() => this.initializePageQueue_())
+      .then(fin, fin);
 
     this.getHost_().classList.add(NEXT_PAGE_CLASS);
 
     return this.readyPromise_;
+  }
+
+  /**
+   * Resolve when the document scrolls for the first time or loads in
+   * scrolled position.
+   * @return {!Promise}
+   * @private
+   */
+  whenFirstScroll_() {
+    return new Promise((resolve) => {
+      console.log('INI', this.doc_.scrollingElement.scrollTop);
+      if (this.doc_.scrollingElement.scrollTop != 0) {
+        return resolve();
+      }
+      listenOnce(this.win_, 'scroll', () => {
+        console.log('SCROLL');
+        resolve();
+      });
+    });
   }
 
   /**
