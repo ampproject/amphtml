@@ -13,18 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { dev } from '../../../../../../../src/log';
-dev().info;
+
+import {user} from '../../../../../../../src/log';
+
+user().fine(TAG, 'fine');
+user().fine;
+user().info('Should not be removed');
 
 function hello() {
+  user().fine(TAG, 'fine');
+  user().info('Should not be removed');
   return false;
 }
 
 export function helloAgain() {
+  user().fine(TAG, 'fine');
+  user().info('Should not be removed');
   return false;
 }
 
 class Foo {
-  method() {}
-
+  method() {
+    user().fine(TAG, 'fine');
+    user().info('Should not be removed');
+  }
 }
