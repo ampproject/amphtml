@@ -20,9 +20,8 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Window} global
  * @param {!Object} data
  */
-export function pps(global, data) {
-  validateData(data, ['crid', 'width', 'height', 'holderScript'],
-      []);
+export function ppstudio(global, data) {
+  validateData(data, ['crid', 'width', 'height', 'holderScript'], []);
 
   global._ppstudio = {
     crid: data.crid,
@@ -32,19 +31,18 @@ export function pps(global, data) {
   };
 
   const e = global.document.createElement('script');
-  e.id = "pps-script-" + data.crid;
+  e.id = 'pps-script-' + data.crid;
   e.dataset.width = data.width;
   e.dataset.height = data.height;
-  e.dataset.clickUrl = "";
+  e.dataset.clickUrl = '';
   e.src = data.holderScript;
   const scriptStr = e.outerHTML;
   global.document.write(scriptStr);
 
   const i = global.document.createElement('ins');
   i.classList.add('ppstudio');
-  i.dataset.ppsTargetId = 'cr-'+data.crid;
+  i.dataset.ppsTargetId = 'cr-' + data.crid;
   global.document.getElementById('c').appendChild(i);
 
   loadScript(global, 'https://ads-cdn.tenmax.io/code/ppstudio.js');
-
 }
