@@ -34,10 +34,7 @@ import {
   removeFragment,
 } from '../url';
 import {dev, devAssert, user, userAssert} from '../log';
-import {
-  installServiceInEmbedScope,
-  registerServiceBuilderForDoc,
-} from '../service';
+import {registerServiceBuilderForDoc} from '../service';
 
 import {Expander} from './url-expander/expander';
 import {Services} from '../services';
