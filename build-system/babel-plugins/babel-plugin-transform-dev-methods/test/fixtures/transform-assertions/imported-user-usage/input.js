@@ -14,15 +14,27 @@
  * limitations under the License.
  */
 
-dev().info(
-  TAG,
-  'Removing iframe query string before navigation:',
-  fromLocation.search
-);
-dev().info;
+import {user} from '../../../../../../../src/log';
 
-dev().fine(TAG, 'fine');
-dev().fine;
-
-user().fine(TAG, 'user fine');
+user().fine(TAG, 'fine');
 user().fine;
+user().info('Should not be removed');
+
+function hello() {
+  user().fine(TAG, 'fine');
+  user().info('Should not be removed');
+  return false;
+}
+
+export function helloAgain() {
+  user().fine(TAG, 'fine');
+  user().info('Should not be removed');
+  return false;
+}
+
+class Foo {
+  method() {
+    user().fine(TAG, 'fine');
+    user().info('Should not be removed');
+  }
+}
