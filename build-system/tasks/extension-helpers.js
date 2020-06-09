@@ -339,7 +339,7 @@ async function buildExtensions(options) {
     }
   }
   await Promise.all(results);
-  if (!options.compileOnlyCss && !argv.single_pass) {
+  if (!options.compileOnlyCss) {
     endBuildStep(
       options.minify ? 'Minified all' : 'Compiled all',
       'extensions',
@@ -454,9 +454,7 @@ async function buildExtension(
   if (name === 'amp-analytics') {
     await vendorConfigs(options);
   }
-  if (!argv.single_pass) {
-    await buildExtensionJs(path, name, version, latestVersion, options);
-  }
+  await buildExtensionJs(path, name, version, latestVersion, options);
 }
 
 /**

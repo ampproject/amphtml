@@ -29,7 +29,6 @@ import {parseQueryString_} from './url-parse-query-string';
  *   rtvVersion: string,
  *   runtime: (null|string|undefined),
  *   a4aId: (null|string|undefined),
- *   singlePassType: (string|undefined),
  *   esm: (boolean|undefined)
  * }}
  */
@@ -79,7 +78,6 @@ function getMode_(win) {
     // from the URL.
     win.location.originalHash || win.location.hash
   );
-  const {spt: singlePassType} = AMP_CONFIG;
 
   const searchQuery = parseQueryString_(win.location.search);
 
@@ -114,7 +112,6 @@ function getMode_(win) {
     log: hashQuery['log'],
     version: internalRuntimeVersion(),
     rtvVersion,
-    singlePassType,
   };
 }
 
