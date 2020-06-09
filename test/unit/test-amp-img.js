@@ -17,10 +17,12 @@
 import {AmpImg, installImg} from '../../builtins/amp-img';
 import {BaseElement} from '../../src/base-element';
 import {BrowserController} from '../../testing/test-helper';
-import {Layout, LayoutPriority} from '../../src/layout';
+import {Layout, LayoutPriority, applyStaticLayout} from '../../src/layout';
 import {Services} from '../../src/services';
 import {createCustomEvent} from '../../src/event-helper';
+import {createElementWithAttributes} from '../../src/dom';
 import {createIframePromise} from '../../testing/iframe';
+import {toArray} from '../../src/types';
 
 describes.sandboxed('amp-img', {}, (env) => {
   let sandbox;
@@ -60,8 +62,8 @@ describes.sandboxed('amp-img', {}, (env) => {
     }
 
     if (children != null) {
-      for (const key in children) {
-        img.appendChild(children[key]);
+      for (let i = 0; i < children.length; i++) {
+        img.appendChild(children[i]);
       }
     }
     return Promise.resolve(fixture.addElement(img));
@@ -835,6 +837,117 @@ describes.sandboxed('amp-img', {}, (env) => {
               width: 80,
               height: 80,
             });
+          });
+      });
+
+      it('SSR sizer does not interfere with img creation', () => {
+        let ampImg;
+        const parentDiv = fixture.doc.getElementById('parent');
+        parentDiv.setAttribute('style', 'width: 80px; height: 80px');
+
+        // Hack so we don't duplicate intrinsic's layout code here.
+        const tmp = createElementWithAttributes(fixture.doc, 'div', {
+          src: '/examples/img/sample.jpg', // 641 x 481
+          width: 800,
+          height: 600,
+          layout: 'intrinsic',
+        });
+        applyStaticLayout(tmp);
+        const attributes = {
+          'i-amphtml-ssr': '',
+        };
+        for (let i = 0; i < tmp.attributes.length; i++) {
+          attributes[tmp.attributes[i].name] = tmp.attributes[i].value;
+        }
+
+        return getImg(attributes, toArray(tmp.children))
+          .then((image) => {
+            ampImg = image;
+            return browser.waitForElementLayout('amp-img');
+          })
+          .then(() => {
+            expect(ampImg.querySelector('img[src*="sample.jpg"]')).to.exist;
+            expect(ampImg.querySelector('img[src*="image/svg+xml"]')).to.exist;
+          });
+      });
+
+      it('SSR sizer does not interfere with SSR img before', () => {
+        let ampImg;
+        const parentDiv = fixture.doc.getElementById('parent');
+        parentDiv.setAttribute('style', 'width: 80px; height: 80px');
+
+        // Hack so we don't duplicate intrinsic's layout code here.
+        const tmp = createElementWithAttributes(fixture.doc, 'div', {
+          src: '/examples/img/sample.jpg', // 641 x 481
+          width: 800,
+          height: 600,
+          layout: 'intrinsic',
+        });
+        applyStaticLayout(tmp);
+        const attributes = {
+          'i-amphtml-ssr': '',
+        };
+        for (let i = 0; i < tmp.attributes.length; i++) {
+          attributes[tmp.attributes[i].name] = tmp.attributes[i].value;
+        }
+
+        const children = toArray(tmp.children);
+        children.unshift(
+          createElementWithAttributes(fixture.doc, 'img', {
+            decoding: 'async',
+            class: 'i-amphtml-fill-content i-amphtml-replaced-content',
+            src: tmp.getAttribute('src'),
+          })
+        );
+
+        return getImg(attributes, children)
+          .then((image) => {
+            ampImg = image;
+            return browser.waitForElementLayout('amp-img');
+          })
+          .then(() => {
+            expect(ampImg.querySelector('img[src*="sample.jpg"]')).to.exist;
+            expect(ampImg.querySelector('img[src*="image/svg+xml"]')).to.exist;
+          });
+      });
+
+      it('SSR sizer does not interfere with SSR img after', () => {
+        let ampImg;
+        const parentDiv = fixture.doc.getElementById('parent');
+        parentDiv.setAttribute('style', 'width: 80px; height: 80px');
+
+        // Hack so we don't duplicate intrinsic's layout code here.
+        const tmp = createElementWithAttributes(fixture.doc, 'div', {
+          src: '/examples/img/sample.jpg', // 641 x 481
+          width: 800,
+          height: 600,
+          layout: 'intrinsic',
+        });
+        applyStaticLayout(tmp);
+        const attributes = {
+          'i-amphtml-ssr': '',
+        };
+        for (let i = 0; i < tmp.attributes.length; i++) {
+          attributes[tmp.attributes[i].name] = tmp.attributes[i].value;
+        }
+
+        const children = toArray(tmp.children);
+        children.push(
+          createElementWithAttributes(fixture.doc, 'img', {
+            decoding: 'async',
+            class: 'i-amphtml-fill-content i-amphtml-replaced-content',
+            src: tmp.getAttribute('src'),
+          })
+        );
+
+        return getImg(attributes, children)
+          .then((image) => {
+            ampImg = image;
+            return browser.waitForElementLayout('amp-img');
+          })
+          .then(() => {
+            expect(ampImg.querySelector('img[src*="sample.jpg"]')).to.exist;
+            expect(ampImg.querySelector('img[src*="image/svg+xml"]')).to.exist;
           });
       });
     });
