@@ -23,7 +23,7 @@ import {
 } from '../../../src/service/variable-source';
 import {user, userAssert} from '../../../src/log';
 
-const ALLOWED_VARIABLES = [
+const ALLOWLISTED_VARIABLES = [
   'AMPDOC_HOST',
   'AMPDOC_HOSTNAME',
   'AMPDOC_URL',
@@ -88,8 +88,8 @@ export class A4AVariableSource extends VariableSource {
   initialize() {
     // Initiate allowed varaibles first in case the resolver function needs
     // to be overwritten.
-    for (let v = 0; v < ALLOWED_VARIABLES.length; v++) {
-      const varName = ALLOWED_VARIABLES[v];
+    for (let v = 0; v < ALLOWLISTED_VARIABLES.length; v++) {
+      const varName = ALLOWLISTED_VARIABLES[v];
       const resolvers = this.globalVariableSource_.get(varName);
       this.set(varName, resolvers.sync).setAsync(varName, resolvers.async);
     }

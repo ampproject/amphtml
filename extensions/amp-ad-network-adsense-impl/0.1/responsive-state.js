@@ -16,8 +16,8 @@
 
 import {
   ADSENSE_MCRSPV_TAG,
-  ADSENSE_RSPV_TAG,
   ADSENSE_RSPV_ALLOWED_HEIGHT,
+  ADSENSE_RSPV_TAG,
   getMatchedContentResponsiveHeightAndUpdatePubParams,
 } from '../../../ads/google/utils';
 import {Services} from '../../../src/services';
