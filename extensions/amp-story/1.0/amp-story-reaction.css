@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@import url('https://fonts.googleapis.com/css?family=Poppins&display=swap');
-
 .i-amphtml-story-reaction-container {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', sans-serif !important;
 }
