@@ -20,11 +20,12 @@ limitations under the License.
 
 ```html
 <amp-embed
-    type="ppstudio"
-    width="300"
-    height="250"
-    data-crid="16013"
-    data-holder-script="https://tenmaxsgads.blob.core.windows.net/holder/16013_f9742d8d6d22.js">
+  type="ppstudio"
+  width="300"
+  height="250"
+  data-crid="16013"
+  data-holder-script="https://tenmaxsgads.blob.core.windows.net/holder/16013_f9742d8d6d22.js"
+>
 </amp-embed>
 ```
 
