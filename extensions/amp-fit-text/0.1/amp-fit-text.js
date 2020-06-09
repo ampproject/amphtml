@@ -40,6 +40,13 @@ class AmpFitText extends AMP.BaseElement {
 
     /** @private {number} */
     this.maxFontSize_ = -1;
+
+    /**
+     * Synchronously stores updated textContent, but only after it has been
+     * updated.
+     * @private {string}
+     */
+    this.textContent_ = '';
   }
 
   /** @override */
