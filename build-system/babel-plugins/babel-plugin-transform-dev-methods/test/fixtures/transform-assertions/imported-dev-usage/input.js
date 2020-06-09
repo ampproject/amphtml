@@ -23,12 +23,16 @@ dev().info(
 );
 dev().info;
 
+dev().fine(TAG, 'fine');
+dev().fine;
+
 function hello() {
   dev().info(
     TAG,
     'Removing iframe query string before navigation:',
     fromLocation.search
   );
+  dev().fine(TAG, 'fine');
   return false;
 }
 
@@ -38,6 +42,7 @@ export function helloAgain() {
     'Removing iframe query string before navigation:',
     fromLocation.search
   );
+  dev().fine(TAG, 'fine');
   return false;
 }
 
@@ -48,5 +53,6 @@ class Foo {
       'Removing iframe query string before navigation:',
       fromLocation.search
     );
+    dev().fine(TAG, 'fine');
   }
 }
