@@ -932,11 +932,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   getCustomRealTimeConfigMacros_() {
     /**
-     * This whitelist allow attributes on the amp-ad element to be used as
+     * This lists permissible attributes on the amp-ad element to be used as
      * macros for constructing the RTC URL. Add attributes here, in lowercase,
      * to make them available.
      */
-    const whitelist = {
+    const allowlist = {
       'height': true,
       'width': true,
       'data-slot': true,
@@ -964,7 +964,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           parseInt(opt_timeout, 10)
         ),
       ATTR: (name) => {
-        if (!whitelist[name.toLowerCase()]) {
+        if (!allowlist[name.toLowerCase()]) {
           dev().warn('TAG', `Invalid attribute ${name}`);
         } else {
           return this.element.getAttribute(name);

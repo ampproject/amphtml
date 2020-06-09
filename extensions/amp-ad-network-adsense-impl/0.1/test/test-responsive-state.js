@@ -16,8 +16,8 @@
 
 import {
   ADSENSE_MCRSPV_TAG,
+  ADSENSE_RSPV_ALLOWED_HEIGHT,
   ADSENSE_RSPV_TAG,
-  ADSENSE_RSPV_WHITELISTED_HEIGHT,
 } from '../../../../ads/google/utils';
 import {
   AD_SIZE_OPTIMIZATION_EXP,
@@ -136,13 +136,13 @@ describes.realWin(
     describe('isValidElement', () => {
       it('should return true if it is a container width state', () => {
         const state = createContainerWidthState({
-          'height': [ADSENSE_RSPV_WHITELISTED_HEIGHT],
+          'height': [ADSENSE_RSPV_ALLOWED_HEIGHT],
           'width': '960',
         });
         expect(state.isValidElement()).to.be.true;
       });
 
-      it('should return false if the height is not whitelisted', () => {
+      it('should return false if the height is not allowed', () => {
         const state = createState({
           'data-auto-format': [ADSENSE_RSPV_TAG],
           'height': '310',
@@ -151,11 +151,11 @@ describes.realWin(
         expect(state.isValidElement()).to.be.false;
       });
 
-      it('should return false if the width is not whitelisted', () => {
+      it('should return false if the width is not allowed', () => {
         const state = createState({
           'data-auto-format': [ADSENSE_RSPV_TAG],
           'data-full-width': '',
-          'height': [ADSENSE_RSPV_WHITELISTED_HEIGHT],
+          'height': [ADSENSE_RSPV_ALLOWED_HEIGHT],
           'width': '90vw',
         });
         expect(state.isValidElement()).to.be.false;
@@ -165,7 +165,7 @@ describes.realWin(
         const state = createState({
           'data-auto-format': [ADSENSE_RSPV_TAG],
           'data-full-width': '',
-          'height': [ADSENSE_RSPV_WHITELISTED_HEIGHT],
+          'height': [ADSENSE_RSPV_ALLOWED_HEIGHT],
           'width': '100vw',
         });
         expect(state.isValidElement()).to.be.true;
@@ -177,7 +177,7 @@ describes.realWin(
         const state = createState({
           'data-auto-format': [ADSENSE_RSPV_TAG],
           'data-full-width': '',
-          'height': [ADSENSE_RSPV_WHITELISTED_HEIGHT],
+          'height': [ADSENSE_RSPV_ALLOWED_HEIGHT],
           'width': '100vw',
         });
         expect(state.getRafmtParam()).to.be.equal(13);
@@ -187,7 +187,7 @@ describes.realWin(
         const state = createState({
           'data-auto-format': [ADSENSE_MCRSPV_TAG],
           'data-full-width': '',
-          'height': [ADSENSE_RSPV_WHITELISTED_HEIGHT],
+          'height': [ADSENSE_RSPV_ALLOWED_HEIGHT],
           'width': '100vw',
         });
         expect(state.getRafmtParam()).to.be.equal(15);
@@ -199,7 +199,7 @@ describes.realWin(
         const state = createState({
           'data-auto-format': [ADSENSE_RSPV_TAG],
           'data-full-width': '',
-          'height': [ADSENSE_RSPV_WHITELISTED_HEIGHT],
+          'height': [ADSENSE_RSPV_ALLOWED_HEIGHT],
           'width': '100vw',
         });
 
@@ -221,7 +221,7 @@ describes.realWin(
         const state = createState({
           'data-auto-format': [ADSENSE_RSPV_TAG],
           'data-full-width': '',
-          'height': [ADSENSE_RSPV_WHITELISTED_HEIGHT],
+          'height': [ADSENSE_RSPV_ALLOWED_HEIGHT],
           'width': '100vw',
         });
 
@@ -405,7 +405,7 @@ describes.realWin(
         );
         env.sandbox.stub(vsyncMock, 'runPromise').returns({
           then: () => {
-            element.setAttribute('height', ADSENSE_RSPV_WHITELISTED_HEIGHT);
+            element.setAttribute('height', ADSENSE_RSPV_ALLOWED_HEIGHT);
             element.setAttribute('width', mockContainerWith);
             element.removeAttribute('data-full-width');
             element.removeAttribute('data-auto-format');
@@ -421,7 +421,7 @@ describes.realWin(
         expect(result).to.not.be.null;
         expect(result.isValidElement()).to.be.true;
         expect(element.getAttribute('height')).to.be.equal(
-          `${ADSENSE_RSPV_WHITELISTED_HEIGHT}`
+          `${ADSENSE_RSPV_ALLOWED_HEIGHT}`
         );
         expect(element.getAttribute('width')).to.be.equal(mockContainerWith);
         expect(element).to.not.have.attribute('data-full-width');
@@ -449,7 +449,7 @@ describes.realWin(
         expect(result).to.not.be.null;
         expect(result.isValidElement()).to.be.true;
         expect(element.getAttribute('height')).to.be.equal(
-          `${ADSENSE_RSPV_WHITELISTED_HEIGHT}`
+          `${ADSENSE_RSPV_ALLOWED_HEIGHT}`
         );
         expect(element.getAttribute('width')).to.be.equal('100vw');
         expect(element).to.have.attribute('data-full-width');
