@@ -274,7 +274,7 @@ exports.rules = [
       'extensions/amp-a4a/0.1/a4a-variable-source.js->' +
         'src/service/variable-source.js',
       'extensions/amp-a4a/0.1/amp-a4a.js->' +
-        'src/service/url-replacements-impl.js',
+        'src/service/url-replacements-for-embed.js',
       'extensions/amp-video/0.1/amp-video.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-video-iframe/0.1/amp-video-iframe.js->' +
@@ -298,7 +298,7 @@ exports.rules = [
       'extensions/amp-gfycat/0.1/amp-gfycat.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-a4a/0.1/friendly-frame-util.js->' +
-        'src/service/url-replacements-impl.js',
+        'src/service/url-replacements-for-embed.js',
       'extensions/amp-nexxtv-player/0.1/amp-nexxtv-player.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-3q-player/0.1/amp-3q-player.js->' +
