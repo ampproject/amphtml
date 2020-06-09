@@ -92,7 +92,8 @@ export class InstrumentationService {
    * @param {!Element} target
    * @param {string} eventType
    * @param {!JsonObject=} opt_vars A map of vars and their values.
-   * @param {boolean} enableDataVars
+   * @param {boolean} enableDataVars A boolean to indicate if data-vars-*
+   * attribute value from target element should be included.
    */
   triggerEventForTarget(target, eventType, opt_vars, enableDataVars = true) {
     const event = new AnalyticsEvent(

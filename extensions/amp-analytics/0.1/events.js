@@ -205,6 +205,7 @@ export function getTrackerTypesForParentType(parentType) {
 
 /**
  * Expand the event variables to include default data-vars
+ * eventVars value will override data-vars value
  * @param {!Element} target
  * @param {!JsonObject} eventVars
  * @return {!JsonObject}
@@ -215,7 +216,9 @@ function mergeDataVars(target, eventVars) {
     /* computeParamNameFunc */ undefined,
     VARIABLE_DATA_ATTRIBUTE_KEY
   );
-  deepMerge(vars, eventVars, 1);
+  // Merge eventVars into vars, depth=0 because
+  // vars and eventVars are not supposed to contain nested object.
+  deepMerge(vars, eventVars, 0);
   return vars;
 }
 
@@ -246,7 +249,8 @@ export class AnalyticsEvent {
    * @param {!Element} target The most relevant target element.
    * @param {string} type The type of event.
    * @param {?JsonObject=} opt_vars A map of vars and their values.
-   * @param {boolean} enableDataVars
+   * @param {boolean} enableDataVars A boolean to indicate if data-vars-*
+   * attribute value from target element should be included.
    */
   constructor(target, type, opt_vars, enableDataVars = true) {
     /** @const */
