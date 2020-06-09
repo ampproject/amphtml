@@ -1194,6 +1194,10 @@ exports.extensionAliasBundles = {
     version: '1.0',
     aliasedVersion: '0.1',
   },
+  'amp-story': {
+    version: '1.0',
+    aliasedVersion: '0.1',
+  },
 };
 
 /**
