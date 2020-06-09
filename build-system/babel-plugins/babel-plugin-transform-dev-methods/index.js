@@ -16,11 +16,48 @@
 
 const {resolve, dirname} = require('path');
 
-// This Babel Plugin removes `dev().info(...)` CallExpressions for production ESM builds.
+// Returns a new Map<string, {detected: boolean, removeable: Array<string>}
+// key is a valid callee name to potentially remove.
+// value.detected indicates if the callee name (key) was imported into the current module.
+// value.removeable is the array of property names that can be removed.
+// Example: ['dev', {detected: false, removeable: ['fine']}] would mean ... `dev().fine(...)` can be removed.
+function defaultCalleeToPropertiesMap() {
+  return new Map([
+    [
+      'dev',
+      {
+        detected: false,
+        removeable: ['info', 'fine'],
+      },
+    ],
+    [
+      'user',
+      {
+        detected: false,
+        removeable: ['fine'],
+      },
+    ],
+  ]);
+}
+
+// This Babel Plugin removes
+// 1. `dev().info(...)`
+// 2. `dev().fine(...)`
+// 3. `user().fine(...)`
+// CallExpressions for production ESM builds.
 module.exports = function () {
-  let devLoggingImported = false;
+  let calleeToPropertiesMap = defaultCalleeToPropertiesMap();
+  let parseCallExpressions = false;
   return {
     visitor: {
+      Program: {
+        exit() {
+          // After each program exits, return the values per module back to false.
+          // Otherwise, once changed to true... all future modules will remove these call expressions.
+          calleeToPropertiesMap = defaultCalleeToPropertiesMap();
+          parseCallExpressions = false;
+        },
+      },
       ImportDeclaration({node}, state) {
         // Only remove the CallExpressions if this module imported the correct method ('dev') from '/log'.
         const {specifiers, source} = node;
@@ -28,19 +65,26 @@ module.exports = function () {
           return;
         }
         specifiers.forEach((specifier) => {
-          if (specifier.imported && specifier.imported.name === 'dev') {
+          if (specifier.imported) {
             const filepath = resolve(
               dirname(state.file.opts.filename),
               source.value
             );
+
             if (filepath.endsWith('/amphtml/src/log')) {
-              devLoggingImported = true;
+              const propertyMapped = calleeToPropertiesMap.get(
+                specifier.imported.name
+              );
+              if (propertyMapped) {
+                propertyMapped.detected = true;
+                parseCallExpressions = true;
+              }
             }
           }
         });
       },
       CallExpression(path) {
-        if (!devLoggingImported) {
+        if (!parseCallExpressions) {
           return;
         }
 
@@ -49,12 +93,15 @@ module.exports = function () {
         if (callee.type === 'MemberExpression') {
           const {object: obj, property} = callee;
           const {callee: memberCallee} = obj;
-          if (
-            memberCallee &&
-            memberCallee.name === 'dev' &&
-            property.name === 'info'
-          ) {
-            path.remove();
+          if (memberCallee) {
+            const propertyMapped = calleeToPropertiesMap.get(memberCallee.name);
+            if (
+              propertyMapped &&
+              propertyMapped.detected &&
+              propertyMapped.removeable.includes(property.name)
+            ) {
+              path.remove();
+            }
           }
         }
       },
