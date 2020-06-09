@@ -75,10 +75,6 @@ jobs:
       script:
         - unbuffer node build-system/pr-check/module-dist-bundle-size.js
     - stage: test
-      name: 'Single Pass Tests'
-      script:
-        - unbuffer node build-system/pr-check/single-pass-tests.js
-    - stage: test
       name: 'Visual Diff Tests'
       script:
         - unbuffer node build-system/pr-check/visual-diff-tests.js
