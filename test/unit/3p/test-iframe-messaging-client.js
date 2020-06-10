@@ -50,7 +50,7 @@ describes.realWin('iframe-messaging-client', {}, (env) => {
               },
               'messageId': 1,
             },
-            '$internalRuntimeVersion$'
+            '01$internalRuntimeVersion$'
           )
         );
 
@@ -79,7 +79,7 @@ describes.realWin('iframe-messaging-client', {}, (env) => {
               },
               'messageId': 1,
             },
-            '$internalRuntimeVersion$'
+            '01$internalRuntimeVersion$'
           )
         );
 
@@ -108,7 +108,7 @@ describes.realWin('iframe-messaging-client', {}, (env) => {
               },
               'messageId': 1,
             },
-            '$internalRuntimeVersion$'
+            '01$internalRuntimeVersion$'
           )
         );
 
@@ -137,7 +137,7 @@ describes.realWin('iframe-messaging-client', {}, (env) => {
               },
               'messageId': 1,
             },
-            '$internalRuntimeVersion$'
+            '01$internalRuntimeVersion$'
           )
         );
 
@@ -174,7 +174,7 @@ describes.realWin('iframe-messaging-client', {}, (env) => {
             'request-type',
             'sentinel-123',
             {},
-            '$internalRuntimeVersion$'
+            '01$internalRuntimeVersion$'
           )
         );
 
@@ -200,7 +200,7 @@ describes.realWin('iframe-messaging-client', {}, (env) => {
             'request-type',
             'sentinel-123',
             {},
-            '$internalRuntimeVersion$'
+            '01$internalRuntimeVersion$'
           )
         );
 
@@ -365,7 +365,7 @@ describes.realWin('iframe-messaging-client', {}, (env) => {
             'request-type',
             'sentinel-123',
             {x: 1, y: 'abc'},
-            '$internalRuntimeVersion$'
+            '01$internalRuntimeVersion$'
           )
         );
       });
@@ -399,7 +399,7 @@ describes.realWin('iframe-messaging-client', {}, (env) => {
             'request-type',
             'sentinel-123',
             {},
-            '$internalRuntimeVersion$'
+            '01$internalRuntimeVersion$'
           )
         );
         expect(postMessageStub2).to.be.calledWith(
@@ -407,7 +407,7 @@ describes.realWin('iframe-messaging-client', {}, (env) => {
             'request-type',
             'sentinel-123',
             {},
-            '$internalRuntimeVersion$'
+            '01$internalRuntimeVersion$'
           )
         );
 

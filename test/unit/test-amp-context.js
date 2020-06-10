@@ -69,7 +69,7 @@ describe('3p ampcontext.js', () => {
         'user-error-in-iframe',
         '1-291921',
         {'message': 'test'},
-        '$internalRuntimeVersion$'
+        '01$internalRuntimeVersion$'
       )
     );
   });
@@ -177,7 +177,7 @@ describe('3p ampcontext.js', () => {
     // observer
     expect(windowPostMessageSpy).to.be.calledOnce;
     expect(windowPostMessageSpy).to.be.calledWith(
-      'amp-$internalRuntimeVersion$' +
+      'amp-01$internalRuntimeVersion$' +
         '{"type":"send-intersections","sentinel":"1-291921"}',
       '*'
     );
@@ -218,7 +218,7 @@ describe('3p ampcontext.js', () => {
     // observer
     expect(windowPostMessageSpy).to.be.calledOnce;
     expect(windowPostMessageSpy).to.be.calledWith(
-      'amp-$internalRuntimeVersion$' +
+      'amp-01$internalRuntimeVersion$' +
         '{"type":"send-embed-state","sentinel":"1-291921"}',
       '*'
     );
@@ -271,7 +271,7 @@ describe('3p ampcontext.js', () => {
     // window.context should have sent postMessage requesting resize
     expect(windowPostMessageSpy).to.be.calledOnce;
     expect(windowPostMessageSpy).to.be.calledWith(
-      'amp-$internalRuntimeVersion$' +
+      'amp-01$internalRuntimeVersion$' +
         '{"width":100,"height":200,"type":"embed-size","sentinel":"1-291921"}',
       '*'
     );
@@ -318,7 +318,7 @@ describe('3p ampcontext.js', () => {
     // window.context should have sent resize request postMessage
     expect(windowPostMessageSpy).to.be.calledOnce;
     expect(windowPostMessageSpy).to.be.calledWith(
-      'amp-$internalRuntimeVersion$' +
+      'amp-01$internalRuntimeVersion$' +
         '{"width":100,"height":200,"type":"embed-size","sentinel":"1-291921"}',
       '*'
     );
