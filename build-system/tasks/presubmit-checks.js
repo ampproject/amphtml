@@ -48,6 +48,9 @@ const realiasGetMode =
 // Terms that must not appear in our source files.
 const forbiddenTerms = {
   'DO NOT SUBMIT': '',
+  'blacklist': {
+    message: 'Please use the term denylist instead',
+  },
   // TODO(dvoytenko, #8464): cleanup allowlist.
   '(^-amp-|\\W-amp-)': {
     message: 'Switch to new internal class form',
