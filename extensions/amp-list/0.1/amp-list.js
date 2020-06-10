@@ -191,7 +191,7 @@ export class AmpList extends AMP.BaseElement {
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
 
-    /** @private {?../../../src/service/owners-impl.OwnersImpl} */
+    /** @private {?../../../src/service/owners-interface.OwnersInterface} */
     this.owners_ = null;
   }
 
