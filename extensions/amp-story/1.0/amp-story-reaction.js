@@ -214,8 +214,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
    * @private
    */
   loadFonts_() {
-    if (!AmpStoryReaction.loadedFonts && this.win.document.fonts) {
-      AmpStoryReaction.loadedFonts = true;
+    if (!AmpStoryReaction.loadedFonts && this.win.document.fonts && FontFace) {
       fontsToLoad.forEach((fontProperties) => {
         const font = new FontFace(fontProperties.family, fontProperties.src, {
           weight: fontProperties.weight,
@@ -226,6 +225,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
         });
       });
     }
+    AmpStoryReaction.loadedFonts = true;
   }
 
   /**
