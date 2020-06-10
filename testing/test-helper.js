@@ -184,16 +184,16 @@ export class RequestBank {
    */
   static withdraw(requestId) {
     const url = `${REQUEST_URL}/withdraw/${requestId}/`;
-    return this.fetch_(url).then((res) => res.json());
+    return this.fetch_(url, 'withdraw').then((res) => res.json());
   }
 
   static tearDown() {
     const url = `${REQUEST_URL}/teardown/`;
-    return this.fetch_(url);
+    return this.fetch_(url, 'tearDown');
   }
 
-  static fetch_(url) {
-    return xhrServiceForTesting(window)
+  static fetch_(url, action, timeout = 10000) {
+    const fetch = xhrServiceForTesting(window)
       .fetchJson(url, {
         method: 'GET',
         ampCors: false,
@@ -208,6 +208,14 @@ export class RequestBank {
           throw err;
         }
       });
+    const timer = new Promise(() => {
+      setTimeout(() => {
+        throw new Error(
+          `"RequestBank.${action}" timed out after ${timeout} ms.`
+        );
+      }, timeout);
+    });
+    return Promise.race([fetch, timer]);
   }
 }
 
