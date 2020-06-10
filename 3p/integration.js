@@ -212,6 +212,7 @@ import {plista} from '../ads/plista';
 import {polymorphicads} from '../ads/polymorphicads';
 import {popin} from '../ads/popin';
 import {postquare} from '../ads/postquare';
+import {ppstudio} from '../ads/ppstudio';
 import {pressboard} from '../ads/pressboard';
 import {promoteiq} from '../ads/promoteiq';
 import {pubexchange} from '../ads/pubexchange';
@@ -328,6 +329,7 @@ const AMP_EMBED_ALLOWED = {
   outbrain: true,
   plista: true,
   postquare: true,
+  ppstudio: true,
   pubexchange: true,
   rbinfox: true,
   readmo: true,
@@ -515,6 +517,7 @@ register('plista', plista);
 register('polymorphicads', polymorphicads);
 register('popin', popin);
 register('postquare', postquare);
+register('ppstudio', ppstudio);
 register('pressboard', pressboard);
 register('promoteiq', promoteiq);
 register('pubexchange', pubexchange);
