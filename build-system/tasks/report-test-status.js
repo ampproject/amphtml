@@ -35,10 +35,7 @@ const IS_SAUCELABS_BETA = !!argv.saucelabs && !!argv.beta;
 const IS_DIST = !!argv.compiled;
 
 const TEST_TYPE_SUBTYPES = new Map([
-  [
-    'integration',
-    ['local', 'minified', 'single-pass', 'saucelabs-beta', 'saucelabs-stable'],
-  ],
+  ['integration', ['local', 'minified', 'saucelabs-beta', 'saucelabs-stable']],
   ['unit', ['local', 'local-changes', 'saucelabs']],
   ['e2e', ['local']],
 ]);

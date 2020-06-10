@@ -115,7 +115,6 @@ const forbiddenTerms = {
       'allowlist a legit case.',
     allowlist: [
       'build-system/common/check-package-manager.js',
-      'build-system/compile/single-pass.js',
       'build-system/pr-check/build.js',
       'build-system/pr-check/build-targets.js',
       'build-system/pr-check/checks.js',
@@ -127,7 +126,6 @@ const forbiddenTerms = {
       'build-system/pr-check/local-tests.js',
       'build-system/pr-check/performance-tests.js',
       'build-system/pr-check/remote-tests.js',
-      'build-system/pr-check/single-pass-tests.js',
       'build-system/pr-check/utils.js',
       'build-system/pr-check/validator-tests.js',
       'build-system/pr-check/visual-diff-tests.js',
