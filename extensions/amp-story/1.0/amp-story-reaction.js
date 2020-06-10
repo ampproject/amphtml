@@ -75,6 +75,22 @@ export let ReactionResponseType;
  */
 export let OptionConfigType;
 
+/** @const {Array<Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
+const fontsToLoad = [
+  {
+    family: 'Poppins',
+    weight: '400',
+    src:
+      "url(https://fonts.gstatic.com/s/poppins/v9/pxiEyp8kv8JHgFVrJJfecnFHGPc.woff2) format('woff2')",
+  },
+  {
+    family: 'Poppins',
+    weight: '700',
+    src:
+      "url(https://fonts.gstatic.com/s/poppins/v9/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2) format('woff2')",
+  },
+];
+
 /**
  * Reaction abstract class with shared functionality for interactive components.
  *
@@ -179,9 +195,10 @@ export class AmpStoryReaction extends AMP.BaseElement {
 
   /** @override */
   buildCallback(concreteCSS = '') {
+    this.loadFonts_();
     this.options_ = this.parseOptions_();
     this.rootEl_ = this.buildComponent();
-    this.rootEl_.classList.add('i-amphtml-story-reaction');
+    this.rootEl_.classList.add('i-amphtml-story-reaction-container');
     this.element.classList.add('i-amphtml-story-reaction-component');
     this.adjustGridLayer_();
     this.initializeListeners_();
@@ -191,6 +208,24 @@ export class AmpStoryReaction extends AMP.BaseElement {
       dev().assertElement(this.rootEl_),
       CSS + concreteCSS
     );
+  }
+
+  /**
+   * @private
+   */
+  loadFonts_() {
+    if (!AmpStoryReaction.loadedFonts && this.win.document.fonts && FontFace) {
+      fontsToLoad.forEach((fontProperties) => {
+        const font = new FontFace(fontProperties.family, fontProperties.src, {
+          weight: fontProperties.weight,
+          style: 'normal',
+        });
+        font.load().then(() => {
+          this.win.document.fonts.add(font);
+        });
+      });
+    }
+    AmpStoryReaction.loadedFonts = true;
   }
 
   /**
