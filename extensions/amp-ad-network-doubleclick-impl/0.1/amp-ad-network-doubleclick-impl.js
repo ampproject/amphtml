@@ -759,9 +759,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({});
       });
 
-    const rtcParamsPromise = opt_rtcResponsesPromise.then((results) =>
-      this.mergeRtcResponses_(results)
-    );
+    const checkStillCurrent = this.verifyStillCurrent();
+
+    const rtcParamsPromise = opt_rtcResponsesPromise.then((results) => {
+      checkStillCurrent();
+      return this.mergeRtcResponses_(results);
+    });
 
     // TODO(#28555): Delete extra logic when 'expand-json-targeting' exp launches.
     const isJsonTargetingExpOn =
@@ -776,8 +779,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             dev().warn(TAG, 'JSON Targeting expansion failed/timed out.');
           })
       : Promise.resolve();
-
-    const checkStillCurrent = this.verifyStillCurrent();
 
     Promise.all([
       rtcParamsPromise,
