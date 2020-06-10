@@ -43,5 +43,7 @@ export function ppstudio(global, data) {
   i.setAttribute('data-pps-target-id', 'cr-' + data.crid);
   global.document.getElementById('c').appendChild(i);
 
-  loadScript(global, 'https://ads-cdn.tenmax.io/code/ppstudio.js');
+  loadScript(global, 'https://ads-cdn.tenmax.io/code/ppstudio.js', () => {
+    global.context.renderStart();
+  });
 }

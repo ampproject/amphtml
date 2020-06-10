@@ -837,7 +837,9 @@ const adConfig = jsonConfiguration({
 
   'postquare': {},
 
-  'ppstudio': {},
+  'ppstudio': {
+    renderStartImplemented: true,
+  },
 
   'pressboard': {
     renderStartImplemented: true,
