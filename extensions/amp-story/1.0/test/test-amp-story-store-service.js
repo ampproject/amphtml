@@ -232,16 +232,16 @@ describes.fakeWin('amp-story-store-service actions', {}, (env) => {
     expect(storeService.get(StateProperty.PAUSED_STATE)).to.be.true;
   });
 
-  it('should add an action to the whitelist', () => {
+  it('should add an action to the allowlist', () => {
     const action1 = {tagOrTarget: 'foo', method: 1};
     const action2 = {tagOrTarget: 'foo', method: 2};
 
-    storeService.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, action1);
+    storeService.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, action1);
 
     const actionsListenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.ACTIONS_WHITELIST, actionsListenerSpy);
+    storeService.subscribe(StateProperty.ACTIONS_ALLOWLIST, actionsListenerSpy);
 
-    storeService.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, action2);
+    storeService.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, action2);
 
     expect(actionsListenerSpy).to.have.been.calledOnceWithExactly([
       action1,
@@ -249,17 +249,17 @@ describes.fakeWin('amp-story-store-service actions', {}, (env) => {
     ]);
   });
 
-  it('should add an array of actions to the whitelist', () => {
+  it('should add an array of actions to the allowlist', () => {
     const action1 = {tagOrTarget: 'foo', method: 1};
     const action2 = {tagOrTarget: 'foo', method: 2};
     const action3 = {tagOrTarget: 'foo', method: 3};
 
-    storeService.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, action1);
+    storeService.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, action1);
 
     const actionsListenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.ACTIONS_WHITELIST, actionsListenerSpy);
+    storeService.subscribe(StateProperty.ACTIONS_ALLOWLIST, actionsListenerSpy);
 
-    storeService.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, [action2, action3]);
+    storeService.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, [action2, action3]);
 
     expect(actionsListenerSpy).to.have.been.calledOnceWithExactly([
       action1,

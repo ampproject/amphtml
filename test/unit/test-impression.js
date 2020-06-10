@@ -452,7 +452,7 @@ describe('impression', () => {
       });
     }
 
-    it('should return true for whitelisted hosts', () => {
+    it('should return true for allowlisted hosts', () => {
       test('https://t.co/docref', true);
     });
 
@@ -460,7 +460,7 @@ describe('impression', () => {
       test('http://t.co/asdf', false);
     });
 
-    it('should not trust non-whitelisted hosts', () => {
+    it('should not trust non-allowlisted hosts', () => {
       test('https://www.t.co/asdf', false);
       test('https://t.com/asdf', false);
       test('https://t.cn/asdf', false);

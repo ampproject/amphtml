@@ -413,7 +413,7 @@ Additionally, you can create multiple projects and switch between them in the CL
 
 #### Testing Ads
 
-Testing ads in deployed demos requires whitelisting of 3p urls. You can do this by adding your intended deployment hostname as an environemnt variable `AMP_TESTING_HOST` and using the `fortesting` flag. For example:
+Testing ads in deployed demos requires allowlisting of 3p urls. You can do this by adding your intended deployment hostname as an environemnt variable `AMP_TESTING_HOST` and using the `fortesting` flag. For example:
 
 ```sh
 export AMP_TESTING_HOST="my-project.firebaseapp.com"

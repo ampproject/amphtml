@@ -622,7 +622,7 @@ descendant_tag_list: {
 }
 descendant_tag_list: {
   name: "amp-story-grid-layer-allowed-descendants"
-  tag: "A" # `show-tooltip` attribute is whitelisted in validator-main.protoascii.
+  tag: "A" # `show-tooltip` attribute is allowlisted in validator-main.protoascii.
   tag: "ABBR"
   tag: "ADDRESS"
   tag: "AMP-ANALYTICS"
@@ -847,7 +847,7 @@ tags: {  # <amp-story-animation>
   }
 }
 descendant_tag_list {
-  # Whitelisting as many components as possible, unless they could result in a
+  # Allowlisting as many components as possible, unless they could result in a
   # bad UX (ie: modal in a modal with amp-lightbox), or potential security
   # issues (ie: amp-form).
   name: "amp-story-page-attachment-allowed-descendants"

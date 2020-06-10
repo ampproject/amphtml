@@ -747,7 +747,7 @@ public final class TagSpecUtils {
         final TagStack tagStack = context.getTagStack();
 
         for (DescendantConstraints allowedDescendantsList : tagStack.allowedDescendantsList()) {
-            // If the tag we're validating is not whitelisted for a specific ancestor,
+            // If the tag we're validating is not allowlisted for a specific ancestor,
             // then throw an error.
             if (!allowedDescendantsList.getAllowedTags().contains(encounteredTag.upperName())) {
                 final List<String> params = new ArrayList<>();

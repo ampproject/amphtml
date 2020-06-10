@@ -302,7 +302,7 @@ tags: {
   attr_lists: "common-link-attrs"
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
 }
-# Whitelisted font providers
+# Allowlisted font providers
 tags: {
   html_format: AMP
   html_format: AMP4ADS
@@ -1337,7 +1337,7 @@ tags: {
       protocol: "https"
       protocol: "mailto"
       protocol: "maps"
-      # Whitelisting additional commonly observed third party
+      # Allowlisting additional commonly observed third party
       # protocols which should be safe.
       # BiP Messenger
       protocol: "bip"

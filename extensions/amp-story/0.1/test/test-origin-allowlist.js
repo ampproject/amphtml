@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ORIGIN_WHITELIST} from '../origin-whitelist';
+import {ORIGIN_ALLOWLIST} from '../origin-allowlist';
 
-describes.fakeWin('amp-story origin whitelist', {}, () => {
+describes.fakeWin('amp-story origin allowlist', {}, () => {
   it('should not have duplicates', () => {
     let hasDuplicates = false;
-    const originList = ORIGIN_WHITELIST.reduce((origins, origin) => {
+    const originList = ORIGIN_ALLOWLIST.reduce((origins, origin) => {
       if (origins.indexOf(origin) >= 0) {
         hasDuplicates = true;
         return origins;

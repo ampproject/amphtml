@@ -202,7 +202,7 @@ export const ALLOWLISTED_ATTRS = [
 ];
 
 /**
- * Attributes that are only whitelisted for specific, non-AMP elements.
+ * Attributes that are only allowlisted for specific, non-AMP elements.
  * @const {!Object<string, !Array<string>>}
  */
 export const ALLOWLISTED_ATTRS_BY_TAGS = {

@@ -722,13 +722,13 @@ export class AmpStory extends AMP.BaseElement {
       this.storeService_.dispatch(action, data);
     });
 
-    // Actions whitelist could be initialized empty, or with some actions some
+    // Actions allowlist could be initialized empty, or with some actions some
     // other components registered.
     this.storeService_.subscribe(
-      StateProperty.ACTIONS_WHITELIST,
-      (actionsWhitelist) => {
+      StateProperty.ACTIONS_ALLOWLIST,
+      (actionsAllowlist) => {
         const actions = Services.actionServiceForDoc(this.element);
-        actions.setWhitelist(actionsWhitelist);
+        actions.setAllowlist(actionsAllowlist);
       },
       true /** callToInitialize */
     );
@@ -1047,7 +1047,7 @@ export class AmpStory extends AMP.BaseElement {
       this.liveStoryManager_ = new LiveStoryManager(this);
       this.liveStoryManager_.build();
 
-      this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, [
+      this.storeService_.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, [
         {tagOrTarget: 'AMP-LIVE-LIST', method: 'update'},
       ]);
 
@@ -1278,7 +1278,7 @@ export class AmpStory extends AMP.BaseElement {
     return Promise.all(pageImplPromises).then((pages) => {
       this.pages_ = pages;
       if (isExperimentOn(this.win, 'amp-story-branching')) {
-        this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, [
+        this.storeService_.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, [
           {tagOrTarget: 'AMP-STORY', method: 'goToPage'},
         ]);
       }
@@ -2651,7 +2651,7 @@ export class AmpStory extends AMP.BaseElement {
       {tagOrTarget: 'AMP-SIDEBAR', method: 'close'},
       {tagOrTarget: 'AMP-SIDEBAR', method: 'toggle'},
     ];
-    this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, actions);
+    this.storeService_.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, actions);
   }
 
   /**

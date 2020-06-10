@@ -18,7 +18,7 @@ limitations under the License.
 
 ## Overview
 
-AMP HTML allows for most HTML5 standard tags and a few additional tags specific to the AMP runtime. The [AMP Spec](amp-html-format.md) broadly defines the set of tags that are disallowed. AMP Validator implementations, however, must be implemented using a tag whitelist. This addendum lists the set of tags which an AMP Validator should whitelist.
+AMP HTML allows for most HTML5 standard tags and a few additional tags specific to the AMP runtime. The [AMP Spec](amp-html-format.md) broadly defines the set of tags that are disallowed. AMP Validator implementations, however, must be implemented using a tag allowlist. This addendum lists the set of tags which an AMP Validator should allowlist.
 
 If an HTML tag is not in this list, the AMP Validator does not consider that tag
 valid in any context. However, many of these tags have additional restrictions.
@@ -27,7 +27,7 @@ For example `<script>` is in the list, but custom javascript is not allowed.
 TODO(gregable): Add additional detail to the addendum regarding specific
 validation requirements for each tag.
 
-## HTML5 Tag Whitelist
+## HTML5 Tag Allowlist
 
 Below we list the allowed tags in the order in which they are appear in the HTML5 spec in section 4 [The Elements of HTML](http://www.w3.org/TR/html5/single-page.html#html-elements).
 

@@ -91,21 +91,21 @@ describes.realWin(
       });
     });
 
-    describe('allowList of variables', () => {
+    describe('Allowlist of variables', () => {
       const mockBindings = {
         RANDOM: () => 0.1234,
         ABC: () => 'three',
         ABCD: () => 'four',
       };
 
-      function createExpanderWithAllowList(allowList, mockBindings) {
+      function createExpanderWithAllowlist(allowlist, mockBindings) {
         variableSource = new GlobalVariableSource(env.ampdoc);
-        variableSource.variableAllowList_ = allowList;
+        variableSource.variableAllowlist_ = allowlist;
         return new Expander(variableSource, mockBindings);
       }
 
-      it('should not replace not allowed RANDOM', () => {
-        const expander = createExpanderWithAllowList(
+      it('should not replace unallowlisted RANDOM', () => {
+        const expander = createExpanderWithAllowlist(
           ['ABC', 'ABCD', 'CANONICAL'],
           mockBindings
         );
@@ -114,8 +114,8 @@ describes.realWin(
         return expect(expander.expand(url)).to.eventually.equal(expected);
       });
 
-      it('should replace allowed ABCD', () => {
-        const expander = createExpanderWithAllowList(
+      it('should replace allowlisted ABCD', () => {
+        const expander = createExpanderWithAllowlist(
           ['ABC', 'ABCD', 'CANONICAL'],
           mockBindings
         );
@@ -124,8 +124,8 @@ describes.realWin(
         return expect(expander.expand(url)).to.eventually.equal(expected);
       });
 
-      it('should not replace anything with empty allowList', () => {
-        const expander = createExpanderWithAllowList([''], mockBindings);
+      it('should not replace anything with empty allowlist', () => {
+        const expander = createExpanderWithAllowlist([''], mockBindings);
         const url = 'http://www.google.com/?test=ABCD';
         const expected = 'http://www.google.com/?test=ABCD';
         return expect(expander.expand(url)).to.eventually.equal(expected);
@@ -493,17 +493,17 @@ describes.realWin(
         });
       });
 
-      describe('opt_allowList', () => {
-        it('should only resolve values in the allowList', () => {
+      describe('opt_allowlist', () => {
+        it('should only resolve values in the allowlist', () => {
           const url = 'UPPERCASE(foo)RANDOMLOWERCASE(BAR)';
-          const allowList = {RANDOM: true};
+          const allowlist = {RANDOM: true};
           return expect(
             new Expander(
               variableSource,
               mockBindings,
               /* opt_collectVars */ undefined,
               /* opt_sync */ false,
-              /* opt_allowList */ allowList
+              /* opt_allowlist */ allowlist
             ).expand(url)
           ).to.eventually.equal('UPPERCASE(foo)123456LOWERCASE(BAR)');
         });

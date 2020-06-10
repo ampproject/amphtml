@@ -165,7 +165,7 @@ export class AmpSelector extends AMP.BaseElement {
 
     /** If the element is in an `email` document, allow its `clear`,
      * `selectDown`, `selectUp`, and `toggle` actions. */
-    this.action_.addToWhitelist(
+    this.action_.addToAllowlist(
       TAG,
       ['clear', 'selectDown', 'selectUp', 'toggle'],
       ['email']

@@ -139,7 +139,7 @@ Link substitutions are restricted and will only be fulfilled for URLs matching:
 - The page’s canonical origin
 - A white listed origin
 
-To whitelist an origin, include a `amp-link-variable-allowed-origin` `meta` tag in the `head` of your document. To specify multiple domains, separate each domain with a space.
+To allowlist an origin, include a `amp-link-variable-allowed-origin` `meta` tag in the `head` of your document. To specify multiple domains, separate each domain with a space.
 
 ```html
 <meta
