@@ -24,13 +24,13 @@ import {
   isUserErrorMessage,
 } from './log';
 import {dict} from './utils/object';
+import {endsWith, startsWith} from './string';
 import {experimentTogglesOrNull, getBinaryType, isCanary} from './experiments';
 import {exponentialBackoff} from './exponential-backoff';
 import {getMode} from './mode';
 import {isLoadErrorMessage} from './event-helper';
 import {isProxyOrigin} from './url';
 import {makeBodyVisibleRecovery} from './style-installer';
-import {startsWith} from './string';
 import {triggerAnalyticsEvent} from './analytics';
 import {urls} from './config';
 
@@ -695,8 +695,9 @@ export function detectJsEngineFromStack() {
   } catch (e) {
     const {stack} = e;
 
-    // Safari only mentions the method name.
-    if (startsWith(stack, 't@')) {
+    // Safari 12 and under only mentions the method name.
+    // Safari 13 mentions the wrapping function (obfuscated "detectJsEngineFromStack").
+    if (startsWith(stack, 't@') || endsWith(stack, '_wrapCall')) {
       return 'Safari';
     }
 
