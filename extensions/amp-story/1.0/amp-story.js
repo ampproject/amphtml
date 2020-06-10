@@ -61,14 +61,7 @@ import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
-import {
-  HistoryState,
-  getHistoryState,
-  removeAttributeInMutate,
-  setAttributeInMutate,
-  setHistoryState,
-  shouldShowStoryUrlInfo,
-} from './utils';
+import {HistoryState, getHistoryState, setHistoryState} from './history';
 import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
@@ -114,6 +107,11 @@ import {getMode} from '../../../src/mode';
 import {getState} from '../../../src/history';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseQueryString} from '../../../src/url';
+import {
+  removeAttributeInMutate,
+  setAttributeInMutate,
+  shouldShowStoryUrlInfo,
+} from './utils';
 import {toArray} from '../../../src/types';
 import {upgradeBackgroundAudio} from './audio';
 import LocalizedStringsAr from './_locales/ar';

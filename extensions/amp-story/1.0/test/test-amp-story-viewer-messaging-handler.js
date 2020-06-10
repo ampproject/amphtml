@@ -20,7 +20,7 @@ import {
   getStoreService,
 } from '../amp-story-store-service';
 import {AmpStoryViewerMessagingHandler} from '../amp-story-viewer-messaging-handler';
-import {HistoryState, setHistoryState} from '../utils';
+import {HistoryState, setHistoryState} from '../history';
 
 describes.fakeWin('amp-story-viewer-messaging-handler', {}, (env) => {
   let fakeViewerService;

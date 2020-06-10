@@ -495,6 +495,7 @@ const forbiddenTerms = {
       'extensions/amp-access/0.1/amp-access-iframe.js',
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
       'extensions/amp-script/0.1/amp-script.js',
+      'extensions/amp-story/1.0/history.js',
       'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
       'extensions/amp-web-push/0.1/amp-web-push-permission-dialog.js',
       'src/experiments.js',

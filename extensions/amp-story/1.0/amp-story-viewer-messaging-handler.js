@@ -20,7 +20,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AnalyticsVariable, getVariableService} from './variable-service';
-import {HistoryState, getHistoryState} from './utils';
+import {HistoryState, getHistoryState} from './history';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
