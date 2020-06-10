@@ -485,7 +485,6 @@ export class AmpStory extends AMP.BaseElement {
       Action.TOGGLE_PAUSED,
       this.pausedStateToRestore_
     );
-    // Need to revert touchstart state when swiping back between stories(#28425)
     this.advancement_.resolveTouchstart();
   }
 

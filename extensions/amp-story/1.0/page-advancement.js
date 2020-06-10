@@ -262,6 +262,9 @@ export class ManualAdvancement extends AdvancementConfig {
     /** @private {?number} Last touchstart event's timestamp */
     this.touchstartTimestamp_ = null;
 
+    /** @private {boolean} Saving the paused state before pressing */
+    this.pausedState_ = false;
+
     this.startListening_();
 
     if (element.ownerDocument.defaultView) {
@@ -341,6 +344,7 @@ export class ManualAdvancement extends AdvancementConfig {
     }
 
     this.touchstartTimestamp_ = Date.now();
+    this.pausedState_ = this.storeService_.get(StateProperty.PAUSED_STATE);
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
     this.timeoutId_ = this.timer_.delay(() => {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
@@ -377,7 +381,7 @@ export class ManualAdvancement extends AdvancementConfig {
     if (!this.touchstartTimestamp_) {
       return;
     }
-    this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
+    this.storeService_.dispatch(Action.TOGGLE_PAUSED, this.pausedState_);
     this.touchstartTimestamp_ = null;
     this.timer_.cancel(this.timeoutId_);
     if (
