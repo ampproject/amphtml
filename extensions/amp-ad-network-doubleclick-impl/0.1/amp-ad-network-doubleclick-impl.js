@@ -198,6 +198,14 @@ let tokensToInstances = {};
 /** @private {?Promise} */
 let sraRequests = null;
 
+/**
+ * The random subdomain to load SafeFrame from, if SafeFrame is
+ * being loaded from a random subdomain and if the subdomain
+ * has been generated.
+ * @private {?string}
+ */
+let safeFrameRandomSubdomain = null;
+
 /** @typedef {{
       adUrl: !Promise<string>,
       lineItemId: string,
@@ -322,14 +330,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @protected {ConsentTupleDef} */
     this.consentTuple = {};
-
-    /**
-     * The random subdomain to load SafeFrame from, if SafeFrame is
-     * being loaded from a random subdomain and if the subdomain
-     * has been generated.
-     * @private {?string}
-     */
-    this.safeFrameRandomSubdomain_ = null;
 
     /** @protected {!Deferred<string>} */
     this.getAdUrlDeferred = new Deferred();
@@ -1227,11 +1227,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!this.experimentIds.includes(randomSubdomainExperimentBranch)) {
       return super.getSafeframePath();
     }
-    this.safeFrameRandomSubdomain_ =
-      this.safeFrameRandomSubdomain_ || this.getRandomString_();
+    safeFrameRandomSubdomain =
+      safeFrameRandomSubdomain || this.getRandomString_();
 
     return (
-      `https://${this.safeFrameRandomSubdomain_}.safeframe.googlesyndication.com/safeframe/` +
+      `https://${safeFrameRandomSubdomain}.safeframe.googlesyndication.com/safeframe/` +
       `${this.safeframeVersion}/html/container.html`
     );
   }
