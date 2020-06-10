@@ -159,7 +159,7 @@ tags: {
   }
 }
 descendant_tag_list {
-  # Purposefully being restrictive when whitelisting child components;
+  # Purposefully being restrictive when allowlisting child components;
   # On demand, add more components to this list after manual testing.
   name: "amp-mega-menu-allowed-descendants"
   tag: "A"

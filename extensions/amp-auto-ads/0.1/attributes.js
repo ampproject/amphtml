@@ -25,7 +25,7 @@ const TAG = 'amp-auto-ads';
 /**
  * @const {!Object<string, boolean>}
  */
-const NON_DATA_ATTRIBUTE_WHITELIST = {
+const NON_DATA_ATTRIBUTE_ALLOWLIST = {
   'type': true,
   'rtc-config': true,
 };
@@ -64,7 +64,7 @@ export function getAttributesFromConfigObj(configObj, attributes) {
 function parseAttributes(attributeObject) {
   const attributes = dict();
   for (const key in attributeObject) {
-    if (!NON_DATA_ATTRIBUTE_WHITELIST[key] && !startsWith(key, 'data-')) {
+    if (!NON_DATA_ATTRIBUTE_ALLOWLIST[key] && !startsWith(key, 'data-')) {
       user().warn(TAG, 'Attribute not whitlisted: ' + key);
       continue;
     }

@@ -27,7 +27,7 @@ describe('attributes', () => {
     ).to.deep.equal({});
   });
 
-  it('should get only whitelisted attributes', () => {
+  it('should get only allowlisted attributes', () => {
     const configObj = {
       attributes: {
         'not-allowed': 'val1',

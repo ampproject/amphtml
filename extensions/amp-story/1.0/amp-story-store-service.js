@@ -108,7 +108,7 @@ export let InteractiveComponentDef;
  *    systemUiIsVisibleState: boolean,
  *    uiState: !UIType,
  *    viewportWarningState: boolean,
- *    actionsWhitelist: !Array<{tagOrTarget: string, method: string}>,
+ *    actionsAllowlist: !Array<{tagOrTarget: string, method: string}>,
  *    consentId: ?string,
  *    currentPageId: string,
  *    currentPageIndex: number,
@@ -161,7 +161,7 @@ export const StateProperty = {
   VIEWPORT_WARNING_STATE: 'viewportWarningState',
 
   // App data.
-  ACTIONS_WHITELIST: 'actionsWhitelist',
+  ACTIONS_ALLOWLIST: 'actionsAllowlist',
   CONSENT_ID: 'consentId',
   CURRENT_PAGE_ID: 'currentPageId',
   CURRENT_PAGE_INDEX: 'currentPageIndex',
@@ -174,7 +174,7 @@ export const StateProperty = {
 
 /** @const @enum {string} */
 export const Action = {
-  ADD_TO_ACTIONS_WHITELIST: 'addToActionsWhitelist',
+  ADD_TO_ACTIONS_ALLOWLIST: 'addToActionsAllowlist',
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
   SET_ADVANCEMENT_MODE: 'setAdvancementMode',
@@ -213,7 +213,7 @@ export const Action = {
  * @private @const {!Object<string, !function(*, *):boolean>}
  */
 const stateComparisonFunctions = {
-  [StateProperty.ACTIONS_WHITELIST]: (old, curr) => old.length !== curr.length,
+  [StateProperty.ACTIONS_ALLOWLIST]: (old, curr) => old.length !== curr.length,
   [StateProperty.INTERACTIVE_COMPONENT_STATE]:
     /**
      * @param {InteractiveComponentDef} old
@@ -238,14 +238,14 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.NEW_PAGE_AVAILABLE_ID]: data,
       });
-    case Action.ADD_TO_ACTIONS_WHITELIST:
-      const newActionsWhitelist = [].concat(
-        state[StateProperty.ACTIONS_WHITELIST],
+    case Action.ADD_TO_ACTIONS_ALLOWLIST:
+      const newActionsAllowlist = [].concat(
+        state[StateProperty.ACTIONS_ALLOWLIST],
         data
       );
       return /** @type {!State} */ ({
         ...state,
-        [StateProperty.ACTIONS_WHITELIST]: newActionsWhitelist,
+        [StateProperty.ACTIONS_ALLOWLIST]: newActionsAllowlist,
       });
     // Triggers the amp-acess paywall.
     case Action.TOGGLE_ACCESS:
@@ -561,7 +561,7 @@ export class AmpStoryStoreService {
       [StateProperty.VIEWPORT_WARNING_STATE]: false,
       // amp-story only allows actions on a case-by-case basis to preserve UX
       // behaviors. By default, no actions are allowed.
-      [StateProperty.ACTIONS_WHITELIST]: [],
+      [StateProperty.ACTIONS_ALLOWLIST]: [],
       [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
       [StateProperty.CURRENT_PAGE_INDEX]: 0,

@@ -15,10 +15,10 @@
  */
 
 /**
- * A whitelist of djb2a hashes of publisher origins.
+ * A allowlist of djb2a hashes of publisher origins.
  * @const {!Array<string>}
  */
-export const ORIGIN_WHITELIST = [
+export const ORIGIN_ALLOWLIST = [
   '1005249088',
   '1006163429',
   '1008162951',

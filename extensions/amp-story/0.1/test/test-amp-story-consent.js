@@ -221,18 +221,18 @@ describes.realWin('amp-story-consent', {amp: true}, (env) => {
     expect(linkEl).not.to.have.display('none');
   });
 
-  it('should whitelist the <amp-consent> actions', () => {
-    const addToWhitelistStub = env.sandbox.stub(
+  it('should allowlist the <amp-consent> actions', () => {
+    const addToAllowlistStub = env.sandbox.stub(
       storyConsent.actions_,
-      'addToWhitelist'
+      'addToAllowlist'
     );
 
     storyConsent.buildCallback();
 
-    expect(addToWhitelistStub).to.have.callCount(3);
-    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT', 'accept');
-    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT', 'prompt');
-    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT', 'reject');
+    expect(addToAllowlistStub).to.have.callCount(3);
+    expect(addToAllowlistStub).to.have.been.calledWith('AMP-CONSENT', 'accept');
+    expect(addToAllowlistStub).to.have.been.calledWith('AMP-CONSENT', 'prompt');
+    expect(addToAllowlistStub).to.have.been.calledWith('AMP-CONSENT', 'reject');
   });
 
   it('should broadcast the amp actions', () => {

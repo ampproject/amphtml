@@ -28,7 +28,7 @@ const TAG = 'amp-viewer-assistance';
 const GSI_TOKEN_PROVIDER = 'actions-on-google-gsi';
 
 /** @const {!Array<string>} */
-const ACTION_STATUS_WHITELIST = [
+const ACTION_STATUS_ALLOWLIST = [
   'ACTIVE_ACTION_STATUS',
   'FAILED_ACTION_STATUS',
   'COMPLETED_ACTION_STATUS',
@@ -229,7 +229,7 @@ export class AmpViewerAssistance {
       }
     } else if (update) {
       const actionStatus = update && update['actionStatus'];
-      if (!actionStatus || !ACTION_STATUS_WHITELIST.includes(actionStatus)) {
+      if (!actionStatus || !ACTION_STATUS_ALLOWLIST.includes(actionStatus)) {
         return Promise.reject(
           '"updateActionState" action "update" parameter' +
             ' must contain a valid "actionStatus" field.'

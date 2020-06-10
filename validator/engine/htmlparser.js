@@ -563,7 +563,7 @@ const HtmlParser = class {
           }
           attribs.push(attribName, decodedValue);
         } else if (m[4]) {
-          if (eflags !== void 0) {  // False if not in whitelist.
+          if (eflags !== void 0) {  // False if not in allowlist.
             if (openTag) {
               tagStack.startTag(new parserInterface.ParsedHtmlTag(
                   /** @type {string} */ (tagName), attribs));

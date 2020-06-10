@@ -1814,7 +1814,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(element.isLoadingEnabled_()).to.be.false;
       });
 
-      it('should disable when element is not whitelisted', () => {
+      it('should disable when element is not allowlisted', () => {
         stubInA4A(false);
         LOADING_ELEMENTS_['amp-test-loader'.toUpperCase()] = false;
         expect(element.isLoadingEnabled_()).to.be.false;

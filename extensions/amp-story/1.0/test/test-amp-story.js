@@ -564,7 +564,7 @@ describes.realWin(
 
         env.sandbox
           .stub(Services, 'actionServiceForDoc')
-          .returns({setWhitelist: () => {}, trigger: () => {}});
+          .returns({setAllowlist: () => {}, trigger: () => {}});
 
         // Prevents amp-story-consent element from running code that is irrelevant
         // to this test.
@@ -598,7 +598,7 @@ describes.realWin(
       it('should play the story after the consent is resolved', async () => {
         env.sandbox
           .stub(Services, 'actionServiceForDoc')
-          .returns({setWhitelist: () => {}, trigger: () => {}});
+          .returns({setAllowlist: () => {}, trigger: () => {}});
 
         // Prevents amp-story-consent element from running code that is irrelevant
         // to this test.
@@ -642,7 +642,7 @@ describes.realWin(
       it('should play the story if the consent was already resolved', async () => {
         env.sandbox
           .stub(Services, 'actionServiceForDoc')
-          .returns({setWhitelist: () => {}, trigger: () => {}});
+          .returns({setAllowlist: () => {}, trigger: () => {}});
 
         // Prevents amp-story-consent element from running code that is irrelevant
         // to this test.
@@ -843,7 +843,7 @@ describes.realWin(
 
         const executeSpy = env.sandbox.spy();
         env.sandbox.stub(Services, 'actionServiceForDoc').returns({
-          setWhitelist: () => {},
+          setAllowlist: () => {},
           trigger: () => {},
           execute: executeSpy,
         });
@@ -869,7 +869,7 @@ describes.realWin(
         story.element.appendChild(sidebar);
 
         env.sandbox.stub(Services, 'actionServiceForDoc').returns({
-          setWhitelist: () => {},
+          setAllowlist: () => {},
           trigger: () => {},
           execute: () => {
             sidebar.setAttribute('open', '');

@@ -119,7 +119,7 @@ describes.fakeWin(
     });
 
     describes.realWin(
-      'allowList of variable substitutions',
+      'Allowlist of variable substitutions',
       {
         amp: {
           ampdoc: 'single',
@@ -129,7 +129,7 @@ describes.fakeWin(
         let variableSource;
         beforeEach(() => {
           variableSource = new VariableSource(env.ampdoc);
-          variableSource.variableAllowList_ = ['ABC', 'ABCD', 'CANONICAL'];
+          variableSource.variableAllowlist_ = ['ABC', 'ABCD', 'CANONICAL'];
         });
 
         it('Works with allowlisted variables', () => {
@@ -172,7 +172,7 @@ describes.fakeWin(
 
     it('Should not work with empty variable allowlist', () => {
       const variableSource = new VariableSource(env.ampdoc);
-      variableSource.variableAllowList_ = [''];
+      variableSource.variableAllowlist_ = [''];
 
       variableSource.setAsync('RANDOM', () => Promise.resolve('0.1234'));
       expect(variableSource.getExpr()).to.be.ok;

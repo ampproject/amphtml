@@ -1397,9 +1397,9 @@ Below outlines the types of errors that may arise when working with `amp-bind`.
     <td>Verify the expression for typos.</td>
   </tr>
   <tr>
-    <td>Non-whitelisted functions</td>
+    <td>Non-allowlisted functions</td>
     <td><em>alert is not a supported function.</em></td>
-    <td>Use only <a href="#white-listed-functions">white-listed functions</a>.</td>
+    <td>Use only <a href="#allow-listed-functions">allow-listed functions</a>.</td>
   </tr>
   <tr>
     <td>Sanitized result</td>

@@ -184,7 +184,7 @@ class AmpLightbox extends AMP.BaseElement {
     this.registerDefaultAction((i) => this.open_(i.trust), 'open');
     this.registerAction('close', (i) => this.close(i.trust));
     /** If the element is in an email document, allow its `open` and `close` actions. */
-    this.action_.addToWhitelist('AMP-LIGHTBOX', ['open', 'close'], ['email']);
+    this.action_.addToAllowlist('AMP-LIGHTBOX', ['open', 'close'], ['email']);
   }
 
   /**

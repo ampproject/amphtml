@@ -38,7 +38,7 @@
                     data-param-url="https://example.com/">
   </amp-social-share>
 
-  <!-- Valid: A share endpoint that's a URL with whitelisted app protocol -->
+  <!-- Valid: A share endpoint that's a URL with allowlisted app protocol -->
   <amp-social-share type="whatsapp"
                     layout="container"
                     data-share-endpoint="whatsapp://send"
@@ -46,7 +46,7 @@
     Share on Whatsapp
   </amp-social-share>
 
-  <!-- Valid: A share endpoint that's a URL with the whitelisted https protocol
+  <!-- Valid: A share endpoint that's a URL with the allowlisted https protocol
     -->
   <amp-social-share type="vote-this-up"
                     layout="container"
@@ -75,7 +75,7 @@
                     data-param-url="https://example.com/">
   </amp-social-share>
 
-  <!-- Invalid: Endpoint given with a protocol that doesn't fit the whitelist -->
+  <!-- Invalid: Endpoint given with a protocol that doesn't fit the allowlist -->
   <amp-social-share type="vote-this-up"
                     layout="container"
                     data-share-endpoint="votethisup://vote"
@@ -83,7 +83,7 @@
     Share on Whatsapp
   </amp-social-share>
 
-  <!-- Invalid: Endpoint given with a protocol that doesn't fit the whitelist -->
+  <!-- Invalid: Endpoint given with a protocol that doesn't fit the allowlist -->
   <amp-social-share type="uhm-no-hahaha"
                     layout="container"
                     data-share-endpoint="j a v a s c r i p t : alert('oh hi')"

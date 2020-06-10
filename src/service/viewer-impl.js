@@ -192,7 +192,7 @@ export class ViewerImpl {
     /** @const @private {!Promise<string>} */
     this.referrerUrl_ = new Promise((resolve) => {
       if (this.isEmbedded() && ampdoc.getParam('referrer') != null) {
-        // Viewer override, but only for whitelisted viewers. Only allowed for
+        // Viewer override, but only for allowlisted viewers. Only allowed for
         // iframed documents.
         this.isTrustedViewer().then((isTrusted) => {
           if (isTrusted) {
@@ -224,7 +224,7 @@ export class ViewerImpl {
       /** @const {?string} */
       const viewerUrlOverride = ampdoc.getParam('viewerUrl');
       if (this.isEmbedded() && viewerUrlOverride) {
-        // Viewer override, but only for whitelisted viewers. Only allowed for
+        // Viewer override, but only for allowlisted viewers. Only allowed for
         // iframed documents.
         this.isTrustedViewer().then((isTrusted) => {
           if (isTrusted) {
@@ -602,7 +602,7 @@ export class ViewerImpl {
   }
 
   /**
-   * Whether the viewer is has been whitelisted for more sensitive operations
+   * Whether the viewer is has been allowlisted for more sensitive operations
    * by looking at the ancestorOrigins.
    * @return {boolean|undefined}
    */

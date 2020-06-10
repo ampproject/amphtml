@@ -265,7 +265,7 @@ export function hasNaturalDimensions(tagName) {
 /**
  * Determines the default dimensions for an element which could vary across
  * different browser implementations, like <audio> for instance.
- * This operation can only be completed for an element whitelisted by
+ * This operation can only be completed for an element allowlisted by
  * `hasNaturalDimensions`.
  * @param {!Element} element
  * @return {DimensionsDef}
@@ -308,7 +308,7 @@ export function isLoadingAllowed(element) {
 /**
  * All video player components must either have a) "video" or b) "player" in
  * their name. A few components don't follow this convention for historical
- * reasons, so they're present in the LOADING_ELEMENTS_ whitelist.
+ * reasons, so they're present in the LOADING_ELEMENTS_ allowlist.
  * @param {string} tagName
  * @return {boolean}
  */
