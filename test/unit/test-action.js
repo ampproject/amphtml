@@ -1529,6 +1529,42 @@ describes.fakeWin('Core events', {amp: true}, (env) => {
     );
   });
 
+  it('should trigger change event for <input type="file"> elements', () => {
+    const handler = window.document.addEventListener.getCall(3).args[1];
+    const element = document.createElement('input');
+    element.setAttribute('type', 'file');
+    const event = {target: element};
+    handler(event);
+    expect(action.trigger).to.have.been.calledWith(
+      element,
+      'change',
+      env.sandbox.match((e) => e.detail.files.length == 0)
+    );
+
+    element.setAttribute('multiple', '');
+    Object.defineProperty(element, 'files', {
+      value: {
+        0: new File(['foo'], 'foo.txt', {type: 'text/plain'}),
+        1: new File(['bar'], 'bar.txt', {type: 'text/plain'}),
+        length: 2,
+      },
+    });
+
+    handler({target: element});
+    expect(action.trigger).to.have.been.calledWith(
+      element,
+      'change',
+      env.sandbox.match({
+        detail: {
+          files: [
+            {name: 'foo.txt', size: 3, type: 'text/plain'},
+            {name: 'bar.txt', size: 3, type: 'text/plain'},
+          ],
+        },
+      })
+    );
+  });
+
   it('should trigger change event with details for <select> elements', () => {
     const handler = window.document.addEventListener.getCall(3).args[1];
     const element = document.createElement('select');

@@ -33,7 +33,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../service';
 import {isAmp4Email} from '../format';
-import {isArray, isFiniteNumber, toWin} from '../types';
+import {isArray, isFiniteNumber, toArray, toWin} from '../types';
 import {isEnabled} from '../dom';
 import {reportError} from '../error';
 
@@ -860,6 +860,14 @@ export class ActionService {
     if (target.min !== undefined || target.max !== undefined) {
       detail['min'] = target.min;
       detail['max'] = target.max;
+    }
+
+    if (target.files) {
+      detail['files'] = toArray(target.files).map((file) => ({
+        'name': file.name,
+        'size': file.size,
+        'type': file.type,
+      }));
     }
 
     if (Object.keys(detail).length > 0) {
