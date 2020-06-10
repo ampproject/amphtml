@@ -119,10 +119,10 @@ describe
   });
 
 // Move IE tests into its own `describe()`
-// so that Mocha picks up its 'ifIe()' configuration
+// so that we can load a different fixture.
 describe
   .configure()
-  .ifIe()
+  .enableIe()
   .run('Rendering of amp-img - Internet Explorer edge cases', () => {
     let fixture;
     beforeEach(() => {
@@ -136,21 +136,58 @@ describe
     // IE doesn't support the srcset attribute, so if the developer
     // provides a srcset but no src to amp-img, it should set the src
     // attribute to the first entry in srcset.
-    it('should guarantee src if srcset is not supported', () => {
-      const imageLoadedPromise = waitForImageToLoad(fixture.doc);
+    describe
+      .configure()
+      .ifIe()
+      .run('srcset support', () => {
+        it('should guarantee src if srcset is not supported', () => {
+          const imageLoadedPromise = waitForImageToLoad(
+            fixture.doc,
+            'img[amp-img-id="srcset"]'
+          );
+          return imageLoadedPromise.then(() => {
+            const ampImg = fixture.doc.getElementById('srcset');
+            const img = ampImg.querySelector('img[amp-img-id="srcset"]');
+            expect(img.getAttribute('src')).to.equal(
+              '/examples/img/hero@1x.jpg'
+            );
+          });
+        });
+      });
+
+    // IE can't scale SVG images, so intrinsic sizers use a PNG instead.
+    it('renders intrinsic layout with correct size', () => {
+      const imageLoadedPromise = waitForImageToLoad(
+        fixture.doc,
+        'img[amp-img-id="intrinsic"]'
+      );
       return imageLoadedPromise.then(() => {
-        const ampImg = fixture.doc.getElementById('img4');
-        const img = ampImg.querySelector('img[amp-img-id="img4"]');
-        expect(img.getAttribute('src')).to.equal('/examples/img/hero@1x.jpg');
+        const ampImg = fixture.doc.getElementById('intrinsic');
+        const width = parseInt(ampImg.getAttribute('width'), 10);
+        const height = parseInt(ampImg.getAttribute('height'), 10);
+        const bounds = ampImg.getBoundingClientRect();
+
+        expect(reduce(width, height)).to.deep.equal(
+          reduce(bounds.width, bounds.height)
+        );
       });
     });
   });
 
-function waitForImageToLoad(document) {
+function reduce(a, b) {
+  const gcd = greatestCommonDivisor(a, b);
+  return [a / gcd, b / gcd];
+}
+
+function greatestCommonDivisor(a, b) {
+  return b ? greatestCommonDivisor(b, a % b) : a;
+}
+
+function waitForImageToLoad(document, selector) {
   return poll(
-    'wait for img4 to load',
+    'wait for img to load',
     () => {
-      const img = document.querySelector('img[amp-img-id="img4"]');
+      const img = document.querySelector(selector);
       return img !== null;
     },
     () => {},
