@@ -75,7 +75,7 @@ export let ReactionResponseType;
  */
 export let OptionConfigType;
 
-/** @const {Array<Map<string, string>>} from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
+/** @const {Array<Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
 const fontsToLoad = [
   {
     family: 'Poppins',
