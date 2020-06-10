@@ -34,6 +34,7 @@ import {
 import {getMode} from '../mode';
 import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
+import {checkAndFix as ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error';
 import {listen, loadPromise} from '../event-helper';
@@ -377,6 +378,8 @@ export class ResourcesImpl {
       if (IS_ESM) {
         return;
       }
+
+      ieIntrinsicCheckAndFix(this.win);
 
       // With IntersectionObserver, no need for remeasuring hacks.
       if (!this.intersectionObserver_) {
