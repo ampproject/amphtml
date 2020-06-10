@@ -27,7 +27,7 @@ const {
 const {buildRuntime} = require('../common/utils');
 const {transform} = require('../server/new-server/transforms/dist/transform');
 const globby = require('globby');
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 
 class Runner extends RuntimeTestRunner {
@@ -46,15 +46,14 @@ class Runner extends RuntimeTestRunner {
 
 async function buildTransformedHtml() {
   const filePaths = await globby('./test/fixtures/*.html');
-  const filePath = filePaths.pop();
-  const p = process.cwd() + '/' + path.normalize(filePath);
-  const transformedHtml = transform(p);
-  //filePaths.forEach(filePath => {
-    //console.log('filePath', filePath);
-    //const destPath = `test-bin/${filePath}`;
-    //console.log(destPath);
-    //fs.writeFileSync(`test-bin/${}`);
-  //});
+  for (const filePath of filePaths) {
+    const cwd = process.cwd();
+    const normalizedFilePath = path.normalize(filePath);
+    const absoluteFilePath = `${cwd}/${normalizedFilePath}`;
+    const transformedHtml = await transform(absoluteFilePath);
+    const destPath = `${cwd}/test-bin/${normalizedFilePath}`;
+    fs.write(destPath, transformedHtml);
+  }
 }
 
 async function integration() {
