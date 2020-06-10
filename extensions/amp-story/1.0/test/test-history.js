@@ -65,6 +65,22 @@ describes.realWin('amp-story history', {}, (env) => {
     expect(getHistoryState(win2, 'stateName')).to.equal('foo');
   });
 
+  it('should share history between windows and ignore fragments', async () => {
+    const win1 = await getWin('/404-is-fine.html#XXX');
+    const win2 = await getWin('/404-is-fine.html#YYY');
+    setHistoryState(win1, 'stateName', 'foo');
+    expect(getHistoryState(win1, 'stateName')).to.equal('foo');
+    expect(getHistoryState(win2, 'stateName')).to.equal('foo');
+  });
+
+  it('should not share state if a #page=foo param is present', async () => {
+    const win1 = await getWin('/404-is-fine.html');
+    const win2 = await getWin('/404-is-fine.html#page=test');
+    setHistoryState(win1, 'stateName', 'foo');
+    expect(getHistoryState(win1, 'stateName')).to.equal('foo');
+    expect(getHistoryState(win2, 'stateName')).to.be.null;
+  });
+
   it('should expire localStorage based state', async () => {
     const win1 = await getWin();
     const win2 = await getWin();

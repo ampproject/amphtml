@@ -61,19 +61,15 @@ export function setHistoryState(win, stateName, value) {
  */
 export function getHistoryState(win, stateName) {
   const {history} = win;
-  if (history) {
-    let state = getState(history);
-    // We do get an early state but without a navigation path. In that case we
-    // prefer localStorage.
-    if (!state || !state[HistoryState.NAVIGATION_PATH]) {
-      state = getLocalStorageState(win);
-    }
-    if (state) {
-      console.log('state', state);
-      return /** @type {string|boolean|Array<string>|null} */ (state[
-        stateName
-      ] || null);
-    }
+  let state = getState(history);
+  // We do get an early state but without a navigation path. In that case we
+  // prefer localStorage.
+  if (!state || !state[stateName]) {
+    state = getLocalStorageState(win);
+  }
+  if (state) {
+    return /** @type {string|boolean|Array<string>|null} */ (state[stateName] ||
+      null);
   }
   return null;
 }
@@ -84,9 +80,13 @@ export function getHistoryState(win, stateName) {
  * @return {*}
  */
 function getLocalStorageState(win) {
+  // We definitely don't want to restore state from localStorage if the URL
+  // is explicit about the page that should be shown.
+  if (win.location.hash.indexOf('page=') != -1) {
+    return undefined;
+  }
   const container = getLocalStorageStateContainer(win);
   const holder = container && container[getDocumentKey(win)];
-  console.log('local history', holder);
   return holder && holder[STATE];
 }
 
