@@ -91,7 +91,7 @@ amp4email_feature_tests/amp-autocomplete.html:85:4 The mandatory attribute 'src'
 |        <input />
 |        <script type="application/json">
 >>       ^~~~~~~~~
-amp4email_feature_tests/amp-autocomplete.html:87:6 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags)
+amp4email_feature_tests/amp-autocomplete.html:87:6 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/troubleshooting/validation_errors#custom-javascript-is-not-allowed)
 |          {}
 |        </script>
 |      </amp-autocomplete>
