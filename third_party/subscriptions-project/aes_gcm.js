@@ -26,9 +26,9 @@ export function decryptAesGcm(key, text) {
   const keybytes = base64Decode(key);
   return safeAesGcmImportKey(keybytes.buffer).then((formattedkey) => {
     text = text.replace(/\s+/g, '');
-    const contbuff = base64Decode(text).buffer;
-    const iv = contbuff.slice(0, 12);
-    const bytesToDecrypt = contbuff.slice(12);
+    const contentBuffer = base64Decode(text).buffer;
+    const iv = contentBuffer.slice(0, 12);
+    const bytesToDecrypt = contentBuffer.slice(12);
     return decryptAesGcmImpl(formattedkey, iv, bytesToDecrypt)
   });
   }
@@ -64,7 +64,7 @@ export function decryptAesGcmImpl(key, iv, text) {
     });
 }
 
-      /**
+/**
  * Subtle import key for AES-GCM key types that is supported
  * on all browser types.
  * @param {!ArrayBuffer} key

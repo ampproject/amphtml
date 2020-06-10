@@ -128,9 +128,9 @@ export class CryptoHandler {
         const promises = [];
         iterateCursor(encryptedSections, (encryptedSection) => {
           const text = encryptedSection.textContent.replace(/\s+/g, '');
-          const constbuff = base64Decode(text).buffer;
-          const iv = constbuff.slice(0, 12);
-          const bytesToDecrypt = constbuff.slice(12);
+          const contentBuffer = base64Decode(text).buffer;
+          const iv = contentBuffer.slice(0, 12);
+          const bytesToDecrypt = contentBuffer.slice(12);
           promises.push(
             decryptAesGcmImpl(formattedkey, iv, bytesToDecrypt).then(
               (decryptedContent) => {
