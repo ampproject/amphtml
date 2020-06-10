@@ -8,13 +8,16 @@
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <style amp-custom>
       body {
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Rubik', sans-serif;
+      }
+      amp-story-reaction-quiz, amp-story-reaction-poll {
+        justify-self: center;
       }
     </style>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
     <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,500;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
   </head>
   <body>
     <amp-story
@@ -39,6 +42,29 @@
             </div>
           </amp-story-grid-layer>
         </amp-story-page>
+        <amp-story-page id="quiz-intl">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="img/roadshow.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-reaction-quiz
+                id="first-cup-dark"
+                endpoint="http://localhost:3000/reactions"
+                style="--reaction-accent-color: rgb(235, 139, 13);"
+                theme="dark"
+                prompt-text="This is an international quiz?"
+                option-1-text="你好，这是马蒂亚斯"
+                option-2-text="مرحبا هذا ماتياس"
+                option-3-text="Yes it is" option-3-correct
+                option-4-text="ब्राज़ील यहाँ होना चाहिए">
+            </amp-story-reaction-quiz>
+          </amp-story-grid-layer>
+        </amp-story-page>
         <amp-story-page id="quiz-1">
           <amp-story-grid-layer template="fill">
             <amp-img
@@ -49,7 +75,7 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
-            <h1 style="color: white">This is a quiz</h1>
+
             <amp-story-reaction-quiz
                 id="first-cup-dark"
                 endpoint="http://localhost:3000/reactions"
@@ -76,7 +102,7 @@
             <amp-story-reaction-quiz
                 id="last-cup-dark"
                 theme="dark"
-                style="--reaction-accent-color: rgb(0, 0, 0);"
+                style="--reaction-accent-color: rgb(221, 17, 228);"
                 chip-corner="sharp"
                 prompt-text="Who won the last soccer world cup?"
                 option-1-text="France" option-1-correct
@@ -102,7 +128,7 @@
                 chip-corner="sharp"
                 prompt-text="What is the largest mammal?"
                 option-1-text="Blue whale" option-1-correct
-                option-2-text="Etruscan shrew is the smallest animal on earth and I need a really long line here">
+                option-2-text="Etruscan shrew">
             </amp-story-reaction-quiz>
           </amp-story-grid-layer>
         </amp-story-page>
@@ -118,6 +144,7 @@
           <amp-story-grid-layer template="center">
             <amp-story-reaction-quiz
                 id="smallest-mammal-light"
+                endpoint="http://localhost:3000/reactions"
                 chip-corner="sharp"
                 prompt-text="What is the smallest mammal?"
                 option-1-text="Blue whale"

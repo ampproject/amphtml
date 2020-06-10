@@ -31,9 +31,7 @@ import {setStyles} from '../../../src/style';
 const buildQuizTemplate = (element) => {
   const html = htmlFor(element);
   return html`
-    <div
-      class="i-amphtml-story-reaction-quiz-container i-amphtml-story-reaction-container"
-    >
+    <div class="i-amphtml-story-reaction-quiz-container">
       <div class="i-amphtml-story-reaction-quiz-prompt-container"></div>
       <div class="i-amphtml-story-reaction-quiz-option-container"></div>
     </div>
