@@ -26,7 +26,6 @@ import {
   isProxyOrigin,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {getState} from '../../../src/history';
 import {setStyle} from '../../../src/style';
 import {user, userAssert} from '../../../src/log';
 
@@ -250,44 +249,6 @@ export function resolveImgSrc(win, url) {
     urlSrc = urlSrc.replace('/c/s/', '/i/s/');
   }
   return urlSrc;
-}
-
-/** @enum {string} */
-export const HistoryState = {
-  ATTACHMENT_PAGE_ID: 'ampStoryAttachmentPageId',
-  BOOKEND_ACTIVE: 'ampStoryBookendActive',
-  NAVIGATION_PATH: 'ampStoryNavigationPath',
-};
-
-/**
- * Updates the value for a given state in the window history.
- * @param {!Window} win
- * @param {string} stateName
- * @param {string|boolean|Array<string>|null} value
- */
-export function setHistoryState(win, stateName, value) {
-  const {history} = win;
-  const state = getState(history) || {};
-  const newHistory = {
-    ...state,
-    [stateName]: value,
-  };
-
-  history.replaceState(newHistory, '');
-}
-
-/**
- * Returns the value of a given state of the window history.
- * @param {!Window} win
- * @param {string} stateName
- * @return {*}
- */
-export function getHistoryState(win, stateName) {
-  const {history} = win;
-  if (history && getState(history)) {
-    return getState(history)[stateName];
-  }
-  return null;
 }
 
 /**

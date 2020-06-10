@@ -16,7 +16,7 @@
 
 import {Action, StateProperty} from './amp-story-store-service';
 import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
-import {HistoryState, setHistoryState} from './utils';
+import {HistoryState, setHistoryState} from './history';
 import {Services} from '../../../src/services';
 import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {closest, removeElement} from '../../../src/dom';
