@@ -25,6 +25,10 @@ const {
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
 const {buildRuntime} = require('../common/utils');
+const {transform} = require('../server/new-server/transforms/dist/transform');
+const globby = require('globby');
+const fs = require('fs');
+const path = require('path');
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -40,14 +44,25 @@ class Runner extends RuntimeTestRunner {
   }
 }
 
-async buildTransformedHtml() {
-
+async function buildTransformedHtml() {
+  const filePaths = await globby('./test/fixtures/*.html');
+  const filePath = filePaths.pop();
+  const p = process.cwd() + '/' + path.normalize(filePath);
+  const transformedHtml = transform(p);
+  //filePaths.forEach(filePath => {
+    //console.log('filePath', filePath);
+    //const destPath = `test-bin/${filePath}`;
+    //console.log(destPath);
+    //fs.writeFileSync(`test-bin/${}`);
+  //});
 }
 
 async function integration() {
   if (shouldNotRun()) {
     return;
   }
+
+  await buildTransformedHtml();
 
   maybePrintArgvMessages();
 
