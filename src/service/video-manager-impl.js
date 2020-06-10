@@ -517,6 +517,9 @@ class VideoEntry {
       this.videoLoaded()
     );
     listen(video.element, VideoEvents.PAUSE, () => this.videoPaused_());
+    listen(video.element, VideoEvents.PLAY, () =>
+      analyticsEvent(this, VideoAnalyticsEvents.PLAY)
+    );
     listen(video.element, VideoEvents.PLAYING, () => this.videoPlayed_());
     listen(video.element, VideoEvents.MUTED, () => (this.muted_ = true));
     listen(video.element, VideoEvents.UNMUTED, () => {
@@ -681,7 +684,6 @@ class VideoEntry {
     if (this.isVisible_) {
       this.visibilitySessionManager_.beginSession();
     }
-    analyticsEvent(this, VideoAnalyticsEvents.PLAY);
   }
 
   /**
