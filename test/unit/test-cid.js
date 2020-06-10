@@ -1028,7 +1028,7 @@ describes.realWin('cid', {amp: true}, (env) => {
       expect(cid.isScopeOptedIn_('bar')).to.equal('bar-api-key');
     });
 
-    it('should not work if vendor not whitelisted', () => {
+    it('should not work if vendor not allowlisted', () => {
       ampdoc.win.document.head.innerHTML +=
         '<meta name="amp-google-client-id-api" content="abodeanalytics">';
       expect(cid.isScopeOptedIn_('AMP_ECID_GOOGLE')).to.equal(undefined);

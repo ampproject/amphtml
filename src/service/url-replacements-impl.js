@@ -814,17 +814,17 @@ export class UrlReplacements {
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} source
    * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_allowList Optional allow list of
+   * @param {!Object<string, boolean>=} opt_allowlist Optional white list of
    *     names that can be substituted.
    * @return {string}
    */
-  expandStringSync(source, opt_bindings, opt_allowList) {
+  expandStringSync(source, opt_bindings, opt_allowlist) {
     return /** @type {string} */ (new Expander(
       this.variableSource_,
       opt_bindings,
       /* opt_collectVars */ undefined,
       /* opt_sync */ true,
-      opt_allowList,
+      opt_allowlist,
       /* opt_noEncode */ true
     )./*OK*/ expand(source));
   }
@@ -835,16 +835,16 @@ export class UrlReplacements {
    * or override existing ones.
    * @param {string} source
    * @param {!Object<string, *>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_allowList
+   * @param {!Object<string, boolean>=} opt_allowlist
    * @return {!Promise<string>}
    */
-  expandStringAsync(source, opt_bindings, opt_allowList) {
+  expandStringAsync(source, opt_bindings, opt_allowlist) {
     return /** @type {!Promise<string>} */ (new Expander(
       this.variableSource_,
       opt_bindings,
       /* opt_collectVars */ undefined,
       /* opt_sync */ undefined,
-      opt_allowList,
+      opt_allowlist,
       /* opt_noEncode */ true
     )./*OK*/ expand(source));
   }
@@ -855,11 +855,11 @@ export class UrlReplacements {
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} url
    * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_allowList Optional allow list of
+   * @param {!Object<string, boolean>=} opt_allowlist Optional white list of
    *     names that can be substituted.
    * @return {string}
    */
-  expandUrlSync(url, opt_bindings, opt_allowList) {
+  expandUrlSync(url, opt_bindings, opt_allowlist) {
     return this.ensureProtocolMatches_(
       url,
       /** @type {string} */ (new Expander(
@@ -867,7 +867,7 @@ export class UrlReplacements {
         opt_bindings,
         /* opt_collectVars */ undefined,
         /* opt_sync */ true,
-        opt_allowList
+        opt_allowlist
       )./*OK*/ expand(url))
     );
   }
@@ -878,18 +878,18 @@ export class UrlReplacements {
    * or override existing ones.
    * @param {string} url
    * @param {!Object<string, *>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_allowList Optional allow list of names
+   * @param {!Object<string, boolean>=} opt_allowlist Optional white list of names
    *     that can be substituted.
    * @param {boolean=} opt_noEncode should not encode URL
    * @return {!Promise<string>}
    */
-  expandUrlAsync(url, opt_bindings, opt_allowList, opt_noEncode) {
+  expandUrlAsync(url, opt_bindings, opt_allowlist, opt_noEncode) {
     return /** @type {!Promise<string>} */ (new Expander(
       this.variableSource_,
       opt_bindings,
       /* opt_collectVars */ undefined,
       /* opt_sync */ undefined,
-      opt_allowList,
+      opt_allowlist,
       opt_noEncode
     )
       ./*OK*/ expand(url)
@@ -934,8 +934,8 @@ export class UrlReplacements {
       element
     );
 
-    const allowList = this.getAllowListForElement_(element);
-    if (!allowList) {
+    const allowlist = this.getAllowlistForElement_(element);
+    if (!allowlist) {
       return opt_sync ? element.value : Promise.resolve(element.value);
     }
     if (element[ORIGINAL_VALUE_PROPERTY] === undefined) {
@@ -946,7 +946,7 @@ export class UrlReplacements {
       /* opt_bindings */ undefined,
       /* opt_collectVars */ undefined,
       /* opt_sync */ opt_sync,
-      /* opt_allowList */ allowList
+      /* opt_allowlist */ allowlist
     )./*OK*/ expand(element[ORIGINAL_VALUE_PROPERTY] || element.value);
 
     if (opt_sync) {
@@ -959,19 +959,19 @@ export class UrlReplacements {
   }
 
   /**
-   * Returns a replacement allowList from elements' data-amp-replace attribute.
+   * Returns a replacement allowlist from elements' data-amp-replace attribute.
    * @param {!Element} element
    * @param {!Object<string, boolean>=} opt_supportedReplacement Optional supported
-   * replacement that filters allowList to a subset.
+   * replacement that filters allowlist to a subset.
    * @return {!Object<string, boolean>|undefined}
    */
-  getAllowListForElement_(element, opt_supportedReplacement) {
-    const allowList = element.getAttribute('data-amp-replace');
-    if (!allowList) {
+  getAllowlistForElement_(element, opt_supportedReplacement) {
+    const allowlist = element.getAttribute('data-amp-replace');
+    if (!allowlist) {
       return;
     }
     const requestedReplacements = {};
-    allowList
+    allowlist
       .trim()
       .split(/\s+/)
       .forEach((replacement) => {
@@ -1003,9 +1003,9 @@ export class UrlReplacements {
 
     const meta = this.ampdoc.getMetaByName('amp-link-variable-allowed-origin');
     if (meta) {
-      const allowList = meta.trim().split(/\s+/);
-      for (let i = 0; i < allowList.length; i++) {
-        if (url.origin == parseUrlDeprecated(allowList[i]).origin) {
+      const allowlist = meta.trim().split(/\s+/);
+      for (let i = 0; i < allowlist.length; i++) {
+        if (url.origin == parseUrlDeprecated(allowlist[i]).origin) {
           return true;
         }
       }
@@ -1033,12 +1033,12 @@ export class UrlReplacements {
     };
     let additionalUrlParameters =
       element.getAttribute('data-amp-addparams') || '';
-    const allowList = this.getAllowListForElement_(
+    const allowlist = this.getAllowlistForElement_(
       element,
       supportedReplacements
     );
 
-    if (!allowList && !additionalUrlParameters && !defaultUrlParams) {
+    if (!allowlist && !additionalUrlParameters && !defaultUrlParams) {
       return;
     }
     // ORIGINAL_HREF_PROPERTY has the value of the href "pre-replacement".
@@ -1055,18 +1055,18 @@ export class UrlReplacements {
     const isAllowedOrigin = this.isAllowedOrigin_(url);
     if (additionalUrlParameters) {
       additionalUrlParameters = isAllowedOrigin
-        ? this.expandSyncIfAllowList_(additionalUrlParameters, allowList)
+        ? this.expandSyncIfAllowedList_(additionalUrlParameters, allowlist)
         : additionalUrlParameters;
       href = addParamsToUrl(href, parseQueryString(additionalUrlParameters));
     }
 
     if (!isAllowedOrigin) {
-      if (allowList) {
+      if (allowlist) {
         user().warn(
           'URL',
           'Ignoring link replacement %s' +
             " because the link does not go to the document's" +
-            ' source, canonical, or allowed origin.',
+            ' source, canonical, or allowlisted origin.',
           href
         );
       }
@@ -1081,34 +1081,34 @@ export class UrlReplacements {
     // defaultUrlParams will by default support QUERY_PARAM, and will still be
     // expanded.
     if (defaultUrlParams) {
-      if (!allowList || !allowList['QUERY_PARAM']) {
-        // override allowList and expand defaultUrlParams;
-        const overrideAllowList = {'QUERY_PARAM': true};
+      if (!allowlist || !allowlist['QUERY_PARAM']) {
+        // override allowlist and expand defaultUrlParams;
+        const overrideAllowlist = {'QUERY_PARAM': true};
         defaultUrlParams = this.expandUrlSync(
           defaultUrlParams,
           /* opt_bindings */ undefined,
-          /* opt_allowList */ overrideAllowList
+          /* opt_allowlist */ overrideAllowlist
         );
       }
       href = addParamsToUrl(href, parseQueryString(defaultUrlParams));
     }
 
-    href = this.expandSyncIfAllowList_(href, allowList);
+    href = this.expandSyncIfAllowedList_(href, allowlist);
 
     return (element.href = href);
   }
 
   /**
    * @param {string} href
-   * @param {!Object<string, boolean>|undefined} allowList
+   * @param {!Object<string, boolean>|undefined} allowlist
    * @return {string}
    */
-  expandSyncIfAllowList_(href, allowList) {
-    return allowList
+  expandSyncIfAllowedList_(href, allowlist) {
+    return allowlist
       ? this.expandUrlSync(
           href,
           /* opt_bindings */ undefined,
-          /* opt_allowList */ allowList
+          /* opt_allowlist */ allowlist
         )
       : href;
   }
@@ -1130,18 +1130,18 @@ export class UrlReplacements {
 
   /**
    * Collects substitutions in the `src` attribute of the given element
-   * that are _not_allowed_ via `data-amp-replace` opt-in attribute.
+   * that are _not_ allowlisted via `data-amp-replace` opt-in attribute.
    * @param {!Element} element
    * @return {!Array<string>}
    */
   collectDisallowedVarsSync(element) {
     const url = element.getAttribute('src');
     const macroNames = new Expander(this.variableSource_).getMacroNames(url);
-    const allowList = this.getAllowListForElement_(element);
-    if (allowList) {
-      return macroNames.filter((v) => !allowList[v]);
+    const allowlist = this.getAllowlistForElement_(element);
+    if (allowlist) {
+      return macroNames.filter((v) => !allowlist[v]);
     } else {
-      // All vars are not allowed if the element has no allowList.
+      // All vars are unallowlisted if the element has no allowlist.
       return macroNames;
     }
   }

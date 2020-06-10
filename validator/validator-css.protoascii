@@ -631,7 +631,7 @@ tags: {  # <style amp-custom>, AMP4EMAIL, not data-css-strict
     name: "type"
     value_casei: "text/css"
   }
-  # TODO(b/68756045): Whitelist CSS properties allowed in Dynamic Mail.
+  # TODO(b/68756045): Allowlist CSS properties allowed in Dynamic Mail.
   cdata: {
     doc_css_bytes: true
     max_bytes: 75000
@@ -689,7 +689,7 @@ tags: {  # <style amp-custom>, AMP4EMAIL, data-css-strict
     name: "type"
     value_casei: "text/css"
   }
-  # TODO(b/68756045): Whitelist CSS properties allowed in Dynamic Mail.
+  # TODO(b/68756045): Allowlist CSS properties allowed in Dynamic Mail.
   cdata: {
     doc_css_bytes: true
     max_bytes: 75000

@@ -719,7 +719,7 @@ Once the user tries to submit the form, AMP will try to resolve the variables an
 </form>
 ```
 
-Note how `CANONICAL_HOSTNAME` above did not get replaced because it was not in the whitelist through `data-amp-replace` attribute on the first field.
+Note how `CANONICAL_HOSTNAME` above did not get replaced because it was not in the allowlist through `data-amp-replace` attribute on the first field.
 
 Substitutions will happen on every subsequent submission. Read more about [variable substitutions in AMP](../../spec/amp-var-substitutions.md).
 

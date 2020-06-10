@@ -75,7 +75,7 @@ describe('batchFetchJsonFor', () => {
     });
 
     it(
-      'should throw user error if expanding non-whitelisted vars with ' +
+      'should throw user error if expanding non-allowlisted vars with ' +
         'urlReplacement == OPT_IN',
       () => {
         const el = element('https://data.com?x=FOO&y=BAR');

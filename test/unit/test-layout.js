@@ -48,7 +48,7 @@ describe('Layout', () => {
       tagName: 'hold',
     };
     const elementsValidTagNames = [
-      // in whitelist.
+      // in allowlist.
       'AMP-AD',
       'AMP-ANIM',
       'AMP-EMBED',

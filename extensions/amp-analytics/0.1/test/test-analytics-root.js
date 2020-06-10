@@ -637,18 +637,18 @@ describes.realWin(
       const allowlist = {
         'custom': CustomEventTracker,
       };
-      const customTracker = root.getTrackerForAllowList(
+      const customTracker = root.getTrackerForAllowlist(
         AnalyticsEventType.CUSTOM,
         allowlist
       );
       expect(customTracker).to.be.instanceOf(CustomEventTracker);
       expect(customTracker.root).to.equal(root);
 
-      const noneTracker = root.getTrackerForAllowList('none', allowlist);
+      const noneTracker = root.getTrackerForAllowlist('none', allowlist);
       expect(noneTracker).to.be.null;
 
       expect(
-        root.getTrackerForAllowList(AnalyticsEventType.CUSTOM, allowlist)
+        root.getTrackerForAllowlist(AnalyticsEventType.CUSTOM, allowlist)
       ).to.equal(customTracker);
       expect(
         root.getTracker(AnalyticsEventType.CUSTOM, CustomEventTracker)

@@ -1626,7 +1626,7 @@ function createBaseCustomElementClass(win) {
       // 3. The element has already been laid out, and does not support reshowing the indicator (include having loading
       //    error);
       // 4. The element is too small or has not yet been measured;
-      // 5. The element has not been whitelisted;
+      // 5. The element has not been allowlisted;
       // 6. The element is an internal node (e.g. `placeholder` or `fallback`);
       // 7. The element's layout is not a size-defining layout.
       if (this.isInA4A()) {

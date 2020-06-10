@@ -346,7 +346,7 @@ message AmpLayout {
   // Specifies which layouts are supported by this element.
   repeated Layout supported_layouts = 1;
   // Specifies whether this element has default dimensions. This corresponds
-  // to being whitelisted in naturalDimensions_ in
+  // to being allowlisted in naturalDimensions_ in
   // https://github.com/ampproject/amphtml/blob/master/src/layout.js.
   optional bool defines_default_width = 2;
   optional bool defines_default_height = 3;

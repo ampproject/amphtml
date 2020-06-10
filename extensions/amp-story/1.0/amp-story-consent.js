@@ -238,7 +238,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
         {tagOrTarget: 'AMP-CONSENT', method: 'prompt'},
         {tagOrTarget: 'AMP-CONSENT', method: 'reject'},
       ];
-      this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, actions);
+      this.storeService_.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, actions);
 
       this.setAcceptButtonFontColor_();
 

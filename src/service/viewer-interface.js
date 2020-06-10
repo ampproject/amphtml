@@ -139,7 +139,7 @@ export class ViewerInterface {
   getReferrerUrl() {}
 
   /**
-   * Whether the viewer has been whitelisted for more sensitive operations
+   * Whether the viewer has been allowlisted for more sensitive operations
    * such as customizing referrer.
    * @return {!Promise<boolean>}
    */

@@ -1748,9 +1748,9 @@ describe('ValidatorRulesMakeSense', () => {
         typeIdentifiersShouldMakeSense(attrSpec, 'attr_spec', attrSpec.name);
       }
       // Special check that every <script> tag with a src attribute has a
-      // whitelist check on the attribute value.
+      // allowlist check on the attribute value.
       if (tagSpec.tagName === 'SCRIPT' && attrSpec.name === 'src') {
-        it('every <script> tag with a src attribute has a whitelist check',
+        it('every <script> tag with a src attribute has a allowlist check',
            () => {
              expect(attrSpec.value.length > 0 || attrSpec.valueRegex !== null)
                  .toBe(true);

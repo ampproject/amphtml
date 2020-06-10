@@ -249,7 +249,7 @@ describes.sandboxed('Navigation', {}, () => {
           expect(handleNavSpy).to.be.calledOnce;
         });
 
-        it('should only expand with whitelist', () => {
+        it('should only expand with allowlist', () => {
           anchor.href = 'https://www.google.com/link?out=QUERY_PARAM(hello)';
           handler.handle_(event);
           expect(anchor.href).to.equal(
