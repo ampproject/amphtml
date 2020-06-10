@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@import url('https://fonts.googleapis.com/css?family=Poppins&display=swap');
-
 .i-amphtml-story-reaction-poll-container {
   display: flex !important;
   justify-content: center !important;
@@ -26,7 +24,6 @@
   color: var(--reaction-accent-color) !important;
   background: var(--reaction-background-color) !important;
   overflow: hidden !important;
-  font-family: 'Poppins', sans-serif !important;
 
   --post-select-scale: 0.5 !important;
   --post-select-scale-variable: 1 !important;
