@@ -32,11 +32,12 @@ export interface ScriptNode extends PostHTML.Node {
  * @param node
  */
 export function isValidScript(node: PostHTML.Node): node is ScriptNode {
-  if (node.tag !== 'script') {
-    return false;
-  }
+  return true;
+  //if (node.tag !== 'script') {
+    //return false;
+  //}
 
-  const attrs = node.attrs || {};
-  const src = new URL(attrs.src || '');
-  return src.origin === VALID_CDN_ORIGIN && extname(src.pathname) === '.js';
+  //const attrs = node.attrs || {};
+  //const src = new URL(attrs.src || '');
+  //return src.origin === VALID_CDN_ORIGIN && extname(src.pathname) === '.js';
 }
