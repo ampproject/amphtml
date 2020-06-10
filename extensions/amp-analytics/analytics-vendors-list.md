@@ -217,6 +217,13 @@ Type attribute value: `lotame`
 
 Adds support for Lotame. More information and configuration details can be found at [mylotame.force.com](https://mylotame.force.com/s/article/Google-AMP).
 
+### Mapp Intelligence
+
+Type attribute value: `mapp_intelligence`
+
+Adds support for Mapp Intelligence tracking. More information and configuration details can be found at [docs.mapp.com](https://docs.mapp.com/pages/viewpage.action?pageId=10027966).
+
+
 ### Marin Software
 
 Type attribute value: `marinsoftware`
