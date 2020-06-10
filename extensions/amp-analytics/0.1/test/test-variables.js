@@ -552,6 +552,20 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
         return check('$MATCH(thisisatest, thisisatest, test)', 'thisisatest');
       });
     });
+
+    it('SCROLL_TOP round to integer', async () => {
+      let scrollTopValue = 100;
+      env.sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
+        return {
+          getScrollTop: () => scrollTopValue,
+        };
+      });
+      await check('SCROLL_TOP', '100');
+      scrollTopValue = 99.4;
+      await check('SCROLL_TOP', '99');
+      scrollTopValue = 99.5;
+      await check('SCROLL_TOP', '100');
+    });
   });
 
   describe('getNameArgs:', () => {
