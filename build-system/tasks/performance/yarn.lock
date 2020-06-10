@@ -640,10 +640,10 @@ mkdirp-classic@^0.5.2:
   resolved "https://registry.yarnpkg.com/mkdirp-classic/-/mkdirp-classic-0.5.2.tgz#54c441ce4c96cd7790e10b41a87aa51068ecab2b"
   integrity sha512-ejdnDQcR75gwknmMw/tx02AuRs8jCtqFoFqDZMjiNxsu85sRIJVXDKHuLYvUUPRBUtV2FpSZa9bL1BUa3BdR2g==
 
-mocha@8.0.0:
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/mocha/-/mocha-8.0.0.tgz#2d1299f18d63b2d0fa9e05e642cbba43041fc806"
-  integrity sha512-UJeGtX4o0eBwXmTrihNpVvvXG0QYgZZQAxGYmAx0B0ZRY4oZWj4LuDXmgZpqe3g3Phx7lEi9CwyyGwBxKW+oxQ==
+mocha@8.0.1:
+  version "8.0.1"
+  resolved "https://registry.yarnpkg.com/mocha/-/mocha-8.0.1.tgz#fe01f0530362df271aa8f99510447bc38b88d8ed"
+  integrity sha512-vefaXfdYI8+Yo8nPZQQi0QO2o+5q9UIMX1jZ1XMmK3+4+CQjc7+B0hPdUeglXiTlr8IHMVRo63IhO9Mzt6fxOg==
   dependencies:
     ansi-colors "4.1.1"
     browser-stdout "1.3.1"
