@@ -64,19 +64,15 @@ async function lazyBuild(url, matcher, bundles, buildFunc, next) {
     const name = maybeGetUnminifiedName(bundles, match[1]);
     const bundle = bundles[name];
     if (bundle) {
-      if (bundle.pendingBuild) {
-        await bundle.pendingBuild;
-      } else if (!bundle.watched) {
-        await build(bundles, name, buildFunc);
-      }
+      await build(bundles, name, buildFunc);
     }
   }
   next();
 }
 
 /**
- * Actually build a JS file or extension. Mark it as watched and store the
- * pendingBuild property if a build is pending.
+ * Actually build a JS file or extension. Only will allow one build per
+ * bundle at a time.
  *
  * @param {!Object} bundles
  * @param {string} name
@@ -84,6 +80,13 @@ async function lazyBuild(url, matcher, bundles, buildFunc, next) {
  */
 async function build(bundles, name, buildFunc) {
   const bundle = bundles[name];
+  if (bundle.pendingBuild) {
+    return await bundle.pendingBuild;
+  }
+  if (bundle.watched) {
+    return;
+  }
+  bundle.watched = true;
   bundle.pendingBuild = buildFunc(bundles, name, {
     watch: true,
     minify: argv.compiled,
@@ -95,7 +98,6 @@ async function build(bundles, name, buildFunc) {
   });
   await bundle.pendingBuild;
   bundle.pendingBuild = undefined;
-  bundle.watched = true;
 }
 
 /**
