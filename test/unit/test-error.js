@@ -29,7 +29,7 @@ import {
   reportErrorToAnalytics,
   reportErrorToServerOrViewer,
 } from '../../src/error';
-import {getMode, getRtvVersionForTesting} from '../../src/mode';
+import {getRtvVersionForTesting} from '../../src/mode';
 import {
   resetExperimentTogglesForTesting,
   toggleExperiment,
@@ -319,9 +319,7 @@ describe('getErrorReportData', () => {
     expect(data.m).to.equal('XYZ');
     expect(data.el).to.equal('FOO-BAR');
     expect(data.a).to.equal('0');
-    expect(data.v).to.equal(
-      getRtvVersionForTesting(window, getMode().localDev)
-    );
+    expect(data.v).to.equal(getRtvVersionForTesting(window));
     expect(data.noAmp).to.equal('0');
   });
 
@@ -343,9 +341,7 @@ describe('getErrorReportData', () => {
     );
     expect(data.m).to.equal('XYZ');
     expect(data.a).to.equal('1');
-    expect(data.v).to.equal(
-      getRtvVersionForTesting(window, getMode().localDev)
-    );
+    expect(data.v).to.equal(getRtvVersionForTesting(window));
   });
 
   it('reportError mark asserts without error object', () => {
@@ -360,9 +356,7 @@ describe('getErrorReportData', () => {
     const data = getErrorReportData(e.message, undefined, undefined, undefined);
     expect(data.m).to.equal('XYZ');
     expect(data.a).to.equal('1');
-    expect(data.v).to.equal(
-      getRtvVersionForTesting(window, getMode().localDev)
-    );
+    expect(data.v).to.equal(getRtvVersionForTesting(window));
   });
 
   it('reportError marks 3p', () => {

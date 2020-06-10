@@ -79,44 +79,20 @@ describe('getRtvVersion', () => {
     resetRtvVersionForTesting();
   });
 
-  function getFreshMode(win, prop) {
-    delete win.__AMP_MODE;
-    return getMode(win)[prop];
-  }
-
   it('should default to version', () => {
     // $internalRuntimeVersion$ doesn't get replaced during test
-    expect(getRtvVersionForTesting(window, true)).to.equal(
-      '$internalRuntimeVersion$'
-    );
-    expect(getRtvVersionForTesting(window, false)).to.equal(
+    expect(getRtvVersionForTesting(window)).to.equal(
       '01$internalRuntimeVersion$'
     );
   });
 
-  it('should use window.AMP_CONFIG.v if not in dev mode', () => {
+  it('should use window.AMP_CONFIG.v', () => {
     const win = {
       AMP_CONFIG: {
         v: '12345',
       },
       location: parseUrlDeprecated('https://acme.org/doc1'),
     };
-    expect(getRtvVersionForTesting(win, true)).to.equal(
-      '$internalRuntimeVersion$'
-    );
-    expect(getRtvVersionForTesting(win, false)).to.equal('12345');
-    expect(getFreshMode(win, 'version')).to.equal('$internalRuntimeVersion$');
-    resetRtvVersionForTesting();
-    expect(getFreshMode(win, 'rtvVersion')).to.equal('12345');
-
-    delete win.AMP_CONFIG;
-    expect(getRtvVersionForTesting(win, false)).to.equal(
-      '01$internalRuntimeVersion$'
-    );
-    expect(getFreshMode(win, 'version')).to.equal('$internalRuntimeVersion$');
-    resetRtvVersionForTesting();
-    expect(getFreshMode(win, 'rtvVersion')).to.equal(
-      '01$internalRuntimeVersion$'
-    );
+    expect(getRtvVersionForTesting(win)).to.equal('12345');
   });
 });
