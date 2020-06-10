@@ -393,6 +393,17 @@ export class VideoManager {
   isRollingAd(videoOrElement) {
     return this.getEntry_(videoOrElement).isRollingAd();
   }
+
+  /**
+   * @param {!VideoEntry} entryBeingPlayed
+   */
+  pauseOtherVideos(entryBeingPlayed) {
+    this.entries_.forEach((entry) => {
+      if (entry !== entryBeingPlayed && entry.isPlaying()) {
+        entry.video.pause();
+      }
+    });
+  }
 }
 
 /**
@@ -590,6 +601,11 @@ class VideoEntry {
   }
 
   /** @return {boolean} */
+  isPlaying() {
+    return this.isPlaying_;
+  }
+
+  /** @return {boolean} */
   isMuted() {
     return this.muted_;
   }
@@ -635,6 +651,7 @@ class VideoEntry {
 
     if (this.getPlayingState() == PlayingStates.PLAYING_MANUAL) {
       this.firstPlayEventOrNoop_();
+      this.manager_.pauseOtherVideos(this);
     }
 
     const {video} = this;
