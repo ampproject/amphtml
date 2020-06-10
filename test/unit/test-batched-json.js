@@ -44,7 +44,7 @@ describe('batchFetchJsonFor', () => {
   beforeEach(() => {
     urlReplacements = {
       expandUrlAsync: window.sandbox.stub(),
-      collectUnwhitelistedVarsSync: window.sandbox.stub(),
+      collectDisallowedVarsSync: window.sandbox.stub(),
     };
     window.sandbox
       .stub(Services, 'urlReplacementsForDoc')
@@ -70,7 +70,7 @@ describe('batchFetchJsonFor', () => {
       return batchFetchJsonFor(ampdoc, el).then(() => {
         expect(fetchJson).to.be.calledWith('https://data.com?x=FOO&y=BAR');
         expect(urlReplacements.expandUrlAsync).to.not.be.called;
-        expect(urlReplacements.collectUnwhitelistedVarsSync).to.not.be.called;
+        expect(urlReplacements.collectDisallowedVarsSync).to.not.be.called;
       });
     });
 
@@ -83,9 +83,7 @@ describe('batchFetchJsonFor', () => {
         urlReplacements.expandUrlAsync
           .withArgs('https://data.com?x=FOO&y=BAR')
           .returns(Promise.resolve('https://data.com?x=abc&y=BAR'));
-        urlReplacements.collectUnwhitelistedVarsSync
-          .withArgs(el)
-          .returns(['BAR']);
+        urlReplacements.collectDisallowedVarsSync.withArgs(el).returns(['BAR']);
 
         const optIn = UrlReplacementPolicy.OPT_IN;
         const rejectError = /Please add data-amp-replace="BAR" to the <AMP-LIST> element./;
@@ -106,7 +104,7 @@ describe('batchFetchJsonFor', () => {
       const all = UrlReplacementPolicy.ALL;
       return batchFetchJsonFor(ampdoc, el, {urlReplacement: all}).then(() => {
         expect(fetchJson).to.be.calledWith('https://data.com?x=abc&y=BAR');
-        expect(urlReplacements.collectUnwhitelistedVarsSync).to.not.be.called;
+        expect(urlReplacements.collectDisallowedVarsSync).to.not.be.called;
         expect(userError).to.not.be.called;
       });
     });
