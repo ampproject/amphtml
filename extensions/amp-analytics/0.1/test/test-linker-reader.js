@@ -36,12 +36,22 @@ describe('LinkerReader', () => {
         'Safari/537.36'
     );
     mockWin.getUserLanguage.returns('en-US');
-    mockWin.location = window.location;
-    window.location.href =
-      'https://example.com?testlinker=1*1f66u1p*key1*dmFsdWUx';
+    mockWin.location = {
+      href: 'https://example.com?testlinker=1*1f66u1p*key1*dmFsdWUx',
+      search: '?testlinker=1*1f66u1p*key1*dmFsdWUx',
+      origin: 'https://example.com',
+      pathname: '',
+      hash: '',
+    };
     mockWin.history = {
       replaceState: (unusedVar1, unusedVar2, newHref) => {
+        const a = document.createElement('a');
+        a.href = newHref;
         mockWin.location.href = newHref;
+        mockWin.location.origin = a.origin;
+        mockWin.location.pathname = a.pathname;
+        mockWin.location.search = a.search;
+        mockWin.location.hash = a.hash;
       },
     };
     installLinkerReaderService(mockWin);
@@ -66,23 +76,41 @@ describe('LinkerReader', () => {
 
     it('return null when linker name value is invalid', () => {
       expectAsyncConsoleError(/LINKER_PARAM value checksum not valid/);
-      mockWin.location.href = 'https://example.com?testlinker=1*123*key*error';
+      mockWin.location = {
+        href: 'https://example.com?testlinker=1*123*key*error',
+        origin: 'https://example.com',
+        search: '?testlinker=1*123*key*error',
+        pathname: '/',
+        hash: '',
+      };
       expect(linkerReader.get('testlinker', 'key')).to.be.null;
       expect(mockWin.location.href).to.equal('https://example.com/');
     });
 
     it('return null when no linker id value', () => {
-      mockWin.location.href =
-        'https://example.com?testlinker=1*1f66u1p*key1*dmFsdWUx';
+      mockWin.location = {
+        href: 'https://example.com?testlinker=1*1f66u1p*key1*dmFsdWUx',
+        origin: 'https://example.com',
+        search: '?testlinker=1*1f66u1p*key1*dmFsdWUx',
+        pathname: '/',
+        hash: '',
+      };
       expect(linkerReader.get('testlinker', 'key2')).to.be.null;
       expect(mockWin.location.href).to.equal('https://example.com/');
     });
 
     it('remove linker_param from url', () => {
-      mockWin.location.href =
-        'https://example.com?a=1&b=2&' +
-        'testlinker=1*1f66u1p*key1*dmFsdWUx&c&' +
-        'testlinker2=1*1f66u1p*key1*dmFsdWUx&d=2#hash';
+      mockWin.location = {
+        href:
+          'https://example.com?a=1&b=2&testlinker=1*1f66u1p*key1*dmFsdWUx&c' +
+          '&testlinker2=1*1f66u1p*key1*dmFsdWUx&d=2#hash',
+        origin: 'https://example.com',
+        search:
+          '?a=1&b=2&testlinker=1*1f66u1p*key1*dmFsdWUx&c' +
+          '&testlinker2=1*1f66u1p*key1*dmFsdWUx&d=2',
+        pathname: '/',
+        hash: '#hash',
+      };
       linkerReader.get('testlinker', 'id');
       expect(mockWin.location.href).to.equal(
         'https://example.com/?a=1&b=2&c&' +
@@ -95,10 +123,17 @@ describe('LinkerReader', () => {
     });
 
     it('return correct id value', () => {
-      mockWin.location.href =
-        'https://example.com?' +
-        'test=1*1f66u1p*key1*dmFsdWUx&var=foo&' +
-        'test2=1*1m48hbv*cid*MTIzNDU.*ref*aHR0cHM6Ly93d3cuZXhhbXBsZS5jb20.';
+      mockWin.location = {
+        href:
+          'https://example.com?test=1*1f66u1p*key1*dmFsdWUx&var=foo&' +
+          'test2=1*1m48hbv*cid*MTIzNDU.*ref*aHR0cHM6Ly93d3cuZXhhbXBsZS5jb20.',
+        search:
+          '?test=1*1f66u1p*key1*dmFsdWUx&var=foo&' +
+          'test2=1*1m48hbv*cid*MTIzNDU.*ref*aHR0cHM6Ly93d3cuZXhhbXBsZS5jb20.',
+        origin: 'https://example.com',
+        pathname: '/',
+        hash: '',
+      };
       expect(linkerReader.get('test', 'key1')).to.equal('value1');
       expect(linkerReader.get('test2', 'cid')).to.equal('12345');
       expect(linkerReader.get('test2', 'ref')).to.equal(
@@ -108,8 +143,13 @@ describe('LinkerReader', () => {
     });
 
     it('returns same value when reading the same id', () => {
-      mockWin.location.href =
-        'https://example.com?test=1*1f66u1p*key1*dmFsdWUx&var=foo';
+      mockWin.location = {
+        href: 'https://example.com?test=1*1f66u1p*key1*dmFsdWUx&var=foo',
+        search: '?test=1*1f66u1p*key1*dmFsdWUx&var=foo',
+        origin: 'https://example.com',
+        pathname: '/',
+        hash: '',
+      };
       expect(linkerReader.get('test', 'key1')).to.equal('value1');
       expect(linkerReader.get('test', 'key1')).to.equal('value1');
     });
