@@ -226,12 +226,7 @@ The error ping will be sent by creating an image pixel in the document. See `sen
 
 The AMP-Consent extension provides publishers the ability to collect and store a user's consent through a UI control, while also providing the ability to block other AMP components based on the user's consent. See [here for documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md).
 
-<<<<<<< HEAD
-Real Time Config supports integration with AMP-Consent. If the AMP-consent response is neither `SUFFICIENT` nor `UNKNOWN_NOT_REQUIRED`, then by default all RTC callouts are suppressed. However, you may optionally modify this setting, to allowlist specific RTC callouts that should be sent regardless of the consent state. A publisher can modify this across all RTC requests for a given ad slot or on a per-RTC-callout basis. A publisher also may either allowlist for all consent states, or only specific consent states, using the RTC Config attribute `sendRegardlessOfConsentState`.
-=======
 Real Time Config supports integration with AMP-Consent. If the AMP-consent response is neither `SUFFICIENT` nor `UNKNOWN_NOT_REQUIRED`, then by default all RTC callouts are suppressed. However, you may optionally modify this setting, to allow specific RTC callouts that should be sent regardless of the consent state. A publisher can modify this across all RTC requests for a given ad slot or on a per-RTC-callout basis. A publisher also may either permit all consent states, or only specific consent states, using the RTC Config attribute `sendRegardlessOfConsentState`.
-
-> > > > > > > 212190879e0a01fca5664ada96f05465a287de32
 
 The value of `sendRegardlessOfConsentState` should either be the boolean `true` or an array of consent policy state strings as defined in src/consent-state.js (i.e. use the string keys, like`"UNKNOWN"` not its corresponding numeric value). In a case where the RTC callout would normally be supressed (for example if the AMP-consent response is `UNKNOWN`), it will instead be sent if `sendRegardlessOfConsentState` is set to boolean `true` or an array of values that contains a match for the AMP-consent state response (e.g. `['UNKNOWN']`). If set to an array, then only the values in that array (in addition to the defualt values of `SUFFICIENT` and `UNKNOWN_NOT_REQUIRED`) are treated as valid.
 
@@ -239,15 +234,7 @@ The setting of `sendRegardlessOfConsentState` can either be done once for the en
 
 Here are various examples of how to do this for any given ad slot:
 
-<<<<<<< HEAD
-
-#### Allowlist all RTC callouts for all consent states
-
-=======
-
 #### Allow all RTC callouts for all consent states
-
-> > > > > > > 212190879e0a01fca5664ada96f05465a287de32
 
 ```html
 <amp-ad
@@ -272,15 +259,7 @@ Here are various examples of how to do this for any given ad slot:
 
 By setting `sendRegardlessOfConsentState` at top-level to `true`, this indicates that for any consent state, all of the callouts in this RTC configuration should still be sent.
 
-<<<<<<< HEAD
-
-#### Allowlist all RTC callouts for only certain consent states
-
-=======
-
 #### Allow all RTC callouts for only certain consent states
-
-> > > > > > > 212190879e0a01fca5664ada96f05465a287de32
 
 ```html
 <amp-ad
@@ -305,15 +284,7 @@ By setting `sendRegardlessOfConsentState` at top-level to `true`, this indicates
 
 By setting `sendRegardlessOfConsentState` to an array, this indicates that only when the page consent state matches any of the consent states in the array (in this case only `UNKNOWN` in addition to the default states `SUFFICIENT` and `UNKNOWN_NOT_REQUIRED`) should all of the RTC callouts still be sent. For instance, if the page state is `INSUFFICIENT`, then none of the callout specified above will be sent. If the page state is `UNKNOWN`, then all of the callouts will be sent.
 
-<<<<<<< HEAD
-
-#### Allowlist some RTC callouts in the "url" array
-
-=======
-
 #### Allow some RTC callouts in the "url" array
-
-> > > > > > > 212190879e0a01fca5664ada96f05465a287de32
 
 ```html
 <amp-ad
@@ -361,15 +332,7 @@ Is is also possible to set `sendRegardlessOfConsentState` here to an array as we
 </amp-ad>
 ```
 
-<<<<<<< HEAD
-
-#### Allowlist some RTC callouts in the "vendors" object
-
-=======
-
 #### Allow some RTC callouts in the "vendors" object
-
-> > > > > > > 212190879e0a01fca5664ada96f05465a287de32
 
 ```html
 <amp-ad
