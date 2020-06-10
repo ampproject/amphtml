@@ -323,11 +323,8 @@ export class Performance {
       return;
     }
 
-    // Chromium doesn't implement the buffered flag for PerformanceObserver.
-    // That means we need to read existing entries and maintain state
-    // as to whether we have reported a value yet, since in the future it may
-    // be reported twice.
-    // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
+    // These state vars ensure that we only report a given value once, because
+    // the backend doesn't support updates.
     let recordedFirstPaint = false;
     let recordedFirstContentfulPaint = false;
     let recordedFirstInputDelay = false;
