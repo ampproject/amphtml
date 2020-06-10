@@ -299,10 +299,10 @@ export class VariableService {
    * @param {!ExpansionOptions} options configuration to use for expansion.
    * @param {!Element} element amp-analytics element.
    * @param {!JsonObject=} opt_bindings
-   * @param {!Object=} opt_whitelist
+   * @param {!Object=} opt_allowList
    * @return {!Promise<string>} The expanded string.
    */
-  expandTemplate(template, options, element, opt_bindings, opt_whitelist) {
+  expandTemplate(template, options, element, opt_bindings, opt_allowList) {
     return asyncStringReplace(template, /\${([^}]*)}/g, (match, key) => {
       if (options.iterations < 0) {
         user().error(
@@ -335,7 +335,7 @@ export class VariableService {
           element,
           urlReplacements,
           opt_bindings,
-          opt_whitelist,
+          opt_allowList,
           argList
         );
       } else if (isArray(value)) {
@@ -349,7 +349,7 @@ export class VariableService {
                   element,
                   urlReplacements,
                   opt_bindings,
-                  opt_whitelist
+                  opt_allowList
                 )
               : value[i];
         }
@@ -370,7 +370,7 @@ export class VariableService {
    * @param {!Element} element amp-analytics element.
    * @param {!../../../src/service/url-replacements-impl.UrlReplacements} urlReplacements
    * @param {!JsonObject=} opt_bindings
-   * @param {!Object=} opt_whitelist
+   * @param {!Object=} opt_allowList
    * @param {string=} opt_argList
    * @return {Promise<string>}
    */
@@ -380,7 +380,7 @@ export class VariableService {
     element,
     urlReplacements,
     opt_bindings,
-    opt_whitelist,
+    opt_allowList,
     opt_argList
   ) {
     return this.expandTemplate(
@@ -392,12 +392,12 @@ export class VariableService {
       ),
       element,
       opt_bindings,
-      opt_whitelist
+      opt_allowList
     ).then((val) =>
       urlReplacements.expandStringAsync(
         opt_argList ? val + opt_argList : val,
         opt_bindings || this.getMacros(element),
-        opt_whitelist
+        opt_allowList
       )
     );
   }

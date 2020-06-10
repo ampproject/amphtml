@@ -616,7 +616,7 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     this.setAsync('AMP_STATE', (key) => {
-      // This is safe since AMP_STATE is not an A4A whitelisted variable.
+      // This is safe since AMP_STATE is not an A4A allowlisted variable.
       const root = this.ampdoc.getRootNode();
       const element = /** @type {!Element|!ShadowRoot} */ (root.documentElement ||
         root);
@@ -814,17 +814,17 @@ export class UrlReplacements {
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} source
    * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of
+   * @param {!Object<string, boolean>=} opt_allowList Optional allow list of
    *     names that can be substituted.
    * @return {string}
    */
-  expandStringSync(source, opt_bindings, opt_whiteList) {
+  expandStringSync(source, opt_bindings, opt_allowList) {
     return /** @type {string} */ (new Expander(
       this.variableSource_,
       opt_bindings,
       /* opt_collectVars */ undefined,
       /* opt_sync */ true,
-      opt_whiteList,
+      opt_allowList,
       /* opt_noEncode */ true
     )./*OK*/ expand(source));
   }
@@ -835,16 +835,16 @@ export class UrlReplacements {
    * or override existing ones.
    * @param {string} source
    * @param {!Object<string, *>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_whiteList
+   * @param {!Object<string, boolean>=} opt_allowList
    * @return {!Promise<string>}
    */
-  expandStringAsync(source, opt_bindings, opt_whiteList) {
+  expandStringAsync(source, opt_bindings, opt_allowList) {
     return /** @type {!Promise<string>} */ (new Expander(
       this.variableSource_,
       opt_bindings,
       /* opt_collectVars */ undefined,
       /* opt_sync */ undefined,
-      opt_whiteList,
+      opt_allowList,
       /* opt_noEncode */ true
     )./*OK*/ expand(source));
   }
@@ -855,11 +855,11 @@ export class UrlReplacements {
    * variables or override existing ones.  Any async bindings are ignored.
    * @param {string} url
    * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of
+   * @param {!Object<string, boolean>=} opt_allowList Optional allow list of
    *     names that can be substituted.
    * @return {string}
    */
-  expandUrlSync(url, opt_bindings, opt_whiteList) {
+  expandUrlSync(url, opt_bindings, opt_allowList) {
     return this.ensureProtocolMatches_(
       url,
       /** @type {string} */ (new Expander(
@@ -867,7 +867,7 @@ export class UrlReplacements {
         opt_bindings,
         /* opt_collectVars */ undefined,
         /* opt_sync */ true,
-        opt_whiteList
+        opt_allowList
       )./*OK*/ expand(url))
     );
   }
@@ -878,18 +878,18 @@ export class UrlReplacements {
    * or override existing ones.
    * @param {string} url
    * @param {!Object<string, *>=} opt_bindings
-   * @param {!Object<string, boolean>=} opt_whiteList Optional white list of names
+   * @param {!Object<string, boolean>=} opt_allowList Optional allow list of names
    *     that can be substituted.
    * @param {boolean=} opt_noEncode should not encode URL
    * @return {!Promise<string>}
    */
-  expandUrlAsync(url, opt_bindings, opt_whiteList, opt_noEncode) {
+  expandUrlAsync(url, opt_bindings, opt_allowList, opt_noEncode) {
     return /** @type {!Promise<string>} */ (new Expander(
       this.variableSource_,
       opt_bindings,
       /* opt_collectVars */ undefined,
       /* opt_sync */ undefined,
-      opt_whiteList,
+      opt_allowList,
       opt_noEncode
     )
       ./*OK*/ expand(url)
@@ -934,8 +934,8 @@ export class UrlReplacements {
       element
     );
 
-    const whitelist = this.getWhitelistForElement_(element);
-    if (!whitelist) {
+    const allowList = this.getAllowListForElement_(element);
+    if (!allowList) {
       return opt_sync ? element.value : Promise.resolve(element.value);
     }
     if (element[ORIGINAL_VALUE_PROPERTY] === undefined) {
@@ -946,7 +946,7 @@ export class UrlReplacements {
       /* opt_bindings */ undefined,
       /* opt_collectVars */ undefined,
       /* opt_sync */ opt_sync,
-      /* opt_whitelist */ whitelist
+      /* opt_allowList */ allowList
     )./*OK*/ expand(element[ORIGINAL_VALUE_PROPERTY] || element.value);
 
     if (opt_sync) {
@@ -959,19 +959,19 @@ export class UrlReplacements {
   }
 
   /**
-   * Returns a replacement whitelist from elements' data-amp-replace attribute.
+   * Returns a replacement allowList from elements' data-amp-replace attribute.
    * @param {!Element} element
    * @param {!Object<string, boolean>=} opt_supportedReplacement Optional supported
-   * replacement that filters whitelist to a subset.
+   * replacement that filters allowList to a subset.
    * @return {!Object<string, boolean>|undefined}
    */
-  getWhitelistForElement_(element, opt_supportedReplacement) {
-    const whitelist = element.getAttribute('data-amp-replace');
-    if (!whitelist) {
+  getAllowListForElement_(element, opt_supportedReplacement) {
+    const allowList = element.getAttribute('data-amp-replace');
+    if (!allowList) {
       return;
     }
     const requestedReplacements = {};
-    whitelist
+    allowList
       .trim()
       .split(/\s+/)
       .forEach((replacement) => {
@@ -1003,9 +1003,9 @@ export class UrlReplacements {
 
     const meta = this.ampdoc.getMetaByName('amp-link-variable-allowed-origin');
     if (meta) {
-      const whitelist = meta.trim().split(/\s+/);
-      for (let i = 0; i < whitelist.length; i++) {
-        if (url.origin == parseUrlDeprecated(whitelist[i]).origin) {
+      const allowList = meta.trim().split(/\s+/);
+      for (let i = 0; i < allowList.length; i++) {
+        if (url.origin == parseUrlDeprecated(allowList[i]).origin) {
           return true;
         }
       }
@@ -1033,12 +1033,12 @@ export class UrlReplacements {
     };
     let additionalUrlParameters =
       element.getAttribute('data-amp-addparams') || '';
-    const whitelist = this.getWhitelistForElement_(
+    const allowList = this.getAllowListForElement_(
       element,
       supportedReplacements
     );
 
-    if (!whitelist && !additionalUrlParameters && !defaultUrlParams) {
+    if (!allowList && !additionalUrlParameters && !defaultUrlParams) {
       return;
     }
     // ORIGINAL_HREF_PROPERTY has the value of the href "pre-replacement".
@@ -1055,18 +1055,18 @@ export class UrlReplacements {
     const isAllowedOrigin = this.isAllowedOrigin_(url);
     if (additionalUrlParameters) {
       additionalUrlParameters = isAllowedOrigin
-        ? this.expandSyncIfAllowedList_(additionalUrlParameters, whitelist)
+        ? this.expandSyncIfAllowList_(additionalUrlParameters, allowList)
         : additionalUrlParameters;
       href = addParamsToUrl(href, parseQueryString(additionalUrlParameters));
     }
 
     if (!isAllowedOrigin) {
-      if (whitelist) {
+      if (allowList) {
         user().warn(
           'URL',
           'Ignoring link replacement %s' +
             " because the link does not go to the document's" +
-            ' source, canonical, or whitelisted origin.',
+            ' source, canonical, or allowed origin.',
           href
         );
       }
@@ -1075,40 +1075,40 @@ export class UrlReplacements {
 
     // Note that defaultUrlParams is treated differently than
     // additionalUrlParameters in two ways #1: If the outgoing url origin is not
-    // whitelisted: additionalUrlParameters are always appended by not expanded,
+    // allowlisted: additionalUrlParameters are always appended by not expanded,
     // defaultUrlParams will not be appended. #2: If the expansion function is
-    // not whitelisted: additionalUrlParamters will not be expanded,
+    // not allowlisted: additionalUrlParamters will not be expanded,
     // defaultUrlParams will by default support QUERY_PARAM, and will still be
     // expanded.
     if (defaultUrlParams) {
-      if (!whitelist || !whitelist['QUERY_PARAM']) {
-        // override whitelist and expand defaultUrlParams;
-        const overrideWhitelist = {'QUERY_PARAM': true};
+      if (!allowList || !allowList['QUERY_PARAM']) {
+        // override allowList and expand defaultUrlParams;
+        const overrideAllowList = {'QUERY_PARAM': true};
         defaultUrlParams = this.expandUrlSync(
           defaultUrlParams,
           /* opt_bindings */ undefined,
-          /* opt_whitelist */ overrideWhitelist
+          /* opt_allowList */ overrideAllowList
         );
       }
       href = addParamsToUrl(href, parseQueryString(defaultUrlParams));
     }
 
-    href = this.expandSyncIfAllowedList_(href, whitelist);
+    href = this.expandSyncIfAllowList_(href, allowList);
 
     return (element.href = href);
   }
 
   /**
    * @param {string} href
-   * @param {!Object<string, boolean>|undefined} allowedList
+   * @param {!Object<string, boolean>|undefined} allowList
    * @return {string}
    */
-  expandSyncIfAllowedList_(href, allowedList) {
-    return allowedList
+  expandSyncIfAllowList_(href, allowList) {
+    return allowList
       ? this.expandUrlSync(
           href,
           /* opt_bindings */ undefined,
-          /* opt_whitelist */ allowedList
+          /* opt_allowList */ allowList
         )
       : href;
   }
@@ -1130,18 +1130,18 @@ export class UrlReplacements {
 
   /**
    * Collects substitutions in the `src` attribute of the given element
-   * that are _not_ whitelisted via `data-amp-replace` opt-in attribute.
+   * that are _not_allowed_ via `data-amp-replace` opt-in attribute.
    * @param {!Element} element
    * @return {!Array<string>}
    */
-  collectUnwhitelistedVarsSync(element) {
+  collectDisallowedVarsSync(element) {
     const url = element.getAttribute('src');
     const macroNames = new Expander(this.variableSource_).getMacroNames(url);
-    const whitelist = this.getWhitelistForElement_(element);
-    if (whitelist) {
-      return macroNames.filter((v) => !whitelist[v]);
+    const allowList = this.getAllowListForElement_(element);
+    if (allowList) {
+      return macroNames.filter((v) => !allowList[v]);
     } else {
-      // All vars are unwhitelisted if the element has no whitelist.
+      // All vars are not allowed if the element has no allowList.
       return macroNames;
     }
   }

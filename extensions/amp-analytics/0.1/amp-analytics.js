@@ -50,7 +50,7 @@ const TAG = 'amp-analytics';
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
 
-const WHITELIST_EVENT_IN_SANDBOX = [
+const ALLOWLIST_EVENT_IN_SANDBOX = [
   AnalyticsEventType.VISIBLE,
   AnalyticsEventType.HIDDEN,
 ];
@@ -343,7 +343,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           const eventType = trigger['on'];
           if (
             isEnumValue(AnalyticsEventType, eventType) &&
-            !WHITELIST_EVENT_IN_SANDBOX.includes(eventType)
+            !ALLOWLIST_EVENT_IN_SANDBOX.includes(eventType)
           ) {
             this.user().error(
               TAG,
