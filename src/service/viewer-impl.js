@@ -40,6 +40,7 @@ import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
 import {urls} from '../config';
+import {listenOnce} from '../event-helper';
 
 const TAG_ = 'Viewer';
 
@@ -266,6 +267,8 @@ export class ViewerImpl {
     this.ampdoc.whenFirstVisible().then(() => {
       this.maybeUpdateFragmentForCct();
     });
+
+    this.visibleOnUserAction_();
   }
 
   /** @private */
@@ -876,6 +879,34 @@ export class ViewerImpl {
     } catch (e) {
       dev().error(TAG_, 'replaceUrl failed', e);
     }
+  }
+
+  /**
+   * Defense in-depth against viewer communication issues: Will make the
+   * document visible if it receives a user action without having been
+   * made visible by the viewer.
+   */
+  visibleOnUserAction_() {
+    if (this.ampdoc.getVisibilityState() == VisibilityState.VISIBLE) {
+      return;
+    }
+    const unlisten = [];
+    const doUnlisten = () => unlisten.forEach((fn) => fn());
+    const makeVisible = () => {
+      this.setVisibilityState_(VisibilityState.VISIBLE);
+      doUnlisten();
+      dev().error(TAG_, 'Received user action in non-visible doc');
+    };
+    const options = {
+      capture: true,
+      passive: true,
+    };
+    unlisten.push(
+      listenOnce(this.win, 'keydown', makeVisible, options),
+      listenOnce(this.win, 'touchstart', makeVisible, options),
+      listenOnce(this.win, 'mousedown', makeVisible, options)
+    );
+    this.whenFirstVisible().then(doUnlisten);
   }
 }
 
