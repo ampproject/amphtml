@@ -193,11 +193,11 @@ export class AnalyticsRoot {
    * Returns the tracker for the specified name and list of allowed types.
    *
    * @param {string} name
-   * @param {!Object<string, typeof ./events.EventTracker>} allowList
+   * @param {!Object<string, typeof ./events.EventTracker>} allowlist
    * @return {?./events.EventTracker}
    */
-  getTrackerForAllowList(name, allowList) {
-    const trackerProfile = allowList[name];
+  getTrackerForAllowlist(name, allowlist) {
+    const trackerProfile = allowlist[name];
     if (trackerProfile) {
       return this.getTracker(name, trackerProfile);
     }

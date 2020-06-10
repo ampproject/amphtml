@@ -1530,7 +1530,7 @@ describes.realWin(
       );
       expect(userErrorStub).to.be.calledOnce;
       expect(userErrorStub.args[0][1]).to.match(
-        /"AMP-CAROUSEL.toggleAutoplay" is not whitelisted/
+        /"AMP-CAROUSEL.toggleAutoplay" is not allowlisted/
       );
     });
   }

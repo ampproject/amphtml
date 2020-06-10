@@ -143,7 +143,7 @@ export class InaboxMessagingHost {
       ? allowedTypes.split(/\s*,\s*/)
       : READ_ONLY_MESSAGES;
     if (allowedTypesList.indexOf(request['type']) === -1) {
-      dev().info(TAG, 'Impermissible message type ignored:', message);
+      dev().info(TAG, 'Message type ignored:', message);
       return false;
     }
 
