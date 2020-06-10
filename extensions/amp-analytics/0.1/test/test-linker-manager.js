@@ -297,7 +297,6 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
         pathname: '/dest',
         hash: '',
       };
-      windowInterface.document = doc;
 
       installLinkerReaderService(windowInterface);
       const linkerReader = linkerReaderServiceFor(windowInterface);
