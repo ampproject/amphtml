@@ -87,7 +87,7 @@ export class RequestHandler {
     this.transport_ = transport;
 
     /** @const @private {!Object|undefined} */
-    this.allowList_ = isSandbox ? SANDBOX_AVAILABLE_VARS : undefined;
+    this.allowlist_ = isSandbox ? SANDBOX_AVAILABLE_VARS : undefined;
 
     /** @private {?number} */
     this.batchIntervalTimeoutId_ = null;
@@ -142,14 +142,14 @@ export class RequestHandler {
         expansionOption,
         this.element_,
         bindings,
-        this.allowList_
+        this.allowlist_
       );
 
       this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then((baseUrl) => {
         return this.urlReplacementService_.expandUrlAsync(
           baseUrl,
           bindings,
-          this.allowList_
+          this.allowlist_
         );
       });
     }
@@ -170,14 +170,14 @@ export class RequestHandler {
           requestOriginExpansionOpt,
           this.element_,
           bindings,
-          this.allowList_
+          this.allowlist_
         )
         // substitute in URL values e.g. DOCUMENT_REFERRER -> https://example.com
         .then((expandedRequestOrigin) => {
           return this.urlReplacementService_.expandUrlAsync(
             expandedRequestOrigin,
             bindings,
-            this.allowList_,
+            this.allowlist_,
             true // opt_noEncode
           );
         });
@@ -192,7 +192,7 @@ export class RequestHandler {
       expansionOption,
       bindings,
       this.element_,
-      this.allowList_
+      this.allowlist_
     ).then((params) => {
       return dict({
         'trigger': trigger['on'],
@@ -455,7 +455,7 @@ export function expandPostMessage(
  * @param {!./variables.ExpansionOptions} expansionOption
  * @param {!Object} bindings
  * @param {!Element} element
- * @param {!Object=} opt_allowList
+ * @param {!Object=} opt_allowlist
  * @return {!Promise<!Object>}
  * @private
  */
@@ -466,7 +466,7 @@ function expandExtraUrlParams(
   expansionOption,
   bindings,
   element,
-  opt_allowList
+  opt_allowlist
 ) {
   const requestPromises = [];
   // Don't encode param values here,
@@ -484,7 +484,7 @@ function expandExtraUrlParams(
       const request = variableService
         .expandTemplate(value, option, element)
         .then((value) =>
-          urlReplacements.expandStringAsync(value, bindings, opt_allowList)
+          urlReplacements.expandStringAsync(value, bindings, opt_allowlist)
         )
         .then((value) => (params[key] = value));
       requestPromises.push(request);

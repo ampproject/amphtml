@@ -423,7 +423,7 @@ describes.realWin(
 );
 
 describes.realWin(
-  'amp-story origin whitelist',
+  'amp-story origin allowlist',
   {
     amp: {
       extensions: ['amp-story'],
@@ -443,40 +443,40 @@ describes.realWin(
       story.hashOrigin_ = IDENTITY_FN;
     });
 
-    it('should allow exact whitelisted origin with https scheme', () => {
-      story.originWhitelist_ = ['example.com'];
-      expect(story.isOriginWhitelisted_('https://example.com')).to.be.true;
+    it('should allow exact allowlisted origin with https scheme', () => {
+      story.originAllowlist_ = ['example.com'];
+      expect(story.isOriginAllowlisted_('https://example.com')).to.be.true;
     });
 
-    it('should allow exact whitelisted origin with http scheme', () => {
-      story.originWhitelist_ = ['example.com'];
-      expect(story.isOriginWhitelisted_('http://example.com')).to.be.true;
+    it('should allow exact allowlisted origin with http scheme', () => {
+      story.originAllowlist_ = ['example.com'];
+      expect(story.isOriginAllowlisted_('http://example.com')).to.be.true;
     });
 
     it('should allow www subdomain of origin', () => {
-      story.originWhitelist_ = ['example.com'];
-      expect(story.isOriginWhitelisted_('https://www.example.com')).to.be.true;
+      story.originAllowlist_ = ['example.com'];
+      expect(story.isOriginAllowlisted_('https://www.example.com')).to.be.true;
     });
 
     it('should allow subdomain of origin', () => {
-      story.originWhitelist_ = ['example.com'];
-      expect(story.isOriginWhitelisted_('https://foobar.example.com')).to.be
+      story.originAllowlist_ = ['example.com'];
+      expect(story.isOriginAllowlisted_('https://foobar.example.com')).to.be
         .true;
     });
 
-    it('should not allow exact whitelisted domain under different tld', () => {
-      story.originWhitelist_ = ['example.com'];
-      expect(story.isOriginWhitelisted_('https://example.co.uk')).to.be.false;
+    it('should not allow exact allowlisted domain under different tld', () => {
+      story.originAllowlist_ = ['example.com'];
+      expect(story.isOriginAllowlisted_('https://example.co.uk')).to.be.false;
     });
 
-    it('should not allow exact whitelisted domain infixed in another tld', () => {
-      story.originWhitelist_ = ['example.co.uk'];
-      expect(story.isOriginWhitelisted_('https://example.co')).to.be.false;
+    it('should not allow exact allowlisted domain infixed in another tld', () => {
+      story.originAllowlist_ = ['example.co.uk'];
+      expect(story.isOriginAllowlisted_('https://example.co')).to.be.false;
     });
 
-    it('should not allow domain that contains whitelisted domain', () => {
-      story.originWhitelist_ = ['example.co'];
-      expect(story.isOriginWhitelisted_('https://example.co.uk')).to.be.false;
+    it('should not allow domain that contains allowlisted domain', () => {
+      story.originAllowlist_ = ['example.co'];
+      expect(story.isOriginAllowlisted_('https://example.co.uk')).to.be.false;
     });
   }
 );

@@ -48,6 +48,9 @@ const realiasGetMode =
 // Terms that must not appear in our source files.
 const forbiddenTerms = {
   'DO NOT SUBMIT': '',
+  'whitelist': {
+    message: 'Please use the term allowlist',
+  },
   'blacklist': {
     message: 'Please use the term denylist instead',
   },
