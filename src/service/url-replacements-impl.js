@@ -1134,7 +1134,7 @@ export class UrlReplacements {
    * @param {!Element} element
    * @return {!Array<string>}
    */
-  collectUnallowlistedVarsSync(element) {
+  collectDisallowedVarsSync(element) {
     const url = element.getAttribute('src');
     const macroNames = new Expander(this.variableSource_).getMacroNames(url);
     const allowlist = this.getAllowlistForElement_(element);
