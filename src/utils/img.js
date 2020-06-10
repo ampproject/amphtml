@@ -31,3 +31,21 @@ export function guaranteeSrcForSrcsetUnsupportedBrowsers(img) {
     img.setAttribute('src', srcseturl);
   }
 }
+
+/**
+ * Generates a transparent PNG of a given width/height.
+ *
+ * @param {number} width
+ * @param {number} height
+ * @return {string}
+ */
+export function transparentPng(width, height) {
+  const canvas = self.document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+
+  // Canvases are fully transparent by default, so we don't actually need to
+  // draw anything.
+
+  return canvas.toDataURL();
+}

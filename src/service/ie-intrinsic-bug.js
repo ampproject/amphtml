@@ -17,7 +17,7 @@
 import {Services} from '../services';
 import {closestAncestorElementBySelector} from '../dom';
 import {getLengthNumeral} from '../layout';
-import {transparent} from '../png';
+import {transparentPng} from '../utils/img';
 
 /**
  * IE can't handle auto-scaling SVG images used for intrinsic layout. Generate

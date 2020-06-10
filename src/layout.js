@@ -24,7 +24,7 @@ import {htmlFor} from './static-template';
 import {isFiniteNumber} from './types';
 import {setStyle, setStyles, toggle} from './style';
 import {startsWith} from './string';
-import {transparent} from './png';
+import {transparentPng} from './utils/img';
 
 /**
  * @enum {string}
@@ -530,7 +530,7 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
     intrinsicSizer.setAttribute(
       'src',
       fixIeIntrinsic
-        ? transparent(width, height)
+        ? transparentPng(width, height)
         : `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`
     );
     element.insertBefore(sizer, element.firstChild);
