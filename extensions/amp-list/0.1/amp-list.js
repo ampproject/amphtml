@@ -1060,7 +1060,7 @@ export class AmpList extends AMP.BaseElement {
       } else {
         if (!opt_append) {
           toArray(container.children).forEach((child) =>
-            this.owners_.scheduleUnlayout(this.element, child)
+            this.owners_./*OK*/ scheduleUnlayout(container, child)
           );
           removeChildren(container);
         }
