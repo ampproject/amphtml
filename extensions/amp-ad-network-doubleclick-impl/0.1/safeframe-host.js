@@ -774,6 +774,10 @@ export class SafeframeHostApi {
       setStyles(iframe, {height: `${newHeight}px`});
     }
     this.baseInstance_.fireFluidDelayedImpression();
+    // In case we've unloaded in a race condition.
+    if (!this.iframe_.contentWindow) {
+      return;
+    }
     this.iframe_.contentWindow./*OK*/ postMessage(
       JSON.stringify(dict({'message': 'resize-complete', 'c': this.channel})),
       '*'
