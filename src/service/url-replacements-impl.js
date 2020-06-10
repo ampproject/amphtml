@@ -1100,15 +1100,15 @@ export class UrlReplacements {
 
   /**
    * @param {string} href
-   * @param {!Object<string, boolean>|undefined} allowedList
+   * @param {!Object<string, boolean>|undefined} allowlist
    * @return {string}
    */
-  expandSyncIfAllowedList_(href, allowedList) {
-    return allowedList
+  expandSyncIfAllowedList_(href, allowlist) {
+    return allowlist
       ? this.expandUrlSync(
           href,
           /* opt_bindings */ undefined,
-          /* opt_allowlist */ allowedList
+          /* opt_allowlist */ allowlist
         )
       : href;
   }

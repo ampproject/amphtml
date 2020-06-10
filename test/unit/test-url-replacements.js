@@ -207,7 +207,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         win.ampdoc = ampdoc;
         env.sandbox.stub(win.ampdoc, 'getMeta').returns({
           'amp-link-variable-allowed-origin':
-            'https://allowlisted.com https://greylisted.com http://example.com',
+            'https://allowlisted.com http://example.com',
         });
         installUrlReplacementsServiceForDoc(ampdoc);
         return win;
@@ -1474,7 +1474,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         element.setAttribute('data-amp-replace', 'QUERY_PARAM');
         const {documentElement} = win.document;
         const urlReplacements = Services.urlReplacementsForDoc(documentElement);
-        const unallowlisted = urlReplacements.collectUnallowlistedVarsSync(
+        const unallowlisted = urlReplacements.collectDisallowedVarsSync(
           element
         );
         expect(unallowlisted).to.deep.equal(['SOURCE_HOST', 'COUNTER']);
@@ -1566,7 +1566,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
         });
       });
 
-      it('should expand sync and respect white list', () => {
+      it('should expand sync and respect allowlisted', () => {
         const win = getFakeWindow();
         const {documentElement} = win.document;
         const urlReplacements = Services.urlReplacementsForDoc(documentElement);
@@ -1789,7 +1789,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           expect(a.href).to.equal('https://example.com/link');
         });
 
-        it('should not replace without user allowlisting', () => {
+        it('should not replace without user allowance', () => {
           a.href = 'https://example.com/link?out=QUERY_PARAM(foo)';
           urlReplacements.maybeExpandLink(a, null);
           expect(a.href).to.equal(
@@ -1797,7 +1797,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           );
         });
 
-        it('should not replace without user allowlisting 2', () => {
+        it('should not replace without user allowance 2', () => {
           a.href = 'https://example.com/link?out=QUERY_PARAM(foo)';
           a.setAttribute('data-amp-replace', 'ABC');
           urlReplacements.maybeExpandLink(a, null);
