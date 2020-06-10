@@ -1,4 +1,4 @@
-{
+module.exports = {
   "rules": {
     // We include some JSON. It doesn't like dangling commas.
     "comma-dangle": 0,
