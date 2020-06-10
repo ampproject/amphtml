@@ -46,6 +46,6 @@ export function checkAndFix(win, opt_platform) {
     }
     const width = getLengthNumeral(element.getAttribute('width'));
     const height = getLengthNumeral(element.getAttribute('height'));
-    intrinsic.src = transparent(width, height);
+    intrinsic.src = transparentPng(width, height);
   }
 }
