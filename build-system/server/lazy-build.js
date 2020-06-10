@@ -84,6 +84,9 @@ async function lazyBuild(url, matcher, bundles, buildFunc, next) {
  */
 async function build(bundles, name, buildFunc) {
   const bundle = bundles[name];
+  if (bundle.pendingBuild) {
+    return await bundle.pendingBuild;
+  }
   bundle.pendingBuild = buildFunc(bundles, name, {
     watch: true,
     minify: argv.compiled,
