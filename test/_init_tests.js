@@ -172,6 +172,10 @@ class TestConfig {
     return this;
   }
 
+  skipSauceLabs() {
+    return this.skip(() => !!window.ampTestRuntimeConfig.saucelabs);
+  }
+
   ifChrome() {
     return this.if(this.runOnChrome);
   }

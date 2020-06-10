@@ -219,6 +219,10 @@ describe
           return browserController.waitForElementLayout('amp-recaptcha-input');
         });
 
+        afterEach(() => {
+          return RequestBank.tearDown();
+        });
+
         it('should make a request with correct parameters', function () {
           return submitForm(doc).then(() => {
             return RequestBank.withdraw(recaptchaRequestId.GET).then((req) => {
@@ -268,6 +272,10 @@ describe
 
           const browserController = new BrowserController(env.win);
           return browserController.waitForElementLayout('amp-recaptcha-input');
+        });
+
+        afterEach(() => {
+          return RequestBank.tearDown();
         });
 
         it('should make a request with correct parameters', function () {
