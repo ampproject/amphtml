@@ -51,6 +51,9 @@ const forbiddenTerms = {
   'whitelist': {
     message: 'Please use the term allowlist',
   },
+  'blacklist': {
+    message: 'Please use the term denylist instead',
+  },
   // TODO(dvoytenko, #8464): cleanup allowlist.
   '(^-amp-|\\W-amp-)': {
     message: 'Switch to new internal class form',
