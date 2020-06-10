@@ -716,8 +716,6 @@ class AmpLightbox extends AMP.BaseElement {
         return candidate;
       }
     }
-
-    return null;
   }
 
   /**
