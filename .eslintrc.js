@@ -14,6 +14,24 @@
  * limitations under the License.
  */
 
+const fs = require('fs');
+
+/**
+ * Dynamically extracts experiment globals from the config file.
+ *
+ * @return {!Object}
+ */
+function getExperimentGlobals() {
+  const experiments = Object.keys(
+    JSON.parse(
+      fs.readFileSync('build-system/global-configs/experiments-const.json')
+    )
+  );
+  const globals = {};
+  experiments.forEach((experiment) => (globals[experiment] = 'readonly'));
+  return globals;
+}
+
 module.exports = {
   'root': true,
   'parser': 'babel-eslint',
@@ -39,10 +57,7 @@ module.exports = {
     'sourceType': 'module',
   },
   'globals': {
-    'INTERSECTION_OBSERVER_POLYFILL': 'readonly',
-    'INTERSECTION_OBSERVER_POLYFILL_INABOX': 'readonly',
-    'MOVE_FIXED_LAYER': 'readonly',
-    'NATIVE_CUSTOM_ELEMENTS_V1': 'readonly',
+    ...getExperimentGlobals(),
     'IS_ESM': 'readonly',
     'AMP': 'readonly',
     'context': 'readonly',
