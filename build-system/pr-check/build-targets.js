@@ -147,6 +147,18 @@ const targetMatchers = {
   'PACKAGE_UPGRADE': (file) => {
     return file == 'package.json' || file == 'yarn.lock';
   },
+  'RENOVATE_CONFIG': (file) => {
+    return (
+      file == '.renovaterc.json' ||
+      file == 'build-system/tasks/check-renovate-config.js'
+    );
+  },
+  'RUNTIME': (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return file.startsWith('src/');
+  },
   'SERVER': (file) => {
     if (isOwnersFile(file)) {
       return false;
@@ -189,8 +201,7 @@ const targetMatchers = {
     }
     return (
       file.startsWith('validator/java/') ||
-      file === 'build-system/tasks/validator.js' ||
-      isValidatorFile(file)
+      file === 'build-system/tasks/validator.js'
     );
   },
   'VALIDATOR_WEBUI': (file) => {
@@ -246,10 +257,12 @@ function determineBuildTargets(fileName = 'build-targets.js') {
   if (buildTargets.has('BABEL_PLUGIN') || buildTargets.has('SERVER')) {
     buildTargets.add('RUNTIME');
   }
-  // Test all targets on Travis during package upgrades.
+  // Test all targets except VALIDATOR_JAVA on Travis during package upgrades.
   if (isTravisBuild() && buildTargets.has('PACKAGE_UPGRADE')) {
     const allTargets = Object.keys(targetMatchers);
-    allTargets.forEach((target) => buildTargets.add(target));
+    allTargets
+      .filter((target) => target != 'VALIDATOR_JAVA')
+      .forEach((target) => buildTargets.add(target));
   }
   return buildTargets;
 }

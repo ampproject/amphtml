@@ -20,11 +20,14 @@ import {Services} from '../../../src/services';
 import {VisibilityManagerForMApp} from './visibility-manager-for-mapp';
 import {
   closestAncestorElementBySelector,
+  getDataParamsFromAttributes,
   matches,
   scopedQuerySelector,
 } from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {isArray} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
 import {provideVisibilityManager} from './visibility-manager';
@@ -32,6 +35,7 @@ import {tryResolve} from '../../../src/utils/promise';
 import {whenContentIniLoad} from '../../../src/ini-load';
 
 const TAG = 'amp-analytics/analytics-root';
+const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 
 /**
  * An analytics root. Analytics can be scoped to either ampdoc, embed or
@@ -189,11 +193,11 @@ export class AnalyticsRoot {
    * Returns the tracker for the specified name and list of allowed types.
    *
    * @param {string} name
-   * @param {!Object<string, typeof ./events.EventTracker>} whitelist
+   * @param {!Object<string, typeof ./events.EventTracker>} allowList
    * @return {?./events.EventTracker}
    */
-  getTrackerForWhitelist(name, whitelist) {
-    const trackerProfile = whitelist[name];
+  getTrackerForAllowList(name, allowList) {
+    const trackerProfile = allowList[name];
     if (trackerProfile) {
       return this.getTracker(name, trackerProfile);
     }
@@ -280,6 +284,75 @@ export class AnalyticsRoot {
   }
 
   /**
+   * @param {!Array<string>} selectors Array of DOM query selectors.
+   * @return {!Promise<!Array<!Element>>} Element corresponding to the selector.
+   */
+  getElementsByQuerySelectorAll_(selectors) {
+    // Wait for document-ready to avoid false missed searches
+    return this.ampdoc.whenReady().then(() => {
+      let elements = [];
+      for (let i = 0; i < selectors.length; i++) {
+        let nodeList;
+        let elementArray = [];
+        const selector = selectors[i];
+        try {
+          nodeList = this.getRoot().querySelectorAll(selector);
+        } catch (e) {
+          userAssert(false, `Invalid query selector ${selector}`);
+        }
+        for (let j = 0; j < nodeList.length; j++) {
+          if (this.contains(nodeList[j])) {
+            elementArray.push(nodeList[j]);
+          }
+        }
+        elementArray = this.getDataVarsElements_(elementArray, selector);
+        userAssert(elementArray.length, `Element "${selector}" not found`);
+        this.verifyAmpElements_(elementArray, selector);
+        elements = elements.concat(elementArray);
+      }
+      // Return unique
+      return elements.filter(
+        (element, index) => elements.indexOf(element) === index
+      );
+    });
+  }
+
+  /**
+   * Return all elements that have a data-vars attribute.
+   * @param {!Array<!Element>} elementArray
+   * @param {string} selector
+   * @return {!Array<!Element>}
+   */
+  getDataVarsElements_(elementArray, selector) {
+    let removedCount = 0;
+    const dataVarsArray = [];
+    for (let i = 0; i < elementArray.length; i++) {
+      const dataVarKeys = Object.keys(
+        getDataParamsFromAttributes(
+          elementArray[i],
+          /* computeParamNameFunc */ undefined,
+          VARIABLE_DATA_ATTRIBUTE_KEY
+        )
+      );
+      if (dataVarKeys.length) {
+        dataVarsArray.push(elementArray[i]);
+      } else {
+        removedCount++;
+      }
+    }
+    if (removedCount) {
+      user().warn(
+        TAG,
+        '%s element(s) ommited from selector "%s"' +
+          ' because no data-vars-* attribute was found.',
+        removedCount,
+        selector
+      );
+    }
+    return dataVarsArray;
+  }
+
+  /**
    * Searches the AMP element that matches the selector within the scope of the
    * analytics root in relationship to the specified context node.
    *
@@ -287,20 +360,61 @@ export class AnalyticsRoot {
    * @param {string} selector DOM query selector.
    * @param {?string=} selectionMethod Allowed values are `null`,
    *   `'closest'` and `'scope'`.
-   * @param {boolean=} opt_multiSelectorOn multi-selector expriment
    * @return {!Promise<!AmpElement>} AMP element corresponding to the selector if found.
    */
-  getAmpElement(context, selector, selectionMethod, opt_multiSelectorOn) {
+  getAmpElement(context, selector, selectionMethod) {
     return this.getElement(context, selector, selectionMethod).then(
       (element) => {
-        userAssert(
-          element.classList.contains('i-amphtml-element'),
-          'Element "%s" is required to be an AMP element',
-          selector
-        );
+        this.verifyAmpElements_([element], selector);
         return element;
       }
     );
+  }
+
+  /**
+   * Searches for the AMP element(s) that matches the selector
+   * within the scope of the analytics root in relationship to
+   * the specified context node.
+   *
+   * @param {!Element} context
+   * @param {!Array<string>|string} selectors DOM query selector(s).
+   * @param {?string=} selectionMethod Allowed values are `null`,
+   *   `'closest'` and `'scope'`.
+   * @return {!Promise<!Array<!AmpElement>>} Array of AMP elements corresponding to the selector if found.
+   */
+  getAmpElements(context, selectors, selectionMethod) {
+    if (
+      isExperimentOn(this.ampdoc.win, 'visibility-trigger-improvements') &&
+      isArray(selectors)
+    ) {
+      userAssert(
+        !selectionMethod,
+        'Cannot have selectionMethod %s defined with an array selector.',
+        selectionMethod
+      );
+      return this.getElementsByQuerySelectorAll_(
+        /** @type {!Array<string>} */ (selectors)
+      );
+    }
+    return this.getAmpElement(
+      context,
+      /** @type {string} */ (selectors),
+      selectionMethod
+    ).then((element) => [element]);
+  }
+
+  /**
+   * @param {!Array<Element>} elements
+   * @param {string} selector
+   */
+  verifyAmpElements_(elements, selector) {
+    for (let i = 0; i < elements.length; i++) {
+      userAssert(
+        elements[i].classList.contains('i-amphtml-element'),
+        'Element "%s" is required to be an AMP element',
+        selector
+      );
+    }
   }
 
   /**

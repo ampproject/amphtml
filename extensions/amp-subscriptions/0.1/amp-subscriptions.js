@@ -26,14 +26,14 @@ import {DocImpl} from './doc-impl';
 import {ENTITLEMENTS_REQUEST_TIMEOUT} from './constants';
 import {Entitlement, GrantReason} from './entitlement';
 import {
-  PageConfig,
+  PageConfig as PageConfigInterface,
   PageConfigResolver,
 } from '../../../third_party/subscriptions-project/config';
 import {PlatformStore} from './platform-store';
 import {Renderer} from './renderer';
 import {ServiceAdapter} from './service-adapter';
 import {Services} from '../../../src/services';
-import {SubscriptionPlatform} from './subscription-platform';
+import {SubscriptionPlatform as SubscriptionPlatformInterface} from './subscription-platform';
 import {ViewerSubscriptionPlatform} from './viewer-subscription-platform';
 import {ViewerTracker} from './viewer-tracker';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
@@ -73,7 +73,7 @@ export class SubscriptionService {
     /** @private @const {!Renderer} */
     this.renderer_ = new Renderer(ampdoc);
 
-    /** @private {?PageConfig} */
+    /** @private {?PageConfigInterface} */
     this.pageConfig_ = null;
 
     /** @private {?JsonObject} */
@@ -160,9 +160,11 @@ export class SubscriptionService {
 
       this.initializePlatformStore_(serviceIds);
 
-      this.platformConfig_['services'].forEach((service) => {
-        this.initializeLocalPlatforms_(service);
-      });
+      /** @type {!Array} */ (this.platformConfig_['services']).forEach(
+        (service) => {
+          this.initializeLocalPlatforms_(service);
+        }
+      );
 
       this.platformStore_
         .getAvailablePlatforms()
@@ -220,14 +222,14 @@ export class SubscriptionService {
 
   /**
    * Returns Page config
-   * @return {!PageConfig}
+   * @return {!PageConfigInterface}
    */
   getPageConfig() {
     const pageConfig = devAssert(
       this.pageConfig_,
       'Page config is not yet fetched'
     );
-    return /** @type {!PageConfig} */ (pageConfig);
+    return /** @type {!PageConfigInterface} */ (pageConfig);
   }
 
   /**
@@ -263,7 +265,7 @@ export class SubscriptionService {
    * service.
    *
    * @param {string} serviceId
-   * @param {function(!JsonObject, !ServiceAdapter):!SubscriptionPlatform} subscriptionPlatformFactory
+   * @param {function(!JsonObject, !ServiceAdapter):!SubscriptionPlatformInterface} subscriptionPlatformFactory
    * @return {!Promise}
    */
   registerPlatform(serviceId, subscriptionPlatformFactory) {
@@ -404,7 +406,7 @@ export class SubscriptionService {
       ]).then((promiseValues) => {
         /** @type {!JsonObject} */
         this.platformConfig_ = promiseValues[0];
-        /** @type {!PageConfig} */
+        /** @type {!PageConfigInterface} */
         this.pageConfig_ = promiseValues[1];
       });
     }
@@ -486,7 +488,7 @@ export class SubscriptionService {
 
   /**
    * Internal function to wrap SwG decryption handling
-   * @param {!SubscriptionPlatform} platform
+   * @param {!SubscriptionPlatformInterface} platform
    * @return {!Promise<?./entitlement.Entitlement>}
    * @private
    */
@@ -511,7 +513,7 @@ export class SubscriptionService {
   }
 
   /**
-   * @param {!SubscriptionPlatform} subscriptionPlatform
+   * @param {!SubscriptionPlatformInterface} subscriptionPlatform
    * @return {!Promise}
    */
   fetchEntitlements_(subscriptionPlatform) {
@@ -577,30 +579,32 @@ export class SubscriptionService {
     const origin = getWinOrigin(this.ampdoc_.win);
     this.initializePlatformStore_(serviceIds);
 
-    this.platformConfig_['services'].forEach((service) => {
-      if ((service['serviceId'] || 'local') == 'local') {
-        const viewerPlatform = new ViewerSubscriptionPlatform(
-          this.ampdoc_,
-          service,
-          this.serviceAdapter_,
-          origin
-        );
-        this.platformStore_.resolvePlatform('local', viewerPlatform);
-        this.getEntitlements_(viewerPlatform)
-          .then((entitlement) => {
-            devAssert(entitlement, 'Entitlement is null');
-            // Viewer authorization is redirected to use local platform instead.
-            this.resolveEntitlementsToStore_(
-              'local',
-              /** @type {!./entitlement.Entitlement}*/ (entitlement)
-            );
-          })
-          .catch((reason) => {
-            this.platformStore_.reportPlatformFailureAndFallback('local');
-            dev().error(TAG, 'Viewer auth failed:', reason);
-          });
+    /** @type {!Array} */ (this.platformConfig_['services']).forEach(
+      (service) => {
+        if ((service['serviceId'] || 'local') == 'local') {
+          const viewerPlatform = new ViewerSubscriptionPlatform(
+            this.ampdoc_,
+            service,
+            this.serviceAdapter_,
+            origin
+          );
+          this.platformStore_.resolvePlatform('local', viewerPlatform);
+          this.getEntitlements_(viewerPlatform)
+            .then((entitlement) => {
+              devAssert(entitlement, 'Entitlement is null');
+              // Viewer authorization is redirected to use local platform instead.
+              this.resolveEntitlementsToStore_(
+                'local',
+                /** @type {!./entitlement.Entitlement}*/ (entitlement)
+              );
+            })
+            .catch((reason) => {
+              this.platformStore_.reportPlatformFailureAndFallback('local');
+              dev().error(TAG, 'Viewer auth failed:', reason);
+            });
+        }
       }
-    });
+    );
   }
 
   /**
@@ -726,25 +730,6 @@ export class SubscriptionService {
   isPageFree_() {
     return !this.pageConfig_.isLocked() || this.platformConfig_['alwaysGrant'];
   }
-}
-
-/**
- * @package
- * @visibleForTesting
- * @return {*} TODO(#23582): Specify return type
- */
-export function getPlatformClassForTesting() {
-  return SubscriptionPlatform;
-}
-
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package
- * @visibleForTesting
- * @return {*} TODO(#23582): Specify return type
- */
-export function getPageConfigClassForTesting() {
-  return PageConfig;
 }
 
 // Register the `amp-subscriptions` extension.

@@ -15,6 +15,12 @@
  */
 'use strict';
 
+const argv = require('minimist')(process.argv.slice(2));
+const browserifyPersistFs = require('browserify-persist-fs');
+const crypto = require('crypto');
+const fs = require('fs');
+const globby = require('globby');
+
 const {gitCommitterEmail} = require('../common/git');
 const {isTravisBuild, travisJobNumber} = require('../common/travis');
 
@@ -27,6 +33,10 @@ const COMMON_CHROME_FLAGS = [
   '--autoplay-policy=no-user-gesture-required',
 ];
 
+if (argv.debug) {
+  COMMON_CHROME_FLAGS.push('--auto-open-devtools-for-tabs');
+}
+
 // Reduces the odds of Sauce labs timing out during tests. See #16135 and #24286.
 // Reference: https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-Timeouts
 const SAUCE_TIMEOUT_CONFIG = {
@@ -34,6 +44,40 @@ const SAUCE_TIMEOUT_CONFIG = {
   commandTimeout: 10 * 60,
   idleTimeout: 30 * 60,
 };
+
+// Used by persistent browserify caching to further salt hashes with our
+// environment state. Eg, when updating a babel-plugin, the environment hash
+// must change somehow so that the cache busts and the file is retransformed.
+const createHash = (input) =>
+  crypto.createHash('sha1').update(input).digest('hex');
+
+const persistentCache = browserifyPersistFs(
+  '.karma-cache',
+  {
+    deps: createHash(fs.readFileSync('./yarn.lock')),
+    build: globby
+      .sync([
+        'build-system/**/*.js',
+        '!build-system/eslint-rules',
+        '!**/test/**',
+      ])
+      .map((f) => {
+        return createHash(fs.readFileSync(f));
+      }),
+  },
+  () => {
+    process.stdout.write('.');
+  }
+);
+
+persistentCache.gc(
+  {
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+  },
+  () => {
+    // swallow errors
+  }
+);
 
 /**
  * @param {!Object} config
@@ -69,6 +113,8 @@ module.exports = {
     transform: [['babelify', {caller: {name: 'test'}, global: true}]],
     // Prevent "cannot find module" errors on Travis. See #14166.
     bundleDelay: isTravisBuild() ? 5000 : 1200,
+
+    persistentCache,
   },
 
   reporters: ['super-dots', 'karmaSimpleReporter'],

@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
+import {TickLabel} from '../../../src/enums';
 import {asyncStringReplace} from '../../../src/string';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {cookieReader} from './cookie-reader';
@@ -27,6 +28,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
+import {isInFie} from '../../../src/iframe-helper';
 import {linkerReaderServiceFor} from './linker-reader';
 
 /** @const {string} */
@@ -218,7 +220,8 @@ export class VariableService {
         'DateTimeFormat' in this.ampdoc_.win.Intl
       ) {
         // It could be undefined (i.e. IE11)
-        tzCode = new Intl.DateTimeFormat().resolvedOptions().timeZone;
+        tzCode = new this.ampdoc_.win.Intl.DateTimeFormat().resolvedOptions()
+          .timeZone;
       }
 
       return tzCode;
@@ -226,27 +229,13 @@ export class VariableService {
 
     // Returns a promise resolving to viewport.getScrollTop.
     this.register_('SCROLL_TOP', () =>
-      Services.viewportForDoc(this.ampdoc_).getScrollTop()
+      Math.round(Services.viewportForDoc(this.ampdoc_).getScrollTop())
     );
 
     // Returns a promise resolving to viewport.getScrollLeft.
     this.register_('SCROLL_LEFT', () =>
-      Services.viewportForDoc(this.ampdoc_).getScrollLeft()
+      Math.round(Services.viewportForDoc(this.ampdoc_).getScrollLeft())
     );
-    // Was set async before
-    this.register_('FIRST_CONTENTFUL_PAINT', () => {
-      return Services.performanceFor(
-        this.ampdoc_.win
-      ).getFirstContentfulPaint();
-    });
-
-    this.register_('FIRST_VIEWPORT_READY', () => {
-      return Services.performanceFor(this.ampdoc_.win).getFirstViewportReady();
-    });
-
-    this.register_('MAKE_BODY_VISIBLE', () => {
-      return Services.performanceFor(this.ampdoc_.win).getMakeBodyVisible();
-    });
   }
 
   /**
@@ -259,7 +248,35 @@ export class VariableService {
         cookieReader(this.ampdoc_.win, dev().assertElement(element), name),
       'CONSENT_STATE': getConsentStateStr(element),
     };
-    const merged = {...this.macros_, ...elementMacros};
+    const perfMacros = isInFie(element)
+      ? {}
+      : {
+          'FIRST_CONTENTFUL_PAINT': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE
+            ),
+          'FIRST_VIEWPORT_READY': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.FIRST_VIEWPORT_READY
+            ),
+          'MAKE_BODY_VISIBLE': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.MAKE_BODY_VISIBLE
+            ),
+          'LARGEST_CONTENTFUL_PAINT': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE
+            ),
+          'FIRST_INPUT_DELAY': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.FIRST_INPUT_DELAY_VISIBLE
+            ),
+          'CUMULATIVE_LAYOUT_SHIFT': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.CUMULATIVE_LAYOUT_SHIFT
+            ),
+        };
+    const merged = {...this.macros_, ...elementMacros, ...perfMacros};
     return /** @type {!JsonObject} */ (merged);
   }
 
@@ -282,10 +299,10 @@ export class VariableService {
    * @param {!ExpansionOptions} options configuration to use for expansion.
    * @param {!Element} element amp-analytics element.
    * @param {!JsonObject=} opt_bindings
-   * @param {!Object=} opt_whitelist
+   * @param {!Object=} opt_allowList
    * @return {!Promise<string>} The expanded string.
    */
-  expandTemplate(template, options, element, opt_bindings, opt_whitelist) {
+  expandTemplate(template, options, element, opt_bindings, opt_allowList) {
     return asyncStringReplace(template, /\${([^}]*)}/g, (match, key) => {
       if (options.iterations < 0) {
         user().error(
@@ -309,61 +326,41 @@ export class VariableService {
       }
 
       let value = options.getVar(name);
+      const urlReplacements = Services.urlReplacementsForDoc(element);
 
       if (typeof value == 'string') {
-        value = this.expandValue_(
+        value = this.expandValueAndReplaceAsync_(
           value,
           options,
           element,
+          urlReplacements,
           opt_bindings,
-          opt_whitelist
+          opt_allowList,
+          argList
         );
       } else if (isArray(value)) {
         // Treat each value as a template and expand
         for (let i = 0; i < value.length; i++) {
           value[i] =
             typeof value[i] == 'string'
-              ? this.expandValue_(
+              ? this.expandValueAndReplaceAsync_(
                   value[i],
                   options,
                   element,
+                  urlReplacements,
                   opt_bindings,
-                  opt_whitelist
+                  opt_allowList
                 )
               : value[i];
         }
+        value = Promise.all(/** @type {!Array<string>} */ (value));
       }
 
-      const bindings = opt_bindings || this.getMacros(element);
-      const urlReplacements = Services.urlReplacementsForDoc(element);
-
-      return Promise.resolve(value)
-        .then((value) => {
-          if (isArray(value)) {
-            return Promise.all(
-              value.map((item) =>
-                typeof item == 'string'
-                  ? urlReplacements.expandStringAsync(
-                      item,
-                      bindings,
-                      opt_whitelist
-                    )
-                  : item
-              )
-            );
-          }
-          return urlReplacements.expandStringAsync(
-            value + argList,
-            bindings,
-            opt_whitelist
-          );
-        })
-        .then((value) => {
-          if (!options.noEncode) {
-            value = encodeVars(/** @type {string|?Array<string>} */ (value));
-          }
-          return value;
-        });
+      return Promise.resolve(value).then((value) =>
+        !options.noEncode
+          ? encodeVars(/** @type {string|?Array<string>} */ (value))
+          : value
+      );
     });
   }
 
@@ -371,11 +368,21 @@ export class VariableService {
    * @param {string} value
    * @param {!ExpansionOptions} options
    * @param {!Element} element amp-analytics element.
+   * @param {!../../../src/service/url-replacements-impl.UrlReplacements} urlReplacements
    * @param {!JsonObject=} opt_bindings
-   * @param {!Object=} opt_whitelist
+   * @param {!Object=} opt_allowList
+   * @param {string=} opt_argList
    * @return {Promise<string>}
    */
-  expandValue_(value, options, element, opt_bindings, opt_whitelist) {
+  expandValueAndReplaceAsync_(
+    value,
+    options,
+    element,
+    urlReplacements,
+    opt_bindings,
+    opt_allowList,
+    opt_argList
+  ) {
     return this.expandTemplate(
       value,
       new ExpansionOptions(
@@ -385,7 +392,13 @@ export class VariableService {
       ),
       element,
       opt_bindings,
-      opt_whitelist
+      opt_allowList
+    ).then((val) =>
+      urlReplacements.expandStringAsync(
+        opt_argList ? val + opt_argList : val,
+        opt_bindings || this.getMacros(element),
+        opt_allowList
+      )
     );
   }
 

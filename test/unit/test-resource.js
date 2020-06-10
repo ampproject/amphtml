@@ -28,9 +28,11 @@ describes.realWin('Resource', {amp: true}, (env) => {
   let elementMock;
   let resources;
   let resource;
+  let sandbox;
 
   beforeEach(() => {
     win = env.win;
+    sandbox = env.sandbox;
     doc = win.document;
 
     element = env.createAmpElement('amp-fake-element');
@@ -103,6 +105,24 @@ describes.realWin('Resource', {amp: true}, (env) => {
     });
   });
 
+  describe('intersect-resources', () => {
+    beforeEach(() => {
+      sandbox.stub(resources, 'isIntersectionExperimentOn').returns(true);
+      resource = new Resource(1, element, resources);
+    });
+
+    it('should be ready for layout if measured before build', () => {
+      resource.premeasure({left: 0, top: 0, width: 100, height: 100});
+      resource.measure(/* usePremeasuredRect */ true);
+      elementMock.expects('isUpgraded').returns(true).atLeast(1);
+      elementMock.expects('build').returns(Promise.resolve()).once();
+      elementMock.expects('onMeasure').withArgs(/* sizeChanged */ true).once();
+      return resource.build().then(() => {
+        expect(resource.getState()).to.equal(ResourceState.READY_FOR_LAYOUT);
+      });
+    });
+  });
+
   it('should build if element is currently building', () => {
     elementMock.expects('isBuilt').returns(false).once();
     elementMock.expects('isBuilding').returns(true).once();
@@ -112,7 +132,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
     expect(r.isBuilding()).to.be.true;
   });
 
-  it('should blacklist on build failure', () => {
+  it('should denylist on build failure', () => {
     env.sandbox
       .stub(resource, 'maybeReportErrorOnBuildFailure')
       .callsFake(() => {});

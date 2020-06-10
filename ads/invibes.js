@@ -34,12 +34,22 @@ export function invibes(global, data) {
   );
 
   let url = data.customEndpoint || 'https://k.r66net.com/GetAmpLink';
+
   if (data.adCateg) {
     url = addQueryParam(url, 'adCateg', data.adCateg);
   }
 
   if (data.pid) {
     url = addQueryParam(url, 'pid', data.pid);
+  }
+
+  if (
+    window &&
+    window.context &&
+    window.context.location &&
+    window.context.location.href
+  ) {
+    url = addQueryParam(url, 'referrerUrl', window.context.location.href);
   }
 
   loadScript(global, url);

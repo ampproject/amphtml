@@ -462,7 +462,7 @@ export class SafeframeHostApi {
    */
   sendMessage_(payload, serviceName) {
     if (!this.iframe_ || !this.iframe_.contentWindow) {
-      dev().error(TAG, 'Frame contentWindow unavailable.');
+      dev().expectedError(TAG, 'Frame contentWindow unavailable.');
       return;
     }
     const message = dict();
@@ -774,6 +774,10 @@ export class SafeframeHostApi {
       setStyles(iframe, {height: `${newHeight}px`});
     }
     this.baseInstance_.fireFluidDelayedImpression();
+    // In case we've unloaded in a race condition.
+    if (!this.iframe_.contentWindow) {
+      return;
+    }
     this.iframe_.contentWindow./*OK*/ postMessage(
       JSON.stringify(dict({'message': 'resize-complete', 'c': this.channel})),
       '*'

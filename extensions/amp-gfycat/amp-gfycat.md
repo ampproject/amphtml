@@ -2,7 +2,6 @@
 $category@: social
 formats:
   - websites
-  - stories
 teaser:
   text: Displays a Gfycat video GIF.
 ---

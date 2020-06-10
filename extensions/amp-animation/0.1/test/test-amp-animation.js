@@ -82,28 +82,12 @@ describes.sandboxed('AmpAnimation', {}, () => {
         expect(anim.configJson_).to.deep.equal({duration: 1001});
       });
 
-      it('should fail without config', () => {
-        return createAnim({}, null).then(
-          () => {
-            throw new Error('must have failed');
-          },
-          (reason) => {
-            expect(reason.message).to.match(
-              /\"<script type=application\/json>\" must be present/
-            );
-          }
-        );
+      it('should fail without config', async () => {
+        await expect(createAnim({}, null)).to.be.eventually.be.rejected;
       });
 
-      it('should fail with malformed config', () => {
-        return createAnim({}, 'broken').then(
-          () => {
-            throw new Error('must have failed');
-          },
-          (reason) => {
-            expect(reason.message).to.match(/failed to parse animation script/);
-          }
-        );
+      it('should fail with malformed config', async () => {
+        await expect(createAnim({}, 'borked')).to.be.eventually.be.rejected;
       });
 
       it('should default trigger to none', function* () {

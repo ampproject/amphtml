@@ -25,6 +25,9 @@ const {
   checkExactVersions,
 } = require('./build-system/tasks/check-exact-versions');
 const {
+  checkRenovateConfig,
+} = require('./build-system/tasks/check-renovate-config');
+const {
   process3pGithubPr,
 } = require('./build-system/tasks/process-3p-github-pr');
 const {
@@ -47,7 +50,9 @@ const {bundleSize} = require('./build-system/tasks/bundle-size');
 const {cachesJson} = require('./build-system/tasks/caches-json');
 const {checkLinks} = require('./build-system/tasks/check-links');
 const {checkOwners} = require('./build-system/tasks/check-owners');
+const {checkSourcemaps} = require('./build-system/tasks/check-sourcemaps');
 const {checkTypes} = require('./build-system/tasks/check-types');
+const {cherryPick} = require('./build-system/tasks/cherry-pick');
 const {clean} = require('./build-system/tasks/clean');
 const {codecovUpload} = require('./build-system/tasks/codecov-upload');
 const {compileJison} = require('./build-system/tasks/compile-jison');
@@ -65,6 +70,7 @@ const {integration} = require('./build-system/tasks/integration');
 const {lint} = require('./build-system/tasks/lint');
 const {makeExtension} = require('./build-system/tasks/extension-generator');
 const {nailgunStart, nailgunStop} = require('./build-system/tasks/nailgun');
+const {performanceUrls} = require('./build-system/tasks/performance-urls');
 const {performance} = require('./build-system/tasks/performance');
 const {prCheck} = require('./build-system/tasks/pr-check');
 const {prependGlobal} = require('./build-system/tasks/prepend-global');
@@ -138,7 +144,10 @@ createTask('caches-json', cachesJson);
 createTask('check-exact-versions', checkExactVersions);
 createTask('check-links', checkLinks);
 createTask('check-owners', checkOwners);
+createTask('check-renovate-config', checkRenovateConfig);
+createTask('check-sourcemaps', checkSourcemaps);
 createTask('check-types', checkTypes);
+createTask('cherry-pick', cherryPick);
 createTask('clean', clean);
 createTask('codecov-upload', codecovUpload);
 createTask('compile-jison', compileJison);
@@ -158,6 +167,7 @@ createTask('make-extension', makeExtension);
 createTask('nailgun-start', nailgunStart);
 createTask('nailgun-stop', nailgunStop);
 createTask('performance', performance);
+createTask('performance-urls', performanceUrls);
 createTask('pr-check', prCheck);
 createTask('prepend-global', prependGlobal);
 createTask('presubmit', presubmit);

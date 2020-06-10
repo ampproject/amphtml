@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
+import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {AmpDocService} from '../../../../src/service/ampdoc-impl';
 import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
 import {Deferred} from '../../../../src/utils/promise';
 import {Services} from '../../../../src/services';
+import {
+  createElementWithAttributes,
+  whenUpgradedToCustomElement,
+} from '../../../../src/dom';
 import {
   resetExperimentTogglesForTesting,
   toggleExperiment,
@@ -150,6 +155,11 @@ describes.repeated(
           rendered,
           opts = DEFAULT_LIST_OPTS
         ) {
+          expectFetch(fetched, rendered, opts);
+          expectRender();
+        }
+
+        function expectFetch(fetched, rendered, opts = DEFAULT_LIST_OPTS) {
           // Mock the actual network request.
           listMock
             .expects('fetch_')
@@ -160,7 +170,7 @@ describes.repeated(
           // If "reset-on-refresh" is set, show loading/placeholder before fetch.
           if (opts.resetOnRefresh) {
             listMock.expects('togglePlaceholder').withExactArgs(true).once();
-            listMock.expects('toggleLoading').withExactArgs(true, true).once();
+            listMock.expects('toggleLoading').withExactArgs(true).once();
           }
 
           // Stub the rendering of the template.
@@ -174,23 +184,14 @@ describes.repeated(
           ssrTemplateHelper.applySsrOrCsrTemplate
             .withArgs(element, itemsToRender)
             .returns(Promise.resolve(rendered));
-
-          expectRender();
         }
 
         function expectRender() {
-          // Call mutate OR measureMutate, then measure during render.
+          // Call mutate before measure during render.
           listMock
             .expects('mutateElement')
             .callsFake((m) => m())
-            .atLeast(0);
-          listMock
-            .expects('measureMutateElement')
-            .callsFake((m, n) => {
-              m();
-              n();
-            })
-            .atLeast(0);
+            .atLeast(1);
           listMock
             .expects('measureElement')
             .callsFake((m) => m())
@@ -246,46 +247,123 @@ describes.repeated(
             return list.layoutCallback();
           });
 
-          it('should unlock height for layout=container with successful attemptChangeHeight', async () => {
-            const itemElement = doc.createElement('div');
-            const placeholder = doc.createElement('div');
-            placeholder.style.height = '1337px';
-            element.appendChild(placeholder);
-            element.getPlaceholder = () => placeholder;
-            list.isLayoutSupported('container');
-            expectFetchAndRender(DEFAULT_FETCHED_DATA, [itemElement]);
+          describe('initialized with [layout=container]', () => {
+            function expectLockedRender() {
+              // Call measureMutate before measure during render.
+              listMock
+                .expects('measureMutateElement')
+                .callsFake((m, n) => {
+                  m();
+                  n();
+                })
+                .atLeast(1);
+              listMock
+                .expects('measureElement')
+                .callsFake((m) => m())
+                .atLeast(1);
 
-            listMock
-              .expects('attemptChangeHeight')
-              .withExactArgs(1337)
-              .returns(Promise.resolve(true));
-            listMock
-              .expects('maybeResizeListToFitItems_')
-              .returns(Promise.resolve(true));
-            listMock.expects('unlockHeightInsideMutate_').once();
+              // Hide loading/placeholder during render.
+              listMock.expects('toggleLoading').withExactArgs(false).atLeast(1);
+              listMock
+                .expects('togglePlaceholder')
+                .withExactArgs(false)
+                .atLeast(1);
+            }
 
-            return list.layoutCallback();
-          });
+            it('should error without experiment', () => {
+              allowConsoleError(() => {
+                expect(() => list.isLayoutSupported('container')).to.throw(
+                  'Experiment "amp-list-layout-container" is not turned on.'
+                );
+              });
+            });
 
-          it('should not unlock height for layout=container for unsuccessful attemptChangeHeight', () => {
-            const itemElement = doc.createElement('div');
-            const placeholder = doc.createElement('div');
-            placeholder.style.height = '1337px';
-            element.appendChild(placeholder);
-            element.getPlaceholder = () => placeholder;
-            list.isLayoutSupported('container');
-            expectFetchAndRender(DEFAULT_FETCHED_DATA, [itemElement]);
+            describes.repeated(
+              'enabled type',
+              {
+                'with experiment on': {type: 'experiment'},
+                'in an AMP4Email document': {type: 'email'},
+              },
+              (name, variant) => {
+                let itemElement;
 
-            listMock
-              .expects('attemptChangeHeight')
-              .withExactArgs(1337)
-              .returns(Promise.reject(false));
-            listMock
-              .expects('maybeResizeListToFitItems_')
-              .returns(Promise.resolve(false));
-            listMock.expects('unlockHeightInsideMutate_').never();
+                beforeEach(() => {
+                  if (variant.type === 'experiment') {
+                    toggleExperiment(win, 'amp-list-layout-container', true);
+                  } else if (variant.type === 'email') {
+                    doc.documentElement.setAttribute('amp4email', '');
+                  }
+                  itemElement = doc.createElement('div');
+                  const placeholder = doc.createElement('div');
+                  placeholder.style.height = '1337px';
+                  element.appendChild(placeholder);
+                  element.getPlaceholder = () => placeholder;
+                });
 
-            return list.layoutCallback();
+                afterEach(() => {
+                  if (variant.type === 'experiment') {
+                    toggleExperiment(win, 'amp-list-layout-container', false);
+                  }
+                });
+
+                it('should require placeholder', () => {
+                  list.getPlaceholder = () => null;
+                  allowConsoleError(() => {
+                    expect(() => list.isLayoutSupported('container')).to.throw(
+                      /amp-list with layout=container relies on a placeholder/
+                    );
+                  });
+                });
+
+                it('should unlock height for layout=container with successful attemptChangeHeight', () => {
+                  expect(list.isLayoutSupported('container')).to.be.true;
+                  expect(list.enableManagedResizing_).to.be.true;
+                  expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
+                  expectLockedRender();
+                  listMock
+                    .expects('attemptChangeHeight')
+                    .withExactArgs(1337)
+                    .returns(Promise.resolve());
+                  listMock
+                    .expects('maybeResizeListToFitItems_')
+                    .returns(Promise.resolve(true));
+                  listMock.expects('unlockHeightInsideMutate_').once();
+                  return list.layoutCallback();
+                });
+
+                it('should not unlock height for layout=container for unsuccessful attemptChangeHeight', () => {
+                  expect(list.isLayoutSupported('container')).to.be.true;
+                  expect(list.enableManagedResizing_).to.be.true;
+                  expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
+                  expectLockedRender();
+                  listMock
+                    .expects('attemptChangeHeight')
+                    .withExactArgs(1337)
+                    .returns(Promise.reject(false));
+                  listMock
+                    .expects('maybeResizeListToFitItems_')
+                    .returns(Promise.resolve(false));
+                  listMock.expects('unlockHeightInsideMutate_').never();
+                  return list.layoutCallback();
+                });
+
+                it('should not unlock height for layout=container for null return', () => {
+                  expect(list.isLayoutSupported('container')).to.be.true;
+                  expect(list.enableManagedResizing_).to.be.true;
+                  expectFetch(DEFAULT_FETCHED_DATA, [itemElement]);
+                  expectLockedRender();
+                  listMock
+                    .expects('attemptChangeHeight')
+                    .withExactArgs(1337)
+                    .returns(Promise.resolve());
+                  listMock
+                    .expects('maybeResizeListToFitItems_')
+                    .returns(Promise.resolve(null));
+                  listMock.expects('unlockHeightInsideMutate_').never();
+                  return list.layoutCallback();
+                });
+              }
+            );
           });
 
           it('should attemptChangeHeight rendered contents', () => {
@@ -453,8 +531,8 @@ describes.repeated(
               expect(list.container_.contains(foo)).to.be.true;
 
               const opts = {refresh: true, resetOnRefresh: true, expr: 'items'};
-
               expectFetchAndRender(DEFAULT_FETCHED_DATA, [foo], opts);
+
               return list.executeAction({
                 method: 'refresh',
                 satisfiesTrust: () => true,
@@ -1097,10 +1175,7 @@ describes.repeated(
               listMock.expects('fetchList_').never();
               // Expect display of placeholder/loading before render.
               listMock.expects('togglePlaceholder').withExactArgs(true).once();
-              listMock
-                .expects('toggleLoading')
-                .withExactArgs(true, true)
-                .once();
+              listMock.expects('toggleLoading').withExactArgs(true).once();
               // Expect hiding of placeholder/loading after render.
               listMock.expects('togglePlaceholder').withExactArgs(false).once();
               listMock.expects('toggleLoading').withExactArgs(false).once();
@@ -1181,6 +1256,43 @@ describes.repeated(
               expect(bind.rescan).to.have.been.calledOnce;
               expect(bind.rescan).calledWithExactly([child], [], {
                 update: false,
+                fast: true,
+              });
+            });
+
+            it('should rescan() with {update: true} after FIRST_MUTATE', async () => {
+              bind.signals = () => {
+                return {get: (name) => name === 'FIRST_MUTATE'};
+              };
+              const child = doc.createElement('div');
+              child.setAttribute('i-amphtml-binding', '');
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [child]);
+              await list.layoutCallback();
+              expect(bind.rescan).to.have.been.calledOnce;
+              expect(bind.rescan).calledWithExactly(
+                [child],
+                [list.container_],
+                {
+                  update: true,
+                  fast: true,
+                }
+              );
+            });
+          });
+
+          describe('binding="refresh-evaluate"', () => {
+            beforeEach(() => {
+              element.setAttribute('binding', 'refresh-evaluate');
+            });
+
+            it('should rescan() with {update: "evaluate"} before FIRST_MUTATE', async () => {
+              const child = doc.createElement('div');
+              child.setAttribute('i-amphtml-binding', '');
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [child]);
+              await list.layoutCallback();
+              expect(bind.rescan).to.have.been.calledOnce;
+              expect(bind.rescan).calledWithExactly([child], [], {
+                update: 'evaluate',
                 fast: true,
               });
             });
@@ -1306,5 +1418,61 @@ describes.repeated(
         }); // with amp-bind
       }
     );
+  }
+);
+
+describes.realWin(
+  'amp-list component with runtime on',
+  {
+    amp: {
+      extensions: ['amp-list'],
+      runtimeOn: true,
+    },
+  },
+  (env) => {
+    it('should allow default actions in email documents', async () => {
+      env.win.document.documentElement.setAttribute('amp4email', '');
+      const action = new ActionService(env.ampdoc, env.win.document);
+
+      env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
+      const element = createElementWithAttributes(
+        env.win.document,
+        'amp-list',
+        {
+          'width': '300',
+          'height': '100',
+          'src': 'https://data.com/list.json',
+        }
+      );
+      env.win.document.body.appendChild(element);
+      env.sandbox.spy(element, 'enqueAction');
+      env.sandbox.stub(element, 'getDefaultActionAlias').returns({'items': []});
+      await whenUpgradedToCustomElement(element);
+      env.sandbox.stub(element.implementation_, 'fetchList_');
+
+      ['changeToLayoutContainer', 'refresh'].forEach((method) => {
+        action.execute(
+          element,
+          method,
+          null,
+          'source',
+          'caller',
+          'event',
+          ActionTrust.HIGH
+        );
+        expect(element.enqueAction).to.be.calledWith(
+          env.sandbox.match({
+            actionEventType: '?',
+            args: null,
+            caller: 'caller',
+            event: 'event',
+            method,
+            node: element,
+            source: 'source',
+            trust: ActionTrust.HIGH,
+          })
+        );
+      });
+    });
   }
 );

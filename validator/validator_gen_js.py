@@ -61,7 +61,7 @@ def FindDescriptors(validator_pb2, msg_desc_by_name, enum_desc_by_name):
     msg_desc_by_name: A map of message descriptors, keyed by full_name.
     enum_desc_by_name: A map of enum descriptors, keyed by full name.
   """
-  for msg_type in validator_pb2.DESCRIPTOR.message_types_by_name.values():
+  for msg_type in list(validator_pb2.DESCRIPTOR.message_types_by_name.values()):
     msg_desc_by_name[msg_type.full_name] = msg_type
     for enum_type in msg_type.enum_types:
       enum_desc_by_name[enum_type.full_name] = enum_type
@@ -321,7 +321,7 @@ def ValueToString(descriptor, field_desc, value):
   """
   if field_desc.type == descriptor.FieldDescriptor.TYPE_STRING:
     escaped = ('' + value).encode('unicode-escape')
-    return "'%s'" % escaped.replace("'", "\\'")
+    return "'%s'" % escaped.decode().replace("'", "\\'")
   if field_desc.type == descriptor.FieldDescriptor.TYPE_BOOL:
     if value:
       return 'true'
@@ -339,8 +339,8 @@ CONSTRUCTOR_ARG_FIELDS = [
     'amp.validator.AtRuleSpec.type',
     'amp.validator.AttrSpec.name',
     'amp.validator.AttrTriggerSpec.also_requires_attr',
-    'amp.validator.BlackListedCDataRegex.error_message',
-    'amp.validator.BlackListedCDataRegex.regex',
+    'amp.validator.DenyListedCDataRegex.error_message',
+    'amp.validator.DenyListedCDataRegex.regex',
     'amp.validator.ErrorFormat.code',
     'amp.validator.ErrorFormat.format',
     'amp.validator.PropertySpec.name',
@@ -370,7 +370,7 @@ ATTR_LIST_NAME_REFERENCE_FIELD = ['amp.validator.TagSpec.attr_lists']
 # the AttrSpecs.
 SYNTHETIC_REFERENCE_FIELD = [
     'amp.validator.AttrList.attrs',
-    'amp.validator.AttrSpec.blacklisted_value_regex',
+    'amp.validator.AttrSpec.disallowed_value_regex',
     'amp.validator.AttrSpec.mandatory_anyof',
     'amp.validator.AttrSpec.mandatory_oneof',
     'amp.validator.AttrSpec.value_regex',
@@ -448,7 +448,7 @@ def PrintClassFor(descriptor, msg_desc, out):
         'this.%s = %s;' % (UnderscoreToCamelCase(field.name), assigned_value))
   if msg_desc.full_name == 'amp.validator.CdataSpec':
     out.Line('/** @type {?number} */')
-    out.Line('this.combinedBlacklistedCdataRegex = null;')
+    out.Line('this.combinedDenyListedCdataRegex = null;')
   if msg_desc.full_name == 'amp.validator.ValidatorRules':
     out.Line('/** @type {!Array<!string>} */')
     out.Line('this.dispatchKeyByTagSpecId = Array(tags.length);')
@@ -667,13 +667,12 @@ def PrintObject(descriptor, msg, registry, out):
                  msg.DESCRIPTOR.full_name), ','.join(constructor_arg_values)))
 
   if (msg.DESCRIPTOR.full_name == 'amp.validator.CdataSpec' and
-      msg.blacklisted_cdata_regex):
-    combined_blacklisted_cdata_regex = '(%s)' % '|'.join([
-        r.regex for r in msg.blacklisted_cdata_regex])
-    out.Line('%s.%s = %d;' % (
-        this_message_reference,
-        'combinedBlacklistedCdataRegex',
-        registry.InternString(combined_blacklisted_cdata_regex)))
+      msg.disallowed_cdata_regex):
+    combined_disallowed_cdata_regex = '(%s)' % '|'.join(
+        [r.regex for r in msg.disallowed_cdata_regex])
+    out.Line('%s.%s = %d;' %
+             (this_message_reference, 'combinedDenyListedCdataRegex',
+              registry.InternString(combined_disallowed_cdata_regex)))
 
 
 def DispatchKeyForTagSpecOrNone(tag_spec):
@@ -757,7 +756,7 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, generate_proto_only,
   FindDescriptors(validator_pb2, msg_desc_by_name, enum_desc_by_name)
 
   rules_obj = '%s.RULES' % validator_pb2.DESCRIPTOR.package
-  all_names = [rules_obj] + msg_desc_by_name.keys() + enum_desc_by_name.keys()
+  all_names = [rules_obj] + list(msg_desc_by_name.keys()) + list(enum_desc_by_name.keys())
   all_names.sort()
 
   out = OutputFormatter(out)

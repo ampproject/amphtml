@@ -25,9 +25,14 @@
 @import './pagination-buttons.css';
 
 /** Common */
-amp-story, amp-story-page, amp-story-grid-layer, amp-story-cta-layer {
+amp-story, amp-story-page, amp-story-cta-layer {
   contain: strict !important;
   overflow: hidden !important;
+  -webkit-touch-callout: none !important;
+}
+
+amp-story-grid-layer {
+  contain: size layout !important;
   -webkit-touch-callout: none !important;
 }
 
@@ -370,6 +375,15 @@ amp-story-grid-layer {
   width: 100% !important;
   top: 0 !important;
   left: 0 !important;
+}
+
+/**
+ * Prevents pre-load placeholders from pushing content offscreen. 
+ * Prevents preload placeholders from pushing content offscreen. 
+ */
+.i-amphtml-story-grid-template-fill amp-img img,
+.i-amphtml-story-grid-template-fill amp-video video {
+  position: absolute !important;
 }
 
 /**
@@ -859,17 +873,19 @@ amp-story .amp-video-eq,
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 48 48" fill="#FFF"><path d="M0 0h48v48H0z" fill="none"/><path d="M24 4C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm-4 29V15l12 9-12 9z"/></svg>') !important;
 }
 
-amp-story-quiz {
+.i-amphtml-story-reaction-component {
   align-self: center;
   width: auto !important;
   height: auto !important;
   /* 224px = the width of a narrow phone (320px) - tap-safe margins (48px * 2) */
   min-width: 224px !important;
   max-width: 400px !important;
+  /* Properties overrideable by user */
   --reaction-accent-color: #005AF0;
-  --reaction-prompt-text-color: white;
-  --reaction-option-text-color: #5F6368;
-  --reaction-theme-background: white !important;
+  --reaction-background-color: white;
+  /* Shared properties by components */
+  --reaction-prompt-text-color: white !important;
+  --reaction-option-text-color: #5F6368 !important;
   --reaction-theme-border: #DADCE0 !important;
   --reaction-theme-shading: #ECEDEF !important;
   --reaction-chip-radius: 32px !important;
@@ -878,22 +894,22 @@ amp-story-quiz {
   --reaction-answer-choice-background: white !important;
 }
 
-amp-story-quiz[theme="dark"] {
-  --reaction-option-text-color: white;
-  --reaction-theme-background: #202124 !important;
+.i-amphtml-story-reaction-component[theme="dark"] {
+  --reaction-option-text-color: white !important;
+  --reaction-background-color: #202124;
   --reaction-theme-border: #3C4043 !important;
   --reaction-theme-shading: #3C4043 !important;
 }
 
-amp-story-quiz[chip-corner="sharp"] {
+.i-amphtml-story-reaction-component[chip-corner="sharp"] {
   --reaction-chip-radius: 8px !important;
 }
 
-amp-story-quiz[chip-style="shadow"] {
+.i-amphtml-story-reaction-component[chip-style="shadow"] {
   --reaction-chip-shadow: 0px 2px 8px rgba(60, 60, 60, 0.12) !important;
   --reaction-theme-border: rgba(0, 0, 0, 0) !important;
 }
 
-amp-story-quiz[chip-style="shadow"][theme="dark"] {
+.i-amphtml-story-reaction-component[chip-style="shadow"][theme="dark"] {
   --reaction-chip-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.3) !important;
 }

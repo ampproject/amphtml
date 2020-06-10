@@ -159,12 +159,6 @@ class TestConfig {
     });
   }
 
-  skipSinglePass() {
-    return this.skip(function () {
-      return window.__karma__.config.amp.singlePass;
-    });
-  }
-
   enableIe() {
     this.skipMatchers.splice(this.skipMatchers.indexOf(this.runOnIe), 1);
     return this;

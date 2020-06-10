@@ -684,16 +684,18 @@ function installPatches(win, registry) {
       'innerHTML'
     );
   }
-  const innerHTMLSetter = innerHTMLDesc.set;
-  innerHTMLDesc.set = function (html) {
-    innerHTMLSetter.call(this, html);
-    registry.upgrade(this);
-  };
-  Object.defineProperty(
-    /** @type {!Object} */ (innerHTMLProto),
-    'innerHTML',
-    innerHTMLDesc
-  );
+  if (innerHTMLDesc && innerHTMLDesc.configurable) {
+    const innerHTMLSetter = innerHTMLDesc.set;
+    innerHTMLDesc.set = function (html) {
+      innerHTMLSetter.call(this, html);
+      registry.upgrade(this);
+    };
+    Object.defineProperty(
+      /** @type {!Object} */ (innerHTMLProto),
+      'innerHTML',
+      innerHTMLDesc
+    );
+  }
 }
 
 /**
@@ -804,6 +806,8 @@ function polyfill(win) {
   // And because `HTMLElementPolyfill` extends from `HTMLElement`, it doesn't
   // have a `.call`! So we need to manually install it.
   if (!HTMLElementPolyfill.call) {
+    HTMLElementPolyfill.apply = win.Function.apply;
+    HTMLElementPolyfill.bind = win.Function.bind;
     HTMLElementPolyfill.call = win.Function.call;
   }
 }

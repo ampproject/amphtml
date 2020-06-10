@@ -223,12 +223,16 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, (env) => {
 
     it('should check that login action is present', () => {
       delete actionMap[Action.LOGIN];
-      expect(localSubscriptionPlatform.validateActionMap, actionMap).to.throw;
+      expect(() =>
+        localSubscriptionPlatform.validateActionMap(actionMap)
+      ).to.throw();
     });
 
     it('should check that subscribe action is present', () => {
       delete actionMap[Action.SUBSCRIBE];
-      expect(localSubscriptionPlatform.validateActionMap, actionMap).to.throw;
+      expect(() =>
+        localSubscriptionPlatform.validateActionMap(actionMap)
+      ).to.throw();
     });
 
     it(

@@ -37,6 +37,10 @@ describes.realWin('amp-story-consent', {amp: true}, (env) => {
 
   beforeEach(() => {
     win = env.win;
+    const localizationService = new LocalizationService(win.document.body);
+    env.sandbox
+      .stub(Services, 'localizationForDoc')
+      .returns(localizationService);
     const storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', function () {
       return storeService;
@@ -58,11 +62,6 @@ describes.realWin('amp-story-consent', {amp: true}, (env) => {
     getComputedStyleStub = env.sandbox
       .stub(win, 'getComputedStyle')
       .returns(styles);
-
-    const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', function () {
-      return localizationService;
-    });
 
     // Test DOM structure:
     // <amp-story>

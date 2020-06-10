@@ -21,12 +21,10 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../src/ampdoc-fie';
-import {AdsenseSharedState} from './adsense-shared-state';
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {Navigation} from '../../../src/service/navigation';
 import {
+  AMP_AD_NO_CENTER_CSS_EXP,
   QQID_HEADER,
+  RENDER_ON_IDLE_FIX_EXP,
   SANDBOX_HEADER,
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
@@ -41,6 +39,11 @@ import {
   isReportingEnabled,
   maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
+import {AdsenseSharedState} from './adsense-shared-state';
+import {AmpA4A, NO_SIGNING_EXP} from '../../amp-a4a/0.1/amp-a4a';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {FIE_INIT_CHUNKING_EXP} from '../../../src/friendly-iframe-embed';
+import {Navigation} from '../../../src/service/navigation';
 import {ResponsiveState} from './responsive-state';
 import {Services} from '../../../src/services';
 import {
@@ -55,6 +58,7 @@ import {getData} from '../../../src/event-helper';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
 import {
   getExperimentBranch,
+  isExperimentOn,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
@@ -190,13 +194,15 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       if (state != null) {
         this.responsiveState_ = state;
       }
-      if (this.responsiveState_ != null) {
+      if (
+        this.responsiveState_ != null &&
+        !this.responsiveState_.isContainerWidthState()
+      ) {
         return this.responsiveState_.attemptToMatchResponsiveHeight();
       }
       // This should happen last, as some diversion criteria rely on some of the
       // preceding logic (specifically responsive logic).
       this.divertExperiments();
-      this.maybeAddSinglePassExperiment();
     });
   }
 
@@ -221,6 +227,31 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           Number(this.element.getAttribute('height')) > 0,
         branches: ['21062003', '21062004'],
       },
+      [AMP_AD_NO_CENTER_CSS_EXP.id]: {
+        isTrafficEligible: () => true,
+        branches: [
+          AMP_AD_NO_CENTER_CSS_EXP.control,
+          AMP_AD_NO_CENTER_CSS_EXP.experiment,
+        ],
+      },
+      [[FIE_INIT_CHUNKING_EXP.id]]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [FIE_INIT_CHUNKING_EXP.control],
+          [FIE_INIT_CHUNKING_EXP.experiment],
+        ],
+      },
+      [[RENDER_ON_IDLE_FIX_EXP.id]]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [RENDER_ON_IDLE_FIX_EXP.control],
+          [RENDER_ON_IDLE_FIX_EXP.experiment],
+        ],
+      },
+      [NO_SIGNING_EXP.id]: {
+        isTrafficEligible: () => true,
+        branches: [[NO_SIGNING_EXP.control], [NO_SIGNING_EXP.experiment]],
+      },
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
     });
     const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
@@ -244,7 +275,15 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl(consentState) {
+  getAdUrl(consentTuple) {
+    let consentState = undefined;
+    let consentString = undefined;
+    let gdprApplies = undefined;
+    if (consentTuple) {
+      consentState = consentTuple.consentState;
+      consentString = consentTuple.consentString;
+      gdprApplies = consentTuple.gdprApplies;
+    }
     if (
       consentState == CONSENT_POLICY_STATE.UNKNOWN &&
       this.element.getAttribute('data-npa-on-unknown-consent') != 'true'
@@ -263,10 +302,18 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const width = Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('height'));
 
-    this.size_ =
-      getExperimentBranch(this.win, FORMAT_EXP) == '21062004'
-        ? {width, height}
-        : this.getIntersectionElementLayoutBox();
+    if (
+      this.responsiveState_ != null &&
+      this.responsiveState_.isContainerWidthState()
+    ) {
+      this.size_ = {width, height};
+    } else {
+      this.size_ =
+        getExperimentBranch(this.win, FORMAT_EXP) == '21062004'
+          ? {width, height}
+          : this.getIntersectionElementLayoutBox();
+    }
+
     const sizeToSend = this.isSinglePageStoryAd
       ? {width: 1, height: 1}
       : this.size_;
@@ -330,6 +377,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         this.responsiveState_ != null
           ? this.responsiveState_.getRafmtParam()
           : null,
+      'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
+      'gdpr_consent': consentString,
       'pfx': pfx ? '1' : '0',
       'aanf': /^(true|false)$/i.test(this.element.getAttribute('data-no-fill'))
         ? this.element.getAttribute('data-no-fill')
@@ -487,6 +536,19 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       width: `${this.size_.width}px`,
       height: `${this.size_.height}px`,
     });
+
+    // Set the centering CSS if the experiment is off
+    if (
+      !isExperimentOn(this.win, 'amp-ad-no-center-css') ||
+      getExperimentBranch(this.win, AMP_AD_NO_CENTER_CSS_EXP.id) ===
+        AMP_AD_NO_CENTER_CSS_EXP.control
+    ) {
+      setStyles(dev().assertElement(this.iframe), {
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+      });
+    }
     if (this.qqid_) {
       this.element.setAttribute('data-google-query-id', this.qqid_);
     }

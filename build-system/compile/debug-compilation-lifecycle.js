@@ -41,16 +41,24 @@ const LIFECYCLES = {
  *
  * @param {string} lifecycle
  * @param {string} fullpath
- * @param {string} content
+ * @param {Buffer} content
+ * @param {Object} sourcemap
  */
-function debug(lifecycle, fullpath, content) {
+function debug(lifecycle, fullpath, content, sourcemap) {
   if (argv.debug && Object.keys(LIFECYCLES).includes(lifecycle)) {
+    const contentsPath = tempy.writeSync(content);
+    if (sourcemap) {
+      fs.writeFileSync(
+        `${contentsPath}.map`,
+        JSON.stringify(sourcemap, null, 4)
+      );
+    }
     fs.appendFileSync(
       logFile,
       `${pad(lifecycle, 20)}: ${pad(
         path.basename(fullpath),
         30
-      )} ${tempy.writeSync(content)}\n`
+      )} ${contentsPath}\n`
     );
   }
 }

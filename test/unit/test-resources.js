@@ -463,6 +463,43 @@ describe('Resources', () => {
     // The other task is not updated.
     expect(task2.priority).to.equal(LayoutPriority.ADS);
   });
+
+  describe('slow element ratio (ser)', () => {
+    const slowTask = {resource: {isInViewport: () => true}};
+    const fastTask = {resource: {isInViewport: () => false}};
+
+    it('No layouts --> 0', () => {
+      resources.firstVisibleTime_ = 1;
+      expect(resources.getSlowElementRatio()).equal(0);
+    });
+
+    it('0 slow / 1 total --> 0', () => {
+      resources.firstVisibleTime_ = 1;
+      resources.taskComplete_(fastTask);
+      expect(resources.getSlowElementRatio()).equal(0);
+    });
+
+    it('ser is 0 if page was never visible', () => {
+      resources.firstVisibleTime_ = -1;
+      resources.taskComplete_(slowTask);
+      expect(resources.getSlowElementRatio()).equal(0);
+    });
+
+    it('1 slow / 1 total --> 1', () => {
+      resources.firstVisibleTime_ = 1;
+      resources.taskComplete_(slowTask);
+      expect(resources.getSlowElementRatio()).equal(1);
+    });
+
+    it('9 slow/ 10 total --> 0.9', () => {
+      resources.firstVisibleTime_ = 1;
+      for (let i = 0; i < 9; i++) {
+        resources.taskComplete_(slowTask);
+      }
+      resources.taskComplete_(fastTask);
+      expect(resources.getSlowElementRatio()).equal(0.9);
+    });
+  });
 });
 
 describes.fakeWin(
@@ -671,6 +708,7 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     resources.resources_ = [resource1, resource2];
     resources.vsync_ = {
       mutate: (callback) => callback(),
+      measure: (callback) => callback(),
       measurePromise: (callback) => Promise.resolve(callback()),
     };
   });
@@ -1290,6 +1328,24 @@ describes.realWin(
       expect(resources.maybeChangeHeight_).to.equal(false);
       expect(resources.documentReady_).to.equal(true);
       expect(resources.contentHeight_).to.equal(contentHeight);
+    });
+
+    it('should only send contentHeight to the viewer once amp finishes init', () => {
+      resources.firstPassAfterDocumentReady_ = false;
+      resources.documentReady_ = false;
+      resources.ampInitialized_ = false;
+      resources.doPass();
+      expect(viewerSendMessageStub).not.called;
+
+      resources.firstPassAfterDocumentReady_ = true;
+      resources.documentReady_ = true;
+      resources.ampInitialized_ = true;
+      resources.doPass();
+      expect(viewerSendMessageStub).calledWithExactly(
+        'documentHeight',
+        {height: 0},
+        true
+      );
     });
 
     it('should send contentHeight to viewer if height was changed', () => {

@@ -15,8 +15,15 @@
  */
 
 import * as lolex from 'lolex';
-import {CONSENT_ITEM_STATE, constructConsentInfo} from '../consent-info';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
+import {
+  CONSENT_ITEM_STATE,
+  constructConsentInfo,
+  constructMetadata,
+} from '../consent-info';
+import {
+  CONSENT_POLICY_STATE,
+  CONSENT_STRING_TYPE,
+} from '../../../../src/consent-state';
 import {
   ConsentPolicyInstance,
   ConsentPolicyManager,
@@ -65,6 +72,9 @@ describes.realWin(
               })
             );
           },
+          getConsentInstanceGdprApplies: () => {
+            return Promise.resolve(false);
+          },
         });
       });
     });
@@ -77,7 +87,11 @@ describes.realWin(
       let manager;
       beforeEach(() => {
         manager = new ConsentPolicyManager(ampdoc);
-        consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test');
+        consentInfo = constructConsentInfo(
+          CONSENT_ITEM_STATE.ACCEPTED,
+          'test',
+          constructMetadata(CONSENT_STRING_TYPE.TCF_V1)
+        );
         manager.setLegacyConsentInstanceId('ABC');
       });
 
@@ -86,6 +100,9 @@ describes.realWin(
         expect(consentManagerOnChangeSpy).to.be.called;
         expect(manager.consentState_).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
         expect(manager.consentString_).to.equal('test');
+        expect(manager.consentMetadata_).to.be.deep.equals(
+          constructMetadata(CONSENT_STRING_TYPE.TCF_V1)
+        );
       });
 
       describe('Register policy instance', () => {
@@ -570,6 +587,53 @@ describes.realWin(
         ).to.eventually.deep.equal({
           'shared': 'test',
         });
+      });
+    });
+
+    describe('getConsentMetadataInfo', () => {
+      let manager;
+
+      beforeEach(() => {
+        manager = new ConsentPolicyManager(ampdoc);
+        manager.setLegacyConsentInstanceId('ABC');
+        env.sandbox
+          .stub(ConsentPolicyInstance.prototype, 'getReadyPromise')
+          .callsFake(() => {
+            return Promise.resolve();
+          });
+        consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test');
+      });
+
+      // TODO(micajuineho) combine into metadata values
+      it('should return gdprApplies value', async () => {
+        manager.registerConsentPolicyInstance('default', {
+          'waitFor': {
+            'ABC': undefined,
+          },
+        });
+        await macroTask();
+        await expect(manager.getConsentMetadataInfo('default')).to.eventually.be
+          .undefined;
+      });
+    });
+
+    describe('getGdprApplies', () => {
+      let manager;
+
+      beforeEach(() => {
+        manager = new ConsentPolicyManager(ampdoc);
+        manager.setLegacyConsentInstanceId('ABC');
+      });
+
+      it('should return gdprApplies value', async () => {
+        manager.registerConsentPolicyInstance('default', {
+          'waitFor': {
+            'ABC': undefined,
+          },
+        });
+        await macroTask();
+        // Set above in getConsentInstanceGdprApplies mock
+        await expect(manager.getGdprApplies()).to.eventually.be.false;
       });
     });
   }

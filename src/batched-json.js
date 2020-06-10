@@ -108,7 +108,7 @@ export function requestForBatchFetch(element, replacement, refresh) {
     // Throw user error if this element is performing URL substitutions
     // without the soon-to-be-required opt-in (#12498).
     if (replacement == UrlReplacementPolicy.OPT_IN) {
-      const invalid = urlReplacements.collectUnwhitelistedVarsSync(element);
+      const invalid = urlReplacements.collectDisallowedVarsSync(element);
       if (invalid.length > 0) {
         throw user().createError(
           'URL variable substitutions in CORS ' +

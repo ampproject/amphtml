@@ -47,10 +47,16 @@ describes.sandboxed('StandardActions', {}, (env) => {
     return element;
   }
 
-  function stubMutate(methodName) {
+  function stubMutate() {
     return env.sandbox
-      .stub(standardActions.mutator_, methodName)
+      .stub(standardActions.mutator_, 'mutateElement')
       .callsFake((unusedElement, mutator) => mutator());
+  }
+  function stubMutateNoop() {
+    standardActions.mutator_.mutateElement.restore();
+    return env.sandbox
+      .stub(standardActions.mutator_, 'mutateElement')
+      .callsFake(() => {});
   }
 
   function expectElementMutatedAsync(element) {
@@ -63,12 +69,8 @@ describes.sandboxed('StandardActions', {}, (env) => {
     expect(element).to.have.attribute('hidden');
   }
 
-  function expectElementToHaveBeenShown(element, sync = false) {
-    if (sync) {
-      expect(mutateElementStub).to.not.have.been.called;
-    } else {
-      expectElementMutatedAsync(element);
-    }
+  function expectElementToHaveBeenShown(element) {
+    expectElementMutatedAsync(element);
     expect(element).to.not.have.attribute('hidden');
     expect(element.hasAttribute('hidden')).to.be.false;
   }
@@ -114,7 +116,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
     ampdoc = new AmpDocSingle(window);
     env.sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(ampdoc);
     standardActions = new StandardActions(ampdoc);
-    mutateElementStub = stubMutate('mutateElement');
+    mutateElementStub = stubMutate();
     scrollStub = env.sandbox.stub(
       standardActions.viewport_,
       'animateScrollIntoView'
@@ -212,29 +214,31 @@ describes.sandboxed('StandardActions', {}, (env) => {
           </div>
         `;
         standardActions.handleShow_(trustedInvocation({node}));
-        expectElementToHaveBeenShown(node, /* sync */ false);
+        expectElementToHaveBeenShown(node);
       });
 
       it('executes asynchronously when no autofocus (direct)', () => {
         const node = html` <input /> `;
         standardActions.handleShow_(trustedInvocation({node}));
-        expectElementToHaveBeenShown(node, /* sync */ false);
+        expectElementToHaveBeenShown(node);
       });
 
       it('executes synchronously when autofocus (wrapped)', () => {
+        mutateElementStub = stubMutateNoop();
         const node = html`
           <div>
             <div><input autofocus /></div>
           </div>
         `;
         standardActions.handleShow_(trustedInvocation({node}));
-        expectElementToHaveBeenShown(node, /* sync */ true);
+        expectElementToHaveBeenShown(node);
       });
 
       it('executes synchronously when autofocus (direct)', () => {
+        mutateElementStub = stubMutateNoop();
         const node = html` <input autofocus /> `;
         standardActions.handleShow_(trustedInvocation({node}));
-        expectElementToHaveBeenShown(node, /* sync */ true);
+        expectElementToHaveBeenShown(node);
       });
     });
 
@@ -250,16 +254,18 @@ describes.sandboxed('StandardActions', {}, (env) => {
         });
 
         it('focuses [autofocus] element synchronously (direct)', () => {
+          mutateElementStub = stubMutateNoop();
           const node = html` <input autofocus /> `;
           node.focus = env.sandbox.spy();
 
           standardActions.handleShow_(trustedInvocation({node}));
 
-          expect(mutateElementStub).to.not.have.been.called;
+          expectElementToHaveBeenShown(node);
           expect(node.focus).to.have.been.calledOnce;
         });
 
         it('focuses [autofocus] element synchronously (wrapped)', () => {
+          mutateElementStub = stubMutateNoop();
           const wrapper = html` <div><div></div></div> `;
           const node = html` <input autofocus /> `;
           node.focus = env.sandbox.spy();
@@ -267,7 +273,7 @@ describes.sandboxed('StandardActions', {}, (env) => {
           wrapper.firstElementChild.appendChild(node);
           standardActions.handleShow_(trustedInvocation({node: wrapper}));
 
-          expect(mutateElementStub).to.not.have.been.called;
+          expectElementToHaveBeenShown(wrapper);
           expect(node.focus).to.have.been.calledOnce;
         });
 

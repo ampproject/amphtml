@@ -19,6 +19,7 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+import * as bytesUtils from '../../../../src/utils/bytes';
 import {
   AMP_SIGNATURE_HEADER,
   VerificationStatus,
@@ -32,6 +33,8 @@ import {
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkDoubleclickImpl,
+  EXPAND_JSON_TARGETING_EXP,
+  RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES,
   getNetworkId,
   getPageviewStateTokensForAdRequest,
   resetLocationQueryParametersForTesting,
@@ -45,8 +48,10 @@ import {QQID_HEADER} from '../../../../ads/google/a4a/utils';
 import {SafeframeHostApi} from '../safeframe-host';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {toggleExperiment} from '../../../../src/experiments';
-import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
+import {
+  forceExperimentBranch,
+  toggleExperiment,
+} from '../../../../src/experiments';
 
 /**
  * We're allowing external resources because otherwise using realWin causes
@@ -703,7 +708,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
           /(\?|&)ady=-?[0-9]+(&|$)/,
           /(\?|&)u_aw=[0-9]+(&|$)/,
           /(\?|&)u_ah=[0-9]+(&|$)/,
-          /(\?|&)u_cd=24(&|$)/,
+          /(\?|&)u_cd=(24|30)(&|$)/,
           /(\?|&)u_w=[0-9]+(&|$)/,
           /(\?|&)u_h=[0-9]+(&|$)/,
           /(\?|&)u_tz=-?[0-9]+(&|$)/,
@@ -808,6 +813,48 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       new AmpAd(element).upgradeCallback();
       return impl.getAdUrl().then((url) => {
         expect(url).to.match(/&scp=excl_cat%3Dsports&/);
+      });
+    });
+
+    it('expands CLIENT_ID in targeting', () => {
+      toggleExperiment(win, 'expand-json-targeting', true, true);
+      forceExperimentBranch(
+        win,
+        EXPAND_JSON_TARGETING_EXP.ID,
+        EXPAND_JSON_TARGETING_EXP.EXPERIMENT
+      );
+      element.setAttribute(
+        'json',
+        `{
+          "targeting": {
+            "cid": "CLIENT_ID(foo)"
+          }
+        }`
+      );
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then((url) => {
+        expect(url).to.match(/&scp=cid%3Damp-[\w-]+&/);
+      });
+    });
+
+    it('expands CLIENT_ID in targeting inside array', () => {
+      toggleExperiment(win, 'expand-json-targeting', true, true);
+      forceExperimentBranch(
+        win,
+        EXPAND_JSON_TARGETING_EXP.ID,
+        EXPAND_JSON_TARGETING_EXP.EXPERIMENT
+      );
+      element.setAttribute(
+        'json',
+        `{
+          "targeting": {
+            "arr": ["cats", "CLIENT_ID(foo)"]
+          }
+        }`
+      );
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then((url) => {
+        expect(url).to.match(/&scp=arr%3Dcats%2Camp-[\w-]+&/);
       });
     });
 
@@ -980,31 +1027,61 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
     });
 
     it('should return empty string if unknown consentState', () =>
-      impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN).then((url) => {
-        expect(url).equal('');
-        return expect(impl.getAdUrlDeferred.promise).to.eventually.equal('');
-      }));
+      impl
+        .getAdUrl({consentState: CONSENT_POLICY_STATE.UNKNOWN})
+        .then((url) => {
+          expect(url).equal('');
+          return expect(impl.getAdUrlDeferred.promise).to.eventually.equal('');
+        }));
 
     it('should include npa=1 if unknown consent & explicit npa', () => {
       impl.element.setAttribute('data-npa-on-unknown-consent', 'true');
-      return impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN).then((url) => {
-        expect(url).to.match(/(\?|&)npa=1(&|$)/);
-      });
+      return impl
+        .getAdUrl({consentState: CONSENT_POLICY_STATE.UNKNOWN})
+        .then((url) => {
+          expect(url).to.match(/(\?|&)npa=1(&|$)/);
+        });
     });
 
     it('should include npa=1 if insufficient consent', () =>
-      impl.getAdUrl(CONSENT_POLICY_STATE.INSUFFICIENT).then((url) => {
-        expect(url).to.match(/(\?|&)npa=1(&|$)/);
-      }));
+      impl
+        .getAdUrl({consentState: CONSENT_POLICY_STATE.INSUFFICIENT})
+        .then((url) => {
+          expect(url).to.match(/(\?|&)npa=1(&|$)/);
+        }));
 
     it('should not include npa, if sufficient consent', () =>
-      impl.getAdUrl(CONSENT_POLICY_STATE.SUFFICIENT).then((url) => {
-        expect(url).to.not.match(/(\?|&)npa=(&|$)/);
-      }));
+      impl
+        .getAdUrl({consentState: CONSENT_POLICY_STATE.SUFFICIENT})
+        .then((url) => {
+          expect(url).to.not.match(/(\?|&)npa=(&|$)/);
+        }));
 
     it('should not include npa, if not required consent', () =>
-      impl.getAdUrl(CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED).then((url) => {
-        expect(url).to.not.match(/(\?|&)npa=(&|$)/);
+      impl
+        .getAdUrl({consentState: CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED})
+        .then((url) => {
+          expect(url).to.not.match(/(\?|&)npa=(&|$)/);
+        }));
+
+    it('should include gdpr_consent, if TC String is provided', () =>
+      impl.getAdUrl({consentString: 'tcstring'}).then((url) => {
+        expect(url).to.match(/(\?|&)gdpr_consent=tcstring(&|$)/);
+      }));
+
+    it('should include gdpr=1, if gdprApplies is true', () =>
+      impl.getAdUrl({gdprApplies: true}).then((url) => {
+        expect(url).to.match(/(\?|&)gdpr=1(&|$)/);
+      }));
+
+    it('should include gdpr=0, if gdprApplies is false', () =>
+      impl.getAdUrl({gdprApplies: false}).then((url) => {
+        expect(url).to.match(/(\?|&)gdpr=0(&|$)/);
+      }));
+
+    it('should not include gdpr, if gdprApplies is missing', () =>
+      impl.getAdUrl({}).then((url) => {
+        expect(url).to.not.match(/(\?|&)gdpr=(&|$)/);
       }));
 
     it('should include msz/psz/fws if in holdback control', () => {
@@ -1040,7 +1117,9 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       });
       const impl = new AmpAdNetworkDoubleclickImpl(element);
       expect(
-        impl.getPageParameters(CONSENT_POLICY_STATE.INSUFFICIENT).npa
+        impl.getPageParameters({
+          consentState: CONSENT_POLICY_STATE.INSUFFICIENT,
+        }).npa
       ).to.equal(1);
     });
   });
@@ -1138,15 +1217,33 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
   });
 
   describe('#delayAdRequestEnabled', () => {
-    beforeEach(() => {
-      const element = createElementWithAttributes(doc, 'amp-ad', {
-        type: 'doubleclick',
-      });
-      doc.body.appendChild(element);
-      impl = new AmpAdNetworkDoubleclickImpl(element);
+    it('should return false', () => {
+      expect(impl.delayAdRequestEnabled()).to.be.false;
     });
 
-    it('should return false by default', () => {
+    it('should not respect loading strategy', () => {
+      impl.element.setAttribute(
+        'data-loading-strategy',
+        'prefer-viewability-over-views'
+      );
+      expect(impl.delayAdRequestEnabled()).to.be.false;
+    });
+
+    it('should respect loading strategy if fetch attribute present', () => {
+      impl.element.setAttribute(
+        'data-loading-strategy',
+        'prefer-viewability-over-views'
+      );
+      impl.element.setAttribute('data-lazy-fetch', 'true');
+      expect(impl.delayAdRequestEnabled()).to.equal(1.25);
+    });
+
+    it('should NOT delay due to non-true fetch attribute', () => {
+      impl.element.setAttribute(
+        'data-loading-strategy',
+        'prefer-viewability-over-views'
+      );
+      impl.element.setAttribute('data-lazy-fetch', 'false');
       expect(impl.delayAdRequestEnabled()).to.be.false;
     });
   });
@@ -1170,7 +1267,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       return {
         arrayBuffer: () =>
           Promise.resolve(
-            utf8Encode('<html><body>Hello, World!</body></html>')
+            bytesUtils.utf8Encode('<html><body>Hello, World!</body></html>')
           ),
         headers: {
           get(prop) {
@@ -1454,6 +1551,48 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       ).to.equal(XORIGIN_MODE.SAFEFRAME);
     });
   });
+
+  describe('#RandomSubdomainSafeFrame', () => {
+    beforeEach(() => {
+      element = doc.createElement('amp-ad');
+      element.setAttribute('type', 'doubleclick');
+      element.setAttribute('data-ad-client', 'doubleclick');
+      element.setAttribute('width', '320');
+      element.setAttribute('height', '50');
+      doc.body.appendChild(element);
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+    });
+
+    it('should use random subdomain when experiment is enabled', () => {
+      impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
+
+      const expectedPath =
+        '^https:\\/\\/[\\w\\d]{32}.safeframe.googlesyndication.com' +
+        '\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$';
+
+      expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
+    });
+
+    it('uses random subdomain if experiment is on without win.crypto', () => {
+      impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
+
+      env.sandbox.stub(bytesUtils, 'getCryptoRandomBytesArray').returns(null);
+
+      const expectedPath =
+        '^https:\\/\\/[\\w\\d]{32}.safeframe.googlesyndication.com' +
+        '\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$';
+
+      expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
+    });
+
+    it('should use constant subdomain when experiment is disabled', () => {
+      const expectedPath =
+        '^https://tpc.googlesyndication.com' +
+        '\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$';
+
+      expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
+    });
+  });
 });
 
 describes.realWin(
@@ -1503,17 +1642,13 @@ describes.realWin(
       function verifyCss(iframe, expectedSize) {
         expect(iframe).to.be.ok;
         const style = env.win.getComputedStyle(iframe);
-        expect(style.top).to.equal('50%');
-        expect(style.left).to.equal('50%');
         expect(style.width).to.equal(expectedSize.width);
         expect(style.height).to.equal(expectedSize.height);
         // We don't know the exact values by which the frame will be
         // translated, as this can vary depending on whether we use the
         // height/width attributes, or the actual size of the frame. To make
         // this less of a hassle, we'll just match against regexp.
-        expect(style.transform).to.match(
-          new RegExp('matrix\\(1, 0, 0, 1, -[0-9]+, -[0-9]+\\)')
-        );
+        expect(style.transform).to.equal('none');
       }
 
       afterEach(() => env.win.document.body.removeChild(impl.element));
@@ -1892,7 +2027,7 @@ describes.realWin(
         };
         expect(
           AmpAdNetworkDoubleclickImpl.prototype.maybeValidateAmpCreative(
-            utf8Encode(creative),
+            bytesUtils.utf8Encode(creative),
             mockHeaders
           )
         ).to.eventually.equal('foo');
@@ -1913,10 +2048,13 @@ describes.realWin(
           },
         };
         return AmpAdNetworkDoubleclickImpl.prototype
-          .maybeValidateAmpCreative(utf8Encode(creative), mockHeaders)
+          .maybeValidateAmpCreative(
+            bytesUtils.utf8Encode(creative),
+            mockHeaders
+          )
           .then((result) => {
             expect(result).to.be.ok;
-            expect(utf8Decode(result)).to.equal(creative);
+            expect(bytesUtils.utf8Decode(result)).to.equal(creative);
           });
       });
 
@@ -1936,7 +2074,7 @@ describes.realWin(
         };
         expect(
           AmpAdNetworkDoubleclickImpl.prototype.maybeValidateAmpCreative(
-            utf8Encode(creative),
+            bytesUtils.utf8Encode(creative),
             mockHeaders
           )
         ).to.eventually.not.be.ok;

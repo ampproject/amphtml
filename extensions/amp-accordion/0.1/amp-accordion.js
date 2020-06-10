@@ -83,6 +83,11 @@ class AmpAccordion extends AMP.BaseElement {
   }
 
   /** @override */
+  prerenderAllowed() {
+    return true;
+  }
+
+  /** @override */
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
     this.sessionOptOut_ = this.element.hasAttribute('disable-session-states');
@@ -426,7 +431,6 @@ class AmpAccordion extends AMP.BaseElement {
           'opacity': '0',
         });
         if (!section.hasAttribute('expanded')) {
-          this.triggerEvent_('expand', section, trust);
           section.setAttribute('expanded', '');
         }
       }
@@ -478,6 +482,7 @@ class AmpAccordion extends AMP.BaseElement {
         );
         return animation.start(duration).thenAlways(() => {
           this.mutateElement(() => {
+            this.triggerEvent_('expand', section, trust);
             setStyles(section, {
               'overflow': '',
               'height': '',
