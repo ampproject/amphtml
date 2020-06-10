@@ -11,7 +11,11 @@
       owners: [{name: 'ampproject/wg-ui-and-a11y'}],
     },
     {
-      pattern: '{cid-*,*-cid-*,*-cid,consent,consent-state,extension-analytics}.js',
+      pattern: '{cid-*,*-cid-*,*-cid,extension-analytics,analytics}.js',
+      owners: [{name: 'ampproject/wg-analytics'}],
+    },
+    {
+      pattern: '{consent,consent-state}.js',
       owners: [{name: 'ampproject/wg-analytics'}],
     },
     {
