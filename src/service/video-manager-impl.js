@@ -1502,6 +1502,7 @@ export class AnalyticsPercentageTracker {
       return;
     }
     while (this.unlisteners_.length > 0) {
+      // TODO: is this a bug?
       this.unlisteners_.pop().call();
     }
     this.triggerId_++;

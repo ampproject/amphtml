@@ -185,6 +185,7 @@ export class AmpVideoIntegration {
     if (!(method in this.methods_)) {
       return;
     }
+    // TODO: is this a bug? Why should `this` be set to undefined.
     this.methods_[method].call();
   }
 

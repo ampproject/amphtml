@@ -216,7 +216,7 @@ export function reportError(error, opt_associatedElement) {
     // 'call' to make linter happy. And .call to make compiler happy
     // that expects some @this.
     onError['call'](
-      undefined,
+      self,
       undefined,
       undefined,
       undefined,
