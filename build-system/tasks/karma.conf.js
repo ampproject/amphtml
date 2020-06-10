@@ -245,8 +245,8 @@ module.exports = {
     SL_Firefox: {
       base: 'SauceLabs',
       browserName: 'firefox',
-      browserVersion: 'latest',
-      platformName: 'Linux',
+      version: 'latest',
+      platform: 'Linux',
       ...SAUCE_TIMEOUT_CONFIG,
     },
     SL_Firefox_Beta: {
@@ -259,8 +259,8 @@ module.exports = {
     SL_Safari: {
       base: 'SauceLabs',
       browserName: 'safari',
-      browserVersion: 'latest',
-      platformName: 'macOS 10.15',
+      version: 'latest',
+      platform: 'macOS 10.15',
       ...SAUCE_TIMEOUT_CONFIG,
     },
     SL_Safari_12: {
