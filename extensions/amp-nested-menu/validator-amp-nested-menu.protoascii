@@ -123,7 +123,7 @@ tags: {  # <amp-nested-menu> <span amp-nested-submenu-open/close>
   attr_lists: "amp-nested-menu-actions"
 }
 descendant_tag_list {
-  # Purposefully being restrictive when whitelisting child components;
+  # Purposefully being restrictive when allowlisting child components;
   # On demand, add more components to this list after manual testing.
   name: "amp-nested-menu-allowed-descendants"
   tag: "A"

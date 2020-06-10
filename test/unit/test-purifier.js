@@ -369,7 +369,7 @@ describe
       });
 
       // Need to test this since DOMPurify doesn't offer a API for tag-specific
-      // attribute whitelists. Instead, we hack around it with custom hooks.
+      // attribute allowlists. Instead, we hack around it with custom hooks.
       it('should not allow unsupported attributes after a valid one', () => {
         const html =
           '<form action-xhr="https://foo.com"></form>' +
@@ -403,8 +403,8 @@ describe
       });
 
       it('should avoid disallowing default-supported attributes', () => {
-        // We whitelist all attributes of AMP elements, but make sure we don't
-        // remove default-supported attributes from the whitelist afterwards.
+        // We allowlist all attributes of AMP elements, but make sure we don't
+        // remove default-supported attributes from the allowlist afterwards.
         expect(
           purify(
             '<amp-img style="color: red"></amp-img><p style="color: blue"></p>'
@@ -487,7 +487,7 @@ describe
         );
       });
 
-      it('should NOT output non-whitelisted markup', () => {
+      it('should NOT output non-allowlisted markup', () => {
         expect(purifyTripleMustache('a<style>b</style>c')).to.be.equal('ac');
         expect(purifyTripleMustache('a<img>c')).to.be.equal('ac');
       });
@@ -503,23 +503,23 @@ describe
         expect(purifyTripleMustache(html)).to.be.equal(html);
       });
 
-      it('should whitelist formatting related elements', () => {
-        const nonWhiteListedTag = '<img>';
-        const whiteListedFormattingTags =
+      it('should allowlist formatting related elements', () => {
+        const nonAllowlistedTag = '<img>';
+        const allowlistedFormattingTags =
           '<b>abc</b><div>def</div>' +
           '<br><code></code><del></del><em></em>' +
           '<i></i><ins></ins><mark></mark><s></s>' +
           '<small></small><strong></strong><sub></sub>' +
           '<sup></sup><time></time><u></u><hr>';
-        const html = `${whiteListedFormattingTags}${nonWhiteListedTag}`;
-        // Expect the purifier to unescape the whitelisted tags and to sanitize
+        const html = `${allowlistedFormattingTags}${nonAllowlistedTag}`;
+        // Expect the purifier to unescape the allowlisted tags and to sanitize
         // and remove the img tag.
         expect(purifyTripleMustache(html)).to.be.equal(
-          whiteListedFormattingTags
+          allowlistedFormattingTags
         );
       });
 
-      it('should whitelist table related elements and anchor tags', () => {
+      it('should allowlist table related elements and anchor tags', () => {
         const html =
           '<table class="valid-class">' +
           '<colgroup><col><col></colgroup>' +
@@ -797,7 +797,7 @@ describe
         });
       });
 
-      it('should only allow whitelisted AMP elements in AMP4EMAIL', () => {
+      it('should only allow allowlisted AMP elements in AMP4EMAIL', () => {
         html.setAttribute('amp4email', '');
         expect(purify('<amp-analytics>')).to.equal('');
         expect(purify('<amp-iframe>')).to.equal('');
@@ -876,7 +876,7 @@ describe('validateAttributeChange', () => {
     expect(vac('p', 'data-amp-bind-text', 'foo')).to.be.false;
   });
 
-  it('should allow whitelisted-by-tag attributes', () => {
+  it('should allow allowlisted-by-tag attributes', () => {
     purifier.isValidAttribute = () => false;
 
     expect(vac('a', 'rel', 'amphtml')).to.be.true;
