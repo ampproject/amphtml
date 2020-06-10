@@ -48,11 +48,14 @@ const realiasGetMode =
 // Terms that must not appear in our source files.
 const forbiddenTerms = {
   'DO NOT SUBMIT': '',
-  'whitelist': {
-    message: 'Please use the term allowlist',
+  'whitelist|white-list': {
+    message: 'Please use the term allowlist instead',
   },
-  'blacklist': {
+  'blacklist|black-list': {
     message: 'Please use the term denylist instead',
+  },
+  'grandfather|grandfathered': {
+    message: 'Please use the term legacy instead',
   },
   // TODO(dvoytenko, #8464): cleanup allowlist.
   '(^-amp-|\\W-amp-)': {
