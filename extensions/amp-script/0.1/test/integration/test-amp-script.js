@@ -25,7 +25,6 @@ function poll(description, condition, opt_onError) {
 
 describe
   .configure()
-  .skipSinglePass()
   .skipFirefox()
   .run('amp-script', function () {
     this.timeout(TIMEOUT);

@@ -293,7 +293,7 @@ function runSanitizerTests() {
       });
     });
 
-    it('should NOT output blacklisted values for class attributes', () => {
+    it('should NOT output denylisted values for class attributes', () => {
       allowConsoleError(() => {
         expect(sanitize('<p class="i-amphtml-">hello</p>')).to.be.equal(
           '<p>hello</p>'
