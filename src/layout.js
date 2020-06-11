@@ -530,7 +530,10 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
     intrinsicSizer.setAttribute(
       'src',
       fixIeIntrinsic
-        ? transparentPng(width, height)
+        ? transparentPng(
+            dev().assertNumber(getLengthNumeral(width)),
+            dev().assertNumber(getLengthNumeral(height))
+          )
         : `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`
     );
     element.insertBefore(sizer, element.firstChild);
