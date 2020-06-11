@@ -258,16 +258,16 @@ feature_tests/leaks.html:145:4 The tag 'param' is disallowed.
 |  -->
 |  <script src="https://leaking.via/script-src"></script>
 >> ^~~~~~~~~
-feature_tests/leaks.html:152:0 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/troubleshooting/validation_errors#custom-javascript-is-not-allowed)
+feature_tests/leaks.html:152:0 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
 |  <svg><script href="https://leaking.via/svg-script-href"></script></svg>
 >>      ^~~~~~~~~
-feature_tests/leaks.html:153:5 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/troubleshooting/validation_errors#custom-javascript-is-not-allowed)
+feature_tests/leaks.html:153:5 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
 |  <svg><script xlink:href="https://leaking.via/svg-script-xlink-href"></script></svg>
 >>      ^~~~~~~~~
-feature_tests/leaks.html:154:5 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/troubleshooting/validation_errors#custom-javascript-is-not-allowed)
+feature_tests/leaks.html:154:5 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
 |  <script>
 >> ^~~~~~~~~
-feature_tests/leaks.html:155:0 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/troubleshooting/validation_errors#custom-javascript-is-not-allowed)
+feature_tests/leaks.html:155:0 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
 |  //# sourceMappingURL=https://leaking.via/javascript-source-map
 |  </script>
 |
