@@ -223,7 +223,6 @@ Type attribute value: `mapp_intelligence`
 
 Adds support for Mapp Intelligence tracking. More information and configuration details can be found at [docs.mapp.com](https://docs.mapp.com/pages/viewpage.action?pageId=10027966).
 
-
 ### Marin Software
 
 Type attribute value: `marinsoftware`
