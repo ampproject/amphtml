@@ -610,7 +610,7 @@ export class AmpList extends AMP.BaseElement {
           dev().assertElement(this.container_).children
         ).forEach((child) =>
           this.owners_./*OK*/ scheduleUnlayout(
-            /** @type {!Element} */ (this.container_),
+            dev().assertElement(this.container_),
             child
           )
         );
