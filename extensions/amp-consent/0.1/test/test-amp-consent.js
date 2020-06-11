@@ -376,7 +376,7 @@ describes.realWin(
             'https://server-test-1/':
               '{"consentRequired": false, "consentStateValue": "unknown", "consentString": "hello"}',
             'https://server-test-2/':
-              '{"consentRequired": true, "consentStateValue": "rejected", "consentString": "mystring", "consentMetadata":{"consentStringType": 3}}',
+              '{"consentRequired": true, "consentStateValue": "rejected", "consentString": "mystring", "consentMetadata":{"consentStringType": 3, "additionalConsent": "1~1.35.41.101"}}',
             'https://server-test-3/':
               '{"consentRequired": true, "consentStateValue": "unknown"}',
             'https://geo-override-check2/': '{"consentRequired": true}',
@@ -508,7 +508,8 @@ describes.realWin(
             'consentState': CONSENT_ITEM_STATE.REJECTED,
             'consentString': 'mystring',
             'consentMetadata': constructMetadata(
-              CONSENT_STRING_TYPE.US_PRIVACY_STRING
+              CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+              '1~1.35.41.101'
             ),
             'isDirty': undefined,
           });
@@ -546,7 +547,7 @@ describes.realWin(
             'https://server-test-4/':
               '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "newstring"}',
             'https://server-test-5/':
-              '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "newstring", "consentMetadata": {"consentStringType": 3}}',
+              '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "newstring", "consentMetadata": {"consentStringType": 3, "additionalConsent": "1~1.35.41.101"}}',
             'https://server-test-6/':
               '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "newstring"}',
             'https://geo-override-check2/': '{"consentRequired": true}',
@@ -599,6 +600,7 @@ describes.realWin(
               [STORAGE_KEY.METADATA]: {
                 [METADATA_STORAGE_KEY.CONSENT_STRING_TYPE]:
                   CONSENT_STRING_TYPE.TCF_V2,
+                [METADATA_STORAGE_KEY.ADDITIONAL_CONSENT]: '3~3.33.303',
               },
             },
           };
@@ -618,7 +620,8 @@ describes.realWin(
             'consentString': 'newstring',
             'isDirty': undefined,
             'consentMetadata': constructMetadata(
-              CONSENT_STRING_TYPE.US_PRIVACY_STRING
+              CONSENT_STRING_TYPE.US_PRIVACY_STRING,
+              '1~1.35.41.101'
             ),
           });
         });
@@ -634,7 +637,6 @@ describes.realWin(
             'amp-consent:abc': {
               [STORAGE_KEY.STATE]: 0,
               [STORAGE_KEY.STRING]: 'oldstring',
-              [STORAGE_KEY.STRING]: {},
             },
           };
           ampConsent = getAmpConsent(doc, inlineConfig);
@@ -826,8 +828,9 @@ describes.realWin(
           )
         ).to.deep.equals(constructMetadata());
         expect(spy.args[0][1]).to.match(
-          /CMP metadata consent string type is invalid./
+          /Consent metadata value "%s" is invalid./
         );
+        expect(spy.args[0][2]).to.match(/consentStringType/);
         responseMetadata['consentStringType'] = CONSENT_STRING_TYPE.TCF_V2;
         expect(
           ampConsent.configureMetadataByConsentString_(
@@ -835,6 +838,21 @@ describes.realWin(
             'consentString'
           )
         ).to.deep.equals(constructMetadata(2));
+      });
+
+      it('should remove invalid additionalConsent', () => {
+        const spy = env.sandbox.stub(user(), 'error');
+        const responseMetadata = {'additionalConsent': 4};
+        expect(
+          ampConsent.configureMetadataByConsentString_(
+            responseMetadata,
+            'consentString'
+          )
+        ).to.deep.equals(constructMetadata());
+        expect(spy.args[0][1]).to.match(
+          /Consent metadata value "%s" is invalid./
+        );
+        expect(spy.args[0][2]).to.match(/additionalConsent/);
       });
     });
 
@@ -926,14 +944,17 @@ describes.realWin(
           'type': 'consent-response',
           'action': 'accept',
           'info': 'accept-string',
-          'consentMetadata': {'consentStringType': CONSENT_STRING_TYPE.TCF_V1},
+          'consentMetadata': {
+            'consentStringType': CONSENT_STRING_TYPE.TCF_V1,
+            'additionalConsent': '1~1.35.41.101',
+          },
         };
         event.source = iframe.contentWindow;
         win.dispatchEvent(event);
         expect(actionSpy).to.be.calledWith(
           ACTION_TYPE.ACCEPT,
           'accept-string',
-          {'consentStringType': CONSENT_STRING_TYPE.TCF_V1}
+          constructMetadata(CONSENT_STRING_TYPE.TCF_V1, '1~1.35.41.101')
         );
       });
 
