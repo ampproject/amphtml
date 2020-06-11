@@ -19,7 +19,7 @@ import {AmpStoryStoreService} from '../amp-story-store-service';
 import {Services} from '../../../../src/services';
 import {
   addConfigToInteractive,
-  getMockInteractiveData,
+  getMockInteractionData,
 } from './test-amp-story-interactive';
 import {getRequestService} from '../amp-story-request-service';
 import {measureMutateElementStub} from '../../../../testing/test-helper';
@@ -123,7 +123,7 @@ describes.realWin(
     it('should handle the percentage pipeline', async () => {
       env.sandbox
         .stub(requestService, 'executeRequest')
-        .resolves(getMockInteractiveData());
+        .resolves(getMockInteractionData());
 
       ampStoryPoll.element.setAttribute('endpoint', 'http://localhost:8000');
 
