@@ -15,6 +15,7 @@
  */
 
 import '../amp-brightcove';
+import {CommonSignals} from '../../../../src/common-signals';
 import {VideoEvents} from '../../../../src/video-interface';
 import {
   createElementWithAttributes,
@@ -52,7 +53,7 @@ describes.realWin(
 
       await element.whenBuilt();
 
-      const whenLaidOut = element.implementation_.layoutCallback();
+      await element.signals().whenSignal(CommonSignals.LOAD_START);
 
       try {
         fakePostMessage(element, {event: 'ready'});
@@ -62,7 +63,7 @@ describes.realWin(
         // throw.
       }
 
-      await whenLaidOut;
+      await element.signals().whenSignal(CommonSignals.LOAD_END);
 
       return element;
     }
