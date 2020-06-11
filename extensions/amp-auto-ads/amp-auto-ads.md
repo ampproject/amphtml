@@ -135,7 +135,7 @@ The fields to specify in the configuration object:
     <td><code>adConstraints</code></td>
     <td>AdConstraintsObj</td>
     <td>
-      An <em>optional</em> field that specifies the contraints that should be used when placing ads on the page. If not specified then
+      An <em>optional</em> field that specifies the constraints that should be used when placing ads on the page. If not specified then
       <code>amp-auto-ads</code> will attempt to use the default constraints specified in [ad-network-config.js](0.1/ad-network-config.js).
     </td>
   </tr>
