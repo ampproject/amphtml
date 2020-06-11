@@ -191,7 +191,7 @@ export class RequestBank {
     return this.fetch_(url, 'tearDown');
   }
 
-  static fetch_(url, action, timeout = 10000) {
+  static fetch_(url, action, timeout = 20000) {
     const xhr = fetch(url)
       .then((response) => {
         if (!response.ok) {
