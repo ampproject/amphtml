@@ -20,15 +20,16 @@ limitations under the License.
 
 ```html
 <amp-ad
-  width="468"
-  height="60"
+  width="728"
+  height="90"
   type="sas"
   layout="fixed"
   data-customer-name="canary"
-  data-size="320x50"
+  data-size="728x90"
   data-area="areaname"
   data-site="sitename"
   data-tags='{"CAT":"SYLVESTER","POSITION":"TOP"}'
+  data-multi-size="700x90,700x60,500x60"
 >
 </amp-ad>
 ```
@@ -47,3 +48,4 @@ For configuration details, please email support@sas.com.
 - `data-site`
 - `data-area`
 - `data-tags`
+- `data-multi-size`
