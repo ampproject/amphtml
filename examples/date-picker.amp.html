@@ -56,6 +56,7 @@
   <amp-date-picker
     type="range"
     id="drp"
+    allow-past-selection
     on="
     select:
       AMP.setState({
@@ -98,6 +99,7 @@
   <h2>external <code>src</code> static single</h2>
   <input id="externalSrc-static" type="tel" placeholder="Pick a date">
   <amp-date-picker
+    allow-past-selection
     type="single"
     number-of-months="1"
     mode="static"

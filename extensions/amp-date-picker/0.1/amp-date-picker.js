@@ -293,6 +293,9 @@ export class AmpDatePicker extends AMP.BaseElement {
     this.allowBlockedEndDate_ = false;
 
     /** @private */
+    this.allowPastSelection_ = false;
+
+    /** @private */
     this.fullscreen_ = false;
 
     /** @private */
@@ -422,6 +425,10 @@ export class AmpDatePicker extends AMP.BaseElement {
 
     this.allowBlockedEndDate_ = this.element.hasAttribute(
       'allow-blocked-end-date'
+    );
+
+    this.allowPastSelection_ = this.element.hasAttribute(
+      'allow-past-selection'
     );
 
     this.fullscreen_ = this.element.hasAttribute('fullscreen');
@@ -1970,6 +1977,7 @@ export class AmpDatePicker extends AMP.BaseElement {
               'weekDayFormat': this.weekDayFormat_,
               'isFocused': props['isFocused'], // should automatically focus
               'focused': props['focused'],
+              'isOutsideRange': this.allowPastSelection_ && (() => false),
             }),
             ...props,
           }),

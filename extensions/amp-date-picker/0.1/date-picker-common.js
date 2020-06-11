@@ -152,7 +152,8 @@ export function withDatePickerCommon(WrappedComponent) {
       allowBlockedEndDate
     );
     this.isDayHighlighted = datesListContains.bind(null, highlighted);
-    this.isOutsideRange = isOutsideRange.bind(null, min, max);
+    this.isOutsideRange =
+      props['isOutsideRange'] || isOutsideRange.bind(null, min, max);
   }
 
   DateComponent.prototype = Object.create(react.Component.prototype);
@@ -174,9 +175,14 @@ export function withDatePickerCommon(WrappedComponent) {
     const max = nextProps['max'];
     const min = nextProps['min'];
     const startDate = nextProps['startDate'];
-
-    if (min != this.props['min'] || max != this.props['max']) {
-      this.isOutsideRange = isOutsideRange.bind(null, min, max);
+    const isOutsideRange = nextProps['isOutsideRange'];
+    if (
+      min != this.props['min'] ||
+      max != this.props['max'] ||
+      isOutsideRange != this.props['isOutsideRange']
+    ) {
+      this.isOutsideRange =
+        isOutsideRange || isOutsideRange.bind(null, min, max);
     }
 
     if (
