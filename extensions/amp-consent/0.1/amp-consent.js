@@ -731,7 +731,10 @@ export class AmpConsent extends AMP.BaseElement {
       return;
     }
     assertMetadataValues(opt_metadata);
-    return constructMetadata(opt_metadata['consentStringType']);
+    return constructMetadata(
+      opt_metadata['consentStringType'],
+      opt_metadata['additionalConsent']
+    );
   }
 }
 
