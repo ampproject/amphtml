@@ -59,8 +59,7 @@ describes.realWin(
         fakePostMessage(element, {event: 'ready'});
       } catch (_) {
         // This fails when the iframe is not available (after layoutCallback
-        // fails) in which case awaiting the layoutCallback promise below will
-        // throw.
+        // fails) in which case awaiting the LOAD_END sigal below will throw.
       }
 
       await element.signals().whenSignal(CommonSignals.LOAD_END);
