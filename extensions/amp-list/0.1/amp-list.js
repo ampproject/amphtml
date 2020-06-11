@@ -609,7 +609,10 @@ export class AmpList extends AMP.BaseElement {
         toArray(
           dev().assertElement(this.container_).children
         ).forEach((child) =>
-          this.owners_./*OK*/ scheduleUnlayout(this.container_, child)
+          this.owners_./*OK*/ scheduleUnlayout(
+            /** @type {!Element} */ (this.container_),
+            child
+          )
         );
         removeChildren(dev().assertElement(this.container_));
       };
