@@ -374,6 +374,10 @@ export class ResourcesImpl {
       const input = Services.inputFor(this.win);
       input.setupInputModeClasses(this.ampdoc);
 
+      if (IS_ESM) {
+        return;
+      }
+
       // With IntersectionObserver, no need for remeasuring hacks.
       if (!this.intersectionObserver_) {
         const fixPromise = ieMediaCheckAndFix(this.win);
