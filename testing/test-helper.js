@@ -24,7 +24,6 @@ import {
 } from '../src/service';
 import {getStyle} from '../src/style';
 import {poll} from './iframe';
-import {xhrServiceForTesting} from '../src/service/xhr-impl';
 
 export function stubService(sandbox, win, serviceId, method) {
   // Register if not already registered.
@@ -193,11 +192,12 @@ export class RequestBank {
   }
 
   static fetch_(url, action, timeout = 10000) {
-    const fetch = xhrServiceForTesting(window)
-      .fetchJson(url, {
-        method: 'GET',
-        ampCors: false,
-        credentials: 'omit',
+    const xhr = fetch(url)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP Error with status ${response.status}`);
+        }
+        return response;
       })
       .catch((err) => {
         if (err.response != null) {
@@ -215,7 +215,7 @@ export class RequestBank {
         );
       }, timeout);
     });
-    return Promise.race([fetch, timer]);
+    return Promise.race([xhr, timer]);
   }
 }
 
