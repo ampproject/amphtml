@@ -18,9 +18,9 @@
 const initTestsPath = ['test/_init_tests.js'];
 
 const fixturesExamplesPaths = [
-  'test/fixtures/*.html',
+  'test-bin/test/fixtures/*.html',
   {
-    pattern: 'test/fixtures/served/*.html',
+    pattern: 'test-bin/test/fixtures/served/*.html',
     included: false,
     nocache: false,
     watched: true,

@@ -18,10 +18,11 @@ import {promises as fsPromises} from 'fs';
 import minimist from 'minimist';
 import posthtml from 'posthtml';
 import transformModules from './modules/modules-transform';
-import transformScriptPaths from './scripts/scripts-transform';
+//import transformScriptPaths from './scripts/scripts-transform';
 import transformStories from './stories/stories-transform';
 
-const transforms = [transformStories, transformScriptPaths];
+//const transforms = [transformStories, transformScriptPaths];
+const transforms = [transformStories];
 
 const argv = minimist(process.argv.slice(2));
 if (argv.esm) {

@@ -46,13 +46,21 @@ class Runner extends RuntimeTestRunner {
 
 async function buildTransformedHtml() {
   const filePaths = await globby('./test/fixtures/*.html');
-  for (const filePath of filePaths) {
-    const cwd = process.cwd();
-    const normalizedFilePath = path.normalize(filePath);
-    const absoluteFilePath = `${cwd}/${normalizedFilePath}`;
-    const transformedHtml = await transform(absoluteFilePath);
-    const destPath = `${cwd}/test-bin/${normalizedFilePath}`;
-    fs.write(destPath, transformedHtml);
+  let normalizedFilePath;
+  try {
+    for (const filePath of filePaths) {
+      const cwd = process.cwd();
+      normalizedFilePath = path.normalize(filePath);
+      const absoluteFilePath = `${cwd}/${normalizedFilePath}`;
+      const transformedHtml = await transform(absoluteFilePath);
+      const destPath = `${cwd}/test-bin/${normalizedFilePath}`;
+      await fs.outputFile(destPath, transformedHtml);
+    }
+  } catch (e) {
+    console./*OK*/log(
+      `${normalizedFilePath} could not be transformed by the postHTML ` +
+        `pipeline.\n${e.message}`
+    );
   }
 }
 

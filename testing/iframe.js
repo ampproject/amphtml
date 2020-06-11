@@ -65,6 +65,7 @@ export function createFixtureIframe(
   initialIframeHeight,
   opt_beforeLoad
 ) {
+
   return new Promise((resolve, reject) => {
     // Counts the supported custom events.
     const events = {
@@ -80,6 +81,7 @@ export function createFixtureIframe(
       [BindEvents.RESCAN_TEMPLATE]: 0,
       [FormEvents.SERVICE_INIT]: 0,
     };
+    console.log('html?!', __html__);
     let html = __html__[fixture] // eslint-disable-line no-undef
       .replace(
         /__TEST_SERVER_PORT__/g,

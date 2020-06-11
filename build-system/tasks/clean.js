@@ -33,6 +33,7 @@ async function clean() {
     'build-system/runner/build',
     'build-system/runner/dist',
     'build-system/server/new-server/transforms/dist',
+    'test-bin',
   ]);
 }
 

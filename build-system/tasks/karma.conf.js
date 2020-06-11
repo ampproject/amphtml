@@ -85,7 +85,7 @@ module.exports = {
   ],
 
   preprocessors: {
-    './test/fixtures/*.html': ['html2js'],
+    './test-bin/test/fixtures/*.html': ['html2js'],
     './test/**/*.js': ['browserify'],
     './ads/**/test/test-*.js': ['browserify'],
     './extensions/**/test/**/*.js': ['browserify'],
