@@ -23,7 +23,7 @@ By default, Doubeclick type AMP Ad fetches all slots on the page independent of 
 ```
 
 When set, the ad request will be delayed until the slot is 3 viewports away (can be set to a specific viewport value based on data-loading-strategy=viewports. Publishers using data-loading-strategy=prefer-viewability-over-views will use current 1.25 viewports. Example of setting lazy fetch to 2 viewports:
-  
+
 ```html
 <amp-ad ... data-lazy-fetch="true" data-loading-strategy="2"></amp-ad>
 ```
