@@ -265,7 +265,7 @@ export class ManualAdvancement extends AdvancementConfig {
     /** @private {boolean} Saving the paused state before pressing */
     this.pausedState_ = false;
 
-    /** @private {!AmpDoc} */
+    /** @private {!./../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = getAmpdoc(win.document);
 
     this.startListening_();
@@ -351,9 +351,9 @@ export class ManualAdvancement extends AdvancementConfig {
     }
 
     this.touchstartTimestamp_ = Date.now();
-    this.pausedState_ = /** @type {boolean} */ this.storeService_.get(
+    this.pausedState_ = /** @type {boolean} */ (this.storeService_.get(
       StateProperty.PAUSED_STATE
-    );
+    ));
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
     this.timeoutId_ = this.timer_.delay(() => {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
