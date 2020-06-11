@@ -368,7 +368,7 @@ export function composeMetadataStoreValue(consentInfoMetadata) {
     storageMetadata[METADATA_STORAGE_KEY.ADDITIONAL_CONSENT] =
       consentInfoMetadata['additionalConsent'];
   }
-  if (consentInfoMetadata['gdprApplies']) {
+  if (consentInfoMetadata['gdprApplies'] != undefined) {
     storageMetadata[METADATA_STORAGE_KEY.GDPR_APPLIES] =
       consentInfoMetadata['gdprApplies'];
   }
@@ -416,8 +416,6 @@ export function assertMetadataValues(metadata) {
     delete metadata['additionalConsent'];
     errorFields.push('additionalConsent');
   }
-
-  // Maybe default to consentRequired here
   if (gdprApplies && typeof gdprApplies != 'boolean') {
     delete metadata['gdprApplies'];
     errorFields.push('gdprApplies');

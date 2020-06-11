@@ -376,7 +376,7 @@ describes.realWin(
             'https://server-test-1/':
               '{"consentRequired": false, "consentStateValue": "unknown", "consentString": "hello"}',
             'https://server-test-2/':
-              '{"consentRequired": true, "consentStateValue": "rejected", "consentString": "mystring", "consentMetadata":{"consentStringType": 3, "additionalConsent": "1~1.35.41.101"}}',
+              '{"consentRequired": true, "consentStateValue": "rejected", "consentString": "mystring", "consentMetadata":{"consentStringType": 3, "additionalConsent": "1~1.35.41.101", "gdprApplies": false}}',
             'https://server-test-3/':
               '{"consentRequired": true, "consentStateValue": "unknown"}',
             'https://geo-override-check2/': '{"consentRequired": true}',
@@ -461,7 +461,8 @@ describes.realWin(
             'consentString': 'mystring',
             'consentMetadata': constructMetadata(
               CONSENT_STRING_TYPE.US_PRIVACY_STRING,
-              '1~1.35.41.101'
+              '1~1.35.41.101',
+              false
             ),
             'isDirty': undefined,
           });
@@ -499,7 +500,7 @@ describes.realWin(
             'https://server-test-4/':
               '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "newstring"}',
             'https://server-test-5/':
-              '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "newstring", "consentMetadata": {"consentStringType": 3, "additionalConsent": "1~1.35.41.101"}}',
+              '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "newstring", "consentMetadata": {"consentStringType": 3, "additionalConsent": "1~1.35.41.101", "gdprApplies": true}}',
             'https://server-test-6/':
               '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "newstring"}',
             'https://geo-override-check2/': '{"consentRequired": true}',
@@ -573,7 +574,8 @@ describes.realWin(
             'isDirty': undefined,
             'consentMetadata': constructMetadata(
               CONSENT_STRING_TYPE.US_PRIVACY_STRING,
-              '1~1.35.41.101'
+              '1~1.35.41.101',
+              true
             ),
           });
         });
@@ -806,6 +808,21 @@ describes.realWin(
         );
         expect(spy.args[0][2]).to.match(/additionalConsent/);
       });
+
+      it('should remove invalid gdprApplies', () => {
+        const spy = env.sandbox.stub(user(), 'error');
+        const responseMetadata = {'gdprApplies': 4};
+        expect(
+          ampConsent.configureMetadataByConsentString_(
+            responseMetadata,
+            'consentString'
+          )
+        ).to.deep.equals(constructMetadata());
+        expect(spy.args[0][1]).to.match(
+          /Consent metadata value "%s" is invalid./
+        );
+        expect(spy.args[0][2]).to.match(/gdprApplies/);
+      });
     });
 
     describe('amp-geo integration', () => {
@@ -899,6 +916,7 @@ describes.realWin(
           'consentMetadata': {
             'consentStringType': CONSENT_STRING_TYPE.TCF_V1,
             'additionalConsent': '1~1.35.41.101',
+            'gdprApplies': true,
           },
         };
         event.source = iframe.contentWindow;
@@ -906,7 +924,7 @@ describes.realWin(
         expect(actionSpy).to.be.calledWith(
           ACTION_TYPE.ACCEPT,
           'accept-string',
-          constructMetadata(CONSENT_STRING_TYPE.TCF_V1, '1~1.35.41.101')
+          constructMetadata(CONSENT_STRING_TYPE.TCF_V1, '1~1.35.41.101', true)
         );
       });
 

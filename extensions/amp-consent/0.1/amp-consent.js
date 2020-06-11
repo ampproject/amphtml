@@ -496,30 +496,6 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
-   * Create and set gdprApplies promise form consent manager.
-   * Default value to remote `consentRequired`, if no
-   * `gdprApplies` value is provided.
-   *
-   * TODO(micajuinho) remove this method (and subsequent methods
-   * in consent-state-manager) in favor of consolidation with
-   * consentString
-   */
-  setGdprApplies() {
-    const responsePromise = this.getConsentRemote_();
-    const gdprAppliesPromise = responsePromise.then((response) => {
-      if (!response) {
-        return null;
-      }
-      const gdprApplies = response['gdprApplies'];
-      return gdprApplies === undefined || typeof gdprApplies !== 'boolean'
-        ? response['consentRequired']
-        : gdprApplies;
-    });
-
-    // this.consentStateManager_.setConsentInstanceGdprApplies(gdprAppliesPromise);
-  }
-
-  /**
    * Clear cache for server side decision and then sync.
    */
   syncRemoteConsentState_() {

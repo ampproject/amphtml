@@ -722,7 +722,7 @@ export class AmpA4A extends AMP.BaseElement {
         const consentMetadata = consentResponse[2];
         const gdprApplies = consentMetadata
           ? consentMetadata['gdprApplies']
-          : false;
+          : consentMetadata;
 
         return /** @type {!Promise<?string>} */ (this.getAdUrl(
           {consentState, consentString, gdprApplies},
