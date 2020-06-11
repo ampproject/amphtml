@@ -57,9 +57,3 @@ branches:
 env:
   global:
     - NPM_CONFIG_PROGRESS="false"
-
-cache:
-  pip: true,
-  directories:
-    - node_modules
-    - $HOME/.nvm
