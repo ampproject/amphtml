@@ -66,8 +66,13 @@ export function newPerformanceResourceTiming(
   const tcpTime = cached ? 0 : duration * 0.2;
   const serverTime = cached ? duration : duration * 0.4;
   const transferTime = cached ? 0 : duration * 0.3;
+  function urlify(url) {
+    const a = document.createElement('a');
+    a.href = url;
+    return {host: a.host, pathname: a.pathname, search: a.search};
+  }
   return {
-    name: url,
+    name: urlify(url),
     initiatorType,
     startTime,
     duration,
