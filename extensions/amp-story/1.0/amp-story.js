@@ -1404,7 +1404,7 @@ export class AmpStory extends AMP.BaseElement {
 
     // Step out if trying to navigate to the currently active page.
     if (this.activePage_ && this.activePage_.element.id === targetPageId) {
-      return Promise.resolve();
+      return this.activePage_.rewindAllMedia();
     }
 
     // If the next page might be paywall protected, and the access
@@ -2216,6 +2216,7 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     map[pageId] = distance;
+
     const page = this.getPageById(pageId);
     page.getAdjacentPageIds().forEach((adjacentPageId) => {
       if (

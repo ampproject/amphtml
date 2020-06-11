@@ -243,6 +243,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {boolean}  */
     this.isFirstPage_ = false;
 
+    /** @private {boolean} */
+    this.isLastPage_ = false;
+
     /** @private {?LoadingSpinner} */
     this.loadingSpinner_ = null;
 
@@ -334,6 +337,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   firstAttachedCallback() {
     // Only prerender the first story page.
     this.isFirstPage_ = matches(this.element, 'amp-story-page:first-of-type');
+    this.isLastPage_ = matches(this.element, 'amp-story-page:last-of-type');
   }
 
   /** @override */
@@ -483,7 +487,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       // opacity instead of immediately jumping to the first frame. See #17985.
       this.pauseAllMedia_(false /** rewindToBeginning */);
       this.timer_.delay(() => {
-        this.rewindAllMedia_();
+        this.rewindAllMedia();
       }, REWIND_TIMEOUT_MS);
     } else {
       this.pauseAllMedia_(true /** rewindToBeginning */);
@@ -1099,9 +1103,9 @@ export class AmpStoryPage extends AMP.BaseElement {
   /**
    * Rewinds all media on this page.
    * @return {!Promise} Promise that resolves after the callbacks are called.
-   * @private
+   * @public
    */
-  rewindAllMedia_() {
+  rewindAllMedia() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
       if (this.isBotUserAgent_) {
         mediaEl.currentTime = 0;
@@ -1305,7 +1309,10 @@ export class AmpStoryPage extends AMP.BaseElement {
       return nextElement.id;
     }
 
-    return null;
+    const firstPage = this.element.parentElement.querySelector(
+      'amp-story-page:first-of-type'
+    );
+    return firstPage ? firstPage.id : null;
   }
 
   /**
