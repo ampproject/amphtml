@@ -36,6 +36,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {ActionTrust} from '../../../src/action-constants';
+import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
 import {
   AdvancementMode,
   StoryAnalyticsEvent,
@@ -72,7 +73,6 @@ import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {LiveStoryManager} from './live-story-manager';
-import {ManualAdvancement, TapNavigationDirection} from './page-advancement';
 import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
@@ -250,8 +250,8 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win, this.element);
 
-    /** @private @const {!ManualAdvancement} */
-    this.advancement_ = new ManualAdvancement(this.win, this.element);
+    /** @private @const {!AdvancementConfig} */
+    this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
     this.advancement_.start();
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
