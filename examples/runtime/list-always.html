@@ -17,8 +17,13 @@
       { "man": "bill", "bear": "honey", "pig": "zoinks"}
     </script>
   </amp-state>
+  <amp-state id="animals">
+    <script type="application/json">
+      { "items": ["man", "bear", "pig"]}
+    </script>
+  </amp-state>
 
-  <amp-list src="./animals.json" layout="fixed-height" height="300px" binding="always">
+  <amp-list src="amp-state:animals" layout="fixed-height" height="300px" binding="always">
     <template type="amp-mustache">
       <li [text]="'a {{.}} named ' + nameMap.{{.}}"]></li>
     </template>

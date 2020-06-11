@@ -61,7 +61,7 @@ import {
 } from '../../../src/localized-strings';
 import {MediaPool, MediaType} from './media-pool';
 import {NavigationState} from './navigation-state';
-import {ORIGIN_WHITELIST} from './origin-whitelist';
+import {ORIGIN_ALLOWLIST} from './origin-allowlist';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareMenu} from './amp-story-share-menu';
@@ -286,7 +286,7 @@ export class AmpStory extends AMP.BaseElement {
     this.shareWidget_ = null;
 
     /** @private @const {!Array<string>} */
-    this.originWhitelist_ = ORIGIN_WHITELIST;
+    this.originAllowlist_ = ORIGIN_ALLOWLIST;
 
     /** @private {!AmpStoryHint} */
     this.ampStoryHint_ = new AmpStoryHint(this.win, this.element);
@@ -739,7 +739,7 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     const origin = getSourceOrigin(this.win.location);
-    return this.isOriginWhitelisted_(origin);
+    return this.isOriginAllowlisted_(origin);
   }
 
   /**
@@ -753,16 +753,16 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * @param {string} origin The origin to check.
-   * @return {boolean} Whether the specified origin is whitelisted to use the
+   * @return {boolean} Whether the specified origin is allowlisted to use the
    *     amp-story extension.
    * @private
    */
-  isOriginWhitelisted_(origin) {
+  isOriginAllowlisted_(origin) {
     const hostName = parseUrlDeprecated(origin).hostname;
     const domains = hostName.split('.');
 
     // Check all permutations of the domain to see if any level of the domain is
-    // whitelisted.  Taking the example of the whitelisted domain
+    // allowlisted.  Taking the example of the allowlisted domain
     // example.co.uk, if the page is served from www.example.co.uk/page.html:
     //
     //   www.example.co.uk => false
@@ -771,14 +771,14 @@ export class AmpStory extends AMP.BaseElement {
     //   uk => false
     //
     // This is necessary, since we don't have any guarantees of which level of
-    // the domain is whitelisted.  For many domains (e.g. .com), the second
-    // level of the domain is likely to be whitelisted, whereas for others
-    // (e.g. .co.uk) the third level may be whitelisted.  Additionally, this
-    // allows subdomains to be whitelisted individually.
+    // the domain is allowlisted.  For many domains (e.g. .com), the second
+    // level of the domain is likely to be allowlisted, whereas for others
+    // (e.g. .co.uk) the third level may be allowlisted.  Additionally, this
+    // allows subdomains to be allowlisted individually.
     return domains.some((unusedDomain, index) => {
       const domain = domains.slice(index, domains.length).join('.');
       const domainHash = this.hashOrigin_(domain);
-      return this.originWhitelist_.includes(domainHash);
+      return this.originAllowlist_.includes(domainHash);
     });
   }
 

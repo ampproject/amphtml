@@ -450,7 +450,7 @@ describes.realWin('meta override', {}, (env) => {
     win = env.win;
   });
 
-  it('should allow override iff the experiment is whitelisted', () => {
+  it('should allow override iff the experiment is allowlisted', () => {
     win.AMP_CONFIG = {
       'allow-doc-opt-in': ['e1', 'e3'],
       e1: 0,
@@ -467,7 +467,7 @@ describes.realWin('meta override', {}, (env) => {
     resetExperimentTogglesForTesting(window);
 
     expect(isExperimentOn(win, 'e1')).to.be.true;
-    expect(isExperimentOn(win, 'e2')).to.be.false; // e2 is not whitelisted
+    expect(isExperimentOn(win, 'e2')).to.be.false; // e2 is not allowlisted
     expect(isExperimentOn(win, 'e3')).to.be.true;
 
     toggleExperiment(win, 'e1', false);
@@ -486,7 +486,7 @@ describes.fakeWin('url override', {}, (env) => {
     win = env.win;
   });
 
-  it('should allow override iff the experiment is whitelisted', () => {
+  it('should allow override iff the experiment is allowlisted', () => {
     win.AMP_CONFIG = {
       'allow-url-opt-in': ['e1', 'e3', 'e4', 'e6', 'e7', 'e8'],
       e1: 0,
@@ -502,10 +502,10 @@ describes.fakeWin('url override', {}, (env) => {
     resetExperimentTogglesForTesting(window);
 
     expect(isExperimentOn(win, 'e1')).to.be.true;
-    expect(isExperimentOn(win, 'e2')).to.be.false; // e2 is not whitelisted
+    expect(isExperimentOn(win, 'e2')).to.be.false; // e2 is not allowlisted
     expect(isExperimentOn(win, 'e3')).to.be.true;
     expect(isExperimentOn(win, 'e4')).to.be.false;
-    expect(isExperimentOn(win, 'e5')).to.be.true; // e5 is not whitelisted
+    expect(isExperimentOn(win, 'e5')).to.be.true; // e5 is not allowlisted
     expect(isExperimentOn(win, 'e6')).to.be.false;
     expect(isExperimentOn(win, 'e7')).to.be.true; // overrides cookies
     expect(isExperimentOn(win, 'e8')).to.be.false; // overrides cookies

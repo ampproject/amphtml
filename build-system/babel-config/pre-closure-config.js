@@ -53,6 +53,8 @@ function getPreClosureConfig() {
         // Imports that are not needed for valid transformed documents.
         '../build/ampshared.css': ['cssText', 'ampSharedCss'],
         '../build/ampdoc.css': ['cssText', 'ampDocCss'],
+        // Srcset fallbacks aren't needed in ESM builds
+        '../src/utils/img': ['guaranteeSrcForSrcsetUnsupportedBrowsers'],
         // Used by experiment
         [fixedLayerImport]: ['FixedLayer'],
       },
@@ -74,6 +76,9 @@ function getPreClosureConfig() {
     reactJsxPlugin,
     './build-system/babel-plugins/babel-plugin-transform-inline-configure-component',
     // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
+    argv.esm
+      ? './build-system/babel-plugins/babel-plugin-transform-dev-methods'
+      : null,
     [
       './build-system/babel-plugins/babel-plugin-transform-log-methods',
       {replaceCallArguments: false},
@@ -87,9 +92,10 @@ function getPreClosureConfig() {
     replacePlugin,
     './build-system/babel-plugins/babel-plugin-transform-amp-asserts',
     argv.esm ? filterImportsPlugin : null,
-    argv.esm
-      ? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
-      : null,
+    // TODO(erwinm, #28698): fix this in fixit week
+    //argv.esm
+    //? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
+    //: null,
     !isCheckTypes
       ? './build-system/babel-plugins/babel-plugin-transform-json-configuration'
       : null,

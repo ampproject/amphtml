@@ -100,6 +100,7 @@
           <option>sirdata</option>
           <option>Marfeel</option>
           <option>Ogury</option>
+          <option>opencmp</option>
           <option>SourcePoint</option>
           <option>Usercentrics</option>
         </select>
@@ -246,6 +247,21 @@
       </amp-consent>
       <!-- End Ogury example -->
 
+      <!-- opencmp example -->
+      <amp-consent id='consent' layout='nodisplay' type='opencmp'>
+        <script type="application/json">
+          {
+            "postPromptUI": "opencmp-consent-prompt-ui",
+            "clientConfig": {}
+          }
+        </script>
+        <div id="opencmp-consent-prompt-ui">
+          Post Prompt UI
+          <button on="tap:consent.prompt(consent=opencmp)" role="button">Privacy Settings</button>
+        </div>
+      </amp-consent>
+      <!-- End opencmp example -->
+
       <!-- SourcePoint example -->
       <amp-consent id='consent' layout='nodisplay' type='SourcePoint'>
         <script type="application/json">
@@ -287,6 +303,7 @@
         </div>
       </amp-consent>
       <!-- End Usercentrics example -->
+
     </div>
   </body>
 </html>

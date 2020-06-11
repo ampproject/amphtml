@@ -212,6 +212,7 @@ import {plista} from '../ads/plista';
 import {polymorphicads} from '../ads/polymorphicads';
 import {popin} from '../ads/popin';
 import {postquare} from '../ads/postquare';
+import {ppstudio} from '../ads/ppstudio';
 import {pressboard} from '../ads/pressboard';
 import {promoteiq} from '../ads/promoteiq';
 import {pubexchange} from '../ads/pubexchange';
@@ -328,6 +329,7 @@ const AMP_EMBED_ALLOWED = {
   outbrain: true,
   plista: true,
   postquare: true,
+  ppstudio: true,
   pubexchange: true,
   rbinfox: true,
   readmo: true,
@@ -515,6 +517,7 @@ register('plista', plista);
 register('polymorphicads', polymorphicads);
 register('popin', popin);
 register('postquare', postquare);
+register('ppstudio', ppstudio);
 register('pressboard', pressboard);
 register('promoteiq', promoteiq);
 register('pubexchange', pubexchange);
@@ -695,7 +698,7 @@ window.draw3p = function (
     manageWin(window);
     installEmbedStateListener();
 
-    // Ugly type annotation is due to Event.prototype.data being blacklisted
+    // Ugly type annotation is due to Event.prototype.data being denylisted
     // and the compiler not being able to discern otherwise
     // TODO(alanorozco): Do this more elegantly once old impl is cleaned up.
     draw3p(
@@ -771,13 +774,13 @@ export function validateAllowedTypes(window, type, allowedTypes) {
   }
   userAssert(
     allowedTypes && allowedTypes.indexOf(type) != -1,
-    'Non-whitelisted 3p type for custom iframe: %s',
+    '3p type for custom iframe not allowed: %s',
     type
   );
 }
 
 /**
- * Check that parent host name was whitelisted.
+ * Check that parent host name was allowed.
  * @param {!Window} window
  * @param {!Array<string>} allowedHostnames Suffixes of allowed host names.
  * @visibleForTesting
@@ -799,11 +802,11 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
       .hostname;
   }
   for (let i = 0; i < allowedHostnames.length; i++) {
-    // Either the hostname is exactly as whitelisted…
+    // Either the hostname is allowed
     if (allowedHostnames[i] == hostname) {
       return;
     }
-    // Or it ends in .$hostname (aka is a sub domain of the whitelisted domain.
+    // Or it ends in .$hostname (aka is a sub domain of an allowed domain.
     if (endsWith(hostname, '.' + allowedHostnames[i])) {
       return;
     }

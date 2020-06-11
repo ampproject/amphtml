@@ -363,7 +363,7 @@ Note that you _can_ add changes into an existing commit but that opens up some a
 AMP uses the following tools for code quality and style:
 
 - [Eslint](https://eslint.org/) is used to ensure the code quality of JS files.
-  - Default rules can be found in [.eslintrc](../.eslintrc) files across the repo.
+  - Default rules can be found in [.eslintrc.js](../.eslintrc.js) files across the repo.
   - Custom rules can be found in [build-system/eslint-rules/](../build-system/eslint-rules/index.js).
 - [Prettier](https://prettier.io/) is used to standardize the code style and formatting of JS files and several non-JS files.
   - Default and file-specific rules can be found in [.prettierrc](../.prettierrc).

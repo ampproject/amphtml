@@ -229,7 +229,7 @@ export class AmpSidebar extends AMP.BaseElement {
     });
     /** If the element is in an email document,
      * allow its `open`, `close`, and `toggle` actions. */
-    this.action_.addToWhitelist(
+    this.action_.addToAllowlist(
       'amp-sidebar',
       ['open', 'close', 'toggle'],
       ['email']
