@@ -410,7 +410,7 @@ gulp prettify --local_changes --fix
 
 Before sending your code changes for review, please make sure that all of the affected tests are passing. You may be expected to add/modify some tests as well.
 
-Note: You can automatically run critical checks before `git push` by enabling our pre-push hook. To do so, run `./build-system/enable-git-pre-push.sh`.
+Note: You can automatically run critical checks before `git push` by enabling our pre-push hook. To do so, run `./build-system/common/enable-git-pre-push.sh`.
 
 ## Running tests locally
 
