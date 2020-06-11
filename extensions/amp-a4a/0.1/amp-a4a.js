@@ -46,7 +46,7 @@ import {
   is3pThrottled,
 } from '../../amp-ad/0.1/concurrent-load';
 import {
-  getConsentPolicyGdprApplies,
+  getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
@@ -699,18 +699,18 @@ export class AmpA4A extends AMP.BaseElement {
             return null;
           });
 
-          const gdprAppliesPromise = getConsentPolicyGdprApplies(
+          const consentMetadataPromise = getConsentMetadata(
             this.element,
             consentPolicyId
           ).catch((err) => {
-            user().error(TAG, 'Error determining gdprApplies', err);
+            user().error(TAG, 'Error determining consent metadata', err);
             return null;
           });
 
           return Promise.all([
             consentStatePromise,
             consentStringPromise,
-            gdprAppliesPromise,
+            consentMetadataPromise,
           ]);
         }
 
@@ -723,7 +723,10 @@ export class AmpA4A extends AMP.BaseElement {
 
         const consentState = consentResponse[0];
         const consentString = consentResponse[1];
-        const gdprApplies = consentResponse[2];
+        const consentMetadata = consentResponse[2];
+        const gdprApplies = consentMetadata
+          ? consentMetadata['gdprApplies']
+          : false;
 
         return /** @type {!Promise<?string>} */ (this.getAdUrl(
           {consentState, consentString, gdprApplies},

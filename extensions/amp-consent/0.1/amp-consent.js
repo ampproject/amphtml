@@ -249,7 +249,6 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
-   * TODO(micajuineho) add gdprApplies here
    * Listen to external consent flow iframe's response
    * with consent string and metadata.
    */
@@ -434,7 +433,6 @@ export class AmpConsent extends AMP.BaseElement {
    */
   init_() {
     this.passSharedData_();
-    this.setGdprApplies();
     this.syncRemoteConsentState_();
 
     this.getConsentRequiredPromise_()
@@ -518,7 +516,7 @@ export class AmpConsent extends AMP.BaseElement {
         : gdprApplies;
     });
 
-    this.consentStateManager_.setConsentInstanceGdprApplies(gdprAppliesPromise);
+    // this.consentStateManager_.setConsentInstanceGdprApplies(gdprAppliesPromise);
   }
 
   /**
@@ -536,8 +534,6 @@ export class AmpConsent extends AMP.BaseElement {
         this.consentStateManager_.setDirtyBit();
       }
 
-      // TODO(micajuineho) When we consolidate, add gdprApplies field
-      // to be set with consentString.
       // Decision from promptUI takes precedence over consent decision from response
       if (
         !!response['consentRequired'] &&
@@ -733,7 +729,8 @@ export class AmpConsent extends AMP.BaseElement {
     assertMetadataValues(opt_metadata);
     return constructMetadata(
       opt_metadata['consentStringType'],
-      opt_metadata['additionalConsent']
+      opt_metadata['additionalConsent'],
+      opt_metadata['gdprApplies']
     );
   }
 }
