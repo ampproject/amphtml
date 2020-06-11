@@ -203,7 +203,7 @@ export const WebAnimationTimingFill = {
 };
 
 /** @const {!Object<string, boolean>} */
-const ALLOWLISTED_RPOPS = {
+const ALLOWLISTED_PROPS = {
   'opacity': true,
   'transform': true,
   'transform-origin': true,
@@ -219,5 +219,5 @@ const ALLOWLISTED_RPOPS = {
  * @return {boolean}
  */
 export function isAllowlistedProp(prop) {
-  return ALLOWLISTED_RPOPS[prop] || false;
+  return ALLOWLISTED_PROPS[prop] || false;
 }
