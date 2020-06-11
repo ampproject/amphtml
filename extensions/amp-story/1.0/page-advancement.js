@@ -265,6 +265,9 @@ export class ManualAdvancement extends AdvancementConfig {
     /** @private {boolean} Saving the paused state before pressing */
     this.pausedState_ = false;
 
+    /** @private {!AmpDoc} */
+    this.ampdoc_ = getAmpdoc(win.document);
+
     this.startListening_();
 
     if (element.ownerDocument.defaultView) {
@@ -320,6 +323,9 @@ export class ManualAdvancement extends AdvancementConfig {
       this.maybePerformNavigation_.bind(this),
       true
     );
+    this.ampdoc_.onVisibilityChanged(() => {
+      this.ampdoc_.isVisible() ? this.resolveTouchstart() : null;
+    });
   }
 
   /**
@@ -339,12 +345,15 @@ export class ManualAdvancement extends AdvancementConfig {
     // class. Also ignores any subsequent touchstart that would happen before
     // touchend was fired, since it'd reset the touchstartTimestamp (ie: user
     // touches the screen with a second finger).
+
     if (this.touchstartTimestamp_ || !this.shouldHandleEvent_(event)) {
       return;
     }
 
     this.touchstartTimestamp_ = Date.now();
-    this.pausedState_ = this.storeService_.get(StateProperty.PAUSED_STATE);
+    this.pausedState_ = /** @type {boolean} */ this.storeService_.get(
+      StateProperty.PAUSED_STATE
+    );
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
     this.timeoutId_ = this.timer_.delay(() => {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);

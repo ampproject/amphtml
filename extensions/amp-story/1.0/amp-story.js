@@ -485,7 +485,6 @@ export class AmpStory extends AMP.BaseElement {
       Action.TOGGLE_PAUSED,
       this.pausedStateToRestore_
     );
-    this.advancement_.resolveTouchstart();
   }
 
   /**
