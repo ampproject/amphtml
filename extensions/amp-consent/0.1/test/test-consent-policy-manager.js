@@ -601,19 +601,25 @@ describes.realWin(
           .callsFake(() => {
             return Promise.resolve();
           });
-        consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test');
+        consentInfo = constructConsentInfo(
+          CONSENT_ITEM_STATE.ACCEPTED,
+          'test',
+          constructMetadata(CONSENT_STRING_TYPE.TCF_V2, '1~1.10.14.103')
+        );
       });
 
-      // TODO(micajuineho) combine into metadata values
-      it('should return gdprApplies value', async () => {
+      it('should return metadata values from state manager', async () => {
         manager.registerConsentPolicyInstance('default', {
           'waitFor': {
             'ABC': undefined,
           },
         });
         await macroTask();
-        await expect(manager.getConsentMetadataInfo('default')).to.eventually.be
-          .undefined;
+        await expect(
+          manager.getConsentMetadataInfo('default')
+        ).to.eventually.deep.equals(
+          constructMetadata(CONSENT_STRING_TYPE.TCF_V2, '1~1.10.14.103')
+        );
       });
     });
 
