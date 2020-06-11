@@ -146,7 +146,7 @@ app.use('/request-bank/:bid/withdraw/:id/', (req, res) => {
   }
   const callback = function (result) {
     if (result === undefined) {
-      // This happens when tearDown is called but no request
+      // This happens when withdraw is called but no request
       // of given ID has been received yet.
       res.status(404).send(`Request of given ID not found: [${key}]`);
     } else {

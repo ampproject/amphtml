@@ -192,22 +192,15 @@ export class RequestBank {
   }
 
   static fetch_(url, action, timeout = 20000) {
-    const xhr = fetch(url)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP Error with status ${response.status}`);
-        }
-        return response;
-      })
-      .catch((err) => {
-        if (err.response != null) {
-          return err.response.text().then((msg) => {
-            throw new Error(err.message + ': ' + msg);
-          });
-        } else {
-          throw err;
-        }
-      });
+    const xhr = fetch(url).then((response) => {
+      const {ok, status, statusText} = response;
+      if (!ok) {
+        throw new Error(
+          `RequestBank.${action}: HTTP ${status} error -- ${statusText}`
+        );
+      }
+      return response;
+    });
     const timer = new Promise(() => {
       setTimeout(() => {
         throw new Error(
