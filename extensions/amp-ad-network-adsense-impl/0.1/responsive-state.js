@@ -373,7 +373,7 @@ export class ResponsiveState {
           if (this.isContainerWidth_) {
             setStyle(this.element_, 'width', '100%');
           } else {
-            // Exit if the full-width resize did not success before.
+            // Exit if the full-width resize did not succeed before.
             if (elementStyleWidth != viewportSize.width) {
               return;
             }
