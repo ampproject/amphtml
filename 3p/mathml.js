@@ -59,6 +59,9 @@ export function mathml(global, data) {
       global.document.body.appendChild(div);
       mathjax.Hub.Config({
         showMathMenu: false,
+        menuSettings: {
+          inTabOrder: false,
+        },
       });
       mathjax.Hub.Queue(function () {
         const rendered = document.getElementById('MathJax-Element-1-Frame');
