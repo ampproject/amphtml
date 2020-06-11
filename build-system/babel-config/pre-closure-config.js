@@ -53,6 +53,8 @@ function getPreClosureConfig() {
         // Imports that are not needed for valid transformed documents.
         '../build/ampshared.css': ['cssText', 'ampSharedCss'],
         '../build/ampdoc.css': ['cssText', 'ampDocCss'],
+        // Srcset fallbacks aren't needed in ESM builds
+        '../src/utils/img': ['guaranteeSrcForSrcsetUnsupportedBrowsers'],
         // Used by experiment
         [fixedLayerImport]: ['FixedLayer'],
       },
