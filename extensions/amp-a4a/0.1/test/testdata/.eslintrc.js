@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
-const fs = require('fs');
-const path = require('path');
-
-const rules = {};
-const ruleFiles = fs
-  .readdirSync(__dirname)
-  .filter(
-    (ruleFile) => !['index.js', '.eslintrc.js', 'OWNERS'].includes(ruleFile)
-  );
-ruleFiles.forEach(function (ruleFile) {
-  const rule = ruleFile.replace(path.extname(ruleFile), '');
-  rules[rule] = require(path.join(__dirname, rule));
-});
-
-module.exports = {rules};
+ module.exports = {
+  "rules": {
+    // We include some JSON. It doesn't like dangling commas.
+    "comma-dangle": 0,
+    // Files in this directory are created by automated processes; line lengths
+    // aren't under our control.
+    "max-len": 0
+  }
+}
