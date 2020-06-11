@@ -265,7 +265,7 @@ export class ManualAdvancement extends AdvancementConfig {
     /** @private {boolean} Saving the paused state before pressing */
     this.pausedState_ = false;
 
-    /** @private {!./../../src/service/ampdoc-impl.AmpDoc} */
+    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = getAmpdoc(win.document);
 
     this.startListening_();
