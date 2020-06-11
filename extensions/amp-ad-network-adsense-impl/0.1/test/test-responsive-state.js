@@ -255,9 +255,10 @@ describes.realWin(
         const state = createState({
           'data-auto-format': [ADSENSE_RSPV_TAG],
           'data-full-width': '',
-          'height': '500px',
+          'height': '200px',
           'width': '100vw',
         });
+        element.style.width = '375px';
 
         state.alignToViewport();
 
@@ -269,15 +270,34 @@ describes.realWin(
         const state = createState({
           'data-auto-format': [ADSENSE_RSPV_TAG],
           'data-full-width': '',
-          'height': '500px',
+          'height': '200px',
           'width': '100vw',
         });
+        element.style.width = '375px';
         element.parentElement.style.direction = 'rtl';
 
         state.alignToViewport();
 
         expect(element.style.marginLeft).to.be.equal('');
         expect(element.style.marginRight).to.be.equal('50px');
+
+        element.parentElement.style.direction = '';
+      });
+
+      it('Do not align the element if its full-width resize failed', () => {
+        const state = createState({
+          'data-auto-format': [ADSENSE_RSPV_TAG],
+          'data-full-width': '',
+          'height': '100px',
+          'width': '100vw',
+        });
+        // The viewport width is 375.
+        element.style.width = '200px';
+
+        state.alignToViewport();
+
+        expect(element.style.marginLeft).to.be.equal('');
+        expect(element.style.marginRight).to.be.equal('');
 
         element.parentElement.style.direction = '';
       });
