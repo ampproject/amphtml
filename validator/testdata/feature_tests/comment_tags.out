@@ -40,6 +40,6 @@ FAIL
 |         as closing the comment. -->
 |    <!-- --!><script></script>
 >>            ^~~~~~~~~
-feature_tests/comment_tags.html:40:11 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/troubleshooting/validation_errors#custom-javascript-is-not-allowed)
+feature_tests/comment_tags.html:40:11 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
 |  </body>
 |  </html>
