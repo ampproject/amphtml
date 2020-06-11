@@ -71,6 +71,11 @@ limitations under the License.
     <td>Launched</td>
   </tr>
   <tr>
+    <td><a href="lazy-fetch.md">Lazy Fetch</a></td>
+    <td>Allows for delaying ad request until slot is within a configurable distance from the viewport.</td>
+    <td>Launched</td>
+  </tr>
+  <tr>
     <td><a href="refresh.md">Refresh</a></td>
     <td>Enabled slots will periodically refetch new creatives.</td>
     <td>Launched</td>
