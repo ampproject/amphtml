@@ -659,6 +659,7 @@ class AmpVideo extends AMP.BaseElement {
     setStyles(poster, {
       'background-image': `url(${src})`,
       'background-size': 'cover',
+      'background-position': 'center',
     });
     poster.classList.add('i-amphtml-android-poster-bug');
     this.applyFillContent(poster);
