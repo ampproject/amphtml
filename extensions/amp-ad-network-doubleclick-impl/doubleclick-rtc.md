@@ -21,6 +21,7 @@ Google Ad Manager's RTC implementation has made many macros available for RTC ur
 - **PAGEVIEWID** - pageViewId
 - **PAGEVIEWID_64** - pageViewId64
 - **HREF** - equivalent to window.context.location.href
+- **REFERRER** - Referrer URL
 - **ATTR(height)** - Height attribute of the amp-ad element
 - **ATTR(width)** - Width attribute of the amp-ad element
 - **ATTR(data-slot)** - data-slot attribute of the amp-ad element
