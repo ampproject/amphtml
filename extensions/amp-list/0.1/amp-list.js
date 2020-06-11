@@ -1061,6 +1061,8 @@ export class AmpList extends AMP.BaseElement {
       this.hideFallbackAndPlaceholder_();
 
       if (this.element.hasAttribute('diffable') && container.hasChildNodes()) {
+        // TODO:(wg-ui-and-a11y)(#28781) Ensure owners_.scheduleUnlayout() is
+        // called for diff elements that are removed
         this.diff_(container, elements);
       } else {
         if (!opt_append) {
