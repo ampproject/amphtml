@@ -606,6 +606,11 @@ export class AmpList extends AMP.BaseElement {
             'update': false,
           });
         }
+        toArray(
+          dev().assertElement(this.container_).children
+        ).forEach((child) =>
+          this.owners_./*OK*/ scheduleUnlayout(this.container_, child)
+        );
         removeChildren(dev().assertElement(this.container_));
       };
 
