@@ -13,7 +13,7 @@
       "options": {"parser": "markdown"}
     },
     {
-      "files": [".eslintrc", ".prettierrc", ".renovaterc.json", "*.json"],
+      "files": [".prettierrc", ".renovaterc.json", "*.json"],
       "options": {"parser": "json"}
     },
     {

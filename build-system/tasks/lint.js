@@ -160,7 +160,7 @@ function eslintRulesChanged() {
   return (
     gitDiffNameOnlyMaster().filter(function (file) {
       return (
-        path.basename(file).includes('.eslintrc') ||
+        path.basename(file).includes('.eslintrc.js') ||
         path.dirname(file) === 'build-system/eslint-rules'
       );
     }).length > 0
