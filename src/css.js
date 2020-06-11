@@ -105,9 +105,8 @@ export function prependSelectorsWith(selector, distribute) {
 export function escapeCssSelectorIdent(ident) {
   if (IS_ESM) {
     return CSS.escape(ident);
-  } else {
-    return cssEscape(ident);
   }
+  return cssEscape(ident);
 }
 
 /**

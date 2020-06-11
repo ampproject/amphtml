@@ -99,7 +99,10 @@ export class AmpImg extends BaseElement {
         /* opt_removeMissingAttrs */ true
       );
       this.propagateDataset(this.img_);
-      guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
+
+      if (!IS_ESM) {
+        guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
+      }
     }
   }
 
@@ -185,7 +188,9 @@ export class AmpImg extends BaseElement {
     this.maybeGenerateSizes_(/* sync setAttribute */ true);
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
     this.propagateDataset(this.img_);
-    guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
+    if (!IS_ESM) {
+      guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
+    }
     this.applyFillContent(this.img_, true);
     propagateObjectFitStyles(this.element, this.img_);
 
