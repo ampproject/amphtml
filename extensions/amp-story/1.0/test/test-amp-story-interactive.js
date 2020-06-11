@@ -207,13 +207,13 @@ describes.realWin(
       await ampStoryInteractive.getOptionElements()[1].click();
       expect(trigger).to.have.been.calledWith('story-interaction');
       const variables = analyticsVars.get();
-      expect(variables[AnalyticsVariable.STORY_INTERACTIVE_ID]).to.equal(
+      expect(variables[AnalyticsVariable.STORY_INTERACTION_ID]).to.equal(
         'TEST_interactionId'
       );
-      expect(variables[AnalyticsVariable.STORY_INTERACTIVE_RESPONSE]).to.equal(
+      expect(variables[AnalyticsVariable.STORY_INTERACTION_RESPONSE]).to.equal(
         1
       );
-      expect(variables[AnalyticsVariable.STORY_INTERACTIVE_TYPE]).to.equal(
+      expect(variables[AnalyticsVariable.STORY_INTERACTION_TYPE]).to.equal(
         ampStoryInteractive.interactionType_
       );
     });
