@@ -789,7 +789,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     /** If the element is in an email document, allow its `open` action. */
     Services.actionServiceForDoc(
       this.element
-    ).addToWhitelist('AMP-IMAGE-LIGHTBOX', 'open', ['email']);
+    ).addToAllowlist('AMP-IMAGE-LIGHTBOX', 'open', ['email']);
   }
 
   /**
