@@ -198,6 +198,14 @@ let tokensToInstances = {};
 /** @private {?Promise} */
 let sraRequests = null;
 
+/**
+ * The random subdomain to load SafeFrame from, if SafeFrame is
+ * being loaded from a random subdomain and if the subdomain
+ * has been generated.
+ * @private {?string}
+ */
+let safeFrameRandomSubdomain = null;
+
 /** @typedef {{
       adUrl: !Promise<string>,
       lineItemId: string,
@@ -322,14 +330,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @protected {ConsentTupleDef} */
     this.consentTuple = {};
-
-    /**
-     * The random subdomain to load SafeFrame from, if SafeFrame is
-     * being loaded from a random subdomain and if the subdomain
-     * has been generated.
-     * @private {?string}
-     */
-    this.safeFrameRandomSubdomain_ = null;
 
     /** @protected {!Deferred<string>} */
     this.getAdUrlDeferred = new Deferred();
@@ -759,9 +759,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({});
       });
 
-    const rtcParamsPromise = opt_rtcResponsesPromise.then((results) =>
-      this.mergeRtcResponses_(results)
-    );
+    const checkStillCurrent = this.verifyStillCurrent();
+
+    const rtcParamsPromise = opt_rtcResponsesPromise.then((results) => {
+      checkStillCurrent();
+      return this.mergeRtcResponses_(results);
+    });
 
     // TODO(#28555): Delete extra logic when 'expand-json-targeting' exp launches.
     const isJsonTargetingExpOn =
@@ -776,8 +779,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             dev().warn(TAG, 'JSON Targeting expansion failed/timed out.');
           })
       : Promise.resolve();
-
-    const checkStillCurrent = this.verifyStillCurrent();
 
     Promise.all([
       rtcParamsPromise,
@@ -931,7 +932,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   getCustomRealTimeConfigMacros_() {
     /**
-     * This lists permissible attributes on the amp-ad element to be used as
+     * This lists allowed attributes on the amp-ad element to be used as
      * macros for constructing the RTC URL. Add attributes here, in lowercase,
      * to make them available.
      */
@@ -1227,11 +1228,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!this.experimentIds.includes(randomSubdomainExperimentBranch)) {
       return super.getSafeframePath();
     }
-    this.safeFrameRandomSubdomain_ =
-      this.safeFrameRandomSubdomain_ || this.getRandomString_();
+    safeFrameRandomSubdomain =
+      safeFrameRandomSubdomain || this.getRandomString_();
 
     return (
-      `https://${this.safeFrameRandomSubdomain_}.safeframe.googlesyndication.com/safeframe/` +
+      `https://${safeFrameRandomSubdomain}.safeframe.googlesyndication.com/safeframe/` +
       `${this.safeframeVersion}/html/container.html`
     );
   }

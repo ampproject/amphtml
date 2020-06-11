@@ -28,7 +28,7 @@ import {
   WebKeyframesDef,
   WebMultiAnimationDef,
   WebSwitchAnimationDef,
-  isWhitelistedProp,
+  isAllowlistedProp,
 } from './web-animation-types';
 import {NativeWebAnimationRunner} from './runners/native-web-animation-runner';
 import {ScrollTimelineWorkletRunner} from './runners/scrolltimeline-worklet-runner';
@@ -486,7 +486,7 @@ export class MeasureScanner extends Scanner {
     if (isObject(specKeyframes)) {
       // Property -> keyframes form.
       // The object is cloned, while properties are verified to be
-      // whitelisted. Additionally, the `offset:0` frames are inserted
+      // allowlisted. Additionally, the `offset:0` frames are inserted
       // to polyfill partial keyframes per spec.
       // See https://github.com/w3c/web-animations/issues/187
       const object = /** @type {!Object<string, *>} */ (specKeyframes);
@@ -516,7 +516,7 @@ export class MeasureScanner extends Scanner {
 
     if (isArray(specKeyframes) && specKeyframes.length > 0) {
       // Keyframes -> property form.
-      // The array is cloned, while properties are verified to be whitelisted.
+      // The array is cloned, while properties are verified to be allowlisted.
       // Additionally, if the `offset:0` properties are inserted when absent
       // to polyfill partial keyframes per spec.
       // See https://github.com/w3c/web-animations/issues/187 and
@@ -577,8 +577,8 @@ export class MeasureScanner extends Scanner {
       return;
     }
     userAssert(
-      isWhitelistedProp(prop),
-      'Property is not whitelisted for animation: %s',
+      isAllowlistedProp(prop),
+      'Property is not allowlisted for animation: %s',
       prop
     );
   }

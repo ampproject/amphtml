@@ -14,7 +14,7 @@ FAIL
 |    </style>
 |    <script async custom-element="amp-viewer-gpay-button" src="https://cdn.ampproject.org/v0/amp-viewer-gpay-button-0.1.js"></script>
 >>   ^~~~~~~~~
-amp-viewer-gpay-button/0.1/test/validator-amp-viewer-gpay-button.html:14:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags)
+amp-viewer-gpay-button/0.1/test/validator-amp-viewer-gpay-button.html:14:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/troubleshooting/validation_errors#custom-javascript-is-not-allowed)
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>

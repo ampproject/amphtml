@@ -82,7 +82,7 @@ function getMode_(win) {
   const searchQuery = parseQueryString_(win.location.search);
 
   if (!rtvVersion) {
-    rtvVersion = getRtvVersion(win, isLocalDev);
+    rtvVersion = getRtvVersion(win);
   }
 
   // The `minified`, `test` and `localDev` properties are replaced
@@ -120,16 +120,9 @@ function getMode_(win) {
  * denoting canary/prod/experiment (unless `isLocalDev` is true).
  *
  * @param {!Window} win
- * @param {boolean} isLocalDev
  * @return {string}
  */
-function getRtvVersion(win, isLocalDev) {
-  // If it's local dev then we won't actually have a full version so
-  // just use the version.
-  if (isLocalDev) {
-    return internalRuntimeVersion();
-  }
-
+function getRtvVersion(win) {
   if (win.AMP_CONFIG && win.AMP_CONFIG.v) {
     return win.AMP_CONFIG.v;
   }
@@ -144,12 +137,11 @@ function getRtvVersion(win, isLocalDev) {
 
 /**
  * @param {!Window} win
- * @param {boolean} isLocalDev
  * @return {string}
  * @visibleForTesting
  */
-export function getRtvVersionForTesting(win, isLocalDev) {
-  return getRtvVersion(win, isLocalDev);
+export function getRtvVersionForTesting(win) {
+  return getRtvVersion(win);
 }
 
 /** @visibleForTesting */
