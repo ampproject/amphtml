@@ -42,8 +42,8 @@ export class DatesList {
 
     /** @private @const */
     this.rrulestrs_ = dates
-      .filter(d => this.getDateType_(d) === DateType.RRULE)
-      .map(d => tryParseRrulestr(d));
+      .filter((d) => this.getDateType_(d) === DateType.RRULE)
+      .map((d) => tryParseRrulestr(d));
 
     /** @private @const */
     this.dates_ = dates
@@ -80,7 +80,7 @@ export class DatesList {
       }
     }
     const rruleDates = this.rrulestrs_
-      .map(rrule => /** @type {RRule} */ (rrule).after(date))
+      .map((rrule) => /** @type {RRule} */ (rrule).after(date))
       .filter(Boolean)
       .map(normalizeRruleReturn);
 
@@ -109,12 +109,8 @@ export class DatesList {
    * @private
    */
   matchesRrule_(date) {
-    const nextDate = date
-      .clone()
-      .startOf('day')
-      .add(1, 'day')
-      .toDate();
-    return this.rrulestrs_.some(rrule => {
+    const nextDate = date.clone().startOf('day').add(1, 'day').toDate();
+    return this.rrulestrs_.some((rrule) => {
       const rruleUTCDate = /** @type {RRule} */ (rrule).before(nextDate);
       if (!rruleUTCDate) {
         return false;
