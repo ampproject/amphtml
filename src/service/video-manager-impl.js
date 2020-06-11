@@ -399,7 +399,10 @@ export class VideoManager {
    */
   pauseOtherVideos(entryBeingPlayed) {
     this.entries_.forEach((entry) => {
-      if (entry !== entryBeingPlayed && entry.isPlaying()) {
+      if (
+        entry !== entryBeingPlayed &&
+        entry.getPlayingState() == PlayingStates.PLAYING_MANUAL
+      ) {
         entry.video.pause();
       }
     });
@@ -515,7 +518,10 @@ class VideoEntry {
     listen(video.element, VideoEvents.PAUSE, () => this.videoPaused_());
     listen(video.element, VideoEvents.PLAYING, () => this.videoPlayed_());
     listen(video.element, VideoEvents.MUTED, () => (this.muted_ = true));
-    listen(video.element, VideoEvents.UNMUTED, () => (this.muted_ = false));
+    listen(video.element, VideoEvents.UNMUTED, () => {
+      this.muted_ = false;
+      this.manager_.pauseOtherVideos(this);
+    });
 
     listen(video.element, VideoEvents.CUSTOM_TICK, (e) => {
       const data = getData(e);
@@ -598,11 +604,6 @@ class VideoEntry {
         this.video.pause();
       }
     });
-  }
-
-  /** @return {boolean} */
-  isPlaying() {
-    return this.isPlaying_;
   }
 
   /** @return {boolean} */
