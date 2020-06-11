@@ -19,7 +19,7 @@ import {Layout} from '../layout';
 import {Services} from '../services';
 import {computedStyle, toggle} from '../style';
 import {dev, devAssert} from '../log';
-import {isBlockedByConsent} from '../error';
+import {isBlockedByConsent, reportError} from '../error';
 import {
   layoutRectLtwh,
   layoutRectSizeEquals,
@@ -885,6 +885,13 @@ export class Resource {
     }
     if (this.state_ == ResourceState.LAYOUT_FAILED) {
       return Promise.reject(this.lastLayoutError_);
+    }
+    if (this.state_ != ResourceState.LAYOUT_SCHEDULED) {
+      const err = dev().createError(
+        'startLayout called but not LAYOUT_SCHEDULED'
+      );
+      reportError(err, this.element);
+      return Promise.reject(err);
     }
 
     devAssert(
