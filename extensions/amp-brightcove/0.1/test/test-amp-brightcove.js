@@ -51,8 +51,6 @@ describes.realWin(
 
       await whenUpgradedToCustomElement(element);
 
-      await element.whenBuilt();
-
       await element.signals().whenSignal(CommonSignals.LOAD_START);
 
       try {
