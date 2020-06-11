@@ -1146,7 +1146,7 @@ export class AmpA4A extends AMP.BaseElement {
   attemptToRenderCreative() {
     // Promise may be null if element was determined to be invalid for A4A.
     if (!this.adPromise_) {
-      if (this.shouldInitializePromiseChain_()) {
+      if (this.shouldInitializePromiseChain_() && !this.fromResumeCallback) {
         dev().error(TAG, 'Null promise in layoutCallback');
       }
       return Promise.resolve();
