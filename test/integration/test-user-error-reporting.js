@@ -19,7 +19,8 @@ import {BrowserController, RequestBank} from '../../testing/test-helper';
 const t = describe
   .configure()
   .skipSafari() // TODO(zhouyx, #11459): Unskip the test on safari.
-  .skipEdge();
+  .skipEdge()
+  .skipSauceLabs(); // TODO(wg-infra): RequestBank causes SauceLabs disconnect.
 
 t.run('user-error', function () {
   describes.integration(

@@ -19,13 +19,17 @@ import {maybeSwitchToCompiledJs} from '../../testing/iframe';
 import {parseQueryString} from '../../src/url';
 import {xhrServiceForTesting} from '../../src/service/xhr-impl';
 
-describe('AMPHTML ad on AMP Page', () => {
-  describes.integration(
-    'ATF',
-    {
-      amp: true,
-      extensions: ['amp-ad'],
-      body: `
+// TODO(wg-infra): RequestBank causes SauceLabs disconnect.
+describe
+  .configure()
+  .skipSauceLabs()
+  .run('AMPHTML ad on AMP Page', () => {
+    describes.integration(
+      'ATF',
+      {
+        amp: true,
+        extensions: ['amp-ad'],
+        body: `
   <amp-ad
       width="300" height="250"
       id="i-amphtml-demo-id"
@@ -36,26 +40,26 @@ describe('AMPHTML ad on AMP Page', () => {
       src="//ads.localhost:9876/amp4test/a4a/${RequestBank.getBrowserId()}">
   </amp-ad>
       `,
-    },
-    () => {
-      afterEach(() => {
-        return RequestBank.tearDown();
-      });
+      },
+      () => {
+        afterEach(() => {
+          return RequestBank.tearDown();
+        });
 
-      it('should layout amp-img, amp-pixel, amp-analytics', () => {
-        // Open http://ads.localhost:9876/amp4test/a4a/12345 to see ad content
-        return testAmpComponents();
-      });
-    }
-  );
+        it('should layout amp-img, amp-pixel, amp-analytics', () => {
+          // Open http://ads.localhost:9876/amp4test/a4a/12345 to see ad content
+          return testAmpComponents();
+        });
+      }
+    );
 
-  describes.integration(
-    'BTF',
-    {
-      amp: true,
-      extensions: ['amp-ad'],
-      frameStyle: 'height: 100vh',
-      body: `
+    describes.integration(
+      'BTF',
+      {
+        amp: true,
+        extensions: ['amp-ad'],
+        frameStyle: 'height: 100vh',
+        body: `
   <div style="height: 100vh"></div>
   <amp-ad
       width="300" height="250"
@@ -67,27 +71,31 @@ describe('AMPHTML ad on AMP Page', () => {
       src="//ads.localhost:9876/amp4test/a4a/${RequestBank.getBrowserId()}">
   </amp-ad>
       `,
-    },
-    (env) => {
-      afterEach(() => {
-        return RequestBank.tearDown();
-      });
+      },
+      (env) => {
+        afterEach(() => {
+          return RequestBank.tearDown();
+        });
 
-      // TODO(#24657): Flaky on Travis.
-      it.skip('should layout amp-img, amp-pixel, amp-analytics', () => {
-        // Open http://ads.localhost:9876/amp4test/a4a/12345 to see ad content
-        return testAmpComponentsBTF(env.win);
-      });
-    }
-  );
-});
+        // TODO(#24657): Flaky on Travis.
+        it.skip('should layout amp-img, amp-pixel, amp-analytics', () => {
+          // Open http://ads.localhost:9876/amp4test/a4a/12345 to see ad content
+          return testAmpComponentsBTF(env.win);
+        });
+      }
+    );
+  });
 
-describe('AMPHTML ad on non-AMP page (inabox)', () => {
-  describes.integration(
-    'ATF',
-    {
-      amp: false,
-      body: `
+// TODO(wg-infra): RequestBank causes SauceLabs disconnect.
+describe
+  .configure()
+  .skipSauceLabs()
+  .run('AMPHTML ad on non-AMP page (inabox)', () => {
+    describes.integration(
+      'ATF',
+      {
+        amp: false,
+        body: `
       <iframe
       src="//ads.localhost:9876/amp4test/a4a/${RequestBank.getBrowserId()}"
           scrolling="no" id="inabox"
@@ -95,61 +103,61 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       </iframe>
       <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
       `,
-    },
-    (env) => {
-      it('should layout amp-img, amp-pixel, amp-analytics', () => {
-        // See amp4test.js for creative content
-        return testAmpComponents();
-      });
+      },
+      (env) => {
+        it('should layout amp-img, amp-pixel, amp-analytics', () => {
+          // See amp4test.js for creative content
+          return testAmpComponents();
+        });
 
-      afterEach(() => {
-        unregisterIframe(env.win, env.win.document.getElementById('inabox'));
-        return RequestBank.tearDown();
-      });
-    }
-  );
+        afterEach(() => {
+          unregisterIframe(env.win, env.win.document.getElementById('inabox'));
+          return RequestBank.tearDown();
+        });
+      }
+    );
 
-  const srcdoc = `
+    const srcdoc = `
 ￼        <iframe
 ￼        src='//ads.localhost:9876/amp4test/a4a/${RequestBank.getBrowserId()}'
 ￼        width='300' height='250' scrolling='no' frameborder=0>
 ￼        </iframe>
 ￼        `;
 
-  // Test that the host script can observe a nested iframe properly.
-  // TODO: Make this work on Edge (which doesn't support srcdoc).
-  describes.integration(
-    'ATF nested',
-    {
-      amp: false,
-      body: `
+    // Test that the host script can observe a nested iframe properly.
+    // TODO: Make this work on Edge (which doesn't support srcdoc).
+    describes.integration(
+      'ATF nested',
+      {
+        amp: false,
+        body: `
       <iframe srcdoc="${srcdoc}"
           scrolling="no" id="inabox"
           width="300" height="250">
       </iframe>
       <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
       `,
-    },
-    (env) => {
-      it.configure()
-        .skipEdge()
-        .run('should layout amp-img, amp-pixel, amp-analytics', () => {
-          return testAmpComponents();
+      },
+      (env) => {
+        it.configure()
+          .skipEdge()
+          .run('should layout amp-img, amp-pixel, amp-analytics', () => {
+            return testAmpComponents();
+          });
+
+        afterEach(() => {
+          unregisterIframe(env.win, env.win.document.getElementById('inabox'));
+          return RequestBank.tearDown();
         });
+      }
+    );
 
-      afterEach(() => {
-        unregisterIframe(env.win, env.win.document.getElementById('inabox'));
-        return RequestBank.tearDown();
-      });
-    }
-  );
-
-  describes.integration(
-    'BTF',
-    {
-      amp: false,
-      frameStyle: 'height: 100vh',
-      body: `
+    describes.integration(
+      'BTF',
+      {
+        amp: false,
+        frameStyle: 'height: 100vh',
+        body: `
       <div style="height: 100vh"></div>
       <iframe
       src="//ads.localhost:9876/amp4test/a4a/${RequestBank.getBrowserId()}"
@@ -158,276 +166,280 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       </iframe>
       <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
       `,
-    },
-    (env) => {
-      it('should layout amp-img, amp-pixel, amp-analytics', () => {
-        // See amp4test.js for creative content
-        return testAmpComponentsBTF(env.win);
-      });
-
-      afterEach(() => {
-        unregisterIframe(env.win, env.win.document.getElementById('inabox'));
-        return RequestBank.tearDown();
-      });
-    }
-  );
-
-  describes.integration(
-    'ATF within friendly frame or safe frame',
-    {
-      amp: false,
-      body: `
-      <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
-      `,
-    },
-    (env) => {
-      let adContent;
-      let iframe;
-      before(() => {
-        // Gets the same ad as the other tests.
-        return fetchAdContent().then((text) => {
-          adContent = text;
-        });
-      });
-
-      beforeEach(() => {
-        iframe = document.createElement('iframe');
-        Array.prototype.push.apply(env.win.ampInaboxIframes, [iframe]);
-      });
-
-      afterEach(() => {
-        unregisterIframe(env.win, iframe);
-        env.win.document.body.removeChild(iframe);
-        return RequestBank.tearDown();
-      });
-
-      it(
-        'should layout amp-img, amp-pixel, ' +
-          'amp-analytics within friendly frame',
-        () => {
-          writeFriendlyFrame(env.win.document, iframe, adContent);
-          return testAmpComponents();
-        }
-      );
-
-      it(
-        'should layout amp-img, amp-pixel, ' +
-          'amp-analytics within safe frame',
-        () => {
-          writeSafeFrame(env.win.document, iframe, adContent);
-          return testAmpComponents();
-        }
-      );
-    }
-  );
-
-  // TODO(zombifier): The BTF test fails on Safari (#21311).
-  // TODO(powerivq): Flaky on Firefox and Edge too. unskip. (#24657)
-  describes.integration(
-    'BTF within friendly frame or safe frame',
-    {
-      amp: false,
-      body: `
-      <div style="height: 100vh"></div>
-      <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
-      `,
-    },
-    (env) => {
-      let adContent;
-      let iframe;
-      before(() => {
-        return fetchAdContent().then((text) => {
-          adContent = text;
-        });
-      });
-
-      beforeEach(() => {
-        env.iframe.style.height = '100vh';
-        iframe = document.createElement('iframe');
-        Array.prototype.push.apply(env.win.ampInaboxIframes, [iframe]);
-      });
-
-      afterEach(() => {
-        unregisterIframe(env.win, iframe);
-        env.win.document.body.removeChild(iframe);
-        return RequestBank.tearDown();
-      });
-
-      it.skip(
-        'should layout amp-img, amp-pixel, ' +
-          'amp-analytics within friendly frame',
-        () => {
-          writeFriendlyFrame(env.win.document, iframe, adContent);
+      },
+      (env) => {
+        it('should layout amp-img, amp-pixel, amp-analytics', () => {
+          // See amp4test.js for creative content
           return testAmpComponentsBTF(env.win);
-        }
-      );
+        });
 
-      it.skip(
-        'should layout amp-img, amp-pixel, ' +
-          'amp-analytics within safe frame',
-        () => {
-          writeSafeFrame(env.win.document, iframe, adContent);
-          return testAmpComponentsBTF(env.win);
-        }
-      );
-    }
-  );
-});
-
-describe('A more real AMPHTML image ad', () => {
-  const {testServerPort} = window.ampTestRuntimeConfig;
-
-  // The image ad as seen in examples/inabox.gpt.html,
-  // with visibility pings being placeholders that's substituted with calls to
-  // the request bank.
-  const adBody = maybeSwitchToCompiledJs(
-    // eslint-disable-next-line no-undef
-    __html__['test/fixtures/amp-cupcake-ad.html']
-  )
-    .replace(/__TEST_SERVER_PORT__/g, testServerPort)
-    .replace(/__VIEW_URL__/g, RequestBank.getUrl('view')) // get all instances
-    .replace('__VISIBLE_URL__', RequestBank.getUrl('visible'))
-    .replace('__ACTIVE_VIEW_URL__', RequestBank.getUrl('activeview'));
-
-  function testVisibilityPings(visibleDelay, activeViewDelay) {
-    let viewTime = 0;
-    let visibleTime = 0;
-    let activeViewTime = 0;
-    const viewPromise = RequestBank.withdraw('view').then(
-      () => (viewTime = Date.now())
-    );
-    const visiblePromise = RequestBank.withdraw('visible').then(
-      () => (visibleTime = Date.now())
-    );
-    const activeViewPromise = RequestBank.withdraw('activeview').then(
-      () => (activeViewTime = Date.now())
-    );
-    return Promise.all([viewPromise, visiblePromise, activeViewPromise]).then(
-      () => {
-        // Add a 200ms "buffer" to account for possible browser jankiness
-        expect(visibleTime - viewTime).to.be.above(visibleDelay - 200);
-        expect(activeViewTime - viewTime).to.be.above(activeViewDelay - 200);
+        afterEach(() => {
+          unregisterIframe(env.win, env.win.document.getElementById('inabox'));
+          return RequestBank.tearDown();
+        });
       }
     );
-  }
 
-  describes.integration(
-    'ATF within friendly frame or safe frame',
-    {
-      amp: false,
-      body: `
-        <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
-        `,
-    },
-    (env) => {
-      let iframe;
-      let doc;
-      beforeEach(() => {
-        doc = env.win.document;
-        iframe = document.createElement('iframe');
-        // we add the iframe here because it's dynamically created, so the
-        // bootstrap script would have missed it.
-        Array.prototype.push.apply(env.win.ampInaboxIframes, [iframe]);
-      });
+    describes.integration(
+      'ATF within friendly frame or safe frame',
+      {
+        amp: false,
+        body: `
+      <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
+      `,
+      },
+      (env) => {
+        let adContent;
+        let iframe;
+        before(() => {
+          // Gets the same ad as the other tests.
+          return fetchAdContent().then((text) => {
+            adContent = text;
+          });
+        });
 
-      it('should properly render ad in a friendly iframe with viewability pings', () => {
-        writeFriendlyFrame(doc, iframe, adBody);
-        return testVisibilityPings(0, 1000);
-      });
+        beforeEach(() => {
+          iframe = document.createElement('iframe');
+          Array.prototype.push.apply(env.win.ampInaboxIframes, [iframe]);
+        });
 
-      it('should properly render ad in a safe frame with viewability pings', () => {
-        writeSafeFrame(doc, iframe, adBody);
-        return testVisibilityPings(0, 1000);
-      });
+        afterEach(() => {
+          unregisterIframe(env.win, iframe);
+          env.win.document.body.removeChild(iframe);
+          return RequestBank.tearDown();
+        });
 
-      afterEach(() => {
-        unregisterIframe(env.win, iframe);
-        doc.body.removeChild(iframe);
-        return RequestBank.tearDown();
-      });
-    }
-  );
-
-  // Testing that analytics components use IntersectionObserver properly.
-  describes.integration(
-    'No Host Script within friendly frame or safe frame',
-    {
-      amp: false,
-      body: '',
-    },
-    (env) => {
-      let iframe;
-      let doc;
-      beforeEach(() => {
-        doc = env.win.document;
-        iframe = document.createElement('iframe');
-      });
-
-      it('should properly render ad in a friendly iframe with viewability pings', () => {
-        writeFriendlyFrame(doc, iframe, adBody);
-        return testVisibilityPings(0, 1000);
-      });
-
-      it.configure()
-        .ifChrome()
-        .run(
-          'should properly render ad in a safe frame with viewability pings',
+        it(
+          'should layout amp-img, amp-pixel, ' +
+            'amp-analytics within friendly frame',
           () => {
-            writeSafeFrame(doc, iframe, adBody);
-            return testVisibilityPings(0, 1000);
+            writeFriendlyFrame(env.win.document, iframe, adContent);
+            return testAmpComponents();
           }
         );
 
-      afterEach(() => {
-        doc.body.removeChild(iframe);
-        return RequestBank.tearDown();
-      });
-    }
-  );
+        it(
+          'should layout amp-img, amp-pixel, ' +
+            'amp-analytics within safe frame',
+          () => {
+            writeSafeFrame(env.win.document, iframe, adContent);
+            return testAmpComponents();
+          }
+        );
+      }
+    );
 
-  // TODO(zombifier): unskip the tests.
-  describes.integration(
-    'BTF within friendly frame or safe frame',
-    {
-      amp: false,
-      body: `
+    // TODO(zombifier): The BTF test fails on Safari (#21311).
+    // TODO(powerivq): Flaky on Firefox and Edge too. unskip. (#24657)
+    describes.integration(
+      'BTF within friendly frame or safe frame',
+      {
+        amp: false,
+        body: `
+      <div style="height: 100vh"></div>
+      <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
+      `,
+      },
+      (env) => {
+        let adContent;
+        let iframe;
+        before(() => {
+          return fetchAdContent().then((text) => {
+            adContent = text;
+          });
+        });
+
+        beforeEach(() => {
+          env.iframe.style.height = '100vh';
+          iframe = document.createElement('iframe');
+          Array.prototype.push.apply(env.win.ampInaboxIframes, [iframe]);
+        });
+
+        afterEach(() => {
+          unregisterIframe(env.win, iframe);
+          env.win.document.body.removeChild(iframe);
+          return RequestBank.tearDown();
+        });
+
+        it.skip(
+          'should layout amp-img, amp-pixel, ' +
+            'amp-analytics within friendly frame',
+          () => {
+            writeFriendlyFrame(env.win.document, iframe, adContent);
+            return testAmpComponentsBTF(env.win);
+          }
+        );
+
+        it.skip(
+          'should layout amp-img, amp-pixel, ' +
+            'amp-analytics within safe frame',
+          () => {
+            writeSafeFrame(env.win.document, iframe, adContent);
+            return testAmpComponentsBTF(env.win);
+          }
+        );
+      }
+    );
+  });
+
+// TODO(wg-infra): RequestBank causes SauceLabs disconnect.
+describe
+  .configure()
+  .skipSauceLabs()
+  .run('A more real AMPHTML image ad', () => {
+    const {testServerPort} = window.ampTestRuntimeConfig;
+
+    // The image ad as seen in examples/inabox.gpt.html,
+    // with visibility pings being placeholders that's substituted with calls to
+    // the request bank.
+    const adBody = maybeSwitchToCompiledJs(
+      // eslint-disable-next-line no-undef
+      __html__['test/fixtures/amp-cupcake-ad.html']
+    )
+      .replace(/__TEST_SERVER_PORT__/g, testServerPort)
+      .replace(/__VIEW_URL__/g, RequestBank.getUrl('view')) // get all instances
+      .replace('__VISIBLE_URL__', RequestBank.getUrl('visible'))
+      .replace('__ACTIVE_VIEW_URL__', RequestBank.getUrl('activeview'));
+
+    function testVisibilityPings(visibleDelay, activeViewDelay) {
+      let viewTime = 0;
+      let visibleTime = 0;
+      let activeViewTime = 0;
+      const viewPromise = RequestBank.withdraw('view').then(
+        () => (viewTime = Date.now())
+      );
+      const visiblePromise = RequestBank.withdraw('visible').then(
+        () => (visibleTime = Date.now())
+      );
+      const activeViewPromise = RequestBank.withdraw('activeview').then(
+        () => (activeViewTime = Date.now())
+      );
+      return Promise.all([viewPromise, visiblePromise, activeViewPromise]).then(
+        () => {
+          // Add a 200ms "buffer" to account for possible browser jankiness
+          expect(visibleTime - viewTime).to.be.above(visibleDelay - 200);
+          expect(activeViewTime - viewTime).to.be.above(activeViewDelay - 200);
+        }
+      );
+    }
+
+    describes.integration(
+      'ATF within friendly frame or safe frame',
+      {
+        amp: false,
+        body: `
+        <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
+        `,
+      },
+      (env) => {
+        let iframe;
+        let doc;
+        beforeEach(() => {
+          doc = env.win.document;
+          iframe = document.createElement('iframe');
+          // we add the iframe here because it's dynamically created, so the
+          // bootstrap script would have missed it.
+          Array.prototype.push.apply(env.win.ampInaboxIframes, [iframe]);
+        });
+
+        it('should properly render ad in a friendly iframe with viewability pings', () => {
+          writeFriendlyFrame(doc, iframe, adBody);
+          return testVisibilityPings(0, 1000);
+        });
+
+        it('should properly render ad in a safe frame with viewability pings', () => {
+          writeSafeFrame(doc, iframe, adBody);
+          return testVisibilityPings(0, 1000);
+        });
+
+        afterEach(() => {
+          unregisterIframe(env.win, iframe);
+          doc.body.removeChild(iframe);
+          return RequestBank.tearDown();
+        });
+      }
+    );
+
+    // Testing that analytics components use IntersectionObserver properly.
+    describes.integration(
+      'No Host Script within friendly frame or safe frame',
+      {
+        amp: false,
+        body: '',
+      },
+      (env) => {
+        let iframe;
+        let doc;
+        beforeEach(() => {
+          doc = env.win.document;
+          iframe = document.createElement('iframe');
+        });
+
+        it('should properly render ad in a friendly iframe with viewability pings', () => {
+          writeFriendlyFrame(doc, iframe, adBody);
+          return testVisibilityPings(0, 1000);
+        });
+
+        it.configure()
+          .ifChrome()
+          .run(
+            'should properly render ad in a safe frame with viewability pings',
+            () => {
+              writeSafeFrame(doc, iframe, adBody);
+              return testVisibilityPings(0, 1000);
+            }
+          );
+
+        afterEach(() => {
+          doc.body.removeChild(iframe);
+          return RequestBank.tearDown();
+        });
+      }
+    );
+
+    // TODO(zombifier): unskip the tests.
+    describes.integration(
+      'BTF within friendly frame or safe frame',
+      {
+        amp: false,
+        body: `
         <div style="height: 100vh"></div>
         <script src="/examples/amphtml-ads/ads-tag-integration.js"></script>
         `,
-    },
-    (env) => {
-      let iframe;
-      let doc;
-      beforeEach(() => {
-        env.iframe.style.height = '100vh';
-        doc = env.win.document;
-        iframe = document.createElement('iframe');
-        Array.prototype.push.apply(env.win.ampInaboxIframes, [iframe]);
-        setTimeout(() => {
-          env.win.scrollTo(0, 1000);
-          window.top.scrollBy(0, 1);
-          window.top.scrollBy(0, -1);
-        }, 2000);
-      });
+      },
+      (env) => {
+        let iframe;
+        let doc;
+        beforeEach(() => {
+          env.iframe.style.height = '100vh';
+          doc = env.win.document;
+          iframe = document.createElement('iframe');
+          Array.prototype.push.apply(env.win.ampInaboxIframes, [iframe]);
+          setTimeout(() => {
+            env.win.scrollTo(0, 1000);
+            window.top.scrollBy(0, 1);
+            window.top.scrollBy(0, -1);
+          }, 2000);
+        });
 
-      it.skip('should properly render ad in a friendly iframe with viewability pings', () => {
-        writeFriendlyFrame(doc, iframe, adBody);
-        return testVisibilityPings(2000, 3000);
-      });
+        it.skip('should properly render ad in a friendly iframe with viewability pings', () => {
+          writeFriendlyFrame(doc, iframe, adBody);
+          return testVisibilityPings(2000, 3000);
+        });
 
-      it.skip('should properly render ad in a safe frame with viewability pings', () => {
-        writeSafeFrame(doc, iframe, adBody);
-        return testVisibilityPings(2000, 3000);
-      });
+        it.skip('should properly render ad in a safe frame with viewability pings', () => {
+          writeSafeFrame(doc, iframe, adBody);
+          return testVisibilityPings(2000, 3000);
+        });
 
-      afterEach(() => {
-        unregisterIframe(env.win, iframe);
-        doc.body.removeChild(iframe);
-        return RequestBank.tearDown();
-      });
-    }
-  );
-});
+        afterEach(() => {
+          unregisterIframe(env.win, iframe);
+          doc.body.removeChild(iframe);
+          return RequestBank.tearDown();
+        });
+      }
+    );
+  });
 
 function testAmpComponents() {
   const imgPromise = RequestBank.withdraw('image').then((req) => {

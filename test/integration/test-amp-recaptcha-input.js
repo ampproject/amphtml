@@ -19,10 +19,12 @@ import {Deferred} from '../../src/utils/promise';
 import {poll} from '../../testing/iframe';
 
 // TODO(torch2424, #20541): These tests fail on firefox and Edge.
+// TODO(wg-infra): RequestBank causes SauceLabs disconnect.
 describe
   .configure()
   .skipFirefox()
   .skipEdge()
+  .skipSauceLabs()
   .run('amp-recaptcha-input', function () {
     describes.integration(
       'with form and amp-mustache',
