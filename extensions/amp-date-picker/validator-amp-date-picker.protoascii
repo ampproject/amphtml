@@ -143,6 +143,10 @@ attr_lists: {
     name: "allow-blocked-ranges"
     value: ""
   }
+  attrs: {
+    name: "allow-past-selection"
+    value: ""
+  }
   attrs: { name: "blocked" }
   attrs: {
     name: "day-size"
