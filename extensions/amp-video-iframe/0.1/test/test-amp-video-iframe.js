@@ -95,6 +95,13 @@ describes.realWin(
 
     async function layoutAndLoad(videoIframe) {
       await whenUpgradedToCustomElement(videoIframe);
+      // Affects looksLikeTrackingIframe() in layoutCallback.
+      // Use default width/height of 100 since element is not sized
+      // as expected in test fixture.
+      env.sandbox.stub(videoIframe, 'getLayoutBox').returns({
+        width: Number(videoIframe.getAttribute('width')) || 100,
+        height: Number(videoIframe.getAttribute('height')) || 100,
+      });
       videoIframe.implementation_.layoutCallback();
       return listenOncePromise(videoIframe, VideoEvents.LOAD);
     }
@@ -181,7 +188,7 @@ describes.realWin(
         trackingSizes.forEach((size) => {
           const {implementation_} = createVideoIframe({}, size);
           allowConsoleError(() => {
-            expect(() => implementation_.buildCallback()).to.throw();
+            expect(() => implementation_.layoutCallback()).to.throw();
           });
         });
       });
