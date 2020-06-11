@@ -239,7 +239,7 @@ feature_tests/mandatory_dimensions.html:143:4 The attribute 'src' may not appear
 >>     ^~~~~~~~~
 feature_tests/mandatory_dimensions.html:143:4 The tag 'amp-lightbox' requires including the 'amp-lightbox' extension JavaScript. (see https://amp.dev/documentation/components/amp-lightbox)
 |
-|      <!-- Not-whitelisted attributes -->
+|      <!-- Not-allowlisted attributes -->
 |      <amp-img height="42" src="img" foo="bar"></amp-img>
 >>     ^~~~~~~~~
 feature_tests/mandatory_dimensions.html:146:4 The attribute 'foo' may not appear in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img)

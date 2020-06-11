@@ -385,54 +385,6 @@ describes.realWin(
           };
         });
 
-        describe('gdprApplies value', () => {
-          it('uses given value', async () => {
-            const inlineConfig = {
-              'consentInstanceId': 'abc',
-              'consentRequired': 'remote',
-              'checkConsentHref': 'https://gdpr-applies/',
-            };
-            ampConsent = getAmpConsent(doc, inlineConfig);
-            await ampConsent.buildCallback();
-            await macroTask();
-            const stateManagerGdprApplies = await ampConsent
-              .getConsentStateManagerForTesting()
-              .getConsentInstanceGdprApplies();
-            expect(stateManagerGdprApplies).to.be.false;
-          });
-
-          it('defaults to consentRequired remote value', async () => {
-            const inlineConfig = {
-              'consentInstanceId': 'abc',
-              'consentRequired': 'remote',
-              'checkConsentHref': 'https://geo-override-check2/',
-            };
-            ampConsent = getAmpConsent(doc, inlineConfig);
-            await ampConsent.buildCallback();
-            await macroTask();
-            await expect(
-              ampConsent
-                .getConsentStateManagerForTesting()
-                .getConsentInstanceGdprApplies()
-            ).to.eventually.be.true;
-          });
-
-          it('never defaults to inline config when checkConsentHref is not defined', async () => {
-            const inlineConfig = {
-              'consentInstanceId': 'abc',
-              'consentRequired': true,
-            };
-            ampConsent = getAmpConsent(doc, inlineConfig);
-            await ampConsent.buildCallback();
-            await macroTask();
-            await expect(
-              ampConsent
-                .getConsentStateManagerForTesting()
-                .getConsentInstanceGdprApplies()
-            ).to.eventually.be.null;
-          });
-        });
-
         it('should not update local storage when response is false', async () => {
           const inlineConfig = {
             'consentInstanceId': 'abc',

@@ -48,6 +48,15 @@ const realiasGetMode =
 // Terms that must not appear in our source files.
 const forbiddenTerms = {
   'DO NOT SUBMIT': '',
+  'whitelist|white-list': {
+    message: 'Please use the term allowlist instead',
+  },
+  'blacklist|black-list': {
+    message: 'Please use the term denylist instead',
+  },
+  'grandfather|grandfathered': {
+    message: 'Please use the term legacy instead',
+  },
   // TODO(dvoytenko, #8464): cleanup allowlist.
   '(^-amp-|\\W-amp-)': {
     message: 'Switch to new internal class form',
@@ -109,7 +118,6 @@ const forbiddenTerms = {
       'allowlist a legit case.',
     allowlist: [
       'build-system/common/check-package-manager.js',
-      'build-system/compile/single-pass.js',
       'build-system/pr-check/build.js',
       'build-system/pr-check/build-targets.js',
       'build-system/pr-check/checks.js',
@@ -121,7 +129,6 @@ const forbiddenTerms = {
       'build-system/pr-check/local-tests.js',
       'build-system/pr-check/performance-tests.js',
       'build-system/pr-check/remote-tests.js',
-      'build-system/pr-check/single-pass-tests.js',
       'build-system/pr-check/utils.js',
       'build-system/pr-check/validator-tests.js',
       'build-system/pr-check/visual-diff-tests.js',
@@ -488,6 +495,7 @@ const forbiddenTerms = {
       'extensions/amp-access/0.1/amp-access-iframe.js',
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
       'extensions/amp-script/0.1/amp-script.js',
+      'extensions/amp-story/1.0/history.js',
       'extensions/amp-web-push/0.1/amp-web-push-helper-frame.js',
       'extensions/amp-web-push/0.1/amp-web-push-permission-dialog.js',
       'src/experiments.js',
@@ -577,7 +585,7 @@ const forbiddenTerms = {
     message:
       'Logging message require explicitly `TAG`, or an all uppercase' +
       ' string as the first parameter',
-    whitelist: [
+    allowlist: [
       'build-system/babel-plugins/babel-plugin-transform-dev-methods/index.js',
     ],
   },

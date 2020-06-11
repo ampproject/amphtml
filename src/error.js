@@ -311,8 +311,8 @@ export function installErrorReporting(win) {
  * @this {!Window|undefined}
  */
 function onError(message, filename, line, col, error) {
-  // Make an attempt to unhide the body.
-  if (this && this.document) {
+  // Make an attempt to unhide the body but don't if the error is actually expected.
+  if (this && this.document && (!error || !error.expected)) {
     makeBodyVisibleRecovery(this.document);
   }
   if (getMode().localDev || getMode().development || getMode().test) {
@@ -556,10 +556,6 @@ export function getErrorReportData(
     runtime = '3p';
   } else if (getMode().runtime) {
     runtime = getMode().runtime;
-  }
-
-  if (getMode().singlePassType) {
-    data['spt'] = getMode().singlePassType;
   }
 
   data['rt'] = runtime;

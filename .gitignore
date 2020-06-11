@@ -35,3 +35,7 @@ build-system/server/new-server/transforms/dist
 build-system/tasks/performance/cache
 build-system/tasks/performance/results.json
 build-system/global-configs/custom-config.json
+export
+validator/export
+validator/java/.classpath
+validator/java/.project

@@ -22,7 +22,7 @@ const rules = {};
 const ruleFiles = fs
   .readdirSync(__dirname)
   .filter(
-    (ruleFile) => !['index.js', '.eslintrc', 'OWNERS'].includes(ruleFile)
+    (ruleFile) => !['index.js', '.eslintrc.js', 'OWNERS'].includes(ruleFile)
   );
 ruleFiles.forEach(function (ruleFile) {
   const rule = ruleFile.replace(path.extname(ruleFile), '');

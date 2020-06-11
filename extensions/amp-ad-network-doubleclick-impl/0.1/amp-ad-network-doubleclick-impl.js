@@ -23,7 +23,14 @@
 import '../../amp-a4a/0.1/real-time-config-manager';
 import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../src/ampdoc-fie';
 import {
-  AMP_AD_NO_CENTER_CSS_EXP,
+  AmpA4A,
+  ConsentTupleDef,
+  DEFAULT_SAFEFRAME_VERSION,
+  NO_SIGNING_EXP,
+  XORIGIN_MODE,
+  assignAdUrlToError,
+} from '../../amp-a4a/0.1/amp-a4a';
+import {
   AmpAnalyticsConfigDef,
   QQID_HEADER,
   RENDER_ON_IDLE_FIX_EXP,
@@ -44,14 +51,6 @@ import {
   maybeAppendErrorParameter,
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
-import {
-  AmpA4A,
-  ConsentTupleDef,
-  DEFAULT_SAFEFRAME_VERSION,
-  NO_SIGNING_EXP,
-  XORIGIN_MODE,
-  assignAdUrlToError,
-} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
 import {FIE_INIT_CHUNKING_EXP} from '../../../src/friendly-iframe-embed';
@@ -100,15 +99,15 @@ import {
   waitFor3pThrottle,
 } from '../../amp-ad/0.1/concurrent-load';
 import {getCryptoRandomBytesArray, utf8Decode} from '../../../src/utils/bytes';
+import {getMode} from '../../../src/mode';
+import {getMultiSizeDimensions} from '../../../ads/google/utils';
+import {getOrCreateAdCid} from '../../../src/ad-cid';
+
 import {
   getExperimentBranch,
   isExperimentOn,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
-import {getMode} from '../../../src/mode';
-import {getMultiSizeDimensions} from '../../../ads/google/utils';
-import {getOrCreateAdCid} from '../../../src/ad-cid';
-
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {isArray} from '../../../src/types';
 import {isCancellation} from '../../../src/error';
@@ -197,6 +196,14 @@ let tokensToInstances = {};
 
 /** @private {?Promise} */
 let sraRequests = null;
+
+/**
+ * The random subdomain to load SafeFrame from, if SafeFrame is
+ * being loaded from a random subdomain and if the subdomain
+ * has been generated.
+ * @private {?string}
+ */
+let safeFrameRandomSubdomain = null;
 
 /** @typedef {{
       adUrl: !Promise<string>,
@@ -322,14 +329,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @protected {ConsentTupleDef} */
     this.consentTuple = {};
-
-    /**
-     * The random subdomain to load SafeFrame from, if SafeFrame is
-     * being loaded from a random subdomain and if the subdomain
-     * has been generated.
-     * @private {?string}
-     */
-    this.safeFrameRandomSubdomain_ = null;
 
     /** @protected {!Deferred<string>} */
     this.getAdUrlDeferred = new Deferred();
@@ -461,13 +460,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT,
         ],
       },
-      [AMP_AD_NO_CENTER_CSS_EXP.id]: {
-        isTrafficEligible: () => true,
-        branches: [
-          [AMP_AD_NO_CENTER_CSS_EXP.control],
-          [AMP_AD_NO_CENTER_CSS_EXP.experiment],
-        ],
-      },
       [[FIE_INIT_CHUNKING_EXP.id]]: {
         isTrafficEligible: () => true,
         branches: [
@@ -595,7 +587,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.isFluidRequest_ =
         !!multiSizeStr && multiSizeStr.indexOf('fluid') != -1;
     }
-    this.maybeAddSinglePassExperiment();
   }
 
   /** @override */
@@ -760,9 +751,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({});
       });
 
-    const rtcParamsPromise = opt_rtcResponsesPromise.then((results) =>
-      this.mergeRtcResponses_(results)
-    );
+    const checkStillCurrent = this.verifyStillCurrent();
+
+    const rtcParamsPromise = opt_rtcResponsesPromise.then((results) => {
+      checkStillCurrent();
+      return this.mergeRtcResponses_(results);
+    });
 
     // TODO(#28555): Delete extra logic when 'expand-json-targeting' exp launches.
     const isJsonTargetingExpOn =
@@ -777,8 +771,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             dev().warn(TAG, 'JSON Targeting expansion failed/timed out.');
           })
       : Promise.resolve();
-
-    const checkStillCurrent = this.verifyStillCurrent();
 
     Promise.all([
       rtcParamsPromise,
@@ -932,11 +924,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   getCustomRealTimeConfigMacros_() {
     /**
-     * This whitelist allow attributes on the amp-ad element to be used as
+     * This lists allowed attributes on the amp-ad element to be used as
      * macros for constructing the RTC URL. Add attributes here, in lowercase,
      * to make them available.
      */
-    const whitelist = {
+    const allowlist = {
       'height': true,
       'width': true,
       'data-slot': true,
@@ -964,7 +956,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           parseInt(opt_timeout, 10)
         ),
       ATTR: (name) => {
-        if (!whitelist[name.toLowerCase()]) {
+        if (!allowlist[name.toLowerCase()]) {
           dev().warn('TAG', `Invalid attribute ${name}`);
         } else {
           return this.element.getAttribute(name);
@@ -1228,11 +1220,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!this.experimentIds.includes(randomSubdomainExperimentBranch)) {
       return super.getSafeframePath();
     }
-    this.safeFrameRandomSubdomain_ =
-      this.safeFrameRandomSubdomain_ || this.getRandomString_();
+    safeFrameRandomSubdomain =
+      safeFrameRandomSubdomain || this.getRandomString_();
 
     return (
-      `https://${this.safeFrameRandomSubdomain_}.safeframe.googlesyndication.com/safeframe/` +
+      `https://${safeFrameRandomSubdomain}.safeframe.googlesyndication.com/safeframe/` +
       `${this.safeframeVersion}/html/container.html`
     );
   }
@@ -1314,19 +1306,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       height: `${size.height}px`,
       position: isMultiSizeFluid ? 'relative' : null,
     });
-
-    // Set the centering CSS if the experiment is off
-    if (
-      !isExperimentOn(this.win, 'amp-ad-no-center-css') ||
-      getExperimentBranch(this.win, AMP_AD_NO_CENTER_CSS_EXP.id) ===
-        AMP_AD_NO_CENTER_CSS_EXP.control
-    ) {
-      setStyles(dev().assertElement(this.iframe), {
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-      });
-    }
 
     if (this.qqid_) {
       this.element.setAttribute('data-google-query-id', this.qqid_);
