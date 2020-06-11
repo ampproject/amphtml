@@ -76,7 +76,8 @@ function getAdTypes() {
     if (
       path.extname(files[i]) == '.js' &&
       files[i][0] != '_' &&
-      files[i] != 'ads.extern.js'
+      files[i] != 'ads.extern.js' &&
+      files[i] != '.eslintrc.js'
     ) {
       const adType = path.basename(files[i], '.js');
       const expanded = namingExceptions[adType];
