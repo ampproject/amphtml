@@ -581,7 +581,6 @@ export function runVideoPlayerIntegrationTests(
         video.setAttribute('layout', 'fixed');
         video.setAttribute('width', '300px');
         video.setAttribute('height', '50vh');
-        video.setAttribute('i-amphtml-integration-test', '');
 
         video.style.position = 'absolute';
         video.style.top = top;
