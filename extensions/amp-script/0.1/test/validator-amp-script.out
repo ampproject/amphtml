@@ -121,7 +121,7 @@ amp-script/0.1/test/validator-amp-script.html:94:2 The attribute 'data-ampdevmod
 |    <!-- Invalid: Local script without 'target' or 'id' attributes. -->
 |    <script type=text/plain>
 >>   ^~~~~~~~~
-amp-script/0.1/test/validator-amp-script.html:97:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/troubleshooting/validation_errors#custom-javascript-is-not-allowed)
+amp-script/0.1/test/validator-amp-script.html:97:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
 |      document.body.textContent = "Hello World!";
 |    </script>
 |
@@ -135,14 +135,14 @@ amp-script/0.1/test/validator-amp-script.html:102:2 The attribute 'type' in tag 
 |    <!-- Invalid: Local script with invalid 'target'. -->
 |    <script type=text/plain target=amp-js id=hello>
 >>   ^~~~~~~~~
-amp-script/0.1/test/validator-amp-script.html:107:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/troubleshooting/validation_errors#custom-javascript-is-not-allowed)
+amp-script/0.1/test/validator-amp-script.html:107:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
 |      document.body.textContent = "Hello World!";
 |    </script>
 |
 |    <!-- Invalid: Local script without 'target' attribute. -->
 |    <script type=text/plain id=hello>
 >>   ^~~~~~~~~
-amp-script/0.1/test/validator-amp-script.html:112:2 Custom JavaScript is not allowed. (see https://www.ampproject.org/docs/troubleshooting/validation_errors#custom-javascript-is-not-allowed)
+amp-script/0.1/test/validator-amp-script.html:112:2 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
 |      document.body.textContent = "Hello World!";
 |    </script>
 |
