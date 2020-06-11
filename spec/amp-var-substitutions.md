@@ -139,7 +139,7 @@ Link substitutions are restricted and will only be fulfilled for URLs matching:
 - The page’s canonical origin
 - A white listed origin
 
-To whitelist an origin, include a `amp-link-variable-allowed-origin` `meta` tag in the `head` of your document. To specify multiple domains, separate each domain with a space.
+To allowlist an origin, include a `amp-link-variable-allowed-origin` `meta` tag in the `head` of your document. To specify multiple domains, separate each domain with a space.
 
 ```html
 <meta
@@ -185,19 +185,23 @@ The tables below list the available URL variables grouped by type of usage. Furt
 
 ### Performance
 
-| Variable Name                                           | Platform Variable      | amp-analytics Variable  |
-| ------------------------------------------------------- | ---------------------- | ----------------------- |
-| [Content Load Time](#content-load-time)                 | `CONTENT_LOAD_TIME`    | `${contentLoadTime}`    |
-| [Domain Lookup Time](#domain-lookup-time)               | `DOMAIN_LOOKUP_TIME`   | `${domainLookupTime}`   |
-| [DOM Interactive Time](#dom-interactive-time)           | `DOM_INTERACTIVE_TIME` | `${domInteractiveTime}` |
-| [Navigation Redirect Count](#navigation-redirect-count) | `NAV_REDIRECT_COUNT`   | `${navRedirectCount}`   |
-| [Navigation Timing ](#navigation-timing)                | `NAV_TIMING`           | `${navTiming}`          |
-| [Navigation Type](#navigation-type)                     | `NAV_TYPE`             | `${navType}`            |
-| [Page Download Time](#page-download-time)               | `PAGE_DOWNLOAD_TIME`   | `${pageDownloadTime}`   |
-| [Page Load Time](#page-load-time)                       | `PAGE_LOAD_TIME`       | `${pageLoadTime}`       |
-| [Redirect Time](#redirect-time)                         | `REDIRECT_TIME`        | `${redirectTime}`       |
-| [Server Response Time](#server-response-time)           | `SERVER_RESPONSE_TIME` | `${serverResponseTime}` |
-| [TCP Connection Time](#tcp-connection-time)             | `TCP_CONNECT_TIME`     | `${tcpConnectTime}`     |
+| Variable Name                                           | Platform Variable      | amp-analytics Variable      |
+| ------------------------------------------------------- | ---------------------- | --------------------------- |
+| [Content Load Time](#content-load-time)                 | `CONTENT_LOAD_TIME`    | `${contentLoadTime}`        |
+| [Cumulative Layout Shift](#cumulative-layout-shift)     | N/A                    | `${cumulativeLayoutShift}`  |
+| [Domain Lookup Time](#domain-lookup-time)               | `DOMAIN_LOOKUP_TIME`   | `${domainLookupTime}`       |
+| [DOM Interactive Time](#dom-interactive-time)           | `DOM_INTERACTIVE_TIME` | `${domInteractiveTime}`     |
+| [First Contentful Paint](#first-contentful-paint)       | N/A                    | `${firstContentfulPaint}`   |
+| [First Input Delay](#first-input-delay)                 | N/A                    | `${firstInputDelay}`        |
+| [Largest Contentful Paint](#largest-contentful-paint)   | N/A                    | `${largestContentfulPaint}` |
+| [Navigation Redirect Count](#navigation-redirect-count) | `NAV_REDIRECT_COUNT`   | `${navRedirectCount}`       |
+| [Navigation Timing ](#navigation-timing)                | `NAV_TIMING`           | `${navTiming}`              |
+| [Navigation Type](#navigation-type)                     | `NAV_TYPE`             | `${navType}`                |
+| [Page Download Time](#page-download-time)               | `PAGE_DOWNLOAD_TIME`   | `${pageDownloadTime}`       |
+| [Page Load Time](#page-load-time)                       | `PAGE_LOAD_TIME`       | `${pageLoadTime}`           |
+| [Redirect Time](#redirect-time)                         | `REDIRECT_TIME`        | `${redirectTime}`           |
+| [Server Response Time](#server-response-time)           | `SERVER_RESPONSE_TIME` | `${serverResponseTime}`     |
+| [TCP Connection Time](#tcp-connection-time)             | `TCP_CONNECT_TIME`     | `${tcpConnectTime}`         |
 
 ### Device and Browser
 
@@ -211,10 +215,10 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Screen Width](#screen-width)                       | `SCREEN_WIDTH`            | `${screenWidth}`           |
 | [Scroll Height](#scroll-height)                     | `SCROLL_HEIGHT`           | `${scrollHeight}`          |
 | [Scroll Width](#scroll-width)                       | `SCROLL_WIDTH`            | `${scrollWidth}`           |
-| [Scroll Left](#scroll-left)                         | `SCROLL_LEFT`             | `${scrollLeft}`            |
-| [Scroll Top](#scroll-top)                           | `SCROLL_TOP`              | `${scrollTop}`             |
+| [Scroll Left](#scroll-left)                         | N/A                       | `${scrollLeft}`            |
+| [Scroll Top](#scroll-top)                           | N/A                       | `${scrollTop}`             |
 | [Timezone](#timezone)                               | `TIMEZONE`                | `${timezone}`              |
-| [Timezone Code](#timezone-code)                     | `TIMEZONE_CODE`           | `${timezoneCode}`          |
+| [Timezone Code](#timezone-code)                     | N/A                       | `${timezoneCode}`          |
 | [User Agent](#user-agent)                           | `USER_AGENT`              | `${userAgent}`             |
 | [Viewport Height](#viewport-height)                 | `VIEWPORT_HEIGHT`         | `${viewportHeight}`        |
 | [Viewport Width](#viewport-width)                   | `VIEWPORT_WIDTH`          | `${viewportWidth}`         |
@@ -1035,11 +1039,7 @@ Provides the total height of the page in pixels.
 
 Provides the number of pixels that the user has scrolled from left.
 
-- **platform variable**: `SCROLL_LEFT`
-  - Example: <br>
-  ```html
-  <amp-pixel src="https://foo.com/pixel?scrollLeft=SCROLL_LEFT"></amp-pixel>
-  ```
+- **platform variable**: N/A
 - **amp-analytics variable**: `${scrollLeft}`
   - Example value: `100`
 
@@ -1047,11 +1047,7 @@ Provides the number of pixels that the user has scrolled from left.
 
 Provides the number of pixels that the user has scrolled from top.
 
-- **platform variable**: `SCROLL_TOP`
-  - Example: <br>
-  ```html
-  <amp-pixel src="https://foo.com/pixel?st=SCROLL_TOP"></amp-pixel>
-  ```
+- **platform variable**: N/A
 - **amp-analytics variable**: `${scrollTop}`
   - Example value: `0`
 
@@ -1190,11 +1186,7 @@ Provides the user's time-zone offset from UTC, in minutes.
 
 Provides the user's IANA time-zone code (if available).
 
-- **platform variable**: `TIMEZONE_CODE`
-  - Example: <br>
-  ```html
-  <amp-pixel src="https://foo.com/pixel?tz_code=TIMEZONE_CODE"></amp-pixel>
-  ```
+- **platform variable**: N/A
 - **amp-analytics variable**: `${timezoneCode}`
   - Example value: `Europe/Rome`.
 

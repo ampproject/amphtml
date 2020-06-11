@@ -112,7 +112,7 @@ class AmpMyElement extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-my-element', '0.1', AMP => {
+AMP.extension('amp-my-element', '0.1', (AMP) => {
   AMP.registerElement('amp-my-element', AmpMyElement, CSS);
 });
 ```
@@ -288,7 +288,7 @@ AMP; all AMP extensions are prefixed with `amp-`. This is where you
 tell AMP which class to use for this tag name and which CSS to load.
 
 ```javascript
-AMP.extension('amp-carousel', '0.1', AMP => {
+AMP.extension('amp-carousel', '0.1', (AMP) => {
   AMP.registerElement('amp-carousel', CarouselSelector, CSS);
 });
 ```
@@ -361,7 +361,7 @@ owners.
 ```javascript
 this.cells_ = this.getRealChildren();
 
-this.cells_.forEach(cell => {
+this.cells_.forEach((cell) => {
   Services.ownersForDoc(this.element).setOwner(cell, this.element);
   cell.style.display = 'inline-block';
   this.container_.appendChild(cell);
@@ -570,7 +570,7 @@ probably wants to return true in order to signal to AMP the need to call
 `layoutCallback` again once the document is active. Otherwise your
 element will never be re-laid out.
 
-### vsync, mutateElement, and changeSize
+### vsync, mutateElement, and requestChangeSize
 
 AMP provides multiple utilities to optimize many mutations and measuring
 for better performance. These include vsync service with a mutate and

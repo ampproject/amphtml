@@ -17,7 +17,7 @@
 import {AnalyticsEventType} from './events';
 import {BatchSegmentDef, defaultSerializer} from './transport-serializer';
 import {ExpansionOptions, variableServiceForDoc} from './variables';
-import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-whitelist';
+import {SANDBOX_AVAILABLE_VARS} from './sandbox-vars-allowlist';
 import {Services} from '../../../src/services';
 import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -87,7 +87,7 @@ export class RequestHandler {
     this.transport_ = transport;
 
     /** @const @private {!Object|undefined} */
-    this.whiteList_ = isSandbox ? SANDBOX_AVAILABLE_VARS : undefined;
+    this.allowlist_ = isSandbox ? SANDBOX_AVAILABLE_VARS : undefined;
 
     /** @private {?number} */
     this.batchIntervalTimeoutId_ = null;
@@ -142,14 +142,14 @@ export class RequestHandler {
         expansionOption,
         this.element_,
         bindings,
-        this.whiteList_
+        this.allowlist_
       );
 
-      this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then(baseUrl => {
+      this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then((baseUrl) => {
         return this.urlReplacementService_.expandUrlAsync(
           baseUrl,
           bindings,
-          this.whiteList_
+          this.allowlist_
         );
       });
     }
@@ -170,14 +170,14 @@ export class RequestHandler {
           requestOriginExpansionOpt,
           this.element_,
           bindings,
-          this.whiteList_
+          this.allowlist_
         )
         // substitute in URL values e.g. DOCUMENT_REFERRER -> https://example.com
-        .then(expandedRequestOrigin => {
+        .then((expandedRequestOrigin) => {
           return this.urlReplacementService_.expandUrlAsync(
             expandedRequestOrigin,
             bindings,
-            this.whiteList_,
+            this.allowlist_,
             true // opt_noEncode
           );
         });
@@ -192,8 +192,8 @@ export class RequestHandler {
       expansionOption,
       bindings,
       this.element_,
-      this.whiteList_
-    ).then(params => {
+      this.allowlist_
+    ).then((params) => {
       return dict({
         'trigger': trigger['on'],
         'timestamp': timestamp,
@@ -258,7 +258,7 @@ export class RequestHandler {
       ? requestOriginPromise
       : baseUrlTemplatePromise;
 
-    preconnectPromise.then(preUrl => {
+    preconnectPromise.then((preUrl) => {
       this.preconnect_.url(this.ampdoc_, preUrl, true);
     });
 
@@ -266,7 +266,7 @@ export class RequestHandler {
       baseUrlPromise,
       Promise.all(segmentPromises),
       requestOriginPromise,
-    ]).then(results => {
+    ]).then((results) => {
       const requestUrl = this.composeRequestUrl_(results[0], results[2]);
 
       const batchSegments = results[1];
@@ -421,7 +421,7 @@ export function expandPostMessage(
 
   const basePromise = variableService
     .expandTemplate(msg, expansionOption, element)
-    .then(base => {
+    .then((base) => {
       return urlReplacementService.expandStringAsync(base, bindings);
     });
   if (msg.indexOf('${extraUrlParams}') < 0) {
@@ -429,7 +429,7 @@ export function expandPostMessage(
     return basePromise;
   }
 
-  return basePromise.then(expandedMsg => {
+  return basePromise.then((expandedMsg) => {
     const params = {...configParams, ...trigger['extraUrlParams']};
     //return base url with the appended extra url params;
     return expandExtraUrlParams(
@@ -439,7 +439,7 @@ export function expandPostMessage(
       expansionOption,
       bindings,
       element
-    ).then(extraUrlParams => {
+    ).then((extraUrlParams) => {
       return defaultSerializer(expandedMsg, [
         dict({'extraUrlParams': extraUrlParams}),
       ]);
@@ -455,7 +455,7 @@ export function expandPostMessage(
  * @param {!./variables.ExpansionOptions} expansionOption
  * @param {!Object} bindings
  * @param {!Element} element
- * @param {!Object=} opt_whitelist
+ * @param {!Object=} opt_allowlist
  * @return {!Promise<!Object>}
  * @private
  */
@@ -466,7 +466,7 @@ function expandExtraUrlParams(
   expansionOption,
   bindings,
   element,
-  opt_whitelist
+  opt_allowlist
 ) {
   const requestPromises = [];
   // Don't encode param values here,
@@ -483,19 +483,21 @@ function expandExtraUrlParams(
     if (typeof value === 'string') {
       const request = variableService
         .expandTemplate(value, option, element)
-        .then(value =>
-          urlReplacements.expandStringAsync(value, bindings, opt_whitelist)
+        .then((value) =>
+          urlReplacements.expandStringAsync(value, bindings, opt_allowlist)
         )
-        .then(value => (params[key] = value));
+        .then((value) => (params[key] = value));
       requestPromises.push(request);
     } else if (isArray(value)) {
-      value.forEach((_, index) => expandObject(value, index));
+      /** @type {!Array} */ (value).forEach((_, index) =>
+        expandObject(value, index)
+      );
     } else if (isObject(value) && value !== null) {
-      Object.keys(value).forEach(key => expandObject(value, key));
+      Object.keys(value).forEach((key) => expandObject(value, key));
     }
   };
 
-  Object.keys(params).forEach(key => expandObject(params, key));
+  Object.keys(params).forEach((key) => expandObject(params, key));
 
   return Promise.all(requestPromises).then(() => params);
 }

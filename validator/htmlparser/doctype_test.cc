@@ -14,7 +14,7 @@
 // limitations under the license.
 //
 
-#include "htmlparser/doctype.h"
+#include "doctype.h"
 
 #include "gtest/gtest.h"
 

@@ -14,12 +14,12 @@
 // limitations under the license.
 //
 
-#include "htmlparser/node.h"
+#include "node.h"
 
 #include "gtest/gtest.h"
-#include "htmlparser/atom.h"
-#include "htmlparser/parser.h"
-#include "htmlparser/renderer.h"
+#include "atom.h"
+#include "parser.h"
+#include "renderer.h"
 
 using htmlparser::Atom;
 using htmlparser::Attribute;

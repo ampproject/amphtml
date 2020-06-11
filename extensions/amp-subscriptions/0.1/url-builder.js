@@ -48,7 +48,7 @@ export class UrlBuilder {
    * @return {!Promise<string>}
    */
   buildUrl(url, useAuthData) {
-    return this.prepareUrlVars_(useAuthData).then(vars => {
+    return this.prepareUrlVars_(useAuthData).then((vars) => {
       return this.urlReplacements_.expandUrlAsync(url, vars);
     });
   }
@@ -59,7 +59,7 @@ export class UrlBuilder {
    * @return {!Promise<!Object<string, *>>}
    */
   collectUrlVars(url, useAuthData) {
-    return this.prepareUrlVars_(useAuthData).then(vars => {
+    return this.prepareUrlVars_(useAuthData).then((vars) => {
       return this.urlReplacements_.collectVars(url, vars);
     });
   }
@@ -70,13 +70,13 @@ export class UrlBuilder {
    * @private
    */
   prepareUrlVars_(useAuthData) {
-    return this.readerIdPromise_.then(readerId => {
+    return this.readerIdPromise_.then((readerId) => {
       const vars = {
         'READER_ID': readerId,
         'ACCESS_READER_ID': readerId, // A synonym.
       };
       if (useAuthData) {
-        vars['AUTHDATA'] = field => {
+        vars['AUTHDATA'] = (field) => {
           if (this.authResponse_) {
             return getValueForExpr(this.authResponse_, field);
           }

@@ -52,7 +52,7 @@ export function openx(global, data) {
   // conversion rules are explained in openx.md.
   if (data.dfpSlot) {
     // Anything starting with 'dfp' gets promoted.
-    openxData.forEach(openxKey => {
+    openxData.forEach((openxKey) => {
       if (openxKey in dfpData && openxKey !== 'dfp') {
         if (startsWith(openxKey, 'dfp')) {
           // Remove 'dfp' prefix, lowercase the first letter.
@@ -156,10 +156,10 @@ function advanceImplementation(global, jssdk, dfpData, data) {
  */
 function setCustomVars(oxRequest, customVars) {
   const customVarKeys = Object.keys(customVars);
-  customVarKeys.forEach(customVarKey => {
+  customVarKeys.forEach((customVarKey) => {
     const customVarValue = customVars[customVarKey];
     if (Array.isArray(customVarValue)) {
-      customVarValue.forEach(value => {
+      /** @type {!Array} */ (customVarValue).forEach((value) => {
         oxRequest.addVariable(customVarKey, value);
       });
     } else {
@@ -174,11 +174,11 @@ function setCustomVars(oxRequest, customVars) {
  */
 function filterCustomVar(customVars) {
   const filterPattern = /^[A-Za-z0-9._]{1,20}$/;
-  const filteredKeys = Object.keys(customVars).filter(key =>
+  const filteredKeys = Object.keys(customVars).filter((key) =>
     filterPattern.test(key)
   );
   const filteredCustomVar = {};
-  filteredKeys.forEach(key => {
+  filteredKeys.forEach((key) => {
     filteredCustomVar[key.toLowerCase()] = customVars[key];
   });
   return filteredCustomVar;

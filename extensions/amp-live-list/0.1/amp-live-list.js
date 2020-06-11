@@ -192,7 +192,7 @@ export class AmpLiveList extends AMP.BaseElement {
   buildCallback() {
     this.viewport_ = this.getViewport();
 
-    LiveListManager.forDoc(this.element).then(manager => {
+    LiveListManager.forDoc(this.element).then((manager) => {
       this.manager_ = manager;
       this.manager_.register(this.liveListId_, this);
     });
@@ -232,7 +232,7 @@ export class AmpLiveList extends AMP.BaseElement {
 
     const actualCount = [].slice
       .call(this.itemsSlot_.children)
-      .filter(child => !child.hasAttribute('data-tombstone')).length;
+      .filter((child) => !child.hasAttribute('data-tombstone')).length;
 
     this.maxItemsPerPage_ = Math.max(
       getNumberMaxOrDefault(maxItems, 1),
@@ -243,7 +243,7 @@ export class AmpLiveList extends AMP.BaseElement {
 
     // Make sure we hide the button
     this.toggleUpdateButton_(false);
-    this.eachChildElement_(this.itemsSlot_, item => {
+    this.eachChildElement_(this.itemsSlot_, (item) => {
       item.classList.add(classes.ITEM);
     });
 
@@ -335,7 +335,7 @@ export class AmpLiveList extends AMP.BaseElement {
       if (hasInsertItems) {
         // Remove the new class from the previously inserted items if
         // we are inserting new items.
-        this.eachChildElement_(itemsSlot, child => {
+        this.eachChildElement_(itemsSlot, (child) => {
           child.classList.remove(classes.NEW_ITEM);
         });
         this.curNumOfLiveItems_ += this.insert_(
@@ -427,7 +427,7 @@ export class AmpLiveList extends AMP.BaseElement {
   insert_(parent, orphans) {
     let count = 0;
 
-    orphans.forEach(orphan => {
+    orphans.forEach((orphan) => {
       if (this.itemsSlot_.childElementCount === 0) {
         this.itemsSlot_.appendChild(orphan);
       } else {
@@ -508,7 +508,7 @@ export class AmpLiveList extends AMP.BaseElement {
    */
   replace_(parent, orphans) {
     let count = 0;
-    orphans.forEach(orphan => {
+    orphans.forEach((orphan) => {
       const orphanId = orphan.getAttribute('id');
       const liveElement = parent./*OK*/ querySelector(`#${orphanId}`);
       // Don't bother updating if live element is tombstoned or
@@ -535,7 +535,7 @@ export class AmpLiveList extends AMP.BaseElement {
    */
   tombstone_(parent, orphans) {
     let count = 0;
-    orphans.forEach(orphan => {
+    orphans.forEach((orphan) => {
       const orphanId = orphan.getAttribute('id');
       const liveElement = parent./*OK*/ querySelector(`#${orphanId}`);
       if (!liveElement) {
@@ -617,7 +617,7 @@ export class AmpLiveList extends AMP.BaseElement {
         }
       },
       mutate: () => {
-        actualDeleteItems.forEach(child => {
+        actualDeleteItems.forEach((child) => {
           parent.removeChild(child);
           this.curNumOfLiveItems_--;
         });
@@ -638,7 +638,7 @@ export class AmpLiveList extends AMP.BaseElement {
     // weren't in the actual request DOM structure as it doesn't make sense
     // to insert new items between old items.
     // Order matters as this is how it will be appended into the DOM.
-    items.sort(this.comparator_).forEach(elem => {
+    items.sort(this.comparator_).forEach((elem) => {
       elem.classList.add(classes.ITEM);
       elem.classList.add(classes.NEW_ITEM);
     });
@@ -657,7 +657,7 @@ export class AmpLiveList extends AMP.BaseElement {
    */
   preparePendingItemsReplace_(items) {
     // Order doesn't matter since we do an in place replacement.
-    items.forEach(elem => {
+    items.forEach((elem) => {
       const hasPendingCounterpart = this.hasMatchingPendingElement_(
         this.pendingItemsReplace_,
         elem
@@ -857,7 +857,7 @@ export class AmpLiveList extends AMP.BaseElement {
   countAndCacheValidItems_(element, opt_cacheIds) {
     let numItems = 0;
 
-    this.eachChildElement_(element, child => {
+    this.eachChildElement_(element, (child) => {
       if (this.isValidChild_(child)) {
         numItems++;
         if (opt_cacheIds) {
@@ -1031,7 +1031,7 @@ export class AmpLiveList extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-live-list', '0.1', function(AMP) {
+AMP.extension('amp-live-list', '0.1', function (AMP) {
   AMP.registerElement('amp-live-list', AmpLiveList, CSS);
   AMP.registerServiceForDoc(SERVICE_ID, LiveListManager);
 });

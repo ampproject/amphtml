@@ -6,18 +6,6 @@ teaser:
   text: A container to display an ad.
 ---
 
-# amp-ad / amp-embed
-
-A container to display an ad. The <code>amp-embed</code> is an alias to the <code>amp-ad</code> tag, deriving all of its functionality with a different tag name. Use <code>amp-embed</code> when semantically more accurate. AMP documents only support ads/embeds served via HTTPS.
-
-# <a name="amp-ad"></a> `amp-ad` / `amp-embed`
-
-[TOC]
-
-{% call callout('Note', type='note') %}
-The specification of `amp-ad` / `amp-embed` is likely to significantly evolve over time. The current approach is designed to bootstrap the format to be able to show ads.
-{% endcall %}
-
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -34,24 +22,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>A container to display an ad. The <code>amp-embed</code> is an alias to the <code>amp-ad</code> tag, deriving all of its functionality with a different tag name. Use <code>amp-embed</code> when semantically more accurate. AMP documents only support ads/embeds served via HTTPS.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js">&lt;/script></code><br>Note: amp-ad may still work without this script, but we highly recommend it for future compatibility</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-ad/">amp-ad example</a>.</td>
-  </tr>
-</table>
+# amp-ad / amp-embed
+
+The `amp-embed` is an alias to the `amp-ad` tag, deriving all of its functionality with a different tag name. Use `amp-embed` when semantically more accurate. AMP documents only support ads/embeds served via HTTPS.
+
+{% call callout('Note', type='note') %}
+The specification of `amp-ad` / `amp-embed` is likely to significantly evolve over time. The current approach is designed to bootstrap the format to be able to show ads.
+{% endcall %}
 
 ## Behavior
 
@@ -158,7 +135,7 @@ Optionally, `amp-ad` supports a child element with the `placeholder` attribute. 
 
 ## No ad available
 
-If no ad is availabel for the slot, AMP attempts to collapse the `amp-ad` element (that is, set to `display: none`). AMP determines that this operation can be performed without affecting the user's scroll position. If the ad is in the current viewport, the ad will not be collapsed because it affects the user's scroll position; however, if the ad is outside of the current viewport, it will be collapsed.
+If no ad is available for the slot, AMP attempts to collapse the `amp-ad` element (that is, set to `display: none`). AMP determines that this operation can be performed without affecting the user's scroll position. If the ad is in the current viewport, the ad will not be collapsed because it affects the user's scroll position; however, if the ad is outside of the current viewport, it will be collapsed.
 
 In the case that the attempt to collapse fails. The `amp-ad` component supports a child element with the `fallback` attribute. If there is a fallback element in presence, the customized fallback element is shown. Otherwise AMP will apply a default fallback.
 
@@ -286,6 +263,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [AJA](../../ads/aja.md)
 - [AMoAd](../../ads/amoad.md)
 - [Aniview](../../ads/aniview.md)
+- [AnyClip](../../ads/anyclip.md)
 - [AppNexus](../../ads/appnexus.md)
 - [AppVador](../../ads/appvador.md)
 - [Atomx](../../ads/atomx.md)
@@ -307,7 +285,6 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Criteo](../../ads/criteo.md)
 - [CSA](../../ads/google/csa.md)
 - [CxenseDisplay](../../ads/eas.md)
-- [Dianomi](../../ads/dianomi.md)
 - [Directadvert](../../ads/directadvert.md)
 - [DistroScale](../../ads/distroscale.md)
 - [Dot and Media](../../ads/dotandads.md)
@@ -342,6 +319,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [InMobi](../../ads/inmobi.md)
 - [Innity](../../ads/innity.md)
 - [Invibes](../../ads/invibes.md)
+- [Iprom](../../ads/iprom.md)
 - [Kargo](../../ads/kargo.md)
 - [Kiosked](../../ads/kiosked.md)
 - [Kixer](../../ads/kixer.md)
@@ -353,6 +331,8 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [LOKA](../../ads/loka.md)
 - [MADS](../../ads/mads.md)
 - [MANTIS](../../ads/mantis.md)
+- [Mediaad.org](../../ads/mediaad.md)
+- [Marfeel](../../ads/marfeel.md)
 - [Media.net](../../ads/medianet.md)
 - [Mediavine](../../ads/mediavine.md)
 - [Medyanet](../../ads/medyanet.md)
@@ -363,6 +343,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Mixpo](../../ads/mixpo.md)
 - [Monetizer101](../../ads/monetizer101.md)
 - [mox](../../ads/mox.md)
+- [my6Sense](../../ads/my6sense.md)
 - [myTarget](../../ads/mytarget.md)
 - [myWidget](../../ads/mywidget.md)
 - [NativeRoll](../../ads/nativeroll.md)
@@ -383,6 +364,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [plista](../../ads/plista.md)
 - [polymorphicAds](../../ads/polymorphicads.md)
 - [popin](../../ads/popin.md)
+- [PPStudio](../../ads/ppstudio.md)
 - [Pressboard](../../ads/pressboard.md)
 - [PromoteIQ](../../ads/promoteiq.md)
 - [PubGuru](../../ads/pubguru.md)
@@ -391,12 +373,14 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [PulsePoint](../../ads/pulsepoint.md)
 - [PuffNetwork](../../ads/puffnetwork.md)
 - [Purch](../../ads/purch.md)
+- [Rakuten Unified Ads](../../ads/rakutenunifiedads.md)
 - [Rambler&Co](../../ads/capirs.md)
 - [RbInfoxSg](../../ads/rbinfox.md)
 - [Realclick](../../ads/realclick.md)
 - [recomAD](../../ads/recomad.md)
 - [Red for Publishers](../../ads/rfp.md)
 - [Relap](../../ads/relap.md)
+- [RelapPro](../../ads/relappro.md)
 - [Revcontent](../../ads/revcontent.md)
 - [RevJet](../../ads/revjet.md)
 - [rnetplus](../../ads/rnetplus.md)
@@ -475,6 +459,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Taboola](../../ads/taboola.md)
 - [TE Medya](../../ads/temedya.md)
 - [Whopa InFeed](../../ads/whopainfeed.md)
+- [Yahoo Native-Display Ads Federation](../../ads/yahoofedads.md)
 - [Yahoo Native Ads](../../ads/yahoonativeads.md)
 - [Zen](../../ads/zen.md)
 - [ZergNet](../../ads/zergnet.md)

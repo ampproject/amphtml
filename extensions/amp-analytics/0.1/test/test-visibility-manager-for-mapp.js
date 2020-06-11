@@ -46,7 +46,7 @@ class MockVisibilityInterface {
   }
 }
 
-describes.fakeWin('VisibilityManagerForMapp', {amp: true}, env => {
+describes.fakeWin('VisibilityManagerForMapp', {amp: true}, (env) => {
   let win;
   let ampdoc;
   let clock;
@@ -68,7 +68,7 @@ describes.fakeWin('VisibilityManagerForMapp', {amp: true}, env => {
 
     win.IntersectionObserver = null;
 
-    eventPromise = new Promise(resolve => {
+    eventPromise = new Promise((resolve) => {
       eventResolver = resolve;
     });
   });
@@ -185,7 +185,7 @@ describes.fakeWin('VisibilityManagerForMapp', {amp: true}, env => {
       layoutRectLtwh(1, 2, 100, 201)
     );
     clock.tick(3);
-    return eventPromise.then(state => {
+    return eventPromise.then((state) => {
       expect(disposed).to.be.calledOnce;
       expect(root.models_).to.have.length(0);
       expect(state.totalVisibleTime).to.equal(10);

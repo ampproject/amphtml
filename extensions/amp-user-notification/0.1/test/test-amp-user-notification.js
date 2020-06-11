@@ -34,7 +34,7 @@ describes.realWin(
       extensions: ['amp-user-notification'],
     },
   },
-  env => {
+  (env) => {
     let ampdoc;
     let win;
     let dftAttrs;
@@ -52,9 +52,9 @@ describes.realWin(
       };
 
       resetServiceForTesting(win, 'geo');
-      registerServiceBuilder(win, 'geo', function() {
+      registerServiceBuilder(win, 'geo', function () {
         return Promise.resolve({
-          isInCountryGroup: group =>
+          isInCountryGroup: (group) =>
             ISOCountryGroups.indexOf(group) >= 0
               ? GEO_IN_GROUP.IN
               : GEO_IN_GROUP.NOT_IN,
@@ -65,7 +65,7 @@ describes.realWin(
       return Promise.all([
         Services.userNotificationManagerForDoc(el),
         Services.storageForDoc(el),
-      ]).then(services => {
+      ]).then((services) => {
         const userNotificationManager = services[0];
         env.sandbox.stub(userNotificationManager, 'registerUserNotification');
 
@@ -115,7 +115,7 @@ describes.realWin(
         'data-show-if-geo': 'nafta',
       });
       const impl = el.implementation_;
-      expect(impl.buildCallback.bind(impl)).to.not.throw;
+      expect(impl.buildCallback.bind(impl)).to.not.throw();
     });
 
     it.skip('should NOT require `data-show-if-geo`', () => {
@@ -124,7 +124,7 @@ describes.realWin(
         'data-show-if-href': 'https://www.ampproject.org/get',
       });
       const impl = el.implementation_;
-      expect(impl.buildCallback.bind(impl)).to.not.throw;
+      expect(impl.buildCallback.bind(impl)).to.not.throw();
     });
 
     it('should throw if more than one data-how-if-* attrib is defined', () => {
@@ -148,7 +148,7 @@ describes.realWin(
         'data-show-if-href': 'https://www.ampproject.org/get',
       });
       const impl = el.implementation_;
-      expect(impl.buildCallback.bind(impl)).to.not.throw;
+      expect(impl.buildCallback.bind(impl)).to.not.throw();
     });
 
     it('isDismissed should return true if dismissal has been recorded', () => {
@@ -161,7 +161,7 @@ describes.realWin(
         .withExactArgs('amp-user-notification:n1')
         .returns(Promise.resolve(true))
         .once();
-      impl.isDismissed().then(dismissed => {
+      impl.isDismissed().then((dismissed) => {
         expect(dismissed).to.be.true;
         storageMock.verify();
       });
@@ -177,7 +177,7 @@ describes.realWin(
         .withExactArgs('amp-user-notification:n1')
         .returns(Promise.resolve(null))
         .once();
-      impl.isDismissed().then(dismissed => {
+      impl.isDismissed().then((dismissed) => {
         expect(dismissed).to.be.false;
         storageMock.verify();
       });
@@ -190,7 +190,7 @@ describes.realWin(
       impl.buildCallback();
 
       storageMock.expects('get').never();
-      impl.isDismissed().then(dismissed => {
+      impl.isDismissed().then((dismissed) => {
         expect(dismissed).to.be.false;
         storageMock.verify();
       });
@@ -206,7 +206,7 @@ describes.realWin(
         .withExactArgs('amp-user-notification:n1')
         .returns(Promise.reject('intentional'))
         .once();
-      impl.isDismissed().then(dismissed => {
+      impl.isDismissed().then((dismissed) => {
         expect(dismissed).to.be.false;
         storageMock.verify();
       });
@@ -223,7 +223,7 @@ describes.realWin(
         .withExactArgs('amp-user-notification:n1')
         .returns(Promise.resolve(true))
         .once();
-      return impl.shouldShow().then(shouldShow => {
+      return impl.shouldShow().then((shouldShow) => {
         expect(shouldShow).to.equal(false);
         storageMock.verify();
       });
@@ -248,7 +248,7 @@ describes.realWin(
         .stub(impl, 'getShowEndpoint_')
         .returns(Promise.resolve({showNotification: true}));
 
-      return impl.shouldShow().then(shouldShow => {
+      return impl.shouldShow().then((shouldShow) => {
         expect(shouldShow).to.equal(true);
         expect(cidStub).to.be.calledOnce;
         expect(showEndpointStub).to.be.calledOnce;
@@ -296,7 +296,7 @@ describes.realWin(
         .stub(impl, 'getShowEndpoint_')
         .returns(Promise.resolve({showNotification: true}));
 
-      return impl.shouldShow().then(shouldShow => {
+      return impl.shouldShow().then((shouldShow) => {
         expect(shouldShow).to.equal(true);
         expect(cidStub).to.be.calledOnce;
         expect(showEndpointStub).to.be.calledOnce;
@@ -322,7 +322,7 @@ describes.realWin(
         .stub(impl, 'getShowEndpoint_')
         .returns(Promise.resolve({showNotification: false}));
 
-      return impl.shouldShow().then(shouldShow => {
+      return impl.shouldShow().then((shouldShow) => {
         expect(shouldShow).to.equal(false);
         expect(cidStub).to.be.calledOnce;
         expect(showEndpointStub).to.be.calledOnce;
@@ -341,7 +341,7 @@ describes.realWin(
         .withExactArgs('amp-user-notification:n1')
         .returns(Promise.resolve(undefined))
         .once();
-      return impl.shouldShow().then(shouldShow => {
+      return impl.shouldShow().then((shouldShow) => {
         expect(shouldShow).to.equal(true);
         storageMock.verify();
       });
@@ -368,7 +368,7 @@ describes.realWin(
         .stub(impl, 'getShowEndpoint_')
         .returns(Promise.resolve({showNotification: true}));
 
-      return impl.shouldShow().then(shouldShow => {
+      return impl.shouldShow().then((shouldShow) => {
         expect(shouldShow).to.equal(true);
         expect(cidStub).to.be.calledOnce;
         expect(showEndpointStub).to.be.calledOnce;
@@ -390,7 +390,7 @@ describes.realWin(
         .withExactArgs('amp-user-notification:n1')
         .returns(Promise.reject('intentional'))
         .once();
-      return impl.shouldShow().then(shouldShow => {
+      return impl.shouldShow().then((shouldShow) => {
         expect(shouldShow).to.equal(true);
         storageMock.verify();
       });
@@ -469,7 +469,7 @@ describes.realWin(
         .returns(Promise.resolve(false))
         .once();
 
-      return impl.shouldShow().then(shouldShow => {
+      return impl.shouldShow().then((shouldShow) => {
         expect(shouldShow).to.equal(true);
       });
     });
@@ -490,7 +490,7 @@ describes.realWin(
         .returns(Promise.resolve(false))
         .once();
 
-      return impl.shouldShow().then(shouldShow => {
+      return impl.shouldShow().then((shouldShow) => {
         expect(shouldShow).to.equal(true);
       });
     });
@@ -511,7 +511,7 @@ describes.realWin(
         .returns(Promise.resolve(false))
         .once();
 
-      return impl.shouldShow().then(shouldShow => {
+      return impl.shouldShow().then((shouldShow) => {
         expect(shouldShow).to.equal(true);
       });
     });
@@ -526,7 +526,7 @@ describes.realWin(
       const impl = el.implementation_;
       impl.buildCallback();
 
-      return impl.shouldShow().then(shouldShow => {
+      return impl.shouldShow().then((shouldShow) => {
         expect(shouldShow).to.equal(false);
       });
     });
@@ -541,7 +541,7 @@ describes.realWin(
       const impl = el.implementation_;
       impl.buildCallback();
 
-      return impl.shouldShow().then(shouldShow => {
+      return impl.shouldShow().then((shouldShow) => {
         expect(shouldShow).to.equal(false);
       });
     });
@@ -556,7 +556,7 @@ describes.realWin(
       const impl = el.implementation_;
       impl.buildCallback();
 
-      return impl.shouldShow().then(shouldShow => {
+      return impl.shouldShow().then((shouldShow) => {
         expect(shouldShow).to.equal(true);
       });
     });
@@ -571,7 +571,7 @@ describes.realWin(
       const impl = el.implementation_;
       impl.buildCallback();
 
-      return impl.shouldShow().then(shouldShow => {
+      return impl.shouldShow().then((shouldShow) => {
         expect(shouldShow).to.equal(false);
       });
     });
@@ -637,11 +637,11 @@ describes.realWin(
       const impl = el.implementation_;
       impl.buildCallback();
       impl.dialogPromise_ = Promise.resolve();
-      impl.dialogResolve_ = function() {};
+      impl.dialogResolve_ = function () {};
 
       expect(el).to.not.have.class('amp-active');
 
-      return impl.shouldShow().then(shouldShow => {
+      return impl.shouldShow().then((shouldShow) => {
         if (shouldShow) {
           impl.show();
         }
@@ -665,7 +665,7 @@ describes.realWin(
       const impl = el.implementation_;
       impl.buildCallback();
       impl.dialogPromise_ = Promise.resolve();
-      impl.dialogResolve_ = function() {};
+      impl.dialogResolve_ = function () {};
       const removeFromFixedLayerStub = env.sandbox.stub(
         impl.getViewport(),
         'removeFromFixedLayer'
@@ -673,7 +673,7 @@ describes.realWin(
 
       expect(el).to.not.have.class('amp-active');
 
-      return impl.shouldShow().then(shouldShow => {
+      return impl.shouldShow().then((shouldShow) => {
         if (shouldShow) {
           impl.show();
         }
@@ -726,7 +726,7 @@ describes.realWin(
         const el = getUserNotification(dftAttrs);
         const impl = el.implementation_;
         impl.buildCallback();
-        return impl.buildGetHref_('12345').then(href => {
+        return impl.buildGetHref_('12345').then((href) => {
           const value = href.match(/\?ord=(.*)$/)[1];
           expect(href).to.not.contain('RANDOM');
           expect(parseInt(value, 10)).to.be.a('number');
@@ -737,7 +737,7 @@ describes.realWin(
         const el = getUserNotification(dftAttrs);
         const impl = el.implementation_;
         impl.buildCallback();
-        return impl.buildGetHref_('12345').then(href => {
+        return impl.buildGetHref_('12345').then((href) => {
           expect(href).to.equal(
             'https://www.ampproject.org/get/here?elementId=n1&ampUserId=12345'
           );
@@ -785,16 +785,16 @@ describes.realWin(
         return expect(service.get('n1')).to.eventually.equal(userNotification);
       });
 
-      it('should queue up multiple amp-user-notification elements', function*() {
+      it('should queue up multiple amp-user-notification elements', function* () {
         const tag1 = {...tag};
         const tag2 = {...tag};
         let resolve1;
         let resolve2;
 
-        const s1 = new Promise(resolve => {
+        const s1 = new Promise((resolve) => {
           resolve1 = resolve;
         });
-        const s2 = new Promise(resolve => {
+        const s2 = new Promise((resolve) => {
           resolve2 = resolve;
         });
 

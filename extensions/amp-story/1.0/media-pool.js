@@ -246,7 +246,7 @@ export class MediaPool {
   initializeMediaPool_(maxCounts) {
     let poolIdCounter = 0;
 
-    this.forEachMediaType_(key => {
+    this.forEachMediaType_((key) => {
       const type = MediaType[key];
       const count = maxCounts[type] || 0;
 
@@ -271,13 +271,15 @@ export class MediaPool {
       // comparison with the itervar below, so we have to roll it by hand.
       for (let i = count; i > 0; i--) {
         // Use seed element at end of set to prevent wasting it.
-        const mediaEl =
-          /** @type {!PoolBoundElementDef} */ (i == 1
-            ? mediaElSeed
-            : mediaElSeed.cloneNode(/* deep */ true));
+        const mediaEl = /** @type {!PoolBoundElementDef} */ (i == 1
+          ? mediaElSeed
+          : mediaElSeed.cloneNode(/* deep */ true));
         mediaEl.addEventListener('error', this.onMediaError_, {capture: true});
         const sources = this.getDefaultSource_(type);
         mediaEl.id = POOL_ELEMENT_ID_PREFIX + poolIdCounter++;
+        // In Firefox, cloneNode() does not properly copy the muted property
+        // that was set in the seed. We need to set it again here.
+        mediaEl.muted = true;
         mediaEl[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] = MediaElementOrigin.POOL;
         this.enqueueMediaElementTask_(
           mediaEl,
@@ -402,7 +404,7 @@ export class MediaPool {
     }
 
     const allocatedEls = this.allocated[mediaType];
-    const index = findIndex(allocatedEls, poolMediaEl => {
+    const index = findIndex(allocatedEls, (poolMediaEl) => {
       return poolMediaEl[REPLACED_MEDIA_PROPERTY_NAME] === domMediaEl.id;
     });
 
@@ -572,7 +574,7 @@ export class MediaPool {
       return;
     }
 
-    componentEl.getImpl().then(impl => {
+    componentEl.getImpl().then((impl) => {
       if (impl.resetOnDomChange) {
         impl.resetOnDomChange();
       }
@@ -637,10 +639,10 @@ export class MediaPool {
    * @private
    */
   forEachMediaElement_(callbackFn) {
-    [this.allocated, this.unallocated].forEach(mediaSet => {
-      this.forEachMediaType_(key => {
+    [this.allocated, this.unallocated].forEach((mediaSet) => {
+      this.forEachMediaType_((key) => {
         const type = MediaType[key];
-        const els = mediaSet[type];
+        const els = /** @type {!Array} */ (mediaSet[type]);
         if (!els) {
           return;
         }
@@ -654,7 +656,7 @@ export class MediaPool {
    * a media element that can be used in its stead for playback.
    * @param {!DomElementDef} domMediaEl The media element, found in the
    *     DOM, whose content should be loaded.
-   * @return {Promise<!PoolBoundElementDef>} A media element from the pool that
+   * @return {Promise<!PoolBoundElementDef|undefined>} A media element from the pool that
    *     can be used to replace the specified element.
    */
   loadInternal_(domMediaEl) {
@@ -797,7 +799,7 @@ export class MediaPool {
    *     element has been successfully played.
    */
   play(domMediaEl) {
-    return this.loadInternal_(domMediaEl).then(poolMediaEl => {
+    return this.loadInternal_(domMediaEl).then((poolMediaEl) => {
       if (!poolMediaEl) {
         return Promise.resolve();
       }
@@ -929,7 +931,7 @@ export class MediaPool {
 
     this.ampElementsToBless_ = null; // GC
 
-    this.forEachMediaElement_(mediaEl => {
+    this.forEachMediaElement_((mediaEl) => {
       blessPromises.push(this.bless_(mediaEl));
     });
 
@@ -937,7 +939,7 @@ export class MediaPool {
       () => {
         this.blessed_ = true;
       },
-      reason => {
+      (reason) => {
         dev().expectedError('AMP-STORY', 'Blessing all media failed: ', reason);
       }
     );
@@ -959,7 +961,7 @@ export class MediaPool {
     const executionFn = () => {
       task
         .execute(mediaEl)
-        .catch(reason => dev().error('AMP-STORY', reason))
+        .catch((reason) => dev().error('AMP-STORY', reason))
         .then(() => {
           // Run regardless of success or failure of task execution.
           queue.shift();
@@ -1017,7 +1019,7 @@ export class MediaPool {
     instances[newId] = new MediaPool(
       toWin(root.getElement().ownerDocument.defaultView),
       root.getMaxMediaElementCounts(),
-      element => root.getElementDistance(element)
+      (element) => root.getElementDistance(element)
     );
 
     return instances[newId];

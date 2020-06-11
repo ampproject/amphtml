@@ -21,15 +21,15 @@
 #include <iostream>  // For DumpDocument
 #endif  // DUMP_NODES
 
-#include "base/logging.h"
-#include "htmlparser/atomutil.h"
-#include "htmlparser/comparators.h"
-#include "htmlparser/defer.h"
-#include "htmlparser/doctype.h"
-#include "htmlparser/error.h"
-#include "htmlparser/foreign.h"
-#include "htmlparser/parser.h"
-#include "htmlparser/strings.h"
+#include "logging.h"
+#include "atomutil.h"
+#include "comparators.h"
+#include "defer.h"
+#include "doctype.h"
+#include "error.h"
+#include "foreign.h"
+#include "parser.h"
+#include "strings.h"
 
 namespace htmlparser {
 
@@ -213,7 +213,7 @@ int Parser::IndexOfElementInScope(Scope scope,
           }
           break;
         default:
-          QCHECK(false) << "HTML Parser reached unreachable scope";
+          CHECK(false, "HTML Parser reached unreachable scope");
       }
     }
 
@@ -270,7 +270,7 @@ void Parser::ClearStackToContext(Scope scope) {
         }
         break;
       default:
-        QCHECK(false) << "HTML Parser reached unreachable scope";
+        CHECK(false, "HTML Parser reached unreachable scope");
     }
   }
 }  // Parser::ClearStackToContext.
@@ -539,8 +539,8 @@ void Parser::AcknowledgeSelfClosingTag() {
 
 // Section 12.2.4.1, "using the rules for".
 void Parser::SetOriginalIM() {
-  CHECK(!original_insertion_mode_)
-      << "html: bad parser state: original_insertion_mode was set twice";
+  CHECK(!original_insertion_mode_,
+        "html: bad parser state: original_insertion_mode was set twice");
   original_insertion_mode_ = insertion_mode_;
 }  // Parser::SetOriginalIM.
 
@@ -654,6 +654,7 @@ bool Parser::InitialIM() {
       if (record_node_offsets_) {
         node->position_in_html_src_ = token_.position_in_html_src;
       }
+      node->SetManufactured(token_.is_manufactured);
       document_->AppendChild(node);
       return true;
     }
@@ -723,6 +724,8 @@ bool Parser::BeforeHTMLIM() {
     }
     case TokenType::COMMENT_TOKEN: {
       Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      node->SetManufactured(token_.is_manufactured);
+      node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = std::data(token_.data);
       document_->AppendChild(node);
       return true;
@@ -778,6 +781,8 @@ bool Parser::BeforeHeadIM() {
     }
     case TokenType::COMMENT_TOKEN: {
       Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      node->SetManufactured(token_.is_manufactured);
+      node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = std::move(token_.data);
       AddChild(node);
       return true;
@@ -908,6 +913,8 @@ bool Parser::InHeadIM() {
     }
     case TokenType::COMMENT_TOKEN: {
       Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      node->SetManufactured(token_.is_manufactured);
+      node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = std::move(token_.data);
       AddChild(node);
       return true;
@@ -985,8 +992,8 @@ bool Parser::InHeadNoscriptIM() {
       break;
   }
   open_elements_stack_.Pop();
-  CHECK(top()->atom_ == Atom::HEAD)
-      << "html: the new current node will be a head element.";
+  CHECK(top()->atom_ == Atom::HEAD,
+        "html: the new current node will be a head element.");
 
   insertion_mode_ = std::bind(&Parser::InHeadIM, this);
   if (token_.atom == Atom::NOSCRIPT) {
@@ -1066,6 +1073,8 @@ bool Parser::AfterHeadIM() {
     }
     case TokenType::COMMENT_TOKEN: {
       Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      node->SetManufactured(token_.is_manufactured);
+      node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = token_.data;
       AddChild(node);
       return true;
@@ -1194,6 +1203,7 @@ bool Parser::InBodyIM() {
         case Atom::BLOCKQUOTE:
         case Atom::CENTER:
         case Atom::DETAILS:
+        case Atom::DIALOG:
         case Atom::DIR:
         case Atom::DIV:
         case Atom::DL:
@@ -1203,6 +1213,7 @@ bool Parser::InBodyIM() {
         case Atom::FOOTER:
         case Atom::HEADER:
         case Atom::HGROUP:
+        case Atom::MAIN:
         case Atom::MENU:
         case Atom::NAV:
         case Atom::OL:
@@ -1595,7 +1606,7 @@ bool Parser::InBodyIM() {
             insertion_mode_ = std::bind(&Parser::AfterBodyIM, this);
           }
           break;
-        case Atom::HTML:
+        case Atom::HTML: {
           if (ElementInScope(Scope::DefaultScope, Atom::BODY)) {
             ParseImpliedToken(TokenType::END_TAG_TOKEN, Atom::BODY,
                 AtomUtil::ToString(Atom::BODY));
@@ -1603,6 +1614,7 @@ bool Parser::InBodyIM() {
           }
           return true;
           break;
+        }
         case Atom::ADDRESS:
         case Atom::ARTICLE:
         case Atom::ASIDE:
@@ -1610,6 +1622,7 @@ bool Parser::InBodyIM() {
         case Atom::BUTTON:
         case Atom::CENTER:
         case Atom::DETAILS:
+        case Atom::DIALOG:
         case Atom::DIR:
         case Atom::DIV:
         case Atom::DL:
@@ -1620,6 +1633,7 @@ bool Parser::InBodyIM() {
         case Atom::HEADER:
         case Atom::HGROUP:
         case Atom::LISTING:
+        case Atom::MAIN:
         case Atom::MENU:
         case Atom::NAV:
         case Atom::OL:
@@ -1729,6 +1743,8 @@ bool Parser::InBodyIM() {
     }
     case TokenType::COMMENT_TOKEN: {
       Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      node->SetManufactured(token_.is_manufactured);
+      node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = token_.data;
       AddChild(node);
       break;
@@ -2119,6 +2135,8 @@ bool Parser::InTableIM() {
     }
     case TokenType::COMMENT_TOKEN: {
       Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      node->SetManufactured(token_.is_manufactured);
+      node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = token_.data;
       AddChild(node);
       return true;
@@ -2231,6 +2249,8 @@ bool Parser::InColumnGroupIM() {
     }
     case TokenType::COMMENT_TOKEN: {
       Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      node->SetManufactured(token_.is_manufactured);
+      node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = token_.data;
       AddChild(node);
       return true;
@@ -2366,6 +2386,8 @@ bool Parser::InTableBodyIM() {
     }
     case TokenType::COMMENT_TOKEN: {
       Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      node->SetManufactured(token_.is_manufactured);
+      node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = token_.data;
       AddChild(node);
       return true;
@@ -2644,6 +2666,8 @@ bool Parser::InSelectIM() {
     }
     case TokenType::COMMENT_TOKEN: {
       Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      node->SetManufactured(token_.is_manufactured);
+      node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = token_.data;
       AddChild(node);
       break;
@@ -2828,11 +2852,13 @@ bool Parser::AfterBodyIM() {
       break;
     case TokenType::COMMENT_TOKEN: {
       // The comment is attached to the <html> element.
-      QCHECK(open_elements_stack_.size() > 0 &&
-          open_elements_stack_.at(0)->atom_ == Atom::HTML)
-          << "html: bad parser state: <html> element not found, in the "
-             "after-body insertion mode";
+      CHECK((open_elements_stack_.size() > 0 &&
+             open_elements_stack_.at(0)->atom_ == Atom::HTML),
+            "html: bad parser state: <html> element not found, in the "
+            "after-body insertion mode");
       Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      node->SetManufactured(token_.is_manufactured);
+      node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = token_.data;
       open_elements_stack_.at(0)->AppendChild(node);
       return true;
@@ -2850,6 +2876,8 @@ bool Parser::InFramesetIM() {
   switch (token_.token_type) {
     case TokenType::COMMENT_TOKEN: {
       Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      node->SetManufactured(token_.is_manufactured);
+      node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = token_.data;
       AddChild(node);
       break;
@@ -2904,6 +2932,8 @@ bool Parser::AfterFramesetIM() {
   switch (token_.token_type) {
     case TokenType::COMMENT_TOKEN: {
       Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      node->SetManufactured(token_.is_manufactured);
+      node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = token_.data;
       AddChild(node);
       break;
@@ -2959,6 +2989,8 @@ bool Parser::AfterAfterBodyIM() {
       break;
     case TokenType::COMMENT_TOKEN: {
       Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      node->SetManufactured(token_.is_manufactured);
+      node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = token_.data;
       document_->AppendChild(node);
       return true;
@@ -2978,6 +3010,8 @@ bool Parser::AfterAfterFramesetIM() {
   switch (token_.token_type) {
     case TokenType::COMMENT_TOKEN: {
       Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      node->SetManufactured(token_.is_manufactured);
+      node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = token_.data;
       document_->AppendChild(node);
       break;
@@ -3024,9 +3058,10 @@ bool Parser::ParseForeignContent() {
       AddText(token_.data);
       break;
     case TokenType::COMMENT_TOKEN: {
-      Node* comment_node = Node::make_node(NodeType::COMMENT_NODE);
-      comment_node->data_ = token_.data;
-      AddChild(comment_node);
+      Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      node->SetManufactured(token_.is_manufactured);
+      node->data_ = token_.data;
+      AddChild(node);
       break;
     }
     case TokenType::START_TAG_TOKEN: {
@@ -3067,7 +3102,8 @@ bool Parser::ParseForeignContent() {
         }
         AdjustSVGAttributeNames(&token_.attributes);
       } else {
-        LOG(FATAL) << "html: bad parser state: unexpected namespace";
+        throw std::runtime_error(
+             "html: bad parser state: unexpected namespace");
       }
 
       AdjustForeignAttributes(&token_.attributes);

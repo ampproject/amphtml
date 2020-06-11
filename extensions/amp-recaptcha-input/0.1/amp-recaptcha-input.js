@@ -53,6 +53,9 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 
     /** @private {?Promise} */
     this.registerPromise_ = null;
+
+    /** @private {boolean} */
+    this.global_ = false;
   }
 
   /** @override */
@@ -76,7 +79,9 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
       this.element
     );
 
-    return recaptchaServiceForDoc(this.element).then(service => {
+    this.global_ = this.element.hasAttribute('data-global');
+
+    return recaptchaServiceForDoc(this.element).then((service) => {
       this.recaptchaService_ = service;
 
       return this.mutateElement(() => {
@@ -108,7 +113,10 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     if (!this.registerPromise_ && this.sitekey_) {
-      this.registerPromise_ = this.recaptchaService_.register(this.sitekey_);
+      this.registerPromise_ = this.recaptchaService_.register(
+        this.sitekey_,
+        this.global_
+      );
     }
 
     return /** @type {!Promise} */ (this.registerPromise_);
@@ -145,7 +153,7 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerServiceForDoc('amp-recaptcha', AmpRecaptchaService);
   AMP.registerElement(TAG, AmpRecaptchaInput, CSS);
 });

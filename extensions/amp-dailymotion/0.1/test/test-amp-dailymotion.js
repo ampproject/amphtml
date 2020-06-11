@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-dailymotion'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {

@@ -17,13 +17,12 @@
 import {BaseElement} from '../src/base-element';
 import {Layout, isLayoutSizeDefined} from '../src/layout';
 import {Services} from '../src/services';
+import {childElementByTag, removeElement} from '../src/dom';
 import {dev} from '../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img';
-import {isExperimentOn} from '../src/experiments';
 import {listen} from '../src/event-helper';
 import {propagateObjectFitStyles, setImportantStyles} from '../src/style';
 import {registerElement} from '../src/service/custom-element-registry';
-import {removeElement} from '../src/dom';
 
 /** @const {string} */
 const TAG = 'amp-img';
@@ -34,14 +33,14 @@ const TAG = 'amp-img';
  */
 const ATTRIBUTES_TO_PROPAGATE = [
   'alt',
-  'title',
-  'referrerpolicy',
-  'aria-label',
   'aria-describedby',
+  'aria-label',
   'aria-labelledby',
-  'srcset',
-  'src',
+  'referrerpolicy',
   'sizes',
+  'src',
+  'srcset',
+  'title',
 ];
 
 export class AmpImg extends BaseElement {
@@ -75,7 +74,7 @@ export class AmpImg extends BaseElement {
   mutatedAttributesCallback(mutations) {
     if (this.img_) {
       const attrs = ATTRIBUTES_TO_PROPAGATE.filter(
-        value => mutations[value] !== undefined
+        (value) => mutations[value] !== undefined
       );
       // Mutating src should override existing srcset, so remove the latter.
       if (
@@ -162,7 +161,7 @@ export class AmpImg extends BaseElement {
     // For inabox SSR, image will have been written directly to DOM so no need
     // to recreate.  Calling appendChild again will have no effect.
     if (this.element.hasAttribute('i-amphtml-ssr')) {
-      this.img_ = this.element.querySelector('img');
+      this.img_ = childElementByTag(this.element, 'img');
     }
     this.img_ = this.img_ || new Image();
     this.img_.setAttribute('decoding', 'async');
@@ -307,8 +306,7 @@ export class AmpImg extends BaseElement {
     const placeholder = this.getPlaceholder();
     if (
       placeholder &&
-      placeholder.classList.contains('i-amphtml-blurry-placeholder') &&
-      isExperimentOn(this.win, 'blurry-placeholder')
+      placeholder.classList.contains('i-amphtml-blurry-placeholder')
     ) {
       setImportantStyles(placeholder, {'opacity': 0});
     } else {

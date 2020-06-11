@@ -21,7 +21,7 @@
 
 #include <string>
 
-#include "htmlparser/node.h"
+#include "node.h"
 
 namespace htmlparser {
 

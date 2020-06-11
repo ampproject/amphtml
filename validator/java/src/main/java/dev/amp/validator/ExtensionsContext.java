@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The extensions context keeys track of the extensions that the validator has
+ * The extensions context keys track of the extensions that the validator has
  * seen, as well as which have been used, which are required to be used, etc.
  *
  * @author nhant01
@@ -61,6 +61,7 @@ public class ExtensionsContext {
     /**
      * Returns a list of errors accrued while processing the
      * head for tags requiring an extension which was not found.
+     *
      * @return returns a list of errors found while processing head
      */
     public List<ValidatorProtos.ValidationError> missingExtensionErrors() {
@@ -80,6 +81,7 @@ public class ExtensionsContext {
      * than their first usage. This is true for amp-foo tags, since the
      * extension must be loaded in the head and amp-foo tags are not supported
      * in the head as per HTML spec.
+     *
      * @param extension to check for.
      * @return returns true iff extension is loaded.
      */
@@ -90,6 +92,7 @@ public class ExtensionsContext {
     /**
      * Returns a list of unused extensions which produce validation errors
      * when unused.
+     *
      * @return returns a list of unused extensions.
      */
     public List<String> unusedExtensionsRequired() {
@@ -107,6 +110,7 @@ public class ExtensionsContext {
     /**
      * Update ExtensionContext state when we encounter an amp extension or
      * tag using an extension.
+     *
      * @param result a ValidateTagResult.
      */
     public void updateFromTagResult(@Nonnull final ValidateTagResult result) {
@@ -127,7 +131,7 @@ public class ExtensionsContext {
             // look like <script custom-element=amp-foo ...> or similar.
             this.extensionsLoaded.put(extensionName, true);
             switch (extensionSpec.getRequiresUsage()) {
-                case GRANDFATHERED: // Fallthrough intended:
+                case EXEMPTED: // Fallthrough intended:
                 case NONE:
                     // This extension does not have usage demonstrated by a tag, for
                     // example: amp-dynamic-css-classes
@@ -150,6 +154,7 @@ public class ExtensionsContext {
 
     /**
      * Records extensions that are used within the document.
+     *
      * @param extensions the list of extensions.
      */
     public void recordUsedExtensions(@Nonnull final List<String> extensions) {
@@ -162,8 +167,9 @@ public class ExtensionsContext {
      * Record a possible error to report once we have collected all
      * extensions in the document. If the given extension is missing,
      * then report the given error.
+     *
      * @param parsedTagSpec parsed tag spec.
-     * @param lineCol a line/col.
+     * @param lineCol       a line/col.
      */
     public void recordFutureErrorsIfMissing(@Nonnull final ParsedTagSpec parsedTagSpec,
                                             @Nonnull final Locator lineCol) {
@@ -186,15 +192,23 @@ public class ExtensionsContext {
         }
     }
 
-    /** Used as a set, based on key names. */
+    /**
+     * Used as a set, based on key names.
+     */
     private Map<String, Boolean> extensionsLoaded;
 
-   /** A list of extension unused required. */
+    /**
+     * A list of extension unused required.
+     */
     private List<String> extensionsUnusedRequired;
 
-    /** Used as a set, based on key names. */
+    /**
+     * Used as a set, based on key names.
+     */
     private Map<String, Boolean> extensionsUsed;
 
-    /** Missing errors extension. */
+    /**
+     * Missing errors extension.
+     */
     private List<ExtensionMissingError> extensionMissingErrors;
 }

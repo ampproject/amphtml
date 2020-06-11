@@ -30,9 +30,11 @@ describes.endtoend(
     testUrl:
       'http://localhost:8000/test/fixtures/e2e/amp-story-auto-ads/fullbleed.html',
     initialRect: {width: viewport.WIDTH, height: viewport.HEIGHT},
-    environments: ['single', 'viewer-demo'],
+    // TODO(ccordry): re-enable viewer-demo that should handle the 64px
+    // offset set by the viewer header.
+    environments: ['single' /*, 'viewer-demo'*/],
   },
-  env => {
+  (env) => {
     let controller;
 
     beforeEach(() => {

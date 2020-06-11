@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import {Action} from '../amp-story-store-service';
 import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
@@ -21,10 +22,9 @@ import {Keys} from '../../../../src/utils/key-codes';
 import {LocalizationService} from '../../../../src/service/localization';
 import {PaginationButtons} from '../pagination-buttons';
 import {Services} from '../../../../src/services';
-import {registerServiceBuilder} from '../../../../src/service';
 
 const NOOP = () => {};
-const IDENTITY_FN = x => x;
+const IDENTITY_FN = (x) => x;
 // Represents the correct value of KeyboardEvent.which for the Right Arrow
 const KEYBOARD_EVENT_WHICH_RIGHT_ARROW = 39;
 
@@ -36,7 +36,7 @@ describes.realWin(
       extensions: ['amp-story'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let element;
     let story;
@@ -90,13 +90,13 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
+      const localizationService = new LocalizationService(win.document.body);
+      env.sandbox
+        .stub(Services, 'localizationForDoc')
+        .returns(localizationService);
+
       element = win.document.createElement('amp-story');
       win.document.body.appendChild(element);
-
-      const localizationService = new LocalizationService(win);
-      registerServiceBuilder(win, 'localization-v01', function() {
-        return localizationService;
-      });
 
       AmpStory.isBrowserSupported = () => true;
       story = new AmpStory(element);
@@ -129,11 +129,11 @@ describes.realWin(
           const pageElements = story.element.getElementsByTagName(
             'amp-story-page'
           );
-          const pages = Array.from(pageElements).map(el => el.getImpl());
+          const pages = Array.from(pageElements).map((el) => el.getImpl());
 
           return Promise.all(pages);
         })
-        .then(pages => {
+        .then((pages) => {
           // Only the first page should be active.
           for (let i = 0; i < pages.length; i++) {
             i === 0
@@ -256,10 +256,7 @@ describes.realWin(
       appendEmptyPage(element, /* opt_active */ true);
 
       env.sandbox.stub(impl, 'getPageCount').returns(count);
-      env.sandbox
-        .stub(impl, 'getPageIndex')
-        .withArgs(page)
-        .returns(index);
+      env.sandbox.stub(impl, 'getPageIndex').withArgs(page).returns(index);
 
       impl.switchTo_(page);
 
@@ -304,7 +301,7 @@ describes.realWin(
       // Stubbing because we need to assert synchronously
       env.sandbox
         .stub(element.implementation_, 'mutateElement')
-        .callsFake(mutator => {
+        .callsFake((mutator) => {
           mutator();
           return Promise.resolve();
         });
@@ -426,13 +423,13 @@ describes.realWin(
 );
 
 describes.realWin(
-  'amp-story origin whitelist',
+  'amp-story origin allowlist',
   {
     amp: {
       extensions: ['amp-story'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let element;
     let story;
@@ -446,40 +443,40 @@ describes.realWin(
       story.hashOrigin_ = IDENTITY_FN;
     });
 
-    it('should allow exact whitelisted origin with https scheme', () => {
-      story.originWhitelist_ = ['example.com'];
-      expect(story.isOriginWhitelisted_('https://example.com')).to.be.true;
+    it('should allow exact allowlisted origin with https scheme', () => {
+      story.originAllowlist_ = ['example.com'];
+      expect(story.isOriginAllowlisted_('https://example.com')).to.be.true;
     });
 
-    it('should allow exact whitelisted origin with http scheme', () => {
-      story.originWhitelist_ = ['example.com'];
-      expect(story.isOriginWhitelisted_('http://example.com')).to.be.true;
+    it('should allow exact allowlisted origin with http scheme', () => {
+      story.originAllowlist_ = ['example.com'];
+      expect(story.isOriginAllowlisted_('http://example.com')).to.be.true;
     });
 
     it('should allow www subdomain of origin', () => {
-      story.originWhitelist_ = ['example.com'];
-      expect(story.isOriginWhitelisted_('https://www.example.com')).to.be.true;
+      story.originAllowlist_ = ['example.com'];
+      expect(story.isOriginAllowlisted_('https://www.example.com')).to.be.true;
     });
 
     it('should allow subdomain of origin', () => {
-      story.originWhitelist_ = ['example.com'];
-      expect(story.isOriginWhitelisted_('https://foobar.example.com')).to.be
+      story.originAllowlist_ = ['example.com'];
+      expect(story.isOriginAllowlisted_('https://foobar.example.com')).to.be
         .true;
     });
 
-    it('should not allow exact whitelisted domain under different tld', () => {
-      story.originWhitelist_ = ['example.com'];
-      expect(story.isOriginWhitelisted_('https://example.co.uk')).to.be.false;
+    it('should not allow exact allowlisted domain under different tld', () => {
+      story.originAllowlist_ = ['example.com'];
+      expect(story.isOriginAllowlisted_('https://example.co.uk')).to.be.false;
     });
 
-    it('should not allow exact whitelisted domain infixed in another tld', () => {
-      story.originWhitelist_ = ['example.co.uk'];
-      expect(story.isOriginWhitelisted_('https://example.co')).to.be.false;
+    it('should not allow exact allowlisted domain infixed in another tld', () => {
+      story.originAllowlist_ = ['example.co.uk'];
+      expect(story.isOriginAllowlisted_('https://example.co')).to.be.false;
     });
 
-    it('should not allow domain that contains whitelisted domain', () => {
-      story.originWhitelist_ = ['example.co'];
-      expect(story.isOriginWhitelisted_('https://example.co.uk')).to.be.false;
+    it('should not allow domain that contains allowlisted domain', () => {
+      story.originAllowlist_ = ['example.co'];
+      expect(story.isOriginAllowlisted_('https://example.co.uk')).to.be.false;
     });
   }
 );

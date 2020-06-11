@@ -6,7 +6,7 @@ formats:
   - ads
   - stories
 teaser:
-  text: "AMP's layout system for any element."
+  text: A generic, multi-purpose container element that brings AMP's powerful layouts to any element.
 ---
 
 <!---

@@ -111,7 +111,7 @@ const getTemplate = (config, consentId, logoSrc) => ({
                   attrs: dict({'class': 'i-amphtml-story-consent-vendors'}),
                   children:
                     config.vendors &&
-                    config.vendors.map(vendor => ({
+                    config.vendors.map((vendor) => ({
                       tag: 'li',
                       attrs: dict({'class': 'i-amphtml-story-consent-vendor'}),
                       children: [],
@@ -227,9 +227,9 @@ export class AmpStoryConsent extends AMP.BaseElement {
       createShadowRootWithStyle(this.element, this.storyConsentEl_, CSS);
 
       // Allow <amp-consent> actions in STAMP (defaults to no actions allowed).
-      this.actions_.addToWhitelist('AMP-CONSENT', 'accept');
-      this.actions_.addToWhitelist('AMP-CONSENT', 'prompt');
-      this.actions_.addToWhitelist('AMP-CONSENT', 'reject');
+      this.actions_.addToAllowlist('AMP-CONSENT', 'accept');
+      this.actions_.addToAllowlist('AMP-CONSENT', 'prompt');
+      this.actions_.addToAllowlist('AMP-CONSENT', 'reject');
 
       this.setAcceptButtonFontColor_();
 
@@ -248,7 +248,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
   initializeListeners_() {
     this.storyConsentEl_.addEventListener(
       'click',
-      event => this.onClick_(event),
+      (event) => this.onClick_(event),
       true /** useCapture */
     );
 

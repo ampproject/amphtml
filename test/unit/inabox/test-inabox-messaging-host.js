@@ -18,7 +18,7 @@ import {InaboxMessagingHost} from '../../../ads/inabox/inabox-messaging-host';
 import {deserializeMessage} from '../../../src/3p-frame-messaging';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 
-describes.realWin('inabox-host:messaging', {}, env => {
+describes.realWin('inabox-host:messaging', {}, (env) => {
   let win;
   let host;
   let iframe1;
@@ -176,7 +176,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
       ).to.be.false;
     });
 
-    it('should allow read-only messages from frames with no whitelist', () => {
+    it('should allow read-only messages from frames with no allowlist', () => {
       expect(
         host.processMessage({
           source: iframe3.contentWindow,
@@ -191,7 +191,7 @@ describes.realWin('inabox-host:messaging', {}, env => {
       ).to.be.true;
     });
 
-    it('should ignore write messages from frames with no whitelist', () => {
+    it('should ignore write messages from frames with no allowlist', () => {
       expect(
         host.processMessage({
           source: iframe3.contentWindow,

@@ -26,8 +26,8 @@
 #include <sstream>
 #include <utility>
 
-#include "htmlparser/defer.h"
-#include "htmlparser/fileutil.h"
+#include "defer.h"
+#include "fileutil.h"
 
 const char kFileHeader[] =
     R"HEADER(//
@@ -55,7 +55,7 @@ const char kFileHeader[] =
 #include <algorithm>
 #include <utility>
 
-#include "htmlparser/comparators.h"
+#include "comparators.h"
 
 namespace htmlparser {
 
@@ -170,7 +170,7 @@ int main(int argc, char** argv) {
     return EXIT_FAILURE;
   }
 
-  std::ofstream fd("htmlparser/casetable.h");
+  std::ofstream fd("casetable.h");
   htmlparser::Defer __([&]() {fd.close();});
 
   fd << kFileHeader;

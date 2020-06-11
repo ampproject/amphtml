@@ -28,28 +28,6 @@ limitations under the License.
 
 A generic carousel for displaying multiple similar pieces of content along a horizontal axis; meant to be highly flexible and performant.
 
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>
-      <ul>
-        <li>carousel: fixed, fixed-height, and nodisplay.</li>
-        <li>slides: fill, fixed, fixed-height, flex-item, nodisplay, and responsive. See best practices below for additional considerations about slides.</li>
-      </ul>
-    </td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>AMP By Example's:<ul>
-      <li><a href="https://amp.dev/documentation/examples/components/amp-carousel/">amp-carousel example</a></li>
-      <li><a href="https://amp.dev/documentation/examples/multimedia-animations/image_galleries_with_amp-carousel/">Image galleries with amp-carousel</a></td>
-  </tr>
-</table>
-
 ## Behavior
 
 Each of the `amp-carousel` component’s immediate children is considered an item in the carousel. Each of these nodes may also have arbitrary HTML children.

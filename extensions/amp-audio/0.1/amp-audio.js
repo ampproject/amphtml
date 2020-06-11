@@ -27,6 +27,7 @@ import {closestAncestorElementBySelector} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
+import {setIsMediaComponent} from '../../../src/video-interface';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 const TAG = 'amp-audio';
@@ -62,6 +63,8 @@ export class AmpAudio extends AMP.BaseElement {
       this.element.removeAttribute('autoplay');
       this.buildAudioElement();
     }
+
+    setIsMediaComponent(this.element);
 
     this.registerAction('play', this.play_.bind(this));
     this.registerAction('pause', this.pause_.bind(this));
@@ -100,14 +103,13 @@ export class AmpAudio extends AMP.BaseElement {
   }
 
   /**
-   * Builds the internal <audio> element
-   * @return {*} TODO(#23582): Specify return type
+   * Builds the internal <audio> element.
    */
   buildAudioElement() {
     const audio = this.element.ownerDocument.createElement('audio');
     if (!audio.play) {
       this.toggleFallback(true);
-      return Promise.resolve();
+      return;
     }
 
     // Force controls otherwise there is no player UI.
@@ -132,7 +134,7 @@ export class AmpAudio extends AMP.BaseElement {
     );
 
     this.applyFillContent(audio);
-    this.getRealChildNodes().forEach(child => {
+    this.getRealChildNodes().forEach((child) => {
       if (child.getAttribute && child.getAttribute('src')) {
         assertHttpsUrl(child.getAttribute('src'), dev().assertElement(child));
       }
@@ -297,6 +299,6 @@ export class AmpAudio extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpAudio);
 });

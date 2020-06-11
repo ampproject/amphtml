@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 import {LocalizedStringId} from '../../../src/localized-strings'; // eslint-disable-line no-unused-vars
-import {Services} from '../../../src/services';
+
 import {createElementWithAttributes} from '../../../src/dom';
 import {devAssert} from '../../../src/log';
-import {isArray, toWin} from '../../../src/types';
+import {getLocalizationService} from './amp-story-localization-service';
+import {isArray} from '../../../src/types';
 
 /**
  * @typedef {{
@@ -58,7 +59,7 @@ export function renderAsElement(doc, elementDef) {
  */
 function renderMulti(doc, elementsDef) {
   const fragment = doc.createDocumentFragment();
-  elementsDef.forEach(elementDef =>
+  elementsDef.forEach((elementDef) =>
     fragment.appendChild(renderSingle(doc, elementDef))
   );
   return fragment;
@@ -75,13 +76,12 @@ function renderSingle(doc, elementDef) {
     : doc.createElement(elementDef.tag);
 
   if (elementDef.localizedStringId) {
-    const win = toWin(doc.defaultView);
-    Services.localizationServiceForOrNullV01(win).then(localizationService => {
-      devAssert(localizationService, 'Could not retrieve LocalizationService.');
-      el.textContent = localizationService.getLocalizedString(
-        /** @type {!LocalizedStringId} */ (elementDef.localizedStringId)
-      );
-    });
+    const localizationService = getLocalizationService(devAssert(doc.body));
+
+    devAssert(localizationService, 'Could not retrieve LocalizationService.');
+    el.textContent = localizationService.getLocalizedString(
+      /** @type {!LocalizedStringId} */ (elementDef.localizedStringId)
+    );
   }
 
   if (elementDef.unlocalizedString) {

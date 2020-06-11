@@ -219,12 +219,15 @@ public final class TagSpecUtils {
                             context.getTypeIdentifiers())) {
                         continue;
                     }
-                    final ValidatorProtos.ValidationResult.Builder resultForAttempt = TagSpecUtils.validateTagAgainstSpec(
+                    final ValidateTagResult resultForAttempt = TagSpecUtils.validateTagAgainstSpec(
                             parsedTagSpec, bestMatchReferencePoint, context, encounteredTag);
                     if (context.getRules().betterValidationResultThan(
-                            resultForAttempt, ret.getValidationResult())) {
+                            resultForAttempt.getValidationResult(), ret.getValidationResult())) {
                         ret.setBestMatchTagSpec(parsedTagSpec);
-                        ret.setValidationResult(resultForAttempt);
+                        ret.setValidationResult(resultForAttempt.getValidationResult());
+                        // TODO (GeorgeLuo) : this copy operation is unnecessary, should refactor to instantiate ret with
+                        //  return for resultForAttempt in the first place (5/3/2020)
+                        ret.setInlineStyleCssBytes(resultForAttempt.getInlineStyleCssBytes());
                         // Exit early on success
                         if (ret.getValidationResult().getStatus() == ValidatorProtos.ValidationResult.Status.PASS) {
                             return ret;
@@ -272,10 +275,12 @@ public final class TagSpecUtils {
         resultForBestAttempt.setStatus(ValidatorProtos.ValidationResult.Status.UNKNOWN);
         ParsedTagSpec bestMatchTagSpec = null;
         for (final ParsedTagSpec parsedTagSpec : filteredTagSpecs) {
-            final ValidatorProtos.ValidationResult.Builder resultForAttempt = TagSpecUtils.validateTagAgainstSpec(
+          // TODO (GeorgeLuo) : refactor here to handle InlineStyleCssBytes
+          //  changes (5/3/2020)
+          final ValidateTagResult resultForAttempt = TagSpecUtils.validateTagAgainstSpec(
                     parsedTagSpec, bestMatchReferencePoint, context, encounteredTag);
-            if (context.getRules().betterValidationResultThan(resultForAttempt, resultForBestAttempt)) {
-                resultForBestAttempt = resultForAttempt;
+            if (context.getRules().betterValidationResultThan(resultForAttempt.getValidationResult(), resultForBestAttempt)) {
+                resultForBestAttempt = resultForAttempt.getValidationResult();
                 bestMatchTagSpec = parsedTagSpec;
                 // Exit early
                 if (resultForBestAttempt.getStatus() == ValidatorProtos.ValidationResult.Status.PASS) {
@@ -299,13 +304,16 @@ public final class TagSpecUtils {
      * @throws CssValidationException Css validation exception.
      * @return returns the validation result.
      */
-    public static ValidatorProtos.ValidationResult.Builder validateTagAgainstSpec(
+    public static ValidateTagResult validateTagAgainstSpec(
             @Nonnull final ParsedTagSpec parsedTagSpec,
             final ParsedTagSpec bestMatchReferencePoint,
             @Nonnull final Context context,
             @Nonnull final ParsedHtmlTag encounteredTag)
             throws TagValidationException, IOException, CssValidationException {
         final ValidatorProtos.ValidationResult.Builder resultForAttempt = ValidatorProtos.ValidationResult.newBuilder();
+        ValidateTagResult wrapperResult =
+            new ValidateTagResult(resultForAttempt, null);
+
         resultForAttempt.setStatus(ValidatorProtos.ValidationResult.Status.PASS);
         validateParentTag(parsedTagSpec, context, resultForAttempt);
         validateAncestorTags(parsedTagSpec, context, resultForAttempt);
@@ -315,13 +323,13 @@ public final class TagSpecUtils {
         context.getTagStack().matchChildTagName(
                 encounteredTag, context, resultForAttempt);
 
-        // Only validate attributes if we haven't yet found any errors. The
+      // Only validate attributes if we haven't yet found any errors. The
         // Parent/Ancestor errors are informative without adding additional errors
         // about attributes.
         if (resultForAttempt.getStatus() == ValidatorProtos.ValidationResult.Status.PASS) {
             AttributeSpecUtils.validateAttributes(
                     parsedTagSpec, bestMatchReferencePoint, context, encounteredTag,
-                    resultForAttempt);
+              wrapperResult);
         }
 
         // Only validate that this is a valid descendant if it's not already invalid.
@@ -371,7 +379,7 @@ public final class TagSpecUtils {
                         resultForAttempt);
             }
         }
-        return resultForAttempt;
+        return wrapperResult;
     }
 
     /**
@@ -739,7 +747,7 @@ public final class TagSpecUtils {
         final TagStack tagStack = context.getTagStack();
 
         for (DescendantConstraints allowedDescendantsList : tagStack.allowedDescendantsList()) {
-            // If the tag we're validating is not whitelisted for a specific ancestor,
+            // If the tag we're validating is not allowlisted for a specific ancestor,
             // then throw an error.
             if (!allowedDescendantsList.getAllowedTags().contains(encounteredTag.upperName())) {
                 final List<String> params = new ArrayList<>();
@@ -871,14 +879,14 @@ public final class TagSpecUtils {
     }
 
     /** List identifiers for AMP format. */
-    public static final List AMP_IDENTIFIERS = Arrays.asList("⚡", "amp", "transformed", "data-ampdevmode");
+    public static final List AMP_IDENTIFIERS = Arrays.asList("\u26a1", "\u26a1\ufe0f", "amp", "transformed", "data-ampdevmode");
 
     /** List identifiers for AMP4ADS format. */
-    public static final List AMP4ADS_IDENTIFIERS = Arrays.asList("⚡4ads", "amp4ads", "data-ampdevmode");
+    public static final List AMP4ADS_IDENTIFIERS = Arrays.asList("\u26a14ads", "\u26a1\ufe0f4ads", "amp4ads", "data-ampdevmode");
 
     /** List identifiers for AMP4EMAIL format. */
-    public static final List AMP4EMAIL_IDENTIFIERS = Arrays.asList("⚡4email", "amp4email", "data-ampdevmode");
+    public static final List AMP4EMAIL_IDENTIFIERS = Arrays.asList("\u26a14email", "\u26a1\ufe0f4email", "amp4email", "data-ampdevmode");
 
     /** List identifiers for ACTIONS format. */
-    public static final List ACTIONS_IDENTIFIERS = Arrays.asList("⚡", "amp", "actions", "data-ampdevmode");
+    public static final List ACTIONS_IDENTIFIERS = Arrays.asList("\u26a1", "\u26a1\ufe0f", "amp", "actions", "data-ampdevmode");
 }

@@ -292,6 +292,10 @@ class AmpBridPlayer extends AMP.BaseElement {
         'ready': VideoEvents.LOAD,
         'play': VideoEvents.PLAYING,
         'pause': VideoEvents.PAUSE,
+        'ended': VideoEvents.ENDED,
+        'adStart': VideoEvents.AD_START,
+        'adEnd': VideoEvents.AD_END,
+        'loadedmetadata': VideoEvents.LOADEDMETADATA,
       });
     }
 
@@ -416,6 +420,6 @@ class AmpBridPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpBridPlayer);
 });

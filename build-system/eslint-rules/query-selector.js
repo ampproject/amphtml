@@ -15,7 +15,7 @@
  */
 'use strict';
 
-module.exports = function(context) {
+module.exports = function (context) {
   function callQuerySelector(node) {
     const {callee} = node;
 
@@ -29,7 +29,7 @@ module.exports = function(context) {
     }
 
     if (property.leadingComments) {
-      const ok = property.leadingComments.some(comment => {
+      const ok = property.leadingComments.some((comment) => {
         return comment.value === 'OK';
       });
       if (ok) {
@@ -77,7 +77,7 @@ module.exports = function(context) {
     }
 
     if (node.leadingComments) {
-      const ok = node.leadingComments.some(comment => {
+      const ok = node.leadingComments.some((comment) => {
         return comment.value === 'OK';
       });
       if (ok) {
@@ -111,7 +111,7 @@ module.exports = function(context) {
     } else if (arg.type === 'TemplateLiteral') {
       // Ensure all template variables are properly escaped.
       let accumulator = '';
-      const quasis = arg.quasis.map(v => v.value.raw);
+      const quasis = arg.quasis.map((v) => v.value.raw);
       for (let i = 0; i < arg.expressions.length; i++) {
         const expression = arg.expressions[i];
         accumulator += quasis[i];
@@ -166,7 +166,7 @@ module.exports = function(context) {
     }
 
     // strip out things that can't affect children selection
-    selector = selector.replace(/\(.*\)|\[.*\]/, function(match) {
+    selector = selector.replace(/\(.*\)|\[.*\]/, function (match) {
       return match[0] + match[match.length - 1];
     });
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.93 */
+/** Version: 0.1.22.107 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -29,7 +29,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /** @enum {number} */
 const AnalyticsEvent = {
   UNKNOWN: 0,
@@ -81,6 +80,7 @@ const AnalyticsEvent = {
   EVENT_GPAY_NO_TX_ID: 3003,
   EVENT_GPAY_CANNOT_CONFIRM_TX_ID: 3004,
   EVENT_GOOGLE_UPDATED: 3005,
+  EVENT_NEW_TX_ID: 3006,
   EVENT_SUBSCRIPTION_STATE: 4000,
 };
 /** @enum {number} */
@@ -97,13 +97,15 @@ const EventOriginator = {
  * @implements {Message}
  */
 class AccountCreationRequest {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?boolean} */
-    this.complete_ = (data[1] == null) ? null : data[1];
+    this.complete_ = data[base] == null ? null : data[base];
   }
 
   /**
@@ -121,14 +123,18 @@ class AccountCreationRequest {
   }
 
   /**
+   * @param {boolean} includeLabel
    * @return {!Array}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.complete_,  // field 1 - complete
+  toArray(includeLabel = true) {
+    const arr = [
+      this.complete_, // field 1 - complete
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -144,16 +150,18 @@ class AccountCreationRequest {
  * @implements {Message}
  */
 class AlreadySubscribedResponse {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?boolean} */
-    this.subscriberOrMember_ = (data[1] == null) ? null : data[1];
+    this.subscriberOrMember_ = data[base] == null ? null : data[base];
 
     /** @private {?boolean} */
-    this.linkRequested_ = (data[2] == null) ? null : data[2];
+    this.linkRequested_ = data[1 + base] == null ? null : data[1 + base];
   }
 
   /**
@@ -185,15 +193,19 @@ class AlreadySubscribedResponse {
   }
 
   /**
+   * @param {boolean} includeLabel
    * @return {!Array}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.subscriberOrMember_,  // field 1 - subscriber_or_member
-      this.linkRequested_,  // field 2 - link_requested
+  toArray(includeLabel = true) {
+    const arr = [
+      this.subscriberOrMember_, // field 1 - subscriber_or_member
+      this.linkRequested_, // field 2 - link_requested
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -209,43 +221,45 @@ class AlreadySubscribedResponse {
  * @implements {Message}
  */
 class AnalyticsContext {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?string} */
-    this.embedderOrigin_ = (data[1] == null) ? null : data[1];
+    this.embedderOrigin_ = data[base] == null ? null : data[base];
 
     /** @private {?string} */
-    this.transactionId_ = (data[2] == null) ? null : data[2];
+    this.transactionId_ = data[1 + base] == null ? null : data[1 + base];
 
     /** @private {?string} */
-    this.referringOrigin_ = (data[3] == null) ? null : data[3];
+    this.referringOrigin_ = data[2 + base] == null ? null : data[2 + base];
 
     /** @private {?string} */
-    this.utmSource_ = (data[4] == null) ? null : data[4];
+    this.utmSource_ = data[3 + base] == null ? null : data[3 + base];
 
     /** @private {?string} */
-    this.utmCampaign_ = (data[5] == null) ? null : data[5];
+    this.utmCampaign_ = data[4 + base] == null ? null : data[4 + base];
 
     /** @private {?string} */
-    this.utmMedium_ = (data[6] == null) ? null : data[6];
+    this.utmMedium_ = data[5 + base] == null ? null : data[5 + base];
 
     /** @private {?string} */
-    this.sku_ = (data[7] == null) ? null : data[7];
+    this.sku_ = data[6 + base] == null ? null : data[6 + base];
 
     /** @private {?boolean} */
-    this.readyToPay_ = (data[8] == null) ? null : data[8];
+    this.readyToPay_ = data[7 + base] == null ? null : data[7 + base];
 
     /** @private {!Array<string>} */
-    this.label_ = data[9] || [];
+    this.label_ = data[8 + base] || [];
 
     /** @private {?string} */
-    this.clientVersion_ = (data[10] == null) ? null : data[10];
+    this.clientVersion_ = data[9 + base] == null ? null : data[9 + base];
 
     /** @private {?string} */
-    this.url_ = (data[11] == null) ? null : data[11];
+    this.url_ = data[10 + base] == null ? null : data[10 + base];
   }
 
   /**
@@ -403,24 +417,28 @@ class AnalyticsContext {
   }
 
   /**
+   * @param {boolean} includeLabel
    * @return {!Array}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.embedderOrigin_,  // field 1 - embedder_origin
-      this.transactionId_,  // field 2 - transaction_id
-      this.referringOrigin_,  // field 3 - referring_origin
-      this.utmSource_,  // field 4 - utm_source
-      this.utmCampaign_,  // field 5 - utm_campaign
-      this.utmMedium_,  // field 6 - utm_medium
-      this.sku_,  // field 7 - sku
-      this.readyToPay_,  // field 8 - ready_to_pay
-      this.label_,  // field 9 - label
-      this.clientVersion_,  // field 10 - client_version
-      this.url_,  // field 11 - url
+  toArray(includeLabel = true) {
+    const arr = [
+      this.embedderOrigin_, // field 1 - embedder_origin
+      this.transactionId_, // field 2 - transaction_id
+      this.referringOrigin_, // field 3 - referring_origin
+      this.utmSource_, // field 4 - utm_source
+      this.utmCampaign_, // field 5 - utm_campaign
+      this.utmMedium_, // field 6 - utm_medium
+      this.sku_, // field 7 - sku
+      this.readyToPay_, // field 8 - ready_to_pay
+      this.label_, // field 9 - label
+      this.clientVersion_, // field 10 - client_version
+      this.url_, // field 11 - url
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -436,16 +454,18 @@ class AnalyticsContext {
  * @implements {Message}
  */
 class AnalyticsEventMeta {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?EventOriginator} */
-    this.eventOriginator_ = (data[1] == null) ? null : data[1];
+    this.eventOriginator_ = data[base] == null ? null : data[base];
 
     /** @private {?boolean} */
-    this.isFromUserAction_ = (data[2] == null) ? null : data[2];
+    this.isFromUserAction_ = data[1 + base] == null ? null : data[1 + base];
   }
 
   /**
@@ -477,15 +497,19 @@ class AnalyticsEventMeta {
   }
 
   /**
+   * @param {boolean} includeLabel
    * @return {!Array}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.eventOriginator_,  // field 1 - event_originator
-      this.isFromUserAction_,  // field 2 - is_from_user_action
+  toArray(includeLabel = true) {
+    const arr = [
+      this.eventOriginator_, // field 1 - event_originator
+      this.isFromUserAction_, // field 2 - is_from_user_action
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -501,25 +525,33 @@ class AnalyticsEventMeta {
  * @implements {Message}
  */
 class AnalyticsRequest {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?AnalyticsContext} */
-    this.context_ = (data[1] == null || data[1] == undefined) ? null : new
-        AnalyticsContext(data[1]);
+    this.context_ =
+      data[base] == null || data[base] == undefined
+        ? null
+        : new AnalyticsContext(data[base], includesLabel);
 
     /** @private {?AnalyticsEvent} */
-    this.event_ = (data[2] == null) ? null : data[2];
+    this.event_ = data[1 + base] == null ? null : data[1 + base];
 
     /** @private {?AnalyticsEventMeta} */
-    this.meta_ = (data[3] == null || data[3] == undefined) ? null : new
-        AnalyticsEventMeta(data[3]);
+    this.meta_ =
+      data[2 + base] == null || data[2 + base] == undefined
+        ? null
+        : new AnalyticsEventMeta(data[2 + base], includesLabel);
 
     /** @private {?EventParams} */
-    this.params_ = (data[4] == null || data[4] == undefined) ? null : new
-        EventParams(data[4]);
+    this.params_ =
+      data[3 + base] == null || data[3 + base] == undefined
+        ? null
+        : new EventParams(data[3 + base], includesLabel);
   }
 
   /**
@@ -579,17 +611,21 @@ class AnalyticsRequest {
   }
 
   /**
+   * @param {boolean} includeLabel
    * @return {!Array}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.context_ ? this.context_.toArray() : [], // field 1 - context
-      this.event_,  // field 2 - event
-      this.meta_ ? this.meta_.toArray() : [], // field 3 - meta
-      this.params_ ? this.params_.toArray() : [], // field 4 - params
+  toArray(includeLabel = true) {
+    const arr = [
+      this.context_ ? this.context_.toArray(includeLabel) : [], // field 1 - context
+      this.event_, // field 2 - event
+      this.meta_ ? this.meta_.toArray(includeLabel) : [], // field 3 - meta
+      this.params_ ? this.params_.toArray(includeLabel) : [], // field 4 - params
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -605,13 +641,15 @@ class AnalyticsRequest {
  * @implements {Message}
  */
 class EntitlementsResponse {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?string} */
-    this.jwt_ = (data[1] == null) ? null : data[1];
+    this.jwt_ = data[base] == null ? null : data[base];
   }
 
   /**
@@ -629,14 +667,18 @@ class EntitlementsResponse {
   }
 
   /**
+   * @param {boolean} includeLabel
    * @return {!Array}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.jwt_,  // field 1 - jwt
+  toArray(includeLabel = true) {
+    const arr = [
+      this.jwt_, // field 1 - jwt
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -652,22 +694,27 @@ class EntitlementsResponse {
  * @implements {Message}
  */
 class EventParams {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?string} */
-    this.smartboxMessage_ = (data[1] == null) ? null : data[1];
+    this.smartboxMessage_ = data[base] == null ? null : data[base];
 
     /** @private {?string} */
-    this.gpayTransactionId_ = (data[2] == null) ? null : data[2];
+    this.gpayTransactionId_ = data[1 + base] == null ? null : data[1 + base];
 
     /** @private {?boolean} */
-    this.hadLogged_ = (data[3] == null) ? null : data[3];
+    this.hadLogged_ = data[2 + base] == null ? null : data[2 + base];
 
     /** @private {?string} */
-    this.sku_ = (data[4] == null) ? null : data[4];
+    this.sku_ = data[3 + base] == null ? null : data[3 + base];
+
+    /** @private {?string} */
+    this.oldTransactionId_ = data[4 + base] == null ? null : data[4 + base];
   }
 
   /**
@@ -727,17 +774,36 @@ class EventParams {
   }
 
   /**
+   * @return {?string}
+   */
+  getOldTransactionId() {
+    return this.oldTransactionId_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setOldTransactionId(value) {
+    this.oldTransactionId_ = value;
+  }
+
+  /**
+   * @param {boolean} includeLabel
    * @return {!Array}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.smartboxMessage_,  // field 1 - smartbox_message
-      this.gpayTransactionId_,  // field 2 - gpay_transaction_id
-      this.hadLogged_,  // field 3 - had_logged
-      this.sku_,  // field 4 - sku
+  toArray(includeLabel = true) {
+    const arr = [
+      this.smartboxMessage_, // field 1 - smartbox_message
+      this.gpayTransactionId_, // field 2 - gpay_transaction_id
+      this.hadLogged_, // field 3 - had_logged
+      this.sku_, // field 4 - sku
+      this.oldTransactionId_, // field 5 - old_transaction_id
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -753,16 +819,18 @@ class EventParams {
  * @implements {Message}
  */
 class FinishedLoggingResponse {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?boolean} */
-    this.complete_ = (data[1] == null) ? null : data[1];
+    this.complete_ = data[base] == null ? null : data[base];
 
     /** @private {?string} */
-    this.error_ = (data[2] == null) ? null : data[2];
+    this.error_ = data[1 + base] == null ? null : data[1 + base];
   }
 
   /**
@@ -794,15 +862,19 @@ class FinishedLoggingResponse {
   }
 
   /**
+   * @param {boolean} includeLabel
    * @return {!Array}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.complete_,  // field 1 - complete
-      this.error_,  // field 2 - error
+  toArray(includeLabel = true) {
+    const arr = [
+      this.complete_, // field 1 - complete
+      this.error_, // field 2 - error
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -818,16 +890,18 @@ class FinishedLoggingResponse {
  * @implements {Message}
  */
 class LinkSaveTokenRequest {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?string} */
-    this.authCode_ = (data[1] == null) ? null : data[1];
+    this.authCode_ = data[base] == null ? null : data[base];
 
     /** @private {?string} */
-    this.token_ = (data[2] == null) ? null : data[2];
+    this.token_ = data[1 + base] == null ? null : data[1 + base];
   }
 
   /**
@@ -859,15 +933,19 @@ class LinkSaveTokenRequest {
   }
 
   /**
+   * @param {boolean} includeLabel
    * @return {!Array}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.authCode_,  // field 1 - auth_code
-      this.token_,  // field 2 - token
+  toArray(includeLabel = true) {
+    const arr = [
+      this.authCode_, // field 1 - auth_code
+      this.token_, // field 2 - token
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -883,13 +961,15 @@ class LinkSaveTokenRequest {
  * @implements {Message}
  */
 class LinkingInfoResponse {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?boolean} */
-    this.requested_ = (data[1] == null) ? null : data[1];
+    this.requested_ = data[base] == null ? null : data[base];
   }
 
   /**
@@ -907,14 +987,18 @@ class LinkingInfoResponse {
   }
 
   /**
+   * @param {boolean} includeLabel
    * @return {!Array}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.requested_,  // field 1 - requested
+  toArray(includeLabel = true) {
+    const arr = [
+      this.requested_, // field 1 - requested
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -930,25 +1014,27 @@ class LinkingInfoResponse {
  * @implements {Message}
  */
 class SkuSelectedResponse {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?string} */
-    this.sku_ = (data[1] == null) ? null : data[1];
+    this.sku_ = data[base] == null ? null : data[base];
 
     /** @private {?string} */
-    this.oldSku_ = (data[2] == null) ? null : data[2];
+    this.oldSku_ = data[1 + base] == null ? null : data[1 + base];
 
     /** @private {?boolean} */
-    this.oneTime_ = (data[3] == null) ? null : data[3];
+    this.oneTime_ = data[2 + base] == null ? null : data[2 + base];
 
     /** @private {?string} */
-    this.playOffer_ = (data[4] == null) ? null : data[4];
+    this.playOffer_ = data[3 + base] == null ? null : data[3 + base];
 
     /** @private {?string} */
-    this.oldPlayOffer_ = (data[5] == null) ? null : data[5];
+    this.oldPlayOffer_ = data[4 + base] == null ? null : data[4 + base];
   }
 
   /**
@@ -1022,18 +1108,22 @@ class SkuSelectedResponse {
   }
 
   /**
+   * @param {boolean} includeLabel
    * @return {!Array}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.sku_,  // field 1 - sku
-      this.oldSku_,  // field 2 - old_sku
-      this.oneTime_,  // field 3 - one_time
-      this.playOffer_,  // field 4 - play_offer
-      this.oldPlayOffer_,  // field 5 - old_play_offer
+  toArray(includeLabel = true) {
+    const arr = [
+      this.sku_, // field 1 - sku
+      this.oldSku_, // field 2 - old_sku
+      this.oneTime_, // field 3 - one_time
+      this.playOffer_, // field 4 - play_offer
+      this.oldPlayOffer_, // field 5 - old_play_offer
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -1049,13 +1139,15 @@ class SkuSelectedResponse {
  * @implements {Message}
  */
 class SmartBoxMessage {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?boolean} */
-    this.isClicked_ = (data[1] == null) ? null : data[1];
+    this.isClicked_ = data[base] == null ? null : data[base];
   }
 
   /**
@@ -1073,14 +1165,18 @@ class SmartBoxMessage {
   }
 
   /**
+   * @param {boolean} includeLabel
    * @return {!Array}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.isClicked_,  // field 1 - is_clicked
+  toArray(includeLabel = true) {
+    const arr = [
+      this.isClicked_, // field 1 - is_clicked
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -1096,13 +1192,15 @@ class SmartBoxMessage {
  * @implements {Message}
  */
 class SubscribeResponse {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?boolean} */
-    this.subscribe_ = (data[1] == null) ? null : data[1];
+    this.subscribe_ = data[base] == null ? null : data[base];
   }
 
   /**
@@ -1120,14 +1218,18 @@ class SubscribeResponse {
   }
 
   /**
+   * @param {boolean} includeLabel
    * @return {!Array}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.subscribe_,  // field 1 - subscribe
+  toArray(includeLabel = true) {
+    const arr = [
+      this.subscribe_, // field 1 - subscribe
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -1143,13 +1245,15 @@ class SubscribeResponse {
  * @implements {Message}
  */
 class ViewSubscriptionsResponse {
- /**
-  * @param {!Array=} data
-  */
-  constructor(data = []) {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
 
     /** @private {?boolean} */
-    this.native_ = (data[1] == null) ? null : data[1];
+    this.native_ = data[base] == null ? null : data[base];
   }
 
   /**
@@ -1167,14 +1271,18 @@ class ViewSubscriptionsResponse {
   }
 
   /**
+   * @param {boolean} includeLabel
    * @return {!Array}
    * @override
    */
-  toArray() {
-    return [
-      this.label(),  // message label
-      this.native_,  // field 1 - native
+  toArray(includeLabel = true) {
+    const arr = [
+      this.native_, // field 1 - native
     ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
   }
 
   /**
@@ -1205,7 +1313,7 @@ const PROTO_MAP = {
 
 /**
  * Utility to deserialize a buffer
- * @param {!Array} data
+ * @param {!Array<*>} data
  * @return {!Message}
  */
 function deserialize(data) {
@@ -1228,6 +1336,78 @@ function deserialize(data) {
 function getLabel(messageType) {
   const message = /** @type {!Message} */ (new messageType());
   return message.label();
+}
+
+/**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @enum {number}  */
+const FilterResult = {
+  /** The event is allowed to proceed to the listeners. */
+  PROCESS_EVENT: 0,
+  /** The event is canceled and the listeners are not informed about it. */
+  CANCEL_EVENT: 1,
+};
+
+/**
+ * Defines a client event in SwG
+ * Properties:
+ * - eventType: Required. The AnalyticsEvent type that occurred.
+ * - eventOriginator: Required.  The codebase that initiated the event.
+ * - isFromUserAction: Optional.  True if the user took an action to generate
+ *   the event.
+ * - additionalParameters: Optional.  A JSON object to store generic data.
+ *
+ *  @typedef {{
+ *    eventType: !AnalyticsEvent,
+ *    eventOriginator: !EventOriginator,
+ *    isFromUserAction: ?boolean,
+ *    additionalParameters: ?Object,
+ * }}
+ */
+let ClientEvent;
+
+/**
+ * @interface
+ */
+class ClientEventManagerApi {
+  /**
+   * Call this function to log an event. The registered listeners will be
+   * invoked unless the event is filtered.
+   * @param {!function(!ClientEvent)} listener
+   */
+  registerEventListener(listener) { }
+
+  /**
+   * Register a filterer for events if you need to potentially prevent the
+   * listeners from hearing about it.  A filterer should return
+   * FilterResult.CANCEL_EVENT to prevent listeners from hearing about the
+   * event.
+   * @param {!function(!ClientEvent):FilterResult} filterer
+   */
+  registerEventFilterer(filterer) { }
+
+  /**
+   * Call this function to log an event.  It will immediately throw an error if
+   * the event is invalid.  It will then asynchronously call the filterers and
+   * stop the event if a filterer cancels it.  After that, it will call each
+   * listener asynchronously.
+   * @param {!ClientEvent} event
+   */
+  logEvent(event) { }
 }
 
 /**
@@ -1522,8 +1702,10 @@ function getRandomInts(numInts, maxVal) {
       ? new Uint16Array(numInts)
       : new Uint32Array(numInts);
 
-  if (crypto && crypto.getRandomValues) {
-    crypto.getRandomValues(arr);
+  const isIE = !!self['msCrypto'];
+  const localCrypto = isIE ? self['msCrypto'] : self.crypto;
+  if (localCrypto && localCrypto.getRandomValues) {
+    localCrypto.getRandomValues(arr);
     for (let i = arr.length - 1; i > -1; i--) {
       arr[i] = arr[i] % maxVal;
     }
@@ -1615,6 +1797,10 @@ function getUuid() {
     }
   }
   return uuid;
+}
+
+function getSwgTransactionId() {
+  return getUuid() + '.swg';
 }
 
 /**
@@ -4727,11 +4913,9 @@ class UserData {
  * limitations under the License.
  */
 
-
 /**
  */
 class SubscribeResponse$1 {
-
   /**
    * @param {string} raw
    * @param {!PurchaseData} purchaseData
@@ -4740,9 +4924,18 @@ class SubscribeResponse$1 {
    * @param {!string} productType
    * @param {function():!Promise} completeHandler
    * @param {?string=} oldSku
+   * @param {?number=} paymentRecurrence
    */
-  constructor(raw, purchaseData, userData, entitlements, productType,
-      completeHandler, oldSku = null) {
+  constructor(
+    raw,
+    purchaseData,
+    userData,
+    entitlements,
+    productType,
+    completeHandler,
+    oldSku = null,
+    paymentRecurrence = null
+  ) {
     /** @const {string} */
     this.raw = raw;
     /** @const {!PurchaseData} */
@@ -4757,6 +4950,8 @@ class SubscribeResponse$1 {
     this.completeHandler_ = completeHandler;
     /** @const {?string} */
     this.oldSku = oldSku;
+    /** @const {?number} */
+    this.paymentRecurrence = paymentRecurrence;
   }
 
   /**
@@ -4764,13 +4959,13 @@ class SubscribeResponse$1 {
    */
   clone() {
     return new SubscribeResponse$1(
-        this.raw,
-        this.purchaseData,
-        this.userData,
-        this.entitlements,
-        this.productType,
-        this.completeHandler_,
-        this.oldSku
+      this.raw,
+      this.purchaseData,
+      this.userData,
+      this.entitlements,
+      this.productType,
+      this.completeHandler_,
+      this.oldSku
     );
   }
 
@@ -4782,7 +4977,7 @@ class SubscribeResponse$1 {
       'purchaseData': this.purchaseData.json(),
       'userData': this.userData ? this.userData.json() : null,
       'entitlements': this.entitlements ? this.entitlements.json() : null,
-      'oldSku' : this.oldSku,
+      'oldSku': this.oldSku,
       'productType': this.productType,
     };
   }
@@ -4805,11 +5000,9 @@ class SubscribeResponse$1 {
   }
 }
 
-
 /**
  */
 class PurchaseData {
-
   /**
    * @param {string} raw
    * @param {string} signature
@@ -5375,6 +5568,14 @@ function addQueryParam(url, param, value) {
 }
 
 /**
+ * @param {!../proto/api_messages.Message} message
+ * @return {string}
+ */
+function serializeProtoMessageForUrl(message) {
+  return JSON.stringify(/** @type {JsonObject} */ (message.toArray(false)));
+}
+
+/**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -5459,7 +5660,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.93',
+    '_client': 'SwG 0.1.22.107',
   });
 }
 
@@ -5641,7 +5842,7 @@ class PayCompleteFlow {
     /** @const @type {./client-event-manager.ClientEventManager} */
     const eventManager = deps.eventManager();
 
-    deps.payClient().onResponse(payPromise => {
+    deps.payClient().onResponse((payPromise) => {
       deps.entitlementsManager().blockNextNotification();
       const flow = new PayCompleteFlow(deps);
       const promise = validatePayResponse(
@@ -5651,7 +5852,7 @@ class PayCompleteFlow {
       );
       deps.callbacks().triggerPaymentResponse(promise);
       return promise.then(
-        response => {
+        (response) => {
           const sku = parseSkuFromPurchaseDataSafe(response.purchaseData);
           deps.analytics().setSku(sku || '');
           eventManager.logSwgEvent(
@@ -5661,7 +5862,7 @@ class PayCompleteFlow {
           );
           flow.start(response);
         },
-        reason => {
+        (reason) => {
           if (isCancelError(reason)) {
             const productType = /** @type {!Object} */ (reason)['productType'];
             const flow =
@@ -5733,10 +5934,12 @@ class PayCompleteFlow {
     );
     this.deps_.entitlementsManager().reset(true);
     this.response_ = response;
+    // TODO(dianajing): future-proof isOneTime flag
     const args = {
       'publicationId': this.deps_.pageConfig().getPublicationId(),
       'productType': this.response_['productType'],
       'isSubscriptionUpdate': !!this.response_['oldSku'],
+      'isOneTime': !!this.response_['paymentRecurrence'],
     };
     // TODO(dvoytenko, #400): cleanup once entitlements is launched everywhere.
     if (response.userData && response.entitlements) {
@@ -5822,7 +6025,7 @@ PayCompleteFlow.waitingForPayClient_ = false;
 function validatePayResponse(deps, payPromise, completeHandler) {
   const wasRedirect = !PayCompleteFlow.waitingForPayClient_;
   PayCompleteFlow.waitingForPayClient_ = false;
-  return payPromise.then(data => {
+  return payPromise.then((data) => {
     // 1) We log against a random TX ID which is how we track a specific user
     //    anonymously.
     // 2) If there was a redirect to gPay, we may have lost our stored TX ID.
@@ -5877,6 +6080,7 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
   let raw = null;
   let productType = ProductType.SUBSCRIPTION;
   let oldSku = null;
+  let paymentRecurrence = null;
 
   if (data) {
     if (typeof data == 'string') {
@@ -5892,6 +6096,9 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
       }
       if ('paymentRequest' in data) {
         oldSku = (data['paymentRequest']['swg'] || {})['oldSku'];
+        paymentRecurrence = (data['paymentRequest']['swg'] || {})[
+          'paymentRecurrence'
+        ];
         productType =
           (data['paymentRequest']['i'] || {})['productType'] ||
           ProductType.SUBSCRIPTION;
@@ -5916,7 +6123,8 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
     parseEntitlements(deps, swgData),
     productType,
     completeHandler,
-    oldSku
+    oldSku,
+    paymentRecurrence
   );
 }
 
@@ -5962,12 +6170,10 @@ function parseEntitlements(deps, swgData) {
  * @return {?string}
  */
 function parseSkuFromPurchaseDataSafe(purchaseData) {
-  return (
-    /** @type {?string} */ (getPropertyFromJsonString(
-      purchaseData.raw,
-      'productId'
-    ) || null)
-  );
+  return /** @type {?string} */ (getPropertyFromJsonString(
+    purchaseData.raw,
+    'productId'
+  ) || null);
 }
 
 /**
@@ -6573,7 +6779,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.93',
+        '_client': 'SwG 0.1.22.107',
         'supportsEventManager': true,
       },
       args || {}
@@ -6690,78 +6896,6 @@ class ActivityPorts$1 {
   getOriginalWebActivityPorts() {
     return this.activityPorts_;
   }
-}
-
-/**
- * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/** @enum {number}  */
-const FilterResult = {
-  /** The event is allowed to proceed to the listeners. */
-  PROCESS_EVENT: 0,
-  /** The event is canceled and the listeners are not informed about it. */
-  CANCEL_EVENT: 1,
-};
-
-/**
- * Defines a client event in SwG
- * Properties:
- * - eventType: Required. The AnalyticsEvent type that occurred.
- * - eventOriginator: Required.  The codebase that initiated the event.
- * - isFromUserAction: Optional.  True if the user took an action to generate
- *   the event.
- * - additionalParameters: Optional.  A JSON object to store generic data.
- *
- *  @typedef {{
- *    eventType: !AnalyticsEvent,
- *    eventOriginator: !EventOriginator,
- *    isFromUserAction: ?boolean,
- *    additionalParameters: ?Object,
- * }}
- */
-let ClientEvent;
-
-/**
- * @interface
- */
-class ClientEventManagerApi {
-  /**
-   * Call this function to log an event. The registered listeners will be
-   * invoked unless the event is filtered.
-   * @param {!function(!ClientEvent)} listener
-   */
-  registerEventListener(listener) { }
-
-  /**
-   * Register a filterer for events if you need to potentially prevent the
-   * listeners from hearing about it.  A filterer should return
-   * FilterResult.CANCEL_EVENT to prevent listeners from hearing about the
-   * event.
-   * @param {!function(!ClientEvent):FilterResult} filterer
-   */
-  registerEventFilterer(filterer) { }
-
-  /**
-   * Call this function to log an event.  It will immediately throw an error if
-   * the event is invalid.  It will then asynchronously call the filterers and
-   * stop the event if a filterer cancels it.  After that, it will call each
-   * listener asynchronously.
-   * @param {!ClientEvent} event
-   */
-  logEvent(event) { }
 }
 
 /**
@@ -6987,6 +7121,65 @@ class ClientEventManager {
     return this.isReadyPromise_;
   }
 }
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @enum {string}
+ */
+const ExperimentFlags = {
+  /**
+   * Enables the feature that allows you to replace one subscription
+   * for another in the subscribe() API.
+   */
+  REPLACE_SUBSCRIPTION: 'replace-subscription',
+
+  /**
+   * Enables the contributions feature.
+   * DEPRECATED. This flag can be removed once not used by anyone.
+   */
+  CONTRIBUTIONS: 'contributions',
+
+  /**
+   * Enables the Propensity feature
+   */
+  PROPENSITY: 'propensity',
+
+  /**
+   * Enables the Smartbox feature.
+   */
+  SMARTBOX: 'smartbox',
+
+  /**
+   * Enables using new Activities APIs
+   */
+  HEJIRA: 'hejira',
+
+  /** Enables logging to both the new SwG Clearcut service and the pre-existing
+   *  Clearcut iframe while we verify the new logging system works.
+   *  Publishers should not activate this experiment.
+   */
+  LOGGING_BEACON: 'logging-beacon',
+
+  /** Enables googleTransactionID change. With the experiment on the ID is
+   *  changed from '<uuid>' to '<uuid>.swg'.
+   */
+  UPDATE_GOOGLE_TRANSACTION_ID: 'update-google-transaction-id',
+};
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -7261,8 +7454,12 @@ function createErrorResponse(error) {
 class AnalyticsService {
   /**
    * @param {!./deps.DepsDef} deps
+   * @param {!./fetcher.Fetcher} fetcher
    */
-  constructor(deps) {
+  constructor(deps, fetcher) {
+    /** @private @const {!./fetcher.Fetcher} */
+    this.fetcher_ = fetcher;
+
     /** @private @const {!../model/doc.Doc} */
     this.doc_ = deps.doc();
 
@@ -7327,7 +7524,18 @@ class AnalyticsService {
    * @param {string} transactionId
    */
   setTransactionId(transactionId) {
+    const oldTransactionId = this.context_.getTransactionId();
     this.context_.setTransactionId(transactionId);
+    if (oldTransactionId != null && oldTransactionId != transactionId) {
+      const eventType = AnalyticsEvent.EVENT_NEW_TX_ID;
+      const eventParams = new EventParams();
+      eventParams.setOldTransactionId(oldTransactionId);
+      this.eventManager_.logSwgEvent(
+        eventType,
+        /* isFromUserAction= */ true,
+        eventParams
+      );
+    }
   }
 
   /**
@@ -7402,9 +7610,18 @@ class AnalyticsService {
   setStaticContext_() {
     const context = this.context_;
     // These values should all be available during page load.
-    context.setTransactionId(getUuid());
+    if (
+      isExperimentOn(
+        this.doc_.getWin(),
+        ExperimentFlags.UPDATE_GOOGLE_TRANSACTION_ID
+      )
+    ) {
+      context.setTransactionId(getSwgTransactionId());
+    } else {
+      context.setTransactionId(getUuid());
+    }
     context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.93');
+    context.setClientVersion('SwG 0.1.22.107');
 
     const utmParams = parseQueryString$1(this.getQueryString_());
     const campaign = utmParams['utm_campaign'];
@@ -7547,9 +7764,13 @@ class AnalyticsService {
     }
     // Register we sent a log, the port will call this.afterLogging_ when done.
     this.unfinishedLogs_++;
-    this.lastAction_ = this.start().then(port =>
-      port.execute(this.createLogRequest_(event))
-    );
+    this.lastAction_ = this.start().then(port => {
+      const analyticsRequest = this.createLogRequest_(event);
+      port.execute(analyticsRequest);
+      if (isExperimentOn(this.doc_.getWin(), ExperimentFlags.LOGGING_BEACON)) {
+        this.sendBeacon_(analyticsRequest);
+      }
+    });
   }
 
   /**
@@ -7615,6 +7836,19 @@ class AnalyticsService {
     }
 
     return this.promiseToLog_;
+  }
+
+  /**
+   * A beacon is a rapid fire browser request that does not wait for a response
+   * from the server.  It is guaranteed to go out before the page redirects.
+   * @param {!AnalyticsRequest} analyticsRequest
+   */
+  sendBeacon_(analyticsRequest) {
+    const pubId = encodeURIComponent(
+      this.deps_.pageConfig().getPublicationId()
+    );
+    const url = serviceUrl('/publication/' + pubId + '/clientlogs');
+    this.fetcher_.sendBeacon(url, analyticsRequest);
   }
 }
 
@@ -10416,54 +10650,6 @@ function irtpStringToBoolean(value) {
  * limitations under the License.
  */
 
-/**
- * @enum {string}
- */
-const ExperimentFlags = {
-  /**
-   * Enables the feature that allows you to replace one subscription
-   * for another in the subscribe() API.
-   */
-  REPLACE_SUBSCRIPTION: 'replace-subscription',
-
-  /**
-   * Enables the contributions feature.
-   * DEPRECATED. This flag can be removed once not used by anyone.
-   */
-  CONTRIBUTIONS: 'contributions',
-
-  /**
-   * Enables the Propensity feature
-   */
-  PROPENSITY: 'propensity',
-
-  /**
-   * Enables the Smartbox feature.
-   */
-  SMARTBOX: 'smartbox',
-
-  /**
-   * Enables using new Activities APIs
-   */
-  HEJIRA: 'hejira',
-};
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
 
@@ -10845,6 +11031,13 @@ class Fetcher {
    * @return {!Promise<!../utils/xhr.FetchResponse>}
    */
   fetch(unusedUrl, unusedInit) {}
+
+  /**
+   * POST data to a URL endpoint, do not wait for a response.
+   * @param {!string} unusedUrl
+   * @param {!string|!Object} unusedData
+   */
+  sendBeacon(unusedUrl, unusedData) {}
 }
 
 /**
@@ -10866,12 +11059,32 @@ class XhrFetcher {
       headers: {'Accept': 'text/plain, application/json'},
       credentials: 'include',
     });
-    return this.xhr_.fetch(url, init).then(response => response.json());
+    return this.fetch(url, init).then(response => response.json());
   }
 
   /** @override */
   fetch(url, init) {
     return this.xhr_.fetch(url, init);
+  }
+
+  /** @override */
+  sendBeacon(url, data) {
+    const contentType = 'application/x-www-form-urlencoded;charset=UTF-8';
+    const body = 'f.req=' + serializeProtoMessageForUrl(data);
+    if (navigator.sendBeacon) {
+      const blob = new Blob([body], {type: contentType});
+      navigator.sendBeacon(url, blob);
+      return;
+    }
+
+    // Only newer browsers support beacon.  Fallback to standard XHR POST.
+    const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
+      method: 'POST',
+      headers: {'Content-Type': contentType},
+      credentials: 'include',
+      body,
+    });
+    this.fetch(url, init);
   }
 }
 
@@ -15120,9 +15333,16 @@ class RedirectVerifierHelper {
     // b. WebCrypto (crypto.subtle);
     // c. Crypto random (crypto.getRandomValues);
     // d. SHA284 (crypto.subtle.digest).
+    let supportsLocalStorage;
+    try {
+      supportsLocalStorage = !!this.win_.localStorage;
+    } catch (e) {
+      // Note: This can happen when cookies are disabled.
+      supportsLocalStorage = false;
+    }
     const crypto = this.win_.crypto;
     if (
-      this.win_.localStorage &&
+      supportsLocalStorage &&
       crypto &&
       crypto.getRandomValues &&
       crypto.subtle &&
@@ -15874,7 +16094,7 @@ class ConfiguredRuntime {
     this.activityPorts_ = new ActivityPorts$1(this);
 
     /** @private @const {!AnalyticsService} */
-    this.analyticsService_ = new AnalyticsService(this);
+    this.analyticsService_ = new AnalyticsService(this, this.fetcher_);
     this.analyticsService_.start();
 
     /** @private @const {!PayClient} */
@@ -16321,4 +16541,4 @@ class ConfiguredRuntime {
   }
 }
 
-export { AnalyticsEvent, ClientEvent, ClientEventManagerApi, ConfiguredRuntime, Entitlement, Entitlements, EventOriginator, Fetcher, FilterResult, SubscribeResponse$1 as SubscribeResponse };
+export { AnalyticsEvent, ClientEvent, ClientEventManagerApi, ConfiguredRuntime, DeferredAccountCreationResponse, Entitlement, Entitlements, EventOriginator, Fetcher, FilterResult, PurchaseData, SubscribeResponse$1 as SubscribeResponse, UserData };

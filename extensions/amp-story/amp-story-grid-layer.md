@@ -22,26 +22,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# `amp-story-grid-layer`
+# amp-story-grid-layer
 
 The `<amp-story-grid-layer>` component lays its children out into a grid. Its implementation is based off of the [CSS Grid Spec](https://www.w3.org/TR/css-grid-1/).
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>container</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/introduction/stories_in_amp">Annotated code example for stories</a></td>
-  </tr>
-</table>
-
-[TOC]
 
 <div class="flex-images">
   <amp-img alt="Layer 1" layout="flex-item" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-1.gif" width="200" height="355">
@@ -74,6 +57,21 @@ Example:
   <p grid-area="middle-third">Element 1</p>
   <p grid-area="lower-third">Element 2</p>
   <p grid-area="upper-third">Element 3</p>
+</amp-story-grid-layer>
+```
+
+### aspect-ratio [optional]
+
+The value specifies an aspect ratio in the "horizontal:vertical" format, where both "horizontal" and "vertical" are integer numbers. If this attribute is specified, the layout of the grid layer is set to conform to the specified proportions. The font size, in this case, is automatically set to the 1/10th of the resulting height to enable proportional content scaling.
+
+Example:
+
+```html
+<amp-story-grid-layer aspect-ratio="9:16" template="vertical">
+  <div style="width: 10%; height: 10%; font-size: 2em;">
+    This block will be in 9:16 aspect ratio and font size will be set at the 20%
+    of the layer's height.
+  </div>
 </amp-story-grid-layer>
 ```
 
@@ -198,7 +196,6 @@ An `amp-story-grid-layer` can contain any of the following elements:
     <td>Analytics & Measurement</td>
     <td>
       <ul>
-        <li><code>&lt;amp-analytics></code></li>
         <li><code>&lt;amp-experiment></code></li>
         <li><code>&lt;amp-pixel></code></li>
       </ul>

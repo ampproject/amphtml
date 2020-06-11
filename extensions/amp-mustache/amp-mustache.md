@@ -5,7 +5,7 @@ formats:
   - ads
   - email
 teaser:
-  text: Allows rendering of Mustache.js templates.
+  text: Allows rendering of Mustache templates.
 ---
 
 <!---
@@ -26,35 +26,16 @@ limitations under the License.
 
 # amp-mustache
 
-Allows rendering of <a href="https://github.com/janl/mustache.js/">Mustache.js</a>.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td>
-      <div>
-        <code>&lt;script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js">&lt;/script></code>
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-mustache/">annotated amp-mustache</a> example.</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Version notes
 
 | Version | Description                                                                                                                                                                                                                                                                                                                                                                                              |
 | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0.2     | Support for SVG elements and reduced bundle size (12.2KB vs. 20.5KB, gzipped).<br><br>Migrates to a more modern HTML sanitizer library (Caja to DOMPurify). This may cause minor breaking changes due to differences in the tag and attribute whitelisting. We recommend testing your pages first before pushing to production to make sure the changes in generated markup do not affect functionality. |
+| 0.2     | Support for SVG elements and reduced bundle size (12.2KB vs. 20.5KB, gzipped).<br><br>Migrates to a more modern HTML sanitizer library (Caja to DOMPurify). This may cause minor breaking changes due to differences in the tag and attribute allowlisting. We recommend testing your pages first before pushing to production to make sure the changes in generated markup do not affect functionality. |
 | 0.1     | Initial implementation.                                                                                                                                                                                                                                                                                                                                                                                  |
 
 ## Syntax
 
-Mustache is a logic-less template syntax. See [Mustache.js docs](https://github.com/janl/mustache.js/) for more details. Some of the core Mustache tags are:
+Mustache is a logic-less template syntax. See [Mustache specification](http://mustache.github.io/mustache.5.html) for more details. Some of the core Mustache tags are:
 
 - `{{variable}}`: A variable tag. It outputs the the HTML-escaped value of a variable.
 - `{{#section}} {{/section}}`: A section tag. It can test the existence of a variable and iterate over it if it's an array.

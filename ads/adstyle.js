@@ -35,8 +35,8 @@ export function adstyle(global, data) {
 
   const url = 'https://widgets.ad.style/amp.js';
 
-  window.context.observeIntersection(function(changes) {
-    changes.forEach(function(c) {
+  window.context.observeIntersection(function (changes) {
+    /** @type {!Array} */ (changes).forEach(function (c) {
       window['intersectionRect' + data.widget] = c.intersectionRect;
       window['boundingClientRect' + data.widget] = c.boundingClientRect;
     });

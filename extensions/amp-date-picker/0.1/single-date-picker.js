@@ -36,16 +36,16 @@ function createSingleDatePickerBase() {
 
   const defaultProps = dict({
     'date': null,
-    'onDateChange': function() {},
+    'onDateChange': function () {},
 
     'focused': false,
-    'onFocusChange': function() {},
-    'onClose': function() {},
+    'onFocusChange': function () {},
+    'onClose': function () {},
 
     'keepOpenOnDateSelect': false,
-    'isOutsideRange': function() {},
-    'isDayBlocked': function() {},
-    'isDayHighlighted': function() {},
+    'isOutsideRange': function () {},
+    'isDayBlocked': function () {},
+    'isDayHighlighted': function () {},
 
     // DayPicker props
     'renderMonth': null,
@@ -64,15 +64,15 @@ function createSingleDatePickerBase() {
     'navPrev': null,
     'navNext': null,
 
-    'onPrevMonthClick': function() {},
-    'onNextMonthClick': function() {},
+    'onPrevMonthClick': function () {},
+    'onNextMonthClick': function () {},
     'onOutsideClick': null,
 
     'renderDay': null,
     'renderCalendarInfo': null,
 
     // accessibility
-    'onBlur': function() {},
+    'onBlur': function () {},
     'isFocused': false,
     'showKeyboardShortcuts': false,
 
@@ -117,7 +117,7 @@ function withFocusedTrueHack(WrappedComponent) {
   FocusedTrueHack.prototype.constructor = FocusedTrueHack;
 
   /** @override */
-  FocusedTrueHack.prototype.render = function() {
+  FocusedTrueHack.prototype.render = function () {
     const props = {...this.props, ...dict({'focused': true})};
     return react.createElement(WrappedComponent, props);
   };

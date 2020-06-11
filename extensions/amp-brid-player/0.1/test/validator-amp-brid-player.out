@@ -80,5 +80,16 @@ amp-brid-player/0.1/test/validator-amp-brid-player.html:72:2 The tag 'amp-brid-p
 |        layout="responsive"
 |        width="480" height="270">
 |    </amp-brid-player>
+|    <!-- Invalid: `dock` without `amp-video-docking` extension. -->
+|    <amp-brid-player
+>>   ^~~~~~~~~
+amp-brid-player/0.1/test/validator-amp-brid-player.html:79:2 The attribute 'dock' requires including the 'amp-video-docking' extension JavaScript.
+|        dock
+|        data-partner="264"
+|        data-player="4144"
+|        data-video="13663"
+|        layout="responsive"
+|        width="480" height="270">
+|    </amp-brid-player>
 |  </body>
 |  </html>

@@ -17,7 +17,7 @@ import {ViewerTracker} from '../viewer-tracker';
  * limitations under the License.
  */
 
-describes.realWin('ViewerTracker', {amp: true}, env => {
+describes.realWin('ViewerTracker', {amp: true}, (env) => {
   let ampdoc;
   let viewTracker;
   let clock;
@@ -84,7 +84,7 @@ describes.realWin('ViewerTracker', {amp: true}, env => {
     it('should register "viewed" signal after scroll', async () => {
       const scrolled = new Observable();
       viewTracker.viewport_ = {
-        onScroll: callback => scrolled.add(callback),
+        onScroll: (callback) => scrolled.add(callback),
       };
       const viewPromise = viewTracker.whenViewed_(2000);
       scrolled.fire();

@@ -233,9 +233,8 @@ export function assertLengthOrPercent(length) {
  */
 export function getLengthUnits(length) {
   assertLength(length);
-  dev().assertString(length);
   const m = userAssert(
-    length.match(/[a-z]+/i),
+    /[a-z]+/i.exec(length),
     'Failed to read units from %s',
     length
   );
@@ -266,7 +265,7 @@ export function hasNaturalDimensions(tagName) {
 /**
  * Determines the default dimensions for an element which could vary across
  * different browser implementations, like <audio> for instance.
- * This operation can only be completed for an element whitelisted by
+ * This operation can only be completed for an element allowlisted by
  * `hasNaturalDimensions`.
  * @param {!Element} element
  * @return {DimensionsDef}
@@ -295,7 +294,7 @@ export function getNaturalDimensions(element) {
 }
 
 /**
- * Whether the loading can be shown for the specified elemeent. This set has
+ * Whether the loading can be shown for the specified element. This set has
  * to be externalized since the element's implementation may not be
  * downloaded yet.
  * @param {!Element} element
@@ -309,7 +308,7 @@ export function isLoadingAllowed(element) {
 /**
  * All video player components must either have a) "video" or b) "player" in
  * their name. A few components don't follow this convention for historical
- * reasons, so they're present in the LOADING_ELEMENTS_ whitelist.
+ * reasons, so they're present in the LOADING_ELEMENTS_ allowlist.
  * @param {string} tagName
  * @return {boolean}
  */
@@ -353,6 +352,9 @@ export function applyStaticLayout(element) {
       // Find sizer, but assume that it might not have been parsed yet.
       element.sizerElement =
         element.querySelector('i-amphtml-sizer') || undefined;
+      if (element.sizerElement) {
+        element.sizerElement.setAttribute('slot', 'i-amphtml-svc');
+      }
     } else if (layout == Layout.NODISPLAY) {
       toggle(element, false);
       // TODO(jridgewell): Temporary hack while SSR still adds an inline
@@ -506,6 +508,7 @@ export function applyStaticLayout(element) {
     setStyle(element, 'height', dev().assertString(height));
   } else if (layout == Layout.RESPONSIVE) {
     const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
+    sizer.setAttribute('slot', 'i-amphtml-svc');
     setStyles(sizer, {
       paddingTop:
         (getLengthNumeral(height) / getLengthNumeral(width)) * 100 + '%',
@@ -517,7 +520,7 @@ export function applyStaticLayout(element) {
     // trick Note a naked svg won't work becasue other thing expect the
     // i-amphtml-sizer element
     const sizer = htmlFor(element)`
-      <i-amphtml-sizer class="i-amphtml-sizer">
+      <i-amphtml-sizer class="i-amphtml-sizer" slot="i-amphtml-svc">
         <img alt="" role="presentation" aria-hidden="true"
              class="i-amphtml-intrinsic-sizer" />
       </i-amphtml-sizer>`;

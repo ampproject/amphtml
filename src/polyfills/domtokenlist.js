@@ -49,7 +49,7 @@ export function install(win) {
     });
 
     const {add} = win.DOMTokenList.prototype;
-    win.DOMTokenList.prototype.add = function() {
+    win.DOMTokenList.prototype.add = function () {
       for (let i = 0; i < arguments.length; i++) {
         add.call(this, arguments[i]);
       }

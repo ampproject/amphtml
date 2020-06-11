@@ -22,6 +22,7 @@
 package dev.amp.validator.css;
 
 import dev.amp.validator.ValidatorProtos;
+import dev.amp.validator.utils.CssSpecUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -39,12 +40,14 @@ public class CssParsingConfigTest {
 
   @BeforeTest
   public void init() {
-    defaultSpec = ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_IGNORE;
+    defaultSpec = CssSpecUtils.BlockType.PARSE_AS_IGNORE;
     atRuleSpec = new HashMap<>();
 
-    atRuleSpec.put("$DEFAULT", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_IGNORE);
-    atRuleSpec.put("media", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_RULES);
-    atRuleSpec.put("page", ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
+    atRuleSpec.put("font-face", CssSpecUtils.BlockType.PARSE_AS_DECLARATIONS);
+    atRuleSpec.put("keyframes", CssSpecUtils.BlockType.PARSE_AS_RULES);
+    atRuleSpec.put("media", CssSpecUtils.BlockType.PARSE_AS_RULES);
+    atRuleSpec.put("page", CssSpecUtils.BlockType.PARSE_AS_DECLARATIONS);
+    atRuleSpec.put("supports", CssSpecUtils.BlockType.PARSE_AS_RULES);
   }
 
   @Test
@@ -52,32 +55,24 @@ public class CssParsingConfigTest {
     final ValidatorProtos.CssSpec.Builder cssSpecBuilder = ValidatorProtos.CssSpec.newBuilder();
 
     final ValidatorProtos.AtRuleSpec.Builder atRuleSpecBuilder1 = ValidatorProtos.AtRuleSpec.newBuilder();
-    atRuleSpecBuilder1.setType(ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_RULES);
     atRuleSpecBuilder1.setName("media");
 
     final ValidatorProtos.AtRuleSpec.Builder atRuleSpecBuilder2 = ValidatorProtos.AtRuleSpec.newBuilder();
-    atRuleSpecBuilder2.setType(ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_DECLARATIONS);
     atRuleSpecBuilder2.setName("page");
 
     final ValidatorProtos.AtRuleSpec.Builder atRuleSpecBuilder3 = ValidatorProtos.AtRuleSpec.newBuilder();
-    atRuleSpecBuilder3.setType(ValidatorProtos.AtRuleSpec.BlockType.PARSE_AS_ERROR);
     atRuleSpecBuilder3.setName("$DEFAULT");
 
     cssSpecBuilder.addAtRuleSpec(atRuleSpecBuilder1.build());
     cssSpecBuilder.addAtRuleSpec(atRuleSpecBuilder2.build());
     cssSpecBuilder.addAtRuleSpec(atRuleSpecBuilder3.build());
 
-    final ValidatorProtos.CssSpec cssSpec = cssSpecBuilder.build();
-    try {
-      final CssParsingConfig cssParsingConfig = CssParsingConfig.computeCssParsingConfig(cssSpec);
-      Assert.assertEquals(cssParsingConfig.getAtRuleSpec().size(), 3);
-      Assert.assertEquals(cssParsingConfig.getAtRuleSpec(), atRuleSpec);
-      Assert.assertEquals(cssParsingConfig.getDefaultSpec(), defaultSpec);
-    } catch (CssValidationException e) {
-      e.printStackTrace();
-    }
+    final CssParsingConfig cssParsingConfig = CssParsingConfig.computeCssParsingConfig();
+    Assert.assertEquals(cssParsingConfig.getAtRuleSpec().size(), 5);
+    Assert.assertEquals(cssParsingConfig.getAtRuleSpec(), atRuleSpec);
+    Assert.assertEquals(cssParsingConfig.getDefaultSpec(), defaultSpec);
   }
 
-  private Map<String, ValidatorProtos.AtRuleSpec.BlockType> atRuleSpec;
-  private ValidatorProtos.AtRuleSpec.BlockType defaultSpec;
+  private Map<String, CssSpecUtils.BlockType> atRuleSpec;
+  private CssSpecUtils.BlockType defaultSpec;
 }

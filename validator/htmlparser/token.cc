@@ -14,9 +14,9 @@
 // limitations under the license.
 //
 
-#include "htmlparser/token.h"
+#include "token.h"
 
-#include "htmlparser/strings.h"
+#include "strings.h"
 
 namespace htmlparser {
 

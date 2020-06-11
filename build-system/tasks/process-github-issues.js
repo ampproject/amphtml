@@ -84,7 +84,7 @@ function processGithubIssues() {
     );
     return;
   }
-  return updateGitHubIssues().then(function() {
+  return updateGitHubIssues().then(function () {
     log(colors.blue('automation applied'));
   });
 }
@@ -102,7 +102,7 @@ function getIssues(opt_page) {
     'per_page': 100,
     'access_token': GITHUB_ACCESS_TOKEN,
   };
-  return request(options).then(res => {
+  return request(options).then((res) => {
     const issues = JSON.parse(res.body);
     assert(Array.isArray(issues), 'issues must be an array.');
     return issues;
@@ -123,10 +123,10 @@ function updateGitHubIssues() {
     arrayPromises.push(getIssues(batch));
   }
   return Promise.all(arrayPromises)
-    .then(requests => [].concat.apply([], requests))
-    .then(issues => {
+    .then((requests) => [].concat.apply([], requests))
+    .then((issues) => {
       const allIssues = issues;
-      allIssues.forEach(function(issue) {
+      allIssues.forEach(function (issue) {
         const {
           labels,
           milestone,
@@ -167,11 +167,11 @@ function updateGitHubIssues() {
           issueNewMilestone = milestone.number;
         }
         // promise starts
-        promise = promise.then(function() {
+        promise = promise.then(function () {
           log('Update ' + issue.number);
           const updates = [];
           // Get the labels we want to check
-          labels.forEach(function(label) {
+          labels.forEach(function (label) {
             if (label) {
               // Check if the issues has type
               if (
@@ -400,8 +400,8 @@ function applyComment(issue, comment) {
     'access_token': GITHUB_ACCESS_TOKEN,
   };
   // delay the comment request so we don't reach github rate limits requests
-  const promise = new Promise(resolve => setTimeout(resolve, 120000));
-  return promise.then(function() {
+  const promise = new Promise((resolve) => setTimeout(resolve, 120000));
+  return promise.then(function () {
     if (isDryrun) {
       log(colors.blue('waited 2 minutes to avoid gh rate limits'));
       log(

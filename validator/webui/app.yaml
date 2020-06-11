@@ -1,4 +1,4 @@
-runtime: go
+runtime: googlelegacy
 api_version: go1
 
 handlers:

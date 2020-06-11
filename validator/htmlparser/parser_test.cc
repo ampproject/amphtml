@@ -14,14 +14,14 @@
 // limitations under the license.
 //
 
-#include "htmlparser/parser.h"
+#include "parser.h"
 
 #include "gtest/gtest.h"
-#include "htmlparser/atom.h"
-#include "htmlparser/atomutil.h"
-#include "htmlparser/node.h"
-#include "htmlparser/renderer.h"
-#include "htmlparser/token.h"
+#include "atom.h"
+#include "atomutil.h"
+#include "node.h"
+#include "renderer.h"
+#include "token.h"
 
 // For operator""s.
 using namespace std::string_literals;
@@ -718,7 +718,7 @@ TEST(ParserTest, ImageVsImg) {
 
 TEST(ParserTest, VoidElementsParsedCorrectly) {
   std::string html = R"HTML(<html><head></head><body>
-  <img src="foo.png" /></body></html>")HTML";
+  <img src="foo.png" /></body></html>)HTML";
 
   htmlparser::Parser p(html);
   auto doc = p.Parse();

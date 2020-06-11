@@ -48,17 +48,12 @@ import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {LayoutPriority} from '../../../../src/layout';
 import {MockA4AImpl, TEST_URL} from './utils';
 import {RealTimeConfigManager} from '../real-time-config-manager';
-import {
-  SINGLE_PASS_EXPERIMENT_IDS,
-  isInExperiment,
-} from '../../../../ads/google/a4a/traffic-experiments';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/utils/signals';
 import {cancellation} from '../../../../src/error';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {createIframePromise} from '../../../../testing/iframe';
 import {dev, user} from '../../../../src/log';
-import {getMode} from '../../../../src/mode';
 import {
   incrementLoadingAds,
   is3pThrottled,
@@ -250,10 +245,8 @@ describe('amp-a4a', () => {
     expect(element).to.be.visible;
     expect(element.querySelectorAll('iframe')).to.have.lengthOf(1);
     const safeFrameUrl =
-      'https://tpc.googlesyndication.com/safeframe/' +
-      sfVersion +
-      '/html/container.html';
-    const child = element.querySelector(`iframe[src^="${safeFrameUrl}"][name]`);
+      'googlesyndication.com/safeframe/' + sfVersion + '/html/container.html';
+    const child = element.querySelector(`iframe[src*="${safeFrameUrl}"][name]`);
     expect(child).to.be.ok;
     const name = child.getAttribute('name');
     expect(name).to.match(/[^;]+;\d+;[\s\S]+/);
@@ -346,7 +339,7 @@ describe('amp-a4a', () => {
       'ad-iframe-loaded',
     ]
       .concat(additionalEvents)
-      .forEach(evnt =>
+      .forEach((evnt) =>
         expect(triggerAnalyticsEventSpy).to.be.calledWith(a4a.element, evnt, {
           'time': window.sandbox.match.number,
         })
@@ -481,7 +474,7 @@ describe('amp-a4a', () => {
 
     it('should fire amp-analytics triggers for lifecycle events', async () => {
       let iniLoadResolver;
-      const iniLoadPromise = new Promise(resolve => {
+      const iniLoadPromise = new Promise((resolve) => {
         iniLoadResolver = resolve;
       });
       const whenIniLoadedStub = window.sandbox
@@ -613,7 +606,7 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       let promiseResolver;
-      a4a.adPromise_ = new Promise(resolver => {
+      a4a.adPromise_ = new Promise((resolver) => {
         promiseResolver = resolver;
       });
       const layoutCallbackPromise = a4a.layoutCallback();
@@ -638,7 +631,7 @@ describe('amp-a4a', () => {
       a4a.buildCallback();
       a4a.onLayoutMeasure();
       let promiseResolver;
-      a4a.renderAmpCreative_ = new Promise(resolver => {
+      a4a.renderAmpCreative_ = new Promise((resolver) => {
         promiseResolver = resolver;
       });
       const layoutCallbackPromise = a4a.layoutCallback();
@@ -816,7 +809,7 @@ describe('amp-a4a', () => {
       });
 
       ['', 'client_cache', 'safeframe', 'some_random_thing'].forEach(
-        headerVal => {
+        (headerVal) => {
           // TODO(wg-ads, #25690): Fails on Travis.
           it.skip(`should not attach a NameFrame when header is ${headerVal}`, async () => {
             const devStub = window.sandbox.stub(dev(), 'error');
@@ -926,7 +919,7 @@ describe('amp-a4a', () => {
       });
 
       ['', 'client_cache', 'nameframe', 'some_random_thing'].forEach(
-        headerVal => {
+        (headerVal) => {
           it(`should not attach a SafeFrame when header is ${headerVal}`, async () => {
             const devStub = window.sandbox.stub(dev(), 'error');
             // If rendering type is anything but safeframe, we SHOULD NOT
@@ -945,11 +938,11 @@ describe('amp-a4a', () => {
               expect(devStub).to.not.be.called;
             }
             const safeframeUrl =
-              'https://tpc.googlesyndication.com/safeframe/' +
+              '.googlesyndication.com/safeframe/' +
               DEFAULT_SAFEFRAME_VERSION +
               '/html/container.html';
             const safeChild = a4aElement.querySelector(
-              `iframe[src^="${safeframeUrl}"]`
+              `iframe[src*="${safeframeUrl}"]`
             );
             expect(safeChild).to.not.be.ok;
             if (headerVal != 'nameframe') {
@@ -1007,7 +1000,7 @@ describe('amp-a4a', () => {
       expect(fetchMock.called('ad')).to.be.true;
     });
 
-    ['nameframe', 'safeframe'].forEach(renderType => {
+    ['nameframe', 'safeframe'].forEach((renderType) => {
       it(`should not use ${renderType} if creative is A4A`, async () => {
         adResponse.headers[RENDERING_TYPE_HEADER] = renderType;
         a4a.buildCallback();
@@ -1228,7 +1221,12 @@ describe('amp-a4a', () => {
       expect(maybeExecuteRealTimeConfigStub.calledOnce).to.be.true;
       expect(maybeExecuteRealTimeConfigStub.calledWith({}, null)).to.be.true;
       expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once').to.be.true;
-      expect(getAdUrlSpy.calledWith(null, rtcResponse)).to.be.true;
+      expect(
+        getAdUrlSpy.calledWith(
+          {consentState: null, consentString: null, gdprApplies: null},
+          rtcResponse
+        )
+      ).to.be.true;
       expect(fetchMock.called('ad')).to.be.true;
       expect(preloadExtensionSpy.withArgs('amp-font')).to.be.calledOnce;
       expect(
@@ -1252,7 +1250,7 @@ describe('amp-a4a', () => {
         'allowtransparency': '',
         'scrolling': 'no',
       };
-      Object.keys(expectedAttributes).forEach(key => {
+      Object.keys(expectedAttributes).forEach((key) => {
         expect(friendlyIframe.getAttribute(key)).to.equal(
           expectedAttributes[key]
         );
@@ -1328,7 +1326,7 @@ describe('amp-a4a', () => {
       const {doc} = fixture;
       const a4aElement = createA4aElement(doc);
       const a4a = new MockA4AImpl(a4aElement);
-      window.sandbox.stub(a4a, 'getAmpAdMetadata').callsFake(creative => {
+      window.sandbox.stub(a4a, 'getAmpAdMetadata').callsFake((creative) => {
         const metaData = AmpA4A.prototype.getAmpAdMetadata.call(a4a, creative);
         metaData.images = [
           'https://prefetch.me.com?a=b',
@@ -1563,7 +1561,7 @@ describe('amp-a4a', () => {
         .stub(a4a, 'onNetworkFailure')
         .withArgs(
           window.sandbox.match(
-            val =>
+            (val) =>
               val.message && val.message.indexOf('XHR Failed fetching') == 0
           ),
           TEST_URL
@@ -1599,7 +1597,7 @@ describe('amp-a4a', () => {
         .stub(a4a, 'onNetworkFailure')
         .withArgs(
           window.sandbox.match(
-            val =>
+            (val) =>
               val.message && val.message.indexOf('XHR Failed fetching') == 0
           ),
           TEST_URL
@@ -1686,7 +1684,7 @@ describe('amp-a4a', () => {
         name: 'no fill header',
         fn: () => (adResponse.headers['amp-ff-empty-creative'] = ''),
       },
-    ].forEach(test => {
+    ].forEach((test) => {
       it(`should collapse ${test.name}`, async () => {
         const fixture = await createIframePromise();
         setupForAdTesting(fixture);
@@ -1729,7 +1727,7 @@ describe('amp-a4a', () => {
           height: 456,
         });
         let attemptChangeSizeResolver;
-        const attemptChangeSizePromise = new Promise(resolve => {
+        const attemptChangeSizePromise = new Promise((resolve) => {
           attemptChangeSizeResolver = resolve;
         });
         window.sandbox
@@ -1769,7 +1767,7 @@ describe('amp-a4a', () => {
       expect(
         doc.querySelector(
           'link[rel=preload]' +
-            '[href="https://tpc.googlesyndication.com/safeframe/' +
+            '[href*=".googlesyndication.com/safeframe/' +
             '1-2-3/html/container.html"]'
         )
       ).to.be.ok;
@@ -1797,9 +1795,9 @@ describe('amp-a4a', () => {
         getResourceStub.returns({
           getUpgradeDelayMs: () => 1,
           renderOutsideViewport: () => 3,
-          whenWithinViewport: viewport => {
+          whenWithinViewport: (viewport) => {
             expect(viewport).to.equal(3);
-            return new Promise(resolve => {
+            return new Promise((resolve) => {
               whenWithinViewportResolve = resolve;
             });
           },
@@ -1820,9 +1818,9 @@ describe('amp-a4a', () => {
         getResourceStub.returns({
           getUpgradeDelayMs: () => 1,
           renderOutsideViewport: () => 3,
-          whenWithinViewport: viewport => {
+          whenWithinViewport: (viewport) => {
             expect(viewport).to.equal(6);
-            return new Promise(resolve => {
+            return new Promise((resolve) => {
               whenWithinViewportResolve = resolve;
             });
           },
@@ -2118,7 +2116,7 @@ describe('amp-a4a', () => {
       const frameDoc = friendlyIframe.contentDocument;
       const styles = frameDoc.querySelectorAll('style[amp-custom]');
       expect(
-        Array.prototype.some.call(styles, s => {
+        Array.prototype.some.call(styles, (s) => {
           return s.innerHTML == 'p { background: green }';
         }),
         'Some style is "background: green"'
@@ -2146,7 +2144,7 @@ describe('amp-a4a', () => {
       const frameDoc = friendlyIframe.contentDocument;
       const styles = frameDoc.querySelectorAll('style[amp-custom]');
       expect(
-        Array.prototype.some.call(styles, s => {
+        Array.prototype.some.call(styles, (s) => {
           return s.innerHTML == 'p { background: green }';
         }),
         'Some style is "background: green"'
@@ -2169,7 +2167,7 @@ describe('amp-a4a', () => {
           ampdoc: 'shadow',
         },
       },
-      env => {
+      (env) => {
         it('should return priority of 1', () => {
           const body = env.ampdoc.getBody();
           const a4aElement = createA4aElement(env.win.document, null, body);
@@ -2186,7 +2184,7 @@ describe('amp-a4a', () => {
           ampdoc: 'single',
         },
       },
-      env => {
+      (env) => {
         it('should return priority of 2', () => {
           const body = env.ampdoc.getBody();
           const a4aElement = createA4aElement(env.win.document, null, body);
@@ -2248,7 +2246,7 @@ describe('amp-a4a', () => {
       setupForAdTesting(fixture);
       let whenFirstVisibleResolve = null;
       whenVisibleMock.returns(
-        new Promise(resolve => {
+        new Promise((resolve) => {
           whenFirstVisibleResolve = resolve;
         })
       );
@@ -2275,7 +2273,7 @@ describe('amp-a4a', () => {
     });
 
     describe('consent integration', () => {
-      let fixture, a4aElement, a4a, consentString;
+      let fixture, a4aElement, a4a, consentString, gdprApplies;
       beforeEach(async () => {
         fixture = await createIframePromise();
         setupForAdTesting(fixture);
@@ -2287,6 +2285,7 @@ describe('amp-a4a', () => {
         a4aElement = createA4aElement(fixture.doc);
         a4a = new MockA4AImpl(a4aElement);
         consentString = 'test-consent-string';
+        gdprApplies = true;
         return fixture;
       });
 
@@ -2295,13 +2294,16 @@ describe('amp-a4a', () => {
           .stub(AMP.BaseElement.prototype, 'getConsentPolicy')
           .returns('default');
         let inResolver;
-        const policyPromise = new Promise(resolver => (inResolver = resolver));
+        const policyPromise = new Promise(
+          (resolver) => (inResolver = resolver)
+        );
         window.sandbox
           .stub(Services, 'consentPolicyServiceForDocOrNull')
           .returns(
             Promise.resolve({
               whenPolicyResolved: () => policyPromise,
               getConsentStringInfo: () => consentString,
+              getGdprApplies: () => gdprApplies,
             })
           );
 
@@ -2318,8 +2320,13 @@ describe('amp-a4a', () => {
         expect(getAdUrlSpy).to.not.be.called;
         inResolver(CONSENT_POLICY_STATE.SUFFICIENT);
         await a4a.layoutCallback();
-        expect(getAdUrlSpy.withArgs(CONSENT_POLICY_STATE.SUFFICIENT))
-          .calledOnce;
+        expect(
+          getAdUrlSpy.withArgs({
+            consentState: CONSENT_POLICY_STATE.SUFFICIENT,
+            consentString,
+            gdprApplies,
+          })
+        ).calledOnce;
         expect(
           tryExecuteRealTimeConfigSpy.withArgs(
             CONSENT_POLICY_STATE.SUFFICIENT,
@@ -2353,6 +2360,7 @@ describe('amp-a4a', () => {
               whenPolicyResolved: () =>
                 Promise.resolve(CONSENT_POLICY_STATE.SUFFICIENT),
               getConsentStringInfo: () => consentString,
+              getGdprApplies: () => gdprApplies,
             })
           );
 
@@ -2365,8 +2373,13 @@ describe('amp-a4a', () => {
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         await a4a.layoutCallback();
-        expect(getAdUrlSpy.withArgs(CONSENT_POLICY_STATE.SUFFICIENT))
-          .calledOnce;
+        expect(
+          getAdUrlSpy.withArgs({
+            consentState: CONSENT_POLICY_STATE.SUFFICIENT,
+            consentString,
+            gdprApplies,
+          })
+        ).calledOnce;
         expect(
           tryExecuteRealTimeConfigSpy.withArgs(
             CONSENT_POLICY_STATE.SUFFICIENT,
@@ -2390,6 +2403,9 @@ describe('amp-a4a', () => {
               getConsentStringInfo: () => {
                 throw new Error('consent err!');
               },
+              getGdprApplies: () => {
+                throw new Error('consent err!');
+              },
             })
           );
 
@@ -2402,7 +2418,13 @@ describe('amp-a4a', () => {
         a4a.buildCallback();
         a4a.onLayoutMeasure();
         await a4a.layoutCallback();
-        expect(getAdUrlSpy.withArgs(CONSENT_POLICY_STATE.UNKNOWN)).calledOnce;
+        expect(
+          getAdUrlSpy.withArgs({
+            consentState: CONSENT_POLICY_STATE.UNKNOWN,
+            consentString: null,
+            gdprApplies: null,
+          })
+        ).calledOnce;
         expect(
           tryExecuteRealTimeConfigSpy.withArgs(
             CONSENT_POLICY_STATE.UNKNOWN,
@@ -2417,7 +2439,7 @@ describe('amp-a4a', () => {
         let errorCalls = 0;
         expect(
           protectFunctionWrapper(
-            name => {
+            (name) => {
               return `hello ${name}`;
             },
             null,
@@ -2606,7 +2628,7 @@ describe('amp-a4a', () => {
           layoutCanceled: () => {},
         };
       };
-      a4a.mutateElement = func => func();
+      a4a.mutateElement = (func) => func();
       a4a.togglePlaceholder = window.sandbox.spy();
 
       // We don't really care about the behavior of the following methods, so
@@ -2651,7 +2673,7 @@ describe('amp-a4a', () => {
           layoutCanceled: () => {},
         };
       };
-      a4a.mutateElement = func => func();
+      a4a.mutateElement = (func) => func();
       a4a.togglePlaceholder = window.sandbox.spy();
 
       // We don't really care about the behavior of the following methods, so
@@ -2696,7 +2718,7 @@ describe('amp-a4a', () => {
           layoutCanceled: () => {},
         };
       };
-      a4a.mutateElement = func => func();
+      a4a.mutateElement = (func) => func();
       a4a.togglePlaceholder = window.sandbox.spy();
 
       window.sandbox
@@ -2811,7 +2833,7 @@ describe('amp-a4a', () => {
   //   - All
 });
 
-describes.realWin('AmpA4a-RTC', {amp: true}, env => {
+describes.realWin('AmpA4a-RTC', {amp: true}, (env) => {
   let element;
   let a4a;
   let errorSpy;
@@ -2873,7 +2895,7 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
       {type: 'doubleclick'},
       {type: 'doubleclick', prefVal: ''},
       {type: 'otherNetwork', prefVal: true},
-    ].forEach(test =>
+    ].forEach((test) =>
       it(JSON.stringify(test), () => {
         const {type, prefVal, expected} = test;
         if (type) {
@@ -2883,62 +2905,5 @@ describes.realWin('AmpA4a-RTC', {amp: true}, env => {
         expect(a4a.inNonAmpPreferenceExp()).to.equal(!!expected);
       })
     );
-  });
-
-  describe('single pass experiments', () => {
-    it('should add single pass id', () => {
-      getMode().singlePassType = 'sp';
-      a4a.maybeAddSinglePassExperiment();
-
-      const isInSinglePass = isInExperiment(
-        a4a.element,
-        SINGLE_PASS_EXPERIMENT_IDS.SINGLE_PASS
-      );
-      const isInMultiPass = isInExperiment(
-        a4a.element,
-        SINGLE_PASS_EXPERIMENT_IDS.MULTI_PASS
-      );
-
-      expect(isInSinglePass).to.be.true;
-      expect(isInMultiPass).to.be.false;
-
-      getMode().singlePassType = '';
-    });
-
-    it('should add multi pass id', () => {
-      getMode().singlePassType = 'mp';
-      a4a.maybeAddSinglePassExperiment();
-
-      const isInSinglePass = isInExperiment(
-        a4a.element,
-        SINGLE_PASS_EXPERIMENT_IDS.SINGLE_PASS
-      );
-      const isInMultiPass = isInExperiment(
-        a4a.element,
-        SINGLE_PASS_EXPERIMENT_IDS.MULTI_PASS
-      );
-
-      expect(isInSinglePass).to.be.false;
-      expect(isInMultiPass).to.be.true;
-
-      getMode().singlePassType = '';
-    });
-
-    it('should not add any single pass experiment ids', () => {
-      getMode().singlePassType = undefined;
-      a4a.maybeAddSinglePassExperiment();
-
-      const isInSinglePass = isInExperiment(
-        a4a.element,
-        SINGLE_PASS_EXPERIMENT_IDS.SINGLE_PASS
-      );
-      const isInMultiPass = isInExperiment(
-        a4a.element,
-        SINGLE_PASS_EXPERIMENT_IDS.MULTI_PASS
-      );
-
-      expect(isInSinglePass).to.be.false;
-      expect(isInMultiPass).to.be.false;
-    });
   });
 });

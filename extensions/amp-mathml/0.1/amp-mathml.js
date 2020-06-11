@@ -72,12 +72,12 @@ export class AmpMathml extends AMP.BaseElement {
     listenFor(
       iframe,
       'embed-size',
-      data => {
+      (data) => {
         if (!this.element.hasAttribute('inline')) {
           // Don't change the width if not inlined.
           data['width'] = undefined;
         }
-        Services.mutatorForDoc(this.getAmpDoc())./*OK*/ changeSize(
+        Services.mutatorForDoc(this.getAmpDoc()).forceChangeSize(
           this.element,
           data['height'],
           data['width']
@@ -109,6 +109,6 @@ export class AmpMathml extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-mathml', '0.1', AMP => {
+AMP.extension('amp-mathml', '0.1', (AMP) => {
   AMP.registerElement('amp-mathml', AmpMathml, CSS);
 });

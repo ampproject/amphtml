@@ -45,7 +45,7 @@ export class AmpInputmaskService {
    */
   install() {
     const maskElements = this.ampdoc.getRootNode().querySelectorAll('[mask]');
-    iterateCursor(maskElements, element => {
+    iterateCursor(maskElements, (element) => {
       if (TextMask.isMasked(element)) {
         return;
       }
@@ -59,13 +59,13 @@ export class AmpInputmaskService {
    */
   uninstall() {
     this.domUpdateUnlistener_();
-    this.masks_.forEach(m => m.dispose());
+    this.masks_.forEach((m) => m.dispose());
     this.masks_ = [];
   }
 }
 
-AMP.extension(TAG, '0.1', function(AMP) {
-  AMP.registerServiceForDoc(SERVICE, function(ampdoc) {
+AMP.extension(TAG, '0.1', function (AMP) {
+  AMP.registerServiceForDoc(SERVICE, function (ampdoc) {
     return new AmpInputmaskService(ampdoc);
   });
 });

@@ -14,12 +14,12 @@
 // limitations under the license.
 //
 
-#include "htmlparser/renderer.h"
+#include "renderer.h"
 
 #include <sstream>
 
 #include "gtest/gtest.h"
-#include "htmlparser/parser.h"
+#include "parser.h"
 
 using namespace std::string_literals;
 

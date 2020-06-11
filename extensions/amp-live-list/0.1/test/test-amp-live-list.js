@@ -26,7 +26,7 @@ describes.realWin(
       extensions: ['amp-live-list'],
     },
   },
-  function(env) {
+  function (env) {
     let win;
     let ampdoc;
     let liveList;

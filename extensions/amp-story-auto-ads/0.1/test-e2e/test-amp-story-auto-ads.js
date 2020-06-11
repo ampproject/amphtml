@@ -32,9 +32,11 @@ describes.endtoend(
     initialRect: {width: viewport.WIDTH, height: viewport.HEIGHT},
     // TODO(ccordry): reenable shadow demo? fails while waiting for
     // .amp-doc-host[style="visibility: visible;"]
-    environments: ['single', 'viewer-demo'],
+    // TODO(ccordry): re-enable viewer-demo that should handle the 64px
+    // offset set by the viewer header.
+    environments: ['single' /*, 'viewer-demo'*/],
   },
-  env => {
+  (env) => {
     let controller;
 
     beforeEach(() => {
@@ -73,9 +75,11 @@ describes.endtoend(
     testUrl:
       'http://localhost:8000/test/fixtures/e2e/amp-story-auto-ads/dv3-request.html',
     initialRect: {width: viewport.WIDTH, height: viewport.HEIGHT},
-    environments: ['single', 'viewer-demo'],
+    // TODO(ccordry): re-enable viewer-demo that should handle the 64px
+    // offset set by the viewer header.
+    environments: ['single' /*, 'viewer-demo'*/],
   },
-  env => {
+  (env) => {
     let controller;
 
     beforeEach(() => {

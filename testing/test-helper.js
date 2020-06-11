@@ -28,7 +28,7 @@ import {xhrServiceForTesting} from '../src/service/xhr-impl';
 
 export function stubService(sandbox, win, serviceId, method) {
   // Register if not already registered.
-  registerServiceBuilder(win, serviceId, function() {
+  registerServiceBuilder(win, serviceId, function () {
     return {
       [method]: () => {},
     };
@@ -39,7 +39,7 @@ export function stubService(sandbox, win, serviceId, method) {
 
 export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
   // Register if not already registered.
-  registerServiceBuilderForDoc(ampdoc, serviceId, function() {
+  registerServiceBuilderForDoc(ampdoc, serviceId, function () {
     return {
       [method]: () => {},
     };
@@ -51,14 +51,14 @@ export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
 export function mockServiceForDoc(sandbox, ampdoc, serviceId, methods) {
   resetServiceForTesting(ampdoc.win, serviceId);
   const impl = {};
-  methods.forEach(method => {
+  methods.forEach((method) => {
     impl[method] = () => {};
   });
-  registerServiceBuilderForDoc(ampdoc, serviceId, function() {
+  registerServiceBuilderForDoc(ampdoc, serviceId, function () {
     return impl;
   });
   const mock = {};
-  methods.forEach(method => {
+  methods.forEach((method) => {
     mock[method] = sandbox.stub(impl, method);
   });
   return mock;
@@ -66,10 +66,10 @@ export function mockServiceForDoc(sandbox, ampdoc, serviceId, methods) {
 
 export function mockWindowInterface(sandbox) {
   const methods = Object.getOwnPropertyNames(WindowInterface).filter(
-    p => typeof WindowInterface[p] === 'function'
+    (p) => typeof WindowInterface[p] === 'function'
   );
   const mock = {};
-  methods.forEach(method => {
+  methods.forEach((method) => {
     mock[method] = sandbox.stub(WindowInterface, method);
   });
   return mock;
@@ -110,7 +110,7 @@ export function isAnimationNone(element) {
   for (const property in noneValues) {
     const value = getStyle(element, property);
     const expectedValues = noneValues[property];
-    if (!expectedValues.some(expectedValue => value == expectedValue)) {
+    if (!expectedValues.some((expectedValue) => value == expectedValue)) {
       return false;
     }
   }
@@ -184,7 +184,7 @@ export class RequestBank {
    */
   static withdraw(requestId) {
     const url = `${REQUEST_URL}/withdraw/${requestId}/`;
-    return this.fetch_(url).then(res => res.json());
+    return this.fetch_(url).then((res) => res.json());
   }
 
   static tearDown() {
@@ -199,9 +199,9 @@ export class RequestBank {
         ampCors: false,
         credentials: 'omit',
       })
-      .catch(err => {
+      .catch((err) => {
         if (err.response != null) {
-          return err.response.text().then(msg => {
+          return err.response.text().then((msg) => {
             throw new Error(err.message + ': ' + msg);
           });
         } else {
@@ -218,7 +218,7 @@ export class BrowserController {
   }
 
   wait(duration) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       setTimeout(resolve, duration);
     });
   }
@@ -254,7 +254,7 @@ export class BrowserController {
     return poll(
       `"${selector}" to build`,
       () => {
-        const someNotBuilt = [].some.call(elements, e =>
+        const someNotBuilt = [].some.call(elements, (e) =>
           e.classList.contains('i-amphtml-notbuilt')
         );
         return !someNotBuilt;
@@ -281,7 +281,7 @@ export class BrowserController {
         // layoutCallback() promise is resolved.
         const someNotReady = [].some.call(
           elements,
-          e => e.readyState !== 'complete'
+          (e) => e.readyState !== 'complete'
         );
         return !someNotReady;
       },
@@ -351,12 +351,20 @@ export class ImagePixelVerifier {
     }
     return this.imagePixels_[this.imagePixels_.length - 1].src;
   }
+
+  verifyAndRemoveRequestUrl(url) {
+    for (let i = this.imagePixels_.length - 1; i >= 0; i--) {
+      if (this.imagePixels_[i].src == url) {
+        this.imagePixels_.splice(i, 1);
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 export function measureMutateElementStub(measure, mutate) {
-  return Promise.resolve()
-    .then(measure)
-    .then(mutate);
+  return Promise.resolve().then(measure).then(mutate);
 }
 
 export function measureElementStub(measure) {

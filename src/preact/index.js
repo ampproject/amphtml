@@ -21,17 +21,17 @@ import * as preact from /*OK*/ 'preact';
 // TODO: hydrate, isValidElement, Component, cloneElement, toChildArray
 
 /**
- * @param {!Preact.FunctionalComponent|string} unusedType
+ * @param {!PreactDef.FunctionalComponent|string} unusedType
  * @param {(!Object|null)=} unusedProps
  * @param {...*} var_args
- * @return {!Preact.VNode}
+ * @return {!PreactDef.VNode}
  */
 export function createElement(unusedType, unusedProps, var_args) {
   return preact.createElement.apply(undefined, arguments);
 }
 
 /**
- * @param {!Preact.VNode} vnode
+ * @param {!PreactDef.VNode} vnode
  * @param {Node} container
  */
 export function render(vnode, container) {
@@ -40,7 +40,7 @@ export function render(vnode, container) {
 
 /**
  * @param {!JsonObject} props
- * @return {Preact.Renderable}
+ * @return {PreactDef.Renderable}
  */
 export function Fragment(props) {
   return preact.Fragment(props);
@@ -56,14 +56,14 @@ export function createRef() {
 
 /**
  * @param {!Object} value
- * @return {!Preact.Context}
+ * @return {!PreactDef.Context}
  */
 export function createContext(value) {
   return preact.createContext(value);
 }
 
 // Defines the type interfaces for the approved Preact Hooks APIs.
-// TODO: useReducer, useImperativeHandle, useMemo, useCallback, useDebugValue, useErrorBoundary
+// TODO: useReducer, useImperativeHandle, useDebugValue, useErrorBoundary
 
 /**
  * @param {S|function():S} initial
@@ -100,9 +100,29 @@ export function useLayoutEffect(effect, opt_deps) {
 }
 
 /**
- * @param {Preact.Context} context
+ * @param {PreactDef.Context} context
  * @return {!JsonObject}
  */
 export function useContext(context) {
   return hooks.useContext(context);
+}
+
+/**
+ * @param {function():T} cb
+ * @param {!Array<*>=} opt_deps
+ * @return {T}
+ * @template T
+ */
+export function useMemo(cb, opt_deps) {
+  return hooks.useMemo(cb, opt_deps);
+}
+
+/**
+ * @param {function(...*):T|undefined} cb
+ * @param {!Array<*>=} opt_deps
+ * @return {function(...*):T|undefined}
+ * @template T
+ */
+export function useCallback(cb, opt_deps) {
+  return hooks.useCallback(cb, opt_deps);
 }

@@ -14,7 +14,7 @@
 // limitations under the license.
 //
 
-#include "htmlparser/navigator.h"
+#include "navigator.h"
 
 namespace htmlparser {
 

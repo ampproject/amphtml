@@ -31,7 +31,7 @@ import {createElementWithAttributes} from '../../src/dom';
 function fakeLocalStorage(initial = {}) {
   const state = {...initial};
   return {
-    getItem: key => (key in state ? state[key] : null),
+    getItem: (key) => (key in state ? state[key] : null),
     setItem: (key, value) => (state[key] = value),
   };
 }
@@ -443,14 +443,14 @@ describe('toggleExperiment', () => {
   });
 });
 
-describes.realWin('meta override', {}, env => {
+describes.realWin('meta override', {}, (env) => {
   let win;
 
   beforeEach(() => {
     win = env.win;
   });
 
-  it('should allow override iff the experiment is whitelisted', () => {
+  it('should allow override iff the experiment is allowlisted', () => {
     win.AMP_CONFIG = {
       'allow-doc-opt-in': ['e1', 'e3'],
       e1: 0,
@@ -467,7 +467,7 @@ describes.realWin('meta override', {}, env => {
     resetExperimentTogglesForTesting(window);
 
     expect(isExperimentOn(win, 'e1')).to.be.true;
-    expect(isExperimentOn(win, 'e2')).to.be.false; // e2 is not whitelisted
+    expect(isExperimentOn(win, 'e2')).to.be.false; // e2 is not allowlisted
     expect(isExperimentOn(win, 'e3')).to.be.true;
 
     toggleExperiment(win, 'e1', false);
@@ -479,14 +479,14 @@ describes.realWin('meta override', {}, env => {
   });
 });
 
-describes.fakeWin('url override', {}, env => {
+describes.fakeWin('url override', {}, (env) => {
   let win;
 
   beforeEach(() => {
     win = env.win;
   });
 
-  it('should allow override iff the experiment is whitelisted', () => {
+  it('should allow override iff the experiment is allowlisted', () => {
     win.AMP_CONFIG = {
       'allow-url-opt-in': ['e1', 'e3', 'e4', 'e6', 'e7', 'e8'],
       e1: 0,
@@ -502,10 +502,10 @@ describes.fakeWin('url override', {}, env => {
     resetExperimentTogglesForTesting(window);
 
     expect(isExperimentOn(win, 'e1')).to.be.true;
-    expect(isExperimentOn(win, 'e2')).to.be.false; // e2 is not whitelisted
+    expect(isExperimentOn(win, 'e2')).to.be.false; // e2 is not allowlisted
     expect(isExperimentOn(win, 'e3')).to.be.true;
     expect(isExperimentOn(win, 'e4')).to.be.false;
-    expect(isExperimentOn(win, 'e5')).to.be.true; // e5 is not whitelisted
+    expect(isExperimentOn(win, 'e5')).to.be.true; // e5 is not allowlisted
     expect(isExperimentOn(win, 'e6')).to.be.false;
     expect(isExperimentOn(win, 'e7')).to.be.true; // overrides cookies
     expect(isExperimentOn(win, 'e8')).to.be.false; // overrides cookies
@@ -659,7 +659,7 @@ describe('experiment branch tests', () => {
       window.sandbox.win.trafficEligible = true;
       const experimentInfo = {
         'expt_0': {
-          isTrafficEligible: win => {
+          isTrafficEligible: (win) => {
             return win.trafficEligible;
           },
           branches: ['0_0', '0_1'],
@@ -676,7 +676,7 @@ describe('experiment branch tests', () => {
       window.sandbox.win.trafficEligible = false;
       const experimentInfo = {
         'expt_0': {
-          isTrafficEligible: win => {
+          isTrafficEligible: (win) => {
             return win.trafficEligible;
           },
           branches: ['0_0', '0_1'],
@@ -710,7 +710,7 @@ describe('experiment branch tests', () => {
         window.sandbox.win.trafficEligible = false;
         const experimentInfo = {
           'expt_0': {
-            isTrafficEligible: win => {
+            isTrafficEligible: (win) => {
               return win.trafficEligible;
             },
             branches: ['0_0', '0_1'],

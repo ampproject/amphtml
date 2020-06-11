@@ -32,13 +32,10 @@ const IS_LOCAL_CHANGES = !!argv.local_changes;
 const IS_SAUCELABS = !!argv.saucelabs;
 const IS_SAUCELABS_STABLE = !!argv.saucelabs && !!argv.stable;
 const IS_SAUCELABS_BETA = !!argv.saucelabs && !!argv.beta;
-const IS_SINGLE_PASS = !!argv.single_pass;
+const IS_DIST = !!argv.compiled;
 
 const TEST_TYPE_SUBTYPES = new Map([
-  [
-    'integration',
-    ['local', 'single-pass', 'saucelabs-beta', 'saucelabs-stable'],
-  ],
+  ['integration', ['local', 'minified', 'saucelabs-beta', 'saucelabs-stable']],
   ['unit', ['local', 'local-changes', 'saucelabs']],
   ['e2e', ['local']],
 ]);
@@ -72,10 +69,8 @@ function inferTestType() {
     return `${type}/saucelabs-stable`;
   } else if (IS_SAUCELABS) {
     return `${type}/saucelabs`;
-  }
-
-  if (IS_SINGLE_PASS) {
-    return `${type}/single-pass`;
+  } else if (IS_DIST) {
+    return `${type}/minified`;
   }
 
   return `${type}/local`;
@@ -95,7 +90,7 @@ function postReport(type, action) {
       },
       // Do not use `json: true` because the response is a string, not JSON.
     })
-      .then(body => {
+      .then((body) => {
         log(
           green('INFO:'),
           'reported',
@@ -110,7 +105,7 @@ function postReport(type, action) {
           );
         }
       })
-      .catch(error => {
+      .catch((error) => {
         log(
           yellow('WARNING:'),
           'failed to report',
@@ -143,7 +138,9 @@ function reportTestStarted() {
 async function reportAllExpectedTests(buildTargets) {
   for (const [type, subTypes] of TEST_TYPE_SUBTYPES) {
     const testTypeBuildTargets = TEST_TYPE_BUILD_TARGETS.get(type);
-    const action = testTypeBuildTargets.some(target => buildTargets.has(target))
+    const action = testTypeBuildTargets.some((target) =>
+      buildTargets.has(target)
+    )
       ? 'queued'
       : 'skipped';
     for (const subType of subTypes) {

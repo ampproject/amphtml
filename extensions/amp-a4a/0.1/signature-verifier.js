@@ -226,7 +226,7 @@ export class SignatureVerifier {
       'Keyset for service %s not loaded before verification',
       signingServiceName
     );
-    return signer.promise.then(success => {
+    return signer.promise.then((success) => {
       if (!success) {
         // The public keyset couldn't be fetched and imported. Probably a
         // network connectivity failure.
@@ -240,7 +240,7 @@ export class SignatureVerifier {
           signer.keys,
           signingServiceName,
           keypairId
-        ).then(success => {
+        ).then((success) => {
           if (signer.keys[keypairId] === undefined) {
             // We still don't have this key; make sure we never try
             // again.
@@ -259,7 +259,7 @@ export class SignatureVerifier {
         // We don't have this key and we already tried cachebusting.
         return VerificationStatus.ERROR_KEY_NOT_FOUND;
       } else {
-        return keyPromise.then(key => {
+        return keyPromise.then((key) => {
           if (!key) {
             // This particular public key couldn't be imported. Probably the
             // signing service's fault.
@@ -267,11 +267,11 @@ export class SignatureVerifier {
           }
           const crypto = Services.cryptoFor(this.win_);
           return crypto.verifyPkcs(key, signature, creative).then(
-            result =>
+            (result) =>
               result
                 ? VerificationStatus.OK
                 : VerificationStatus.ERROR_SIGNATURE_MISMATCH,
-            err => {
+            (err) => {
               // Web Cryptography rejected the verification attempt. This
               // hopefully won't happen in the wild, but browsers can be weird
               // about this, so we need to guard against the possibility.
@@ -319,7 +319,7 @@ export class SignatureVerifier {
         credentials: 'omit',
       })
       .then(
-        response => {
+        (response) => {
           // These are assertions on signing service behavior required by
           // the spec. However, nothing terrible happens if they aren't met
           // and there's no meaningful error recovery to be done if they
@@ -335,7 +335,7 @@ export class SignatureVerifier {
               'application/jwk-set+json'
           );
           return response.json().then(
-            jsonResponse => {
+            (jsonResponse) => {
               const jwkSet = /** @type {!JsonObject} */ (jsonResponse);
               // This is supposed to be a JSON Web Key Set, as defined in
               // Section 5 of RFC 7517. However, the signing service could
@@ -348,7 +348,7 @@ export class SignatureVerifier {
                 );
                 return false;
               }
-              jwkSet['keys'].forEach(jwk => {
+              /** @type {!Array} */ (jwkSet['keys']).forEach((jwk) => {
                 if (!jwk || typeof jwk['kid'] != 'string') {
                   signingServiceError(
                     signingServiceName,
@@ -358,7 +358,7 @@ export class SignatureVerifier {
                   // We haven't seen this keypair ID before.
                   keys[jwk['kid']] = Services.cryptoFor(this.win_)
                     .importPkcsKey(jwk)
-                    .catch(err => {
+                    .catch((err) => {
                       // Web Cryptography rejected the key
                       // import attempt. Either the signing
                       // service sent a malformed key or the
@@ -375,7 +375,7 @@ export class SignatureVerifier {
               });
               return true;
             },
-            err => {
+            (err) => {
               // The signing service didn't send valid JSON.
               signingServiceError(
                 signingServiceName,
@@ -385,7 +385,7 @@ export class SignatureVerifier {
             }
           );
         },
-        err => {
+        (err) => {
           // Some kind of error occurred during the XHR. This could be a lot
           // of things (and we have no type information), but if there's no
           // `response` it's probably a network connectivity failure, so we

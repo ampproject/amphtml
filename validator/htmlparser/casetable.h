@@ -23,7 +23,7 @@
 #include <algorithm>
 #include <utility>
 
-#include "htmlparser/comparators.h"
+#include "comparators.h"
 
 namespace htmlparser {
 

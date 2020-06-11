@@ -22,7 +22,7 @@
 #include <string>
 #include <vector>
 
-#include "htmlparser/atom.h"
+#include "atom.h"
 
 namespace htmlparser {
 
@@ -85,6 +85,13 @@ struct Token {
   // List of attributes (unsorted in the same order as they appear in html
   // source, with duplicates).
   std::vector<Attribute> attributes;
+
+  // Tells if the token is manufactured. This should not be confused with
+  // manufactured head, body, tbody, thead etc, these are manufactured during
+  // parsing not tokenization. This field accounts for only special cases where
+  // illegal characters leads to manufacturing of comments token.
+  // Eg: https://html.spec.whatwg.org/multipage/parsing.html#parse-error-unexpected-question-mark-instead-of-tag-name
+  bool is_manufactured = false;
 
   // Helper functions to return string representations of the token.
   // ===============================================================

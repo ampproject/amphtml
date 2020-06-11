@@ -21,7 +21,9 @@
 
 package dev.amp.validator;
 
+import dev.amp.validator.css.ParsedDocCssSpec;
 import dev.amp.validator.exception.TagValidationException;
+import dev.amp.validator.utils.ExtensionsUtils;
 import dev.amp.validator.utils.TagSpecUtils;
 import dev.amp.validator.utils.ValidationErrorUtils;
 import org.xml.sax.Locator;
@@ -34,6 +36,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static dev.amp.validator.utils.AttributeSpecUtils.isUsedForTypeIdentifiers;
+import static dev.amp.validator.utils.ExtensionsUtils.isAmpRuntimeScript;
+import static dev.amp.validator.utils.ExtensionsUtils.isExtensionScript;
+import static dev.amp.validator.utils.ExtensionsUtils.isLtsScriptUrl;
+
 /**
  * The Context keeps track of the line / column that the validator is
  * in, as well as the mandatory tag specs that have already been validated.
@@ -45,8 +52,10 @@ import java.util.Set;
  */
 
 public class Context {
+
     /**
      * Constructor.
+     *
      * @param parsedValidatorRules a ParsedValidationRules object.
      */
     public Context(@Nonnull final ParsedValidatorRules parsedValidatorRules) {
@@ -58,7 +67,7 @@ public class Context {
         //TODO - it's a hack, remove this when DOCTYPE is fixed
         tagspecsValidated.put(0, true);
 
-        this.styleAmpCustomByteSize = 0;
+        this.styleTagByteSize = 0;
         this.inlineStyleByteSize = 0;
         this.typeIdentifiers = new ArrayList<>();
         this.valueSetsProvided = new HashSet<>();
@@ -66,14 +75,16 @@ public class Context {
         this.conditionsSatisfied = new HashMap<>();
         this.firstUrlSeenTag = null;
         this.extensions = new ExtensionsContext();
+        this.scriptReleaseVersion = ExtensionsUtils.ScriptReleaseVersion.UNKNOWN;
     }
 
     /**
      * Given the tagResult from validating a single tag, update the overall
      * result as well as the Context state to affect later validation.
-     * @param encounteredTag the encountered tag.
+     *
+     * @param encounteredTag       the encountered tag.
      * @param referencePointResult the reference point result.
-     * @param tagResult the tag result.
+     * @param tagResult            the tag result.
      * @throws TagValidationException the TagValidationException.
      */
     public void updateFromTagResults(@Nonnull final ParsedHtmlTag encounteredTag,
@@ -92,6 +103,7 @@ public class Context {
     /**
      * Given a tag result, update the Context state to affect
      * later validation. Does not handle updating the tag stack.
+     *
      * @param result a result.
      */
     private void updateFromTagResult(@Nonnull final ValidateTagResult result) {
@@ -145,8 +157,25 @@ public class Context {
     }
 
     /**
+     * Record if this document contains a tag requesting the LTS runtime engine.
+     *
+     * @param parsedTag
+     * @param result    the result
+     */
+    private void recordScriptReleaseVersionFromTagResult(@Nonnull final ParsedHtmlTag parsedTag,
+                                                         @Nonnull final ValidatorProtos.ValidationResult result) {
+        if (this.getScriptReleaseVersion() == ExtensionsUtils.ScriptReleaseVersion.UNKNOWN
+                && (isExtensionScript(parsedTag) || isAmpRuntimeScript(parsedTag))) {
+            final String src = (parsedTag.attrsByKey().get("src") != null) ? parsedTag.attrsByKey().get("src") : "";
+            this.scriptReleaseVersion = isLtsScriptUrl(src)
+                    ? ExtensionsUtils.ScriptReleaseVersion.LTS : ExtensionsUtils.ScriptReleaseVersion.STANDARD;
+        }
+    }
+
+    /**
      * Records that a Tag was seen which contains an URL. Used to note issues
      * with base href occurring in the document after an URL.
+     *
      * @param parsedTagSpec parsed tag spec.
      */
     public void markUrlSeenFromMatchingTagSpec(@Nonnull final ParsedTagSpec parsedTagSpec) {
@@ -158,6 +187,7 @@ public class Context {
     /**
      * Returns all the value set provisions so far, as a set of derived keys, as
      * computed by keyFromValueSetProvision_().
+     *
      * @return the value sets provided
      */
     public Set<String> valueSetsProvided() {
@@ -167,6 +197,7 @@ public class Context {
     /**
      * Returns all the value set requirements so far, keyed by derived keys, as
      * computed by getValueSetProvisionKey().
+     *
      * @return the map of value sets required.
      */
     public Map<String, List<ValidatorProtos.ValidationError>> valueSetsRequired() {
@@ -175,7 +206,8 @@ public class Context {
 
     /**
      * Records that this document contains a tag matching a particular tag spec.
-     * @param isPassing is passing status.
+     *
+     * @param isPassing     is passing status.
      * @param parsedTagSpec parsed tag spec.
      */
     private void recordValidatedFromTagSpec(final boolean isPassing, @Nonnull final ParsedTagSpec parsedTagSpec) {
@@ -189,6 +221,7 @@ public class Context {
 
     /**
      * Record document-level conditions which have been satisfied.
+     *
      * @param parsedTagSpec parsed tag spec.
      */
     private void satisfyConditionsFromTagSpec(@Nonnull final ParsedTagSpec parsedTagSpec) {
@@ -200,6 +233,7 @@ public class Context {
     /**
      * Record that this document contains a tag which is a member of a list
      * of mandatory alternatives.
+     *
      * @param parsedTagSpec parsed tag spec.
      */
     public void satisfyMandatoryAlternativesFromTagSpec(@Nonnull final ParsedTagSpec parsedTagSpec) {
@@ -212,11 +246,12 @@ public class Context {
     /**
      * Record when an encountered tag's attribute that requires an extension
      * that it also satisfies that the requied extension is used.
+     *
      * @param encounteredTag encountered tag.
-     * @param tagResult tag result.
+     * @param tagResult      tag result.
      */
     private void recordAttrRequiresExtension(@Nonnull final ParsedHtmlTag encounteredTag,
-                                              @Nonnull final ValidateTagResult tagResult) {
+                                             @Nonnull final ValidateTagResult tagResult) {
         if (tagResult.getBestMatchTagSpec() == null) {
             return;
         }
@@ -250,7 +285,7 @@ public class Context {
     }
 
     /**
-     * @param error a ValidationError object.
+     * @param error            a ValidationError object.
      * @param validationResult a ValidationResult object.
      */
     public void addBuiltError(@Nonnull final ValidatorProtos.ValidationError error,
@@ -264,11 +299,12 @@ public class Context {
 
     /**
      * Add an error field to validationResult with severity ERROR.
+     *
      * @param validationErrorCode Error code
-     * @param lineCol a line / column pair.
-     * @param params a list of params.
-     * @param specUrl a link (URL) to the amphtml spec
-     * @param validationResult a ValidationResult object.
+     * @param lineCol             a line / column pair.
+     * @param params              a list of params.
+     * @param specUrl             a link (URL) to the amphtml spec
+     * @param validationResult    a ValidationResult object.
      */
     public void addError(@Nonnull final ValidatorProtos.ValidationError.Code validationErrorCode,
                          @Nonnull final Locator lineCol,
@@ -280,12 +316,13 @@ public class Context {
 
     /**
      * Add an error field to validationResult with severity ERROR.
+     *
      * @param validationErrorCode Error code
-     * @param line a line number.
-     * @param column a column number.
-     * @param params a list of params.
-     * @param specUrl a link (URL) to the amphtml spec
-     * @param validationResult a ValidationResult object.
+     * @param line                a line number.
+     * @param column              a column number.
+     * @param params              a list of params.
+     * @param specUrl             a link (URL) to the amphtml spec
+     * @param validationResult    a ValidationResult object.
      */
     public void addError(@Nonnull final ValidatorProtos.ValidationError.Code validationErrorCode,
                          final int line,
@@ -303,11 +340,12 @@ public class Context {
 
     /**
      * Add an error field to validationResult with severity WARNING.
+     *
      * @param validationErrorCode Error code
-     * @param lineCol a line / column pair.
-     * @param params a list of params.
-     * @param specUrl a link (URL) to the amphtml spec
-     * @param validationResult a ValidationResult object.
+     * @param lineCol             a line / column pair.
+     * @param params              a list of params.
+     * @param specUrl             a link (URL) to the amphtml spec
+     * @param validationResult    a ValidationResult object.
      */
     public void addWarning(@Nonnull final ValidatorProtos.ValidationError.Code validationErrorCode,
                            @Nonnull final Locator lineCol,
@@ -322,6 +360,7 @@ public class Context {
 
     /**
      * Returns a line/col pair.
+     *
      * @return returns a line/col pair.
      */
     public Locator getLineCol() {
@@ -330,6 +369,7 @@ public class Context {
 
     /**
      * Setting the LineCol.
+     *
      * @param lineCol a pair line/col.
      */
     public void setLineCol(@Nonnull final Locator lineCol) {
@@ -338,6 +378,7 @@ public class Context {
 
     /**
      * Returns the ParsedValidatorRules.
+     *
      * @return returns the ParsedValidatorRules object.
      */
     public ParsedValidatorRules getRules() {
@@ -346,6 +387,7 @@ public class Context {
 
     /**
      * Returns the tag stack.
+     *
      * @return returns the tag stack.
      */
     public TagStack getTagStack() {
@@ -354,6 +396,7 @@ public class Context {
 
     /**
      * Record the type identifier in this document.
+     *
      * @param typeIdentifier type identifier.
      */
     public void recordTypeIdentifier(@Nonnull final String typeIdentifier) {
@@ -362,6 +405,7 @@ public class Context {
 
     /**
      * Returns the type identifiers in this document.
+     *
      * @return returns the type identifiers.
      */
     public List<String> getTypeIdentifiers() {
@@ -379,6 +423,7 @@ public class Context {
      * Returns the tag spec ids that have been validated. The return object
      * should be treated as a set (the object keys), and the value should be
      * ignored.
+     *
      * @return returns validated tag specs.
      */
     public Map<Integer, Boolean> getTagspecsValidated() {
@@ -387,6 +432,7 @@ public class Context {
 
     /**
      * Returns the boolean value of true if exists.
+     *
      * @param id tag spec id.
      * @return returns the boolean value of true if exists.
      */
@@ -401,14 +447,16 @@ public class Context {
 
     /**
      * Records how much of the document is used towards &lt;style amp-custom&gt;.
+     *
      * @param byteSize byte size.
      */
-    public void addStyleAmpCustomByteSize(final int byteSize) {
-        this.styleAmpCustomByteSize += byteSize;
+    public void addStyleTagByteSize(final int byteSize) {
+        this.styleTagByteSize += byteSize;
     }
 
     /**
      * Records how much of the document is used towards inline style.
+     *
      * @param byteSize integer to add to running inline style byte size.
      */
     public void addInlineStyleByteSize(final int byteSize) {
@@ -417,6 +465,7 @@ public class Context {
 
     /**
      * Returns the size of inline styles.
+     *
      * @return returns running inline style byte size.
      */
     public int getInlineStyleByteSize() {
@@ -425,14 +474,16 @@ public class Context {
 
     /**
      * Returns the size of style amp-custom.
+     *
      * @return returns the size of style of amp-custom
      */
-    public int getStyleAmpCustomByteSize() {
-        return this.styleAmpCustomByteSize;
+    public int getStyleTagByteSize() {
+        return this.styleTagByteSize;
     }
 
     /**
      * Returns true iff "transformed" is a type identifier in this document.
+     *
      * @return returns true iff "transformed" is a type identifier in this document.
      */
     public boolean isTransformed() {
@@ -442,6 +493,7 @@ public class Context {
     /**
      * Returns true iff the current context has observed a tag which contains
      * an URL. This is set by calling markUrlSeen_ above.
+     *
      * @return returns true if first url seen tag is not null.
      */
     public boolean hasSeenUrl() {
@@ -459,6 +511,7 @@ public class Context {
     /**
      * The TagSpecName of the first seen URL. Do not call unless HasSeenUrl
      * returns true.
+     *
      * @return returns TagSpecName of the first seen URL.
      */
     public String firstSeenUrlTagName() {
@@ -468,10 +521,20 @@ public class Context {
     /**
      * The mandatory alternatives that we've satisfied. This may contain
      * duplicates (we'd have to filter them in record... above if we cared).
+     *
      * @return returns the mandatory alternatives that we've satisfied.
      */
     public List<String> getMandatoryAlternativesSatisfied() {
         return this.mandatoryAlternativesSatisfied;
+    }
+
+    /**
+     * getter for scriptReleaseVersion
+     *
+     * @return the associated script release version.
+     */
+    public ExtensionsUtils.ScriptReleaseVersion getScriptReleaseVersion() {
+        return this.scriptReleaseVersion;
     }
 
     /**
@@ -482,6 +545,38 @@ public class Context {
         return (provision.hasSet() ? provision.getSet() : "")
                 + ">"
                 + (provision.hasValue() ? provision.getValue() : "");
+    }
+
+    /**
+     * Returns the first (there should be at most one) DocCssSpec which matches
+     * both the html format and type identifiers recorded so far in this
+     * context. If called before identifiers have been recorded, it may return
+     * an incorrect selection.
+     *
+     * @return ParsedDocCssSpec
+     */
+    public ParsedDocCssSpec matchingDocCssSpec() {
+        // The specs are usually already filtered by HTML format, so this loop
+        // should be very short, often 1:
+        for (ParsedDocCssSpec spec : this.rules.getCss()) {
+            if (this.rules.isDocCssSpecCorrectHtmlFormat(spec.getSpec()) && this.isDocCssSpecValidForTypeIdentifiers(spec)) {
+                return spec;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns true iff `spec` should be used for the type identifiers recorded
+     * in this context, as seen in the document so far. If called before type
+     * identifiers have been recorded, will always return false.
+     *
+     * @param spec
+     * @return true iff `spec` should be used for the type identifiers recorded in context
+     */
+    private boolean isDocCssSpecValidForTypeIdentifiers(final ParsedDocCssSpec spec) {
+        return isUsedForTypeIdentifiers(
+                this.getTypeIdentifiers(), spec.enabledBy(), spec.disabledBy());
     }
 
     /**
@@ -512,7 +607,7 @@ public class Context {
     /**
      * Size of &lt;style amp-custom&gt;.
      */
-    private int styleAmpCustomByteSize = 0;
+    private int styleTagByteSize = 0;
 
     /**
      * Size of all inline styles (style attribute) combined.
@@ -548,4 +643,9 @@ public class Context {
      * Extension-specific context.
      */
     private ExtensionsContext extensions;
+
+    /**
+     * flag for LTS runtime engine present
+     */
+    private ExtensionsUtils.ScriptReleaseVersion scriptReleaseVersion;
 }

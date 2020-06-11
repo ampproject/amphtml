@@ -88,7 +88,7 @@ Dependencies:
 
   - openjdk-7-jre
     ```sh
-    brew tap caskroom/cask
+    brew tap homebrew/cask
     brew install Caskroom/cask/java
     ```
 
