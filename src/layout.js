@@ -529,7 +529,7 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
     const intrinsicSizer = sizer.firstElementChild;
     intrinsicSizer.setAttribute(
       'src',
-      fixIeIntrinsic
+      fixIeIntrinsic && !IS_ESM
         ? transparentPng(
             dev().assertNumber(getLengthNumeral(width)),
             dev().assertNumber(getLengthNumeral(height))
