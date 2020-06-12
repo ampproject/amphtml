@@ -45,7 +45,7 @@ const {unitTestsToRun} = require('./helpers-unit');
 function updateBrowsers(config) {
   if (argv.saucelabs) {
     if (config.testType == 'unit') {
-      Object.assign(config, {browsers: ['SL_Safari_12', 'SL_Firefox']});
+      Object.assign(config, {browsers: ['SL_Safari', 'SL_Firefox']});
       return;
     }
 
@@ -55,8 +55,7 @@ function updateBrowsers(config) {
           'SL_Chrome',
           'SL_Firefox',
           'SL_Edge',
-          'SL_Safari_12',
-          'SL_Safari_11',
+          'SL_Safari',
           'SL_IE',
           // TODO(amp-infra): Evaluate and add more platforms here.
           //'SL_Chrome_Android_7',

@@ -153,6 +153,10 @@ class TestConfig {
     return this.skip(this.runOnIos);
   }
 
+  skipSauceLabs() {
+    return this.skip(() => !!window.ampTestRuntimeConfig.saucelabs);
+  }
+
   skipIfPropertiesObfuscated() {
     return this.skip(function () {
       return window.__karma__.config.amp.propertiesObfuscated;
