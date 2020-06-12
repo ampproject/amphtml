@@ -437,7 +437,7 @@ class VideoEntry {
     this.video = video;
 
     /** @private {boolean} */
-    this.allowAutoplay_ = true;
+    this.allowPlayback_ = true;
 
     /** @private {boolean} */
     this.loaded_ = false;
@@ -572,7 +572,7 @@ class VideoEntry {
       actions.trigger(element, firstPlay, event, trust);
     });
 
-    this.listenForAutoplayDelegation_();
+    this.listenForPlaybackDelegation_();
   }
 
   /** @public */
@@ -594,11 +594,11 @@ class VideoEntry {
     analyticsEvent(this, VideoAnalyticsEvents.CUSTOM, prefixedVars);
   }
 
-  /** Listens for signals to delegate autoplay to a different module. */
-  listenForAutoplayDelegation_() {
+  /** Listens for signals to delegate playback to a different module. */
+  listenForPlaybackDelegation_() {
     const signals = this.video.signals();
-    signals.whenSignal(VideoServiceSignals.AUTOPLAY_DELEGATED).then(() => {
-      this.allowAutoplay_ = false;
+    signals.whenSignal(VideoServiceSignals.PLAYBACK_DELEGATED).then(() => {
+      this.allowPlayback_ = false;
 
       if (this.isPlaying_) {
         this.video.pause();
@@ -907,7 +907,7 @@ class VideoEntry {
    * @private
    */
   autoplayLoadedVideoVisibilityChanged_() {
-    if (!this.allowAutoplay_) {
+    if (!this.allowPlayback_) {
       return;
     }
     if (this.isVisible_) {
