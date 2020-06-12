@@ -182,26 +182,13 @@ const targetMatchers = {
     );
   },
   'VALIDATOR': (file) => {
-    if (
-      isOwnersFile(file) ||
-      file.startsWith('validator/webui/') ||
-      file.startsWith('validator/java/')
-    ) {
+    if (isOwnersFile(file) || file.startsWith('validator/webui/')) {
       return false;
     }
     return (
       file.startsWith('validator/') ||
       file === 'build-system/tasks/validator.js' ||
       isValidatorFile(file)
-    );
-  },
-  'VALIDATOR_JAVA': (file) => {
-    if (isOwnersFile(file)) {
-      return false;
-    }
-    return (
-      file.startsWith('validator/java/') ||
-      file === 'build-system/tasks/validator.js'
     );
   },
   'VALIDATOR_WEBUI': (file) => {
@@ -257,12 +244,10 @@ function determineBuildTargets(fileName = 'build-targets.js') {
   if (buildTargets.has('BABEL_PLUGIN') || buildTargets.has('SERVER')) {
     buildTargets.add('RUNTIME');
   }
-  // Test all targets except VALIDATOR_JAVA on Travis during package upgrades.
+  // Test all targets on Travis during package upgrades.
   if (isTravisBuild() && buildTargets.has('PACKAGE_UPGRADE')) {
     const allTargets = Object.keys(targetMatchers);
-    allTargets
-      .filter((target) => target != 'VALIDATOR_JAVA')
-      .forEach((target) => buildTargets.add(target));
+    allTargets.forEach((target) => buildTargets.add(target));
   }
   return buildTargets;
 }
