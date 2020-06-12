@@ -45,10 +45,11 @@ class Runner extends RuntimeTestRunner {
 }
 
 async function buildTransformedHtml() {
-  const filePaths = await globby('./test/fixtures/*.html');
+  const filePaths = await globby('./test/fixtures/**/*.html');
   let normalizedFilePath;
   try {
     for (const filePath of filePaths) {
+      //await fs.copySync(filePath, `./test-bin/${filePath}`);
       const cwd = process.cwd();
       normalizedFilePath = path.normalize(filePath);
       const absoluteFilePath = `${cwd}/${normalizedFilePath}`;
@@ -65,11 +66,11 @@ async function buildTransformedHtml() {
 }
 
 async function integration() {
+  await buildTransformedHtml();
+
   if (shouldNotRun()) {
     return;
   }
-
-  await buildTransformedHtml();
 
   maybePrintArgvMessages();
 
