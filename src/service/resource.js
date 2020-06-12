@@ -886,13 +886,6 @@ export class Resource {
     if (this.state_ == ResourceState.LAYOUT_FAILED) {
       return Promise.reject(this.lastLayoutError_);
     }
-    if (this.state_ != ResourceState.LAYOUT_SCHEDULED) {
-      const err = dev().createError(
-        'startLayout called but not LAYOUT_SCHEDULED'
-      );
-      reportError(err, this.element);
-      return Promise.reject(err);
-    }
 
     devAssert(
       this.state_ != ResourceState.NOT_BUILT,
@@ -901,6 +894,14 @@ export class Resource {
       this.state_
     );
     devAssert(this.isDisplayed(), 'Not displayed for layout: %s', this.debugid);
+
+    if (this.state_ != ResourceState.LAYOUT_SCHEDULED) {
+      const err = dev().createError(
+        'startLayout called but not LAYOUT_SCHEDULED'
+      );
+      reportError(err, this.element);
+      return Promise.reject(err);
+    }
 
     // Unwanted re-layouts are ignored.
     if (this.layoutCount_ > 0 && !this.element.isRelayoutNeeded()) {
