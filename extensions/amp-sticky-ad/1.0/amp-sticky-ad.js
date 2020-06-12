@@ -68,7 +68,7 @@ class AmpStickyAd extends AMP.BaseElement {
     if (isExperimentOn(this.win, 'sticky-ad-padding-bottom')) {
       const experimentInfoMap = /** @type {!Object<string,
         !../../../src/experiments.ExperimentInfo>} */ ({
-        [[STICKY_AD_PADDING_BOTTOM_EXP.id]]: {
+        [STICKY_AD_PADDING_BOTTOM_EXP.id]: {
           isTrafficEligible: () => true,
           branches: [
             [STICKY_AD_PADDING_BOTTOM_EXP.control],

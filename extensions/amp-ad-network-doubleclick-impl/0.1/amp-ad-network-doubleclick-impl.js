@@ -494,7 +494,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         isTrafficEligible: () => true,
         branches: [[NO_SIGNING_EXP.control], [NO_SIGNING_EXP.experiment]],
       },
-      [[STICKY_AD_PADDING_BOTTOM_EXP.id]]: {
+      [STICKY_AD_PADDING_BOTTOM_EXP.id]: {
         isTrafficEligible: () => true,
         branches: [
           [STICKY_AD_PADDING_BOTTOM_EXP.control],
