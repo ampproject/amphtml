@@ -16,7 +16,7 @@
 import {BrowserController} from '../../testing/test-helper';
 import {poll as classicPoll} from '../../testing/iframe';
 
-const TIMEOUT = 15000;
+const TIMEOUT = 10000;
 
 // Skip Edge, which throws "Permission denied" errors when inspecting
 // element properties in the testing iframe (Edge 17, Windows 10).

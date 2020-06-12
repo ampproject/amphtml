@@ -87,7 +87,6 @@ import {
   FakeWindow,
   interceptEventListeners,
 } from './fake-dom';
-import {RequestBank, stubService} from './test-helper';
 import {Services} from '../src/services';
 import {addParamsToUrl} from '../src/url';
 import {adopt, adoptShadowMode} from '../src/runtime';
@@ -101,6 +100,7 @@ import {
   installBuiltinElements,
   installRuntimeServices,
 } from '../src/service/core-services';
+import {stubService} from './test-helper';
 
 import {install as installCustomElements} from '../src/polyfills/custom-elements';
 import {installDocService} from '../src/service/ampdoc-impl';
@@ -551,7 +551,6 @@ class IntegrationFixture {
     if (env.iframe.parentNode) {
       env.iframe.parentNode.removeChild(env.iframe);
     }
-    return RequestBank.tearDown();
   }
 }
 
