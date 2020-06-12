@@ -3,7 +3,7 @@ FAIL
 >> ^~~~~~~~~
 feature_tests/unprintable_chars.html:1:0 The mandatory attribute '⚡' is missing in tag 'html'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
 >> ^~~~~~~~~
-feature_tests/unprintable_chars.html:1:0 The parent tag of tag 'html' is '$root', but it can only be '!doctype'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
+feature_tests/unprintable_chars.html:1:0 Invalid or missing doctype declaration. Should be <!doctype html>. See https://amp.dev/documentation/guides-and-tutorials/start/create/basic_markup/
 >> ^~~~~~~~~
 feature_tests/unprintable_chars.html:1:0 Tag or text which is only allowed inside the body section found outside of the body section.
 >> ^~~~~~~~~
