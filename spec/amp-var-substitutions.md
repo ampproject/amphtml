@@ -1332,11 +1332,11 @@ Used to assign fallback value when the variable is resolved to empty string.
 
 - Example: `$TOLOWERCASE(${var})`
 
-#### ToUpperCase
+##### ToUpperCase
 
 - Example: `$TOUPPERCASE(TITLE)`
 
-##### NOT
+##### Not
 
 Used to convert truth-y/false-y value to `'false'`/`'true'` string.
 
@@ -1356,8 +1356,7 @@ SHA-384 hash
 
 An if statement to choose between values
 
-- Example: `$IF(${var}, value1, value2)`
-- Example result: Resolve to `value2` if `${var}` resolves to falsey value including `'false'`, `''`, `'0'`, `'null'`, `'Nan'` or `'undefined'`.
+- Example: `$IF(${var}, value1, value2)` resolves to `value2` if `${var}` resolves to falsey value (`'false'`, `''`, `'0'`, `'null'`, `'Nan'` or `'undefined'`), otherwise will resolve to `value1`.
 
 ##### Replace
 
