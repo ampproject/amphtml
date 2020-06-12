@@ -1326,7 +1326,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @return {!../../../src/service/viewer-interface.ViewerInterface}
    */
   getViewer_() {
-    if (this.viewer_ == null) {
+    if (this.viewer_ === null) {
       this.viewer_ = Services.viewerForDoc(getAmpdoc(this.win.document));
     }
     return this.viewer_;
