@@ -1236,7 +1236,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
     const manualAdvanceNext = this.getNextPageId(
       false /* opt_isAutomaticAdvance */,
-      true /* opt_iallowCircularReference */
+      true /* opt_allowCircularReference */
     );
     const previous = this.getPreviousPageId();
 
