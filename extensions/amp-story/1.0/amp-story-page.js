@@ -1309,7 +1309,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     // Link last page to first page if it's on it's own.
-    if (!this.viewer_.hasCapability('swipe')) {
+    if (!this.viewer_.hasCapability('swipe') && firstPage) { return firstPage}
+    
+    return null;
       const firstPage = this.element.parentElement.querySelector(
         'amp-story-page:first-of-type'
       );
