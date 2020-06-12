@@ -64,13 +64,8 @@ class AmpStickyAd extends AMP.BaseElement {
     this.viewport_ = this.getViewport();
     this.element.classList.add('i-amphtml-sticky-ad-layout');
 
-    // For iPhone users with a home bar, we set a padding to prevent the ads from being unclickable.
-    // All current all-screen iPhones have an aspect ratio of ~2.16
-    if (
-      navigator.userAgent.match(/iPhone/i) &&
-      Number(window.screen.height) / window.screen.width > 2.1 &&
-      isExperimentOn(this.win, 'sticky-ad-padding-bottom')
-    ) {
+    // Setting padding-bottom to avoid iPhone home bar
+    if (isExperimentOn(this.win, 'sticky-ad-padding-bottom')) {
       const experimentInfoMap = /** @type {!Object<string,
         !../../../src/experiments.ExperimentInfo>} */ ({
         [[STICKY_AD_PADDING_BOTTOM_EXP.id]]: {
@@ -83,13 +78,12 @@ class AmpStickyAd extends AMP.BaseElement {
       });
       randomlySelectUnsetExperiments(this.win, experimentInfoMap);
       if (
-        true ||
         getExperimentBranch(this.win, STICKY_AD_PADDING_BOTTOM_EXP.id) ==
-          STICKY_AD_PADDING_BOTTOM_EXP.experiment
+        STICKY_AD_PADDING_BOTTOM_EXP.experiment
       ) {
         setStyle(
           this.element,
-          'margin-bottom',
+          'padding-bottom',
           'env(safe-area-inset-bottom, 0px)'
         );
       }
