@@ -372,6 +372,10 @@ You can render success or error responses in your form by using [extended templa
 - Render the response in the child element by including a template via `<template></template>` or `<script type="text/plain"></script>` tag inside it or by referencing a template with a `template="id_of_other_template"` attribute.
 - Provide a valid JSON object for responses to `submit-success` and `submit-error`. Both success and error responses should have a `Content-Type: application/json` header.
 
+[tip type="note"]
+When using `<amp-form>` in tandem with another templating AMP component, such as `<amp-list>`, note that templates may not nest in valid AMP documents. In this case a valid workaround is to provide the template by `id` via the `template` attribute. Learn more about [nested templates in `<amp-mustache>`](https://amp.dev/documentation/components/amp-mustache/#nested-templates).
+[/tip]
+
 <a id="example-submitting"></a>
 
 ##### Example: Form displays success, error, and submitting messages
