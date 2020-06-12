@@ -19,8 +19,7 @@ import {
   RequestBank,
 } from '../../../../../testing/test-helper';
 
-// TODO(wg-infra): RequestBank causes SauceLabs disconnect.
-const t = describe.configure().skipSafari().skipEdge().skipSauceLabs();
+const t = describe.configure().skipSafari().skipEdge();
 
 t.run('amp-story-affiliate link', () => {
   describes.integration(

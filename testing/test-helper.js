@@ -204,7 +204,7 @@ export class RequestBank {
     if (timeout <= 0) {
       return xhr;
     }
-    const timer = new Promise((resolve, reject) => {
+    const timer = new Promise((_, reject) => {
       setTimeout(() => {
         reject(
           new Error(`"RequestBank.${action}" timed out after ${timeout} ms.`)

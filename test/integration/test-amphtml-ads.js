@@ -19,7 +19,7 @@ import {maybeSwitchToCompiledJs} from '../../testing/iframe';
 import {parseQueryString} from '../../src/url';
 import {xhrServiceForTesting} from '../../src/service/xhr-impl';
 
-// TODO(wg-infra): RequestBank causes SauceLabs disconnect.
+// TODO: SauceLabs gets 502 Bad Gateway when trying to resolve "ads.localhost:9876".
 describe
   .configure()
   .skipSauceLabs()
@@ -86,7 +86,7 @@ describe
     );
   });
 
-// TODO(wg-infra): RequestBank causes SauceLabs disconnect.
+// TODO: SauceLabs gets 502 Bad Gateway when trying to resolve "ads.localhost:9876".
 describe
   .configure()
   .skipSauceLabs()
@@ -282,7 +282,7 @@ describe
     );
   });
 
-// TODO(wg-infra): RequestBank causes SauceLabs disconnect.
+// TODO: SauceLabs gets 502 Bad Gateway when trying to resolve "ads.localhost:9876".
 describe
   .configure()
   .skipSauceLabs()

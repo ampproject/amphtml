@@ -20,7 +20,7 @@ import {parseQueryString} from '../../src/url';
 // TODO(wg-infra): RequestBank causes SauceLabs disconnect.
 describe
   .configure()
-  .skipSauceLabs()
+  .skipSafari() // TODO: These tests hang on SauceLabs Safari.
   .run('amp-analytics', function () {
     describes.integration(
       'basic pageview',
