@@ -1,6 +1,7 @@
 # Release Schedule
 
 [filter format="none"]
+
 - [Release Channels](#release-channels)
   - [Nightly](#nightly)
   - [Weekly](#weekly)
