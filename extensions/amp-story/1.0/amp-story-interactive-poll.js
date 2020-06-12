@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpStoryInteractive, InteractionType} from './amp-story-interactive';
+import {AmpStoryInteractive, InteractiveType} from './amp-story-interactive';
 import {CSS} from '../../../build/amp-story-interactive-poll-1.0.css';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
@@ -73,7 +73,7 @@ export class AmpStoryInteractivePoll extends AmpStoryInteractive {
    * @param {!AmpElement} element
    */
   constructor(element) {
-    super(element, InteractionType.POLL, /* bounds */ [2, 2]);
+    super(element, InteractiveType.POLL, /* bounds */ [2, 2]);
   }
 
   /** @override */

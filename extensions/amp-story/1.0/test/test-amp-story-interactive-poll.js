@@ -19,7 +19,7 @@ import {AmpStoryStoreService} from '../amp-story-store-service';
 import {Services} from '../../../../src/services';
 import {
   addConfigToInteractive,
-  getMockInteractionData,
+  getMockInteractiveData,
 } from './test-amp-story-interactive';
 import {getRequestService} from '../amp-story-request-service';
 import {measureMutateElementStub} from '../../../../testing/test-helper';
@@ -105,7 +105,7 @@ describes.realWin(
       );
     });
 
-    it('should enter the post-interaction state on option click', async () => {
+    it('should enter the post-interactive state on option click', async () => {
       addConfigToInteractive(ampStoryPoll, 2);
       ampStoryPoll.buildCallback();
       await ampStoryPoll.layoutCallback();
@@ -123,7 +123,7 @@ describes.realWin(
     it('should handle the percentage pipeline', async () => {
       env.sandbox
         .stub(requestService, 'executeRequest')
-        .resolves(getMockInteractionData());
+        .resolves(getMockInteractiveData());
 
       ampStoryPoll.element.setAttribute('endpoint', 'http://localhost:8000');
 

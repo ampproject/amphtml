@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpStoryInteractive, InteractionType} from '../amp-story-interactive';
+import {AmpStoryInteractive, InteractiveType} from '../amp-story-interactive';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {AnalyticsVariable, getVariableService} from '../variable-service';
 import {Services} from '../../../../src/services';
@@ -29,7 +29,7 @@ import {registerServiceBuilder} from '../../../../src/service';
  *
  * @return {Object}
  */
-export const getMockInteractionData = () => {
+export const getMockInteractiveData = () => {
   return {
     options: [
       {
@@ -71,7 +71,7 @@ export const addConfigToInteractive = (
 
 class InteractiveTest extends AmpStoryInteractive {
   constructor(element) {
-    super(element, InteractionType.QUIZ);
+    super(element, InteractiveType.QUIZ);
   }
 
   /** @override */
@@ -129,7 +129,7 @@ describes.realWin(
       const ampStoryInteractiveEl = win.document.createElement(
         'amp-story-interactive'
       );
-      ampStoryInteractiveEl.id = 'TEST_interactionId';
+      ampStoryInteractiveEl.id = 'TEST_interactiveId';
       ampStoryInteractiveEl.getResources = () =>
         win.__AMP_SERVICES.resources.obj;
 
@@ -172,7 +172,7 @@ describes.realWin(
       expect(optionsList[0]).to.haveOwnProperty('correct', 'correct');
     });
 
-    it('should enter post-interaction state on option click', async () => {
+    it('should enter post-interactive state on option click', async () => {
       addConfigToInteractive(ampStoryInteractive);
       ampStoryInteractive.buildCallback();
       await ampStoryInteractive.layoutCallback();
@@ -205,23 +205,23 @@ describes.realWin(
       ampStoryInteractive.buildCallback();
       await ampStoryInteractive.layoutCallback();
       await ampStoryInteractive.getOptionElements()[1].click();
-      expect(trigger).to.have.been.calledWith('story-interaction');
+      expect(trigger).to.have.been.calledWith('story-interactive');
       const variables = analyticsVars.get();
-      expect(variables[AnalyticsVariable.STORY_INTERACTION_ID]).to.equal(
-        'TEST_interactionId'
+      expect(variables[AnalyticsVariable.STORY_INTERACTIVE_ID]).to.equal(
+        'TEST_interactiveId'
       );
-      expect(variables[AnalyticsVariable.STORY_INTERACTION_RESPONSE]).to.equal(
+      expect(variables[AnalyticsVariable.STORY_INTERACTIVE_RESPONSE]).to.equal(
         1
       );
-      expect(variables[AnalyticsVariable.STORY_INTERACTION_TYPE]).to.equal(
-        ampStoryInteractive.interactionType_
+      expect(variables[AnalyticsVariable.STORY_INTERACTIVE_TYPE]).to.equal(
+        ampStoryInteractive.interactiveType_
       );
     });
 
     it('should update the quiz when the user has already reacted', async () => {
       env.sandbox
         .stub(requestService, 'executeRequest')
-        .resolves(getMockInteractionData());
+        .resolves(getMockInteractiveData());
       addConfigToInteractive(ampStoryInteractive);
       ampStoryInteractive.element.setAttribute(
         'endpoint',
@@ -249,7 +249,7 @@ describes.realWin(
     });
 
     it('should preprocess percentages properly', () => {
-      const responseData1 = getMockInteractionData()['options'];
+      const responseData1 = getMockInteractiveData()['options'];
 
       const percentages1 = ampStoryInteractive.preprocessPercentages_(
         responseData1
