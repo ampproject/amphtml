@@ -31,9 +31,9 @@ import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, devAssert, user} from '../../../src/log';
+import {expandConsentEndpointUrl, getConsentCID} from './consent-config';
 
 const TAG = 'CONSENT-STATE-MANAGER';
-const CID_SCOPE = 'AMP-CONSENT';
 
 /** @visibleForTesting */
 export const CONSENT_STRING_MAX_LENGTH = 1024;
@@ -482,13 +482,7 @@ export class ConsentInstance {
     const legacyConsentState = calculateLegacyStateValue(
       consentInfo['consentState']
     );
-    const cidPromise = Services.cidForDoc(this.ampdoc_).then((cid) => {
-      return cid.get(
-        {scope: CID_SCOPE, createCookieIfNotPresent: true},
-        Promise.resolve()
-      );
-    });
-    cidPromise.then((userId) => {
+    getConsentCID(this.ampdoc_).then((userId) => {
       const request = /** @type {!JsonObject} */ ({
         // Unfortunately we need to keep the name to be backward compatible
         'consentInstanceId': this.id_,
@@ -513,10 +507,12 @@ export class ConsentInstance {
         ampCors: false,
       };
       this.ampdoc_.whenFirstVisible().then(() => {
-        Services.xhrFor(this.ampdoc_.win).fetchJson(
-          /** @type {string} */ (this.onUpdateHref_),
-          init
-        );
+        expandConsentEndpointUrl(
+          this.ampdoc_.getHeadNode(),
+          /** @type {string} */ (this.onUpdateHref_)
+        ).then((expandedUpdateHref) => {
+          Services.xhrFor(this.ampdoc_.win).fetchJson(expandedUpdateHref, init);
+        });
       });
     });
   }
