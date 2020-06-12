@@ -3,7 +3,7 @@ $category@: presentation
 formats:
   - websites
 teaser:
-  text: Displays GL Transmission Format (gITF) 3D models.
+  text: Displays a countdown sequence to a specified date.
 ---
 
 <!--
