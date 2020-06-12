@@ -126,7 +126,8 @@ class CustomEventReporter {
     triggerAnalyticsEvent(
       this.parent_,
       this.getEventTypeInSandbox_(eventType),
-      opt_vars
+      opt_vars,
+      /** enableDataVars */ false
     );
   }
   /**

@@ -129,7 +129,12 @@ export class SubscriptionAnalytics {
     user().info(TAG, loggedString, opt_vars || '');
 
     opt_vars = opt_vars || dict({});
-    triggerAnalyticsEvent(this.element_, loggedString, opt_vars);
+    triggerAnalyticsEvent(
+      this.element_,
+      loggedString,
+      opt_vars,
+      /** enableDataVars */ false
+    );
 
     for (let l = 0; l < this.listeners_.length; l++) {
       this.listeners_[l](eventType, opt_vars, internalVars);

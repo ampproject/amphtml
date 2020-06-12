@@ -477,7 +477,8 @@ export class NextPageService {
       /** @type {!JsonObject} */ ({
         'title': title,
         'url': url,
-      })
+      }),
+      /** enableDataVars */ false
     );
   }
 
@@ -1072,7 +1073,8 @@ export class NextPageService {
           /** @type {!JsonObject} */ ({
             'title': page.title,
             'url': page.url,
-          })
+          }),
+          /** enableDataVars */ false
         );
         const a2a = this.navigation_.navigateToAmpUrl(
           page.url,

@@ -737,7 +737,12 @@ export function reportErrorToAnalytics(error, win) {
       'errorName': error.name,
       'errorMessage': error.message,
     });
-    triggerAnalyticsEvent(getRootElement_(win), 'user-error', vars);
+    triggerAnalyticsEvent(
+      getRootElement_(win),
+      'user-error',
+      vars,
+      /** enableDataVars */ false
+    );
   }
 }
 
