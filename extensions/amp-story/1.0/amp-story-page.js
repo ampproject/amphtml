@@ -243,9 +243,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {boolean}  */
     this.isFirstPage_ = false;
 
-    /** @private {boolean} */
-    this.isLastPage_ = false;
-
     /** @private {?LoadingSpinner} */
     this.loadingSpinner_ = null;
 
@@ -304,6 +301,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
 
+    /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
+    this.viewer_ = Services.viewerForDoc(getAmpDoc(this.win.document));
+
     /**
      * Whether the user agent matches a bot.  This is used to prevent resource
      * optimizations that make the document less useful at crawl time, e.g.
@@ -337,7 +337,6 @@ export class AmpStoryPage extends AMP.BaseElement {
   firstAttachedCallback() {
     // Only prerender the first story page.
     this.isFirstPage_ = matches(this.element, 'amp-story-page:first-of-type');
-    this.isLastPage_ = matches(this.element, 'amp-story-page:last-of-type');
   }
 
   /** @override */
@@ -1309,10 +1308,14 @@ export class AmpStoryPage extends AMP.BaseElement {
       return nextElement.id;
     }
 
-    const firstPage = this.element.parentElement.querySelector(
-      'amp-story-page:first-of-type'
-    );
-    return firstPage ? firstPage.id : null;
+    // Link last page to first page if it's on it's own.
+    if (!this.viewer_.hasCapability('swipe')) {
+      const firstPage = this.element.parentElement.querySelector(
+        'amp-story-page:first-of-type'
+      );
+      return firstPage ? firstPage.id : null;
+    }
+    return null;
   }
 
   /**

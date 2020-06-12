@@ -2216,7 +2216,6 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     map[pageId] = distance;
-
     const page = this.getPageById(pageId);
     page.getAdjacentPageIds().forEach((adjacentPageId) => {
       if (
