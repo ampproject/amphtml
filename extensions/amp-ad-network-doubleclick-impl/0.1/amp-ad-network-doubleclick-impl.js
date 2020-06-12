@@ -1307,6 +1307,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       position: isMultiSizeFluid ? 'relative' : null,
     });
 
+    // Check if this is a multi-size creative that's narrower than the ad slot.
+    if (
+      this.returnedSize_ &&
+      this.returnedSize_.width &&
+      this.returnedSize_.width < this.getSlotSize().width
+    ) {
+      setStyles(dev().assertElement(this.iframe), {
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+      });
+    }
+
     if (this.qqid_) {
       this.element.setAttribute('data-google-query-id', this.qqid_);
     }
