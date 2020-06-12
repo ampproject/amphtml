@@ -50,6 +50,7 @@ limitations under the License.
   data-adslot="mrec"
 ></amp-ad>
 ```
+
 For a maintenanced uptodate documentation please refer to our
 [official springAds document](https://github.com/spring-media/adsolutions-implementationReference/blob/master/publisher-amp-reference.md)
 
