@@ -23,14 +23,7 @@
 import '../../amp-a4a/0.1/real-time-config-manager';
 import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../src/ampdoc-fie';
 import {
-  AmpA4A,
-  ConsentTupleDef,
-  DEFAULT_SAFEFRAME_VERSION,
-  NO_SIGNING_EXP,
-  XORIGIN_MODE,
-  assignAdUrlToError,
-} from '../../amp-a4a/0.1/amp-a4a';
-import {
+  AMP_AD_NO_CENTER_CSS_EXP,
   AmpAnalyticsConfigDef,
   QQID_HEADER,
   RENDER_ON_IDLE_FIX_EXP,
@@ -51,6 +44,14 @@ import {
   maybeAppendErrorParameter,
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
+import {
+  AmpA4A,
+  ConsentTupleDef,
+  DEFAULT_SAFEFRAME_VERSION,
+  NO_SIGNING_EXP,
+  XORIGIN_MODE,
+  assignAdUrlToError,
+} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
 import {FIE_INIT_CHUNKING_EXP} from '../../../src/friendly-iframe-embed';
@@ -99,15 +100,15 @@ import {
   waitFor3pThrottle,
 } from '../../amp-ad/0.1/concurrent-load';
 import {getCryptoRandomBytesArray, utf8Decode} from '../../../src/utils/bytes';
-import {getMode} from '../../../src/mode';
-import {getMultiSizeDimensions} from '../../../ads/google/utils';
-import {getOrCreateAdCid} from '../../../src/ad-cid';
-
 import {
   getExperimentBranch,
   isExperimentOn,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
+import {getMode} from '../../../src/mode';
+import {getMultiSizeDimensions} from '../../../ads/google/utils';
+import {getOrCreateAdCid} from '../../../src/ad-cid';
+
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {isArray} from '../../../src/types';
 import {isCancellation} from '../../../src/error';
@@ -458,6 +459,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         branches: [
           RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.CONTROL,
           RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT,
+        ],
+      },
+      [AMP_AD_NO_CENTER_CSS_EXP.id]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [AMP_AD_NO_CENTER_CSS_EXP.control],
+          [AMP_AD_NO_CENTER_CSS_EXP.experiment],
         ],
       },
       [[FIE_INIT_CHUNKING_EXP.id]]: {
@@ -1306,6 +1314,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       height: `${size.height}px`,
       position: isMultiSizeFluid ? 'relative' : null,
     });
+
+    // Set the centering CSS if the experiment is off
+    if (
+      !isExperimentOn(this.win, 'amp-ad-no-center-css') ||
+      getExperimentBranch(this.win, AMP_AD_NO_CENTER_CSS_EXP.id) ===
+        AMP_AD_NO_CENTER_CSS_EXP.control
+    ) {
+      setStyles(dev().assertElement(this.iframe), {
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+      });
+    }
 
     if (this.qqid_) {
       this.element.setAttribute('data-google-query-id', this.qqid_);
