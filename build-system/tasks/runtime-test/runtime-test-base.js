@@ -169,6 +169,10 @@ function updateReporters(config) {
   if (argv.saucelabs) {
     config.reporters.push('saucelabs');
   }
+
+  if (false) { // TODO(rafer45): add a suitable condition
+    config.reporters.push('json-result');
+  }
 }
 
 class RuntimeTestConfig {
