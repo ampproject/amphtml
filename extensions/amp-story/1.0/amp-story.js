@@ -460,7 +460,6 @@ export class AmpStory extends AMP.BaseElement {
         );
       });
     }
-    this.element.setAttribute('aria-live', 'polite');
   }
 
   /**
