@@ -43,10 +43,10 @@ limitations under the License.
 >
 </amp-ad>
 <amp-ad width="320" height="50" type="springAds" data-adslot="banner"></amp-ad>
-<amp-ad 
-  width="100vW" 
-  height="fluid" 
-  type="springAds" 
+<amp-ad
+  width="100vW"
+  height="fluid"
+  type="springAds"
   data-adslot="mrec"
 ></amp-ad>
 ```
