@@ -42,7 +42,10 @@ export const StoryAnalyticsEvent = {
   STORY_UNMUTED: 'story-audio-unmuted',
 };
 
-/** @enum {string} */
+/**
+ * @enum {string}
+ * Note: auto advance advancements should always be prefixed with "autoAdvance".
+ */
 export const AdvancementMode = {
   GO_TO_PAGE: 'goToPageAction',
   AUTO_ADVANCE_TIME: 'autoAdvanceTime',
