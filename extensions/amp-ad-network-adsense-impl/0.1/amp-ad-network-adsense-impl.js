@@ -537,18 +537,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       height: `${this.size_.height}px`,
     });
 
-    // Set the centering CSS if the experiment is off
-    if (
-      !isExperimentOn(this.win, 'amp-ad-no-center-css') ||
-      getExperimentBranch(this.win, AMP_AD_NO_CENTER_CSS_EXP.id) ===
-        AMP_AD_NO_CENTER_CSS_EXP.control
-    ) {
-      setStyles(dev().assertElement(this.iframe), {
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-      });
-    }
     if (this.qqid_) {
       this.element.setAttribute('data-google-query-id', this.qqid_);
     }
