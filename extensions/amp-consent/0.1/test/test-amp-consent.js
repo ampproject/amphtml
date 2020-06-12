@@ -30,6 +30,7 @@ import {
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service';
+import {removeSearch} from '../../../../src/url';
 import {user} from '../../../../src/log';
 import {xhrServiceForTesting} from '../../../../src/service/xhr-impl';
 
@@ -67,6 +68,7 @@ describes.realWin(
         'http://www.origin.com/r/1': '{}',
         'https://invalid.response.com/': '{"consentRequired": 3}',
         'https://xssi-prefix/': 'while(1){"consentRequired": false}',
+        'https://example.test/': '{}',
       };
 
       xhrServiceMock = {
@@ -74,6 +76,7 @@ describes.realWin(
           requestBody = init.body;
           expect(init.credentials).to.equal('include');
           expect(init.method).to.equal('POST');
+          url = removeSearch(url);
           return Promise.resolve({
             json() {
               return Promise.resolve(JSON.parse(jsonMockResponses[url]));
@@ -173,6 +176,22 @@ describes.realWin(
           expect(fetchSpy).to.be.calledOnce;
           expect(win.testLocation.origin).not.to.be.empty;
           expect(fetchSpy).to.be.calledWith('http://www.origin.com/r/1');
+        });
+
+        it('supports checkConsentHref expansion', async () => {
+          const fetchSpy = env.sandbox.spy(xhrServiceMock, 'fetchJson');
+          consentElement = createConsentElement(
+            doc,
+            dict({
+              'checkConsentHref': 'https://example.test?cid=CLIENT_ID&r=RANDOM',
+              'consentInstanceId': 'test',
+            })
+          );
+          const ampConsent = new AmpConsent(consentElement);
+          doc.body.appendChild(consentElement);
+          await ampConsent.buildCallback();
+          await macroTask();
+          expect(fetchSpy).to.be.calledWithMatch(/cid=amp-.{22}&r=RANDOM/);
         });
       });
     });

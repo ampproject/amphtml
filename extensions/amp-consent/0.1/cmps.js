@@ -30,8 +30,9 @@ export const CMP_CONFIG = {};
 if (getMode().test || getMode().localDev) {
   CMP_CONFIG['_ping_'] = {
     'consentInstanceId': '_ping_',
-    'checkConsentHref': '/get-consent-v1',
-    'promptUISrc': '/examples/amp-consent/diy-consent.html',
+    'checkConsentHref': '/get-consent-v1?cid=CLIENT_ID&pid=PAGE_VIEW_ID',
+    'promptUISrc':
+      '/examples/amp-consent/diy-consent.html?cid=CLIENT_ID&pid=PAGE_VIEW_ID',
   };
 }
 
