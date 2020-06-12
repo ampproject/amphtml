@@ -236,7 +236,6 @@ exports.rules = [
       'extensions/amp-user-notification/0.1/amp-user-notification.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
 
       // AMP Story
-      'extensions/amp-story/0.1/animation.js->extensions/amp-animation/0.1/web-animation-types.js',
       'extensions/amp-story/1.0/animation-types.js->extensions/amp-animation/0.1/web-animation-types.js',
       // Story ads
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/amp-story-store-service.js',
@@ -366,7 +365,6 @@ exports.rules = [
       'extensions/amp-link-rewriter/0.1/amp-link-rewriter.js->' +
         'src/service/navigation.js',
       // For localization.
-      'extensions/amp-story/0.1/amp-story-localization-service.js->src/service/localization.js',
       'extensions/amp-story/1.0/amp-story-localization-service.js->src/service/localization.js',
       'extensions/amp-story-auto-ads/0.1/story-ad-localization.js->src/service/localization.js',
       // Accessing calculateScriptBaseUrl() for vendor config URLs
