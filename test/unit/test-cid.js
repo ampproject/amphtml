@@ -69,7 +69,7 @@ describes.sandboxed('cid', {}, (env) => {
       localStorage: {
         setItem: (key, value) => {
           expect(key).to.equal('amp-cid');
-          expect(value).to.be.string;
+          expect(value).to.be.a('string');
           storage[key] = value;
         },
         getItem: (key) => {
@@ -208,7 +208,7 @@ describes.sandboxed('cid', {}, (env) => {
           'e1',
           'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come1)'
         ).then(() => {
-          expect(storage['amp-cid']).to.be.string;
+          expect(storage['amp-cid']).to.be.a('string');
           const stored = JSON.parse(storage['amp-cid']);
           expect(stored.cid).to.equal(
             'sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])'
@@ -584,7 +584,7 @@ describes.sandboxed('cid', {}, (env) => {
             clock.tick(777);
             resolve();
             return Promise.all([persistencePromise, sha384Promise]).then(() => {
-              expect(storage['amp-cid']).to.be.string;
+              expect(storage['amp-cid']).to.be.a('string');
               const stored = JSON.parse(storage['amp-cid']);
               expect(stored.cid).to.equal(
                 'sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])'
@@ -1028,7 +1028,7 @@ describes.realWin('cid', {amp: true}, (env) => {
       expect(cid.isScopeOptedIn_('bar')).to.equal('bar-api-key');
     });
 
-    it('should not work if vendor not whitelisted', () => {
+    it('should not work if vendor not allowlisted', () => {
       ampdoc.win.document.head.innerHTML +=
         '<meta name="amp-google-client-id-api" content="abodeanalytics">';
       expect(cid.isScopeOptedIn_('AMP_ECID_GOOGLE')).to.equal(undefined);

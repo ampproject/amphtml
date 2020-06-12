@@ -286,7 +286,7 @@ Any `<link>` tag present with attribute `rel` equal to any of the following:
 
 </details>
 
-#### Remove non-whitelisted `<meta>` tags
+#### Remove non-allowlisted `<meta>` tags
 
 _Condition_:
 Remove any `<meta>` tags except for those that:

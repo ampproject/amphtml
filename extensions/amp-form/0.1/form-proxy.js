@@ -20,17 +20,17 @@ import {startsWith} from '../../../src/string';
 import {toWin} from '../../../src/types';
 
 /**
- * Blacklisted properties. Used mainly fot testing.
+ * denylisted properties. Used mainly fot testing.
  * @type {?Array<string>}
  */
-let blacklistedProperties = null;
+let denylistedProperties = null;
 
 /**
  * @param {?Array<string>} properties
  * @visibleForTesting
  */
-export function setBlacklistedPropertiesForTesting(properties) {
-  blacklistedProperties = properties;
+export function setDenylistedPropertiesForTesting(properties) {
+  denylistedProperties = properties;
 }
 
 /**
@@ -114,7 +114,7 @@ function createFormProxyConstr(win) {
         // Exclude properties that already been created.
         ObjectProto.hasOwnProperty.call(FormProxyProto, name) ||
         // Exclude some properties. Currently only used for testing.
-        (blacklistedProperties && blacklistedProperties.includes(name))
+        (denylistedProperties && denylistedProperties.includes(name))
       ) {
         continue;
       }

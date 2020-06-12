@@ -25,6 +25,9 @@ const {
   checkExactVersions,
 } = require('./build-system/tasks/check-exact-versions');
 const {
+  checkRenovateConfig,
+} = require('./build-system/tasks/check-renovate-config');
+const {
   process3pGithubPr,
 } = require('./build-system/tasks/process-3p-github-pr');
 const {
@@ -34,11 +37,6 @@ const {
   storybookAmp,
   storybookPreact,
 } = require('./build-system/tasks/storybook');
-const {
-  validator,
-  validatorJava,
-  validatorWebui,
-} = require('./build-system/tasks/validator');
 const {a4a} = require('./build-system/tasks/a4a');
 const {ava} = require('./build-system/tasks/ava');
 const {babelPluginTests} = require('./build-system/tasks/babel-plugin-tests');
@@ -49,6 +47,7 @@ const {checkLinks} = require('./build-system/tasks/check-links');
 const {checkOwners} = require('./build-system/tasks/check-owners');
 const {checkSourcemaps} = require('./build-system/tasks/check-sourcemaps');
 const {checkTypes} = require('./build-system/tasks/check-types');
+const {cherryPick} = require('./build-system/tasks/cherry-pick');
 const {clean} = require('./build-system/tasks/clean');
 const {codecovUpload} = require('./build-system/tasks/codecov-upload');
 const {compileJison} = require('./build-system/tasks/compile-jison');
@@ -66,6 +65,7 @@ const {integration} = require('./build-system/tasks/integration');
 const {lint} = require('./build-system/tasks/lint');
 const {makeExtension} = require('./build-system/tasks/extension-generator');
 const {nailgunStart, nailgunStop} = require('./build-system/tasks/nailgun');
+const {performanceUrls} = require('./build-system/tasks/performance-urls');
 const {performance} = require('./build-system/tasks/performance');
 const {prCheck} = require('./build-system/tasks/pr-check');
 const {prependGlobal} = require('./build-system/tasks/prepend-global');
@@ -77,6 +77,7 @@ const {size} = require('./build-system/tasks/size');
 const {todosFindClosed} = require('./build-system/tasks/todos');
 const {unit} = require('./build-system/tasks/unit');
 const {updatePackages} = require('./build-system/tasks/update-packages');
+const {validator, validatorWebui} = require('./build-system/tasks/validator');
 const {vendorConfigs} = require('./build-system/tasks/vendor-configs');
 const {visualDiff} = require('./build-system/tasks/visual-diff');
 
@@ -139,8 +140,10 @@ createTask('caches-json', cachesJson);
 createTask('check-exact-versions', checkExactVersions);
 createTask('check-links', checkLinks);
 createTask('check-owners', checkOwners);
+createTask('check-renovate-config', checkRenovateConfig);
 createTask('check-sourcemaps', checkSourcemaps);
 createTask('check-types', checkTypes);
+createTask('cherry-pick', cherryPick);
 createTask('clean', clean);
 createTask('codecov-upload', codecovUpload);
 createTask('compile-jison', compileJison);
@@ -160,6 +163,7 @@ createTask('make-extension', makeExtension);
 createTask('nailgun-start', nailgunStart);
 createTask('nailgun-stop', nailgunStop);
 createTask('performance', performance);
+createTask('performance-urls', performanceUrls);
 createTask('pr-check', prCheck);
 createTask('prepend-global', prependGlobal);
 createTask('presubmit', presubmit);
@@ -175,7 +179,6 @@ createTask('todos:find-closed', todosFindClosed);
 createTask('unit', unit);
 createTask('update-packages', updatePackages);
 createTask('validator', validator);
-createTask('validator-java', validatorJava);
 createTask('validator-webui', validatorWebui);
 createTask('vendor-configs', vendorConfigs);
 createTask('visual-diff', visualDiff);

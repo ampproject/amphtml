@@ -54,10 +54,12 @@ async function main() {
     timedExecOrDie('gulp babel-plugin-tests');
     timedExecOrDie('gulp caches-json');
     timedExecOrDie('gulp dev-dashboard-tests');
+    timedExecOrDie('gulp check-renovate-config');
     timedExecOrDie('gulp server-tests');
     timedExecOrDie('gulp dep-check');
     timedExecOrDie('gulp check-types');
     timedExecOrDie('gulp check-sourcemaps');
+    timedExecOrDie('gulp performance-urls');
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
@@ -68,6 +70,7 @@ async function main() {
     timedExecOrDie('gulp lint');
     timedExecOrDie('gulp prettify');
     timedExecOrDie('gulp presubmit');
+    timedExecOrDie('gulp performance-urls');
 
     if (buildTargets.has('AVA')) {
       timedExecOrDie('gulp ava');
@@ -93,6 +96,10 @@ async function main() {
     // Validate owners syntax only for PR builds.
     if (buildTargets.has('OWNERS')) {
       timedExecOrDie('gulp check-owners --local_changes');
+    }
+
+    if (buildTargets.has('RENOVATE_CONFIG')) {
+      timedExecOrDie('gulp check-renovate-config');
     }
 
     if (buildTargets.has('SERVER')) {

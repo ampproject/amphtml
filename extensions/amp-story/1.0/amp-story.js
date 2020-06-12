@@ -52,6 +52,7 @@ import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
+import {AmpStoryReactionPoll} from './amp-story-reaction-poll';
 import {AmpStoryReactionQuiz} from './amp-story-reaction-quiz';
 import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
@@ -60,19 +61,11 @@ import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {EventType, dispatch} from './events';
 import {Gestures} from '../../../src/gesture';
-import {
-  HistoryState,
-  getHistoryState,
-  removeAttributeInMutate,
-  setAttributeInMutate,
-  setHistoryState,
-  shouldShowStoryUrlInfo,
-} from './utils';
+import {HistoryState, getHistoryState, setHistoryState} from './history';
 import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {LiveStoryManager} from './live-story-manager';
-import {LocalizationService} from '../../../src/service/localization';
 import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
@@ -108,12 +101,17 @@ import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex, lastItem} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
+import {getLocalizationService} from './amp-story-localization-service';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode} from '../../../src/mode';
 import {getState} from '../../../src/history';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseQueryString} from '../../../src/url';
-import {registerServiceBuilder} from '../../../src/service';
+import {
+  removeAttributeInMutate,
+  setAttributeInMutate,
+  shouldShowStoryUrlInfo,
+} from './utils';
 import {toArray} from '../../../src/types';
 import {upgradeBackgroundAudio} from './audio';
 import LocalizedStringsAr from './_locales/ar';
@@ -155,6 +153,7 @@ const Attributes = {
   AUTO_ADVANCE_AFTER: 'auto-advance-after',
   AUTO_ADVANCE_TO: 'auto-advance-to',
   DESKTOP_POSITION: 'i-amphtml-desktop-position',
+  MUTED: 'muted',
   ORIENTATION: 'orientation',
   PUBLIC_ADVANCE_TO: 'advance-to',
   RETURN_TO: 'i-amphtml-return-to',
@@ -359,9 +358,9 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?LiveStoryManager} */
     this.liveStoryManager_ = null;
 
-    /** @private @const {!LocalizationService} */
-    this.localizationService_ = new LocalizationService(this.win);
-    const localizationService = this.localizationService_;
+    /** @private @const {!../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = getLocalizationService(this.element);
+
     this.localizationService_
       .registerLocalizedStringBundle('default', LocalizedStringsDefault)
       .registerLocalizedStringBundle('ar', LocalizedStringsAr)
@@ -394,10 +393,6 @@ export class AmpStory extends AMP.BaseElement {
       'en-xa',
       enXaPseudoLocaleBundle
     );
-
-    registerServiceBuilder(this.win, 'localization', function () {
-      return localizationService;
-    });
   }
 
   /** @override */
@@ -725,13 +720,13 @@ export class AmpStory extends AMP.BaseElement {
       this.storeService_.dispatch(action, data);
     });
 
-    // Actions whitelist could be initialized empty, or with some actions some
+    // Actions allowlist could be initialized empty, or with some actions some
     // other components registered.
     this.storeService_.subscribe(
-      StateProperty.ACTIONS_WHITELIST,
-      (actionsWhitelist) => {
+      StateProperty.ACTIONS_ALLOWLIST,
+      (actionsAllowlist) => {
         const actions = Services.actionServiceForDoc(this.element);
-        actions.setWhitelist(actionsWhitelist);
+        actions.setAllowlist(actionsAllowlist);
       },
       true /** callToInitialize */
     );
@@ -1050,7 +1045,7 @@ export class AmpStory extends AMP.BaseElement {
       this.liveStoryManager_ = new LiveStoryManager(this);
       this.liveStoryManager_.build();
 
-      this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, [
+      this.storeService_.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, [
         {tagOrTarget: 'AMP-LIVE-LIST', method: 'update'},
       ]);
 
@@ -1281,7 +1276,7 @@ export class AmpStory extends AMP.BaseElement {
     return Promise.all(pageImplPromises).then((pages) => {
       this.pages_ = pages;
       if (isExperimentOn(this.win, 'amp-story-branching')) {
-        this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, [
+        this.storeService_.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, [
           {tagOrTarget: 'AMP-STORY', method: 'goToPage'},
         ]);
       }
@@ -2512,6 +2507,9 @@ export class AmpStory extends AMP.BaseElement {
    */
   onMutedStateUpdate_(isMuted) {
     isMuted ? this.mute_() : this.unmute_();
+    isMuted
+      ? this.element.setAttribute(Attributes.MUTED, '')
+      : this.element.removeAttribute(Attributes.MUTED);
   }
 
   /**
@@ -2651,7 +2649,7 @@ export class AmpStory extends AMP.BaseElement {
       {tagOrTarget: 'AMP-SIDEBAR', method: 'close'},
       {tagOrTarget: 'AMP-SIDEBAR', method: 'toggle'},
     ];
-    this.storeService_.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, actions);
+    this.storeService_.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, actions);
   }
 
   /**
@@ -2789,7 +2787,10 @@ export class AmpStory extends AMP.BaseElement {
    */
   static isBrowserSupported(win) {
     return Boolean(
-      win.CSS && win.CSS.supports && win.CSS.supports('display', 'grid')
+      win.CSS &&
+        win.CSS.supports &&
+        win.CSS.supports('display', 'grid') &&
+        win.CSS.supports('color', 'var(--test)')
     );
   }
 }
@@ -2804,5 +2805,6 @@ AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story-page', AmpStoryPage);
   AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment);
   AMP.registerElement('amp-story-reaction-quiz', AmpStoryReactionQuiz);
+  AMP.registerElement('amp-story-reaction-poll', AmpStoryReactionPoll);
   AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });

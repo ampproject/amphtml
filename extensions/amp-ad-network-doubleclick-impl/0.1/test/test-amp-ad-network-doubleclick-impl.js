@@ -33,6 +33,7 @@ import {
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkDoubleclickImpl,
+  EXPAND_JSON_TARGETING_EXP,
   RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES,
   getNetworkId,
   getPageviewStateTokensForAdRequest,
@@ -47,7 +48,10 @@ import {QQID_HEADER} from '../../../../ads/google/a4a/utils';
 import {SafeframeHostApi} from '../safeframe-host';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {toggleExperiment} from '../../../../src/experiments';
+import {
+  forceExperimentBranch,
+  toggleExperiment,
+} from '../../../../src/experiments';
 
 /**
  * We're allowing external resources because otherwise using realWin causes
@@ -704,7 +708,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
           /(\?|&)ady=-?[0-9]+(&|$)/,
           /(\?|&)u_aw=[0-9]+(&|$)/,
           /(\?|&)u_ah=[0-9]+(&|$)/,
-          /(\?|&)u_cd=24(&|$)/,
+          /(\?|&)u_cd=(24|30)(&|$)/,
           /(\?|&)u_w=[0-9]+(&|$)/,
           /(\?|&)u_h=[0-9]+(&|$)/,
           /(\?|&)u_tz=-?[0-9]+(&|$)/,
@@ -809,6 +813,48 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       new AmpAd(element).upgradeCallback();
       return impl.getAdUrl().then((url) => {
         expect(url).to.match(/&scp=excl_cat%3Dsports&/);
+      });
+    });
+
+    it('expands CLIENT_ID in targeting', () => {
+      toggleExperiment(win, 'expand-json-targeting', true, true);
+      forceExperimentBranch(
+        win,
+        EXPAND_JSON_TARGETING_EXP.ID,
+        EXPAND_JSON_TARGETING_EXP.EXPERIMENT
+      );
+      element.setAttribute(
+        'json',
+        `{
+          "targeting": {
+            "cid": "CLIENT_ID(foo)"
+          }
+        }`
+      );
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then((url) => {
+        expect(url).to.match(/&scp=cid%3Damp-[\w-]+&/);
+      });
+    });
+
+    it('expands CLIENT_ID in targeting inside array', () => {
+      toggleExperiment(win, 'expand-json-targeting', true, true);
+      forceExperimentBranch(
+        win,
+        EXPAND_JSON_TARGETING_EXP.ID,
+        EXPAND_JSON_TARGETING_EXP.EXPERIMENT
+      );
+      element.setAttribute(
+        'json',
+        `{
+          "targeting": {
+            "arr": ["cats", "CLIENT_ID(foo)"]
+          }
+        }`
+      );
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then((url) => {
+        expect(url).to.match(/&scp=arr%3Dcats%2Camp-[\w-]+&/);
       });
     });
 
@@ -1023,6 +1069,21 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
         expect(url).to.match(/(\?|&)gdpr_consent=tcstring(&|$)/);
       }));
 
+    it('should include gdpr=1, if gdprApplies is true', () =>
+      impl.getAdUrl({gdprApplies: true}).then((url) => {
+        expect(url).to.match(/(\?|&)gdpr=1(&|$)/);
+      }));
+
+    it('should include gdpr=0, if gdprApplies is false', () =>
+      impl.getAdUrl({gdprApplies: false}).then((url) => {
+        expect(url).to.match(/(\?|&)gdpr=0(&|$)/);
+      }));
+
+    it('should not include gdpr, if gdprApplies is missing', () =>
+      impl.getAdUrl({}).then((url) => {
+        expect(url).to.not.match(/(\?|&)gdpr=(&|$)/);
+      }));
+
     it('should include msz/psz/fws if in holdback control', () => {
       env.sandbox
         .stub(impl, 'randomlySelectUnsetExperiments_')
@@ -1156,15 +1217,33 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
   });
 
   describe('#delayAdRequestEnabled', () => {
-    beforeEach(() => {
-      const element = createElementWithAttributes(doc, 'amp-ad', {
-        type: 'doubleclick',
-      });
-      doc.body.appendChild(element);
-      impl = new AmpAdNetworkDoubleclickImpl(element);
+    it('should return false', () => {
+      expect(impl.delayAdRequestEnabled()).to.be.false;
     });
 
-    it('should return false by default', () => {
+    it('should not respect loading strategy', () => {
+      impl.element.setAttribute(
+        'data-loading-strategy',
+        'prefer-viewability-over-views'
+      );
+      expect(impl.delayAdRequestEnabled()).to.be.false;
+    });
+
+    it('should respect loading strategy if fetch attribute present', () => {
+      impl.element.setAttribute(
+        'data-loading-strategy',
+        'prefer-viewability-over-views'
+      );
+      impl.element.setAttribute('data-lazy-fetch', 'true');
+      expect(impl.delayAdRequestEnabled()).to.equal(1.25);
+    });
+
+    it('should NOT delay due to non-true fetch attribute', () => {
+      impl.element.setAttribute(
+        'data-loading-strategy',
+        'prefer-viewability-over-views'
+      );
+      impl.element.setAttribute('data-lazy-fetch', 'false');
       expect(impl.delayAdRequestEnabled()).to.be.false;
     });
   });
@@ -1494,6 +1573,18 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
     });
 
+    it('should use the same random subdomain for every slot on a page', () => {
+      impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
+
+      const first = impl.getSafeframePath();
+
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+      impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
+      const second = impl.getSafeframePath();
+
+      expect(first).to.equal(second);
+    });
+
     it('uses random subdomain if experiment is on without win.crypto', () => {
       impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
 
@@ -1707,6 +1798,100 @@ describes.realWin(
               )
             ).to.be.ok
         );
+      });
+    });
+
+    describe('#idleRenderOutsideViewport', () => {
+      beforeEach(() => {
+        element = createElementWithAttributes(doc, 'amp-ad', {
+          'width': '200',
+          'height': '50',
+          'type': 'doubleclick',
+        });
+        impl = new AmpAdNetworkDoubleclickImpl(element);
+        env.sandbox
+          .stub(impl, 'getResource')
+          .returns({whenWithinViewport: () => Promise.resolve()});
+      });
+
+      it('should use experiment value', () => {
+        impl.postAdResponseExperimentFeatures['render-idle-vp'] = '4';
+        expect(impl.idleRenderOutsideViewport()).to.equal(4);
+        expect(impl.isIdleRender_).to.be.true;
+      });
+
+      it('should return false if using loading strategy', () => {
+        impl.postAdResponseExperimentFeatures['render-idle-vp'] = '4';
+        impl.element.setAttribute(
+          'data-loading-strategy',
+          'prefer-viewability-over-views'
+        );
+        expect(impl.idleRenderOutsideViewport()).to.be.false;
+        expect(impl.isIdleRender_).to.be.false;
+      });
+
+      it('should return false if invalid experiment value', () => {
+        impl.postAdResponseExperimentFeatures['render-idle-vp'] = 'abc';
+        expect(impl.idleRenderOutsideViewport()).to.be.false;
+      });
+
+      it('should return 12 if no experiment header', () => {
+        expect(impl.idleRenderOutsideViewport()).to.equal(12);
+      });
+
+      it('should return renderOutsideViewport boolean', () => {
+        env.sandbox.stub(impl, 'renderOutsideViewport').returns(false);
+        expect(impl.idleRenderOutsideViewport()).to.be.false;
+      });
+    });
+
+    describe('idle renderNonAmpCreative', () => {
+      beforeEach(() => {
+        element = createElementWithAttributes(doc, 'amp-ad', {
+          'width': '200',
+          'height': '50',
+          'type': 'doubleclick',
+        });
+        impl = new AmpAdNetworkDoubleclickImpl(element);
+        impl.postAdResponseExperimentFeatures['render-idle-vp'] = '4';
+        impl.postAdResponseExperimentFeatures['render-idle-throttle'] = 'true';
+        env.sandbox
+          .stub(AmpA4A.prototype, 'renderNonAmpCreative')
+          .returns(Promise.resolve());
+      });
+
+      // TODO(jeffkaufman, #13422): this test was silently failing
+      it.skip('should throttle if idle render and non-AMP creative', () => {
+        impl.win['3pla'] = 1;
+        const startTime = Date.now();
+        return impl.renderNonAmpCreative().then(() => {
+          expect(Date.now() - startTime).to.be.at.least(1000);
+        });
+      });
+
+      it('should NOT throttle if idle experiment not enabled', () => {
+        impl.win['3pla'] = 1;
+        delete impl.postAdResponseExperimentFeatures['render-idle-vp'];
+        const startTime = Date.now();
+        return impl.renderNonAmpCreative().then(() => {
+          expect(Date.now() - startTime).to.be.at.most(50);
+        });
+      });
+
+      it('should NOT throttle if experiment throttle not enabled', () => {
+        impl.win['3pla'] = 1;
+        const startTime = Date.now();
+        return impl.renderNonAmpCreative().then(() => {
+          expect(Date.now() - startTime).to.be.at.most(50);
+        });
+      });
+
+      it('should NOT throttle if idle render and no previous', () => {
+        impl.win['3pla'] = 0;
+        const startTime = Date.now();
+        return impl.renderNonAmpCreative().then(() => {
+          expect(Date.now() - startTime).to.be.at.most(50);
+        });
       });
     });
 

@@ -119,7 +119,7 @@ describes.fakeWin(
     });
 
     describes.realWin(
-      'Whitelist of variable substitutions',
+      'Allowlist of variable substitutions',
       {
         amp: {
           ampdoc: 'single',
@@ -128,13 +128,11 @@ describes.fakeWin(
       (env) => {
         let variableSource;
         beforeEach(() => {
-          env.sandbox.stub(env.ampdoc, 'getMeta').returns({
-            'amp-allowed-url-macros': 'ABC,ABCD,CANONICAL',
-          });
           variableSource = new VariableSource(env.ampdoc);
+          variableSource.variableAllowlist_ = ['ABC', 'ABCD', 'CANONICAL'];
         });
 
-        it('Works with whitelisted variables', () => {
+        it('Works with allowlisted variables', () => {
           variableSource.setAsync('ABCD', () => Promise.resolve('abcd'));
           expect(variableSource.getExpr()).to.be.ok;
           expect(variableSource.getExpr().toString()).to.contain('ABCD');
@@ -147,7 +145,7 @@ describes.fakeWin(
             });
         });
 
-        it('Should not work with unwhitelisted variables', () => {
+        it('Should not work with unallowlisted variables', () => {
           variableSource.setAsync('RANDOM', () => Promise.resolve('0.1234'));
           expect(variableSource.getExpr()).to.be.ok;
           expect(variableSource.getExpr().toString()).not.to.contain('RANDOM');
@@ -159,14 +157,22 @@ describes.fakeWin(
               expect(value).to.equal('0.1234');
             });
         });
+
+        it('Should ignore allowlisted variables for email documents', () => {
+          env.win.document.documentElement.setAttribute('amp4email', '');
+          expect(variableSource.getExpr()).to.be.ok;
+          expect(variableSource.getExpr().toString()).not.to.contain('ABC');
+          expect(variableSource.getExpr().toString()).not.to.contain('ABCD');
+          expect(variableSource.getExpr().toString()).not.to.contain(
+            'CANONICAL'
+          );
+        });
       }
     );
 
-    it('Should not work with empty variable whitelist', () => {
-      env.sandbox.stub(env.ampdoc, 'getMeta').returns({
-        'amp-allowed-url-macros': '',
-      });
+    it('Should not work with empty variable allowlist', () => {
       const variableSource = new VariableSource(env.ampdoc);
+      variableSource.variableAllowlist_ = [''];
 
       variableSource.setAsync('RANDOM', () => Promise.resolve('0.1234'));
       expect(variableSource.getExpr()).to.be.ok;

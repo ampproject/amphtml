@@ -1112,7 +1112,7 @@ export class TimerEventTracker extends EventTracker {
     }
 
     const timerHandler = new TimerEventHandler(
-      timerSpec,
+      /** @type {!JsonObject} */ (timerSpec),
       startBuilder,
       stopBuilder
     );
@@ -1143,7 +1143,7 @@ export class TimerEventTracker extends EventTracker {
     const eventType = user().assertString(config['on']);
     const trackerKey = getTrackerKeyName(eventType);
 
-    return this.root.getTrackerForWhitelist(
+    return this.root.getTrackerForAllowlist(
       trackerKey,
       getTrackerTypesForParentType('timer')
     );
@@ -1668,16 +1668,16 @@ export class VisibilityTracker extends EventTracker {
       return null;
     }
 
-    const trackerWhitelist = getTrackerTypesForParentType('visible');
+    const trackerAllowlist = getTrackerTypesForParentType('visible');
     userAssert(
-      waitForSpec == 'none' || trackerWhitelist[waitForSpec] !== undefined,
+      waitForSpec == 'none' || trackerAllowlist[waitForSpec] !== undefined,
       'waitFor value %s not supported',
       waitForSpec
     );
 
     const waitForTracker =
       this.waitForTrackers_[waitForSpec] ||
-      this.root.getTrackerForWhitelist(waitForSpec, trackerWhitelist);
+      this.root.getTrackerForAllowlist(waitForSpec, trackerAllowlist);
     if (waitForTracker) {
       this.waitForTrackers_[waitForSpec] = waitForTracker;
     } else {

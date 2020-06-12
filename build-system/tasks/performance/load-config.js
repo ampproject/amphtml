@@ -22,7 +22,14 @@ const PATH = './config.json';
 
 /**
  * Loads test config from ./config.json
- * @return {{concurrency:number, headless:boolean, runs:number, handlers:Array<Object>, urlToHandlers:Object}}
+ * @return {{
+ *  concurrency:number,
+ *  headless:boolean,
+ *  runs:number,
+ *  handlers:Array<Object>,
+ *  urlToHandlers:Object,
+ *  adsUrls?:Array<string>
+ * }}
  */
 function loadConfig() {
   const file = fs.readFileSync(path.join(__dirname, PATH));
@@ -43,7 +50,27 @@ function loadConfig() {
   if (Object.keys(config.urlToHandlers).length < 1) {
     throw new Error('No URLs found in config.');
   }
+  config.headless = !!argv.headless;
+  config.devtools = !!argv.devtools;
+
+  maybeExtractAdsUrls(config);
   return config;
+}
+
+/**
+ * If adsHandler is in use, add the array as top level key to be used for
+ * easy access to files for caching.
+ * @param {!Object} config
+ */
+function maybeExtractAdsUrls(config) {
+  if (!config || !config.handlers) {
+    return;
+  }
+  for (const handler of config.handlers) {
+    if (handler.handlerName === 'adsHandler' && handler.adsUrls) {
+      config['adsUrls'] = handler.adsUrls;
+    }
+  }
 }
 
 module.exports = loadConfig;

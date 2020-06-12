@@ -128,8 +128,11 @@ export class AmpForm {
     /** @private @const {string} */
     this.id_ = id;
 
+    /** @private @const {?Document} */
+    this.doc_ = element.ownerDocument;
+
     /** @const @private {!Window} */
-    this.win_ = toWin(element.ownerDocument.defaultView);
+    this.win_ = toWin(this.doc_.defaultView);
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
@@ -220,6 +223,8 @@ export class AmpForm {
     /** @const @private {!./form-verifiers.FormVerifier} */
     this.verifier_ = getFormVerifier(this.form_, () => this.handleXhrVerify_());
 
+    /** If the element is in an email document, allow its `clear` and `submit` actions. */
+    this.actions_.addToAllowlist('FORM', ['clear', 'submit'], ['email']);
     this.actions_.installActionHandler(
       this.form_,
       this.actionHandler_.bind(this)
@@ -239,6 +244,9 @@ export class AmpForm {
     Services.formSubmitForDoc(element).then((service) => {
       this.formSubmitService_ = service;
     });
+
+    /** @private */
+    this.isAmp4Email_ = this.doc_ && isAmp4Email(this.doc_);
   }
 
   /**
@@ -296,20 +304,18 @@ export class AmpForm {
    * @param {string} url
    * @param {string} method
    * @param {!Object<string, string>=} opt_extraFields
-   * @param {!Array<string>=} opt_fieldBlacklist
+   * @param {!Array<string>=} opt_fieldDenylist
    * @return {!Promise<!FetchRequestDef>}
    */
-  requestForFormFetch(url, method, opt_extraFields, opt_fieldBlacklist) {
+  requestForFormFetch(url, method, opt_extraFields, opt_fieldDenylist) {
     let xhrUrl, body;
     let headers = dict({'Accept': 'application/json'});
     const isHeadOrGet = method == 'GET' || method == 'HEAD';
     if (isHeadOrGet) {
       this.assertNoSensitiveFields_();
       const values = this.getFormAsObject_();
-      if (opt_fieldBlacklist) {
-        opt_fieldBlacklist.forEach((name) => {
-          delete values[name];
-        });
+      if (opt_fieldDenylist) {
+        opt_fieldDenylist.forEach((name) => delete values[name]);
       }
 
       if (opt_extraFields) {
@@ -329,10 +335,8 @@ export class AmpForm {
         devAssert(this.encType_ === 'multipart/form-data');
         body = createFormDataWrapper(this.win_, this.form_);
       }
-      if (opt_fieldBlacklist) {
-        opt_fieldBlacklist.forEach((name) => {
-          body.delete(name);
-        });
+      if (opt_fieldDenylist) {
+        opt_fieldDenylist.forEach((name) => body.delete(name));
       }
 
       for (const key in opt_extraFields) {
@@ -948,13 +952,13 @@ export class AmpForm {
         `[${escapeCssSelectorIdent(FORM_VERIFY_OPTOUT)}]`
       )
     );
-    const blacklist = noVerifyFields.map((field) => field.name || field.id);
+    const denylist = noVerifyFields.map((field) => field.name || field.id);
 
     return this.doXhr_(
       dev().assertString(this.xhrVerify_),
       this.method_,
       /**opt_extraFields*/ {[FORM_VERIFY_PARAM]: true},
-      /**opt_fieldBlacklist*/ blacklist
+      /**opt_fieldDenylist*/ denylist
     );
   }
 
@@ -963,17 +967,17 @@ export class AmpForm {
    * @param {string} url
    * @param {string} method
    * @param {!Object<string, string>=} opt_extraFields
-   * @param {!Array<string>=} opt_fieldBlacklist
+   * @param {!Array<string>=} opt_fieldDenylist
    * @return {!Promise<!Response>}
    * @private
    */
-  doXhr_(url, method, opt_extraFields, opt_fieldBlacklist) {
+  doXhr_(url, method, opt_extraFields, opt_fieldDenylist) {
     this.assertSsrTemplate_(false, 'XHRs should be proxied.');
     return this.requestForFormFetch(
       url,
       method,
       opt_extraFields,
-      opt_fieldBlacklist
+      opt_fieldDenylist
     ).then((request) => this.xhr_.fetch(request.xhrUrl, request.fetchOpt));
   }
 
@@ -992,9 +996,8 @@ export class AmpForm {
           'See https://github.com/ampproject/amphtml/issues/24894.'
       );
     }
-    const doc = this.form_.ownerDocument;
     // Only degrade trust across form submission in AMP4EMAIL for now.
-    return doc && isAmp4Email(doc)
+    return this.isAmp4Email_
       ? /** @type {!ActionTrust} */ (incomingTrust - 1)
       : incomingTrust;
   }
@@ -1182,9 +1185,8 @@ export class AmpForm {
     }
     const redirectTo = response.headers.get(REDIRECT_TO_HEADER);
     if (redirectTo) {
-      const doc = this.form_.ownerDocument;
       userAssert(
-        !(doc && isAmp4Email(doc)),
+        !this.isAmp4Email_,
         'Redirects not supported in AMP4Email.',
         this.form_
       );
@@ -1381,7 +1383,7 @@ export class AmpForm {
       if (field.hasAttribute('data-amp-replace')) {
         return;
       }
-      // Form fields must be whitelisted
+      // Form fields must be allowlisted
       if (!field.hasAttribute('data-allow-initialization')) {
         return;
       }

@@ -40,8 +40,8 @@ import {dict, hasOwn} from '../../../src/utils/object';
 import {expandTemplate} from '../../../src/string';
 import {getMode} from '../../../src/mode';
 import {installLinkerReaderService} from './linker-reader';
+import {isAnalyticsChunksExperimentOn} from './analytics-group';
 import {isArray, isEnumValue} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {isIframed} from '../../../src/dom';
 import {isInFie} from '../../../src/iframe-helper';
 import {toggle} from '../../../src/style';
@@ -50,7 +50,7 @@ const TAG = 'amp-analytics';
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
 
-const WHITELIST_EVENT_IN_SANDBOX = [
+const ALLOWLIST_EVENT_IN_SANDBOX = [
   AnalyticsEventType.VISIBLE,
   AnalyticsEventType.HIDDEN,
 ];
@@ -231,7 +231,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           const configPromise = new AnalyticsConfig(this.element).loadConfig();
           loadConfigDeferred.resolve(configPromise);
         };
-        if (isExperimentOn(this.win, 'analytics-chunks') && !this.isInabox_) {
+        if (isAnalyticsChunksExperimentOn(this.win)) {
           chunk(this.element, loadConfigTask, ChunkPriority.HIGH);
         } else {
           loadConfigTask();
@@ -288,7 +288,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     if (!this.config_['triggers']) {
       const TAG = this.getName_();
-      this.user().error(
+      this.user().warn(
         TAG,
         'No triggers were found in the ' +
           'config. No analytics data will be sent.'
@@ -343,7 +343,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           const eventType = trigger['on'];
           if (
             isEnumValue(AnalyticsEventType, eventType) &&
-            !WHITELIST_EVENT_IN_SANDBOX.includes(eventType)
+            !ALLOWLIST_EVENT_IN_SANDBOX.includes(eventType)
           ) {
             this.user().error(
               TAG,
@@ -516,7 +516,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (!this.config_['requests']) {
       if (!this.allowParentPostMessage_()) {
         const TAG = this.getName_();
-        this.user().error(
+        this.user().warn(
           TAG,
           'No request strings defined. Analytics ' +
             'data will not be sent from this page.'
@@ -583,7 +583,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     const linkerTask = () => {
       this.linkerManager_.init();
     };
-    if (isExperimentOn(this.win, 'analytics-chunks') && !this.isInabox_) {
+    if (isAnalyticsChunksExperimentOn(this.win)) {
       chunk(this.element, linkerTask, ChunkPriority.LOW);
     } else {
       linkerTask();
@@ -720,7 +720,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           .then((digest) => digest * 100 < threshold);
         sampleDeferred.resolve(samplePromise);
       };
-      if (isExperimentOn(this.win, 'analytics-chunks') && !this.isInabox_) {
+      if (isAnalyticsChunksExperimentOn(this.win)) {
         chunk(this.element, sampleInTask, ChunkPriority.LOW);
       } else {
         sampleInTask();

@@ -41,6 +41,10 @@ You can specify a template in one of two ways:
 - a `template` attribute that references an ID of an existing templating element.
 - a templating element nested directly inside the `amp-list` element.
 
+[tip type="note"]
+When using `<amp-list>` in tandem with another templating AMP component, such as `<amp-form>`, note that templates may not nest in valid AMP documents. In this case a valid workaround is to provide the template by `id` via the `template` attribute. Learn more about [nested templates in `<amp-mustache>`](https://amp.dev/documentation/components/amp-mustache/#nested-templates).
+[/tip]
+
 For more details on templates, see [AMP HTML Templates](../../spec/amp-html-templates.md).
 
 _Example: Displaying a dynamic list_
@@ -220,6 +224,8 @@ In several cases, we may need the `<amp-list>` to resize on user interaction. Fo
 </amp-list>
 ```
 
+[filter formats="websites, stories"]
+
 ### Initialization from amp-state
 
 In most cases, you’ll probably want to have `<amp-list>` request JSON from a server. But `<amp-list>` can also use JSON you’ve included in an `<amp-state>`, right there in your HTML! This means rendering can occur without an additional server call, although, of course, if your page is served from an AMP cache, the data may not be fresh.
@@ -248,6 +254,8 @@ See below for a full example,
   </template>
 </amp-list>
 ```
+
+[/filter]<!-- formats="websites, stories" -->
 
 ## Attributes
 

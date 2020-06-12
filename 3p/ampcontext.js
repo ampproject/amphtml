@@ -111,7 +111,7 @@ export class AbstractAmpContext {
 
     /** @protected {!IframeMessagingClient} */
     this.client_ = new IframeMessagingClient(win, this.getHostWindow_());
-    this.client_.setSentinel(dev().assertString(this.sentinel));
+    this.client_.setSentinel(devAssert(this.sentinel));
 
     this.listenForPageVisibility_();
   }
@@ -180,7 +180,7 @@ export class AbstractAmpContext {
   /**
    *  Requests HTML snippet from the parent window.
    *  @param {string} selector CSS selector
-   *  @param {!Array<string>} attributes whitelisted attributes to be kept
+   *  @param {!Array<string>} attributes permissible attributes to be kept
    *    in the returned HTML string
    *  @param {function(*)} callback to be invoked with the HTML string
    */

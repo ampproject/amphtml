@@ -227,6 +227,13 @@ export class AmpSidebar extends AMP.BaseElement {
         this.open_(trust, caller);
       }
     });
+    /** If the element is in an email document,
+     * allow its `open`, `close`, and `toggle` actions. */
+    this.action_.addToAllowlist(
+      'amp-sidebar',
+      ['open', 'close', 'toggle'],
+      ['email']
+    );
 
     element.addEventListener(
       'click',

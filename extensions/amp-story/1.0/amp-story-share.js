@@ -22,6 +22,7 @@ import {
 } from '../../../src/clipboard';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from './../../../src/utils/object';
+import {getLocalizationService} from './amp-story-localization-service';
 import {getRequestService} from './amp-story-request-service';
 import {isObject} from '../../../src/types';
 import {listen} from '../../../src/event-helper';
@@ -220,9 +221,6 @@ export class ShareWidget {
     /** @protected {?Element} */
     this.root = null;
 
-    /** @private {?Promise<?../../../src/service/localization.LocalizationService>} */
-    this.localizationServicePromise_ = null;
-
     /** @private @const {!./amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = getRequestService(this.win, storyEl);
   }
@@ -244,9 +242,6 @@ export class ShareWidget {
     devAssert(!this.root, 'Already built.');
 
     this.ampdoc_ = ampdoc;
-    this.localizationServicePromise_ = Services.localizationServiceForOrNull(
-      this.win
-    );
 
     this.root = renderAsElement(this.win.document, TEMPLATE);
 
@@ -291,16 +286,12 @@ export class ShareWidget {
     const url = Services.documentInfoForDoc(this.getAmpDoc_()).canonicalUrl;
 
     if (!copyTextToClipboard(this.win, url)) {
-      this.localizationServicePromise_.then((localizationService) => {
-        devAssert(
-          localizationService,
-          'Could not retrieve LocalizationService.'
-        );
-        const failureString = localizationService.getLocalizedString(
-          LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
-        );
-        Toast.show(this.storyEl, dev().assertString(failureString));
-      });
+      const localizationService = getLocalizationService(this.storyEl);
+      devAssert(localizationService, 'Could not retrieve LocalizationService.');
+      const failureString = localizationService.getLocalizedString(
+        LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
+      );
+      Toast.show(this.storyEl, dev().assertString(failureString));
       return;
     }
 

@@ -36,10 +36,10 @@ let compilerErrors = '';
  */
 function formatClosureCompilerError(message) {
   const closurePluginLoggingPrefix = /^.*?gulp-google-closure-compiler.*?: /;
-  message = message.replace(closurePluginLoggingPrefix, '');
-  message = highlight(message, {ignoreIllegals: true});
-  message = message.replace(/WARNING/g, yellow('WARNING'));
-  message = message.replace(/ERROR/g, red('ERROR'));
+  message = highlight(message, {ignoreIllegals: true})
+    .replace(closurePluginLoggingPrefix, '')
+    .replace(/ WARNING /g, yellow(' WARNING '))
+    .replace(/ ERROR /g, red(' ERROR '));
   return message;
 }
 
@@ -72,16 +72,6 @@ function handleCompilerError(err, outputFilename, options, resolve) {
  */
 function handleTypeCheckError(err) {
   logError(red('Type checking failed:'));
-  emitError(err);
-}
-
-/**
- * Handles a closure error during single-pass compilation
- *
- * @param {Error} err
- */
-function handleSinglePassCompilerError(err) {
-  logError(red('Single pass compilation failed:'));
   emitError(err);
 }
 
@@ -137,34 +127,27 @@ function gulpClosureCompile(compilerOptions, nailgunPort) {
     logger: (errors) => (compilerErrors = errors), // Capture compiler errors
   };
 
-  if (compilerOptions.includes('SINGLE_FILE_COMPILATION=true')) {
-    // For single-pass compilation, use the default compiler.jar
-    closureCompiler.compiler.JAR_PATH = require.resolve(
-      '../../node_modules/google-closure-compiler-java/compiler.jar'
-    );
+  // On Mac OS and Linux, speed up compilation using nailgun (unless the
+  // --disable_nailgun flag was passed in)
+  // See https://github.com/facebook/nailgun.
+  if (
+    !argv.disable_nailgun &&
+    (process.platform == 'darwin' || process.platform == 'linux')
+  ) {
+    compilerOptions = [
+      '--nailgun-port',
+      nailgunPort,
+      'org.ampproject.AmpCommandLineRunner',
+      '--',
+    ].concat(compilerOptions);
+    pluginOptions.platform = ['native']; // nailgun-runner isn't a java binary
+    initOptions.extraArguments = null; // Already part of nailgun-server
   } else {
-    // On Mac OS and Linux, speed up compilation using nailgun (unless the
-    // --disable_nailgun flag was passed in)
-    // See https://github.com/facebook/nailgun.
-    if (
-      !argv.disable_nailgun &&
-      (process.platform == 'darwin' || process.platform == 'linux')
-    ) {
-      compilerOptions = [
-        '--nailgun-port',
-        nailgunPort,
-        'org.ampproject.AmpCommandLineRunner',
-        '--',
-      ].concat(compilerOptions);
-      pluginOptions.platform = ['native']; // nailgun-runner isn't a java binary
-      initOptions.extraArguments = null; // Already part of nailgun-server
-    } else {
-      // For other platforms, or if nailgun is explicitly disabled, use AMP's
-      // custom runner.jar
-      closureCompiler.compiler.JAR_PATH = require.resolve(
-        `../runner/dist/${nailgunPort}/runner.jar`
-      );
-    }
+    // For other platforms, or if nailgun is explicitly disabled, use AMP's
+    // custom runner.jar
+    closureCompiler.compiler.JAR_PATH = require.resolve(
+      `../runner/dist/${nailgunPort}/runner.jar`
+    );
   }
 
   return makeSourcemapsRelative(
@@ -175,6 +158,5 @@ function gulpClosureCompile(compilerOptions, nailgunPort) {
 module.exports = {
   gulpClosureCompile,
   handleCompilerError,
-  handleSinglePassCompilerError,
   handleTypeCheckError,
 };
