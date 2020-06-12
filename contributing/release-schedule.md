@@ -11,6 +11,7 @@
 - [Release Cadence](#release-cadence)
   - [Detailed schedule](#detailed-schedule)
   - [Release Freezes](#release-freezes)
+
 [/filter]
 
 A new release of AMP is pushed to all AMP pages every week on Tuesday. **Once a change in AMP is merged into the master branch of the amphtml repository, it will typically take 1-2 weeks for the change be live for all users.**
