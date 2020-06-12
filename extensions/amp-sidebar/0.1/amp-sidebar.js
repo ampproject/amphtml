@@ -150,6 +150,15 @@ export class AmpSidebar extends AMP.BaseElement {
 
     this.action_ = Services.actionServiceForDoc(element);
 
+    if (
+      this.element.parentNode != this.element.ownerDocument.body &&
+      this.element.parentNode != this.getAmpDoc().getBody()
+    ) {
+      this.user().warn(
+        `${TAG} is recommended to be a direct child of the <body> element to preserve a logical DOM order.`
+      );
+    }
+
     if (this.side_ != Side.LEFT && this.side_ != Side.RIGHT) {
       this.side_ = this.setSideAttribute_(
         isRTL(this.document_) ? Side.RIGHT : Side.LEFT
