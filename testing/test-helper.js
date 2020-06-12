@@ -191,7 +191,7 @@ export class RequestBank {
     return this.fetch_(url, 'tearDown');
   }
 
-  static fetch_(url, action, timeout = 20000) {
+  static fetch_(url, action, timeout = 10000) {
     const xhr = fetch(url).then((response) => {
       const {ok, status, statusText} = response;
       if (!ok) {
@@ -201,10 +201,13 @@ export class RequestBank {
       }
       return response;
     });
-    const timer = new Promise(() => {
+    if (timeout <= 0) {
+      return xhr;
+    }
+    const timer = new Promise((resolve, reject) => {
       setTimeout(() => {
-        throw new Error(
-          `"RequestBank.${action}" timed out after ${timeout} ms.`
+        reject(
+          new Error(`"RequestBank.${action}" timed out after ${timeout} ms.`)
         );
       }, timeout);
     });
