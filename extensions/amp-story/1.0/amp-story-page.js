@@ -301,8 +301,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
 
-    /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
-    this.viewer_ = Services.viewerForDoc(getAmpdoc(this.win.document));
+    /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
+    this.viewer_ = null;
 
     /**
      * Whether the user agent matches a bot.  This is used to prevent resource
@@ -1308,16 +1308,25 @@ export class AmpStoryPage extends AMP.BaseElement {
       return nextElement.id;
     }
 
-    // Link last page to first page if it's on it's own.
-    if (!this.viewer_.hasCapability('swipe') && firstPage) { return firstPage}
-    
-    return null;
+    // Link last page to first page if the story is on it's own.
+    if (!this.getViewer_().hasCapability('swipe')) {
       const firstPage = this.element.parentElement.querySelector(
         'amp-story-page:first-of-type'
       );
       return firstPage ? firstPage.id : null;
     }
     return null;
+  }
+
+  /**
+   * @private
+   * @return {!../../../src/service/viewer-interface.ViewerInterface}
+   */
+  getViewer_() {
+    if (this.viewer_ == null) {
+      this.viewer_ = Services.viewerForDoc(getAmpdoc(this.win.document));
+    }
+    return this.viewer_;
   }
 
   /**
