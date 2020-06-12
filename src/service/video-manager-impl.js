@@ -398,6 +398,9 @@ export class VideoManager {
    * @param {!VideoEntry} entryBeingPlayed
    */
   pauseOtherVideos(entryBeingPlayed) {
+    if (!this.allowPlayback_) {
+      return;
+    }
     this.entries_.forEach((entry) => {
       if (
         entry !== entryBeingPlayed &&
