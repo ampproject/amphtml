@@ -235,7 +235,11 @@ export class AmpStoryPlayer {
    * @private
    */
   addSandboxFlags_(iframe) {
-    if (!iframe.sandbox || !iframe.sandbox.supports) {
+    if (
+      !iframe.sandbox ||
+      !iframe.sandbox.supports ||
+      iframe.sandbox.length <= 0
+    ) {
       return; // Can't feature detect support.
     }
 
