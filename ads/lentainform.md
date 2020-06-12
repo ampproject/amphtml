@@ -42,3 +42,4 @@ For details on the configuration semantics, please contact the ad network or ref
 ### Optional parameters
 
 - `data-url`
+- `data-options`
