@@ -3,7 +3,7 @@ $category@: presentation
 formats:
   - websites
 teaser:
-  text: Display a sequence of backward counting to indicate the time remaining before an event is scheduled to occur.
+  text: Displays a countdown sequence to a specified date.
 ---
 
 <!--
