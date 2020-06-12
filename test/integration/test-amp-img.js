@@ -156,22 +156,28 @@ describe
       });
 
     // IE can't scale SVG images, so intrinsic sizers use a PNG instead.
-    it('renders intrinsic layout with correct size', () => {
-      const imageLoadedPromise = waitForImageToLoad(
-        fixture.doc,
-        'img[amp-img-id="intrinsic"]'
-      );
-      return imageLoadedPromise.then(() => {
-        const ampImg = fixture.doc.getElementById('intrinsic');
-        const width = parseInt(ampImg.getAttribute('width'), 10);
-        const height = parseInt(ampImg.getAttribute('height'), 10);
-        const bounds = ampImg.getBoundingClientRect();
+    describe
+      .configure()
+      .enableIe()
+      .skipSafari()
+      .run('intrinsic layout', () => {
+        it('renders intrinsic layout with correct size', () => {
+          const imageLoadedPromise = waitForImageToLoad(
+            fixture.doc,
+            'img[amp-img-id="intrinsic"]'
+          );
+          return imageLoadedPromise.then(() => {
+            const ampImg = fixture.doc.getElementById('intrinsic');
+            const width = parseInt(ampImg.getAttribute('width'), 10);
+            const height = parseInt(ampImg.getAttribute('height'), 10);
+            const bounds = ampImg.getBoundingClientRect();
 
-        expect(reduce(width, height)).to.deep.equal(
-          reduce(bounds.width, bounds.height)
-        );
+            expect(reduce(width, height)).to.deep.equal(
+              reduce(bounds.width, bounds.height)
+            );
+          });
+        });
       });
-    });
   });
 
 function reduce(a, b) {
