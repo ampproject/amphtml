@@ -30,6 +30,7 @@
   "fixed-elements-in-lightbox": 1,
   "flexAdSlots": 0.05,
   "hidden-mutation-observer": 1,
+  "intersect-resources": 0.1,
   "ios-fixed-no-transfer": 0,
   "layoutbox-invalidate-on-scroll": 1,
   "pump-early-frame": 1,
@@ -37,7 +38,6 @@
   "swg-gpay-api": 1,
   "swg-gpay-native": 1,
   "version-locking": 1,
-  "amp-ad-no-center-css": 1,
   "analytics-chunks": 1,
   "fie-init-chunking": 0.1
 }
