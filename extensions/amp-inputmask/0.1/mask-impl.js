@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../../src/amp-events';
 import {MASK_SEPARATOR_CHAR, MaskChars, NamedMasks} from './constants';
 import {MaskInterface} from './mask-interface';
 import {dict} from '../../../src/utils/object';
@@ -95,6 +96,10 @@ export class Mask {
     }
 
     this.controller_ = this.Inputmask_(config);
+
+    this.element_.addEventListener(AmpEvents.FORM_VALUE_CHANGE, () => {
+      this.mask();
+    });
   }
 
   /**
@@ -167,12 +172,12 @@ export class Mask {
 function convertAmpMaskToInputmask(ampMask) {
   const masks = ampMask
     .split(MASK_SEPARATOR_CHAR)
-    .map(m => m.replace(/_/g, ' '));
-  return masks.map(mask => {
+    .map((m) => m.replace(/_/g, ' '));
+  return masks.map((mask) => {
     let escapeNext = false;
     return mask
       .split('')
-      .map(c => {
+      .map((c) => {
         const escape = escapeNext;
         escapeNext = c == MaskChars.ESCAPE;
 
@@ -191,6 +196,7 @@ const NONALPHANUMERIC_REGEXP = /[^0-9\xB2\xB3\xB9\xBC-\xBE\u0660-\u0669\u06F0-\u
 /**
  * Removes special characters from the provided string.
  * @param {string} value
+ * @return {string}
  */
 function getAlphaNumeric(value) {
   return value.replace(NONALPHANUMERIC_REGEXP, '');

@@ -88,6 +88,14 @@ module.exports = {
         ) {
           return;
         }
+
+        if (
+          parent.type === 'Property' &&
+          parent.key === node &&
+          parent.parent.type === 'ObjectPattern'
+        ) {
+          return;
+        }
       }
 
       const message = [
@@ -167,7 +175,7 @@ module.exports = {
         stack.push({used: new Set(), declared: new Map()});
       },
 
-      'ClassBody:exit': function() {
+      'ClassBody:exit': function () {
         if (shouldIgnoreFile()) {
           return;
         }
@@ -180,7 +188,7 @@ module.exports = {
         });
       },
 
-      'ClassBody > MethodDefinition': function(node) {
+      'ClassBody > MethodDefinition': function (node) {
         if (shouldIgnoreFile()) {
           return;
         }
@@ -195,7 +203,7 @@ module.exports = {
         declared.set(name, node);
       },
 
-      'MethodDefinition[kind="constructor"] MemberExpression': function(node) {
+      'MethodDefinition[kind="constructor"] MemberExpression': function (node) {
         if (
           shouldIgnoreFile() ||
           !shouldCheckMember(node) ||
@@ -206,10 +214,12 @@ module.exports = {
 
         const {name} = node.property;
         const {declared} = current();
-        declared.set(name, node.parent);
+        if (!declared.has(name)) {
+          declared.set(name, node.parent);
+        }
       },
 
-      'ClassBody MemberExpression': function(node) {
+      'ClassBody MemberExpression': function (node) {
         if (
           shouldIgnoreFile() ||
           !shouldCheckMember(node, false) ||
@@ -221,6 +231,28 @@ module.exports = {
         const {name} = node.property;
         const {used} = current();
         used.add(name);
+      },
+
+      'ClassBody VariableDeclarator > ObjectPattern': function (node) {
+        if (shouldIgnoreFile()) {
+          return;
+        }
+
+        if (node.parent.init.type !== 'ThisExpression') {
+          return;
+        }
+
+        const {properties} = node;
+        for (let i = 0; i < properties.length; i++) {
+          const prop = properties[i];
+          if (prop.computed || !isPrivateName(prop.key)) {
+            continue;
+          }
+
+          const {name} = prop.key;
+          const {used} = current();
+          used.add(name);
+        }
       },
     };
   },

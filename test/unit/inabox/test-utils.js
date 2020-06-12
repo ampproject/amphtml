@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
+import * as IniLoad from '../../../src/ini-load';
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom.js';
 import {getA4AId, registerIniLoadListener} from '../../../src/inabox/utils';
 
-describes.realWin('inabox-utils', {}, env => {
-  let getResourcesInRectStub;
+describes.realWin('inabox-utils', {}, (env) => {
   let dispatchEventStub;
   let parentPostMessageStub;
   let initCustomEventStub;
   let ampdoc;
   let a4aIdMetaElement;
+  let iniLoadDeferred;
 
   function addA4AMetaTagToDocument() {
     a4aIdMetaElement = createElementWithAttributes(env.win.document, 'meta', {
@@ -37,18 +38,18 @@ describes.realWin('inabox-utils', {}, env => {
 
   beforeEach(() => {
     ampdoc = {win: env.win, getRootNode: () => ({})};
-    getResourcesInRectStub = sandbox.stub();
-    sandbox
-      .stub(Services, 'resourcesForDoc')
-      .withArgs(ampdoc)
-      .returns({getResourcesInRect: getResourcesInRectStub});
-    sandbox
+    iniLoadDeferred = new Deferred();
+
+    env.sandbox
+      .stub(IniLoad, 'whenContentIniLoad')
+      .returns(iniLoadDeferred.promise);
+    env.sandbox
       .stub(Services, 'viewportForDoc')
       .withArgs(ampdoc)
       .returns({getLayoutRect: () => ({})});
-    parentPostMessageStub = sandbox.stub();
-    dispatchEventStub = sandbox.stub();
-    initCustomEventStub = sandbox.stub();
+    parentPostMessageStub = env.sandbox.stub();
+    dispatchEventStub = env.sandbox.stub();
+    initCustomEventStub = env.sandbox.stub();
     env.win.parent = {postMessage: parentPostMessageStub};
     env.win.CustomEvent = (type, eventInit) => {
       initCustomEventStub(type, eventInit);
@@ -60,8 +61,6 @@ describes.realWin('inabox-utils', {}, env => {
   });
 
   it('should fire custom event and postMessage', () => {
-    const iniLoadDeferred = new Deferred();
-    getResourcesInRectStub.returns(iniLoadDeferred.promise);
     registerIniLoadListener(ampdoc);
     expect(dispatchEventStub).to.not.be.called;
     expect(parentPostMessageStub).to.not.be.called;

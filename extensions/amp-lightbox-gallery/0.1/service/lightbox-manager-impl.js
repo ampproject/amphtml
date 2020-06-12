@@ -52,7 +52,7 @@ export const VIDEO_TAGS = {
 };
 
 const GALLERY_TAG = 'amp-lightbox-gallery';
-const CAROUSEL_TAG = 'AMP-CAROUSEL';
+const CAROUSEL_TAGS = ['AMP-CAROUSEL', 'AMP-BASE-CAROUSEL'];
 const FIGURE_TAG = 'FIGURE';
 const SLIDE_SELECTOR = '.amp-carousel-slide, .i-amphtml-carousel-slotted';
 
@@ -150,7 +150,8 @@ export class LightboxManager {
     });
 
     // Process elements where the `lightbox` attr is dynamically set.
-    root.addEventListener(AutoLightboxEvents.NEWLY_SET, ({target}) => {
+    root.addEventListener(AutoLightboxEvents.NEWLY_SET, (e) => {
+      const {target} = e;
       this.processLightboxElement_(dev().assertElement(target));
     });
 
@@ -192,8 +193,8 @@ export class LightboxManager {
       carousel.getAttribute('lightbox') ||
       `carousel${carousel.getAttribute('id') || this.counter_++}`;
 
-    this.getSlidesFromCarousel_(carousel).then(slides => {
-      slides.forEach(slide => {
+    this.getSlidesFromCarousel_(carousel).then((slides) => {
+      slides.forEach((slide) => {
         const shouldExcludeSlide =
           slide.hasAttribute('lightbox-exclude') ||
           (slide.hasAttribute('lightbox') &&
@@ -221,7 +222,7 @@ export class LightboxManager {
       return;
     }
     this.seen_.push(element);
-    if (element.tagName == CAROUSEL_TAG) {
+    if (CAROUSEL_TAGS.includes(element.tagName)) {
       this.processLightboxCarousel_(element);
     } else {
       const lightboxGroupId = element.getAttribute('lightbox') || 'default';
@@ -241,7 +242,7 @@ export class LightboxManager {
     // that is not the figcaption.
     const element = childElement(
       figure,
-      child => child.tagName !== 'FIGCAPTION'
+      (child) => child.tagName !== 'FIGCAPTION'
     );
     if (element) {
       element.setAttribute('lightbox', lightboxGroupId);
@@ -344,7 +345,7 @@ export class LightboxManager {
    */
   getVideoTimestamp_(element) {
     return VIDEO_TAGS[element.tagName]
-      ? element.getImpl().then(videoPlayer => videoPlayer.getDuration())
+      ? element.getImpl().then((videoPlayer) => videoPlayer.getDuration())
       : Promise.resolve();
   }
 
@@ -355,7 +356,7 @@ export class LightboxManager {
    * @return {!Array<!LightboxThumbnailDataDef>}
    */
   getThumbnails(lightboxGroupId) {
-    return this.lightboxGroups_[lightboxGroupId].map(element => ({
+    return this.lightboxGroups_[lightboxGroupId].map((element) => ({
       srcset: this.getThumbnailSrcset_(dev().assertElement(element)),
       placeholderSrc: this.getPlaceholderForElementType_(element),
       element,

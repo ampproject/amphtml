@@ -19,12 +19,15 @@
       line-height: 1.2em;
     }
 
-    h1 {
+    #header-x {
       position: absolute;
       top: 20vh;
       left: 5vw;
-      padding: 5px;
       z-index: 2;
+    }
+
+    #header-y {
+      padding: 5px;
     }
 
     .spacer {
@@ -41,13 +44,18 @@
       left: 0;
     }
 
-    #stars {
-      background-image: url(img/stars.png);
-      background-repeat: repeat-y;
+    #stars-x {
       width: 100vw;
       height: 80vh;
       top: 0;
       position:absolute;
+    }
+
+    #stars-y {
+      background-image: url(img/stars.png);
+      background-repeat: repeat-y;
+      width: 100%;
+      height: 100%;
     }
   </style>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
@@ -55,7 +63,7 @@
 </head>
 
 <body>
-  <amp-animation id="stars" layout="nodisplay">
+  <amp-animation id="starsX" layout="nodisplay">
     <script type="application/json">
       {
       "duration": "3s",
@@ -63,17 +71,17 @@
       "direction": "alternate",
       "animations": [
         {
-          "selector": "#stars",
+          "selector": "#stars-x",
           "keyframes": [
-            { "transform": "translate(-10vw, -10vh)" },
-            { "transform": "translate(10vw, 10vh)" }
+            { "transform": "translateX(-10vw)" },
+            { "transform": "translateX(10vw)" }
           ]
         }
       ]
     }
     </script>
   </amp-animation>
-  <amp-animation id="text" layout="nodisplay">
+  <amp-animation id="starsY" layout="nodisplay">
     <script type="application/json">
       {
       "duration": "3s",
@@ -81,23 +89,59 @@
       "direction": "alternate",
       "animations": [
         {
-          "selector": "#header",
+          "selector": "#stars-y",
           "keyframes": [
-            { "transform": "translate(0)" },
-            { "transform": "translate(20vw, 20vh)" }
+            { "transform": "translateY(-10vw)" },
+            { "transform": "translateY(10vw)" }
           ]
         }
       ]
     }
     </script>
   </amp-animation>
+  <amp-animation id="headerX" layout="nodisplay">
+    <script type="application/json">
+      {
+      "duration": "3s",
+      "fill": "both",
+      "direction": "alternate",
+      "animations": [
+        {
+          "selector": "#header-x",
+          "keyframes": [
+            { "transform": "translateX(0)" },
+            { "transform": "translateX(20vh)" }
+          ]
+        }
+      ]
+    }
+    </script>
+  </amp-animation>
+  <amp-animation id="headerY" layout="nodisplay">
+      <script type="application/json">
+        {
+        "duration": "3s",
+        "fill": "both",
+        "direction": "alternate",
+        "animations": [
+          {
+            "selector": "#header-y",
+            "keyframes": [
+              { "transform": "translateY(0)" },
+              { "transform": "translateY(20vh)" }
+            ]
+          }
+        ]
+      }
+      </script>
+    </amp-animation>
   <amp-orientation-observer
-    on="beta:stars.seekTo(percent=event.percent);gamma:stars.seekTo(percent=event.percent);"
-    layout="nodisplay">
+    on="gamma:starsX.seekTo(percent=event.percent);beta:starsY.seekTo(percent=event.percent);"
+    layout="nodisplay" smoothing="5">
   </amp-orientation-observer>
   <amp-orientation-observer
-    on="beta:text.seekTo(percent=event.percent);gamma:text.seekTo(percent=event.percent);"
-    layout="nodisplay">
+    on="gamma:headerX.seekTo(percent=event.percent);beta:headerY.seekTo(percent=event.percent);"
+    layout="nodisplay" smoothing="5">
   </amp-orientation-observer>
 
   <div class="spacer"></div>
@@ -108,10 +152,14 @@
       height="651"
       layout="responsive">
     </amp-img>  
-    <div id="stars"></div>
-    <h1 id="header">
-      <span class="title">Lorem Ipsum </br>Dolor Sit </br>Lorem Ipsum<span>
-    </h1>
+    <div id="stars-x">
+      <div id="stars-y"></div>
+    </div>
+    <div id="header-x">
+      <h1 id="header-y">
+        <span class="title">Lorem Ipsum </br>Dolor Sit </br>Lorem Ipsum<span>
+      </h1>
+    </div>
   </div>
   <div class="spacer"></div>
 

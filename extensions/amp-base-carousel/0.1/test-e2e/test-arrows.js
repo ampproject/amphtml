@@ -24,12 +24,15 @@ describes.endtoend(
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/custom-arrows.amp.html',
-    experiments: ['amp-base-carousel', 'layers'],
-    browsers: ['chrome', 'firefox'],
+    experiments: [
+      'amp-base-carousel',
+      'layers',
+      'amp-lightbox-gallery-base-carousel',
+    ],
     //TODO(spaharmi): fails on shadow demo
     environments: ['single', 'viewer-demo'],
   },
-  async function(env) {
+  async function (env) {
     let controller;
     let prevArrow;
     let nextArrow;

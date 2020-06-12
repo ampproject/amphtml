@@ -22,29 +22,24 @@ describe
   .retryOnSaucelabs()
   .run('on="..."', () => {
     let fixture;
-    let sandbox;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
+      return createFixtureIframe('test/fixtures/actions.html', 500).then(
+        (f) => {
+          fixture = f;
 
-      return createFixtureIframe('test/fixtures/actions.html', 500).then(f => {
-        fixture = f;
-
-        // Wait for one <amp-img> element to load.
-        return fixture.awaitEvent(AmpEvents.LOAD_END, 1);
-      });
+          // Wait for one <amp-img> element to load.
+          return fixture.awaitEvent(AmpEvents.LOAD_END, 1);
+        }
+      );
     });
 
     function waitForDisplay(element, display) {
       return () => fixture.win.getComputedStyle(element)['display'] === display;
     }
 
-    afterEach(() => {
-      sandbox.restore();
-    });
-
     describe('"tap" event', () => {
-      it('<non-AMP element>.toggleVisibility', function*() {
+      it('<non-AMP element>.toggleVisibility', function* () {
         const span = fixture.doc.getElementById('spanToHide');
         const button = fixture.doc.getElementById('hideBtn');
 
@@ -52,7 +47,7 @@ describe
         yield poll('#spanToHide hidden', waitForDisplay(span, 'none'));
       });
 
-      it('<AMP element>.toggleVisibility', function*() {
+      it('<AMP element>.toggleVisibility', function* () {
         const img = fixture.doc.getElementById('imgToToggle');
         const button = fixture.doc.getElementById('toggleBtn');
 
@@ -69,14 +64,17 @@ describe
       describe
         .configure()
         .skipIfPropertiesObfuscated()
-        .run('navigate', function() {
-          it('AMP.navigateTo(url=)', function*() {
+        .run('navigate', function () {
+          it('AMP.navigateTo(url=)', function* () {
             const button = fixture.doc.getElementById('navigateBtn');
 
             // This is brittle but I don't know how else to stub
             // window navigation.
-            const navigationService = fixture.win.services.navigation.obj;
-            const navigateTo = sandbox.stub(navigationService, 'navigateTo');
+            const navigationService = fixture.win.__AMP_SERVICES.navigation.obj;
+            const navigateTo = window.sandbox.stub(
+              navigationService,
+              'navigateTo'
+            );
 
             button.click();
             yield poll('navigateTo() called with correct args', () => {
@@ -85,10 +83,10 @@ describe
           });
         });
 
-      it('AMP.print()', function*() {
+      it('AMP.print()', function* () {
         const button = fixture.doc.getElementById('printBtn');
 
-        const print = sandbox.stub(fixture.win, 'print');
+        const print = window.sandbox.stub(fixture.win, 'print');
 
         button.click();
         yield poll('print() called once', () => {

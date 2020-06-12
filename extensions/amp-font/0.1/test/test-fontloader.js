@@ -62,7 +62,7 @@ describes.repeated(
           ampdoc: variant.ampdoc,
         },
       },
-      env => {
+      (env) => {
         let fontloader;
         let setupFontCheckSpy;
         let setupFontLoadSpy;
@@ -91,15 +91,15 @@ describes.repeated(
               : ampdoc.getBody();
           body = variant.ampdoc === 'single' ? doc.body : root;
 
-          setupLoadWithPolyfillSpy = sandbox.spy(
+          setupLoadWithPolyfillSpy = env.sandbox.spy(
             FontLoader.prototype,
             'loadWithPolyfill_'
           );
-          setupCreateFontComparatorsSpy = sandbox.spy(
+          setupCreateFontComparatorsSpy = env.sandbox.spy(
             FontLoader.prototype,
             'createFontComparators_'
           );
-          setupDisposeSpy = sandbox.spy(FontLoader.prototype, 'dispose_');
+          setupDisposeSpy = env.sandbox.spy(FontLoader.prototype, 'dispose_');
 
           const style = doc.createElement('style');
           style.textContent = FONT_FACE_ + CSS_RULES_;
@@ -108,8 +108,8 @@ describes.repeated(
           textEl.textContent =
             'Neque porro quisquam est qui dolorem ipsum quia dolor';
           body.appendChild(textEl);
-          setupFontCheckSpy = sandbox./*OK*/ spy(doc.fonts, 'check');
-          setupFontLoadSpy = sandbox./*OK*/ spy(doc.fonts, 'load');
+          setupFontCheckSpy = env.sandbox./*OK*/ spy(doc.fonts, 'check');
+          setupFontLoadSpy = env.sandbox./*OK*/ spy(doc.fonts, 'load');
           fontloader = new FontLoader(env.ampdoc);
         });
 
@@ -129,7 +129,7 @@ describes.repeated(
         });
 
         it('should check and load font via polyfill', () => {
-          sandbox
+          env.sandbox
             .stub(FontLoader.prototype, 'canUseNativeApis_')
             .returns(false);
           fontloader
@@ -162,7 +162,7 @@ describes.repeated(
         });
 
         it('should error when font is not available via polyfill', () => {
-          sandbox
+          env.sandbox
             .stub(FontLoader.prototype, 'canUseNativeApis_')
             .returns(false);
           fontloader
@@ -182,12 +182,12 @@ describes.repeated(
         });
 
         it('should check if elements are being created when using polyfill', () => {
-          sandbox
+          env.sandbox
             .stub(FontLoader.prototype, 'canUseNativeApis_')
             .returns(false);
           setupDisposeSpy /*OK*/
             .restore();
-          setupDisposeSpy = sandbox
+          setupDisposeSpy = env.sandbox
             .stub(FontLoader.prototype, 'dispose_')
             .returns(undefined);
           const initialElementsCount = doc.getElementsByTagName('*').length;
@@ -212,7 +212,7 @@ describes.repeated(
           'should check if elements created using the polyfill ' +
             'are disposed',
           () => {
-            sandbox
+            env.sandbox
               .stub(FontLoader.prototype, 'canUseNativeApis_')
               .returns(false);
             const initialElementsCount = doc.getElementsByTagName('*').length;
@@ -235,7 +235,7 @@ describes.repeated(
             .load(FONT_CONFIG, 3000)
             .then(() => {
               const comparators = fontloader.createFontComparators_();
-              expect(comparators.some(c => c.compare())).to.be.true;
+              expect(comparators.some((c) => c.compare())).to.be.true;
             })
             .catch(() => {
               assert.fail('Font load failed');

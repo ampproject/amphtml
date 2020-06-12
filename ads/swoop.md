@@ -19,13 +19,16 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="auto" height="125"
-        type="swoop"
-        layout="fixed-height"
-        data-layout="fixed-height"
-        data-publisher="SW-11122234-1AMP"
-        data-placement="page/content"
-        data-slot="article/body">
+<amp-ad
+  width="auto"
+  height="125"
+  type="swoop"
+  layout="fixed-height"
+  data-layout="fixed-height"
+  data-publisher="SW-11122234-1AMP"
+  data-placement="page/content"
+  data-slot="article/body"
+>
   <div placeholder></div>
   <div fallback></div>
 </amp-ad>
@@ -33,7 +36,7 @@ limitations under the License.
 
 ## Configuration
 
-For details on the configuration semantics, please contact the ad network or refer to their documentation. 
+For details on the configuration semantics, please contact the ad network or refer to their documentation.
 
 ### Required parameters
 

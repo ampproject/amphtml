@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.javascript.jscomp.ClosureCodingConvention;
 import com.google.javascript.jscomp.CodingConvention;
-import com.google.javascript.jscomp.CodingConvention.AssertionFunctionSpec;
 import com.google.javascript.jscomp.CodingConventions;
 import com.google.javascript.rhino.jstype.JSType;
 import com.google.javascript.rhino.jstype.JSTypeNative;
@@ -52,20 +51,6 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
    * delivery), this could go away there.
    */
   @Override public boolean isExported(String name, boolean local) {
-    // This stops compiler from inlining functions (local or not) that end with
-    // NoInline in their name. Mostly used for externing try-catch to avoid v8
-    // de-optimization (https://goo.gl/gvzlDp)
-    if (name.endsWith("NoInline")) {
-      return true;
-    }
-    // Bad hack, but we should really not try to inline CSS as these strings can
-    // be very long.
-    // See https://github.com/ampproject/amphtml/issues/10118
-    // cssText is defined in build-system/tasks/css.js#writeCss
-    if (name.startsWith("cssText$$module$build$")) {
-      return true;
-    }
-
     if (local) {
       return false;
     }

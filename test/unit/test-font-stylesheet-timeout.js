@@ -15,14 +15,13 @@
  */
 
 import {fontStylesheetTimeout} from '../../src/font-stylesheet-timeout';
-import {toggleExperiment} from '../../src/experiments';
 
 describes.realWin(
   'font-stylesheet-timeout',
   {
     amp: true,
   },
-  env => {
+  (env) => {
     describe
       .configure()
       .skipFirefox()
@@ -30,23 +29,33 @@ describes.realWin(
         let clock;
         let win;
         let readyState;
-        let responseStart;
+        let navigationStart;
+
+        const defaultTimeout =
+          /* target */ 2500 -
+          /* max paint time */ 400 -
+          /* default nav start*/ 1500;
+
         beforeEach(() => {
           clock = env.sandbox.useFakeTimers();
           win = env.win;
           win.setTimeout = self.setTimeout;
           readyState = 'interactive';
-          responseStart = 0;
-          Object.defineProperty(win.document, 'readyState', {
+          navigationStart = undefined;
+          env.sandbox.defineProperty(win.document, 'readyState', {
             get() {
               return readyState;
             },
           });
-          Object.defineProperty(win.performance.timing, 'responseStart', {
-            get() {
-              return responseStart;
-            },
-          });
+          env.sandbox.defineProperty(
+            win.performance.timing,
+            'navigationStart',
+            {
+              get() {
+                return navigationStart;
+              },
+            }
+          );
         });
 
         function addLink(opt_content, opt_href) {
@@ -87,7 +96,7 @@ describes.realWin(
         it('should time out if style sheets do not load', () => {
           const link = addLink(undefined, '/does-not-exist.css');
           fontStylesheetTimeout(win);
-          clock.tick(249);
+          clock.tick(defaultTimeout - 1);
           expect(
             win.document.querySelectorAll(
               'link[rel="stylesheet"][i-amphtml-timeout]'
@@ -102,9 +111,9 @@ describes.realWin(
           const after = win.document.querySelector('link[rel="stylesheet"]');
           expect(after).to.equal(link);
           expect(after.href).to.equal(link.href);
-          expect(after.media).to.equal('not-matching');
+          expect(after.media).to.equal('print');
           after.href = immediatelyLoadingHref('/* make-it-load */');
-          return new Promise(resolve => {
+          return new Promise((resolve) => {
             after.addEventListener('load', () => {
               resolve();
             });
@@ -114,11 +123,13 @@ describes.realWin(
         });
 
         it('should time out from response start', () => {
-          responseStart = 200;
+          const startTime = 100000;
+          clock.tick(startTime);
+          navigationStart = startTime;
           clock.tick(250);
           const link = addLink(undefined, '/does-not-exist.css');
           fontStylesheetTimeout(win);
-          clock.tick(199);
+          clock.tick(2500 - 400 - 250 - 1);
           expect(
             win.document.querySelectorAll(
               'link[rel="stylesheet"][i-amphtml-timeout]'
@@ -139,7 +150,7 @@ describes.realWin(
         });
 
         it('should time out multiple style sheets and ignore CDN URLs', () => {
-          responseStart = 500;
+          navigationStart = 500;
           clock.tick(10000);
           const link0 = addLink(undefined, '/does-not-exist.css');
           const link1 = addLink(undefined, '/does-not-exist.css');
@@ -197,7 +208,7 @@ describes.realWin(
               null,
             ];
             let index = 0;
-            Object.defineProperty(win.document, 'fonts', {
+            env.sandbox.defineProperty(win.document, 'fonts', {
               get: () => {
                 return {
                   values: () => {
@@ -210,14 +221,6 @@ describes.realWin(
                 };
               },
             });
-            toggleExperiment(win, 'font-display-swap', true);
-          });
-
-          it('should not do anything with experiment off', () => {
-            toggleExperiment(win, 'font-display-swap', false);
-            fontStylesheetTimeout(win);
-            clock.tick(250);
-            expect(fonts[1].display).to.equal('auto');
           });
 
           it('should not change loaded fonts', () => {
@@ -230,14 +233,14 @@ describes.realWin(
             fontStylesheetTimeout(win);
             expect(fonts[1].display).to.equal('auto');
             expect(fonts[2].display).to.equal('auto');
-            clock.tick(250);
+            clock.tick(defaultTimeout);
             expect(fonts[1].display).to.equal('swap');
             expect(fonts[2].display).to.equal('swap');
           });
 
           it('should not override non-default values', () => {
             fontStylesheetTimeout(win);
-            clock.tick(250);
+            clock.tick(defaultTimeout);
             expect(fonts[3].display).to.equal('optional');
           });
         });

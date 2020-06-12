@@ -22,8 +22,8 @@
  */
 
 const colors = require('ansi-colors');
-const {getStderr} = require('../exec');
-const {gitDiffColor} = require('../git');
+const {getStderr} = require('../common/exec');
+const {gitDiffColor, gitDiffNameOnly} = require('../common/git');
 
 /**
  * Makes sure package.json and yarn.lock are in sync.
@@ -73,10 +73,10 @@ function isYarnLockFileInSync(fileName = 'yarn-checks.js') {
  * @return {boolean}
  */
 function isYarnLockFileProperlyUpdated(fileName = 'yarn-checks.js') {
-  const localChanges = gitDiffColor();
+  const filesChanged = gitDiffNameOnly();
   const fileLogPrefix = colors.bold(colors.yellow(`${fileName}:`));
 
-  if (localChanges.includes('yarn.lock')) {
+  if (filesChanged.includes('yarn.lock')) {
     console.error(
       fileLogPrefix,
       colors.red('ERROR:'),
@@ -92,7 +92,7 @@ function isYarnLockFileProperlyUpdated(fileName = 'yarn-checks.js') {
         ', and push a new commit containing the changes.'
     );
     console.error(fileLogPrefix, 'Expected changes:');
-    console.log(localChanges);
+    console.log(gitDiffColor());
     return false;
   }
   return true;

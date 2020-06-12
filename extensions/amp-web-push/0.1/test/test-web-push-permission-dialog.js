@@ -28,7 +28,7 @@ describes.realWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let webPush;
     const webPushConfig = {};
     let iframeWindow = null;
@@ -76,7 +76,7 @@ describes.realWin(
     // TODO(dvoytenko, #12476): Make this test work with sinon 4.0.
     it.skip('should detect opened as popup', () => {
       return setupPermissionDialogFrame().then(() => {
-        sandbox./*OK*/ stub(iframeWindow, 'opener').callsFake(true);
+        env.sandbox./*OK*/ stub(iframeWindow, 'opener').callsFake(true);
         const isCurrentDialogPopup = iframeWindow._ampWebPushPermissionDialog.isCurrentDialogPopup();
         expect(isCurrentDialogPopup).to.eq(true);
       });
@@ -84,18 +84,18 @@ describes.realWin(
 
     it('should detect opened from redirect', () => {
       return setupPermissionDialogFrame().then(() => {
-        sandbox./*OK*/ stub(iframeWindow, 'opener').callsFake(false);
+        env.sandbox./*OK*/ stub(iframeWindow, 'opener').callsFake(false);
         iframeWindow.fakeLocation = parseUrlDeprecated(
           'https://test.com/?return=' +
             encodeURIComponent('https://another-site.com')
         );
-        sandbox
+        env.sandbox
           ./*OK*/ stub(
             iframeWindow._ampWebPushPermissionDialog,
             'requestNotificationPermission'
           )
           .callsFake(() => Promise.resolve());
-        const spy = sandbox./*OK*/ spy(
+        const spy = env.sandbox./*OK*/ spy(
           iframeWindow._ampWebPushPermissionDialog,
           'isCurrentDialogPopup'
         );
@@ -107,13 +107,13 @@ describes.realWin(
     // TODO(jasonpang): This fails on master under headless Chrome.
     it.skip('should request notification permissions, when opened as popup', () => {
       return setupPermissionDialogFrame().then(() => {
-        sandbox
+        env.sandbox
           ./*OK*/ stub(
             iframeWindow._ampWebPushPermissionDialog,
             'isCurrentDialogPopup'
           )
           .callsFake(() => true);
-        const permissionStub = sandbox
+        const permissionStub = env.sandbox
           ./*OK*/ stub(iframeWindow.Notification, 'requestPermission')
           .callsFake(() => Promise.resolve('default'));
         iframeWindow._ampWebPushPermissionDialog.run();
@@ -124,7 +124,7 @@ describes.realWin(
     // TODO(jasonpang): This fails on master under headless Chrome.
     it.skip('should request notification permissions when redirected', () => {
       return setupPermissionDialogFrame().then(() => {
-        sandbox
+        env.sandbox
           ./*OK*/ stub(
             iframeWindow._ampWebPushPermissionDialog,
             'isCurrentDialogPopup'
@@ -134,7 +134,7 @@ describes.realWin(
           'https://test.com/?return=' +
             encodeURIComponent('https://another-site.com')
         );
-        const permissionStub = sandbox
+        const permissionStub = env.sandbox
           ./*OK*/ stub(iframeWindow.Notification, 'requestPermission')
           .callsFake(() => Promise.resolve('default'));
         iframeWindow._ampWebPushPermissionDialog.run();
@@ -147,7 +147,7 @@ describes.realWin(
       let spy = null;
       return setupPermissionDialogFrame()
         .then(() => {
-          sandbox
+          env.sandbox
             ./*OK*/ stub(
               iframeWindow._ampWebPushPermissionDialog,
               'isCurrentDialogPopup'
@@ -157,16 +157,16 @@ describes.realWin(
             'https://test.com/?return=' +
               encodeURIComponent('https://another-site.com')
           );
-          sandbox
+          env.sandbox
             ./*OK*/ stub(
               iframeWindow._ampWebPushPermissionDialog,
               'requestNotificationPermission'
             )
             .callsFake(() => Promise.resolve());
-          sandbox
+          env.sandbox
             ./*OK*/ stub(iframeWindow.Notification, 'requestPermission')
             .callsFake(() => Promise.resolve('default'));
-          spy = sandbox./*OK*/ spy(
+          spy = env.sandbox./*OK*/ spy(
             iframeWindow._ampWebPushPermissionDialog,
             'redirectToUrl'
           );
@@ -193,9 +193,8 @@ describes.realWin(
 
     it('should show target permission section', () => {
       return setupPermissionDialogFrame().then(() => {
-        Object.defineProperty(iframeWindow.Notification, 'permission', {
+        env.sandbox.defineProperty(iframeWindow.Notification, 'permission', {
           enumerable: false,
-          configurable: false,
           writable: false,
           value: 'granted',
         });
@@ -221,9 +220,8 @@ describes.realWin(
           localStorage.getItem('amp-web-push-notification-permission')
         ).to.eq(null);
 
-        Object.defineProperty(iframeWindow.Notification, 'permission', {
+        env.sandbox.defineProperty(iframeWindow.Notification, 'permission', {
           enumerable: false,
-          configurable: false,
           writable: false,
           value: 'granted',
         });
@@ -244,7 +242,7 @@ describes.realWin(
         iframeWindow._ampWebPushPermissionDialog.onCloseIconClick_();
         const {document} = iframeWindow;
         const closeElement = document.querySelector('#close');
-        spy = sandbox./*OK*/ spy(
+        spy = env.sandbox./*OK*/ spy(
           iframeWindow._ampWebPushPermissionDialog,
           'closeDialog'
         );

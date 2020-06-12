@@ -19,10 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="300" height="250"
-    type="xlift"
-    data-mediaid="mamaster">
-</amp-ad>
+<amp-ad width="300" height="250" type="xlift" data-mediaid="mamaster"> </amp-ad>
 ```
 
 ## Configuration

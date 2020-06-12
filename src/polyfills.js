@@ -14,51 +14,50 @@
  * limitations under the License.
  */
 
-/** @fileoverview @suppress {suspiciousCode} */
+/** @fileoverview */
 
 import {getMode} from './mode';
 import {install as installArrayIncludes} from './polyfills/array-includes';
 import {install as installCustomElements} from './polyfills/custom-elements';
-import {install as installDOMTokenListToggle} from './polyfills/domtokenlist-toggle';
+import {install as installDOMTokenList} from './polyfills/domtokenlist';
 import {install as installDocContains} from './polyfills/document-contains';
 import {install as installFetch} from './polyfills/fetch';
 import {install as installGetBoundingClientRect} from './get-bounding-client-rect';
+import {install as installIntersectionObserver} from './polyfills/intersection-observer';
 import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installObjectValues} from './polyfills/object-values';
 import {install as installPromise} from './polyfills/promise';
-import {installCustomElements as installRegisterElement} from 'document-register-element/build/document-register-element.patched';
-import {isExperimentOn} from './experiments';
 
-installFetch(self);
-installMathSign(self);
-installObjectAssign(self);
-installObjectValues(self);
-installPromise(self);
-installArrayIncludes(self);
+if (!IS_ESM) {
+  installFetch(self);
+  installMathSign(self);
+  installObjectAssign(self);
+  installObjectValues(self);
+  installPromise(self);
+  installArrayIncludes(self);
+}
 
 // Polyfills that depend on DOM availability
 if (self.document) {
-  installDOMTokenListToggle(self);
-  installDocContains(self);
-  installGetBoundingClientRect(self);
-
-  // isExperimentOn() must be called after Object.assign polyfill is installed.
-  // TODO(jridgewell): Ship custom-elements-v1. For now, we use this hack so it
-  // is DCE'd from production builds. Note: When the hack is removed, remove the
-  // @suppress {suspiciousCode} annotation at the top of this file.
-  // TODO(jridgewell, estherkim): Find out why CE isn't being polyfilled for IE.
+  if (!IS_ESM) {
+    installDOMTokenList(self);
+    installDocContains(self);
+    installGetBoundingClientRect(self);
+  }
+  // The anonymous class parameter allows us to detect native classes vs
+  // transpiled classes.
+  installCustomElements(self, class {});
+  // The AMP and Inabox are launched separately and so there are two
+  // experiment constants.
   if (
-    (false && isExperimentOn(self, 'custom-elements-v1')) ||
-    (getMode().test && !getMode().testIe)
+    // eslint-disable-next-line no-undef
+    INTERSECTION_OBSERVER_POLYFILL ||
+    // eslint-disable-next-line no-undef
+    INTERSECTION_OBSERVER_POLYFILL_INABOX ||
+    getMode().localDev ||
+    getMode().test
   ) {
-    installCustomElements(self);
-  } else {
-    installRegisterElement(self, 'auto');
+    installIntersectionObserver(self);
   }
 }
-
-// TODO(#18268, erwinm): For whatever reason imports to modules that have no
-// export currently break for singlepass runs. This is a temporary workaround
-// until we figure the issue out.
-export const erwinmHack = 'this export is a temporary hack for single pass';

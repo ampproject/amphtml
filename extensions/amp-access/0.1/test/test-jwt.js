@@ -28,16 +28,10 @@ describe('JwtHelper', () => {
   const TOKEN_SIG = 'TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ';
   const TOKEN = `${TOKEN_HEADER}.${TOKEN_PAYLOAD}.${TOKEN_SIG}`;
 
-  let sandbox;
   let helper;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     helper = new JwtHelper(window);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   describe('decode', () => {
@@ -110,10 +104,6 @@ describe('JwtHelper', () => {
       'o2kQ+X5xK9cipRgEKwIDAQAB\n' +
       '-----END PUBLIC KEY-----';
 
-    beforeEach(() => {});
-
-    afterEach(() => {});
-
     // TODO(aghassemi, 6292): Unskip for Safari after #6292
     it.configure()
       .skipSafari()
@@ -122,9 +112,11 @@ describe('JwtHelper', () => {
         if (!helper.isVerificationSupported()) {
           return;
         }
-        return helper.decodeAndVerify(TOKEN, Promise.resolve(PEM)).then(tok => {
-          expect(tok['name']).to.equal('John Do');
-        });
+        return helper
+          .decodeAndVerify(TOKEN, Promise.resolve(PEM))
+          .then((tok) => {
+            expect(tok['name']).to.equal('John Do');
+          });
       });
 
     it.configure()
@@ -145,7 +137,7 @@ describe('JwtHelper', () => {
           () => {
             throw new Error('must have failed');
           },
-          error => {
+          (error) => {
             // Expected.
             expect(error.message).to.match(/Signature verification failed/);
           }
@@ -180,11 +172,10 @@ describe('JwtHelper', () => {
         importKey: () => {},
         verify: () => {},
       };
-      subtleMock = sandbox.mock(subtle);
+      subtleMock = window.sandbox.mock(subtle);
 
       windowApi = {
         crypto: {subtle},
-        services: {},
       };
       helper = new JwtHelper(windowApi);
     });
@@ -198,7 +189,7 @@ describe('JwtHelper', () => {
         () => {
           throw new Error('Must have failed');
         },
-        error => {
+        (error) => {
           expect(error.message).to.match(/Invalid token/);
         }
       );
@@ -210,7 +201,7 @@ describe('JwtHelper', () => {
         () => {
           throw new Error('Must have failed');
         },
-        error => {
+        (error) => {
           expect(error.message).to.match(/Only alg=RS256 is supported/);
         }
       );
@@ -223,7 +214,7 @@ describe('JwtHelper', () => {
         () => {
           throw new Error('Must have failed');
         },
-        error => {
+        (error) => {
           expect(error.message).to.match(/Only alg=RS256 is supported/);
         }
       );
@@ -247,12 +238,12 @@ describe('JwtHelper', () => {
         .withExactArgs(
           {name: 'RSASSA-PKCS1-v1_5'},
           key,
-          /* sig */ sinon.match(() => true),
-          /* verifiable */ sinon.match(() => true)
+          /* sig */ window.sandbox.match(() => true),
+          /* verifiable */ window.sandbox.match(() => true)
         )
         .returns(Promise.resolve(true))
         .once();
-      return helper.decodeAndVerify(TOKEN, Promise.resolve(PEM)).then(tok => {
+      return helper.decodeAndVerify(TOKEN, Promise.resolve(PEM)).then((tok) => {
         expect(tok['name']).to.equal('John Do');
       });
     });

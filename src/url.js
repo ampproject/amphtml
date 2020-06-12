@@ -99,7 +99,7 @@ export function getWinOrigin(win) {
 export function parseUrlDeprecated(url, opt_nocache) {
   if (!a) {
     a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
-    cache = self.UrlCache || (self.UrlCache = new LruCache(100));
+    cache = self.__AMP_URL_CACHE || (self.__AMP_URL_CACHE = new LruCache(100));
   }
 
   return parseUrlWithA(a, url, opt_nocache ? null : cache);
@@ -238,6 +238,7 @@ export function addParamsToUrl(url, params) {
  * exist in current query string.
  * @param {string} url
  * @param {!JsonObject<string, string|!Array<string>>} params
+ * @return {string}
  */
 export function addMissingParamsToUrl(url, params) {
   const location = parseUrlDeprecated(url);
@@ -648,4 +649,16 @@ export function checkCorsUrl(url) {
  */
 export function tryDecodeUriComponent(component, opt_fallback) {
   return tryDecodeUriComponent_(component, opt_fallback);
+}
+
+/**
+ * Adds the path to the given url.
+ *
+ * @param {!Location} url
+ * @param {string} path
+ * @return {string}
+ */
+export function appendPathToUrl(url, path) {
+  const pathname = url.pathname.replace(/\/?$/, '/') + path.replace(/^\//, '');
+  return url.origin + pathname + url.search + url.hash;
 }

@@ -6,6 +6,7 @@ teaser:
   text: Displays multiple similar pieces of content along a horizontal axis or vertical axis.
 experimental: true
 ---
+
 <!---
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -26,29 +27,6 @@ limitations under the License.
 
 A generic carousel for displaying multiple similar pieces of content along a horizontal or vertical axis.
 
-<table>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a>; You must turn on the `amp-base-carousel` experiment to use this component.</div></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-base-carousel" src="https://cdn.ampproject.org/v0/amp-base-carousel-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>
-      fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, and responsive.
-    </td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>
-      <a href="https://ampbyexample.com/components/amp-base-carousel/">amp-carousel example</a>
-    </td>
-  </tr>
-</table>
-
 ## Behavior
 
 Each of the `amp-base-carousel` component’s immediate children is considered an item in the carousel. Each of these nodes may also have arbitrary HTML children.
@@ -58,12 +36,15 @@ The carousel consists of an arbitrary number of items, as well as optional navig
 The carousel advances between items if the user swipes or uses the customizable arrow buttons.
 
 ## Attributes
+
 ### Using Media Queries
 
 The attributes for `<amp-base-carousel>` can be configured to use different options based on a media query. You can also use a value without any media queries. The format looks like:
 
 ```html
-<amp-base-carousel attr-name="(min-width: 1000px) valueOne, (min-width: 600px) valueTwo, defaultValue"></amp-base-carousel>
+<amp-base-carousel
+  attr-name="(min-width: 1000px) valueOne, (min-width: 600px) valueTwo, defaultValue"
+></amp-base-carousel>
 ```
 
 The media queries are evaluated from left to right, with the first matching media query being used. A default value (without a media query) is required. In this case, if the page has a screen width of 1000px or more, `valueOne` is used. If the width is between 999px and 600px, `valueTwo` is used. When it is 599px or smaller, `defaultValue` is used.
@@ -139,15 +120,16 @@ The media queries are evaluated from left to right, with the first matching medi
   </tr>
   <tr>
     <td width="40%"><strong><code>horizontal</code></strong></td>
-    <td>Either <code>true</code> or <code>false</code>, defaults to <code>false</code>. When true the carousel will lay out horizontally, with the user being able to swipe left and right. When false, the carousel lays out vertically, with the user being able to swipe up and down.
+    <td>Either <code>true</code> or <code>false</code>, defaults to <code>true</code>. When true the carousel will lay out horizontally, with the user being able to swipe left and right. When false, the carousel lays out vertically, with the user being able to swipe up and down.
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 
 ## Events
+
 <table>
   <tr>
     <td width="40%"><strong><code>slideChange</code></strong></td>
@@ -156,6 +138,7 @@ The media queries are evaluated from left to right, with the first matching medi
 </table>
 
 ## Actions
+
 <table>
   <tr>
     <td width="40%"><strong><code>next</code></strong></td>
@@ -172,9 +155,11 @@ The media queries are evaluated from left to right, with the first matching medi
 </table>
 
 ## Styling
+
 - You may use the `amp-base-carousel` element selector to style the carousel freely.
 
 ### Customizing Arrow Buttons
+
 Arrow buttons can be customized by passing in your own custom markup. For example, you can recreate the default styling with the following HTML and CSS:
 
 ```css
@@ -203,7 +188,11 @@ Arrow buttons can be customized by passing in your own custom markup. For exampl
   <div>first slide</div>
   …
   <button slot="next-arrow" class="carousel-next" aria-label="Next"></button>
-  <button slot="prev-arrow" class="carousel-prev" aria-label="Previous"></button>
+  <button
+    slot="prev-arrow"
+    class="carousel-prev"
+    aria-label="Previous"
+  ></button>
 </amp-base-carousel>
 ```
 
@@ -254,14 +243,16 @@ When changing the number of visible slides using `visible-slides`, in response t
 ```html
 <!-- Using an aspect ratio of 3:2 for the slides in this example. -->
 <amp-base-carousel
-    layout="responsive" width="3" height="1"
-    heights="(min-width: 600px) calc(100% * 4 * 3 / 2), calc(100% * 3 * 3 / 2)"
-    visible-count="(min-width: 600px) 4, 3"
-    advance-count="(min-width: 600px) 4, 3">
+  layout="responsive"
+  width="3"
+  height="1"
+  heights="(min-width: 600px) calc(100% * 4 * 3 / 2), calc(100% * 3 * 3 / 2)"
+  visible-count="(min-width: 600px) 4, 3"
+  advance-count="(min-width: 600px) 4, 3"
+>
   <amp-img layout="flex-item" src="…"></amp-img>
   …
 </amp-base-carousel>
-
 ```
 
 ## Validation

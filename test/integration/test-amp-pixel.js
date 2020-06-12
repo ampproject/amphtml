@@ -16,10 +16,9 @@
 
 import {AmpPixel} from '../../builtins/amp-pixel';
 import {BrowserController, RequestBank} from '../../testing/test-helper';
-import {Services} from '../../src/services';
 import {createElementWithAttributes} from '../../src/dom';
 
-describe.configure().run('amp-pixel', function() {
+describe.configure().run('amp-pixel', function () {
   describes.integration(
     'amp-pixel macro integration test',
     {
@@ -29,15 +28,38 @@ describe.configure().run('amp-pixel', function() {
         a: 123,
       },
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementBuild('amp-pixel');
       });
 
       it('should expand the TITLE macro', () => {
-        return RequestBank.withdraw().then(req => {
+        return RequestBank.withdraw().then((req) => {
           expect(req.url).to.equal('/hello-world?title=AMP%20TEST&qp=123');
+          expect(req.headers.host).to.be.ok;
+        });
+      });
+    }
+  );
+
+  describes.integration(
+    'amp-pixel nested macro with leading spaces',
+    {
+      body: `<amp-pixel src="${RequestBank.getUrl()}?nested=QUERY_PARAM(doesNotExist,  1.QUERY_PARAM(a))">`,
+      params: {
+        a: '1234',
+      },
+    },
+    (env) => {
+      beforeEach(() => {
+        const browser = new BrowserController(env.win);
+        return browser.waitForElementBuild('amp-pixel');
+      });
+
+      it('should ignore leading spaces and resolve correctly', () => {
+        return RequestBank.withdraw().then((req) => {
+          expect(req.url).to.equal('/?nested=1.1234');
           expect(req.headers.host).to.be.ok;
         });
       });
@@ -49,14 +71,14 @@ describe.configure().run('amp-pixel', function() {
     {
       body: `<amp-pixel src="${RequestBank.getUrl()}">`,
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementBuild('amp-pixel');
       });
 
       it('should keep referrer if no referrerpolicy specified', () => {
-        return RequestBank.withdraw().then(req => {
+        return RequestBank.withdraw().then((req) => {
           expect(req.url).to.equal('/');
           expect(req.headers.referer).to.be.ok;
         });
@@ -70,14 +92,14 @@ describe.configure().run('amp-pixel', function() {
       body: `<amp-pixel src="${RequestBank.getUrl()}"
              referrerpolicy="no-referrer">`,
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementBuild('amp-pixel');
       });
 
       it('should remove referrer if referrerpolicy=no-referrer', () => {
-        return RequestBank.withdraw().then(req => {
+        return RequestBank.withdraw().then((req) => {
           expect(req.url).to.equal('/');
           expect(req.headers.referer).to.not.be.ok;
         });
@@ -86,7 +108,7 @@ describe.configure().run('amp-pixel', function() {
   );
 });
 
-describes.fakeWin('amp-pixel with img (inabox)', {amp: true}, env => {
+describes.fakeWin('amp-pixel with img (inabox)', {amp: true}, (env) => {
   it('should not write image', () => {
     const src = 'https://foo.com/tracker/foo';
     const pixelElem = createElementWithAttributes(
@@ -98,10 +120,7 @@ describes.fakeWin('amp-pixel with img (inabox)', {amp: true}, env => {
       createElementWithAttributes(env.win.document, 'img', {src})
     );
     env.win.document.body.appendChild(pixelElem);
-    const viewer = Services.viewerForDoc(env.win.document);
-    env.sandbox.stub(viewer, 'whenFirstVisible').callsFake(() => {
-      return Promise.resolve();
-    });
+    env.sandbox.stub(env.ampdoc, 'whenFirstVisible').returns(Promise.resolve());
     const pixel = new AmpPixel(pixelElem);
     pixel.buildCallback();
     expect(pixelElem.querySelectorAll('img').length).to.equal(1);

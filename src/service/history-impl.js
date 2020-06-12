@@ -96,7 +96,7 @@ export class History {
    */
   push(opt_onPop, opt_stateUpdate) {
     return this.enque_(() => {
-      return this.binding_.push(opt_stateUpdate).then(historyState => {
+      return this.binding_.push(opt_stateUpdate).then((historyState) => {
         this.onStateUpdated_(historyState);
         if (opt_onPop) {
           this.stackOnPop_[historyState.stackIndex] = opt_onPop;
@@ -117,7 +117,7 @@ export class History {
    */
   pop(stateId) {
     return this.enque_(() => {
-      return this.binding_.pop(stateId).then(historyState => {
+      return this.binding_.pop(stateId).then((historyState) => {
         this.onStateUpdated_(historyState);
       });
     }, 'pop');
@@ -156,7 +156,7 @@ export class History {
       }
       // Pop the current state. The binding will ignore the request if
       // it cannot satisfy it.
-      return this.binding_.pop(this.stackIndex_).then(historyState => {
+      return this.binding_.pop(this.stackIndex_).then((historyState) => {
         this.onStateUpdated_(historyState);
       });
     }, 'goBack');
@@ -275,10 +275,10 @@ export class History {
 
     promise
       .then(
-        result => {
+        (result) => {
           task.resolve(result);
         },
-        reason => {
+        (reason) => {
           dev().error(TAG_, 'failed to execute a task:', reason);
           // TODO(dvoytenko, #8785): cleanup after tracing.
           if (task.trace) {
@@ -475,7 +475,7 @@ export class HistoryBindingNatural_ {
     history.pushState = this.historyPushState_.bind(this);
     history.replaceState = this.historyReplaceState_.bind(this);
 
-    this.popstateHandler_ = e => {
+    this.popstateHandler_ = (e) => {
       const event = /** @type {!PopStateEvent} */ (e);
       const state = /** @type {!JsonObject} */ (event.state);
       dev().fine(
@@ -542,7 +542,7 @@ export class HistoryBindingNatural_ {
     stackIndex = Math.max(stackIndex, this.startIndex_);
     return this.whenReady_(() => {
       return this.back_(this.stackIndex_ - stackIndex + 1);
-    }).then(newStackIndex => {
+    }).then((newStackIndex) => {
       return this.mergeStateUpdate_(this.getState_(), {
         stackIndex: newStackIndex,
       });
@@ -829,17 +829,15 @@ export class HistoryBindingNatural_ {
    * @return {!HistoryStateDef}
    */
   mergeStateUpdate_(state, update) {
-    const mergedData = /** @type {!JsonObject} */ (Object.assign(
-      {},
-      (state && state.data) || {},
-      update.data || {}
-    ));
-    return /** @type {!HistoryStateDef} */ (Object.assign(
-      {},
-      state || {},
-      update,
-      {data: mergedData}
-    ));
+    const mergedData = /** @type {!JsonObject} */ ({
+      ...((state && state.data) || {}),
+      ...(update.data || {}),
+    });
+    return /** @type {!HistoryStateDef} */ ({
+      ...(state || {}),
+      ...update,
+      data: mergedData,
+    });
   }
 }
 
@@ -855,13 +853,13 @@ export class HistoryBindingNatural_ {
 export class HistoryBindingVirtual_ {
   /**
    * @param {!Window} win
-   * @param {!./viewer-impl.Viewer} viewer
+   * @param {!./viewer-interface.ViewerInterface} viewer
    */
   constructor(win, viewer) {
     /** @const {!Window} */
     this.win = win;
 
-    /** @private @const {!./viewer-impl.Viewer} */
+    /** @private @const {!./viewer-interface.ViewerInterface} */
     this.viewer_ = viewer;
 
     /** @private {number} */
@@ -873,7 +871,7 @@ export class HistoryBindingVirtual_ {
     /** @private {!UnlistenDef} */
     this.unlistenOnHistoryPopped_ = this.viewer_.onMessage(
       'historyPopped',
-      data => this.onHistoryPopped_(data)
+      (data) => this.onHistoryPopped_(data)
     );
   }
 
@@ -899,15 +897,30 @@ export class HistoryBindingVirtual_ {
    * otherwise.
    * @param {*} maybeHistoryState
    * @param {!HistoryStateDef} fallbackState
+   * @param {string} debugId
    * @return {!HistoryStateDef}
    * @private
    */
-  toHistoryState_(maybeHistoryState, fallbackState) {
-    if (maybeHistoryState && maybeHistoryState['stackIndex']) {
+  toHistoryState_(maybeHistoryState, fallbackState, debugId) {
+    if (this.isHistoryState_(maybeHistoryState)) {
       return /** @type {!HistoryStateDef} */ (maybeHistoryState);
+    } else {
+      dev().warn(
+        TAG_,
+        'Ignored unexpected "%s" data:',
+        debugId,
+        maybeHistoryState
+      );
     }
-
     return fallbackState;
+  }
+
+  /**
+   * @param {*} maybeHistoryState
+   * @return {boolean}
+   */
+  isHistoryState_(maybeHistoryState) {
+    return !!maybeHistoryState && maybeHistoryState['stackIndex'] !== undefined;
   }
 
   /**
@@ -919,17 +932,16 @@ export class HistoryBindingVirtual_ {
    * @override
    */
   push(opt_stateUpdate) {
-    const message = /** @type {!JsonObject} */ (Object.assign(
-      {'stackIndex': this.stackIndex_ + 1},
-      opt_stateUpdate || {}
-    ));
+    const message = /** @type {!JsonObject} */ ({
+      'stackIndex': this.stackIndex_ + 1,
+      ...(opt_stateUpdate || {}),
+    });
+    const push = 'pushHistory';
     return this.viewer_
-      .sendMessageAwaitResponse('pushHistory', message)
-      .then(response => {
-        const newState = this.toHistoryState_(
-          response,
-          /** @type {!HistoryStateDef} */ (message)
-        );
+      .sendMessageAwaitResponse(push, message)
+      .then((response) => {
+        const fallbackState = /** @type {!HistoryStateDef} */ (message);
+        const newState = this.toHistoryState_(response, fallbackState, push);
         this.updateHistoryState_(newState);
         return newState;
       });
@@ -948,13 +960,14 @@ export class HistoryBindingVirtual_ {
       return this.get();
     }
     const message = dict({'stackIndex': this.stackIndex_});
+    const pop = 'popHistory';
     return this.viewer_
-      .sendMessageAwaitResponse('popHistory', message)
-      .then(response => {
+      .sendMessageAwaitResponse(pop, message)
+      .then((response) => {
         const fallbackState = /** @type {!HistoryStateDef} */ (dict({
           'stackIndex': this.stackIndex_ - 1,
         }));
-        const newState = this.toHistoryState_(response, fallbackState);
+        const newState = this.toHistoryState_(response, fallbackState, pop);
         this.updateHistoryState_(newState);
         return newState;
       });
@@ -984,21 +997,16 @@ export class HistoryBindingVirtual_ {
       opt_stateUpdate.url = url;
     }
 
-    const message = /** @type {!JsonObject} */ (Object.assign(
-      {'stackIndex': this.stackIndex_},
-      opt_stateUpdate || {}
-    ));
+    const message = /** @type {!JsonObject} */ ({
+      'stackIndex': this.stackIndex_,
+      ...(opt_stateUpdate || {}),
+    });
+    const replace = 'replaceHistory';
     return this.viewer_
-      .sendMessageAwaitResponse(
-        'replaceHistory',
-        message,
-        /* cancelUnsent */ true
-      )
-      .then(response => {
-        const newState = this.toHistoryState_(
-          response,
-          /** @type {!HistoryStateDef} */ (message)
-        );
+      .sendMessageAwaitResponse(replace, message, /* cancelUnsent */ true)
+      .then((response) => {
+        const fallbackState = /** @type {!HistoryStateDef} */ (message);
+        const newState = this.toHistoryState_(response, fallbackState, replace);
         this.updateHistoryState_(newState);
         return newState;
       });
@@ -1033,7 +1041,11 @@ export class HistoryBindingVirtual_ {
     if (data['newStackIndex'] !== undefined) {
       data['stackIndex'] = data['newStackIndex'];
     }
-    this.updateHistoryState_(/** @type {!HistoryStateDef} */ (data));
+    if (this.isHistoryState_(data)) {
+      this.updateHistoryState_(/** @type {!HistoryStateDef} */ (data));
+    } else {
+      dev().warn(TAG_, 'Ignored unexpected "historyPopped" data:', data);
+    }
   }
 
   /**
@@ -1069,7 +1081,7 @@ export class HistoryBindingVirtual_ {
         undefined,
         /* cancelUnsent */ true
       )
-      .then(data => {
+      .then((data) => {
         if (!data) {
           return '';
         }
@@ -1113,7 +1125,7 @@ function createHistory(ampdoc) {
   if (
     viewer.isOvertakeHistory() ||
     getMode(ampdoc.win).test ||
-    ampdoc.win.AMP_TEST_IFRAME
+    ampdoc.win.__AMP_TEST_IFRAME
   ) {
     binding = new HistoryBindingVirtual_(ampdoc.win, viewer);
   } else {

@@ -24,7 +24,7 @@ describes.fakeWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let ampdoc;
     let clock;
     let validConfig;
@@ -49,7 +49,7 @@ describes.fakeWin(
         buildUrl: () => {},
         collectUrlVars: () => {},
       };
-      contextMock = sandbox.mock(context);
+      contextMock = env.sandbox.mock(context);
     });
 
     afterEach(() => {
@@ -118,7 +118,7 @@ describes.fakeWin(
 
     describe('runtime connect', () => {
       it('should NOT connect until necessary', () => {
-        const connectStub = sandbox.stub(Messenger.prototype, 'connect');
+        const connectStub = env.sandbox.stub(Messenger.prototype, 'connect');
         const adapter = new AccessIframeAdapter(ampdoc, validConfig, context);
         expect(adapter.connectedPromise_).to.be.null;
         expect(adapter.iframe_.parentNode).to.be.null;
@@ -126,7 +126,7 @@ describes.fakeWin(
       });
 
       it('should connect on first and only first authorize', () => {
-        const connectStub = sandbox.stub(Messenger.prototype, 'connect');
+        const connectStub = env.sandbox.stub(Messenger.prototype, 'connect');
         const adapter = new AccessIframeAdapter(ampdoc, validConfig, context);
         adapter.authorize();
         expect(adapter.connectedPromise_).to.not.be.null;
@@ -146,7 +146,7 @@ describes.fakeWin(
           )
           .once();
         validConfig['iframeVars'] = ['VAR1', 'VAR2'];
-        const sendStub = sandbox
+        const sendStub = env.sandbox
           .stub(Messenger.prototype, 'sendCommandRsvp')
           .returns(Promise.resolve({}));
         const adapter = new AccessIframeAdapter(ampdoc, validConfig, context);
@@ -156,12 +156,13 @@ describes.fakeWin(
           expect(sendStub).to.be.calledOnce;
           expect(sendStub).to.be.calledWithExactly('start', {
             'protocol': 'amp-access',
-            'config': Object.assign({}, validConfig, {
+            'config': {
+              ...validConfig,
               'iframeVars': {
                 'VAR1': 'A',
                 'VAR2': 'B',
               },
-            }),
+            },
           });
         });
       });
@@ -178,12 +179,12 @@ describes.fakeWin(
           setItem: () => {},
           removeItem: () => {},
         };
-        storageMock = sandbox.mock(storage);
-        Object.defineProperty(ampdoc.win, 'sessionStorage', {
+        storageMock = env.sandbox.mock(storage);
+        env.sandbox.defineProperty(ampdoc.win, 'sessionStorage', {
           get: () => storage,
         });
         adapter = new AccessIframeAdapter(ampdoc, validConfig, context);
-        messengerMock = sandbox.mock(adapter.messenger_);
+        messengerMock = env.sandbox.mock(adapter.messenger_);
       });
 
       afterEach(() => {
@@ -215,7 +216,7 @@ describes.fakeWin(
             .withExactArgs('authorize', {})
             .returns(Promise.resolve({a: 1}))
             .once();
-          return adapter.authorize().then(result => {
+          return adapter.authorize().then((result) => {
             expect(result).to.deep.equal({a: 1});
           });
         });
@@ -228,7 +229,7 @@ describes.fakeWin(
             .once();
           const p = adapter.authorize();
           clock.tick(3001);
-          return p.then(result => {
+          return p.then((result) => {
             expect(result).to.deep.equal({response: 'default'});
           });
         });
@@ -279,7 +280,7 @@ describes.fakeWin(
             .once();
           const p = adapter.authorize();
           clock.tick(3001);
-          return p.then(result => {
+          return p.then((result) => {
             expect(result).to.deep.equal(data);
           });
         });
@@ -303,13 +304,13 @@ describes.fakeWin(
             .once();
           const p = adapter.authorize();
           clock.tick(3001);
-          return p.then(result => {
+          return p.then((result) => {
             expect(result).to.deep.equal({response: 'default'});
           });
         });
 
         it('should tolerate storage failures', () => {
-          const devErrorStub = sandbox.stub(dev(), 'error');
+          const devErrorStub = env.sandbox.stub(dev(), 'error');
           storageMock
             .expects('getItem')
             .withExactArgs('amp-access-iframe')
@@ -328,7 +329,7 @@ describes.fakeWin(
             .once();
           const p = adapter.authorize();
           clock.tick(3001);
-          return p.then(result => {
+          return p.then((result) => {
             expect(result).to.deep.equal({response: 'default'});
             expect(devErrorStub).to.be.calledOnce;
             expect(devErrorStub.args[0][1]).to.match(/failed to restore/);
@@ -349,7 +350,7 @@ describes.fakeWin(
             .once();
           const p = adapter.authorize();
           clock.tick(3001);
-          return p.then(result => {
+          return p.then((result) => {
             expect(result).to.deep.equal({response: 'default'});
           });
         });

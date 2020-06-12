@@ -19,7 +19,7 @@ import {
   BOOKEND_CONFIG_ATTRIBUTE_NAME,
 } from '../amp-story-request-service';
 
-describes.fakeWin('amp-story-store-service', {amp: true}, env => {
+describes.fakeWin('amp-story-store-service', {amp: true}, (env) => {
   let requestService;
   let storyElement;
   let xhrMock;
@@ -28,13 +28,13 @@ describes.fakeWin('amp-story-store-service', {amp: true}, env => {
     storyElement = env.win.document.createElement('div');
     env.win.document.body.appendChild(storyElement);
     requestService = new AmpStoryRequestService(env.win, storyElement);
-    xhrMock = sandbox.mock(requestService.xhr_);
+    xhrMock = env.sandbox.mock(requestService.xhr_);
   });
 
   it('should not load the bookend config if no attribute is set', () => {
     xhrMock.expects('fetchJson').never();
 
-    return requestService.loadBookendConfig().then(config => {
+    return requestService.loadBookendConfig().then((config) => {
       expect(config).to.be.null;
       xhrMock.verify();
     });
@@ -75,7 +75,7 @@ describes.fakeWin('amp-story-store-service', {amp: true}, env => {
       })
       .once();
 
-    return requestService.loadBookendConfig().then(config => {
+    return requestService.loadBookendConfig().then((config) => {
       expect(config).to.equal(fetchedConfig);
       xhrMock.verify();
     });

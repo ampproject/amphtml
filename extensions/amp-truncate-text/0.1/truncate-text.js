@@ -123,7 +123,7 @@ function removeTruncation(node) {
     node.removeAttribute(ELEMENT_OVERFLOW_ATTRIBUTE);
   }
 
-  forEachChild(node, child => removeTruncation(child));
+  forEachChild(node, (child) => removeTruncation(child));
 }
 
 /**
@@ -172,10 +172,10 @@ function getOverflowY(element) {
  *
  * @param {{
  *   container: !Element,
- *   overflowElement: ?Element,
+ *   overflowNodes: !Array<!Node>,
  * }} config
  */
-export function truncateText({container, overflowElement} = {}) {
+export function truncateText({container, overflowNodes} = {}) {
   clearTruncated(container);
 
   // If everything fits while the overflow button is hidden, we are done.
@@ -189,7 +189,7 @@ export function truncateText({container, overflowElement} = {}) {
   // Set the container as truncateed, so we show the overflow element and we can
   // truncate taking the size into account.
   setTruncated(container);
-  runTruncation(container, containerRect, overflowElement);
+  runTruncation(container, containerRect, overflowNodes);
 }
 
 /**
@@ -198,6 +198,7 @@ export function truncateText({container, overflowElement} = {}) {
  * @param {function(!Node): boolean} filter A filter function for which nodes
  *    (and their subtrees) to include.
  * @param {!Array<!Node>} nodes An optional Array of initial nodes to include.
+ * @return {*} TODO(#23582): Specify return type
  */
 function getAllNodes(root, filter, nodes = []) {
   if (!filter(root)) {
@@ -205,7 +206,7 @@ function getAllNodes(root, filter, nodes = []) {
   }
 
   nodes.push(root);
-  forEachChild(root, child => getAllNodes(child, filter, nodes));
+  forEachChild(root, (child) => getAllNodes(child, filter, nodes));
   return nodes;
 }
 
@@ -214,12 +215,12 @@ function getAllNodes(root, filter, nodes = []) {
  * truncation and truncating it.
  * @param {!Element} container The Element to do truncation for.
  * @param {!ClientRect} containerRect The rect for `container`.
- * @param {?Element} overflowElement An Element that shows when overflowing,
- *    or null if none is specified.
+ * @param {!Array<!Node>} overflowNodes Any nodes that should be showing
+ *    when there is overflow.
  */
-function runTruncation(container, containerRect, overflowElement) {
-  const nodes = getAllNodes(container, node => {
-    return node != overflowElement;
+function runTruncation(container, containerRect, overflowNodes) {
+  const nodes = getAllNodes(container, (node) => {
+    return !overflowNodes.includes(node);
   });
 
   // Work backwards, truncating nodes from the end until we find one that can
@@ -264,6 +265,7 @@ function underflowAtPosition(container, node, text, offset) {
  * @param {!Text} node A Text Node to ellipsize.
  * @param {!Element} container The container that should have no overflow.
  * @param {!ClientRect} containerRect The ClientRect for `container`.
+ * @return {*} TODO(#23582): Specify return type
  */
 function maybeEllipsizeNode(node, container, containerRect) {
   // The Node can have no rects if an ancestor has `display: none`. We need to
@@ -302,7 +304,7 @@ function maybeEllipsizeNode(node, container, containerRect) {
   const searchIndex = binarySearch(
     0,
     text.length,
-    offset => {
+    (offset) => {
       // Treat whitespace as being the same as the the previous non-whitespace
       // character in terms of truncation. This is necessary as we will strip
       // trailing whitespace, so we do not to include its width when considering

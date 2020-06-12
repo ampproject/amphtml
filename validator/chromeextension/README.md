@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+
 # AMP Validator Chrome Extension
 
 This is the source code to the publicly available [AMP Validator](https://chrome.google.com/webstore/detail/amp-validator/nmoffdblmcmgeicmolmhobpoocbbmknc) Chrome extension.
@@ -21,8 +22,8 @@ This is the source code to the publicly available [AMP Validator](https://chrome
 
 The following tools are required to build the extension:
 
-* [Bower](https://bower.io/)
-* [Polybuild](https://github.com/PolymerLabs/polybuild)
+- [Bower](https://bower.io/)
+- [Polybuild](https://github.com/PolymerLabs/polybuild)
 
 Once these tools are installed, run `./build_extension.sh`.
 

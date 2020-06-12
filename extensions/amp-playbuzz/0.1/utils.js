@@ -32,14 +32,15 @@ import {rethrowAsync} from './../../../src/log';
  * @param {Function} func
  * @param {number} wait
  * @param {boolean=} immediate
+ * @return {Function}
  */
 export function debounce(func, wait, immediate) {
   let timeout;
-  return function() {
+  return function () {
     const context = this,
       args = arguments;
     clearTimeout(timeout);
-    timeout = setTimeout(function() {
+    timeout = setTimeout(function () {
       timeout = null;
       if (!immediate) {
         func.apply(context, args);
@@ -75,7 +76,7 @@ export function getElementCreator(document) {
  */
 function appendChildren(element, children) {
   children = !children ? [] : Array.isArray(children) ? children : [children];
-  children.forEach(child => element.appendChild(child));
+  children.forEach((child) => element.appendChild(child));
 }
 
 /**

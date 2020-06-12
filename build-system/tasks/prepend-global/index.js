@@ -16,16 +16,20 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const BBPromise = require('bluebird');
 const childProcess = require('child_process');
-const exec = BBPromise.promisify(childProcess.exec);
 const colors = require('ansi-colors');
-const fs = BBPromise.promisifyAll(require('fs'));
+const fs = require('fs');
 const log = require('fancy-log');
 const path = require('path');
-const {isTravisBuild} = require('../../travis');
+const util = require('util');
+
+const exec = util.promisify(childProcess.exec);
 
 const {red, cyan} = colors;
+
+// custom-config.json overlays the active config. It is not part of checked-in source (.gitignore'd). See:
+// https://github.com/ampproject/amphtml/blob/master/build-system/global-configs/README.md#custom-configjson
+const customConfigFile = 'build-system/global-configs/custom-config.json';
 
 /**
  * Returns the number of AMP_CONFIG matches in the given config string.
@@ -65,7 +69,7 @@ function checkoutBranchConfigs(filename, opt_localBranch, opt_branch) {
   }
   const branch = opt_branch || 'origin/master';
   // One bad path here will fail the whole operation.
-  return exec(`git checkout ${branch} ${filename}`).catch(function(e) {
+  return exec(`git checkout ${branch} ${filename}`).catch(function (e) {
     // This means the files don't exist in master. Assume that it exists
     // in the current branch.
     if (/did not match any file/.test(e.message)) {
@@ -99,7 +103,7 @@ function writeTarget(filename, fileString, opt_dryrun) {
     log(fileString);
     return Promise.resolve();
   }
-  return fs.writeFileAsync(filename, fileString);
+  return fs.promises.writeFile(filename, fileString);
 }
 
 /**
@@ -136,42 +140,52 @@ function applyConfig(
   return checkoutBranchConfigs(filename, opt_localBranch, opt_branch)
     .then(() => {
       return Promise.all([
-        fs.readFileAsync(filename),
-        fs.readFileAsync(target),
+        fs.promises.readFile(filename, 'utf8'),
+        fs.promises.readFile(target, 'utf8'),
+        fs.promises.readFile(customConfigFile, 'utf8').catch(() => {}),
       ]);
     })
-    .then(files => {
+    .then(([configString, targetString, overlayString]) => {
       let configJson;
       try {
-        configJson = JSON.parse(files[0].toString());
+        configJson = JSON.parse(configString);
       } catch (e) {
         log(red(`Error parsing config file: ${filename}`));
         throw e;
+      }
+      if (overlayString) {
+        try {
+          const overlayJson = JSON.parse(overlayString);
+          Object.assign(configJson, overlayJson);
+          log('Overlaid config with', cyan(path.basename(customConfigFile)));
+        } catch (e) {
+          log(
+            red('Could not apply overlay from'),
+            cyan(path.basename(customConfigFile))
+          );
+        }
       }
       if (opt_localDev) {
         configJson = enableLocalDev(config, target, configJson);
       }
       if (opt_fortesting) {
-        configJson = Object.assign({test: true}, configJson);
+        configJson = {test: true, ...configJson};
       }
-      const targetString = files[1].toString();
-      const configString = JSON.stringify(configJson);
+      configString = JSON.stringify(configJson);
       return prependConfig(configString, targetString);
     })
-    .then(fileString => {
+    .then((fileString) => {
       sanityCheck(fileString);
       return writeTarget(target, fileString, argv.dryrun);
     })
     .then(() => {
-      if (!isTravisBuild()) {
-        const details =
-          '(' +
-          cyan(config) +
-          (opt_localDev ? ', ' + cyan('localDev') : '') +
-          (opt_fortesting ? ', ' + cyan('test') : '') +
-          ')';
-        log('Applied AMP config', details, 'to', cyan(path.basename(target)));
-      }
+      const details =
+        '(' +
+        cyan(config) +
+        (opt_localDev ? ', ' + cyan('localDev') : '') +
+        (opt_fortesting ? ', ' + cyan('test') : '') +
+        ')';
+      log('Applied AMP config', details, 'to', cyan(path.basename(target)));
     });
 }
 
@@ -195,16 +209,14 @@ function enableLocalDev(config, target, configJson) {
       thirdPartyFrameHost: TESTING_HOST_NO_PROTOCOL,
       thirdPartyFrameRegex: TESTING_HOST_NO_PROTOCOL,
     });
-    if (!isTravisBuild()) {
-      log(
-        'Set',
-        cyan('TESTING_HOST'),
-        'to',
-        cyan(TESTING_HOST),
-        'in',
-        cyan(target)
-      );
-    }
+    log(
+      'Set',
+      cyan('TESTING_HOST'),
+      'to',
+      cyan(TESTING_HOST),
+      'in',
+      cyan(target)
+    );
   }
   return Object.assign(LOCAL_DEV_AMP_CONFIG, configJson);
 }
@@ -214,7 +226,7 @@ function enableLocalDev(config, target, configJson) {
  * @return {!Promise}
  */
 function removeConfig(target) {
-  return fs.readFileAsync(target).then(file => {
+  return fs.promises.readFile(target).then((file) => {
     let contents = file.toString();
     if (numConfigs(contents) == 0) {
       return Promise.resolve();
@@ -223,9 +235,7 @@ function removeConfig(target) {
     const config = /self\.AMP_CONFIG\|\|\(self\.AMP_CONFIG=.*?\/\*AMP_CONFIG\*\//;
     contents = contents.replace(config, '');
     return writeTarget(target, contents, argv.dryrun).then(() => {
-      if (!isTravisBuild()) {
-        log('Removed existing config from', cyan(target));
-      }
+      log('Removed existing config from', cyan(target));
     });
   });
 }

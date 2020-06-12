@@ -4,8 +4,9 @@ formats:
   - websites
   - stories
 teaser:
-  text: Creates an iframe and displays a Gist from GitHub
+  text: Creates an iframe and displays a GitHub Gist.
 ---
+
 <!--
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -24,36 +25,14 @@ limitations under the License.
 
 # amp-gist
 
-Displays a <a href="https://gist.github.com/">GitHub Gist</a>.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-gist" src="https://cdn.ampproject.org/v0/amp-gist-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fixed-height</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-gist/">Annotated code example for amp-gist</a></td>
-  </tr>
-</table>
-
-[TOC]
-
-## Behavior
-
-This extension creates an iframe and displays a [gist from GitHub](https://help.github.com/articles/about-gists/).
-
 #### Example: Embedding multiple files
 
 ```html
 <amp-gist
-    data-gistid="b9bb35bc68df68259af94430f012425f"
-    layout="fixed-height"
-    height="225">
+  data-gistid="b9bb35bc68df68259af94430f012425f"
+  layout="fixed-height"
+  height="225"
+>
 </amp-gist>
 ```
 
@@ -61,10 +40,11 @@ This extension creates an iframe and displays a [gist from GitHub](https://help.
 
 ```html
 <amp-gist
-    data-gistid="a19e811dcd7df10c4da0931641538497"
-    data-file="hi.c"
-    layout="fixed-height"
-    height="185">
+  data-gistid="a19e811dcd7df10c4da0931641538497"
+  data-file="hi.c"
+  layout="fixed-height"
+  height="185"
+>
 </amp-gist>
 ```
 
@@ -91,6 +71,6 @@ This extension creates an iframe and displays a [gist from GitHub](https://help.
   </tr>
 </table>
 
-
 ## Validation
+
 See [amp-gist rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-gist/validator-amp-gist.protoascii) in the AMP validator specification.

@@ -31,6 +31,6 @@ FAIL
 |    <!-- Invalid: Missing extension script -->
 |    <div amp-fx="parallax" data-parallax-factor="0.8"></div>
 >>   ^~~~~~~~~
-amp-fx-collection/0.1/test/validator-amp-fx-collection-missing-extension.html:31:2 The attribute 'amp-fx' requires including the 'amp-fx-collection' extension JavaScript. [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+amp-fx-collection/0.1/test/validator-amp-fx-collection-missing-extension.html:31:2 The attribute 'amp-fx' requires including the 'amp-fx-collection' extension JavaScript.
 |  </body>
 |  </html>

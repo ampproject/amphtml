@@ -30,6 +30,7 @@ import {
 import {closest, domOrderComparator, matches} from '../dom';
 import {dev, user} from '../log';
 import {endsWith} from '../string';
+import {getMode} from '../mode';
 import {isExperimentOn} from '../experiments';
 import {remove} from '../utils/array';
 
@@ -43,6 +44,7 @@ const LIGHTBOX_ELEMENT_CLASS = 'i-amphtml-lightbox-element';
 
 /**
  * @param {!Element} el
+ * @return {boolean}
  */
 function isLightbox(el) {
   return el.tagName.indexOf('LIGHTBOX') !== -1;
@@ -96,9 +98,7 @@ export class FixedLayer {
     this.elements_ = [];
 
     /** @const @private {!Pass} */
-    this.updatePass_ = new Pass(ampdoc.win, () => {
-      this.update();
-    });
+    this.updatePass_ = new Pass(ampdoc.win, () => this.update());
 
     /** @private {?function()} */
     this.hiddenObserverUnlistener_ = null;
@@ -130,12 +130,12 @@ export class FixedLayer {
     }
 
     if (opt_lightbox && opt_onComplete) {
-      opt_onComplete.then(() => {
+      opt_onComplete.then(() =>
         this.scanNode_(
           dev().assertElement(opt_lightbox),
           /* lightboxMode */ true
-        );
-      });
+        )
+      );
     }
   }
 
@@ -148,7 +148,7 @@ export class FixedLayer {
       transferLayer.setLightboxMode(false);
     }
 
-    const fes = remove(this.elements_, fe => !!fe.lightboxed);
+    const fes = remove(this.elements_, (fe) => !!fe.lightboxed);
     this.returnFixedElements_(fes);
     if (!this.elements_.length) {
       this.unobserveHiddenMutations_();
@@ -157,12 +157,19 @@ export class FixedLayer {
 
   /**
    * Must be always called after DOMReady.
+   * @return {boolean}
    */
   setup() {
+    const viewer = Services.viewerForDoc(this.ampdoc);
+    if (!getMode().localDev && !viewer.isEmbedded()) {
+      // FixedLayer is not needed for standalone documents.
+      return false;
+    }
+
     const root = this.ampdoc.getRootNode();
     const stylesheets = root.styleSheets;
     if (!stylesheets) {
-      return;
+      return true;
     }
 
     this.fixedSelectors_.length = 0;
@@ -173,7 +180,7 @@ export class FixedLayer {
       // Rare but may happen if the document is being concurrently disposed.
       if (!stylesheet) {
         dev().error(TAG, 'Aborting setup due to null stylesheet.');
-        return;
+        return true;
       }
       const {disabled, ownerNode} = stylesheet;
       if (
@@ -206,6 +213,8 @@ export class FixedLayer {
           ' slightly different layout.'
       );
     }
+
+    return true;
   }
 
   /**
@@ -214,7 +223,7 @@ export class FixedLayer {
    * @private
    */
   scanNode_(node, opt_lightboxMode) {
-    this.trySetupSelectorsNoInline(node, opt_lightboxMode);
+    this.trySetupSelectors_(node, opt_lightboxMode);
 
     // Sort tracked elements in document order.
     this.sortInDomOrder_();
@@ -294,7 +303,7 @@ export class FixedLayer {
     // determine whether an element is currently docked to apply transform.
     if (transform) {
       // Apply transform style to all fixed elements
-      this.elements_.forEach(e => {
+      this.elements_.forEach((e) => {
         if (e.fixedNow && e.top) {
           setStyle(e.element, 'transition', 'none');
           if (e.transform && e.transform != 'none') {
@@ -306,7 +315,7 @@ export class FixedLayer {
       });
     } else {
       // Reset transform style to all fixed elements
-      this.elements_.forEach(e => {
+      this.elements_.forEach((e) => {
         if (e.fixedNow && e.top) {
           setStyles(e.element, {
             transform: '',
@@ -403,9 +412,9 @@ export class FixedLayer {
     // Some of the elements may no longer be in DOM.
     /** @type {!Array<!ElementDef>} */
     const toRemove = this.elements_.filter(
-      fe => !this.ampdoc.contains(fe.element)
+      (fe) => !this.ampdoc.contains(fe.element)
     );
-    toRemove.forEach(fe => this.tearDownElement_(fe.element));
+    toRemove.forEach((fe) => this.tearDownElement_(fe.element));
 
     if (this.elements_.length == 0) {
       return Promise.resolve();
@@ -421,7 +430,7 @@ export class FixedLayer {
     return this.vsync_
       .runPromise(
         {
-          measure: state => {
+          measure: (state) => {
             const elements = this.elements_;
             const autoTops = [];
             const {win} = this.ampdoc;
@@ -528,7 +537,7 @@ export class FixedLayer {
               };
             }
           },
-          mutate: state => {
+          mutate: (state) => {
             if (hasTransferables && this.transfer_) {
               this.getTransferLayer_().update();
             }
@@ -555,7 +564,7 @@ export class FixedLayer {
         },
         {}
       )
-      .catch(error => {
+      .catch((error) => {
         // Fail silently.
         dev().error(TAG, 'Failed to mutate fixed elements:', error);
       });
@@ -565,13 +574,12 @@ export class FixedLayer {
    * Calls `setupSelectors_` in a try-catch.
    * Fails quietly with a dev error if call fails.
    * This method should not be inlined to prevent TryCatch deoptimization.
-   * NoInline keyword at the end of function name also prevents Closure compiler
-   * from inlining the function.
    * @param {!Node} root
    * @param {boolean=} opt_lightboxMode
    * @private
+   * @noinline
    */
-  trySetupSelectorsNoInline(root, opt_lightboxMode) {
+  trySetupSelectors_(root, opt_lightboxMode) {
     try {
       this.setupSelectors_(root, opt_lightboxMode);
     } catch (e) {
@@ -665,7 +673,9 @@ export class FixedLayer {
     opt_lightboxMode
   ) {
     // Warn that pub-authored inline styles may be overriden by FixedLayer.
-    this.warnAboutInlineStylesIfNecessary_(element);
+    if (!opt_forceTransfer) {
+      this.warnAboutInlineStylesIfNecessary_(element);
+    }
 
     // Ignore lightboxes because FixedLayer can interfere with their
     // opening/closing animations (#19149).
@@ -844,9 +854,7 @@ export class FixedLayer {
       return this.transferLayer_;
     }
     const doc = this.ampdoc.win.document;
-    this.transferLayer_ = doc.body.shadowRoot
-      ? new TransferLayerShadow(doc, this.vsync_)
-      : new TransferLayerBody(doc, this.vsync_);
+    this.transferLayer_ = new TransferLayerBody(doc, this.vsync_);
     return this.transferLayer_;
   }
 
@@ -1088,7 +1096,7 @@ class TransferLayerBody {
 
     // Test if the element still matches one of the `fixed` selectors. If not
     // return it back to BODY.
-    const matches = fe.selectors.some(selector =>
+    const matches = fe.selectors.some((selector) =>
       this.matches_(element, selector)
     );
     if (!matches) {
@@ -1136,81 +1144,5 @@ class TransferLayerBody {
       dev().error(TAG, 'Failed to test query match:', e);
       return false;
     }
-  }
-}
-
-const FIXED_LAYER_SLOT = 'i-amphtml-fixed';
-
-/**
- * The fixed layer is created inside the shadow root of the `<body>` element
- * and fixed elements are distributed into this element via slots.
- * @implements {TransferLayerDef}
- */
-class TransferLayerShadow {
-  /**
-   * @param {!Document} doc
-   * @param {!./vsync-impl.Vsync} vsync
-   */
-  constructor(doc, vsync) {
-    /** @private @const {!./vsync-impl.Vsync} */
-    this.vsync_ = vsync;
-
-    /** @private @const {!Element} */
-    this.layer_ = doc.createElement('div');
-    this.layer_.id = 'i-amphtml-fixed-layer';
-    setImportantStyles(this.layer_, {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      height: 0,
-      width: 0,
-      overflow: 'hidden',
-    });
-
-    // The slot where all fixed elements will be distributed.
-    const slot = doc.createElement('slot');
-    slot.setAttribute('name', FIXED_LAYER_SLOT);
-    this.layer_.appendChild(slot);
-
-    doc.body.shadowRoot.appendChild(this.layer_);
-  }
-
-  /** @override */
-  getRoot() {
-    return this.layer_;
-  }
-
-  /** @override */
-  setLightboxMode(on) {
-    this.vsync_.mutate(() => {
-      setStyle(this.getRoot(), 'visibility', on ? 'hidden' : 'visible');
-    });
-  }
-
-  /** @override */
-  update() {
-    // Nothing to do.
-  }
-
-  /** @override */
-  transferTo(fe) {
-    const {element} = fe;
-
-    dev().fine(TAG, 'transfer to fixed:', fe.id, fe.element);
-    user().warn(
-      TAG,
-      'In order to improve scrolling performance in Safari,' +
-        ' we now move the element to a fixed positioning layer:',
-      fe.element
-    );
-
-    // Distribute to the slot.
-    element.setAttribute('slot', FIXED_LAYER_SLOT);
-  }
-
-  /** @override */
-  returnFrom(fe) {
-    dev().fine(TAG, 'return from fixed:', fe.id, fe.element);
-    fe.element.removeAttribute('slot');
   }
 }

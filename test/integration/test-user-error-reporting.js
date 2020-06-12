@@ -19,16 +19,14 @@ import {BrowserController, RequestBank} from '../../testing/test-helper';
 const t = describe
   .configure()
   .skipSafari() // TODO(zhouyx, #11459): Unskip the test on safari.
-  .skipEdge()
-  .skipWindows(); // TODO(#19647): Flaky on Chrome 71 on Windows 10.
+  .skipEdge();
 
-t.run('user-error', function() {
+t.run('user-error', function () {
   describes.integration(
     'user-error integration test',
     {
       extensions: ['amp-analytics'],
       hash: 'log=0',
-      experiments: ['user-error-reporting'],
       body: `
     <amp-analytics>
       <script type="application/json">
@@ -50,7 +48,7 @@ t.run('user-error', function() {
             referrerpolicy="fail-referrer">
             `,
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics');
@@ -67,8 +65,6 @@ t.run('user-error', function() {
     {
       extensions: ['amp-analytics'],
       hash: 'log=0',
-      experiments: ['user-error-reporting'],
-
       body: `
     <amp-img
       src="../../examples/img/sea@1x.jpg"
@@ -92,7 +88,7 @@ t.run('user-error', function() {
       </script>
     </amp-analytics>`,
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics, amp-img');
@@ -109,8 +105,6 @@ t.run('user-error', function() {
     {
       extensions: ['amp-analytics', 'amp-ad'],
       hash: 'log=0',
-      experiments: ['user-error-reporting'],
-
       body: `
     <amp-ad width=300 height=250
         type="_ping_"
@@ -135,7 +129,7 @@ t.run('user-error', function() {
       </script>
     </amp-analytics>`,
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics, amp-ad');

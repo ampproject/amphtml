@@ -28,7 +28,7 @@ describes.fakeWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     it('get a param', () => {
       // URL encoded '{"s":["amp","highlight"]}'.
       env.win.location =
@@ -36,6 +36,7 @@ describes.fakeWin(
         '%7B%22s%22%3A%5B%22amp%22%2C%22highlight%22%5D%7D';
       expect(getHighlightParam(env.ampdoc)).to.deep.equal({
         sentences: ['amp', 'highlight'],
+        skipScrollAnimation: false,
         skipRendering: false,
       });
     });
@@ -47,7 +48,20 @@ describes.fakeWin(
         '%7B%22s%22%3A%5B%22amp%22%2C%22highlight%22%5D%2C%20%22n%22%3A%201%7D';
       expect(getHighlightParam(env.ampdoc)).to.deep.equal({
         sentences: ['amp', 'highlight'],
+        skipScrollAnimation: false,
         skipRendering: true,
+      });
+    });
+
+    it('skip animation flag', () => {
+      // URL encoded '{"s":["amp","highlight"], "na": 1}'
+      env.win.location =
+        'page.html#highlight=' +
+        '%7B%22s%22%3A%5B%22amp%22%2C%22highlight%22%5D%2C%20%22na%22%3A%201%7D';
+      expect(getHighlightParam(env.ampdoc)).to.deep.equal({
+        sentences: ['amp', 'highlight'],
+        skipScrollAnimation: true,
+        skipRendering: false,
       });
     });
 
@@ -107,7 +121,7 @@ describes.realWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     let root = null;
     let docreadyCb = null;
     beforeEach(() => {
@@ -121,8 +135,8 @@ describes.realWin(
       div1.textContent = 'highlighted text';
       root.appendChild(div1);
 
-      sandbox.stub(docready, 'whenDocumentReady').returns({
-        then: cb => {
+      env.sandbox.stub(docready, 'whenDocumentReady').returns({
+        then: (cb) => {
           docreadyCb = cb;
         },
       });
@@ -130,16 +144,16 @@ describes.realWin(
 
     it('initialize with visibility=visible', () => {
       const {ampdoc} = env;
-      const scrollStub = sandbox.stub(
+      const scrollStub = env.sandbox.stub(
         Services.viewportForDoc(ampdoc),
         'animateScrollIntoView'
       );
       scrollStub.returns(Promise.reject());
-      const sendMsgStub = sandbox.stub(
+      const sendMsgStub = env.sandbox.stub(
         Services.viewerForDoc(ampdoc),
         'sendMessage'
       );
-      const setScrollTop = sandbox.stub(
+      const setScrollTop = env.sandbox.stub(
         Services.viewportForDoc(ampdoc),
         'setScrollTop'
       );
@@ -182,8 +196,8 @@ describes.realWin(
 
       const viewerOrigin = 'http://localhost:9876';
       const port = new WindowPortEmulator(window, viewerOrigin);
-      port.addEventListener = function() {};
-      port.postMessage = function() {};
+      port.addEventListener = function () {};
+      port.postMessage = function () {};
       const messaging = new Messaging(env.win, port);
 
       handler.setupMessaging(messaging);
@@ -198,12 +212,12 @@ describes.realWin(
 
     it('initialize with skipRendering', () => {
       const {ampdoc} = env;
-      const scrollStub = sandbox.stub(
+      const scrollStub = env.sandbox.stub(
         Services.viewportForDoc(ampdoc),
         'animateScrollIntoView'
       );
       scrollStub.returns(Promise.reject());
-      const sendMsgStub = sandbox.stub(
+      const sendMsgStub = env.sandbox.stub(
         Services.viewerForDoc(ampdoc),
         'sendMessage'
       );
@@ -230,6 +244,53 @@ describes.realWin(
       );
     });
 
+    it('initialize with skipScrollAnimation', () => {
+      const {ampdoc} = env;
+      const scrollStub = env.sandbox.stub(
+        Services.viewportForDoc(ampdoc),
+        'animateScrollIntoView'
+      );
+      scrollStub.returns(Promise.reject());
+      const sendMsgStub = env.sandbox.stub(
+        Services.viewerForDoc(ampdoc),
+        'sendMessage'
+      );
+      const setScrollTop = env.sandbox.stub(
+        Services.viewportForDoc(ampdoc),
+        'setScrollTop'
+      );
+
+      const handler = new HighlightHandler(ampdoc, {
+        sentences: ['amp', 'highlight'],
+        skipScrollAnimation: true,
+      });
+
+      // initHighlight_ is not called before document become ready.
+      expect(handler.highlightedNodes_).to.be.null;
+      docreadyCb();
+      // initHighlight_ was called in docreadyCb() and highlightedNodes_ is set.
+      expect(handler.highlightedNodes_).not.to.be.null;
+
+      expect(setScrollTop).to.be.calledOnce;
+      expect(setScrollTop.firstCall.args.length).to.equal(1);
+
+      expect(scrollStub).not.to.be.calledOnce;
+
+      // For some reason, expect(args).to.deep.equal does not work.
+      expect(sendMsgStub.callCount).to.equal(3);
+      expect(sendMsgStub.firstCall.args[0]).to.equal('highlightState');
+      expect(sendMsgStub.firstCall.args[1]).to.deep.equal({
+        state: 'found',
+        scroll: 0,
+      });
+      expect(sendMsgStub.secondCall.args[1]).to.deep.equal({
+        state: 'auto_scroll',
+      });
+      expect(sendMsgStub.thirdCall.args[1]).to.deep.equal({
+        state: 'shown',
+      });
+    });
+
     it('initialize with amp-access', () => {
       // Inject <script id="amp-access"> to emulate pages with <amp-access>.
       const {document} = env.win;
@@ -238,12 +299,12 @@ describes.realWin(
       document.body.appendChild(script);
 
       const {ampdoc} = env;
-      const scrollStub = sandbox.stub(
+      const scrollStub = env.sandbox.stub(
         Services.viewportForDoc(ampdoc),
         'animateScrollIntoView'
       );
       scrollStub.returns(Promise.reject());
-      const sendMsgStub = sandbox.stub(
+      const sendMsgStub = env.sandbox.stub(
         Services.viewerForDoc(ampdoc),
         'sendMessage'
       );
@@ -269,21 +330,21 @@ describes.realWin(
       // If visibility != visible, highlight texts and scroll to the start
       // position of the animation. But do not trigger the animation.
       const {ampdoc} = env;
-      const scrollStub = sandbox.stub(
+      const scrollStub = env.sandbox.stub(
         Services.viewportForDoc(ampdoc),
         'animateScrollIntoView'
       );
       scrollStub.returns(Promise.reject());
-      const sendMsgStub = sandbox.stub(
+      const sendMsgStub = env.sandbox.stub(
         Services.viewerForDoc(ampdoc),
         'sendMessage'
       );
-      const setScrollTop = sandbox.stub(
+      const setScrollTop = env.sandbox.stub(
         Services.viewportForDoc(ampdoc),
         'setScrollTop'
       );
-      sandbox
-        .stub(Services.viewerForDoc(ampdoc), 'getVisibilityState')
+      env.sandbox
+        .stub(ampdoc, 'getVisibilityState')
         .returns(VisibilityState.PRERENDER);
 
       new HighlightHandler(ampdoc, {sentences: ['amp', 'highlight']});
@@ -308,11 +369,11 @@ describes.realWin(
       expect(handler.highlightedNodes_).not.to.be.null;
 
       const viewport = Services.viewportForDoc(env.ampdoc);
-      sandbox
+      env.sandbox
         .stub(viewport, 'getLayoutRect')
         .returns(layoutRectLtwh(0, 500, 100, 50));
-      sandbox.stub(viewport, 'getHeight').returns(300);
-      sandbox.stub(viewport, 'getPaddingTop').returns(50);
+      env.sandbox.stub(viewport, 'getHeight').returns(300);
+      env.sandbox.stub(viewport, 'getPaddingTop').returns(50);
 
       // 525px (The center of the element) - 0.5 * 250px (window height)
       // - 50px (padding top) = 350px.
@@ -325,11 +386,11 @@ describes.realWin(
       expect(handler.highlightedNodes_).not.to.be.null;
 
       const viewport = Services.viewportForDoc(env.ampdoc);
-      sandbox
+      env.sandbox
         .stub(viewport, 'getLayoutRect')
         .returns(layoutRectLtwh(0, 500, 100, 500));
-      sandbox.stub(viewport, 'getHeight').returns(300);
-      sandbox.stub(viewport, 'getPaddingTop').returns(50);
+      env.sandbox.stub(viewport, 'getHeight').returns(300);
+      env.sandbox.stub(viewport, 'getPaddingTop').returns(50);
 
       // Scroll to the top of the element with PAGE_TOP_MARGIN margin
       // because it's too tall.
@@ -346,15 +407,15 @@ describes.realWin(
       // Set up an environment where calcTopToCenterHighlightedNodes_
       // returns 350.
       const viewport = Services.viewportForDoc(env.ampdoc);
-      sandbox
+      env.sandbox
         .stub(viewport, 'getLayoutRect')
         .returns(layoutRectLtwh(0, 500, 100, 50));
-      sandbox.stub(viewport, 'getHeight').returns(300);
-      sandbox.stub(viewport, 'getPaddingTop').returns(50);
+      env.sandbox.stub(viewport, 'getHeight').returns(300);
+      env.sandbox.stub(viewport, 'getPaddingTop').returns(50);
       // The current top is 500.
-      sandbox.stub(viewport, 'getScrollTop').returns(500);
+      env.sandbox.stub(viewport, 'getScrollTop').returns(500);
 
-      const setScrollTopStub = sandbox.stub(viewport, 'setScrollTop');
+      const setScrollTopStub = env.sandbox.stub(viewport, 'setScrollTop');
 
       const param = handler.mayAdjustTop_(400);
       expect(param).to.deep.equal({'nd': 150, 'od': 100});

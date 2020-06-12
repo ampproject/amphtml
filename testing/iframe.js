@@ -74,6 +74,7 @@ export function createFixtureIframe(
       [AmpEvents.LOAD_END]: 0,
       [AmpEvents.LOAD_START]: 0,
       [AmpEvents.STUBBED]: 0,
+      [AmpEvents.UNLOAD]: 0,
       [BindEvents.INITIALIZE]: 0,
       [BindEvents.SET_STATE]: 0,
       [BindEvents.RESCAN_TEMPLATE]: 0,
@@ -93,10 +94,10 @@ export function createFixtureIframe(
     // starts loading. This appears to be the only way to get the correct
     // window object early enough to not miss any events that may get fired
     // on that window.
-    window.beforeLoad = function(win) {
+    window.beforeLoad = function (win) {
       // Flag as being a test window.
-      win.AMP_TEST_IFRAME = true;
-      win.AMP_TEST = true;
+      win.__AMP_TEST_IFRAME = true;
+      win.__AMP_TEST = true;
       // Set the testLocation on iframe to parent's location since location of
       // the test iframe is about:srcdoc.
       // Unfortunately location object is not configurable, so we have to define
@@ -113,7 +114,7 @@ export function createFixtureIframe(
         if (!(eventName in events)) {
           throw new Error('Unknown custom event ' + eventName);
         }
-        return new Promise(function(resolve) {
+        return new Promise(function (resolve) {
           if (events[eventName] >= count) {
             resolve();
           } else {
@@ -131,7 +132,7 @@ export function createFixtureIframe(
           events[name]++;
         });
       }
-      win.onerror = function(message, file, line, col, error) {
+      win.onerror = function (message, file, line, col, error) {
         reject(
           new Error(
             'Error in frame: ' +
@@ -146,21 +147,21 @@ export function createFixtureIframe(
         );
       };
       const errors = [];
-      win.console.error = function() {
+      win.console.error = function () {
         errors.push('Error: ' + [].slice.call(arguments).join(' '));
         console.error.apply(console, arguments);
       };
       // Make time go 10x as fast
       const {setTimeout} = win;
-      win.setTimeout = function(fn, ms) {
+      win.setTimeout = function (fn, ms) {
         ms = ms || 0;
         setTimeout(fn, ms / 10);
       };
-      setTimeout(function() {
+      setTimeout(function () {
         reject(new Error('Timeout waiting for elements to start loading.'));
       }, window.ampTestRuntimeConfig.mochaTimeout || 2000);
       // Declare the test ready to run when the document was fully parsed.
-      window.afterLoad = function() {
+      window.afterLoad = function () {
         resolve({
           win,
           doc: win.document,
@@ -179,7 +180,7 @@ export function createFixtureIframe(
       iframe.setAttribute('scrolling', 'no');
     }
     iframe.name = 'test_' + fixture + iframeCount++;
-    iframe.onerror = function(event) {
+    iframe.onerror = function (event) {
       reject(event.error);
     };
     iframe.height = initialIframeHeight;
@@ -219,13 +220,13 @@ export function createFixtureIframe(
  * }>}
  */
 export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     const iframe = document.createElement('iframe');
     iframe.name = 'test_' + iframeCount++;
     iframe.srcdoc = '<!doctype><html><head><body><div id=parent></div>';
-    iframe.onload = function() {
+    iframe.onload = function () {
       // Flag as being a test window.
-      iframe.contentWindow.AMP_TEST_IFRAME = true;
+      iframe.contentWindow.__AMP_TEST_IFRAME = true;
       iframe.contentWindow.testLocation = new FakeLocation(
         window.location.href,
         iframe.contentWindow
@@ -240,10 +241,12 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       installDocService(iframe.contentWindow, /* isSingleDoc */ true);
       const ampdoc = Services.ampdocServiceFor(
         iframe.contentWindow
-      ).getAmpDoc();
+      ).getSingleDoc();
       installExtensionsService(iframe.contentWindow);
       installRuntimeServices(iframe.contentWindow);
-      installCustomElements(iframe.contentWindow);
+      // The anonymous class parameter allows us to detect native classes vs
+      // transpiled classes.
+      installCustomElements(iframe.contentWindow, class {});
       installAmpdocServices(ampdoc);
       Services.resourcesForDoc(ampdoc).ampInitComplete();
       // Act like no other elements were loaded by default.
@@ -256,7 +259,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
             doc: iframe.contentWindow.document,
             ampdoc,
             iframe,
-            addElement: function(element) {
+            addElement: function (element) {
               const iWin = iframe.contentWindow;
               const p = onInsert(iWin)
                 .then(() => {
@@ -292,14 +295,14 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
 }
 
 export function createServedIframe(src) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     const iframe = document.createElement('iframe');
     iframe.name = 'test_' + iframeCount++;
     iframe.src = src;
-    iframe.onload = function() {
+    iframe.onload = function () {
       const win = iframe.contentWindow;
-      win.AMP_TEST_IFRAME = true;
-      win.AMP_TEST = true;
+      win.__AMP_TEST_IFRAME = true;
+      win.__AMP_TEST = true;
       installRuntimeServices(win);
       resolve({
         win,
@@ -336,7 +339,7 @@ export function createIframeWithMessageStub(win) {
    * Instructs the iframe to send a message to parent window.
    * @param {!Object} msg
    */
-  element.postMessageToParent = msg => {
+  element.postMessageToParent = (msg) => {
     element.src = IFRAME_STUB_URL + encodeURIComponent(JSON.stringify(msg));
   };
 
@@ -348,10 +351,10 @@ export function createIframeWithMessageStub(win) {
    *     string is passed, the determination is based on whether the message's
    *     type matches the string.
    */
-  element.expectMessageFromParent = callbackOrType => {
+  element.expectMessageFromParent = (callbackOrType) => {
     let filter;
     if (typeof callbackOrType === 'string') {
-      filter = data => {
+      filter = (data) => {
         return 'type' in data && data.type == callbackOrType;
       };
     } else {
@@ -392,8 +395,8 @@ export function createIframeWithMessageStub(win) {
  * @return {!Promise<!Object>}
  */
 export function expectPostMessage(sourceWin, targetwin, msg) {
-  return new Promise(resolve => {
-    const listener = event => {
+  return new Promise((resolve) => {
+    const listener = (event) => {
       if (
         event.source == sourceWin &&
         JSON.stringify(msg) == JSON.stringify(event.data)
@@ -510,7 +513,7 @@ export function expectBodyToBecomeVisible(win, opt_timeout) {
 export function doNotLoadExternalResourcesInTest(win) {
   const {prototype} = win.Document;
   const {createElement} = prototype;
-  prototype.createElement = function(tagName) {
+  prototype.createElement = function (tagName) {
     const element = createElement.apply(this, arguments);
     tagName = tagName.toLowerCase();
     if (tagName == 'iframe' || tagName == 'img') {
@@ -518,22 +521,22 @@ export function doNotLoadExternalResourcesInTest(win) {
       // triggering invocation.
       element.fakeSrc = '';
       Object.defineProperty(element, 'src', {
-        set: function(val) {
+        set: function (val) {
           this.fakeSrc = val;
         },
-        get: function() {
+        get: function () {
           return this.fakeSrc;
         },
       });
       // Triggers a load event on the element in the next micro task.
-      element.triggerLoad = function() {
+      element.triggerLoad = function () {
         const e = new Event('load');
         Promise.resolve().then(() => {
           this.dispatchEvent(e);
         });
       };
       // Triggers an error event on the element in the next micro task.
-      element.triggerError = function() {
+      element.triggerError = function () {
         const e = new Event('error');
         Promise.resolve().then(() => {
           this.dispatchEvent(e);
@@ -555,7 +558,7 @@ export function doNotLoadExternalResourcesInTest(win) {
  * @return {!Promise<undefined>}
  */
 function onInsert(win) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const observer = new win.MutationObserver(() => {
       observer.disconnect();
       resolve();
@@ -599,7 +602,7 @@ class MessageReceiver {
    */
   constructor(win) {
     this.events_ = [];
-    win.addEventListener('message', event => {
+    win.addEventListener('message', (event) => {
       const parsedData = this.parseMessageData_(event.data);
 
       if (

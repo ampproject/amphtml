@@ -19,16 +19,19 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="320" height="120" 
-      type="caajainfeed" 
-      data-ad-spot="thtuegn1pAQ" 
-      data-test="true">
+<amp-ad
+  width="320"
+  height="120"
+  type="caajainfeed"
+  data-ad-spot="thtuegn1pAQ"
+  data-test="true"
+>
 </amp-ad>
 ```
 
 ## Configuration
 
-For configuration details, please email amb-nad@cyberagent.co.jp. 
+For configuration details, please email amb-nad@cyberagent.co.jp.
 
 ### Required parameters
 

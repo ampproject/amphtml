@@ -24,8 +24,7 @@ const {
   RuntimeTestRunner,
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
-const {clean} = require('./clean');
-const {dist} = require('./dist');
+const {buildRuntime} = require('../common/utils');
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -37,10 +36,7 @@ class Runner extends RuntimeTestRunner {
     if (argv.nobuild) {
       return;
     }
-    argv.fortesting = true;
-    argv.compiled = true;
-    await clean();
-    await dist();
+    await buildRuntime();
   }
 }
 
@@ -67,9 +63,13 @@ integration.description = 'Runs integration tests';
 integration.flags = {
   'chrome_canary': '  Runs tests on Chrome Canary',
   'chrome_flags': '  Uses the given flags to launch Chrome',
-  'compiled':
-    '  Changes integration tests to use production JS binaries for execution',
+  'compiled': '  Runs tests against minified JS',
+  'config':
+    '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'coverage': '  Run tests in code coverage mode',
+  'debug':
+    '  Allow debug statements by auto opening devtools. NOTE: This only ' +
+    'works in non headless mode.',
   'firefox': '  Runs tests on Firefox',
   'files': '  Runs tests for specific files',
   'grep': '  Runs tests that match the pattern',
@@ -78,7 +78,9 @@ integration.flags = {
   'nobuild': '  Skips build step',
   'nohelp': '  Silence help messages that are printed prior to test run',
   'safari': '  Runs tests on Safari',
-  'saucelabs': '  Runs tests on saucelabs (requires setup)',
+  'saucelabs': '  Runs tests on Sauce Labs (requires setup)',
+  'stable': '  Runs Sauce Labs tests on stable browsers',
+  'beta': '  Runs Sauce Labs tests on beta browsers',
   'testnames': '  Lists the name of each test being run',
   'verbose': '  With logging enabled',
   'watch': '  Watches for changes in files, runs corresponding test(s)',

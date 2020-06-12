@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpViewerIntegrationVariableService} from './variable-service';
+import {FixedLayer} from '../../../src/service/fixed-layer';
 import {FocusHandler} from './focus-handler';
 import {
   HighlightHandler,
@@ -31,7 +31,7 @@ import {Services} from '../../../src/services';
 import {TouchHandler} from './touch-handler';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getAmpdoc, registerServiceBuilder} from '../../../src/service';
+import {getAmpdoc} from '../../../src/service';
 import {getData, listen, listenOnce} from '../../../src/event-helper';
 import {getSourceUrl} from '../../../src/url';
 import {isIframed} from '../../../src/dom';
@@ -69,14 +69,6 @@ export class AmpViewerIntegration {
      * @private {?HighlightHandler}
      */
     this.highlightHandler_ = null;
-
-    /** @const @private {!AmpViewerIntegrationVariableService} */
-    this.variableService_ = new AmpViewerIntegrationVariableService(
-      getAmpdoc(this.win.document)
-    );
-    registerServiceBuilder(this.win, 'viewer-integration-variable', () =>
-      this.variableService_.get()
-    );
   }
 
   /**
@@ -98,10 +90,15 @@ export class AmpViewerIntegration {
       return Promise.resolve();
     }
 
+    if (MOVE_FIXED_LAYER) {
+      const viewport = Services.viewportForDoc(ampdoc);
+      viewport.createFixedLayer(FixedLayer);
+    }
+
     if (this.isWebView_ || this.isHandShakePoll_) {
       const source = isIframed(this.win) ? this.win.parent : null;
       return this.webviewPreHandshakePromise_(source, origin).then(
-        receivedPort => {
+        (receivedPort) => {
           return this.openChannelAndStart_(
             viewer,
             ampdoc,
@@ -142,8 +139,8 @@ export class AmpViewerIntegration {
    * @private
    */
   webviewPreHandshakePromise_(source, origin) {
-    return new Promise(resolve => {
-      const unlisten = listen(this.win, 'message', e => {
+    return new Promise((resolve) => {
+      const unlisten = listen(this.win, 'message', (e) => {
         dev().fine(
           TAG,
           'AMPDOC got a pre-handshake message:',
@@ -178,7 +175,7 @@ export class AmpViewerIntegration {
   }
 
   /**
-   * @param {!../../../src/service/viewer-impl.Viewer} viewer
+   * @param {!../../../src/service/viewer-interface.ViewerInterface} viewer
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    * @param {string} origin
    * @param {!Messaging} messaging
@@ -206,7 +203,7 @@ export class AmpViewerIntegration {
 
   /**
    * @param {!Messaging} messaging
-   * @param {!../../../src/service/viewer-impl.Viewer} viewer
+   * @param {!../../../src/service/viewer-interface.ViewerInterface} viewer
    * @param {string} origin
    * @return {Promise<*>|undefined}
    * @private
@@ -222,9 +219,17 @@ export class AmpViewerIntegration {
 
     viewer.setMessageDeliverer(messaging.sendRequest.bind(messaging), origin);
 
-    listenOnce(this.win, 'unload', this.handleUnload_.bind(this, messaging));
+    // Unloading inside a viewer is considered an error so the viewer must be notified
+    // in order to display an error message.
+    // Note: This does not affect the BFCache since it is only installed for pages running
+    // within a viewer (which do no support B/F anyway).
+    listenOnce(
+      this.win,
+      /*OK*/ 'unload',
+      this.handleUnload_.bind(this, messaging)
+    );
 
-    if (viewer.hasCapability('swipe')) {
+    if (viewer.hasCapability('swipe') || viewer.hasCapability('touch')) {
       this.initTouchHandler_(messaging);
     }
     if (viewer.hasCapability('keyboard')) {
@@ -273,6 +278,6 @@ export class AmpViewerIntegration {
   }
 }
 
-AMP.extension(TAG, '0.1', function(AMP) {
+AMP.extension(TAG, '0.1', function (AMP) {
   new AmpViewerIntegration(AMP.win).init();
 });

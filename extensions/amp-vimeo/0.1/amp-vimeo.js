@@ -88,9 +88,10 @@ class AmpVimeo extends AMP.BaseElement {
 
     /**
      * @param {!Event} e
+     * @return {*} TODO(#23582): Specify return type
      * @private
      */
-    this.boundOnMessage_ = e => this.onMessage_(e);
+    this.boundOnMessage_ = (e) => this.onMessage_(e);
 
     /** @private {!UnlistenDef|null} */
     this.unlistenFrame_ = null;
@@ -98,12 +99,13 @@ class AmpVimeo extends AMP.BaseElement {
 
   /** @override */
   preconnectCallback(onLayout = false) {
-    const {preconnect} = this;
-    preconnect.url('https://player.vimeo.com', onLayout);
+    const preconnect = Services.preconnectFor(this.win);
+    const ampdoc = this.getAmpDoc();
+    preconnect.url(ampdoc, 'https://player.vimeo.com', onLayout);
     // Host that Vimeo uses to serve poster frames needed by player.
-    preconnect.url('https://i.vimeocdn.com', onLayout);
+    preconnect.url(ampdoc, 'https://i.vimeocdn.com', onLayout);
     // Host that Vimeo uses to serve JS, CSS and other assets needed.
-    preconnect.url('https://f.vimeocdn.com', onLayout);
+    preconnect.url(ampdoc, 'https://f.vimeocdn.com', onLayout);
   }
 
   /** @override */
@@ -118,7 +120,9 @@ class AmpVimeo extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return this.isAutoplay_().then(isAutoplay => this.buildIframe_(isAutoplay));
+    return this.isAutoplay_().then((isAutoplay) =>
+      this.buildIframe_(isAutoplay)
+    );
   }
 
   /**
@@ -189,7 +193,7 @@ class AmpVimeo extends AMP.BaseElement {
   onReady_() {
     const {element} = this;
 
-    Object.keys(VIMEO_EVENTS).forEach(event => {
+    Object.keys(VIMEO_EVENTS).forEach((event) => {
       this.sendCommand_('addEventListener', event);
     });
 
@@ -219,6 +223,10 @@ class AmpVimeo extends AMP.BaseElement {
     }
 
     const data = objOrParseJson(eventData);
+
+    if (data == null) {
+      return; // we only process valid json
+    }
 
     if (data['event'] == 'ready' || data['method'] == 'ping') {
       this.onReadyOnce_();
@@ -378,6 +386,6 @@ class AmpVimeo extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpVimeo);
 });

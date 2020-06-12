@@ -23,28 +23,28 @@ import {
 describe
   .configure()
   .retryOnSaucelabs()
-  .run('released components: ', function() {
+  .run('released components: ', function () {
     runTest.call(this, false);
   });
 
 describe
   .configure()
   .retryOnSaucelabs()
-  .run('released components with polyfills: ', function() {
+  .run('released components with polyfills: ', function () {
     runTest.call(this, true);
   });
 
 function runTest(shouldKillPolyfillableApis) {
-  describe.configure().run('Rendering of released components', function() {
+  describe.configure().run('Rendering of released components', function () {
     this.timeout(5000);
     let fixture;
     beforeEach(() => {
       this.timeout(3100);
-      return createFixtureIframe('test/fixtures/released.html', 3000, win => {
+      return createFixtureIframe('test/fixtures/released.html', 3000, (win) => {
         if (shouldKillPolyfillableApis) {
           win.Promise = undefined;
         }
-      }).then(f => {
+      }).then((f) => {
         fixture = f;
       });
     });
@@ -57,16 +57,16 @@ function runTest(shouldKillPolyfillableApis) {
     it.configure()
       .skipFirefox()
       .skipChrome()
-      .run('all components should get loaded', function() {
+      .run('all components should get loaded', function () {
         this.timeout(15000);
-        return pollForLayout(fixture.win, 13, 10000)
+        return pollForLayout(fixture.win, 12, 10000)
           .then(() => {
             expect(
               fixture.doc.querySelectorAll('.i-amphtml-element')
-            ).to.have.length(17);
+            ).to.have.length(16);
             expect(
               fixture.doc.querySelectorAll('.i-amphtml-layout')
-            ).to.have.length(13);
+            ).to.have.length(12);
             expect(
               fixture.doc.querySelectorAll('.i-amphtml-error')
             ).to.have.length(0);
@@ -77,7 +77,7 @@ function runTest(shouldKillPolyfillableApis) {
           });
       });
 
-    it('sanity for Firefox while we skip above', function() {
+    it('sanity for Firefox while we skip above', function () {
       this.timeout(15000);
       // Test this only in firefox.
       if (!navigator.userAgent.match(/Firefox/)) {
@@ -111,7 +111,7 @@ function checkGlobalScope(win) {
   ];
   expect(win).to.not.include.keys(commonSymbols);
   expect(win).to.not.include.keys(
-    commonSymbols.map(symbol => {
+    commonSymbols.map((symbol) => {
       return symbol.toUpperCase();
     })
   );

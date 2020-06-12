@@ -16,12 +16,12 @@
 
 import {Signals} from '../../../src/utils/signals';
 
-describes.sandboxed('Signals', {}, () => {
+describes.sandboxed('Signals', {}, (env) => {
   let clock;
   let signals;
 
   beforeEach(() => {
-    clock = sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     clock.tick(1);
     signals = new Signals();
   });
@@ -63,7 +63,7 @@ describes.sandboxed('Signals', {}, () => {
     expect(signals.promiseMap_['sig'].reject).to.be.ok;
     expect(signals.whenSignal('sig')).to.equal(promise); // Reuse promise.
     signals.signal('sig', 11);
-    return promise.then(time => {
+    return promise.then((time) => {
       expect(time).to.equal(11);
       expect(signals.promiseMap_['sig'].promise).to.equal(promise);
       expect(signals.promiseMap_['sig'].resolve).to.be.undefined;
@@ -79,7 +79,7 @@ describes.sandboxed('Signals', {}, () => {
     expect(signals.promiseMap_['sig'].resolve).to.be.undefined;
     expect(signals.promiseMap_['sig'].reject).to.be.undefined;
     expect(signals.whenSignal('sig')).to.equal(promise); // Reuse promise.
-    return promise.then(time => {
+    return promise.then((time) => {
       expect(time).to.equal(11);
       expect(signals.promiseMap_['sig'].promise).to.equal(promise);
       expect(signals.promiseMap_['sig'].resolve).to.be.undefined;
@@ -97,7 +97,7 @@ describes.sandboxed('Signals', {}, () => {
       () => {
         throw new Error('should have failed');
       },
-      reason => {
+      (reason) => {
         expect(reason).to.equal(error);
         expect(signals.promiseMap_['sig'].promise).to.equal(promise);
         expect(signals.promiseMap_['sig'].resolve).to.be.undefined;
@@ -116,7 +116,7 @@ describes.sandboxed('Signals', {}, () => {
       () => {
         throw new Error('should have failed');
       },
-      reason => {
+      (reason) => {
         expect(reason).to.equal(error);
         expect(signals.promiseMap_['sig'].promise).to.equal(promise);
         expect(signals.promiseMap_['sig'].resolve).to.be.undefined;
@@ -174,5 +174,20 @@ describes.sandboxed('Signals', {}, () => {
     signals.reset('sig');
     // Promise has been reset completely.
     expect(signals.promiseMap_['sig']).to.be.undefined;
+  });
+});
+
+describes.sandboxed('Signals with zero for tests', {}, (env) => {
+  let signals;
+
+  beforeEach(() => {
+    env.sandbox.useFakeTimers();
+    signals = new Signals();
+  });
+
+  it('should register signal without promise', () => {
+    // The signal value is often 0 in tests due to the fake timer.
+    signals.signal('sig');
+    expect(signals.get('sig')).to.equal(0);
   });
 });

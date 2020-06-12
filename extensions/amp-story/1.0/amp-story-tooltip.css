@@ -104,12 +104,15 @@
   text-shadow: none !important;
   font-weight: 500 !important;
   display: flex !important;
-  justify-content: space-between !important;
   align-items: center !important;
   background: white !important;
   box-shadow: 0px 6px 16px rgba(0,0,0,0.16) !important;
   transform: translate3d(0, -16px, 0) !important;
   transition: transform 0.2s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+}
+
+.i-amphtml-story-tooltip-theme-dark {
+  background: rgba(32, 33, 37, 1) !important;
 }
 
 .i-amphtml-story-tooltip.i-amphtml-tooltip-arrow-on-top {
@@ -121,7 +124,7 @@
   overflow: hidden !important;
   white-space: nowrap !important;
   max-width: 172px !important;
-  margin: 0px 10px !important;
+  margin: 0px 5px !important;
   font-family: 'Roboto', sans-serif !important;
   font-size: 14px !important;
   color: #3C4043 !important;
@@ -129,9 +132,14 @@
   line-height: 20px !important;
 }
 
+.i-amphtml-story-tooltip-theme-dark .i-amphtml-tooltip-text {
+  color: #9AA0A6 !important;
+}
+
 .i-amphtml-story-tooltip-custom-icon {
   width: 24px !important;
   height: 24px !important;
+  margin: 0px 5px !important;
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
@@ -145,6 +153,7 @@
 .i-amphtml-tooltip-action-icon {
   width: 16px !important;
   height: 16px !important;
+  margin: 0px 5px !important;
   padding-bottom: 2px !important;
 }
 
@@ -156,6 +165,14 @@
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" viewBox="0 0 48 48" fill="#757575"><path d="M17.17 32.92l9.17-9.17-9.17-9.17L20 11.75l12 12-12 12z"/><path d="M0-.25h48v48H0z" fill="none"/></svg>') !important;
 }
 
+.i-amphtml-story-tooltip-theme-dark .i-amphtml-tooltip-action-icon-launch {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" viewBox="0 0 48 48" fill="rgba(255, 255, 255, 0.54)"><path d="M0 0h48v48H0z" fill="none"/><path d="M38 38H10V10h14V6H10c-2.21 0-4 1.79-4 4v28c0 2.21 1.79 4 4 4h28c2.21 0 4-1.79 4-4V24h-4v14zM28 6v4h7.17L15.51 29.66l2.83 2.83L38 12.83V20h4V6H28z"/></svg>') !important;
+}
+
+.i-amphtml-story-tooltip-theme-dark .i-amphtml-tooltip-action-icon-expand {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18px" height="18px" viewBox="0 0 48 48" fill="rgba(255, 255, 255, 0.54)"><path d="M17.17 32.92l9.17-9.17-9.17-9.17L20 11.75l12 12-12 12z"/><path d="M0-.25h48v48H0z" fill="none"/></svg>') !important;
+}
+
 .i-amphtml-story-tooltip-arrow {
   border-right: 8px solid transparent !important;
   border-left: 8px solid transparent !important;
@@ -164,9 +181,21 @@
   bottom: -8px !important;
 }
 
+.i-amphtml-story-tooltip-theme-dark .i-amphtml-story-tooltip-arrow {
+  border-top: 10px solid rgba(32, 33, 37, 1) !important;
+}
+
 .i-amphtml-tooltip-arrow-on-top .i-amphtml-story-tooltip-arrow {
   bottom: auto !important;
   top: -8px !important;
   border-top: 0px !important;
   border-bottom: 10px solid white !important;
+}
+
+.i-amphtml-story-tooltip-theme-dark .i-amphtml-tooltip-arrow-on-top .i-amphtml-story-tooltip-arrow {
+  border-bottom: 10px solid rgba(32, 33, 37, 1) !important;
+}
+
+.amp-social-share-twitter-no-background {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet"><g fill="none" fill-rule="evenodd"><path d="M0 0h400v400H0z"/><path fill="%231da1f2" fill-rule="nonzero" d="M153.62 301.59c94.34 0 145.94-78.16 145.94-145.94 0-2.22 0-4.43-.15-6.63A104.36 104.36 0 0 0 325 122.47a102.38 102.38 0 0 1-29.46 8.07 51.47 51.47 0 0 0 22.55-28.37 102.79 102.79 0 0 1-32.57 12.45c-15.9-16.906-41.163-21.044-61.625-10.093-20.461 10.95-31.032 34.266-25.785 56.873A145.62 145.62 0 0 1 92.4 107.81c-13.614 23.436-6.66 53.419 15.88 68.47A50.91 50.91 0 0 1 85 169.86v.65c.007 24.416 17.218 45.445 41.15 50.28a51.21 51.21 0 0 1-23.16.88c6.72 20.894 25.976 35.208 47.92 35.62a102.92 102.92 0 0 1-63.7 22 104.41 104.41 0 0 1-12.21-.74 145.21 145.21 0 0 0 78.62 23"/></g></svg>');
 }

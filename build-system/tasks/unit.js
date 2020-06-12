@@ -24,8 +24,10 @@ const {
   RuntimeTestRunner,
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
+const {compileJison} = require('./compile-jison');
 const {css} = require('./css');
 const {getUnitTestsToRun} = require('./runtime-test/helpers-unit');
+const {vendorConfigs} = require('./vendor-configs');
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -34,11 +36,12 @@ class Runner extends RuntimeTestRunner {
 
   /** @override */
   async maybeBuild() {
-    if (argv.nobuild) {
-      return;
-    }
+    await vendorConfigs();
 
-    await css();
+    if (!argv.nobuild) {
+      await css();
+      await compileJison();
+    }
   }
 }
 

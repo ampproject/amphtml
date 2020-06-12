@@ -16,7 +16,7 @@
 
 import {Messenger} from '../iframe-api/messenger';
 
-describes.fakeWin('Messenger', {}, env => {
+describes.fakeWin('Messenger', {}, (env) => {
   let win;
 
   beforeEach(() => {
@@ -33,9 +33,9 @@ describes.fakeWin('Messenger', {}, env => {
       // A port knows the origin, but doesn't always know the source window.
       source = null;
       messenger = new Messenger(win, () => source, 'https://example-sp.com');
-      onCommand = sandbox.spy();
-      addEventListenerSpy = sandbox.spy(win, 'addEventListener');
-      removeEventListenerSpy = sandbox.spy(win, 'removeEventListener');
+      onCommand = env.sandbox.spy();
+      addEventListenerSpy = env.sandbox.spy(win, 'addEventListener');
+      removeEventListenerSpy = env.sandbox.spy(win, 'removeEventListener');
       messenger.connect(onCommand);
     });
 
@@ -82,7 +82,7 @@ describes.fakeWin('Messenger', {}, env => {
 
     it('should send a command once connected', () => {
       source = {
-        postMessage: sandbox.spy(),
+        postMessage: env.sandbox.spy(),
       };
       messenger.sendCommand('start', {a: 1});
       expect(source.postMessage).to.be.calledOnce;
@@ -130,7 +130,7 @@ describes.fakeWin('Messenger', {}, env => {
 
     it('should send and receive a rsvp command', () => {
       source = {
-        postMessage: sandbox.spy(),
+        postMessage: env.sandbox.spy(),
       };
       const promise = messenger.sendCommandRsvp('authorize', {a: 1});
       expect(source.postMessage).to.be.calledOnce;
@@ -155,14 +155,14 @@ describes.fakeWin('Messenger', {}, env => {
           payload: {result: {a: 2}},
         },
       });
-      return promise.then(result => {
+      return promise.then((result) => {
         expect(result).to.deep.equal({a: 2});
       });
     });
 
     it('should increment rvsp', () => {
       source = {
-        postMessage: sandbox.spy(),
+        postMessage: env.sandbox.spy(),
       };
       messenger.sendCommandRsvp('authorize', {});
       expect(source.postMessage.args[0][0]).to.deep.equal({
@@ -183,7 +183,7 @@ describes.fakeWin('Messenger', {}, env => {
 
     it('should send and receive a rsvp command with error', () => {
       source = {
-        postMessage: sandbox.spy(),
+        postMessage: env.sandbox.spy(),
       };
       const promise = messenger.sendCommandRsvp('authorize', {a: 1});
       expect(source.postMessage).to.be.calledOnce;
@@ -212,7 +212,7 @@ describes.fakeWin('Messenger', {}, env => {
         () => {
           throw new Error('must have failed');
         },
-        reason => {
+        (reason) => {
           expect(() => {
             throw reason;
           }).to.throw(/intentional/);
@@ -227,14 +227,14 @@ describes.fakeWin('Messenger', {}, env => {
       let handlerResponse;
 
       beforeEach(() => {
-        sandbox
+        env.sandbox
           .stub(messenger, 'handleCommand_')
           .callsFake(() => handlerResponse);
         let sendResolver;
-        sendPromise = new Promise(resolve => {
+        sendPromise = new Promise((resolve) => {
           sendResolver = resolve;
         });
-        sendStub = sandbox.stub(messenger, 'sendCommand_').callsFake(() => {
+        sendStub = env.sandbox.stub(messenger, 'sendCommand_').callsFake(() => {
           sendResolver();
         });
         handler = addEventListenerSpy.args[0][1];
@@ -304,11 +304,11 @@ describes.fakeWin('Messenger', {}, env => {
     beforeEach(() => {
       // A host knows the target window, but not the origin.
       target = {
-        postMessage: sandbox.spy(),
+        postMessage: env.sandbox.spy(),
       };
       messenger = new Messenger(win, target, /* targetOrigin */ null);
-      onCommand = sandbox.spy();
-      addEventListenerSpy = sandbox.spy(win, 'addEventListener');
+      onCommand = env.sandbox.spy();
+      addEventListenerSpy = env.sandbox.spy(win, 'addEventListener');
       messenger.connect(onCommand);
     });
 

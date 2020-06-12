@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+const {
+  staticTemplateTags,
+  staticTemplateFactoryFns,
+} = require('../static-template-metadata');
 const {minify} = require('html-minifier');
 
 const INSERTED_TEMPLATES = new Map();
@@ -40,18 +44,34 @@ function optimizeLiteralOutput(templateLiteral) {
   });
 }
 
-module.exports = function({types: t}) {
+module.exports = function ({types: t}) {
+  /**
+   * Determines whether a TaggedTemplateExpression should be handled based on
+   * naming convention:
+   *
+   *    html`<content>...` for `html` and `svg` named tags.
+   *
+   *    htmlFor(element)`<content>...` for `htmlFor` and `svgFor` tag factories.
+   *
+   * @param {Node} tag
+   * @return {boolean}
+   */
+  const isTagOrFactoryByName = (tag) =>
+    (t.isIdentifier(tag) && staticTemplateTags.has(tag.name)) ||
+    (t.isCallExpression(tag) &&
+      t.isIdentifier(tag.callee) &&
+      staticTemplateFactoryFns.has(tag.callee.name));
+
   return {
     name: 'transform-html-templates',
     visitor: {
+      Program() {
+        INSERTED_TEMPLATES.clear();
+      },
       TaggedTemplateExpression(path) {
         const {tag} = path.node;
 
-        if (
-          t.isIdentifier(tag, {name: 'html'}) ||
-          (t.isCallExpression(tag) &&
-            t.isIdentifier(tag.callee, {name: 'htmlFor'}))
-        ) {
+        if (isTagOrFactoryByName(tag)) {
           // Replace a matching TemplateExpression by either inlining a
           // transpiled template or hoisting the template and referring
           // to its value.
@@ -80,10 +100,10 @@ module.exports = function({types: t}) {
                 hoistedIdentifier = path.scope.generateUidIdentifier(
                   'template'
                 );
-                const program = path.findParent(path => path.isProgram());
+                const program = path.findParent((path) => path.isProgram());
 
                 program.scope.push({
-                  id: hoistedIdentifier,
+                  id: t.cloneNode(hoistedIdentifier),
                   init: templateArrayExpression,
                   kind: 'const',
                 });

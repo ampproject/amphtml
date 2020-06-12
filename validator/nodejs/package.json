@@ -1,6 +1,6 @@
 {
   "name": "amphtml-validator",
-  "version": "1.0.23",
+  "version": "1.0.31",
   "description": "Official validator for AMP HTML (www.ampproject.org)",
   "keywords": [
     "AMP",
@@ -9,9 +9,6 @@
     "AMP HTML",
     "Accelerated Mobile Pages"
   ],
-  "engines": {
-    "node": "^10.0.0"
-  },
   "author": "The AMP HTML Authors",
   "license": "Apache-2.0",
   "repository": {
@@ -19,10 +16,7 @@
     "url": "https://github.com/ampproject/amphtml/tree/master/validator/nodejs/"
   },
   "bin": {
-    "amphtml-validator": "index.js"
-  },
-  "scripts": {
-    "preinstall": "node ../../build-system/check-package-manager.js"
+    "amphtml-validator": "./cli.js"
   },
   "dependencies": {
     "colors": "1.2.5",
@@ -30,6 +24,6 @@
     "promise": "8.0.1"
   },
   "devDependencies": {
-    "jasmine": "3.1.0"
+    "jasmine": "3.5.0"
   }
 }

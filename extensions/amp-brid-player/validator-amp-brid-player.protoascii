@@ -21,7 +21,7 @@ tags: {  # amp-brid-player
     name: "amp-brid-player"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -59,6 +59,10 @@ tags: {  # <amp-brid-player>
     name: "data-video"
     mandatory_oneof: "['data-outstream', 'data-playlist', 'data-video']"
     value_regex: "[0-9]+"
+  }
+  attrs: {
+    name: "dock"
+    requires_extension: "amp-video-docking"
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-brid-player"

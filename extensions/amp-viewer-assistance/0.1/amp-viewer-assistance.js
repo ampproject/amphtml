@@ -28,7 +28,7 @@ const TAG = 'amp-viewer-assistance';
 const GSI_TOKEN_PROVIDER = 'actions-on-google-gsi';
 
 /** @const {!Array<string>} */
-const ACTION_STATUS_WHITELIST = [
+const ACTION_STATUS_ALLOWLIST = [
   'ACTIVE_ACTION_STATUS',
   'FAILED_ACTION_STATUS',
   'COMPLETED_ACTION_STATUS',
@@ -54,13 +54,16 @@ export class AmpViewerAssistance {
     this.assistanceElement_ = dev().assertElement(assistanceElement);
 
     /** @const @private {JsonObject|null|undefined} */
-    this.configJson_ = tryParseJson(this.assistanceElement_.textContent, e => {
-      throw user().createError(
-        'Failed to parse "amp-viewer-assistance" JSON: ' + e
-      );
-    });
+    this.configJson_ = tryParseJson(
+      this.assistanceElement_.textContent,
+      (e) => {
+        throw user().createError(
+          'Failed to parse "amp-viewer-assistance" JSON: ' + e
+        );
+      }
+    );
 
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(ampdoc);
 
     /** @private @const {!../../../src/service/action-impl.ActionService} */
@@ -78,19 +81,17 @@ export class AmpViewerAssistance {
   actionHandler_(invocation) {
     const {method, args} = invocation;
     if (method == 'updateActionState') {
-      // "updateActionState" requires a low-trust event.
       if (invocation.satisfiesTrust(ActionTrust.LOW)) {
         this.validateAndTransformUpdateArgs_(args)
-          .then(args => {
+          .then((args) => {
             return this.viewer_./*OK*/ sendMessageAwaitResponse(method, args);
           })
-          .catch(err => {
+          .catch((err) => {
             user().error(TAG, err.toString());
           });
       }
     } else if (method == 'signIn') {
-      // "signIn" requires a high-trust event.
-      if (invocation.satisfiesTrust(ActionTrust.HIGH)) {
+      if (invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
         this.requestSignIn_();
       }
     }
@@ -107,7 +108,7 @@ export class AmpViewerAssistance {
       user().error(TAG, 'Could not find #amp-viewer-assistance element.');
       return this;
     }
-    return this.viewer_.isTrustedViewer().then(isTrustedViewer => {
+    return this.viewer_.isTrustedViewer().then((isTrustedViewer) => {
       if (
         !isTrustedViewer &&
         !isExperimentOn(this.ampdoc_.win, 'amp-viewer-assistance-untrusted')
@@ -149,7 +150,7 @@ export class AmpViewerAssistance {
           'providers': [GSI_TOKEN_PROVIDER],
         })
       )
-      .then(token => {
+      .then((token) => {
         this.setIdTokenStatus_(Boolean(!!token));
         return token;
       })
@@ -169,7 +170,7 @@ export class AmpViewerAssistance {
           'providers': [GSI_TOKEN_PROVIDER],
         })
       )
-      .then(token => {
+      .then((token) => {
         user().info(TAG, 'Token: ' + token);
         if (token) {
           this.setIdTokenStatus_(/*available=*/ true);
@@ -177,7 +178,7 @@ export class AmpViewerAssistance {
             this.assistanceElement_,
             'signedIn',
             null,
-            ActionTrust.HIGH
+            ActionTrust.DEFAULT // DEFAULT because async after gesture.
           );
         } else {
           this.setIdTokenStatus_(/*available=*/ false);
@@ -209,7 +210,7 @@ export class AmpViewerAssistance {
     } else if (error) {
       // Must transform 'error' Response object
       if (error && typeof error.text === 'function') {
-        return error.text().then(errorMessage => {
+        return error.text().then((errorMessage) => {
           return dict({
             'update': {
               'actionStatus': 'FAILED_ACTION_STATUS',
@@ -228,7 +229,7 @@ export class AmpViewerAssistance {
       }
     } else if (update) {
       const actionStatus = update && update['actionStatus'];
-      if (!actionStatus || !ACTION_STATUS_WHITELIST.includes(actionStatus)) {
+      if (!actionStatus || !ACTION_STATUS_ALLOWLIST.includes(actionStatus)) {
         return Promise.reject(
           '"updateActionState" action "update" parameter' +
             ' must contain a valid "actionStatus" field.'
@@ -276,8 +277,8 @@ export class AmpViewerAssistance {
 }
 
 // Register the extension services.
-AMP.extension(TAG, '0.1', function(AMP) {
-  AMP.registerServiceForDoc('amp-viewer-assistance', function(ampdoc) {
+AMP.extension(TAG, '0.1', function (AMP) {
+  AMP.registerServiceForDoc('amp-viewer-assistance', function (ampdoc) {
     return new AmpViewerAssistance(ampdoc).start_();
   });
 });

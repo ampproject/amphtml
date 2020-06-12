@@ -53,7 +53,7 @@ export class BindEvaluator {
   addBindings(bindings) {
     const errors = Object.create(null);
     // Create BindExpression objects from expression strings.
-    bindings.forEach(binding => {
+    bindings.forEach((binding) => {
       const parsed = this.parse_(binding.expressionString);
       if (parsed.error) {
         errors[binding.expressionString] = parsed.error;
@@ -71,14 +71,14 @@ export class BindEvaluator {
   removeBindingsWithExpressionStrings(expressionStrings) {
     const expressionsToRemove = Object.create(null);
 
-    expressionStrings.forEach(expressionString => {
+    expressionStrings.forEach((expressionString) => {
       delete this.expressions_[expressionString];
       expressionsToRemove[expressionString] = true;
     });
 
     remove(
       this.bindings_,
-      binding => !!expressionsToRemove[binding.expressionString]
+      (binding) => !!expressionsToRemove[binding.expressionString]
     );
   }
 
@@ -109,7 +109,7 @@ export class BindEvaluator {
   /**
    * Evaluates all expressions with the given `scope` data returns two maps:
    * expression strings to results and expression strings to errors.
-   * @param {!Object} scope
+   * @param {!JsonObject} scope
    * @return {!BindEvaluateBindingsResultDef}
    */
   evaluateBindings(scope) {
@@ -118,8 +118,10 @@ export class BindEvaluator {
     /** @type {!Object<string, !BindEvaluatorErrorDef>} */
     const errors = Object.create(null);
 
+    this.setGlobals_(scope);
+
     // First, evaluate all of the expression strings in the bindings.
-    this.bindings_.forEach(binding => {
+    this.bindings_.forEach((binding) => {
       const {expressionString} = binding;
       // Skip if we've already evaluated this expression string.
       if (cache[expressionString] !== undefined || errors[expressionString]) {
@@ -142,10 +144,14 @@ export class BindEvaluator {
     });
 
     // Then, validate each binding and delete invalid expression results.
-    this.bindings_.forEach(binding => {
+    this.bindings_.forEach((binding) => {
       const {tagName, property, expressionString} = binding;
       const result = cache[expressionString];
       if (result === undefined) {
+        return;
+      }
+      // Don't validate non-primitive expression results e.g. arrays, objects.
+      if (result !== null && typeof result === 'object') {
         return;
       }
       // IMPORTANT: We need to validate expression results on each binding
@@ -169,7 +175,7 @@ export class BindEvaluator {
   /**
    * Evaluates and returns a single expression string.
    * @param {string} expressionString
-   * @param {!Object} scope
+   * @param {!JsonObject} scope
    * @return {!BindEvaluateExpressionResultDef}
    */
   evaluateExpression(expressionString, scope) {
@@ -177,11 +183,22 @@ export class BindEvaluator {
     if (!parsed.expression) {
       return {result: null, error: parsed.error};
     }
+    this.setGlobals_(scope);
     const evaluated = this.evaluate_(parsed.expression, scope);
     if (!evaluated.result) {
       return {result: null, error: evaluated.error};
     }
     return {result: evaluated.result, error: null};
+  }
+
+  /**
+   * Sets global references in scope if they're not already set or overriden.
+   * @param {!JsonObject} scope
+   */
+  setGlobals_(scope) {
+    if (!('global' in scope)) {
+      scope['global'] = scope;
+    }
   }
 
   /**
@@ -207,7 +224,7 @@ export class BindEvaluator {
   /**
    * Evaluate a single expression with the given scope.
    * @param {!BindExpression} expression
-   * @param {!Object} scope
+   * @param {!JsonObject} scope
    * @return {{result: ?BindExpressionResultDef, error: ?BindEvaluatorErrorDef}}
    * @private
    */
