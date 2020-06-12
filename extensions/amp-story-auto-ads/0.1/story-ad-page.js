@@ -83,7 +83,7 @@ export class StoryAdPage {
    * @param {number} index
    * @param {!./story-ad-localization.StoryAdLocalization} localization
    * @param {!./story-ad-button-text-fitter.ButtonTextFitter} buttonFitter
-   * @param {!../../amp-story/0.1/amp-story-store-service.AmpStoryStoreService|!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} storeService
+   * @param {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} storeService
    */
   constructor(ampdoc, config, index, localization, buttonFitter, storeService) {
     /** @private @const {!JsonObject} */
@@ -140,7 +140,7 @@ export class StoryAdPage {
     /** @private {boolean} */
     this.viewed_ = false;
 
-    /** @private @const {!../../amp-story/0.1/amp-story-store-service.AmpStoryStoreService|!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    /** @private @const {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = storeService;
   }
 
