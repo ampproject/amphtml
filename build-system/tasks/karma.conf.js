@@ -93,11 +93,11 @@ module.exports = {
     './testing/**/*.js': ['browserify'],
   },
 
-  html2JsPreprocessor: {
+  //html2JsPreprocessor: {
     // Strip the test-bin/ prefix for the transformer destination so that the
     // change is transparent for users of the path.
-    stripPrefix: 'test-bin/',
-  },
+    //stripPrefix: 'test-bin/',
+  //},
 
   // TODO(rsimha, #15510): Sauce labs on Safari doesn't reliably support
   // 'localhost' addresses. See #14848 for more info.

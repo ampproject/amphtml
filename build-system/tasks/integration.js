@@ -49,13 +49,7 @@ async function buildTransformedHtml() {
   let normalizedFilePath;
   try {
     for (const filePath of filePaths) {
-      //await fs.copySync(filePath, `./test-bin/${filePath}`);
-      const cwd = process.cwd();
-      normalizedFilePath = path.normalize(filePath);
-      const absoluteFilePath = `${cwd}/${normalizedFilePath}`;
-      const transformedHtml = await transform(absoluteFilePath);
-      const destPath = `${cwd}/test-bin/${normalizedFilePath}`;
-      await fs.outputFile(destPath, transformedHtml);
+      await fs.copySync(filePath, `./test-bin/${filePath}`);
     }
   } catch (e) {
     console./*OK*/log(
