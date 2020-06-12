@@ -427,9 +427,9 @@ The `amp-ad-exit` element exposes an `exit` action that other elements reference
   </tr>
 </table>
 
-{% call callout('Warning', type='caution') %}
+[tip type="important"]
 When triggering the `exit` action, either `target` or `variable` should be provided, but not both, e.g. `exit(target='product1')` or `exit(variable='currentProduct', default='product1')`.
-{% endcall %}
+[/tip]
 
 _Example: Using variable targets_
 

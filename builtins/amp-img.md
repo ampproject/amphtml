@@ -51,9 +51,9 @@ The runtime may choose to delay or prioritize resource loading based on the view
 `amp-img` components, like all externally fetched AMP resources, must be given an
 explicit size (as in `width` / `height`) in advance, so that the aspect ratio can be known without fetching the image. Actual layout behavior is determined by the `layout` attribute.
 
-{% call callout('Read on', type='read') %}
+[tip type="read-on"]
 Learn more about layouts in the [AMP HTML Layout System](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md) spec and [Supported Layouts](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout.html#the-layout-attribute).
-{% endcall %}
+[/tip]
 
 #### Example: Displaying a responsive image
 
@@ -74,9 +74,9 @@ In the following example, we display an image that responds to the size of the v
 
 [/example]
 
-{% call callout('Read on', type='read') %}
+[tip type="read-on"]
 Learn about responsive AMP pages in the [Create Responsive AMP Pages](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/responsive_design) guide.
-{% endcall %}
+[/tip]
 
 If the resource requested by the `amp-img` component fails to load, the space will be blank unless a [`fallback`](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#fallback) child is provided. A fallback is only executed on the initial layout and subsequent src changes after the fact (through resize + srcset for example) will not have a fallback for performance implications.
 
@@ -110,12 +110,12 @@ A placeholder background color or other visual can be set using CSS selector and
 
 Additional image features like captions can be implemented with standard HTML (for example, `figure` and `figcaption`).
 
-{% call callout('Read on', type='read') %}
+[tip type="read-on"]
 Learn more about using `amp-img` from these resources:
 
 - [Placeholders & fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders)
 - [Include Images & Video](https://amp.dev/documentation/guides-and-tutorials/develop/media_iframes_3p/)
-  {% endcall %}
+  [/tip]
 
 ## Attributes
 
@@ -142,9 +142,9 @@ The value of the AMP `sizes` attribute is a sizes expression that selects the de
 
 It is possible to use `sizes` on `<amp-img>` without `srcset` purely for setting an inline style for `width` according to the matched media query, or purely for inferencing layout `responsive`.
 
-{% call callout('Read on', type='read') %}
+[tip type="read-on"]
 For the `<img>` tag in `HTML`, the `sizes` attribute is used in conjunction with the `srcset` attribute and specifies the intended display size of the image as corresponding to a media condition. It will influence the intrinsic display size of the underlying `<img>` based on [browser behavior](https://gist.github.com/cathyxz/f17d12c07d60bcef52591e64e5e684fb).
-{% endcall %}
+[/tip]
 
 See [Responsive images with srcset, sizes & heights](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/art_direction) for usage of `sizes` and `srcset`.
 
@@ -217,9 +217,9 @@ If you want your image to display at a fixed size:
 1. Set `layout=fixed` for `<amp-img>`.
 2. Specify the `width` and `height`.
 
-{% call callout('Read on', type='read') %}
+[tip type="read-on"]
 Learn about the [inferred layout](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#what-if-the-layout-attribute-isn%E2%80%99t-specified?) if you don't specify the `layout` attribute.
-{% endcall %}
+[/tip]
 
 #### Setting the aspect ratio
 

@@ -191,8 +191,9 @@ selectors will be set to `display: none` in all child documents.
 configure this <code>amp-next-page</code> component. This must be a CORS HTTP service.
 The URL's protocol must be HTTPS.
 <br><br>
-{% call callout('Important', type='caution') %} Your endpoint must implement
-the requirements specified in the CORS Requests in AMP spec. {% endcall %}
+[tip type="important"]
+Your endpoint must implement
+the requirements specified in the CORS Requests in AMP spec. [/tip]
 <br><br>
 The <code>src</code> attribute is required unless a config has been specified inline.</td>
   </tr>

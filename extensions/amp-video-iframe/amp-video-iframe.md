@@ -213,21 +213,21 @@ The provided callback specifies how the AMP document and the iframed video docum
 playback methods and event dispatchers to plug these together. For common video frameworks, the integration script
 [provides readymade playback support](#readymade-integrations), but you can also [write a custom integration yourself](#custom-integrations) if you don't use any of the tools for which support is available.
 
-{% call callout('Do not autoplay yourself', type='caution') %}
+[tip type="important"]
 **Never play the video inside the frame automatically.** Instead, you should support the integration script and use the `amp-video-iframe` tag with the `autoplay` attribute. The AMP component will automatically send the necessary signals to your iframe to autoplay for a better user experience.
-{% endcall %}
+[/tip]
 
 ### Readymade integrations
 
 If you're using a common video framework like [JW Player](https://www.jwplayer.com/) or [Video.js](http://videojs.com/), you can call **`listenTo()`** for a basic, readymade integration. These integrations support all playback and UI controls when the framework provides them, see each for supported methods.
 
-{% call callout('Framework APIs', type='note') %}
+[tip type="note"]
 Depending on which video framework you use, you'll call the `listenTo` method differently. Read on the specific APIs below.
-{% endcall %}
+[/tip]
 
-{% call callout('Expanded support', type='note') %}
+[tip type="note"]
 You can additionally use [custom integration methods](#custom-integrations) if you require a feature not available in readymade implementations.
-{% endcall %}
+[/tip]
 
 ##### For JW Player
 

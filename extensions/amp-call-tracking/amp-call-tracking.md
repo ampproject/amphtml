@@ -41,9 +41,9 @@ by a CORS endpoint.
 </amp-call-tracking>
 ```
 
-{% call callout('Note', type='note') %}
+[tip type="note"]
 Each unique CORS endpoint is called only once per page.
-{% endcall %}
+[/tip]
 
 ## Attributes
 
@@ -56,9 +56,9 @@ Each unique CORS endpoint is called only once per page.
   <li>`phoneNumber` (required): Specifies the phone number to call when the user clicks the link.</li>
   <li>`formattedPhoneNumber` (optional): Specifies the phone number to display. If not specified, the value in `phoneNumber` is used.</li>
 </ul>
-<p>{% call callout('Important', type='caution') %}
+<p>[tip type="important"]
   Your XHR endpoint must implement the requirements specified in the <a href="https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests">CORS Requests in AMP</a> spec.
-  {% endcall %}</p></td>
+  [/tip]</p></td>
   </tr>
 </table>
 

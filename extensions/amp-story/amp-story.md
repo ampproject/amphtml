@@ -562,9 +562,9 @@ The following animation effects are available as presets for AMP stories:
 | `zoom-in`         | 1000                  | 0                  |
 | `zoom-out`        | 1000                  | 0                  |
 
-{% call callout('Tip', type='success') %}
+[tip type="read-on"]
 See a [live demo of all the AMP story animations](https://amp.dev/documentation/examples/visual-effects/amp_story_animations/) on AMP By Example.
-{% endcall %}
+[/tip]
 
 ### Animation attributes
 
@@ -619,9 +619,9 @@ _Example_: After 0.4 seconds, a heading flies in from the left of the page and c
 </h2>
 ```
 
-{% call callout('Note', type='note') %}
+[tip type="note"]
 The animation delay is not guaranteed to be exact. Additional delays can be caused by loading the `amp-animation` extension in the background when the first animated element has been scanned. The attribute contract is defined as _delay this animation for at least N milliseconds_. This applies to all elements including those with a delay of 0 seconds.
-{% endcall %}
+[/tip]
 
 ##### animate-in-after [optional]
 
@@ -756,9 +756,9 @@ You can apply multiple entrance animations on one element (for example, an eleme
 </div>
 ```
 
-{% call callout('Note', type='note') %}
+[tip type="note"]
 If a composed animation is supposed to start after the end of a separate element's animation, make sure that all nested elements that compose the animation have the attribute `animate-in-after` set to the same `id`.
-{% endcall %}
+[/tip]
 
 ## Branching
 
