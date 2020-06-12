@@ -24,7 +24,6 @@ import {
 } from '../src/service';
 import {getStyle} from '../src/style';
 import {poll} from './iframe';
-import {xhrServiceForTesting} from '../src/service/xhr-impl';
 
 export function stubService(sandbox, win, serviceId, method) {
   // Register if not already registered.
@@ -184,30 +183,35 @@ export class RequestBank {
    */
   static withdraw(requestId) {
     const url = `${REQUEST_URL}/withdraw/${requestId}/`;
-    return this.fetch_(url).then((res) => res.json());
+    return this.fetch_(url, 'withdraw').then((res) => res.json());
   }
 
   static tearDown() {
     const url = `${REQUEST_URL}/teardown/`;
-    return this.fetch_(url);
+    return this.fetch_(url, 'tearDown');
   }
 
-  static fetch_(url) {
-    return xhrServiceForTesting(window)
-      .fetchJson(url, {
-        method: 'GET',
-        ampCors: false,
-        credentials: 'omit',
-      })
-      .catch((err) => {
-        if (err.response != null) {
-          return err.response.text().then((msg) => {
-            throw new Error(err.message + ': ' + msg);
-          });
-        } else {
-          throw err;
-        }
-      });
+  static fetch_(url, action, timeout = 10000) {
+    const xhr = fetch(url).then((response) => {
+      const {ok, status, statusText} = response;
+      if (!ok) {
+        throw new Error(
+          `RequestBank.${action}: HTTP ${status} error -- ${statusText}`
+        );
+      }
+      return response;
+    });
+    if (timeout <= 0) {
+      return xhr;
+    }
+    const timer = new Promise((_, reject) => {
+      setTimeout(() => {
+        reject(
+          new Error(`"RequestBank.${action}" timed out after ${timeout} ms.`)
+        );
+      }, timeout);
+    });
+    return Promise.race([xhr, timer]);
   }
 }
 

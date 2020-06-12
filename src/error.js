@@ -695,7 +695,7 @@ export function detectJsEngineFromStack() {
   } catch (e) {
     const {stack} = e;
 
-    // Safari only mentions the method name.
+    // Safari 12 and under only mentions the method name.
     if (startsWith(stack, 't@')) {
       return 'Safari';
     }

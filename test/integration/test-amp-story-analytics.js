@@ -155,6 +155,10 @@ config.run('amp-story analytics', () => {
         return browser.waitForElementLayout('amp-story');
       });
 
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
+
       it('should send analytics event when landing on a page', async () => {
         await browser.waitForElementLayout('#page-1[active]');
 
@@ -294,6 +298,10 @@ config.run('amp-story analytics', () => {
         env.iframe.style.width = '412px';
         await browser.waitForElementLayout('amp-analytics');
         return browser.waitForElementLayout('amp-story');
+      });
+
+      afterEach(() => {
+        return RequestBank.tearDown();
       });
 
       it('should not send same analytics event twice when repeat option is present', async () => {

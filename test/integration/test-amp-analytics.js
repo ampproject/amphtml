@@ -17,7 +17,10 @@
 import {BrowserController, RequestBank} from '../../testing/test-helper';
 import {parseQueryString} from '../../src/url';
 
-describe('amp-analytics', function () {
+// TODO(wg-analytics): These tests cause SauceLabs disconnections.
+const t = describe.configure().skipSauceLabs();
+
+t.run('amp-analytics', function () {
   describes.integration(
     'basic pageview',
     {
@@ -65,6 +68,7 @@ describe('amp-analytics', function () {
       afterEach(() => {
         // clean up written _cid cookie
         document.cookie = '_cid=;expires=' + new Date(0).toUTCString();
+        return RequestBank.tearDown();
       });
 
       it('should send request', () => {
@@ -141,6 +145,7 @@ describe('amp-analytics', function () {
       afterEach(() => {
         // clean up written _cid cookie
         document.cookie = '_cid=;expires=' + new Date(0).toUTCString();
+        return RequestBank.tearDown();
       });
 
       it('should send request', () => {
@@ -212,6 +217,10 @@ describe('amp-analytics', function () {
         return browser.waitForElementLayout('amp-analytics');
       });
 
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
+
       it('should send request', () => {
         const reqPromise = RequestBank.withdraw().then((req) => {
           expect(req.url).to.equal('/?f=hello%20world&b=2');
@@ -263,6 +272,10 @@ describe('amp-analytics', function () {
       beforeEach(() => {
         browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics');
+      });
+
+      afterEach(() => {
+        return RequestBank.tearDown();
       });
 
       it('should trigger on scroll', () => {
@@ -323,6 +336,10 @@ describe('amp-analytics', function () {
       beforeEach(() => {
         browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics');
+      });
+
+      afterEach(() => {
+        return RequestBank.tearDown();
       });
 
       it('should trigger when image being 50% visible for 0.5s', () => {
@@ -388,6 +405,10 @@ describe('amp-analytics', function () {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics');
+      });
+
+      afterEach(() => {
+        return RequestBank.tearDown();
       });
 
       it('should trigger 1s after amp-analytics starts', () => {
@@ -459,6 +480,7 @@ describe('amp-analytics', function () {
       afterEach(() => {
         // clean up written _cid cookie
         document.cookie = '_cid=;expires=' + new Date(0).toUTCString();
+        return RequestBank.tearDown();
       });
 
       it('should assign new cid', () => {
@@ -525,6 +547,10 @@ describe('amp-analytics', function () {
         return browser.waitForElementLayout('amp-analytics');
       });
 
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
+
       it('should send request in batch', () => {
         return RequestBank.withdraw().then((req) => {
           expect(req.url).to.equal('/?a=1&b=AMP%20TEST&a=1&b=AMP%20TEST');
@@ -586,6 +612,10 @@ describe('amp-analytics', function () {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics');
+      });
+
+      afterEach(() => {
+        return RequestBank.tearDown();
       });
 
       it('should send request use POST body payload', () => {
@@ -660,6 +690,10 @@ describe('amp-analytics', function () {
         return browser.waitForElementLayout('amp-analytics');
       });
 
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
+
       it('should send batch request use POST body payload', () => {
         return RequestBank.withdraw().then((req) => {
           expect(req.url).to.equal('/');
@@ -707,6 +741,10 @@ describe('amp-analytics', function () {
         return browser.waitForElementLayout('amp-analytics');
       });
 
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
+
       it('should remove referrer if referrerpolicy=no-referrer', () => {
         return RequestBank.withdraw().then((req) => {
           expect(req.url).to.equal('/');
@@ -741,6 +779,10 @@ describe('amp-analytics', function () {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics');
+      });
+
+      afterEach(() => {
+        return RequestBank.tearDown();
       });
 
       it('should use config from server', () => {
@@ -779,6 +821,10 @@ describe('amp-analytics', function () {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics');
+      });
+
+      afterEach(() => {
+        return RequestBank.tearDown();
       });
 
       it('should use config from server', () => {
@@ -840,6 +886,7 @@ describe('amp-analytics', function () {
       afterEach(() => {
         // clean up written _ga cookie
         document.cookie = '_ga=;expires=' + new Date(0).toUTCString();
+        return RequestBank.tearDown();
       });
 
       it('should send request', () => {

@@ -18,17 +18,15 @@ import {BrowserController, RequestBank} from '../../testing/test-helper';
 import {Deferred} from '../../src/utils/promise';
 import {poll} from '../../testing/iframe';
 
-// TODO(torch2424, #20541): These tests fail on firefox and Edge.
-describe
-  .configure()
-  .skipFirefox()
-  .skipEdge()
-  .run('amp-recaptcha-input', function () {
-    describes.integration(
-      'with form and amp-mustache',
-      {
-        /* eslint-disable max-len */
-        body: `
+// TODO(wg-ui-and-a11y): These tests cause SauceLabs disconnections.
+const t = describe.configure().skipSauceLabs();
+
+t.run('amp-recaptcha-input', function () {
+  describes.integration(
+    'with form and amp-mustache',
+    {
+      /* eslint-disable max-len */
+      body: `
     <form
       method="POST"
       action-xhr="/recaptcha/submit"
@@ -72,7 +70,7 @@ describe
 
     </form>
     `,
-        css: `
+      css: `
       form.amp-form-submit-success [submit-success] {
         color: green;
       }
@@ -112,79 +110,79 @@ describe
         display: block;
       }
     `,
-        /* eslint-enable max-len */
-        extensions: ['amp-recaptcha-input', 'amp-form', 'amp-mustache:0.2'],
-        experiments: ['amp-recaptcha-input'],
-      },
-      (env) => {
-        let doc;
+      /* eslint-enable max-len */
+      extensions: ['amp-recaptcha-input', 'amp-form', 'amp-mustache:0.2'],
+      experiments: ['amp-recaptcha-input'],
+    },
+    (env) => {
+      let doc;
 
-        beforeEach(() => {
-          doc = env.win.document;
+      beforeEach(() => {
+        doc = env.win.document;
 
-          const browserController = new BrowserController(env.win);
-          return browserController.waitForElementLayout('amp-recaptcha-input');
+        const browserController = new BrowserController(env.win);
+        return browserController.waitForElementLayout('amp-recaptcha-input');
+      });
+
+      it('should be able to create the bootstrap frame', function () {
+        return waitForBootstrapFrameToBeCreated(doc).then((frame) => {
+          expect(frame.src.includes('recaptcha')).to.be.true;
+          expect(frame.getAttribute('data-amp-3p-sentinel')).to.be.equal(
+            'amp-recaptcha'
+          );
+          expect(frame.getAttribute('name')).to.be.equal(
+            JSON.stringify({
+              'sitekey': '6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE',
+              'sentinel': 'amp-recaptcha',
+              'global': false,
+            })
+          );
         });
+      });
 
-        it('should be able to create the bootstrap frame', function () {
-          return waitForBootstrapFrameToBeCreated(doc).then((frame) => {
-            expect(frame.src.includes('recaptcha')).to.be.true;
-            expect(frame.getAttribute('data-amp-3p-sentinel')).to.be.equal(
-              'amp-recaptcha'
-            );
-            expect(frame.getAttribute('name')).to.be.equal(
-              JSON.stringify({
-                'sitekey': '6LebBGoUAAAAAHbj1oeZMBU_rze_CutlbyzpH8VE',
-                'sentinel': 'amp-recaptcha',
-                'global': false,
-              })
-            );
+      it('should load the 3p recaptcha frame', function () {
+        return waitForBootstrapFrameOnLoad(doc).then((frame) => {
+          expect(frame).to.be.ok;
+        });
+      });
+
+      it(
+        'should create a hidden input, ' +
+          'with the value resolved from the recaptcha mock, ' +
+          ' on submit',
+        function () {
+          return submitForm(doc).then((hiddenInput) => {
+            expect(hiddenInput).to.be.ok;
+            expect(hiddenInput.name).to.be.equal('recaptcha-token');
+            expect(hiddenInput.value).to.be.equal('recaptcha-mock');
           });
+        }
+      );
+
+      it('should show submit-success on successful submit/response', function () {
+        return submitForm(doc).then(() => {
+          return poll(
+            'submit-success',
+            () => {
+              return doc.querySelector('div[id="submit-success"]');
+            },
+            undefined,
+            5000
+          );
         });
+      });
+    }
+  );
 
-        it('should load the 3p recaptcha frame', function () {
-          return waitForBootstrapFrameOnLoad(doc).then((frame) => {
-            expect(frame).to.be.ok;
-          });
-        });
-
-        it(
-          'should create a hidden input, ' +
-            'with the value resolved from the recaptcha mock, ' +
-            ' on submit',
-          function () {
-            return submitForm(doc).then((hiddenInput) => {
-              expect(hiddenInput).to.be.ok;
-              expect(hiddenInput.name).to.be.equal('recaptcha-token');
-              expect(hiddenInput.value).to.be.equal('recaptcha-mock');
-            });
-          }
-        );
-
-        it('should show submit-success on successful submit/response', function () {
-          return submitForm(doc).then(() => {
-            return poll(
-              'submit-success',
-              () => {
-                return doc.querySelector('div[id="submit-success"]');
-              },
-              undefined,
-              5000
-            );
-          });
-        });
-      }
-    );
-
-    const recaptchaRequestId = {
-      GET: 'request bank GET',
-      POST: 'request bank POST',
-    };
-    describes.integration(
-      recaptchaRequestId.GET,
-      {
-        /* eslint-disable max-len */
-        body: `
+  const recaptchaRequestId = {
+    GET: 'request bank GET',
+    POST: 'request bank POST',
+  };
+  describes.integration(
+    recaptchaRequestId.GET,
+    {
+      /* eslint-disable max-len */
+      body: `
     <form
       method="GET"
       action-xhr="${RequestBank.getUrl(recaptchaRequestId.GET)}"
@@ -205,37 +203,41 @@ describe
       </fieldset>
     </form>
   `,
-        /* eslint-enable max-len */
-        extensions: ['amp-recaptcha-input', 'amp-form'],
-        experiments: ['amp-recaptcha-input'],
-      },
-      (env) => {
-        let doc;
+      /* eslint-enable max-len */
+      extensions: ['amp-recaptcha-input', 'amp-form'],
+      experiments: ['amp-recaptcha-input'],
+    },
+    (env) => {
+      let doc;
 
-        beforeEach(() => {
-          doc = env.win.document;
+      beforeEach(() => {
+        doc = env.win.document;
 
-          const browserController = new BrowserController(env.win);
-          return browserController.waitForElementLayout('amp-recaptcha-input');
-        });
+        const browserController = new BrowserController(env.win);
+        return browserController.waitForElementLayout('amp-recaptcha-input');
+      });
 
-        it('should make a request with correct parameters', function () {
-          return submitForm(doc).then(() => {
-            return RequestBank.withdraw(recaptchaRequestId.GET).then((req) => {
-              expect(req.url).to.include('term=recaptcha-search');
-              expect(req.url).to.include('recaptcha-token=recaptcha-mock');
-              expect(req.headers.host).to.be.ok;
-            });
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
+
+      it('should make a request with correct parameters', function () {
+        return submitForm(doc).then(() => {
+          return RequestBank.withdraw(recaptchaRequestId.GET).then((req) => {
+            expect(req.url).to.include('term=recaptcha-search');
+            expect(req.url).to.include('recaptcha-token=recaptcha-mock');
+            expect(req.headers.host).to.be.ok;
           });
         });
-      }
-    );
+      });
+    }
+  );
 
-    describes.integration(
-      recaptchaRequestId.POST,
-      {
-        /* eslint-disable max-len */
-        body: `
+  describes.integration(
+    recaptchaRequestId.POST,
+    {
+      /* eslint-disable max-len */
+      body: `
     <form
       method="POST"
       action-xhr="${RequestBank.getUrl(recaptchaRequestId.POST)}"
@@ -256,33 +258,37 @@ describe
       </fieldset>
     </form>
   `,
-        /* eslint-enable max-len */
-        extensions: ['amp-recaptcha-input', 'amp-form'],
-        experiments: ['amp-recaptcha-input'],
-      },
-      (env) => {
-        let doc;
+      /* eslint-enable max-len */
+      extensions: ['amp-recaptcha-input', 'amp-form'],
+      experiments: ['amp-recaptcha-input'],
+    },
+    (env) => {
+      let doc;
 
-        beforeEach(() => {
-          doc = env.win.document;
+      beforeEach(() => {
+        doc = env.win.document;
 
-          const browserController = new BrowserController(env.win);
-          return browserController.waitForElementLayout('amp-recaptcha-input');
-        });
+        const browserController = new BrowserController(env.win);
+        return browserController.waitForElementLayout('amp-recaptcha-input');
+      });
 
-        it('should make a request with correct parameters', function () {
-          return submitForm(doc).then(() => {
-            return RequestBank.withdraw(recaptchaRequestId.POST).then((req) => {
-              expect(req.body).to.be.ok;
-              expect(req.body.term).to.be.equal('recaptcha-search');
-              expect(req.body['recaptcha-token']).to.be.equal('recaptcha-mock');
-              expect(req.headers.host).to.be.ok;
-            });
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
+
+      it('should make a request with correct parameters', function () {
+        return submitForm(doc).then(() => {
+          return RequestBank.withdraw(recaptchaRequestId.POST).then((req) => {
+            expect(req.body).to.be.ok;
+            expect(req.body.term).to.be.equal('recaptcha-search');
+            expect(req.body['recaptcha-token']).to.be.equal('recaptcha-mock');
+            expect(req.headers.host).to.be.ok;
           });
         });
-      }
-    );
-  });
+      });
+    }
+  );
+});
 
 function waitForBootstrapFrameToBeCreated(doc) {
   return poll(
