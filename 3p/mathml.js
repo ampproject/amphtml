@@ -59,6 +59,12 @@ export function mathml(global, data) {
       global.document.body.appendChild(div);
       mathjax.Hub.Config({
         showMathMenu: false,
+        // (#26082): From a11y perspective, user should not be able to tab to
+        // the math formula which has no functionality to interact with.  This
+        // configuration removes the formula from the tab-index.
+        menuSettings: {
+          inTabOrder: false,
+        },
       });
       mathjax.Hub.Queue(function () {
         const rendered = document.getElementById('MathJax-Element-1-Frame');
