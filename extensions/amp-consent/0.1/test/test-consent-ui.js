@@ -105,7 +105,7 @@ describes.realWin(
 
     const getReadyIframeCmpConsentUi = () => {
       const config = dict({
-        'promptUISrc': 'https//promptUISrc',
+        'promptUISrc': 'https://promptUISrc',
       });
       const consentUI = new ConsentUI(mockInstance, config);
       const showIframeSpy = env.sandbox.spy(consentUI, 'showIframe_');
@@ -127,7 +127,7 @@ describes.realWin(
       it('should ignore promptUISrc w/ promptUI', function* () {
         const config = dict({
           'promptUI': 'test1',
-          'promptUISrc': 'https//promptUISrc',
+          'promptUISrc': 'https://promptUISrc',
         });
         consentUI = new ConsentUI(mockInstance, config);
         expect(consentUI.ui_.id).to.equal('test1');
@@ -135,7 +135,7 @@ describes.realWin(
 
       it('should create iframe from promptUISrc', function* () {
         const config = dict({
-          'promptUISrc': 'https//promptUISrc',
+          'promptUISrc': 'https://promptUISrc',
         });
         consentUI = new ConsentUI(mockInstance, config);
         expect(consentUI.ui_.tagName).to.equal('IFRAME');
@@ -160,7 +160,7 @@ describes.realWin(
 
       it('append/remove iframe', function* () {
         const config = dict({
-          'promptUISrc': 'https//promptUISrc',
+          'promptUISrc': 'https://promptUISrc',
         });
         consentUI = new ConsentUI(mockInstance, config);
         expect(elementByTag(parent, 'iframe')).to.be.null;
@@ -173,7 +173,7 @@ describes.realWin(
 
       it('should not lock scrolling', () => {
         const config = dict({
-          'promptUISrc': 'https//promptUISrc',
+          'promptUISrc': 'https://promptUISrc',
         });
         consentUI = new ConsentUI(mockInstance, config);
 
@@ -198,7 +198,7 @@ describes.realWin(
     describe('placeholder', () => {
       it('should be created / shown while loading CMP Iframe', async () => {
         const config = dict({
-          'promptUISrc': 'https//promptUISrc',
+          'promptUISrc': 'https://promptUISrc',
         });
         consentUI = new ConsentUI(mockInstance, config);
 
@@ -223,7 +223,7 @@ describes.realWin(
           'then show it with correct state CSS classes',
         () => {
           const config = dict({
-            'promptUISrc': 'https//promptUISrc',
+            'promptUISrc': 'https://promptUISrc',
           });
           consentUI = new ConsentUI(mockInstance, config);
           expect(parent.classList.contains('amp-active')).to.be.false;
@@ -253,9 +253,22 @@ describes.realWin(
         }
       );
 
+      it('should expand the promptUISrc', function* () {
+        const config = dict({
+          'promptUISrc': 'https://example.test?cid=CLIENT_ID&r=RANDOM',
+          'clientConfig': {
+            'test': 'ABC',
+          },
+        });
+        consentUI = new ConsentUI(mockInstance, config);
+        consentUI.show(false);
+        yield macroTask();
+        expect(consentUI.ui_.src).to.match(/cid=amp-.{22}&r=RANDOM/);
+      });
+
       it('should pass the info to the iframe', function* () {
         const config = dict({
-          'promptUISrc': 'https//promptUISrc',
+          'promptUISrc': 'https://promptUISrc',
           'clientConfig': {
             'test': 'ABC',
           },
@@ -284,7 +297,7 @@ describes.realWin(
 
       it('should pass the promptTrigger reason to the iframe', function* () {
         const config = dict({
-          'promptUISrc': 'https//promptUISrc',
+          'promptUISrc': 'https://promptUISrc',
           'clientConfig': {
             'test': 'ABC',
           },
@@ -308,7 +321,7 @@ describes.realWin(
 
         it('should focus on the SR alert button', () => {
           consentUI = new ConsentUI(mockInstance, {
-            'promptUISrc': 'https//promptUISrc',
+            'promptUISrc': 'https://promptUISrc',
           });
           const showIframeSpy = env.sandbox.spy(consentUI, 'showIframe_');
 
@@ -323,7 +336,7 @@ describes.realWin(
 
         it('should style SR dialog correctly', () => {
           consentUI = new ConsentUI(mockInstance, {
-            'promptUISrc': 'https//promptUISrc',
+            'promptUISrc': 'https://promptUISrc',
           });
           const showIframeSpy = env.sandbox.spy(consentUI, 'showIframe_');
 
@@ -339,7 +352,7 @@ describes.realWin(
 
         it('should append, remove, & not show the SR alert and have default titles', async () => {
           consentUI = new ConsentUI(mockInstance, {
-            'promptUISrc': 'https//promptUISrc',
+            'promptUISrc': 'https://promptUISrc',
           });
 
           consentUI.show(false);
@@ -375,7 +388,7 @@ describes.realWin(
           const newConsentPromptCaption = 'New Consent Policy Title';
           const newButtonActionCaption = 'New Button Action Caption';
           consentUI = new ConsentUI(mockInstance, {
-            'promptUISrc': 'https//promptUISrc',
+            'promptUISrc': 'https://promptUISrc',
             'captions': {
               'consentPromptCaption': newConsentPromptCaption,
               'buttonActionCaption': newButtonActionCaption,
@@ -396,7 +409,7 @@ describes.realWin(
 
         it('should focus on iframe when button is clicked', function* () {
           consentUI = new ConsentUI(mockInstance, {
-            'promptUISrc': 'https//promptUISrc',
+            'promptUISrc': 'https://promptUISrc',
           });
 
           consentUI.show(false);
@@ -413,7 +426,7 @@ describes.realWin(
 
         it('should not expand if iframe is not in focus', async () => {
           consentUI = new ConsentUI(mockInstance, {
-            'promptUISrc': 'https//promptUISrc',
+            'promptUISrc': 'https://promptUISrc',
           });
 
           consentUI.show(false);
@@ -441,7 +454,7 @@ describes.realWin(
 
         it('should expand if iframe is in focus', async () => {
           consentUI = new ConsentUI(mockInstance, {
-            'promptUISrc': 'https//promptUISrc',
+            'promptUISrc': 'https://promptUISrc',
           });
 
           consentUI.show(false);
@@ -482,7 +495,7 @@ describes.realWin(
           const errorSpy = env.sandbox.spy(user(), 'warn');
 
           consentUI = new ConsentUI(mockInstance, {
-            'promptUISrc': 'https//promptUISrc',
+            'promptUISrc': 'https://promptUISrc',
           });
 
           // No user interation through actionPromptTrigger
@@ -534,7 +547,7 @@ describes.realWin(
         describe('actionPromptTrigger', () => {
           it('should expand when actionPromptTrigger is true', async () => {
             consentUI = new ConsentUI(mockInstance, {
-              'promptUISrc': 'https//promptUISrc',
+              'promptUISrc': 'https://promptUISrc',
             });
 
             consentUI.show(true);
@@ -559,7 +572,7 @@ describes.realWin(
     describe('overlay', () => {
       it('should not enable the overlay if not configured', function* () {
         const config = dict({
-          'promptUISrc': 'https//promptUISrc',
+          'promptUISrc': 'https://promptUISrc',
           'uiConfig': {},
         });
         consentUI = new ConsentUI(mockInstance, config);
@@ -577,7 +590,7 @@ describes.realWin(
 
       it('append/hide/show overlay', function* () {
         const config = dict({
-          'promptUISrc': 'https//promptUISrc',
+          'promptUISrc': 'https://promptUISrc',
           'uiConfig': {
             'overlay': true,
           },

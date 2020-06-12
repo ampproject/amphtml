@@ -24,7 +24,11 @@ import {
   hasStoredValue,
 } from './consent-info';
 import {CSS} from '../../../build/amp-consent-0.1.css';
-import {ConsentConfig, expandPolicyConfig} from './consent-config';
+import {
+  ConsentConfig,
+  expandConsentEndpointUrl,
+  expandPolicyConfig,
+} from './consent-config';
 import {ConsentPolicyManager} from './consent-policy-manager';
 import {ConsentStateManager} from './consent-state-manager';
 import {ConsentUI} from './consent-ui';
@@ -616,11 +620,15 @@ export class AmpConsent extends AMP.BaseElement {
         const resolvedHref = resolveRelativeUrl(href, sourceBase);
         const xhrService = Services.xhrFor(this.win);
         return ampdoc.whenFirstVisible().then(() => {
-          return xhrService
-            .fetchJson(resolvedHref, init)
-            .then((res) =>
-              xhrService.xssiJson(res, this.consentConfig_['xssiPrefix'])
-            );
+          return expandConsentEndpointUrl(this.element, resolvedHref).then(
+            (expandedHref) => {
+              return xhrService
+                .fetchJson(expandedHref, init)
+                .then((res) =>
+                  xhrService.xssiJson(res, this.consentConfig_['xssiPrefix'])
+                );
+            }
+          );
         });
       });
     }

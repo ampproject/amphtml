@@ -205,7 +205,7 @@ export class Services {
   }
 
   /**
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!./service/cid-impl.CidDef>}
    */
   static cidForDoc(elementOrAmpDoc) {
