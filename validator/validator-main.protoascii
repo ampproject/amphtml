@@ -29,7 +29,7 @@ min_validator_revision_required: 474
 spec_file_revision: 1052
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages"
-script_spec_url: "https://www.ampproject.org/docs/troubleshooting/validation_errors#custom-javascript-is-not-allowed"
+script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed"
 
 # Validator extensions.
 # =====================
