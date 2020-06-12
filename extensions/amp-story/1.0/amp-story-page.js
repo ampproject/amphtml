@@ -302,7 +302,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.timer_ = Services.timerFor(this.win);
 
     /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
-    this.viewer_ = Services.viewerForDoc(getAmpDoc(this.win.document));
+    this.viewer_ = Services.viewerForDoc(getAmpdoc(this.win.document));
 
     /**
      * Whether the user agent matches a bot.  This is used to prevent resource
