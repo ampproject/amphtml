@@ -4008,14 +4008,6 @@ function validateParentTag(parsedTagSpec, context, validationResult) {
   if (spec.mandatoryParent !== null &&
       (spec.mandatoryParent !== context.getTagStack().parentTagName()) &&
       (spec.mandatoryParent !== context.getTagStack().parentTagSpecName())) {
-    if (spec.mandatoryParent == '!DOCTYPE') {
-      context.addError(
-          generated.ValidationError.Code.INVALID_DOCTYPE_HTML,
-          context.getLineCol(),
-          [], "", validationResult);
-      return;
-    }
-
     // Output a parent/child error using CSS Child Selector syntax which is
     // both succinct and should be well understood by web developers.
     context.addError(
