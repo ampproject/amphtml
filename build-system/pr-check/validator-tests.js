@@ -46,9 +46,6 @@ function main() {
 
   if (!isTravisPullRequestBuild()) {
     timedExecOrDie('gulp validator');
-    // #27786: Java validator is not guaranteed to be in sync with AMP code.
-    // #28497: Java Validator tests are broken due to Ubuntu keyserver outage.
-    // timedExec('gulp validator-java');
     timedExecOrDie('gulp validator-webui');
   } else {
     printChangeSummary(FILENAME);
@@ -72,13 +69,6 @@ function main() {
     if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR')) {
       timedExecOrDie('gulp validator');
     }
-
-    // #28497: Java Validator tests are broken due to Ubuntu keyserver outage.
-    // if (buildTargets.has('VALIDATOR_JAVA')) {
-    //   timedExecOrDie('gulp validator-java');
-    // } else if (buildTargets.has('RUNTIME')) {
-    //   timedExec('gulp validator-java');
-    // }
 
     if (buildTargets.has('VALIDATOR_WEBUI')) {
       timedExecOrDie('gulp validator-webui');
