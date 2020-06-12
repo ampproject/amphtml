@@ -26,13 +26,14 @@ import {transparentPng} from '../utils/img';
  * @param {!../service/platform-impl.Platform=} opt_platform
  * @package
  */
-export function checkAndFix(win, opt_platform) {
+export function ieIntrinsicCheckAndFix(win, opt_platform) {
   const platform = opt_platform || Services.platformFor(win);
   if (!platform.isIe()) {
     return;
   }
 
-  const intrinsics = win.document.querySelectorAll(
+  const {document} = win;
+  const intrinsics = document.querySelectorAll(
     '.i-amphtml-intrinsic-sizer[src^=data:image/svg]'
   );
   for (let i = 0; i < intrinsics.length; i++) {
@@ -47,7 +48,7 @@ export function checkAndFix(win, opt_platform) {
     const width = getLengthNumeral(element.getAttribute('width'));
     const height = getLengthNumeral(element.getAttribute('height'));
     if (width && height) {
-      intrinsic.src = transparentPng(width, height);
+      intrinsic.src = transparentPng(document, width, height);
     }
   }
 }

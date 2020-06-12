@@ -34,8 +34,8 @@ import {
 import {getMode} from '../mode';
 import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
-import {checkAndFix as ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
-import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
+import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
+import {ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error';
 import {listen, loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';

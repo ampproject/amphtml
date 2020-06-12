@@ -531,6 +531,7 @@ export function applyStaticLayout(element, fixIeIntrinsic = false) {
       'src',
       fixIeIntrinsic && !IS_ESM
         ? transparentPng(
+            element.ownerDocument,
             dev().assertNumber(getLengthNumeral(width)),
             dev().assertNumber(getLengthNumeral(height))
           )

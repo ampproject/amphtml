@@ -123,7 +123,7 @@ describe
 describe
   .configure()
   .enableIe()
-  .run('Rendering of amp-img - Internet Explorer edge cases', () => {
+  .run('Rendering of amp-img', () => {
     let fixture;
     beforeEach(() => {
       return createFixtureIframe('test/fixtures/images-ie.html', 500).then(
@@ -139,7 +139,7 @@ describe
     describe
       .configure()
       .ifIe()
-      .run('srcset support', () => {
+      .run('srcset support - Internet Explorer edge cases', () => {
         it('should guarantee src if srcset is not supported', () => {
           const imageLoadedPromise = waitForImageToLoad(
             fixture.doc,
@@ -172,22 +172,14 @@ describe
             const height = parseInt(ampImg.getAttribute('height'), 10);
             const bounds = ampImg.getBoundingClientRect();
 
-            expect(reduce(width, height)).to.deep.equal(
-              reduce(bounds.width, bounds.height)
+            expect(bounds.width / bounds.height).to.be.closeTo(
+              width / height,
+              0.001
             );
           });
         });
       });
   });
-
-function reduce(a, b) {
-  const gcd = greatestCommonDivisor(a, b);
-  return [a / gcd, b / gcd];
-}
-
-function greatestCommonDivisor(a, b) {
-  return b ? greatestCommonDivisor(b, a % b) : a;
-}
 
 function waitForImageToLoad(document, selector) {
   return poll(

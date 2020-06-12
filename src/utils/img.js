@@ -35,12 +35,13 @@ export function guaranteeSrcForSrcsetUnsupportedBrowsers(img) {
 /**
  * Generates a transparent PNG of a given width/height.
  *
+ * @param {!Document} doc
  * @param {number} width
  * @param {number} height
  * @return {string}
  */
-export function transparentPng(width, height) {
-  const canvas = self.document.createElement('canvas');
+export function transparentPng(doc, width, height) {
+  const canvas = doc.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
 
