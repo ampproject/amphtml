@@ -1231,10 +1231,12 @@ export class AmpStoryPage extends AMP.BaseElement {
       : [];
 
     const autoAdvanceNext = this.getNextPageId(
-      true /* opt_isAutomaticAdvance */
+      true /* opt_isAutomaticAdvance */,
+      true /* opt_iallowCircularReference */
     );
     const manualAdvanceNext = this.getNextPageId(
-      false /* opt_isAutomaticAdvance */
+      false /* opt_isAutomaticAdvance */,
+      true /* opt_iallowCircularReference */
     );
     const previous = this.getPreviousPageId();
 
@@ -1288,10 +1290,11 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Gets the ID of the next page in the story (after the current page).
    * @param {boolean=} isAutomaticAdvance Whether this navigation was caused
    *     by an automatic advancement after a timeout.
+   * @param {boolean=} allowCircularReference Whether the last page will point to the first page.
    * @return {?string} Returns the ID of the next page in the story, or null if
    *     there isn't one.
    */
-  getNextPageId(isAutomaticAdvance = false) {
+  getNextPageId(isAutomaticAdvance = false, allowCircularReference = false) {
     if (isAutomaticAdvance && this.element.hasAttribute('auto-advance-to')) {
       return this.element.getAttribute('auto-advance-to');
     }
@@ -1309,7 +1312,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
 
     // Link last page to first page if the story is on it's own.
-    if (!this.getViewer_().hasCapability('swipe')) {
+    if (allowCircularReference && !this.getViewer_().hasCapability('swipe')) {
       const firstPage = this.element.parentElement.querySelector(
         'amp-story-page:first-of-type'
       );
