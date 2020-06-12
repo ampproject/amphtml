@@ -58,9 +58,6 @@ amp-sticky-ad[visible] {
   display: block;
 }
 
-.i-amp-sticky-ad-padding-bottom {
-  padding-bottom: 20px;
-}
 
 .amp-sticky-ad-close-button {
   position: absolute;

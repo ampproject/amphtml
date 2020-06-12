@@ -83,10 +83,15 @@ class AmpStickyAd extends AMP.BaseElement {
       });
       randomlySelectUnsetExperiments(this.win, experimentInfoMap);
       if (
+        true ||
         getExperimentBranch(this.win, STICKY_AD_PADDING_BOTTOM_EXP.id) ==
-        STICKY_AD_PADDING_BOTTOM_EXP.experiment
+          STICKY_AD_PADDING_BOTTOM_EXP.experiment
       ) {
-        this.element.classList.add('i-amp-sticky-ad-padding-bottom');
+        setStyle(
+          this.element,
+          'margin-bottom',
+          'env(safe-area-inset-bottom, 0px)'
+        );
       }
     }
 
