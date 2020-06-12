@@ -147,6 +147,18 @@ const targetMatchers = {
   'PACKAGE_UPGRADE': (file) => {
     return file == 'package.json' || file == 'yarn.lock';
   },
+  'RENOVATE_CONFIG': (file) => {
+    return (
+      file == '.renovaterc.json' ||
+      file == 'build-system/tasks/check-renovate-config.js'
+    );
+  },
+  'RUNTIME': (file) => {
+    if (isOwnersFile(file)) {
+      return false;
+    }
+    return file.startsWith('src/');
+  },
   'SERVER': (file) => {
     if (isOwnersFile(file)) {
       return false;

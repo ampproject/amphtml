@@ -4,9 +4,106 @@
     "supportPolicy": ["lts_active"]
   },
   "statusCheckVerify": true,
+  "ignorePaths": [],
+
   "commitMessagePrefix": "📦",
-  "dependencies": {
-    "enabled": false
-  },
-  "ignorePaths": []
+  "timezone": "America/Los_Angeles",
+  "schedule": "after 12am every weekday",
+
+  "masterIssue": true,
+  "prBodyColumns": ["Package", "Update", "Type", "Change", "Package file"],
+  "separateMinorPatch": true,
+  "packageRules": [
+    {
+      "paths": ["**/*"],
+      "groupName": "subpackage devDependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "subpackage-"
+      }
+    },
+    {
+      "paths": ["src/**"],
+      "labels": ["WG: runtime"],
+
+      "groupName": "runtime devDependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "runtime-"
+      }
+    },
+
+    {
+      "paths": ["build-system/**"],
+      "labels": ["WG: infra"],
+
+      "groupName": "build system devDependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "build-system-"
+      }
+    },
+
+    {
+      "paths": ["validator/**"],
+      "labels": ["WG: caching"],
+
+      "groupName": "validator devDependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "validator-"
+      }
+    },
+
+    {
+      "paths": ["+(package.json)"],
+
+      "groupName": "core devDependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "core-"
+      }
+    },
+
+    {
+      "packagePatterns": ["\\b(prettier|eslint)\\b"],
+      "prBodyNotes": [
+        "This PR upgrades one or more packages used to ensure code formatting. In case there are new errors, you will need to check out this branch, make sure `gulp lint` and `gulp prettify` pass (try using `--fix`), and commit the fixes to ensure a green Travis build."
+      ],
+
+      "groupName": "linting devDependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "linting-"
+      }
+    },
+
+    {
+      "excludePackagePatterns": ["^@ampproject/"],
+      "depTypeList": ["dependencies"],
+      "enabled": false
+    },
+
+    {
+      "packagePatterns": ["^@ampproject/"],
+      "depTypeList": ["devDependencies"],
+
+      "groupName": "ampproject devDependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "ampproject-"
+      }
+    },
+
+    {
+      "packagePatterns": ["^@ampproject/"],
+      "depTypeList": ["dependencies"],
+
+      "groupName": "ampproject dependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "ampproject-"
+      }
+    }
+  ]
 }

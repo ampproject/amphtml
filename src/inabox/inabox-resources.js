@@ -254,6 +254,11 @@ export class InaboxResources {
       observer.observe(element);
     }
   }
+
+  /** @override */
+  getSlowElementRatio() {
+    return 0;
+  }
 }
 
 /**

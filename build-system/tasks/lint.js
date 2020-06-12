@@ -27,7 +27,11 @@ const lazypipe = require('lazypipe');
 const log = require('fancy-log');
 const path = require('path');
 const watch = require('gulp-watch');
-const {getFilesChanged, logOnSameLine} = require('../common/utils');
+const {
+  getFilesChanged,
+  getFilesFromArgv,
+  logOnSameLine,
+} = require('../common/utils');
 const {gitDiffNameOnlyMaster} = require('../common/git');
 const {isTravisBuild} = require('../common/travis');
 const {maybeUpdatePackages} = require('./update-packages');
@@ -156,7 +160,7 @@ function eslintRulesChanged() {
   return (
     gitDiffNameOnlyMaster().filter(function (file) {
       return (
-        path.basename(file).includes('.eslintrc') ||
+        path.basename(file).includes('.eslintrc.js') ||
         path.dirname(file) === 'build-system/eslint-rules'
       );
     }).length > 0
@@ -189,7 +193,7 @@ function lint() {
   maybeUpdatePackages();
   let filesToLint = config.lintGlobs;
   if (argv.files) {
-    filesToLint = getFilesToLint(argv.files.split(','));
+    filesToLint = getFilesToLint(getFilesFromArgv());
   } else if (!eslintRulesChanged() && argv.local_changes) {
     const lintableFiles = getFilesChanged(config.lintGlobs);
     if (lintableFiles.length == 0) {

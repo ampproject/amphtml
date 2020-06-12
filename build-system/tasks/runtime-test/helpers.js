@@ -25,7 +25,7 @@ const {
   reportTestFinished,
   reportTestRunComplete,
 } = require('../report-test-status');
-const {green, yellow, cyan, red} = require('ansi-colors');
+const {green, yellow, cyan} = require('ansi-colors');
 const {isTravisBuild} = require('../../common/travis');
 const {Server} = require('karma');
 
@@ -76,7 +76,8 @@ function getAdTypes() {
     if (
       path.extname(files[i]) == '.js' &&
       files[i][0] != '_' &&
-      files[i] != 'ads.extern.js'
+      files[i] != 'ads.extern.js' &&
+      files[i] != '.eslintrc.js'
     ) {
       const adType = path.basename(files[i], '.js');
       const expanded = namingExceptions[adType];
@@ -188,15 +189,6 @@ function maybePrintCoverageMessage() {
  * @param {Object} browser
  * @private
  */
-function karmaBrowserStart_(browser) {
-  console./*OK*/ log('\n');
-  log(`${browser.name}: ${green('STARTED')}`);
-}
-
-/**
- * @param {Object} browser
- * @private
- */
 async function karmaBrowserComplete_(browser) {
   const result = browser.lastResult;
   result.total = result.success + result.failed + result.skipped;
@@ -209,22 +201,7 @@ async function karmaBrowserComplete_(browser) {
       'Received a status with zero tests:',
       cyan(JSON.stringify(result))
     );
-
-    return;
   }
-  // Print a summary for each browser as soon as tests complete.
-  let message =
-    `${browser.name}: Executed ` +
-    `${result.success + result.failed} of ${result.total} ` +
-    `(Skipped ${result.skipped}) `;
-  if (result.failed === 0) {
-    message += green('SUCCESS');
-  } else {
-    message += red(result.failed + ' FAILED');
-  }
-  message += '\n';
-  console./*OK*/ log('\n');
-  log(message);
 }
 
 /**
@@ -383,9 +360,8 @@ async function runTestInBatchesWithBrowsers_(
     configBatch.browsers = browsers.slice(startIndex, endIndex);
     log(
       green('Batch'),
-      cyan(`#${batch}`) + green(': Running tests on'),
-      cyan(configBatch.browsers.length),
-      green('Sauce Labs browser(s)...')
+      cyan(`#${batch}`) + green(':'),
+      cyan(configBatch.browsers.join(', '))
     );
     batchExitCodes.push(await createKarmaServer(configBatch, runCompleteFn));
     startIndex = batch * BATCHSIZE;
@@ -421,7 +397,6 @@ async function createKarmaServer(
   karmaServer
     .on('run_start', karmaRunStart_)
     .on('browsers_ready', karmaBrowsersReady_)
-    .on('browser_start', karmaBrowserStart_)
     .on('browser_complete', karmaBrowserComplete_)
     .on('run_complete', runCompleteFn);
 

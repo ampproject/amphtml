@@ -45,7 +45,7 @@ tags: {  # amp-analytics (json)
   }
   attr_lists: "nonce-attr"
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
@@ -65,9 +65,8 @@ tags: {  # <amp-analytics>
       allow_relative: true  # Will be set to false at a future date.
       allow_empty: true
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "type" }
   spec_url: "https://amp.dev/documentation/components/amp-analytics"
 }
-

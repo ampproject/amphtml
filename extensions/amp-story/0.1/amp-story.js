@@ -55,14 +55,13 @@ import {Gestures} from '../../../src/gesture';
 import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
-import {LocalizationService} from '../../../src/service/localization';
 import {
   LocalizedStringId,
   createPseudoLocale,
 } from '../../../src/localized-strings';
 import {MediaPool, MediaType} from './media-pool';
 import {NavigationState} from './navigation-state';
-import {ORIGIN_WHITELIST} from './origin-whitelist';
+import {ORIGIN_ALLOWLIST} from './origin-allowlist';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareMenu} from './amp-story-share-menu';
@@ -93,6 +92,7 @@ import {dict} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex} from '../../../src/utils/array';
 import {getDetail} from '../../../src/event-helper';
+import {getLocalizationService} from './amp-story-localization-service';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin, parseUrlDeprecated} from '../../../src/url';
 import {getState} from '../../../src/history';
@@ -211,9 +211,9 @@ export class AmpStory extends AMP.BaseElement {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = this.getVsync();
 
-    /** @private @const {!LocalizationService} */
-    this.localizationService_ = new LocalizationService(this.win);
-    const localizationService = this.localizationService_;
+    /** @private @const {!../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = getLocalizationService(this.element);
+
     this.localizationService_
       .registerLocalizedStringBundle('default', LocalizedStringsDefault)
       .registerLocalizedStringBundle('en', LocalizedStringsEn);
@@ -226,10 +226,6 @@ export class AmpStory extends AMP.BaseElement {
       'en-xa',
       enXaPseudoLocaleBundle
     );
-
-    registerServiceBuilder(this.win, 'localization-v01', function () {
-      return localizationService;
-    });
 
     /** @private @const {!Bookend} */
     this.bookend_ = new Bookend(this.win, this.element);
@@ -290,7 +286,7 @@ export class AmpStory extends AMP.BaseElement {
     this.shareWidget_ = null;
 
     /** @private @const {!Array<string>} */
-    this.originWhitelist_ = ORIGIN_WHITELIST;
+    this.originAllowlist_ = ORIGIN_ALLOWLIST;
 
     /** @private {!AmpStoryHint} */
     this.ampStoryHint_ = new AmpStoryHint(this.win, this.element);
@@ -588,7 +584,7 @@ export class AmpStory extends AMP.BaseElement {
       SHARE_WIDGET_PILL_CONTAINER
     );
 
-    this.shareWidget_ = new ShareWidget(this.win);
+    this.shareWidget_ = new ShareWidget(this.win, this.element);
 
     const shareLabelEl = dev().assertElement(
       container.querySelector('.i-amphtml-story-share-pill-label'),
@@ -743,7 +739,7 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     const origin = getSourceOrigin(this.win.location);
-    return this.isOriginWhitelisted_(origin);
+    return this.isOriginAllowlisted_(origin);
   }
 
   /**
@@ -757,16 +753,16 @@ export class AmpStory extends AMP.BaseElement {
 
   /**
    * @param {string} origin The origin to check.
-   * @return {boolean} Whether the specified origin is whitelisted to use the
+   * @return {boolean} Whether the specified origin is allowlisted to use the
    *     amp-story extension.
    * @private
    */
-  isOriginWhitelisted_(origin) {
+  isOriginAllowlisted_(origin) {
     const hostName = parseUrlDeprecated(origin).hostname;
     const domains = hostName.split('.');
 
     // Check all permutations of the domain to see if any level of the domain is
-    // whitelisted.  Taking the example of the whitelisted domain
+    // allowlisted.  Taking the example of the allowlisted domain
     // example.co.uk, if the page is served from www.example.co.uk/page.html:
     //
     //   www.example.co.uk => false
@@ -775,14 +771,14 @@ export class AmpStory extends AMP.BaseElement {
     //   uk => false
     //
     // This is necessary, since we don't have any guarantees of which level of
-    // the domain is whitelisted.  For many domains (e.g. .com), the second
-    // level of the domain is likely to be whitelisted, whereas for others
-    // (e.g. .co.uk) the third level may be whitelisted.  Additionally, this
-    // allows subdomains to be whitelisted individually.
+    // the domain is allowlisted.  For many domains (e.g. .com), the second
+    // level of the domain is likely to be allowlisted, whereas for others
+    // (e.g. .co.uk) the third level may be allowlisted.  Additionally, this
+    // allows subdomains to be allowlisted individually.
     return domains.some((unusedDomain, index) => {
       const domain = domains.slice(index, domains.length).join('.');
       const domainHash = this.hashOrigin_(domain);
-      return this.originWhitelist_.includes(domainHash);
+      return this.originAllowlist_.includes(domainHash);
     });
   }
 

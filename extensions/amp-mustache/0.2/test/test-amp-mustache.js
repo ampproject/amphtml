@@ -433,7 +433,7 @@ describes.repeated(
       }
 
       // Need to test this since DOMPurify doesn't have an required-attribute
-      // tag whitelist API. Instead, we hack around it with custom hooks.
+      // tag allowlist API. Instead, we hack around it with custom hooks.
       it('should not allow unsupported templates after a supported one', () => {
         const html =
           '1<template type="amp-mustache">2</template>3<template>' +

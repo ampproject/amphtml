@@ -19,13 +19,6 @@
       owners: [{name: 'rsimha', notify: true}],
     },
     {
-      pattern: 'single-pass.js',
-      owners: [
-        {name: 'erwinmombay', notify: true},
-        {name: 'rsimha', notify: true},
-      ],
-    },
-    {
       pattern: 'internal-version.js',
       owners: [{name: 'danielrozenberg', notify: true}],
     },

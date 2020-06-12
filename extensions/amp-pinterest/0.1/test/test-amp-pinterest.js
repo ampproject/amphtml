@@ -43,6 +43,9 @@ describes.realWin(
       pin.setAttribute('data-url', pinUrl);
       pin.setAttribute('data-media', pinMedia);
       pin.setAttribute('data-description', pinDescription);
+      pin.setAttribute('layout', 'responsive');
+      pin.setAttribute('width', '100');
+      pin.setAttribute('height', '100');
       div.appendChild(pin);
       pin.implementation_.buildCallback();
       return pin.implementation_.layoutCallback().then(() => {
@@ -60,6 +63,9 @@ describes.realWin(
       const pin = env.win.document.createElement('amp-pinterest');
       pin.setAttribute('data-do', 'embedPin');
       pin.setAttribute('data-url', pinURL + pinID);
+      pin.setAttribute('layout', 'responsive');
+      pin.setAttribute('width', '100');
+      pin.setAttribute('height', '100');
       if (pinAlt) {
         pin.setAttribute('alt', pinAlt);
       }
@@ -242,7 +248,7 @@ describes.realWin(
             'pinner': {
               'about': '',
               'location': 'London',
-              'full_name': 'Paul Matthews',
+              'full_name': 'Paul Matthews&auml;',
               'follower_count': 10,
               'image_small_url':
                 'https://i.pinimg.com/30x30_RS/f0/3e/21/f03e21f499084c44fca771555f547474.jpg',
@@ -343,6 +349,10 @@ describes.realWin(
             'rails in SF, cable car rails #cablecar #sanfrancisco #endoftheline ' +
             '#tourist #rails #saturdayafternoon #california'
         );
+
+        expect(
+          pin.querySelector('.-amp-pinterest-embed-pin-pinner-name').textContent
+        ).to.equal('Paul Matthewsä');
       });
     });
 

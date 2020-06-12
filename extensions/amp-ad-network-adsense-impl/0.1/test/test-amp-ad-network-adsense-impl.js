@@ -54,7 +54,6 @@ describes.realWin(
   {
     amp: {
       extensions: ['amp-ad', 'amp-ad-network-adsense-impl'],
-      // runtimeOn: true,
     },
   },
   (env) => {
@@ -476,7 +475,7 @@ describes.realWin(
           'enableAutoAdSize': '1',
         };
 
-        win.postMessage(data, '*');
+        win.postMessage(JSON.stringify(data), '*');
 
         await savePromise;
 
@@ -692,7 +691,7 @@ describes.realWin(
             /(\?|&)ady=-?\d+(&|$)/,
             /(\?|&)u_aw=\d+(&|$)/,
             /(\?|&)u_ah=\d+(&|$)/,
-            /(\?|&)u_cd=24(&|$)/,
+            /(\?|&)u_cd=(24|30)(&|$)/,
             /(\?|&)u_w=\d+(&|$)/,
             /(\?|&)u_h=\d+(&|$)/,
             /(\?|&)u_tz=-?\d+(&|$)/,
@@ -873,6 +872,21 @@ describes.realWin(
       it('should include gdpr_consent, if TC String is provided', () =>
         impl.getAdUrl({consentString: 'tcstring'}).then((url) => {
           expect(url).to.match(/(\?|&)gdpr_consent=tcstring(&|$)/);
+        }));
+
+      it('should include gdpr=1, if gdprApplies is true', () =>
+        impl.getAdUrl({gdprApplies: true}).then((url) => {
+          expect(url).to.match(/(\?|&)gdpr=1(&|$)/);
+        }));
+
+      it('should include gdpr=0, if gdprApplies is false', () =>
+        impl.getAdUrl({gdprApplies: false}).then((url) => {
+          expect(url).to.match(/(\?|&)gdpr=0(&|$)/);
+        }));
+
+      it('should not include gdpr, if gdprApplies is missing', () =>
+        impl.getAdUrl({}).then((url) => {
+          expect(url).to.not.match(/(\?|&)gdpr=(&|$)/);
         }));
 
       it('should have spsa and size 1x1 when single page story ad', () => {
