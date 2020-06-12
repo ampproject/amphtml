@@ -33,11 +33,11 @@
           "requests": {
             "endpoint": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png",
             "base": "${endpoint}?${type|default:foo}&path=${canonicalPath}",
-            "click": "${base}?&index=${storyPageIndex}&id=${storyPageId}&interactionType=${storyInteractionType}&interactionId=${storyInteractionId}&interactionesponseId=${storyInteractionResponse}"
+            "click": "${base}?&index=${storyPageIndex}&id=${storyPageId}&interactiveType=${storyInteractiveType}&interactiveId=${storyInteractiveId}&interactiveesponseId=${storyInteractiveResponse}"
           },
           "triggers": {
             "trackQuizResponse": {
-              "on": "story-interaction",
+              "on": "story-interactive",
               "tagname": "amp-story-interactive-quiz",
               "request": "click"
             }
@@ -70,7 +70,7 @@
         </style>
         <amp-story-interactive-quiz
           id='cat-question-appear'
-          endpoint="http://localhost:3000/interactions"
+          endpoint="http://localhost:3000/interactives"
           chip-corner="sharp"
           theme="dark"
           prompt-text="When did the domestic cat first appear on the scene?"

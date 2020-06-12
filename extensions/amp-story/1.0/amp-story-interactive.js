@@ -41,7 +41,7 @@ const TAG = 'amp-story-interactive';
 /**
  * @const @enum {number}
  */
-export const InteractionType = {
+export const InteractiveType = {
   QUIZ: 0,
   POLL: 1,
 };
@@ -64,7 +64,7 @@ export let InteractiveOptionType;
  *    options: !Array<InteractiveOptionType>,
  * }}
  */
-export let InteractionResponseType;
+export let InteractiveResponseType;
 
 /**
  * @typedef {{
@@ -115,19 +115,19 @@ const fontsToLoad = [
 export class AmpStoryInteractive extends AMP.BaseElement {
   /**
    * @param {!AmpElement} element
-   * @param {!InteractionType} type
+   * @param {!InteractiveType} type
    * @param {!Array<number>} bounds the bounds on number of options, inclusive
    */
   constructor(element, type, bounds = [2, 4]) {
     super(element);
 
-    /** @protected @const {InteractionType} */
-    this.interactionType_ = type;
+    /** @protected @const {InteractiveType} */
+    this.interactiveType_ = type;
 
     /** @protected @const {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win, element);
 
-    /** @protected {?Promise<?InteractionResponseType|?JsonObject|undefined>} */
+    /** @protected {?Promise<?InteractiveResponseType|?JsonObject|undefined>} */
     this.backendDataPromise_ = null;
 
     /** @protected {?Promise<!../../../src/service/cid-impl.CidDef>} */
@@ -155,7 +155,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     this.rootEl_ = null;
 
     /** @protected {?string} */
-    this.interactionId_ = null;
+    this.interactiveId_ = null;
 
     /** @protected {!./amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = getRequestService(this.win, this.element);
@@ -285,7 +285,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     return (this.backendDataPromise_ = this.element.hasAttribute('endpoint')
-      ? this.retrieveInteractionData_()
+      ? this.retrieveInteractiveData_()
       : Promise.resolve());
   }
 
@@ -395,21 +395,21 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    */
   triggerAnalytics_(optionEl) {
     this.variableService_.onVariableUpdate(
-      AnalyticsVariable.STORY_INTERACTION_ID,
+      AnalyticsVariable.STORY_INTERACTIVE_ID,
       this.element.getAttribute('id')
     );
     this.variableService_.onVariableUpdate(
-      AnalyticsVariable.STORY_INTERACTION_RESPONSE,
+      AnalyticsVariable.STORY_INTERACTIVE_RESPONSE,
       optionEl.optionIndex_
     );
     this.variableService_.onVariableUpdate(
-      AnalyticsVariable.STORY_INTERACTION_TYPE,
-      this.interactionType_
+      AnalyticsVariable.STORY_INTERACTIVE_TYPE,
+      this.interactiveType_
     );
 
     this.element[ANALYTICS_TAG_NAME] = this.element.tagName;
     this.analyticsService_.triggerEvent(
-      StoryAnalyticsEvent.INTERACTION,
+      StoryAnalyticsEvent.INTERACTIVE,
       this.element
     );
   }
@@ -508,7 +508,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   }
 
   /**
-   * Triggers changes to component state on response interaction.
+   * Triggers changes to component state on response interactive.
    *
    * @param {!Element} optionEl
    * @private
@@ -536,7 +536,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         });
 
         if (this.element.hasAttribute('endpoint')) {
-          this.executeInteractionRequest_('POST', optionEl.optionIndex_);
+          this.executeInteractiveRequest_('POST', optionEl.optionIndex_);
         }
       })
       .catch(() => {
@@ -552,47 +552,47 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   /**
    * Get the Interactive data from the datastore
    *
-   * @return {?Promise<?InteractionResponseType|?JsonObject|undefined>}
+   * @return {?Promise<?InteractiveResponseType|?JsonObject|undefined>}
    * @private
    */
-  retrieveInteractionData_() {
-    return this.executeInteractionRequest_('GET').then((response) => {
+  retrieveInteractiveData_() {
+    return this.executeInteractiveRequest_('GET').then((response) => {
       this.handleSuccessfulDataRetrieval_(
-        /** @type {InteractionResponseType} */ (response)
+        /** @type {InteractiveResponseType} */ (response)
       );
     });
   }
 
   /**
-   * Executes a Interaction API call.
+   * Executes a Interactive API call.
    *
    * @param {string} method GET or POST.
    * @param {number=} optionSelected
-   * @return {!Promise<!InteractionResponseType|string>}
+   * @return {!Promise<!InteractiveResponseType|string>}
    * @private
    */
-  executeInteractionRequest_(method, optionSelected = undefined) {
+  executeInteractiveRequest_(method, optionSelected = undefined) {
     let url = this.element.getAttribute('endpoint');
     if (!assertAbsoluteHttpOrHttpsUrl(url)) {
       return Promise.reject(ENDPOINT_INVALID_ERROR);
     }
 
-    if (!this.interactionId_) {
+    if (!this.interactiveId_) {
       const pageId = closest(dev().assertElement(this.element), (el) => {
         return el.tagName.toLowerCase() === 'amp-story-page';
       }).getAttribute('id');
-      this.interactionId_ = `CANONICAL_URL+${pageId}`;
+      this.interactiveId_ = `CANONICAL_URL+${pageId}`;
     }
 
     return this.getClientId_().then((clientId) => {
       const requestOptions = {'method': method};
       const requestParams = dict({
-        'interactionType': this.interactionType_,
+        'interactiveType': this.interactiveType_,
         'clientId': clientId,
       });
       url = appendPathToUrl(
         this.urlService_.parse(url),
-        dev().assertString(this.interactionId_)
+        dev().assertString(this.interactiveId_)
       );
       if (requestOptions['method'] === 'POST') {
         requestOptions['body'] = {'optionSelected': optionSelected};
@@ -607,7 +607,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   }
 
   /**
-   * Handles incoming interaction data response
+   * Handles incoming interactive data response
    *
    * RESPONSE FORMAT
    * {
@@ -620,18 +620,18 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    *    ...
    *  ]
    * }
-   * @param {InteractionResponseType|undefined} response
+   * @param {InteractiveResponseType|undefined} response
    * @private
    */
   handleSuccessfulDataRetrieval_(response) {
     if (!(response && response['options'])) {
       devAssert(
         response && 'options' in response,
-        `Invalid interaction response, expected { data: InteractionResponseType, ...} but received ${response}`
+        `Invalid interactive response, expected { data: InteractiveResponseType, ...} but received ${response}`
       );
       dev().error(
         TAG,
-        `Invalid interaction response, expected { data: InteractionResponseType, ...} but received ${response}`
+        `Invalid interactive response, expected { data: InteractiveResponseType, ...} but received ${response}`
       );
       return;
     }
