@@ -151,7 +151,6 @@ const prettifyGlobs = [
   '.lando.yml',
   '.lgtm.yml',
   '.travis.yml',
-  '**/.eslintrc',
   '.prettierrc',
   '.renovaterc.json',
   '.vscode/settings.json',

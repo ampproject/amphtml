@@ -219,7 +219,7 @@ playback methods and event dispatchers to plug these together. For common video 
 
 ### Readymade integrations
 
-If you're using a common video framework like [JwPlayer](https://www.jwplayer.com/) or [Video.js](http://videojs.com/), you can call **`listenTo()`** for a basic, readymade integration. These integrations support all playback and UI controls when the framework provides them, see each for supported methods.
+If you're using a common video framework like [JW Player](https://www.jwplayer.com/) or [Video.js](http://videojs.com/), you can call **`listenTo()`** for a basic, readymade integration. These integrations support all playback and UI controls when the framework provides them, see each for supported methods.
 
 {% call callout('Framework APIs', type='note') %}
 Depending on which video framework you use, you'll call the `listenTo` method differently. Read on the specific APIs below.
@@ -229,7 +229,7 @@ Depending on which video framework you use, you'll call the `listenTo` method di
 You can additionally use [custom integration methods](#custom-integrations) if you require a feature not available in readymade implementations.
 {% endcall %}
 
-##### For JwPlayer
+##### For JW Player
 
 **Default supported events:** `ad_end`/`ad_start`, `canplay`, `error`, `muted`/`unmuted`, `pause`/`playing`
 

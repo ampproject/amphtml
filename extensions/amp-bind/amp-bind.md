@@ -933,7 +933,7 @@ Bind an element's `class` using the `[class]` attribute. A `[class]` expression 
   </button>
   <!-- String arrays also work -->
   <button
-    on="tap:AMP.setState({ myClass: ['background-green'], ['border-red'] })"
+    on="tap:AMP.setState({ myClass: ['background-green', 'border-red'] })"
   >
     Working string array: Change Class
   </button>
