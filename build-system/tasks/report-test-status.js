@@ -58,13 +58,11 @@ function inferTestType() {
 
   if (IS_LOCAL_CHANGES) {
     return `${type}/local-changes`;
-  }
-
-  if (IS_DIST) {
+  } else if (IS_DIST) {
     return `${type}/minified`;
+  } else {
+    return `${type}/local`;
   }
-
-  return `${type}/local`;
 }
 
 function postReport(type, action) {
