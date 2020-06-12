@@ -279,7 +279,11 @@ export function googlePageParameters(a4a, startTime) {
       dev().expectedError('AMP-A4A', 'Referrer timeout!');
       return '';
     });
-  const domLoading = getNavigationTiming(win, 'domLoading');
+  // Set dom loading time to first visible if page started in prerender state
+  // determined by truthy value for visibilityState param.
+  const domLoading = a4a.getAmpDoc().getParam('visibilityState')
+    ? a4a.getAmpDoc().getLastVisibleTime()
+    : getNavigationTiming(win, 'domLoading');
   return Promise.all([
     getOrCreateAdCid(ampDoc, 'AMP_ECID_GOOGLE', '_ga'),
     referrerPromise,
