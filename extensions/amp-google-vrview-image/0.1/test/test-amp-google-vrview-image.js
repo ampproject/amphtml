@@ -24,7 +24,7 @@ describes.realWin(
       extensions: ['amp-google-vrview-image'],
     },
   },
-  function(env) {
+  function (env) {
     let win, doc;
 
     beforeEach(() => {
@@ -51,7 +51,7 @@ describes.realWin(
     }
 
     it('renders', () => {
-      return getVrImage({'src': 'https://example.com/image1'}).then(vr => {
+      return getVrImage({'src': 'https://example.com/image1'}).then((vr) => {
         const iframe = vr.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -67,7 +67,7 @@ describes.realWin(
       return getVrImage({
         'src': 'https://example.com/image1',
         'stereo': '',
-      }).then(vr => {
+      }).then((vr) => {
         const iframe = vr.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -81,7 +81,7 @@ describes.realWin(
     });
 
     it('renders responsively', () => {
-      return getVrImage({'src': 'https://example.com/image1'}).then(vr => {
+      return getVrImage({'src': 'https://example.com/image1'}).then((vr) => {
         const iframe = vr.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.className).to.match(/i-amphtml-fill-content/);

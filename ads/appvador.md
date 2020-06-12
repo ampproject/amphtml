@@ -19,9 +19,12 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="320" height="180"
-    type="appvador"
-    data-id="7393d415ebe7366b0cc24478c5675ee0">
+<amp-ad
+  width="320"
+  height="180"
+  type="appvador"
+  data-id="7393d415ebe7366b0cc24478c5675ee0"
+>
 </amp-ad>
 ```
 

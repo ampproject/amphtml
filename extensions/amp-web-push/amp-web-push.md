@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Allows users to subscribe to web push notifications.
 ---
+
 <!--
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -23,40 +24,35 @@ limitations under the License.
 
 # amp-web-push
 
-Allows users to subscribe to <a href="https://developers.google.com/web/fundamentals/engage-and-retain/push-notifications/">web push notifications</a>.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-web-push" src="https://cdn.ampproject.org/v0/amp-web-push-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fixed</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/amp-web-push.amp.html">amp-web-push.amp.html</a></td>
-  </tr>
-</table>
-
 ## Behavior
 
 Developers compose widgets that appear based on a user's subscription state. Widgets are composed of AMP elements and can be as simple as a button or a text link.
 
-*Example*
+_Example_
 
 Clicking the subscription widget pops up a page prompting the user for notification permissions and signals the service worker (configured below) to subscribe the user to push in the background. Clicking the unsubscription widget signals the worker to unsubscribe the user from push in the background.
 
 ```html
 <!-- A subscription widget -->
-<amp-web-push-widget visibility="unsubscribed" layout="fixed" width="250" height="80">
+<amp-web-push-widget
+  visibility="unsubscribed"
+  layout="fixed"
+  width="250"
+  height="80"
+>
   <button on="tap:amp-web-push.subscribe">Subscribe to Notifications</button>
 </amp-web-push-widget>
 
 <!-- An unsubscription widget -->
-<amp-web-push-widget visibility="subscribed" layout="fixed" width="250" height="80">
-  <button on="tap:amp-web-push.unsubscribe">Unsubscribe from Notifications</button>
+<amp-web-push-widget
+  visibility="subscribed"
+  layout="fixed"
+  width="250"
+  height="80"
+>
+  <button on="tap:amp-web-push.unsubscribe">
+    Unsubscribe from Notifications
+  </button>
 </amp-web-push-widget>
 ```
 
@@ -77,6 +73,7 @@ The `amp-web-push` component requires extra integration on your site. You will n
 
 ```html
 <amp-web-push
+  layout="nodisplay"
   helper-iframe-url="https://example.com/helper-iframe.html"
   permission-dialog-url="https://example.com/permission-dialog.html"
   service-worker-url="https://example.com/service-worker.js"
@@ -146,4 +143,5 @@ All properties are <strong>required</strong>, and all URLs must begin with the s
 </table>
 
 ## Validation
+
 See [amp-web-push rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-web-push/validator-amp-web-push.protoascii) in the AMP validator specification.

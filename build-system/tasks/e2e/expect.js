@@ -15,10 +15,12 @@
  */
 
 const chai = require('chai');
-const {ControllerPromise} = require('./functional-test-controller');
+chai.use(require('chai-as-promised'));
+const {ControllerPromise} = require('./controller-promise');
 
 let installed;
 let lastExpectError;
+let networkLogger;
 
 function clearLastExpectError() {
   lastExpectError = null;
@@ -70,14 +72,14 @@ const chaiMethodsAndProperties = [
   {name: 'arguments', type: ChaiType.PROPERTY},
   {name: 'Arguments', type: ChaiType.PROPERTY},
   {name: 'below', type: ChaiType.METHOD},
-  {name: 'by', type: ChaiType.METHOD},
-  {name: 'change', type: ChaiType.METHOD},
-  {name: 'changes', type: ChaiType.METHOD},
+  {name: 'by', type: ChaiType.METHOD, unsupported: true},
+  {name: 'change', type: ChaiType.METHOD, unsupported: true},
+  {name: 'changes', type: ChaiType.METHOD, unsupported: true},
   {name: 'closeTo', type: ChaiType.METHOD},
   {name: 'contain', type: ChaiType.CHAINABLE_METHOD},
   {name: 'contains', type: ChaiType.CHAINABLE_METHOD},
-  {name: 'decrease', type: ChaiType.METHOD},
-  {name: 'decreases', type: ChaiType.METHOD},
+  {name: 'decrease', type: ChaiType.METHOD, unsupported: true},
+  {name: 'decreases', type: ChaiType.METHOD, unsupported: true},
   {name: 'empty', type: ChaiType.PROPERTY},
   {name: 'eq', type: ChaiType.METHOD},
   {name: 'eql', type: ChaiType.METHOD},
@@ -96,15 +98,10 @@ const chaiMethodsAndProperties = [
   {name: 'haveOwnPropertyDescriptor', type: ChaiType.METHOD},
   {name: 'include', type: ChaiType.CHAINABLE_METHOD},
   {name: 'includes', type: ChaiType.CHAINABLE_METHOD},
-  {name: 'increase', type: ChaiType.METHOD},
-  {name: 'increases', type: ChaiType.METHOD},
+  {name: 'increase', type: ChaiType.METHOD, unsupported: true},
+  {name: 'increases', type: ChaiType.METHOD, unsupported: true},
   {name: 'instanceof', type: ChaiType.METHOD},
   {name: 'instanceOf', type: ChaiType.METHOD},
-  {name: 'isFalse', type: ChaiType.PROPERTY},
-  {name: 'isNull', type: ChaiType.PROPERTY},
-  {name: 'isOk', type: ChaiType.PROPERTY},
-  {name: 'isTrue', type: ChaiType.PROPERTY},
-  {name: 'itself', type: ChaiType.PROPERTY},
   {name: 'key', type: ChaiType.METHOD},
   {name: 'keys', type: ChaiType.METHOD},
   {name: 'least', type: ChaiType.METHOD},
@@ -123,18 +120,16 @@ const chaiMethodsAndProperties = [
   {name: 'oneOf', type: ChaiType.METHOD},
   {name: 'ownProperty', type: ChaiType.METHOD},
   {name: 'ownPropertyDescriptor', type: ChaiType.METHOD},
-  // 'property' is implemented as ChaiType:METHOD in Chai
-  // but doing so here causes assertion errors. See #22811
-  {name: 'property', type: ChaiType.CHAINABLE_METHOD},
-  {name: 'respondsTo', type: ChaiType.METHOD},
-  {name: 'respondTo', type: ChaiType.METHOD},
+  {name: 'property', type: ChaiType.METHOD},
+  {name: 'respondsTo', type: ChaiType.METHOD, unsupported: true},
+  {name: 'respondTo', type: ChaiType.METHOD, unsupported: true},
   {name: 'satisfies', type: ChaiType.METHOD},
   {name: 'satisfy', type: ChaiType.METHOD},
   {name: 'sealed', type: ChaiType.PROPERTY},
   {name: 'string', type: ChaiType.METHOD},
-  {name: 'throw', type: ChaiType.METHOD},
-  {name: 'Throw', type: ChaiType.METHOD},
-  {name: 'throws', type: ChaiType.METHOD},
+  {name: 'throw', type: ChaiType.METHOD, unsupported: true},
+  {name: 'Throw', type: ChaiType.METHOD, unsupported: true},
+  {name: 'throws', type: ChaiType.METHOD, unsupported: true},
   {name: 'true', type: ChaiType.PROPERTY},
   {name: 'undefined', type: ChaiType.PROPERTY},
   {name: 'within', type: ChaiType.METHOD},
@@ -143,9 +138,12 @@ const chaiMethodsAndProperties = [
 function installWrappers(chai, utils) {
   const {METHOD, PROPERTY, CHAINABLE_METHOD} = ChaiType;
   const {Assertion} = chai;
-  const overwrite = overwriteAlwaysUseSuper(utils);
 
-  for (const {name, type} of chaiMethodsAndProperties) {
+  for (const {name, type, unsupported} of chaiMethodsAndProperties) {
+    const overwrite = unsupported
+      ? overwriteUnsupported
+      : overwriteAlwaysUseSuper(utils);
+
     switch (type) {
       case METHOD:
         Assertion.overwriteMethod(name, overwrite);
@@ -169,8 +167,8 @@ function installWrappers(chai, utils) {
 function overwriteAlwaysUseSuper(utils) {
   const {flag} = utils;
 
-  return function(_super) {
-    return async function() {
+  return function (_super) {
+    return function () {
       const obj = this._obj;
       const isControllerPromise = obj instanceof ControllerPromise;
       if (!isControllerPromise) {
@@ -178,16 +176,28 @@ function overwriteAlwaysUseSuper(utils) {
       }
       const {waitForValue} = obj;
       if (!waitForValue) {
-        const result = await obj;
-        flag(this, 'object', result);
-        return _super.apply(this, arguments);
+        return obj.then((result) => {
+          flag(this, 'object', result);
+          return _super.apply(this, arguments);
+        });
       }
 
-      const resultPromise = waitForValue(obj => {
+      /**
+       * When passed to `waitForValue`, this method causes the Promise
+       * returned by `waitForValue` to resolve only when the value it
+       * polls matches expectation set by the `expect` chain.
+       * @param {*} value
+       * @return {boolean} true if the ControllerPromise polling value
+       * satisfies the `expect` chain.
+       */
+      const valueSatisfiesExpectation = (value) => {
         try {
-          flag(this, 'object', obj);
+          // Tell chai to use value as the subject of the expect chain.
+          flag(this, 'object', value);
+
           // Run the code that checks the condition.
           _super.apply(this, arguments);
+
           clearLastExpectError();
           // Let waitForValue know we are done.
           return true;
@@ -200,8 +210,9 @@ function overwriteAlwaysUseSuper(utils) {
         } finally {
           flag(this, 'object', resultPromise);
         }
-      });
+      };
 
+      const resultPromise = waitForValue(valueSatisfiesExpectation);
       flag(this, 'object', resultPromise);
       return resultPromise;
     };
@@ -209,13 +220,59 @@ function overwriteAlwaysUseSuper(utils) {
 }
 
 function inheritChainingBehavior(_super) {
-  return function() {
+  return function () {
     _super.apply(this, arguments);
   };
+}
+
+function overwriteUnsupported(_super) {
+  return function () {
+    const obj = this._obj;
+    const isControllerPromise = obj instanceof ControllerPromise;
+    if (isControllerPromise) {
+      throw new Error(
+        'ControllerPromise used with unsupported expectation. Await the Promise and expect the value.'
+      );
+    }
+    return _super.apply(this, arguments);
+  };
+}
+
+function installBrowserAssertions(_networkLogger) {
+  networkLogger = _networkLogger;
+  chai.use(installBrowserWrappers);
+}
+
+function installBrowserWrappers(chai, utils) {
+  const {Assertion} = chai;
+
+  // Assert that a request with a testUrl was sent
+  // Example usage: await expect(testUrl).to.have.been.sent;
+  utils.addProperty(Assertion.prototype, 'sent', async function () {
+    const url = this._obj;
+    const requests = await networkLogger.getSentRequests(url);
+    this.assert(0 < requests.length, 'expected #{this} to have been sent');
+  });
+  Assertion.overwriteProperty('sent', overwriteAlwaysUseSuper(utils));
+
+  // Assert that a request was sent n number of times
+  // Example usage: await expect(testUrl).to.have.sentCount(n);
+  utils.addMethod(Assertion.prototype, 'sentCount', async function (count) {
+    const url = this._obj;
+    const requests = await networkLogger.getSentRequests(url);
+    this.assert(
+      count === requests.length,
+      `expected #{this} to have been sent ${
+        count == 1 ? 'once' : count + ' times'
+      }`
+    );
+  });
+  Assertion.overwriteMethod('sentCount', overwriteAlwaysUseSuper(utils));
 }
 
 module.exports = {
   clearLastExpectError,
   expect,
   getLastExpectError,
+  installBrowserAssertions,
 };

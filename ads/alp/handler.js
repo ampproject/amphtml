@@ -114,7 +114,7 @@ export function handleClick(e, opt_viewerNavigate) {
  * }|undefined} A URL on the AMP Cache.
  */
 function getLinkInfo(e) {
-  const a = closest(dev().assertElement(e.target), element => {
+  const a = closest(dev().assertElement(e.target), (element) => {
     return element.tagName == 'A' && element.href;
   });
   if (!a) {
@@ -245,7 +245,7 @@ export function getA2AAncestor(win) {
   }
   const top = origins[origins.length - 1];
   // Not a security property. We just check whether the
-  // viewer might support A2A. More domains can be added to whitelist
+  // viewer might support A2A. More domains can be added to allowlist
   // as needed.
   if (top.indexOf('.google.') == -1) {
     return null;
@@ -264,6 +264,7 @@ export function getA2AAncestor(win) {
  * Returns the Nth parent of the given window.
  * @param {!Window} win
  * @param {number} distance frames above us.
+ * @return {!Window}
  */
 function getNthParentWindow(win, distance) {
   let parent = win;

@@ -29,7 +29,7 @@ import {writeScript} from './3p';
  * @param {function()} cb
  */
 function getGistJs(global, scriptSource, cb) {
-  writeScript(global, scriptSource, function() {
+  writeScript(global, scriptSource, function () {
     cb();
   });
 }
@@ -52,7 +52,7 @@ export function github(global, data) {
     gistUrl += '?file=' + encodeURIComponent(data.file);
   }
 
-  getGistJs(global, gistUrl, function() {
+  getGistJs(global, gistUrl, function () {
     // Dimensions are given by the parent frame.
     delete data.width;
     delete data.height;

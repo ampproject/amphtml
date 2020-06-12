@@ -31,12 +31,11 @@ const {
   timedExecOrDie: timedExecOrDieBase,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {isTravisPullRequestBuild} = require('../travis');
+const {isTravisPullRequestBuild} = require('../common/travis');
 
 const FILENAME = 'visual-diff-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd, unusedFileName) =>
-  timedExecOrDieBase(cmd, FILENAME);
+const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
@@ -45,12 +44,10 @@ function main() {
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
-    timedExecOrDie('gulp visual-diff --nobuild --master');
+    timedExecOrDie('gulp visual-diff --compiled --nobuild --master');
   } else {
     printChangeSummary(FILENAME);
-    const buildTargets = new Set();
-    determineBuildTargets(buildTargets, FILENAME);
-
+    const buildTargets = determineBuildTargets(FILENAME);
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
     if (
       buildTargets.has('RUNTIME') ||
@@ -59,9 +56,9 @@ function main() {
     ) {
       downloadDistOutput(FILENAME);
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp visual-diff --nobuild');
+      timedExecOrDie('gulp visual-diff --compiled --nobuild');
     } else {
-      timedExecOrDie('gulp visual-diff --nobuild --empty');
+      timedExecOrDie('gulp visual-diff --empty');
       console.log(
         `${FILELOGPREFIX} Skipping`,
         colors.cyan('Visual Diff Tests'),

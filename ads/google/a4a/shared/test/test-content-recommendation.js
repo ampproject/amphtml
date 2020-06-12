@@ -20,8 +20,8 @@ import {
   getPubControlConfig,
 } from '../content-recommendation.js';
 
-describe('getAutoConfig', function() {
-  it('should use image_stacked on wide slots', function() {
+describe('getAutoConfig', function () {
+  it('should use image_stacked on wide slots', function () {
     const runTest = (availableWidth, expectedWidth, expectedHeight) => {
       expect(
         getAutoConfig(availableWidth, /* isMobile= */ false)
@@ -60,7 +60,7 @@ describe('getAutoConfig', function() {
     );
   });
 
-  it('should use mobile_banner_image_sidebyside on narrow slots on mobile', function() {
+  it('should use mobile_banner_image_sidebyside on narrow slots on mobile', function () {
     const runTest = (availableWidth, expectedWidth, expectedHeight) => {
       expect(getAutoConfig(availableWidth, /* isMobile= */ true)).to.deep.equal(
         {
@@ -109,7 +109,7 @@ describe('getAutoConfig', function() {
     );
   });
 
-  it('should use image_sidebyside on narrow slots on desktop', function() {
+  it('should use image_sidebyside on narrow slots on desktop', function () {
     const runTest = (availableWidth, expectedWidth, expectedHeight) => {
       expect(
         getAutoConfig(availableWidth, /* isMobile= */ false)
@@ -164,8 +164,8 @@ describe('getAutoConfig', function() {
   });
 });
 
-describe('getPubControlConfig', function() {
-  it('should use setting when only one provided', function() {
+describe('getPubControlConfig', function () {
+  it('should use setting when only one provided', function () {
     const rawPubControlParams = {
       numberOfColumns: '4',
       numberOfRows: '2',
@@ -209,7 +209,7 @@ describe('getPubControlConfig', function() {
     );
   });
 
-  it('should use different settings for mobile and desktop when two provided', function() {
+  it('should use different settings for mobile and desktop when two provided', function () {
     const rawPubControlParams = {
       numberOfColumns: '1,4',
       numberOfRows: '3,2',
@@ -279,7 +279,7 @@ describe('getPubControlConfig', function() {
     );
   });
 
-  it('should return different sizes for different layouts', function() {
+  it('should return different sizes for different layouts', function () {
     // sanity check that when publisher provides different layouts we use
     // apply different coefficients and get different ad slot sizes.
     const runTest = (layout, expectedHeight) => {
@@ -303,7 +303,7 @@ describe('getPubControlConfig', function() {
     runTest('text_card', /* expectedHeight= */ 184);
   });
 
-  it('should reject invalid pub params', function() {
+  it('should reject invalid pub params', function () {
     const runTest = (pubControlParams, expectedErrorRegex) => {
       const coreConfig = getPubControlConfig(100, pubControlParams);
       expect(coreConfig.validationError).to.match(expectedErrorRegex);
@@ -357,7 +357,7 @@ describe('getPubControlConfig', function() {
     );
   });
 
-  it('limits number of columns if publisher chose too many', function() {
+  it('limits number of columns if publisher chose too many', function () {
     const rawPubControlParams = {
       numberOfColumns: '5', // want 5 columns.
       numberOfRows: '2',

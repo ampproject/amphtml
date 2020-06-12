@@ -15,24 +15,18 @@
  */
 package org.ampproject;
 
-
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.javascript.jscomp.CommandLineRunner;
 import com.google.javascript.jscomp.CompilerOptions;
-import com.google.javascript.jscomp.CustomPassExecutionTime;
 import com.google.javascript.jscomp.FlagUsageException;
 import com.google.javascript.jscomp.PropertyRenamingPolicy;
 import com.google.javascript.jscomp.VariableRenamingPolicy;
-import com.google.javascript.rhino.IR;
-import com.google.javascript.rhino.Node;
 
 import java.io.IOException;
-import java.util.Set;
 
 
 /**
- * Adds a custom pass for Tree shaking `dev.fine` and `dev.assert` calls.
+ * Sets custom closure compiler flags that cannot be set via the command line.
  */
 public class AmpCommandLineRunner extends CommandLineRunner {
 
@@ -42,34 +36,6 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   private boolean typecheck_only = false;
 
   private boolean pseudo_names = false;
-
-  private boolean is_production_env = true;
-
-  private String amp_version = "";
-
-  /**
-   * List of string suffixes to eliminate from the AST.
-   */
-  ImmutableSet<String> suffixTypes = ImmutableSet.of(
-      "dev$$module$src$log().assert()",
-      "dev$$module$src$log().fine()",
-      "dev$$module$src$log().assertElement()",
-      "dev$$module$src$log().assertString()",
-      "dev$$module$src$log().assertNumber()",
-      "dev$$module$src$log().assertArray()",
-      "dev$$module$src$log().assertBoolean()",
-      "devAssert$$module$src$log()",
-      "user$$module$src$log().fine()"
-      );
-
-
-  ImmutableMap<String, Node> assignmentReplacements = ImmutableMap.of(
-      "IS_MINIFIED",
-      IR.trueNode());
-
-  ImmutableMap<String, Node> prodAssignmentReplacements = ImmutableMap.of(
-      "IS_DEV",
-      IR.falseNode());
 
   protected AmpCommandLineRunner(String[] args) {
     super(args);
@@ -81,10 +47,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     }
     CompilerOptions options = super.createOptions();
     options.setCollapsePropertiesLevel(CompilerOptions.PropertyCollapseLevel.ALL);
-    AmpPass ampPass = new AmpPass(getCompiler(), is_production_env, suffixTypes,
-        assignmentReplacements, prodAssignmentReplacements, amp_version);
-    options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, ampPass);
-    options.setDevirtualizePrototypeMethods(true);
+    options.setDevirtualizeMethods(true);
     options.setExtractPrototypeMemberDeclarations(true);
     options.setSmartNameRemoval(true);
     options.optimizeCalls = true;
@@ -92,12 +55,10 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     // might override a method. In the future this might be doable
     // with using a more complete extern file instead.
     options.setRemoveUnusedPrototypeProperties(false);
-    options.setInlineProperties(false);
     options.setComputeFunctionSideEffects(false);
     // Property renaming. Relies on AmpCodingConvention to be safe.
     options.setRenamingPolicy(VariableRenamingPolicy.ALL,
         PropertyRenamingPolicy.ALL_UNQUOTED);
-    options.setDisambiguatePrivateProperties(true);
     options.setGeneratePseudoNames(pseudo_names);
     return options;
   }
@@ -121,16 +82,11 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   public static void main(String[] args) {
     AmpCommandLineRunner runner = new AmpCommandLineRunner(args);
 
-    // Scan for TYPECHECK_ONLY string which we pass in as a --define
     for (String arg : args) {
       if (arg.contains("TYPECHECK_ONLY=true")) {
         runner.typecheck_only = true;
-      } else if (arg.contains("FORTESTING=true")) {
-        runner.is_production_env = false;
       } else if (arg.contains("PSEUDO_NAMES=true")) {
         runner.pseudo_names = true;
-      } else if (arg.contains("VERSION=")) {
-        runner.amp_version = arg.substring(arg.lastIndexOf("=") + 1);
       }
     }
 

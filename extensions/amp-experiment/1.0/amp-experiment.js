@@ -17,6 +17,7 @@
 import {ATTR_PREFIX, Variants, allocateVariant} from './variant';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
+import {applyExperimentToVariant} from './apply-experiment';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getServicePromiseForDoc} from '../../../src/service';
@@ -26,17 +27,30 @@ import {
 } from '../../../src/service/origin-experiments-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
-import {parseMutation} from './mutation-parser';
 
 const TAG = 'amp-experiment';
-
-/** @const {number} */
-const MAX_MUTATIONS = 70;
 
 export class AmpExperiment extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.NODISPLAY || layout == Layout.CONTAINER;
+  }
+
+  /** @override */
+  prerenderAllowed() {
+    /*
+     * Prerender is allowed because the client_id is only used to calculate
+     * the variant bucket.
+     * In the case where a client_id is first generated
+     * during prerender, the base cid will be stored in the AMP viewer domain.
+     */
+    return true;
+  }
+
+  /** @override */
+  isBuildRenderBlocking() {
+    // variantService is render blocking
+    return true;
   }
 
   /** @override */
@@ -46,7 +60,7 @@ export class AmpExperiment extends AMP.BaseElement {
       this.isExperimentEnabled_(),
     ];
 
-    return Promise.all(buildCallbackPromises).then(responses => {
+    return Promise.all(buildCallbackPromises).then((responses) => {
       const variantsService = responses[0];
       const enabled = responses[1];
 
@@ -72,10 +86,10 @@ export class AmpExperiment extends AMP.BaseElement {
 
         // All experiments can be disabled by a hash param
         const viewer = Services.viewerForDoc(ampdoc);
-        const override = viewer.getParam(
+        const override = ampdoc.getParam(
           ATTR_PREFIX + 'disable-all-experiments'
         );
-        if (override !== undefined) {
+        if (override != null) {
           variantsService.init(
             Promise.resolve(this.getEmptyExperimentToVariant_(config))
           );
@@ -83,13 +97,13 @@ export class AmpExperiment extends AMP.BaseElement {
         }
 
         const experimentToVariant = Object.create(null);
-        const variants = Object.keys(config).map(experimentName => {
+        const variants = Object.keys(config).map((experimentName) => {
           return allocateVariant(
             ampdoc,
             viewer,
             experimentName,
             config[experimentName]
-          ).then(variantName => {
+          ).then((variantName) => {
             experimentToVariant[experimentName] = variantName;
           });
         });
@@ -97,15 +111,20 @@ export class AmpExperiment extends AMP.BaseElement {
         /** @private @const {!Promise<!Object<string, ?string>>} */
         const experimentVariants = Promise.all(variants)
           .then(() => {
-            this.validateExperimentToVariant_(config, experimentToVariant);
-            const applyExperimentsPromise = this.applyExperimentVariants_(
+            const ampdoc = this.getAmpDoc();
+            const applyExperimentsPromise = applyExperimentToVariant(
+              ampdoc,
               config,
               experimentToVariant
             );
-            variantsService.init(applyExperimentsPromise);
-            return applyExperimentsPromise;
+
+            const experimentToVariantPromise = applyExperimentsPromise.then(
+              () => experimentToVariant
+            );
+            variantsService.init(experimentToVariantPromise);
+            return experimentToVariantPromise;
           })
-          .catch(e => {
+          .catch((e) => {
             // Ensure downstream consumers don't wait for the promise forever.
             variantsService.init(
               Promise.resolve(this.getEmptyExperimentToVariant_(config))
@@ -168,106 +187,11 @@ export class AmpExperiment extends AMP.BaseElement {
    */
   getEmptyExperimentToVariant_(config) {
     const experimentToVariant = Object.create(null);
-    Object.keys(config).map(experimentName => {
+    Object.keys(config).map((experimentName) => {
       experimentToVariant[experimentName] = null;
     });
 
     return experimentToVariant;
-  }
-
-  /**
-   * Function to run validations and limitations on the current
-   * chosen Experiment / variant combination.
-   *
-   * @param {!JsonObject} config
-   * @param {!Object<string, ?string>} experimentToVariant
-   */
-  validateExperimentToVariant_(config, experimentToVariant) {
-    // Ensure that the current experiment / variant
-    // combination does not exceed the maximum mutations.
-    // NOTE: We are not validating the entire config,
-    // As that would take more time, and affect the user,
-    // vs. help the developer.
-    let totalMutations = 0;
-    const experimentToVariantKeys = Object.keys(experimentToVariant);
-
-    for (let i = 0; i < experimentToVariantKeys.length; i++) {
-      const experimentKey = experimentToVariantKeys[i];
-      const variantKey = experimentToVariant[experimentKey];
-      const variant =
-        /** @type {!JsonObject} */ (config[experimentKey]['variants'][
-          variantKey
-        ]);
-      totalMutations += variant['mutations'].length;
-    }
-
-    if (totalMutations > MAX_MUTATIONS) {
-      const numMutationsError =
-        'Max number of mutations for the total ' +
-        `applied experiments exceeded: ${totalMutations} > ` +
-        MAX_MUTATIONS;
-      user().error(TAG, numMutationsError);
-      throw new Error(numMutationsError);
-    }
-  }
-
-  /**
-   * Passes the given experiment and variant pairs to the correct handler,
-   * to apply the experiment to the document.
-   * Experiment with no variant assigned (null) will be skipped.
-   *
-   * For example, the `experimentToVariant` object looks like:
-   * {
-   *   'appliedExperimentName': 'chosenVariantName',
-   *   'anotherAppliedExperimentName': 'chosenVariantName'
-   * }
-   * Which is a simplified version of the config and
-   * represents what variant of each experiment
-   * should be applied.
-   *
-   * @param {!JsonObject} config
-   * @param {!Object<string, ?string>} experimentToVariant
-   * @return {!Promise<!Object<string, ?string>>} a promise of the original
-   *     param passed in
-   * @private
-   */
-  applyExperimentVariants_(config, experimentToVariant) {
-    const appliedExperimentToVariantPromises = [];
-
-    for (const experimentName in experimentToVariant) {
-      const variantName = experimentToVariant[experimentName];
-      if (variantName) {
-        const variantObject = config[experimentName]['variants'][variantName];
-        appliedExperimentToVariantPromises.push(
-          this.applyMutations_(experimentName, variantObject)
-        );
-      }
-    }
-
-    return Promise.all(appliedExperimentToVariantPromises).then(
-      () => experimentToVariant
-    );
-  }
-
-  /**
-   * Passes the given experimentName and variantObject pairs
-   * to the mutation service to be applied to the document.
-   * @param {string} experimentName
-   * @param {!JsonObject} variantObject
-   * @return {!Promise}
-   * @private
-   */
-  applyMutations_(experimentName, variantObject) {
-    const doc = this.getAmpDoc();
-    return doc.whenReady().then(() => {
-      // Parse / Validate all of our mutations
-      const mutationOperations = variantObject['mutations'].map(mutation =>
-        parseMutation(mutation, this.win.document)
-      );
-
-      // Apply our mutations
-      mutationOperations.forEach(mutationOperation => mutationOperation());
-    });
   }
 
   /**
@@ -285,13 +209,13 @@ export class AmpExperiment extends AMP.BaseElement {
     installOriginExperimentsForDoc(this.getAmpDoc());
     return originExperimentsForDoc(this.element)
       .getExperiments()
-      .then(trials => {
+      .then((trials) => {
         return trials && trials.includes('amp-experiment-1.0');
       });
   }
 }
 
-AMP.extension(TAG, '1.0', AMP => {
+AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerServiceForDoc('variant', Variants);
   AMP.registerElement(TAG, AmpExperiment);
 });

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import {CONSENT_POLICY_STATE} from '../src/consent-state';
 import {loadScript, validateData} from '../3p/3p';
 
-const pubmineOptional = ['section', 'pt', 'ht'],
+const pubmineOptional = ['section', 'pt', 'ht', 'npaOnUnknownConsent'],
   pubmineRequired = ['siteid'],
   pubmineURL = 'https://s.pubmine.com/head.js';
 
@@ -25,11 +26,27 @@ const pubmineOptional = ['section', 'pt', 'ht'],
  * @param {!Window} global
  */
 function initMasterFrame(data, global) {
+  /*
+   * INSUFFICIENT and UNKNOWN should be treated as INSUFFICIENT
+   * unless state is UNKNOWN and `data-npa-on-unknown-consent=false`
+   */
+  const paUnknown =
+    data['npaOnUnknownConsent'] !== undefined &&
+    'false' == data['npaOnUnknownConsent'];
+  const ctxt = global.context;
+  const consent =
+    ctxt.initialConsentState === null ||
+    ctxt.initialConsentState === CONSENT_POLICY_STATE.SUFFICIENT ||
+    ctxt.initialConsentState === CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED ||
+    (ctxt.initialConsentState === CONSENT_POLICY_STATE.UNKNOWN && paUnknown);
+
   global['__ATA_PP'] = {
     pt: data['pt'] || 1,
     ht: data['ht'] || 1,
     tn: 'amp',
     amp: true,
+    consent: consent ? 1 : 0,
+    siteid: Number(data['siteid']) || undefined,
   };
   global['__ATA'] = global['__ATA'] || {};
   global['__ATA']['cmd'] = global['__ATA']['cmd'] || [];
@@ -71,7 +88,7 @@ export function pubmine(global, data) {
     initMasterFrame(data, global);
   }
   const master = isMaster ? global : global.context.master;
-  master['__ATA']['cmd']['push'](function() {
+  master['__ATA']['cmd']['push'](function () {
     master['__ATA']['insertStyles'](global);
     master['__ATA']['initSlot'](slotId, slotConfig);
   });

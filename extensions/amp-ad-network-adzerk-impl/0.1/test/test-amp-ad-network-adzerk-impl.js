@@ -28,17 +28,17 @@ import {Xhr} from '../../../../src/service/xhr-impl';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
 
-describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
+describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, (env) => {
   let win, doc;
   let element, impl;
   let fetchTextMock;
 
   beforeEach(() => {
     win = env.win;
-    win.AMP_MODE = {localDev: false};
+    win.__AMP_MODE = {localDev: false};
     win.AMP.registerTemplate('amp-mustache', AmpMustache);
     doc = win.document;
-    fetchTextMock = sandbox.stub(Xhr.prototype, 'fetchText');
+    fetchTextMock = env.sandbox.stub(Xhr.prototype, 'fetchText');
     element = createElementWithAttributes(doc, 'amp-ad', {
       'type': 'adzerk',
       'width': '320',
@@ -123,15 +123,15 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
         .maybeValidateAmpCreative(
           utf8Encode(JSON.stringify(adResponseBody)).buffer,
           {
-            get: name => {
+            get: (name) => {
               expect(name).to.equal(AMP_TEMPLATED_CREATIVE_HEADER_NAME);
               return 'amp-mustache';
             },
           },
           () => {}
         )
-        .then(buffer => Promise.resolve(utf8Decode(buffer)))
-        .then(creative => {
+        .then((buffer) => Promise.resolve(utf8Decode(buffer)))
+        .then((creative) => {
           expect(creative).to.not.contain(
             '<script async src="https://cdn.ampproject.org/v0.js">' +
               '</script>'
@@ -191,15 +191,15 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
         .maybeValidateAmpCreative(
           utf8Encode(JSON.stringify(adResponseBody)).buffer,
           {
-            get: name => {
+            get: (name) => {
               expect(name).to.equal(AMP_TEMPLATED_CREATIVE_HEADER_NAME);
               return 'amp-mustache';
             },
           },
           () => {}
         )
-        .then(buffer => utf8Decode(buffer))
-        .then(creative => {
+        .then((buffer) => utf8Decode(buffer))
+        .then((creative) => {
           expect(impl.getAmpAdMetadata()).to.jsonEqual({
             minifiedCreative: creative,
             customElementExtensions: ['amp-analytics', 'amp-mustache'],
@@ -223,15 +223,15 @@ describes.fakeWin('amp-ad-network-adzerk-impl', {amp: true}, env => {
         .maybeValidateAmpCreative(
           utf8Encode(JSON.stringify(adResponseBody)).buffer,
           {
-            get: name => {
+            get: (name) => {
               expect(name).to.equal(AMP_TEMPLATED_CREATIVE_HEADER_NAME);
               return 'amp-mustache';
             },
           },
           () => {}
         )
-        .then(buffer => utf8Decode(buffer))
-        .then(creative => {
+        .then((buffer) => utf8Decode(buffer))
+        .then((creative) => {
           expect(impl.getAmpAdMetadata()).to.jsonEqual({
             minifiedCreative: creative,
             customElementExtensions: ['amp-mustache'],

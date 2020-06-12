@@ -20,19 +20,19 @@ limitations under the License.
 
 - [Background](#background)
 - [Implementation guide](#implementation-guide)
-    - [Before getting started](#before-getting-started)
-    - [Task 1: For non-AMP pages on the publisher origin, set up an identifier and send analytics pings](#task1)
-    - [Task 2: For AMP pages, set up an identifier and send analytics pings by including Client ID replacement in amp-analytics pings](#task2)
-    - [Task 3: Process analytics pings from pages on the publisher origin](#task3)
-    - [Task 4: Process analytics pings from AMP cache or AMP viewer display contexts and establish identifier mappings (if needed)](#task4)
-    - [Task 5: Using Client ID in linking and form submission](#task5)
+  - [Before getting started](#before-getting-started)
+  - [Task 1: For non-AMP pages on the publisher origin, set up an identifier and send analytics pings](#task1)
+  - [Task 2: For AMP pages, set up an identifier and send analytics pings by including Client ID replacement in amp-analytics pings](#task2)
+  - [Task 3: Process analytics pings from pages on the publisher origin](#task3)
+  - [Task 4: Process analytics pings from AMP cache or AMP viewer display contexts and establish identifier mappings (if needed)](#task4)
+  - [Task 5: Using Client ID in linking and form submission](#task5)
 - [Strongly recommended practices](#strongly-recommended-practices)
 
 User state is an important concept on today’s web. Consider the following use cases that are enabled by managing user state:
 
- - A merchant builds a useful **shopping cart** that shows a user the same items during their second visit that they had added to the cart during their first visit many weeks ago. Such an experience increases the chance of the user buying that item by making sure they remain aware of the item they considered buying in the past.
- - A news publisher who can tailor **recommended articles** to a reader based on the reader’s repeated visits to the publisher’s articles, which helps keep the reader engaged and discovering more content.
- - A website developer running any type of site collects **analytics** that can tell if two pageviews belong to the same person who saw two pages or to two different people who each saw a single page. Having this insight helps to know how the site is performing, and, ultimately, how to improve it.
+- A merchant builds a useful **shopping cart** that shows a user the same items during their second visit that they had added to the cart during their first visit many weeks ago. Such an experience increases the chance of the user buying that item by making sure they remain aware of the item they considered buying in the past.
+- A news publisher who can tailor **recommended articles** to a reader based on the reader’s repeated visits to the publisher’s articles, which helps keep the reader engaged and discovering more content.
+- A website developer running any type of site collects **analytics** that can tell if two pageviews belong to the same person who saw two pages or to two different people who each saw a single page. Having this insight helps to know how the site is performing, and, ultimately, how to improve it.
 
 This article is designed to help you be more successful in **managing non-authenticated user state in AMP**, a way of providing a seamless user journey even if the user hasn’t taken an action to provide their identity, like signing in. After reviewing some of the challenges and considerations in approaching this topic, this guide outlines the ways in which user state is supported by AMP and offers recommendations on how you can approach a technical implementation.
 
@@ -79,7 +79,7 @@ Let’s examine each of these situations more closely.
 
 **Context #1: the publisher’s origin.** AMP pages are deployed so that they are originally hosted from and accessible via the publisher’s site, e.g. on `https://example.com` one might find `https://example.com/article.amp.html`.
 
-Publishers can choose to publish exclusively in AMP, or to publish two versions of content (that is, AMP content “paired” with non-AMP content). The “paired” model requires some [particular steps](https://www.ampproject.org/docs/fundamentals/discovery) to ensure the AMP versions of pages are discoverable to search engines, social media sites, and other platforms. Both publishing approaches are fully supported; it's up to the publisher to decide on which approach to take.
+Publishers can choose to publish exclusively in AMP, or to publish two versions of content (that is, AMP content “paired” with non-AMP content). The “paired” model requires some [particular steps](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/discovery) to ensure the AMP versions of pages are discoverable to search engines, social media sites, and other platforms. Both publishing approaches are fully supported; it's up to the publisher to decide on which approach to take.
 
 > **NOTE:**
 >
@@ -101,7 +101,7 @@ Publishers must be prepared to manage the user state for each display context se
 
 However, publishers of AMP pages can easily end up (unwittingly) designing user journeys that involve multiple contexts. Let’s revisit our earlier look at the shopping cart use case and add some more detail to it to make a full **user story**:
 
-> *On day 1, the user discovers an AMP page from Example Inc. via Google Search. Google Search loads AMP pages in an AMP viewer. While viewing the page, the user adds four items to their shopping cart but doesn't check out. Two weeks later, on day 15, the user remembers the four items they were considering to purchase and decides now is the time to buy. They access Example Inc.’s homepage at `https://example.com` directly (it is a non-AMP homepage) and finds their four items are still saved in the shopping cart.*
+> _On day 1, the user discovers an AMP page from Example Inc. via Google Search. Google Search loads AMP pages in an AMP viewer. While viewing the page, the user adds four items to their shopping cart but doesn't check out. Two weeks later, on day 15, the user remembers the four items they were considering to purchase and decides now is the time to buy. They access Example Inc.’s homepage at `https://example.com` directly (it is a non-AMP homepage) and finds their four items are still saved in the shopping cart._
 
 In this scenario, the user receives a consistent shopping cart experience even though she has traversed from an AMP viewer context to a publisher origin context—and with some time passing between these events. This experience is very reasonable and, if you’re designing a shopping experience, you should expect to support it, so how do you make it happen?
 
@@ -123,8 +123,7 @@ This section provides recommendations for managing user state. The tasks below a
 
 After laying the foundation, we then visit a topic with a narrower range of use cases but that offers a complete solution for those use cases.
 
-**Chunk #2: Using Client ID in linking and form submission:** In Task 5, you'll learn to  advantage of link traversal and/or form submission to pass AMP Client ID information across contextual boundaries where the user is traversing from one page directly to another.
-
+**Chunk #2: Using Client ID in linking and form submission:** In Task 5, you'll learn to advantage of link traversal and/or form submission to pass AMP Client ID information across contextual boundaries where the user is traversing from one page directly to another.
 
 > **CAUTION:**
 >
@@ -132,14 +131,13 @@ After laying the foundation, we then visit a topic with a narrower range of use 
 
 ### Before getting started
 
-In walking through the technical guidance below, let's  assume that you’ll be binding **user state** to a stable **identifier** that represents the user. For example, the identifier might look like `n34ic982n2386n30`. On the server side you then associate `n34ic982n2386n30` to any set of user state information, such as shopping cart content, a list of previously read articles, or other data depending on the use case.
+In walking through the technical guidance below, let's assume that you’ll be binding **user state** to a stable **identifier** that represents the user. For example, the identifier might look like `n34ic982n2386n30`. On the server side you then associate `n34ic982n2386n30` to any set of user state information, such as shopping cart content, a list of previously read articles, or other data depending on the use case.
 
 <amp-img alt="A single identifier could be used to manage user state for many use cases" layout="responsive" src="https://github.com/ampproject/amphtml/raw/master/spec/img/identifiers-for-use-cases.png" width="1276" height="376">
   <noscript>
     <img alt="A single identifier could be used to manage user state for many use cases" src="https://github.com/ampproject/amphtml/raw/master/spec/img/identifiers-for-use-cases.png" />
   </noscript>
 </amp-img>
-
 
 For clarity throughout the rest of this document, we’ll call various strings of characters that are identifiers by more readable names preceded by a dollar sign (`$`):
 
@@ -154,6 +152,7 @@ n34ic982n2386n30 ⇒ $sample_id
 **The concepts presented below can be extended to other use cases:** Although we focus just on the analytics use case, the concepts conveyed below can be reworked for other use cases requiring user state management across contexts.
 
 <a id="task1"></a>
+
 ### Task 1: For non-AMP pages on the publisher origin, set up an identifier and send analytics pings
 
 Let’s begin by configuring analytics for non-AMP pages served off of the publisher origin. This can be achieved in many ways, including using an analytics package like Google Analytics or Adobe Analytics, or by writing a custom implementation.
@@ -197,7 +196,7 @@ Once you’ve set up an identifier, you can now incorporate it in analytics ping
 
 The specific implementation will depend on your desired configuration, but generally you’ll be looking to send pings (requests) to your analytics server, which include useful data within the URL of the request itself. Here’s an example, which also indicates how you’d include your cookie value inside of the request:
 
-```text
+```http
 https://analytics.example.com/ping?type=pageview&user_id=$publisher_origin_identifier
 ```
 
@@ -210,11 +209,12 @@ user_id=$publisher_origin_identifier
 The use of “`user_id`” here should be determined by what your analytics server expects to process and is not specifically tied to what you call the cookie that stores the identifier locally.
 
 <a id="task2"></a>
+
 ### Task 2: For AMP pages, set up an identifier and send analytics pings by including Client ID replacement in amp-analytics pings
 
 Turning now to AMP pages, let's look at how you can establish and transmit an identifier for analytics. This will be applicable regardless of the context the AMP page is presented in, so this covers any AMP page on the publisher origin, served via an AMP cache, or displayed in AMP viewer.
 
-Through usage of features that require Client ID, AMP will do the “under the hood” work to generate and store client ID values and surface them to the features that require them. One of the principal features that can use AMP’s Client ID is [amp-analytics](https://www.ampproject.org/docs/reference/components/amp-analytics), which happens to be exactly what we’ll need to implement our analytics use case example.
+Through usage of features that require Client ID, AMP will do the “under the hood” work to generate and store client ID values and surface them to the features that require them. One of the principal features that can use AMP’s Client ID is [amp-analytics](https://amp.dev/documentation/components/amp-analytics), which happens to be exactly what we’ll need to implement our analytics use case example.
 
 On AMP pages, construct an amp-analytics ping containing the Client ID:
 
@@ -231,7 +231,7 @@ On AMP pages, construct an amp-analytics ping containing the Client ID:
 
 Take note of the fact that the parameter passed into the Client ID substitution, `${clientId(uid)`, is `uid`. This was a deliberate choice that matches the same cookie name used on the publisher origin as described in [Task 1](#task1). For the most seamless integration, you should apply the same technique.
 
-Concerning the rest of the amp-analytics implementation, see the documentation for [amp-analytics configuration](https://www.ampproject.org/docs/analytics/analytics_amp) for more detail on how to set up amp-analytics requests or to modify those of your analytics vendor. The ping can be further modified to transport additional data that you either directly define or by taking advantage of other [AMP substitutions](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md).
+Concerning the rest of the amp-analytics implementation, see the documentation for [amp-analytics configuration](https://amp.dev/documentation/guides-and-tutorials/optimize-measure/configure-analytics/) for more detail on how to set up amp-analytics requests or to modify those of your analytics vendor. The ping can be further modified to transport additional data that you either directly define or by taking advantage of other [AMP substitutions](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md).
 
 > **Good to know:**
 >
@@ -240,6 +240,7 @@ Concerning the rest of the amp-analytics implementation, see the documentation f
 On the publisher origin, it’s easiest to think of “scope” as what you call the cookie. By recommending a value of `uid` for the Client ID parameter here in [Task 2](#task2), we align with the choice to use a cookie called `uid` in [Task 1](#task1).
 
 <a id="task3"></a>
+
 ### Task 3: Process analytics pings from pages on the publisher origin
 
 Because of the setup performed in Tasks 1 and 2, when someone accesses the AMP version (from any context) or the non-AMP version on the publisher origin the analytics ping will use the same identifier. By following the guidance in [Task 2](#task2) to choose a Client ID "scope" that was the same name as the name of the cookie you used in [Task 1](#task1), AMP reuses the same cookie.
@@ -258,6 +259,7 @@ This is illustrated in the table below:
 </table>
 
 <a id="task4"></a>
+
 ### Task 4: Process analytics pings from AMP cache or AMP viewer display contexts and establish identifier mappings (if needed)
 
 When we set up analytics pings in [Task 2](#task2) to transmit data from AMP pages displayed within an AMP cache or AMP viewer, we also created a problem. As discussed previously, AMP cache and AMP viewer contexts are different from the publisher origin context, and along with this comes as different way of maintaining identifiers. To process these pings to avoid problems like overcounting users, we’ll take some [steps](#implementation-steps) to try and reconcile identifiers as often as we can.
@@ -306,7 +308,7 @@ Our mapping table will associate AMP Client ID values that are seen in the analy
 
 Immediately after determining that you were unsuccessful in reading the publisher origin identifier, check if the AMP Client ID contained within the analytics ping is already used in a mapping. To do this, first consult the incoming amp-analytics request to get the Client ID value. For example, from this request:
 
-```text
+```http
 https://analytics.example.com/ping?type=pageview&user_id=$amp_client_id
 ```
 
@@ -357,6 +359,7 @@ Now that you've figured out the analytics record identifier you can actually sto
 ```
 
 <a id="task5"></a>
+
 ### Task 5: Using Client ID in linking and form submission
 
 In general, when reading and writing third-party cookies is disallowed, there will be situations where managing user state is impossible to do with complete effectiveness. In Tasks 1-4, the steps we’ve taken help in two ways: (1) They provide a completely effective solution for when reading and writing third-party cookies is allowed, and (2) they set our system up to take advantage of any eventual opportunity to reconcile cross-context identifiers if immediate reconciliation is impossible due to the browser’s cookie settings.
@@ -376,30 +379,46 @@ Our approach will take advantage of two types of [AMP variable substitutions](./
 **To update outgoing links to use a Client ID substitution:** Define a new query parameter, `ref_id` (“referrer ID”), which will appear within the URL and indicate the **originating context’s identifier** for the user. Set this query parameter to equal the value of AMP’s Client ID substitution:
 
 ```html
-<a href="https://example.com/step2.html?ref_id=CLIENT_ID(uid)" data-amp-replace="CLIENT_ID">
+<a
+  href="https://example.com/step2.html?ref_id=CLIENT_ID(uid)"
+  data-amp-replace="CLIENT_ID"
+></a>
 ```
 
 **Alternative solution for passing Client ID to the outgoing links:** Define the new query parameter `ref_id` as part of the data attribute `data-amp-addparams` and for queries that needs parameter substitution provide those details as part of `data-amp-replace`. With this approach the URL would look clean and the parameters specified on `data-amp-addparams` will be dynamically added
 
 ```html
-<a href="https://example.com/step2.html" data-amp-addparams="ref_id=CLIENT_ID(uid)" data-amp-replace="CLIENT_ID">
+<a
+  href="https://example.com/step2.html"
+  data-amp-addparams="ref_id=CLIENT_ID(uid)"
+  data-amp-replace="CLIENT_ID"
+></a>
 ```
 
 For passing multiple query parameters through `data-amp-addparams` have those `&` separated like
 
 ```html
-<a href="https://example.com/step2.html" data-amp-addparams="ref_id=CLIENT_ID(uid)&pageid=p123" data-amp-replace="CLIENT_ID">
+<a
+  href="https://example.com/step2.html"
+  data-amp-addparams="ref_id=CLIENT_ID(uid)&pageid=p123"
+  data-amp-replace="CLIENT_ID"
+></a>
 ```
 
 **To update form inputs to use a Client ID substitution:** Define a name for the input field, such as `orig_user_id`. Specify the `default-value` of the form field to be the value of AMP’s Client ID substitution:
 
 ```html
-<input name="ref_id" type="hidden" value="CLIENT_ID(uid)" data-amp-replace="CLIENT_ID">
+<input
+  name="ref_id"
+  type="hidden"
+  value="CLIENT_ID(uid)"
+  data-amp-replace="CLIENT_ID"
+/>
 ```
 
 By taking these steps, the Client ID is available to the target server and/or as a URL parameter on the page the user lands on after the link click or form submission (the **destination context**). The name (or “key”) will be `ref_id` because that’s how we’ve defined it in the above implementations and will have an associated value equal to the Client ID. For instance, by following the link (`<a>` tag) defined above, the user will navigate to this URL:
 
-```text
+```http
 https://example.com/step2.html?ref_id=$amp_client_id
 ```
 
@@ -436,15 +455,15 @@ To process on the landing page, the approach will vary depending on whether that
   </noscript>
 </amp-img>
 
-*Updates to AMP page:* Use the Query Parameter substitution feature in your amp-analytics configuration to obtain the `ref_id` identifier value within the URL. The Query Parameter feature takes a parameter that indicates the “key” of the desired key-value pair in the URL and returns the corresponding value. Use the Client ID feature as we have been doing to get the identifier for the AMP page context.
+_Updates to AMP page:_ Use the Query Parameter substitution feature in your amp-analytics configuration to obtain the `ref_id` identifier value within the URL. The Query Parameter feature takes a parameter that indicates the “key” of the desired key-value pair in the URL and returns the corresponding value. Use the Client ID feature as we have been doing to get the identifier for the AMP page context.
 
-```text
+```http
 https://analytics.example.com/ping?type=pageview&orig_user_id=${queryParam(ref_id)}&user_id=${clientId(uid)}
 ```
 
 When this gets transmitted across the network, actual values will be replaced:
 
-```text
+```http
 https://analytics.example.com/ping?type=pageview&orig_user_id=$referrer_page_identifier&user_id=$current_page_identifier
 ```
 
@@ -457,14 +476,13 @@ $current_page_identifier is $publisher_origin_id
 
 so the ping is actually:
 
-```text
+```http
 https://analytics.example.com/ping?type=pageview&orig_user_id=$amp_client_id&user_id=$publisher_origin_id
 ```
 
 We recommend validating the authenticity of query parameter values by using the steps outlined in the [Parameter validation](#parameter-validation) section below.
 
-*Updates to non-AMP page:* Similarly, on a non-AMP page served from your publisher origin, extract and transmit `ref_id` value contained within the URL. Validate the authenticity of the value by following the steps outlined in the [Parameter validation](#parameter-validation) section below. Then, construct analytics pings that will include both an `orig_user_id` derived from `ref_id` and a `user_id` based on the value of the first-party cookie identifier.
-
+_Updates to non-AMP page:_ Similarly, on a non-AMP page served from your publisher origin, extract and transmit `ref_id` value contained within the URL. Validate the authenticity of the value by following the steps outlined in the [Parameter validation](#parameter-validation) section below. Then, construct analytics pings that will include both an `orig_user_id` derived from `ref_id` and a `user_id` based on the value of the first-party cookie identifier.
 
 <blockquote>
 <p><strong>IMPORTANT:</strong></p>
@@ -488,7 +506,7 @@ Unlike in [Task 4](#task4) where we configured the analytics ping to contain jus
 
 Before we proceed, be sure to take note of the steps described in [Parameter validation](#parameter-validation) below and ensure that you are willing to trust both of the values indicated by `orig_user_id` and `user_id`.
 
-Check if either of the values corresponding to  is present in your mapping table. In our example above, the first pageview happens on an AMP page that’s NOT on the publisher origin followed by the second pageview that happens on the publisher origin. As a result, the values for the analytics ping query parameters will look like this:
+Check if either of the values corresponding to is present in your mapping table. In our example above, the first pageview happens on an AMP page that’s NOT on the publisher origin followed by the second pageview that happens on the publisher origin. As a result, the values for the analytics ping query parameters will look like this:
 
 **Case #1: Identifier arrangement when analytics ping is sent from page on publisher origin**
 
@@ -557,13 +575,13 @@ Values contained in a URL can be maliciously changed, malformed, or somehow othe
 
 For instance, in the steps above, we constructed the following URL, intended for the user to click on and navigate to the corresponding page:
 
-```text
+```http
 https://example.com/step2.html?orig_user_id=$amp_client_id
 ```
 
 However, it’s just as possible that the user or some attacker change this URL to be:
 
-```text
+```http
 https://example.com/step2.html?orig_user_id=$malicious_value
 ```
 

@@ -27,8 +27,10 @@
  * </amp-soundcloud>
  */
 
-import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
 
 class AmpSoundcloud extends AMP.BaseElement {
@@ -45,12 +47,21 @@ class AmpSoundcloud extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://api.soundcloud.com/', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://api.soundcloud.com/',
+      opt_onLayout
+    );
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED_HEIGHT;
+    return isLayoutSizeDefined(layout);
+  }
+
+  /** @override */
+  buildCallback() {
+    setIsMediaComponent(this.element);
   }
 
   /**@override*/
@@ -112,6 +123,6 @@ class AmpSoundcloud extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-soundcloud', '0.1', AMP => {
+AMP.extension('amp-soundcloud', '0.1', (AMP) => {
   AMP.registerElement('amp-soundcloud', AmpSoundcloud);
 });

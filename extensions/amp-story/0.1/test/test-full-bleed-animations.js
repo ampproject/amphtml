@@ -34,7 +34,7 @@ describes.realWin(
       extensions: ['amp-story'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let storyElem;
     let ampStory;
@@ -92,7 +92,7 @@ describes.realWin(
       container.appendChild(gridLayer);
     }
 
-    it(
+    it.skip(
       'Should add corresponding CSS class when a full bleed animation target is' +
         ' attached as a child of a grid layer with fill template.',
       () => {
@@ -104,10 +104,10 @@ describes.realWin(
             const pageElements = ampStory.element.getElementsByTagName(
               'amp-story-page'
             );
-            const pages = Array.from(pageElements).map(el => el.getImpl());
+            const pages = Array.from(pageElements).map((el) => el.getImpl());
             return Promise.all(pages);
           })
-          .then(pages => {
+          .then((pages) => {
             // Append an image animated with a full-bleed animation inside a grid-
             // layer with a `fill` template of the first page.
             addAnimationToImage(pages[1].element, 'pan-down', 'fill');
@@ -122,7 +122,7 @@ describes.realWin(
       }
     );
 
-    it(
+    it.skip(
       'Should not add additional CSS class to the target when a full-bleed ' +
         'animation is used BUT the target is a child of a grid layer with a ' +
         'template other than `fill`.',
@@ -135,10 +135,10 @@ describes.realWin(
             const pageElements = ampStory.element.getElementsByTagName(
               'amp-story-page'
             );
-            const pages = Array.from(pageElements).map(el => el.getImpl());
+            const pages = Array.from(pageElements).map((el) => el.getImpl());
             return Promise.all(pages);
           })
-          .then(pages => {
+          .then((pages) => {
             // Append an image animated with a full-bleed animation inside a grid-
             // layer with a template other than fill.
             addAnimationToImage(pages[1].element, 'fade-in', 'vertical');
@@ -153,7 +153,7 @@ describes.realWin(
       }
     );
 
-    it(
+    it.skip(
       'Should not add additional CSS class to the target when a non-full-bleed' +
         'animation is used.',
       () => {
@@ -165,10 +165,10 @@ describes.realWin(
             const pageElements = ampStory.element.getElementsByTagName(
               'amp-story-page'
             );
-            const pages = Array.from(pageElements).map(el => el.getImpl());
+            const pages = Array.from(pageElements).map((el) => el.getImpl());
             return Promise.all(pages);
           })
-          .then(pages => {
+          .then((pages) => {
             // Append an image animated with a non-full-bleed animation.
             addAnimationToImage(pages[1].element, 'fade-in', 'fill');
 

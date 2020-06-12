@@ -41,7 +41,7 @@ function createButton(win, classNameOrList, handler) {
   button.setAttribute('role', 'button');
 
   if (isArray(classNameOrList)) {
-    classNameOrList.forEach(className => button.classList.add(className));
+    classNameOrList.forEach((className) => button.classList.add(className));
   } else {
     button.classList.add(/** @type {string} */ (classNameOrList));
   }
@@ -76,6 +76,7 @@ export class DevelopmentModeLogButtonSet {
 
   /**
    * @param {!Window} win
+   * @return {!DevelopmentModeLogButtonSet}
    */
   static create(win) {
     return new DevelopmentModeLogButtonSet(win);
@@ -184,6 +185,7 @@ export class DevelopmentModeLog {
 
   /**
    * @param {!Window} win
+   * @return {!DevelopmentModeLog}
    */
   static create(win) {
     return new DevelopmentModeLog(win);

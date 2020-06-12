@@ -24,7 +24,7 @@ tags: {  # amp-experiment
     version: "0.1"
     version: "1.0"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -45,7 +45,7 @@ tags: {  # amp-experiment (json)
   cdata: {
     max_bytes: 15000
     max_bytes_spec_url: "https://amp.dev/documentation/components/amp-experiment#configuration"
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }

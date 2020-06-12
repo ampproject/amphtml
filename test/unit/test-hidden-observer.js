@@ -22,14 +22,13 @@ describes.fakeWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let hiddenObserver;
-    let sandbox;
     let MutationObserver;
 
     function setupSingletonMutationObserver(opt_cb = () => {}) {
       const mo = new FakeMutationObserver(opt_cb);
-      MutationObserver = sandbox.stub().callsFake(function() {
+      MutationObserver = env.sandbox.stub().callsFake(function () {
         return mo;
       });
       env.win.MutationObserver = MutationObserver;
@@ -37,7 +36,6 @@ describes.fakeWin(
     }
 
     beforeEach(() => {
-      sandbox = env.sandbox;
       hiddenObserver = Services.hiddenObserverForDoc(
         env.win.document.documentElement
       );
@@ -45,7 +43,7 @@ describes.fakeWin(
 
     it('initializes mutation observer on first listen', () => {
       const mo = setupSingletonMutationObserver();
-      const observe = sandbox.spy(mo, 'observe');
+      const observe = env.sandbox.spy(mo, 'observe');
 
       hiddenObserver.add(() => {});
 
@@ -55,7 +53,7 @@ describes.fakeWin(
 
     it('keeps mutation observer on second listen', () => {
       const mo = setupSingletonMutationObserver();
-      const observe = sandbox.spy(mo, 'observe');
+      const observe = env.sandbox.spy(mo, 'observe');
 
       hiddenObserver.add(() => {});
       hiddenObserver.add(() => {});
@@ -66,7 +64,7 @@ describes.fakeWin(
 
     it('frees mutation observer after last unlisten', () => {
       const mo = setupSingletonMutationObserver();
-      const disconnect = sandbox.spy(mo, 'disconnect');
+      const disconnect = env.sandbox.spy(mo, 'disconnect');
 
       const unlisten = hiddenObserver.add(() => {});
       unlisten();
@@ -76,7 +74,7 @@ describes.fakeWin(
 
     it('keeps mutation observer after second-to-last unlisten', () => {
       const mo = setupSingletonMutationObserver();
-      const disconnect = sandbox.spy(mo, 'disconnect');
+      const disconnect = env.sandbox.spy(mo, 'disconnect');
 
       const unlisten = hiddenObserver.add(() => {});
       const unlisten2 = hiddenObserver.add(() => {});
@@ -88,8 +86,8 @@ describes.fakeWin(
       expect(disconnect).to.have.been.calledOnce;
     });
 
-    it('passes MutationRecords to handler', function*() {
-      const stub = sandbox.stub();
+    it('passes MutationRecords to handler', function* () {
+      const stub = env.sandbox.stub();
       const mo = setupSingletonMutationObserver(stub);
 
       const mutation = {};

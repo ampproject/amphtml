@@ -44,7 +44,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
     /** @private {?../../../src/service/document-info-impl.DocumentInfoDef} */
     this.docInfo_ = null;
 
-    /** @private {?../../../src/service/viewer-impl.Viewer} */
+    /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = null;
 
     /** @private {?./link-rewriter/link-rewriter-manager.LinkRewriterManager} */
@@ -87,7 +87,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
     return this.ampDoc_
       .waitForBodyOpen()
       .then(() => this.viewer_.getReferrerUrl())
-      .then(referrer => {
+      .then((referrer) => {
         this.referrer_ = referrer;
         this.startSkimcore_();
       });
@@ -123,16 +123,12 @@ export class AmpSkimlinks extends AMP.BaseElement {
   sendImpressionTracking_(beaconData) {
     // Update tracking service with extra info.
     this.trackingService_.setTrackingInfo({guid: beaconData['guid']});
-    const viewer = Services.viewerForDoc(
-      /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */
-      (this.ampDoc_)
-    );
     /*
       WARNING: Up to here, the code may have been executed during page
-      pre-rendering. Wait for the page to be visible in the viewer before
+      pre-rendering. Wait for the page to be visible in the doc before
       sending impression tracking.
     */
-    viewer.whenFirstVisible().then(() => {
+    this.ampDoc_.whenFirstVisible().then(() => {
       this.trackingService_.sendImpressionTracking(
         this.skimlinksLinkRewriter_.getAnchorReplacementList()
       );
@@ -169,7 +165,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
 
     const linkRewriter = this.linkRewriterService_.registerLinkRewriter(
       SKIMLINKS_REWRITER_ID,
-      anchorList => {
+      (anchorList) => {
         return this.affiliateLinkResolver_.resolveUnknownAnchors(anchorList);
       },
       options
@@ -181,7 +177,7 @@ export class AmpSkimlinks extends AMP.BaseElement {
       [linkRewriterEvents.CLICK]: this.onClick_.bind(this),
     };
 
-    linkRewriter.events.add(event => {
+    linkRewriter.events.add((event) => {
       const handler = eventHandlers[event.type];
       if (handler) {
         handler(event.eventData);
@@ -237,6 +233,6 @@ export class AmpSkimlinks extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-skimlinks', '0.1', AMP => {
+AMP.extension('amp-skimlinks', '0.1', (AMP) => {
   AMP.registerElement('amp-skimlinks', AmpSkimlinks);
 });

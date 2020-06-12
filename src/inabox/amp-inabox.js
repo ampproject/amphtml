@@ -21,33 +21,30 @@
 import '../polyfills';
 import {Navigation} from '../service/navigation';
 import {Services} from '../services';
+import {TickLabel} from '../enums';
 import {adopt} from '../runtime';
-import {cssText as ampDocCss} from '../../build/ampdoc.css';
+import {allowLongTasksInChunking, startupChunk} from '../chunk';
 import {cssText as ampSharedCss} from '../../build/ampshared.css';
 import {doNotTrackImpression} from '../impression';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getA4AId, registerIniLoadListener} from './utils';
 import {getMode} from '../mode';
+import {installAmpdocServicesForInabox} from './inabox-services';
 import {
-  installAmpdocServices,
   installBuiltinElements,
   installRuntimeServices,
 } from '../service/core-services';
 import {installDocService} from '../service/ampdoc-impl';
 import {installErrorReporting} from '../error';
-import {installIframeMessagingClient} from './inabox-iframe-messaging-client';
-import {installInaboxViewportService} from './inabox-viewport';
 import {installPerformanceService} from '../service/performance-impl';
+import {installPlatformService} from '../service/platform-impl';
 import {
   installStylesForDoc,
   makeBodyVisible,
   makeBodyVisibleRecovery,
 } from '../style-installer';
-import {installViewerServiceForDoc} from '../service/viewer-impl';
 import {internalRuntimeVersion} from '../internal-version';
-import {isExperimentOn} from '../experiments';
 import {maybeValidate} from '../validator-integration';
-import {startupChunk} from '../chunk';
 import {stubElementsForDoc} from '../service/custom-element-registry';
 
 getMode(self).runtime = 'inabox';
@@ -73,34 +70,27 @@ try {
   makeBodyVisibleRecovery(self.document);
   throw e;
 }
+allowLongTasksInChunking();
 startupChunk(self.document, function initial() {
   /** @const {!../service/ampdoc-impl.AmpDoc} */
   const ampdoc = ampdocService.getAmpDoc(self.document);
+  installPlatformService(self);
   installPerformanceService(self);
   /** @const {!../service/performance-impl.Performance} */
   const perf = Services.performanceFor(self);
-  perf.tick('is');
+  perf.tick(TickLabel.INSTALL_STYLES);
 
   self.document.documentElement.classList.add('i-amphtml-inabox');
-  const fullCss =
-    (isExperimentOn(self, 'inabox-css-cleanup')
-      ? ampSharedCss
-      : ampDocCss + ampSharedCss) +
-    'html.i-amphtml-inabox{width:100%!important;height:100%!important}';
   installStylesForDoc(
     ampdoc,
-    fullCss,
+    ampSharedCss +
+      'html.i-amphtml-inabox{width:100%!important;height:100%!important}',
     () => {
       startupChunk(self.document, function services() {
         // Core services.
         installRuntimeServices(self);
         fontStylesheetTimeout(self);
-        installIframeMessagingClient(self);
-        // Install inabox specific Viewport service before
-        // runtime tries to install the normal one.
-        installViewerServiceForDoc(ampdoc);
-        installInaboxViewportService(ampdoc);
-        installAmpdocServices(ampdoc, undefined, true);
+        installAmpdocServicesForInabox(ampdoc);
         // We need the core services (viewer/resources) to start instrumenting
         perf.coreServicesAvailable();
         doNotTrackImpression();
@@ -117,13 +107,17 @@ startupChunk(self.document, function initial() {
         // Pre-stub already known elements.
         stubElementsForDoc(ampdoc);
       });
-      startupChunk(self.document, function final() {
-        Navigation.installAnchorClickInterceptor(ampdoc, self);
-        maybeValidate(self);
-        makeBodyVisible(self.document);
-      });
+      startupChunk(
+        self.document,
+        function final() {
+          Navigation.installAnchorClickInterceptor(ampdoc, self);
+          maybeValidate(self);
+          makeBodyVisible(self.document);
+        },
+        /* makes the body visible */ true
+      );
       startupChunk(self.document, function finalTick() {
-        perf.tick('e_is');
+        perf.tick(TickLabel.END_INSTALL_STYLES);
         Services.resourcesForDoc(ampdoc).ampInitComplete();
         // TODO(erwinm): move invocation of the `flush` method when we have the
         // new ticks in place to batch the ticks properly.

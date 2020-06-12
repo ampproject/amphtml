@@ -20,6 +20,7 @@ import {assertSuccess} from '../../src/utils/xhr-utils';
 import {createFormDataWrapper} from '../../src/form-data-wrapper';
 import {fetchPolyfill} from '../../src/polyfills/fetch';
 import {getCookie} from '../../src/cookies';
+import {toggleExperiment} from '../../src/experiments';
 import {user} from '../../src/log';
 import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
 import {xhrServiceForTesting} from '../../src/service/xhr-impl';
@@ -28,9 +29,9 @@ import {xhrServiceForTesting} from '../../src/service/xhr-impl';
 describe
   .configure()
   .skipSafari()
-  .run('XHR', function() {
-    let sandbox;
+  .run('XHR', function () {
     let ampdocServiceForStub;
+    let ampdoc;
     let ampdocViewerStub;
     let xhrCreated;
     let viewer;
@@ -61,8 +62,8 @@ describe
     ];
 
     function setupMockXhr() {
-      const mockXhr = sandbox.useFakeXMLHttpRequest();
-      xhrCreated = new Promise(resolve => (mockXhr.onCreate = resolve));
+      const mockXhr = window.sandbox.useFakeXMLHttpRequest();
+      xhrCreated = new Promise((resolve) => (mockXhr.onCreate = resolve));
     }
 
     function noOrigin(url) {
@@ -75,25 +76,23 @@ describe
     }
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
-      ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
-      ampdocViewerStub = sandbox.stub(Services, 'viewerForDoc');
-      ampdocViewerStub.returns({
+      ampdocServiceForStub = window.sandbox.stub(Services, 'ampdocServiceFor');
+      ampdoc = {
+        getRootNode: () => null,
         whenFirstVisible: () => Promise.resolve(),
-      });
+      };
       ampdocServiceForStub.returns({
         isSingleDoc: () => false,
-        getAmpDoc: () => ampdocViewerStub,
+        getAmpDoc: () => ampdoc,
+        getSingleDoc: () => ampdoc,
       });
+      ampdocViewerStub = window.sandbox.stub(Services, 'viewerForDoc');
+      ampdocViewerStub.returns({});
 
       location.href = 'https://acme.com/path';
     });
 
-    afterEach(() => {
-      sandbox.restore();
-    });
-
-    scenarios.forEach(test => {
+    scenarios.forEach((test) => {
       let xhr;
       beforeEach(() => {
         xhr = xhrServiceForTesting(test.win);
@@ -148,14 +147,14 @@ describe
 
           it('should allow FormData as body', () => {
             const fakeWin = null;
-            sandbox.stub(Services, 'platformFor').returns({
+            window.sandbox.stub(Services, 'platformFor').returns({
               isIos() {
                 return false;
               },
             });
 
             const formData = createFormDataWrapper(fakeWin);
-            sandbox.stub(JSON, 'stringify');
+            window.sandbox.stub(JSON, 'stringify');
             formData.append('name', 'John Miller');
             formData.append('age', 56);
             const post = xhr.fetchJson.bind(xhr, '/post', {
@@ -168,12 +167,12 @@ describe
 
           it('should do `GET` as default method', () => {
             xhr.fetchJson('/get?k=v1');
-            return xhrCreated.then(xhr => expect(xhr.method).to.equal('GET'));
+            return xhrCreated.then((xhr) => expect(xhr.method).to.equal('GET'));
           });
 
           it('should normalize GET method name to uppercase', () => {
             xhr.fetchJson('/abc');
-            return xhrCreated.then(xhr => expect(xhr.method).to.equal('GET'));
+            return xhrCreated.then((xhr) => expect(xhr.method).to.equal('GET'));
           });
 
           it('should normalize POST method name to uppercase', () => {
@@ -183,12 +182,14 @@ describe
                 hello: 'world',
               },
             });
-            return xhrCreated.then(xhr => expect(xhr.method).to.equal('POST'));
+            return xhrCreated.then((xhr) =>
+              expect(xhr.method).to.equal('POST')
+            );
           });
 
           it('should inject source origin query parameter', () => {
             xhr.fetchJson('/get?k=v1#h1');
-            return xhrCreated.then(xhr =>
+            return xhrCreated.then((xhr) =>
               expect(noOrigin(xhr.url)).to.equal(
                 '/get?k=v1&__amp_source_origin=https%3A%2F%2Facme.com#h1'
               )
@@ -197,7 +198,7 @@ describe
 
           it('should inject source origin query parameter w/o query', () => {
             xhr.fetchJson('/get');
-            return xhrCreated.then(xhr =>
+            return xhrCreated.then((xhr) =>
               expect(noOrigin(xhr.url)).to.equal(
                 '/get?__amp_source_origin=https%3A%2F%2Facme.com'
               )
@@ -233,7 +234,7 @@ describe
               'set to false',
             () => {
               xhr.fetchJson('/get', {ampCors: false});
-              return xhrCreated.then(xhr =>
+              return xhrCreated.then((xhr) =>
                 expect(noOrigin(xhr.url)).to.equal('/get')
               );
             }
@@ -241,7 +242,7 @@ describe
 
           it('should accept AMP origin when received in response', () => {
             const promise = xhr.fetchJson('/get');
-            xhrCreated.then(xhr =>
+            xhrCreated.then((xhr) =>
               xhr.respond(
                 200,
                 {
@@ -253,23 +254,19 @@ describe
             return promise;
           });
 
-          describe('viewer visibility', () => {
+          describe('doc visibility', () => {
             afterEach(() => {
               test.win.fetch.restore();
             });
             it('should not call fetch if view is not visible ', () => {
-              const fetchCall = sandbox.spy(test.win, 'fetch');
-              ampdocViewerStub.returns({
-                whenFirstVisible: () => Promise.reject(),
-              });
+              const fetchCall = window.sandbox.spy(test.win, 'fetch');
+              ampdoc.whenFirstVisible = () => Promise.reject();
               xhr.fetchJson('/get', {ampCors: false});
               expect(fetchCall.notCalled).to.be.true;
             });
             it('should call fetch if view is visible ', () => {
-              const fetchCall = sandbox.spy(test.win, 'fetch');
-              ampdocViewerStub.returns({
-                whenFirstVisible: () => Promise.resolve(),
-              });
+              const fetchCall = window.sandbox.spy(test.win, 'fetch');
+              ampdoc.whenFirstVisible = () => Promise.resolve();
               const fetch = xhr.fetchJson('/get', {ampCors: false});
               fetch.then(() => {
                 expect(fetchCall.calledOnce).to.be.true;
@@ -341,7 +338,7 @@ describe
           it('should resolve if success', () => {
             mockXhr.status = 200;
             return assertSuccess(createResponseInstance('', mockXhr)).then(
-              response => {
+              (response) => {
                 expect(response.status).to.equal(200);
               }
             ).should.not.be.rejected;
@@ -356,7 +353,7 @@ describe
           it('should include response in error', () => {
             mockXhr.status = 500;
             return assertSuccess(createResponseInstance('', mockXhr)).catch(
-              error => {
+              (error) => {
                 expect(error.response).to.exist;
                 expect(error.response.status).to.equal(500);
               }
@@ -373,12 +370,12 @@ describe
           });
         });
 
-        it('should do simple JSON fetch', () => {
-          sandbox.stub(user(), 'assert');
+        it.skip('should do simple JSON fetch', () => {
+          window.sandbox.stub(user(), 'assert');
           return xhr
             .fetchJson(`${baseUrl}/get?k=v1`)
-            .then(res => res.json())
-            .then(res => {
+            .then((res) => res.json())
+            .then((res) => {
               expect(res).to.exist;
               expect(res['args']['k']).to.equal('v1');
             });
@@ -390,8 +387,8 @@ describe
             encodeURIComponent(`${baseUrl}/get?k=v2`);
           return xhr
             .fetchJson(url, {ampCors: false})
-            .then(res => res.json())
-            .then(res => {
+            .then((res) => res.json())
+            .then((res) => {
               expect(res).to.exist;
               expect(res['args']['k']).to.equal('v2');
             });
@@ -403,7 +400,7 @@ describe
             () => {
               throw new Error('UNREACHABLE');
             },
-            error => {
+            (error) => {
               expect(error.message).to.contain('HTTP error 404');
             }
           );
@@ -415,7 +412,7 @@ describe
             () => {
               throw new Error('UNREACHABLE');
             },
-            error => {
+            (error) => {
               expect(error.message).to.contain('HTTP error 500');
             }
           );
@@ -424,7 +421,7 @@ describe
         it('should NOT succeed CORS setting cookies without credentials', () => {
           const cookieName = 'TEST_CORS_' + Math.round(Math.random() * 10000);
           const url = `${baseUrl}/cookies/set?${cookieName}=v1`;
-          return xhr.fetchJson(url).then(res => {
+          return xhr.fetchJson(url).then((res) => {
             expect(res).to.exist;
             expect(getCookie(window, cookieName)).to.be.null;
           });
@@ -433,7 +430,7 @@ describe
         it('should succeed CORS setting cookies with credentials', () => {
           const cookieName = 'TEST_CORS_' + Math.round(Math.random() * 10000);
           const url = `${baseUrl}/cookies/set?${cookieName}=v1`;
-          return xhr.fetchJson(url, {credentials: 'include'}).then(res => {
+          return xhr.fetchJson(url, {credentials: 'include'}).then((res) => {
             expect(res).to.exist;
             expect(getCookie(window, cookieName)).to.equal('v1');
           });
@@ -442,7 +439,7 @@ describe
         it('should ignore CORS setting cookies w/omit credentials', () => {
           const cookieName = 'TEST_CORS_' + Math.round(Math.random() * 10000);
           const url = `${baseUrl}/cookies/set?${cookieName}=v1`;
-          return xhr.fetchJson(url, {credentials: 'omit'}).then(res => {
+          return xhr.fetchJson(url, {credentials: 'omit'}).then((res) => {
             expect(res).to.exist;
             expect(getCookie(window, cookieName)).to.be.null;
           });
@@ -460,7 +457,7 @@ describe
           const url =
             `${baseUrl}/response-headers?AMP-Header=Value1&` +
             'Access-Control-Expose-Headers=AMP-Header';
-          return xhr.fetchAmpCors_(url, {ampCors: false}).then(res => {
+          return xhr.fetchAmpCors_(url, {ampCors: false}).then((res) => {
             expect(res.headers.get('AMP-Header')).to.equal('Value1');
           });
         });
@@ -471,7 +468,7 @@ describe
             () => {
               throw new Error('UNREACHABLE');
             },
-            error => {
+            (error) => {
               const {message} = error;
               expect(message).to.contain('http://localhost:31863');
               expect(message).not.to.contain('status/500');
@@ -487,7 +484,7 @@ describe
 
         beforeEach(() => {
           xhr = xhrServiceForTesting(test.win);
-          fetchStub = sandbox
+          fetchStub = window.sandbox
             .stub(xhr, 'fetchAmpCors_')
             .callsFake(() => Promise.resolve(new Response(TEST_TEXT)));
         });
@@ -499,10 +496,10 @@ describe
             headers: {'Accept': 'text/plain'},
           });
           return promise
-            .then(res => {
+            .then((res) => {
               return res.text();
             })
-            .then(text => {
+            .then((text) => {
               expect(text).to.equal(TEST_TEXT);
             });
         });
@@ -520,17 +517,17 @@ describe
         if (test.desc != 'Native') {
           it('should be able to fetch a response', () => {
             setupMockXhr();
-            const promise = xhr.fetch('/index.html').then(response => {
+            const promise = xhr.fetch('/index.html').then((response) => {
               expect(response.headers.get('X-foo-header')).to.equal('foo data');
               expect(response.headers.get('X-bar-header')).to.equal('bar data');
               response
                 .arrayBuffer()
-                .then(bytes => utf8FromArrayBuffer(bytes))
-                .then(text => {
+                .then((bytes) => utf8FromArrayBuffer(bytes))
+                .then((text) => {
                   expect(text).to.equal(creative);
                 });
             });
-            xhrCreated.then(xhr =>
+            xhrCreated.then((xhr) =>
               xhr.respond(
                 200,
                 {
@@ -547,7 +544,7 @@ describe
       });
     });
 
-    scenarios.forEach(test => {
+    scenarios.forEach((test) => {
       const {testServerPort} = window.ampTestRuntimeConfig;
       const url = `http://localhost:${testServerPort}/post`;
 
@@ -568,7 +565,7 @@ describe
                 'Other': 'another',
               },
             });
-            return xhrCreated.then(xhr =>
+            return xhrCreated.then((xhr) =>
               expect(xhr.requestHeaders).to.deep.equal({
                 'Accept': 'application/json',
                 'Content-Type': 'text/plain;charset=utf-8',
@@ -589,8 +586,8 @@ describe
                 'Content-Type': 'application/json;charset=utf-8',
               },
             })
-            .then(res => res.json())
-            .then(res => {
+            .then((res) => res.json())
+            .then((res) => {
               expect(res.json).to.jsonEqual({
                 hello: 'world',
               });
@@ -663,9 +660,14 @@ describe
         optedInDoc = window.document.implementation.createHTMLDocument('');
         optedInDoc.documentElement.setAttribute('allow-xhr-interception', '');
 
+        const ampdoc = {
+          getRootNode: () => optedInDoc,
+          whenFirstVisible: () => Promise.resolve(),
+        };
         ampdocServiceForStub.returns({
           isSingleDoc: () => true,
-          getAmpDoc: () => ({getRootNode: () => optedInDoc}),
+          getAmpDoc: () => ampdoc,
+          getSingleDoc: () => ampdoc,
         });
         viewer = {
           hasCapability: () => true,
@@ -673,7 +675,10 @@ describe
           sendMessageAwaitResponse: getDefaultResponsePromise,
           whenFirstVisible: () => Promise.resolve(),
         };
-        sendMessageStub = sandbox.stub(viewer, 'sendMessageAwaitResponse');
+        sendMessageStub = window.sandbox.stub(
+          viewer,
+          'sendMessageAwaitResponse'
+        );
         sendMessageStub.returns(getDefaultResponsePromise());
         ampdocViewerStub.returns(viewer);
         interceptionEnabledWin = {
@@ -685,10 +690,23 @@ describe
         };
       });
 
+      afterEach(() => {
+        toggleExperiment(
+          interceptionEnabledWin,
+          'untrusted-xhr-interception',
+          false
+        );
+      });
+
       it('should not intercept if AMP doc is not single', () => {
+        const ampdoc = {
+          getRootNode: () => optedInDoc,
+          whenFirstVisible: () => Promise.resolve(),
+        };
         ampdocServiceForStub.returns({
           isSingleDoc: () => false,
-          getAmpDoc: () => ({getRootNode: () => optedInDoc}),
+          getAmpDoc: () => ampdoc,
+          getSingleDoc: () => ampdoc,
         });
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
@@ -701,9 +719,14 @@ describe
         const nonOptedInDoc = window.document.implementation.createHTMLDocument(
           ''
         );
+        const ampdoc = {
+          getRootNode: () => nonOptedInDoc,
+          whenFirstVisible: () => Promise.resolve(),
+        };
         ampdocServiceForStub.returns({
           isSingleDoc: () => true,
-          getAmpDoc: () => ({getRootNode: () => nonOptedInDoc}),
+          getAmpDoc: () => ampdoc,
+          getSingleDoc: () => ampdoc,
         });
 
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
@@ -714,7 +737,7 @@ describe
       });
 
       it('should not intercept if viewer is not capable', () => {
-        sandbox
+        window.sandbox
           .stub(viewer, 'hasCapability')
           .withArgs('xhrInterceptor')
           .returns(false);
@@ -726,7 +749,9 @@ describe
       });
 
       it('should not intercept if viewer untrusted and non-dev mode', () => {
-        sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
+        window.sandbox
+          .stub(viewer, 'isTrustedViewer')
+          .returns(Promise.resolve(false));
         interceptionEnabledWin.AMP_DEV_MODE = false;
 
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
@@ -753,8 +778,32 @@ describe
       });
 
       it('should intercept if viewer untrusted but in local dev mode', () => {
-        sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
-        sandbox.stub(mode, 'getMode').returns({localDev: true});
+        window.sandbox
+          .stub(viewer, 'isTrustedViewer')
+          .returns(Promise.resolve(false));
+        window.sandbox.stub(mode, 'getMode').returns({localDev: true});
+
+        const xhr = xhrServiceForTesting(interceptionEnabledWin);
+
+        return xhr
+          .fetch('https://www.some-url.org/some-resource/')
+          .then(() => expect(sendMessageStub).to.have.been.called);
+      });
+
+      it('should intercept if untrusted-xhr-interception experiment enabled', () => {
+        window.sandbox
+          .stub(viewer, 'isTrustedViewer')
+          .returns(Promise.resolve(false));
+        window.sandbox.stub(mode, 'getMode').returns({localDev: false});
+        window.sandbox
+          .stub(viewer, 'hasCapability')
+          .withArgs('xhrInterceptor')
+          .returns(true);
+        toggleExperiment(
+          interceptionEnabledWin,
+          'untrusted-xhr-interception',
+          true
+        );
 
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
@@ -764,7 +813,9 @@ describe
       });
 
       it('should intercept if non-dev mode but viewer trusted', () => {
-        sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(true));
+        window.sandbox
+          .stub(viewer, 'isTrustedViewer')
+          .returns(Promise.resolve(true));
         interceptionEnabledWin.AMP_DEV_MODE = false;
 
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
@@ -782,7 +833,7 @@ describe
           .then(() =>
             expect(sendMessageStub).to.have.been.calledWithMatch(
               'xhr',
-              sinon.match.any
+              window.sandbox.match.any
             )
           );
       });
@@ -792,7 +843,7 @@ describe
 
         return xhr.fetch('https://www.some-url.org/some-resource/').then(() =>
           expect(sendMessageStub).to.have.been.calledWithMatch(
-            sinon.match.any,
+            window.sandbox.match.any,
             {
               originalRequest: {
                 input:
@@ -819,7 +870,7 @@ describe
           })
           .then(() =>
             expect(sendMessageStub).to.have.been.calledWithMatch(
-              sinon.match.any,
+              window.sandbox.match.any,
               {
                 originalRequest: {
                   input:
@@ -842,7 +893,7 @@ describe
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
         const fakeWin = null;
-        sandbox.stub(Services, 'platformFor').returns({
+        window.sandbox.stub(Services, 'platformFor').returns({
           isIos() {
             return false;
           },
@@ -860,7 +911,7 @@ describe
           })
           .then(() =>
             expect(sendMessageStub).to.have.been.calledWithMatch(
-              sinon.match.any,
+              window.sandbox.match.any,
               {
                 originalRequest: {
                   input:
@@ -870,7 +921,11 @@ describe
                     headers: {
                       'Content-Type': 'multipart/form-data;charset=utf-8',
                     },
-                    body: [['a', '42'], ['b', '24'], ['b', 'true']],
+                    body: [
+                      ['a', '42'],
+                      ['b', '24'],
+                      ['b', 'true'],
+                    ],
                     method: 'POST',
                   },
                 },
@@ -880,6 +935,7 @@ describe
       });
 
       it('should be rejected when response undefined', () => {
+        expectAsyncConsoleError(/Object expected/);
         sendMessageStub.returns(Promise.resolve());
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
@@ -889,6 +945,7 @@ describe
       });
 
       it('should be rejected when response null', () => {
+        expectAsyncConsoleError(/Object expected/);
         sendMessageStub.returns(Promise.resolve(null));
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
@@ -898,6 +955,7 @@ describe
       });
 
       it('should be rejected when response is string', () => {
+        expectAsyncConsoleError(/Object expected/);
         sendMessageStub.returns(Promise.resolve('response text'));
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
@@ -919,7 +977,10 @@ describe
               init: {
                 status: 242,
                 statusText: 'Magic status',
-                headers: [['a', 2], ['b', false]],
+                headers: [
+                  ['a', 2],
+                  ['b', false],
+                ],
               },
             })
           );
@@ -927,13 +988,11 @@ describe
 
           return xhr
             .fetch('https://www.some-url.org/some-resource/')
-            .then(response => {
+            .then((response) => {
               expect(response.headers.get('a')).to.equal('2');
               expect(response.headers.get('b')).to.equal('false');
               expect(response).to.have.property('ok').that.is.true;
-              expect(response)
-                .to.have.property('status')
-                .that.equals(242);
+              expect(response).to.have.property('status').that.equals(242);
               expect(response)
                 .to.have.property('statusText')
                 .that.equals('Magic status');
@@ -957,7 +1016,10 @@ describe
               init: {
                 status: 242,
                 statusText: 'Magic status',
-                headers: [['a', 2], ['b', false]],
+                headers: [
+                  ['a', 2],
+                  ['b', false],
+                ],
               },
             })
           );
@@ -965,13 +1027,11 @@ describe
 
           return xhr
             .fetch('https://www.some-url.org/some-resource/')
-            .then(response => {
+            .then((response) => {
               expect(response.headers.get('a')).to.equal('2');
               expect(response.headers.get('b')).to.equal('false');
               expect(response).to.have.property('ok').that.is.true;
-              expect(response)
-                .to.have.property('status')
-                .that.equals(242);
+              expect(response).to.have.property('status').that.equals(242);
               return expect(response.json()).to.eventually.deep.equal({
                 content: 32,
               });
@@ -984,13 +1044,11 @@ describe
 
           return xhr
             .fetch('https://www.some-url.org/some-resource/', {ampCors: false})
-            .then(response => {
+            .then((response) => {
               expect(response.headers.get('a')).to.be.null;
               expect(response.headers.has('a')).to.be.false;
               expect(response).to.have.property('ok').that.is.true;
-              expect(response)
-                .to.have.property('status')
-                .that.equals(200);
+              expect(response).to.have.property('status').that.equals(200);
               return expect(response.text()).to.eventually.be.empty;
             });
         });
@@ -1001,12 +1059,10 @@ describe
 
           return xhr
             .fetch('https://www.some-url.org/some-resource/', {ampCors: false})
-            .then(response => {
+            .then((response) => {
               expect(response.headers.get('a')).to.be.null;
               expect(response.headers.has('a')).to.be.false;
-              expect(response)
-                .to.have.property('status')
-                .that.equals(200);
+              expect(response).to.have.property('status').that.equals(200);
             });
         });
 
@@ -1016,7 +1072,7 @@ describe
 
           return xhr
             .fetch('https://www.some-url.org/some-resource/', {ampCors: false})
-            .then(response => {
+            .then((response) => {
               return expect(response.text()).to.eventually.equal('32');
             });
         });
@@ -1027,7 +1083,7 @@ describe
 
           return xhr
             .fetch('https://www.some-url.org/some-resource/', {ampCors: false})
-            .then(response => {
+            .then((response) => {
               return expect(response)
                 .to.have.property('status')
                 .that.equals(209);
@@ -1038,7 +1094,11 @@ describe
           sendMessageStub.returns(
             Promise.resolve({
               init: {
-                headers: [[1, true], [false, NaN], [undefined, null]],
+                headers: [
+                  [1, true],
+                  [false, NaN],
+                  [undefined, null],
+                ],
               },
             })
           );
@@ -1046,7 +1106,7 @@ describe
 
           return xhr
             .fetch('https://www.some-url.org/some-resource/', {ampCors: false})
-            .then(response => {
+            .then((response) => {
               expect(response.headers.get(1)).to.equal('true');
               expect(response.headers.get('false')).to.equal('NaN');
               expect(response.headers.get('undefined')).to.equal('null');
@@ -1069,7 +1129,7 @@ describe
 
           return xhr
             .fetch('https://www.some-url.org/some-resource/', {ampCors: false})
-            .then(response => {
+            .then((response) => {
               expect(response.headers.get('content-type')).to.equal(
                 'text/plain'
               );
@@ -1077,6 +1137,47 @@ describe
               expect(response.headers.get('X-AMP-CUSTOM')).to.equal('foo');
             });
         });
+      });
+    });
+
+    describe('#xssiJson', () => {
+      let xhr;
+      beforeEach(() => {
+        xhr = xhrServiceForTesting(polyfillWin);
+        setupMockXhr();
+      });
+
+      it('should call response.json() if prefix is either missing or the empty string', () => {
+        xhrCreated.then((mock) => mock.respond(200, [], '{a: 1}'));
+        const response = {
+          json: () => Promise.resolve(),
+          text: () => Promise.reject(new Error('should not be called')),
+        };
+
+        return Promise.all([
+          xhr.xssiJson(response),
+          xhr.xssiJson(response, ''),
+        ]);
+      });
+
+      it('should not strip characters if the prefix is not present', () => {
+        xhrCreated.then((mock) => mock.respond(200, [], '{"a": 1}'));
+        return xhr
+          .fetchJson('/abc')
+          .then((res) => xhr.xssiJson(res, 'while(1)'))
+          .then((json) => {
+            expect(json).to.be.deep.equal({a: 1});
+          });
+      });
+
+      it('should strip prefix from the response text if prefix is present', () => {
+        xhrCreated.then((mock) => mock.respond(200, [], 'while(1){"a": 1}'));
+        return xhr
+          .fetchJson('/abc')
+          .then((res) => xhr.xssiJson(res, 'while(1)'))
+          .then((json) => {
+            expect(json).to.be.deep.equal({a: 1});
+          });
       });
     });
   });

@@ -25,7 +25,6 @@ import {macroTask} from '../../testing/yield';
 
 describe('waitForServices', () => {
   let win;
-  let sandbox;
   let clock;
   let dynamicCssResolve;
   let experimentResolve;
@@ -34,8 +33,7 @@ describe('waitForServices', () => {
   let variantStub;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    const getService = sandbox.stub(service, 'getServicePromise');
+    const getService = window.sandbox.stub(service, 'getServicePromise');
     dynamicCssResolve = waitForService(getService, 'amp-dynamic-css-classes');
     experimentResolve = waitForService(getService, 'amp-experiment');
 
@@ -45,11 +43,11 @@ describe('waitForServices', () => {
       },
     };
     variantResolve = waitForService(getService, 'variant', variantService);
-    variantStub = sandbox
+    variantStub = window.sandbox
       .stub(variantService, 'whenReady')
       .returns(Promise.resolve());
 
-    return createIframePromise().then(iframe => {
+    return createIframePromise().then((iframe) => {
       win = iframe.win;
       clock = lolex.install({target: win});
     });
@@ -57,7 +55,6 @@ describe('waitForServices', () => {
 
   afterEach(() => {
     clock.uninstall();
-    sandbox.restore();
   });
 
   it('should resolve if no blocking services is presented', () => {
@@ -67,7 +64,7 @@ describe('waitForServices', () => {
     return expect(waitForServices(win)).to.eventually.have.lengthOf(0);
   });
 
-  it('should timeout if some blocking services are missing', function*() {
+  it('should timeout if some blocking services are missing', function* () {
     addExtensionScript(win, 'amp-dynamic-css-classes');
     win.document.body.appendChild(win.document.createElement('amp-experiment'));
     expect(hasRenderDelayingServices(win)).to.be.true;
@@ -119,7 +116,7 @@ describe('waitForServices', () => {
     dynamicCssResolve();
     variantResolve(); // this unblocks 'amp-experiment'
 
-    return promise.then(services => {
+    return promise.then((services) => {
       expect(services.length).to.be.equal(2);
       expect(variantStub).to.be.calledOnce;
     });
@@ -128,8 +125,8 @@ describe('waitForServices', () => {
 
 function waitForService(getService, serviceId, service) {
   let resolve = null;
-  getService.withArgs(sinon.match.any, serviceId).returns(
-    new Promise(r => {
+  getService.withArgs(window.sandbox.match.any, serviceId).returns(
+    new Promise((r) => {
       resolve = r.bind(this, service);
     })
   );

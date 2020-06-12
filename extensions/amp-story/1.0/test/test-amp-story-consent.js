@@ -20,7 +20,7 @@ import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
 
-describes.realWin('amp-story-consent', {amp: true}, env => {
+describes.realWin('amp-story-consent', {amp: true}, (env) => {
   const CONSENT_ID = 'CONSENT_ID';
   let win;
   let consentConfigEl;
@@ -31,14 +31,20 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
   let storyConsentEl;
   let storyEl;
 
-  const setConfig = config => {
+  const setConfig = (config) => {
     storyConsentConfigEl.textContent = JSON.stringify(config);
   };
 
   beforeEach(() => {
     win = env.win;
+    const localizationService = new LocalizationService(win.document.body);
+    env.sandbox
+      .stub(Services, 'localizationForDoc')
+      .returns(localizationService);
     const storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', () => storeService);
+    registerServiceBuilder(win, 'story-store', function () {
+      return storeService;
+    });
 
     const consentConfig = {
       consents: {ABC: {checkConsentHref: 'https://example.com'}},
@@ -53,12 +59,9 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     };
 
     const styles = {'background-color': 'rgb(0, 0, 0)'};
-    getComputedStyleStub = sandbox
+    getComputedStyleStub = env.sandbox
       .stub(win, 'getComputedStyle')
       .returns(styles);
-
-    const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', () => localizationService);
 
     // Test DOM structure:
     // <amp-story>
@@ -83,7 +86,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     setConfig(defaultConfig);
 
     storyConsentEl = win.document.createElement('amp-story-consent');
-    storyConsentEl.getResources = () => win.services.resources.obj;
+    storyConsentEl.getAmpDoc = () => storyConsentEl;
     storyConsentEl.appendChild(storyConsentConfigEl);
 
     storyEl.appendChild(consentEl);
@@ -242,11 +245,11 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     expect(linkEl).not.to.have.display('none');
   });
 
-  it('should whitelist the <amp-consent> actions', () => {
+  it('should allowlist the <amp-consent> actions', () => {
     storyConsent.buildCallback();
 
     const actions = storyConsent.storeService_.get(
-      StateProperty.ACTIONS_WHITELIST
+      StateProperty.ACTIONS_ALLOWLIST
     );
     expect(actions).to.deep.contain({
       tagOrTarget: 'AMP-CONSENT',
@@ -263,7 +266,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
   });
 
   it('should broadcast the amp actions', () => {
-    sandbox.stub(storyConsent.actions_, 'trigger');
+    env.sandbox.stub(storyConsent.actions_, 'trigger');
 
     storyConsent.buildCallback();
 
@@ -296,37 +299,34 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     );
   });
 
-  it('should set the consent ID in the store if right amp-geo group', () => {
+  it('should set the consent ID in the store if right amp-geo group', async () => {
     const config = {consents: {ABC: {promptIfUnknownForGeoGroup: 'eea'}}};
     consentConfigEl.textContent = JSON.stringify(config);
 
-    sandbox
+    env.sandbox
       .stub(Services, 'geoForDocOrNull')
       .resolves({matchedISOCountryGroups: ['eea']});
 
     storyConsent.buildCallback();
 
-    return Promise.resolve().then(() => {
-      expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID)).to.equal(
-        CONSENT_ID
-      );
-    });
+    await Promise.resolve();
+    expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID)).to.equal(
+      CONSENT_ID
+    );
   });
 
-  it('should not set consent ID in the store if wrong amp-geo group', () => {
+  it('should not set consent ID in the store if wrong amp-geo group', async () => {
     const config = {consents: {ABC: {promptIfUnknownForGeoGroup: 'eea'}}};
     consentConfigEl.textContent = JSON.stringify(config);
 
-    sandbox
+    env.sandbox
       .stub(Services, 'geoForDocOrNull')
       .resolves({matchedISOCountryGroups: ['othergroup']});
 
     storyConsent.buildCallback();
 
-    return Promise.resolve().then(() => {
-      expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID)).to.be
-        .null;
-    });
+    await Promise.resolve();
+    expect(storyConsent.storeService_.get(StateProperty.CONSENT_ID)).to.be.null;
   });
 
   it('should set the font color to black if background is white', () => {

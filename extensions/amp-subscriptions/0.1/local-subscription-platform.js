@@ -16,7 +16,6 @@
 
 import {LocalSubscriptionIframePlatform} from './local-subscription-platform-iframe';
 import {LocalSubscriptionRemotePlatform} from './local-subscription-platform-remote';
-import {PageConfig} from '../../../third_party/subscriptions-project/config';
 
 /**
  * Local subscription platform factory method.
@@ -43,12 +42,4 @@ export function localSubscriptionPlatformFactory(
     platformConfig,
     serviceAdapter
   );
-}
-
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package @VisibleForTesting
- */
-export function getPageConfigClassForTesting() {
-  return PageConfig;
 }

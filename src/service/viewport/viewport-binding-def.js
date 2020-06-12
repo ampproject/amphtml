@@ -1,5 +1,4 @@
 import {computedStyle} from '../../style';
-import {isExperimentOn} from '../../experiments';
 
 /**
  * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
@@ -19,7 +18,7 @@ import {isExperimentOn} from '../../experiments';
 
 /**
  * ViewportBindingDef is an interface that defines an underlying technology
- * behind the {@link Viewport}.
+ * behind the {@link ViewportInterface}.
  * @interface
  */
 export class ViewportBindingDef {
@@ -180,9 +179,15 @@ export class ViewportBindingDef {
    *     pass in, if they cached these values and would like to avoid
    *     remeasure. Requires appropriate updating the values on scroll.
    * @param {number=} unusedScrollTop Same comment as above.
+   * @param {!ClientRect=} unusedPremeasuredRect
    * @return {!../../layout-rect.LayoutRectDef}
    */
-  getLayoutRect(unusedEl, unusedScrollLeft, unusedScrollTop) {}
+  getLayoutRect(
+    unusedEl,
+    unusedScrollLeft,
+    unusedScrollTop,
+    unusedPremeasuredRect
+  ) {}
 
   /**
    * Returns the client rect of the current window.
@@ -217,9 +222,6 @@ export class ViewportBindingDef {
  * @return {number}
  */
 export function marginBottomOfLastChild(win, element) {
-  if (!isExperimentOn(win, 'margin-bottom-in-content-height')) {
-    return 0;
-  }
   let style;
   for (let n = element.lastElementChild; n; n = n.previousElementSibling) {
     const r = n./*OK*/ getBoundingClientRect();

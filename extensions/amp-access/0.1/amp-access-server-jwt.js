@@ -89,9 +89,6 @@ export class AccessServerJwtAdapter {
     /** @private @const */
     this.clientAdapter_ = new AccessClientAdapter(ampdoc, configJson, context);
 
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = Services.viewerForDoc(ampdoc);
-
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(ampdoc.win);
 
@@ -101,14 +98,8 @@ export class AccessServerJwtAdapter {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(ampdoc.win);
 
-    const stateElement = ampdoc
-      .getRootNode()
-      .querySelector('meta[name="i-amphtml-access-state"]');
-
     /** @private @const {?string} */
-    this.serverState_ = stateElement
-      ? stateElement.getAttribute('content')
-      : null;
+    this.serverState_ = ampdoc.getMetaByName('i-amphtml-access-state');
 
     const isInExperiment = isExperimentOn(ampdoc.win, 'amp-access-server-jwt');
 
@@ -116,7 +107,7 @@ export class AccessServerJwtAdapter {
     this.isProxyOrigin_ = isProxyOrigin(ampdoc.win.location) || isInExperiment;
 
     const serviceUrlOverride = isInExperiment
-      ? this.viewer_.getParam('serverAccessService')
+      ? ampdoc.getParam('serverAccessService')
       : null;
 
     /** @private @const {string} */
@@ -205,7 +196,7 @@ export class AccessServerJwtAdapter {
       /* useAuthData */ false
     );
     let jwtPromise = urlPromise
-      .then(url => {
+      .then((url) => {
         dev().fine(TAG, 'Authorization URL: ', url);
         return this.timer_.timeoutPromise(
           AUTHORIZATION_TIMEOUT,
@@ -214,10 +205,10 @@ export class AccessServerJwtAdapter {
           })
         );
       })
-      .then(resp => {
+      .then((resp) => {
         return resp.text();
       })
-      .then(encoded => {
+      .then((encoded) => {
         const jwt = this.jwtHelper_.decode(encoded);
         userAssert(
           jwt['amp_authdata'],
@@ -228,7 +219,7 @@ export class AccessServerJwtAdapter {
     if (this.shouldBeValidated_()) {
       // Validate JWT in the development mode.
       if (this.jwtHelper_.isVerificationSupported()) {
-        jwtPromise = jwtPromise.then(resp => {
+        jwtPromise = jwtPromise.then((resp) => {
           return this.jwtHelper_
             .decodeAndVerify(resp.encoded, this.loadKeyPem_())
             .then(() => resp);
@@ -240,12 +231,12 @@ export class AccessServerJwtAdapter {
             " it doesn't support WebCrypto APIs"
         );
       }
-      jwtPromise = jwtPromise.then(resp => {
+      jwtPromise = jwtPromise.then((resp) => {
         this.validateJwt_(resp.jwt);
         return resp;
       });
     }
-    return jwtPromise.catch(reason => {
+    return jwtPromise.catch((reason) => {
       throw user().createError('JWT fetch or validation failed: ', reason);
     });
   }
@@ -260,7 +251,7 @@ export class AccessServerJwtAdapter {
     }
     return this.xhr_
       .fetchText(dev().assertString(this.keyUrl_))
-      .then(res => res.text());
+      .then((res) => res.text());
   }
 
   /**
@@ -310,7 +301,7 @@ export class AccessServerJwtAdapter {
       'Proceed via client protocol via ',
       this.clientAdapter_.getAuthorizationUrl()
     );
-    return this.fetchJwt_().then(resp => {
+    return this.fetchJwt_().then((resp) => {
       return resp.jwt['amp_authdata'];
     });
   }
@@ -321,7 +312,7 @@ export class AccessServerJwtAdapter {
    */
   authorizeOnServer_() {
     dev().fine(TAG, 'Proceed via server protocol');
-    return this.fetchJwt_().then(resp => {
+    return this.fetchJwt_().then((resp) => {
       const {encoded, jwt} = resp;
       const accessData = jwt['amp_authdata'];
       const request = serializeQueryString(
@@ -346,7 +337,7 @@ export class AccessServerJwtAdapter {
             }),
           })
         )
-        .then(response => {
+        .then((response) => {
           dev().fine(TAG, 'Authorization response: ', response);
           return this.replaceSections_(response);
         })

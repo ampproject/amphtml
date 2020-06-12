@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a cloud-hosted Connatix Player.
 ---
+
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -21,22 +22,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# `amp-connatix-player`
-
-Displays a cloud-hosted <a href="https://www.connatix.com/">Connatix Player</a>.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-connatix-player" src="https://cdn.ampproject.org/v0/amp-connatix-player-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-</table>
-
-[TOC]
+# amp-connatix-player
 
 ## Example
 
@@ -45,11 +31,12 @@ The `width` and `height` attributes determine the aspect ratio of the player emb
 Example:
 
 ```html
-<amp-connatix-player 
+<amp-connatix-player
   data-player-id="03ef71d8-0941-4bff-94f2-74ca3580b497"
   layout="responsive"
   width="16"
-  height="9">
+  height="9"
+>
 </amp-connatix-player>
 ```
 
@@ -66,9 +53,10 @@ Example:
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 
 ## Validation
+
 See [amp-connatix-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-connatix-player/validator-amp-connatix-player.protoascii) in the AMP validator specification.

@@ -14,36 +14,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the license.
  */
+goog.module('amp.validator.keyframesParseCss');
 
-goog.provide('parse_css.validateKeyframesCss');
-goog.require('amp.validator.ValidationError');
-goog.require('parse_css.ErrorToken');
-goog.require('parse_css.RuleVisitor');
-goog.require('parse_css.Stylesheet');
-goog.require('parse_css.TRIVIAL_ERROR_TOKEN');
+const parse_css = goog.require('parse_css');
+const tokenize_css = goog.require('tokenize_css');
+const {ValidationError} = goog.require('amp.validator.protogenerated');
 
 /**
  * Fills an ErrorToken with the provided position, code, and params.
- * @param {!parse_css.Token} positionToken
- * @param {!amp.validator.ValidationError.Code} code
+ * @param {!tokenize_css.Token} positionToken
+ * @param {!ValidationError.Code} code
  * @param {!Array<string>} params
- * @return {!parse_css.ErrorToken}
+ * @return {!tokenize_css.ErrorToken}
  */
-function createErrorTokenAt(positionToken, code, params) {
-  const token = new parse_css.ErrorToken(code, params);
+const createErrorTokenAt = function(positionToken, code, params) {
+  const token = new tokenize_css.ErrorToken(code, params);
   positionToken.copyPosTo(token);
   return token;
-}
+};
+exports.createErrorTokenAt = createErrorTokenAt;
 
 /** @private */
 class KeyframesVisitor extends parse_css.RuleVisitor {
   /**
-   * @param {!Array<parse_css.ErrorToken>} errors
+   * @param {!Array<!tokenize_css.ErrorToken>} errors
    */
   constructor(errors) {
     super();
 
-    /** @type {!Array<parse_css.ErrorToken>} */
+    /** @type {!Array<!tokenize_css.ErrorToken>} */
     this.errors = errors;
 
     /** @type {boolean} */
@@ -55,16 +54,17 @@ class KeyframesVisitor extends parse_css.RuleVisitor {
     if (!this.parentIsKeyframesAtRule) {
       this.errors.push(createErrorTokenAt(
           qualifiedRule,
-          amp.validator.ValidationError.Code
+          ValidationError.Code
               .CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME,
           ['style', qualifiedRule.ruleName()]));
       return;
     }
-    if (qualifiedRule.declarations.length > 0) {return;}
+    if (qualifiedRule.declarations.length > 0) {
+      return;
+    }
     this.errors.push(createErrorTokenAt(
         qualifiedRule,
-        amp.validator.ValidationError.Code
-            .CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS,
+        ValidationError.Code.CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS,
         ['style', qualifiedRule.ruleName()]));
   }
 
@@ -78,7 +78,7 @@ class KeyframesVisitor extends parse_css.RuleVisitor {
         if (this.parentIsKeyframesAtRule) {
           this.errors.push(createErrorTokenAt(
               atRule,
-              amp.validator.ValidationError.Code
+              ValidationError.Code
                   .CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME,
               ['style']));
         }
@@ -96,9 +96,10 @@ class KeyframesVisitor extends parse_css.RuleVisitor {
 
 /**
  * @param {!parse_css.Stylesheet} styleSheet
- * @param {!Array<!parse_css.ErrorToken>} errors
+ * @param {!Array<!tokenize_css.ErrorToken>} errors
  */
-parse_css.validateKeyframesCss = function(styleSheet, errors) {
+const validateKeyframesCss = function(styleSheet, errors) {
   const visitor = new KeyframesVisitor(errors);
   styleSheet.accept(visitor);
 };
+exports.validateKeyframesCss = validateKeyframesCss;

@@ -61,7 +61,7 @@ export function redispatch(element, event, events) {
     return false;
   }
   const dispatchEvent = events[event];
-  (isArray(dispatchEvent) ? dispatchEvent : [dispatchEvent]).forEach(e => {
+  (isArray(dispatchEvent) ? dispatchEvent : [dispatchEvent]).forEach((e) => {
     element.dispatchCustomEvent(dev().assertString(e));
   });
   return true;

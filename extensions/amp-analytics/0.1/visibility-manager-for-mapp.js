@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
 import {VisibilityManager} from './visibility-manager';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -35,14 +34,11 @@ export class VisibilityManagerForMApp extends VisibilityManager {
      * In VisibilityManagerForMApp case,
      */
 
-    /** @const @private */
-    this.viewer_ = Services.viewerForDoc(ampdoc);
-
     /** @const @private {!../../../src/inabox/host-services.VisibilityInterface} */
     this.visibilityInterface_ = visibilityInterface;
 
     /** @const @private {boolean} */
-    this.backgroundedAtStart_ = !this.viewer_.isVisible();
+    this.backgroundedAtStart_ = !ampdoc.isVisible();
 
     /** @private {?../../../src/layout-rect.LayoutRectDef} */
     this.intersectionRect_ = null;
@@ -64,16 +60,16 @@ export class VisibilityManagerForMApp extends VisibilityManager {
 
   /** @override */
   getStartTime() {
-    // viewer.getFirstVisibleTime depend on the visibilitychange API and
+    // AmpDoc.getFirstVisibleTime depend on the visibilitychange API and
     // document['hidden']
-    // Expect the viewer is always visible in webview
-    return dev().assertNumber(this.viewer_.getFirstVisibleTime());
+    // Expect the ampdoc is always visible in webview
+    return dev().assertNumber(this.ampdoc.getFirstVisibleTime());
   }
 
   /** @override */
   isBackgrounded() {
     // Listens to visibilitychange event, in theory this never fires
-    return !this.viewer_.isVisible();
+    return !this.ampdoc.isVisible();
   }
 
   /** @override */
@@ -126,7 +122,7 @@ export class VisibilityManagerForMApp extends VisibilityManager {
       return;
     }
     //TODO: Need discussion
-    // rootVisibility is set by hostAPI, instead of Viewer.isVisible
+    // rootVisibility is set by hostAPI, instead of ampdoc.isVisible
     let ratio = visibilityData.visibleRatio;
     // Convert to valid ratio range in [0, 1]
     ratio = Math.min(Math.max(0, ratio), 1);

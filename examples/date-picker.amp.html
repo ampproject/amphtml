@@ -5,7 +5,6 @@
   <title>AMP Date Picker Example</title>
   <link rel="canonical" href="amps.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-  <meta name="amp-experiments-opt-in" content="amp-date-picker">
   <style amp-custom>
   body {
     padding: 20px;
@@ -160,15 +159,15 @@
       ],
       "datesToDetails": {
         "2017-10-20": {
-          "imageUrl": "https://www.ampbyexample.com/img/product1_640x426.jpg",
+          "imageUrl": "https://amp.dev/static/samples/img/product1_640x426.jpg",
           "message": "We are having a special on apples!"
         },
         "2017-10-22": {
-          "imageUrl": "https://www.ampbyexample.com/img/product2_640x426.jpg",
+          "imageUrl": "https://amp.dev/static/samples/img/product2_640x426.jpg",
           "message": "We are having a special on oranges!"
         },
         "2017-10-24": {
-          "imageUrl": "https://www.ampbyexample.com/img/product3_640x426.jpg",
+          "imageUrl": "https://amp.dev/static/samples/img/product3_640x426.jpg",
           "message": "We are having a special on pears!"
         }
       }
@@ -335,7 +334,11 @@
     min="2018-12-10" [min]="rangeMin" max="2018-12-20" [max]="rangeMax"
 ></amp-date-picker>
 
-
+<h3>hide keyboard shortcuts panel</h3>
+<amp-date-picker
+    mode="static" type="single" layout="fixed-height" height="360"
+    hide-keyboard-shortcuts-panel
+></amp-date-picker>
 <div class="spacer"></div>
 </body>
 </html>

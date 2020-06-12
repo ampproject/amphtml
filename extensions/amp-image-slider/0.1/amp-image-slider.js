@@ -22,7 +22,6 @@ import {Services} from '../../../src/services';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {clamp} from '../../../src/utils/math';
 import {dev, user, userAssert} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
@@ -144,16 +143,11 @@ export class AmpImageSlider extends AMP.BaseElement {
       '2 <amp-img>s must be provided for comparison'
     );
 
-    // TODO(kqian): remove this after layer launch
-    if (
-      !isExperimentOn(this.win, 'layers') ||
-      !isExperimentOn(this.win, 'layers-prioritization')
-    ) {
-      // see comment in layoutCallback
-      // When layers not enabled
-      this.setAsOwner(dev().assertElement(this.leftAmpImage_));
-      this.setAsOwner(dev().assertElement(this.rightAmpImage_));
-    }
+    // see comment in layoutCallback
+    // When layers not enabled
+    const owners = Services.ownersForDoc(this.element);
+    owners.setOwner(dev().assertElement(this.leftAmpImage_), this.element);
+    owners.setOwner(dev().assertElement(this.rightAmpImage_), this.element);
 
     this.container_ = this.doc_.createElement('div');
     this.container_.classList.add('i-amphtml-image-slider-container');
@@ -166,7 +160,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.registerAction(
       'seekTo',
-      invocation => {
+      (invocation) => {
         const {args} = invocation;
         if (args) {
           if (args['percent'] !== undefined) {
@@ -364,7 +358,7 @@ export class AmpImageSlider extends AMP.BaseElement {
 
     this.gestures_ = Gestures.get(this.element);
 
-    this.gestures_.onGesture(SwipeXRecognizer, e => {
+    this.gestures_.onGesture(SwipeXRecognizer, (e) => {
       if (e.data.first) {
         // Disable hint reappearance timeout if needed
         this.animateHideHint_();
@@ -372,7 +366,7 @@ export class AmpImageSlider extends AMP.BaseElement {
       this.pointerMoveX_(e.data.startX + e.data.deltaX);
     });
 
-    this.gestures_.onPointerDown(e => {
+    this.gestures_.onPointerDown((e) => {
       // Ensure touchstart changes slider position
       this.pointerMoveX_(e.touches[0].pageX, true);
       this.animateHideHint_();
@@ -560,6 +554,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * Get current slider's percentage to the left
    * Should be wrapped inside measureElement
    * @private
+   * @return {number}
    */
   getCurrentSliderPercentage_() {
     const {left: barLeft} = this.bar_./*OK*/ getBoundingClientRect();
@@ -693,6 +688,7 @@ export class AmpImageSlider extends AMP.BaseElement {
    * Limit percentage between 0 and 1
    * @param {number} percentage
    * @private
+   * @return {number}
    */
   limitPercentage_(percentage) {
     return clamp(percentage, 0, 1);
@@ -718,14 +714,21 @@ export class AmpImageSlider extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    // Extensions such as amp-carousel still uses .setAsOwner()
+    // Extensions such as amp-carousel still uses .setOwner()
     // This would break the rendering of the images as carousel
     // will call .scheduleLayout on the slider but not the contents
     // while Resources would found amp-imgs' parent has owner and
     // refuse to run the normal scheduling in discoverWork_.
     // SIMPLER SOL: simply always call scheduleLayout no matter what
-    this.scheduleLayout(dev().assertElement(this.leftAmpImage_));
-    this.scheduleLayout(dev().assertElement(this.rightAmpImage_));
+    const owners = Services.ownersForDoc(this.element);
+    owners.scheduleLayout(
+      this.element,
+      dev().assertElement(this.leftAmpImage_)
+    );
+    owners.scheduleLayout(
+      this.element,
+      dev().assertElement(this.rightAmpImage_)
+    );
 
     this.registerEvents_();
 
@@ -778,6 +781,6 @@ export class AmpImageSlider extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-image-slider', '0.1', AMP => {
+AMP.extension('amp-image-slider', '0.1', (AMP) => {
   AMP.registerElement('amp-image-slider', AmpImageSlider, CSS);
 });

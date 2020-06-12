@@ -57,10 +57,7 @@ const BUILTINS = dict({
     },
   },
   'gplus': {
-    'shareEndpoint': 'https://plus.google.com/share',
-    'defaultParams': {
-      'url': 'CANONICAL_URL',
-    },
+    'obsolete': true,
   },
   'email': {
     'bindings': ['recipient'],

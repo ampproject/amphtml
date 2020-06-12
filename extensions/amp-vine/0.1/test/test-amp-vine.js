@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-vine'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -47,7 +47,7 @@ describes.realWin(
     }
 
     it('renders', () => {
-      return getVine('MdKjXez002d').then(vine => {
+      return getVine('MdKjXez002d').then((vine) => {
         const iframe = vine.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -58,7 +58,7 @@ describes.realWin(
     });
 
     it('renders responsively', () => {
-      return getVine('MdKjXez002d', true).then(vine => {
+      return getVine('MdKjXez002d', true).then((vine) => {
         const iframe = vine.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.className).to.match(/i-amphtml-fill-content/);

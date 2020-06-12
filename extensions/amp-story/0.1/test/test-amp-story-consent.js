@@ -16,10 +16,9 @@
 
 import {AmpStoryConsent} from '../amp-story-consent';
 import {AmpStoryStoreService, StateProperty} from '../amp-story-store-service';
-import {LocalizationService} from '../../../../src/service/localization';
 import {registerServiceBuilder} from '../../../../src/service';
 
-describes.realWin('amp-story-consent', {amp: true}, env => {
+describes.realWin('amp-story-consent', {amp: true}, (env) => {
   const CONSENT_ID = 'CONSENT_ID';
   let win;
   let defaultConfig;
@@ -28,14 +27,16 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
   let storyConsentConfigEl;
   let storyConsentEl;
 
-  const setConfig = config => {
+  const setConfig = (config) => {
     storyConsentConfigEl.textContent = JSON.stringify(config);
   };
 
   beforeEach(() => {
     win = env.win;
     const storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', () => storeService);
+    registerServiceBuilder(win, 'story-store', function () {
+      return storeService;
+    });
 
     defaultConfig = {
       title: 'Foo title.',
@@ -46,12 +47,9 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     };
 
     const styles = {'background-color': 'rgb(0, 0, 0)'};
-    getComputedStyleStub = sandbox
+    getComputedStyleStub = env.sandbox
       .stub(win, 'getComputedStyle')
       .returns(styles);
-
-    const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization-v01', () => localizationService);
 
     // Test DOM structure:
     // <amp-consent>
@@ -223,22 +221,22 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     expect(linkEl).not.to.have.display('none');
   });
 
-  it('should whitelist the <amp-consent> actions', () => {
-    const addToWhitelistStub = sandbox.stub(
+  it('should allowlist the <amp-consent> actions', () => {
+    const addToAllowlistStub = env.sandbox.stub(
       storyConsent.actions_,
-      'addToWhitelist'
+      'addToAllowlist'
     );
 
     storyConsent.buildCallback();
 
-    expect(addToWhitelistStub).to.have.callCount(3);
-    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT', 'accept');
-    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT', 'prompt');
-    expect(addToWhitelistStub).to.have.been.calledWith('AMP-CONSENT', 'reject');
+    expect(addToAllowlistStub).to.have.callCount(3);
+    expect(addToAllowlistStub).to.have.been.calledWith('AMP-CONSENT', 'accept');
+    expect(addToAllowlistStub).to.have.been.calledWith('AMP-CONSENT', 'prompt');
+    expect(addToAllowlistStub).to.have.been.calledWith('AMP-CONSENT', 'reject');
   });
 
   it('should broadcast the amp actions', () => {
-    sandbox.stub(storyConsent.actions_, 'trigger');
+    env.sandbox.stub(storyConsent.actions_, 'trigger');
 
     storyConsent.buildCallback();
 

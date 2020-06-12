@@ -15,13 +15,14 @@
  */
 'use strict';
 
-const BBPromise = require('bluebird');
 const colors = require('ansi-colors');
 const gulp = require('gulp');
 const log = require('fancy-log');
-const request = BBPromise.promisify(require('request'));
-const srcGlobs = require('../config').presubmitGlobs;
+const srcGlobs = require('../test-configs/config').presubmitGlobs;
 const through2 = require('through2');
+const util = require('util');
+
+const request = util.promisify(require('request'));
 
 const {GITHUB_ACCESS_TOKEN} = process.env;
 
@@ -56,12 +57,12 @@ function findClosedTodosInFile(file) {
     return Promise.resolve(0);
   }
   return Promise.all(promises)
-    .then(results => {
-      return results.reduce(function(acc, v) {
+    .then((results) => {
+      return results.reduce(function (acc, v) {
         return acc + v;
       }, 0);
     })
-    .catch(function(error) {
+    .catch(function (error) {
       log(colors.red('Failed in', file.path, error, error.stack));
       return 0;
     });
@@ -78,7 +79,7 @@ function reportClosedIssue(file, issueId, todo) {
     return issueCache[issueId];
   }
   return (issueCache[issueId] = githubRequest('/issues/' + issueId).then(
-    response => {
+    (response) => {
       const issue = JSON.parse(response.body);
       const value = issue.state == 'closed' ? 1 : 0;
       if (value) {
@@ -118,20 +119,21 @@ function githubRequest(path, opt_method, opt_data) {
 
 /**
  * todos:find-closed task.
+ * @return {!Promise}
  */
 function todosFindClosed() {
   let foundCount = 0;
   return gulp
     .src(srcGlobs)
     .pipe(
-      through2.obj(function(file, enc, cb) {
-        findClosedTodosInFile(file).then(function(count) {
+      through2.obj(function (file, enc, cb) {
+        findClosedTodosInFile(file).then(function (count) {
           foundCount += count;
           cb();
         });
       })
     )
-    .on('end', function() {
+    .on('end', function () {
       if (foundCount > 0) {
         log(colors.red('Found closed TODOs: ', foundCount));
         process.exit(1);

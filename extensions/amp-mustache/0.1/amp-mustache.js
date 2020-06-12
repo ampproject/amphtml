@@ -15,7 +15,6 @@
  */
 
 import {dict} from '../../../src/utils/object';
-import {isExperimentOn} from '../../../src/experiments';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {
   sanitizeHtml,
@@ -26,20 +25,15 @@ import mustache from '../../../third_party/mustache/mustache';
 
 const TAG = 'amp-mustache';
 
-/**
- * @typedef {BaseTemplate$$module$src$service$template_impl}
- */
-AMP.BaseTemplate;
+const BaseTemplate = /** @type {typeof ../../../src/service/template-impl.BaseTemplate} */ (AMP.BaseTemplate);
 
 /**
  * Implements an AMP template for Mustache.js.
  * See {@link https://github.com/janl/mustache.js/}.
  *
- * @private Visible for testing.
- * @extends {AMP.BaseTemplate}
- * @suppress {checkTypes}
+ * @visibleForTesting
  */
-export class AmpMustache extends AMP.BaseTemplate {
+export class AmpMustache extends BaseTemplate {
   /**
    * @param {!Element} element
    * @param {!Window} win
@@ -126,7 +120,7 @@ export class AmpMustache extends AMP.BaseTemplate {
   render(data) {
     let mustacheData = data;
     if (typeof data === 'object') {
-      mustacheData = Object.assign({}, data, this.nestedTemplates_);
+      mustacheData = {...data, ...this.nestedTemplates_};
     }
     const html = mustache.render(
       this.template_,
@@ -145,13 +139,12 @@ export class AmpMustache extends AMP.BaseTemplate {
   serializeHtml_(html) {
     const doc = this.win.document;
     const root = doc.createElement('div');
-    const diffing = isExperimentOn(self, 'amp-list-diffing');
-    const sanitized = sanitizeHtml(html, doc, diffing);
+    const sanitized = sanitizeHtml(html, doc);
     root./*OK*/ innerHTML = sanitized;
     return this.unwrap(root);
   }
 }
 
-AMP.extension(TAG, '0.1', function(AMP) {
+AMP.extension(TAG, '0.1', function (AMP) {
   AMP.registerTemplate(TAG, AmpMustache);
 });

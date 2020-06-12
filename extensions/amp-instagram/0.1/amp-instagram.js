@@ -36,6 +36,7 @@
  */
 
 import {CSS} from '../../../build/amp-instagram-0.1.css';
+import {Services} from '../../../src/services';
 import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isObject} from '../../../src/types';
@@ -75,10 +76,15 @@ class AmpInstagram extends AMP.BaseElement {
   preconnectCallback(opt_onLayout) {
     // See
     // https://instagram.com/developer/embedding/?hl=en
-    this.preconnect.url('https://www.instagram.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://www.instagram.com',
+      opt_onLayout
+    );
     // Host instagram used for image serving. While the host name is
     // funky this appears to be stable in the post-domain sharding era.
-    this.preconnect.url(
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
       'https://instagram.fsnc1-1.fna.fbcdn.net',
       opt_onLayout
     );
@@ -106,18 +112,25 @@ class AmpInstagram extends AMP.BaseElement {
   createPlaceholderCallback() {
     const placeholder = this.win.document.createElement('div');
     placeholder.setAttribute('placeholder', '');
-    const image = this.win.document.createElement('amp-img');
-    image.setAttribute('noprerender', '');
+    const image = this.win.document.createElement('img');
+
     // This will redirect to the image URL. By experimentation this is
     // always the same URL that is actually used inside of the embed.
-    image.setAttribute(
-      'src',
-      'https://www.instagram.com/p/' +
-        encodeURIComponent(this.shortcode_) +
-        '/media/?size=l'
-    );
-    image.setAttribute('layout', 'fill');
+    this.getAmpDoc()
+      .whenFirstVisible()
+      .then(() => {
+        image.setAttribute(
+          'src',
+          'https://www.instagram.com/p/' +
+            encodeURIComponent(this.shortcode_) +
+            '/media/?size=l'
+        );
+      });
     image.setAttribute('referrerpolicy', 'origin');
+    setStyles(image, {
+      'overflow': 'hidden',
+      'max-width': '100%',
+    });
 
     this.propagateAttributes(['alt'], image);
     /*
@@ -127,15 +140,13 @@ class AmpInstagram extends AMP.BaseElement {
       this.element.classList.add('amp-instagram-default-framing');
     }
 
-    // This makes the non-iframe image appear in the exact same spot
-    // where it will be inside of the iframe.
-    setStyles(image, {
-      'top': '0 px',
-      'bottom': '0 px',
-      'left': '0 px',
-      'right': '0 px',
-    });
     placeholder.appendChild(image);
+    // Must be kept in-sync with the amp-instagram style in ampdoc.css.
+    // This value is the height of the header of the plugin. Makes the
+    // placeholder start at the right spot.
+    setStyles(placeholder, {
+      'marginTop': '54px',
+    });
     return placeholder;
   }
 
@@ -168,7 +179,7 @@ class AmpInstagram extends AMP.BaseElement {
       encodeURIComponent(this.shortcode_) +
       '/embed/' +
       this.captioned_ +
-      '?cr=1&v=9';
+      '?cr=1&v=12';
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     setStyles(iframe, {
@@ -212,7 +223,7 @@ class AmpInstagram extends AMP.BaseElement {
       const height = data['details']['height'];
       this.getVsync().measure(() => {
         if (this.iframe_ && this.iframe_./*OK*/ offsetHeight !== height) {
-          this./*OK*/ changeHeight(height);
+          this.forceChangeHeight(height);
         }
       });
     }
@@ -237,6 +248,6 @@ class AmpInstagram extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-instagram', '0.1', AMP => {
+AMP.extension('amp-instagram', '0.1', (AMP) => {
   AMP.registerElement('amp-instagram', AmpInstagram, CSS);
 });

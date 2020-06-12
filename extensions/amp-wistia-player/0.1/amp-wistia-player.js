@@ -64,7 +64,11 @@ class AmpWistiaPlayer extends AMP.BaseElement {
    */
   preconnectCallback(onLayout) {
     // video player and video metadata
-    this.preconnect.url('https://fast.wistia.net', onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://fast.wistia.net',
+      onLayout
+    );
   }
 
   /** @override */
@@ -166,7 +170,7 @@ class AmpWistiaPlayer extends AMP.BaseElement {
     }
 
     const data = objOrParseJson(eventData);
-    if (data === undefined) {
+    if (data == null) {
       return; // We only process valid JSON.
     }
 
@@ -327,6 +331,6 @@ class AmpWistiaPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpWistiaPlayer);
 });

@@ -27,7 +27,7 @@ import {isObject} from './types';
 
 /**
  * JSON scalar. It's either string, number or boolean.
- * @typedef {*} should be string|number|boolean
+ * @typedef {*} should be string|number|boolean|null
  */
 let JSONScalarDef;
 
@@ -222,4 +222,41 @@ function hasOwnProperty(obj, key) {
     /** @type {!Object} */ (obj),
     key
   );
+}
+
+/**
+ * This helper function handles configurations specified in a JSON format.
+ *
+ * It allows the configuration is to be written in plain JS (which has better
+ * dev ergonomics like comments and trailing commas), and allows the
+ * configuration to be transformed into an efficient JSON-parsed representation
+ * in the dist build. See https://v8.dev/blog/cost-of-javascript-2019#json
+ *
+ * @param {!Object} obj
+ * @return {!JsonObject}
+ */
+export function jsonConfiguration(obj) {
+  return /** @type {!JsonObject} */ (obj);
+}
+
+/**
+ * This converts an Object into a suitable type to be used in `includeJsonLiteral`.
+ * This doesn't actually do any conversion, it only changes the closure type.
+ *
+ * @param {!Object|!Array|string|number|boolean|null} value
+ * @return {!InternalJsonLiteralTypeDef}
+ */
+export function jsonLiteral(value) {
+  return /** @type {!InternalJsonLiteralTypeDef} */ (value);
+}
+
+/**
+ * Allows inclusion of a variable (that's wrapped in a jsonLiteral
+ * call) to be included inside a jsonConfiguration.
+ *
+ * @param {!InternalJsonLiteralTypeDef} value
+ * @return {*}
+ */
+export function includeJsonLiteral(value) {
+  return value;
 }

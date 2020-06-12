@@ -18,9 +18,9 @@ const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const log = require('fancy-log');
 const path = require('path');
-const {build} = require('./build');
 const {clean} = require('./clean');
-const {dist} = require('./dist');
+const {doBuild} = require('./build');
+const {doDist} = require('./dist');
 
 async function walk(dest) {
   const filelist = [];
@@ -42,28 +42,18 @@ async function copyAndReplaceUrls(src, dest) {
   // Recursively gets all the files within the directory and its children.
   const files = await walk(dest);
   const promises = files
-    .filter(fileName => path.extname(fileName) == '.html')
-    .map(file => replaceUrls(file));
+    .filter((fileName) => path.extname(fileName) == '.html')
+    .map((file) => replaceUrls(file));
   await Promise.all(promises);
-}
-
-async function modifyThirdPartyUrl() {
-  const filePath = 'firebase/dist/amp.js';
-  const data = await fs.readFile('firebase/dist/amp.js', 'utf8');
-  const result = data.replace(
-    'self.AMP_CONFIG={',
-    'self.AMP_CONFIG={"thirdPartyUrl":location.origin,'
-  );
-  await fs.writeFile(filePath, result, 'utf8');
 }
 
 async function firebase() {
   if (!argv.nobuild) {
     await clean();
-    if (argv.min) {
-      await dist();
+    if (argv.compiled) {
+      await doDist({fortesting: argv.fortesting});
     } else {
-      await build();
+      await doBuild({fortesting: argv.fortesting});
     }
   }
   await fs.mkdirp('firebase');
@@ -75,6 +65,7 @@ async function firebase() {
     });
     await replaceUrls('firebase/index.html');
   } else {
+    log(colors.green('Copying test/manual and examples folders.'));
     await Promise.all([
       copyAndReplaceUrls('test/manual', 'firebase/manual'),
       copyAndReplaceUrls('examples', 'firebase/examples'),
@@ -85,8 +76,8 @@ async function firebase() {
     fs.copy('dist', 'firebase/dist', {overwrite: true}),
     fs.copy('dist.3p/current', 'firebase/dist.3p/current', {overwrite: true}),
   ]);
+
   await Promise.all([
-    modifyThirdPartyUrl(),
     fs.copyFile('firebase/dist/ww.max.js', 'firebase/dist/ww.js', {
       overwrite: true,
     }),
@@ -99,7 +90,7 @@ async function replaceUrls(filePath) {
     /https:\/\/cdn\.ampproject\.org\/v0\.js/g,
     '/dist/amp.js'
   );
-  if (argv.min) {
+  if (argv.compiled) {
     result = result.replace(
       /https:\/\/cdn\.ampproject\.org\/v0\/(.+?).js/g,
       '/dist/v0/$1.js'
@@ -119,7 +110,9 @@ module.exports = {
 
 firebase.description = 'Generates firebase folder for deployment';
 firebase.flags = {
-  'file': 'File to deploy to firebase as index.html',
-  'min': 'Source from minified files',
-  'nobuild': 'Skips the gulp build|dist step.',
+  'file': '  File to deploy to firebase as index.html',
+  'compiled': '  Deploy from minified files',
+  'nobuild': '  Skips the gulp build|dist step.',
+  'fortesting':
+    '  Expects an env var AMP_TESTING_HOST and writes this to AMP_CONFIG',
 };
