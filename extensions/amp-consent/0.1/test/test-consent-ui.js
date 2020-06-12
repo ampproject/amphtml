@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-import {CONSENT_ITEM_STATE, constructConsentInfo} from '../consent-info';
+import {
+  CONSENT_ITEM_STATE,
+  constructConsentInfo,
+  constructMetadata,
+} from '../consent-info';
+import {CONSENT_STRING_TYPE} from '../../../../src/consent-state';
 import {ConsentUI, consentUiClasses} from '../consent-ui';
 import {Services} from '../../../../src/services';
 import {dict} from '../../../../src/utils/object';
@@ -85,7 +90,11 @@ describes.realWin(
         return Promise.resolve({
           getLastConsentInstanceInfo: () => {
             return Promise.resolve(
-              constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test')
+              constructConsentInfo(
+                CONSENT_ITEM_STATE.ACCEPTED,
+                'test',
+                constructMetadata(CONSENT_STRING_TYPE.TCF_V2, '1~1.10.12.103')
+              )
             );
           },
         });
@@ -262,6 +271,10 @@ describes.realWin(
             },
             'consentState': 'accepted',
             'consentStateValue': 'accepted',
+            'consentMetadata': constructMetadata(
+              CONSENT_STRING_TYPE.TCF_V2,
+              '1~1.10.12.103'
+            ),
             'consentString': 'test',
             'promptTrigger': 'load',
             'isDirty': false,
@@ -280,18 +293,8 @@ describes.realWin(
         consentUI.show(true);
         yield macroTask();
 
-        expect(consentUI.ui_.getAttribute('name')).to.deep.equal(
-          JSON.stringify({
-            'clientConfig': {
-              'test': 'ABC',
-            },
-            'consentState': 'accepted',
-            'consentStateValue': 'accepted',
-            'consentString': 'test',
-            'promptTrigger': 'action',
-            'isDirty': false,
-          })
-        );
+        const clientInfo = JSON.parse(consentUI.ui_.getAttribute('name'));
+        expect(clientInfo.promptTrigger).to.equal('action');
       });
 
       describe('fullscreen user interaction experiment', () => {
