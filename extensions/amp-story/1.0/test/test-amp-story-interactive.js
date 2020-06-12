@@ -172,7 +172,7 @@ describes.realWin(
       expect(optionsList[0]).to.haveOwnProperty('correct', 'correct');
     });
 
-    it('should enter post-interactive state on option click', async () => {
+    it('should enter post-selection state on option click', async () => {
       addConfigToInteractive(ampStoryInteractive);
       ampStoryInteractive.buildCallback();
       await ampStoryInteractive.layoutCallback();
