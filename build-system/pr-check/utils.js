@@ -16,7 +16,6 @@
 'use strict';
 
 const colors = require('ansi-colors');
-const requestPromise = require('request-promise');
 const {
   gitBranchCreationPoint,
   gitBranchName,
@@ -115,15 +114,13 @@ function printChangeSummary(fileName) {
 }
 
 /**
- * Starts connection to Sauce Labs after getting account credentials
+ * Starts connection to Sauce Labs using account credentials from env vars.
  * @param {string} functionName
  */
 async function startSauceConnect(functionName) {
-  process.env['SAUCE_USERNAME'] = 'amphtml';
-  const response = await requestPromise(
-    'https://amphtml-sauce-token-dealer.appspot.com/getJwtToken'
-  );
-  process.env['SAUCE_ACCESS_KEY'] = response.trim();
+  if (!process.env.SAUCE_USERNAME || !process.env.SAUCE_ACCESS_KEY) {
+    throw new Error('Missing Sauce Labs credentials');
+  }
   const startScCmd = 'build-system/sauce_connect/start_sauce_connect.sh';
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
   console.log(
