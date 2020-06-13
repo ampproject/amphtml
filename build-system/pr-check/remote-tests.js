@@ -21,78 +21,30 @@
  * This is run during the CI stage = test; job = remote tests.
  */
 
-const colors = require('ansi-colors');
 const {
   downloadDistOutput,
-  printChangeSummary,
   startTimer,
   stopTimer,
   startSauceConnect,
   stopSauceConnect,
   timedExecOrDie: timedExecOrDieBase,
 } = require('./utils');
-const {determineBuildTargets} = require('./build-targets');
-const {isTravisPullRequestBuild} = require('../common/travis');
 
 const FILENAME = 'remote-tests.js';
-const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
 const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
 
-  if (!isTravisPullRequestBuild()) {
-    downloadDistOutput(FILENAME);
-    timedExecOrDie('gulp update-packages');
+  downloadDistOutput(FILENAME);
+  timedExecOrDie('gulp update-packages');
 
-    await startSauceConnect(FILENAME);
-    timedExecOrDie('gulp unit --nobuild --saucelabs');
-    timedExecOrDie(
-      'gulp integration --nobuild --compiled --saucelabs --stable'
-    );
-    timedExecOrDie('gulp integration --nobuild --compiled --saucelabs --beta');
+  await startSauceConnect(FILENAME);
+  timedExecOrDie('gulp unit --nobuild --saucelabs');
+  timedExecOrDie('gulp integration --nobuild --compiled --saucelabs --stable');
+  timedExecOrDie('gulp integration --nobuild --compiled --saucelabs --beta');
 
-    stopSauceConnect(FILENAME);
-  } else {
-    printChangeSummary(FILENAME);
-    const buildTargets = determineBuildTargets(FILENAME);
-    if (
-      !buildTargets.has('RUNTIME') &&
-      !buildTargets.has('FLAG_CONFIG') &&
-      !buildTargets.has('UNIT_TEST') &&
-      !buildTargets.has('INTEGRATION_TEST')
-    ) {
-      console.log(
-        `${FILELOGPREFIX} Skipping`,
-        colors.cyan('Remote (Sauce Labs) Tests'),
-        'because this commit does not affect the runtime, flag configs,',
-        'unit tests, or integration tests.'
-      );
-      stopTimer(FILENAME, FILENAME, startTime);
-      return;
-    }
-    downloadDistOutput(FILENAME);
-    timedExecOrDie('gulp update-packages');
-    await startSauceConnect(FILENAME);
-
-    if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {
-      timedExecOrDie('gulp unit --nobuild --saucelabs');
-    }
-
-    if (
-      buildTargets.has('RUNTIME') ||
-      buildTargets.has('FLAG_CONFIG') ||
-      buildTargets.has('INTEGRATION_TEST')
-    ) {
-      timedExecOrDie(
-        'gulp integration --nobuild --compiled --saucelabs --stable'
-      );
-      timedExecOrDie(
-        'gulp integration --nobuild --compiled --saucelabs --beta'
-      );
-    }
-    stopSauceConnect(FILENAME);
-  }
+  stopSauceConnect(FILENAME);
 
   stopTimer(FILENAME, FILENAME, startTime);
 }
