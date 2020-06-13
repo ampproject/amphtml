@@ -36,11 +36,11 @@ import {
   serializeQueryString,
 } from '../url';
 import {isIframed} from '../dom';
+import {listen} from '../event-helper';
 import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
 import {urls} from '../config';
-import {listenOnce} from '../event-helper';
 
 const TAG_ = 'Viewer';
 
@@ -902,9 +902,9 @@ export class ViewerImpl {
       passive: true,
     };
     unlisten.push(
-      listenOnce(this.win, 'keydown', makeVisible, options),
-      listenOnce(this.win, 'touchstart', makeVisible, options),
-      listenOnce(this.win, 'mousedown', makeVisible, options)
+      listen(this.win, 'keydown', makeVisible, options),
+      listen(this.win, 'touchstart', makeVisible, options),
+      listen(this.win, 'mousedown', makeVisible, options)
     );
     this.whenFirstVisible().then(doUnlisten);
   }
