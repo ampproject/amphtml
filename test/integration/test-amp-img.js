@@ -159,7 +159,6 @@ describe
     describe
       .configure()
       .enableIe()
-      .skipSafari()
       .run('intrinsic layout', () => {
         it('renders intrinsic layout with correct size', () => {
           const imageLoadedPromise = waitForImageToLoad(
