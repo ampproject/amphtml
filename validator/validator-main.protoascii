@@ -26,7 +26,7 @@ min_validator_revision_required: 474
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 1056
+spec_file_revision: 1057
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed"
@@ -47,6 +47,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "!DOCTYPE"
   spec_name: "html doctype"
+  descriptive_name: "html !doctype"
   mandatory_parent: "$ROOT"
   mandatory: true
   unique: true
@@ -69,6 +70,7 @@ tags: {
   html_format: AMP4ADS
   tag_name: "!DOCTYPE"
   spec_name: "html doctype (AMP4ADS)"
+  descriptive_name: "html !doctype"
   mandatory_parent: "$ROOT"
   mandatory: true
   unique: true
@@ -238,6 +240,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link rel=canonical"
+  descriptive_name: "link rel=canonical"
   mandatory_parent: "HEAD"
   mandatory: true
   unique: true
@@ -265,6 +268,7 @@ tags: {
   html_format: AMP4ADS
   tag_name: "LINK"
   spec_name: "link rel=manifest"
+  descriptive_name: "link rel=manifest"
   mandatory_parent: "HEAD"
   satisfies: "amp-app-banner data source"
   attrs: {
@@ -290,6 +294,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link rel=preload"
+  descriptive_name: "link rel=preload"
   disallowed_ancestor: "TEMPLATE"
   attrs: { name: "as" }
   attrs: { name: "href" }
@@ -309,6 +314,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link rel=stylesheet for fonts"
+  descriptive_name: "link rel=stylesheet for fonts"
   named_id: LINK_FONT_STYLESHEET
   mandatory_parent: "HEAD"
   attr_lists: "nonce-attr"
@@ -353,6 +359,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link itemprop=sameAs"
+  descriptive_name: "link itemprop=sameAs"
   attrs: {
     name: "href"
     mandatory: true
@@ -373,6 +380,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link itemprop="
+  descriptive_name: "link itemprop="
   attrs: {
     name: "href"
     mandatory: true
@@ -391,6 +399,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link property="
+  descriptive_name: "link property="
   attrs: {
     name: "href"
     mandatory: true
@@ -411,6 +420,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta charset=utf-8"
+  descriptive_name: "meta charset=utf-8"
   mandatory: true
   mandatory_parent: "HEAD"
   unique: true
@@ -428,6 +438,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta name=viewport"
+  descriptive_name: "meta name=viewport"
   mandatory: true
   mandatory_parent: "HEAD"
   unique: true
@@ -461,6 +472,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta http-equiv=X-UA-Compatible"
+  descriptive_name: "meta http-equiv=X-UA-Compatible"
   mandatory_ancestor: "HEAD"
   attrs: {
     name: "content"
@@ -4077,6 +4089,7 @@ tags: {
   html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amphtml engine v0.js script"
+  descriptive_name: "amphtml engine v0.js script"
   mandatory_alternatives: "amphtml engine v0.js script"
   unique: true
   mandatory_parent: "HEAD"
@@ -4100,6 +4113,7 @@ tags: {
   html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amphtml engine v0.js lts script"
+  descriptive_name: "amphtml engine v0.js script"
   mandatory_alternatives: "amphtml engine v0.js script"
   unique: true
   mandatory_parent: "HEAD"
@@ -4124,6 +4138,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "amphtml engine v0.js script [AMP4EMAIL,ACTIONS]"
+  descriptive_name: "amphtml engine v0.js script"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -4147,6 +4162,7 @@ tags: {
   html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp4ads engine amp4ads-v0.js script"
+  descriptive_name: "amphtml engine amp4ads-v0.js script"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -4174,6 +4190,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "script type=application/ld+json"
+  descriptive_name: "script type=application/ld+json"
   attr_lists: "nonce-attr"
   attrs: {
     name: "type"
@@ -4221,6 +4238,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "amp-ima-video > script[type=application/json]"
+  descriptive_name: "script type=application/ld+json"
   mandatory_parent: "AMP-IMA-VIDEO"
   attrs: {
     name: "type"
@@ -4243,6 +4261,7 @@ tags: {
   disabled_by: "transformed"
   tag_name: "NOSCRIPT"
   spec_name: "noscript enclosure for boilerplate"
+  descriptive_name: "noscript enclosure for boilerplate"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -4254,6 +4273,7 @@ tags: {
   enabled_by: "transformed"
   tag_name: "NOSCRIPT"
   spec_name: "noscript enclosure for boilerplate (transformed)"
+  descriptive_name: "noscript enclosure for boilerplate"
   unique: true
   mandatory_parent: "HEAD"
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites"

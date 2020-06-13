@@ -74,6 +74,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name : "AMP-LIVE-LIST [update]"
+  descriptive_name : "amp-live-list [update]"
   attrs: {
     name: "update"
     mandatory: true
@@ -85,6 +86,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-LIVE-LIST [items]"
+  descriptive_name : "amp-live-list [items]"
   attrs: {
     name: "items"
     mandatory: true
@@ -99,6 +101,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name : "AMP-LIVE-LIST [pagination]"
+  descriptive_name : "amp-live-list [pagination]"
   attrs: {
     name: "pagination"
     mandatory: true
@@ -110,6 +113,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name : "AMP-LIVE-LIST [items] item"
+  descriptive_name : "amp-live-list [items] item"
   attrs: {
     name: "data-sort-time"
     mandatory: true

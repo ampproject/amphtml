@@ -38,7 +38,7 @@ amp-inline-gallery/0.1/test/validator-amp-inline-gallery-pagination.html:32:2 Th
 |    <amp-inline-gallery layout="container">
 |      <amp-inline-gallery-pagination layout="fixed-height" height="24" inset>
 >>     ^~~~~~~~~
-amp-inline-gallery/0.1/test/validator-amp-inline-gallery-pagination.html:36:4 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-inline-gallery-pagination [inset]'. (see https://amp.dev/documentation/components/amp-inline-gallery/)
+amp-inline-gallery/0.1/test/validator-amp-inline-gallery-pagination.html:36:4 The specified layout 'FIXED_HEIGHT' is not supported by tag 'amp-inline-gallery-pagination'. (see https://amp.dev/documentation/components/amp-inline-gallery/)
 |      </amp-inline-gallery-pagination>
 |    </amp-inline-gallery>
 |    <!-- Valid: Inset with nodisplay -->

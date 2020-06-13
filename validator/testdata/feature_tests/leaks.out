@@ -24,9 +24,9 @@ FAIL
 |  -->
 |  <!doctype html SYSTEM "https://leaking.via/doctype">
 >> ^~~~~~~~~
-feature_tests/leaks.html:24:0 The attribute '"https://leaking.via/doctype"' may not appear in tag 'html doctype'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+feature_tests/leaks.html:24:0 The attribute '"https://leaking.via/doctype"' may not appear in tag 'html !doctype'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 >> ^~~~~~~~~
-feature_tests/leaks.html:24:0 The attribute 'system' may not appear in tag 'html doctype'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
+feature_tests/leaks.html:24:0 The attribute 'system' may not appear in tag 'html !doctype'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 |
 |  <html ⚡ manifest="https://leaking.via/html-manifest">
 >> ^~~~~~~~~
@@ -63,17 +63,17 @@ feature_tests/leaks.html:45:4 CSS syntax error in tag 'style amp-custom' - saw i
 |  -->
 |  <meta http-equiv="refresh" content="10; url=http://leaking.via/meta-refresh">
 >> ^~~~~~~~~
-feature_tests/leaks.html:51:0 The attribute 'http-equiv' may not appear in tag 'meta name= and content='.
+feature_tests/leaks.html:51:0 The attribute 'http-equiv' may not appear in tag 'meta'.
 |
 |  <!--
 |  %CSP
 |  -->
 |  <meta http-equiv="Content-Security-Policy" content="script-src 'self'; report-uri http://leaking.via/meta-csp-report-uri">
 >> ^~~~~~~~~
-feature_tests/leaks.html:56:0 The attribute 'http-equiv' may not appear in tag 'meta name= and content='.
+feature_tests/leaks.html:56:0 The attribute 'http-equiv' may not appear in tag 'meta'.
 |  <meta http-equiv="Content-Security-Policy-Report-Only" content="script-src 'self'; report-uri http://leaking.via/meta-csp-report-uri-2">
 >> ^~~~~~~~~
-feature_tests/leaks.html:57:0 The attribute 'http-equiv' may not appear in tag 'meta name= and content='.
+feature_tests/leaks.html:57:0 The attribute 'http-equiv' may not appear in tag 'meta'.
 |
 |  <!--
 |  %Links
@@ -83,13 +83,13 @@ feature_tests/leaks.html:57:0 The attribute 'http-equiv' may not appear in tag '
 feature_tests/leaks.html:62:0 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'https://leaking.via/link-stylesheet'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#custom-fonts)
 |  <link rel="alternate stylesheet" href="https://leaking.via/link-alternate-stylesheet" />
 >> ^~~~~~~~~
-feature_tests/leaks.html:63:0 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'alternate stylesheet'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags)
+feature_tests/leaks.html:63:0 The attribute 'rel' in tag 'link' is set to the invalid value 'alternate stylesheet'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags)
 |  <link rel="import" href="https://leaking.via/link-import" />
 >> ^~~~~~~~~
-feature_tests/leaks.html:64:0 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'import'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags)
+feature_tests/leaks.html:64:0 The attribute 'rel' in tag 'link' is set to the invalid value 'import'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags)
 |  <link rel="subresource" href="https://leaking.via/link-subresource">
 >> ^~~~~~~~~
-feature_tests/leaks.html:65:0 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'subresource'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags)
+feature_tests/leaks.html:65:0 The attribute 'rel' in tag 'link' is set to the invalid value 'subresource'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags)
 |
 |  <!--
 |  %MSIE Imports
@@ -173,11 +173,11 @@ feature_tests/leaks.html:109:0 The tag 'isindex' is disallowed.
 feature_tests/leaks.html:110:0 The tag 'isindex' is disallowed.
 |  <form id="test2"></form><isindex type="submit" formaction="https://leaking.via/isindex-formaction" form="test2"></isindex>
 >> ^~~~~~~~~
-feature_tests/leaks.html:111:0 The mandatory attribute 'action' is missing in tag 'FORM [method=GET]'. (see https://amp.dev/documentation/components/amp-form)
+feature_tests/leaks.html:111:0 The mandatory attribute 'action' is missing in tag 'form'. (see https://amp.dev/documentation/components/amp-form)
 >> ^~~~~~~~~
-feature_tests/leaks.html:111:0 The mandatory attribute 'target' is missing in tag 'FORM [method=GET]'. (see https://amp.dev/documentation/components/amp-form)
+feature_tests/leaks.html:111:0 The mandatory attribute 'target' is missing in tag 'form'. (see https://amp.dev/documentation/components/amp-form)
 >> ^~~~~~~~~
-feature_tests/leaks.html:111:0 The tag 'FORM [method=GET]' requires including the 'amp-form' extension JavaScript. (see https://amp.dev/documentation/components/amp-form)
+feature_tests/leaks.html:111:0 The tag 'form' requires including the 'amp-form' extension JavaScript. (see https://amp.dev/documentation/components/amp-form)
 >>                         ^~~~~~~~~
 feature_tests/leaks.html:111:24 The tag 'isindex' is disallowed.
 |

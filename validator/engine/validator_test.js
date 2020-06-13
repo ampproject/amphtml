@@ -743,7 +743,7 @@ describe('Validator.CssLengthAmpEmail', () => {
        test.expectedOutputFile = null;
        test.expectedOutput = 'FAIL\n' +
            'amp4email_feature_tests/css_length.html:28:2 The author stylesheet ' +
-           'specified in tag \'style amp-custom (AMP4EMAIL)\' is too long - document ' +
+           'specified in tag \'style amp-custom\' is too long - document ' +
            'contains 75001 bytes whereas the limit is 75000 bytes. ' +
            '(see https://amp.dev/documentation/guides-and-tutorials/' +
            'learn/spec/amphtml/#maximum-size)';
@@ -765,7 +765,7 @@ describe('Validator.CssLengthAmpEmail', () => {
        test.expectedOutputFile = null;
        test.expectedOutput = 'FAIL\n' +
            'amp4email_feature_tests/css_length.html:28:2 The author ' +
-           'stylesheet specified in tag \'style amp-custom (AMP4EMAIL)\' is ' +
+           'stylesheet specified in tag \'style amp-custom\' is ' +
            'too long - document contains 75002 bytes whereas the limit is ' +
            '75000 bytes. (see ' +
            'https://amp.dev/documentation/guides-and-tutorials/' +
@@ -1569,6 +1569,11 @@ describe('ValidatorRulesMakeSense', () => {
         expect(tagWithoutSpecNameIsUnique.hasOwnProperty(tagSpec.tagName))
             .toBe(false);
         tagWithoutSpecNameIsUnique[tagSpec.tagName] = 0;
+      }
+    });
+    it('reference points must set descriptive_name', () => {
+      if (tagSpec.tagName == '$REFERENCE_POINT') {
+        expect(tagSpec.descriptiveName !== null);
       }
     });
     if ((tagSpec.enabledBy.length > 0) || (tagSpec.disabledBy.length > 0)) {

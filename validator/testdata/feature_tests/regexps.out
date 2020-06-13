@@ -123,13 +123,13 @@ feature_tests/regexps.html:92:2 The attribute 'href' in tag 'link rel=stylesheet
 |    <link rel="accessibility alternate archives">
 |    <link rel="import">
 >>   ^~~~~~~~~
-feature_tests/regexps.html:105:2 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'import'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags)
+feature_tests/regexps.html:105:2 The attribute 'rel' in tag 'link' is set to the invalid value 'import'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags)
 |    <link rel="accessibility subresource">
 >>   ^~~~~~~~~
-feature_tests/regexps.html:106:2 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'accessibility subresource'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags)
+feature_tests/regexps.html:106:2 The attribute 'rel' in tag 'link' is set to the invalid value 'accessibility subresource'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags)
 |    <link rel="manifest accessibility">
 >>   ^~~~~~~~~
-feature_tests/regexps.html:107:2 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'manifest accessibility'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags)
+feature_tests/regexps.html:107:2 The attribute 'rel' in tag 'link' is set to the invalid value 'manifest accessibility'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags)
 |
 |    <!--
 |    name disallowed_value_regex: "(^|\\s)(viewport|content-disposition|revisit-after)($|\\s)"
@@ -139,10 +139,10 @@ feature_tests/regexps.html:107:2 The attribute 'rel' in tag 'link rel=' is set t
 |    <meta name="validcontent-disposition" content="">
 |    <meta name="content-disposition" content="">
 >>   ^~~~~~~~~
-feature_tests/regexps.html:115:2 The attribute 'name' in tag 'meta name= and content=' is set to the invalid value 'content-disposition'.
+feature_tests/regexps.html:115:2 The attribute 'name' in tag 'meta' is set to the invalid value 'content-disposition'.
 |    <meta name="invalid content-disposition" content="">
 >>   ^~~~~~~~~
-feature_tests/regexps.html:116:2 The attribute 'name' in tag 'meta name= and content=' is set to the invalid value 'invalid content-disposition'.
+feature_tests/regexps.html:116:2 The attribute 'name' in tag 'meta' is set to the invalid value 'invalid content-disposition'.
 |
 |    <!--
 |    css selector disallowed_value_regex: "(^|\\W)i-amphtml-"

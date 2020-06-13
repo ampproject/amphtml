@@ -51,9 +51,9 @@ FAIL
 |      <audio>
 |        <source>
 >>       ^~~~~~~~~
-feature_tests/noscript.html:51:6 The mandatory attribute 'src' is missing in tag 'audio > source'. (see https://amp.dev/documentation/components/amp-audio/)
+feature_tests/noscript.html:51:6 The mandatory attribute 'src' is missing in tag 'source'. (see https://amp.dev/documentation/components/amp-audio/)
 >>       ^~~~~~~~~
-feature_tests/noscript.html:51:6 The mandatory attribute 'type' is missing in tag 'audio > source'. (see https://amp.dev/documentation/components/amp-audio/)
+feature_tests/noscript.html:51:6 The mandatory attribute 'type' is missing in tag 'source'. (see https://amp.dev/documentation/components/amp-audio/)
 |      </audio>
 |    </noscript>
 |    <!-- Invalid: img must have src; alt, height and width are optional -->

@@ -71,6 +71,7 @@ tags: {  # <amp-accordion> > <section>
   html_format: ACTIONS
   tag_name: "SECTION"
   spec_name: "amp-accordion > section"
+  descriptive_name: "amp-accordion > section"
   mandatory_parent: "AMP-ACCORDION"
   attrs: { name: "expanded" value: "" }
   # amp-bind
