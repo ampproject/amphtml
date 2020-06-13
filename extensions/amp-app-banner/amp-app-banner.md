@@ -62,11 +62,9 @@ For a full-page example, see
 
 Use of `amp-app-banner` must meet the following requirements:
 
-- Don't include [`amp-ad`](https://amp.dev/documentation/components/amp-ad/),
-  [`amp-sticky-ad`](https://amp.dev/documentation/components/amp-sticky-ad/),
-  [`amp-embed`](https://amp.dev/documentation/components/amp-ad/) (also called
-  `amp-ad`), or
-  [`amp-iframe`](https://amp.dev/documentation/components/amp-iframe/) as
+- Don't include [`amp-ad/amp-embed`](../amp-ad/amp-ad.md),
+  [`amp-sticky-ad`](../amp-sticky-ad/amp-sticky-ad.md), or
+  [`amp-iframe`](../amp-iframe/amp-iframe.md) as
   descendants.
 
 - [`height`](https://www.w3schools.com/tags/att_height.asp) can't exceed
@@ -228,5 +226,5 @@ Specifies the layout of the banner. The value must be `nodisplay`.
 
 ## Validation
 
-See [`amp-app-banner` rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-app-banner/validator-amp-app-banner.protoascii)
+See [`amp-app-banner` rules](validator-amp-app-banner.protoascii)
 in the AMP validator specification.
