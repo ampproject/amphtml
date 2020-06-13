@@ -84,7 +84,7 @@ amp-mega-menu/0.1/test/validator-amp-mega-menu-error.html:59:10 The tag 'div', a
 |    <amp-mega-menu layout="fixed-height" height="80">
 |      <div></div>
 >>     ^~~~~~~~~
-amp-mega-menu/0.1/test/validator-amp-mega-menu-error.html:66:4 Tag 'div' is disallowed as child of tag 'amp-mega-menu'. Child tag must be one of ['nav', 'amp-list']. (see https://amp.dev/documentation/components/amp-mega-menu)
+amp-mega-menu/0.1/test/validator-amp-mega-menu-error.html:66:4 Tag 'div' is disallowed as child of tag 'amp-mega-menu'. Child tag must be one of ['nav', 'amp-list']. (see https://amp.dev/documentation/components/amp-mega-menu/)
 |    </amp-mega-menu>
 |    <!-- amp-list under amp-mega-menu must contain a template -->
 |    <amp-mega-menu layout="fixed-height" height="80">

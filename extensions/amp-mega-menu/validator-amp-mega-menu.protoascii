@@ -28,7 +28,7 @@ tags: {  # <amp-mega-menu>
   tag_name: "AMP-MEGA-MENU"
   requires_extension: "amp-mega-menu"
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-mega-menu"
+  spec_url: "https://amp.dev/documentation/components/amp-mega-menu/"
   descendant_tag_list: "amp-mega-menu-allowed-descendants"
   # We want to support both of the cases below:
   # <amp-mega-menu> > <nav> > ... and

@@ -140,7 +140,7 @@ feature_tests/forms.html:125:2 The attribute 'target' in tag 'FORM [method=POST]
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
 |      <input type="image" name="image">
 >>     ^~~~~~~~~
-feature_tests/forms.html:136:4 The attribute 'type' in tag 'input' is set to the invalid value 'image'. (see https://amp.dev/documentation/components/amp-form)
+feature_tests/forms.html:136:4 The attribute 'type' in tag 'input' is set to the invalid value 'image'. (see https://amp.dev/documentation/components/amp-form/)
 |    </form>
 |    <!-- Valid: input can be type="password" or type="file" in a post xhr form. -->
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
@@ -151,7 +151,7 @@ feature_tests/forms.html:136:4 The attribute 'type' in tag 'input' is set to the
 |    <form method="get" action="https://example.com/subscribe" action-xhr="https://example.com/subscribe" target="_blank">
 |      <input type="password" name="password">
 >>     ^~~~~~~~~
-feature_tests/forms.html:145:4 The tag 'INPUT [type=password]' may only appear as a descendant of tag 'form [method=post]'. (see https://amp.dev/documentation/components/amp-form)
+feature_tests/forms.html:145:4 The tag 'INPUT [type=password]' may only appear as a descendant of tag 'form [method=post]'. (see https://amp.dev/documentation/components/amp-form/)
 |    </form>
 |    <!-- Invalid: if validation-for is set on an element, then -->
 |    <!-- visible-when-invalid must also be set and vice versa. -->
@@ -231,7 +231,7 @@ feature_tests/forms.html:193:6 The tag 'template' may not appear as a descendant
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
 |      <input mask="L0L_0L0" type="tel">
 >>     ^~~~~~~~~
-feature_tests/forms.html:203:4 The tag 'input [mask] (custom mask)' requires including the 'amp-inputmask' extension JavaScript. (see https://amp.dev/documentation/components/amp-inputmask)
+feature_tests/forms.html:203:4 The tag 'input [mask] (custom mask)' requires including the 'amp-inputmask' extension JavaScript. (see https://amp.dev/documentation/components/amp-inputmask/)
 |    </form>
 |    <!-- Valid: textarea within form -->
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
