@@ -85,6 +85,7 @@ jobs:
         - unbuffer node build-system/pr-check/dist-tests.js
     - stage: test
       name: 'Remote (Sauce Labs) Tests'
+      if: type = push
       script:
         - unbuffer node build-system/pr-check/remote-tests.js
       after_script:
