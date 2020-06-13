@@ -97,6 +97,10 @@ describes.repeated(
           env.sandbox.stub(Services, 'bindForDocOrNull').returns(promise);
           setBindService = resolve;
 
+          env.sandbox
+            .stub(Services, 'ownersForDoc')
+            .returns({scheduleUnlayout: env.sandbox.stub()});
+
           ssrTemplateHelper = {
             isEnabled: () => false,
             ssr: () => Promise.resolve(),
