@@ -26,6 +26,7 @@ import {
   QQID_HEADER,
   RENDER_ON_IDLE_FIX_EXP,
   SANDBOX_HEADER,
+  STICKY_AD_PADDING_BOTTOM_EXP,
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
   additionalDimensions,
@@ -251,6 +252,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       [NO_SIGNING_EXP.id]: {
         isTrafficEligible: () => true,
         branches: [[NO_SIGNING_EXP.control], [NO_SIGNING_EXP.experiment]],
+      },
+      [STICKY_AD_PADDING_BOTTOM_EXP.id]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [STICKY_AD_PADDING_BOTTOM_EXP.control],
+          [STICKY_AD_PADDING_BOTTOM_EXP.experiment],
+        ],
       },
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
     });
