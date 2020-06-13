@@ -54,6 +54,10 @@ t.run('user-error', function () {
         return browser.waitForElementLayout('amp-analytics');
       });
 
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
+
       it('should ping correct host with amp-pixel user().assert err', () => {
         return RequestBank.withdraw();
       });
@@ -92,6 +96,10 @@ t.run('user-error', function () {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics, amp-img');
+      });
+
+      afterEach(() => {
+        return RequestBank.tearDown();
       });
 
       it('should ping correct host with amp-img user().error err', () => {
@@ -133,6 +141,10 @@ t.run('user-error', function () {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics, amp-ad');
+      });
+
+      afterEach(() => {
+        return RequestBank.tearDown();
       });
 
       it('should ping correct host with 3p error message', () => {
