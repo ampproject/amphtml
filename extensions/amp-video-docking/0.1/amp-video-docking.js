@@ -496,7 +496,10 @@ export class VideoDocking {
    * @private
    */
   getDoc_() {
-    return /** @type {!Document} */ (this.ampdoc_.getRootNode());
+    const root = this.ampdoc_.getRootNode();
+    return /** @type {!Document} */ (root.ownerDocument
+      ? root.ownerDocument
+      : root);
   }
 
   /**
