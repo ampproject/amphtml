@@ -87,8 +87,9 @@ class Amp3QPlayer extends AMP.BaseElement {
     Services.videoManagerForDoc(el).register(this);
   }
 
-  /** private */
+  /** @private */
   generateIframeSrc_() {
+
     const explicitParamsAttributes = ['key', 'timestamp', 'controls'];
 
     let iframeSrc = 'https://playout.3qsdn.com/';
@@ -102,8 +103,7 @@ class Amp3QPlayer extends AMP.BaseElement {
         '/';
     }
 
-    iframeSrc +=
-      encodeURIComponent(dev().assertString(this.dataId)) +
+    iframeSrc += dev().assertString(this.dataId) +
       // Autoplay is handled by VideoManager
       '?autoplay=false&amp=true';
 
@@ -114,7 +114,7 @@ class Amp3QPlayer extends AMP.BaseElement {
       }
     });
 
-    return iframeSrc;
+    return encodeURIComponent(iframeSrc);
   }
 
   /** @override */
