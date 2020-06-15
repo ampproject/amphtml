@@ -41,6 +41,10 @@ You can specify a template in one of two ways:
 - a `template` attribute that references an ID of an existing templating element.
 - a templating element nested directly inside the `amp-list` element.
 
+[tip type="note"]
+When using `<amp-list>` in tandem with another templating AMP component, such as `<amp-form>`, note that templates may not nest in valid AMP documents. In this case a valid workaround is to provide the template by `id` via the `template` attribute. Learn more about [nested templates in `<amp-mustache>`](https://amp.dev/documentation/components/amp-mustache/#nested-templates).
+[/tip]
+
 For more details on templates, see [AMP HTML Templates](../../spec/amp-html-templates.md).
 
 _Example: Displaying a dynamic list_
@@ -426,7 +430,11 @@ We've introduced the `load-more` attributes with options `manual` and `auto` to 
 For working examples, please see [test/manual/amp-list/infinite-scroll-1.amp.html](../../test/manual/amp-list/infinite-scroll-1.amp.html) and [test/manual/amp-list/infinite-scroll-2.amp.html](../../test/manual/amp-list/infinite-scroll-1.amp.html).
 
 [tip type="important"]
-**Important** When using `<amp-list>` infinite scroll in conjunction with `<amp-analytics>` scroll triggers, it is recommended to make use of the `useInitialPageSize` property of `<amp-analytics>` to get a more accurate measurement of the scroll position that ignores the hight changes caused by `<amp-list>`. Without `useInitialPageSize`, the `100%` scroll trigger point might never fire as more documents get loaded. Note that this will also ignore the size changes caused by other extensions (such as expanding embedded content) so some scroll events might fire prematurely instead
+**Important**
+
+When using `<amp-list>` infinite scroll in conjunction with `<amp-analytics>` scroll triggers, it is recommended to make use of the `useInitialPageSize` property of `<amp-analytics>` to get a more accurate measurement of the scroll position that ignores the height changes caused by `<amp-list>`.
+
+Without `useInitialPageSize`, the `100%` scroll trigger point might never fire as more documents get loaded. Note that this will also ignore the size changes caused by other extensions (such as expanding embedded content) so some scroll events might fire prematurely instead.
 [/tip]
 
 ### Attributes
