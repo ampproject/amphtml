@@ -105,9 +105,9 @@
   display: none !important;
 }
 
-[ad-showing]:not(.i-amphtml-current-page-has-audio)
+[ad-showing]:not([i-amphtml-current-page-has-audio])
 .i-amphtml-story-mute-audio-control,
-[ad-showing]:not(.i-amphtml-current-page-has-audio)
+[ad-showing]:not([i-amphtml-current-page-has-audio])
 .i-amphtml-story-unmute-audio-control {
   visibility: hidden !important;
 }
