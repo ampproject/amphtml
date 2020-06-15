@@ -277,7 +277,7 @@ tags: {
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
   }
-  spec_url: "https://amp.dev/documentation/components/amp-story"
+  spec_url: "https://amp.dev/documentation/components/amp-story/"
 }
 tags: {
   html_format: AMP
@@ -345,7 +345,7 @@ tags: {
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
   }
-  spec_url: "https://amp.dev/documentation/components/amp-story"
+  spec_url: "https://amp.dev/documentation/components/amp-story/"
 }
 tags: {  # <amp-story-bookend>
   html_format: AMP
@@ -451,13 +451,13 @@ tags: {  # amp-experiment (json)
   attr_lists: "nonce-attr"
   cdata: {
     max_bytes: 15000
-    max_bytes_spec_url: "https://amp.dev/documentation/components/amp-experiment#configuration"
+    max_bytes_spec_url: "https://amp.dev/documentation/components/amp-experiment/#configuration"
     disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
   }
-  spec_url: "https://amp.dev/documentation/components/amp-experiment"
+  spec_url: "https://amp.dev/documentation/components/amp-experiment/"
 }
 tags: {
   html_format: AMP
@@ -507,7 +507,7 @@ tags: {
   reference_points: {
     tag_spec_name: "AMP-STORY-CTA-LAYER animate-in"
   }
-  spec_url: "https://amp.dev/documentation/components/amp-story"
+  spec_url: "https://amp.dev/documentation/components/amp-story/"
 }
 descendant_tag_list: {
   name: "amp-story-cta-layer-allowed-descendants"

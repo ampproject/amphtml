@@ -26,7 +26,7 @@ FAIL
 |    <style amp4email-boilerplate>body{visibility:hidden}</style>
 |    <script async src="https://cdn.ampproject.org/v0.js" nonce="disallowed"></script>
 >>   ^~~~~~~~~
-amp4email_feature_tests/nonce_disallowed.html:26:2 The attribute 'nonce' may not appear in tag 'amphtml engine v0.js script [AMP4EMAIL,ACTIONS]'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
+amp4email_feature_tests/nonce_disallowed.html:26:2 The attribute 'nonce' may not appear in tag 'amphtml engine v0.js script'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 |  </head>
 |  <body>
 |  Hello, world.

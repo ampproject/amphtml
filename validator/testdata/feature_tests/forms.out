@@ -105,7 +105,7 @@ FAIL
 |    <!-- Invalid: form action must be https. -->
 |    <form method="post" action-xhr="http://example.com/subscribe" target="_blank">
 >>   ^~~~~~~~~
-feature_tests/forms.html:105:2 Invalid URL protocol 'http:' for attribute 'action-xhr' in tag 'FORM [method=POST]'. (see https://amp.dev/documentation/components/amp-form)
+feature_tests/forms.html:105:2 Invalid URL protocol 'http:' for attribute 'action-xhr' in tag 'form'. (see https://amp.dev/documentation/components/amp-form)
 |      <input type="submit" value="Subscribe">
 |    </form>
 |    <!-- Invalid: form action must be a non-cdn link. -->
@@ -127,7 +127,7 @@ feature_tests/forms.html:105:2 Invalid URL protocol 'http:' for attribute 'actio
 |    <!-- Invalid: form target must be _blank or _top -->
 |    <form method="post" action-xhr="https://example/subscribe" target="_new">
 >>   ^~~~~~~~~
-feature_tests/forms.html:125:2 The attribute 'target' in tag 'FORM [method=POST]' is set to the invalid value '_new'. (see https://amp.dev/documentation/components/amp-form)
+feature_tests/forms.html:125:2 The attribute 'target' in tag 'form' is set to the invalid value '_new'. (see https://amp.dev/documentation/components/amp-form)
 |      <input type="submit" value="Subscribe">
 |    </form>
 |    <!-- Invalid: input, select, option and textarea must be children of form. -->
@@ -140,7 +140,7 @@ feature_tests/forms.html:125:2 The attribute 'target' in tag 'FORM [method=POST]
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
 |      <input type="image" name="image">
 >>     ^~~~~~~~~
-feature_tests/forms.html:136:4 The attribute 'type' in tag 'input' is set to the invalid value 'image'. (see https://amp.dev/documentation/components/amp-form)
+feature_tests/forms.html:136:4 The attribute 'type' in tag 'input' is set to the invalid value 'image'. (see https://amp.dev/documentation/components/amp-form/)
 |    </form>
 |    <!-- Valid: input can be type="password" or type="file" in a post xhr form. -->
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
@@ -151,7 +151,7 @@ feature_tests/forms.html:136:4 The attribute 'type' in tag 'input' is set to the
 |    <form method="get" action="https://example.com/subscribe" action-xhr="https://example.com/subscribe" target="_blank">
 |      <input type="password" name="password">
 >>     ^~~~~~~~~
-feature_tests/forms.html:145:4 The tag 'INPUT [type=password]' may only appear as a descendant of tag 'form [method=post]'. (see https://amp.dev/documentation/components/amp-form)
+feature_tests/forms.html:145:4 The tag 'input' may only appear as a descendant of tag 'form [method=post]'. (see https://amp.dev/documentation/components/amp-form/)
 |    </form>
 |    <!-- Invalid: if validation-for is set on an element, then -->
 |    <!-- visible-when-invalid must also be set and vice versa. -->
@@ -173,17 +173,17 @@ feature_tests/forms.html:156:4 The attribute 'submit-success' may not appear in 
 |    <!-- Invalid: post implies action-xhr -->
 |    <form method="post" action="https://example.com/subscribe" target="_top">
 >>   ^~~~~~~~~
-feature_tests/forms.html:159:2 The attribute 'action' may not appear in tag 'FORM [method=POST]'. (see https://amp.dev/documentation/components/amp-form)
+feature_tests/forms.html:159:2 The attribute 'action' may not appear in tag 'form'. (see https://amp.dev/documentation/components/amp-form)
 |    </form>
 |    <!-- Invalid: get implies action -->
 |    <form method="get" action-xhr="https://example.com/subscribe" target="_top">
 >>   ^~~~~~~~~
-feature_tests/forms.html:162:2 The mandatory attribute 'action' is missing in tag 'FORM [method=GET]'. (see https://amp.dev/documentation/components/amp-form)
+feature_tests/forms.html:162:2 The mandatory attribute 'action' is missing in tag 'form'. (see https://amp.dev/documentation/components/amp-form)
 |    </form>
 |    <!-- Invalid: get implies action, default method is get -->
 |    <form action-xhr="https://example.com/subscribe" target="_top">
 >>   ^~~~~~~~~
-feature_tests/forms.html:165:2 The mandatory attribute 'action' is missing in tag 'FORM [method=GET]'. (see https://amp.dev/documentation/components/amp-form)
+feature_tests/forms.html:165:2 The mandatory attribute 'action' is missing in tag 'form'. (see https://amp.dev/documentation/components/amp-form)
 |    </form>
 |    <!-- Valid: inlined template, referenced template -->
 |    <template type="amp-mustache" id="submit_success_template">
@@ -231,7 +231,7 @@ feature_tests/forms.html:193:6 The tag 'template' may not appear as a descendant
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
 |      <input mask="L0L_0L0" type="tel">
 >>     ^~~~~~~~~
-feature_tests/forms.html:203:4 The tag 'input [mask] (custom mask)' requires including the 'amp-inputmask' extension JavaScript. (see https://amp.dev/documentation/components/amp-inputmask)
+feature_tests/forms.html:203:4 The tag 'input' requires including the 'amp-inputmask' extension JavaScript. (see https://amp.dev/documentation/components/amp-inputmask/)
 |    </form>
 |    <!-- Valid: textarea within form -->
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">

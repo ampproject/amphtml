@@ -32,9 +32,9 @@ FAIL
 |    <!-- Invalid: Missing script, test is to see if the error message is OK. -->
 |    <amp-carousel layout=fill></amp-carousel>
 >>   ^~~~~~~~~
-amp-carousel/0.2/test/validator-amp-carousel-error-msg.html:32:2 The tag 'AMP-CAROUSEL' requires including the 'amp-carousel' extension JavaScript. (see https://amp.dev/documentation/components/amp-carousel)
+amp-carousel/0.2/test/validator-amp-carousel-error-msg.html:32:2 The tag 'amp-carousel' requires including the 'amp-carousel' extension JavaScript. (see https://amp.dev/documentation/components/amp-carousel/)
 |    <amp-carousel width="600" height="522" layout="responsive" type="slides" controls></amp-carousel>
 >>   ^~~~~~~~~
-amp-carousel/0.2/test/validator-amp-carousel-error-msg.html:33:2 The tag 'AMP-CAROUSEL' requires including the 'amp-carousel' extension JavaScript. (see https://amp.dev/documentation/components/amp-carousel)
+amp-carousel/0.2/test/validator-amp-carousel-error-msg.html:33:2 The tag 'amp-carousel' requires including the 'amp-carousel' extension JavaScript. (see https://amp.dev/documentation/components/amp-carousel/)
 |  </body>
 |  </html>

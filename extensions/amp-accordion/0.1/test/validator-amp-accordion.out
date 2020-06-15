@@ -66,11 +66,11 @@ FAIL
 |    <amp-accordion>
 |      <amp-accordion> <!-- can't nest amp-accordion -->
 >>     ^~~~~~~~~
-amp-accordion/0.1/test/validator-amp-accordion.html:66:4 Tag 'amp-accordion' is disallowed as child of tag 'amp-accordion'. Child tag must be one of ['section']. (see https://amp.dev/documentation/components/amp-accordion)
+amp-accordion/0.1/test/validator-amp-accordion.html:66:4 Tag 'amp-accordion' is disallowed as child of tag 'amp-accordion'. Child tag must be one of ['section']. (see https://amp.dev/documentation/components/amp-accordion/)
 |      </amp-accordion>
 |      <p>Some paragraph of text that doesn't belong here.</p>
 >>     ^~~~~~~~~
-amp-accordion/0.1/test/validator-amp-accordion.html:68:4 Tag 'p' is disallowed as child of tag 'amp-accordion'. Child tag must be one of ['section']. (see https://amp.dev/documentation/components/amp-accordion)
+amp-accordion/0.1/test/validator-amp-accordion.html:68:4 Tag 'p' is disallowed as child of tag 'amp-accordion'. Child tag must be one of ['section']. (see https://amp.dev/documentation/components/amp-accordion/)
 |      <section>
 >>     ^~~~~~~~~
 amp-accordion/0.1/test/validator-amp-accordion.html:69:4 Tag 'amp-accordion > section' must have 2 child tags - saw 3 child tags.

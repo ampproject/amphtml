@@ -528,7 +528,7 @@ message HtmlFormat {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 39
+// NEXT AVAILABLE TAG: 40
 message TagSpec {
   // The html_format field tells the validator for which html formats
   // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is allowed to validate.
@@ -554,10 +554,18 @@ message TagSpec {
   optional string tag_name = 1;
 
   // If provided, the spec_name must be unique within the validator
-  // rules. It will be used with preference over the tag_name in
-  // parameters for error messages and other usages that require or
-  // benefit from a unique identifier.
+  // rules. This string forms a a unique id for this TagSpec. If not set, the
+  // tag_name field is used as the unique id. This string is not used in error
+  // messages, see descriptive_name for that.
   optional string spec_name = 2;
+
+  // If `tag_name` is not a sufficient descriptor for error messages having to
+  // do with this tag spec, provide a `descriptive_name` value, which if present
+  // will be used in place of `tag_name`. Typically `descriptive_name` should
+  // include the tag_name in it, and should avoid using < and > in case
+  // downstream libraries of the validator fail to properly HTML escape rendered
+  // error strings.
+  optional string descriptive_name = 39;
 
   // NamedId's are used to uniquely identify specific TagSpecs in the
   // validator rules in a stable manner. Most TagSpecs have no set NamedId.

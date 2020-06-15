@@ -171,13 +171,13 @@ tags: {  # <amp-script> (local script)
   attr_lists: "nonce-attr"
   cdata: {
     max_bytes: 10000
-    max_bytes_spec_url: "https://amp.dev/documentation/components/amp-script#faq"
+    max_bytes_spec_url: "https://amp.dev/documentation/components/amp-script/#faq"
     disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
   }
-  spec_url: "https://amp.dev/documentation/components/amp-script"
+  spec_url: "https://amp.dev/documentation/components/amp-script/"
 }
 tags: {  # <amp-script>
   html_format: AMP

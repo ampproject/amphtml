@@ -35,7 +35,7 @@ FAIL
 |        <amp-story-grid-layer template="horizontal">
 |          <img class="footer-logo" src="img/foot-logo.svg" width="40" height="40" /> <!-- The real error here is that <img/> tag is not allowed. But this is a weird use case where the validator error will comment about reference points. This needs to be fixed in the near future. -->
 >>         ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-reference-point.html:35:8 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img)
+amp-story/1.0/test/validator-amp-story-reference-point.html:35:8 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://amp.dev/documentation/components/amp-img/)
 |        </amp-story-grid-layer>
 |      </amp-story-page>
 |      <amp-story-bookend src="./related.json" layout="nodisplay"></amp-story-bookend>

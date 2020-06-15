@@ -44,7 +44,7 @@ FAIL
 |  -->
 |  <amp-carousel
 >> ^~~~~~~~~
-amp4email_feature_tests/amp_carousel.html:44:0 The attribute 'arrows' may not appear in tag 'AMP-CAROUSEL'. (see https://amp.dev/documentation/components/amp-carousel)
+amp4email_feature_tests/amp_carousel.html:44:0 The attribute 'arrows' may not appear in tag 'amp-carousel'. (see https://amp.dev/documentation/components/amp-carousel/)
 |    arrows
 |    width="800" height="600"
 |    layout="responsive"

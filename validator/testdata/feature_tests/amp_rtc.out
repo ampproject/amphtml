@@ -44,7 +44,7 @@ FAIL
 |    <!-- Invalid: found in body, duplicate -->
 |    <script type="application/json" id="amp-rtc">
 >>   ^~~~~~~~~
-feature_tests/amp_rtc.html:44:2 The parent tag of tag 'script id=amp-rtc' is 'body', but it can only be 'head'.
+feature_tests/amp_rtc.html:44:2 The parent tag of tag 'script' is 'body', but it can only be 'head'.
 |    {
 |      "doubleclick": {
 |        "url": "https://pub.com/rtc-endpoint",
