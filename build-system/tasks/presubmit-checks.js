@@ -681,6 +681,7 @@ const forbiddenTerms = {
     message:
       'SVG data images must use charset=utf-8: ' +
       '"data:image/svg+xml;charset=utf-8,..."',
+    allowlist: ['src/service/ie-intrinsic-bug.js'],
   },
   'new CustomEvent\\(': {
     message: 'Use createCustomEvent() helper instead.',

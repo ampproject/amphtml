@@ -823,7 +823,10 @@ function createBaseCustomElementClass(win) {
         this.everAttached = true;
 
         try {
-          this.layout_ = applyStaticLayout(this);
+          this.layout_ = applyStaticLayout(
+            this,
+            Services.platformFor(toWin(this.ownerDocument.defaultView)).isIe()
+          );
         } catch (e) {
           reportError(e, this);
         }
