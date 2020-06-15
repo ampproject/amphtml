@@ -321,6 +321,10 @@ amp-story .amp-active > div {
   display: none !important;
 }
 
+amp-story .i-amphtml-loader-background {
+  display: none !important;
+} 
+
 /**
  * Uses a selector that stops targeting amp-story-page elements once they have a
  * [distance] or [active] attribute, so amp-story.css doesn't have to rely on
