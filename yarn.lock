@@ -15388,6 +15388,13 @@ rocambole@0.7.0:
   dependencies:
     esprima "^2.1"
 
+rrule-without-luxon@2.6.4:
+  version "2.6.4"
+  resolved "https://registry.yarnpkg.com/rrule-without-luxon/-/rrule-without-luxon-2.6.4.tgz#702eacf0008ab1aedbbd778e610a904f16a7ba6d"
+  integrity sha512-9eHiRkARqfvBliOYRO3jiYSg4OPDgsBhbbYug/bASnOAVtMJX5JPZITlL1Si4QvETVJBJMjM1OcQQ6CnR6mcFQ==
+  dependencies:
+    tslib "^1.10.0"
+
 rst-selector-parser@^2.2.3:
   version "2.2.3"
   resolved "https://registry.yarnpkg.com/rst-selector-parser/-/rst-selector-parser-2.2.3.tgz#81b230ea2fcc6066c89e3472de794285d9b03d91"
@@ -17145,6 +17152,11 @@ tsickle@0.38.1:
   version "0.38.1"
   resolved "https://registry.yarnpkg.com/tsickle/-/tsickle-0.38.1.tgz#30762db759d40c435943093b6972c7f2efb384ef"
   integrity sha512-4xZfvC6+etRu6ivKCNqMOd1FqcY/m6JY3Y+yr5+Xw+i751ciwrWINi6x/3l1ekcODH9GZhlf0ny2LpzWxnjWYA==
+
+tslib@^1.10.0:
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.13.0.tgz#c881e13cc7015894ed914862d276436fa9a47043"
+  integrity sha512-i/6DQjL8Xf3be4K/E6Wgpekn5Qasl1usyw++dAA35Ue5orEn65VIxOA+YvNNl9HV3qv70T7CNwjODHZrLwvd1Q==
 
 tslib@^1.9.0:
   version "1.10.0"
