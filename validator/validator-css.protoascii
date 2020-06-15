@@ -306,12 +306,12 @@ css {
   html_format: AMP
   disabled_by: "transformed"
   spec_url:
-  "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets"
+  "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets"
 
   max_bytes: 75000
   max_bytes_per_inline_style: 1000
   max_bytes_spec_url:
-  "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size"
+  "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
   url_bytes_included: true
 
   # This is a legacy requirement. Style tags support all declarations while
@@ -344,12 +344,12 @@ css {
 css {
   html_format: AMP
   enabled_by: "transformed"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets"
 
   max_bytes: 75000
   max_bytes_per_inline_style: 1000
   max_bytes_spec_url:
-  "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size"
+  "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
   url_bytes_included: false
 
   allow_all_declaration_in_style_tag: true
@@ -376,7 +376,7 @@ css {
 css {
   html_format: ACTIONS
   spec_url:
-  "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets"
+  "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets"
 
   # Due to a bug, we allowed unlimited doc-level bytes for CSS in ACTIONS
   # formats. To avoid breaking existing docs, this is temporarily allowed until
@@ -384,7 +384,7 @@ css {
   # max_bytes: 75000
   # max_bytes_per_inline_style: 1000
   max_bytes_spec_url:
-  "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size"
+  "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
   url_bytes_included: true
 
   allow_all_declaration_in_style_tag: true
@@ -409,13 +409,13 @@ css {
 # DocCss rules for AMP4ADS.
 css {
   html_format: AMP4ADS
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec#css"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec/#css"
 
   # AMP4ADS currently allows unlimited inline style, and only limits style in
   # the <style amp-custom> tag in the document head.
   # max_bytes: 20000
   # max_bytes_per_inline_style: 1000
-  max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec#css"
+  max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec/#css"
 
   allow_all_declaration_in_style_tag: true
   allow_important: false
@@ -439,7 +439,7 @@ css {
 # DocCss rules for AMP4EMAIL
 css {
   html_format: AMP4EMAIL
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets"
 
   # Due to a bug, we allowed unlimited doc-level bytes for CSS in AMP4EMAIL
   # formats. To avoid breaking emails, this is temporarily set to a warning but
@@ -449,7 +449,7 @@ css {
   max_bytes_per_inline_style: 1000
 
   max_bytes_spec_url:
-  "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size"
+  "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
   url_bytes_included: true
 
   # This is a legacy requirement. Style tags support all declarations while
@@ -480,6 +480,7 @@ tags: {  # <style amp-custom-length-check>, ALL FORMATS
   html_format: ACTIONS
   tag_name: "STYLE"
   spec_name: "style amp-custom-length-check"
+  descriptive_name: "style amp-custom-length-check"
   unique: true
   mandatory_parent: "HEAD"
   attrs: {
@@ -504,6 +505,7 @@ tags: {  # <style amp-custom>, [AMP, ACTIONS]
   html_format: ACTIONS
   tag_name: "STYLE"
   spec_name: "style amp-custom"
+  descriptive_name: "style amp-custom"
   named_id: STYLE_AMP_CUSTOM
   unique: true
   mandatory_parent: "HEAD"
@@ -526,7 +528,7 @@ tags: {  # <style amp-custom>, [AMP, ACTIONS]
     doc_css_bytes: true
     max_bytes: 75000
     max_bytes_spec_url:
-    "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size"
+    "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
 
     css_spec: {
       at_rule_spec: { name: 'font-face' }
@@ -546,13 +548,14 @@ tags: {  # <style amp-custom>, [AMP, ACTIONS]
       error_message: "CSS i-amphtml- name prefix"
     }
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets"
 }
 
 tags: {  # <style amp-custom>, AMP4ADS
   html_format: AMP4ADS
   tag_name: "STYLE"
   spec_name: "style amp-custom (AMP4ADS)"
+  descriptive_name: "style amp-custom"
   unique: true
   mandatory_parent: "HEAD"
   attr_lists: "nonce-attr"
@@ -574,7 +577,7 @@ tags: {  # <style amp-custom>, AMP4ADS
     doc_css_bytes: true
     max_bytes: 20000  # Smaller than AMP, which is 75,000.
     max_bytes_spec_url:
-    "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size"
+    "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
     css_spec: {
       at_rule_spec: { name: 'font-face' }
       at_rule_spec: { name: 'keyframes' }
@@ -607,7 +610,7 @@ tags: {  # <style amp-custom>, AMP4ADS
       error_message: "CSS i-amphtml- name prefix"
     }
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec#css"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec/#css"
 }
 
 tags: {  # <style amp-custom>, AMP4EMAIL, not data-css-strict
@@ -615,6 +618,7 @@ tags: {  # <style amp-custom>, AMP4EMAIL, not data-css-strict
   disabled_by: "data-css-strict"
   tag_name: "STYLE"
   spec_name: "style amp-custom (AMP4EMAIL)"
+  descriptive_name: "style amp-custom"
   unique: true
   mandatory_parent: "HEAD"
   attrs: {
@@ -636,7 +640,7 @@ tags: {  # <style amp-custom>, AMP4EMAIL, not data-css-strict
     doc_css_bytes: true
     max_bytes: 75000
     max_bytes_spec_url:
-    "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size"
+    "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
 
     css_spec: {
       at_rule_spec: {
@@ -665,7 +669,7 @@ tags: {  # <style amp-custom>, AMP4EMAIL, not data-css-strict
       error_message: "CSS i-amphtml- name prefix"
     }
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets"
 }
 
 tags: {  # <style amp-custom>, AMP4EMAIL, data-css-strict
@@ -673,6 +677,7 @@ tags: {  # <style amp-custom>, AMP4EMAIL, data-css-strict
   enabled_by: "data-css-strict"
   tag_name: "STYLE"
   spec_name: "style amp-custom (css-strict)"
+  descriptive_name: "style amp-custom"
   unique: true
   mandatory_parent: "HEAD"
   attrs: {
@@ -694,7 +699,7 @@ tags: {  # <style amp-custom>, AMP4EMAIL, data-css-strict
     doc_css_bytes: true
     max_bytes: 75000
     max_bytes_spec_url:
-    "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size"
+    "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
 
     css_spec: {
       at_rule_spec: {
@@ -764,7 +769,7 @@ tags: {  # <style amp-custom>, AMP4EMAIL, data-css-strict
       error_message: "CSS i-amphtml- name prefix"
     }
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets"
 }
 
 tags: {  # `<style amp-boilerplate>`, [AMP, ACTIONS]
@@ -773,6 +778,7 @@ tags: {  # `<style amp-boilerplate>`, [AMP, ACTIONS]
   disabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "head > style[amp-boilerplate]"
+  descriptive_name: "head > style[amp-boilerplate]"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -789,7 +795,7 @@ tags: {  # `<style amp-boilerplate>`, [AMP, ACTIONS]
     # is required in the boilerplate. It was made by replacing ' ' with \\s+.
     cdata_regex: "\\s*body\\s*{\\s*-webkit-animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-moz-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-ms-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;?\\s*}\\s*@-webkit-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-moz-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-ms-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-o-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*"
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites"
 }
 
 tags: {  # `<style amp-boilerplate>`, transformed [AMP, ACTIONS]
@@ -798,6 +804,7 @@ tags: {  # `<style amp-boilerplate>`, transformed [AMP, ACTIONS]
   enabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "head > style[amp-boilerplate] (transformed)"
+  descriptive_name: "head > style[amp-boilerplate]"
   unique: true
   mandatory_parent: "HEAD"
   attrs: {
@@ -812,13 +819,14 @@ tags: {  # `<style amp-boilerplate>`, transformed [AMP, ACTIONS]
     # is required in the boilerplate. It was made by replacing ' ' with \\s+.
     cdata_regex: "\\s*body\\s*{\\s*-webkit-animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-moz-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-ms-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;?\\s*}\\s*@-webkit-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-moz-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-ms-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-o-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*"
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites"
 }
 
 tags: {  # `<style amp4ads-boilerplate>`, AMP4ADS
   html_format: AMP4ADS
   tag_name: "STYLE"
   spec_name: "head > style[amp4ads-boilerplate]"
+  descriptive_name: "head > style[amp4ads-boilerplate]"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -836,13 +844,14 @@ tags: {  # `<style amp4ads-boilerplate>`, AMP4ADS
     # pretty printing tools some latitude.
     cdata_regex: "\\s*body\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*"
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec?format=ads#boilerplate"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec/?format=ads#boilerplate"
 }
 
 tags: {  # `<style amp4email-boilerplate>`, AMP4EMAIL
   html_format: AMP4EMAIL
   tag_name: "STYLE"
   spec_name: "head > style[amp4email-boilerplate]"
+  descriptive_name: "head > style[amp4email-boilerplate]"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -858,7 +867,7 @@ tags: {  # `<style amp4email-boilerplate>`, AMP4EMAIL
     # is required in the boilerplate. It was made by replacing ' ' with \\s+.
     cdata_regex: "\\s*body\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*"
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/amp-email-format?format=email#required-markup"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-format/?format=email#required-markup"
 }
 
 tags: {  # `<style amp-boilerplate>`, [AMP, ACTIONS]
@@ -867,6 +876,7 @@ tags: {  # `<style amp-boilerplate>`, [AMP, ACTIONS]
   disabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "noscript > style[amp-boilerplate]"
+  descriptive_name: "noscript > style[amp-boilerplate]"
   mandatory: true
   unique: true
   mandatory_parent: "NOSCRIPT"
@@ -882,7 +892,7 @@ tags: {  # `<style amp-boilerplate>`, [AMP, ACTIONS]
     doc_css_bytes: false
     cdata_regex: "\\s*body\\s*{\\s*-webkit-animation:\\s*none;\\s*-moz-animation:\\s*none;\\s*-ms-animation:\\s*none;\\s*animation:\\s*none;?\\s*}\\s*"
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites"
 }
 
 tags: {  # `<style amp-boilerplate>`, transformed [AMP, ACTIONS]
@@ -891,6 +901,7 @@ tags: {  # `<style amp-boilerplate>`, transformed [AMP, ACTIONS]
   enabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "noscript > style[amp-boilerplate] (transformed)"
+  descriptive_name: "noscript > style[amp-boilerplate]"
   unique: true
   mandatory_parent: "NOSCRIPT"
   mandatory_ancestor: "HEAD"
@@ -904,7 +915,7 @@ tags: {  # `<style amp-boilerplate>`, transformed [AMP, ACTIONS]
     doc_css_bytes: false
     cdata_regex: "\\s*body\\s*{\\s*-webkit-animation:\\s*none;\\s*-moz-animation:\\s*none;\\s*-ms-animation:\\s*none;\\s*animation:\\s*none;?\\s*}\\s*"
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites"
 }
 
 tags: {  # `<style amp-keyframes>`, [AMP, AMP4ADS, ACTIONS]
@@ -913,6 +924,7 @@ tags: {  # `<style amp-keyframes>`, [AMP, AMP4ADS, ACTIONS]
   html_format: ACTIONS
   tag_name: "STYLE"
   spec_name: "style[amp-keyframes]"
+  descriptive_name: "style[amp-keyframes]"
   unique: true
   mandatory_parent: "BODY"
   mandatory_last_child: true
@@ -928,7 +940,7 @@ tags: {  # `<style amp-keyframes>`, [AMP, AMP4ADS, ACTIONS]
     # to animation keyframes rules.
     doc_css_bytes: false
     max_bytes: 500000
-    max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#keyframes-stylesheet"
+    max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#keyframes-stylesheet"
     css_spec: {
       at_rule_spec: { name: 'keyframes' }
       at_rule_spec: { name: 'media' }
@@ -948,6 +960,7 @@ tags: {  # '<style amp-runtime>`, transformed AMP
   enabled_by: "transformed"
   tag_name: "STYLE"
   spec_name: "style[amp-runtime] (transformed)"
+  descriptive_name: "style[amp-runtime]"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -962,5 +975,5 @@ tags: {  # '<style amp-runtime>`, transformed AMP
     mandatory: true
     value_regex: "^\\d{15}|latest$"
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets"
 }

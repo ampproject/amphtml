@@ -33,23 +33,23 @@ FAIL
 |    <!-- Invalid: nested menu must be inside sidebar -->
 |    <amp-nested-menu layout="fill"></amp-nested-menu>
 >>   ^~~~~~~~~
-amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:33:2 The tag 'amp-nested-menu' may only appear as a descendant of tag 'amp-sidebar'. (see https://amp.dev/documentation/components/amp-nested-menu)
+amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:33:2 The tag 'amp-nested-menu' may only appear as a descendant of tag 'amp-sidebar'. (see https://amp.dev/documentation/components/amp-nested-menu/)
 |    <amp-sidebar layout="nodisplay">
 |      <!-- Invalid: incorrect side value -->
 |      <amp-nested-menu layout="fill" side="center">
 >>     ^~~~~~~~~
-amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:36:4 The attribute 'side' in tag 'amp-nested-menu' is set to the invalid value 'center'. (see https://amp.dev/documentation/components/amp-nested-menu)
+amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:36:4 The attribute 'side' in tag 'amp-nested-menu' is set to the invalid value 'center'. (see https://amp.dev/documentation/components/amp-nested-menu/)
 |        <!-- Invalid: no element can include more than one submenu attributes -->
 |        <div>
 |          <h4 amp-nested-submenu-open amp-nested-submenu-close></h4>
 >>         ^~~~~~~~~
-amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:39:8 Mutually exclusive attributes encountered in tag 'h4 amp-nested-menu' - pick one of ['amp-nested-submenu-close', 'amp-nested-submenu-open'].
+amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:39:8 Mutually exclusive attributes encountered in tag 'h4' - pick one of ['amp-nested-submenu-close', 'amp-nested-submenu-open'].
 |          <div amp-nested-submenu amp-nested-submenu-close></div>
 >>         ^~~~~~~~~
-amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:40:8 Mutually exclusive attributes encountered in tag 'div amp-nested-menu' - pick one of ['amp-nested-submenu', 'amp-nested-submenu-close', 'amp-nested-submenu-open'].
+amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:40:8 Mutually exclusive attributes encountered in tag 'div' - pick one of ['amp-nested-submenu', 'amp-nested-submenu-close', 'amp-nested-submenu-open'].
 |          <div amp-nested-submenu amp-nested-submenu-open></div>
 >>         ^~~~~~~~~
-amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:41:8 Mutually exclusive attributes encountered in tag 'div amp-nested-menu' - pick one of ['amp-nested-submenu', 'amp-nested-submenu-close', 'amp-nested-submenu-open'].
+amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:41:8 Mutually exclusive attributes encountered in tag 'div' - pick one of ['amp-nested-submenu', 'amp-nested-submenu-close', 'amp-nested-submenu-open'].
 |        </div>
 |        <!-- Invalid: only divs may include the amp-nested-submenu attribute -->
 |        <div>
@@ -64,7 +64,7 @@ amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:46:8 The attribute
 |        <div>
 |          <a amp-nested-submenu-open></a>
 >>         ^~~~~~~~~
-amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:50:8 The attribute 'amp-nested-submenu-open' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links)
+amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:50:8 The attribute 'amp-nested-submenu-open' may not appear in tag 'a'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#links)
 |          <h1 amp-nested-submenu-close></h1>
 >>         ^~~~~~~~~
 amp-nested-menu/0.1/test/validator-amp-nested-menu-error.html:51:8 The attribute 'amp-nested-submenu-close' may not appear in tag 'h1'.
