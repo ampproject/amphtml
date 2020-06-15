@@ -65,7 +65,7 @@ tags: {  # <amp-ad>
   attrs: { name: "template" }
   attrs: { name: "type" mandatory: true }
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-ad"
+  spec_url: "https://amp.dev/documentation/components/amp-ad/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -147,7 +147,7 @@ tags: {  # <amp-ad data-multi-size>
   }
   attrs: { name: "type" mandatory: true }
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-ad"
+  spec_url: "https://amp.dev/documentation/components/amp-ad/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -191,7 +191,7 @@ tags: {  # <amp-ad data-enable-refresh>
   }
   attrs: { name: "type" mandatory: true }
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-ad"
+  spec_url: "https://amp.dev/documentation/components/amp-ad/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -223,7 +223,7 @@ tags: {  # <amp-embed>
   }
   attrs: { name: "type" mandatory: true }
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-ad"
+  spec_url: "https://amp.dev/documentation/components/amp-ad/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -267,7 +267,7 @@ tags: {  # <amp-embed data-multi-size>
   }
   attrs: { name: "type" mandatory: true }
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-ad"
+  spec_url: "https://amp.dev/documentation/components/amp-ad/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
