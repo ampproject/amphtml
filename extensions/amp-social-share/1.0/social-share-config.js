@@ -26,21 +26,19 @@ export function getSocialConfig(type) {
 }
 
 /**
- * @typedef {{
- *   paramUrl: string,
- *   paramText:string,
- *   paramMini: string,
- *   paramRecipient: string,
- * }}
- */
-let ShareEndpointArgsDef;
-
-/**
- * @typedef {!Object<string, !JsonObject|string|function(!ShareEndpointArgsDef):string>}
+ * @typedef {!Object<string, !JsonObject|string>}
  */
 let SocialShareConfigDef;
 
 /**
+ * This object contains the configuration data for pre-configured types (i.e.
+ * 'twitter', 'facebook') for the Amp Social Share component.  The config data
+ * contains the following properties:
+ *   {string} shareEndpoint - The base API endpoint for sharing to the
+ *     specified social media type.
+ *   {JsonObject} defaultParams - Parameters to be appended to the end of the
+ *     shareEndpoint as query parameters.  The values in this object are used
+ *     as binding keys which are resolved by the AMP framework.
  * @type {!Object<string, !SocialShareConfigDef>}
  */
 const BUILTINS = {

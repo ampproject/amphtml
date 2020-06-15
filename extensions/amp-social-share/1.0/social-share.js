@@ -20,7 +20,7 @@ import {Keys} from '../../../src/utils/key-codes';
 import {SocialShareIcon} from '../../../third_party/optimized-svg-icons/social-share-svgs';
 import {addParamsToUrl, parseQueryString} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
-import {getSocialConfig} from './amp-social-share-config';
+import {getSocialConfig} from './social-share-config';
 import {openWindowDialog} from '../../../src/dom';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
@@ -43,14 +43,12 @@ const NAME = 'SocialShare';
  */
 export function SocialShare(props) {
   useResourcesNotify();
-  console.log('props', props);
   const {
     finalEndpoint,
     checkedWidth,
     checkedHeight,
     checkedTarget,
   } = checkProps(props);
-  console.log('fe', finalEndpoint);
 
   const type = props['type'].toUpperCase();
   const baseStyle = CSS.BASE_STYLE;

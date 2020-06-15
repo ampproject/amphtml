@@ -21,7 +21,7 @@ import {SocialShare} from './social-share';
 import {addParamsToUrl, parseQueryString} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
-import {getSocialConfig} from './amp-social-share-config';
+import {getSocialConfig} from './social-share-config';
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
 import {user, userAssert} from '../../../src/log';
@@ -134,7 +134,6 @@ class AmpSocialShare extends PreactBaseElement {
       const href = result;
       // mailto:, sms: protocols breaks when opened in _blank on iOS Safari
       const {protocol, search} = Services.urlForDoc(this.element).parse(href);
-      console.log('amp', href, protocol, search, parseQueryString(search));
 
       const isMailTo = protocol === 'mailto:';
       const isSms = protocol === 'sms:';
