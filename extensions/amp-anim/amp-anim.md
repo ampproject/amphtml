@@ -60,7 +60,6 @@ email doesn't allow the following attributes:
 [/filter]
 
 [filter formats="websites, ads"]
-
 ### `srcset`
 
 Specifies the image URL to use in different circumstances. Operates the same as
@@ -82,6 +81,7 @@ Indicates the attribution of the image. For example, `attribution="CC courtesy o
 ### `width` and `height`
 
 Provides the explicit size of the image.
+
 
 ### Common attributes
 
