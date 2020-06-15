@@ -16370,6 +16370,13 @@ rocambole@0.7.0:
   dependencies:
     esprima "^2.1"
 
+rrule-without-luxon@2.6.4:
+  version "2.6.4"
+  resolved "https://registry.yarnpkg.com/rrule-without-luxon/-/rrule-without-luxon-2.6.4.tgz#702eacf0008ab1aedbbd778e610a904f16a7ba6d"
+  integrity sha512-9eHiRkARqfvBliOYRO3jiYSg4OPDgsBhbbYug/bASnOAVtMJX5JPZITlL1Si4QvETVJBJMjM1OcQQ6CnR6mcFQ==
+  dependencies:
+    tslib "^1.10.0"
+
 rst-selector-parser@^2.2.3:
   version "2.2.3"
   resolved "https://registry.yarnpkg.com/rst-selector-parser/-/rst-selector-parser-2.2.3.tgz#81b230ea2fcc6066c89e3472de794285d9b03d91"
