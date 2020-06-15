@@ -141,6 +141,13 @@ Type attribute value: `gemius`
 
 Adds support for Gemius Audience/Prism analytics. Additionally, the gemius-provided `prefix` and `identifier` variables must be specified. It's also possible to specify the optional variable `extraparams` (key1=value1|key2=value2). More details can be found at [gemius.com](https://www.gemius.com).
 
+### GfK Sensic
+
+Type attribute value: `gfksensic`
+
+Adds support for GfK Sensic audio stream usage analytics.
+Please refer to our [client documentation](https://confluence-docu.gfk.com/display/SENSIC/AMP+Integration) for details.
+
 ### Google Ads
 
 Type attribute value: `googleadwords`

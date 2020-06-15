@@ -1,0 +1,30 @@
+{
+  "requestOrigin": "https://${regionID}-config.sensic.net",
+  "requests": {
+    "base": "/tp?${page_params}&${client_params}",
+    "page_params": "r=${r}&ua=${ua}&v=${v}&l=${l}",
+    "client_params": "p=${regionID}&m=${mediaID}&cid=${clientId(cid)}",
+    "event_params": "ut=${ut}&pr=${pr}&rn=${rn}&c=${contentID}&vt=${vt}&sp=${sp}&st=${st}",
+    "audio-play": "${base}&${event_params}&ty=PL&sn=COUNTER(play_${pr})",
+    "audio-stop": "${base}&${event_params}&ty=ST&sn=COUNTER(stop_${pr})"
+  },
+  "vars": {
+    "ty": "HB",
+    "contentID": "default",
+    "v": "0.0.1",
+    "r": "${ampdocHost}",
+    "ut": "${timestamp}",
+    "ua": "${userAgent}",
+    "l": "${browserLanguage}",
+    "pr": "${pageViewId}${streamID}",
+    "rn": "${requestCount}",
+    "vt": "1",
+    "sp": "-1",
+    "st": "${ut}"
+  },
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
+  }
+}
