@@ -135,6 +135,14 @@
     "pageview": "https://!prefix.hit.gemius.pl/__timestamp_/redot.gif?l=91&id=!identifier&tz=_timezone_&col=_screen_color_depth_&screen=_screen_width_x_screen_height_&window=_viewport_width_x_viewport_height_&fr=1&href=_source_url_&ref=_document_referrer_&sarg=_canonical_url_&extra=gemamp%3D1%7Campid%3D_client_id(gemius)_%7C!extraparams&nc=0&et=view&hsrc=1",
     "event": "https://!prefix.hit.gemius.pl/__timestamp_/redot.gif?l=91&id=!identifier&tz=_timezone_&col=_screen_color_depth_&screen=_screen_width_x_screen_height_&window=_viewport_width_x_viewport_height_&fr=1&href=_source_url_&ref=_document_referrer_&sarg=_canonical_url_&extra=gemamp%3D1%7Campid%3D_client_id(gemius)_%7C!extraparams&nc=0&et=action&hsrc=3"
   },
+  "gfksensic": {
+    "base": "https://%21regionid-config.sensic.net/tp?r=_ampdoc_host_&ua=_user_agent_&v=0.0.1&l=_browser_language_&p=!regionID&m=!mediaID&cid=_client_id(cid)_",
+    "page_params": "<ignore for test>",
+    "client_params": "<ignore for test>",
+    "event_params": "<ignore for test>",
+    "audio-play": "https://%21regionid-config.sensic.net/tp?r=_ampdoc_host_&ua=_user_agent_&v=0.0.1&l=_browser_language_&p=!regionID&m=!mediaID&cid=_client_id(cid)_&ut=_timestamp_&pr=_page_view_id_!streamID&rn=1&c=default&vt=1&sp=-1&st=_timestamp_&ty=PL&sn=_counter(play__page_view_id_!streamID)_",
+    "audio-stop": "https://%21regionid-config.sensic.net/tp?r=_ampdoc_host_&ua=_user_agent_&v=0.0.1&l=_browser_language_&p=!regionID&m=!mediaID&cid=_client_id(cid)_&ut=_timestamp_&pr=_page_view_id_!streamID&rn=1&c=default&vt=1&sp=-1&st=_timestamp_&ty=ST&sn=_counter(stop__page_view_id_!streamID)_"
+  },
   "googleadwords": {
     "conversion_prefix": "<ignore for test>",
     "remarketing_prefix": "<ignore for test>",
