@@ -1,10 +1,12 @@
 ---
 $category: dynamic-content
 formats:
-  - websites
-  - email
-teaser:
+
+- websites
+- email
+  teaser:
   text: Suggests completed results corresponding to the user input as they type into the input field.
+
 ---
 
 <!--
@@ -38,6 +40,7 @@ The `amp-autocomplete` extension should be used for suggesting completed items b
 This can be used to power search experiences, in cases where the user may not know the full range of potential inputs, or in forms to help ensure inputs where there may be multiple ways to express the same intent (using a state abbreviation instead of its full name, for example) yield more predictable results.
 
 Example:
+[filter formats="websites"]
 
 ```html
 <amp-autocomplete filter="substring" id="myAutocomplete">
@@ -48,9 +51,26 @@ Example:
 </amp-autocomplete>
 ```
 
+[/filter] <!-- formats="websites" -->
+
+[filter formats="email"]
+
+```html
+<amp-autocomplete
+  filter="substring"
+  id="myAutocomplete"
+  src="/static/samples/json/amp-autocomplete-cities.json"
+>
+  <input />
+</amp-autocomplete>
+```
+
+[/filter] <!-- formats="email" -->
+
 ## Attributes
 
 <table>
+  [filter formats="websites"]
   <tr>
     <td width="40%"><strong>filter (required)</strong></td>
     <td>The filtering mechanism applied to source data to produce filtered results for user input. In all cases the filtered results will be displayed in array order of data retrieved. If filtering is being done (<code>filter != none</code>), it is done client side. The following are supported values:
@@ -63,6 +83,7 @@ Example:
       <li><strong>custom</strong>: a conditional statement involving an item and a user input to be applied to each item such that evaluating to true implies the item gets suggested; using this filter requires including <code>amp-bind</code> if <code>filter==custom</code>, an additional attribute <code>filter-expr</code> is required to specify a boolean expression by which to perform the custom filter.</li>
     </td>
   </tr>
+  [/filter] <!-- formats="websites" -->
   <tr>
     <td width="40%"><strong>src (optional)</strong></td>
     <td>The URL of the remote endpoint that returns the JSON that will be filtered and rendered within this <code>amp-autocomplete</code>. This must be a CORS HTTP service and the URL's protocol must be HTTPS. The endpoint must implement the requirements specified in the <a href="https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests?referrer=ampproject.org">CORS Requests in AMP</a> spec. If fetching the data at the src URL fails, the <code>amp-autocomplete</code> triggers a fallback. The src attribute may be omitted if the <code>[src]</code> attribute exists.
@@ -73,6 +94,7 @@ Example:
     <td>The query parameter to generate a static remote endpoint that returns the JSON that will be filtered and rendered within this <code>amp-autocomplete</code>. This requires the presence of the <code>src</code> attribute. For example, if <code>src="http://www.example.com"</code> and <code>query="q"</code>, then when a user types in <code>abc</code>, the component will retrieve data from <code>http://www.example.com?q=abc</code>.
     </td>
   </tr>
+  [filter formats="websites"]
   <tr>
     <td width="40%"><strong>filter-expr (optional)</strong></td>
     <td>Required if <code>filter==custom</code></td>
@@ -81,6 +103,7 @@ Example:
     <td width="40%"><strong>filter-value (optional)</strong></td>
     <td>If data is an array of JsonObjects, the filter-value is the property name that will be accessed for client side filtering. This attribute is unnecessary if filter is none. Defaults to "value".</td>
   </tr>
+  [/filter] <!-- formats="websites" -->
   <tr>
     <td width="40%"><strong>min-characters (optional)</strong></td>
     <td>
