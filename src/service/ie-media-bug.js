@@ -28,7 +28,7 @@ const TAG = 'ie-media-bug';
  * @return {?Promise}
  * @package
  */
-export function checkAndFix(win, opt_platform) {
+export function ieMediaCheckAndFix(win, opt_platform) {
   const platform = opt_platform || Services.platformFor(win);
   if (!platform.isIe() || matchMediaIeQuite(win)) {
     return null;
