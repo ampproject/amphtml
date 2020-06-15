@@ -17,6 +17,7 @@
 import {
   CONSENT_ITEM_STATE,
   ConsentInfoDef,
+  ConsentMetadataDef,
   calculateLegacyStateValue,
   composeStoreValue,
   constructConsentInfo,
@@ -30,12 +31,12 @@ import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, devAssert, user} from '../../../src/log';
+import {expandConsentEndpointUrl, getConsentCID} from './consent-config';
 
 const TAG = 'CONSENT-STATE-MANAGER';
-const CID_SCOPE = 'AMP-CONSENT';
 
 /** @visibleForTesting */
-export const CONSENT_STRING_MAX_LENGTH = 200;
+export const CONSENT_STRING_MAX_LENGTH = 1024;
 
 export class ConsentStateManager {
   /**
@@ -93,16 +94,19 @@ export class ConsentStateManager {
    * Update consent instance state
    * @param {CONSENT_ITEM_STATE} state
    * @param {string=} consentStr
+   * @param {ConsentMetadataDef=} opt_consentMetadata
    */
-  updateConsentInstanceState(state, consentStr) {
+  updateConsentInstanceState(state, consentStr, opt_consentMetadata) {
     if (!this.instance_) {
       dev().error(TAG, 'instance not registered');
       return;
     }
-    this.instance_.update(state, consentStr, false);
+    this.instance_.update(state, consentStr, opt_consentMetadata, false);
 
     if (this.consentChangeHandler_) {
-      this.consentChangeHandler_(constructConsentInfo(state, consentStr));
+      this.consentChangeHandler_(
+        constructConsentInfo(state, consentStr, opt_consentMetadata)
+      );
     }
   }
 
@@ -289,7 +293,12 @@ export class ConsentInstance {
         // No need to update with dirtyBit
         return;
       }
-      this.update(info['consentState'], info['consentString'], true);
+      this.update(
+        info['consentState'],
+        info['consentString'],
+        info['consentMetadata'],
+        true
+      );
     });
   }
 
@@ -297,9 +306,10 @@ export class ConsentInstance {
    * Update the local consent state list
    * @param {!CONSENT_ITEM_STATE} state
    * @param {string=} consentString
+   * @param {ConsentMetadataDef=} opt_consentMetadata
    * @param {boolean=} opt_systemUpdate
    */
-  update(state, consentString, opt_systemUpdate) {
+  update(state, consentString, opt_consentMetadata, opt_systemUpdate) {
     const localState =
       this.localConsentInfo_ && this.localConsentInfo_['consentState'];
     const calculatedState = recalculateConsentStateValue(state, localState);
@@ -307,10 +317,13 @@ export class ConsentInstance {
     if (state === CONSENT_ITEM_STATE.DISMISSED) {
       const localConsentStr =
         this.localConsentInfo_ && this.localConsentInfo_['consentString'];
-      // If state is dismissed, use the old consent string.
+      const localConsentMetadata =
+        this.localConsentInfo_ && this.localConsentInfo_['consentMetadata'];
+      // If state is dismissed, use the old consent string and metadata.
       this.localConsentInfo_ = constructConsentInfo(
         calculatedState,
-        localConsentStr
+        localConsentStr,
+        localConsentMetadata
       );
       return;
     }
@@ -322,6 +335,7 @@ export class ConsentInstance {
       this.localConsentInfo_ = constructConsentInfo(
         calculatedState,
         consentString,
+        opt_consentMetadata,
         true
       );
     } else {
@@ -329,13 +343,15 @@ export class ConsentInstance {
       // from localConsentInfo_
       this.localConsentInfo_ = constructConsentInfo(
         calculatedState,
-        consentString
+        consentString,
+        opt_consentMetadata
       );
     }
 
     const newConsentInfo = constructConsentInfo(
       calculatedState,
       consentString,
+      opt_consentMetadata,
       this.hasDirtyBitNext_
     );
 
@@ -377,8 +393,7 @@ export class ConsentInstance {
       const consentStr = consentInfo['consentString'];
       if (consentStr && consentStr.length > CONSENT_STRING_MAX_LENGTH) {
         // Verify the length of consentString.
-        // 200 * 2 (utf8Encode) * 4/3 (base64) = 533 bytes.
-        // TODO: Need utf8Encode if necessary.
+        // 1024 * 4/3 (base64) = 1336 bytes.
         user().error(
           TAG,
           'Cannot store consentString which length exceeds %s. ' +
@@ -391,6 +406,8 @@ export class ConsentInstance {
         // TODO: Good to have a way to inform CMP service in this case
         return;
       }
+
+      // TODO: enforce metadata limits here (if any)
 
       const value = composeStoreValue(consentInfo);
       if (value == null) {
@@ -465,13 +482,7 @@ export class ConsentInstance {
     const legacyConsentState = calculateLegacyStateValue(
       consentInfo['consentState']
     );
-    const cidPromise = Services.cidForDoc(this.ampdoc_).then((cid) => {
-      return cid.get(
-        {scope: CID_SCOPE, createCookieIfNotPresent: true},
-        Promise.resolve()
-      );
-    });
-    cidPromise.then((userId) => {
+    getConsentCID(this.ampdoc_).then((userId) => {
       const request = /** @type {!JsonObject} */ ({
         // Unfortunately we need to keep the name to be backward compatible
         'consentInstanceId': this.id_,
@@ -486,6 +497,9 @@ export class ConsentInstance {
       if (consentInfo['consentString']) {
         request['consentString'] = consentInfo['consentString'];
       }
+      if (consentInfo['consentMetadata']) {
+        request['consentMetadata'] = consentInfo['consentMetadata'];
+      }
       const init = {
         credentials: 'include',
         method: 'POST',
@@ -493,10 +507,12 @@ export class ConsentInstance {
         ampCors: false,
       };
       this.ampdoc_.whenFirstVisible().then(() => {
-        Services.xhrFor(this.ampdoc_.win).fetchJson(
-          /** @type {string} */ (this.onUpdateHref_),
-          init
-        );
+        expandConsentEndpointUrl(
+          this.ampdoc_.getHeadNode(),
+          /** @type {string} */ (this.onUpdateHref_)
+        ).then((expandedUpdateHref) => {
+          Services.xhrFor(this.ampdoc_.win).fetchJson(expandedUpdateHref, init);
+        });
       });
     });
   }

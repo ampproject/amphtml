@@ -29,17 +29,11 @@ const IS_GULP_UNIT = argv._[0] === 'unit';
 const IS_GULP_E2E = argv._[0] === 'e2e';
 
 const IS_LOCAL_CHANGES = !!argv.local_changes;
-const IS_SAUCELABS = !!argv.saucelabs;
-const IS_SAUCELABS_STABLE = !!argv.saucelabs && !!argv.stable;
-const IS_SAUCELABS_BETA = !!argv.saucelabs && !!argv.beta;
-const IS_SINGLE_PASS = !!argv.single_pass;
+const IS_DIST = !!argv.compiled;
 
 const TEST_TYPE_SUBTYPES = new Map([
-  [
-    'integration',
-    ['local', 'single-pass', 'saucelabs-beta', 'saucelabs-stable'],
-  ],
-  ['unit', ['local', 'local-changes', 'saucelabs']],
+  ['integration', ['local', 'minified']],
+  ['unit', ['local', 'local-changes']],
   ['e2e', ['local']],
 ]);
 const TEST_TYPE_BUILD_TARGETS = new Map([
@@ -64,21 +58,11 @@ function inferTestType() {
 
   if (IS_LOCAL_CHANGES) {
     return `${type}/local-changes`;
+  } else if (IS_DIST) {
+    return `${type}/minified`;
+  } else {
+    return `${type}/local`;
   }
-
-  if (IS_SAUCELABS_BETA) {
-    return `${type}/saucelabs-beta`;
-  } else if (IS_SAUCELABS_STABLE) {
-    return `${type}/saucelabs-stable`;
-  } else if (IS_SAUCELABS) {
-    return `${type}/saucelabs`;
-  }
-
-  if (IS_SINGLE_PASS) {
-    return `${type}/single-pass`;
-  }
-
-  return `${type}/local`;
 }
 
 function postReport(type, action) {

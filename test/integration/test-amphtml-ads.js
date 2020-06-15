@@ -17,10 +17,12 @@
 import {RequestBank} from '../../testing/test-helper';
 import {maybeSwitchToCompiledJs} from '../../testing/iframe';
 import {parseQueryString} from '../../src/url';
-import {toggleExperiment} from '../../src/experiments';
 import {xhrServiceForTesting} from '../../src/service/xhr-impl';
 
-describe('AMPHTML ad on AMP Page', () => {
+// TODO(wg-ads): SauceLabs gets 502 Bad Gateway when trying to resolve "ads.localhost:9876".
+const t = describe.configure().skipSauceLabs();
+
+t.run('AMPHTML ad on AMP Page', () => {
   describes.integration(
     'ATF',
     {
@@ -39,6 +41,10 @@ describe('AMPHTML ad on AMP Page', () => {
       `,
     },
     () => {
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
+
       it('should layout amp-img, amp-pixel, amp-analytics', () => {
         // Open http://ads.localhost:9876/amp4test/a4a/12345 to see ad content
         return testAmpComponents();
@@ -66,6 +72,10 @@ describe('AMPHTML ad on AMP Page', () => {
       `,
     },
     (env) => {
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
+
       // TODO(#24657): Flaky on Travis.
       it.skip('should layout amp-img, amp-pixel, amp-analytics', () => {
         // Open http://ads.localhost:9876/amp4test/a4a/12345 to see ad content
@@ -75,7 +85,7 @@ describe('AMPHTML ad on AMP Page', () => {
   );
 });
 
-describe('AMPHTML ad on non-AMP page (inabox)', () => {
+t.run('AMPHTML ad on non-AMP page (inabox)', () => {
   describes.integration(
     'ATF',
     {
@@ -97,6 +107,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
 
       afterEach(() => {
         unregisterIframe(env.win, env.win.document.getElementById('inabox'));
+        return RequestBank.tearDown();
       });
     }
   );
@@ -131,6 +142,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
 
       afterEach(() => {
         unregisterIframe(env.win, env.win.document.getElementById('inabox'));
+        return RequestBank.tearDown();
       });
     }
   );
@@ -158,6 +170,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
 
       afterEach(() => {
         unregisterIframe(env.win, env.win.document.getElementById('inabox'));
+        return RequestBank.tearDown();
       });
     }
   );
@@ -188,6 +201,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       afterEach(() => {
         unregisterIframe(env.win, iframe);
         env.win.document.body.removeChild(iframe);
+        return RequestBank.tearDown();
       });
 
       it(
@@ -239,6 +253,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
       afterEach(() => {
         unregisterIframe(env.win, iframe);
         env.win.document.body.removeChild(iframe);
+        return RequestBank.tearDown();
       });
 
       it.skip(
@@ -262,7 +277,7 @@ describe('AMPHTML ad on non-AMP page (inabox)', () => {
   );
 });
 
-describe('A more real AMPHTML image ad', () => {
+t.run('A more real AMPHTML image ad', () => {
   const {testServerPort} = window.ampTestRuntimeConfig;
 
   // The image ad as seen in examples/inabox.gpt.html,
@@ -331,6 +346,7 @@ describe('A more real AMPHTML image ad', () => {
       afterEach(() => {
         unregisterIframe(env.win, iframe);
         doc.body.removeChild(iframe);
+        return RequestBank.tearDown();
       });
     }
   );
@@ -351,7 +367,6 @@ describe('A more real AMPHTML image ad', () => {
       });
 
       it('should properly render ad in a friendly iframe with viewability pings', () => {
-        toggleExperiment(env.win, 'inabox-viewport-friendly', true);
         writeFriendlyFrame(doc, iframe, adBody);
         return testVisibilityPings(0, 1000);
       });
@@ -368,6 +383,7 @@ describe('A more real AMPHTML image ad', () => {
 
       afterEach(() => {
         doc.body.removeChild(iframe);
+        return RequestBank.tearDown();
       });
     }
   );
@@ -410,6 +426,7 @@ describe('A more real AMPHTML image ad', () => {
       afterEach(() => {
         unregisterIframe(env.win, iframe);
         doc.body.removeChild(iframe);
+        return RequestBank.tearDown();
       });
     }
   );

@@ -175,7 +175,6 @@ exports.jsBundles = {
       minifiedName: 'v0.js',
       includePolyfills: true,
       wrapper: wrappers.mainBinary,
-      singlePassCompilation: argv.single_pass,
       esmPassCompilation: argv.esm,
       includeOnlyESMLevelPolyfills: argv.esm,
     },
@@ -470,7 +469,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-date-display',
-    version: ['0.1', '0.2'],
+    version: ['0.1', '1.0'],
     latestVersion: '0.1',
     type: TYPES.MISC,
   },
@@ -527,6 +526,12 @@ exports.extensionBundles = [
     version: '0.1',
     latestVersion: '0.1',
     options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-fit-text',
+    version: '1.0',
+    latestVersion: '0.1',
     type: TYPES.MISC,
   },
   {
@@ -860,26 +865,6 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-story',
-    version: '0.1',
-    latestVersion: '1.0',
-    options: {
-      hasCss: true,
-      cssBinaries: [
-        'amp-story-bookend',
-        'amp-story-consent',
-        'amp-story-hint',
-        'amp-story-unsupported-browser-layer',
-        'amp-story-viewport-warning-layer',
-        'amp-story-info-dialog',
-        'amp-story-share',
-        'amp-story-share-menu',
-        'amp-story-system-layer',
-      ],
-    },
-    type: TYPES.MISC,
-  },
-  {
-    name: 'amp-story',
     version: '1.0',
     latestVersion: '1.0',
     options: {
@@ -891,6 +876,7 @@ exports.extensionBundles = [
         'amp-story-hint',
         'amp-story-info-dialog',
         'amp-story-reaction',
+        'amp-story-reaction-poll',
         'amp-story-reaction-quiz',
         'amp-story-share',
         'amp-story-share-menu',
@@ -931,7 +917,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-selector',
-    version: '0.1',
+    version: ['0.1', '1.0'],
     latestVersion: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,
@@ -1023,13 +1009,13 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-social-share',
-    version: '0.2',
+    version: '1.0',
     latestVersion: '0.1',
     type: TYPES.MISC,
   },
   {
     name: 'amp-timeago',
-    version: ['0.1', '0.2'],
+    version: ['0.1', '1.0'],
     latestVersion: '0.1',
     type: TYPES.MISC,
   },
@@ -1188,25 +1174,11 @@ exports.extensionAliasBundles = {
     version: '1.0',
     aliasedVersion: '0.1',
   },
+  'amp-story': {
+    version: '1.0',
+    aliasedVersion: '0.1',
+  },
 };
-
-/**
- * Used to generate alternative JS build targets
- */
-exports.altMainBundles = [
-  {
-    path: 'src/amp-shadow.js',
-    name: 'shadow-v0',
-    version: '0.1',
-    latestVersion: '0.1',
-  },
-  {
-    path: 'src/inabox/amp-inabox.js',
-    name: 'amp4ads-v0',
-    version: '0.1',
-    latestVersion: '0.1',
-  },
-];
 
 /**
  * @param {boolean} condition

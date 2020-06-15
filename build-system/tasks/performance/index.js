@@ -16,6 +16,7 @@
 
 const cacheDocuments = require('./cache-documents');
 const compileScripts = require('./compile-scripts');
+const copyLocalImages = require('./copy-images');
 const getMetrics = require('./measure-documents');
 const loadConfig = require('./load-config');
 const rewriteAnalyticsTags = require('./rewrite-analytics-tags');
@@ -36,9 +37,11 @@ async function performance() {
   installPackages(__dirname);
   const config = new loadConfig();
   const urls = Object.keys(config.urlToHandlers);
-  await cacheDocuments(urls);
-  await compileScripts(urls);
-  await rewriteScriptTags(urls);
+  const urlsAndAdsUrls = urls.concat(config.adsUrls || []);
+  await cacheDocuments(urlsAndAdsUrls);
+  await compileScripts(urlsAndAdsUrls);
+  copyLocalImages(urlsAndAdsUrls);
+  await rewriteScriptTags(urlsAndAdsUrls);
   await rewriteAnalyticsTags(config.handlers);
   await getMetrics(urls, config);
   printReport(urls);
@@ -49,6 +52,8 @@ async function performance() {
 performance.description = 'Runs web performance test on current branch';
 
 performance.flags = {
+  'devtools': '  Run with devtools open',
+  'headless': '  Run chromium headless',
   'nobuild': '  Does not compile minified runtime before running tests',
   'threshold':
     '  Fraction by which metrics are allowed to increase. Number between 0.0 and 1.0',

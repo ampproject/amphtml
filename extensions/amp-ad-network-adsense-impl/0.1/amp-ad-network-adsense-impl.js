@@ -24,7 +24,9 @@ import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../sr
 import {
   AMP_AD_NO_CENTER_CSS_EXP,
   QQID_HEADER,
+  RENDER_ON_IDLE_FIX_EXP,
   SANDBOX_HEADER,
+  STICKY_AD_PADDING_BOTTOM_EXP,
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
   additionalDimensions,
@@ -39,7 +41,7 @@ import {
   maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
 import {AdsenseSharedState} from './adsense-shared-state';
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {AmpA4A, NO_SIGNING_EXP} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {FIE_INIT_CHUNKING_EXP} from '../../../src/friendly-iframe-embed';
 import {Navigation} from '../../../src/service/navigation';
@@ -193,13 +195,15 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       if (state != null) {
         this.responsiveState_ = state;
       }
-      if (this.responsiveState_ != null) {
+      if (
+        this.responsiveState_ != null &&
+        !this.responsiveState_.isContainerWidthState()
+      ) {
         return this.responsiveState_.attemptToMatchResponsiveHeight();
       }
       // This should happen last, as some diversion criteria rely on some of the
       // preceding logic (specifically responsive logic).
       this.divertExperiments();
-      this.maybeAddSinglePassExperiment();
     });
   }
 
@@ -236,6 +240,24 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         branches: [
           [FIE_INIT_CHUNKING_EXP.control],
           [FIE_INIT_CHUNKING_EXP.experiment],
+        ],
+      },
+      [[RENDER_ON_IDLE_FIX_EXP.id]]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [RENDER_ON_IDLE_FIX_EXP.control],
+          [RENDER_ON_IDLE_FIX_EXP.experiment],
+        ],
+      },
+      [NO_SIGNING_EXP.id]: {
+        isTrafficEligible: () => true,
+        branches: [[NO_SIGNING_EXP.control], [NO_SIGNING_EXP.experiment]],
+      },
+      [STICKY_AD_PADDING_BOTTOM_EXP.id]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [STICKY_AD_PADDING_BOTTOM_EXP.control],
+          [STICKY_AD_PADDING_BOTTOM_EXP.experiment],
         ],
       },
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
@@ -288,10 +310,18 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const width = Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('height'));
 
-    this.size_ =
-      getExperimentBranch(this.win, FORMAT_EXP) == '21062004'
-        ? {width, height}
-        : this.getIntersectionElementLayoutBox();
+    if (
+      this.responsiveState_ != null &&
+      this.responsiveState_.isContainerWidthState()
+    ) {
+      this.size_ = {width, height};
+    } else {
+      this.size_ =
+        getExperimentBranch(this.win, FORMAT_EXP) == '21062004'
+          ? {width, height}
+          : this.getIntersectionElementLayoutBox();
+    }
+
     const sizeToSend = this.isSinglePageStoryAd
       ? {width: 1, height: 1}
       : this.size_;

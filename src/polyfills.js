@@ -29,18 +29,22 @@ import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installObjectValues} from './polyfills/object-values';
 import {install as installPromise} from './polyfills/promise';
 
-installFetch(self);
-installMathSign(self);
-installObjectAssign(self);
-installObjectValues(self);
-installPromise(self);
-installArrayIncludes(self);
+if (!IS_ESM) {
+  installFetch(self);
+  installMathSign(self);
+  installObjectAssign(self);
+  installObjectValues(self);
+  installPromise(self);
+  installArrayIncludes(self);
+}
 
 // Polyfills that depend on DOM availability
 if (self.document) {
-  installDOMTokenList(self);
-  installDocContains(self);
-  installGetBoundingClientRect(self);
+  if (!IS_ESM) {
+    installDOMTokenList(self);
+    installDocContains(self);
+    installGetBoundingClientRect(self);
+  }
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
   installCustomElements(self, class {});
@@ -57,8 +61,3 @@ if (self.document) {
     installIntersectionObserver(self);
   }
 }
-
-// TODO(#18268, erwinm): For whatever reason imports to modules that have no
-// export currently break for singlepass runs. This is a temporary workaround
-// until we figure the issue out.
-export const erwinmHack = 'this export is a temporary hack for single pass';

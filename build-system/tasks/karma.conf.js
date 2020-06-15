@@ -15,6 +15,7 @@
  */
 'use strict';
 
+const argv = require('minimist')(process.argv.slice(2));
 const browserifyPersistFs = require('browserify-persist-fs');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -31,6 +32,10 @@ const COMMON_CHROME_FLAGS = [
   // Allows simulating user actions (e.g unmute) which otherwise will be denied.
   '--autoplay-policy=no-user-gesture-required',
 ];
+
+if (argv.debug) {
+  COMMON_CHROME_FLAGS.push('--auto-open-devtools-for-tabs');
+}
 
 // Reduces the odds of Sauce labs timing out during tests. See #16135 and #24286.
 // Reference: https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-Timeouts
@@ -210,38 +215,11 @@ module.exports = {
       version: 'beta',
       ...SAUCE_TIMEOUT_CONFIG,
     },
-    SL_Chrome_Android_7: {
-      base: 'SauceLabs',
-      appiumVersion: '1.8.1',
-      deviceName: 'Android GoogleAPI Emulator',
-      browserName: 'Chrome',
-      platformName: 'Android',
-      platformVersion: '7.1',
-      ...SAUCE_TIMEOUT_CONFIG,
-    },
-    SL_iOS_12: {
-      base: 'SauceLabs',
-      appiumVersion: '1.9.1',
-      deviceName: 'iPhone X Simulator',
-      browserName: 'Safari',
-      platformName: 'iOS',
-      platformVersion: '12.0',
-      ...SAUCE_TIMEOUT_CONFIG,
-    },
-    SL_iOS_11: {
-      base: 'SauceLabs',
-      appiumVersion: '1.9.1',
-      deviceName: 'iPhone X Simulator',
-      browserName: 'Safari',
-      platformName: 'iOS',
-      platformVersion: '11.3',
-      ...SAUCE_TIMEOUT_CONFIG,
-    },
     SL_Firefox: {
       base: 'SauceLabs',
       browserName: 'firefox',
-      platform: 'Windows 10',
       version: 'latest',
+      platform: 'macOS 10.15',
       ...SAUCE_TIMEOUT_CONFIG,
     },
     SL_Firefox_Beta: {
@@ -251,18 +229,11 @@ module.exports = {
       version: 'beta',
       ...SAUCE_TIMEOUT_CONFIG,
     },
-    SL_Safari_12: {
+    SL_Safari: {
       base: 'SauceLabs',
       browserName: 'safari',
-      platform: 'macOS 10.13',
-      version: '12.1',
-      ...SAUCE_TIMEOUT_CONFIG,
-    },
-    SL_Safari_11: {
-      base: 'SauceLabs',
-      browserName: 'safari',
-      platform: 'macOS 10.13',
-      version: '11.1',
+      version: 'latest',
+      platform: 'macOS 10.15',
       ...SAUCE_TIMEOUT_CONFIG,
     },
     SL_Edge: {

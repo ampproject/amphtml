@@ -22,6 +22,7 @@ import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
+import {TickLabel} from '../../../src/enums';
 import {cancellation} from '../../../src/error';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -134,8 +135,10 @@ export class AccessService {
       this.firstAuthorizationsCompleted_ = true;
       this.analyticsEvent_('access-authorization-received');
       if (this.performance_) {
-        this.performance_.tick('aaa');
-        this.performance_.tickSinceVisible('aaav');
+        this.performance_.tick(TickLabel.ACCESS_AUTHORIZATION);
+        this.performance_.tickSinceVisible(
+          TickLabel.ACCESS_AUTHORIZATION_VISIBLE
+        );
         this.performance_.flush();
       }
     });
@@ -295,7 +298,12 @@ export class AccessService {
    * @private
    */
   analyticsEvent_(eventType) {
-    triggerAnalyticsEvent(this.getRootElement_(), eventType);
+    triggerAnalyticsEvent(
+      this.getRootElement_(),
+      eventType,
+      /** vars */ undefined,
+      /** enableDataVars */ false
+    );
   }
 
   /**
@@ -777,7 +785,7 @@ AMP.extension(TAG, '0.1', function (AMP) {
 
 /**
  * @package Visible for testing only.
- * @return {*} TODO(#23582): Specify return type
+ * @return {typeof AccessVars}
  */
 export function getAccessVarsClassForTesting() {
   return AccessVars;

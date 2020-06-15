@@ -33,7 +33,6 @@ import {dev, devAssert, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
@@ -660,6 +659,7 @@ class AmpVideo extends AMP.BaseElement {
     setStyles(poster, {
       'background-image': `url(${src})`,
       'background-size': 'cover',
+      'background-position': 'center',
     });
     poster.classList.add('i-amphtml-android-poster-bug');
     this.applyFillContent(poster);
@@ -810,10 +810,7 @@ class AmpVideo extends AMP.BaseElement {
     const placeholder = this.getPlaceholder();
     // checks for the existence of a visible blurry placeholder
     if (placeholder) {
-      if (
-        placeholder.classList.contains('i-amphtml-blurry-placeholder') &&
-        isExperimentOn(this.win, 'blurry-placeholder')
-      ) {
+      if (placeholder.classList.contains('i-amphtml-blurry-placeholder')) {
         setImportantStyles(placeholder, {'opacity': 0.0});
         return true;
       }

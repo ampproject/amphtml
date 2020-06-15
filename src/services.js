@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {LocalizationService} from './service/localization';
 import {
   getAmpdoc,
   getExistingServiceForDocInEmbedScope,
@@ -22,7 +21,6 @@ import {
   getService,
   getServiceForDoc,
   getServicePromiseForDoc,
-  registerServiceBuilderForDoc,
 } from './service';
 import {
   getElementServiceForDoc,
@@ -207,7 +205,7 @@ export class Services {
   }
 
   /**
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!./service/cid-impl.CidDef>}
    */
   static cidForDoc(elementOrAmpDoc) {
@@ -492,11 +490,11 @@ export class Services {
    * Version of the story store service depends on which version of amp-story
    * the publisher is loading. They all have the same implementation.
    * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService|?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>}
+   * @return {?Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService>}
    */
   static storyStoreServiceForOrNull(win) {
     return (
-      /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService|?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>} */
+      /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService>} */
       (getElementServiceIfAvailable(win, 'story-store', 'amp-story'))
     );
   }
@@ -546,22 +544,14 @@ export class Services {
   }
 
   /**
-   * @return {!./service/localization.LocalizationService}
    * @param {!Element} element
+   * @return {?./service/localization.LocalizationService}
    */
   static localizationForDoc(element) {
-    let service = /** @type {?./service/localization.LocalizationService} */ (getExistingServiceForDocInEmbedScope(
+    return /** @type {?./service/localization.LocalizationService} */ (getExistingServiceForDocInEmbedScope(
       element,
       'localization'
     ));
-
-    if (!service) {
-      service = new LocalizationService(element);
-      registerServiceBuilderForDoc(element, 'localization', function () {
-        return service;
-      });
-    }
-    return service;
   }
 
   /**
@@ -585,24 +575,6 @@ export class Services {
       /** @type {?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService} */
       (getExistingServiceOrNull(win, 'story-analytics'))
     );
-  }
-
-  /**
-   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
-   * @param {!Window} win
-   * @return {!../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService}
-   */
-  static storyStoreServiceV01(win) {
-    return getService(win, 'story-store');
-  }
-
-  /**
-   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
-   * @param {!Window} win
-   * @return {!../extensions/amp-story/0.1/amp-story-request-service.AmpStoryRequestService}
-   */
-  static storyRequestServiceV01(win) {
-    return getService(win, 'story-request-v01');
   }
 
   /**

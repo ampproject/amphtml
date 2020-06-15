@@ -154,8 +154,8 @@ export class Criteria {
    * @return {boolean}
    */
   static meetsSizingCriteria(element) {
-    const {naturalWidth, naturalHeight} = dev().assertElement(
-      element.querySelector('img')
+    const {naturalWidth, naturalHeight} = getMaxNaturalDimensions(
+      dev().assertElement(element.querySelector('img'))
     );
 
     const {width: renderWidth, height: renderHeight} = element.getLayoutBox();
@@ -172,6 +172,57 @@ export class Criteria {
       vh
     );
   }
+}
+
+/**
+ * Regex for the width-selection portion of a srcset, so for the
+ * general grammar: (URL [NUM[w|x]],)*, this should express "NUMw".
+ * E.g. in "image1.png 100w, image2.png 50w", this matches "100w" and "50w"
+ */
+const srcsetWidthRe = /\s+([0-9]+)w(,|[\S\s]*$)/g;
+
+/**
+ * Parses srcset partially to get the maximum defined intrinsic width.
+ * @param {!Element} img
+ * @return {number} -1 if no srcset, or if srcset is defined by dpr instead of
+ *   width. (This value is useful for comparisons, see getMaxNaturalDimensions.)
+ */
+export function getMaxWidthFromSrcset(img) {
+  let max = -1;
+
+  const srcsetAttr = img.getAttribute('srcset');
+  if (srcsetAttr) {
+    let match;
+    while ((match = srcsetWidthRe.exec(srcsetAttr))) {
+      const width = parseInt(match[1], 10);
+      if (width > max) {
+        max = width;
+      }
+    }
+  }
+
+  return max;
+}
+
+/**
+ * Gets the maximum natural dimensions for an image with srcset.
+ * This is necessary when the browser selects a src that is not shrunk for its
+ * render size, but the srcset provides a different, higher resolution image
+ * that can be used in the lightbox.
+ * @param {!Element} img
+ * @return {{naturalWidth: number, naturalHeight: number}}
+ */
+export function getMaxNaturalDimensions(img) {
+  const {naturalWidth, naturalHeight} = img;
+  const ratio = naturalWidth / naturalHeight;
+  const maxWidthFromSrcset = getMaxWidthFromSrcset(img);
+  if (maxWidthFromSrcset > naturalWidth) {
+    return {
+      naturalWidth: maxWidthFromSrcset,
+      naturalHeight: maxWidthFromSrcset / ratio,
+    };
+  }
+  return {naturalWidth, naturalHeight};
 }
 
 /**

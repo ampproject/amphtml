@@ -458,6 +458,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         webAnimationService.createBuilder.withArgs(
           env.sandbox.match({
             scope: page,
+            scaleByScope: true,
           })
         )
       ).to.have.been.calledOnce;
@@ -495,10 +496,10 @@ describes.realWin('amp-story animations', {}, (env) => {
 
       const page = html`
         <div>
-          <amp-story-animation ref="spec1source">
+          <amp-story-animation trigger="visibility" ref="spec1source">
             <script type="application/json"></script>
           </amp-story-animation>
-          <amp-story-animation ref="spec2source">
+          <amp-story-animation trigger="visibility" ref="spec2source">
             <script type="application/json"></script>
           </amp-story-animation>
         </div>
@@ -646,6 +647,7 @@ describes.realWin('amp-story animations', {}, (env) => {
             id="animated-fourth"
             ref="animatedFourth"
             animate-in-after="animated-third"
+            trigger="visibility"
           >
             <script type="application/json">
               {}
