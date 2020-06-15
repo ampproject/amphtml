@@ -286,10 +286,17 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
     const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
     return lm.init().then(() => {
       clock.tick(1000 * 60 * 5); // 5 minutes.
-      const linkerUrl = clickAnchor('https://www.source.test/dest?a=1');
+      clickAnchor('https://www.source.test/dest?a=1');
 
       windowInterface.history = {replaceState: () => {}};
-      windowInterface.location = {href: linkerUrl};
+      windowInterface.location = {
+        href:
+          'https://www.source.test/dest?a=1&testLinker=1*4o2q85*cid*MTIzNDU.',
+        search: '?a=1&testLinker=1*4o2q85*cid*MTIzNDU.',
+        origin: 'https://www.source.test',
+        pathname: '/dest',
+        hash: '',
+      };
 
       installLinkerReaderService(windowInterface);
       const linkerReader = linkerReaderServiceFor(windowInterface);

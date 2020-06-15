@@ -20,3 +20,9 @@ dev().info(
   fromLocation.search
 );
 dev().info;
+
+dev().fine(TAG, 'fine');
+dev().fine;
+
+user().fine(TAG, 'user fine');
+user().fine;

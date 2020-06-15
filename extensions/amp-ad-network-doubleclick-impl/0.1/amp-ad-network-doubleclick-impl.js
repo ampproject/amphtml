@@ -28,6 +28,7 @@ import {
   QQID_HEADER,
   RENDER_ON_IDLE_FIX_EXP,
   SANDBOX_HEADER,
+  STICKY_AD_PADDING_BOTTOM_EXP,
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
@@ -198,6 +199,14 @@ let tokensToInstances = {};
 /** @private {?Promise} */
 let sraRequests = null;
 
+/**
+ * The random subdomain to load SafeFrame from, if SafeFrame is
+ * being loaded from a random subdomain and if the subdomain
+ * has been generated.
+ * @private {?string}
+ */
+let safeFrameRandomSubdomain = null;
+
 /** @typedef {{
       adUrl: !Promise<string>,
       lineItemId: string,
@@ -322,14 +331,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
     /** @protected {ConsentTupleDef} */
     this.consentTuple = {};
-
-    /**
-     * The random subdomain to load SafeFrame from, if SafeFrame is
-     * being loaded from a random subdomain and if the subdomain
-     * has been generated.
-     * @private {?string}
-     */
-    this.safeFrameRandomSubdomain_ = null;
 
     /** @protected {!Deferred<string>} */
     this.getAdUrlDeferred = new Deferred();
@@ -493,6 +494,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         isTrafficEligible: () => true,
         branches: [[NO_SIGNING_EXP.control], [NO_SIGNING_EXP.experiment]],
       },
+      [STICKY_AD_PADDING_BOTTOM_EXP.id]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [STICKY_AD_PADDING_BOTTOM_EXP.control],
+          [STICKY_AD_PADDING_BOTTOM_EXP.experiment],
+        ],
+      },
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
     });
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
@@ -595,7 +603,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       this.isFluidRequest_ =
         !!multiSizeStr && multiSizeStr.indexOf('fluid') != -1;
     }
-    this.maybeAddSinglePassExperiment();
   }
 
   /** @override */
@@ -760,9 +767,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({});
       });
 
-    const rtcParamsPromise = opt_rtcResponsesPromise.then((results) =>
-      this.mergeRtcResponses_(results)
-    );
+    const checkStillCurrent = this.verifyStillCurrent();
+
+    const rtcParamsPromise = opt_rtcResponsesPromise.then((results) => {
+      checkStillCurrent();
+      return this.mergeRtcResponses_(results);
+    });
 
     // TODO(#28555): Delete extra logic when 'expand-json-targeting' exp launches.
     const isJsonTargetingExpOn =
@@ -777,8 +787,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
             dev().warn(TAG, 'JSON Targeting expansion failed/timed out.');
           })
       : Promise.resolve();
-
-    const checkStillCurrent = this.verifyStillCurrent();
 
     Promise.all([
       rtcParamsPromise,
@@ -932,11 +940,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   getCustomRealTimeConfigMacros_() {
     /**
-     * This whitelist allow attributes on the amp-ad element to be used as
+     * This lists allowed attributes on the amp-ad element to be used as
      * macros for constructing the RTC URL. Add attributes here, in lowercase,
      * to make them available.
      */
-    const whitelist = {
+    const allowlist = {
       'height': true,
       'width': true,
       'data-slot': true,
@@ -964,7 +972,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           parseInt(opt_timeout, 10)
         ),
       ATTR: (name) => {
-        if (!whitelist[name.toLowerCase()]) {
+        if (!allowlist[name.toLowerCase()]) {
           dev().warn('TAG', `Invalid attribute ${name}`);
         } else {
           return this.element.getAttribute(name);
@@ -1228,11 +1236,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (!this.experimentIds.includes(randomSubdomainExperimentBranch)) {
       return super.getSafeframePath();
     }
-    this.safeFrameRandomSubdomain_ =
-      this.safeFrameRandomSubdomain_ || this.getRandomString_();
+    safeFrameRandomSubdomain =
+      safeFrameRandomSubdomain || this.getRandomString_();
 
     return (
-      `https://${this.safeFrameRandomSubdomain_}.safeframe.googlesyndication.com/safeframe/` +
+      `https://${safeFrameRandomSubdomain}.safeframe.googlesyndication.com/safeframe/` +
       `${this.safeframeVersion}/html/container.html`
     );
   }

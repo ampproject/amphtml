@@ -139,7 +139,7 @@ Link substitutions are restricted and will only be fulfilled for URLs matching:
 - The page’s canonical origin
 - A white listed origin
 
-To whitelist an origin, include a `amp-link-variable-allowed-origin` `meta` tag in the `head` of your document. To specify multiple domains, separate each domain with a space.
+To allowlist an origin, include a `amp-link-variable-allowed-origin` `meta` tag in the `head` of your document. To specify multiple domains, separate each domain with a space.
 
 ```html
 <meta
@@ -274,6 +274,23 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Variant](#experiment-variant)   | `VARIANT`         | N/A                    | [`<amp-experiment>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-experiment/amp-experiment.md) |
 | [Variants](#experiment-variants) | `VARIANTS`        | N/A                    | [`<amp-experiment>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-experiment/amp-experiment.md) |
 | [Geolocation](#geolocation)      | `AMP_GEO`         | `${ampGeo}`            | [`<amp-geo>`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-geo/amp-geo.md)                      |
+
+### Analytics Advanced Variable Syntax
+
+| Variable Name               | Platform Variable | amp-analytics Variable |
+| --------------------------- | ----------------- | ---------------------- |
+| [Default](#default)         | N/A               | `$DEFAULT`             |
+| [SubStr](#string-substr)    | N/A               | `$SUBSTR`              |
+| [Trim](#trim)               | N/A               | `$TRIM`                |
+| [ToLowerCase](#tolowercase) | N/A               | `$TOLOWERCASE`         |
+| [ToUpperCase](#touppercase) | N/A               | `$TOUPPERCASE`         |
+| [Not](#not)                 | N/A               | `$NOT`                 |
+| [Base64](#base64)           | N/A               | `$BASE64`              |
+| [Hash](#hash)               | N/A               | `$HASH`                |
+| [If](#if)                   | N/A               | `$IF`                  |
+| [Replace](#replace)         | N/A               | `$REPLACE`             |
+| [Match](#match)             | N/A               | `$MATCH`               |
+| [Equals](#equals)           | N/A               | `$EQUALS`              |
 
 ### Miscellaneous
 
@@ -1292,3 +1309,67 @@ Provides the viewport width in pixels available for the page rendering. In contr
   ```
 - **amp-analytics variable**: `${viewportWidth}`
   - Example value: `2560`
+
+#### Analytics Advanced Variable Syntax
+
+The following variables are only supported in `<amp-analytics>`
+
+##### Default
+
+Used to assign fallback value when the variable is resolved to empty string.
+
+- Example: `$DEFAULT(${var}, fallback)`
+
+##### String substr
+
+- Example: `$SUBSTR(${var}, 1, 4)`
+
+##### Trim
+
+- Example: `$TRIM(${var})`
+
+##### ToLowerCase
+
+- Example: `$TOLOWERCASE(${var})`
+
+##### ToUpperCase
+
+- Example: `$TOUPPERCASE(TITLE)`
+
+##### Not
+
+Used to convert truth-y/false-y value to `'false'`/`'true'` string.
+
+- Example `$NOT(hello)` = `'false'` and `$NOT()` = `'true'`
+
+##### Base64
+
+- Example `$BASE64(PAGE_VIEW_ID)`
+
+##### Hash
+
+SHA-384 hash
+
+- Example: `$HASH(PAGE_VIEW_ID)`
+
+##### If
+
+An if statement to choose between values
+
+- Example: `$IF(${var}, value1, value2)` resolves to `value2` if `${var}` resolves to falsey value (`'false'`, `''`, `'0'`, `'null'`, `'Nan'` or `'undefined'`), otherwise will resolve to `value1`.
+
+##### Replace
+
+Find an replace all matched pattern.
+
+- Example: `$REPLACE(${var}, matchPattern, replaceStr)`
+
+##### Match
+
+Find the specified (or first) matched pattern.
+
+- Example: `$MATCH(${var}, matchPatter, 0)`
+
+##### Equals
+
+- Example: `$EQUALS(${val}, value)` resolves to `'true'` or `'false'`

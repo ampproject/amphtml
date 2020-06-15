@@ -223,7 +223,7 @@ export class AmpList extends AMP.BaseElement {
     this.owners_ = Services.ownersForDoc(this.element);
     /** If the element is in an email document,
      * allow its `changeToLayoutContainer` and `refresh` actions. */
-    this.action_.addToWhitelist(
+    this.action_.addToAllowlist(
       'AMP-LIST',
       ['changeToLayoutContainer', 'refresh'],
       ['email']
