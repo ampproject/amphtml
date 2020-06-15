@@ -16,42 +16,66 @@
 
 /**
  * Subtle-based AES-GCM decryption supported on all browser types.
- * Decrypts the input text using AES-GCM with the input key.
+ * Decrypts the input text using AES-GCM with the input base64 encoded key
+ * and importing the key using subtle.importKey.
  * @param {string} key
  * @param {string} text
  * @return {!Promise}
  */
 export function decryptAesGcm(key, text) {
   const keybytes = base64Decode(key);
+  return safeAesGcmImportKey(keybytes.buffer).then((formattedkey) => {
+    text = text.replace(/\s+/g, '');
+    const contentBuffer = base64Decode(text).buffer;
+    const iv = contentBuffer.slice(0, 12);
+    const bytesToDecrypt = contentBuffer.slice(12);
+    return decryptAesGcmImpl(formattedkey, iv, bytesToDecrypt)
+  });
+  }
+    
+/**
+ * Subtle-based AES-GCM decryption supported on all browser types.
+ * Decrypts the input text using AES-GCM with the input key and IV.
+ * @param {!CryptoKey} key
+ * @param {!ArrayBuffer} iv
+ * @param {!ArrayBuffer} text
+ * @return {!Promise}
+ */
+export function decryptAesGcmImpl(key, iv, text) {
   const isIE = !!self.msCrypto;
   const subtle = isIE ? self.msCrypto.subtle : self.crypto.subtle;
-  return wrapCryptoOp(subtle.importKey('raw', keybytes.buffer,
-    'AES-GCM',
-    true, ['decrypt'])).
-    then((formattedkey) => {
-      text = text.replace(/\s+/g, '');
-      const contbuff = base64Decode(text).buffer;
-      const iv = contbuff.slice(0, 12);
-      const bytesToDecrypt = contbuff.slice(12);
-      return wrapCryptoOp(subtle
-        .decrypt(
-          {
-            name: 'AES-GCM',
-            iv: iv,
-            // IE requires "tag" of length 16.
-            tag: isIE ? bytesToDecrypt.slice(bytesToDecrypt.byteLength - 16) : undefined,
-            // Edge requires "tagLength".
-            tagLength: 128 // block size (16): 1-128
-          },
-          formattedkey,
-          // IE requires "tag" to be removed from the bytes.
-          isIE ? bytesToDecrypt.slice(0, bytesToDecrypt.byteLength - 16) : bytesToDecrypt
-        ))
-        .then((buffer) => {
-          // 5. Decryption gives us raw bytes and we need to turn them into text.
-          return utf8Decode(new Uint8Array(buffer));
-        });
+  return wrapCryptoOp(subtle
+    .decrypt(
+      {
+        name: 'AES-GCM',
+        iv: iv,
+        // IE requires "tag" of length 16.
+        tag: isIE ? text.slice(text.byteLength - 16) : undefined,
+        // Edge requires "tagLength".
+        tagLength: 128 // block size (16): 1-128
+      },
+      key,
+      // IE requires "tag" to be removed from the bytes.
+      isIE ? text.slice(0, text.byteLength - 16) : text
+    ))
+    .then((buffer) => {
+      // 5. Decryption gives us raw bytes and we need to turn them into text.
+      return utf8Decode(new Uint8Array(buffer));
     });
+}
+
+/**
+ * Subtle import key for AES-GCM key types that is supported
+ * on all browser types.
+ * @param {!ArrayBuffer} key
+ * @return {!Promise}
+ */
+export function safeAesGcmImportKey(key) {
+  const isIE = !!self.msCrypto;
+  const subtle = isIE ? self.msCrypto.subtle : self.crypto.subtle;
+  return wrapCryptoOp(subtle.importKey('raw', key,
+    'AES-GCM',
+    true, ['decrypt']));
 }
 
 /** 
@@ -94,7 +118,7 @@ function utf8Decode(bytes) {
  * @param {string} str
  * @return {!Uint8Array}
  */
-function base64Decode(str) {
+export function base64Decode(str) {
   const bytes = atob(str);
   const len = bytes.length;
   const array = new Uint8Array(len);
