@@ -300,7 +300,7 @@ class AmpMowplayer extends AMP.BaseElement {
    */
   onResize_(data) {
     if (!window.mowStickyEnabled) {
-      this.forceChangeHeight(data.state.dimensions.height + 10);
+      this.attemptChangeHeight(data.state.dimensions.height + 10);
     }
   }
 
@@ -435,7 +435,7 @@ class AmpMowplayer extends AMP.BaseElement {
           this.originalHeight_ = parseInt(this.element.offsetHeight, 10);
         }
 
-        this.forceChangeHeight(
+        this.attemptChangeHeight(
           parseInt((parseInt(this.element.offsetWidth, 10) * 9) / 16, 10)
         );
       } else {
@@ -451,7 +451,7 @@ class AmpMowplayer extends AMP.BaseElement {
           maxWidth: '100%',
         });
 
-        this.forceChangeHeight(this.originalHeight_);
+        this.attemptChangeHeight(this.originalHeight_);
       }
 
       this.sendMessage_('sticky_state_update', {enabled: enable});
