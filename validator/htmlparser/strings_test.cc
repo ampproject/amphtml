@@ -341,6 +341,24 @@ TEST(StringsTest, TrimTest) {
   s_with_utf = "Amaltas 안안안안안";
   htmlparser::Strings::TrimRight(&s_with_utf, "안 ");
   EXPECT_EQ(s_with_utf, "Amaltas");
+
+  std::string_view sv_with_space = "     amaltas.";
+  htmlparser::Strings::TrimLeft(&sv_with_space);
+  EXPECT_EQ(sv_with_space, "amaltas.");
+  sv_with_space = "amaltas.                    ";
+  htmlparser::Strings::TrimRight(&sv_with_space);
+  EXPECT_EQ(sv_with_space, "amaltas.");
+
+  sv_with_space = "      \n\n              amaltas.                  ";
+  htmlparser::Strings::Trim(&sv_with_space);
+  EXPECT_EQ(sv_with_space, "amaltas.");
+
+  std::string_view sv_with_utf = "안안안안안Amaltas";
+  htmlparser::Strings::TrimLeft(&sv_with_utf, "안");
+  EXPECT_EQ(sv_with_utf, "Amaltas");
+  sv_with_utf = "Amaltas 안안안안안";
+  htmlparser::Strings::TrimRight(&sv_with_utf, "안 ");
+  EXPECT_EQ(sv_with_utf, "Amaltas");
 }
 
 TEST(StringsTest, ReplaceTest) {

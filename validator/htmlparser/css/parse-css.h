@@ -970,11 +970,15 @@ class SelectorsGroup : public Selector {
 // SelectorsGroup, SimpleSelectorSequence, or Combinator.
 ErrorTokenOr<Selector> ParseASelectorsGroup(TokenStream* token_stream);
 
-// A super class for making visitors (by overriding the types of interest).
-// The parse_css::TraverseSelectors function can be used to visit nodes in a
-// parsed CSS selector.
-class SelectorVisitor {
+// A super class for making visitors (by overriding the types of interest) of
+// Selector fields. The standard RuleVisitor does not recursively parse the
+// prelude of qualified rules for the components of a selectors. This Visitor
+// re-parses these preludes and then visits the fields within. The parse step
+// has the possibility of emitting new CSS ErrorTokens.
+class SelectorVisitor : public RuleVisitor {
  public:
+  explicit SelectorVisitor(std::vector<std::unique_ptr<ErrorToken>>* errors)
+      : errors_(errors) {}
   virtual ~SelectorVisitor() = default;
 
   virtual void VisitTypeSelector(const TypeSelector& selector) {}
@@ -986,11 +990,18 @@ class SelectorVisitor {
       const SimpleSelectorSequence& sequence) {}
   virtual void VisitCombinator(const Combinator& combinator) {}
   virtual void VisitSelectorsGroup(const SelectorsGroup& group) {}
-};
 
-// Visits |selector| and its children, recursively, by calling the appropriate
-// methods on the provided visitor.
-void TraverseSelectors(const Selector& selector, SelectorVisitor* visitor);
+ private:
+  void VisitStylesheet(const Stylesheet& stylesheet) final {}
+  void LeaveStylesheet(const Stylesheet& stylesheet) final {}
+  void VisitAtRule(const AtRule& at_rule) final {}
+  void LeaveAtRule(const AtRule& at_rule) final {}
+  void VisitQualifiedRule(const QualifiedRule& qualified_rule) final;
+  void LeaveQualifiedRule(const QualifiedRule& qualified_rule) final {}
+  void VisitDeclaration(const Declaration& declaration) final {}
+  void LeaveDeclaration(const Declaration& declaration) final {}
+  std::vector<std::unique_ptr<ErrorToken>>* errors_;
+};
 }  // namespace htmlparser::css
 
 #endif  // HTMLPARSER__CSS_PARSE_CSS_H_

@@ -3787,23 +3787,31 @@ TEST(ParseCssTest, ParseSelectors_ReportsErrorForUnparsedRemainderOfInput) {
 
 class CollectCombinatorNodes : public SelectorVisitor {
  public:
-  vector<const Combinator*> combinators_;
+  CollectCombinatorNodes() : SelectorVisitor(&errors_) {}
+  vector<unique_ptr<Token>> combinators_;
+  vector<unique_ptr<ErrorToken>> errors_;
 
   void VisitCombinator(const Combinator& combinator) override {
-    combinators_.push_back(&combinator);
+    combinators_.push_back(combinator.Clone());
   }
 };
+
 TEST(ParseCssTest, SelectorParserImplementsVisitorPattern) {
-  vector<unique_ptr<Token>> tokens = ParseSelectorForTest("a > b c + d ~ e");
-  TokenStream token_stream(std::move(tokens));
-  token_stream.Consume();
-  ErrorTokenOr<Selector> selector = ParseASelectorsGroup(&token_stream);
-  ASSERT_TRUE(std::holds_alternative<unique_ptr<Selector>>(selector));
+  vector<char32_t> css =
+      htmlparser::Strings::Utf8ToCodepoints("a > b c + d ~ e {}");
   CollectCombinatorNodes visitor;
-  TraverseSelectors(*std::get<unique_ptr<Selector>>(selector), &visitor);
+  vector<unique_ptr<ErrorToken>> errors;
+  vector<unique_ptr<Token>> tokens =
+      Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
+  unique_ptr<Stylesheet> stylesheet =
+      ParseAStylesheet(&tokens, AmpCssParsingConfig(), &errors);
+  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  stylesheet->Accept(&visitor);
   EXPECT_EQ(4, visitor.combinators_.size());
-  EXPECT_EQ("GENERAL_SIBLING", CombinatorType::Code_Name(
-                                   visitor.combinators_[0]->combinator_type()));
+  Combinator* combinator =
+      static_cast<Combinator*>(visitor.combinators_[0].get());
+  EXPECT_EQ("GENERAL_SIBLING",
+            CombinatorType::Code_Name(combinator->combinator_type()));
   EXPECT_EQ(1, visitor.combinators_[0]->line());
   EXPECT_EQ(12, visitor.combinators_[0]->col());
 
@@ -3875,13 +3883,15 @@ TEST(ParseCssTest, SelectorParserImplementsVisitorPattern) {
 // A4A project (http://go/a4areserializer).
 class CollectBodyTypeSelectors : public SelectorVisitor {
  public:
-  vector<const TypeSelector*> body_selectors_;
+  CollectBodyTypeSelectors() : SelectorVisitor(&errors_) {}
+  vector<unique_ptr<Token>> body_selectors_;
+  vector<unique_ptr<ErrorToken>> errors_;
 
   void VisitTypeSelector(const TypeSelector& selector) override {
     if (selector.element_name() == "body" &&
         (selector.namespace_prefix() == nullptr ||
          *selector.namespace_prefix() == "*"))
-      body_selectors_.push_back(&selector);
+      body_selectors_.push_back(selector.Clone());
   }
 };
 
@@ -3894,20 +3904,22 @@ TEST(ParseCssTest, ExtractBodySelectorPositions) {
       "a,body,div "          // pos: 62 end_pos: 66
       ":not(body) "          // no match (todo?)
       "body > div "          // pos: 82 end_pos: 86
-      "svg|body");           // no match due to filtering in VisitTypeSelector
-  vector<unique_ptr<Token>> tokens = ParseSelectorForTest(selector_str);
-  TokenStream token_stream(std::move(tokens));
-  token_stream.Consume();
-  ErrorTokenOr<Selector> selector = ParseASelectorsGroup(&token_stream);
-  // Parsing is successful. If it wasn't, see for instance
-  // ParseSelectors_ReportsErrorForUnparsedRemainderOfInput for how to
-  // extract the error.
-  ASSERT_TRUE(std::holds_alternative<unique_ptr<Selector>>(selector));
+      "svg|body {}");        // no match due to filtering in VisitTypeSelector
+  vector<char32_t> css = htmlparser::Strings::Utf8ToCodepoints(selector_str);
   CollectBodyTypeSelectors visitor;
-  TraverseSelectors(*std::get<unique_ptr<Selector>>(selector), &visitor);
+  vector<unique_ptr<ErrorToken>> errors;
+  vector<unique_ptr<Token>> tokens =
+      Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
+  unique_ptr<Stylesheet> stylesheet =
+      ParseAStylesheet(&tokens, AmpCssParsingConfig(), &errors);
+  EXPECT_EQ(JsonFromList(errors), "[\n\n]");
+  stylesheet->Accept(&visitor);
+
   vector<std::pair<int, int>> positions;
-  for (const TypeSelector* s : visitor.body_selectors_)
+  for (const unique_ptr<Token>& sp : visitor.body_selectors_) {
+    TypeSelector* s = static_cast<TypeSelector*>(sp.get());
     positions.emplace_back(s->pos(), s->end_pos());
+  }
 
   vector<std::pair<int, int>> expected = {
       {0, 4}, {19, 25}, {50, 54}, {62, 66}, {82, 86}};
@@ -3922,7 +3934,7 @@ TEST(ParseCssTest, ExtractBodySelectorPositions) {
     EXPECT_EQ(6, length);
     EXPECT_EQ("*|body", selector_str.substr(segment.first, length));
   }
-}
+}  // namespace
 
 TEST(ParseCssTest, CloneToken) {
   IdentToken identtoken("body");
