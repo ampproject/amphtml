@@ -13,7 +13,8 @@
     ".codecov.yml": "yaml",
     ".lando.yml": "yaml",
     ".lgtm.yml": "yaml",
-    ".travis.yml": "yaml"
+    ".travis.yml": "yaml",
+    ".github/workflows/continuous-integration-workflow.yml": "yaml"
   },
 
   // Auto-fix JS files with ESLint using amphtml's custom settings. Needs

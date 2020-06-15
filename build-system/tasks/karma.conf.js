@@ -22,6 +22,7 @@ const fs = require('fs');
 const globby = require('globby');
 
 const {gitCommitterEmail} = require('../common/git');
+const {isGithubActionsBuild} = require('../common/github-actions');
 const {isTravisBuild, travisJobNumber} = require('../common/travis');
 
 const TEST_SERVER_PORT = 8081;
@@ -116,7 +117,10 @@ module.exports = {
     persistentCache,
   },
 
-  reporters: ['super-dots', 'karmaSimpleReporter'],
+  reporters: [
+    isGithubActionsBuild() ? 'dots' : 'super-dots',
+    'karmaSimpleReporter',
+  ],
 
   superDotsReporter: {
     nbDotsPerLine: 100000,
@@ -301,7 +305,7 @@ module.exports = {
     'karma-structured-json-reporter',
     'karma-mocha',
     'karma-mocha-reporter',
-    'karma-safari-launcher',
+    'karma-safarinative-launcher',
     'karma-sauce-launcher',
     'karma-simple-reporter',
     'karma-sinon-chai',

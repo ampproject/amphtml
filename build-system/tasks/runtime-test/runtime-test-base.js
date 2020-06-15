@@ -92,7 +92,15 @@ function updateBrowsers(config) {
       },
     })
     .set('edge', {browsers: ['Edge']})
-    .set('firefox', {browsers: ['Firefox']})
+    .set('firefox', {
+      browsers: ['FirefoxHeadless'],
+      customLaunchers: {
+        FirefoxHeadless: {
+          base: 'Firefox',
+          flags: ['-headless'],
+        },
+      },
+    })
     .set('headless', {browsers: ['Chrome_no_extensions_headless']})
     .set('ie', {
       browsers: ['IE'],
@@ -103,7 +111,7 @@ function updateBrowsers(config) {
         },
       },
     })
-    .set('safari', {browsers: ['Safari']});
+    .set('safari', {browsers: ['SafariNative']});
 
   for (const [key, value] of options) {
     if (argv.hasOwnProperty(key)) {
@@ -128,8 +136,8 @@ function getFiles(testType) {
       if (argv.files) {
         return files.concat(getFilesFromArgv());
       }
-      if (argv.saucelabs) {
-        return files.concat(testConfig.unitTestOnSaucePaths);
+      if (argv.saucelabs || argv.safari || argv.firefox) {
+        return files.concat(testConfig.unitTestCrossBrowserPaths);
       }
       if (argv.local_changes) {
         return files.concat(unitTestsToRun());
