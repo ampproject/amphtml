@@ -1,3 +1,11 @@
+# Requirements:
+# clang with c++17 support.
+#
+# Usage:
+# To build the library, use the following bazel command:
+#
+# bazel build --repo_env=CC=clang --cxxopt='-std=c++17' <build_target>
+
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test", "cc_proto_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
 

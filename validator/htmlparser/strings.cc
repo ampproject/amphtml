@@ -355,6 +355,31 @@ void Strings::Trim(std::string* s, std::string_view chars_to_trim) {
   TrimRight(s, chars_to_trim);
 }
 
+void Strings::TrimLeft(std::string_view* s, std::string_view chars_to_trim) {
+  if (auto count = s->find_first_not_of(chars_to_trim);
+      count != std::string_view::npos) {
+    s->remove_prefix(count);
+  } else {
+    // All whitespace.
+    s->remove_prefix(s->size());
+  }
+}
+
+void Strings::TrimRight(std::string_view* s, std::string_view chars_to_trim) {
+  if (auto count = s->find_last_not_of(chars_to_trim);
+      count != std::string_view::npos) {
+    s->remove_suffix(s->size() - count - 1);
+  } else {
+    // All whitespace.
+    s->remove_suffix(s->size());
+  }
+}
+
+void Strings::Trim(std::string_view* s, std::string_view chars_to_trim) {
+  TrimLeft(s, chars_to_trim);
+  TrimRight(s, chars_to_trim);
+}
+
 
 void Strings::RemoveExtraSpaceChars(std::string* s) {
   int put_index = 0;
