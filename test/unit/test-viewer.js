@@ -82,6 +82,13 @@ describes.sandboxed('Viewer', {}, (env) => {
       ancestorOrigins: null,
       search: '',
     };
+    windowApi.addEventListener = (type, listener) => {
+      events[type] = listener;
+    };
+    windowApi.removeEventListener = (type, listener) => {
+      expect(events[type]).to.equal(listener);
+      delete events[type];
+    };
     windowApi.document = {
       nodeType: /* DOCUMENT */ 9,
       defaultView: windowApi,
@@ -644,6 +651,33 @@ describes.sandboxed('Viewer', {}, (env) => {
       changeVisibility('visible');
       expect(ampdoc.getVisibilityState()).to.equal('visible');
     });
+  });
+
+  describe('User action makes doc visible', () => {
+    const eventTest = (eventName) => {
+      ampdoc.overrideVisibilityState('prerender');
+      viewer = new ViewerImpl(ampdoc);
+      expect(ampdoc.getVisibilityState()).to.equal('prerender');
+
+      expect(events.touchstart).to.not.be.undefined;
+      expect(events.keydown).to.not.be.undefined;
+      expect(events.mousedown).to.not.be.undefined;
+
+      events[eventName]();
+      expect(ampdoc.getVisibilityState()).to.equal('visible');
+      expect(events.touchstart).to.be.undefined;
+      expect(events.keydown).to.be.undefined;
+      expect(events.mousedown).to.be.undefined;
+    };
+
+    it(
+      'should become visible on touchstart',
+      eventTest.bind(null, 'touchstart')
+    );
+
+    it('should become visible on mousedown', eventTest.bind(null, 'mousedown'));
+
+    it('should become visible on keydown', eventTest.bind(null, 'keydown'));
   });
 
   describe('Messaging not embedded', () => {
