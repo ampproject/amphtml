@@ -31,21 +31,21 @@ FAIL
 |      /* all other @ rules are banned */
 |      @supports (display: flex) {}
 >>     ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:31:4 CSS syntax error in tag 'style amp-custom (css-strict)' - saw invalid at rule '@supports'.
+amp4email_feature_tests/css_strict.html:31:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@supports'.
 |      @font-face {}
 >>     ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:32:4 CSS syntax error in tag 'style amp-custom (css-strict)' - saw invalid at rule '@font-face'.
+amp4email_feature_tests/css_strict.html:32:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@font-face'.
 |      @keyframes slidein {}
 >>     ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:33:4 CSS syntax error in tag 'style amp-custom (css-strict)' - saw invalid at rule '@keyframes'.
+amp4email_feature_tests/css_strict.html:33:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@keyframes'.
 |      @invalid {}
 >>     ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:34:4 CSS syntax error in tag 'style amp-custom (css-strict)' - saw invalid at rule '@invalid'.
+amp4email_feature_tests/css_strict.html:34:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@invalid'.
 |
 |      /* Since data-css-strict is specified, we apply selector rules. */
 |      .a[invalid] {}
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:37:6 CSS error in tag 'style amp-custom (css-strict)' - disallowed attribute selector 'invalid'.
+amp4email_feature_tests/css_strict.html:37:6 CSS error in tag 'style amp-custom' - disallowed attribute selector 'invalid'.
 |      .a:invalid {}
 |      .a::invalid {}
 |

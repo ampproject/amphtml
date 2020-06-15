@@ -92,7 +92,7 @@ tags: {  # <amp-carousel>
   requires_extension: "amp-carousel"
   attr_lists: "amp-carousel-common"
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-carousel"
+  spec_url: "https://amp.dev/documentation/components/amp-carousel/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -115,7 +115,7 @@ tags: {  # <amp-carousel lightbox>
   }
   attr_lists: "amp-carousel-common"
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-carousel"
+  spec_url: "https://amp.dev/documentation/components/amp-carousel/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

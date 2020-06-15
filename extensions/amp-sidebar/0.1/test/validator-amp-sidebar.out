@@ -70,7 +70,7 @@ FAIL
 |    <amp-sidebar layout="nodisplay">
 |      <nav toolbar="(min-width: 0px) and (max-width: 768px)" toolbar-target="id">
 >>     ^~~~~~~~~
-amp-sidebar/0.1/test/validator-amp-sidebar.html:70:4 Tag 'amp-sidebar > nav' must have 1 child tags - saw 2 child tags.
+amp-sidebar/0.1/test/validator-amp-sidebar.html:70:4 Tag 'nav' must have 1 child tags - saw 2 child tags.
 |        <ul>
 |          <li>Nav item 1</li>
 |        </ul>
@@ -85,7 +85,7 @@ amp-sidebar/0.1/test/validator-amp-sidebar.html:70:4 Tag 'amp-sidebar > nav' mus
 |    <amp-sidebar layout="nodisplay">
 |      <nav toolbar="(min-width: 0px) and (max-width: 768px)" toolbar-target="id">
 >>     ^~~~~~~~~
-amp-sidebar/0.1/test/validator-amp-sidebar.html:83:4 Tag 'amp-sidebar > nav' must have 1 child tags - saw 2 child tags.
+amp-sidebar/0.1/test/validator-amp-sidebar.html:83:4 Tag 'nav' must have 1 child tags - saw 2 child tags.
 |        <ol>
 |          <li>Nav item 1</li>
 |        </ol>
@@ -100,7 +100,7 @@ amp-sidebar/0.1/test/validator-amp-sidebar.html:83:4 Tag 'amp-sidebar > nav' mus
 |      <amp-sidebar layout="nodisplay">
 |        <nav toolbar="(min-width: 0px) and (max-width: 768px)" toolbar-target="id">
 >>       ^~~~~~~~~
-amp-sidebar/0.1/test/validator-amp-sidebar.html:96:6 Tag 'amp-sidebar > nav' must have 1 child tags - saw 2 child tags.
+amp-sidebar/0.1/test/validator-amp-sidebar.html:96:6 Tag 'nav' must have 1 child tags - saw 2 child tags.
 |          <ul>
 |            <li>Nav item 1</li>
 |          </ul>
@@ -114,6 +114,6 @@ amp-sidebar/0.1/test/validator-amp-sidebar.html:96:6 Tag 'amp-sidebar > nav' mus
 |    <!-- Invalid: incorrect side value -->
 |    <amp-sidebar side="center" layout="nodisplay"></amp-sidebar>
 >>   ^~~~~~~~~
-amp-sidebar/0.1/test/validator-amp-sidebar.html:108:2 The attribute 'side' in tag 'amp-sidebar' is set to the invalid value 'center'. (see https://amp.dev/documentation/components/amp-sidebar)
+amp-sidebar/0.1/test/validator-amp-sidebar.html:108:2 The attribute 'side' in tag 'amp-sidebar' is set to the invalid value 'center'. (see https://amp.dev/documentation/components/amp-sidebar/)
 |  </body>
 |  </html>
