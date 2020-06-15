@@ -443,6 +443,11 @@ export class MediaPool {
     // document.
     allocatedEls.sort((a, b) => this.compareMediaDistances_(a, b));
 
+    console.log(
+      'allocatedVideoBefore=',
+      allocatedEls.map((e) => e.parentElement.id)
+    );
+
     // Do not deallocate any media elements if the element being loaded or
     // played is further than the farthest allocated element.
     if (opt_elToAllocate) {
@@ -502,6 +507,7 @@ export class MediaPool {
       return null;
     }
 
+    console.log(' ->> then evicting', poolMediaEl.parentElement.id);
     this.swapPoolMediaElementOutOfDom_(poolMediaEl);
     return poolMediaEl;
   }
@@ -668,6 +674,11 @@ export class MediaPool {
       domMediaEl
     );
     if (existingPoolMediaEl) {
+      console.log(
+        '[mediapool] loading',
+        domMediaEl.parentElement.id,
+        "-> already exists, don't load"
+      );
       // The element being loaded already has an allocated media element.
       return Promise.resolve(
         /** @type {!PoolBoundElementDef} */ (existingPoolMediaEl)
@@ -688,11 +699,21 @@ export class MediaPool {
     if (!poolMediaEl) {
       // If there is no space in the pool to allocate a new element, and no
       // element can be evicted, do not return any element.
+      console.log(
+        '[mediapool] loading',
+        domMediaEl.parentElement.id,
+        '-> cannot evict videos'
+      );
       return Promise.resolve();
     }
 
     this.allocateMediaElement_(mediaType, poolMediaEl);
 
+    console.log(
+      '[mediapool] loading',
+      domMediaEl.parentElement.id,
+      '-> load successful'
+    );
     return this.swapPoolMediaElementIntoDom_(
       placeholderEl,
       poolMediaEl,
@@ -785,6 +806,7 @@ export class MediaPool {
     // Empty then() invocation hides the value yielded by the loadInternal_
     // promise, so that we do not leak the pool media element outside of the
     // scope of the media pool.
+    console.log('[story] preload', domMediaEl.parentElement.id);
     return this.loadInternal_(domMediaEl).then();
   }
 
@@ -796,6 +818,7 @@ export class MediaPool {
    *     element has been successfully played.
    */
   play(domMediaEl) {
+    console.log('[story] play', domMediaEl.parentElement.id);
     return this.loadInternal_(domMediaEl).then((poolMediaEl) => {
       if (!poolMediaEl) {
         return Promise.resolve();

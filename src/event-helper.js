@@ -206,10 +206,17 @@ export function loadPromise(eleOrWindow) {
         (child) => child.tagName === 'SOURCE'
       );
       if (!errorTarget) {
+        console.log(
+          'no errorTarget, media has no source',
+          eleOrWindow.parentElement.id
+        );
         return reject(new Error('Media has no source.'));
       }
     }
-    unlistenError = listenOnce(errorTarget, 'error', reject);
+    unlistenError = listenOnce(errorTarget, 'error', (event) => {
+      console.log('listened to error in target video');
+      return reject(event);
+    });
   });
 
   return loadingPromise.then(
@@ -220,6 +227,7 @@ export function loadPromise(eleOrWindow) {
       return eleOrWindow;
     },
     () => {
+      console.log('loadingPromise failed', unlistenLoad);
       if (unlistenLoad) {
         unlistenLoad();
       }
@@ -248,6 +256,7 @@ function failedToLoad(eleOrWindow) {
   if (target && target.src) {
     target = target.src;
   }
+  console.log('throwing error', target.parentElement.id);
   throw user().createError(LOAD_FAILURE_PREFIX, target);
 }
 

@@ -438,6 +438,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
         if (this.state_ === PageState.PAUSED) {
           this.advancement_.start();
+          console.log('play from setstate');
           this.playAllMedia_();
           if (this.animationManager_) {
             this.animationManager_.resumeAll();
@@ -910,6 +911,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   playMedia_(mediaPool, mediaEl) {
+    console.log('playMedia_', mediaEl.parentElement.id);
     if (this.isBotUserAgent_) {
       mediaEl.play();
       return Promise.resolve();

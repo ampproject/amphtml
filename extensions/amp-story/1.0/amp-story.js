@@ -2169,9 +2169,9 @@ export class AmpStory extends AMP.BaseElement {
       let distance = distanceMap[pageId];
       // If on last page, mark first page with distance 1
       if (
-        pageId == this.pages_[0].element.id &&
+        pageId === this.pages_[0].element.id &&
         this.activePage_ == this.pages_[this.pages_.length - 1] &&
-        this.viewer_.hasCapability('swipe')
+        !this.viewer_.hasCapability('swipe')
       ) {
         distance = 1;
       }
