@@ -2599,12 +2599,26 @@ ErrorTokenOr<Selector> ParseASelectorsGroup(TokenStream* token_stream) {
   }
 }
 
-void TraverseSelectors(const Selector& selector, SelectorVisitor* visitor) {
+void SelectorVisitor::VisitQualifiedRule(const QualifiedRule& qualified_rule) {
+  vector<unique_ptr<Token>> cloned_prelude;
+  cloned_prelude.reserve(qualified_rule.prelude().size());
+  for (const auto& token : qualified_rule.prelude()) {
+    cloned_prelude.push_back(token->Clone());
+  }
+  TokenStream stream(std::move(cloned_prelude));
+  stream.Consume();
+  ErrorTokenOr<Selector> maybe_selector = ParseASelectorsGroup(&stream);
+  if (absl::holds_alternative<unique_ptr<ErrorToken>>(maybe_selector)) {
+    errors_->emplace_back(
+        std::move(absl::get<unique_ptr<ErrorToken>>(maybe_selector)));
+    return;
+  }
+  const Selector& selector = *absl::get<unique_ptr<Selector>>(maybe_selector);
   std::deque<const Selector*> to_visit = {&selector};
   while (!to_visit.empty()) {
     const Selector* node = to_visit.front();
     to_visit.pop_front();
-    node->Accept(visitor);
+    node->Accept(this);
     node->ForEachChild(
         [&to_visit](const Selector& child) { to_visit.push_back(&child); });
   }
