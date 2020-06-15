@@ -27,6 +27,7 @@ import {
   tryFocus,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
+import {expandConsentEndpointUrl} from './consent-config';
 import {getConsentStateValue} from './consent-info';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
@@ -169,6 +170,9 @@ export class ConsentUI {
     /** @private @const {!Function} */
     this.boundHandleIframeMessages_ = this.handleIframeMessages_.bind(this);
 
+    /** @private {?Promise<string>} */
+    this.promptUISrcPromise_ = null;
+
     this.init_(config, opt_postPromptUI);
   }
 
@@ -206,7 +210,13 @@ export class ConsentUI {
     } else if (promptUISrc) {
       // Create an iframe element with the provided src
       this.isCreatedIframe_ = true;
-      this.ui_ = this.createPromptIframeFromSrc_(promptUISrc);
+      assertHttpsUrl(promptUISrc, this.parent_);
+      // TODO: Preconnect to the promptUISrc?
+      this.promptUISrcPromise_ = expandConsentEndpointUrl(
+        this.parent_,
+        promptUISrc
+      );
+      this.ui_ = this.createPromptIframe_();
       this.placeholder_ = this.createPlaceholder_();
       this.clientConfig_ = config['clientConfig'] || null;
     }
@@ -227,7 +237,7 @@ export class ConsentUI {
     classList.remove('amp-hidden');
     // Add to fixed layer
     this.baseInstance_.getViewport().addToFixedLayer(this.parent_);
-    if (this.isCreatedIframe_) {
+    if (this.isCreatedIframe_ && this.promptUISrcPromise_) {
       // show() can be called multiple times, but notificationsUiManager
       // ensures that only 1 is shown at a time, so no race condition here
       this.isActionPromptTrigger_ = isActionPromptTrigger;
@@ -412,13 +422,11 @@ export class ConsentUI {
 
   /**
    * Create the iframe if promptUISrc is valid
-   * @param {string} promptUISrc
    * @return {!Element}
    */
-  createPromptIframeFromSrc_(promptUISrc) {
+  createPromptIframe_() {
     const iframe = this.parent_.ownerDocument.createElement('iframe');
     const sandbox = ['allow-scripts', 'allow-popups'];
-    iframe.src = assertHttpsUrl(promptUISrc, this.parent_);
     const allowSameOrigin = this.allowSameOrigin_(iframe.src);
     if (allowSameOrigin) {
       sandbox.push('allow-same-origin');
@@ -512,10 +520,13 @@ export class ConsentUI {
     classList.add(consentUiClasses.loading);
     toggle(dev().assertElement(this.ui_), false);
 
-    const iframePromise = this.getClientInfoPromise_().then((clientInfo) => {
-      this.ui_.setAttribute('name', JSON.stringify(clientInfo));
-      this.win_.addEventListener('message', this.boundHandleIframeMessages_);
-      insertAtStart(this.parent_, dev().assertElement(this.ui_));
+    const iframePromise = this.promptUISrcPromise_.then((expandedSrc) => {
+      this.ui_.src = expandedSrc;
+      return this.getClientInfoPromise_().then((clientInfo) => {
+        this.ui_.setAttribute('name', JSON.stringify(clientInfo));
+        this.win_.addEventListener('message', this.boundHandleIframeMessages_);
+        insertAtStart(this.parent_, dev().assertElement(this.ui_));
+      });
     });
 
     return Promise.all([

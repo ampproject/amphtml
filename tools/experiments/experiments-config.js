@@ -314,6 +314,11 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/28435',
   },
   {
+    id: 'amp-ad-no-center-css',
+    name: 'Removing the centering css rule for amp-ad',
+    spec: 'https://github.com/ampproject/amphtml/issues/27095',
+  },
+  {
     id: 'fie-init-chunking',
     name: 'More chunking for friendly iframe initialization',
     spec: 'https://github.com/ampproject/amphtml/issues/27584',
@@ -322,5 +327,10 @@ export const EXPERIMENTS = [
     id: 'a4a-no-signing',
     name: 'Remove signing requirement for AMPHTML ads',
     spec: 'https://github.com/ampproject/amphtml/issues/27189',
+  },
+  {
+    id: 'sticky-ad-padding-bottom',
+    name: 'Add a bottom padding for edgeless iPhones',
+    spec: 'https://github.com/ampproject/amphtml/issues/22251',
   },
 ];
