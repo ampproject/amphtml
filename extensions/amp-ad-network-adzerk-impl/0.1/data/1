@@ -1,6 +1,45 @@
 {
-  "templateUrl": "1",
+  "templateUrl": "https://s.yimg.jp/bdv/yahoo/tmp/ad_test002.html",
   "data": {
-    "url": "https://www.google.com"
-  }
+    "ads" : [
+        {
+          "title" : "ad_title_001_1544313633",
+          "body" : "ad_body",
+          "url" : "yahoo.co.jp",
+          "link_url" : "https://m.yahoo.co.jp/?link"
+        },
+        {
+          "title" : "ad_title_002_710539832",
+          "body" : "ad_body",
+          "url" : "yahoo.co.jp",
+          "link_url" : "https://m.yahoo.co.jp/?link"
+        }
+    ]
+  },
+  "analytics": [{
+    "inline": {
+      "requests": {
+          "viewablelog" : "https://b94.yahoo.co.jp/1/v?vi=${yahoo_ydn_vi}&rand=${random}&amp=1",
+          "measurablelog" : "https://b94.yahoo.co.jp/1/m?measurable=1&vi=${yahoo_ydn_vi}&rand=${random}&amp=1"
+      },
+      "vars": {
+          "yahoo_ydn_vi" : "DEMO_VI"
+      },
+      "triggers": {
+          "ydn_viewable": {
+              "on": "visible",
+              "request": "viewablelog",
+              "visibilitySpec": {
+                "selectionMethod": "scope",
+                "visiblePercentageMin": 50,
+                "continuousTimeMin": 1000
+              }
+          },
+          "ydn_measurable": {
+              "on": "render-start",
+              "request": "measurablelog"
+          }
+      }
+    }
+  }]
 }

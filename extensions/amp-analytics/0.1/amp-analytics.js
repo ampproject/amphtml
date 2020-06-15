@@ -151,6 +151,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    console.log('amp-analytics layout');
     // Now that we are rendered, stop rendering the element to reduce
     // resource consumption.
     return this.ensureInitialized_();
@@ -212,18 +213,33 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     this.iniPromise_ = this.getAmpDoc()
       .whenFirstVisible()
+      .then(() => console.log('first visible'))
       // Rudimentary "idle" signal.
       .then(() => Services.timerFor(this.win).promise(1))
       .then(() => this.consentPromise_)
       .then(() => Services.ampdocServiceFor(this.win))
       .then((ampDocService) => ampDocService.getAmpDoc(this.element))
-      .then((ampdoc) =>
-        Promise.all([
-          instrumentationServicePromiseForDoc(ampdoc),
-          variableServicePromiseForDoc(ampdoc),
-        ])
-      )
+      .then(ampdoc => {
+        console.log(ampdoc);
+        return ampdoc;
+      })
+      .then((ampdoc) => {
+        const isp = instrumentationServicePromiseForDoc(ampdoc);
+        const vsp = variableServicePromiseForDoc(ampdoc);
+        isp.then(() => {
+          console.log('ips');
+        });
+        vsp.then(() => {
+          console.log('vsp');
+        });
+        return Promise.all([
+          isp,
+          vsp,
+        ]);
+      })
       .then((services) => {
+        console.log('services');
+
         this.instrumentation_ = services[0];
         this.variableService_ = services[1];
         const loadConfigDeferred = new Deferred();
@@ -248,6 +264,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           this.win,
           this.config_['transport'] || {}
         );
+        console.log('init');
       })
       .then(this.registerTriggers_.bind(this))
       .then(this.initializeLinker_.bind(this));
@@ -831,6 +848,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 }
 
 AMP.extension(TAG, '0.1', (AMP) => {
+  console.log('!!!!!! amp-analytics register');
+  AMP.registerElement(TAG, AmpAnalytics);
   // Register doc-service factory.
   AMP.registerServiceForDoc(
     'amp-analytics-instrumentation',
@@ -840,5 +859,4 @@ AMP.extension(TAG, '0.1', (AMP) => {
   installLinkerReaderService(AMP.win);
   AMP.registerServiceForDoc('amp-analytics-variables', VariableService);
   // Register the element.
-  AMP.registerElement(TAG, AmpAnalytics);
 });

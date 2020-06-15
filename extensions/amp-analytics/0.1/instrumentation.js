@@ -49,6 +49,8 @@ export class InstrumentationService {
 
     /** @const */
     this.root_ = this.findRoot_(ampdoc.getRootNode());
+
+    console.log('InstrumentationService constructor');
   }
 
   /** @override */

@@ -222,8 +222,10 @@ export function installFriendlyIframeEmbed(
   let readyPromise;
   const maybeGetDelayPromise = getDelayPromiseProducer(win);
   if (isIframeReady(iframe)) {
+    console.log('fie ready right away');
     readyPromise = Promise.resolve();
   } else {
+    console.log('fie ready polling');
     readyPromise = new Promise((resolve) => {
       /** @const {number} */
       const interval = win.setInterval(() => {
@@ -247,6 +249,7 @@ export function installFriendlyIframeEmbed(
   }
 
   return readyPromise.then(() => {
+    console.log('fie ready');
     const childWin = /** @type {!Window} */ (iframe.contentWindow);
     const signals = spec.host && spec.host.signals();
     const ampdoc =
@@ -756,6 +759,7 @@ export class FriendlyIframeEmbed {
     const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
     setParentWindow(childWin, parentWin);
 
+    console.log('!!!!!!!!!!installExtensionsInFie', extensionIds);
     // Install necessary polyfills.
     installPolyfillsInChildWindow(parentWin, childWin);
 
@@ -870,6 +874,7 @@ export class FriendlyIframeEmbed {
    * @visibleForTesting
    */
   doInstallExtensionsInChildWindow(extensions, childWin, extensionIds) {
+    console.log('!!!!!!doInstallExtensionsInChildWindow', extensionIds);
     const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
     const maybeGetDelayPromise = getDelayPromiseProducer(parentWin);
 

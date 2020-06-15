@@ -101,6 +101,7 @@ function tryUpgradeElement_(element, toClass) {
 export function stubElementsForDoc(ampdoc) {
   const extensions = extensionScriptsInNode(ampdoc.getHeadNode());
   extensions.forEach((name) => {
+    console.log('stubElementsForDoc', name);
     ampdoc.declareExtension(name);
     stubElementIfNotKnown(ampdoc.win, name);
   });
@@ -112,6 +113,7 @@ export function stubElementsForDoc(ampdoc) {
  * @param {string} name
  */
 export function stubElementIfNotKnown(win, name) {
+  console.log('stubElementIfNotKnown', name);
   const knownElements = getExtendedElements(win);
   if (!knownElements[name]) {
     registerElement(win, name, ElementStub);

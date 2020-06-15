@@ -167,6 +167,7 @@ export function registerServiceBuilderForDoc(
 ) {
   const ampdoc = getAmpdoc(nodeOrDoc);
   const holder = getAmpdocServiceHolder(ampdoc);
+  // console.log('registerServiceBuilderForDoc', constructor);
   registerServiceInternal(holder, ampdoc, id, constructor);
   if (opt_instantiate) {
     getServiceInternal(holder, id);

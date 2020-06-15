@@ -484,6 +484,7 @@ export class AmpDoc {
    * @return {boolean}
    */
   declaresExtension(extensionId) {
+    console.log('declaresExtension', extensionId, this.declaredExtensions_);
     return this.declaredExtensions_.indexOf(extensionId) != -1;
   }
 
@@ -493,6 +494,7 @@ export class AmpDoc {
    * @restricted
    */
   declareExtension(extensionId) {
+    console.log('declareExtension', extensionId);
     if (!this.declaresExtension(extensionId)) {
       this.declaredExtensions_.push(extensionId);
     }

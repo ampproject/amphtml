@@ -221,6 +221,7 @@ export class Extensions {
    * @return {!Promise<!ExtensionDef>}
    */
   installExtensionForDoc(ampdoc, extensionId, opt_extensionVersion) {
+    console.log('installExtensionForDoc', extensionId);
     const rootNode = ampdoc.getRootNode();
     let extLoaders = rootNode[LOADER_PROP];
     if (!extLoaders) {
@@ -326,6 +327,7 @@ export class Extensions {
   addElement(name, implementationClass, css) {
     const holder = this.getCurrentExtensionHolder_(name);
     holder.extension.elements[name] = {implementationClass, css};
+    console.log('addElement', name);
     this.addDocFactory((ampdoc) => {
       this.installElement_(ampdoc, name, implementationClass, css);
     });
@@ -377,6 +379,7 @@ export class Extensions {
    */
   addService(name, implementationClass) {
     const holder = this.getCurrentExtensionHolder_();
+    console.log('addService', implementationClass.name);
     holder.extension.services.push(
       /** @type {!ExtensionServiceDef} */ ({
         serviceName: name,
@@ -384,6 +387,8 @@ export class Extensions {
       })
     );
     this.addDocFactory((ampdoc) => {
+      console.log('addDocFactory', implementationClass.name);
+
       registerServiceBuilderForDoc(
         ampdoc,
         name,
@@ -405,13 +410,17 @@ export class Extensions {
     const holder = this.getCurrentExtensionHolder_(opt_forName);
     holder.docFactories.push(factory);
 
+    console.log('docfactory');
     // If a single-doc mode, run factory right away if it's included by the doc.
     if (this.currentExtensionId_ && this.ampdocService_.isSingleDoc()) {
       const ampdoc = this.ampdocService_.getAmpDoc(this.win.document);
       const extensionId = dev().assertString(this.currentExtensionId_);
       // Note that this won't trigger for FIE extensions that are not present
       // in the parent doc.
+      console.log('before declaresExtension');
+      console.log({holderauto: holder.auto});
       if (ampdoc.declaresExtension(extensionId) || holder.auto) {
+        console.log('run docfactory');
         factory(ampdoc);
       }
     }
@@ -426,6 +435,7 @@ export class Extensions {
    * @restricted
    */
   installExtensionsInDoc(ampdoc, extensionIds) {
+    console.log('installExtensionsInDoc', extensionIds);
     const promises = [];
     extensionIds.forEach((extensionId) => {
       promises.push(this.installExtensionInDoc(ampdoc, extensionId));
@@ -440,8 +450,10 @@ export class Extensions {
    * @return {!Promise}
    */
   installExtensionInDoc(ampdoc, extensionId) {
+    console.log('installExtensionInDoc', extensionId);
     const holder = this.getExtensionHolder_(extensionId, /* auto */ false);
     return this.waitFor_(holder).then(() => {
+      console.log('real-installExtensionInDoc', extensionId);
       ampdoc.declareExtension(extensionId);
       holder.docFactories.forEach((factory) => {
         try {

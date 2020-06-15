@@ -770,6 +770,7 @@ function createBaseCustomElementClass(win) {
         );
       }
       if (this.isInTemplate_) {
+        console.log('connectedCallback isInTemplate', this.tagName.toLowerCase());
         return;
       }
 
@@ -784,6 +785,7 @@ function createBaseCustomElementClass(win) {
         this.classList.add('amp-notbuilt');
       }
 
+      console.log('connectedCallback before ampdoc', this.tagName.toLowerCase());
       if (!this.ampdoc_) {
         // Ampdoc can now be initialized.
         const win = toWin(this.ownerDocument.defaultView);
@@ -792,10 +794,12 @@ function createBaseCustomElementClass(win) {
         this.ampdoc_ = ampdoc;
         // Load the pre-stubbed extension if needed.
         const extensionId = this.tagName.toLowerCase();
+        console.log('connectedCallback', extensionId);
         if (
           isStub(this.implementation_) &&
           !ampdoc.declaresExtension(extensionId)
         ) {
+          console.log('installExtensionForDoc', extensionId);
           Services.extensionsFor(win).installExtensionForDoc(
             ampdoc,
             extensionId

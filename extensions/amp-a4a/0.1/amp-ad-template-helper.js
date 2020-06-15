@@ -86,6 +86,7 @@ export class AmpAdTemplateHelper {
    * @param {!Array|!JsonObject} analyticsValue
    */
   insertAnalytics(element, analyticsValue) {
+    console.log('!!!!!!!!!!!insertAnalytics');
     analyticsValue = /**@type {!Array}*/ (isArray(analyticsValue)
       ? analyticsValue
       : [analyticsValue]);
