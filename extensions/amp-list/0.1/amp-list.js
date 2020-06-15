@@ -606,13 +606,9 @@ export class AmpList extends AMP.BaseElement {
             'update': false,
           });
         }
-        toArray(
-          dev().assertElement(this.container_).children
-        ).forEach((child) =>
-          this.owners_./*OK*/ scheduleUnlayout(
-            dev().assertElement(this.container_),
-            child
-          )
+        this.owners_./*OK*/ scheduleUnlayout(
+          this.element,
+          dev().assertElement(this.container_)
         );
         removeChildren(dev().assertElement(this.container_));
       };
@@ -1069,9 +1065,7 @@ export class AmpList extends AMP.BaseElement {
         this.diff_(container, elements);
       } else {
         if (!opt_append) {
-          toArray(container.children).forEach((child) =>
-            this.owners_./*OK*/ scheduleUnlayout(container, child)
-          );
+          this.owners_./*OK*/ scheduleUnlayout(this.element, container);
           removeChildren(container);
         }
         this.addElementsToContainer_(elements, container);
