@@ -324,7 +324,7 @@ export class ManualAdvancement extends AdvancementConfig {
       true
     );
     this.ampdoc_.onVisibilityChanged(() => {
-      this.ampdoc_.isVisible() ? this.resolveTouchstart() : null;
+      this.ampdoc_.isVisible() ? this.processTouchend_() : null;
     });
   }
 
@@ -349,7 +349,6 @@ export class ManualAdvancement extends AdvancementConfig {
     if (this.touchstartTimestamp_ || !this.shouldHandleEvent_(event)) {
       return;
     }
-
     this.touchstartTimestamp_ = Date.now();
     this.pausedState_ = /** @type {boolean} */ (this.storeService_.get(
       StateProperty.PAUSED_STATE
@@ -379,20 +378,21 @@ export class ManualAdvancement extends AdvancementConfig {
       event.preventDefault();
     }
 
-    this.resolveTouchstart();
+    this.processTouchend_();
   }
 
   /**
    * Reverts the touchstart events' state (eg: when resuming from swipe in player)
-   * @public
+   * @private
    */
-  resolveTouchstart() {
+  processTouchend_() {
     if (!this.touchstartTimestamp_) {
       return;
     }
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, this.pausedState_);
     this.touchstartTimestamp_ = null;
     this.timer_.cancel(this.timeoutId_);
+    this.timeoutId_ = null;
     if (
       !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) &&
       /** @type {InteractiveComponentDef} */ (this.storeService_.get(
