@@ -20,8 +20,6 @@ const argv = require('minimist')(process.argv.slice(2));
 const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
 const {cyan, red} = require('ansi-colors');
-const {buildNewServer} = require('./build-system/tasks/typescript-compile');
-buildNewServer();
 
 const {
   checkExactVersions,
@@ -82,7 +80,6 @@ const {updatePackages} = require('./build-system/tasks/update-packages');
 const {validator, validatorWebui} = require('./build-system/tasks/validator');
 const {vendorConfigs} = require('./build-system/tasks/vendor-configs');
 const {visualDiff} = require('./build-system/tasks/visual-diff');
-
 
 /**
  * Creates a gulp task using the given name and task function.

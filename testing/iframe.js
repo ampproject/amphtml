@@ -65,7 +65,6 @@ export function createFixtureIframe(
   initialIframeHeight,
   opt_beforeLoad
 ) {
-
   return new Promise((resolve, reject) => {
     // Counts the supported custom events.
     const events = {
