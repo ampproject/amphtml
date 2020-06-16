@@ -481,6 +481,8 @@ describes.sandboxed('amp-img', {}, (env) => {
     function getImgWithBlur(addPlaceholder, addBlurClass) {
       const el = document.createElement('amp-img');
       const img = document.createElement('img');
+      el.setAttribute('src', '/examples/img/sample.jpg');
+      img.src = 'data:image/svg+xml;charset=utf-8,%3Csvg%3E%3C/svg%3E';
       if (addPlaceholder) {
         img.setAttribute('placeholder', '');
         el.getPlaceholder = () => img;
@@ -533,6 +535,49 @@ describes.sandboxed('amp-img', {}, (env) => {
       el = impl.element;
       img = el.firstChild;
       expect(impl.togglePlaceholder).to.have.been.calledWith(false);
+    });
+
+    it('does not interfere with SSR img creation', () => {
+      const impl = getImgWithBlur(true, true);
+      const ampImg = impl.element;
+      ampImg.setAttribute('i-amphtml-ssr', '');
+      impl.buildCallback();
+      impl.layoutCallback();
+
+      expect(ampImg.querySelector('img[src*="sample.jpg"]')).to.exist;
+      expect(ampImg.querySelector('img[src*="image/svg+xml"]')).to.exist;
+    });
+
+    it('does not interfere with SSR img before placeholder', () => {
+      const impl = getImgWithBlur(true, true);
+      const ampImg = impl.element;
+      ampImg.setAttribute('i-amphtml-ssr', '');
+
+      const img = document.createElement('img');
+      img.src = ampImg.getAttribute('src');
+      ampImg.insertBefore(img, impl.getPlaceholder());
+
+      impl.buildCallback();
+      impl.layoutCallback();
+
+      expect(ampImg.querySelector('img[src*="sample.jpg"]')).to.exist;
+      expect(ampImg.querySelector('img[src*="image/svg+xml"]')).to.exist;
+    });
+
+    it('does not interfere with SSR img after placeholder', () => {
+      const impl = getImgWithBlur(true, true);
+      const ampImg = impl.element;
+      ampImg.setAttribute('i-amphtml-ssr', '');
+
+      const img = document.createElement('img');
+      img.src = ampImg.getAttribute('src');
+      ampImg.appendChild(img);
+
+      impl.buildCallback();
+      impl.layoutCallback();
+
+      expect(ampImg.querySelector('img[src*="sample.jpg"]')).to.exist;
+      expect(ampImg.querySelector('img[src*="image/svg+xml"]')).to.exist;
     });
   });
 
