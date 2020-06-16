@@ -4,12 +4,12 @@ formats:
   - websites
   - ads
 teaser:
-  text: Provides configurable behavior for ad exits for AMP ads.
+  text: Provides configurable behavior for ad exits for AMPHTML ads.
 ---
 
 # amp-ad-exit
 
-Provides configurable ad exit behavior for AMP ads.
+Provides configurable ad exit behavior for AMPHTML ads.
 
 <!--
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
