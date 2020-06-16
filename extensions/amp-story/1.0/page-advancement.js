@@ -345,7 +345,6 @@ export class ManualAdvancement extends AdvancementConfig {
     // class. Also ignores any subsequent touchstart that would happen before
     // touchend was fired, since it'd reset the touchstartTimestamp (ie: user
     // touches the screen with a second finger).
-
     if (this.touchstartTimestamp_ || !this.shouldHandleEvent_(event)) {
       return;
     }
