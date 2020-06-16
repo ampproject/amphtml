@@ -58,7 +58,7 @@ hidden permanently.
 ```
 
 For a full-page example, see
-[article.amp.html](https://github.com/ampproject/amphtml/blob/master/examples/article.amp.html).
+[article.amp.html](../../examples/article.amp.html).
 
 Use of `amp-app-banner` must meet the following requirements:
 
@@ -86,9 +86,9 @@ To extend and promote the usage of the natively supported app banners on
 and [Android](https://web.dev/customize-install/), `amp-app-banner` uses the
 exact data sources that the native app banners use on their respective
 platforms. iOS uses a
-<[`meta`](https://www.w3schools.com/tags/tag_meta.asp) name="apple-itunes-app">
+[`<meta name="apple-itunes-app">`](https://www.w3schools.com/tags/tag_meta.asp)
 tag in the head of the document, while Android uses a
-<[`link`](https://www.w3schools.com/tags/tag_link.asp) rel="manifest"> tag.
+[`<link rel="manifest">`](https://www.w3schools.com/tags/tag_link.asp) tag.
 
 - On iOS, the AMP runtime parses the `<meta>` tag content attribute to extract
   the App ID and `app-argument`. These are usually used for deep link URIs,
