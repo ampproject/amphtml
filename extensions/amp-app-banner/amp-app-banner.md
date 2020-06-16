@@ -102,7 +102,7 @@ tag in the head of the document, while Android uses a
   - The value of the `content` attribute must contain `app-id=`.
 
 - On Android, the AMP runtime makes an XHR request to fetch the
-  [`manifest.json` file](#example-for-manifest-json). The runtime parses the
+  `manifest.json` file. The runtime parses the
   content to extract `app_id` from `related_applications` and calculates the
   app store URL as well as open-in-app URL, which has the following form:
   `android-app://${appId}/${protocol}/${host}${pathname}`
