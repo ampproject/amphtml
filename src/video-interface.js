@@ -546,13 +546,13 @@ export function isDockable(element) {
 /** @enum {string} */
 export const VideoServiceSignals = {
   USER_INTERACTED: 'user-interacted',
-  AUTOPLAY_DELEGATED: 'autoplay-delegated',
+  PLAYBACK_DELEGATED: 'playback-delegated',
 };
 
 /** @param {!AmpElement|!VideoOrBaseElementDef} video */
 export function delegateAutoplay(video) {
   whenUpgradedToCustomElement(dev().assertElement(video)).then((el) => {
-    el.signals().signal(VideoServiceSignals.AUTOPLAY_DELEGATED);
+    el.signals().signal(VideoServiceSignals.PLAYBACK_DELEGATED);
   });
 }
 
