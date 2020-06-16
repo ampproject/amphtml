@@ -206,7 +206,7 @@ app.get(
   [
     '/examples/*.(min|max).html',
     '/test/manual/*.(min|max).html',
-    '/test-bin/test/fixtures/e2e/*/*.(min|max).html',
+    '/test/fixtures/e2e/*/*.(min|max).html',
     '/dist/cache-sw.(min|max).html',
   ],
   (req, res) => {
@@ -938,8 +938,8 @@ app.get(
   [
     '/examples/(**/)?*.html',
     '/test/manual/(**/)?*.html',
-    '/test-bin/test/fixtures/e2e/(**/)?*.html',
-    '/test-bin/test/fixtures/performance/(**/)?*.html',
+    '/test/fixtures/e2e/(**/)?*.html',
+    '/test/fixtures/performance/(**/)?*.html',
   ],
   (req, res, next) => {
     const filePath = req.path;
