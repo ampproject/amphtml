@@ -43,13 +43,9 @@ export const _default = () => {
     'random',
   ];
   const type = select('type', knobConfigurations, knobConfigurations[0]);
-  const endpoint = text('endpoint', undefined);
-  const paramUrl = text('paramUrl', undefined);
-  const paramText = text('paramText', undefined);
-  const paramMini = text('paramMini', undefined);
-  const paramRecipient = text('paramRecipient', undefined);
-  const ignoreParams = select('ignoreParams', [true, false], false);
+  const endpoint = text('customEndpoint', undefined);
   const additionalParams = object('additionalParams', {'subject': 'test'});
+  const target = text('target', undefined);
   const width = text('width', undefined);
   const height = text('height', undefined);
 
@@ -64,6 +60,7 @@ export const _default = () => {
         type={type}
         endpoint={endpoint}
         params={additionalParams}
+        target={target}
         width={width}
         height={height}
       />
