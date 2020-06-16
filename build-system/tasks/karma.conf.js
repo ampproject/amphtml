@@ -37,14 +37,6 @@ if (argv.debug) {
   COMMON_CHROME_FLAGS.push('--auto-open-devtools-for-tabs');
 }
 
-// Reduces the odds of Sauce labs timing out during tests. See #16135 and #24286.
-// Reference: https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-Timeouts
-const SAUCE_TIMEOUT_CONFIG = {
-  maxDuration: 30 * 60,
-  commandTimeout: 10 * 60,
-  idleTimeout: 30 * 60,
-};
-
 // Used by persistent browserify caching to further salt hashes with our
 // environment state. Eg, when updating a babel-plugin, the environment hash
 // must change somehow so that the cache busts and the file is retransformed.
@@ -206,47 +198,40 @@ module.exports = {
       browserName: 'chrome',
       browserVersion: 'latest',
       platformName: 'Windows 10',
-      ...SAUCE_TIMEOUT_CONFIG,
     },
     SL_Chrome_Beta: {
       base: 'SauceLabs',
       browserName: 'chrome',
       browserVersion: 'beta',
       platformName: 'Windows 10',
-      ...SAUCE_TIMEOUT_CONFIG,
     },
     SL_Firefox: {
       base: 'SauceLabs',
       browserName: 'firefox',
       browserVersion: 'latest',
       platformName: 'macOS 10.15',
-      ...SAUCE_TIMEOUT_CONFIG,
     },
     SL_Firefox_Beta: {
       base: 'SauceLabs',
       browserName: 'firefox',
       browserVersion: 'beta',
       platformName: 'Windows 10',
-      ...SAUCE_TIMEOUT_CONFIG,
     },
     SL_Safari: {
       base: 'SauceLabs',
       browserName: 'safari',
       browserVersion: 'latest',
       platformName: 'macOS 10.15',
-      ...SAUCE_TIMEOUT_CONFIG,
     },
     SL_Edge: {
       base: 'SauceLabs',
       browserName: 'MicrosoftEdge',
       platformName: 'Windows 10',
-      ...SAUCE_TIMEOUT_CONFIG,
     },
     SL_IE: {
       base: 'SauceLabs',
       browserName: 'internet explorer',
       platformName: 'Windows 10',
-      ...SAUCE_TIMEOUT_CONFIG,
     },
   },
 
@@ -258,6 +243,11 @@ module.exports = {
     connectOptions: {
       noSslBumpDomains: 'all',
     },
+    // Reduces the odds of Sauce labs timing out during tests. See #16135 and #24286.
+    // Reference: https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-Timeouts
+    maxDuration: 30 * 60,
+    commandTimeout: 10 * 60,
+    idleTimeout: 30 * 60,
   },
 
   client: {
