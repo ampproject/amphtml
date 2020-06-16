@@ -406,6 +406,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         const attributes = dict({
           'ampAutocompleteAttributes': {
             'items': itemsExpr,
+            'maxEntries': this.maxEntries_,
           },
         });
         return this.getSsrTemplateHelper().ssr(
