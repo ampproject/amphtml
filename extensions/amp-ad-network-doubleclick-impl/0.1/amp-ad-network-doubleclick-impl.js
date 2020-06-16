@@ -23,7 +23,14 @@
 import '../../amp-a4a/0.1/real-time-config-manager';
 import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../src/ampdoc-fie';
 import {
-  AMP_AD_NO_CENTER_CSS_EXP,
+  AmpA4A,
+  ConsentTupleDef,
+  DEFAULT_SAFEFRAME_VERSION,
+  NO_SIGNING_EXP,
+  XORIGIN_MODE,
+  assignAdUrlToError,
+} from '../../amp-a4a/0.1/amp-a4a';
+import {
   AmpAnalyticsConfigDef,
   QQID_HEADER,
   RENDER_ON_IDLE_FIX_EXP,
@@ -45,14 +52,6 @@ import {
   maybeAppendErrorParameter,
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
-import {
-  AmpA4A,
-  ConsentTupleDef,
-  DEFAULT_SAFEFRAME_VERSION,
-  NO_SIGNING_EXP,
-  XORIGIN_MODE,
-  assignAdUrlToError,
-} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
 import {FIE_INIT_CHUNKING_EXP} from '../../../src/friendly-iframe-embed';
@@ -460,13 +459,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         branches: [
           RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.CONTROL,
           RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT,
-        ],
-      },
-      [AMP_AD_NO_CENTER_CSS_EXP.id]: {
-        isTrafficEligible: () => true,
-        branches: [
-          [AMP_AD_NO_CENTER_CSS_EXP.control],
-          [AMP_AD_NO_CENTER_CSS_EXP.experiment],
         ],
       },
       [[FIE_INIT_CHUNKING_EXP.id]]: {
@@ -1323,11 +1315,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       position: isMultiSizeFluid ? 'relative' : null,
     });
 
-    // Set the centering CSS if the experiment is off
+    // Check if this is a multi-size creative that's narrower than the ad slot.
     if (
-      !isExperimentOn(this.win, 'amp-ad-no-center-css') ||
-      getExperimentBranch(this.win, AMP_AD_NO_CENTER_CSS_EXP.id) ===
-        AMP_AD_NO_CENTER_CSS_EXP.control
+      this.returnedSize_ &&
+      this.returnedSize_.width &&
+      this.returnedSize_.width < this.getSlotSize().width
     ) {
       setStyles(dev().assertElement(this.iframe), {
         top: '50%',
