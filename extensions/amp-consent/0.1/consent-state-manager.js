@@ -166,17 +166,6 @@ export class ConsentStateManager {
   }
 
   /**
-   * Sets a promise which resolves to a boolean that is to be returned
-   * from the remote endpoint.
-   *
-   * @param {!Promise<?boolean>} gdprAppliesPromise
-   */
-  setConsentInstanceGdprApplies(gdprAppliesPromise) {
-    devAssert(this.instance_, '%s: cannot find the instance', TAG);
-    this.instance_.gdprAppliesPromise = gdprAppliesPromise;
-  }
-
-  /**
    * Sets the dirty bit so current consent info won't be used for
    * decision making on next visit
    */
@@ -193,16 +182,6 @@ export class ConsentStateManager {
   getConsentInstanceSharedData() {
     devAssert(this.instance_, '%s: cannot find the instance', TAG);
     return this.instance_.sharedDataPromise;
-  }
-
-  /**
-   * Returns a promise that resolves to a gdprApplies value
-   *
-   * @return {?Promise<?boolean>}
-   */
-  getConsentInstanceGdprApplies() {
-    devAssert(this.instance_, '%s: cannot find the instance', TAG);
-    return this.instance_.gdprAppliesPromise;
   }
 
   /**
@@ -250,11 +229,6 @@ export class ConsentInstance {
 
     /** @public {?Promise<Object>} */
     this.sharedDataPromise = null;
-
-    // TODO(micajuineho) remove this in favor
-    // of consolidation with consentString
-    /** @public {?Promise<?boolean>} */
-    this.gdprAppliesPromise = null;
 
     /** @private {Promise<!../../../src/service/storage-impl.Storage>} */
     this.storagePromise_ = Services.storageForDoc(ampdoc);
