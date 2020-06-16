@@ -247,13 +247,6 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
         );
       });
     });
-
-    it('receives and sets gdprApplies', async () => {
-      manager.registerConsentInstance('test', {});
-      manager.setConsentInstanceGdprApplies(Promise.resolve(false));
-      await expect(manager.getConsentInstanceGdprApplies()).to.eventually.be
-        .false;
-    });
   });
 
   describe('ConsentInstance', () => {
@@ -355,7 +348,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
           instance.update(
             CONSENT_ITEM_STATE.UNKNOWN,
             'test',
-            constructMetadata(CONSENT_STRING_TYPE.TCF_V2xz)
+            constructMetadata(CONSENT_STRING_TYPE.TCF_V2)
           );
           yield macroTask();
           expect(storageSetSpy).to.not.be.called;

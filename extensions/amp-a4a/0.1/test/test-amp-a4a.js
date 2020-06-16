@@ -2273,7 +2273,7 @@ describe('amp-a4a', () => {
     });
 
     describe('consent integration', () => {
-      let fixture, a4aElement, a4a, consentString, gdprApplies;
+      let fixture, a4aElement, a4a, consentString, consentMetadata, gdprApplies;
       beforeEach(async () => {
         fixture = await createIframePromise();
         setupForAdTesting(fixture);
@@ -2286,6 +2286,7 @@ describe('amp-a4a', () => {
         a4a = new MockA4AImpl(a4aElement);
         consentString = 'test-consent-string';
         gdprApplies = true;
+        consentMetadata = {gdprApplies};
         return fixture;
       });
 
@@ -2303,7 +2304,7 @@ describe('amp-a4a', () => {
             Promise.resolve({
               whenPolicyResolved: () => policyPromise,
               getConsentStringInfo: () => consentString,
-              getGdprApplies: () => gdprApplies,
+              getConsentMetadataInfo: () => consentMetadata,
             })
           );
 
@@ -2360,7 +2361,7 @@ describe('amp-a4a', () => {
               whenPolicyResolved: () =>
                 Promise.resolve(CONSENT_POLICY_STATE.SUFFICIENT),
               getConsentStringInfo: () => consentString,
-              getGdprApplies: () => gdprApplies,
+              getConsentMetadataInfo: () => consentMetadata,
             })
           );
 
@@ -2403,7 +2404,7 @@ describe('amp-a4a', () => {
               getConsentStringInfo: () => {
                 throw new Error('consent err!');
               },
-              getGdprApplies: () => {
+              getConsentMetadata: () => {
                 throw new Error('consent err!');
               },
             })
