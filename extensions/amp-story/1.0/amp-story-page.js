@@ -438,7 +438,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
         if (this.state_ === PageState.PAUSED) {
           this.advancement_.start();
-          console.log('play from setstate');
           this.playAllMedia_();
           if (this.animationManager_) {
             this.animationManager_.resumeAll();
@@ -484,7 +483,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       // opacity instead of immediately jumping to the first frame. See #17985.
       this.pauseAllMedia_(false /** rewindToBeginning */);
       this.timer_.delay(() => {
-        this.rewindAllMedia();
+        this.rewindAllMedia_();
       }, REWIND_TIMEOUT_MS);
     } else {
       this.pauseAllMedia_(true /** rewindToBeginning */);
@@ -911,7 +910,6 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   playMedia_(mediaPool, mediaEl) {
-    console.log('playMedia_', mediaEl.parentElement.id);
     if (this.isBotUserAgent_) {
       mediaEl.play();
       return Promise.resolve();
@@ -1101,9 +1099,9 @@ export class AmpStoryPage extends AMP.BaseElement {
   /**
    * Rewinds all media on this page.
    * @return {!Promise} Promise that resolves after the callbacks are called.
-   * @public
+   * @private
    */
-  rewindAllMedia() {
+  rewindAllMedia_() {
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
       if (this.isBotUserAgent_) {
         mediaEl.currentTime = 0;
