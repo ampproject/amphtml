@@ -537,6 +537,15 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
         );
       });
 
+      it('support onUpdateHref expansion', function* () {
+        instance = new ConsentInstance(ampdoc, 'test', {
+          'onUpdateHref': 'https://example.test?cid=CLIENT_ID&r=RANDOM',
+        });
+        yield instance.update(CONSENT_ITEM_STATE.ACCEPTED);
+        yield macroTask();
+        expect(requestSpy).to.be.calledWithMatch(/cid=amp-.{22}&r=RANDOM/);
+      });
+
       it('do not send update request on dismiss/notRequied', function* () {
         instance.update(CONSENT_ITEM_STATE.DISMISSED);
         yield macroTask();
