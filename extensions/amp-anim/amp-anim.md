@@ -44,6 +44,7 @@ element to further optimize `amp-anim`.
 ```
 
 ## Attributes
+
 ### `src`
 
 Specifies the URL for a GIF image.
