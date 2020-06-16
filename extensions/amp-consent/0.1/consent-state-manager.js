@@ -31,12 +31,13 @@ import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, devAssert, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {expandConsentEndpointUrl, getConsentCID} from './consent-config';
 
 const TAG = 'CONSENT-STATE-MANAGER';
 
 /** @visibleForTesting */
-export const CONSENT_STRING_MAX_LENGTH = 1024;
+export const CONSENT_STORAGE_MAX = 1200;
 
 export class ConsentStateManager {
   /**
@@ -364,29 +365,32 @@ export class ConsentInstance {
         return;
       }
 
-      const consentStr = consentInfo['consentString'];
-      if (consentStr && consentStr.length > CONSENT_STRING_MAX_LENGTH) {
-        // Verify the length of consentString.
-        // 1024 * 4/3 (base64) = 1336 bytes.
+      const value = composeStoreValue(consentInfo);
+      if (value == null) {
+        // Value can be false, do not use !value check
+        // Nothing to store to localStorage
+        return;
+      }
+
+      // Check size
+      const size = JSON.stringify(
+        dict({
+          [this.storageKey_]: value,
+        })
+      ).length;
+
+      if (size > CONSENT_STORAGE_MAX) {
+        // 1200 * 4/3 (base64) = 1600 bytes
         user().error(
           TAG,
-          'Cannot store consentString which length exceeds %s. ' +
+          'Cannot store consent information which length exceeds %s. ' +
             'Previous stored consentInfo will be cleared',
-          CONSENT_STRING_MAX_LENGTH
+          CONSENT_STORAGE_MAX
         );
         // If new consentInfo value cannot be stored, need to remove previous
         // value
         storage.remove(this.storageKey_);
         // TODO: Good to have a way to inform CMP service in this case
-        return;
-      }
-
-      // TODO: enforce metadata limits here (if any)
-
-      const value = composeStoreValue(consentInfo);
-      if (value == null) {
-        // Value can be false, do not use !value check
-        // Nothing to store to localStorage
         return;
       }
       this.savedConsentInfo_ = consentInfo;
