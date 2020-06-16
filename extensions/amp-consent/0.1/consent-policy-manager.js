@@ -279,20 +279,6 @@ export class ConsentPolicyManager {
   }
 
   /**
-   * Get gdprApplies value of a policy.
-   *
-   * @param {string} policyId
-   * @return {!Promise<?boolean>}
-   */
-  getGdprApplies(policyId) {
-    return this.whenPolicyResolved(policyId)
-      .then(() => this.ConsentStateManagerPromise_)
-      .then((manager) => {
-        return manager.getConsentInstanceGdprApplies();
-      });
-  }
-
-  /**
    * Get the consent string value of a policy. Return a promise that resolves
    * when the policy resolves.
    * @param {string} policyId
