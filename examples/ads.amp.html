@@ -2145,7 +2145,7 @@
   </amp-ad>
 
   <h2>Spring Ads</h2>
-  <amp-ad width="0" height="0"
+  <amp-ad height="fluid"
           type="springAds"
           data-adssetup='{
           "view": "amp",
@@ -2154,7 +2154,7 @@
           "adSlotSizes": {
             "banner": [{
               "minWidth": 1,
-              "sizes": [[320, 50], [320, 160]]
+              "sizes": [[320, 50]]
             }],
             "mrec": [{
               "minWidth": 1,
@@ -2163,17 +2163,21 @@
           },
           "pageName": "demo_story",
           "publisher": "adtechnology.axelspringer.com",
-          "target": "singleAds;multiAds;you;me;team=adtech,MIT;"
+          "target": "demopage=ampdemo;"
         }'>
   </amp-ad>
-  <amp-ad width="320" height="50"
-          type="springAds"
-          data-adslot="banner">
-  </amp-ad>
-  <amp-ad width="300" height="250"
-          type="springAds"
-          data-adslot="mrec">
-  </amp-ad>
+  <amp-ad
+    width="320"
+    height="50"
+    type="springAds"
+    data-adslot="banner"
+  ></amp-ad>
+  <amp-ad
+    width="100vw"
+    height="fluid"
+    type="springAds"
+    data-adslot="mrec"
+  ></amp-ad>
 
   <h2>SSP</h2>
   <amp-ad width="480" height="300"
