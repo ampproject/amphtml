@@ -113,5 +113,4 @@ jobs:
         - unbuffer node build-system/pr-check/performance-tests.js
   allow_failures:
     - script: unbuffer node build-system/pr-check/performance-tests.js # See #28148
-    - script: unbuffer node build-system/pr-check/remote-tests.js # See #28343
   fast_finish: true
