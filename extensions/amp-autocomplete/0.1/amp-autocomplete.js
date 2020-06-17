@@ -212,6 +212,17 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.interacted_ = false;
+
+    /**
+     * To ensure that we provide an accessible experience,
+    * the suggestion container must have a unique ID.
+     * In case the autocomplete doesn't have an ID we use a
+     * random number to ensure uniqueness.
+     @private {number|string} 
+     */
+    this.containerId_ = element.id
+      ? element.id
+      : Math.floor(Math.random() * 100) + '_AMP_content_';
   }
 
   /** @override */
@@ -257,7 +268,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     this.inputElement_.setAttribute('dir', 'auto');
     this.inputElement_.setAttribute('aria-autocomplete', 'both');
-    this.inputElement_.setAttribute('role', 'combobox');
+    this.inputElement_.setAttribute('role', 'textbox');
+    this.inputElement_.setAttribute('aria-controls', this.containerId_);
+    if (this.inputElement_.tagName === 'INPUT') {
+      this.element.setAttribute('role', 'combobox');
+      this.inputElement_.setAttribute('aria-multiline', 'false');
+    }
+    this.element.setAttribute('aria-haspopup', 'listbox');
+    this.element.setAttribute('aria-expanded', 'false');
+    this.element.setAttribute('aria-owns', this.containerId_);
 
     const form = this.getFormOrNull_();
     if (form && form.hasAttribute('autocomplete')) {
@@ -313,8 +332,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
       'highlight-user-entry'
     );
 
-    // Set accessibility attributes
-    this.element.setAttribute('aria-haspopup', 'listbox');
     this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
 
@@ -466,6 +483,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       container.classList.add('i-amphtml-autocomplete-results-up');
     }
     container.setAttribute('role', 'listbox');
+    container.setAttribute('id', this.containerId_);
     toggle(container, false);
     return container;
   }
