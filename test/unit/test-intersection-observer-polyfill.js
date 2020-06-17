@@ -16,13 +16,10 @@
 
 import {AmpDocService} from '../../src/service/ampdoc-impl';
 import {
-  DEFAULT_THRESHOLD,
   IntersectionObserverHostApi,
   getIntersectionChangeEntry,
-  getThresholdSlot,
   intersectionRatio,
 } from '../../src/utils/intersection-observer-polyfill';
-import {Services} from '../../src/services';
 import {installHiddenObserverForDoc} from '../../src/service/hidden-observer-impl';
 import {layoutRectLtwh} from '../../src/layout-rect';
 
