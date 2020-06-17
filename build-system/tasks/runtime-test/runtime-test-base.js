@@ -57,10 +57,6 @@ function updateBrowsers(config) {
           'SL_Edge',
           'SL_Safari',
           'SL_IE',
-          // TODO(amp-infra): Evaluate and add more platforms here.
-          //'SL_Chrome_Android_7',
-          //'SL_iOS_11',
-          //'SL_iOS_12',
           'SL_Chrome_Beta',
           'SL_Firefox_Beta',
         ],
