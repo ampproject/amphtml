@@ -20,7 +20,7 @@ import {
   getAnalyticsService,
 } from './story-analytics';
 import {AnalyticsVariable, getVariableService} from './variable-service';
-import {CSS} from '../../../build/amp-story-reaction-1.0.css';
+import {CSS} from '../../../build/amp-story-interactive-1.0.css';
 import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {
@@ -36,12 +36,12 @@ import {getRequestService} from './amp-story-request-service';
 import {toArray} from '../../../src/types';
 
 /** @const {string} */
-const TAG = 'amp-story-reaction';
+const TAG = 'amp-story-interactive';
 
 /**
  * @const @enum {number}
  */
-export const ReactionType = {
+export const InteractiveType = {
   QUIZ: 0,
   POLL: 1,
 };
@@ -57,14 +57,14 @@ const ENDPOINT_INVALID_ERROR =
  *    selectedByUser: boolean,
  * }}
  */
-export let ReactionOptionType;
+export let InteractiveOptionType;
 
 /**
  * @typedef {{
- *    options: !Array<ReactionOptionType>,
+ *    options: !Array<InteractiveOptionType>,
  * }}
  */
-export let ReactionResponseType;
+export let InteractiveResponseType;
 
 /**
  * @typedef {{
@@ -92,42 +92,42 @@ const fontsToLoad = [
 ];
 
 /**
- * Reaction abstract class with shared functionality for interactive components.
+ * Interactive abstract class with shared functionality for interactive components.
  *
  * Lifecycle:
  * 1) When created, the abstract class will call the buildComponent() method implemented by each concrete class.
- *   NOTE: When created, the component will receive a .i-amphtml-story-reaction, inheriting useful CSS variables.
+ *   NOTE: When created, the component will receive a .i-amphtml-story-interactive-component, inheriting useful CSS variables.
  *
  * 2) If an endpoint is specified, it will retrieve aggregate results from the backend and process them. If the clientId
  *   has responded in a previous session, the component will change to a post-selection state. Otherwise it will wait
  *   for user selection.
- *   NOTE: Click listeners will be attached to all options, which require .i-amphtml-story-reaction-option.
+ *   NOTE: Click listeners will be attached to all options, which require .i-amphtml-story-interactive-option.
  *
  * 3) On user selection, it will process the backend results (if endpoint specified) and display the selected option.
  *   Analytic events will be sent, percentages updated (implemented by the concrete class), and backend posted with the
  *   user response. Classes will be added to the component and options accordingly.
- *   NOTE: On option selected, the selection will receive a .i-amphtml-story-reaction-option-selected, and the root element
- *   will receive a .i-amphtml-story-reaction-post-selection. Optionally, if the endpoint returned aggregate results,
- *   the root element will also receive a .i-amphtml-story-reaction-has-data.
+ *   NOTE: On option selected, the selection will receive a .i-amphtml-story-interactive-option-selected, and the root element
+ *   will receive a .i-amphtml-story-interactive-post-selection. Optionally, if the endpoint returned aggregate results,
+ *   the root element will also receive a .i-amphtml-story-interactive-has-data.
  *
  * @abstract
  */
-export class AmpStoryReaction extends AMP.BaseElement {
+export class AmpStoryInteractive extends AMP.BaseElement {
   /**
    * @param {!AmpElement} element
-   * @param {!ReactionType} type
+   * @param {!InteractiveType} type
    * @param {!Array<number>} bounds the bounds on number of options, inclusive
    */
   constructor(element, type, bounds = [2, 4]) {
     super(element);
 
-    /** @protected @const {ReactionType} */
-    this.reactionType_ = type;
+    /** @protected @const {InteractiveType} */
+    this.interactiveType_ = type;
 
     /** @protected @const {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win, element);
 
-    /** @protected {?Promise<?ReactionResponseType|?JsonObject|undefined>} */
+    /** @protected {?Promise<?InteractiveResponseType|?JsonObject|undefined>} */
     this.backendDataPromise_ = null;
 
     /** @protected {?Promise<!../../../src/service/cid-impl.CidDef>} */
@@ -148,14 +148,14 @@ export class AmpStoryReaction extends AMP.BaseElement {
     /** @protected {?Array<!OptionConfigType>} */
     this.options_ = null;
 
-    /** @protected {?Array<!ReactionOptionType>} */
+    /** @protected {?Array<!InteractiveOptionType>} */
     this.optionsData_ = null;
 
     /** @protected {?Element} */
     this.rootEl_ = null;
 
     /** @protected {?string} */
-    this.reactionId_ = null;
+    this.interactiveId_ = null;
 
     /** @protected {!./amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = getRequestService(this.win, this.element);
@@ -187,7 +187,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
   getOptionElements() {
     if (!this.optionElements_) {
       this.optionElements_ = toArray(
-        this.rootEl_.querySelectorAll('.i-amphtml-story-reaction-option')
+        this.rootEl_.querySelectorAll('.i-amphtml-story-interactive-option')
       );
     }
     return this.optionElements_;
@@ -198,8 +198,8 @@ export class AmpStoryReaction extends AMP.BaseElement {
     this.loadFonts_();
     this.options_ = this.parseOptions_();
     this.rootEl_ = this.buildComponent();
-    this.rootEl_.classList.add('i-amphtml-story-reaction-container');
-    this.element.classList.add('i-amphtml-story-reaction-component');
+    this.rootEl_.classList.add('i-amphtml-story-interactive-container');
+    this.element.classList.add('i-amphtml-story-interactive-component');
     this.adjustGridLayer_();
     this.initializeListeners_();
     devAssert(this.element.children.length == 0, 'Too many children');
@@ -214,7 +214,11 @@ export class AmpStoryReaction extends AMP.BaseElement {
    * @private
    */
   loadFonts_() {
-    if (!AmpStoryReaction.loadedFonts && this.win.document.fonts && FontFace) {
+    if (
+      !AmpStoryInteractive.loadedFonts &&
+      this.win.document.fonts &&
+      FontFace
+    ) {
       fontsToLoad.forEach((fontProperties) => {
         const font = new FontFace(fontProperties.family, fontProperties.src, {
           weight: fontProperties.weight,
@@ -225,7 +229,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
         });
       });
     }
-    AmpStoryReaction.loadedFonts = true;
+    AmpStoryInteractive.loadedFonts = true;
   }
 
   /**
@@ -281,7 +285,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     return (this.backendDataPromise_ = this.element.hasAttribute('endpoint')
-      ? this.retrieveReactionData_()
+      ? this.retrieveInteractiveData_()
       : Promise.resolve());
   }
 
@@ -331,7 +335,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
       return el.tagName.toLowerCase() === 'amp-story-grid-layer';
     });
 
-    gridLayer.classList.add('i-amphtml-story-has-reaction');
+    gridLayer.classList.add('i-amphtml-story-has-interactive');
 
     if (gridLayer.parentElement.querySelector('amp-story-cta-layer')) {
       gridLayer.classList.add('i-amphtml-story-has-CTA-layer');
@@ -373,7 +377,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
     const optionEl = closest(
       dev().assertElement(e.target),
       (element) => {
-        return element.classList.contains('i-amphtml-story-reaction-option');
+        return element.classList.contains('i-amphtml-story-interactive-option');
       },
       this.rootEl_
     );
@@ -391,21 +395,21 @@ export class AmpStoryReaction extends AMP.BaseElement {
    */
   triggerAnalytics_(optionEl) {
     this.variableService_.onVariableUpdate(
-      AnalyticsVariable.STORY_REACTION_ID,
+      AnalyticsVariable.STORY_INTERACTIVE_ID,
       this.element.getAttribute('id')
     );
     this.variableService_.onVariableUpdate(
-      AnalyticsVariable.STORY_REACTION_RESPONSE,
+      AnalyticsVariable.STORY_INTERACTIVE_RESPONSE,
       optionEl.optionIndex_
     );
     this.variableService_.onVariableUpdate(
-      AnalyticsVariable.STORY_REACTION_TYPE,
-      this.reactionType_
+      AnalyticsVariable.STORY_INTERACTIVE_TYPE,
+      this.interactiveType_
     );
 
     this.element[ANALYTICS_TAG_NAME] = this.element.tagName;
     this.analyticsService_.triggerEvent(
-      StoryAnalyticsEvent.REACTION,
+      StoryAnalyticsEvent.INTERACTIVE,
       this.element
     );
   }
@@ -415,7 +419,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
    * Called when user has responded (in this session or before).
    *
    * @protected @abstract
-   * @param {!Array<!ReactionOptionType>} unusedOptionsData
+   * @param {!Array<!InteractiveOptionType>} unusedOptionsData
    */
   updateOptionPercentages_(unusedOptionsData) {
     // Subclass must implement
@@ -424,7 +428,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
   /**
    * Preprocess the percentages for display.
    *
-   * @param {!Array<!ReactionOptionType>} optionsData
+   * @param {!Array<!InteractiveOptionType>} optionsData
    * @return {Array<number>}
    * @protected
    */
@@ -504,7 +508,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
   }
 
   /**
-   * Triggers changes to component state on response interaction.
+   * Triggers changes to component state on response interactive.
    *
    * @param {!Element} optionEl
    * @private
@@ -532,7 +536,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
         });
 
         if (this.element.hasAttribute('endpoint')) {
-          this.executeReactionRequest_('POST', optionEl.optionIndex_);
+          this.executeInteractiveRequest_('POST', optionEl.optionIndex_);
         }
       })
       .catch(() => {
@@ -546,49 +550,49 @@ export class AmpStoryReaction extends AMP.BaseElement {
   }
 
   /**
-   * Get the Reaction data from the datastore
+   * Get the Interactive data from the datastore
    *
-   * @return {?Promise<?ReactionResponseType|?JsonObject|undefined>}
+   * @return {?Promise<?InteractiveResponseType|?JsonObject|undefined>}
    * @private
    */
-  retrieveReactionData_() {
-    return this.executeReactionRequest_('GET').then((response) => {
+  retrieveInteractiveData_() {
+    return this.executeInteractiveRequest_('GET').then((response) => {
       this.handleSuccessfulDataRetrieval_(
-        /** @type {ReactionResponseType} */ (response)
+        /** @type {InteractiveResponseType} */ (response)
       );
     });
   }
 
   /**
-   * Executes a Reactions API call.
+   * Executes a Interactive API call.
    *
    * @param {string} method GET or POST.
    * @param {number=} optionSelected
-   * @return {!Promise<!ReactionResponseType|string>}
+   * @return {!Promise<!InteractiveResponseType|string>}
    * @private
    */
-  executeReactionRequest_(method, optionSelected = undefined) {
+  executeInteractiveRequest_(method, optionSelected = undefined) {
     let url = this.element.getAttribute('endpoint');
     if (!assertAbsoluteHttpOrHttpsUrl(url)) {
       return Promise.reject(ENDPOINT_INVALID_ERROR);
     }
 
-    if (!this.reactionId_) {
+    if (!this.interactiveId_) {
       const pageId = closest(dev().assertElement(this.element), (el) => {
         return el.tagName.toLowerCase() === 'amp-story-page';
       }).getAttribute('id');
-      this.reactionId_ = `CANONICAL_URL+${pageId}`;
+      this.interactiveId_ = `CANONICAL_URL+${pageId}`;
     }
 
     return this.getClientId_().then((clientId) => {
       const requestOptions = {'method': method};
       const requestParams = dict({
-        'reactionType': this.reactionType_,
+        'interactiveType': this.interactiveType_,
         'clientId': clientId,
       });
       url = appendPathToUrl(
         this.urlService_.parse(url),
-        dev().assertString(this.reactionId_)
+        dev().assertString(this.interactiveId_)
       );
       if (requestOptions['method'] === 'POST') {
         requestOptions['body'] = {'optionSelected': optionSelected};
@@ -603,7 +607,7 @@ export class AmpStoryReaction extends AMP.BaseElement {
   }
 
   /**
-   * Handles incoming reaction data response
+   * Handles incoming interactive data response
    *
    * RESPONSE FORMAT
    * {
@@ -616,38 +620,38 @@ export class AmpStoryReaction extends AMP.BaseElement {
    *    ...
    *  ]
    * }
-   * @param {ReactionResponseType|undefined} response
+   * @param {InteractiveResponseType|undefined} response
    * @private
    */
   handleSuccessfulDataRetrieval_(response) {
     if (!(response && response['options'])) {
       devAssert(
         response && 'options' in response,
-        `Invalid reaction response, expected { data: ReactionResponseType, ...} but received ${response}`
+        `Invalid interactive response, expected { data: InteractiveResponseType, ...} but received ${response}`
       );
       dev().error(
         TAG,
-        `Invalid reaction response, expected { data: ReactionResponseType, ...} but received ${response}`
+        `Invalid interactive response, expected { data: InteractiveResponseType, ...} but received ${response}`
       );
       return;
     }
     const numOptions = this.rootEl_.querySelectorAll(
-      '.i-amphtml-story-reaction-option'
+      '.i-amphtml-story-interactive-option'
     ).length;
     // Only keep the visible options to ensure visible percentages add up to 100.
-    this.updateReactionOnDataRetrieval_(
+    this.updateComponentOnDataRetrieval_(
       response['options'].slice(0, numOptions)
     );
   }
 
   /**
    * Updates the quiz to reflect the state of the remote data.
-   * @param {!Array<ReactionOptionType>} data
+   * @param {!Array<InteractiveOptionType>} data
    * @private
    */
-  updateReactionOnDataRetrieval_(data) {
+  updateComponentOnDataRetrieval_(data) {
     const options = this.rootEl_.querySelectorAll(
-      '.i-amphtml-story-reaction-option'
+      '.i-amphtml-story-interactive-option'
     );
 
     this.optionsData_ = data;
@@ -668,11 +672,11 @@ export class AmpStoryReaction extends AMP.BaseElement {
    * @private
    */
   updateToPostSelectionState_(selectedOption) {
-    this.rootEl_.classList.add('i-amphtml-story-reaction-post-selection');
-    selectedOption.classList.add('i-amphtml-story-reaction-option-selected');
+    this.rootEl_.classList.add('i-amphtml-story-interactive-post-selection');
+    selectedOption.classList.add('i-amphtml-story-interactive-option-selected');
 
     if (this.optionsData_) {
-      this.rootEl_.classList.add('i-amphtml-story-reaction-has-data');
+      this.rootEl_.classList.add('i-amphtml-story-interactive-has-data');
     }
   }
 }
