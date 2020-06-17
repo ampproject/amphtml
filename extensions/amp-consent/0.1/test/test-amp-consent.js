@@ -90,7 +90,10 @@ describes.realWin(
       };
 
       storageMock = {
-        setNonBoolean: () => {},
+        setNonBoolean: (name, value) => {
+          storageValue[name] = value;
+          return Promise.resolve();
+        },
         get: (name) => {
           return Promise.resolve(storageValue[name]);
         },
@@ -1134,6 +1137,16 @@ describes.realWin(
           // And the postPrompt to be hidden.
           await macroTask();
           expect(postPromptUI).to.have.display('none');
+        });
+
+        it('postPromptUI to accept expireCache arg', async () => {
+          storageValue = {
+            'amp-consent:ABC': true,
+          };
+          await ampConsent.buildCallback();
+          ampConsent.handleReprompt_({args: {'expireCache': true}});
+          await macroTask();
+          expect(storageValue['amp-consent:ABC']['d']).to.equal(1);
         });
 
         describe('hide/show postPromptUI with local storage', () => {
