@@ -441,7 +441,7 @@ export class ManualAdvancement extends AdvancementConfig {
         }
 
         if (
-          startsWith(tagName, 'amp-story-reaction-') &&
+          startsWith(tagName, 'amp-story-interactive-') &&
           !this.isInScreenSideEdge_(event, this.element_.getLayoutBox())
         ) {
           shouldHandleEvent = false;
