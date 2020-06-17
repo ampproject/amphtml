@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  AmpStoryReaction,
-  OptionConfigType,
-  ReactionType,
-} from './amp-story-reaction';
+import {AmpStoryReaction, ReactionType} from './amp-story-reaction';
 import {CSS} from '../../../build/amp-story-reaction-results-category-1.0.css';
 import {StateProperty} from './amp-story-store-service';
 import {htmlFor} from '../../../src/static-template';
