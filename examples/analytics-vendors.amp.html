@@ -80,6 +80,7 @@
       <option>krux</option>
       <option>linkpulse</option>
       <option>lotame</option>
+      <option>mapp_intelligence</option>
       <option>marinsoftware</option>
       <option>mediametrie</option>
       <option>mediarithmics</option>
@@ -919,6 +920,25 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Lotame example -->
+
+<!-- Mapp Intelligence tracking -->
+<amp-analytics type="mapp_intelligence" id="mapp_intelligence">
+  <script type="application/json">
+    {
+      "vars": {
+        "trackDomain": "analytics.webtrekk.net",
+        "trackId": "111111111111111"
+      },
+      "triggers": {
+        "trackPageview": {
+          "on": "visible",
+          "request": "pageview"
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End Mapp Intelligence example -->
 
 <!-- Marin Software tracking.
   Configure tracker id (required)
