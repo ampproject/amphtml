@@ -135,11 +135,6 @@ export class IntersectionObserverHostApi {
     );
   }
 
-  /** @protected */
-  fire() {
-    // QQQQ: remove before merging.
-  }
-
   /**
    * Function to start listening to viewport event. and observer intersection
    * change on the element.

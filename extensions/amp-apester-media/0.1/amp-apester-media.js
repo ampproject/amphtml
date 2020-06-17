@@ -160,15 +160,6 @@ class AmpApesterMedia extends AMP.BaseElement {
   }
 
   /**
-   * @override
-   */
-  onLayoutMeasure() {
-    if (this.intersectionObserverHostApi_) {
-      this.intersectionObserverHostApi_.fire();
-    }
-  }
-
-  /**
    * @return {string}
    **/
   buildUrl_() {

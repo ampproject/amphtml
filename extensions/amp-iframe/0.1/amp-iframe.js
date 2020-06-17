@@ -321,13 +321,6 @@ export class AmpIframe extends AMP.BaseElement {
     this.isTrackingFrame_ = this.looksLikeTrackingIframe_();
     this.isDisallowedAsAd_ =
       this.isAdLike_ && !isAdPositionAllowed(element, this.win);
-
-    // When the framework has the need to remeasure us, our position might
-    // have changed. Send an intersection record if needed. This can be done by
-    // IntersectionObserverHostApi onlayoutMeasure function.
-    if (this.intersectionObserverHostApi_) {
-      this.intersectionObserverHostApi_.fire();
-    }
   }
 
   /**
