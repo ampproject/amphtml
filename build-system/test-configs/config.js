@@ -81,11 +81,8 @@ const unitTestPaths = [
   'extensions/**/test/unit/*.js',
 ];
 
-const unitTestOnSaucePaths = [
-  'test/unit/**/*.js',
-  'ads/**/test/test-*.js',
-  'ads/**/test/unit/test-*.js',
-];
+// TODO(rsimha, #28838): Refine this opt-in mechanism.
+const unitTestOnSaucePaths = ['test/unit/test-error.js'];
 
 const integrationTestPaths = [
   'test/integration/**/*.js',
