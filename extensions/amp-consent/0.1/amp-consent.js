@@ -245,9 +245,9 @@ export class AmpConsent extends AMP.BaseElement {
       this.handleAction_(ACTION_TYPE.DISMISS);
     });
 
-    this.registerAction('prompt', () => {
-      this.scheduleDisplay_(true);
-    });
+    this.registerAction('prompt', (invocation) =>
+      this.handleReprompt_(invocation)
+    );
 
     this.enableExternalInteractions_();
   }
@@ -430,6 +430,19 @@ export class AmpConsent extends AMP.BaseElement {
 
     // Hide current dialog
     this.hide_();
+  }
+
+  /**
+   * Handle the prompt action to re-prompt.
+   * Accpet arg expireCache=true
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   */
+  handleReprompt_(invocation) {
+    const {args} = invocation;
+    if (args && args['expireCache'] === true) {
+      this.consentStateManager_.setDirtyBit();
+    }
+    this.scheduleDisplay_(true);
   }
 
   /**
