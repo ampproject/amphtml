@@ -18,8 +18,7 @@ import {BrowserController, RequestBank} from '../../testing/test-helper';
 import {Deferred} from '../../src/utils/promise';
 import {poll} from '../../testing/iframe';
 
-// TODO(wg-ui-and-a11y): These tests cause SauceLabs disconnections.
-const t = describe.configure().skipSauceLabs();
+const t = describe.configure();
 
 t.run('amp-recaptcha-input', function () {
   describes.integration(
