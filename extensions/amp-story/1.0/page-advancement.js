@@ -381,7 +381,7 @@ export class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
-   * Logic for touchend events.
+   * Logic triggered by touchend events.
    * @private
    */
   processTouchend_() {
