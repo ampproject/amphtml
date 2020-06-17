@@ -17,17 +17,39 @@
 import {CSS} from '../../../build/amp-story-360-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
+import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
 
 
-class CameraHeading {
+
+class CameraOrientation {
+  /** 
+   * @param {number} theta
+   * @param {number} phi
+   * @param {number} scale
+  */
   constructor(theta, phi, scale) {
     this.theta = theta;
     this.phi = phi;
     this.scale = scale;
   }
 
+  /** 
+   * @param {number} heading
+   * @param {number} pitch
+   * @param {number} zoom
+   * @return {!CameraOrientation}
+  */
+  static fromDegrees(heading, pitch, zoom) {
+    const deg2rad = (deg) => deg * Math.PI / 180;
+    return new CameraOrientation(deg2rad(-pitch-90), deg2rad(heading), 1/zoom);
+  }
+
+  /** 
+   * @return {!CameraOrientation}
+  */
   get rotation() {
     return Matrix.mul(3,
         Matrix.rotation(3, 1, 2, this.theta),
@@ -36,9 +58,9 @@ class CameraHeading {
 }
 
 class CameraAnimation {
-  constructor(duration, headings) {
+  constructor(duration, orientations) {
     this.maxFrame = 60 / 1000 * duration;
-    this.headings = headings;
+    this.orientations = orientations;
     this.currentHeadingIndex = 0;
     this.currentFrame = 0;
   }
@@ -47,28 +69,28 @@ class CameraAnimation {
     return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
   }
 
-  getNextHeading() {
+  getNextOrientation() {
     if (this.currentHeadingIndex < 0 || this.currentFrame == this.maxFrame - 1) {
       // Animation ended.
       return null;
     }
     this.currentFrame++;
-    const framesPerSection = this.maxFrame / (this.headings.length - 1);
+    const framesPerSection = this.maxFrame / (this.orientations.length - 1);
     const lastFrameOfCurrentSection = (this.currentHeadingIndex + 1) * framesPerSection;
     if (this.currentFrame >= lastFrameOfCurrentSection) {
       this.currentHeadingIndex++;
-      if (this.currentHeadingIndex == this.headings.length) {
+      if (this.currentHeadingIndex == this.orientations.length) {
         // End of animation.
         this.currentHeadingIndex = -1;
         return null;
       } else {
-        return this.headings[this.currentHeadingIndex];
+        return this.orientations[this.currentHeadingIndex];
       }
     }
     const easing = this.easeInOutQuad(this.currentFrame % framesPerSection / framesPerSection);
-    const from = this.headings[this.currentHeadingIndex];
-    const to = this.headings[this.currentHeadingIndex + 1];
-    return new CameraHeading(
+    const from = this.orientations[this.currentHeadingIndex];
+    const to = this.orientations[this.currentHeadingIndex + 1];
+    return new CameraOrientation(
       from.theta + (to.theta - from.theta) * easing,
       from.phi + (to.phi - from.phi) * easing,
       from.scale + (to.scale - from.scale) * easing);
@@ -83,11 +105,11 @@ export class AmpStory360 extends AMP.BaseElement {
     /** @private {?Promise} */
     this.imagePromise_ = null;
 
-    /** @private {Array<!CameraHeading>} */
-    this.headings_ = [];
+    /** @private {Array<!CameraOrientation>} */
+    this.orientations_ = [];
 
     /** @private {number} */
-    this.duration_ = parseInt(element.getAttribute('duration') || 0, 10);
+    this.duration_ = timeStrToMillis(element.getAttribute('duration'));
 
     /** @private {?Element} */
     this.container_ = null;
@@ -98,10 +120,20 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const values = this.element.getAttribute('heading').split(',').map(s => parseFloat(s));
-    for (let i = 0; i + 3 <= values.length; i = i + 3) {
-      this.headings_.push(new CameraHeading(values[i], values[i+1], values[i+2]));
+    const attr = (name) => this.element.getAttribute(name);
+
+    const startHeading = parseFloat(attr('heading-start') || 0);
+    const startPitch = parseFloat(attr('pitch-start') || 0);
+    const startZoom = parseFloat(attr('zoom-start') || 1);
+    this.orientations_.push(CameraOrientation.fromDegrees(startHeading, startPitch, startZoom));
+
+    if (attr('heading-end') !== undefined || attr('pitch-end') !== undefined || attr('zoom-end') !== undefined) {
+      const endHeading = parseFloat(attr('heading-end') || 0);
+      const endPitch = parseFloat(attr('pitch-end') || 0);
+      const endZoom = parseFloat(attr('zoom-end') || 1);
+      this.orientations_.push(CameraOrientation.fromDegrees(endHeading, endPitch, endZoom));
     }
+
     this.container_ = this.element.ownerDocument.createElement('div');
     const canvas = this.element.ownerDocument.createElement('canvas');
     this.element.appendChild(this.container_);
@@ -111,7 +143,6 @@ export class AmpStory360 extends AMP.BaseElement {
 
     const ampImgEl = this.element.querySelector('amp-img');
     this.imagePromise_ = whenUpgradedToCustomElement(ampImgEl).then(() => {
-      console.log('image element upgraded', ampImgEl.signals());
       return ampImgEl.signals().whenSignal(CommonSignals.LOAD_END);
     });
   }
@@ -126,24 +157,24 @@ export class AmpStory360 extends AMP.BaseElement {
     return this.imagePromise_.then(() => {
         this.renderer_.resize();
         this.renderer_.setImage(this.element.querySelector('img'));
-        if (this.headings_.length < 1) {
+        if (this.orientations_.length < 1) {
           return;
         }
-        this.renderer_.setCamera(this.headings_[0].rotation, this.headings_[0].scale);
+        this.renderer_.setCamera(this.orientations_[0].rotation, this.orientations_[0].scale);
         this.renderer_.render(false);
-        if (this.duration_ && this.headings_.length > 1) {
+        if (this.duration_ && this.orientations_.length > 1) {
           this.animate();
         }
     });
   }
 
   animate() {
-    const animation = new CameraAnimation(this.duration_, this.headings_);
+    const animation = new CameraAnimation(this.duration_, this.orientations_);
     const loop = () => {
-      let nextHeading = animation.getNextHeading();
-      if (nextHeading) {
+      let nextOrientation = animation.getNextOrientation();
+      if (nextOrientation) {
         window.requestAnimationFrame(() => {
-          this.renderer_.setCamera(nextHeading.rotation, nextHeading.scale);
+          this.renderer_.setCamera(nextOrientation.rotation, nextOrientation.scale);
           this.renderer_.render(true);
           loop();
         });  
