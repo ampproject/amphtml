@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {AmpStoryReaction, ReactionType} from './amp-story-reaction';
-import {CSS} from '../../../build/amp-story-reaction-poll-1.0.css';
+import {AmpStoryInteractive, InteractiveType} from './amp-story-interactive';
+import {CSS} from '../../../build/amp-story-interactive-poll-1.0.css';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {setStyle} from '../../../src/style';
@@ -36,7 +36,7 @@ export const FontSize = {
  */
 const buildBinaryPollTemplate = (element) => {
   const html = htmlFor(element);
-  return html` <div class="i-amphtml-story-reaction-poll-container"></div> `;
+  return html` <div class="i-amphtml-story-interactive-poll-container"></div> `;
 };
 
 /**
@@ -48,11 +48,11 @@ const buildBinaryPollTemplate = (element) => {
 const buildOptionTemplate = (element) => {
   const html = htmlFor(element);
   return html`
-    <div class="i-amphtml-story-reaction-option">
-      <span class="i-amphtml-story-reaction-option-title"
-        ><span class="i-amphtml-story-reaction-option-title-text"></span
+    <div class="i-amphtml-story-interactive-option">
+      <span class="i-amphtml-story-interactive-option-title"
+        ><span class="i-amphtml-story-interactive-option-title-text"></span
       ></span>
-      <span class="i-amphtml-story-reaction-option-percentage-text">0%</span>
+      <span class="i-amphtml-story-interactive-option-percentage-text">0%</span>
     </div>
   `;
 };
@@ -65,15 +65,15 @@ const buildOptionTemplate = (element) => {
  */
 const buildBinaryOptionDividerTemplate = (element) => {
   const html = htmlFor(element);
-  return html` <div class="i-amphtml-story-reaction-option-divider"></div> `;
+  return html` <div class="i-amphtml-story-interactive-option-divider"></div> `;
 };
 
-export class AmpStoryReactionPoll extends AmpStoryReaction {
+export class AmpStoryInteractivePoll extends AmpStoryInteractive {
   /**
    * @param {!AmpElement} element
    */
   constructor(element) {
-    super(element, ReactionType.POLL, /* bounds */ [2, 2]);
+    super(element, InteractiveType.POLL, /* bounds */ [2, 2]);
   }
 
   /** @override */
@@ -127,7 +127,7 @@ export class AmpStoryReactionPoll extends AmpStoryReaction {
   adaptFontSize_(root) {
     let largestFontSize = FontSize.EMOJI;
     const allTitles = toArray(
-      root.querySelectorAll('.i-amphtml-story-reaction-option-title-text')
+      root.querySelectorAll('.i-amphtml-story-interactive-option-title-text')
     );
     return this.measureMutateElement(
       () => {
@@ -157,7 +157,7 @@ export class AmpStoryReactionPoll extends AmpStoryReaction {
 
   /**
    * Creates an option template filled with the details the attributes.
-   * @param {./amp-story-reaction.OptionConfigType} option
+   * @param {./amp-story-interactive.OptionConfigType} option
    * @return {Element} option element
    * @private
    */
@@ -165,7 +165,7 @@ export class AmpStoryReactionPoll extends AmpStoryReaction {
     const convertedOption = buildOptionTemplate(this.element);
 
     const optionText = convertedOption.querySelector(
-      '.i-amphtml-story-reaction-option-title-text'
+      '.i-amphtml-story-interactive-option-title-text'
     );
     optionText.textContent = option['text'];
     convertedOption.optionIndex_ = option['optionIndex'];
@@ -186,7 +186,7 @@ export class AmpStoryReactionPoll extends AmpStoryReaction {
       // TODO(jackbsteinberg): Add i18n support for various ways of displaying percentages.
       const currOption = this.getOptionElements()[index];
       currOption.querySelector(
-        '.i-amphtml-story-reaction-option-percentage-text'
+        '.i-amphtml-story-interactive-option-percentage-text'
       ).textContent = `${percentage}%`;
       currOption.setAttribute('style', `flex-grow: ${percentage} !important`);
     });
