@@ -20,7 +20,7 @@ import {
   constructMetadata,
 } from '../consent-info';
 import {
-  CONSENT_STRING_MAX_LENGTH,
+  CONSENT_STORAGE_MAX,
   ConsentInstance,
   ConsentStateManager,
 } from '../consent-state-manager';
@@ -175,16 +175,19 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
       });
 
       it('update consent string that exceeds max size', function* () {
-        expectAsyncConsoleError(/Cannot store consentString/);
+        expectAsyncConsoleError(/Cannot store consent information/);
         manager.registerConsentInstance('test', {});
         let testStr = 'a';
-        for (let i = 0; i < CONSENT_STRING_MAX_LENGTH; i++) {
+        // Reserve 26 chars to metadata size `"m":{"cst":1,"ac":"12345"}`
+        // Reserve 36 chars to the storage key, `''` and `{}`
+        // Leaves CONSENT_STORAGE_MAX - 62 chars to consent string
+        for (let i = 0; i < CONSENT_STORAGE_MAX - 62; i++) {
           testStr += 'a';
         }
         manager.updateConsentInstanceState(
           CONSENT_ITEM_STATE.ACCEPTED,
           testStr,
-          constructMetadata()
+          constructMetadata(CONSENT_STRING_TYPE.TCF_V1, '12345')
         );
         let value;
         const p = manager.getConsentInstanceInfo().then((v) => (value = v));
@@ -193,7 +196,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
           constructConsentInfo(
             CONSENT_ITEM_STATE.ACCEPTED,
             testStr,
-            constructMetadata()
+            constructMetadata(CONSENT_STRING_TYPE.TCF_V1, '12345')
           )
         );
       });
@@ -356,12 +359,19 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
         });
 
         it('remove consentInfo when consentStr length exceeds', function* () {
-          expectAsyncConsoleError(/Cannot store consentString/);
+          expectAsyncConsoleError(/Cannot store consent information/);
           let testStr = 'a';
-          for (let i = 0; i < CONSENT_STRING_MAX_LENGTH; i++) {
+          // Reserve 26 chars to metadata size `"m":{"cst":1,"ac":"12345"}`
+          // Reserve 36 chars to the storage key, `''` and `{}`
+          // Leaves CONSENT_STORAGE_MAX - 62 chars to consent string
+          for (let i = 0; i < CONSENT_STORAGE_MAX - 62; i++) {
             testStr += 'a';
           }
-          instance.update(CONSENT_ITEM_STATE.ACCEPTED, testStr);
+          instance.update(
+            CONSENT_ITEM_STATE.ACCEPTED,
+            testStr,
+            constructMetadata(CONSENT_STRING_TYPE.TCF_V1, '12345')
+          );
           yield macroTask();
           expect(storageSetSpy).to.not.be.called;
           expect(storageRemoveSpy).to.be.calledOnce;
