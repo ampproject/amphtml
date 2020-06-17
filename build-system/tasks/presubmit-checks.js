@@ -1020,6 +1020,7 @@ const forbiddenTermsSrcInclusive = {
       'ads/google/a4a/line-delimited-response-handler.js',
       'examples/pwa/pwa.js',
       'src/utils/bytes.js',
+      'src/utils/stream-response.js',
     ],
   },
   'contentHeightChanged': {
