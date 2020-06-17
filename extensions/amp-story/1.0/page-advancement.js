@@ -381,7 +381,7 @@ export class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
-   * Reverts the touchstart events' state (eg: when resuming from swipe in player)
+   * Logic for touchend events.
    * @private
    */
   processTouchend_() {
