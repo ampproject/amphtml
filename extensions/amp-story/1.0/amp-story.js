@@ -2167,7 +2167,7 @@ export class AmpStory extends AMP.BaseElement {
     const pagesByDistance = [];
     Object.keys(distanceMap).forEach((pageId) => {
       let distance = distanceMap[pageId];
-      // If on last page, mark first page with distance 1
+      // If on last page, mark first page with distance 1.
       if (
         pageId === this.pages_[0].element.id &&
         this.activePage_ == this.pages_[this.pages_.length - 1] &&
@@ -2651,7 +2651,7 @@ export class AmpStory extends AMP.BaseElement {
       dev().assertElement(this.pages_[0].element).id,
       NavigationDirection.NEXT
     );
-    // Restart page media, advancements, etc.
+    // Restart page media, advancements, etc (#27742).
     if (this.pages_.length == 1) {
       this.pages_[0].setState(PageState.NOT_ACTIVE);
       this.pages_[0].setState(PageState.PLAYING);
