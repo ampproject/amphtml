@@ -20,6 +20,7 @@ import {
   MediaBasedAdvancement,
   TimeBasedAdvancement,
 } from '../page-advancement';
+import {StateProperty} from '../amp-story-store-service';
 import {htmlFor} from '../../../../src/static-template';
 
 describes.realWin('page-advancement', {amp: true}, (env) => {
@@ -45,6 +46,50 @@ describes.realWin('page-advancement', {amp: true}, (env) => {
         const advancement = AdvancementConfig.forElement(win, pageEl);
 
         expect(advancement).to.not.be.instanceOf(ManualAdvancement);
+      });
+
+      it('should unpause on visibilitychange', async () => {
+        // Fix #28425, on player swipe doesn't get touchend so UI doesn't show.
+        const storyEl = win.document.createElement('amp-story');
+        const pageEl = win.document.createElement('amp-story-page');
+        storyEl.appendChild(pageEl);
+        const advancement = new ManualAdvancement(win, storyEl);
+
+        advancement.onTouchstart_({target: pageEl});
+
+        expect(advancement.storeService_.get(StateProperty.PAUSED_STATE)).to.be
+          .true;
+
+        // Update visibility to visible.
+        env.sandbox.stub(advancement.ampdoc_, 'isVisible').returns(true);
+        advancement.ampdoc_.visibilityStateHandlers_.fire();
+
+        expect(advancement.storeService_.get(StateProperty.PAUSED_STATE)).to.be
+          .false;
+      });
+
+      it('should not hide system UI on visibilitychange', async () => {
+        // Fix #28425, on player swipe doesn't get touchend so UI doesn't show.
+        const storyEl = win.document.createElement('amp-story');
+        const pageEl = win.document.createElement('amp-story-page');
+        storyEl.appendChild(pageEl);
+        const advancement = new ManualAdvancement(win, storyEl);
+
+        advancement.onTouchstart_({target: pageEl});
+
+        expect(!!advancement.timeoutId_).to.be.true;
+
+        // Update visibility to visible.
+        env.sandbox.stub(advancement.ampdoc_, 'isVisible').returns(true);
+        advancement.ampdoc_.visibilityStateHandlers_.fire();
+
+        // Check system UI is not visible and timeout was cancelled.
+        expect(
+          advancement.storeService_.get(
+            StateProperty.SYSTEM_UI_IS_VISIBLE_STATE
+          )
+        ).to.be.true;
+        expect(!!advancement.timeoutId_).to.be.false;
       });
     });
 
