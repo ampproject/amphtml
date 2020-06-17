@@ -123,45 +123,18 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    // Assuming it's an image, for video we can check the file extension 
-    // (or do something fancier like reading the bytes and check the file header).
-
-    return this.imagePromise_.then(resolve => {
-        console.log('were here', this.element.querySlector('img'));
+    return this.imagePromise_.then(() => {
         this.renderer_.resize();
         this.renderer_.setImage(this.element.querySelector('img'));
         if (this.headings_.length < 1) {
-          return
+          return;
         }
         this.renderer_.setCamera(this.headings_[0].rotation, this.headings_[0].scale);
         this.renderer_.render(false);
-        resolve(); 
         if (this.duration_ && this.headings_.length > 1) {
           this.animate();
         }
     });
-
-    // const img = new Image();
-    // const renderer = this.renderer_;
-    // const loadPromise = new Promise(resolve => {
-    //   img.onload = () => {
-    //     this.renderer_.resize();
-    //     this.renderer_.setImage(img);
-    //     if (this.headings_.length < 1) {
-    //       return
-    //     }
-    //     this.renderer_.setCamera(this.headings_[0].rotation, this.headings_[0].scale);
-    //     this.renderer_.render(false);
-    //     resolve(); 
-    //     if (this.duration_ && this.headings_.length > 1) {
-    //       this.animate();
-    //     }
-    //   };
-    // });
-    // img.src = this.contentSrc_;
-    // Return a load promise for the image so the runtime knows when the
-    // component is ready.
-    // return loadPromise;
   }
 
   animate() {
