@@ -18,6 +18,8 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
 } from '../../../src/consent-state';
+import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
+import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
@@ -60,6 +62,7 @@ import {isArray, isEnumValue, isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
+import {streamResponseToWriter} from '../../../src/utils/stream-response';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryResolve} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
@@ -363,6 +366,20 @@ export class AmpA4A extends AMP.BaseElement {
      * @type {boolean}
      */
     this.isSinglePageStoryAd = false;
+
+    /**
+     * Promise that will resolve with processed <head> from ad server response.
+     * @visibleForTesting temporary to satisfy linter while implementing.
+     * @private {?Promise<!Element>}
+     */
+    this.sanitizedHeadPromise_ = null;
+
+    /**
+     * Transfers elements from the detached body to the given body element.
+     * @visibleForTesting temporary to satisfy linter while implementing.
+     * @private {?function(!Element)}
+     */
+    this.transferBody_ = null;
   }
 
   /** @override */
@@ -815,7 +832,6 @@ export class AmpA4A extends AMP.BaseElement {
             this.getSafeframePath()
           );
         }
-
         return fetchResponse;
       })
       .then((fetchResponse) =>
@@ -846,11 +862,47 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Response} unusedResponse
+   * Start streaming response into the detached document.
+   * @param {!Response} response
+   * @return {boolean}
    */
-  streamResponse_(unusedResponse) {
-    // TODO(ccordry): implement
-    dev().error(TAG, 'unsigned path not yet implemented');
+  streamResponse_(response) {
+    // TODO(ccordry): get size from headers equivalent to
+    // validation flow, and double check any other values
+    // that might be set.
+
+    // This transformation consumes the detached DOM chunks and
+    // exposes our waitForHead and transferBody methods.
+    const transformStream = new DomTransformStream(this.win);
+    // Receives chunks of text and writes to detached DOM.
+    const detachedStream = new DetachedDomStream(
+      this.win,
+      (chunk) => transformStream.onChunk(chunk),
+      (doc) => transformStream.onEnd(doc)
+    );
+    // Decodes our response bytes and pipes them to the
+    // DetachedDomStream.
+    streamResponseToWriter(this.win, response, detachedStream);
+
+    this.sanitizedHeadPromise_ = transformStream
+      .waitForHead()
+      .then((head) => this.validateHead_(head));
+
+    this.transferBody_ = transformStream.transferBody;
+
+    // TODO(ccordry): throw NO_CONTENT_RESPONSE if body is empty. Only gets
+    // here if amp-ff-empty-creative header is not present.
+    return true;
+  }
+
+  /**
+   * Prepare the creative <head> by removing any non-secure elements and
+   * @param {!Element} head
+   * @return {?Element} head or null if we should fall back to xdomain.
+   */
+  validateHead_(head) {
+    // TODO(ccordry): Implement client side head validation.
+    return head;
   }
 
   /**
@@ -1168,6 +1220,12 @@ export class AmpA4A extends AMP.BaseElement {
         if (this.iframe && !this.isRefreshing) {
           return Promise.resolve();
         }
+
+        // TODO(ccordry): split rendering flow in exp
+        //  Create iframe with CSP
+        //  Wait for sanitized head, transfer it to created iframe or fallback.
+        //  call this.transferBody_(iframeBody) when ready to render.
+
         if (!creativeMetaData) {
           // Non-AMP creative case, will verify ad url existence.
           return this.renderNonAmpCreative();
