@@ -2172,7 +2172,15 @@ export class AmpStory extends AMP.BaseElement {
     // Transpose the map into a 2D array.
     const pagesByDistance = [];
     Object.keys(distanceMap).forEach((pageId) => {
-      const distance = distanceMap[pageId];
+      let distance = distanceMap[pageId];
+      // If on last page, mark first page with distance 1.
+      if (
+        pageId === this.pages_[0].element.id &&
+        this.activePage_ === this.pages_[this.pages_.length - 1] &&
+        !this.viewer_.hasCapability('swipe')
+      ) {
+        distance = 1;
+      }
       if (!pagesByDistance[distance]) {
         pagesByDistance[distance] = [];
       }
@@ -2672,6 +2680,11 @@ export class AmpStory extends AMP.BaseElement {
       dev().assertElement(this.pages_[0].element).id,
       NavigationDirection.NEXT
     );
+    // Restart page media, advancements, etc (#27742).
+    if (this.pages_.length === 1) {
+      this.pages_[0].setState(PageState.NOT_ACTIVE);
+      this.pages_[0].setState(PageState.PLAYING);
+    }
 
     // Reset all pages so that they are offscreen to right instead of left in
     // desktop view.
