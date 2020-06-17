@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-.i-amphtml-story-reaction-poll-container {
+.i-amphtml-story-interactive-poll-container {
   display: flex !important;
   justify-content: center !important;
   height: 90px !important;
   max-width: 296px !important;
   border-radius: 16px !important;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.12) !important;
-  color: var(--reaction-accent-color) !important;
-  background: var(--reaction-background-color) !important;
+  color: var(--interactive-accent-color) !important;
+  background: var(--interactive-background-color) !important;
   overflow: hidden !important;
 
   --post-select-scale: 0.5 !important;
   --post-select-scale-variable: 1 !important;
 }
 
-.i-amphtml-story-reaction-poll-container:not(.i-amphtml-story-reaction-post-selection) {
+.i-amphtml-story-interactive-poll-container:not(.i-amphtml-story-interactive-post-selection) {
   cursor: pointer !important;
 }
 
-.i-amphtml-story-reaction-option {
+.i-amphtml-story-interactive-option {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -45,18 +45,18 @@
   position: relative !important;
 }
 
-.i-amphtml-story-reaction-poll-container:not(.i-amphtml-story-reaction-post-selection)
-  .i-amphtml-story-reaction-option-divider {
+.i-amphtml-story-interactive-poll-container:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-option-divider {
   height: 100% !important;
   width: 1px !important;
   opacity: 0.3 !important;
-  background-color: var(--reaction-accent-color) !important;
+  background-color: var(--interactive-accent-color) !important;
 }
 
-.i-amphtml-story-reaction-post-selection
-  .i-amphtml-story-reaction-option.i-amphtml-story-reaction-option-selected::before {
+.i-amphtml-story-interactive-post-selection
+  .i-amphtml-story-interactive-option.i-amphtml-story-interactive-option-selected::before {
   content: '' !important;
-  background-color: var(--reaction-accent-color) !important;
+  background-color: var(--interactive-accent-color) !important;
   opacity: 0.2 !important;
   position: absolute !important;
   left: 0px !important;
@@ -64,7 +64,7 @@
   height: 100% !important;
 }
 
-.i-amphtml-story-reaction-option-title {
+.i-amphtml-story-interactive-option-title {
   font-weight: 800 !important;
   font-size: 28px !important;
   margin: 0 !important;
@@ -76,13 +76,13 @@
   justify-content: center !important;
 }
 
-.i-amphtml-story-reaction-post-selection
-  .i-amphtml-story-reaction-option-title {
+.i-amphtml-story-interactive-post-selection
+  .i-amphtml-story-interactive-option-title {
   transform: scale(var(--post-select-scale)) !important;
   height: 33px !important;
 }
 
-.i-amphtml-story-reaction-option-title-text {
+.i-amphtml-story-interactive-option-title-text {
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   display: -webkit-box !important;
@@ -90,18 +90,18 @@
   -webkit-box-orient: vertical !important;
 }
 
-.i-amphtml-story-reaction-post-selection
-  .i-amphtml-story-reaction-option-title-text {
+.i-amphtml-story-interactive-post-selection
+  .i-amphtml-story-interactive-option-title-text {
   transform: scale(var(--post-select-scale-variable)) !important;
 }
 
-.i-amphtml-story-reaction-option-percentage-text {
+.i-amphtml-story-interactive-option-percentage-text {
   font-weight: 700 !important;
   font-size: 22px !important;
   display: none !important;
 }
 
-.i-amphtml-story-reaction-post-selection
-  .i-amphtml-story-reaction-option-percentage-text {
+.i-amphtml-story-interactive-post-selection
+  .i-amphtml-story-interactive-option-percentage-text {
   display: block !important;
 }

@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import {AmpStoryReactionPoll} from '../amp-story-reaction-poll';
+import {AmpStoryInteractivePoll} from '../amp-story-interactive-poll';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {Services} from '../../../../src/services';
 import {
-  addConfigToReaction,
-  getMockReactionData,
-} from './test-amp-story-reaction';
+  addConfigToInteractive,
+  getMockInteractiveData,
+} from './test-amp-story-interactive';
 import {getRequestService} from '../amp-story-request-service';
 import {measureMutateElementStub} from '../../../../testing/test-helper';
 import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin(
-  'amp-story-reaction-poll',
+  'amp-story-interactive-poll',
   {
     amp: true,
   },
@@ -44,7 +44,7 @@ describes.realWin(
         .resolves({get: () => Promise.resolve('cid')});
 
       const ampStoryPollEl = win.document.createElement(
-        'amp-story-reaction-poll'
+        'amp-story-interactive-poll'
       );
       ampStoryPollEl.getResources = () => win.__AMP_SERVICES.resources.obj;
       requestService = getRequestService(win, ampStoryPollEl);
@@ -62,7 +62,7 @@ describes.realWin(
       storyEl.appendChild(storyPage);
 
       win.document.body.appendChild(storyEl);
-      ampStoryPoll = new AmpStoryReactionPoll(ampStoryPollEl);
+      ampStoryPoll = new AmpStoryInteractivePoll(ampStoryPollEl);
       env.sandbox
         .stub(ampStoryPoll, 'measureMutateElement')
         .callsFake(measureMutateElementStub);
@@ -70,7 +70,7 @@ describes.realWin(
     });
 
     it('should throw an error with fewer than two options', () => {
-      addConfigToReaction(ampStoryPoll, 1);
+      addConfigToInteractive(ampStoryPoll, 1);
       allowConsoleError(() => {
         expect(() => {
           ampStoryPoll.buildCallback();
@@ -79,12 +79,12 @@ describes.realWin(
     });
 
     it('should not throw an error with two options', () => {
-      addConfigToReaction(ampStoryPoll, 2);
+      addConfigToInteractive(ampStoryPoll, 2);
       expect(() => ampStoryPoll.buildCallback()).to.not.throw();
     });
 
     it('should throw an error with more than two options', () => {
-      addConfigToReaction(ampStoryPoll, 3);
+      addConfigToInteractive(ampStoryPoll, 3);
       allowConsoleError(() => {
         expect(() => {
           ampStoryPoll.buildCallback();
@@ -105,29 +105,29 @@ describes.realWin(
       );
     });
 
-    it('should enter the post-interaction state on option click', async () => {
-      addConfigToReaction(ampStoryPoll, 2);
+    it('should enter the post-interactive state on option click', async () => {
+      addConfigToInteractive(ampStoryPoll, 2);
       ampStoryPoll.buildCallback();
       await ampStoryPoll.layoutCallback();
 
       await ampStoryPoll.getOptionElements()[0].click();
 
       expect(ampStoryPoll.getRootElement()).to.have.class(
-        'i-amphtml-story-reaction-post-selection'
+        'i-amphtml-story-interactive-post-selection'
       );
       expect(ampStoryPoll.getOptionElements()[0]).to.have.class(
-        'i-amphtml-story-reaction-option-selected'
+        'i-amphtml-story-interactive-option-selected'
       );
     });
 
     it('should handle the percentage pipeline', async () => {
       env.sandbox
         .stub(requestService, 'executeRequest')
-        .resolves(getMockReactionData());
+        .resolves(getMockInteractiveData());
 
       ampStoryPoll.element.setAttribute('endpoint', 'http://localhost:8000');
 
-      addConfigToReaction(ampStoryPoll, 2);
+      addConfigToInteractive(ampStoryPoll, 2);
       ampStoryPoll.buildCallback();
       await ampStoryPoll.layoutCallback();
 
