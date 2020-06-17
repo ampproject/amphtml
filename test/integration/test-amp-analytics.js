@@ -17,8 +17,7 @@
 import {BrowserController, RequestBank} from '../../testing/test-helper';
 import {parseQueryString} from '../../src/url';
 
-// TODO(wg-analytics): These tests cause SauceLabs disconnections.
-const t = describe.configure().skipSauceLabs();
+const t = describe.configure();
 
 t.run('amp-analytics', function () {
   describes.integration(
