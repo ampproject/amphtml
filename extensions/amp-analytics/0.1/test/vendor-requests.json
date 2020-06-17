@@ -224,6 +224,22 @@
   "lotame": {
     "pageview": "https://bcp.crwdcntrl.net/amp?c=!account&pv=y"
   },
+  "mapp_intelligence": {
+    "trackURL": "https://!trackDomain/!trackId/wt",
+    "basePrefix": "?p=440,_title_,1,_screen_width_x_screen_height_,_screen_color_depth_,1,",
+    "baseSuffix": ",_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id(amp-wt3-eid)_&la=_browser_language_",
+    "parameterPrefix": "?p=440,_title_,1,_screen_width_x_screen_height_,_screen_color_depth_,1,_timestamp_,_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id(amp-wt3-eid)_&la=_browser_language_",
+    "parameterSuffix": "&pu=_source_url_&eor=1",
+    "pageview": "https://!trackDomain/!trackId/wt?p=440,_title_,1,_screen_width_x_screen_height_,_screen_color_depth_,1,_timestamp_,_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id(amp-wt3-eid)_&la=_browser_language_&&cp570=_page_load_time_&pu=_source_url_&eor=1",
+    "event": "https://!trackDomain/!trackId/wt?p=440,_title_,1,_screen_width_x_screen_height_,_screen_color_depth_,1,_timestamp_,_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id(amp-wt3-eid)_&la=_browser_language_&ct=webtrekk_ignore&&pu=_source_url_&eor=1",
+    "scroll": "https://!trackDomain/!trackId/wt?p=440,_title_,1,_screen_width_x_screen_height_,_screen_color_depth_,1,_timestamp_,_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id(amp-wt3-eid)_&la=_browser_language_&ct=webtrekk_ignore&ck540=!verticalScrollBoundary&pu=_source_url_&eor=1",
+    "mediaPrefix": "https://!trackDomain/!trackId/wt?p=440,_title_,1,_screen_width_x_screen_height_,_screen_color_depth_,1,,_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id(amp-wt3-eid)_&la=_browser_language_&mi=!id",
+    "mediaSuffix": "&mt1=!currentTime&mt2=!duration&&pu=_source_url_&eor=1&x=!playedTotal",
+    "mediaPlay": "https://!trackDomain/!trackId/wt?p=440,_title_,1,_screen_width_x_screen_height_,_screen_color_depth_,1,,_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id(amp-wt3-eid)_&la=_browser_language_&mi=!id&mk=play&mt1=!currentTime&mt2=!duration&&pu=_source_url_&eor=1&x=!playedTotal",
+    "mediaPause": "https://!trackDomain/!trackId/wt?p=440,_title_,1,_screen_width_x_screen_height_,_screen_color_depth_,1,,_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id(amp-wt3-eid)_&la=_browser_language_&mi=!id&mk=pause&mt1=!currentTime&mt2=!duration&&pu=_source_url_&eor=1&x=!playedTotal",
+    "mediaPosition": "https://!trackDomain/!trackId/wt?p=440,_title_,1,_screen_width_x_screen_height_,_screen_color_depth_,1,,_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id(amp-wt3-eid)_&la=_browser_language_&mi=!id&mk=pos&mt1=!currentTime&mt2=!duration&&pu=_source_url_&eor=1&x=!playedTotal",
+    "mediaEnded": "https://!trackDomain/!trackId/wt?p=440,_title_,1,_screen_width_x_screen_height_,_screen_color_depth_,1,,_document_referrer_,_viewport_width_x_viewport_height_,0&tz=_timezone_&eid=_client_id(amp-wt3-eid)_&la=_browser_language_&mi=!id&mk=eof&mt1=!currentTime&mt2=!duration&&pu=_source_url_&eor=1&x=!playedTotal"
+  },
   "marinsoftware": {
     "base": "https://tracker.marinsm.com/tp",
     "baseParams": "cid=!trackerId&ampVersion=_amp_version_&ds=AMP&ref=_external_referrer_&page=_source_url_&uuid=_client_id(marin_amp_id)_&rnd=_random_",
