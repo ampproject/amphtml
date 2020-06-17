@@ -5,7 +5,9 @@
 **Join other AMP contributors at the online OpenJS World & Collab Summit June 22-26! [Register](https://events.linuxfoundation.org/openjs-world/register/) today!**
 
 - OpenJS World (June 23 & 24) is the [OpenJS Foundation](https://openjsf.org/)’s annual event, bringing together the JavaScript and web ecosystem including Node.js, Electron, AMP and more. See the [schedule](https://events.linuxfoundation.org/openjs-world/program/schedule/) for details.
-- OpenJS Collab Summit (June 22, 25 & 26) provides an opportunity for contributors and maintainers working across all OpenJS Foundation projects to collaborate in real-time, share, learn, and get to know each other. **This year the AMP Contributor Summit has been merged into the OpenJS Collab Summit this year. We'll have a number of technical talks and breakout sessions for AMP contributors. The detailed schedule is coming soon!**
+- OpenJS Collab Summit (June 22, 25 & 26) provides an opportunity for contributors and maintainers working across all OpenJS Foundation projects to collaborate in real-time, share, learn, and get to know each other. **This year the AMP Contributor Summit has been merged into the OpenJS Collab Summit. See [AMP's talk and breakout session schedule](https://docs.google.com/spreadsheets/d/1GY9qNrjxM6Ro-jFSGscL11sKQA46msRMdSrQMhTL8K0/edit#gid=461228868); note that all times are Central US (UTC-5).**
+
+Please join the [#openjsworld2020](https://app.slack.com/client/T0ADHJGD6/C015JF065K5) channel on [AMP's Slack](https://bit.ly/amp-slack-signup) for the latest summit news and to stay in touch during the summit.
 
 ⚡⚡⚡
 
