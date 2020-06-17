@@ -28,7 +28,7 @@ limitations under the License.
 
 The `amp-access-poool` component, based on `amp-access`, loads and shows a paywall using your `bundleID` from Poool's Dashboard configuration.
 
-See [poool.tech](https://poool.tech) and [demo.poool.tech](https://demo.poool.tech) for more details. `amp-access-poool` is based on, and requires,
+See [poool.tech](https://poool.tech) for more details. `amp-access-poool` is based on, and requires,
 [`amp-access`](https://amp.dev/documentation/components/amp-access).
 
 As you'll know if you're familiar with how Poool works outside of AMP, you cannot use `excerpt` and `hide` modes here. This is due to AMP's specific behavior. You will be able to lock or unlock your content with the `access` variable which is provided by `amp-access`. Check out the `poool-widget` section just below.

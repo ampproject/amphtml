@@ -46,15 +46,15 @@ You can refer to the documentation on configuring the [LaterPay Connector](https
 
 The generated list can be styled and presented according to the publisher's preference.
 
-This component also relies on [Access Content Markup](../amp-access/amp-access#access-content-markup) to show and hide content.
+This component also relies on [Access Content Markup](../amp-access/amp-access.md) to show and hide content.
 
 ### Using amp-access-laterpay with amp-access
 
 If you have an existing subscription system and you intend to use LaterPay only for individual article sales, it's possible to have both sale methods coexist in the same page, using both `amp-access` and `amp-access-laterpay` together.
 
-First of, please refer to the [`amp-access`](../amp-access/amp-access) documentation to learn how to configure `amp-access` with your existing paywall.
+First of, please refer to the [`amp-access`](../amp-access/amp-access.md) documentation to learn how to configure `amp-access` with your existing paywall.
 
-The [multiple providers](../amp-access/amp-access#multiple-access-providers) section explains how to setup multiple providers with namespaces.
+The [multiple providers](../amp-access/amp-access.md) section explains how to setup multiple providers with namespaces.
 
 When using it with LaterPay and an existing paywall integration, the necessary configuration can look something like this:
 
@@ -257,7 +257,7 @@ The structure created for the dialog looks as follows:
 
 ## Analytics
 
-Given that `amp-access-laterpay` is based on `amp-access` it supports all the [analytics events](../amp-access/amp-access#integration-with-amp-analytics) sent by `amp-access`.
+Given that `amp-access-laterpay` is based on `amp-access` it supports all the [analytics events](../amp-access/amp-access.md) sent by `amp-access`.
 
 The examples at [https://ampexample.laterpay.net/](https://ampexample.laterpay.net/) are all configured to send these analytics events if you'd like to see a more complete example as to how this would look in practice.
 
