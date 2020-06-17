@@ -16,6 +16,9 @@
 'using strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const fs = require('fs-extra');
+const globby = require('globby');
+const log = require('fancy-log');
 const {
   maybePrintArgvMessages,
   shouldNotRun,
@@ -25,9 +28,6 @@ const {
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
 const {buildRuntime} = require('../common/utils');
-const globby = require('globby');
-const fs = require('fs-extra');
-const log = require('fancy-log');
 const {cyan, green} = require('ansi-colors');
 
 class Runner extends RuntimeTestRunner {
@@ -58,7 +58,7 @@ async function buildTransformedHtml() {
       await fs.copySync(filePath, `./test-bin/${filePath}`);
     }
   } catch (e) {
-    console./*OK*/log(
+    console./*OK*/ log(
       `${normalizedFilePath} could not be transformed by the postHTML ` +
         `pipeline.\n${e.message}`
     );
@@ -66,7 +66,6 @@ async function buildTransformedHtml() {
 }
 
 async function integration() {
-
   if (shouldNotRun()) {
     return;
   }
