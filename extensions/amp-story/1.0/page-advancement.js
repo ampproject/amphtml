@@ -262,6 +262,12 @@ export class ManualAdvancement extends AdvancementConfig {
     /** @private {?number} Last touchstart event's timestamp */
     this.touchstartTimestamp_ = null;
 
+    /** @private {boolean} Saving the paused state before pressing */
+    this.pausedState_ = false;
+
+    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = getAmpdoc(win.document);
+
     this.startListening_();
 
     if (element.ownerDocument.defaultView) {
@@ -317,6 +323,9 @@ export class ManualAdvancement extends AdvancementConfig {
       this.maybePerformNavigation_.bind(this),
       true
     );
+    this.ampdoc_.onVisibilityChanged(() => {
+      this.ampdoc_.isVisible() ? this.processTouchend_() : null;
+    });
   }
 
   /**
@@ -339,8 +348,10 @@ export class ManualAdvancement extends AdvancementConfig {
     if (this.touchstartTimestamp_ || !this.shouldHandleEvent_(event)) {
       return;
     }
-
     this.touchstartTimestamp_ = Date.now();
+    this.pausedState_ = /** @type {boolean} */ (this.storeService_.get(
+      StateProperty.PAUSED_STATE
+    ));
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
     this.timeoutId_ = this.timer_.delay(() => {
       this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
@@ -366,9 +377,21 @@ export class ManualAdvancement extends AdvancementConfig {
       event.preventDefault();
     }
 
-    this.storeService_.dispatch(Action.TOGGLE_PAUSED, false);
+    this.processTouchend_();
+  }
+
+  /**
+   * Logic triggered by touchend events.
+   * @private
+   */
+  processTouchend_() {
+    if (!this.touchstartTimestamp_) {
+      return;
+    }
+    this.storeService_.dispatch(Action.TOGGLE_PAUSED, this.pausedState_);
     this.touchstartTimestamp_ = null;
     this.timer_.cancel(this.timeoutId_);
+    this.timeoutId_ = null;
     if (
       !this.storeService_.get(StateProperty.SYSTEM_UI_IS_VISIBLE_STATE) &&
       /** @type {InteractiveComponentDef} */ (this.storeService_.get(
