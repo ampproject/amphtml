@@ -328,4 +328,9 @@ export const EXPERIMENTS = [
     name: 'Add a bottom padding for edgeless iPhones',
     spec: 'https://github.com/ampproject/amphtml/issues/22251',
   },
+  {
+    id: 'expand-json-targeting',
+    name: 'Allow CLIENT_ID in doubleclick json targeting feature',
+    spec: 'https://github.com/ampproject/amphtml/issues/25190',
+  },
 ];
