@@ -14,13 +14,8 @@
  * limitations under the License.
  */
 
-import {Pass} from '../pass';
-import {Services} from '../services';
 import {SubscriptionApi} from '../iframe-helper';
-import {dev, devAssert} from '../log';
 import {dict} from './object';
-import {getMode} from '../mode';
-import {isArray, isFiniteNumber} from '../types';
 import {layoutRectLtwh, moveLayoutRect, rectIntersection} from '../layout-rect';
 
 /**
@@ -71,9 +66,6 @@ export const DEFAULT_THRESHOLD = [
 let ElementIntersectionStateDef;
 
 /** @const @private */
-const TAG = 'INTERSECTION-OBSERVER';
-
-/** @const @private */
 const INIT_TIME = Date.now();
 
 /**
@@ -109,9 +101,6 @@ export class IntersectionObserverHostApi {
 
     /** @private {?IntersectionObserver} */
     this.intersectionObserver_ = null;
-
-    /** @private {!../service/viewport/viewport-interface.ViewportInterface} */
-    this.viewport_ = baseElement.getViewport();
 
     /** @private {?SubscriptionApi} */
     this.subscriptionApi_ = new SubscriptionApi(

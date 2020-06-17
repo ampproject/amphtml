@@ -27,7 +27,6 @@ import {
   setParentWindow,
 } from './service';
 import {escapeHtml} from './dom';
-import {getMode} from './mode';
 import {installAmpdocServices} from './service/core-services';
 import {install as installCustomElements} from './polyfills/custom-elements';
 import {install as installDOMTokenList} from './polyfills/domtokenlist';

@@ -231,8 +231,9 @@ export class RefreshManager {
     const thresholdString = String(threshold);
     return (
       observers[thresholdString] ||
-      (observers[thresholdString] =
-        new this.win_.IntersectionObserver(this.ioCallback_, {threshold}))
+      (observers[
+        thresholdString
+      ] = new this.win_.IntersectionObserver(this.ioCallback_, {threshold}))
     );
   }
 
