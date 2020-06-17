@@ -86,6 +86,7 @@
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  transition: transform .5s var(--ease-out-curve) !important;
 }
 
 .i-amphtml-story-interactive-post-selection
