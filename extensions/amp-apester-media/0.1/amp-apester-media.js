@@ -114,9 +114,6 @@ class AmpApesterMedia extends AMP.BaseElement {
 
   /** @override */
   viewportCallback(inViewport) {
-    if (this.intersectionObserverHostApi_) {
-      this.intersectionObserverHostApi_.onViewportCallback(inViewport);
-    }
     if (inViewport && !this.seen_) {
       if (this.iframe_ && this.iframe_.contentWindow) {
         dev().fine(TAG, 'media seen');

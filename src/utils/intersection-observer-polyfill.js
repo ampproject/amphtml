@@ -110,15 +110,6 @@ export class IntersectionObserverHostApi {
     /** @private {?IntersectionObserver} */
     this.intersectionObserver_ = null;
 
-    /** @private {boolean} */
-    this.shouldObserve_ = false;
-
-    /** @private {boolean} */
-    this.isInViewport_ = false;
-
-    /** @private {?function()} */
-    this.unlistenOnDestroy_ = null;
-
     /** @private {!../service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = baseElement.getViewport();
 
@@ -142,14 +133,11 @@ export class IntersectionObserverHostApi {
       },
       {threshold: DEFAULT_THRESHOLD}
     );
+  }
 
-    /** @const {function()} */
-    // QQQQ: still needed?
-    this.fire = () => {
-      if (!this.shouldObserve_ || !this.isInViewport_) {
-        return;
-      }
-    };
+  /** @protected */
+  fire() {
+    // QQQQ: remove before merging.
   }
 
   /**
@@ -157,40 +145,15 @@ export class IntersectionObserverHostApi {
    * change on the element.
    */
   startSendingIntersection_() {
-    this.shouldObserve_ = true;
     this.intersectionObserver_.observe(this.baseElement_.element);
-    this.baseElement_.getVsync().measure(() => {
-      this.isInViewport_ = this.baseElement_.isInViewport();
-      this.fire();
-    });
-
-    const unlistenViewportScroll = this.viewport_.onScroll(this.fire);
-    const unlistenViewportChange = this.viewport_.onChanged(this.fire);
-    this.unlistenOnDestroy_ = () => {
-      unlistenViewportScroll();
-      unlistenViewportChange();
-    };
-  }
-
-  /**
-   * Enable to the PositionObserver to listen to viewport events
-   * @param {boolean} inViewport
-   */
-  onViewportCallback(inViewport) {
-    this.isInViewport_ = inViewport;
   }
 
   /**
    * Clean all listenrs
    */
   destroy() {
-    this.shouldObserve_ = false;
     this.intersectionObserver_.disconnect();
     this.intersectionObserver_ = null;
-    if (this.unlistenOnDestroy_) {
-      this.unlistenOnDestroy_();
-      this.unlistenOnDestroy_ = null;
-    }
     this.subscriptionApi_.destroy();
     this.subscriptionApi_ = null;
   }
