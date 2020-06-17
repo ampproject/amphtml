@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-// TODO(#27807): Remove polyfill part InOb polyfill has been launched. But the
-// host part has to stay.
-
 import {Pass} from '../pass';
 import {Services} from '../services';
 import {SubscriptionApi} from '../iframe-helper';
@@ -97,33 +94,6 @@ export function getIntersectionChangeEntry(element, owner, hostViewport) {
 }
 
 /**
- * @param {!Window} win
- * @return {boolean}
- */
-export function nativeIntersectionObserverSupported(win) {
-  if (!('IntersectionObserver' in win)) {
-    return false;
-  }
-  if (
-    // The polyfill experiment is launched on inabox separately. This class
-    // is not used anywhere except inabox and thus only one experiment
-    // constant is used to avoid an accidental launch when we ramp it up
-    // in AMP-mode.
-    // eslint-disable-next-line no-undef
-    INTERSECTION_OBSERVER_POLYFILL_INABOX ||
-    getMode().localDev ||
-    getMode().test
-  ) {
-    // For the new stub polyfill it's enough to have a stub to be functional.
-    return true;
-  }
-  return (
-    'IntersectionObserverEntry' in win &&
-    'intersectionRatio' in win.IntersectionObserverEntry.prototype
-  );
-}
-
-/**
  * A class to help amp-iframe and amp-ad nested iframe listen to intersection
  * change.
  */
@@ -137,7 +107,7 @@ export class IntersectionObserverHostApi {
     /** @private @const {!AMP.BaseElement} */
     this.baseElement_ = baseElement;
 
-    /** @private {?IntersectionObserverPolyfill} */
+    /** @private {?IntersectionObserver} */
     this.intersectionObserver_ = null;
 
     /** @private {boolean} */
@@ -162,7 +132,7 @@ export class IntersectionObserverHostApi {
       }
     );
 
-    this.intersectionObserver_ = new IntersectionObserverPolyfill(
+    this.intersectionObserver_ = new IntersectionObserver(
       (entries) => {
         // Remove target info from cross origin iframe.
         for (let i = 0; i < entries.length; i++) {
@@ -172,14 +142,13 @@ export class IntersectionObserverHostApi {
       },
       {threshold: DEFAULT_THRESHOLD}
     );
-    this.intersectionObserver_.tick(this.viewport_.getRect());
 
     /** @const {function()} */
+    // QQQQ: still needed?
     this.fire = () => {
       if (!this.shouldObserve_ || !this.isInViewport_) {
         return;
       }
-      this.intersectionObserver_.tick(this.viewport_.getRect());
     };
   }
 
@@ -224,264 +193,6 @@ export class IntersectionObserverHostApi {
     }
     this.subscriptionApi_.destroy();
     this.subscriptionApi_ = null;
-  }
-}
-
-/**
- * The IntersectionObserverPolyfill class lets any element receive its
- * intersection data with the viewport. It acts like native browser supported
- * IntersectionObserver.
- * The IntersectionObserver receives a callback function and an optional option
- * as params. Whenever the element intersection ratio cross a threshold value,
- * IntersectionObserverPolyfill will call the provided callback function with
- * the change entry. Only Works with one document for now.
- * @visibleForTesting
- */
-export class IntersectionObserverPolyfill {
-  /**
-   * @param {function(!Array<!IntersectionObserverEntry>)} callback
-   * @param {Object=} opt_option
-   */
-  constructor(callback, opt_option) {
-    /** @private @const {function(!Array<!IntersectionObserverEntry>)} */
-    this.callback_ = callback;
-
-    // The input threshold can be a number or an array of numbers.
-    let threshold = opt_option && opt_option.threshold;
-    if (threshold) {
-      threshold = isArray(threshold) ? threshold : [threshold];
-    } else {
-      threshold = [0];
-    }
-
-    for (let i = 0; i < threshold.length; i++) {
-      devAssert(
-        isFiniteNumber(threshold[i]),
-        'Threshold should be a finite number or an array of finite numbers'
-      );
-    }
-
-    /**
-     * A list of threshold, sorted in increasing numeric order
-     * @private @const {!Array}
-     */
-    this.threshold_ = threshold.sort();
-    devAssert(
-      this.threshold_[0] >= 0 &&
-        this.threshold_[this.threshold_.length - 1] <= 1,
-      'Threshold should be in the range from "[0, 1]"'
-    );
-
-    /** @private {?../layout-rect.LayoutRectDef} */
-    this.lastViewportRect_ = null;
-
-    /**
-     * Store a list of observed elements and their current threshold slot which
-     * their intersection ratio fills, range from [0, this.threshold_.length]
-     * @private {Array<!ElementIntersectionStateDef>}
-     */
-    this.observeEntries_ = [];
-
-    /**
-     * Mutation observer to fire off on visibility changes
-     * @private {?function()}
-     */
-    this.hiddenObserverUnlistener_ = null;
-
-    /** @private {Pass} */
-    this.mutationPass_ = null;
-  }
-
-  /**
-   * Function to unobserve all elements.
-   * and clean up the polyfill.
-   */
-  disconnect() {
-    this.observeEntries_.length = 0;
-    this.disconnectMutationObserver_();
-  }
-
-  /**
-   * Provide a way to observe the intersection change for a specific element
-   * Please note IntersectionObserverPolyfill only support AMP element now
-   * TODO: Support non AMP element
-   * @param {!Element} element
-   */
-  observe(element) {
-    // Check the element is an AMP element.
-    devAssert(element.getLayoutBox);
-
-    // If the element already exists in current observeEntries, do nothing
-    for (let i = 0; i < this.observeEntries_.length; i++) {
-      if (this.observeEntries_[i].element === element) {
-        dev().warn(TAG, 'should observe same element once');
-        return;
-      }
-    }
-
-    const newState = {
-      element,
-      currentThresholdSlot: 0,
-    };
-
-    // Get the new observed element's first changeEntry based on last viewport
-    if (this.lastViewportRect_) {
-      const change = this.getValidIntersectionChangeEntry_(
-        newState,
-        this.lastViewportRect_
-      );
-      if (change) {
-        this.callback_([change]);
-      }
-    }
-
-    // Add a mutation observer to tick ourself
-    // TODO (@torch2424): Allow this to observe elements,
-    // from multiple documents.
-    const ampdoc = Services.ampdoc(element);
-    if (ampdoc.win.MutationObserver && !this.hiddenObserverUnlistener_) {
-      this.mutationPass_ = new Pass(
-        ampdoc.win,
-        this.handleMutationObserverPass_.bind(this, element)
-      );
-      const hiddenObserver = Services.hiddenObserverForDoc(element);
-      this.hiddenObserverUnlistener_ = hiddenObserver.add(
-        this.handleMutationObserverNotification_.bind(this)
-      );
-    }
-
-    // push new observed element
-    this.observeEntries_.push(newState);
-  }
-
-  /**
-   * Provide a way to unobserve intersection change for a specified element
-   * @param {!Element} element
-   */
-  unobserve(element) {
-    // find the unobserved element in observeEntries
-    for (let i = 0; i < this.observeEntries_.length; i++) {
-      if (this.observeEntries_[i].element === element) {
-        this.observeEntries_.splice(i, 1);
-        if (this.observeEntries_.length <= 0) {
-          this.disconnectMutationObserver_();
-        }
-        return;
-      }
-    }
-    dev().warn(TAG, 'unobserve non-observed element');
-  }
-
-  /**
-   * Tick function that update the DOMRect of the root of observed elements.
-   * Caller needs to make sure to pass in the correct container.
-   * @param {!../layout-rect.LayoutRectDef} hostViewport
-   */
-  tick(hostViewport) {
-    this.lastViewportRect_ = hostViewport;
-
-    const changes = [];
-
-    for (let i = 0; i < this.observeEntries_.length; i++) {
-      const change = this.getValidIntersectionChangeEntry_(
-        this.observeEntries_[i],
-        hostViewport
-      );
-      if (change) {
-        changes.push(change);
-      }
-    }
-
-    if (changes.length) {
-      this.callback_(changes);
-    }
-  }
-
-  /**
-   * Return a change entry for one element that should be compatible with
-   * IntersectionObserverEntry if it's valid with current config.
-   * When the new intersection ratio doesn't cross one of a threshold value,
-   * the function will return null.
-   *
-   * @param {!ElementIntersectionStateDef} state
-   * @param {!../layout-rect.LayoutRectDef} hostViewport hostViewport's rect
-   * @return {?IntersectionObserverEntry} A valid change entry or null if ratio
-   * @private
-   */
-  getValidIntersectionChangeEntry_(state, hostViewport) {
-    const {element} = state;
-
-    const elementRect = element.getLayoutBox();
-    const owner = element.getOwner();
-    const ownerRect = owner && owner.getLayoutBox();
-
-    // calculate intersectionRect. that the element intersects with hostViewport
-    // and intersects with owner element and container iframe if exists.
-    const intersectionRect =
-      rectIntersection(elementRect, ownerRect, hostViewport) ||
-      layoutRectLtwh(0, 0, 0, 0);
-    // calculate ratio, call callback based on new ratio value.
-    const ratio = intersectionRatio(intersectionRect, elementRect);
-    const newThresholdSlot = getThresholdSlot(this.threshold_, ratio);
-
-    if (newThresholdSlot == state.currentThresholdSlot) {
-      return null;
-    }
-    state.currentThresholdSlot = newThresholdSlot;
-
-    // To get same behavior as native IntersectionObserver set hostViewport null
-    // if inside an iframe
-    const changeEntry = calculateChangeEntry(
-      elementRect,
-      hostViewport,
-      intersectionRect,
-      ratio
-    );
-    changeEntry.target = element;
-    return changeEntry;
-  }
-
-  /**
-   * Handle Mutation Oberserver events
-   * @private
-   */
-  handleMutationObserverNotification_() {
-    if (this.mutationPass_.isPending()) {
-      return;
-    }
-
-    // Wait one animation frame so that other mutations may arrive.
-    this.mutationPass_.schedule(16);
-  }
-
-  /**
-   * Handle Mutation Observer Pass
-   * This performas the tick, and is wrapped in a paas
-   * To handle throttling of the observer
-   * @param {!Element} element
-   * @private
-   */
-  handleMutationObserverPass_(element) {
-    const viewport = Services.viewportForDoc(element);
-    const resources = Services.resourcesForDoc(element);
-    resources.onNextPass(() => {
-      this.tick(viewport.getRect());
-    });
-  }
-
-  /**
-   * Clean up the mutation observer
-   * @private
-   */
-  disconnectMutationObserver_() {
-    if (this.hiddenObserverUnlistener_) {
-      this.hiddenObserverUnlistener_();
-    }
-    this.hiddenObserverUnlistener_ = null;
-    if (this.mutationPass_) {
-      this.mutationPass_.cancel();
-    }
-    this.mutationPass_ = null;
   }
 }
 

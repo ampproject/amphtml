@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {RefreshIntersectionObserverPolyfillWrapper} from './refresh-intersection-observer-polyfill-wrapper';
 import {Services} from '../../../src/services';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -132,7 +131,7 @@ const RefreshLifecycleState = {
  * Each IO is configured to a different threshold, and all elements that
  * share the same visiblePercentageMin will be monitored by the same IO.
  *
- * @const {!Object<string, (!IntersectionObserver|!RefreshIntersectionObserverPolyfillWrapper)>}
+ * @const {!Object<string, (!IntersectionObserver)>}
  */
 const observers = {};
 
@@ -226,20 +225,14 @@ export class RefreshManager {
    * one if one does not yet exist.
    *
    * @param {number} threshold
-   * @return {(!IntersectionObserver|!RefreshIntersectionObserverPolyfillWrapper)}
+   * @return {!IntersectionObserver}
    */
   getIntersectionObserverWithThreshold_(threshold) {
     const thresholdString = String(threshold);
     return (
       observers[thresholdString] ||
       (observers[thresholdString] =
-        'IntersectionObserver' in this.win_
-          ? new this.win_['IntersectionObserver'](this.ioCallback_, {threshold})
-          : new RefreshIntersectionObserverPolyfillWrapper(
-              this.ioCallback_,
-              this.a4a_,
-              {threshold}
-            ))
+        new this.win_.IntersectionObserver(this.ioCallback_, {threshold}))
     );
   }
 
