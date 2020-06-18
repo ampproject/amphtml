@@ -85,11 +85,18 @@ module.exports = {
   ],
 
   preprocessors: {
-    './test/fixtures/*.html': ['html2js'],
+    // `test-bin` is the output directory of the postHTML transformation.
+    './test-bin/test/fixtures/*.html': ['html2js'],
     './test/**/*.js': ['browserify'],
     './ads/**/test/test-*.js': ['browserify'],
     './extensions/**/test/**/*.js': ['browserify'],
     './testing/**/*.js': ['browserify'],
+  },
+
+  html2JsPreprocessor: {
+    // Strip the test-bin/ prefix for the transformer destination so that the
+    // change is transparent for users of the path.
+    stripPrefix: 'test-bin/',
   },
 
   // TODO(rsimha, #15510): Sauce labs on Safari doesn't reliably support
