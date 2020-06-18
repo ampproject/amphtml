@@ -214,12 +214,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14263',
   },
   {
-    id: 'blurry-placeholder',
-    name: 'Enables a blurred image placeholder as an amp-img loads',
-    spec: 'https://github.com/ampproject/amphtml/issues/15146',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
-  },
-  {
     id: 'amp-carousel-chrome-scroll-snap',
     name: 'Enables scroll snap on carousel on Chrome browsers',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
@@ -309,9 +303,15 @@ export const EXPERIMENTS = [
   },
   {
     id: 'analytics-chunks',
-    name: 'AMP Analytics Break long tasks to chunks',
-    spec: 'TODO: add before merge',
-    cleanupIssue: 'TODO: create issue before merge',
+    name: 'AMP Analytics Break long tasks to chunks (AMP docs only)',
+    spec: 'https://github.com/ampproject/amphtml/issues/28435',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/28435',
+  },
+  {
+    id: 'analytics-chunks-inabox',
+    name: 'AMP Analytics Break long tasks to chunks (AMP Ads only)',
+    spec: 'https://github.com/ampproject/amphtml/issues/28435',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/28435',
   },
   {
     id: 'amp-ad-no-center-css',
@@ -322,5 +322,10 @@ export const EXPERIMENTS = [
     id: 'fie-init-chunking',
     name: 'More chunking for friendly iframe initialization',
     spec: 'https://github.com/ampproject/amphtml/issues/27584',
+  },
+  {
+    id: 'a4a-no-signing',
+    name: 'Remove signing requirement for AMPHTML ads',
+    spec: 'https://github.com/ampproject/amphtml/issues/27189',
   },
 ];

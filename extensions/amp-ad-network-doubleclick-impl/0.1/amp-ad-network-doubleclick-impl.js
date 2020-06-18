@@ -26,6 +26,7 @@ import {
   AMP_AD_NO_CENTER_CSS_EXP,
   AmpAnalyticsConfigDef,
   QQID_HEADER,
+  RENDER_ON_IDLE_FIX_EXP,
   SANDBOX_HEADER,
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
@@ -47,6 +48,7 @@ import {
   AmpA4A,
   ConsentTupleDef,
   DEFAULT_SAFEFRAME_VERSION,
+  NO_SIGNING_EXP,
   XORIGIN_MODE,
   assignAdUrlToError,
 } from '../../amp-a4a/0.1/amp-a4a';
@@ -86,10 +88,17 @@ import {
 import {deepMerge, dict} from '../../../src/utils/object';
 import {dev, devAssert, user} from '../../../src/log';
 import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {
   extractUrlExperimentId,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
+import {
+  getAmpAdRenderOutsideViewport,
+  incrementLoadingAds,
+  is3pThrottled,
+  waitFor3pThrottle,
+} from '../../amp-ad/0.1/concurrent-load';
 import {getCryptoRandomBytesArray, utf8Decode} from '../../../src/utils/bytes';
 import {
   getExperimentBranch,
@@ -99,12 +108,9 @@ import {
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
-import {
-  incrementLoadingAds,
-  is3pThrottled,
-  waitFor3pThrottle,
-} from '../../amp-ad/0.1/concurrent-load';
+
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
+import {isArray} from '../../../src/types';
 import {isCancellation} from '../../../src/error';
 import {
   lineDelimitedStreamer,
@@ -157,10 +163,31 @@ export const RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES = {
 };
 
 /**
+ * @const @enum {string}
+ * @visibleForTesting
+ * TODO(#28555): Clean up experiment
+ */
+export const EXPAND_JSON_TARGETING_EXP = {
+  ID: 'expand-json-targeting',
+  CONTROL: '21066261',
+  EXPERIMENT: '21066262',
+};
+
+/**
  * Required size to be sent with fluid requests.
  * @const {string}
  */
 const DUMMY_FLUID_SIZE = '320x50';
+
+/** @const @private {string} attribute indicating if lazy fetch is enabled.*/
+const LAZY_FETCH_ATTRIBUTE = 'data-lazy-fetch';
+
+/**
+ * Macros that can be expanded in json targeting attribute.
+ */
+const TARGETING_MACRO_ALLOWLIST = {
+  'CLIENT_ID': true,
+};
 
 /**
  * Map of pageview tokens to the instances they belong to.
@@ -448,6 +475,24 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           [FIE_INIT_CHUNKING_EXP.experiment],
         ],
       },
+      [[EXPAND_JSON_TARGETING_EXP.ID]]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [EXPAND_JSON_TARGETING_EXP.CONTROL],
+          [EXPAND_JSON_TARGETING_EXP.EXPERIMENT],
+        ],
+      },
+      [[RENDER_ON_IDLE_FIX_EXP.id]]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [RENDER_ON_IDLE_FIX_EXP.control],
+          [RENDER_ON_IDLE_FIX_EXP.experiment],
+        ],
+      },
+      [NO_SIGNING_EXP.id]: {
+        isTrafficEligible: () => true,
+        branches: [[NO_SIGNING_EXP.control], [NO_SIGNING_EXP.experiment]],
+      },
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
     });
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
@@ -501,18 +546,41 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /** @override */
+  delayAdRequestEnabled() {
+    if (this.element.getAttribute(LAZY_FETCH_ATTRIBUTE) !== 'true') {
+      return false;
+    }
+    return getAmpAdRenderOutsideViewport(this.element) || 3;
+  }
+
+  /** @override */
   buildCallback() {
     super.buildCallback();
     this.maybeDeprecationWarn_();
     this.setPageLevelExperiments(this.extractUrlExperimentId_());
+    const pubEnabledSra = !!this.win.document.querySelector(
+      'meta[name=amp-ad-doubleclick-sra]'
+    );
+    const delayFetchEnabled = !!this.win.document.querySelector(
+      `amp-ad[type=doubleclick][${escapeCssSelectorIdent(
+        LAZY_FETCH_ATTRIBUTE
+      )}=true]`
+    );
+    if (pubEnabledSra && delayFetchEnabled) {
+      user().warn(
+        TAG,
+        'SRA is not compatible with lazy fetching, disabling SRA'
+      );
+    }
     this.useSra =
-      (getMode().localDev &&
+      !delayFetchEnabled &&
+      ((getMode().localDev &&
         /(\?|&)force_sra=true(&|$)/.test(this.win.location.search)) ||
-      !!this.win.document.querySelector('meta[name=amp-ad-doubleclick-sra]') ||
-      [
-        DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
-        DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER,
-      ].some((eid) => this.experimentIds.indexOf(eid) >= 0);
+        pubEnabledSra ||
+        [
+          DOUBLECLICK_SRA_EXP_BRANCHES.SRA,
+          DOUBLECLICK_SRA_EXP_BRANCHES.SRA_NO_RECOVER,
+        ].some((eid) => this.experimentIds.indexOf(eid) >= 0));
     this.identityTokenPromise_ = this.getAmpDoc()
       .whenFirstVisible()
       .then(() =>
@@ -564,8 +632,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   }
 
   /**
-   * Constructs block-level url parameters with side effect of setting
-   * size_, jsonTargeting, and adKey_ fields.
+   * Constructs block-level url parameters.
    * @return {!Object<string,string|boolean|number>}
    */
   getBlockParameters_() {
@@ -624,6 +691,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * Populate's block-level state for ad URL construction.
+   * Sets initialSize_ , jsonTargeting, and adKey member fields.
    * @param {ConsentTupleDef} consentTuple
    * @visibleForTesting
    */
@@ -681,18 +749,44 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     // fallback to non-SRA if single block.
     this.populateAdUrlState(consentTuple);
     // TODO: Check for required and allowed parameters. Probably use
-    // validateData, from 3p/3p/js, after noving it someplace common.
+    // validateData, from 3p/3p/js, after moving it someplace common.
     const startTime = Date.now();
-    const identityPromise = Services.timerFor(this.win)
+    const timerService = Services.timerFor(this.win);
+
+    const identityPromise = timerService
       .timeoutPromise(1000, this.identityTokenPromise_)
       .catch(() => {
         // On error/timeout, proceed.
         return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({});
       });
+
+    const rtcParamsPromise = opt_rtcResponsesPromise.then((results) =>
+      this.mergeRtcResponses_(results)
+    );
+
+    // TODO(#28555): Delete extra logic when 'expand-json-targeting' exp launches.
+    const isJsonTargetingExpOn =
+      isExperimentOn(this.win, 'expand-json-targeting') &&
+      getExperimentBranch(this.win, EXPAND_JSON_TARGETING_EXP.ID) ===
+        EXPAND_JSON_TARGETING_EXP.EXPERIMENT;
+
+    const targetingExpansionPromise = isJsonTargetingExpOn
+      ? timerService
+          .timeoutPromise(1000, this.expandJsonTargeting_(rtcParamsPromise))
+          .catch(() => {
+            dev().warn(TAG, 'JSON Targeting expansion failed/timed out.');
+          })
+      : Promise.resolve();
+
     const checkStillCurrent = this.verifyStillCurrent();
-    Promise.all([opt_rtcResponsesPromise, identityPromise]).then((results) => {
+
+    Promise.all([
+      rtcParamsPromise,
+      identityPromise,
+      targetingExpansionPromise,
+    ]).then((results) => {
       checkStillCurrent();
-      const rtcParams = this.mergeRtcResponses_(results[0]);
+      const rtcParams = results[0];
       this.identityToken = results[1];
       googleAdUrl(
         this,
@@ -709,6 +803,59 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     });
     this.troubleshootData_.adUrl = this.getAdUrlDeferred.promise;
     return this.getAdUrlDeferred.promise;
+  }
+
+  /**
+   * Waits for RTC to complete, then overwrites json attr targeting values
+   * with expanded vars.
+   * @param {!Promise} rtcMergedPromise
+   * @return {!Promise}
+   */
+  expandJsonTargeting_(rtcMergedPromise) {
+    return rtcMergedPromise.then(() => {
+      const targeting = this.jsonTargeting['targeting'];
+      if (!targeting) {
+        return Promise.resolve();
+      }
+      const expansionPromises = Object.keys(targeting).map((key) =>
+        this.expandValue_(targeting[key]).then((expanded) => {
+          targeting[key] = expanded;
+        })
+      );
+      return Promise.all(expansionPromises);
+    });
+  }
+
+  /**
+   * Expands json targeting values.
+   * @param {string|Array<string>|null} value
+   * @return {!Promise<string>|!Promise<Array<string>>}
+   */
+  expandValue_(value) {
+    if (!value) {
+      return Promise.resolve(value);
+    }
+    if (isArray(value)) {
+      return Promise.all(
+        value.map((arrVal) => this.expandString_(dev().assertString(arrVal)))
+      );
+    }
+    return this.expandString_(dev().assertString(value));
+  }
+
+  /**
+   * Expands macros in strings.
+   * @param {string} string
+   * @return {!Promise<string>}
+   */
+  expandString_(string) {
+    return Services.urlReplacementsForDoc(
+      this.element
+    )./*OK*/ expandStringAsync(
+      string,
+      undefined /*opt_bindings*/,
+      TARGETING_MACRO_ALLOWLIST
+    );
   }
 
   /**

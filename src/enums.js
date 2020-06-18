@@ -56,6 +56,7 @@ export const TickLabel = {
   MESSAGING_READY: 'msr',
   ON_FIRST_VISIBLE: 'ofv',
   ON_LOAD: 'ol',
+  SLOW_ELEMENT_RATIO: 'ser',
   TIME_ORIGIN: 'timeOrigin',
   VIDEO_CACHE_STATE: 'vcs',
   VIDEO_ERROR: 'verr',

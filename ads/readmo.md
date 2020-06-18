@@ -28,7 +28,6 @@ ReadMo only requires a section code to run. Please work with your account manage
   height="320"
   type="readmo"
   layout="responsive"
-  data-url="https://yourdomain.com"
   data-infinite="true"
   data-section="1234567"
 >
@@ -38,7 +37,6 @@ ReadMo only requires a section code to run. Please work with your account manage
 ### Required parameters
 
 - `data-section` : A unique identifier that represents your site and placement
-- `data-url` : The url that the section is allowed to run on
 
 ### Optional parameters
 
@@ -46,4 +44,5 @@ ReadMo only requires a section code to run. Please work with your account manage
 - `data-infinite` : If true, enables infinite feed for your module
 - `data-title` : The title that appears above the module (defaults to "You May Like")
 - `data-sponsored-by-label` : Text override to the default "Sponsored by" label that appears next to the sponsors name
+- `data-url` : Publisher url override
 - `json` : Use this to pass additional configuration properties (ex: `json='{ "contentId": 1234 }'`)

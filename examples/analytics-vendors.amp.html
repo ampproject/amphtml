@@ -72,6 +72,7 @@
       <option>googleanalytics</option>
       <option>ibeatanalytics</option>
       <option>infonline</option>
+      <option>infonline_anonymous</option>
       <option>iplabel</option>
       <option>keen</option>
       <option>kenshoo</option>
@@ -103,6 +104,7 @@
       <option>rakam</option>
       <option>reppublika</option>
       <option>retargetly</option>
+      <option>rudderstack</option>
       <option>segment</option>
       <option>shinystat</option>
       <option>simplereach</option>
@@ -756,6 +758,30 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End INFOnline example -->
 
+<!--
+  INFOnline anonymous example
+  Important: url needs to point to a copy of
+  amp-analytics-infonline-anonymous.html on a different subdomain
+  than your AMP files.
+-->
+<amp-analytics type="infonline_anonymous" id="infonline_anonymous">
+  <script type="application/json">
+    {
+      "vars": {
+        "st":  "site",
+        "co":  "comment",
+        "cp":  "code",
+        "cn": "de",
+        "dn": "relay domain name"
+      },
+      "requests": {
+        "url":  "https://3p.ampproject.net/custom/amp-analytics-infonline-anonymous.html"
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End INFOnline anonymous example -->
+
 <!-- iplabel rumbi. Ensure you replace "ampTrackerId" with your tracker id . -->
 <amp-analytics type="iplabel" id="iplabel" >
 <script type="application/json">
@@ -1346,6 +1372,33 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Retargetly example -->
 
+<!-- RudderStack example -->
+<amp-analytics type="rudderstack" id="rudderstack">
+<script type="application/json">
+{
+  "vars": {
+    "writeKey": "1XI9Niof0vuKt5XTLurbWh9KkXn",
+    "dataPlaneUrl": "https://hosted.rudderlabs.com",
+    "pageName": "My Page name"
+  },
+  "extraUrlParams": {
+    "properties.source": "RudderStack AMP"
+  },
+  "triggers": {
+    "click": {
+      "on": "click",
+      "selector": "#test1",
+      "request": "track",
+      "vars": {
+        "eventName": "click"
+      }
+    }
+  }
+}
+</script>
+</amp-analytics>
+<!-- End RudderStack example -->
+
 <!-- Segment analytics tracking -->
 <amp-analytics type="segment" id="segment">
 <script type="application/json">
@@ -1766,6 +1819,7 @@ For complete documentation and additional examples please see: https://marketing
     "au": "author1,author2",
     "pt": "publishTime",
     "ct": "1",
+    "hid": "153",
     "d":"m.ibeatdev.com"
   }
 }

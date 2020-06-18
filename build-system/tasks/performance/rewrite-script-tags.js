@@ -20,6 +20,7 @@ const {
   CONTROL,
   DEFAULT_EXTENSIONS,
   EXPERIMENT,
+  INABOX_PATH,
   LOCAL_PATH_REGEXP,
   V0_PATH,
   copyToCache,
@@ -50,6 +51,8 @@ async function useLocalScripts(url) {
       script.src = await copyToCache(matchArray[1]);
     } else if (script.src === V0_PATH) {
       script.src = await copyToCache('v0.js');
+    } else if (script.src === INABOX_PATH) {
+      script.src = await copyToCache('amp4ads-v0.js');
     }
   }
 
@@ -76,6 +79,8 @@ async function useRemoteScripts(url) {
       script.src = await downloadToDisk(CDN_URL + matchArray[1]);
     } else if (script.src === V0_PATH) {
       script.src = await downloadToDisk(CDN_URL + 'v0.js');
+    } else if (script.src === INABOX_PATH) {
+      script.src = await downloadToDisk(CDN_URL + 'amp4ads-v0.js');
     }
   }
 
