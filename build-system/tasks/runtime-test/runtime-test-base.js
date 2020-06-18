@@ -170,8 +170,11 @@ function updateReporters(config) {
     config.reporters.push('saucelabs');
   }
 
-  if (false) { // TODO(rafer45): add a suitable condition
+  if (process.env.TRAVIS && process.env.TRAVIS_EVENT_TYPE === 'push') {
     config.reporters.push('json-result');
+    config.jsonReporter = {
+      outputFile: `results_${config.testType}.json`,
+    };
   }
 }
 
