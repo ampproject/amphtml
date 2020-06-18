@@ -18,13 +18,11 @@ import * as IniLoad from '../../../../src/ini-load';
 import {AmpDocShadow} from '../../../../src/service/ampdoc-impl';
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from '../analytics-root';
 import {AnalyticsEventType, CustomEventTracker} from '../events';
-import {HostServices} from '../../../../src/inabox/host-services';
 import {ScrollManager} from '../scroll-manager';
 import {
   VisibilityManagerForDoc,
   VisibilityManagerForEmbed,
 } from '../visibility-manager';
-import {VisibilityManagerForMApp} from '../visibility-manager-for-mapp';
 import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
 
@@ -34,7 +32,6 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
   let viewport;
   let root;
   let body, target, child, other;
-  let mockVisibilityInterface;
 
   beforeEach(() => {
     win = env.win;
@@ -57,10 +54,6 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
     other.id = 'other';
     other.className = 'other';
     body.appendChild(other);
-
-    mockVisibilityInterface = {
-      onVisibilityChange: () => {},
-    };
   });
 
   it('should initialize correctly', () => {
@@ -149,30 +142,6 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
     expect(visibilityManager.parent).to.be.null;
     // Ensure the instance is reused.
     expect(root.getVisibilityManager()).to.equal(visibilityManager);
-  });
-
-  it('should create correct visiblityManager', () => {
-    env.sandbox.stub(HostServices, 'isAvailable').callsFake(() => true);
-    env.sandbox.stub(HostServices, 'visibilityForDoc').callsFake(() => {
-      return Promise.resolve(mockVisibilityInterface);
-    });
-    return root.isUsingHostAPI().then(() => {
-      const visibilityManager = root.getVisibilityManager();
-      expect(visibilityManager).to.be.instanceOf(VisibilityManagerForMApp);
-    });
-  });
-
-  it('should fallback to correct visibilityManager', () => {
-    env.sandbox.stub(HostServices, 'isAvailable').callsFake(() => true);
-    env.sandbox.stub(HostServices, 'visibilityForDoc').callsFake(() => {
-      return Promise.reject({
-        fallback: true,
-      });
-    });
-    return root.isUsingHostAPI().then(() => {
-      const visibilityManager = root.getVisibilityManager();
-      expect(visibilityManager).to.be.instanceOf(VisibilityManagerForDoc);
-    });
   });
 
   it('should create scroll manager', () => {
