@@ -170,7 +170,7 @@ function updateReporters(config) {
     config.reporters.push('saucelabs');
   }
 
-  if (isTravisPushBuild()) {
+  if (/*isTravisPushBuild()*/ true) {
     config.reporters.push('json-result');
     config.jsonReporter = {
       outputFile: `results_${config.testType}.json`,
