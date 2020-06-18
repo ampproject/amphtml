@@ -52,7 +52,7 @@ class CameraOrientation {
   }
 
   /**
-   * @return {!CameraOrientation}
+   * @return {!Float32Array}
    */
   get rotation() {
     return Matrix.mul(
