@@ -16,7 +16,8 @@
 const log = require('fancy-log');
 const {cyan, green} = require('ansi-colors');
 const {exec} = require('../common/exec');
-const {SERVER_TRANSFORM_PATH} = require('../compile/sources');
+
+const SERVER_TRANSFORM_PATH = 'build-system/server/new-server/transforms';
 
 // Used by new server implementation
 const typescriptBinary = './node_modules/typescript/bin/tsc';
@@ -42,4 +43,5 @@ function buildNewServer() {
 
 module.exports = {
   buildNewServer,
+  SERVER_TRANSFORM_PATH,
 };

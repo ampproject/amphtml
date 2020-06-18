@@ -25,17 +25,19 @@ const morgan = require('morgan');
 const path = require('path');
 const watch = require('gulp-watch');
 const {
+  buildNewServer,
+  SERVER_TRANSFORM_PATH,
+} = require('../server/typescript-compile');
+const {
   lazyBuildExtensions,
   lazyBuildJs,
   preBuildRuntimeFiles,
   preBuildExtensions,
 } = require('../server/lazy-build');
-const {buildNewServer} = require('./typescript-compile');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green, red} = require('ansi-colors');
 const {distNailgunPort, stopNailgunServer} = require('./nailgun');
 const {logServeMode, setServeMode} = require('../server/app-utils');
-const {SERVER_TRANSFORM_PATH} = require('../compile/sources');
 const {watchDebounceDelay} = require('./helpers');
 
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
