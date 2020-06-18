@@ -218,7 +218,7 @@ When configuring the URLs for various endpoints, the Publisher can use substitut
   </tr>
   <tr>
     <td class="col-thirty"><code>AUTHDATA(field)</code></td>
-    <td>Available to Pingback and Login URLs. It allows passing any field in the authorization response as an URL parameter. For example, <code>AUTHDATA(data.isLoggedIn)`</code></td>
+    <td>Available to Pingback and Login URLs. It allows passing any field in the authorization response as an URL parameter. For example, <code>AUTHDATA(data.isLoggedIn)</code></td>
   </tr>
   <tr>
     <td class="col-thirty"><code>RETURN_URL</code></td>
