@@ -41,12 +41,12 @@ export const STORAGE_KEY = {
 
 /**
  * Key values for retriving/storing metadata values within consent info
- * GDPR_APPLIES: 'ga'
  * @enum {string}
  */
 export const METADATA_STORAGE_KEY = {
   CONSENT_STRING_TYPE: 'cst',
   ADDITIONAL_CONSENT: 'ac',
+  GDPR_APPLIES: 'ga',
 };
 
 /**
@@ -273,15 +273,18 @@ export function constructConsentInfo(
  *
  * @param {CONSENT_STRING_TYPE=} opt_consentStringType
  * @param {string=} opt_additionalConsent
+ * @param {boolean=} opt_gdprApplies
  * @return {!ConsentMetadataDef}
  */
 export function constructMetadata(
   opt_consentStringType,
-  opt_additionalConsent
+  opt_additionalConsent,
+  opt_gdprApplies
 ) {
   return {
     'consentStringType': opt_consentStringType,
     'additionalConsent': opt_additionalConsent,
+    'gdprApplies': opt_gdprApplies,
   };
 }
 
@@ -349,7 +352,7 @@ export function getConsentStateValue(enumState) {
 
 /**
  * Converts ConsentMetadataDef to stroage value:
- * {'gdprApplies': true, 'consentStringType': 2} =>
+ * {'gdprApplies': true, 'additionalConsent': undefined, 'consentStringType': 2} =>
  * {'ga': true, 'cst': 2}
  *
  * @param {ConsentMetadataDef=} consentInfoMetadata
@@ -365,13 +368,17 @@ export function composeMetadataStoreValue(consentInfoMetadata) {
     storageMetadata[METADATA_STORAGE_KEY.ADDITIONAL_CONSENT] =
       consentInfoMetadata['additionalConsent'];
   }
+  if (consentInfoMetadata['gdprApplies'] != undefined) {
+    storageMetadata[METADATA_STORAGE_KEY.GDPR_APPLIES] =
+      consentInfoMetadata['gdprApplies'];
+  }
   return storageMetadata;
 }
 
 /**
  * Converts stroage metadata to ConsentMetadataDef:
  * {'ga': true, 'cst': 2} =>
- * {'gdprApplies': true, 'consentStringType': 2}
+ * {'gdprApplies': true, 'additionalConsnet': undefined, 'consentStringType': 2}
  *
  * @param {Object|null|undefined} storageMetadata
  * @return {ConsentMetadataDef}
@@ -382,7 +389,8 @@ export function convertStorageMetadata(storageMetadata) {
   }
   return constructMetadata(
     storageMetadata[METADATA_STORAGE_KEY.CONSENT_STRING_TYPE],
-    storageMetadata[METADATA_STORAGE_KEY.ADDITIONAL_CONSENT]
+    storageMetadata[METADATA_STORAGE_KEY.ADDITIONAL_CONSENT],
+    storageMetadata[METADATA_STORAGE_KEY.GDPR_APPLIES]
   );
 }
 
@@ -394,6 +402,7 @@ export function convertStorageMetadata(storageMetadata) {
 export function assertMetadataValues(metadata) {
   const consentStringType = metadata['consentStringType'];
   const additionalConsent = metadata['additionalConsent'];
+  const gdprApplies = metadata['gdprApplies'];
   const errorFields = [];
 
   if (
@@ -406,6 +415,10 @@ export function assertMetadataValues(metadata) {
   if (additionalConsent && typeof additionalConsent != 'string') {
     delete metadata['additionalConsent'];
     errorFields.push('additionalConsent');
+  }
+  if (gdprApplies && typeof gdprApplies != 'boolean') {
+    delete metadata['gdprApplies'];
+    errorFields.push('gdprApplies');
   }
   for (let i = 0; i < errorFields.length; i++) {
     user().error(

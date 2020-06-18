@@ -35,6 +35,7 @@ import {
   QQID_HEADER,
   RENDER_ON_IDLE_FIX_EXP,
   SANDBOX_HEADER,
+  STICKY_AD_PADDING_BOTTOM_EXP,
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
   extractAmpAnalyticsConfig,
@@ -99,15 +100,15 @@ import {
   waitFor3pThrottle,
 } from '../../amp-ad/0.1/concurrent-load';
 import {getCryptoRandomBytesArray, utf8Decode} from '../../../src/utils/bytes';
-import {getMode} from '../../../src/mode';
-import {getMultiSizeDimensions} from '../../../ads/google/utils';
-import {getOrCreateAdCid} from '../../../src/ad-cid';
-
 import {
   getExperimentBranch,
   isExperimentOn,
   randomlySelectUnsetExperiments,
 } from '../../../src/experiments';
+import {getMode} from '../../../src/mode';
+import {getMultiSizeDimensions} from '../../../ads/google/utils';
+import {getOrCreateAdCid} from '../../../src/ad-cid';
+
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {isArray} from '../../../src/types';
 import {isCancellation} from '../../../src/error';
@@ -484,6 +485,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       [NO_SIGNING_EXP.id]: {
         isTrafficEligible: () => true,
         branches: [[NO_SIGNING_EXP.control], [NO_SIGNING_EXP.experiment]],
+      },
+      [STICKY_AD_PADDING_BOTTOM_EXP.id]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [STICKY_AD_PADDING_BOTTOM_EXP.control],
+          [STICKY_AD_PADDING_BOTTOM_EXP.experiment],
+        ],
       },
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
     });
@@ -1306,6 +1314,19 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       height: `${size.height}px`,
       position: isMultiSizeFluid ? 'relative' : null,
     });
+
+    // Check if this is a multi-size creative that's narrower than the ad slot.
+    if (
+      this.returnedSize_ &&
+      this.returnedSize_.width &&
+      this.returnedSize_.width < this.getSlotSize().width
+    ) {
+      setStyles(dev().assertElement(this.iframe), {
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+      });
+    }
 
     if (this.qqid_) {
       this.element.setAttribute('data-google-query-id', this.qqid_);

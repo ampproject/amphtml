@@ -407,7 +407,7 @@ Font providers can be white listed if they support CSS-only integrations and ser
 
 - Fonts.com: `https://fast.fonts.net`
 - Google Fonts: `https://fonts.googleapis.com`
-- Font Awesome: `https://maxcdn.bootstrapcdn.com`
+- Font Awesome: `https://maxcdn.bootstrapcdn.com, https://use.fontawesome.com`
 - [Typekit](https://helpx.adobe.com/typekit/using/google-amp.html): `https://use.typekit.net/kitId.css` (replace `kitId` accordingly)
 
 IMPLEMENTERS NOTE: Adding to this list requires a change to the AMP Cache CSP rule.

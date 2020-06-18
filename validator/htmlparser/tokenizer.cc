@@ -932,10 +932,10 @@ TokenType Tokenizer::Next(bool template_mode) {
           return token_type_;
         }
         is_token_manufactured_ = true;
-        ReadUntilCloseAngle();
         // <? is part of the comment text.
         UnreadByte();
         UnreadByte();
+        ReadUntilCloseAngle();
         token_type_ = TokenType::COMMENT_TOKEN;
         return token_type_;
       }
