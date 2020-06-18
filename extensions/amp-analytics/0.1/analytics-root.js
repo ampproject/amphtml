@@ -62,13 +62,6 @@ export class AnalyticsRoot {
     this.scrollManager_ = null;
   }
 
-  /**
-   * @return {!Promise<boolean>}
-   */
-  isUsingHostAPI() {
-    return Promise.resolve(false);
-  }
-
   /** @override */
   dispose() {
     for (const k in this.trackers_) {
@@ -458,9 +451,6 @@ export class AnalyticsRoot {
    * Returns the visibility root corresponding to this analytics root (ampdoc
    * or embed). The visibility root is created lazily as needed and takes
    * care of all visibility tracking functions.
-   *
-   * The caller needs to make sure to call getVisibilityManager after
-   * usingHostAPIPromise has resolved
    * @return {!./visibility-manager.VisibilityManager}
    */
   getVisibilityManager() {
