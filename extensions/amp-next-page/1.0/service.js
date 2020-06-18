@@ -313,7 +313,7 @@ export class NextPageService {
     // Attempt to get more pages
     return (
       this.getRemotePages_()
-        .then((pages) => this.queuePages_(pages))
+        .then((pages) => this.queuePages_(pages, true /** preventFetching */))
         // Queuing pages can result in no new pages (in case the server
         // returned an empty array or the suggestions already exist in the queue)
         .then(() => {
@@ -804,9 +804,10 @@ export class NextPageService {
    * Add the provided page metadata into the queue of
    * pages to fetch
    * @param {!Array<!./page.PageMeta>} pages
+   * @param {boolean} preventFetching
    * @return {!Promise}
    */
-  queuePages_(pages) {
+  queuePages_(pages, preventFetching = false) {
     if (!pages.length || this.finished_) {
       return Promise.resolve();
     }
@@ -826,6 +827,10 @@ export class NextPageService {
         user().error(TAG, 'Failed to queue page due to error:', e);
       }
     });
+
+    if (preventFetching) {
+      return Promise.resolve();
+    }
 
     // To be safe, if the pages were parsed after the user
     // finished scrolling
