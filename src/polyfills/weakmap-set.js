@@ -23,7 +23,7 @@
 export function install(win) {
   const {WeakMap} = win;
   const m = new WeakMap();
-  if (m.set(0, 0) !== m) {
+  if (m.set({}, 0) !== m) {
     const {set} = m;
 
     win.Object.defineProperty(WeakMap.prototype, 'set', {
