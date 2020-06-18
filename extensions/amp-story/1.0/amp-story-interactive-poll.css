@@ -28,7 +28,7 @@
   --post-select-scale: 0.5 !important;
   --post-select-scale-variable: 1 !important;
   --ease-out-curve: cubic-bezier(.3, 0, 0, 1);
-  --animation-time: .3s;
+  --animation-time: .3s
 }
 
 .i-amphtml-story-interactive-poll-container:not(.i-amphtml-story-interactive-post-selection) {
