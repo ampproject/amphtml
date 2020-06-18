@@ -49,10 +49,8 @@ async function buildTransformedHtml() {
   let normalizedFilePath;
   try {
     log(
-      green('Copying'),
-      cyan('Integration files'),
-      green('to'),
-      cyan(`test-bin/`) + green('...')
+      green('Copying integration test files to'),
+      cyan('test-bin/') + green('...')
     );
     for (const filePath of filePaths) {
       await fs.copySync(filePath, `./test-bin/${filePath}`);
