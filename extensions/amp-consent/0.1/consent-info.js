@@ -41,7 +41,6 @@ export const STORAGE_KEY = {
 
 /**
  * Key values for retriving/storing metadata values within consent info
- * TODO(micajuineho)
  * GDPR_APPLIES: 'ga'
  * @enum {string}
  */
@@ -370,7 +369,7 @@ export function composeMetadataStoreValue(consentInfoMetadata) {
 }
 
 /**
- * TODO(micajuineho) Converts stroage metadata to ConsentMetadataDef:
+ * Converts stroage metadata to ConsentMetadataDef:
  * {'ga': true, 'cst': 2} =>
  * {'gdprApplies': true, 'consentStringType': 2}
  *
