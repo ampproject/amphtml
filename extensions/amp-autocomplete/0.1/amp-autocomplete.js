@@ -102,10 +102,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.minChars_ = 1;
 
     /**
-     * The value of the "max-entries" attribute on <autocomplete>.
+     * The value of the "max-items" attribute on <autocomplete>.
      * @private {?number}
      */
-    this.maxEntries_ = null;
+    this.maxItems_ = null;
 
     /**
      * If the "suggest-first" attribute is present on <autocomplete>.
@@ -324,7 +324,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.minChars_ = this.element.hasAttribute('min-characters')
       ? parseInt(this.element.getAttribute('min-characters'), 10)
       : 1;
-    this.maxEntries_ = this.element.hasAttribute('max-entries')
+    this.maxItems_ = this.element.hasAttribute('max-items')
+      ? parseInt(this.element.getAttribute('max-items'), 10)
+      : this.element.hasAttribute('max-entries')
       ? parseInt(this.element.getAttribute('max-entries'), 10)
       : null;
     this.shouldSuggestFirst_ = this.binding_.shouldSuggestFirst();
@@ -423,7 +425,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
         const attributes = dict({
           'ampAutocompleteAttributes': {
             'items': itemsExpr,
-            'maxEntries': this.maxEntries_,
+            'maxItems': this.maxItems_,
           },
         });
         return this.getSsrTemplateHelper().ssr(
@@ -771,7 +773,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
   filterData_(data, input) {
     // Server-side filtering.
     if (this.filter_ === FilterType.NONE) {
-      return this.truncateToMaxEntries_(data);
+      return this.truncateToMaxItems_(data);
     }
 
     // Client-side filtering.
@@ -809,7 +811,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       }
     });
 
-    return this.truncateToMaxEntries_(filteredData);
+    return this.truncateToMaxItems_(filteredData);
   }
 
   /**
@@ -905,14 +907,14 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
-   * Truncate the given data to a maximum length of the max-entries attribute.
+   * Truncate the given data to a maximum length of the max-items attribute.
    * @param {!Array<!JsonObject|string>} data
    * @return {!Array<!JsonObject|string>}
    * @private
    */
-  truncateToMaxEntries_(data) {
-    if (this.maxEntries_ && this.maxEntries_ < data.length) {
-      data = data.slice(0, this.maxEntries_);
+  truncateToMaxItems_(data) {
+    if (this.maxItems_ && this.maxItems_ < data.length) {
+      data = data.slice(0, this.maxItems_);
     }
     return data;
   }
