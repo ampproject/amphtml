@@ -372,7 +372,7 @@ export class AmpAnalytics extends AMP.BaseElement {
               trigger['selector'] = this.element.parentElement.tagName;
               trigger['selectionMethod'] = 'closest';
               return this.addTrigger_(trigger);
-            } else if (trigger['selector']) {
+            } else if (trigger['selector'] && !isArray(trigger['selector'])) {
               // Expand the selector using variable expansion.
               return this.variableService_
                 .expandTemplate(
