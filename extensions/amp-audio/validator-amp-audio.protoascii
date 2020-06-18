@@ -41,7 +41,7 @@ attr_lists: { # amp-audio attributes that are common to both AMP and A4A format.
       protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   # <amp-bind>
   attrs: { name: "[album]" }
@@ -70,7 +70,7 @@ tags: {  # <amp-audio> for AMP (autoplay attribute allowed)
   }
   attr_lists: "amp-audio-common"
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-audio"
+  spec_url: "https://amp.dev/documentation/components/amp-audio/"
   amp_layout {
     defines_default_height: true
     # TODO(johannes): in the longer run, defines_default_width should
@@ -95,7 +95,7 @@ tags: {  # <amp-audio> for AMP, amp-story (autoplay attribute mandatory)
   }
   attr_lists: "amp-audio-common"
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-audio"
+  spec_url: "https://amp.dev/documentation/components/amp-audio/"
   amp_layout {
     supported_layouts: NODISPLAY
   }
@@ -108,7 +108,7 @@ tags: {  # <amp-audio> for A4A (autoplay attribute disallowed)
   requires_extension: "amp-audio"
   attr_lists: "amp-audio-common"
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-audio"
+  spec_url: "https://amp.dev/documentation/components/amp-audio/"
   amp_layout {
     defines_default_height: true
     defines_default_width: true

@@ -214,12 +214,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14263',
   },
   {
-    id: 'blurry-placeholder',
-    name: 'Enables a blurred image placeholder as an amp-img loads',
-    spec: 'https://github.com/ampproject/amphtml/issues/15146',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
-  },
-  {
     id: 'amp-carousel-chrome-scroll-snap',
     name: 'Enables scroll snap on carousel on Chrome browsers',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
@@ -320,11 +314,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/28435',
   },
   {
-    id: 'amp-ad-no-center-css',
-    name: 'Removing the centering css rule for amp-ad',
-    spec: 'https://github.com/ampproject/amphtml/issues/27095',
-  },
-  {
     id: 'fie-init-chunking',
     name: 'More chunking for friendly iframe initialization',
     spec: 'https://github.com/ampproject/amphtml/issues/27584',
@@ -333,5 +322,15 @@ export const EXPERIMENTS = [
     id: 'a4a-no-signing',
     name: 'Remove signing requirement for AMPHTML ads',
     spec: 'https://github.com/ampproject/amphtml/issues/27189',
+  },
+  {
+    id: 'sticky-ad-padding-bottom',
+    name: 'Add a bottom padding for edgeless iPhones',
+    spec: 'https://github.com/ampproject/amphtml/issues/22251',
+  },
+  {
+    id: 'expand-json-targeting',
+    name: 'Allow CLIENT_ID in doubleclick json targeting feature',
+    spec: 'https://github.com/ampproject/amphtml/issues/25190',
   },
 ];

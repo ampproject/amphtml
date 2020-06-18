@@ -26,7 +26,7 @@ import {user, userAssert} from '../../../src/log';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const TAG = 'consent-policy-manager';
 
-const WHITELIST_POLICY = {
+const ALLOWLIST_POLICY = {
   'default': true,
   '_till_responded': true,
   '_till_accepted': true,
@@ -224,7 +224,7 @@ export class ConsentPolicyManager {
    */
   whenPolicyResolved(policyId) {
     // If customized policy is not supported
-    if (!WHITELIST_POLICY[policyId]) {
+    if (!ALLOWLIST_POLICY[policyId]) {
       user().error(
         TAG,
         'can not find policy %s, only predefined policies are supported',
@@ -246,7 +246,7 @@ export class ConsentPolicyManager {
    */
   whenPolicyUnblock(policyId) {
     // If customized policy is not supported
-    if (!WHITELIST_POLICY[policyId]) {
+    if (!ALLOWLIST_POLICY[policyId]) {
       user().error(
         TAG,
         'can not find policy %s, only predefined policies are supported',
@@ -275,20 +275,6 @@ export class ConsentPolicyManager {
       .then(() => this.ConsentStateManagerPromise_)
       .then((manager) => {
         return manager.getConsentInstanceSharedData();
-      });
-  }
-
-  /**
-   * Get gdprApplies value of a policy.
-   *
-   * @param {string} policyId
-   * @return {!Promise<?boolean>}
-   */
-  getGdprApplies(policyId) {
-    return this.whenPolicyResolved(policyId)
-      .then(() => this.ConsentStateManagerPromise_)
-      .then((manager) => {
-        return manager.getConsentInstanceGdprApplies();
       });
   }
 

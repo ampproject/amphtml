@@ -72,9 +72,6 @@ describes.realWin(
               })
             );
           },
-          getConsentInstanceGdprApplies: () => {
-            return Promise.resolve(false);
-          },
         });
       });
     });
@@ -601,39 +598,25 @@ describes.realWin(
           .callsFake(() => {
             return Promise.resolve();
           });
-        consentInfo = constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED, 'test');
+        consentInfo = constructConsentInfo(
+          CONSENT_ITEM_STATE.ACCEPTED,
+          'test',
+          constructMetadata(CONSENT_STRING_TYPE.TCF_V2, '1~1.10.14.103', false)
+        );
       });
 
-      // TODO(micajuineho) combine into metadata values
-      it('should return gdprApplies value', async () => {
+      it('should return metadata values from state manager', async () => {
         manager.registerConsentPolicyInstance('default', {
           'waitFor': {
             'ABC': undefined,
           },
         });
         await macroTask();
-        await expect(manager.getConsentMetadataInfo('default')).to.eventually.be
-          .undefined;
-      });
-    });
-
-    describe('getGdprApplies', () => {
-      let manager;
-
-      beforeEach(() => {
-        manager = new ConsentPolicyManager(ampdoc);
-        manager.setLegacyConsentInstanceId('ABC');
-      });
-
-      it('should return gdprApplies value', async () => {
-        manager.registerConsentPolicyInstance('default', {
-          'waitFor': {
-            'ABC': undefined,
-          },
-        });
-        await macroTask();
-        // Set above in getConsentInstanceGdprApplies mock
-        await expect(manager.getGdprApplies()).to.eventually.be.false;
+        await expect(
+          manager.getConsentMetadataInfo('default')
+        ).to.eventually.deep.equals(
+          constructMetadata(CONSENT_STRING_TYPE.TCF_V2, '1~1.10.14.103', false)
+        );
       });
     });
   }

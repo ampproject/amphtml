@@ -393,6 +393,21 @@ export class VideoManager {
   isRollingAd(videoOrElement) {
     return this.getEntry_(videoOrElement).isRollingAd();
   }
+
+  /**
+   * @param {!VideoEntry} entryBeingPlayed
+   */
+  pauseOtherVideos(entryBeingPlayed) {
+    this.entries_.forEach((entry) => {
+      if (
+        entry.isPlaybackManaged() &&
+        entry !== entryBeingPlayed &&
+        entry.getPlayingState() == PlayingStates.PLAYING_MANUAL
+      ) {
+        entry.video.pause();
+      }
+    });
+  }
 }
 
 /**
@@ -423,7 +438,7 @@ class VideoEntry {
     this.video = video;
 
     /** @private {boolean} */
-    this.allowAutoplay_ = true;
+    this.managePlayback_ = true;
 
     /** @private {boolean} */
     this.loaded_ = false;
@@ -504,7 +519,10 @@ class VideoEntry {
     listen(video.element, VideoEvents.PAUSE, () => this.videoPaused_());
     listen(video.element, VideoEvents.PLAYING, () => this.videoPlayed_());
     listen(video.element, VideoEvents.MUTED, () => (this.muted_ = true));
-    listen(video.element, VideoEvents.UNMUTED, () => (this.muted_ = false));
+    listen(video.element, VideoEvents.UNMUTED, () => {
+      this.muted_ = false;
+      this.manager_.pauseOtherVideos(this);
+    });
 
     listen(video.element, VideoEvents.CUSTOM_TICK, (e) => {
       const data = getData(e);
@@ -555,7 +573,7 @@ class VideoEntry {
       actions.trigger(element, firstPlay, event, trust);
     });
 
-    this.listenForAutoplayDelegation_();
+    this.listenForPlaybackDelegation_();
   }
 
   /** @public */
@@ -577,11 +595,11 @@ class VideoEntry {
     analyticsEvent(this, VideoAnalyticsEvents.CUSTOM, prefixedVars);
   }
 
-  /** Listens for signals to delegate autoplay to a different module. */
-  listenForAutoplayDelegation_() {
+  /** Listens for signals to delegate playback to a different module. */
+  listenForPlaybackDelegation_() {
     const signals = this.video.signals();
-    signals.whenSignal(VideoServiceSignals.AUTOPLAY_DELEGATED).then(() => {
-      this.allowAutoplay_ = false;
+    signals.whenSignal(VideoServiceSignals.PLAYBACK_DELEGATED).then(() => {
+      this.managePlayback_ = false;
 
       if (this.isPlaying_) {
         this.video.pause();
@@ -592,6 +610,11 @@ class VideoEntry {
   /** @return {boolean} */
   isMuted() {
     return this.muted_;
+  }
+
+  /** @return {boolean} */
+  isPlaybackManaged() {
+    return this.managePlayback_;
   }
 
   /** @private */
@@ -635,6 +658,7 @@ class VideoEntry {
 
     if (this.getPlayingState() == PlayingStates.PLAYING_MANUAL) {
       this.firstPlayEventOrNoop_();
+      this.manager_.pauseOtherVideos(this);
     }
 
     const {video} = this;
@@ -889,7 +913,7 @@ class VideoEntry {
    * @private
    */
   autoplayLoadedVideoVisibilityChanged_() {
-    if (!this.allowAutoplay_) {
+    if (!this.managePlayback_) {
       return;
     }
     if (this.isVisible_) {

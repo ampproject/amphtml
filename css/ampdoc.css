@@ -317,7 +317,11 @@ amp-story-page {
   background-color: #757575;
 }
 
-amp-story .amp-active > div {
+/* Hide amp-loader in stories
+ * TODO(maxbittker): remove after amp-loader is no longer imported in stories
+ */
+amp-story .amp-active > div,
+amp-story .i-amphtml-loader-background {
   display: none !important;
 }
 
