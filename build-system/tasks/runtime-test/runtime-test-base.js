@@ -172,7 +172,7 @@ function updateReporters(config) {
 
   if (/*isTravisPushBuild()*/ true) {
     config.reporters.push('json-result');
-    config.jsonReporter = {
+    config.jsonResultReporter = {
       outputFile: `results_${config.testType}.json`,
     };
   }
