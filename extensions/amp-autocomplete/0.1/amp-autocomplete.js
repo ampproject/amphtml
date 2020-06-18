@@ -324,11 +324,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.minChars_ = this.element.hasAttribute('min-characters')
       ? parseInt(this.element.getAttribute('min-characters'), 10)
       : 1;
-    this.maxItems_ = this.element.hasAttribute('max-items')
-      ? parseInt(this.element.getAttribute('max-items'), 10)
-      : this.element.hasAttribute('max-entries')
-      ? parseInt(this.element.getAttribute('max-entries'), 10)
-      : null;
+    if (this.element.hasAttribute('max-entries')) {
+      user().warn(TAG, '"max-items" attribute is preferred to "max-entries"');
+    }
+    const maxItems =
+      this.element.getAttribute('max-items') ||
+      this.element.getAttribute('max-entries');
+    this.maxItems_ = maxItems ? parseInt(maxItems, 10) : null;
     this.shouldSuggestFirst_ = this.binding_.shouldSuggestFirst();
     this.highlightUserEntry_ = this.element.hasAttribute(
       'highlight-user-entry'
