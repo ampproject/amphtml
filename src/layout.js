@@ -326,7 +326,7 @@ export function isLoadingAllowed(element) {
  */
 export function isContainerLoadingAllowed(element) {
   const tagName = element.tagName.toUpperCase();
-  return LOADING_CONTAINER_ELEMENTS_[tagName] || false;
+  return !!LOADING_CONTAINER_ELEMENTS_[tagName];
 }
 
 /**

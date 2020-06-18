@@ -19,7 +19,11 @@ import {AmpEvents} from '../../src/amp-events';
 import {BaseElement} from '../../src/base-element';
 import {CommonSignals} from '../../src/common-signals';
 import {ElementStub} from '../../src/element-stub';
-import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
+import {
+  LOADING_CONTAINER_ELEMENTS_,
+  LOADING_ELEMENTS_,
+  Layout,
+} from '../../src/layout';
 import {ResourceState} from '../../src/service/resource';
 import {Services} from '../../src/services';
 import {chunkInstanceForTesting} from '../../src/chunk';
@@ -1845,6 +1849,13 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
 
         element.layout_ = Layout.NODISPLAY;
         expect(element.isLoadingEnabled_()).to.be.false;
+      });
+
+      it('should enable when element is not sized but allowlisted', () => {
+        stubInA4A(false);
+        LOADING_CONTAINER_ELEMENTS_['amp-test-loader'.toUpperCase()] = true;
+        element.layout_ = Layout.CONTAINER;
+        expect(element.isLoadingEnabled_()).to.be.true;
       });
 
       it('should ignore loading-off if never created', () => {

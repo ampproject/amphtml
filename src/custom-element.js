@@ -1648,7 +1648,7 @@ function createBaseCustomElementClass(win) {
         !isLoadingAllowed(this) ||
         isInternalOrServiceNode(this) ||
         this.layout_ == Layout.NODISPLAY ||
-        (this.layout_ == Layout.Container && !isContainerLoadingAllowed(this))
+        (this.layout_ == Layout.CONTAINER && !isContainerLoadingAllowed(this))
       ) {
         return false;
       }
