@@ -108,6 +108,17 @@ export const LOADING_ELEMENTS_ = {
   'AMP-PLAYBUZZ': true,
   'AMP-TWITTER': true,
 };
+
+/**
+ * Elements that are exempt from the layout size-defined requirement
+ * for showing progress.
+ * @enum {boolean}
+ * @private  Visible for testing only!
+ */
+export const LOADING_CONTAINER_ELEMENTS_ = {
+  'AMP-LIST': true, // amp-list[layout=container] requires a size-defining placeholder.
+};
+
 /**
  * All video player components must either have a) "video" or b) "player" in
  * their name. A few components don't follow this convention for historical
@@ -304,6 +315,18 @@ export function getNaturalDimensions(element) {
 export function isLoadingAllowed(element) {
   const tagName = element.tagName.toUpperCase();
   return LOADING_ELEMENTS_[tagName] || isIframeVideoPlayerComponent(tagName);
+}
+
+/**
+ * Whether the loading can be shown for the specified element. This set has
+ * to be externalized since the element's implementation may not be
+ * downloaded yet.
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isContainerLoadingAllowed(element) {
+  const tagName = element.tagName.toUpperCase();
+  return LOADING_CONTAINER_ELEMENTS_[tagName] || false;
 }
 
 /**
