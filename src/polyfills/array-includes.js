@@ -43,7 +43,7 @@ function includes(value, opt_fromIndex) {
  */
 export function install(win) {
   if (!win.Array.prototype.includes) {
-    win.Object.defineProperty(Array.prototype, 'includes', {
+    win.Object.defineProperty(win.Array.prototype, 'includes', {
       enumerable: false,
       configurable: true,
       writable: true,
