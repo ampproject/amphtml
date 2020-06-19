@@ -21,7 +21,6 @@ import {ElementStub} from './element-stub';
 import {
   Layout,
   applyStaticLayout,
-  isContainerLoadingAllowed,
   isInternalElement,
   isLoadingAllowed,
 } from './layout';
@@ -1631,7 +1630,7 @@ function createBaseCustomElementClass(win) {
       // 4. The element is too small or has not yet been measured;
       // 5. The element has not been allowlisted;
       // 6. The element is an internal node (e.g. `placeholder` or `fallback`);
-      // 7. The element's layout is not a size-defined layout or otherwise allowlisted.
+      // 7. The element's layout is not nodisplay.
       if (this.isInA4A()) {
         return false;
       }
@@ -1647,8 +1646,7 @@ function createBaseCustomElementClass(win) {
         this.layoutWidth_ <= 0 || // Layout is not ready or invisible
         !isLoadingAllowed(this) ||
         isInternalOrServiceNode(this) ||
-        this.layout_ == Layout.NODISPLAY ||
-        (this.layout_ == Layout.CONTAINER && !isContainerLoadingAllowed(this))
+        this.layout_ == Layout.NODISPLAY
       ) {
         return false;
       }

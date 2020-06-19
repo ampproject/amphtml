@@ -19,11 +19,7 @@ import {AmpEvents} from '../../src/amp-events';
 import {BaseElement} from '../../src/base-element';
 import {CommonSignals} from '../../src/common-signals';
 import {ElementStub} from '../../src/element-stub';
-import {
-  LOADING_CONTAINER_ELEMENTS_,
-  LOADING_ELEMENTS_,
-  Layout,
-} from '../../src/layout';
+import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {ResourceState} from '../../src/service/resource';
 import {Services} from '../../src/services';
 import {chunkInstanceForTesting} from '../../src/chunk';
@@ -1842,18 +1838,14 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(element.isLoadingEnabled_()).to.be.false;
       });
 
-      it('should disable when element is not sized', () => {
+      it('should disable when element is layout=nodisplay', () => {
         stubInA4A(false);
-        element.layout_ = Layout.CONTAINER;
-        expect(element.isLoadingEnabled_()).to.be.false;
-
         element.layout_ = Layout.NODISPLAY;
         expect(element.isLoadingEnabled_()).to.be.false;
       });
 
-      it('should enable when element is not sized but allowlisted', () => {
+      it('should enable when element is layout=container', () => {
         stubInA4A(false);
-        LOADING_CONTAINER_ELEMENTS_['amp-test-loader'.toUpperCase()] = true;
         element.layout_ = Layout.CONTAINER;
         expect(element.isLoadingEnabled_()).to.be.true;
       });
