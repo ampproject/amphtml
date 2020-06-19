@@ -101,7 +101,8 @@ function updateBrowsers(config) {
         },
       },
     })
-    .set('safari', {browsers: ['Safari']});
+    .set('safari', {browsers: ['Safari']})
+    .set('macOS', {browsers: ['Chrome', 'Firefox', 'Safari']});
 
   for (const [key, value] of options) {
     if (argv.hasOwnProperty(key)) {

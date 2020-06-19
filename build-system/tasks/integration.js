@@ -40,7 +40,7 @@ class Runner extends RuntimeTestRunner {
   }
 }
 
-async function integration() {
+async function integration(done) {
   if (shouldNotRun()) {
     return;
   }
@@ -53,6 +53,14 @@ async function integration() {
   await runner.setup();
   await runner.run();
   await runner.teardown();
+
+  // Sometimes, a Karma child process causes the test run to hang for 120s
+  // despite the tests completing execution. This seems to happen when
+  // tests timeout.
+  setTimeout(() => {
+    done();
+    process.exit();
+  }, 1000);
 }
 
 module.exports = {
@@ -71,6 +79,7 @@ integration.flags = {
     '  Allow debug statements by auto opening devtools. NOTE: This only ' +
     'works in non headless mode.',
   'firefox': '  Runs tests on Firefox',
+  'macOS': '  Runs tests on Chrome, Firefox and Safari',
   'files': '  Runs tests for specific files',
   'grep': '  Runs tests that match the pattern',
   'headless': '  Run tests in a headless Chrome window',
