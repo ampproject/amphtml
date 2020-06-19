@@ -31,7 +31,7 @@ const {
 const {app} = require('../../server/test-server');
 const {getFilesFromArgv} = require('../../common/utils');
 const {green, yellow, cyan, red} = require('ansi-colors');
-const {isTravisBuild, isTravisPushBuild} = require('../../common/travis');
+const {isTravisBuild /*, isTravisPushBuild*/} = require('../../common/travis');
 const {reportTestStarted} = require('.././report-test-status');
 const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');
