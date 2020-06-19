@@ -11,4 +11,5 @@ Files in this directory (copied from https://github.com/y-fujii/zuho):
 - zuho.js (from https://github.com/y-fujii/zuho/commit/083a0183c218e388690f48253474d95ab81ef28b)
 
 Local Modifications:
-- None so far
+- Removed all event handling, CSS, menu UI and unused projection mappings
+- Refactored into module, exporting Renderer and Matrix classes
