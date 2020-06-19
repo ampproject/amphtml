@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpStoryReaction, ReactionType} from '../amp-story-reaction';
+import {AmpStoryInteractive, InteractiveType} from '../amp-story-interactive';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {AnalyticsVariable, getVariableService} from '../variable-service';
 import {Services} from '../../../../src/services';
@@ -25,11 +25,11 @@ import {htmlFor} from '../../../../src/static-template';
 import {registerServiceBuilder} from '../../../../src/service';
 
 /**
- * Returns mock reaction data.
+ * Returns mock interactive data.
  *
  * @return {Object}
  */
-export const getMockReactionData = () => {
+export const getMockInteractiveData = () => {
   return {
     options: [
       {
@@ -56,29 +56,31 @@ export const getMockReactionData = () => {
   };
 };
 
-export const addConfigToReaction = (
-  reaction,
+export const addConfigToInteractive = (
+  interactive,
   options = 4,
   correct = undefined
 ) => {
   for (let i = 0; i < options; i++) {
-    reaction.element.setAttribute(`option-${i + 1}-text`, `text ${i + 1}`);
+    interactive.element.setAttribute(`option-${i + 1}-text`, `text ${i + 1}`);
   }
   if (correct) {
-    reaction.element.setAttribute(`option-${correct}-correct`, 'correct');
+    interactive.element.setAttribute(`option-${correct}-correct`, 'correct');
   }
 };
 
-class ReactionTest extends AmpStoryReaction {
+class InteractiveTest extends AmpStoryInteractive {
   constructor(element) {
-    super(element, ReactionType.QUIZ);
+    super(element, InteractiveType.QUIZ);
   }
 
   /** @override */
   buildComponent() {
     const html = htmlFor(this.element);
     const root = html`<div class="container"></div>`;
-    const option = html`<span class="i-amphtml-story-reaction-option"></span>`;
+    const option = html`<span
+      class="i-amphtml-story-interactive-option"
+    ></span>`;
     for (let i = 0; i < this.options_.length; i++) {
       const newOption = option.cloneNode();
       newOption.optionIndex_ = this.options_[i]['optionIndex'];
@@ -105,13 +107,13 @@ export const generateResponseDataFor = (responseCounts) => {
 };
 
 describes.realWin(
-  'amp-story-reaction',
+  'amp-story-interactive',
   {
     amp: true,
   },
   (env) => {
     let win;
-    let ampStoryReaction;
+    let ampStoryInteractive;
     let storyEl;
     let analytics;
     let analyticsVars;
@@ -124,15 +126,16 @@ describes.realWin(
         .stub(Services, 'cidForDoc')
         .resolves({get: () => Promise.resolve('cid')});
 
-      const ampStoryReactionEl = win.document.createElement(
-        'amp-story-reaction'
+      const ampStoryInteractiveEl = win.document.createElement(
+        'amp-story-interactive'
       );
-      ampStoryReactionEl.id = 'TEST_reactionId';
-      ampStoryReactionEl.getResources = () => win.__AMP_SERVICES.resources.obj;
+      ampStoryInteractiveEl.id = 'TEST_interactiveId';
+      ampStoryInteractiveEl.getResources = () =>
+        win.__AMP_SERVICES.resources.obj;
 
       analyticsVars = getVariableService(win);
       analytics = getAnalyticsService(win, win.document.body);
-      requestService = getRequestService(win, ampStoryReactionEl);
+      requestService = getRequestService(win, ampStoryInteractiveEl);
 
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
@@ -142,21 +145,25 @@ describes.realWin(
       storyEl = win.document.createElement('amp-story');
       const storyPage = win.document.createElement('amp-story-page');
       const gridLayer = win.document.createElement('amp-story-grid-layer');
-      gridLayer.appendChild(ampStoryReactionEl);
+      gridLayer.appendChild(ampStoryInteractiveEl);
       storyPage.appendChild(gridLayer);
       storyEl.appendChild(storyPage);
 
       win.document.body.appendChild(storyEl);
-      ampStoryReaction = new ReactionTest(ampStoryReactionEl);
+      ampStoryInteractive = new InteractiveTest(ampStoryInteractiveEl);
 
       env.sandbox
-        .stub(ampStoryReaction, 'mutateElement')
+        .stub(ampStoryInteractive, 'mutateElement')
         .callsFake((fn) => fn());
     });
 
     it('should parse the attributes properly into an options list', async () => {
-      addConfigToReaction(ampStoryReaction, /* options */ 3, /* correct */ 1);
-      const optionsList = ampStoryReaction.parseOptions_();
+      addConfigToInteractive(
+        ampStoryInteractive,
+        /* options */ 3,
+        /* correct */ 1
+      );
+      const optionsList = ampStoryInteractive.parseOptions_();
       expect(optionsList).to.have.length(3);
       for (let i = 0; i < 3; i++) {
         expect(optionsList[i]).to.haveOwnProperty('text');
@@ -165,84 +172,86 @@ describes.realWin(
       expect(optionsList[0]).to.haveOwnProperty('correct', 'correct');
     });
 
-    it('should enter post-interaction state on option click', async () => {
-      addConfigToReaction(ampStoryReaction);
-      ampStoryReaction.buildCallback();
-      await ampStoryReaction.layoutCallback();
-      await ampStoryReaction.getOptionElements()[0].click();
-      expect(ampStoryReaction.getRootElement()).to.have.class(
-        'i-amphtml-story-reaction-post-selection'
+    it('should enter post-selection state on option click', async () => {
+      addConfigToInteractive(ampStoryInteractive);
+      ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.layoutCallback();
+      await ampStoryInteractive.getOptionElements()[0].click();
+      expect(ampStoryInteractive.getRootElement()).to.have.class(
+        'i-amphtml-story-interactive-post-selection'
       );
-      expect(ampStoryReaction.getOptionElements()[0]).to.have.class(
-        'i-amphtml-story-reaction-option-selected'
+      expect(ampStoryInteractive.getOptionElements()[0]).to.have.class(
+        'i-amphtml-story-interactive-option-selected'
       );
     });
 
     it('should only record first option selected', async () => {
-      addConfigToReaction(ampStoryReaction);
-      ampStoryReaction.buildCallback();
-      await ampStoryReaction.layoutCallback();
-      await ampStoryReaction.getOptionElements()[0].click();
-      await ampStoryReaction.getOptionElements()[1].click();
-      expect(ampStoryReaction.getOptionElements()[0]).to.have.class(
-        'i-amphtml-story-reaction-option-selected'
+      addConfigToInteractive(ampStoryInteractive);
+      ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.layoutCallback();
+      await ampStoryInteractive.getOptionElements()[0].click();
+      await ampStoryInteractive.getOptionElements()[1].click();
+      expect(ampStoryInteractive.getOptionElements()[0]).to.have.class(
+        'i-amphtml-story-interactive-option-selected'
       );
-      expect(ampStoryReaction.getOptionElements()[1]).to.not.have.class(
-        'i-amphtml-story-reaction-option-selected'
+      expect(ampStoryInteractive.getOptionElements()[1]).to.not.have.class(
+        'i-amphtml-story-interactive-option-selected'
       );
     });
 
     it('should trigger an analytics event with the right variables on selection', async () => {
       const trigger = env.sandbox.stub(analytics, 'triggerEvent');
-      addConfigToReaction(ampStoryReaction);
-      ampStoryReaction.buildCallback();
-      await ampStoryReaction.layoutCallback();
-      await ampStoryReaction.getOptionElements()[1].click();
-      expect(trigger).to.have.been.calledWith('story-reaction');
+      addConfigToInteractive(ampStoryInteractive);
+      ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.layoutCallback();
+      await ampStoryInteractive.getOptionElements()[1].click();
+      expect(trigger).to.have.been.calledWith('story-interactive');
       const variables = analyticsVars.get();
-      expect(variables[AnalyticsVariable.STORY_REACTION_ID]).to.equal(
-        'TEST_reactionId'
+      expect(variables[AnalyticsVariable.STORY_INTERACTIVE_ID]).to.equal(
+        'TEST_interactiveId'
       );
-      expect(variables[AnalyticsVariable.STORY_REACTION_RESPONSE]).to.equal(1);
-      expect(variables[AnalyticsVariable.STORY_REACTION_TYPE]).to.equal(
-        ampStoryReaction.reactionType_
+      expect(variables[AnalyticsVariable.STORY_INTERACTIVE_RESPONSE]).to.equal(
+        1
+      );
+      expect(variables[AnalyticsVariable.STORY_INTERACTIVE_TYPE]).to.equal(
+        ampStoryInteractive.interactiveType_
       );
     });
 
     it('should update the quiz when the user has already reacted', async () => {
       env.sandbox
         .stub(requestService, 'executeRequest')
-        .resolves(getMockReactionData());
-      addConfigToReaction(ampStoryReaction);
-      ampStoryReaction.element.setAttribute(
+        .resolves(getMockInteractiveData());
+      addConfigToInteractive(ampStoryInteractive);
+      ampStoryInteractive.element.setAttribute(
         'endpoint',
         'http://localhost:8000'
       );
-      ampStoryReaction.buildCallback();
-      await ampStoryReaction.layoutCallback();
+      ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.layoutCallback();
 
-      expect(ampStoryReaction.getRootElement()).to.have.class(
-        'i-amphtml-story-reaction-post-selection'
+      expect(ampStoryInteractive.getRootElement()).to.have.class(
+        'i-amphtml-story-interactive-post-selection'
       );
-      expect(ampStoryReaction.getOptionElements()[0]).to.have.class(
-        'i-amphtml-story-reaction-option-selected'
+      expect(ampStoryInteractive.getOptionElements()[0]).to.have.class(
+        'i-amphtml-story-interactive-option-selected'
       );
     });
 
     it('should throw error if percentages are not correctly passed', () => {
-      addConfigToReaction(ampStoryReaction);
+      addConfigToInteractive(ampStoryInteractive);
       const responseData = dict({'wrongKey': []});
       allowConsoleError(() => {
         expect(() =>
-          ampStoryReaction.handleSuccessfulDataRetrieval_(responseData)
+          ampStoryInteractive.handleSuccessfulDataRetrieval_(responseData)
         ).to.throw();
       });
     });
 
     it('should preprocess percentages properly', () => {
-      const responseData1 = getMockReactionData()['options'];
+      const responseData1 = getMockInteractiveData()['options'];
 
-      const percentages1 = ampStoryReaction.preprocessPercentages_(
+      const percentages1 = ampStoryInteractive.preprocessPercentages_(
         responseData1
       );
 
@@ -251,7 +260,7 @@ describes.realWin(
 
     it('should preprocess percentages preserving ties', () => {
       const responseData2 = generateResponseDataFor([3, 3, 3]);
-      const percentages2 = ampStoryReaction.preprocessPercentages_(
+      const percentages2 = ampStoryInteractive.preprocessPercentages_(
         responseData2
       );
 
@@ -260,7 +269,7 @@ describes.realWin(
 
     it('should preprocess percentages preserving order', () => {
       const responseData3 = generateResponseDataFor([255, 255, 245, 245]);
-      const percentages3 = ampStoryReaction.preprocessPercentages_(
+      const percentages3 = ampStoryInteractive.preprocessPercentages_(
         responseData3
       );
 
@@ -269,7 +278,7 @@ describes.realWin(
 
     it('should preprocess percentages handling rounding edge cases', () => {
       const responseData4 = generateResponseDataFor([335, 335, 330]);
-      const percentages4 = ampStoryReaction.preprocessPercentages_(
+      const percentages4 = ampStoryInteractive.preprocessPercentages_(
         responseData4
       );
 

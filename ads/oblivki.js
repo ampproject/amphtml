@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,32 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
-const del = require('del');
+import {validateData, writeScript} from '../3p/3p';
+
+const oblivkiFields = ['id'];
 
 /**
- * Clean up the build artifacts
- * @return {!Promise}
+ * @param {!Window} global
+ * @param {!Object} data
  */
-async function clean() {
-  return del([
-    'dist',
-    'dist.3p',
-    'dist.tools',
-    'build',
-    '.amp-build',
-    '.karma-cache',
-    'deps.txt',
-    'build-system/runner/build',
-    'build-system/runner/dist',
-    'build-system/server/new-server/transforms/dist',
-    'test-bin',
-  ]);
+export function oblivki(global, data) {
+  validateData(data, oblivkiFields, []);
+
+  global.oblivkiParam = data;
+  writeScript(global, 'https://oblivki.biz/ads/amp.js');
 }
-
-module.exports = {
-  clean,
-};
-
-clean.description = 'Removes build output';
