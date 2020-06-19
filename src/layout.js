@@ -108,7 +108,6 @@ export const LOADING_ELEMENTS_ = {
   'AMP-PLAYBUZZ': true,
   'AMP-TWITTER': true,
 };
-
 /**
  * All video player components must either have a) "video" or b) "player" in
  * their name. A few components don't follow this convention for historical
