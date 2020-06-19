@@ -41,7 +41,7 @@ on mobile devices.
   children.
 - Each `<section>` must contain exactly two direct children.
 - The first child in a `<section>` is the heading for that section of the
-  `amp-accordion`, while the second child in a `<section>` is the 
+  `amp-accordion`, while the second child in a `<section>` is the
   expandable/collapsible content.
 - The children of a `<section>` can be any tag allowed in [AMP HTML](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md).
 - A click or tap on a `<section>` heading expands or collapses the section.

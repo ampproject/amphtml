@@ -53,8 +53,8 @@ FAIL
 |        </amp-accordion>
 |      </section>
 |      <section>
-|        <header>The header tag is supported as well.</header>
-|        <p>Even more awesome.</p>
+|        <p>Section with differently-styled header</p>
+|        <p>More awesome content</p>
 |      </section>
 |      <section [data-expand]="">
 |        <h2>Section with bound [data-expand] attribute</h2>
@@ -74,11 +74,9 @@ amp-accordion/0.1/test/validator-amp-accordion.html:68:4 Tag 'p' is disallowed a
 |      <section>
 >>     ^~~~~~~~~
 amp-accordion/0.1/test/validator-amp-accordion.html:69:4 Tag 'amp-accordion > section' must have 2 child tags - saw 3 child tags.
-|        <div>header which isn't h1-h6.</div>
->>       ^~~~~~~~~
-amp-accordion/0.1/test/validator-amp-accordion.html:70:6 Tag 'div' is disallowed as first child of tag 'amp-accordion > section'. First child tag must be one of ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header'].
+|        <div>a first child</div>
 |        <div>a second child</div>
-|        <div>a third child</div>
+|        <div>an invalid third child</div>
 |      </section>
 |    </amp-accordion>
 |  </body>
