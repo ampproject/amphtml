@@ -1882,7 +1882,8 @@ describes.realWin('Events', {amp: 1}, (env) => {
           /* createReportReadyPromiseFunc */ null,
           saveCallback
         )
-        .once();
+        .once()
+        .returns(() => {});
       const res = tracker.add(analyticsElement, 'visible', {}, eventResolver);
       expect(res).to.be.a('function');
       await macroTask();
@@ -1901,7 +1902,8 @@ describes.realWin('Events', {amp: 1}, (env) => {
       visibilityManagerMock
         .expects('listenRoot')
         .withExactArgs(matchEmptySpec, readyPromise, null, saveCallback)
-        .once();
+        .once()
+        .returns(() => {});
       const res = tracker.add(
         analyticsElement,
         'visible',
@@ -1930,7 +1932,8 @@ describes.realWin('Events', {amp: 1}, (env) => {
           /* createReportReadyPromiseFunc */ null,
           saveCallback
         )
-        .once();
+        .once()
+        .returns(() => {});
       const res = tracker.add(
         analyticsElement,
         'visible',
@@ -2320,32 +2323,6 @@ describes.realWin('Events', {amp: 1}, (env) => {
           expect(handlerSpy).to.be.calledOnce;
           expect(event.type).to.equal('visible');
         });
-      });
-    });
-
-    describe('Unmeasurable with HostAPI', () => {
-      beforeEach(() => {
-        env.sandbox.stub(tracker.root, 'isUsingHostAPI').callsFake(() => {
-          return Promise.resolve(true);
-        });
-      });
-
-      it('element level selector is unmeasurable', () => {
-        expectAsyncConsoleError(
-          /Element  .target that is not root is not supported with host API/
-        );
-        const config = {visibilitySpec: {selector: '.target'}};
-        tracker.add(analyticsElement, 'visible', config, eventResolver);
-      });
-
-      it('reportWhen documentExit is unmeasurable', () => {
-        expectAsyncConsoleError(
-          /reportWhen : documentExit is not supported with host API/
-        );
-        const config = {
-          visibilitySpec: {selector: ':root', reportWhen: 'documentExit'},
-        };
-        tracker.add(analyticsElement, 'visible', config, eventResolver);
       });
     });
   });

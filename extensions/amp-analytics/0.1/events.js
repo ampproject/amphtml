@@ -1449,7 +1449,6 @@ export class VisibilityTracker extends EventTracker {
     let readyPromiseWaitForSpec;
     let reportWhenSpec = visibilitySpec['reportWhen'];
     let createReportReadyPromiseFunc = null;
-    const unlistenPromises = [];
     if (reportWhenSpec) {
       userAssert(
         !visibilitySpec['repeat'],
@@ -1468,14 +1467,7 @@ export class VisibilityTracker extends EventTracker {
       reportWhenSpec = 'documentHidden';
     }
 
-    const visibilityManagerPromise = this.root
-      .isUsingHostAPI()
-      .then((hasHostAPI) => {
-        if (hasHostAPI) {
-          this.assertMeasurableWithHostApi_(selector, reportWhenSpec);
-        }
-        return this.root.getVisibilityManager();
-      });
+    const visibilityManager = this.root.getVisibilityManager();
 
     if (reportWhenSpec == 'documentHidden') {
       createReportReadyPromiseFunc = this.createReportReadyPromiseForDocumentHidden_.bind(
@@ -1498,60 +1490,50 @@ export class VisibilityTracker extends EventTracker {
       // When `selector` is specified, we always use "ini-load" signal as
       // a "ready" signal.
       readyPromiseWaitForSpec = waitForSpec || (selector ? 'ini-load' : null);
-      unlistenPromises.push(
-        visibilityManagerPromise.then(
-          (visibilityManager) => {
-            return visibilityManager.listenRoot(
-              visibilitySpec,
-              this.getReadyPromise(readyPromiseWaitForSpec),
-              createReportReadyPromiseFunc,
-              this.onEvent_.bind(
-                this,
-                eventType,
-                listener,
-                this.root.getRootElement()
-              )
-            );
-          },
-          () => {}
+      return visibilityManager.listenRoot(
+        visibilitySpec,
+        this.getReadyPromise(readyPromiseWaitForSpec),
+        createReportReadyPromiseFunc,
+        this.onEvent_.bind(
+          this,
+          eventType,
+          listener,
+          this.root.getRootElement()
         )
       );
-    } else {
-      // An AMP-element. Wait for DOM to be fully parsed to avoid
-      // false missed searches.
-      // Array selectors do not suppor the special cases: ':host' & ':root'
-      const selectionMethod =
-        config['selectionMethod'] || visibilitySpec['selectionMethod'];
-      readyPromiseWaitForSpec = waitForSpec || 'ini-load';
-      this.assertUniqueSelectors_(selector);
-      this.root
-        .getAmpElements(
-          context.parentElement || context,
-          selector,
-          selectionMethod
-        )
-        .then((elements) => {
-          for (let i = 0; i < elements.length; i++) {
-            unlistenPromises.push(
-              visibilityManagerPromise.then(
-                (visibilityManager) => {
-                  return visibilityManager.listenElement(
-                    elements[i],
-                    visibilitySpec,
-                    this.getReadyPromise(readyPromiseWaitForSpec, elements[i]),
-                    createReportReadyPromiseFunc,
-                    this.onEvent_.bind(this, eventType, listener, elements[i])
-                  );
-                },
-                () => {}
-              )
-            );
-          }
-        });
     }
 
+    // An AMP-element. Wait for DOM to be fully parsed to avoid
+    // false missed searches.
+    // Array selectors do not suppor the special cases: ':host' & ':root'
+    const selectionMethod =
+      config['selectionMethod'] || visibilitySpec['selectionMethod'];
+    readyPromiseWaitForSpec = waitForSpec || 'ini-load';
+    this.assertUniqueSelectors_(selector);
+    const unlistenPromise = this.root
+      .getAmpElements(
+        context.parentElement || context,
+        selector,
+        selectionMethod
+      )
+      .then((elements) => {
+        const unlistenCallbacks = [];
+        for (let i = 0; i < elements.length; i++) {
+          unlistenCallbacks.push(
+            visibilityManager.listenElement(
+              elements[i],
+              visibilitySpec,
+              this.getReadyPromise(readyPromiseWaitForSpec, elements[i]),
+              createReportReadyPromiseFunc,
+              this.onEvent_.bind(this, eventType, listener, elements[i])
+            )
+          );
+        }
+        return unlistenCallbacks;
+      });
+
     return function () {
-      return Promise.all(unlistenPromises).then((unlistenCallbacks) => {
+      unlistenPromise.then((unlistenCallbacks) => {
         for (let i = 0; i < unlistenCallbacks.length; i++) {
           unlistenCallbacks[i]();
         }
@@ -1575,24 +1557,6 @@ export class VisibilityTracker extends EventTracker {
         map[selectors[i]] = selectors[i];
       }
     }
-  }
-
-  /**
-   * Assert that the setting is measurable with host API
-   * @param {string=} selector
-   * @param {string=} reportWhenSpec
-   */
-  assertMeasurableWithHostApi_(selector, reportWhenSpec) {
-    userAssert(
-      !selector || selector == ':root' || selector == ':host',
-      'Element %s that is not root is not supported with host API',
-      selector
-    );
-
-    userAssert(
-      reportWhenSpec !== 'documentExit',
-      'reportWhen : documentExit is not supported with host API'
-    );
   }
 
   /**
