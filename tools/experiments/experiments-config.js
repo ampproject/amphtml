@@ -153,10 +153,6 @@ export const EXPERIMENTS = [
     name: 'Display jank meter',
   },
   {
-    id: 'as-use-attr-for-format',
-    name: 'Use slot width/height attribute for AdSense size format',
-  },
-  {
     id: 'input-debounced',
     name: 'A debounced input event for AMP actions',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9413',
