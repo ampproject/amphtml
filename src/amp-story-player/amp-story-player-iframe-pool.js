@@ -77,4 +77,58 @@ export class IframePool {
 
     return detachedStoryIdx;
   }
+
+  /**
+   * Clears stored story indices.
+   * @return {!Array<number>}
+   */
+  evictStories() {
+    const evictedStories = this.storyIdsWithIframe_;
+    this.storyIdsWithIframe_ = [];
+    return evictedStories;
+  }
+
+  /**
+   * @return {!Array<number>}
+   */
+  getAvailableIframeIdx() {
+    return this.iframePool_;
+  }
+
+  /**
+   * Finds adjacent iframe indices given an index.
+   * Examples (x is provided index):
+   * [x] [1] [2] [] []
+   * [2] [x] [1] [] []
+   * [] [] [2] [1] [x]
+   * [1] [x]
+   * @param {!Array<number>} queue
+   * @param {!Array<number>} adjacent
+   * @param {number} numStories
+   */
+  findAdjacent(queue, adjacent, numStories) {
+    const idx = queue.shift();
+
+    if (adjacent.length >= this.iframePool_.length) {
+      return;
+    }
+
+    if (idx < 0 || idx >= numStories) {
+      return;
+    }
+
+    adjacent.push(idx);
+
+    if (!queue.includes(idx + 1) && !adjacent.includes(idx + 1)) {
+      queue.push(idx + 1);
+    }
+
+    if (!queue.includes(idx - 1) && !adjacent.includes(idx - 1)) {
+      queue.push(idx - 1);
+    }
+
+    while (adjacent.length < this.iframePool_.length && queue.length > 0) {
+      this.findAdjacent(queue, adjacent, numStories);
+    }
+  }
 }
