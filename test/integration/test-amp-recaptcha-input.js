@@ -18,9 +18,9 @@ import {BrowserController, RequestBank} from '../../testing/test-helper';
 import {Deferred} from '../../src/utils/promise';
 import {poll} from '../../testing/iframe';
 
-// TODO(wg-ui-and-a11y, #28343): These tests cause SauceLabs disconnections,
-// possibly related to the recaptcha inner iframe at *.recaptcha.localhost.
-const t = describe.configure().skipSauceLabs();
+// TODO(wg-ui-and-a11y): These tests are broken on Firefox (as of v77) and the
+// long timeouts cause browser disconnects on SauceLabs.
+const t = describe.configure().skipFirefox();
 
 t.run('amp-recaptcha-input', function () {
   describes.integration(
