@@ -82,16 +82,6 @@ function screenProperty(screen, property) {
  */
 export class GlobalVariableSource extends VariableSource {
   /**
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   */
-  constructor(ampdoc) {
-    super(ampdoc);
-
-    /** @private {?Promise<?ShareTrackingFragmentsDef>} */
-    this.shareTrackingFragments_ = null;
-  }
-
-  /**
    * Utility function for setting resolver for timing data that supports
    * sync and async.
    * @param {string} varName
@@ -384,26 +374,6 @@ export class GlobalVariableSource extends VariableSource {
             GEO_DELIM
           ));
         }, 'AMP_GEO');
-      })
-    );
-
-    // Returns incoming share tracking fragment.
-    this.setAsync(
-      'SHARE_TRACKING_INCOMING',
-      /** @type {AsyncResolverDef} */ (() => {
-        return this.getShareTrackingValue_((fragments) => {
-          return fragments.incomingFragment;
-        }, 'SHARE_TRACKING_INCOMING');
-      })
-    );
-
-    // Returns outgoing share tracking fragment.
-    this.setAsync(
-      'SHARE_TRACKING_OUTGOING',
-      /** @type {AsyncResolverDef} */ (() => {
-        return this.getShareTrackingValue_((fragments) => {
-          return fragments.outgoingFragment;
-        }, 'SHARE_TRACKING_OUTGOING');
       })
     );
 
@@ -762,30 +732,6 @@ export class GlobalVariableSource extends VariableSource {
     return Services.geoForDocOrNull(element).then((geo) => {
       userAssert(geo, 'To use variable %s, amp-geo should be configured', expr);
       return getter(geo);
-    });
-  }
-
-  /**
-   * Resolves the value via amp-share-tracking's service.
-   * @param {function(!ShareTrackingFragmentsDef):T} getter
-   * @param {string} expr
-   * @return {!Promise<T>}
-   * @template T
-   * @private
-   */
-  getShareTrackingValue_(getter, expr) {
-    if (!this.shareTrackingFragments_) {
-      this.shareTrackingFragments_ = Services.shareTrackingForOrNull(
-        this.ampdoc.win
-      );
-    }
-    return this.shareTrackingFragments_.then((fragments) => {
-      userAssert(
-        fragments,
-        'To use variable %s, amp-share-tracking should be configured',
-        expr
-      );
-      return getter(/** @type {!ShareTrackingFragmentsDef} */ (fragments));
     });
   }
 }

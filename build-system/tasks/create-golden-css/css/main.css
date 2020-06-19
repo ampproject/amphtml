@@ -621,7 +621,7 @@ amp-live-list > [update] {
 /**
  * Display none elements
  */
-amp-experiment, amp-share-tracking {
+amp-experiment {
   display: none;
 }
 
