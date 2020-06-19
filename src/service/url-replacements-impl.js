@@ -82,16 +82,6 @@ function screenProperty(screen, property) {
  */
 export class GlobalVariableSource extends VariableSource {
   /**
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
-   */
-  constructor(ampdoc) {
-    super(ampdoc);
-
-    /** @private {?Promise<?ShareTrackingFragmentsDef>} */
-    this.shareTrackingFragments_ = null;
-  }
-
-  /**
    * Utility function for setting resolver for timing data that supports
    * sync and async.
    * @param {string} varName
