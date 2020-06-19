@@ -80,12 +80,5 @@ tags: {  # <amp-accordion> > <section>
   }
   child_tags: {
     mandatory_num_child_tags: 2
-    first_child_tag_name_oneof: "H1"
-    first_child_tag_name_oneof: "H2"
-    first_child_tag_name_oneof: "H3"
-    first_child_tag_name_oneof: "H4"
-    first_child_tag_name_oneof: "H5"
-    first_child_tag_name_oneof: "H6"
-    first_child_tag_name_oneof: "HEADER"
   }
 }
