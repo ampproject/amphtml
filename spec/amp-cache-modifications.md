@@ -414,7 +414,6 @@ Remove unused custom-element extensions with the following exceptions:
 - amp-auto-ads
 - amp-dynamic-css-classes
 - amp-form
-- amp-share-tracking
 
 <details>
 <summary>example</summary>
