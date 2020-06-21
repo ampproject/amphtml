@@ -85,12 +85,12 @@ const getPjsonData = (pjson) => {
   };
 };
 
-export const callPjson = (props) => {
-  const data = getPjsonData(props);
+export const callPjson = (params) => {
+  const data = getPjsonData(params);
   const endpoint = `${API_SERVER}/live/red_pjson`;
 
   callPixelEndpoint({
-    ampDoc: props.ampDoc,
+    ampDoc: params.ampDoc,
     endpoint,
     data,
   });

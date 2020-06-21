@@ -39,7 +39,7 @@ export function SocialShare(props) {
   );
   const finalEndpoint = createEndpoint(typeConfig, baseEndpoint, props);
 
-  const type = props['type'].toUpperCase();
+  const type = props.type.toUpperCase();
   const baseStyle = CSS.BASE_STYLE;
   const backgroundStyle = CSS[type] || CSS.DEFAULT;
   const size = {
@@ -49,7 +49,7 @@ export function SocialShare(props) {
   return (
     <div
       role="button"
-      tabindex={props['tabIndex'] || '0'}
+      tabindex={props.tabIndex || '0'}
       onKeyDown={(e) => handleKeyPress(e, finalEndpoint)}
       onClick={() => handleActivation(finalEndpoint)}
       style={{...size, ...props['style']}}
@@ -73,14 +73,7 @@ export function SocialShare(props) {
  * }}
  */
 function checkProps(props) {
-  const {
-    'type': type,
-    'shareEndpoint': shareEndpoint,
-    'params': params,
-    'bindings': bindings,
-    'width': width,
-    'height': height,
-  } = props;
+  const {type, shareEndpoint, params, bindings, width, height} = props;
 
   // Verify type is provided
   if (type === undefined) {
@@ -130,7 +123,7 @@ function throwWarning(message) {
  * @return {?string}
  */
 function createEndpoint(typeConfig, baseEndpoint, props) {
-  const {'params': params, 'bindings': bindings} = props;
+  const {params, bindings} = props;
   const combinedParams = {...typeConfig['defaultParams'], ...params};
   const endpointWithParams = addParamsToUrl(
     /** @type {string} */ (baseEndpoint),

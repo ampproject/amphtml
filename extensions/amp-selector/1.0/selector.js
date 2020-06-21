@@ -26,13 +26,13 @@ const SelectorContext = Preact.createContext({});
  */
 export function Selector(props) {
   const {
-    'as': Comp = 'div',
-    'children': children,
-    'disabled': disabled,
-    'value': value,
-    'multiple': multiple,
-    'onChange': onChange,
-    'role': role = 'listbox',
+    as: Comp = 'div',
+    children,
+    disabled,
+    value,
+    multiple,
+    onChange,
+    role = 'listbox',
     ...rest
   } = props;
   const [selectedState, setSelectedState] = useState(value ? value : []);
@@ -88,12 +88,12 @@ export function Selector(props) {
  */
 export function Option(props) {
   const {
-    'as': Comp = 'div',
-    'disabled': disabled,
-    'onClick': onClick,
-    'option': option,
-    'role': role = 'option',
-    'style': style,
+    as: Comp = 'div',
+    disabled,
+    onClick,
+    option,
+    role = 'option',
+    style,
   } = props;
   const selectorContext = useContext(SelectorContext);
   const {

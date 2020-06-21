@@ -351,9 +351,9 @@ class AmpLightbox extends AMP.BaseElement {
       closedStyle,
     } = this.getAnimationPresetDef_();
 
-    const props = Object.keys(openStyle);
+    const keys = Object.keys(openStyle);
 
-    const transition = props
+    const transition = keys
       .map((p) => `${p} ${durationSeconds}s ease-in`)
       .join(',');
 

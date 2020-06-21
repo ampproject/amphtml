@@ -551,11 +551,11 @@ export class LaterpayVendor {
    */
   formatPrice_(priceValue) {
     const value = priceValue / 100;
-    const props = {
+    const opts = {
       style: 'decimal',
       minimumFractionDigits: 0,
     };
-    return value.toLocaleString(this.currentLocale_, props);
+    return value.toLocaleString(this.currentLocale_, opts);
   }
 
   /**

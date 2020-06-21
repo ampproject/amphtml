@@ -57,10 +57,10 @@ const getEngData = (params) => {
 
 /**
  * Makes an ajax request to eng endpoint with params
- * @param {{monitors: *, loc: Location, ampDoc: !../../../../src/service/ampdoc-impl.AmpDoc, pubId: string}} props
+ * @param {{monitors: *, loc: Location, ampDoc: !../../../../src/service/ampdoc-impl.AmpDoc, pubId: string}} params
  */
-export const callEng = (props) => {
-  const object = getEngData(props);
+export const callEng = (params) => {
+  const object = getEngData(params);
   const data = dict({
     'al': object.al,
     'amp': object.amp,
@@ -78,7 +78,7 @@ export const callEng = (props) => {
     'sid': object.sid,
   });
   const url = addParamsToUrl(`${API_SERVER}/live/red_lojson/100eng.json`, data);
-  const {ampDoc} = props;
+  const {ampDoc} = params;
 
   if (ampDoc.win.navigator.sendBeacon) {
     ampDoc.win.navigator.sendBeacon(url, '{}');

@@ -157,22 +157,22 @@ function getOptionState(element, mu) {
       const option = child.getAttribute('option');
       const selected = child.hasAttribute('selected');
       const disabled = child.hasAttribute('disabled');
-      const props = {
-        as: OptionShim,
-        option,
+      const props = dict({
+        'as': OptionShim,
+        'option': option,
         // TODO: `disabled` is always undefined for OptionShim
-        isDisabled: disabled,
-        disabled,
-        role: child.getAttribute('role') || 'option',
-        domElement: child,
+        'isDisabled': disabled,
+        'disabled': disabled,
+        'role': child.getAttribute('role') || 'option',
+        'domElement': child,
         // TODO(wg-bento): This implementation causes infinite loops on DOM mutation.
         // See https://github.com/ampproject/amp-react-prototype/issues/40.
-        postRender: () => {
+        'postRender': () => {
           // Skip mutations to avoid cycles.
           mu.takeRecords();
         },
-        selected,
-      };
+        'selected': selected,
+      });
       if (selected && option) {
         value.push(option);
       }
@@ -275,13 +275,7 @@ function selectByDelta(delta, value, options) {
  * @return {PreactDef.Renderable}
  */
 function OptionShim(props) {
-  const {
-    'domElement': domElement,
-    'onClick': onClick,
-    'selected': selected,
-    'isDisabled': isDisabled,
-    'role': role = 'option',
-  } = props;
+  const {domElement, onClick, selected, isDisabled, role = 'option'} = props;
   useLayoutEffect(() => {
     if (!onClick) {
       return;
@@ -313,12 +307,7 @@ function OptionShim(props) {
  * @return {PreactDef.Renderable}
  */
 function SelectorShim(props) {
-  const {
-    'domElement': domElement,
-    'role': role = 'listbox',
-    'multiple': multiple,
-    'disabled': disabled,
-  } = props;
+  const {domElement, role = 'listbox', multiple, disabled} = props;
 
   useLayoutEffect(() => {
     toggleAttribute(domElement, 'multiple', multiple);

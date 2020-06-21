@@ -35,8 +35,8 @@ export function getAmpContext() {
   return (
     context ||
     (context = createContext({
-      'renderable': true,
-      'playable': true,
+      renderable: true,
+      playable: true,
     }))
   );
 }
@@ -52,10 +52,10 @@ export function WithAmpContext(props) {
   const parent = useContext(AmpContext);
   const current = {
     ...props,
-    'renderable': parent['renderable'] && props['renderable'],
-    'playable': parent['playable'] && props['playable'],
+    'renderable': parent['renderable'] && props.renderable,
+    'playable': parent['playable'] && props.playable,
     'children': undefined,
   };
 
-  return <AmpContext.Provider children={props['children']} value={current} />;
+  return <AmpContext.Provider children={props.children} value={current} />;
 }

@@ -27,7 +27,7 @@ import {useResourcesNotify} from '../../../src/preact/utils';
  * @return {null}
  */
 export function RenderDomTree(props) {
-  const {'dom': dom, 'host': host} = props;
+  const {dom, host} = props;
   useResourcesNotify();
 
   removeChildren(dev().assertElement(host));

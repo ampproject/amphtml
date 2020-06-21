@@ -22,7 +22,7 @@ import * as preact from /*OK*/ 'preact';
 
 /**
  * @param {!PreactDef.FunctionalComponent|string} unusedType
- * @param {(!Object|null)=} unusedProps
+ * @param {(!JsonObject|null)=} unusedProps
  * @param {...*} var_args
  * @return {!PreactDef.VNode}
  */
@@ -55,7 +55,7 @@ export function createRef() {
 }
 
 /**
- * @param {!Object} value
+ * @param {!JsonObject} value
  * @return {!PreactDef.Context}
  */
 export function createContext(value) {
