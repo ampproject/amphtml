@@ -9,7 +9,8 @@ besides 1 or 0.
 
 - `name`: Experiment name
 - `environment`: Specify the type of environment the experiment runs. Only support `AMP` and `INABOX`.
-- `command`: Command used to build the experiment
+- `command`: Command used to build the experiment's nomodule build
+- `esmCommand`: Command used to build the experiment's module build
 - `issue`: The issue tracker URL for this experiment
 - `expiration_date_utc`: The experiment expiration date in YYYY-MM-DD format, in UTC. If an experiment is expired, it will fail the build process. This expiration date is only read during the build. As a result, the experiment will actually end on the following release date after the expiration.
 - `define_experiment_constant`: (Optional) The flag that is used to section out experiment code. This is passed into the `minify-replace` babel plugin and defaults to `false`. If an experiment relies on `minify-replace` to replace its experiment flag, this value must be defined.
