@@ -16,6 +16,9 @@
 'using strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const fs = require('fs-extra');
+const globby = require('globby');
+const log = require('fancy-log');
 const {
   maybePrintArgvMessages,
   shouldNotRun,
@@ -25,6 +28,7 @@ const {
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
 const {buildRuntime} = require('../common/utils');
+const {cyan, green} = require('ansi-colors');
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -40,10 +44,31 @@ class Runner extends RuntimeTestRunner {
   }
 }
 
+async function buildTransformedHtml() {
+  const filePaths = await globby('./test/fixtures/**/*.html');
+  let normalizedFilePath;
+  try {
+    log(
+      green('Copying integration test files to'),
+      cyan('test-bin/') + green('...')
+    );
+    for (const filePath of filePaths) {
+      await fs.copySync(filePath, `./test-bin/${filePath}`);
+    }
+  } catch (e) {
+    console./*OK*/ log(
+      `${normalizedFilePath} could not be transformed by the postHTML ` +
+        `pipeline.\n${e.message}`
+    );
+  }
+}
+
 async function integration() {
   if (shouldNotRun()) {
     return;
   }
+
+  await buildTransformedHtml();
 
   maybePrintArgvMessages();
 
@@ -64,7 +89,6 @@ integration.flags = {
   'chrome_canary': '  Runs tests on Chrome Canary',
   'chrome_flags': '  Uses the given flags to launch Chrome',
   'compiled': '  Runs tests against minified JS',
-  'single_pass': '  Run tests in Single Pass mode',
   'config':
     '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'coverage': '  Run tests in code coverage mode',

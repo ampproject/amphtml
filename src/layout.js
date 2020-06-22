@@ -24,6 +24,7 @@ import {htmlFor} from './static-template';
 import {isFiniteNumber} from './types';
 import {setStyle, setStyles, toggle} from './style';
 import {startsWith} from './string';
+import {transparentPng} from './utils/img';
 
 /**
  * @enum {string}
@@ -265,7 +266,7 @@ export function hasNaturalDimensions(tagName) {
 /**
  * Determines the default dimensions for an element which could vary across
  * different browser implementations, like <audio> for instance.
- * This operation can only be completed for an element whitelisted by
+ * This operation can only be completed for an element allowlisted by
  * `hasNaturalDimensions`.
  * @param {!Element} element
  * @return {DimensionsDef}
@@ -308,7 +309,7 @@ export function isLoadingAllowed(element) {
 /**
  * All video player components must either have a) "video" or b) "player" in
  * their name. A few components don't follow this convention for historical
- * reasons, so they're present in the LOADING_ELEMENTS_ whitelist.
+ * reasons, so they're present in the LOADING_ELEMENTS_ allowlist.
  * @param {string} tagName
  * @return {boolean}
  */
@@ -333,9 +334,10 @@ export function isIframeVideoPlayerComponent(tagName) {
  * implement SSR. For more information on SSR see bit.ly/amp-ssr.
  *
  * @param {!Element} element
+ * @param {boolean} fixIeIntrinsic
  * @return {!Layout}
  */
-export function applyStaticLayout(element) {
+export function applyStaticLayout(element, fixIeIntrinsic = false) {
   // Check if the layout has already been done by server-side rendering or
   // client-side rendering and the element was cloned. The document may be
   // visible to the user if the boilerplate was removed so please take care in
@@ -527,7 +529,13 @@ export function applyStaticLayout(element) {
     const intrinsicSizer = sizer.firstElementChild;
     intrinsicSizer.setAttribute(
       'src',
-      `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`
+      !IS_ESM && fixIeIntrinsic && element.ownerDocument
+        ? transparentPng(
+            element.ownerDocument,
+            dev().assertNumber(getLengthNumeral(width)),
+            dev().assertNumber(getLengthNumeral(height))
+          )
+        : `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`
     );
     element.insertBefore(sizer, element.firstChild);
     element.sizerElement = sizer;

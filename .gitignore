@@ -7,6 +7,7 @@ c
 /dist
 dist.3p
 dist.tools
+test-bin
 examples.min
 node_modules
 npm-debug.log
@@ -35,3 +36,5 @@ build-system/server/new-server/transforms/dist
 build-system/tasks/performance/cache
 build-system/tasks/performance/results.json
 build-system/global-configs/custom-config.json
+export
+validator/export

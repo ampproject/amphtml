@@ -36,7 +36,7 @@ tags: {  # amp-next-page: JSON Config
     value_casei: "application/json"
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
-  spec_url: "https://amp.dev/documentation/components/amp-next-page"
+  spec_url: "https://amp.dev/documentation/components/amp-next-page/"
 }
 tags: {
   html_format: AMP
@@ -96,7 +96,7 @@ tags: {  # <amp-next-page>
     mandatory: true
     unique: true
   }
-  spec_url: "https://amp.dev/documentation/components/amp-next-page"
+  spec_url: "https://amp.dev/documentation/components/amp-next-page/"
 }
 tags: {  # <amp-next-page src>
   html_format: AMP
@@ -116,7 +116,7 @@ tags: {  # <amp-next-page src>
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "xssi-prefix" }
   reference_points: {
@@ -135,7 +135,7 @@ tags: {  # <amp-next-page src>
     tag_spec_name: "AMP-NEXT-PAGE > SCRIPT[type=application/json]"
     unique: true
   }
-  spec_url: "https://amp.dev/documentation/components/amp-next-page"
+  spec_url: "https://amp.dev/documentation/components/amp-next-page/"
 }
 tags: {  # <amp-next-page type="adsense">
   html_format: AMP
@@ -177,5 +177,5 @@ tags: {  # <amp-next-page type="adsense">
     tag_spec_name: "AMP-NEXT-PAGE > SCRIPT[type=application/json]"
     unique: true
   }
-  spec_url: "https://amp.dev/documentation/components/amp-next-page"
+  spec_url: "https://amp.dev/documentation/components/amp-next-page/"
 }

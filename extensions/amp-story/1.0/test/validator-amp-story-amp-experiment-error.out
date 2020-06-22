@@ -48,7 +48,7 @@ FAIL
 |          <!-- Invalid: bare script not allowed as a child of amp-story-grid-layer -->
 |          <script type="application/json">
 >>         ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-amp-experiment-error.html:48:8 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags)
+amp-story/1.0/test/validator-amp-story-amp-experiment-error.html:48:8 Custom JavaScript is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed)
 |            {
 |              "background-color-test": {
 |                "variants": {

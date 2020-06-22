@@ -1652,7 +1652,7 @@ describes.realWin('CustomElement Service Elements', {amp: true}, (env) => {
     expect(element.getPlaceholder()).to.equal(placeholder2);
   });
 
-  it('getPlaceholder should blacklist some tags', () => {
+  it('getPlaceholder should denylist some tags', () => {
     const placeholder1 = element.appendChild(createWithAttr('placeholder'));
     const input = doc.createElement('input');
     input.setAttribute('placeholder', '');
@@ -1814,7 +1814,7 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(element.isLoadingEnabled_()).to.be.false;
       });
 
-      it('should disable when element is not whitelisted', () => {
+      it('should disable when element is not allowlisted', () => {
         stubInA4A(false);
         LOADING_ELEMENTS_['amp-test-loader'.toUpperCase()] = false;
         expect(element.isLoadingEnabled_()).to.be.false;
@@ -1838,13 +1838,16 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(element.isLoadingEnabled_()).to.be.false;
       });
 
-      it('should disable when element is not sized', () => {
+      it('should disable when element is layout=nodisplay', () => {
         stubInA4A(false);
-        element.layout_ = Layout.CONTAINER;
-        expect(element.isLoadingEnabled_()).to.be.false;
-
         element.layout_ = Layout.NODISPLAY;
         expect(element.isLoadingEnabled_()).to.be.false;
+      });
+
+      it('should enable when element is layout=container', () => {
+        stubInA4A(false);
+        element.layout_ = Layout.CONTAINER;
+        expect(element.isLoadingEnabled_()).to.be.true;
       });
 
       it('should ignore loading-off if never created', () => {

@@ -38,7 +38,7 @@ tags: {
     name: "mask"
     mandatory: true
     dispatch_key: NAME_DISPATCH
-    blacklisted_value_regex: "(payment-card"
+    disallowed_value_regex: "(payment-card"
         "|date-dd-mm-yyyy"
         "|date-mm-dd-yyyy"
         "|date-mm-yy"
@@ -53,7 +53,7 @@ tags: {
   attr_lists: "input-common-attr"
   attr_lists: "name-attr"
   attrs: { name: "[type]" }
-  spec_url: "https://amp.dev/documentation/components/amp-inputmask"
+  spec_url: "https://amp.dev/documentation/components/amp-inputmask/"
 }
 
 tags: {
@@ -70,7 +70,7 @@ tags: {
   attr_lists: "amp-inputmask-common-attr"
   attr_lists: "input-common-attr"
   attr_lists: "name-attr"
-  spec_url: "https://amp.dev/documentation/components/amp-inputmask"
+  spec_url: "https://amp.dev/documentation/components/amp-inputmask/"
 }
 
 tags: {
@@ -87,7 +87,7 @@ tags: {
   attr_lists: "amp-inputmask-common-attr"
   attr_lists: "input-common-attr"
   attr_lists: "name-attr"
-  spec_url: "https://amp.dev/documentation/components/amp-inputmask"
+  spec_url: "https://amp.dev/documentation/components/amp-inputmask/"
 }
 
 tags: {
@@ -104,7 +104,7 @@ tags: {
   attr_lists: "amp-inputmask-common-attr"
   attr_lists: "input-common-attr"
   attr_lists: "name-attr"
-  spec_url: "https://amp.dev/documentation/components/amp-inputmask"
+  spec_url: "https://amp.dev/documentation/components/amp-inputmask/"
 }
 
 tags: {
@@ -121,7 +121,7 @@ tags: {
   attr_lists: "amp-inputmask-common-attr"
   attr_lists: "input-common-attr"
   attr_lists: "name-attr"
-  spec_url: "https://amp.dev/documentation/components/amp-inputmask"
+  spec_url: "https://amp.dev/documentation/components/amp-inputmask/"
 }
 
 tags: {
@@ -138,7 +138,7 @@ tags: {
   attr_lists: "amp-inputmask-common-attr"
   attr_lists: "input-common-attr"
   attr_lists: "name-attr"
-  spec_url: "https://amp.dev/documentation/components/amp-inputmask"
+  spec_url: "https://amp.dev/documentation/components/amp-inputmask/"
 }
 
 attr_lists: {
