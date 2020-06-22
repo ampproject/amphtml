@@ -54,6 +54,13 @@ export const RENDER_ON_IDLE_FIX_EXP = {
   experiment: '21066312',
 };
 
+/** @const {!{id: string, control: string, experiment: string}} */
+export const STICKY_AD_PADDING_BOTTOM_EXP = {
+  id: 'sticky-ad-padding-bottom',
+  control: '21066401',
+  experiment: '21066402',
+};
+
 /** @const {!Object} */
 export const ValidAdContainerTypes = {
   'AMP-CAROUSEL': 'ac',
@@ -279,7 +286,11 @@ export function googlePageParameters(a4a, startTime) {
       dev().expectedError('AMP-A4A', 'Referrer timeout!');
       return '';
     });
-  const domLoading = getNavigationTiming(win, 'domLoading');
+  // Set dom loading time to first visible if page started in prerender state
+  // determined by truthy value for visibilityState param.
+  const domLoading = a4a.getAmpDoc().getParam('visibilityState')
+    ? a4a.getAmpDoc().getLastVisibleTime()
+    : getNavigationTiming(win, 'domLoading');
   return Promise.all([
     getOrCreateAdCid(ampDoc, 'AMP_ECID_GOOGLE', '_ga'),
     referrerPromise,

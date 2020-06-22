@@ -22,7 +22,7 @@ const log = require('fancy-log');
 const path = require('path');
 const posthtml = require('posthtml');
 const through = require('through2');
-const {buildNewServer} = require('../tasks/serve');
+const {buildNewServer} = require('../server/typescript-compile');
 const {cyan, green, red} = require('ansi-colors');
 const {isTravisBuild} = require('../common/travis');
 
