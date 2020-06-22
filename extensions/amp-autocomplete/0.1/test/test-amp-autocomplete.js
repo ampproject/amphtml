@@ -422,18 +422,18 @@ describes.realWin(
       expect(impl.tokenPrefixMatch_(item, 'd c')).to.be.false;
     });
 
-    it('truncateToMaxEntries_() should truncate given data', () => {
+    it('truncateToMaxItems_() should truncate given data', () => {
       expect(
-        impl.truncateToMaxEntries_(['a', 'b', 'c', 'd'])
+        impl.truncateToMaxItems_(['a', 'b', 'c', 'd'])
       ).to.have.ordered.members(['a', 'b', 'c', 'd']);
-      impl.maxEntries_ = 3;
+      impl.maxItems_ = 3;
       expect(
-        impl.truncateToMaxEntries_(['a', 'b', 'c', 'd'])
+        impl.truncateToMaxItems_(['a', 'b', 'c', 'd'])
       ).to.have.ordered.members(['a', 'b', 'c']);
       expect(
-        impl.truncateToMaxEntries_(['a', 'b', 'c'])
+        impl.truncateToMaxItems_(['a', 'b', 'c'])
       ).to.have.ordered.members(['a', 'b', 'c']);
-      expect(impl.truncateToMaxEntries_(['a', 'b'])).to.have.ordered.members([
+      expect(impl.truncateToMaxItems_(['a', 'b'])).to.have.ordered.members([
         'a',
         'b',
       ]);

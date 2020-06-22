@@ -208,10 +208,18 @@ describes.realWin(
         'filter': 'substring',
         'max-entries': '10',
       }).then((ampAutocomplete) => {
-        expect(ampAutocomplete.implementation_.maxEntries_).to.equal(10);
+        expect(ampAutocomplete.implementation_.maxItems_).to.equal(10);
       });
     });
 
+    it('should render with max-items passed', () => {
+      return getAutocomplete({
+        'filter': 'substring',
+        'max-items': '10',
+      }).then((ampAutocomplete) => {
+        expect(ampAutocomplete.implementation_.maxItems_).to.equal(10);
+      });
+    });
     it('should error with invalid JSON script', () => {
       expectAsyncConsoleError(
         'Unexpected token o in JSON at position 32 [object HTMLElement]'
