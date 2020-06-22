@@ -5399,7 +5399,7 @@ core-js@^3.0.0:
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.4.1.tgz#76dd6828412900ab27c8ce0b22e6114d7ce21b18"
   integrity sha512-KX/dnuY/J8FtEwbnrzmAjUYgLqtk+cxM86hfG60LGiW3MmltIc2yAmDgBgEkfm0blZhUrdr1Zd84J2Y14mLxzg==
 
-core-js@^3.6.4, core-js@^3.6.5:
+core-js@^3.6.5:
   version "3.6.5"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.6.5.tgz#7395dc273af37fb2e50e9bd3d9fe841285231d1a"
   integrity sha512-vZVEEwZoIsI+vPEuoF9Iqf5H7/M3eeQqWlQnYa8FSKKePuYTf5MWnxb5SDAzCa60b3JBRS5g9b+Dq7b1y/RCrA==
@@ -8430,20 +8430,7 @@ glob@^7.0.3, glob@^7.1.0, glob@^7.1.1, glob@^7.1.2, glob@^7.1.3:
     once "^1.3.0"
     path-is-absolute "^1.0.0"
 
-global-agent@2.1.8:
-  version "2.1.8"
-  resolved "https://registry.yarnpkg.com/global-agent/-/global-agent-2.1.8.tgz#99d153662b2c04cbc1199ffbc081a3aa656ac50f"
-  integrity sha512-VpBe/rhY6Rw2VDOTszAMNambg+4Qv8j0yiTNDYEXXXxkUNGWLHp8A3ztK4YDBbFNcWF4rgsec6/5gPyryya/+A==
-  dependencies:
-    boolean "^3.0.0"
-    core-js "^3.6.4"
-    es6-error "^4.1.1"
-    matcher "^2.1.0"
-    roarr "^2.15.2"
-    semver "^7.1.2"
-    serialize-error "^5.0.0"
-
-global-agent@^2.1.8:
+global-agent@2.1.12, global-agent@^2.1.8:
   version "2.1.12"
   resolved "https://registry.yarnpkg.com/global-agent/-/global-agent-2.1.12.tgz#e4ae3812b731a9e81cbf825f9377ef450a8e4195"
   integrity sha512-caAljRMS/qcDo69X9BfkgrihGUgGx44Fb4QQToNQjsiWh+YlQ66uqYVAdA8Olqit+5Ng0nkz09je3ZzANMZcjg==
@@ -12466,13 +12453,6 @@ matcher@^2.0.0:
   dependencies:
     escape-string-regexp "^2.0.0"
 
-matcher@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/matcher/-/matcher-2.1.0.tgz#64e1041c15b993e23b786f93320a7474bf833c28"
-  integrity sha512-o+nZr+vtJtgPNklyeUKkkH42OsK8WAfdgaJE2FNxcjLPg+5QbeEoT6vRj8Xq/iv18JlQ9cmKsEu0b94ixWf1YQ==
-  dependencies:
-    escape-string-regexp "^2.0.0"
-
 matcher@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/matcher/-/matcher-3.0.0.tgz#bd9060f4c5b70aa8041ccc6f80368760994f30ca"
@@ -13014,10 +12994,10 @@ moment@2.24.0, moment@>=1.6.0:
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.24.0.tgz#0d055d53f5052aa653c9f6eb68bb5d12bf5c2b5b"
   integrity sha512-bV7f+6l2QigeBBZSM/6yTNq4P2fNpSWj/0e7jQcy87A8e7o2nAfP/34/2ky5Vw4B9S446EtIhodAzkFCcR4dQg==
 
-moment@2.25.3:
-  version "2.25.3"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.25.3.tgz#252ff41319cf41e47761a1a88cab30edfe9808c0"
-  integrity sha512-PuYv0PHxZvzc15Sp8ybUCoQ+xpyPWvjOuK72a5ovzp2LI32rJXOiIfyoFoYvG3s6EwwrdkMyWuRiEHSZRLJNdg==
+moment@2.27.0:
+  version "2.27.0"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.27.0.tgz#8bff4e3e26a236220dfe3e36de756b6ebaa0105d"
+  integrity sha512-al0MUK7cpIcglMv3YF13qSgdAIqxHTO7brRtaz3DlSULbqfazqkc5kEjNrLDOM7fsjshoFIihnU8snrP7zUvhQ==
 
 "moment@>= 2.9.0", moment@^2.10.6:
   version "2.26.0"
@@ -15898,10 +15878,10 @@ remove-trailing-separator@^1.0.1, remove-trailing-separator@^1.1.0:
   resolved "https://registry.yarnpkg.com/remove-trailing-separator/-/remove-trailing-separator-1.1.0.tgz#c24bce2a283adad5bc3f58e0d48249b92379d8ef"
   integrity sha1-wkvOKig62tW8P1jg1IJJuSN52O8=
 
-renovate@21.12.4:
-  version "21.12.4"
-  resolved "https://registry.yarnpkg.com/renovate/-/renovate-21.12.4.tgz#8aa558b1f93dfc8bad9fbacf62b8aa8d84a99e66"
-  integrity sha512-NI32LiIaNoLLxcnW6lGd2klfLzC10EDONDMr45B6QbnqlK8nUk4ns46yAxU6fd5TQ0oRfsyB5xYfIeOrA4zM+g==
+renovate@21.14.0:
+  version "21.14.0"
+  resolved "https://registry.yarnpkg.com/renovate/-/renovate-21.14.0.tgz#1e255efd31c60885f1644949a72506436be6f962"
+  integrity sha512-h/VbWKPoY50K6eCvwjwXUJdUWdo2khwC+/+I0x/1j4YnNYlxi2+fKQA8d4bNRXgzIaHW3paMS7vTekqoOGVRrg==
   dependencies:
     "@renovate/pep440" "0.4.1"
     "@sindresorhus/is" "2.1.1"
@@ -15924,7 +15904,7 @@ renovate@21.12.4:
     find-up "4.1.0"
     fs-extra "9.0.1"
     github-url-from-git "1.5.0"
-    global-agent "2.1.8"
+    global-agent "2.1.12"
     got "9.6.0"
     handlebars "4.7.6"
     handy-redis "1.8.3"
@@ -15942,7 +15922,7 @@ renovate@21.12.4:
     markdown-it "10.0.0"
     markdown-table "1.1.3"
     minimatch "3.0.4"
-    moment "2.25.3"
+    moment "2.27.0"
     moment-timezone "0.5.31"
     node-emoji "1.10.0"
     node-html-parser "1.2.19"
@@ -16337,7 +16317,7 @@ rndm@1.2.0:
   resolved "https://registry.yarnpkg.com/rndm/-/rndm-1.2.0.tgz#f33fe9cfb52bbfd520aa18323bc65db110a1b76c"
   integrity sha1-8z/pz7Urv9UgqhgyO8ZdsRCht2w=
 
-roarr@^2.15.2, roarr@^2.15.3:
+roarr@^2.15.3:
   version "2.15.3"
   resolved "https://registry.yarnpkg.com/roarr/-/roarr-2.15.3.tgz#65248a291a15af3ebfd767cbf7e44cb402d1d836"
   integrity sha512-AEjYvmAhlyxOeB9OqPUzQCo3kuAkNfuDk/HqWbZdFsqDFpapkTjiw+p4svNEoRLvuqNTxqfL+s+gtD4eDgZ+CA==
@@ -16538,7 +16518,7 @@ semver@7.0.0:
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.0.0.tgz#5f3ca35761e47e05b206c6daff2cf814f0316b8e"
   integrity sha512-+GB6zVA9LWh6zovYQLALHwv5rb2PHGlJi3lfiqIHxR0uuwCgefcOJc59v9fv1w8GbStwxuuqqAjI9NMAOOgq1A==
 
-semver@7.3.2, semver@^7.1.2, semver@^7.2.1, semver@^7.3.2:
+semver@7.3.2, semver@^7.2.1, semver@^7.3.2:
   version "7.3.2"
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.3.2.tgz#604962b052b81ed0786aae84389ffba70ffd3938"
   integrity sha512-OrOb32TeeambH6UrhtShmF7CRDqhL6/5XpPNp2DuRH6+9QLw/orhp72j87v8Qa1ScDkvrrBNpZcDejAirJmfXQ==
@@ -16622,13 +16602,6 @@ serialize-error@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/serialize-error/-/serialize-error-2.1.0.tgz#50b679d5635cdf84667bdc8e59af4e5b81d5f60a"
   integrity sha1-ULZ51WNc34Rme9yOWa9OW4HV9go=
-
-serialize-error@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/serialize-error/-/serialize-error-5.0.0.tgz#a7ebbcdb03a5d71a6ed8461ffe0fc1a1afed62ac"
-  integrity sha512-/VtpuyzYf82mHYTtI4QKtwHa79vAdU5OQpNPAmE/0UDdlGT0ZxHwC+J6gXkw29wwoVI8fMPsfcVHOwXtUQYYQA==
-  dependencies:
-    type-fest "^0.8.0"
 
 serialize-error@^7.0.0, serialize-error@^7.0.1:
   version "7.0.1"

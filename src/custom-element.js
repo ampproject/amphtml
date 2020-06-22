@@ -22,7 +22,6 @@ import {
   Layout,
   applyStaticLayout,
   isInternalElement,
-  isLayoutSizeDefined,
   isLoadingAllowed,
 } from './layout';
 import {LayoutDelayMeter} from './layout-delay-meter';
@@ -1631,7 +1630,7 @@ function createBaseCustomElementClass(win) {
       // 4. The element is too small or has not yet been measured;
       // 5. The element has not been allowlisted;
       // 6. The element is an internal node (e.g. `placeholder` or `fallback`);
-      // 7. The element's layout is not a size-defining layout.
+      // 7. The element's layout is not nodisplay.
       if (this.isInA4A()) {
         return false;
       }
@@ -1647,7 +1646,7 @@ function createBaseCustomElementClass(win) {
         this.layoutWidth_ <= 0 || // Layout is not ready or invisible
         !isLoadingAllowed(this) ||
         isInternalOrServiceNode(this) ||
-        !isLayoutSizeDefined(this.layout_)
+        this.layout_ == Layout.NODISPLAY
       ) {
         return false;
       }
