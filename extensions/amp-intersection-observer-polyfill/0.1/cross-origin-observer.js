@@ -19,6 +19,8 @@ import {WindowInterface} from '../../../src/window-interface';
 import {getMode} from '../../../src/mode';
 import {iframeMessagingClientFor} from '../../../src/inabox/inabox-iframe-messaging-client';
 import {layoutRectLtwh} from '../../../src/layout-rect';
+import {canInspectWindow} from '../../../src/iframe-helper';
+import {getPositionObserver} from '../../../ads/inabox/position-observer';
 
 /**
  * Setup cross-origin iframe polyfill for AMP iframes, such as inabox.
@@ -26,26 +28,30 @@ import {layoutRectLtwh} from '../../../src/layout-rect';
  * @param {!Window} win
  */
 export function maybeSetupCrossOriginObserver(win) {
-  if (win == WindowInterface.getTop(win) || getMode(win).runtime != 'inabox') {
+  const top = WindowInterface.getTop(win);
+  console.log('maybeSetupCrossOriginObserver: ', {
+    isTop: win == top,
+    runtime: getMode(win).runtime,
+  });
+  if (win == top || getMode(win).runtime != 'inabox') {
     // Not an iframe at all.
-    console.log('1');
+    console.log('not an inabox');
     return;
   }
 
   // Check if there is an iframe client connected and if it's indeed a polyfill.
-  const iframeClient = iframeMessagingClientFor(win);
   const setupPolyfillUpdater =
     win.IntersectionObserver['_setupCrossOriginUpdater'];
-  if (!iframeClient || !setupPolyfillUpdater) {
-    console.log('2');
+  if (!setupPolyfillUpdater) {
+    console.log('not a polyfill');
     return;
   }
-  console.log('host message set up');
-  const updater = setupPolyfillUpdater();
-  iframeClient.makeRequest(
-    MessageType.SEND_POSITIONS,
-    MessageType.POSITION,
-    (data) => {
+
+  const isFriendlyIframe = canInspectWindow(top);
+  const iframeClient = iframeMessagingClientFor(win);
+  if (isFriendlyIframe || iframeClient) {
+    const updater = setupPolyfillUpdater();
+    const handleData = (data) => {
       const boundingClientRect = /** @type {!../../../src/layout-rect.LayoutRectDef} */ (data[
         'targetRect'
       ]);
@@ -57,8 +63,24 @@ export function maybeSetupCrossOriginObserver(win) {
         boundingClientRect
       );
       updater(boundingClientRect, intersectionRect);
+    };
+    if (iframeClient) {
+      iframeClient.makeRequest(
+        MessageType.SEND_POSITIONS,
+        MessageType.POSITION,
+        handleData
+      );
+    } else {
+      const topWindowPositionObserver = getPositionObserver(top);
+      topWindowPositionObserver.observe(
+        /** @type {!HTMLIFrameElement|!HTMLElement} */
+        win.frameElement,
+        handleData
+      );
     }
-  );
+  } else {
+    console.log('no other way to get host data');
+  }
 }
 
 /**
