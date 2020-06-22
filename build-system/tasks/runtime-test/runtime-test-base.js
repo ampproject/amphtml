@@ -170,8 +170,8 @@ function updateReporters(config) {
     config.reporters.push('saucelabs');
   }
 
-  const testTypeAllowList = ['unit', 'integration'];
-  if (isTravisPushBuild() && testTypeAllowList.includes(config.testType)) {
+  const testTypeAllowList = new Set(['unit', 'integration']);
+  if (isTravisPushBuild() && testTypeAllowList.has(config.testType)) {
     config.reporters.push('json-result');
     config.jsonResultReporter = {
       outputFile: `results_${config.testType}.json`,
