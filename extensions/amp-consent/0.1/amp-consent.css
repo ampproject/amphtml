@@ -94,6 +94,11 @@ amp-consent.amp-hidden {
   top: auto;
 }
 
+[dir=rtl] .i-amphtml-consent-alertdialog {
+  right: -10000px;
+  left: auto;
+}
+
 .i-amphtml-consent-ui-fill {
   position: absolute;
   top: 0;
