@@ -36,6 +36,8 @@ const {reportTestStarted} = require('.././report-test-status');
 const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');
 
+const JSON_REPORT_TEST_TYPES = new Set(['unit', 'integration']);
+
 /**
  * Updates the browsers based off of the test type
  * being run (unit, integration, a4a) and test settings.
@@ -170,7 +172,6 @@ function updateReporters(config) {
     config.reporters.push('saucelabs');
   }
 
-  const testTypeAllowList = new Set(['unit', 'integration']);
   if (isTravisPushBuild() && testTypeAllowList.has(config.testType)) {
     config.reporters.push('json-result');
     config.jsonResultReporter = {
