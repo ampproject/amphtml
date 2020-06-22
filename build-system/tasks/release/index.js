@@ -138,8 +138,12 @@ function discoverDistFlavors_() {
   const distFlavors = [
     BASE_FLAVOR_CONFIG,
     ...Object.entries(experimentsConfig)
-      .filter(([, experimentConfig]) => experimentConfig.command)
+      .filter(
+        ([, experimentConfig]) => experimentConfig.define_experiment_constant
+      )
       .map(([flavorType, experimentConfig]) => ({
+        // TODO(#28168, erwinmombay): relace with single `--module --nomodule` command.
+        command: `gulp dist --esm --define_experiment_constant ${experimentConfig.define_experiment_constant} && gulp dist --define_experiment_constant ${experimentConfig.define_experiment_constant}`,
         flavorType,
         rtvPrefixes: [
           EXPERIMENTAL_RTV_PREFIXES[experimentConfig.environment][flavorType],
