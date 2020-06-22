@@ -165,11 +165,7 @@ function runTest() {
  */
 function serverTests() {
   buildNewServer();
-  return gulp.src(inputPaths).pipe(runTest())
-      .on('error', function(err) {
-        console.log(err);
-      })
-      .on('end', reportResult);
+  return gulp.src(inputPaths).pipe(runTest()).on('end', reportResult);
 }
 
 module.exports = {
