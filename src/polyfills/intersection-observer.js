@@ -25,7 +25,9 @@ import {IntersectionObserverStub} from '../polyfillstub/intersection-observer-st
  * @param {!Window} win
  */
 export function install(win) {
+  // Always install
   if (!win.IntersectionObserver) {
+    console.log('install polyfill');
     win.IntersectionObserver = /** @type {typeof IntersectionObserver} */ (IntersectionObserverStub);
   }
   fixEntry(win);

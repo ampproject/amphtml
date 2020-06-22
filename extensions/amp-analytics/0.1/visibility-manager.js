@@ -747,12 +747,13 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     // Native.
     const {win} = this.ampdoc;
     if (nativeIntersectionObserverSupported(win)) {
+      console.log('native supported');
       return new win.IntersectionObserver(
         this.onIntersectionChanges_.bind(this),
         {threshold: DEFAULT_THRESHOLD}
       );
     }
-
+    console.log('need polyfill');
     // Polyfill.
     const intersectionObserverPolyfill = new IntersectionObserverPolyfill(
       this.onIntersectionChanges_.bind(this),

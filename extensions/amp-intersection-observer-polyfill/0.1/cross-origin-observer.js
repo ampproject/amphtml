@@ -28,6 +28,7 @@ import {layoutRectLtwh} from '../../../src/layout-rect';
 export function maybeSetupCrossOriginObserver(win) {
   if (win == WindowInterface.getTop(win) || getMode(win).runtime != 'inabox') {
     // Not an iframe at all.
+    console.log('1');
     return;
   }
 
@@ -36,9 +37,10 @@ export function maybeSetupCrossOriginObserver(win) {
   const setupPolyfillUpdater =
     win.IntersectionObserver['_setupCrossOriginUpdater'];
   if (!iframeClient || !setupPolyfillUpdater) {
+    console.log('2');
     return;
   }
-
+  console.log('host message set up');
   const updater = setupPolyfillUpdater();
   iframeClient.makeRequest(
     MessageType.SEND_POSITIONS,

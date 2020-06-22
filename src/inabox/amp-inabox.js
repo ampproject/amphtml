@@ -70,6 +70,9 @@ try {
   makeBodyVisibleRecovery(self.document);
   throw e;
 }
+delete window['IntersectionObserver'];
+delete window['IntersectionObserverEntry'];
+console.log(('IntersectionObserver' in window));
 allowLongTasksInChunking();
 startupChunk(self.document, function initial() {
   /** @const {!../service/ampdoc-impl.AmpDoc} */
