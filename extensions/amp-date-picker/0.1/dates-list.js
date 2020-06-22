@@ -15,7 +15,9 @@
  */
 
 import {requireExternal} from '../../../src/module';
-import {rrulestr} from 'rrule-without-luxon/dist/esm/src/index.js';
+import * as rrule from '../../../node_modules/rrule-without-luxon/dist/es5/rrule.min.js/';
+
+const rrulestr = rrule.rrulestr;
 
 /** @enum {string} */
 const DateType = {
