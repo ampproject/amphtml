@@ -80,7 +80,7 @@ The filtering mechanism applied to source data to produce filtered results for u
 - `prefix`: if the user input is a prefix of an item, then the item gets suggested
 - `token-prefix`: if the user input is a prefix of any word in a multi-worded item, then the item gets suggested; example “je” is a token-prefix in “blue jeans”
 - `fuzzy`: typos in the input field can result in partial match items appearing in the filtered results—need further research
-- `none`: no client-side filter; renders retrieved data based on bound <code>[src]</code> attribute; truncates to <code>max-entries</code> attribute if provided
+- `none`: no client-side filter; renders retrieved data based on bound <code>[src]</code> attribute; truncates to <code>max-items</code> attribute if provided
 - `custom`: a conditional statement involving an item and a user input to be applied to each item such that evaluating to true implies the item gets suggested; using this filter requires including <code>amp-bind</code> if <code>filter==custom</code>, an additional attribute <code>filter-expr</code> is required to specify a boolean expression by which to perform the custom filter
 
 ### `filter-expr`
@@ -105,7 +105,7 @@ The query parameter to generate a static remote endpoint that returns the JSON t
 
 The min character length of a user input to provide results, default 1
 
-### `max-entries`
+### `max-items`
 
 The max specified number of items to suggest at once based on a user input, displays all if unspecified
 

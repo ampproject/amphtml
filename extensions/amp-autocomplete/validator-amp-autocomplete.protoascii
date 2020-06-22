@@ -63,6 +63,7 @@ tags: {  # <amp-autocomplete>
   attrs: { name: "inline" }
   attrs: { name: "items" }
   attrs: { name: "max-entries" }
+  attrs: { name: "max-items" }
   attrs: { name: "min-characters" }
   attrs: {
     name: "query"
@@ -105,6 +106,7 @@ tags: {  # <amp-autocomplete>
   attrs: { name: "inline" }
   attrs: { name: "items" }
   attrs: { name: "max-entries" }
+  attrs: { name: "max-items" }
   attrs: { name: "min-characters" }
   attrs: {
     name: "query"
