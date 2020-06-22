@@ -311,10 +311,27 @@
       </script>
     </amp-autocomplete>
 
+    <!-- Valid: amp-component with static data and max-items attribute -->
+    <amp-autocomplete filter="prefix" max-items="10">
+      <input />
+      <script type="application/json">
+        {}
+      </script>
+    </amp-autocomplete>
+
     <!-- Valid: amp-component with remote data and max-entries attribute -->
     <amp-autocomplete
       filter="prefix"
       max-entries="10"
+      src="https://data.com/articles.json?ref=CANONICAL_URL"
+    >
+      <input />
+    </amp-autocomplete>
+
+    <!-- Valid: amp-component with remote data and max-items attribute -->
+    <amp-autocomplete
+      filter="prefix"
+      max-items="10"
       src="https://data.com/articles.json?ref=CANONICAL_URL"
     >
       <input />
