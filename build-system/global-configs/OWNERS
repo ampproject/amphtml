@@ -9,6 +9,10 @@
           name: 'ampproject/wg-approvers',
           requestReviews: false,
         },
+        {
+          name: 'danielrozenberg',
+          notify: true,
+        },
       ],
     },
   ],
