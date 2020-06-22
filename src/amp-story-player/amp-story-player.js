@@ -17,6 +17,7 @@
 import {AmpStoryPlayer} from './amp-story-player-impl';
 import {AmpStoryPlayerManager} from './amp-story-player-manager';
 
+// Jose's comment
 self.onload = () => {
   const manager = new AmpStoryPlayerManager(self);
   manager.loadPlayers();
