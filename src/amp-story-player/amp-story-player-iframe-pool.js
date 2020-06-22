@@ -97,38 +97,43 @@ export class IframePool {
 
   /**
    * Finds adjacent iframe indices given an index.
-   * Examples (x is provided index):
+   * Examples of resulting adjacent arrays (x is provided index):
    * [x] [1] [2] [] []
    * [2] [x] [1] [] []
    * [] [] [2] [1] [x]
    * [1] [x]
-   * @param {!Array<number>} queue
-   * @param {!Array<number>} adjacent
-   * @param {number} numStories
+   * @param {number} storyIdx
+   * @param {number} maxIdx
+   * @return {!Array<number>}
    */
-  findAdjacent(queue, adjacent, numStories) {
-    const idx = queue.shift();
+  findAdjacent(storyIdx, maxIdx) {
+    const queue = [storyIdx];
+    const adjacent = [];
 
-    if (adjacent.length >= this.iframePool_.length) {
-      return;
-    }
+    const findAdjacentRecursive = () => {
+      const idx = queue.shift();
 
-    if (idx < 0 || idx >= numStories) {
-      return;
-    }
+      if (idx < 0 || idx > maxIdx) {
+        return;
+      }
 
-    adjacent.push(idx);
+      adjacent.push(idx);
 
-    if (!queue.includes(idx + 1) && !adjacent.includes(idx + 1)) {
-      queue.push(idx + 1);
-    }
+      if (!queue.includes(idx + 1) && !adjacent.includes(idx + 1)) {
+        queue.push(idx + 1);
+      }
 
-    if (!queue.includes(idx - 1) && !adjacent.includes(idx - 1)) {
-      queue.push(idx - 1);
-    }
+      if (!queue.includes(idx - 1) && !adjacent.includes(idx - 1)) {
+        queue.push(idx - 1);
+      }
 
-    while (adjacent.length < this.iframePool_.length && queue.length > 0) {
-      this.findAdjacent(queue, adjacent, numStories);
-    }
+      while (adjacent.length < this.iframePool_.length && queue.length > 0) {
+        findAdjacentRecursive();
+      }
+    };
+
+    findAdjacentRecursive();
+
+    return adjacent;
   }
 }

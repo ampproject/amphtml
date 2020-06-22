@@ -357,7 +357,7 @@ export class AmpStoryPlayer {
   show(storyUrl) {
     const storyIdx = this.stories_.findIndex(({href}) => href === storyUrl);
 
-    // TODO(Enriqe): replace for add() once implemented.
+    // TODO(proyectoramirez): replace for add() once implemented.
     if (!this.stories_[storyIdx]) {
       throw new Error(`Story URL not found in the player: ${storyUrl}`);
     }
@@ -397,12 +397,9 @@ export class AmpStoryPlayer {
    */
   assignIframesForStoryIdx_(storyIdx) {
     const availableIframeIdx = this.iframePool_.getAvailableIframeIdx();
-    const adjacentStoriesIdx = [];
-
-    this.iframePool_.findAdjacent(
-      [storyIdx],
-      adjacentStoriesIdx,
-      this.stories_.length
+    const adjacentStoriesIdx = this.iframePool_.findAdjacent(
+      storyIdx,
+      this.stories_.length - 1
     );
 
     // Sort new set of stories with iframes to respect the flow they would

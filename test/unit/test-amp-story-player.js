@@ -355,6 +355,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       expect(stories[4][IFRAME_IDX]).to.eql(2);
     });
 
+    // TODO(proyectoramirez): delete once add() is implemented.
     it('show callback should throw when story is not found', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
