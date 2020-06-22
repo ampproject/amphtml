@@ -34,5 +34,5 @@
 ⏪ Reverting a previous change
 ♻️ Refactoring
 🚮 Deleting code
-🔬 Experimental code
+🧪 Experimental code
 -->
