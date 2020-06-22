@@ -1040,14 +1040,10 @@ export class MediaBasedAdvancement extends AdvancementConfig {
   startVideoInterfaceElement_() {
     this.element_.getImpl().then((video) => {
       this.video_ = video;
-      // Removes [loop] attribute if specified so the 'ended' event can trigger.
-      this.video_.element.removeAttribute('loop');
-      this.video_.propagateAttributes(
-        'loop',
-        this.element_.querySelector('video'),
-        true /** opt_removeMissingAttrs */
-      );
     });
+
+    // Removes [loop] attribute if specified, so the 'ended' event can trigger.
+    this.element_.querySelector('video').removeAttribute('loop');
 
     this.unlistenFns_.push(
       listenOnce(this.element_, VideoEvents.ENDED, () => this.onAdvance(), {
