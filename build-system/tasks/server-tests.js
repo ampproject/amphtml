@@ -89,7 +89,13 @@ async function getTransform(inputFile) {
  * @return {string}
  */
 async function getOutput(transform, input) {
-  return (await posthtml(transform).process(input)).html;
+  let output;
+  try {
+    return output = await posthtml(transform).process(input).html;
+  } catch (e) {
+    console.log(e.message);
+  }
+  return output;
 }
 
 /**
@@ -159,7 +165,11 @@ function runTest() {
  */
 function serverTests() {
   buildNewServer();
-  return gulp.src(inputPaths).pipe(runTest()).on('end', reportResult);
+  return gulp.src(inputPaths).pipe(runTest())
+      .on('error', function(err) {
+        console.log(err);
+      })
+      .on('end', reportResult);
 }
 
 module.exports = {
