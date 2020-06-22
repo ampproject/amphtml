@@ -421,6 +421,7 @@ exports.rules = [
       'src/polyfills.js->src/polyfills/intersection-observer.js',
       'src/polyfills.js->src/polyfills/map-set.js',
       'src/polyfills.js->src/polyfills/set-add.js',
+      'src/polyfills.js->src/polyfills/weakmap-set.js',
       'src/friendly-iframe-embed.js->src/polyfills/custom-elements.js',
       'src/friendly-iframe-embed.js->src/polyfills/document-contains.js',
       'src/friendly-iframe-embed.js->src/polyfills/domtokenlist.js',

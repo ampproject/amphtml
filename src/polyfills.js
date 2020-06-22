@@ -30,6 +30,7 @@ import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installObjectValues} from './polyfills/object-values';
 import {install as installPromise} from './polyfills/promise';
 import {install as installSetAdd} from './polyfills/set-add';
+import {install as installWeakMapSet} from './polyfills/weakmap-set';
 
 if (!IS_ESM) {
   installFetch(self);
@@ -39,6 +40,7 @@ if (!IS_ESM) {
   installPromise(self);
   installArrayIncludes(self);
   installMapSet(self);
+  installWeakMapSet(self);
   installSetAdd(self);
 }
 
