@@ -10,6 +10,7 @@
           requestReviews: false,
         },
         {
+          pattern: 'experiments-config.json',
           name: 'danielrozenberg',
           notify: true,
         },
