@@ -1838,13 +1838,16 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(element.isLoadingEnabled_()).to.be.false;
       });
 
-      it('should disable when element is not sized', () => {
+      it('should disable when element is layout=nodisplay', () => {
         stubInA4A(false);
-        element.layout_ = Layout.CONTAINER;
-        expect(element.isLoadingEnabled_()).to.be.false;
-
         element.layout_ = Layout.NODISPLAY;
         expect(element.isLoadingEnabled_()).to.be.false;
+      });
+
+      it('should enable when element is layout=container', () => {
+        stubInA4A(false);
+        element.layout_ = Layout.CONTAINER;
+        expect(element.isLoadingEnabled_()).to.be.true;
       });
 
       it('should ignore loading-off if never created', () => {
