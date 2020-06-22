@@ -27,6 +27,8 @@
 
   --post-select-scale: 0.5 !important;
   --post-select-scale-variable: 1 !important;
+  --ease-out-curve: cubic-bezier(.3, 0, 0, 1);
+  --animation-time: .3s
 }
 
 .i-amphtml-story-interactive-poll-container:not(.i-amphtml-story-interactive-post-selection) {
@@ -43,6 +45,17 @@
   flex: 100 !important;
   overflow: hidden !important;
   position: relative !important;
+  transition: flex-grow var(--animation-time) calc(var(--animation-time) * .12) var(--ease-out-curve) !important;
+}
+
+.i-amphtml-story-interactive-option-text-container {
+  transform: translateY(17px) !important;
+}
+
+.i-amphtml-story-interactive-post-selection
+  .i-amphtml-story-interactive-option-text-container {
+  transition: transform var(--animation-time) var(--ease-out-curve) !important;
+  transform: translateY(0) !important;
 }
 
 .i-amphtml-story-interactive-poll-container:not(.i-amphtml-story-interactive-post-selection)
@@ -62,6 +75,16 @@
   left: 0px !important;
   right: 0px !important;
   height: 100% !important;
+  animation: flashBG forwards var(--animation-time) var(--ease-out-curve);
+}
+
+@keyframes flashBG {
+  0% {
+    opacity: .4;
+  }
+  100% {
+    opacity: .2;
+  }
 }
 
 .i-amphtml-story-interactive-option-title {
@@ -70,16 +93,16 @@
   margin: 0 !important;
   line-height: 36px !important;
   width: 124px !important;
-  height: 66px !important;
+  height: 33px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  transition: transform var(--animation-time) var(--ease-out-curve) !important;
 }
 
 .i-amphtml-story-interactive-post-selection
   .i-amphtml-story-interactive-option-title {
   transform: scale(var(--post-select-scale)) !important;
-  height: 33px !important;
 }
 
 .i-amphtml-story-interactive-option-title-text {
@@ -88,6 +111,7 @@
   display: -webkit-box !important;
   -webkit-line-clamp: 2 !important;
   -webkit-box-orient: vertical !important;
+  transition: transform var(--animation-time) var(--ease-out-curve) !important;
 }
 
 .i-amphtml-story-interactive-post-selection
@@ -98,10 +122,12 @@
 .i-amphtml-story-interactive-option-percentage-text {
   font-weight: 700 !important;
   font-size: 22px !important;
-  display: none !important;
+  transform: scale(0) !important;
+  display: inline-block !important;
+  transition: transform var(--animation-time) var(--ease-out-curve) !important;
 }
 
 .i-amphtml-story-interactive-post-selection
   .i-amphtml-story-interactive-option-percentage-text {
-  display: block !important;
+  transform: scale(1) !important;
 }
