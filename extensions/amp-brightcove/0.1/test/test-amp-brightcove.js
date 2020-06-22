@@ -88,21 +88,6 @@ describes.realWin(
       });
     });
 
-    // TODO(alanorozco): Remove. We don't need this, it tests a runtime feature.
-    it.skip('renders responsively', () => {
-      return getBrightcove(
-        {
-          'data-account': '1290862519001',
-          'data-video-id': 'ref:amp-test-video',
-        },
-        true
-      ).then((bc) => {
-        const iframe = bc.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.className).to.match(/i-amphtml-fill-content/);
-      });
-    });
-
     it('requires data-account', () => {
       expectAsyncConsoleError(/The data-account attribute is required for/, 1);
       return getBrightcove({}).should.eventually.be.rejectedWith(
