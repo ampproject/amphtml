@@ -146,16 +146,22 @@ function checkSourcemapMappings(sourcemapJson) {
   const firstLineFile = sourcemapJson.sources[sourceIndex];
   const contents = fs.readFileSync(firstLineFile, 'utf8').split('\n');
   const firstLineCode = contents[sourceCodeLine];
+  const helpMessage =
+    'If this change is intentional, update the mapping related constants in ' +
+    cyan('build-system/tasks/check-sourcemaps.js') +
+    '.';
   if (firstLineFile != expectedFirstLineFile) {
     log(red('ERROR:'), 'Found mapping for incorrect file.');
     log('Actual:', cyan(firstLineFile));
     log('Expected:', cyan(expectedFirstLineFile));
+    log(helpMessage);
     throwError('Found mapping for incorrect file');
   }
   if (firstLineCode != expectedFirstLineCode) {
     log(red('ERROR:'), 'Found mapping for incorrect code.');
     log('Actual:', cyan(firstLineCode));
     log('Expected:', cyan(expectedFirstLineCode));
+    log(helpMessage);
     throwError('Found mapping for incorrect code');
   }
   if (generatedCodeColumn != 0 || sourceCodeColumn != 0) {
