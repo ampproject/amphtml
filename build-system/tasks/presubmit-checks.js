@@ -433,8 +433,8 @@ const forbiddenTerms = {
       'extensions/amp-experiment/0.1/variant.js',
       'extensions/amp-experiment/1.0/variant.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
-      'extensions/amp-consent/0.1/consent-state-manager.js',
-      'extensions/amp-story/1.0/amp-story-reaction.js',
+      'extensions/amp-consent/0.1/consent-config.js',
+      'extensions/amp-story/1.0/amp-story-interactive.js',
     ],
   },
   'getBaseCid': {
@@ -681,6 +681,7 @@ const forbiddenTerms = {
     message:
       'SVG data images must use charset=utf-8: ' +
       '"data:image/svg+xml;charset=utf-8,..."',
+    allowlist: ['src/service/ie-intrinsic-bug.js'],
   },
   'new CustomEvent\\(': {
     message: 'Use createCustomEvent() helper instead.',
@@ -1019,6 +1020,7 @@ const forbiddenTermsSrcInclusive = {
       'ads/google/a4a/line-delimited-response-handler.js',
       'examples/pwa/pwa.js',
       'src/utils/bytes.js',
+      'src/utils/stream-response.js',
     ],
   },
   'contentHeightChanged': {

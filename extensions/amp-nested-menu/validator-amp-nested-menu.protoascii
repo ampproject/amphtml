@@ -39,7 +39,7 @@ tags: {  # amp-nested-menu
     supported_layouts: FILL
   }
   descendant_tag_list: "amp-nested-menu-allowed-descendants"
-  spec_url: "https://amp.dev/documentation/components/amp-nested-menu"
+  spec_url: "https://amp.dev/documentation/components/amp-nested-menu/"
 }
 tags: {  # <amp-nested-menu> <div amp-nested-submenu(-open/-close)>
   html_format: AMP
