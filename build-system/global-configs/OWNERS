@@ -9,6 +9,11 @@
           name: 'ampproject/wg-approvers',
           requestReviews: false,
         },
+        {
+          pattern: 'experiments-config.json',
+          name: 'danielrozenberg',
+          notify: true,
+        },
       ],
     },
   ],
