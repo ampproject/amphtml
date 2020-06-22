@@ -115,7 +115,8 @@ fi
 
 # Launch proxy and wait for a tunnel to be created.
 echo "$LOG_PREFIX Launching $(CYAN "$BINARY_FILE")..."
-"$BINARY_FILE" --verbose --tunnel-identifier "$TUNNEL_IDENTIFIER" --readyfile "$READY_FILE" --pidfile "$PID_FILE" --logfile "$LOG_FILE" 1>"$OUTPUT_FILE" 2>&1 &
+# --no-ssl-bump-domains corresponds to "addons > hosts" in .travis.yml.
+"$BINARY_FILE" --verbose --no-ssl-bump-domains "*.localhost,*.recaptcha.localhost" --tunnel-identifier "$TUNNEL_IDENTIFIER" --readyfile "$READY_FILE" --pidfile "$PID_FILE" --logfile "$LOG_FILE" 1>"$OUTPUT_FILE" 2>&1 &
 count=0
 while [ $count -lt $READY_DELAY_SECS ]
 do

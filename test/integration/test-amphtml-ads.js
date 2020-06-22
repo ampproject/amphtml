@@ -19,8 +19,7 @@ import {maybeSwitchToCompiledJs} from '../../testing/iframe';
 import {parseQueryString} from '../../src/url';
 import {xhrServiceForTesting} from '../../src/service/xhr-impl';
 
-// TODO(wg-ads): SauceLabs gets 502 Bad Gateway when trying to resolve "ads.localhost:9876".
-const t = describe.configure().skipSauceLabs();
+const t = describe.configure();
 
 t.run('AMPHTML ad on AMP Page', () => {
   describes.integration(
