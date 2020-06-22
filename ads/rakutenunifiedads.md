@@ -50,6 +50,24 @@ limitations under the License.
 - `data-genre` : Genre object
 - `data-ifa` : IFA string
 - `data-targeting` : Targeting object
+- `data-iscode` : ID type. 'true': `data-id` works as code
+
+### Set id as adSpot code
+
+- `data-id` : Your code with `data-iscode`
+- `data-iscode` : ID type. 'true': id works as code
+
+```html
+<amp-ad
+  width="300"
+  height="250"
+  type="rakutenunifiedads"
+  data-id="aabbcc"
+  data-iscode="true"
+  data-env="dev"
+>
+</amp-ad>
+```
 
 ### How to handle responsive design
 
