@@ -228,10 +228,43 @@ requirement: {
   error_message: 'Map.prototype.values is not allowed'
   value: 'Map.prototype.values'
 }
+
 requirement: {
   type: BANNED_PROPERTY_CALL
   error_message: 'Map.prototype.entries is not allowed'
   value: 'Map.prototype.entries'
+}
+
+# WeakMap
+
+requirement: {
+  type: BANNED_CODE_PATTERN
+  error_message: 'Cannot construct WeakMap with Iterable'
+  value: '/** @param {Array|Object} a */function template(a) {new WeakMap(a)}'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'WeakMap.prototype.keys is not allowed'
+  value: 'WeakMap.prototype.keys'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'WeakMap.prototype.values is not allowed'
+  value: 'WeakMap.prototype.values'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'WeakMap.prototype.entries is not allowed'
+  value: 'WeakMap.prototype.entries'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'WeakMap.prototype.clear is not allowed'
+  value: 'WeakMap.prototype.clear'
 }
 
 # Set
@@ -253,6 +286,7 @@ requirement: {
   error_message: 'Set.prototype.values is not allowed'
   value: 'Set.prototype.values'
 }
+
 requirement: {
   type: BANNED_PROPERTY_CALL
   error_message: 'Set.prototype.entries is not allowed'
@@ -335,13 +369,7 @@ requirement: {
 
 requirement: {
   type: BANNED_NAME
-  error_message: 'WeakMap is not allowed'
-  value: 'WeakMap'
-}
-
-requirement: {
-  type: BANNED_NAME
-  error_message: 'WeakSet is not allowed'
+  error_message: 'WeakSet is not allowed. You can use a WeakMap instead'
   value: 'WeakSet'
 }
 
