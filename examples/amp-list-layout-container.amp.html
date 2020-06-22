@@ -35,6 +35,38 @@
     <button on="tap:text.toggleVisibility">
       Toggle text
     </button>
+    <amp-list
+      layout="container"
+      src="https://amp.dev/documentation/examples/api/slow-json/?delay=10000"
+      binding="no">
+    <div placeholder>
+      <div role="listitem">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus vel quam
+        eu turpis eleifend pretium. Aenean sagittis, leo ac congue mattis, est
+        nisl accumsan eros, sit amet suscipit massa lectus non nibh. In justo
+        libero, ultricies sed tristique vel, tincidunt non nulla. Pellentesque vel
+        pharetra risus. Donec tempus tortor at est vulputate ultrices. Quisque
+        sagittis pretium facilisis. Aliquam dignissim dapibus nibh sed bibendum.
+        Phasellus et nulla pulvinar, placerat sapien ac, vehicula mauris. Mauris
+        efficitur quis orci sed convallis.
+      </div>
+      <div role="listitem">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus vel quam
+        eu turpis eleifend pretium. Aenean sagittis, leo ac congue mattis, est
+        nisl accumsan eros, sit amet suscipit massa lectus non nibh. In justo
+        libero, ultricies sed tristique vel, tincidunt non nulla. Pellentesque vel
+        pharetra risus. Donec tempus tortor at est vulputate ultrices. Quisque
+        sagittis pretium facilisis. Aliquam dignissim dapibus nibh sed bibendum.
+        Phasellus et nulla pulvinar, placerat sapien ac, vehicula mauris. Mauris
+        efficitur quis orci sed convallis.
+      </div>
+    </div>
+    <template type="amp-mustache">
+      <div>
+        <p>{{title}}</p>
+      </div>
+    </template>
+  </amp-list>
     <h3>amp-list with layout="container"</h3>
     <amp-list
       id="list1"
