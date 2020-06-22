@@ -355,6 +355,7 @@ export class AmpStoryPlayer {
    * @param {string} storyUrl
    */
   show(storyUrl) {
+    // TODO(enriqe): sanitize URLs for matching.
     const storyIdx = this.stories_.findIndex(({href}) => href === storyUrl);
 
     // TODO(proyectoramirez): replace for add() once implemented.
