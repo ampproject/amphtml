@@ -451,19 +451,6 @@ export class Services {
   }
 
   /**
-   * @param {!Window} win
-   * @return {?Promise<?{incomingFragment: string, outgoingFragment: string}>}
-   */
-  static shareTrackingForOrNull(win) {
-    return /** @type {!Promise<?{incomingFragment: string, outgoingFragment: string}>} */ (getElementServiceIfAvailable(
-      win,
-      'share-tracking',
-      'amp-share-tracking',
-      true
-    ));
-  }
-
-  /**
    * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
    * @param {!Window} win
    * @return {?Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>}

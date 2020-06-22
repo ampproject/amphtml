@@ -72,7 +72,6 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           installDocumentInfoServiceForDoc(iframe.ampdoc);
           resetScheduledElementForTesting(iframe.win, 'amp-analytics');
           resetScheduledElementForTesting(iframe.win, 'amp-experiment');
-          resetScheduledElementForTesting(iframe.win, 'amp-share-tracking');
           if (opt_options) {
             if (opt_options.withCid) {
               markElementScheduledForTesting(iframe.win, 'amp-analytics');
@@ -93,15 +92,6 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
                       'x2': null,
                     }),
                 };
-              });
-            }
-            if (opt_options.withShareTracking) {
-              markElementScheduledForTesting(iframe.win, 'amp-share-tracking');
-              registerServiceBuilder(iframe.win, 'share-tracking', function () {
-                return Promise.resolve({
-                  incomingFragment: '12345',
-                  outgoingFragment: '54321',
-                });
               });
             }
             if (opt_options.withViewerIntegrationVariableService) {
@@ -222,7 +212,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           // Restrict the number of replacement params to globalVariableSource
           // Please consider adding the logic to amp-analytics instead.
           // Please contact @lannka or @zhouyx if the test fail.
-          expect(variables.length).to.equal(61);
+          expect(variables.length).to.equal(59);
         });
       });
 
@@ -753,29 +743,6 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
           'amp-experiment is not configured ',
         () => {
           return expect(expandUrlAsync('?VARIANTS')).to.eventually.equal('?');
-        }
-      );
-
-      it('should replace SHARE_TRACKING_INCOMING and SHARE_TRACKING_OUTGOING', () => {
-        return expect(
-          expandUrlAsync(
-            '?in=SHARE_TRACKING_INCOMING&out=SHARE_TRACKING_OUTGOING',
-            /*opt_bindings*/ undefined,
-            {withShareTracking: true}
-          )
-        ).to.eventually.equal('?in=12345&out=54321');
-      });
-
-      // TODO(#16916): Make this test work with synchronous throws.
-      it.skip(
-        'should replace SHARE_TRACKING_INCOMING and SHARE_TRACKING_OUTGOING' +
-          ' with empty string if amp-share-tracking is not configured',
-        () => {
-          return expect(
-            expandUrlAsync(
-              '?in=SHARE_TRACKING_INCOMING&out=SHARE_TRACKING_OUTGOING'
-            )
-          ).to.eventually.equal('?in=&out=');
         }
       );
 

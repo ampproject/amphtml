@@ -8198,10 +8198,10 @@ functions-have-names@^1.2.0:
   resolved "https://registry.yarnpkg.com/functions-have-names/-/functions-have-names-1.2.1.tgz#a981ac397fa0c9964551402cdc5533d7a4d52f91"
   integrity sha512-j48B/ZI7VKs3sgeI2cZp7WXWmZXu7Iq5pl5/vptV5N2mq+DGFuS/ulaDjtaoLpYzuD6u8UgrUKHfgo7fDTSiBA==
 
-fuse.js@6.0.4:
-  version "6.0.4"
-  resolved "https://registry.yarnpkg.com/fuse.js/-/fuse.js-6.0.4.tgz#9f5af976f836247ad5d2c338090d6ce13cf9a4d2"
-  integrity sha512-XAeQaT+DV8dxqohN911+Qzkb4iMzTzae04mdb9/XSQbMjbsFasQxe0+UwM+3UWP+8vO7svz1Rj0KuQw6xJ45Ww==
+fuse.js@6.2.0:
+  version "6.2.0"
+  resolved "https://registry.yarnpkg.com/fuse.js/-/fuse.js-6.2.0.tgz#a54d00541e1a371c7e22d79d14cca0b62340f592"
+  integrity sha512-i8Grj5u800Nmg240pJ0h2tU/So7srYPanb2gCwnw9rcCPynH8yiudlfTJGVsYoHkYYYBtiBog/EvotduzEmDJg==
 
 gauge@~2.7.3:
   version "2.7.4"
@@ -15898,10 +15898,10 @@ remove-trailing-separator@^1.0.1, remove-trailing-separator@^1.1.0:
   resolved "https://registry.yarnpkg.com/remove-trailing-separator/-/remove-trailing-separator-1.1.0.tgz#c24bce2a283adad5bc3f58e0d48249b92379d8ef"
   integrity sha1-wkvOKig62tW8P1jg1IJJuSN52O8=
 
-renovate@21.11.1:
-  version "21.11.1"
-  resolved "https://registry.yarnpkg.com/renovate/-/renovate-21.11.1.tgz#988e7d87c3f9f0b44549727925753c3e3319a5d4"
-  integrity sha512-38UdlRg4bVetcD5uarDB59Xh7P9L/o9H2wcd08PFf3rPrK+11Fw2LeEUKlmKaFNhLOn6hfQ3mkO4N5kWNmT+RQ==
+renovate@21.12.4:
+  version "21.12.4"
+  resolved "https://registry.yarnpkg.com/renovate/-/renovate-21.12.4.tgz#8aa558b1f93dfc8bad9fbacf62b8aa8d84a99e66"
+  integrity sha512-NI32LiIaNoLLxcnW6lGd2klfLzC10EDONDMr45B6QbnqlK8nUk4ns46yAxU6fd5TQ0oRfsyB5xYfIeOrA4zM+g==
   dependencies:
     "@renovate/pep440" "0.4.1"
     "@sindresorhus/is" "2.1.1"

@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,32 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
-
-const del = require('del');
 
 /**
- * Clean up the build artifacts
- * @return {!Promise}
+ * Forces the return value from Set.prototype.add to always be the set
+ * instance. IE11 returns undefined.
+ *
+ * @param {!Window} win
  */
-async function clean() {
-  return del([
-    'dist',
-    'dist.3p',
-    'dist.tools',
-    'build',
-    '.amp-build',
-    '.karma-cache',
-    'deps.txt',
-    'build-system/runner/build',
-    'build-system/runner/dist',
-    'build-system/server/new-server/transforms/dist',
-    'test-bin',
-  ]);
+export function install(win) {
+  const {Set} = win;
+  const s = new Set();
+  if (s.add(0) !== s) {
+    const {add} = s;
+
+    win.Object.defineProperty(Set.prototype, 'add', {
+      enumerable: false,
+      configurable: true,
+      writable: true,
+      value: function () {
+        add.apply(this, arguments);
+        return this;
+      },
+    });
+  }
 }
-
-module.exports = {
-  clean,
-};
-
-clean.description = 'Removes build output';
