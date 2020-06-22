@@ -183,7 +183,9 @@ export class RequestBank {
    */
   static withdraw(requestId) {
     const url = `${REQUEST_URL}/withdraw/${requestId}/`;
-    return this.fetch_(url, 'withdraw').then((res) => res.json());
+    return this.fetch_(url, `withdraw(${requestId ?? ''})`).then((res) =>
+      res.json()
+    );
   }
 
   static tearDown() {
