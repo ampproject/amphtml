@@ -479,12 +479,6 @@ app.use('/form/verify-search-json/post', (req, res) => {
   });
 });
 
-app.use('/share-tracking/get-outgoing-fragment', (req, res) => {
-  res.json({
-    fragment: '54321',
-  });
-});
-
 // Fetches an AMP document from the AMP proxy and replaces JS
 // URLs, so that they point to localhost.
 function proxyToAmpProxy(req, res, mode) {

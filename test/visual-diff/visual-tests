@@ -666,8 +666,8 @@
       ],
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-reaction-quiz-sizing-positioning.html",
-      "name": "amp-story-reaction-quiz: sizing and positioning",
+      "url": "examples/visual-tests/amp-story/amp-story-interactive-quiz-sizing-positioning.html",
+      "name": "amp-story-interactive-quiz: sizing and positioning",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
