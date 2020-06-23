@@ -21,22 +21,17 @@
 // (2) Type 'goapp serve .' in the dist/webui_appengine directory.
 // (3) Point your web browser at http://localhost:8080/
 
-package webui
+package main
 
 import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
-
-	"appengine"
-	"appengine/urlfetch"
+	"os"
 )
-
-func init() {
-	http.HandleFunc("/", handler)
-}
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" ||
@@ -50,8 +45,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad request.", http.StatusBadRequest)
 		return
 	}
-	ctx := appengine.NewContext(r)
-	client := urlfetch.Client(ctx)
+
+	client := &http.Client {}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Bad gateway (%v)", err.Error()),
@@ -88,3 +83,16 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 	w.Write(bytes)
 }
+
+func main() {
+	http.HandleFunc("/", handler)
+
+  port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	addr := fmt.Sprintf(":%s", port)
+	log.Printf("listening on %s", addr)
+	log.Fatal(http.ListenAndServe(addr, nil))
+}
+
