@@ -32,9 +32,9 @@ Fetches content dynamically from a CORS JSON endpoint and renders it using a sup
 
 The `<amp-list>` component fetches dynamic content from a CORS JSON endpoint. The response from the endpoint contains data, which is rendered in the specified template.
 
-{% call callout('Important', type='caution') %}
+[tip type="important"]
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
-{% endcall %}
+[/tip]
 
 You can specify a template in one of two ways:
 

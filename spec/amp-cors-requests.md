@@ -144,11 +144,11 @@ For example, endpoints should allow requests from:
 
 - Google AMP Cache subdomain: `https://<publisher's domain>.cdn.ampproject.org` <br>(for example, `https://nytimes-com.cdn.ampproject.org`)
 
-{% call callout('Read on', type='read') %}
+[tip type="read-on"]
 For information on AMP Cache URL formats, see these resources:
 
 - [Google AMP Cache Overview](https://developers.google.com/amp/cache/overview)
-  {% endcall %}
+  [/tip]
 
 #### 2) Allow same-origin requests
 
@@ -179,9 +179,9 @@ Although the W3 CORS spec allows the value of <code>\*</code> to be returned in 
 
 ### Processing state changing requests
 
-{% call callout('Important', type='caution') %}
+[tip type="important"]
 Perform these validation checks _before_ you process the request. This validation helps to provide protection against CSRF attacks, and avoids processing untrusted sources requests.
-{% endcall %}
+[/tip]
 
 Before processing requests that could change the state of your system (for
 example, a user subscribes to or unsubscribes from a mailing list), check the

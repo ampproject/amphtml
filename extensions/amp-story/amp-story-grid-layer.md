@@ -79,9 +79,9 @@ Example:
 
 The following are available templates to specify for the layout of the grid layer.
 
-{% call callout('Tip', type='success') %}
-To see the layout templates in use, check out the [layouts demo on AMP By Example](https://amp.dev/documentation/examples/style-layout/amp_story_layouts/).
-{% endcall %}
+[tip type="read-on"]
+To see the layout templates in use, check out the [layouts demo](https://amp.dev/documentation/examples/style-layout/amp_story_layouts/).
+[/tip]
 
 ### fill
 

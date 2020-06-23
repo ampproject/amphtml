@@ -115,9 +115,9 @@ Example:
 </amp-selector>
 ```
 
-{% call callout('Tip', type='success') %}
-See live demos at [AMP By Example](https://amp.dev/documentation/examples/components/amp-selector/).
-{% endcall %}
+[tip type="read-on"]
+See our [`amp-selector` examples](https://amp.dev/documentation/examples/components/amp-selector/).
+[/tip]
 
 ## Attributes
 
