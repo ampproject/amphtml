@@ -18,6 +18,7 @@ import {AmpStoryReaction, ReactionType} from './amp-story-reaction';
 import {CSS} from '../../../build/amp-story-reaction-results-category-1.0.css';
 import {StateProperty} from './amp-story-store-service';
 import {htmlFor} from '../../../src/static-template';
+import {setStyle} from '../../../src/style';
 
 /**
  * Generates the template for the quiz.
@@ -30,12 +31,28 @@ const buildResultsCategoryTemplate = (element) => {
   return html`
     <div class="i-amphtml-story-reaction-results-category-container">
       <div class="i-amphtml-story-reaction-results-pre-select">
-        Come back when you're done
+        <span>Come back when you're done</span>
+        <span
+          class="i-amphtml-story-reaction-results-percentage-completed"
+        ></span>
       </div>
       <div class="i-amphtml-story-reaction-results-post-select">
-        <div class="i-amphtml-story-reaction-title">You are a</div>
-        <img class="i-amphtml-story-reaction-category-image" />
-        <div class="i-amphtml-story-reaction-category-text"></div>
+        <div class="i-amphtml-story-reaction-results-line"></div>
+        <div class="i-amphtml-story-reaction-results-visuals">
+          <div class="i-amphtml-story-reaction-results-dots"></div>
+          <div class="i-amphtml-story-reaction-results-image">
+            <div class="i-amphtml-story-reaction-results-category-image"></div>
+          </div>
+          <div class="i-amphtml-story-reaction-results-dots"></div>
+        </div>
+        <div class="i-amphtml-story-reaction-results-prompt">You are a</div>
+        <div class="i-amphtml-story-reaction-results-category-text">
+          Category
+        </div>
+        <div class="i-amphtml-story-reaction-results-category-description">
+          You love jumping around and having fun. Your bubbly personality is
+          contagious, and your love for carrots is unconditional.
+        </div>
       </div>
     </div>
   `;
@@ -66,6 +83,7 @@ export class AmpStoryReactionResultsCategory extends AmpStoryReaction {
     this.storeService_.subscribe(
       StateProperty.INTERACTION_RESULTS_STATE,
       (data) => {
+        console.log(data);
         if (data.finished) {
           this.options_.forEach((e) => {
             if (e.category == data.category) {
@@ -75,6 +93,10 @@ export class AmpStoryReactionResultsCategory extends AmpStoryReaction {
               });
             }
           });
+        } else {
+          this.rootEl_.querySelector(
+            '.i-amphtml-story-reaction-results-percentage-completed'
+          ).textContent = data.percentageCompleted + '%';
         }
       },
       true
@@ -86,11 +108,19 @@ export class AmpStoryReactionResultsCategory extends AmpStoryReaction {
    * @param {OptionConfigType} categorySelected
    */
   updateCategory(categorySelected) {
-    this.rootEl_.querySelector('.i-amphtml-story-reaction-category-image').src =
-      categorySelected.image;
+    setStyle(
+      this.rootEl_.querySelector(
+        '.i-amphtml-story-reaction-results-category-image'
+      ),
+      'background',
+      'url(' + categorySelected.image + ')'
+    );
     this.rootEl_.querySelector(
-      '.i-amphtml-story-reaction-category-text'
+      '.i-amphtml-story-reaction-results-category-text'
     ).textContent = categorySelected.text;
+    this.rootEl_.querySelector(
+      '.i-amphtml-story-reaction-results-category-description'
+    ).textContent = categorySelected.description || '';
   }
 
   /** @override */

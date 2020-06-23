@@ -20,11 +20,10 @@
     font-family: 'Poppins', sans-serif !important;
     background: var(--reaction-background-color) !important;
     border-radius: var(--reaction-chip-radius) !important;
-    color: var(--reaction-option-text-color) !important;
-    padding: 10px 20px !important;
-    font-weight: bold !important;
+    color: var(--reaction-strong-text-color) !important;
     text-align: center !important;
-    max-width: 300px !important;
+		max-width: 300px !important;
+		box-shadow: 0px 4px 8px #000000aa;
 }
 
 .i-amphtml-story-reaction-results-category-container.i-amphtml-story-reaction-post-selection .i-amphtml-story-reaction-results-pre-select {
@@ -35,11 +34,68 @@
     display: none !important;
 }
 
-.i-amphtml-story-reaction-category-image {
-    max-height: 150px !important;
-    max-width: 200px !important;
+.i-amphtml-story-reaction-results-pre-select, .i-amphtml-story-reaction-results-post-select{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+	padding: 20px 5px;
 }
 
-.i-amphtml-story-reaction-category-text {
-    color: var(--reaction-accent-color) !important;
+.i-amphtml-story-reaction-results-line {
+  background-color: var(--reaction-accent-color);
+  width: 30px;
+  height: 4px;
+  margin-bottom: 20px;
+  border-radius: 2px;
+}
+
+.i-amphtml-story-reaction-results-dots {
+  background-image: radial-gradient(var(--reaction-accent-color) 20%, transparent 25%);
+	width: 52px;
+	height: 94px;
+	background-position: top;
+  background-size: 8px 8px;
+}
+
+.i-amphtml-story-reaction-results-visuals {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.i-amphtml-story-reaction-results-category-image {
+  width: 130px;
+  height: 130px;
+  background-size: cover !important;
+  background-position: center !important;
+  border-radius: 50%;
+}
+
+.i-amphtml-story-reaction-results-image {
+  background: linear-gradient(180deg, transparent 56%, var(--reaction-accent-color) 56%);
+  margin: 0px 10px;
+  padding: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--reaction-accent-color);
+}
+
+.i-amphtml-story-reaction-results-prompt {
+  text-transform: uppercase;
+  font-size: 12px;
+  margin-top: 20px;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.i-amphtml-story-reaction-results-category-text {
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.i-amphtml-story-reaction-results-category-description {
+  font-size: 14px;
+  text-align: center;
+  color: var(--reaction-option-text-color);
+	margin-top: 8px;
+	padding: 0px 20px;
 }

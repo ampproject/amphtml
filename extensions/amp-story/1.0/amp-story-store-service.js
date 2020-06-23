@@ -238,7 +238,10 @@ const stateComparisonFunctions = {
   [StateProperty.NAVIGATION_PATH]: (old, curr) => old.length !== curr.length,
   [StateProperty.PAGE_IDS]: (old, curr) => old.length !== curr.length,
   [StateProperty.INTERACTION_RESULTS_STATE]: (old, curr) => {
-    return old.finished != curr.finished;
+    return (
+      old.finished != curr.finished ||
+      old.percentageCompleted != curr.percentageCompleted
+    );
   },
 };
 
@@ -268,6 +271,7 @@ const processInteractiveResults = (data) => {
     'category': Object.keys(categories).reduce((prev, curr) =>
       categories[prev] > categories[curr] ? prev : curr
     ),
+    'percentageCompleted': ((100 * completed) / totalCount).toFixed(0),
   };
   return result;
 };

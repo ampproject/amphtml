@@ -48,7 +48,6 @@ const TAG = 'amp-story-reaction';
 export const ReactionType = {
   QUIZ: 0,
   POLL: 1,
-  CATEGORY: 2,
 };
 
 /** @const {string} */
@@ -78,6 +77,7 @@ export let ReactionResponseType;
  *    correct: ?string,
  *    category: ?string,
  *    image: ?string,
+ * 		description: ?string,
  * }}
  */
 export let OptionConfigType;
