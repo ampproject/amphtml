@@ -1083,12 +1083,11 @@ export class AmpStory extends AMP.BaseElement {
         'amp-story-reaction-quiz, amp-story-reaction-poll'
       )
     ).forEach((element) => {
-      const tag = element.tagName.toLowerCase();
-      if (tag == 'amp-story-reaction-quiz') {
-        new AmpStoryReactionQuiz(element).updateStoryStoreState_();
-      } else if (tag == 'amp-story-reaction-poll') {
-        new AmpStoryReactionPoll(element).updateStoryStoreState_();
-      }
+      whenUpgradedToCustomElement(element).then((el) =>
+        el.getImpl().then((impl) => {
+          impl.updateStoryStoreState_();
+        })
+      );
     });
   }
 

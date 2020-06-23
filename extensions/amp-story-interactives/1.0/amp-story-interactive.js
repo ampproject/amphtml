@@ -81,6 +81,7 @@ export let InteractiveResponseType;
  *    correct: ?string,
  *    resultscategory: ?string,
  *    image: ?string,
+ * 		description: ?string,
  * }}
  */
 export let OptionConfigType;
