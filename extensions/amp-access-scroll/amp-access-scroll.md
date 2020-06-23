@@ -3,7 +3,7 @@ $category@: dynamic-content
 formats:
   - websites
 teaser:
-  text: Integrates with Scroll paywall.
+  text: Integrates with Scroll membership.
 ---
 
 <!---
