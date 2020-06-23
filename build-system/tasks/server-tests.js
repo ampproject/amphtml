@@ -89,13 +89,7 @@ async function getTransform(inputFile) {
  * @return {string}
  */
 async function getOutput(transform, input) {
-  let output;
-  try {
-    return output = await posthtml(transform).process(input).html;
-  } catch (e) {
-    console.log(e.message);
-  }
-  return output;
+  return (await posthtml(transform).process(input)).html;
 }
 
 /**
