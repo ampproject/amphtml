@@ -275,7 +275,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   /**
    * Finds the prompt and adds it to the prompt-container
    *
-   * @proteted
+   * @protected
    * @param {Element} root
    */
   attachPrompt_(root) {

@@ -66,7 +66,7 @@
   height: 100% !important;
   width: 1px !important;
   opacity: 0.3 !important;
-  background-color: var(--interactive-accent-color) !important;
+  background-color: var(--interactive-theme-border) !important;
 }
 
 .i-amphtml-story-interactive-post-selection
