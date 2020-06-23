@@ -882,23 +882,26 @@ amp-story .amp-video-eq,
   max-width: 400px !important;
 	/* Properties overrideable by user */
 	--interactive-accent-color: #005AF0;
-	--interactive-option-background-color: white;
 	--interactive-prompt-background-color: var(--interactive-accent-color);
 	--interactive-prompt-text-color: white;
-	--interactive-prompt-alignment: left;
-  /* Shared properties by components */
+	--interactive-prompt-alignment: initial;
+	/* Shared properties by components */
+	--interactive-option-accent-color: var(--interactive-accent-color);
+	--interactive-option-background-color: white !important;
   --interactive-option-text-color: #5F6368 !important;
   --interactive-theme-border: #DADCE0 !important;
   --interactive-theme-shading: #ECEDEF !important;
   --interactive-chip-radius: 32px !important;
   --interactive-chip-shadow: none !important;
   --interactive-answer-choice-border: var(--interactive-accent-color) !important;
-  --interactive-answer-choice-background: white !important;
+	--interactive-answer-choice-background: white !important;
+	--interactive-prompt-text-size: 22px;
+	--interactive-prompt-line-height: 28px;
 }
 
 .i-amphtml-story-interactive-component[theme="dark"] {
-  --interactive-option-text-color: white !important;
-  --interactive-option-background-color: #202124;
+  --interactive-option-text-color: #9AA0A6 !important;
+  --interactive-option-background-color: #202124 !important;
   --interactive-theme-border: #3C4043 !important;
   --interactive-theme-shading: #3C4043 !important;
 }
@@ -916,11 +919,16 @@ amp-story .amp-video-eq,
   --interactive-chip-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.3) !important;
 }
 
-/* Properties locked by specific components */
-amp-story-interactive-quiz {
-	--interactive-option-background-color: white !important
+.i-amphtml-story-interactive-component[prompt-size="large"] {
+	--interactive-prompt-text-size: 28px;
+	--interactive-prompt-line-height: 36px;
 }
 
-amp-story-interactive-quiz[theme="dark"] {
-	--interactive-option-background-color: #202124 !important;
+.i-amphtml-story-interactive-component[prompt-size="small"] {
+	--interactive-prompt-text-size: 18px;
+	--interactive-prompt-line-height: 24px;
+}
+
+amp-story-interactive-poll[theme="dark"] {
+	--interactive-option-accent-color: white !important;
 }
