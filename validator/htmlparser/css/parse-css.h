@@ -842,23 +842,23 @@ class AttrSelector : public Selector {
 // http://www.w3.org/TR/css3-selectors/#pseudo-elements.
 //
 // Typically written as ':visited', ':lang(fr)', and '::first-line'.
-//
-//
-// func: If it's a function style pseudo selector, like lang(fr), then func
-// the function tokens. TODO(johannes): parse this in more detail.
 class PseudoSelector : public Selector {
  public:
   // |is_class|: Pseudo selectors with a single colon (e.g., ':visited')
   // are pseudo class selectors. Selectors with two colons (e.g.,
   // '::first-line') are pseudo elements.
   // |func|: If it's a function style pseudo selector, like lang(fr), then func
-  // the function tokens. TODO(johannes): parse this in more detail.
+  // is the function tokens.
   PseudoSelector(bool is_class, const std::string& name,
                  const htmlparser::json::JsonArray& func);
   std::unique_ptr<Token> Clone() const override;
 
   htmlparser::json::JsonDict ToJson() const override;
   void Accept(SelectorVisitor* visitor) const override;
+
+  const std::string& name() const { return name_; }
+  bool is_pseudo_class() const { return is_class_; }
+  bool is_pseudo_element() const { return !is_class_; }
 
  private:
   const bool is_class_;
