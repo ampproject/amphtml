@@ -37,26 +37,17 @@ if (MY_EXPERIMENT) {
   // old code path
 }
 ```
-During transpiling, babel will replace the experiment flag with a boolean value and removed the used code path.
+During transpiling, babel will replace the experiment flag with a boolean value and removed the unused code path.
 
-The experiment flag values are default to `false`. There are two ways to set the experiment flag value during build.
-You can either use the `--define_experiment_constant` flag to set the value to `true`.
+The experiment flag values are default to `false`. You can use the `--define_experiment_constant` flag to set the value to `true`.
 
 ```
 gulp build --define_experiment_const MY_EXPERIMENT`
 ```
 
-Or you can declare the experiment flag value in the `experiments-const.js` [file](https://github.com/ampproject/amphtml/blob/master/build-system/global-configs/experiments-const.json)
-
-```
-{
-  "MY_EXPERIMENT": false,
-}
-```
-
 ### Start an Experiment
 
-Once you received approval to start a server side experiment. You can add your experiment to one of the three experiment slots under the `experiments-config.js` [file](https://github.com/ampproject/amphtml/blob/master/build-system/global-configs/experiments-config.json).
+Once you receive approval to start a server side experiment. You can add your experiment to one of the three experiment slots under the `experiments-config.js` [file](https://github.com/ampproject/amphtml/blob/master/build-system/global-configs/experiments-config.json).
 
 Example
 ```
