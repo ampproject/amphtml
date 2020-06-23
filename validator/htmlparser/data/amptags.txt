@@ -106,6 +106,7 @@ amp-reddit
 amp-riddle-quiz
 amp-script
 amp-selector
+amp-share-tracking
 amp-sidebar
 amp-skimlinks
 amp-smartlinks
