@@ -44,9 +44,7 @@ Using `<link rel="stylesheet" href="...">` is not allowed anywhere in the email.
 - [Class selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors) `.classname`
 - [ID selector](https://developer.mozilla.org/en-US/docs/Web/CSS/ID_selectors) `#idname`
 - [Universal selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Universal_selectors) `*`
-
-Warning: [Attribute selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Attribute_selectors)
-`[attr=value]` are not currently supported by all email providers.
+- [Attribute selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Attribute_selectors) `[attr=value]`
 
 ### Combinators
 
@@ -90,8 +88,13 @@ Warning: [Attribute selector](https://developer.mozilla.org/en-US/docs/Web/CSS/A
 
 ## Supported CSS properties
 
+- [`-moz-appearance`](https://developer.mozilla.org/en-US/docs/Web/CSS/appearance)
+- [`-webkit-appearance`](https://developer.mozilla.org/en-US/docs/Web/CSS/appearance)
+- [`-webkit-tap-highlight-color`](https://developer.mozilla.org/en-US/docs/Web/CSS/-webkit-tap-highlight-color)
+- [`align-content`](https://developer.mozilla.org/en-US/docs/Web/CSS/align-content)
 - [`align-items`](https://developer.mozilla.org/en-US/docs/Web/CSS/align-items)
 - [`align-self`](https://developer.mozilla.org/en-US/docs/Web/CSS/align-self)
+- [`appearance`](https://developer.mozilla.org/en-US/docs/Web/CSS/appearance)
 - [`azimuth`](https://developer.mozilla.org/en-US/docs/Web/CSS/azimuth)
 - [`background`](https://developer.mozilla.org/en-US/docs/Web/CSS/background)
 - [`background-attachment`](https://developer.mozilla.org/en-US/docs/Web/CSS/background-attachment)
@@ -184,6 +187,7 @@ Warning: [Attribute selector](https://developer.mozilla.org/en-US/docs/Web/CSS/A
 - [`font-variant-numeric`](https://developer.mozilla.org/en-US/docs/Web/CSS/font-variant-numeric)
 - [`font-variation-settings`](https://developer.mozilla.org/en-US/docs/Web/CSS/font-variation-settings)
 - [`font-weight`](https://developer.mozilla.org/en-US/docs/Web/CSS/font-weight)
+- [`gap`](https://developer.mozilla.org/en-US/docs/Web/CSS/gap)
 - [`grid`](https://developer.mozilla.org/en-US/docs/Web/CSS/grid)
 - [`grid-area`](https://developer.mozilla.org/en-US/docs/Web/CSS/grid-area)
 - [`grid-auto-columns`](https://developer.mozilla.org/en-US/docs/Web/CSS/grid-auto-columns)
@@ -257,6 +261,7 @@ Warning: [Attribute selector](https://developer.mozilla.org/en-US/docs/Web/CSS/A
 - [`resize`](https://developer.mozilla.org/en-US/docs/Web/CSS/resize)
 - `richness`
 - [`right`](https://developer.mozilla.org/en-US/docs/Web/CSS/right)
+- [`row-gap`](https://developer.mozilla.org/en-US/docs/Web/CSS/row-gap)
 - `speak`
 - `speak-header`
 - `speak-numeral`
