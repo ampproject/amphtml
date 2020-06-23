@@ -882,7 +882,7 @@ amp-story .amp-video-eq,
   max-width: 400px !important;
 	/* Properties overrideable by user */
 	--interactive-accent-color: #005AF0;
-	--interactive-background-color: white;
+	--interactive-option-background-color: white;
 	--interactive-prompt-background-color: var(--interactive-accent-color);
 	--interactive-prompt-text-color: white;
 	--interactive-prompt-alignment: left;
@@ -898,7 +898,7 @@ amp-story .amp-video-eq,
 
 .i-amphtml-story-interactive-component[theme="dark"] {
   --interactive-option-text-color: white !important;
-  --interactive-background-color: #202124;
+  --interactive-option-background-color: #202124;
   --interactive-theme-border: #3C4043 !important;
   --interactive-theme-shading: #3C4043 !important;
 }
@@ -918,9 +918,9 @@ amp-story .amp-video-eq,
 
 /* Properties locked by specific components */
 amp-story-interactive-quiz {
-	--interactive-background-color: white !important
+	--interactive-option-background-color: white !important
 }
 
 amp-story-interactive-quiz[theme="dark"] {
-	--interactive-background-color: #202124 !important;
+	--interactive-option-background-color: #202124 !important;
 }
