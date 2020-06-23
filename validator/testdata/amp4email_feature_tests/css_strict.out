@@ -47,7 +47,17 @@ amp4email_feature_tests/css_strict.html:34:4 CSS syntax error in tag 'style amp-
 >>       ^~~~~~~~~
 amp4email_feature_tests/css_strict.html:37:6 CSS error in tag 'style amp-custom' - disallowed attribute selector 'invalid'.
 |      .a:invalid {}
+>>       ^~~~~~~~~
+amp4email_feature_tests/css_strict.html:38:6 CSS error in tag 'style amp-custom' - disallowed pseudo class 'invalid'.
 |      .a::invalid {}
+>>       ^~~~~~~~~
+amp4email_feature_tests/css_strict.html:39:6 CSS error in tag 'style amp-custom' - disallowed pseudo element 'invalid'.
+|      :invalid {}
+>>     ^~~~~~~~~
+amp4email_feature_tests/css_strict.html:40:4 CSS error in tag 'style amp-custom' - disallowed pseudo class 'invalid'.
+|      .a[id]:invalid {}
+>>           ^~~~~~~~~
+amp4email_feature_tests/css_strict.html:41:10 CSS error in tag 'style amp-custom' - disallowed pseudo class 'invalid'.
 |
 |      .a[active] {}
 |      .a[alt] {}
@@ -87,6 +97,25 @@ amp4email_feature_tests/css_strict.html:37:6 CSS error in tag 'style amp-custom'
 |      .a[type] {}
 |      .a[value] {}
 |      .a[width] {}
+|
+|      /* Vendor prefixes are not automatically expanded */
+|      .a { margin: 1px; }
+|      .a { -webkit-margin: 1px; }
+>>          ^~~~~~~~~
+amp4email_feature_tests/css_strict.html:84:9 CSS syntax error in tag 'style amp-custom' - invalid property '-webkit-margin'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
+|
+|      /* Three specific prefixes are explicitly allowlisted */
+|      .a {
+|        -moz-appearance: foo;
+|        -webkit-appearance: foo;
+|        -webkit-tap-highlight-color: foo;
+|      }
+|
+|      /* Not all properties are automatically allowed */
+|      .a { invalid: 1px; }
+>>          ^~~~~~~~~
+amp4email_feature_tests/css_strict.html:94:9 CSS syntax error in tag 'style amp-custom' - invalid property 'invalid'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
+|
 |    </style>
 |  </head>
 |  <body>
