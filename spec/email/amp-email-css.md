@@ -44,8 +44,7 @@ Using `<link rel="stylesheet" href="...">` is not allowed anywhere in the email.
 - [Class selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors) `.classname`
 - [ID selector](https://developer.mozilla.org/en-US/docs/Web/CSS/ID_selectors) `#idname`
 - [Universal selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Universal_selectors) `*`
-- [Attribute selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Attribute_selectors)
-`[attr=value]`
+- [Attribute selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Attribute_selectors) `[attr=value]`
 
 ### Combinators
 
