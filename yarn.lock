@@ -11619,6 +11619,11 @@ karma-source-map-support@1.4.0:
   dependencies:
     source-map-support "^0.5.5"
 
+karma-structured-json-reporter@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/karma-structured-json-reporter/-/karma-structured-json-reporter-1.0.1.tgz#1d6409ea65c0168b345caf77d3d2bd9f4ced15d5"
+  integrity sha1-HWQJ6mXAFos0XK9309K9n0ztFdU=
+
 karma-super-dots-reporter@0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/karma-super-dots-reporter/-/karma-super-dots-reporter-0.2.0.tgz#71c3ac8ee0b7353ef2234fe43815f740d254544a"
