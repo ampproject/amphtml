@@ -4696,6 +4696,11 @@ tags: {
     value: "async"
     mandatory: true
   }
+  attrs: {
+    name: "loading"
+    value: "lazy"
+    mandatory: true
+  }
 }
 
 # AMP Layout attributes: implied for TagSpecs with amp_layout field
