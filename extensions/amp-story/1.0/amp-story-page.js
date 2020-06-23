@@ -67,7 +67,7 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
-import {getData, listen} from '../../../src/event-helper';
+import {getData, listen, listenOnce} from '../../../src/event-helper';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getLocalizationService} from './amp-story-localization-service';
 import {getLogEntries} from './logging';
@@ -263,8 +263,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
     this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.win.document));
 
-    const deferred = new Deferred();
-
     /** @private @const {!./media-performance-metrics-service.MediaPerformanceMetricsService} */
     this.mediaPerformanceMetricsService_ = getMediaPerformanceMetricsService(
       this.win
@@ -276,14 +274,16 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?Promise} */
     this.registerAllMediaPromise_ = null;
 
+    const mediaPoolDeferred = new Deferred();
+
     /** @private @const {!Promise<!MediaPool>} */
-    this.mediaPoolPromise_ = deferred.promise;
+    this.mediaPoolPromise_ = mediaPoolDeferred.promise;
 
     /** @private @const {!function(!MediaPool)} */
-    this.mediaPoolResolveFn_ = deferred.resolve;
+    this.mediaPoolResolveFn_ = mediaPoolDeferred.resolve;
 
     /** @private @const {!function(*)} */
-    this.mediaPoolRejectFn_ = deferred.reject;
+    this.mediaPoolRejectFn_ = mediaPoolDeferred.reject;
 
     /** @private {!PageState} */
     this.state_ = PageState.NOT_ACTIVE;
@@ -513,6 +513,7 @@ export class AmpStoryPage extends AMP.BaseElement {
             }
           });
         this.startMeasuringVideoPerformance_();
+        this.checkPageHasAudio_();
         this.preloadAllMedia_()
           .then(() => this.startListeningToVideoEvents_())
           .then(() => this.playAllMedia_());
@@ -520,7 +521,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.prefersReducedMotion_()
         ? this.maybeFinishAnimations_()
         : this.maybeStartAnimations_();
-      this.checkPageHasAudio_();
       this.checkPageHasElementWithPlayback_();
       this.renderOpenAttachmentUI_();
       this.findAndPrepareEmbeddedComponents_();
@@ -1436,32 +1436,6 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Checks if the page has any audio.
-   * @private
-   */
-  checkPageHasAudio_() {
-    const pageHasAudio =
-      this.element.hasAttribute('background-audio') ||
-      this.element.querySelector('amp-audio') ||
-      this.hasVideoWithAudio_();
-
-    this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, pageHasAudio);
-  }
-
-  /**
-   * Checks if the page has any videos with audio.
-   * @return {boolean}
-   * @private
-   */
-  hasVideoWithAudio_() {
-    const ampVideoEls = this.element.querySelectorAll('amp-video');
-    return Array.prototype.some.call(
-      ampVideoEls,
-      (video) => !video.hasAttribute('noaudio')
-    );
-  }
-
-  /**
    * Checks if the page has elements with playback.
    * @private
    */
@@ -1575,6 +1549,70 @@ export class AmpStoryPage extends AMP.BaseElement {
       );
     });
   }
+
+  checkPageHasAudio_() {
+    new Promise((resolveHasAudio) => {
+      const pageHasAudio =
+        this.element.hasAttribute('background-audio') ||
+        this.element.querySelector('amp-audio');
+      console.log('HERE');
+      if (pageHasAudio) {
+        console.log('HERE', 1, true);
+        resolveHasAudio(true);
+        return;
+      }
+
+      const ampVideoEls = this.element.querySelectorAll('amp-video');
+      const hasAtLeastOneWithoutNoAudio = Array.prototype.some.call(
+        ampVideoEls,
+        (video) => !video.hasAttribute('noaudio')
+      );
+
+      if (!hasAtLeastOneWithoutNoAudio) {
+        console.log('HERE', 2, false);
+        resolveHasAudio(false);
+        return;
+      }
+
+      const videoEls = this.getAllVideos_();
+      console.log('HERE', 6, videoEls);
+      let playingCount = 0;
+      Array.prototype.forEach.call(videoEls, (videoEl) => {
+        console.log('HERE listen');
+        listenOnce(videoEl, 'playing', () => {
+          console.log('HERE', 0, undefined);
+          if ('webkitAudioDecodedByteCount' in videoEl) {
+            if (videoEl.webkitAudioDecodedByteCount > 0) {
+              console.log('HERE', 3, true);
+              resolveHasAudio(true);
+              return;
+            }
+          }
+          if ('mozHasAudio' in videoEl) {
+            if (videoEl['mozHasAudio']) {
+              console.log('HERE', 4, true);
+              resolveHasAudio(true);
+              return;
+            }
+          }
+          if (++playingCount == videoEls.length) {
+            console.log('HERE', 5, false);
+            resolveHasAudio(false);
+            return;
+          }
+        });
+      });
+    }).then((hasAudio) => {
+      this.storeService_.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, hasAudio);
+    });
+  }
+
+  /**
+   * Checks if the page has any videos with audio.
+   * @return {boolean}
+   * @private
+   */
+  hasVideoWithAudio_() {}
 
   /**
    * @private
