@@ -32,7 +32,7 @@ export function advertserve(global, data) {
     let params = '';
     for (let i = 1; i <= 10; i++) {
       const fieldName = 'custom' + i;
-      if (data[fieldName]) {
+      if (data[fieldName] !== undefined) {
         params += '&' + fieldName + '=' + encodeURIComponent(data[fieldName]);
       }
     }
