@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {AmpStoryPlayerManager} from '../amp-story-player-manager';
+import {AmpStoryComponentManager} from '../amp-story-component-manager';
 
 self.onload = () => {
-  const manager = new AmpStoryPlayerManager(self);
+  const manager = new AmpStoryComponentManager(self);
   manager.loadEntryPoints();
 };

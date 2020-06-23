@@ -22,7 +22,7 @@ import {throttle} from '../utils/rate-limit';
 /** @const {string} */
 const SCROLL_THROTTLE_MS = 500;
 
-export class AmpStoryPlayerManager {
+export class AmpStoryComponentManager {
   /**
    * @param {!Window} win
    * @constructor
