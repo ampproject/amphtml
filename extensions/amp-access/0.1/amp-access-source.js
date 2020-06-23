@@ -278,7 +278,12 @@ export class AccessSource {
    * @private
    */
   analyticsEvent_(eventType) {
-    triggerAnalyticsEvent(this.getRootElement_(), eventType);
+    triggerAnalyticsEvent(
+      this.getRootElement_(),
+      eventType,
+      /** vars */ undefined,
+      /** enableDataVars */ false
+    );
   }
 
   /**
@@ -303,7 +308,7 @@ export class AccessSource {
    * @return {!Promise<string>}
    */
   buildUrl(url, useAuthData) {
-    return this.prepareUrlVars_(useAuthData).then(vars => {
+    return this.prepareUrlVars_(useAuthData).then((vars) => {
       return this.urlReplacements_.expandUrlAsync(url, vars);
     });
   }
@@ -314,7 +319,7 @@ export class AccessSource {
    * @return {!Promise<!Object<string, *>>}
    */
   collectUrlVars(url, useAuthData) {
-    return this.prepareUrlVars_(useAuthData).then(vars => {
+    return this.prepareUrlVars_(useAuthData).then((vars) => {
       return this.urlReplacements_.collectVars(url, vars);
     });
   }
@@ -325,13 +330,13 @@ export class AccessSource {
    * @private
    */
   prepareUrlVars_(useAuthData) {
-    return this.getReaderId_().then(readerId => {
+    return this.getReaderId_().then((readerId) => {
       const vars = {
         'READER_ID': readerId,
         'ACCESS_READER_ID': readerId, // A synonym.
       };
       if (useAuthData) {
-        vars['AUTHDATA'] = field => {
+        vars['AUTHDATA'] = (field) => {
           if (this.authResponse_) {
             return getValueForExpr(this.authResponse_, field);
           }
@@ -355,7 +360,7 @@ export class AccessSource {
       return Promise.resolve();
     }
 
-    const responsePromise = this.adapter_.authorize().catch(error => {
+    const responsePromise = this.adapter_.authorize().catch((error) => {
       this.analyticsEvent_('access-authorization-failed');
       if (this.authorizationFallbackResponse_ && !opt_disableFallback) {
         // Use fallback.
@@ -368,13 +373,13 @@ export class AccessSource {
     });
 
     const promise = responsePromise
-      .then(response => {
+      .then((response) => {
         dev().fine(TAG, 'Authorization response: ', response);
         this.setAuthResponse_(response);
         this.buildLoginUrls_();
         return response;
       })
-      .catch(error => {
+      .catch((error) => {
         user().error(TAG, 'Authorization failed: ', error);
         this.firstAuthorizationResolver_();
         throw error;
@@ -402,7 +407,7 @@ export class AccessSource {
         dev().fine(TAG, 'Pingback complete');
         this.analyticsEvent_('access-pingback-sent');
       })
-      .catch(error => {
+      .catch((error) => {
         this.analyticsEvent_('access-pingback-failed');
         throw user().createError('Pingback failed: ', error);
       });
@@ -479,7 +484,7 @@ export class AccessSource {
     this.loginAnalyticsEvent_(eventLabel, 'started');
     const dialogPromise = this.openLoginDialog_(loginUrl);
     const loginPromise = dialogPromise
-      .then(result => {
+      .then((result) => {
         dev().fine(TAG, 'Login dialog completed: ', eventLabel, result);
         this.loginPromise_ = null;
         const query = parseQueryString(result);
@@ -505,7 +510,7 @@ export class AccessSource {
           });
         }
       })
-      .catch(reason => {
+      .catch((reason) => {
         dev().fine(TAG, 'Login dialog failed: ', eventLabel, reason);
         this.loginAnalyticsEvent_(eventLabel, 'failed');
         if (this.loginPromise_ == loginPromise) {
@@ -542,7 +547,7 @@ export class AccessSource {
     for (const k in this.loginConfig_) {
       promises.push(
         this.buildUrl(this.loginConfig_[k], /* useAuthData */ true).then(
-          url => {
+          (url) => {
             this.loginUrlMap_[k] = url;
             return {type: k, url};
           }

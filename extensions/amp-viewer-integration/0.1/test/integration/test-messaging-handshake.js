@@ -50,13 +50,13 @@ describes.sandboxed('AmpViewerMessagingIntegration', {}, () => {
           viewerIframe.contentWindow,
           iframeOrigin
         )
-          .then(messaging => {
+          .then((messaging) => {
             messaging.setDefaultHandler(() => Promise.resolve());
-            return new Promise(resolve =>
+            return new Promise((resolve) =>
               messaging.registerHandler('documentLoaded', resolve)
             );
           })
-          .then(name => {
+          .then((name) => {
             expect(name).to.equal('documentLoaded');
           });
       });
@@ -76,13 +76,13 @@ describes.sandboxed('AmpViewerMessagingIntegration', {}, () => {
           'null',
           'test-token'
         )
-          .then(messaging => {
+          .then((messaging) => {
             messaging.setDefaultHandler(() => Promise.resolve());
-            return new Promise(resolve =>
+            return new Promise((resolve) =>
               messaging.registerHandler('documentLoaded', resolve)
             );
           })
-          .then(name => {
+          .then((name) => {
             expect(name).to.equal('documentLoaded');
           });
       });
@@ -100,14 +100,14 @@ describes.sandboxed('AmpViewerMessagingIntegration', {}, () => {
           viewerIframe.contentWindow,
           iframeOrigin,
           'bar'
-        ).then(messaging => {
+        ).then((messaging) => {
           const handlerStub = window.sandbox.stub();
           messaging.setDefaultHandler(handlerStub);
           expect(handlerStub).to.not.have.been.called;
         });
       });
 
-      it('should perform polling handshake', function() {
+      it('should perform polling handshake', function () {
         this.timeout(5000);
 
         const params = serializeQueryString({
@@ -120,13 +120,13 @@ describes.sandboxed('AmpViewerMessagingIntegration', {}, () => {
         return Messaging.initiateHandshakeWithDocument(
           viewerIframe.contentWindow
         )
-          .then(messaging => {
+          .then((messaging) => {
             messaging.setDefaultHandler(() => Promise.resolve());
-            return new Promise(resolve =>
+            return new Promise((resolve) =>
               messaging.registerHandler('documentLoaded', resolve)
             );
           })
-          .then(name => {
+          .then((name) => {
             expect(name).to.equal('documentLoaded');
           });
       });

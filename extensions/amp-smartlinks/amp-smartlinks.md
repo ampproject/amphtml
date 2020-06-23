@@ -23,22 +23,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-smartlinks"></a> `amp-smartlinks`
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Run Narrativ's Linkmate process inside your AMP page</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-smartlinks" src="https://cdn.ampproject.org/v0/amp-smartlinks-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-</table>
+# amp-smartlinks
 
 ## Overview
 

@@ -33,8 +33,8 @@ export function conative(global, data) {
   window.dmConativeData.preview = window.dmConativeData.preview || data.preview;
   window.dmConativeData.visibility = window.dmConativeData.visibility || 0;
 
-  window.context.observeIntersection(function(changes) {
-    changes.forEach(function(c) {
+  window.context.observeIntersection(function (changes) {
+    /** @type {!Array} */ (changes).forEach(function (c) {
       window.dmConativeData.visibility = parseInt(
         (c.intersectionRect.height / c.boundingClientRect.height) * 100,
         10

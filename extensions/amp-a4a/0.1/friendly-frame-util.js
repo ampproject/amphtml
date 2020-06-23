@@ -61,7 +61,7 @@ export function renderCreativeIntoFriendlyFrame(
 
   const fontsArray = [];
   if (creativeMetadata.customStylesheets) {
-    creativeMetadata.customStylesheets.forEach(s => {
+    creativeMetadata.customStylesheets.forEach((s) => {
       const href = s['href'];
       if (href) {
         fontsArray.push(href);
@@ -88,7 +88,7 @@ export function renderCreativeIntoFriendlyFrame(
         new A4AVariableSource(parentAmpdoc, embedWin)
       );
     }
-  ).then(friendlyIframeEmbed => {
+  ).then((friendlyIframeEmbed) => {
     setFriendlyIframeEmbedVisible(friendlyIframeEmbed, element.isInViewport());
     // Ensure visibility hidden has been removed (set by boilerplate).
     const frameDoc =

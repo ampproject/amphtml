@@ -42,6 +42,6 @@ export class AmpViewerGpayInline extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-viewer-gpay-inline', '0.1', AMP => {
+AMP.extension('amp-viewer-gpay-inline', '0.1', (AMP) => {
   AMP.registerElement('amp-viewer-gpay-inline', AmpViewerGpayInline);
 });

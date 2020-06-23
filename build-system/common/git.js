@@ -65,15 +65,22 @@ function shortSha(sha) {
 }
 
 /**
+ * Returns the list of files changed but not committed to the local branch, one
+ * on each line.
+ * @return {!Array<string>}
+ */
+function gitDiffNameOnly() {
+  return getStdout('git diff --name-only').trim().split('\n');
+}
+
+/**
  * Returns the list of files changed relative to the branch point off of master,
  * one on each line.
  * @return {!Array<string>}
  */
 function gitDiffNameOnlyMaster() {
   const masterBaseline = gitMasterBaseline();
-  return getStdout(`git diff --name-only ${masterBaseline}`)
-    .trim()
-    .split('\n');
+  return getStdout(`git diff --name-only ${masterBaseline}`).trim().split('\n');
 }
 
 /**
@@ -162,12 +169,36 @@ function gitCommitterEmail() {
 }
 
 /**
- * Returns the timestamp of the latest commit on the local branch.
- * @return {number}
+ * Returns list of commit SHAs and their cherry-pick status from master.
+ *
+ * `git cherry <branch>` returns a list of commit SHAs. While the exact
+ * mechanism is too complicated for this comment (run `git help cherry` for a
+ * full explanation), the gist of it is that commits that were cherry-picked
+ * from <branch> are prefixed with '- ', and those that were not are prefixed
+ * with '+ '.
+ *
+ * @return {!Array<{sha: string, isCherryPick: boolean}>}
  */
-function gitCommitFormattedTime() {
+function gitCherryMaster() {
+  return getStdout('git cherry master')
+    .trim()
+    .split('\n')
+    .map((line) => ({
+      isCherryPick: line.substring(0, 2) == '- ',
+      sha: line.substring(2),
+    }));
+}
+
+/**
+ * Returns (UTC) time of a commit on the local branch, in %y%m%d%H%M%S format.
+ *
+ * @param {string} ref a Git reference (commit SHA, branch name, etc.) for the
+ *   commit to get the time of.
+ * @return {string}
+ */
+function gitCommitFormattedTime(ref = 'HEAD') {
   return getStdout(
-    'TZ=UTC git log -1 --pretty="%cd" --date=format-local:%y%m%d%H%M%S'
+    `TZ=UTC git log ${ref} -1 --pretty="%cd" --date=format-local:%y%m%d%H%M%S`
   ).trim();
 }
 
@@ -204,6 +235,7 @@ function gitDiffPath(path, commit) {
 module.exports = {
   gitBranchCreationPoint,
   gitBranchName,
+  gitCherryMaster,
   gitCommitFormattedTime,
   gitCommitHash,
   gitCommitterEmail,
@@ -211,6 +243,7 @@ module.exports = {
   gitDiffColor,
   gitDiffCommitLog,
   gitDiffFileMaster,
+  gitDiffNameOnly,
   gitDiffNameOnlyMaster,
   gitDiffPath,
   gitDiffStatMaster,

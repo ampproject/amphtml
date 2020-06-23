@@ -34,8 +34,7 @@ const {isTravisPullRequestBuild} = require('../common/travis');
 
 const FILENAME = 'e2e-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd, unusedFileName) =>
-  timedExecOrDieBase(cmd, FILENAME);
+const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
@@ -43,7 +42,7 @@ async function main() {
   if (!isTravisPullRequestBuild()) {
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp e2e --nobuild --headless');
+    timedExecOrDie('gulp e2e --nobuild --headless --compiled');
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
@@ -54,7 +53,7 @@ async function main() {
     ) {
       downloadDistOutput(FILENAME);
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp e2e --nobuild --headless');
+      timedExecOrDie('gulp e2e --nobuild --headless --compiled');
     } else {
       console.log(
         `${FILELOGPREFIX} Skipping`,

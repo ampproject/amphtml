@@ -25,20 +25,7 @@ limitations under the License.
 
 # amp-experiment
 
-Conduct user experience experiments (such as A/B testing and multivariate testing) on an AMP document and collect corresponding data with <code>amp-pixel</code> or <code>amp-analytics</code>.
-
-<table>
-  <tr>
-    <td><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-experiment" src="https://cdn.ampproject.org/v0/amp-experiment-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-experiment/">amp-experiment example</a>.</td>
-  </tr>
-</table>
-
-[TOC]
+Conduct user experience experiments (such as A/B testing and multivariate testing) on an AMP document and collect corresponding data with `amp-pixel` or `amp-analytics`.
 
 ## Behavior
 

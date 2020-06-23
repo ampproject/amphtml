@@ -58,7 +58,7 @@ describes.realWin(
     },
     allowExternalResources: true,
   },
-  env => {
+  (env) => {
     let ad3p;
     let win;
     let registryBackup;
@@ -66,7 +66,7 @@ describes.realWin(
 
     beforeEach(() => {
       registryBackup = Object.create(null);
-      Object.keys(adConfig).forEach(k => {
+      Object.keys(adConfig).forEach((k) => {
         registryBackup[k] = adConfig[k];
         delete adConfig[k];
       });
@@ -82,7 +82,7 @@ describes.realWin(
     });
 
     afterEach(() => {
-      Object.keys(registryBackup).forEach(k => {
+      Object.keys(registryBackup).forEach((k) => {
         adConfig[k] = registryBackup[k];
       });
       registryBackup = null;
@@ -200,7 +200,7 @@ describes.realWin(
         });
       });
 
-      it('should allow position:fixed with whitelisted ad container', () => {
+      it('should allow position:fixed with an allowed ad container', () => {
         const adContainerElement = win.document.createElement('amp-sticky-ad');
         adContainerElement.style.position = 'fixed';
         win.document.body.appendChild(adContainerElement);
@@ -270,11 +270,11 @@ describes.realWin(
         });
 
         it('should noop pause', () => {
-          expect(() => ad3p.pauseCallback()).to.not.throw;
+          expect(() => ad3p.pauseCallback()).to.not.throw();
         });
 
         it('should noop resume', () => {
-          expect(() => ad3p.resumeCallback()).to.not.throw;
+          expect(() => ad3p.resumeCallback()).to.not.throw();
         });
       });
 
@@ -330,7 +330,7 @@ describes.realWin(
           expect(fetches).to.have.length(2);
           expect(
             Array.from(fetches)
-              .map(link => link.href)
+              .map((link) => link.href)
               .sort()
           ).to.jsonEqual([
             'http://ads.localhost:9876/dist.3p/current/frame.max.html',
@@ -358,7 +358,7 @@ describes.realWin(
         return whenFirstVisible.then(() => {
           expect(
             Array.from(win.document.querySelectorAll('link[rel=preload]')).some(
-              link => link.href == `${remoteUrl}?$internalRuntimeVersion$`
+              (link) => link.href == `${remoteUrl}?$internalRuntimeVersion$`
             )
           ).to.be.true;
         });
@@ -377,7 +377,7 @@ describes.realWin(
         return whenFirstVisible.then(() => {
           expect(
             Array.from(win.document.querySelectorAll('link[rel=preload]')).some(
-              link =>
+              (link) =>
                 link.href ==
                 'http://ads.localhost:9876/dist.3p/current/frame.max.html'
             )
@@ -405,7 +405,7 @@ describes.realWin(
         }
       );
 
-      it('should only allow rendering one ad per second', function*() {
+      it('should only allow rendering one ad per second', function* () {
         const clock = lolex.install({
           target: win,
           toFake: ['Date', 'setTimeout', 'clearTimeout'],
@@ -427,7 +427,7 @@ describes.realWin(
         expect(ad3p2.renderOutsideViewport()).to.equal(3);
       });
 
-      it('should only allow rendering one ad a time', function*() {
+      it('should only allow rendering one ad a time', function* () {
         const ad3p2 = createAmpAd(win);
         expect(ad3p.renderOutsideViewport()).to.equal(3);
         expect(ad3p2.renderOutsideViewport()).to.equal(3);
@@ -678,7 +678,7 @@ describe('#getLayoutPriority', () => {
         ampdoc: 'shadow',
       },
     },
-    env => {
+    (env) => {
       it('should return priority of 1', () => {
         const ad3p = createAmpAd(env.ampdoc.win, /*attach*/ true, env.ampdoc);
         expect(ad3p.getLayoutPriority()).to.equal(LayoutPriority.METADATA);
@@ -693,7 +693,7 @@ describe('#getLayoutPriority', () => {
         ampdoc: 'single',
       },
     },
-    env => {
+    (env) => {
       it('should return priority of 2', () => {
         const ad3p = createAmpAd(env.ampdoc.win, /*attach*/ true, env.ampdoc);
         expect(ad3p.getLayoutPriority()).to.equal(LayoutPriority.ADS);

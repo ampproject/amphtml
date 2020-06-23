@@ -22,7 +22,7 @@ import {getScopeElements} from './scope';
 const WL_ANCHOR_ATTR = ['href', 'id', 'rel', 'rev'];
 const PREFIX_DATA_ATTR = /^vars(.+)/;
 const REG_DOMAIN_URL = /^(?:https?:)?(?:\/\/)?([^\/?]+)/i;
-const PAGE_PROP_WHITELIST = {
+const PAGE_PROP_ALLOWLIST = {
   'SOURCE_URL': true,
   'DOCUMENT_REFERRER': true,
 };
@@ -112,7 +112,7 @@ export class LinkRewriter {
       return true;
     }
 
-    const filtered = this.listElements_.filter(element => {
+    const filtered = this.listElements_.filter((element) => {
       return element === anchor;
     });
 
@@ -132,7 +132,7 @@ export class LinkRewriter {
   isInternalLink_(htmlElement, trimmedDomains) {
     const {href} = htmlElement;
 
-    return trimmedDomains.some(domain => {
+    return trimmedDomains.some((domain) => {
       const domainHrefMatch = href.match(REG_DOMAIN_URL);
       if (!domainHrefMatch) {
         return true;
@@ -162,8 +162,7 @@ export class LinkRewriter {
       this.rewrittenUrl_,
       /** expandUrlSync doesn't fill DOCUMENT_REFERRER so we pass it*/
       {DOCUMENT_REFERRER: this.referrer_},
-      undefined,
-      PAGE_PROP_WHITELIST
+      PAGE_PROP_ALLOWLIST
     );
   }
 
@@ -176,7 +175,7 @@ export class LinkRewriter {
     /**
      * Merge vars with attributes of the anchor element
      */
-    WL_ANCHOR_ATTR.forEach(val => {
+    WL_ANCHOR_ATTR.forEach((val) => {
       if (htmlElement.getAttribute(val)) {
         vars[val] = htmlElement.getAttribute(val);
       }
@@ -197,15 +196,13 @@ export class LinkRewriter {
     Object.assign(vars, dataset);
 
     /** add a random value to be use in the output pattern */
-    vars['random'] = Math.random()
-      .toString(32)
-      .substr(2);
+    vars['random'] = Math.random().toString(32).substr(2);
 
     /**
      * Replace placeholders for properties of the document, anchor attributes
      * and 'vars config property' all of them merged in vars
      */
-    Object.keys(vars).forEach(key => {
+    Object.keys(vars).forEach((key) => {
       if (vars[key]) {
         this.rewrittenUrl_ = this.rewrittenUrl_.replace(
           '${' + key + '}',

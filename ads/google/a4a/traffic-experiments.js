@@ -39,16 +39,6 @@ export let A4aExperimentBranches;
 export const MANUAL_EXPERIMENT_ID = '117152632';
 
 /**
- * Experiment IDs used to identify single pass experiments.
- *
- * @enum {string}
- */
-export const SINGLE_PASS_EXPERIMENT_IDS = {
-  MULTI_PASS: '21063529',
-  SINGLE_PASS: '21063530',
-};
-
-/**
  * @param {!Window} win
  * @param {!Element} element Ad tag Element.
  * @return {?string} experiment extracted from page url.
@@ -71,7 +61,7 @@ export function extractUrlExperimentId(win, element) {
   let arg;
   let match;
   expKeys.forEach(
-    key =>
+    (key) =>
       (arg =
         arg ||
         ((match = new RegExp(`(?:^|,)${key}:(-?\\d+)`).exec(expParam)) &&
@@ -112,7 +102,7 @@ export function parseExperimentIds(idString) {
  */
 export function isInExperiment(element, id) {
   return parseExperimentIds(element.getAttribute(EXPERIMENT_ATTRIBUTE)).some(
-    x => {
+    (x) => {
       return x === id;
     }
   );
@@ -140,7 +130,7 @@ export function isInManualExperiment(element) {
  * @return {boolean} Whether all list elements are valid experiment IDs.
  */
 export function validateExperimentIds(idList) {
-  return idList.every(id => {
+  return idList.every((id) => {
     return !isNaN(parseInt(id, 10));
   });
 }

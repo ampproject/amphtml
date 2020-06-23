@@ -143,6 +143,7 @@ The following video player libraries have contributed copy and paste-able playba
 
 ##### [JwPlayer](https://developer.jwplayer.com/jwplayer/docs)
 
+
 The `amp` object sets up a [JwPlayer instance](https://developer.jwplayer.com/jw-player/docs/javascript-api-reference/) by using `listenTo('jwplayer')`. If you're embedding your player using a video-specific script, you only need to register for Jwplayer usage:
 
 ```html

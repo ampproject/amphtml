@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,51 +14,30 @@
  * limitations under the License.
  */
 
-import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
+import {AnalyticsConfig} from '../config';
 import {ExpansionOptions, variableServiceForDoc} from '../variables';
-//import {IFRAME_TRANSPORTS} from '../iframe-transport-vendors';
+import {IFRAME_TRANSPORTS} from '../iframe-transport-vendors';
 import {
   ImagePixelVerifier,
   mockWindowInterface,
 } from '../../../../testing/test-helper';
 import {Services} from '../../../../src/services';
-//import {hasOwn} from '../../../../src/utils/object';
+import {hasOwn} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
-
-// TODO(zhouyx@): Remove after ANALYTICS_VENDOR_SPLIT clean up
 
 /* global require: false */
 const VENDOR_REQUESTS = require('./vendor-requests.json');
-const AnalyticsConfig = {...ANALYTICS_CONFIG};
 
-// TODO(zhouyx@) Fix the "describe block" if we are going to revert the test
-// "Top-level "describe" blocks in test files have been deprecated"
-
-// describe.skip('iframe transport', () => {
-//   it('Should not contain iframe transport if not whitelisted', () => {
-//     for (const vendor in AnalyticsConfig) {
-//       const vendorEntry = AnalyticsConfig[vendor];
-//       if (
-//         hasOwn(vendorEntry, 'transport') &&
-//         hasOwn(vendorEntry.transport, 'iframe')
-//       ) {
-//         expect(vendorEntry['transport']['iframe']).to.equal(
-//           IFRAME_TRANSPORTS[vendor]
-//         );
-//       }
-//     }
-//   });
-// });
-
-describes.realWin.skip(
+describes.realWin(
   'amp-analytics',
   {
     amp: {
       extensions: ['amp-analytics'],
     },
+    mockFetch: false,
   },
-  function(env) {
+  function (env) {
     let win, doc;
     let requestVerifier;
     let elementMacros;
@@ -75,189 +54,201 @@ describes.realWin.skip(
       };
     });
 
-    function getAnalyticsTag(config, attrs) {
-      config['transport'] = {
-        xhrpost: false,
-        beacon: false,
-      };
-      config = JSON.stringify(config);
-      const el = doc.createElement('amp-analytics');
-      const script = doc.createElement('script');
-      script.textContent = config;
-      script.setAttribute('type', 'application/json');
-      el.appendChild(script);
-      for (const k in attrs) {
-        el.setAttribute(k, attrs[k]);
+    describe('Should not contain iframe transport if not allowlisted', () => {
+      for (const vendor in VENDOR_REQUESTS) {
+        it('test vendor: ' + vendor, () => {
+          const el = doc.createElement('amp-analytics');
+          el.setAttribute('type', vendor);
+          doc.body.appendChild(el);
+          const analyticsConfig = new AnalyticsConfig(el);
+          return analyticsConfig.loadConfig().then((config) => {
+            if (
+              hasOwn(config, 'transport') &&
+              hasOwn(config.transport, 'iframe')
+            ) {
+              expect(config['transport']['iframe']).to.equal(
+                IFRAME_TRANSPORTS[vendor]
+              );
+            }
+          });
+        });
       }
-
-      doc.body.appendChild(el);
-
-      el.connectedCallback();
-      const analytics = new AmpAnalytics(el);
-      analytics.createdCallback();
-      analytics.buildCallback();
-      return analytics;
-    }
-
-    /**
-     * Clears the properties in the config that should only be used in vendor
-     * configs. This is needed because we pass in all the vendor requests as
-     * inline config and iframePings/optout are not allowed to be used without
-     * AMP team's approval.
-     *
-     * @param {!JsonObject} config The inline config to update.
-     * @return {!JsonObject}
-     */
-    function clearVendorOnlyConfig(config) {
-      for (const t in config.triggers) {
-        if (config.triggers[t].iframePing) {
-          config.triggers[t].iframePing = undefined;
-        }
-      }
-      if (config.optout) {
-        config.optout = undefined;
-      }
-      return config;
-    }
+    });
 
     describe('vendor request tests', () => {
-      for (const vendor in AnalyticsConfig) {
-        if (vendor === 'default') {
-          continue;
-        }
-        const config = AnalyticsConfig[vendor];
-        if (!config.requests) {
-          delete AnalyticsConfig[vendor];
-          continue;
-        }
-        describe('analytics vendor: ' + vendor, function() {
-          beforeEach(() => {
-            // Remove all the triggers to prevent unwanted requests, for instance
-            // one from a "visible" trigger. Those unwanted requests are a source
-            // of test flakiness. Especially they will alternate value of var
-            // $requestCount.
-            config.triggers = {};
+      for (const vendor in VENDOR_REQUESTS) {
+        describe('analytics vendor: ' + vendor, function () {
+          let config;
+          let analytics;
+          beforeEach((done) => {
+            const urlReplacements = Services.urlReplacementsForDoc(
+              doc.documentElement
+            );
+            window.sandbox
+              .stub(urlReplacements.getVariableSource(), 'get')
+              .callsFake(function (name) {
+                expect(this.replacements_).to.have.property(name);
+                return {
+                  sync: (...args) => mockMacrosBinding(name, args),
+                };
+              });
+
+            window.sandbox
+              .stub(ExpansionOptions.prototype, 'getVar')
+              .callsFake(function (name) {
+                let val = this.vars[name];
+                if (val == null || val == '') {
+                  val = '!' + name;
+                }
+                return val;
+              });
+
+            analytics = getAnalyticsTag(doc, vendor);
+            analytics.layoutCallback().then(() => {
+              config = analytics.config_;
+              done();
+            });
+
+            // Have to get service after analytics element is created
+            const variableService = variableServiceForDoc(doc);
+
+            window.sandbox
+              .stub(variableService, 'getMacros')
+              .callsFake(function () {
+                // Add all the macros in amp-analytics
+                const merged = {...this.macros_, ...elementMacros};
+
+                // Change the resolving function
+                const keys = Object.keys(merged);
+                for (let i = 0; i < keys.length; i++) {
+                  const key = keys[i];
+                  merged[key] = (...args) => mockMacrosBinding(key, args);
+                }
+                return /** @type {!JsonObject} */ (merged);
+              });
           });
 
-          for (const name in config.requests) {
-            it(
-              'should produce request: ' +
-                name +
-                '. If this test fails update vendor-requests.json',
-              function*() {
-                const urlReplacements = Services.urlReplacementsForDoc(
-                  doc.documentElement
-                );
-                const analytics = getAnalyticsTag(
-                  clearVendorOnlyConfig(config)
-                );
-                window.sandbox
-                  .stub(urlReplacements.getVariableSource(), 'get')
-                  .callsFake(function(name) {
-                    expect(this.replacements_).to.have.property(name);
-                    const defaultValue = `_${name.toLowerCase()}_`;
-                    return {
-                      sync: () => defaultValue,
-                    };
-                  });
-
-                window.sandbox
-                  .stub(ExpansionOptions.prototype, 'getVar')
-                  .callsFake(function(name) {
-                    let val = this.vars[name];
-                    if (val == null || val == '') {
-                      val = '!' + name;
-                    }
-                    return val;
-                  });
-                analytics.createdCallback();
-                analytics.buildCallback();
-                yield analytics.layoutCallback();
-
-                // Have to get service after analytics element is created
-                const variableService = variableServiceForDoc(doc);
-
-                window.sandbox
-                  .stub(variableService, 'getMacros')
-                  .callsFake(function() {
-                    // Add all the macros in amp-analytics
-                    const merged = {...this.macros_, ...elementMacros};
-
-                    // Change the resolving function
-                    const keys = Object.keys(merged);
-                    for (let i = 0; i < keys.length; i++) {
-                      const key = keys[i];
-                      merged[key] = (opt_param, opt_param2, opt_param3) => {
-                        return `_${key.replace('$', '')}_`;
-                      };
-                    }
-                    return /** @type {!JsonObject} */ (merged);
-                  });
-
-                // Wait for event queue to clear.
-                yield macroTask();
-
-                analytics.handleEvent_(
-                  {
-                    request: name,
-                  },
-                  {
-                    vars: Object.create(null),
-                  }
-                );
-                yield macroTask();
-                expect(requestVerifier.hasRequestSent()).to.be.true;
-                let url = requestVerifier.getLastRequestUrl();
-
-                const vendorData = VENDOR_REQUESTS[vendor];
-                if (!vendorData) {
-                  throw new Error(
-                    'Add vendor ' + vendor + ' to vendor-requests.json'
-                  );
+          it('test requests', function* () {
+            const outputConfig = {};
+            if (!config.requests) {
+              throw new Error(
+                'Request for ' +
+                  vendor +
+                  ' not found. Please make sure you run ' +
+                  '"gulp vendor-configs" or build amp-analytics ' +
+                  'before running the test'
+              );
+            }
+            for (const name in config.requests) {
+              // Wait for event queue to clear.
+              // To prevent default triggers
+              yield macroTask();
+              analytics.handleEvent_(
+                {
+                  request: name,
+                },
+                {
+                  vars: Object.create(null),
                 }
-                const val = vendorData[name];
-                if (val == '<ignore for test>') {
-                  url = '<ignore for test>';
-                }
-                if (val == null) {
-                  throw new Error(
-                    'Define ' +
-                      vendor +
-                      '.' +
-                      name +
-                      ' in vendor-requests.json. Expected value: ' +
-                      url
-                  );
-                }
+              );
 
-                // Write this out for easy copy pasting.
-                writeOutput(vendor, name, url);
+              // Reset $requestCount value after each
+              analytics.config_['vars']['requestCount'] = 0;
 
-                expect(url).to.equal(val);
+              yield macroTask();
+              expect(requestVerifier.hasRequestSent()).to.be.true;
+              const lastUrl = requestVerifier.getLastRequestUrl();
+              const vendorData = VENDOR_REQUESTS[vendor];
+              if (!vendorData) {
+                throw new Error(
+                  'Add vendor ' + vendor + ' to vendor-requests.json'
+                );
               }
-            );
-          }
+              const val = vendorData[name];
+              if (val == '<ignore for test>') {
+                continue;
+              }
+              if (val == null) {
+                throw new Error(
+                  'Define ' +
+                    vendor +
+                    '.' +
+                    name +
+                    ' in vendor-requests.json. Last sent out value is: ' +
+                    lastUrl
+                );
+              }
+              outputConfig[name] = lastUrl;
+              // Write this out for easy copy pasting.
+              if (!requestVerifier.verifyAndRemoveRequestUrl(val)) {
+                throw new Error(
+                  `Vendor ${vendor}, request ${name} doesn't match. ` +
+                    `Expected value ${val}, last sent out value is ${lastUrl}.`
+                );
+              }
+            }
+            writeOutput(vendor, outputConfig);
+          });
         });
       }
     });
   }
 );
 
-const actualResults = {};
+/**
+ * Get the AmpAnalytics instance
+ * @param {string} vendor
+ */
+function getAnalyticsTag(doc, vendor) {
+  const el = doc.createElement('amp-analytics');
+  el.setAttribute('type', vendor);
 
-function writeOutput(vendor, name, url) {
-  if (!actualResults[vendor]) {
-    actualResults[vendor] = {};
+  // Overwrite transport method to use image
+  expectAsyncConsoleError(/should not overwrite vendor transport/);
+  const script = doc.createElement('script');
+  script.setAttribute('type', 'application/json');
+  script.textContent = JSON.stringify({
+    'transport': {
+      'iframe': false,
+      'image': true,
+    },
+  });
+  el.appendChild(script);
+
+  doc.body.appendChild(el);
+  el.connectedCallback();
+  const analytics = new AmpAnalytics(el);
+  analytics.createdCallback();
+  analytics.buildCallback();
+  return analytics;
+}
+
+let outputBox;
+
+function writeOutput(vendor, output) {
+  if (!outputBox) {
+    outputBox = top.document.createElement('div');
+    top.document.body.appendChild(outputBox);
   }
-  actualResults[vendor][name] = url;
-  const cnt = Object.keys(AnalyticsConfig[vendor]['requests']).length;
-  AnalyticsConfig[vendor].testCnt = (AnalyticsConfig[vendor].testCnt || 0) + 1;
-  if (cnt == AnalyticsConfig[vendor].testCnt) {
-    delete AnalyticsConfig[vendor];
-    if (Object.keys(AnalyticsConfig).length == 1) {
-      const out = top.document.createElement('div');
-      out.textContent = JSON.stringify(actualResults, null, '  ');
-      top.document.body.insertBefore(out, top.document.body.firstChild);
-    }
+  const vendorDiv = top.document.createElement('h3');
+  vendorDiv.textContent = vendor;
+  outputBox.appendChild(vendorDiv);
+
+  const out = top.document.createElement('div');
+  out.textContent = JSON.stringify(output, null, '  ');
+  outputBox.appendChild(out);
+}
+
+/**
+ * CLIENT_ID(_ga) -> _client_id(_ga)_
+ * $NOT(true) -> _not(true)_
+ * @param {string} macroName
+ * @param {!Array<string>} argumentsList
+ */
+function mockMacrosBinding(macroName, argumentsList) {
+  let params = argumentsList.filter((val) => val !== undefined).join(',');
+  if (params) {
+    params = '(' + params + ')';
   }
+  return `_${macroName.replace('$', '').toLowerCase()}${params}_`;
 }

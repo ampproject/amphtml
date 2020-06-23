@@ -24,27 +24,6 @@ limitations under the License.
 
 # amp-video-docking
 
-[TOC]
-
-Functionality for videos that minimize ("dock") to a corner or a custom position on scroll.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>AMP By Example's:<ul>
-      <li><a href="https://amp.dev/documentation/examples/multimedia-animations/advanced_video_docking/">Advanced video docking</a> with multiple targets, event triggers and media queries.</li>
-    </ul></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>N/A</td>
-  </tr>
-</table>
-
 ## Behavior
 
 The `amp-video-docking` extension allows videos to be minimized to a corner or
@@ -64,6 +43,7 @@ component's visual area. If the user scrolls back, the video reverts to its orig
 This extension is used in conjunction with a [supported video player](../../spec/amp-video-interface.md).
 Currently, the supported players are:
 
+- [`amp-brid-player`](https://amp.dev/documentation/components/amp-brid-player)
 - [`amp-brightcove`](https://amp.dev/documentation/components/amp-brightcove)
 - [`amp-dailymotion`](https://amp.dev/documentation/components/amp-dailymotion)
 - [`amp-delight-player`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-delight-player/amp-delight-player.md)

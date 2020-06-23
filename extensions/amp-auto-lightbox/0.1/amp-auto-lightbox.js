@@ -117,7 +117,7 @@ const NOOP = () => {};
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {!Document|!ShadowRoot}
  */
-const getRootNode = ampdoc => ampdoc.getRootNode();
+const getRootNode = (ampdoc) => ampdoc.getRootNode();
 
 /** @visibleForTesting */
 export class Criteria {
@@ -154,8 +154,8 @@ export class Criteria {
    * @return {boolean}
    */
   static meetsSizingCriteria(element) {
-    const {naturalWidth, naturalHeight} = dev().assertElement(
-      element.querySelector('img')
+    const {naturalWidth, naturalHeight} = getMaxNaturalDimensions(
+      dev().assertElement(element.querySelector('img'))
     );
 
     const {width: renderWidth, height: renderHeight} = element.getLayoutBox();
@@ -172,6 +172,57 @@ export class Criteria {
       vh
     );
   }
+}
+
+/**
+ * Regex for the width-selection portion of a srcset, so for the
+ * general grammar: (URL [NUM[w|x]],)*, this should express "NUMw".
+ * E.g. in "image1.png 100w, image2.png 50w", this matches "100w" and "50w"
+ */
+const srcsetWidthRe = /\s+([0-9]+)w(,|[\S\s]*$)/g;
+
+/**
+ * Parses srcset partially to get the maximum defined intrinsic width.
+ * @param {!Element} img
+ * @return {number} -1 if no srcset, or if srcset is defined by dpr instead of
+ *   width. (This value is useful for comparisons, see getMaxNaturalDimensions.)
+ */
+export function getMaxWidthFromSrcset(img) {
+  let max = -1;
+
+  const srcsetAttr = img.getAttribute('srcset');
+  if (srcsetAttr) {
+    let match;
+    while ((match = srcsetWidthRe.exec(srcsetAttr))) {
+      const width = parseInt(match[1], 10);
+      if (width > max) {
+        max = width;
+      }
+    }
+  }
+
+  return max;
+}
+
+/**
+ * Gets the maximum natural dimensions for an image with srcset.
+ * This is necessary when the browser selects a src that is not shrunk for its
+ * render size, but the srcset provides a different, higher resolution image
+ * that can be used in the lightbox.
+ * @param {!Element} img
+ * @return {{naturalWidth: number, naturalHeight: number}}
+ */
+export function getMaxNaturalDimensions(img) {
+  const {naturalWidth, naturalHeight} = img;
+  const ratio = naturalWidth / naturalHeight;
+  const maxWidthFromSrcset = getMaxWidthFromSrcset(img);
+  if (maxWidthFromSrcset > naturalWidth) {
+    return {
+      naturalWidth: maxWidthFromSrcset,
+      naturalHeight: maxWidthFromSrcset / ratio,
+    };
+  }
+  return {naturalWidth, naturalHeight};
 }
 
 /**
@@ -230,7 +281,7 @@ function candidateSelector(tagName) {
  * @return {!Promise}
  */
 function whenLoaded(element) {
-  return whenUpgradedToCustomElement(element).then(element =>
+  return whenUpgradedToCustomElement(element).then((element) =>
     element.signals().whenSignal(CommonSignals.LOAD_END)
   );
 }
@@ -285,11 +336,11 @@ export class DocMetaAnnotations {
    */
   static getAllLdJsonTypes(ampdoc) {
     return toArray(getRootNode(ampdoc).querySelectorAll(SCRIPT_LD_JSON))
-      .map(el => {
+      .map((el) => {
         const {textContent} = el;
         return (tryParseJson(textContent) || {})['@type'];
       })
-      .filter(typeOrUndefined => typeOrUndefined);
+      .filter((typeOrUndefined) => typeOrUndefined);
   }
 
   /**
@@ -300,7 +351,7 @@ export class DocMetaAnnotations {
    */
   static hasValidLdJsonType(ampdoc) {
     return DocMetaAnnotations.getAllLdJsonTypes(ampdoc).some(
-      type => ENABLED_LD_JSON_TYPES[type]
+      (type) => ENABLED_LD_JSON_TYPES[type]
     );
   }
 }
@@ -317,7 +368,7 @@ function usesLightboxExplicitly(ampdoc) {
 
   const lightboxedElementsSelector = `[${LIGHTBOXABLE_ATTR}]:not([${VISITED_ATTR}])`;
 
-  const exists = selector => !!getRootNode(ampdoc).querySelector(selector);
+  const exists = (selector) => !!getRootNode(ampdoc).querySelector(selector);
 
   return (
     exists(requiredExtensionSelector) && exists(lightboxedElementsSelector)
@@ -381,7 +432,7 @@ export function apply(ampdoc, element) {
  * @return {!Array<!Promise<!Element|undefined>>}
  */
 export function runCandidates(ampdoc, candidates) {
-  return candidates.map(candidate =>
+  return candidates.map((candidate) =>
     whenLoaded(candidate).then(() => {
       // <amp-img> will change the img's src inline data on unlayout and remove
       // it from DOM, but a LOAD_END event would still be triggered afterwards.
@@ -412,10 +463,10 @@ export function scan(ampdoc, opt_root) {
   return runCandidates(ampdoc, Scanner.getCandidates(root));
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   const {ampdoc} = AMP;
   ampdoc.whenReady().then(() => {
-    getRootNode(ampdoc).addEventListener(AmpEvents.DOM_UPDATE, e => {
+    getRootNode(ampdoc).addEventListener(AmpEvents.DOM_UPDATE, (e) => {
       const {target} = e;
       scan(ampdoc, dev().assertElement(target));
     });

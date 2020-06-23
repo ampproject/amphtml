@@ -18,7 +18,7 @@
 const initTestsPath = ['test/_init_tests.js'];
 
 const fixturesExamplesPaths = [
-  'test/fixtures/*.html',
+  'test-bin/test/fixtures/*.html',
   {
     pattern: 'test/fixtures/served/*.html',
     included: false,
@@ -73,8 +73,6 @@ const a4aTestPaths = initTestsPath.concat([
   'ads/google/a4a/test/*.js',
 ]);
 
-const chaiAsPromised = ['test/chai-as-promised/chai-as-promised.js'];
-
 const unitTestPaths = [
   'test/unit/**/*.js',
   'ads/**/test/test-*.js',
@@ -83,11 +81,8 @@ const unitTestPaths = [
   'extensions/**/test/unit/*.js',
 ];
 
-const unitTestOnSaucePaths = [
-  'test/unit/**/*.js',
-  'ads/**/test/test-*.js',
-  'ads/**/test/unit/test-*.js',
-];
+// TODO(rsimha, #28838): Refine this opt-in mechanism.
+const unitTestOnSaucePaths = ['test/unit/test-error.js'];
 
 const integrationTestPaths = [
   'test/integration/**/*.js',
@@ -116,11 +111,14 @@ const presubmitGlobs = [
   '!dist.3p/current/**/iframe-transport-client-lib.js',
   '!out/**/*.*',
   '!validator/validator.pb.go',
+  '!validator/chromeextension/*.*',
   '!validator/dist/**/*.*',
+  '!validator/htmlparser/**/*.*',
   '!validator/node_modules/**/*.*',
   '!validator/nodejs/node_modules/**/*.*',
   '!validator/webui/dist/**/*.*',
   '!validator/webui/node_modules/**/*.*',
+  '!build-system/server/new-server/transforms/dist/**/*.*',
   '!build-system/tasks/e2e/node_modules/**/*.*',
   '!build-system/tasks/presubmit-checks.js',
   '!build-system/runner/build/**/*.*',
@@ -129,7 +127,6 @@ const presubmitGlobs = [
   '!build/polyfills.js',
   '!build/polyfills/*.js',
   '!third_party/**/*.*',
-  '!validator/chromeextension/*.*',
   '!src/purifier/node_modules/**/*.*',
   // Files in this testdata dir are machine-generated and are not part
   // of the AMP runtime, so shouldn't be checked.
@@ -151,7 +148,6 @@ const prettifyGlobs = [
   '.lando.yml',
   '.lgtm.yml',
   '.travis.yml',
-  '**/.eslintrc',
   '.prettierrc',
   '.renovaterc.json',
   '.vscode/settings.json',
@@ -159,7 +155,7 @@ const prettifyGlobs = [
   '**/OWNERS',
   '**/*.md',
   '!.github/ISSUE_TEMPLATE/**',
-  '!**/{node_modules,build,dist,dist.3p,dist.tools}/**',
+  '!**/{node_modules,build,dist,dist.3p,dist.tools,.karma-cache}/**',
 ];
 
 /**
@@ -168,7 +164,7 @@ const prettifyGlobs = [
  */
 const linkCheckGlobs = [
   '**/*.md',
-  '!**/{examples,node_modules,build,dist,dist.3p,dist.tools}/**',
+  '!**/{examples,node_modules,build,dist,dist.3p,dist.tools,.karma-cache}/**',
 ];
 
 /**
@@ -204,7 +200,6 @@ const changelogIgnoreFileTypes = /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/;
 /** @const  */
 module.exports = {
   a4aTestPaths,
-  chaiAsPromised,
   changelogIgnoreFileTypes,
   commonIntegrationTestPaths,
   commonUnitTestPaths,

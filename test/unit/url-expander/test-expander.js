@@ -16,7 +16,6 @@
 
 import {Expander} from '../../../src/service/url-expander/expander';
 import {GlobalVariableSource} from '../../../src/service/url-replacements-impl';
-import {createElementWithAttributes} from '../../../src/dom';
 import {macroTask} from '../../../testing/yield';
 
 describes.realWin(
@@ -26,7 +25,7 @@ describes.realWin(
       ampdoc: 'single',
     },
   },
-  env => {
+  (env) => {
     let variableSource;
 
     beforeEach(() => {
@@ -92,28 +91,22 @@ describes.realWin(
       });
     });
 
-    describe('Whitelist of variables', () => {
+    describe('Allowlist of variables', () => {
       const mockBindings = {
         RANDOM: () => 0.1234,
         ABC: () => 'three',
         ABCD: () => 'four',
       };
 
-      function createExpanderWithWhitelist(whitelist, mockBindings) {
-        env.win.document.head.appendChild(
-          createElementWithAttributes(env.win.document, 'meta', {
-            name: 'amp-allowed-url-macros',
-            content: whitelist,
-          })
-        );
-
+      function createExpanderWithAllowlist(allowlist, mockBindings) {
         variableSource = new GlobalVariableSource(env.ampdoc);
+        variableSource.variableAllowlist_ = allowlist;
         return new Expander(variableSource, mockBindings);
       }
 
-      it('should not replace unwhitelisted RANDOM', () => {
-        const expander = createExpanderWithWhitelist(
-          'ABC,ABCD,CANONICAL',
+      it('should not replace unallowlisted RANDOM', () => {
+        const expander = createExpanderWithAllowlist(
+          ['ABC', 'ABCD', 'CANONICAL'],
           mockBindings
         );
         const url = 'http://www.google.com/?test=RANDOM';
@@ -121,9 +114,9 @@ describes.realWin(
         return expect(expander.expand(url)).to.eventually.equal(expected);
       });
 
-      it('should replace whitelisted ABCD', () => {
-        const expander = createExpanderWithWhitelist(
-          'ABC,ABCD,CANONICAL',
+      it('should replace allowlisted ABCD', () => {
+        const expander = createExpanderWithAllowlist(
+          ['ABC', 'ABCD', 'CANONICAL'],
           mockBindings
         );
         const url = 'http://www.google.com/?test=ABCD';
@@ -131,8 +124,8 @@ describes.realWin(
         return expect(expander.expand(url)).to.eventually.equal(expected);
       });
 
-      it('should not replace anything with empty whitelist', () => {
-        const expander = createExpanderWithWhitelist('', mockBindings);
+      it('should not replace anything with empty allowlist', () => {
+        const expander = createExpanderWithAllowlist([''], mockBindings);
         const url = 'http://www.google.com/?test=ABCD';
         const expected = 'http://www.google.com/?test=ABCD';
         return expect(expander.expand(url)).to.eventually.equal(expected);
@@ -152,13 +145,13 @@ describes.realWin(
         CLIENT_ID: mockClientIdFn, // fn resolving to promise
         CANONICAL_URL: 'www.google.com', // string
         RANDOM: () => 123456, // number
-        TRIM: str => str.trim(), // fn
-        UPPERCASE: str => str.toUpperCase(),
-        LOWERCASE: str => str.toLowerCase(),
+        TRIM: (str) => str.trim(), // fn
+        UPPERCASE: (str) => str.toUpperCase(),
+        LOWERCASE: (str) => str.toLowerCase(),
         CONCAT: (a, b) => a + '-' + b,
         CAT_THREE: (a, b, c) => a + b + c,
         ASYNC: Promise.resolve('hello'),
-        ASYNCFN: arg => Promise.resolve(arg),
+        ASYNCFN: (arg) => Promise.resolve(arg),
         BROKEN: () => undefined,
         TITLE: 'hello world ',
       };
@@ -267,7 +260,7 @@ describes.realWin(
       ];
 
       describe('called asyncronously', () => {
-        sharedTestCases.forEach(test => {
+        sharedTestCases.forEach((test) => {
           const {description, input, output} = test;
           it(description, () =>
             expect(
@@ -299,7 +292,7 @@ describes.realWin(
       });
 
       describe('called synchronously', () => {
-        sharedTestCases.forEach(test => {
+        sharedTestCases.forEach((test) => {
           const {description, input, output} = test;
           it(description, () =>
             expect(
@@ -435,9 +428,9 @@ describes.realWin(
         ];
 
         describe('called asyncronously', () => {
-          tests.forEach(test => {
+          tests.forEach((test) => {
             const {description, input, output} = test;
-            it(description, function*() {
+            it(description, function* () {
               const vars = {};
               new Expander(
                 variableSource,
@@ -450,7 +443,7 @@ describes.realWin(
             });
           });
 
-          it('should handle async functions', function*() {
+          it('should handle async functions', function* () {
             const vars = {};
             const input = 'CLIENT_ID(__ga)UPPERCASE(foo)';
             new Expander(
@@ -467,7 +460,7 @@ describes.realWin(
         });
 
         describe('called syncronously', () => {
-          tests.forEach(test => {
+          tests.forEach((test) => {
             const {description, input, output} = test;
             it(description, () => {
               const vars = {};
@@ -500,17 +493,17 @@ describes.realWin(
         });
       });
 
-      describe('opt_whiteList', () => {
-        it('should only resolve values in the whitelist', () => {
+      describe('opt_allowlist', () => {
+        it('should only resolve values in the allowlist', () => {
           const url = 'UPPERCASE(foo)RANDOMLOWERCASE(BAR)';
-          const whitelist = {RANDOM: true};
+          const allowlist = {RANDOM: true};
           return expect(
             new Expander(
               variableSource,
               mockBindings,
               /* opt_collectVars */ undefined,
               /* opt_sync */ false,
-              /* opt_whiteList */ whitelist
+              /* opt_allowlist */ allowlist
             ).expand(url)
           ).to.eventually.equal('UPPERCASE(foo)123456LOWERCASE(BAR)');
         });

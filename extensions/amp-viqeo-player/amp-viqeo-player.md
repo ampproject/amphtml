@@ -24,31 +24,6 @@ limitations under the License.
 
 # amp-viqeo-player
 
-Displays a <a href="https://viqeo.tv/">Viqeo</a> video player.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-viqeo-player" src="https://cdn.ampproject.org/v0/amp-viqeo-player-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, responsive</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td>
-    <ul>
-    <li>Viqeo WordPress embedding demo: <a href="http://demo.viqeo.tv/2018/04/04/%D0%BF%D0%BE%D0%B4%D0%B2%D0%BE%D0%B4%D0%BD%D1%8B%D0%B9-%D1%81%D0%BA%D1%83%D1%82%D0%B5%D1%80-%D0%B4%D0%BB%D1%8F-%D0%B4%D0%B0%D0%B9%D0%B2%D0%B8%D0%BD%D0%B3%D0%B0-%D0%BA%D0%BE%D1%82%D0%BE%D1%80%D1%8B-2/">Aqua Scooter</a></li>
-    <li>The-Village: <a href="https://www.the-village.ru/village/food/place/316257-mesto">Pizza Resto Review</a></li>
-    <li>Kanobu.ru: <a href="https://kanobu.ru/reviews/retsenziya-na-deadpool-372034/">Deadpool game review</a></li>
-    </ul>
-    </td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Example
 
 The `width` and `height` attributes determine the aspect ratio of the Viqeo embedded in responsive layouts.

@@ -101,7 +101,7 @@ describe('invokeWebWorker', () => {
       };
       fakeWorker.onmessage({data});
 
-      return invokePromise.then(returnValue => {
+      return invokePromise.then((returnValue) => {
         expect(returnValue).to.deep.equals({'qux': 456});
       });
     });
@@ -135,7 +135,7 @@ describe('invokeWebWorker', () => {
         },
       });
 
-      return Promise.all([foo, bar, qux]).then(values => {
+      return Promise.all([foo, bar, qux]).then((values) => {
         expect(values[0]).to.equal('foo-retVal');
         expect(values[1]).to.equal('bar-retVal');
         expect(values[2]).to.equal('qux-retVal');
@@ -184,7 +184,7 @@ describe('invokeWebWorker', () => {
         },
       });
 
-      return Promise.all([one, two, three]).then(values => {
+      return Promise.all([one, two, three]).then((values) => {
         expect(values[0]).to.equal('one');
         expect(values[1]).to.equal('two');
         expect(values[2]).to.equal('three');

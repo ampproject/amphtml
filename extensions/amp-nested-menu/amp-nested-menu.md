@@ -22,24 +22,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# `amp-nested-menu`
-
-Drilldown menu component with items that open nested submenus on tap.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a>; activated by the <code>amp-nested-menu</code> experiment.</div></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><div>None (<code>amp-sidebar</code> lazy loads the component)</div></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill</td>
-  </tr>
-</table>
+# amp-nested-menu
 
 ## Overview
 

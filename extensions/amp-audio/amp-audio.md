@@ -26,26 +26,9 @@ limitations under the License.
 
 # amp-audio
 
-A replacement for the HTML5 <code>audio</code> tag. The <code>amp-audio</code> component is only to be used for direct HTML5 audio file embeds.
+## Usage
 
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js">&lt;/script></code></td>
-  </tr>
-   <tr>
-     <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-     <td>fixed, fixed-height, nodisplay</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-audio/">Annotated code example for amp-audio</a></td>
-  </tr>
-</table>
-
-[TOC]
-
-## Behavior
+Use the `amp-audio` components with direct HTML5 audio file embeds.
 
 The `amp-audio` component loads the audio resource specified by its `src` attribute at a time determined by the runtime. It can be controlled in much the same way as a standard HTML5 `audio` tag.
 Like all embedded external resources in an AMP file, the audio is "lazily" loaded, only when the `amp-audio` element is in or near the viewport
@@ -74,56 +57,44 @@ For example:
 
 ## Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>src</strong></td>
-    <td>Required if no <code>&lt;source&gt;</code> children are present. Must be HTTPS.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>preload</strong></td>
-    <td>If present, sets the preload attribute in the html <code>&lt;audio&gt;</code> tag which specifies if the author thinks that the audio file should be loaded when the page loads.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>autoplay</strong></td>
-    <td>If present, the attribute implies that the audio will start playing as soon as
-it is ready.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>loop</strong></td>
-    <td>If present, the audio will automatically loop back to the start upon reaching the end.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>muted</strong></td>
-    <td>If present, will mute the audio by default.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>controlsList</strong></td>
-    <td>Same as <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList">controlsList</a> attribute of HTML5 audio element. Only supported by certain browsers. Please see <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList">https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList</a> for details.</td>
-  </tr>
-</table>
+### `src`
 
-## Media Session Attributes
+Required if no `<source>` children are present. Must be HTTPS.
 
-`amp-audio` implements the [Media Session API](https://developers.google.com/web/updates/2017/02/media-session) enabling developers to specify more information about the audio file that is playing to be displayed in the notification center of user's devices (along with play/pause controls).
+### `preload`
 
-<table>
-  <tr>
-    <td width="40%"><strong>artwork</strong></td>
-    <td>URL to a PNG/JPG/ICO image serving as the audio's artwork. If not present, the MediaSessionAPI Helper will use either the `image` field in the `schema.org` definition, the `og:image` or the website's `favicon`.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>artist</strong></td>
-    <td>(string) indicates the author of the audio</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>album</strong></td>
-    <td>(string) indicates the album the audio was taken from</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>title</strong></td>
-    <td>(string) part of the [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes), doubles as the audio's name displayed in the MediaSession notification. If not provided, the MediaSessionAPI Helper will use either the `aria-label` attribute or fall back to the page's title.</td>
-  </tr>
-</table>
+If present, sets the preload attribute in the html `<audio>` tag which specifies
+if the author thinks that the audio file should be loaded when the page loads.
+
+### `autoplay`
+
+If present, the attribute implies that the audio will start playing as soon as
+it is ready.
+
+### `loop`
+
+If present, the audio will automatically loop back to the start upon reaching
+the end.
+
+### `muted`
+
+If present, will mute the audio by default.
+
+### `controlsList`
+
+Same as
+[controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList)
+attribute of HTML5 audio element. Only supported by certain browsers. Please
+see [https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/controlsList)
+for details.
+
+### Media Session Attributes
+
+`amp-audio` implements the
+[Media Session API](https://developers.google.com/web/updates/2017/02/media-session)
+enabling developers to specify more information about the audio file that is
+playing to be displayed in the notification center of user's devices (along with
+play/pause controls).
 
 Example:
 
@@ -141,15 +112,44 @@ Example:
 </amp-audio>
 ```
 
+#### `artwork`
+
+URL to a PNG/JPG/ICO image serving as the audio's artwork. If not present, the
+MediaSessionAPI Helper will use either the `image` field in the `schema.org`
+definition, the `og:image` or the website's `favicon`.
+
+#### `artist`
+
+(string) indicates the author of the audio.
+
+#### `album`
+
+(string) indicates the album the audio was taken from.
+
+#### `title`
+
+(string) part of the
+[common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes),
+doubles as the audio's name displayed in the MediaSession notification. If not
+provided, the MediaSessionAPI Helper will use either the `aria-label` attribute
+or fall back to the page's title.
+
 ## Analytics
 
-AMP audio analytics gathers data about how users interact with audios in AMP documents. AMP audio extension issues analytics events during their lifecycle. These events can be reported through the analytics configuration using `audio-*` triggers. `audio-play` and `audio-pause` are the two analytics events supported now.
+AMP audio analytics gathers data about how users interact with audios in AMP
+documents. AMP audio extension issues analytics events during their lifecycle.
+These events can be reported through the analytics configuration using `audio-*`
+triggers. `audio-play` and `audio-pause` are the two analytics events supported
+now.
 
-See [the AMP Analytics component](../amp-analytics/amp-analytics.md) for details on _amp-analytics_ configuration.
+See the [AMP Analytics component](https://amp.dev/documentation/components/amp-analytics/)
+for details on amp-analytics configuration.
 
 ### Audio play trigger (`"on": "audio-play"`)
 
-The `audio-play` trigger is fired when the audio begins playing from a user clicking play or from autoplay beginning or resuming. Use these configurations to fire a request for this event.
+The `audio-play` trigger is fired when the audio begins playing from a user
+clicking play or from autoplay beginning or resuming. Use these configurations
+to fire a request for this event.
 
 ```javascript
 "triggers": {
@@ -163,7 +163,9 @@ The `audio-play` trigger is fired when the audio begins playing from a user clic
 
 ### Audio pause trigger (`"on": "audio-pause"`)
 
-The `audio-pause` trigger is fired when the audio stops playing from a user clicking pause, from autoplay pausing, or from the audio reaching the end. Use these configurations to fire a request for this event.
+The `audio-pause` trigger is fired when the audio stops playing from a user
+clicking pause, from autoplay pausing, or from the audio reaching the end.
+Use these configurations to fire a request for this event.
 
 ```javascript
 "triggers": {
@@ -177,4 +179,4 @@ The `audio-pause` trigger is fired when the audio stops playing from a user clic
 
 ## Validation
 
-See [amp-audio rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/validator-amp-audio.protoascii) in the AMP validator specification.
+See [amp-audio rules](validator-amp-audio.protoascii) in the AMP validator specification.

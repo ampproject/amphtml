@@ -17,7 +17,11 @@
 import {BrowserController, RequestBank} from '../../testing/test-helper';
 import {parseQueryString} from '../../src/url';
 
-describe('amp-analytics', function() {
+// TODO(wg-analytics): These tests time out on Firefox and Safari
+// (locally too) which causes browser disconnections on SauceLabs.
+const t = describe.configure().skipSauceLabs();
+
+t.run('amp-analytics', function () {
   describes.integration(
     'basic pageview',
     {
@@ -65,10 +69,88 @@ describe('amp-analytics', function() {
       afterEach(() => {
         // clean up written _cid cookie
         document.cookie = '_cid=;expires=' + new Date(0).toUTCString();
+        return RequestBank.tearDown();
       });
 
       it('should send request', () => {
-        return RequestBank.withdraw().then(req => {
+        return RequestBank.withdraw().then((req) => {
+          const q = parseQueryString(req.url.substr(1));
+          expect(q['a']).to.equal('2');
+          expect(q['b']).to.equal('AMP TEST');
+          expect(q['cid']).to.equal('amp-12345');
+          expect(q['loadend']).to.not.equal('0');
+          expect(q['default']).to.equal('test');
+          // cookie set via http response header when requesting
+          // localhost:9876/amp4test/compose-doc
+          expect(q['cookie']).to.equal('test');
+
+          if (window.PerformancePaintTiming) {
+            expect(q['fcp']).to.not.be.null;
+          }
+          expect(q['fvr']).to.not.be.null;
+          expect(q['mbv']).to.not.be.null;
+          expect(
+            req.headers.referer,
+            'should keep referrer if no referrerpolicy specified'
+          ).to.be.ok;
+        });
+      });
+    }
+  );
+
+  describes.integration(
+    'basic pageview chunk',
+    {
+      body: `
+      <script>
+        // initialize _cid cookie with a CLIENT_ID
+        document.cookie='_cid=amp-12345';
+      </script>
+      <!-- put amp-analytics > 3 viewports away from viewport -->
+      <div style="height: 400vh">
+        viewport
+      </div>
+      <amp-analytics>
+        <script type="application/json">
+        {
+          "requests": {
+            "endpoint": "${RequestBank.getUrl()}"
+          },
+          "triggers": {
+            "pageview": {
+              "on": "visible",
+              "request": "endpoint",
+              "extraUrlParams": {
+                "a": 2
+              }
+            }
+          },
+          "extraUrlParams": {
+            "a": 1,
+            "b": "\${title}",
+            "cid": "\${clientId(_cid)}",
+            "loadend": "\${navTiming(loadEventEnd)}",
+            "default": "\$DEFAULT( , test)",
+            "fcp": "FIRST_CONTENTFUL_PAINT",
+            "fvr": "FIRST_VIEWPORT_READY",
+            "mbv": "MAKE_BODY_VISIBLE",
+            "cookie": "\${cookie(test-cookie)}"
+          }
+        }
+        </script>
+      </amp-analytics>`,
+      extensions: ['amp-analytics'],
+      experiments: ['analytics-chunks'],
+    },
+    () => {
+      afterEach(() => {
+        // clean up written _cid cookie
+        document.cookie = '_cid=;expires=' + new Date(0).toUTCString();
+        return RequestBank.tearDown();
+      });
+
+      it('should send request', () => {
+        return RequestBank.withdraw().then((req) => {
           const q = parseQueryString(req.url.substr(1));
           expect(q['a']).to.equal('2');
           expect(q['b']).to.equal('AMP TEST');
@@ -128,7 +210,7 @@ describe('amp-analytics', function() {
       `,
       extensions: ['amp-analytics'],
     },
-    env => {
+    (env) => {
       let browser;
 
       beforeEach(() => {
@@ -136,8 +218,12 @@ describe('amp-analytics', function() {
         return browser.waitForElementLayout('amp-analytics');
       });
 
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
+
       it('should send request', () => {
-        const reqPromise = RequestBank.withdraw().then(req => {
+        const reqPromise = RequestBank.withdraw().then((req) => {
           expect(req.url).to.equal('/?f=hello%20world&b=2');
         });
         browser.click('a');
@@ -181,7 +267,7 @@ describe('amp-analytics', function() {
       `,
       extensions: ['amp-analytics'],
     },
-    env => {
+    (env) => {
       let browser;
 
       beforeEach(() => {
@@ -189,8 +275,12 @@ describe('amp-analytics', function() {
         return browser.waitForElementLayout('amp-analytics');
       });
 
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
+
       it('should trigger on scroll', () => {
-        const reqPromise = RequestBank.withdraw().then(req => {
+        const reqPromise = RequestBank.withdraw().then((req) => {
           expect(req.url).to.equal('/?scrollTop=75&scrollHeight=300');
         });
         // verticalBoundaries is set to 70%
@@ -241,7 +331,7 @@ describe('amp-analytics', function() {
       `,
       extensions: ['amp-analytics'],
     },
-    env => {
+    (env) => {
       let browser;
 
       beforeEach(() => {
@@ -249,9 +339,13 @@ describe('amp-analytics', function() {
         return browser.waitForElementLayout('amp-analytics');
       });
 
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
+
       it('should trigger when image being 50% visible for 0.5s', () => {
         let scrollTime = Infinity;
-        const reqPromise = RequestBank.withdraw().then(req => {
+        const reqPromise = RequestBank.withdraw().then((req) => {
           const q = parseQueryString(req.url.substr(1));
           expect(Date.now()).to.be.not.below(scrollTime + 500);
           expect(parseInt(q['timestamp'], 10)).to.be.not.below(
@@ -308,15 +402,19 @@ describe('amp-analytics', function() {
       `,
       extensions: ['amp-analytics'],
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics');
       });
 
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
+
       it('should trigger 1s after amp-analytics starts', () => {
         const startTime = Date.now();
-        return RequestBank.withdraw().then(req => {
+        return RequestBank.withdraw().then((req) => {
           const q = parseQueryString(req.url.substr(1));
           const timerStart = parseFloat(q['timerStart']);
           expect(timerStart + 1000).to.be.at.most(Date.now());
@@ -374,7 +472,7 @@ describe('amp-analytics', function() {
       `,
       extensions: ['amp-analytics'],
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics');
@@ -383,13 +481,14 @@ describe('amp-analytics', function() {
       afterEach(() => {
         // clean up written _cid cookie
         document.cookie = '_cid=;expires=' + new Date(0).toUTCString();
+        return RequestBank.tearDown();
       });
 
       it('should assign new cid', () => {
         return Promise.all([
           RequestBank.withdraw(1),
           RequestBank.withdraw(2),
-        ]).then(reqs => {
+        ]).then((reqs) => {
           const req1 = reqs[0];
           const req2 = reqs[1];
           expect(req1.url).to.match(/^\/\?cid=/);
@@ -443,14 +542,18 @@ describe('amp-analytics', function() {
       </amp-analytics>`,
       extensions: ['amp-analytics'],
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics');
       });
 
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
+
       it('should send request in batch', () => {
-        return RequestBank.withdraw().then(req => {
+        return RequestBank.withdraw().then((req) => {
           expect(req.url).to.equal('/?a=1&b=AMP%20TEST&a=1&b=AMP%20TEST');
         });
       });
@@ -506,14 +609,18 @@ describe('amp-analytics', function() {
       </amp-analytics>`,
       extensions: ['amp-analytics'],
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics');
       });
 
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
+
       it('should send request use POST body payload', () => {
-        return RequestBank.withdraw().then(req => {
+        return RequestBank.withdraw().then((req) => {
           expect(req.url).to.equal('/');
           expect(JSON.parse(req.body)).to.deep.equal({
             a: 2,
@@ -578,14 +685,18 @@ describe('amp-analytics', function() {
       </amp-analytics>`,
       extensions: ['amp-analytics'],
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics');
       });
 
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
+
       it('should send batch request use POST body payload', () => {
-        return RequestBank.withdraw().then(req => {
+        return RequestBank.withdraw().then((req) => {
           expect(req.url).to.equal('/');
           expect(JSON.parse(req.body)).to.deep.equal([
             {
@@ -625,14 +736,18 @@ describe('amp-analytics', function() {
       </amp-analytics>`,
       extensions: ['amp-analytics'],
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics');
       });
 
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
+
       it('should remove referrer if referrerpolicy=no-referrer', () => {
-        return RequestBank.withdraw().then(req => {
+        return RequestBank.withdraw().then((req) => {
           expect(req.url).to.equal('/');
           expect(req.headers.referer).to.not.be.ok;
         });
@@ -661,14 +776,18 @@ describe('amp-analytics', function() {
       </amp-analytics>`,
       extensions: ['amp-analytics'],
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics');
       });
 
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
+
       it('should use config from server', () => {
-        return RequestBank.withdraw().then(req => {
+        return RequestBank.withdraw().then((req) => {
           // The config here should have been rewritten by the /analytics/rewriter
           // endpoint. This logic is located in the file
           // /build-system/routes/analytics.js
@@ -699,14 +818,18 @@ describe('amp-analytics', function() {
       </amp-analytics>`,
       extensions: ['amp-analytics'],
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics');
       });
 
+      afterEach(() => {
+        return RequestBank.tearDown();
+      });
+
       it('should use config from server', () => {
-        return RequestBank.withdraw().then(req => {
+        return RequestBank.withdraw().then((req) => {
           // The config here should have been rewritten by the /analytics/rewriter
           // endpoint. This logic is located in the file
           // /build-system/routes/analytics.js
@@ -755,7 +878,7 @@ describe('amp-analytics', function() {
       </amp-analytics>`,
       extensions: ['amp-analytics'],
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         const browser = new BrowserController(env.win);
         return browser.waitForElementLayout('amp-analytics');
@@ -764,10 +887,11 @@ describe('amp-analytics', function() {
       afterEach(() => {
         // clean up written _ga cookie
         document.cookie = '_ga=;expires=' + new Date(0).toUTCString();
+        return RequestBank.tearDown();
       });
 
       it('should send request', () => {
-        return RequestBank.withdraw().then(req => {
+        return RequestBank.withdraw().then((req) => {
           expect(req.url).to.match(/^\/r\/collect\?/);
           const queries = parseQueryString(req.url.substr('/r/collect'.length));
           // see vendors/googleanalytics.js "pageview" request for config
@@ -803,7 +927,7 @@ describe('amp-analytics', function() {
   describe
     .configure()
     .skipEdge()
-    .run('amp-analytics:shadow mode', function() {
+    .run('amp-analytics:shadow mode', function () {
       describes.integration(
         'basic pageview',
         {
@@ -840,7 +964,7 @@ describe('amp-analytics', function() {
         },
         () => {
           it('should send request', () => {
-            return RequestBank.withdraw().then(req => {
+            return RequestBank.withdraw().then((req) => {
               expect(req.url).to.match(/\/?a=2&b=Shadow%20Viewer&cid=amp-.*/);
               expect(
                 req.headers.referer,

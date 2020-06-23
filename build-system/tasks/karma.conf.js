@@ -15,7 +15,12 @@
  */
 'use strict';
 
-const {BABELIFY_GLOBAL_TRANSFORM, BABELIFY_PLUGINS} = require('./helpers');
+const argv = require('minimist')(process.argv.slice(2));
+const browserifyPersistFs = require('browserify-persist-fs');
+const crypto = require('crypto');
+const fs = require('fs');
+const globby = require('globby');
+
 const {gitCommitterEmail} = require('../common/git');
 const {isTravisBuild, travisJobNumber} = require('../common/travis');
 
@@ -28,21 +33,43 @@ const COMMON_CHROME_FLAGS = [
   '--autoplay-policy=no-user-gesture-required',
 ];
 
-// Reduces the odds of Sauce labs timing out during tests. See #16135 and #24286.
-// Reference: https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-Timeouts
-const SAUCE_TIMEOUT_CONFIG = {
-  maxDuration: 30 * 60,
-  commandTimeout: 10 * 60,
-  idleTimeout: 30 * 60,
-};
+if (argv.debug) {
+  COMMON_CHROME_FLAGS.push('--auto-open-devtools-for-tabs');
+}
 
-const BABELIFY_CONFIG = {
-  ...BABELIFY_GLOBAL_TRANSFORM,
-  ...BABELIFY_PLUGINS,
-  sourceMapsAbsolute: true,
-};
+// Used by persistent browserify caching to further salt hashes with our
+// environment state. Eg, when updating a babel-plugin, the environment hash
+// must change somehow so that the cache busts and the file is retransformed.
+const createHash = (input) =>
+  crypto.createHash('sha1').update(input).digest('hex');
 
-const preprocessors = ['browserify'];
+const persistentCache = browserifyPersistFs(
+  '.karma-cache',
+  {
+    deps: createHash(fs.readFileSync('./yarn.lock')),
+    build: globby
+      .sync([
+        'build-system/**/*.js',
+        '!build-system/eslint-rules',
+        '!**/test/**',
+      ])
+      .map((f) => {
+        return createHash(fs.readFileSync(f));
+      }),
+  },
+  () => {
+    process.stdout.write('.');
+  }
+);
+
+persistentCache.gc(
+  {
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+  },
+  () => {
+    // swallow errors
+  }
+);
 
 /**
  * @param {!Object} config
@@ -58,11 +85,18 @@ module.exports = {
   ],
 
   preprocessors: {
-    './test/fixtures/*.html': ['html2js'],
-    './test/**/*.js': preprocessors,
-    './ads/**/test/test-*.js': preprocessors,
-    './extensions/**/test/**/*.js': preprocessors,
-    './testing/**/*.js': preprocessors,
+    // `test-bin` is the output directory of the postHTML transformation.
+    './test-bin/test/fixtures/*.html': ['html2js'],
+    './test/**/*.js': ['browserify'],
+    './ads/**/test/test-*.js': ['browserify'],
+    './extensions/**/test/**/*.js': ['browserify'],
+    './testing/**/*.js': ['browserify'],
+  },
+
+  html2JsPreprocessor: {
+    // Strip the test-bin/ prefix for the transformer destination so that the
+    // change is transparent for users of the path.
+    stripPrefix: 'test-bin/',
   },
 
   // TODO(rsimha, #15510): Sauce labs on Safari doesn't reliably support
@@ -70,16 +104,16 @@ module.exports = {
   // Details: https://support.saucelabs.com/hc/en-us/articles/115010079868
   hostname: 'localhost',
 
-  babelifyConfig: BABELIFY_CONFIG,
-
   browserify: {
     watch: true,
     debug: true,
     fast: true,
     basedir: __dirname + '/../../',
-    transform: [['babelify', BABELIFY_CONFIG]],
+    transform: [['babelify', {caller: {name: 'test'}, global: true}]],
     // Prevent "cannot find module" errors on Travis. See #14166.
     bundleDelay: isTravisBuild() ? 5000 : 1200,
+
+    persistentCache,
   },
 
   reporters: ['super-dots', 'karmaSimpleReporter'],
@@ -169,83 +203,42 @@ module.exports = {
     SL_Chrome: {
       base: 'SauceLabs',
       browserName: 'chrome',
-      platform: 'Windows 10',
-      version: 'latest',
-      ...SAUCE_TIMEOUT_CONFIG,
+      browserVersion: 'latest',
+      platformName: 'Windows 10',
     },
     SL_Chrome_Beta: {
       base: 'SauceLabs',
       browserName: 'chrome',
-      platform: 'Windows 10',
-      version: 'beta',
-      ...SAUCE_TIMEOUT_CONFIG,
-    },
-    SL_Chrome_Android_7: {
-      base: 'SauceLabs',
-      appiumVersion: '1.8.1',
-      deviceName: 'Android GoogleAPI Emulator',
-      browserName: 'Chrome',
-      platformName: 'Android',
-      platformVersion: '7.1',
-      ...SAUCE_TIMEOUT_CONFIG,
-    },
-    SL_iOS_12: {
-      base: 'SauceLabs',
-      appiumVersion: '1.9.1',
-      deviceName: 'iPhone X Simulator',
-      browserName: 'Safari',
-      platformName: 'iOS',
-      platformVersion: '12.0',
-      ...SAUCE_TIMEOUT_CONFIG,
-    },
-    SL_iOS_11: {
-      base: 'SauceLabs',
-      appiumVersion: '1.9.1',
-      deviceName: 'iPhone X Simulator',
-      browserName: 'Safari',
-      platformName: 'iOS',
-      platformVersion: '11.3',
-      ...SAUCE_TIMEOUT_CONFIG,
+      browserVersion: 'beta',
+      platformName: 'Windows 10',
     },
     SL_Firefox: {
       base: 'SauceLabs',
       browserName: 'firefox',
-      platform: 'Windows 10',
-      version: 'latest',
-      ...SAUCE_TIMEOUT_CONFIG,
+      browserVersion: 'latest',
+      platformName: 'macOS 10.15',
     },
     SL_Firefox_Beta: {
       base: 'SauceLabs',
       browserName: 'firefox',
-      platform: 'Windows 10',
-      version: 'beta',
-      ...SAUCE_TIMEOUT_CONFIG,
+      browserVersion: 'beta',
+      platformName: 'Windows 10',
     },
-    SL_Safari_12: {
+    SL_Safari: {
       base: 'SauceLabs',
       browserName: 'safari',
-      platform: 'macOS 10.13',
-      version: '12.1',
-      ...SAUCE_TIMEOUT_CONFIG,
-    },
-    SL_Safari_11: {
-      base: 'SauceLabs',
-      browserName: 'safari',
-      platform: 'macOS 10.13',
-      version: '11.1',
-      ...SAUCE_TIMEOUT_CONFIG,
+      browserVersion: 'latest',
+      platformName: 'macOS 10.15',
     },
     SL_Edge: {
       base: 'SauceLabs',
       browserName: 'MicrosoftEdge',
-      platform: 'Windows 10',
-      ...SAUCE_TIMEOUT_CONFIG,
+      platformName: 'Windows 10',
     },
     SL_IE: {
       base: 'SauceLabs',
       browserName: 'internet explorer',
-      platform: 'Windows 10',
-      ...SAUCE_TIMEOUT_CONFIG,
+      platformName: 'Windows 10',
     },
   },
 
@@ -257,6 +250,11 @@ module.exports = {
     connectOptions: {
       noSslBumpDomains: 'all',
     },
+    // Reduces the odds of Sauce labs timing out during tests. See #16135 and #24286.
+    // Reference: https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-Timeouts
+    maxDuration: 30 * 60,
+    commandTimeout: 10 * 60,
+    idleTimeout: 30 * 60,
   },
 
   client: {
@@ -300,6 +298,7 @@ module.exports = {
     'karma-fixture',
     'karma-html2js-preprocessor',
     'karma-ie-launcher',
+    'karma-structured-json-reporter',
     'karma-mocha',
     'karma-mocha-reporter',
     'karma-safari-launcher',
@@ -311,7 +310,7 @@ module.exports = {
     {
       'middleware:custom': [
         'factory',
-        function() {
+        function () {
           return require(require.resolve('../server/app.js'));
         },
       ],

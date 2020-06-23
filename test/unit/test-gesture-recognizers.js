@@ -92,10 +92,7 @@ describe('TapRecognizer', () => {
   });
 
   it('should signal ready on touchend', () => {
-    gesturesMock
-      .expects('signalReady_')
-      .withExactArgs(recognizer, 0)
-      .once();
+    gesturesMock.expects('signalReady_').withExactArgs(recognizer, 0).once();
     recognizer.onTouchEnd({});
   });
 
@@ -108,7 +105,7 @@ describe('TapRecognizer', () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match(data => {
+        window.sandbox.match((data) => {
           return (
             data.clientX == 101 && data.clientY == 201 && data.target === target
           );
@@ -116,10 +113,7 @@ describe('TapRecognizer', () => {
         null
       )
       .once();
-    gesturesMock
-      .expects('signalEnd_')
-      .withExactArgs(recognizer)
-      .once();
+    gesturesMock.expects('signalEnd_').withExactArgs(recognizer).once();
     recognizer.acceptStart();
   });
 });
@@ -206,10 +200,7 @@ describe('DoubletapRecognizer', () => {
     gesturesMock.expects('signalPending_').once();
     recognizer.onTouchEnd({});
 
-    gesturesMock
-      .expects('signalReady_')
-      .withExactArgs(recognizer, 0)
-      .once();
+    gesturesMock.expects('signalReady_').withExactArgs(recognizer, 0).once();
     recognizer.onTouchEnd({});
     expect(recognizer.tapCount_).to.equal(2);
   });
@@ -221,16 +212,13 @@ describe('DoubletapRecognizer', () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match(data => {
+        window.sandbox.match((data) => {
           return data.clientX == 101 && data.clientY == 201;
         }),
         null
       )
       .once();
-    gesturesMock
-      .expects('signalEnd_')
-      .withExactArgs(recognizer)
-      .once();
+    gesturesMock.expects('signalEnd_').withExactArgs(recognizer).once();
     recognizer.acceptStart();
     expect(recognizer.tapCount_).to.equal(0);
   });
@@ -301,10 +289,7 @@ describe('SwipeXYRecognizer', () => {
   });
 
   it('should send ready after significant move', () => {
-    gesturesMock
-      .expects('signalReady_')
-      .withExactArgs(recognizer, -10)
-      .once();
+    gesturesMock.expects('signalReady_').withExactArgs(recognizer, -10).once();
 
     let res = recognizer.onTouchStart({
       touches: [{clientX: 101, clientY: 201}],
@@ -327,7 +312,7 @@ describe('SwipeXYRecognizer', () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match(data => {
+        window.sandbox.match((data) => {
           return (
             data.first === true &&
             data.last === false &&
@@ -365,7 +350,7 @@ describe('SwipeXYRecognizer', () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match(data => {
+        window.sandbox.match((data) => {
           return (
             data.first === false &&
             data.last === false &&
@@ -401,7 +386,7 @@ describe('SwipeXYRecognizer', () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match(data => {
+        window.sandbox.match((data) => {
           return (
             data.first === false &&
             data.last === true &&
@@ -435,7 +420,7 @@ describe('SwipeXYRecognizer', () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match(data => {
+        window.sandbox.match((data) => {
           return (
             data.first === false &&
             data.last === true &&
@@ -597,10 +582,7 @@ describe('TapzoomRecognizer', () => {
 
   it('should send ready after significant move', () => {
     recognizer.tapCount_ = 1;
-    gesturesMock
-      .expects('signalReady_')
-      .withExactArgs(recognizer, 0)
-      .once();
+    gesturesMock.expects('signalReady_').withExactArgs(recognizer, 0).once();
 
     let res = recognizer.onTouchStart({
       touches: [{clientX: 101, clientY: 201}],
@@ -622,7 +604,7 @@ describe('TapzoomRecognizer', () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match(data => {
+        window.sandbox.match((data) => {
           return (
             data.first === true &&
             data.last === false &&
@@ -655,7 +637,7 @@ describe('TapzoomRecognizer', () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match(data => {
+        window.sandbox.match((data) => {
           return (
             data.first === false &&
             data.last === false &&
@@ -691,7 +673,7 @@ describe('TapzoomRecognizer', () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match(data => {
+        window.sandbox.match((data) => {
           return (
             data.first === false &&
             data.last === true &&
@@ -800,10 +782,7 @@ describe('PinchRecognizer', () => {
   });
 
   it('should send ready after significant move', () => {
-    gesturesMock
-      .expects('signalReady_')
-      .withExactArgs(recognizer, 0)
-      .once();
+    gesturesMock.expects('signalReady_').withExactArgs(recognizer, 0).once();
 
     let res = recognizer.onTouchStart({
       touches: [
@@ -869,7 +848,7 @@ describe('PinchRecognizer', () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match(data => {
+        window.sandbox.match((data) => {
           return (
             data.first === true &&
             data.last === false &&
@@ -924,7 +903,7 @@ describe('PinchRecognizer', () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match(unusedData => true),
+        window.sandbox.match((unusedData) => true),
         null
       )
       .once();
@@ -941,7 +920,7 @@ describe('PinchRecognizer', () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match(data => {
+        window.sandbox.match((data) => {
           return (
             data.first === false &&
             data.last === false &&
@@ -982,7 +961,7 @@ describe('PinchRecognizer', () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match(unusedData => true),
+        window.sandbox.match((unusedData) => true),
         null
       )
       .once();
@@ -994,7 +973,7 @@ describe('PinchRecognizer', () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match(data => {
+        window.sandbox.match((data) => {
           return (
             data.first === false &&
             data.last === true &&
@@ -1033,7 +1012,7 @@ describe('PinchRecognizer', () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match(unusedData => true),
+        window.sandbox.match((unusedData) => true),
         null
       )
       .once();
@@ -1045,7 +1024,7 @@ describe('PinchRecognizer', () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match(data => {
+        window.sandbox.match((data) => {
           return (
             data.first === false &&
             data.last === true &&
@@ -1089,7 +1068,7 @@ describe('PinchRecognizer', () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match(data => {
+        window.sandbox.match((data) => {
           return (
             data.centerClientX == 100 &&
             data.centerClientY == 100 &&
@@ -1110,7 +1089,7 @@ describe('PinchRecognizer', () => {
       .expects('signalEmit_')
       .withExactArgs(
         recognizer,
-        window.sandbox.match(data => {
+        window.sandbox.match((data) => {
           return (
             data.centerClientX == 100 &&
             data.centerClientY == 100 &&

@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import {HostServices} from '../../../src/inabox/host-services';
 import {ScrollManager} from './scroll-manager';
 import {Services} from '../../../src/services';
-import {VisibilityManagerForMApp} from './visibility-manager-for-mapp';
 import {
   closestAncestorElementBySelector,
+  getDataParamsFromAttributes,
   matches,
   scopedQuerySelector,
 } from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {isArray} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
 import {provideVisibilityManager} from './visibility-manager';
@@ -32,6 +33,7 @@ import {tryResolve} from '../../../src/utils/promise';
 import {whenContentIniLoad} from '../../../src/ini-load';
 
 const TAG = 'amp-analytics/analytics-root';
+const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 
 /**
  * An analytics root. Analytics can be scoped to either ampdoc, embed or
@@ -58,45 +60,6 @@ export class AnalyticsRoot {
 
     /** @private {?./scroll-manager.ScrollManager} */
     this.scrollManager_ = null;
-
-    /** @private {?Promise} */
-    this.usingHostAPIPromise_ = null;
-
-    /** @private {?../../../src/inabox/host-services.VisibilityInterface} */
-    this.hostVisibilityService_ = null;
-  }
-
-  /**
-   * @return {!Promise<boolean>}
-   */
-  isUsingHostAPI() {
-    if (this.usingHostAPIPromise_) {
-      return this.usingHostAPIPromise_;
-    }
-    if (!HostServices.isAvailable(this.ampdoc)) {
-      this.usingHostAPIPromise_ = Promise.resolve(false);
-    } else {
-      // TODO: Using the visibility service and apply it for all tracking types
-      const promise = HostServices.visibilityForDoc(this.ampdoc);
-      this.usingHostAPIPromise_ = promise
-        .then(visibilityService => {
-          this.hostVisibilityService_ = visibilityService;
-          return true;
-        })
-        .catch(error => {
-          dev().fine(
-            TAG,
-            'VisibilityServiceError - fallback=' + error.fallback
-          );
-          if (error.fallback) {
-            // Do not use HostAPI, fallback to original implementation.
-            return false;
-          }
-          // Cannot fallback, service error. Throw user error.
-          throw user().createError('Host Visibility Service Error');
-        });
-    }
-    return this.usingHostAPIPromise_;
   }
 
   /** @override */
@@ -143,7 +106,11 @@ export class AnalyticsRoot {
    */
   getRootElement() {
     const root = this.getRoot();
-    return dev().assertElement(root.documentElement || root.body || root);
+    // In the case of a shadow doc, its host will be used as
+    // a refrence point
+    return dev().assertElement(
+      root.host || root.documentElement || root.body || root
+    );
   }
 
   /**
@@ -185,11 +152,11 @@ export class AnalyticsRoot {
    * Returns the tracker for the specified name and list of allowed types.
    *
    * @param {string} name
-   * @param {!Object<string, typeof ./events.EventTracker>} whitelist
+   * @param {!Object<string, typeof ./events.EventTracker>} allowlist
    * @return {?./events.EventTracker}
    */
-  getTrackerForWhitelist(name, whitelist) {
-    const trackerProfile = whitelist[name];
+  getTrackerForAllowlist(name, allowlist) {
+    const trackerProfile = allowlist[name];
     if (trackerProfile) {
       return this.getTracker(name, trackerProfile);
     }
@@ -239,7 +206,7 @@ export class AnalyticsRoot {
       return tryResolve(() => this.getRootElement());
     }
     if (selector == ':host') {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         resolve(
           user().assertElement(
             this.getHostElement(),
@@ -276,6 +243,75 @@ export class AnalyticsRoot {
   }
 
   /**
+   * @param {!Array<string>} selectors Array of DOM query selectors.
+   * @return {!Promise<!Array<!Element>>} Element corresponding to the selector.
+   */
+  getElementsByQuerySelectorAll_(selectors) {
+    // Wait for document-ready to avoid false missed searches
+    return this.ampdoc.whenReady().then(() => {
+      let elements = [];
+      for (let i = 0; i < selectors.length; i++) {
+        let nodeList;
+        let elementArray = [];
+        const selector = selectors[i];
+        try {
+          nodeList = this.getRoot().querySelectorAll(selector);
+        } catch (e) {
+          userAssert(false, `Invalid query selector ${selector}`);
+        }
+        for (let j = 0; j < nodeList.length; j++) {
+          if (this.contains(nodeList[j])) {
+            elementArray.push(nodeList[j]);
+          }
+        }
+        elementArray = this.getDataVarsElements_(elementArray, selector);
+        userAssert(elementArray.length, `Element "${selector}" not found`);
+        this.verifyAmpElements_(elementArray, selector);
+        elements = elements.concat(elementArray);
+      }
+      // Return unique
+      return elements.filter(
+        (element, index) => elements.indexOf(element) === index
+      );
+    });
+  }
+
+  /**
+   * Return all elements that have a data-vars attribute.
+   * @param {!Array<!Element>} elementArray
+   * @param {string} selector
+   * @return {!Array<!Element>}
+   */
+  getDataVarsElements_(elementArray, selector) {
+    let removedCount = 0;
+    const dataVarsArray = [];
+    for (let i = 0; i < elementArray.length; i++) {
+      const dataVarKeys = Object.keys(
+        getDataParamsFromAttributes(
+          elementArray[i],
+          /* computeParamNameFunc */ undefined,
+          VARIABLE_DATA_ATTRIBUTE_KEY
+        )
+      );
+      if (dataVarKeys.length) {
+        dataVarsArray.push(elementArray[i]);
+      } else {
+        removedCount++;
+      }
+    }
+    if (removedCount) {
+      user().warn(
+        TAG,
+        '%s element(s) ommited from selector "%s"' +
+          ' because no data-vars-* attribute was found.',
+        removedCount,
+        selector
+      );
+    }
+    return dataVarsArray;
+  }
+
+  /**
    * Searches the AMP element that matches the selector within the scope of the
    * analytics root in relationship to the specified context node.
    *
@@ -286,14 +322,58 @@ export class AnalyticsRoot {
    * @return {!Promise<!AmpElement>} AMP element corresponding to the selector if found.
    */
   getAmpElement(context, selector, selectionMethod) {
-    return this.getElement(context, selector, selectionMethod).then(element => {
+    return this.getElement(context, selector, selectionMethod).then(
+      (element) => {
+        this.verifyAmpElements_([element], selector);
+        return element;
+      }
+    );
+  }
+
+  /**
+   * Searches for the AMP element(s) that matches the selector
+   * within the scope of the analytics root in relationship to
+   * the specified context node.
+   *
+   * @param {!Element} context
+   * @param {!Array<string>|string} selectors DOM query selector(s).
+   * @param {?string=} selectionMethod Allowed values are `null`,
+   *   `'closest'` and `'scope'`.
+   * @return {!Promise<!Array<!AmpElement>>} Array of AMP elements corresponding to the selector if found.
+   */
+  getAmpElements(context, selectors, selectionMethod) {
+    if (
+      isExperimentOn(this.ampdoc.win, 'visibility-trigger-improvements') &&
+      isArray(selectors)
+    ) {
       userAssert(
-        element.classList.contains('i-amphtml-element'),
+        !selectionMethod,
+        'Cannot have selectionMethod %s defined with an array selector.',
+        selectionMethod
+      );
+      return this.getElementsByQuerySelectorAll_(
+        /** @type {!Array<string>} */ (selectors)
+      );
+    }
+    return this.getAmpElement(
+      context,
+      /** @type {string} */ (selectors),
+      selectionMethod
+    ).then((element) => [element]);
+  }
+
+  /**
+   * @param {!Array<Element>} elements
+   * @param {string} selector
+   */
+  verifyAmpElements_(elements, selector) {
+    for (let i = 0; i < elements.length; i++) {
+      userAssert(
+        elements[i].classList.contains('i-amphtml-element'),
         'Element "%s" is required to be an AMP element',
         selector
       );
-      return element;
-    });
+    }
   }
 
   /**
@@ -310,7 +390,7 @@ export class AnalyticsRoot {
    * @return {function(!Event)}
    */
   createSelectiveListener(listener, context, selector, selectionMethod = null) {
-    return event => {
+    return (event) => {
       if (selector == ':host') {
         // `:host` is not reachable via selective listener b/c event path
         // cannot be retargeted across the boundary of the embed.
@@ -371,22 +451,11 @@ export class AnalyticsRoot {
    * Returns the visibility root corresponding to this analytics root (ampdoc
    * or embed). The visibility root is created lazily as needed and takes
    * care of all visibility tracking functions.
-   *
-   * The caller needs to make sure to call getVisibilityManager after
-   * usingHostAPIPromise has resolved
    * @return {!./visibility-manager.VisibilityManager}
    */
   getVisibilityManager() {
     if (!this.visibilityManager_) {
-      if (this.hostVisibilityService_) {
-        // If there is hostAPI (hostAPI never exist with the FIE case)
-        this.visibilityManager_ = new VisibilityManagerForMApp(
-          this.ampdoc,
-          this.hostVisibilityService_
-        );
-      } else {
-        this.visibilityManager_ = provideVisibilityManager(this.getRoot());
-      }
+      this.visibilityManager_ = provideVisibilityManager(this.getRoot());
     }
     return this.visibilityManager_;
   }
@@ -400,7 +469,7 @@ export class AnalyticsRoot {
   getScrollManager() {
     // TODO (zhouyx@): Disallow scroll trigger with host API
     if (!this.scrollManager_) {
-      this.scrollManager_ = new ScrollManager(this.ampdoc);
+      this.scrollManager_ = new ScrollManager(this);
     }
 
     return this.scrollManager_;

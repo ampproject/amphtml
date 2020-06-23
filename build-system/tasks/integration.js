@@ -16,6 +16,9 @@
 'using strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const fs = require('fs-extra');
+const globby = require('globby');
+const log = require('fancy-log');
 const {
   maybePrintArgvMessages,
   shouldNotRun,
@@ -24,7 +27,8 @@ const {
   RuntimeTestRunner,
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
-const {execOrDie} = require('../common/exec');
+const {buildRuntime} = require('../common/utils');
+const {cyan, green} = require('ansi-colors');
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -36,12 +40,26 @@ class Runner extends RuntimeTestRunner {
     if (argv.nobuild) {
       return;
     }
-    execOrDie('gulp clean');
-    if (argv.compiled) {
-      execOrDie(`gulp dist --fortesting --config ${argv.config}`);
-    } else {
-      execOrDie(`gulp build --config ${argv.config}`);
+    await buildRuntime();
+  }
+}
+
+async function buildTransformedHtml() {
+  const filePaths = await globby('./test/fixtures/**/*.html');
+  let normalizedFilePath;
+  try {
+    log(
+      green('Copying integration test files to'),
+      cyan('test-bin/') + green('...')
+    );
+    for (const filePath of filePaths) {
+      await fs.copySync(filePath, `./test-bin/${filePath}`);
     }
+  } catch (e) {
+    console./*OK*/ log(
+      `${normalizedFilePath} could not be transformed by the postHTML ` +
+        `pipeline.\n${e.message}`
+    );
   }
 }
 
@@ -49,6 +67,8 @@ async function integration() {
   if (shouldNotRun()) {
     return;
   }
+
+  await buildTransformedHtml();
 
   maybePrintArgvMessages();
 
@@ -68,12 +88,13 @@ integration.description = 'Runs integration tests';
 integration.flags = {
   'chrome_canary': '  Runs tests on Chrome Canary',
   'chrome_flags': '  Uses the given flags to launch Chrome',
-  'compiled':
-    '  Changes integration tests to use production JS binaries for execution',
-  'single_pass': '  Run tests in Single Pass mode',
+  'compiled': '  Runs tests against minified JS',
   'config':
     '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'coverage': '  Run tests in code coverage mode',
+  'debug':
+    '  Allow debug statements by auto opening devtools. NOTE: This only ' +
+    'works in non headless mode.',
   'firefox': '  Runs tests on Firefox',
   'files': '  Runs tests for specific files',
   'grep': '  Runs tests that match the pattern',

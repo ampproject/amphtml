@@ -294,6 +294,16 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'anyclip': {
+    prefetch:
+      'https://player.anyclip.com/anyclip-widget/lre-widget/prod/v1/src/lre.js',
+    preconnect: [
+      'https://trafficmanager.anyclip.com',
+      'https://lreprx-server.anyclip.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   'appnexus': {
     prefetch: 'https://acdn.adnxs.com/ast/ast.js',
     preconnect: 'https://ib.adnxs.com',
@@ -309,11 +319,11 @@ const adConfig = jsonConfiguration({
   },
 
   'beopinion': {
-    prefetch: 'https://widget.beopinion.com/sdk.js',
+    prefetch: 'https://widget.beop.io/sdk.js',
     preconnect: [
-      'https://t.beopinion.com',
-      'https://s.beopinion.com',
-      'https://data.beopinion.com',
+      'https://t.beop.io',
+      'https://s.beop.io',
+      'https://data.beop.io',
     ],
     renderStartImplemented: true,
   },
@@ -567,6 +577,10 @@ const adConfig = jsonConfiguration({
     consentHandlingOverride: true,
   },
 
+  'iprom': {
+    prefetch: 'https://cdn.ipromcloud.com/ipromNS.js',
+  },
+
   'ix': {
     prefetch: ['https://js-sec.indexww.com/apl/amp.js'],
     preconnect: 'https://as-sec.casalemedia.com',
@@ -634,6 +648,12 @@ const adConfig = jsonConfiguration({
     ],
   },
 
+  'marfeel': {
+    prefetch: 'https://www.googletagservices.com/tag/js/gpt.js',
+    preconnect: 'https://live.mrf.io',
+    consentHandlingOverride: true,
+  },
+
   'mantis-recommend': {
     prefetch: 'https://assets.mantisadnetwork.com/recommend.min.js',
     preconnect: [
@@ -641,6 +661,8 @@ const adConfig = jsonConfiguration({
       'https://resize.mantisadnetwork.com',
     ],
   },
+
+  'mediaad': {},
 
   'medianet': {
     preconnect: 'https://contextual.media.net',
@@ -707,6 +729,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'my6sense': {
+    renderStartImplemented: true,
+  },
+
   'mytarget': {
     prefetch: 'https://ad.mail.ru/static/ads-async.js',
     renderStartImplemented: true,
@@ -755,6 +781,10 @@ const adConfig = jsonConfiguration({
   },
 
   'nws': {},
+
+  'oblivki': {
+    renderStartImplemented: true,
+  },
 
   'onead': {
     prefetch: 'https://ad-specs.guoshipartners.com/static/js/onead-amp.min.js',
@@ -809,6 +839,10 @@ const adConfig = jsonConfiguration({
 
   'postquare': {},
 
+  'ppstudio': {
+    renderStartImplemented: true,
+  },
+
   'pressboard': {
     renderStartImplemented: true,
   },
@@ -852,6 +886,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'rakutenunifiedads': {
+    prefetch: 'https://s-cdn.rmp.rakuten.co.jp/js/amp.js',
+    renderStartImplemented: true,
+  },
+
   'rbinfox': {
     renderStartImplemented: true,
   },
@@ -869,6 +908,12 @@ const adConfig = jsonConfiguration({
   },
 
   'relap': {
+    renderStartImplemented: true,
+  },
+
+  'relappro': {
+    prefetch: 'https://cdn.relappro.com/adservices/amp/relappro.amp.min.js',
+    preconnect: 'https://tags.relappro.com',
     renderStartImplemented: true,
   },
 
@@ -941,6 +986,10 @@ const adConfig = jsonConfiguration({
       'https://video.freeskreen.com',
     ],
     renderStartImplemented: true,
+  },
+
+  'smartads': {
+    prefetch: 'https://smart-ads.biz/amp.js',
   },
 
   'smartadserver': {
@@ -1039,9 +1088,10 @@ const adConfig = jsonConfiguration({
   },
 
   'teads': {
-    prefetch: 'https://a.teads.tv/media/format/v3/teads-format.min.js',
+    prefetch: 'https://s8t.teads.tv/media/format/v3/teads-format.min.js',
     preconnect: [
       'https://cdn2.teads.tv',
+      'https://a.teads.tv',
       'https://t.teads.tv',
       'https://r.teads.tv',
     ],
@@ -1050,7 +1100,7 @@ const adConfig = jsonConfiguration({
 
   'temedya': {
     prefetch: [
-      'https://vidyome-com.cdn.vidyome.com/vidyome/builds/temedya-amp.js',
+      'https://widget.cdn.vidyome.com/builds/loader-amp.js',
       'https://vidyome-com.cdn.vidyome.com/vidyome/builds/widgets.js',
     ],
     renderStartImplemented: true,
@@ -1157,6 +1207,10 @@ const adConfig = jsonConfiguration({
   'yahoo': {
     prefetch: 'https://s.yimg.com/aaq/ampad/display.js',
     preconnect: 'https://us.adserver.yahoo.com',
+  },
+
+  'yahoofedads': {
+    renderStartImplemented: true,
   },
 
   'yahoojp': {

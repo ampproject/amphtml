@@ -24,21 +24,6 @@ limitations under the License.
 
 # amp-image-slider
 
-A slider to compare two images.
-
-[TOC]
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-image-slider" src="https://cdn.ampproject.org/v0/amp-image-slider-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fixed, responsive, intrinsic</td>
-  </tr>
-</table>
-
 ## Behavior
 
 The `amp-image-slider` component requires exactly two `amp-img` elements as its children. The first child image displays on the left, the second child image displays on the right.

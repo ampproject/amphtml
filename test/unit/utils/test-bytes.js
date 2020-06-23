@@ -23,13 +23,13 @@ import {
   utf8Encode,
 } from '../../../src/utils/bytes';
 
-describe('stringToBytes', function() {
+describe('stringToBytes', function () {
   let fakeWin;
 
   beforeEach(() => {
     fakeWin = {
       crypto: {
-        getRandomValues: array => {
+        getRandomValues: (array) => {
           for (let i = 0; i < array.length; i++) {
             array[i] = i + 1;
           }
@@ -81,7 +81,7 @@ describe('stringToBytes', function() {
   );
 });
 
-describe('utf8', function() {
+describe('utf8', function () {
   // Examples here courtesy of StackOverflow:
   // http://stackoverflow.com/questions/478201/how-to-test-an-application-for
   // -correct-encoding-e-g-utf-8
@@ -379,7 +379,7 @@ describe('utf8', function() {
   });
 });
 
-describe('bytesToUInt32', function() {
+describe('bytesToUInt32', function () {
   it('should convert Uint8Arrays into unsigned 32-bit integers', () => {
     expect(bytesToUInt32(new Uint8Array([0xff, 0xff, 0xff, 0xff]))).to.equal(
       0xffffffff

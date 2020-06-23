@@ -26,7 +26,6 @@ import {
   isProxyOrigin,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {getState} from '../../../src/history';
 import {setStyle} from '../../../src/style';
 import {user, userAssert} from '../../../src/log';
 
@@ -156,7 +155,7 @@ export function getTextColorForRGB(rgb) {
   const {r, g, b} = rgb;
   // Calculates the relative luminance L.
   // https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
-  const getLinearRGBValue = x => {
+  const getLinearRGBValue = (x) => {
     // 8bit to sRGB.
     x /= 255;
 
@@ -252,44 +251,6 @@ export function resolveImgSrc(win, url) {
   return urlSrc;
 }
 
-/** @enum {string} */
-export const HistoryState = {
-  ATTACHMENT_PAGE_ID: 'ampStoryAttachmentPageId',
-  BOOKEND_ACTIVE: 'ampStoryBookendActive',
-  NAVIGATION_PATH: 'ampStoryNavigationPath',
-};
-
-/**
- * Updates the value for a given state in the window history.
- * @param {!Window} win
- * @param {string} stateName
- * @param {string|boolean|Array<string>|null} value
- */
-export function setHistoryState(win, stateName, value) {
-  const {history} = win;
-  const state = getState(history) || {};
-  const newHistory = {
-    ...state,
-    [stateName]: value,
-  };
-
-  history.replaceState(newHistory, '');
-}
-
-/**
- * Returns the value of a given state of the window history.
- * @param {!Window} win
- * @param {string} stateName
- * @return {*}
- */
-export function getHistoryState(win, stateName) {
-  const {history} = win;
-  if (history && getState(history)) {
-    return getState(history)[stateName];
-  }
-  return null;
-}
-
 /**
  * Returns a boolean indicating whether the media element is visible or has to
  * play, or hidden by any publisher CSS rule.
@@ -340,7 +301,7 @@ export function setTextBackgroundColor(element) {
     TEXT_BACKGROUND_COLOR_SELECTOR
   );
 
-  Array.prototype.forEach.call(elementsToUpgradeStyles, el => {
+  Array.prototype.forEach.call(elementsToUpgradeStyles, (el) => {
     const color = el.getAttribute(TEXT_BACKGROUND_COLOR_ATTRIBUTE_NAME);
     setStyle(el, 'background-color', color);
   });

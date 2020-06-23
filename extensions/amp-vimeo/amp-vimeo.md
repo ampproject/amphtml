@@ -24,25 +24,6 @@ limitations under the License.
 
 # amp-vimeo
 
-Displays a <a href="https://vimeo.com">Vimeo</a> video.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-vimeo" src="https://cdn.ampproject.org/v0/amp-vimeo-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-vimeo/">Annotated code example for amp-vimeo</a></td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Example
 
 With responsive layout, the width and height from the example should yield correct layouts for 16:9 aspect ratio videos:

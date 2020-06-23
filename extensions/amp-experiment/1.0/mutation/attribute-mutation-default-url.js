@@ -65,7 +65,7 @@ export class AttributeMutationDefaultUrl {
 
   /** @override */
   mutate() {
-    this.elements_.forEach(element => {
+    this.elements_.forEach((element) => {
       // name can be href or src
       const name = this.mutationRecord_['attributeName'];
       const value = this.mutationRecord_['value'];

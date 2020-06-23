@@ -27,13 +27,13 @@ describes.realWin(
       extensions: ['amp-autocomplete'],
     },
   },
-  env => {
+  (env) => {
     let win, doc, impl;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      return buildAmpAutocomplete().then(ampAutocomplete => {
+      return buildAmpAutocomplete().then((ampAutocomplete) => {
         impl = ampAutocomplete;
       });
     });
@@ -422,18 +422,18 @@ describes.realWin(
       expect(impl.tokenPrefixMatch_(item, 'd c')).to.be.false;
     });
 
-    it('truncateToMaxEntries_() should truncate given data', () => {
+    it('truncateToMaxItems_() should truncate given data', () => {
       expect(
-        impl.truncateToMaxEntries_(['a', 'b', 'c', 'd'])
+        impl.truncateToMaxItems_(['a', 'b', 'c', 'd'])
       ).to.have.ordered.members(['a', 'b', 'c', 'd']);
-      impl.maxEntries_ = 3;
+      impl.maxItems_ = 3;
       expect(
-        impl.truncateToMaxEntries_(['a', 'b', 'c', 'd'])
+        impl.truncateToMaxItems_(['a', 'b', 'c', 'd'])
       ).to.have.ordered.members(['a', 'b', 'c']);
       expect(
-        impl.truncateToMaxEntries_(['a', 'b', 'c'])
+        impl.truncateToMaxItems_(['a', 'b', 'c'])
       ).to.have.ordered.members(['a', 'b', 'c']);
-      expect(impl.truncateToMaxEntries_(['a', 'b'])).to.have.ordered.members([
+      expect(impl.truncateToMaxItems_(['a', 'b'])).to.have.ordered.members([
         'a',
         'b',
       ]);
@@ -722,7 +722,7 @@ describes.realWin(
       impl.activeElement_ = doc.createElement('div');
       expect(impl.userInput_).not.to.equal(impl.inputElement_.value);
       env.sandbox.stub(impl, 'areResultsDisplayed_').returns(true);
-      const fireEventSpy = env.sandbox.spy(impl, 'fireSelectEvent_');
+      const fireEventSpy = env.sandbox.spy(impl, 'fireSelectAndChangeEvents_');
       return impl
         .layoutCallback()
         .then(() => {
@@ -812,29 +812,33 @@ describes.realWin(
         })
         .then(() => {
           expect(getItemSpy).to.have.been.calledTwice;
-          expect(selectItemSpy).to.have.been.called;
+          expect(selectItemSpy).to.have.been.calledWith(null);
           expect(impl.inputElement_.value).to.equal('');
           mockEl = impl.createElementFromItem_('abc');
           return impl.selectHandler_({target: mockEl});
         })
         .then(() => {
           expect(getItemSpy).to.have.been.calledWith(mockEl);
-          expect(selectItemSpy).to.have.been.calledWith(mockEl);
+          expect(selectItemSpy).to.have.been.calledWith('abc');
           expect(impl.inputElement_.value).to.equal('abc');
         });
     });
 
-    it('should fire select event from selectItem_', () => {
-      const fireEventSpy = env.sandbox.spy(impl, 'fireSelectEvent_');
+    it('should fire events from selectItem_', () => {
+      const fireEventSpy = env.sandbox.spy(impl, 'fireSelectAndChangeEvents_');
       const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
-      const mockEl = doc.createElement('div');
+      const dispatchSpy = env.sandbox.spy(impl.inputElement_, 'dispatchEvent');
       return impl.layoutCallback().then(() => {
         impl.toggleResults_(true);
-        mockEl.setAttribute('data-value', 'test');
-        impl.selectItem_(mockEl);
+        impl.selectItem_('test');
         expect(fireEventSpy).to.have.been.calledOnce;
         expect(fireEventSpy).to.have.been.calledWith('test');
-        expect(triggerSpy).to.have.been.calledOnce;
+        expect(triggerSpy).to.have.been.calledWith(impl.element, 'select');
+        expect(triggerSpy).to.have.been.calledWith(
+          impl.inputElement_,
+          'change'
+        );
+        expect(dispatchSpy).to.have.been.calledOnce;
       });
     });
 
@@ -958,7 +962,7 @@ describes.realWin(
       });
 
       it('should throw error when fallback is not provided', () => {
-        return impl.layoutCallback().catch(e => {
+        return impl.layoutCallback().catch((e) => {
           expect(getDataSpy).to.have.been.calledOnce;
           expect(fallbackSpy).to.have.been.calledWith(e);
           expect(toggleFallbackSpy).not.to.have.been.called;

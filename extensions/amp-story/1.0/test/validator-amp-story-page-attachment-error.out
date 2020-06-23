@@ -42,21 +42,32 @@ amp-story/1.0/test/validator-amp-story-page-attachment-error.html:37:6 The attri
 |          <p>Bacon ipsum dolor cat cat cat.</p>
 |        </amp-story-page-attachment>
 |
-|        <amp-story-page-attachment layout="nodisplay">
+|        <amp-story-page-attachment layout="nodisplay" href="javascript:alert(1)"></amp-story-page-attachment>
 >>       ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-page-attachment-error.html:42:6 Tag 'amp-story-page-attachment', if present, must be the last child of tag 'amp-story-page'.
+amp-story/1.0/test/validator-amp-story-page-attachment-error.html:42:6 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'amp-story-page-attachment'.
+|
+|        <amp-story-page-attachment layout="nodisplay" href="https://www.gooogle.com">
+>>       ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-page-attachment-error.html:44:6 Tag 'amp-story-page-attachment' must have 0 child tags - saw 1 child tags.
+>>       ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-page-attachment-error.html:44:6 Tag 'amp-story-page-attachment[href]', if present, must be the last child of tag 'amp-story-page'.
+>>       ^~~~~~~~~
+amp-story/1.0/test/validator-amp-story-page-attachment-error.html:44:6 Tag 'amp-story-page-attachment[href]', if present, must be the last child of tag 'amp-story-page'.
+|          <h1>Illegal child element</h1>
+|        </amp-story-page-attachment>
+|
+|
+|        <amp-story-page-attachment layout="nodisplay">
 |          <h1>Amazing title</h1>
 |          <p>Bacon ipsum dolor cat cat cat.</p>
 |
 |          <amp-story-grid-layer template="vertical">
->>         ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-page-attachment-error.html:46:8 The tag 'amp-story-grid-layer' may not appear as a descendant of tag 'amp-story-page-attachment'.
 |            <h1>fill</h1>
 |          </amp-story-grid-layer>
 |
 |          <amp-story-bookend src="bookendv1.json" layout="nodisplay">
 >>         ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-page-attachment-error.html:50:8 The tag 'amp-story-bookend' may not appear as a descendant of tag 'amp-story-page-attachment'.
+amp-story/1.0/test/validator-amp-story-page-attachment-error.html:57:8 Tag 'amp-story-bookend', if present, must be the last child of tag 'amp-story-page-attachment'.
 |          </amp-story-bookend>
 |
 |          <amp-youtube

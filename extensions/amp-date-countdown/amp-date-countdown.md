@@ -3,7 +3,7 @@ $category@: presentation
 formats:
   - websites
 teaser:
-  text: Displays GL Transmission Format (gITF) 3D models.
+  text: Displays a countdown sequence to a specified date.
 ---
 
 <!--
@@ -25,23 +25,6 @@ limitations under the License.
 # amp-date-countdown
 
 Display a sequence of backward counting to indicate the time remaining before an event is scheduled to occur.
-
-<table>
-  <tr>
-    <td><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-date-countdown" src="https://cdn.ampproject.org/v0/amp-date-countdown-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-date-countdown/">amp-date-countdown example</a>.</td>
-  </tr>
-</table>
-
-[TOC]
 
 ## Behavior
 
@@ -186,10 +169,10 @@ _Example: Demonstrating usage of timeout event_
 <amp-animation id="hide-timeout-event" layout="nodisplay">
   <script type="application/json">
     {
-        "duration": "1s",
-        "fill": "both",
-        "selector": "#ampdate, #sample",
-        "keyframes": { "visibility": "hidden"}
+      "duration": "1s",
+      "fill": "both",
+      "selector": "#ampdate, #sample",
+      "keyframes": {"visibility": "hidden"}
     }
   </script>
 </amp-animation>

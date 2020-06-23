@@ -35,7 +35,7 @@ export function renderPageDescription(page, videos) {
       'id': descriptionElId,
     })
   );
-  const append = el => {
+  const append = (el) => {
     page.mutateElement(() => {
       descriptionEl.appendChild(el);
       // Add descriptionEl to actual page if that hasn't happened yet.
@@ -63,10 +63,11 @@ export function renderPageDescription(page, videos) {
 
   addTagToDescriptionEl('h2', page.element.getAttribute('title'));
 
-  videos.forEach(videoEl => {
+  videos.forEach((videoEl) => {
     addTagToDescriptionEl('p', videoEl.getAttribute('alt'));
     addTagToDescriptionEl('p', videoEl.getAttribute('title'));
-    fetchCaptions(page, videoEl).then(text => {
+    addTagToDescriptionEl('p', videoEl.getAttribute('aria-label'));
+    fetchCaptions(page, videoEl).then((text) => {
       addTagToDescriptionEl('p', text);
     });
   });
@@ -91,7 +92,7 @@ function fetchCaptions(page, videoEl) {
     .fetchText(track.src, {
       mode: 'cors',
     })
-    .then(response => {
+    .then((response) => {
       if (!response.ok) {
         return;
       }
@@ -147,7 +148,7 @@ function extractTextContentWebVtt(text) {
   let seenQueue = false;
   text = text
     .split(/[\n\r]+/)
-    .filter(line => {
+    .filter((line) => {
       const isQueue = queue.test(line);
       seenQueue = seenQueue || isQueue;
       // Filter queues and everything before.
@@ -157,7 +158,7 @@ function extractTextContentWebVtt(text) {
       // Filter comments.
       return !/^NOTE\s+/.test(line);
     })
-    .map(line => {
+    .map((line) => {
       return (
         line
           // Strip multiline indicators.

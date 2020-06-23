@@ -26,13 +26,6 @@
   width: 48px;
 }
 
-.amp-access-scroll-bar.amp-access-scroll-holdback {
-  height: 44px;
-  left: 0;
-  right: 0;
-  width: 100%;
-}
-
 .amp-access-scroll-sheet {
   position: fixed;
   background: transparent;
@@ -62,18 +55,5 @@
     left: auto;
     right: 16px;
     width: 475px;
-  }
-}
-
-.amp-access-scroll-sheet.amp-access-scroll-holdback {
-  /* mobile */
-  bottom: 44px;
-  height: 100px;
-}
-
-@media (min-width: 600px) {
-  .amp-access-scroll-sheet.amp-access-scroll-holdback {
-    bottom: 63px;
-    height: 56px;
   }
 }

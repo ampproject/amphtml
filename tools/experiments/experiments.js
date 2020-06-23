@@ -55,6 +55,7 @@ let ExperimentDef;
  */
 const EXPERIMENTAL_CHANNEL_ID = 'experimental-channel';
 const BETA_CHANNEL_ID = 'beta-channel';
+const NIGHTLY_CHANNEL_ID = 'nightly-channel';
 const RTV_CHANNEL_ID = 'rtv-channel';
 
 /**
@@ -64,41 +65,33 @@ const AMP_OPT_IN_COOKIE = {
   DISABLED: '0',
   EXPERIMENTAL: 'experimental',
   BETA: 'beta',
-  // NIGHTLY: 'nightly',  // TODO(#25616): add when CDN supports nightly builds.
-};
-
-/**
- * Legacy values for __Host-AMP_OPT_IN cookie.
- * TODO(#25205): remove this once the CDN stops supporting these values.
- */
-const _LEGACY_AMP_OPT_IN_COOKIE = {
-  DISABLED: '0',
-  EXPERIMENTAL: '1',
-  BETA: '2',
+  NIGHTLY: 'nightly',
 };
 
 /** @const {!Array<!ExperimentDef>} */
 const CHANNELS = [
-  // Experimental Channel
   {
     id: EXPERIMENTAL_CHANNEL_ID,
     name: 'AMP Experimental Channel (more info)',
     spec:
-      'https://github.com/ampproject/amphtml/blob/master/' +
-      'contributing/release-schedule.md#amp-experimental-and-beta-channels',
+      'https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#amp-experimental-and-beta-channels',
   },
-  // Beta Channel
   {
     id: BETA_CHANNEL_ID,
     name: 'AMP Beta Channel (more info)',
     spec:
-      'https://github.com/ampproject/amphtml/blob/master/' +
-      'contributing/release-schedule.md#amp-experimental-and-beta-channels',
+      'https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#amp-experimental-and-beta-channels',
+  },
+  {
+    id: NIGHTLY_CHANNEL_ID,
+    name: 'AMP Nightly Channel (more info)',
+    spec:
+      'https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#amp-experimental-and-beta-channels',
   },
 ];
 
 if (getMode().localDev) {
-  EXPERIMENTS.forEach(experiment => {
+  EXPERIMENTS.forEach((experiment) => {
     devAssert(
       experiment.cleanupIssue,
       `experiment ${experiment.name} must have a \`cleanupIssue\` field.`
@@ -121,7 +114,7 @@ function build() {
   const input = redirect.querySelector('input');
   const button = redirect.querySelector('button');
   const anchor = redirect.querySelector('a');
-  button.addEventListener('click', function() {
+  button.addEventListener('click', function () {
     let urlString = input.value.trim();
     // Avoid protocol-less urlString from being parsed as a relative URL.
     const hasProtocol = /^https?:\/\//.test(urlString);
@@ -138,12 +131,12 @@ function build() {
   });
 
   const channelsTable = document.getElementById('channels-table');
-  CHANNELS.forEach(function(experiment) {
+  CHANNELS.forEach(function (experiment) {
     channelsTable.appendChild(buildExperimentRow(experiment));
   });
 
   const experimentsTable = document.getElementById('experiments-table');
-  EXPERIMENTS.forEach(function(experiment) {
+  EXPERIMENTS.forEach(function (experiment) {
     experimentsTable.appendChild(buildExperimentRow(experiment));
   });
 
@@ -176,10 +169,7 @@ function build() {
   });
 
   if (isExperimentOn_(RTV_CHANNEL_ID)) {
-    // TODO(#25205): remove this once the CDN stops supporting the AMP_CANARY
-    // cookie.
-    rtvInput.value =
-      getCookie(window, '__Host-AMP_OPT_IN') || getCookie(window, 'AMP_CANARY');
+    rtvInput.value = getCookie(window, '__Host-AMP_OPT_IN');
     rtvInput.dispatchEvent(new Event('input'));
     document.getElementById('rtv-details').open = true;
   }
@@ -255,7 +245,7 @@ function buildLinkMaybe(text, link) {
  * Updates states of all experiments in the table.
  */
 function update() {
-  CHANNELS.concat(EXPERIMENTS).forEach(function(experiment) {
+  CHANNELS.concat(EXPERIMENTS).forEach(function (experiment) {
     updateExperimentRow(experiment);
   });
 }
@@ -282,20 +272,14 @@ function updateExperimentRow(experiment) {
  * @return {boolean}
  */
 function isExperimentOn_(id) {
-  // TODO(#25205): remove this once the CDN stops supporting the AMP_CANARY
-  // cookie.
-  const optInCookieValue =
-    getCookie(window, '__Host-AMP_OPT_IN') || getCookie(window, 'AMP_CANARY');
+  const optInCookieValue = getCookie(window, '__Host-AMP_OPT_IN');
   switch (id) {
     case EXPERIMENTAL_CHANNEL_ID:
-      return [
-        AMP_OPT_IN_COOKIE.EXPERIMENTAL,
-        _LEGACY_AMP_OPT_IN_COOKIE.EXPERIMENTAL,
-      ].includes(optInCookieValue);
+      return optInCookieValue == AMP_OPT_IN_COOKIE.EXPERIMENTAL;
     case BETA_CHANNEL_ID:
-      return [AMP_OPT_IN_COOKIE.BETA, _LEGACY_AMP_OPT_IN_COOKIE.BETA].includes(
-        optInCookieValue
-      );
+      return optInCookieValue == AMP_OPT_IN_COOKIE.BETA;
+    case NIGHTLY_CHANNEL_ID:
+      return optInCookieValue == AMP_OPT_IN_COOKIE.NIGHTLY;
     case RTV_CHANNEL_ID:
       return RTV_PATTERN.test(optInCookieValue);
     default:
@@ -304,8 +288,8 @@ function isExperimentOn_(id) {
 }
 
 /**
- * Opts in to / out of the "beta" or "experimental" channels or a specific RTV
- * by setting the __Host-AMP_OPT_IN cookie.
+ * Opts in to / out of the pre-release channels or a specific RTV by setting the
+ * __Host-AMP_OPT_IN cookie.
  * @param {string} cookieState One of the AMP_OPT_IN_COOKIE enum values, or a
  *   15-digit RTV.
  */
@@ -331,11 +315,6 @@ function setAmpOptInCookie_(cookieState) {
     validUntil,
     cookieOptions
   );
-  // TODO(#25205): remove this once the CDN stops supporting the AMP_CANARY
-  // cookie.
-  // Set explicit domain, so the cookie gets sent to sub domains.
-  cookieOptions.domain = location.hostname;
-  setCookie(window, 'AMP_CANARY', cookieState, validUntil, cookieOptions);
   // Reflect default experiment state.
   self.location.reload();
 }
@@ -355,16 +334,24 @@ function toggleExperiment_(id, name, opt_on) {
     : 'Do you really want to deactivate the AMP experiment?';
 
   showConfirmation_(`${confirmMessage}: "${name}"`, () => {
-    if (id == EXPERIMENTAL_CHANNEL_ID) {
-      setAmpOptInCookie_(
-        on ? AMP_OPT_IN_COOKIE.EXPERIMENTAL : AMP_OPT_IN_COOKIE.DISABLED
-      );
-    } else if (id == BETA_CHANNEL_ID) {
-      setAmpOptInCookie_(
-        on ? AMP_OPT_IN_COOKIE.BETA : AMP_OPT_IN_COOKIE.DISABLED
-      );
-    } else {
-      toggleExperiment(window, id, on);
+    switch (id) {
+      case EXPERIMENTAL_CHANNEL_ID:
+        setAmpOptInCookie_(
+          on ? AMP_OPT_IN_COOKIE.EXPERIMENTAL : AMP_OPT_IN_COOKIE.DISABLED
+        );
+        break;
+      case BETA_CHANNEL_ID:
+        setAmpOptInCookie_(
+          on ? AMP_OPT_IN_COOKIE.BETA : AMP_OPT_IN_COOKIE.DISABLED
+        );
+        break;
+      case NIGHTLY_CHANNEL_ID:
+        setAmpOptInCookie_(
+          on ? AMP_OPT_IN_COOKIE.NIGHTLY : AMP_OPT_IN_COOKIE.DISABLED
+        );
+        break;
+      default:
+        toggleExperiment(window, id, on);
     }
     update();
   });
@@ -383,9 +370,9 @@ function showConfirmation_(message, callback) {
     document.getElementById('popup-button-cancel')
   );
   const unlistenSet = [];
-  const closePopup = affirmative => {
+  const closePopup = (affirmative) => {
     container.classList.remove('show');
-    unlistenSet.forEach(unlisten => unlisten());
+    unlistenSet.forEach((unlisten) => unlisten());
     if (affirmative) {
       callback();
     }
@@ -399,8 +386,9 @@ function showConfirmation_(message, callback) {
 
 /**
  * Loads the AMP_CONFIG objects from whatever the v0.js is that the user has
- * (depends on whether they opted into beta, experimental, or a specific RTV) so
- * that experiment state can reflect the default activated experiments.
+ * (depends on whether they opted into one of the pre-release channels or into a
+ * specific RTV) so that experiment state can reflect the default activated
+ * experiments.
  * @return {Promise<JSON>} the active AMP_CONFIG, parsed as a JSON object
  */
 function getAmpConfig() {
@@ -417,7 +405,7 @@ function getAmpConfig() {
   xhr.open('GET', '/v0.js?' + Math.random(), true);
   xhr.send(null);
   return promise
-    .then(text => {
+    .then((text) => {
       const match = text.match(/self\.AMP_CONFIG=(\{.+?\})/);
       if (!match) {
         throw new Error("Can't find AMP_CONFIG in: " + text);
@@ -425,7 +413,7 @@ function getAmpConfig() {
       // Setting global var to make standard experiment code just work.
       return (self.AMP_CONFIG = JSON.parse(match[1]));
     })
-    .catch(error => {
+    .catch((error) => {
       console./*OK*/ error('Error fetching AMP_CONFIG', error);
       return {};
     });
