@@ -31,10 +31,12 @@ const {
 const {app} = require('../../server/test-server');
 const {getFilesFromArgv} = require('../../common/utils');
 const {green, yellow, cyan, red} = require('ansi-colors');
-const {isTravisBuild} = require('../../common/travis');
+const {isTravisBuild, isTravisPushBuild} = require('../../common/travis');
 const {reportTestStarted} = require('.././report-test-status');
 const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');
+
+const JSON_REPORT_TEST_TYPES = new Set(['unit', 'integration']);
 
 /**
  * Updates the browsers based off of the test type
@@ -168,6 +170,13 @@ function updateReporters(config) {
 
   if (argv.saucelabs) {
     config.reporters.push('saucelabs');
+  }
+
+  if (isTravisPushBuild() && JSON_REPORT_TEST_TYPES.has(config.testType)) {
+    config.reporters.push('json-result');
+    config.jsonResultReporter = {
+      outputFile: `results_${config.testType}.json`,
+    };
   }
 }
 
