@@ -86,8 +86,8 @@ export class AmpStoryPlayerManager {
    * @private
    */
   layoutIfVisible_(elImpl) {
-    const playerTop = elImpl.getElement()./*OK*/ getBoundingClientRect().top;
-    if (this.win_./*OK*/ innerHeight * 2 > playerTop) {
+    const elTop = elImpl.getElement()./*OK*/ getBoundingClientRect().top;
+    if (this.win_./*OK*/ innerHeight * 2 > elTop) {
       elImpl.layoutCallback();
     }
   }
