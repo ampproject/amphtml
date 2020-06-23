@@ -60,6 +60,10 @@ const GET_STATE_CONFIGURATIONS = {
     dataSource: DataSources.HISTORY,
     property: HistoryState.ATTACHMENT_PAGE_ID,
   },
+  'PAUSED_STATE': {
+    dataSource: DataSources.STORE_SERVICE,
+    property: StateProperty.PAUSED_STATE,
+  },
   'STORY_PROGRESS': {
     dataSource: DataSources.VARIABLE_SERVICE,
     property: AnalyticsVariable.STORY_PROGRESS,
@@ -73,6 +77,10 @@ let SetStateConfigurationDef;
 const SET_STATE_CONFIGURATIONS = {
   'MUTED_STATE': {
     action: Action.TOGGLE_MUTED,
+    isValueValid: (value) => typeof value === 'boolean',
+  },
+  'PAUSED_STATE': {
+    action: Action.TOGGLE_PAUSED,
     isValueValid: (value) => typeof value === 'boolean',
   },
 };
