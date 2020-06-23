@@ -301,6 +301,16 @@ declaration_list {
   declaration: { name: "clip-path" }
 }
 
+declaration_list {
+  name: "EMAIL_SPECIFIC_VENDOR_PREFIXES"
+  # data-css-strict AMP Email does not enable automatic expansion of vendor
+  # prefixes on CSS properties. Instead, these are the only 3 vendor-prefixed
+  # CSS properties which data-css-strict email explicitly supports.
+  declaration: { name: "-moz-appearance" }
+  declaration: { name: "-webkit-appearance" }
+  declaration: { name: "-webkit-tap-highlight-color" }
+}
+
 # DocCSS rules for AMP for non-transformed documents.
 css {
   html_format: AMP
@@ -436,9 +446,10 @@ css {
   declaration_list_svg: "SVG_BASIC_DECLARATIONS"
 }
 
-# DocCss rules for AMP4EMAIL
+# DocCss rules for AMP4EMAIL, not data-css-strict
 css {
   html_format: AMP4EMAIL
+  disabled_by: "data-css-strict"
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets"
 
   # Due to a bug, we allowed unlimited doc-level bytes for CSS in AMP4EMAIL
@@ -463,6 +474,31 @@ css {
   }
   expand_vendor_prefixes: true
   declaration_list: "BASIC_DECLARATIONS"
+  declaration_list_svg: "SVG_BASIC_DECLARATIONS"
+}
+
+# DocCss rules for AMP4EMAIL, data-css-strict
+css {
+  html_format: AMP4EMAIL
+  enabled_by: "data-css-strict"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets"
+
+  max_bytes_is_warning: false
+  max_bytes: 75000
+  max_bytes_per_inline_style: 1000
+
+  max_bytes_spec_url:
+  "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#maximum-size"
+  url_bytes_included: true
+
+  allow_all_declaration_in_style_tag: false
+  allow_important: false
+  image_url_spec: {
+    protocol: "https"
+  }
+  expand_vendor_prefixes: false
+  declaration_list: "BASIC_DECLARATIONS"
+  declaration_list: "EMAIL_SPECIFIC_VENDOR_PREFIXES"
   declaration_list_svg: "SVG_BASIC_DECLARATIONS"
 }
 

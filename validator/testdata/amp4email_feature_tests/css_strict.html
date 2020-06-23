@@ -37,6 +37,8 @@
     .a[invalid] {}
     .a:invalid {}
     .a::invalid {}
+    :invalid {}
+    .a[id]:invalid {}
 
     .a[active] {}
     .a[alt] {}
@@ -76,6 +78,21 @@
     .a[type] {}
     .a[value] {}
     .a[width] {}
+
+    /* Vendor prefixes are not automatically expanded */
+    .a { margin: 1px; }
+    .a { -webkit-margin: 1px; }
+
+    /* Three specific prefixes are explicitly allowlisted */
+    .a {
+      -moz-appearance: foo;
+      -webkit-appearance: foo;
+      -webkit-tap-highlight-color: foo;
+    }
+
+    /* Not all properties are automatically allowed */
+    .a { invalid: 1px; }
+
   </style>
 </head>
 <body>

@@ -46,6 +46,9 @@ amp4email_feature_tests/css.html:34:4 CSS syntax error in tag 'style amp-custom'
 |      .a[otherwisevalid] {}
 |      .a:otherwiseinvalid {}
 |      .a::otherwiseinvalid {}
+|
+|      /* And vendor-prefixes are automatically expanded and allowed */
+|      .a { -webkit-margin: 1px; }
 |    </style>
 |  </head>
 |  <body>

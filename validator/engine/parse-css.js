@@ -1841,6 +1841,8 @@ const PseudoSelector = class extends Selector {
     visitor.visitPseudoSelector(this);
   }
 };
+exports.PseudoSelector = PseudoSelector;
+
 /** @inheritDoc */
 PseudoSelector.prototype.toJSON = function() {
   const json = Selector.prototype.toJSON.call(this);
