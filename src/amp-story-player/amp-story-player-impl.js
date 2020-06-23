@@ -403,10 +403,6 @@ export class AmpStoryPlayer {
       this.stories_.length - 1
     );
 
-    // Sort new set of stories with iframes to respect the flow they would
-    // normally follow since previous_() and next_() follow this assumption.
-    adjacentStoriesIdx.sort();
-
     for (let i = 0; i < adjacentStoriesIdx.length; i++) {
       const story = this.stories_[adjacentStoriesIdx[i]];
       story[IFRAME_IDX] = availableIframeIdx[i];

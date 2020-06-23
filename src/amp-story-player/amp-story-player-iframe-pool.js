@@ -97,42 +97,28 @@ export class IframePool {
 
   /**
    * Finds adjacent iframe indices given an index.
-   * Examples of resulting adjacent arrays (x is provided index):
-   * [x] [1] [2] [] []
-   * [2] [x] [1] [] []
-   * [] [] [2] [1] [x]
-   * [1] [x]
+   * Examples of resulting adjacent arrays:
+   * 0 -> [0] [1] [2] [] []
+   * 1 -> [0] [1] [2] [] []
+   * 4 -> [] [] [0] [1] [2]
+   * 1 -> [0] [1]
    * @param {number} storyIdx
    * @param {number} maxIdx
    * @return {!Array<number>}
    */
   findAdjacent(storyIdx, maxIdx) {
-    const queue = [storyIdx];
     const adjacent = [];
 
-    const findAdjacentRecursive = () => {
-      const idx = queue.shift();
-
-      if (idx < 0 || idx > maxIdx) {
-        return;
+    // If index is at rightmost part of the array, adjacent iframes will all be
+    // at the left.
+    let cursor = storyIdx + 1 > maxIdx ? storyIdx - 2 : storyIdx - 1;
+    while (adjacent.length < this.iframePool_.length) {
+      if (cursor < 0) {
+        ++cursor;
+        continue;
       }
-
-      adjacent.push(idx);
-
-      if (!queue.includes(idx + 1) && !adjacent.includes(idx + 1)) {
-        queue.push(idx + 1);
-      }
-
-      if (!queue.includes(idx - 1) && !adjacent.includes(idx - 1)) {
-        queue.push(idx - 1);
-      }
-
-      while (adjacent.length < this.iframePool_.length && queue.length > 0) {
-        findAdjacentRecursive();
-      }
-    };
-
-    findAdjacentRecursive();
+      adjacent.push(cursor++);
+    }
 
     return adjacent;
   }
