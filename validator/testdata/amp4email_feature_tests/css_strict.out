@@ -47,7 +47,17 @@ amp4email_feature_tests/css_strict.html:34:4 CSS syntax error in tag 'style amp-
 >>       ^~~~~~~~~
 amp4email_feature_tests/css_strict.html:37:6 CSS error in tag 'style amp-custom' - disallowed attribute selector 'invalid'.
 |      .a:invalid {}
+>>       ^~~~~~~~~
+amp4email_feature_tests/css_strict.html:38:6 CSS error in tag 'style amp-custom' - disallowed pseudo class 'invalid'.
 |      .a::invalid {}
+>>       ^~~~~~~~~
+amp4email_feature_tests/css_strict.html:39:6 CSS error in tag 'style amp-custom' - disallowed pseudo element 'invalid'.
+|      :invalid {}
+>>     ^~~~~~~~~
+amp4email_feature_tests/css_strict.html:40:4 CSS error in tag 'style amp-custom' - disallowed pseudo class 'invalid'.
+|      .a[id]:invalid {}
+>>           ^~~~~~~~~
+amp4email_feature_tests/css_strict.html:41:10 CSS error in tag 'style amp-custom' - disallowed pseudo class 'invalid'.
 |
 |      .a[active] {}
 |      .a[alt] {}
