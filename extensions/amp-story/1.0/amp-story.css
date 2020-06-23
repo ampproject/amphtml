@@ -880,11 +880,13 @@ amp-story .amp-video-eq,
   /* 224px = the width of a narrow phone (320px) - tap-safe margins (48px * 2) */
   min-width: 224px !important;
   max-width: 400px !important;
-  /* Properties overrideable by user */
-  --interactive-accent-color: #005AF0;
-  --interactive-background-color: white;
+	/* Properties overrideable by user */
+	--interactive-accent-color: #005AF0;
+	--interactive-background-color: white;
+	--interactive-prompt-background-color: var(--interactive-accent-color);
+	--interactive-prompt-text-color: white;
+	--interactive-prompt-alignment: left;
   /* Shared properties by components */
-  --interactive-prompt-text-color: white !important;
   --interactive-option-text-color: #5F6368 !important;
   --interactive-theme-border: #DADCE0 !important;
   --interactive-theme-shading: #ECEDEF !important;
@@ -912,4 +914,13 @@ amp-story .amp-video-eq,
 
 .i-amphtml-story-interactive-component[chip-style="shadow"][theme="dark"] {
   --interactive-chip-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Properties locked by specific components */
+amp-story-interactive-quiz {
+	--interactive-background-color: white !important
+}
+
+amp-story-interactive-quiz[theme="dark"] {
+	--interactive-background-color: #202124 !important;
 }

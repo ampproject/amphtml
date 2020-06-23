@@ -55,7 +55,7 @@
             <amp-story-interactive-quiz
                 id="first-cup-dark"
                 endpoint="http://localhost:3000/interactives"
-                style="--interactive-accent-color: rgb(235, 139, 13);"
+                style="--interactive-accent-color: rgb(16, 218, 93);--interactive-prompt-background-color: rgb(4, 41, 18);--interactive-prompt-text-color: rgb(16, 218, 93);"
                 theme="dark"
                 prompt-text="Is this an international quiz?"
                 option-1-text="你好，这是马蒂亚斯"
@@ -163,9 +163,9 @@
           </amp-story-grid-layer>
           <amp-story-grid-layer template="thirds">
             <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
-              <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
               <amp-story-interactive-poll
-                endpoint="http://localhost:3000/interactives"
+								endpoint="http://localhost:3000/interactives"
+								prompt-text="What is your favorite movie?"
                 id="movie-light-connected"
                 option-1-text="דוקטור מוזר"
                 option-2-text="פנתר שחור">
