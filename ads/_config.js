@@ -988,6 +988,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'smartads': {
+    prefetch: 'https://smart-ads.biz/amp.js',
+  },
+
   'smartadserver': {
     prefetch: 'https://ec-ns.sascdn.com/diff/js/amp.v0.js',
     preconnect: 'https://static.sascdn.com',
