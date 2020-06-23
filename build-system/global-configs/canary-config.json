@@ -4,7 +4,9 @@
     "analytics-chunks",
     "analytics-chunks-inabox"
   ],
-  "allow-url-opt-in": ["pump-early-frame"],
+  "allow-url-opt-in": [
+    "pump-early-frame"
+  ],
   "canary": 1,
   "a4aProfilingRate": 0.01,
   "adsense-ad-size-optimization": 0.01,
@@ -21,7 +23,6 @@
   "amp-story-responsive-units": 1,
   "amp-story-v1": 1,
   "ampdoc-closest": 1,
-  "as-use-attr-for-format": 0.01,
   "chunked-amp": 1,
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
