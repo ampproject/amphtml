@@ -49,6 +49,10 @@ export function maybeSetupCrossOriginObserver(win) {
 
   const isFriendlyIframe = canInspectWindow(top);
   const iframeClient = iframeMessagingClientFor(win);
+  if (!iframeClient) {
+    // QQQQQ: remove. testing.
+    return;
+  }
   if (isFriendlyIframe || iframeClient) {
     const updater = setupPolyfillUpdater();
     const handleData = (data) => {

@@ -70,8 +70,10 @@ try {
   makeBodyVisibleRecovery(self.document);
   throw e;
 }
+/*QQQQQ
 delete window['IntersectionObserver'];
 delete window['IntersectionObserverEntry'];
+*/
 console.log(('IntersectionObserver' in window));
 allowLongTasksInChunking();
 startupChunk(self.document, function initial() {

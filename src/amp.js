@@ -72,8 +72,10 @@ const shouldMainBootstrapRun = !self.IS_AMP_ALT;
  */
 function bootstrap(ampdoc, perf) {
   //QQQQQQ
+  /*
   delete window['IntersectionObserver'];
   delete window['IntersectionObserverEntry'];
+  */
   console.log(('IntersectionObserver' in window));
   startupChunk(self.document, function services() {
     // Core services.
