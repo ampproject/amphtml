@@ -1063,6 +1063,63 @@ describe('amp-a4a', () => {
     expect(child.getAttribute('height')).to.equal('50');
   });
 
+  it('should set a default title on the iframe', async () => {
+    // Make sure there's no signature, so that we go down the 3p iframe path.
+    delete adResponse.headers['AMP-Fast-Fetch-Signature'];
+    delete adResponse.headers[AMP_SIGNATURE_HEADER];
+    adResponse.headers['X-CreativeSize'] = '320x50';
+    const fixture = await createIframePromise();
+    setupForAdTesting(fixture);
+    fetchMock.getOnce(
+      TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
+      () => adResponse,
+      {name: 'ad'}
+    );
+    const {doc} = fixture;
+    const a4aElement = createA4aElement(doc);
+    a4aElement.setAttribute('width', 480);
+    a4aElement.setAttribute('height', 75);
+    a4aElement.setAttribute('type', 'doubleclick');
+    const a4a = new MockA4AImpl(a4aElement);
+    doc.body.appendChild(a4aElement);
+    a4a.buildCallback();
+    a4a.onLayoutMeasure();
+    const renderPromise = a4a.layoutCallback();
+    await renderPromise;
+    const child = a4aElement.querySelector('iframe[name]');
+    expect(child).to.be.ok;
+    expect(child.getAttribute('title')).to.equal('3rd party ad content');
+  });
+
+  it('should use the amp-ad title on the iframe if set', async () => {
+    // Make sure there's no signature, so that we go down the 3p iframe path.
+    delete adResponse.headers['AMP-Fast-Fetch-Signature'];
+    delete adResponse.headers[AMP_SIGNATURE_HEADER];
+    adResponse.headers['X-CreativeSize'] = '320x50';
+    const fixture = await createIframePromise();
+    setupForAdTesting(fixture);
+    fetchMock.getOnce(
+      TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
+      () => adResponse,
+      {name: 'ad'}
+    );
+    const {doc} = fixture;
+    const a4aElement = createA4aElement(doc);
+    a4aElement.setAttribute('width', 480);
+    a4aElement.setAttribute('height', 75);
+    a4aElement.setAttribute('type', 'doubleclick');
+    a4aElement.setAttribute('title', 'Custom title');
+    const a4a = new MockA4AImpl(a4aElement);
+    doc.body.appendChild(a4aElement);
+    a4a.buildCallback();
+    a4a.onLayoutMeasure();
+    const renderPromise = a4a.layoutCallback();
+    await renderPromise;
+    const child = a4aElement.querySelector('iframe[name]');
+    expect(child).to.be.ok;
+    expect(child.getAttribute('title')).to.equal('Custom title');
+  });
+
   describe('#onLayoutMeasure', () => {
     it('resumeCallback calls onLayoutMeasure', async () => {
       // Force non-FIE
