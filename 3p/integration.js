@@ -229,6 +229,7 @@ import {rbinfox} from '../ads/rbinfox';
 import {readmo} from '../ads/readmo';
 import {realclick} from '../ads/realclick';
 import {recomad} from '../ads/recomad';
+import {recreativ} from '../ads/recreativ';
 import {relap} from '../ads/relap';
 import {relappro} from '../ads/relappro';
 import {revcontent} from '../ads/revcontent';
@@ -334,6 +335,7 @@ const AMP_EMBED_ALLOWED = {
   pubexchange: true,
   rbinfox: true,
   readmo: true,
+  recreativ: true,
   runative: true,
   smartclip: true,
   smi2: true,
@@ -536,6 +538,7 @@ register('readmo', readmo);
 register('realclick', realclick);
 register('reddit', reddit);
 register('recomad', recomad);
+register('recreativ', recreativ);
 register('relap', relap);
 register('relappro', relappro);
 register('revcontent', revcontent);
