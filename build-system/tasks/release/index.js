@@ -426,29 +426,6 @@ async function release() {
   log('Compiling all', `${green('flavors')}...`);
   await compileDistFlavors_(distFlavors, tempDir);
 
-  // TODO(#28168, erwinmombay): this is a temporary hack, and should be removed
-  // once the '--module --nomodule' flags exist. This is the only thing blocking
-  // us from being able to shard `gulp release` for parallel executions for each
-  // flavor!
-  log(
-    'Copying any files missing in',
-    `non-${green('base')}`,
-    'flavors from',
-    cyan('base/dist')
-  );
-  await Promise.all(
-    distFlavors
-      .map(({flavorType}) => flavorType)
-      .filter((flavorType) => flavorType != 'base')
-      .map((flavorType) =>
-        fs.copy(
-          path.join(tempDir, 'base/dist'),
-          path.join(tempDir, flavorType, 'dist'),
-          {overwrite: false}
-        )
-      )
-  );
-
   log('Fetching npm package', `${cyan('@ampproject/amp-sw')}...`);
   await fetchAmpSw_(distFlavors, tempDir);
 
