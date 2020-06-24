@@ -22,7 +22,7 @@
  * @param {?function(!Function)} defaultScheduler
  * @return {function(function(!Function)=)}
  */
-export function oneAtATime(handler, defaultScheduler = null) {
+export function throttleTail(handler, defaultScheduler = null) {
   let scheduled = false;
   const handleAndUnschedule = () => {
     scheduled = false;

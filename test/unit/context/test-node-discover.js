@@ -223,8 +223,8 @@ describes.realWin('ContextNode', {}, (env) => {
     it('should skip itself', () => {
       ContextNode.get(element);
       const grandparentContext = ContextNode.get(grandparent);
-      expect(ContextNode.closest(element, true)).to.equal(grandparentContext);
-      expect(ContextNode.closest(grandparent, true)).to.be.null;
+      expect(ContextNode.closest(element, false)).to.equal(grandparentContext);
+      expect(ContextNode.closest(grandparent, false)).to.be.null;
     });
 
     it('should go up DOM tree', () => {

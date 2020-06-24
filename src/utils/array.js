@@ -113,15 +113,15 @@ export function pushIfNotExist(array, item) {
 }
 
 /**
- * Removes one item in the array. The array is assumed to have unique values
- * only. Returns `true` if the array changed.
+ * Removes the first matching item in the array. Returns `true` if the array
+ * has changed.
  *
  * @param {!Array<T>} array
  * @param {T} item
  * @return {boolean}
  * @template T
  */
-export function removeUniqueItem(array, item) {
+export function removeItem(array, item) {
   const index = array.indexOf(item);
   if (index == -1) {
     return false;

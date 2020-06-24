@@ -16,16 +16,16 @@
 
 import {dev, devAssert} from '../log';
 import {getMode} from '../mode';
-import {oneAtATime} from './scheduler';
-import {pushIfNotExist, removeUniqueItem} from '../utils/array';
+import {throttleTail} from './scheduler';
+import {pushIfNotExist, removeItem} from '../utils/array';
 import {startsWith} from '../string';
 
 // Protection for creating the ContextNode directly. See the constructor.
 const PRIVATE_ONLY = {};
 
 // Properties set on the DOM nodes to track the context state.
-const NODE_PROP = '__ampNode';
-const ASSIGNED_SLOT_PROP = '__ampAssignedSlot';
+const NODE_PROP = '__AMP_NODE';
+const ASSIGNED_SLOT_PROP = '__AMP_ASSIGNED_SLOT';
 const AMP_PREFIX = 'AMP-';
 
 // Relevant node types.
@@ -51,7 +51,7 @@ export class ContextNode {
   static get(node) {
     let contextNode = /** @type {!ContextNode|undefined} */ (node[NODE_PROP]);
     if (!contextNode) {
-      contextNode = new ContextNode(PRIVATE_ONLY, node);
+      contextNode = new ContextNode(node, PRIVATE_ONLY);
       if (getMode().localDev || getMode().test) {
         // The `Object.defineProperty({enumerable: false})` helps tests, but
         // hurts performance. So this is only done in a dev/test modes.
@@ -70,8 +70,8 @@ export class ContextNode {
 
   /**
    * Returns the closest available context node to the one specified. If the
-   * `node` has the context node, it's returned unless `excludeSelf` is set as
-   * `true`.
+   * `node` has the context node, it's returned unless `includeSelf` is set as
+   * `false`.
    *
    * The DOM traversal goes at most as far as the root node (document,
    * shadow root, document fragment) or as far as the DOM tree allows. The
@@ -81,15 +81,15 @@ export class ContextNode {
    * during the traversal.
    *
    * @param {!Node} node The node from which to perform the search.
-   * @param {boolean=} excludeSelf Whether the specified node itself should
-   * be excluded from the search. Defaults to `false` - do not exclude.
+   * @param {boolean=} includeSelf Whether the specified node itself should
+   * be included in the search. Defaults to `true`.
    * @return {?ContextNode}
    */
-  static closest(node, excludeSelf = false) {
+  static closest(node, includeSelf = true) {
     let n = node;
     while (n) {
       // Check if a node is a candidate to be returned.
-      if (n != node || !excludeSelf) {
+      if (n != node || includeSelf) {
         if (n[NODE_PROP]) {
           // Already a discovered node.
           return /** @type {!ContextNode} */ (n[NODE_PROP]);
@@ -136,7 +136,7 @@ export class ContextNode {
     if (node[ASSIGNED_SLOT_PROP] == slot) {
       return;
     }
-    node[ASSIGNED_SLOT_PROP] = devAssert(slot);
+    node[ASSIGNED_SLOT_PROP] = slot;
     forEachContained(node, (cn) => cn.discover());
   }
 
@@ -151,17 +151,17 @@ export class ContextNode {
     if (node[ASSIGNED_SLOT_PROP] != slot) {
       return;
     }
-    delete node[ASSIGNED_SLOT_PROP];
+    node[ASSIGNED_SLOT_PROP] = undefined;
     forEachContained(node, (cn) => cn.discover());
   }
 
   /**
    * Creates the context node and automatically starts the discovery process.
    *
-   * @param {*} privateOnly
    * @param {!Node} node
+   * @param {*} privateOnly
    */
-  constructor(privateOnly, node) {
+  constructor(node, privateOnly) {
     devAssert(privateOnly === PRIVATE_ONLY);
 
     /** @const @private {!Node} */
@@ -183,7 +183,7 @@ export class ContextNode {
     this.children_ = null;
 
     /** @const @private {function()} */
-    this.scheduleDiscover_ = oneAtATime(this.discover_.bind(this), setTimeout);
+    this.scheduleDiscover_ = throttleTail(this.discover_.bind(this), setTimeout);
 
     this.discover();
   }
@@ -288,7 +288,7 @@ export class ContextNode {
       // queue.
       return;
     }
-    const parent = ContextNode.closest(this.node_, /* excludeSelf */ true);
+    const parent = ContextNode.closest(this.node_, /* includeSelf */ false);
     this.updateTree_(parent, /* parentOverriden */ false);
   }
 
@@ -307,7 +307,7 @@ export class ContextNode {
 
       // Remove from the old parent.
       if (oldParent && oldParent.children_) {
-        removeUniqueItem(oldParent.children_, this);
+        removeItem(oldParent.children_, this);
       }
 
       // Add to the new parent.
@@ -360,10 +360,10 @@ export class ContextNode {
  *
  * @param {!Node} node
  * @param {function(!ContextNode)} callback
- * @param {boolean=} excludeSelf
+ * @param {boolean=} includeSelf
  */
-function forEachContained(node, callback, excludeSelf = false) {
-  const closest = ContextNode.closest(node, excludeSelf);
+function forEachContained(node, callback, includeSelf = true) {
+  const closest = ContextNode.closest(node, includeSelf);
   if (!closest) {
     return;
   }
