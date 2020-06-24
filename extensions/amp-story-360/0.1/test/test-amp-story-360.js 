@@ -22,24 +22,33 @@ describes.realWin(
   {
     amp: {
       runtimeOn: true,
-      extensions: ['amp-story-360'],
+      extensions: ['amp-story-360', 'amp-img'],
     },
   },
   (env) => {
     let win;
     let element;
+    let threesixty;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       win = env.win;
-      element = createElementWithAttributes(win.document, 'amp-story-360', {
-        layout: 'responsive',
-      });
+
+      element = win.document.createElement('amp-story-360');
+      element.setAttribute('layout', 'fill');
+
       win.document.body.appendChild(element);
+      threesixty = await element.getImpl();
     });
 
-    it('should have hello world when built', () => {
-      await element.whenBuilt();
-      expect(element.querySelector('div').textContent).to.equal('hello world');
+    it('should have hello world when built', async () => {
+      const ampImg = win.document.createElement('amp-img');
+      ampImg.setAttribute('src', '/examples/img/hero@1x.jpg');
+      ampImg.setAttribute('layout', 'fill');
+      ampImg.signals = () => ({whenSignal: () => Promise.resolve()});
+      element.appendChild(ampImg);
+      threesixty.buildCallback();
+      await threesixty.layoutCallback();
+      expect(true).to.be.true;
     });
   }
 );
