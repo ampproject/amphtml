@@ -37,7 +37,11 @@ const {reportTestStarted} = require('.././report-test-status');
 const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');
 
-const JSON_REPORT_TEST_TYPES = new Set(['unit', 'integration']);
+const {
+  isReportTestType,
+  sendTravisKarmaReport,
+  resultFilename,
+} = require('./helpers-test-reporting');
 
 /**
  * Updates the browsers based off of the test type
@@ -202,10 +206,10 @@ function updateReporters(config) {
     config.reporters.push('saucelabs');
   }
 
-  if (isTravisPushBuild() && JSON_REPORT_TEST_TYPES.has(config.testType)) {
+  if (/*isTravisPushBuild() &&*/ isReportTestType(config.testType)) {
     config.reporters.push('json-result');
     config.jsonResultReporter = {
-      outputFile: `results_${config.testType}.json`,
+      outputFile: resultFilename(config.testType),
     };
   }
 }
@@ -290,6 +294,8 @@ class RuntimeTestRunner {
   async teardown() {
     await stopServer();
     exitCtrlcHandler(this.env.get('handlerProcess'));
+
+    await sendTravisKarmaReport(this.config.testType);
 
     if (this.exitCode != 0) {
       log(
