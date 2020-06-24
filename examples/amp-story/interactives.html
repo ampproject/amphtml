@@ -55,7 +55,7 @@
             <amp-story-interactive-quiz
                 id="first-cup-dark"
                 endpoint="http://localhost:3000/interactives"
-                style="--interactive-accent-color: rgb(235, 139, 13);"
+                style="--interactive-accent-color: rgb(16, 218, 93);--interactive-prompt-background-color: rgb(4, 41, 18);--interactive-prompt-text-color: rgb(16, 218, 93);"
                 theme="dark"
                 prompt-text="Is this an international quiz?"
                 option-1-text="你好，这是马蒂亚斯"
@@ -103,8 +103,6 @@
                 id="last-cup-dark"
                 theme="dark"
                 style="--interactive-accent-color: rgb(221, 17, 228);"
-                chip-corner="sharp"
-                prompt-text="Who won the last soccer world cup?"
                 option-1-text="France" option-1-correct
                 option-2-text="Spain"
                 option-3-text="Uruguay"
@@ -125,7 +123,6 @@
             <amp-story-interactive-quiz
                 id="largest-mammal-light"
                 endpoint="http://localhost:3000/interactives"
-                chip-corner="sharp"
                 prompt-text="What is the largest mammal?"
                 option-1-text="Blue whale" option-1-correct
                 option-2-text="Etruscan shrew">
@@ -145,7 +142,6 @@
             <amp-story-interactive-quiz
                 id="smallest-mammal-light"
                 endpoint="http://localhost:3000/interactives"
-                chip-corner="sharp"
                 prompt-text="What is the smallest mammal?"
                 option-1-text="Blue whale"
                 option-2-text="Etruscan shrew" option-2-correct>
@@ -163,10 +159,12 @@
           </amp-story-grid-layer>
           <amp-story-grid-layer template="thirds">
             <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
-              <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
               <amp-story-interactive-poll
-                endpoint="http://localhost:3000/interactives"
-                id="movie-light-connected"
+								endpoint="http://localhost:3000/interactives"
+								prompt-text="What is your favorite movie?"
+								id="movie-light-connected"
+								style="--interactive-accent-color: rgb(16, 218, 93);--interactive-prompt-background-color: rgb(4, 41, 18);--interactive-prompt-text-color: rgb(16, 218, 93);"
+                theme="dark"
                 option-1-text="דוקטור מוזר"
                 option-2-text="פנתר שחור">
               </amp-story-interactive-poll>

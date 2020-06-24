@@ -32,7 +32,7 @@ const buildQuizTemplate = (element) => {
   const html = htmlFor(element);
   return html`
     <div class="i-amphtml-story-interactive-quiz-container">
-      <div class="i-amphtml-story-interactive-quiz-prompt-container"></div>
+      <div class="i-amphtml-story-interactive-prompt-container"></div>
       <div class="i-amphtml-story-interactive-quiz-option-container"></div>
     </div>
   `;
@@ -89,19 +89,7 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
    * @param {Element} root
    */
   attachContent_(root) {
-    const promptContainer = root.querySelector(
-      '.i-amphtml-story-interactive-quiz-prompt-container'
-    );
-
-    if (!this.element.hasAttribute('prompt-text')) {
-      this.rootEl_.removeChild(promptContainer);
-    } else {
-      const prompt = document.createElement('p');
-
-      prompt.textContent = this.element.getAttribute('prompt-text');
-      prompt.classList.add('i-amphtml-story-interactive-quiz-prompt');
-      promptContainer.appendChild(prompt);
-    }
+    this.attachPrompt_(root);
 
     // Localize the answer choice options
     this.answerChoiceOptions_ = this.answerChoiceOptions_.map((choice) => {

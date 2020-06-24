@@ -23,53 +23,13 @@
     --option-2-percentage: 0%;
     --option-3-percentage: 0%;
     --option-4-percentage: 0%;
-    background: var(--interactive-accent-color) !important;
-    border-radius: 32px !important;
-}
-
-/* TODO: remove bg on no-prompt attribute here */
-
-.i-amphtml-story-interactive-quiz-prompt-container {
-    display: flex !important;
-    justify-items: center !important;
-    padding: 20px !important;
-    color: var(--interactive-prompt-text-color) !important;
-}
-
-.i-amphtml-story-interactive-quiz-prompt {
-    margin: 0px !important;
-    overflow : hidden !important;
-    text-overflow: ellipsis !important;
-    display: -webkit-box !important;
-    -webkit-line-clamp: 4 !important;
-    -webkit-box-orient: vertical !important;
-    visibility: visible !important;
-}
-
-h1.i-amphtml-story-interactive-quiz-prompt {
-    font-size: 28px !important;
-    line-height: 36px !important;
-    max-height: 144px !important;
-}
-
-h2.i-amphtml-story-interactive-quiz-prompt, p.i-amphtml-story-interactive-quiz-prompt {
-    font-size: 22px !important;
-    line-height: 28px !important;
-    max-height: 112px !important;
-    font-weight: bold;
-}
-
-h3.i-amphtml-story-interactive-quiz-prompt {
-    font-size: 18px !important;
-    line-height: 24px !important;
-    max-height: 96px !important;
 }
 
 .i-amphtml-story-interactive-quiz-option-container {
     display: flex !important;
     flex-direction: column;
-    background-color: var(--interactive-background-color) !important;
-    border-radius: var(--interactive-chip-radius) !important;
+    background-color: var(--i-amphtml-interactive-option-background-color) !important;
+    border-radius: var(--i-amphtml-interactive-chip-radius) !important;
     padding: 8px 8px 0px 8px !important;
 }
 
@@ -78,15 +38,15 @@ h3.i-amphtml-story-interactive-quiz-prompt {
     display: flex !important;
     justify-items: start !important;
     align-items: center !important;
-    border-radius: var(--interactive-chip-radius) !important;
+    border-radius: var(--i-amphtml-interactive-chip-radius) !important;
     padding: 8px 16px 8px 8px !important;
-    background-color: var(--interactive-background-color) !important;
+    background-color: var(--i-amphtml-interactive-option-background-color) !important;
     margin-bottom: 8px !important;
-    color: var(--interactive-option-text-color) !important;
-    border: solid 1px var(--interactive-theme-border) !important;
-    box-shadow: var(--interactive-chip-shadow) !important;
-    -webkit-box-shadow: var(--interactive-chip-shadow) !important;
-    -moz-box-shadow: var(--interactive-chip-shadow) !important;
+    color: var(--i-amphtml-interactive-option-text-color) !important;
+    border: solid 1px var(--i-amphtml-interactive-theme-border) !important;
+    box-shadow: var(--i-amphtml-interactive-chip-shadow) !important;
+    -webkit-box-shadow: var(--i-amphtml-interactive-chip-shadow) !important;
+    -moz-box-shadow: var(--i-amphtml-interactive-chip-shadow) !important;
     font-size: 16px !important;
     line-height: 20px !important;
     overflow: hidden !important;
@@ -125,7 +85,7 @@ h3.i-amphtml-story-interactive-quiz-prompt {
     padding: 5px !important;
     margin-right: 16px !important;
     color: var(--interactive-accent-color) !important;
-    border-color: var(--interactive-answer-choice-border) !important;
+    border-color: var(--i-amphtml-interactive-answer-choice-border) !important;
     font-size: 16px !important;
     line-height: 16px !important;
     font-weight: bold !important;
@@ -172,7 +132,7 @@ h3.i-amphtml-story-interactive-quiz-prompt {
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-option-selected > .i-amphtml-story-interactive-quiz-answer-choice {
     border-color: transparent !important;
     animation: answer-choice-bounce forwards 600ms linear;
-    background-color: var(--interactive-answer-choice-background) !important;
+    background-color: var(--i-amphtml-interactive-answer-choice-background) !important;
 }
 
 /** TODO(jackbsteinberg): Use a more a11y-friendly approach than font-size: 0px; */
@@ -200,7 +160,7 @@ h3.i-amphtml-story-interactive-quiz-prompt {
     position: absolute !important;
     width: 100% !important;
     height: 100% !important;
-    border-radius: var(--interactive-chip-radius) !important;
+    border-radius: var(--i-amphtml-interactive-chip-radius) !important;
     font-size: 16px !important;
     line-height: 20px !important;
 }
@@ -253,8 +213,8 @@ h3.i-amphtml-story-interactive-quiz-prompt {
     width: 100% !important;
     height: 100% !important;
     border-radius: 0px !important;
-    background: var(--interactive-theme-shading) !important;
-    color: var(--interactive-theme-shading) !important;
+    background: var(--i-amphtml-interactive-theme-shading) !important;
+    color: var(--i-amphtml-interactive-theme-shading) !important;
     transition: transform 1s !important;
 }
 
@@ -304,7 +264,7 @@ h3.i-amphtml-story-interactive-quiz-prompt {
 @keyframes answer-choice-bounce {
     0% {
         visibility: hidden;
-        border: solid 2px var(--interactive-answer-choice-background);
+        border: solid 2px var(--i-amphtml-interactive-answer-choice-background);
         transform: scale(0);
     }
     20% {
@@ -393,7 +353,7 @@ h3.i-amphtml-story-interactive-quiz-prompt {
     98% { transform: scale(0.999); }
     99% { transform: scale(0.998); }
     100% { 
-        border: solid 2px var(--interactive-answer-choice-background);
+        border: solid 2px var(--i-amphtml-interactive-answer-choice-background);
         transform: scale(1); 
     }
 }
