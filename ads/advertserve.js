@@ -24,11 +24,21 @@ export function advertserve(global, data) {
   validateData(
     data,
     ['zid', 'pid', 'client'],
-    ['custom1', 'custom2', 'custom3', 'custom4', 'custom5',
-      'custom6', 'custom7', 'custom8', 'custom9', 'custom10']
+    [
+      'custom1',
+      'custom2',
+      'custom3',
+      'custom4',
+      'custom5',
+      'custom6',
+      'custom7',
+      'custom8',
+      'custom9',
+      'custom10',
+    ]
   );
-  
-  const customFields = (function() {
+
+  const customFields = (function () {
     let params = '';
     for (let i = 1; i <= 10; i++) {
       const fieldName = 'custom' + i;
