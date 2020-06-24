@@ -312,7 +312,7 @@ export class ContextNode {
 
       // Add to the new parent.
       if (parent) {
-        const parentChildren = parent.children_ ?? (parent.children_ = []);
+        const parentChildren = parent.children_ || (parent.children_ = []);
         pushIfNotExist(parentChildren, this);
 
         // Check if this node has been inserted in between the parent and
