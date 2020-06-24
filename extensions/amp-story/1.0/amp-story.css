@@ -906,10 +906,6 @@ amp-story .amp-video-eq,
   --interactive-theme-shading: #3C4043 !important;
 }
 
-.i-amphtml-story-interactive-component[chip-corner="sharp"] {
-  --interactive-chip-radius: 8px !important;
-}
-
 .i-amphtml-story-interactive-component[chip-style="shadow"] {
   --interactive-chip-shadow: 0px 2px 8px rgba(60, 60, 60, 0.12) !important;
   --interactive-theme-border: rgba(0, 0, 0, 0) !important;
