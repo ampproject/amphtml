@@ -1611,6 +1611,7 @@ export class AmpA4A extends AMP.BaseElement {
         'allowfullscreen': '',
         'allowtransparency': '',
         'scrolling': 'no',
+        'title': this.getIframeTitle(),
       })
     ));
     this.applyFillContent(this.iframe);
@@ -1683,6 +1684,7 @@ export class AmpA4A extends AMP.BaseElement {
       dict({
         'height': this.creativeSize_.height,
         'width': this.creativeSize_.width,
+        'title': this.getIframeTitle(),
       })
     );
 
@@ -2096,6 +2098,14 @@ export class AmpA4A extends AMP.BaseElement {
    */
   isVerifiedAmpCreative() {
     return this.isVerifiedAmpCreative_;
+  }
+
+  /**
+   * Returns the amp-ad title attribute or a fallback string.
+   * @return {string} iframe title attribute
+   */
+  getIframeTitle() {
+    return this.element.getAttribute('title') || '3rd party ad content';
   }
 }
 
