@@ -555,6 +555,7 @@ class AmpVideo extends AMP.BaseElement {
         VideoEvents.LOADEDMETADATA,
         VideoEvents.PAUSE,
         VideoEvents.PLAYING,
+        VideoEvents.PLAY,
       ],
       video
     );
