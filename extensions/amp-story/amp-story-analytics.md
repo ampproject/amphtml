@@ -56,6 +56,81 @@ Consult your vendor's documentation for more specific details on how to set this
 
 The `story-last-page-visible` trigger is fired when the last page in the story is shown to the user. This can be used to measure completion rate.
 
+### Tooltip focus trigger (`"on": "story-focus"`)
+
+The `story-focus` trigger is fired when clicking an element that opens a tooltip.
+
+The current elements trackable by the `story-focus` and `story-click-through` triggers are:
+
+- `<a>`
+- `<amp-twitter>`
+
+To use it, specify the trigger on your `"triggers"` property of your analytics configuration, accompanied by the `"tagName"` of the element you want to track.
+
+Example:
+
+```
+<amp-analytics id="my-analytics">
+  <script type="application/json">
+    {
+      "requests": {
+        "click": "https://example.com/my-endpoint"
+      },
+      "triggers": {
+        "trackFocusState": {
+          "on": "story-focus",
+          "tagName": "a",
+          "request": "click"
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+
+```
+
+### Tooltip click through trigger (`"on": "story-click-through"`)
+
+The `story-click-through` trigger is fired when clicking on a tooltip.
+
+To use it, specify the trigger on your `"triggers"` property of your analytics configuration, accompanied by the `"tagName"` of the element you want to track.
+
+Example:
+
+```
+<amp-analytics id="my-analytics">
+  <script type="application/json">
+    {
+      "requests": {
+        "click": "https://example.com/my-endpoint"
+      },
+      "triggers": {
+        "trackClickThrough": {
+          "on": "story-click-through",
+          "tagName": "a",
+          "request": "click"
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+
+```
+
+### Story open trigger (`"on": "story-open"`)
+
+The `story-open` trigger is fired when opening a drawer or dialog inside a story. The components that are currently trackable by this are:
+
+- Page attachment
+- Bookend
+- Share dialog
+- Info dialog
+- Sidebar
+
+### Story close trigger (`"on": "story-close"`)
+
+The `story-close` trigger is fired when closing a drawer or dialog inside a story. The components that are currently trackable by this are the same as the [`story-open` trigger](#Story-open-trigger-"on":-"story-open").
+
 ### Bookend enter trigger (`"on": "story-bookend-enter"`)
 
 The `story-bookend-enter` trigger is fired when the bookend is shown to the user, after the last page of the current story.
@@ -84,6 +159,45 @@ The `story-page-attachment-enter` trigger is fired when a page attachment is ope
 
 The `story-page-attachment-exit` trigger is fired when a page attachment is dismissed by the user.
 
+## Variables as data attribute
+
+For the following event types, variables can be passed as part of the element level data attribute
+
+- story-focus
+- story-click-through
+- story-open
+- story-close
+
+The variables passed as data attributes should follow the format `data-vars-*`.
+
+Example:
+
+Given the following analytics config with the corresponding element
+
+```
+// amp-analytics config
+"trackTooltipClicks": {
+  "on": "story-focus",
+  "request": "focusedState",
+},
+
+...
+
+<amp-twitter width="375" data-tooltip-text="my twitter embed"
+  height="472"
+  layout="responsive"
+  data-tweetid="1166723359696130049"
+  data-vars-tooltip-click-id="tweet1"
+  data-vars-tooltip-href="twitter.com"
+  interactive>
+</amp-twitter>
+
+```
+
+And in the request url the token would be of the format `${eventId}` (follows camelcase):
+
+`"focusedState": "${base}&tooltipClickId=${tooltipClickId}&tooltipTargetHref=${tooltipHref}"`
+
 ## Story variables
 
 AMP story contributes the following URL substitutions:
@@ -95,6 +209,14 @@ The unique ID for an AMP story page, as provided by the `id` attribute of the cu
 ### `storyPageIndex`
 
 A zero-based index value for an AMP story page determined by its ordering within `amp-story`.
+
+### `storyPreviousPageId`
+
+The unique ID for an AMP story page, as provided by the `id` attribute of the previous `amp-story-page`.
+
+### `storyAdvancementMode`
+
+Advancement mode through which the user navigated (i.e. manual or automatic).
 
 ### `storyPageCount`
 

@@ -141,6 +141,13 @@ Type attribute value: `gemius`
 
 Adds support for Gemius Audience/Prism analytics. Additionally, the gemius-provided `prefix` and `identifier` variables must be specified. It's also possible to specify the optional variable `extraparams` (key1=value1|key2=value2). More details can be found at [gemius.com](https://www.gemius.com).
 
+### GfK Sensic
+
+Type attribute value: `gfksensic`
+
+Adds support for GfK Sensic audio stream usage analytics.
+Please refer to our [client documentation](https://confluence-docu.gfk.com/display/SENSIC/AMP+Integration) for details.
+
 ### Google Ads
 
 Type attribute value: `googleadwords`
@@ -234,6 +241,12 @@ Adds support for Linkpulse. Configuration details can be found at [docs.linkpuls
 Type attribute value: `lotame`
 
 Adds support for Lotame. More information and configuration details can be found at [mylotame.force.com](https://mylotame.force.com/s/article/Google-AMP).
+
+### Mapp Intelligence
+
+Type attribute value: `mapp_intelligence`
+
+Adds support for Mapp Intelligence tracking. More information and configuration details can be found at [docs.mapp.com](https://docs.mapp.com/pages/viewpage.action?pageId=10027966).
 
 ### Marin Software
 

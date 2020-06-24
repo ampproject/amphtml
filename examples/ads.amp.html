@@ -208,6 +208,7 @@
         <option>noddus</option>
         <option>nokta</option>
         <option>nws</option>
+        <option>oblivki</option>
         <option>onead</option>
         <option>onnetwork</option>
         <option>openadstream</option>
@@ -1482,7 +1483,7 @@
       data-publisher="mediaad.org"
       data-medtag="mediaad-kryZ">
   </amp-ad>
-  
+
   <h2>Marfeel</h2>
   <amp-ad width="300" height="250"
     type="marfeel"
@@ -1663,6 +1664,12 @@
   <amp-ad width="320" height="50"
       type="nws"
       src="https://tags.nws.ai/113106/">
+  </amp-ad>
+
+  <h2>Oblivki 300x250 banner</h2>
+  <amp-ad width="300" height="250"
+          type="oblivki"
+          data-block-key="XgSNxZnGpAmULblp9d23">
   </amp-ad>
 
   <h2>OneAD</h2>
@@ -2145,7 +2152,7 @@
   </amp-ad>
 
   <h2>Spring Ads</h2>
-  <amp-ad width="0" height="0"
+  <amp-ad height="fluid"
           type="springAds"
           data-adssetup='{
           "view": "amp",
@@ -2154,7 +2161,7 @@
           "adSlotSizes": {
             "banner": [{
               "minWidth": 1,
-              "sizes": [[320, 50], [320, 160]]
+              "sizes": [[320, 50]]
             }],
             "mrec": [{
               "minWidth": 1,
@@ -2163,17 +2170,21 @@
           },
           "pageName": "demo_story",
           "publisher": "adtechnology.axelspringer.com",
-          "target": "singleAds;multiAds;you;me;team=adtech,MIT;"
+          "target": "demopage=ampdemo;"
         }'>
   </amp-ad>
-  <amp-ad width="320" height="50"
-          type="springAds"
-          data-adslot="banner">
-  </amp-ad>
-  <amp-ad width="300" height="250"
-          type="springAds"
-          data-adslot="mrec">
-  </amp-ad>
+  <amp-ad
+    width="320"
+    height="50"
+    type="springAds"
+    data-adslot="banner"
+  ></amp-ad>
+  <amp-ad
+    width="100vw"
+    height="fluid"
+    type="springAds"
+    data-adslot="mrec"
+  ></amp-ad>
 
   <h2>SSP</h2>
   <amp-ad width="480" height="300"
