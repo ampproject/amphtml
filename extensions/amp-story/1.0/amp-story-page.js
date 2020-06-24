@@ -811,10 +811,10 @@ export class AmpStoryPage extends AMP.BaseElement {
       getFriendlyIframeEmbedOptional(
         /** @type {!HTMLIFrameElement} */ (iframe)
       );
-    const mediaSet = [];
+    const mediaSet = new Set();
 
     iterateCursor(scopedQuerySelectorAll(this.element, selector), (el) =>
-      mediaSet.push(el)
+      mediaSet.add(el)
     );
 
     if (fie) {
@@ -823,7 +823,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           fie.win.document.body,
           Selectors.ALL_IFRAMED_MEDIA
         ),
-        (el) => mediaSet.push(el)
+        (el) => mediaSet.add(el)
       );
     }
 
