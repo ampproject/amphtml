@@ -120,9 +120,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     this.adBadgeContainer_ = null;
 
     /**
-     * Version of the story store service depends on which version of amp-story
-     * the publisher is loading. They all have the same implementation.
-     * @private {?../../amp-story/0.1/amp-story-store-service.AmpStoryStoreService|?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService}
+     * @private {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService}
      */
     this.storeService_ = null;
 
@@ -263,7 +261,6 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * Determine if enough pages in the story are left for ad placement to be
    * possible.
-   * TODO(ccordry): also use this on subsequent ad requests.
    * @param {number} pageIndex
    * @return {boolean}
    * @private
@@ -432,6 +429,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   }
 
   /**
+   * Respond to page navigation event. This method is not called for the first
+   * page that is shown on load.
    * @param {number} pageIndex
    * @param {string} pageId
    * @private
@@ -487,12 +486,14 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.idOfAdShowing_ = adIndex;
     }
 
-    // If there is already an ad inserted, but not viewed it doesn't matter how
-    // many pages we have seen, we should not keep trying to insert more ads.
     if (
       !this.pendingAdView_ &&
       this.enoughContentPagesViewed_() &&
-      !this.tryingToPlace_
+      // If there is already an ad inserted, but not viewed it doesn't matter how
+      // many pages we have seen, we should not keep trying to insert more ads.
+      !this.tryingToPlace_ &&
+      // Prevent edge case where we try to place an ad twice. See #28840.
+      this.adsPlaced_ < this.adPagesCreated_
     ) {
       this.tryToPlaceAdAfterPage_(pageId).then((adState) => {
         this.tryingToPlace_ = false;

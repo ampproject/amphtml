@@ -25,6 +25,10 @@ const morgan = require('morgan');
 const path = require('path');
 const watch = require('gulp-watch');
 const {
+  buildNewServer,
+  SERVER_TRANSFORM_PATH,
+} = require('../server/typescript-compile');
+const {
   lazyBuildExtensions,
   lazyBuildJs,
   preBuildRuntimeFiles,
@@ -33,15 +37,10 @@ const {
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green, red} = require('ansi-colors');
 const {distNailgunPort, stopNailgunServer} = require('./nailgun');
-const {exec} = require('../common/exec');
 const {logServeMode, setServeMode} = require('../server/app-utils');
 const {watchDebounceDelay} = require('./helpers');
 
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
-
-// Used by new server implementation
-const typescriptBinary = './node_modules/typescript/bin/tsc';
-const transformsPath = 'build-system/server/new-server/transforms';
 
 // Used for logging.
 let url = null;
@@ -50,7 +49,7 @@ let quiet = !!argv.quiet;
 // Used for live reload.
 const serverFiles = globby.sync([
   'build-system/server/**',
-  `!${transformsPath}/dist/**`,
+  `!${SERVER_TRANSFORM_PATH}/dist/**`,
 ]);
 
 // Used to enable / disable lazy building.
@@ -115,25 +114,6 @@ async function startServer(
   url = `http${options.https ? 's' : ''}://${options.host}:${options.port}`;
   log(green('Started'), cyan(options.name), green('at'), cyan(url));
   logServeMode();
-}
-
-/**
- * Builds the new server by converting typescript transforms to JS
- */
-function buildNewServer() {
-  const buildCmd = `${typescriptBinary} -p ${transformsPath}/tsconfig.json`;
-  log(
-    green('Building'),
-    cyan('AMP Dev Server'),
-    green('at'),
-    cyan(`${transformsPath}/dist`) + green('...')
-  );
-  const result = exec(buildCmd, {'stdio': ['inherit', 'inherit', 'pipe']});
-  if (result.status != 0) {
-    const err = new Error('Could not build AMP Dev Server');
-    err.showStack = false;
-    throw err;
-  }
 }
 
 /**
@@ -212,7 +192,6 @@ async function doServe(lazyBuild = false) {
 }
 
 module.exports = {
-  buildNewServer,
   serve,
   doServe,
   startServer,
