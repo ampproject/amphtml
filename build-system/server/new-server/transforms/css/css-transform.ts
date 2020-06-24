@@ -21,16 +21,25 @@ import {readFileSync} from 'fs';
 const argv = minimist(process.argv.slice(2));
 const isTestMode: boolean = argv._.includes('server-tests');
 
+const testDir = 'build-system/server/new-server/transforms/css/test';
+const cwd = process.cwd();
+
 const cssPath = isTestMode
-  ? `${process.cwd()}/build-system/server/new-server/transforms/css/test/test.css`
-  : `${process.cwd()}/build/css/v0.css`;
-const v0Css = readFileSync(cssPath).toString();
+  ? `${cwd}/${testDir}/test.css`
+  : `${cwd}/build/css/v0.css`;
+const versionPath = isTestMode
+  ? `${cwd}/${testDir}/version.txt`
+  : `${cwd}/dist/version.txt`;
+
+const v0Css = readFileSync(cssPath).toString().trim();
+const version = readFileSync(versionPath).toString().trim();
 
 interface StyleNode extends PostHTML.Node {
   tag: 'style',
   attrs: {
     [key: string]: string | undefined
     'amp-runtime': string,
+    'i-amphtml-version': string,
   },
   content: string[]
 }
@@ -43,6 +52,8 @@ function prependAmpStyles(head: PostHTML.Node): PostHTML.Node {
     tag: 'style',
     attrs: {
       'amp-runtime': '',
+      // Prefix 01 to simulate stable/prod version RTV prefix.
+      'i-amphtml-version': `01${version}`,
     },
     content: [v0Css]
   };
