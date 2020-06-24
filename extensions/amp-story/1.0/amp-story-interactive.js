@@ -273,6 +273,27 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   }
 
   /**
+   * Finds the prompt and adds it to the prompt-container
+   *
+   * @protected
+   * @param {Element} root
+   */
+  attachPrompt_(root) {
+    const promptContainer = root.querySelector(
+      '.i-amphtml-story-interactive-prompt-container'
+    );
+
+    if (!this.element.hasAttribute('prompt-text')) {
+      this.rootEl_.removeChild(promptContainer);
+    } else {
+      const prompt = document.createElement('p');
+      prompt.textContent = this.element.getAttribute('prompt-text');
+      prompt.classList.add('i-amphtml-story-interactive-prompt');
+      promptContainer.appendChild(prompt);
+    }
+  }
+
+  /**
    * Generates the template from the config_ Map.
    *
    * @return {!Element} rootEl_

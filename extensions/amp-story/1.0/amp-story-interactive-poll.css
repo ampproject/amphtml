@@ -15,24 +15,23 @@
  */
 
 .i-amphtml-story-interactive-poll-container {
-  display: flex !important;
-  justify-content: center !important;
-  height: 90px !important;
-  max-width: 296px !important;
-  border-radius: 16px !important;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.12) !important;
-  color: var(--interactive-accent-color) !important;
-  background: var(--interactive-background-color) !important;
-  overflow: hidden !important;
-
+  color: var(--i-amphtml-interactive-option-accent-color) !important;
   --post-select-scale: 0.5 !important;
   --post-select-scale-variable: 1 !important;
   --ease-out-curve: cubic-bezier(.3, 0, 0, 1);
-  --animation-time: .3s
+	--animation-time: .3s;
+	border-radius: 32px !important;
+	max-width: 296px !important;
 }
 
-.i-amphtml-story-interactive-poll-container:not(.i-amphtml-story-interactive-post-selection) {
-  cursor: pointer !important;
+.i-amphtml-story-interactive-poll-option-container {
+	background: var(--i-amphtml-interactive-option-background-color) !important;
+	display: flex !important;
+  justify-content: center !important;
+  height: 90px !important;
+	border-radius: 16px !important;
+	overflow: hidden !important;
 }
 
 .i-amphtml-story-interactive-option {
@@ -46,6 +45,10 @@
   overflow: hidden !important;
   position: relative !important;
   transition: flex-grow var(--animation-time) calc(var(--animation-time) * .12) var(--ease-out-curve) !important;
+}
+
+.i-amphtml-story-interactive-prompt {
+	text-align: center !important;
 }
 
 .i-amphtml-story-interactive-option-text-container {
@@ -63,13 +66,13 @@
   height: 100% !important;
   width: 1px !important;
   opacity: 0.3 !important;
-  background-color: var(--interactive-accent-color) !important;
+  background-color: var(--i-amphtml-interactive-theme-border) !important;
 }
 
 .i-amphtml-story-interactive-post-selection
   .i-amphtml-story-interactive-option.i-amphtml-story-interactive-option-selected::before {
   content: '' !important;
-  background-color: var(--interactive-accent-color) !important;
+  background-color: var(--i-amphtml-interactive-option-accent-color) !important;
   opacity: 0.2 !important;
   position: absolute !important;
   left: 0px !important;
