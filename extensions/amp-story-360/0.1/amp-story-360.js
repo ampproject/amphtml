@@ -133,7 +133,9 @@ export class AmpStory360 extends AMP.BaseElement {
     this.orientations_ = [];
 
     /** @private {number} */
-    this.duration_ = timeStrToMillis(element.getAttribute('duration'));
+    this.duration_ = element.getAttribute('duration')
+      ? timeStrToMillis(element.getAttribute('duration'))
+      : null;
 
     /** @private {?Element} */
     this.container_ = null;
