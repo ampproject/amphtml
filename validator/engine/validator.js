@@ -4729,6 +4729,24 @@ function validateScriptSrcAttr(srcAttr, tagSpec, context, result) {
 }
 
 /**
+ * Validates that the reserved `i-amphtml-` prefix is not used in a class
+ * token.
+ * @param {!parserInterface.ParsedAttr} attr
+ * @param {!generated.TagSpec} tagSpec
+ * @param {!Context} context
+ * @param {!generated.ValidationResult} result
+ */
+function validateAttrClass(attr, tagSpec, context, result) {
+  const re = /(^|\W)i-amphtml-/;
+  if (re.test(attr.value)) {
+    context.addError(
+        generated.ValidationError.Code.INVALID_ATTR_VALUE, context.getLineCol(),
+        /* params */[attr.name, getTagDescriptiveName(tagSpec), attr.value],
+        getTagSpecUrl(tagSpec), result);
+  }
+}
+
+/**
  * Helper method for ValidateAttributes.
  * @param {!ParsedAttrSpec} parsedAttrSpec
  * @param {!Context} context
@@ -5037,12 +5055,18 @@ function validateAttributes(
   // values. We skip over this array 2 at a time to iterate over the keys.
   const attrsByName = parsedTagSpec.getAttrsByName();
   for (const attr of encounteredTag.attrs()) {
-    // For transformed AMP, attributes `class` and `i-amphtml-layout` are
-    // handled within validateSsrLayout for non-sizer elements.
-    if (context.isTransformed() &&
-        encounteredTag.lowerName() !== 'i-amphtml-sizer' &&
-        (attr.name === 'class' || attr.name === 'i-amphtml-layout')) {
-      continue;
+    if (context.isTransformed()) {
+      // For transformed AMP, `i-amphtml-layout` is handled within validateSsrLayout
+      if (attr.name === 'i-amphtml-layout') {
+        continue;
+      }
+    } else if (attr.name === 'class') {
+      // For non-transformed AMP, `class` must not contain 'i-amphtml-' prefix.
+      validateAttrClass(attr, spec, context, result.validationResult);
+      if (result.validationResult.status ===
+          generated.ValidationResult.Status.FAIL) {
+        continue;
+      }
     }
 
     // If |spec| is the runtime or an extension script, validate that LTS is
