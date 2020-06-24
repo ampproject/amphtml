@@ -101,7 +101,7 @@ export let InteractionResultsDef;
  *    hasSidebarState: boolean,
  *    infoDialogState: boolean,
  *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
- *    interactionReactState: !Map<string, {option: {?Object, reactionId: string}}>,
+ *    interactionReactState: !Map<string, {option: {?Object, interactiveId: string}}>,
  *    interactionResultsState: !InteractionResultsDef,
  *    mutedState: boolean,
  *    pageAudioState: boolean,
@@ -254,11 +254,11 @@ const processInteractiveResults = (data) => {
   let completed = 0;
   let totalCount = 0;
   const categories = {null: -1};
-  Object.values(data).forEach((reactionConfig) => {
+  Object.values(data).forEach((interactiveConfig) => {
     totalCount += 1;
-    if (reactionConfig['option'] != null) {
+    if (interactiveConfig['option'] != null) {
       completed += 1;
-      const currCategory = reactionConfig['option']['category'];
+      const currCategory = interactiveConfig['option']['category'];
       if (currCategory != undefined) {
         categories[currCategory] = categories[currCategory]
           ? categories[currCategory] + 1
@@ -290,7 +290,7 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.INTERACTION_REACT_STATE]: {
           ...state[StateProperty.INTERACTION_REACT_STATE],
-          [data['reactionId']]: data,
+          [data['interactiveId']]: data,
         },
       });
       state[

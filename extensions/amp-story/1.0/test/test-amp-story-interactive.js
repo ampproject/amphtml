@@ -287,7 +287,7 @@ describes.realWin(
 
     it('should update store service when selecting option', () => {
       const responseData4 = generateResponseDataFor([335, 335, 330]);
-      const percentages4 = ampStoryReaction.preprocessPercentages_(
+      const percentages4 = ampStoryInteractive.preprocessPercentages_(
         responseData4
       );
 

@@ -892,6 +892,7 @@ amp-story .amp-video-eq,
   --interactive-chip-shadow: none !important;
   --interactive-answer-choice-border: var(--interactive-accent-color) !important;
   --interactive-answer-choice-background: white !important;
+  --interactive-strong-text-color: black !important;
 }
 
 .i-amphtml-story-interactive-component[theme="dark"] {
@@ -899,6 +900,7 @@ amp-story .amp-video-eq,
   --interactive-background-color: #202124;
   --interactive-theme-border: #3C4043 !important;
   --interactive-theme-shading: #3C4043 !important;
+  --interactive-strong-text-color: white !important;
 }
 
 .i-amphtml-story-interactive-component[chip-corner="sharp"] {
