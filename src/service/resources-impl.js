@@ -911,7 +911,7 @@ export class ResourcesImpl {
 
       // Find minimum top position and run all mutates.
       let minTop = -1;
-      const scrollAdjSet = [];
+      const scrollAdjSet = new Set();
       let aboveVpHeightChange = 0;
       for (let i = 0; i < requestsChangeSize.length; i++) {
         const request = requestsChangeSize[i];
