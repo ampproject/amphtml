@@ -81,6 +81,12 @@ Check out the documentation for differences between <a href="https://developers.
 When you are embedding a comment reply, you can optionally also include the parent comment of the reply.</td>
   </tr>
   <tr>
+    <td width="40%"><strong>data-allowfullscreen</strong></td>
+    <td>The value is either set or omitted. The default is omitted (no fullscreen).
+<br><br>
+When embedding a video, set this value to allow for a fullscreen experience.</td>
+  </tr>
+  <tr>
      <td width="40%"><strong>data-align-center</strong></td>
      <td>The value is either <code>true</code> or <code>false</code>. The default is <code>false</code>.
 <br><br>
