@@ -34,7 +34,7 @@ describes.realWin(
       const widget = doc.createElement('amp-sona');
 
       widget.setAttribute('data-client-id', clientId);
-      widget.setAttribute('data-resource', clientId);
+      widget.setAttribute('data-resource', resource);
       widget.setAttribute('data-variant', variant);
 
       if (opt_attrs) {
@@ -57,7 +57,9 @@ describes.realWin(
     });
 
     it('renders sona widget', () => {
-      return createSonaWidget(clientId, resource, variant).then((widget) => {
+      return createSonaWidget(clientId, resource, variant, {
+        layout: 'fixed',
+      }).then((widget) => {
         const iframe = widget.firstChild;
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -71,7 +73,9 @@ describes.realWin(
       }).then((widget) => {
         const iframe = widget.firstChild;
         expect(iframe).to.not.be.null;
-        expect(widget.className).to.match(/i-amphtml-layout-fixed/);
+        expect(widget.className).to.match(
+          /i-amphtml-element i-amphtml-error i-amphtml-layout/
+        );
       });
     });
 
@@ -81,7 +85,9 @@ describes.realWin(
       }).then((widget) => {
         const iframe = widget.firstChild;
         expect(iframe).to.not.be.null;
-        expect(widget.className).to.match(/i-amphtml-layout-fixed-height/);
+        expect(widget.className).to.match(
+          /i-amphtml-element i-amphtml-error i-amphtml-layout/
+        );
       });
     });
 
