@@ -671,7 +671,7 @@ export class NextPageService {
     toArray(doc.querySelectorAll('amp-next-page')).forEach((el) => {
       if (this.hasDeepParsing_) {
         const pages = this.getInlinePages_(el);
-        this.queuePages_(pages);
+        this.fetchAndQueuePages_(pages);
       }
       removeElement(el);
     });
@@ -782,7 +782,7 @@ export class NextPageService {
   initializePageQueue_() {
     const inlinePages = this.getInlinePages_(this.getHost_());
     if (inlinePages.length) {
-      return this.queuePages_(inlinePages);
+      return this.fetchAndQueuePages_(inlinePages);
     }
 
     userAssert(
@@ -796,7 +796,7 @@ export class NextPageService {
         user().warn(TAG, 'Could not find recommendations');
         return Promise.resolve();
       }
-      return this.queuePages_(remotePages);
+      return this.fetchAndQueuePages_(remotePages);
     });
   }
 
@@ -827,9 +827,19 @@ export class NextPageService {
       }
     });
 
+    return Promise.resolve();
+  }
+
+  /**
+   * Add the provided page metadata into the queue of
+   * pages to fetch then fetches again
+   * @param {!Array<!./page.PageMeta>} pages
+   * @return {!Promise}
+   */
+  fetchAndQueuePages_(pages) {
     // To be safe, if the pages were parsed after the user
-    // finished scrolling
-    return this.maybeFetchNext();
+    // finished scrolling, we fetch again
+    return this.queuePages_(pages).then(() => this.maybeFetchNext());
   }
 
   /**
