@@ -114,9 +114,7 @@ export class ViewerTracker {
       unlistenSet.add(this.viewport_.onScroll(resolve));
 
       // 4. Tap: register a view.
-      unlistenSet.add(
-        listenOnce(this.ampdoc_.getRootNode(), 'click', resolve)
-      );
+      unlistenSet.add(listenOnce(this.ampdoc_.getRootNode(), 'click', resolve));
     }).then(
       () => {
         unlistenSet.forEach((unlisten) => unlisten());

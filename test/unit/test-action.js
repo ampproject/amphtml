@@ -334,7 +334,9 @@ describe('ActionService parseAction', () => {
 
   it('should return null for undefined references in dereferenced arg', () => {
     const a = parseAction('e:t.m(key1=foo.bar)');
-    expect(dereferenceArgsVariables(a.args, null)).to.deep.equal(new Map().set('key1', null));
+    expect(dereferenceArgsVariables(a.args, null)).to.deep.equal(
+      new Map().set('key1', null)
+    );
     expect(dereferenceArgsVariables(a.args, {})).to.deep.equal({key1: null});
     expect(dereferenceArgsVariables(a.args, {foo: null})).to.deep.equal({
       key1: null,

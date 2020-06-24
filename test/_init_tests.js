@@ -400,6 +400,8 @@ before(function () {
   };
 });
 
+this.mapToStringDefault = Map.prototype.toString;
+
 beforeEach(function () {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   beforeTest();
@@ -410,6 +412,17 @@ beforeEach(function () {
   warnForConsoleError();
   initialGlobalState = Object.keys(global);
   initialWindowState = Object.keys(window);
+
+  // Hack to override Map toString to allow better readability in Jasmine
+  // eslint-disable-next-line no-extend-native
+  Map.prototype.toString = () => {
+    let str = '{';
+    Object.keys(this).forEach((key) => {
+      str += ` ${key}: ${this.get(key)}, `;
+    });
+    str += '}';
+    return str;
+  };
 });
 
 function beforeTest() {
@@ -583,4 +596,8 @@ chai.Assertion.addMethod('jsonEqual', function (compare) {
     a,
     b
   );
+
+  // Revert to default toString method for Map
+  // eslint-disable-next-line no-extend-native
+  Map.prototype.toString = this.mapToStringDefault;
 });
