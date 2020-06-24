@@ -15,16 +15,18 @@
  */
 
 /**
- * @fileoverview Embeds a Soundcloud clip
+ * @fileoverview Embeds a sona widget
  *
  * Example:
- * <code>
  * <amp-sona
- *   height=166
- *   data-trackid="243169232"
- *   data-color="ff5500"
- *   layout="fixed-height">
- * </amp-sona>
+ *  height="600"
+ *  width="120"
+ *  layout="fixed"
+ *  data-client-id="4a2f2764-0ca3-11ea-bd94-0242ac130008"
+ *  data-resource="image"
+ *  data-variant="120x600"
+ *  >
+ *  </amp-sona>
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';

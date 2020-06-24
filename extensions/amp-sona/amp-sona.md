@@ -46,17 +46,17 @@ The `width` and `height` from the example should yield correct layouts for 1:1 a
 <table>
   <tr>
     <td width="40%"><strong>data-client-id</strong></td>
-    <td>This attribute is required if <code>data-client-id</code> is not defined.<br />
+    <td>This attribute is required.<br />
 The value for this attribute is the ID of a client, a string in the uuid format.</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-resource</strong></td>
-    <td>This attribute is required if <code>data-resource</code> is not defined.
+    <td>This attribute is required.<br />
 The value for this attribute is the type of a resource, a string. Eg. "image" or "video"</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-variant</strong></td>
-       <td>This attribute is required if <code>data-varient</code> is not defined.
+       <td>This attribute is required.<br />
     The value for this attribute is the id or name of the image or video, a string. Eg. 120x600</td>
   </tr>
 </table>
