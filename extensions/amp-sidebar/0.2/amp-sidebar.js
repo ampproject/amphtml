@@ -165,6 +165,7 @@ export class AmpSidebar extends AMP.BaseElement {
       this.element.parentNode != this.getAmpDoc().getBody()
     ) {
       this.user().warn(
+        TAG,
         `${TAG} is recommended to be a direct child of the <body> element to preserve a logical DOM order.`
       );
     }
