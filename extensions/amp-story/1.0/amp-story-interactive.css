@@ -38,8 +38,8 @@
 	-webkit-line-clamp: 4 !important;
 	-webkit-box-orient: vertical !important;
 	visibility: visible !important;
-	font-size: 28px !important;
-	line-height: 36px !important;
+	font-size: var(--interactive-prompt-text-size) !important;
+	line-height: var(--interactive-prompt-line-height) !important;
 	max-height: 112px !important;
 	font-weight: bold !important;
 	text-align: var(--interactive-prompt-alignment) !important;
