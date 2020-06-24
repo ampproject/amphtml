@@ -1174,9 +1174,11 @@ export function dereferenceArgsVariables(args, event, opt_args) {
       value = exprValue === undefined ? null : exprValue;
     }
     if (data[value]) {
-      applied[key] = data[value];
+      //applied[key] = data[value];
+      applied.set(key, data[value]);
     } else {
-      applied[key] = value;
+      //applied[key] = value;
+      applied.set(key, value);
     }
   });
   return applied;
