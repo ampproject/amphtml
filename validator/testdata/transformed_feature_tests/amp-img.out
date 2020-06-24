@@ -45,7 +45,7 @@ FAIL
 |    <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="responsive" width="900" height="600">
 |      <img src="/img/canoe_900x600.jpg" alt="An image about canoeing" decoding="async" loading="lazy">
 >>     ^~~~~~~~~
-transformed_feature_tests/amp-img.html:45:4 The parent tag of tag 'img' is 'amp-img', but it can only be 'amp-img (transformed)'.
+transformed_feature_tests/amp-img.html:45:4 The parent tag of tag 'img' is 'amp-img', but it can only be 'i-amphtml-sizer-intrinsic'.
 |    </amp-img>
 |
 |    <!-- Invalid: amp-img > img, missing decoding attr -->
