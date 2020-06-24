@@ -417,6 +417,7 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeListenersForDev_();
     this.initializePageIds_();
     this.initializeStoryPlayer_();
+    this.initializeInteractiveComponents_();
 
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
 
@@ -1070,7 +1071,7 @@ export class AmpStory extends AMP.BaseElement {
   initializeInteractiveComponents_() {
     toArray(
       this.element.querySelectorAll(
-        'amp-story-reaction-quiz, amp-story-reaction-poll'
+        'amp-story-interactive-quiz, amp-story-interactive-poll'
       )
     ).forEach((element) => {
       whenUpgradedToCustomElement(element).then((el) =>
