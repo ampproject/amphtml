@@ -23,7 +23,7 @@ import {
   isShadowCssSupported,
   isShadowDomSupported,
 } from './web-components';
-import {closestNode, isShadowRoot, iterateCursor} from './dom';
+import {closestNode, isShadowRoot, iterateCursor, removeChildren} from './dom';
 import {dev, devAssert} from './log';
 import {escapeCssSelectorIdent} from './css';
 import {installCssTransformer} from './style-installer';
@@ -197,6 +197,7 @@ export function importShadowBody(shadowRoot, body, deep) {
     }
   }
   setStyle(resultBody, 'position', 'relative');
+  removeChildren(shadowRoot);
   shadowRoot.appendChild(resultBody);
   Object.defineProperty(shadowRoot, 'body', {
     configurable: true,

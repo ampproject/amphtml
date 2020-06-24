@@ -250,6 +250,7 @@ describes.sandboxed('shadow-embed', {}, () => {
               const secondBody = importShadowBody(shadowRoot, newSource, true);
 
               expect(shadowRoot.body).to.equal(secondBody);
+              expect(shadowRoot.children).to.have.length(1);
               expect(firstBody).not.to.equal(secondBody);
               expect(secondBody.children).to.have.length(1);
               expect(secondBody.firstChild.tagName).to.equal('SPAN');
