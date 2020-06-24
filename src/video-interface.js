@@ -282,6 +282,18 @@ export const VideoEvents = {
   LOADEDMETADATA: 'loadedmetadata',
 
   /**
+   * play
+   *
+   * Fired when the video plays (either because of autoplay or the play method).
+   *
+   * Note: Because this event was not originally present in this interface, we
+   * cannot rely on all all implementations to emit it.
+   *
+   * @event play
+   */
+  PLAY: 'play',
+
+  /**
    * playing
    *
    * Fired when the video begins playing.

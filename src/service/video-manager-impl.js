@@ -492,6 +492,9 @@ class VideoEntry {
     /** @private {boolean} */
     this.muted_ = false;
 
+    /** @private {boolean} */
+    this.hasSeenPlayEvent_ = false;
+
     this.hasAutoplay = video.element.hasAttribute(VideoAttributes.AUTOPLAY);
 
     if (this.hasAutoplay) {
@@ -517,6 +520,10 @@ class VideoEntry {
       this.videoLoaded()
     );
     listen(video.element, VideoEvents.PAUSE, () => this.videoPaused_());
+    listen(video.element, VideoEvents.PLAY, () => {
+      this.hasSeenPlayEvent_ = true;
+      analyticsEvent(this, VideoAnalyticsEvents.PLAY);
+    });
     listen(video.element, VideoEvents.PLAYING, () => this.videoPlayed_());
     listen(video.element, VideoEvents.MUTED, () => (this.muted_ = true));
     listen(video.element, VideoEvents.UNMUTED, () => {
@@ -681,7 +688,14 @@ class VideoEntry {
     if (this.isVisible_) {
       this.visibilitySessionManager_.beginSession();
     }
-    analyticsEvent(this, VideoAnalyticsEvents.PLAY);
+
+    // The PLAY event was omitted from the original VideoInterface. Thus
+    // not every implementation emits it. It should always happen before
+    // PLAYING. Hence we treat the PLAYING as an indication to emit the
+    // Analytics PLAY event if we haven't seen PLAY.
+    if (!this.hasSeenPlayEvent_) {
+      analyticsEvent(this, VideoAnalyticsEvents.PLAY);
+    }
   }
 
   /**
