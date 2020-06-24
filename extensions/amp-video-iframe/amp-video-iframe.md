@@ -26,7 +26,7 @@ limitations under the License.
 
 [TOC]
 
-Embeds a video player within an [iframe](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe).
+Embeds a video player within an iframe.
 
 <table>
   <tr>
@@ -88,9 +88,9 @@ The `<amp-video-iframe>` component requires the embedded html document to includ
 
 Provide a callback that specifies how the AMP document and the iframes video document communicate. You must implement a set of playback methods and event dispatchers to sync the documents together. Implement support by:
 
-- Use a [third party integration](#third-party-integration)
-- Use a [video library's playback support](todo)
-- Write a [custom integration](#custom-integrations) if your solution doesn't use third party integrations.
+- Use a third party integration
+- Use a video library's playback support
+- Write a custom integration if your solution doesn't use third party integrations.
 
 #### Third party integration
 
