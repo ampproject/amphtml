@@ -882,7 +882,7 @@ amp-story .amp-video-eq,
   max-width: 400px !important;
   /* Properties overrideable by user */
   --interactive-accent-color: #005AF0;
-  --interactive-prompt-background-color: var(--interactive-accent-color);
+  --interactive-prompt-background: var(--interactive-accent-color);
   --interactive-prompt-text-color: white;
   --interactive-prompt-alignment: initial;
   /* Shared properties by interactives */

@@ -2,29 +2,28 @@
 <html ⚡ lang="es">
   <head>
     <meta charset="utf-8">
-    <title [text]="'Reactions Story (' + results.category + ')'">Reactions Story</title>
-    <link rel="canonical" href="reactions.html">
+    <title >Interactive Story</title>
+    <link rel="canonical" href="interactive_Results.html">
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
-    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
     <style amp-custom>
     body {
       font-family: 'Poppins', sans-serif;
     }
 
-    .i-amphtml-story-reaction-component {
+    amp-story-interactive-quiz {
       align-self: center;
       justify-self: center;
     }
 
-    amp-story-reaction-results-category {
-      align-self: center !important;
-      justify-self: center !important;
+    amp-story-interactive-results-category {
+      align-self: center;
+      justify-self: center;
     }
 
-    h3.reaction-results-comments {
+    h3.interactive-results-comments {
       align-self: flex-end;
       justify-self: center;
       font-size: 20px;
@@ -32,13 +31,11 @@
       text-shadow: 0px 2px 2px black;
     }
     </style>
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
   </head>
   <body>
     <amp-story
         standalone
-        title="Reactions Story"
+        title="Interactive Story"
         publisher="AMP Story testing"
         publisher-logo-src="example.com/logo.png"
         poster-portrait-src="example.com/poster.jpg">
@@ -68,13 +65,13 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
-            <amp-story-reaction-quiz
+            <amp-story-interactive-quiz
                 prompt-text="Whats your favorite food?"
                 option-1-text="Bones" option-1-category="dog" option-1-correct
                 option-2-text="Fish" option-2-category="cat" option-2-correct
                 option-3-text="Carrots" option-3-category="bunny" option-3-correct
                 option-4-text="Cheese" option-4-category="mouse" option-4-correct>
-            </amp-story-reaction-quiz>
+            </amp-story-interactive-quiz>
           </amp-story-grid-layer>
         </amp-story-page>
         <amp-story-page id="quiz-2">
@@ -84,13 +81,13 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
-            <amp-story-reaction-quiz
+            <amp-story-interactive-quiz
                 prompt-text="How do you spend your free time?"
                 option-1-text="Stretching your back" option-1-category="cat" option-1-correct
                 option-2-text="Caressing your mustache" option-2-category="mouse" option-2-correct
                 option-3-text="Jumping all over the place" option-3-category="bunny" option-3-correct
                 option-4-text="Running behind a ball" option-4-category="dog" option-4-correct>
-            </amp-story-reaction-quiz>
+            </amp-story-interactive-quiz>
           </amp-story-grid-layer>
         </amp-story-page>
         <amp-story-page id="quiz-3">
@@ -100,13 +97,13 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
-            <amp-story-reaction-quiz
+            <amp-story-interactive-quiz
                 prompt-text="What would you do for holidays?"
                 option-1-text="Easter island" option-1-category="bunny" option-1-correct
                 option-2-text="Drive in a car with your tongue out" option-2-category="dog" option-2-correct
                 option-3-text="Get far away from cats" option-3-category="mouse" option-3-correct
                 option-4-text="Stay in bed sleeping" option-4-category="cat" option-4-correct>
-            </amp-story-reaction-quiz>
+            </amp-story-interactive-quiz>
           </amp-story-grid-layer>
         </amp-story-page>
         <amp-story-page id="quiz-4">
@@ -116,13 +113,13 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
-            <amp-story-reaction-quiz
+            <amp-story-interactive-quiz
                 prompt-text="What's your favorite place in the house?"
                 option-1-text="Inside my spacious cage" option-1-category="mouse" option-1-correct
                 option-2-text="On the backyard" option-2-category="bunny" option-2-correct
                 option-3-text="Where my owner is" option-3-category="dog" option-3-correct
                 option-4-text="On top of the fridge" option-4-category="cat" option-4-correct>
-            </amp-story-reaction-quiz>
+            </amp-story-interactive-quiz>
           </amp-story-grid-layer>
         </amp-story-page>
         <amp-story-page id="quiz-results">
@@ -135,15 +132,14 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer>
-            <!-- <h3 class="reaction-results-comments">chip-corner="sharp"</h3> -->
-            <amp-story-reaction-results-category
-								style="--reaction-accent-color: #F34E4E"
+            <amp-story-interactive-results-category
+								style="--interactive-accent-color: #F34E4E"
 								ptompt-text="You are a"
                 option-1-text="Cat" option-1-category="cat" option-1-image="https://images.pexels.com/photos/104827/cat-pet-animal-domestic-104827.jpeg" option-1-description="Everyone loves cats, and so do you! Cats are the best companion to WFH"
                 option-2-text="Dog" option-2-category="dog" option-2-image="https://post.medicalnewstoday.com/wp-content/uploads/sites/3/2020/02/322868_1100-1100x628.jpg" option-2-description="You always have energy and love being with friends. Outdoors is your favorite place"
                 option-3-text="Bunny" option-3-category="bunny" option-3-image="https://www.smdp.com/wp-content/uploads/2020/04/BUNNY_-Snowflake.jpg" option-3-description="You love jumping around and having fun. Your bubbly personality is contagious, and your love for carrots is unconditional"
                 option-4-text="Mouse" option-4-category="mouse" option-4-image="https://www.jax.org/-/media/jaxweb/images/jax-mice-and-services/c-22-images/blue-background-mice/c22__0029.jpg" option-4-description="Even though you're small, you're also full of curiosity and love going around finding new things to do">
-            </amp-story-reaction-results-category>
+            </amp-story-interactive-results-category>
           </amp-story-grid-layer>
 				</amp-story-page>
 				<amp-story-page id="quiz-results-2">
@@ -156,16 +152,15 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer>
-            <!-- <h3 class="reaction-results-comments">chip-corner="sharp"</h3> -->
-            <amp-story-reaction-results-category
-								style="--reaction-accent-color: #F34E4E"
+            <amp-story-interactive-results-category
+								style="--interactive-accent-color: #F34E4E"
 								ptompt-text="You are a"
 								theme="dark"
                 option-1-text="Cat" option-1-category="cat" option-1-image="https://images.pexels.com/photos/104827/cat-pet-animal-domestic-104827.jpeg" option-1-description="Everyone loves cats, and so do you! Cats are the best companion to WFH"
                 option-2-text="Dog" option-2-category="dog" option-2-image="https://post.medicalnewstoday.com/wp-content/uploads/sites/3/2020/02/322868_1100-1100x628.jpg" option-2-description="You always have energy and love being with friends. Outdoors is your favorite place"
                 option-3-text="Bunny" option-3-category="bunny" option-3-image="https://www.smdp.com/wp-content/uploads/2020/04/BUNNY_-Snowflake.jpg" option-3-description="You love jumping around and having fun. Your bubbly personality is contagious, and your love for carrots is unconditional"
                 option-4-text="Mouse" option-4-category="mouse" option-4-image="https://www.jax.org/-/media/jaxweb/images/jax-mice-and-services/c-22-images/blue-background-mice/c22__0029.jpg" option-4-description="Even though you're small, you're also full of curiosity and love going around finding new things to do">
-            </amp-story-reaction-results-category>
+            </amp-story-interactive-results-category>
           </amp-story-grid-layer>
         </amp-story-page>
     </amp-story>

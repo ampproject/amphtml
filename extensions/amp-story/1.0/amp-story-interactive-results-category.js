@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {AmpStoryReaction, ReactionType} from './amp-story-reaction';
-import {CSS} from '../../../build/amp-story-reaction-results-category-1.0.css';
+import {AmpStoryInteractive, InteractiveType} from './amp-story-interactive';
+import {CSS} from '../../../build/amp-story-interactive-results-category-1.0.css';
 import {StateProperty} from './amp-story-store-service';
 import {htmlFor} from '../../../src/static-template';
 import {setStyle} from '../../../src/style';
@@ -29,27 +29,29 @@ import {setStyle} from '../../../src/style';
 const buildResultsCategoryTemplate = (element) => {
   const html = htmlFor(element);
   return html`
-    <div class="i-amphtml-story-reaction-results-category-container">
-      <div class="i-amphtml-story-reaction-results-pre-select">
+    <div class="i-amphtml-story-interactive-results-category-container">
+      <div class="i-amphtml-story-interactive-results-pre-select">
         <span>Come back when you're done</span>
         <span
-          class="i-amphtml-story-reaction-results-percentage-completed"
+          class="i-amphtml-story-interactive-results-percentage-completed"
         ></span>
       </div>
-      <div class="i-amphtml-story-reaction-results-post-select">
-        <div class="i-amphtml-story-reaction-results-line"></div>
-        <div class="i-amphtml-story-reaction-results-visuals">
-          <div class="i-amphtml-story-reaction-results-dots"></div>
-          <div class="i-amphtml-story-reaction-results-image">
-            <div class="i-amphtml-story-reaction-results-category-image"></div>
+      <div class="i-amphtml-story-interactive-results-post-select">
+        <div class="i-amphtml-story-interactive-results-line"></div>
+        <div class="i-amphtml-story-interactive-results-visuals">
+          <div class="i-amphtml-story-interactive-results-dots"></div>
+          <div class="i-amphtml-story-interactive-results-image">
+            <div
+              class="i-amphtml-story-interactive-results-category-image"
+            ></div>
           </div>
-          <div class="i-amphtml-story-reaction-results-dots"></div>
+          <div class="i-amphtml-story-interactive-results-dots"></div>
         </div>
-        <div class="i-amphtml-story-reaction-results-prompt">You are a</div>
-        <div class="i-amphtml-story-reaction-results-category-text">
+        <div class="i-amphtml-story-interactive-results-prompt">You are a</div>
+        <div class="i-amphtml-story-interactive-results-category-text">
           Category
         </div>
-        <div class="i-amphtml-story-reaction-results-category-description">
+        <div class="i-amphtml-story-interactive-results-category-description">
           You love jumping around and having fun. Your bubbly personality is
           contagious, and your love for carrots is unconditional.
         </div>
@@ -58,12 +60,12 @@ const buildResultsCategoryTemplate = (element) => {
   `;
 };
 
-export class AmpStoryReactionResultsCategory extends AmpStoryReaction {
+export class AmpStoryInteractiveResultsCategory extends AmpStoryInteractive {
   /**
    * @param {!AmpElement} element
    */
   constructor(element) {
-    super(element, ReactionType.CATEGORY, [2, 10]);
+    super(element, InteractiveType.CATEGORY, [2, 10]);
   }
 
   /** @override */
@@ -95,7 +97,7 @@ export class AmpStoryReactionResultsCategory extends AmpStoryReaction {
           });
         } else {
           this.rootEl_.querySelector(
-            '.i-amphtml-story-reaction-results-percentage-completed'
+            '.i-amphtml-story-interactive-results-percentage-completed'
           ).textContent = data.percentageCompleted + '%';
         }
       },
@@ -110,16 +112,16 @@ export class AmpStoryReactionResultsCategory extends AmpStoryReaction {
   updateCategory(categorySelected) {
     setStyle(
       this.rootEl_.querySelector(
-        '.i-amphtml-story-reaction-results-category-image'
+        '.i-amphtml-story-interactive-results-category-image'
       ),
       'background',
       'url(' + categorySelected.image + ')'
     );
     this.rootEl_.querySelector(
-      '.i-amphtml-story-reaction-results-category-text'
+      '.i-amphtml-story-interactive-results-category-text'
     ).textContent = categorySelected.text;
     this.rootEl_.querySelector(
-      '.i-amphtml-story-reaction-results-category-description'
+      '.i-amphtml-story-interactive-results-category-description'
     ).textContent = categorySelected.description || '';
   }
 
