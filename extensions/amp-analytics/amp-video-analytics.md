@@ -56,6 +56,8 @@ The `video-play` trigger is fired when the video begins playing from a user clic
 }
 ```
 
+_Note:_ This event was initially mapped to the `playing` event emitted by video elements instead of the `play` event. This may lead to overcounting as those events are also emitted when playing was interrupted by network issues. While this bug has been fixed in general, individual video players may continue to use the `playing` event internally instead of the `play` event.
+
 ### Video pause trigger (`"on": "video-pause"`)
 
 The `video-pause` trigger is fired when the video stops playing from a user clicking pause, from autoplay pausing, or from the video reaching the end. Use these configurations to fire a request for this event.

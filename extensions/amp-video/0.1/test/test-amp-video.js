@@ -599,7 +599,9 @@ describes.realWin(
       impl.mute();
       await listenOncePromise(v, VideoEvents.MUTED);
       impl.play();
+      const playPromise = listenOncePromise(v, VideoEvents.PLAY);
       await listenOncePromise(v, VideoEvents.PLAYING);
+      await playPromise;
       impl.pause();
       await listenOncePromise(v, VideoEvents.PAUSE);
       impl.unmute();
