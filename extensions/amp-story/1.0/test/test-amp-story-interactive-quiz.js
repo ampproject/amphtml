@@ -106,7 +106,7 @@ describes.realWin(
 
       const quizContent = ampStoryQuiz.getRootElement().children;
       expect(quizContent[0]).to.have.class(
-        'i-amphtml-story-interactive-quiz-prompt-container'
+        'i-amphtml-story-interactive-prompt-container'
       );
       expect(quizContent[1]).to.have.class(
         'i-amphtml-story-interactive-quiz-option-container'
@@ -115,9 +115,7 @@ describes.realWin(
       // Check prompt container structure.
       expect(quizContent[0].children.length).to.equal(1);
       expect(
-        quizContent[0].querySelectorAll(
-          '.i-amphtml-story-interactive-quiz-prompt'
-        )
+        quizContent[0].querySelectorAll('.i-amphtml-story-interactive-prompt')
       ).to.have.length(1);
 
       // Check option container structure.
