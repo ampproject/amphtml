@@ -19,7 +19,7 @@ import {Layout} from '../layout';
 import {Services} from '../services';
 import {computedStyle, toggle} from '../style';
 import {dev, devAssert} from '../log';
-import {isBlockedByConsent} from '../error';
+import {isBlockedByConsent, reportError} from '../error';
 import {
   layoutRectLtwh,
   layoutRectSizeEquals,
@@ -894,6 +894,14 @@ export class Resource {
       this.state_
     );
     devAssert(this.isDisplayed(), 'Not displayed for layout: %s', this.debugid);
+
+    if (this.state_ != ResourceState.LAYOUT_SCHEDULED) {
+      const err = dev().createError(
+        'startLayout called but not LAYOUT_SCHEDULED'
+      );
+      reportError(err, this.element);
+      return Promise.reject(err);
+    }
 
     // Unwanted re-layouts are ignored.
     if (this.layoutCount_ > 0 && !this.element.isRelayoutNeeded()) {
