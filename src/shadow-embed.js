@@ -198,7 +198,10 @@ export function importShadowBody(shadowRoot, body, deep) {
   }
   setStyle(resultBody, 'position', 'relative');
   shadowRoot.appendChild(resultBody);
-  Object.defineProperty(shadowRoot, 'body', {value: resultBody});
+  Object.defineProperty(shadowRoot, 'body', {
+    configurable: true,
+    value: resultBody,
+  });
   return resultBody;
 }
 
