@@ -175,7 +175,6 @@ exports.jsBundles = {
       minifiedName: 'v0.js',
       includePolyfills: true,
       wrapper: wrappers.mainBinary,
-      singlePassCompilation: argv.single_pass,
       esmPassCompilation: argv.esm,
       includeOnlyESMLevelPolyfills: argv.esm,
     },
@@ -815,12 +814,6 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
-    name: 'amp-share-tracking',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.MISC,
-  },
-  {
     name: 'amp-sidebar',
     version: ['0.1', '0.2'],
     latestVersion: '0.1',
@@ -866,26 +859,6 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-story',
-    version: '0.1',
-    latestVersion: '1.0',
-    options: {
-      hasCss: true,
-      cssBinaries: [
-        'amp-story-bookend',
-        'amp-story-consent',
-        'amp-story-hint',
-        'amp-story-unsupported-browser-layer',
-        'amp-story-viewport-warning-layer',
-        'amp-story-info-dialog',
-        'amp-story-share',
-        'amp-story-share-menu',
-        'amp-story-system-layer',
-      ],
-    },
-    type: TYPES.MISC,
-  },
-  {
-    name: 'amp-story',
     version: '1.0',
     latestVersion: '1.0',
     options: {
@@ -896,8 +869,9 @@ exports.extensionBundles = [
         'amp-story-draggable-drawer-header',
         'amp-story-hint',
         'amp-story-info-dialog',
-        'amp-story-reaction',
-        'amp-story-reaction-quiz',
+        'amp-story-interactive',
+        'amp-story-interactive-poll',
+        'amp-story-interactive-quiz',
         'amp-story-share',
         'amp-story-share-menu',
         'amp-story-system-layer',
@@ -1194,25 +1168,11 @@ exports.extensionAliasBundles = {
     version: '1.0',
     aliasedVersion: '0.1',
   },
+  'amp-story': {
+    version: '1.0',
+    aliasedVersion: '0.1',
+  },
 };
-
-/**
- * Used to generate alternative JS build targets
- */
-exports.altMainBundles = [
-  {
-    path: 'src/amp-shadow.js',
-    name: 'shadow-v0',
-    version: '0.1',
-    latestVersion: '0.1',
-  },
-  {
-    path: 'src/inabox/amp-inabox.js',
-    name: 'amp4ads-v0',
-    version: '0.1',
-    latestVersion: '0.1',
-  },
-];
 
 /**
  * @param {boolean} condition

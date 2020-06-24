@@ -26,6 +26,7 @@ import {
   removeFragment,
 } from '../url';
 import {applySandbox} from '../3p-frame';
+import {createCustomEvent} from '../event-helper';
 import {dict, map} from '../utils/object';
 // Source for this constant is css/amp-story-player-iframe.css
 import {cssText} from '../../build/amp-story-player-iframe.css';
@@ -50,7 +51,7 @@ const IframePosition = {
 const SUPPORTED_CACHES = ['cdn.ampproject.org', 'www.bing-amp.com'];
 
 /** @const @type {!Array<string>} */
-const SANDBOX_WHITELIST = ['allow-top-navigation'];
+const SANDBOX_MIN_LIST = ['allow-top-navigation'];
 
 /**
  * @enum {number}
@@ -110,6 +111,9 @@ export class AmpStoryPlayer {
     /** @private {boolean} */
     this.isLaidOut_ = false;
 
+    /** @private {boolean} */
+    this.isBuilt_ = false;
+
     /** @private {!IframePool} */
     this.iframePool_ = new IframePool();
 
@@ -129,6 +133,26 @@ export class AmpStoryPlayer {
       lastX: 0,
       isSwipeX: null,
     };
+
+    this.attachCallbacksToElement_();
+  }
+
+  /**
+   * Attaches callbacks to the DOM element for them to be used by publishers.
+   * @private
+   */
+  attachCallbacksToElement_() {
+    this.element_.load = this.load.bind(this);
+    this.element_.show = this.show.bind(this);
+  }
+
+  /**
+   * External callback for manually loading the player.
+   * @public
+   */
+  load() {
+    this.buildCallback();
+    this.layoutCallback();
   }
 
   /**
@@ -141,10 +165,22 @@ export class AmpStoryPlayer {
 
   /** @public */
   buildCallback() {
+    if (this.isBuilt_) {
+      return;
+    }
+
     this.stories_ = toArray(this.element_.querySelectorAll('a'));
 
     this.initializeShadowRoot_();
     this.initializeIframes_();
+    this.signalReady_();
+    this.isBuilt_ = true;
+  }
+
+  /** @private */
+  signalReady_() {
+    this.element_.dispatchEvent(createCustomEvent(this.win_, 'ready', {}));
+    this.element_.isReady = true;
   }
 
   /** @private */
@@ -190,7 +226,7 @@ export class AmpStoryPlayer {
     this.iframes_.push(iframeEl);
 
     applySandbox(iframeEl);
-    this.whitelistSandbox_(iframeEl);
+    this.addSandboxFlags_(iframeEl);
     this.initializeLoadingListeners_(iframeEl);
     this.rootEl_.appendChild(iframeEl);
   }
@@ -199,13 +235,17 @@ export class AmpStoryPlayer {
    * @param {!Element} iframe
    * @private
    */
-  whitelistSandbox_(iframe) {
-    if (!iframe.sandbox || !iframe.sandbox.supports) {
+  addSandboxFlags_(iframe) {
+    if (
+      !iframe.sandbox ||
+      !iframe.sandbox.supports ||
+      iframe.sandbox.length <= 0
+    ) {
       return; // Can't feature detect support.
     }
 
-    for (let i = 0; i < SANDBOX_WHITELIST.length; i++) {
-      const flag = SANDBOX_WHITELIST[i];
+    for (let i = 0; i < SANDBOX_MIN_LIST.length; i++) {
+      const flag = SANDBOX_MIN_LIST[i];
 
       if (!iframe.sandbox.supports(flag)) {
         throw new Error(`Iframe doesn't support: ${flag}`);
@@ -308,6 +348,87 @@ export class AmpStoryPlayer {
     }
 
     this.isLaidOut_ = true;
+  }
+
+  /**
+   * Shows the story provided by the URL in the player.
+   * @param {string} storyUrl
+   */
+  show(storyUrl) {
+    // TODO(enriqe): sanitize URLs for matching.
+    const storyIdx = this.stories_.findIndex(({href}) => href === storyUrl);
+
+    // TODO(proyectoramirez): replace for add() once implemented.
+    if (!this.stories_[storyIdx]) {
+      throw new Error(`Story URL not found in the player: ${storyUrl}`);
+    }
+
+    if (storyIdx === this.currentIdx_) {
+      return;
+    }
+
+    this.currentIdx_ = storyIdx;
+
+    this.evictStoriesFromIframes_();
+    this.assignIframesForStoryIdx_(storyIdx);
+  }
+
+  /**
+   * Evicts stories from iframes
+   * @private
+   */
+  evictStoriesFromIframes_() {
+    const evictedStories = this.iframePool_.evictStories();
+
+    evictedStories.forEach((storyIdx) => {
+      const story = this.stories_[storyIdx];
+      this.messagingPromises_[story[IFRAME_IDX]].then((messaging) => {
+        messaging.unregisterHandler('selectDocument');
+      });
+      story[IFRAME_IDX] = undefined;
+    });
+  }
+
+  /**
+   * Sets up new iframe arrangement given a story index. The adjacent stories
+   * will be prerendered and positioned accordingly. All messaging will be
+   * setup.
+   * @param {number} storyIdx
+   * @private
+   */
+  assignIframesForStoryIdx_(storyIdx) {
+    const availableIframeIdx = this.iframePool_.getAvailableIframeIdx();
+    const adjacentStoriesIdx = this.iframePool_.findAdjacent(
+      storyIdx,
+      this.stories_.length - 1
+    );
+
+    for (let i = 0; i < adjacentStoriesIdx.length; i++) {
+      const story = this.stories_[adjacentStoriesIdx[i]];
+      story[IFRAME_IDX] = availableIframeIdx[i];
+      this.iframePool_.addStoryIdx(adjacentStoriesIdx[i]);
+
+      const iframe = this.iframes_[story[IFRAME_IDX]];
+
+      this.layoutIframe_(
+        story,
+        iframe,
+        adjacentStoriesIdx[i] === storyIdx
+          ? VisibilityState.VISIBLE
+          : VisibilityState.PRERENDER
+      );
+
+      this.updateIframePosition_(
+        availableIframeIdx[i],
+        adjacentStoriesIdx[i] === storyIdx
+          ? IframePosition.CURRENT
+          : adjacentStoriesIdx[i] > storyIdx
+          ? IframePosition.NEXT
+          : IframePosition.PREVIOUS
+      );
+
+      this.setUpMessagingForIframe_(story, iframe);
+    }
   }
 
   /**
@@ -479,13 +600,10 @@ export class AmpStoryPlayer {
    * @private
    */
   getEncodedLocation_(href, visibilityState = VisibilityState.INACTIVE) {
-    const {location} = this.win_;
-    const url = parseUrlWithA(this.cachedA_, location.href);
-
     const params = dict({
       'amp_js_v': '0.1',
       'visibilityState': visibilityState,
-      'origin': url.origin,
+      'origin': this.win_.origin,
       'showStoryUrlInfo': '0',
       'storyPlayer': 'v0',
       'cap': 'swipe',

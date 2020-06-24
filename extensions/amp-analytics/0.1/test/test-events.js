@@ -71,6 +71,50 @@ describes.realWin('Events', {amp: 1}, (env) => {
     target2.appendChild(child2);
   });
 
+  describe('AnalyticsEvent', () => {
+    it('should handle data-vars', () => {
+      let analyticsEvent = new AnalyticsEvent(target, 'custom-event', {
+        'var': 'test',
+      });
+      expect(analyticsEvent.vars).to.deep.equal({
+        'var': 'test',
+      });
+
+      target.setAttribute('data-params-test-param', 'error');
+      target.setAttribute('data-vars-test-var', 'default');
+      analyticsEvent = new AnalyticsEvent(target, 'custom-event');
+      expect(analyticsEvent.vars).to.deep.equal({
+        'testVar': 'default',
+      });
+
+      analyticsEvent = new AnalyticsEvent(
+        target,
+        'custom-event',
+        {
+          'var': 'test',
+        },
+        false
+      );
+      expect(analyticsEvent.vars).to.deep.equal({
+        'var': 'test',
+      });
+    });
+
+    it('event vars should override data-vars', () => {
+      target.setAttribute('data-vars-test-var', 'error');
+      target.setAttribute('data-vars-test-var1', 'test1');
+      const analyticsEvent = new AnalyticsEvent(target, 'custom-event', {
+        'testVar': 'override',
+        'someVar': 'test',
+      });
+      expect(analyticsEvent.vars).to.deep.equal({
+        'testVar': 'override',
+        'testVar1': 'test1',
+        'someVar': 'test',
+      });
+    });
+  });
+
   describe('AnalyticsEventType', () => {
     it('should match TRACKER_TYPES', () => {
       const analyticsEventTypes = Object.values(AnalyticsEventType);
@@ -1838,7 +1882,8 @@ describes.realWin('Events', {amp: 1}, (env) => {
           /* createReportReadyPromiseFunc */ null,
           saveCallback
         )
-        .once();
+        .once()
+        .returns(() => {});
       const res = tracker.add(analyticsElement, 'visible', {}, eventResolver);
       expect(res).to.be.a('function');
       await macroTask();
@@ -1857,7 +1902,8 @@ describes.realWin('Events', {amp: 1}, (env) => {
       visibilityManagerMock
         .expects('listenRoot')
         .withExactArgs(matchEmptySpec, readyPromise, null, saveCallback)
-        .once();
+        .once()
+        .returns(() => {});
       const res = tracker.add(
         analyticsElement,
         'visible',
@@ -1886,7 +1932,8 @@ describes.realWin('Events', {amp: 1}, (env) => {
           /* createReportReadyPromiseFunc */ null,
           saveCallback
         )
-        .once();
+        .once()
+        .returns(() => {});
       const res = tracker.add(
         analyticsElement,
         'visible',
@@ -2276,32 +2323,6 @@ describes.realWin('Events', {amp: 1}, (env) => {
           expect(handlerSpy).to.be.calledOnce;
           expect(event.type).to.equal('visible');
         });
-      });
-    });
-
-    describe('Unmeasurable with HostAPI', () => {
-      beforeEach(() => {
-        env.sandbox.stub(tracker.root, 'isUsingHostAPI').callsFake(() => {
-          return Promise.resolve(true);
-        });
-      });
-
-      it('element level selector is unmeasurable', () => {
-        expectAsyncConsoleError(
-          /Element  .target that is not root is not supported with host API/
-        );
-        const config = {visibilitySpec: {selector: '.target'}};
-        tracker.add(analyticsElement, 'visible', config, eventResolver);
-      });
-
-      it('reportWhen documentExit is unmeasurable', () => {
-        expectAsyncConsoleError(
-          /reportWhen : documentExit is not supported with host API/
-        );
-        const config = {
-          visibilitySpec: {selector: ':root', reportWhen: 'documentExit'},
-        };
-        tracker.add(analyticsElement, 'visible', config, eventResolver);
       });
     });
   });

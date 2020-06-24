@@ -52,7 +52,7 @@ class AmpFitText extends PreactBaseElement {
     });
 
     const props = getFontSizeAttrs(this.element);
-    props['style'] = {width: '100%', height: '100%'};
+    props['style'] = {width: '100%', height: '100%', position: 'absolute'};
 
     return props;
   }
@@ -74,5 +74,5 @@ AmpFitText['Component'] = FitText;
 AmpFitText['passthrough'] = true;
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpFitText, CSS);
+  AMP.registerElement(TAG, AmpFitText);
 });

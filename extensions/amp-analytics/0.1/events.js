@@ -22,8 +22,8 @@ import {
   VideoAnalyticsEvents,
   videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
+import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
-import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isArray, isEnumValue, isFiniteNumber} from '../../../src/types';
@@ -204,6 +204,25 @@ export function getTrackerTypesForParentType(parentType) {
 }
 
 /**
+ * Expand the event variables to include default data-vars
+ * eventVars value will override data-vars value
+ * @param {!Element} target
+ * @param {!JsonObject} eventVars
+ * @return {!JsonObject}
+ */
+function mergeDataVars(target, eventVars) {
+  const vars = getDataParamsFromAttributes(
+    target,
+    /* computeParamNameFunc */ undefined,
+    VARIABLE_DATA_ATTRIBUTE_KEY
+  );
+  // Merge eventVars into vars, depth=0 because
+  // vars and eventVars are not supposed to contain nested object.
+  deepMerge(vars, eventVars, 0);
+  return vars;
+}
+
+/**
  * @interface
  */
 class SignalTrackerDef {
@@ -229,15 +248,17 @@ export class AnalyticsEvent {
   /**
    * @param {!Element} target The most relevant target element.
    * @param {string} type The type of event.
-   * @param {?JsonObject=} opt_vars A map of vars and their values.
+   * @param {!JsonObject} vars A map of vars and their values.
+   * @param {boolean} enableDataVars A boolean to indicate if data-vars-*
+   * attribute value from target element should be included.
    */
-  constructor(target, type, opt_vars) {
+  constructor(target, type, vars = dict(), enableDataVars = true) {
     /** @const */
     this['target'] = target;
     /** @const */
     this['type'] = type;
     /** @const */
-    this['vars'] = opt_vars || dict();
+    this['vars'] = enableDataVars ? mergeDataVars(target, vars) : vars;
   }
 }
 
@@ -544,12 +565,7 @@ export class ClickEventTracker extends EventTracker {
    * @private
    */
   handleClick_(listener, target, unusedEvent) {
-    const params = getDataParamsFromAttributes(
-      target,
-      /* computeParamNameFunc */ undefined,
-      VARIABLE_DATA_ATTRIBUTE_KEY
-    );
-    listener(new AnalyticsEvent(target, 'click', params));
+    listener(new AnalyticsEvent(target, 'click'));
   }
 }
 
@@ -709,7 +725,8 @@ export class ScrollEventTracker extends EventTracker {
         new AnalyticsEvent(
           this.root_.getRootElement(),
           AnalyticsEventType.SCROLL,
-          vars
+          vars,
+          /** enableDataVars */ false
         )
       );
     }
@@ -1143,7 +1160,7 @@ export class TimerEventTracker extends EventTracker {
     const eventType = user().assertString(config['on']);
     const trackerKey = getTrackerKeyName(eventType);
 
-    return this.root.getTrackerForWhitelist(
+    return this.root.getTrackerForAllowlist(
       trackerKey,
       getTrackerTypesForParentType('timer')
     );
@@ -1206,7 +1223,8 @@ export class TimerEventTracker extends EventTracker {
     return new AnalyticsEvent(
       this.root.getRootElement(),
       eventType,
-      this.trackers_[timerId].getTimerVars()
+      this.trackers_[timerId].getTimerVars(),
+      /** enableDataVars */ false
     );
   }
 
@@ -1395,11 +1413,11 @@ function normalizeVideoEventType(type, details) {
 
 /**
  * @param {?JsonObject|undefined} details
- * @return {?JsonObject|undefined}
+ * @return {!JsonObject|undefined}
  */
 function removeInternalVars(details) {
   if (!details) {
-    return details;
+    return dict();
   }
   const clean = {...details};
   delete clean[videoAnalyticsCustomEventTypeKey];
@@ -1431,7 +1449,6 @@ export class VisibilityTracker extends EventTracker {
     let readyPromiseWaitForSpec;
     let reportWhenSpec = visibilitySpec['reportWhen'];
     let createReportReadyPromiseFunc = null;
-    const unlistenPromises = [];
     if (reportWhenSpec) {
       userAssert(
         !visibilitySpec['repeat'],
@@ -1450,14 +1467,7 @@ export class VisibilityTracker extends EventTracker {
       reportWhenSpec = 'documentHidden';
     }
 
-    const visibilityManagerPromise = this.root
-      .isUsingHostAPI()
-      .then((hasHostAPI) => {
-        if (hasHostAPI) {
-          this.assertMeasurableWithHostApi_(selector, reportWhenSpec);
-        }
-        return this.root.getVisibilityManager();
-      });
+    const visibilityManager = this.root.getVisibilityManager();
 
     if (reportWhenSpec == 'documentHidden') {
       createReportReadyPromiseFunc = this.createReportReadyPromiseForDocumentHidden_.bind(
@@ -1480,60 +1490,50 @@ export class VisibilityTracker extends EventTracker {
       // When `selector` is specified, we always use "ini-load" signal as
       // a "ready" signal.
       readyPromiseWaitForSpec = waitForSpec || (selector ? 'ini-load' : null);
-      unlistenPromises.push(
-        visibilityManagerPromise.then(
-          (visibilityManager) => {
-            return visibilityManager.listenRoot(
-              visibilitySpec,
-              this.getReadyPromise(readyPromiseWaitForSpec),
-              createReportReadyPromiseFunc,
-              this.onEvent_.bind(
-                this,
-                eventType,
-                listener,
-                this.root.getRootElement()
-              )
-            );
-          },
-          () => {}
+      return visibilityManager.listenRoot(
+        visibilitySpec,
+        this.getReadyPromise(readyPromiseWaitForSpec),
+        createReportReadyPromiseFunc,
+        this.onEvent_.bind(
+          this,
+          eventType,
+          listener,
+          this.root.getRootElement()
         )
       );
-    } else {
-      // An AMP-element. Wait for DOM to be fully parsed to avoid
-      // false missed searches.
-      // Array selectors do not suppor the special cases: ':host' & ':root'
-      const selectionMethod =
-        config['selectionMethod'] || visibilitySpec['selectionMethod'];
-      readyPromiseWaitForSpec = waitForSpec || 'ini-load';
-      this.assertUniqueSelectors_(selector);
-      this.root
-        .getAmpElements(
-          context.parentElement || context,
-          selector,
-          selectionMethod
-        )
-        .then((elements) => {
-          for (let i = 0; i < elements.length; i++) {
-            unlistenPromises.push(
-              visibilityManagerPromise.then(
-                (visibilityManager) => {
-                  return visibilityManager.listenElement(
-                    elements[i],
-                    visibilitySpec,
-                    this.getReadyPromise(readyPromiseWaitForSpec, elements[i]),
-                    createReportReadyPromiseFunc,
-                    this.onEvent_.bind(this, eventType, listener, elements[i])
-                  );
-                },
-                () => {}
-              )
-            );
-          }
-        });
     }
 
+    // An AMP-element. Wait for DOM to be fully parsed to avoid
+    // false missed searches.
+    // Array selectors do not suppor the special cases: ':host' & ':root'
+    const selectionMethod =
+      config['selectionMethod'] || visibilitySpec['selectionMethod'];
+    readyPromiseWaitForSpec = waitForSpec || 'ini-load';
+    this.assertUniqueSelectors_(selector);
+    const unlistenPromise = this.root
+      .getAmpElements(
+        context.parentElement || context,
+        selector,
+        selectionMethod
+      )
+      .then((elements) => {
+        const unlistenCallbacks = [];
+        for (let i = 0; i < elements.length; i++) {
+          unlistenCallbacks.push(
+            visibilityManager.listenElement(
+              elements[i],
+              visibilitySpec,
+              this.getReadyPromise(readyPromiseWaitForSpec, elements[i]),
+              createReportReadyPromiseFunc,
+              this.onEvent_.bind(this, eventType, listener, elements[i])
+            )
+          );
+        }
+        return unlistenCallbacks;
+      });
+
     return function () {
-      return Promise.all(unlistenPromises).then((unlistenCallbacks) => {
+      unlistenPromise.then((unlistenCallbacks) => {
         for (let i = 0; i < unlistenCallbacks.length; i++) {
           unlistenCallbacks[i]();
         }
@@ -1557,24 +1557,6 @@ export class VisibilityTracker extends EventTracker {
         map[selectors[i]] = selectors[i];
       }
     }
-  }
-
-  /**
-   * Assert that the setting is measurable with host API
-   * @param {string=} selector
-   * @param {string=} reportWhenSpec
-   */
-  assertMeasurableWithHostApi_(selector, reportWhenSpec) {
-    userAssert(
-      !selector || selector == ':root' || selector == ':host',
-      'Element %s that is not root is not supported with host API',
-      selector
-    );
-
-    userAssert(
-      reportWhenSpec !== 'documentExit',
-      'reportWhen : documentExit is not supported with host API'
-    );
   }
 
   /**
@@ -1668,16 +1650,16 @@ export class VisibilityTracker extends EventTracker {
       return null;
     }
 
-    const trackerWhitelist = getTrackerTypesForParentType('visible');
+    const trackerAllowlist = getTrackerTypesForParentType('visible');
     userAssert(
-      waitForSpec == 'none' || trackerWhitelist[waitForSpec] !== undefined,
+      waitForSpec == 'none' || trackerAllowlist[waitForSpec] !== undefined,
       'waitFor value %s not supported',
       waitForSpec
     );
 
     const waitForTracker =
       this.waitForTrackers_[waitForSpec] ||
-      this.root.getTrackerForWhitelist(waitForSpec, trackerWhitelist);
+      this.root.getTrackerForAllowlist(waitForSpec, trackerAllowlist);
     if (waitForTracker) {
       this.waitForTrackers_[waitForSpec] = waitForTracker;
     } else {
@@ -1698,6 +1680,7 @@ export class VisibilityTracker extends EventTracker {
    * @private
    */
   onEvent_(eventType, listener, target, state) {
+    // TODO: Verify usage and change behavior to have state override data-vars
     const attr = getDataParamsFromAttributes(
       target,
       /* computeParamNameFunc */ undefined,
@@ -1706,6 +1689,8 @@ export class VisibilityTracker extends EventTracker {
     for (const key in attr) {
       state[key] = attr[key];
     }
-    listener(new AnalyticsEvent(target, eventType, state));
+    listener(
+      new AnalyticsEvent(target, eventType, state, /** enableDataVars */ false)
+    );
   }
 }

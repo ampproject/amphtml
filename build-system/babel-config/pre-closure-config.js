@@ -16,7 +16,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const {getExperimentConstant, getReplacePlugin} = require('./helpers');
+const {getReplacePlugin} = require('./helpers');
 
 /**
  * Gets the config for pre-closure babel transforms run during `gulp dist`.
@@ -29,32 +29,13 @@ function getPreClosureConfig() {
   const isTestTask = testTasks.some((task) => argv._.includes(task));
   const isFortesting = argv.fortesting || isTestTask;
 
-  // For experiment, remove FixedLayer import from v0.js, otherwise remove
-  // from amp-viewer-integration
-  const fixedLayerImport =
-    getExperimentConstant() == 'MOVE_FIXED_LAYER'
-      ? './../fixed-layer'
-      : '../../../src/service/fixed-layer';
   const filterImportsPlugin = [
     'filter-imports',
     {
       imports: {
-        // Imports removed for all ESM builds.
-        './polyfills/document-contains': ['installDocContains'],
-        './polyfills/domtokenlist': ['installDOMTokenList'],
-        './polyfills/fetch': ['installFetch'],
-        './polyfills/math-sign': ['installMathSign'],
-        './polyfills/object-assign': ['installObjectAssign'],
-        './polyfills/object-values': ['installObjectValues'],
-        './polyfills/promise': ['installPromise'],
-        './polyfills/array-includes': ['installArrayIncludes'],
-        './ie-media-bug': ['ieMediaCheckAndFix'],
-        '../third_party/css-escape/css-escape': ['cssEscape'],
         // Imports that are not needed for valid transformed documents.
         '../build/ampshared.css': ['cssText', 'ampSharedCss'],
         '../build/ampdoc.css': ['cssText', 'ampDocCss'],
-        // Used by experiment
-        [fixedLayerImport]: ['FixedLayer'],
       },
     },
   ];
@@ -74,6 +55,9 @@ function getPreClosureConfig() {
     reactJsxPlugin,
     './build-system/babel-plugins/babel-plugin-transform-inline-configure-component',
     // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
+    argv.esm
+      ? './build-system/babel-plugins/babel-plugin-transform-dev-methods'
+      : null,
     [
       './build-system/babel-plugins/babel-plugin-transform-log-methods',
       {replaceCallArguments: false},
@@ -87,9 +71,10 @@ function getPreClosureConfig() {
     replacePlugin,
     './build-system/babel-plugins/babel-plugin-transform-amp-asserts',
     argv.esm ? filterImportsPlugin : null,
-    argv.esm
-      ? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
-      : null,
+    // TODO(erwinm, #28698): fix this in fixit week
+    //argv.esm
+    //? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
+    //: null,
     !isCheckTypes
       ? './build-system/babel-plugins/babel-plugin-transform-json-configuration'
       : null,

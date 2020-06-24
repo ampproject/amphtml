@@ -21,6 +21,7 @@ import {Deferred} from '../../../../src/utils/promise';
 import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
 import {Services} from '../../../../src/services';
+import {Signals} from '../../../../src/utils/signals';
 import {
   createElementWithAttributes,
   scopedQuerySelectorAll,
@@ -71,6 +72,8 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
     element = win.document.createElement('amp-story-page');
     gridLayerEl = win.document.createElement('amp-story-grid-layer');
     element.getAmpDoc = () => new AmpDocSingle(win);
+    const signals = new Signals();
+    element.signals = () => signals;
     element.appendChild(gridLayerEl);
     story.appendChild(element);
     win.document.body.appendChild(story);
@@ -113,14 +116,25 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
     expect(page.element).to.have.attribute('active');
   });
 
+  function resolveSignals(element) {
+    const deferred = new Deferred();
+    element.signals = () => ({
+      signal: () => {},
+      whenSignal: () => deferred.promise,
+    });
+    deferred.resolve();
+  }
+
   it('should start the advancement when state becomes active', async () => {
     page.registerAllMediaPromise_ = Promise.resolve();
     page.buildCallback();
     const advancementStartStub = env.sandbox.stub(page.advancement_, 'start');
     await page.layoutCallback();
+    resolveSignals(page);
     page.setState(PageState.PLAYING);
 
     // Microtask tick
+    await Promise.resolve();
     await Promise.resolve();
 
     expect(advancementStartStub).to.have.been.calledOnce;
@@ -269,6 +283,21 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
 
     const audioEl = scopedQuerySelectorAll(element, Selectors.ALL_MEDIA)[0];
     expect(mediaPoolRegister).to.have.been.calledOnceWithExactly(audioEl);
+  });
+
+  it('should preload the background audio on layoutCallback', async () => {
+    env.sandbox
+      .stub(page.resources_, 'getResourceForElement')
+      .returns({isDisplayed: () => true});
+
+    element.setAttribute('background-audio', 'foo.mp3');
+    page.buildCallback();
+    const mediaPool = await page.mediaPoolPromise_;
+    const mediaPoolPreload = env.sandbox.stub(mediaPool, 'preload');
+    await page.layoutCallback();
+
+    const audioEl = scopedQuerySelectorAll(element, Selectors.ALL_MEDIA)[0];
+    expect(mediaPoolPreload).to.have.been.calledOnceWithExactly(audioEl);
   });
 
   it('should wait for media layoutCallback to register it', async () => {

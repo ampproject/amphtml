@@ -265,6 +265,12 @@ class Strings {
       std::string_view chars_to_trim = kWhitespace);
   static void Trim(std::string* s,
       std::string_view chars_to_trim = kWhitespace);
+  static void TrimLeft(std::string_view* s,
+      std::string_view chars_to_trim = kWhitespace);
+  static void TrimRight(std::string_view* s,
+      std::string_view chars_to_trim = kWhitespace);
+  static void Trim(std::string_view* s,
+      std::string_view chars_to_trim = kWhitespace);
 
   // Reduces all consecutive sequences of space characters to a single space
   // character.

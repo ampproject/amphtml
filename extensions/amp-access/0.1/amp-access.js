@@ -298,7 +298,12 @@ export class AccessService {
    * @private
    */
   analyticsEvent_(eventType) {
-    triggerAnalyticsEvent(this.getRootElement_(), eventType);
+    triggerAnalyticsEvent(
+      this.getRootElement_(),
+      eventType,
+      /** vars */ undefined,
+      /** enableDataVars */ false
+    );
   }
 
   /**
@@ -780,7 +785,7 @@ AMP.extension(TAG, '0.1', function (AMP) {
 
 /**
  * @package Visible for testing only.
- * @return {*} TODO(#23582): Specify return type
+ * @return {typeof AccessVars}
  */
 export function getAccessVarsClassForTesting() {
   return AccessVars;

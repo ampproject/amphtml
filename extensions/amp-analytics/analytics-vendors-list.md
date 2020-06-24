@@ -141,6 +141,13 @@ Type attribute value: `gemius`
 
 Adds support for Gemius Audience/Prism analytics. Additionally, the gemius-provided `prefix` and `identifier` variables must be specified. It's also possible to specify the optional variable `extraparams` (key1=value1|key2=value2). More details can be found at [gemius.com](https://www.gemius.com).
 
+### GfK Sensic
+
+Type attribute value: `gfksensic`
+
+Adds support for GfK Sensic audio stream usage analytics.
+Please refer to our [client documentation](https://confluence-docu.gfk.com/display/SENSIC/AMP+Integration) for details.
+
 ### Google Ads
 
 Type attribute value: `googleadwords`
@@ -163,6 +170,8 @@ Unlike other analytics vendors, Google Tag Manager is a tag management service, 
 
 Type attribute value: `ibeatanalytics`
 
+Adds support for Ibeat Analytics. More details for adding Ibeat support can be found at [Ibeat Integration Support](https://ibeat.indiatimes.com/support.html#h.a5rit14mwie1).
+
 ### INFOnline / IVW
 
 Type attribute value: `infonline`
@@ -177,6 +186,22 @@ Additionally, the following variables must be defined:
 - `url`: HTTPS location of `amp-analytics-infonline.html`
 
 More details for adding INFOnline / IVW support can be found at [www.infonline.de](https://www.infonline.de/).
+
+### INFOnline anonymous
+
+Type attribute value: `infonline-anonymous`
+
+Adds support for the [anonymous INFOnline](https://www.infonline.de). Requires a copy of [infonline-anonymous.html](https://www.infonline.de/amp/infonline-anonymous.html) on a different subdomain than the including AMP file ([why?](https://github.com/ampproject/amphtml/blob/master/spec/amp-iframe-origin-policy.md)). The file must be served via HTTPS. For example, if your AMP files are hosted on `www.example.com`, then `infonline-anonymous.html` needs to be on another subdomain such as `iframe.example.com` or `assets.example.com`.
+
+Additionally, the following variables must be defined:
+
+- `st`: offer ID
+- `co`: comment
+- `cp`: code
+- `url`: HTTPS location of `infonline-anonymous.html`
+- `dn`: The relay domain name
+
+More details for adding INFOnline anonymous support can be found at [www.infonline.de](https://www.infonline.de/).
 
 ### ip-label
 
@@ -216,6 +241,12 @@ Adds support for Linkpulse. Configuration details can be found at [docs.linkpuls
 Type attribute value: `lotame`
 
 Adds support for Lotame. More information and configuration details can be found at [mylotame.force.com](https://mylotame.force.com/s/article/Google-AMP).
+
+### Mapp Intelligence
+
+Type attribute value: `mapp_intelligence`
+
+Adds support for Mapp Intelligence tracking. More information and configuration details can be found at [docs.mapp.com](https://docs.mapp.com/pages/viewpage.action?pageId=10027966).
 
 ### Marin Software
 
@@ -366,6 +397,13 @@ Type attribute value: `reppublika`
 ### Retargetly
 
 Type attribute value: `retargetly`
+
+### RudderStack
+
+Type attribute value: `rudderstack`
+
+Adds support for RudderStack page views and events.
+Find out more on the implementation check our [documentation](https://docs.rudderstack.com/sdk-integration-guide/getting-started-with-javascript-sdk/amp-analytics).
 
 ### Segment
 

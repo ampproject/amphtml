@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import {
+  AmpStoryPlayer,
+  IFRAME_IDX,
+} from '../../src/amp-story-player/amp-story-player-impl';
 import {AmpStoryPlayerManager} from '../../src/amp-story-player/amp-story-player-manager';
-import {IFRAME_IDX} from '../../src/amp-story-player/amp-story-player-impl';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {toArray} from '../../src/types';
 
@@ -111,7 +114,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     expect(storyIframe.getAttribute('src')).to.equals(
       DEFAULT_CACHE_URL +
-        '?amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc' +
+        '?amp_js_v=0.1#visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
         '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
     );
   });
@@ -126,7 +129,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     expect(storyIframe.getAttribute('src')).to.equals(
       DEFAULT_CACHE_URL +
         existingParams +
-        '&amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc' +
+        '&amp_js_v=0.1#visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
         '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
     );
   });
@@ -256,7 +259,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       expect(storyIframe.getAttribute('src')).to.equals(
         DEFAULT_CACHE_URL +
-          '?amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc' +
+          '?amp_js_v=0.1#visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
           '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
       );
     });
@@ -271,7 +274,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       expect(storyIframe.getAttribute('src')).to.equals(
         DEFAULT_ORIGIN_URL +
-          '?amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc' +
+          '?amp_js_v=0.1#visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
           '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
       );
     });
@@ -281,6 +284,90 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       return expect(() => manager.loadPlayers()).to.throw(
         /Unsupported cache, use one of following: cdn.ampproject.org,www.bing-amp.com/
+      );
+    });
+  });
+
+  describe('Player API', () => {
+    function appendStoriesToPlayer(playerEl, numStories) {
+      for (let i = 0; i < numStories; i++) {
+        const story = win.document.createElement('a');
+        story.setAttribute('href', `https://example.com/story${i}.html`);
+        playerEl.appendChild(story);
+      }
+    }
+
+    it('signals when its ready to be interacted with', async () => {
+      buildStoryPlayer();
+      const readySpy = env.sandbox.spy();
+      playerEl.addEventListener('ready', readySpy);
+      await manager.loadPlayers();
+
+      expect(readySpy).to.have.been.calledOnce;
+    });
+
+    it('does not signal when attaching listener after it was built', async () => {
+      buildStoryPlayer();
+      const readySpy = env.sandbox.spy();
+      await manager.loadPlayers();
+
+      playerEl.addEventListener('ready', readySpy);
+
+      expect(readySpy).to.not.have.been.called;
+    });
+
+    it('has isReady property after it is built', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+
+      expect(playerEl.isReady).to.be.true;
+    });
+
+    it('load callback builds iframe inside the player', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      const story = win.document.createElement('a');
+      story.setAttribute('href', DEFAULT_CACHE_URL);
+      playerEl.appendChild(story);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      expect(playerEl.shadowRoot.querySelector('iframe')).to.exist;
+    });
+
+    it('show callback builds corresponding adjacent iframes', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      await player.show('https://example.com/story3.html');
+
+      const stories = toArray(playerEl.querySelectorAll('a'));
+
+      expect(stories[0][IFRAME_IDX]).to.eql(undefined);
+      expect(stories[1][IFRAME_IDX]).to.eql(undefined);
+      expect(stories[2][IFRAME_IDX]).to.eql(0);
+      expect(stories[3][IFRAME_IDX]).to.eql(1);
+      expect(stories[4][IFRAME_IDX]).to.eql(2);
+    });
+
+    // TODO(proyectoramirez): delete once add() is implemented.
+    it('show callback should throw when story is not found', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      return expect(() =>
+        player.show('https://example.com/story6.html')
+      ).to.throw(
+        'Story URL not found in the player: https://example.com/story6.html'
       );
     });
   });

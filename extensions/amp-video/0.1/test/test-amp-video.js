@@ -19,7 +19,6 @@ import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {listenOncePromise} from '../../../../src/event-helper';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
   'amp-video',
@@ -600,7 +599,9 @@ describes.realWin(
       impl.mute();
       await listenOncePromise(v, VideoEvents.MUTED);
       impl.play();
+      const playPromise = listenOncePromise(v, VideoEvents.PLAY);
       await listenOncePromise(v, VideoEvents.PLAYING);
+      await playPromise;
       impl.pause();
       await listenOncePromise(v, VideoEvents.PAUSE);
       impl.unmute();
@@ -622,10 +623,6 @@ describes.realWin(
     });
 
     describe('blurred image placeholder', () => {
-      beforeEach(() => {
-        toggleExperiment(win, 'blurry-placeholder', true, true);
-      });
-
       /**
        * Creates an amp-video with an image child that could potentially be a
        * blurry placeholder.

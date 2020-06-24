@@ -505,7 +505,13 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     if (this.isActive()) {
       registerAllPromise.then(() => {
-        this.advancement_.start();
+        this.signals()
+          .whenSignal(CommonSignals.LOAD_END)
+          .then(() => {
+            if (this.state_ == PageState.PLAYING) {
+              this.advancement_.start();
+            }
+          });
         this.startMeasuringVideoPerformance_();
         this.preloadAllMedia_()
           .then(() => this.startListeningToVideoEvents_())
@@ -531,9 +537,11 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.element.getAttribute('auto-advance-after');
     const audioEl = upgradeBackgroundAudio(this.element, loop);
     if (audioEl) {
-      this.mediaPoolPromise_.then((mediaPool) => {
-        this.registerMedia_(mediaPool, dev().assertElement(audioEl));
-      });
+      this.mediaPoolPromise_.then((mediaPool) =>
+        this.registerMedia_(mediaPool, dev().assertElement(audioEl)).then(() =>
+          mediaPool.preload(dev().assertElement(audioEl))
+        )
+      );
     }
     this.muteAllMedia();
     this.getViewport().onResize(

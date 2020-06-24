@@ -31,10 +31,12 @@ const {
 const {app} = require('../../server/test-server');
 const {getFilesFromArgv} = require('../../common/utils');
 const {green, yellow, cyan, red} = require('ansi-colors');
-const {isTravisBuild} = require('../../common/travis');
+const {isTravisBuild, isTravisPushBuild} = require('../../common/travis');
 const {reportTestStarted} = require('.././report-test-status');
 const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');
+
+const JSON_REPORT_TEST_TYPES = new Set(['unit', 'integration']);
 
 /**
  * Updates the browsers based off of the test type
@@ -45,7 +47,7 @@ const {unitTestsToRun} = require('./helpers-unit');
 function updateBrowsers(config) {
   if (argv.saucelabs) {
     if (config.testType == 'unit') {
-      Object.assign(config, {browsers: ['SL_Safari_12', 'SL_Firefox']});
+      Object.assign(config, {browsers: ['SL_Safari', 'SL_Firefox']});
       return;
     }
 
@@ -55,13 +57,8 @@ function updateBrowsers(config) {
           'SL_Chrome',
           'SL_Firefox',
           'SL_Edge',
-          'SL_Safari_12',
-          'SL_Safari_11',
+          'SL_Safari',
           'SL_IE',
-          // TODO(amp-infra): Evaluate and add more platforms here.
-          //'SL_Chrome_Android_7',
-          //'SL_iOS_11',
-          //'SL_iOS_12',
           'SL_Chrome_Beta',
           'SL_Firefox_Beta',
         ],
@@ -174,6 +171,13 @@ function updateReporters(config) {
   if (argv.saucelabs) {
     config.reporters.push('saucelabs');
   }
+
+  if (isTravisPushBuild() && JSON_REPORT_TEST_TYPES.has(config.testType)) {
+    config.reporters.push('json-result');
+    config.jsonResultReporter = {
+      outputFile: `results_${config.testType}.json`,
+    };
+  }
 }
 
 class RuntimeTestConfig {
@@ -201,10 +205,8 @@ class RuntimeTestConfig {
     this.client.amp = {
       useCompiledJs: !!argv.compiled,
       saucelabs: !!argv.saucelabs,
-      singlePass: !!argv.single_pass,
       adTypes: getAdTypes(),
       mochaTimeout: this.client.mocha.timeout,
-      propertiesObfuscated: !!argv.single_pass,
       testServerPort: this.client.testServerPort,
     };
 

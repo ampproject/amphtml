@@ -50,7 +50,7 @@ const TAG = 'amp-analytics';
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
 
-const WHITELIST_EVENT_IN_SANDBOX = [
+const ALLOWLIST_EVENT_IN_SANDBOX = [
   AnalyticsEventType.VISIBLE,
   AnalyticsEventType.HIDDEN,
 ];
@@ -288,7 +288,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     if (!this.config_['triggers']) {
       const TAG = this.getName_();
-      this.user().error(
+      this.user().warn(
         TAG,
         'No triggers were found in the ' +
           'config. No analytics data will be sent.'
@@ -343,7 +343,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           const eventType = trigger['on'];
           if (
             isEnumValue(AnalyticsEventType, eventType) &&
-            !WHITELIST_EVENT_IN_SANDBOX.includes(eventType)
+            !ALLOWLIST_EVENT_IN_SANDBOX.includes(eventType)
           ) {
             this.user().error(
               TAG,
@@ -372,7 +372,7 @@ export class AmpAnalytics extends AMP.BaseElement {
               trigger['selector'] = this.element.parentElement.tagName;
               trigger['selectionMethod'] = 'closest';
               return this.addTrigger_(trigger);
-            } else if (trigger['selector']) {
+            } else if (trigger['selector'] && !isArray(trigger['selector'])) {
               // Expand the selector using variable expansion.
               return this.variableService_
                 .expandTemplate(
@@ -516,7 +516,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (!this.config_['requests']) {
       if (!this.allowParentPostMessage_()) {
         const TAG = this.getName_();
-        this.user().error(
+        this.user().warn(
           TAG,
           'No request strings defined. Analytics ' +
             'data will not be sent from this page.'
