@@ -24,13 +24,15 @@ const hasOwn_ = Object.prototype.hasOwnProperty;
  * If opt_initial is provided, copies its own properties into the
  * newly created object.
  * @param {T=} opt_initial This should typically be an object literal.
- * @return {T}
+ * @return {Map}
  * @template T
  */
 export function map(opt_initial) {
-  const obj = Object.create(null);
+  const obj = new Map();
   if (opt_initial) {
-    Object.assign(obj, opt_initial);
+    for(const [key, value] of Object.entries(opt_initial)){
+      obj.set(key, value);
+    }
   }
   return obj;
 }
