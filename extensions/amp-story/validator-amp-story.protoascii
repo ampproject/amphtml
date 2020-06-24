@@ -277,7 +277,7 @@ tags: {
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
   }
-  spec_url: "https://amp.dev/documentation/components/amp-story"
+  spec_url: "https://amp.dev/documentation/components/amp-story/"
 }
 tags: {
   html_format: AMP
@@ -345,7 +345,7 @@ tags: {
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
   }
-  spec_url: "https://amp.dev/documentation/components/amp-story"
+  spec_url: "https://amp.dev/documentation/components/amp-story/"
 }
 tags: {  # <amp-story-bookend>
   html_format: AMP
@@ -404,7 +404,7 @@ tags: {  # amp-story-consent (json)
   }
   attr_lists: "nonce-attr"
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
@@ -451,13 +451,13 @@ tags: {  # amp-experiment (json)
   attr_lists: "nonce-attr"
   cdata: {
     max_bytes: 15000
-    max_bytes_spec_url: "https://amp.dev/documentation/components/amp-experiment#configuration"
-    blacklisted_cdata_regex: {
+    max_bytes_spec_url: "https://amp.dev/documentation/components/amp-experiment/#configuration"
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
   }
-  spec_url: "https://amp.dev/documentation/components/amp-experiment"
+  spec_url: "https://amp.dev/documentation/components/amp-experiment/"
 }
 tags: {
   html_format: AMP
@@ -507,7 +507,7 @@ tags: {
   reference_points: {
     tag_spec_name: "AMP-STORY-CTA-LAYER animate-in"
   }
-  spec_url: "https://amp.dev/documentation/components/amp-story"
+  spec_url: "https://amp.dev/documentation/components/amp-story/"
 }
 descendant_tag_list: {
   name: "amp-story-cta-layer-allowed-descendants"
@@ -622,7 +622,7 @@ descendant_tag_list: {
 }
 descendant_tag_list: {
   name: "amp-story-grid-layer-allowed-descendants"
-  tag: "A" # `show-tooltip` attribute is whitelisted in validator-main.protoascii.
+  tag: "A" # `show-tooltip` attribute is allowlisted in validator-main.protoascii.
   tag: "ABBR"
   tag: "ADDRESS"
   tag: "AMP-ANALYTICS"
@@ -818,7 +818,7 @@ tags: {  # <amp-story-animation> <script>
   }
   attr_lists: "nonce-attr"
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
@@ -847,7 +847,7 @@ tags: {  # <amp-story-animation>
   }
 }
 descendant_tag_list {
-  # Whitelisting as many components as possible, unless they could result in a
+  # Allowlisting as many components as possible, unless they could result in a
   # bad UX (ie: modal in a modal with amp-lightbox), or potential security
   # issues (ie: amp-form).
   name: "amp-story-page-attachment-allowed-descendants"

@@ -190,6 +190,9 @@ export class AmpList extends AMP.BaseElement {
 
     /** @private {?../../../src/service/action-impl.ActionService} */
     this.action_ = null;
+
+    /** @private {?../../../src/service/owners-interface.OwnersInterface} */
+    this.owners_ = null;
   }
 
   /** @override */
@@ -217,9 +220,10 @@ export class AmpList extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
+    this.owners_ = Services.ownersForDoc(this.element);
     /** If the element is in an email document,
      * allow its `changeToLayoutContainer` and `refresh` actions. */
-    this.action_.addToWhitelist(
+    this.action_.addToAllowlist(
       'AMP-LIST',
       ['changeToLayoutContainer', 'refresh'],
       ['email']
@@ -602,6 +606,10 @@ export class AmpList extends AMP.BaseElement {
             'update': false,
           });
         }
+        this.owners_./*OK*/ scheduleUnlayout(
+          this.element,
+          dev().assertElement(this.container_)
+        );
         removeChildren(dev().assertElement(this.container_));
       };
 
@@ -1052,9 +1060,12 @@ export class AmpList extends AMP.BaseElement {
       this.hideFallbackAndPlaceholder_();
 
       if (this.element.hasAttribute('diffable') && container.hasChildNodes()) {
+        // TODO:(wg-ui-and-a11y)(#28781) Ensure owners_.scheduleUnlayout() is
+        // called for diff elements that are removed
         this.diff_(container, elements);
       } else {
         if (!opt_append) {
+          this.owners_./*OK*/ scheduleUnlayout(this.element, container);
           removeChildren(container);
         }
         this.addElementsToContainer_(elements, container);

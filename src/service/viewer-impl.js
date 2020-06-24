@@ -36,6 +36,7 @@ import {
   serializeQueryString,
 } from '../url';
 import {isIframed} from '../dom';
+import {listen} from '../event-helper';
 import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
@@ -192,7 +193,7 @@ export class ViewerImpl {
     /** @const @private {!Promise<string>} */
     this.referrerUrl_ = new Promise((resolve) => {
       if (this.isEmbedded() && ampdoc.getParam('referrer') != null) {
-        // Viewer override, but only for whitelisted viewers. Only allowed for
+        // Viewer override, but only for allowlisted viewers. Only allowed for
         // iframed documents.
         this.isTrustedViewer().then((isTrusted) => {
           if (isTrusted) {
@@ -224,7 +225,7 @@ export class ViewerImpl {
       /** @const {?string} */
       const viewerUrlOverride = ampdoc.getParam('viewerUrl');
       if (this.isEmbedded() && viewerUrlOverride) {
-        // Viewer override, but only for whitelisted viewers. Only allowed for
+        // Viewer override, but only for allowlisted viewers. Only allowed for
         // iframed documents.
         this.isTrustedViewer().then((isTrusted) => {
           if (isTrusted) {
@@ -266,6 +267,8 @@ export class ViewerImpl {
     this.ampdoc.whenFirstVisible().then(() => {
       this.maybeUpdateFragmentForCct();
     });
+
+    this.visibleOnUserAction_();
   }
 
   /** @private */
@@ -602,7 +605,7 @@ export class ViewerImpl {
   }
 
   /**
-   * Whether the viewer is has been whitelisted for more sensitive operations
+   * Whether the viewer is has been allowlisted for more sensitive operations
    * by looking at the ancestorOrigins.
    * @return {boolean|undefined}
    */
@@ -876,6 +879,34 @@ export class ViewerImpl {
     } catch (e) {
       dev().error(TAG_, 'replaceUrl failed', e);
     }
+  }
+
+  /**
+   * Defense in-depth against viewer communication issues: Will make the
+   * document visible if it receives a user action without having been
+   * made visible by the viewer.
+   */
+  visibleOnUserAction_() {
+    if (this.ampdoc.getVisibilityState() == VisibilityState.VISIBLE) {
+      return;
+    }
+    const unlisten = [];
+    const doUnlisten = () => unlisten.forEach((fn) => fn());
+    const makeVisible = () => {
+      this.setVisibilityState_(VisibilityState.VISIBLE);
+      doUnlisten();
+      dev().error(TAG_, 'Received user action in non-visible doc');
+    };
+    const options = {
+      capture: true,
+      passive: true,
+    };
+    unlisten.push(
+      listen(this.win, 'keydown', makeVisible, options),
+      listen(this.win, 'touchstart', makeVisible, options),
+      listen(this.win, 'mousedown', makeVisible, options)
+    );
+    this.whenFirstVisible().then(doUnlisten);
   }
 }
 

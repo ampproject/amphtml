@@ -56,10 +56,10 @@ amp-story-grid-layer {
   padding: 68px 32px 32px; /* 44 + 24 */
 }
 
-amp-story-grid-layer.i-amphtml-story-has-page-attachment.i-amphtml-story-has-reaction {
+amp-story-grid-layer.i-amphtml-story-has-page-attachment.i-amphtml-story-has-interactive {
   padding-bottom: 104px;
 }
 
-amp-story-grid-layer.i-amphtml-story-has-CTA-layer.i-amphtml-story-has-reaction {
+amp-story-grid-layer.i-amphtml-story-has-CTA-layer.i-amphtml-story-has-interactive {
   padding-bottom: 20%;
 }

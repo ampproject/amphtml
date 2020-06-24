@@ -37,12 +37,12 @@ const wrappers = require('../compile/compile-wrappers');
 const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
-const {altMainBundles, jsBundles} = require('../compile/bundles.config');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {closureCompile} = require('../compile/compile');
 const {EventEmitter} = require('events');
 const {green, red, cyan} = require('ansi-colors');
 const {isTravisBuild} = require('../common/travis');
+const {jsBundles} = require('../compile/bundles.config');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
 
@@ -277,12 +277,6 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
     if (options.latestName) {
       name += ` → ${maybeToEsmName(options.latestName)}`;
     }
-    if (options.singlePassCompilation) {
-      altMainBundles.forEach((bundle) => {
-        name += `, ${maybeToEsmName(`${bundle.name}.js`)}`;
-      });
-      name += ', and all extensions';
-    }
     endBuildStep('Minified', name, timeInfo.startTime);
 
     const target = path.basename(minifiedName, path.extname(minifiedName));
@@ -293,19 +287,6 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
         /* fortesting */ options.fortesting
       );
     }
-
-    if (argv.noconfig || !options.singlePassCompilation) {
-      return;
-    }
-    return await Promise.all(
-      altMainBundles.map(({name}) =>
-        applyAmpConfig(
-          maybeToEsmName(`dist/${name}.js`),
-          /* localDev */ options.fortesting,
-          /* fortesting */ options.fortesting
-        )
-      )
-    );
   }
   await doCompileMinifiedJs(options.continueOnError);
 }

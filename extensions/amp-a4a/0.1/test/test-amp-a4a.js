@@ -48,17 +48,12 @@ import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {LayoutPriority} from '../../../../src/layout';
 import {MockA4AImpl, TEST_URL} from './utils';
 import {RealTimeConfigManager} from '../real-time-config-manager';
-import {
-  SINGLE_PASS_EXPERIMENT_IDS,
-  isInExperiment,
-} from '../../../../ads/google/a4a/traffic-experiments';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/utils/signals';
 import {cancellation} from '../../../../src/error';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {createIframePromise} from '../../../../testing/iframe';
 import {dev, user} from '../../../../src/log';
-import {getMode} from '../../../../src/mode';
 import {
   incrementLoadingAds,
   is3pThrottled,
@@ -2278,7 +2273,7 @@ describe('amp-a4a', () => {
     });
 
     describe('consent integration', () => {
-      let fixture, a4aElement, a4a, consentString, gdprApplies;
+      let fixture, a4aElement, a4a, consentString, consentMetadata, gdprApplies;
       beforeEach(async () => {
         fixture = await createIframePromise();
         setupForAdTesting(fixture);
@@ -2291,6 +2286,7 @@ describe('amp-a4a', () => {
         a4a = new MockA4AImpl(a4aElement);
         consentString = 'test-consent-string';
         gdprApplies = true;
+        consentMetadata = {gdprApplies};
         return fixture;
       });
 
@@ -2308,7 +2304,7 @@ describe('amp-a4a', () => {
             Promise.resolve({
               whenPolicyResolved: () => policyPromise,
               getConsentStringInfo: () => consentString,
-              getGdprApplies: () => gdprApplies,
+              getConsentMetadataInfo: () => consentMetadata,
             })
           );
 
@@ -2365,7 +2361,7 @@ describe('amp-a4a', () => {
               whenPolicyResolved: () =>
                 Promise.resolve(CONSENT_POLICY_STATE.SUFFICIENT),
               getConsentStringInfo: () => consentString,
-              getGdprApplies: () => gdprApplies,
+              getConsentMetadataInfo: () => consentMetadata,
             })
           );
 
@@ -2408,7 +2404,7 @@ describe('amp-a4a', () => {
               getConsentStringInfo: () => {
                 throw new Error('consent err!');
               },
-              getGdprApplies: () => {
+              getConsentMetadata: () => {
                 throw new Error('consent err!');
               },
             })
@@ -2910,62 +2906,5 @@ describes.realWin('AmpA4a-RTC', {amp: true}, (env) => {
         expect(a4a.inNonAmpPreferenceExp()).to.equal(!!expected);
       })
     );
-  });
-
-  describe('single pass experiments', () => {
-    it('should add single pass id', () => {
-      getMode().singlePassType = 'sp';
-      a4a.maybeAddSinglePassExperiment();
-
-      const isInSinglePass = isInExperiment(
-        a4a.element,
-        SINGLE_PASS_EXPERIMENT_IDS.SINGLE_PASS
-      );
-      const isInMultiPass = isInExperiment(
-        a4a.element,
-        SINGLE_PASS_EXPERIMENT_IDS.MULTI_PASS
-      );
-
-      expect(isInSinglePass).to.be.true;
-      expect(isInMultiPass).to.be.false;
-
-      getMode().singlePassType = '';
-    });
-
-    it('should add multi pass id', () => {
-      getMode().singlePassType = 'mp';
-      a4a.maybeAddSinglePassExperiment();
-
-      const isInSinglePass = isInExperiment(
-        a4a.element,
-        SINGLE_PASS_EXPERIMENT_IDS.SINGLE_PASS
-      );
-      const isInMultiPass = isInExperiment(
-        a4a.element,
-        SINGLE_PASS_EXPERIMENT_IDS.MULTI_PASS
-      );
-
-      expect(isInSinglePass).to.be.false;
-      expect(isInMultiPass).to.be.true;
-
-      getMode().singlePassType = '';
-    });
-
-    it('should not add any single pass experiment ids', () => {
-      getMode().singlePassType = undefined;
-      a4a.maybeAddSinglePassExperiment();
-
-      const isInSinglePass = isInExperiment(
-        a4a.element,
-        SINGLE_PASS_EXPERIMENT_IDS.SINGLE_PASS
-      );
-      const isInMultiPass = isInExperiment(
-        a4a.element,
-        SINGLE_PASS_EXPERIMENT_IDS.MULTI_PASS
-      );
-
-      expect(isInSinglePass).to.be.false;
-      expect(isInMultiPass).to.be.false;
-    });
   });
 });

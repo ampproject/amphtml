@@ -57,7 +57,7 @@ tags: {  # <amp-sidebar> not in amp-story or email
   mark_descendants {
     marker: AUTOSCROLL
   }
-  spec_url: "https://amp.dev/documentation/components/amp-sidebar"
+  spec_url: "https://amp.dev/documentation/components/amp-sidebar/"
 }
 tags: {  # <amp-sidebar> in email
   html_format: AMP4EMAIL
@@ -73,7 +73,7 @@ tags: {  # <amp-sidebar> in email
   amp_layout: {
     supported_layouts: NODISPLAY
   }
-  spec_url: "https://amp.dev/documentation/components/amp-sidebar"
+  spec_url: "https://amp.dev/documentation/components/amp-sidebar/"
 }
 tags: { # <amp-sidebar> in amp-story
   html_format: AMP
@@ -85,7 +85,7 @@ tags: { # <amp-sidebar> in amp-story
   mark_descendants {
     marker: AUTOSCROLL
   }
-  spec_url: "https://amp.dev/documentation/components/amp-sidebar"
+  spec_url: "https://amp.dev/documentation/components/amp-sidebar/"
 }
 tags: {  # amp-sidebar > nav
   html_format: AMP

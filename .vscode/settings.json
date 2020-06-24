@@ -6,7 +6,6 @@
     "OWNERS": "json5",
 
     // Enable JSON auto-formatting for these files.
-    ".eslintrc": "json",
     ".prettierrc": "json",
     ".renovaterc.json": "json",
 
