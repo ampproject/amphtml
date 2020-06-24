@@ -313,7 +313,7 @@ export class NextPageService {
     // Attempt to get more pages
     return (
       this.getRemotePages_()
-        .then((pages) => this.queuePages_(pages, true /** preventFetching */))
+        .then((pages) => this.queuePages_(pages))
         // Queuing pages can result in no new pages (in case the server
         // returned an empty array or the suggestions already exist in the queue)
         .then(() => {
@@ -671,7 +671,7 @@ export class NextPageService {
     toArray(doc.querySelectorAll('amp-next-page')).forEach((el) => {
       if (this.hasDeepParsing_) {
         const pages = this.getInlinePages_(el);
-        this.queuePages_(pages);
+        this.fetchAndQueuePages_(pages);
       }
       removeElement(el);
     });
@@ -782,7 +782,7 @@ export class NextPageService {
   initializePageQueue_() {
     const inlinePages = this.getInlinePages_(this.getHost_());
     if (inlinePages.length) {
-      return this.queuePages_(inlinePages);
+      return this.fetchAndQueuePages_(inlinePages);
     }
 
     userAssert(
@@ -796,7 +796,7 @@ export class NextPageService {
         user().warn(TAG, 'Could not find recommendations');
         return Promise.resolve();
       }
-      return this.queuePages_(remotePages);
+      return this.fetchAndQueuePages_(remotePages);
     });
   }
 
@@ -804,10 +804,9 @@ export class NextPageService {
    * Add the provided page metadata into the queue of
    * pages to fetch
    * @param {!Array<!./page.PageMeta>} pages
-   * @param {boolean} preventFetching
    * @return {!Promise}
    */
-  queuePages_(pages, preventFetching = false) {
+  queuePages_(pages) {
     if (!pages.length || this.finished_) {
       return Promise.resolve();
     }
@@ -828,13 +827,19 @@ export class NextPageService {
       }
     });
 
-    if (preventFetching) {
-      return Promise.resolve();
-    }
+    return Promise.resolve();
+  }
 
+  /**
+   * Add the provided page metadata into the queue of
+   * pages to fetch then fetches again
+   * @param {!Array<!./page.PageMeta>} pages
+   * @return {!Promise}
+   */
+  fetchAndQueuePages_(pages) {
     // To be safe, if the pages were parsed after the user
-    // finished scrolling
-    return this.maybeFetchNext();
+    // finished scrolling, we fetch again
+    return this.queuePages_(pages).then(() => this.maybeFetchNext());
   }
 
   /**
