@@ -473,7 +473,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   pause_() {
     this.advancement_.stop();
 
-    this.stopMeasuringVideoPerformance_();
+    this.stopMeasuringAllVideoPerformance_();
     this.stopListeningToVideoEvents_();
     this.toggleErrorMessage_(false);
     this.togglePlayMessage_(false);
@@ -512,7 +512,7 @@ export class AmpStoryPage extends AMP.BaseElement {
               this.advancement_.start();
             }
           });
-        this.startMeasuringVideoPerformance_();
+        this.startMeasuringAllVideoPerformance_();
         this.preloadAllMedia_()
           .then(() => this.startListeningToVideoEvents_())
           .then(() => this.playAllMedia_());
@@ -960,7 +960,9 @@ export class AmpStoryPage extends AMP.BaseElement {
                   }
 
                   // Error was expected, don't send the performance metrics.
-                  this.stopMeasuringVideoPerformance_(false /** sendMetrics */);
+                  this.stopMeasuringAllVideoPerformance_(
+                    false /** sendMetrics */
+                  );
                   this.togglePlayMessage_(true);
                 });
               }
@@ -1502,17 +1504,28 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Has to be called directly before playing the video.
    * @private
    */
-  startMeasuringVideoPerformance_() {
+  startMeasuringAllVideoPerformance_() {
     if (!this.mediaPerformanceMetricsService_.isPerformanceTrackingOn()) {
       return;
     }
 
-    this.performanceTrackedVideos_ = /** @type {!Array<!HTMLMediaElement>} */ (this.getAllVideos_());
-    for (let i = 0; i < this.performanceTrackedVideos_.length; i++) {
-      this.mediaPerformanceMetricsService_.startMeasuring(
-        this.performanceTrackedVideos_[i]
-      );
+    const videoEls = /** @type {!Array<!HTMLMediaElement>} */ (this.getAllVideos_());
+    for (let i = 0; i < videoEls.length; i++) {
+      this.startMeasuringVideoPerformance_(videoEls[i]);
     }
+  }
+
+  /**
+   * @param {!HTMLMediaElement} videoEl
+   * @private
+   */
+  startMeasuringVideoPerformance_(videoEl) {
+    if (!this.mediaPerformanceMetricsService_.isPerformanceTrackingOn()) {
+      return;
+    }
+
+    this.performanceTrackedVideos_.push(videoEl);
+    this.mediaPerformanceMetricsService_.startMeasuring(videoEl);
   }
 
   /**
@@ -1521,7 +1534,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @param {boolean=} sendMetrics
    * @private
    */
-  stopMeasuringVideoPerformance_(sendMetrics = true) {
+  stopMeasuringAllVideoPerformance_(sendMetrics = true) {
     if (!this.mediaPerformanceMetricsService_.isPerformanceTrackingOn()) {
       return;
     }
@@ -1610,6 +1623,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           .then(() => this.preloadMedia_(mediaPool, videoEl))
           .then((poolVideoEl) => {
             if (!this.storeService_.get(StateProperty.PAUSED_STATE)) {
+              this.startMeasuringVideoPerformance_(poolVideoEl);
               this.playMedia_(mediaPool, poolVideoEl);
             }
             if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
@@ -1666,7 +1680,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     this.playMessageEl_.addEventListener('click', () => {
       this.togglePlayMessage_(false);
-      this.startMeasuringVideoPerformance_();
+      this.startMeasuringAllVideoPerformance_();
       this.mediaPoolPromise_
         .then((mediaPool) => mediaPool.blessAll())
         .then(() => this.playAllMedia_());
