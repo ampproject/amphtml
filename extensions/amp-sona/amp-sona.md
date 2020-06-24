@@ -24,8 +24,6 @@ limitations under the License.
 
 # amp-sona
 
-
-
 ## Examples
 
 The `width` and `height` from the example should yield correct layouts for 1:1 aspect ratio embeds:
@@ -37,7 +35,8 @@ The `width` and `height` from the example should yield correct layouts for 1:1 a
   layout="fixed"
   data-client-id="4a2f2764-0ca3-11ea-bd94-0242ac130008"
   data-resource="image"
-  data-variant="120x600">
+  data-variant="120x600"
+>
 </amp-sona>
 ```
 
