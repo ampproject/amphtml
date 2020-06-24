@@ -376,7 +376,7 @@ export function composeMetadataStoreValue(consentInfoMetadata) {
 }
 
 /**
- * TODO(micajuineho) Converts stroage metadata to ConsentMetadataDef:
+ * Converts stroage metadata to ConsentMetadataDef:
  * {'ga': true, 'cst': 2} =>
  * {'gdprApplies': true, 'additionalConsnet': undefined, 'consentStringType': 2}
  *
