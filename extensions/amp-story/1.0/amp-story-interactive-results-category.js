@@ -78,6 +78,7 @@ export class AmpStoryInteractiveResultsCategory extends AmpStoryInteractive {
     this.storeService_.subscribe(
       StateProperty.INTERACTIVE_RESULTS_STATE,
       (data) => {
+        console.log(data);
         if (data.finished) {
           this.options_.forEach((e) => {
             if (e.category == data.category) {

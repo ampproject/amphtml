@@ -238,7 +238,7 @@ const stateComparisonFunctions = {
   [StateProperty.NAVIGATION_PATH]: (old, curr) => old.length !== curr.length,
   [StateProperty.PAGE_IDS]: (old, curr) => old.length !== curr.length,
   [StateProperty.INTERACTIVE_RESULTS_STATE]: (old, curr) => {
-    return old.percentageCompleted != curr.percentageCompleted;
+    return old.finished != curr.finished;
   },
 };
 
