@@ -76,8 +76,6 @@ const UNMINIFIED_TARGETS = ['alp.max', 'amp-inabox', 'amp-shadow', 'amp'];
 
 /**
  * List of minified targets to which AMP_CONFIG should be written
- * Note: keep this list in sync with release script. Contact @ampproject/wg-infra
- * for details.
  */
 const MINIFIED_TARGETS = ['alp', 'amp4ads-v0', 'shadow-v0', 'v0'];
 
@@ -645,6 +643,7 @@ function toPromise(readable) {
 }
 
 module.exports = {
+  MINIFIED_TARGETS,
   applyAmpConfig,
   bootstrapThirdPartyFrames,
   compileAllJs,
