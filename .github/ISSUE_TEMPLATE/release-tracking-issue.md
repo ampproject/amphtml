@@ -18,6 +18,7 @@ to Beta/Experimental opt-in, Beta/Experimental traffic, and Stable and LTS. The 
 uses this issue to keep track of what is going on with the release so please keep this issue
 up to date:
 
+- To update the new commits URL, find <LATEST_STABLE_RELEASE_NUMBER> at https://github.com/ampproject/amphtml/releases/latest. This needs to be updated when creating this issue and recording cherry picks.
 - As you reach each stage of the release, check the appropriate checkbox and replace <CL submit time> with the "Submitted" text from the corresponding CL, e.g. "2:49 PM, Jul 25, 2018 UTC-4".
 - If you need to perform cherry picks, add new checkboxes here (by editing this
   issue), making sure to use the release number for the new build. Link the
@@ -29,7 +30,7 @@ up to date:
 Note: remove the backticks (``) from the link. They are there to allow the template file for this issue to pass `gulp check-links`.
 -->
 
-This issue tracks release `[<RELEASE_NUMBER>](https://github.com/ampproject/amphtml/releases/tag/<RELEASE_NUMBER>)`
+This issue tracks release `[<RELEASE_NUMBER>](https://github.com/ampproject/amphtml/releases/tag/<RELEASE_NUMBER>)`. See what's new compared to stable `[here](https://github.com/ampproject/amphtml/compare/<LATEST_STABLE_RELEASE_NUMBER>...<RELEASE_NUMBER>)`.
 
 - [ ] Release <RELEASE_NUMBER> promoted to Experimental and Beta (opt-in) channels (<CL submit time>)
 - [ ] Release <RELEASE_NUMBER> promoted to Experimental and Beta (1% traffic) channels (<CL submit time>)

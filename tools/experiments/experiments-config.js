@@ -153,10 +153,6 @@ export const EXPERIMENTS = [
     name: 'Display jank meter',
   },
   {
-    id: 'as-use-attr-for-format',
-    name: 'Use slot width/height attribute for AdSense size format',
-  },
-  {
     id: 'input-debounced',
     name: 'A debounced input event for AMP actions',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9413',
@@ -306,11 +302,6 @@ export const EXPERIMENTS = [
     name: 'AMP Analytics Break long tasks to chunks (AMP Ads only)',
     spec: 'https://github.com/ampproject/amphtml/issues/28435',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/28435',
-  },
-  {
-    id: 'fie-init-chunking',
-    name: 'More chunking for friendly iframe initialization',
-    spec: 'https://github.com/ampproject/amphtml/issues/27584',
   },
   {
     id: 'a4a-no-signing',
