@@ -608,7 +608,6 @@ export class AmpStoryStoreService {
       [StateProperty.INTERACTIVE_RESULTS_STATE]: {
         finished: false,
         category: '',
-        percentageCorrect: 0,
       },
       [StateProperty.INTERACTIVE_COMPONENT_STATE]: {
         state: EmbeddedComponentState.HIDDEN,
