@@ -15,7 +15,7 @@
  */
 
 import {AmpStoryInteractive, InteractiveType} from './amp-story-interactive';
-import {CSS} from '../../../build/amp-story-interactive-results-category-1.0.css';
+import {CSS} from '../../../build/amp-story-interactive-results-1.0.css';
 import {StateProperty} from './amp-story-store-service';
 import {htmlFor} from '../../../src/static-template';
 import {setStyle} from '../../../src/style';
@@ -26,10 +26,10 @@ import {setStyle} from '../../../src/style';
  * @param {!Element} element
  * @return {!Element}
  */
-const buildResultsCategoryTemplate = (element) => {
+const buildResultsTemplate = (element) => {
   const html = htmlFor(element);
   return html`
-    <div class="i-amphtml-story-interactive-results-category-container">
+    <div class="i-amphtml-story-interactive-results-container">
       <div class="i-amphtml-story-interactive-results-pre-select">
         <span>Come back when you're done</span>
       </div>
@@ -38,28 +38,24 @@ const buildResultsCategoryTemplate = (element) => {
         <div class="i-amphtml-story-interactive-results-visuals">
           <div class="i-amphtml-story-interactive-results-dots"></div>
           <div class="i-amphtml-story-interactive-results-image-border">
-            <div
-              class="i-amphtml-story-interactive-results-category-image"
-            ></div>
+            <div class="i-amphtml-story-interactive-results-image"></div>
           </div>
           <div class="i-amphtml-story-interactive-results-dots"></div>
         </div>
         <div class="i-amphtml-story-interactive-results-prompt"></div>
-        <div class="i-amphtml-story-interactive-results-category-text"></div>
-        <div
-          class="i-amphtml-story-interactive-results-category-description"
-        ></div>
+        <div class="i-amphtml-story-interactive-results-text"></div>
+        <div class="i-amphtml-story-interactive-results-description"></div>
       </div>
     </div>
   `;
 };
 
-export class AmpStoryInteractiveResultsCategory extends AmpStoryInteractive {
+export class AmpStoryInteractiveResults extends AmpStoryInteractive {
   /**
    * @param {!AmpElement} element
    */
   constructor(element) {
-    super(element, InteractiveType.RESULTS, [2, 10]);
+    super(element, InteractiveType.RESULTS, [2, 4]);
   }
 
   /** @override */
@@ -69,7 +65,7 @@ export class AmpStoryInteractiveResultsCategory extends AmpStoryInteractive {
 
   /** @override */
   buildComponent() {
-    this.rootEl_ = buildResultsCategoryTemplate(this.element);
+    this.rootEl_ = buildResultsTemplate(this.element);
     return this.rootEl_;
   }
 
@@ -85,10 +81,10 @@ export class AmpStoryInteractiveResultsCategory extends AmpStoryInteractive {
       (data) => {
         if (data.finished) {
           this.options_.forEach((e) => {
-            if (e.category == data.category) {
+            if (e.category == data.resultscategory) {
               this.mutateElement(() => {
                 this.updateCategory(e);
-                this.updateToPostSelectionState_();
+                this.updateToPostSelectionState_(null);
               });
             }
           });
@@ -104,17 +100,15 @@ export class AmpStoryInteractiveResultsCategory extends AmpStoryInteractive {
    */
   updateCategory(categorySelected) {
     setStyle(
-      this.rootEl_.querySelector(
-        '.i-amphtml-story-interactive-results-category-image'
-      ),
+      this.rootEl_.querySelector('.i-amphtml-story-interactive-results-image'),
       'background',
       'url(' + categorySelected.image + ')'
     );
     this.rootEl_.querySelector(
-      '.i-amphtml-story-interactive-results-category-text'
-    ).textContent = categorySelected.category;
+      '.i-amphtml-story-interactive-results-text'
+    ).textContent = categorySelected.resultscategory;
     this.rootEl_.querySelector(
-      '.i-amphtml-story-interactive-results-category-description'
+      '.i-amphtml-story-interactive-results-description'
     ).textContent = categorySelected.text || '';
   }
 

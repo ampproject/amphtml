@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-.i-amphtml-story-interactive-results-category-container {
+.i-amphtml-story-interactive-results-container {
   font-family: 'Poppins', sans-serif !important;
   background: var(--i-amphtml-interactive-option-background-color) !important;
   border-radius: var(--i-amphtml-interactive-chip-radius) !important;
@@ -24,11 +24,11 @@
   box-shadow: var(--i-amphtml-interactive-component-shadow) !important;
 }
 
-.i-amphtml-story-interactive-results-category-container.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-results-pre-select {
+.i-amphtml-story-interactive-results-container.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-results-pre-select {
   display: none !important;
 }
 
-.i-amphtml-story-interactive-results-category-container:not(.i-amphtml-story-interactive-post-selection) .i-amphtml-story-interactive-results-post-select {
+.i-amphtml-story-interactive-results-container:not(.i-amphtml-story-interactive-post-selection) .i-amphtml-story-interactive-results-post-select {
   display: none !important;
 }
 
@@ -61,7 +61,7 @@
   align-items: center !important;
 }
 
-.i-amphtml-story-interactive-results-category-image {
+.i-amphtml-story-interactive-results-image {
   width: 130px !important;
   height: 130px !important;
   background-size: cover !important;
@@ -85,12 +85,12 @@
   letter-spacing: 2px !important;
 }
 
-.i-amphtml-story-interactive-results-category-text {
+.i-amphtml-story-interactive-results-text {
   font-size: 28px !important;
   font-weight: bold !important;
 }
 
-.i-amphtml-story-interactive-results-category-description {
+.i-amphtml-story-interactive-results-description {
   font-size: 14px !important;
   text-align: center !important;
   color: var(--i-amphtml-interactive-option-text-color) !important;
