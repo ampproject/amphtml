@@ -139,6 +139,7 @@ function discoverDistFlavors_() {
     BASE_FLAVOR_CONFIG,
     ...Object.entries(experimentsConfig)
       .filter(
+        // Only include experiments that have a `define_experiment_constant` field.
         ([, experimentConfig]) => experimentConfig.define_experiment_constant
       )
       .map(([flavorType, experimentConfig]) => ({
@@ -150,9 +151,10 @@ function discoverDistFlavors_() {
         ],
         ...experimentConfig,
       })),
-  ];
-  // TODO(#28168, danielrozenberg): if --flavor is defined, filter out the other
-  // flavors.
+  ].filter(
+    // If --flavor is defined, filter out the rest.
+    ([flavorType]) => !argv.flavor || flavorType == argv.flavor
+  );
 
   log(
     'The following',
@@ -423,6 +425,11 @@ async function release() {
   log('Discovering release', `${green('flavors')}...`);
   const distFlavors = await discoverDistFlavors_();
 
+  if (argv.flavor && distFlavors.length == 0) {
+    log('Flavor', cyan(argv.flavor), 'is inactive. Quitting...');
+    return;
+  }
+
   log('Compiling all', `${green('flavors')}...`);
   await compileDistFlavors_(distFlavors, tempDir);
 
@@ -439,9 +446,10 @@ async function release() {
   await prependConfig_(outputDir);
 
   log('Copying from temporary directory to', cyan('net-wildcard'));
-  // TODO(#28168, danielrozenberg): this should only be done if --flavor=base or
-  // if --flavor is not set.
-  await populateNetWildcard_(tempDir, outputDir);
+  if (!argv.flavor || argv.flavor == 'base') {
+    // Only populate the net-wildcard directory if --flavor=base or if --flavor is not set.
+    await populateNetWildcard_(tempDir, outputDir);
+  }
 
   log('Cleaning up temp dir...');
   await cleanup_(tempDir);
@@ -458,7 +466,6 @@ release.description = 'Generates a release build';
 release.flags = {
   'output_dir':
     '  Directory path to emplace release files (defaults to "./release")',
-  // TODO(#28168, danielrozenberg): implement a '--flavor' flag that will limit
-  // this release to a single flavor, so that multiple build servers can split
-  // the work between them.
+  'flavor':
+    '  Limit this release build to a single flavor. Can be used to split the release work between multiple build machines.',
 };
