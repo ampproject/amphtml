@@ -23,6 +23,7 @@
     --option-2-percentage: 0%;
     --option-3-percentage: 0%;
     --option-4-percentage: 0%;
+    box-shadow: var(--i-amphtml-interactive-component-shadow) !important;
 }
 
 .i-amphtml-story-interactive-quiz-option-container {

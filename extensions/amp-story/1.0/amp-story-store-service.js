@@ -82,7 +82,7 @@ export let InteractiveComponentDef;
  *    category: ?string,
  * }}
  */
-export let InteractionResultsDef;
+export let InteractiveResultsDef;
 
 /**
  * @typedef {{
@@ -568,8 +568,8 @@ export class AmpStoryStoreService {
       [StateProperty.EDUCATION_STATE]: false,
       [StateProperty.HAS_SIDEBAR_STATE]: false,
       [StateProperty.INFO_DIALOG_STATE]: false,
-      [StateProperty.INTERACTION_REACT_STATE]: {},
-      [StateProperty.INTERACTION_RESULTS_STATE]: {
+      [StateProperty.INTERACTIVE_REACT_STATE]: {},
+      [StateProperty.INTERACTIVE_RESULTS_STATE]: {
         finished: false,
         category: '',
         percentageCorrect: 0,

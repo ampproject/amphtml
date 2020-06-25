@@ -14,88 +14,86 @@
  * limitations under the License.
  */
 
-@import url('https://fonts.googleapis.com/css?family=Poppins&display=swap');
-
 .i-amphtml-story-interactive-results-category-container {
-    font-family: 'Poppins', sans-serif !important;
-    background: var(--interactive-background-color) !important;
-    border-radius: var(--interactive-chip-radius) !important;
-    color: var(--interactive-strong-text-color) !important;
-    text-align: center !important;
-		max-width: 300px !important;
-		box-shadow: 0px 4px 8px #000000aa;
+  font-family: 'Poppins', sans-serif !important;
+  background: var(--i-amphtml-interactive-option-background-color) !important;
+  border-radius: var(--i-amphtml-interactive-chip-radius) !important;
+  color: var(--i-amphtml-interactive-strong-text-color) !important;
+  text-align: center !important;
+  max-width: 300px !important;
+  box-shadow: var(--i-amphtml-interactive-component-shadow) !important;
 }
 
 .i-amphtml-story-interactive-results-category-container.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-results-pre-select {
-    display: none !important;
+  display: none !important;
 }
 
 .i-amphtml-story-interactive-results-category-container:not(.i-amphtml-story-interactive-post-selection) .i-amphtml-story-interactive-results-post-select {
-    display: none !important;
+  display: none !important;
 }
 
 .i-amphtml-story-interactive-results-pre-select, .i-amphtml-story-interactive-results-post-select{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-	padding: 20px 5px;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+	padding: 20px 5px !important;
 }
 
 .i-amphtml-story-interactive-results-line {
-  background-color: var(--interactive-accent-color);
-  width: 30px;
-  height: 4px;
-  margin-bottom: 20px;
-  border-radius: 2px;
+  background-color: var(--interactive-accent-color) !important;
+  width: 30px !important;
+  height: 4px !important;
+  margin-bottom: 20px !important;
+  border-radius: 2px !important;
 }
 
 .i-amphtml-story-interactive-results-dots {
-  background-image: radial-gradient(var(--interactive-accent-color) 20%, transparent 25%);
-	width: 52px;
-	height: 94px;
-	background-position: top;
-  background-size: 8px 8px;
+  background-image: radial-gradient(var(--interactive-accent-color) 20%, transparent 20%) !important;
+	width: 52px !important;
+	height: 94px !important;
+	background-position: top !important;
+  background-size: 8px 8px !important;
 }
 
 .i-amphtml-story-interactive-results-visuals {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
 }
 
 .i-amphtml-story-interactive-results-category-image {
-  width: 130px;
-  height: 130px;
+  width: 130px !important;
+  height: 130px !important;
   background-size: cover !important;
   background-position: center !important;
-  border-radius: 50%;
+  border-radius: 50% !important;
 }
 
-.i-amphtml-story-interactive-results-image {
+.i-amphtml-story-interactive-results-image-border {
   background: linear-gradient(180deg, transparent 56%, var(--interactive-accent-color) 56%);
-  margin: 0px 10px;
-  padding: 10px;
-  border-radius: 50%;
-  border: 2px solid var(--interactive-accent-color);
+  margin: 0px 10px !important;
+  padding: 10px !important;
+  border-radius: 50% !important;
+  border: 2px solid var(--interactive-accent-color) !important;
 }
 
 .i-amphtml-story-interactive-results-prompt {
-  text-transform: uppercase;
-  font-size: 12px;
-  margin-top: 20px;
-  font-weight: bold;
-  letter-spacing: 2px;
+  text-transform: uppercase !important;
+  font-size: 12px !important;
+  margin-top: 20px !important;
+  font-weight: bold !important;
+  letter-spacing: 2px !important;
 }
 
 .i-amphtml-story-interactive-results-category-text {
-  font-size: 28px;
-  font-weight: bold;
+  font-size: 28px !important;
+  font-weight: bold !important;
 }
 
 .i-amphtml-story-interactive-results-category-description {
-  font-size: 14px;
-  text-align: center;
-  color: var(--interactive-option-text-color);
-	margin-top: 8px;
-	padding: 0px 20px;
+  font-size: 14px !important;
+  text-align: center !important;
+  color: var(--interactive-option-text-color) !important;
+	margin-top: 8px !important;
+	padding: 0px 20px !important;
 }

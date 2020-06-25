@@ -81,7 +81,6 @@ export let InteractiveResponseType;
  *    correct: ?string,
  *    resultscategory: ?string,
  *    image: ?string,
- * 		description: ?string,
  * }}
  */
 export let OptionConfigType;
@@ -731,11 +730,14 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @param {?Element} selectedOption
    * @protected
    */
-  updateToPostSelectionState_(selectedOption = null) {
-    this.rootEl_.classList.add('i-amphtml-story-reaction-post-selection');
-    if (selectedOption) {
-      selectedOption.classList.add('i-amphtml-story-reaction-option-selected');
-    }
+  updateToPostSelectionState_(selectedOption) {
+    this.rootEl_.classList.add('i-amphtml-story-interactive-post-selection');
+    selectedOption
+      ? selectedOption.classList.add(
+          'i-amphtml-story-interactive-option-selected'
+        )
+      : null;
+
     if (this.optionsData_) {
       this.rootEl_.classList.add('i-amphtml-story-interactive-has-data');
       this.updateOptionPercentages_(this.optionsData_);

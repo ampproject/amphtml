@@ -393,7 +393,7 @@ describes.fakeWin('amp-story-store-service interaction reacts', {}, (env) => {
   it('should not trigger the interaction subscription when initializing interactive', () => {
     const actionsListenerSpy = env.sandbox.spy();
     storeService.subscribe(
-      StateProperty.INTERACTION_RESULTS_STATE,
+      StateProperty.INTERACTIVE_RESULTS_STATE,
       actionsListenerSpy
     );
 
@@ -404,7 +404,7 @@ describes.fakeWin('amp-story-store-service interaction reacts', {}, (env) => {
   it('should trigger the interaction subscription when answering interactive ', () => {
     const actionsListenerSpy = env.sandbox.spy();
     storeService.subscribe(
-      StateProperty.INTERACTION_RESULTS_STATE,
+      StateProperty.INTERACTIVE_RESULTS_STATE,
       actionsListenerSpy
     );
 
@@ -419,7 +419,7 @@ describes.fakeWin('amp-story-store-service interaction reacts', {}, (env) => {
   it('should not trigger the interaction subscription twice when updating the interactive', () => {
     const actionsListenerSpy = env.sandbox.spy();
     storeService.subscribe(
-      StateProperty.INTERACTION_RESULTS_STATE,
+      StateProperty.INTERACTIVE_RESULTS_STATE,
       actionsListenerSpy
     );
 
@@ -438,7 +438,7 @@ describes.fakeWin('amp-story-store-service interaction reacts', {}, (env) => {
   it('should trigger the interaction subscription when all interactives are completed', () => {
     const actionsListenerSpy = env.sandbox.spy();
     storeService.subscribe(
-      StateProperty.INTERACTION_RESULTS_STATE,
+      StateProperty.INTERACTIVE_RESULTS_STATE,
       actionsListenerSpy
     );
 
