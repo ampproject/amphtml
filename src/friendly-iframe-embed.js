@@ -35,7 +35,6 @@ import {
   setParentWindow,
 } from './service';
 import {escapeHtml} from './dom';
-import {getExperimentBranch, isExperimentOn} from './experiments';
 import {getMode} from './mode';
 import {installAmpdocServices} from './service/core-services';
 import {install as installCustomElements} from './polyfills/custom-elements';
@@ -83,13 +82,6 @@ export let FriendlyIframeSpec;
  */
 let srcdocSupported;
 
-/** @const {!{id: string, control: string, experiment: string}} */
-export const FIE_INIT_CHUNKING_EXP = {
-  id: 'fie-init-chunking',
-  control: '21065820',
-  experiment: '21065821',
-};
-
 /**
  * @param {boolean|undefined} val
  * @visibleForTesting
@@ -99,22 +91,13 @@ export function setSrcdocSupportedForTesting(val) {
 }
 
 /**
- * @param {!Window} win
  * @return {function(*): !Promise<*>}
  */
-function getDelayPromiseProducer(win) {
-  if (
-    isExperimentOn(win, 'fie-init-chunking') &&
-    getExperimentBranch(win, FIE_INIT_CHUNKING_EXP.id) ===
-      FIE_INIT_CHUNKING_EXP.experiment
-  ) {
-    return (val) =>
-      new Promise((resolve) => {
-        setTimeout(() => resolve(val), 1);
-      });
-  } else {
-    return (val) => Promise.resolve(val);
-  }
+function getDelayPromiseProducer() {
+  return (val) =>
+    new Promise((resolve) => {
+      setTimeout(() => resolve(val), 1);
+    });
 }
 
 /**
@@ -220,7 +203,7 @@ export function installFriendlyIframeEmbed(
   // no other reliable signal for `readyState` in a child window and thus
   // we have to fallback to polling.
   let readyPromise;
-  const maybeGetDelayPromise = getDelayPromiseProducer(win);
+  const getDelayPromise = getDelayPromiseProducer();
   if (isIframeReady(iframe)) {
     readyPromise = Promise.resolve();
   } else {
@@ -274,7 +257,7 @@ export function installFriendlyIframeEmbed(
       if (!childWin.frameElement) {
         return null;
       }
-      return maybeGetDelayPromise(undefined)
+      return getDelayPromise(undefined)
         .then(() =>
           embed.preInstallExtensionsInChildWindow(
             extensions,
@@ -298,7 +281,7 @@ export function installFriendlyIframeEmbed(
           );
           return embed;
         })
-        .then(maybeGetDelayPromise);
+        .then(getDelayPromise);
     }
   });
 }
@@ -812,14 +795,14 @@ export class FriendlyIframeEmbed {
     const topWin = extensions.win;
     const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
     setParentWindow(childWin, parentWin);
-    const maybeGetDelayPromise = getDelayPromiseProducer(parentWin);
+    const getDelayPromise = getDelayPromiseProducer();
 
-    return maybeGetDelayPromise(undefined)
+    return getDelayPromise(undefined)
       .then(() => {
         // Install necessary polyfills.
         installPolyfillsInChildWindow(parentWin, childWin);
       })
-      .then(maybeGetDelayPromise)
+      .then(getDelayPromise)
       .then(() => {
         // Install runtime styles.
         installStylesLegacy(
@@ -830,25 +813,25 @@ export class FriendlyIframeEmbed {
           /* opt_ext */ 'amp-runtime'
         );
       })
-      .then(maybeGetDelayPromise)
+      .then(getDelayPromise)
       .then(() => {
         // Run pre-install callback.
         if (opt_preinstallCallback) {
           opt_preinstallCallback(childWin);
         }
       })
-      .then(maybeGetDelayPromise)
+      .then(getDelayPromise)
       .then(() => {
         // Install embeddable standard services.
         installStandardServicesInEmbed(childWin);
       })
-      .then(maybeGetDelayPromise)
+      .then(getDelayPromise)
       .then(() => {
         // Install built-ins elements.
         copyBuiltinElementsToChildWindow(topWin, childWin);
         stubLegacyElements(childWin);
       })
-      .then(maybeGetDelayPromise)
+      .then(getDelayPromise)
       .then(() => {
         extensionIds.forEach((extensionId) => {
           // This will extend automatic upgrade of custom elements from top
@@ -858,7 +841,7 @@ export class FriendlyIframeEmbed {
           }
         });
       })
-      .then(maybeGetDelayPromise);
+      .then(getDelayPromise);
   }
 
   /**
@@ -870,12 +853,11 @@ export class FriendlyIframeEmbed {
    * @visibleForTesting
    */
   doInstallExtensionsInChildWindow(extensions, childWin, extensionIds) {
-    const parentWin = toWin(childWin.frameElement.ownerDocument.defaultView);
-    const maybeGetDelayPromise = getDelayPromiseProducer(parentWin);
+    const getDelayPromise = getDelayPromiseProducer();
 
     const promises = [];
     extensionIds.forEach((extensionId) => {
-      const promise = maybeGetDelayPromise(undefined)
+      const promise = getDelayPromise(undefined)
         .then(() => extensions.preloadExtension(extensionId))
         .then((extension) => {
           // Adopt embeddable extension services.

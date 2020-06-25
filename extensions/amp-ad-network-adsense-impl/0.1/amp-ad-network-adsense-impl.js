@@ -24,7 +24,6 @@ import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../sr
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A, NO_SIGNING_EXP} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {FIE_INIT_CHUNKING_EXP} from '../../../src/friendly-iframe-embed';
 import {Navigation} from '../../../src/service/navigation';
 import {
   QQID_HEADER,
@@ -213,13 +212,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   divertExperiments() {
     const experimentInfoMap = /** @type {!Object<string,
         !../../../src/experiments.ExperimentInfo>} */ ({
-      [[FIE_INIT_CHUNKING_EXP.id]]: {
-        isTrafficEligible: () => true,
-        branches: [
-          [FIE_INIT_CHUNKING_EXP.control],
-          [FIE_INIT_CHUNKING_EXP.experiment],
-        ],
-      },
       [[RENDER_ON_IDLE_FIX_EXP.id]]: {
         isTrafficEligible: () => true,
         branches: [

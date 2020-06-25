@@ -54,7 +54,6 @@ import {
 } from '../../../ads/google/a4a/utils';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
-import {FIE_INIT_CHUNKING_EXP} from '../../../src/friendly-iframe-embed';
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
@@ -459,13 +458,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         branches: [
           RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.CONTROL,
           RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT,
-        ],
-      },
-      [[FIE_INIT_CHUNKING_EXP.id]]: {
-        isTrafficEligible: () => true,
-        branches: [
-          [FIE_INIT_CHUNKING_EXP.control],
-          [FIE_INIT_CHUNKING_EXP.experiment],
         ],
       },
       [[EXPAND_JSON_TARGETING_EXP.ID]]: {
