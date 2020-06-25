@@ -102,7 +102,7 @@ export let InteractiveResultsDef;
  *    hasSidebarState: boolean,
  *    infoDialogState: boolean,
  *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
- *    interactiveReactState: !Map<string, {option: ?OptionConfigType, interactiveId: string}}>,
+ *    interactiveReactState: !Map<string, {option: ?OptionConfigType, interactiveId: string}>,
  *    interactiveResultsState: !InteractiveResultsDef,
  *    mutedState: boolean,
  *    pageAudioState: boolean,
