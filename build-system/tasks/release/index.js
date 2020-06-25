@@ -435,7 +435,9 @@ async function release() {
     return;
   }
 
-  log('Compiling all', `${green('flavors')}...`);
+  if (!argv.flavor) {
+    log('Compiling all', `${green('flavors')}...`);
+  }
   await compileDistFlavors_(distFlavors, tempDir);
 
   log('Fetching npm package', `${cyan('@ampproject/amp-sw')}...`);
