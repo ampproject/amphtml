@@ -285,13 +285,35 @@ describes.realWin(
       expect(percentages4).to.deep.equal([33, 33, 33]);
     });
 
-    it('should update store service when selecting option', () => {
-      const responseData4 = generateResponseDataFor([335, 335, 330]);
-      const percentages4 = ampStoryInteractive.preprocessPercentages_(
-        responseData4
+    it('should update store service when selecting option', async () => {
+      const trigger = env.sandbox.stub(
+        ampStoryInteractive,
+        'updateStoryStoreState_'
       );
+      addConfigToInteractive(ampStoryInteractive);
+      ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.layoutCallback();
+      await ampStoryInteractive.getOptionElements()[2].click();
+      expect(trigger).to.be.calledWith(2);
+    });
 
-      expect(percentages4).to.deep.equal([33, 33, 33]);
+    it('should update store service when getting option selected from backend', async () => {
+      const trigger = env.sandbox.stub(
+        ampStoryInteractive,
+        'updateStoryStoreState_'
+      );
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(getMockInteractiveData());
+      addConfigToInteractive(ampStoryInteractive);
+      ampStoryInteractive.element.setAttribute(
+        'endpoint',
+        'http://localhost:8000'
+      );
+      ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.layoutCallback();
+
+      expect(trigger).to.be.calledWith(0);
     });
   }
 );
