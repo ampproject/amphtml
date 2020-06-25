@@ -16,12 +16,12 @@
 'use strict';
 
 /**
- * @fileoverview Provides functions that extract various kinds of Github Actions
+ * @fileoverview Provides functions that extract various kinds of GitHub Actions
  * state.
  */
 
 /**
- * Returns true if this is a Github Actions build.
+ * Returns true if this is a GitHub Actions build.
  * @return {boolean}
  */
 function isGithubActionsBuild() {

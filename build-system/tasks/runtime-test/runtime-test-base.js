@@ -97,7 +97,7 @@ function updateBrowsers(config) {
       customLaunchers: {
         FirefoxHeadless: {
           base: 'Firefox',
-          flags: ['-headless'],
+          flags: argv.headless ? ['-headless'] : [],
         },
       },
     })

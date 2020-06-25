@@ -22,7 +22,7 @@ jobs:
       - run: sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
       - run: yarn global add gulp-cli
       - name: Build and Test
-        run: node build-system/pr-check/cross-browser-tests-linux.js
+        run: node build-system/pr-check/cross-browser-tests.js
   macos_tests:
     name: Mac OS
     runs-on: macos-latest
@@ -37,4 +37,4 @@ jobs:
       - run: sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
       - run: yarn global add gulp-cli
       - name: Build and Test
-        run: node build-system/pr-check/cross-browser-tests-macos.js
+        run: node build-system/pr-check/cross-browser-tests.js

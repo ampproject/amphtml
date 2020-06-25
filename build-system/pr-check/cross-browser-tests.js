@@ -15,10 +15,13 @@
  */
 'use strict';
 
+const log = require('fancy-log');
+const {red, cyan} = require('ansi-colors');
+
 /**
  * @fileoverview
- * This script kicks off the unit and integration tests on Linux.
- * This is run on Github Actions CI stage = Linux.
+ * This script kicks off the unit and integration tests on Linux and Mac OS.
+ * This is run on Github Actions CI stage = Linux | Mac OS.
  */
 
 const {
@@ -27,15 +30,32 @@ const {
   timedExecOrDie: timedExecOrDieBase,
 } = require('./utils');
 
-const FILENAME = 'cross-browser-tests-linux.js';
+const FILENAME = 'cross-browser-tests.js';
 const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
   timedExecOrDie('gulp update-packages');
-  timedExecOrDie('gulp unit --firefox');
   timedExecOrDie('gulp dist --fortesting');
-  timedExecOrDie('gulp integration --nobuild --compiled --firefox');
+
+  switch (process.platform) {
+    case 'linux':
+      timedExecOrDie('gulp unit --headless --firefox');
+      timedExecOrDie(
+        'gulp integration --nobuild --compiled --headless --firefox'
+      );
+    case 'darwin':
+      timedExecOrDie('gulp unit --safari');
+      timedExecOrDie('gulp integration --nobuild --compiled --safari');
+      break;
+    // TODO(rsimha, #28208): Build on Windows with native closure compiler.
+    default:
+      log(
+        red('ERROR:'),
+        'Cannot run cross-browser tests on',
+        cyan(process.platform) + '.'
+      );
+  }
   stopTimer(FILENAME, FILENAME, startTime);
 }
 
