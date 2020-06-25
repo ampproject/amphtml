@@ -75,6 +75,11 @@ export class AmpStoryInteractiveResultsCategory extends AmpStoryInteractive {
 
   /** @override */
   layoutCallback() {
+    if (this.element.hasAttribute('prompt-text')) {
+      this.rootEl_.querySelector(
+        '.i-amphtml-story-interactive-results-prompt'
+      ).textContent = this.element.getAttribute('prompt-text');
+    }
     this.storeService_.subscribe(
       StateProperty.INTERACTIVE_RESULTS_STATE,
       (data) => {
