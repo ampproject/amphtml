@@ -16,6 +16,7 @@
 
 import {EmbedMode, parseEmbedMode} from './embed-mode';
 import {Observable} from '../../../src/observable';
+import {OptionConfigType} from './amp-story-interactive';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {hasOwn} from '../../../src/utils/object';
@@ -101,7 +102,7 @@ export let InteractiveResultsDef;
  *    hasSidebarState: boolean,
  *    infoDialogState: boolean,
  *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
- *    interactiveReactState: !Map<string, {option: {?Object, interactiveId: string}}>,
+ *    interactiveReactState: !Map<string, {option: ?OptionConfigType, interactiveId: string}}>,
  *    interactiveResultsState: !InteractiveResultsDef,
  *    mutedState: boolean,
  *    pageAudioState: boolean,
