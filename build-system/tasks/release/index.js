@@ -288,9 +288,9 @@ async function populateOrgCdn_(distFlavors, tempDir, outputDir) {
     // INABOX experiments need to have their control population be created from
     // the base flavor.
     if (flavorType == 'base') {
-      experimentsConfig
-        .filter(({environment}) => environment == 'INABOX')
-        .map(({flavorType: experimentFlavor}) => {
+      Object.entries(experimentsConfig)
+        .filter(([, {environment}]) => environment == 'INABOX')
+        .map(([experimentFlavor]) => {
           const rtvPrefix =
             EXPERIMENTAL_RTV_PREFIXES['INABOX'][`${experimentFlavor}-control`];
           rtvCopyingPromises.push(rtvCopyingPromise(rtvPrefix, 'base'));
