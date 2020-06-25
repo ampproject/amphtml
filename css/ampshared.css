@@ -402,9 +402,11 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
   z-index: 2;
   visibility: hidden;
   /* display:initial overrides display:none from the "hide all children of
-     non-container elements" rule. This avoids a minor content jump after
+     non-container elements" rule. Similarly, line-height:normal overrides 
+     line-height:0 for text node children. This avoids a minor content jump after
      element build since overflows increase the height of their parents. */
   display: initial;
+  line-height: normal;
 }
 
 .i-amphtml-element > [overflow].amp-visible {
