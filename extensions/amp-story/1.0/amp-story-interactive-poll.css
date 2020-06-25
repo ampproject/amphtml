@@ -15,7 +15,7 @@
  */
 
 .i-amphtml-story-interactive-poll-container {
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.12) !important;
+  box-shadow: var(--i-amphtml-interactive-component-shadow) !important;
   color: var(--i-amphtml-interactive-option-accent-color) !important;
   --post-select-scale: 0.5 !important;
   --post-select-scale-variable: 1 !important;

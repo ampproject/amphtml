@@ -32,29 +32,23 @@ const buildResultsCategoryTemplate = (element) => {
     <div class="i-amphtml-story-interactive-results-category-container">
       <div class="i-amphtml-story-interactive-results-pre-select">
         <span>Come back when you're done</span>
-        <span
-          class="i-amphtml-story-interactive-results-percentage-completed"
-        ></span>
       </div>
       <div class="i-amphtml-story-interactive-results-post-select">
         <div class="i-amphtml-story-interactive-results-line"></div>
         <div class="i-amphtml-story-interactive-results-visuals">
           <div class="i-amphtml-story-interactive-results-dots"></div>
-          <div class="i-amphtml-story-interactive-results-image">
+          <div class="i-amphtml-story-interactive-results-image-border">
             <div
               class="i-amphtml-story-interactive-results-category-image"
             ></div>
           </div>
           <div class="i-amphtml-story-interactive-results-dots"></div>
         </div>
-        <div class="i-amphtml-story-interactive-results-prompt">You are a</div>
-        <div class="i-amphtml-story-interactive-results-category-text">
-          Category
-        </div>
-        <div class="i-amphtml-story-interactive-results-category-description">
-          You love jumping around and having fun. Your bubbly personality is
-          contagious, and your love for carrots is unconditional.
-        </div>
+        <div class="i-amphtml-story-interactive-results-prompt"></div>
+        <div class="i-amphtml-story-interactive-results-category-text"></div>
+        <div
+          class="i-amphtml-story-interactive-results-category-description"
+        ></div>
       </div>
     </div>
   `;
@@ -65,7 +59,7 @@ export class AmpStoryInteractiveResultsCategory extends AmpStoryInteractive {
    * @param {!AmpElement} element
    */
   constructor(element) {
-    super(element, InteractiveType.CATEGORY, [2, 10]);
+    super(element, InteractiveType.RESULTS, [2, 10]);
   }
 
   /** @override */
@@ -81,11 +75,9 @@ export class AmpStoryInteractiveResultsCategory extends AmpStoryInteractive {
 
   /** @override */
   layoutCallback() {
-    // TODO(mszylkowski): If accepts endpoint, then call super.layoutCallback().
     this.storeService_.subscribe(
-      StateProperty.INTERACTION_RESULTS_STATE,
+      StateProperty.INTERACTIVE_RESULTS_STATE,
       (data) => {
-        console.log(data);
         if (data.finished) {
           this.options_.forEach((e) => {
             if (e.category == data.category) {
@@ -95,10 +87,6 @@ export class AmpStoryInteractiveResultsCategory extends AmpStoryInteractive {
               });
             }
           });
-        } else {
-          this.rootEl_.querySelector(
-            '.i-amphtml-story-interactive-results-percentage-completed'
-          ).textContent = data.percentageCompleted + '%';
         }
       },
       true
@@ -119,10 +107,10 @@ export class AmpStoryInteractiveResultsCategory extends AmpStoryInteractive {
     );
     this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-results-category-text'
-    ).textContent = categorySelected.text;
+    ).textContent = categorySelected.category;
     this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-results-category-description'
-    ).textContent = categorySelected.description || '';
+    ).textContent = categorySelected.text || '';
   }
 
   /** @override */

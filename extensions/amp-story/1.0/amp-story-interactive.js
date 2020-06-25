@@ -48,6 +48,7 @@ const TAG = 'amp-story-interactive';
 export const InteractiveType = {
   QUIZ: 0,
   POLL: 1,
+  RESULTS: 2,
 };
 
 /** @const {string} */
@@ -77,7 +78,6 @@ export let InteractiveResponseType;
  *    correct: ?string,
  *    category: ?string,
  *    image: ?string,
- * 		description: ?string,
  * }}
  */
 export let OptionConfigType;
@@ -711,7 +711,11 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    */
   updateToPostSelectionState_(selectedOption) {
     this.rootEl_.classList.add('i-amphtml-story-interactive-post-selection');
-    selectedOption.classList.add('i-amphtml-story-interactive-option-selected');
+    selectedOption
+      ? selectedOption.classList.add(
+          'i-amphtml-story-interactive-option-selected'
+        )
+      : null;
 
     if (this.optionsData_) {
       this.rootEl_.classList.add('i-amphtml-story-interactive-has-data');

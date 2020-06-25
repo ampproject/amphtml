@@ -81,7 +81,7 @@ export let InteractiveComponentDef;
  *    category: ?string,
  * }}
  */
-export let InteractionResultsDef;
+export let InteractiveResultsDef;
 
 /**
  * @typedef {{
@@ -101,8 +101,8 @@ export let InteractionResultsDef;
  *    hasSidebarState: boolean,
  *    infoDialogState: boolean,
  *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
- *    interactionReactState: !Map<string, {option: {?Object, interactiveId: string}}>,
- *    interactionResultsState: !InteractionResultsDef,
+ *    interactiveReactState: !Map<string, {option: {?Object, interactiveId: string}}>,
+ *    interactiveResultsState: !InteractiveResultsDef,
  *    mutedState: boolean,
  *    pageAudioState: boolean,
  *    pageHasElementsWithPlaybackState: boolean,
@@ -151,9 +151,9 @@ export const StateProperty = {
   INFO_DIALOG_STATE: 'infoDialogState',
   INTERACTIVE_COMPONENT_STATE: 'interactiveEmbeddedComponentState',
   // State of interactive components (polls, quizzes) on the story.
-  INTERACTION_REACT_STATE: 'interactionReactState',
-  // The final state of the interactive components, updated on finished.
-  INTERACTION_RESULTS_STATE: 'interactionResultsState',
+  INTERACTIVE_REACT_STATE: 'interactiveReactState',
+  // The results by aggregating the INTERACTIVE_COMPONENT_STATE.
+  INTERACTIVE_RESULTS_STATE: 'interactiveResultsState',
   MUTED_STATE: 'mutedState',
   PAGE_HAS_AUDIO_STATE: 'pageAudioState',
   PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE: 'pageHasElementsWithPlaybackState',
@@ -237,18 +237,15 @@ const stateComparisonFunctions = {
     (old, curr) => old.element !== curr.element || old.state !== curr.state,
   [StateProperty.NAVIGATION_PATH]: (old, curr) => old.length !== curr.length,
   [StateProperty.PAGE_IDS]: (old, curr) => old.length !== curr.length,
-  [StateProperty.INTERACTION_RESULTS_STATE]: (old, curr) => {
-    return (
-      old.finished != curr.finished ||
-      old.percentageCompleted != curr.percentageCompleted
-    );
+  [StateProperty.INTERACTIVE_RESULTS_STATE]: (old, curr) => {
+    return old.percentageCompleted != curr.percentageCompleted;
   },
 };
 
 /**
  * Gets the map of quizzes responded and sets the correct values on the template.
  * @param {!Object} data
- * @return {!InteractionResultsDef}
+ * @return {!InteractiveResultsDef}
  */
 const processInteractiveResults = (data) => {
   let completed = 0;
@@ -271,7 +268,6 @@ const processInteractiveResults = (data) => {
     'category': Object.keys(categories).reduce((prev, curr) =>
       categories[prev] > categories[curr] ? prev : curr
     ),
-    'percentageCompleted': ((100 * completed) / totalCount).toFixed(0),
   };
   return result;
 };
@@ -288,15 +284,15 @@ const actions = (state, action, data) => {
     case Action.ADD_INTERACTIVE_REACT:
       state = /** @type {!State} */ ({
         ...state,
-        [StateProperty.INTERACTION_REACT_STATE]: {
-          ...state[StateProperty.INTERACTION_REACT_STATE],
+        [StateProperty.INTERACTIVE_REACT_STATE]: {
+          ...state[StateProperty.INTERACTIVE_REACT_STATE],
           [data['interactiveId']]: data,
         },
       });
       state[
-        StateProperty.INTERACTION_RESULTS_STATE
+        StateProperty.INTERACTIVE_RESULTS_STATE
       ] = processInteractiveResults(
-        state[StateProperty.INTERACTION_REACT_STATE]
+        state[StateProperty.INTERACTIVE_REACT_STATE]
       );
       return /** @type {!State} */ (state);
     case Action.ADD_NEW_PAGE_ID:
@@ -608,8 +604,8 @@ export class AmpStoryStoreService {
       [StateProperty.EDUCATION_STATE]: false,
       [StateProperty.HAS_SIDEBAR_STATE]: false,
       [StateProperty.INFO_DIALOG_STATE]: false,
-      [StateProperty.INTERACTION_REACT_STATE]: {},
-      [StateProperty.INTERACTION_RESULTS_STATE]: {
+      [StateProperty.INTERACTIVE_REACT_STATE]: {},
+      [StateProperty.INTERACTIVE_RESULTS_STATE]: {
         finished: false,
         category: '',
         percentageCorrect: 0,
