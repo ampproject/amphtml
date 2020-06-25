@@ -17,11 +17,7 @@
 import {BrowserController, RequestBank} from '../../testing/test-helper';
 import {parseQueryString} from '../../src/url';
 
-// TODO(wg-analytics): These tests time out on Firefox and Safari
-// (locally too) which causes browser disconnections on SauceLabs.
-const t = describe.configure().skipSauceLabs();
-
-t.run('amp-analytics', function () {
+describe('amp-analytics', function () {
   describes.integration(
     'basic pageview',
     {

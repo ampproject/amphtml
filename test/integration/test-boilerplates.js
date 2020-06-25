@@ -23,26 +23,23 @@ import {isAnimationNone} from '../../testing/test-helper';
 
 const timeout = window.ampTestRuntimeConfig.mochaTimeout;
 
-describe
-  .configure()
-  .retryOnSaucelabs()
-  .run('Old Opacity Boilerplate', () => {
-    let fixture;
-    beforeEach(() => {
-      return createFixtureIframe(
-        'test/fixtures/boilerplate-old-opacity.html',
-        1000
-      ).then((f) => {
-        fixture = f;
-      });
-    });
-
-    it('should show the body when opacity boilerplate is used', () => {
-      return expectBodyToBecomeVisible(fixture.win, timeout).then(() => {
-        expect(getStyle(fixture.win.document.body, 'opacity')).to.equal('1');
-      });
+describe.configure().run('Old Opacity Boilerplate', () => {
+  let fixture;
+  beforeEach(() => {
+    return createFixtureIframe(
+      'test/fixtures/boilerplate-old-opacity.html',
+      1000
+    ).then((f) => {
+      fixture = f;
     });
   });
+
+  it('should show the body when opacity boilerplate is used', () => {
+    return expectBodyToBecomeVisible(fixture.win, timeout).then(() => {
+      expect(getStyle(fixture.win.document.body, 'opacity')).to.equal('1');
+    });
+  });
+});
 
 describe.configure().run('New Visibility Boilerplate', () => {
   let fixture;

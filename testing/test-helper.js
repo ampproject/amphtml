@@ -143,8 +143,7 @@ export function assertScreenReaderElement(element, {index = 0} = {}) {
   expect(computedStyle.getPropertyValue('visibility')).to.equal('visible');
 }
 
-// Use a browserId to avoid cross-browser race conditions
-// when testing in Saucelabs.
+// TODO(amphtml): Remove browserId now that we don't test on Sauce Labs.
 /** @const {string} */
 const browserId = (Date.now() + Math.random()).toString(32);
 

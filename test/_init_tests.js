@@ -153,10 +153,6 @@ class TestConfig {
     return this.skip(this.runOnIos);
   }
 
-  skipSauceLabs() {
-    return this.skip(() => !!window.ampTestRuntimeConfig.saucelabs);
-  }
-
   skipIfPropertiesObfuscated() {
     return this.skip(function () {
       return window.__karma__.config.amp.propertiesObfuscated;
@@ -206,16 +202,6 @@ class TestConfig {
    */
   if(fn) {
     this.ifMatchers.push(fn);
-    return this;
-  }
-
-  retryOnSaucelabs(times = 4) {
-    if (!window.ampTestRuntimeConfig.saucelabs) {
-      return this;
-    }
-    this.configTasks.push((mocha) => {
-      mocha.retries(times);
-    });
     return this;
   }
 
@@ -490,7 +476,7 @@ afterEach(function () {
   cancelTimersForTesting();
 });
 
-chai.use(require('chai-as-promised')); // eslint-disable-line 
+chai.use(require('chai-as-promised')); // eslint-disable-line
 
 chai.Assertion.addMethod('attribute', function (attr) {
   const obj = this._obj;

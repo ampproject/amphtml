@@ -20,19 +20,13 @@ import {
   pollForLayout,
 } from '../../testing/iframe.js';
 
-describe
-  .configure()
-  .retryOnSaucelabs()
-  .run('released components: ', function () {
-    runTest.call(this, false);
-  });
+describe('released components: ', function () {
+  runTest.call(this, false);
+});
 
-describe
-  .configure()
-  .retryOnSaucelabs()
-  .run('released components with polyfills: ', function () {
-    runTest.call(this, true);
-  });
+describe('released components with polyfills: ', function () {
+  runTest.call(this, true);
+});
 
 function runTest(shouldKillPolyfillableApis) {
   describe.configure().run('Rendering of released components', function () {
@@ -49,8 +43,7 @@ function runTest(shouldKillPolyfillableApis) {
       });
     });
 
-    // There is really weird behavior when running this test in FF in
-    // saucelabs.
+    // There is really weird behavior when running this test in FF.
     // It never renders the ad, even though it appears to work when looking
     // at the rendering. The test passes when running locally in FF.
     // TODO(lannka, #3561): unmute the test.
