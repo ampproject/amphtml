@@ -239,7 +239,6 @@ export class Extensions {
   /**
    * Reloads the new version of the extension.
    * @param {string} extensionId
-   * @return {!Promise<!ExtensionDef>}
    */
   reloadExtension(extensionId) {
     // Ignore inserted script elements to prevent recursion.
@@ -267,7 +266,7 @@ export class Extensions {
       el.setAttribute('i-amphtml-loaded-new-version', extensionId)
     );
     const urlParts = parseExtensionUrl(els[0].src);
-    return this.preloadExtension(extensionId, urlParts.extensionVersion);
+    this.preloadExtension(extensionId, urlParts.extensionVersion);
   }
 
   /**
