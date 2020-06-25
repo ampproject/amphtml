@@ -31,7 +31,8 @@
   justify-content: center !important;
   height: 90px !important;
 	border-radius: 16px !important;
-	overflow: hidden !important;
+  overflow: hidden !important;
+  box-shadow: var(--i-amphtml-interactive-component-shadow) !important;
 }
 
 .i-amphtml-story-interactive-option {

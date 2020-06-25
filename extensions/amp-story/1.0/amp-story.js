@@ -1066,7 +1066,7 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Parse doc for polls and quizzes, and initialize them.
+   * Parse doc for polls and quizzes, and update the story-state.
    */
   initializeInteractiveComponents_() {
     toArray(
