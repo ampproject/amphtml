@@ -400,8 +400,6 @@ before(function () {
   };
 });
 
-this.mapToStringDefault = Map.prototype.toString;
-
 beforeEach(function () {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   beforeTest();
@@ -412,17 +410,6 @@ beforeEach(function () {
   warnForConsoleError();
   initialGlobalState = Object.keys(global);
   initialWindowState = Object.keys(window);
-
-  // Hack to override Map toString to allow better readability in Jasmine
-  // eslint-disable-next-line no-extend-native
-  Map.prototype.toString = () => {
-    let str = '{';
-    Object.keys(this).forEach((key) => {
-      str += ` ${key}: ${this.get(key)}, `;
-    });
-    str += '}';
-    return str;
-  };
 });
 
 function beforeTest() {
@@ -596,8 +583,25 @@ chai.Assertion.addMethod('jsonEqual', function (compare) {
     a,
     b
   );
+});
 
-  // Revert to default toString method for Map
-  // eslint-disable-next-line no-extend-native
-  Map.prototype.toString = this.mapToStringDefault;
+chai.Assertion.addMethod('deepEqualMapObject', function (compare) {
+  const map = this._obj;
+  const objStr = stringify(compare);
+
+  // Manual stringify because JSON stringify does not work for Map
+  let mapStr = '{';
+  map.forEach((value, key) => {
+    let valueStr = value ? `"${value}"` : null;
+    mapStr += `"${key}":${valueStr},`;
+  });
+  mapStr = mapStr.substring(0, mapStr.length - 1) + '}';
+
+  this.assert(
+    mapStr == objStr,
+    'expected JSON of Map to be equal to that of Object.\nExp: #{exp}\nAct: #{act}',
+    'expected JSON of Map to not be equal to that of Object.\nExp: #{exp}\nAct: #{act}',
+    objStr,
+    mapStr
+  );
 });

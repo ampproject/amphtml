@@ -334,35 +334,45 @@ describe('ActionService parseAction', () => {
 
   it('should return null for undefined references in dereferenced arg', () => {
     const a = parseAction('e:t.m(key1=foo.bar)');
-    expect(dereferenceArgsVariables(a.args, null)).to.deep.equal(
-      new Map().set('key1', null)
-    );
-    expect(dereferenceArgsVariables(a.args, {})).to.deep.equal({key1: null});
-    expect(dereferenceArgsVariables(a.args, {foo: null})).to.deep.equal({
+    expect(dereferenceArgsVariables(a.args, null)).to.deepEqualMapObject({
       key1: null,
     });
+    expect(dereferenceArgsVariables(a.args, {})).to.deepEqualMapObject({
+      key1: null,
+    });
+    expect(dereferenceArgsVariables(a.args, {foo: null})).to.deepEqualMapObject(
+      {
+        key1: null,
+      }
+    );
   });
 
   it('should return null for non-primitives in dereferenced args', () => {
     const a = parseAction('e:t.m(key1=foo.bar)');
     expect(
       dereferenceArgsVariables(a.args, {foo: {bar: undefined}})
-    ).to.deep.equal({key1: null});
-    expect(dereferenceArgsVariables(a.args, {foo: {bar: {}}})).to.deep.equal({
+    ).to.deepEqualMapObject({key1: null});
+    expect(
+      dereferenceArgsVariables(a.args, {foo: {bar: {}}})
+    ).to.deepEqualMapObject({
       key1: null,
     });
-    expect(dereferenceArgsVariables(a.args, {foo: {bar: []}})).to.deep.equal({
+    expect(
+      dereferenceArgsVariables(a.args, {foo: {bar: []}})
+    ).to.deepEqualMapObject({
       key1: null,
     });
     expect(
       dereferenceArgsVariables(a.args, {foo: {bar: () => {}}})
-    ).to.deep.equal({key1: null});
+    ).to.deepEqualMapObject({key1: null});
   });
 
   it('should support event data and opt_args', () => {
     const a = parseAction('e:t.m(key1=foo,key2=x)');
     const event = createCustomEvent(window, 'MyEvent');
-    expect(dereferenceArgsVariables(a.args, event, {x: 'bar'})).to.deep.equal({
+    expect(
+      dereferenceArgsVariables(a.args, event, {x: 'bar'})
+    ).to.deepEqualMapObject({
       key1: 'foo',
       key2: 'bar',
     });
@@ -376,13 +386,13 @@ describe('ActionService parseAction', () => {
 
   it('should dereference arg expressions', () => {
     const a = parseAction('e:t.m(key1=foo)');
-    expect(dereferenceArgsVariables(a.args, null)).to.deep.equal({key1: 'foo'});
+    expect(dereferenceArgsVariables(a.args, null)).to.deepEqualMapObject({key1: 'foo'});
   });
 
   it('should dereference arg expressions with an event without data', () => {
     const a = parseAction('e:t.m(key1=foo)');
     const event = createCustomEvent(window, 'MyEvent');
-    expect(dereferenceArgsVariables(a.args, {event})).to.deep.equal({
+    expect(dereferenceArgsVariables(a.args, {event})).to.deepEqualMapObject({
       key1: 'foo',
     });
   });
@@ -390,7 +400,7 @@ describe('ActionService parseAction', () => {
   it('should dereference arg expressions with an event with data', () => {
     const a = parseAction('e:t.m(key1=event.foo)');
     const event = createCustomEvent(window, 'MyEvent', {foo: 'bar'});
-    expect(dereferenceArgsVariables(a.args, event)).to.deep.equal({
+    expect(dereferenceArgsVariables(a.args, event)).to.deepEqualMapObject({
       key1: 'bar',
     });
   });
@@ -883,7 +893,7 @@ describes.sandboxed('Action method', {}, (env) => {
         expect(event).to.be.null;
         expect(method).to.equal('method');
         expect(actionEventType).to.equal('tap');
-        expect(args).to.deep.equal({realArgName: 'realArgValue'});
+        expect(args).to.deepEqualMapObject({realArgName: 'realArgValue'});
         expect(trust).to.equal(ActionTrust.HIGH);
         expect(tagOrTarget).to.equal('AMP-ACTION-MACRO');
         expect(actionEventType).to.equal('tap');
