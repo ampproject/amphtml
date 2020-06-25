@@ -16,7 +16,6 @@
 
 import {EmbedMode, parseEmbedMode} from './embed-mode';
 import {Observable} from '../../../src/observable';
-import {OptionConfigType} from './amp-story-interactive';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {hasOwn} from '../../../src/utils/object';
@@ -102,7 +101,7 @@ export let InteractiveResultsDef;
  *    hasSidebarState: boolean,
  *    infoDialogState: boolean,
  *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
- *    interactiveReactState: !Map<string, {option: ?OptionConfigType, interactiveId: string}>,
+ *    interactiveReactState: !Map<string, {option: ?./amp-story-interactive.OptionConfigType, interactiveId: string}>,
  *    interactiveResultsState: !InteractiveResultsDef,
  *    mutedState: boolean,
  *    pageAudioState: boolean,
@@ -190,7 +189,7 @@ export const StateProperty = {
 /** @const @enum {string} */
 export const Action = {
   ADD_INTERACTIVE_REACT: 'addInteractiveReact',
-  ADD_TO_ACTIONS_WHITELIST: 'addToActionsWhitelist',
+  ADD_TO_ACTIONS_ALLOWLIST: 'addToActionsAllowlist',
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
   SET_ADVANCEMENT_MODE: 'setAdvancementMode',
@@ -256,7 +255,7 @@ const processInteractiveResults = (data) => {
     totalCount += 1;
     if (interactiveConfig['option'] != null) {
       completed += 1;
-      const currCategory = interactiveConfig['option']['category'];
+      const currCategory = interactiveConfig['option']['resultscategory'];
       if (currCategory != undefined) {
         categories[currCategory] = categories[currCategory]
           ? categories[currCategory] + 1

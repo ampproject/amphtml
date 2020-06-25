@@ -280,7 +280,11 @@ describes.fakeWin('amp-story-store-service interaction reacts', {}, (env) => {
     return {
       interactiveId,
       option: answered
-        ? {'optionIndex': 1, 'category': category, 'text': 'This is an option'}
+        ? {
+            'optionIndex': 1,
+            'resultscategory': category,
+            'text': 'This is an option',
+          }
         : null,
     };
   };

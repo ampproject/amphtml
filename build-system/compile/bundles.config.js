@@ -872,7 +872,7 @@ exports.extensionBundles = [
         'amp-story-interactive',
         'amp-story-interactive-poll',
         'amp-story-interactive-quiz',
-        'amp-story-interactive-results-category',
+        'amp-story-interactive-results',
         'amp-story-share',
         'amp-story-share-menu',
         'amp-story-system-layer',

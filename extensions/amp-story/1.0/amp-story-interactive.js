@@ -76,7 +76,7 @@ export let InteractiveResponseType;
  *    optionIndex: number,
  *    text: string,
  *    correct: ?string,
- *    category: ?string,
+ *    resultscategory: ?string,
  *    image: ?string,
  * }}
  */
@@ -274,7 +274,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         while (options.length < optionNumber) {
           options.push({'optionIndex': options.length});
         }
-        options[optionNumber - 1][splitParts[2]] = attr.value;
+        options[optionNumber - 1][splitParts.slice(2).join('')] = attr.value;
       }
     });
     if (
