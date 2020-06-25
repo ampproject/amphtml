@@ -15,7 +15,7 @@
  */
 
 import {requireExternal} from '../../../src/module';
-import {rrulestr} from 'rrule-without-luxon/dist/esm/src/index.js';
+import {rrulestr} from 'rrule';
 
 /** @enum {string} */
 const DateType = {

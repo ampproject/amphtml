@@ -96,6 +96,29 @@ function patchIntersectionObserver() {
 }
 
 /**
+ * TODO(friedj): remove this patch when a better fix is upstreamed (https://github.com/jakubroztocil/rrule/pull/410).
+ *
+ * Patches rrule to remove references to luxon. Even though rrule marks luxon as an optional dependency,
+ * it is used as if its a required one (static import). rrule relies on its consumers either
+ * installing luxon or adding it as a webpack-style external. We don't want the former and
+ * can't yet do the latter.
+ *
+ * This function replaces the reference to luxon with a mock that throws (which the code handles well).
+ */
+function patchRRule() {
+  const path = 'node_modules/rrule/dist/esm/src/datewithzone.js';
+  let patchedContents = fs
+    .readFileSync(path)
+    .toString()
+    .replace(
+      `import { DateTime } from 'luxon;'`,
+      `const DateTime = { fromJSDate() { throw TypeError() } };`
+    );
+
+  writeIfUpdated(path, patchedContents);
+}
+
+/**
  * Does a yarn check on node_modules, and if it is outdated, runs yarn.
  */
 function runYarnCheck() {
@@ -145,6 +168,7 @@ async function updatePackages() {
   }
   patchWebAnimations();
   patchIntersectionObserver();
+  patchRRule();
 }
 
 module.exports = {

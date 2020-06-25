@@ -77,6 +77,10 @@
         "managerBranchPrefix": "linting-"
       }
     },
+    {
+      "packagePatterns": ["rrule"],
+      "enabled": false
+    },
 
     {
       "excludePackagePatterns": ["^@ampproject/"],
