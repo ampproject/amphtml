@@ -277,19 +277,24 @@ async function populateOrgCdn_(distFlavors, tempDir, outputDir) {
   };
 
   const rtvCopyingPromises = [];
-  for (const {environment, flavorType, rtvPrefixes} of distFlavors) {
+  for (const {flavorType, rtvPrefixes} of distFlavors) {
     rtvCopyingPromises.push(
       ...rtvPrefixes.map((rtvPrefix) =>
         rtvCopyingPromise(rtvPrefix, flavorType)
       )
     );
 
-    // Special handling for INABOX experiments, which requires that their
-    // control population be created from the base flavor.
-    if (environment == 'INABOX') {
-      const rtvPrefix =
-        EXPERIMENTAL_RTV_PREFIXES['INABOX'][`${flavorType}-control`];
-      rtvCopyingPromises.push(rtvCopyingPromise(rtvPrefix, 'base'));
+    // Special handling for INABOX experiments when compiling the base flavor.
+    // INABOX experiments need to have their control population be created from
+    // the base flavor.
+    if (flavorType == 'base') {
+      experimentsConfig
+        .filter(({environment}) => environment == 'INABOX')
+        .map(({flavorType: experimentFlavor}) => {
+          const rtvPrefix =
+            EXPERIMENTAL_RTV_PREFIXES['INABOX'][`${experimentFlavor}-control`];
+          rtvCopyingPromises.push(rtvCopyingPromise(rtvPrefix, 'base'));
+        });
     }
   }
   await Promise.all(rtvCopyingPromises);
