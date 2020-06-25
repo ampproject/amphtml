@@ -445,9 +445,9 @@ async function release() {
   log('Prepending config to entry files...');
   await prependConfig_(outputDir);
 
-  log('Copying from temporary directory to', cyan('net-wildcard'));
   if (!argv.flavor || argv.flavor == 'base') {
     // Only populate the net-wildcard directory if --flavor=base or if --flavor is not set.
+    log('Copying from temporary directory to', cyan('net-wildcard'));
     await populateNetWildcard_(tempDir, outputDir);
   }
 
