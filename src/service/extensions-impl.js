@@ -20,7 +20,7 @@ import {
   calculateExtensionScriptUrl,
   parseExtensionUrl,
 } from './extension-location';
-import {dev, devAssert, rethrowAsync} from '../log';
+import {dev, devAssert, rethrowAsync, user} from '../log';
 import {getMode} from '../mode';
 import {installStylesForDoc} from '../style-installer';
 import {map} from '../utils/object';
@@ -247,11 +247,15 @@ export class Extensions {
       extensionId,
       /* includeInserted */ false
     );
-    devAssert(
-      els.length > 0,
-      'Cannot find script for extension: %s',
-      extensionId
-    );
+    if (!els.length) {
+      const TAG = 'reloadExtension';
+      user().warn(
+        TAG,
+        'Extension script for "%s" is missing or was already reloaded.',
+        extensionId
+      );
+      return;
+    }
     // The previously awaited extension loader must not have finished or
     // failed.
     const holder = this.extensions_[extensionId];
