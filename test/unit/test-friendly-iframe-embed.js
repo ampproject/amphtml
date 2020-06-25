@@ -843,7 +843,9 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
 
           // Body is now not empty.
           contentBody.firstChild = {};
-          clock.tick(5);
+          window.setInterval(() => {
+            clock.tick(5);
+          }, 5);
           return embedPromise;
         })
         .then(() => {
@@ -860,6 +862,9 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       });
       expect(polls).to.have.length(1);
       iframe.contentWindow = contentWindow;
+      window.setInterval(() => {
+        clock.tick(5);
+      }, 5);
       loadListener();
       return embedPromise.then(() => {
         expect(polls).to.have.length(0);
