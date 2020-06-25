@@ -23,7 +23,6 @@
     --option-2-percentage: 0%;
     --option-3-percentage: 0%;
     --option-4-percentage: 0%;
-    box-shadow: var(--i-amphtml-interactive-component-shadow) !important;
 }
 
 .i-amphtml-story-interactive-quiz-option-container {
@@ -32,6 +31,7 @@
     background-color: var(--i-amphtml-interactive-option-background-color) !important;
     border-radius: var(--i-amphtml-interactive-chip-radius) !important;
     padding: 8px 8px 0px 8px !important;
+    box-shadow: var(--i-amphtml-interactive-component-shadow) !important;
 }
 
 .i-amphtml-story-interactive-quiz-option {
