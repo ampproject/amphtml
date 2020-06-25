@@ -96,7 +96,7 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
 
   /**
    * Updates the element with the correct category
-   * @param {OptionConfigType} categorySelected
+   * @param {./amp-story-interactive.OptionConfigType} categorySelected
    */
   updateCategory(categorySelected) {
     setStyle(

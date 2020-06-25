@@ -711,11 +711,11 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    */
   updateToPostSelectionState_(selectedOption) {
     this.rootEl_.classList.add('i-amphtml-story-interactive-post-selection');
-    selectedOption
-      ? selectedOption.classList.add(
-          'i-amphtml-story-interactive-option-selected'
-        )
-      : null;
+    if (selectedOption != null) {
+      selectedOption.classList.add(
+        'i-amphtml-story-interactive-option-selected'
+      );
+    }
 
     if (this.optionsData_) {
       this.rootEl_.classList.add('i-amphtml-story-interactive-has-data');
