@@ -239,6 +239,7 @@ export class Extensions {
   /**
    * Reloads the new version of the extension.
    * @param {string} extensionId
+   * @return {?Promise<!ExtensionDef>}
    */
   reloadExtension(extensionId) {
     // Ignore inserted script elements to prevent recursion.
@@ -253,7 +254,7 @@ export class Extensions {
         'Extension script for "%s" is missing or was already reloaded.',
         extensionId
       );
-      return;
+      return null;
     }
     // The previously awaited extension loader must not have finished or
     // failed.
@@ -266,7 +267,7 @@ export class Extensions {
       el.setAttribute('i-amphtml-loaded-new-version', extensionId)
     );
     const urlParts = parseExtensionUrl(els[0].src);
-    this.preloadExtension(extensionId, urlParts.extensionVersion);
+    return this.preloadExtension(extensionId, urlParts.extensionVersion);
   }
 
   /**
