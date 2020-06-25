@@ -153,7 +153,7 @@ function discoverDistFlavors_() {
       })),
   ].filter(
     // If --flavor is defined, filter out the rest.
-    ([flavorType]) => !argv.flavor || flavorType == argv.flavor
+    ({flavorType}) => !argv.flavor || flavorType == argv.flavor
   );
 
   log(
