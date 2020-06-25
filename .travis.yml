@@ -84,14 +84,6 @@ jobs:
       script:
         - unbuffer node build-system/pr-check/dist-tests.js
     - stage: test
-      name: 'Remote (Sauce Labs) Tests'
-      if: type = push
-      script:
-        - unbuffer node build-system/pr-check/remote-tests.js
-      after_script:
-        - build-system/sauce_connect/stop_sauce_connect.sh
-        - ps -ef
-    - stage: test
       name: 'End to End Tests'
       script:
         - unbuffer node build-system/pr-check/e2e-tests.js
