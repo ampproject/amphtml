@@ -93,7 +93,7 @@
 .i-amphtml-story-interactive-results-category-description {
   font-size: 14px !important;
   text-align: center !important;
-  color: var(--interactive-option-text-color) !important;
+  color: var(--i-amphtml-interactive-option-text-color) !important;
 	margin-top: 8px !important;
 	padding: 0px 20px !important;
 }
