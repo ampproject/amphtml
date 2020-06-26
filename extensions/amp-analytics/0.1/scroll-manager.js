@@ -113,8 +113,8 @@ export class ScrollManager {
         left: this.viewport_.getScrollLeft() - scrollLeft,
         width: size.width,
         height: size.height,
-        scrollHeight,
-        scrollWidth,
+        scrollWidth: this.viewport_.getScrollWidth(),
+        scrollHeight: this.viewport_.getScrollHeight(),
         initialSize: {scrollHeight, scrollWidth},
       };
       handler(scrollEvent);
@@ -142,12 +142,7 @@ export class ScrollManager {
       // Initial root layout rectangle
       const {height: initialScrollHeight, width: initialScrollWidth} = rects[0];
       // Current root layout rectangle
-      const {
-        top: scrollTop,
-        left: scrollLeft,
-        width: scrollWidth,
-        height: scrollHeight,
-      } = rects[1];
+      const {top: scrollTop, left: scrollLeft} = rects[1];
       /** {./scroll-manager.ScrollEventDef} */
       const scrollEvent = {
         // In the case of shadow documents (e.g. amp-next-page), we offset
@@ -160,8 +155,8 @@ export class ScrollManager {
         left: e.left - scrollLeft,
         width: e.width,
         height: e.height,
-        scrollWidth,
-        scrollHeight,
+        scrollWidth: this.viewport_.getScrollWidth(),
+        scrollHeight: this.viewport_.getScrollHeight(),
         initialSize: {
           scrollHeight: initialScrollHeight,
           scrollWidth: initialScrollWidth,

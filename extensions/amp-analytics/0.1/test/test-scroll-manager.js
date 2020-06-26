@@ -59,6 +59,8 @@ describes.realWin('ScrollManager', {amp: 1}, (env) => {
         .returns({top: 0, left: 0, height: 200, width: 200}),
       'getScrollTop': env.sandbox.stub().returns(0),
       'getScrollLeft': env.sandbox.stub().returns(0),
+      'getScrollHeight': env.sandbox.stub().returns(624),
+      'getScrollWidth': env.sandbox.stub().returns(364),
       'getLayoutRect': env.sandbox
         .stub()
         .returns({width: 500, height: 500, top: 0, left: 0}),
@@ -130,8 +132,8 @@ describes.realWin('ScrollManager', {amp: 1}, (env) => {
       left: 500,
       height: 250,
       width: 250,
-      scrollWidth: 800,
-      scrollHeight: 700,
+      scrollWidth: 364,
+      scrollHeight: 624,
       initialSize: {scrollHeight: 500, scrollWidth: 500},
     };
 
@@ -174,8 +176,8 @@ describes.realWin('ScrollManager', {amp: 1}, (env) => {
       left: 450,
       height: 250,
       width: 250,
-      scrollWidth: 800,
-      scrollHeight: 700,
+      scrollWidth: 364,
+      scrollHeight: 624,
       initialSize: {scrollHeight: 500, scrollWidth: 500},
     };
 

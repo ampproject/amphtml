@@ -253,6 +253,8 @@ describes.realWin('Events', {amp: 1}, (env) => {
           .returns({top: 0, left: 0, height: 200, width: 200}),
         'getScrollTop': env.sandbox.stub().returns(0),
         'getScrollLeft': env.sandbox.stub().returns(0),
+        'getScrollHeight': env.sandbox.stub().returns(1224),
+        'getScrollWidth': env.sandbox.stub().returns(364),
         'getLayoutRect': env.sandbox
           .stub()
           .returns({width: 500, height: 500, top: 0, left: 0}),
@@ -291,6 +293,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
     });
 
     it('fires on scroll', async () => {
+      fakeViewport['getScrollHeight'] = env.sandbox.stub().returns(500);
       const fn1 = env.sandbox.stub();
       const fn2 = env.sandbox.stub();
       tracker.add(
