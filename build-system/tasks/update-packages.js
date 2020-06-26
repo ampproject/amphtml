@@ -107,11 +107,11 @@ function patchIntersectionObserver() {
  */
 function patchRRule() {
   const path = 'node_modules/rrule/dist/esm/src/datewithzone.js';
-  let patchedContents = fs
+  const patchedContents = fs
     .readFileSync(path)
     .toString()
     .replace(
-      `import { DateTime } from 'luxon;'`,
+      `import { DateTime } from 'luxon';`,
       `const DateTime = { fromJSDate() { throw TypeError() } };`
     );
 
