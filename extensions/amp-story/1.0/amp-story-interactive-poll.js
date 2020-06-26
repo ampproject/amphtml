@@ -29,7 +29,7 @@ export const FontSize = {
 };
 
 /** @const {number} */
-const MIN_HORIZONTAL_PADDING = 27;
+const MIN_HORIZONTAL_PADDING = 20;
 
 /**
  * Generates the template for the binary poll.
@@ -57,6 +57,7 @@ const buildOptionTemplate = (element) => {
   const html = htmlFor(element);
   return html`
     <div class="i-amphtml-story-interactive-option">
+      <span class="i-amphtml-story-interactive-option-percent-bar"></span>
       <span class="i-amphtml-story-interactive-option-text-container">
         <span class="i-amphtml-story-interactive-option-title"
           ><span class="i-amphtml-story-interactive-option-title-text"></span
@@ -204,21 +205,29 @@ export class AmpStoryInteractivePoll extends AmpStoryInteractive {
       currOption.querySelector(
         '.i-amphtml-story-interactive-option-percentage-text'
       ).textContent = `${percentage}%`;
-      currOption.setAttribute('style', `flex-grow: ${percentage} !important`);
 
-      if (percentage < 20) {
-        const textContainer = currOption.querySelector(
-          '.i-amphtml-story-interactive-option-text-container'
-        );
-        textContainer.setAttribute(
+      currOption
+        .querySelector('.i-amphtml-story-interactive-option-percent-bar')
+        .setAttribute(
           'style',
-          `transform: translateX(${
-            index === 0 ? MIN_HORIZONTAL_PADDING : -MIN_HORIZONTAL_PADDING
-          }%) !important`
+          `transform: scaleX(${percentage * 0.01 * 2}) !important`
         );
-        if (percentage === 0) {
-          textContainer.setAttribute('style', 'opacity: 0 !important');
-        }
+
+      const textContainer = currOption.querySelector(
+        '.i-amphtml-story-interactive-option-text-container'
+      );
+
+      textContainer.setAttribute(
+        'style',
+        `transform: translateX(${
+          percentage > 25
+            ? (percentage - 50) * (index === 0 ? 1 : -1)
+            : MIN_HORIZONTAL_PADDING * (index === 0 ? -1 : 1)
+        }%) !important`
+      );
+
+      if (percentage === 0) {
+        textContainer.setAttribute('style', 'opacity: 0 !important');
       }
     });
   }
