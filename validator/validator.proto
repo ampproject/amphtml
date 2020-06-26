@@ -1032,15 +1032,3 @@ message ValidationResult {
   // requirements.
   repeated ValueSetRequirement value_set_requirements = 8;
 }
-
-// Information about the validator returned by ValidatorFactory
-// (see validator.h).
-// NEXT AVAILABLE TAG: 4
-message ValidatorInfo {
-  // Path from which the spec file was loaded.
-  optional string rules_path = 1;
-  // The file revision of validator.cc.
-  optional int32 validator_revision = 2 [default = -1];
-  // The file revision of the spec file (validator.protoascii).
-  optional int32 spec_file_revision = 3 [default = -1];
-}

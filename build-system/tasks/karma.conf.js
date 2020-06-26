@@ -298,6 +298,7 @@ module.exports = {
     'karma-fixture',
     'karma-html2js-preprocessor',
     'karma-ie-launcher',
+    'karma-structured-json-reporter',
     'karma-mocha',
     'karma-mocha-reporter',
     'karma-safari-launcher',

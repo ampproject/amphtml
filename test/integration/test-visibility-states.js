@@ -70,7 +70,11 @@ t.run('Viewer Visibility State', () => {
 
       let shouldPass = false;
       let doPass_;
+      let intersect_;
       let notifyPass = noop;
+
+      let intersected;
+      let notifyIntersected;
 
       function doPass() {
         if (shouldPass) {
@@ -80,11 +84,26 @@ t.run('Viewer Visibility State', () => {
         }
       }
 
+      function intersect() {
+        intersect_.apply(this, arguments);
+        notifyIntersected();
+      }
+
       function waitForNextPass() {
         return new Promise((resolve) => {
-          shouldPass = true;
           notifyPass = resolve;
-          resources.schedulePass();
+
+          if (resources.isIntersectionExperimentOn()) {
+            // Element lifecycle callbacks depend on the observer taking its
+            // initial measurements, so wait for an intersection first.
+            return intersected.then(() => {
+              shouldPass = true;
+              resources.schedulePass();
+            });
+          } else {
+            shouldPass = true;
+            resources.schedulePass();
+          }
         });
       }
 
@@ -93,13 +112,15 @@ t.run('Viewer Visibility State', () => {
         unlayoutCallback.reset();
         pauseCallback.reset();
         resumeCallback.reset();
-        //unselect.reset();
       }
 
       beforeEach(() => {
         win = env.win;
         notifyPass = noop;
         shouldPass = false;
+        intersected = new Promise((resolve) => {
+          notifyIntersected = resolve;
+        });
 
         const vsync = Services.vsyncFor(win);
         env.sandbox.stub(vsync, 'mutate').callsFake((mutator) => {
@@ -119,9 +140,9 @@ t.run('Viewer Visibility State', () => {
 
             resources = Services.resourcesForDoc(win.document);
             doPass_ = resources.doPass;
+            intersect_ = resources.intersect;
             env.sandbox.stub(resources, 'doPass').callsFake(doPass);
-            // TODO(jridgewell@): Do not stub private method
-            //unselect = env.sandbox.stub(resources, 'unselectText_');
+            env.sandbox.stub(resources, 'intersect').callsFake(intersect);
 
             const img = win.document.createElement('amp-img');
             img.setAttribute('width', 100);
@@ -334,7 +355,6 @@ t.run('Viewer Visibility State', () => {
             expect(unlayoutCallback).to.have.been.called;
             expect(pauseCallback).to.have.been.called;
             expect(resumeCallback).not.to.have.been.called;
-            //expect(unselect).to.have.been.called;
           });
         });
 
@@ -392,7 +412,6 @@ t.run('Viewer Visibility State', () => {
             expect(unlayoutCallback).to.have.been.called;
             expect(pauseCallback).to.have.been.called;
             expect(resumeCallback).not.to.have.been.called;
-            //expect(unselect).to.have.been.called;
           });
         });
 
@@ -519,7 +538,6 @@ t.run('Viewer Visibility State', () => {
             expect(unlayoutCallback).to.have.been.called;
             expect(pauseCallback).not.to.have.been.called;
             expect(resumeCallback).not.to.have.been.called;
-            //expect(unselect).to.have.been.called;
           });
         });
 
