@@ -925,6 +925,6 @@ amp-story .amp-video-eq,
   --i-amphtml-interactive-prompt-line-height: 24px !important;
 }
 
-amp-story-interactive-poll[theme="dark"] {
+amp-story-interactive-binary-poll[theme="dark"] {
   --i-amphtml-interactive-option-accent-color: white !important;
 }

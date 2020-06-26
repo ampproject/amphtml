@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpStoryInteractivePoll} from '../amp-story-interactive-poll';
+import {AmpStoryInteractiveBinaryPoll} from '../amp-story-interactive-binary-poll';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {Services} from '../../../../src/services';
 import {
@@ -26,7 +26,7 @@ import {measureMutateElementStub} from '../../../../testing/test-helper';
 import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin(
-  'amp-story-interactive-poll',
+  'amp-story-interactive-binary-poll',
   {
     amp: true,
   },
@@ -44,7 +44,7 @@ describes.realWin(
         .resolves({get: () => Promise.resolve('cid')});
 
       const ampStoryPollEl = win.document.createElement(
-        'amp-story-interactive-poll'
+        'amp-story-interactive-binary-poll'
       );
       ampStoryPollEl.getResources = () => win.__AMP_SERVICES.resources.obj;
       requestService = getRequestService(win, ampStoryPollEl);
@@ -62,7 +62,7 @@ describes.realWin(
       storyEl.appendChild(storyPage);
 
       win.document.body.appendChild(storyEl);
-      ampStoryPoll = new AmpStoryInteractivePoll(ampStoryPollEl);
+      ampStoryPoll = new AmpStoryInteractiveBinaryPoll(ampStoryPollEl);
       env.sandbox
         .stub(ampStoryPoll, 'measureMutateElement')
         .callsFake(measureMutateElementStub);
