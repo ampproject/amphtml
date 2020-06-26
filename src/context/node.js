@@ -16,9 +16,9 @@
 
 import {dev, devAssert} from '../log';
 import {getMode} from '../mode';
-import {throttleTail} from './scheduler';
 import {pushIfNotExist, removeItem} from '../utils/array';
 import {startsWith} from '../string';
+import {throttleTail} from './scheduler';
 
 // Protection for creating the ContextNode directly. See the constructor.
 const PRIVATE_ONLY = {};
@@ -183,7 +183,10 @@ export class ContextNode {
     this.children_ = null;
 
     /** @const @private {function()} */
-    this.scheduleDiscover_ = throttleTail(this.discover_.bind(this), setTimeout);
+    this.scheduleDiscover_ = throttleTail(
+      this.discover_.bind(this),
+      setTimeout
+    );
 
     this.discover();
   }
