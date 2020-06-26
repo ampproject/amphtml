@@ -172,6 +172,7 @@ export class AmpStoryPlayer {
     this.stories_ = toArray(this.element_.querySelectorAll('a'));
 
     this.initializeShadowRoot_();
+    this.initializeButton_();
     this.initializeIframes_();
     this.signalReady_();
     this.isBuilt_ = true;
@@ -209,6 +210,20 @@ export class AmpStoryPlayer {
     styleEl.textContent = cssText;
     shadowRoot.appendChild(styleEl);
     shadowRoot.appendChild(this.rootEl_);
+  }
+
+  /**
+   * Helper to create a button.
+   * @param {!Element} element
+   * @private
+   */
+  initializeButton_() {
+    const button = document.createElement('a');
+    button.textContent = true ? '×' : '←';
+    button.addEventListener("click", (e) => {
+      e.target.dispatchEvent(createCustomEvent(this.win_, 'close', {}));
+    });
+    this.rootEl_.appendChild(button);
   }
 
   /**
