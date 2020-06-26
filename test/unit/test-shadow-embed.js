@@ -197,8 +197,7 @@ describes.sandboxed('shadow-embed', {}, () => {
             });
           });
 
-          // TODO(aghassemi, #12499): Make this work with latest mocha / karma
-          describe.skip('importShadowBody', () => {
+          describe('importShadowBody', () => {
             let shadowRoot, source, child1, child2;
 
             beforeEach(() => {
@@ -242,6 +241,19 @@ describes.sandboxed('shadow-embed', {}, () => {
               }
               expect(shadowRoot.contains(body)).to.be.true;
               expect(body.children).to.have.length(0);
+            });
+
+            it('should allow reusing same body', () => {
+              const firstBody = importShadowBody(shadowRoot, source, true);
+              const newSource = document.createElement('body');
+              newSource.appendChild(document.createElement('span'));
+              const secondBody = importShadowBody(shadowRoot, newSource, true);
+
+              expect(shadowRoot.body).to.equal(secondBody);
+              expect(shadowRoot.children).to.have.length(1);
+              expect(firstBody).not.to.equal(secondBody);
+              expect(secondBody.children).to.have.length(1);
+              expect(secondBody.firstChild.tagName).to.equal('SPAN');
             });
           });
         });

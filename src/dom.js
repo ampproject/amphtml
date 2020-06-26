@@ -118,7 +118,7 @@ export function removeElement(element) {
 
 /**
  * Removes all child nodes of the specified element.
- * @param {!Element} parent
+ * @param {!Element|!DocumentFragment} parent
  */
 export function removeChildren(parent) {
   while (parent.firstChild) {
