@@ -644,14 +644,14 @@ describes.sandboxed('Extensions', {}, () => {
       env.sandbox.stub(Services, 'ampdocServiceFor').returns(null);
       extensions = new Extensions(win);
       env.sandbox.stub(extensions, 'preloadExtension');
-      env.sandbox.stub(user(), 'warn');
+      env.sandbox.stub(user(), 'error');
     });
 
     describe('regular scripts', () => {
       it('should devAssert if script cannot be found', () => {
         extensions.reloadExtension('amp-list');
 
-        expect(user().warn).to.be.calledWith(
+        expect(user().error).to.be.calledWith(
           'reloadExtension',
           'Extension script for "%s" is missing or was already reloaded.',
           'amp-list'
@@ -671,7 +671,7 @@ describes.sandboxed('Extensions', {}, () => {
 
         extensions.reloadExtension('amp-list');
 
-        expect(user().warn).to.be.calledWith(
+        expect(user().error).to.be.calledWith(
           'reloadExtension',
           'Extension script for "%s" is missing or was already reloaded.',
           'amp-list'
@@ -761,7 +761,7 @@ describes.sandboxed('Extensions', {}, () => {
       it('should devAssert if script cannot be found', () => {
         extensions.reloadExtension('amp-list');
 
-        expect(user().warn).to.be.calledWith(
+        expect(user().error).to.be.calledWith(
           'reloadExtension',
           'Extension script for "%s" is missing or was already reloaded.',
           'amp-list'
@@ -792,7 +792,7 @@ describes.sandboxed('Extensions', {}, () => {
 
         extensions.reloadExtension('amp-list');
 
-        expect(user().warn).to.be.calledWith(
+        expect(user().error).to.be.calledWith(
           'reloadExtension',
           'Extension script for "%s" is missing or was already reloaded.',
           'amp-list'

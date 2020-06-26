@@ -249,7 +249,7 @@ export class Extensions {
     );
     if (!els.length) {
       const TAG = 'reloadExtension';
-      user().warn(
+      user().error(
         TAG,
         'Extension script for "%s" is missing or was already reloaded.',
         extensionId
