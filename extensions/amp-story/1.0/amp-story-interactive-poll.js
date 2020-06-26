@@ -28,6 +28,9 @@ export const FontSize = {
   DOUBLE_LINE: 14,
 };
 
+/** @const {number} */
+const MIN_HORIZONTAL_PADDING = 27;
+
 /**
  * Generates the template for the binary poll.
  *
@@ -209,7 +212,9 @@ export class AmpStoryInteractivePoll extends AmpStoryInteractive {
         );
         textContainer.setAttribute(
           'style',
-          `transform: translateX(${index === 0 ? 27 : -27}%) !important`
+          `transform: translateX(${
+            index === 0 ? MIN_HORIZONTAL_PADDING : -MIN_HORIZONTAL_PADDING
+          }%) !important`
         );
         if (percentage === 0) {
           textContainer.setAttribute('style', 'opacity: 0 !important');
