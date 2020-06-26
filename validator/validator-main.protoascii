@@ -3626,7 +3626,7 @@ attr_lists: {
     disabled_by: "amp4email"
     name: "list"
   }
-  attrs: { 
+  attrs: {
     disabled_by: "amp4email"
     name: "enterkeyhint"
   }
@@ -4479,6 +4479,7 @@ tags: {  # <amp-img>
   attrs: { name: "object-fit" }
   attrs: { name: "object-position" }
   attrs: { name: "placeholder" }
+  attrs: { name: "referrerpolicy" }
   # <amp-bind>
   attrs: { name: "[alt]" }
   attrs: { name: "[attribution]" }
@@ -4507,6 +4508,7 @@ tags: {  # <amp-img>
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "placeholder" }
+  attrs: { name: "referrerpolicy" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-amp4email"
   # <amp-bind>
