@@ -197,8 +197,15 @@ export function importShadowBody(shadowRoot, body, deep) {
     }
   }
   setStyle(resultBody, 'position', 'relative');
+  const oldBody = shadowRoot.body;
+  if (oldBody) {
+    shadowRoot.removeChild(oldBody);
+  }
   shadowRoot.appendChild(resultBody);
-  Object.defineProperty(shadowRoot, 'body', {value: resultBody});
+  Object.defineProperty(shadowRoot, 'body', {
+    configurable: true,
+    value: resultBody,
+  });
   return resultBody;
 }
 
