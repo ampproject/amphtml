@@ -36,7 +36,12 @@ export const FontSize = {
  */
 const buildBinaryPollTemplate = (element) => {
   const html = htmlFor(element);
-  return html` <div class="i-amphtml-story-interactive-poll-container"></div> `;
+  return html`
+    <div class="i-amphtml-story-interactive-poll-container">
+      <div class="i-amphtml-story-interactive-prompt-container"></div>
+      <div class="i-amphtml-story-interactive-poll-option-container"></div>
+    </div>
+  `;
 };
 
 /**
@@ -49,10 +54,14 @@ const buildOptionTemplate = (element) => {
   const html = htmlFor(element);
   return html`
     <div class="i-amphtml-story-interactive-option">
-      <span class="i-amphtml-story-interactive-option-title"
-        ><span class="i-amphtml-story-interactive-option-title-text"></span
-      ></span>
-      <span class="i-amphtml-story-interactive-option-percentage-text">0%</span>
+      <span class="i-amphtml-story-interactive-option-text-container">
+        <span class="i-amphtml-story-interactive-option-title"
+          ><span class="i-amphtml-story-interactive-option-title-text"></span
+        ></span>
+        <span class="i-amphtml-story-interactive-option-percentage-text"
+          >0%</span
+        >
+      </span>
     </div>
   `;
 };
@@ -102,9 +111,13 @@ export class AmpStoryInteractivePoll extends AmpStoryInteractive {
    * @param {!Element} root
    */
   attachContent_(root) {
-    root.appendChild(this.generateOption_(this.options_[0]));
-    root.appendChild(buildBinaryOptionDividerTemplate(root));
-    root.appendChild(this.generateOption_(this.options_[1]));
+    this.attachPrompt_(root);
+    const options = root.querySelector(
+      '.i-amphtml-story-interactive-poll-option-container'
+    );
+    options.appendChild(this.generateOption_(this.options_[0]));
+    options.appendChild(buildBinaryOptionDividerTemplate(root));
+    options.appendChild(this.generateOption_(this.options_[1]));
   }
 
   /**
