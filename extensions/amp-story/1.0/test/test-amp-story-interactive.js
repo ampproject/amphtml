@@ -62,7 +62,12 @@ export const addConfigToInteractive = (
   correct = undefined
 ) => {
   for (let i = 0; i < options; i++) {
-    interactive.element.setAttribute(`option-${i + 1}-text`, `text ${i + 1}`);
+    ['text', 'results-category', 'image'].forEach((attr) => {
+      interactive.element.setAttribute(
+        `option-${i + 1}-${attr}`,
+        `${attr} ${i + 1}`
+      );
+    });
   }
   if (correct) {
     interactive.element.setAttribute(`option-${correct}-correct`, 'correct');
