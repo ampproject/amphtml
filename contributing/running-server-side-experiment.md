@@ -86,7 +86,7 @@ After a new experiment slot has been added, AMP's release framework will respect
 
 Once the experimental bianries are shipped, once can access those with different RTV prefix.
 
-For Experiment with `environment = AMP`. The Beta version that has prefix (03) will be used as control build for all experiments.
+For Experiment with `environment = AMP`. The Beta version that has prefix (03) will be used as control group for all experiments.
 
 | Experiment Slot Used  | RTV Prefix |
 |---------------------- | ---------- |
