@@ -209,7 +209,7 @@ function gitCommitFormattedTime(ref = 'HEAD') {
  * @return {string}
  */
 function gitCommitMessage(ref = 'HEAD') {
-  return getStdout(`git log ${ref} -n 1`);
+  return getStdout(`git log ${ref} -n 1 --pretty="%B"`);
 }
 
 /**
