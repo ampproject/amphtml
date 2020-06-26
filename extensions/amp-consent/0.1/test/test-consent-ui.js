@@ -139,6 +139,9 @@ describes.realWin(
         });
         consentUI = new ConsentUI(mockInstance, config);
         expect(consentUI.ui_.tagName).to.equal('IFRAME');
+        expect(consentUI.ui_.getAttribute('sandbox')).to.equal(
+          'allow-scripts allow-popups allow-same-origin'
+        );
       });
     });
 
