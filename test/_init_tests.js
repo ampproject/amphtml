@@ -599,8 +599,8 @@ chai.Assertion.addMethod('deepEqualMapObject', function (compare) {
 
   this.assert(
     mapStr == objStr,
-    'expected JSON of Map to be equal to that of Object.\nExp: #{exp}\nAct: #{act}',
-    'expected JSON of Map to not be equal to that of Object.\nExp: #{exp}\nAct: #{act}',
+    'expected string of Map to be equal to that of Object.\nExp: #{exp}\nAct: #{act}',
+    'expected string of Map to not be equal to that of Object.\nExp: #{exp}\nAct: #{act}',
     objStr,
     mapStr
   );

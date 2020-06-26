@@ -1046,6 +1046,8 @@ export function parseActionMap(action, context) {
         actionMap = map();
       }
 
+      // TODO: If we are using the Map constructor, this should be actionMap.set(event, actions).
+      // However, doing so will break a large amount of tests.
       actionMap[event] = actions;
     } else {
       // Unexpected token.

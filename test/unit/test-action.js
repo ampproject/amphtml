@@ -310,9 +310,13 @@ describe('ActionService parseAction', () => {
     expect(parseAction('e:t.m(k=1); ').args['k']).to.equal(1);
   });
 
+  /*
+  TODO: A good candidate for deletion, per Kris' comment.
+  This is because Maps are not JSON objects, and thus it makes no sense to check for proto.
   it('should parse with args as a proto-less object', () => {
     expect(parseAction('e:t.m(k=1)').args.__proto__).to.be.undefined;
   });
+  */
 
   it('should interprete key always as string', () => {
     expect(parseAction('true:t.m').event).to.equal('true');
@@ -378,11 +382,15 @@ describe('ActionService parseAction', () => {
     });
   });
 
+  /*
+  TODO: A good candidate for deletion, per Kris' comment.
+  This is because Maps are not JSON objects, and thus it makes no sense to check for proto.
   it('evaluated args should be proto-less objects', () => {
     const a = parseAction('e:t.m(key1=foo)');
     expect(dereferenceArgsVariables(a.args, null).__proto__).to.be.undefined;
     expect(dereferenceArgsVariables(a.args, null).constructor).to.be.undefined;
   });
+  */
 
   it('should dereference arg expressions', () => {
     const a = parseAction('e:t.m(key1=foo)');
