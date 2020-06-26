@@ -28,6 +28,10 @@ export const FontSize = {
   DOUBLE_LINE: 14,
 };
 
+/**
+ * Minimum transformX value.
+ * Prevents small percentages from moving outside of poll.
+ *
 /** @const {number} */
 const MIN_HORIZONTAL_PADDING = 20;
 
@@ -208,12 +212,13 @@ export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {
         '.i-amphtml-story-interactive-option-percentage-text'
       ).textContent = `${percentage}%`;
 
-      currOption
-        .querySelector('.i-amphtml-story-interactive-option-percent-bar')
-        .setAttribute(
-          'style',
-          `transform: scaleX(${percentage * 0.01 * 2}) !important`
-        );
+      setStyle(
+        currOption.querySelector(
+          '.i-amphtml-story-interactive-option-percent-bar'
+        ),
+        'transform',
+        `scaleX(${percentage * 0.01 * 2})`
+      );
 
       const textContainer = currOption.querySelector(
         '.i-amphtml-story-interactive-option-text-container'
@@ -222,14 +227,14 @@ export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {
       textContainer.setAttribute(
         'style',
         `transform: translateX(${
-          percentage > 25
-            ? (percentage - 50) * (index === 0 ? 1 : -1)
-            : MIN_HORIZONTAL_PADDING * (index === 0 ? -1 : 1)
+          percentage < MIN_HORIZONTAL_PADDING
+            ? MIN_HORIZONTAL_PADDING * (index === 0 ? -1 : 1)
+            : (percentage - 50) * (index === 0 ? 1 : -1)
         }%) !important`
       );
 
       if (percentage === 0) {
-        textContainer.setAttribute('style', 'opacity: 0 !important');
+        setStyle(textContainer, 'opacity', '0');
       }
     });
   }
