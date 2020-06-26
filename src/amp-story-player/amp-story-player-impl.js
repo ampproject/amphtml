@@ -172,8 +172,8 @@ export class AmpStoryPlayer {
     this.stories_ = toArray(this.element_.querySelectorAll('a'));
 
     this.initializeShadowRoot_();
-    this.initializeButton_();
     this.initializeIframes_();
+    this.initializeButton_();
     this.signalReady_();
     this.isBuilt_ = true;
   }
@@ -214,14 +214,23 @@ export class AmpStoryPlayer {
 
   /**
    * Helper to create a button.
-   * @param {!Element} element
    * @private
    */
   initializeButton_() {
+    const option = this.element_.getAttribute('button');
+    if (!option) {
+      return;
+    }
+
     const button = document.createElement('a');
-    button.textContent = true ? '×' : '←';
+    button.style.position = 'absolute';
+    button.style.color = 'white';
+    button.style.fontSize = '40px';
+    button.style.paddingLeft = '7px';
+    
+    button.textContent = option === 'close' ? '×' : '←';
     button.addEventListener("click", (e) => {
-      e.target.dispatchEvent(createCustomEvent(this.win_, 'close', {}));
+      this.element_.dispatchEvent(createCustomEvent(this.win_, option === 'close' ? 'close' : 'back', {}));
     });
     this.rootEl_.appendChild(button);
   }
