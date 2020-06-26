@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.107 */
+/** Version: 0.1.22.108 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -1507,7 +1507,7 @@ function acceptPortResultData(
   requireOriginVerified,
   requireSecureChannel
 ) {
-  return port.acceptResult().then(result => {
+  return port.acceptResult().then((result) => {
     if (
       result.origin != requireOrigin ||
       (requireOriginVerified && !result.originVerified) ||
@@ -2076,7 +2076,7 @@ function setStyles(element, styles) {
  */
 function resetStyles(element, properties) {
   const styleObj = {};
-  properties.forEach(prop => {
+  properties.forEach((prop) => {
     styleObj[prop] = null;
   });
   setStyles(element, styleObj);
@@ -4188,7 +4188,7 @@ class ActivityIframeView extends View {
      * @private @const
      * {!Promise<!web-activities/activity-ports.ActivityIframePort>}
      */
-    this.portPromise_ = new Promise(resolve => {
+    this.portPromise_ = new Promise((resolve) => {
       this.portResolver_ = resolve;
     });
   }
@@ -4202,7 +4202,7 @@ class ActivityIframeView extends View {
   init(dialog) {
     return this.activityPorts_
       .openIframe(this.iframe_, this.src_, this.args_)
-      .then(port => this.onOpenIframeResponse_(port, dialog));
+      .then((port) => this.onOpenIframeResponse_(port, dialog));
   }
 
   /**
@@ -4230,7 +4230,7 @@ class ActivityIframeView extends View {
     this.port_ = port;
     this.portResolver_(port);
 
-    this.port_.onResizeRequest(height => {
+    this.port_.onResizeRequest((height) => {
       dialog.resizeView(this, height);
     });
 
@@ -4251,7 +4251,7 @@ class ActivityIframeView extends View {
    * @template T
    */
   on(message, callback) {
-    this.getPortPromise_().then(port => {
+    this.getPortPromise_().then((port) => {
       port.on(message, callback);
     });
   }
@@ -4260,7 +4260,7 @@ class ActivityIframeView extends View {
    * @param {!../proto/api_messages.Message} request
    */
   execute(request) {
-    this.getPortPromise_().then(port => {
+    this.getPortPromise_().then((port) => {
       port.execute(request);
     });
   }
@@ -4270,7 +4270,7 @@ class ActivityIframeView extends View {
    * @return {!Promise<!web-activities/activity-ports.ActivityResult>}
    */
   acceptResult() {
-    return this.getPortPromise_().then(port => port.acceptResult());
+    return this.getPortPromise_().then((port) => port.acceptResult());
   }
 
   /**
@@ -4285,7 +4285,7 @@ class ActivityIframeView extends View {
     requireOriginVerified,
     requireSecureChannel
   ) {
-    return this.getPortPromise_().then(port => {
+    return this.getPortPromise_().then((port) => {
       return acceptPortResultData(
         port,
         requireOrigin,
@@ -4307,7 +4307,7 @@ class ActivityIframeView extends View {
    * @param {function()} callback
    */
   onCancel(callback) {
-    this.acceptResult().catch(reason => {
+    this.acceptResult().catch((reason) => {
       if (isCancelError(reason)) {
         callback();
       }
@@ -4409,7 +4409,7 @@ function utf8EncodeSync(string) {
  * @return {!Uint8Array}
  */
 function base64UrlDecodeToBytes(str) {
-  const encoded = atob(str.replace(/[-_.]/g, ch => base64UrlDecodeSubs[ch]));
+  const encoded = atob(str.replace(/[-_.]/g, (ch) => base64UrlDecodeSubs[ch]));
   return stringToBytes(encoded);
 }
 
@@ -5660,7 +5660,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.107',
+    '_client': 'SwG 0.1.22.108',
   });
 }
 
@@ -6253,7 +6253,7 @@ class OffersFlow {
       // Remove old sku from offers if in list.
       let skuList = feArgsObj['skus'];
       const /** @type {string} */ oldSku = feArgsObj['oldSku'];
-      skuList = skuList.filter(sku => sku !== oldSku);
+      skuList = skuList.filter((sku) => sku !== oldSku);
 
       log_2(
         skuList.length > 0,
@@ -6438,7 +6438,7 @@ class SubscribeOptionFlow {
     );
 
     this.activityIframeView_.acceptResult().then(
-      result => {
+      (result) => {
         const data = result.data;
         const response = new SubscribeResponse();
         if (data['subscribe']) {
@@ -6446,7 +6446,7 @@ class SubscribeOptionFlow {
         }
         this.maybeOpenOffersFlow_(response);
       },
-      reason => {
+      (reason) => {
         this.dialogManager_.completeView(this.activityIframeView_);
         throw reason;
       }
@@ -6556,7 +6556,7 @@ class AbbrvOfferFlow {
     );
 
     // If result is due to requesting offers, redirect to offers flow
-    this.activityIframeView_.acceptResult().then(result => {
+    this.activityIframeView_.acceptResult().then((result) => {
       if (result.data['viewOffers']) {
         const options = this.options_ || {};
         if (options.isClosable == undefined) {
@@ -6653,7 +6653,7 @@ class ActivityIframePort$1 {
   connect() {
     return this.iframePort_.connect().then(() => {
       // Attach a callback to receive messages after connection complete
-      this.iframePort_.onMessage(data => {
+      this.iframePort_.onMessage((data) => {
         const response = data && data['RESPONSE'];
         if (!response) {
           return;
@@ -6665,7 +6665,7 @@ class ActivityIframePort$1 {
       });
 
       if (this.deps_ && this.deps_.eventManager()) {
-        this.on(AnalyticsRequest, request => {
+        this.on(AnalyticsRequest, (request) => {
           this.deps_.eventManager().logEvent({
             eventType: request.getEvent(),
             eventOriginator: EventOriginator.SWG_SERVER,
@@ -6779,7 +6779,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.107',
+        '_client': 'SwG 0.1.22.108',
         'supportsEventManager': true,
       },
       args || {}
@@ -6878,7 +6878,7 @@ class ActivityPorts$1 {
    * @param {function(!ActivityPortDef)} callback
    */
   onResult(requestId, callback) {
-    this.activityPorts_.onResult(requestId, port => {
+    this.activityPorts_.onResult(requestId, (port) => {
       callback(new ActivityPortDeprecated(port));
     });
   }
@@ -7265,7 +7265,7 @@ function getExperiments(win) {
 
     // Format:
     // - experimentString = (experimentSpec,)*
-    combinedExperimentString.split(',').forEach(s => {
+    combinedExperimentString.split(',').forEach((s) => {
       s = s.trim();
       if (!s) {
         return;
@@ -7572,7 +7572,7 @@ class AnalyticsService {
   addLabels(labels) {
     if (labels && labels.length > 0) {
       const newLabels = [].concat(this.context_.getLabelList());
-      labels.forEach(label => {
+      labels.forEach((label) => {
         if (newLabels.indexOf(label) == -1) {
           newLabels.push(label);
         }
@@ -7621,7 +7621,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.107');
+    context.setClientVersion('SwG 0.1.22.108');
 
     const utmParams = parseQueryString$1(this.getQueryString_());
     const campaign = utmParams['utm_campaign'];
@@ -7657,7 +7657,7 @@ class AnalyticsService {
       this.serviceReady_ = this.activityPorts_
         .openIframe(this.iframe_, feUrl('/serviceiframe'), null, true)
         .then(
-          port => {
+          (port) => {
             // Register a listener for the logging to code indicate it is
             // finished logging.
             port.on(FinishedLoggingResponse, this.afterLogging_.bind(this));
@@ -7668,7 +7668,7 @@ class AnalyticsService {
               return port;
             });
           },
-          message => {
+          (message) => {
             // If the port doesn't open register that logging is broken so
             // nothing is just waiting.
             this.loggingBroken_ = true;
@@ -7764,7 +7764,7 @@ class AnalyticsService {
     }
     // Register we sent a log, the port will call this.afterLogging_ when done.
     this.unfinishedLogs_++;
-    this.lastAction_ = this.start().then(port => {
+    this.lastAction_ = this.start().then((port) => {
       const analyticsRequest = this.createLogRequest_(event);
       port.execute(analyticsRequest);
       if (isExperimentOn(this.doc_.getWin(), ExperimentFlags.LOGGING_BEACON)) {
@@ -7819,7 +7819,7 @@ class AnalyticsService {
       return Promise.resolve(true);
     }
     if (this.promiseToLog_ === null) {
-      this.promiseToLog_ = new Promise(resolve => {
+      this.promiseToLog_ = new Promise((resolve) => {
         this.loggingResolver_ = resolve;
       });
 
@@ -7969,9 +7969,11 @@ class SmartSubscriptionButtonApi {
     });
     this.button_.appendChild(this.iframe_);
     const args = this.activityPorts_.addDefaultArguments(this.args_);
-    this.activityPorts_.openIframe(this.iframe_, this.src_, args).then(port => {
-      port.on(SmartBoxMessage, this.handleSmartBoxClick_.bind(this));
-    });
+    this.activityPorts_
+      .openIframe(this.iframe_, this.src_, args)
+      .then((port) => {
+        port.on(SmartBoxMessage, this.handleSmartBoxClick_.bind(this));
+      });
     return this.iframe_;
   }
 }
@@ -8186,7 +8188,7 @@ class ButtonApi {
    * @param {boolean=} isFromUserAction
    */
   logSwgEvent_(eventType, isFromUserAction) {
-    this.configuredRuntimePromise_.then(configuredRuntime => {
+    this.configuredRuntimePromise_.then((configuredRuntime) => {
       configuredRuntime.eventManager().logSwgEvent(eventType, isFromUserAction);
     });
   }
@@ -8198,11 +8200,10 @@ class ButtonApi {
    * @private
    */
   getOptions_(optionsOrCallback) {
-    const options =
-      /** @type {!../api/subscriptions.ButtonOptions|!../api/subscriptions.SmartButtonOptions} */ (optionsOrCallback &&
-      typeof optionsOrCallback != 'function'
-        ? optionsOrCallback
-        : {'theme': Theme.LIGHT});
+    const options = /** @type {!../api/subscriptions.ButtonOptions|!../api/subscriptions.SmartButtonOptions} */ (optionsOrCallback &&
+    typeof optionsOrCallback != 'function'
+      ? optionsOrCallback
+      : {'theme': Theme.LIGHT});
 
     const theme = options['theme'];
     if (theme !== Theme.LIGHT && theme !== Theme.DARK) {
@@ -8219,12 +8220,10 @@ class ButtonApi {
    * @private
    */
   getCallback_(optionsOrCallback, callback) {
-    return (
-      /** @type {function()|function(Event):boolean} */ ((typeof optionsOrCallback ==
-      'function'
-        ? optionsOrCallback
-        : null) || callback)
-    );
+    return /** @type {function()|function(Event):boolean} */ ((typeof optionsOrCallback ==
+    'function'
+      ? optionsOrCallback
+      : null) || callback);
   }
 
   /**
@@ -8236,7 +8235,7 @@ class ButtonApi {
   setupButtonAndGetParams_(button, optionsOrCallback, callbackFun) {
     const options = this.getOptions_(optionsOrCallback);
     const callback = this.getCallback_(optionsOrCallback, callbackFun);
-    const clickFun = event => {
+    const clickFun = (event) => {
       this.logSwgEvent_(AnalyticsEvent.ACTION_SWG_BUTTON_CLICK, true);
       if (typeof callback === 'function') {
         callback(event);
@@ -8325,7 +8324,7 @@ class Callbacks {
   triggerEntitlementsResponse(promise) {
     return this.trigger_(
       CallbackId.ENTITLEMENTS,
-      promise.then(res => res.clone())
+      promise.then((res) => res.clone())
     );
   }
 
@@ -8446,13 +8445,13 @@ class Callbacks {
    */
   triggerPaymentResponse(responsePromise) {
     this.paymentResponsePromise_ = responsePromise.then(
-      res => {
+      (res) => {
         this.trigger_(
           CallbackId.PAYMENT_RESPONSE,
           Promise.resolve(res.clone())
         );
       },
-      reason => {
+      (reason) => {
         if (isCancelError(reason)) {
           return;
         }
@@ -8770,13 +8769,13 @@ class DeferredAccountFlow {
 
     this.openPromise_ = this.dialogManager_.openView(this.activityIframeView_);
     return this.activityIframeView_.acceptResult().then(
-      result => {
+      (result) => {
         // The consent part is complete.
         return this.handleConsentResponse_(
           /** @type {!Object} */ (result.data)
         );
       },
-      reason => {
+      (reason) => {
         if (isCancelError(reason)) {
           this.deps_
             .callbacks()
@@ -8812,7 +8811,7 @@ class DeferredAccountFlow {
     );
     const purchaseDataList = data['purchaseDataList']
       ? data['purchaseDataList'].map(
-          pd => new PurchaseData(pd['data'], pd['signature'])
+          (pd) => new PurchaseData(pd['data'], pd['signature'])
         )
       : [
           // TODO(dvoytenko): cleanup/deprecate.
@@ -8900,7 +8899,7 @@ class FriendlyIframe {
     resetAllStyles(this.iframe_);
 
     /** @private @const {!Promise} */
-    this.ready_ = new Promise(resolve => {
+    this.ready_ = new Promise((resolve) => {
       this.iframe_.onload = resolve;
     });
   }
@@ -8981,7 +8980,7 @@ class FriendlyIframe {
 function transition(el, props, durationMillis, curve) {
   const win = el.ownerDocument.defaultView;
   const previousTransitionValue = el.style.transition || '';
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     win.setTimeout(() => {
       win.setTimeout(resolve, durationMillis);
       const tr = `${durationMillis}ms ${curve}`;
@@ -9281,7 +9280,7 @@ function onDocumentState(doc, condition, callback) {
  * @return {!Promise<!Document>}
  */
 function whenDocumentReady(doc) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     onDocumentReady(doc, resolve);
   });
 }
@@ -9957,13 +9956,13 @@ class DialogManager {
    * @return {!Promise}
    */
   openView(view, hidden = false) {
-    view.whenComplete().catch(reason => {
+    view.whenComplete().catch((reason) => {
       if (isCancelError(reason)) {
         this.completeView(view);
       }
       throw reason;
     });
-    return this.openDialog(hidden).then(dialog => {
+    return this.openDialog(hidden).then((dialog) => {
       return dialog.openView(view);
     });
   }
@@ -10084,7 +10083,7 @@ class Toast {
     setImportantStyles(this.iframe_, toastImportantStyles);
 
     /** @private @const {!Promise} */
-    this.ready_ = new Promise(resolve => {
+    this.ready_ = new Promise((resolve) => {
       this.iframe_.onload = resolve;
     });
   }
@@ -10113,7 +10112,7 @@ class Toast {
     const toastDurationSeconds = 7;
     return this.activityPorts_
       .openIframe(this.iframe_, this.src_, this.args_)
-      .then(port => {
+      .then((port) => {
         return port.whenReady();
       })
       .then(() => {
@@ -10302,7 +10301,7 @@ class EntitlementsManager {
     if (!this.responsePromise_) {
       this.responsePromise_ = this.getEntitlementsFlow_(encryptedDocumentKey);
     }
-    return this.responsePromise_.then(response => {
+    return this.responsePromise_.then((response) => {
       if (response.isReadyToPay != null) {
         this.analyticsService_.setReadyToPay(response.isReadyToPay);
       }
@@ -10335,7 +10334,7 @@ class EntitlementsManager {
    */
   getEntitlementsFlow_(encryptedDocumentKey) {
     return this.fetchEntitlementsWithCaching_(encryptedDocumentKey).then(
-      entitlements => {
+      (entitlements) => {
         this.onEntitlementsFetched_(entitlements);
         return entitlements;
       }
@@ -10351,7 +10350,7 @@ class EntitlementsManager {
     return Promise.all([
       this.storage_.get(ENTS_STORAGE_KEY),
       this.storage_.get(IS_READY_TO_PAY_STORAGE_KEY),
-    ]).then(cachedValues => {
+    ]).then((cachedValues) => {
       const raw = cachedValues[0];
       const irtp = cachedValues[1];
       // Try cache first.
@@ -10368,7 +10367,7 @@ class EntitlementsManager {
         }
       }
       // If cache didn't match, perform fetch.
-      return this.fetchEntitlements_(encryptedDocumentKey).then(ents => {
+      return this.fetchEntitlements_(encryptedDocumentKey).then((ents) => {
         // If entitlements match the product, store them in cache.
         if (ents && ents.enablesThis() && ents.raw) {
           this.storage_.set(ENTS_STORAGE_KEY, ents.raw);
@@ -10389,11 +10388,11 @@ class EntitlementsManager {
     this.positiveRetries_ = 0;
     const attempt = () => {
       positiveRetries--;
-      return this.fetch_(encryptedDocumentKey).then(entitlements => {
+      return this.fetch_(encryptedDocumentKey).then((entitlements) => {
         if (entitlements.enablesThis() || positiveRetries <= 0) {
           return entitlements;
         }
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           this.win_.setTimeout(() => {
             resolve(attempt());
           }, 550);
@@ -10559,7 +10558,7 @@ class EntitlementsManager {
     }
     // Check if storage bit is set. It's only set by the `Entitlements.ack`
     // method.
-    return this.storage_.get(TOAST_STORAGE_KEY).then(value => {
+    return this.storage_.get(TOAST_STORAGE_KEY).then((value) => {
       if (value == '1') {
         // Already shown;
         return;
@@ -10607,12 +10606,11 @@ class EntitlementsManager {
       encodeURIComponent(this.publicationId_) +
       '/entitlements';
     if (encryptedDocumentKey) {
-      //TODO(chenshay): Make this a 'Post'.
       url += '?crypt=' + encodeURIComponent(encryptedDocumentKey);
     }
     return this.fetcher_
       .fetchCredentialedJson(serviceUrl(url))
-      .then(json => this.parseEntitlements(json));
+      .then((json) => this.parseEntitlements(json));
   }
 }
 
@@ -10710,8 +10708,8 @@ class Xhr {
     init = setupInit(init);
     return this.fetch_(input, init)
       .then(
-        response => response,
-        reason => {
+        (response) => response,
+        (reason) => {
           const targetOrigin = parseUrl$1(input).origin;
           throw new Error(
             `XHR Failed fetching (${targetOrigin}/...):`,
@@ -10719,7 +10717,7 @@ class Xhr {
           );
         }
       )
-      .then(response => assertSuccess(response));
+      .then((response) => assertSuccess(response));
   }
 }
 
@@ -10776,7 +10774,7 @@ function setupInit(init, accept) {
  * @private Visible for testing
  */
 function fetchPolyfill(input, init) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     const xhr = createXhrRequest(init.method || 'GET', input);
 
     if (init.credentials == 'include') {
@@ -10788,7 +10786,7 @@ function fetchPolyfill(input, init) {
     }
 
     if (init.headers) {
-      Object.keys(init.headers).forEach(function(header) {
+      Object.keys(init.headers).forEach(function (header) {
         xhr.setRequestHeader(header, init.headers[header]);
       });
     }
@@ -10856,7 +10854,7 @@ function isRetriable(status) {
  * @private Visible for testing
  */
 function assertSuccess(response) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     if (response.ok) {
       return resolve(response);
     }
@@ -11059,7 +11057,7 @@ class XhrFetcher {
       headers: {'Accept': 'text/plain, application/json'},
       credentials: 'include',
     });
-    return this.fetch(url, init).then(response => response.json());
+    return this.fetch(url, init).then((response) => response.json());
   }
 
   /** @override */
@@ -11287,14 +11285,14 @@ class LinkCompleteFlow {
         /* requireSecureChannel */ false
       );
       return promise.then(
-        response => {
+        (response) => {
           deps
             .eventManager()
             .logSwgEvent(AnalyticsEvent.ACTION_LINK_CONTINUE, true);
           const flow = new LinkCompleteFlow(deps, response);
           flow.start();
         },
-        reason => {
+        (reason) => {
           if (isCancelError(reason)) {
             deps
               .eventManager()
@@ -11354,7 +11352,7 @@ class LinkCompleteFlow {
     this.completeResolver_ = null;
 
     /** @private @const {!Promise} */
-    this.completePromise_ = new Promise(resolve => {
+    this.completePromise_ = new Promise((resolve) => {
       this.completeResolver_ = resolve;
     });
   }
@@ -11370,10 +11368,10 @@ class LinkCompleteFlow {
       /* requireSecureChannel */ true
     );
     promise
-      .then(response => {
+      .then((response) => {
         this.complete_(response);
       })
-      .catch(reason => {
+      .catch((reason) => {
         // Rethrow async.
         setTimeout(() => {
           throw reason;
@@ -11505,10 +11503,10 @@ class LinkSaveFlow {
     if (!response || !response.getRequested()) {
       return;
     }
-    this.requestPromise_ = new Promise(resolve => {
+    this.requestPromise_ = new Promise((resolve) => {
       resolve(this.callback_());
     })
-      .then(request => {
+      .then((request) => {
         const saveRequest = new LinkSaveTokenRequest();
         if (request && request.token) {
           if (request.authCode) {
@@ -11523,7 +11521,7 @@ class LinkSaveFlow {
         }
         this.activityIframeView_.execute(saveRequest);
       })
-      .catch(reason => {
+      .catch((reason) => {
         // The flow is complete.
         this.complete_();
         throw reason;
@@ -11568,10 +11566,10 @@ class LinkSaveFlow {
         /* requireOriginVerified */ true,
         /* requireSecureChannel */ true
       )
-      .then(result => {
+      .then((result) => {
         return this.handleLinkSaveResponse_(result);
       })
-      .catch(reason => {
+      .catch((reason) => {
         // In case this flow wasn't complete, complete it here
         this.complete_();
         // Handle cancellation from user, link confirm start or completion here
@@ -11803,7 +11801,6 @@ class LoginNotificationApi {
         productId: deps.pageConfig().getProductId(),
         // No need to ask the user. Just tell them you're logging them in.
         userConsent: false,
-        // TODO(chenshay): Pass entitlements value here.
       }),
       /* shouldFadeBody */ true
     );
@@ -11827,7 +11824,7 @@ class LoginNotificationApi {
         // The consent part is complete.
         this.dialogManager_.completeView(this.activityIframeView_);
       },
-      reason => {
+      (reason) => {
         this.dialogManager_.completeView(this.activityIframeView_);
         throw reason;
       }
@@ -11881,7 +11878,6 @@ class LoginPromptApi {
         productId: deps.pageConfig().getProductId(),
         // First ask the user if they want us to log them in.
         userConsent: true,
-        // TODO(chenshay): Pass entitlements value here.
       }),
       /* shouldFadeBody */ true
     );
@@ -11905,7 +11901,7 @@ class LoginPromptApi {
         // The consent part is complete.
         this.dialogManager_.completeView(this.activityIframeView_);
       },
-      reason => {
+      (reason) => {
         if (isCancelError(reason)) {
           this.deps_
             .callbacks()
@@ -11973,7 +11969,7 @@ class OffersApi {
         encodeURIComponent(productId)
     );
     // TODO(dvoytenko): switch to a non-credentialed request after launch.
-    return this.fetcher_.fetchCredentialedJson(url).then(json => {
+    return this.fetcher_.fetchCredentialedJson(url).then((json) => {
       return json['offers'] || [];
     });
   }
@@ -15120,9 +15116,9 @@ class PayClient {
       this.win_ != this.top_()
     );
     let resolver = null;
-    const promise = new Promise(resolve => (resolver = resolve));
+    const promise = new Promise((resolve) => (resolver = resolve));
     // Notice that the callback for verifier may execute asynchronously.
-    this.redirectVerifierHelper_.useVerifier(verifier => {
+    this.redirectVerifierHelper_.useVerifier((verifier) => {
       if (verifier) {
         setInternalParam(paymentRequest, 'redirectVerifier', verifier);
       }
@@ -15182,19 +15178,20 @@ class PayClient {
         // Temporary client side solution to remember the
         // input params. TODO: Remove this once server-side
         // input preservation is done and is part of the response.
-        res => {
+        (res) => {
           if (request) {
             res['paymentRequest'] = request;
           }
           return res;
         }
       )
-      .catch(reason => {
+      .catch((reason) => {
         if (typeof reason == 'object' && reason['statusCode'] == 'CANCELED') {
           const error = createCancelError(this.win_);
           if (request) {
-            error['productType'] =
-              /** @type {!PaymentDataRequest} */ (request)['i']['productType'];
+            error['productType'] = /** @type {!PaymentDataRequest} */ (request)[
+              'i'
+            ]['productType'];
           } else {
             error['productType'] = null;
           }
@@ -15270,7 +15267,7 @@ class RedirectVerifierHelper {
    * @param {function(?string)} callback
    */
   useVerifier(callback) {
-    this.getOrCreatePair_(pair => {
+    this.getOrCreatePair_((pair) => {
       if (pair) {
         try {
           this.win_.localStorage.setItem(REDIRECT_STORAGE_KEY, pair.key);
@@ -15313,7 +15310,7 @@ class RedirectVerifierHelper {
       callback(this.pair_);
     } else if (this.pairPromise_) {
       // Otherwise wait for it to be created.
-      this.pairPromise_.then(pair => callback(pair));
+      this.pairPromise_.then((pair) => callback(pair));
     }
     return this.pairPromise_;
   }
@@ -15358,7 +15355,7 @@ class RedirectVerifierHelper {
 
         // 3. Create a hash.
         crypto.subtle.digest({name: 'SHA-384'}, stringToBytes(key)).then(
-          buffer => {
+          (buffer) => {
             const verifier = btoa(
               bytesToString(
                 new Uint8Array(/** @type {!ArrayBuffer} */ (buffer))
@@ -15366,7 +15363,7 @@ class RedirectVerifierHelper {
             );
             resolve({key, verifier});
           },
-          reason => {
+          (reason) => {
             reject(reason);
           }
         );
@@ -15376,7 +15373,7 @@ class RedirectVerifierHelper {
           // recoverable.
           return null;
         })
-        .then(pair => {
+        .then((pair) => {
           this.pairCreated_ = true;
           this.pair_ = pair;
           return pair;
@@ -15713,8 +15710,8 @@ class PropensityServer {
       referrer;
     return this.fetcher_
       .fetch(this.propensityUrl_(url), init)
-      .then(result => result.json())
-      .then(response => {
+      .then((result) => result.json())
+      .then((response) => {
         return this.parsePropensityResponse_(response);
       });
   }
@@ -15871,7 +15868,7 @@ class Storage {
    */
   get(key) {
     if (!this.values_[key]) {
-      this.values_[key] = new Promise(resolve => {
+      this.values_[key] = new Promise((resolve) => {
         if (this.win_.sessionStorage) {
           try {
             resolve(this.win_.sessionStorage.getItem(storageKey(key)));
@@ -15894,7 +15891,7 @@ class Storage {
    */
   set(key, value) {
     this.values_[key] = Promise.resolve(value);
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (this.win_.sessionStorage) {
         try {
           this.win_.sessionStorage.setItem(storageKey(key), value);
@@ -15912,7 +15909,7 @@ class Storage {
    */
   remove(key) {
     delete this.values_[key];
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (this.win_.sessionStorage) {
         try {
           this.win_.sessionStorage.removeItem(storageKey(key));
@@ -15999,12 +15996,12 @@ class WaitForSubscriptionLookupApi {
     );
 
     return this.accountPromise_.then(
-      account => {
+      (account) => {
         // Account was found.
         this.dialogManager_.completeView(this.activityIframeView_);
         return account;
       },
-      reason => {
+      (reason) => {
         this.dialogManager_.completeView(this.activityIframeView_);
         throw reason;
       }
@@ -16137,7 +16134,7 @@ class ConfiguredRuntime {
     injectStyleSheet(this.doc_, CSS$1);
 
     // Report redirect errors if any.
-    this.activityPorts_.onRedirectError(error => {
+    this.activityPorts_.onRedirectError((error) => {
       this.analyticsService_.addLabels(['redirect']);
       this.eventManager_.logSwgEvent(
         AnalyticsEvent.EVENT_PAYMENT_FAILED,
@@ -16229,7 +16226,7 @@ class ConfiguredRuntime {
           }
           break;
         case 'experiments':
-          v.forEach(experiment => setExperiment(this.win_, experiment, true));
+          v.forEach((experiment) => setExperiment(this.win_, experiment, true));
           if (this.analytics()) {
             // If analytics service isn't set up yet, then it will get the
             // experiments later.
@@ -16291,12 +16288,13 @@ class ConfiguredRuntime {
   getEntitlements(encryptedDocumentKey) {
     return this.entitlementsManager_
       .getEntitlements(encryptedDocumentKey)
-      .then(entitlements => {
+      .then((entitlements) => {
         // Auto update internal things tracking the user's current SKU.
         if (entitlements) {
           try {
             const skus = entitlements.entitlements.map(
-              entitlement => entitlement.getSku() || 'unknown subscriptionToken'
+              (entitlement) =>
+                entitlement.getSku() || 'unknown subscriptionToken'
             );
             if (skus.length > 0) {
               this.analyticsService_.setSku(skus.join(','));
