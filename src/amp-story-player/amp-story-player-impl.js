@@ -222,15 +222,17 @@ export class AmpStoryPlayer {
       return;
     }
 
-    const button = document.createElement('a');
-    button.style.position = 'absolute';
-    button.style.color = 'white';
-    button.style.fontSize = '40px';
-    button.style.paddingLeft = '7px';
-    
+    const button = this.doc_.createElement('a');
+    setStyle(button, 'position', 'absolute');
+    setStyle(button, 'color', 'white');
+    setStyle(button, 'fontSize', '40px');
+    setStyle(button, 'paddingLeft', '7px');
+
     button.textContent = option === 'close' ? '×' : '←';
-    button.addEventListener("click", (e) => {
-      this.element_.dispatchEvent(createCustomEvent(this.win_, option === 'close' ? 'close' : 'back', {}));
+    button.addEventListener('click', () => {
+      this.element_.dispatchEvent(
+        createCustomEvent(this.win_, option === 'close' ? 'close' : 'back', {})
+      );
     });
     this.rootEl_.appendChild(button);
   }
