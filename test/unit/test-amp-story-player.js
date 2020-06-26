@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import {AmpStoryComponentManager} from '../../src/amp-story-player/amp-story-component-manager';
 import {
   AmpStoryPlayer,
   IFRAME_IDX,
 } from '../../src/amp-story-player/amp-story-player-impl';
-import {AmpStoryPlayerManager} from '../../src/amp-story-player/amp-story-player-manager';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {toArray} from '../../src/types';
 
@@ -53,7 +53,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       playerEl.appendChild(storyAnchor);
     }
     win.document.body.appendChild(playerEl);
-    manager = new AmpStoryPlayerManager(win);
+    manager = new AmpStoryComponentManager(win);
 
     env.sandbox
       .stub(Messaging, 'waitForHandshakeFromDocument')

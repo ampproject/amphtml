@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpStoryEntryPoint} from './amp-story-entry-point/amp-story-entry-point-impl';
 import {AmpStoryPlayer} from './amp-story-player-impl';
 import {initLogConstructor} from '../log';
 import {throttle} from '../utils/rate-limit';
@@ -21,7 +22,7 @@ import {throttle} from '../utils/rate-limit';
 /** @const {string} */
 const SCROLL_THROTTLE_MS = 500;
 
-export class AmpStoryPlayerManager {
+export class AmpStoryComponentManager {
   /**
    * @param {!Window} win
    * @constructor
@@ -32,13 +33,13 @@ export class AmpStoryPlayerManager {
   }
 
   /**
-   * Calls layoutCallback on the player when it is close to the viewport.
-   * @param {!AmpStoryPlayer} playerImpl
+   * Calls layoutCallback on the element when it is close to the viewport.
+   * @param {!AmpStoryPlayer|!AmpStoryEntryPoint} elImpl
    * @private
    */
-  layoutPlayer_(playerImpl) {
+  layoutEl_(elImpl) {
     if (!this.win_.IntersectionObserver || this.win_ !== this.win_.parent) {
-      this.layoutFallback_(playerImpl);
+      this.layoutFallback_(elImpl);
       return;
     }
 
@@ -47,48 +48,47 @@ export class AmpStoryPlayerManager {
         if (!entry.isIntersecting) {
           return;
         }
-        playerImpl.layoutCallback();
+        elImpl.layoutCallback();
       });
     };
 
     const observer = new IntersectionObserver(intersectingCallback, {
       rootMargin: '100%',
     });
-    observer.observe(playerImpl.getElement());
+    observer.observe(elImpl.getElement());
   }
 
   /**
    * Fallback for when IntersectionObserver is not supported. Calls
-   * layoutCallback on the player when it is close to the viewport.
-   * @param {!AmpStoryPlayer} playerImpl
+   * layoutCallback on the element when it is close to the viewport.
+   * @param {!AmpStoryPlayer|!AmpStoryEntryPoint} elImpl
    * @private
    */
-  layoutFallback_(playerImpl) {
-    // TODO(Enriqe): pause players when scrolling away from viewport.
+  layoutFallback_(elImpl) {
+    // TODO(Enriqe): pause elements when scrolling away from viewport.
     this.win_.addEventListener(
       'scroll',
       throttle(
         this.win_,
-        this.layoutIfVisible_.bind(this, playerImpl),
+        this.layoutIfVisible_.bind(this, elImpl),
         SCROLL_THROTTLE_MS
       )
     );
 
     // Calls it once it in case scroll event never fires.
-    this.layoutIfVisible_(playerImpl);
+    this.layoutIfVisible_(elImpl);
   }
 
   /**
-   * Checks if player is close to the viewport and calls layoutCallback when it
+   * Checks if element is close to the viewport and calls layoutCallback when it
    * is.
-   * @param {!AmpStoryPlayer} playerImpl
+   * @param {!AmpStoryPlayer|!AmpStoryEntryPoint} elImpl
    * @private
    */
-  layoutIfVisible_(playerImpl) {
-    const playerTop = playerImpl.getElement()./*OK*/ getBoundingClientRect()
-      .top;
-    if (this.win_./*OK*/ innerHeight * 2 > playerTop) {
-      playerImpl.layoutCallback();
+  layoutIfVisible_(elImpl) {
+    const elTop = elImpl.getElement()./*OK*/ getBoundingClientRect().top;
+    if (this.win_./*OK*/ innerHeight * 2 > elTop) {
+      elImpl.layoutCallback();
     }
   }
 
@@ -104,7 +104,24 @@ export class AmpStoryPlayerManager {
       const playerEl = players[i];
       const player = new AmpStoryPlayer(this.win_, playerEl);
       player.buildCallback();
-      this.layoutPlayer_(player);
+      this.layoutEl_(player);
+    }
+  }
+
+  /**
+   * Builds and layouts entry points.
+   * @public
+   */
+  loadEntryPoints() {
+    const doc = this.win_.document;
+    const entryPoints = doc.getElementsByTagName('amp-story-entry-point');
+    initLogConstructor();
+
+    for (let i = 0; i < entryPoints.length; i++) {
+      const entryPointEl = entryPoints[i];
+      const entryPoint = new AmpStoryEntryPoint(this.win_, entryPointEl);
+      entryPoint.buildCallback();
+      this.layoutEl_(entryPoint);
     }
   }
 }

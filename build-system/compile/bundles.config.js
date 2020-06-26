@@ -145,6 +145,16 @@ exports.jsBundles = {
       includePolyfills: false,
     },
   },
+  'amp-story-entry-point.js': {
+    srcDir: './src/amp-story-player/amp-story-entry-point/',
+    srcFilename: 'amp-story-entry-point.js',
+    destDir: './dist',
+    minifiedDestDir: './dist',
+    options: {
+      minifiedName: 'amp-story-entry-point-v0.js',
+      includePolyfills: false,
+    },
+  },
   'amp-story-player.js': {
     srcDir: './src/amp-story-player/',
     srcFilename: 'amp-story-player.js',
