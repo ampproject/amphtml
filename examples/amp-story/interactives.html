@@ -10,7 +10,7 @@
       body {
         font-family: 'Rubik', sans-serif;
       }
-      amp-story-interactive-quiz, amp-story-interactive-poll {
+      amp-story-interactive-quiz, amp-story-interactive-binary-poll {
         justify-self: center;
       }
     </style>
@@ -159,7 +159,7 @@
           </amp-story-grid-layer>
           <amp-story-grid-layer template="thirds">
             <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
-              <amp-story-interactive-poll
+              <amp-story-interactive-binary-poll
 								endpoint="http://localhost:3000/interactives"
 								prompt-text="What is your favorite movie?"
 								id="movie-light-connected"
@@ -167,7 +167,7 @@
                 theme="dark"
                 option-1-text="דוקטור מוזר"
                 option-2-text="פנתר שחור">
-              </amp-story-interactive-poll>
+              </amp-story-interactive-binary-poll>
             </div>
           </amp-story-grid-layer>
           <amp-story-page-attachment layout="nodisplay" data-cta-text="Read more">
@@ -184,13 +184,13 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
-            <amp-story-interactive-poll
+            <amp-story-interactive-binary-poll
               endpoint="http://localhost:3000/interactives"
               id="movie-light-connected"
               theme="dark"
               option-1-text="Doctor Strange"
               option-2-text="Black Panther">
-            </amp-story-interactive-poll>
+            </amp-story-interactive-binary-poll>
           </amp-story-grid-layer>
         </amp-story-page>
         <amp-story-page id="poll-binary-3">
@@ -205,13 +205,13 @@
           <amp-story-grid-layer template="thirds">
             <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
               <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
-              <amp-story-interactive-poll
+              <amp-story-interactive-binary-poll
                 endpoint="http://localhost:3000/interactives"
                 id="movie-light-connected"
                 style="--interactive-accent-color: #FFC700;"
                 option-1-text="🧛"
                 option-2-text="🐆">
-              </amp-story-interactive-poll>
+              </amp-story-interactive-binary-poll>
             </div>
           </amp-story-grid-layer>
         </amp-story-page>
@@ -227,13 +227,13 @@
           <amp-story-grid-layer template="thirds">
             <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
               <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
-              <amp-story-interactive-poll
+              <amp-story-interactive-binary-poll
                 endpoint="http://localhost:3000/interactives"
                 id="movie-light-connected"
                 style="--interactive-accent-color: rgb(0, 0, 0);"
                 option-1-text="Doctor"
                 option-2-text="Panther">
-              </amp-story-interactive-poll>
+              </amp-story-interactive-binary-poll>
             </div>
           </amp-story-grid-layer>
         </amp-story-page>
@@ -247,14 +247,14 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="vertical">
-            <amp-story-interactive-poll
+            <amp-story-interactive-binary-poll
               endpoint="http://localhost:3000/interactives"
               id="movie-light-connected"
               theme="dark"
               style="--interactive-accent-color: #FFFFFF;"
               option-1-text="This is a really long text"
               option-2-text="Panther">
-            </amp-story-interactive-poll>
+            </amp-story-interactive-binary-poll>
           </amp-story-grid-layer>
         </amp-story-page>
     </amp-story>
