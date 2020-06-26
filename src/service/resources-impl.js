@@ -257,7 +257,7 @@ export class ResourcesImpl {
         : null);
       try {
         this.intersectionObserver_ = new IntersectionObserver(
-          (e) => this.intersects_(e),
+          (e) => this.intersect(e),
           {root, rootMargin: '200% 25%'}
         );
 
@@ -332,9 +332,9 @@ export class ResourcesImpl {
 
   /**
    * @param {!Array<!IntersectionObserverEntry>} entries
-   * @private
+   * @visibleForTesting
    */
-  intersects_(entries) {
+  intersect(entries) {
     devAssert(this.intersectionObserver_);
 
     // TODO(willchou): Remove assert once #27167 is fixed.
