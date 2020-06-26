@@ -61,6 +61,11 @@ const cssEntryPoints = [
     outCss: 'video-autoplay-out.css',
   },
   {
+    path: 'amp-story-entry-point.css',
+    outJs: 'amp-story-entry-point.css.js',
+    outCss: 'amp-story-entry-point-v0.css',
+  },
+  {
     // Publisher imported CSS for `src/amp-story-player/amp-story-player.js`.
     path: 'amp-story-player.css',
     outJs: 'amp-story-player.css.js',
