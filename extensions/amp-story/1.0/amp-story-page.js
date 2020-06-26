@@ -1624,6 +1624,11 @@ export class AmpStoryPage extends AMP.BaseElement {
           .then((poolVideoEl) => {
             if (!this.storeService_.get(StateProperty.PAUSED_STATE)) {
               this.startMeasuringVideoPerformance_(poolVideoEl);
+
+              // Restart video event listeners.
+              this.stopListeningToVideoEvents_();
+              this.startListeningToVideoEvents_();
+
               this.playMedia_(mediaPool, poolVideoEl);
             }
             if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
