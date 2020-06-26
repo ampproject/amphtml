@@ -43,7 +43,7 @@ const buildResultsTemplate = (element) => {
           <div class="i-amphtml-story-interactive-results-dots"></div>
         </div>
         <div class="i-amphtml-story-interactive-results-prompt"></div>
-        <div class="i-amphtml-story-interactive-results-text"></div>
+        <div class="i-amphtml-story-interactive-results-title"></div>
         <div class="i-amphtml-story-interactive-results-description"></div>
       </div>
     </div>
@@ -81,12 +81,18 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
       (data) => {
         if (data.finished) {
           this.options_.forEach((e) => {
-            if (e.category == data.resultscategory) {
+            if (e.resultscategory === data.category) {
               this.mutateElement(() => {
-                this.updateCategory(e);
+                this.updateCategory_(e);
                 this.updateToPostSelectionState_(null);
               });
             }
+          });
+        } else {
+          this.mutateElement(() => {
+            this.rootEl_.classList.remove(
+              'i-amphtml-story-interactive-post-selection'
+            );
           });
         }
       },
@@ -97,15 +103,16 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
   /**
    * Updates the element with the correct category
    * @param {./amp-story-interactive.OptionConfigType} categorySelected
+   * @private
    */
-  updateCategory(categorySelected) {
+  updateCategory_(categorySelected) {
     setStyle(
       this.rootEl_.querySelector('.i-amphtml-story-interactive-results-image'),
       'background',
       'url(' + categorySelected.image + ')'
     );
     this.rootEl_.querySelector(
-      '.i-amphtml-story-interactive-results-text'
+      '.i-amphtml-story-interactive-results-title'
     ).textContent = categorySelected.resultscategory;
     this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-results-description'
