@@ -202,6 +202,19 @@ export class AmpStoryInteractivePoll extends AmpStoryInteractive {
         '.i-amphtml-story-interactive-option-percentage-text'
       ).textContent = `${percentage}%`;
       currOption.setAttribute('style', `flex-grow: ${percentage} !important`);
+
+      if (percentage < 20) {
+        const textContainer = currOption.querySelector(
+          '.i-amphtml-story-interactive-option-text-container'
+        );
+        textContainer.setAttribute(
+          'style',
+          `transform: translateX(${index === 0 ? 27 : -27}%) !important`
+        );
+        if (percentage === 0) {
+          textContainer.setAttribute('style', 'opacity: 0 !important');
+        }
+      }
     });
   }
 }
