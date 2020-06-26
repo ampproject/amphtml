@@ -16,9 +16,7 @@
 
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {AmpStoryInteractiveResults} from '../amp-story-interactive-results';
-import {Services} from '../../../../src/services';
 import {addConfigToInteractive} from './test-amp-story-interactive';
-import {getRequestService} from '../amp-story-request-service';
 import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin(
@@ -34,10 +32,6 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
-
-      // env.sandbox
-      //   .stub(Services, 'cidForDoc')
-      //   .resolves({get: () => Promise.resolve('cid')});
 
       const ampStoryResultsEl = win.document.createElement(
         'amp-story-interactive-results'
