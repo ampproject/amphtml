@@ -269,7 +269,7 @@ export class VariableService {
             ),
           'FIRST_INPUT_DELAY': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
-              TickLabel.FIRST_INPUT_DELAY_VISIBLE
+              TickLabel.FIRST_INPUT_DELAY
             ),
           'CUMULATIVE_LAYOUT_SHIFT': () =>
             Services.performanceFor(this.ampdoc_.win).getMetric(
