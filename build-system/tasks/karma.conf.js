@@ -178,8 +178,6 @@ module.exports = {
 
   autoWatch: true,
 
-  browsers: [isTravisBuild() ? 'Chrome_travis_ci' : 'Chrome_no_extensions'],
-
   customLaunchers: {
     /* eslint "google-camelcase/google-camelcase": 0*/
     Chrome_travis_ci: {
