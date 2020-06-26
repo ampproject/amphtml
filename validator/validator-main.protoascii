@@ -4516,6 +4516,7 @@ tags: {  # <amp-img i-amphtml-ssr>
   attrs: { name: "object-fit" }
   attrs: { name: "object-position" }
   attrs: { name: "placeholder" }
+  attrs: { name: "referrerpolicy" }
   # <amp-bind>
   attrs: { name: "[alt]" }
   attrs: { name: "[attribution]" }
