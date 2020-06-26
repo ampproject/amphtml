@@ -34,7 +34,6 @@
   flex-direction: row;
   height: 58px;
   overflow: hidden;
-  box-sizing: border-box;
   padding: 0px 12px;
   position: relative;
   box-shadow: var(--i-amphtml-interactive-chip-shadow);
@@ -75,7 +74,7 @@
   transform: translatex(calc(var(--option-percentage) - 100%));
 }
 
-.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-option.i-amphtml-story-interactive-option-selected::after {
+.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-option.i-amphtml-story-interactive-option-selected::before {
   opacity: 0.2;
   box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.2);
 }

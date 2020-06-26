@@ -10,7 +10,7 @@
       body {
         font-family: 'Rubik', sans-serif;
       }
-      amp-story-interactive-quiz, amp-story-interactive-binary-poll {
+      amp-story-interactive-quiz, amp-story-interactive-binary-poll, amp-story-interactive-poll {
         justify-self: center;
       }
     </style>
@@ -257,7 +257,7 @@
             </amp-story-interactive-binary-poll>
           </amp-story-grid-layer>
         </amp-story-page>
-        <amp-story-page id="poll-1">
+        <amp-story-page id="new-polls">
           <amp-story-grid-layer template="fill">
             <amp-img
                 src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
@@ -299,6 +299,50 @@
               option-1-text="Montevideo"
               option-2-text="Paris">
             </amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="new-quizzes">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="img/roadshow.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-quiz
+                endpoint="http://localhost:3000/interactives"
+                id="last-cup-dark"
+                theme="dark"
+                prompt-text="What city do you like the most?"
+                option-1-text="Montevideo" option-1-correct
+                option-2-text="Paris">
+            </amp-story-interactive-quiz>
+            <amp-story-interactive-quiz
+                endpoint="http://localhost:3000/interactives"
+                id="last-cup-dark"
+                prompt-text="What city do you like the most?"
+                option-1-text="Montevideo" option-1-correct
+                option-2-text="Paris">
+            </amp-story-interactive-quiz>
+            <amp-story-interactive-quiz
+                endpoint="http://localhost:3000/interactives"
+                id="last-cup-dark"
+                theme="dark"
+                chip-style="shadow"
+                prompt-text="What city do you like the most?"
+                option-1-text="Montevideo" option-1-correct
+                option-2-text="Paris">
+            </amp-story-interactive-quiz>
+            <amp-story-interactive-quiz
+                endpoint="http://localhost:3000/interactives"
+                id="last-cup-dark"
+                chip-style="shadow"
+                prompt-text="What city do you like the most?"
+                option-1-text="Montevideo" option-1-correct
+                option-2-text="Paris">
+            </amp-story-interactive-quiz>
           </amp-story-grid-layer>
         </amp-story-page>
     </amp-story>
