@@ -53,6 +53,13 @@ describes.sandboxed('Signals', {}, (env) => {
   it('should override signal time', () => {
     signals.signal('sig', 11);
     expect(signals.map_['sig']).to.equal(11);
+
+    signals.signal('sig-1');
+    expect(signals.map_['sig-1']).to.equal(1);
+
+    // zero is respected
+    signals.signal('sig-2', 0);
+    expect(signals.map_['sig-2']).to.equal(0);
     expect(signals.promiseMap_).to.be.null;
   });
 
