@@ -42,7 +42,7 @@
   flex-direction: column !important;
   flex-grow: 50 !important;
   flex: 100 !important;
-  min-width: 0 !important;
+  overflow: hidden !important;
   position: relative !important;
   transition: flex-grow var(--animation-time) calc(var(--animation-time) * .12) var(--ease-out-curve) !important;
 }
@@ -57,8 +57,7 @@
 
 .i-amphtml-story-interactive-post-selection
   .i-amphtml-story-interactive-option-text-container {
-  transition: transform var(--animation-time) var(--ease-out-curve), 
-    opacity var(--animation-time) var(--ease-out-curve) !important;
+  transition: transform var(--animation-time) var(--ease-out-curve) !important;
   transform: translateY(0) !important;
 }
 

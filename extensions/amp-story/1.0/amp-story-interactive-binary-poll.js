@@ -28,9 +28,6 @@ export const FontSize = {
   DOUBLE_LINE: 14,
 };
 
-/** @const {number} */
-const MIN_HORIZONTAL_PADDING = 27;
-
 /**
  * Generates the template for the binary poll.
  *
@@ -207,21 +204,6 @@ export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {
         '.i-amphtml-story-interactive-option-percentage-text'
       ).textContent = `${percentage}%`;
       currOption.setAttribute('style', `flex-grow: ${percentage} !important`);
-
-      if (percentage < 20) {
-        const textContainer = currOption.querySelector(
-          '.i-amphtml-story-interactive-option-text-container'
-        );
-        textContainer.setAttribute(
-          'style',
-          `transform: translateX(${
-            index === 0 ? MIN_HORIZONTAL_PADDING : -MIN_HORIZONTAL_PADDING
-          }%) !important`
-        );
-        if (percentage === 0) {
-          textContainer.setAttribute('style', 'opacity: 0 !important');
-        }
-      }
     });
   }
 }
