@@ -15,7 +15,7 @@
  */
 
 import {AmpStoryInteractive, InteractiveType} from './amp-story-interactive';
-import {CSS} from '../../../build/amp-story-interactive-poll-1.0.css';
+import {CSS} from '../../../build/amp-story-interactive-binary-poll-1.0.css';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {setStyle} from '../../../src/style';
@@ -40,9 +40,11 @@ const MIN_HORIZONTAL_PADDING = 20;
 const buildBinaryPollTemplate = (element) => {
   const html = htmlFor(element);
   return html`
-    <div class="i-amphtml-story-interactive-poll-container">
+    <div class="i-amphtml-story-interactive-binary-poll-container">
       <div class="i-amphtml-story-interactive-prompt-container"></div>
-      <div class="i-amphtml-story-interactive-poll-option-container"></div>
+      <div
+        class="i-amphtml-story-interactive-binary-poll-option-container"
+      ></div>
     </div>
   `;
 };
@@ -81,7 +83,7 @@ const buildBinaryOptionDividerTemplate = (element) => {
   return html` <div class="i-amphtml-story-interactive-option-divider"></div> `;
 };
 
-export class AmpStoryInteractivePoll extends AmpStoryInteractive {
+export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {
   /**
    * @param {!AmpElement} element
    */
@@ -117,7 +119,7 @@ export class AmpStoryInteractivePoll extends AmpStoryInteractive {
   attachContent_(root) {
     this.attachPrompt_(root);
     const options = root.querySelector(
-      '.i-amphtml-story-interactive-poll-option-container'
+      '.i-amphtml-story-interactive-binary-poll-option-container'
     );
     options.appendChild(this.generateOption_(this.options_[0]));
     options.appendChild(buildBinaryOptionDividerTemplate(root));
