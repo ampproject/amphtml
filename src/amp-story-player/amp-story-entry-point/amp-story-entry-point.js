@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-import {AmpStoryComponentManager} from './amp-story-component-manager';
-import {AmpStoryPlayer} from './amp-story-player-impl';
+import {AmpStoryComponentManager} from '../amp-story-component-manager';
 
 self.onload = () => {
   const manager = new AmpStoryComponentManager(self);
-  manager.loadPlayers();
+  manager.loadEntryPoints();
 };
-
-globalThis.AmpStoryPlayer = AmpStoryPlayer;
