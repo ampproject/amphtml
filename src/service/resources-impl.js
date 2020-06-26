@@ -1011,7 +1011,7 @@ export class ResourcesImpl {
             // These requests will be executed in the next animation cycle and
             // adjust the scroll position.
             aboveVpHeightChange = aboveVpHeightChange + heightDiff;
-            scrollAdjSet.push(request);
+            scrollAdjSet.add(request);
           } else {
             // Defer till next cycle.
             this.requestsChangeSize_.push(request);
