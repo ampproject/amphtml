@@ -257,6 +257,50 @@
             </amp-story-interactive-binary-poll>
           </amp-story-grid-layer>
         </amp-story-page>
+        <amp-story-page id="poll-1">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-poll
+              endpoint="http://localhost:3000/interactives"
+              id="poll-1"
+              theme="dark"
+              prompt-text="What city do you like the most?"
+              option-1-text="Montevideo"
+              option-2-text="Paris">
+            </amp-story-interactive-poll>
+            <amp-story-interactive-poll
+              endpoint="http://localhost:3000/interactives"
+              id="poll-2"
+              prompt-text="What city do you like the most?"
+              option-1-text="Montevideo"
+              option-2-text="Paris">
+            </amp-story-interactive-poll>
+            <amp-story-interactive-poll
+              endpoint="http://localhost:3000/interactives"
+              id="poll-3"
+              theme="dark"
+              chip-style="shadow"
+              prompt-text="What city do you like the most?"
+              option-1-text="Montevideo"
+              option-2-text="Paris">
+            </amp-story-interactive-poll>
+            <amp-story-interactive-poll
+              endpoint="http://localhost:3000/interactives"
+              id="poll-4"
+              chip-style="shadow"
+              prompt-text="What city do you like the most?"
+              option-1-text="Montevideo"
+              option-2-text="Paris">
+            </amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
     </amp-story>
   </body>
 </html>
