@@ -4736,7 +4736,7 @@ function validateScriptSrcAttr(srcAttr, tagSpec, context, result) {
  * @param {!Context} context
  * @param {!generated.ValidationResult} result
  */
-function validateAttrClass(attr, tagSpec, context, result) {
+function validateClassAttr(attr, tagSpec, context, result) {
   const re = /(^|\W)i-amphtml-/;
   if (re.test(attr.value)) {
     context.addError(
@@ -5062,7 +5062,7 @@ function validateAttributes(
       }
     } else if (attr.name === 'class') {
       // For non-transformed AMP, `class` must not contain 'i-amphtml-' prefix.
-      validateAttrClass(attr, spec, context, result.validationResult);
+      validateClassAttr(attr, spec, context, result.validationResult);
       if (result.validationResult.status ===
           generated.ValidationResult.Status.FAIL) {
         continue;
