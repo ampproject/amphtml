@@ -1109,7 +1109,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
         },
       });
 
-      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_.length).to.equal(1);
       expect(perf.events_[0]).to.be.jsonEqual({
         label: 'fid',
         delta: 3,
