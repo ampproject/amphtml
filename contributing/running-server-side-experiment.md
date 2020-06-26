@@ -16,9 +16,11 @@ limitations under the License.
 
 # Running Experiment with Different Binaries
 
-We understand that experimenting a new feature or change on the client side is not always practial. For example, if you rewrite a big chunk of the code base, or include add extra step to optimize code in the transpiling process, you want to run the experiment at the server level, where different bianries will be returned.
+We understand that experimenting a new feature or change on the client side is not always practical. For example, if you rewrite a big chunk of the code base, or include a new transformer in the transpiling process, you would want to run the experiment at the server level, where different binaries will be returned.
 
-This doc explains how to create a server side experiment.
+This doc explains how to create a server side diverted experiment.
+
+*Refer to [enabling AMP experimental features doc](https://amp.dev/documentation/guides-and-tutorials/learn/experimental) to learn more on client side experiments*
 
 ## Before you start
 
@@ -124,5 +126,6 @@ E.g.
 ```
 
 Make sure to remove the experiment config from [`experiment-configs.json`](https://github.com/ampproject/amphtml/blob/master/build-system/global-configs/experiments-config.json) when you do so. Because the config will override the value from [`experiment-consts.json`](https://github.com/ampproject/amphtml/blob/master/build-system/global-configs/experiments-const.json).
-Please remove the flag from the above file with a proper clean up after the launch.
+
+It is recommended to follow up with a proper clean up and remove the flag from the above file after the change is stable in production.
 
