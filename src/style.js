@@ -71,7 +71,7 @@ export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
   if (!propertyNameCache) {
     propertyNameCache = map();
   }
-  let propertyName = propertyNameCache[camelCase];
+  let propertyName = propertyNameCache.get(camelCase);
   if (!propertyName || opt_bypassCache) {
     propertyName = camelCase;
     if (style[camelCase] === undefined) {
@@ -83,7 +83,7 @@ export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
       }
     }
     if (!opt_bypassCache) {
-      propertyNameCache[camelCase] = propertyName;
+      propertyNameCache.set(camelCase, propertyName);
     }
   }
   return propertyName;

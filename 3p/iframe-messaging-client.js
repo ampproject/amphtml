@@ -46,7 +46,7 @@ export class IframeMessagingClient {
     /**
      * Map messageType keys to observables to be fired when messages of that
      * type are received.
-     * @private {!Object}
+     * @private {!Map}
      */
     this.observableFor_ = map();
     this.setupEventListener_();
