@@ -1529,9 +1529,8 @@ describes.repeated(
           });
         });
 
-        it('should degrade trust across submit-* in AMP4EMAIL', async () => {
+        it('should degrade trust across submit-*', async () => {
           const form = getForm();
-          form.ownerDocument.documentElement.setAttribute('amp4email', '');
 
           const actions = {
             installActionHandler: () => {},
