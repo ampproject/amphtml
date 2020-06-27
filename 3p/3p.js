@@ -39,7 +39,7 @@ let syncScriptLoads = 0;
 
 /**
  * Returns the registration map
- * @return {Map} TODO(#23582): Specify return type
+ * @return {?Map} TODO(#23582): Specify return type
  */
 export function getRegistrations() {
   if (!registrations) {
@@ -54,8 +54,8 @@ export function getRegistrations() {
  */
 export function register(id, draw) {
   const registrations = getRegistrations();
-  devAssert(!registrations[id], 'Double registration %s', id);
-  registrations[id] = draw;
+  devAssert(!registrations.get(id), 'Double registration %s', id);
+  registrations.set(id, draw);
 }
 
 /**
@@ -65,7 +65,7 @@ export function register(id, draw) {
  * @param {!Object} data
  */
 export function run(id, win, data) {
-  const fn = registrations[id];
+  const fn = registrations.get(id);
   userAssert(fn, 'Unknown 3p: ' + id);
   fn(win, data);
 }
