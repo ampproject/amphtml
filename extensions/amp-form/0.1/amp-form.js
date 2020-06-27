@@ -988,18 +988,8 @@ export class AmpForm {
    * @private
    */
   trustForSubmitResponse_(incomingTrust) {
-    // TODO(choumx): Remove this expected error before Q1 2020.
-    if (incomingTrust <= ActionTrust.DEFAULT) {
-      dev().expectedError(
-        TAG,
-        'Recursive form submissions are scheduled to be deprecated by 1/1/2020. ' +
-          'See https://github.com/ampproject/amphtml/issues/24894.'
-      );
-    }
-    // Only degrade trust across form submission in AMP4EMAIL for now.
-    return this.isAmp4Email_
-      ? /** @type {!ActionTrust} */ (incomingTrust - 1)
-      : incomingTrust;
+    // Degrade trust across form submission.
+    return /** @type {!ActionTrust} */ (incomingTrust - 1);
   }
 
   /**
