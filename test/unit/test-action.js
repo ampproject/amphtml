@@ -394,7 +394,9 @@ describe('ActionService parseAction', () => {
 
   it('should dereference arg expressions', () => {
     const a = parseAction('e:t.m(key1=foo)');
-    expect(dereferenceArgsVariables(a.args, null)).to.deepEqualMapObject({key1: 'foo'});
+    expect(dereferenceArgsVariables(a.args, null)).to.deepEqualMapObject({
+      key1: 'foo',
+    });
   });
 
   it('should dereference arg expressions with an event without data', () => {
