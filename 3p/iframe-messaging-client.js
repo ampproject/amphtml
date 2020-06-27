@@ -46,7 +46,7 @@ export class IframeMessagingClient {
     /**
      * Map messageType keys to observables to be fired when messages of that
      * type are received.
-     * @private {!Map}
+     * @private {?Map}
      */
     this.observableFor_ = map();
     this.setupEventListener_();
@@ -228,10 +228,10 @@ export class IframeMessagingClient {
    * @return {!Observable<?JsonObject>}
    */
   getOrCreateObservableFor_(messageType) {
-    if (!(messageType in this.observableFor_)) {
-      this.observableFor_[messageType] = new Observable();
+    if (!this.observableFor_.has(messageType)) {
+      this.observableFor_.set(messageType, new Observable());
     }
-    return this.observableFor_[messageType];
+    return this.observableFor_.get(messageType);
   }
 
   /**
@@ -239,8 +239,8 @@ export class IframeMessagingClient {
    * @param {Object} message
    */
   fireObservable_(messageType, message) {
-    if (messageType in this.observableFor_) {
-      this.observableFor_[messageType].fire(message);
+    if (this.observableFor_.has(messageType)) {
+      this.observableFor_.get(messageType).fire(message);
     }
   }
 
