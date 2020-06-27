@@ -369,7 +369,7 @@ function showConfirmation_(message, callback) {
   const cancelButton = devAssert(
     document.getElementById('popup-button-cancel')
   );
-  const unlistenSet = [];
+  const unlistenSet = new Set();
   const closePopup = (affirmative) => {
     container.classList.remove('show');
     unlistenSet.forEach((unlisten) => unlisten());
@@ -379,8 +379,8 @@ function showConfirmation_(message, callback) {
   };
 
   messageElement.textContent = message;
-  unlistenSet.push(listenOnce(confirmButton, 'click', () => closePopup(true)));
-  unlistenSet.push(listenOnce(cancelButton, 'click', () => closePopup(false)));
+  unlistenSet.add(listenOnce(confirmButton, 'click', () => closePopup(true)));
+  unlistenSet.add(listenOnce(cancelButton, 'click', () => closePopup(false)));
   container.classList.add('show');
 }
 
