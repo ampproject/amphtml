@@ -102,13 +102,6 @@ export class ViewerInterface {
   isOvertakeHistory() {}
 
   /**
-   * How much the viewer has requested the runtime to prerender the document.
-   * The values are in number of screens.
-   * @return {number}
-   */
-  getPrerenderSize() {}
-
-  /**
    * Returns the resolved viewer URL value. It's by default the current page's
    * URL. The trusted viewers are allowed to override this value.
    * @return {string}

@@ -172,7 +172,6 @@
       this.alreadyLoaded_ = false;
       this.stackIndex_ = 0;
       this.visibilityState_ = visible ? 'visible' : 'hidden';
-      this.prerenderSize_ = 1;
       this.csi_ = 1;
 
       this.viewer = document.querySelector('viewer');
@@ -208,7 +207,6 @@
         height: this.container./*OK*/offsetHeight,
         paddingTop: this.header./*OK*/offsetHeight,
         visibilityState: this.visibilityState_,
-        prerenderSize: this.prerenderSize_,
         origin: parseUrlDeprecated(window.location.href).origin,
         csi: this.csi_,
         cap: 'foo,a2a,swipe,iframeScroll',
@@ -244,7 +242,6 @@
       this.visibilityState_ = visible ? 'visible' : 'hidden';
       this.ampViewerHost_.sendRequest('visibilitychange', {
         state: this.visibilityState_,
-        prerenderSize: this.prerenderSize
       }, true);
       if (updateToggle) {
         this.updateVisibilityToggle_();

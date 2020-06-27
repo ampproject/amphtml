@@ -92,9 +92,6 @@ export class ViewerImpl {
     /** @private {boolean} */
     this.overtakeHistory_ = false;
 
-    /** @private {number} */
-    this.prerenderSize_ = 1;
-
     /** @private {!Object<string, !Observable<!JsonObject>>} */
     this.messageObservables_ = map();
 
@@ -147,11 +144,6 @@ export class ViewerImpl {
     dev().fine(TAG_, '- history:', this.overtakeHistory_);
 
     dev().fine(TAG_, '- visibilityState:', this.ampdoc.getVisibilityState());
-
-    this.prerenderSize_ =
-      parseInt(ampdoc.getParam('prerenderSize'), 10) || this.prerenderSize_;
-    dev().fine(TAG_, '- prerenderSize:', this.prerenderSize_);
-    this.prerenderSizeDeprecation_();
 
     /**
      * Whether the AMP document is embedded in a Chrome Custom Tab.
@@ -269,16 +261,6 @@ export class ViewerImpl {
     });
 
     this.visibleOnUserAction_();
-  }
-
-  /** @private */
-  prerenderSizeDeprecation_() {
-    if (this.prerenderSize_ !== 1) {
-      dev().expectedError(
-        TAG_,
-        `prerenderSize (${this.prerenderSize_}) is deprecated (#27167)`
-      );
-    }
   }
 
   /**
@@ -555,11 +537,6 @@ export class ViewerImpl {
   }
 
   /** @override */
-  getPrerenderSize() {
-    return this.prerenderSize_;
-  }
-
-  /** @override */
   getResolvedViewerUrl() {
     return this.resolvedViewerUrl_;
   }
@@ -697,11 +674,6 @@ export class ViewerImpl {
   /** @override */
   receiveMessage(eventType, data, unusedAwaitResponse) {
     if (eventType == 'visibilitychange') {
-      if (data['prerenderSize'] !== undefined) {
-        this.prerenderSize_ = data['prerenderSize'];
-        dev().fine(TAG_, '- prerenderSize change:', this.prerenderSize_);
-        this.prerenderSizeDeprecation_();
-      }
       this.setVisibilityState_(data['state']);
       return Promise.resolve();
     }

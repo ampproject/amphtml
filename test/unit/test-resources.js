@@ -842,31 +842,17 @@ describes.realWin('Resources discoverWork', {amp: true}, (env) => {
     expect(resource2.state_).to.equal(ResourceState.LAYOUT_SCHEDULED);
   });
 
-  it('should prerender only one screen with prerenderSize = 1', () => {
+  it('should prerender only one screen in visibilityState=prerender', () => {
     resources.visible_ = false;
     sandbox
       .stub(resources.ampdoc, 'getVisibilityState')
       .returns(VisibilityState.PRERENDER);
-    resources.prerenderSize_ = 1;
     viewportMock.expects('getRect').returns(layoutRectLtwh(0, 0, 300, 1009));
 
     resources.discoverWork_();
 
     expect(resources.queue_.getSize()).to.equal(1);
     expect(resources.queue_.tasks_[0].resource).to.equal(resource1);
-  });
-
-  it('should NOT prerender anything with prerenderSize = 0', () => {
-    resources.visible_ = false;
-    sandbox
-      .stub(resources.ampdoc, 'getVisibilityState')
-      .returns(VisibilityState.PRERENDER);
-    resources.prerenderSize_ = 0;
-    viewportMock.expects('getRect').returns(layoutRectLtwh(0, 0, 300, 400));
-
-    resources.discoverWork_();
-
-    expect(resources.queue_.getSize()).to.equal(0);
   });
 
   // TODO(dvoytenko, #12476): Make this test work with sinon 4.0.

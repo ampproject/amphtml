@@ -90,11 +90,6 @@ class InaboxViewer {
   }
 
   /** @override */
-  getPrerenderSize() {
-    return 0;
-  }
-
-  /** @override */
   getResolvedViewerUrl() {
     return this.ampdoc_.win.location.href;
   }
