@@ -16,8 +16,8 @@
 
 .i-amphtml-story-interactive-container {
 	font-family: 'Poppins', sans-serif !important;
-	--animation-time: .3s;
-	--ease-out-curve: cubic-bezier(.3, 0, 0, 1);
+	--animation-time: .3s !important;
+	--ease-out-curve: cubic-bezier(.3, 0, 0, 1) !important;
 }
 
 .i-amphtml-story-interactive-container {

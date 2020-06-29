@@ -37,7 +37,9 @@
   overflow: hidden;
   padding: 0px 12px;
   position: relative;
-  box-shadow: var(--i-amphtml-interactive-chip-shadow), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border);
+  box-shadow: var(--i-amphtml-interactive-chip-shadow), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
+  -webkit-box-shadow: var(--i-amphtml-interactive-chip-shadow), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
+  -moz-box-shadow: var(--i-amphtml-interactive-chip-shadow), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
   border-radius: 8px;
 }
 
@@ -47,7 +49,9 @@
 
 .i-amphtml-story-interactive-option.i-amphtml-story-interactive-option-selected {
   background-color: var(--i-amphtml-interactive-theme-shading);
-  box-shadow: var(--i-amphtml-interactive-chip-shadow-inset), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border);
+  box-shadow: var(--i-amphtml-interactive-chip-shadow-inset), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
+  -webkit-box-shadow: var(--i-amphtml-interactive-chip-shadow-inset), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
+  -moz-box-shadow: var(--i-amphtml-interactive-chip-shadow-inset), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
   animation: flashBGColor forwards var(--animation-time) var(--ease-out-curve);
 }
 
