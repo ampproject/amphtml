@@ -52,23 +52,31 @@ export function SocialShare(props) {
 
   const type = props['type'].toUpperCase();
   const baseStyle = CSS.BASE_STYLE;
-  const backgroundStyle = CSS[type] || CSS.DEFAULT;
+  const backgroundStyle = CSS[type];
   const size = {
     width: checkedWidth,
     height: checkedHeight,
   };
+
+  // Only show children if not using a pre-configured type
+  const children = getSocialConfig(props['type']) ? (
+    <SocialShareIcon
+      style={{...backgroundStyle, ...baseStyle, ...size}}
+      type={type}
+    />
+  ) : (
+    props['children']
+  );
+
   return (
     <div
       role="button"
       tabindex={props['tabIndex'] || '0'}
       onKeyDown={(e) => handleKeyPress(e, finalEndpoint, checkedTarget)}
       onClick={() => handleActivation(finalEndpoint, checkedTarget)}
-      style={{...size, ...props['style']}}
+      style={{...size, ...baseStyle, ...props['style']}}
     >
-      <SocialShareIcon
-        style={{...backgroundStyle, ...baseStyle, ...size}}
-        type={type}
-      />
+      {children}
     </div>
   );
 }
@@ -160,10 +168,18 @@ function handleActivation(finalEndpoint, target) {
         `Could not complete system share.  Navigator unavailable. ${NAME}`
       );
     }
-  } else if (protocol === 'sms') {
+  } else if (protocol === 'sms' || protocol === 'mailto') {
+    if (
+      window &&
+      window.navigator &&
+      window.navigator.userAgent &&
+      window.navigator.userAgent.search(/iPhone|iPad|iPod/i)
+    ) {
+      target = '_top';
+    }
     openWindowDialog(
       window,
-      finalEndpoint.replace('?', '?&'),
+      protocol === 'sms' ? finalEndpoint.replace('?', '?&') : finalEndpoint,
       target,
       windowFeatures
     );
