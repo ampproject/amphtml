@@ -158,10 +158,7 @@ function getFiles(testType) {
       if (argv.files) {
         return files.concat(getFilesFromArgv());
       }
-      if (
-        argv.saucelabs ||
-        (isGithubActionsBuild() && (argv.safari || argv.firefox))
-      ) {
+      if (argv.saucelabs || isGithubActionsBuild()) {
         return files.concat(testConfig.unitTestCrossBrowserPaths);
       }
       if (argv.local_changes) {

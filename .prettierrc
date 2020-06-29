@@ -19,10 +19,10 @@
     {
       "files": [
         ".codecov.yml",
+        ".github/workflows/continuous-integration-workflow.yml",
         ".lando.yml",
         ".lgtm.yml",
-        ".travis.yml",
-        ".github/workflows/continuous-integration-workflow.yml"
+        ".travis.yml"
       ],
       "options": {"parser": "yaml"}
     }

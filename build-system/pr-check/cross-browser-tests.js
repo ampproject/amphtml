@@ -40,12 +40,12 @@ async function main() {
 
   switch (process.platform) {
     case 'linux':
-      timedExecOrDie('gulp unit --headless --firefox');
+      timedExecOrDie('gulp unit --nobuild --headless --firefox');
       timedExecOrDie(
         'gulp integration --nobuild --compiled --headless --firefox'
       );
     case 'darwin':
-      timedExecOrDie('gulp unit --safari');
+      timedExecOrDie('gulp unit --nobuild --safari');
       timedExecOrDie('gulp integration --nobuild --compiled --safari');
       break;
     // TODO(rsimha, #28208): Build on Windows with native closure compiler.

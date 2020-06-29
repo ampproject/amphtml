@@ -19,8 +19,6 @@ jobs:
         with:
           node-version: 12
       - run: yarn
-      - run: sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
-      - run: yarn global add gulp-cli
       - name: Build and Test
         run: node build-system/pr-check/cross-browser-tests.js
   macos_tests:
