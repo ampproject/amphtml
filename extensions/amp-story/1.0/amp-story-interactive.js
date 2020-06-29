@@ -578,7 +578,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    */
   retrieveInteractiveData_() {
     return this.executeInteractiveRequest_('GET').then((response) => {
-      console.log(response);
       this.handleSuccessfulDataRetrieval_(
         /** @type {InteractiveResponseType} */ (response)
       );
