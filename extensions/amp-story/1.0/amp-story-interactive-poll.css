@@ -52,7 +52,7 @@
   box-shadow: var(--i-amphtml-interactive-chip-shadow-inset), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
   -webkit-box-shadow: var(--i-amphtml-interactive-chip-shadow-inset), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
   -moz-box-shadow: var(--i-amphtml-interactive-chip-shadow-inset), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
-  animation: flashBGColor forwards var(--animation-time) var(--ease-out-curve) !important;
+  animation: flashBGColor forwards var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
 .i-amphtml-story-interactive-option::after {
@@ -63,27 +63,27 @@
   width: 100% !important;
   left: 0 !important;
   top: 0 !important;
-  transform: translatex(-200%) !important;
-  transition: transform var(--animation-time) var(--ease-out-curve) !important;
+  transform: translateX(-200%) !important;
+  transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
 .i-amphtml-story-interactive-poll-container[dir="rtl"] .i-amphtml-story-interactive-option::after {
-  transform: translatex(100%)!important;
+  transform: translateX(100%)!important;
 }
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-option::after {
-  transform: translatex(calc(var(--option-percentage) - 100%)) !important;
+  transform: translateX(calc(var(--option-percentage) - 100%)) !important;
 }
 
 .i-amphtml-story-interactive-poll-container.i-amphtml-story-interactive-post-selection[dir="rtl"] .i-amphtml-story-interactive-option::after {
-  transform: translatex(calc(100% - var(--option-percentage)))!important;
+  transform: translateX(calc(100% - var(--option-percentage)))!important;
 }
 
 .i-amphtml-story-interactive-option-text {
   font-size: 22px !important;
   margin: 0 !important;
   z-index: 1 !important;
-  transition: transform var(--animation-time) var(--ease-out-curve) !important;
+  transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
   transform-origin: left !important;
 }
 
@@ -100,19 +100,19 @@
   font-size: 28px !important;
   margin: 0 !important;
   opacity: 0 !important;
-  transition: transform var(--animation-time) var(--ease-out-curve) !important;
-  transform: translatex(60px) !important;
+  transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
+  transform: translateX(60px) !important;
   direction: ltr;
 }
 
 .i-amphtml-story-interactive-poll-container[dir="rtl"] .i-amphtml-story-interactive-option-percentage {
-  transform: translatex(-60px) !important;
+  transform: translateX(-60px) !important;
 }
 
 .i-amphtml-story-interactive-poll-container.i-amphtml-story-interactive-post-selection[dir="rtl"] .i-amphtml-story-interactive-option-percentage,
 .i-amphtml-story-interactive-poll-container.i-amphtml-story-interactive-post-selection:not([dir="rtl"]) .i-amphtml-story-interactive-option-percentage {
   opacity: 1 !important;
-  transform: translatex(0px) !important;
+  transform: translateX(0px) !important;
 }
 
 .i-amphtml-story-interactive-option-percentage-sign {

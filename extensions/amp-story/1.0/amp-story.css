@@ -900,6 +900,8 @@ amp-story .amp-video-eq,
   --i-amphtml-interactive-prompt-text-size: 22px !important;
   --i-amphtml-interactive-prompt-line-height: 28px !important;
   --i-amphtml-interactive-strong-text-color: black !important;
+  --i-amphtml-interactive-animation-time: .3s !important;
+  --i-amphtml-interactive-ease-out-curve: cubic-bezier(.3, 0, 0, 1) !important;
 }
 
 .i-amphtml-story-interactive-component[theme="dark"] {
