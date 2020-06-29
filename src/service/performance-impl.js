@@ -459,7 +459,7 @@ export class Performance {
    */
   onVisibilityChange_() {
     if (this.win.document.visibilityState === 'hidden') {
-      this.tickVariableMetrics_();
+      this.tickCumulativeMetrics_();
     }
   }
 
@@ -470,7 +470,7 @@ export class Performance {
    */
   onAmpDocVisibilityChange_() {
     if (this.ampdoc_.getVisibilityState() === VisibilityState.INACTIVE) {
-      this.tickVariableMetrics_();
+      this.tickCumulativeMetrics_();
     }
   }
 
@@ -478,7 +478,7 @@ export class Performance {
    * Tick the metrics whose values change over time.
    * @private
    */
-  tickVariableMetrics_() {
+  tickCumulativeMetrics_() {
     if (this.supportsLayoutShift_) {
       this.tickLayoutShiftScore_();
     }
