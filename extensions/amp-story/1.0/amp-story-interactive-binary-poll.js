@@ -33,7 +33,7 @@ export const FontSize = {
  * Prevents small percentages from moving outside of poll.
  *
 /** @const {number} */
-const MIN_HORIZONTAL_PADDING = 20;
+const MIN_HORIZONTAL_TRANSFORM = -20;
 
 /**
  * Generates the template for the binary poll.
@@ -196,6 +196,23 @@ export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {
   }
 
   /**
+   * Creates a number to transfrom the x axis of binary poll text.
+   * @param {number} percentage
+   * @return {number}
+   * @private
+   */
+  getTransformVal_(percentage) {
+    let mappedVal = percentage - 50;
+    if (mappedVal < MIN_HORIZONTAL_TRANSFORM) {
+      mappedVal = MIN_HORIZONTAL_TRANSFORM;
+    }
+    if (document.dir === 'rtl') {
+      mappedVal *= -1;
+    }
+    return mappedVal;
+  }
+
+  /**
    * @override
    */
   updateOptionPercentages_(responseData) {
@@ -227,9 +244,7 @@ export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {
       textContainer.setAttribute(
         'style',
         `transform: translateX(${
-          percentage < MIN_HORIZONTAL_PADDING
-            ? MIN_HORIZONTAL_PADDING * (index === 0 ? -1 : 1)
-            : (percentage - 50) * (index === 0 ? 1 : -1)
+          this.getTransformVal_(percentage) * (index === 0 ? 1 : -1)
         }%) !important`
       );
 

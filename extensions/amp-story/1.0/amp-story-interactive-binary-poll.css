@@ -84,9 +84,19 @@
   transition: transform var(--animation-time) var(--ease-out-curve);
 }
 
+[dir=rtl] .i-amphtml-story-interactive-option
+  .i-amphtml-story-interactive-option-percent-bar {
+  transform-origin: right !important;
+}
+
 .i-amphtml-story-interactive-option:last-child 
   .i-amphtml-story-interactive-option-percent-bar {
-  transform-origin: right;
+  transform-origin: right !important;
+}
+
+[dir=rtl] .i-amphtml-story-interactive-option:last-child 
+  .i-amphtml-story-interactive-option-percent-bar {
+  transform-origin: left !important;
 }
 
 .i-amphtml-story-interactive-post-selection
