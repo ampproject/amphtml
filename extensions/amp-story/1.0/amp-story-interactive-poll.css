@@ -33,11 +33,11 @@
   text-align: center;
   flex-direction: row;
   height: 58px;
+  box-sizing: border-box;
   overflow: hidden;
   padding: 0px 12px;
   position: relative;
-  box-shadow: var(--i-amphtml-interactive-chip-shadow);
-  border: 1px solid var(--i-amphtml-interactive-theme-border);
+  box-shadow: var(--i-amphtml-interactive-chip-shadow), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border);
   border-radius: 8px;
 }
 
@@ -45,45 +45,42 @@
   margin-top: 8px;
 }
 
-.i-amphtml-story-interactive-option::after {
-  content: '';
-  background-color: var(--i-amphtml-interactive-strong-text-color);
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  left: 0;
-  top: 0;
-  opacity: 0.2;
-  transform: translatex(calc(var(--option-percentage) - 200%));
-  transition: transform var(--transition-type) var(--transition-time);
+.i-amphtml-story-interactive-option.i-amphtml-story-interactive-option-selected {
+  background-color: var(--i-amphtml-interactive-theme-shading);
+  box-shadow: var(--i-amphtml-interactive-chip-shadow-inset), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border);
+  animation: flashBGColor forwards var(--animation-time) var(--ease-out-curve);
 }
 
-.i-amphtml-story-interactive-option::before {
+.i-amphtml-story-interactive-option::after {
   content: '';
-  background-color: var(--i-amphtml-interactive-strong-text-color);
+  background-color: var(--i-amphtml-interactive-theme-shading);
   position: absolute;
   height: 100%;
   width: 100%;
   left: 0;
   top: 0;
-  opacity: 0;
-  transition: opacity var(--transition-type) var(--transition-time);
+  transform: translatex(-200%);
+  transition: transform var(--animation-time) var(--ease-out-curve);
 }
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-option::after {
   transform: translatex(calc(var(--option-percentage) - 100%));
 }
 
-.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-option.i-amphtml-story-interactive-option-selected::before {
-  opacity: 0.2;
-  box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.2);
+.i-amphtml-story-interactive-option.i-amphtml-story-interactive-option-selected::after {
+  box-shadow: var(--i-amphtml-interactive-chip-shadow-inset);
 }
 
-.i-amphtml-story-interactive-option-title {
-  font-weight: 400;
+.i-amphtml-story-interactive-option-text {
   font-size: 22px;
   margin: 0;
   z-index: 1;
+  transition: transform var(--animation-time) var(--ease-out-curve);
+  transform-origin: left;
+}
+
+.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-option-text {
+  transform: scale(0.72);
 }
 
 .i-amphtml-story-interactive-option-percentage {
@@ -91,9 +88,8 @@
   font-size: 28px;
   margin: 0;
   opacity: 0;
-  transition: all var(--transition-time) var(--transition-type);
+  transition: transform var(--animation-time) var(--ease-out-curve);
   transform: translatex(60px);
-  transition-delay: 0.3s;
 }
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-option-percentage {
@@ -103,5 +99,5 @@
 
 .i-amphtml-story-interactive-option-percentage-sign {
   font-size: 16px;
-  margin-left: 0px;
+  margin-left: -5px;
 }

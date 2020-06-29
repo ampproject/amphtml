@@ -19,8 +19,6 @@
   color: var(--i-amphtml-interactive-option-accent-color) !important;
   --post-select-scale: 0.5 !important;
   --post-select-scale-variable: 1 !important;
-  --ease-out-curve: cubic-bezier(.3, 0, 0, 1);
-	--animation-time: .3s;
 	border-radius: 32px !important;
 	max-width: 296px !important;
 }
@@ -79,15 +77,6 @@
   right: 0px !important;
   height: 100% !important;
   animation: flashBG forwards var(--animation-time) var(--ease-out-curve);
-}
-
-@keyframes flashBG {
-  0% {
-    opacity: .4;
-  }
-  100% {
-    opacity: .2;
-  }
 }
 
 .i-amphtml-story-interactive-option-title {
