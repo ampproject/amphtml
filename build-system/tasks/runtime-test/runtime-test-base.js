@@ -31,6 +31,7 @@ const {
 const {app} = require('../../server/test-server');
 const {getFilesFromArgv} = require('../../common/utils');
 const {green, yellow, cyan, red} = require('ansi-colors');
+const {isGithubActionsBuild} = require('../../common/github-actions');
 const {isTravisBuild, isTravisPushBuild} = require('../../common/travis');
 const {reportTestStarted} = require('.././report-test-status');
 const {startServer, stopServer} = require('../serve');
@@ -157,7 +158,10 @@ function getFiles(testType) {
       if (argv.files) {
         return files.concat(getFilesFromArgv());
       }
-      if (argv.saucelabs || argv.safari || argv.firefox) {
+      if (
+        argv.saucelabs ||
+        (isGithubActionsBuild() && (argv.safari || argv.firefox))
+      ) {
         return files.concat(testConfig.unitTestCrossBrowserPaths);
       }
       if (argv.local_changes) {
