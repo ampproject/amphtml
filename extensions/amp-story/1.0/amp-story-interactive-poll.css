@@ -19,32 +19,32 @@
 }
 
 .i-amphtml-story-interactive-option-container {
-  background-color: var(--i-amphtml-interactive-option-background-color);
+  background-color: var(--i-amphtml-interactive-option-background-color) !important;
   border-radius: 16px !important;
-  color: var(--i-amphtml-interactive-strong-text-color);
-  font-weight: bold;
-  padding: 8px;
+  color: var(--i-amphtml-interactive-strong-text-color) !important;
+  font-weight: bold !important;
+  padding: 8px !important;
 }
 
 .i-amphtml-story-interactive-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  text-align: center;
-  flex-direction: row;
-  height: 58px;
-  box-sizing: border-box;
-  overflow: hidden;
-  padding: 0px 12px;
-  position: relative;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  text-align: center !important;
+  flex-direction: row !important;
+  height: 58px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  padding: 0px 12px !important;
+  position: relative !important;
   box-shadow: var(--i-amphtml-interactive-chip-shadow), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
   -webkit-box-shadow: var(--i-amphtml-interactive-chip-shadow), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
   -moz-box-shadow: var(--i-amphtml-interactive-chip-shadow), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
-  border-radius: 8px;
+  border-radius: 8px !important;
 }
 
 .i-amphtml-story-interactive-option:not(:first-child) {
-  margin-top: 8px;
+  margin-top: 8px !important;
 }
 
 .i-amphtml-story-interactive-option.i-amphtml-story-interactive-option-selected {
@@ -52,56 +52,67 @@
   box-shadow: var(--i-amphtml-interactive-chip-shadow-inset), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
   -webkit-box-shadow: var(--i-amphtml-interactive-chip-shadow-inset), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
   -moz-box-shadow: var(--i-amphtml-interactive-chip-shadow-inset), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
-  animation: flashBGColor forwards var(--animation-time) var(--ease-out-curve);
+  animation: flashBGColor forwards var(--animation-time) var(--ease-out-curve) !important;
 }
 
 .i-amphtml-story-interactive-option::after {
-  content: '';
-  background-color: var(--i-amphtml-interactive-theme-shading);
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  left: 0;
-  top: 0;
-  transform: translatex(-200%);
-  transition: transform var(--animation-time) var(--ease-out-curve);
+  content: '' !important;
+  background-color: var(--i-amphtml-interactive-theme-shading) !important;
+  position: absolute !important;
+  height: 100% !important;
+  width: 100% !important;
+  left: 0 !important;
+  top: 0 !important;
+  transform: translatex(-200%) !important;
+  transition: transform var(--animation-time) var(--ease-out-curve) !important;
 }
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-option::after {
-  transform: translatex(calc(var(--option-percentage) - 100%));
+  transform: translatex(calc(var(--option-percentage) - 100%)) !important;
 }
 
 .i-amphtml-story-interactive-option.i-amphtml-story-interactive-option-selected::after {
-  box-shadow: var(--i-amphtml-interactive-chip-shadow-inset);
+  box-shadow: var(--i-amphtml-interactive-chip-shadow-inset) !important;
 }
 
 .i-amphtml-story-interactive-option-text {
-  font-size: 22px;
-  margin: 0;
-  z-index: 1;
-  transition: transform var(--animation-time) var(--ease-out-curve);
-  transform-origin: left;
+  font-size: 22px !important;
+  margin: 0 !important;
+  z-index: 1 !important;
+  transition: transform var(--animation-time) var(--ease-out-curve) !important;
+  transform-origin: left !important;
+}
+
+.i-amphtml-story-interactive-poll-container[dir="rtl"] .i-amphtml-story-interactive-option-text{
+  transform-origin: right !important;
 }
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-option-text {
-  transform: scale(0.72);
+  transform: scale(0.72) !important;
 }
 
 .i-amphtml-story-interactive-option-percentage {
-  font-weight: 700;
-  font-size: 28px;
-  margin: 0;
-  opacity: 0;
-  transition: transform var(--animation-time) var(--ease-out-curve);
-  transform: translatex(60px);
+  font-weight: 700 !important;
+  font-size: 28px !important;
+  margin: 0 !important;
+  opacity: 0 !important;
+  transition: transform var(--animation-time) var(--ease-out-curve) !important;
+  transform: translatex(60px) !important;
+  direction: ltr;
 }
 
-.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-option-percentage {
-  opacity: 1;
-  transform: translatex(0px);
+.i-amphtml-story-interactive-poll-container[dir="rtl"] .i-amphtml-story-interactive-option-percentage {
+  transform: translatex(-60px) !important;
+}
+
+.i-amphtml-story-interactive-poll-container.i-amphtml-story-interactive-post-selection[dir="rtl"] .i-amphtml-story-interactive-option-percentage,
+.i-amphtml-story-interactive-poll-container.i-amphtml-story-interactive-post-selection:not([dir="rtl"]) .i-amphtml-story-interactive-option-percentage {
+  opacity: 1 !important;
+  transform: translatex(0px) !important;
 }
 
 .i-amphtml-story-interactive-option-percentage-sign {
-  font-size: 16px;
-  margin-left: -5px;
+  font-size: 16px !important;
+  margin-left: -5px !important;
+  display: inline-block !important;
 }
