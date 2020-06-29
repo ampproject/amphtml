@@ -15,7 +15,9 @@
  */
 
 .i-amphtml-story-interactive-container {
-  font-family: 'Poppins', sans-serif !important;
+	font-family: 'Poppins', sans-serif !important;
+	--animation-time: .3s;
+	--ease-out-curve: cubic-bezier(.3, 0, 0, 1);
 }
 
 .i-amphtml-story-interactive-container {
@@ -43,4 +45,22 @@
 	max-height: 112px !important;
 	font-weight: bold !important;
 	text-align: var(--interactive-prompt-alignment) !important;
+}
+
+@keyframes flashBG {
+  0% {
+    opacity: .4;
+  }
+  100% {
+    opacity: .2;
+  }
+}
+
+@keyframes flashBGColor {
+  0% {
+    background-color: var(--i-amphtml-interactive-theme-shading-flash);
+  }
+  100% {
+    background-color: var(--i-amphtml-interactive-theme-shading);
+  }
 }

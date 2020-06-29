@@ -26,7 +26,7 @@
         publisher="AMP Story testing"
         publisher-logo-src="example.com/logo.png"
         poster-portrait-src="example.com/poster.jpg">
-        <amp-story-page id="cover">
+        <!-- <amp-story-page id="cover">
           <amp-story-grid-layer template="fill">
             <amp-img
                 src="img/overview.jpg"
@@ -256,7 +256,7 @@
               option-2-text="Panther">
             </amp-story-interactive-binary-poll>
           </amp-story-grid-layer>
-        </amp-story-page>
+        </amp-story-page> -->
         <amp-story-page id="new-polls">
           <amp-story-grid-layer template="fill">
             <amp-img
@@ -275,26 +275,24 @@
               option-1-text="Montevideo"
               option-2-text="Paris">
             </amp-story-interactive-poll>
-            <amp-story-interactive-poll
-              endpoint="http://localhost:3000/interactives"
-              id="poll-2"
-              prompt-text="What city do you like the most?"
-              option-1-text="Montevideo"
-              option-2-text="Paris">
             </amp-story-interactive-poll>
             <amp-story-interactive-poll
               endpoint="http://localhost:3000/interactives"
               id="poll-3"
               theme="dark"
               chip-style="shadow"
+              style="--interactive-accent-color: #f5aa42"
               prompt-text="What city do you like the most?"
               option-1-text="Montevideo"
-              option-2-text="Paris">
+              option-2-text="Paris"
+              option-3-text="Amsterdam"
+              option-4-text="Buenos Aires">
             </amp-story-interactive-poll>
             <amp-story-interactive-poll
               endpoint="http://localhost:3000/interactives"
               id="poll-4"
               chip-style="shadow"
+              style="--interactive-accent-color: #eb50a8"
               prompt-text="What city do you like the most?"
               option-1-text="Montevideo"
               option-2-text="Paris">
