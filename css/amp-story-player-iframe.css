@@ -59,3 +59,19 @@ main .story-player-iframe[i-amphtml-iframe-position="1"] {
 main .story-player-iframe[i-amphtml-iframe-position="-1"] {
   transform: translate3d(-100%, 0, 0);
 }
+
+.amp-story-player-close-button {
+  position: absolute;
+  color: white;
+  font-size: 45px;
+  padding-left: 10px;
+  padding-top: 4px;
+}
+
+.amp-story-player-back-button {
+  position: absolute;
+  color: white;
+  font-size: 50px;
+  padding-left: 5px;
+  margin-top: -3px;
+}

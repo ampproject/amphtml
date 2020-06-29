@@ -221,17 +221,15 @@ export class AmpStoryPlayer {
     if (!option) {
       return;
     }
+    const optionBool = option === 'close';
 
     const button = this.doc_.createElement('a');
-    setStyle(button, 'position', 'absolute');
-    setStyle(button, 'color', 'white');
-    setStyle(button, 'fontSize', '40px');
-    setStyle(button, 'paddingLeft', '7px');
+    button.classList.add('amp-story-player-' + option + '-button');
 
-    button.textContent = option === 'close' ? '×' : '←';
+    button.textContent = optionBool ? '×' : '←';
     button.addEventListener('click', () => {
       this.element_.dispatchEvent(
-        createCustomEvent(this.win_, option === 'close' ? 'close' : 'back', {})
+        createCustomEvent(this.win_, optionBool ? 'close' : 'back', {})
       );
     });
     this.rootEl_.appendChild(button);
