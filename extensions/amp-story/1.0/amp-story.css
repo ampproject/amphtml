@@ -889,7 +889,7 @@ amp-story .amp-video-eq,
   --i-amphtml-interactive-option-accent-color: var(--interactive-accent-color) !important;
   --i-amphtml-interactive-option-background-color: white !important;
   --i-amphtml-interactive-option-text-color: #5F6368 !important;
-  --i-amphtml-interactive-theme-border: #DADCE0 !important;
+  --i-amphtml-interactive-theme-border: rgba(0, 0, 0, 0.2) !important;
   --i-amphtml-interactive-theme-shading: rgba(95, 99, 104, 0.2) !important;
   --i-amphtml-interactive-theme-shading-flash: rgba(95, 99, 104, 0.4) !important;
   --i-amphtml-interactive-chip-radius: 32px !important;
@@ -905,7 +905,7 @@ amp-story .amp-video-eq,
 .i-amphtml-story-interactive-component[theme="dark"] {
   --i-amphtml-interactive-option-text-color: #9AA0A6 !important;
   --i-amphtml-interactive-option-background-color: #202124 !important;
-  --i-amphtml-interactive-theme-border: #3C4043 !important;
+  --i-amphtml-interactive-theme-border: rgba(255, 255, 255, 0.2) !important;
   --i-amphtml-interactive-theme-shading: rgba(154, 160, 166, 0.2) !important;
   --i-amphtml-interactive-theme-shading-flash: rgba(154, 160, 166, 0.4) !important;
   --i-amphtml-interactive-strong-text-color: white !important;
