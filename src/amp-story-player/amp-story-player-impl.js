@@ -143,6 +143,7 @@ export class AmpStoryPlayer {
    */
   attachCallbacksToElement_() {
     this.element_.load = this.load.bind(this);
+    this.element_.show = this.show.bind(this);
   }
 
   /**
@@ -347,6 +348,87 @@ export class AmpStoryPlayer {
     }
 
     this.isLaidOut_ = true;
+  }
+
+  /**
+   * Shows the story provided by the URL in the player.
+   * @param {string} storyUrl
+   */
+  show(storyUrl) {
+    // TODO(enriqe): sanitize URLs for matching.
+    const storyIdx = this.stories_.findIndex(({href}) => href === storyUrl);
+
+    // TODO(proyectoramirez): replace for add() once implemented.
+    if (!this.stories_[storyIdx]) {
+      throw new Error(`Story URL not found in the player: ${storyUrl}`);
+    }
+
+    if (storyIdx === this.currentIdx_) {
+      return;
+    }
+
+    this.currentIdx_ = storyIdx;
+
+    this.evictStoriesFromIframes_();
+    this.assignIframesForStoryIdx_(storyIdx);
+  }
+
+  /**
+   * Evicts stories from iframes
+   * @private
+   */
+  evictStoriesFromIframes_() {
+    const evictedStories = this.iframePool_.evictStories();
+
+    evictedStories.forEach((storyIdx) => {
+      const story = this.stories_[storyIdx];
+      this.messagingPromises_[story[IFRAME_IDX]].then((messaging) => {
+        messaging.unregisterHandler('selectDocument');
+      });
+      story[IFRAME_IDX] = undefined;
+    });
+  }
+
+  /**
+   * Sets up new iframe arrangement given a story index. The adjacent stories
+   * will be prerendered and positioned accordingly. All messaging will be
+   * setup.
+   * @param {number} storyIdx
+   * @private
+   */
+  assignIframesForStoryIdx_(storyIdx) {
+    const availableIframeIdx = this.iframePool_.getAvailableIframeIdx();
+    const adjacentStoriesIdx = this.iframePool_.findAdjacent(
+      storyIdx,
+      this.stories_.length - 1
+    );
+
+    for (let i = 0; i < adjacentStoriesIdx.length; i++) {
+      const story = this.stories_[adjacentStoriesIdx[i]];
+      story[IFRAME_IDX] = availableIframeIdx[i];
+      this.iframePool_.addStoryIdx(adjacentStoriesIdx[i]);
+
+      const iframe = this.iframes_[story[IFRAME_IDX]];
+
+      this.layoutIframe_(
+        story,
+        iframe,
+        adjacentStoriesIdx[i] === storyIdx
+          ? VisibilityState.VISIBLE
+          : VisibilityState.PRERENDER
+      );
+
+      this.updateIframePosition_(
+        availableIframeIdx[i],
+        adjacentStoriesIdx[i] === storyIdx
+          ? IframePosition.CURRENT
+          : adjacentStoriesIdx[i] > storyIdx
+          ? IframePosition.NEXT
+          : IframePosition.PREVIOUS
+      );
+
+      this.setUpMessagingForIframe_(story, iframe);
+    }
   }
 
   /**

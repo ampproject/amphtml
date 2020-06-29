@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import {AmpStoryComponentManager} from '../../src/amp-story-player/amp-story-component-manager';
 import {
   AmpStoryPlayer,
   IFRAME_IDX,
 } from '../../src/amp-story-player/amp-story-player-impl';
-import {AmpStoryPlayerManager} from '../../src/amp-story-player/amp-story-player-manager';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {toArray} from '../../src/types';
 
@@ -53,7 +53,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       playerEl.appendChild(storyAnchor);
     }
     win.document.body.appendChild(playerEl);
-    manager = new AmpStoryPlayerManager(win);
+    manager = new AmpStoryComponentManager(win);
 
     env.sandbox
       .stub(Messaging, 'waitForHandshakeFromDocument')
@@ -289,6 +289,14 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   });
 
   describe('Player API', () => {
+    function appendStoriesToPlayer(playerEl, numStories) {
+      for (let i = 0; i < numStories; i++) {
+        const story = win.document.createElement('a');
+        story.setAttribute('href', `https://example.com/story${i}.html`);
+        playerEl.appendChild(story);
+      }
+    }
+
     it('signals when its ready to be interacted with', async () => {
       buildStoryPlayer();
       const readySpy = env.sandbox.spy();
@@ -326,6 +334,41 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
 
       expect(playerEl.shadowRoot.querySelector('iframe')).to.exist;
+    });
+
+    it('show callback builds corresponding adjacent iframes', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      await player.show('https://example.com/story3.html');
+
+      const stories = toArray(playerEl.querySelectorAll('a'));
+
+      expect(stories[0][IFRAME_IDX]).to.eql(undefined);
+      expect(stories[1][IFRAME_IDX]).to.eql(undefined);
+      expect(stories[2][IFRAME_IDX]).to.eql(0);
+      expect(stories[3][IFRAME_IDX]).to.eql(1);
+      expect(stories[4][IFRAME_IDX]).to.eql(2);
+    });
+
+    // TODO(proyectoramirez): delete once add() is implemented.
+    it('show callback should throw when story is not found', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      return expect(() =>
+        player.show('https://example.com/story6.html')
+      ).to.throw(
+        'Story URL not found in the player: https://example.com/story6.html'
+      );
     });
   });
 });

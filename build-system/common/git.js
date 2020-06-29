@@ -203,6 +203,27 @@ function gitCommitFormattedTime(ref = 'HEAD') {
 }
 
 /**
+ * Returns the commit message of a given ref.
+ * @param {string} ref a Git reference (commit SHA, branch name, etc.) for the
+ *   commit to get the time of.
+ * @return {string}
+ */
+function gitCommitMessage(ref = 'HEAD') {
+  return getStdout(`git log ${ref} -n 1 --pretty="%B"`);
+}
+
+/**
+ * Checks if a branch contains a specific ref.
+ * @param {string} ref a Git reference (commit SHA, branch name, etc.) for the
+ *   commit to get the time of.
+ * @param {string} branch the branch to check.
+ * @return {boolean}
+ */
+function gitBranchContains(ref, branch = 'master') {
+  return Boolean(getStdout(`git branch ${branch} --contains ${ref}`).trim());
+}
+
+/**
  * Returns the merge base of the current branch off of master when running on
  * a local workspace.
  * @return {string}
@@ -233,11 +254,13 @@ function gitDiffPath(path, commit) {
 }
 
 module.exports = {
+  gitBranchContains,
   gitBranchCreationPoint,
   gitBranchName,
   gitCherryMaster,
   gitCommitFormattedTime,
   gitCommitHash,
+  gitCommitMessage,
   gitCommitterEmail,
   gitDiffAddedNameOnlyMaster,
   gitDiffColor,
