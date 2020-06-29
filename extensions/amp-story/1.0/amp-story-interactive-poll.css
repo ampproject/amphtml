@@ -120,3 +120,7 @@
   margin-left: -5px !important;
   display: inline-block !important;
 }
+
+.i-amphtml-story-interactive-poll-container:not(.i-amphtml-story-interactive-has-data) .i-amphtml-story-interactive-option-percentage {
+  display: none !important;
+}
