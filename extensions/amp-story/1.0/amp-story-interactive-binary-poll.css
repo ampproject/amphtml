@@ -19,8 +19,8 @@
   color: var(--i-amphtml-interactive-option-accent-color) !important;
   --post-select-scale: 0.5 !important;
   --post-select-scale-variable: 1 !important;
-  --ease-out-curve: cubic-bezier(.3, 0, 0, 1);
-	--animation-time: .3s;
+  --ease-out-curve: cubic-bezier(.3, 0, 0, 1) !important;
+	--animation-time: .3s !important;
 	border-radius: 32px !important;
 	max-width: 296px !important;
 }
@@ -52,10 +52,10 @@
 }
 
 .i-amphtml-story-interactive-option-text-container {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  flex-direction: column !important;
   transform: translateY(17px) !important;
 }
 
@@ -76,12 +76,12 @@
 
 .i-amphtml-story-interactive-option
   .i-amphtml-story-interactive-option-percent-bar {
-  height: 100%;
-  width: 100%;
-  position: absolute;
-  opacity: 0;
-  transform-origin: left;
-  transition: transform var(--animation-time) var(--ease-out-curve);
+  height: 100% !important;
+  width: 100% !important;
+  position: absolute !important;
+  opacity: 0 !important;
+  transform-origin: left !important;
+  transition: transform var(--animation-time) var(--ease-out-curve) !important;
 }
 
 [dir=rtl] .i-amphtml-story-interactive-option
@@ -103,6 +103,7 @@
   .i-amphtml-story-interactive-option.i-amphtml-story-interactive-option-selected 
     .i-amphtml-story-interactive-option-percent-bar {
   background-color: var(--i-amphtml-interactive-option-accent-color) !important;
+  opacity: .2 !important;
   animation: flashBG forwards var(--animation-time) var(--ease-out-curve) !important;
 }
 
