@@ -157,7 +157,8 @@
                 width="900">
             </amp-img>
           </amp-story-grid-layer>
-          <amp-story-grid-layer template="center">
+          <amp-story-grid-layer template="thirds">
+            <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
               <amp-story-interactive-binary-poll
 								endpoint="http://localhost:3000/interactives"
 								prompt-text="What is your favorite movie?"
@@ -167,28 +168,85 @@
                 option-1-text="דוקטור מוזר"
                 option-2-text="פנתר שחור">
               </amp-story-interactive-binary-poll>
+            </div>
+          </amp-story-grid-layer>
+          <amp-story-page-attachment layout="nodisplay" data-cta-text="Read more">
+            <iframe src="https://www.amp.dev" style="width:100%;height:100%"></iframe>
+          </amp-story-page-attachment>
+        </amp-story-page>
+        <amp-story-page id="poll-binary-2">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
             <amp-story-interactive-binary-poll
               endpoint="http://localhost:3000/interactives"
               id="movie-light-connected"
               theme="dark"
-              prompt-text="What is the best movie?"
               option-1-text="Doctor Strange"
               option-2-text="Black Panther">
             </amp-story-interactive-binary-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-binary-3">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="thirds">
+            <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
+              <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
               <amp-story-interactive-binary-poll
                 endpoint="http://localhost:3000/interactives"
                 id="movie-light-connected"
-                prompt-text="What is the best movie?"
-                style="--interactive-accent-color: #FFC700; --interactive-prompt-text-color:black"
+                style="--interactive-accent-color: #FFC700;"
                 option-1-text="🧛"
                 option-2-text="🐆">
               </amp-story-interactive-binary-poll>
+            </div>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-binary-4">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="thirds">
+            <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
+              <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
               <amp-story-interactive-binary-poll
                 endpoint="http://localhost:3000/interactives"
                 id="movie-light-connected"
+                style="--interactive-accent-color: rgb(0, 0, 0);"
                 option-1-text="Doctor"
                 option-2-text="Panther">
               </amp-story-interactive-binary-poll>
+            </div>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-binary-5">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="vertical">
             <amp-story-interactive-binary-poll
               endpoint="http://localhost:3000/interactives"
               id="movie-light-connected"
@@ -199,7 +257,7 @@
             </amp-story-interactive-binary-poll>
           </amp-story-grid-layer>
         </amp-story-page>
-        <amp-story-page id="new-polls">
+        <amp-story-page id="poll-1">
           <amp-story-grid-layer template="fill">
             <amp-img
                 src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
@@ -216,7 +274,18 @@
               option-1-text="Montevideo"
               option-2-text="Paris">
             </amp-story-interactive-poll>
-            </amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-2">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
             <amp-story-interactive-poll
               id="poll-2"
               theme="dark"
@@ -226,6 +295,18 @@
               option-1-text="Montevideo"
               option-2-text="Paris">
             </amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-3">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
             <amp-story-interactive-poll
               id="poll-3"
               style="--interactive-accent-color: rgb(255, 152, 152); --interactive-prompt-text-color: black"
@@ -233,6 +314,18 @@
               option-1-text="Montevideo"
               option-2-text="Paris">
             </amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-4">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
             <amp-story-interactive-poll
               id="poll-4"
               chip-style="shadow"
@@ -241,50 +334,6 @@
               option-1-text="Montevideo"
               option-2-text="Paris">
             </amp-story-interactive-poll>
-          </amp-story-grid-layer>
-        </amp-story-page>
-        <amp-story-page id="new-quizzes">
-          <amp-story-grid-layer template="fill">
-            <amp-img
-                src="img/roadshow.jpg"
-                layout="responsive"
-                height="1600"
-                width="900">
-            </amp-img>
-          </amp-story-grid-layer>
-          <amp-story-grid-layer template="center">
-            <amp-story-interactive-quiz
-                endpoint="http://localhost:3000/interactives"
-                id="last-cup-dark"
-                theme="dark"
-                prompt-text="What city do you like the most?"
-                option-1-text="Montevideo" option-1-correct
-                option-2-text="Paris">
-            </amp-story-interactive-quiz>
-            <amp-story-interactive-quiz
-                endpoint="http://localhost:3000/interactives"
-                id="last-cup-dark"
-                prompt-text="What city do you like the most?"
-                option-1-text="Montevideo" option-1-correct
-                option-2-text="Paris">
-            </amp-story-interactive-quiz>
-            <amp-story-interactive-quiz
-                endpoint="http://localhost:3000/interactives"
-                id="last-cup-dark"
-                theme="dark"
-                chip-style="shadow"
-                prompt-text="What city do you like the most?"
-                option-1-text="Montevideo" option-1-correct
-                option-2-text="Paris">
-            </amp-story-interactive-quiz>
-            <amp-story-interactive-quiz
-                endpoint="http://localhost:3000/interactives"
-                id="last-cup-dark"
-                chip-style="shadow"
-                prompt-text="What city do you like the most?"
-                option-1-text="Montevideo" option-1-correct
-                option-2-text="Paris">
-            </amp-story-interactive-quiz>
           </amp-story-grid-layer>
         </amp-story-page>
     </amp-story>
