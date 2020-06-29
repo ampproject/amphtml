@@ -202,10 +202,7 @@ export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {
    * @private
    */
   getTransformVal_(percentage) {
-    let mappedVal = percentage - 50;
-    if (mappedVal < MIN_HORIZONTAL_TRANSFORM) {
-      mappedVal = MIN_HORIZONTAL_TRANSFORM;
-    }
+    let mappedVal = Math.max(percentage - 50, MIN_HORIZONTAL_TRANSFORM);
     if (document.dir === 'rtl') {
       mappedVal *= -1;
     }
