@@ -370,5 +370,57 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         'Story URL not found in the player: https://example.com/story6.html'
       );
     });
+
+    it('testing back button', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+      player.setAttribute('button', 'back');
+      
+      await player.load();
+      
+      const readySpy = env.sandbox.spy();
+      playerEl.addEventListener('back', readySpy);
+      
+      win.document.getElement('back-button').click();
+
+      expect(readySpy).to.have.been.calledOnce;
+    });
+
+    // it('', async () => {
+    //   const playerEl = win.document.createElement('amp-story-player');
+    //   appendStoriesToPlayer(playerEl, 5);
+
+    //   const player = new AmpStoryPlayer(win, playerEl);
+    //   player.setAttribute('button', 'close');
+      
+    //   await player.load();
+      
+    //   const readySpy = env.sandbox.spy();
+    //   playerEl.addEventListener('close', readySpy);
+      
+      
+      
+
+    //   expect(readySpy).to.have.been.calledOnce;
+    // });
+
+    // it('', async () => {
+    //   const playerEl = win.document.createElement('amp-story-player');
+    //   appendStoriesToPlayer(playerEl, 5);
+
+    //   const player = new AmpStoryPlayer(win, playerEl);
+    //   player.setAttribute('button', 'brokenattribute');
+      
+    //   await player.load();
+      
+    //   const readySpy = env.sandbox.spy();
+    //   playerEl.addEventListener('close', readySpy);
+      
+      
+
+    //   expect(readySpy).to.have.been.calledOnce;
+    // });
   });
 });

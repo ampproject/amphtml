@@ -225,6 +225,7 @@ export class AmpStoryPlayer {
 
     const button = this.doc_.createElement('a');
     button.classList.add('amp-story-player-' + option + '-button');
+    button.id = option + '-button';
 
     button.textContent = optionBool ? '×' : '←';
     button.addEventListener('click', () => {
