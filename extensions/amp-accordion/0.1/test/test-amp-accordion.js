@@ -244,7 +244,7 @@ describes.realWin(
         const content = section.children[1];
         expect(section.hasAttribute('expanded')).to.be.false;
         expect(header.getAttribute('aria-expanded')).to.equal('false');
-        content.dispatchEvent(new Event('rendersubtreeactivation'));
+        content.dispatchEvent(new Event('beforematch'));
         expect(section.hasAttribute('expanded')).to.be.true;
         expect(header.getAttribute('aria-expanded')).to.equal('true');
         toggleExperiment(win, 'amp-accordion-display-locking', false);
