@@ -57,7 +57,7 @@ amp-story-grid-layer {
 }
 
 amp-story-grid-layer[aspect-ratio] {
-  padding: 0.5em; /* px padding breaks letterboxed mode */
+  padding: 1em 0.5em 0.5em; /* px padding breaks letterboxed mode */
 }
 
 amp-story-grid-layer.i-amphtml-story-has-page-attachment.i-amphtml-story-has-interactive {
