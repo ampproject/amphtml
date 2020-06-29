@@ -17,6 +17,7 @@
 import minimist from 'minimist';
 import {PostHTML} from 'posthtml';
 import {readFileSync} from 'fs';
+import {transformCss} from '../../../../tasks/jsify-css';
 
 const argv = minimist(process.argv.slice(2));
 const isTestMode: boolean = argv._.includes('server-tests');
@@ -31,8 +32,7 @@ const versionPath = isTestMode
   ? `${cwd}/${testDir}/version.txt`
   : `${cwd}/dist/version.txt`;
 
-const v0Css = readFileSync(cssPath).toString().trim();
-const version = readFileSync(versionPath).toString().trim();
+const version = readFileSync(versionPath, 'utf8').toString().trim();
 
 interface StyleNode extends PostHTML.Node {
   tag: 'style',
@@ -44,7 +44,8 @@ interface StyleNode extends PostHTML.Node {
   content: string[]
 }
 
-function prependAmpStyles(head: PostHTML.Node): PostHTML.Node {
+function prependAmpStyles(resolver: Promise, tree: PostHTML.Node, head: PostHTML.Node): PostHTML.Node {
+  const v0CssPromise = transformCss(cssPath);
   const content = head.content || [];
   const styleNode: StyleNode = {
     walk: head.walk,
@@ -55,7 +56,7 @@ function prependAmpStyles(head: PostHTML.Node): PostHTML.Node {
       // Prefix 01 to simulate stable/prod version RTV prefix.
       'i-amphtml-version': `01${version}`,
     },
-    content: [v0Css]
+    content: ['.hello {}']
   };
   content.unshift(styleNode);
   return { ...head, content };
@@ -64,6 +65,10 @@ function prependAmpStyles(head: PostHTML.Node): PostHTML.Node {
 /**
  * Replace the src for every stories script tag.
  */
-export default function(tree: PostHTML.Node): void {
-  tree.match({tag: 'head'}, prependAmpStyles);
+export default function(tree: PostHTML.Node): Promise<PostHTML.Node> {
+  return new Promise((resolve) => {
+    tree.match({tag: 'head'}, (head) => {
+      prependAmpStyles(head);
+    });
+  });
 }

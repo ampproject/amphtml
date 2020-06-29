@@ -7,7 +7,7 @@
     "moduleResolution": "node",
     "target": "ES2019",
     "module": "CommonJS",
-    "allowJs": false,
+    "allowJs": true,
     "noUnusedLocals": true,
     "strictNullChecks": true,
     "noImplicitAny": true,
@@ -15,7 +15,11 @@
     "alwaysStrict": true,
     "incremental": true,
     "esModuleInterop": true,
-    "declaration": true
+    "declaration": true,
+    "baseUrl": ".",
+    "paths": {
+      "../../../../tasks/jsify-css": ["*", "../../../../../tasks/jsify-css"]
+    }
   },
   "include": ["./*.ts", "./**/*.ts"]
 }
