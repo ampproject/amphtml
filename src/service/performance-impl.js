@@ -695,15 +695,13 @@ export class Performance {
     }
 
     // Emit events. Used by `gulp performance`.
-    if (getMode().test) {
-      this.win.dispatchEvent(
-        createCustomEvent(
-          this.win,
-          'perf',
-          /** @type {JsonObject} */ ({label, delta})
-        )
-      );
-    }
+    this.win.dispatchEvent(
+      createCustomEvent(
+        this.win,
+        'perf',
+        /** @type {JsonObject} */ ({label, delta})
+      )
+    );
 
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
       this.viewer_.sendMessage('tick', data);
