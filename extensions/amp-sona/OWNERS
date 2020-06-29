@@ -4,7 +4,7 @@
 {
   rules: [
     {
-      owners: [{name: 'daniel-asmson'}],
+      owners: [{name: 'daniel-samson'}],
       owners: [{name: 'richdynamix'}],
     },
   ],
