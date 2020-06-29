@@ -67,12 +67,16 @@
   transition: transform var(--animation-time) var(--ease-out-curve) !important;
 }
 
+.i-amphtml-story-interactive-poll-container[dir="rtl"] .i-amphtml-story-interactive-option::after {
+  transform: translatex(100%)!important;
+}
+
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-option::after {
   transform: translatex(calc(var(--option-percentage) - 100%)) !important;
 }
 
-.i-amphtml-story-interactive-option.i-amphtml-story-interactive-option-selected::after {
-  box-shadow: var(--i-amphtml-interactive-chip-shadow-inset) !important;
+.i-amphtml-story-interactive-poll-container.i-amphtml-story-interactive-post-selection[dir="rtl"] .i-amphtml-story-interactive-option::after {
+  transform: translatex(calc(100% - var(--option-percentage)))!important;
 }
 
 .i-amphtml-story-interactive-option-text {
