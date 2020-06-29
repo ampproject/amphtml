@@ -21,7 +21,7 @@ import {requireExternal} from '../../../../src/module';
 describes.sandboxed('DatesList', {}, () => {
   const moment = requireExternal('moment');
 
-  it('should accept date strings and RRULE strings', function () {
+  it('should accept date strings and RRule strings', function () {
     this.timeout(3000);
     const containedDate = '09/04/1998';
     const notContainedDate = '09/03/1998';
@@ -68,8 +68,10 @@ describes.sandboxed('DatesList', {}, () => {
     const containedDate = '09/04/1998';
     const dateBefore = '01/01/1998';
     // const notContainedDate = '09/03/1998';
+    const containedRrule =
+      'FREQ=WEEKLY;COUNT=10;DTSTART=20180101T000000Z;WKST=SU;BYDAY=TU,SA';
     // const matchesRrule = '01/02/2018';
-    const datesList = new DatesList([containedDate]);
+    const datesList = new DatesList([containedDate, containedRrule]);
 
     const result = datesList.firstDateAfter(dateBefore);
 

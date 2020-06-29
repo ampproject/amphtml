@@ -123,7 +123,7 @@ export class DatesList {
   }
 
   /**
-   * Distinguish between moment dates.
+   * Distinguish between RRULE dates and moment dates.
    * @param {!moment|string} date
    * @return {!DateType}
    * @private

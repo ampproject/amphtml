@@ -362,7 +362,7 @@ A space-separated list of ISO 8601 dates or RFC 5545 RRULE repeating dates to pr
 ##### highlighted
 
 A space-separated list of ISO 8601 dates or RFC 5545 RRULE repeating dates to specially style as highlighted to draw the user's attention.
-Default styling is a blue dot on the date. Default styling is a blue dot on the date.
+Default styling is a blue dot on the date.
 
 ##### day-size
 
