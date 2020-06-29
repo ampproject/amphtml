@@ -405,6 +405,36 @@ export class AmpStoryPlayer {
   }
 
   /**
+   * Navigates stories given a number.
+   * @param {number} storyDelta
+   * @private
+   */
+  go(storyDelta) {
+    if (this.currentIdx_ + storyDelta > this.stories_.length) {
+      throw new Error('Out of Story range.')
+    }
+    if (this.currentIdx_ + storyDelta > 0) {
+      throw new Error('Out of Story range.')
+    }
+    
+    if (storyDelta === 0) {
+      return;
+    }
+    if (storyDelta > 0) {
+      for (let i = 0; i < storyDelta; i++) {
+        this.next_();
+      }
+      return;
+    }
+    if (storyDelta < 0) {
+      for (let i = 0; i > storyDelta; i--) {
+        this.previous_();
+      }
+      return;
+    }
+  }
+
+  /**
    * Updates an iframe to the `inactive` state.
    * @param {number} iframeIdx
    * @param {!IframePosition} position
