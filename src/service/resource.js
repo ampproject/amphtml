@@ -897,9 +897,12 @@ export class Resource {
 
     if (this.state_ != ResourceState.LAYOUT_SCHEDULED) {
       const err = dev().createError(
-        'startLayout called but not LAYOUT_SCHEDULED'
+        'startLayout called but not LAYOUT_SCHEDULED',
+        'currently: ',
+        this.state_
       );
-      reportError(err, this.element);
+      err.associatedElement = this.element;
+      reportError(err);
       return Promise.reject(err);
     }
 
