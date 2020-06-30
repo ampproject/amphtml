@@ -53,3 +53,35 @@ export const defaultArrowButton = {
   height: '32px',
   background: 'rgba(0, 0, 0, 0.25)',
 };
+
+/*
+ * Styles to hide scrollbars, with three different methods:
+ *
+ * 1. scrollbar-width
+ *  - Note: this is actually scrollbar *thickness* and applies to horizontal
+ *    scrollbars as well
+ * 2. ::-webkit-scrollbar
+ * 3. Using padding to push scrollbar outside of the overflow
+ *
+ * The last method has side-effect of having the bottom of the slides being
+ * cut-off, since the height (or width) of the scrollbar is included when
+ * calculating the 100% height (or width) of the slide.
+ */
+/* Firefox */
+export const hideScrollbar = {
+  scrollbarWidth: 'none',
+};
+/* Chrome, Safari */
+export const hideScrollbarPseudo = `[hide-scrollbar]::-webkit-scrollbar {
+  display: none;
+  box-sizing: content-box !important;
+  }`;
+export const horizontalScroll = {
+  flexDirection: 'row',
+  /* Firefox, IE */
+  scrollSnapTypeX: 'mandatory',
+  scrollSnapType: 'x mandatory',
+  /* Hide scrollbar */
+  paddingBottom: '20px',
+  overflowY: 'hidden',
+};

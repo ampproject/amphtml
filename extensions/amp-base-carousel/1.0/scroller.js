@@ -61,21 +61,30 @@ export function Scroller(props) {
   }
 
   return (
-    <div
-      key="container"
-      ref={containerRef}
-      onScroll={scrollHandler}
-      style={styles.scrollContainer}
-    >
-      {slides.map((child, index) => (
-        <WithAmpContext
-          key={`slide-${child.key || index}`}
-          renderable={index == currentSlide}
-          playable={index == currentSlide}
-        >
-          <div style={styles.slideElement}>{child}</div>
-        </WithAmpContext>
-      ))}
-    </div>
+    <>
+      <style>{styles.hideScrollbarPseudo}</style>
+      <div
+        horizontal
+        hide-scrollbar
+        key="container"
+        ref={containerRef}
+        onScroll={scrollHandler}
+        style={{
+          ...styles.scrollContainer,
+          ...styles.hideScrollbar,
+          ...styles.horizontalScroll,
+        }}
+      >
+        {slides.map((child, index) => (
+          <WithAmpContext
+            key={`slide-${child.key || index}`}
+            renderable={index == currentSlide}
+            playable={index == currentSlide}
+          >
+            <div style={styles.slideElement}>{child}</div>
+          </WithAmpContext>
+        ))}
+      </div>
+    </>
   );
 }
