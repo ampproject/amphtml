@@ -1,0 +1,38 @@
+name: Cross-Browser Tests
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  ubuntu_tests:
+    name: Linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - run: yarn
+      - name: Build and Test
+        run: node build-system/pr-check/cross-browser-tests.js
+  macos_tests:
+    name: Mac OS
+    runs-on: macos-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - run: yarn
+      - run: sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
+      - run: yarn global add gulp-cli
+      - name: Build and Test
+        run: node build-system/pr-check/cross-browser-tests.js
