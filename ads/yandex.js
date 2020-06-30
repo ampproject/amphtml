@@ -26,10 +26,7 @@ export function yandex(global, data) {
   validateData(data, ['blockId'], ['data', 'onRender', 'onError']);
 
   addToQueue(global, data);
-  loadScript(
-    global,
-    'https://yastatic.net/partner-code/loaders/context_amp.js'
-  );
+  loadScript(global, 'https://an.yandex.ru/system/context_amp.js');
 }
 
 /**
