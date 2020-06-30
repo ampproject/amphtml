@@ -11,6 +11,7 @@
 
     // Enable YAML auto-formatting for these files.
     ".codecov.yml": "yaml",
+    ".github/workflows/continuous-integration-workflow.yml": "yaml",
     ".lando.yml": "yaml",
     ".lgtm.yml": "yaml",
     ".travis.yml": "yaml"
