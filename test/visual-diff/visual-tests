@@ -183,6 +183,10 @@
       "interactive_tests": "examples/visual-tests/font.amp.404/font.amp.js"
     },
     {
+      "url": "examples/visual-tests/css.amp/css.amp.html",
+      "name": "unbuilt css",
+    },
+    {
       "url": "examples/visual-tests/article.amp/article.amp.html",
       "name": "AMP Article",
       "loading_complete_selectors": [
