@@ -18,6 +18,7 @@ import {Services} from '../services';
 import {Signals} from '../utils/signals';
 import {TickLabel} from '../enums';
 import {VisibilityState} from '../visibility-state';
+import {createCustomEvent} from '../event-helper';
 import {dev, devAssert} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
@@ -457,13 +458,7 @@ export class Performance {
    */
   onVisibilityChange_() {
     if (this.win.document.visibilityState === 'hidden') {
-      if (this.supportsLayoutShift_) {
-        this.tickLayoutShiftScore_();
-      }
-      if (this.supportsLargestContentfulPaint_) {
-        this.tickLargestContentfulPaint_();
-      }
-      this.tickSlowElementRatio_();
+      this.tickCumulativeMetrics_();
     }
   }
 
@@ -474,14 +469,22 @@ export class Performance {
    */
   onAmpDocVisibilityChange_() {
     if (this.ampdoc_.getVisibilityState() === VisibilityState.INACTIVE) {
-      if (this.supportsLayoutShift_) {
-        this.tickLayoutShiftScore_();
-      }
-      if (this.supportsLargestContentfulPaint_) {
-        this.tickLargestContentfulPaint_();
-      }
-      this.tickSlowElementRatio_();
+      this.tickCumulativeMetrics_();
     }
+  }
+
+  /**
+   * Tick the metrics whose values change over time.
+   * @private
+   */
+  tickCumulativeMetrics_() {
+    if (this.supportsLayoutShift_) {
+      this.tickLayoutShiftScore_();
+    }
+    if (this.supportsLargestContentfulPaint_) {
+      this.tickLargestContentfulPaint_();
+    }
+    this.tickSlowElementRatio_();
   }
 
   /**
@@ -689,6 +692,15 @@ export class Performance {
       delta = this.win.performance.now();
       data['value'] = this.timeOrigin_ + delta;
     }
+
+    // Emit events. Used by `gulp performance`.
+    this.win.dispatchEvent(
+      createCustomEvent(
+        this.win,
+        'perf',
+        /** @type {JsonObject} */ ({label, delta})
+      )
+    );
 
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
       this.viewer_.sendMessage('tick', data);
