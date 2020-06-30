@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {requireExternal} from '../../../src/module';
 import * as rrule from '../../../node_modules/rrule/dist/es5/rrule.min.js';
-const rrulestr = rrule.default.rrulestr || rrule.rrulestr; // CC imports into .default, browserify doesnt.
+import {requireExternal} from '../../../src/module';
+
+const rrulestr = rrule.default.rrulestr || rrule.rrulestr; // CC imports into .default, browserify flattens a layer.
 
 /** @enum {string} */
 const DateType = {
