@@ -15,8 +15,8 @@
  */
 
 import {requireExternal} from '../../../src/module';
-import {rrulestr} from '../../../node_modules/rrule/dist/es5/rrule.min.js';
-
+import * as rrule from '../../../node_modules/rrule/dist/es5/rrule.min.js';
+const rrulestr = rrule.default.rrulestr || rrule.rrulestr; // CC imports into .default, browserify doesnt.
 
 /** @enum {string} */
 const DateType = {
