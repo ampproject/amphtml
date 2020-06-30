@@ -131,7 +131,13 @@ export class DatesList {
    * @private
    */
   getDateType_(date) {
-    if (this.moment_(date, this.moment_.ISO_8601, true).isValid()) {
+    if (
+      this.moment_(
+        date,
+        /** @type {!{ISO_8601: string}} */ this.moment_.ISO_8601,
+        true
+      ).isValid()
+    ) {
       return DateType.DATE;
     }
 
