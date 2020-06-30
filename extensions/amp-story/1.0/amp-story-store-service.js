@@ -607,6 +607,10 @@ export class AmpStoryStoreService {
           [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: false,
           [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
         };
+      case EmbedMode.NO_SYSTEM_LAYER_ICONS:
+        return {
+          [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
+        };
       default:
         return {};
     }

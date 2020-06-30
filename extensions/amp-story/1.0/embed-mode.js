@@ -62,6 +62,15 @@ export const EmbedMode = {
    * - Disallows ads
    */
   PREVIEW: 3,
+
+  /**
+   * This mode is intended for embedders that natively handle the audio and
+   * sharing experiences, through native controls and viewer communication.
+   *
+   * This differs from the NOT_EMBEDDED embed mode in the following ways:
+   * - Hides all system layer buttons
+   */
+  NO_SYSTEM_LAYER_ICONS: 4,
 };
 
 /**
