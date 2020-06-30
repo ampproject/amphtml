@@ -40,6 +40,7 @@ const {unitTestsToRun} = require('./helpers-unit');
 const {
   isReportTestType,
   sendTravisKarmaReport,
+  shouldPostReport,
   resultFilename,
 } = require('./helpers-test-reporting');
 
@@ -206,7 +207,7 @@ function updateReporters(config) {
     config.reporters.push('saucelabs');
   }
 
-  if (/*isTravisPushBuild() &&*/ isReportTestType(config.testType)) {
+  if (isTravisPushBuild() && isReportTestType(config.testType)) {
     config.reporters.push('json-result');
     config.jsonResultReporter = {
       outputFile: resultFilename(config.testType),
@@ -295,7 +296,9 @@ class RuntimeTestRunner {
     await stopServer();
     exitCtrlcHandler(this.env.get('handlerProcess'));
 
-    await sendTravisKarmaReport(this.config.testType);
+    if (shouldPostReport(this.config)) {
+      await sendTravisKarmaReport(this.config.testType);
+    }
 
     if (this.exitCode != 0) {
       log(

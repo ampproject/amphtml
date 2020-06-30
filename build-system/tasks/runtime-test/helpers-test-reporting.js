@@ -74,8 +74,13 @@ function isReportTestType(testType) {
   return JSON_REPORT_TEST_TYPES.has(testType);
 }
 
+function shouldPostReport(config) {
+  return config.reporters.includes('json-result');
+}
+
 module.exports = {
   isReportTestType,
+  shouldPostReport,
   sendTravisKarmaReport,
   resultFilename,
 };
