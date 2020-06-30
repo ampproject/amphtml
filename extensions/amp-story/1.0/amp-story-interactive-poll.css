@@ -30,10 +30,7 @@
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  text-align: center !important;
-  flex-direction: row !important;
   height: 58px !important;
-  box-sizing: border-box !important;
   overflow: hidden !important;
   padding: 0px 12px !important;
   position: relative !important;
