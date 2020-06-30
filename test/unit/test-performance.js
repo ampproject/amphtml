@@ -819,11 +819,12 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
     // offered in fake-dom.js. We can't immediately because
     // document.visibilityState is a read-only property in that object.
     fakeWin = {
+      CustomEvent: env.win.CustomEvent,
       Date: env.win.Date,
       PerformanceObserver: env.sandbox.stub(),
       addEventListener: env.sandbox.stub(),
       removeEventListener: env.win.removeEventListener,
-      dispatchEvent: env.win.dispatchEvent,
+      dispatchEvent: (e) => env.win.dispatchEvent(e),
       document: {
         addEventListener: env.sandbox.stub(),
         hidden: false,
