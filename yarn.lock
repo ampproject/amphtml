@@ -11585,10 +11585,10 @@ karma-mocha@2.0.1:
   dependencies:
     minimist "^1.2.3"
 
-karma-safari-launcher@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/karma-safari-launcher/-/karma-safari-launcher-1.0.0.tgz#96982a2cc47d066aae71c553babb28319115a2ce"
-  integrity sha1-lpgqLMR9BmquccVTursoMZEVos4=
+karma-safarinative-launcher@1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/karma-safarinative-launcher/-/karma-safarinative-launcher-1.1.0.tgz#9f3435e13365445051305eb4d1bb80757cf337a3"
+  integrity sha512-vdMjdQDHkSUbOZc8Zq2K5bBC0yJGFEgfrKRJTqt0Um0SC1Rt8drS2wcN6UA3h4LgsL3f1pMcmRSvKucbJE8Qdg==
 
 karma-sauce-launcher@4.1.5:
   version "4.1.5"

@@ -82,7 +82,7 @@ const unitTestPaths = [
 ];
 
 // TODO(rsimha, #28838): Refine this opt-in mechanism.
-const unitTestOnSaucePaths = ['test/unit/test-error.js'];
+const unitTestCrossBrowserPaths = ['test/unit/test-error.js'];
 
 const integrationTestPaths = [
   'test/integration/**/*.js',
@@ -151,6 +151,7 @@ const prettifyGlobs = [
   '.prettierrc',
   '.renovaterc.json',
   '.vscode/settings.json',
+  '.github/workflows/continuous-integration-workflow.yml',
   '**/*.json',
   '**/OWNERS',
   '**/*.md',
@@ -213,6 +214,6 @@ module.exports = {
   prettifyGlobs,
   testPaths,
   thirdPartyFrames,
-  unitTestOnSaucePaths,
+  unitTestCrossBrowserPaths,
   unitTestPaths,
 };
