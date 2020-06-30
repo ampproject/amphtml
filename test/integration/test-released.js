@@ -43,9 +43,6 @@ function runTest(shouldKillPolyfillableApis) {
       });
     });
 
-    // There is really weird behavior when running this test in FF.
-    // It never renders the ad, even though it appears to work when looking
-    // at the rendering. The test passes when running locally in FF.
     // TODO(lannka, #3561): unmute the test.
     it.configure()
       .skipFirefox()
