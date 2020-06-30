@@ -15,7 +15,8 @@
  */
 
 import {requireExternal} from '../../../src/module';
-import {rrulestr} from 'rrule';
+import {rrulestr} from '../../../node_modules/rrule/dist/es5/rrule.min.js';
+
 
 /** @enum {string} */
 const DateType = {
@@ -129,7 +130,7 @@ export class DatesList {
    * @private
    */
   getDateType_(date) {
-    if (this.moment_(date).isValid()) {
+    if (this.moment_(date, this.moment_.ISO_8601, true).isValid()) {
       return DateType.DATE;
     }
 

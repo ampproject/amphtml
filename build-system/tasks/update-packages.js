@@ -106,13 +106,13 @@ function patchIntersectionObserver() {
  * This function replaces the reference to luxon with a mock that throws (which the code handles well).
  */
 function patchRRule() {
-  const path = 'node_modules/rrule/dist/esm/src/datewithzone.js';
+  const path = 'node_modules/rrule/dist/es5/rrule.min.js';
   const patchedContents = fs
     .readFileSync(path)
     .toString()
     .replace(
-      `import { DateTime } from 'luxon';`,
-      `const DateTime = { fromJSDate() { throw TypeError() } };`
+      /require\("luxon"\)/g,
+      `{ DateTime: { fromJSDate() { throw TypeError() } } }`
     );
 
   writeIfUpdated(path, patchedContents);
