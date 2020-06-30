@@ -289,7 +289,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   });
 
   describe('Player API', () => {
-    function appendStori_esToPlayer(playerEl, numStories) {
+    function appendStoriesToPlayer(playerEl, numStories) {
       for (let i = 0; i < numStories; i++) {
         const story = win.document.createElement('a');
         story.setAttribute('href', `https://example.com/story${i}.html`);
@@ -379,10 +379,40 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       await player.load();
 
-      expect(player.go(-1)).to.throw('Out of Story range.');
-      expect(player.go(0)).to.eql(undefined);
-      expect(player.go(1)).to.eql(undefined);
-      expect(player.go(6)).to.throw('Out of Story range.');
+      const stories = toArray(playerEl.querySelectorAll('a'));
+
+      player.go(0);
+      expect(stories[0][IFRAME_IDX]).to.eql(0);
+      player.go(1);
+      expect(stories[0][IFRAME_IDX]).to.eql(1);
+      player.go(-1);
+      expect(stories[0][IFRAME_IDX]).to.eql(0);
+    });
+
+    it('go should throw when negative number is out of story range', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      const stories = toArray(playerEl.querySelectorAll('a'));
+
+      return expect(() => player.go(-1)).to.throw('Out of Story range.');
+    });
+
+    it('go should throw when positive number is out of story range', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      const stories = toArray(playerEl.querySelectorAll('a'));
+
+      return expect(() => player.go(6)).to.throw('Out of Story range.');
     });
   });
 });
