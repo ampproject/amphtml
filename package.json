@@ -135,7 +135,7 @@
     "karma-ie-launcher": "1.0.0",
     "karma-mocha": "2.0.1",
     "karma-mocha-reporter": "2.2.5",
-    "karma-safari-launcher": "1.0.0",
+    "karma-safarinative-launcher": "1.1.0",
     "karma-sauce-launcher": "4.1.5",
     "karma-simple-reporter": "2.0.0",
     "karma-sinon-chai": "2.0.2",
