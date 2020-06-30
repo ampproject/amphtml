@@ -134,7 +134,7 @@ export class DatesList {
     if (
       this.moment_(
         date,
-        /** @type {!{ISO_8601: string}} */ this.moment_.ISO_8601,
+        /** @type {!{ISO_8601: string}} */ (this.moment_).ISO_8601,
         true
       ).isValid()
     ) {
