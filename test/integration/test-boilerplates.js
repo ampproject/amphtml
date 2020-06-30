@@ -23,7 +23,7 @@ import {isAnimationNone} from '../../testing/test-helper';
 
 const timeout = window.ampTestRuntimeConfig.mochaTimeout;
 
-describe.configure().run('Old Opacity Boilerplate', () => {
+describe('Old Opacity Boilerplate', () => {
   let fixture;
   beforeEach(() => {
     return createFixtureIframe(
@@ -41,7 +41,7 @@ describe.configure().run('Old Opacity Boilerplate', () => {
   });
 });
 
-describe.configure().run('New Visibility Boilerplate', () => {
+describe('New Visibility Boilerplate', () => {
   let fixture;
   beforeEach(() => {
     return createFixtureIframe(

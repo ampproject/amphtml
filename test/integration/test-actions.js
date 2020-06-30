@@ -17,7 +17,7 @@
 import {AmpEvents} from '../../src/amp-events';
 import {createFixtureIframe, poll} from '../../testing/iframe.js';
 
-describe.configure().run('on="..."', () => {
+describe('on="..."', () => {
   let fixture;
 
   beforeEach(() => {
