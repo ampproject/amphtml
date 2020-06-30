@@ -32,6 +32,8 @@
   height: 90px !important;
 	border-radius: 16px !important;
 	overflow: hidden !important;
+  /* overflow bug fix for percent bar animation on ios safari  */
+  transform: translateZ(0) !important;
 }
 
 .i-amphtml-story-interactive-option {
