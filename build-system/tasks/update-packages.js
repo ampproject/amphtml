@@ -96,7 +96,7 @@ function patchIntersectionObserver() {
 }
 
 /**
- * TODO(friedj): remove this patch when a better fix is upstreamed (https://github.com/jakubroztocil/rrule/pull/410).
+ * TODO(samouri): remove this patch when a better fix is upstreamed (https://github.com/jakubroztocil/rrule/pull/410).
  *
  * Patches rrule to remove references to luxon. Even though rrule marks luxon as an optional dependency,
  * it is used as if its a required one (static import). rrule relies on its consumers either
