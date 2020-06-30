@@ -47,6 +47,11 @@ CMP_CONFIG['didomi'] = {
   'promptUISrc': 'https://sdk-amp.privacy-center.org/loader.html',
 };
 
+CMP_CONFIG['iubenda'] = {
+  'consentInstanceId': 'iubenda',
+  'checkConsentHref': 'https://hits.iubenda.com/cs/amp/checkConsent',
+};
+
 CMP_CONFIG['sirdata'] = {
   'consentInstanceId': 'sirdata',
   'checkConsentHref': 'https://sddan.mgr.consensu.org/api/v1/public/amp/check',
@@ -75,9 +80,4 @@ CMP_CONFIG['Usercentrics'] = {
   'consentInstanceId': 'Usercentrics',
   'checkConsentHref': 'https://consents.usercentrics.eu/amp/checkConsent',
   'promptUISrc': 'https://amp.usercentrics.eu/amp.html',
-};
-
-CMP_CONFIG['iubenda'] = {
-  'consentInstanceId': 'iubenda',
-  'checkConsentHref': 'https://hits.iubenda.com/cs/amp/checkConsent',
 };
