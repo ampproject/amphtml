@@ -18,6 +18,7 @@ import {Services} from '../services';
 import {Signals} from '../utils/signals';
 import {TickLabel} from '../enums';
 import {VisibilityState} from '../visibility-state';
+import {createCustomEvent} from '../event-helper';
 import {dev, devAssert} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
@@ -347,7 +348,6 @@ export class Performance {
       ) {
         const value = entry.processingStart - entry.startTime;
         this.tickDelta(TickLabel.FIRST_INPUT_DELAY, value);
-        this.tickSinceVisible(TickLabel.FIRST_INPUT_DELAY_VISIBLE, value);
         recordedFirstInputDelay = true;
       } else if (entry.entryType === 'layout-shift') {
         // Ignore layout shift that occurs within 500ms of user input, as it is
@@ -458,13 +458,7 @@ export class Performance {
    */
   onVisibilityChange_() {
     if (this.win.document.visibilityState === 'hidden') {
-      if (this.supportsLayoutShift_) {
-        this.tickLayoutShiftScore_();
-      }
-      if (this.supportsLargestContentfulPaint_) {
-        this.tickLargestContentfulPaint_();
-      }
-      this.tickSlowElementRatio_();
+      this.tickCumulativeMetrics_();
     }
   }
 
@@ -475,14 +469,22 @@ export class Performance {
    */
   onAmpDocVisibilityChange_() {
     if (this.ampdoc_.getVisibilityState() === VisibilityState.INACTIVE) {
-      if (this.supportsLayoutShift_) {
-        this.tickLayoutShiftScore_();
-      }
-      if (this.supportsLargestContentfulPaint_) {
-        this.tickLargestContentfulPaint_();
-      }
-      this.tickSlowElementRatio_();
+      this.tickCumulativeMetrics_();
     }
+  }
+
+  /**
+   * Tick the metrics whose values change over time.
+   * @private
+   */
+  tickCumulativeMetrics_() {
+    if (this.supportsLayoutShift_) {
+      this.tickLayoutShiftScore_();
+    }
+    if (this.supportsLargestContentfulPaint_) {
+      this.tickLargestContentfulPaint_();
+    }
+    this.tickSlowElementRatio_();
   }
 
   /**
@@ -691,6 +693,15 @@ export class Performance {
       data['value'] = this.timeOrigin_ + delta;
     }
 
+    // Emit events. Used by `gulp performance`.
+    this.win.dispatchEvent(
+      createCustomEvent(
+        this.win,
+        'perf',
+        /** @type {JsonObject} */ ({label, delta})
+      )
+    );
+
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
       this.viewer_.sendMessage('tick', data);
     } else {
@@ -729,11 +740,15 @@ export class Performance {
   /**
    * Tick time delta since the document has become visible.
    * @param {TickLabel} label The variable name as it will be reported.
-   * @param {number=} opt_end If present, use this value for end time instead of now()
+   * @param {number=} opt_delta The optional delta value in milliseconds.
    */
-  tickSinceVisible(label, opt_end) {
-    const end = opt_end || this.timeOrigin_ + this.win.performance.now();
-    const visibleTime = this.ampdoc_ ? this.ampdoc_.getFirstVisibleTime() : 0;
+  tickSinceVisible(label, opt_delta) {
+    const delta =
+      opt_delta == undefined ? this.win.performance.now() : opt_delta;
+    const end = this.timeOrigin_ + delta;
+
+    // Order is timeOrigin -> firstVisibleTime -> end.
+    const visibleTime = this.ampdoc_ && this.ampdoc_.getFirstVisibleTime();
     const v = visibleTime ? Math.max(end - visibleTime, 0) : 0;
     this.tickDelta(label, v);
   }

@@ -31,6 +31,7 @@ const {
 const {app} = require('../../server/test-server');
 const {getFilesFromArgv} = require('../../common/utils');
 const {green, yellow, cyan, red} = require('ansi-colors');
+const {isGithubActionsBuild} = require('../../common/github-actions');
 const {isTravisBuild, isTravisPushBuild} = require('../../common/travis');
 const {reportTestStarted} = require('.././report-test-status');
 const {startServer, stopServer} = require('../serve');
@@ -41,7 +42,7 @@ const JSON_REPORT_TEST_TYPES = new Set(['unit', 'integration']);
 /**
  * Updates the browsers based off of the test type
  * being run (unit, integration, a4a) and test settings.
- * Keeps the default spec as is if no matching settings are found.
+ * Defaults to Chrome if no matching settings are found.
  * @param {!RuntimeTestConfig} config
  */
 function updateBrowsers(config) {
@@ -71,30 +72,27 @@ function updateBrowsers(config) {
     );
   }
 
-  const chromeFlags = [];
-  if (argv.chrome_flags) {
-    argv.chrome_flags.split(',').forEach((flag) => {
-      chromeFlags.push('--'.concat(flag));
-    });
+  if (argv.edge) {
+    Object.assign(config, {browsers: ['Edge']});
+    return;
   }
 
-  const options = new Map();
-  options
-    .set('chrome_canary', {browsers: ['ChromeCanary']})
-    .set('chrome_flags', {
-      browsers: ['Chrome_flags'],
+  if (argv.firefox) {
+    Object.assign(config, {
+      browsers: ['Firefox_flags'],
       customLaunchers: {
         // eslint-disable-next-line
-        Chrome_flags: {
-          base: 'Chrome',
-          flags: chromeFlags,
+        Firefox_flags: {
+          base: 'Firefox',
+          flags: argv.headless ? ['-headless'] : [],
         },
       },
-    })
-    .set('edge', {browsers: ['Edge']})
-    .set('firefox', {browsers: ['Firefox']})
-    .set('headless', {browsers: ['Chrome_no_extensions_headless']})
-    .set('ie', {
+    });
+    return;
+  }
+
+  if (argv.ie) {
+    Object.assign(config, {
       browsers: ['IE'],
       customLaunchers: {
         IeNoAddOns: {
@@ -102,15 +100,47 @@ function updateBrowsers(config) {
           flags: ['-extoff'],
         },
       },
-    })
-    .set('safari', {browsers: ['Safari']});
-
-  for (const [key, value] of options) {
-    if (argv.hasOwnProperty(key)) {
-      Object.assign(config, value);
-      return;
-    }
+    });
+    return;
   }
+
+  if (argv.safari) {
+    Object.assign(config, {browsers: ['SafariNative']});
+    return;
+  }
+
+  if (argv.chrome_canary) {
+    Object.assign(config, {browsers: ['ChromeCanary']});
+    return;
+  }
+
+  if (argv.chrome_flags) {
+    const chromeFlags = [];
+    argv.chrome_flags.split(',').forEach((flag) => {
+      chromeFlags.push('--'.concat(flag));
+    });
+    Object.assign(config, {
+      browsers: ['Chrome_flags'],
+      customLaunchers: {
+        // eslint-disable-next-line
+          Chrome_flags: {
+          base: 'Chrome',
+          flags: chromeFlags,
+        },
+      },
+    });
+    return;
+  }
+
+  if (argv.headless) {
+    Object.assign(config, {browsers: ['Chrome_no_extensions_headless']});
+    return;
+  }
+
+  // Default to Chrome.
+  Object.assign(config, {
+    browsers: [isTravisBuild() ? 'Chrome_travis_ci' : 'Chrome_no_extensions'],
+  });
 }
 
 /**
@@ -128,8 +158,8 @@ function getFiles(testType) {
       if (argv.files) {
         return files.concat(getFilesFromArgv());
       }
-      if (argv.saucelabs) {
-        return files.concat(testConfig.unitTestOnSaucePaths);
+      if (argv.saucelabs || isGithubActionsBuild()) {
+        return files.concat(testConfig.unitTestCrossBrowserPaths);
       }
       if (argv.local_changes) {
         return files.concat(unitTestsToRun());

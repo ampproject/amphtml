@@ -8,6 +8,7 @@ c
 dist.3p
 dist.tools
 test-bin
+/release
 examples.min
 node_modules
 npm-debug.log

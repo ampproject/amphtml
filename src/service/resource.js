@@ -897,9 +897,12 @@ export class Resource {
 
     if (this.state_ != ResourceState.LAYOUT_SCHEDULED) {
       const err = dev().createError(
-        'startLayout called but not LAYOUT_SCHEDULED'
+        'startLayout called but not LAYOUT_SCHEDULED',
+        'currently: ',
+        this.state_
       );
-      reportError(err, this.element);
+      err.associatedElement = this.element;
+      reportError(err);
       return Promise.reject(err);
     }
 
@@ -1023,7 +1026,13 @@ export class Resource {
     this.setInViewport(false);
     if (this.element.unlayoutCallback()) {
       this.element.togglePlaceholder(true);
-      this.state_ = ResourceState.NOT_LAID_OUT;
+      // With IntersectionObserver, the element won't receive another
+      // measurement if/when the document becomes active again.
+      // Therefore, its post-unlayout state must be READY_FOR_LAYOUT
+      // (built and measured) to become eligible for relayout later.
+      this.state_ = this.intersect_
+        ? ResourceState.READY_FOR_LAYOUT
+        : ResourceState.NOT_LAID_OUT;
       this.layoutCount_ = 0;
       this.layoutPromise_ = null;
     }

@@ -50,7 +50,7 @@ import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
-import {AmpStoryInteractivePoll} from './amp-story-interactive-poll';
+import {AmpStoryInteractiveBinaryPoll} from './amp-story-interactive-binary-poll';
 import {AmpStoryInteractiveQuiz} from './amp-story-interactive-quiz';
 import {AmpStoryInteractiveResults} from './amp-story-interactive-results';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
@@ -2836,7 +2836,10 @@ AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story-page', AmpStoryPage);
   AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment);
   AMP.registerElement('amp-story-interactive-quiz', AmpStoryInteractiveQuiz);
-  AMP.registerElement('amp-story-interactive-poll', AmpStoryInteractivePoll);
+  AMP.registerElement(
+    'amp-story-interactive-binary-poll',
+    AmpStoryInteractiveBinaryPoll
+  );
   AMP.registerElement(
     'amp-story-interactive-results',
     AmpStoryInteractiveResults
