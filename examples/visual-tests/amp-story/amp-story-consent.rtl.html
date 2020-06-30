@@ -46,14 +46,11 @@
 
       <amp-consent id="myConsent" layout="nodisplay">
         <script type="application/json">
-            {
-              "consents": {
-                "myConsent": {
-                  "checkConsentHref": "http://localhost:8000/get-consent-v1",
-                  "promptUI": "consentUI"
-                }
-              }
-            }
+          {
+            "consentInstanceId": "myConsent",
+            "checkConsentHref": "http://localhost:8000/get-consent-v1",
+            "promptUI": "consentUI"
+          }
           </script>
         <amp-story-consent id="consentUI" layout="nodisplay">
           <script type="application/json">
