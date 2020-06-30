@@ -49,7 +49,7 @@ CMP_CONFIG['didomi'] = {
 
 CMP_CONFIG['iubenda'] = {
   'consentInstanceId': 'iubenda',
-  'checkConsentHref': 'https://hits.iubenda.com/cs/amp/checkConsent',
+  'checkConsentHref': 'https://cdn.iubenda.com/cs/amp/checkConsent',
 };
 
 CMP_CONFIG['sirdata'] = {
