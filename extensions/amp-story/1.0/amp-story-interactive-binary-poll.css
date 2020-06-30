@@ -33,7 +33,7 @@
 	border-radius: 16px !important;
 	overflow: hidden !important;
   /* overflow bug fix for percent bar animation on ios safari  */
-  -webkit-transform: translate3d(0, 0, 0) !important;
+  transform: translateZ(0) !important;
 }
 
 .i-amphtml-story-interactive-option {
