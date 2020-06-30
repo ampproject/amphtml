@@ -15,12 +15,11 @@
  * limitations under the License.
  */
 
- amp-story-360 canvas {
+amp-story-360 canvas {
  	width: 100% !important;
  	height: 100% !important;
- }
+}
 
- amp-story-360 amp-img {
+amp-story-360 amp-img {
   opacity: 0 !important;
- }
- 
+}

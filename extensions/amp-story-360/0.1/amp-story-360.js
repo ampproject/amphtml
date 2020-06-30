@@ -20,6 +20,7 @@ import {CommonSignals} from '../../../src/common-signals';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {userAssert} from '../../../src/log';
+import {Services} from '../../../src/services';
 import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
 
 
@@ -132,10 +133,8 @@ export class AmpStory360 extends AMP.BaseElement {
     /** @private {!Array<!CameraOrientation>} */
     this.orientations_ = [];
 
-    /** @private {number} */
-    this.duration_ = element.getAttribute('duration')
-      ? timeStrToMillis(element.getAttribute('duration'))
-      : null;
+    /** @private {?number} */
+    this.duration_ = null;
 
     /** @private {?Element} */
     this.container_ = null;
@@ -153,6 +152,9 @@ export class AmpStory360 extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const attr = (name) => this.element.getAttribute(name);
+
+    this.duration_ =
+        attr('duration') ? timeStrToMillis(attr('duration')) : null;
 
     const startHeading = parseFloat(attr('heading-start') || 0);
     const startPitch = parseFloat(attr('pitch-start') || 0);
@@ -186,7 +188,9 @@ export class AmpStory360 extends AMP.BaseElement {
   layoutCallback() {
     const ampImgEl = this.element.querySelector('amp-img');
     userAssert(ampImgEl, 'amp-story-360 must contain an amp-img element.');
-
+    const owners = Services.ownersForDoc(this.element);
+    owners.setOwner(ampImgEl, this.element);
+    owners.scheduleLayout(this.element, ampImgEl);
     return whenUpgradedToCustomElement(ampImgEl)
         .then(() => {
           return ampImgEl.signals().whenSignal(CommonSignals.LOAD_END);
@@ -202,10 +206,22 @@ export class AmpStory360 extends AMP.BaseElement {
         });
   }
 
+  /** @override */
+  onMeasureChanged() {
+    this.mutateElement(() => {
+      this.renderer_.resize();
+      if (!this.isPlaying_) {
+        this.renderer_.render(false);
+      }
+    });
+  }
+
   renderInitialPosition_() {
-    this.renderer_.setCamera(
-        this.orientations_[0].rotation, this.orientations_[0].scale);
-    this.renderer_.render(false);
+    this.mutateElement(() => {
+      this.renderer_.setCamera(
+          this.orientations_[0].rotation, this.orientations_[0].scale);
+      this.renderer_.render(false);
+    });
   }
 
   /**
@@ -227,6 +243,7 @@ export class AmpStory360 extends AMP.BaseElement {
       }
       let nextOrientation = this.animation_.getNextOrientation();
       if (nextOrientation) {
+        // mutateElement causes inaccurate animation speed here, so we use rAF.
         this.win.requestAnimationFrame(() => {
           this.renderer_.setCamera(
               nextOrientation.rotation, nextOrientation.scale);
@@ -234,11 +251,12 @@ export class AmpStory360 extends AMP.BaseElement {
           loop();
         });
       } else {
+        this.isPlaying_ = false;
         this.renderer_.render(false);
         return;
       }
     };
-    loop();
+    this.mutateElement(() => loop());
   }
 
   pause() {
