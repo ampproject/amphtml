@@ -378,6 +378,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
     if (legacyConsents) {
       const policyId = Object.keys(legacyConsents)[0];
       const policy = legacyConsents[policyId];
+      this.consentConfig_.consentInstanceId = policyId;
       this.consentConfig_.checkConsentHref = policy.checkConsentHref;
       this.consentConfig_.promptIfUnknownForGeoGroup =
         policy.promptIfUnknownForGeoGroup;
