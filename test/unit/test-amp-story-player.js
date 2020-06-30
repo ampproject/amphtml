@@ -289,7 +289,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   });
 
   describe('Player API', () => {
-    function appendStoriesToPlayer(playerEl, numStories) {
+    function appendStori_esToPlayer(playerEl, numStories) {
       for (let i = 0; i < numStories; i++) {
         const story = win.document.createElement('a');
         story.setAttribute('href', `https://example.com/story${i}.html`);
@@ -369,6 +369,20 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       ).to.throw(
         'Story URL not found in the player: https://example.com/story6.html'
       );
+    });
+
+    it('navigate to stories given a number', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      expect(player.go(-1)).to.throw('Out of Story range.');
+      expect(player.go(0)).to.eql(undefined);
+      expect(player.go(1)).to.eql(undefined);
+      expect(player.go(6)).to.throw('Out of Story range.');
     });
   });
 });
