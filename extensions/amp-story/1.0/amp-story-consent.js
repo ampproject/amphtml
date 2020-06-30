@@ -311,6 +311,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
     const parentEl = dev().assertElement(this.element.parentElement);
     const consentScript = childElementByTag(parentEl, 'script');
     this.consentConfig_ = consentScript && parseJson(consentScript.textContent);
+    this.mergeLegacyConsents_();
 
     // amp-consent already triggered console errors, step out to avoid polluting
     // the console.
@@ -368,24 +369,39 @@ export class AmpStoryConsent extends AMP.BaseElement {
   }
 
   /**
+   * Merge legacy `consents` policy object from
+   * amp-consent config into top level.
+   * @private
+   */
+  mergeLegacyConsents_() {
+    const legacyConsents = this.consentConfig_['consents'];
+    if (legacyConsents) {
+      const policyId = Object.keys(legacyConsents)[0];
+      const policy = legacyConsents[policyId];
+      this.consentConfig_.consentInstanceId = policyId;
+      this.consentConfig_.checkConsentHref = policy.checkConsentHref;
+      this.consentConfig_.promptIfUnknownForGeoGroup =
+        policy.promptIfUnknownForGeoGroup;
+      delete this.consentConfig_['consents'];
+    }
+  }
+
+  /**
    * @param {string} consentId
    * @private
    */
   storeConsentId_(consentId) {
-    const policyId = Object.keys(this.consentConfig_['consents'])[0];
-    const policy = this.consentConfig_['consents'][policyId];
-
     // checkConsentHref response overrides the amp-geo config, if provided.
-    if (policy.checkConsentHref) {
+    if (this.consentConfig_.checkConsentHref) {
       this.storeService_.dispatch(Action.SET_CONSENT_ID, consentId);
       return;
     }
 
     // If using amp-access with amp-geo, only set the consent id if the user is
     // in the expected geo group.
-    if (policy['promptIfUnknownForGeoGroup']) {
+    const geoGroup = this.consentConfig_.promptIfUnknownForGeoGroup;
+    if (geoGroup) {
       Services.geoForDocOrNull(this.element).then((geo) => {
-        const geoGroup = policy['promptIfUnknownForGeoGroup'];
         const matchedGeoGroups = /** @type {!Array<string>} */ (geo.matchedISOCountryGroups);
         if (geo && !matchedGeoGroups.includes(geoGroup)) {
           return;
