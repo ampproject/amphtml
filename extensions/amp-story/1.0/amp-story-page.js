@@ -1625,7 +1625,8 @@ export class AmpStoryPage extends AMP.BaseElement {
             if (!this.storeService_.get(StateProperty.PAUSED_STATE)) {
               this.startMeasuringVideoPerformance_(poolVideoEl);
 
-              // Restart video event listeners.
+              // Restart video event listeners with the new visible video. This
+              // fixes the loading indicator on the first story page.
               this.stopListeningToVideoEvents_();
               this.startListeningToVideoEvents_();
 
