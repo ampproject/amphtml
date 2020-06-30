@@ -166,7 +166,7 @@ export class AmpSidebar extends AMP.BaseElement {
     ) {
       this.user().warn(
         TAG,
-        `${TAG} is recommended to be a direct child of the <body> element to preserve a logical DOM order.`
+        `If ${TAG} is not a direct child of <body>, its overlay may not appear properly.`
       );
     }
 
