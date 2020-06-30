@@ -304,21 +304,14 @@ export class AmpAutocomplete extends AMP.BaseElement {
         !this.element.hasAttribute('filter'),
         `${TAG} does not support client-side filter when server-side render is required.`
       );
-      this.filter_ = FilterType.NONE;
-    } else {
-      this.filter_ = userAssert(
-        this.element.getAttribute('filter'),
-        '%s requires "filter" attribute. %s',
-        TAG,
-        this.element
-      );
-      userAssert(
-        isEnumValue(FilterType, this.filter_),
-        'Unexpected filter: %s. %s',
-        this.filter_,
-        this.element
-      );
     }
+    this.filter_ = this.element.getAttribute('filter') || FilterType.NONE;
+    userAssert(
+      isEnumValue(FilterType, this.filter_),
+      'Unexpected filter: %s. %s',
+      this.filter_,
+      this.element
+    );
 
     // Read configuration attributes
     this.minChars_ = this.element.hasAttribute('min-characters')
