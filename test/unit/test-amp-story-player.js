@@ -371,56 +371,80 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       );
     });
 
-    it('testing back button', async () => {
+    it('back button should be created', async () => {
       const playerEl = win.document.createElement('amp-story-player');
+      playerEl.setAttribute('button', 'back');
       appendStoriesToPlayer(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
-      player.setAttribute('button', 'back');
+      
+      await player.load();
+      
+      expect(playerEl.shadowRoot.getElementById('back-button')).to.exist;
+    });
+
+    it('close button should be created', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      playerEl.setAttribute('button', 'close');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+      
+      await player.load();
+      
+      expect(playerEl.shadowRoot.getElementById('close-button')).to.exist;
+    });
+
+    it('no button should be created', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      playerEl.setAttribute('button', 'brokenattribute');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+      
+      await player.load();
+      
+      // Previous implementation relied on a ternary statement that defaulted to back-button
+      // if the attribute was set to a value other than close or back. This test ensures that
+      // correct behavior of the button not being created in the mentioned case.
+      expect(playerEl.shadowRoot.getElementById('back-button')).to.not.exist;
+      expect(playerEl.shadowRoot.getElementById('close-button')).to.not.exist;
+    });
+
+    it('back button should fire back event once', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      playerEl.setAttribute('button', 'back');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
       
       await player.load();
       
       const readySpy = env.sandbox.spy();
+      playerEl.addEventListener('close', readySpy);
       playerEl.addEventListener('back', readySpy);
       
-      win.document.getElement('back-button').click();
+      playerEl.shadowRoot.getElementById('back-button').click();
 
       expect(readySpy).to.have.been.calledOnce;
     });
 
-    // it('', async () => {
-    //   const playerEl = win.document.createElement('amp-story-player');
-    //   appendStoriesToPlayer(playerEl, 5);
+    it('close button should fire close event once', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      playerEl.setAttribute('button', 'close');
+      appendStoriesToPlayer(playerEl, 5);
 
-    //   const player = new AmpStoryPlayer(win, playerEl);
-    //   player.setAttribute('button', 'close');
+      const player = new AmpStoryPlayer(win, playerEl);
       
-    //   await player.load();
+      await player.load();
       
-    //   const readySpy = env.sandbox.spy();
-    //   playerEl.addEventListener('close', readySpy);
+      const readySpy = env.sandbox.spy();
+      playerEl.addEventListener('close', readySpy);
+      playerEl.addEventListener('back', readySpy);
       
-      
-      
+      playerEl.shadowRoot.getElementById('close-button').click();
 
-    //   expect(readySpy).to.have.been.calledOnce;
-    // });
-
-    // it('', async () => {
-    //   const playerEl = win.document.createElement('amp-story-player');
-    //   appendStoriesToPlayer(playerEl, 5);
-
-    //   const player = new AmpStoryPlayer(win, playerEl);
-    //   player.setAttribute('button', 'brokenattribute');
-      
-    //   await player.load();
-      
-    //   const readySpy = env.sandbox.spy();
-    //   playerEl.addEventListener('close', readySpy);
-      
-      
-
-    //   expect(readySpy).to.have.been.calledOnce;
-    // });
+      expect(readySpy).to.have.been.calledOnce;
+    });
   });
 });

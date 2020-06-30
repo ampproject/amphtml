@@ -218,7 +218,7 @@ export class AmpStoryPlayer {
    */
   initializeButton_() {
     const option = this.element_.getAttribute('button');
-    if (!option) {
+    if (!option || (option !== 'close' && option !== 'back')) {
       return;
     }
     const optionBool = option === 'close';
