@@ -104,7 +104,7 @@
     .i-amphtml-story-interactive-option-percent-bar {
   background-color: var(--i-amphtml-interactive-option-accent-color) !important;
   opacity: .2 !important;
-  i-amphtml-interactive-animation-flash-background forwards var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve);
+  animation: i-amphtml-interactive-animation-flash-background forwards var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve);
 }
 
 .i-amphtml-story-interactive-option-title {
