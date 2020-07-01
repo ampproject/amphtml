@@ -149,7 +149,7 @@ export class History {
    * @param {boolean=} canPerformWindowBack
    * @return {!Promise}
    */
-  goBack(canPerformWindowBack) {
+  goBack() {
     return this.enque_(() => {
       if (this.stackIndex_ <= 0 && !canPerformWindowBack) {
         return Promise.resolve();
