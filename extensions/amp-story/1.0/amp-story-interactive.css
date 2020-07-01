@@ -45,7 +45,7 @@
   text-align: var(--interactive-prompt-alignment) !important;
 }
 
-@keyframes flashBG {
+@keyframes i-amphtml-interactive-animation-flash-background {
   0% {
     opacity: .4;
   }
@@ -54,7 +54,7 @@
   }
 }
 
-@keyframes flashBGColor {
+@keyframes i-amphtml-interactive-animation-flash-background-color {
   0% {
     background-color: var(--i-amphtml-interactive-theme-shading-flash);
   }

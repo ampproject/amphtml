@@ -76,7 +76,7 @@
   left: 0px !important;
   right: 0px !important;
   height: 100% !important;
-  animation: flashBG forwards var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve);
+  animation: i-amphtml-interactive-animation-flash-background forwards var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve);
 }
 
 .i-amphtml-story-interactive-option-title {
