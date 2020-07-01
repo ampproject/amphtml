@@ -140,6 +140,9 @@ export class Renderer {
     this.canvas = canvas;
     this.resize();
 
+    this.rotation = null;
+    this.scale = 1;
+
     this.vertShader = gl.createShader(gl.VERTEX_SHADER);
     this.fragShaderFast = gl.createShader(gl.FRAGMENT_SHADER);
     this.fragShaderSlow = gl.createShader(gl.FRAGMENT_SHADER);
