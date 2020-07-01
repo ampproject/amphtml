@@ -64,3 +64,27 @@ export const provideArrows = () => {
     </BaseCarousel>
   );
 };
+
+export const WithLooping = () => {
+  const width = number('width', 440);
+  const height = number('height', 225);
+  const currentSlide = number('currentSlide', 0);
+  return (
+    <BaseCarousel
+      currentSlide={currentSlide}
+      loop
+      style={{width, height, position: 'relative'}}
+    >
+      {[
+        'lightcoral',
+        'peachpuff',
+        'lavender',
+        'azure',
+        'honeydew',
+        'rebeccapurple',
+      ].map((color) => (
+        <div style={{backgroundColor: color, width, height}}></div>
+      ))}
+    </BaseCarousel>
+  );
+};
