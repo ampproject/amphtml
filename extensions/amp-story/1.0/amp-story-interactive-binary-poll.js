@@ -29,6 +29,13 @@ export const FontSize = {
 };
 
 /**
+ * Minimum transformX value.
+ * Prevents small percentages from moving outside of poll.
+ *
+/** @const {number} */
+const MIN_HORIZONTAL_TRANSFORM = -20;
+
+/**
  * Generates the template for the binary poll.
  *
  * @param {!Element} element
@@ -56,6 +63,7 @@ const buildOptionTemplate = (element) => {
   const html = htmlFor(element);
   return html`
     <div class="i-amphtml-story-interactive-option">
+      <span class="i-amphtml-story-interactive-option-percent-bar"></span>
       <span class="i-amphtml-story-interactive-option-text-container">
         <span class="i-amphtml-story-interactive-option-title"
           ><span class="i-amphtml-story-interactive-option-title-text"></span
@@ -188,6 +196,20 @@ export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {
   }
 
   /**
+   * Creates a number to transfrom the x axis of binary poll text.
+   * @param {number} percentage
+   * @return {number}
+   * @private
+   */
+  getTransformVal_(percentage) {
+    let mappedVal = Math.max(percentage - 50, MIN_HORIZONTAL_TRANSFORM);
+    if (document.dir === 'rtl') {
+      mappedVal *= -1;
+    }
+    return mappedVal;
+  }
+
+  /**
    * @override
    */
   updateOptionPercentages_(responseData) {
@@ -203,7 +225,29 @@ export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {
       currOption.querySelector(
         '.i-amphtml-story-interactive-option-percentage-text'
       ).textContent = `${percentage}%`;
-      currOption.setAttribute('style', `flex-grow: ${percentage} !important`);
+
+      setStyle(
+        currOption.querySelector(
+          '.i-amphtml-story-interactive-option-percent-bar'
+        ),
+        'transform',
+        `scaleX(${percentage * 0.01 * 2})`
+      );
+
+      const textContainer = currOption.querySelector(
+        '.i-amphtml-story-interactive-option-text-container'
+      );
+
+      textContainer.setAttribute(
+        'style',
+        `transform: translateX(${
+          this.getTransformVal_(percentage) * (index === 0 ? 1 : -1)
+        }%) !important`
+      );
+
+      if (percentage === 0) {
+        setStyle(textContainer, 'opacity', '0');
+      }
     });
   }
 }

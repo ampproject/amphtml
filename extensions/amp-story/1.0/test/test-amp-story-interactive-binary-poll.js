@@ -164,5 +164,10 @@ describes.realWin(
         '--post-select-scale-variable:1'
       );
     });
+
+    it('should clamp transformX of text to MIN_HORIZONTAL_TRANSFORM value', () => {
+      const transformVal = ampStoryPoll.getTransformVal_(10);
+      expect(transformVal).to.deep.equal(-20);
+    });
   }
 );
