@@ -7,7 +7,7 @@
     "moduleResolution": "node",
     "target": "ES2019",
     "module": "CommonJS",
-    "allowJs": true,
+    "allowJs": false,
     "noUnusedLocals": true,
     "strictNullChecks": true,
     "noImplicitAny": true,
@@ -15,11 +15,7 @@
     "alwaysStrict": true,
     "incremental": true,
     "esModuleInterop": true,
-    "declaration": true,
-    "baseUrl": ".",
-    "paths": {
-      "../../../../tasks/": ["*", "../../../../../tasks/"]
-    }
+    "declaration": true
   },
   "include": ["./*.ts", "./**/*.ts"]
 }
