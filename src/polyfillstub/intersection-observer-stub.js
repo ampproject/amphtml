@@ -199,7 +199,7 @@ export class IntersectionObserverStub {
     if (this.inst_) {
       this.inst_.unobserve(target);
     } else {
-      if(this.elements_.has(target)){
+      if (this.elements_.has(target)) {
         this.elements_.delete(target);
       }
     }

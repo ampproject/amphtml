@@ -27,7 +27,12 @@ import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
 
 /** @private @const {!Set<string>} */
-const filteredLinkRels = new Set(['prefetch', 'preload', 'preconnect', 'dns-prefetch']);
+const filteredLinkRels = new Set([
+  'prefetch',
+  'preload',
+  'preconnect',
+  'dns-prefetch',
+]);
 
 /**
  * Properties:
