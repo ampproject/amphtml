@@ -27,32 +27,56 @@ describes.realWin(
   },
   (env) => {
     let win;
-    let ampImg;
     let element;
     let threesixty;
 
-    beforeEach(async () => {
-      win = env.win;
+    function appendAmpImg(parent, path) {
+      const ampImg = createElementWithAttributes(win.document, 'amp-img', {
+        'src': path,
+        'width': '7168',
+        'height': '3584',
+      });
+      parent.appendChild(ampImg);
+    }
 
-      element = win.document.createElement('amp-story-360');
-      element.setAttribute('layout', 'fill');
-      element.setAttribute('duration', '1s');
-      element.setAttribute('heading-end', '95');
-      element.style.height = '100px';
-
-      ampImg = win.document.createElement('amp-img');
-      ampImg.setAttribute('src', '/examples/img/panorama1.jpg');
-      ampImg.setAttribute('width', '7168');
-      ampImg.setAttribute('height', '3584');
-      element.appendChild(ampImg);
-
+    async function createAmpStory360(imagePath) {
+      element = createElementWithAttributes(win.document, 'amp-story-360', {
+        'layout': 'fill',
+        'duration': '1s',
+        'heading-end': '95',
+        'style': 'height: 100px',
+      });
+      if (imagePath) {
+        appendAmpImg(element, imagePath);
+      }
       win.document.body.appendChild(element);
       threesixty = await element.getImpl();
+    }
+
+    beforeEach(() => {
+      win = env.win;
     });
 
-    it('should build and parse duration attribute', async () => {
+    it('should build', async () => {
+      await createAmpStory360('/examples/img/panorama1.jpg');
+      expect(() => {
+        threesixty.layoutCallback();
+      }).to.not.throw();
+    });
+
+    it('should throw if nested amp-img is missing', async () => {
+      await createAmpStory360();
+      expect(() => {
+        allowConsoleError(() => {
+          threesixty.layoutCallback();
+        });
+      }).to.throw();
+    });
+
+    it('parse orientation attributes', async () => {
+      await createAmpStory360('/examples/img/panorama1.jpg');
       await threesixty.layoutCallback();
-      expect(threesixty.duration_).to.equal(1000);
+      expect(threesixty.canAnimate).to.be.true;
     });
   }
-);  
+);

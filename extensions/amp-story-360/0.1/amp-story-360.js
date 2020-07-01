@@ -15,14 +15,16 @@
  */
 
 import {CSS} from '../../../build/amp-story-360-0.1.css';
-import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
 import {CommonSignals} from '../../../src/common-signals';
-import {whenUpgradedToCustomElement} from '../../../src/dom';
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {userAssert} from '../../../src/log';
-import {Services} from '../../../src/services';
 import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
+import {Services} from '../../../src/services';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
+import {user, userAssert} from '../../../src/log';
+import {whenUpgradedToCustomElement} from '../../../src/dom';
 
+/** @const {string} */
+const TAG = 'AMP_STORY_360';
 
 /**
  * Internal helper class representing a camera orientation (POV) in polar
@@ -47,9 +49,12 @@ class CameraOrientation {
    * @return {!CameraOrientation}
    */
   static fromDegrees(heading, pitch, zoom) {
-    const deg2rad = (deg) => deg * Math.PI / 180;
+    const deg2rad = (deg) => (deg * Math.PI) / 180;
     return new CameraOrientation(
-        deg2rad(-pitch - 90), deg2rad(heading), 1 / zoom);
+      deg2rad(-pitch - 90),
+      deg2rad(heading),
+      1 / zoom
+    );
   }
 
   /**
@@ -57,11 +62,12 @@ class CameraOrientation {
    */
   get rotation() {
     return Matrix.mul(
-        3, Matrix.rotation(3, 1, 2, this.theta),
-        Matrix.rotation(3, 0, 1, this.phi));
+      3,
+      Matrix.rotation(3, 1, 2, this.theta),
+      Matrix.rotation(3, 0, 1, this.phi)
+    );
   }
 }
-
 
 /**
  * Internal helper class generating a sequence of frame by frame orientations
@@ -74,10 +80,11 @@ class CameraAnimation {
    * @param {!Array<!CameraOrientation>} orientations
    */
   constructor(durationMs, orientations) {
-    this.maxFrame = 60 / 1000 * durationMs;
+    this.maxFrame = (60 / 1000) * durationMs;
     this.orientations = orientations;
     this.currentHeadingIndex = 0;
     this.currentFrame = 0;
+    this.framesPerSection = this.maxFrame / (orientations.length - 1);
   }
 
   /**
@@ -95,15 +102,16 @@ class CameraAnimation {
    * @return {?CameraOrientation}
    */
   getNextOrientation() {
-    if (this.currentHeadingIndex < 0 ||
-        this.currentFrame == this.maxFrame - 1) {
+    if (
+      this.currentHeadingIndex < 0 ||
+      this.currentFrame == this.maxFrame - 1
+    ) {
       // Animation ended.
       return null;
     }
     this.currentFrame++;
-    const framesPerSection = this.maxFrame / (this.orientations.length - 1);
     const lastFrameOfCurrentSection =
-        (this.currentHeadingIndex + 1) * framesPerSection;
+      (this.currentHeadingIndex + 1) * this.framesPerSection;
     if (this.currentFrame >= lastFrameOfCurrentSection) {
       this.currentHeadingIndex++;
       if (this.currentHeadingIndex == this.orientations.length) {
@@ -115,13 +123,15 @@ class CameraAnimation {
       }
     }
     const easing = this.easeInOutQuad_(
-        this.currentFrame % framesPerSection / framesPerSection);
+      (this.currentFrame % this.framesPerSection) / this.framesPerSection
+    );
     const from = this.orientations[this.currentHeadingIndex];
     const to = this.orientations[this.currentHeadingIndex + 1];
     return new CameraOrientation(
-        from.theta + (to.theta - from.theta) * easing,
-        from.phi + (to.phi - from.phi) * easing,
-        from.scale + (to.scale - from.scale) * easing);
+      from.theta + (to.theta - from.theta) * easing,
+      from.phi + (to.phi - from.phi) * easing,
+      from.scale + (to.scale - from.scale) * easing
+    );
   }
 }
 
@@ -133,11 +143,11 @@ export class AmpStory360 extends AMP.BaseElement {
     /** @private {!Array<!CameraOrientation>} */
     this.orientations_ = [];
 
-    /** @private {?number} */
-    this.duration_ = null;
+    /** @private {number} */
+    this.duration_ = 0;
 
     /** @private {?Element} */
-    this.container_ = null;
+    this.canvas_ = null;
 
     /** @private {?Renderer} */
     this.renderer_ = null;
@@ -153,30 +163,35 @@ export class AmpStory360 extends AMP.BaseElement {
   buildCallback() {
     const attr = (name) => this.element.getAttribute(name);
 
-    this.duration_ =
-        attr('duration') ? timeStrToMillis(attr('duration')) : null;
+    if (attr('duration')) {
+      this.duration_ = timeStrToMillis(attr('duration')) || 0;
+    }
 
     const startHeading = parseFloat(attr('heading-start') || 0);
     const startPitch = parseFloat(attr('pitch-start') || 0);
     const startZoom = parseFloat(attr('zoom-start') || 1);
     this.orientations_.push(
-        CameraOrientation.fromDegrees(startHeading, startPitch, startZoom));
+      CameraOrientation.fromDegrees(startHeading, startPitch, startZoom)
+    );
 
-    if (attr('heading-end') !== undefined || attr('pitch-end') !== undefined ||
-        attr('zoom-end') !== undefined) {
+    if (
+      attr('heading-end') !== undefined ||
+      attr('pitch-end') !== undefined ||
+      attr('zoom-end') !== undefined
+    ) {
       const endHeading = parseFloat(attr('heading-end') || 0);
       const endPitch = parseFloat(attr('pitch-end') || 0);
       const endZoom = parseFloat(attr('zoom-end') || 1);
       this.orientations_.push(
-          CameraOrientation.fromDegrees(endHeading, endPitch, endZoom));
+        CameraOrientation.fromDegrees(endHeading, endPitch, endZoom)
+      );
     }
 
-    this.container_ = this.element.ownerDocument.createElement('div');
-    const canvas = this.element.ownerDocument.createElement('canvas');
-    this.element.appendChild(this.container_);
-    this.container_.appendChild(canvas);
-    this.renderer_ = new Renderer(canvas);
-    this.applyFillContent(this.container_, /* replacedContent */ true);
+    const container = this.element.ownerDocument.createElement('div');
+    this.canvas_ = this.element.ownerDocument.createElement('canvas');
+    this.element.appendChild(container);
+    container.appendChild(this.canvas_);
+    this.applyFillContent(container, /* replacedContent */ true);
   }
 
   /** @override */
@@ -192,34 +207,45 @@ export class AmpStory360 extends AMP.BaseElement {
     owners.setOwner(ampImgEl, this.element);
     owners.scheduleLayout(this.element, ampImgEl);
     return whenUpgradedToCustomElement(ampImgEl)
-        .then(() => {
-          return ampImgEl.signals().whenSignal(CommonSignals.LOAD_END);
-        })
-        .then(() => {
-          this.renderer_.resize();
+      .then(() => {
+        return ampImgEl.signals().whenSignal(CommonSignals.LOAD_END);
+      })
+      .then(
+        () => {
+          this.renderer_ = new Renderer(this.canvas_);
           this.renderer_.setImage(this.element.querySelector('img'));
+          this.renderer_.resize();
           if (this.orientations_.length < 1) {
             return;
           }
           this.renderInitialPosition_();
           this.canAnimate && this.play();
-        });
+        },
+        () => {
+          user().error(TAG, 'Failed to load the amp-img.');
+        }
+      );
   }
 
   /** @override */
   onMeasureChanged() {
     this.mutateElement(() => {
-      this.renderer_.resize();
-      if (!this.isPlaying_) {
-        this.renderer_.render(false);
+      if (this.renderer_) {
+        this.renderer_.resize();
+        if (!this.isPlaying_) {
+          this.renderer_.render(false);
+        }
       }
     });
   }
 
+  /** @private */
   renderInitialPosition_() {
     this.mutateElement(() => {
       this.renderer_.setCamera(
-          this.orientations_[0].rotation, this.orientations_[0].scale);
+        this.orientations_[0].rotation,
+        this.orientations_[0].scale
+      );
       this.renderer_.render(false);
     });
   }
@@ -228,7 +254,7 @@ export class AmpStory360 extends AMP.BaseElement {
    * @return {boolean}
    */
   get canAnimate() {
-    return this.duration_ && this.orientations_.length > 1;
+    return this.duration_ > 0 && this.orientations_.length > 1;
   }
 
   /** @private */
@@ -241,12 +267,14 @@ export class AmpStory360 extends AMP.BaseElement {
         this.renderer_.render(false);
         return;
       }
-      let nextOrientation = this.animation_.getNextOrientation();
+      const nextOrientation = this.animation_.getNextOrientation();
       if (nextOrientation) {
         // mutateElement causes inaccurate animation speed here, so we use rAF.
         this.win.requestAnimationFrame(() => {
           this.renderer_.setCamera(
-              nextOrientation.rotation, nextOrientation.scale);
+            nextOrientation.rotation,
+            nextOrientation.scale
+          );
           this.renderer_.render(true);
           loop();
         });
@@ -259,19 +287,23 @@ export class AmpStory360 extends AMP.BaseElement {
     this.mutateElement(() => loop());
   }
 
+  /** @public */
   pause() {
     this.isPlaying_ = false;
   }
 
+  /** @public */
   play() {
     userAssert(
-        this.canAnimate,
-        'amp-story-360 is either not configured to play an animation or ' +
-            'still loading content.');
+      this.canAnimate,
+      'amp-story-360 is either not configured to play an animation or ' +
+        'still loading content.'
+    );
     this.isPlaying_ = true;
     this.animate_();
   }
 
+  /** @public */
   rewind() {
     if (!this.canAnimate) {
       return;
