@@ -49,7 +49,10 @@ async function main() {
       timedExecOrDie('gulp unit --nobuild --safari');
       timedExecOrDie('gulp integration --nobuild --compiled --safari');
       break;
-    // TODO(rsimha, #28208): Build on Windows with native closure compiler.
+    case 'win32':
+      timedExecOrDie('gulp unit --nobuild --edge');
+      timedExecOrDie('gulp integration --nobuild --compiled --edge');
+      break;
     default:
       log(
         red('ERROR:'),
