@@ -377,9 +377,9 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       appendStoriesToPlayer(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
-      
+
       await player.load();
-      
+
       expect(playerEl.shadowRoot.getElementById('back-button')).to.exist;
     });
 
@@ -389,9 +389,9 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       appendStoriesToPlayer(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
-      
+
       await player.load();
-      
+
       expect(playerEl.shadowRoot.getElementById('close-button')).to.exist;
     });
 
@@ -401,9 +401,9 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       appendStoriesToPlayer(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
-      
+
       await player.load();
-      
+
       // Previous implementation relied on a ternary statement that defaulted to back-button
       // if the attribute was set to a value other than close or back. This test ensures that
       // correct behavior of the button not being created in the mentioned case.
@@ -417,13 +417,13 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       appendStoriesToPlayer(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
-      
+
       await player.load();
-      
+
       const readySpy = env.sandbox.spy();
       playerEl.addEventListener('close', readySpy);
       playerEl.addEventListener('back', readySpy);
-      
+
       playerEl.shadowRoot.getElementById('back-button').click();
 
       expect(readySpy).to.have.been.calledOnce;
@@ -435,13 +435,13 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       appendStoriesToPlayer(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
-      
+
       await player.load();
-      
+
       const readySpy = env.sandbox.spy();
       playerEl.addEventListener('close', readySpy);
       playerEl.addEventListener('back', readySpy);
-      
+
       playerEl.shadowRoot.getElementById('close-button').click();
 
       expect(readySpy).to.have.been.calledOnce;
