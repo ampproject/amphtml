@@ -131,9 +131,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected @const {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win, element);
 
-    /** @private @const {?Promise} promise that resolves when the page becomes active */
-    this.activePagePromise_ = null;
-
     /** @protected {?Promise<?InteractiveResponseType|?JsonObject|undefined>} */
     this.backendDataPromise_ = null;
 
