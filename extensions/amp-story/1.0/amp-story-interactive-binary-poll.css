@@ -61,7 +61,7 @@
 
 .i-amphtml-story-interactive-post-selection
   .i-amphtml-story-interactive-option-text-container {
-  transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve)
+  transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve),
     opacity var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
   transform: translateY(0) !important;
 }
