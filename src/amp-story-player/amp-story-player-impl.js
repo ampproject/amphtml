@@ -500,18 +500,24 @@ export class AmpStoryPlayer {
     if (storyDelta === 0) {
       return;
     }
-    
-    if (storyDelta > 0) {
-      for (let i = 0; i < storyDelta; i++) {
-        this.next_();
-      }
-      return;
-    }
-    if (storyDelta < 0) {
-      for (let i = 0; i > storyDelta; i--) {
-        this.previous_();
-      }
-      return;
+
+    const newIndex = this.stories_[this.currentIdx_ + storyDelta];
+
+    const previousStory = this.stories_[newIndex - 1];
+    this.updatePreviousIframe_(
+      previousStory[IFRAME_IDX],
+      IframePosition.PREVIOUS
+    );
+
+    const currentStory = this.stories_[newIndex];
+    this.updateCurrentIframe_(currentStory[IFRAME_IDX]);
+
+    const nextStoryIdx = newIndex + 1;
+    if (
+      nextStoryIdx < this.stories_.length &&
+      this.stories_[nextStoryIdx][IFRAME_IDX] === undefined
+    ) {
+      this.allocateIframeForStory_(nextStoryIdx);
     }
   }
 
