@@ -36,7 +36,6 @@ const {
 } = require('../server/lazy-build');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green, red} = require('ansi-colors');
-const {distNailgunPort, stopNailgunServer} = require('./nailgun');
 const {logServeMode, setServeMode} = require('../server/app-utils');
 const {watchDebounceDelay} = require('./helpers');
 
@@ -130,9 +129,6 @@ function resetServerFiles() {
  * Stops the currently running server
  */
 async function stopServer() {
-  if (lazyBuild && argv.compiled) {
-    await stopNailgunServer(distNailgunPort);
-  }
   if (url) {
     connect.serverClose();
     log(green('Stopped server at'), cyan(url));
@@ -144,7 +140,6 @@ async function stopServer() {
  * Closes the existing server and restarts it
  */
 async function restartServer() {
-  await stopServer();
   if (argv.new_server) {
     try {
       buildNewServer();

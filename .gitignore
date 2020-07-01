@@ -17,7 +17,6 @@ npm-debug.log
 .settings
 typings
 typings.json
-build-system/runner/dist
 /test/manual/amp-ad.adtech.html
 test/coverage
 ./package-lock.json
