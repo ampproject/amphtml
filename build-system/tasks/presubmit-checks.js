@@ -140,7 +140,6 @@ const forbiddenTerms = {
       'build-system/tasks/check-types.js',
       'build-system/tasks/dist.js',
       'build-system/tasks/dns-monitor.js',
-      'build-system/tasks/generate-runner.js',
       'build-system/tasks/helpers.js',
       'build-system/tasks/prettify.js',
       'build-system/tasks/server-tests.js',
