@@ -72,9 +72,9 @@ export function Scroller(props) {
     }
     const container = containerRef.current;
     ignoreProgrammaticScroll.current = true;
-    container /* OK */.scrollLeft = loop
-      ? container /* OK */.offsetWidth * pivotIndex
-      : container /* OK */.offsetWidth * restingIndex;
+    container./* OK */ scrollLeft = loop
+      ? container./* OK */ offsetWidth * pivotIndex
+      : container./* OK */ offsetWidth * restingIndex;
   }, [ignoreProgrammaticScroll, restingIndex, pivotIndex, loop]);
 
   // Trigger render by setting the resting index to the current scroll state.
@@ -99,9 +99,9 @@ export function Scroller(props) {
   const updateCurrentIndex = () => {
     const container = containerRef.current;
     const slideOffset = Math.round(
-      (container /* OK */.scrollLeft -
-        offsetRef.current * container /* OK */.offsetWidth) /
-        container /* OK */.offsetWidth
+      (container./* OK */ scrollLeft -
+        offsetRef.current * container./* OK */ offsetWidth) /
+        container./* OK */ offsetWidth
     );
     currentIndex.current = mod(slideOffset, children.length);
   };
