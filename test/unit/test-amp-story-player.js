@@ -379,14 +379,16 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       await player.load();
 
-      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-
-      player.go(0);
-      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('0');
-      player.go(1);
-      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
-      player.go(-1);
-      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+      win.requestAnimationFrame(() => {
+        const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+        
+        player.go(0);
+        expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+        player.go(1);
+        expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+        player.go(-1);
+        expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+      });
     });
 
     it('go should throw when negative number is out of story range', async () => {
