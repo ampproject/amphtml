@@ -183,11 +183,19 @@ and the user can select a date range with a starting date and ending date.
 
 ## Date formats
 
-`amp-date-picker` attributes accept dates in ISO 8601.
+`amp-date-picker` attributes accept dates in ISO 8601 and RFC 5545 RRULE formats.
 
 [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) formats dates as `YYYY-MM-DD`
 and is the standard for sharing dates between electronic systems.
 For example, ISO 8601 formats the date February 28 2018 as `2018-02-28`.
+
+[RFC 5545 Recurrence Rules (RRULEs)](https://icalendar.org/iCalendar-RFC-5545/3-3-10-recurrence-rule.html)
+standardize a format for specifying repeating dates.
+For example, RFC 5545 formats Halloween as `RRULE:FREQ=YEARLY;BYMONTH=10;BYMONTHDAY=31`.
+More complex dates are also possible, such as the United States Thanksgiving holiday,
+which is every November on the fourth Thursday: `RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=+4TH`.
+The API is not friendly to memorize, but there are various
+[RRULE generators](https://jakubroztocil.github.io/rrule) available online.
 
 ## Attributes
 
@@ -349,11 +357,11 @@ The day to specify as the first day of the week (0-6). The default value is `"0"
 
 ##### blocked
 
-A space-separated list of ISO 8601 dates to prevent the user from selecting on the calendar.
+A space-separated list of ISO 8601 dates or RFC 5545 RRULE repeating dates to prevent the user from selecting on the calendar.
 
 ##### highlighted
 
-A space-separated list of ISO 8601 dates to specially style as highlighted to draw the user's attention.
+A space-separated list of ISO 8601 dates or RFC 5545 RRULE repeating dates to specially style as highlighted to draw the user's attention.
 Default styling is a blue dot on the date.
 
 ##### day-size
@@ -398,7 +406,7 @@ The following table lists the properties that you can specify in the JSON data:
 </tr>
 <tr>
 <td><code>blocked</code></td>
-<td>An array of ISO 8601 single dates to render as blocked in the calendar view. The user is prevented from selecting these dates.</td>
+<td>An array of ISO 8601 single dates or RFC 5545 RRULE repeating dates to render as blocked in the calendar view. The user is prevented from selecting these dates.</td>
 </tr>
 <tr>
 <td><code>date</code></td>
@@ -410,7 +418,7 @@ The following table lists the properties that you can specify in the JSON data:
 </tr>
 <tr>
 <td><code>highlighted</code></td>
-<td>An array of ISO 8601 single dates to render as highlighted in the calendar view.</td>
+<td>An array of ISO 8601 single dates or RFC 5545 RRULE repeating dates to render as highlighted in the calendar view.</td>
 </tr>
 <tr>
 <td><code>startDate</code></td>
@@ -427,7 +435,7 @@ The `src` attribute may be updated after a user gesture with [`amp-bind`](https:
 
 ###### template definition objects
 
-The `dates` property is an array of ISO 8601 single dates.
+The `dates` property is an array of ISO 8601 single dates or RFC 5545 RRULE repeating dates.
 The `id` property specifies the `id` of a template that the date picker can use to
 render the specified dates in the calendar view.
 
@@ -736,7 +744,7 @@ Using `src` prevents chached AMP documents from showing out-of-date information.
 
 A `date-template` must have a `dates` or `default` attribute.
 
-- **dates**: A space-separated list of ISO 8601 single dates.
+- **dates**: A space-separated list of ISO 8601 single dates or RFC 5545 RRULE repeating dates.
   The template content will render for the dates matching the dates in the attribute.
 - **default**: If the `default` attribute is present, the template content will render for
   all dates not matching an existing template.
