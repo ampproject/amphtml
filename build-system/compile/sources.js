@@ -36,6 +36,7 @@ const COMMON_GLOBS = [
   'third_party/timeagojs/**/*.js',
   'third_party/vega/**/*.js',
   'third_party/webcomponentsjs/ShadowCSS.js',
+  'third_party/zuho/**/*.js',
   'node_modules/dompurify/package.json',
   'node_modules/dompurify/dist/purify.es.js',
   'node_modules/intersection-observer/package.json',
