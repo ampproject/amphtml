@@ -51,6 +51,19 @@
 </head>
 <body>
   <h1>amp-date-picker</h1>
+  <h2>highlighted and blocked attributes</h2>
+  <amp-date-picker id="simple-date-picker-3"
+    type="single"
+    mode="static"
+    layout="fixed-height"
+    height="360"
+    on="select:AMP.setState({date3: event.date ? event.date : ''})"
+    locale="en"
+    format="YYYY-MM-DD"
+    highlighted="FREQ=WEEKLY;WKST=SU;BYDAY=TH"
+    blocked="FREQ=WEEKLY;WKST=SU;BYDAY=SA,SU">
+  </amp-date-picker>
+
   <h2><code>&lt;amp-date-range&gt;</code></h2>
   <p>Try to pick a range. This is a date-range picker</p>
   <amp-date-picker
