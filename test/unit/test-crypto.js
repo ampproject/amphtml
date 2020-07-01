@@ -38,7 +38,7 @@ describes.realWin('crypto-impl', {}, (env) => {
   }
 
   function testSuite(description, win, expectedError) {
-    // TODO(amphtml, #25621): Cannot find atob / btoa on Safari on Sauce Labs.
+    // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
     describe
       .configure()
       .skipSafari()

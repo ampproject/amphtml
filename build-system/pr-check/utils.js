@@ -114,39 +114,6 @@ function printChangeSummary(fileName) {
 }
 
 /**
- * Starts connection to Sauce Labs using account credentials from env vars.
- * @param {string} functionName
- */
-async function startSauceConnect(functionName) {
-  if (!process.env.SAUCE_USERNAME || !process.env.SAUCE_ACCESS_KEY) {
-    throw new Error('Missing Sauce Labs credentials');
-  }
-  const startScCmd = 'build-system/sauce_connect/start_sauce_connect.sh';
-  const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
-  console.log(
-    '\n' + fileLogPrefix,
-    'Starting Sauce Connect Proxy:',
-    colors.cyan(startScCmd)
-  );
-  execOrDie(startScCmd);
-}
-
-/**
- * Stops connection to Sauce Labs
- * @param {string} functionName
- */
-function stopSauceConnect(functionName) {
-  const stopScCmd = 'build-system/sauce_connect/stop_sauce_connect.sh';
-  const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
-  console.log(
-    '\n' + fileLogPrefix,
-    'Stopping Sauce Connect Proxy:',
-    colors.cyan(stopScCmd)
-  );
-  execOrDie(stopScCmd);
-}
-
-/**
  * Starts a timer to measure the execution time of the given function.
  * @param {string} functionName
  * @param {string} fileName
@@ -400,8 +367,6 @@ module.exports = {
   processAndUploadDistOutput,
   startTimer,
   stopTimer,
-  startSauceConnect,
-  stopSauceConnect,
   stopTimedJob,
   timedExec,
   timedExecOrDie,

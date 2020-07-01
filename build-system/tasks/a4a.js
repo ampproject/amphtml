@@ -17,14 +17,11 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
-  maybePrintArgvMessages,
-  shouldNotRun,
-} = require('./runtime-test/helpers');
-const {
   RuntimeTestRunner,
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
 const {css} = require('./css');
+const {maybePrintArgvMessages} = require('./runtime-test/helpers');
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -42,10 +39,6 @@ class Runner extends RuntimeTestRunner {
 }
 
 async function a4a() {
-  if (shouldNotRun()) {
-    return;
-  }
-
   maybePrintArgvMessages();
 
   const config = new RuntimeTestConfig('a4a');

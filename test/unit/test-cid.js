@@ -159,7 +159,7 @@ describes.sandboxed('cid', {}, (env) => {
     window.localStorage.removeItem('amp-cid');
   });
 
-  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari on Sauce Labs.
+  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
   describe
     .configure()
     .skipSafari()
@@ -185,7 +185,7 @@ describes.sandboxed('cid', {}, (env) => {
       });
     });
 
-  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari on Sauce Labs.
+  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
   describe
     .configure()
     .skipSafari()
@@ -829,7 +829,7 @@ describes.realWin('cid', {amp: true}, (env) => {
     clock.uninstall();
   });
 
-  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari on Sauce Labs.
+  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
   it.configure().skipSafari(
     'should store CID in cookie when not in Viewer',
     function* () {
@@ -915,7 +915,7 @@ describes.realWin('cid', {amp: true}, (env) => {
     yield macroTask();
   });
 
-  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari on Sauce Labs.
+  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
   describe
     .configure()
     .skipSafari()

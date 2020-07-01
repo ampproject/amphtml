@@ -50,7 +50,7 @@ describes.sandboxed('UrlReplacements', {}, (env) => {
   let userErrorStub;
   let ampdoc;
 
-  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari on Sauce Labs.
+  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
   describe
     .configure()
     .skipSafari()
