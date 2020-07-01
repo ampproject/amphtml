@@ -86,7 +86,7 @@ describes.fakeWin('OriginExperiments', {amp: true}, (env) => {
     expect(error).calledWithMatch(TAG, 'Failed to verify experiment token');
   });
 
-  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari on Sauce Labs.
+  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
   it.configure().skipSafari(
     'should return true for valid token with matching origin',
     function* () {
@@ -100,7 +100,7 @@ describes.fakeWin('OriginExperiments', {amp: true}, (env) => {
     }
   );
 
-  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari on Sauce Labs.
+  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
   it.configure().skipSafari(
     'should return false if experiment is not in config',
     function* () {
@@ -127,7 +127,7 @@ describes.fakeWin('TokenMaster', {amp: true}, (env) => {
   let tokenWithBadConfigLength;
   let tokenWithBadSignature;
 
-  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari on Sauce Labs.
+  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
   describe
     .configure()
     .skipSafari()

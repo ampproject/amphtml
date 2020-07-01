@@ -437,7 +437,7 @@ Notes:
 - This will force a clean build and run all the PR checks one by one.
 - Just like on Travis, a failing check will prevent subsequent checks from being run.
 - The `gulp visual-diff` check will be skipped unless you have set up a Percy account as described in the [Testing](TESTING.md#running-visual-diff-tests-locally) guide.
-- Unit and integration tests will be run on local Chrome unless you have set up a Sauce Labs account as described in the [Testing](TESTING.md#testing-on-sauce-labs) guide.
+- Unit and integration tests will be run on local Chrome.
 
 ## Adding tests
 

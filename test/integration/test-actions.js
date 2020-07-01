@@ -17,81 +17,73 @@
 import {AmpEvents} from '../../src/amp-events';
 import {createFixtureIframe, poll} from '../../testing/iframe.js';
 
-describe
-  .configure()
-  .retryOnSaucelabs()
-  .run('on="..."', () => {
-    let fixture;
+describe('on="..."', () => {
+  let fixture;
 
-    beforeEach(() => {
-      return createFixtureIframe('test/fixtures/actions.html', 500).then(
-        (f) => {
-          fixture = f;
+  beforeEach(() => {
+    return createFixtureIframe('test/fixtures/actions.html', 500).then((f) => {
+      fixture = f;
 
-          // Wait for one <amp-img> element to load.
-          return fixture.awaitEvent(AmpEvents.LOAD_END, 1);
-        }
-      );
+      // Wait for one <amp-img> element to load.
+      return fixture.awaitEvent(AmpEvents.LOAD_END, 1);
+    });
+  });
+
+  function waitForDisplay(element, display) {
+    return () => fixture.win.getComputedStyle(element)['display'] === display;
+  }
+
+  describe('"tap" event', () => {
+    it('<non-AMP element>.toggleVisibility', function* () {
+      const span = fixture.doc.getElementById('spanToHide');
+      const button = fixture.doc.getElementById('hideBtn');
+
+      button.click();
+      yield poll('#spanToHide hidden', waitForDisplay(span, 'none'));
     });
 
-    function waitForDisplay(element, display) {
-      return () => fixture.win.getComputedStyle(element)['display'] === display;
-    }
+    it('<AMP element>.toggleVisibility', function* () {
+      const img = fixture.doc.getElementById('imgToToggle');
+      const button = fixture.doc.getElementById('toggleBtn');
 
-    describe('"tap" event', () => {
-      it('<non-AMP element>.toggleVisibility', function* () {
-        const span = fixture.doc.getElementById('spanToHide');
-        const button = fixture.doc.getElementById('hideBtn');
+      button.click();
+      yield poll('#imgToToggle hidden', waitForDisplay(img, 'none'));
 
-        button.click();
-        yield poll('#spanToHide hidden', waitForDisplay(span, 'none'));
-      });
+      button.click();
+      yield poll('#imgToToggle displayed', waitForDisplay(img, 'inline-block'));
+    });
 
-      it('<AMP element>.toggleVisibility', function* () {
-        const img = fixture.doc.getElementById('imgToToggle');
-        const button = fixture.doc.getElementById('toggleBtn');
+    describe
+      .configure()
+      .skipIfPropertiesObfuscated()
+      .run('navigate', function () {
+        it('AMP.navigateTo(url=)', function* () {
+          const button = fixture.doc.getElementById('navigateBtn');
 
-        button.click();
-        yield poll('#imgToToggle hidden', waitForDisplay(img, 'none'));
+          // This is brittle but I don't know how else to stub
+          // window navigation.
+          const navigationService = fixture.win.__AMP_SERVICES.navigation.obj;
+          const navigateTo = window.sandbox.stub(
+            navigationService,
+            'navigateTo'
+          );
 
-        button.click();
-        yield poll(
-          '#imgToToggle displayed',
-          waitForDisplay(img, 'inline-block')
-        );
-      });
-
-      describe
-        .configure()
-        .skipIfPropertiesObfuscated()
-        .run('navigate', function () {
-          it('AMP.navigateTo(url=)', function* () {
-            const button = fixture.doc.getElementById('navigateBtn');
-
-            // This is brittle but I don't know how else to stub
-            // window navigation.
-            const navigationService = fixture.win.__AMP_SERVICES.navigation.obj;
-            const navigateTo = window.sandbox.stub(
-              navigationService,
-              'navigateTo'
-            );
-
-            button.click();
-            yield poll('navigateTo() called with correct args', () => {
-              return navigateTo.calledWith(fixture.win, 'https://google.com');
-            });
+          button.click();
+          yield poll('navigateTo() called with correct args', () => {
+            return navigateTo.calledWith(fixture.win, 'https://google.com');
           });
         });
+      });
 
-      it('AMP.print()', function* () {
-        const button = fixture.doc.getElementById('printBtn');
+    it('AMP.print()', function* () {
+      const button = fixture.doc.getElementById('printBtn');
 
-        const print = window.sandbox.stub(fixture.win, 'print');
+      const print = window.sandbox.stub(fixture.win, 'print');
 
-        button.click();
-        yield poll('print() called once', () => {
-          return print.calledOnce;
-        });
+      button.click();
+      yield poll('print() called once', () => {
+        return print.calledOnce;
       });
     });
   });
+});

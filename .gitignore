@@ -24,9 +24,6 @@ test/coverage
 *.swp
 *.swo
 yarn-error.log
-sc-*-linux*
-sc-*-osx*
-sauce_connect_*
 deps.txt
 firebase
 .firebaserc
