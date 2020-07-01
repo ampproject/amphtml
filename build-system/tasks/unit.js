@@ -17,16 +17,13 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const {
-  maybePrintArgvMessages,
-  shouldNotRun,
-} = require('./runtime-test/helpers');
-const {
   RuntimeTestRunner,
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
 const {compileJison} = require('./compile-jison');
 const {css} = require('./css');
 const {getUnitTestsToRun} = require('./runtime-test/helpers-unit');
+const {maybePrintArgvMessages} = require('./runtime-test/helpers');
 const {vendorConfigs} = require('./vendor-configs');
 
 class Runner extends RuntimeTestRunner {
@@ -46,10 +43,6 @@ class Runner extends RuntimeTestRunner {
 }
 
 async function unit() {
-  if (shouldNotRun()) {
-    return;
-  }
-
   maybePrintArgvMessages();
 
   if (argv.local_changes && !getUnitTestsToRun()) {
@@ -83,7 +76,6 @@ unit.flags = {
   'nobuild': '  Skips build step',
   'nohelp': '  Silence help messages that are printed prior to test run',
   'safari': '  Runs tests on Safari',
-  'saucelabs': '  Runs tests on saucelabs (requires setup)',
   'testnames': '  Lists the name of each test being run',
   'verbose': '  With logging enabled',
   'watch': '  Watches for changes in files, runs corresponding test(s)',

@@ -25,7 +25,6 @@ const TIMEOUT = window.ampTestRuntimeConfig.mochaTimeout;
 
 const t = describe
   .configure()
-  .retryOnSaucelabs()
   // TODO(@cramforce): Find out why it does not work with obfuscated props.
   .skipIfPropertiesObfuscated();
 

@@ -33,7 +33,7 @@ describes.sandboxed('Storage', {}, (env) => {
   let ampdoc;
   let viewerBroadcastHandler;
 
-  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari on Sauce Labs.
+  // TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
   describe
     .configure()
     .skipSafari()
