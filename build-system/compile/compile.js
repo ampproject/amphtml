@@ -30,9 +30,8 @@ const {
   handleTypeCheckError,
 } = require('./closure-compile');
 const {checkForUnknownDeps} = require('./check-for-unknown-deps');
-const {checkTypesNailgunPort, distNailgunPort} = require('../tasks/nailgun');
 const {CLOSURE_SRC_GLOBS} = require('./sources');
-const {isTravisBuild} = require('../common/travis');
+const {cpus} = require('os');
 const {postClosureBabel} = require('./post-closure-babel');
 const {preClosureBabel, handlePreClosureError} = require('./pre-closure-babel');
 const {sanitize} = require('./sanitize');
@@ -45,9 +44,8 @@ let inProgress = 0;
 // There's a race in the gulp plugin of closure compiler that gets exposed
 // during various local development scenarios.
 // See https://github.com/google/closure-compiler-npm/issues/9
-const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild()
-  ? 2
-  : parseInt(argv.closure_concurrency, 10) || 1;
+const MAX_PARALLEL_CLOSURE_INVOCATIONS =
+  parseInt(argv.closure_concurrency, 10) || cpus().length;
 
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
@@ -341,7 +339,7 @@ function compile(
         .pipe(sourcemaps.init())
         .pipe(preClosureBabel())
         .on('error', (err) => handlePreClosureError(err, outputFilename))
-        .pipe(gulpClosureCompile(compilerOptionsArray, checkTypesNailgunPort))
+        .pipe(gulpClosureCompile(compilerOptionsArray))
         .on('error', (err) => handleTypeCheckError(err))
         .pipe(nop())
         .on('end', resolve);
@@ -354,7 +352,7 @@ function compile(
         .on('error', (err) =>
           handlePreClosureError(err, outputFilename, options, resolve)
         )
-        .pipe(gulpClosureCompile(compilerOptionsArray, distNailgunPort))
+        .pipe(gulpClosureCompile(compilerOptionsArray))
         .on('error', (err) =>
           handleCompilerError(err, outputFilename, options, resolve)
         )
