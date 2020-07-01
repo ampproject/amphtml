@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 import * as Preact from '../../../src/preact';
-import * as styles from './base-carousel.css';
+import {Arrow} from './arrow';
 import {Scroller} from './scroller';
-import {mod} from '../../../src/utils/math';
-import {useRef} from '../../../src/preact';
-import {useStateFromProp} from '../../../src/preact/utils';
+import {useRef, useState} from '../../../src/preact';
 
 /**
  * @param {!JsonObject} props
@@ -26,7 +24,7 @@ import {useStateFromProp} from '../../../src/preact/utils';
  */
 export function BaseCarousel(props) {
   const {style, arrowPrev, arrowNext, children, currentSlide, loop} = props;
-  const {0: curSlide, 1: setCurSlide} = useStateFromProp(currentSlide || 0);
+  const {0: curSlide, 1: setCurSlide} = useState(currentSlide || 0);
   const ignoreProgrammaticScroll = useRef(true);
   const setRestingIndex = (i) => {
     ignoreProgrammaticScroll.current = true;
@@ -60,52 +58,5 @@ export function BaseCarousel(props) {
         customArrow={arrowNext}
       ></Arrow>
     </div>
-  );
-}
-
-/**
- * @param {!JsonObject} props
- * @return {PreactDef.Renderable}
- */
-function Arrow(props) {
-  const {dir, restingIndex, setRestingIndex, length, customArrow, loop} = props;
-  const button = customArrow ? customArrow : DefaultArrow({dir});
-  const nextSlide = restingIndex + dir;
-  const {children, 'disabled': disabled, onClick, ...rest} = button.props;
-  const isDisabled =
-    disabled || (loop ? false : nextSlide < 0 || nextSlide >= length);
-  const handleClick = () => {
-    if (onClick) {
-      onClick();
-    }
-    setRestingIndex(mod(restingIndex + dir, length));
-  };
-  return Preact.cloneElement(
-    button,
-    {
-      onClick: handleClick,
-      disabled: isDisabled,
-      ...rest,
-    },
-    children
-  );
-}
-
-/**
- * @param {!JsonObject} props
- * @return {PreactDef.Renderable}
- */
-function DefaultArrow(props) {
-  const {dir} = props;
-  return (
-    <button
-      style={{
-        // Offset button from the edge.
-        [dir < 0 ? 'left' : 'right']: '8px',
-        ...styles.defaultArrowButton,
-      }}
-    >
-      {props.dir < 0 ? '<<' : '>>'}
-    </button>
   );
 }
