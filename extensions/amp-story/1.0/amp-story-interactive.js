@@ -414,7 +414,9 @@ export class AmpStoryInteractive extends AMP.BaseElement {
           this.timer_.delay(
             () => {
               this.mutateElement(() => {
-                this.rootEl_.classList.add('i-amphtml-interactive-active');
+                this.rootEl_.classList.add(
+                  'i-amphtml-story-interactive-active'
+                );
               });
             },
             this.storeService_.get(StateProperty.UI_STATE) ===
