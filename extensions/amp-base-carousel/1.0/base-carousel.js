@@ -16,6 +16,8 @@
 import * as Preact from '../../../src/preact';
 import * as styles from './base-carousel.css';
 import {Scroller} from './scroller';
+import {mod} from '../../../src/utils/math';
+import {useRef} from '../../../src/preact';
 import {useStateFromProp} from '../../../src/preact/utils';
 
 /**
@@ -23,25 +25,37 @@ import {useStateFromProp} from '../../../src/preact/utils';
  * @return {PreactDef.Renderable}
  */
 export function BaseCarousel(props) {
-  const {style, arrowPrev, arrowNext, children, currentSlide} = props;
+  const {style, arrowPrev, arrowNext, children, currentSlide, loop} = props;
   const {0: curSlide, 1: setCurSlide} = useStateFromProp(currentSlide || 0);
+  const ignoreProgrammaticScroll = useRef(true);
+  const setRestingIndex = (i) => {
+    ignoreProgrammaticScroll.current = true;
+    setCurSlide(i);
+  };
 
   return (
     <div style={style}>
-      <Scroller currentSlide={curSlide} setCurrentSlide={setCurSlide}>
+      <Scroller
+        ignoreProgrammaticScroll={ignoreProgrammaticScroll}
+        loop={loop}
+        restingIndex={curSlide}
+        setRestingIndex={setRestingIndex}
+      >
         {children}
       </Scroller>
       <Arrow
         dir={-1}
-        currentSlide={curSlide}
-        setCurrentSlide={setCurSlide}
+        loop={loop}
+        restingIndex={curSlide}
+        setRestingIndex={setRestingIndex}
         length={children.length}
         customArrow={arrowPrev}
       ></Arrow>
       <Arrow
         dir={1}
-        currentSlide={curSlide}
-        setCurrentSlide={setCurSlide}
+        loop={loop}
+        restingIndex={curSlide}
+        setRestingIndex={setRestingIndex}
         length={children.length}
         customArrow={arrowNext}
       ></Arrow>
@@ -53,17 +67,25 @@ export function BaseCarousel(props) {
  * @param {!JsonObject} props
  * @return {PreactDef.Renderable}
  */
-export function Arrow(props) {
-  const {dir, currentSlide, setCurrentSlide, length, customArrow} = props;
+function Arrow(props) {
+  const {dir, restingIndex, setRestingIndex, length, customArrow, loop} = props;
   const button = customArrow ? customArrow : DefaultArrow({dir});
-  const nextSlide = currentSlide + dir;
-  const {style = {}, children} = button.props;
+  const nextSlide = restingIndex + dir;
+  const {children, 'disabled': disabled, onClick, ...rest} = button.props;
+  const isDisabled =
+    disabled || (loop ? false : nextSlide < 0 || nextSlide >= length);
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    }
+    setRestingIndex(mod(restingIndex + dir, length));
+  };
   return Preact.cloneElement(
     button,
     {
-      onClick: () => setCurrentSlide(currentSlide + dir),
-      disabled: nextSlide < 0 || nextSlide >= length,
-      style: style ? style : {},
+      onClick: handleClick,
+      disabled: isDisabled,
+      ...rest,
     },
     children
   );
