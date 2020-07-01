@@ -18,10 +18,12 @@ import {BrowserController, RequestBank} from '../../testing/test-helper';
 import {Deferred} from '../../src/utils/promise';
 import {poll} from '../../testing/iframe';
 
-// TODO(wg-ui-and-a11y): These tests are broken on Firefox (as of v77).
+// TODO(wg-ui-and-a11y): These tests are broken on Firefox (as of v77). They
+// also fail on Safari.
 describe
   .configure()
   .skipFirefox()
+  .skipSafari()
   .run('amp-recaptcha-input', function () {
     describes.integration(
       'with form and amp-mustache',
