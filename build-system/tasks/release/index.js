@@ -290,7 +290,7 @@ async function populateOrgCdn_(distFlavors, tempDir, outputDir) {
     if (flavorType == 'base') {
       Object.entries(experimentsConfig)
         .filter(([, {environment}]) => environment == 'INABOX')
-        .map(([experimentFlavor]) => {
+        .forEach(([experimentFlavor]) => {
           const rtvPrefix =
             EXPERIMENTAL_RTV_PREFIXES['INABOX'][`${experimentFlavor}-control`];
           rtvCopyingPromises.push(rtvCopyingPromise(rtvPrefix, 'base'));
