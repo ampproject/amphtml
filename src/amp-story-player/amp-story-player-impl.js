@@ -500,6 +500,7 @@ export class AmpStoryPlayer {
     if (storyDelta === 0) {
       return;
     }
+    
     if (storyDelta > 0) {
       for (let i = 0; i < storyDelta; i++) {
         this.next_();
