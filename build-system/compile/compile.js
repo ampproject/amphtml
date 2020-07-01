@@ -32,6 +32,7 @@ const {
 const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {CLOSURE_SRC_GLOBS} = require('./sources');
 const {cpus} = require('os');
+const {isTravisBuild} = require('../common/travis');
 const {postClosureBabel} = require('./post-closure-babel');
 const {preClosureBabel, handlePreClosureError} = require('./pre-closure-babel');
 const {sanitize} = require('./sanitize');
@@ -44,8 +45,9 @@ let inProgress = 0;
 // There's a race in the gulp plugin of closure compiler that gets exposed
 // during various local development scenarios.
 // See https://github.com/google/closure-compiler-npm/issues/9
-const MAX_PARALLEL_CLOSURE_INVOCATIONS =
-  parseInt(argv.closure_concurrency, 10) || cpus().length;
+const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild()
+  ? 4
+  : parseInt(argv.closure_concurrency, 10) || cpus().length;
 
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
