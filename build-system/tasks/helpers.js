@@ -287,7 +287,8 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
       );
     }
   }
-  await doCompileMinifiedJs(options.continueOnError);
+
+  return doCompileMinifiedJs(options.continueOnError);
 }
 
 /**
@@ -457,9 +458,9 @@ async function compileTs(srcDir, srcFilename, destDir, options) {
 async function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
   if (options.minify) {
-    return await compileMinifiedJs(srcDir, srcFilename, destDir, options);
+    return compileMinifiedJs(srcDir, srcFilename, destDir, options);
   } else {
-    return await compileUnminifiedJs(srcDir, srcFilename, destDir, options);
+    return compileUnminifiedJs(srcDir, srcFilename, destDir, options);
   }
 }
 

@@ -15,8 +15,7 @@
  */
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
-const closureCompiler = require('google-closure-compiler');
+const closureCompiler = require('@kristoferbaxter/google-closure-compiler');
 const log = require('fancy-log');
 const path = require('path');
 const pumpify = require('pumpify');
@@ -115,43 +114,15 @@ function makeSourcemapsRelative(closureStream) {
 
 /**
  * @param {Array<string>} compilerOptions
- * @param {?string} nailgunPort
  * @return {stream.Writable}
  */
-function gulpClosureCompile(compilerOptions, nailgunPort) {
-  const initOptions = {
-    extraArguments: ['-XX:+TieredCompilation'], // Significant speed up!
-  };
+function gulpClosureCompile(compilerOptions) {
   const pluginOptions = {
-    platform: ['java'], // Override the binary used by closure compiler
     logger: (errors) => (compilerErrors = errors), // Capture compiler errors
   };
 
-  // On Mac OS and Linux, speed up compilation using nailgun (unless the
-  // --disable_nailgun flag was passed in)
-  // See https://github.com/facebook/nailgun.
-  if (
-    !argv.disable_nailgun &&
-    (process.platform == 'darwin' || process.platform == 'linux')
-  ) {
-    compilerOptions = [
-      '--nailgun-port',
-      nailgunPort,
-      'org.ampproject.AmpCommandLineRunner',
-      '--',
-    ].concat(compilerOptions);
-    pluginOptions.platform = ['native']; // nailgun-runner isn't a java binary
-    initOptions.extraArguments = null; // Already part of nailgun-server
-  } else {
-    // For other platforms, or if nailgun is explicitly disabled, use AMP's
-    // custom runner.jar
-    closureCompiler.compiler.JAR_PATH = require.resolve(
-      `../runner/dist/${nailgunPort}/runner.jar`
-    );
-  }
-
   return makeSourcemapsRelative(
-    closureCompiler.gulp(initOptions)(compilerOptions, pluginOptions)
+    closureCompiler.gulp()(compilerOptions, pluginOptions)
   );
 }
 
