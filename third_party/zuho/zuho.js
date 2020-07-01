@@ -2,7 +2,7 @@
 // Refactored and trimmed off for AMP project needs.
 
 const SHADERS = {
-  fragSourceCommon: String.raw`
+  fragSourceCommon: `
     #ifdef GL_FRAGMENT_PRECISION_HIGH
       precision highp   float;
     #else
@@ -31,12 +31,12 @@ const SHADERS = {
       }
     }
   `,
-  fragSourceFast: String.raw`
+  fragSourceFast: `
     void main() {
       gl_FragColor = sample(0.0, 0.0);
     }
   `,
-  fragSourceSlow: String.raw`
+  fragSourceSlow: `
     vec4 sampleSq(float dx, float dy) {
       vec4 s = sample(dx, dy);
       return vec4(s.xyz * s.xyz, s.w);
@@ -65,7 +65,7 @@ const SHADERS = {
       gl_FragColor = vec4(sqrt(acc.xyz), acc.w);
     }
   `,
-  vertSource: String.raw`
+  vertSource: `
     uniform   vec2 uScale;
     attribute vec2 aPos;
     varying   vec2 vPos;
@@ -78,9 +78,9 @@ const SHADERS = {
 };
 
 const MAPPING = {
-  azPerspective: String.raw`
+  azPerspective: `
     bool unproject(vec2 p, out vec3 q) {
-      q = vec3(p, -1.0);
+      q = vec3(-p.x, p.y, -1.0);
       return true;
     }
   `,
@@ -139,6 +139,9 @@ export class Renderer {
 
     this.canvas = canvas;
     this.resize();
+
+    this.rotation = null;
+    this.scale = 1;
 
     this.vertShader = gl.createShader(gl.VERTEX_SHADER);
     this.fragShaderFast = gl.createShader(gl.FRAGMENT_SHADER);
