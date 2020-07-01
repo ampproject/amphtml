@@ -406,7 +406,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       true /** callToInitialize */
     );
 
-    // Add a listener to check if the active page is the current.
+    // Check if the component page is active, and add class.
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_ID,
       (currPageId) => {
@@ -428,7 +428,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       },
       true
     );
-    this.activePagePromise_.then(() => {});
 
     // Add a click listener to the element to trigger the class change
     this.rootEl_.addEventListener('click', (e) => this.handleTap_(e));
