@@ -12345,7 +12345,7 @@ lru-queue@0.1:
   dependencies:
     es5-ext "~0.10.2"
 
-luxon@1.24.1:
+luxon@1.24.1, luxon@^1.21.3:
   version "1.24.1"
   resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.24.1.tgz#a8383266131ed4eaed4b5f430f96f3695403a52a"
   integrity sha512-CgnIMKAWT0ghcuWFfCWBnWGOddM0zu6c4wZAWmD0NN7MZTnro0+833DF6tJep+xlxRPg4KtsYEHYLfTMBQKwYg==
@@ -16369,6 +16369,15 @@ rocambole@0.7.0:
   integrity sha1-9seVBVF9xCtvuECEK4uVOw+WhYU=
   dependencies:
     esprima "^2.1"
+
+rrule@2.6.4:
+  version "2.6.4"
+  resolved "https://registry.yarnpkg.com/rrule/-/rrule-2.6.4.tgz#7f4f31fda12bc7249bb176c891109a9bc448e035"
+  integrity sha512-sLdnh4lmjUqq8liFiOUXD5kWp/FcnbDLPwq5YAc/RrN6120XOPb86Ae5zxF7ttBVq8O3LxjjORMEit1baluahA==
+  dependencies:
+    tslib "^1.10.0"
+  optionalDependencies:
+    luxon "^1.21.3"
 
 rst-selector-parser@^2.2.3:
   version "2.2.3"
