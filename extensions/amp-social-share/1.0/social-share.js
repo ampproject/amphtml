@@ -58,25 +58,18 @@ export function SocialShare(props) {
     height: checkedHeight,
   };
 
-  // Only show children if not using a pre-configured type
-  const children = getSocialConfig(props['type']) ? (
-    <SocialShareIcon
-      style={{...backgroundStyle, ...baseStyle, ...size}}
-      type={type}
-    />
-  ) : (
-    props['children']
-  );
-
   return (
     <div
       role="button"
       tabindex={props['tabIndex'] || '0'}
       onKeyDown={(e) => handleKeyPress(e, finalEndpoint, checkedTarget)}
       onClick={() => handleActivation(finalEndpoint, checkedTarget)}
-      style={{...size, ...baseStyle, ...props['style']}}
+      style={{...size, ...props['style']}}
     >
-      {children}
+      <SocialShareIcon
+        style={{...backgroundStyle, ...baseStyle, ...size}}
+        type={type}
+      />
     </div>
   );
 }
@@ -169,18 +162,10 @@ function handleActivation(finalEndpoint, target) {
       );
     }
   } else if (protocol === 'sms' || protocol === 'mailto') {
-    if (
-      window &&
-      window.navigator &&
-      window.navigator.userAgent &&
-      window.navigator.userAgent.search(/iPhone|iPad|iPod/i)
-    ) {
-      target = '_top';
-    }
     openWindowDialog(
       window,
       protocol === 'sms' ? finalEndpoint.replace('?', '?&') : finalEndpoint,
-      target,
+      isIos() ? '_top' : target,
       windowFeatures
     );
   } else {
@@ -199,6 +184,20 @@ function getQueryString(endpoint) {
   q = q === -1 ? endpoint.length : q;
   h = h === -1 ? endpoint.length : h;
   return endpoint.slice(q, h);
+}
+
+/**
+ * Checkers whether or not the userAgent of the current device indicates
+ * that this is an Ios device
+ * @return {boolean}
+ */
+function isIos() {
+  return (
+    window &&
+    window.navigator &&
+    window.navigator.userAgent &&
+    window.navigator.userAgent.search(/iPhone|iPad|iPod/i) >= 0
+  );
 }
 
 /**
