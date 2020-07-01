@@ -143,9 +143,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected {boolean} */
     this.hasUserSelection_ = false;
 
-    /** @protected {?string} */
-    this.interactiveId_ = null;
-
     /** @private {!Array<number>} min and max number of options, inclusive */
     this.optionBounds_ = bounds;
 
@@ -640,7 +637,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       return Promise.reject(ENDPOINT_INVALID_ERROR);
     }
 
-    this.interactiveId_ = `CANONICAL_URL+${this.getPageId_()}`;
+    const interactiveId_ = `CANONICAL_URL+${this.getPageId_()}`;
 
     return this.getClientId_().then((clientId) => {
       const requestOptions = {'method': method};
@@ -648,7 +645,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         'interactiveType': this.interactiveType_,
         'clientId': clientId,
       });
-      url = appendPathToUrl(this.urlService_.parse(url), this.interactiveId_);
+      url = appendPathToUrl(this.urlService_.parse(url), interactiveId_);
       if (requestOptions['method'] === 'POST') {
         requestOptions['body'] = {'optionSelected': optionSelected};
         requestOptions['headers'] = {'Content-Type': 'application/json'};
