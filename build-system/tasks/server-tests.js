@@ -75,7 +75,12 @@ async function getExpectedOutput(inputFile) {
 async function getTransform(inputFile) {
   const transformDir = path.dirname(path.dirname(inputFile));
   const parsed = path.parse(transformDir);
-  const transformPath = path.join(parsed.dir, 'dist', parsed.base);
+  // We need to do a deep directory glob "**" because typescript will deepen
+  // the directory structure if there are any imports to modules that are
+  // traversing up relative to the the `rootDir`.
+  // This can happen if the typescript code has any javascript dependency in
+  // our build system.
+  const transformPath = path.join(parsed.dir, 'dist', '**', parsed.base);
   const transformFile = (await globby(path.resolve(transformPath, '*.js')))[0];
   // TODO(rsimha): Change require to import when node v14 is the active LTS.
   return require(transformFile).default;

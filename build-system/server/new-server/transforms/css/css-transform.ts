@@ -17,7 +17,7 @@
 import minimist from 'minimist';
 import {PostHTML} from 'posthtml';
 import {readFileSync} from 'fs';
-import {transformCss} from '../../../../tasks/jsify-css';
+import jsify from '../../../../tasks/jsify-css';
 
 const argv = minimist(process.argv.slice(2));
 const isTestMode: boolean = argv._.includes('server-tests');
@@ -44,22 +44,33 @@ interface StyleNode extends PostHTML.Node {
   content: string[]
 }
 
-function prependAmpStyles(resolver: Promise, tree: PostHTML.Node, head: PostHTML.Node): PostHTML.Node {
-  const v0CssPromise = transformCss(cssPath);
-  const content = head.content || [];
-  const styleNode: StyleNode = {
-    walk: head.walk,
-    match: head.match,
-    tag: 'style',
-    attrs: {
-      'amp-runtime': '',
-      // Prefix 01 to simulate stable/prod version RTV prefix.
-      'i-amphtml-version': `01${version}`,
-    },
-    content: ['.hello {}']
-  };
-  content.unshift(styleNode);
-  return { ...head, content };
+interface PostCssProcessor {
+  css: string
+}
+
+function prependAmpStyles(resolve: (node: PostHTML.Node) => void, head: PostHTML.Node): PostHTML.Node {
+  // We're not able to make `prependAmpStyles` an async function as tree.match
+  // is able to accept them so we have to make this a promise than we don't
+  // return but will eventually call the `resolve` function with the changes
+  // to the Node.
+  jsify.transformCss(cssPath).then((result: unknown) => {
+    const {css} = result as PostCssProcessor;
+    const content = head.content || [];
+    const styleNode: StyleNode = {
+      walk: head.walk,
+      match: head.match,
+      tag: 'style',
+      attrs: {
+        'amp-runtime': '',
+        // Prefix 01 to simulate stable/prod version RTV prefix.
+        'i-amphtml-version': `01${version}`,
+      },
+      content: [css]
+    };
+    content.unshift(styleNode);
+    resolve({...head, content});
+  });
+  return head;
 }
 
 /**
@@ -67,8 +78,8 @@ function prependAmpStyles(resolver: Promise, tree: PostHTML.Node, head: PostHTML
  */
 export default function(tree: PostHTML.Node): Promise<PostHTML.Node> {
   return new Promise((resolve) => {
-    tree.match({tag: 'head'}, (head) => {
-      prependAmpStyles(head);
+    tree.match({tag: 'head'}, (head: PostHTML.Node) => {
+      return prependAmpStyles(resolve, head);
     });
   });
 }

@@ -14,4 +14,6 @@
  * limitations under the License.
  */
 
-.i-amp-internal {}
+.i-amp-internal {
+  background-color: red;
+}

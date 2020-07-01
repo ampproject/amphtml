@@ -18,7 +18,7 @@
     "declaration": true,
     "baseUrl": ".",
     "paths": {
-      "../../../../tasks/jsify-css": ["*", "../../../../../tasks/jsify-css"]
+      "../../../../tasks/": ["*", "../../../../../tasks/"]
     }
   },
   "include": ["./*.ts", "./**/*.ts"]
