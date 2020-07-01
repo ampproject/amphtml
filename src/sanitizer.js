@@ -177,7 +177,7 @@ export function sanitizeHtml(html, doc) {
           let origTarget = index != -1 ? savedAttribs[index] : null;
           if (origTarget != null) {
             origTarget = origTarget.toLowerCase();
-            if (ALLOWLISTED_TARGETS.indexOf(origTarget) != -1) {
+            if (ALLOWLISTED_TARGETS.has(origTarget)) {
               attribs[index] = origTarget;
             } else {
               attribs[index] = '_top';

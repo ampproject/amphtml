@@ -323,8 +323,8 @@ export class AmpDoc {
     /** @protected {?Object<string, string>} */
     this.meta_ = null;
 
-    /** @private @const {!Array<string>} */
-    this.declaredExtensions_ = [];
+    /** @private @const {!Set<string>} */
+    this.declaredExtensions_ = new Set();
 
     /** @private {?VisibilityState} */
     this.visibilityStateOverride_ =
@@ -484,7 +484,7 @@ export class AmpDoc {
    * @return {boolean}
    */
   declaresExtension(extensionId) {
-    return this.declaredExtensions_.indexOf(extensionId) != -1;
+    return this.declaredExtensions_.has(extensionId);
   }
 
   /**
@@ -494,7 +494,7 @@ export class AmpDoc {
    */
   declareExtension(extensionId) {
     if (!this.declaresExtension(extensionId)) {
-      this.declaredExtensions_.push(extensionId);
+      this.declaredExtensions_.add(extensionId);
     }
   }
 

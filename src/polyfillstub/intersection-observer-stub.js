@@ -112,8 +112,8 @@ export class IntersectionObserverStub {
       throw new Error('root must be an Element');
     }
 
-    /** @private {?Array<!Element>} */
-    this.elements_ = [];
+    /** @private {?Set<!Element>} */
+    this.elements_ = new Set();
 
     /** @private {?IntersectionObserver} */
     this.inst_ = null;
@@ -162,7 +162,7 @@ export class IntersectionObserverStub {
     if (this.inst_) {
       this.inst_.disconnect();
     } else {
-      this.elements_.length = 0;
+      this.elements_.clear();
     }
   }
 
@@ -185,8 +185,8 @@ export class IntersectionObserverStub {
     if (this.inst_) {
       this.inst_.observe(target);
     } else {
-      if (this.elements_.indexOf(target) == -1) {
-        this.elements_.push(target);
+      if (!this.elements_.has(target)) {
+        this.elements_.add(target);
       }
     }
   }
@@ -199,9 +199,8 @@ export class IntersectionObserverStub {
     if (this.inst_) {
       this.inst_.unobserve(target);
     } else {
-      const index = this.elements_.indexOf(target);
-      if (index != -1) {
-        this.elements_.splice(index, 1);
+      if(this.elements_.has(target)){
+        this.elements_.delete(target);
       }
     }
   }

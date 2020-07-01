@@ -1112,7 +1112,7 @@ export class ResourcesImpl {
       }
 
       // Execute scroll-adjusting resize requests, if any.
-      if (scrollAdjSet.length > 0) {
+      if (scrollAdjSet.size > 0) {
         this.vsync_.run(
           {
             measure: (state) => {

@@ -214,7 +214,7 @@ export const ALLOWLISTED_ATTRS_BY_TAGS = {
   'textarea': ['autoexpand'],
 };
 
-/** @const {!Array<string>} */
+/** @const {!Set<string>} */
 export const ALLOWLISTED_TARGETS = ['_top', '_blank'];
 
 // Extended from IS_SCRIPT_OR_DATA in https://github.com/cure53/DOMPurify/blob/master/src/regexp.js.

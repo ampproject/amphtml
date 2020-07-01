@@ -95,7 +95,7 @@ export class ViewerTracker {
     }
 
     // Viewing kick off: document is visible.
-    const unlistenSet = new Set();
+    const unlistenSet = [];
     return new Promise((resolve, reject) => {
       // 1. Document becomes invisible again: cancel.
       unlistenSet.add(
@@ -108,13 +108,13 @@ export class ViewerTracker {
 
       // 2. After a few seconds: register a view.
       const timeoutId = this.timer_.delay(resolve, timeToView);
-      unlistenSet.add(() => this.timer_.cancel(timeoutId));
+      unlistenSet.push(() => this.timer_.cancel(timeoutId));
 
       // 3. If scrolled: register a view.
-      unlistenSet.add(this.viewport_.onScroll(resolve));
+      unlistenSet.push(this.viewport_.onScroll(resolve));
 
       // 4. Tap: register a view.
-      unlistenSet.add(
+      unlistenSet.push(
         listenOnce(this.ampdoc_.getRootNode(), 'click', resolve)
       );
     }).then(

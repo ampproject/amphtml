@@ -26,8 +26,8 @@ import {isArray} from '../types';
 import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
 
-/** @private @const {!Array<string>} */
-const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
+/** @private @const {!Set<string>} */
+const filteredLinkRels = new Set(['prefetch', 'preload', 'preconnect', 'dns-prefetch']);
 
 /**
  * Properties:
@@ -150,7 +150,7 @@ function getLinkRels(doc) {
       }
 
       rels.split(/\s+/).forEach((rel) => {
-        if (filteredLinkRels.indexOf(rel) != -1) {
+        if (filteredLinkRels.has(rel)) {
           return;
         }
 
