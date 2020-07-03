@@ -34,7 +34,6 @@ The `amp-font` component was AMP's solution to controlling timeouts on font load
 
 Historically, the `amp-font` extension was used for controlling timeouts on font loading. **We recommend implementing this functionality with [`font-display`](https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display) instead.**
 
-
 The `amp-font` extension allows adding and removing CSS classes from `document.documentElement`
 or `document.body` based on whether a font was loaded or is in error-state.
 
