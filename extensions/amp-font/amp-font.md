@@ -4,6 +4,7 @@ formats:
   - websites
   - stories
   - ads
+deprecated: true  
 teaser:
   text: Trigger and monitor the loading of custom fonts on AMP pages.
 ---
