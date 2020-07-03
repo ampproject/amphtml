@@ -98,7 +98,6 @@ Behaves same as standard CSS [`font-style` property](https://developer.mozilla.o
 
 Behaves same as standard CSS [`font-variant` property](https://developer.mozilla.org/en-US/docs/Web/CSS/font-variant).
 
-
 ### `layout`
 
 The `layout` attribute must be set to `nodisplay`.
