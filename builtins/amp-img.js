@@ -36,6 +36,7 @@ const ATTRIBUTES_TO_PROPAGATE = [
   'aria-describedby',
   'aria-label',
   'aria-labelledby',
+  'crossorigin',
   'referrerpolicy',
   'sizes',
   'src',

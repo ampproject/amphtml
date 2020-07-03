@@ -222,6 +222,18 @@ describes.sandboxed('amp-img', {}, (env) => {
     );
   });
 
+  it('should propagate crossorigin attribute', () => {
+    return getImg({
+      src: '/examples/img/sample.jpg',
+      width: 320,
+      height: 240,
+      crossorigin: 'anonymous',
+    }).then((ampImg) => {
+      const img = ampImg.querySelector('img');
+      expect(img.getAttribute('crossorigin')).to.equal('anonymous');
+    });
+  });
+
   describe('#fallback on initial load', () => {
     let el;
     let impl;

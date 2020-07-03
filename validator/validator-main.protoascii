@@ -4476,6 +4476,7 @@ tags: {  # <amp-img>
   tag_name: "AMP-IMG"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
+  attrs: { name: "crossorigin" }
   attrs: { name: "object-fit" }
   attrs: { name: "object-position" }
   attrs: { name: "placeholder" }
