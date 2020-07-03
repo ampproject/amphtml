@@ -52,7 +52,7 @@ class CameraOrientation {
     const deg2rad = (deg) => (deg * Math.PI) / 180;
     return new CameraOrientation(
       deg2rad(-pitch - 90),
-      deg2rad(90 - heading),
+      deg2rad(heading),
       1 / zoom
     );
   }
@@ -229,14 +229,14 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @override */
   onMeasureChanged() {
-    // this.mutateElement(() => {
-    //   if (this.renderer_) {
-    //     this.renderer_.resize();
-    //     if (!this.isPlaying_) {
-    //       this.renderer_.render(false);
-    //     }
-    //   }
-    // });
+    this.mutateElement(() => {
+      if (this.renderer_) {
+        this.renderer_.resize();
+        if (!this.isPlaying_) {
+          this.renderer_.render(false);
+        }
+      }
+    });
   }
 
   /** @private */
