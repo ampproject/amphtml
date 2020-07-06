@@ -10,7 +10,7 @@
       body {
         font-family: 'Rubik', sans-serif;
       }
-      amp-story-interactive-quiz, amp-story-interactive-binary-poll {
+      amp-story-interactive-quiz, amp-story-interactive-binary-poll, amp-story-interactive-poll {
         justify-self: center;
       }
     </style>
@@ -101,8 +101,9 @@
           <amp-story-grid-layer template="center">
             <amp-story-interactive-quiz
                 id="last-cup-dark"
+                endpoint="http://localhost:3000/interactives"
                 theme="dark"
-                style="--interactive-accent-color: rgb(221, 17, 228);"
+                style="--interactive-accent-color: rgb(221, 17, 229);"
                 option-1-text="France" option-1-correct
                 option-2-text="Spain"
                 option-3-text="Uruguay"
@@ -255,6 +256,89 @@
               option-1-text="This is a really long text"
               option-2-text="Panther">
             </amp-story-interactive-binary-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-1">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-poll
+              id="poll-1"
+              theme="dark"
+              endpoint="http://localhost:3000/interactives"
+              prompt-text="What city do you like the most?"
+              option-1-text="Montevideo"
+              option-2-text="Paris">
+            </amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-2">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-poll
+              id="poll-2"
+              theme="dark"
+              endpoint="http://localhost:3000/interactives"
+              chip-style="shadow"
+              style="--interactive-accent-color: #f5aa42"
+              prompt-text="What city do you like the most?"
+              option-1-text="Montevideo"
+              option-2-text="Paris">
+            </amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-3">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-poll
+              id="poll-3"
+              endpoint="http://localhost:3000/interactives"
+              style="--interactive-accent-color: rgb(255, 152, 152); --interactive-prompt-text-color: black"
+              prompt-text="What city do you like the most?"
+              option-1-text="Montevideo"
+              option-2-text="Paris">
+            </amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-4">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-poll
+              id="poll-4"
+              chip-style="shadow"
+              endpoint="http://localhost:3000/interactives"
+              style="--interactive-accent-color: #eb50a8"
+              prompt-text="What city do you like the most?"
+              option-1-text="Montevideo"
+              option-2-text="Paris">
+            </amp-story-interactive-poll>
           </amp-story-grid-layer>
         </amp-story-page>
     </amp-story>

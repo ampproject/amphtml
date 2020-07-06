@@ -19,8 +19,6 @@
   color: var(--i-amphtml-interactive-option-accent-color) !important;
   --post-select-scale: 0.5 !important;
   --post-select-scale-variable: 1 !important;
-  --ease-out-curve: cubic-bezier(.3, 0, 0, 1) !important;
-	--animation-time: .3s !important;
 	border-radius: 32px !important;
 	max-width: 296px !important;
 }
@@ -46,7 +44,7 @@
   flex: 100 !important;
   min-width: 0 !important;
   position: relative !important;
-  transition: flex-grow var(--animation-time) calc(var(--animation-time) * .12) var(--ease-out-curve) !important;
+  transition: flex-grow var(--i-amphtml-interactive-animation-time) calc(var(--i-amphtml-interactive-animation-time) * .12) var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
 .i-amphtml-story-interactive-prompt {
@@ -63,8 +61,8 @@
 
 .i-amphtml-story-interactive-post-selection
   .i-amphtml-story-interactive-option-text-container {
-  transition: transform var(--animation-time) var(--ease-out-curve), 
-    opacity var(--animation-time) var(--ease-out-curve) !important;
+  transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve),
+    opacity var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
   transform: translateY(0) !important;
 }
 
@@ -106,16 +104,7 @@
     .i-amphtml-story-interactive-option-percent-bar {
   background-color: var(--i-amphtml-interactive-option-accent-color) !important;
   opacity: .2 !important;
-  animation: flashBG forwards var(--animation-time) var(--ease-out-curve) !important;
-}
-
-@keyframes flashBG {
-  0% {
-    opacity: .4;
-  }
-  100% {
-    opacity: .2;
-  }
+  animation: i-amphtml-interactive-animation-flash-background forwards var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve);
 }
 
 .i-amphtml-story-interactive-option-title {
@@ -128,7 +117,7 @@
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  transition: transform var(--animation-time) var(--ease-out-curve) !important;
+  transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
 .i-amphtml-story-interactive-post-selection
@@ -142,7 +131,7 @@
   display: -webkit-box !important;
   -webkit-line-clamp: 2 !important;
   -webkit-box-orient: vertical !important;
-  transition: transform var(--animation-time) var(--ease-out-curve) !important;
+  transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
 .i-amphtml-story-interactive-post-selection
@@ -155,7 +144,7 @@
   font-size: 22px !important;
   transform: scale(0) !important;
   display: inline-block !important;
-  transition: transform var(--animation-time) var(--ease-out-curve) !important;
+  transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
 .i-amphtml-story-interactive-post-selection

@@ -19,28 +19,46 @@
 }
 
 .i-amphtml-story-interactive-container {
-	background: var(--interactive-prompt-background-color) !important;
-	border-radius: 32px !important;
+  background: var(--interactive-prompt-background-color) !important;
+  border-radius: 32px !important;
 }
 
 .i-amphtml-story-interactive-prompt-container {
-	display: flex !important;
-	justify-items: center !important;
-	padding: 20px !important;
-	color: var(--interactive-prompt-text-color) !important;
+  display: flex !important;
+  justify-items: center !important;
+  padding: 20px !important;
+  color: var(--interactive-prompt-text-color) !important;
 }
 
 .i-amphtml-story-interactive-prompt {
-	margin: 0px !important;
-	overflow : hidden !important;
-	text-overflow: ellipsis !important;
-	display: -webkit-box !important;
-	-webkit-line-clamp: 4 !important;
-	-webkit-box-orient: vertical !important;
-	visibility: visible !important;
-	font-size: var(--i-amphtml-interactive-prompt-text-size) !important;
-	line-height: var(--i-amphtml-interactive-prompt-line-height) !important;
-	max-height: 112px !important;
-	font-weight: bold !important;
-	text-align: var(--interactive-prompt-alignment) !important;
+  margin: 0px !important;
+  overflow : hidden !important;
+  text-overflow: ellipsis !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 4 !important;
+  -webkit-box-orient: vertical !important;
+  visibility: visible !important;
+  font-size: var(--i-amphtml-interactive-prompt-text-size) !important;
+  line-height: var(--i-amphtml-interactive-prompt-line-height) !important;
+  max-height: 112px !important;
+  font-weight: bold !important;
+  text-align: var(--interactive-prompt-alignment) !important;
+}
+
+@keyframes i-amphtml-interactive-animation-flash-background {
+  0% {
+    opacity: .4;
+  }
+  100% {
+    opacity: .2;
+  }
+}
+
+@keyframes i-amphtml-interactive-animation-flash-background-color {
+  0% {
+    background-color: var(--i-amphtml-interactive-theme-shading-flash);
+  }
+  100% {
+    background-color: var(--i-amphtml-interactive-theme-shading);
+  }
 }
