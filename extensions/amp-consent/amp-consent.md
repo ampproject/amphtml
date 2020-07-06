@@ -613,6 +613,11 @@ You can use the response of `checkConsentHref` to show a consent to the user if 
 
 Yes. See example [here](https://amp.dev/documentation/examples/user-consent/geolocation-based_consent_flow/).
 
+##### Does AMP support the IAB TCF?
+
+AMP supports popular transparency consent frameworks including the IAB TCF v1, TCF v2 and the IAB US Privacy String.
+Please check with your consent management platform (CMP) and ad networks on their AMP support. AMP will read and pass the strings passed by the frameworks (IAB TCF v1, TCF v2 and the IAB US Privacy String) when received by CMPs/ad networks.
+
 ##### I can't see feature X being supported, what can I do?
 
 Join in on the discussion where we are discussing [upcoming potential features](https://github.com/ampproject/amphtml/issues/13716#issuecomment-382474345). Please chime in on the thread if something isn't supported yet.
