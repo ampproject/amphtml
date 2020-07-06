@@ -406,9 +406,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       StateProperty.CURRENT_PAGE_ID,
       (currPageId) => {
         if (currPageId === this.getPageId_()) {
-          this.mutateElement(() => {
-            this.rootEl_.classList.add(INTERACTIVE_ACTIVE_CLASS);
-          });
+          this.rootEl_.classList.add(INTERACTIVE_ACTIVE_CLASS);
         } else {
           this.rootEl_.classList.remove(INTERACTIVE_ACTIVE_CLASS);
         }
