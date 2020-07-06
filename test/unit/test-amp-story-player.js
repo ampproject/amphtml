@@ -371,48 +371,48 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       );
     });
 
-    it('back button should be created', async () => {
+    it('back button should be created and close button should not', async () => {
       const playerEl = win.document.createElement('amp-story-player');
-      playerEl.setAttribute('button', 'back');
+      playerEl.setAttribute('exit-control', 'back-button');
       appendStoriesToPlayer(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
 
-      expect(playerEl.shadowRoot.querySelector('a')).to.exist;
+      expect(playerEl.shadowRoot.querySelector('a.amp-story-player-back-button')).to.exist;
+      expect(playerEl.shadowRoot.querySelector('a.amp-story-player-close-button')).to.not.exist;
     });
 
-    it('close button should be created', async () => {
+    it('close button should be created and back button should not', async () => {
       const playerEl = win.document.createElement('amp-story-player');
-      playerEl.setAttribute('button', 'close');
+      playerEl.setAttribute('exit-control', 'close-button');
       appendStoriesToPlayer(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
 
-      expect(playerEl.shadowRoot.querySelector('a')).to.exist;
+      expect(playerEl.shadowRoot.querySelector('a.amp-story-player-close-button')).to.exist;
+      expect(playerEl.shadowRoot.querySelector('a.amp-story-player-back-button')).to.not.exist;
     });
 
     it('no button should be created', async () => {
       const playerEl = win.document.createElement('amp-story-player');
-      playerEl.setAttribute('button', 'brokenattribute');
+      playerEl.setAttribute('exit-control', 'brokenattribute');
       appendStoriesToPlayer(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
 
-      // Previous implementation relied on a ternary statement that defaulted to back-button
-      // if the attribute was set to a value other than close or back. This test ensures that
-      // correct behavior of the button not being created in the mentioned case.
-      expect(playerEl.shadowRoot.querySelector('a')).to.not.exist;
+      expect(playerEl.shadowRoot.querySelector('a.amp-story-player-close-button')).to.not.exist;
+      expect(playerEl.shadowRoot.querySelector('a.amp-story-player-back-button')).to.not.exist;
     });
 
     it('back button should fire back event once', async () => {
       const playerEl = win.document.createElement('amp-story-player');
-      playerEl.setAttribute('button', 'back');
+      playerEl.setAttribute('exit-control', 'back-button');
       appendStoriesToPlayer(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
@@ -420,17 +420,16 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
 
       const readySpy = env.sandbox.spy();
-      playerEl.addEventListener('close', readySpy);
-      playerEl.addEventListener('back', readySpy);
+      playerEl.addEventListener('amp-story-player-back', readySpy);
 
-      playerEl.shadowRoot.querySelector('a').click();
+      playerEl.shadowRoot.querySelector('a.amp-story-player-back-button').click();
 
       expect(readySpy).to.have.been.calledOnce;
     });
 
     it('close button should fire close event once', async () => {
       const playerEl = win.document.createElement('amp-story-player');
-      playerEl.setAttribute('button', 'close');
+      playerEl.setAttribute('exit-control', 'close-button');
       appendStoriesToPlayer(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
@@ -438,10 +437,9 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
 
       const readySpy = env.sandbox.spy();
-      playerEl.addEventListener('close', readySpy);
-      playerEl.addEventListener('back', readySpy);
+      playerEl.addEventListener('amp-story-player-close', readySpy);
 
-      playerEl.shadowRoot.querySelector('a').click();
+      playerEl.shadowRoot.querySelector('a.amp-story-player-close-button').click();
 
       expect(readySpy).to.have.been.calledOnce;
     });

@@ -68,8 +68,20 @@ const MAX_IFRAMES = 3;
 
 /** @enum {string} */
 const BUTTON_TYPES = {
-  BACK: 'back',
-  CLOSE: 'close',
+  BACK: 'back-button',
+  CLOSE: 'close-button',
+};
+
+/** @enum {string} */
+const BUTTON_CLASSES = {
+  [BUTTON_TYPES.BACK]: 'amp-story-player-back-button',
+  [BUTTON_TYPES.CLOSE]: 'amp-story-player-close-button',
+};
+
+/** @enum {string} */
+const BUTTON_EVENTS = {
+  [BUTTON_TYPES.BACK]: 'amp-story-player-back',
+  [BUTTON_TYPES.CLOSE]: 'amp-story-player-close',
 };
 
 /** @const {string} */
@@ -221,16 +233,16 @@ export class AmpStoryPlayer {
    * @private
    */
   initializeButton_() {
-    const option = this.element_.getAttribute('button');
+    const option = this.element_.getAttribute('exit-control');
     if (!Object.values(BUTTON_TYPES).includes(option)) {
       return;
     }
 
     const button = this.doc_.createElement('a');
-    button.classList.add('amp-story-player-' + option + '-button');
+    button.classList.add(BUTTON_CLASSES[option]);
 
     button.addEventListener('click', () => {
-      this.element_.dispatchEvent(createCustomEvent(this.win_, option, {}));
+      this.element_.dispatchEvent(createCustomEvent(this.win_, BUTTON_EVENTS[option], {}));
     });
 
     this.rootEl_.appendChild(button);
