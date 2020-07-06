@@ -22,7 +22,7 @@ const SHADERS = {
       vec3 q;
       if(unproject(p, q)) {
         vec3 dir = normalize(uRot * q);
-        float u = (0.5 / pi) * atan(dir[1], dir[0]) + 0.5;
+        float u = (-0.5 / pi) * atan(dir[1], dir[0]) + 0.5;
         float v = (1.0 / pi) * acos(dir[2]);
         return texture2D(uTex, vec2(u, v));
       }
@@ -80,7 +80,7 @@ const SHADERS = {
 const MAPPING = {
   azPerspective: `
     bool unproject(vec2 p, out vec3 q) {
-      q = vec3(-p.x, p.y, -1.0);
+      q = vec3(p, -1.0);
       return true;
     }
   `,
@@ -113,7 +113,7 @@ export class Matrix {
 
   static rotation(n, i, j, arg) {
     console.assert(i < n && j < n);
-    const z = this.identity(n);
+    const z = Matrix.identity(n);
     const cos = Math.cos(arg);
     const sin = Math.sin(arg);
     z[i * n + i] = +cos;
