@@ -78,7 +78,7 @@ export let InteractiveComponentDef;
 /**
  * @typedef {{
  *    finished: boolean,
- *    categories: Map<string, number>,
+ *    categories: ({string: number}|{}),
  * }}
  */
 export let InteractiveResultsDef;
