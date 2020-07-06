@@ -227,7 +227,6 @@ export class AmpStoryPlayer {
     const button = this.doc_.createElement('a');
     button.classList.add('amp-story-player-' + option + '-button');
 
-    button.textContent = option == BUTTON_TYPES.CLOSE ? '×' : '←';
     button.addEventListener('click', () => {
       this.element_.dispatchEvent(
         createCustomEvent(this.win_, option, {})
