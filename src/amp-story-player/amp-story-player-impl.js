@@ -490,7 +490,6 @@ export class AmpStoryPlayer {
   /**
    * Navigates stories given a number.
    * @param {number} storyDelta
-   * @private
    */
   go(storyDelta) {
     if (this.currentIdx_ + storyDelta >= this.stories_.length || this.currentIdx_ + storyDelta < 0) {
