@@ -62,7 +62,12 @@ export const addConfigToInteractive = (
   correct = undefined
 ) => {
   for (let i = 0; i < options; i++) {
-    interactive.element.setAttribute(`option-${i + 1}-text`, `text ${i + 1}`);
+    ['text', 'results-category', 'image'].forEach((attr) => {
+      interactive.element.setAttribute(
+        `option-${i + 1}-${attr}`,
+        `${attr} ${i + 1}`
+      );
+    });
   }
   if (correct) {
     interactive.element.setAttribute(`option-${correct}-correct`, 'correct');
@@ -283,6 +288,37 @@ describes.realWin(
       );
 
       expect(percentages4).to.deep.equal([33, 33, 33]);
+    });
+
+    it('should update store service when selecting option', async () => {
+      const trigger = env.sandbox.stub(
+        ampStoryInteractive,
+        'updateStoryStoreState_'
+      );
+      addConfigToInteractive(ampStoryInteractive);
+      ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.layoutCallback();
+      await ampStoryInteractive.getOptionElements()[2].click();
+      expect(trigger).to.be.calledWith(2);
+    });
+
+    it('should update store service when getting option selected from backend', async () => {
+      const trigger = env.sandbox.stub(
+        ampStoryInteractive,
+        'updateStoryStoreState_'
+      );
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(getMockInteractiveData());
+      addConfigToInteractive(ampStoryInteractive);
+      ampStoryInteractive.element.setAttribute(
+        'endpoint',
+        'http://localhost:8000'
+      );
+      ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.layoutCallback();
+
+      expect(trigger).to.be.calledWith(0);
     });
   }
 );

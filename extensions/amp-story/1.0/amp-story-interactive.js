@@ -19,10 +19,14 @@ import {
   StoryAnalyticsEvent,
   getAnalyticsService,
 } from './story-analytics';
+import {
+  Action,
+  StateProperty,
+  getStoreService,
+} from './amp-story-store-service';
 import {AnalyticsVariable, getVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-interactive-1.0.css';
 import {Services} from '../../../src/services';
-import {StateProperty, getStoreService} from './amp-story-store-service';
 import {
   addParamsToUrl,
   appendPathToUrl,
@@ -44,6 +48,7 @@ const TAG = 'amp-story-interactive';
 export const InteractiveType = {
   QUIZ: 0,
   POLL: 1,
+  RESULTS: 2,
 };
 
 /** @const {string} */
@@ -70,7 +75,9 @@ export let InteractiveResponseType;
  * @typedef {{
  *    optionIndex: number,
  *    text: string,
- *    correct: ?string
+ *    correct: ?string,
+ *    resultscategory: ?string,
+ *    image: ?string,
  * }}
  */
 export let OptionConfigType;
@@ -168,6 +175,8 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
     /** @const @protected {!./variable-service.AmpStoryVariableService} */
     this.variableService_ = getVariableService(this.win);
+
+    this.updateStoryStoreState_(null);
   }
 
   /**
@@ -191,6 +200,21 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       );
     }
     return this.optionElements_;
+  }
+
+  /**
+   * Gets the interactive ID
+   * @private
+   * @return {string}
+   */
+  getInteractiveId_() {
+    if (!this.interactiveId_) {
+      const pageId = closest(dev().assertElement(this.element), (el) => {
+        return el.tagName.toLowerCase() === 'amp-story-page';
+      }).getAttribute('id');
+      this.interactiveId_ = `CANONICAL_URL+${pageId}`;
+    }
+    return this.interactiveId_;
   }
 
   /** @override */
@@ -245,14 +269,14 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     const options = [];
     toArray(this.element.attributes).forEach((attr) => {
       // Match 'option-#-type' (eg: option-1-text, option-2-image, option-3-correct...)
-      if (attr.name.match(/^option-\d+-\w+$/)) {
+      if (attr.name.match(/^option-\d+(-\w+)+$/)) {
         const splitParts = attr.name.split('-');
         const optionNumber = parseInt(splitParts[1], 10);
         // Add all options in order on the array with correct index.
         while (options.length < optionNumber) {
           options.push({'optionIndex': options.length});
         }
-        options[optionNumber - 1][splitParts[2]] = attr.value;
+        options[optionNumber - 1][splitParts.slice(2).join('')] = attr.value;
       }
     });
     if (
@@ -404,6 +428,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     );
 
     if (optionEl) {
+      this.updateStoryStoreState_(optionEl.optionIndex_);
       this.handleOptionSelection_(optionEl);
     }
   }
@@ -598,13 +623,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       return Promise.reject(ENDPOINT_INVALID_ERROR);
     }
 
-    if (!this.interactiveId_) {
-      const pageId = closest(dev().assertElement(this.element), (el) => {
-        return el.tagName.toLowerCase() === 'amp-story-page';
-      }).getAttribute('id');
-      this.interactiveId_ = `CANONICAL_URL+${pageId}`;
-    }
-
     return this.getClientId_().then((clientId) => {
       const requestOptions = {'method': method};
       const requestParams = dict({
@@ -613,7 +631,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       });
       url = appendPathToUrl(
         this.urlService_.parse(url),
-        dev().assertString(this.interactiveId_)
+        this.getInteractiveId_()
       );
       if (requestOptions['method'] === 'POST') {
         requestOptions['body'] = {'optionSelected': optionSelected};
@@ -679,6 +697,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     data.forEach((response, index) => {
       if (response.selectedByUser) {
         this.hasUserSelection_ = true;
+        this.updateStoryStoreState_(index);
         this.mutateElement(() => {
           this.updateOptionPercentages_(data);
           this.updateToPostSelectionState_(options[index]);
@@ -699,5 +718,17 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     if (this.optionsData_) {
       this.rootEl_.classList.add('i-amphtml-story-interactive-has-data');
     }
+  }
+
+  /**
+   * @public
+   * @param {?number} option
+   */
+  updateStoryStoreState_(option = null) {
+    const update = {
+      'option': option != null ? this.options_[option] : null,
+      'interactiveId': this.getInteractiveId_(),
+    };
+    this.storeService_.dispatch(Action.ADD_INTERACTIVE_REACT, update);
   }
 }

@@ -77,6 +77,14 @@ export let InteractiveComponentDef;
 
 /**
  * @typedef {{
+ *    finished: boolean,
+ *    category: ?string,
+ * }}
+ */
+export let InteractiveResultsDef;
+
+/**
+ * @typedef {{
  *    canInsertAutomaticAd: boolean,
  *    canShowBookend: boolean,
  *    canShowNavigationOverlayHint: boolean,
@@ -93,6 +101,8 @@ export let InteractiveComponentDef;
  *    hasSidebarState: boolean,
  *    infoDialogState: boolean,
  *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
+ *    interactiveReactState: !Map<string, {option: ?./amp-story-interactive.OptionConfigType, interactiveId: string}>,
+ *    interactiveResultsState: !InteractiveResultsDef,
  *    mutedState: boolean,
  *    pageAudioState: boolean,
  *    pageHasElementsWithPlaybackState: boolean,
@@ -140,6 +150,10 @@ export const StateProperty = {
   HAS_SIDEBAR_STATE: 'hasSidebarState',
   INFO_DIALOG_STATE: 'infoDialogState',
   INTERACTIVE_COMPONENT_STATE: 'interactiveEmbeddedComponentState',
+  // State of interactive components (polls, quizzes) on the story.
+  INTERACTIVE_REACT_STATE: 'interactiveReactState',
+  // The results by aggregating the INTERACTIVE_COMPONENT_STATE.
+  INTERACTIVE_RESULTS_STATE: 'interactiveResultsState',
   MUTED_STATE: 'mutedState',
   PAGE_HAS_AUDIO_STATE: 'pageAudioState',
   PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE: 'pageHasElementsWithPlaybackState',
@@ -174,6 +188,7 @@ export const StateProperty = {
 
 /** @const @enum {string} */
 export const Action = {
+  ADD_INTERACTIVE_REACT: 'addInteractiveReact',
   ADD_TO_ACTIONS_ALLOWLIST: 'addToActionsAllowlist',
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
@@ -222,6 +237,39 @@ const stateComparisonFunctions = {
     (old, curr) => old.element !== curr.element || old.state !== curr.state,
   [StateProperty.NAVIGATION_PATH]: (old, curr) => old.length !== curr.length,
   [StateProperty.PAGE_IDS]: (old, curr) => old.length !== curr.length,
+  [StateProperty.INTERACTIVE_RESULTS_STATE]: (old, curr) => {
+    return old.finished != curr.finished;
+  },
+};
+
+/**
+ * Gets the map of quizzes responded and sets the correct values on the template.
+ * @param {!Object} data
+ * @return {!InteractiveResultsDef}
+ */
+const processInteractiveResults = (data) => {
+  let completed = 0;
+  let totalCount = 0;
+  const categories = {null: -1};
+  Object.values(data).forEach((interactiveConfig) => {
+    totalCount += 1;
+    if (interactiveConfig['option'] != null) {
+      completed += 1;
+      const currCategory = interactiveConfig['option']['resultscategory'];
+      if (currCategory != undefined) {
+        categories[currCategory] = categories[currCategory]
+          ? categories[currCategory] + 1
+          : 1;
+      }
+    }
+  });
+  const result = {
+    'finished': completed == totalCount,
+    'category': Object.keys(categories).reduce((prev, curr) =>
+      categories[prev] > categories[curr] ? prev : curr
+    ),
+  };
+  return result;
 };
 
 /**
@@ -233,6 +281,20 @@ const stateComparisonFunctions = {
  */
 const actions = (state, action, data) => {
   switch (action) {
+    case Action.ADD_INTERACTIVE_REACT:
+      state = /** @type {!State} */ ({
+        ...state,
+        [StateProperty.INTERACTIVE_REACT_STATE]: {
+          ...state[StateProperty.INTERACTIVE_REACT_STATE],
+          [data['interactiveId']]: data,
+        },
+      });
+      state[
+        StateProperty.INTERACTIVE_RESULTS_STATE
+      ] = processInteractiveResults(
+        state[StateProperty.INTERACTIVE_REACT_STATE]
+      );
+      return /** @type {!State} */ (state);
     case Action.ADD_NEW_PAGE_ID:
       return /** @type {!State} */ ({
         ...state,
@@ -544,6 +606,11 @@ export class AmpStoryStoreService {
       [StateProperty.INFO_DIALOG_STATE]: false,
       [StateProperty.INTERACTIVE_COMPONENT_STATE]: {
         state: EmbeddedComponentState.HIDDEN,
+      },
+      [StateProperty.INTERACTIVE_REACT_STATE]: {},
+      [StateProperty.INTERACTIVE_RESULTS_STATE]: {
+        finished: false,
+        category: '',
       },
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
