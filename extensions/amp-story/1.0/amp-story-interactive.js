@@ -22,11 +22,7 @@ import {
 import {AnalyticsVariable, getVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-interactive-1.0.css';
 import {Services} from '../../../src/services';
-import {
-  StateProperty,
-  UIType,
-  getStoreService,
-} from './amp-story-store-service';
+import {StateProperty, getStoreService} from './amp-story-store-service';
 import {
   addParamsToUrl,
   appendPathToUrl,
