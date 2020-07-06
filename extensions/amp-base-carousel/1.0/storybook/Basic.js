@@ -76,14 +76,25 @@ export const WithLooping = () => {
       style={{width, height, position: 'relative'}}
     >
       {[
+        'lightpink',
         'lightcoral',
         'peachpuff',
+        'powderblue',
         'lavender',
-        'azure',
-        'honeydew',
-        'rebeccapurple',
-      ].map((color) => (
-        <div style={{backgroundColor: color, width, height}}></div>
+        'thistle',
+      ].map((color, index) => (
+        <div
+          style={{
+            backgroundColor: color,
+            width,
+            height,
+            textAlign: 'center',
+            fontSize: '48pt',
+            lineHeight: height + 'px',
+          }}
+        >
+          {index}
+        </div>
       ))}
     </BaseCarousel>
   );
