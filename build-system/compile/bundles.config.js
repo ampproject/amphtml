@@ -881,6 +881,7 @@ exports.extensionBundles = [
         'amp-story-info-dialog',
         'amp-story-interactive',
         'amp-story-interactive-binary-poll',
+        'amp-story-interactive-poll',
         'amp-story-interactive-quiz',
         'amp-story-share',
         'amp-story-share-menu',
