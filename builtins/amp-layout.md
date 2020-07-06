@@ -25,7 +25,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-#amp-layout <a name="amp-layout"></a>
+# amp-layout <a name="amp-layout"></a>
 
 ## Usage
 
