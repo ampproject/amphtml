@@ -40,23 +40,19 @@ export const _default = () => {
 export const provideArrows = () => {
   const width = number('width', 440);
   const height = number('height', 225);
-  const myButtonStyle = (side) => ({
+  const myButtonStyle = {
     background: 'lightblue',
     borderRadius: '50%',
     fontSize: 14,
     color: 'white',
-    bottom: 0,
-    [side]: 0,
     width: '30px',
     height: '30px',
-    position: 'absolute',
-    textAlign: 'center',
-  });
+  };
   return (
     <BaseCarousel
       style={{width, height, position: 'relative'}}
-      arrowPrev={<button style={myButtonStyle('left')}>←</button>}
-      arrowNext={<button style={myButtonStyle('right')}>→</button>}
+      arrowPrev={<button style={myButtonStyle}>←</button>}
+      arrowNext={<button style={myButtonStyle}>→</button>}
     >
       {['lightcoral', 'peachpuff', 'lavender'].map((color) => (
         <div style={{backgroundColor: color, width, height}}></div>

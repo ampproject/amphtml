@@ -44,11 +44,18 @@ export const scrollContainer = {
   scrollSnapType: 'x mandatory',
 };
 
-export const defaultArrowButton = {
+export const arrowPlacement = {
   position: 'absolute',
+  zIndex: 1,
+  display: 'flex',
+  flexDirection: 'row',
+  justifyContent: 'space-between',
   // Center the button vertically.
   top: '50%',
   transform: 'translateY(-50%)',
+};
+
+export const defaultArrowButton = {
   width: '32px',
   height: '32px',
   background: 'rgba(0, 0, 0, 0.25)',

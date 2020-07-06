@@ -35,14 +35,24 @@ export function Arrow(props) {
     }
     setRestingIndex(mod(restingIndex + dir, length));
   };
-  return Preact.cloneElement(
-    button,
-    {
-      onClick: handleClick,
-      disabled: isDisabled,
-      ...rest,
-    },
-    children
+  return (
+    <div
+      style={{
+        ...styles.arrowPlacement,
+        // Offset button from the edge.
+        [dir < 0 ? 'left' : 'right']: '0px',
+      }}
+    >
+      {Preact.cloneElement(
+        button,
+        {
+          onClick: handleClick,
+          disabled: isDisabled,
+          ...rest,
+        },
+        children
+      )}
+    </div>
   );
 }
 
@@ -51,15 +61,8 @@ export function Arrow(props) {
  * @return {PreactDef.Renderable}
  */
 function renderDefaultArrow(props) {
-  const {dir} = props;
   return (
-    <button
-      style={{
-        // Offset button from the edge.
-        [dir < 0 ? 'left' : 'right']: '8px',
-        ...styles.defaultArrowButton,
-      }}
-    >
+    <button style={styles.defaultArrowButton}>
       {props.dir < 0 ? '<<' : '>>'}
     </button>
   );
