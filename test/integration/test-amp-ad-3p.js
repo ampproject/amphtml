@@ -23,7 +23,7 @@ function createFixture() {
   return createFixtureIframe('test/fixtures/3p-ad.html', 3000, () => {});
 }
 
-describe.configure().run('amp-ad 3P', () => {
+describe('amp-ad 3P', () => {
   let fixture;
 
   beforeEach(() => {
