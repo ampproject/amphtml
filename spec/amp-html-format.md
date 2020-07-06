@@ -359,8 +359,6 @@ In the following examples `<property>` needs to be in the white list above.
 - `transition <property>` (also -vendorPrefix-transition)
 - `@keyframes name { from: {<property>: value} to {<property: value>} }` (also `@-vendorPrefix-keyframes`)
 
-`overflow` (and `overflow-y`, `overflow-x`) may not be styled as “auto” or “scroll”. No user defined element in an AMP document may have a scrollbar.
-
 #### Maximum size
 
 It is a validation error if the author stylesheet or inline styles together are larger than 75,000 bytes.
