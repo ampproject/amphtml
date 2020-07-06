@@ -167,9 +167,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @const @protected {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
 
-    /** @private @const {!../../../src/service/timer-impl.Timer} */
-    this.timer_ = Services.timerFor(this.win);
-
     /** @protected {../../../src/service/url-impl.Url} */
     this.urlService_ = Services.urlForDoc(this.element);
 
@@ -210,6 +207,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         return el.tagName.toLowerCase() === 'amp-story-page';
       }).getAttribute('id');
     }
+    return this.pageId_;
   }
 
   /** @override */
@@ -405,19 +403,9 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       StateProperty.CURRENT_PAGE_ID,
       (currPageId) => {
         if (currPageId === this.getPageId_()) {
-          this.timer_.delay(
-            () => {
-              this.mutateElement(() => {
-                this.rootEl_.classList.add(
-                  'i-amphtml-story-interactive-active'
-                );
-              });
-            },
-            this.storeService_.get(StateProperty.UI_STATE) ===
-              UIType.DESKTOP_PANELS
-              ? 350
-              : 0
-          );
+          this.mutateElement(() => {
+            this.rootEl_.classList.add('i-amphtml-story-interactive-active');
+          });
         }
       },
       true

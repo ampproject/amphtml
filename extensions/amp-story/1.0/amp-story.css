@@ -897,6 +897,7 @@ amp-story .amp-video-eq,
   --i-amphtml-interactive-answer-choice-background: white !important;
   --i-amphtml-interactive-prompt-text-size: 22px !important;
   --i-amphtml-interactive-prompt-line-height: 28px !important;
+  --i-amphtml-interactive-animation-delay: 0s !important;
 }
 
 .i-amphtml-story-interactive-component[theme="dark"] {
@@ -927,4 +928,8 @@ amp-story .amp-video-eq,
 
 amp-story-interactive-binary-poll[theme="dark"] {
   --i-amphtml-interactive-option-accent-color: white !important;
+}
+
+amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-component {
+  --i-amphtml-interactive-animation-delay: 0.35s !important;
 }
