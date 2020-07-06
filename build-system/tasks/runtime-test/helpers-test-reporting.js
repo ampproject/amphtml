@@ -23,6 +23,7 @@ const {
   travisJobNumber,
   travisCommitSha,
 } = require('../../common/travis');
+const {cyan, green, yellow} = require('ansi-colors');
 
 const JSON_REPORT_TEST_TYPES = new Set(['unit', 'integration']);
 const REPORTING_API_URL = 'https://amp-test-cases.appspot.com/report';
@@ -64,9 +65,21 @@ async function sendTravisKarmaReport(testType) {
   });
 
   if (response.ok) {
-    log(`Test results of type ${testType} reported to ${REPORTING_API_URL}`);
+    log(
+      green('INFO:'),
+      `Test results of type`,
+      cyan(testType),
+      'reported to',
+      cyan(REPORTING_API_URL)
+    );
   } else {
-    log(`Error reporting results of type ${testType}: ${response.statusText}`);
+    log(
+      yellow('WARNING:'),
+      'failed to report results of type',
+      cyan(testType),
+      ': \n',
+      yellow(response.statusText).substr(0, 100)
+    );
   }
 }
 
