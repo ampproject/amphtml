@@ -53,9 +53,7 @@ const SUPPORTED_CACHES = ['cdn.ampproject.org', 'www.bing-amp.com'];
 /** @const @type {!Array<string>} */
 const SANDBOX_MIN_LIST = ['allow-top-navigation'];
 
-/**
- * @enum {number}
- */
+/** @enum {number} */
 const SwipingState = {
   NOT_SWIPING: 0,
   SWIPING_TO_LEFT: 1,
@@ -67,6 +65,12 @@ const TOGGLE_THRESHOLD_PX = 50;
 
 /** @const {number} */
 const MAX_IFRAMES = 3;
+
+/** @enum {string} */
+const BUTTON_TYPES = {
+  BACK: "back", 
+  CLOSE: "close"
+};
 
 /** @const {string} */
 export const IFRAME_IDX = '__AMP_IFRAME_IDX__';
@@ -218,21 +222,18 @@ export class AmpStoryPlayer {
    */
   initializeButton_() {
     const option = this.element_.getAttribute('button');
-    if (!option || (option !== 'close' && option !== 'back')) {
-      return;
-    }
-    const optionBool = option === 'close';
+    if (option in BUTTON_TYPES) { return; }
 
     const button = this.doc_.createElement('a');
     button.classList.add('amp-story-player-' + option + '-button');
-    button.id = option + '-button';
 
-    button.textContent = optionBool ? '×' : '←';
+    button.textContent = option == BUTTON_TYPES.CLOSE ? '×' : '←';
     button.addEventListener('click', () => {
       this.element_.dispatchEvent(
-        createCustomEvent(this.win_, optionBool ? 'close' : 'back', {})
+        createCustomEvent(this.win_, option, {})
       );
     });
+
     this.rootEl_.appendChild(button);
   }
 

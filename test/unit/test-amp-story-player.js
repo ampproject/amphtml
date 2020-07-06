@@ -380,7 +380,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       await player.load();
 
-      expect(playerEl.shadowRoot.getElementById('back-button')).to.exist;
+      expect(playerEl.shadowRoot.querySelector('a')).to.exist;
     });
 
     it('close button should be created', async () => {
@@ -392,7 +392,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       await player.load();
 
-      expect(playerEl.shadowRoot.getElementById('close-button')).to.exist;
+      expect(playerEl.shadowRoot.querySelector('a')).to.exist;
     });
 
     it('no button should be created', async () => {
@@ -407,8 +407,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       // Previous implementation relied on a ternary statement that defaulted to back-button
       // if the attribute was set to a value other than close or back. This test ensures that
       // correct behavior of the button not being created in the mentioned case.
-      expect(playerEl.shadowRoot.getElementById('back-button')).to.not.exist;
-      expect(playerEl.shadowRoot.getElementById('close-button')).to.not.exist;
+      expect(playerEl.shadowRoot.querySelector('a')).to.not.exist;
     });
 
     it('back button should fire back event once', async () => {
@@ -424,7 +423,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       playerEl.addEventListener('close', readySpy);
       playerEl.addEventListener('back', readySpy);
 
-      playerEl.shadowRoot.getElementById('back-button').click();
+      playerEl.shadowRoot.querySelector('a').click();
 
       expect(readySpy).to.have.been.calledOnce;
     });
@@ -442,7 +441,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       playerEl.addEventListener('close', readySpy);
       playerEl.addEventListener('back', readySpy);
 
-      playerEl.shadowRoot.getElementById('close-button').click();
+      playerEl.shadowRoot.querySelector('a').click();
 
       expect(readySpy).to.have.been.calledOnce;
     });
