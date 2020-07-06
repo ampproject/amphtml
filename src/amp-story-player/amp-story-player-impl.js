@@ -500,7 +500,7 @@ export class AmpStoryPlayer {
       return;
     }
 
-    const newIndex = this.stories_[this.currentIdx_ + storyDelta];
+    const newIndex = this.currentIdx_ + storyDelta;
 
     const previousStory = this.stories_[newIndex - 1];
     this.updatePreviousIframe_(
