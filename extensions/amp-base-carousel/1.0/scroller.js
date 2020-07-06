@@ -36,9 +36,9 @@ const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
  */
 export function Scroller(props) {
   const {
-    children = [],
-    loop,
+    children,
     ignoreProgrammaticScroll,
+    loop,
     restingIndex,
     setRestingIndex,
   } = props;
@@ -55,13 +55,12 @@ export function Scroller(props) {
    */
   const offsetRef = useRef(restingIndex);
   const containerRef = useRef();
-  const slides = Slides({
+  const slides = renderSlides({
     children,
-    restingIndex,
-    container: containerRef,
+    loop,
     offsetRef,
     pivotIndex,
-    loop,
+    restingIndex,
   });
   const currentIndex = useRef(restingIndex);
 
@@ -75,7 +74,7 @@ export function Scroller(props) {
     container./* OK */ scrollLeft = loop
       ? container./* OK */ offsetWidth * pivotIndex
       : container./* OK */ offsetWidth * restingIndex;
-  }, [ignoreProgrammaticScroll, restingIndex, pivotIndex, loop]);
+  }, [ignoreProgrammaticScroll, loop, restingIndex, pivotIndex]);
 
   // Trigger render by setting the resting index to the current scroll state.
   const resetScrollReferencePoint = () => {
@@ -86,7 +85,6 @@ export function Scroller(props) {
     }
     setRestingIndex(currentIndex.current);
   };
-
   const debouncedResetScrollReferencePoint = debounce(
     window,
     resetScrollReferencePoint,
@@ -187,7 +185,7 @@ export function Scroller(props) {
  * @param {!JsonObject} props
  * @return {PreactDef.Renderable}
  */
-function Slides(props) {
+function renderSlides(props) {
   const {children, restingIndex, offsetRef, pivotIndex, loop} = props;
   const {length} = children;
   const slides = [];

@@ -42,20 +42,20 @@ export function BaseCarousel(props) {
         {children}
       </Scroller>
       <Arrow
+        customArrow={arrowPrev}
         dir={-1}
+        length={children.length}
         loop={loop}
         restingIndex={curSlide}
         setRestingIndex={setRestingIndex}
-        length={children.length}
-        customArrow={arrowPrev}
       ></Arrow>
       <Arrow
+        customArrow={arrowNext}
         dir={1}
+        length={children.length}
         loop={loop}
         restingIndex={curSlide}
         setRestingIndex={setRestingIndex}
-        length={children.length}
-        customArrow={arrowNext}
       ></Arrow>
     </div>
   );

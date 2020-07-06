@@ -23,15 +23,15 @@ import {mod} from '../../../src/utils/math';
  * @return {PreactDef.Renderable}
  */
 export function Arrow(props) {
-  const {dir, restingIndex, setRestingIndex, length, customArrow, loop} = props;
+  const {customArrow, dir, length, loop, restingIndex, setRestingIndex} = props;
   const button = customArrow ? customArrow : renderDefaultArrow({dir});
   const nextSlide = restingIndex + dir;
   const {children, 'disabled': disabled, onClick, ...rest} = button.props;
   const isDisabled =
     disabled || (loop ? false : nextSlide < 0 || nextSlide >= length);
-  const handleClick = () => {
+  const handleClick = (e) => {
     if (onClick) {
-      onClick();
+      onClick(e);
     }
     setRestingIndex(mod(restingIndex + dir, length));
   };
