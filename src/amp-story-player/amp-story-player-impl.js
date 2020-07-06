@@ -68,8 +68,8 @@ const MAX_IFRAMES = 3;
 
 /** @enum {string} */
 const BUTTON_TYPES = {
-  BACK: "back", 
-  CLOSE: "close"
+  BACK: 'back',
+  CLOSE: 'close',
 };
 
 /** @const {string} */
@@ -222,15 +222,15 @@ export class AmpStoryPlayer {
    */
   initializeButton_() {
     const option = this.element_.getAttribute('button');
-    if (option in BUTTON_TYPES) { return; }
+    if (option in BUTTON_TYPES) {
+      return;
+    }
 
     const button = this.doc_.createElement('a');
     button.classList.add('amp-story-player-' + option + '-button');
 
     button.addEventListener('click', () => {
-      this.element_.dispatchEvent(
-        createCustomEvent(this.win_, option, {})
-      );
+      this.element_.dispatchEvent(createCustomEvent(this.win_, option, {}));
     });
 
     this.rootEl_.appendChild(button);
