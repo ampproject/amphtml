@@ -931,5 +931,5 @@ amp-story-interactive-binary-poll[theme="dark"] {
 }
 
 amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-component {
-  --i-amphtml-interactive-animation-delay: 0.35s !important;
+  --i-amphtml-interactive-animation-delay: 350ms !important;
 }
