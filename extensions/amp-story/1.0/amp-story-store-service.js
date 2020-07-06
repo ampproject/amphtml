@@ -78,7 +78,7 @@ export let InteractiveComponentDef;
 /**
  * @typedef {{
  *    finished: boolean,
- *    categories: ({string: number}|{}),
+ *    categories: !Object<string, number>,
  * }}
  */
 export let InteractiveResultsDef;
