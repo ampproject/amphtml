@@ -43,10 +43,9 @@
     background-color: var(--i-amphtml-interactive-option-background-color) !important;
     margin-bottom: 8px !important;
     color: var(--i-amphtml-interactive-option-text-color) !important;
-    border: solid 1px var(--i-amphtml-interactive-theme-border) !important;
-    box-shadow: var(--i-amphtml-interactive-chip-shadow) !important;
-    -webkit-box-shadow: var(--i-amphtml-interactive-chip-shadow) !important;
-    -moz-box-shadow: var(--i-amphtml-interactive-chip-shadow) !important;
+    box-shadow: var(--i-amphtml-interactive-chip-shadow), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
+    -webkit-box-shadow: var(--i-amphtml-interactive-chip-shadow), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
+    -moz-box-shadow: var(--i-amphtml-interactive-chip-shadow), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
     font-size: 16px !important;
     line-height: 20px !important;
     overflow: hidden !important;
@@ -224,23 +223,17 @@
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-option-selected[correct].i-amphtml-story-interactive-quiz-option {
     background: var(--correct-color) !important;
+    box-shadow: var(--i-amphtml-interactive-chip-shadow-inset) !important;
 }
 
 .i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-option-selected:not([correct]).i-amphtml-story-interactive-quiz-option {
     background: var(--incorrect-color) !important;
+    box-shadow: var(--i-amphtml-interactive-chip-shadow-inset) !important;
 }
 
-.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-option-selected.i-amphtml-story-interactive-quiz-option {
-    /* Ups the padding by one to account for the border which must be removed
-    * to allow the shading to reach the edge of the box */
-    padding: 9px 17px 9px 9px !important;
+.i-amphtml-story-interactive-option-selected.i-amphtml-story-interactive-quiz-option {
     border: none !important;
-}
-
-.i-amphtml-story-interactive-post-selection[dir=rtl] .i-amphtml-story-interactive-option-selected.i-amphtml-story-interactive-quiz-option {
-    /* Switches the extra padding to the left from the right, since the answer choice and the percentage switch */
-    padding: 9px 9px 9px 17px !important;
-    border: none !important;
+    box-shadow: var(--i-amphtml-interactive-chip-shadow-inset) !important;
 }
 
 .i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data .i-amphtml-story-interactive-option-selected[correct].i-amphtml-story-interactive-quiz-option::before {
