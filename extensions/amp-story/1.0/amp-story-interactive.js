@@ -408,7 +408,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
           });
         }
       },
-      true
+      true /** callToInitialize */
     );
 
     // Add a click listener to the element to trigger the class change
