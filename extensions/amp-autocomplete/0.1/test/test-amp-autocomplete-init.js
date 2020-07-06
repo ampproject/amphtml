@@ -176,14 +176,6 @@ describes.realWin(
         });
     });
 
-    it('should require filter attribute', () => {
-      return allowConsoleError(() => {
-        return expect(getAutocomplete({})).to.be.rejectedWith(
-          /requires "filter" attribute/
-        );
-      });
-    });
-
     it('should require valid filter attribute', () => {
       return allowConsoleError(() => {
         return expect(
