@@ -625,7 +625,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       return Promise.reject(ENDPOINT_INVALID_ERROR);
     }
 
-    const interactiveId_ = `CANONICAL_URL+${this.getPageId_()}`;
+    const interactiveId = `CANONICAL_URL+${this.getPageId_()}`;
 
     return this.getClientId_().then((clientId) => {
       const requestOptions = {'method': method};
@@ -633,7 +633,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         'interactiveType': this.interactiveType_,
         'clientId': clientId,
       });
-      url = appendPathToUrl(this.urlService_.parse(url), interactiveId_);
+      url = appendPathToUrl(this.urlService_.parse(url), interactiveId);
       if (requestOptions['method'] === 'POST') {
         requestOptions['body'] = {'optionSelected': optionSelected};
         requestOptions['headers'] = {'Content-Type': 'application/json'};
