@@ -54,6 +54,9 @@ export const InteractiveType = {
 const ENDPOINT_INVALID_ERROR =
   'The publisher has specified an invalid datastore endpoint';
 
+/** @const {string} */
+const INTERACTIVE_ACTIVE_CLASS = 'i-amphtml-story-interactive-active';
+
 /**
  * @typedef {{
  *    optionIndex: number,
@@ -404,8 +407,10 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       (currPageId) => {
         if (currPageId === this.getPageId_()) {
           this.mutateElement(() => {
-            this.rootEl_.classList.add('i-amphtml-story-interactive-active');
+            this.rootEl_.classList.add(INTERACTIVE_ACTIVE_CLASS);
           });
+        } else {
+          this.rootEl_.classList.remove(INTERACTIVE_ACTIVE_CLASS);
         }
       },
       true /** callToInitialize */
