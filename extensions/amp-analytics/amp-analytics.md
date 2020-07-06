@@ -683,7 +683,7 @@ that indicate the boundaries that triggered a request to be sent. Use
 
 - `useInitialPageSize` (optional, default `false`)
 
-  If set to `true`, scroll position scroll position is calculated based on
+  If set to `true`, scroll position is calculated based on
   the initial sizing of the page, ignoring its new dimensions when
   resized.
 
