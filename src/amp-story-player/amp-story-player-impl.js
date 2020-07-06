@@ -222,7 +222,7 @@ export class AmpStoryPlayer {
    */
   initializeButton_() {
     const option = this.element_.getAttribute('button');
-    if (option in BUTTON_TYPES) {
+    if (!Object.values(BUTTON_TYPES).includes(option)) {
       return;
     }
 
