@@ -242,7 +242,9 @@ export class AmpStoryPlayer {
     button.classList.add(BUTTON_CLASSES[option]);
 
     button.addEventListener('click', () => {
-      this.element_.dispatchEvent(createCustomEvent(this.win_, BUTTON_EVENTS[option], {}));
+      this.element_.dispatchEvent(
+        createCustomEvent(this.win_, BUTTON_EVENTS[option], {})
+      );
     });
 
     this.rootEl_.appendChild(button);
