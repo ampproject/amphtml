@@ -78,7 +78,7 @@ export let InteractiveComponentDef;
 /**
  * @typedef {{
  *    finished: boolean,
- *    category: ?string,
+ *    categories: Map<string, number>,
  * }}
  */
 export let InteractiveResultsDef;
@@ -250,7 +250,7 @@ const stateComparisonFunctions = {
 const processInteractiveResults = (data) => {
   let completed = 0;
   let totalCount = 0;
-  const categories = {null: -1};
+  const categories = {};
   Object.values(data).forEach((interactiveConfig) => {
     totalCount += 1;
     if (interactiveConfig['option'] != null) {
@@ -265,9 +265,7 @@ const processInteractiveResults = (data) => {
   });
   const result = {
     'finished': completed == totalCount,
-    'category': Object.keys(categories).reduce((prev, curr) =>
-      categories[prev] > categories[curr] ? prev : curr
-    ),
+    'categories': categories,
   };
   return result;
 };
