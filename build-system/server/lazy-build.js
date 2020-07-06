@@ -77,6 +77,7 @@ async function lazyBuild(url, matcher, bundles, buildFunc, next) {
  * @param {!Object} bundles
  * @param {string} name
  * @param {function()} buildFunc
+ * @return {Promise|undefined}
  */
 async function build(bundles, name, buildFunc) {
   const bundle = bundles[name];
