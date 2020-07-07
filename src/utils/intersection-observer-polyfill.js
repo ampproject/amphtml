@@ -22,9 +22,14 @@ import {Services} from '../services';
 import {SubscriptionApi} from '../iframe-helper';
 import {dev, devAssert} from '../log';
 import {dict} from './object';
+import {
+  getLayoutRectAsync,
+  layoutRectLtwh,
+  moveLayoutRect,
+  rectIntersection,
+} from '../layout-rect';
 import {getMode} from '../mode';
 import {isArray, isFiniteNumber} from '../types';
-import {layoutRectLtwh, moveLayoutRect, rectIntersection} from '../layout-rect';
 
 /**
  * The structure that defines the rectangle used in intersection observers.
@@ -290,6 +295,9 @@ export class IntersectionObserverPolyfill {
 
     /** @private {Pass} */
     this.mutationPass_ = null;
+
+    /** @private @const {!./service/vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(self);
   }
 
   /**
@@ -303,14 +311,9 @@ export class IntersectionObserverPolyfill {
 
   /**
    * Provide a way to observe the intersection change for a specific element
-   * Please note IntersectionObserverPolyfill only support AMP element now
-   * TODO: Support non AMP element
    * @param {!Element} element
    */
   observe(element) {
-    // Check the element is an AMP element.
-    devAssert(element.getLayoutBox);
-
     // If the element already exists in current observeEntries, do nothing
     for (let i = 0; i < this.observeEntries_.length; i++) {
       if (this.observeEntries_[i].element === element) {
@@ -326,14 +329,18 @@ export class IntersectionObserverPolyfill {
 
     // Get the new observed element's first changeEntry based on last viewport
     if (this.lastViewportRect_) {
-      const change = this.getValidIntersectionChangeEntry_(
+      this.getValidIntersectionChangeEntry_(
         newState,
         this.lastViewportRect_
-      );
-      if (change) {
-        this.callback_([change]);
-      }
+      ).then((change) => {
+        if (change) {
+          this.callback_([change]);
+        }
+      });
     }
+
+    // Does this next section have to happen after the callback?
+    // Aka should it be part of the promise chain
 
     // Add a mutation observer to tick ourself
     // TODO (@torch2424): Allow this to observe elements,
@@ -381,20 +388,26 @@ export class IntersectionObserverPolyfill {
     this.lastViewportRect_ = hostViewport;
 
     const changes = [];
+    const changePromises = [];
 
     for (let i = 0; i < this.observeEntries_.length; i++) {
-      const change = this.getValidIntersectionChangeEntry_(
-        this.observeEntries_[i],
-        hostViewport
+      changePromises.push(
+        this.getValidIntersectionChangeEntry_(
+          this.observeEntries_[i],
+          hostViewport
+        ).then((change) => {
+          if (change) {
+            changes.push(change);
+          }
+        })
       );
-      if (change) {
-        changes.push(change);
-      }
     }
 
-    if (changes.length) {
-      this.callback_(changes);
-    }
+    Promise.all(changePromises).then(() => {
+      if (changes.length) {
+        this.callback_(changes);
+      }
+    });
   }
 
   /**
@@ -404,41 +417,47 @@ export class IntersectionObserverPolyfill {
    * the function will return null.
    *
    * @param {!ElementIntersectionStateDef} state
-   * @param {!../layout-rect.LayoutRectDef} hostViewport hostViewport's rect
-   * @return {?IntersectionObserverEntry} A valid change entry or null if ratio
+   * @param {?./layout-rect.LayoutRectDef} hostViewport hostViewport's rect
+   * @return {Promise<?IntersectionObserverEntry>} A valid change entry or null if ratio
    * @private
    */
   getValidIntersectionChangeEntry_(state, hostViewport) {
     const {element} = state;
 
-    const elementRect = element.getLayoutBox();
-    const owner = element.getOwner();
+    // Non-AMP elements may not have these functions, so we supplement them
+    const elementRectPromise =
+      element.getLayoutBox && typeof element.getLayoutBox == 'function'
+        ? Promise.resolve(element.getLayoutBox())
+        : getLayoutRectAsync(element, hostViewport, this.vsync_);
+    const owner = element.getOwner && element.getOwner();
     const ownerRect = owner && owner.getLayoutBox();
 
-    // calculate intersectionRect. that the element intersects with hostViewport
-    // and intersects with owner element and container iframe if exists.
-    const intersectionRect =
-      rectIntersection(elementRect, ownerRect, hostViewport) ||
-      layoutRectLtwh(0, 0, 0, 0);
-    // calculate ratio, call callback based on new ratio value.
-    const ratio = intersectionRatio(intersectionRect, elementRect);
-    const newThresholdSlot = getThresholdSlot(this.threshold_, ratio);
+    return elementRectPromise.then((elementRect) => {
+      // calculate intersectionRect. that the element intersects with hostViewport
+      // and intersects with owner element.
+      const intersectionRect =
+        rectIntersection(elementRect, ownerRect, hostViewport) ||
+        layoutRectLtwh(0, 0, 0, 0);
+      // calculate ratio, call callback based on new ratio value.
+      const ratio = intersectionRatio(intersectionRect, elementRect);
+      const newThresholdSlot = getThresholdSlot(this.threshold_, ratio);
 
-    if (newThresholdSlot == state.currentThresholdSlot) {
-      return null;
-    }
-    state.currentThresholdSlot = newThresholdSlot;
+      if (newThresholdSlot == state.currentThresholdSlot) {
+        return null;
+      }
+      state.currentThresholdSlot = newThresholdSlot;
 
-    // To get same behavior as native IntersectionObserver set hostViewport null
-    // if inside an iframe
-    const changeEntry = calculateChangeEntry(
-      elementRect,
-      hostViewport,
-      intersectionRect,
-      ratio
-    );
-    changeEntry.target = element;
-    return changeEntry;
+      // To get same behavior as native IntersectionObserver set hostViewport null
+      // if inside an iframe
+      const changeEntry = calculateChangeEntry(
+        elementRect,
+        hostViewport,
+        intersectionRect,
+        ratio
+      );
+      changeEntry.target = element;
+      return changeEntry;
+    });
   }
 
   /**

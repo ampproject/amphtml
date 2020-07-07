@@ -667,8 +667,6 @@ export class VisibilityManagerForDoc extends VisibilityManager {
 
   /** @override */
   observe(element, listener) {
-    this.polyfillAmpElementIfNeeded_(element);
-
     const id = getElementId(element);
     let trackedElement = this.trackedElements_[id];
     if (!trackedElement) {
@@ -766,26 +764,6 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     // Tick in the next event loop. That's how native InOb works.
     setTimeout(ticker);
     return intersectionObserverPolyfill;
-  }
-
-  /**
-   * @param {!Element} element
-   * @private
-   */
-  polyfillAmpElementIfNeeded_(element) {
-    const {win} = this.ampdoc;
-    if (nativeIntersectionObserverSupported(win)) {
-      return;
-    }
-
-    // InOb polyfill requires partial AmpElement implementation.
-    if (typeof element.getLayoutBox == 'function') {
-      return;
-    }
-    element.getLayoutBox = () => {
-      return this.viewport_.getLayoutRect(element);
-    };
-    element.getOwner = () => null;
   }
 
   /**

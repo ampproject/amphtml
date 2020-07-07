@@ -1820,12 +1820,12 @@ describes.realWin('Events', {amp: 1}, (env) => {
     let saveCallback;
     let matchEmptySpec;
     let matchFunc;
-    let getAmpElementSpy;
+    let getElementSpy;
 
     beforeEach(() => {
       tracker = root.getTracker('visible', VisibilityTracker);
       visibilityManagerMock = env.sandbox.mock(root.getVisibilityManager());
-      getAmpElementSpy = env.sandbox.spy(root, 'getAmpElement');
+      getElementSpy = env.sandbox.spy(root, 'getElement');
       tracker.waitForTrackers_['ini-load'] = root.getTracker(
         'ini-load',
         IniLoadTracker
@@ -1976,7 +1976,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
           eventResolver
         );
         expect(res).to.be.a('function');
-        const unlistenReady = getAmpElementSpy.returnValues[0];
+        const unlistenReady = getElementSpy.returnValues[0];
         // #getAmpElement Promise
         await unlistenReady;
         // #assertMeasurable_ Promise
@@ -2082,8 +2082,8 @@ describes.realWin('Events', {amp: 1}, (env) => {
             .once();
           // Dispose function
           res = tracker.add(analyticsElement, 'visible', config, eventResolver);
-          const unlistenReady = getAmpElementSpy.returnValues[0];
-          const unlistenReady2 = getAmpElementSpy.returnValues[1];
+          const unlistenReady = getElementSpy.returnValues[0];
+          const unlistenReady2 = getElementSpy.returnValues[1];
           // #getAmpElement Promise
           await unlistenReady;
           await unlistenReady2;
@@ -2153,7 +2153,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
         eventResolver
       );
       expect(res).to.be.a('function');
-      const unlistenReady = getAmpElementSpy.returnValues[0];
+      const unlistenReady = getElementSpy.returnValues[0];
       // #getAmpElement Promise
       await unlistenReady;
       // #assertMeasurable_ Promise
@@ -2178,8 +2178,8 @@ describes.realWin('Events', {amp: 1}, (env) => {
         .returns(null)
         .once();
       tracker.add(analyticsElement, 'hidden', config, eventResolver);
-      const unlistenReady = getAmpElementSpy.returnValues[0];
-      // #getAmpElement Promise
+      const unlistenReady = getElementSpy.returnValues[0];
+      // #getElement Promise
       yield unlistenReady;
       // #assertMeasurable_ Promise
       yield macroTask();

@@ -410,19 +410,16 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
     );
   });
 
-  it('should support polyfill on non-amp root element', () => {
+  it('should support polyfill on non-amp root element', async () => {
     delete win.IntersectionObserver;
     const inOb = root.getIntersectionObserver_();
+    const spy = env.sandbox.spy(root, 'onIntersectionChange_');
 
     const rootElement = win.document.documentElement;
     root.listenElement(rootElement, {}, null, null, eventResolver);
     expect(root.models_).to.have.length(1);
     const model = root.models_[0];
     expect(inOb.observeEntries_).to.have.length(1);
-
-    // AMP API is polyfilled.
-    expect(rootElement.getLayoutBox).to.be.a('function');
-    expect(rootElement.getOwner()).to.be.null;
 
     // Starts as invisible.
     expect(model.getVisibility_()).to.equal(0);
@@ -431,22 +428,20 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
     env.sandbox.stub(viewport, 'getRect').callsFake(() => {
       return layoutRectLtwh(0, 0, 100, 100);
     });
-    env.sandbox.stub(viewport, 'getLayoutRect').callsFake((element) => {
-      if (element == rootElement) {
-        return layoutRectLtwh(0, 50, 100, 100);
-      }
-      return null;
-    });
-    expect(rootElement.getLayoutBox()).to.contain({
+    env.sandbox.stub(rootElement, 'getBoundingClientRect').returns({
       left: 0,
       top: 50,
       width: 100,
       height: 100,
     });
     viewport.scrollObservable_.fire({type: AnalyticsEventType.SCROLL});
-    expect(model.getVisibility_()).to.equal(0.5);
 
     return eventPromise.then(() => {
+      expect(spy.args[0][0]).to.equal(rootElement);
+      // Visability
+      expect(spy.args[0][1]).to.equal(0.5);
+      // Intersection rect
+      expect(spy.args[0][2]).to.deep.equal(layoutRectLtwh(0, 50, 100, 50));
       expect(inOb.observeEntries_).to.have.length(0);
     });
   });
