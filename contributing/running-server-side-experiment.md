@@ -87,7 +87,7 @@ Please keep the expiration date 30 days within the start date unless otherwise i
 
 After a new experiment slot has been added, AMP's release framework will respect the config and build additional experimental binaries. E2E tests will be ran with these experiment binaries.
 
-Once the experimental bianries are shipped, once can access those with different RTV prefix.
+Once the experimental binaries are shipped, once can access those with different RTV prefix.
 
 For Experiment with `environment = AMP`. The Beta version that has prefix (03) will be used as control group for all experiments.
 
