@@ -30,6 +30,7 @@
     "web-animations-js": "2.3.1"
   },
   "devDependencies": {
+    "0x": "4.9.1",
     "@ampproject/filesize": "4.2.0",
     "@ampproject/remapping": "0.2.0",
     "@babel/core": "7.10.2",
