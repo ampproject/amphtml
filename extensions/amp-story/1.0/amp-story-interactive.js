@@ -212,6 +212,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   getInteractiveId_() {
     return `CANONICAL_URL+${this.getPageId_()}`;
   }
+
   /**
    * @private
    * @return {string} the page id
