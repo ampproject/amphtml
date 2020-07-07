@@ -8,10 +8,10 @@
     "define_experiment_constant": "MOVE_FIXED_LAYER"
   },
   "experimentC": {
-    "name": "strict compilation",
+    "name": "StrictCompilation",
     "environment": "AMP",
     "issue": "https://github.com/ampproject/amphtml/issues/19380",
     "expiration_date_utc": "2020-08-07",
-    "define_experiment_constant": "STRICT_EXPERIMENT"
+    "define_experiment_constant": "STRICT_COMPILATION"
   }
 }
