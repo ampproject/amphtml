@@ -57,6 +57,11 @@ function getPreClosureConfig() {
     argv.esm
       ? './build-system/babel-plugins/babel-plugin-transform-dev-methods'
       : null,
+    // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
+    [
+      './build-system/babel-plugins/babel-plugin-transform-log-methods',
+      {replaceCallArguments: false},
+    ],
     './build-system/babel-plugins/babel-plugin-transform-parenthesize-expression',
     './build-system/babel-plugins/babel-plugin-is_minified-constant-transformer',
     './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
