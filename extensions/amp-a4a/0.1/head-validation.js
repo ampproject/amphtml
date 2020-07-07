@@ -19,10 +19,12 @@ import {map} from '../../../src/utils/object';
 import {parseExtensionUrl} from '../../../src/service/extension-location';
 import {removeElement} from '../../../src/dom';
 
-/** @typedef {{
- *    extensions: !Array<?../../../src/service/extension-location.ExtensionInfoDef>
+/**
+ * @typedef {{
+ *    extensions: !Array<{extensionId: (string|undefined), extensionVersion: (string|undefined)}>,
  *    head: !Element
- *  }} */
+ * }}
+ */
 export let ValidatedHeadDef;
 
 const FONT_ALLOWLIST = map({
@@ -64,6 +66,7 @@ const EXTENSION_ALLOWLIST = map({
 const EXTENSION_URL_PREFIX = /^https:\/\/cdn\.ampproject.org\/v0\//;
 
 /**
+ * Sanitizes AMPHTML Ad head element and extracts extensions to be installed.
  * @param {!Window} win
  * @param {!Element} adElement
  * @param {?Element} head
@@ -113,7 +116,6 @@ export function validateHead(win, adElement, head) {
   extensions.forEach((extension) =>
     extensionService.preloadExtension(extension.extensionId)
   );
-
   // Preload any fonts.
   fonts.forEach((fontUrl) =>
     Services.preconnectFor(win).preload(adElement.getAmpDoc(), fontUrl)
@@ -132,8 +134,8 @@ export function validateHead(win, adElement, head) {
 }
 
 /**
- * Removes the element from the head.
- * @param {!Array<?../../../src/service/extension-location.ExtensionInfoDef>} extensions
+ * Allows json scripts and allow listed amp elements while removing others.
+ * @param {!Array} extensions
  * @param {!Element} script
  */
 function handleScript(extensions, script) {
@@ -162,7 +164,6 @@ function handleScript(extensions, script) {
  */
 function handleLink(urlService, fonts, images, link) {
   const {href, as, rel} = link;
-  // write a test for this!
   if (rel === 'preload' && as === 'image') {
     images.push(href);
     return;

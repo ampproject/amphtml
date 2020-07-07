@@ -899,7 +899,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Prepare the creative <head> by removing any non-secure elements and
    * @param {!Element} head
-   * @return {?ValidatedHeadDef} head data or null if we should fall back to xdomain.
+   * @return {?./head-validation.ValidatedHeadDef} head data or null if we should fall back to xdomain.
    */
   validateHead_(head) {
     return validateHead(this.win, this.element, head);
