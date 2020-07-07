@@ -718,5 +718,60 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       this.rootEl_.classList.add('i-amphtml-story-interactive-has-data');
       this.updateOptionPercentages_(this.optionsData_);
     }
+
+    const confettiEmoji = this.options_[selectedOption.optionIndex_].confetti;
+    if (confettiEmoji) {
+      this.emojiBurst(confettiEmoji);
+    }
+  }
+
+  emojiBurst(confettiEmoji) {
+    const particleHolder = this.rootEl_.appendChild(
+      document.createElement('div')
+    );
+    particleHolder.classList.add('particle-holder');
+
+    const numParticles = 5;
+    const slice = (Math.PI * 2) / numParticles;
+
+    setTimeout(() => {
+      for (let i = 0; i < numParticles; i++) {
+        const particle = particleHolder.appendChild(
+          document.createElement('div')
+        );
+        particle.classList.add('particle');
+
+        const particleContent = particle.appendChild(
+          document.createElement('p')
+        );
+        particleContent.textContent = confettiEmoji;
+
+        const clientRect = this.rootEl_.getBoundingClientRect();
+        const angle = slice * i + randomInRange(-slice * 0.2, slice * 0.2);
+        const destX = Math.sin(angle) * (clientRect.width / 2 + 20);
+        const destY = Math.cos(angle) * (clientRect.height / 2 + 20);
+        particle.style.transform = `translate(${destX}px, ${destY}px)`;
+
+        particleContent.style.fontSize = randomInRange(40, 60) + 'px';
+        particleContent.style.transform = `rotate(${randomInRange(
+          -10,
+          10
+        )}deg)`;
+      }
+
+      particleHolder.style.transform = 'scale(1)';
+
+      setTimeout(() => {
+        particleHolder.style.transform = `scale(1.2)`;
+        particleHolder.style.opacity = `0`;
+        particleHolder.addEventListener('transitionend', () => {
+          if (particleHolder) this.rootEl_.removeChild(particleHolder);
+        });
+      }, 1000);
+    }, 300);
+
+    function randomInRange(min, max) {
+      return Math.random() * (max - min) + min;
+    }
   }
 }
