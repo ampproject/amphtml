@@ -1215,9 +1215,12 @@ export class ResourcesImpl {
     this.divertedRenderOnIdleFixExperiment_ = true;
     const experimentInfoMap = /** @type {!Object<string,
         !../experiments.ExperimentInfo>} */ ({
-      [RENDER_ON_IDLE_FIX_EXP.experiment]: {
+      [RENDER_ON_IDLE_FIX_EXP.id]: {
         isTrafficEligible: () => true,
-        branches: [RENDER_ON_IDLE_FIX_EXP.control, RENDER_ON_IDLE_FIX_EXP],
+        branches: [
+          RENDER_ON_IDLE_FIX_EXP.control,
+          RENDER_ON_IDLE_FIX_EXP.experiment,
+        ],
       },
     });
     randomlySelectUnsetExperiments(this.win, experimentInfoMap);
