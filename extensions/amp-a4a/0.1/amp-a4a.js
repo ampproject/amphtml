@@ -66,6 +66,7 @@ import {streamResponseToWriter} from '../../../src/utils/stream-response';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryResolve} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
+import {validateHead} from './validate-head';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
@@ -898,11 +899,10 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Prepare the creative <head> by removing any non-secure elements and
    * @param {!Element} head
-   * @return {?Element} head or null if we should fall back to xdomain.
+   * @return {?ValidatedHeadDef} head data or null if we should fall back to xdomain.
    */
   validateHead_(head) {
-    // TODO(ccordry): Implement client side head validation.
-    return head;
+    return validateHead(this.win, this.element, head);
   }
 
   /**
