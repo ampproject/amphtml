@@ -226,7 +226,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       }).getAttribute('id');
     }
     return this.pageId_;
-
   }
 
   /** @override */
