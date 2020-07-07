@@ -370,5 +370,27 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         'Story URL not found in the player: https://example.com/story6.html'
       );
     });
+
+    it('pauses programatically', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+
+      playerEl.pause();
+
+      messagingMock
+        .expects('sendRequest')
+        .withArgs('visibilitychange', {state: 'paused'});
+    });
+
+    it('plays programatically', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+
+      playerEl.play();
+
+      messagingMock
+        .expects('sendRequest')
+        .withArgs('visibilitychange', {state: 'visible'});
+    });
   });
 });
