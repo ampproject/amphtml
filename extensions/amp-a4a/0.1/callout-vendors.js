@@ -189,6 +189,11 @@ const RTC_VENDORS = jsonConfiguration({
       'https://events.browsiprod.com/events/amp?e=ERROR_TYPE&h=HREF&et=predict_error',
     disableKeyAppend: true,
   },
+  freestar: {
+    url: ' https://dev-prebid.pub.network/openrtb2/amp?tag_id=TAG_ID',
+    macros: ['TAG_ID'],
+    disableKeyAppend: true,
+  },
 });
 
 // DO NOT MODIFY: Setup for tests
