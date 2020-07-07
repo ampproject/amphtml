@@ -144,8 +144,6 @@ export const StateProperty = {
   INTERACTIVE_COMPONENT_STATE: 'interactiveEmbeddedComponentState',
   // State of interactive components (polls, quizzes) on the story.
   INTERACTIVE_REACT_STATE: 'interactiveReactState',
-  // The results by aggregating the INTERACTIVE_COMPONENT_STATE.
-  INTERACTIVE_RESULTS_STATE: 'interactiveResultsState',
   MUTED_STATE: 'mutedState',
   PAGE_HAS_AUDIO_STATE: 'pageAudioState',
   PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE: 'pageHasElementsWithPlaybackState',
