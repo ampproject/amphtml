@@ -610,7 +610,7 @@ export class AmpStoryStoreService {
           [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: false,
           [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
         };
-      case EmbedMode.NO_SYSTEM_LAYER_ICONS:
+      case EmbedMode.NO_SHARING_NOR_AUDIO_UI:
         return {
           [StateProperty.CAN_SHOW_AUDIO_UI]: false,
           [StateProperty.CAN_SHOW_SHARING_UIS]: false,

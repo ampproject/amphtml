@@ -44,8 +44,7 @@ export const EmbedMode = {
    * redundant.
    *
    * This differs from the NOT_EMBEDDED embed mode in the following ways:
-   * - Removes "share" pill from desktop UI
-   * - Removes "share" icon from mobile UI
+   * - Removes share icon from system layer
    * - Removes sharing section from bookend
    * - TODO(#14923): Removes the link information from embedded UIs.
    */
@@ -68,9 +67,11 @@ export const EmbedMode = {
    * sharing experiences, through native controls and viewer communication.
    *
    * This differs from the NOT_EMBEDDED embed mode in the following ways:
-   * - Hides all system layer buttons
+   * - Removes share icon from system layer
+   * - Removes sharing section from bookend
+   * - Removes audio icon from system layer
    */
-  NO_SYSTEM_LAYER_ICONS: 4,
+  NO_SHARING_NOR_AUDIO_UI: 4,
 };
 
 /**
