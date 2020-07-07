@@ -849,6 +849,12 @@ exports.extensionBundles = [
     type: TYPES.MEDIA,
   },
   {
+    name: 'amp-speechkit',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
+  },
+  {
     name: 'amp-springboard-player',
     version: '0.1',
     latestVersion: '0.1',
