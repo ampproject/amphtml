@@ -54,10 +54,10 @@ function getPreClosureConfig() {
     '@babel/plugin-transform-react-constant-elements',
     reactJsxPlugin,
     './build-system/babel-plugins/babel-plugin-transform-inline-configure-component',
-    // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
     argv.esm
       ? './build-system/babel-plugins/babel-plugin-transform-dev-methods'
       : null,
+    // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
     [
       './build-system/babel-plugins/babel-plugin-transform-log-methods',
       {replaceCallArguments: false},
