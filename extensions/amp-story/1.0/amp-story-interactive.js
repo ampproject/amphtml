@@ -210,10 +210,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @return {string}
    */
   getInteractiveId_() {
-    if (!this.interactiveId_) {
-      this.interactiveId_ = `CANONICAL_URL+${this.getPageId_()}`;
-    }
-    return this.interactiveId_;
+    return `CANONICAL_URL+${this.getPageId_()}`;
   }
   /**
    * @private
