@@ -160,11 +160,11 @@ function handleActivation(finalEndpoint, target) {
         `Could not complete system share.  Navigator unavailable. ${NAME}`
       );
     }
-  } else if (protocol === 'sms') {
+  } else if (protocol === 'sms' || protocol === 'mailto') {
     openWindowDialog(
       window,
-      finalEndpoint.replace('?', '?&'),
-      target,
+      protocol === 'sms' ? finalEndpoint.replace('?', '?&') : finalEndpoint,
+      isIos() ? '_top' : target,
       windowFeatures
     );
   } else {
@@ -183,6 +183,20 @@ function getQueryString(endpoint) {
   q = q === -1 ? endpoint.length : q;
   h = h === -1 ? endpoint.length : h;
   return endpoint.slice(q, h);
+}
+
+/**
+ * Checks whether or not the userAgent of the current device indicates
+ * that this is an Ios device
+ * @return {boolean}
+ */
+function isIos() {
+  return (
+    window &&
+    window.navigator &&
+    window.navigator.userAgent &&
+    window.navigator.userAgent.search(/iPhone|iPad|iPod/i) >= 0
+  );
 }
 
 /**
