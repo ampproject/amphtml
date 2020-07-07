@@ -236,6 +236,8 @@ function compile(
     }
     externs.push('build-system/externs/amp.multipass.extern.js');
 
+    const es5Target = STRICT_EXPERIMENT ? 'ECMASCRIPT5_STRICT' : 'ECMASCRIPT5';
+
     /* eslint "google-camelcase/google-camelcase": 0*/
     const compilerOptions = {
       compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
@@ -244,7 +246,7 @@ function compile(
       language_in: 'ECMASCRIPT_2020',
       // Do not transpile down to ES5 if running with `--esm`, since we do
       // limited transpilation in Babel.
-      language_out: argv.esm ? 'NO_TRANSPILE' : 'ECMASCRIPT5_STRICT',
+      language_out: argv.esm ? 'NO_TRANSPILE' : es5Target,
       // We do not use the polyfills provided by closure compiler.
       // If you need a polyfill. Manually include them in the
       // respective top level polyfills.js files.
