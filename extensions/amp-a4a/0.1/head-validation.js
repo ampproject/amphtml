@@ -21,7 +21,6 @@ import {removeElement} from '../../../src/dom';
 
 /** @typedef {{
  *    extensions: !Array<?../../../src/service/extension-location.ExtensionInfoDef>
- *    fonts: !Array<?string>
  *    head: !Element
  *  }} */
 export let ValidatedHeadDef;
@@ -114,20 +113,20 @@ export function validateHead(win, adElement, head) {
   extensions.forEach((extension) =>
     extensionService.preloadExtension(extension.extensionId)
   );
+
   // Preload any fonts.
-  fonts.forEach((font) =>
-    Services.preconnectFor(this.win).preload(this.getAmpDoc(), font.href)
+  fonts.forEach((fontUrl) =>
+    Services.preconnectFor(win).preload(adElement.getAmpDoc(), fontUrl)
   );
   // Preload any AMP images.
   images.forEach(
-    (image) =>
-      urlService.isSecure(image) &&
-      Services.preconnectFor(this.win).preload(this.getAmpDoc(), image)
+    (imageUrl) =>
+      urlService.isSecure(imageUrl) &&
+      Services.preconnectFor(win).preload(adElement.getAmpDoc(), imageUrl)
   );
 
   return {
     extensions,
-    fonts,
     head,
   };
 }
@@ -169,7 +168,7 @@ function handleLink(urlService, fonts, images, link) {
     return;
   }
 
-  if (rel === 'stylesheet' && FONT_ALLOWLIST[urlService.parse(href).domain]) {
+  if (rel === 'stylesheet' && FONT_ALLOWLIST[urlService.parse(href).origin]) {
     fonts.push(href);
     return;
   }

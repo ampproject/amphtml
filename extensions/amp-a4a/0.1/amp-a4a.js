@@ -66,7 +66,7 @@ import {streamResponseToWriter} from '../../../src/utils/stream-response';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryResolve} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
-import {validateHead} from './validate-head';
+import {validateHead} from './head-validation';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
