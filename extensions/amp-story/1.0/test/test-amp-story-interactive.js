@@ -15,14 +15,13 @@
  */
 
 import {AmpStoryInteractive, InteractiveType} from '../amp-story-interactive';
-import {AmpStoryStoreService} from '../amp-story-store-service';
 import {AnalyticsVariable, getVariableService} from '../variable-service';
 import {Services} from '../../../../src/services';
+import {StateProperty, getStoreService} from '../amp-story-store-service';
 import {dict} from '../../../../src/utils/object';
 import {getAnalyticsService} from '../story-analytics';
 import {getRequestService} from '../amp-story-request-service';
 import {htmlFor} from '../../../../src/static-template';
-import {registerServiceBuilder} from '../../../../src/service';
 
 /**
  * Returns mock interactive data.
@@ -123,6 +122,7 @@ describes.realWin(
     let analytics;
     let analyticsVars;
     let requestService;
+    let storeService;
 
     beforeEach(() => {
       win = env.win;
@@ -141,14 +141,11 @@ describes.realWin(
       analyticsVars = getVariableService(win);
       analytics = getAnalyticsService(win, win.document.body);
       requestService = getRequestService(win, ampStoryInteractiveEl);
-
-      const storeService = new AmpStoryStoreService(win);
-      registerServiceBuilder(win, 'story-store', function () {
-        return storeService;
-      });
+      storeService = getStoreService(win);
 
       storyEl = win.document.createElement('amp-story');
       const storyPage = win.document.createElement('amp-story-page');
+      storyPage.id = 'page-1';
       const gridLayer = win.document.createElement('amp-story-grid-layer');
       gridLayer.appendChild(ampStoryInteractiveEl);
       storyPage.appendChild(gridLayer);
@@ -290,23 +287,23 @@ describes.realWin(
       expect(percentages4).to.deep.equal([33, 33, 33]);
     });
 
-    it('should update store service when selecting option', async () => {
-      const trigger = env.sandbox.stub(
-        ampStoryInteractive,
-        'updateStoryStoreState_'
-      );
+    it('should update store service when selecting option with click', async () => {
+      const actionsListenerSpy = env.sandbox.spy();
       addConfigToInteractive(ampStoryInteractive);
       ampStoryInteractive.buildCallback();
       await ampStoryInteractive.layoutCallback();
+      storeService.subscribe(
+        StateProperty.INTERACTIVE_REACT_STATE,
+        actionsListenerSpy
+      );
+
       await ampStoryInteractive.getOptionElements()[2].click();
-      expect(trigger).to.be.calledWith(2);
+
+      expect(actionsListenerSpy).to.have.been.calledOnce;
     });
 
     it('should update store service when getting option selected from backend', async () => {
-      const trigger = env.sandbox.stub(
-        ampStoryInteractive,
-        'updateStoryStoreState_'
-      );
+      const actionsListenerSpy = env.sandbox.spy();
       env.sandbox
         .stub(requestService, 'executeRequest')
         .resolves(getMockInteractiveData());
@@ -315,10 +312,15 @@ describes.realWin(
         'endpoint',
         'http://localhost:8000'
       );
+      storeService.subscribe(
+        StateProperty.INTERACTIVE_REACT_STATE,
+        actionsListenerSpy
+      );
+
       ampStoryInteractive.buildCallback();
       await ampStoryInteractive.layoutCallback();
 
-      expect(trigger).to.be.calledWith(0);
+      expect(actionsListenerSpy).to.have.been.calledOnce;
     });
   }
 );
