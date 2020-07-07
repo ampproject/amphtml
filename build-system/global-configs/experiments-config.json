@@ -1,6 +1,5 @@
 {
-  "experimentA": {
-  },
+  "experimentA": {},
   "experimentB": {
     "name": "MoveFixedLayer",
     "environment": "AMP",
