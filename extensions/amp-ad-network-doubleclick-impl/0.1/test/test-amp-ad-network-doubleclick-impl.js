@@ -1890,6 +1890,20 @@ describes.realWin(
         toggleExperiment(env.win, 'envDfpInvOrigDeprecated', false);
       });
 
+      it('should have correctly formatted experiment map', () => {
+        randomlySelectUnsetExperimentsStub.returns({});
+        impl.buildCallback();
+        const experimentMap =
+          randomlySelectUnsetExperimentsStub.firstCall.args[0];
+        Object.keys(experimentMap).forEach((key) => {
+          expect(key).to.be.a('string');
+          const {branches} = experimentMap[key];
+          expect(branches).to.exist;
+          expect(branches).to.be.a('array');
+          branches.forEach((branch) => expect(branch).to.be.a('string'));
+        });
+      });
+
       it('should select SRA experiments', () => {
         randomlySelectUnsetExperimentsStub.returns({
           doubleclickSraExp: '117152667',

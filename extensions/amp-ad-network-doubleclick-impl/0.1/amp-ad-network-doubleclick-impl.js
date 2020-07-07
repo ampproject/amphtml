@@ -460,29 +460,29 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT,
         ],
       },
-      [[EXPAND_JSON_TARGETING_EXP.ID]]: {
+      [EXPAND_JSON_TARGETING_EXP.ID]: {
         isTrafficEligible: () => true,
         branches: [
-          [EXPAND_JSON_TARGETING_EXP.CONTROL],
-          [EXPAND_JSON_TARGETING_EXP.EXPERIMENT],
+          EXPAND_JSON_TARGETING_EXP.CONTROL,
+          EXPAND_JSON_TARGETING_EXP.EXPERIMENT,
         ],
       },
-      [[RENDER_ON_IDLE_FIX_EXP.id]]: {
+      [RENDER_ON_IDLE_FIX_EXP.id]: {
         isTrafficEligible: () => true,
         branches: [
-          [RENDER_ON_IDLE_FIX_EXP.control],
-          [RENDER_ON_IDLE_FIX_EXP.experiment],
+          RENDER_ON_IDLE_FIX_EXP.control,
+          RENDER_ON_IDLE_FIX_EXP.experiment,
         ],
       },
       [NO_SIGNING_EXP.id]: {
         isTrafficEligible: () => true,
-        branches: [[NO_SIGNING_EXP.control], [NO_SIGNING_EXP.experiment]],
+        branches: [NO_SIGNING_EXP.control, NO_SIGNING_EXP.experiment],
       },
       [STICKY_AD_PADDING_BOTTOM_EXP.id]: {
         isTrafficEligible: () => true,
         branches: [
-          [STICKY_AD_PADDING_BOTTOM_EXP.control],
-          [STICKY_AD_PADDING_BOTTOM_EXP.experiment],
+          STICKY_AD_PADDING_BOTTOM_EXP.control,
+          STICKY_AD_PADDING_BOTTOM_EXP.experiment,
         ],
       },
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,

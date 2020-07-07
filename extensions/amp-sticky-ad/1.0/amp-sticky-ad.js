@@ -71,8 +71,8 @@ class AmpStickyAd extends AMP.BaseElement {
         [STICKY_AD_PADDING_BOTTOM_EXP.id]: {
           isTrafficEligible: () => true,
           branches: [
-            [STICKY_AD_PADDING_BOTTOM_EXP.control],
-            [STICKY_AD_PADDING_BOTTOM_EXP.experiment],
+            STICKY_AD_PADDING_BOTTOM_EXP.control,
+            STICKY_AD_PADDING_BOTTOM_EXP.experiment,
           ],
         },
       });
