@@ -14,4 +14,35 @@
  * limitations under the License.
  */
 
-export {ContextNode} from './node';
+import {ContextNode} from './node';
+
+/**
+ * Public API published by the context node. The `ContextNode` API is too
+ * low-level and the direct use of that API is not allowed.
+ */
+export class ContextApi {
+  /**
+   * Direct slot assignment. Works the same way as shadow slots, but does not
+   * require a shadow root. Automatically starts the discovery phase for the
+   * affected nodes.
+   *
+   * See `Element.assignedSlot` API.
+   *
+   * @param {!Node} node The target node.
+   * @param {!Node} slot The slot to which the target node is assigned.
+   */
+  static assignSlot(node, slot) {
+    ContextNode.assignSlot(node, slot);
+  }
+
+  /**
+   * Unassigns the direct slot previously done by the `assignSlot` call.
+   * Automatically starts the discovery phase for the affected nodes.
+   *
+   * @param {!Node} node The target node.
+   * @param {!Node} slot The slot from which the target node is assigned.
+   */
+  static unassignSlot(node, slot) {
+    ContextNode.unassignSlot(node, slot);
+  }
+}

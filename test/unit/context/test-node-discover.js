@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-import {
-  ContextNode,
-  getChildrenForTesting,
-  getDiscoverableForTesting,
-  getParentForTesting,
-} from '../../../src/context/node';
+import {ContextNode} from '../../../src/context/node';
+import {deepScan, findParent} from '../../../src/context/scan';
 import {domOrderComparator} from '../../../src/dom';
 
 describes.realWin('ContextNode', {}, (env) => {
@@ -132,16 +128,16 @@ describes.realWin('ContextNode', {}, (env) => {
       expect((root && root.node) ?? null, 'root').to.equal(spec.root);
     }
     if (spec.discoverable !== undefined) {
-      expect(getDiscoverableForTesting(contextNode), 'discoverable').to.equal(
+      expect(contextNode.isDiscoverable(), 'discoverable').to.equal(
         spec.discoverable
       );
     }
     if (spec.parent !== undefined) {
-      const parent = getParentForTesting(contextNode);
+      const {parent} = contextNode;
       expect((parent && parent.node) ?? null, 'parent').to.equal(spec.parent);
     }
     if (spec.children !== undefined) {
-      const children = getChildrenForTesting(contextNode).map((cn) => cn.node);
+      const children = (contextNode.children || []).map((cn) => cn.node);
       children.sort(domOrderComparator);
       const specChildren = spec.children.slice(0);
       specChildren.sort(domOrderComparator);
@@ -154,7 +150,6 @@ describes.realWin('ContextNode', {}, (env) => {
       const el = doc.createElement('div');
       const cn = ContextNode.get(el);
       expect(cn.node).to.equal(el);
-      expect(cn.element).to.equal(el);
       // Parent always starts as null.
       expectContext(cn, {
         parent: null,
@@ -169,7 +164,6 @@ describes.realWin('ContextNode', {}, (env) => {
       const frag = doc.createDocumentFragment();
       const cn = ContextNode.get(frag);
       expect(cn.node).to.equal(frag);
-      expect(cn.element).to.be.null;
       // Parent always starts as null.
       expectContext(cn, {
         parent: null,
@@ -183,7 +177,6 @@ describes.realWin('ContextNode', {}, (env) => {
     it('should create a document node', () => {
       const cn = ContextNode.get(doc);
       expect(cn.node).to.equal(doc);
-      expect(cn.element).to.be.null;
       // Parent always starts as null.
       expectContext(cn, {
         parent: null,
@@ -897,6 +890,69 @@ describes.realWin('ContextNode', {}, (env) => {
           discoverable: true,
         });
       });
+    });
+  });
+
+  describe('scanners', () => {
+    const EXCLUDE_SELF = false;
+
+    let parent;
+    let grandparent;
+    let sibling1;
+    let sibling2;
+    let cousin1;
+
+    beforeEach(async () => {
+      grandparent = ContextNode.get(el('T-1'));
+      parent = ContextNode.get(el('T-1-1'));
+      sibling1 = ContextNode.get(el('T-1-1-1'));
+      sibling2 = ContextNode.get(el('T-1-1-2'));
+      cousin1 = ContextNode.get(el('T-1-2-1'));
+      await waitForDiscover(grandparent, parent, sibling1, sibling2, cousin1);
+    });
+
+    it('should find closest', () => {
+      const any = () => true;
+      expect(findParent(sibling1, any)).to.equal(sibling1);
+      expect(findParent(sibling1, any, null, EXCLUDE_SELF)).to.equal(parent);
+
+      const eq = (cn, arg) => cn === arg;
+      expect(findParent(sibling1, eq, sibling1)).to.equal(sibling1);
+      expect(findParent(sibling1, eq, sibling1, EXCLUDE_SELF)).to.be.null;
+      expect(findParent(sibling1, eq, parent)).to.equal(parent);
+    });
+
+    it('should scan the subtree completely', () => {
+      const scanned = [];
+
+      const scan = (cn, exclude) => {
+        scanned.push(cn);
+        if (exclude && exclude.indexOf(cn) != -1) {
+          return false;
+        }
+        return true;
+      };
+
+      // Scan all.
+      scanned.length = 0;
+      deepScan(grandparent, scan);
+      expect(scanned).to.deep.equal([
+        grandparent,
+        parent,
+        sibling1,
+        sibling2,
+        cousin1,
+      ]);
+
+      // Scan subtree.
+      scanned.length = 0;
+      deepScan(grandparent, scan, null, true, EXCLUDE_SELF);
+      expect(scanned).to.deep.equal([parent, sibling1, sibling2, cousin1]);
+
+      // Scan some.
+      scanned.length = 0;
+      deepScan(grandparent, scan, [parent]);
+      expect(scanned).to.deep.equal([grandparent, parent, cousin1]);
     });
   });
 });

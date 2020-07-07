@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev, devAssert} from '../log';
+import {devAssert} from '../log';
 import {getMode} from '../mode';
 import {pushIfNotExist, removeItem} from '../utils/array';
 import {startsWith} from '../string';
@@ -40,6 +40,8 @@ const FRAGMENT_NODE = 11;
  * to manage and compute state can be attached to the context node tree. The
  * tree (mostly) automatically self-manages: the new nodes and DOM mutations
  * are auto-discovered or prompted.
+ *
+ * @package
  */
 export class ContextNode {
   /**
@@ -164,23 +166,46 @@ export class ContextNode {
   constructor(node, privateOnly) {
     devAssert(privateOnly === PRIVATE_ONLY);
 
-    /** @const @private {!Node} */
-    this.node_ = node;
+    /** @const {!Node} */
+    this.node = node;
 
-    /** @private {?ContextNode} */
-    this.parent_ = null;
+    /**
+     * Whether this node is a root. The Document DOM nodes are automatically
+     * considered as roots. But other nodes can become roots as well
+     * (e.g. shadow roots) via `setIsRoot()` API.
+     *
+     * @package {boolean}
+     */
+    this.isRoot = node.nodeType == DOCUMENT_NODE;
+
+    /**
+     * The root context node. Always available for a DOM node connected to a
+     * root node after the discovery phase.
+     *
+     * @package {?ContextNode}
+     */
+    this.root = this.isRoot ? this : null;
+
+    /**
+     * Parent should be mostly meaningless to most API clients, because
+     * it's an async concept: a parent context node can can be insantiated at
+     * any time and it doesn't mean that this node has to change. This is
+     * why the API is declared as package-private. However, it needs to be
+     * unobfuscated to avoid cross-binary issues.
+     *
+     * @package {?ContextNode}
+     */
+    this.parent = null;
+
+    /**
+     * See `parent` description.
+     *
+     * @package {?Array<!ContextNode>}
+     */
+    this.children = null;
 
     /** @private {boolean} */
     this.parentOverriden_ = false;
-
-    /** @private {boolean} */
-    this.isRoot_ = node.nodeType == DOCUMENT_NODE;
-
-    /** @private {?ContextNode} */
-    this.root_ = this.isRoot_ ? this : null;
-
-    /** @private {?Array<!ContextNode>} */
-    this.children_ = null;
 
     /** @const @private {function()} */
     this.scheduleDiscover_ = throttleTail(
@@ -192,56 +217,12 @@ export class ContextNode {
   }
 
   /**
-   * The DOM node corresponding to the context node.
-   *
-   * @return {!Node}
-   */
-  get node() {
-    return this.node_;
-  }
-
-  /**
-   * The DOM element corresponding to the context node.
-   *
-   * @return {?Element}
-   */
-  get element() {
-    // It's convenient to access Element type. If it's not an element,
-    // let it fail downstream. Otherwise, a lot of debug tools fail on trying
-    // to call JSON.stringify.
-    return this.node_.nodeType == ELEMENT_NODE
-      ? dev().assertElement(this.node_)
-      : null;
-  }
-
-  /**
-   * Whether this node is a root. The Document DOM nodes are automatically
-   * considered as roots. But other nodes can become roots as well (e.g. shadow
-   * roots) via `setIsRoot()` API.
-   *
-   * @return {boolean}
-   */
-  get isRoot() {
-    return this.isRoot_;
-  }
-
-  /**
-   * The root context node. Always available for a DOM node connected to a root
-   * node after the discovery phase.
-   *
-   * @return {?ContextNode}
-   */
-  get root() {
-    return this.root_;
-  }
-
-  /**
    * Requests the discovery phase. Asynchronously finds the nearest parent for
    * this node and its root. Roots and parents set directly via `setParent()`
    * API are not discoverable.
    */
   discover() {
-    if (this.isDiscoverable_()) {
+    if (this.isDiscoverable()) {
       this.scheduleDiscover_();
     }
   }
@@ -268,17 +249,32 @@ export class ContextNode {
    * @param {boolean} isRoot
    */
   setIsRoot(isRoot) {
-    this.isRoot_ = isRoot;
-    const newRoot = isRoot ? this : this.parent_ ? this.parent_.root_ : null;
-    this.updateRoot_(newRoot);
+    this.isRoot = isRoot;
+    const newRoot = isRoot ? this : this.parent ? this.parent.root : null;
+    this.updateRoot(newRoot);
+  }
+
+  /**
+   * @param {?ContextNode} root
+   * @protected Used cross-binary.
+   */
+  updateRoot(root) {
+    const oldRoot = this.root;
+    if (root != oldRoot) {
+      // The root has changed.
+      this.root = root;
+      if (this.children) {
+        this.children.forEach((child) => child.updateRoot(root));
+      }
+    }
   }
 
   /**
    * @return {boolean}
-   * @private
+   * @protected Used cross-binary.
    */
-  isDiscoverable_() {
-    return !this.isRoot_ && !this.parentOverriden_;
+  isDiscoverable() {
+    return !this.isRoot && !this.parentOverriden_;
   }
 
   /**
@@ -286,12 +282,12 @@ export class ContextNode {
    * @private
    */
   discover_() {
-    if (!this.isDiscoverable_()) {
+    if (!this.isDiscoverable()) {
       // The discoverability might have changed while this task was in the
       // queue.
       return;
     }
-    const parent = ContextNode.closest(this.node_, /* includeSelf */ false);
+    const parent = ContextNode.closest(this.node, /* includeSelf */ false);
     this.updateTree_(parent, /* parentOverriden */ false);
   }
 
@@ -303,57 +299,40 @@ export class ContextNode {
   updateTree_(parent, parentOverriden) {
     this.parentOverriden_ = parentOverriden;
 
-    const oldParent = this.parent_;
+    const oldParent = this.parent;
     if (parent != oldParent) {
       // The parent has changed.
-      this.parent_ = parent;
+      this.parent = parent;
 
       // Remove from the old parent.
-      if (oldParent && oldParent.children_) {
-        removeItem(oldParent.children_, this);
+      if (oldParent && oldParent.children) {
+        removeItem(oldParent.children, this);
       }
 
       // Add to the new parent.
       if (parent) {
-        const parentChildren = parent.children_ || (parent.children_ = []);
+        const parentChildren = parent.children || (parent.children = []);
         pushIfNotExist(parentChildren, this);
 
         // Check if this node has been inserted in between the parent and
         // it's other children.
         // Since the new parent (`this`) is already known, this is a very
-        // fast operation and doesn't need a separate discover phase.
-        // Iterate over the array in reverse because some children will
-        // be removed by reparenting siblings to the new parent.
-        for (let i = parentChildren.length - 1; i >= 0; i--) {
+        // fast operation.
+        for (let i = 0; i < parentChildren.length; i++) {
           const child = parentChildren[i];
           if (
             child != this &&
-            child.isDiscoverable_() &&
-            this.node_.contains(child.node_)
+            child.isDiscoverable() &&
+            this.node.contains(child.node)
           ) {
-            child.updateTree_(this, /* disableDiscovery */ false);
+            child.discover();
           }
         }
       }
     }
 
     // Check the root.
-    this.updateRoot_(parent ? parent.root_ : null);
-  }
-
-  /**
-   * @param {?ContextNode} root
-   * @private
-   */
-  updateRoot_(root) {
-    const oldRoot = this.root_;
-    if (root != oldRoot) {
-      // The root has changed.
-      this.root_ = root;
-      if (this.children_) {
-        this.children_.forEach((child) => child.updateRoot_(root));
-      }
-    }
+    this.updateRoot(parent ? parent.root : null);
   }
 }
 
@@ -370,48 +349,13 @@ function forEachContained(node, callback, includeSelf = true) {
   if (!closest) {
     return;
   }
-  if (closest.node_ == node) {
+  if (closest.node == node) {
     callback(closest);
-  } else if (closest.children_) {
-    closest.children_.forEach((child) => {
-      if (node.contains(child.node_)) {
+  } else if (closest.children) {
+    closest.children.forEach((child) => {
+      if (node.contains(child.node)) {
         callback(child);
       }
     });
   }
-}
-
-/**
- * Parent should be mostly meaningless to most API clients, because
- * it's an async concept: a parent context node can can be insantiated at
- * any time and it doesn't mean that this node has to change.
- *
- * @param {!ContextNode} contextNode
- * @return {?ContextNode}
- * @visibleForTesting
- */
-export function getParentForTesting(contextNode) {
-  return contextNode.parent_;
-}
-
-/**
- * See `getParentForTesting` for more info.
- *
- * @param {!ContextNode} contextNode
- * @return {?Array<!ContextNode>}
- * @visibleForTesting
- */
-export function getChildrenForTesting(contextNode) {
-  return contextNode.children_ || [];
-}
-
-/**
- * See `getParentForTesting` for more info.
- *
- * @param {!ContextNode} contextNode
- * @return {boolean}
- * @visibleForTesting
- */
-export function getDiscoverableForTesting(contextNode) {
-  return contextNode.isDiscoverable_();
 }
