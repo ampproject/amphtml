@@ -146,6 +146,46 @@ describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
       m.sortSources_(v);
       expect(currentBitrates(v)).to.jsonEqual([10000, 20000, 30000, 40000]);
     });
+
+    it('should retain order within a given bitrate', () => {
+      const m = getManager('4g');
+      const v = getVideo([4000, 1000, 3000, 2000], ['mkv', 'mp4']);
+      const cacheSource = v.firstElementChild.cloneNode();
+      cacheSource.setAttribute('amp-orig-src', 'CACHE');
+      v.insertBefore(cacheSource, v.firstElementChild);
+      m.sortSources_(v);
+      expect(currentBitrates(v)).to.jsonEqual([
+        2000,
+        2000,
+        1000,
+        1000,
+        3000,
+        3000,
+        4000,
+        4000,
+        4000,
+      ]);
+      expect(
+        toArray(childElementsByTag(v, 'source')).map((source) => {
+          return source.getAttribute('type');
+        })
+      ).to.jsonEqual([
+        'video/mkv',
+        'video/mp4',
+        'video/mkv',
+        'video/mp4',
+        'video/mkv',
+        'video/mp4',
+        'video/mkv',
+        'video/mkv',
+        'video/mp4',
+      ]);
+      expect(
+        toArray(childElementsByTag(v, 'source')).map((source) => {
+          return source.getAttribute('amp-orig-src');
+        })
+      ).to.jsonEqual([null, null, null, null, null, null, 'CACHE', null, null]);
+    });
   });
 
   function currentBitrates(video) {
@@ -172,14 +212,18 @@ describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
     clock.tick(opt_time || 50);
   }
 
-  function getVideo(rates) {
+  function getVideo(rates, opt_types) {
     const video = env.win.document.createElement('video');
     rates.forEach((rate) => {
-      const s = env.win.document.createElement('source');
-      s.src = `${rate}.mp4`;
-      s.setAttribute('data-bitrate', rate);
-      video.appendChild(s);
+      (opt_types || ['mp4']).forEach((type) => {
+        const s = env.win.document.createElement('source');
+        s.src = `${rate}.${type}`;
+        s.setAttribute('type', `video/${type}`);
+        s.setAttribute('data-bitrate', rate);
+        video.appendChild(s);
+      });
     });
+
     Object.defineProperty(video, 'currentSrc', {
       get: () => {
         return video.currentSrcOverride;

@@ -132,24 +132,23 @@ export class BitrateManager {
    * @param {!Element} video
    */
   sortSources_(video) {
-    const before = toArray(childElementsByTag(video, 'source'));
-    before.forEach((source) => {
+    const sources = toArray(childElementsByTag(video, 'source'));
+    // Ensure each element has the bitrate_ property
+    sources.forEach((source) => {
       if (source.bitrate_) {
         return;
       }
       const bitrate = source.getAttribute('data-bitrate');
       source.bitrate_ = bitrate ? parseInt(bitrate, 10) : 0;
     });
-    const after = before.slice();
-    after.sort((a, b) => {
+    sources.sort((a, b) => {
       // Biggest first, bitrates above threshold to the back
       return (
         this.getBitrateForComparisson_(b) - this.getBitrateForComparisson_(a)
       );
     });
-    const ref = after[0] == before[0] ? before[1] : before[0];
-    after.forEach((source) => {
-      video.insertBefore(source, ref);
+    sources.forEach((source) => {
+      video.appendChild(source);
     });
   }
 
