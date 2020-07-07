@@ -563,6 +563,7 @@ export class AmpStoryPlayer {
     this.maybeGetCacheUrl_(story.href).then((url) => {
       const {href} = this.getEncodedLocation_(url, visibilityState);
       iframe.setAttribute('src', href);
+      iframe.setAttribute('title', story.textContent.trim());
     });
   }
 
