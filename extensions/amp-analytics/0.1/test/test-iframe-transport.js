@@ -23,7 +23,7 @@ import {expectPostMessage} from '../../../../testing/iframe.js';
 import {urls} from '../../../../src/config';
 import {user} from '../../../../src/log';
 
-describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
+describes.realWin('amp-analytics.iframe-transport', {amp: true}, (env) => {
   let iframeTransport;
   const frameUrl = 'http://example.test';
 
@@ -191,7 +191,7 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
 describes.realWin(
   'amp-analytics.iframe-transport',
   {amp: true, allowExternalResources: true},
-  env => {
+  (env) => {
     it('logs poor performance of vendor iframe', () => {
       const body =
         '<html><head><script>' +

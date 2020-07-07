@@ -171,7 +171,7 @@ export class FormValidator {
    * @private
    */
   checkTextAreaValidityInForm_(form) {
-    iterateCursor(form.elements, element => {
+    iterateCursor(form.elements, (element) => {
       if (element.tagName == 'TEXTAREA') {
         this.checkInputValidity(element);
       }
@@ -588,6 +588,8 @@ function getInvalidType(input) {
     }
   }
   // Finding error type with value true
-  const response = validityTypes.filter(type => input.validity[type] === true);
+  const response = validityTypes.filter(
+    (type) => input.validity[type] === true
+  );
   return response.length ? response[0] : null;
 }

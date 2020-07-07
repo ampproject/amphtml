@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {PageConfig} from '../../../third_party/subscriptions-project/config';
+import {PageConfig as PageConfigInterface} from '../../../third_party/subscriptions-project/config';
 
 export class ServiceAdapter {
   /**
@@ -25,20 +25,19 @@ export class ServiceAdapter {
   }
 
   /**
-   * Returns the page config.
-   * @return {!PageConfig}
+   * Returns the analytics service for subscriptions.
+   * @return {!./analytics.SubscriptionAnalytics}
    */
-  getPageConfig() {
-    return this.subscriptionService_.getPageConfig();
+  getAnalytics() {
+    return this.subscriptionService_.getAnalytics();
   }
 
   /**
-   * Returns the reader ID for the specified service.
-   * @param {string} serviceId
-   * @return {!Promise<string>}
+   * Returns the singleton Dialog instance
+   * @return {!./dialog.Dialog}
    */
-  getReaderId(serviceId) {
-    return this.subscriptionService_.getReaderId(serviceId);
+  getDialog() {
+    return this.subscriptionService_.getDialog();
   }
 
   /**
@@ -51,11 +50,20 @@ export class ServiceAdapter {
   }
 
   /**
-   * Returns the analytics service for subscriptions.
-   * @return {!./analytics.SubscriptionAnalytics}
+   * Returns the page config.
+   * @return {!PageConfigInterface}
    */
-  getAnalytics() {
-    return this.subscriptionService_.getAnalytics();
+  getPageConfig() {
+    return this.subscriptionService_.getPageConfig();
+  }
+
+  /**
+   * Returns the reader ID for the specified service.
+   * @param {string} serviceId
+   * @return {!Promise<string>}
+   */
+  getReaderId(serviceId) {
+    return this.subscriptionService_.getReaderId(serviceId);
   }
 
   /**
@@ -109,14 +117,6 @@ export class ServiceAdapter {
   }
 
   /**
-   * Returns the singleton Dialog instance
-   * @return {!./dialog.Dialog}
-   */
-  getDialog() {
-    return this.subscriptionService_.getDialog();
-  }
-
-  /**
    * Returns login platform based on platform selection
    *
    * @return {!./subscription-platform.SubscriptionPlatform}
@@ -124,13 +124,4 @@ export class ServiceAdapter {
   selectPlatformForLogin() {
     return this.subscriptionService_.selectPlatformForLogin();
   }
-}
-
-/**
- * @package
- * @visibleForTesting
- * @return {*} TODO(#23582): Specify return type
- */
-export function getPageConfigForTesting() {
-  return PageConfig;
 }

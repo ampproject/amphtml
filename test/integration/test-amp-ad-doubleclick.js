@@ -19,7 +19,6 @@ import {createFixtureIframe, poll, pollForLayout} from '../../testing/iframe';
 describe
   .configure()
   .enableIe()
-  .retryOnSaucelabs()
   .run('Rendering of one ad', () => {
     let fixture;
     let beforeHref;
@@ -36,10 +35,10 @@ describe
       return createFixtureIframe(
         'test/fixtures/doubleclick.html',
         3000,
-        win => {
+        (win) => {
           replaceUrl(win);
         }
-      ).then(f => {
+      ).then((f) => {
         fixture = f;
       });
     });
@@ -53,7 +52,7 @@ describe
     // TODO(lannka, #3561): unmute the test.
     // it.configure().skipEdge().run(
     // 'should create an iframe loaded', function() {
-    it.skip('should create an iframe loaded', function() {
+    it.skip('should create an iframe loaded', function () {
       this.timeout(20000);
       let iframe;
       let ampAd;
@@ -64,7 +63,7 @@ describe
             return fixture.doc.querySelector('iframe');
           });
         })
-        .then(iframeElement => {
+        .then((iframeElement) => {
           iframe = iframeElement;
           expect(fixture.doc.querySelectorAll('iframe')).to.have.length(1);
           ampAd = iframe.parentElement;
@@ -84,10 +83,10 @@ describe
             );
           });
         })
-        .then(unusedCanvas => {
+        .then((unusedCanvas) => {
           return poll('3p JS to load.', () => iframe.contentWindow.context);
         })
-        .then(context => {
+        .then((context) => {
           expect(context.hidden).to.be.false;
           // In some browsers the referrer is empty. But in Chrome it works, so
           // we always check there.
@@ -120,7 +119,7 @@ describe
         })
         .then(() => {
           return poll('render-start message received', () => {
-            return fixture.messages.filter(message => {
+            return fixture.messages.filter((message) => {
               return message.type == 'render-start';
             }).length;
           });
@@ -134,7 +133,7 @@ describe
             );
           });
         })
-        .then(pubads => {
+        .then((pubads) => {
           const canvas = iframe.contentWindow.document.querySelector('#c');
           expect(pubads.get('page_url')).to.equal(
             'https://www.example.com/doubleclick.html'
@@ -156,7 +155,7 @@ describe
         })
         .then(() => {
           expect(iframe.contentWindow.context.hidden).to.be.false;
-          return new Promise(resolve => {
+          return new Promise((resolve) => {
             // Listening to the "amp:visibilitychange" string literal because it's
             // part of the public API.
             // https://github.com/ampproject/amphtml/blob/master/ads/README.md#page-visibility
@@ -188,7 +187,7 @@ describe
             15000
           );
         })
-        .then(creativeId => {
+        .then((creativeId) => {
           if (isEdge) {
             // TODO(cramforce): Get this to pass in Edge
             return;

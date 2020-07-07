@@ -21,9 +21,9 @@ const GLOBALS = Object.create(null);
 GLOBALS.window = 'Use `self` instead.';
 GLOBALS.document = 'Reference it as `self.document` or similar instead.';
 
-module.exports = function(context) {
+module.exports = function (context) {
   return {
-    Identifier: function(node) {
+    Identifier: function (node) {
       const {name} = node;
       if (!(name in GLOBALS)) {
         return;

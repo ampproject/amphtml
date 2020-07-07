@@ -164,7 +164,7 @@ export class LinkRewriterManager {
         clickType: event.type,
       };
 
-      suitableLinkRewriters.forEach(linkRewriter => {
+      suitableLinkRewriters.forEach((linkRewriter) => {
         const event = {
           type: EVENTS.CLICK,
           eventData,
@@ -184,9 +184,7 @@ export class LinkRewriterManager {
    * @private
    */
   getPriorityList_(ampdoc) {
-    const docInfo = Services.documentInfoForDoc(ampdoc);
-    const value = docInfo.metaTags[PRIORITY_META_TAG_NAME];
-
+    const value = ampdoc.getMetaByName(PRIORITY_META_TAG_NAME);
     return value ? value.trim().split(/\s+/) : [];
   }
 
@@ -209,7 +207,7 @@ export class LinkRewriterManager {
    * @private
    */
   onDomChanged_() {
-    this.linkRewriters_.forEach(linkRewriter => {
+    this.linkRewriters_.forEach((linkRewriter) => {
       linkRewriter.onDomUpdated();
     });
   }

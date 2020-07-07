@@ -18,9 +18,14 @@ const fs = require('fs');
 const {
   CDN_URL,
   CONTROL,
+  DEFAULT_EXTENSIONS,
   EXPERIMENT,
+  INABOX_PATH,
+  LOCAL_PATH_REGEXP,
+  V0_PATH,
   copyToCache,
   downloadToDisk,
+  getLocalPathFromExtension,
   urlToCachePath,
 } = require('./helpers');
 const {JSDOM} = require('jsdom');
@@ -37,8 +42,17 @@ async function useLocalScripts(url) {
 
   const scripts = Array.from(dom.window.document.querySelectorAll('script'));
   for (const script of scripts) {
+    const matchArray = script.src.match(LOCAL_PATH_REGEXP);
+    // These cases handle real world websites and locally hosted websites
     if (script.src.startsWith(CDN_URL)) {
-      script.src = await copyToCache(script.src);
+      const split = script.src.split(CDN_URL)[1];
+      script.src = await copyToCache(split);
+    } else if (matchArray) {
+      script.src = await copyToCache(matchArray[1]);
+    } else if (script.src === V0_PATH) {
+      script.src = await copyToCache('v0.js');
+    } else if (script.src === INABOX_PATH) {
+      script.src = await copyToCache('amp4ads-v0.js');
     }
   }
 
@@ -46,7 +60,8 @@ async function useLocalScripts(url) {
 }
 
 /**
- * Lookup URL from cache and download scripts to cache and rewrite URLs to local copy
+ * Lookup URL from cache and download scripts to cache and rewrite URLs to local
+ * copy
  *
  * @param {string} url
  */
@@ -57,12 +72,35 @@ async function useRemoteScripts(url) {
 
   const scripts = Array.from(dom.window.document.querySelectorAll('script'));
   for (const script of scripts) {
+    const matchArray = script.src.match(LOCAL_PATH_REGEXP);
+    // These cases handle real world websites and locally hosted websites
     if (script.src.startsWith(CDN_URL)) {
       script.src = await downloadToDisk(script.src);
+    } else if (matchArray) {
+      script.src = await downloadToDisk(CDN_URL + matchArray[1]);
+    } else if (script.src === V0_PATH) {
+      script.src = await downloadToDisk(CDN_URL + 'v0.js');
+    } else if (script.src === INABOX_PATH) {
+      script.src = await downloadToDisk(CDN_URL + 'amp4ads-v0.js');
     }
   }
 
   fs.writeFileSync(cachePath, dom.serialize());
+}
+
+/**
+ * Download local and master version of default extension that
+ * are not explicility stated by script tags in the HTML.
+ * @return {Promise}
+ */
+async function downloadDefaultExtensions() {
+  return Promise.all(
+    DEFAULT_EXTENSIONS.flatMap((extension) => {
+      const localPath = getLocalPathFromExtension(extension);
+      const cdnUrl = CDN_URL + localPath;
+      return [downloadToDisk(cdnUrl), copyToCache(localPath)];
+    })
+  );
 }
 
 /**
@@ -71,9 +109,10 @@ async function useRemoteScripts(url) {
  * @param {!Array<string>} urls
  * @return {Promise}
  */
-function rewriteScriptTags(urls) {
+async function rewriteScriptTags(urls) {
+  await downloadDefaultExtensions();
   return Promise.all(
-    urls.flatMap(url => [useLocalScripts(url), useRemoteScripts(url)])
+    urls.flatMap((url) => [useLocalScripts(url), useRemoteScripts(url)])
   );
 }
 

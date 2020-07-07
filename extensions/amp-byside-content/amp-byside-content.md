@@ -24,18 +24,7 @@ limitations under the License.
 
 # amp-byside-content
 
-Displays dynamic content from the <a href="http://www.byside.com/">BySide service</a>.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-byside-content" src="https://cdn.ampproject.org/v0/amp-byside-content-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-</table>
+Displays dynamic content from the [BySide service](http://www.byside.com/).
 
 ## Behavior
 
@@ -50,6 +39,7 @@ The `width` and `height` attributes determine the aspect ratio of the embedded B
 <amp-byside-content
   data-webcare-id="D6604AE5D0"
   data-label="amp-responsive"
+  data-webcare-zone="we2"
   data-lang="en"
   width="1024"
   height="500"
@@ -68,6 +58,10 @@ The `width` and `height` attributes determine the aspect ratio of the embedded B
   <tr>
     <td width="40%"><strong>data-label (required)</strong></td>
     <td>The content label as seen in your BySide account.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-webcare-zone</strong></td>
+    <td>The webcare zone property, as specified in the BySide customer account geographic zone. Defaults to main zone ("we1").</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-lang</strong></td>

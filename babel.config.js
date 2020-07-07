@@ -15,7 +15,7 @@
  */
 
 /**
- * @fileoverview Global configuration file for the babelify transform.
+ * @fileoverview Global configuration file for various babel transforms.
  *
  * Notes: From https://babeljs.io/docs/en/plugins#plugin-ordering:
  * 1. Plugins run before Presets.
@@ -25,46 +25,48 @@
 
 'use strict';
 
-const minimist = require('minimist');
-const {isTravisBuild} = require('./build-system/common/travis');
-const argv = minimist(process.argv.slice(2));
+const log = require('fancy-log');
+const {
+  getDepCheckConfig,
+  getPostClosureConfig,
+  getPreClosureConfig,
+  getTestConfig,
+  getUnminifiedConfig,
+} = require('./build-system/babel-config');
+const {cyan, yellow} = require('ansi-colors');
 
-const isClosureCompiler =
-  argv._.includes('dist') || argv._.includes('check-types');
-const {esm} = argv;
-const noModuleTarget = {
-  'browsers': isTravisBuild()
-    ? ['Last 2 versions', 'safari >= 9']
-    : ['Last 2 versions'],
-};
+/**
+ * Mapping of babel transform callers to their corresponding babel configs.
+ */
+const babelTransforms = new Map([
+  ['babel-jest', {}],
+  ['dep-check', getDepCheckConfig()],
+  ['post-closure', getPostClosureConfig()],
+  ['pre-closure', getPreClosureConfig()],
+  ['test', getTestConfig()],
+  ['unminified', getUnminifiedConfig()],
+]);
 
-// eslint-disable-next-line local/no-module-exports
-module.exports = function(api) {
-  api.cache(true);
-  // Closure Compiler builds do not use any of the default settings below until its
-  // an esm build. (Both Multipass and Singlepass)
-  if (isClosureCompiler && !esm) {
+/**
+ * Main entry point. Returns babel config corresponding to the caller, or a
+ * blank config if the caller is unrecognized.
+ *
+ * @param {!Object} api
+ * @return {!Object}
+ */
+module.exports = function (api) {
+  const callerName = api.caller((callerObj) => {
+    return callerObj ? callerObj.name : '<unnamed>';
+  });
+  if (callerName && babelTransforms.has(callerName)) {
+    return babelTransforms.get(callerName);
+  } else {
+    log(
+      yellow('WARNING:'),
+      'Unrecognized Babel caller',
+      cyan(callerName),
+      '(see babel.config.js).'
+    );
     return {};
   }
-  return {
-    'presets': [
-      esm
-        ? [
-            'babel-preset-modules',
-            {
-              'loose': true,
-            },
-          ]
-        : [
-            '@babel/preset-env',
-            {
-              'modules': isClosureCompiler ? false : 'commonjs',
-              'loose': true,
-              'targets': noModuleTarget,
-            },
-          ],
-    ],
-    'compact': false,
-    'sourceType': 'module',
-  };
 };

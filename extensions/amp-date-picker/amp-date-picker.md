@@ -3,7 +3,7 @@ $category@: dynamic-content
 formats:
   - websites
 teaser:
-  text: Provides a calendar widget to select dates.
+  text: Provides a widget to select dates. The date picker can render as an overlay relative to input fields, or as a static calendar widget.
 ---
 
 <!---
@@ -23,30 +23,6 @@ limitations under the License.
 -->
 
 # amp-date-picker
-
-[TOC]
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Provides a widget to select dates. The date picker can render as an overlay relative to input fields, or as a static calendar widget.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-date-picker" src="https://cdn.ampproject.org/v0/amp-date-picker-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td><ul>
-      <li>For static mode: <code>fixed</code>, <code>fixed-height</code>, <code>responsive</code>, <code>fill</code> or <code>flex-item</code></li>
-      <li>For overlay mode: <code>container</code></li>
-    </ul></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-date-picker/">amp-date-picker</a>.</td>
-  </tr>
-</table>
 
 ## Behavior
 
@@ -207,11 +183,19 @@ and the user can select a date range with a starting date and ending date.
 
 ## Date formats
 
-`amp-date-picker` attributes accept dates in ISO 8601.
+`amp-date-picker` attributes accept dates in ISO 8601 and RFC 5545 RRULE formats.
 
 [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) formats dates as `YYYY-MM-DD`
 and is the standard for sharing dates between electronic systems.
 For example, ISO 8601 formats the date February 28 2018 as `2018-02-28`.
+
+[RFC 5545 Recurrence Rules (RRULEs)](https://icalendar.org/iCalendar-RFC-5545/3-3-10-recurrence-rule.html)
+standardize a format for specifying repeating dates.
+For example, RFC 5545 formats Halloween as `RRULE:FREQ=YEARLY;BYMONTH=10;BYMONTHDAY=31`.
+More complex dates are also possible, such as the United States Thanksgiving holiday,
+which is every November on the fourth Thursday: `RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=+4TH`.
+The API is not friendly to memorize, but there are various
+[RRULE generators](https://jakubroztocil.github.io/rrule) available online.
 
 ## Attributes
 
@@ -373,11 +357,11 @@ The day to specify as the first day of the week (0-6). The default value is `"0"
 
 ##### blocked
 
-A space-separated list of ISO 8601 dates to prevent the user from selecting on the calendar.
+A space-separated list of ISO 8601 dates or RFC 5545 RRULE repeating dates to prevent the user from selecting on the calendar.
 
 ##### highlighted
 
-A space-separated list of ISO 8601 dates to specially style as highlighted to draw the user's attention.
+A space-separated list of ISO 8601 dates or RFC 5545 RRULE repeating dates to specially style as highlighted to draw the user's attention.
 Default styling is a blue dot on the date.
 
 ##### day-size
@@ -422,7 +406,7 @@ The following table lists the properties that you can specify in the JSON data:
 </tr>
 <tr>
 <td><code>blocked</code></td>
-<td>An array of ISO 8601 single dates to render as blocked in the calendar view. The user is prevented from selecting these dates.</td>
+<td>An array of ISO 8601 single dates or RFC 5545 RRULE repeating dates to render as blocked in the calendar view. The user is prevented from selecting these dates.</td>
 </tr>
 <tr>
 <td><code>date</code></td>
@@ -434,7 +418,7 @@ The following table lists the properties that you can specify in the JSON data:
 </tr>
 <tr>
 <td><code>highlighted</code></td>
-<td>An array of ISO 8601 single dates to render as highlighted in the calendar view.</td>
+<td>An array of ISO 8601 single dates or RFC 5545 RRULE repeating dates to render as highlighted in the calendar view.</td>
 </tr>
 <tr>
 <td><code>startDate</code></td>
@@ -451,7 +435,7 @@ The `src` attribute may be updated after a user gesture with [`amp-bind`](https:
 
 ###### template definition objects
 
-The `dates` property is an array of ISO 8601 single dates.
+The `dates` property is an array of ISO 8601 single dates or RFC 5545 RRULE repeating dates.
 The `id` property specifies the `id` of a template that the date picker can use to
 render the specified dates in the calendar view.
 
@@ -509,9 +493,7 @@ _Example: Markup using the `src` attribute_
   layout="fixed-height"
   height="360"
 >
-  <template type="amp-mustache" date-template id="my-template-id"
-    >⚡️</template
-  >
+  <template type="amp-mustache" date-template id="my-template-id">⚡️</template>
   <template type="amp-mustache" date-template id="my-second-template-id"
     >🌮</template
   >
@@ -762,7 +744,7 @@ Using `src` prevents chached AMP documents from showing out-of-date information.
 
 A `date-template` must have a `dates` or `default` attribute.
 
-- **dates**: A space-separated list of ISO 8601 single dates.
+- **dates**: A space-separated list of ISO 8601 single dates or RFC 5545 RRULE repeating dates.
   The template content will render for the dates matching the dates in the attribute.
 - **default**: If the `default` attribute is present, the template content will render for
   all dates not matching an existing template.
@@ -776,9 +758,7 @@ rendered after the calendar view renders for the first time.
 ```html
 <amp-date-picker layout="fixed-height" height="360">
   <!-- Render the "party" emoji on New Years Day 2018 -->
-  <template type="amp-mustache" date-template dates="2018-01-01"
-    >🎉</template
-  >
+  <template type="amp-mustache" date-template dates="2018-01-01">🎉</template>
   <!-- Render the "taco" emoji every Tuesday for 52 weeks starting 2018-01-01 -->
   <template
     type="amp-mustache"
@@ -791,9 +771,7 @@ rendered after the calendar view renders for the first time.
     <amp-img layout="fixed-height" height="39" src="./example.jpg"></amp-img>
   </template>
   <!-- Renders dates in the two-digit day format -->
-  <template type="amp-mustache" date-template default
-    >{{DD}}</template
-  >
+  <template type="amp-mustache" date-template default>{{DD}}</template>
 </amp-date-picker>
 ```
 

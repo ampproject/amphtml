@@ -30,7 +30,7 @@ const realWinConfig = {
   allowExternalResources: true,
 };
 
-describes.realWin('TemplateRenderer', realWinConfig, env => {
+describes.realWin('TemplateRenderer', realWinConfig, (env) => {
   const templateUrl = '/adzerk/1';
 
   let doc;
@@ -91,7 +91,7 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
             )
           ),
         headers: {
-          get: header => {
+          get: (header) => {
             switch (header) {
               case AMP_TEMPLATED_CREATIVE_HEADER_NAME:
                 return 'amp-mustache';
@@ -106,7 +106,7 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
 
       env.sandbox
         .stub(getAmpAdTemplateHelper(env.win), 'fetch')
-        .callsFake(url => {
+        .callsFake((url) => {
           expect(url).to.equal(templateUrl);
           return Promise.resolve(data.adTemplate);
         });
@@ -129,7 +129,7 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
       impl.adResponsePromise_ = Promise.resolve({
         arrayBuffer: () => Promise.resolve(utf8Encode(mockCreative)),
         headers: {
-          get: header => {
+          get: (header) => {
             switch (header) {
               case AMP_TEMPLATED_CREATIVE_HEADER_NAME:
                 return 'amp-mustache';
@@ -157,7 +157,7 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
       impl.adResponsePromise_ = Promise.resolve({
         arrayBuffer: () => Promise.resolve(utf8Encode(mockCreative)),
         headers: {
-          get: header => {
+          get: (header) => {
             switch (header) {
               case 'AMP-Ad-Response-Type':
                 return 'template';

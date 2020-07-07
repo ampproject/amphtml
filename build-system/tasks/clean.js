@@ -28,10 +28,10 @@ async function clean() {
     'dist.tools',
     'build',
     '.amp-build',
+    '.karma-cache',
     'deps.txt',
-    'EXTENSIONS_CSS_MAP',
-    'build-system/runner/build',
-    'build-system/runner/dist',
+    'build-system/server/new-server/transforms/dist',
+    'test-bin',
   ]);
 }
 

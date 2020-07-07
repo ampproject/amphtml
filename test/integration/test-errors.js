@@ -25,16 +25,15 @@ const TIMEOUT = window.ampTestRuntimeConfig.mochaTimeout;
 
 const t = describe
   .configure()
-  .retryOnSaucelabs()
   // TODO(@cramforce): Find out why it does not work with obfuscated props.
   .skipIfPropertiesObfuscated();
 
-t.run('error page', function() {
+t.run('error page', function () {
   this.timeout(TIMEOUT);
 
   let fixture;
   beforeEach(() => {
-    return createFixtureIframe('test/fixtures/errors.html', 1000, win => {
+    return createFixtureIframe('test/fixtures/errors.html', 1000, (win) => {
       // Trigger dev mode.
       try {
         win.history.pushState({}, '', 'test2.html#development=1');
@@ -42,7 +41,7 @@ t.run('error page', function() {
         // Some browsers do not allow this.
         win.AMP_DEV_MODE = true;
       }
-    }).then(f => {
+    }).then((f) => {
       fixture = f;
       return poll(
         'errors to happen',

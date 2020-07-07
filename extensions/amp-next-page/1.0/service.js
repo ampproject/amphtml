@@ -26,7 +26,7 @@ import {VisibilityState} from '../../../src/visibility-state';
 import {
   childElementByAttr,
   childElementsByTag,
-  insertAfterOrAtStart,
+  insertAtStart,
   isJsonScriptTag,
   removeChildren,
   removeElement,
@@ -34,6 +34,7 @@ import {
 } from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
+import {findIndex} from '../../../src/utils/array';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {
@@ -43,6 +44,7 @@ import {
 } from '../../../src/mediasession-helper';
 import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryParseJson} from '../../../src/json';
 import {validatePage, validateUrl} from './utils';
 import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
@@ -59,9 +61,6 @@ const SHADOW_ROOT_CLASS = 'i-amphtml-next-page-shadow-root';
 const PLACEHOLDER_CLASS = 'i-amphtml-next-page-placeholder';
 
 const ASYNC_NOOP = () => Promise.resolve();
-
-/** @enum */
-export const Direction = {UP: 1, DOWN: -1};
 
 export class NextPageService {
   /**
@@ -96,13 +95,16 @@ export class NextPageService {
     this.separator_ = null;
 
     /** @private {?Element} */
-    this.footer_ = null;
+    this.recBox_ = null;
 
     /** @private {function():!Promise} */
-    this.refreshFooter_ = ASYNC_NOOP;
+    this.refreshRecBox_ = ASYNC_NOOP;
 
     /** @private {boolean} */
     this.finished_ = false;
+
+    /** @private {?Promise<!Array<!./page.PageMeta>>} */
+    this.remoteFetchingPromise_ = null;
 
     /** @private {?AmpElement} element */
     this.host_ = null;
@@ -116,26 +118,29 @@ export class NextPageService {
     /** @private {?../../../src/service/history-impl.History} */
     this.history_ = null;
 
+    /** @private {?../../../src/service/navigation.Navigation} */
+    this.navigation_ = null;
+
     /** @private {?Array<!Page>} */
     this.pages_;
 
     /** @private {?Page} */
     this.lastFetchedPage_ = null;
 
-    /** @private {!Direction} */
-    this.scrollDirection_ = Direction.DOWN;
-
-    /** @private {number} */
-    this.lastScrollTop_ = 0;
-
     /** @private {?Page} */
     this.hostPage_ = null;
+
+    /** @private {?Page} */
+    this.currentTitlePage_ = null;
 
     /** @private {!Object<string, !Element>} */
     this.replaceableElements_ = {};
 
     /** @private {boolean} */
     this.hasDeepParsing_ = false;
+
+    /** @private {number} */
+    this.maxPages_ = Infinity;
 
     /** @private {?string} */
     this.nextSrc_ = null;
@@ -144,7 +149,7 @@ export class NextPageService {
     this.readyResolver_ = null;
 
     /** @private @const {!Promise} */
-    this.readyPromise_ = new Promise(resolve => {
+    this.readyPromise_ = new Promise((resolve) => {
       this.readyResolver_ = resolve;
     });
   }
@@ -160,26 +165,47 @@ export class NextPageService {
    * Builds the next-page service by fetching the required elements
    * and the initial list of pages and installing scoll listeners
    * @param {!AmpElement} element <amp-next-page> element on the host page
+   * @return {!Promise}
    */
   build(element) {
     // Prevent multiple amp-next-page on the same document
     if (this.isBuilt()) {
-      return;
+      return Promise.resolve();
+    }
+
+    if (this.ampdoc_.getBody().lastElementChild !== element) {
+      user().warn(
+        TAG,
+        'should be the last element in the body of the document, a footer element can be added as a child of <amp-next-page> if it has the `footer` attribute'
+      );
     }
 
     // Save the <amp-next-page> from the host page
     this.host_ = element;
 
+    // Parse attributes
+    this.nextSrc_ = this.getHost_().getAttribute('src');
+    this.hasDeepParsing_ = this.getHost_().hasAttribute('deep-parsing')
+      ? this.getHost_().getAttribute('deep-parsing') !== 'false'
+      : !this.nextSrc_;
+    this.maxPages_ = this.getHost_().hasAttribute('max-pages')
+      ? parseInt(this.getHost_().getAttribute('max-pages'), 10)
+      : Infinity;
+
     // Get the separator and more box (and remove the provided elements in the process)
     this.separator_ = this.getSeparatorElement_(element);
-    this.footer_ = this.getFooterElement_(element);
+    this.recBox_ = this.getRecBox_(element);
 
     // Create a reference to the host page
     this.hostPage_ = this.createHostPage();
     this.toggleHiddenAndReplaceableElements(this.doc_);
+    // Have the recommendation box be always visible
+    insertAtStart(this.host_, this.recBox_);
 
     this.history_ = Services.historyForDoc(this.ampdoc_);
     this.initializeHistory();
+
+    this.navigation_ = Services.navigationForDoc(this.ampdoc_);
 
     this.multidocManager_ = new MultidocManager(
       this.win_,
@@ -188,25 +214,50 @@ export class NextPageService {
       Services.timerFor(this.win_)
     );
     this.visibilityObserver_ = new VisibilityObserver(this.ampdoc_);
+    this.readyPromise_.then(() => {
+      // Observe the host page's visibility
+      this.visibilityObserver_.observeHost(this.getHost_(), (position) => {
+        this.hostPage_.relativePos = position;
+        this.updateVisibility();
+      });
+    });
 
     if (!this.pages_) {
       this.pages_ = [this.hostPage_];
       this.setLastFetchedPage(this.hostPage_);
     }
 
-    // Have the footer be always visible
-    insertAfterOrAtStart(this.host_, this.footer_, null /** after */);
-
-    this.nextSrc_ = this.getHost_().getAttribute('src');
-    this.hasDeepParsing_ =
-      this.getHost_().hasAttribute('deep-parsing') || !this.nextSrc_;
-    this.initializePageQueue_();
+    const fin = () => {
+      // Render the initial recommendation box template with all pages
+      this.refreshRecBox_();
+      // Mark the page as ready
+      this.readyResolver_();
+    };
+    this.whenFirstScroll_()
+      .then(() => this.initializePageQueue_())
+      .then(fin, fin);
 
     this.getHost_().classList.add(NEXT_PAGE_CLASS);
 
-    this.viewport_.onScroll(() => this.updateScroll_());
-    this.viewport_.onResize(() => this.updateScroll_());
-    this.updateScroll_();
+    return this.readyPromise_;
+  }
+
+  /**
+   * Resolve when the document scrolls for the first time or loads in
+   * scrolled position.
+   * @return {!Promise}
+   * @private
+   */
+  whenFirstScroll_() {
+    return new Promise((resolve) => {
+      if (this.viewport_.getScrollTop() != 0) {
+        return resolve();
+      }
+      const unlisten = this.viewport_.onScroll(() => {
+        resolve();
+        unlisten();
+      });
+    });
   }
 
   /**
@@ -218,58 +269,58 @@ export class NextPageService {
   }
 
   /**
-   * @private
-   */
-  updateScroll_() {
-    this.updateScrollDirection_();
-    if (this.finished_) {
-      return;
-    }
-    this.readyPromise_.then(() => {
-      this.maybeFetchNext();
-    });
-  }
-
-  /**
    * @param {boolean=} force
    * @return {!Promise}
    */
   maybeFetchNext(force = false) {
-    devAssert(!this.finished_);
+    // If we already fetched the maximum number of pages
+    const exceededMaximum =
+      this.pages_.filter((page) => !page.is(PageState.QUEUED)).length >
+      this.maxPages_;
+    // If a page is already queued to be fetched, we need to wait for it
+    const isFetching = this.pages_.some((page) => page.is(PageState.FETCHING));
+    // If we're still too far from the bottom, we don't need to perform this now
+    const isTooEarly =
+      this.getViewportsAway_() > PRERENDER_VIEWPORT_COUNT && !force;
 
-    // If a page is already queued to be fetched, wait for it
-    if (this.pages_.some(page => page.is(PageState.FETCHING))) {
-      return Promise.resolve();
-    }
-    // If we're still too far from the bottom, early return
-    if (this.getViewportsAway_() > PRERENDER_VIEWPORT_COUNT && !force) {
+    if (this.finished_ || isFetching || isTooEarly || exceededMaximum) {
       return Promise.resolve();
     }
 
     const pageCount = this.pages_.length;
     const nextPage = this.pages_[this.getPageIndex_(this.lastFetchedPage_) + 1];
     if (nextPage) {
-      return nextPage.fetch().then(() => {
-        if (nextPage.is(PageState.FAILED)) {
-          // Silently skip this page and get the footer ready in case
-          // this page is the last one
-          this.setLastFetchedPage(nextPage);
-          return this.refreshFooter_();
-        }
-      });
+      return nextPage
+        .fetch()
+        .then(() => {
+          if (nextPage.is(PageState.FAILED)) {
+            // Silently skip this page
+            this.setLastFetchedPage(nextPage);
+          }
+        })
+        .then(
+          () => {
+            return this.refreshRecBox_();
+          },
+          (reason) => {
+            return this.refreshRecBox_().then(() => {
+              throw reason;
+            });
+          }
+        );
     }
 
     // Attempt to get more pages
     return (
       this.getRemotePages_()
-        .then(pages => this.queuePages_(pages))
+        .then((pages) => this.queuePages_(pages))
         // Queuing pages can result in no new pages (in case the server
         // returned an empty array or the suggestions already exist in the queue)
         .then(() => {
           if (this.pages_.length <= pageCount) {
-            // Remote server did not return any new pages, update the footer and lock the state
+            // Remote server did not return any new pages, update the recommendation box and lock the state
             this.finished_ = true;
-            return this.refreshFooter_();
+            return this.refreshRecBox_();
           }
           return this.maybeFetchNext(true /** force */);
         })
@@ -282,12 +333,11 @@ export class NextPageService {
    */
   updateVisibility() {
     this.pages_.forEach((page, index) => {
-      if (
-        page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT &&
-        page.isVisible()
-      ) {
-        page.setVisibility(VisibilityState.HIDDEN);
-      } else {
+      if (page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT) {
+        if (page.isVisible()) {
+          page.setVisibility(VisibilityState.HIDDEN);
+        }
+      } else if (page.relativePos !== ViewportRelativePos.LEAVING_VIEWPORT) {
         if (!page.isVisible()) {
           page.setVisibility(VisibilityState.VISIBLE);
         }
@@ -297,18 +347,28 @@ export class NextPageService {
     });
 
     // If no page is visible then the host page should be
-    if (!this.pages_.some(page => page.isVisible())) {
+    if (!this.pages_.some((page) => page.isVisible())) {
       this.hostPage_.setVisibility(VisibilityState.VISIBLE);
     }
 
     // Hide elements if necessary
     this.pages_
-      .filter(page => page.isVisible())
-      .forEach(page =>
+      .filter((page) => page.isVisible())
+      .forEach((page) =>
         this.toggleHiddenAndReplaceableElements(
           /** @type {!Document|!ShadowRoot} */ (devAssert(page.document))
         )
       );
+
+    // Switch the title and url of the page to reflect the first visible page
+    const visiblePageIndex = findIndex(this.pages_, (page) => page.isVisible());
+    const visiblePage = this.pages_[visiblePageIndex] || null;
+    if (visiblePage && this.currentTitlePage_ !== visiblePage) {
+      this.setTitlePage(visiblePage);
+    }
+
+    // Check if we're close to the bottom, if so fetch more pages
+    this.maybeFetchNext();
   }
 
   /**
@@ -328,21 +388,23 @@ export class NextPageService {
         ? PAUSE_PAGE_COUNT
         : pausePageCountForTesting;
 
-    const scrollingDown = this.scrollDirection_ === Direction.DOWN;
     // Hide the host (first) page if needed
-    if (scrollingDown && this.hostPage_.isVisible()) {
+    if (
+      this.visibilityObserver_.isScrollingDown() &&
+      this.hostPage_.isVisible()
+    ) {
       this.hostPage_.setVisibility(VisibilityState.HIDDEN);
     }
 
     // Get all the pages that the user scrolled past (or didn't see yet)
-    const previousPages = scrollingDown
+    const previousPages = this.visibilityObserver_.isScrollingDown()
       ? this.pages_.slice(1, index).reverse()
       : this.pages_.slice(index + 1);
 
     // Find the ones that should be hidden (no longer inside the viewport)
     return Promise.all(
       previousPages
-        .filter(page => {
+        .filter((page) => {
           // Pages that are outside of the viewport should be hidden
           return page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT;
         })
@@ -383,9 +445,9 @@ export class NextPageService {
         Math.max(0, index - pausePageCount - 1),
         Math.min(this.pages_.length, index + pausePageCount + 1)
       )
-      .filter(page => page.is(PageState.PAUSED));
+      .filter((page) => page.is(PageState.PAUSED));
 
-    return Promise.all(nearViewportPages.map(page => page.resume()));
+    return Promise.all(nearViewportPages.map((page) => page.resume()));
   }
 
   /**
@@ -408,6 +470,16 @@ export class NextPageService {
     const {title, url} = page;
     this.doc_.title = title;
     this.history_.replace({title, url});
+    this.currentTitlePage_ = page;
+    triggerAnalyticsEvent(
+      this.getHost_(),
+      'amp-next-page-scroll',
+      /** @type {!JsonObject} */ ({
+        'title': title,
+        'url': url,
+      }),
+      /** enableDataVars */ false
+    );
   }
 
   /**
@@ -421,7 +493,7 @@ export class NextPageService {
 
   /**
    * Creates the initial (host) page based on the window's metadata
-   * @return {!Page}
+   * @return {!HostPage}
    */
   createHostPage() {
     const {title, location} = this.doc_;
@@ -431,7 +503,8 @@ export class NextPageService {
       parseOgImage(this.doc_) ||
       parseFavicon(this.doc_) ||
       '';
-    return new HostPage(
+
+    return /** @type {!HostPage} */ (new HostPage(
       this,
       {
         url,
@@ -440,8 +513,8 @@ export class NextPageService {
       },
       PageState.INSERTED /** initState */,
       VisibilityState.VISIBLE /** initVisibility */,
-      this.doc_ /** initDoc */
-    );
+      this.doc_
+    ));
   }
 
   /**
@@ -453,7 +526,7 @@ export class NextPageService {
   createDocumentContainerForPage(page) {
     const container = this.doc_.createElement('div');
     container.classList.add(DOC_CONTAINER_CLASS);
-    this.host_.insertBefore(container, dev().assertElement(this.footer_));
+    this.host_.insertBefore(container, dev().assertElement(this.recBox_));
 
     // Insert the document
     const shadowRoot = this.doc_.createElement('div');
@@ -464,7 +537,7 @@ export class NextPageService {
     this.visibilityObserver_.observe(
       shadowRoot /** element */,
       container /** parent */,
-      position => {
+      (position) => {
         page.relativePos = position;
         this.updateVisibility();
       }
@@ -485,7 +558,7 @@ export class NextPageService {
     // If the user already scrolled to the bottom, prevent rendering
     if (this.getViewportsAway_() < NEAR_BOTTOM_VIEWPORT_COUNT && !force) {
       // TODO(wassgha): Append a "load next article" button?
-      return Promise.resolve();
+      return Promise.resolve(null);
     }
 
     const container = dev().assertElement(page.container);
@@ -535,7 +608,7 @@ export class NextPageService {
 
       // Insert the separator
       const separatorInstance = this.separator_.cloneNode(true);
-      insertAfterOrAtStart(container, separatorInstance, null /** after */);
+      insertAtStart(container, separatorInstance);
       const separatorPromise = this.maybeRenderSeparatorTemplate_(
         separatorInstance,
         page
@@ -544,7 +617,7 @@ export class NextPageService {
       return separatorPromise.then(() => amp);
     } catch (e) {
       dev().error(TAG, 'failed to attach shadow document for page', e);
-      return Promise.resolve();
+      return Promise.resolve(null);
     }
   }
 
@@ -594,14 +667,11 @@ export class NextPageService {
    * @param {!Document} doc Document to attach.
    */
   sanitizeDoc(doc) {
-    // TODO(wassgha): Allow amp-analytics after bug bash
-    toArray(doc.querySelectorAll('amp-analytics')).forEach(removeElement);
-
     // Parse for more pages and queue them
-    toArray(doc.querySelectorAll('amp-next-page')).forEach(el => {
+    toArray(doc.querySelectorAll('amp-next-page')).forEach((el) => {
       if (this.hasDeepParsing_) {
         const pages = this.getInlinePages_(el);
-        this.queuePages_(pages);
+        this.fetchAndQueuePages_(pages);
       }
       removeElement(el);
     });
@@ -622,7 +692,7 @@ export class NextPageService {
   toggleHiddenAndReplaceableElements(doc, isVisible = true) {
     // Hide elements that have [next-page-hide] on child documents
     if (doc !== this.hostPage_.document) {
-      toArray(doc.querySelectorAll('[next-page-hide]')).forEach(element =>
+      toArray(doc.querySelectorAll('[next-page-hide]')).forEach((element) =>
         toggle(element, false /** opt_display */)
       );
     }
@@ -635,7 +705,7 @@ export class NextPageService {
     // Replace elements that have [next-page-replace]
     toArray(
       doc.querySelectorAll('*:not(amp-next-page) [next-page-replace]')
-    ).forEach(element => {
+    ).forEach((element) => {
       let uniqueId = element.getAttribute('next-page-replace');
       if (!uniqueId) {
         uniqueId = String(Date.now() + Math.floor(Math.random() * 100));
@@ -667,16 +737,6 @@ export class NextPageService {
   }
 
   /**
-   * @private
-   */
-  updateScrollDirection_() {
-    const scrollTop = this.viewport_.getScrollTop();
-    this.scrollDirection_ =
-      scrollTop > this.lastScrollTop_ ? Direction.DOWN : Direction.UP;
-    this.lastScrollTop_ = scrollTop;
-  }
-
-  /**
    * @param {Page} desiredPage
    * @return {number} The index of the page.
    */
@@ -692,7 +752,7 @@ export class NextPageService {
   fetchPageDocument(page) {
     return Services.xhrFor(this.win_)
       .fetch(page.url, {ampCors: false})
-      .then(response => {
+      .then((response) => {
         // Make sure the response is coming from the same origin as the
         // page and update the page's url in case of a redirection
         validateUrl(response.url, this.ampdoc_.getUrl());
@@ -700,14 +760,14 @@ export class NextPageService {
 
         return response.text();
       })
-      .then(html => {
+      .then((html) => {
         const doc = this.doc_.implementation.createHTMLDocument('');
         doc.open();
         doc.write(html);
         doc.close();
         return doc;
       })
-      .catch(e => {
+      .catch((e) => {
         user().error(TAG, 'failed to fetch %s', page.url, e);
         throw e;
       });
@@ -721,25 +781,23 @@ export class NextPageService {
    */
   initializePageQueue_() {
     const inlinePages = this.getInlinePages_(this.getHost_());
+    if (inlinePages.length) {
+      return this.fetchAndQueuePages_(inlinePages);
+    }
+
     userAssert(
-      inlinePages || this.nextSrc_,
+      this.nextSrc_,
       '%s should contain a <script> child or a URL specified in [src]',
       TAG
     );
-    return this.getRemotePages_()
-      .then(remotePages => [].concat(inlinePages, remotePages))
-      .then(pages => {
-        if (pages.length === 0) {
-          user().warn(TAG, 'Could not find recommendations');
-          return Promise.resolve();
-        }
-        return this.queuePages_(pages).then(() => {
-          // Render the initial footer template with all pages
-          this.refreshFooter_();
-          // Mark the page as ready
-          this.readyResolver_();
-        });
-      });
+
+    return this.getRemotePages_().then((remotePages) => {
+      if (remotePages.length === 0) {
+        user().warn(TAG, 'Could not find recommendations');
+        return Promise.resolve();
+      }
+      return this.fetchAndQueuePages_(remotePages);
+    });
   }
 
   /**
@@ -753,13 +811,13 @@ export class NextPageService {
       return Promise.resolve();
     }
     // Queue the given pages
-    pages.forEach(meta => {
+    pages.forEach((meta) => {
       try {
         validatePage(meta, this.ampdoc_.getUrl());
         // Prevent loops by checking if the page already exists
         // we use initialUrl since the url can get updated if
         // the page issues a redirect
-        if (this.pages_.some(page => page.initialUrl == meta.url)) {
+        if (this.pages_.some((page) => page.initialUrl == meta.url)) {
           return;
         }
         // Queue the page for fetching
@@ -769,9 +827,19 @@ export class NextPageService {
       }
     });
 
+    return Promise.resolve();
+  }
+
+  /**
+   * Add the provided page metadata into the queue of
+   * pages to fetch then fetches again
+   * @param {!Array<!./page.PageMeta>} pages
+   * @return {!Promise}
+   */
+  fetchAndQueuePages_(pages) {
     // To be safe, if the pages were parsed after the user
-    // finished scrolling
-    return this.maybeFetchNext();
+    // finished scrolling, we fetch again
+    return this.queuePages_(pages).then(() => this.maybeFetchNext());
   }
 
   /**
@@ -796,7 +864,7 @@ export class NextPageService {
         'be inside a <script> tag with type="application/json"'
     );
 
-    const parsed = tryParseJson(scriptElement.textContent, error => {
+    const parsed = tryParseJson(scriptElement.textContent, (error) => {
       user().error(TAG, 'failed to parse inline page list', error);
     });
 
@@ -819,20 +887,35 @@ export class NextPageService {
     if (!this.nextSrc_) {
       return Promise.resolve([]);
     }
-    return batchFetchJsonFor(this.ampdoc_, this.getHost_(), {
-      urlReplacement: UrlReplacementPolicy.ALL,
-      xssiPrefix: this.getHost_().getAttribute('xssi-prefix') || undefined,
-    })
-      .then(result => {
+
+    if (this.remoteFetchingPromise_) {
+      return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (this
+        .remoteFetchingPromise_);
+    }
+
+    this.remoteFetchingPromise_ = batchFetchJsonFor(
+      this.ampdoc_,
+      this.getHost_(),
+      {
+        urlReplacement: UrlReplacementPolicy.ALL,
+        xssiPrefix: this.getHost_().getAttribute('xssi-prefix') || undefined,
+      }
+    )
+      .then((result) => {
         this.nextSrc_ = result['next'] || null;
         if (this.nextSrc_) {
           this.getHost_().setAttribute('src', this.nextSrc_);
         }
         return result['pages'] || [];
       })
-      .catch(error =>
-        user().error(TAG, 'error fetching page list from remote server', error)
-      );
+      .catch((error) => {
+        user().error(TAG, 'error fetching page list from remote server', error);
+        this.nextSrc_ = null;
+        return [];
+      });
+
+    return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (this
+      .remoteFetchingPromise_);
   }
 
   /**
@@ -846,6 +929,9 @@ export class NextPageService {
     const providedSeparator = childElementByAttr(element, 'separator');
     if (providedSeparator) {
       removeElement(providedSeparator);
+      if (!providedSeparator.hasAttribute('tabindex')) {
+        providedSeparator.setAttribute('tabindex', '0');
+      }
       return providedSeparator;
     }
     // If no separator is provided, we build a default one
@@ -862,6 +948,7 @@ export class NextPageService {
       <div
         class="amp-next-page-separator"
         aria-label="Next article separator"
+        tabindex="0"
       ></div>
     `;
   }
@@ -888,7 +975,7 @@ export class NextPageService {
 
     return this.templates_
       .findAndRenderTemplate(separator, data)
-      .then(rendered => {
+      .then((rendered) => {
         return this.mutator_.mutateElement(separator, () => {
           removeChildren(dev().assertElement(separator));
           separator.appendChild(rendered);
@@ -901,75 +988,76 @@ export class NextPageService {
    * @return {!Element}
    * @private
    */
-  getFooterElement_(element) {
-    const providedFooter = childElementByAttr(element, 'footer');
-    if (providedFooter) {
-      this.refreshFooter_ = this.templates_.hasTemplate(providedFooter)
-        ? () => this.renderFooterTemplate_()
+  getRecBox_(element) {
+    const providedRecBox = childElementByAttr(element, 'recommendation-box');
+    if (providedRecBox) {
+      this.refreshRecBox_ = this.templates_.hasTemplate(providedRecBox)
+        ? () => this.renderRecBoxTemplate_()
         : ASYNC_NOOP;
-      removeElement(providedFooter);
-      return providedFooter;
+      return providedRecBox;
     }
-    // If no footer is provided then we build a default one
-    this.refreshFooter_ = () => this.refreshDefaultFooter_();
-    return this.buildDefaultFooter_();
+    // If no recommendation box is provided then we build a default one
+    this.refreshRecBox_ = () => this.refreshDefaultRecBox_();
+    return this.buildDefaultRecBox_();
   }
 
   /**
    * @return {!Element}
    * @private
    */
-  buildDefaultFooter_() {
+  buildDefaultRecBox_() {
     const html = htmlFor(this.getHost_());
     return html`
-      <div class="amp-next-page-footer" aria-label="Read more articles"></div>
+      <div class="amp-next-page-links" aria-label="Read more articles"></div>
     `;
   }
 
   /**
-   * Renders the template inside the footer element using
+   * Renders the template inside the recommendation box using
    * data from the current articles
    *
    * @return {!Promise}
    */
-  renderFooterTemplate_() {
-    const footer = dev().assertElement(this.footer_);
-    devAssert(this.templates_.hasTemplate(footer));
+  renderRecBoxTemplate_() {
+    const recBox = dev().assertElement(this.recBox_);
+    devAssert(this.templates_.hasTemplate(recBox));
+    const templateElement = dev().assertElement(
+      this.templates_.maybeFindTemplate(recBox)
+    );
 
     const data = /** @type {!JsonObject} */ ({
       pages: (this.pages_ || [])
-        .filter(page => !page.isLoaded() && !page.is(PageState.FETCHING))
-        .map(page => ({
+        .filter((page) => !page.isLoaded() && !page.is(PageState.FETCHING))
+        .map((page) => ({
           title: page.title,
           url: page.url,
           image: page.image,
         })),
     });
 
-    // Re-render templated footer (if needed)
+    // Re-render templated recommendation box (if needed)
     return this.templates_
-      .findAndRenderTemplate(footer, data)
-      .then(rendered => {
-        return this.mutator_.mutateElement(footer, () => {
-          removeChildren(dev().assertElement(footer));
-          footer.appendChild(rendered);
+      .findAndRenderTemplate(recBox, data)
+      .then((rendered) => {
+        return this.mutator_.mutateElement(recBox, () => {
+          removeChildren(dev().assertElement(recBox));
+          recBox.appendChild(templateElement);
+          recBox.appendChild(rendered);
         });
       });
   }
 
   /**
-   * Renders the template inside the footer element using
-   * data from the current articles (if a template is present)
-   * otherwise rehydrates the default footer element
+   * Rehydrates the default recommendation box element
    *
    * @return {!Promise}
    */
-  refreshDefaultFooter_() {
-    const footer = dev().assertElement(this.footer_);
+  refreshDefaultRecBox_() {
+    const recBox = dev().assertElement(this.recBox_);
     const data = /** @type {!JsonObject} */ ({
       pages: (this.pages_ || [])
-        .filter(page => !page.isLoaded() && !page.is(PageState.FETCHING))
-        .map(page => ({
+        .filter((page) => !page.isLoaded() && !page.is(PageState.FETCHING))
+        .map((page) => ({
           title: page.title,
           url: page.url,
           image: page.image,
@@ -977,27 +1065,43 @@ export class NextPageService {
     });
 
     const html = htmlFor(this.getHost_());
-    const content = this.doc_.createElement('div');
-    content.classList.add('amp-next-page-footer-content');
-
-    data['pages'].forEach(page => {
-      const article = html`
-        <a class="amp-next-page-footer-article">
-          <img ref="image" class="amp-next-page-footer-image" />
-          <span ref="title" class="amp-next-page-footer-title"></span>
+    const links = /** @type {!Array} */ (data['pages']).map((page) => {
+      const link = html`
+        <a class="amp-next-page-link">
+          <img ref="image" class="amp-next-page-image" />
+          <span ref="title" class="amp-next-page-text"></span>
         </a>
       `;
-      const {image, title} = htmlRefs(article);
+      const {image, title} = htmlRefs(link);
       image.src = page.image;
       title.textContent = page.title;
-      article.href = page.url;
+      link.href = page.url;
+      link.addEventListener('click', (e) => {
+        triggerAnalyticsEvent(
+          this.getHost_(),
+          'amp-next-page-click',
+          /** @type {!JsonObject} */ ({
+            'title': page.title,
+            'url': page.url,
+          }),
+          /** enableDataVars */ false
+        );
+        const a2a = this.navigation_.navigateToAmpUrl(
+          page.url,
+          'content-discovery'
+        );
+        if (a2a) {
+          // A2A is enabled, don't navigate the browser.
+          e.preventDefault();
+        }
+      });
 
-      content.appendChild(article);
+      return link;
     });
 
-    return this.mutator_.mutateElement(footer, () => {
-      removeChildren(dev().assertElement(footer));
-      footer.appendChild(content);
+    return this.mutator_.mutateElement(recBox, () => {
+      removeChildren(dev().assertElement(recBox));
+      links.forEach((link) => recBox.appendChild(link));
     });
   }
 }

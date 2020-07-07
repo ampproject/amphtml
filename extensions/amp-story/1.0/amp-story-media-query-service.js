@@ -25,12 +25,12 @@ import {registerServiceBuilder} from '../../../src/service';
  * @param  {!Window} win
  * @return {!AmpStoryMediaQueryService}
  */
-export const getMediaQueryService = win => {
+export const getMediaQueryService = (win) => {
   let service = Services.storyMediaQueryService(win);
 
   if (!service) {
     service = new AmpStoryMediaQueryService(win);
-    registerServiceBuilder(win, 'story-media-query', function() {
+    registerServiceBuilder(win, 'story-media-query', function () {
       return service;
     });
   }
@@ -70,7 +70,7 @@ export class AmpStoryMediaQueryService {
   onMediaQueryMatch(media, callback) {
     return this.initialize_().then(() => {
       const mediaQueryList = this.matcher_.contentWindow.matchMedia(media);
-      mediaQueryList.addListener(event => callback(event.matches));
+      mediaQueryList.addListener((event) => callback(event.matches));
       callback(mediaQueryList.matches);
       return mediaQueryList;
     });
@@ -87,7 +87,7 @@ export class AmpStoryMediaQueryService {
       return this.initializePromise_;
     }
 
-    this.initializePromise_ = new Promise(resolve => {
+    this.initializePromise_ = new Promise((resolve) => {
       this.matcher_ = this.win_.document.createElement('iframe');
       this.matcher_.classList.add('i-amphtml-story-media-query-matcher');
       this.matcher_.onload = resolve;

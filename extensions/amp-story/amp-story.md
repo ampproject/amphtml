@@ -1,7 +1,6 @@
 ---
 $category@: presentation
 formats:
-  - websites
   - stories
 teaser:
   text: A rich, visual storytelling format.
@@ -23,33 +22,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="`amp-story`"></a> `amp-story`
+# amp-story
 
-The `amp-story` extension provides a format for displaying visual content that you can assemble into a story-telling experience. With an AMP story, you can provide users with bite-sized, visually rich information and content.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>A rich, visual storytelling format.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>none</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><ul>
-      <li>See AMP By Example's <a href="https://amp.dev/documentation/examples/introduction/stories_in_amp/">Hello World</a> sample.</li>
-      <li>Learn from the <a href="https://amp.dev/documentation/guides-and-tutorials/start/visual_story/">Create a visual AMP story</a> tutorial.</li>
-    </ul></td>
-  </tr>
-</table>
-
-[TOC]
+[Web stories](https://amp.dev/documentation/guides-and-tutorials/start/create_successful_stories/?format=stories) are an immersive, tappable and easily shareable storytelling format. Web stories are built using the AMP Framework. The `amp-story` component provides the AMP story subsect of AMP. It is the base technology for web stories.
 
 <figure class="centered-fig">
   <amp-anim width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story.gif">
@@ -300,9 +275,9 @@ The `amp-story` component represents an entire story. The component itself imple
 
 ### Metadata guidelines
 
-Metadata attributes display a preview of the story across the AMP stories ecosystem, such as rendering an engaging preview link in the bookend of a related stories. These attributes future-proof your story for rich, embedded experience AMP stories surfaces to come.
+Metadata attributes display a preview of the story across the Web Stories ecosystem, such as rendering an engaging preview link in the bookend of a related stories. These attributes future-proof your story for rich, embedded experience Web Stories surfaces to come.
 
-These metadata attributes supplement and do not replace any Structured Data (e.g. JSON-LD) on the page. We still recommend adding [Structured Data](https://developers.google.com/search/docs/data-types/article#amp-sd) to all your AMP pages, including AMP stories.
+These metadata attributes supplement and do not replace any Structured Data (e.g. JSON-LD) on the page. We still recommend adding [Structured Data to your Web Stories](https://developers.google.com/search/docs/guides/enable-web-stories#implement).
 
 #### `publisher-logo-src` guidelines
 
@@ -364,9 +339,9 @@ These guidelines apply to the story poster image(s):
 - The poster image should be in 3x4 aspect ratio for portrait, 4x3 for landscape, and 1x1 for square.
 - If the poster image is derived from a frame in a video, the thumbnail should be representative of the video. For example, the first frame in a video is often not representative.
 - Each poster image should meet the recommended minimium size:
-  - Portrait: 696px x 928px
-  - Landscape: 928px x 696px
-  - Square: 928px x 928px
+  - Portrait: 640px x 853px
+  - Landscape: 853px x 640px
+  - Square: 640px x 640px
 
 ### Landscape orientation and full bleed desktop experience opt in
 

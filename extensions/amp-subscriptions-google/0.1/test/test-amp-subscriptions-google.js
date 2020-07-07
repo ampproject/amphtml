@@ -20,6 +20,10 @@ import {
   SubscriptionAnalytics,
 } from '../../../amp-subscriptions/0.1/analytics';
 import {
+  AmpFetcher,
+  GoogleSubscriptionsPlatform,
+} from '../amp-subscriptions-google';
+import {
   ConfiguredRuntime,
   Entitlements,
   SubscribeResponse,
@@ -29,22 +33,17 @@ import {
   Entitlement,
   GrantReason,
 } from '../../../amp-subscriptions/0.1/entitlement';
-import {
-  GoogleSubscriptionsPlatform,
-  getAmpFetcherClassForTesting,
-} from '../amp-subscriptions-google';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../../src/services';
-import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/score-factors';
+import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/constants';
+import {WindowInterface} from '../../../../src/window-interface';
 import {toggleExperiment} from '../../../../src/experiments';
 
 const PLATFORM_ID = 'subscribe.google.com';
 const AMP_URL = 'myAMPurl.amp';
 
-describes.realWin('AmpFetcher', {amp: true}, env => {
-  let win;
-  let ampdoc;
+describes.realWin('AmpFetcher', {amp: true}, (env) => {
   let fetcher;
   let xhr;
 
@@ -63,33 +62,32 @@ describes.realWin('AmpFetcher', {amp: true}, env => {
     'baseUrl',
   ];
   const sentMessage = {
-    toArray: function() {
+    toArray: function () {
       return sentArray;
     },
   };
   const contentType = 'application/x-www-form-urlencoded;charset=UTF-8';
   const expectedBodyString = 'f.req=' + JSON.stringify(sentArray);
-  const AmpFetcher = getAmpFetcherClassForTesting();
 
   beforeEach(() => {
-    win = env.win;
-    ampdoc = env.ampdoc;
-    fetcher = new AmpFetcher(ampdoc.win);
-    xhr = Services.xhrFor(env.win);
+    const {win} = env.ampdoc;
+    fetcher = new AmpFetcher(win);
+    xhr = Services.xhrFor(win);
   });
 
   it('should support beacon when beacon supported', async () => {
     const expectedBlob = new Blob([expectedBodyString], {type: contentType});
-    env.sandbox.stub(win.navigator, 'sendBeacon').callsFake((url, body) => {
-      expect(url).to.equal(sentUrl);
-      expect(body).to.deep.equal(expectedBlob);
+    env.sandbox.stub(WindowInterface, 'getSendBeacon').callsFake(() => {
+      return (url, body) => {
+        expect(url).to.equal(sentUrl);
+        expect(body).to.deep.equal(expectedBlob);
+      };
     });
     fetcher.sendBeacon(sentUrl, sentMessage);
   });
 
   it('should support beacon when beacon not supported', async () => {
-    const tempFun = win.navigator.sendBeacon;
-    win.navigator.sendBeacon = null;
+    env.sandbox.stub(WindowInterface, 'getSendBeacon').callsFake(() => null);
     env.sandbox.stub(xhr, 'fetch').callsFake((url, init) => {
       expect(url).to.equal(sentUrl);
       expect(init).to.deep.equal({
@@ -101,13 +99,10 @@ describes.realWin('AmpFetcher', {amp: true}, env => {
     });
 
     fetcher.sendBeacon(sentUrl, sentMessage);
-
-    // Restore the original function so we don't break Xhr tests throughout AMP.
-    win.navigator.sendBeacon = tempFun;
   });
 });
 
-describes.realWin('amp-subscriptions-google', {amp: true}, env => {
+describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
   let ampdoc;
   let pageConfig;
   let platform;
@@ -492,7 +487,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
         () => promise,
         null
       );
-      const resetPlatformsPromise = new Promise(resolve => {
+      const resetPlatformsPromise = new Promise((resolve) => {
         env.sandbox.stub(serviceAdapter, 'resetPlatforms').callsFake(() => {
           resolve();
         });
@@ -674,6 +669,20 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       lang: 'en',
       messageTextColor: '#09f',
       theme: 'light',
+    });
+  });
+
+  it('should use message number', () => {
+    const elem = env.win.document.createElement('div');
+    const attachStub = env.sandbox.stub(platform.runtime_, 'attachSmartButton');
+    elem.textContent = 'some html';
+    elem.setAttribute('subscriptions-lang', 'en');
+    elem.setAttribute('subscriptions-message-number', 1);
+    platform.decorateUI(elem, 'subscribe-smartbutton');
+    expect(attachStub).to.be.calledWith(elem, {
+      lang: 'en',
+      theme: 'light',
+      messageNumber: '1', // Message is 'Subscribe with just a few taps' on smartbox button.
     });
   });
 

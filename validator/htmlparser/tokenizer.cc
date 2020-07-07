@@ -50,7 +50,9 @@ inline char Tokenizer::ReadByte() {
     current_line_col_.second -= (multi_byte - 1);
   }
 
-  if (c == '\n') {
+  if (c == '\n' || (c == '\r' &&
+                    raw_.end < buffer_.size() &&
+                    buffer_.at(raw_.end) != '\n')) {
     lines_cols_.back() = current_line_col_;
     // Increment line number and reset column number.
     current_line_col_.first++;
@@ -827,6 +829,7 @@ TokenType Tokenizer::Next(bool template_mode) {
   raw_.start = raw_.end;
   data_.start = raw_.end;
   data_.end = raw_.end;
+  is_token_manufactured_ = false;
 
   if (eof_) {
     err_ = true;
@@ -920,7 +923,6 @@ TokenType Tokenizer::Next(bool template_mode) {
           }
           return token_type_;
         }
-        UnreadByte();
         ReadUntilCloseAngle();
         token_type_ = TokenType::COMMENT_TOKEN;
         return token_type_;
@@ -929,6 +931,9 @@ TokenType Tokenizer::Next(bool template_mode) {
           token_type_ = ReadMarkupDeclaration();
           return token_type_;
         }
+        is_token_manufactured_ = true;
+        // <? is part of the comment text.
+        UnreadByte();
         UnreadByte();
         ReadUntilCloseAngle();
         token_type_ = TokenType::COMMENT_TOKEN;
@@ -1056,6 +1061,9 @@ Token Tokenizer::token() {
     case TokenType::COMMENT_TOKEN:
     case TokenType::DOCTYPE_TOKEN:
       t.data = Text();
+      t.is_manufactured = is_token_manufactured_;
+      token_line_col_ = {current_line_col_.first,
+                         current_line_col_.second - t.data.size()};
       break;
     case TokenType::START_TAG_TOKEN:
     case TokenType::SELF_CLOSING_TAG_TOKEN:

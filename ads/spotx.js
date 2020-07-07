@@ -42,7 +42,7 @@ export function spotx(global, data) {
     }
   }
 
-  global['spotx_ad_done_function'] = function(spotxAdFound) {
+  global['spotx_ad_done_function'] = function (spotxAdFound) {
     if (!spotxAdFound) {
       global.context.noContentAvailable();
     }

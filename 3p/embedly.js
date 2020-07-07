@@ -37,7 +37,7 @@ const RESIZE_EVENT_NAME = 'card.resize';
 const CARD_CSS_CLASS = 'embedly-card';
 
 /**
- * Whitelisted card options.
+ * Allowed card options.
  *
  * - Key is in camel case as received in "data".
  * - The value is in the format expected by embedly.
@@ -64,7 +64,7 @@ export const CardOptions = {
  * @visibleForTesting
  */
 function getEmbedly(global, callback) {
-  loadScript(global, EMBEDLY_SDK_URL, function() {
+  loadScript(global, EMBEDLY_SDK_URL, function () {
     callback();
   });
 }
@@ -81,7 +81,7 @@ export function embedly(global, data) {
   card.href = data.url;
   card.classList.add(CARD_CSS_CLASS);
 
-  // Add whitelisted data attributes and values to card
+  // Add permissible data attributes and values to card
   // when these are provided by component.
   for (const key in CardOptions) {
     if (hasOwn(CardOptions, key) && typeof data[key] !== 'undefined') {
@@ -98,7 +98,7 @@ export function embedly(global, data) {
 
   container.appendChild(card);
 
-  getEmbedly(global, function() {
+  getEmbedly(global, function () {
     // Given by the parent frame.
     delete data.width;
     delete data.height;
@@ -106,7 +106,7 @@ export function embedly(global, data) {
     global.window['embedly']('card', card);
 
     // Use embedly SDK to listen to resize event from loaded card
-    global.window['embedly']('on', RESIZE_EVENT_NAME, function(iframe) {
+    global.window['embedly']('on', RESIZE_EVENT_NAME, function (iframe) {
       context.requestResize(
         iframe./*OK*/ width,
         parseInt(iframe./*OK*/ height, 10) + /* margin */ 5

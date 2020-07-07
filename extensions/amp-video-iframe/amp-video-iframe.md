@@ -24,21 +24,6 @@ limitations under the License.
 
 # amp-video-iframe
 
-[TOC]
-
-Displays an [iframe](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe) containing a video player.
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-video-iframe" src="https://cdn.ampproject.org/v0/amp-video-iframe-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, responsive</td>
-  </tr>
-</table>
-
 ## When should I use this?
 
 This component is useful if you've built your own Javascript-based
@@ -234,7 +219,7 @@ playback methods and event dispatchers to plug these together. For common video 
 
 ### Readymade integrations
 
-If you're using a common video framework like [JwPlayer](https://www.jwplayer.com/) or [Video.js](http://videojs.com/), you can call **`listenTo()`** for a basic, readymade integration. These integrations support all playback and UI controls when the framework provides them, see each for supported methods.
+If you're using a common video framework like [JW Player](https://www.jwplayer.com/) or [Video.js](http://videojs.com/), you can call **`listenTo()`** for a basic, readymade integration. These integrations support all playback and UI controls when the framework provides them, see each for supported methods.
 
 {% call callout('Framework APIs', type='note') %}
 Depending on which video framework you use, you'll call the `listenTo` method differently. Read on the specific APIs below.
@@ -244,21 +229,35 @@ Depending on which video framework you use, you'll call the `listenTo` method di
 You can additionally use [custom integration methods](#custom-integrations) if you require a feature not available in readymade implementations.
 {% endcall %}
 
-##### For JwPlayer
+##### For JW Player
 
 **Default supported events:** `ad_end`/`ad_start`, `canplay`, `error`, `muted`/`unmuted`, `pause`/`playing`
 
 **Default supported methods:** `pause`/`play`, `mute`/`unmute`, `hidecontrols`/`showcontrols`, `fullscreenenter`/`fullscreenexit`
 
-Pass in your [`jwplayer` instance object](https://developer.jwplayer.com/jw-player/docs/javascript-api-reference/)
-through the signature `ampIntegration.listenTo('jwplayer', myJwplayer)`. The `ampIntegration` object then knows how
-to setup the player through the instance API.
+The `amp` object knows how to setup a JwPlayer instance by using `listenTo('jwplayer')`.
+If you're embedding your player [using a video-specific script](https://support.jwplayer.com/articles/how-to-embed-a-jwplayer), you only need to register Jwplayer usage:
+
+```html
+<script src="https://cdn.jwplayer.com/players/UVQWMA4o-kGWxh33Q.js"></script>
+<script>
+  (window.AmpVideoIframe = window.AmpVideoIframe || []).push(function (
+    ampIntegration
+  ) {
+    ampIntegration.listenTo('jwplayer');
+  });
+</script>
+```
+
+Otherwise, pass in your [JwPlayer instance](https://developer.jwplayer.com/jwplayer/docs/jw8-javascript-api-reference)
+through the signature `amp.listenTo('jwplayer', instance)`:
 
 ```js
-function onAmpIntegrationReady(ampIntegration) {
-  var myJwplayer = jwplayer('my-video');
-  ampIntegration.listenTo('jwplayer', myJwplayer);
-}
+(window.AmpVideoIframe = window.AmpVideoIframe || []).push(function (
+  ampIntegration
+) {
+  ampIntegration.listenTo('jwplayer', jwplayer('my-video'));
+});
 ```
 
 ##### For Video.js
@@ -307,7 +306,7 @@ If you use a supported framework, it's possible to have more fine-grained contro
 Implements a method that calls playback functions on the video. For example:
 
 ```js
-ampIntegration.method('play', function() {
+ampIntegration.method('play', function () {
   myVideo.play();
 });
 ```
@@ -343,7 +342,7 @@ You can choose to only implement this interface partially, with a few caveats:
 Posts a playback event to the frame. For example:
 
 ```js
-myVideoElement.addEventListener('pause', function() {
+myVideoElement.addEventListener('pause', function () {
   ampIntegration.postEvent('pause');
 });
 ```
@@ -431,8 +430,8 @@ Gets the intersection ratio (between 0 and 1) for the video element. This is use
 
 ```js
 // Will log intersection every 2 seconds
-setInterval(function() {
-  integration.getIntersection(function(intersection) {
+setInterval(function () {
+  integration.getIntersection(function (intersection) {
     console.log('Intersection ratio:', intersection.intersectionRatio);
   });
 }, 2000);

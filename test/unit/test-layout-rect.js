@@ -27,13 +27,13 @@ describe('LayoutRect', () => {
     expect(rect.right).to.equal(4);
   });
 
-  it('layoutRectsOverlap', () => {
+  it('rectsOverlap', () => {
     const rect1 = lr.layoutRectLtwh(10, 20, 30, 40);
     const rect2 = lr.layoutRectLtwh(40, 60, 10, 10);
     const rect3 = lr.layoutRectLtwh(41, 60, 10, 10);
-    expect(lr.layoutRectsOverlap(rect1, rect2)).to.equal(true);
-    expect(lr.layoutRectsOverlap(rect1, rect3)).to.equal(false);
-    expect(lr.layoutRectsOverlap(rect2, rect3)).to.equal(true);
+    expect(lr.rectsOverlap(rect1, rect2)).to.equal(true);
+    expect(lr.rectsOverlap(rect1, rect3)).to.equal(false);
+    expect(lr.rectsOverlap(rect2, rect3)).to.equal(true);
   });
 
   it('expandLayoutRect', () => {

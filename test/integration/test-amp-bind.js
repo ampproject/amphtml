@@ -16,14 +16,14 @@
 import {BrowserController} from '../../testing/test-helper';
 import {poll as classicPoll} from '../../testing/iframe';
 
-const TIMEOUT = 15000;
+const TIMEOUT = 10000;
 
 // Skip Edge, which throws "Permission denied" errors when inspecting
 // element properties in the testing iframe (Edge 17, Windows 10).
 describe
   .configure()
   .skipEdge()
-  .run('amp-bind', function() {
+  .run('amp-bind', function () {
     this.timeout(TIMEOUT);
 
     // Helper that sets the poll timeout.
@@ -43,7 +43,7 @@ describe
         /* eslint-enable max-len */
         extensions: ['amp-bind'],
       },
-      env => {
+      (env) => {
         let browser;
         let doc;
         let text;
@@ -54,14 +54,14 @@ describe
           browser = new BrowserController(env.win);
         });
 
-        it('[text]', function*() {
+        it('[text]', function* () {
           expect(text.textContent).to.equal('before_text');
           yield browser.wait(200);
           browser.click('#changeText');
           yield poll('[text]', () => text.textContent === 'after_text');
         });
 
-        it('[class]', function*() {
+        it('[class]', function* () {
           expect(text.className).to.equal('before_class');
           yield browser.wait(200);
           browser.click('#changeClass');
@@ -86,7 +86,7 @@ describe
     `,
         extensions: ['amp-bind'],
       },
-      env => {
+      (env) => {
         let doc, img;
 
         beforeEach(() => {
@@ -144,7 +144,7 @@ describe
         /* eslint-enable max-len */
         extensions: ['amp-bind'],
       },
-      env => {
+      (env) => {
         let doc;
 
         beforeEach(() => {
@@ -170,7 +170,7 @@ describe
           poll('[text]', () => checkboxText.textContent === 'checked: true');
         });
 
-        it('[checked]', function*() {
+        it('[checked]', function* () {
           const checkbox = doc.querySelector('input[type="checkbox"]');
           const button = doc.querySelector('button');
 
@@ -215,7 +215,7 @@ describe
         /* eslint-enable max-len */
         extensions: ['amp-bind', 'amp-carousel'],
       },
-      env => {
+      (env) => {
         let doc, carousel, slideText;
 
         beforeEach(() => {
@@ -237,7 +237,7 @@ describe
           return poll('[slide]', () => slideText.textContent === '1');
         });
 
-        it('[slide]', function*() {
+        it('[slide]', function* () {
           const slides = carousel.querySelectorAll(
             '.i-amphtml-slide-item > amp-img'
           );
@@ -278,7 +278,7 @@ describe
   `;
     /* eslint-enable max-len */
 
-    const listTests = env => {
+    const listTests = (env) => {
       let doc;
       let list;
       let browser;
@@ -300,11 +300,11 @@ describe
         );
       });
 
-      it('evaluate bindings in children', function*() {
+      it('evaluate bindings in children', function* () {
         yield browser.waitForElementLayout('amp-list');
         const children = list.querySelectorAll('p');
         expect(children.length).to.equal(3);
-        children.forEach(span => {
+        children.forEach((span) => {
           expect(span.textContent).to.equal('123');
         });
       });
@@ -344,7 +344,7 @@ describe
         /* eslint-enable max-len */
         extensions: ['amp-bind', 'amp-selector'],
       },
-      env => {
+      (env) => {
         let doc, images, selectedText;
 
         beforeEach(() => {
@@ -356,7 +356,7 @@ describe
           return browserController.waitForElementLayout('amp-selector');
         });
 
-        it('on:select', function*() {
+        it('on:select', function* () {
           expect(images[0].hasAttribute('selected')).to.be.false;
           expect(images[1].hasAttribute('selected')).to.be.false;
           expect(images[2].hasAttribute('selected')).to.be.false;
@@ -368,7 +368,7 @@ describe
           expect(images[2].hasAttribute('selected')).to.be.false;
         });
 
-        it('[selected]', function*() {
+        it('[selected]', function* () {
           const button = doc.querySelector('button');
           expect(images[0].hasAttribute('selected')).to.be.false;
           expect(images[1].hasAttribute('selected')).to.be.false;

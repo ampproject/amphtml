@@ -24,24 +24,16 @@ limitations under the License.
 
 # amp-3q-player
 
-Embeds videos from <a href="https://www.3qsdn.com/en/">3Q SDN</a>.
+Enables AMP to embed videos from 3Q SDN into your websites.
 
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-3q-player" src="https://cdn.ampproject.org/v0/amp-3q-player-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, flex-item, responsive</td>
-  </tr>
-</table>
+## Usage
 
-[TOC]
+The `amp-3q-player` component embeds videos from 3Q SDN onto an AMP page. The
+component includes a video interface, and you can customize the `width` and
+`height` of the player. Specify a `responsive` layout to maintain a 16:9 video
+aspect ratio.
 
-## Example
-
-With the `responsive` layout, the width and height in this should yield correct layouts for 16:9 aspect ratio videos:
+### Example
 
 ```html
 <amp-3q-player
@@ -54,29 +46,31 @@ With the `responsive` layout, the width and height in this should yield correct 
 
 ## Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong><strong>Examples</strong></td>
-    <td>The sdnPlayoutId from 3Q SDN.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>autoplay (optional)</strong></td>
-    <td ><p>If this attribute is present, and the browser supports autoplay:</p>
-<ul>
-  <li>the video is automatically muted before autoplay starts</li>
-  <li>when the video is scrolled out of view, the video is paused</li>
-  <li>when the video is scrolled into view, the video resumes playback</li>
-  <li>when the user taps the video, the video is unmuted</li>
-  <li>if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.</li>
-</ul>
-<p>for example <code>setModelRotation(x=0.5, xMin=0, xMax=3.14)</code> will change <code>x</code> component of rotation to <code>1.57</code>.</p></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
-  </tr>
-</table>
+### data-id
+
+The `data-id` attribute specifies the appropriate `sdnPlayoutId` from 3Q SDN.
+
+### autoplay (optional)
+
+If the `autoplay` attribute is present, and the browser supports autoplay, the
+following behaviors are enabled:
+
+- The video automatically mutes before autoplay starts.
+- When the user scrolls the video out of view, the video pauses.
+- When the user scrolls the video into view, the video resumes.
+- The video unmutes when the user taps it.
+
+If the user interacts with the video and then scrolls it into or out of view,
+the state of the video remains the same. For example, if the user pauses the
+video, scrolls the video out of view and then scrolls back up to it, the video
+remains paused.
+
+### Common attributes
+
+The `amp-3q-player` component includes the [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)
+that are extended to all AMP components.
 
 ## Validation
 
-See [amp-3q-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-3q-player/validator-amp-3q-player.protoascii) in the AMP validator specification.
+See [amp-3q-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-3q-player/validator-amp-3q-player.protoascii)
+in the AMP validator specification.

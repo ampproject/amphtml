@@ -17,12 +17,12 @@
 import {AmpDocService} from '../../src/service/ampdoc-impl';
 import {
   DEFAULT_THRESHOLD,
-  IntersectionObserverApi,
+  IntersectionObserverHostApi,
   IntersectionObserverPolyfill,
   getIntersectionChangeEntry,
   getThresholdSlot,
   intersectionRatio,
-} from '../../src/intersection-observer-polyfill';
+} from '../../src/utils/intersection-observer-polyfill';
 import {Services} from '../../src/services';
 import {installHiddenObserverForDoc} from '../../src/service/hidden-observer-impl';
 import {layoutRectLtwh} from '../../src/layout-rect';
@@ -39,7 +39,7 @@ const fakeAmpDoc = {
 };
 installHiddenObserverForDoc(fakeAmpDoc);
 
-describes.sandboxed('IntersectionObserverApi', {}, env => {
+describes.sandboxed('IntersectionObserverHostApi', {}, (env) => {
   let onScrollSpy;
   let onChangeSpy;
   let testDoc;
@@ -107,7 +107,7 @@ describes.sandboxed('IntersectionObserverApi', {}, env => {
       element: testEle,
       getVsync: () => {
         return {
-          measure: func => {
+          measure: (func) => {
             func();
           },
         };
@@ -119,7 +119,7 @@ describes.sandboxed('IntersectionObserverApi', {}, env => {
         return false;
       },
     };
-    ioApi = new IntersectionObserverApi(baseElement, testIframe);
+    ioApi = new IntersectionObserverHostApi(baseElement, testIframe);
     insert(testIframe);
     tickSpy = env.sandbox.spy(ioApi.intersectionObserver_, 'tick');
   });
@@ -143,7 +143,7 @@ describes.sandboxed('IntersectionObserverApi', {}, env => {
     baseElement.isInViewport = () => {
       return true;
     };
-    ioApi = new IntersectionObserverApi(baseElement, testIframe);
+    ioApi = new IntersectionObserverHostApi(baseElement, testIframe);
     insert(testIframe);
     const inViewportTickSpy = env.sandbox.spy(
       ioApi.intersectionObserver_,
@@ -190,7 +190,7 @@ describes.sandboxed('IntersectionObserverApi', {}, env => {
   });
 });
 
-describes.sandboxed('getIntersectionChangeEntry', {}, env => {
+describes.sandboxed('getIntersectionChangeEntry', {}, (env) => {
   beforeEach(() => {
     env.sandbox.stub(performance, 'now').callsFake(() => 100);
     env.sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(fakeAmpDoc);
@@ -241,7 +241,7 @@ describes.sandboxed('getIntersectionChangeEntry', {}, env => {
   });
 });
 
-describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
+describes.sandboxed('IntersectionObserverPolyfill', {}, (env) => {
   beforeEach(() => {
     env.sandbox.stub(performance, 'now').callsFake(() => 100);
     env.sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(fakeAmpDoc);
@@ -349,7 +349,7 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
       });
       env.sandbox.stub(Services, 'resourcesForDoc').callsFake(() => {
         return {
-          onNextPass: callback => {
+          onNextPass: (callback) => {
             callback();
           },
         };
@@ -635,134 +635,6 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
             boundingClientRect: layoutRectLtwh(50, -50, 150, 200),
             intersectionRect: layoutRectLtwh(50, 0, 50, 50),
             intersectionRatio: 1 / 12,
-            target: element,
-          },
-        ]);
-      });
-    });
-
-    describe('w/ container should get IntersectionChangeEntry when', () => {
-      it('nested element in container in viewport', async () => {
-        element.getLayoutBox = () => {
-          return layoutRectLtwh(10, 10, 10, 10);
-        };
-        const rootBounds = layoutRectLtwh(1, 100, 200, 200);
-        const containerBounds = layoutRectLtwh(2, 102, 50, 50);
-        io.observe(element);
-        io.tick(rootBounds, containerBounds);
-        await macroTask();
-        expect(callbackSpy).to.be.calledOnce;
-        expect(callbackSpy).to.be.calledWith([
-          {
-            time: 100,
-            rootBounds: null,
-            boundingClientRect: layoutRectLtwh(10, 10, 10, 10),
-            intersectionRect: layoutRectLtwh(10, 10, 10, 10),
-            intersectionRatio: 1,
-            target: element,
-          },
-        ]);
-      });
-
-      it('nested element in container, container intersect viewport', async () => {
-        element.getLayoutBox = () => {
-          return layoutRectLtwh(75, 0, 50, 50);
-        };
-        const rootBounds = layoutRectLtwh(0, 100, 200, 200);
-        const containerBounds = layoutRectLtwh(100, 100, 200, 200);
-        io.observe(element);
-        io.tick(rootBounds, containerBounds);
-        await macroTask();
-        expect(callbackSpy).to.be.calledOnce;
-        expect(callbackSpy).to.be.calledWith([
-          {
-            time: 100,
-            rootBounds: null,
-            boundingClientRect: layoutRectLtwh(75, 0, 50, 50),
-            intersectionRect: layoutRectLtwh(75, 0, 25, 50),
-            intersectionRatio: 0.5,
-            target: element,
-          },
-        ]);
-      });
-
-      it('nested element in container, container not in viewport', async () => {
-        element.getLayoutBox = () => {
-          return layoutRectLtwh(0, 0, 50, 50);
-        };
-        const rootBounds = layoutRectLtwh(0, 100, 200, 200);
-        const containerBounds = layoutRectLtwh(0, 300, 100, 100);
-        io.observe(element);
-        // Tick once before to set threshold to value other than 0;
-        io.tick(rootBounds, layoutRectLtwh(0, 200, 200, 200));
-        await macroTask();
-        io.tick(rootBounds, containerBounds);
-        await macroTask();
-        expect(callbackSpy).to.be.calledTwice;
-        expect(callbackSpy.secondCall).to.be.calledWith([
-          {
-            time: 100,
-            rootBounds: null,
-            boundingClientRect: layoutRectLtwh(0, 0, 50, 50),
-            intersectionRect: layoutRectLtwh(0, 0, 50, 0),
-            intersectionRatio: 0,
-            target: element,
-          },
-        ]);
-      });
-
-      it('nested element outside container but in viewport', async () => {
-        const rootBounds = layoutRectLtwh(0, 100, 200, 200);
-        const containerBounds = layoutRectLtwh(0, 301, 100, 100);
-        // Tick once before to set threshold to value other than 0;
-        element.getLayoutBox = () => {
-          return layoutRectLtwh(0, 0, 50, 50);
-        };
-        io.observe(element);
-        io.tick(rootBounds, layoutRectLtwh(0, 200, 200, 200));
-        await macroTask();
-        element.getLayoutBox = () => {
-          return layoutRectLtwh(0, -101, 50, 50);
-        };
-        io.tick(rootBounds, containerBounds);
-        await macroTask();
-        expect(callbackSpy).to.be.calledTwice;
-        expect(callbackSpy.secondCall).to.be.calledWith([
-          {
-            time: 100,
-            rootBounds: null,
-            boundingClientRect: layoutRectLtwh(0, -101, 50, 50),
-            intersectionRect: layoutRectLtwh(0, 0, 0, 0),
-            intersectionRatio: 0,
-            target: element,
-          },
-        ]);
-      });
-
-      it('element has an owner', async () => {
-        element.getLayoutBox = () => {
-          return layoutRectLtwh(75, 0, 50, 50);
-        };
-        element.getOwner = () => {
-          return {
-            getLayoutBox: () => {
-              return layoutRectLtwh(0, 25, 200, 25);
-            },
-          };
-        };
-        const rootBounds = layoutRectLtwh(0, 100, 200, 200);
-        const containerBounds = layoutRectLtwh(100, 100, 200, 200);
-        io.observe(element);
-        io.tick(rootBounds, containerBounds);
-        await macroTask();
-        expect(callbackSpy).to.be.calledOnce;
-        expect(callbackSpy).to.be.calledWith([
-          {
-            time: 100,
-            rootBounds: null,
-            boundingClientRect: layoutRectLtwh(75, 0, 50, 50),
-            intersectionRect: layoutRectLtwh(75, 25, 25, 25),
-            intersectionRatio: 0.25,
             target: element,
           },
         ]);

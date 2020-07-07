@@ -1,5 +1,13 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
+# Requirements:
+# clang with c++17 support.
+#
+# Usage:
+# To build the library, use the following bazel command:
+#
+# bazel build --repo_env=CC=clang --cxxopt='-std=c++17' <build_target>
+
 package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
@@ -261,6 +269,16 @@ cc_library(
 )
 
 cc_library(
+    name = "url",
+    srcs = [
+        "url.cc",
+    ],
+    hdrs = [
+        "url.h",
+    ],
+)
+
+cc_library(
     name = "navigator",
     srcs = [
         "navigator.cc",
@@ -447,6 +465,17 @@ cc_test(
     ],
     deps = [
         ":htmlentities",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "url_test",
+    srcs = [
+        "url_test.cc",
+    ],
+    deps = [
+        ":url",
         "@com_google_googletest//:gtest_main",
     ],
 )

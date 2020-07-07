@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-o2-player'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {

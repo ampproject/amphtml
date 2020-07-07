@@ -26,23 +26,7 @@ limitations under the License.
 
 # amp-list
 
-Fetches content dynamically from a CORS JSON endpoint and renders it
-using a supplied template.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-list/">amp-list example</a>.</td>
-  </tr>
-</table>
+Fetches content dynamically from a CORS JSON endpoint and renders it using a supplied template.
 
 ## Usage
 
@@ -56,6 +40,10 @@ You can specify a template in one of two ways:
 
 - a `template` attribute that references an ID of an existing templating element.
 - a templating element nested directly inside the `amp-list` element.
+
+[tip type="note"]
+When using `<amp-list>` in tandem with another templating AMP component, such as `<amp-form>`, note that templates may not nest in valid AMP documents. In this case a valid workaround is to provide the template by `id` via the `template` attribute. Learn more about [nested templates in `<amp-mustache>`](https://amp.dev/documentation/components/amp-mustache/#nested-templates).
+[/tip]
 
 For more details on templates, see [AMP HTML Templates](../../spec/amp-html-templates.md).
 
@@ -236,6 +224,39 @@ In several cases, we may need the `<amp-list>` to resize on user interaction. Fo
 </amp-list>
 ```
 
+[filter formats="websites, stories"]
+
+### Initialization from amp-state
+
+In most cases, you’ll probably want to have `<amp-list>` request JSON from a server. But `<amp-list>` can also use JSON you’ve included in an `<amp-state>`, right there in your HTML! This means rendering can occur without an additional server call, although, of course, if your page is served from an AMP cache, the data may not be fresh.
+
+Here’s how to have `<amp-list>` render from an `<amp-state>`:
+
+1. Add the [amp-bind](https://amp.dev/documentation/components/amp-bind/) script to your document's `<head>`.
+2. Use the `amp-state:` protocol in your `<amp-list>`’s src attribute, like this:
+   `<amp-list src="amp-state:localState">`
+
+Note that `<amp-list>` treats your JSON in the same way whether it’s requested from your server or pulled from a state variable. The format required doesn’t change.
+
+See below for a full example,
+
+```html
+<amp-state id="localState">
+  <script type="application/json">
+    {
+      "items": [{"id": 1}, {"id": 2}, {"id": 2}]
+    }
+  </script>
+</amp-state>
+<amp-list src="amp-state:localState">
+  <template type="amp-mustache">
+    <li>{{id}}</li>
+  </template>
+</amp-list>
+```
+
+[/filter]<!-- formats="websites, stories" -->
+
 ## Attributes
 
 ### src (required)
@@ -407,6 +428,14 @@ We've introduced the `load-more` attributes with options `manual` and `auto` to 
 ```
 
 For working examples, please see [test/manual/amp-list/infinite-scroll-1.amp.html](../../test/manual/amp-list/infinite-scroll-1.amp.html) and [test/manual/amp-list/infinite-scroll-2.amp.html](../../test/manual/amp-list/infinite-scroll-1.amp.html).
+
+[tip type="important"]
+**Important**
+
+When using `<amp-list>` infinite scroll in conjunction with `<amp-analytics>` scroll triggers, it is recommended to make use of the `useInitialPageSize` property of `<amp-analytics>` to get a more accurate measurement of the scroll position that ignores the height changes caused by `<amp-list>`.
+
+Without `useInitialPageSize`, the `100%` scroll trigger point might never fire as more documents get loaded. Note that this will also ignore the size changes caused by other extensions (such as expanding embedded content) so some scroll events might fire prematurely instead.
+[/tip]
 
 ### Attributes
 

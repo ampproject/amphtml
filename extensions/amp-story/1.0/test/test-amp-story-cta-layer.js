@@ -25,13 +25,13 @@ describes.realWin(
       extensions: ['amp-story:1.0'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let ampStoryCtaLayer;
 
     beforeEach(() => {
       win = env.win;
-      registerServiceBuilder(win, 'performance', function() {
+      registerServiceBuilder(win, 'performance', function () {
         return {
           isPerformanceTrackingOn: () => false,
         };
@@ -82,7 +82,7 @@ describes.realWin(
 
       pageElements[0].appendChild(ampStoryCtaLayer.element);
 
-      ampStoryCtaLayer.layoutCallback().then(layer => {
+      ampStoryCtaLayer.layoutCallback().then((layer) => {
         return allowConsoleError(() => {
           return expect(layer).to.throw();
         });
@@ -105,7 +105,7 @@ describes.realWin(
       pageElements[1].appendChild(ampStoryCtaLayer.element);
       pageElements[2].appendChild(ampStoryCtaLayer.element);
 
-      ampStoryCtaLayer.layoutCallback().then(layer => {
+      ampStoryCtaLayer.layoutCallback().then((layer) => {
         return expect(layer).to.not.throw();
       });
     });

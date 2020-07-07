@@ -28,9 +28,13 @@ std::pair<bool, LineCol> JSONParser::Validate(std::string_view json) {
   uint8_t state = 0;
   std::vector<uint8_t> states_stack {0};
 
-  LineCol line_col;
-  for (uint8_t c : json) {
-    if (c == '\n') {
+  LineCol line_col{0, 0};
+  std::size_t str_size = json.size();
+  for (std::size_t i = 0; i < str_size; i++) {
+    uint8_t c = json.at(i);
+    if (c == '\n' || (c == '\r' &&
+                      i < str_size - 1 &&
+                      json.at(i + 1) != '\n')) {
       line_col.first++;
       line_col.second = 0;
     } else {

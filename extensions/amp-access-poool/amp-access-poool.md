@@ -3,7 +3,7 @@ $category@: dynamic-content
 formats:
   - websites
 teaser:
-  text: Displays a Poool paywall. See poool.tech and demo.poool.tech for more details. amp-access-poool is based on, and requires, AMP Access.
+  text: Displays a Poool paywall.
 ---
 
 <!---
@@ -22,33 +22,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name=”amp-access-poool></a> `amp-access-poool`
+# amp-access-poool
 
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>Displays a Poool paywall<br />.
-    See <a href="https://poool.tech">poool.tech</a> and <a href="https://demo.poool.tech">demo.poool.tech</a> for more details. <code>amp-access-poool</code> is based on, and requires, <a href="https://amp.dev/documentation/components/amp-access">AMP Access</a>.</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Required Scripts</strong></td>
-    <td>
-        <small>Notice that you need scripts for "amp-access-poool" and "amp-access".</small>
-      <div>
-        <code>&lt;script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js">&lt;/script></code>
-      </div>
-      <div>
-        <code>&lt;script async custom-element="amp-access-poool" src="https://cdn.ampproject.org/v0/amp-access-poool-0.1.js">&lt;/script></code>
-      </div>
-    </td>
-  </tr>
-</table>
-
-[TOC]
-
-## Behavior
+## Usage
 
 The `amp-access-poool` component, based on `amp-access`, loads and shows a paywall using your `bundleID` from Poool's Dashboard configuration.
+
+See [poool.tech](https://poool.tech) for more details. `amp-access-poool` is based on, and requires,
+[`amp-access`](https://amp.dev/documentation/components/amp-access).
 
 As you'll know if you're familiar with how Poool works outside of AMP, you cannot use `excerpt` and `hide` modes here. This is due to AMP's specific behavior. You will be able to lock or unlock your content with the `access` variable which is provided by `amp-access`. Check out the `poool-widget` section just below.
 
@@ -56,9 +37,13 @@ The `amp-access-poool` component does not require an authorization or pingback c
 
 For more information about modes, check out our [SDK documentation](https://dev.poool.tech/doc/sdk#mode).
 
-## Configurations
+### Configurations
 
-### HTML sections
+You have to set configuration attributes within AMP in camelCase instead of the underscore (" \_ ") symbol traditionally used by Poool.
+
+For example : use `customSegment="amp-custom-segment"` to achieve `poool("config", "custom_segment", "amp-custom-segment");`.
+
+#### HTML sections
 
 **Set poool-widget section, which contain poool paywall when access isn't granted.**
 
@@ -94,7 +79,7 @@ The `amp-access-poool` component requires 3 different sections:
 <section amp-access="NOT error AND NOT access" id="poool"></section>
 ```
 
-### amp-access script - poool config
+#### amp-access script - poool config
 
 **Example: Basic paywall configuration (with default values)**
 
@@ -133,62 +118,56 @@ Configuration is similar to AMP Access, except no authorization, pingback or log
 
 For more information about configuration variables, check out our [SDK documentation](https://dev.poool.tech/doc/sdk#configuration).
 
-##### Notice
-
-You have to set configuration attributes within AMP in camelCase instead of the underscore (" \_ ") symbol traditionally used by Poool.
-
-For example : use `customSegment="amp-custom-segment"` to achieve `poool("config", "custom_segment", "amp-custom-segment");`.
-
 ## Attributes
 
-##### bundleID (required)
+### bundleID (required)
 
 Your App ID (you can find it on your Dashboard).
 
-##### itemID (required)
+### itemID (required)
 
 Your **unique** article ID.
 
-##### pageType (required)
+### pageType (required)
 
 Used to tell Poool that a page has been visited by the current user.
 See [documentation](https://dev.poool.tech/doc/sdk#page_view) for more information.
 
-##### debug
+### debug
 
 Enable/disable debug mode.
 See [documentation](https://dev.poool.tech/doc/sdk#debug) for more information.
 
-##### forceWidget
+### forceWidget
 
 Override current widget for user.
 See [documentation](https://dev.poool.tech/doc/sdk#force_widget) for more information.
 
-##### loginButtonEnabled
+### loginButtonEnabled
 
 Enable/disable paywall "login" button.
 See [documentation](https://dev.poool.tech/doc/sdk#login_button_enabled) for more information.
 
-##### signatureEnabled
+### signatureEnabled
 
 Enable/disable paywall signature, shown under article content when the article has been unlocked.
 See [documentation](https://dev.poool.tech/doc/sdk#signature_enabled) for more information.
 
-##### videoClient
+### videoClient
 
 Set default video client (vast, googima) for video widget.
 See [documentation](https://dev.poool.tech/doc/sdk#video_client) for more information.
 
-##### customSegment
+### customSegment
 
 Override native segments with a custom group/segment slug.
 See [documentation](https://dev.poool.tech/doc/sdk#custom_segment) for more information.
 
-##### cookiesEnabled
+### cookiesEnabled
 
 Following latest GDPR requirements, we decided to disable cookies by default inside our paywall. You will have to explicitly set this attribute to reflect the user's consent.
 See [documentation](https://dev.poool.tech/doc/sdk#cookies_enabled) for more information.
 
 ## Validation
 
-See [amp-access-poool rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access-poool/validator-amp-access-poool.protoascii) in the AMP validator specification.
+See [`amp-access-poool` rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access-poool/validator-amp-access-poool.protoascii) in the AMP validator specification.

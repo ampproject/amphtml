@@ -119,7 +119,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
     );
     this.registerAction(
       'seekTo',
-      invocation => {
+      (invocation) => {
         const {args} = invocation;
         if (args) {
           this.seekTo_(args);
@@ -132,7 +132,7 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const animData = batchFetchJsonFor(this.ampdoc_, this.element);
-    return animData.then(data => {
+    return animData.then((data) => {
       const opt_context = {
         loop: this.loop_,
         autoplay: this.autoplay_,
@@ -262,6 +262,6 @@ export class AmpBodymovinAnimation extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpBodymovinAnimation);
 });

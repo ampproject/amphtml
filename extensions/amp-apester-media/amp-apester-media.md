@@ -24,51 +24,41 @@ limitations under the License.
 
 # amp-apester-media
 
-Displays a <a href="https://apester.com/">Apester</a> smart unit.
+## Usage
 
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td> <code>&lt;script async custom-element="amp-apester-media" src="https://cdn.ampproject.org/v0/amp-apester-media-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>
-    fill, fixed, fixed-height, flex-item, nodisplay, responsive
-    </td>
-  </tr>
-</table>
-
-[TOC]
-
-## Examples
-
-Single Mode:
-
-```html
-<amp-apester-media height="390" data-apester-media-id="#"> </amp-apester-media>
-```
-
-Playlist Mode:
-
-```html
-<amp-apester-media height="390" data-apester-channel-token="#">
-</amp-apester-media>
-```
+Displays an Apester smart unit.
 
 ## Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>data-apester-media-id</strong></td>
-    <td>This attribute is required for single mode, and it represents the ID of the media (string value).</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-apester-channel-token</strong></td>
-    <td>This attribute is required for playlist mode, and it represents the token of the channel (string value).</td>
-  </tr>
-</table>
+### `data-apester-media-id`
+
+This attribute is required for single mode, and it represents the ID of the
+media (string value).
+
+```html
+<amp-apester-media height="390" data-apester-media-id="#"></amp-apester-media>
+```
+
+### `data-apester-channel-token`
+
+This attribute is required for playlist mode, and it represents the token of the
+channel (string value).
+
+```html
+<amp-apester-media
+  height="390"
+  data-apester-channel-token="#"
+></amp-apester-media>
+```
+
+## Accessibility
+
+`amp-apester-media` automatically adds the
+[`aria-label`](https://www.w3.org/TR/wai-aria-1.1/#aria-label) attribute. This
+[ARIA attribute](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA)
+is applied to the Apester Media loading image.
 
 ## Validation
 
-See [amp-apester-media rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-apester-media/validator-amp-apester-media.protoascii) in the AMP validator specification.
+See [`amp-apester-media` rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-apester-media/validator-amp-apester-media.protoascii)
+in the AMP validator specification.

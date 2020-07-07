@@ -27,7 +27,7 @@ import {
   setReportError,
   user,
 } from '../src/log';
-import {dict} from '../src/utils/object';
+import {dict, hasOwn} from '../src/utils/object';
 import {isProxyOrigin, parseUrlDeprecated} from '../src/url';
 import {loadScript} from './3p';
 import {parseJson} from '../src/json';
@@ -55,6 +55,10 @@ const TAG = 'RECAPTCHA';
 
 /** @const {string} */
 const RECAPTCHA_API_URL = 'https://www.google.com/recaptcha/api.js?render=';
+
+/** @const {string} */
+const GLOBAL_RECAPTCHA_API_URL =
+  'https://www.recaptcha.net/recaptcha/api.js?render=';
 
 /** {?IframeMessaginClient} */
 let iframeMessagingClient = null;
@@ -99,20 +103,28 @@ export function initRecaptcha(recaptchaApiBaseUrl = RECAPTCHA_API_URL) {
     'The sitekey is required for the <amp-recaptcha-input> iframe'
   );
   sitekey = dataObject.sitekey;
+  // Determine the recaptcha api URL based on global property
+  devAssert(
+    hasOwn(dataObject, 'global'),
+    'The global property is required for the <amp-recaptcha-input> iframe'
+  );
+  if (dataObject.global) {
+    recaptchaApiBaseUrl = GLOBAL_RECAPTCHA_API_URL;
+  }
   const recaptchaApiUrl = recaptchaApiBaseUrl + sitekey;
 
   loadScript(
     win,
     recaptchaApiUrl,
-    function() {
+    function () {
       const {grecaptcha} = win;
 
-      grecaptcha.ready(function() {
+      grecaptcha.ready(function () {
         initializeIframeMessagingClient(win, grecaptcha, dataObject);
         iframeMessagingClient./*OK*/ sendMessage('amp-recaptcha-ready');
       });
     },
-    function() {
+    function () {
       dev().error(TAG + ' Failed to load recaptcha api script');
     }
   );
@@ -155,7 +167,7 @@ function actionTypeHandler(win, grecaptcha, data) {
 
       // .then() promise pollyfilled by recaptcha api script
       executePromise./*OK*/ then(
-        function(token) {
+        function (token) {
           iframeMessagingClient./*OK*/ sendMessage(
             'amp-recaptcha-token',
             dict({
@@ -164,7 +176,7 @@ function actionTypeHandler(win, grecaptcha, data) {
             })
           );
         },
-        function(err) {
+        function (err) {
           let message =
             'There was an error running ' +
             'execute() on the reCAPTCHA script.';
@@ -182,7 +194,7 @@ function actionTypeHandler(win, grecaptcha, data) {
         }
       );
     })
-    .catch(error => {
+    .catch((error) => {
       dev().error(TAG, '%s', error.message);
     });
 }
@@ -210,7 +222,7 @@ export function doesOriginDomainMatchIframeSrc(win, data) {
 
   return ampToolboxCacheUrl
     .createCurlsSubdomain(data.origin)
-    .then(curlsSubdomain => {
+    .then((curlsSubdomain) => {
       return compareCurlsDomain(win, curlsSubdomain, data.origin);
     });
 }

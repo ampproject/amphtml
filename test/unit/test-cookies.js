@@ -22,7 +22,7 @@ import {
   setCookie,
 } from '../../src/cookies';
 
-describes.fakeWin('test-cookies', {amp: true}, env => {
+describes.fakeWin('test-cookies', {amp: true}, (env) => {
   let win;
   let clock;
   let doc;
