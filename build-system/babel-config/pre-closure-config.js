@@ -54,14 +54,9 @@ function getPreClosureConfig() {
     '@babel/plugin-transform-react-constant-elements',
     reactJsxPlugin,
     './build-system/babel-plugins/babel-plugin-transform-inline-configure-component',
-    // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
     argv.esm
       ? './build-system/babel-plugins/babel-plugin-transform-dev-methods'
       : null,
-    [
-      './build-system/babel-plugins/babel-plugin-transform-log-methods',
-      {replaceCallArguments: false},
-    ],
     './build-system/babel-plugins/babel-plugin-transform-parenthesize-expression',
     './build-system/babel-plugins/babel-plugin-is_minified-constant-transformer',
     './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
