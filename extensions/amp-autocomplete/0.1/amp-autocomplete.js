@@ -1121,7 +1121,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const nativeChangeEvent = createCustomEvent(
       this.win,
       'change',
-      /** @type {!JsonObject} */ ({value})
+      /** @type {!JsonObject} */ ({value}),
+      {bubbles: true}
     );
     this.inputElement_.dispatchEvent(nativeChangeEvent);
   }
