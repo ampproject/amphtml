@@ -278,9 +278,11 @@ describes.fakeWin(
       return history.goBack(true);
     });
 
-    it('should not call pop() if stack is empty and passed false', () => {
+    it('should not call pop() if stack is empty and passed a falsy arg', async () => {
       bindingMock.expects('pop').never();
-      return history.goBack(false);
+
+      await history.goBack();
+      await history.goBack(false);
     });
 
     it('should get fragment', () => {
