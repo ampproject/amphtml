@@ -156,6 +156,37 @@ export class AmpStoryPlayer {
   }
 
   /**
+   * Makes the current story play its content/auto-advance
+   */
+  play() {
+    this.togglePaused(false);
+  }
+
+  /**
+   * Makes the current story pause its content/auto-advance
+   */
+  pause() {
+    this.togglePaused(true);
+  }
+
+  /**
+   * Makes the current story play or pause its content/auto-advance
+   *
+   * @param {boolean} paused If true, the story will be paused, and it will be played otherwise
+   */
+  togglePaused(paused) {
+    const currentStory = this.stories_[this.currentIdx_];
+    const iframeIdx = currentStory[IFRAME_IDX];
+
+    this.updateVisibilityState_(
+      iframeIdx,
+      paused ? VisibilityState.PAUSED : VisibilityState.VISIBLE
+    );
+  }
+
+
+  /**
+   *
    * @public
    * @return {!Element}
    */
