@@ -17,6 +17,7 @@
 import {EmbedMode, parseEmbedMode} from './embed-mode';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
+import {deepEquals} from '../../../src/json';
 import {dev} from '../../../src/log';
 import {hasOwn} from '../../../src/utils/object';
 import {registerServiceBuilder} from '../../../src/service';
@@ -77,14 +78,6 @@ export let InteractiveComponentDef;
 
 /**
  * @typedef {{
- *    finished: boolean,
- *    categories: !Object<string, number>,
- * }}
- */
-export let InteractiveResultsDef;
-
-/**
- * @typedef {{
  *    canInsertAutomaticAd: boolean,
  *    canShowBookend: boolean,
  *    canShowNavigationOverlayHint: boolean,
@@ -102,7 +95,6 @@ export let InteractiveResultsDef;
  *    infoDialogState: boolean,
  *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
  *    interactiveReactState: !Map<string, {option: ?./amp-story-interactive.OptionConfigType, interactiveId: string}>,
- *    interactiveResultsState: !InteractiveResultsDef,
  *    mutedState: boolean,
  *    pageAudioState: boolean,
  *    pageHasElementsWithPlaybackState: boolean,
@@ -237,37 +229,8 @@ const stateComparisonFunctions = {
     (old, curr) => old.element !== curr.element || old.state !== curr.state,
   [StateProperty.NAVIGATION_PATH]: (old, curr) => old.length !== curr.length,
   [StateProperty.PAGE_IDS]: (old, curr) => old.length !== curr.length,
-  [StateProperty.INTERACTIVE_RESULTS_STATE]: (old, curr) => {
-    return old.finished != curr.finished;
-  },
-};
-
-/**
- * Gets the map of quizzes responded and sets the correct values on the template.
- * @param {!Object} data
- * @return {!InteractiveResultsDef}
- */
-const processInteractiveResults = (data) => {
-  let completed = 0;
-  let totalCount = 0;
-  const categories = {};
-  Object.values(data).forEach((interactiveConfig) => {
-    totalCount += 1;
-    if (interactiveConfig['option'] != null) {
-      completed += 1;
-      const currCategory = interactiveConfig['option']['resultscategory'];
-      if (currCategory != undefined) {
-        categories[currCategory] = categories[currCategory]
-          ? categories[currCategory] + 1
-          : 1;
-      }
-    }
-  });
-  const result = {
-    'finished': completed == totalCount,
-    'categories': categories,
-  };
-  return result;
+  [StateProperty.INTERACTIVE_REACT_STATE]: (old, curr) =>
+    !deepEquals(old, curr, 3),
 };
 
 /**
@@ -280,19 +243,13 @@ const processInteractiveResults = (data) => {
 const actions = (state, action, data) => {
   switch (action) {
     case Action.ADD_INTERACTIVE_REACT:
-      state = /** @type {!State} */ ({
+      return /** @type {!State} */ ({
         ...state,
         [StateProperty.INTERACTIVE_REACT_STATE]: {
           ...state[StateProperty.INTERACTIVE_REACT_STATE],
           [data['interactiveId']]: data,
         },
       });
-      state[
-        StateProperty.INTERACTIVE_RESULTS_STATE
-      ] = processInteractiveResults(
-        state[StateProperty.INTERACTIVE_REACT_STATE]
-      );
-      return /** @type {!State} */ (state);
     case Action.ADD_NEW_PAGE_ID:
       return /** @type {!State} */ ({
         ...state,
@@ -606,10 +563,6 @@ export class AmpStoryStoreService {
         state: EmbeddedComponentState.HIDDEN,
       },
       [StateProperty.INTERACTIVE_REACT_STATE]: {},
-      [StateProperty.INTERACTIVE_RESULTS_STATE]: {
-        finished: false,
-        category: '',
-      },
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
       [StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: false,
