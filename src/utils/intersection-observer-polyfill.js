@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import {Pass} from './pass';
-import {Services} from './services';
-import {SubscriptionApi} from './iframe-helper';
-import {dev, devAssert} from './log';
-import {dict} from './utils/object';
+// TODO(#27807): Remove polyfill part InOb polyfill has been launched. But the
+// host part has to stay.
+
+import {Pass} from '../pass';
+import {Services} from '../services';
+import {SubscriptionApi} from '../iframe-helper';
+import {dev, devAssert} from '../log';
+import {dict} from './object';
 import {
   getLayoutRectAsync,
   layoutRectLtwh,
   moveLayoutRect,
   rectIntersection,
-} from './layout-rect';
-import {isArray, isFiniteNumber} from './types';
-
-// TODO(#27807): Remove polyfill part InOb polyfill has been launched. But the
-// host part has to stay.
+} from '../layout-rect';
 import {getMode} from '../mode';
+import {isArray, isFiniteNumber} from '../types';
 
 /**
  * The structure that defines the rectangle used in intersection observers.
@@ -425,15 +425,16 @@ export class IntersectionObserverPolyfill {
     const {element} = state;
 
     // Non-AMP elements may not have these functions, so we supplement them
-    const elementRectPromise = element.getLayoutBox
-      ? Promise.resolve(element.getLayoutBox())
-      : getLayoutRectAsync(element, hostViewport, this.vsync_);
+    const elementRectPromise =
+      element.getLayoutBox && typeof element.getLayoutBox == 'function'
+        ? Promise.resolve(element.getLayoutBox())
+        : getLayoutRectAsync(element, hostViewport, this.vsync_);
     const owner = element.getOwner && element.getOwner();
     const ownerRect = owner && owner.getLayoutBox();
 
     return elementRectPromise.then((elementRect) => {
       // calculate intersectionRect. that the element intersects with hostViewport
-      // and intersects with owner element and container iframe if exists.
+      // and intersects with owner element.
       const intersectionRect =
         rectIntersection(elementRect, ownerRect, hostViewport) ||
         layoutRectLtwh(0, 0, 0, 0);

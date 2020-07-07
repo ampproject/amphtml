@@ -1503,7 +1503,7 @@ export class VisibilityTracker extends EventTracker {
       );
     }
 
-    // An AMP-element. Wait for DOM to be fully parsed to avoid
+    // An element. Wait for DOM to be fully parsed to avoid
     // false missed searches.
     // Array selectors do not suppor the special cases: ':host' & ':root'
     const selectionMethod =
@@ -1511,11 +1511,7 @@ export class VisibilityTracker extends EventTracker {
     readyPromiseWaitForSpec = waitForSpec || 'ini-load';
     this.assertUniqueSelectors_(selector);
     const unlistenPromise = this.root
-      .getAmpElements(
-        context.parentElement || context,
-        selector,
-        selectionMethod
-      )
+      .getElements(context.parentElement || context, selector, selectionMethod)
       .then((elements) => {
         const unlistenCallbacks = [];
         for (let i = 0; i < elements.length; i++) {
