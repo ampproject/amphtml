@@ -492,7 +492,10 @@ export class AmpStoryPlayer {
    * @param {number} storyDelta
    */
   go(storyDelta) {
-    if (this.currentIdx_ + storyDelta >= this.stories_.length || this.currentIdx_ + storyDelta < 0) {
+    if (
+      this.currentIdx_ + storyDelta >= this.stories_.length || 
+      this.currentIdx_ + storyDelta < 0
+    ) {
       throw new Error('Out of Story range.')
     }
     
@@ -500,24 +503,9 @@ export class AmpStoryPlayer {
       return;
     }
 
-    const newIndex = this.currentIdx_ + storyDelta;
+    const currentStory = this.stories_[this.currentIdx_ + storyDelta];
 
-    const previousStory = this.stories_[newIndex - 1];
-    this.updatePreviousIframe_(
-      previousStory[IFRAME_IDX],
-      IframePosition.PREVIOUS
-    );
-
-    const currentStory = this.stories_[newIndex];
-    this.updateCurrentIframe_(currentStory[IFRAME_IDX]);
-
-    const nextStoryIdx = newIndex + 1;
-    if (
-      nextStoryIdx < this.stories_.length &&
-      this.stories_[nextStoryIdx][IFRAME_IDX] === undefined
-    ) {
-      this.allocateIframeForStory_(nextStoryIdx);
-    }
+    this.show(currentStory.href);
   }
 
   /**
