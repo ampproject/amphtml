@@ -40,7 +40,7 @@ const EXPERIMENT = {
 export const EXPERIMENT_INFO_MAP = {
   [EXPERIMENT_ID]: {
     isTrafficEligible: () => true,
-    branches: [[EXPERIMENT.control], [EXPERIMENT.experiment]],
+    branches: [EXPERIMENT.control, EXPERIMENT.experiment],
   },
 };
 
