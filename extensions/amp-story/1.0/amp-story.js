@@ -1314,7 +1314,7 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Adds an empty alt tag to img elements if an alt tag is not present.
+   * Adds an empty alt tag to amp-img elements if not present.
    * Prevents screen readers from announcing the img src value.
    * @private
    */
