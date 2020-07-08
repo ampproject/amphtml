@@ -432,6 +432,21 @@ export class AmpStoryPlayer {
   }
 
   /**
+   * Indicates the player changed story.
+   * @private
+   */
+  signalNavigation() {
+    let index = this.currentIdx_;
+    let remaining = this.stories_.length - this.currentIdx_ - 1;
+    const event = createCustomEvent(
+      this.win_, 
+      'navigation', 
+      {index, remaining}
+    );
+    this.element_.dispatchEvent(event);
+  }
+
+  /**
    * Navigates to the next story in the player.
    * @private
    */
@@ -458,6 +473,7 @@ export class AmpStoryPlayer {
     ) {
       this.allocateIframeForStory_(nextStoryIdx);
     }
+    this.signalNavigation();
   }
 
   /**
@@ -484,6 +500,7 @@ export class AmpStoryPlayer {
     ) {
       this.allocateIframeForStory_(nextStoryIdx, true /** reverse */);
     }
+    this.signalNavigation();
   }
 
   /**
