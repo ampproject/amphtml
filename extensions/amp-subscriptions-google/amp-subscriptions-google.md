@@ -64,6 +64,53 @@ The `amp-subscriptions-google` is configured as part of `amp-subscriptions` conf
 </head>
 ```
 
+## Real Time Config (rtc)
+
+Real Time Config allows the publisher to spcify the sku or sku's for a subscribe button at page load time. The allows user spscifc offers, time limited offers etc.
+
+To enable rtc add a `skuMapUrl` to the `subscribe.google.com` service.
+
+```html
+<script type="application/json" id="amp-subscriptions">
+  {
+    "services": [
+      {
+        // Local service configuration
+      },
+      {
+        "serviceId": "subscribe.google.com"
+        "skuMapUrl": "https://example.com/sky/map/endpoint"
+      }
+    ]
+  }
+</script>
+```
+
+The `skuMapUrl` is called on page load. It should a map of element id's and configurations:
+
+```JSON
+{
+  "subscribe.google.com': {
+    // button that goes straight to purchase flow
+    "elementId": {
+      "sku": "sku"
+     },
+    // button that launches an offer carousel
+    "anotherElementId": {
+      'carouselOptions': {
+          'skus': ['basic', 'premium_monthly'],
+      }
+    }
+  }
+}
+```
+
+Each configuration corresponds to the sku or skus associated with the button.
+
+To enable a button for rtc add the `subscriptions-google-rtc` attribute. If this attrubte is present the button will be disabled until the skuMapUrl request is completed. Once the skuMap resolved the `subscriptions-google-rtc` attribute will be removed and `subscriptions-google-rtc-set` attrubte added. These attribute may be used for CSS styling, however it is reccomended that the button not be hidden if it will cause a page re-layout when displayed.
+
+Note: The `skuMapUrl` can be the same as the local service auth url as the JSON objects do not conflict. If the auth url is cacheable (`max-age=1` is sufficient) this will allow in a single request to the server to resove authentication and mapping.
+
 ## Entitlements pingback
 
 As described in [amp-subscriptions](../amp-subscriptions/amp-subscriptions.md#pingback-endpoint), if a `pingbackUrl` is specified by the local service, the entitlements response returned by the "winning" service will be sent to the `pingbackUrl` via a POST request.

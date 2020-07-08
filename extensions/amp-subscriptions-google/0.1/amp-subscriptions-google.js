@@ -35,7 +35,9 @@ import {
 } from '../../amp-subscriptions/0.1/entitlement';
 import {Services} from '../../../src/services';
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/constants.js';
+import {UrlBuilder} from '../../amp-subscriptions/0.1/url-builder';
 import {WindowInterface} from '../../../src/window-interface';
+import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
 import {experimentToggles, isExperimentOn} from '../../../src/experiments';
 import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
@@ -387,11 +389,12 @@ export class GoogleSubscriptionsPlatform {
    * Fetch a real time config if appropriate.
    *
    * Note that we don't return the skuMap, instead we save it.
-   * The creates an intentional reace condition.  If the server
+   * The creates an intentional race condition.  If the server
    * doesn't return a skuMap before the user clicks the subscribe button
-   * it will default the server side configured offer carousel.
-   * We do this so that a failure to return a skuMap doesn't block
-   * a user purchase.
+   * the button wil lbe disabled.
+   *
+   * We can't wait for the skumap in the button click becasue it will be popup blocked.
+   *
    * @return {!Promise}
    */
   maybeFetchRealTimeConfig() {

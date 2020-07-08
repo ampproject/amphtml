@@ -117,6 +117,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
   let ackStub;
   let element;
   let entitlementResponse;
+  let rtcButtonElement;
   let win;
 
   beforeEach(() => {
@@ -183,6 +184,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
         ConfiguredRuntime.prototype,
         'showContributionOptions'
       ),
+      subscribe: env.sandbox.stub(ConfiguredRuntime.prototype, 'subscribe'),
       showOffers: env.sandbox.stub(ConfiguredRuntime.prototype, 'showOffers'),
       showAbbrvOffer: env.sandbox.stub(
         ConfiguredRuntime.prototype,
@@ -699,6 +701,57 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     const executeStub = platform.runtime_.showOffers;
     platform.executeAction(Action.SUBSCRIBE);
     expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
+  });
+
+  it('should do nothing if rtc mapped button is not read ', () => {
+    // rtc button
+    rtcButtonElement = env.win.document.createElement('button');
+    rtcButtonElement.setAttribute('subscriptions-google-rtc', '');
+    rtcButtonElement.id = 'rtcTestButton';
+    env.win.document.body.appendChild(rtcButtonElement);
+    platform.skuMap_ = {
+      rtcTestButton: {
+        sku: 'testSku',
+      },
+    };
+    const executeStub = platform.runtime_.subscribe;
+    platform.executeAction(Action.SUBSCRIBE, 'rtcTestButton');
+    expect(executeStub).to.not.be.called;
+  });
+
+  it('should show subscribe flow if single sku is mapped ', () => {
+    // rtc button
+    rtcButtonElement = env.win.document.createElement('button');
+    rtcButtonElement.setAttribute('subscriptions-google-rtc-set', '');
+    rtcButtonElement.id = 'rtcTestButton';
+    env.win.document.body.appendChild(rtcButtonElement);
+    platform.skuMap_ = {
+      rtcTestButton: {
+        sku: 'testSku',
+      },
+    };
+    const executeStub = platform.runtime_.subscribe;
+    platform.executeAction(Action.SUBSCRIBE, 'rtcTestButton');
+    expect(executeStub).to.be.calledWith('testSku');
+  });
+
+  it("should show offers if multiple sku's are mapped", () => {
+    // rtc button
+    rtcButtonElement = env.win.document.createElement('button');
+    rtcButtonElement.setAttribute('subscriptions-google-rtc-set', '');
+    rtcButtonElement.id = 'rtcTestButton';
+    env.win.document.body.appendChild(rtcButtonElement);
+    platform.skuMap_ = {
+      rtcTestButton: {
+        carouselOptions: {skus: ['testSku1', 'testsku2']},
+      },
+    };
+    const executeStub = platform.runtime_.showOffers;
+    platform.executeAction(Action.SUBSCRIBE, 'rtcTestButton');
+    expect(executeStub).to.be.calledWith({
+      isClosable: true,
+      skus: ['testSku1', 'testsku2'],
+    });
   });
 
   it('should show contributions if contribute action is delegated', () => {
