@@ -471,6 +471,7 @@ export class AmpStory extends AMP.BaseElement {
       StateProperty.PAUSED_STATE
     );
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+    this.pauseBackgroundAudio_();
   }
 
   /**
@@ -483,6 +484,7 @@ export class AmpStory extends AMP.BaseElement {
       Action.TOGGLE_PAUSED,
       this.pausedStateToRestore_
     );
+    this.playBackgroundAudio_();
   }
 
   /**
