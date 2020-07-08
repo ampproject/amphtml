@@ -28,11 +28,18 @@ export default {
 export const _default = () => {
   const width = number('width', 440);
   const height = number('height', 225);
+  const slideCount = number('slide count', 1, {min: 0, max: 99});
+  const colorIncrement = Math.floor(255 / (slideCount + 1));
   return (
     <BaseCarousel style={{width, height, position: 'relative'}}>
-      {['lightcoral', 'peachpuff', 'lavender'].map((color) => (
-        <div style={{backgroundColor: color, width, height}}></div>
-      ))}
+      {Array.from({length: slideCount}, (x, i) => {
+        const v = colorIncrement * (i + 1);
+        return (
+          <div
+            style={{backgroundColor: `rgb(${v}, 100, 100)`, width, height}}
+          ></div>
+        );
+      })}
     </BaseCarousel>
   );
 };
