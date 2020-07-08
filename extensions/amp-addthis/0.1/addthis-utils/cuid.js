@@ -23,10 +23,10 @@ const CUID_SESSION_TIME = Date.now();
  * @param {string} cuid
  * @return {Date}
  */
-const getDateFromCuid = cuid => {
+const getDateFromCuid = (cuid) => {
   let date = new Date();
   try {
-    date = (new Date((parseInt(cuid.substr(0, 8), 16) * 1000)));
+    date = new Date(parseInt(cuid.substr(0, 8), 16) * 1000);
   } catch (e) {}
   return date;
 };
@@ -36,13 +36,13 @@ const getDateFromCuid = cuid => {
  * @param {string} cuid
  * @return {boolean}
  */
-const isCuidInFuture = cuid => {
+const isCuidInFuture = (cuid) => {
   const date = getDateFromCuid(cuid);
   date.setDate(date.getDate() - 1);
   return isDateInFuture(date);
 };
 
-export const isDateInFuture = date => {
+export const isDateInFuture = (date) => {
   const now = new Date();
   if (date.getFullYear() < now.getFullYear()) {
     return false;
@@ -64,7 +64,7 @@ export const isDateInFuture = date => {
  * @param {string} cuid
  * @return {boolean}
  */
-export const isValidCUID = cuid => {
+export const isValidCUID = (cuid) => {
   return Boolean(cuid && cuid.match(RE_CUID) && !isCuidInFuture(cuid));
 };
 
@@ -75,7 +75,10 @@ export const isValidCUID = cuid => {
  * @return {string}
  */
 export const createCUID = () => {
-  const suffix = '00000000' +
-      (Math.floor(Math.random() * (MAX_HEX + 1))).toString(16).slice(-8);
-  return ((CUID_SESSION_TIME / 1000) & MAX_HEX).toString(16) + suffix;
+  return (
+    ((CUID_SESSION_TIME / 1000) & MAX_HEX).toString(16) +
+    ('00000000' + Math.floor(Math.random() * (MAX_HEX + 1)).toString(16)).slice(
+      -8
+    )
+  );
 };

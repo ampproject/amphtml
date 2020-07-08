@@ -20,9 +20,7 @@ import {
 } from '../../../amp-a4a/0.1/template-validator';
 import {AmpAdTemplate} from '../amp-ad-custom';
 import {AmpMustache} from '../../../amp-mustache/0.1/amp-mustache';
-import {
-  data,
-} from '../../../amp-a4a/0.1/test/testdata/valid_css_at_rules_amp.reserialized';
+import {data} from '../../../amp-a4a/0.1/test/testdata/valid_css_at_rules_amp.reserialized';
 import {tryParseJson} from '../../../../src/json';
 import {utf8Encode} from '../../../../src/utils/bytes';
 
@@ -32,15 +30,16 @@ const realWinConfig = {
   allowExternalResources: true,
 };
 
-describes.realWin('TemplateRenderer', realWinConfig, env => {
-
+describes.realWin('TemplateRenderer', realWinConfig, (env) => {
   const templateUrl = '/adzerk/1';
 
+  let doc;
   let containerElement;
   let impl;
 
   beforeEach(() => {
-    containerElement = document.createElement('div');
+    doc = env.win.document;
+    containerElement = doc.createElement('div');
     containerElement.setAttribute('height', 50);
     containerElement.setAttribute('width', 320);
     containerElement.setAttribute('src', templateUrl);
@@ -49,15 +48,21 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
     });
     containerElement.renderStarted = () => {};
     containerElement.getPageLayoutBox = () => ({
-      left: 0, top: 0, width: 0, height: 0,
+      left: 0,
+      top: 0,
+      width: 0,
+      height: 0,
     });
     containerElement.getLayoutBox = () => ({
-      left: 0, top: 0, width: 0, height: 0,
+      left: 0,
+      top: 0,
+      width: 0,
+      height: 0,
     });
     containerElement.getIntersectionChangeEntry = () => ({});
     containerElement.isInViewport = () => true;
     containerElement.getAmpDoc = () => env.ampdoc;
-    document.body.appendChild(containerElement);
+    doc.body.appendChild(containerElement);
 
     impl = new AmpAdTemplate(containerElement);
     impl.attemptChangeSize = (width, height) => {
@@ -68,22 +73,25 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
   });
 
   afterEach(() => {
-    sandbox.restore();
-    document.body.removeChild(containerElement);
+    doc.body.removeChild(containerElement);
   });
 
   describe('Iframe Rendering', () => {
-
     it('should load AMP ad in friendly frame', () => {
       impl.adResponsePromise_ = Promise.resolve({
-        arrayBuffer: () => Promise.resolve(utf8Encode(JSON.stringify({
-          templateUrl,
-          data: {
-            url: 'https://www.google.com',
-          },
-        }))),
+        arrayBuffer: () =>
+          Promise.resolve(
+            utf8Encode(
+              JSON.stringify({
+                templateUrl,
+                data: {
+                  url: 'https://www.google.com',
+                },
+              })
+            )
+          ),
         headers: {
-          get: header => {
+          get: (header) => {
             switch (header) {
               case AMP_TEMPLATED_CREATIVE_HEADER_NAME:
                 return 'amp-mustache';
@@ -96,20 +104,23 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
         },
       });
 
-      sandbox.stub(getAmpAdTemplateHelper(env.win), 'fetch').callsFake(url => {
-        expect(url).to.equal(templateUrl);
-        return Promise.resolve(data.adTemplate);
-      });
+      env.sandbox
+        .stub(getAmpAdTemplateHelper(env.win), 'fetch')
+        .callsFake((url) => {
+          expect(url).to.equal(templateUrl);
+          return Promise.resolve(data.adTemplate);
+        });
 
       impl.buildCallback();
       impl.getRequestUrl();
       return impl.layoutCallback().then(() => {
         const iframe = containerElement.querySelector('iframe');
         expect(iframe).to.be.ok;
-        expect(iframe.contentWindow.document.body.innerHTML.trim()).to
-            .equal('<div>\n      <p>ipsum lorem</p>\n      <a href="https://' +
-                'www.google.com/" target="_top">Click for ad!</a>\n    ' +
-                '</div>');
+        expect(iframe.contentWindow.document.body.innerHTML.trim()).to.equal(
+          '<div>\n      <p>ipsum lorem</p>\n      <a href="https://' +
+            'www.google.com/" target="_top">Click for ad!</a>\n    ' +
+            '</div>'
+        );
       });
     });
 
@@ -118,7 +129,7 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
       impl.adResponsePromise_ = Promise.resolve({
         arrayBuffer: () => Promise.resolve(utf8Encode(mockCreative)),
         headers: {
-          get: header => {
+          get: (header) => {
             switch (header) {
               case AMP_TEMPLATED_CREATIVE_HEADER_NAME:
                 return 'amp-mustache';
@@ -146,7 +157,7 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
       impl.adResponsePromise_ = Promise.resolve({
         arrayBuffer: () => Promise.resolve(utf8Encode(mockCreative)),
         headers: {
-          get: header => {
+          get: (header) => {
             switch (header) {
               case 'AMP-Ad-Response-Type':
                 return 'template';
@@ -181,7 +192,16 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
       impl.element.setAttribute('data-request-param-camel-case', '789');
       impl.baseRequestUrl_ = 'https://foo.com';
       expect(impl.getRequestUrl()).to.equal(
-          'https://foo.com?bar=123&baz=456&camelCase=789');
+        'https://foo.com?bar=123&baz=456&camelCase=789'
+      );
+    });
+    it('should substitute macros', () => {
+      impl.buildCallback();
+      impl.baseRequestUrl_ = 'https://foo.com?location=CANONICAL_URL';
+      expect(impl.getRequestUrl()).to.equal(
+        'https://foo.com?location=' +
+          'http%3A%2F%2Flocalhost%3A9876%2Fcontext.html'
+      );
     });
   });
 
@@ -189,11 +209,10 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
     it('should throw if missing src attribute', () => {
       containerElement.removeAttribute('src');
       allowConsoleError(() => {
-        expect(() => new AmpAdTemplate(containerElement)).to
-            .throw('Invalid network configuration: no request URL specified');
+        expect(() => new AmpAdTemplate(containerElement)).to.throw(
+          'Invalid network configuration: no request URL specified'
+        );
       });
     });
   });
 });
-
-

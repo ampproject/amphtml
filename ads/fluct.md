@@ -19,10 +19,13 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="300" height="250"
-    type="fluct"
-    data-g="{GROUP-ID}"
-    data-u="{UNIT-ID}">
+<amp-ad
+  width="300"
+  height="250"
+  type="fluct"
+  data-g="{GROUP-ID}"
+  data-u="{UNIT-ID}"
+>
 </amp-ad>
 ```
 

@@ -17,7 +17,6 @@
 /** @typedef {{className: string, minWidth: number}} */
 export let SyntheticBreakpointDef;
 
-
 /**
  * @param {!Element} element
  * @param {number} width
@@ -28,9 +27,9 @@ export function applyBreakpointClassname(element, width, breakpoints) {
   breakpoints = breakpoints.sort((a, b) => b.minWidth - a.minWidth);
 
   let maxBreakpoint = -1;
-  breakpoints.forEach(({className, minWidth}) => {
-    if (minWidth <= width &&
-        minWidth > maxBreakpoint) {
+  breakpoints.forEach((breakpoint) => {
+    const {className, minWidth} = breakpoint;
+    if (minWidth <= width && minWidth > maxBreakpoint) {
       element.classList.add(className);
       maxBreakpoint = minWidth;
     } else {

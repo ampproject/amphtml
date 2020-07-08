@@ -28,12 +28,22 @@ export function smartclip(global, data) {
     data,
   };
 
-  validateData(data,
-      global._smartclip_amp.mandatory_data, global._smartclip_amp.allowed_data);
+  validateData(
+    data,
+    global._smartclip_amp.mandatory_data,
+    global._smartclip_amp.allowed_data
+  );
 
   const rand = Math.round(Math.random() * 100000000);
 
-  loadScript(global, 'https://des.smartclip.net/ads?type=dyn&plc='
-    + encodeURIComponent(data.plc) + '&sz=' + encodeURIComponent(data.sz)
-    + (data.extra ? '&' + encodeURI(data.extra) : '') + '&rnd=' + rand);
+  loadScript(
+    global,
+    'https://des.smartclip.net/ads?type=dyn&plc=' +
+      encodeURIComponent(data.plc) +
+      '&sz=' +
+      encodeURIComponent(data.sz) +
+      (data.extra ? '&' + encodeURI(data.extra) : '') +
+      '&rnd=' +
+      rand
+  );
 }

@@ -39,20 +39,17 @@ function log(queryParams) {
 }
 
 /**
- * Strip data from string
+ * Pinterest provides text HTML encoded. This utility transforms it back
+ * into UTF-8 text.
  * @param {string} str - the string to filter
  * @return {string}
  */
 function filter(str) {
-  let decoded, ret;
-  decoded = '';
-  ret = '';
   try {
-    decoded = decodeURIComponent(str);
-  } catch (e) { }
-  ret = decoded.replace(/</g, '&lt;');
-  ret = ret.replace(/>/g, '&gt;');
-  return ret;
+    return new DOMParser().parseFromString(str, 'text/html').body.textContent;
+  } catch (e) {
+    return str;
+  }
 }
 
 /**
@@ -62,7 +59,9 @@ function filter(str) {
  * @return {Element}
  */
 function make(doc, data) {
-  let el = null, tag, attr;
+  let el = null,
+    tag,
+    attr;
   for (tag in data) {
     el = doc.createElement(tag);
     for (attr in data[tag]) {

@@ -21,7 +21,7 @@ tags: {  # amp-pinterest
     name: "amp-pinterest"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -40,7 +40,7 @@ tags: {  # <amp-pinterest>
     mandatory: true
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-pinterest"
+  spec_url: "https://amp.dev/documentation/components/amp-pinterest/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

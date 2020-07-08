@@ -1,3 +1,11 @@
+---
+$category@: dynamic-content
+formats:
+  - websites
+teaser:
+  text: Displays a document file supported by Google Drive.
+---
+
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,28 +22,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-google-document-embed"></a> `amp-google-document-embed`
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Displays a document file supported by Google Drive.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-google-document-embed" src="https://cdn.ampproject.org/v0/amp-google-document-embed-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-google-document-embed/">amp-google-document-embed example</a>.</td>
-  </tr>
-</table>
-
-[TOC]
+# amp-google-document-embed
 
 ## Behavior
 
@@ -43,12 +30,14 @@ The `amp-google-document-embed` component displays document files like Word docu
 Excel spreadsheets, and PDFs.
 
 Example:
+
 ```html
 <amp-google-document-embed
-    src="https://www.example.com/document.pdf"
-    width="800"
-    height="600"
-    layout="responsive">
+  src="https://www.example.com/document.pdf"
+  width="800"
+  height="600"
+  layout="responsive"
+>
 </amp-google-document-embed>
 ```
 
@@ -60,7 +49,7 @@ The URL of the document.
 
 ##### common attributes
 
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
 ## Validation
 

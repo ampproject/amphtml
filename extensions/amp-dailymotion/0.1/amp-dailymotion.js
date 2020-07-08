@@ -28,7 +28,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   fullscreenEnter,
@@ -37,10 +37,10 @@ import {
   isFullscreenElement,
 } from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {
-  installVideoManagerForDoc,
-} from '../../../src/service/video-manager-impl';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
+
+const TAG = 'amp-dailymotion';
 
 /**
  * Player events reverse-engineered from the Dailymotion API
@@ -76,7 +76,6 @@ const DailymotionEvents = {
  * @implements {../../../src/video-interface.VideoInterface}
  */
 class AmpDailymotion extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -106,17 +105,24 @@ class AmpDailymotion extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isFullscreen_ = false;
-
   }
 
   /**
-  * @param {boolean=} opt_onLayout
-  * @override
-  */
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://www.dailymotion.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://www.dailymotion.com',
+      opt_onLayout
+    );
     // Host that Dailymotion uses to serve JS needed by player.
-    this.preconnect.url('https://static1.dmcdn.net', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://static1.dmcdn.net',
+      opt_onLayout
+    );
   }
 
   /**
@@ -146,10 +152,11 @@ class AmpDailymotion extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.videoid_ = user().assert(
-        this.element.getAttribute('data-videoid'),
-        'The data-videoid attribute is required for <amp-dailymotion> %s',
-        this.element);
+    this.videoid_ = userAssert(
+      this.element.getAttribute('data-videoid'),
+      'The data-videoid attribute is required for <amp-dailymotion> %s',
+      this.element
+    );
 
     installVideoManagerForDoc(this.element);
     Services.videoManagerForDoc(this.element).register(this);
@@ -164,7 +171,7 @@ class AmpDailymotion extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    dev().assert(this.videoid_);
+    devAssert(this.videoid_);
 
     this.iframe_ = createFrameFor(this, this.getIframeSrc_());
 
@@ -212,11 +219,11 @@ class AmpDailymotion extends AMP.BaseElement {
         break;
 
       case DailymotionEvents.VOLUMECHANGE:
-        const isMuted =
-            data['volume'] == 0 ||
-              (data['muted'] == 'true');
-        if (this.playerState_ == DailymotionEvents.UNSTARTED
-            || this.muted_ != isMuted) {
+        const isMuted = data['volume'] == 0 || data['muted'] == 'true';
+        if (
+          this.playerState_ == DailymotionEvents.UNSTARTED ||
+          this.muted_ != isMuted
+        ) {
           this.muted_ = isMuted;
           this.element.dispatchCustomEvent(mutedOrUnmutedEvent(isMuted));
         }
@@ -244,20 +251,23 @@ class AmpDailymotion extends AMP.BaseElement {
     const endpoint = 'https://www.dailymotion.com';
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        const message = JSON.stringify(dict({
-          'command': command,
-          'parameters': opt_args || [],
-        }));
-        this.iframe_.contentWindow./*OK*/postMessage(message, endpoint);
+        const message = JSON.stringify(
+          dict({
+            'command': command,
+            'parameters': opt_args || [],
+          })
+        );
+        this.iframe_.contentWindow./*OK*/ postMessage(message, endpoint);
       }
     });
   }
 
   /** @private */
   getIframeSrc_() {
-
-    let iframeSrc = 'https://www.dailymotion.com/embed/video/' +
-       encodeURIComponent(this.videoid_ || '') + '?api=1&html=1&app=amp';
+    let iframeSrc =
+      'https://www.dailymotion.com/embed/video/' +
+      encodeURIComponent(this.videoid_ || '') +
+      '?api=1&html=1&app=amp';
 
     const explicitParamsAttributes = [
       'mute',
@@ -269,7 +279,7 @@ class AmpDailymotion extends AMP.BaseElement {
       'info',
     ];
 
-    explicitParamsAttributes.forEach(explicitParam => {
+    explicitParamsAttributes.forEach((explicitParam) => {
       const val = this.element.getAttribute(`data-${explicitParam}`);
       if (val) {
         iframeSrc = addParamToUrl(iframeSrc, explicitParam, val);
@@ -423,9 +433,13 @@ class AmpDailymotion extends AMP.BaseElement {
     // Not supported.
     return [];
   }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    this.user().error(TAG, '`seekTo` not supported.');
+  }
 }
 
-
-AMP.extension('amp-dailymotion', '0.1', AMP => {
-  AMP.registerElement('amp-dailymotion', AmpDailymotion);
+AMP.extension(TAG, '0.1', (AMP) => {
+  AMP.registerElement(TAG, AmpDailymotion);
 });

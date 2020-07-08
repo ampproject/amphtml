@@ -21,16 +21,13 @@
  */
 
 import {AccessController} from './access-controller';
-import {Deferred} from '../../../../src/utils/promise';
 import {Messenger} from './messenger';
-
 
 /**
  * Connects to the parent AMP document and executes authorization, pingback,
  * and other access features.
  */
 export class AmpAccessIframeApi {
-
   /**
    * @param {!AccessController} controller
    * @param {!Window=} opt_win
@@ -50,9 +47,10 @@ export class AmpAccessIframeApi {
 
     /** @private @const {!Messenger} */
     this.messenger_ = new Messenger(
-        this.win_,
-        this.target_,
-        /* targetOrigin */ null);
+      this.win_,
+      this.target_,
+      /* targetOrigin */ null
+    );
 
     /** @private {?Object} */
     this.config_ = null;
@@ -60,16 +58,17 @@ export class AmpAccessIframeApi {
     /** @private {?string} */
     this.protocol_ = null;
 
-    const deferred = new Deferred();
+    /** @private {?function()} */
+    this.connectedResolver_ = null;
 
     /** @private @const {!Promise} */
-    this.connectedPromise_ = deferred.promise;
-
-    /** @private {?function()} */
-    this.connectedResolver_ = deferred.resolve;
+    this.connectedPromise_ = new Promise((resolve) => {
+      this.connectedResolver_ = resolve;
+    });
   }
 
   /**
+   * @return {!Promise} Promise that resolves when connection completes.
    */
   connect() {
     this.messenger_.connect(this.handleCommand_.bind(this));
@@ -94,11 +93,14 @@ export class AmpAccessIframeApi {
       // Response to "connect" command.
       this.config_ = payload['config'];
       this.protocol_ = payload['protocol'];
-      const promise = new Promise(resolve => {
-        resolve(this.controller_.connect(
+      const promise = new Promise((resolve) => {
+        resolve(
+          this.controller_.connect(
             this.messenger_.getTargetOrigin(),
             this.protocol_,
-            this.config_));
+            this.config_
+          )
+        );
       });
       this.connectedResolver_(promise);
       return promise;
@@ -108,7 +110,7 @@ export class AmpAccessIframeApi {
       return;
     }
     if (cmd == 'authorize') {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         resolve(this.controller_.authorize());
       });
     }
@@ -116,15 +118,17 @@ export class AmpAccessIframeApi {
       if (!this.controller_.pingback) {
         return null;
       }
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         resolve(this.controller_.pingback());
       }).then(() => {});
     }
   }
 }
 
-
-/** @package Visible for testing. */
+/**
+ * @package Visible for testing.
+ * @return {typeof AccessController}
+ */
 export function getAccessControllerForTesting() {
   return AccessController;
 }

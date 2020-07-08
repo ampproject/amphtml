@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 /**
  * Polyfill for `document.contains()` method. Notice that according to spec
  * `document.contains` is inclusionary.
@@ -30,7 +29,6 @@ function documentContainsPolyfill(node) {
   return node == this || this.documentElement.contains(node);
 }
 
-
 /**
  * Polyfills `HTMLDocument.contains` API.
  * @param {!Window} win
@@ -39,7 +37,7 @@ export function install(win) {
   // HTMLDocument is undefined in Internet Explorer 10, but it has Document,
   // so we use that as a fallback.
   const documentClass = win.HTMLDocument || win.Document;
-  if (!documentClass.prototype.contains) {
+  if (documentClass && !documentClass.prototype.contains) {
     win.Object.defineProperty(documentClass.prototype, 'contains', {
       enumerable: false,
       configurable: true,

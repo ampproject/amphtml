@@ -2,7 +2,7 @@
  * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use baseInstance file except in compliance with the License.
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {ancestorElementsByTag} from '../../../src/dom';
 import {getAdContainer} from '../../../src/ad-helper';
 
 export class AmpAdUIHandler {
-
   /**
    * @param {!AMP.BaseElement} baseInstance
    */
@@ -37,8 +37,11 @@ export class AmpAdUIHandler {
     if (this.element_.hasAttribute('data-ad-container-id')) {
       const id = this.element_.getAttribute('data-ad-container-id');
       const container = this.doc_.getElementById(id);
-      if (container && container.tagName == 'AMP-LAYOUT' &&
-          container.contains(this.element_)) {
+      if (
+        container &&
+        container.tagName == 'AMP-LAYOUT' &&
+        container.contains(this.element_)
+      ) {
         // Parent <amp-layout> component with reference id can serve as the
         // ad container
         this.containerElement_ = container;
@@ -54,26 +57,17 @@ export class AmpAdUIHandler {
   }
 
   /**
-   * Create a default placeholder if not provided.
-   * Should be called in baseElement createPlaceholderCallback.
-   */
-  createPlaceholder() {
-    return this.addDefaultUiComponent_('placeholder');
-  }
-
-  /**
    * Apply UI for laid out ad with no-content
    * Order: try collapse -> apply provided fallback -> apply default fallback
    */
   applyNoContentUI() {
     if (getAdContainer(this.element_) === 'AMP-STICKY-AD') {
       // Special case: force collapse sticky-ad if no content.
-      this.baseInstance_./*OK*/collapse();
+      this.baseInstance_./*OK*/ collapse();
       return;
     }
 
     if (getAdContainer(this.element_) === 'AMP-FX-FLYING-CARPET') {
-
       /**
        * Special case: Force collapse the ad if it is the,
        * only and direct child of a flying carpet.
@@ -83,15 +77,17 @@ export class AmpAdUIHandler {
        * used with flying carpet and ads yet.
        */
 
-      const flyingCarpetElements =
-        ancestorElementsByTag(this.element_, 'amp-fx-flying-carpet');
+      const flyingCarpetElements = ancestorElementsByTag(
+        this.element_,
+        'amp-fx-flying-carpet'
+      );
       const flyingCarpetElement = flyingCarpetElements[0];
 
-      flyingCarpetElement.getImpl().then(implementation => {
+      flyingCarpetElement.getImpl().then((implementation) => {
         const children = implementation.getChildren();
 
         if (children.length === 1 && children[0] === this.element_) {
-          this.baseInstance_./*OK*/collapse();
+          this.baseInstance_./*OK*/ collapse();
         }
       });
       return;
@@ -100,10 +96,10 @@ export class AmpAdUIHandler {
     let attemptCollapsePromise;
     if (this.containerElement_) {
       // Collapse the container element if there's one
-      attemptCollapsePromise = this.element_.getResources().attemptCollapse(
-          this.containerElement_);
-      attemptCollapsePromise.then(() => {
-      });
+      attemptCollapsePromise = Services.mutatorForDoc(
+        this.element_.getAmpDoc()
+      ).attemptCollapse(this.containerElement_);
+      attemptCollapsePromise.then(() => {});
     } else {
       attemptCollapsePromise = this.baseInstance_.attemptCollapse();
     }
@@ -155,21 +151,26 @@ export class AmpAdUIHandler {
    * @param {number|string|undefined} width
    * @param {number} iframeHeight
    * @param {number} iframeWidth
+   * @param {!MessageEvent} event
    * @return {!Promise<!Object>}
    */
-  updateSize(height, width, iframeHeight, iframeWidth) {
+  updateSize(height, width, iframeHeight, iframeWidth, event) {
     // Calculate new width and height of the container to include the padding.
     // If padding is negative, just use the requested width and height directly.
     let newHeight, newWidth;
     height = parseInt(height, 10);
     if (!isNaN(height)) {
-      newHeight = Math.max(this.element_./*OK*/offsetHeight +
-          height - iframeHeight, height);
+      newHeight = Math.max(
+        this.element_./*OK*/ offsetHeight + height - iframeHeight,
+        height
+      );
     }
     width = parseInt(width, 10);
     if (!isNaN(width)) {
-      newWidth = Math.max(this.element_./*OK*/offsetWidth +
-          width - iframeWidth, width);
+      newWidth = Math.max(
+        this.element_./*OK*/ offsetWidth + width - iframeWidth,
+        width
+      );
     }
 
     /** @type {!Object<boolean, number|undefined, number|undefined>} */
@@ -188,13 +189,15 @@ export class AmpAdUIHandler {
       resizeInfo.success = false;
       return Promise.resolve(resizeInfo);
     }
-    return this.baseInstance_.attemptChangeSize(
-        newHeight, newWidth).then(() => {
-      return resizeInfo;
-    }, () => {
-      resizeInfo.success = false;
-      return resizeInfo;
-    });
+    return this.baseInstance_
+      .attemptChangeSize(newHeight, newWidth, event)
+      .then(
+        () => resizeInfo,
+        () => {
+          resizeInfo.success = false;
+          return resizeInfo;
+        }
+      );
   }
 }
 

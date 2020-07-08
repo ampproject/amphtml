@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 /**
  * Returns true if the element is in the array and false otherwise.
  *
@@ -39,12 +38,12 @@ function includes(value, opt_fromIndex) {
 }
 
 /**
-* Sets the Array.contains polyfill if it does not exist.
-* @param {!Window} win
-*/
+ * Sets the Array.contains polyfill if it does not exist.
+ * @param {!Window} win
+ */
 export function install(win) {
   if (!win.Array.prototype.includes) {
-    win.Object.defineProperty(Array.prototype, 'includes', {
+    win.Object.defineProperty(win.Array.prototype, 'includes', {
       enumerable: false,
       configurable: true,
       writable: true,

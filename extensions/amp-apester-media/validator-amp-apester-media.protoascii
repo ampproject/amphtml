@@ -21,7 +21,7 @@ tags: {  # amp-apester-media
     name: "amp-apester-media"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -49,5 +49,5 @@ tags: {  # <amp-apester-media>
       supported_layouts: NODISPLAY
       supported_layouts: RESPONSIVE
   }
-  spec_url: "https://www.ampproject.org/docs/reference/components/amp-apester-media"
+  spec_url: "https://amp.dev/documentation/components/amp-apester-media/"
 }

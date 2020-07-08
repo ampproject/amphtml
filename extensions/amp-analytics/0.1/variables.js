@@ -15,17 +15,34 @@
  */
 
 import {Services} from '../../../src/services';
+import {TickLabel} from '../../../src/enums';
+import {asyncStringReplace} from '../../../src/string';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
-import {dev, user} from '../../../src/log';
-import {getService, registerServiceBuilder} from '../../../src/service';
+import {cookieReader} from './cookie-reader';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {getConsentPolicyState} from '../../../src/consent';
+import {
+  getServiceForDoc,
+  getServicePromiseForDoc,
+  registerServiceBuilderForDoc,
+} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
-import {tryResolve} from '../../../src/utils/promise';
+import {isInFie} from '../../../src/iframe-helper';
+import {linkerReaderServiceFor} from './linker-reader';
 
 /** @const {string} */
 const TAG = 'amp-analytics/variables';
 
 /** @const {RegExp} */
 const VARIABLE_ARGS_REGEXP = /^(?:([^\s]*)(\([^)]*\))|[^]+)$/;
+
+const EXTERNAL_CONSENT_POLICY_STATE_STRING = {
+  1: 'sufficient',
+  2: 'insufficient',
+  3: 'not_required',
+  4: 'unknown',
+};
 
 /** @typedef {{name: string, argList: string}} */
 let FunctionNameArgsDef;
@@ -74,26 +91,28 @@ export class ExpansionOptions {
   }
 }
 
-
-
 /**
- * @param {string} str
+ * @param {string} value
  * @param {string} s
  * @param {string=} opt_l
  * @return {string}
  */
-function substrMacro(str, s, opt_l) {
+function substrMacro(value, s, opt_l) {
   const start = Number(s);
-  let {length} = str;
-  user().assert(isFiniteNumber(start),
-      'Start index ' + start + 'in substr macro should be a number');
+  let {length} = value;
+  userAssert(
+    isFiniteNumber(start),
+    'Start index ' + start + 'in substr macro should be a number'
+  );
   if (opt_l) {
     length = Number(opt_l);
-    user().assert(isFiniteNumber(length),
-        'Length ' + length + ' in substr macro should be a number');
+    userAssert(
+      isFiniteNumber(length),
+      'Length ' + length + ' in substr macro should be a number'
+    );
   }
 
-  return str.substr(start, length);
+  return value.substr(start, length);
 }
 
 /**
@@ -103,7 +122,7 @@ function substrMacro(str, s, opt_l) {
  */
 function defaultMacro(value, defaultValue) {
   if (!value || !value.length) {
-    return user().assertString(defaultValue);
+    return defaultValue;
   }
   return value;
 }
@@ -125,6 +144,34 @@ function replaceMacro(string, matchPattern, opt_newSubStr) {
   return string.replace(regex, opt_newSubStr);
 }
 
+/**
+ * Applies the match function to the given string with the given regex
+ * @param {string} string input to be replaced
+ * @param {string} matchPattern string representation of regex pattern
+ * @param {string=} opt_matchingGroupIndexStr the matching group to return.
+ *                  Index of 0 indicates the full match. Defaults to 0
+ * @return {string} returns the matching group given by opt_matchingGroupIndexStr
+ */
+function matchMacro(string, matchPattern, opt_matchingGroupIndexStr) {
+  if (!matchPattern) {
+    user().warn(TAG, 'MATCH macro must have two or more arguments');
+  }
+
+  let index = 0;
+  if (opt_matchingGroupIndexStr) {
+    index = parseInt(opt_matchingGroupIndexStr, 10);
+
+    // if given a non-number or negative number
+    if ((index != 0 && !index) || index < 0) {
+      user().error(TAG, 'Third argument in MATCH macro must be a number >= 0');
+      index = 0;
+    }
+  }
+
+  const regex = new RegExp(matchPattern);
+  const matches = string.match(regex);
+  return matches && matches[index] ? matches[index] : '';
+}
 
 /**
  * Provides support for processing of advanced variable syntax like nested
@@ -132,66 +179,137 @@ function replaceMacro(string, matchPattern, opt_newSubStr) {
  */
 export class VariableService {
   /**
-   * @param {!Window} window
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(window) {
+  constructor(ampdoc) {
+    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
 
-    /** @private {!Window} */
-    this.win_ = window;
+    /** @private {!JsonObject} */
+    this.macros_ = dict({});
 
-    /** @private {!Object<string, *>} */
-    this.macros_ = {};
+    /** @const @private {!./linker-reader.LinkerReader} */
+    this.linkerReader_ = linkerReaderServiceFor(this.ampdoc_.win);
 
     this.register_('$DEFAULT', defaultMacro);
     this.register_('$SUBSTR', substrMacro);
-    this.register_('$TRIM', value => value.trim());
-    this.register_('$TOLOWERCASE', value => value.toLowerCase());
-    this.register_('$TOUPPERCASE', value => value.toUpperCase());
-    this.register_('$NOT', value => String(!value));
-    this.register_('$BASE64', value => base64UrlEncodeFromString(value));
+    this.register_('$TRIM', (value) => value.trim());
+    this.register_('$TOLOWERCASE', (value) => value.toLowerCase());
+    this.register_('$TOUPPERCASE', (value) => value.toUpperCase());
+    this.register_('$NOT', (value) => String(!value));
+    this.register_('$BASE64', (value) => base64UrlEncodeFromString(value));
     this.register_('$HASH', this.hashMacro_.bind(this));
-    this.register_('$IF',
-        (value, thenValue, elseValue) => value ? thenValue : elseValue);
+    this.register_('$IF', (value, thenValue, elseValue) =>
+      stringToBool(value) ? thenValue : elseValue
+    );
     this.register_('$REPLACE', replaceMacro);
+    this.register_('$MATCH', matchMacro);
+    this.register_(
+      '$EQUALS',
+      (firstValue, secValue) => firstValue === secValue
+    );
+    this.register_('LINKER_PARAM', (name, id) =>
+      this.linkerReader_.get(name, id)
+    );
+
+    // Returns the IANA timezone code
+    this.register_('TIMEZONE_CODE', () => {
+      let tzCode = '';
+      if (
+        'Intl' in this.ampdoc_.win &&
+        'DateTimeFormat' in this.ampdoc_.win.Intl
+      ) {
+        // It could be undefined (i.e. IE11)
+        tzCode = new this.ampdoc_.win.Intl.DateTimeFormat().resolvedOptions()
+          .timeZone;
+      }
+
+      return tzCode;
+    });
+
+    // Returns a promise resolving to viewport.getScrollTop.
+    this.register_('SCROLL_TOP', () =>
+      Math.round(Services.viewportForDoc(this.ampdoc_).getScrollTop())
+    );
+
+    // Returns a promise resolving to viewport.getScrollLeft.
+    this.register_('SCROLL_LEFT', () =>
+      Math.round(Services.viewportForDoc(this.ampdoc_).getScrollLeft())
+    );
   }
 
   /**
-   * @return {!Object} contains all registered macros
+   * @param {!Element} element
+   * @return {!JsonObject} contains all registered macros
    */
-  getMacros() {
-    return this.macros_;
+  getMacros(element) {
+    const elementMacros = {
+      'COOKIE': (name) =>
+        cookieReader(this.ampdoc_.win, dev().assertElement(element), name),
+      'CONSENT_STATE': getConsentStateStr(element),
+    };
+    const perfMacros = isInFie(element)
+      ? {}
+      : {
+          'FIRST_CONTENTFUL_PAINT': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE
+            ),
+          'FIRST_VIEWPORT_READY': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.FIRST_VIEWPORT_READY
+            ),
+          'MAKE_BODY_VISIBLE': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.MAKE_BODY_VISIBLE
+            ),
+          'LARGEST_CONTENTFUL_PAINT': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE
+            ),
+          'FIRST_INPUT_DELAY': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.FIRST_INPUT_DELAY
+            ),
+          'CUMULATIVE_LAYOUT_SHIFT': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.CUMULATIVE_LAYOUT_SHIFT
+            ),
+        };
+    const merged = {...this.macros_, ...elementMacros, ...perfMacros};
+    return /** @type {!JsonObject} */ (merged);
   }
 
   /**
+   * TODO (micajuineho): If we add new synchronous macros, we
+   * will need to split this method and getMacros into sync and
+   * async version (currently all macros are async).
    * @param {string} name
    * @param {*} macro
    */
   register_(name, macro) {
-    dev().assert(!this.macros_[name], 'Macro "' + name
-        + '" already registered.');
+    devAssert(!this.macros_[name], 'Macro "' + name + '" already registered.');
     this.macros_[name] = macro;
   }
 
   /**
-   * @param {string} template The template to expand
-   * @param {!ExpansionOptions} options configuration to use for expansion
-   * @return {!Promise<string>} The expanded string
+   * Converts templates from ${} format to MACRO() and resolves any platform
+   * level macros when encountered.
+   * @param {string} template The template to expand.
+   * @param {!ExpansionOptions} options configuration to use for expansion.
+   * @param {!Element} element amp-analytics element.
+   * @param {!JsonObject=} opt_bindings
+   * @param {!Object=} opt_allowlist
+   * @return {!Promise<string>} The expanded string.
    */
-  expandTemplate(template, options) {
-    return tryResolve(this.expandTemplateSync.bind(this, template, options));
-  }
-
-  /**
-   * @param {string} template The template to expand
-   * @param {!ExpansionOptions} options configuration to use for expansion
-   * @return {string} The expanded string
-   * @visibleForTesting
-   */
-  expandTemplateSync(template, options) {
-    return template.replace(/\${([^}]*)}/g, (match, key) => {
+  expandTemplate(template, options, element, opt_bindings, opt_allowlist) {
+    return asyncStringReplace(template, /\${([^}]*)}/g, (match, key) => {
       if (options.iterations < 0) {
-        user().error(TAG, 'Maximum depth reached while expanding variables. ' +
-            'Please ensure that the variables are not recursive.');
+        user().error(
+          TAG,
+          'Maximum depth reached while expanding variables. ' +
+            'Please ensure that the variables are not recursive.'
+        );
         return match;
       }
 
@@ -208,30 +326,88 @@ export class VariableService {
       }
 
       let value = options.getVar(name);
+      const urlReplacements = Services.urlReplacementsForDoc(element);
 
       if (typeof value == 'string') {
-        value = this.expandTemplateSync(value,
-            new ExpansionOptions(options.vars, options.iterations - 1,
-                true /* noEncode */));
+        value = this.expandValueAndReplaceAsync_(
+          value,
+          options,
+          element,
+          urlReplacements,
+          opt_bindings,
+          opt_allowlist,
+          argList
+        );
+      } else if (isArray(value)) {
+        // Treat each value as a template and expand
+        for (let i = 0; i < value.length; i++) {
+          value[i] =
+            typeof value[i] == 'string'
+              ? this.expandValueAndReplaceAsync_(
+                  value[i],
+                  options,
+                  element,
+                  urlReplacements,
+                  opt_bindings,
+                  opt_allowlist
+                )
+              : value[i];
+        }
+        value = Promise.all(/** @type {!Array<string>} */ (value));
       }
 
-      if (!options.noEncode) {
-        value = encodeVars(/** @type {string|?Array<string>} */(value));
-      }
-      if (value) {
-        value += argList;
-      }
-      return value;
+      return Promise.resolve(value).then((value) =>
+        !options.noEncode
+          ? encodeVars(/** @type {string|?Array<string>} */ (value))
+          : value
+      );
     });
   }
 
+  /**
+   * @param {string} value
+   * @param {!ExpansionOptions} options
+   * @param {!Element} element amp-analytics element.
+   * @param {!../../../src/service/url-replacements-impl.UrlReplacements} urlReplacements
+   * @param {!JsonObject=} opt_bindings
+   * @param {!Object=} opt_allowlist
+   * @param {string=} opt_argList
+   * @return {Promise<string>}
+   */
+  expandValueAndReplaceAsync_(
+    value,
+    options,
+    element,
+    urlReplacements,
+    opt_bindings,
+    opt_allowlist,
+    opt_argList
+  ) {
+    return this.expandTemplate(
+      value,
+      new ExpansionOptions(
+        options.vars,
+        options.iterations - 1,
+        true /* noEncode */
+      ),
+      element,
+      opt_bindings,
+      opt_allowlist
+    ).then((val) =>
+      urlReplacements.expandStringAsync(
+        opt_argList ? val + opt_argList : val,
+        opt_bindings || this.getMacros(element),
+        opt_allowlist
+      )
+    );
+  }
 
   /**
    * @param {string} value
    * @return {!Promise<string>}
    */
   hashMacro_(value) {
-    return Services.cryptoFor(this.win_).sha384Base64(value);
+    return Services.cryptoFor(this.ampdoc_.win).sha384Base64(value);
   }
 }
 
@@ -265,24 +441,39 @@ export function getNameArgs(key) {
     return {name: '', argList: ''};
   }
   const match = key.match(VARIABLE_ARGS_REGEXP);
-  user().assert(match, 'Variable with invalid format found: ' + key);
+  userAssert(match, 'Variable with invalid format found: ' + key);
 
   return {name: match[1] || match[0], argList: match[2] || ''};
 }
 
 /**
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  */
-export function installVariableService(win) {
-  registerServiceBuilder(win, 'amp-analytics-variables', VariableService);
+export function installVariableServiceForTesting(ampdoc) {
+  registerServiceBuilderForDoc(
+    ampdoc,
+    'amp-analytics-variables',
+    VariableService
+  );
 }
 
 /**
- * @param {!Window} win
+ * @param {!Element|!ShadowRoot|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
  * @return {!VariableService}
  */
-export function variableServiceFor(win) {
-  return getService(win, 'amp-analytics-variables');
+export function variableServiceForDoc(elementOrAmpDoc) {
+  return getServiceForDoc(elementOrAmpDoc, 'amp-analytics-variables');
+}
+
+/**
+ * @param {!Element|!ShadowRoot|!../../../src/service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+ * @return {!Promise<!VariableService>}
+ */
+export function variableServicePromiseForDoc(elementOrAmpDoc) {
+  return /** @type {!Promise<!VariableService>} */ (getServicePromiseForDoc(
+    elementOrAmpDoc,
+    'amp-analytics-variables'
+  ));
 }
 
 /**
@@ -292,4 +483,34 @@ export function variableServiceFor(win) {
  */
 export function getNameArgsForTesting(key) {
   return getNameArgs(key);
+}
+
+/**
+ * Get the resolved consent state value to send with analytics request
+ * @param {!Element} element
+ * @return {!Promise<?string>}
+ */
+function getConsentStateStr(element) {
+  return getConsentPolicyState(element).then((consent) => {
+    if (!consent) {
+      return null;
+    }
+    return EXTERNAL_CONSENT_POLICY_STATE_STRING[consent];
+  });
+}
+
+/**
+ * Converts string to boolean
+ * @param {string} str
+ * @return {boolean}
+ */
+export function stringToBool(str) {
+  return (
+    str !== 'false' &&
+    str !== '' &&
+    str !== '0' &&
+    str !== 'null' &&
+    str !== 'NaN' &&
+    str !== 'undefined'
+  );
 }

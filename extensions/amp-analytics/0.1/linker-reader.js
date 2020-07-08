@@ -17,19 +17,13 @@
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {hasOwn} from '../../../src/utils/object';
 import {parseLinker} from './linker';
-import {
-  parseQueryString,
-  parseUrlDeprecated,
-  removeParamsFromSearch,
-} from '../../../src/url';
+import {parseQueryString, removeParamsFromSearch} from '../../../src/url';
 
 import {user} from '../../../src/log';
 
 const TAG = 'amp-analytics/linker-reader';
 
-
-class LinkerReader {
-
+export class LinkerReader {
   /**
    * @param {!Window} win
    */
@@ -58,10 +52,7 @@ class LinkerReader {
     }
 
     if (this.linkerParams_[name] && this.linkerParams_[name][id]) {
-      // Return the id value and remove the id from the object
-      const value = this.linkerParams_[name][id];
-      delete this.linkerParams_[name][id];
-      return value;
+      return this.linkerParams_[name][id];
     }
 
     return null;
@@ -74,18 +65,15 @@ class LinkerReader {
    * @return {?Object<string, string>}
    */
   parseAndCleanQueryString_(name) {
-    const parsedUrl = parseUrlDeprecated(this.win_.location.href);
-    const params = parseQueryString(parsedUrl.search);
+    const params = parseQueryString(this.win_.location.search);
     if (!hasOwn(params, name)) {
       // Linker param not found.
       return null;
     }
     const value = params[name];
-
-    this.removeLinkerParam_(parsedUrl, name);
+    this.removeLinkerParam_(this.win_.location, name);
     return parseLinker(value);
   }
-
 
   /**
    * Remove the linker param from the current url
@@ -99,8 +87,11 @@ class LinkerReader {
     }
     const searchUrl = url.search;
     const removedLinkerParamSearchUrl = removeParamsFromSearch(searchUrl, name);
-    const newHref = url.origin + url.pathname +
-        removedLinkerParamSearchUrl + (url.hash || '');
+    const newHref =
+      url.origin +
+      url.pathname +
+      removedLinkerParamSearchUrl +
+      (url.hash || '');
     this.win_.history.replaceState(null, '', newHref);
   }
 }
@@ -109,8 +100,7 @@ class LinkerReader {
  * @param {!Window} win
  */
 export function installLinkerReaderService(win) {
-  registerServiceBuilder(win, 'amp-analyitcs-linker-reader',
-      LinkerReader);
+  registerServiceBuilder(win, 'amp-analytics-linker-reader', LinkerReader);
 }
 
 /**
@@ -118,5 +108,5 @@ export function installLinkerReaderService(win) {
  * @return {!LinkerReader}
  */
 export function linkerReaderServiceFor(win) {
-  return getService(win, 'amp-analyitcs-linker-reader');
+  return getService(win, 'amp-analytics-linker-reader');
 }

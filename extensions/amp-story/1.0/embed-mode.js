@@ -16,7 +16,6 @@
 import {isEnumValue} from '../../../src/types';
 import {parseQueryString} from '../../../src/url';
 
-
 /**
  * Embed mode for AMP story.  See ../embed-modes.md for details.
  * @enum {number}
@@ -51,8 +50,19 @@ export const EmbedMode = {
    * - TODO(#14923): Removes the link information from embedded UIs.
    */
   NO_SHARING: 2,
-};
 
+  /**
+   * This mode is intended for a preview of the story.
+   *
+   * This differs from the NOT_EMBEDDED embed mode in the following ways:
+   * - Auto-advances pages by a given duration.
+   * - Hides bookend
+   * - Hides all system layer buttons
+   * - Disables swipe-based user education
+   * - Disallows ads
+   */
+  PREVIEW: 3,
+};
 
 /**
  * Parameter to retrieve the embed mode from the location hash.
@@ -60,11 +70,10 @@ export const EmbedMode = {
  */
 export const EmbedModeParam = 'embedMode';
 
-
 /**
  * @param {string} str
  * @return {!EmbedMode}
- * @private
+ * @package
  */
 export function parseEmbedMode(str) {
   const params = parseQueryString(str);

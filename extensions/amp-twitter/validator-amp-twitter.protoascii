@@ -21,7 +21,7 @@ tags: {  # amp-twitter
     name: "amp-twitter"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -49,21 +49,9 @@ tags: {  # <amp-twitter>
     }
   }
   attrs: {
-    name: "data-link-color"
-    trigger: {
-      also_requires_attr: "data-tweetid"
-    }
-  }
-  attrs: {
     name: "data-momentid"
     mandatory_oneof: "['data-momentid', 'data-timeline-source-type', 'data-tweetid']"
     value_regex: "\\d+"
-  }
-  attrs: {
-    name: "data-theme"
-    trigger: {
-      also_requires_attr: "data-tweetid"
-    }
   }
   attrs: {
     name: "data-timeline-id"
@@ -115,6 +103,10 @@ tags: {  # <amp-twitter>
   attrs: {
     name: "data-tweetid"
     mandatory_oneof: "['data-momentid', 'data-timeline-source-type', 'data-tweetid']"
+  }
+  # <amp-bind>
+  attrs: {
+    name: "[data-tweetid]"
   }
   attr_lists: "extended-amp-global"
   amp_layout: {

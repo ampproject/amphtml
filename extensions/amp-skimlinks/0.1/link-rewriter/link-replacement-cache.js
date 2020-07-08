@@ -24,7 +24,6 @@ export class LinkReplacementCache {
    * Constructor
    */
   constructor() {
-
     /** @private {!Array<!HTMLElement>} */
     this.anchorList_ = [];
 
@@ -44,7 +43,7 @@ export class LinkReplacementCache {
     // Warning: This step needs to be done before updating this.anchorList_
     // since getReplacementUrlForAnchor relies on it.
     this.replacementList_ = newAnchorList.map(
-        this.getReplacementUrlForAnchor.bind(this)
+      this.getReplacementUrlForAnchor.bind(this)
     );
 
     this.anchorList_ = newAnchorList;
@@ -55,7 +54,8 @@ export class LinkReplacementCache {
    * @public
    */
   updateReplacementUrls(replacementList) {
-    replacementList.forEach(({anchor, replacementUrl}) => {
+    replacementList.forEach((replacementItem) => {
+      const {anchor, replacementUrl} = replacementItem;
       const anchorIndex = this.anchorList_.indexOf(anchor);
       if (anchorIndex !== -1) {
         this.replacementList_[anchorIndex] = replacementUrl;
@@ -91,7 +91,7 @@ export class LinkReplacementCache {
    * @public
    */
   getAnchorReplacementList() {
-    return this.anchorList_.map(anchor => {
+    return this.anchorList_.map((anchor) => {
       return /** @type {!{anchor: !HTMLElement, replacementUrl: ?string}} */ ({
         anchor,
         replacementUrl: this.getReplacementUrlForAnchor(anchor),

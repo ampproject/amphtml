@@ -1,0 +1,97 @@
+/**
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.i-amphtml-lbg-caption-scroll {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 1;
+  /* 
+   * Make sure we do not overlap with the buttons. This is not applied to
+   * `.i-amphtml-lbg-caption-text` to avoid expanding the hit area when
+   * collapsed.
+   */
+  padding-top: 40px !important;
+  box-sizing: border-box !important;
+  color: #ffffff;
+  text-shadow: 1px 0 5px rgba(0, 0, 0, 0.4) !important;
+  overflow: hidden !important;
+  /* 40px padding top, plus 20px padding top/bottom for the caption text. */
+  max-height: calc(80px + 3rem) !important;
+  transition: max-height ease-out 0.3s !important;
+  /* Prevent clicks on this on the padding from expanding the caption. */
+  pointer-events: none !important;
+}
+
+.i-amphtml-lbg-caption-text {
+  padding: 20px !important;
+  pointer-events: all !important;
+}
+
+.i-amphtml-lbg-caption-text:empty {
+  display: none !important;
+}
+
+[i-amphtml-lbg-caption-state="clip"] {
+  /* Fade out the text, using an approximated exponential gradient. */
+  mask-image: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.0) 0rem,
+    rgba(0, 0, 0, 0.2) 1rem,
+    rgba(0, 0, 0, 0.55) 2rem,
+    rgba(0, 0, 0, 1.0) 3rem
+  );
+}
+
+[i-amphtml-lbg-caption-state="expand"]  {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  max-height: 100% !important;
+  transition: max-height ease-out 0.7s !important;
+  /* Fade out the text, using an approximated exponential gradient. */
+  mask-image: linear-gradient(
+    rgba(0, 0, 0, 0.0) 0px,
+    rgba(0, 0, 0, 0.2) 20px,
+    rgba(0, 0, 0, 0.55) 40px,
+    rgba(0, 0, 0, 1.0) 60px
+  );
+}
+
+.i-amphtml-lbg-caption-mask {
+  min-height: 1rem;
+  width: 100% !important;
+  position: fixed !important;
+  bottom: 0 !important;
+  pointer-events: all !important;
+}
+
+[i-amphtml-lbg-caption-state="clip"] + .i-amphtml-lbg-caption-mask {
+  z-index: 1 !important;
+  background: transparent !important;
+  transition: background-color ease-out 0.5s !important;
+}
+
+[i-amphtml-lbg-caption-state="expand"] + .i-amphtml-lbg-caption-mask {
+  background-color: rgba(0,0,0,0.4) !important;
+  top: 0 !important;
+  z-index: 0 !important;
+  transition: background-color ease-in 0.4s !important;
+}
+
+.i-amphtml-lbg[gallery-view] .i-amphtml-lbg-caption {
+  display: none;
+}

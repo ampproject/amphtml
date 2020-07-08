@@ -21,12 +21,12 @@ import {loadScript} from '../3p/3p';
  */
 export function nativo(global, data) {
   let ntvAd;
-  (function(ntvAd, global, data) {
-    global
-        .history
-        .replaceState(null,
-            '',
-            location.pathname + location.hash.replace(/({).*(})/, ''));
+  (function (ntvAd, global, data) {
+    global.history.replaceState(
+      null,
+      '',
+      location.pathname + location.hash.replace(/({).*(})/, '')
+    );
     // Private
     let delayedAdLoad = false;
     let percentageOfadViewed;
@@ -36,37 +36,40 @@ export function nativo(global, data) {
      * @return {boolean}
      */
     function isValidDelayTime(delay) {
-      return ((typeof delay != 'undefined'
-        && !isNaN(delay)
-        && parseInt(delay,10) >= 0));
+      return (
+        typeof delay != 'undefined' && !isNaN(delay) && parseInt(delay, 10) >= 0
+      );
     }
     /**
      * @param {!Object} data
      * @return {boolean}
      */
     function isDelayedTimeStart(data) {
-      return (isValidDelayTime(data.delayByTime)
-        && ('delay' in data)
-        && !('delayByView' in data));
+      return (
+        isValidDelayTime(data.delayByTime) &&
+        'delay' in data &&
+        !('delayByView' in data)
+      );
     }
     /**
      * @param {!Object} data
      * @return {boolean}
      */
     function isDelayedViewStart(data) {
-      return (isValidDelayTime(data.delayByTime)
-        && ('delayByView' in data));
+      return isValidDelayTime(data.delayByTime) && 'delayByView' in data;
     }
     /**
      * Loads ad when done.
      */
     function loadAdWhenViewed() {
       const g = global;
-      global.context.observeIntersection(function(positions) {
+      global.context.observeIntersection(function (positions) {
         const coordinates = getLastPositionCoordinates(positions);
-        if (typeof coordinates.rootBounds != 'undefined'
-            && (coordinates.intersectionRect.top == (
-              coordinates.rootBounds.top + coordinates.boundingClientRect.y))) {
+        if (
+          typeof coordinates.rootBounds != 'undefined' &&
+          coordinates.intersectionRect.top ==
+            coordinates.rootBounds.top + coordinates.boundingClientRect.y
+        ) {
           if (isDelayedViewStart(data) && !delayedAdLoad) {
             g.PostRelease.Start();
             delayedAdLoad = true;
@@ -79,13 +82,14 @@ export function nativo(global, data) {
      */
     function loadAdWhenTimedout() {
       const g = global;
-      setTimeout(function() {
+      setTimeout(function () {
         g.PostRelease.Start();
         delayedAdLoad = true;
       }, parseInt(data.delayByTime, 10));
     }
     /**
      * @param {*} positions
+     * @return {*} TODO(#23582): Specify return type
      */
     function getLastPositionCoordinates(positions) {
       return positions[positions.length - 1];
@@ -104,43 +108,49 @@ export function nativo(global, data) {
     function viewabilityConfiguration(positions) {
       const coordinates = getLastPositionCoordinates(positions);
       setPercentageOfadViewed(
-          (((coordinates.intersectionRect
-              .height * 100) / coordinates
-              .boundingClientRect
-              .height) / 100));
+        (coordinates.intersectionRect.height * 100) /
+          coordinates.boundingClientRect.height /
+          100
+      );
       global.PostRelease.checkIsAdVisible();
     }
     // Public
-    ntvAd.getPercentageOfadViewed = function() {
+    ntvAd.getPercentageOfadViewed = function () {
       return percentageOfadViewed;
     };
-    ntvAd.getScriptURL = function() {
+    ntvAd.getScriptURL = function () {
       return 'https://s.ntv.io/serve/load.js';
     };
     // Configuration setup is based on the parameters/attributes associated with
     // the amp-ad node
-    ntvAd.setupAd = function() {
+    ntvAd.setupAd = function () {
       global._prx = [['cfg.Amp']];
       global._prx.push(['cfg.RequestUrl', data['requestUrl'] || loc.href]);
       for (const key in data) {
         switch (key) {
-          case 'premium': global._prx.push(['cfg.SetUserPremium']); break;
-          case 'debug': global._prx.push(['cfg.Debug']); break;
-          case 'delay': if (isValidDelayTime(data.delayByTime)) {
-            global._prx.push(['cfg.SetNoAutoStart']);
-          } break;
+          case 'premium':
+            global._prx.push(['cfg.SetUserPremium']);
+            break;
+          case 'debug':
+            global._prx.push(['cfg.Debug']);
+            break;
+          case 'delay':
+            if (isValidDelayTime(data.delayByTime)) {
+              global._prx.push(['cfg.SetNoAutoStart']);
+            }
+            break;
         }
       }
     };
     // Used to Delay Start and Initalize Tracking. This is a callback AMP will
     // use once script is loaded
-    ntvAd.Start = function() {
+    ntvAd.Start = function () {
       if (isDelayedTimeStart(data)) {
         loadAdWhenTimedout();
       } else if (isDelayedViewStart(data)) {
         loadAdWhenViewed();
       }
-      global.PostRelease.checkAmpViewability = function() {
+      global.PostRelease.checkAmpViewability = function () {
         return ntvAd.getPercentageOfadViewed();
       };
       // ADD TRACKING HANDLER TO OBSERVER

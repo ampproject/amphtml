@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
+import {devAssert} from '../../../src/log';
 
 /**
  * Maintains state in between different AdSense slots on the same page. This
@@ -22,12 +22,10 @@ import {dev} from '../../../src/log';
  * parameters.
  */
 export class AdsenseSharedState {
-
   /**
    * Creates an instance of AdsenseSharedState.
    */
   constructor() {
-
     /** @private {!Array<!{id: string, format: string, client: string, slotname: (string|undefined)}>} */
     this.previousSlots_ = [];
   }
@@ -45,12 +43,12 @@ export class AdsenseSharedState {
    * */
   addNewSlot(format, id, client, slotname) {
     const result = {pv: 2, prevFmts: '', prevSlotnames: ''};
-    this.previousSlots_.forEach(slot => {
-      dev().assert(slot.id != id);
+    this.previousSlots_.forEach((slot) => {
+      devAssert(slot.id != id);
       result.prevFmts += (result.prevFmts ? ',' : '') + slot.format;
       if (slot.slotname) {
         result.prevSlotnames +=
-            (result.prevSlotnames ? ',' : '') + slot.slotname;
+          (result.prevSlotnames ? ',' : '') + slot.slotname;
       }
       if (slot.client == client) {
         result.pv = 1;
@@ -65,7 +63,7 @@ export class AdsenseSharedState {
    * @param {string} id The ID of the slot to be removed.
    */
   removeSlot(id) {
-    this.previousSlots_ = this.previousSlots_.filter(slot => {
+    this.previousSlots_ = this.previousSlots_.filter((slot) => {
       return slot.id != id;
     });
   }

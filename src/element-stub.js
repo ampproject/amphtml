@@ -15,11 +15,10 @@
  */
 
 import {BaseElement} from './base-element';
-import {dev} from './log';
+import {devAssert} from './log';
 
 /** @type {!Array} */
 export const stubbedElements = [];
-
 
 export class ElementStub extends BaseElement {
   /** @param {!AmpElement} element */
@@ -30,7 +29,7 @@ export class ElementStub extends BaseElement {
 
   /** @override */
   getLayoutPriority() {
-    return dev().assert(0, 'Cannot get priority of stubbed element');
+    return devAssert(0, 'Cannot get priority of stubbed element');
   }
 
   /** @override */

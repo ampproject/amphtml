@@ -44,6 +44,15 @@
       layout="responsive"
       width="480" height="270">
   </amp-brid-player>
+  <!-- Alternate valid example using a dynamic playlist. -->
+  <amp-brid-player
+      data-partner="264"
+      data-player="4144"
+      data-playlist="test tag"
+      data-dynamic="tag"
+      layout="responsive"
+      width="480" height="270">
+  </amp-brid-player>
   <!-- Alternate valid example using a outstream. -->
   <amp-brid-player
       data-partner="6205"
@@ -63,6 +72,15 @@
   <amp-brid-player
       data-partner="264"
       data-player="4144"
+      layout="responsive"
+      width="480" height="270">
+  </amp-brid-player>
+  <!-- Invalid: `dock` without `amp-video-docking` extension. -->
+  <amp-brid-player
+      dock
+      data-partner="264"
+      data-player="4144"
+      data-video="13663"
       layout="responsive"
       width="480" height="270">
   </amp-brid-player>

@@ -18,14 +18,7 @@ import {CustomEventReporterBuilder} from '../../../src/extension-analytics.js';
 import {dict} from '../../../src/utils/object';
 import {generatePageImpressionId, isExcludedAnchorUrl} from './utils';
 
-import {
-
-  LINKS_IMPRESSIONS_TRACKING_URL,
-  NA_CLICK_TRACKING_URL,
-  PAGE_IMPRESSION_TRACKING_URL,
-  PLATFORM_NAME,
-  XCUST_ATTRIBUTE_NAME,
-} from './constants';
+import {PLATFORM_NAME, XCUST_ATTRIBUTE_NAME} from './constants';
 
 const PAGE_IMPRESSIONS = 'page-impressions';
 const LINK_IMPRESSIONS = 'link-impressions';
@@ -119,13 +112,10 @@ export class Tracking {
     });
 
     const {numberAffiliateLinks, urls} = this.extractAnchorTrackingInfo_(
-        anchorReplacementList
+      anchorReplacementList
     );
 
-    this.sendPageImpressionTracking_(
-        commonData,
-        numberAffiliateLinks
-    );
+    this.sendPageImpressionTracking_(commonData, numberAffiliateLinks);
     this.sendLinkImpressionTracking_(commonData, numberAffiliateLinks, urls);
   }
 
@@ -162,11 +152,15 @@ export class Tracking {
     });
 
     // Sends POST request. Second param is the object used to interpolate
-    // placeholder variables defined in NA_CLICK_TRACKING_URL.
-    this.analytics_.trigger(NON_AFFILIATE_CLICK, dict({
-      'data': JSON.stringify(data),
-      'rnd': 'RANDOM',
-    }));
+    // placeholder variables defined in NA_CLICK_TRACKING_URL
+    // (See constants.js).
+    this.analytics_.trigger(
+      NON_AFFILIATE_CLICK,
+      dict({
+        'data': JSON.stringify(data),
+        'rnd': 'RANDOM',
+      })
+    );
   }
 
   /**
@@ -180,21 +174,25 @@ export class Tracking {
     const {customTrackingId, referrer} = this.trackingInfo_;
 
     const data = /** @type {!JsonObject} */ (Object.assign(
-        dict({
-          'slc': numberAffiliateLinks,
-          'jsl': 0, // Javascript load time, not relevant in AMP context.
-          'pref': referrer,
-          'uc': customTrackingId,
-          't': 1,
-        }),
-        commonData
+      dict({
+        'slc': numberAffiliateLinks,
+        'jsl': 0, // Javascript load time, not relevant in AMP context.
+        'pref': referrer,
+        'uc': customTrackingId,
+        't': 1,
+      }),
+      commonData
     ));
 
     // Sends POST request. Second param is the object used to interpolate
-    // placeholder variables defined in PAGE_IMPRESSION_TRACKING_URL.
-    this.analytics_.trigger(PAGE_IMPRESSIONS, dict({
-      'data': JSON.stringify(data),
-    }));
+    // placeholder variables defined in PAGE_IMPRESSION_TRACKING_URL
+    // (See constants.js).
+    this.analytics_.trigger(
+      PAGE_IMPRESSIONS,
+      dict({
+        'data': JSON.stringify(data),
+      })
+    );
   }
 
   /**
@@ -206,20 +204,29 @@ export class Tracking {
    * @private
    */
   sendLinkImpressionTracking_(commonData, numberAffiliateLinks, urls) {
+    if (numberAffiliateLinks === 0) {
+      // Nothing to send.
+      return;
+    }
+
     const data = /** @type {!JsonObject} */ (Object.assign(
-        dict({
-          'dl': urls,
-          'hae': numberAffiliateLinks ? 1 : 0, // 1 if has at least one AE link
-          'typ': 'l',
-        }),
-        commonData
+      dict({
+        'dl': urls,
+        'hae': numberAffiliateLinks ? 1 : 0, // 1 if has at least one AE link
+        'typ': 'l',
+      }),
+      commonData
     ));
 
     // Send POST request. Second param is the object used to interpolate
     // placeholder variables defined in LINKS_IMPRESSIONS_TRACKING_URL.
-    this.analytics_.trigger(LINK_IMPRESSIONS, dict({
-      'data': JSON.stringify(data),
-    }));
+    // (See constants.js).
+    this.analytics_.trigger(
+      LINK_IMPRESSIONS,
+      dict({
+        'data': JSON.stringify(data),
+      })
+    );
   }
 
   /**
@@ -233,23 +240,28 @@ export class Tracking {
    */
   setupAnalytics_(element) {
     const analyticsBuilder = new CustomEventReporterBuilder(element);
+    const {
+      pageTrackingUrl,
+      linksTrackingUrl,
+      nonAffiliateTrackingUrl,
+    } = this.skimOptions_.config;
+
     // Configure analytics to send POST request when receiving
     // 'page-impressions' event.
-    analyticsBuilder.track(PAGE_IMPRESSIONS,
-        PAGE_IMPRESSION_TRACKING_URL);
-    analyticsBuilder.track(LINK_IMPRESSIONS,
-        LINKS_IMPRESSIONS_TRACKING_URL);
-    analyticsBuilder.track(NON_AFFILIATE_CLICK,
-        NA_CLICK_TRACKING_URL);
+    analyticsBuilder.track(PAGE_IMPRESSIONS, pageTrackingUrl);
+    analyticsBuilder.track(LINK_IMPRESSIONS, linksTrackingUrl);
+    analyticsBuilder.track(NON_AFFILIATE_CLICK, nonAffiliateTrackingUrl);
 
-    analyticsBuilder.setTransportConfig(dict({
-      'beacon': true,
-      'image': true,
-      // Tracking API supports CORS with wildcard in Access-Control-Origin
-      // which is not compatible with the credentials flag set to true when
-      // using xhrpost.
-      'xhrpost': false,
-    }));
+    analyticsBuilder.setTransportConfig(
+      dict({
+        'beacon': true,
+        'image': true,
+        // Tracking API supports CORS with wildcard in Access-Control-Origin
+        // which is not compatible with the credentials flag set to true when
+        // using xhrpost.
+        'xhrpost': false,
+      })
+    );
 
     return analyticsBuilder.build();
   }
@@ -258,10 +270,12 @@ export class Tracking {
    * Extract the information about links on the page
    * in order to send it to the tracking API:
    * - Number of affiliate links on the pages
-   * - A map of each url seen on the page associated with some information:
-   *   i.e: {url1: { count: 1, ae: 0 }, url2: { count: 4, ae: 1}}
+   * - A map of each AE url seen on the page associated with some information:
+   *   i.e: {url1: { count: 1, ae: 1 }, url2: { count: 4, ae: 1}}
    *
-   * @param {!./link-rewriter/link-rewriter.AnchorReplacementList} anchorReplacementList - Map of all the anchors on the page
+   * Note: NA links are now excluded from the tracking info.
+   *
+   * @param {!./link-rewriter/link-rewriter.AnchorReplacementList} anchorReplacementList - List of all the anchors on the page
    *    associated with their potential replacement url.
    * @return {!{numberAffiliateLinks: number, urls: !JsonObject}}
    * @private
@@ -270,21 +284,24 @@ export class Tracking {
     let numberAffiliateLinks = 0;
     const urls = dict({});
 
-    anchorReplacementList.forEach(({replacementUrl, anchor}) => {
-      if (isExcludedAnchorUrl(anchor, this.skimOptions_)) {
+    anchorReplacementList.forEach((anchorReplacement) => {
+      const {replacementUrl, anchor} = anchorReplacement;
+      const isExcluded = isExcludedAnchorUrl(anchor, this.skimOptions_);
+      const isAffiliate = Boolean(replacementUrl);
+      // Do not track na-links since the backend doesn't use them.
+      if (!isAffiliate || isExcluded) {
         return;
       }
 
-      urls[anchor.href] = urls[anchor.href] || dict({
-        'ae': replacementUrl ? 1 : 0,
-        'count': 0,
-      });
+      urls[anchor.href] =
+        urls[anchor.href] ||
+        dict({
+          'ae': 1, // 1 means affiliated link.
+          'count': 0,
+        });
 
       urls[anchor.href]['count'] += 1;
-
-      if (urls[anchor.href]['ae'] === 1) {
-        numberAffiliateLinks += 1;
-      }
+      numberAffiliateLinks += 1;
     });
 
     return {

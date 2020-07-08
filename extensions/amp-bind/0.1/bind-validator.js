@@ -35,7 +35,7 @@ let PropertyRulesDef;
  */
 const GLOBAL_PROPERTY_RULES = {
   'class': {
-    blacklistedValueRegex: '(^|\\W)i-amphtml-',
+    denylistedValueRegex: '(^|\\W)i-amphtml-',
   },
   'hidden': null,
   'text': null,
@@ -93,7 +93,7 @@ export class BindValidator {
    * @return {boolean}
    */
   canBind(tag, property) {
-    return (this.rulesForTagAndProperty_(tag, property) !== undefined);
+    return this.rulesForTagAndProperty_(tag, property) !== undefined;
   }
 
   /**
@@ -140,9 +140,9 @@ export class BindValidator {
       }
     }
     // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
-    const {blacklistedValueRegex} = rules;
-    if (value && blacklistedValueRegex) {
-      const re = new RegExp(blacklistedValueRegex, 'i');
+    const {denylistedValueRegex} = rules;
+    if (value && denylistedValueRegex) {
+      const re = new RegExp(denylistedValueRegex, 'i');
       if (re.test(value)) {
         return false;
       }
@@ -221,6 +221,43 @@ export class BindValidator {
 function createElementRules_() {
   // Initialize `rules` with tag-specific constraints.
   const rules = {
+    'AMP-AUDIO': {
+      'album': null,
+      'artist': null,
+      'artwork': null,
+      'controlsList': null,
+      'loop': null,
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
+      'title': null,
+    },
+    'AMP-AUTOCOMPLETE': {
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
+    },
+    'AMP-BASE-CAROUSEL': {
+      'advance-count': null,
+      'auto-advance-count': null,
+      'auto-advance-interval': null,
+      'auto-advance-loops': null,
+      'auto-advance': null,
+      'horizontal': null,
+      'initial-index': null,
+      'loop': null,
+      'mixed-length': null,
+      'side-slide-count': null,
+      'slide': null,
+      'snap-align': null,
+      'snap-by': null,
+      'snap': null,
+      'visible-count': null,
+    },
     'AMP-BRIGHTCOVE': {
       'data-account': null,
       'data-embed': null,
@@ -235,6 +272,11 @@ function createElementRules_() {
     'AMP-DATE-PICKER': {
       'max': null,
       'min': null,
+      'src': {
+        'allowedProtocols': {
+          'https': true,
+        },
+      },
     },
     'AMP-GOOGLE-DOCUMENT-EMBED': {
       'src': null,
@@ -242,6 +284,7 @@ function createElementRules_() {
     },
     'AMP-IFRAME': {
       'src': null,
+      'title': null,
     },
     'AMP-IMG': {
       'alt': null,
@@ -284,10 +327,17 @@ function createElementRules_() {
       'datetime': null,
       'title': null,
     },
+    'AMP-TWITTER': {
+      'data-tweetid': null,
+    },
     'AMP-VIDEO': {
+      'album': null,
       'alt': null,
+      'artist': null,
+      'artwork': null,
       'attribution': null,
       'controls': null,
+      'controlslist': null,
       'loop': null,
       'poster': null,
       'preload': null,
@@ -296,19 +346,31 @@ function createElementRules_() {
           'https': true,
         },
       },
+      'title': null,
     },
     'AMP-YOUTUBE': {
       'data-videoid': null,
     },
     'A': {
       'href': {
+        // This should be kept in sync with validator-main.protoascii.
         'allowedProtocols': {
           'ftp': true,
+          'geo': true,
           'http': true,
           'https': true,
           'mailto': true,
+          'maps': true,
+          // 3rd Party Protocols
+          'bip': true,
+          'bbmi': true,
+          'chrome': true,
+          'itms-services': true,
+          'facetime': true,
+          'fb-me': true,
           'fb-messenger': true,
           'intent': true,
+          'line': true,
           'skype': true,
           'sms': true,
           'snapchat': true,
@@ -317,6 +379,9 @@ function createElementRules_() {
           'threema': true,
           'twitter': true,
           'viber': true,
+          'webcal': true,
+          'web+mastodon': true,
+          'wh': true,
           'whatsapp': true,
         },
       },
@@ -325,6 +390,9 @@ function createElementRules_() {
       'disabled': null,
       'type': null,
       'value': null,
+    },
+    'DETAILS': {
+      'open': null,
     },
     'FIELDSET': {
       'disabled': null,
@@ -359,7 +427,7 @@ function createElementRules_() {
       'spellcheck': null,
       'step': null,
       'type': {
-        blacklistedValueRegex: '(^|\\s)(button|image|)(\\s|$)',
+        denylistedValueRegex: '(^|\\s)(button|image|)(\\s|$)',
       },
       'value': null,
       'width': null,
@@ -373,6 +441,9 @@ function createElementRules_() {
     'OPTGROUP': {
       'disabled': null,
       'label': null,
+    },
+    'SECTION': {
+      'data-expand': null,
     },
     'SELECT': {
       'autofocus': null,
@@ -405,6 +476,7 @@ function createElementRules_() {
       'disabled': null,
       'maxlength': null,
       'minlength': null,
+      'pattern': null,
       'placeholder': null,
       'readonly': null,
       'required': null,
@@ -414,6 +486,8 @@ function createElementRules_() {
       'selectionstart': null,
       'spellcheck': null,
       'wrap': null,
+      // Non-standard property.
+      'defaulttext': null,
     },
   };
   return rules;

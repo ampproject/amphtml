@@ -17,6 +17,7 @@
 import {
   getRGBFromCssColorValue,
   getTextColorForRGB,
+  shouldShowStoryUrlInfo,
   timeStrToMillis,
 } from '../utils';
 
@@ -54,13 +55,19 @@ describes.fakeWin('amp-story utils', {}, () => {
 
   describe('getRGBFromCssColorValue', () => {
     it('should accept rgb parameters', () => {
-      expect(getRGBFromCssColorValue('rgb(0, 10, 100)'))
-          .to.deep.equal({r: 0, g: 10, b: 100});
+      expect(getRGBFromCssColorValue('rgb(0, 10, 100)')).to.deep.equal({
+        r: 0,
+        g: 10,
+        b: 100,
+      });
     });
 
     it('should accept rgba parameters', () => {
-      expect(getRGBFromCssColorValue('rgba(0, 10, 100, 0.1)'))
-          .to.deep.equal({r: 0, g: 10, b: 100});
+      expect(getRGBFromCssColorValue('rgba(0, 10, 100, 0.1)')).to.deep.equal({
+        r: 0,
+        g: 10,
+        b: 100,
+      });
     });
 
     it('should throw an error if wrong parameters', () => {
@@ -71,8 +78,11 @@ describes.fakeWin('amp-story utils', {}, () => {
 
     it('should return a default value if wrong parameters', () => {
       allowConsoleError(() => {
-        expect(getRGBFromCssColorValue('who dis'))
-            .to.deep.equal({r: 0, g: 0, b: 0});
+        expect(getRGBFromCssColorValue('who dis')).to.deep.equal({
+          r: 0,
+          g: 0,
+          b: 0,
+        });
       });
     });
   });
@@ -86,5 +96,38 @@ describes.fakeWin('amp-story utils', {}, () => {
       expect(getTextColorForRGB({r: 200, g: 200, b: 200})).to.equal('#000');
     });
   });
-});
 
+  describe('shouldShowStoryUrlInfo', () => {
+    it('should be true when isEmbedded', () => {
+      const fakeViewer = {
+        getParam: () => null,
+        isEmbedded: () => true,
+      };
+      expect(shouldShowStoryUrlInfo(fakeViewer)).to.be.true;
+    });
+
+    it('should be forced to false when isEmbedded', () => {
+      const fakeViewer = {
+        getParam: () => '0',
+        isEmbedded: () => true,
+      };
+      expect(shouldShowStoryUrlInfo(fakeViewer)).to.be.false;
+    });
+
+    it('should be false when !isEmbedded', () => {
+      const fakeViewer = {
+        getParam: () => null,
+        isEmbedded: () => false,
+      };
+      expect(shouldShowStoryUrlInfo(fakeViewer)).to.be.false;
+    });
+
+    it('should be forced to true when !isEmbedded', () => {
+      const fakeViewer = {
+        getParam: () => '1',
+        isEmbedded: () => false,
+      };
+      expect(shouldShowStoryUrlInfo(fakeViewer)).to.be.true;
+    });
+  });
+});

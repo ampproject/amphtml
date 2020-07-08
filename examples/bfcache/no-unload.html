@@ -1,0 +1,57 @@
+<!doctype html>
+<html ⚡ lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <link rel="preload" as="script" href="https://cdn.ampproject.org/v0.js">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+  <style amp-custom>
+  main {
+    margin: 0 auto;
+    width: 50vw;
+    min-width: 320px;
+    max-width: 800px;
+  }
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <link rel="canonical" href=".">
+  <title>AMP BFCache example</title>
+</head>
+<body>
+<main>
+  <h1>AMP BFCache example</h1>
+  <h2>Wow 1</h2>
+  <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Molestias quas laborum voluptate culpa error asperiores similique facere, natus ullam beatae quos. Asperiores reiciendis, assumenda placeat architecto eius iusto distinctio nesciunt.</p>
+  <amp-img src="/examples/img/hero@1x.jpg" layout="responsive" width="640" height="480"></amp-img>
+  <a href="no-unload.html?page=QUERY_PARAM(page)0" data-amp-replace="QUERY_PARAM">Next page</a>
+
+  <h2>Wow 2</h2>
+  <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Molestias quas laborum voluptate culpa error asperiores similique facere, natus ullam beatae quos. Asperiores reiciendis, assumenda placeat architecto eius iusto distinctio nesciunt.</p>
+  <amp-img src="/examples/img/hero@1x.jpg" layout="responsive" width="640" height="480"></amp-img>
+  <a href="no-unload.html?page=QUERY_PARAM(page)1" data-amp-replace="QUERY_PARAM">Next page</a>
+
+  <h2>Wow 3</h2>
+  <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Molestias quas laborum voluptate culpa error asperiores similique facere, natus ullam beatae quos. Asperiores reiciendis, assumenda placeat architecto eius iusto distinctio nesciunt.</p>
+  <amp-img src="/examples/img/hero@1x.jpg" layout="responsive" width="640" height="480"></amp-img>
+  <a href="no-unload.html?page=QUERY_PARAM(page)2" data-amp-replace="QUERY_PARAM">Next page</a>
+  <amp-list src="/list/infinite-scroll-random/animals" layout="fixed-height" height="300" load-more="manual">
+    <template type="amp-mustache">
+      <amp-img layout=responsive width=3 height=2 src={{src}}></amp-img>
+    </template>
+    <button overflow>Show more</button>
+  </amp-list>
+
+  <h2>Wow 4</h2>
+  <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Molestias quas laborum voluptate culpa error asperiores similique facere, natus ullam beatae quos. Asperiores reiciendis, assumenda placeat architecto eius iusto distinctio nesciunt.</p>
+  <amp-img src="/examples/img/hero@1x.jpg" layout="responsive" width="640" height="480"></amp-img>
+  <a href="no-unload.html?page=QUERY_PARAM(page)3" data-amp-replace="QUERY_PARAM">Next page</a>
+
+  <h2>Wow 5</h2>
+  <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Molestias quas laborum voluptate culpa error asperiores similique facere, natus ullam beatae quos. Asperiores reiciendis, assumenda placeat architecto eius iusto distinctio nesciunt.</p>
+  <amp-img src="/examples/img/hero@1x.jpg" layout="responsive" width="640" height="480"></amp-img>
+  <a href="no-unload.html?page=QUERY_PARAM(page)4" data-amp-replace="QUERY_PARAM">Next page</a>
+</main>
+</body>
+</html>

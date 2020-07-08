@@ -271,7 +271,7 @@
   </style>
   <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
   <script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js"></script>
-  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.2.js"></script>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <style amp-boilerplate>
     body {
@@ -346,7 +346,7 @@
         "requests": {
           "open": "https://foo.com/open",
           "thumb": "https://foo.com/thumb",
-          "slide": "https://foo.com/slide",
+          "slide": "https://foo.com/slide?to=${toSlide}&from=${fromSlide}",
           "controlToggle": "https://foo.com/controlToggle",
           "descExpand": "https://foo.com/descExpand"
         },
@@ -359,9 +359,18 @@
             "on": "thumbnailsViewToggled",
             "request": "thumb"
           },
-          "trackSlideChange": {
-            "on": "slideChange",
+          "trackAmpCarouselChange": {
+            "selector": "main",
+            "on": "amp-carousel-change",
             "request": "slide"
+          },
+          "trackAmpCarouselChangeInLightbox": {
+            "selector": "amp-lightbox-gallery",
+            "on": "amp-carousel-change",
+            "request": "slide",
+            "extraUrlParams": {
+              "gallery": "true"
+            }
           },
           "trackControlsToggled": {
             "on": "controlsToggled",
@@ -443,13 +452,15 @@
           </p>
           <h3>Other Modern Architectures</h3>
           <amp-carousel lightbox width=1600 height=900 layout=responsive type=slides>
-            <amp-img src="https://picsum.photos/1600/900?image=898" layout="responsive" width="1600" height="900" aria-describedby="desc1">
+            <!-- Uses a data-slide-id for the analytics event instead of the index. -->
+            <amp-img data-slide-id="first" src="https://picsum.photos/1600/900?image=898" layout="responsive" width="1600" height="900" aria-describedby="desc1">
               <div id="desc1" class="lightbox-only-description">
                 <p>Short - Sed pharetra semper fringilla. Nulla fringilla, neque eget</p>
               </div>
             </amp-img>
 
-            <amp-img src="https://picsum.photos/1600/900?image=864" layout="responsive" width="1600" height="900" aria-describedby="desc2">
+            <!-- Uses a data-slide-id for the analytics event instead of the index. -->
+            <amp-img data-slide-id="second" src="https://picsum.photos/1600/900?image=864" layout="responsive" width="1600" height="900" aria-describedby="desc2">
               <div id="desc2" class="lightbox-only-description">
                 <p> Medium - Sed pharetra semper fringilla. Nulla fringilla, neque eget varius suscipit, mi turpis congue odio,
                   quis dignissim nisi nulla at erat. Duis non nibh vel erat vehicula hendrerit eget vel velit. Donec congue
@@ -458,7 +469,8 @@
               </div>
             </amp-img>
 
-            <amp-img src="https://picsum.photos/1600/900?image=870" layout="responsive" width="1600" height="900" aria-describedby="desc3">
+            <!-- Uses a data-slide-id for the analytics event instead of the index. -->
+            <amp-img data-slide-id="third" src="https://picsum.photos/1600/900?image=870" layout="responsive" width="1600" height="900" aria-describedby="desc3">
               <div id="desc3" class="lightbox-only-description">
                 <p> Long - Sed pharetra semper fringilla. Nulla fringilla, neque eget varius suscipit, mi turpis congue odio,
                   quis dignissim nisi nulla at erat. Duis non nibh vel erat vehicula hendrerit eget vel velit. Donec congue
@@ -471,13 +483,16 @@
               </div>
             </amp-img>
 
+            <!-- No data-slide-id, will use the index of analytics. -->
             <amp-img src="https://picsum.photos/1600/400?image=857" layout="responsive" width="1600" height="400"
               alt="Wide image">
             </amp-img>
 
+            <!-- No data-slide-id, will use the index of analytics. -->
             <amp-img src="https://picsum.photos/400/1600?image=682" layout="responsive" width="400" height="1600" alt="Tall image">
             </amp-img>
 
+             <!-- No data-slide-id, will use the index of analytics. -->
             <amp-img id="cover" src="https://picsum.photos/900/1600?image=629" layout="responsive" width="900" height="1600" alt="Tall image with fit:cover">
             </amp-img>
           </amp-carousel>

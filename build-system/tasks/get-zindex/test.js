@@ -15,7 +15,6 @@
  */
 'use strict';
 
-
 const m = require('./');
 const test = require('ava');
 
@@ -30,20 +29,20 @@ const result = {
   },
 };
 
-test.cb('collects selectors', t => {
+test.cb('collects selectors', (t) => {
   const data = Object.create(null);
   const testFiles = `${__dirname}/*.css`;
-  m.getZindex(testFiles)
-      .on('data', chunk => {
-        data[chunk.name] = chunk.selectors;
-      })
-      .on('end', () => {
-        t.deepEqual(data, result);
-        t.end();
-      });
+  m.getZindexStream(testFiles)
+    .on('data', (chunk) => {
+      data[chunk.name] = chunk.selectors;
+    })
+    .on('end', () => {
+      t.deepEqual(data, result);
+      t.end();
+    });
 });
 
-test('sync - create array of arrays with z index order', t => {
+test('sync - create array of arrays with z index order', (t) => {
   t.plan(1);
   const table = m.createTable(result);
   const expected = [

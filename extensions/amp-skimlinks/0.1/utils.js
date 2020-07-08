@@ -24,8 +24,8 @@ export function generatePageImpressionId() {
   let str = '';
   for (let i = 0; i < 8; i++) {
     str += Math.floor((1 + Math.random()) * 0x10000)
-        .toString(16)
-        .substring(1);
+      .toString(16)
+      .substring(1);
   }
 
   return str;

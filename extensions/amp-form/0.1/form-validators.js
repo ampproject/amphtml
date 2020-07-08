@@ -18,6 +18,7 @@ import {Services} from '../../../src/services';
 import {ValidationBubble} from './validation-bubble';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
+import {iterateCursor} from '../../../src/dom';
 import {toWin} from '../../../src/types';
 
 /** @const @private {string} */
@@ -26,6 +27,15 @@ const VALIDATION_CACHE_PREFIX = '__AMP_VALIDATION_';
 /** @const @private {string} */
 const VISIBLE_VALIDATION_CACHE = '__AMP_VISIBLE_VALIDATION';
 
+/** @const @private {string} */
+const ARIA_DESC_ID_PREFIX = 'i-amphtml-aria-desc-';
+
+/**
+ * Validation user message for non-standard pattern mismatch errors.
+ * Note this isn't localized but custom validation can be used instead.
+ * @const @private {string}
+ */
+const CUSTOM_PATTERN_ERROR = 'Please match the requested format.';
 
 /** @type {boolean|undefined} */
 let reportValiditySupported;
@@ -36,7 +46,6 @@ let checkValiditySupported;
 /** @type {number} */
 let validationBubbleCount = 0;
 
-
 /**
  * @param {boolean} isSupported
  * @private visible for testing.
@@ -44,7 +53,6 @@ let validationBubbleCount = 0;
 export function setReportValiditySupportedForTesting(isSupported) {
   reportValiditySupported = isSupported;
 }
-
 
 /**
  * @param {boolean} isSupported
@@ -54,7 +62,6 @@ export function setCheckValiditySupportedForTesting(isSupported) {
   checkValiditySupported = isSupported;
 }
 
-
 /** @const @enum {string} */
 const CustomValidationTypes = {
   AsYouGo: 'as-you-go',
@@ -63,13 +70,11 @@ const CustomValidationTypes = {
   ShowFirstOnSubmit: 'show-first-on-submit',
 };
 
-
 /**
  * Form validator interface.
  * @abstract
  */
 export class FormValidator {
-
   /**
    * @param {!HTMLFormElement} form
    */
@@ -80,8 +85,8 @@ export class FormValidator {
     /** @protected @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = Services.ampdoc(form);
 
-    /** @const @protected {!../../../src/service/resources-impl.Resources} */
-    this.resources = Services.resourcesForDoc(form);
+    /** @const @protected {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator = Services.mutatorForDoc(form);
 
     /** @protected @const {!Document|!ShadowRoot} */
     this.root = this.ampdoc.getRootNode();
@@ -114,13 +119,73 @@ export class FormValidator {
   }
 
   /**
+   * Wraps `checkValidity` on input elements to support `pattern` attribute on
+   * <textarea> which is not supported in HTML5.
+   * @param {!Element} input
+   * @return {boolean}
+   * @protected
+   */
+  checkInputValidity(input) {
+    if (input.tagName === 'TEXTAREA' && input.hasAttribute('pattern')) {
+      // FormVerifier also uses setCustomValidity() to signal verification
+      // errors. Make sure we only override pattern errors here.
+      if (
+        input.checkValidity() ||
+        input.validationMessage === CUSTOM_PATTERN_ERROR
+      ) {
+        const pattern = input.getAttribute('pattern');
+        const re = new RegExp(`^${pattern}$`, 'm');
+        const valid = re.test(input.value);
+        input.setCustomValidity(valid ? '' : CUSTOM_PATTERN_ERROR);
+      }
+    }
+    return input.checkValidity();
+  }
+
+  /**
+   * Wraps `checkValidity` on form elements to support `pattern` attribute on
+   * <textarea> which is not supported in HTML5.
+   * @param {!HTMLFormElement} form
+   * @return {boolean}
+   * @protected
+   */
+  checkFormValidity(form) {
+    this.checkTextAreaValidityInForm_(form);
+    return form.checkValidity();
+  }
+
+  /**
+   * Wraps `reportValidity` on form elements to support `pattern` attribute on
+   * <textarea> which is not supported in HTML5.
+   * @param {!HTMLFormElement} form
+   * @return {boolean}
+   * @protected
+   */
+  reportFormValidity(form) {
+    this.checkTextAreaValidityInForm_(form);
+    return form.reportValidity();
+  }
+
+  /**
+   * @param {!HTMLFormElement} form
+   * @private
+   */
+  checkTextAreaValidityInForm_(form) {
+    iterateCursor(form.elements, (element) => {
+      if (element.tagName == 'TEXTAREA') {
+        this.checkInputValidity(element);
+      }
+    });
+  }
+
+  /**
    * Fires a valid/invalid event from the form if its validity state
    * has changed since the last invocation of this function.
    * @visibleForTesting
    */
   fireValidityEventIfNecessary() {
     const previousValidity = this.formValidity_;
-    this.formValidity_ = this.form.checkValidity();
+    this.formValidity_ = this.checkFormValidity(this.form);
     if (previousValidity !== this.formValidity_) {
       const win = toWin(this.form.ownerDocument.defaultView);
       const type = this.formValidity_ ? FormEvents.VALID : FormEvents.INVALID;
@@ -130,21 +195,17 @@ export class FormValidator {
   }
 }
 
-
 /** @private visible for testing */
 export class DefaultValidator extends FormValidator {
-
   /** @override */
   report() {
-    this.form.reportValidity();
+    this.reportFormValidity(this.form);
     this.fireValidityEventIfNecessary();
   }
 }
 
-
 /** @private visible for testing */
 export class PolyfillDefaultValidator extends FormValidator {
-
   /**
    * Creates an instance of PolyfillDefaultValidator.
    * @param {!HTMLFormElement} form
@@ -160,8 +221,8 @@ export class PolyfillDefaultValidator extends FormValidator {
   report() {
     const inputs = this.inputs();
     for (let i = 0; i < inputs.length; i++) {
-      if (!inputs[i].checkValidity()) {
-        inputs[i]./*REVIEW*/focus();
+      if (!this.checkInputValidity(inputs[i])) {
+        inputs[i]./*REVIEW*/ focus();
         this.validationBubble_.show(inputs[i], inputs[i].validationMessage);
         break;
       }
@@ -188,7 +249,7 @@ export class PolyfillDefaultValidator extends FormValidator {
       return;
     }
 
-    if (input.checkValidity()) {
+    if (this.checkInputValidity(input)) {
       input.removeAttribute('aria-invalid');
       this.validationBubble_.hide();
     } else {
@@ -198,19 +259,29 @@ export class PolyfillDefaultValidator extends FormValidator {
   }
 }
 
-
 /**
  * @abstract
  * @private visible for testing
  */
 export class AbstractCustomValidator extends FormValidator {
-
   /**
    * Creates an instance of AbstractCustomValidator.
    * @param {!HTMLFormElement} form
    */
   constructor(form) {
     super(form);
+
+    /** @private {string} */
+    this.uniqueFormId_ = this.form.id
+      ? this.form.id
+      : String(Date.now() + Math.floor(Math.random() * 100));
+
+    /**
+     * Counter used to create a unique id for every validation message
+     * to be used with `aria-describedby`.
+     * @private {number}
+     */
+    this.ariaDescCounter_ = 0;
   }
 
   /**
@@ -221,6 +292,15 @@ export class AbstractCustomValidator extends FormValidator {
     if (invalidType) {
       this.showValidationFor(input, invalidType);
     }
+  }
+
+  /**
+   * @return {string} A unique ID.
+   * @private
+   */
+  createUniqueAriaDescId_() {
+    return `${ARIA_DESC_ID_PREFIX}${this.uniqueFormId_}-${this
+      .ariaDescCounter_++}`;
   }
 
   /**
@@ -235,20 +315,45 @@ export class AbstractCustomValidator extends FormValidator {
 
   /**
    * @param {!Element} input
-   * @param {string=} invalidType
+   * @param {string=} inputInvalidType
    * @return {?Element}
    */
-  getValidationFor(input, invalidType) {
+  getValidationFor(input, inputInvalidType = undefined) {
     if (!input.id) {
       return null;
     }
+    const invalidType = this.getInvalidType_(input, inputInvalidType);
     const property = VALIDATION_CACHE_PREFIX + invalidType;
     if (!(property in input)) {
-      const selector = `[visible-when-invalid=${invalidType}]`
-          + `[validation-for=${input.id}]`;
+      const selector =
+        `[visible-when-invalid=${invalidType}]` +
+        `[validation-for=${input.id}]`;
       input[property] = this.root.querySelector(selector);
     }
     return input[property];
+  }
+
+  /**
+   * Wraps the validity type for inputs to support pattern on <textarea>
+   * @param {!Element} input
+   * @param {string=} inputInvalidType
+   * @return {*} TODO(#23582): Specify return type
+   */
+  getInvalidType_(input, inputInvalidType = undefined) {
+    const {tagName, validationMessage} = input;
+
+    // <textarea> only supports `pattern` and `valueMissing`.
+    // `pattern` is implemented via setCustomValidity(),
+    // which results in the 'customError' validity state.
+    if (
+      tagName === 'TEXTAREA' &&
+      inputInvalidType === 'customError' &&
+      validationMessage === CUSTOM_PATTERN_ERROR
+    ) {
+      return 'patternMismatch';
+    }
+
+    return inputInvalidType;
   }
 
   /**
@@ -265,10 +370,18 @@ export class AbstractCustomValidator extends FormValidator {
     }
     input[VISIBLE_VALIDATION_CACHE] = validation;
 
-    this.resources.mutateElement(input,
-        () => input.setAttribute('aria-invalid', 'true'));
-    this.resources.mutateElement(validation,
-        () => validation.classList.add('visible'));
+    let validationId = validation.getAttribute('id');
+    if (!validationId) {
+      validationId = this.createUniqueAriaDescId_();
+      validation.setAttribute('id', validationId);
+    }
+
+    input.setAttribute('aria-invalid', 'true');
+    input.setAttribute('aria-describedby', validationId);
+
+    this.mutator.mutateElement(validation, () =>
+      validation.classList.add('visible')
+    );
   }
 
   /**
@@ -281,10 +394,12 @@ export class AbstractCustomValidator extends FormValidator {
     }
     delete input[VISIBLE_VALIDATION_CACHE];
 
-    this.resources.mutateElement(input,
-        () => input.removeAttribute('aria-invalid'));
-    this.resources.mutateElement(visibleValidation,
-        () => visibleValidation.classList.remove('visible'));
+    input.removeAttribute('aria-invalid');
+    input.removeAttribute('aria-describedby');
+
+    this.mutator.mutateElement(visibleValidation, () =>
+      visibleValidation.classList.remove('visible')
+    );
   }
 
   /**
@@ -310,10 +425,10 @@ export class AbstractCustomValidator extends FormValidator {
   onInteraction(event) {
     const input = dev().assertElement(event.target);
     const shouldValidate =
-        !!input.checkValidity && this.shouldValidateOnInteraction(input);
+      !!input.checkValidity && this.shouldValidateOnInteraction(input);
 
     this.hideValidationFor(input);
-    if (shouldValidate && !input.checkValidity()) {
+    if (shouldValidate && !this.checkInputValidity(input)) {
       this.reportInput(input);
     }
   }
@@ -329,18 +444,16 @@ export class AbstractCustomValidator extends FormValidator {
   }
 }
 
-
 /** @private visible for testing */
 export class ShowFirstOnSubmitValidator extends AbstractCustomValidator {
-
   /** @override */
   report() {
     this.hideAllValidations();
     const inputs = this.inputs();
     for (let i = 0; i < inputs.length; i++) {
-      if (!inputs[i].checkValidity()) {
+      if (!this.checkInputValidity(inputs[i])) {
         this.reportInput(inputs[i]);
-        inputs[i]./*REVIEW*/focus();
+        inputs[i]./*REVIEW*/ focus();
         break;
       }
     }
@@ -354,24 +467,22 @@ export class ShowFirstOnSubmitValidator extends AbstractCustomValidator {
   }
 }
 
-
 /** @private visible for testing */
 export class ShowAllOnSubmitValidator extends AbstractCustomValidator {
-
   /** @override */
   report() {
     this.hideAllValidations();
     let firstInvalidInput = null;
     const inputs = this.inputs();
     for (let i = 0; i < inputs.length; i++) {
-      if (!inputs[i].checkValidity()) {
+      if (!this.checkInputValidity(inputs[i])) {
         firstInvalidInput = firstInvalidInput || inputs[i];
         this.reportInput(inputs[i]);
       }
     }
 
     if (firstInvalidInput) {
-      firstInvalidInput./*REVIEW*/focus();
+      firstInvalidInput./*REVIEW*/ focus();
     }
 
     this.fireValidityEventIfNecessary();
@@ -382,7 +493,6 @@ export class ShowAllOnSubmitValidator extends AbstractCustomValidator {
     return !!this.getVisibleValidationFor(input);
   }
 }
-
 
 /** @private visible for testing */
 export class AsYouGoValidator extends AbstractCustomValidator {
@@ -398,7 +508,6 @@ export class AsYouGoValidator extends AbstractCustomValidator {
   }
 }
 
-
 /** @private visible for testing */
 export class InteractAndSubmitValidator extends ShowAllOnSubmitValidator {
   /** @override */
@@ -413,7 +522,6 @@ export class InteractAndSubmitValidator extends ShowAllOnSubmitValidator {
   }
 }
 
-
 /**
  * Returns the form validator instance.
  *
@@ -421,8 +529,7 @@ export class InteractAndSubmitValidator extends ShowAllOnSubmitValidator {
  * @return {!FormValidator}
  */
 export function getFormValidator(form) {
-  const customValidation = form.getAttribute(
-      'custom-validation-reporting');
+  const customValidation = form.getAttribute('custom-validation-reporting');
   switch (customValidation) {
     case CustomValidationTypes.AsYouGo:
       return new AsYouGoValidator(form);
@@ -441,7 +548,6 @@ export function getFormValidator(form) {
   return new PolyfillDefaultValidator(form);
 }
 
-
 /**
  * Returns whether reportValidity API is supported.
  * @param {?Document} doc
@@ -453,7 +559,6 @@ function isReportValiditySupported(doc) {
   }
   return !!reportValiditySupported;
 }
-
 
 /**
  * Returns whether reportValidity API is supported.
@@ -467,9 +572,9 @@ export function isCheckValiditySupported(doc) {
   return checkValiditySupported;
 }
 
-
 /**
  * Returns invalid error type on the input.
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/ValidityState
  * @param {!Element} input
  * @return {?string}
  */
@@ -483,7 +588,8 @@ function getInvalidType(input) {
     }
   }
   // Finding error type with value true
-  const response = validityTypes.filter(type =>
-    input.validity[type] === true);
+  const response = validityTypes.filter(
+    (type) => input.validity[type] === true
+  );
   return response.length ? response[0] : null;
 }

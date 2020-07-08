@@ -15,17 +15,17 @@
  */
 
 /**
-  * @fileoverview Embeds a imgur
-  * Example:
-  * <code>
-  * <amp-imgur
-  *   layout="reponsive"
-  *   width="540"
-  *   height="663"
-  *   data-imgur-id="f462IUj">
-  * </amp-imgur>
-  * </code>
-  */
+ * @fileoverview Embeds a imgur
+ * Example:
+ * <code>
+ * <amp-imgur
+ *   layout="reponsive"
+ *   width="540"
+ *   height="663"
+ *   data-imgur-id="f462IUj">
+ * </amp-imgur>
+ * </code>
+ */
 
 import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -33,10 +33,9 @@ import {isObject} from '../../../src/types';
 import {removeElement} from '../../../src/dom';
 import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
-import {user} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 export class AmpImgur extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -47,7 +46,7 @@ export class AmpImgur extends AMP.BaseElement {
     /** @private {?Function} */
     this.unlistenMessage_ = null;
 
-    /** @private {?string} */
+    /** @private {string} */
     this.imgurid_ = '';
   }
 
@@ -58,10 +57,11 @@ export class AmpImgur extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.imgurid_ = user().assert(
-        this.element.getAttribute('data-imgur-id'),
-        'The data-imgur-id attribute is required for <amp-imgur> %s',
-        this.element);
+    this.imgurid_ = userAssert(
+      this.element.getAttribute('data-imgur-id'),
+      'The data-imgur-id attribute is required for <amp-imgur> %s',
+      this.element
+    );
   }
 
   /** @override */
@@ -70,17 +70,22 @@ export class AmpImgur extends AMP.BaseElement {
     this.iframe_ = iframe;
 
     this.unlistenMessage_ = listen(
-        this.win,
-        'message',
-        this.handleImgurMessages_.bind(this)
+      this.win,
+      'message',
+      this.handleImgurMessages_.bind(this)
     );
 
     iframe.setAttribute('scrolling', 'no');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
 
-    iframe.src = 'https://imgur.com/' +
-      encodeURIComponent(this.imgurid_) + '/embed?pub=true';
+    const sanitizedID = this.imgurid_.replace(
+      /^(a\/)?(.*)/,
+      (match, aSlash, rest) => {
+        return 'a/' + encodeURIComponent(rest);
+      }
+    );
+    iframe.src = 'https://imgur.com/' + sanitizedID + '/embed?pub=true';
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     return this.loadPromise(iframe);
@@ -91,13 +96,20 @@ export class AmpImgur extends AMP.BaseElement {
    * @private
    * */
   handleImgurMessages_(event) {
-    if (event.origin != 'https://imgur.com' ||
-        event.source != this.iframe_.contentWindow) {
+    if (
+      event.origin != 'https://imgur.com' ||
+      event.source != this.iframe_.contentWindow
+    ) {
       return;
     }
     const eventData = getData(event);
-    if (!eventData || !(isObject(eventData)
-        || startsWith(/** @type {string} */ (eventData), '{'))) {
+    if (
+      !eventData ||
+      !(
+        isObject(eventData) ||
+        startsWith(/** @type {string} */ (eventData), '{')
+      )
+    ) {
       return;
     }
     const data = isObject(eventData) ? eventData : tryParseJson(eventData);
@@ -120,7 +132,6 @@ export class AmpImgur extends AMP.BaseElement {
   }
 }
 
-
-AMP.extension('amp-imgur', '0.1', AMP => {
+AMP.extension('amp-imgur', '0.1', (AMP) => {
   AMP.registerElement('amp-imgur', AmpImgur);
 });

@@ -44,19 +44,13 @@ const imports = {
     'setStyle',
     'setStyles',
   ],
-  'src/dom': [
-    'escapeCssSelectorIdent',
-    'escapeCssSelectorNth',
-    'scopedQuerySelector',
-    'scopedQuerySelectorAll',
-  ],
-  'src/log': [
-    'user',
-    'dev',
-  ]
+  'src/css': ['escapeCssSelectorIdent', 'escapeCssSelectorNth'],
+  'src/dom': ['scopedQuerySelector', 'scopedQuerySelectorAll'],
+  'src/log': ['user', 'dev'],
+  'src/mode': ['getMode'],
 };
 
-module.exports = function(context) {
+module.exports = function (context) {
   function ImportSpecifier(node, modulePath, mods) {
     const {imported, local} = node;
     const {name} = imported;
@@ -107,7 +101,7 @@ module.exports = function(context) {
           message: [
             `Illegal ${ns}.${name} use, must import and use as a lexical binding`,
             'This makes it easier to write lint rules for incorrect usage',
-            `\`import { ..., ${name}, ...} from '${modulePath}'\`;`
+            `\`import { ..., ${name}, ...} from '${modulePath}'\`;`,
           ].join('\n\t'),
         });
       }
@@ -123,8 +117,9 @@ module.exports = function(context) {
 
       const {source, specifiers} = node;
       const sourceValue = source.value;
-      const absolutePath = path.resolve(path.dirname(fileName),
-          sourceValue).replace(/\.js$/, '');
+      const absolutePath = path
+        .resolve(path.dirname(fileName), sourceValue)
+        .replace(/\.js$/, '');
 
       // Find out if the import matches one of the modules.
       // But we don't know the repo's root directory, so do some work.

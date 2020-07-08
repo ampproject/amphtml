@@ -17,7 +17,6 @@ import {dev} from '../log';
 import {once} from './function';
 import {setStyles} from '../style';
 
-
 /**
  * @param {!Window} win
  * @param {boolean} isLiteViewer
@@ -57,13 +56,12 @@ function isAutoplaySupportedImpl(win, isLiteViewer) {
 
   // Promise wrapped this way to catch both sync throws and async rejections.
   // More info: https://github.com/tc39/proposal-promise-try
-  new Promise(resolve => resolve(detectionElement.play())).catch(() => {
+  new Promise((resolve) => resolve(detectionElement.play())).catch(() => {
     // Suppress any errors, useless to report as they are expected.
   });
 
   return Promise.resolve(!detectionElement.paused);
 }
-
 
 /** @private {?(function(Window, boolean):!Promise<boolean>)} */
 let isAutoplaySupported = null;
@@ -72,11 +70,10 @@ let isAutoplaySupported = null;
  * Sets if autoplay is supported.
  */
 function setIsAutoplaySupported() {
-  isAutoplaySupported =
-    /** @type {function(Window, boolean):!Promise<boolean>} */ (
-      once(isAutoplaySupportedImpl));
+  isAutoplaySupported = /** @type {function(Window, boolean):!Promise<boolean>} */ (once(
+    isAutoplaySupportedImpl
+  ));
 }
-
 
 /**
  * Wrapper around static utilities for testability.

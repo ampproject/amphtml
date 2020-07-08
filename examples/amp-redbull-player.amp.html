@@ -1,0 +1,63 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <link rel="canonical" href="amps.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+      <style amp-custom>
+    </style>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-redbull-player" src="https://cdn.ampproject.org/v0/amp-redbull-player-0.1.js"></script>
+    <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+  </head>
+  <body>
+    <h1>amp-redbull-player</h1>
+    <amp-redbull-player
+      id="rbvideo_1"
+      data-param-videoid="rrn:content:videos:3965a26c-052e-575f-a28b-ded6bee23ee1:en-INT"
+      data-param-locale="us"
+      height="169"
+      width="300"
+      layout="fixed">
+    </amp-redbull-player><br/>
+
+    <amp-redbull-player
+      id="rbvideo_2"
+      data-param-videoid="rrn:content:videos:3e27acc3-2fd2-44f4-9d6f-c1ec0ff587f1:en-INT"
+      data-param-locale="at"
+      data-param-skinid="stv"
+      height=169
+      width=300
+      layout="fixed">
+    </amp-redbull-player>
+    <amp-analytics>
+      <!-- Docs: https://amp.dev/documentation/components/amp-video-iframe/ -> postAnalyticsEvent(eventType[, vars]) -->
+      <!--
+        https://amp.dev/documentation/components/amp-analytics/#transport
+        "transport": {"xhrpost": false, "beacon": false, "image": true},
+      -->
+      <script type="application/json">
+        {
+          "requests": {
+            "base": "https://www.google-analytics.com/collect?",
+            "event": {
+              "baseUrl": "${base}${custom_request}"
+            }
+          },
+          "triggers": {
+            "rbvideo_1": {
+              "on": "video-custom-tracking-rbvideo_1",
+              "request": "event",
+              "selector": "#rbvideo_1"
+            },
+             "rbvideo_2": {
+              "on": "video-custom-tracking-rbvideo_2",
+              "request": "event",
+              "selector": "#rbvideo_2"
+            }
+          }
+        }
+      </script>
+    </amp-analytics>
+  </body>
+</html>

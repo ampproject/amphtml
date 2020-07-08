@@ -40,12 +40,16 @@ export function distroscale(global, data) {
 
   src += '&f=' + encodeURIComponent(srcUrl);
 
-
   global.dsAMPCallbacks = {
     renderStart: global.context.renderStart,
     noContentAvailable: global.context.noContentAvailable,
   };
-  loadScript(global, src, () => {}, () => {
-    global.context.noContentAvailable();
-  });
+  loadScript(
+    global,
+    src,
+    () => {},
+    () => {
+      global.context.noContentAvailable();
+    }
+  );
 }

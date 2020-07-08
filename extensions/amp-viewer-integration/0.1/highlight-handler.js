@@ -19,9 +19,11 @@ import {dict} from '../../../src/utils/object';
 import {findSentences, markTextRangeList} from './findtext';
 import {listenOnce} from '../../../src/event-helper';
 import {moveLayoutRect} from '../../../src/layout-rect';
+import {once} from '../../../src/utils/function';
 import {parseJson} from '../../../src/json';
 import {parseQueryString} from '../../../src/url';
 import {resetStyles, setInitialDisplay, setStyles} from '../../../src/style';
+import {whenDocumentReady} from '../../../src/document-ready';
 
 /**
  * The message name sent by viewers to dismiss highlights.
@@ -66,8 +68,8 @@ const NUM_SENTENCES_LIMIT = 15;
  */
 const NUM_ALL_CHARS_LIMIT = 1500;
 
-/** @typedef {{sentences: !Array<string>, skipRendering: boolean}} */
-let HighlightInfoDef;
+/** @typedef {{sentences: !Array<string>, skipScrollAnimation: boolean, skipRendering: boolean}} */
+export let HighlightInfoDef;
 
 /**
  * The height of scrolling-down animation to highlighted texts.
@@ -117,8 +119,13 @@ export function getHighlightParam(ampdoc) {
   if (highlight['n']) {
     skipRendering = true;
   }
+  let skipScrollAnimation = false;
+  if (highlight['na']) {
+    skipScrollAnimation = true;
+  }
   return {
     sentences: sens,
+    skipScrollAnimation,
     skipRendering,
   };
 }
@@ -135,15 +142,17 @@ export class HighlightHandler {
   constructor(ampdoc, highlightInfo) {
     /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(ampdoc);
-    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private @const {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc_);
 
     /** @private {?Array<!Element>} */
     this.highlightedNodes_ = null;
 
-    this.initHighlight_(highlightInfo);
+    whenDocumentReady(ampdoc.win.document).then(() => {
+      this.initHighlight_(highlightInfo);
+    });
   }
 
   /**
@@ -166,7 +175,10 @@ export class HighlightHandler {
   findHighlightedNodes_(highlightInfo) {
     const {win} = this.ampdoc_;
     const sens = findSentences(
-        win, this.ampdoc_.getBody(), highlightInfo.sentences);
+      win,
+      this.ampdoc_.getBody(),
+      highlightInfo.sentences
+    );
     if (!sens) {
       return;
     }
@@ -175,6 +187,21 @@ export class HighlightHandler {
       return;
     }
     this.highlightedNodes_ = nodes;
+  }
+
+  /**
+   * Registers a callback invoked once when the doc becomes visible.
+   * @param {function()} handler
+   */
+  onVisibleOnce(handler) {
+    // TODO(yunabe): Unregister the handler.
+    handler = once(handler);
+    this.ampdoc_.onVisibilityChanged(() => {
+      if (this.ampdoc_.getVisibilityState() != 'visible') {
+        return;
+      }
+      handler();
+    });
   }
 
   /**
@@ -203,34 +230,42 @@ export class HighlightHandler {
 
     for (let i = 0; i < this.highlightedNodes_.length; i++) {
       const n = this.highlightedNodes_[i];
-      // The background color is same as Android Chrome text finding.
-      // https://cs.chromium.org/chromium/src/chrome/android/java/res/values/colors.xml?l=158&rcl=8b461e376e824c72fec1d6d91cd6633ba344dd55&q=ff9632
+      // The background color is same as Android Chrome text finding (yellow).
       setStyles(n, {
-        backgroundColor: '#ff9632',
+        backgroundColor: '#fcff00',
         color: '#000',
       });
     }
 
-    const visibility = this.viewer_.getVisibilityState();
-    if (visibility == 'visible') {
-      this.animateScrollToTop_(scrollTop);
+    const visibility = this.ampdoc_.getVisibilityState();
+    if (!highlightInfo.skipScrollAnimation) {
+      if (visibility == 'visible') {
+        this.animateScrollToTop_(scrollTop);
+      } else {
+        // Scroll to the animation start position before the page becomes visible
+        // so that the top of the page is not painted when it becomes visible.
+        this.scrollToAnimationStart_(scrollTop);
+        this.onVisibleOnce(() => {
+          this.animateScrollToTop_(this.calcTopToCenterHighlightedNodes_());
+        });
+      }
     } else {
-      // Scroll to the animation start position before the page becomes visible
-      // so that the top of the page is not painted when it becomes visible.
-      this.scrollToAnimationStart_(scrollTop);
-
-      let called = false;
-      this.viewer_.onVisibilityChanged(() => {
-        // TODO(yunabe): Unregister the handler.
-        if (called || this.viewer_.getVisibilityState() != 'visible') {
-          return;
-        }
-        this.animateScrollToTop_(this.calcTopToCenterHighlightedNodes_());
-        called = true;
-      });
+      if (visibility == 'visible') {
+        this.scrollToTopWitoutAnimation_(scrollTop);
+      } else {
+        this.viewport_.setScrollTop(scrollTop);
+        this.onVisibleOnce(() => {
+          this.scrollToTopWitoutAnimation_(
+            this.calcTopToCenterHighlightedNodes_()
+          );
+        });
+      }
     }
-    listenOnce(this.ampdoc_.getBody(), 'click',
-        this.dismissHighlight_.bind(this));
+    listenOnce(
+      this.ampdoc_.getBody(),
+      'click',
+      this.dismissHighlight_.bind(this)
+    );
   }
 
   /**
@@ -250,8 +285,11 @@ export class HighlightHandler {
       // top and bottom returned by getLayoutRect includes the header padding
       // size. We need to cancel the padding to calculate the positions in
       // document.body like Viewport.animateScrollIntoView does.
-      const {top, bottom} = moveLayoutRect(viewport.getLayoutRect(nodes[i]),
-          0, -paddingTop);
+      const {top, bottom} = moveLayoutRect(
+        viewport.getLayoutRect(nodes[i]),
+        0,
+        -paddingTop
+      );
       minTop = Math.min(minTop, top);
       maxBottom = Math.max(maxBottom, bottom);
     }
@@ -264,6 +302,17 @@ export class HighlightHandler {
       pos = minTop - PAGE_TOP_MARGIN;
     }
     return pos > 0 ? pos : 0;
+  }
+
+  /**
+   * Equivalent to animateScrollToTop_ without scroll animation.
+   * @param {number} top
+   * @private
+   */
+  scrollToTopWitoutAnimation_(top) {
+    this.sendHighlightState_('auto_scroll');
+    this.viewport_.setScrollTop(top);
+    this.sendHighlightState_('shown');
   }
 
   /**
@@ -341,7 +390,9 @@ export class HighlightHandler {
    */
   setupMessaging(messaging) {
     messaging.registerHandler(
-        HIGHLIGHT_DISMISS, this.dismissHighlight_.bind(this));
+      HIGHLIGHT_DISMISS,
+      this.dismissHighlight_.bind(this)
+    );
   }
 
   /**

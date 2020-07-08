@@ -16,7 +16,7 @@
 
 import {Services} from '../services';
 import {createCustomEvent} from '../event-helper.js';
-import {whenContentIniLoad} from '../friendly-iframe-embed';
+import {whenContentIniLoad} from '../ini-load';
 
 /**
  * Registers ini-load listener that will fire custom 'amp-ini-load' event
@@ -27,16 +27,20 @@ import {whenContentIniLoad} from '../friendly-iframe-embed';
 export function registerIniLoadListener(ampdoc) {
   const {win} = ampdoc;
   const root = ampdoc.getRootNode();
-  whenContentIniLoad(ampdoc, win,
-      Services.viewportForDoc(ampdoc).getLayoutRect(
-          root.documentElement || root.body || root))
-      .then(() => {
-        win.dispatchEvent(createCustomEvent(
-            win, 'amp-ini-load', /* detail */ null, {bubbles: true}));
-        if (win.parent) {
-          win.parent./*OK*/postMessage('amp-ini-load', '*');
-        }
-      });
+  whenContentIniLoad(
+    ampdoc,
+    win,
+    Services.viewportForDoc(ampdoc).getLayoutRect(
+      root.documentElement || root.body || root
+    )
+  ).then(() => {
+    win.dispatchEvent(
+      createCustomEvent(win, 'amp-ini-load', /* detail */ null, {bubbles: true})
+    );
+    if (win.parent) {
+      win.parent./*OK*/ postMessage('amp-ini-load', '*');
+    }
+  });
 }
 
 /**
@@ -45,9 +49,9 @@ export function registerIniLoadListener(ampdoc) {
  * @return {?string}
  */
 export function getA4AId(win) {
-
-  const a4aIdMetaTag = win.document.head
-      .querySelector('meta[name="amp4ads-id"]');
+  const a4aIdMetaTag = win.document.head.querySelector(
+    'meta[name="amp4ads-id"]'
+  );
 
   if (a4aIdMetaTag) {
     return a4aIdMetaTag.getAttribute('content');

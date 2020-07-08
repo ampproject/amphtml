@@ -14,54 +14,15 @@
  * limitations under the License.
  */
 
-
-import {CSS} from '../../../build/amp-twitter-0.1.css';
 import {MessageType} from '../../../src/3p-frame-messaging';
+import {Services} from '../../../src/services';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {htmlFor} from '../../../src/static-template';
-import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
-import {setStyle} from '../../../src/style';
-
-/**
- * @param {!Window} win
- * @return {boolean} True if we should show the default placeholder with
- *    plusing.
- */
-function isPulsingPlaceholder(win) {
-  return isExperimentOn(win, 'twitter-default-placeholder-pulse');
-}
-
-/**
- * @param {!Window} win
- * @return {boolean} True if we should show the default placeholder with
- *    a fade out.
- */
-function isFadingPlaceholder(win) {
-  return isExperimentOn(win, 'twitter-default-placeholder-fade');
-}
-
-/**
- * @param {!Window} win
- * @return {boolean} True if we should show the default placeholder with
- *    a burst ending animation.
- */
-function isBurstingPlaceholder(win) {
-  return isExperimentOn(win, 'twitter-default-placeholder-burst');
-}
-
-/**
- * @param {!Window} win
- * @return {boolean} True if we should show the default placeholder.
- */
-function enableDefaultPlaceholder(win) {
-  return isExperimentOn(win, 'twitter-default-placeholder');
-}
 
 class AmpTwitter extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -81,36 +42,24 @@ class AmpTwitter extends AMP.BaseElement {
   }
 
   /**
-   * @override
-   */
-  createPlaceholderCallback() {
-    if (!enableDefaultPlaceholder(this.win)) {
-      return;
-    }
-
-    // Svg from https://about.twitter.com/en_us/company/brand-resources.html
-    return htmlFor(this.element)`
-        <div class="i-amphtml-twitter-placeholder" placeholder>
-          <div class="i-amphtml-twitter-placeholder-logo">
-            <svg class="i-amphtml-twitter-placeholder-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><defs><style>.cls-1{fill:none;}.cls-2{fill:#1da1f2;}</style></defs><rect class="cls-1" width="400" height="400"></rect><path class="cls-2" d="M153.62,301.59c94.34,0,145.94-78.16,145.94-145.94,0-2.22,0-4.43-.15-6.63A104.36,104.36,0,0,0,325,122.47a102.38,102.38,0,0,1-29.46,8.07,51.47,51.47,0,0,0,22.55-28.37,102.79,102.79,0,0,1-32.57,12.45,51.34,51.34,0,0,0-87.41,46.78A145.62,145.62,0,0,1,92.4,107.81a51.33,51.33,0,0,0,15.88,68.47A50.91,50.91,0,0,1,85,169.86c0,.21,0,.43,0,.65a51.31,51.31,0,0,0,41.15,50.28,51.21,51.21,0,0,1-23.16.88,51.35,51.35,0,0,0,47.92,35.62,102.92,102.92,0,0,1-63.7,22A104.41,104.41,0,0,1,75,278.55a145.21,145.21,0,0,0,78.62,23"></path></svg>
-          </div>
-        </div>`;
-  }
-
-  /**
    * @param {boolean=} opt_onLayout
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    preloadBootstrap(this.win, this.preconnect);
+    const preconnect = Services.preconnectFor(this.win);
+    const ampdoc = this.getAmpDoc();
+    preloadBootstrap(this.win, ampdoc, preconnect);
     // Hosts the script that renders tweets.
-    this.preconnect.preload(
-        'https://platform.twitter.com/widgets.js', 'script');
+    preconnect.preload(
+      ampdoc,
+      'https://platform.twitter.com/widgets.js',
+      'script'
+    );
     // This domain serves the actual tweets as JSONP.
-    this.preconnect.url('https://syndication.twitter.com', opt_onLayout);
+    preconnect.url(ampdoc, 'https://syndication.twitter.com', opt_onLayout);
     // All images
-    this.preconnect.url('https://pbs.twimg.com', opt_onLayout);
-    this.preconnect.url('https://cdn.syndication.twimg.com', opt_onLayout);
+    preconnect.url(ampdoc, 'https://pbs.twimg.com', opt_onLayout);
+    preconnect.url(ampdoc, 'https://cdn.syndication.twimg.com', opt_onLayout);
   }
 
   /** @override */
@@ -125,26 +74,27 @@ class AmpTwitter extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = getIframe(this.win, this.element, 'twitter', null,
-        {allowFullscreen: true});
+    const iframe = getIframe(this.win, this.element, 'twitter', null, {
+      allowFullscreen: true,
+    });
     this.applyFillContent(iframe);
-    iframe.classList.add('i-amphtml-twitter-iframe');
-    if (isPulsingPlaceholder(this.win)) {
-      this.element.classList.add('i-amphtml-twitter-pulse');
-    }
-    if (isFadingPlaceholder(this.win)) {
-      this.element.classList.add('i-amphtml-twitter-fade');
-    }
-    if (isBurstingPlaceholder(this.win)) {
-      this.element.classList.add('i-amphtml-twitter-burst');
-    }
     this.updateForLoadingState_();
-    listenFor(iframe, MessageType.EMBED_SIZE, data => {
-      this.updateForSuccessState_(data['height']);
-    }, /* opt_is3P */true);
-    listenFor(iframe, MessageType.NO_CONTENT, () => {
-      this.updateForFailureState_();
-    }, /* opt_is3P */true);
+    listenFor(
+      iframe,
+      MessageType.EMBED_SIZE,
+      (data) => {
+        this.updateForSuccessState_(data['height']);
+      },
+      /* opt_is3P */ true
+    );
+    listenFor(
+      iframe,
+      MessageType.NO_CONTENT,
+      () => {
+        this.updateForFailureState_();
+      },
+      /* opt_is3P */ true
+    );
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
     return this.loadPromise(iframe);
@@ -156,13 +106,15 @@ class AmpTwitter extends AMP.BaseElement {
    */
   updateForLoadingState_() {
     let height;
-    this.measureMutateElement(() => {
-      height = this.element./*OK*/getBoundingClientRect().height;
-    }, () => {
-      this.element.setAttribute('i-amphtml-loading', 'start');
-      // Set an explicit height so we can animate it.
-      this./*OK*/changeHeight(height);
-    });
+    this.measureMutateElement(
+      () => {
+        height = this.element./*OK*/ getBoundingClientRect().height;
+      },
+      () => {
+        // Set an explicit height so we can animate it.
+        this.forceChangeHeight(height);
+      }
+    );
   }
 
   /**
@@ -171,27 +123,17 @@ class AmpTwitter extends AMP.BaseElement {
    * @private
    */
   updateForSuccessState_(height) {
-    let placeholderHeight;
-    this.measureMutateElement(() => {
-      if (!this.userPlaceholder_ && isFadingPlaceholder(this.win)) {
-        // Use an explicit height so that the placeholder does not move when\
-        // the container resizes.
-        placeholderHeight = this.element./*OK*/getBoundingClientRect().height;
-      }
-    }, () => {
+    this.mutateElement(() => {
+      this.toggleLoading(false);
       if (this.userPlaceholder_) {
         this.togglePlaceholder(false);
       }
-      this.element.setAttribute('i-amphtml-loading', 'done');
-      this./*OK*/changeHeight(height);
-      if (placeholderHeight) {
-        setStyle(this.getPlaceholder(), 'height', placeholderHeight, 'px');
-      }
+      this.forceChangeHeight(height);
     });
   }
 
   /**
-   * Updates wheen the tweet that failed to load. This uses the fallback
+   * Updates when the tweet failed to load. This uses the fallback
    * provided if available. If not, it uses the user specified placeholder.
    * @private
    */
@@ -200,15 +142,45 @@ class AmpTwitter extends AMP.BaseElement {
     const content = fallback || this.userPlaceholder_;
 
     this.mutateElement(() => {
+      this.toggleLoading(false);
       if (fallback) {
         this.togglePlaceholder(false);
         this.toggleFallback(true);
       }
 
       if (content) {
-        this./*OK*/changeHeight(content./*OK*/offsetHeight);
+        this.forceChangeHeight(content./*OK*/ offsetHeight);
       }
     });
+  }
+
+  /**
+   * amp-twitter reuses the loading indicator when id changes via bind mutation
+   * @override
+   */
+  isLoadingReused() {
+    return true;
+  }
+
+  /** @override */
+  createLoaderLogoCallback() {
+    const html = htmlFor(this.element);
+    return {
+      color: '#1DA1F2',
+      content: html`
+        <svg viewBox="0 0 72 72">
+          <path
+            fill="currentColor"
+            d="M32.29,44.13c7.55,0,11.67-6.25,11.67-11.67c0-0.18,0-0.35-0.01-0.53c0.8-0.58,1.5-1.3,2.05-2.12
+    c-0.74,0.33-1.53,0.55-2.36,0.65c0.85-0.51,1.5-1.31,1.8-2.27c-0.79,0.47-1.67,0.81-2.61,1c-0.75-0.8-1.82-1.3-3-1.3
+    c-2.27,0-4.1,1.84-4.1,4.1c0,0.32,0.04,0.64,0.11,0.94c-3.41-0.17-6.43-1.8-8.46-4.29c-0.35,0.61-0.56,1.31-0.56,2.06
+    c0,1.42,0.72,2.68,1.83,3.42c-0.67-0.02-1.31-0.21-1.86-0.51c0,0.02,0,0.03,0,0.05c0,1.99,1.41,3.65,3.29,4.02
+    c-0.34,0.09-0.71,0.14-1.08,0.14c-0.26,0-0.52-0.03-0.77-0.07c0.52,1.63,2.04,2.82,3.83,2.85c-1.4,1.1-3.17,1.76-5.1,1.76
+    c-0.33,0-0.66-0.02-0.98-0.06C27.82,43.45,29.97,44.13,32.29,44.13"
+          />
+        </svg>
+      `,
+    };
   }
 
   /** @override */
@@ -224,10 +196,17 @@ class AmpTwitter extends AMP.BaseElement {
     }
     return true;
   }
+
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    if (this.iframe_ && mutations['data-tweetid'] != null) {
+      this.unlayoutCallback();
+      this.toggleLoading(true);
+      this.layoutCallback();
+    }
+  }
 }
 
-
-AMP.extension('amp-twitter', '0.1', AMP => {
-  const styles = enableDefaultPlaceholder(AMP.win) ? CSS : undefined;
-  AMP.registerElement('amp-twitter', AmpTwitter, styles);
+AMP.extension('amp-twitter', '0.1', (AMP) => {
+  AMP.registerElement('amp-twitter', AmpTwitter);
 });

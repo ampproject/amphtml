@@ -32,15 +32,15 @@ tags: {  # amp-consent (json)
   mandatory_parent: "AMP-CONSENT"
   unique: true
   satisfies: "amp-consent extension .json script"
-  attrs: { name: "nonce" }
   attrs: {
     name: "type"
     mandatory: true
     value_casei: "application/json"
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
+  attr_lists: "nonce-attr"
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
@@ -50,9 +50,29 @@ tags: {  # <amp-consent>
   html_format: AMP
   tag_name: "AMP-CONSENT"
   requires_extension: "amp-consent"
-  attr_lists: "extended-amp-global"
-  requires: "amp-consent extension .json script"
   unique: true
+  requires: "amp-consent extension .json script"
+  excludes: "amp-consent [type]"
+  attr_lists: "extended-amp-global"
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}
+
+tags: {  # <amp-consent> (type)
+  html_format: AMP
+  tag_name: "AMP-CONSENT"
+  spec_name: "amp-consent [type]"
+  requires_extension: "amp-consent"
+  unique: true
+  requires: "meta name=amp-consent-blocking"
+  requires: "amp-consent extension .json script"
+  satisfies: "amp-consent [type]"
+  attrs: {
+    name: "type"
+    mandatory: true
+  }
+  attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: NODISPLAY
   }

@@ -21,21 +21,24 @@ Serves ads from the [RUNative](https://www.runative.com/).
 ## Example
 
 ```html
-<amp-embed width="640" height="320"
-    layout="responsive"
-    type="runative"
-    data-spot="{spotcode}"
-    data-ad-type="{ad type}label-over"
-    data-cols="{number cols}"
-    data-rows="{number rows}"
-    data-title="{title of ad}"
-    data-keywords="{keywords}">
+<amp-embed
+  width="640"
+  height="320"
+  layout="responsive"
+  type="runative"
+  data-spot="{spotcode}"
+  data-ad-type="{ad type}label-over"
+  data-cols="{number cols}"
+  data-rows="{number rows}"
+  data-title="{title of ad}"
+  data-keywords="{keywords}"
+>
 </amp-embed>
 ```
 
 ## Configuration
 
-For details on the configuration semantics, please contact the ad network or refer to their documentation. 
+For details on the configuration semantics, please contact the ad network or refer to their documentation.
 
 ### Required parameters
 

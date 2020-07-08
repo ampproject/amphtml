@@ -17,7 +17,7 @@ import {ViewerTracker} from '../viewer-tracker';
  * limitations under the License.
  */
 
-describes.realWin('ViewerTracker', {amp: true}, env => {
+describes.realWin('ViewerTracker', {amp: true}, (env) => {
   let ampdoc;
   let viewTracker;
   let clock;
@@ -25,70 +25,73 @@ describes.realWin('ViewerTracker', {amp: true}, env => {
   beforeEach(() => {
     ampdoc = env.ampdoc;
     viewTracker = new ViewerTracker(ampdoc);
-    clock = sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
   });
 
   describe('scheduleView', () => {
-    it('should call `reportWhenViewed_`, if viewer is visible' ,() => {
-      const whenViewedStub = sandbox.stub(viewTracker, 'reportWhenViewed_');
-      sandbox.stub(viewTracker.viewer_, 'isVisible').callsFake(() => true);
-      return viewTracker.scheduleView(2000).then(() => {
-        expect(whenViewedStub).to.be.calledOnce;
-      });
+    it('should call `reportWhenViewed_`, if viewer is visible', async () => {
+      const whenViewedStub = env.sandbox.stub(viewTracker, 'reportWhenViewed_');
+      env.sandbox.stub(ampdoc, 'isVisible').returns(true);
+
+      await viewTracker.scheduleView(2000);
+      expect(whenViewedStub).to.be.calledOnce;
     });
 
-    it('should call `reportWhenViewed_`, when viewer gets visible' , () => {
+    it('should call `reportWhenViewed_`, when viewer gets visible', async () => {
       let visibleState = false;
-      const whenViewedStub = sandbox.stub(viewTracker, 'reportWhenViewed_');
-      const visibilityChangedStub =
-          sandbox.stub(viewTracker.viewer_, 'onVisibilityChanged');
-      const visibilitySandbox = sandbox.stub(viewTracker.viewer_, 'isVisible')
-          .callsFake(() => visibleState);
+      const whenViewedStub = env.sandbox.stub(viewTracker, 'reportWhenViewed_');
+      const visibilityChangedStub = env.sandbox.stub(
+        ampdoc,
+        'onVisibilityChanged'
+      );
+      const visibilitySandbox = env.sandbox
+        .stub(ampdoc, 'isVisible')
+        .callsFake(() => visibleState);
 
       const viewPromise = viewTracker.scheduleView(2000);
 
-      return ampdoc.whenReady().then(() => {
-        expect(visibilitySandbox).to.be.calledOnce;
-        expect(visibilityChangedStub).to.be.calledOnce;
-        expect(whenViewedStub).to.not.be.called;
-        const callback = visibilityChangedStub.getCall(0).args[0];
-        expect(callback).to.be.instanceOf(Function);
-        visibleState = true;
-        callback();
-        return viewPromise.then(() => {
-          expect(whenViewedStub).to.be.called;
-        });
-      });
+      await ampdoc.whenReady();
+      expect(visibilitySandbox).to.be.calledOnce;
+      expect(visibilityChangedStub).to.be.calledOnce;
+      expect(whenViewedStub).to.not.be.called;
+      const callback = visibilityChangedStub.getCall(0).args[0];
+      expect(callback).to.be.instanceOf(Function);
+      visibleState = true;
+      callback();
+
+      await viewPromise;
+      expect(whenViewedStub).to.be.called;
     });
   });
 
   describe('reportWhenViewed_', () => {
     it('should call whenViewed_', () => {
-      const whenViewedStub = sandbox.stub(viewTracker, 'whenViewed_')
-          .callsFake(() => Promise.resolve());
+      const whenViewedStub = env.sandbox
+        .stub(viewTracker, 'whenViewed_')
+        .callsFake(() => Promise.resolve());
       viewTracker.reportWhenViewed_(2000);
       expect(whenViewedStub).to.be.calledOnce;
     });
   });
 
   describe('whenViewed_', () => {
-    it('should register "viewed" signal after timeout', () => {
+    it('should register "viewed" signal after timeout', async () => {
       const viewPromise = viewTracker.whenViewed_(1000);
       clock.tick(1001);
-      return viewPromise;
+      await viewPromise;
     });
 
-    it('should register "viewed" signal after scroll', () => {
+    it('should register "viewed" signal after scroll', async () => {
       const scrolled = new Observable();
       viewTracker.viewport_ = {
-        onScroll: callback => scrolled.add(callback),
+        onScroll: (callback) => scrolled.add(callback),
       };
       const viewPromise = viewTracker.whenViewed_(2000);
       scrolled.fire();
-      return viewPromise;
+      await viewPromise;
     });
 
-    it('should register "viewed" signal after click', () => {
+    it('should register "viewed" signal after click', async () => {
       const viewPromise = viewTracker.whenViewed_(2000);
       let clickEvent;
       if (document.createEvent) {
@@ -100,7 +103,7 @@ describes.realWin('ViewerTracker', {amp: true}, env => {
       }
       const node = ampdoc.getRootNode();
       node.body.dispatchEvent(clickEvent);
-      return viewPromise;
+      await viewPromise;
     });
   });
 });

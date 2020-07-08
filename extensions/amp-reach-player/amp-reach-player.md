@@ -1,3 +1,11 @@
+---
+$category@: media
+formats:
+  - websites
+teaser:
+  text: Displays a Beachfront Reach video player.
+---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,32 +22,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+# amp-reach-player
 
-# <a name="amp-reach"></a> `amp-reach-player`
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Displays the Reach Player configured in the <a href="http://beachfrontreach.com">Beachfront Reach</a> platform.
-    </td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-reach-player" src="https://cdn.ampproject.org/v0/amp-reach-player-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>
-    <a href="https://ampbyexample.com/components/amp-reach-player/">Annotated code example for amp-reach-player</a>
-    </td>
-  </tr>
-</table>
-
-[TOC]
+Displays the Reach Player configured in the [Beachfront Reach](http://beachfrontreach.com) platform.
 
 ## Example
 
@@ -49,22 +34,27 @@ Example:
 
 ```html
 <amp-reach-player
-      data-embed-id="default"
-      layout="responsive"
-      width="560"
-      height="315">
+  data-embed-id="default"
+  layout="responsive"
+  width="560"
+  height="315"
+>
 </amp-reach-player>
 ```
 
 ## Attributes
 
-##### data-embed-id
-
-The Reach player embed id found in the "players" section or in the generated embed itself.
-
-##### common attributes
-
-This element includes [common attributes](https://www.ampproject.org/docs/reference/common_attributes) extended to AMP components.
+<table>
+  <tr>
+    <td width="40%"><strong>data-embed-id</strong></td>
+    <td>The Reach player embed id found in the "players" section or in the generated embed itself.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.
+</td>
+  </tr>
+</table>
 
 ## Validation
 

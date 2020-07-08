@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {DOMAIN_RESOLVER_API_URL} from './constants';
 import {TwoStepsResponse} from './link-rewriter/two-steps-response';
 import {dict} from '../../../src/utils/object';
 import {getNormalizedHostnameFromAnchor, isExcludedDomain} from './utils';
@@ -96,8 +95,8 @@ export class AffiliateLinkResolver {
       'page': '',
       'domains': domains,
     });
-
-    const beaconUrl = `${DOMAIN_RESOLVER_API_URL}?data=${JSON.stringify(data)}`;
+    let {beaconUrl} = this.skimOptions_.config;
+    beaconUrl = `${beaconUrl}?data=${JSON.stringify(data)}`;
     const fetchOptions = {
       method: 'GET',
       // Disabling AMP CORS since API does not support it.
@@ -106,8 +105,9 @@ export class AffiliateLinkResolver {
       credentials: 'include',
     };
 
-    return this.xhr_.fetchJson(beaconUrl, fetchOptions)
-        .then(res => res.json());
+    return this.xhr_
+      .fetchJson(beaconUrl, fetchOptions)
+      .then((res) => res.json());
   }
 
   /**
@@ -129,7 +129,8 @@ export class AffiliateLinkResolver {
    */
   resolveUnknownAnchors(anchorList) {
     const alreadyResolvedResponse = this.associateWithReplacementUrl_(
-        anchorList);
+      anchorList
+    );
     let willBeResolvedPromise = null;
 
     const domainsToAsk = this.getNewDomains_(anchorList);
@@ -139,13 +140,14 @@ export class AffiliateLinkResolver {
       this.markDomainsAsUnknown_(domainsToAsk);
       // Get anchors waiting for the API response to be resolved.
       const unknownAnchors = this.getUnknownAnchors_(anchorList, domainsToAsk);
-      willBeResolvedPromise = this.resolvedUnknownAnchorsAsync_(unknownAnchors,
-          domainsToAsk);
+      willBeResolvedPromise = this.resolvedUnknownAnchorsAsync_(
+        unknownAnchors,
+        domainsToAsk
+      );
     }
 
     // Returns an object containing a sync reponse and an async response.
-    return new TwoStepsResponse(alreadyResolvedResponse,
-        willBeResolvedPromise);
+    return new TwoStepsResponse(alreadyResolvedResponse, willBeResolvedPromise);
   }
 
   /**
@@ -168,14 +170,16 @@ export class AffiliateLinkResolver {
    * @private
    */
   associateWithReplacementUrl_(anchorList) {
-    return anchorList.map(anchor => {
+    return anchorList.map((anchor) => {
       let replacementUrl = null;
       const status = this.getDomainAffiliateStatus_(
-          this.getAnchorDomain_(anchor));
+        this.getAnchorDomain_(anchor)
+      );
       // Always replace unknown, we will overwrite them after asking
       // the api if needed
-      const shouldReplace = status === AFFILIATE_STATUS.AFFILIATE ||
-                            status === AFFILIATE_STATUS.UNKNOWN;
+      const shouldReplace =
+        status === AFFILIATE_STATUS.AFFILIATE ||
+        status === AFFILIATE_STATUS.UNKNOWN;
       if (shouldReplace) {
         replacementUrl = this.waypoint_.getAffiliateUrl(anchor);
       }
@@ -210,7 +214,7 @@ export class AffiliateLinkResolver {
    * @private
    */
   getNewDomains_(anchorList) {
-    return anchorList.reduce(((acc, anchor) => {
+    return anchorList.reduce((acc, anchor) => {
       const domain = this.getAnchorDomain_(anchor);
       const isResolved = this.domains_[domain];
       const isExcluded = isExcludedDomain(domain, this.skimOptions_);
@@ -221,7 +225,7 @@ export class AffiliateLinkResolver {
       }
 
       return acc;
-    }), []);
+    }, []);
   }
 
   /**
@@ -232,7 +236,7 @@ export class AffiliateLinkResolver {
    * @private
    */
   markDomainsAsUnknown_(domains) {
-    domains.forEach(domain => {
+    domains.forEach((domain) => {
       if (this.domains_[domain]) {
         return;
       }
@@ -254,7 +258,7 @@ export class AffiliateLinkResolver {
    * @private
    */
   getUnknownAnchors_(anchorList, unknownDomains) {
-    return anchorList.filter(anchor => {
+    return anchorList.filter((anchor) => {
       const anchorDomain = this.getAnchorDomain_(anchor);
 
       return unknownDomains.indexOf(anchorDomain) !== -1;
@@ -277,7 +281,7 @@ export class AffiliateLinkResolver {
       this.firstRequest = promise;
     }
 
-    return promise.then(data => {
+    return promise.then((data) => {
       const merchantDomains = data['merchant_domains'] || [];
       this.updateDomainsStatusMap_(domainsToAsk, merchantDomains);
 
@@ -292,11 +296,11 @@ export class AffiliateLinkResolver {
    * @private
    */
   updateDomainsStatusMap_(allDomains, affiliateDomains) {
-    allDomains.forEach(domain => {
+    allDomains.forEach((domain) => {
       const isAffiliateDomain = affiliateDomains.indexOf(domain) !== -1;
-      this.domains_[domain] = isAffiliateDomain ?
-        AFFILIATE_STATUS.AFFILIATE :
-        AFFILIATE_STATUS.NON_AFFILIATE;
+      this.domains_[domain] = isAffiliateDomain
+        ? AFFILIATE_STATUS.AFFILIATE
+        : AFFILIATE_STATUS.NON_AFFILIATE;
     });
   }
 

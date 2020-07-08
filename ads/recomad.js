@@ -57,13 +57,13 @@ export function recomad(global, data) {
   validateData(data, ['appId', 'widgetId', ['searchTerm', 'origin']]);
 
   createWidgetContainer(
-      window.document.createElement('div'),
-      data['appId'],
-      data['widgetId'],
-      data['searchTerm'] || '',
-      data['origin'] || '',
-      data['baseUrl'] || '',
-      data['puid'] || ''
+    window.document.createElement('div'),
+    data['appId'],
+    data['widgetId'],
+    data['searchTerm'] || '',
+    data['origin'] || '',
+    data['baseUrl'] || '',
+    data['puid'] || ''
   );
 
   loadScript(window, 'https://widget.s24.com/js/s24widget.min.js');

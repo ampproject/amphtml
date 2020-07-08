@@ -21,28 +21,34 @@ limitations under the License.
 ### Single ad
 
 ```html
-<amp-ad width="728" height="90"
-  type="f1h" 
+<amp-ad
+  width="728"
+  height="90"
+  type="f1h"
   data-section-id="100"
-  data-slot="107">
+  data-slot="107"
+>
 </amp-ad>
 ```
 
 ### Using custom params and custom ad server url
 
 ```html
-<amp-ad width="728" height="90"
-  type="f1h" 
+<amp-ad
+  width="728"
+  height="90"
+  type="f1h"
   data-section-id="100"
   data-slot="107"
   data-custom='{"my_custom_param":"my_custom_value"}'
-  data-pubnetwork-lib="adlib_file_url" >
+  data-pubnetwork-lib="adlib_file_url"
+>
 </amp-ad>
 ```
 
 ## Configuration
 
-For details on the configuration semantics, please contact the ad network or refer to their documentation. 
+For details on the configuration semantics, please contact the ad network or refer to their documentation.
 
 ### Required parameters
 
@@ -52,7 +58,7 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Optional parameters
 
-- `custom`:  usage example
+- `custom`: usage example
 
 ```text
 {
@@ -60,4 +66,3 @@ For details on the configuration semantics, please contact the ad network or ref
     "stringKey":"stringValue"
 }
 ```
-

@@ -39,8 +39,8 @@ export function cedato(global, data) {
   }
 
   const cb = Math.floor(Math.random() * 10000);
-  const domain = data.domain ||
-    parseUrlDeprecated(global.context.sourceUrl).origin;
+  const domain =
+    data.domain || parseUrlDeprecated(global.context.sourceUrl).origin;
 
   /* Create div for ad to target */
   const playerDiv = global.document.createElement('div');
@@ -50,19 +50,19 @@ export function cedato(global, data) {
     height: '100%',
   });
   const playerScript = global.document.createElement('script');
-  const servingDomain = data.servingDomain ?
-    encodeURIComponent(data.servingDomain) :
-    'algovid.com';
+  const servingDomain = data.servingDomain
+    ? encodeURIComponent(data.servingDomain)
+    : 'algovid.com';
   const srcParams = [
     'https://p.' + servingDomain + '/player/player.js',
     '?p=' + encodeURIComponent(data.id),
     '&cb=' + cb,
     '&w=' + encodeURIComponent(data.width),
     '&h=' + encodeURIComponent(data.height),
-    (data.version ? '&pv=' + encodeURIComponent(data.version) : ''),
-    (data.subid ? '&subid=' + encodeURIComponent(data.subid) : ''),
-    (domain ? '&d=' + encodeURIComponent(domain) : ''),
-    (data.extraParams || ''), // already encoded url query string
+    data.version ? '&pv=' + encodeURIComponent(data.version) : '',
+    data.subid ? '&subid=' + encodeURIComponent(data.subid) : '',
+    domain ? '&d=' + encodeURIComponent(domain) : '',
+    data.extraParams || '', // already encoded url query string
   ];
 
   playerScript.onload = () => {

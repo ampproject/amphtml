@@ -16,19 +16,20 @@
 
 import {registerServiceBuilder} from '../service';
 
-
 /**
  * A helper class that provides information about device/OS/browser currently
  * running.
  */
 export class Platform {
-
   /**
    * @param {!Window} win
    */
   constructor(win) {
     /** @const @private {!Navigator} */
     this.navigator_ = /** @type {!Navigator} */ (win.navigator);
+
+    /** @const @private */
+    this.win_ = win;
   }
 
   /**
@@ -52,9 +53,14 @@ export class Platform {
    * @return {boolean}
    */
   isSafari() {
-    return /Safari/i.test(this.navigator_.userAgent) &&
-        !this.isChrome() && !this.isIe() && !this.isEdge() && !this.isFirefox()
-        && !this.isOpera();
+    return (
+      /Safari/i.test(this.navigator_.userAgent) &&
+      !this.isChrome() &&
+      !this.isIe() &&
+      !this.isEdge() &&
+      !this.isFirefox() &&
+      !this.isOpera()
+    );
   }
 
   /**
@@ -63,8 +69,11 @@ export class Platform {
    */
   isChrome() {
     // Also true for MS Edge :)
-    return /Chrome|CriOS/i.test(this.navigator_.userAgent) && !this.isEdge()
-        && !this.isOpera();
+    return (
+      /Chrome|CriOS/i.test(this.navigator_.userAgent) &&
+      !this.isEdge() &&
+      !this.isOpera()
+    );
   }
 
   /**
@@ -91,6 +100,9 @@ export class Platform {
    * @return {boolean}
    */
   isIe() {
+    if (IS_ESM) {
+      return false;
+    }
     return /Trident|MSIE|IEMobile/i.test(this.navigator_.userAgent);
   }
 
@@ -111,11 +123,23 @@ export class Platform {
   }
 
   /**
+   * Whether the current browser is running on Windows.
+   * @return {boolean}
+   */
+  isWindows() {
+    return /Windows/i.test(this.navigator_.userAgent);
+  }
+
+  /**
    * Whether the current browser is isStandalone.
    * @return {boolean}
    */
   isStandalone() {
-    return this.isIos() && this.navigator_.standalone;
+    return (
+      (this.isIos() && this.navigator_.standalone) ||
+      (this.isChrome() &&
+        this.win_.matchMedia('(display-mode: standalone)').matches)
+    );
   }
 
   /**
@@ -132,8 +156,9 @@ export class Platform {
    */
   getMajorVersion() {
     if (this.isSafari()) {
-      return this.isIos() ? (this.getIosMajorVersion() || 0) :
-        this.evalMajorVersion_(/\sVersion\/(\d+)/, 1);
+      return this.isIos()
+        ? this.getIosMajorVersion() || 0
+        : this.evalMajorVersion_(/\sVersion\/(\d+)/, 1);
     }
     if (this.isChrome()) {
       return this.evalMajorVersion_(/(Chrome|CriOS)\/(\d+)/, 2);
@@ -183,8 +208,9 @@ export class Platform {
     if (!this.isIos()) {
       return '';
     }
-    let version = this.navigator_.userAgent
-        .match(/OS ([0-9]+[_.][0-9]+([_.][0-9]+)?)\b/);
+    let version = this.navigator_.userAgent.match(
+      /OS ([0-9]+[_.][0-9]+([_.][0-9]+)?)\b/
+    );
     if (!version) {
       return '';
     }
@@ -205,10 +231,9 @@ export class Platform {
   }
 }
 
-
 /**
  * @param {!Window} window
  */
 export function installPlatformService(window) {
-  return registerServiceBuilder(window, 'platform', Platform);
+  registerServiceBuilder(window, 'platform', Platform);
 }

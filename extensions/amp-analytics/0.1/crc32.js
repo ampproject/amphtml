@@ -21,7 +21,7 @@ import {utf8Encode} from '../../../src/utils/bytes';
  * https://en.wikipedia.org/wiki/Cyclic_redundancy_check#Polynomial_representations_of_cyclic_redundancy_checks
  * @const {number}
  */
-const CRC32_KEY = 0xEDB88320;
+const CRC32_KEY = 0xedb88320;
 
 /** @private {?Array<number>} */
 let crcTable = null;
@@ -41,10 +41,10 @@ export function crc32(str) {
   // Shrink to 32 bits.
   let crc = -1 >>> 0;
   for (let i = 0; i < bytes.length; i++) {
-    const lookupIndex = (crc ^ bytes[i]) & 0xFF;
+    const lookupIndex = (crc ^ bytes[i]) & 0xff;
     crc = (crc >>> 8) ^ crcTable[lookupIndex];
   }
-  return (crc ^ (-1)) >>> 0;
+  return (crc ^ -1) >>> 0;
 }
 
 /**

@@ -14,36 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-
 # AMPHTML Ad Creative Format
 
 _If you'd like to propose changes to the standard, please comment on the [Intent
 to Implement](https://github.com/ampproject/amphtml/issues/4264)_.
 
 AMPHTML ads is a mechanism for rendering fast,
-performant ads in AMP pages.  To ensure that AMPHTML ad documents ("AMP
+performant ads in AMP pages. To ensure that AMPHTML ad documents ("AMP
 creatives") can be rendered quickly and smoothly in the browser and do
 not degrade user experience, AMP creatives must obey a set of validation
-rules.  Similar in spirit to the
-[AMP format rules](https://www.ampproject.org/docs/fundamentals/spec.html), AMPHTML ads have
+rules. Similar in spirit to the
+[AMP format rules](https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml), AMPHTML ads have
 access to a limited set of allowed tags, capabilities, and extensions.
-
-**Table of Contents**
-
-* [AMPHTML ad format rules](#amphtml-ad-format-rules)
-    * [Boilerplate](#boilerplate)
-    * [CSS](#css)
-        * [CSS animations and transitions](#css-animations-and-transitions)
-            * [Selectors](#selectors)
-            * [Transitionable and animatable properties](#transitionable-and-animatable-properties)
-    * [Allowed AMP extensions and builtins](#allowed-amp-extensions-and-builtins)
-    * [HTML tags](#html-tags)
 
 ## AMPHTML ad format rules
 
 Unless otherwise specified below, the creative must obey all rules given by the
-[AMP format rules](https://www.ampproject.org/docs/fundamentals/spec.html),
-included here by reference.  For example, the AMPHTML ad [Boilerplate](#boilerplate) deviates from the AMP standard boilerplate.
+[AMP format rules](https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml.html),
+included here by reference. For example, the AMPHTML ad [Boilerplate](#boilerplate) deviates from the AMP standard boilerplate.
 
 In addition, creatives must obey the following rules:
 
@@ -108,15 +96,19 @@ In addition, creatives must obey the following rules:
 AMPHTML ad creatives require a different, and considerably simpler, boilerplate style line than [general AMP documents do](https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md):
 
 ```html
-<style amp4ads-boilerplate>body{visibility:hidden}</style>
+<style amp4ads-boilerplate>
+  body {
+    visibility: hidden;
+  }
+</style>
 ```
 
 _Rationale:_ The `amp-boilerplate` style hides body content until the AMP
-runtime is ready and can unhide it.  If Javascript is disabled or the AMP
+runtime is ready and can unhide it. If Javascript is disabled or the AMP
 runtime fails to load, the default boilerplate ensures that the content is
-eventually displayed regardless.  In AMPHTML ads, however, if Javascript is entirely
+eventually displayed regardless. In AMPHTML ads, however, if Javascript is entirely
 disabled, AMPHTML ads won't run and no ad will ever be shown, so there is no need for
-the `<noscript>` section.  In the absence of the AMP runtime, most of the
+the `<noscript>` section. In the absence of the AMP runtime, most of the
 machinery that AMPHTML ads rely on (e.g., analytics for visibility
 tracking or `amp-img` for content display) won't be available, so it's better to
 display no ad than a malfunctioning one.
@@ -167,34 +159,36 @@ the [general AMP boilerplate](https://github.com/ampproject/amphtml/blob/master/
 </tbody>
 </table>
 
-
 #### CSS animations and transitions
 
 ##### Selectors
 
 The `transition` and `animation` properties are only allowed on selectors that:
+
 - Contain only `transition`, `animation`, `transform`, `visibility`, or
   `opacity` properties.
 
-  _Rationale:_ This allows the AMP runtime to remove this  class from context
-   to deactivate animations, when necessary for page performance.
+  _Rationale:_ This allows the AMP runtime to remove this class from context
+  to deactivate animations, when necessary for page performance.
 
 **Good**
+
 ```css
 .box {
-    transform: rotate(180deg);
-    transition: transform 2s;
+  transform: rotate(180deg);
+  transition: transform 2s;
 }
 ```
 
 **Bad**
 
 Property not allowed in CSS class.
+
 ```css
 .box {
-    color: red;  // non-animation property not allowed in animation selector
-    transform: rotate(180deg);
-    transition: transform 2s;
+  color: red; // non-animation property not allowed in animation selector
+  transform: rotate(180deg);
+  transition: transform 2s;
 }
 ```
 
@@ -204,16 +198,19 @@ The only properties that may be transitioned are opacity and transform.
 ([Rationale](http://www.html5rocks.com/en/tutorials/speed/high-performance-animations/))
 
 **Good**
+
 ```css
 transition: transform 2s;
 ```
 
 **Bad**
+
 ```css
 transition: background-color 2s;
 ```
 
 **Good**
+
 ```css
 @keyframes turn {
   from {
@@ -227,57 +224,56 @@ transition: background-color 2s;
 ```
 
 **Bad**
+
 ```css
 @keyframes slidein {
   from {
-    margin-left:100%;
-    width:300%
+    margin-left: 100%;
+    width: 300%;
   }
 
   to {
-    margin-left:0%;
-    width:100%;
+    margin-left: 0%;
+    width: 100%;
   }
 }
 ```
-
 
 ### Allowed AMP extensions and builtins
 
 The following are _allowed_ AMP extension modules and AMP built-in tags in an
 AMPHTML ad creative. Extensions or builtin tags not explicitly listed are prohibited.
 
-* [amp-accordion](https://www.ampproject.org/docs/reference/components/amp-accordion)
-* [amp-ad-exit](https://www.ampproject.org/docs/reference/components/amp-ad-exit)
-* [amp-analytics](https://www.ampproject.org/docs/reference/components/amp-analytics)
-* [amp-anim](https://www.ampproject.org/docs/reference/components/amp-anim)
-* [amp-animation](https://www.ampproject.org/docs/reference/components/amp-animation)
-* [amp-audio](https://www.ampproject.org/docs/reference/components/amp-audio)
-* [amp-bind](https://www.ampproject.org/docs/reference/components/amp-bind)
-* [amp-carousel](https://www.ampproject.org/docs/reference/components/amp-carousel)
-* [amp-fit-text](https://www.ampproject.org/docs/reference/components/amp-fit-text)
-* [amp-font](https://www.ampproject.org/docs/reference/components/amp-font)
-* [amp-form](https://www.ampproject.org/docs/reference/components/amp-form)
-* [amp-img](https://www.ampproject.org/docs/reference/components/amp-img)
-* [amp-layout](https://www.ampproject.org/docs/reference/components/amp-layout)
-* [amp-lightbox](https://www.ampproject.org/docs/reference/components/amp-lightbox)
-* [amp-mustache](https://www.ampproject.org/docs/reference/components/amp-mustache)
-* [amp-pixel](https://www.ampproject.org/docs/reference/components/amp-pixel)
-* [amp-position-observer](https://www.ampproject.org/docs/reference/components/amp-position-observer)
-* [amp-social-share](https://www.ampproject.org/docs/reference/components/amp-social-share)
-* [amp-video](https://www.ampproject.org/docs/reference/components/amp-video)
-* [amp-youtube](https://www.ampproject.org/docs/reference/components/amp-youtube)
-
-
+- [amp-accordion](https://amp.dev/documentation/components/amp-accordion)
+- [amp-ad-exit](https://amp.dev/documentation/components/amp-ad-exit)
+- [amp-analytics](https://amp.dev/documentation/components/amp-analytics)
+- [amp-anim](https://amp.dev/documentation/components/amp-anim)
+- [amp-animation](https://amp.dev/documentation/components/amp-animation)
+- [amp-audio](https://amp.dev/documentation/components/amp-audio)
+- [amp-bind](https://amp.dev/documentation/components/amp-bind)
+- [amp-carousel](https://amp.dev/documentation/components/amp-carousel)
+- [amp-fit-text](https://amp.dev/documentation/components/amp-fit-text)
+- [amp-font](https://amp.dev/documentation/components/amp-font)
+- [amp-form](https://amp.dev/documentation/components/amp-form)
+- [amp-img](https://amp.dev/documentation/components/amp-img)
+- [amp-layout](https://amp.dev/documentation/components/amp-layout)
+- [amp-lightbox](https://amp.dev/documentation/components/amp-lightbox)
+- amp-mraid, on an experimental basis. If you're considering using this, please open an issue at [wg-ads](https://github.com/ampproject/wg-ads/issues/new).
+- [amp-mustache](https://amp.dev/documentation/components/amp-mustache)
+- [amp-pixel](https://amp.dev/documentation/components/amp-pixel)
+- [amp-position-observer](https://amp.dev/documentation/components/amp-position-observer)
+- [amp-selector](https://amp.dev/documentation/components/amp-selector)
+- [amp-social-share](https://amp.dev/documentation/components/amp-social-share)
+- [amp-video](https://amp.dev/documentation/components/amp-video)
 
 Most of the omissions are either for performance or to make AMPHTML ads
 simpler to analyze.
 
-_Example:_ `<amp-ad>` is omitted from this list.  It is explicitly disallowed
+_Example:_ `<amp-ad>` is omitted from this list. It is explicitly disallowed
 because allowing an `<amp-ad>` inside an `<amp-ad>` could potentially lead to
 unbounded waterfalls of ad loading, which does not meet AMPHTML ads performance goals.
 
-_Example:_ `<amp-iframe>` is omitted from this list.  It is disallowed
+_Example:_ `<amp-iframe>` is omitted from this list. It is disallowed
 because ads could use it to execute arbitrary Javascript and load arbitrary
 content. Ads wanting to use such capabilities should return `false` from
 their
@@ -288,48 +284,52 @@ _Example:_ `<amp-facebook>`, `<amp-instagram>`, `<amp-twitter>`, and
 `<amp-youtube>` are all omitted for the same reason as `<amp-iframe>`: They
 all create iframes and can potentially consume unbounded resources in them.
 
-_Example:_ `<amp-ad-network-*-impl>` are omitted from this list.  The
+_Example:_ `<amp-ad-network-*-impl>` are omitted from this list. The
 `<amp-ad>` tag handles delegation to these implementation tags; creatives
 should not attempt to include them directly.
 
 _Example:_ `<amp-lightbox>` is not yet included because even some AMPHTML ads creatives
 may be rendered in an iframe and there is currently no mechanism for an ad to
-expand beyond an iframe.  Support may be added for this in the future, if there
+expand beyond an iframe. Support may be added for this in the future, if there
 is demonstrated desire for it.
-
 
 ### HTML tags
 
-The following are _allowed_ tags in an AMPHTML ads creative.  Tags not explicitly
-allowed are prohibited.  This list is a subset of the general [AMP tag
-addendum whitelist](../../spec/amp-tag-addendum.md). Like that list, it is
+The following are _allowed_ tags in an AMPHTML ads creative. Tags not explicitly
+allowed are prohibited. This list is a subset of the general [AMP tag
+addendum allowlist](../../spec/amp-tag-addendum.md). Like that list, it is
 ordered consistent with HTML5 spec in section 4 [The Elements of HTML](http://www.w3.org/TR/html5/single-page.html#html-elements).
 
 Most of the omissions are either for performance or because the tags are not
-HTML5 standard.  For example, `<noscript>` is omitted because AMPHTML ads depends on
+HTML5 standard. For example, `<noscript>` is omitted because AMPHTML ads depends on
 JavaScript being enabled, so a `<noscript>` block will never execute and,
 therefore, will only bloat the creative and cost bandwidth and latency.
 Similarly, `<acronym>`, `<big>`, et al. are prohibited because they are not
 HTML5 compatible.
 
 #### 4.1 The root element
+
 4.1.1 `<html>`
-  - Must use types `<html ⚡4ads>` or `<html amp4ads>`
+
+- Must use types `<html ⚡4ads>` or `<html amp4ads>`
 
 #### 4.2 Document metadata
+
 4.2.1 `<head>`
 
 4.2.2 `<title>`
 
 4.2.4 `<link>`
-  - `<link rel=...>` tags are disallowed, except for `<link rel=stylesheet>`.
-  - __Note:__ Unlike in general AMP, `<link rel="canonical">` tags are
-    prohibited.
 
-4.2.5 `<style>`
-4.2.6 `<meta>`
+- `<link rel=...>` tags are disallowed, except for `<link rel=stylesheet>`.
+- **Note:** Unlike in general AMP, `<link rel="canonical">` tags are
+  prohibited.
+
+  4.2.5 `<style>`
+  4.2.6 `<meta>`
 
 #### 4.3 Sections
+
 4.3.1 `<body>`
 4.3.2 `<article>`
 4.3.3 `<section>`
@@ -341,6 +341,7 @@ HTML5 compatible.
 4.3.9 `<address>`
 
 #### 4.4 Grouping Content
+
 4.4.1 `<p>`
 4.4.2 `<hr>`
 4.4.3 `<pre>`
@@ -357,6 +358,7 @@ HTML5 compatible.
 4.4.14 `<main>`
 
 #### 4.5 Text-level semantics
+
 4.5.1 `<a>`
 4.5.2 `<em>`
 4.5.3 `<strong>`
@@ -387,16 +389,21 @@ HTML5 compatible.
 4.5.28 `<span>`
 4.5.29 `<br>`
 4.5.30 `<wbr>`
+
 #### 4.6 Edits
+
 4.6.1 `<ins>`
 4.6.2 `<del>`
+
 #### 4.7 Embedded Content
+
 - Embedded content is supported only via AMP tags, such as `<amp-img>` or
-`<amp-video>`.
+  `<amp-video>`.
 
 #### 4.7.4 `<source>`
 
 #### 4.7.18 SVG
+
 SVG tags are not in the HTML5 namespace. They are listed below without section ids.
 
 `<svg>`
@@ -428,7 +435,9 @@ SVG tags are not in the HTML5 namespace. They are listed below without section i
 `<symbol>`
 `<desc>`
 `<title>`
+
 #### 4.9 Tabular data
+
 4.9.1 `<table>`
 4.9.2 `<caption>`
 4.9.3 `<colgroup>`
@@ -439,9 +448,13 @@ SVG tags are not in the HTML5 namespace. They are listed below without section i
 4.9.8 `<tr>`
 4.9.9 `<td>`
 4.9.10 `<th>`
+
 #### 4.10 Forms
+
 4.10.8 `<button>`
+
 #### 4.11 Scripting
+
 - Like a general AMP document, the creative's `<head>` tag must contain a
   `<script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>` tag.
 - Unlike general AMP, `<noscript>` is prohibited.
@@ -452,7 +465,7 @@ SVG tags are not in the HTML5 namespace. They are listed below without section i
   prohibited.
   - _Rationale:_ JSON LD is used for structured data markup on host
     pages, but ad creatives are not standalone documents and don't
-    contain structured data.  JSON LD blocks in them would just cost
+    contain structured data. JSON LD blocks in them would just cost
     network bandwidth.
 - All other scripting rules and exclusions are carried over from general
   AMP.

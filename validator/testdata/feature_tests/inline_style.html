@@ -31,11 +31,14 @@
   <amp-img layout=fill src=lemur.png style="display:block; position:relative; width:100px;"></amp-img>
   <!-- Invalid: !important is not allowed -->
   <amp-img layout=fill src=lemur.png style="display:block !important; width:100px;"></amp-img>
+  <amp-img layout=fill src=lemur.png style="display:block ! important; width:100px;"></amp-img>
   <!-- Invalid: position:fixed is not allowed -->
   <amp-img layout=fill src=lemur.png style="display: block; position: fixed; width: 100px;"></amp-img>
   <!-- Invalid: made up declaration is not allowed -->
   <amp-img layout=fill src=lemur.png style="lemur: lemur;"></amp-img>
   <!-- Invalid: attribute [style] is not allowed -->
   <amp-img layout=fill src=lemur.png style="display:block;" [style]="display:block;"></amp-img>
+  <!-- Invalid: mailto protocol not allowed in URLs -->
+  <b style="background-image: url('mailto:foo@bar.com')"></b>
 </body>
 </html>

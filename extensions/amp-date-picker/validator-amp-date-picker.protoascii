@@ -62,6 +62,7 @@ tags: {
     name: "mode"
     mandatory: true
     value_casei: "overlay"
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "type"
@@ -115,6 +116,7 @@ tags: {
     name: "mode"
     mandatory: true
     value_casei: "overlay"
+    dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: {
     name: "type"
@@ -133,6 +135,10 @@ tags: {
 
 attr_lists: {
   name: "amp-date-picker-common-attributes"
+  attrs: {
+    name: "allow-blocked-end-date"
+    value: ""
+  }
   attrs: {
     name: "allow-blocked-ranges"
     value: ""
@@ -165,15 +171,20 @@ attr_lists: {
     value: ""
   }
   attrs: {
+    name: "hide-keyboard-shortcuts-panel"
+    value: ""
+  }
+  attrs: {
     name: "src"
     value_url: {
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "week-day-format" }
   # amp-bind
+  attrs: { name: "[src]" }
   attrs: { name: "[max]" }
   attrs: { name: "[min]" }
 }
@@ -182,6 +193,10 @@ attr_lists: {
   name: "amp-date-picker-range-type-attributes"
   attrs: { name: "end-date" }
   attrs: { name: "end-input-selector" }
+  attrs: {
+    name: "maximum-nights"
+    value_regex: "[0-9]+"
+  }
   attrs: {
     name: "minimum-nights"
     value_regex: "[0-9]+"

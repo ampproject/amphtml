@@ -13,84 +13,69 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {assertAbsoluteHttpOrHttpsUrl, tryDecodeUriComponent} from '../src/url';
 import {getData} from '../src/event-helper';
 import {loadScript} from './3p';
-import {parseJson} from '../src/json';
-import {setStyles} from '../src/style';
+import {tryDecodeUriComponent} from '../src/url';
 
 /**
  * @param {Window} global
- * @param {boolean} autoplay
  * @param {Object} VIQEO
- * @param  {function(Object)} VIQEO.getPlayers - returns viqeo player
- * @param {function(function(Object), Object)} VIQEO.subscribeTracking - subscriber
  * @private
  */
-function viqeoPlayerInitLoaded(global, autoplay, VIQEO) {
-  const {canonicalUrl, pageViewId} = global.context;
-  VIQEO['setConfig']({url: canonicalUrl, amp: {pageViewId}});
+function viqeoPlayerInitLoaded(global, VIQEO) {
+  const {canonicalUrl, pageViewId, sourceUrl} = global.context;
+  const data = getData(global.context);
   let viqeoPlayerInstance;
+  VIQEO['setConfig']({url: sourceUrl, amp: {pageViewId, canonicalUrl}});
+  VIQEO['subscribeTracking']((params) => {
+    viqeoPlayerInstance = params['player'];
+  }, 'Player:added');
+  VIQEO['subscribeTracking'](() => {
+    sendMessage('updatePlayedRanges', viqeoPlayerInstance['getPlayedRanges']());
+    sendMessage('updateCurrentTime', viqeoPlayerInstance['getCurrentTime']());
+  }, 'Player:currentTimeUpdated');
+  VIQEO['subscribeTracking'](() => {
+    sendMessage('updateDuration', viqeoPlayerInstance['getDuration']());
+  }, 'Player:durationUpdated');
+  VIQEO['createPlayer']({
+    videoId: data['videoid'],
+    profileId: data['profileid'],
+    parent: global.document.getElementById('c'),
+  });
+
   global.addEventListener('message', parseMessage, false);
 
-  subscribe('added', 'ready', () => {
-    const players = VIQEO['getPlayers']({container: 'stdPlayer'});
-    viqeoPlayerInstance = players && players[0];
-  });
-  subscribe('started', 'started', () => {
-    // if autoplay is off then player will be paused as it just has been started
-    !autoplay && viqeoPlayerInstance && viqeoPlayerInstance.pause();
-  });
+  subscribe('ready', 'ready');
   subscribe('paused', 'pause');
+  subscribe('started', 'play');
   subscribe('played', 'play');
   subscribe('replayed', 'play');
-  subscribeTracking({
-    Mute: 'mute',
-    Unmute: 'unmute',
-  });
+  subscribe('ended', 'end');
+  subscribe('advStarted', 'startAdvert');
+  subscribe('advEnded', 'endAdvert');
+  subscribe('muted', 'mute');
+  subscribe('unmuted', 'unmute');
 
   /**
    * Subscribe on viqeo's events
    * @param {string} playerEventName
    * @param {string} targetEventName
-   * @param {function()|undefined|null} extraHandler
    * @private
    */
-  function subscribe(playerEventName, targetEventName, extraHandler = null) {
-    VIQEO['subscribeTracking'](
-        () => {
-          sendMessage(targetEventName);
-          if (extraHandler) {
-            extraHandler();
-          }
-        },
-        {eventName: `Player:${playerEventName}`, container: 'stdPlayer'}
-    );
-  }
-
-  /**
-   * Subscribe viqeo's tracking
-   * @param {Object.<string, string>} eventsDescription
-   * @private
-   */
-  function subscribeTracking(eventsDescription) {
-    VIQEO['subscribeTracking'](params => {
-      const name = params && params['trackingParams'] &&
-          params['trackingParams'].name;
-      const targetEventName = eventsDescription[name];
+  function subscribe(playerEventName, targetEventName) {
+    VIQEO['subscribeTracking'](() => {
       sendMessage(targetEventName);
-    }, 'Player:userAction');
+    }, `Player:${playerEventName}`);
   }
 
   const sendMessage = (eventName, value = null) => {
     const {parent} = global;
-    const message = /** @type {JsonObject} */({
+    const message = /** @type {JsonObject} */ ({
       source: 'ViqeoPlayer',
       action: eventName,
       value,
     });
-    parent./*OK*/postMessage(message, '*');
+    parent./*OK*/ postMessage(message, '*');
   };
 
   /**
@@ -123,76 +108,15 @@ function viqeoPlayerInitLoaded(global, autoplay, VIQEO) {
  */
 export function viqeoplayer(global) {
   const data = getData(global.context);
-  let autoplay = false;
-  try {
-    autoplay = parseJson(global.name)['attributes']._context['autoplay'];
-  } catch (e) {
-    // do nothing
-  }
-  const videoId = data['videoid'];
-  const profileId = data['profileid'];
-
-  const markTagsAdvancedParams = data['tag-settings'];
-
   const kindIsProd = data['data-kind'] !== 'stage';
 
   let scriptPlayerInit = data['script-url'];
   scriptPlayerInit =
-      (scriptPlayerInit
-          && tryDecodeUriComponent(scriptPlayerInit)
-      )
-      ||
-      (kindIsProd
-        ? 'https://cdn.viqeo.tv/js/vq_player_init.js?amp=true'
-        : 'https://static.viqeo.tv/js/vq_player_init.js?branch=dev1&amp=true'
-      );
-  // embed preview url
-  let previewUrl = data['player-url'];
-  previewUrl =
-      (previewUrl
-          && previewUrl.length && decodeURI(previewUrl)
-      )
-      || (kindIsProd ? 'https://cdn.viqeo.tv/embed' : 'https://stage.embed.viqeo.tv');
+    (scriptPlayerInit && tryDecodeUriComponent(scriptPlayerInit)) ||
+    (kindIsProd
+      ? 'https://cdn.viqeo.tv/js/vq_starter.js'
+      : 'https://static.viqeo.tv/js/vq_player_init.js?branch=dev1');
 
-  // Create preview iframe source path
-  previewUrl = assertAbsoluteHttpOrHttpsUrl(
-      `${previewUrl}/?vid=${videoId}&amp=true`);
-
-  const doc = global.document;
-  const mark = doc.createElement('div');
-
-  const markTagsStyle = Object.assign({
-    position: 'relative',
-    width: '100%',
-    height: '0',
-    paddingBottom: '100%',
-  }, markTagsAdvancedParams);
-
-  setStyles(mark, markTagsStyle);
-
-  mark.setAttribute('data-vnd', videoId);
-  mark.setAttribute('data-profile', profileId);
-  mark.classList.add('viqeo-embed');
-
-  const iframe = doc.createElement('iframe');
-
-  iframe.setAttribute('width', '100%');
-  iframe.setAttribute('height', '100%');
-  iframe.setAttribute('style', 'position: absolute');
-  iframe.setAttribute('frameBorder', '0');
-  iframe.setAttribute('allowFullScreen', '');
-  iframe.src = previewUrl;
-
-  mark.appendChild(iframe);
-
-  doc.getElementById('c').appendChild(mark);
-
-  loadScript(global, scriptPlayerInit, () => {
-    if (!global['VIQEO']) {
-      global['onViqeoLoad'] =
-        viqeoPlayerInitLoaded.bind(null, global, autoplay);
-    } else {
-      viqeoPlayerInitLoaded(global, autoplay, global['VIQEO']);
-    }
-  });
+  global['onViqeoLoad'] = (VIQEO) => viqeoPlayerInitLoaded(global, VIQEO);
+  loadScript(global, scriptPlayerInit);
 }

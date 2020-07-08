@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-carousel-analytics"></a>AMP Carousel and Analytics
+# AMP Carousel and Analytics
 
 ## Carousel (slides) triggers
 
 `<amp-carousel type="slides">` issues events for major states . These events can be reported through the analytics configuration by using triggers.
 
-See [amp-analytics.md](../amp-analytics/amp-analytics.md) for details on *amp-analytics* configuration.
+See [amp-analytics.md](../amp-analytics/amp-analytics.md) for details on _amp-analytics_ configuration.
 
 ### Change trigger (`"on": "amp-carousel-change"`)
 

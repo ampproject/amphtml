@@ -16,14 +16,14 @@
 
 import {ValidationBubble} from '../validation-bubble';
 
-describes.realWin('validation-bubble', {amp: true}, env => {
+describes.realWin('validation-bubble', {amp: true}, (env) => {
   it('should append a dom element to the document', () => {
     const {ampdoc} = env;
     const document = ampdoc.getRootNode();
 
     new ValidationBubble(ampdoc);
-    expect(document.querySelector('.i-amphtml-validation-bubble'))
-        .to.not.be.null;
+    expect(document.querySelector('.i-amphtml-validation-bubble')).to.not.be
+      .null;
   });
 
   it('should show and hide bubble', () => {

@@ -15,7 +15,7 @@
  */
 
 import {Services} from './services';
-import {getFormAsObject} from './form';
+import {getFormAsObject, getSubmitButtonUsed} from './form';
 import {iterateCursor} from './dom';
 import {map} from './utils/object';
 
@@ -93,9 +93,9 @@ export class PolyfillFormDataWrapper {
   /** @override */
   entries() {
     const fieldEntries = [];
-    Object.keys(this.fieldValues_).forEach(name => {
+    Object.keys(this.fieldValues_).forEach((name) => {
       const values = this.fieldValues_[name];
-      values.forEach(value => fieldEntries.push([name, value]));
+      values.forEach((value) => fieldEntries.push([name, value]));
     });
 
     // Generator functions are not supported by the current Babel configuration,
@@ -103,9 +103,9 @@ export class PolyfillFormDataWrapper {
     let nextIndex = 0;
     return /** @type {!Iterator<!Array<string>>} */ ({
       next() {
-        return nextIndex < fieldEntries.length ?
-          {value: fieldEntries[nextIndex++], done: false} :
-          {value: undefined, done: true};
+        return nextIndex < fieldEntries.length
+          ? {value: fieldEntries[nextIndex++], done: false}
+          : {value: undefined, done: true};
       },
     });
   }
@@ -114,9 +114,9 @@ export class PolyfillFormDataWrapper {
   getFormData() {
     const formData = new FormData();
 
-    Object.keys(this.fieldValues_).forEach(name => {
+    Object.keys(this.fieldValues_).forEach((name) => {
       const values = this.fieldValues_[name];
-      values.forEach(value => formData.append(name, value));
+      values.forEach((value) => formData.append(name, value));
     });
 
     return formData;
@@ -124,8 +124,13 @@ export class PolyfillFormDataWrapper {
 }
 
 /**
- * Wrap the native FormData implementation.
+ * Wrap the native `FormData` implementation.
  *
+ * NOTE: This differs from the standard `FormData` constructor. This constructor
+ * includes a submit button if it was used to submit the `opt_form`, where
+ * the native `FormData` constructor does not include the submit button used to
+ * submit the form.
+ * {@link https://xhr.spec.whatwg.org/#dom-formdata}
  * @implements {FormDataWrapperInterface}
  */
 class NativeFormDataWrapper {
@@ -133,6 +138,28 @@ class NativeFormDataWrapper {
   constructor(opt_form) {
     /** @private @const {!FormData} */
     this.formData_ = new FormData(opt_form);
+
+    this.maybeIncludeSubmitButton_(opt_form);
+  }
+
+  /**
+   * If a submit button is focused (because it was used to submit the form),
+   * or was the first submit button present, add its name and value to the
+   * `FormData`, since publishers expect the submit button to be present.
+   * @param {!HTMLFormElement=} opt_form
+   * @private
+   */
+  maybeIncludeSubmitButton_(opt_form) {
+    // If a form is not passed to the constructor,
+    // we are not in a submitting code path.
+    if (!opt_form) {
+      return;
+    }
+
+    const button = getSubmitButtonUsed(opt_form);
+    if (button && button.name) {
+      this.append(button.name, button.value);
+    }
   }
 
   /**
@@ -171,7 +198,7 @@ class Ios11NativeFormDataWrapper extends NativeFormDataWrapper {
     super(opt_form);
 
     if (opt_form) {
-      iterateCursor(opt_form.elements, input => {
+      iterateCursor(opt_form.elements, (input) => {
         if (input.type == 'file' && input.files.length == 0) {
           this.formData_.delete(input.name);
           this.formData_.append(input.name, new Blob([]), '');
@@ -202,7 +229,7 @@ class Ios11NativeFormDataWrapper extends NativeFormDataWrapper {
  * support `FormData.prototype.entries`.
  *
  * @interface
- * @note Subclassing `FormData` doesn't work in this case as the transpiler
+ * Subclassing `FormData` doesn't work in this case as the transpiler
  *     generates code that calls the super constructor directly using
  *     `Function.prototype.call`. WebKit (Safari) doesn't allow this and
  *     enforces that constructors be called with the `new` operator.
@@ -216,6 +243,10 @@ class FormDataWrapperInterface {
    * only way to implement `entries` in this class is to capture the fields in
    * the form passed to the constructor (and the arguments passed to the
    * `append` method).
+   *
+   * This constructor should also add the submitter element as defined in the
+   * HTML spec for Form Submission Algorithm, but is not defined by the standard
+   * when using the `FormData` constructor directly.
    *
    * For more details on this, see http://mdn.io/FormData.
    *

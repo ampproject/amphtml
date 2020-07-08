@@ -22,7 +22,7 @@ const RE_ADDTHIS_FRAGMENT = /^\.[a-z0-9\-_]{11}(\.[a-z0-9_]+)?$/i;
  * @param {string} url
  * @return {string|undefined}
  */
-const getModernFragment = url => {
+const getModernFragment = (url) => {
   let frag = url.split('#').pop();
 
   // Clean up the fragment
@@ -41,7 +41,7 @@ const getModernFragment = url => {
  * @param {string} url
  * @return {boolean}
  */
-const isAddthisFragment = url => {
+const isAddthisFragment = (url) => {
   if (getModernFragment(url)) {
     return true;
   } else {
@@ -60,7 +60,7 @@ const isAddthisFragment = url => {
  * @param {string} url
  * @return {string}
  */
-export const clearOurFragment = url => {
+export const clearOurFragment = (url) => {
   if (isAddthisFragment(url)) {
     return url.split('#').shift();
   }
@@ -72,7 +72,7 @@ export const clearOurFragment = url => {
  * @param {string} url
  * @return {string|undefined}
  */
-export const getFragmentId = url => {
+export const getFragmentId = (url) => {
   const fragment = getModernFragment(url);
   if (fragment) {
     return fragment.split('.').slice(1).shift();
@@ -86,7 +86,7 @@ export const getFragmentId = url => {
  * @param {string} url
  * @return {string|undefined}
  */
-export const getServiceFromUrlFragment = url => {
+export const getServiceFromUrlFragment = (url) => {
   const fragment = getModernFragment(url);
   if (fragment) {
     return fragment.split('.').slice(2).shift();

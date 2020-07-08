@@ -15,11 +15,11 @@
  */
 
 import {AstNodeType} from './bind-expr-defines';
-import {dev, user} from '../../../src/log';
+import {devAssert, user} from '../../../src/log';
 import {dict, hasOwn, map} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
-import {bindParser as parser} from './bind-expr-impl';
+import {bindParser as parser} from '../../../build/parsers/bind-expr-impl';
 
 const TAG = 'amp-bind';
 
@@ -33,16 +33,16 @@ const MAX_AST_SIZE = 100;
 const CUSTOM_FUNCTIONS = 'custom-functions';
 
 /**
- * Map of object type to function name to whitelisted function.
+ * Map of object type to function name to allowlisted function.
  * @private {!Object<string, !Object<string, Function>>}
  */
-let FUNCTION_WHITELIST;
+let FUNCTION_ALLOWLIST;
 
 /**
  * @return {!Object<string, !Object<string, Function>>}
  * @private
  */
-function generateFunctionWhitelist() {
+function generateFunctionAllowlist() {
   /**
    * Deprecated. Static, not-in-place variant of Array#splice.
    * @param {!Array} array
@@ -116,7 +116,7 @@ function generateFunctionWhitelist() {
   }
 
   // Prototype functions.
-  const whitelist = dict({
+  const allowlist = dict({
     '[object Array]': {
       // TODO(choumx): Polyfill Array#find and Array#findIndex for IE.
       'concat': Array.prototype.concat,
@@ -144,6 +144,7 @@ function generateFunctionWhitelist() {
       'concat': String.prototype.concat,
       'indexOf': String.prototype.indexOf,
       'lastIndexOf': String.prototype.lastIndexOf,
+      'replace': String.prototype.replace,
       'slice': String.prototype.slice,
       'split': String.prototype.split,
       'substr': String.prototype.substr,
@@ -154,14 +155,17 @@ function generateFunctionWhitelist() {
   });
 
   // Un-namespaced static functions.
-  whitelist[CUSTOM_FUNCTIONS] = {
+  allowlist[CUSTOM_FUNCTIONS] = {
     'encodeURI': encodeURI,
     'encodeURIComponent': encodeURIComponent,
     'abs': Math.abs,
     'ceil': Math.ceil,
     'floor': Math.floor,
+    'sqrt': Math.sqrt,
+    'log': Math.log,
     'max': Math.max,
     'min': Math.min,
+    'pow': Math.pow,
     'random': Math.random,
     'round': Math.round,
     'sign': Math.sign,
@@ -172,15 +176,18 @@ function generateFunctionWhitelist() {
   // Creates a map of function name to the function itself.
   // This makes function lookups faster (compared to Array.indexOf).
   const out = map();
-  Object.keys(whitelist).forEach(type => {
+  Object.keys(allowlist).forEach((type) => {
     out[type] = map();
 
-    const functionsForType = whitelist[type];
-    Object.keys(functionsForType).forEach(name => {
+    const functionsForType = allowlist[type];
+    Object.keys(functionsForType).forEach((name) => {
       const func = functionsForType[name];
       if (func) {
-        dev().assert(!func.name || name === func.name, 'Listed function name ' +
-            `"${name}" doesn't match name property "${func.name}".`);
+        devAssert(
+          !func.name || name === func.name,
+          'Listed function name ' +
+            `"${name}" doesn't match name property "${func.name}".`
+        );
         out[type][name] = func;
       } else {
         // This can happen if a browser doesn't support a built-in function.
@@ -209,8 +216,8 @@ export class BindExpression {
    * @throws {Error} On malformed expressions.
    */
   constructor(expressionString, macros, opt_maxAstSize) {
-    if (!FUNCTION_WHITELIST) {
-      FUNCTION_WHITELIST = generateFunctionWhitelist();
+    if (!FUNCTION_ALLOWLIST) {
+      FUNCTION_ALLOWLIST = generateFunctionAllowlist();
     }
 
     /** @const {string} */
@@ -229,14 +236,16 @@ export class BindExpression {
     const maxSize = opt_maxAstSize || MAX_AST_SIZE;
     const skipConstraint = getMode().localDev && !getMode().test;
     if (this.expressionSize > maxSize && !skipConstraint) {
-      throw new Error(`Expression size (${this.expressionSize}) exceeds max ` +
-          `(${maxSize}). Please reduce number of operands.`);
+      throw new Error(
+        `Expression size (${this.expressionSize}) exceeds max ` +
+          `(${maxSize}). Please reduce number of operands.`
+      );
     }
   }
 
   /**
    * Evaluates the expression given a scope.
-   * @param {!Object} scope
+   * @param {!JsonObject} scope
    * @throws {Error} On illegal function invocation.
    * @return {BindExpressionResultDef}
    */
@@ -254,7 +263,7 @@ export class BindExpression {
     if (this.isMacroInvocationNode_(ast)) {
       const macro = this.macros_[String(ast.value)];
       let nodes = macro.getExpressionSize();
-      this.argumentsForInvocation_(ast).forEach(arg => {
+      this.argumentsForInvocation_(ast).forEach((arg) => {
         if (arg) {
           nodes += this.numberOfNodesInAst_(arg) - 1;
         }
@@ -263,7 +272,7 @@ export class BindExpression {
     } else {
       let nodes = 1;
       if (ast.args) {
-        ast.args.forEach(arg => {
+        ast.args.forEach((arg) => {
           if (arg) {
             nodes += this.numberOfNodesInAst_(arg);
           }
@@ -280,7 +289,7 @@ export class BindExpression {
    */
   isMacroInvocationNode_(ast) {
     const isInvocationWithNoCaller =
-        (ast.type === AstNodeType.INVOCATION && !ast.args[0]);
+      ast.type === AstNodeType.INVOCATION && !ast.args[0];
     if (isInvocationWithNoCaller) {
       const macroExistsWithValue = this.macros_[String(ast.value)] != null;
       return macroExistsWithValue;
@@ -298,8 +307,9 @@ export class BindExpression {
   argumentsForInvocation_(ast) {
     // The INVOCATION node may or may not contain an ARGS child node.
     const argsNode =
-        (ast.args.length === 2 && ast.args[1].type === AstNodeType.ARGS)
-          ? ast.args[1] : null;
+      ast.args.length === 2 && ast.args[1].type === AstNodeType.ARGS
+        ? ast.args[1]
+        : null;
     if (argsNode) {
       // An ARGS node can either have an empty array or an ARRAY child.
       const {args} = argsNode;
@@ -318,7 +328,7 @@ export class BindExpression {
   /**
    * Recursively evaluates and returns value of `node` and its children.
    * @param {./bind-expr-defines.AstNode} node
-   * @param {!Object} scope
+   * @param {!JsonObject} scope
    * @throws {Error}
    * @return {BindExpressionResultDef}
    * @private
@@ -341,7 +351,7 @@ export class BindExpression {
 
       case AstNodeType.INVOCATION:
         // Built-in functions and macros don't have a caller object.
-        const isBuiltInOrMacro = (args[0] === undefined);
+        const isBuiltInOrMacro = args[0] === undefined;
 
         const caller = this.eval_(args[0], scope);
         const params = this.eval_(args[1], scope);
@@ -353,35 +363,38 @@ export class BindExpression {
         if (isBuiltInOrMacro) {
           const macro = this.macros_[method];
           if (macro) {
-            validFunction = function() {
+            validFunction = function () {
               return macro.evaluate(
-                  scope, Array.prototype.slice.call(arguments));
+                scope,
+                Array.prototype.slice.call(arguments)
+              );
             };
           } else {
-            validFunction = FUNCTION_WHITELIST[CUSTOM_FUNCTIONS][method];
+            validFunction = FUNCTION_ALLOWLIST[CUSTOM_FUNCTIONS][method];
           }
           if (!validFunction) {
             unsupportedError = `${method} is not a supported function.`;
           }
         } else {
           if (caller === null) {
-            user().warn(TAG, `Cannot invoke method ${method} on null; ` +
-                'returning null.');
+            user().warn(
+              TAG,
+              `Cannot invoke method ${method} on null; returning null.`
+            );
             return null;
           }
           const callerType = Object.prototype.toString.call(caller);
-          const whitelist = FUNCTION_WHITELIST[callerType];
-          if (whitelist) {
+          const allowlist = FUNCTION_ALLOWLIST[callerType];
+          if (allowlist) {
             const f = caller[method];
-            if (f && f === whitelist[method]) {
+            if (f && f === allowlist[method]) {
               validFunction = f;
             } else if (this.isCustomInstanceFunction_(method)) {
-              validFunction = whitelist[method];
+              validFunction = allowlist[method];
             }
           }
           if (!validFunction) {
-            unsupportedError =
-                `${callerType}.${method} is not a supported function.`;
+            unsupportedError = `${callerType}.${method} is not a supported function.`;
           }
         }
 
@@ -428,19 +441,17 @@ export class BindExpression {
 
       case AstNodeType.ARGS:
       case AstNodeType.ARRAY_LITERAL:
-        return (args.length > 0) ? this.eval_(args[0], scope) : [];
+        return args.length > 0 ? this.eval_(args[0], scope) : [];
 
       case AstNodeType.ARRAY:
-        return args.map(element => this.eval_(element, scope));
+        return args.map((element) => this.eval_(element, scope));
 
       case AstNodeType.OBJECT_LITERAL:
-        return (args.length > 0)
-          ? this.eval_(args[0], scope)
-          : map();
+        return args.length > 0 ? this.eval_(args[0], scope) : map();
 
       case AstNodeType.OBJECT:
         const object = map();
-        args.forEach(keyValue => {
+        args.forEach((keyValue) => {
           const {k, v} = this.eval_(keyValue, scope);
           object[k] = v;
         });
@@ -465,20 +476,28 @@ export class BindExpression {
         return this.eval_(args[0], scope) + this.eval_(args[1], scope);
 
       case AstNodeType.MINUS:
-        return Number(this.eval_(args[0], scope)) -
-            Number(this.eval_(args[1], scope));
+        return (
+          Number(this.eval_(args[0], scope)) -
+          Number(this.eval_(args[1], scope))
+        );
 
       case AstNodeType.MULTIPLY:
-        return Number(this.eval_(args[0], scope)) *
-            Number(this.eval_(args[1], scope));
+        return (
+          Number(this.eval_(args[0], scope)) *
+          Number(this.eval_(args[1], scope))
+        );
 
       case AstNodeType.DIVIDE:
-        return Number(this.eval_(args[0], scope)) /
-            Number(this.eval_(args[1], scope));
+        return (
+          Number(this.eval_(args[0], scope)) /
+          Number(this.eval_(args[1], scope))
+        );
 
       case AstNodeType.MODULO:
-        return Number(this.eval_(args[0], scope)) %
-            Number(this.eval_(args[1], scope));
+        return (
+          Number(this.eval_(args[0], scope)) %
+          Number(this.eval_(args[1], scope))
+        );
 
       case AstNodeType.LOGICAL_AND:
         return this.eval_(args[0], scope) && this.eval_(args[1], scope);
@@ -523,7 +542,7 @@ export class BindExpression {
 
           const names = this.eval_(args[0], scope);
           if (names) {
-            names.forEach((name, i) => {
+            /** @type {!Array} */ (names).forEach((name, i) => {
               functionScope[name] = values[i];
             });
           }

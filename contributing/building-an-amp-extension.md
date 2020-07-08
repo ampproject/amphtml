@@ -7,7 +7,7 @@ extensions. If you'd like to add an extension to support your company
 video player, rich embed or just a general UI component like a star
 rating viewer, you'd do this by building an extension.
 
-- [A word on contributing](#a-word-on-contributing)
+- [Getting started](#getting-started)
 - [Naming](#naming)
 - [Directory structure](#directory-structure)
 - [Extend AMP.BaseElement](#extend-ampbaseelement)
@@ -27,17 +27,11 @@ rating viewer, you'd do this by building an extension.
 - [Type checking](#type-checking)
 - [Example PRs](#example-prs)
 
-# Checklist for creating an experiment
+## Getting started
 
--[] Create your directory structure.
--[] Create an experiment.
--[] Check previous PRs of past experiments to model your extension after, if applicable.
+This document describes how to create a new AMP extension, which is one of the most common ways of adding a new feature to AMP.
 
-## A word on contributing
-
-We suggest that you open an "Intent to Implement" GitHub issue for your
-extension as early as you can, so that we can advise you on next steps or provide early feedback on the implementation or naming. For details, see [CONTRIBUTING.md
-for more details](../CONTRIBUTING.md#phase-concept-design).
+Before diving into the details on creating a new AMP extension, please familiarize yourself with the [general process for contributing code and features to AMP](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md). Since you are adding a new extension you will likely need to follow the [process for making a significant change](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#process-for-significant-changes), including filing an ["Intent to Implement" issue](https://github.com/ampproject/amphtml/labels/INTENT%20TO%20IMPLEMENT) and finding a guide before you start significant development.
 
 ## Naming
 
@@ -51,7 +45,7 @@ extension. For example, video players are also suffixed with `-player`
 You create your extension's files inside the `extensions/` directory.
 The directory structure is below:
 
-```text
+```sh
 /extensions/amp-my-element/
 ├── 0.1/
 |   ├── test/
@@ -63,9 +57,9 @@ The directory structure is below:
 ├── validator-amp-my-element.protoascii  # Validator rules (req'd)
 ├── amp-my-element.md                    # Element's main documentation (req'd)
 └── More documentation in .md files (optional)
-└── OWNERS.yaml # Owners file. Primary contact(s) for the extension. More about owners [here](https://github.com/ampproject/amphtml/blob/master/contributing/owners-and-committers.md) (req'd)
-
+└── OWNERS                               # Owners file. Primary contact(s) for the extension. (req'd)
 ```
+
 In most cases you'll only create the required (req'd) files. If your element does not need custom CSS, you don't need to create the CSS file.
 
 ## Extend AMP.BaseElement
@@ -94,7 +88,6 @@ const EXPERIMENT = 'amp-my-element';
 const TAG = 'amp-my-element';
 
 class AmpMyElement extends AMP.BaseElement {
-
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -119,7 +112,9 @@ class AmpMyElement extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-my-element', AmpMyElement, CSS);
+AMP.extension('amp-my-element', '0.1', (AMP) => {
+  AMP.registerElement('amp-my-element', AmpMyElement, CSS);
+});
 ```
 
 ### BaseElement callbacks
@@ -130,8 +125,8 @@ AMP.registerElement('amp-my-element', AmpMyElement, CSS);
 - **Override**: Rarely.
 - **[Vsync](https://github.com/ampproject/amphtml/blob/master/src/service/vsync-impl.js) Context**: None
 - **Usage**: If your extension provides different implementations
-depending on a late runtime condition (e.g. type attribute on the
-element, platform)
+  depending on a late runtime condition (e.g. type attribute on the
+  element, platform)
 - **Example Usage**: amp-ad, amp-app-banner
 
 #### buildCallback
@@ -140,48 +135,48 @@ element, platform)
 - **Override**: Almost always
 - **Vsync Context**: Mutate
 - **Usage**: If your element has UI elements this is where you should
-create your DOM structure and append it to the element. You can also
-read the attributes (e.g. width, height…) the user provided on your
-element in this callback.
+  create your DOM structure and append it to the element. You can also
+  read the attributes (e.g. width, height…) the user provided on your
+  element in this callback.
 - **Warning**: Don't load remote resources during the buildCallback. This
-not only circumvents the AMP resources manager, but it will also lead to
-higher data charges for users because all these resources will be loaded
-before layouting needs to happen.
+  not only circumvents the AMP resources manager, but it will also lead to
+  higher data charges for users because all these resources will be loaded
+  before layouting needs to happen.
 - **Warning 2**: Do the least needed work here, and don't build DOM that
-is not needed at this point.
+  is not needed at this point.
 
 #### preconnectCallback
 
 - **Default**: Does nothing.
 - **Vsync Context**: None (Neither mutate nor measure)
 - **Override**: Sometimes, if your element will be loading remote
-resources.
+  resources.
 - **Usage**: Use to instruct AMP which hosts to preconnect to, and which
-resources to preload/prefetch; this allows AMP to delegate to the browser
-to get a performance boost by preconnecting, preloading and prefetching
-resources via preconnect service.
+  resources to preload/prefetch; this allows AMP to delegate to the browser
+  to get a performance boost by preconnecting, preloading and prefetching
+  resources via preconnect service.
 - **Example Usage**: [Instagram uses this to
-preconnect](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/0.1/amp-instagram.js)
-to instagram hosts.
+  preconnect](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/0.1/amp-instagram.js)
+  to instagram hosts.
 
 #### createPlaceholderCallback
 
 - **Default**: Does nothing.
 - **Vsync Context**: Mutate
 - **Override**: Sometimes. If your component provides a way to dynamically
-create a lightweight placeholder. This gets called only if the element
-doesn't already have a publisher-provided placeholder (through [the
-placeholder
-attribute](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#placeholder)).
+  create a lightweight placeholder. This gets called only if the element
+  doesn't already have a publisher-provided placeholder (through [the
+  placeholder
+  attribute](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#placeholder)).
 - **Usage**: Create placeholder DOM and return it. For example,
-amp-instagram uses this to create a placeholder dynamically by creating
-an amp-img placeholder instead of loading the iframe, leaving the iframe
-loading to layoutCallback.
+  amp-instagram uses this to create a placeholder dynamically by creating
+  an amp-img placeholder instead of loading the iframe, leaving the iframe
+  loading to layoutCallback.
 - **Warning**: Only use amp-elements for creating placeholders that
-require external resource loading. This allows runtime to create this
-early but still defer the resource loading and management to AMP
-resources manager. Don't create or load heavyweight resources (e.g.
-iframe…).
+  require external resource loading. This allows runtime to create this
+  early but still defer the resource loading and management to AMP
+  resources manager. Don't create or load heavyweight resources (e.g.
+  iframe…).
 - **Example Usage**: amp-instagram.
 
 #### onLayoutMeasure
@@ -198,23 +193,23 @@ iframe…).
 - **Vsync Context**: Mutate
 - **Override**: Almost always.
 - **Usage**: Use this to actually render the final version of your
-element. If the element should load a video, this is where you load the
-video. This needs to return a promise that resolves when the element is
-considered "laid out" - usually this means load event has fired but can
-be different from element to element. Note that load events usually are
-fired very early so if there's another event that your element can
-listen to that have a better meaning of ready-ness, use that to resolve
-your promise instead - for example: [amp-youtube](https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/0.1/amp-youtube.js) uses the
-playerready event that the underlying YT Player
-iframe sends to resolve the layoutCallback promise.
+  element. If the element should load a video, this is where you load the
+  video. This needs to return a promise that resolves when the element is
+  considered "laid out" - usually this means load event has fired but can
+  be different from element to element. Note that load events usually are
+  fired very early so if there's another event that your element can
+  listen to that have a better meaning of ready-ness, use that to resolve
+  your promise instead - for example: [amp-youtube](https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/0.1/amp-youtube.js) uses the
+  playerready event that the underlying YT Player
+  iframe sends to resolve the layoutCallback promise.
 
 #### firstLayoutCompleted
 
 - **Default**: Hide element's placeholder.
 - **Vsync Context**: Mutate
 - **Override**: Sometimes. If you'd like to override default behavior and
-not hide the placeholder when the element is considered first laid out.
-Sometimes you wanna control when to hide the placeholder.
+  not hide the placeholder when the element is considered first laid out.
+  Sometimes you wanna control when to hide the placeholder.
 - **Example Usage**: amp-anim
 
 #### pauseCallback
@@ -222,9 +217,9 @@ Sometimes you wanna control when to hide the placeholder.
 - **Default**: Does nothing.
 - **Vsync Context**: Mutate
 - **Called**: When you swipe away from a document in a viewer. Called on
-children of lightbox when you close a lightbox instance, called on
-carousel children when the slide is not the active slide. And possibly
-other places.
+  children of lightbox when you close a lightbox instance, called on
+  carousel children when the slide is not the active slide. And possibly
+  other places.
 - **Override**: Sometimes. Most likely if you're building a player.
 - **Usage**: Use to pause video, slideshow auto-advance...etc
 - **Example Usage**: amp-video, amp-youtube
@@ -236,15 +231,15 @@ other places.
 - **Override**: Sometimes.
 - **Usage**: Use to restart the slideshow auto-advance.
 - **Note**: This is not used widely yet because it's not possible to
-resume video playback for example on mobile.
+  resume video playback for example on mobile.
 
 #### unlayoutOnPause
 
 - **Default**: Returns false.
 - **Vsync Context**: Mutate
 - **Override**: If your element doesn't provide a pausing mechanism,
-instead override this to unlayout the element when AMP tries to pause
-it.
+  instead override this to unlayout the element when AMP tries to pause
+  it.
 - **Return**: True if you want unlayoutCallback to be called when paused.
 - **Usage Example**: amp-brightcove
 
@@ -254,7 +249,7 @@ it.
 - **Vsync Context**: Mutate
 - **Override**: Sometimes.
 - **Usage**: Use to remove and unload heavyweight resources like iframes,
-video, audio and others that your element has created.
+  video, audio and others that your element has created.
 - **Return**: **True** if your element need to re-layout.
 - **Usage Example**: amp-iframe
 
@@ -263,7 +258,7 @@ video, audio and others that your element has created.
 - **Default**: Does nothing.
 - **Override**: Rarely.
 - **Usage**: Use if your element need to know when it comes into viewport
-and when it goes out of it for finer control.
+  and when it goes out of it for finer control.
 - **Usage Example**: amp-carousel, amp-anim
 
 ## Element styling
@@ -281,7 +276,7 @@ registering the element (see below).
 Class names prefixed with `i-amphtml` are considered private. Publishers
 are not allowed to use them for customization (enforced by AMP validator).
 
-Class names prefixed with  `amp-` are public css classes that can be customized
+Class names prefixed with `amp-` are public css classes that can be customized
 by publishers. All such classes should be documented in the component-specific
 `.md` file. All CSS classes in component stylesheets should be prefixed with
 either `i-amphtml-` or `amp-`.
@@ -293,7 +288,9 @@ AMP; all AMP extensions are prefixed with `amp-`. This is where you
 tell AMP which class to use for this tag name and which CSS to load.
 
 ```javascript
-AMP.registerElement('amp-carousel', CarouselSelector, CSS);
+AMP.extension('amp-carousel', '0.1', (AMP) => {
+  AMP.registerElement('amp-carousel', CarouselSelector, CSS);
+});
 ```
 
 ## Actions and events
@@ -314,15 +311,20 @@ executing the `open` action on `lightbox`.
 The syntax for using this on elements is as follow:
 
 ```html
-<form on="submit-success:my-success-lightbox.open;submit-error:my-error-lightbox.open">
-</form>
+<form
+  on="submit-success:my-success-lightbox.open;submit-error:my-error-lightbox.open"
+></form>
 ```
 
 To fire events on your element use AMP's action service and the
 `.trigger` method.
 
 ```javascript
-actionServiceForDoc(doc.documentElement).trigger(this.form_, 'submit-success', null);
+actionServiceForDoc(doc.documentElement).trigger(
+  this.form_,
+  'submit-success',
+  null
+);
 ```
 
 And to expose actions use `registerAction` method that your element
@@ -359,8 +361,8 @@ owners.
 ```javascript
 this.cells_ = this.getRealChildren();
 
-this.cells_.forEach(cell => {
-  this.setAsOwner(cell);
+this.cells_.forEach((cell) => {
+  Services.ownersForDoc(this.element).setOwner(cell, this.element);
   cell.style.display = 'inline-block';
   this.container_.appendChild(cell);
 });
@@ -374,12 +376,13 @@ forward/backward in the slides and then calls `scheduleLayout` for the
 current slide when the user moves to it.
 
 ```javascript
-  this.updateInViewport(oldSlide, false);
-  this.updateInViewport(newSlide, true);
-  this.scheduleLayout(newSlide);
-  this.setControlsState();
-  this.schedulePause(oldSlide);
-  this.schedulePreload(nextSlide);
+const owners = Services.ownersForDoc(this.element);
+owners.updateInViewport(this.element, oldSlide, false);
+owners.updateInViewport(this.element, newSlide, true);
+owners.scheduleLayout(this.element, newSlide);
+this.setControlsState();
+owners.schedulePause(this.element, oldSlide);
+owners.schedulePreload(this.element, nextSlide);
 ```
 
 It's important to understand that the parent/owner element is
@@ -396,6 +399,7 @@ the element will never be preloaded or laid out. This is true to all
 nested amp-elements that are not placeholders. AMP runtime will schedule
 nested amp-elements that are placeholders.
 
+<!-- prettier-ignore-start -->
 ```html
 <amp-carousel> ← Parent element
   <amp-figure> ← Parent needs to schedule this element
@@ -405,6 +409,7 @@ nested amp-elements that are placeholders.
   </amp-figure>
 </amp-carousel>
 ```
+<!-- prettier-ignore-end -->
 
 ## Allowing proper validations
 
@@ -416,11 +421,11 @@ to file an issue on the GitHub repo select "Related to: Validator" and
 mention what rules the validator needs to validate. This usually
 includes
 
--   Your element tag-name
--   Required attributes for the element
--   Specific values that an attribute accept (e.g. `myattr="TYPE1|TYPE2"`)
--   Layouts your element supports (see [Layout specs](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md) and [Layouts supported in your element](#layouts-supported-in-your-element))
--   If there are restrictions where your element can or can't appear (e.g. disallowed_ancestory, mandatory_parent...)
+- Your element tag-name
+- Required attributes for the element
+- Specific values that an attribute accept (e.g. `myattr="TYPE1|TYPE2"`)
+- Layouts your element supports (see [Layout specs](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md) and [Layouts supported in your element](#layouts-supported-in-your-element))
+- If there are restrictions where your element can or can't appear (e.g. disallowed_ancestory, mandatory_parent...)
 
 For more details take a look at [Contributing Component Validator
 Rules](https://github.com/ampproject/amphtml/blob/master/contributing/component-validator-rules.md).
@@ -470,8 +475,12 @@ class AmpInstagram extends AMP.BaseElement {
     // This is always the same URL that is actually used inside of the embed.
     // This lets us avoid loading the image twice and make use of browser cache.
 
-    image.setAttribute('src', 'https://www.instagram.com/p/' +
-        encodeURIComponent(this.shortcode_) + '/media/?size=l');
+    image.setAttribute(
+      'src',
+      'https://www.instagram.com/p/' +
+        encodeURIComponent(this.shortcode_) +
+        '/media/?size=l'
+    );
     image.setAttribute('width', this.element.getAttribute('width'));
     image.setAttribute('height', this.element.getAttribute('height'));
     image.setAttribute('layout', 'responsive');
@@ -561,7 +570,7 @@ probably wants to return true in order to signal to AMP the need to call
 `layoutCallback` again once the document is active. Otherwise your
 element will never be re-laid out.
 
-### vsync, mutateElement, and changeSize
+### vsync, mutateElement, and requestChangeSize
 
 AMP provides multiple utilities to optimize many mutations and measuring
 for better performance. These include vsync service with a mutate and
@@ -649,7 +658,8 @@ const EXPERIMENTS = [
   {
     id: 'amp-my-element',
     name: 'AMP My Element',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+    spec:
+      'https://github.com/ampproject/amphtml/blob/master/extensions/' +
       'amp-my-element/amp-my-element.md',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/XXXYYY',
   },
@@ -657,11 +667,11 @@ const EXPERIMENTS = [
 ];
 ```
 
-And then protecting your code with a check `isExperimentOn(win,
-'amp-my-element')` and only execute your code when it is on.
+And then protecting your code with a check `isExperimentOn(win, 'amp-my-element')` and only execute your code when it is on.
 
 ```javascript
-import {isExperimentOn} from '../src/experiments';
+import {isExperimentOn} from '../../../src/experiments';
+import {userAssert} from '../../../src/log';
 
 /** @const */
 const EXPERIMENT = 'amp-my-element';
@@ -685,25 +695,23 @@ Class AmpMyElement extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    if (!isExperimentOn(this.getWin(), EXPERIMENT)) {
-      user.warn('Experiment %s is not turned on.', EXPERIMENT);
-      return;
-    }
+    userAssert(isExperimentOn(this.win, 'amp-my-element'),
+        `Experiment ${EXPERIMENT} is not turned on.`);
     // get attributes, assertions of values, assign instance variables.
     // build lightweight dom and append to this.element.
   }
 
   /** @override */
   layoutCallback() {
-    if (!isExperimentOn(this.getWin(), EXPERIMENT)) {
-      user.warn('Experiment %s is not turned on.', EXPERIMENT);
-      return;
-    }
+    userAssert(isExperimentOn(this.win, 'amp-my-element'),
+        `Experiment ${EXPERIMENT} is not turned on.`);
     // actually load your resource or render more expensive resources.
   }
 }
 
-AMP.registerElement('amp-my-element', AmpMyElement, CSS);
+AMP.extension('amp-my-element', '0.1', AMP => {
+  AMP.registerElement('amp-my-element', AmpMyElement, CSS);
+});
 ```
 
 ### Enabling and removing your experiment
@@ -712,8 +720,7 @@ Users wanting to experiment with your element can then go to the
 [experiments page](https://cdn.ampproject.org/experiments.html) and
 enable your experiment.
 
-If you are testing on your localhost, use the command `AMP.toggleExperiment(id,
-true/false)` to enable the experiment.
+If you are testing on your localhost, use the command `AMP.toggleExperiment(id, true/false)` to enable the experiment.
 
 File a github issue to cleanup your experiment. Assign it to yourself as a reminder to remove your experiment and code checks. Removal of your experiment happens after the extension has been thoroughly tested and all issues have been addressed.
 
@@ -747,14 +754,14 @@ Also consider contributing to
 ## Updating build configs
 
 In order for your element to build correctly you would need to make few
-changes to bundles.config.js to tell it about your extension, its files and
-its examples. You will need to add an entry in the "extensionBundles" array.
+changes to [`build-system/compile/bundles.config.js`](../build-system/compile/bundles.config.js) to tell it about your
+extension, its files and its examples. You will need to add an entry in the `extensionBundles` array.
 
 ```javascript
 exports.extensionBundles = [
 ...
-  {name: 'amp-kaltura-player', version: '0.1'},
-  {name: 'amp-carousel', version: '0.1', options: {hasCss: true}},
+  {name: 'amp-kaltura-player', version: '0.1', latestVersion: '0.1'},
+  {name: 'amp-carousel', version: '0.1', latestVersion: '0.1', options: {hasCss: true}},
 ...
 ];
 ```
@@ -766,6 +773,10 @@ maintained separately. If your changes to your non-experimental
 extension makes breaking changes that are not backward compatible you
 should version your extension. This would usually be by creating a 0.2
 directory next to your 0.1.
+
+When version 0.2 is under development, make sure that `latestVersion` is
+set to 0.1 for both the 0.1 and 0.2 entries in `extensionBundles`. Once 0.2
+is ready to be released, `latestVersion` can be changed to 0.2.
 
 If your extension is still in experiments breaking changes usually are
 fine so you can just update the same version.
@@ -783,7 +794,7 @@ For faster testing during development, consider using --files argument
 to only run your extensions' tests.
 
 ```shell
-$ gulp test --files=extensions/amp-my-element/0.1/test/test-amp-my-element.js --watch
+$ gulp unit --files=extensions/amp-my-element/0.1/test/test-amp-my-element.js --watch
 ```
 
 ## Type checking

@@ -3,8 +3,13 @@
   "shareProviders": [
     "email",
     {"provider": "facebook", "app_id": "254325784911610"},
-    {"provider": "twitter", "text": "This is custom share text that I would like for the Twitter platform"},
-    "whatsapp"
+    {
+      "provider": "twitter",
+      "text": "This is custom share text that I would like for the Twitter platform"
+    },
+    "whatsapp",
+    "pinterest",
+    "line"
   ],
   "components": [
     {
@@ -81,6 +86,12 @@
           "url": "google.com"
         }
       ]
+    },
+    {
+      "type": "small",
+      "title": "This is an example article",
+      "url": "http://example.com/article.html",
+      "image": "http://placehold.it/256x128"
     },
     {
       "type": "heading",

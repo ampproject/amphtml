@@ -1,3 +1,11 @@
+---
+$category@: presentation
+formats:
+  - websites
+teaser:
+  text: Adds several dynamic CSS class names onto the <body> element.
+---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,29 +22,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-dynamic-css-classes"></a> AMP Dynamic CSS Classes
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Adds several dynamic CSS class names onto the <code>&lt;body></code> element.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-dynamic-css-classes/">amp-dynamic-css-classes</a> example.</td>
-  </tr>
-</table>
+# AMP Dynamic CSS Classes
 
 ## Behavior
 
 The AMP Dynamic CSS Classes extension adds the following CSS classes
 onto the `<body>` element:
 
-**amp-referrer-***
+**amp-referrer-\***
 
 One or more referrer classes will be set, one for each level of
 subdomain specificity. For example, `www.google.com` will add three

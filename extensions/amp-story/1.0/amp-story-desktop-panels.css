@@ -23,89 +23,29 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
  width: 100vw!important;
 }
 
-.i-amphtml-story-desktop-panels .i-amphtml-story-logo {
- display: block!important;
-}
-
-.i-amphtml-story-background-container {
- opacity: .8!important;
- position: absolute!important;
- top: 0!important;
- right: 0!important;
- bottom: 0!important;
- left: 0!important;
- overflow: hidden !important;
-}
-
-.i-amphtml-story-background-overlay,
-.i-amphtml-story-background-overlay::after {
-  position: absolute !important;
-  left: 0 !important;
-  top: 0 !important;
-  height: 100% !important;
-  width: 100% !important;
-  z-index: 1 !important;
-  background-color: rgba(0, 0, 0, 0.2) !important;
-}
-
-/* Separate layer so overlay opacity can transition from 20% to 70%. */
-.i-amphtml-story-background-overlay::after {
-  content: '' !important;
-  display: block !important;
-  opacity: 0 !important;
-  background-color: rgba(0, 0, 0, 0.5) !important;
-  transition: opacity 0.3s !important;
-}
-
-.i-amphtml-story-bookend-active .i-amphtml-story-background-overlay::after {
-  opacity: 1 !important;
-}
-
-.i-amphtml-story-background {
-  position: absolute !important;
-  top: -150px !important;
-  right: -150px !important;
-  bottom: -150px !important;
-  left: -150px !important;
-  opacity: 0 !important;
-  filter: blur(50px) !important;
-  transform: scale(1.2) !important;
-  background-size: cover !important;
-  background-color: transparent !important;
-  background-position: center center !important;
-  will-change: opacity, z-index !important;
-  z-index: 0 !important;
-  transition: opacity 0s linear 0.3s !important;
-}
-
-.i-amphtml-story-background.active {
-  opacity: 1 !important;
-  z-index: 1 !important;
-  transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
-}
-
 /**
  * Page positions and animations.
  */
 
 .i-amphtml-story-desktop-panels amp-story-page.i-amphtml-element {
   /* Pages are stacked to the right side of the screen and then animated in. */
-  transform: scale(0.9) translateX(calc(250% + 192px)) translateY(0%) !important;
+  transform: perspective(1px) scale(0.9) translateX(calc(250% + 192px)) translateY(0%) !important;
   opacity: 0.05 !important;
   transform-origin: left !important;
-  border-radius: 16px !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
 }
 
 [dir=rtl] .i-amphtml-story-desktop-panels amp-story-page.i-amphtml-element {
-  transform: scale(0.9) translateX(calc(-350% - 192px)) translateY(0%) !important;
+  transform: perspective(1px) scale(0.9) translateX(calc(-350% - 192px)) translateY(0%) !important;
 }
 
 .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-visited] {
-  transform: scale(0.9) translateX(calc(-350% - 192px)) translateY(0%) !important;
+  transform: perspective(1px) scale(0.9) translateX(calc(-350% - 192px)) translateY(0%) !important;
 }
 
 [dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-visited] {
-  transform: scale(0.9) translateX(calc(250% + 192px)) translateY(0%) !important;
+  transform: perspective(1px) scale(0.9) translateX(calc(250% + 192px)) translateY(0%) !important;
 }
 
 .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="-2"],
@@ -121,34 +61,36 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
 
 .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="-2"],
 [dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="2"] {
-  transform: scale(0.9) translateX(calc(-250% - 128px)) translateY(0%) !important;
+  transform: perspective(1px) scale(0.9) translateX(calc(-5 * var(--i-amphtml-story-page-50vw, 50%) - 128px)) translateY(0%) !important;
 }
 
 .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="-1"],
 .i-amphtml-story-desktop-panels .prev-container > .i-amphtml-story-page-sentinel,
+[dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[active] + amp-story-page:not([i-amphtml-desktop-position]):not([distance]), /** Position n+1 page on load, before attributes are set. */
 [dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="1"],
 [dir=rtl] .i-amphtml-story-desktop-panels .next-container > .i-amphtml-story-page-sentinel {
-  transform: scale(0.9) translateX(calc(-150% - 64px)) translateY(0%) !important;
+  transform: perspective(1px) scale(0.9) translateX(calc(-3 * var(--i-amphtml-story-page-50vw, 50%) - 64px)) translateY(0%) !important;
 }
 
 .i-amphtml-story-desktop-panels amp-story-page[active],
 [dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[active],
 .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="0"],
 [dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="0"] {
-  transform: scale(1.0) translateX(-50%) translateY(0%) !important;
+  transform: perspective(1px) scale(1.0) translateX(calc(-1 * var(--i-amphtml-story-page-50vw, 50%))) translateY(0%) !important;
   opacity: 1 !important;
 }
 
+.i-amphtml-story-desktop-panels amp-story-page[active] + amp-story-page:not([i-amphtml-desktop-position]):not([distance]), /** Position n+1 page on load, before attributes are set. */
 .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="1"],
 .i-amphtml-story-desktop-panels .next-container > .i-amphtml-story-page-sentinel,
 [dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="-1"],
 [dir=rtl] .i-amphtml-story-desktop-panels .prev-container > .i-amphtml-story-page-sentinel {
-  transform: scale(0.9) translate(calc(50% + 64px), 0%) !important;
+  transform: perspective(1px) scale(0.9) translate(calc(var(--i-amphtml-story-page-50vw, 50%) + 64px), 0%) !important;
 }
 
 .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="2"],
 [dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="-2"] {
-  transform: scale(0.9) translate(calc(150% + 128px), 0%) !important;
+  transform: perspective(1px) scale(0.9) translate(calc(3 * var(--i-amphtml-story-page-50vw, 50%) + 128px), 0%) !important;
 }
 
 .i-amphtml-story-prev-hover > amp-story-page[i-amphtml-desktop-position="-1"] {
@@ -180,7 +122,8 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
 }
 
 .i-amphtml-story-desktop-panels > amp-story-page,
-.i-amphtml-story-desktop-panels .i-amphtml-story-page-sentinel {
+.i-amphtml-story-desktop-panels .i-amphtml-story-page-sentinel,
+.i-amphtml-story-desktop-panels .i-amphtml-story-media-query-matcher {
   left: 50%!important;
   right: auto !important;
   margin: auto !important;
@@ -188,8 +131,4 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
   max-width: calc(3/5 * 75vh) !important;
   min-width: 320px !important;
   min-height: 533px !important;
-}
-
-.i-amphtml-story-desktop-panels > amp-story-page {
-  box-shadow: 0 0 15px rgba(0, 0, 0, .4)!important;
 }

@@ -28,8 +28,16 @@ export function slimcutmedia(global, data) {
     data,
   };
 
-  validateData(data,
-      global._scm_amp.mandatory_data, global._scm_amp.allowed_data);
+  validateData(
+    data,
+    global._scm_amp.mandatory_data,
+    global._scm_amp.allowed_data
+  );
 
-  loadScript(global, 'https://static.freeskreen.com/publisher/' + encodeURIComponent(data.pid) + '/freeskreen.min.js');
+  loadScript(
+    global,
+    'https://static.freeskreen.com/publisher/' +
+      encodeURIComponent(data.pid) +
+      '/freeskreen.min.js'
+  );
 }

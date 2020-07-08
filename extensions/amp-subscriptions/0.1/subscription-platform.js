@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {PageConfig} from '../../../third_party/subscriptions-project/config';
-
 /**
  * This interface is intended to be implemented by Subscription platforms to
  * provide method of getting entitlements.
@@ -23,7 +21,6 @@ import {PageConfig} from '../../../third_party/subscriptions-project/config';
  * @interface
  */
 export class SubscriptionPlatform {
-
   /**
    * Returns the service Id.
    * @return {string}
@@ -52,10 +49,23 @@ export class SubscriptionPlatform {
   reset() {}
 
   /**
+   * True if this platform can fetch entitlement safely in pre-render
+   * without leaking information to the publisher or a 3rd party
+   * @return {boolean}
+   */
+  isPrerenderSafe() {}
+
+  /**
    * Returns if pingback is enabled for this platform.
    * @return {boolean}
    */
   isPingbackEnabled() {}
+
+  /**
+   * True if pingback returns all entitlments
+   * @return {boolean}
+   */
+  pingbackReturnsAllEntitlements() {}
 
   /**
    * Performs the pingback to the subscription platform.
@@ -91,12 +101,4 @@ export class SubscriptionPlatform {
    * @param {?JsonObject} unusedOptions
    */
   decorateUI(unusedElement, unusedAction, unusedOptions) {}
-}
-
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package @visibleForTesting
- */
-export function getPageConfigClassForTesting() {
-  return PageConfig;
 }

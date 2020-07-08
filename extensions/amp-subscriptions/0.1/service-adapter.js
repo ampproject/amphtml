@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import {PageConfig} from '../../../third_party/subscriptions-project/config';
+import {PageConfig as PageConfigInterface} from '../../../third_party/subscriptions-project/config';
 
 export class ServiceAdapter {
-
   /**
    * @param {./amp-subscriptions.SubscriptionService} subscriptionService
    */
@@ -26,8 +25,33 @@ export class ServiceAdapter {
   }
 
   /**
+   * Returns the analytics service for subscriptions.
+   * @return {!./analytics.SubscriptionAnalytics}
+   */
+  getAnalytics() {
+    return this.subscriptionService_.getAnalytics();
+  }
+
+  /**
+   * Returns the singleton Dialog instance
+   * @return {!./dialog.Dialog}
+   */
+  getDialog() {
+    return this.subscriptionService_.getDialog();
+  }
+
+  /**
+   * Returns the encrypted document key for the specified service.
+   * @param {string} serviceId
+   * @return {?string}
+   */
+  getEncryptedDocumentKey(serviceId) {
+    return this.subscriptionService_.getEncryptedDocumentKey(serviceId);
+  }
+
+  /**
    * Returns the page config.
-   * @return {!PageConfig}
+   * @return {!PageConfigInterface}
    */
   getPageConfig() {
     return this.subscriptionService_.getPageConfig();
@@ -40,6 +64,14 @@ export class ServiceAdapter {
    */
   getReaderId(serviceId) {
     return this.subscriptionService_.getReaderId(serviceId);
+  }
+
+  /**
+   * gets Score factors for all platforms
+   * @return {!Promise<!JsonObject>}
+   */
+  getScoreFactorStates() {
+    return this.subscriptionService_.getScoreFactorStates();
   }
 
   /**
@@ -69,8 +101,12 @@ export class ServiceAdapter {
    * @param {?JsonObject} options
    */
   decorateServiceAction(element, serviceId, action, options) {
-    this.subscriptionService_.decorateServiceAction(element, serviceId,
-        action, options);
+    this.subscriptionService_.decorateServiceAction(
+      element,
+      serviceId,
+      action,
+      options
+    );
   }
 
   /**
@@ -78,14 +114,6 @@ export class ServiceAdapter {
    */
   resetPlatforms() {
     this.subscriptionService_.resetPlatforms();
-  }
-
-  /**
-   * Returns the singleton Dialog instance
-   * @return {!./dialog.Dialog}
-   */
-  getDialog() {
-    return this.subscriptionService_.getDialog();
   }
 
   /**
@@ -97,9 +125,3 @@ export class ServiceAdapter {
     return this.subscriptionService_.selectPlatformForLogin();
   }
 }
-
-/** @package @VisibleForTesting */
-export function getPageConfigForTesting() {
-  return PageConfig;
-}
-

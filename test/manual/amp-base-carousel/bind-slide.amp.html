@@ -1,0 +1,68 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>Carousel with bound slide</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script async custom-element="amp-base-carousel" src="https://cdn.ampproject.org/v0/amp-base-carousel-0.1.js"></script>
+  <style amp-custom>
+    amp-base-carousel img {
+      object-fit: cover;
+    }
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+  <amp-state id="carousel">
+    <script type="application/json">
+      {
+        "slide": 0
+      }
+    </script>
+  </amp-state>
+  <h1>Using bind to control the slide</h1>
+  <amp-base-carousel
+      id="carousel-1"
+      width="300" height="200"
+      layout="responsive"
+      [slide]="carousel.slide">
+    <!-- wrapping divs to workaround https://bugs.webkit.org/show_bug.cgi?id=191816 -->
+    <div>
+      <amp-img src="./img/redgradient.png" width=300 height=200 layout="responsive"></amp-img>
+    </div>
+    <div>
+      <amp-img src="./img/greengradient.png" width=300 height=200 layout="responsive"></amp-img>
+    </div>
+    <div>
+      <amp-img src="./img/bluegradient.png" width=300 height=200 layout="responsive"></amp-img>
+    </div>
+    <div>
+      <amp-img src="./img/orangegradient.png" width=300 height=200 layout="responsive"></amp-img>
+    </div>
+    <div>
+      <amp-img src="./img/tealgradient.png" width=300 height=200 layout="responsive"></amp-img>
+    </div>
+    <div>
+      <amp-img src="./img/lemonyellowgradient.png" width=300 height=200 layout="responsive"></amp-img>
+    </div>
+    <div>
+      <amp-img src="./img/lilacgradient.png" width=300 height=200 layout="responsive"></amp-img>
+    </div>
+  </amp-base-carousel>
+  <button id="slide-0"
+      on="tap:AMP.setState({'carousel': {'slide': 0}})">
+    Set slide to 0
+  </button>
+  <button id="slide-2"
+      on="tap:AMP.setState({'carousel': {'slide': 2}})">
+    Set slide to 2
+  </button>
+  <p>
+    Note: the bound value must change in order for the slide to change.
+  </p>
+</body>
+</html>

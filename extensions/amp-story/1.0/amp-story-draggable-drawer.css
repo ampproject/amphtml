@@ -1,0 +1,127 @@
+/**
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.amp-story-draggable-drawer-root {
+  display: block !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  z-index: 4 !important; /** Over amp-story-cta-layer. */
+  transform: translate3d(0, 100%, 0) !important;
+  transition: transform 0.25s cubic-bezier(0.4, 0.0, 1, 1) !important;
+}
+
+.amp-story-draggable-drawer-root[hidden] {
+  display: none !important;
+}
+
+.amp-story-draggable-drawer-root.i-amphtml-story-draggable-drawer-open {
+  transform: translate3d(0, 0, 0) !important;
+  transition: transform 0.4s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+}
+
+.i-amphtml-story-draggable-drawer {
+  height: 100% !important;
+}
+
+.i-amphtml-story-draggable-drawer-container {
+  height: calc(100% - 40px) !important;
+  background: rgba(255, 255, 255, 1) !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  transition: background 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+}
+
+.i-amphtml-story-draggable-drawer-theme-dark .i-amphtml-story-draggable-drawer-container {
+  background: rgba(32, 33, 37, 1) !important;
+}
+
+.i-amphtml-story-draggable-drawer-container[hidden] {
+  display: block !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+}
+
+.i-amphtml-story-draggable-drawer-theme-dark .i-amphtml-story-draggable-drawer-container[hidden] {
+  background: rgba(32, 33, 37, 0.82) !important;
+}
+
+.i-amphtml-story-draggable-drawer-content {
+  opacity: 1 !important;
+  transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+}
+
+
+.i-amphtml-story-draggable-drawer-container[hidden] .i-amphtml-story-draggable-drawer-content {
+  opacity: 0 !important;
+}
+
+.i-amphtml-story-draggable-drawer-container[hidden] .i-amphtml-story-draggable-drawer-content > * {
+  display: none !important;
+}
+
+[desktop] .amp-story-draggable-drawer-root {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(0, 0, 0, 0.55) !important;
+  opacity: 0 !important;
+  transition: opacity 0.15s cubic-bezier(0.4, 0.0, 1, 1), transform 0s linear 0.15s !important;
+}
+
+[desktop] .amp-story-draggable-drawer-root.i-amphtml-story-draggable-drawer-open {
+  opacity: 1 !important;
+  transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+
+[desktop] .i-amphtml-story-draggable-drawer {
+  height: 60vh !important;
+  width: 800px !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+}
+
+/** Bookend overrides. */
+
+.i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer-container,
+.i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer-container[hidden] {
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: transparent !important;
+  transition: none !important;
+}
+
+.i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer-content {
+  margin-top: auto !important;
+  padding-top: 88px !important;
+}
+
+.i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer-container[hidden] .i-amphtml-story-draggable-drawer-content {
+  opacity: 1 !important;
+}
+
+[desktop] .i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+[desktop] .i-amphtml-story-draggable-drawer-bookend .i-amphtml-story-draggable-drawer-content {
+  padding-top: 0 !important;
+}

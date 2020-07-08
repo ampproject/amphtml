@@ -15,96 +15,80 @@
  */
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
-const BBPromise = require('bluebird');
-const colors = require('ansi-colors');
 const fs = require('fs-extra');
-const gulp = require('gulp-help')(require('gulp'));
 const log = require('fancy-log');
-const markdownLinkCheck = BBPromise.promisify(require('markdown-link-check'));
+const markdownLinkCheck = require('markdown-link-check');
 const path = require('path');
-const {gitDiffAddedNameOnlyMaster, gitDiffNameOnlyMaster} = require('../git');
+const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
+const {gitDiffAddedNameOnlyMaster} = require('../common/git');
+const {green, cyan, red, yellow} = require('ansi-colors');
+const {isTravisBuild} = require('../common/travis');
+const {linkCheckGlobs} = require('../test-configs/config');
+const {maybeUpdatePackages} = require('./update-packages');
 
-const maybeUpdatePackages = process.env.TRAVIS ? [] : ['update-packages'];
+const LARGE_REFACTOR_THRESHOLD = 20;
+const GITHUB_BASE_PATH = 'https://github.com/ampproject/amphtml/blob/master/';
+
+let filesIntroducedByPr;
 
 /**
- * Parses the list of files in argv, or extracts it from the commit log.
- *
- * @return {!Array<string>}
+ * Checks for dead links in .md files passed in via --files or --local_changes.
  */
-function getMarkdownFiles() {
-  if (!!argv.files) {
-    return argv.files.split(',');
+async function checkLinks() {
+  maybeUpdatePackages();
+  if (!usesFilesOrLocalChanges('check-links')) {
+    return;
   }
-  return gitDiffNameOnlyMaster().filter(function(file) {
-    return path.extname(file) == '.md' && !file.startsWith('examples/');
-  });
+  const filesToCheck = getFilesToCheck(linkCheckGlobs);
+  if (filesToCheck.length == 0) {
+    return;
+  }
+  if (filesToCheck.length >= LARGE_REFACTOR_THRESHOLD) {
+    log(green('INFO:'), 'Skipping check because this is a large refactor.');
+    return;
+  }
+  if (!isTravisBuild()) {
+    log(green('Starting checks...'));
+  }
+  filesIntroducedByPr = gitDiffAddedNameOnlyMaster();
+  const results = await Promise.all(filesToCheck.map(checkLinksInFile));
+  reportResults(results);
 }
 
 /**
- * Parses the list of files in argv and checks for dead links.
+ * Reports results after all markdown files have been checked.
  *
- * @return {Promise} Used to wait until all async link checkers finish.
+ * @param {!Array<string>} results
  */
-function checkLinks() {
-  const markdownFiles = getMarkdownFiles();
-  const linkCheckers = markdownFiles.map(function(markdownFile) {
-    return runLinkChecker(markdownFile);
-  });
-  return BBPromise.all(linkCheckers)
-      .then(function(allResults) {
-        let deadLinksFound = false;
-        const filesWithDeadLinks = [];
-        allResults.map(function(results, index) {
-          // Skip files that were deleted by the PR.
-          if (!fs.existsSync(markdownFiles[index])) {
-            return;
-          }
-          let deadLinksFoundInFile = false;
-          results.forEach(function(result) {
-            // Skip links to files that were introduced by the PR.
-            if (isLinkToFileIntroducedByPR(result.link)) {
-              return;
-            }
-            if (result.status === 'dead') {
-              deadLinksFound = true;
-              deadLinksFoundInFile = true;
-              log('[%s] %s', colors.red('✖'), result.link);
-            } else if (!process.env.TRAVIS) {
-              log('[%s] %s', colors.green('✔'), result.link);
-            }
-          });
-          if (deadLinksFoundInFile) {
-            filesWithDeadLinks.push(markdownFiles[index]);
-            log(
-                colors.red('ERROR'),
-                'Possible dead link(s) found in',
-                colors.magenta(markdownFiles[index]));
-          } else {
-            log(
-                colors.green('SUCCESS'),
-                'All links in',
-                colors.magenta(markdownFiles[index]), 'are alive.');
-          }
-        });
-        if (deadLinksFound) {
-          log(
-              colors.red('ERROR'),
-              'Please update dead link(s) in',
-              colors.magenta(filesWithDeadLinks.join(',')),
-              'or whitelist them in build-system/tasks/check-links.js');
-          log(
-              colors.yellow('NOTE'),
-              'If the link(s) above are not meant to resolve to a real webpage',
-              'surrounding them with backticks will exempt them from the link',
-              'checker.');
-          process.exit(1);
-        } else {
-          log(
-              colors.green('SUCCESS'),
-              'All links in all markdown files in this branch are alive.');
-        }
-      });
+function reportResults(results) {
+  const filesWithDeadLinks = results
+    .filter((result) => result.containsDeadLinks)
+    .map((result) => result.file);
+  if (filesWithDeadLinks.length > 0) {
+    log(
+      red('ERROR:'),
+      'Please update the dead link(s) in these files:',
+      cyan(filesWithDeadLinks.join(', '))
+    );
+    log(
+      yellow('NOTE 1:'),
+      "Valid links that don't resolve on Travis can be ignored via",
+      cyan('ignorePatterns'),
+      'in',
+      cyan('build-system/tasks/check-links.js') + '.'
+    );
+    log(
+      yellow('NOTE 2:'),
+      "Links that aren't meant to resolve to a real webpage can be exempted",
+      'from this check by surrounding them with backticks (`).'
+    );
+    process.exitCode = 1;
+    return;
+  }
+  log(
+    green('SUCCESS:'),
+    'All links in all markdown files in this branch are alive.'
+  );
 }
 
 /**
@@ -114,73 +98,88 @@ function checkLinks() {
  * @return {boolean} True if the link points to a file introduced by the PR.
  */
 function isLinkToFileIntroducedByPR(link) {
-  return gitDiffAddedNameOnlyMaster().some(function(file) {
-    return (file.length > 0 && link.includes(path.parse(file).base));
+  return filesIntroducedByPr.some((file) => {
+    return file.length > 0 && link.includes(path.parse(file).base);
   });
 }
 
 /**
- * Filters out whitelisted links before running the link checker.
+ * Checks a given markdown file for dead links.
  *
- * @param {string} markdown Original markdown.
- * @return {string} Markdown after filtering out whitelisted links.
+ * @param {string} file
+ * @return {!Promise}
  */
-function filterWhitelistedLinks(markdown) {
-  let filteredMarkdown = markdown;
+function checkLinksInFile(file) {
+  let markdown = fs.readFileSync(file).toString();
 
-  // localhost links optionally preceded by ( or [ (not served on Travis)
-  filteredMarkdown =
-      filteredMarkdown.replace(/(\(|\[)?http:\/\/localhost:8000/g, '');
+  // Links inside <code> blocks are illustrative and not always valid. Must be
+  // removed because markdownLinkCheck() does not ignore them like <pre> blocks.
+  markdown = markdown.replace(/<code>([^]*?)<\/code>/g, '');
 
-  // Links in script tags (illustrative, and not always valid)
-  filteredMarkdown = filteredMarkdown.replace(/src="http.*?"/g, '');
-
-  // Links inside a <code> block (illustrative, and not always valid)
-  filteredMarkdown = filteredMarkdown.replace(/<code>([^]*?)<\/code>/g, '');
-
-  // Links inside a <pre> block (illustrative, and not always valid)
-  filteredMarkdown = filteredMarkdown.replace(/<pre>([^]*?)<\/pre>/g, '');
-
-  // The heroku nightly build page is not always acccessible by the checker.
-  filteredMarkdown = filteredMarkdown.replace(
-      /\(http:\/\/amphtml-nightly.herokuapp.com\/\)/g, '');
-
-  // After all whitelisting is done, clean up any remaining empty blocks bounded
-  // by backticks. Otherwise, `` will be treated as the start of a code block
-  // and confuse the link extractor.
-  filteredMarkdown = filteredMarkdown.replace(/\ \`\`\ /g, '');
-
-  return filteredMarkdown;
-}
-
-/**
- * Reads the raw contents in the given markdown file, filters out localhost
- * links (because they do not resolve on Travis), and checks for dead links.
- *
- * @param {string} markdownFile Path of markdown file, relative to src root.
- * @return {Promise} Used to wait until the async link checker is done.
- */
-function runLinkChecker(markdownFile) {
-  // Skip files that were deleted by the PR.
-  if (!fs.existsSync(markdownFile)) {
-    return Promise.resolve();
-  }
-  const markdown = fs.readFileSync(markdownFile).toString();
-  const filteredMarkdown = filterWhitelistedLinks(markdown);
   const opts = {
-    baseUrl: 'file://' + path.dirname(path.resolve((markdownFile))),
+    // Relative links start at the markdown file's path.
+    baseUrl: 'file://' + path.dirname(path.resolve(file)),
+    ignorePatterns: [
+      // Localhost links don't work unless a `gulp` server is running.
+      {pattern: /localhost/},
+      // Templated links are merely used to generate other markdown files.
+      {pattern: /\$\{[a-z]*\}/},
+    ],
   };
-  return markdownLinkCheck(filteredMarkdown, opts);
+
+  return new Promise((resolve, reject) => {
+    markdownLinkCheck(markdown, opts, (err, results) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      let containsDeadLinks = false;
+      for (const result of results) {
+        const {link, statusCode} = result;
+        let {status} = result;
+        // Skip links to files that were introduced by the PR.
+        if (isLinkToFileIntroducedByPR(link) && status == 'dead') {
+          // Log links with the correct github base as alive, otherwise flag deadlinks.
+          const isValid = filesIntroducedByPr.some((file) => {
+            return link === GITHUB_BASE_PATH + file;
+          });
+          if (isValid) {
+            status = 'alive';
+          }
+        }
+        switch (status) {
+          case 'alive':
+            if (!isTravisBuild()) {
+              log(`[${green('✔')}] ${link}`);
+            }
+            break;
+          case 'ignored':
+            if (!isTravisBuild()) {
+              log(`[${yellow('•')}] ${link}`);
+            }
+            break;
+          case 'dead':
+            containsDeadLinks = true;
+            log(`[${red('✖')}] ${link} (${red(statusCode)})`);
+            break;
+        }
+      }
+      if (containsDeadLinks) {
+        log(red('ERROR:'), 'Possible dead link(s) found in', cyan(file));
+      } else {
+        log(green('SUCCESS:'), 'All links in', cyan(file), 'are alive.');
+      }
+      resolve({file, containsDeadLinks});
+    });
+  });
 }
 
-gulp.task(
-    'check-links',
-    'Detects dead links in markdown files',
-    maybeUpdatePackages,
-    checkLinks,
-    {
-      options: {
-        'files': '  CSV list of files in which to check links',
-      },
-    }
-);
+module.exports = {
+  checkLinks,
+};
+
+checkLinks.description = 'Detects dead links in markdown files';
+checkLinks.flags = {
+  'files': '  Checks only the specified files',
+  'local_changes': '  Checks just the files changed in the local branch',
+};

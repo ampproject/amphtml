@@ -16,7 +16,6 @@
 import {removeElement} from './dom';
 import {setStyles} from './style';
 
-
 /**
  * @param {!Window} win
  * @param {string} text
@@ -45,10 +44,9 @@ export function copyTextToClipboard(win, text) {
   textarea.contentEditable = true;
 
   doc.body.appendChild(textarea);
-  const range = doc.createRange();
-  range.selectNode(textarea);
   win.getSelection().removeAllRanges();
-  win.getSelection().addRange(range);
+
+  textarea./*OK*/ focus();
   textarea.setSelectionRange(0, text.length);
 
   try {
@@ -61,7 +59,6 @@ export function copyTextToClipboard(win, text) {
 
   return copySuccessful;
 }
-
 
 /**
  * @param {!Document} doc

@@ -43,7 +43,7 @@
     </amp-accordion>
     <amp-img layout="fill" src="img"></amp-img>
   </amp-sidebar>
-  <!-- Valid: Example of amp-sidebar with toolbar usage -->
+  <!-- Valid: Example of amp-sidebar with toolbar usage and ul -->
   <amp-sidebar layout="nodisplay">
     <nav toolbar="(min-width: 0px) and (max-width: 768px)" toolbar-target="id">
       <ul>
@@ -51,6 +51,17 @@
         <li>Nav item 2</li>
         <li>Nav item 3</li>
       </ul>
+    </nav>
+    <amp-img layout="fill" src="img"></amp-img>
+  </amp-sidebar>
+  <!-- Valid: Example of amp-sidebar with toolbar usage and ol-->
+  <amp-sidebar layout="nodisplay">
+    <nav toolbar="(min-width: 0px) and (max-width: 768px)" toolbar-target="id">
+      <ol>
+        <li>Nav item 1</li>
+        <li>Nav item 2</li>
+        <li>Nav item 3</li>
+      </ol>
     </nav>
     <amp-img layout="fill" src="img"></amp-img>
   </amp-sidebar>
@@ -67,6 +78,32 @@
     </nav>
     <amp-img layout="fill" src="img"></amp-img>
   </amp-sidebar>
+  <!-- Invalid: more than one <ol> tag -->
+  <amp-sidebar layout="nodisplay">
+    <nav toolbar="(min-width: 0px) and (max-width: 768px)" toolbar-target="id">
+      <ol>
+        <li>Nav item 1</li>
+      </ol>
+      <ol>
+        <li>Nav item 2</li>
+        <li>Nav item 3</li>
+      </ol>
+    </nav>
+    <amp-img layout="fill" src="img"></amp-img>
+  </amp-sidebar>
+  <!-- Invalid: both <ul> and <ol> tags -->
+    <amp-sidebar layout="nodisplay">
+      <nav toolbar="(min-width: 0px) and (max-width: 768px)" toolbar-target="id">
+        <ul>
+          <li>Nav item 1</li>
+        </ul>
+        <ol>
+          <li>Nav item 2</li>
+          <li>Nav item 3</li>
+        </ol>
+      </nav>
+      <amp-img layout="fill" src="img"></amp-img>
+    </amp-sidebar>
   <!-- Invalid: incorrect side value -->
   <amp-sidebar side="center" layout="nodisplay"></amp-sidebar>
 </body>

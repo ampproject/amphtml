@@ -33,6 +33,10 @@ tags: {  # <amp-delight-player>
       name: "data-content-id"
       mandatory: true
   }
+  attrs: {
+    name: "dock"
+    requires_extension: "amp-video-docking"
+  }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FILL

@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-import {BookendComponentInterface} from './bookend-component-interface';
+import {
+  AMP_STORY_BOOKEND_COMPONENT_DATA,
+  BOOKEND_COMPONENT_TYPES,
+  BookendComponentInterface,
+} from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
+import {getSourceUrl, resolveRelativeUrl} from '../../../../../src/url';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {isArray} from '../../../../../src/types';
-import {user} from '../../../../../src/log';
+import {userAssert} from '../../../../../src/log';
 import {userAssertValidProtocol} from '../../utils';
 
 /**
@@ -48,14 +53,18 @@ export class CtaLinkComponent {
    * @override
    * */
   assertValidity(ctaLinksJson, element) {
-    const links = ctaLinksJson['links'];
-    user().assert(links && isArray(links) && links.length > 0,
-        'CTA link component must be an array and contain at least one link ' +
-        'inside it.');
+    const links = /** @type {!Array} */ (ctaLinksJson['links']);
+    userAssert(
+      links && isArray(links) && links.length > 0,
+      'CTA link component must be an array and contain at least one link ' +
+        'inside it.'
+    );
 
-    links.forEach(ctaLink => {
-      user().assert('text' in ctaLink && 'url' in ctaLink,
-          'Links in CTA link component must contain `text` field and a `url`.');
+    links.forEach((ctaLink) => {
+      userAssert(
+        'text' in ctaLink && 'url' in ctaLink,
+        'Links in CTA link component must contain `text` field and a `url`.'
+      );
 
       userAssertValidProtocol(element, ctaLink['url']);
     });
@@ -77,21 +86,31 @@ export class CtaLinkComponent {
   }
 
   /** @override */
-  buildElement(ctaLinksData, doc) {
-    const html = htmlFor(doc);
-    const container =
-        html`<div class="i-amphtml-story-bookend-cta-link-wrapper
-          i-amphtml-story-bookend-component">
-        </div>`;
+  buildElement(ctaLinksData, win, data) {
+    const html = htmlFor(win.document);
+    const container = html`
+      <div
+        class="i-amphtml-story-bookend-cta-link-wrapper
+          i-amphtml-story-bookend-component"
+      ></div>
+    `;
 
-    let linkSeed =
-        html`<a class="i-amphtml-story-bookend-cta-link" target="_top">
-          <div class="i-amphtml-story-bookend-cta-link-text" ref="linkText">
-          </div>
-        </a>`;
-    ctaLinksData['links'].forEach(currentLink => {
+    let linkSeed = html`
+      <a class="i-amphtml-story-bookend-cta-link" target="_top">
+        <div class="i-amphtml-story-bookend-cta-link-text" ref="linkText"></div>
+      </a>
+    `;
+    /** @type {!Array} */ (ctaLinksData['links']).forEach((currentLink) => {
       const el = linkSeed.cloneNode(/* deep */ true);
-      addAttributesToElement(el, dict({'href': currentLink['url']}));
+      addAttributesToElement(
+        el,
+        dict({
+          'href': resolveRelativeUrl(
+            currentLink['url'],
+            getSourceUrl(win.location)
+          ),
+        })
+      );
 
       if (currentLink['amphtml'] === true) {
         addAttributesToElement(el, dict({'rel': 'amphtml'}));
@@ -99,6 +118,11 @@ export class CtaLinkComponent {
 
       const refs = htmlRefs(el);
       refs['linkText'].textContent = currentLink['text'];
+
+      el[AMP_STORY_BOOKEND_COMPONENT_DATA] = {
+        position: data.position,
+        type: BOOKEND_COMPONENT_TYPES.CTA_LINK,
+      };
 
       container.appendChild(el);
     });
