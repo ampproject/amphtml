@@ -32,6 +32,7 @@ import {dict, map} from '../utils/object';
 import {cssText} from '../../build/amp-story-player-iframe.css';
 import {resetStyles, setStyle, setStyles} from '../style';
 import {toArray} from '../types';
+import { dispatch } from '../../extensions/amp-story/1.0/events';
 
 /** @enum {string} */
 const LoadStateClass = {
@@ -377,12 +378,14 @@ export class AmpStoryPlayer {
 
   /** */
   mute() {
-
+    // dispatch(this.win_, this.iframes_[0].contentWindow, EventType.MUTE);
   }
 
   /** */
   unmute() {
-
+    // is it this window or the story's window? probably this window
+    // then have to get the story window because target
+    // dispatch(what window goes here?, EventType.UNMUTE);
   }
 
   /**
