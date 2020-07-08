@@ -639,6 +639,53 @@ describes.realWin(
         });
       });
 
+      it('should trigger lightbox with certain vh', async () => {
+        consentUI = new ConsentUI(mockInstance, {
+          'promptUISrc': 'https//promptUISrc',
+        });
+
+        expect(consentUI.initialHeight_).to.be.equal('30vh');
+        expect(consentUI.isLightbox_).to.be.false;
+        expect(consentUI.overlayEnabled_).to.be.undefined;
+
+        consentUI.show(true);
+        consentUI.handleIframeMessages_({
+          source: consentUI.ui_.contentWindow,
+          data: {
+            type: 'consent-ui',
+            action: 'ready',
+            initialHeight: '80vh',
+          },
+        });
+        await macroTask();
+
+        expect(consentUI.initialHeight_).to.be.equal('80vh');
+        expect(consentUI.isLightbox_).to.be.true;
+        expect(consentUI.overlayEnabled_).to.be.true;
+        expect(
+          consentUI.parent_.classList.contains(
+            consentUiClasses.iframeActiveLightbox
+          )
+        ).to.be.true;
+        expect(
+          consentUI.parent_.classList.contains(consentUiClasses.iframeActive)
+        ).to.be.false;
+        expect(
+          consentUI.parent_.style.getPropertyValue('--lightbox-height')
+        ).to.equal('80vh');
+
+        // Hide
+        consentUI.hide();
+        expect(
+          consentUI.parent_.style.getPropertyValue('--lightbox-height')
+        ).to.equal('');
+        expect(
+          consentUI.parent_.classList.contains(
+            consentUiClasses.iframeActiveLightbox
+          )
+        ).to.be.false;
+      });
+
       it('should throw an error on an invalid initial height', () => {
         return getReadyIframeCmpConsentUi().then((consentUI) => {
           expect(consentUI.initialHeight_).to.be.equal('30vh');
@@ -704,6 +751,26 @@ describes.realWin(
             sendMessageConsentUi(consentUI, 'enter-fullscreen');
 
             expect(enterFullscreenStub).to.not.be.called;
+          });
+
+          it('should not enter fullscreen in lightbox mode', async () => {
+            consentUI = new ConsentUI(mockInstance, {
+              'promptUISrc': 'https//promptUISrc',
+            });
+
+            // trigger lightboxmode
+            consentUI.show(true);
+            consentUI.handleIframeMessages_({
+              source: consentUI.ui_.contentWindow,
+              data: {
+                type: 'consent-ui',
+                action: 'ready',
+                initialHeight: '80vh',
+              },
+            });
+            await macroTask();
+            sendMessageConsentUi(consentUI, 'enter-fullscreen');
+            expect(consentUI.isFullscreen_).to.be.false;
           });
         }
       );
