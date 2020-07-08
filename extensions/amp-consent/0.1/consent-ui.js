@@ -58,6 +58,7 @@ export const ampConsentMessageType = {
 export const consentUiClasses = {
   iframeFullscreen: 'i-amphtml-consent-ui-iframe-fullscreen',
   iframeActive: 'i-amphtml-consent-ui-iframe-active',
+  iframeActiveLightbox: 'i-amphtml-consent-ui-iframe-active-lightbox',
   in: 'i-amphtml-consent-ui-in',
   loading: 'i-amphtml-consent-ui-loading',
   fill: 'i-amphtml-consent-ui-fill',
@@ -162,6 +163,9 @@ export class ConsentUI {
 
     /** @private {boolean} */
     this.enableBorder_ = DEFAULT_ENABLE_BORDER;
+
+    /** @private {boolean} */
+    this.isLightbox_ = false;
 
     /** @private {boolean} */
     this.isActionPromptTrigger_ = false;
@@ -351,6 +355,7 @@ export class ConsentUI {
   handleReady_(data) {
     this.initialHeight_ = DEFAULT_INITIAL_HEIGHT;
     this.enableBorder_ = DEFAULT_ENABLE_BORDER;
+    this.isLightbox_ = false;
 
     // Set our initial height
     if (data['initialHeight']) {
@@ -360,13 +365,16 @@ export class ConsentUI {
       ) {
         const dataHeight = parseInt(data['initialHeight'], 10);
 
-        if (dataHeight >= 10 && dataHeight <= 60) {
+        if (dataHeight >= 10 && dataHeight <= 80) {
           this.initialHeight_ = `${dataHeight}vh`;
+          this.isLightbox_ = dataHeight > 60;
+          // Force overlay if lightbox is enabled.
+          this.overlayEnabled_ = this.isLightbox_ || this.overlayEnabled_;
         } else {
           user().error(
             TAG,
             `Inavlid initial height: ${data['initialHeight']}.` +
-              'Minimum: 10vh. Maximum: 60vh.'
+              'Minimum: 10vh. Maximum: 80vh.'
           );
         }
       } else {
@@ -390,7 +398,12 @@ export class ConsentUI {
    * Enter the fullscreen state for the UI
    */
   enterFullscreen_() {
-    if (!this.ui_ || !this.isVisible_ || this.isFullscreen_) {
+    if (
+      !this.ui_ ||
+      !this.isVisible_ ||
+      this.isFullscreen_ ||
+      this.isLightbox_
+    ) {
       return;
     }
 
@@ -533,7 +546,11 @@ export class ConsentUI {
    */
   showIframe_() {
     const {classList} = this.parent_;
-    classList.add(consentUiClasses.iframeActive);
+    classList.add(
+      this.isLightbox_
+        ? consentUiClasses.iframeActiveLightbox
+        : consentUiClasses.iframeActive
+    );
     toggle(dev().assertElement(this.placeholder_), false);
     toggle(dev().assertElement(this.ui_), true);
 
@@ -568,8 +585,12 @@ export class ConsentUI {
   resetIframe_() {
     const {classList} = this.parent_;
 
-    // Remove the iframe active to go back to our normal height
-    classList.remove(consentUiClasses.iframeActive);
+    // Remove the iframe active (lightbox) to go back to our normal height
+    classList.remove(
+      this.isLightbox_
+        ? consentUiClasses.iframeActiveLightbox
+        : consentUiClasses.iframeActive
+    );
 
     this.win_.removeEventListener('message', this.boundHandleIframeMessages_);
     classList.remove(consentUiClasses.iframeFullscreen);
@@ -648,7 +669,7 @@ export class ConsentUI {
   resetAnimationStyles_() {
     setStyles(this.parent_, {
       transform: '',
-      transition: '',
+      '--lightbox-height': '',
     });
   }
 
@@ -664,6 +685,7 @@ export class ConsentUI {
     }
     setImportantStyles(this.parent_, {
       transform: `translate3d(0px, calc(100% - ${this.initialHeight_}), 0px)`,
+      '--lightbox-height': `${this.initialHeight_}`,
     });
     if (this.enableBorder_) {
       const {classList} = this.parent_;
