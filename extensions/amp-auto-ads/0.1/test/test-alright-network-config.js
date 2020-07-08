@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,21 +62,6 @@ describes.realWin(
         expect(configUrl).to.contain('p=' + PUBLISHER_ID);
         expect(configUrl).to.contain('t=' + PAGE_TYPE);
         expect(configUrl).to.contain('u=https%3A%2F%2Ffoo.bar%2Fbaz');
-      });
-
-      it.skip("should truncate the URL if it's too long", () => {
-        const adNetwork = getAdNetworkConfig('alright', ampAutoAdsElem);
-
-        const canonicalUrl =
-          'http://foo.bar/a'.repeat(4050) + 'shouldnt_be_included';
-
-        const docInfo = Services.documentInfoForDoc(ampAutoAdsElem);
-        env.sandbox.stub(docInfo, 'canonicalUrl').callsFake(canonicalUrl);
-
-        const url = adNetwork.getConfigUrl();
-        expect(url).to.contain('ama_t=amp');
-        expect(url).to.contain('url=http%3A%2F%2Ffoo.bar');
-        expect(url).not.to.contain('shouldnt_be_included');
       });
 
       it('should generate the attributes', () => {
