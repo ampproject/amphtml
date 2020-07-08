@@ -97,7 +97,8 @@ export const Selectors = {
   ALL_AMP_MEDIA:
     'amp-story-grid-layer amp-audio, ' +
     'amp-story-grid-layer amp-video, amp-story-grid-layer amp-img, ' +
-    'amp-story-grid-layer amp-anim',
+    'amp-story-grid-layer amp-anim,' +
+    'amp-story-grid-layer amp-story-360',
   ALL_AMP_VIDEO: 'amp-story-grid-layer amp-video',
   ALL_IFRAMED_MEDIA: 'audio, video',
   ALL_PLAYBACK_AMP_MEDIA:
@@ -108,6 +109,7 @@ export const Selectors = {
   // work with this current implementation.
   ALL_PLAYBACK_MEDIA:
     '> audio, amp-story-grid-layer audio, amp-story-grid-layer video',
+  ALL_STORY_360: 'amp-story-360',
   ALL_VIDEO: 'amp-story-grid-layer video',
 };
 
@@ -311,6 +313,8 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?number} Time at which an audio element failed playing. */
     this.playAudioElementFromTimestamp_ = null;
+
+    this.story360components_ = [];
   }
 
   /**
@@ -494,6 +498,14 @@ export class AmpStoryPage extends AMP.BaseElement {
     if (this.animationManager_) {
       this.animationManager_.cancelAll();
     }
+
+    this.story360components_.forEach(componentPromise => {
+      componentPromise.then(component => {
+        component.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
+          component.pause();
+        });
+      });
+    });
   }
 
   /**
@@ -523,6 +535,16 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.checkPageHasElementWithPlayback_();
       this.renderOpenAttachmentUI_();
       this.findAndPrepareEmbeddedComponents_();
+      this.story360components_.forEach(componentPromise => {
+        componentPromise.then(component => {
+          component.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
+            if (component.canAnimate) {
+              component.rewind();
+              component.play();
+            }
+          })
+        });
+      });
     }
 
     this.reportDevModeErrors_();
@@ -542,6 +564,11 @@ export class AmpStoryPage extends AMP.BaseElement {
         )
       );
     }
+    this.story360components_ = toArray(scopedQuerySelectorAll(
+        this.element, Selectors.ALL_STORY_360))
+        .map(element => whenUpgradedToCustomElement(element)
+            // .then((el) =>el.signals().whenSignal(CommonSignals.LOAD_END))
+            .then(customEl => customEl.getImpl()));
     this.muteAllMedia();
     this.getViewport().onResize(
       debounce(this.win, () => this.onResize_(), RESIZE_TIMEOUT_MS)
@@ -652,8 +679,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     const mediaPromises = mediaSet.map((mediaEl) => {
       return new Promise((resolve) => {
         switch (mediaEl.tagName.toLowerCase()) {
-          case 'amp-img':
           case 'amp-anim':
+          case 'amp-img':
+          case 'amp-story-360':
             whenUpgradedToCustomElement(mediaEl)
               .then((el) => el.signals().whenSignal(CommonSignals.LOAD_END))
               .then(resolve, resolve);
