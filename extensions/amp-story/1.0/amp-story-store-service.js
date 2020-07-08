@@ -80,6 +80,7 @@ export let InteractiveComponentDef;
  * @typedef {{
  *    canInsertAutomaticAd: boolean,
  *    canShowBookend: boolean,
+ *    canShowAudioUi: boolean,
  *    canShowNavigationOverlayHint: boolean,
  *    canShowPaginationButtons: boolean,
  *    canShowPreviousPageHelp: boolean,
@@ -126,6 +127,7 @@ export const StateProperty = {
   // Embed options.
   CAN_INSERT_AUTOMATIC_AD: 'canInsertAutomaticAd',
   CAN_SHOW_BOOKEND: 'canShowBookend',
+  CAN_SHOW_AUDIO_UI: 'canShowAudioUi',
   CAN_SHOW_NAVIGATION_OVERLAY_HINT: 'canShowNavigationOverlayHint',
   CAN_SHOW_PAGINATION_BUTTONS: 'canShowPaginationButtons',
   CAN_SHOW_PREVIOUS_PAGE_HELP: 'canShowPreviousPageHelp',
@@ -544,6 +546,7 @@ export class AmpStoryStoreService {
     return /** @type {!State} */ ({
       [StateProperty.CAN_INSERT_AUTOMATIC_AD]: true,
       [StateProperty.CAN_SHOW_BOOKEND]: true,
+      [StateProperty.CAN_SHOW_AUDIO_UI]: true,
       [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: true,
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
       [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: true,
@@ -622,6 +625,11 @@ export class AmpStoryStoreService {
           [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: false,
           [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: false,
           [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
+        };
+      case EmbedMode.NO_SHARING_NOR_AUDIO_UI:
+        return {
+          [StateProperty.CAN_SHOW_AUDIO_UI]: false,
+          [StateProperty.CAN_SHOW_SHARING_UIS]: false,
         };
       default:
         return {};
