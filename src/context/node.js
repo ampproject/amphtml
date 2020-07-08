@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {devAssert} from '../log';
 import {getMode} from '../mode';
 import {pushIfNotExist, removeItem} from '../utils/array';
 import {startsWith} from '../string';
