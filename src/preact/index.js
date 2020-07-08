@@ -18,7 +18,7 @@ import * as hooks from /*OK*/ 'preact/hooks';
 import * as preact from /*OK*/ 'preact';
 
 // Defines the type interfaces for the approved Preact APIs.
-// TODO: hydrate, isValidElement, Component, cloneElement, toChildArray
+// TODO: hydrate, isValidElement, Component
 
 /**
  * @param {!PreactDef.FunctionalComponent|string} unusedType
@@ -135,4 +135,12 @@ export function useMemo(cb, opt_deps) {
  */
 export function useCallback(cb, opt_deps) {
   return hooks.useCallback(cb, opt_deps);
+}
+
+/**
+ * @param {PreactDef.Renderable} unusedChildren
+ * @return {!Array<PreactDef.Renderable>}
+ */
+export function toChildArray(unusedChildren) {
+  return preact.toChildArray.apply(undefined, arguments);
 }

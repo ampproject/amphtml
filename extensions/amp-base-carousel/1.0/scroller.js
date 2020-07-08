@@ -18,7 +18,7 @@ import * as styles from './base-carousel.css';
 import {WithAmpContext} from '../../../src/preact/context';
 import {debounce} from '../../../src/utils/rate-limit';
 import {mod} from '../../../src/utils/math';
-import {useLayoutEffect, useRef} from '../../../src/preact';
+import {toChildArray, useLayoutEffect, useRef} from '../../../src/preact';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last
@@ -190,7 +190,7 @@ function renderSlides(props) {
   const {length} = children;
   const slides = [];
 
-  children.forEach((child, index) => {
+  toChildArray(children).forEach((child, index) => {
     const key = `slide-${child.key || index}`;
     slides.push(
       <WithAmpContext
