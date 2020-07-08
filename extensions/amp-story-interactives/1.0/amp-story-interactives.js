@@ -22,9 +22,10 @@ import {AmpStoryInteractiveQuiz} from './amp-story-interactive-quiz';
  */
 
 AMP.extension('amp-story-interactives', '1.0', (AMP) => {
-  AMP.registerElement('amp-story-interactive-quiz', AmpStoryInteractiveQuiz);
   AMP.registerElement(
     'amp-story-interactive-binary-poll',
     AmpStoryInteractiveBinaryPoll
   );
+  AMP.registerElement('amp-story-interactive-poll', AmpStoryInteractiveQuiz);
+  AMP.registerElement('amp-story-interactive-quiz', AmpStoryInteractiveQuiz);
 });
