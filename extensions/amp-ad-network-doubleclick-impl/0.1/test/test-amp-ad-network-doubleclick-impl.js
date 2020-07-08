@@ -1607,6 +1607,14 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       impl = new AmpAdNetworkDoubleclickImpl(element);
     });
 
+    it('should use random subdomain when experiment is enabled', () => {
+      const expectedPath =
+        '^https:\\/\\/[\\w\\d]{32}.safeframe.googlesyndication.com' +
+        '\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$';
+
+      expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
+    });
+
     it('should use the same random subdomain for every slot on a page', () => {
       const first = impl.getSafeframePath();
 
