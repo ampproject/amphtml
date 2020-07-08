@@ -5783,6 +5783,7 @@ attr_lists: {
   attrs: {
     name: "subscriptions-google-rtc"
     requires_extension: "amp-subscriptions-google"
+  }
   # amp-next-page specific attributes, see
   # https://amp.dev/documentation/components/amp-next-page
   attrs: {
