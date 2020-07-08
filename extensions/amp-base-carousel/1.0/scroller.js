@@ -18,7 +18,12 @@ import * as styles from './base-carousel.css';
 import {WithAmpContext} from '../../../src/preact/context';
 import {debounce} from '../../../src/utils/rate-limit';
 import {mod} from '../../../src/utils/math';
-import {toChildArray, useLayoutEffect, useRef} from '../../../src/preact';
+import {
+  toChildArray,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+} from '../../../src/preact';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last
@@ -64,7 +69,7 @@ export function Scroller(props) {
   });
   const currentIndex = useRef(restingIndex);
 
-  // Note: this has to be useLayoutEffect, not useEffect.
+  // useLayoutEffect needed to avoid FOUC while scrolling
   useLayoutEffect(() => {
     if (!containerRef.current) {
       return;
@@ -77,18 +82,21 @@ export function Scroller(props) {
   }, [ignoreProgrammaticScroll, loop, restingIndex, pivotIndex]);
 
   // Trigger render by setting the resting index to the current scroll state.
-  const resetScrollReferencePoint = () => {
-    // Check if the resting index we are centered around is the same as where
-    // we stopped scrolling. If so, we do not need to move anything.
-    if (currentIndex.current === restingIndex) {
-      return;
-    }
-    setRestingIndex(currentIndex.current);
-  };
-  const debouncedResetScrollReferencePoint = debounce(
-    window,
-    resetScrollReferencePoint,
-    RESET_SCROLL_REFERENCE_POINT_WAIT_MS
+  const debouncedResetScrollReferencePoint = useMemo(
+    () =>
+      debounce(
+        window,
+        () => {
+          // Check if the resting index we are centered around is the same as where
+          // we stopped scrolling. If so, we do not need to move anything.
+          if (currentIndex.current === restingIndex) {
+            return;
+          }
+          setRestingIndex(currentIndex.current);
+        },
+        RESET_SCROLL_REFERENCE_POINT_WAIT_MS
+      ),
+    [restingIndex, setRestingIndex]
   );
 
   // Track current slide without forcing render.

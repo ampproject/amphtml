@@ -16,7 +16,8 @@
 import * as Preact from '../../../src/preact';
 import {Arrow} from './arrow';
 import {Scroller} from './scroller';
-import {useRef, useState} from '../../../src/preact';
+import {mod} from '../../../src/utils/math';
+import {toChildArray, useRef, useState} from '../../../src/preact';
 
 /**
  * @param {!JsonObject} props
@@ -24,13 +25,16 @@ import {useRef, useState} from '../../../src/preact';
  */
 export function BaseCarousel(props) {
   const {style, arrowPrev, arrowNext, children, currentSlide, loop} = props;
+  const {length} = toChildArray(children);
   const {0: curSlide, 1: setCurSlide} = useState(currentSlide || 0);
   const ignoreProgrammaticScroll = useRef(true);
   const setRestingIndex = (i) => {
     ignoreProgrammaticScroll.current = true;
     setCurSlide(i);
   };
-
+  const advance = (dir) => setRestingIndex(mod(curSlide + dir, length));
+  const disableForDir = (dir) =>
+    !loop && (curSlide + dir < 0 || curSlide + dir >= length);
   return (
     <div style={style}>
       <Scroller
@@ -44,19 +48,15 @@ export function BaseCarousel(props) {
       <Arrow
         customArrow={arrowPrev}
         dir={-1}
-        length={children.length}
-        loop={loop}
-        restingIndex={curSlide}
-        setRestingIndex={setRestingIndex}
-      ></Arrow>
+        disabled={disableForDir(-1)}
+        onClick={() => advance(-1)}
+      />
       <Arrow
         customArrow={arrowNext}
         dir={1}
-        length={children.length}
-        loop={loop}
-        restingIndex={curSlide}
-        setRestingIndex={setRestingIndex}
-      ></Arrow>
+        disabled={disableForDir(1)}
+        onClick={() => advance(1)}
+      />
     </div>
   );
 }

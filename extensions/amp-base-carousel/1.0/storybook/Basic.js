@@ -28,7 +28,7 @@ export default {
 export const _default = () => {
   const width = number('width', 440);
   const height = number('height', 225);
-  const slideCount = number('slide count', 1, {min: 0, max: 99});
+  const slideCount = number('slide count', 5, {min: 0, max: 99});
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   return (
     <BaseCarousel style={{width, height, position: 'relative'}}>

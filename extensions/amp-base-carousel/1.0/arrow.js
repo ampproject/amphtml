@@ -16,24 +16,26 @@
 
 import * as Preact from '../../../src/preact';
 import * as styles from './base-carousel.css';
-import {mod} from '../../../src/utils/math';
 
 /**
  * @param {!JsonObject} props
  * @return {PreactDef.Renderable}
  */
 export function Arrow(props) {
-  const {customArrow, dir, length, loop, restingIndex, setRestingIndex} = props;
+  const {customArrow, dir, onClick, disabled} = props;
   const button = customArrow ? customArrow : renderDefaultArrow({dir});
-  const nextSlide = restingIndex + dir;
-  const {children, 'disabled': disabled, onClick, ...rest} = button.props;
-  const isDisabled =
-    disabled || (loop ? false : nextSlide < 0 || nextSlide >= length);
+  const {
+    children,
+    'disabled': customDisabled,
+    onCustomClick,
+    ...rest
+  } = button.props;
+  const isDisabled = disabled || customDisabled;
   const handleClick = (e) => {
-    if (onClick) {
-      onClick(e);
+    if (onCustomClick) {
+      onCustomClick(e);
     }
-    setRestingIndex(mod(restingIndex + dir, length));
+    onClick();
   };
   return (
     <div
@@ -48,6 +50,7 @@ export function Arrow(props) {
         {
           onClick: handleClick,
           disabled: isDisabled,
+          'aria-disabled': isDisabled,
           ...rest,
         },
         children
