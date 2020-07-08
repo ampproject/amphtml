@@ -834,8 +834,9 @@ export class ActionService {
   }
 
   /**
-   * Given a browser 'change' or 'input' event, add `details` property to it
-   * containing allowlisted properties of the target element.
+   * Given a browser 'change' or 'input' event, add `detail` property to it
+   * containing allowlisted properties of the target element. Noop if `detail`
+   * is readonly.
    * @param {!ActionEventDef} event
    * @private
    */
@@ -871,7 +872,9 @@ export class ActionService {
     }
 
     if (Object.keys(detail).length > 0) {
-      event.detail = detail;
+      try {
+        event.detail = detail;
+      } catch {} // event.detail is readonly
     }
   }
 }
