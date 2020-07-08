@@ -27,11 +27,12 @@ describes.realWin(
   },
   (env) => {
     const podcastEmbedUrlWithPodcastId =
-      'https://staging.spkt.io/amp/3311?podcast_id=281062';
-    const podcastEmbedUrlWithExternalId =
-      'https://staging.spkt.io/amp/3311?external_id=778015';
-    const podcastEmbedUrlWithArticleUrl = `https://staging.spkt.io/amp/3311?article_url=${encodeURIComponent(
-      'https://www.kicker.de/778015/artikel/nach_knieverletzung_maupay_wehrt_sich_gegen_lenos_vorwuerfe#omrss'
+      'https://spkt.io/amp/6673?podcast_id=534513';
+    const podcastEmbedUrlWithExternalId = `https://spkt.io/amp/6673?external_id=${encodeURIComponent(
+      '4d1b1380-a1fc-435a-9e7d-f3cd0e6b617f'
+    )}`;
+    const podcastEmbedUrlWithArticleUrl = `https://spkt.io/amp/6673?article_url=${encodeURIComponent(
+      'https://digiday.com/media/politics-publisher-canary-converting-text-articles-audio-find-new-audiences/'
     )}`;
     let win;
     let element;
@@ -56,7 +57,7 @@ describes.realWin(
     };
 
     it('renders player with data-podcastid', async () => {
-      await getSpeechkitPlayer(3311, {'data-podcastid': 281062});
+      await getSpeechkitPlayer(6673, {'data-podcastid': 534513});
       const iframe = element.firstChild;
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
@@ -64,7 +65,9 @@ describes.realWin(
     });
 
     it('renders player with data-externalid', async () => {
-      await getSpeechkitPlayer(3311, {'data-externalid': 778015});
+      await getSpeechkitPlayer(6673, {
+        'data-externalid': '4d1b1380-a1fc-435a-9e7d-f3cd0e6b617f',
+      });
       const iframe = element.firstChild;
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
@@ -72,9 +75,9 @@ describes.realWin(
     });
 
     it('renders player with data-articleurl', async () => {
-      await getSpeechkitPlayer(3311, {
+      await getSpeechkitPlayer(6673, {
         'data-articleurl':
-          'https://www.kicker.de/778015/artikel/nach_knieverletzung_maupay_wehrt_sich_gegen_lenos_vorwuerfe#omrss',
+          'https://digiday.com/media/politics-publisher-canary-converting-text-articles-audio-find-new-audiences/',
       });
       const iframe = element.firstChild;
       expect(iframe).to.not.be.null;
@@ -93,7 +96,7 @@ describes.realWin(
       expectAsyncConsoleError(
         /data-podcastid or data-externalid or data-articleurl is required for/
       );
-      await expect(getSpeechkitPlayer(3311)).to.be.rejectedWith(
+      await expect(getSpeechkitPlayer(6673)).to.be.rejectedWith(
         /data-podcastid or data-externalid or data-articleurl is required for/
       );
     });

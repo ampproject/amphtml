@@ -22,8 +22,7 @@ import {userAssert} from '../../../src/log';
 
 const makeStringParam = (param) =>
   `?${param[0]}=${encodeURIComponent(param[1])}`;
-// const SERVER_URL = 'https://spkt.io/';
-const SERVER_URL = 'https://staging.spkt.io/';
+const SERVER_URL = 'https://spkt.io/';
 const DEFAULT_HEIGHT = 40;
 const mediaProps = ['podcast_id', 'external_id', 'article_url'];
 

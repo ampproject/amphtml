@@ -7,15 +7,6 @@ teaser:
 ---
 
 <!--
-  All documentation starts with frontmatter. Front matter organizes documentation on amp.dev
-  and improves SEO.
-  * Include the relevant category(ies): ads-analytics, dynamic-content, layout, media, presentation, social, personalization
-  * List applicable format(s): websites, ads, stories, email
-  * Do not include markdown formatting in the frontmatter - plain text and punctionation only!
-  * Remove this comment!
--->
-
-<!--
 Copyright 2020 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,28 +23,6 @@ limitations under the License.
 -->
 
 # `amp-speechkit`
-
-## Usage
-
-One to three paragraphs explaining the component usage. List important functionality. Explain why developers care about it.
-
-[filter formats=“websites”]
-
-Below is an example for websites.
-
-[example preview="inline" playground="true" imports="amp-speechkit"]
-
-```html
-<amp-speechkit height="40" layout="fixed-height"
-    data-projectid="6673" data-podcastid="534513"></amp-speechkit>
-```
-
-[/example][/filter]
-
-<!--
-  * [Read more about filtering sections](https://amp.dev/documentation/guides-and-tutorials/contribute/contribute-documentation/formatting/?format=websites#filtering-sections)
-  * [Read more about executable code samples](https://amp.dev/documentation/guides-and-tutorials/contribute/contribute-documentation/formatting/?format=websites#preview-code-samples)
- -->
 
 ## Attributes
 
@@ -83,11 +52,6 @@ The related article URL for the audio.</td>
     <td>The layout for <code>amp-speechkit</code> is set to <code>fixed-height</code> and it fills all of the available horizontal space. This is ideal for the "Classic" mode.</td>
   </tr>
 </table>
-
-
-### `data-articleurl`
-
-
 
 [example preview=”top-frame” playground=”true”]
 

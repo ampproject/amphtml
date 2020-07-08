@@ -17,11 +17,11 @@ PASS
 |  </head>
 |  <body>
 |    <!-- valid: classic mode -->
-|    <amp-speechkit layout="fixed-height" height="40" data-projectid="3311" data-podcastid="281062"></amp-speechkit>
+|    <amp-speechkit layout="fixed-height" height="40" data-projectid="6673" data-podcastid="534513"></amp-speechkit>
 |    <!-- valid: classic mode with externalId -->
-|    <amp-speechkit layout="fixed-height" height="40" data-projectid="3311" data-externalid="778015"></amp-speechkit>
+|    <amp-speechkit layout="fixed-height" height="40" data-projectid="6673" data-externalid="4d1b1380-a1fc-435a-9e7d-f3cd0e6b617f"></amp-speechkit>
 |    <!-- valid: classic mode with articleUrl -->
-|    <amp-speechkit layout="fixed-height" height="40" data-projectid="3311"
-|                   data-articleurl="https://www.kicker.de/778015/artikel/nach_knieverletzung_maupay_wehrt_sich_gegen_lenos_vorwuerfe#omrss"></amp-speechkit>
+|    <amp-speechkit layout="fixed-height" height="40" data-projectid="6673"
+|                   data-articleurl="https://digiday.com/media/politics-publisher-canary-converting-text-articles-audio-find-new-audiences/"></amp-speechkit>
 |  </body>
 |  </html>
