@@ -18,7 +18,6 @@ import {Services} from '../services';
 import {Signals} from '../utils/signals';
 import {TickLabel} from '../enums';
 import {VisibilityState} from '../visibility-state';
-import {createCustomEvent} from '../event-helper';
 import {dev, devAssert} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
@@ -684,23 +683,15 @@ export class Performance {
 
     if (opt_delta != undefined) {
       data['delta'] = delta = Math.max(opt_delta, 0);
+      this.mark(label, delta);
     } else if (opt_value != undefined) {
       data['value'] = opt_value;
+      this.mark(label, opt_value);
     } else {
-      // Marking only makes sense for non-overridden values (and no deltas).
-      this.mark(label);
       delta = this.win.performance.now();
       data['value'] = this.timeOrigin_ + delta;
+      this.mark(label);
     }
-
-    // Emit events. Used by `gulp performance`.
-    this.win.dispatchEvent(
-      createCustomEvent(
-        this.win,
-        'perf',
-        /** @type {JsonObject} */ ({label, delta})
-      )
-    );
 
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
       this.viewer_.sendMessage('tick', data);
@@ -716,15 +707,23 @@ export class Performance {
    * These are for example exposed in WPT.
    * See https://developer.mozilla.org/en-US/docs/Web/API/Performance/mark
    * @param {string} label
+   * @param {Object=} detail
    */
-  mark(label) {
+  mark(label, detail) {
+    // Bail if marking is unsupported.
+    if (!(this.win.performance && this.win.performance.mark)) {
+      return;
+    }
+    // Bail if label is invalid due to clashing with a pre-existing label.
     if (
       this.win.performance &&
-      this.win.performance.mark &&
-      arguments.length == 1
+      this.win.performance.timing &&
+      label in this.win.performance.timing
     ) {
-      this.win.performance.mark(label);
+      return;
     }
+
+    this.win.performance.mark(label, {detail});
   }
 
   /**
