@@ -15,13 +15,13 @@
  */
 
 import {AmpStoryInteractiveBinaryPoll} from '../amp-story-interactive-binary-poll';
-import {AmpStoryStoreService} from '../amp-story-store-service';
+import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
 import {Services} from '../../../../src/services';
 import {
   addConfigToInteractive,
   getMockInteractiveData,
 } from './test-amp-story-interactive';
-import {getRequestService} from '../amp-story-request-service';
+import {getRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {measureMutateElementStub} from '../../../../testing/test-helper';
 import {registerServiceBuilder} from '../../../../src/service';
 

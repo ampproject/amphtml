@@ -15,12 +15,15 @@
  */
 
 import {AmpStoryInteractive, InteractiveType} from '../amp-story-interactive';
-import {AmpStoryStoreService} from '../amp-story-store-service';
-import {AnalyticsVariable, getVariableService} from '../variable-service';
+import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
+import {
+  AnalyticsVariable,
+  getVariableService,
+} from '../../../amp-story/1.0/variable-service';
 import {Services} from '../../../../src/services';
 import {dict} from '../../../../src/utils/object';
-import {getAnalyticsService} from '../story-analytics';
-import {getRequestService} from '../amp-story-request-service';
+import {getAnalyticsService} from '../../../amp-story/1.0/story-analytics';
+import {getRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {htmlFor} from '../../../../src/static-template';
 import {registerServiceBuilder} from '../../../../src/service';
 

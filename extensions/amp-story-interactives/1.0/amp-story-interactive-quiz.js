@@ -18,7 +18,7 @@ import {AmpStoryInteractive, InteractiveType} from './amp-story-interactive';
 import {CSS} from '../../../build/amp-story-interactive-quiz-1.0.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {dev} from '../../../src/log';
-import {getLocalizationService} from './amp-story-localization-service';
+import {getLocalizationService} from '../../amp-story/1.0/amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
 import {setStyles} from '../../../src/style';
 

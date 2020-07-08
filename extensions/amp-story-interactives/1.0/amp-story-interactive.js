@@ -18,21 +18,27 @@ import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
   getAnalyticsService,
-} from './story-analytics';
-import {AnalyticsVariable, getVariableService} from './variable-service';
+} from '../../amp-story/1.0/story-analytics';
+import {
+  AnalyticsVariable,
+  getVariableService,
+} from '../../amp-story/1.0/variable-service';
 import {CSS} from '../../../build/amp-story-interactive-1.0.css';
 import {Services} from '../../../src/services';
-import {StateProperty, getStoreService} from './amp-story-store-service';
+import {
+  StateProperty,
+  getStoreService,
+} from '../../amp-story/1.0/amp-story-store-service';
 import {
   addParamsToUrl,
   appendPathToUrl,
   assertAbsoluteHttpOrHttpsUrl,
 } from '../../../src/url';
 import {closest} from '../../../src/dom';
-import {createShadowRootWithStyle} from './utils';
+import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getRequestService} from './amp-story-request-service';
+import {getRequestService} from '../../amp-story/1.0/amp-story-request-service';
 import {toArray} from '../../../src/types';
 
 /** @const {string} */
@@ -124,7 +130,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected @const {InteractiveType} */
     this.interactiveType_ = type;
 
-    /** @protected @const {!./story-analytics.StoryAnalyticsService} */
+    /** @protected @const {!../../amp-story/1.0/story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win, element);
 
     /** @protected {?Promise<?InteractiveResponseType|?JsonObject|undefined>} */
@@ -157,16 +163,16 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected {?string} */
     this.interactiveId_ = null;
 
-    /** @protected {!./amp-story-request-service.AmpStoryRequestService} */
+    /** @protected {!../../amp-story/1.0/amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = getRequestService(this.win, this.element);
 
-    /** @const @protected {!./amp-story-store-service.AmpStoryStoreService} */
+    /** @const @protected {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
 
     /** @protected {../../../src/service/url-impl.Url} */
     this.urlService_ = Services.urlForDoc(this.element);
 
-    /** @const @protected {!./variable-service.AmpStoryVariableService} */
+    /** @const @protected {!../../amp-story/1.0/variable-service.AmpStoryVariableService} */
     this.variableService_ = getVariableService(this.win);
   }
 
