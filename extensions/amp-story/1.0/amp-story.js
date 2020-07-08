@@ -2328,7 +2328,7 @@ export class AmpStory extends AMP.BaseElement {
     const interactives = this.element.querySelectorAll(
       'amp-story-interactive-quiz, amp-story-interactive-binary-poll, amp-story-interactive-poll'
     );
-    if (!!interactives) {
+    if (interactives.length > 0) {
       Services.extensionsFor(this.win)
         .installExtensionForDoc(
           this.getAmpDoc(),
