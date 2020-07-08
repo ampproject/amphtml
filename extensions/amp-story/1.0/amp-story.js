@@ -417,7 +417,7 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeListenersForDev_();
     this.initializePageIds_();
     this.initializeStoryPlayer_();
-    this.initializeAltTags_();
+    this.initializeImgAltTags_();
 
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
 
@@ -1318,7 +1318,7 @@ export class AmpStory extends AMP.BaseElement {
    * Prevents screen readers from announcing the img src value.
    * @private
    */
-  initializeAltTags_() {
+  initializeImgAltTags_() {
     this.element.querySelectorAll('amp-img').forEach((imageTag) => {
       !imageTag.getAttribute('alt') && imageTag.setAttribute('alt', ' ');
     });
