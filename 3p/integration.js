@@ -624,7 +624,7 @@ const defaultAllowedTypesInCustomFrame = new Set([
   'twitter',
   'doubleclick',
   'yieldbot',
-  '_ping_',
+  '_ping_'
 ]);
 
 /**
