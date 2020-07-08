@@ -83,7 +83,7 @@ const EXTENSION_URL_PREFIX = new RegExp(
  * @param {?Element} head
  * @return {?ValidatedHeadDef}
  */
-export function validateHead(win, adElement, head) {
+export function processHead(win, adElement, head) {
   if (!head || !head.firstChild) {
     return null;
   }

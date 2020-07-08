@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../../../../src/services';
-import {validateHead} from '../head-validation';
+import {processHead} from '../head-validation';
 
 describes.realWin('head validation', {amp: true}, (env) => {
   let adElement;
@@ -28,9 +28,9 @@ describes.realWin('head validation', {amp: true}, (env) => {
     head = doc.createElement('head');
   });
 
-  describe('validateHead', () => {
+  describe('processHead', () => {
     it('returns null when head is empty', () => {
-      const validated = validateHead(env.win, adElement, head);
+      const validated = processHead(env.win, adElement, head);
       expect(validated).to.be.null;
     });
 
@@ -39,7 +39,7 @@ describes.realWin('head validation', {amp: true}, (env) => {
         <title>cool cat pics</title>
         <meta content="width=device-width,minimum-scale=1,initial-scale=1" name="viewport">
       `;
-      const validated = validateHead(env.win, adElement, head);
+      const validated = processHead(env.win, adElement, head);
       expect(validated.head.querySelector('title')).to.exist;
       expect(validated.head.querySelector('meta')).to.exist;
     });
@@ -48,7 +48,7 @@ describes.realWin('head validation', {amp: true}, (env) => {
       head.innerHTML = `
         <cats>meow</cats>
       `;
-      const validated = validateHead(env.win, adElement, head);
+      const validated = processHead(env.win, adElement, head);
       expect(validated.head.querySelector('cats')).not.to.exist;
     });
 
@@ -61,7 +61,7 @@ describes.realWin('head validation', {amp: true}, (env) => {
         <script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"></script>
         <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
       `;
-      const validated = validateHead(env.win, adElement, head);
+      const validated = processHead(env.win, adElement, head);
       expect(validated.head.querySelector('script')).not.to.exist;
       expect(validated.extensions).to.have.length(2);
       expect(validated.extensions[0].extensionId).to.equal('amp-fit-text');
@@ -79,7 +79,7 @@ describes.realWin('head validation', {amp: true}, (env) => {
       head.innerHTML = `
         <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
       `;
-      const validated = validateHead(env.win, adElement, head);
+      const validated = processHead(env.win, adElement, head);
       expect(validated.head.querySelector('script')).not.to.exist;
       expect(preloadStub).not.to.be.called;
     });
@@ -89,7 +89,7 @@ describes.realWin('head validation', {amp: true}, (env) => {
         <script type="application/json"></script>
         <script src="evil.com"></script>
       `;
-      const validated = validateHead(env.win, adElement, head);
+      const validated = processHead(env.win, adElement, head);
       const script = validated.head.querySelectorAll('script');
       expect(script).to.have.length(1);
       expect(script[0].type).to.equal('application/json');
@@ -99,7 +99,7 @@ describes.realWin('head validation', {amp: true}, (env) => {
       head.innerHTML = `
         <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
       `;
-      const validated = validateHead(env.win, adElement, head);
+      const validated = processHead(env.win, adElement, head);
       expect(validated.head.querySelector('script')).not.to.exist;
     });
 
@@ -111,7 +111,7 @@ describes.realWin('head validation', {amp: true}, (env) => {
       head.innerHTML = `
         <link rel="preload" as="image" href="https://cats.com/meow.jpg" >
       `;
-      const validated = validateHead(env.win, adElement, head);
+      const validated = processHead(env.win, adElement, head);
       expect(validated.head.querySelector('link')).to.exist;
       expect(preloadStub).calledWith(env.ampdoc, 'https://cats.com/meow.jpg');
     });
@@ -126,7 +126,7 @@ describes.realWin('head validation', {amp: true}, (env) => {
         <link rel="preload" href="/styles/other.css" as="style">
         <link rel="preload" href="https://example.com/some/embed" as="embed">
       `;
-      const validated = validateHead(env.win, adElement, head);
+      const validated = processHead(env.win, adElement, head);
       expect(validated.head.querySelector('link')).not.to.exist;
       expect(preloadStub).not.to.be.called;
     });
@@ -139,7 +139,7 @@ describes.realWin('head validation', {amp: true}, (env) => {
       head.innerHTML = `
         <link href="https://fonts.googleapis.com/css2?family=Montserrat+Subrayada&display=swap" rel="stylesheet">
       `;
-      const validated = validateHead(env.win, adElement, head);
+      const validated = processHead(env.win, adElement, head);
       expect(validated.head.querySelector('link')).to.exist;
       expect(preloadStub).calledWith(
         env.ampdoc,
@@ -155,7 +155,7 @@ describes.realWin('head validation', {amp: true}, (env) => {
       head.innerHTML = `
         <link href="https://evil.fonts.com" rel="stylesheet">
       `;
-      const validated = validateHead(env.win, adElement, head);
+      const validated = processHead(env.win, adElement, head);
       expect(validated.head.querySelector('link')).not.to.exist;
       expect(preloadStub).not.to.be.called;
     });
@@ -165,7 +165,7 @@ describes.realWin('head validation', {amp: true}, (env) => {
         <style amp-custom></style>
         <style amp-keyframes></style>
       `;
-      const validated = validateHead(env.win, adElement, head);
+      const validated = processHead(env.win, adElement, head);
       expect(validated.head.querySelectorAll('style')).to.have.length(2);
     });
 
@@ -174,7 +174,7 @@ describes.realWin('head validation', {amp: true}, (env) => {
         <style></style>
         <style random></style>
       `;
-      const validated = validateHead(env.win, adElement, head);
+      const validated = processHead(env.win, adElement, head);
       expect(validated.head.querySelector('style')).not.to.exist;
     });
   });

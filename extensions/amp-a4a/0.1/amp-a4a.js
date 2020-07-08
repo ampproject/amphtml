@@ -60,13 +60,13 @@ import {installUrlReplacementsForEmbed} from '../../../src/service/url-replaceme
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
+import {processHead} from './head-validation';
 import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {streamResponseToWriter} from '../../../src/utils/stream-response';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryResolve} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
-import {validateHead} from './head-validation';
 
 /** @type {Array<string>} */
 const METADATA_STRINGS = [
@@ -898,11 +898,12 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Prepare the creative <head> by removing any non-secure elements and
+   * exracting extensions
    * @param {!Element} head
    * @return {?./head-validation.ValidatedHeadDef} head data or null if we should fall back to xdomain.
    */
   validateHead_(head) {
-    return validateHead(this.win, this.element, head);
+    return processHead(this.win, this.element, head);
   }
 
   /**
