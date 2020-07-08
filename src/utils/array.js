@@ -82,20 +82,6 @@ export function findIndex(array, predicate) {
 }
 
 /**
- * Returns the index of the first element matching the predicate.
- * Like Array#find.
- *
- * @param {!Array<T>} array
- * @param {function(T, number, !Array<T>):boolean} predicate
- * @return {?T}
- * @template T
- */
-export function findItem(array, predicate) {
-  const index = findIndex(array, predicate);
-  return index != -1 ? array[index] : undefined;
-}
-
-/**
  * Converts the given iterator to an array.
  *
  * @param {!Iterator<T>} iterator
