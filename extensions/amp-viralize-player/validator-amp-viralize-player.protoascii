@@ -33,4 +33,12 @@ tags: {  # <amp-viralize-player>
   amp_layout: {
     supported_layouts: RESPONSIVE
   }
+  attrs: {
+    name: "data-zid"
+    mandatory: true
+  }
+  attrs: {
+    name: "data-extra"
+    mandatory: false
+  }
 }
