@@ -296,10 +296,6 @@ describes.realWin(
     it('should update the store property correctly', async () => {
       addConfigToInteractive(ampStoryInteractive, 4, null, ['text']);
       ampStoryInteractive.buildCallback();
-      expect(
-        storeService.get(StateProperty.INTERACTIVE_REACT_STATE)['id']
-      ).to.be.deep.equals({});
-
       await ampStoryInteractive.layoutCallback();
       await ampStoryInteractive.getOptionElements()[2].click();
 
