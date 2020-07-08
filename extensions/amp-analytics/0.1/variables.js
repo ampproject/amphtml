@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
+import {TickLabel} from '../../../src/enums';
 import {asyncStringReplace} from '../../../src/string';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {cookieReader} from './cookie-reader';
@@ -27,6 +28,7 @@ import {
   registerServiceBuilderForDoc,
 } from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
+import {isInFie} from '../../../src/iframe-helper';
 import {linkerReaderServiceFor} from './linker-reader';
 
 /** @const {string} */
@@ -227,27 +229,13 @@ export class VariableService {
 
     // Returns a promise resolving to viewport.getScrollTop.
     this.register_('SCROLL_TOP', () =>
-      Services.viewportForDoc(this.ampdoc_).getScrollTop()
+      Math.round(Services.viewportForDoc(this.ampdoc_).getScrollTop())
     );
 
     // Returns a promise resolving to viewport.getScrollLeft.
     this.register_('SCROLL_LEFT', () =>
-      Services.viewportForDoc(this.ampdoc_).getScrollLeft()
+      Math.round(Services.viewportForDoc(this.ampdoc_).getScrollLeft())
     );
-    // Was set async before
-    this.register_('FIRST_CONTENTFUL_PAINT', () => {
-      return Services.performanceFor(
-        this.ampdoc_.win
-      ).getFirstContentfulPaint();
-    });
-
-    this.register_('FIRST_VIEWPORT_READY', () => {
-      return Services.performanceFor(this.ampdoc_.win).getFirstViewportReady();
-    });
-
-    this.register_('MAKE_BODY_VISIBLE', () => {
-      return Services.performanceFor(this.ampdoc_.win).getMakeBodyVisible();
-    });
   }
 
   /**
@@ -260,7 +248,35 @@ export class VariableService {
         cookieReader(this.ampdoc_.win, dev().assertElement(element), name),
       'CONSENT_STATE': getConsentStateStr(element),
     };
-    const merged = {...this.macros_, ...elementMacros};
+    const perfMacros = isInFie(element)
+      ? {}
+      : {
+          'FIRST_CONTENTFUL_PAINT': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.FIRST_CONTENTFUL_PAINT_VISIBLE
+            ),
+          'FIRST_VIEWPORT_READY': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.FIRST_VIEWPORT_READY
+            ),
+          'MAKE_BODY_VISIBLE': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.MAKE_BODY_VISIBLE
+            ),
+          'LARGEST_CONTENTFUL_PAINT': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE
+            ),
+          'FIRST_INPUT_DELAY': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.FIRST_INPUT_DELAY
+            ),
+          'CUMULATIVE_LAYOUT_SHIFT': () =>
+            Services.performanceFor(this.ampdoc_.win).getMetric(
+              TickLabel.CUMULATIVE_LAYOUT_SHIFT
+            ),
+        };
+    const merged = {...this.macros_, ...elementMacros, ...perfMacros};
     return /** @type {!JsonObject} */ (merged);
   }
 
@@ -283,10 +299,10 @@ export class VariableService {
    * @param {!ExpansionOptions} options configuration to use for expansion.
    * @param {!Element} element amp-analytics element.
    * @param {!JsonObject=} opt_bindings
-   * @param {!Object=} opt_whitelist
+   * @param {!Object=} opt_allowlist
    * @return {!Promise<string>} The expanded string.
    */
-  expandTemplate(template, options, element, opt_bindings, opt_whitelist) {
+  expandTemplate(template, options, element, opt_bindings, opt_allowlist) {
     return asyncStringReplace(template, /\${([^}]*)}/g, (match, key) => {
       if (options.iterations < 0) {
         user().error(
@@ -319,7 +335,7 @@ export class VariableService {
           element,
           urlReplacements,
           opt_bindings,
-          opt_whitelist,
+          opt_allowlist,
           argList
         );
       } else if (isArray(value)) {
@@ -333,7 +349,7 @@ export class VariableService {
                   element,
                   urlReplacements,
                   opt_bindings,
-                  opt_whitelist
+                  opt_allowlist
                 )
               : value[i];
         }
@@ -354,7 +370,7 @@ export class VariableService {
    * @param {!Element} element amp-analytics element.
    * @param {!../../../src/service/url-replacements-impl.UrlReplacements} urlReplacements
    * @param {!JsonObject=} opt_bindings
-   * @param {!Object=} opt_whitelist
+   * @param {!Object=} opt_allowlist
    * @param {string=} opt_argList
    * @return {Promise<string>}
    */
@@ -364,7 +380,7 @@ export class VariableService {
     element,
     urlReplacements,
     opt_bindings,
-    opt_whitelist,
+    opt_allowlist,
     opt_argList
   ) {
     return this.expandTemplate(
@@ -376,12 +392,12 @@ export class VariableService {
       ),
       element,
       opt_bindings,
-      opt_whitelist
+      opt_allowlist
     ).then((val) =>
       urlReplacements.expandStringAsync(
         opt_argList ? val + opt_argList : val,
         opt_bindings || this.getMacros(element),
-        opt_whitelist
+        opt_allowlist
       )
     );
   }

@@ -18,11 +18,9 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
 } from '../../../src/consent-state';
+import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
+import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
-import {
-  SINGLE_PASS_EXPERIMENT_IDS,
-  addExperimentIdToElement,
-} from '../../../ads/google/a4a/traffic-experiments';
 import {Services} from '../../../src/services';
 import {SignatureVerifier, VerificationStatus} from './signature-verifier';
 import {
@@ -46,11 +44,12 @@ import {
   is3pThrottled,
 } from '../../amp-ad/0.1/concurrent-load';
 import {
-  getConsentPolicyGdprApplies,
+  getConsentMetadata,
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getContextMetadata} from '../../../src/iframe-attributes';
+import {getExperimentBranch} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {
@@ -63,6 +62,7 @@ import {isArray, isEnumValue, isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
 import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
+import {streamResponseToWriter} from '../../../src/utils/stream-response';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryResolve} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
@@ -174,6 +174,15 @@ const LIFECYCLE_STAGE_TO_ANALYTICS_TRIGGER = {
   'renderCrossDomainEnd': AnalyticsTrigger.AD_RENDER_END,
   'friendlyIframeIniLoad': AnalyticsTrigger.AD_IFRAME_LOADED,
   'crossDomainIframeLoaded': AnalyticsTrigger.AD_IFRAME_LOADED,
+};
+
+/**
+ * @const @enum {string}
+ */
+export const NO_SIGNING_EXP = {
+  id: 'a4a-no-signing',
+  control: '21066324',
+  experiment: '21066325',
 };
 
 /**
@@ -357,6 +366,20 @@ export class AmpA4A extends AMP.BaseElement {
      * @type {boolean}
      */
     this.isSinglePageStoryAd = false;
+
+    /**
+     * Promise that will resolve with processed <head> from ad server response.
+     * @visibleForTesting temporary to satisfy linter while implementing.
+     * @private {?Promise<!Element>}
+     */
+    this.sanitizedHeadPromise_ = null;
+
+    /**
+     * Transfers elements from the detached body to the given body element.
+     * @visibleForTesting temporary to satisfy linter while implementing.
+     * @private {?function(!Element)}
+     */
+    this.transferBody_ = null;
   }
 
   /** @override */
@@ -689,18 +712,18 @@ export class AmpA4A extends AMP.BaseElement {
             return null;
           });
 
-          const gdprAppliesPromise = getConsentPolicyGdprApplies(
+          const consentMetadataPromise = getConsentMetadata(
             this.element,
             consentPolicyId
           ).catch((err) => {
-            user().error(TAG, 'Error determining gdprApplies', err);
+            user().error(TAG, 'Error determining consent metadata', err);
             return null;
           });
 
           return Promise.all([
             consentStatePromise,
             consentStringPromise,
-            gdprAppliesPromise,
+            consentMetadataPromise,
           ]);
         }
 
@@ -713,7 +736,10 @@ export class AmpA4A extends AMP.BaseElement {
 
         const consentState = consentResponse[0];
         const consentString = consentResponse[1];
-        const gdprApplies = consentResponse[2];
+        const consentMetadata = consentResponse[2];
+        const gdprApplies = consentMetadata
+          ? consentMetadata['gdprApplies']
+          : consentMetadata;
 
         return /** @type {!Promise<?string>} */ (this.getAdUrl(
           {consentState, consentString, gdprApplies},
@@ -738,7 +764,7 @@ export class AmpA4A extends AMP.BaseElement {
       // The following block returns either the response (as a
       // {bytes, headers} object), or null if no response is available /
       // response is empty.
-      /** @return {?Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
+      /** @return {!Promise<!Response>} */
       .then((fetchResponse) => {
         checkStillCurrent();
         this.maybeTriggerAnalyticsEvent_('adRequestEnd');
@@ -806,102 +832,14 @@ export class AmpA4A extends AMP.BaseElement {
             this.getSafeframePath()
           );
         }
-        // Note: Resolving a .then inside a .then because we need to capture
-        // two fields of fetchResponse, one of which is, itself, a promise,
-        // and one of which isn't.  If we just return
-        // fetchResponse.arrayBuffer(), the next step in the chain will
-        // resolve it to a concrete value, but we'll lose track of
-        // fetchResponse.headers.
-        return fetchResponse.arrayBuffer().then((bytes) => {
-          if (bytes.byteLength == 0) {
-            // The server returned no content. Instead of displaying a blank
-            // rectangle, we collapse the slot instead.
-            this.forceCollapse();
-            return Promise.reject(NO_CONTENT_RESPONSE);
-          }
-          return {
-            bytes,
-            headers: fetchResponse.headers,
-          };
-        });
+        return fetchResponse;
       })
-      /** @return {?Promise<?ArrayBuffer>} */
-      .then((responseParts) => {
-        checkStillCurrent();
-        // Keep a handle to the creative body so that we can render into
-        // SafeFrame or NameFrame later, if necessary.  TODO(tdrl): Temporary,
-        // while we
-        // assess whether this is the right solution to the Safari+iOS iframe
-        // src cache issue.  If we decide to keep a SafeFrame-like solution,
-        // we should restructure the promise chain to pass this info along
-        // more cleanly, without use of an object variable outside the chain.
-        if (!responseParts) {
-          return null;
-        }
-        const {bytes, headers} = responseParts;
-        const size = this.extractSize(responseParts.headers);
-        this.creativeSize_ = size || this.creativeSize_;
-        if (
-          this.experimentalNonAmpCreativeRenderMethod_ !=
-            XORIGIN_MODE.CLIENT_CACHE &&
-          bytes
-        ) {
-          this.creativeBody_ = bytes;
-        }
-        return this.maybeValidateAmpCreative(bytes, headers);
-      })
-      .then((creative) => {
-        checkStillCurrent();
-        // Need to know if creative was verified as part of render outside
-        // viewport but cannot wait on promise.  Sadly, need a state a
-        // variable.
-        this.isVerifiedAmpCreative_ = !!creative;
-        return creative && utf8Decode(creative);
-      })
-      // This block returns CreativeMetaDataDef iff the creative was verified
-      // as AMP and could be properly parsed for friendly iframe render.
-      /** @return {?CreativeMetaDataDef} */
-      .then((creativeDecoded) => {
-        checkStillCurrent();
-        // Note: It's critical that #getAmpAdMetadata be called
-        // on precisely the same creative that was validated
-        // via #validateAdResponse_.  See GitHub issue
-        // https://github.com/ampproject/amphtml/issues/4187
-        let creativeMetaDataDef;
-        if (
-          !creativeDecoded ||
-          !(creativeMetaDataDef = this.getAmpAdMetadata(creativeDecoded))
-        ) {
-          if (this.inNonAmpPreferenceExp()) {
-            // Experiment to give non-AMP creatives same benefits as AMP so
-            // update priority.
-            this.updateLayoutPriority(LayoutPriority.CONTENT);
-          }
-          return null;
-        }
-
-        // Update priority.
-        this.updateLayoutPriority(LayoutPriority.CONTENT);
-        // Load any extensions; do not wait on their promises as this
-        // is just to prefetch.
-        const extensions = Services.extensionsFor(this.win);
-        creativeMetaDataDef.customElementExtensions.forEach((extensionId) =>
-          extensions.preloadExtension(extensionId)
-        );
-        // Preload any fonts.
-        (creativeMetaDataDef.customStylesheets || []).forEach((font) =>
-          Services.preconnectFor(this.win).preload(this.getAmpDoc(), font.href)
-        );
-
-        const urls = Services.urlForDoc(this.element);
-        // Preload any AMP images.
-        (creativeMetaDataDef.images || []).forEach(
-          (image) =>
-            urls.isSecure(image) &&
-            Services.preconnectFor(this.win).preload(this.getAmpDoc(), image)
-        );
-        return creativeMetaDataDef;
-      })
+      .then((fetchResponse) =>
+        getExperimentBranch(this.win, NO_SIGNING_EXP.id) ===
+        NO_SIGNING_EXP.experiment
+          ? this.streamResponse_(fetchResponse)
+          : this.startValidationFlow_(fetchResponse, checkStillCurrent)
+      )
       .catch((error) => {
         switch (error.message || error) {
           case IFRAME_GET:
@@ -921,6 +859,162 @@ export class AmpA4A extends AMP.BaseElement {
         this.promiseErrorHandler_(error);
         return null;
       });
+  }
+
+  /**
+   * Start streaming response into the detached document.
+   * @param {!Response} response
+   * @return {boolean}
+   */
+  streamResponse_(response) {
+    // TODO(ccordry): get size from headers equivalent to
+    // validation flow, and double check any other values
+    // that might be set.
+
+    // This transformation consumes the detached DOM chunks and
+    // exposes our waitForHead and transferBody methods.
+    const transformStream = new DomTransformStream(this.win);
+    // Receives chunks of text and writes to detached DOM.
+    const detachedStream = new DetachedDomStream(
+      this.win,
+      (chunk) => transformStream.onChunk(chunk),
+      (doc) => transformStream.onEnd(doc)
+    );
+    // Decodes our response bytes and pipes them to the
+    // DetachedDomStream.
+    streamResponseToWriter(this.win, response, detachedStream);
+
+    this.sanitizedHeadPromise_ = transformStream
+      .waitForHead()
+      .then((head) => this.validateHead_(head));
+
+    this.transferBody_ = transformStream.transferBody;
+
+    // TODO(ccordry): throw NO_CONTENT_RESPONSE if body is empty. Only gets
+    // here if amp-ff-empty-creative header is not present.
+    return true;
+  }
+
+  /**
+   * Prepare the creative <head> by removing any non-secure elements and
+   * @param {!Element} head
+   * @return {?Element} head or null if we should fall back to xdomain.
+   */
+  validateHead_(head) {
+    // TODO(ccordry): Implement client side head validation.
+    return head;
+  }
+
+  /**
+   * Encapsulates logic for validation flow starting with resolving res body
+   * to array buffer.
+   * @param {!Response} fetchResponse
+   * @param {function()} checkStillCurrent
+   * @return {Promise<?CreativeMetaDataDef>}
+   */
+  startValidationFlow_(fetchResponse, checkStillCurrent) {
+    // Note: Resolving a .then inside a .then because we need to capture
+    // two fields of fetchResponse, one of which is, itself, a promise,
+    // and one of which isn't.  If we just return
+    // fetchResponse.arrayBuffer(), the next step in the chain will
+    // resolve it to a concrete value, but we'll lose track of
+    // fetchResponse.headers.
+    return (
+      fetchResponse
+        .arrayBuffer()
+        .then((bytes) => {
+          if (bytes.byteLength == 0) {
+            // The server returned no content. Instead of displaying a blank
+            // rectangle, we collapse the slot instead.
+            this.forceCollapse();
+            return Promise.reject(NO_CONTENT_RESPONSE);
+          }
+          return {
+            bytes,
+            headers: fetchResponse.headers,
+          };
+        })
+        /** @return {?Promise<?ArrayBuffer>} */
+        .then((responseParts) => {
+          checkStillCurrent();
+          // Keep a handle to the creative body so that we can render into
+          // SafeFrame or NameFrame later, if necessary.  TODO(tdrl): Temporary,
+          // while we
+          // assess whether this is the right solution to the Safari+iOS iframe
+          // src cache issue.  If we decide to keep a SafeFrame-like solution,
+          // we should restructure the promise chain to pass this info along
+          // more cleanly, without use of an object variable outside the chain.
+          if (!responseParts) {
+            return null;
+          }
+          const {bytes, headers} = responseParts;
+          const size = this.extractSize(responseParts.headers);
+          this.creativeSize_ = size || this.creativeSize_;
+          if (
+            this.experimentalNonAmpCreativeRenderMethod_ !=
+              XORIGIN_MODE.CLIENT_CACHE &&
+            bytes
+          ) {
+            this.creativeBody_ = bytes;
+          }
+          return this.maybeValidateAmpCreative(bytes, headers);
+        })
+        .then((creative) => {
+          checkStillCurrent();
+          // Need to know if creative was verified as part of render outside
+          // viewport but cannot wait on promise.  Sadly, need a state a
+          // variable.
+          this.isVerifiedAmpCreative_ = !!creative;
+          return creative && utf8Decode(creative);
+        })
+        // This block returns CreativeMetaDataDef iff the creative was verified
+        // as AMP and could be properly parsed for friendly iframe render.
+        /** @return {?CreativeMetaDataDef} */
+        .then((creativeDecoded) => {
+          checkStillCurrent();
+          // Note: It's critical that #getAmpAdMetadata be called
+          // on precisely the same creative that was validated
+          // via #validateAdResponse_.  See GitHub issue
+          // https://github.com/ampproject/amphtml/issues/4187
+          let creativeMetaDataDef;
+          if (
+            !creativeDecoded ||
+            !(creativeMetaDataDef = this.getAmpAdMetadata(creativeDecoded))
+          ) {
+            if (this.inNonAmpPreferenceExp()) {
+              // Experiment to give non-AMP creatives same benefits as AMP so
+              // update priority.
+              this.updateLayoutPriority(LayoutPriority.CONTENT);
+            }
+            return null;
+          }
+
+          // Update priority.
+          this.updateLayoutPriority(LayoutPriority.CONTENT);
+          // Load any extensions; do not wait on their promises as this
+          // is just to prefetch.
+          const extensions = Services.extensionsFor(this.win);
+          creativeMetaDataDef.customElementExtensions.forEach((extensionId) =>
+            extensions.preloadExtension(extensionId)
+          );
+          // Preload any fonts.
+          (creativeMetaDataDef.customStylesheets || []).forEach((font) =>
+            Services.preconnectFor(this.win).preload(
+              this.getAmpDoc(),
+              font.href
+            )
+          );
+
+          const urls = Services.urlForDoc(this.element);
+          // Preload any AMP images.
+          (creativeMetaDataDef.images || []).forEach(
+            (image) =>
+              urls.isSecure(image) &&
+              Services.preconnectFor(this.win).preload(this.getAmpDoc(), image)
+          );
+          return creativeMetaDataDef;
+        })
+    );
   }
 
   /**
@@ -1126,6 +1220,12 @@ export class AmpA4A extends AMP.BaseElement {
         if (this.iframe && !this.isRefreshing) {
           return Promise.resolve();
         }
+
+        // TODO(ccordry): split rendering flow in exp
+        //  Create iframe with CSP
+        //  Wait for sanitized head, transfer it to created iframe or fallback.
+        //  call this.transferBody_(iframeBody) when ready to render.
+
         if (!creativeMetaData) {
           // Non-AMP creative case, will verify ad url existence.
           return this.renderNonAmpCreative();
@@ -1511,6 +1611,7 @@ export class AmpA4A extends AMP.BaseElement {
         'allowfullscreen': '',
         'allowtransparency': '',
         'scrolling': 'no',
+        'title': this.getIframeTitle(),
       })
     ));
     this.applyFillContent(this.iframe);
@@ -1583,6 +1684,7 @@ export class AmpA4A extends AMP.BaseElement {
       dict({
         'height': this.creativeSize_.height,
         'width': this.creativeSize_.width,
+        'title': this.getIframeTitle(),
       })
     );
 
@@ -1999,22 +2101,11 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * Adds single pass experiment IDs if the javascript binary has
-   * "singlePassType" mode.
+   * Returns the amp-ad title attribute or a fallback string.
+   * @return {string} iframe title attribute
    */
-  maybeAddSinglePassExperiment() {
-    const type = getMode().singlePassType;
-    if (type === 'sp') {
-      addExperimentIdToElement(
-        SINGLE_PASS_EXPERIMENT_IDS.SINGLE_PASS,
-        this.element
-      );
-    } else if (type === 'mp') {
-      addExperimentIdToElement(
-        SINGLE_PASS_EXPERIMENT_IDS.MULTI_PASS,
-        this.element
-      );
-    }
+  getIframeTitle() {
+    return this.element.getAttribute('title') || '3rd party ad content';
   }
 }
 

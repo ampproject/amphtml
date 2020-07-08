@@ -132,7 +132,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
     expect(r.isBuilding()).to.be.true;
   });
 
-  it('should blacklist on build failure', () => {
+  it('should denylist on build failure', () => {
     env.sandbox
       .stub(resource, 'maybeReportErrorOnBuildFailure')
       .callsFake(() => {});
@@ -551,6 +551,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
 
   it('should ignore startLayout if already completed or failed or going', () => {
     elementMock.expects('layoutCallback').never();
+    resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
 
     resource.state_ = ResourceState.LAYOUT_COMPLETE;
     resource.startLayout();
@@ -559,6 +560,11 @@ describes.realWin('Resource', {amp: true}, (env) => {
     resource.startLayout();
 
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    allowConsoleError(() => {
+      resource.startLayout();
+    });
+
+    resource.state_ = ResourceState.LAYOUT_SCHEDULED;
     resource.layoutPromise_ = {};
     resource.startLayout();
   });
@@ -576,7 +582,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
 
   it('should ignore startLayout if not visible', () => {
     elementMock.expects('layoutCallback').never();
-    resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    resource.state_ = ResourceState.LAYOUT_SCHEDULED;
     resource.layoutBox_ = {left: 11, top: 12, width: 0, height: 0};
     allowConsoleError(() => {
       expect(() => {
@@ -588,7 +594,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
   it('should force startLayout for first layout', () => {
     elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
 
-    resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    resource.state_ = ResourceState.LAYOUT_SCHEDULED;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
     resource.startLayout();
     expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
@@ -597,7 +603,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
   it('should ignore startLayout for re-layout when not opt-in', () => {
     elementMock.expects('layoutCallback').never();
 
-    resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    resource.state_ = ResourceState.LAYOUT_SCHEDULED;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
     resource.layoutCount_ = 1;
     elementMock.expects('isRelayoutNeeded').returns(false).atLeast(1);
@@ -608,7 +614,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
   it('should force startLayout for re-layout when opt-in', () => {
     elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
 
-    resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    resource.state_ = ResourceState.LAYOUT_SCHEDULED;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
     resource.layoutCount_ = 1;
     elementMock.expects('isRelayoutNeeded').returns(true).atLeast(1);
@@ -619,7 +625,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
   it('should complete startLayout', () => {
     elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
 
-    resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    resource.state_ = ResourceState.LAYOUT_SCHEDULED;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
     const loaded = resource.loadedOnce();
     const promise = resource.startLayout();
@@ -637,7 +643,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
     elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
     elementMock.expects('getLayout').returns('fluid').once();
 
-    resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    resource.state_ = ResourceState.LAYOUT_SCHEDULED;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 0};
     const loaded = resource.loadedOnce();
     const promise = resource.startLayout();
@@ -655,7 +661,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
     const error = new Error('intentional');
     elementMock.expects('layoutCallback').returns(Promise.reject(error)).once();
 
-    resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    resource.state_ = ResourceState.LAYOUT_SCHEDULED;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
     const promise = resource.startLayout();
     expect(resource.layoutPromise_).to.not.equal(null);
@@ -698,7 +704,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
   });
 
   it('should not record layout schedule time in startLayout', () => {
-    resource.state_ = ResourceState.READY_FOR_LAYOUT;
+    resource.state_ = ResourceState.LAYOUT_SCHEDULED;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
     allowConsoleError(() => resource.startLayout());
 
@@ -878,6 +884,7 @@ describes.realWin('Resource', {amp: true}, (env) => {
 
       resource.unlayout();
 
+      resource.state_ = ResourceState.LAYOUT_SCHEDULED;
       elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
       resource.measure();
       resource.startLayout();
@@ -1007,6 +1014,59 @@ describes.realWin('Resource', {amp: true}, (env) => {
       elementMock.expects('resumeCallback').once();
       resource.resume();
     });
+  });
+});
+
+describe('Resource idleRenderOutsideViewport', () => {
+  let element;
+  let resources;
+  let resource;
+  let idleRenderOutsideViewport;
+  let isWithinViewportRatio;
+
+  beforeEach(() => {
+    idleRenderOutsideViewport = window.sandbox.stub();
+    element = {
+      idleRenderOutsideViewport,
+      ownerDocument: {defaultView: window},
+      tagName: 'AMP-AD',
+      hasAttribute: () => false,
+      isBuilt: () => false,
+      isBuilding: () => false,
+      isUpgraded: () => false,
+      prerenderAllowed: () => false,
+      renderOutsideViewport: () => true,
+      build: () => false,
+      getBoundingClientRect: () => null,
+      updateLayoutBox: () => {},
+      isRelayoutNeeded: () => false,
+      layoutCallback: () => {},
+      applySize: () => {},
+      unlayoutOnPause: () => false,
+      unlayoutCallback: () => true,
+      pauseCallback: () => false,
+      resumeCallback: () => false,
+      viewportCallback: () => {},
+      getLayoutPriority: () => LayoutPriority.CONTENT,
+    };
+    resources = new ResourcesImpl(new AmpDocSingle(window));
+    resource = new Resource(1, element, resources);
+    isWithinViewportRatio = window.sandbox.stub(
+      resource,
+      'isWithinViewportRatio'
+    );
+  });
+
+  it('should return true if isWithinViewportRatio', () => {
+    idleRenderOutsideViewport.returns(5);
+    isWithinViewportRatio.withArgs(5).returns(true);
+    expect(resource.idleRenderOutsideViewport()).to.equal(true);
+  });
+
+  it('should return false for false element idleRenderOutsideViewport', () => {
+    idleRenderOutsideViewport.returns(false);
+    isWithinViewportRatio.withArgs(false).returns(false);
+    expect(resource.idleRenderOutsideViewport()).to.equal(false);
   });
 });
 

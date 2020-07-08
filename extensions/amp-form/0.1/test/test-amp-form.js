@@ -591,7 +591,7 @@ describes.repeated(
             );
           });
           form.setAttribute('action-xhr', 'https://example.com');
-          expect(() => new AmpForm(form)).to.not.throw;
+          expect(() => new AmpForm(form)).to.not.throw();
           document.body.removeChild(form);
         });
 
@@ -1536,7 +1536,7 @@ describes.repeated(
           const actions = {
             installActionHandler: () => {},
             trigger: env.sandbox.spy(),
-            addToWhitelist: () => {},
+            addToAllowlist: () => {},
           };
           env.sandbox.stub(Services, 'actionServiceForDoc').returns(actions);
 

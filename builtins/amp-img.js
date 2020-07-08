@@ -19,11 +19,10 @@ import {Layout, isLayoutSizeDefined} from '../src/layout';
 import {Services} from '../src/services';
 import {dev} from '../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img';
-import {isExperimentOn} from '../src/experiments';
 import {listen} from '../src/event-helper';
 import {propagateObjectFitStyles, setImportantStyles} from '../src/style';
 import {registerElement} from '../src/service/custom-element-registry';
-import {removeElement} from '../src/dom';
+import {removeElement, scopedQuerySelector} from '../src/dom';
 
 /** @const {string} */
 const TAG = 'amp-img';
@@ -37,6 +36,7 @@ const ATTRIBUTES_TO_PROPAGATE = [
   'aria-describedby',
   'aria-label',
   'aria-labelledby',
+  'crossorigin',
   'referrerpolicy',
   'sizes',
   'src',
@@ -100,7 +100,10 @@ export class AmpImg extends BaseElement {
         /* opt_removeMissingAttrs */ true
       );
       this.propagateDataset(this.img_);
-      guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
+
+      if (!IS_ESM) {
+        guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
+      }
     }
   }
 
@@ -162,7 +165,7 @@ export class AmpImg extends BaseElement {
     // For inabox SSR, image will have been written directly to DOM so no need
     // to recreate.  Calling appendChild again will have no effect.
     if (this.element.hasAttribute('i-amphtml-ssr')) {
-      this.img_ = this.element.querySelector('img');
+      this.img_ = scopedQuerySelector(this.element, '> img:not([placeholder])');
     }
     this.img_ = this.img_ || new Image();
     this.img_.setAttribute('decoding', 'async');
@@ -186,7 +189,9 @@ export class AmpImg extends BaseElement {
     this.maybeGenerateSizes_(/* sync setAttribute */ true);
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
     this.propagateDataset(this.img_);
-    guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
+    if (!IS_ESM) {
+      guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
+    }
     this.applyFillContent(this.img_, true);
     propagateObjectFitStyles(this.element, this.img_);
 
@@ -307,8 +312,7 @@ export class AmpImg extends BaseElement {
     const placeholder = this.getPlaceholder();
     if (
       placeholder &&
-      placeholder.classList.contains('i-amphtml-blurry-placeholder') &&
-      isExperimentOn(this.win, 'blurry-placeholder')
+      placeholder.classList.contains('i-amphtml-blurry-placeholder')
     ) {
       setImportantStyles(placeholder, {'opacity': 0});
     } else {

@@ -30,13 +30,8 @@ async function clean() {
     '.amp-build',
     '.karma-cache',
     'deps.txt',
-    'build-system/runner/build',
-    'build-system/runner/dist',
     'build-system/server/new-server/transforms/dist',
-    'validator/java/target',
-    'validator/java/src/main/resources',
-    'validator/java/src/main/java/dev/amp/validator/ValidatorProtos.java',
-    'validator/java/bazel-*',
+    'test-bin',
   ]);
 }
 

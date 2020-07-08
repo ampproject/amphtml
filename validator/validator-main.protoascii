@@ -20,16 +20,16 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii, etc) are always released together.
-min_validator_revision_required: 455
+min_validator_revision_required: 474
 
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 1043
+spec_file_revision: 1060
 
-styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages"
-script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
+styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/"
+script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed"
 
 # Validator extensions.
 # =====================
@@ -47,6 +47,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "!DOCTYPE"
   spec_name: "html doctype"
+  descriptive_name: "html !doctype"
   mandatory_parent: "$ROOT"
   mandatory: true
   unique: true
@@ -61,7 +62,7 @@ tags: {
   attrs: {
     name: "lang"
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
 }
 # AMP4ADS may need time to transition <!doctype> to using explicit attrs only.
 # Tracking in b/123227526 to merge into tagspec with spec name "html doctype".
@@ -69,6 +70,7 @@ tags: {
   html_format: AMP4ADS
   tag_name: "!DOCTYPE"
   spec_name: "html doctype (AMP4ADS)"
+  descriptive_name: "html !doctype"
   mandatory_parent: "$ROOT"
   mandatory: true
   unique: true
@@ -77,7 +79,7 @@ tags: {
     mandatory: true
     value: ""
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
 }
 
 # Below, we list the allowed elements in the order in which they are appear
@@ -101,10 +103,10 @@ tags: {  # HTML tag for non-transformed AMP.
     # Because `data-*` attributes are always valid AMP, the following rules explicitly disallow usage.
     name: "data-amp-autocomplete-opt-in"
     value: "false"
-    blacklisted_value_regex: "false"
+    disallowed_value_regex: "false"
   }
   unique: true
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
 }
 tags: {  # HTML tag for transformed AMP.
   html_format: AMP
@@ -123,7 +125,7 @@ tags: {  # HTML tag for transformed AMP.
     name: "i-amphtml-no-boilerplate"
     value: ""
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
 }
 
 # 4.2 Document metadata
@@ -137,7 +139,7 @@ tags: {
   mandatory: true
   mandatory_parent: "HTML"
   unique: true
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
 }
 # 4.2.2 The title element
 tags: {
@@ -211,11 +213,11 @@ tags: {
     # - http://microformats.org/wiki/existing-rel-values
     # - http://www.iana.org/assignments/link-relations/link-relations.xhtml
     # - https://html.spec.whatwg.org/#linkTypes
-    # We blacklist a few specific values which have browser behavior that could
+    # We denylist a few specific values which have browser behavior that could
     # negatively impact performance.
     # TODO(gregable): This could be improved such that the error message would
     # report which value in a list is the one causing problems.
-    blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
+    disallowed_value_regex: "(^|\\s)("  # Values are space separated.
         "canonical|"  # Handled separately below, has specific requirements.
         "components|"
         "import|"
@@ -231,13 +233,14 @@ tags: {
     # origins, not on the AMP Cache.
   }
   attr_lists: "common-link-attrs"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
 }
 tags: {
   html_format: AMP
   html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link rel=canonical"
+  descriptive_name: "link rel=canonical"
   mandatory_parent: "HEAD"
   mandatory: true
   unique: true
@@ -248,7 +251,7 @@ tags: {
       protocol: "http"
       protocol: "https"
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: {
     name: "rel"
@@ -257,7 +260,7 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
   attr_lists: "common-link-attrs"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
 }
 # Allow <link rel="manifest" ...> but not <link rel="manifest foo" ...>
 tags: {
@@ -265,6 +268,7 @@ tags: {
   html_format: AMP4ADS
   tag_name: "LINK"
   spec_name: "link rel=manifest"
+  descriptive_name: "link rel=manifest"
   mandatory_parent: "HEAD"
   satisfies: "amp-app-banner data source"
   attrs: {
@@ -273,7 +277,7 @@ tags: {
     value_url: {
       protocol: "https"
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: {
     name: "rel"
@@ -282,7 +286,7 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
   attr_lists: "common-link-attrs"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
 }
 tags: {
   html_format: AMP
@@ -290,6 +294,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link rel=preload"
+  descriptive_name: "link rel=preload"
   disallowed_ancestor: "TEMPLATE"
   attrs: { name: "as" }
   attrs: { name: "href" }
@@ -300,15 +305,16 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
   attr_lists: "common-link-attrs"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
 }
-# Whitelisted font providers
+# Allowlisted font providers
 tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link rel=stylesheet for fonts"
+  descriptive_name: "link rel=stylesheet for fonts"
   named_id: LINK_FONT_STYLESHEET
   mandatory_parent: "HEAD"
   attr_lists: "nonce-attr"
@@ -344,7 +350,7 @@ tags: {
     name: "type"
     value_casei: "text/css"
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#custom-fonts"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#custom-fonts"
 }
 # itemprop=sameAs is allowed per schema.org, needs not be in head
 tags: {
@@ -353,6 +359,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link itemprop=sameAs"
+  descriptive_name: "link itemprop=sameAs"
   attrs: {
     name: "href"
     mandatory: true
@@ -364,7 +371,7 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
   attr_lists: "common-link-attrs"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
 }
 # rel= isn't mandatory when itemprop= is present.
 tags: {
@@ -373,6 +380,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link itemprop="
+  descriptive_name: "link itemprop="
   attrs: {
     name: "href"
     mandatory: true
@@ -382,7 +390,7 @@ tags: {
     mandatory: true
   }
   attr_lists: "common-link-attrs"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
 }
 # rel= isn't mandatory when property= is present.
 tags: {
@@ -391,6 +399,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link property="
+  descriptive_name: "link property="
   attrs: {
     name: "href"
     mandatory: true
@@ -400,7 +409,7 @@ tags: {
     mandatory: true
   }
   attr_lists: "common-link-attrs"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
 }
 # 4.2.5 the meta element
 # Charset must be utf8, and a specific viewport is required.
@@ -411,6 +420,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta charset=utf-8"
+  descriptive_name: "meta charset=utf-8"
   mandatory: true
   mandatory_parent: "HEAD"
   unique: true
@@ -420,7 +430,7 @@ tags: {
     mandatory: true
     value_casei: "utf-8"
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
 }
 tags: {
   html_format: AMP
@@ -428,6 +438,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta name=viewport"
+  descriptive_name: "meta name=viewport"
   mandatory: true
   mandatory_parent: "HEAD"
   unique: true
@@ -451,7 +462,7 @@ tags: {
     value: "viewport"
     dispatch_key: NAME_VALUE_DISPATCH
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
 }
 # This tag is a hack to tell IE 10 to use its modern rendering engine as opposed
 # to the IE8 engine. So it's explicitly allowed.
@@ -461,6 +472,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta http-equiv=X-UA-Compatible"
+  descriptive_name: "meta http-equiv=X-UA-Compatible"
   mandatory_ancestor: "HEAD"
   attrs: {
     name: "content"
@@ -476,7 +488,7 @@ tags: {
     value_casei: "x-ua-compatible"
     dispatch_key: NAME_VALUE_DISPATCH
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
 }
 # Tag specific to apple-itunes-app installs, see also <amp-app-banner>.
 tags: {
@@ -498,7 +510,7 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
 
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
 }
 # AMP & AMP4ADS metadata, name=amp-experiments-opt-in
 # https://github.com/lannka/amphtml/blob/master/tools/experiments/README.md
@@ -538,7 +550,7 @@ tags: {
     value_casei: "amp-3p-iframe-src"
     dispatch_key: NAME_VALUE_DISPATCH
   }
-  spec_url: "https://amp.dev/documentation/components/amp-ad"
+  spec_url: "https://amp.dev/documentation/components/amp-ad/"
 }
 # AMP metadata, name=amp-consent-blocking
 tags: {
@@ -712,7 +724,7 @@ tags: {
   # are altogether disallowed.
   attrs: {
     name: "name"
-    blacklisted_value_regex: "(^|\\s)("
+    disallowed_value_regex: "(^|\\s)("
         "amp-.*|"
         "amp4ads-.*|"
         "apple-itunes-app|"
@@ -745,7 +757,7 @@ tags: {
     value_casei: "content-type"
     dispatch_key: NAME_VALUE_DISPATCH
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
 }
 # http-equiv content-language tag
 tags: {
@@ -765,7 +777,7 @@ tags: {
     value_casei: "content-language"
     dispatch_key: NAME_VALUE_DISPATCH
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
 }
 # http-equiv pics-label tag
 # https://www.w3.org/PICS/
@@ -786,7 +798,7 @@ tags: {
     value_casei: "pics-label"
     dispatch_key: NAME_VALUE_DISPATCH
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
 }
 # http-equiv imagetoolbar tag
 # https://msdn.microsoft.com/en-us/library/ms532986(v=vs.85).aspx
@@ -807,7 +819,7 @@ tags: {
     value_casei: "imagetoolbar"
     dispatch_key: NAME_VALUE_DISPATCH
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
 }
 # http-equiv content-style-type
 # https://www.w3.org/TR/REC-html40/present/styles#h-14.2.1
@@ -829,7 +841,7 @@ tags: {
     value_casei: "content-style-type"
     dispatch_key: NAME_VALUE_DISPATCH
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
 }
 # http-equiv content-script-type
 # https://www.w3.org/TR/html4/interact/scripts#h-18.2.2.1
@@ -851,7 +863,7 @@ tags: {
     value_casei: "content-script-type"
     dispatch_key: NAME_VALUE_DISPATCH
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
 }
 # http-equiv origin-trial tag
 tags: {
@@ -871,7 +883,7 @@ tags: {
     value_casei: "origin-trial"
     dispatch_key: NAME_VALUE_DISPATCH
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
 }
 # http-equiv resource-type
 # http://www.metatags.info/meta_http_equiv_resource_type
@@ -892,7 +904,7 @@ tags: {
     value_casei: "resource-type"
     dispatch_key: NAME_VALUE_DISPATCH
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
 }
 # http-equiv x-dns-prefetch-control
 # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-DNS-Prefetch-Control
@@ -913,7 +925,7 @@ tags: {
     value_casei: "x-dns-prefetch-control"
     dispatch_key: NAME_VALUE_DISPATCH
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
 }
 # AMP metadata, name=amp-ad-enable-refresh
 # Enables Refresh for amp-ad doubleclick Fast Fetch
@@ -1046,7 +1058,7 @@ tags: {
   mandatory: true
   unique: true
   mandatory_parent: "HTML"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
 }
 # 4.3.2 The article element
 tags: {
@@ -1208,7 +1220,7 @@ attr_lists: {
       protocol: "https"
       allow_empty: true
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
 }
 tags: {
@@ -1337,7 +1349,7 @@ tags: {
       protocol: "https"
       protocol: "mailto"
       protocol: "maps"
-      # Whitelisting additional commonly observed third party
+      # Allowlisting additional commonly observed third party
       # protocols which should be safe.
       # BiP Messenger
       protocol: "bip"
@@ -1369,7 +1381,7 @@ tags: {
       protocol: "whatsapp"
       allow_empty: true
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "hreflang" }
   attrs: { name: "media" }
@@ -1384,11 +1396,11 @@ tags: {
     # - http://microformats.org/wiki/existing-rel-values
     # - http://www.iana.org/assignments/link-relations/link-relations.xhtml
     # - https://html.spec.whatwg.org/#linkTypes
-    # We blacklist a few specific values which have browser behavior that could
+    # We denylist a few specific values which have browser behavior that could
     # negatively impact performance.
     # TODO(gregable): This could be improved such that the error message would
     # report which value in a list is the one causing problems.
-    blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
+    disallowed_value_regex: "(^|\\s)("  # Values are space separated.
         "components|"
         "dns-prefetch|"
         "import|"
@@ -1429,7 +1441,7 @@ tags: {
   attr_lists: "name-attr"
   # <amp-bind>
   attrs: { name: "[href]" }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#links"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#links"
 }
 # AMP4EMAIL restricts the use of mustache delimiters in href. The only allowed
 # protocols for href are http, https and mailto. Relative urls are disallowed.
@@ -1453,7 +1465,7 @@ tags: {
     # Furthermore unbalanced delimiters are not allowed.
     # Additionally section mustache delimiters, i.e., {{#, {{^, {{/ are
     # disallowed.
-    blacklisted_value_regex: "__amp_source_origin|"
+    disallowed_value_regex: "__amp_source_origin|"
         "(.|\\s){{|"    # Openning delimiter can only appear at the beginning.
         "}}(.|\\s)|"    # Closing delimiter can only appear at the end.
         "^{{.*[^}][^}]$|"    # Delimiters must be balanced.
@@ -1771,7 +1783,7 @@ tags: {
   tag_name: "IMG"
   mandatory_ancestor: "NOSCRIPT"
   mandatory_ancestor_suggested_alternative: "AMP-IMG"
-  spec_url: "https://amp.dev/documentation/components/amp-img"
+  spec_url: "https://amp.dev/documentation/components/amp-img/"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "border" }  # Not valid html5 but commonly used and supported.
@@ -1789,7 +1801,7 @@ tags: {
       protocol: "http"
       protocol: "https"
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "importance" }  # Not yet part of the html spec
   attrs: { name: "intrinsicsize" }  # Not yet part of the html spec
@@ -1804,7 +1816,7 @@ tags: {
       protocol: "https"
       allow_relative: true
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "sizes" }
   attrs: { name: "width" }  # Not valid html5 but commonly used and supported.
@@ -1815,7 +1827,7 @@ tags: {
   tag_name: "IFRAME"
   mandatory_ancestor: "NOSCRIPT"
   mandatory_ancestor_suggested_alternative: "AMP-IFRAME"
-  spec_url: "https://amp.dev/documentation/components/amp-iframe"
+  spec_url: "https://amp.dev/documentation/components/amp-iframe/"
   attrs: {
     name: "frameborder"
     value: "0"
@@ -1844,7 +1856,7 @@ tags: {
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: {
     name: "srcdoc"
@@ -1869,7 +1881,7 @@ tags: {
   attrs: {
     name: "muted"
     deprecation: "autoplay"
-    deprecation_url: "https://amp.dev/documentation/components/amp-video"
+    deprecation_url: "https://amp.dev/documentation/components/amp-video/"
   }
   attrs: { name: "playsinline" }
   attrs: { name: "poster" }
@@ -1881,10 +1893,10 @@ tags: {
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "width" }
-  spec_url: "https://amp.dev/documentation/components/amp-video"
+  spec_url: "https://amp.dev/documentation/components/amp-video/"
 }
 # 4.7.7 The audio element
 # Only allowed in noscript tags. Otherwise use amp-audio.
@@ -1905,9 +1917,9 @@ tags: {
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
-  spec_url: "https://amp.dev/documentation/components/amp-audio"
+  spec_url: "https://amp.dev/documentation/components/amp-audio/"
 }
 # 4.7.7 The picture element
 # Only allowed in noscript tags which support img tags.
@@ -1915,7 +1927,7 @@ tags: {
   html_format: AMP
   tag_name: "PICTURE"
   mandatory_parent: "NOSCRIPT"
-  spec_url: "https://amp.dev/documentation/components/amp-img"
+  spec_url: "https://amp.dev/documentation/components/amp-img/"
 }
 # 4.7.8 The source element
 tags: {
@@ -1933,10 +1945,10 @@ tags: {
       protocol: "https"
       allow_relative: true
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "type" }
-  spec_url: "https://amp.dev/documentation/components/amp-img"
+  spec_url: "https://amp.dev/documentation/components/amp-img/"
 }
 tags: {
   html_format: AMP
@@ -1952,13 +1964,13 @@ tags: {
       protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "type" }
   # <amp-bind>
   attrs: { name: "[src]" }
   attrs: { name: "[type]" }
-  spec_url: "https://amp.dev/documentation/components/amp-video"
+  spec_url: "https://amp.dev/documentation/components/amp-video/"
 }
 tags: {
   html_format: AMP
@@ -1974,13 +1986,13 @@ tags: {
       protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "type" }
   # <amp-bind>
   attrs: { name: "[src]" }
   attrs: { name: "[type]" }
-  spec_url: "https://amp.dev/documentation/components/amp-audio"
+  spec_url: "https://amp.dev/documentation/components/amp-audio/"
 }
 tags: {
   html_format: AMP
@@ -1997,13 +2009,13 @@ tags: {
       protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: {
     name: "type"
     mandatory: true
   }
-  spec_url: "https://amp.dev/documentation/components/amp-audio"
+  spec_url: "https://amp.dev/documentation/components/amp-audio/"
 }
 tags: {
   html_format: AMP
@@ -2020,13 +2032,13 @@ tags: {
       protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: {
     name: "type"
     mandatory: true
   }
-  spec_url: "https://amp.dev/documentation/components/amp-video"
+  spec_url: "https://amp.dev/documentation/components/amp-video/"
 }
 tags: {
   html_format: AMP
@@ -2043,7 +2055,7 @@ tags: {
       protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "type" }
   # <amp-bind>
@@ -2077,7 +2089,7 @@ attr_lists: {
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "srclang" }
 }
@@ -2100,7 +2112,7 @@ attr_lists: {
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: {
     name: "srclang"
@@ -2216,7 +2228,7 @@ tags: {
   attrs: { name: "[src]" }
   attrs: { name: "[srclang]" }
   attr_lists: "track-attrs-subtitles"
-  spec_url: "https://amp.dev/documentation/components/amp-ima-video"
+  spec_url: "https://amp.dev/documentation/components/amp-ima-video/"
 }
 
 
@@ -2363,7 +2375,7 @@ tags: {
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2383,7 +2395,7 @@ tags: {
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2401,7 +2413,7 @@ tags: {
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
   attr_lists: "svg-xlink-attributes"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2428,7 +2440,7 @@ tags: {
       allow_empty: false
     }
     # Inline SVGs execute in a different context and can affect page elements.
-    blacklisted_value_regex: "(^|\\s)data:image\\/svg\\+xml"
+    disallowed_value_regex: "(^|\\s)data:image\\/svg\\+xml"
   }
   attrs: { name: "xlink:role" }
   attrs: { name: "xlink:show" }
@@ -2439,7 +2451,7 @@ tags: {
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2460,7 +2472,7 @@ tags: {
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2470,7 +2482,7 @@ tags: {
   mandatory_ancestor: "SVG"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2487,7 +2499,7 @@ tags: {
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2500,7 +2512,7 @@ tags: {
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2526,7 +2538,7 @@ tags: {
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2538,7 +2550,7 @@ tags: {
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2553,7 +2565,7 @@ tags: {
   attrs: { name: "zoomandpan" }
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 # Shapes
 tags: {
@@ -2572,7 +2584,7 @@ tags: {
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2591,7 +2603,7 @@ tags: {
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2610,7 +2622,7 @@ tags: {
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2626,7 +2638,7 @@ tags: {
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2642,7 +2654,7 @@ tags: {
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2663,7 +2675,7 @@ tags: {
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 # Text
 tags: {
@@ -2686,7 +2698,7 @@ tags: {
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2703,7 +2715,7 @@ tags: {
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
   attr_lists: "svg-xlink-attributes"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2717,7 +2729,7 @@ tags: {
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
   attr_lists: "svg-xlink-attributes"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2737,7 +2749,7 @@ tags: {
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 # Rendering
 tags: {
@@ -2753,7 +2765,7 @@ tags: {
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2773,7 +2785,7 @@ tags: {
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
   attr_lists: "svg-xlink-attributes"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2788,7 +2800,7 @@ tags: {
   attrs: { name: "u2" }
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2808,7 +2820,7 @@ tags: {
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
   attr_lists: "svg-xlink-attributes"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2827,7 +2839,7 @@ tags: {
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2850,7 +2862,7 @@ tags: {
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
   attr_lists: "svg-xlink-attributes"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2872,7 +2884,7 @@ tags: {
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
   attr_lists: "svg-xlink-attributes"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2885,7 +2897,7 @@ tags: {
   attrs: { name: "stop-color" }
   attrs: { name: "stop-opacity" }
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2898,7 +2910,7 @@ tags: {
   attrs: { name: "stop-color" }
   attrs: { name: "stop-opacity" }
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2913,7 +2925,7 @@ tags: {
   attrs: { name: "u2" }
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 # Special
 tags: {
@@ -2928,7 +2940,7 @@ tags: {
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2944,7 +2956,7 @@ tags: {
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2963,7 +2975,7 @@ tags: {
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
   attr_lists: "svg-xlink-attributes"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 # Filters
 tags: {
@@ -2979,7 +2991,7 @@ tags: {
   attr_lists: "svg-filter-primitive-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -2998,7 +3010,7 @@ tags: {
   attr_lists: "svg-filter-primitive-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -3010,7 +3022,7 @@ tags: {
   attr_lists: "svg-filter-primitive-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -3025,7 +3037,7 @@ tags: {
   attr_lists: "svg-filter-primitive-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -3037,7 +3049,7 @@ tags: {
   attr_lists: "svg-filter-primitive-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -3048,7 +3060,7 @@ tags: {
   attrs: { name: "in" }
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -3063,7 +3075,7 @@ tags: {
   attr_lists: "svg-filter-primitive-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 # ARIA
 tags: {
@@ -3074,7 +3086,7 @@ tags: {
   mandatory_ancestor: "SVG"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 tags: {
   html_format: AMP
@@ -3085,7 +3097,7 @@ tags: {
   mandatory_ancestor: "SVG"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-style-attr"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#svg"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#svg"
 }
 
 # 4.8 Links
@@ -3241,14 +3253,14 @@ tags {  # <form method=GET ...>
     value_url: {
       protocol: "https"
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: {
     name: "action-xhr"
     value_url: {
       protocol: "https"
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "autocomplete" }
   attrs: {
@@ -3277,7 +3289,7 @@ tags {  # <form method=GET ...>
     value_url: {
       protocol: "https"
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attr_lists: "form-name-attr"
 }
@@ -3297,7 +3309,7 @@ tags {  # <form method=POST ...>
     value_url: {
       protocol: "https"
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "autocomplete" }
   attrs: {
@@ -3328,7 +3340,7 @@ tags {  # <form method=POST ...>
     value_url: {
       protocol: "https"
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attr_lists: "form-name-attr"
 }
@@ -3349,7 +3361,7 @@ tags: {  # <form method=POST ...>
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin|"
+    disallowed_value_regex: "__amp_source_origin|"
         "{{|}}"    # Mustache is disallowed in action-xhr.
   }
   attrs: { name: "autocomplete" }
@@ -3388,7 +3400,7 @@ tags: {  # <form method=POST ...>
     value_url: {
       protocol: "https"
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attr_lists: "form-name-attr"
 }
@@ -3410,7 +3422,7 @@ tags {  # <form method=GET ...>
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin|"
+    disallowed_value_regex: "__amp_source_origin|"
         "{{|}}"    # Mustache is disallowed in action-xhr.
   }
   attrs: { name: "autocomplete" }
@@ -3445,7 +3457,7 @@ tags {  # <form method=POST ...>
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin|"
+    disallowed_value_regex: "__amp_source_origin|"
         "{{|}}"    # Mustache is disallowed in action-xhr.
   }
   attrs: { name: "autocomplete" }
@@ -3614,7 +3626,7 @@ attr_lists: {
     disabled_by: "amp4email"
     name: "list"
   }
-  attrs: { 
+  attrs: {
     disabled_by: "amp4email"
     name: "enterkeyhint"
   }
@@ -3685,7 +3697,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "LABEL"
   attrs: { name: "for" }
-  spec_url: "https://amp.dev/documentation/components/amp-form"
+  spec_url: "https://amp.dev/documentation/components/amp-form/"
 }
 # 4.10.5 The input element.
 # The input tag is also defined by extensions/amp-inputmask/validator-amp-inputmask.protoascii
@@ -3702,7 +3714,7 @@ tags: {
   }
   attrs: {
     name: "type"
-    blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
+    disallowed_value_regex: "(^|\\s)("  # Values are space separated.
         "file|"
         "image|"
         "password|"
@@ -3714,7 +3726,7 @@ tags: {
   }
   attr_lists: "input-common-attr"
   attr_lists: "name-attr"
-  spec_url: "https://amp.dev/documentation/components/amp-form"
+  spec_url: "https://amp.dev/documentation/components/amp-form/"
 }
 tags: {
   html_format: AMP
@@ -3738,7 +3750,7 @@ tags: {
   attr_lists: "input-common-attr"
   attr_lists: "name-attr"
   mandatory_ancestor: "FORM [method=POST]"
-  spec_url: "https://amp.dev/documentation/components/amp-form"
+  spec_url: "https://amp.dev/documentation/components/amp-form/"
 }
 tags: {
   html_format: AMP
@@ -3757,7 +3769,7 @@ tags: {
   attr_lists: "input-common-attr"
   attr_lists: "name-attr"
   mandatory_ancestor: "FORM [method=POST]"
-  spec_url: "https://amp.dev/documentation/components/amp-form"
+  spec_url: "https://amp.dev/documentation/components/amp-form/"
 }
 # 4.10.6 The button element
 tags: {
@@ -3844,7 +3856,7 @@ tags: {
   attrs: { name: "[required]" }
   attrs: { name: "[size]" }
   attr_lists: "name-attr"
-  spec_url: "https://amp.dev/documentation/components/amp-form"
+  spec_url: "https://amp.dev/documentation/components/amp-form/"
 }
 # 4.10.8 The datalist element
 tags: {
@@ -3853,7 +3865,7 @@ tags: {
   html_format: AMP4EMAIL
   html_format: ACTIONS
   tag_name: "DATALIST"
-  spec_url: "https://amp.dev/documentation/components/amp-form"
+  spec_url: "https://amp.dev/documentation/components/amp-form/"
 }
 # 4.10.9 The optgroup element
 tags: {
@@ -3868,7 +3880,7 @@ tags: {
   # <amp-bind>
   attrs: { name: "[disabled]" }
   attrs: { name: "[label]" }
-  spec_url: "https://amp.dev/documentation/components/amp-form"
+  spec_url: "https://amp.dev/documentation/components/amp-form/"
 }
 # 4.10.10 The option element
 tags: {
@@ -3886,7 +3898,7 @@ tags: {
   attrs: { name: "[label]" }
   attrs: { name: "[selected]" }
   attrs: { name: "[value]" }
-  spec_url: "https://amp.dev/documentation/components/amp-form"
+  spec_url: "https://amp.dev/documentation/components/amp-form/"
 }
 # 4.10.11 The textarea element
 tags: {
@@ -3963,7 +3975,7 @@ tags: {
   attrs: { name: "[spellcheck]" }
   attrs: { name: "[wrap]" }
   attr_lists: "name-attr"
-  spec_url: "https://amp.dev/documentation/components/amp-form"
+  spec_url: "https://amp.dev/documentation/components/amp-form/"
 }
 # 4.10.13 The output element
 tags: {
@@ -4077,6 +4089,7 @@ tags: {
   html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amphtml engine v0.js script"
+  descriptive_name: "amphtml engine v0.js script"
   mandatory_alternatives: "amphtml engine v0.js script"
   unique: true
   mandatory_parent: "HEAD"
@@ -4089,17 +4102,18 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "."
       error_message: "contents"
     }
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
 }
 tags: {
   html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amphtml engine v0.js lts script"
+  descriptive_name: "amphtml engine v0.js script"
   mandatory_alternatives: "amphtml engine v0.js script"
   unique: true
   mandatory_parent: "HEAD"
@@ -4112,18 +4126,19 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "."
       error_message: "contents"
     }
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
 }
 tags: {
   html_format: AMP4EMAIL
   html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "amphtml engine v0.js script [AMP4EMAIL,ACTIONS]"
+  descriptive_name: "amphtml engine v0.js script"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -4136,17 +4151,18 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "."
       error_message: "contents"
     }
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
 }
 tags: {
   html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp4ads engine amp4ads-v0.js script"
+  descriptive_name: "amphtml engine amp4ads-v0.js script"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
@@ -4159,12 +4175,12 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "."
       error_message: "contents"
     }
   }
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup"
 }
 # JSON Linked Data
 tags: {
@@ -4174,6 +4190,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "script type=application/ld+json"
+  descriptive_name: "script type=application/ld+json"
   attr_lists: "nonce-attr"
   attrs: {
     name: "type"
@@ -4182,7 +4199,7 @@ tags: {
     dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
@@ -4209,7 +4226,7 @@ tags: {
     value_casei: "application/json"
   }
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
@@ -4221,6 +4238,7 @@ tags: {
   html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "amp-ima-video > script[type=application/json]"
+  descriptive_name: "script type=application/ld+json"
   mandatory_parent: "AMP-IMA-VIDEO"
   attrs: {
     name: "type"
@@ -4229,7 +4247,7 @@ tags: {
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
@@ -4243,10 +4261,11 @@ tags: {
   disabled_by: "transformed"
   tag_name: "NOSCRIPT"
   spec_name: "noscript enclosure for boilerplate"
+  descriptive_name: "noscript enclosure for boilerplate"
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites"
 }
 tags: {
   html_format: AMP
@@ -4254,9 +4273,10 @@ tags: {
   enabled_by: "transformed"
   tag_name: "NOSCRIPT"
   spec_name: "noscript enclosure for boilerplate (transformed)"
+  descriptive_name: "noscript enclosure for boilerplate"
   unique: true
   mandatory_parent: "HEAD"
-  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate?format=websites"
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amp-boilerplate/?format=websites"
 }
 # We allow noscript in the body to contain tags otherwise disallowed by AMP.
 tags: {
@@ -4365,7 +4385,7 @@ attr_lists: {
       protocol: "http"
       protocol: "https"
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
 }
 # In AMP4EMAIL Custom elements require a "src" attribute. Unlike AMP-HTML,
@@ -4387,7 +4407,7 @@ attr_lists: {
     # Furthermore unbalanced delimiters are not allowed.
     # Additionally section mustache delimiters, i.e., {{#, {{^, {{/ are
     # disallowed.
-    blacklisted_value_regex: "__amp_source_origin|"
+    disallowed_value_regex: "__amp_source_origin|"
         "(.|\\s){{|"    # Openning delimiter can only appear at the beginning.
         "}}(.|\\s)|"    # Closing delimiter can only appear at the end.
         "^{{.*[^}][^}]$|"    # Delimiters must be balanced.
@@ -4414,7 +4434,7 @@ attr_lists: {
     # Furthermore unbalanced delimiters are not allowed.
     # Additionally section mustache delimiters, i.e., {{#, {{^, {{/ are
     # disallowed.
-    blacklisted_value_regex: "__amp_source_origin|"
+    disallowed_value_regex: "__amp_source_origin|"
         "(.|\\s){{|"    # Openning delimiter can only appear at the beginning.
         "}}(.|\\s)|"    # Closing delimiter can only appear at the end.
         "^{{.*[^}][^}]$|"    # Delimiters must be balanced.
@@ -4456,9 +4476,11 @@ tags: {  # <amp-img>
   tag_name: "AMP-IMG"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
+  attrs: { name: "crossorigin" }
   attrs: { name: "object-fit" }
   attrs: { name: "object-position" }
   attrs: { name: "placeholder" }
+  attrs: { name: "referrerpolicy" }
   # <amp-bind>
   attrs: { name: "[alt]" }
   attrs: { name: "[attribution]" }
@@ -4467,7 +4489,7 @@ tags: {  # <amp-img>
   attr_lists: "extended-amp-global"
   attr_lists: "lightboxable-elements"
   attr_lists: "mandatory-src-or-srcset"
-  spec_url: "https://amp.dev/documentation/components/amp-img"
+  spec_url: "https://amp.dev/documentation/components/amp-img/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -4487,12 +4509,13 @@ tags: {  # <amp-img>
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "placeholder" }
+  attrs: { name: "referrerpolicy" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-amp4email"
   # <amp-bind>
   attrs: { name: "[alt]" }
   attrs: { name: "[attribution]" }
-  spec_url: "https://amp.dev/documentation/components/amp-img"
+  spec_url: "https://amp.dev/documentation/components/amp-img/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -4509,7 +4532,7 @@ tags: {  # <amp-layout>
   html_format: ACTIONS
   tag_name: "AMP-LAYOUT"
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-layout"
+  spec_url: "https://amp.dev/documentation/components/amp-layout/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -4539,10 +4562,10 @@ tags: {  # <amp-pixel>
       allow_relative: true  # Will be set to false at a future date.
       allow_empty: true
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-pixel"
+  spec_url: "https://amp.dev/documentation/components/amp-pixel/"
   amp_layout {
     defines_default_height: true
     defines_default_width: true
@@ -4563,7 +4586,7 @@ tags: {
     name: "style"
     dispatch_key: NAME_DISPATCH
     mandatory: true
-    blacklisted_value_regex: "!\\s*important"
+    disallowed_value_regex: "!\\s*important"
     css_declaration: {
       name: "display"
       value_casei: "block"
@@ -4610,7 +4633,7 @@ tags: {
   }
   attrs: {
     name: "src"
-    value_regex: "data:image\\/svg\\+xml;charset=utf-8,<svg height=\"\\d+(\\.\\d+)?\" width=\"\\d+(\\.\\d+)?\" xmlns=\"http:\\/\\/www\\.w3\\.org\\/2000\\/svg\" version=\"1\\.1\"\\/>|data:image\\/svg\\+xml;charset=utf-8,<svg height='\\d+(\\.\\d+)?\' width='\\d+(\\.\\d+)?\' xmlns='http:\\/\\/www\\.w3\\.org\\/2000\\/svg' version='1\\.1'\\/>"
+    value_regex: "data:image\\/svg\\+xml;charset=utf-8,\\s*<svg height=\"\\d+(\\.\\d+)?\" width=\"\\d+(\\.\\d+)?\" xmlns=\"http:\\/\\/www\\.w3\\.org\\/2000\\/svg\" version=\"1\\.1\"\\/>|data:image\\/svg\\+xml;charset=utf-8,\\s*<svg height='\\d+(\\.\\d+)?\' width='\\d+(\\.\\d+)?\' xmlns='http:\\/\\/www\\.w3\\.org\\/2000\\/svg' version='1\\.1'\\/>|data:image\\/svg\\+xml;base64,[a-zA-Z0-9+\\/=]+"
     mandatory: true
   }
 }
@@ -4678,10 +4701,10 @@ attr_lists: {
   attrs: {
     name: "id"
     mandatory: true
-    # When updating this blacklisted_value_regex, also update the entry for
+    # When updating this disallowed_value_regex, also update the entry for
     # "id" in $GLOBAL_ATTRS, and also validator-amp-script.protoascii and
     # validator-amp-mustache.protoascii.
-    blacklisted_value_regex: "(^|\\s)("  # Values are space separated
+    disallowed_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
         "__defineGetter__|"
@@ -4809,7 +4832,7 @@ attr_lists: {
   name: "form-name-attr"
   attrs: {
     name: "name"
-    blacklisted_value_regex: "(^|\\s)("
+    disallowed_value_regex: "(^|\\s)("
         "ATTRIBUTE_NODE|"
         "CDATA_SECTION_NODE|"
         "COMMENT_NODE|"
@@ -5161,9 +5184,9 @@ attr_lists: {
   name: "name-attr"
   attrs: {
     name: "name"
-    # When updating this blacklisted_value_regex, also update for
+    # When updating this disallowed_value_regex, also update for
     # mandatory-name-attr.
-    blacklisted_value_regex: "(^|\\s)("  # Values are space separated
+    disallowed_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
         "__defineGetter__|"
@@ -5289,8 +5312,8 @@ attr_lists: {
   attrs: {
     name: "name"
     mandatory: true
-    # When updating this blacklisted_value_regex, also update for name-attr.
-    blacklisted_value_regex: "(^|\\s)("  # Values are space separated
+    # When updating this disallowed_value_regex, also update for name-attr.
+    disallowed_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
         "__defineGetter__|"
@@ -5428,7 +5451,7 @@ attr_lists: {
   attrs: { name: "property" }
   attrs: {
     name: "rel"
-    blacklisted_value_regex: "(^|\\s)("  # Values are space separated
+    disallowed_value_regex: "(^|\\s)("  # Values are space separated
         "canonical|"
         "components|"
         "dns-prefetch|"
@@ -5460,7 +5483,7 @@ attr_lists: {
     # amp-experiment 1.0 implementation.
     disabled_by: "transformed"
     name: "class"
-    blacklisted_value_regex: "(^|\\W)i-amphtml-"
+    disallowed_value_regex: "(^|\\W)i-amphtml-"
   }
   attrs: { name: "dir" }
   attrs: { name: "draggable" }
@@ -5470,10 +5493,10 @@ attr_lists: {
   }
   attrs: {
     name: "id"
-    # When updating this blacklisted_value_regex, also update for
+    # When updating this disallowed_value_regex, also update for
     # mandatory-id-attr, validator-amp-script.protoascii, and
     # validator-amp-mustache.protoascii.
-    blacklisted_value_regex: "(^|\\s)("  # Values are space separated
+    disallowed_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
         "__defineGetter__|"
@@ -5823,7 +5846,7 @@ attr_lists: {
 # error is more specific, ie: more helpful, preferred.
 error_specificity { code: UNKNOWN_CODE specificity: 0 }
 error_specificity { code: MANDATORY_CDATA_MISSING_OR_INCORRECT specificity: 1 }
-error_specificity { code: CDATA_VIOLATES_BLACKLIST specificity: 2 }
+error_specificity { code: CDATA_VIOLATES_DENYLIST specificity: 2 }
 error_specificity { code: NON_WHITESPACE_CDATA_ENCOUNTERED specificity: 3 }
 error_specificity { code: INVALID_JSON_CDATA specificity: 4 }
 error_specificity { code: DISALLOWED_TAG_ANCESTOR specificity: 5 }
@@ -5977,24 +6000,37 @@ error_specificity {
   specificity: 119
 }
 error_specificity {
-  code: INVALID_UTF8
+  code: CSS_SYNTAX_DISALLOWED_ATTR_SELECTOR
   specificity: 120
 }
 error_specificity {
-  code: CSS_EXCESSIVELY_NESTED
+  code: CSS_SYNTAX_DISALLOWED_PSEUDO_CLASS
   specificity: 121
 }
 error_specificity {
-  code: DOCUMENT_SIZE_LIMIT_EXCEEDED
+  code: CSS_SYNTAX_DISALLOWED_PSEUDO_ELEMENT
   specificity: 122
 }
+
 error_specificity {
-  code: VALUE_SET_MISMATCH
+  code: INVALID_UTF8
   specificity: 123
 }
 error_specificity {
-  code: INVALID_DOCTYPE_HTML
+  code: CSS_EXCESSIVELY_NESTED
   specificity: 124
+}
+error_specificity {
+  code: DOCUMENT_SIZE_LIMIT_EXCEEDED
+  specificity: 125
+}
+error_specificity {
+  code: VALUE_SET_MISMATCH
+  specificity: 126
+}
+error_specificity {
+  code: INVALID_DOCTYPE_HTML
+  specificity: 127
 }
 error_specificity {
   code: DEV_MODE_ONLY
@@ -6142,7 +6178,7 @@ error_formats {
   format: "The mandatory text inside tag '%1' is missing or incorrect."
 }
 error_formats {
-  code: CDATA_VIOLATES_BLACKLIST
+  code: CDATA_VIOLATES_DENYLIST
   format: "The text inside tag '%1' contains '%2', which is disallowed."
 }
 error_formats {
@@ -6475,6 +6511,18 @@ error_formats {
 error_formats {
   code: CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE
   format: "CSS syntax error in tag '%1' - disallowed media feature '%2'."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_ATTR_SELECTOR
+  format: "CSS error in tag '%1' - disallowed attribute selector '%2'."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_PSEUDO_CLASS
+  format: "CSS error in tag '%1' - disallowed pseudo class '%2'."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_PSEUDO_ELEMENT
+  format: "CSS error in tag '%1' - disallowed pseudo element '%2'."
 }
 error_formats {
   code: CSS_EXCESSIVELY_NESTED

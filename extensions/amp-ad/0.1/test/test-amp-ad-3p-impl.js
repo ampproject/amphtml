@@ -200,7 +200,7 @@ describes.realWin(
         });
       });
 
-      it('should allow position:fixed with whitelisted ad container', () => {
+      it('should allow position:fixed with an allowed ad container', () => {
         const adContainerElement = win.document.createElement('amp-sticky-ad');
         adContainerElement.style.position = 'fixed';
         win.document.body.appendChild(adContainerElement);
@@ -270,11 +270,11 @@ describes.realWin(
         });
 
         it('should noop pause', () => {
-          expect(() => ad3p.pauseCallback()).to.not.throw;
+          expect(() => ad3p.pauseCallback()).to.not.throw();
         });
 
         it('should noop resume', () => {
-          expect(() => ad3p.resumeCallback()).to.not.throw;
+          expect(() => ad3p.resumeCallback()).to.not.throw();
         });
       });
 

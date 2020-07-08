@@ -39,7 +39,7 @@ export const UrlReplacementPolicy = {
  * @param {string|undefined} options.expr Dot-syntax reference to subdata of JSON result.
  *     to return. If not specified, entire JSON result is returned.
  * @param {UrlReplacementPolicy|undefined} options.urlReplacement If ALL, replaces all URL
- *     vars. If OPT_IN, replaces whitelisted URL vars. Otherwise, don't expand.
+ *     vars. If OPT_IN, replaces allowlisted URL vars. Otherwise, don't expand.
  * @param {boolean|undefined} options.refresh Forces refresh of browser cache.
  * @param {string|undefined} options.token Auth token that forces a POST request.
  * @param {string|undefined} options.xssiPrefix Prefix to optionally
@@ -90,7 +90,7 @@ export function batchFetchJsonFor(
  * fetch.
  * @param {!Element} element
  * @param {!UrlReplacementPolicy} replacement If ALL, replaces all URL
- *     vars. If OPT_IN, replaces whitelisted URL vars. Otherwise, don't expand.
+ *     vars. If OPT_IN, replaces allowlisted URL vars. Otherwise, don't expand.
  * @param {boolean} refresh Forces refresh of browser cache.
  * @return {!Promise<!FetchRequestDef>}
  */
@@ -108,7 +108,7 @@ export function requestForBatchFetch(element, replacement, refresh) {
     // Throw user error if this element is performing URL substitutions
     // without the soon-to-be-required opt-in (#12498).
     if (replacement == UrlReplacementPolicy.OPT_IN) {
-      const invalid = urlReplacements.collectUnwhitelistedVarsSync(element);
+      const invalid = urlReplacements.collectDisallowedVarsSync(element);
       if (invalid.length > 0) {
         throw user().createError(
           'URL variable substitutions in CORS ' +

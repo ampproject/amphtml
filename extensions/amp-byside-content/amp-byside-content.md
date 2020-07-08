@@ -39,6 +39,7 @@ The `width` and `height` attributes determine the aspect ratio of the embedded B
 <amp-byside-content
   data-webcare-id="D6604AE5D0"
   data-label="amp-responsive"
+  data-webcare-zone="we2"
   data-lang="en"
   width="1024"
   height="500"
@@ -57,6 +58,10 @@ The `width` and `height` attributes determine the aspect ratio of the embedded B
   <tr>
     <td width="40%"><strong>data-label (required)</strong></td>
     <td>The content label as seen in your BySide account.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-webcare-zone</strong></td>
+    <td>The webcare zone property, as specified in the BySide customer account geographic zone. Defaults to main zone ("we1").</td>
   </tr>
   <tr>
     <td width="40%"><strong>data-lang</strong></td>

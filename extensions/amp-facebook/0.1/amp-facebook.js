@@ -79,6 +79,9 @@ class AmpFacebook extends AMP.BaseElement {
   layoutCallback() {
     const iframe = getIframe(this.win, this.element, 'facebook');
     this.applyFillContent(iframe);
+    if (this.element.hasAttribute('data-allowfullscreen')) {
+      iframe.setAttribute('allowfullscreen', 'true');
+    }
     // Triggered by context.updateDimensions() inside the iframe.
     listenFor(
       iframe,

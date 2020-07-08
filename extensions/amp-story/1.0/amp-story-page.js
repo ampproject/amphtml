@@ -69,6 +69,7 @@ import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {getData, listen} from '../../../src/event-helper';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
+import {getLocalizationService} from './amp-story-localization-service';
 import {getLogEntries} from './logging';
 import {getMediaPerformanceMetricsService} from './media-performance-metrics-service';
 import {getMode} from '../../../src/mode';
@@ -472,7 +473,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   pause_() {
     this.advancement_.stop();
 
-    this.stopMeasuringVideoPerformance_();
+    this.stopMeasuringAllVideoPerformance_();
     this.stopListeningToVideoEvents_();
     this.toggleErrorMessage_(false);
     this.togglePlayMessage_(false);
@@ -504,8 +505,14 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     if (this.isActive()) {
       registerAllPromise.then(() => {
-        this.advancement_.start();
-        this.startMeasuringVideoPerformance_();
+        this.signals()
+          .whenSignal(CommonSignals.LOAD_END)
+          .then(() => {
+            if (this.state_ == PageState.PLAYING) {
+              this.advancement_.start();
+            }
+          });
+        this.startMeasuringAllVideoPerformance_();
         this.preloadAllMedia_()
           .then(() => this.startListeningToVideoEvents_())
           .then(() => this.playAllMedia_());
@@ -530,9 +537,11 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.element.getAttribute('auto-advance-after');
     const audioEl = upgradeBackgroundAudio(this.element, loop);
     if (audioEl) {
-      this.mediaPoolPromise_.then((mediaPool) => {
-        this.registerMedia_(mediaPool, dev().assertElement(audioEl));
-      });
+      this.mediaPoolPromise_.then((mediaPool) =>
+        this.registerMedia_(mediaPool, dev().assertElement(audioEl)).then(() =>
+          mediaPool.preload(dev().assertElement(audioEl))
+        )
+      );
     }
     this.muteAllMedia();
     this.getViewport().onResize(
@@ -951,7 +960,9 @@ export class AmpStoryPage extends AMP.BaseElement {
                   }
 
                   // Error was expected, don't send the performance metrics.
-                  this.stopMeasuringVideoPerformance_(false /** sendMetrics */);
+                  this.stopMeasuringAllVideoPerformance_(
+                    false /** sendMetrics */
+                  );
                   this.togglePlayMessage_(true);
                 });
               }
@@ -1104,14 +1115,20 @@ export class AmpStoryPage extends AMP.BaseElement {
       return Promise.resolve();
     } else {
       const parentEl = mediaEl.parentElement;
-      let layoutPromise = Promise.resolve();
+      let promise = Promise.resolve();
       if (
         parentEl.tagName === 'AMP-VIDEO' ||
-        parentEl.tagName === 'AMP-AUDIO'
+        (parentEl.tagName === 'AMP-AUDIO' &&
+          parentEl.getAttribute('layout') !== Layout.NODISPLAY)
       ) {
-        layoutPromise = parentEl.signals().whenSignal(CommonSignals.LOAD_END);
+        promise = parentEl.signals().whenSignal(CommonSignals.LOAD_END);
+      } else if (
+        parentEl.tagName === 'AMP-AUDIO' &&
+        parentEl.getAttribute('layout') === Layout.NODISPLAY
+      ) {
+        promise = parentEl.signals().whenSignal(CommonSignals.BUILT);
       }
-      return layoutPromise.then(() => {
+      return promise.then(() => {
         mediaPool.register(
           /** @type {!./media-pool.DomElementDef} */ (mediaEl)
         );
@@ -1226,7 +1243,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   emitProgress_(progress) {
     // Don't emit progress for ads, since the progress bar is hidden.
-    if (this.isAd()) {
+    // Don't emit progress for inactive pages, because race conditions.
+    if (this.isAd() || this.state_ === PageState.NOT_ACTIVE) {
       return;
     }
 
@@ -1487,17 +1505,28 @@ export class AmpStoryPage extends AMP.BaseElement {
    * Has to be called directly before playing the video.
    * @private
    */
-  startMeasuringVideoPerformance_() {
+  startMeasuringAllVideoPerformance_() {
     if (!this.mediaPerformanceMetricsService_.isPerformanceTrackingOn()) {
       return;
     }
 
-    this.performanceTrackedVideos_ = /** @type {!Array<!HTMLMediaElement>} */ (this.getAllVideos_());
-    for (let i = 0; i < this.performanceTrackedVideos_.length; i++) {
-      this.mediaPerformanceMetricsService_.startMeasuring(
-        this.performanceTrackedVideos_[i]
-      );
+    const videoEls = /** @type {!Array<!HTMLMediaElement>} */ (this.getAllVideos_());
+    for (let i = 0; i < videoEls.length; i++) {
+      this.startMeasuringVideoPerformance_(videoEls[i]);
     }
+  }
+
+  /**
+   * @param {!HTMLMediaElement} videoEl
+   * @private
+   */
+  startMeasuringVideoPerformance_(videoEl) {
+    if (!this.mediaPerformanceMetricsService_.isPerformanceTrackingOn()) {
+      return;
+    }
+
+    this.performanceTrackedVideos_.push(videoEl);
+    this.mediaPerformanceMetricsService_.startMeasuring(videoEl);
   }
 
   /**
@@ -1506,7 +1535,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @param {boolean=} sendMetrics
    * @private
    */
-  stopMeasuringVideoPerformance_(sendMetrics = true) {
+  stopMeasuringAllVideoPerformance_(sendMetrics = true) {
     if (!this.mediaPerformanceMetricsService_.isPerformanceTrackingOn()) {
       return;
     }
@@ -1529,7 +1558,10 @@ export class AmpStoryPage extends AMP.BaseElement {
     const videoEls = this.getAllVideos_();
 
     if (videoEls.length) {
-      this.debounceToggleLoadingSpinner_(true);
+      const alreadyPlaying = videoEls.some((video) => video.currentTime != 0);
+      if (!alreadyPlaying) {
+        this.debounceToggleLoadingSpinner_(true);
+      }
     }
 
     Array.prototype.forEach.call(videoEls, (videoEl) => {
@@ -1592,6 +1624,13 @@ export class AmpStoryPage extends AMP.BaseElement {
           .then(() => this.preloadMedia_(mediaPool, videoEl))
           .then((poolVideoEl) => {
             if (!this.storeService_.get(StateProperty.PAUSED_STATE)) {
+              this.startMeasuringVideoPerformance_(poolVideoEl);
+
+              // Restart video event listeners with the new visible video. This
+              // fixes the loading indicator on the first story page.
+              this.stopListeningToVideoEvents_();
+              this.startListeningToVideoEvents_();
+
               this.playMedia_(mediaPool, poolVideoEl);
             }
             if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
@@ -1638,19 +1677,17 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   buildAndAppendPlayMessage_() {
-    const localizationService = Services.localizationService(this.win);
-
     this.playMessageEl_ = buildPlayMessageElement(this.element);
     const labelEl = this.playMessageEl_.querySelector(
       '.i-amphtml-story-page-play-label'
     );
-    labelEl.textContent = localizationService.getLocalizedString(
-      LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO
-    );
+    labelEl.textContent = getLocalizationService(
+      this.element
+    ).getLocalizedString(LocalizedStringId.AMP_STORY_PAGE_PLAY_VIDEO);
 
     this.playMessageEl_.addEventListener('click', () => {
       this.togglePlayMessage_(false);
-      this.startMeasuringVideoPerformance_();
+      this.startMeasuringAllVideoPerformance_();
       this.mediaPoolPromise_
         .then((mediaPool) => mediaPool.blessAll())
         .then(() => this.playAllMedia_());
@@ -1687,15 +1724,13 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   buildAndAppendErrorMessage_() {
-    const localizationService = Services.localizationService(this.win);
-
     this.errorMessageEl_ = buildErrorMessageElement(this.element);
     const labelEl = this.errorMessageEl_.querySelector(
       '.i-amphtml-story-page-error-label'
     );
-    labelEl.textContent = localizationService.getLocalizedString(
-      LocalizedStringId.AMP_STORY_PAGE_ERROR_VIDEO
-    );
+    labelEl.textContent = getLocalizationService(
+      this.element
+    ).getLocalizedString(LocalizedStringId.AMP_STORY_PAGE_ERROR_VIDEO);
 
     this.mutateElement(() => this.element.appendChild(this.errorMessageEl_));
   }
@@ -1748,7 +1783,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
       const openLabel =
         (openLabelAttr && openLabelAttr.trim()) ||
-        Services.localizationService(this.win).getLocalizedString(
+        getLocalizationService(this.element).getLocalizedString(
           LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
         );
 

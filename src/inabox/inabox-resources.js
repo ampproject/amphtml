@@ -198,6 +198,7 @@ export class InaboxResources {
    * @private
    */
   doPass_() {
+    const now = Date.now();
     dev().fine(TAG, 'doPass');
     // measure in a batch
     this.resources_.forEach((resource) => {
@@ -212,6 +213,7 @@ export class InaboxResources {
         resource.getState() === ResourceState.READY_FOR_LAYOUT &&
         resource.isDisplayed()
       ) {
+        resource.layoutScheduled(now);
         resource.startLayout();
       }
     });
@@ -253,6 +255,11 @@ export class InaboxResources {
     if (observer) {
       observer.observe(element);
     }
+  }
+
+  /** @override */
+  getSlowElementRatio() {
+    return 0;
   }
 }
 

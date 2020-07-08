@@ -37,7 +37,7 @@ const PATHS_TO_IGNORE = [
   path.resolve(ROOT_DIR, 'test/'),
 ];
 
-const WINDOW_PROPERTIES = ['win', 'window', 'global', 'self'];
+const WINDOW_PROPERTIES = ['win', 'window', 'global', 'self', 'globalThis'];
 
 module.exports = function (context) {
   /**

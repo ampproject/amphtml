@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
 const log = require('fancy-log');
 const {
@@ -27,6 +28,12 @@ const {
   getLocalPathFromExtension,
   localFileToCachePath,
 } = require('./helpers');
+const {
+  setupAnalyticsHandler,
+  getAnalyticsMetrics,
+} = require('./analytics-handler');
+const {cyan, green} = require('ansi-colors');
+const {setupAdRequestHandler} = require('./ads-handler');
 
 // Require Puppeteer dynamically to prevent throwing error in Travis
 let puppeteer;
@@ -74,30 +81,6 @@ const setupMeasurement = (page) =>
       entryTypes: ['largest-contentful-paint'],
     });
   });
-
-/**
- * Matches intercepted request with special analytics parameter
- * and records first outgoing analytics request, using callback.
- * Abort all requests, to not ping real servers.
- *
- * @param {Request} interceptedRequest
- * @param {string} analyticsParam
- * @param {!Function} setEndTimeCallback
- * @return {!Promise<boolean>}
- */
-async function handleAnalyticsRequests(
-  interceptedRequest,
-  analyticsParam,
-  setEndTimeCallback
-) {
-  const interceptedUrl = interceptedRequest.url();
-  if (interceptedUrl.includes(analyticsParam)) {
-    setEndTimeCallback(Date.now());
-    interceptedRequest.abort();
-    return true;
-  }
-  return false;
-}
 
 /**
  * Intecepts requests for default extensions made by runtime,
@@ -219,37 +202,25 @@ function setupDefaultHandlers(handlersList, version) {
  * @param {?Object} handlerOptions
  * @param {!Puppeteer.page} page
  * @param {!function} resolve
+ * @param {string} version
  */
 async function setupAdditionalHandlers(
   handlersList,
   handlerOptions,
   page,
-  resolve
+  resolve,
+  version
 ) {
   switch (handlerOptions.handlerName) {
+    case 'adsHandler':
+      setupAdRequestHandler(handlersList, version);
+      setupAnalyticsHandler(handlersList, handlerOptions, resolve);
+      break;
     case 'analyticsHandler':
-      // Set up timing
-      Object.assign(handlerOptions, {'startTime': Date.now()});
-      handlersList.push((interceptedRequest) =>
-        handleAnalyticsRequests(
-          interceptedRequest,
-          Object.keys(handlerOptions.extraUrlParam)
-            .map((key) => `${key}=${handlerOptions.extraUrlParam[key]}`)
-            .toString(),
-          (endTime) => {
-            if (!handlerOptions.endTime) {
-              Object.assign(handlerOptions, {
-                endTime,
-                'timeout': 0,
-              });
-              // Resolve and short circuit setTimeout
-              resolve();
-            }
-          }
-        )
-      );
+      setupAnalyticsHandler(handlersList, handlerOptions, resolve);
       break;
     case 'defaultHandler':
+    default:
       await setupMeasurement(page);
       break;
   }
@@ -285,33 +256,13 @@ function startRequestListener(handlersList, page) {
  */
 async function addHandlerMetric(handlerOptions, page) {
   switch (handlerOptions.handlerName) {
+    case 'adsHandler':
     case 'analyticsHandler':
-      return getAnalyticsMetric(handlerOptions);
+      return getAnalyticsMetrics(handlerOptions);
     case 'defaultHandler':
+    default:
       return await readMetrics(page);
   }
-}
-
-/**
- * If reqest didn't fire, don't include any value for
- * analyticsRequest.
- *
- * @param {?Object} analyticsHandlerOptions
- * @return {!Object}
- */
-function getAnalyticsMetric(analyticsHandlerOptions) {
-  const {endTime, startTime} = analyticsHandlerOptions;
-  const analyticsMetric = {};
-  // If there is no end time, that means that request didn't fire.
-  let requestsFailed = 0;
-  if (!endTime) {
-    requestsFailed++;
-  } else {
-    analyticsMetric['analyticsRequest'] = endTime - startTime;
-  }
-  // `percentRequestsFailed` because we take the mean rather than sum
-  analyticsMetric['percentRequestsFailed'] = requestsFailed;
-  return analyticsMetric;
 }
 
 /**
@@ -349,6 +300,7 @@ function writeMetrics(url, version, metrics) {
 async function measureDocument(url, version, config) {
   const browser = await puppeteer.launch({
     headless: config.headless,
+    devtools: config.devtools,
     args: [
       '--allow-file-access-from-files',
       '--enable-blink-features=LayoutInstabilityAPI',
@@ -369,7 +321,8 @@ async function measureDocument(url, version, config) {
     handlersList,
     handlerOptionsForUrl,
     page,
-    resolve
+    resolve,
+    version
   );
   startRequestListener(handlersList, page);
   try {
@@ -419,10 +372,20 @@ async function measureDocuments(urls, config) {
     return Math.floor(secondsPerTask * (tasks.length - i));
   }
 
+  log(
+    green('Taking performance measurements'),
+    cyan(tasks.length),
+    green('times...')
+  );
+
   // Excecute the tasks serially
   let i = 0;
   for (const task of tasks) {
-    log(`Progress: ${i++}/${tasks.length}. ${timeLeft()} seconds left.`);
+    if (!argv.quiet) {
+      log(`Progress: ${i++}/${tasks.length}. ${timeLeft()} seconds left.`);
+    } else {
+      process.stdout.write('.');
+    }
     await task();
   }
 }

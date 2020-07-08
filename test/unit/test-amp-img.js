@@ -17,11 +17,12 @@
 import {AmpImg, installImg} from '../../builtins/amp-img';
 import {BaseElement} from '../../src/base-element';
 import {BrowserController} from '../../testing/test-helper';
-import {Layout, LayoutPriority} from '../../src/layout';
+import {Layout, LayoutPriority, applyStaticLayout} from '../../src/layout';
 import {Services} from '../../src/services';
 import {createCustomEvent} from '../../src/event-helper';
+import {createElementWithAttributes} from '../../src/dom';
 import {createIframePromise} from '../../testing/iframe';
-import {toggleExperiment} from '../../src/experiments';
+import {toArray} from '../../src/types';
 
 describes.sandboxed('amp-img', {}, (env) => {
   let sandbox;
@@ -61,8 +62,8 @@ describes.sandboxed('amp-img', {}, (env) => {
     }
 
     if (children != null) {
-      for (const key in children) {
-        img.appendChild(children[key]);
+      for (let i = 0; i < children.length; i++) {
+        img.appendChild(children[i]);
       }
     }
     return Promise.resolve(fixture.addElement(img));
@@ -219,6 +220,18 @@ describes.sandboxed('amp-img', {}, (env) => {
     expect(img.getAttribute('sizes')).to.equal(
       '(max-width: 320px) 640px, 100vw'
     );
+  });
+
+  it('should propagate crossorigin attribute', () => {
+    return getImg({
+      src: '/examples/img/sample.jpg',
+      width: 320,
+      height: 240,
+      crossorigin: 'anonymous',
+    }).then((ampImg) => {
+      const img = ampImg.querySelector('img');
+      expect(img.getAttribute('crossorigin')).to.equal('anonymous');
+    });
   });
 
   describe('#fallback on initial load', () => {
@@ -468,10 +481,6 @@ describes.sandboxed('amp-img', {}, (env) => {
   });
 
   describe('blurred image placeholder', () => {
-    beforeEach(() => {
-      toggleExperiment(window, 'blurry-placeholder', true, true);
-    });
-
     /**
      * Creates an amp-img with an image child that could potentially be a
      * blurry placeholder.
@@ -484,6 +493,8 @@ describes.sandboxed('amp-img', {}, (env) => {
     function getImgWithBlur(addPlaceholder, addBlurClass) {
       const el = document.createElement('amp-img');
       const img = document.createElement('img');
+      el.setAttribute('src', '/examples/img/sample.jpg');
+      img.src = 'data:image/svg+xml;charset=utf-8,%3Csvg%3E%3C/svg%3E';
       if (addPlaceholder) {
         img.setAttribute('placeholder', '');
         el.getPlaceholder = () => img;
@@ -536,6 +547,49 @@ describes.sandboxed('amp-img', {}, (env) => {
       el = impl.element;
       img = el.firstChild;
       expect(impl.togglePlaceholder).to.have.been.calledWith(false);
+    });
+
+    it('does not interfere with SSR img creation', () => {
+      const impl = getImgWithBlur(true, true);
+      const ampImg = impl.element;
+      ampImg.setAttribute('i-amphtml-ssr', '');
+      impl.buildCallback();
+      impl.layoutCallback();
+
+      expect(ampImg.querySelector('img[src*="sample.jpg"]')).to.exist;
+      expect(ampImg.querySelector('img[src*="image/svg+xml"]')).to.exist;
+    });
+
+    it('does not interfere with SSR img before placeholder', () => {
+      const impl = getImgWithBlur(true, true);
+      const ampImg = impl.element;
+      ampImg.setAttribute('i-amphtml-ssr', '');
+
+      const img = document.createElement('img');
+      img.src = ampImg.getAttribute('src');
+      ampImg.insertBefore(img, impl.getPlaceholder());
+
+      impl.buildCallback();
+      impl.layoutCallback();
+
+      expect(ampImg.querySelector('img[src*="sample.jpg"]')).to.exist;
+      expect(ampImg.querySelector('img[src*="image/svg+xml"]')).to.exist;
+    });
+
+    it('does not interfere with SSR img after placeholder', () => {
+      const impl = getImgWithBlur(true, true);
+      const ampImg = impl.element;
+      ampImg.setAttribute('i-amphtml-ssr', '');
+
+      const img = document.createElement('img');
+      img.src = ampImg.getAttribute('src');
+      ampImg.appendChild(img);
+
+      impl.buildCallback();
+      impl.layoutCallback();
+
+      expect(ampImg.querySelector('img[src*="sample.jpg"]')).to.exist;
+      expect(ampImg.querySelector('img[src*="image/svg+xml"]')).to.exist;
     });
   });
 
@@ -840,6 +894,117 @@ describes.sandboxed('amp-img', {}, (env) => {
               width: 80,
               height: 80,
             });
+          });
+      });
+
+      it('SSR sizer does not interfere with img creation', () => {
+        let ampImg;
+        const parentDiv = fixture.doc.getElementById('parent');
+        parentDiv.setAttribute('style', 'width: 80px; height: 80px');
+
+        // Hack so we don't duplicate intrinsic's layout code here.
+        const tmp = createElementWithAttributes(fixture.doc, 'div', {
+          src: '/examples/img/sample.jpg', // 641 x 481
+          width: 800,
+          height: 600,
+          layout: 'intrinsic',
+        });
+        applyStaticLayout(tmp);
+        const attributes = {
+          'i-amphtml-ssr': '',
+        };
+        for (let i = 0; i < tmp.attributes.length; i++) {
+          attributes[tmp.attributes[i].name] = tmp.attributes[i].value;
+        }
+
+        return getImg(attributes, toArray(tmp.children))
+          .then((image) => {
+            ampImg = image;
+            return browser.waitForElementLayout('amp-img');
+          })
+          .then(() => {
+            expect(ampImg.querySelector('img[src*="sample.jpg"]')).to.exist;
+            expect(ampImg.querySelector('img[src*="image/svg+xml"]')).to.exist;
+          });
+      });
+
+      it('SSR sizer does not interfere with SSR img before', () => {
+        let ampImg;
+        const parentDiv = fixture.doc.getElementById('parent');
+        parentDiv.setAttribute('style', 'width: 80px; height: 80px');
+
+        // Hack so we don't duplicate intrinsic's layout code here.
+        const tmp = createElementWithAttributes(fixture.doc, 'div', {
+          src: '/examples/img/sample.jpg', // 641 x 481
+          width: 800,
+          height: 600,
+          layout: 'intrinsic',
+        });
+        applyStaticLayout(tmp);
+        const attributes = {
+          'i-amphtml-ssr': '',
+        };
+        for (let i = 0; i < tmp.attributes.length; i++) {
+          attributes[tmp.attributes[i].name] = tmp.attributes[i].value;
+        }
+
+        const children = toArray(tmp.children);
+        children.unshift(
+          createElementWithAttributes(fixture.doc, 'img', {
+            decoding: 'async',
+            class: 'i-amphtml-fill-content i-amphtml-replaced-content',
+            src: tmp.getAttribute('src'),
+          })
+        );
+
+        return getImg(attributes, children)
+          .then((image) => {
+            ampImg = image;
+            return browser.waitForElementLayout('amp-img');
+          })
+          .then(() => {
+            expect(ampImg.querySelector('img[src*="sample.jpg"]')).to.exist;
+            expect(ampImg.querySelector('img[src*="image/svg+xml"]')).to.exist;
+          });
+      });
+
+      it('SSR sizer does not interfere with SSR img after', () => {
+        let ampImg;
+        const parentDiv = fixture.doc.getElementById('parent');
+        parentDiv.setAttribute('style', 'width: 80px; height: 80px');
+
+        // Hack so we don't duplicate intrinsic's layout code here.
+        const tmp = createElementWithAttributes(fixture.doc, 'div', {
+          src: '/examples/img/sample.jpg', // 641 x 481
+          width: 800,
+          height: 600,
+          layout: 'intrinsic',
+        });
+        applyStaticLayout(tmp);
+        const attributes = {
+          'i-amphtml-ssr': '',
+        };
+        for (let i = 0; i < tmp.attributes.length; i++) {
+          attributes[tmp.attributes[i].name] = tmp.attributes[i].value;
+        }
+
+        const children = toArray(tmp.children);
+        children.push(
+          createElementWithAttributes(fixture.doc, 'img', {
+            decoding: 'async',
+            class: 'i-amphtml-fill-content i-amphtml-replaced-content',
+            src: tmp.getAttribute('src'),
+          })
+        );
+
+        return getImg(attributes, children)
+          .then((image) => {
+            ampImg = image;
+            return browser.waitForElementLayout('amp-img');
+          })
+          .then(() => {
+            expect(ampImg.querySelector('img[src*="sample.jpg"]')).to.exist;
+            expect(ampImg.querySelector('img[src*="image/svg+xml"]')).to.exist;
           });
       });
     });

@@ -82,24 +82,25 @@ If the resource requested by the `amp-img` component fails to load, the space wi
 
 #### Example: Specifying a fallback image
 
-In the following example, if the browser doesn't support WebP, the fallback JPG image displays:
+In the following example, if the browser cannot load the image, it'll display the fallback image instead (here we're using an inline SVG as fallback):
 
 [example preview="inline" playground="true"]
 
 ```html
 <amp-img
-  alt="Mountains"
+  alt="Misty road"
   width="550"
   height="368"
-  src="{{server_for_email}}/static/inline-examples/images/mountains.webp"
+  src="image-does-not-exist.jpg"
 >
   <amp-img
-    alt="Mountains"
+    alt="Misty road"
     fallback
     width="550"
     height="368"
-    src="{{server_for_email}}/static/inline-examples/images/mountains.jpg"
-  ></amp-img>
+    src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSAiaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmlld0JveD0iMSAxIDggNCI+PGltYWdlIGZpbHRlcj0idXJsKCNibHVyKSIgd2lkdGg9IjEwIiBoZWlnaHQ9IjYiIHhsaW5rOmhyZWY9ImRhdGE6aW1hZ2UvcG5nO2Jhc2U2NCxpVkJPUncwS0dnb0FBQUFOU1VoRVVnQUFBQW9BQUFBR0NBWUFBQUQ2OEEvR0FBQUFBWE5TUjBJQXJzNGM2UUFBQUVSbFdFbG1UVTBBS2dBQUFBZ0FBWWRwQUFRQUFBQUJBQUFBR2dBQUFBQUFBNkFCQUFNQUFBQUJBQUVBQUtBQ0FBUUFBQUFCQUFBQUNxQURBQVFBQUFBQkFBQUFCZ0FBQUFEK2lGWDBBQUFBcjBsRVFWUUlIVDJQU1FxRlFBeEVYN2VpNG9BYkVRV3Y0TVlMZUhLdjQwSVV3UW5uL25ZdmZxQ29JcWxRaVVpU1JQbStqNVFTei9PNDd4dkhjUmlHZ2I3dnNTeUw2N3FRNy91YW9XNHN5L0kzYXYwOGp6SHlsZFNHZmQrcDY5cXcxbTNia21VWlFnalQweXlpS0ZKNlE4ZVdaVWxSRklSaGFLS2JwdUU4VCtaNVJyaXVxejZna2VjNVZWVXhqaVBUTkpremp1TmcyemJzN3htQ0lDQk5VK0k0cHVzNmxGS3M2NHB0MjBicnhCODZ4VmdkUHdJV2NRQUFBQUJKUlU1RXJrSmdnZz09Ii8+PGZpbHRlciBpZD0iYmx1ciI+PGZlR2F1c3NpYW5CbHVyIHN0ZERldmlhdGlvbj0iLjUiIC8+PC9maWx0ZXI+PC9zdmc+"
+  >
+  </amp-img>
 </amp-img>
 ```
 
@@ -207,7 +208,7 @@ If you want your image to scale as the window is resized but up to a maximum wid
 
 #### The difference between responsive and intrinsic layout
 
-Both the `responsive` and `intrinsic` layouts create an image that will scale automatically. The main difference is that the `intrinsic` layout uses an SVG image as its scaling element. This will make it behave in the same way as a standard HTML image while retaining the benefit of the browser knowing the image size on initial layout. The `intrinsic` layout will have an intrinsic size and will inflate a floated `div` until it reaches either the image size defined by the width and height attributes passed to the amp-img (not by the natural size of the image) or a CSS constraint such as `max-width`. or a CSS constraint like `max-width`. The `responsive` layout will render 0x0 in a floated `div` because it takes its size from the parent, which has no natural size when floated.
+Both the `responsive` and `intrinsic` layouts create an image that will scale automatically. The main difference is that the `intrinsic` layout uses an SVG image as its scaling element. This will make it behave in the same way as a standard HTML image while retaining the benefit of the browser knowing the image size on initial layout. The `intrinsic` layout will have an intrinsic size and will inflate a floated `div` until it reaches either the image size defined by the width and height attributes passed to the amp-img (not by the natural size of the image) or a CSS constraint such as `max-width`. The `responsive` layout will render 0x0 in a floated `div` because it takes its size from the parent, which has no natural size when floated.
 
 #### Setting a fixed sized image
 

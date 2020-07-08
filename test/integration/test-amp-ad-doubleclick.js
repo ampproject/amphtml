@@ -19,7 +19,6 @@ import {createFixtureIframe, poll, pollForLayout} from '../../testing/iframe';
 describe
   .configure()
   .enableIe()
-  .retryOnSaucelabs()
   .run('Rendering of one ad', () => {
     let fixture;
     let beforeHref;

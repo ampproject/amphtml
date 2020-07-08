@@ -188,17 +188,6 @@
       text-decoration: underline;
     }
 
-    viewer[data-show-container="dynamic"] #container-dynamic {
-      visibility: visible;
-      -webkit-transform: none;
-      -ms-transform: none;
-      transform: none;
-    }
-
-    viewer[data-show-container="dynamic"] #show-container-dynamic-anchor {
-      text-decoration: underline;
-    }
-
     viewer.natural container {
       overflow-y: hidden;
     }
@@ -230,6 +219,7 @@
       this.startResolve_ = null;
       this.startPromise_ = null;
       this.caps_ = opt_caps || 'a2a,focus-rect,foo,keyboard,swipe,viewerRenderTemplate,iframeScroll';
+      this.receivedMessages = []
 
       this.viewer = document.querySelector('viewer');
       this.header = document.querySelector('header');
@@ -240,6 +230,8 @@
           'allow-popups allow-scripts allow-forms allow-pointer-lock' +
           ' allow-popups-to-escape-sandbox allow-same-origin');
       this.iframe.setAttribute('scrolling', 'yes');
+      this.iframe.setAttribute('height', '800');
+      this.iframe.setAttribute('width', '1200');
       this.viewer.classList.add('natural');
 
       this.visibilityToggle_ = document.getElementById('visibilityToggle');
@@ -436,6 +428,7 @@
 
     Viewer.prototype.processRequest_ = function(name, data, awaitResponse) {
       log(this.id + ': Viewer.prototype.processRequest_', name);
+      this.receivedMessages.push({name, data});
       switch(name) {
         case 'bindReady':
           return Promise.resolve();
@@ -740,21 +733,9 @@
           '9',
           './amp-autocomplete.ssr.html?amp_js_v=0.1',
           false).start();
-      addShowContainer('9');
+      addShowContainer('9'); 
 
-      if (href) {
-        new Viewer(
-            'container-dynamic',
-            'dynamic',
-            addQueryParam(href, 'amp_js_v', '0.1'),
-            true,
-            caps).start();
-        document.getElementById('show-containerdynamic-anchor').hidden = false;
-        addShowContainer('dynamic');
-        showContainer('dynamic');
-      } else {
-        showContainer('1');
-      }
+      showContainer('1');
     }
 
     function addShowContainer(id) {
@@ -800,7 +781,6 @@
       <a class="show-container-anchor" id="show-container7-anchor">Seven</a>
       <a class="show-container-anchor" id="show-container8-anchor">Eight</a>
       <a class="show-container-anchor" id="show-container9-anchor">Nine</a>
-      <a class="show-container-anchor" id="show-containerdynamic-anchor" hidden>Dynamic</a>
       <a>|</a>
       <a id="visibilityToggle">Visible</a>
     </header>
@@ -835,11 +815,6 @@
       </div>
     </container>
     <container id="container7">
-      <div class="wait">
-        Please wait, the AMP doc will appear here...
-      </div>
-    </container>
-    <container id="container-dynamic">
       <div class="wait">
         Please wait, the AMP doc will appear here...
       </div>
