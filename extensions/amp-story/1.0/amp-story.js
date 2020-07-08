@@ -1319,11 +1319,9 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   initializeAltTags_() {
-    const imageTags = scopedQuerySelectorAll(this.element, 'amp-img');
-
-    for (const imageTag of imageTags) {
+    this.element.querySelectorAll('amp-img').forEach((imageTag) => {
       !imageTag.getAttribute('alt') && imageTag.setAttribute('alt', ' ');
-    }
+    });
   }
 
   /**
