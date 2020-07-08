@@ -768,11 +768,11 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
         const clientRect = this.rootEl_.getBoundingClientRect();
         const angle = slice * i + randomInRange(-slice * 0.2, slice * 0.2);
-        const destX = Math.sin(angle) * (clientRect.width / 2 + 20);
-        const destY = Math.cos(angle) * (clientRect.height / 2 + 20);
+        const destX = Math.sin(angle) * (clientRect.width / 2 + 5);
+        const destY = Math.cos(angle) * (clientRect.height / 2 + 5);
         particle.style.transform = `translate(${destX}px, ${destY}px)`;
 
-        particleContent.style.fontSize = randomInRange(40, 60) + 'px';
+        particleContent.style.fontSize = randomInRange(40, 50) + 'px';
         particleContent.style.transform = `rotate(${randomInRange(
           -10,
           10
