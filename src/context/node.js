@@ -117,6 +117,7 @@ export class ContextNode {
         n = n.parentNode;
       }
     }
+    // Only disconnected nodes will return `null` here.
     return null;
   }
 
@@ -198,7 +199,7 @@ export class ContextNode {
     this.children = null;
 
     /** @private {boolean} */
-    this.parentOverriden_ = false;
+    this.parentOverridden_ = false;
 
     /** @const @private {function()} */
     this.scheduleDiscover_ = throttleTail(
@@ -227,12 +228,11 @@ export class ContextNode {
    * @param {!ContextNode|!Node|null} parent
    */
   setParent(parent) {
-    const parentContext = !parent
-      ? null
-      : parent.nodeType
-      ? ContextNode.get(/** @type {!Node} */ (parent))
-      : /** @type {!ContextNode} */ (parent);
-    this.updateTree_(parentContext, /* parentOverriden */ parent != null);
+    const parentContext =
+      parent && parent.nodeType
+        ? ContextNode.get(/** @type {!Node} */ (parent))
+        : /** @type {?ContextNode} */ (parent);
+    this.updateTree_(parentContext, /* parentOverridden */ parent != null);
   }
 
   /**
@@ -267,7 +267,7 @@ export class ContextNode {
    * @protected Used cross-binary.
    */
   isDiscoverable() {
-    return !this.isRoot && !this.parentOverriden_;
+    return !this.isRoot && !this.parentOverridden_;
   }
 
   /**
@@ -281,16 +281,16 @@ export class ContextNode {
       return;
     }
     const parent = ContextNode.closest(this.node, /* includeSelf */ false);
-    this.updateTree_(parent, /* parentOverriden */ false);
+    this.updateTree_(parent, /* parentOverridden */ false);
   }
 
   /**
    * @param {?ContextNode} parent
-   * @param {boolean} parentOverriden
+   * @param {boolean} parentOverridden
    * @private
    */
-  updateTree_(parent, parentOverriden) {
-    this.parentOverriden_ = parentOverriden;
+  updateTree_(parent, parentOverridden) {
+    this.parentOverridden_ = parentOverridden;
 
     const oldParent = this.parent;
     if (parent != oldParent) {
