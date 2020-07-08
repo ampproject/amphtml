@@ -58,10 +58,11 @@ export const getMockInteractiveData = () => {
 export const addConfigToInteractive = (
   interactive,
   options = 4,
-  correct = undefined
+  correct = undefined,
+  attributes = ['text', 'results-category', 'image']
 ) => {
   for (let i = 0; i < options; i++) {
-    ['text', 'results-category', 'image'].forEach((attr) => {
+    attributes.forEach((attr) => {
       interactive.element.setAttribute(
         `option-${i + 1}-${attr}`,
         `${attr} ${i + 1}`
@@ -92,6 +93,11 @@ class InteractiveTest extends AmpStoryInteractive {
       root.appendChild(newOption);
     }
     return root;
+  }
+
+  /** @override */
+  getInteractiveId_() {
+    return 'id';
   }
 }
 
@@ -322,5 +328,22 @@ describes.realWin(
 
       expect(actionsListenerSpy).to.have.been.calledOnce;
     });
+
+    it('should update the store property correctly', async () => {
+      addConfigToInteractive(ampStoryInteractive, 4, null, ['text']);
+      ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.layoutCallback();
+      await ampStoryInteractive.getOptionElements()[2].click();
+
+      expect(
+        storeService.get(StateProperty.INTERACTIVE_REACT_STATE)['id']
+      ).to.be.deep.equals({
+        option: {
+          optionIndex: 2,
+          text: 'text 3',
+        },
+        interactiveId: 'id',
+      });
+    }
   }
 );
