@@ -417,11 +417,11 @@ export class ResponsiveState {
   static isInAdSizeOptimizationExperimentBranch_(element) {
     const experimentInfoMap = /** @type {!Object<string,
         !../../../src/experiments.ExperimentInfo>} */ ({
-      [[AD_SIZE_OPTIMIZATION_EXP.branch]]: {
+      [AD_SIZE_OPTIMIZATION_EXP.branch]: {
         isTrafficEligible: () => true,
         branches: [
-          [AD_SIZE_OPTIMIZATION_EXP.control],
-          [AD_SIZE_OPTIMIZATION_EXP.experiment],
+          AD_SIZE_OPTIMIZATION_EXP.control,
+          AD_SIZE_OPTIMIZATION_EXP.experiment,
         ],
       },
     });
@@ -444,9 +444,9 @@ export class ResponsiveState {
   isInResponsiveHeightFixExperimentBranch_() {
     const experimentInfoMap = /** @type {!Object<string,
         !../../../src/experiments.ExperimentInfo>} */ ({
-      [[MAX_HEIGHT_EXP.branch]]: {
+      [MAX_HEIGHT_EXP.branch]: {
         isTrafficEligible: () => true,
-        branches: [[MAX_HEIGHT_EXP.control], [MAX_HEIGHT_EXP.experiment]],
+        branches: [MAX_HEIGHT_EXP.control, MAX_HEIGHT_EXP.experiment],
       },
     });
     const setExps = randomlySelectUnsetExperiments(
