@@ -344,6 +344,6 @@ describes.realWin(
         },
         interactiveId: 'id',
       });
-    }
+    });
   }
 );
