@@ -417,7 +417,6 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeListenersForDev_();
     this.initializePageIds_();
     this.initializeStoryPlayer_();
-    this.initializeImgAltTags_();
 
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
 
@@ -1310,20 +1309,6 @@ export class AmpStory extends AMP.BaseElement {
     Services.extensionsFor(this.win).installExtensionForDoc(
       this.getAmpDoc(),
       'amp-viewer-integration'
-    );
-  }
-
-  /**
-   * Adds an empty alt tag to amp-img elements if not present.
-   * Prevents screen readers from announcing the img src value.
-   * @private
-   */
-  initializeImgAltTags_() {
-    Array.prototype.forEach.call(
-      this.element.querySelectorAll('amp-img'),
-      (imageTag) => {
-        !imageTag.getAttribute('alt') && imageTag.setAttribute('alt', ' ');
-      }
     );
   }
 

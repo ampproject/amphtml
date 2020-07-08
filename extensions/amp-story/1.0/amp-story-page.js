@@ -361,6 +361,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     );
     this.setPageDescription_();
     this.element.setAttribute('role', 'region');
+    this.initializeImgAltTags_();
   }
 
   /** @private */
@@ -1851,6 +1852,20 @@ export class AmpStoryPage extends AMP.BaseElement {
       }
       this.element.removeAttribute('title');
     }
+  }
+
+  /**
+   * Adds an empty alt tag to amp-img elements if not present.
+   * Prevents screen readers from announcing the img src value.
+   * @private
+   */
+  initializeImgAltTags_() {
+    Array.prototype.forEach.call(
+      this.element.querySelectorAll('amp-img'),
+      (imageTag) => {
+        !imageTag.getAttribute('alt') && imageTag.setAttribute('alt', ' ');
+      }
+    );
   }
 
   /**
