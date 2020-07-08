@@ -505,6 +505,7 @@ export class AmpStoryPlayer {
   updateCurrentIframe_(iframeIdx) {
     this.updateVisibilityState_(iframeIdx, VisibilityState.VISIBLE);
     this.updateIframePosition_(iframeIdx, IframePosition.CURRENT);
+    this.iframes_[iframeIdx].focus();
   }
 
   /**
