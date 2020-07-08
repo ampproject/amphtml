@@ -17,6 +17,7 @@
 import {EmbedMode, parseEmbedMode} from './embed-mode';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
+import {deepEquals} from '../../../src/json';
 import {dev} from '../../../src/log';
 import {hasOwn} from '../../../src/utils/object';
 import {registerServiceBuilder} from '../../../src/service';
@@ -93,6 +94,7 @@ export let InteractiveComponentDef;
  *    hasSidebarState: boolean,
  *    infoDialogState: boolean,
  *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
+ *    interactiveReactState: !Map<string, {option: ?./amp-story-interactive.OptionConfigType, interactiveId: string}>,
  *    mutedState: boolean,
  *    pageAudioState: boolean,
  *    pageHasElementsWithPlaybackState: boolean,
@@ -140,6 +142,8 @@ export const StateProperty = {
   HAS_SIDEBAR_STATE: 'hasSidebarState',
   INFO_DIALOG_STATE: 'infoDialogState',
   INTERACTIVE_COMPONENT_STATE: 'interactiveEmbeddedComponentState',
+  // State of interactive components (polls, quizzes) on the story.
+  INTERACTIVE_REACT_STATE: 'interactiveReactState',
   MUTED_STATE: 'mutedState',
   PAGE_HAS_AUDIO_STATE: 'pageAudioState',
   PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE: 'pageHasElementsWithPlaybackState',
@@ -174,6 +178,7 @@ export const StateProperty = {
 
 /** @const @enum {string} */
 export const Action = {
+  ADD_INTERACTIVE_REACT: 'addInteractiveReact',
   ADD_TO_ACTIONS_ALLOWLIST: 'addToActionsAllowlist',
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
@@ -222,6 +227,8 @@ const stateComparisonFunctions = {
     (old, curr) => old.element !== curr.element || old.state !== curr.state,
   [StateProperty.NAVIGATION_PATH]: (old, curr) => old.length !== curr.length,
   [StateProperty.PAGE_IDS]: (old, curr) => old.length !== curr.length,
+  [StateProperty.INTERACTIVE_REACT_STATE]: (old, curr) =>
+    !deepEquals(old, curr, 3),
 };
 
 /**
@@ -233,6 +240,14 @@ const stateComparisonFunctions = {
  */
 const actions = (state, action, data) => {
   switch (action) {
+    case Action.ADD_INTERACTIVE_REACT:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.INTERACTIVE_REACT_STATE]: {
+          ...state[StateProperty.INTERACTIVE_REACT_STATE],
+          [data['interactiveId']]: data,
+        },
+      });
     case Action.ADD_NEW_PAGE_ID:
       return /** @type {!State} */ ({
         ...state,
@@ -545,6 +560,7 @@ export class AmpStoryStoreService {
       [StateProperty.INTERACTIVE_COMPONENT_STATE]: {
         state: EmbeddedComponentState.HIDDEN,
       },
+      [StateProperty.INTERACTIVE_REACT_STATE]: {},
       [StateProperty.MUTED_STATE]: true,
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
       [StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: false,
