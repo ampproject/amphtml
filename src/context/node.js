@@ -20,9 +20,6 @@ import {pushIfNotExist, removeItem} from '../utils/array';
 import {startsWith} from '../string';
 import {throttleTail} from './scheduler';
 
-// Protection for creating the ContextNode directly. See the constructor.
-const PRIVATE_ONLY = {};
-
 // Properties set on the DOM nodes to track the context state.
 const NODE_PROP = '__AMP_NODE';
 const ASSIGNED_SLOT_PROP = '__AMP_ASSIGNED_SLOT';
@@ -53,7 +50,7 @@ export class ContextNode {
   static get(node) {
     let contextNode = /** @type {!ContextNode|undefined} */ (node[NODE_PROP]);
     if (!contextNode) {
-      contextNode = new ContextNode(node, PRIVATE_ONLY);
+      contextNode = new ContextNode(node);
       if (getMode().localDev || getMode().test) {
         // The `Object.defineProperty({enumerable: false})` helps tests, but
         // hurts performance. So this is only done in a dev/test modes.
@@ -161,11 +158,8 @@ export class ContextNode {
    * Creates the context node and automatically starts the discovery process.
    *
    * @param {!Node} node
-   * @param {*} privateOnly
    */
-  constructor(node, privateOnly) {
-    devAssert(privateOnly === PRIVATE_ONLY);
-
+  constructor(node) {
     /** @const {!Node} */
     this.node = node;
 
