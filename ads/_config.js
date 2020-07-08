@@ -635,6 +635,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'luckyads': {
+    renderStartImplemented: true,
+  },
+
   'mads': {
     prefetch: 'https://eu2.madsone.com/js/tags.js',
   },
