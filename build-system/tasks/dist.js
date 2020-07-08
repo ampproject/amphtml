@@ -129,6 +129,7 @@ async function doDist(extraArgs = {}) {
     fortesting: extraArgs.fortesting || argv.fortesting,
     minify: true,
     watch: argv.watch,
+    sxg: argv.sxg,
   };
   printNobuildHelp();
   printDistHelp(options);
@@ -436,4 +437,5 @@ dist.flags = {
     '  Builds runtime with the EXPERIMENT constant set to true',
   sanitize_vars_for_diff:
     '  Sanitize the output to diff build results. Requires --pseudo_names',
+  sxg: '  Outputs compiled code for the signed exchanges build',
 };
