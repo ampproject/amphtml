@@ -34,7 +34,6 @@ import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkDoubleclickImpl,
   EXPAND_JSON_TARGETING_EXP,
-  RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES,
   getNetworkId,
   getPageviewStateTokensForAdRequest,
   resetLocationQueryParametersForTesting,
