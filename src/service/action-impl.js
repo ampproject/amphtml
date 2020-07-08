@@ -874,7 +874,7 @@ export class ActionService {
     if (Object.keys(detail).length > 0) {
       try {
         event.detail = detail;
-      } catch (e) {}
+      } catch {} // event.detail is readonly
     }
   }
 }
