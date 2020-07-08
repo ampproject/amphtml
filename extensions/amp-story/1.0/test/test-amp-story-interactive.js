@@ -293,42 +293,6 @@ describes.realWin(
       expect(percentages4).to.deep.equal([33, 33, 33]);
     });
 
-    it('should update store service when selecting option with click', async () => {
-      const actionsListenerSpy = env.sandbox.spy();
-      addConfigToInteractive(ampStoryInteractive);
-      ampStoryInteractive.buildCallback();
-      await ampStoryInteractive.layoutCallback();
-      storeService.subscribe(
-        StateProperty.INTERACTIVE_REACT_STATE,
-        actionsListenerSpy
-      );
-
-      await ampStoryInteractive.getOptionElements()[2].click();
-
-      expect(actionsListenerSpy).to.have.been.calledOnce;
-    });
-
-    it('should update store service when getting option selected from backend', async () => {
-      const actionsListenerSpy = env.sandbox.spy();
-      env.sandbox
-        .stub(requestService, 'executeRequest')
-        .resolves(getMockInteractiveData());
-      addConfigToInteractive(ampStoryInteractive);
-      ampStoryInteractive.element.setAttribute(
-        'endpoint',
-        'http://localhost:8000'
-      );
-      storeService.subscribe(
-        StateProperty.INTERACTIVE_REACT_STATE,
-        actionsListenerSpy
-      );
-
-      ampStoryInteractive.buildCallback();
-      await ampStoryInteractive.layoutCallback();
-
-      expect(actionsListenerSpy).to.have.been.calledOnce;
-    });
-
     it('should update the store property correctly', async () => {
       addConfigToInteractive(ampStoryInteractive, 4, null, ['text']);
       ampStoryInteractive.buildCallback();
