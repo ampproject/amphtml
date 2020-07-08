@@ -612,7 +612,7 @@ export class AmpA4A extends AMP.BaseElement {
       user().warn(
         TAG,
         `<${this.element.tagName}> is not allowed to be ` +
-          `placed in elements with position:fixed: ${this.element}`
+          `placed in elements with position: fixed or sticky: ${this.element}`
       );
       return false;
     }
