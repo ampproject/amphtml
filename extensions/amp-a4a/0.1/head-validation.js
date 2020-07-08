@@ -18,6 +18,7 @@ import {Services} from '../../../src/services';
 import {map} from '../../../src/utils/object';
 import {parseExtensionUrl} from '../../../src/service/extension-location';
 import {removeElement} from '../../../src/dom';
+import {urls} from '../../../src/config';
 
 /**
  * @typedef {{
@@ -27,18 +28,26 @@ import {removeElement} from '../../../src/dom';
  */
 export let ValidatedHeadDef;
 
-const FONT_ALLOWLIST = map({
-  'https://cdn.materialdesignicons.com': true,
-  'https://cloud.typography.com': true,
-  'https://fast.fonts.net': true,
-  'https://fonts.googleapis.com': true,
-  'https://maxcdn.bootstrapcdn.com': true,
-  'https://p.typekit.net': true,
-  'https://pro.fontawesome.com': true,
-  'https://use.fontawesome.com': true,
-  'https://use.typekit.net': true,
-});
+// From validator/validator-main.protoascii
+const ALLOWED_FONT_REGEX = new RegExp(
+  'https://cdn\\.materialdesignicons\\.com/' +
+    '([0-9]+\\.?)+/css/materialdesignicons\\.min\\.css|' +
+    'https://cloud\\.typography\\.com/' +
+    '[0-9]*/[0-9]*/css/fonts\\.css|' +
+    'https://fast\\.fonts\\.net/.*|' +
+    'https://fonts\\.googleapis\\.com/css2?\\?.*|' +
+    'https://fonts\\.googleapis\\.com/icon\\?.*|' +
+    'https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|' +
+    'https://maxcdn\\.bootstrapcdn\\.com/font-awesome/' +
+    '([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|' +
+    'https://(use|pro)\\.fontawesome\\.com/releases/v([0-9]+\\.?)+' +
+    '/css/[0-9a-zA-Z-]+\\.css|' +
+    'https://(use|pro)\\.fontawesome\\.com/[0-9a-zA-Z-]+\\.css|' +
+    'https://use\\.typekit\\.net/[\\w\\p{L}\\p{N}_]+\\.css'
+);
 
+// If editing please also change:
+// extensions/amp-a4a/amp-a4a-format.md#allowed-amp-extensions-and-builtins
 const EXTENSION_ALLOWLIST = map({
   'amp-accordion': true,
   'amp-ad-exit': true,
@@ -63,7 +72,9 @@ const EXTENSION_ALLOWLIST = map({
   'amp-video': true,
 });
 
-const EXTENSION_URL_PREFIX = /^https:\/\/cdn\.ampproject.org\/v0\//;
+const EXTENSION_URL_PREFIX = new RegExp(
+  urls.cdn.replace(/\./g, '\\.') + '/v0/'
+);
 
 /**
  * Sanitizes AMPHTML Ad head element and extracts extensions to be installed.
@@ -97,7 +108,7 @@ export function validateHead(win, adElement, head) {
         handleStyle(element);
         break;
       case 'LINK':
-        handleLink(urlService, fonts, images, element);
+        handleLink(fonts, images, element);
         break;
       // Allow these without validation.
       case 'META':
@@ -144,32 +155,31 @@ function handleScript(extensions, script) {
   }
 
   const {src} = script;
-  if (src && EXTENSION_URL_PREFIX.test(src)) {
+  if (EXTENSION_URL_PREFIX.test(src)) {
     const extensionInfo = parseExtensionUrl(src);
     if (EXTENSION_ALLOWLIST[extensionInfo.extensionId]) {
       extensions.push(extensionInfo);
     }
   }
 
-  script.parentElement.removeChild(script);
+  removeElement(script);
 }
 
 /**
  * Collect links that are from allowed font providers or used for image
  * preloading. Remove other <link> elements.
- * @param {!../../../src/service/url-impl.Url} urlService
  * @param {!Array<string>} fonts
  * @param {!Array<string>} images
  * @param {!Element} link
  */
-function handleLink(urlService, fonts, images, link) {
+function handleLink(fonts, images, link) {
   const {href, as, rel} = link;
   if (rel === 'preload' && as === 'image') {
     images.push(href);
     return;
   }
 
-  if (rel === 'stylesheet' && FONT_ALLOWLIST[urlService.parse(href).origin]) {
+  if (rel === 'stylesheet' && ALLOWED_FONT_REGEX.test(href)) {
     fonts.push(href);
     return;
   }

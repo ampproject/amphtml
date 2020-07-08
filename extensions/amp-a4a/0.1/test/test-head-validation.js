@@ -124,7 +124,7 @@ describes.realWin('head validation', {amp: true}, (env) => {
       head.innerHTML = `
         <link rel="preload" href="myFont.woff2" as="font" type="font/woff2">
         <link rel="preload" href="/styles/other.css" as="style">
-        <link rel="preload" href="/some/embed as=embed>
+        <link rel="preload" href="https://example.com/some/embed" as="embed">
       `;
       const validated = validateHead(env.win, adElement, head);
       expect(validated.head.querySelector('link')).not.to.exist;
