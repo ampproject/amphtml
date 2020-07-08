@@ -163,7 +163,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected {?string} */
     this.interactiveId_ = null;
 
-    /** @protected {!./amp-story-request-service.AmpStoryRequestService} */
+    /** @protected {!../../amp-story/1.0/amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = getRequestService(this.win, this.element);
 
     /** @const @protected {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
