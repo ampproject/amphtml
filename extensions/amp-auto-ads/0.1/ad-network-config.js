@@ -15,6 +15,7 @@
  */
 
 import {AdSenseNetworkConfig} from './adsense-network-config';
+import {AlrightNetworkConfig} from './alright-network-config';
 import {DenakopNetworkConfig} from './denakop-network-config';
 import {DoubleclickNetworkConfig} from './doubleclick-network-config';
 import {PingNetworkConfig} from './ping-network-config';
@@ -80,6 +81,9 @@ export function getAdNetworkConfig(type, autoAmpAdsElement) {
   }
   if (type == 'adsense') {
     return new AdSenseNetworkConfig(autoAmpAdsElement);
+  }
+  if (type == 'alright') {
+    return new AlrightNetworkConfig(autoAmpAdsElement);
   }
   if (type == 'denakop') {
     return new DenakopNetworkConfig(autoAmpAdsElement);
