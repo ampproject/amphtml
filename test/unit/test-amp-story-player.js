@@ -370,5 +370,20 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         'Story URL not found in the player: https://example.com/story6.html'
       );
     });
+
+    it.only('signals when player changed story', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      const navigationSpy = env.sandbox.spy();
+      playerEl.addEventListener('navigation', navigationSpy);
+      player.next_();
+      player.previous_();
+      expect(navigationSpy).to.have.been.calledTwice;
+    });
   });
 });
