@@ -107,7 +107,7 @@ The `skuMapUrl` is called on page load. It should be a map of element id's and c
 
 Each configuration corresponds to the sku or skus associated with the button.
 
-To enable a button for rtc add the `subscriptions-google-rtc` attribute. If this attrubte is present the button will be disabled until the skuMapUrl request is completed. Once the skuMap resolved the `subscriptions-google-rtc` attribute will be removed and `subscriptions-google-rtc-set` attrubte added. These attribute may be used for CSS styling, however it is reccomended that the button not be hidden if it will cause a page re-layout when displayed.
+To enable a button for rtc add the `subscriptions-google-rtc` attribute. If this attribute is present the button will be disabled until the skuMapUrl request is completed. Once the skuMap is resolved the `subscriptions-google-rtc` attribute will be removed and `subscriptions-google-rtc-set` attribute added. These attributes may be used for CSS styling, however it is recommended that the button not be hidden if it will cause a page re-layout when displayed.
 
 Note: The `skuMapUrl` can be the same as the local service auth url as the JSON objects do not conflict. If the auth url is cacheable (`max-age=1` is sufficient) this will allow in a single request to the server to resove authentication and mapping.
 
