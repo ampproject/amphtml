@@ -376,7 +376,7 @@ window.parent.postMessage(
 
 ### Post-prompt UI (optional)
 
-You can provide a UI after collecting the initial consent. For example, you can provide a UI for the user to manage their consent (e.g., change their "reject" to "accept"). The post-prompt UI is defined with the `<amp-consent>` JSON configuration object. The `postPromptUI` refers to a child element of `<amp-consent>` by id.
+You can provide a UI after collecting the initial consent. For example, you can provide a UI for the user to manage their consent (e.g., change their "reject" to "accept"). The post-prompt UI is defined with the `<amp-consent>` JSON configuration object. The `postPromptUI` refers to an element by id. If the element is a child element of the `<amp-consent>`, it will be fixed to the bottom of the page same as prompt UIs. You can also inline the `postPromptUI` in the document, but please be aware of the potential layout shift caused by toggling the display of this element.
 
 When defined, the post-prompt UI is shown when all prompt UIs have been hidden, or initially on page load if no prompt UI was triggered.
 

@@ -231,6 +231,10 @@ export class ConsentUI {
       // No prompt UI specified, nothing to do
       return;
     }
+    if (this.isPostPrompt_ && !this.parent_.contains(this.ui_)) {
+      toggle(this.ui_, true);
+      return;
+    }
     toggle(dev().assertElement(this.parent_), true);
     const {classList} = this.parent_;
     classList.add('amp-active');
