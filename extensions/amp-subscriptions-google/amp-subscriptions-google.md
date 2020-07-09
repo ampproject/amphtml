@@ -86,7 +86,7 @@ To enable rtc add a `skuMapUrl` to the `subscribe.google.com` service.
 </script>
 ```
 
-The `skuMapUrl` is called on page load. It should a map of element id's and configurations:
+The `skuMapUrl` is called on page load. It should be a map of element id's and configurations:
 
 ```JSON
 {
