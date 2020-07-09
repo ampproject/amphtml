@@ -16,15 +16,11 @@
 
 /** @externs */
 
-/** @interface */
-class FitTextProps {
-
-  /** @return {number} */
-  get minFontSize() {}
-
-  /** @return {number} */
-  get maxFontSize() {}
-
-  /** @return {?PreactDef.Renderable} */
-  get children() {}
-}
+/**
+ * @typedef {{
+ *   minFontSize: number,
+ *   maxFontSize: number,
+ *   children: ?PreactDef.Renderable,
+ * }}
+ */
+var FitTextProps;
