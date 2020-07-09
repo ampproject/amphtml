@@ -47,9 +47,10 @@ describes.fakeWin('amp-story utils', {}, () => {
       expect(millisForSeconds).to.equal(2500);
     });
 
-    it('should return undefined for invalid types', () => {
-      const convertedMillis = timeStrToMillis('10kg');
-      expect(convertedMillis).to.be.NaN;
+    it('should return fallback value for invalid types', () => {
+      const fallback = 312;
+      const convertedMillis = timeStrToMillis('10kg', fallback);
+      expect(convertedMillis).to.equal(fallback);
     });
   });
 
