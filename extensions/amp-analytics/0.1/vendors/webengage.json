@@ -1,0 +1,32 @@
+{
+  "requests": {
+    "base": "https://c.${region}.webengage.com/amp?licenseCode=${licenseCode}&luid=${clientId(we_luid)}&pageUrl=${sourceUrl}&pageTitle=${title}&referrer=${documentReferrer}&vh=${viewportHeight}&vw=${viewportWidth}&category=application",
+    "wePageview": {
+      "baseUrl": "${base}&eventName=Page Viewed"
+    }
+  },
+  "extraUrlParams": {
+    "isAmp": 1,
+    "amp-viewer": "${viewer}"
+  },
+  "triggers": {
+    "wePageviewTrigger": {
+      "on": "visible",
+      "request": "wePageview"
+    }
+  },
+  "linkers": {
+    "_we_linker": {
+      "enabled": true,
+      "ids": {
+        "we_luid": "${clientId(we_luid)}"
+      },
+      "proxyOnly": false
+    }
+  },
+  "cookies": {
+    "we_luid": {
+      "value": "$IF(LINKER_PARAM(_we_linker, we_luid),LINKER_PARAM(_we_linker, we_luid))"
+    }
+  }
+}

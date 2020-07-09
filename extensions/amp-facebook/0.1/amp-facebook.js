@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
+import {createLoaderLogo} from './facebook-loader';
 import {dashToUnderline} from '../../../src/string';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
@@ -57,13 +59,15 @@ class AmpFacebook extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://facebook.com', opt_onLayout);
+    const preconnect = Services.preconnectFor(this.win);
+    preconnect.url(this.getAmpDoc(), 'https://facebook.com', opt_onLayout);
     // Hosts the facebook SDK.
-    this.preconnect.preload(
+    preconnect.preload(
+      this.getAmpDoc(),
       'https://connect.facebook.net/' + this.dataLocale_ + '/sdk.js',
       'script'
     );
-    preloadBootstrap(this.win, this.preconnect);
+    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
   }
 
   /** @override */
@@ -75,12 +79,15 @@ class AmpFacebook extends AMP.BaseElement {
   layoutCallback() {
     const iframe = getIframe(this.win, this.element, 'facebook');
     this.applyFillContent(iframe);
+    if (this.element.hasAttribute('data-allowfullscreen')) {
+      iframe.setAttribute('allowfullscreen', 'true');
+    }
     // Triggered by context.updateDimensions() inside the iframe.
     listenFor(
       iframe,
       'embed-size',
-      data => {
-        this./*OK*/ changeHeight(data['height']);
+      (data) => {
+        this.forceChangeHeight(data['height']);
       },
       /* opt_is3P */ true
     );
@@ -126,6 +133,11 @@ class AmpFacebook extends AMP.BaseElement {
   }
 
   /** @override */
+  createLoaderLogoCallback() {
+    return createLoaderLogo(this.element);
+  }
+
+  /** @override */
   unlayoutOnPause() {
     return true;
   }
@@ -143,6 +155,6 @@ class AmpFacebook extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-facebook', '0.1', AMP => {
+AMP.extension('amp-facebook', '0.1', (AMP) => {
   AMP.registerElement('amp-facebook', AmpFacebook);
 });

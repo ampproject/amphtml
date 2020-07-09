@@ -20,6 +20,8 @@ import {
   parseQueryString,
   parseUrlDeprecated,
 } from '../url';
+
+import {getRandomString64} from './cid-impl';
 import {isArray} from '../types';
 import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
@@ -32,11 +34,11 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  *     - sourceUrl: the source url of an amp document.
  *     - canonicalUrl: The doc's canonical.
  *     - pageViewId: Id for this page view. Low entropy but should be unique
+ *     - pageViewId64: Id for this page view. High entropy but should be unique
  *       for concurrent page views of a user().
  *     - linkRels: A map object of link tag's rel (key) and corresponding
  *       hrefs (value). rel could be 'canonical', 'icon', etc.
- *     - metaTags: A map object of meta tag's name (key) and corresponding
- *       contents (value).
+ *     - viewport: The global doc's viewport.
  *     - replaceParams: A map object of extra query string parameter names (key)
  *       to corresponding values, used for custom analytics.
  *       Null if not applicable.
@@ -45,8 +47,9 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  *   sourceUrl: string,
  *   canonicalUrl: string,
  *   pageViewId: string,
+ *   pageViewId64: !Promise<string>,
  *   linkRels: !Object<string, string|!Array<string>>,
- *   metaTags: !Object<string, string|!Array<string>>,
+ *   viewport: ?string,
  *   replaceParams: ?Object<string, string|!Array<string>>
  * }}
  */
@@ -54,6 +57,7 @@ export let DocumentInfoDef;
 
 /**
  * @param {!Node|!./ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {*} TODO(#23582): Specify return type
  */
 export function installDocumentInfoServiceForDoc(nodeOrDoc) {
   return registerServiceBuilderForDoc(nodeOrDoc, 'documentInfo', DocInfo);
@@ -68,6 +72,8 @@ export class DocInfo {
     this.ampdoc_ = ampdoc;
     /** @private {?DocumentInfoDef} */
     this.info_ = null;
+    /** @private {?Promise<string>} */
+    this.pageViewId64_ = null;
   }
 
   /** @return {!DocumentInfoDef} */
@@ -88,7 +94,7 @@ export class DocInfo {
     }
     const pageViewId = getPageViewId(ampdoc.win);
     const linkRels = getLinkRels(ampdoc.win.document);
-    const metaTags = getMetaTags(ampdoc.win.document);
+    const viewport = getViewport(ampdoc.win.document);
     const replaceParams = getReplaceParams(ampdoc);
 
     return (this.info_ = {
@@ -98,8 +104,17 @@ export class DocInfo {
       },
       canonicalUrl,
       pageViewId,
+      get pageViewId64() {
+        // Must be calculated async since getRandomString64() can load the
+        // amp-crypto-polyfill on some browsers, and extensions service
+        // may not be registered yet.
+        if (!this.pageViewId64_) {
+          this.pageViewId64_ = getRandomString64(ampdoc.win);
+        }
+        return this.pageViewId64_;
+      },
       linkRels,
-      metaTags,
+      viewport,
       replaceParams,
     });
   }
@@ -134,7 +149,7 @@ function getLinkRels(doc) {
         continue;
       }
 
-      rels.split(/\s+/).forEach(rel => {
+      rels.split(/\s+/).forEach((rel) => {
         if (filteredLinkRels.indexOf(rel) != -1) {
           return;
         }
@@ -156,36 +171,14 @@ function getLinkRels(doc) {
 }
 
 /**
- * Returns a map object of meta tags in document head.
- * Key is the meta name, value is a list of corresponding content values.
+ * Returns the viewport of the document. Note that this is the viewport of the
+ * host document for AmpDocShadow instances.
  * @param {!Document} doc
- * @return {!JsonObject<string, string|!Array<string>>}
+ * @return {?string}
  */
-function getMetaTags(doc) {
-  const metaTags = map();
-  if (doc.head) {
-    const metas = doc.head.querySelectorAll('meta[name]');
-    for (let i = 0; i < metas.length; i++) {
-      const meta = metas[i];
-      const content = meta.getAttribute('content');
-      const name = meta.getAttribute('name');
-      if (!name || !content) {
-        continue;
-      }
-
-      let value = metaTags[name];
-      if (value) {
-        // Change to array if more than one content for the same name
-        if (!isArray(value)) {
-          value = metaTags[name] = [value];
-        }
-        value.push(content);
-      } else {
-        metaTags[name] = content;
-      }
-    }
-  }
-  return metaTags;
+function getViewport(doc) {
+  const viewportEl = doc.head.querySelector('meta[name="viewport"]');
+  return viewportEl ? viewportEl.getAttribute('content') : null;
 }
 
 /**

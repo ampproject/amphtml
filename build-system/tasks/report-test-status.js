@@ -19,8 +19,8 @@ const argv = require('minimist')(process.argv.slice(2));
 const log = require('fancy-log');
 const requestPromise = require('request-promise');
 const {cyan, green, yellow} = require('ansi-colors');
-const {gitCommitHash} = require('../git');
-const {isTravisPullRequestBuild} = require('../travis');
+const {gitCommitHash} = require('../common/git');
+const {travisJobUrl, isTravisPullRequestBuild} = require('../common/travis');
 
 const reportBaseUrl = 'https://amp-test-status-bot.appspot.com/v0/tests';
 
@@ -29,12 +29,11 @@ const IS_GULP_UNIT = argv._[0] === 'unit';
 const IS_GULP_E2E = argv._[0] === 'e2e';
 
 const IS_LOCAL_CHANGES = !!argv.local_changes;
-const IS_SAUCELABS = !!argv.saucelabs;
-const IS_SINGLE_PASS = !!argv.single_pass;
+const IS_DIST = !!argv.compiled;
 
 const TEST_TYPE_SUBTYPES = new Map([
-  ['integration', ['local', 'single-pass', 'saucelabs']],
-  ['unit', ['local', 'local-changes', 'saucelabs']],
+  ['integration', ['local', 'minified']],
+  ['unit', ['local', 'local-changes']],
   ['e2e', ['local']],
 ]);
 const TEST_TYPE_BUILD_TARGETS = new Map([
@@ -59,26 +58,28 @@ function inferTestType() {
 
   if (IS_LOCAL_CHANGES) {
     return `${type}/local-changes`;
+  } else if (IS_DIST) {
+    return `${type}/minified`;
+  } else {
+    return `${type}/local`;
   }
-
-  if (IS_SAUCELABS) {
-    return `${type}/saucelabs`;
-  }
-
-  if (IS_SINGLE_PASS) {
-    return `${type}/single-pass`;
-  }
-
-  return `${type}/local`;
 }
 
 function postReport(type, action) {
   if (type !== null && isTravisPullRequestBuild()) {
     const commitHash = gitCommitHash();
-    const postUrl = `${reportBaseUrl}/${commitHash}/${type}/${action}`;
-    return requestPromise
-      .post(postUrl)
-      .then(body => {
+    return requestPromise({
+      method: 'POST',
+      uri: `${reportBaseUrl}/${commitHash}/${type}/${action}`,
+      body: JSON.stringify({
+        travisJobUrl: travisJobUrl(),
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // Do not use `json: true` because the response is a string, not JSON.
+    })
+      .then((body) => {
         log(
           green('INFO:'),
           'reported',
@@ -93,7 +94,7 @@ function postReport(type, action) {
           );
         }
       })
-      .catch(error => {
+      .catch((error) => {
         log(
           yellow('WARNING:'),
           'failed to report',
@@ -126,7 +127,9 @@ function reportTestStarted() {
 async function reportAllExpectedTests(buildTargets) {
   for (const [type, subTypes] of TEST_TYPE_SUBTYPES) {
     const testTypeBuildTargets = TEST_TYPE_BUILD_TARGETS.get(type);
-    const action = testTypeBuildTargets.some(target => buildTargets.has(target))
+    const action = testTypeBuildTargets.some((target) =>
+      buildTargets.has(target)
+    )
       ? 'queued'
       : 'skipped';
     for (const subType of subTypes) {

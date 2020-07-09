@@ -39,17 +39,20 @@ export function fetchDocument(win, input, opt_init) {
   input = setupInput(win, input, init);
   const ampdocService = Services.ampdocServiceFor(win);
   const ampdocSingle = ampdocService.isSingleDoc()
-    ? ampdocService.getAmpDoc()
+    ? ampdocService.getSingleDoc()
     : null;
   init.responseType = 'document';
   return getViewerInterceptResponse(win, ampdocSingle, input, init).then(
-    interceptorResponse => {
+    (interceptorResponse) => {
       if (interceptorResponse) {
         return interceptorResponse
           .text()
-          .then(body => new DOMParser().parseFromString(body, 'text/html'));
+          .then((body) => new DOMParser().parseFromString(body, 'text/html'));
       }
-      return xhrRequest(input, init).then(({xhr}) => xhr.responseXML);
+      return xhrRequest(input, init).then((resp) => {
+        const {xhr} = resp;
+        return xhr.responseXML;
+      });
     }
   );
 }
@@ -59,6 +62,7 @@ export function fetchDocument(win, input, opt_init) {
  *
  * @param {string} input
  * @param {!FetchInitDef} init
+ * @return {!Promise<!{response: !Response, xhr: !XMLHttpRequest}>}
  * @private
  */
 function xhrRequest(input, init) {
@@ -95,7 +99,7 @@ function xhrRequest(input, init) {
           '',
           /** @type {!ResponseInit} */ (options)
         );
-        const promise = assertSuccess(response).then(response => ({
+        const promise = assertSuccess(response).then((response) => ({
           response,
           xhr,
         }));
@@ -126,7 +130,7 @@ function parseHeaders(rawHeaders) {
   // Replace instances of \r\n and \n followed by at least one space or
   // horizontal tab with a space.
   const preProcessedHeaders = rawHeaders.replace(/\r?\n[\t ]+/g, ' ');
-  preProcessedHeaders.split(/\r?\n/).forEach(function(line) {
+  preProcessedHeaders.split(/\r?\n/).forEach(function (line) {
     const parts = line.split(':');
     const key = parts.shift().trim();
     if (key) {

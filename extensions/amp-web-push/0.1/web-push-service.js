@@ -16,13 +16,20 @@
 
 import {CSS} from '../../../build/amp-web-push-0.1.css';
 import {IFrameHost} from './iframehost';
-import {NotificationPermission, StorageKeys, TAG, WIDGET_TAG} from './vars';
+import {
+  NotificationPermission,
+  SERVICE_TAG,
+  StorageKeys,
+  TAG,
+  WIDGET_TAG,
+} from './vars';
 import {Services} from '../../../src/services';
 import {WebPushWidgetVisibilities} from './amp-web-push-widget';
 import {WindowMessenger} from './window-messenger';
 import {dev, user} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getMode} from '../../../src/mode';
+import {getServicePromiseForDoc} from '../../../src/service';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {openWindowDialog} from '../../../src/dom';
 import {parseQueryString, parseUrlDeprecated} from '../../../src/url';
@@ -49,6 +56,17 @@ export let ServiceWorkerRegistrationMessage;
  * }}
  */
 export let AmpWebPushConfig;
+
+/**
+ * @param {!Element} element
+ * @return {!Promise<!./web-push-service.WebPushService>}
+ */
+export function webPushServiceForDoc(element) {
+  return /** @type {!Promise<!./web-push-service.WebPushService>} */ (getServicePromiseForDoc(
+    element,
+    SERVICE_TAG
+  ));
+}
 
 /**
  * @fileoverview
@@ -235,6 +253,7 @@ export class WebPushService {
    * Given a URL string, returns the URL without the permission dialog URL query
    * parameter fragment indicating a redirect.
    * @param {string} url
+   * @return {string}
    */
   removePermissionPopupUrlFragmentFromUrl(url) {
     let urlWithoutFragment = url.replace(
@@ -266,7 +285,7 @@ export class WebPushService {
       .then(() => {
         return this.frameMessenger_.send(messageTopic, message);
       })
-      .then(result => {
+      .then((result) => {
         const replyPayload = result[0];
         if (replyPayload.success) {
           return replyPayload.result;
@@ -373,7 +392,7 @@ export class WebPushService {
    */
   isServiceWorkerActivated() {
     const self = this;
-    return this.queryServiceWorkerState_().then(serviceWorkerState => {
+    return this.queryServiceWorkerState_().then((serviceWorkerState) => {
       const isControllingFrame = serviceWorkerState.isControllingFrame === true;
       const serviceWorkerHasCorrectUrl = this.isUrlSimilarForQueryParams(
         serviceWorkerState.url,
@@ -505,7 +524,7 @@ export class WebPushService {
    * Subscribe.
    */
   storeLastKnownPermission_() {
-    return this.queryNotificationPermission().then(permission => {
+    return this.queryNotificationPermission().then((permission) => {
       this.lastKnownPermission_ = permission;
     });
   }
@@ -531,7 +550,7 @@ export class WebPushService {
      */
     return this.storeLastKnownPermission_()
       .then(() => this.isQuerySupported_(WindowMessenger.Topics.STORAGE_GET))
-      .then(response => {
+      .then((response) => {
         /*
           Response could be "denied", "granted", or "default". This is a
           response to the notification permission state query, and we're
@@ -559,7 +578,7 @@ export class WebPushService {
           return Promise.resolve(NotificationPermission.DEFAULT);
         }
       })
-      .then(canonicalNotificationPermission => {
+      .then((canonicalNotificationPermission) => {
         /*
             If the canonical notification permission is:
               - Blocked
@@ -580,7 +599,7 @@ export class WebPushService {
           }
         } else {
           return this.isServiceWorkerActivated().then(
-            isServiceWorkerActivated => {
+            (isServiceWorkerActivated) => {
               if (isServiceWorkerActivated) {
                 this.updateWidgetVisibilitiesServiceWorkerActivated_();
               } else {
@@ -592,11 +611,14 @@ export class WebPushService {
       });
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {*} TODO(#23582): Specify return type
+   */
   updateWidgetVisibilitiesServiceWorkerActivated_() {
     return Services.timerFor(this.ampdoc.win).timeoutPromise(
       5000,
-      this.querySubscriptionStateRemotely().then(reply => {
+      this.querySubscriptionStateRemotely().then((reply) => {
         /*
           This Promise will never resolve if the service worker does not support
           amp-web-push, and widgets will stay hidden.
@@ -664,7 +686,7 @@ export class WebPushService {
     // Register the service worker in the background in parallel for a headstart
     promises.push(this.registerServiceWorker());
     promises.push(
-      new Promise(resolve => {
+      new Promise((resolve) => {
         /*
             In most environments, the canonical notification permission returned
             is accurate. On Chrome 62+, the permission is non-ambiguous only if
@@ -703,7 +725,7 @@ export class WebPushService {
             ]);
 
             this.onPermissionDialogInteracted()
-              .then(result => {
+              .then((result) => {
                 return this.handlePermissionDialogInteraction(result);
               })
               .then(() => {
@@ -740,6 +762,7 @@ export class WebPushService {
    * notification permissions when subscribing.
    *
    * @param {Array<?>} result
+   * @return {*} TODO(#23582): Specify return type
    */
   handlePermissionDialogInteraction(result) {
     /*
@@ -768,7 +791,10 @@ export class WebPushService {
     }
   }
 
-  /** @private */
+  /**
+   * @private
+   * @return {*} TODO(#23582): Specify return type
+   */
   onPermissionGrantedSubscribe_() {
     return this.subscribeForPushRemotely().then(() => {
       return this.updateWidgetVisibilities();
@@ -833,7 +859,7 @@ export class WebPushService {
    * @return {Promise<Array<(NotificationPermission|function({closeFrame: boolean}))>>}
    */
   onPermissionDialogInteracted() {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       this.popupMessenger_.on(
         WindowMessenger.Topics.NOTIFICATION_PERMISSION_STATE,
         (message, replyToFrame) => {
@@ -924,7 +950,7 @@ export class WebPushService {
       )
     );
 
-    this.queryNotificationPermission().then(permission => {
+    this.queryNotificationPermission().then((permission) => {
       switch (permission) {
         case NotificationPermission.DENIED:
         case NotificationPermission.DEFAULT:

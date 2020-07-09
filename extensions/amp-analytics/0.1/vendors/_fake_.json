@@ -1,0 +1,35 @@
+{
+  "requests": {
+    "endpoint": "/analytics/fake"
+  },
+  "transport": {
+    "useBody": true
+  },
+  "triggers": {
+    "view": {
+      "on": "visible",
+      "request": "endpoint"
+    }
+  },
+  "configRewriter": {
+    "url": "/analytics/rewriter",
+    "varGroups": {
+      "feature1": {
+        "dr": "DOCUMENT_REFERRER",
+        "su": "SOURCE_URL"
+      },
+      "feature2": {
+        "name": "cats",
+        "title": "TITLE"
+      },
+      "alwaysOnFeature": {
+        "title2": "TITLE",
+        "enabled": true
+      }
+    }
+  },
+  "vars": {
+    "clientId": "CLIENT_ID(_fake_)",
+    "dataSource": "AMP"
+  }
+}

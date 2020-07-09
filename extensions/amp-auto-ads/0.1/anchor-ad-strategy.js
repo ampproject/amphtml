@@ -44,13 +44,18 @@ export class AnchorAdStrategy {
    * @return {!Promise<boolean>} Resolves when the strategy is complete.
    */
   run() {
+    if (this.hasExistingStickyAd_()) {
+      user().warn(
+        TAG,
+        'Auto ads may not work because of already existing <amp-sticky-ad>.'
+      );
+      return Promise.resolve(false);
+    }
+
     if (!this.isAnchorAdEnabled_()) {
       return Promise.resolve(false);
     }
-    if (this.hasExistingStickyAd_()) {
-      user().warn(TAG, 'exists <amp-sticky-ad>');
-      return Promise.resolve(false);
-    }
+
     Services.extensionsFor(this.ampdoc.win)./*OK*/ installExtensionForDoc(
       this.ampdoc,
       STICKY_AD_TAG,
@@ -73,16 +78,9 @@ export class AnchorAdStrategy {
    * @private
    */
   isAnchorAdEnabled_() {
-    const optInStatus = this.configObj_['optInStatus'];
-    if (!optInStatus) {
-      return false;
-    }
-    for (let i = 0; i < optInStatus.length; i++) {
-      if (optInStatus[i] == OPT_IN_STATUS_ANCHOR_ADS) {
-        return true;
-      }
-    }
-    return false;
+    return user()
+      .assertArray(this.configObj_['optInStatus'] || [])
+      .includes(OPT_IN_STATUS_ANCHOR_ADS);
   }
 
   /**
@@ -103,7 +101,9 @@ export class AnchorAdStrategy {
     const stickyAd = createElementWithAttributes(
       doc,
       'amp-sticky-ad',
-      dict({'layout': 'nodisplay'})
+      dict({
+        'layout': 'nodisplay',
+      })
     );
     stickyAd.appendChild(ampAd);
     const body = this.ampdoc.getBody();

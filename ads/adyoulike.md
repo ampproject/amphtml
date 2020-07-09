@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+
 # Adyoulike
 
 Serves ads from [Adyoulike](https://www.adyoulike.com/).
@@ -22,15 +23,18 @@ Serves ads from [Adyoulike](https://www.adyoulike.com/).
 ### Normal ad
 
 ```html
-<amp-ad width="300" height="250"
-      type="adyoulike"
-      data-placement="d135a2027b1041059f06fbf8cf4ddfef">
+<amp-ad
+  width="300"
+  height="250"
+  type="adyoulike"
+  data-placement="d135a2027b1041059f06fbf8cf4ddfef"
+>
 </amp-ad>
 ```
 
 ## Configuration
 
-For configuration details and to generate your tags,  please contact [Adyoulike](https://www.adyoulike.com/#contact).
+For configuration details and to generate your tags, please contact [Adyoulike](https://www.adyoulike.com/#contact).
 
 ### Required parameters
 
@@ -40,4 +44,3 @@ For configuration details and to generate your tags,  please contact [Adyoulike]
 
 - `data-dc`
 - `data-campaign`
-

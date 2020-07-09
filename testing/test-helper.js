@@ -24,11 +24,10 @@ import {
 } from '../src/service';
 import {getStyle} from '../src/style';
 import {poll} from './iframe';
-import {xhrServiceForTesting} from '../src/service/xhr-impl';
 
 export function stubService(sandbox, win, serviceId, method) {
   // Register if not already registered.
-  registerServiceBuilder(win, serviceId, function() {
+  registerServiceBuilder(win, serviceId, function () {
     return {
       [method]: () => {},
     };
@@ -39,7 +38,7 @@ export function stubService(sandbox, win, serviceId, method) {
 
 export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
   // Register if not already registered.
-  registerServiceBuilderForDoc(ampdoc, serviceId, function() {
+  registerServiceBuilderForDoc(ampdoc, serviceId, function () {
     return {
       [method]: () => {},
     };
@@ -51,12 +50,14 @@ export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
 export function mockServiceForDoc(sandbox, ampdoc, serviceId, methods) {
   resetServiceForTesting(ampdoc.win, serviceId);
   const impl = {};
-  methods.forEach(method => {
+  methods.forEach((method) => {
     impl[method] = () => {};
   });
-  registerServiceBuilderForDoc(ampdoc, serviceId, () => impl);
+  registerServiceBuilderForDoc(ampdoc, serviceId, function () {
+    return impl;
+  });
   const mock = {};
-  methods.forEach(method => {
+  methods.forEach((method) => {
     mock[method] = sandbox.stub(impl, method);
   });
   return mock;
@@ -64,10 +65,10 @@ export function mockServiceForDoc(sandbox, ampdoc, serviceId, methods) {
 
 export function mockWindowInterface(sandbox) {
   const methods = Object.getOwnPropertyNames(WindowInterface).filter(
-    p => typeof WindowInterface[p] === 'function'
+    (p) => typeof WindowInterface[p] === 'function'
   );
   const mock = {};
-  methods.forEach(method => {
+  methods.forEach((method) => {
     mock[method] = sandbox.stub(WindowInterface, method);
   });
   return mock;
@@ -108,7 +109,7 @@ export function isAnimationNone(element) {
   for (const property in noneValues) {
     const value = getStyle(element, property);
     const expectedValues = noneValues[property];
-    if (!expectedValues.some(expectedValue => value == expectedValue)) {
+    if (!expectedValues.some((expectedValue) => value == expectedValue)) {
       return false;
     }
   }
@@ -118,15 +119,19 @@ export function isAnimationNone(element) {
 /**
  * Asserts that the given element is only visible to screen readers.
  * @param {!Element} node
+ * @param {{
+ *   index: (number|undefined),
+ * }} options
  */
-export function assertScreenReaderElement(element) {
+export function assertScreenReaderElement(element, {index = 0} = {}) {
+  const offset = index * 8;
   expect(element).to.exist;
   expect(element.classList.contains('i-amphtml-screen-reader')).to.be.true;
   const win = element.ownerDocument.defaultView;
   const computedStyle = win.getComputedStyle(element);
   expect(computedStyle.getPropertyValue('position')).to.equal('fixed');
   expect(computedStyle.getPropertyValue('top')).to.equal('0px');
-  expect(computedStyle.getPropertyValue('left')).to.equal('0px');
+  expect(computedStyle.getPropertyValue('left')).to.equal(`${offset}px`);
   expect(computedStyle.getPropertyValue('width')).to.equal('4px');
   expect(computedStyle.getPropertyValue('height')).to.equal('4px');
   expect(computedStyle.getPropertyValue('opacity')).to.equal('0');
@@ -138,8 +143,8 @@ export function assertScreenReaderElement(element) {
   expect(computedStyle.getPropertyValue('visibility')).to.equal('visible');
 }
 
-// Use a browserId to avoid cross-browser race conditions
-// when testing in Saucelabs.
+// Use a browserId to avoid cross-browser race conditions.
+// TODO(amphtml): Remove browserId now that we no longer test on Sauce Labs.
 /** @const {string} */
 const browserId = (Date.now() + Math.random()).toString(32);
 
@@ -178,35 +183,68 @@ export class RequestBank {
    */
   static withdraw(requestId) {
     const url = `${REQUEST_URL}/withdraw/${requestId}/`;
-    return xhrServiceForTesting(window)
-      .fetchJson(url, {
-        method: 'GET',
-        ampCors: false,
-        credentials: 'omit',
-      })
-      .then(res => res.json());
+    return this.fetch_(url, `withdraw(${requestId ?? ''})`).then((res) =>
+      res.json()
+    );
   }
 
   static tearDown() {
     const url = `${REQUEST_URL}/teardown/`;
-    return xhrServiceForTesting(window).fetchJson(url, {
-      method: 'GET',
-      ampCors: false,
-      credentials: 'omit',
+    return this.fetch_(url, 'tearDown');
+  }
+
+  static fetch_(url, action, timeout = 10000) {
+    const xhr = fetch(url).then((response) => {
+      const {ok, status, statusText} = response;
+      if (!ok) {
+        throw new Error(
+          `RequestBank.${action}: HTTP ${status} error -- ${statusText}`
+        );
+      }
+      return response;
     });
+    if (timeout <= 0) {
+      return xhr;
+    }
+    const timer = new Promise((_, reject) => {
+      setTimeout(() => {
+        reject(
+          new Error(`"RequestBank.${action}" timed out after ${timeout} ms.`)
+        );
+      }, timeout);
+    });
+    return Promise.race([xhr, timer]);
   }
 }
 
 export class BrowserController {
-  constructor(win) {
+  constructor(win, opt_rootNode) {
     this.win_ = win;
-    this.doc_ = this.win_.document;
+    this.rootNode_ = opt_rootNode || this.win_.document;
   }
 
   wait(duration) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       setTimeout(resolve, duration);
     });
+  }
+
+  /**
+   * @param {string} hostSelector
+   * @param {number=} timeout
+   * @return {!Promise}
+   */
+  waitForShadowRoot(hostSelector, timeout = 10000) {
+    const element = this.rootNode_.querySelector(hostSelector);
+    if (!element) {
+      throw new Error(`BrowserController query failed: ${hostSelector}`);
+    }
+    return poll(
+      `"${hostSelector}" to host shadow doc`,
+      () => !!element.shadowRoot,
+      /* onError */ undefined,
+      timeout
+    );
   }
 
   /**
@@ -215,14 +253,14 @@ export class BrowserController {
    * @return {!Promise}
    */
   waitForElementBuild(selector, timeout = 5000) {
-    const elements = this.doc_.querySelectorAll(selector);
+    const elements = this.rootNode_.querySelectorAll(selector);
     if (!elements.length) {
       throw new Error(`BrowserController query failed: ${selector}`);
     }
     return poll(
       `"${selector}" to build`,
       () => {
-        const someNotBuilt = [].some.call(elements, e =>
+        const someNotBuilt = [].some.call(elements, (e) =>
           e.classList.contains('i-amphtml-notbuilt')
         );
         return !someNotBuilt;
@@ -238,7 +276,7 @@ export class BrowserController {
    * @return {!Promise}
    */
   waitForElementLayout(selector, timeout = 10000) {
-    const elements = this.doc_.querySelectorAll(selector);
+    const elements = this.rootNode_.querySelectorAll(selector);
     if (!elements.length) {
       throw new Error(`BrowserController query failed: ${selector}`);
     }
@@ -249,7 +287,7 @@ export class BrowserController {
         // layoutCallback() promise is resolved.
         const someNotReady = [].some.call(
           elements,
-          e => e.readyState !== 'complete'
+          (e) => e.readyState !== 'complete'
         );
         return !someNotReady;
       },
@@ -259,7 +297,7 @@ export class BrowserController {
   }
 
   click(selector) {
-    const element = this.doc_.querySelector(selector);
+    const element = this.rootNode_.querySelector(selector);
     if (element) {
       element.dispatchEvent(new /*OK*/ CustomEvent('click', {bubbles: true}));
     }
@@ -319,12 +357,20 @@ export class ImagePixelVerifier {
     }
     return this.imagePixels_[this.imagePixels_.length - 1].src;
   }
+
+  verifyAndRemoveRequestUrl(url) {
+    for (let i = this.imagePixels_.length - 1; i >= 0; i--) {
+      if (this.imagePixels_[i].src == url) {
+        this.imagePixels_.splice(i, 1);
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 export function measureMutateElementStub(measure, mutate) {
-  return Promise.resolve()
-    .then(measure)
-    .then(mutate);
+  return Promise.resolve().then(measure).then(mutate);
 }
 
 export function measureElementStub(measure) {

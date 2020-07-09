@@ -604,6 +604,13 @@ form [submit-error] {
 }
 
 /**
+ * amp-list error messaging container should be hidden at first.
+ */
+amp-list [fetch-error] {
+  display: none;
+}
+
+/**
  * Hide the update reference point of amp-live-list by default. This is
  * reset by the `amp-live-list > .amp-active[update]` selector.
  */
@@ -614,7 +621,7 @@ amp-live-list > [update] {
 /**
  * Display none elements
  */
-amp-experiment, amp-share-tracking {
+amp-experiment {
   display: none;
 }
 

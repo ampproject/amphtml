@@ -34,7 +34,7 @@ let ExtensionInfoDef;
  * @param {boolean=} opt_isLocalDev
  * @return {string}
  */
-function calculateScriptBaseUrl(location, opt_isLocalDev) {
+export function calculateScriptBaseUrl(location, opt_isLocalDev) {
   if (opt_isLocalDev) {
     let prefix = `${location.protocol}//${location.host}`;
     if (location.protocol == 'about:') {
@@ -43,15 +43,6 @@ function calculateScriptBaseUrl(location, opt_isLocalDev) {
     return `${prefix}/dist`;
   }
   return urls.cdn;
-}
-
-/**
- * Calculates if we need a single pass folder or not.
- *
- * @return {string}
- */
-function getSinglePassExperimentPath() {
-  return getMode().singlePassType ? `${getMode().singlePassType}/` : '';
 }
 
 /**
@@ -68,6 +59,7 @@ export function calculateExtensionScriptUrl(
   opt_extensionVersion,
   opt_isLocalDev
 ) {
+  const fileExtension = getMode().esm ? '.mjs' : '.js';
   const base = calculateScriptBaseUrl(location, opt_isLocalDev);
   const rtv = getMode().rtvVersion;
   if (opt_extensionVersion == null) {
@@ -76,8 +68,7 @@ export function calculateExtensionScriptUrl(
   const extensionVersion = opt_extensionVersion
     ? '-' + opt_extensionVersion
     : '';
-  const spPath = getSinglePassExperimentPath();
-  return `${base}/rtv/${rtv}/${spPath}v0/${extensionId}${extensionVersion}.js`;
+  return `${base}/rtv/${rtv}/v0/${extensionId}${extensionVersion}${fileExtension}`;
 }
 
 /**
@@ -95,12 +86,15 @@ export function calculateEntryPointScriptUrl(
   isLocalDev,
   opt_rtv
 ) {
+  const fileExtension = getMode().esm ? '.mjs' : '.js';
   const base = calculateScriptBaseUrl(location, isLocalDev);
-  if (opt_rtv) {
-    const spPath = getSinglePassExperimentPath();
-    return `${base}/rtv/${getMode().rtvVersion}/${spPath}${entryPoint}.js`;
+  if (isLocalDev) {
+    return `${base}/${entryPoint}${fileExtension}`;
   }
-  return `${base}/${entryPoint}.js`;
+  if (opt_rtv) {
+    return `${base}/rtv/${getMode().rtvVersion}/${entryPoint}${fileExtension}`;
+  }
+  return `${base}/${entryPoint}${fileExtension}`;
 }
 
 /**
@@ -109,9 +103,10 @@ export function calculateEntryPointScriptUrl(
  * @return {!ExtensionInfoDef}
  */
 export function parseExtensionUrl(scriptUrl) {
-  const regex = /^(.*)\/(.*)-([0-9.]+)\.js$/i;
-  const matches = scriptUrl.match(regex);
-
+  // Note that the "(\.max)?" group only applies to local dev.
+  const matches = scriptUrl.match(
+    /^(.*)\/(.*)-([0-9.]+|latest)(\.max)?\.(?:js|mjs)$/i
+  );
   return {
     extensionId: matches ? matches[2] : undefined,
     extensionVersion: matches ? matches[3] : undefined,

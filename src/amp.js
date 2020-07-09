@@ -22,21 +22,24 @@
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
 import {Services} from './services';
-import {
-  adopt,
-  installAmpdocServices,
-  installBuiltins,
-  installRuntimeServices,
-} from './runtime';
+import {TickLabel} from './enums';
+import {adoptWithMultidocDeps} from './runtime';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
+import {getMode} from './mode';
+import {
+  installAmpdocServices,
+  installBuiltinElements,
+  installRuntimeServices,
+} from './service/core-services';
 import {installAutoLightboxExtension} from './auto-lightbox';
 import {installDocService} from './service/ampdoc-impl';
 import {installErrorReporting} from './error';
 import {installPerformanceService} from './service/performance-impl';
 import {installPlatformService} from './service/platform-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
+import {installStandaloneExtension} from './standalone';
 import {
   installStylesForDoc,
   makeBodyVisible,
@@ -45,6 +48,7 @@ import {
 import {internalRuntimeVersion} from './internal-version';
 import {maybeTrackImpression} from './impression';
 import {maybeValidate} from './validator-integration';
+import {preconnectToOrigin} from './preconnect';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
 
@@ -60,6 +64,52 @@ import {stubElementsForDoc} from './service/custom-element-registry';
  * @type {boolean|undefined}
  */
 const shouldMainBootstrapRun = !self.IS_AMP_ALT;
+
+/**
+ * Execute the bootstrap
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./service/performance-impl.Performance} perf
+ */
+function bootstrap(ampdoc, perf) {
+  startupChunk(self.document, function services() {
+    // Core services.
+    installRuntimeServices(self);
+    installAmpdocServices(ampdoc);
+    // We need the core services (viewer/resources) to start instrumenting
+    perf.coreServicesAvailable();
+    maybeTrackImpression(self);
+  });
+  startupChunk(self.document, function adoptWindow() {
+    adoptWithMultidocDeps(self);
+  });
+  startupChunk(self.document, function builtins() {
+    // Builtins.
+    installBuiltinElements(self);
+  });
+  startupChunk(self.document, function stub() {
+    // Pre-stub already known elements.
+    stubElementsForDoc(ampdoc);
+  });
+  startupChunk(
+    self.document,
+    function final() {
+      installPullToRefreshBlocker(self);
+      installAutoLightboxExtension(ampdoc);
+      installStandaloneExtension(ampdoc);
+      maybeValidate(self);
+      makeBodyVisible(self.document);
+      preconnectToOrigin(self.document);
+    },
+    /* makes the body visible */ true
+  );
+  startupChunk(self.document, function finalTick() {
+    perf.tick(TickLabel.END_INSTALL_STYLES);
+    Services.resourcesForDoc(ampdoc).ampInitComplete();
+    // TODO(erwinm): move invocation of the `flush` method when we have the
+    // new ticks in place to batch the ticks properly.
+    perf.flush();
+  });
+}
 
 if (shouldMainBootstrapRun) {
   // Store the originalHash as early as possible. Trying to debug:
@@ -89,6 +139,7 @@ if (shouldMainBootstrapRun) {
   startupChunk(self.document, function initial() {
     /** @const {!./service/ampdoc-impl.AmpDoc} */
     const ampdoc = ampdocService.getAmpDoc(self.document);
+    installPlatformService(self);
     installPerformanceService(self);
     /** @const {!./service/performance-impl.Performance} */
     const perf = Services.performanceFor(self);
@@ -97,50 +148,22 @@ if (shouldMainBootstrapRun) {
     ) {
       perf.addEnabledExperiment('no-boilerplate');
     }
-    installPlatformService(self);
+    if (getMode().esm) {
+      perf.addEnabledExperiment('esm');
+    }
     fontStylesheetTimeout(self);
-    perf.tick('is');
-    installStylesForDoc(
-      ampdoc,
-      ampDocCss + ampSharedCss,
-      () => {
-        startupChunk(self.document, function services() {
-          // Core services.
-          installRuntimeServices(self);
-          installAmpdocServices(ampdoc);
-          // We need the core services (viewer/resources) to start instrumenting
-          perf.coreServicesAvailable();
-          maybeTrackImpression(self);
-        });
-        startupChunk(self.document, function adoptWindow() {
-          adopt(self);
-        });
-        startupChunk(self.document, function builtins() {
-          // Builtins.
-          installBuiltins(self);
-        });
-        startupChunk(self.document, function stub() {
-          // Pre-stub already known elements.
-          stubElementsForDoc(ampdoc);
-        });
-        startupChunk(self.document, function final() {
-          installPullToRefreshBlocker(self);
-          installAutoLightboxExtension(ampdoc);
-
-          maybeValidate(self);
-          makeBodyVisible(self.document);
-        });
-        startupChunk(self.document, function finalTick() {
-          perf.tick('e_is');
-          Services.resourcesForDoc(ampdoc).ampInitComplete();
-          // TODO(erwinm): move invocation of the `flush` method when we have the
-          // new ticks in place to batch the ticks properly.
-          perf.flush();
-        });
-      },
-      /* opt_isRuntimeCss */ true,
-      /* opt_ext */ 'amp-runtime'
-    );
+    perf.tick(TickLabel.INSTALL_STYLES);
+    if (IS_ESM) {
+      bootstrap(ampdoc, perf);
+    } else {
+      installStylesForDoc(
+        ampdoc,
+        ampDocCss + ampSharedCss,
+        () => bootstrap(ampdoc, perf),
+        /* opt_isRuntimeCss */ true,
+        /* opt_ext */ 'amp-runtime'
+      );
+    }
   });
 
   // Output a message to the console and add an attribute to the <html>

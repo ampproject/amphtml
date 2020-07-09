@@ -15,22 +15,42 @@
  */
 
 import '../amp-carousel';
-
+import {ActionService} from '../../../../src/service/action-impl';
+import {ActionTrust} from '../../../../src/action-constants';
+import {Services} from '../../../../src/services';
+import {
+  createElementWithAttributes,
+  whenUpgradedToCustomElement,
+} from '../../../../src/dom';
+import {user} from '../../../../src/log';
 describes.realWin(
   'test-scrollable-carousel',
   {
     amp: {
       extensions: ['amp-carousel'],
+      runtimeOn: true,
     },
   },
-  env => {
-    let win, doc;
+  (env) => {
+    let win,
+      doc,
+      owners,
+      updateInViewportSpy,
+      schedulePauseSpy,
+      scheduleLayoutSpy,
+      schedulePreloadSpy;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
       env.iframe.width = '300';
       env.iframe.height = '200';
+
+      owners = Services.ownersForDoc(doc);
+      updateInViewportSpy = env.sandbox.spy(owners, 'updateInViewport');
+      schedulePauseSpy = env.sandbox.spy(owners, 'schedulePause');
+      scheduleLayoutSpy = env.sandbox.spy(owners, 'scheduleLayout');
+      schedulePreloadSpy = env.sandbox.spy(owners, 'schedulePreload');
     });
 
     function getAmpScrollableCarousel() {
@@ -73,7 +93,7 @@ describes.realWin(
       'should initialize correctly: create container, build initial slides ' +
         'and show control buttons',
       () => {
-        return getAmpScrollableCarousel().then(carousel => {
+        return getAmpScrollableCarousel().then((carousel) => {
           const impl = carousel.implementation_;
 
           // create container
@@ -126,12 +146,8 @@ describes.realWin(
       'should behave correctly when clicking on next button and the ' +
         'space to the right is MORE than containerWidth',
       () => {
-        return getAmpScrollableCarousel().then(carousel => {
+        return getAmpScrollableCarousel().then((carousel) => {
           const impl = carousel.implementation_;
-          const updateInViewportSpy = sandbox.spy(impl, 'updateInViewport');
-          const schedulePauseSpy = sandbox.spy(impl, 'schedulePause');
-          const scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
-          const schedulePreloadSpy = sandbox.spy(impl, 'schedulePreload');
 
           // click on the next button
           impl.goCallback(1, /*animate*/ false);
@@ -142,41 +158,70 @@ describes.realWin(
           // load new slides in viewport
           expect(updateInViewportSpy).to.have.callCount(5);
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[2],
             true
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[3],
             true
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[4],
             true
           );
 
           // unload and pause old slides in viewport
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[0],
             false
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[1],
             false
           );
-          expect(schedulePauseSpy).to.have.been.calledWith(impl.cells_[0]);
-          expect(schedulePauseSpy).to.have.been.calledWith(impl.cells_[1]);
+          expect(schedulePauseSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[0]
+          );
+          expect(schedulePauseSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[1]
+          );
 
           // schedule layout for new slides
           expect(scheduleLayoutSpy).to.have.callCount(3);
-          expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[2]);
-          expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[3]);
-          expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[4]);
+          expect(scheduleLayoutSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[2]
+          );
+          expect(scheduleLayoutSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[3]
+          );
+          expect(scheduleLayoutSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[4]
+          );
 
           // preload slides in viewport
           expect(schedulePreloadSpy).to.have.callCount(3);
-          expect(schedulePreloadSpy).to.have.been.calledWith(impl.cells_[4]);
-          expect(schedulePreloadSpy).to.have.been.calledWith(impl.cells_[5]);
-          expect(schedulePreloadSpy).to.have.been.calledWith(impl.cells_[6]);
+          expect(schedulePreloadSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[4]
+          );
+          expect(schedulePreloadSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[5]
+          );
+          expect(schedulePreloadSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[6]
+          );
 
           // set control buttons correctly
           expect(impl.hasPrev()).to.be.true;
@@ -194,16 +239,11 @@ describes.realWin(
       'should behave correctly when clicking on next button and the ' +
         'space to the right is LESS than containerWidth',
       () => {
-        return getAmpScrollableCarousel().then(carousel => {
+        return getAmpScrollableCarousel().then((carousel) => {
           const impl = carousel.implementation_;
 
           // click on the next button the first time
           impl.goCallback(1, /*animate*/ false);
-
-          const updateInViewportSpy = sandbox.spy(impl, 'updateInViewport');
-          const schedulePauseSpy = sandbox.spy(impl, 'schedulePause');
-          const scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
-          const schedulePreloadSpy = sandbox.spy(impl, 'schedulePreload');
 
           // click on the next button the second time
           impl.goCallback(1, /*animate*/ false);
@@ -215,35 +255,55 @@ describes.realWin(
           // load new slides in viewport
           expect(updateInViewportSpy).to.have.callCount(5);
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[4],
             true
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[5],
             true
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[6],
             true
           );
 
           // unload and pause old slides in viewport
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[2],
             false
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[3],
             false
           );
-          expect(schedulePauseSpy).to.have.been.calledWith(impl.cells_[2]);
-          expect(schedulePauseSpy).to.have.been.calledWith(impl.cells_[3]);
+          expect(schedulePauseSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[2]
+          );
+          expect(schedulePauseSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[3]
+          );
 
           // schedule layout for new slides
           expect(scheduleLayoutSpy).to.have.callCount(3);
-          expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[4]);
-          expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[5]);
-          expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[6]);
+          expect(scheduleLayoutSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[4]
+          );
+          expect(scheduleLayoutSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[5]
+          );
+          expect(scheduleLayoutSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[6]
+          );
 
           // preload slides in viewport
           expect(schedulePreloadSpy).to.have.not.been.called;
@@ -264,18 +324,13 @@ describes.realWin(
       'should behave correctly when clicking on previous button and the ' +
         'space to the left is MORE than containerWidth',
       () => {
-        return getAmpScrollableCarousel().then(carousel => {
+        return getAmpScrollableCarousel().then((carousel) => {
           const impl = carousel.implementation_;
 
           // click on the next button twice to reach the right end
           // scrollLeft after second click is 588
           impl.goCallback(1, /*animate*/ false);
           impl.goCallback(1, /*animate*/ false);
-
-          const updateInViewportSpy = sandbox.spy(impl, 'updateInViewport');
-          const schedulePauseSpy = sandbox.spy(impl, 'schedulePause');
-          const scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
-          const schedulePreloadSpy = sandbox.spy(impl, 'schedulePreload');
 
           // click on the previous button
           impl.goCallback(-1, /*animate*/ false);
@@ -286,41 +341,70 @@ describes.realWin(
           // load new slides in viewport
           expect(updateInViewportSpy).to.have.callCount(5);
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[2],
             true
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[3],
             true
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[4],
             true
           );
 
           // unload and pause old slides in viewport
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[5],
             false
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[6],
             false
           );
-          expect(schedulePauseSpy).to.have.been.calledWith(impl.cells_[5]);
-          expect(schedulePauseSpy).to.have.been.calledWith(impl.cells_[6]);
+          expect(schedulePauseSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[5]
+          );
+          expect(schedulePauseSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[6]
+          );
 
           // schedule layout for new slides
           expect(scheduleLayoutSpy).to.have.callCount(3);
-          expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[2]);
-          expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[3]);
-          expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[4]);
+          expect(scheduleLayoutSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[2]
+          );
+          expect(scheduleLayoutSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[3]
+          );
+          expect(scheduleLayoutSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[4]
+          );
 
           // preload slides in viewport
           expect(schedulePreloadSpy).to.have.callCount(3);
-          expect(schedulePreloadSpy).to.have.been.calledWith(impl.cells_[0]);
-          expect(schedulePreloadSpy).to.have.been.calledWith(impl.cells_[1]);
-          expect(schedulePreloadSpy).to.have.been.calledWith(impl.cells_[2]);
+          expect(schedulePreloadSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[0]
+          );
+          expect(schedulePreloadSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[1]
+          );
+          expect(schedulePreloadSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[2]
+          );
 
           // set control buttons correctly
           expect(impl.hasPrev()).to.be.true;
@@ -338,7 +422,7 @@ describes.realWin(
       'should behave correctly when clicking on previous button and the ' +
         'space to the left is LESS than containerWidth',
       () => {
-        return getAmpScrollableCarousel().then(carousel => {
+        return getAmpScrollableCarousel().then((carousel) => {
           const impl = carousel.implementation_;
 
           // click on the next button twice to reach the right end and click on
@@ -346,11 +430,6 @@ describes.realWin(
           impl.goCallback(1, /*animate*/ false);
           impl.goCallback(1, /*animate*/ false);
           impl.goCallback(-1, /*animate*/ false);
-
-          const updateInViewportSpy = sandbox.spy(impl, 'updateInViewport');
-          const schedulePauseSpy = sandbox.spy(impl, 'schedulePause');
-          const scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
-          const schedulePreloadSpy = sandbox.spy(impl, 'schedulePreload');
 
           // click on the previous button
           impl.goCallback(-1, /*animate*/ false);
@@ -361,35 +440,55 @@ describes.realWin(
           // load new slides in viewport
           expect(updateInViewportSpy).to.have.callCount(5);
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[0],
             true
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[1],
             true
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[2],
             true
           );
 
           // unload and pause old slides in viewport
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[3],
             false
           );
           expect(updateInViewportSpy).to.have.been.calledWith(
+            impl.element,
             impl.cells_[4],
             false
           );
-          expect(schedulePauseSpy).to.have.been.calledWith(impl.cells_[3]);
-          expect(schedulePauseSpy).to.have.been.calledWith(impl.cells_[4]);
+          expect(schedulePauseSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[3]
+          );
+          expect(schedulePauseSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[4]
+          );
 
           // schedule layout for new slides
           expect(scheduleLayoutSpy).to.have.callCount(3);
-          expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[0]);
-          expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[1]);
-          expect(scheduleLayoutSpy).to.have.been.calledWith(impl.cells_[2]);
+          expect(scheduleLayoutSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[0]
+          );
+          expect(scheduleLayoutSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[1]
+          );
+          expect(scheduleLayoutSpy).to.have.been.calledWith(
+            impl.element,
+            impl.cells_[2]
+          );
 
           // preload slides in viewport
           expect(schedulePreloadSpy).to.have.not.been.called;
@@ -404,5 +503,62 @@ describes.realWin(
         });
       }
     );
+
+    it('should allow default actions in email documents', async () => {
+      env.win.document.documentElement.setAttribute('amp4email', '');
+      const action = new ActionService(env.ampdoc, env.win.document);
+      env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
+      const element = createElementWithAttributes(
+        env.win.document,
+        'amp-carousel',
+        {
+          'type': 'carousel',
+          'width': '400',
+          'height': '300',
+        }
+      );
+      env.win.document.body.appendChild(element);
+      env.sandbox.spy(element, 'enqueAction');
+      env.sandbox.stub(element, 'getDefaultActionAlias');
+      await whenUpgradedToCustomElement(element);
+      await element.whenBuilt();
+
+      action.execute(
+        element,
+        'goToSlide',
+        null,
+        'source',
+        'caller',
+        'event',
+        ActionTrust.HIGH
+      );
+      expect(element.enqueAction).to.be.calledWith(
+        env.sandbox.match({
+          actionEventType: '?',
+          args: null,
+          caller: 'caller',
+          event: 'event',
+          method: 'goToSlide',
+          node: element,
+          source: 'source',
+          trust: ActionTrust.HIGH,
+        })
+      );
+
+      const userErrorStub = env.sandbox.stub(user(), 'error');
+      action.execute(
+        element,
+        'toggleAutoplay',
+        null,
+        'source',
+        'caller',
+        'event',
+        ActionTrust.HIGH
+      );
+      expect(userErrorStub).to.be.calledOnce;
+      expect(userErrorStub.args[0][1]).to.match(
+        /"AMP-CAROUSEL.toggleAutoplay" is not allowlisted/
+      );
+    });
   }
 );

@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-access-analytics"></a>AMP Access and Analytics
+# AMP Access and Analytics
 
 ## Access analytics triggers
 
 Access service issues events for major states in the access flow. These events can be reported through the analytics configuration by using triggers.
 
-See [amp-analytics.md](../amp-analytics/amp-analytics.md) for details on *amp-analytics* configuration.
+See [amp-analytics.md](../amp-analytics/amp-analytics.md) for details on _amp-analytics_ configuration.
 
 ### Authorization received trigger (`"on": "access-authorization-received"`)
 

@@ -40,10 +40,10 @@ fs.realpath@^1.0.0:
   resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
   integrity sha1-FQStJSMVjKpA20onh8sBQRmU6k8=
 
-glob@^7.0.6:
-  version "7.1.2"
-  resolved "https://registry.yarnpkg.com/glob/-/glob-7.1.2.tgz#c19c9df9a028702d678612384a6552404c636d15"
-  integrity sha512-MJTUg1kjuLeQCJ+ccE4Vpa6kKVXkPYJ2mOCQyUuKLcLQsdrMCpBPUi8qVE6+YuaJkozeA9NusTAw3hLr8Xe5EQ==
+glob@^7.1.4:
+  version "7.1.6"
+  resolved "https://registry.yarnpkg.com/glob/-/glob-7.1.6.tgz#141f33b81a7c2492e125594307480c46679278a6"
+  integrity sha512-LwaxwyZ72Lk7vZINtNNrywX0ZuLyStrdDtabefZKAY5ZGJhVtgdznluResxNmPitE0SAO+O26sWTHeKSI2wMBA==
   dependencies:
     fs.realpath "^1.0.0"
     inflight "^1.0.4"
@@ -65,18 +65,18 @@ inherits@2:
   resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.3.tgz#633c2c83e3da42a502f52466022480f4208261de"
   integrity sha1-Yzwsg+PaQqUC9SRmAiSA9CCCYd4=
 
-jasmine-core@~3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/jasmine-core/-/jasmine-core-3.1.0.tgz#a4785e135d5df65024dfc9224953df585bd2766c"
-  integrity sha1-pHheE11d9lAk38kiSVPfWFvSdmw=
+jasmine-core@~3.5.0:
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/jasmine-core/-/jasmine-core-3.5.0.tgz#132c23e645af96d85c8bca13c8758b18429fc1e4"
+  integrity sha512-nCeAiw37MIMA9w9IXso7bRaLl+c/ef3wnxsoSAlYrzS+Ot0zTG6nU8G/cIfGkqpkjX2wNaIW9RFG0TwIFnG6bA==
 
-jasmine@3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/jasmine/-/jasmine-3.1.0.tgz#2bd59fd7ec6ec0e8acb64e09f45a68ed2ad1952a"
-  integrity sha1-K9Wf1+xuwOistk4J9Fpo7SrRlSo=
+jasmine@3.5.0:
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/jasmine/-/jasmine-3.5.0.tgz#7101eabfd043a1fc82ac24e0ab6ec56081357f9e"
+  integrity sha512-DYypSryORqzsGoMazemIHUfMkXM7I7easFaxAvNM3Mr6Xz3Fy36TupTrAOxZWN8MVKEU5xECv22J4tUQf3uBzQ==
   dependencies:
-    glob "^7.0.6"
-    jasmine-core "~3.1.0"
+    glob "^7.1.4"
+    jasmine-core "~3.5.0"
 
 minimatch@^3.0.4:
   version "3.0.4"

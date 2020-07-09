@@ -112,9 +112,17 @@ class AmpDailymotion extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://www.dailymotion.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://www.dailymotion.com',
+      opt_onLayout
+    );
     // Host that Dailymotion uses to serve JS needed by player.
-    this.preconnect.url('https://static1.dmcdn.net', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://static1.dmcdn.net',
+      opt_onLayout
+    );
   }
 
   /**
@@ -271,7 +279,7 @@ class AmpDailymotion extends AMP.BaseElement {
       'info',
     ];
 
-    explicitParamsAttributes.forEach(explicitParam => {
+    explicitParamsAttributes.forEach((explicitParam) => {
       const val = this.element.getAttribute(`data-${explicitParam}`);
       if (val) {
         iframeSrc = addParamToUrl(iframeSrc, explicitParam, val);
@@ -432,6 +440,6 @@ class AmpDailymotion extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpDailymotion);
 });

@@ -22,8 +22,9 @@
  *   expect(actual).to.equal(expected);
  * Good:
  *   await expect(actual).to.equal(expected);
+ * @return {!Object}
  */
-module.exports = function(context) {
+module.exports = function (context) {
   return {
     CallExpression(node) {
       const filename = context.getFilename();
@@ -37,6 +38,12 @@ module.exports = function(context) {
       }
 
       if (callee.name !== 'expect') {
+        return;
+      }
+
+      const comments = context.getCommentsBefore(callee);
+      const ok = comments.some((comment) => comment.value === 'OK');
+      if (ok) {
         return;
       }
 

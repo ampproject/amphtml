@@ -72,10 +72,7 @@ export class AccessServerAdapter {
     /** @private @const */
     this.clientAdapter_ = new AccessClientAdapter(ampdoc, configJson, context);
 
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = Services.viewerForDoc(ampdoc);
-
-    /** @const @private {!../../../src/service/xhr-impl.Xhr} */
+    /** @const @protected {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(ampdoc.win);
 
     /** @const @private {!../../../src/service/timer-impl.Timer} */
@@ -84,14 +81,8 @@ export class AccessServerAdapter {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(ampdoc.win);
 
-    const stateElement = ampdoc
-      .getRootNode()
-      .querySelector('meta[name="i-amphtml-access-state"]');
-
     /** @private @const {?string} */
-    this.serverState_ = stateElement
-      ? stateElement.getAttribute('content')
-      : null;
+    this.serverState_ = ampdoc.getMetaByName('i-amphtml-access-state');
 
     const isInExperiment = isExperimentOn(ampdoc.win, 'amp-access-server');
 
@@ -99,7 +90,7 @@ export class AccessServerAdapter {
     this.isProxyOrigin_ = isProxyOrigin(ampdoc.win.location) || isInExperiment;
 
     const serviceUrlOverride = isInExperiment
-      ? this.viewer_.getParam('serverAccessService')
+      ? ampdoc.getParam('serverAccessService')
       : null;
 
     /** @private @const {string} */
@@ -142,7 +133,7 @@ export class AccessServerAdapter {
       /* useAuthData */ false
     );
     return varsPromise
-      .then(vars => {
+      .then((vars) => {
         const requestVars = {};
         for (const k in vars) {
           if (vars[k] != null) {
@@ -168,7 +159,7 @@ export class AccessServerAdapter {
           })
         );
       })
-      .then(responseDoc => {
+      .then((responseDoc) => {
         dev().fine(TAG, 'Authorization response: ', responseDoc);
         const accessDataString = devAssert(
           responseDoc.querySelector('script[id="amp-access-data"]'),

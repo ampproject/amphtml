@@ -21,7 +21,7 @@ import {
 import {Services} from '../../src/services';
 import {fromIterator} from '../../src/utils/array';
 
-describes.realWin('FormDataWrapper', {}, env => {
+describes.realWin('FormDataWrapper', {}, (env) => {
   describe('entries', () => {
     let nativeEntries;
     let nativeDelete;
@@ -61,14 +61,14 @@ describes.realWin('FormDataWrapper', {}, env => {
       });
     }
 
-    scenarios.forEach(scenario => {
+    scenarios.forEach((scenario) => {
       describe(scenario.description, () => {
         beforeEach(scenario.beforeEach);
 
         afterEach(scenario.afterEach);
 
         beforeEach(() => {
-          sandbox.stub(Services, 'platformFor').returns({
+          env.sandbox.stub(Services, 'platformFor').returns({
             isIos() {
               return false;
             },
@@ -381,12 +381,36 @@ describes.realWin('FormDataWrapper', {}, env => {
             ]);
           }
         );
+
+        it('excludes the submit input if it has no name attribute', () => {
+          const form = env.win.document.createElement('form');
+
+          const input = env.win.document.createElement('input');
+          input.type = 'text';
+          input.name = 'foo1';
+          input.value = 'bar';
+
+          const submit = env.win.document.createElement('input');
+          submit.type = 'submit';
+          // no name attribute
+          submit.value = 'baz';
+
+          form.appendChild(input);
+          form.appendChild(submit);
+          env.win.document.body.appendChild(form);
+
+          submit.focus();
+          const formData = createFormDataWrapper(env.win, form);
+          expect(fromIterator(formData.entries())).to.have.deep.members([
+            ['foo1', 'bar'],
+          ]);
+        });
       });
     });
 
     describe('Ios11NativeFormDataWrapper', () => {
       beforeEach(() => {
-        sandbox.stub(Services, 'platformFor').returns({
+        env.sandbox.stub(Services, 'platformFor').returns({
           isIos() {
             return true;
           },

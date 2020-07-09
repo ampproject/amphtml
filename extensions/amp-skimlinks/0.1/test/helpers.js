@@ -20,7 +20,7 @@ import {DEFAULT_SKIM_OPTIONS} from './constants';
 import {Services} from '../../../../src/services';
 import {Tracking} from '../tracking';
 
-const helpersFactory = env => {
+const helpersFactory = (env) => {
   const {win} = env;
 
   return {
@@ -57,7 +57,7 @@ const helpersFactory = env => {
     },
 
     createTrackingWithStubAnalytics(skimOptions) {
-      skimOptions = Object.assign({}, DEFAULT_SKIM_OPTIONS, skimOptions);
+      skimOptions = {...DEFAULT_SKIM_OPTIONS, ...skimOptions};
       this.stubCustomEventReporterBuilder();
 
       return new Tracking(env, skimOptions, 'my-page-referrer');

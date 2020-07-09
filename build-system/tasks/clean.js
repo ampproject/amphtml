@@ -19,9 +19,20 @@ const del = require('del');
 
 /**
  * Clean up the build artifacts
+ * @return {!Promise}
  */
 async function clean() {
-  return del(['dist', 'dist.3p', 'dist.tools', 'build', '.amp-build']);
+  return del([
+    'dist',
+    'dist.3p',
+    'dist.tools',
+    'build',
+    '.amp-build',
+    '.karma-cache',
+    'deps.txt',
+    'build-system/server/new-server/transforms/dist',
+    'test-bin',
+  ]);
 }
 
 module.exports = {

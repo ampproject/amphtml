@@ -154,7 +154,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
     /** @private {!Object|null} */
     this.localeWordList_ = this.getLocaleWord_(this.locale_);
 
-    Services.viewerForDoc(this.getAmpDoc())
+    this.getAmpDoc()
       .whenFirstVisible()
       .then(() => {
         const EPOCH = this.getEpoch_() + this.offsetSeconds_ * 1000;
@@ -342,6 +342,7 @@ export class AmpDateCountdown extends AMP.BaseElement {
   /**
    * @param {!Element} element
    * @private
+   * @return {*} TODO(#23582): Specify return type
    */
   rendered_(element) {
     return this.mutateElement(() => {
@@ -359,6 +360,6 @@ export class AmpDateCountdown extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpDateCountdown);
 });

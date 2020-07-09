@@ -28,6 +28,7 @@
  */
 
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
@@ -46,7 +47,11 @@ export class AmpGist extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://gist.github.com/', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://gist.github.com/',
+      opt_onLayout
+    );
   }
 
   /** @override */
@@ -63,8 +68,8 @@ export class AmpGist extends AMP.BaseElement {
     listenFor(
       iframe,
       'embed-size',
-      data => {
-        this./*OK*/ changeHeight(data['height']);
+      (data) => {
+        this.forceChangeHeight(data['height']);
       },
       /* opt_is3P */ true
     );
@@ -86,6 +91,6 @@ export class AmpGist extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-gist', '0.1', AMP => {
+AMP.extension('amp-gist', '0.1', (AMP) => {
   AMP.registerElement('amp-gist', AmpGist);
 });

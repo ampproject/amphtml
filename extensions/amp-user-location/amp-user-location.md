@@ -5,9 +5,10 @@ formats:
   - websites
   - dynamic-content
 teaser:
-  text: Request the user's precise location.
+  text: Requests the user's location and provides it to AMP components.
 experimental: true
 ---
+
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -24,31 +25,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# `amp-user-location`
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Requests the user's location and provides it to AMP components.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Experimental. The `amp-user-location` experiment must be enabled to use this component.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-user-location" src="https://cdn.ampproject.org/v0/amp-user-location-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <!-- TODO(cvializ) -->
-  <!-- <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>FILL THIS IN</td>
-  </tr> -->
-</table>
+# amp-user-location
 
 ## Behavior
 
@@ -77,21 +54,23 @@ for the current domain, if the user has not already.
 `amp-user-location` exposes the following events
 
 <table>
-<tr>
-<th width="30%">Event</th>
-<th>Description</th>
-</tr>
-<tr>
-<td><code>approve</code></td>
-<td>This event is fired when the user triggers the `request` action and then approves the browser prompt to access their location, or the user has previously approved the prompt. The `event` object contains `lat` `lon` and `source` properties.</td>
-</tr>
-<tr>
-<td><code>deny</code></td>
-<td>This event is fired when the user triggers the `request` action and then denies the browser prompt to access their location, or the user has previously denied the prompt.</td>
-</tr>
-<td><code>error</code></td>
-<td>This event is fired when the user triggers the `request` action and and error occurs. This can happen if the browser takes too long to retrieve the location information, if the hardware is unavailable, or other errors occur.</td>
-</tr>
+  <tr>
+    <th width="30%">Event</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>approve</code></td>
+    <td>This event is fired when the user triggers the `request` action and then approves the browser prompt to access their location, or the user has previously approved the prompt. The `event` object contains `lat` `lon` and `source` properties.
+    </td>
+  </tr>
+  <tr>
+    <td><code>deny</code></td>
+    <td>This event is fired when the user triggers the `request` action and then denies the browser prompt to access their location, or the user has previously denied the prompt.</td>
+  </tr>
+  <tr>
+    <td><code>error</code></td>
+    <td>This event is fired when the user triggers the `request` action and and error occurs. This can happen if the browser takes too long to retrieve the location information, if the hardware is unavailable, or other errors occur.</td>
+  </tr>
 </table>
 
 ## Variable Substitution
@@ -108,4 +87,5 @@ syntax as above. It will wait for the location to be requested before resolving,
 request from occurring until that time. Polling is useful when the location is required for the request.
 
 ## Validation
+
 See [amp-user-location rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-location/validator-amp-user-location.protoascii) in the AMP validator specification.

@@ -135,7 +135,7 @@ it('rejects a specific file that is known to have errors', function(done) {
           if (error.specUrl) {
             out += ' (see ' + error.specUrl + ')';
           }
-          out += ' [' + error.category + ']\n';
+          out += '\n';
         }
 
         expect(out).toBe(severalErrorsOut);
@@ -187,12 +187,11 @@ it('emits text if --format=text is specified on command line', function(done) {
           .split('\n')
           .filter(isErrorLine)
           .splice(1) // trim 1st line
-          .join('\n')
-          .replace(/ \[[A-Z_]+\]/g, ''); // trim error categories
+          .join('\n');
   execFile(
       process.execPath,
       [
-        '../nodejs/index.js', '--format=text',
+        '../nodejs/cli.js', '--format=text',
         '--validator_js=../dist/validator_minified.js',
         'feature_tests/several_errors.html',
         'feature_tests/minimum_valid_amp.html',
@@ -210,7 +209,7 @@ it('emits json if --format=json is specified on command line', function(done) {
   execFile(
       process.execPath,
       [
-        '../nodejs/index.js', '--format=json',
+        '../nodejs/cli.js', '--format=json',
         '--validator_js=../dist/validator_minified.js',
         'feature_tests/several_errors.html',
         'feature_tests/minimum_valid_amp.html',
@@ -246,12 +245,11 @@ it('supports AMP4ADS with --html_format command line option', function(done) {
           .split('\n')
           .filter(isErrorLine)
           .splice(1) // trim 1st line
-          .join('\n')
-          .replace(/ \[[A-Z_]+\]/g, ''); // trim error categories
+          .join('\n');
   execFile(
       process.execPath,
       [
-        '../nodejs/index.js', '--format=text', '--html_format=AMP4ADS',
+        '../nodejs/cli.js', '--format=text', '--html_format=AMP4ADS',
         '--validator_js=../dist/validator_minified.js',
         'amp4ads_feature_tests/style-amp-custom.html',
         'amp4ads_feature_tests/min_valid_amp4ads.html',

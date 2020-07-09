@@ -19,10 +19,13 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="320" height="50"
-    type="adstir"
-    data-app-id="MEDIA--343ded3e"
-    data-ad-spot="1">
+<amp-ad
+  width="320"
+  height="50"
+  type="adstir"
+  data-app-id="MEDIA--343ded3e"
+  data-ad-spot="1"
+>
 </amp-ad>
 ```
 

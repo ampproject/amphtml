@@ -26,7 +26,7 @@ import {user} from '../../src/log';
  * Approved height for AdSense full-width responsive ads.
  * @const {number}
  */
-export const ADSENSE_RSPV_WHITELISTED_HEIGHT = 320;
+export const ADSENSE_RSPV_ALLOWED_HEIGHT = 320;
 
 /**
  * The attribute value for AdSense data-auto-format tag.
@@ -36,20 +36,6 @@ export const ADSENSE_RSPV_WHITELISTED_HEIGHT = 320;
  */
 export const ADSENSE_RSPV_TAG = 'rspv';
 export const ADSENSE_MCRSPV_TAG = 'mcrspv';
-
-/**
- * Required size to be sent with fluid requests.
- * @const {string}
- */
-export const DUMMY_FLUID_SIZE = '320x50';
-
-/**
- * Required size to be sent with fluid requests in array format.
- * @const {!Array<number>}
- */
-const DUMMY_FLUID_SIZE_ARR = DUMMY_FLUID_SIZE.split('x').map(dim =>
-  Number(dim)
-);
 
 /**
  * Given the amp-ad data attribute containing the multi-size dimensions, and a
@@ -80,11 +66,8 @@ export function getMultiSizeDimensions(
   for (let i = 0; i < arrayOfSizeStrs.length; i++) {
     const sizeStr = arrayOfSizeStrs[i];
     if (sizeStr.toLowerCase() == 'fluid') {
-      if (!isFluidPrimary) {
-        // If the primary size is fluid, then the dummy size will already be
-        // be included.
-        dimensions.push(DUMMY_FLUID_SIZE_ARR);
-      }
+      // Fluid dummy sizes should be appended to the front of the request
+      // parameter, so they must be handled elsewhere.
       continue;
     }
     const size = sizeStr.split('x');
@@ -103,12 +86,12 @@ export function getMultiSizeDimensions(
       !validateDimensions(
         width,
         height,
-        w => isNaN(w) || w <= 0,
-        h => isNaN(h) || h <= 0,
-        badParams =>
+        (w) => isNaN(w) || w <= 0,
+        (h) => isNaN(h) || h <= 0,
+        (badParams) =>
           badParams
             .map(
-              badParam =>
+              (badParam) =>
                 `Invalid ${badParam.dim} of ${badParam.val} ` +
                 'given for secondary size.'
             )
@@ -124,12 +107,12 @@ export function getMultiSizeDimensions(
       !validateDimensions(
         width,
         height,
-        w => w > primaryWidth,
-        h => h > primaryHeight,
-        badParams =>
+        (w) => w > primaryWidth,
+        (h) => h > primaryHeight,
+        (badParams) =>
           badParams
             .map(
-              badParam =>
+              (badParam) =>
                 `Secondary ${badParam.dim} ${badParam.val} ` +
                 `can't be larger than the primary ${badParam.dim}.`
             )
@@ -151,12 +134,12 @@ export function getMultiSizeDimensions(
         !validateDimensions(
           width,
           height,
-          w => w < minWidth,
-          h => h < minHeight,
-          badParams =>
+          (w) => w < minWidth,
+          (h) => h < minHeight,
+          (badParams) =>
             badParams
               .map(
-                badParam =>
+                (badParam) =>
                   `Secondary ${badParam.dim} ${badParam.val} is ` +
                   `smaller than 2/3rds of the primary ${badParam.dim}.`
               )

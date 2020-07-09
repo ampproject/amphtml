@@ -20,7 +20,7 @@ tags: {  # amp-dailymotion
     name: "amp-dailymotion"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -73,7 +73,7 @@ tags: {  # <amp-dailymotion>
     requires_extension: "amp-video-docking"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-dailymotion"
+  spec_url: "https://amp.dev/documentation/components/amp-dailymotion/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

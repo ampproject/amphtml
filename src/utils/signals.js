@@ -52,7 +52,8 @@ export class Signals {
    * @return {number|!Error|null}
    */
   get(name) {
-    return this.map_[name] || null;
+    const v = this.map_[name];
+    return v == null ? null : v;
   }
 
   /**
@@ -100,7 +101,7 @@ export class Signals {
       // Do not duplicate signals.
       return;
     }
-    const time = opt_time || Date.now();
+    const time = opt_time == undefined ? Date.now() : opt_time;
     this.map_[name] = time;
     const promiseStruct = this.promiseMap_ && this.promiseMap_[name];
     if (promiseStruct && promiseStruct.resolve) {

@@ -22,14 +22,14 @@
 // src/polyfills.js must be the first import.
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
-import {
-  adoptShadowMode,
-  installBuiltins,
-  installRuntimeServices,
-} from './runtime';
+import {adoptShadowMode} from './runtime';
 import {bodyAlwaysVisible} from './style-installer';
 import {deactivateChunking} from './chunk';
 import {doNotTrackImpression} from './impression';
+import {
+  installBuiltinElements,
+  installRuntimeServices,
+} from './service/core-services';
 import {installDocService} from './service/ampdoc-impl';
 import {internalRuntimeVersion} from './internal-version';
 
@@ -51,7 +51,7 @@ doNotTrackImpression();
 bodyAlwaysVisible(self);
 
 // Builtins.
-installBuiltins(self);
+installBuiltinElements(self);
 
 // Final configuration and stubbing.
 adoptShadowMode(self);

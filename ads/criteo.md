@@ -25,10 +25,13 @@ For configuration details and to generate your tags, please refer to [your publi
 ## Example - Passback
 
 ```html
-<amp-ad width="300" height="250"
-    type="criteo"
-    data-tagtype="passback"
-    data-zone="567890">
+<amp-ad
+  width="300"
+  height="250"
+  type="criteo"
+  data-tagtype="passback"
+  data-zone="567890"
+>
 </amp-ad>
 ```
 

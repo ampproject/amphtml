@@ -1,9 +1,7 @@
 language: node_js
 dist: xenial
 node_js:
-  - "lts/*"
-python:
-  - "2.7"
+  - '12'
 notifications:
   email:
     recipients:
@@ -11,15 +9,22 @@ notifications:
     on_success: change
     on_failure: change
 before_install:
+  # Install the latest version of Yarn (Xenial's built-in version v1.15.2 is outdated)
+  - curl -o- -L https://yarnpkg.com/install.sh | bash
+  - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
   # Override Xenial's default Java version (github.com/travis-ci/travis-ci/issues/10290)
   - export PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
   - export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
-  - pip install --user protobuf
+  # Ensure python v2 and v3 are available, and "python" defaults to v3 (docs.travis-ci.com/user/reference/xenial/#python-support)
+  - pyenv global 3.6.7 2.7.15
+  - python3 --version
+  - python2 --version
+  - python --version
+  # Xenial's version of python-protobuf is outdated (github.com/ampproject/amphtml/pull/22528)
+  - pip3 install --user protobuf
 branches:
   only:
     - master
-    - release
-    - canary
     - /^amp-release-.*$/
 addons:
   apt:
@@ -40,56 +45,64 @@ addons:
     # but should not resolve in tests.
     - fonts.googleapis.com
 stages:
-  - build
-  - test
+  - name: build
+  - name: test
+  - name: experiment
+    if: type = push
 jobs:
   include:
     - stage: build
-      name: "Build"
+      name: 'Build'
       script:
         - unbuffer node build-system/pr-check/build.js
     - stage: build
-      name: "Checks"
+      name: 'Checks'
       script:
         - unbuffer node build-system/pr-check/checks.js
     - stage: build
-      name: "Validator Tests"
+      name: 'Validator Tests'
       script:
         - unbuffer node build-system/pr-check/validator-tests.js
     - stage: build
-      name: "Dist, Bundle Size"
+      name: 'Dist, Bundle Size'
       script:
         - unbuffer node build-system/pr-check/dist-bundle-size.js
-    - stage: test
-      name: "Single Pass Tests"
+    - stage: build
+      name: 'Module Dist, Bundle Size'
       script:
-        - unbuffer node build-system/pr-check/single-pass-tests.js
+        - unbuffer node build-system/pr-check/module-dist-bundle-size.js
     - stage: test
-      name: "Visual Diff Tests"
+      name: 'Visual Diff Tests'
       script:
         - unbuffer node build-system/pr-check/visual-diff-tests.js
     - stage: test
-      name: "Local Tests"
+      name: 'Local Tests'
       script:
         - unbuffer node build-system/pr-check/local-tests.js
     - stage: test
-      name: "Remote (Sauce Labs) Tests"
+      name: 'Dist Tests'
       script:
-        - unbuffer node build-system/pr-check/remote-tests.js
-      after_script:
-        - build-system/sauce_connect/stop_sauce_connect.sh
+        - unbuffer node build-system/pr-check/dist-tests.js
     - stage: test
-      name: "End to End Tests"
+      name: 'End to End Tests'
       script:
         - unbuffer node build-system/pr-check/e2e-tests.js
-cache:
-  directories:
-    - node_modules
-    - build-system/tasks/e2e/node_modules
-    - build-system/tasks/visual-diff/node_modules
-    - sauce_connect
-    - validator/node_modules
-    - validator/nodejs/node_modules
-    - validator/webui/node_modules
-    - $HOME/.cache/pip
-  yarn: true
+    - stage: experiment
+      name: 'Experiment A Tests'
+      script:
+        - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentA
+    - stage: experiment
+      name: 'Experiment B Tests'
+      script:
+        - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentB
+    - stage: experiment
+      name: 'Experiment C Tests'
+      script:
+        - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentC
+    - stage: experiment
+      name: 'Performance Tests'
+      script:
+        - unbuffer node build-system/pr-check/performance-tests.js
+  allow_failures:
+    - script: unbuffer node build-system/pr-check/performance-tests.js # See #28148
+  fast_finish: true

@@ -6,6 +6,7 @@ formats:
 teaser:
   text: Displays a YouTube video.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -24,68 +25,61 @@ limitations under the License.
 
 # amp-youtube
 
-Displays a <a href="https://www.youtube.com/">YouTube</a> video.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-youtube/">Annotated code example for amp-youtube</a></td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Example
 
 With the responsive layout, the width and height from the example should yield correct layouts for 16:9 aspect ratio videos:
 
 ```html
 <amp-youtube
-    data-videoid="mGENRKrdoGY"
-    layout="responsive"
-    width="480" height="270"></amp-youtube>
+  data-videoid="mGENRKrdoGY"
+  layout="responsive"
+  width="480"
+  height="270"
+></amp-youtube>
 ```
 
 ```html
-  <amp-youtube
-      id="myLiveChannel"
-      data-live-channelid="UCB8Kb4pxYzsDsHxzBfnid4Q"
-      width="358"
-      height="204"
-      layout="responsive">
-    <amp-img
-      src="https://i.ytimg.com/vi/Wm1fWz-7nLQ/hqdefault_live.jpg"
-      placeholder
-      layout="fill"
-      />
-  </amp-youtube>
+<amp-youtube
+  id="myLiveChannel"
+  data-live-channelid="UCB8Kb4pxYzsDsHxzBfnid4Q"
+  width="358"
+  height="204"
+  layout="responsive"
+>
+  <amp-img
+    src="https://i.ytimg.com/vi/Wm1fWz-7nLQ/hqdefault_live.jpg"
+    placeholder
+    layout="fill"
+  />
+</amp-youtube>
 ```
+
 ## Attributes
 
 <table>
   <tr>
     <td width="40%"><strong>autoplay</strong></td>
-    <td>If this attribute is present, and the browser supports autoplay:</p>
-<ul>
-  <li>the video is automatically muted before autoplay starts
-  </li>
-  <li>when the video is scrolled out of view, the video is paused
-  </li>
-  <li>when the video is scrolled into view, the video resumes playback
-  </li>
-  <li>when the user taps the video, the video is unmuted
-  </li>
-  <li>if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
-  </li>
-</ul></td>
+    <td>
+      <p>If this attribute is present, and the browser supports autoplay:</p>
+      <ul>
+        <li>the video is automatically muted before autoplay starts
+        </li>
+        <li>when the video is scrolled out of view, the video is paused
+        </li>
+        <li>when the video is scrolled into view, the video resumes playback
+        </li>
+        <li>when the user taps the video, the video is unmuted
+        </li>
+        <li>if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
+        </li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>loop</strong></td>
+    <td>
+      <p>If this attribute is present, the video or playlist will play again (from the beginning) once it ends.</p>
+    </td>
   </tr>
   <tr>
     <td width="40%"><strong>data-videoid</strong></td>
@@ -98,12 +92,13 @@ With the responsive layout, the width and height from the example should yield c
   </tr>
   <tr>
     <td width="40%"><strong>data-param-&#42;</strong></td>
-    <td><p>All <code>data-param-*</code> attributes will be added as query parameter to the YouTube iframe src. This may be used to pass custom values through to YouTube plugins, such as whether to show controls.</p>
+    <td><p>All <code>data-param-*</code> attributes (with the exception of <code>data-param-autoplay</code> and <code>data-param-loop</code>) will be added as query parameter to the YouTube iframe src. This may be used to pass custom values through to YouTube plugins, such as whether to show controls.</p>
 <p>Keys and values will be URI encoded. Keys will be camel cased.</p>
 <ul>
   <li>`data-param-controls=1` becomes `&controls=1`</li>
 </ul>
 <p>See <a href="https://developers.google.com/youtube/player_parameters">YouTube Embedded Player Parameters</a> for more parameter options for YouTube.</p>
+<p>Note: Use the <code>autoplay</code> attribute instead of <code>data-param-autoplay</code> and the <code>loop</code> attribute instead of <code>data-param-loop</code> since both the autoplay and looping behaviors are handled internally by AMP instead of the Youtube player.</p>
 </td>
   </tr>
   <tr>
@@ -123,7 +118,7 @@ With the responsive layout, the width and height from the example should yield c
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

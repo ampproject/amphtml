@@ -85,7 +85,13 @@ export class AmpAnim extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const img = dev().assertElement(this.img_);
-    this.propagateAttributes(LAYOUT_ATTRIBUTES, img);
+    // Remove missing attributes to remove the placeholder srcset if none is
+    // specified on the element.
+    this.propagateAttributes(
+      LAYOUT_ATTRIBUTES,
+      img,
+      /* opt_removeMissingAttrs */ true
+    );
     guaranteeSrcForSrcsetUnsupportedBrowsers(img);
     return this.loadPromise(img);
   }
@@ -123,6 +129,6 @@ export class AmpAnim extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpAnim);
 });

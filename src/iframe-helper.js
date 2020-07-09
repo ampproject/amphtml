@@ -21,7 +21,7 @@ import {dict} from './utils/object';
 import {getData} from './event-helper';
 import {parseUrlDeprecated} from './url';
 import {remove} from './utils/array';
-import {setStyle} from './style';
+import {setStyle, toggle} from './style';
 import {tryParseJson} from './json';
 
 /**
@@ -29,6 +29,13 @@ import {tryParseJson} from './json';
  * @type {string}
  */
 const UNLISTEN_SENTINEL = 'unlisten';
+
+/**
+ * The iframe feature policy that forces the iframe to pause when it's not
+ * display.
+ * See https://github.com/dtapuska/iframe-freeze.
+ */
+const EXECUTION_WHILE_NOT_RENDERED = 'execution-while-not-rendered';
 
 /**
  * @typedef {{
@@ -81,7 +88,7 @@ function getListenForSentinel(parentWin, sentinel, opt_create) {
  * @param {!Element} iframe the iframe element who's context will trigger the
  *     event
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
- * @return {?Object<string, !Array<function(!JsonObject, !Window, string)>>}
+ * @return {?Object<string, !Array<function(!JsonObject, !Window, string, !MessageEvent)>>}
  */
 function getOrCreateListenForEvents(parentWin, iframe, opt_is3P) {
   const sentinel = getSentinel_(iframe, opt_is3P);
@@ -113,7 +120,7 @@ function getOrCreateListenForEvents(parentWin, iframe, opt_is3P) {
  * @param {string} sentinel the sentinel of the message
  * @param {string} origin the source window's origin
  * @param {?Window} triggerWin the window that triggered the event
- * @return {?Object<string, !Array<function(!JsonObject, !Window, string)>>}
+ * @return {?Object<string, !Array<function(!JsonObject, !Window, string, !MessageEvent)>>}
  */
 function getListenForEvents(parentWin, sentinel, origin, triggerWin) {
   const listenSentinel = getListenForSentinel(parentWin, sentinel);
@@ -177,7 +184,7 @@ function dropListenSentinel(listenSentinel) {
       const {events} = windowEvents;
       for (const name in events) {
         // Splice here, so that each unlisten does not shift the array
-        events[name].splice(0, Infinity).forEach(event => {
+        events[name].splice(0, Infinity).forEach((event) => {
           event(noopData);
         });
       }
@@ -193,7 +200,7 @@ function registerGlobalListenerIfNeeded(parentWin) {
   if (parentWin.listeningFors) {
     return;
   }
-  const listenForListener = function(event) {
+  const listenForListener = function (event) {
     if (!getData(event)) {
       return;
     }
@@ -224,7 +231,7 @@ function registerGlobalListenerIfNeeded(parentWin) {
     listeners = listeners.slice();
     for (let i = 0; i < listeners.length; i++) {
       const listener = listeners[i];
-      listener(data, event.source, event.origin);
+      listener(data, event.source, event.origin, event);
     }
   };
 
@@ -237,7 +244,7 @@ function registerGlobalListenerIfNeeded(parentWin) {
  *
  * @param {?Element} iframe
  * @param {string} typeOfMessage
- * @param {?function(!JsonObject, !Window, string)} callback Called when a
+ * @param {?function(!JsonObject, !Window, string, !MessageEvent)} callback Called when a
  *     message of this type arrives for this iframe.
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
  * @param {boolean=} opt_includingNestedWindows set to true if messages from
@@ -276,7 +283,7 @@ export function listenFor(
     listenForEvents[typeOfMessage] || (listenForEvents[typeOfMessage] = []);
 
   let unlisten;
-  let listener = function(data, source, origin) {
+  let listener = function (data, source, origin, event) {
     const sentinel = data['sentinel'];
 
     // Exclude messages that don't satisfy amp sentinel rules.
@@ -304,12 +311,12 @@ export function listenFor(
       unlisten();
       return;
     }
-    callback(data, source, origin);
+    callback(data, source, origin, event);
   };
 
   events.push(listener);
 
-  return (unlisten = function() {
+  return (unlisten = function () {
     if (listener) {
       const index = events.indexOf(listener);
       if (index > -1) {
@@ -330,24 +337,24 @@ export function listenFor(
  * @param {!Element} iframe
  * @param {string|!Array<string>} typeOfMessages
  * @param {boolean=} opt_is3P
- * @return {!Promise<!{data: !JsonObject, source: !Window, origin: string}>}
+ * @return {!Promise<!{data: !JsonObject, source: !Window, origin: string, event: !MessageEvent}>}
  */
 export function listenForOncePromise(iframe, typeOfMessages, opt_is3P) {
   const unlistenList = [];
   if (typeof typeOfMessages == 'string') {
     typeOfMessages = [typeOfMessages];
   }
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     for (let i = 0; i < typeOfMessages.length; i++) {
       const message = typeOfMessages[i];
       const unlisten = listenFor(
         iframe,
         message,
-        (data, source, origin) => {
+        (data, source, origin, event) => {
           for (let i = 0; i < unlistenList.length; i++) {
             unlistenList[i]();
           }
-          resolve({data, source, origin});
+          resolve({data, source, origin, event});
         },
         opt_is3P
       );
@@ -424,7 +431,7 @@ export function parseIfNeeded(data) {
   if (typeof data == 'string') {
     if (data.charAt(0) == '{') {
       data =
-        tryParseJson(data, e => {
+        tryParseJson(data, (e) => {
           dev().warn(
             'IFRAME-HELPER',
             'Postmessage could not be parsed. ' +
@@ -469,7 +476,7 @@ export class SubscriptionApi {
       (data, source, origin) => {
         // This message might be from any window within the iframe, we need
         // to keep track of which windows want to be sent updates.
-        if (!this.clientWindows_.some(entry => entry.win == source)) {
+        if (!this.clientWindows_.some((entry) => entry.win == source)) {
           this.clientWindows_.push({win: source, origin});
         }
         requestCallback(data, source, origin);
@@ -487,7 +494,7 @@ export class SubscriptionApi {
    */
   send(type, data) {
     // Remove clients that have been removed from the DOM.
-    remove(this.clientWindows_, client => !client.win.parent);
+    remove(this.clientWindows_, (client) => !client.win.parent);
     postMessageToWindows(
       this.iframe_,
       this.clientWindows_,
@@ -522,7 +529,12 @@ export function looksLikeTrackingIframe(element) {
 
 // Most common ad sizes
 // Array of [width, height] pairs.
-const adSizes = [[300, 250], [320, 50], [300, 50], [320, 100]];
+const adSizes = [
+  [300, 250],
+  [320, 50],
+  [300, 50],
+  [320, 100],
+];
 
 /**
  * Guess whether this element might be an ad.
@@ -552,7 +564,7 @@ export function isAdLike(element) {
 
 /**
  * @param {!Element} iframe
- * @private
+ * @return {!Element}
  */
 export function disableScrollingOnIframe(iframe) {
   addAttributesToElement(iframe, dict({'scrolling': 'no'}));
@@ -570,7 +582,6 @@ export function disableScrollingOnIframe(iframe) {
  * from the perspective of the current window.
  * @param {!Window} win
  * @return {boolean}
- * @private
  */
 export function canInspectWindow(win) {
   // TODO: this is not reliable.  The compiler assumes that property reads are
@@ -585,4 +596,64 @@ export function canInspectWindow(win) {
     // eslint-disable-line no-unused-vars
     return false;
   }
+}
+
+/** @const {string} */
+export const FIE_EMBED_PROP = '__AMP_EMBED__';
+
+/**
+ * Returns the embed created using `installFriendlyIframeEmbed` or `null`.
+ * Caution: This will only return the FIE after the iframe has 'loaded'. If you
+ * are checking before this signal you may be in a race condition that returns
+ * null.
+ * @param {!HTMLIFrameElement} iframe
+ * @return {?./friendly-iframe-embed.FriendlyIframeEmbed}
+ */
+export function getFriendlyIframeEmbedOptional(iframe) {
+  return /** @type {?./friendly-iframe-embed.FriendlyIframeEmbed} */ (iframe[
+    FIE_EMBED_PROP
+  ]);
+}
+
+/**
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isInFie(element) {
+  return (
+    element.classList.contains('i-amphtml-fie') ||
+    !!closestAncestorElementBySelector(element, '.i-amphtml-fie')
+  );
+}
+
+/**
+ * @param {!HTMLIFrameElement} iframe
+ */
+export function makePausable(iframe) {
+  const oldAllow = (iframe.getAttribute('allow') || '').trim();
+  iframe.setAttribute(
+    'allow',
+    `${EXECUTION_WHILE_NOT_RENDERED} 'none';` + oldAllow
+  );
+}
+
+/**
+ * @param {!HTMLIFrameElement} iframe
+ * @return {boolean}
+ */
+export function isPausable(iframe) {
+  return (
+    !!iframe.featurePolicy &&
+    iframe.featurePolicy.features().indexOf(EXECUTION_WHILE_NOT_RENDERED) !=
+      -1 &&
+    !iframe.featurePolicy.allowsFeature(EXECUTION_WHILE_NOT_RENDERED)
+  );
+}
+
+/**
+ * @param {!HTMLIFrameElement} iframe
+ * @param {boolean} paused
+ */
+export function setPaused(iframe, paused) {
+  toggle(iframe, !paused);
 }

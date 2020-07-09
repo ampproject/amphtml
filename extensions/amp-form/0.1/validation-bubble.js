@@ -31,7 +31,7 @@ export class ValidationBubble {
     /** @private @const {string} */
     this.id_ = id;
 
-    /** @private @const {!../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private @const {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */

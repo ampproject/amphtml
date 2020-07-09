@@ -24,7 +24,7 @@ import {RelativePositions, layoutRectLtwh} from '../../../../src/layout-rect';
  * - moves the container in the viewport and tests enter, exit, progress values,
  *   with various ratio and margin configurations
  */
-describes.sandboxed('amp-position-observer', {}, () => {
+describes.sandboxed('amp-position-observer', {}, (env) => {
   let impl;
   let enterSpy;
   let exitSpy;
@@ -52,9 +52,9 @@ describes.sandboxed('amp-position-observer', {}, () => {
     impl = new AmpVisibilityObserver(elem);
     impl.runOnce_ = runOnce;
     impl.parseAttributes_();
-    enterSpy = sandbox.stub(impl, 'triggerEnter_');
-    exitSpy = sandbox.stub(impl, 'triggerExit_');
-    scrollSpy = sandbox.stub(impl, 'triggerScroll_');
+    enterSpy = env.sandbox.stub(impl, 'triggerEnter_');
+    exitSpy = env.sandbox.stub(impl, 'triggerExit_');
+    scrollSpy = env.sandbox.stub(impl, 'triggerScroll_');
   }
 
   function resetSpies() {

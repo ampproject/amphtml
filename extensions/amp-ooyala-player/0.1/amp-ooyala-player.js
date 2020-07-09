@@ -68,7 +68,11 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://player.ooyala.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://player.ooyala.com',
+      opt_onLayout
+    );
   }
 
   /** @override */
@@ -109,7 +113,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     const playerVersion = el.getAttribute('data-playerversion') || '';
     if (playerVersion.toLowerCase() == 'v4') {
       src =
-        'https://player.ooyala.com/static/v4/sandbox/amp_iframe/' +
+        'https://player.ooyala.com/static/v4/production/latest/' +
         'skin-plugin/amp_iframe.html?pcode=' +
         encodeURIComponent(this.pCode_);
       const configUrl = el.getAttribute('data-config');
@@ -128,7 +132,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
-    this.unlistenMessage_ = listen(this.win, 'message', event => {
+    this.unlistenMessage_ = listen(this.win, 'message', (event) => {
       this.handleOoyalaMessage_(event);
     });
 
@@ -185,7 +189,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
       return;
     }
     const data = objOrParseJson(getData(event));
-    if (data === undefined) {
+    if (data == null) {
       return; // We only process valid JSON.
     }
     redispatch(this.element, data['data'], {
@@ -314,6 +318,6 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpOoyalaPlayer);
 });

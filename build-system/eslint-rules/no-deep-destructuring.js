@@ -22,10 +22,11 @@
  *   const { x: { y } } = obj.prop;
  * Good:
  *   const { y } = obj.prop.x;
+ * @return {!Object}
  */
-module.exports = function(context) {
+module.exports = function (context) {
   return {
-    ObjectPattern: function(node) {
+    ObjectPattern: function (node) {
       if (node.parent.type !== 'Property') {
         return;
       }

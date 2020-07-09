@@ -27,8 +27,7 @@ describes.realWin(
   {
     amp: true,
   },
-  env => {
-    let sandbox;
+  (env) => {
     let timer;
     let ampdoc;
 
@@ -42,15 +41,10 @@ describes.realWin(
       }
 
       beforeEach(() => {
-        sandbox = sinon.sandbox;
         timer = Services.timerFor(env.win);
         ampdoc = env.ampdoc;
-        triggerEventSpy = sandbox.spy();
+        triggerEventSpy = env.sandbox.spy();
         resetServiceForTesting(window, 'amp-analytics-instrumentation');
-      });
-
-      afterEach(() => {
-        sandbox.restore();
       });
 
       it('should not do anything if analytics is not installed', () => {

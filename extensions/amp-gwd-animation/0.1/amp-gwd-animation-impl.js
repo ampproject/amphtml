@@ -143,7 +143,9 @@ export class AmpGwdRuntimeService {
    *     the service.
    */
   constructor(ampdoc, opt_win) {
-    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    // TODO(#22733): remove opt_win subroooting once ampdoc-fie is launched.
+
+    /** @const @protected {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
     /**
@@ -300,7 +302,7 @@ export class AmpGwdRuntimeService {
     // Reset other animation state on the page and all descendants.
     [pageEl]
       .concat(toArray(pageEl.querySelectorAll('*')))
-      .forEach(el => this.resetAnimatedElement_(el));
+      .forEach((el) => this.resetAnimatedElement_(el));
   }
 
   /**

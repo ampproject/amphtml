@@ -15,14 +15,18 @@
  */
 
 import {ActionSource} from './action-source';
+import {CarouselEvents} from './carousel-events';
 import {debounce} from '../../../src/utils/rate-limit';
-import {listen, listenOnce} from '../../../src/event-helper';
+import {getDetail, listen, listenOnce} from '../../../src/event-helper';
 
 const MIN_AUTO_ADVANCE_INTERVAL = 1000;
 
 /**
  * @typedef {{
- *   advance: function(number, !ActionSource=),
+ *   advance: function(number, {
+ *     actionSource: (!ActionSource|undefined),
+ *     allowWrap: (boolean|undefined),
+ *   }),
  * }}
  */
 let AdvanceDef;
@@ -38,11 +42,13 @@ export class AutoAdvance {
   /**
    * @param {{
    *   win: !Window,
+   *   element: !Element,
    *   scrollContainer: !Element,
    *   advanceable: !AdvanceDef
    * }} config
    */
-  constructor({win, scrollContainer, advanceable}) {
+  constructor(config) {
+    const {win, element, scrollContainer, advanceable} = config;
     /** @private @const */
     this.win_ = win;
 
@@ -76,6 +82,9 @@ export class AutoAdvance {
     /** @private {number} */
     this.maxAdvances_ = Number.POSITIVE_INFINITY;
 
+    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = element.getAmpDoc();
+
     this.createDebouncedAdvance_(this.autoAdvanceInterval_);
     this.scrollContainer_.addEventListener(
       'scroll',
@@ -88,6 +97,9 @@ export class AutoAdvance {
       () => this.handleTouchStart_(),
       {capture: true, passive: true}
     );
+    listen(element, CarouselEvents.INDEX_CHANGE, (event) => {
+      this.handleIndexChange_(event);
+    });
   }
 
   /**
@@ -168,11 +180,18 @@ export class AutoAdvance {
    * @private
    */
   createDebouncedAdvance_(interval) {
-    this.debouncedAdvance_ = debounce(
+    const debouncedAdvance = debounce(
       this.win_,
-      () => this.advance_(),
+      () => {
+        if (debouncedAdvance != this.debouncedAdvance_) {
+          return;
+        }
+
+        this.advance_();
+      },
       interval
     );
+    this.debouncedAdvance_ = debouncedAdvance;
   }
 
   /**
@@ -198,6 +217,7 @@ export class AutoAdvance {
   shouldAutoAdvance_() {
     return (
       this.autoAdvance_ &&
+      this.ampdoc_.isVisible() &&
       !this.paused_ &&
       !this.stopped_ &&
       this.advances_ < this.maxAdvances_
@@ -212,6 +232,18 @@ export class AutoAdvance {
   }
 
   /**
+   * @param {!Event} event
+   */
+  handleIndexChange_(event) {
+    const detail = getDetail(event);
+    const actionSource = detail['actionSource'];
+
+    if (actionSource && actionSource !== ActionSource.AUTOPLAY) {
+      this.stop();
+    }
+  }
+
+  /**
    * Advances, as long as we should still auto advance.
    */
   advance_() {
@@ -219,7 +251,10 @@ export class AutoAdvance {
       return;
     }
 
-    this.advanceable_.advance(this.autoAdvanceCount_, ActionSource.AUTOPLAY);
+    this.advanceable_.advance(this.autoAdvanceCount_, {
+      actionSource: ActionSource.AUTOPLAY,
+      allowWrap: true,
+    });
     this.advances_ += this.autoAdvanceCount_;
   }
 

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {ancestorElementsByTag} from '../../../src/dom';
 import {getAdContainer} from '../../../src/ad-helper';
 
@@ -56,14 +57,6 @@ export class AmpAdUIHandler {
   }
 
   /**
-   * Create a default placeholder if not provided.
-   * Should be called in baseElement createPlaceholderCallback.
-   */
-  createPlaceholder() {
-    return this.addDefaultUiComponent_('placeholder');
-  }
-
-  /**
    * Apply UI for laid out ad with no-content
    * Order: try collapse -> apply provided fallback -> apply default fallback
    */
@@ -90,7 +83,7 @@ export class AmpAdUIHandler {
       );
       const flyingCarpetElement = flyingCarpetElements[0];
 
-      flyingCarpetElement.getImpl().then(implementation => {
+      flyingCarpetElement.getImpl().then((implementation) => {
         const children = implementation.getChildren();
 
         if (children.length === 1 && children[0] === this.element_) {
@@ -103,9 +96,9 @@ export class AmpAdUIHandler {
     let attemptCollapsePromise;
     if (this.containerElement_) {
       // Collapse the container element if there's one
-      attemptCollapsePromise = this.element_
-        .getResources()
-        .attemptCollapse(this.containerElement_);
+      attemptCollapsePromise = Services.mutatorForDoc(
+        this.element_.getAmpDoc()
+      ).attemptCollapse(this.containerElement_);
       attemptCollapsePromise.then(() => {});
     } else {
       attemptCollapsePromise = this.baseInstance_.attemptCollapse();
@@ -158,9 +151,10 @@ export class AmpAdUIHandler {
    * @param {number|string|undefined} width
    * @param {number} iframeHeight
    * @param {number} iframeWidth
+   * @param {!MessageEvent} event
    * @return {!Promise<!Object>}
    */
-  updateSize(height, width, iframeHeight, iframeWidth) {
+  updateSize(height, width, iframeHeight, iframeWidth, event) {
     // Calculate new width and height of the container to include the padding.
     // If padding is negative, just use the requested width and height directly.
     let newHeight, newWidth;
@@ -195,15 +189,15 @@ export class AmpAdUIHandler {
       resizeInfo.success = false;
       return Promise.resolve(resizeInfo);
     }
-    return this.baseInstance_.attemptChangeSize(newHeight, newWidth).then(
-      () => {
-        return resizeInfo;
-      },
-      () => {
-        resizeInfo.success = false;
-        return resizeInfo;
-      }
-    );
+    return this.baseInstance_
+      .attemptChangeSize(newHeight, newWidth, event)
+      .then(
+        () => resizeInfo,
+        () => {
+          resizeInfo.success = false;
+          return resizeInfo;
+        }
+      );
   }
 }
 

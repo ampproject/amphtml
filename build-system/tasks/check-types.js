@@ -16,15 +16,12 @@
 
 const log = require('fancy-log');
 const {
-  closureNailgunPort,
-  startNailgunServer,
-  stopNailgunServer,
-} = require('./nailgun');
+  createCtrlcHandler,
+  exitCtrlcHandler,
+} = require('../common/ctrlcHandler');
 const {cleanupBuildDir, closureCompile} = require('../compile/compile');
 const {compileCss} = require('./css');
-const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
-const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
 
 /**
@@ -45,14 +42,14 @@ async function checkTypes() {
     './ads/inabox/inabox-host.js',
     './src/web-worker/web-worker.js',
   ];
-  const extensionValues = Object.keys(extensions).map(function(key) {
+  const extensionValues = Object.keys(extensions).map(function (key) {
     return extensions[key];
   });
   const extensionSrcs = extensionValues
-    .filter(function(extension) {
+    .filter(function (extension) {
       return !extension.noTypeCheck;
     })
-    .map(function(extension) {
+    .map(function (extension) {
       return (
         './extensions/' +
         extension.name +
@@ -65,13 +62,8 @@ async function checkTypes() {
     })
     .sort();
   return compileCss()
-    .then(async () => {
-      await startNailgunServer(closureNailgunPort, /* detached */ false);
-    })
     .then(() => {
-      if (!isTravisBuild()) {
-        log('Checking types...');
-      }
+      log('Checking types...');
       return Promise.all([
         closureCompile(
           compileSrcs.concat(extensionSrcs),
@@ -80,7 +72,7 @@ async function checkTypes() {
           {
             include3pDirectories: true,
             includePolyfills: true,
-            extraGlobs: ['src/inabox/*.js'],
+            extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
             typeCheckOnly: true,
           }
         ),
@@ -120,15 +112,6 @@ async function checkTypes() {
         ),
       ]);
     })
-    .then(() => {
-      if (isTravisBuild()) {
-        // New line after all the compilation progress dots on Travis.
-        console.log('\n');
-      }
-    })
-    .then(async () => {
-      await stopNailgunServer(closureNailgunPort);
-    })
     .then(() => exitCtrlcHandler(handlerProcess));
 }
 
@@ -136,4 +119,9 @@ module.exports = {
   checkTypes,
 };
 
+/* eslint "google-camelcase/google-camelcase": 0 */
+
 checkTypes.description = 'Check source code for JS type errors';
+checkTypes.flags = {
+  closure_concurrency: '  Sets the number of concurrent invocations of closure',
+};

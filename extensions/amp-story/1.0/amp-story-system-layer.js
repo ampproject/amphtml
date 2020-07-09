@@ -19,7 +19,6 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-story-system-layer-1.0.css';
 import {
   DevelopmentModeLog,
@@ -28,18 +27,22 @@ import {
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {ProgressBar} from './progress-bar';
 import {Services} from '../../../src/services';
-import {createShadowRootWithStyle} from './utils';
+import {createShadowRootWithStyle, shouldShowStoryUrlInfo} from './utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {matches} from '../../../src/dom';
 import {renderAsElement} from './simple-template';
+import {toArray} from '../../../src/types';
 
 /** @private @const {string} */
 const AD_SHOWING_ATTRIBUTE = 'ad-showing';
 
 /** @private @const {string} */
 const AUDIO_MUTED_ATTRIBUTE = 'muted';
+
+/** @private @const {string} */
+const PAUSED_ATTRIBUTE = 'paused';
 
 /** @private @const {string} */
 const HAS_INFO_BUTTON_ATTRIBUTE = 'info';
@@ -49,6 +52,12 @@ const MUTE_CLASS = 'i-amphtml-story-mute-audio-control';
 
 /** @private @const {string} */
 const UNMUTE_CLASS = 'i-amphtml-story-unmute-audio-control';
+
+/** @private @const {string} */
+const PAUSE_CLASS = 'i-amphtml-story-pause-control';
+
+/** @private @const {string} */
+const PLAY_CLASS = 'i-amphtml-story-play-control';
 
 /** @private @const {string} */
 const MESSAGE_DISPLAY_CLASS = 'i-amphtml-story-messagedisplay';
@@ -69,13 +78,10 @@ const INFO_CLASS = 'i-amphtml-story-info-control';
 const SIDEBAR_CLASS = 'i-amphtml-story-sidebar-control';
 
 /** @private @const {string} */
-const NEW_PAGE_AVAILABLE_CLASS = 'i-amphtml-story-new-page-control';
-
-/** @private @const {string} */
 const HAS_NEW_PAGE_ATTRIBUTE = 'i-amphtml-story-has-new-page';
 
 /** @private @const {number} */
-const HIDE_AUDIO_MESSAGE_TIMEOUT_MS = 1500;
+const HIDE_MESSAGE_TIMEOUT_MS = 1500;
 
 /** @private @const {!./simple-template.ElementDef} */
 const TEMPLATE = {
@@ -86,6 +92,35 @@ const TEMPLATE = {
   children: [
     {
       tag: 'div',
+      attrs: dict({
+        'class': 'i-amphtml-story-has-new-page-notification-container',
+      }),
+      children: [
+        {
+          tag: 'div',
+          attrs: dict({
+            'class': 'i-amphtml-story-has-new-page-text-wrapper',
+          }),
+          children: [
+            {
+              tag: 'span',
+              attrs: dict({
+                'class': 'i-amphtml-story-has-new-page-circle-icon',
+              }),
+            },
+            {
+              tag: 'div',
+              attrs: dict({
+                'class': 'i-amphtml-story-has-new-page-text',
+              }),
+              localizedStringId: LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      tag: 'div',
       attrs: dict({'class': 'i-amphtml-story-system-layer-buttons'}),
       children: [
         {
@@ -94,6 +129,7 @@ const TEMPLATE = {
             'role': 'button',
             'class': INFO_CLASS + ' i-amphtml-story-button',
           }),
+          localizedLabelId: LocalizedStringId.AMP_STORY_INFO_BUTTON_LABEL,
         },
         {
           tag: 'div',
@@ -104,6 +140,7 @@ const TEMPLATE = {
             {
               tag: 'div',
               attrs: dict({
+                'role': 'alert',
                 'class': 'i-amphtml-message-container',
               }),
               children: [
@@ -134,41 +171,57 @@ const TEMPLATE = {
               ],
             },
             {
-              tag: 'div',
+              tag: 'button',
               attrs: dict({
-                'role': 'button',
                 'class': UNMUTE_CLASS + ' i-amphtml-story-button',
               }),
+              localizedLabelId:
+                LocalizedStringId.AMP_STORY_AUDIO_UNMUTE_BUTTON_LABEL,
             },
             {
-              tag: 'div',
+              tag: 'button',
               attrs: dict({
-                'role': 'button',
                 'class': MUTE_CLASS + ' i-amphtml-story-button',
               }),
+              localizedLabelId:
+                LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL,
             },
           ],
         },
         {
           tag: 'div',
           attrs: dict({
+            'class': 'i-amphtml-paused-display',
+          }),
+          children: [
+            {
+              tag: 'button',
+              attrs: dict({
+                'class': PAUSE_CLASS + ' i-amphtml-story-button',
+              }),
+            },
+            {
+              tag: 'button',
+              attrs: dict({
+                'class': PLAY_CLASS + ' i-amphtml-story-button',
+              }),
+            },
+          ],
+        },
+        {
+          tag: 'a',
+          attrs: dict({
             'role': 'button',
             'class': SHARE_CLASS + ' i-amphtml-story-button',
           }),
+          localizedLabelId: LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL,
         },
         {
-          tag: 'div',
+          tag: 'button',
           attrs: dict({
-            'role': 'button',
             'class': SIDEBAR_CLASS + ' i-amphtml-story-button',
           }),
-        },
-        {
-          tag: 'div',
-          attrs: dict({
-            'role': 'button',
-            'class': NEW_PAGE_AVAILABLE_CLASS + ' i-amphtml-story-button',
-          }),
+          localizedLabelId: LocalizedStringId.AMP_STORY_SIDEBAR_BUTTON_LABEL,
         },
       ],
     },
@@ -184,7 +237,7 @@ const TEMPLATE = {
  *   - share button
  *   - domain info button
  *   - sidebar
- *   - new page updates available button
+ *   - story updated label (for live stories)
  */
 export class SystemLayer {
   /**
@@ -195,7 +248,7 @@ export class SystemLayer {
     /** @private @const {!Window} */
     this.win_ = win;
 
-    /** @private @const {!Element} */
+    /** @protected @const {!Element} */
     this.parentEl_ = parentEl;
 
     /** @private {boolean} */
@@ -217,7 +270,7 @@ export class SystemLayer {
     this.buttonsContainer_ = null;
 
     /** @private @const {!ProgressBar} */
-    this.progressBar_ = ProgressBar.create(win);
+    this.progressBar_ = ProgressBar.create(win, this.parentEl_);
 
     /** @private {!DevelopmentModeLog} */
     this.developerLog_ = DevelopmentModeLog.create(win);
@@ -240,8 +293,9 @@ export class SystemLayer {
 
   /**
    * @return {!Element}
+   * @param {string} initialPageId
    */
-  build() {
+  build(initialPageId) {
     if (this.isBuilt_) {
       return this.getRoot();
     }
@@ -249,12 +303,19 @@ export class SystemLayer {
     this.isBuilt_ = true;
 
     this.root_ = this.win_.document.createElement('div');
+    this.root_.classList.add('i-amphtml-system-layer-host');
     this.systemLayerEl_ = renderAsElement(this.win_.document, TEMPLATE);
+    // Make the share button link to the current document to make sure
+    // embedded STAMPs always have a back-link to themselves, and to make
+    // gestures like right-clicks work.
+    this.systemLayerEl_.querySelector(
+      '.i-amphtml-story-share-control'
+    ).href = Services.documentInfoForDoc(this.parentEl_).canonicalUrl;
 
     createShadowRootWithStyle(this.root_, this.systemLayerEl_, CSS);
 
     this.systemLayerEl_.insertBefore(
-      this.progressBar_.build(),
+      this.progressBar_.build(initialPageId),
       this.systemLayerEl_.firstChild
     );
 
@@ -268,7 +329,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS,
-      canShowButtons => {
+      (canShowButtons) => {
         this.systemLayerEl_.classList.toggle(
           'i-amphtml-story-ui-no-buttons',
           !canShowButtons
@@ -281,9 +342,9 @@ export class SystemLayer {
       this.systemLayerEl_.setAttribute('ios', '');
     }
 
-    if (
-      Services.viewerForDoc(this.win_.document.documentElement).isEmbedded()
-    ) {
+    const viewer = Services.viewerForDoc(this.win_.document.documentElement);
+
+    if (shouldShowStoryUrlInfo(viewer)) {
       this.systemLayerEl_.classList.add('i-amphtml-embedded');
       this.getShadowRoot().setAttribute(HAS_INFO_BUTTON_ATTRIBUTE, '');
     } else {
@@ -291,6 +352,7 @@ export class SystemLayer {
     }
 
     this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
+    this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, 'noshow');
     return this.getRoot();
   }
 
@@ -315,47 +377,45 @@ export class SystemLayer {
    */
   initializeListeners_() {
     // TODO(alanorozco): Listen to tap event properly (i.e. fastclick)
-    this.getShadowRoot().addEventListener('click', event => {
+    this.getShadowRoot().addEventListener('click', (event) => {
       const target = dev().assertElement(event.target);
 
       if (matches(target, `.${MUTE_CLASS}, .${MUTE_CLASS} *`)) {
         this.onAudioIconClick_(true);
       } else if (matches(target, `.${UNMUTE_CLASS}, .${UNMUTE_CLASS} *`)) {
         this.onAudioIconClick_(false);
+      } else if (matches(target, `.${PAUSE_CLASS}, .${PAUSE_CLASS} *`)) {
+        this.onPausedClick_(true);
+      } else if (matches(target, `.${PLAY_CLASS}, .${PLAY_CLASS} *`)) {
+        this.onPausedClick_(false);
       } else if (matches(target, `.${SHARE_CLASS}, .${SHARE_CLASS} *`)) {
-        this.onShareClick_();
+        this.onShareClick_(event);
       } else if (matches(target, `.${INFO_CLASS}, .${INFO_CLASS} *`)) {
         this.onInfoClick_();
       } else if (matches(target, `.${SIDEBAR_CLASS}, .${SIDEBAR_CLASS} *`)) {
         this.onSidebarClick_();
-      } else if (
-        matches(
-          target,
-          `.${NEW_PAGE_AVAILABLE_CLASS}, .${NEW_PAGE_AVAILABLE_CLASS} *`
-        )
-      ) {
-        // Forward event to amp-story.
-        Services.actionServiceForDoc(this.parentEl_).trigger(
-          target,
-          'tap',
-          event,
-          ActionTrust.HIGH
-        );
-        this.toggleNewPageAvailableButton_(false);
       }
     });
 
-    this.storeService_.subscribe(StateProperty.AD_STATE, isAd => {
+    this.storeService_.subscribe(StateProperty.AD_STATE, (isAd) => {
       this.onAdStateUpdate_(isAd);
     });
 
-    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
+    this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
       this.onBookendStateUpdate_(isActive);
     });
 
     this.storeService_.subscribe(
+      StateProperty.CAN_SHOW_AUDIO_UI,
+      (show) => {
+        this.onCanShowAudioUiUpdate_(show);
+      },
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
       StateProperty.CAN_SHOW_SHARING_UIS,
-      show => {
+      (show) => {
         this.onCanShowSharingUisUpdate_(show);
       },
       true /** callToInitialize */
@@ -363,15 +423,23 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.STORY_HAS_AUDIO_STATE,
-      hasAudio => {
+      (hasAudio) => {
         this.onStoryHasAudioStateUpdate_(hasAudio);
       },
       true /** callToInitialize */
     );
 
     this.storeService_.subscribe(
+      StateProperty.STORY_HAS_PLAYBACK_UI_STATE,
+      (hasPlaybackUi) => {
+        this.onStoryHasPlaybackUiStateUpdate_(hasPlaybackUi);
+      },
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
       StateProperty.MUTED_STATE,
-      isMuted => {
+      (isMuted) => {
         this.onMutedStateUpdate_(isMuted);
       },
       true /** callToInitialize */
@@ -379,15 +447,23 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
-      uiState => {
+      (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
       true /** callToInitialize */
     );
 
     this.storeService_.subscribe(
+      StateProperty.PAUSED_STATE,
+      (isPaused) => {
+        this.onPausedStateUpdate_(isPaused);
+      },
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_INDEX,
-      index => {
+      (index) => {
         this.onPageIndexUpdate_(index);
       },
       true /** callToInitialize */
@@ -395,7 +471,7 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.RTL_STATE,
-      rtlState => {
+      (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
       },
       true /** callToInitialize */
@@ -403,15 +479,23 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.PAGE_HAS_AUDIO_STATE,
-      audio => {
+      (audio) => {
         this.onPageHasAudioStateUpdate_(audio);
       },
       true /** callToInitialize */
     );
 
     this.storeService_.subscribe(
+      StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE,
+      (hasPlaybackUi) => {
+        this.onPageHasElementsWithPlaybackStateUpdate_(hasPlaybackUi);
+      },
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
       StateProperty.HAS_SIDEBAR_STATE,
-      hasSidebar => {
+      (hasSidebar) => {
         this.onHasSidebarStateUpdate_(hasSidebar);
       },
       true /** callToInitialize */
@@ -419,13 +503,13 @@ export class SystemLayer {
 
     this.storeService_.subscribe(
       StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
-      isVisible => {
+      (isVisible) => {
         this.onSystemUiIsVisibleStateUpdate_(isVisible);
       }
     );
 
-    this.storeService_.subscribe(StateProperty.NEW_PAGE_AVAILABLE_ID, id => {
-      this.onNewPageAvailable_(id);
+    this.storeService_.subscribe(StateProperty.NEW_PAGE_AVAILABLE_ID, () => {
+      this.onNewPageAvailable_();
     });
   }
 
@@ -449,11 +533,12 @@ export class SystemLayer {
    * @private
    */
   onAdStateUpdate_(isAd) {
-    this.vsync_.mutate(() => {
-      isAd
-        ? this.getShadowRoot().setAttribute(AD_SHOWING_ATTRIBUTE, '')
-        : this.getShadowRoot().removeAttribute(AD_SHOWING_ATTRIBUTE);
-    });
+    // This is not in vsync as we are showing/hiding items in the system layer
+    // based upon this attribute, and when wrapped in vsync there is a visual
+    // lag after the page change before the icons are updated.
+    isAd
+      ? this.getShadowRoot().setAttribute(AD_SHOWING_ATTRIBUTE, '')
+      : this.getShadowRoot().removeAttribute(AD_SHOWING_ATTRIBUTE);
   }
 
   /**
@@ -480,6 +565,21 @@ export class SystemLayer {
     } else {
       this.getShadowRoot().removeAttribute(HAS_SIDEBAR_ATTRIBUTE);
     }
+  }
+
+  /**
+   * Reacts to updates to whether audio UI may be shown, and updates the UI
+   * accordingly.
+   * @param {boolean} canShowAudioUi
+   * @private
+   */
+  onCanShowAudioUiUpdate_(canShowAudioUi) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot().classList.toggle(
+        'i-amphtml-story-no-audio-ui',
+        !canShowAudioUi
+      );
+    });
   }
 
   /**
@@ -513,6 +613,20 @@ export class SystemLayer {
   }
 
   /**
+   * Reacts to story having elements with playback.
+   * @param {boolean} hasPlaybackUi
+   * @private
+   */
+  onStoryHasPlaybackUiStateUpdate_(hasPlaybackUi) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot().classList.toggle(
+        'i-amphtml-story-has-playback-ui',
+        hasPlaybackUi
+      );
+    });
+  }
+
+  /**
    * Reacts to the presence of audio on a page to determine which audio messages
    * to display.
    * @param {boolean} pageHasAudio
@@ -535,6 +649,23 @@ export class SystemLayer {
   }
 
   /**
+   * Reacts to the presence of elements with playback on the page.
+   * @param {boolean} pageHasElementsWithPlayback
+   * @private
+   */
+  onPageHasElementsWithPlaybackStateUpdate_(pageHasElementsWithPlayback) {
+    this.vsync_.mutate(() => {
+      toArray(
+        this.getShadowRoot().querySelectorAll(
+          '.i-amphtml-paused-display button'
+        )
+      ).forEach((button) => {
+        button.disabled = !pageHasElementsWithPlayback;
+      });
+    });
+  }
+
+  /**
    * Reacts to muted state updates.
    * @param {boolean} isMuted
    * @private
@@ -548,29 +679,44 @@ export class SystemLayer {
   }
 
   /**
-   * Hides audio message after elapsed time.
+   * Reacts to paused state updates.
+   * @param {boolean} isPaused
    * @private
    */
-  hideAudioMessageAfterTimeout_() {
+  onPausedStateUpdate_(isPaused) {
+    this.vsync_.mutate(() => {
+      isPaused
+        ? this.getShadowRoot().setAttribute(PAUSED_ATTRIBUTE, '')
+        : this.getShadowRoot().removeAttribute(PAUSED_ATTRIBUTE);
+    });
+  }
+
+  /**
+   * Hides message after elapsed time.
+   * @param {string} message
+   * @private
+   */
+  hideMessageAfterTimeout_(message) {
     if (this.timeoutId_) {
       this.timer_.cancel(this.timeoutId_);
     }
     this.timeoutId_ = this.timer_.delay(
-      () => this.hideAudioMessageInternal_(),
-      HIDE_AUDIO_MESSAGE_TIMEOUT_MS
+      () => this.hideMessageInternal_(message),
+      HIDE_MESSAGE_TIMEOUT_MS
     );
   }
 
   /**
-   * Hides audio message.
+   * Hides message.
+   * @param {string} message
    * @private
    */
-  hideAudioMessageInternal_() {
+  hideMessageInternal_(message) {
     if (!this.isBuilt_) {
       return;
     }
     this.vsync_.mutate(() => {
-      this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'noshow');
+      this.getShadowRoot().setAttribute(message, 'noshow');
     });
   }
 
@@ -617,7 +763,16 @@ export class SystemLayer {
    */
   onPageIndexUpdate_(index) {
     this.vsync_.mutate(() => {
-      this.getShadowRoot().classList.toggle('first-page-active', index === 0);
+      const lastIndex =
+        this.storeService_.get(StateProperty.PAGE_IDS).length - 1;
+      this.getShadowRoot().classList.toggle(
+        'i-amphtml-first-page-active',
+        index === 0
+      );
+      this.getShadowRoot().classList.toggle(
+        'i-amphtml-last-page-active',
+        index === lastIndex
+      );
     });
   }
 
@@ -643,15 +798,26 @@ export class SystemLayer {
     this.storeService_.dispatch(Action.TOGGLE_MUTED, mute);
     this.vsync_.mutate(() => {
       this.getShadowRoot().setAttribute(MESSAGE_DISPLAY_CLASS, 'show');
-      this.hideAudioMessageAfterTimeout_();
+      this.hideMessageAfterTimeout_(MESSAGE_DISPLAY_CLASS);
     });
   }
 
   /**
-   * Handles click events on the share button and toggles the share menu.
+   * Handles click events on the paused and play buttons.
+   * @param {boolean} paused Specifies if the story is being paused or not.
    * @private
    */
-  onShareClick_() {
+  onPausedClick_(paused) {
+    this.storeService_.dispatch(Action.TOGGLE_PAUSED, paused);
+  }
+
+  /**
+   * Handles click events on the share button and toggles the share menu.
+   * @param {!Event} event
+   * @private
+   */
+  onShareClick_(event) {
+    event.preventDefault();
     const isOpen = this.storeService_.get(StateProperty.SHARE_MENU_STATE);
     this.storeService_.dispatch(Action.TOGGLE_SHARE_MENU, !isOpen);
   }
@@ -674,30 +840,13 @@ export class SystemLayer {
   }
 
   /**
-   * Updates the "see new update" button with the new page id.
-   * When clicked it will take the user to the newest page.
-   * @param {string} id
+   * Shows the "story updated" label when a new page was added to the story.
    * @private
    */
-  onNewPageAvailable_(id) {
-    const button = this.buttonsContainer_.querySelector(
-      '.i-amphtml-story-new-page-control'
-    );
+  onNewPageAvailable_() {
     this.vsync_.mutate(() => {
-      button.setAttribute('on', `tap:${this.parentEl_.id}.goToPage(id=${id})`);
-    });
-    this.toggleNewPageAvailableButton_(true);
-  }
-
-  /**
-   * Displays or hides the "see new update" button.
-   * @param {boolean} isVisible
-   */
-  toggleNewPageAvailableButton_(isVisible) {
-    this.vsync_.mutate(() => {
-      isVisible
-        ? this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, '')
-        : this.getShadowRoot().removeAttribute(HAS_NEW_PAGE_ATTRIBUTE);
+      this.getShadowRoot().setAttribute(HAS_NEW_PAGE_ATTRIBUTE, 'show');
+      this.hideMessageAfterTimeout_(HAS_NEW_PAGE_ATTRIBUTE);
     });
   }
 
@@ -732,7 +881,7 @@ export class SystemLayer {
     }
 
     this.vsync_.mutate(() => {
-      logEntries.forEach(logEntry => this.logInternal_(logEntry));
+      logEntries.forEach((logEntry) => this.logInternal_(logEntry));
     });
   }
 

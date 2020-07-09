@@ -24,6 +24,7 @@ import {htmlFor} from './static-template';
 import {isFiniteNumber} from './types';
 import {setStyle, setStyles, toggle} from './style';
 import {startsWith} from './string';
+import {transparentPng} from './utils/img';
 
 /**
  * @enum {string}
@@ -85,20 +86,18 @@ export const naturalDimensions_ = {
 };
 
 /**
- * Elements that the progess can be shown for. This set has to be externalized
+ * Elements that the progress can be shown for. This set has to be externalized
  * since the element's implementation may not be downloaded yet.
+ * This list does not include video players which are found via regex later.
  * @enum {boolean}
  * @private  Visible for testing only!
  */
 export const LOADING_ELEMENTS_ = {
   'AMP-AD': true,
   'AMP-ANIM': true,
-  'AMP-BRIGHTCOVE': true,
-  'AMP-DAILYMOTION': true,
   'AMP-EMBED': true,
   'AMP-FACEBOOK': true,
   'AMP-FACEBOOK-COMMENTS': true,
-  'AMP-FACEBOOK-LIKE': true,
   'AMP-FACEBOOK-PAGE': true,
   'AMP-GOOGLE-DOCUMENT-EMBED': true,
   'AMP-IFRAME': true,
@@ -107,17 +106,15 @@ export const LOADING_ELEMENTS_ = {
   'AMP-LIST': true,
   'AMP-PINTEREST': true,
   'AMP-PLAYBUZZ': true,
-  'AMP-YOUTUBE': true,
-  'AMP-VIMEO': true,
+  'AMP-TWITTER': true,
 };
-
 /**
  * All video player components must either have a) "video" or b) "player" in
  * their name. A few components don't follow this convention for historical
- * reasons, so they're present in the LOADING_ELEMENTS_ whitelist.
+ * reasons, so they are listed individually.
  * @private @const {!RegExp}
  */
-const videoPlayerTagNameRe = /^amp\-(video|.+player)/i;
+const videoPlayerTagNameRe = /^amp\-(video|.+player)|AMP-BRIGHTCOVE|AMP-DAILYMOTION|AMP-YOUTUBE|AMP-VIMEO|AMP-IMA-VIDEO/i;
 
 /**
  * @param {string} s
@@ -156,6 +153,15 @@ export function isLayoutSizeDefined(layout) {
     layout == Layout.FLUID ||
     layout == Layout.INTRINSIC
   );
+}
+
+/**
+ * Whether an element with this layout has a fixed dimension.
+ * @param {!Layout} layout
+ * @return {boolean}
+ */
+export function isLayoutSizeFixed(layout) {
+  return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
 }
 
 /**
@@ -228,9 +234,8 @@ export function assertLengthOrPercent(length) {
  */
 export function getLengthUnits(length) {
   assertLength(length);
-  dev().assertString(length);
   const m = userAssert(
-    length.match(/[a-z]+/i),
+    /[a-z]+/i.exec(length),
     'Failed to read units from %s',
     length
   );
@@ -261,7 +266,7 @@ export function hasNaturalDimensions(tagName) {
 /**
  * Determines the default dimensions for an element which could vary across
  * different browser implementations, like <audio> for instance.
- * This operation can only be completed for an element whitelisted by
+ * This operation can only be completed for an element allowlisted by
  * `hasNaturalDimensions`.
  * @param {!Element} element
  * @return {DimensionsDef}
@@ -290,7 +295,7 @@ export function getNaturalDimensions(element) {
 }
 
 /**
- * Whether the loading can be shown for the specified elemeent. This set has
+ * Whether the loading can be shown for the specified element. This set has
  * to be externalized since the element's implementation may not be
  * downloaded yet.
  * @param {!Element} element
@@ -298,17 +303,20 @@ export function getNaturalDimensions(element) {
  */
 export function isLoadingAllowed(element) {
   const tagName = element.tagName.toUpperCase();
-  return LOADING_ELEMENTS_[tagName] || isVideoPlayerComponent(tagName);
+  return LOADING_ELEMENTS_[tagName] || isIframeVideoPlayerComponent(tagName);
 }
 
 /**
  * All video player components must either have a) "video" or b) "player" in
  * their name. A few components don't follow this convention for historical
- * reasons, so they're present in the LOADING_ELEMENTS_ whitelist.
+ * reasons, so they're present in the LOADING_ELEMENTS_ allowlist.
  * @param {string} tagName
  * @return {boolean}
  */
-function isVideoPlayerComponent(tagName) {
+export function isIframeVideoPlayerComponent(tagName) {
+  if (tagName == 'AMP-VIDEO') {
+    return false;
+  }
   return videoPlayerTagNameRe.test(tagName);
 }
 
@@ -326,9 +334,10 @@ function isVideoPlayerComponent(tagName) {
  * implement SSR. For more information on SSR see bit.ly/amp-ssr.
  *
  * @param {!Element} element
+ * @param {boolean} fixIeIntrinsic
  * @return {!Layout}
  */
-export function applyStaticLayout(element) {
+export function applyStaticLayout(element, fixIeIntrinsic = false) {
   // Check if the layout has already been done by server-side rendering or
   // client-side rendering and the element was cloned. The document may be
   // visible to the user if the boilerplate was removed so please take care in
@@ -345,6 +354,9 @@ export function applyStaticLayout(element) {
       // Find sizer, but assume that it might not have been parsed yet.
       element.sizerElement =
         element.querySelector('i-amphtml-sizer') || undefined;
+      if (element.sizerElement) {
+        element.sizerElement.setAttribute('slot', 'i-amphtml-svc');
+      }
     } else if (layout == Layout.NODISPLAY) {
       toggle(element, false);
       // TODO(jridgewell): Temporary hack while SSR still adds an inline
@@ -367,15 +379,30 @@ export function applyStaticLayout(element) {
 
   // Input layout attributes.
   const inputLayout = layoutAttr ? parseLayout(layoutAttr) : null;
-  userAssert(inputLayout !== undefined, 'Unknown layout: %s', layoutAttr);
+  userAssert(
+    inputLayout !== undefined,
+    'Invalid "layout" value: %s, %s',
+    layoutAttr,
+    element
+  );
   /** @const {string|null|undefined} */
   const inputWidth =
     widthAttr && widthAttr != 'auto' ? parseLength(widthAttr) : widthAttr;
-  userAssert(inputWidth !== undefined, 'Invalid width value: %s', widthAttr);
+  userAssert(
+    inputWidth !== undefined,
+    'Invalid "width" value: %s, %s',
+    widthAttr,
+    element
+  );
   /** @const {string|null|undefined} */
   const inputHeight =
     heightAttr && heightAttr != 'fluid' ? parseLength(heightAttr) : heightAttr;
-  userAssert(inputHeight !== undefined, 'Invalid height value: %s', heightAttr);
+  userAssert(
+    inputHeight !== undefined,
+    'Invalid "height" value: %s, %s',
+    heightAttr,
+    element
+  );
 
   // Effective layout attributes. These are effectively constants.
   let width;
@@ -425,14 +452,13 @@ export function applyStaticLayout(element) {
     layout == Layout.RESPONSIVE ||
     layout == Layout.INTRINSIC
   ) {
-    userAssert(height, 'Expected height to be available: %s', heightAttr);
+    userAssert(height, 'The "height" attribute is missing: %s', element);
   }
   if (layout == Layout.FIXED_HEIGHT) {
     userAssert(
       !width || width == 'auto',
-      'Expected width to be either absent or equal "auto" ' +
-        'for fixed-height layout: %s',
-      widthAttr
+      'The "width" attribute must be missing or "auto": %s',
+      element
     );
   }
   if (
@@ -442,22 +468,24 @@ export function applyStaticLayout(element) {
   ) {
     userAssert(
       width && width != 'auto',
-      'Expected width to be available and not equal to "auto": %s',
-      widthAttr
+      'The "width" attribute must be present and not "auto": %s',
+      element
     );
   }
 
   if (layout == Layout.RESPONSIVE || layout == Layout.INTRINSIC) {
     userAssert(
       getLengthUnits(width) == getLengthUnits(height),
-      'Length units should be the same for width and height: %s, %s',
+      'Length units should be the same for "width" and "height": %s, %s, %s',
       widthAttr,
-      heightAttr
+      heightAttr,
+      element
     );
   } else {
     userAssert(
       heightsAttr === null,
-      'Unexpected "heights" attribute for none-responsive layout'
+      '"heights" attribute must be missing: %s',
+      element
     );
   }
 
@@ -482,6 +510,7 @@ export function applyStaticLayout(element) {
     setStyle(element, 'height', dev().assertString(height));
   } else if (layout == Layout.RESPONSIVE) {
     const sizer = element.ownerDocument.createElement('i-amphtml-sizer');
+    sizer.setAttribute('slot', 'i-amphtml-svc');
     setStyles(sizer, {
       paddingTop:
         (getLengthNumeral(height) / getLengthNumeral(width)) * 100 + '%',
@@ -493,14 +522,20 @@ export function applyStaticLayout(element) {
     // trick Note a naked svg won't work becasue other thing expect the
     // i-amphtml-sizer element
     const sizer = htmlFor(element)`
-      <i-amphtml-sizer class="i-amphtml-sizer">
+      <i-amphtml-sizer class="i-amphtml-sizer" slot="i-amphtml-svc">
         <img alt="" role="presentation" aria-hidden="true"
              class="i-amphtml-intrinsic-sizer" />
       </i-amphtml-sizer>`;
     const intrinsicSizer = sizer.firstElementChild;
     intrinsicSizer.setAttribute(
       'src',
-      `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`
+      !IS_ESM && fixIeIntrinsic && element.ownerDocument
+        ? transparentPng(
+            element.ownerDocument,
+            dev().assertNumber(getLengthNumeral(width)),
+            dev().assertNumber(getLengthNumeral(height))
+          )
+        : `data:image/svg+xml;charset=utf-8,<svg height="${height}" width="${width}" xmlns="http://www.w3.org/2000/svg" version="1.1"/>`
     );
     element.insertBefore(sizer, element.firstChild);
     element.sizerElement = sizer;

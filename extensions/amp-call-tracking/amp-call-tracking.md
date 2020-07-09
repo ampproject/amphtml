@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays GL Transmission Format (gITF) 3D models.
 ---
+
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -26,23 +27,6 @@ limitations under the License.
 Dynamically replaces a phone number in a hyperlink to enable call
 tracking. Executes a CORS request to substitute the number.
 
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-call-tracking" src="https://cdn.ampproject.org/v0/amp-call-tracking-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>container, fill, fixed, fixed-height, flex-item, responsive</td>
-  </tr>
-  <tr>
-    <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://ampbyexample.com/components/amp-call-tracking/">amp-call-tracking example</a>.</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Usage
 
 The `<amp-call-tracking>` tag must wrap a normal anchor tag that hyperlinks a
@@ -56,11 +40,13 @@ by a CORS endpoint.
   <a href="tel:123456789">+1 (23) 456-789</a>
 </amp-call-tracking>
 ```
+
 {% call callout('Note', type='note') %}
 Each unique CORS endpoint is called only once per page.
 {% endcall %}
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>config (required)</strong></td>
@@ -71,7 +57,7 @@ Each unique CORS endpoint is called only once per page.
   <li>`formattedPhoneNumber` (optional): Specifies the phone number to display. If not specified, the value in `phoneNumber` is used.</li>
 </ul>
 <p>{% call callout('Important', type='caution') %}
-  Your XHR endpoint must implement the requirements specified in the <a href="https://www.ampproject.org/docs/fundamentals/amp-cors-requests">CORS Requests in AMP</a> spec.
+  Your XHR endpoint must implement the requirements specified in the <a href="https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests">CORS Requests in AMP</a> spec.
   {% endcall %}</p></td>
   </tr>
 </table>

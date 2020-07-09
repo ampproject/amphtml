@@ -21,7 +21,7 @@ tags: {  # amp-iframe
     name: "amp-iframe"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -61,6 +61,10 @@ tags: {  # <amp-iframe>
     value: "yes"
   }
   attrs: {
+    name: "tabindex"
+    value_regex: "-?\\d+"
+  }
+  attrs: {
     name: "src"
     mandatory_oneof: "['src', 'srcdoc']"
     value_url: {
@@ -68,7 +72,7 @@ tags: {  # <amp-iframe>
       protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: {
     name: "srcdoc"

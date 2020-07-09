@@ -28,14 +28,13 @@ import {
 import {Services} from '../../../../src/services';
 import {ValidationBubble} from '../validation-bubble';
 
-describes.realWin('form-validators', {amp: true}, env => {
-  let sandbox;
+describes.realWin('form-validators', {amp: true}, (env) => {
   const emailTypeValidationMsg = 'Yo! That email does not look so.. email-y';
   const textPatternValidationMsg = 'Yo! No blank emails';
 
   // Stub validation message for predictable message on any platform.
   function stubValidationMessage(input) {
-    Object.defineProperty(input, 'validationMessage', {
+    env.sandbox.defineProperty(input, 'validationMessage', {
       get() {
         return this.fakeValidationMessage_;
       },
@@ -51,13 +50,13 @@ describes.realWin('form-validators', {amp: true}, env => {
     doc.body.appendChild(form);
 
     const {name, email, text, submit} = getInputs(doc);
-    [name, email, text, submit].forEach(c => form.appendChild(c));
+    [name, email, text, submit].forEach((c) => form.appendChild(c));
 
     if (isCustomValidations) {
       const {noName, noEmail, invalidEmail, invalidText} = getCustomValidations(
         doc
       );
-      [noName, noEmail, invalidEmail, invalidText].forEach(c =>
+      [noName, noEmail, invalidEmail, invalidText].forEach((c) =>
         doc.body.appendChild(c)
       );
     }
@@ -101,6 +100,7 @@ describes.realWin('form-validators', {amp: true}, env => {
     const invalidEmail = doc.createElement('div');
     invalidEmail.setAttribute('visible-when-invalid', 'typeMismatch');
     invalidEmail.setAttribute('validation-for', 'email1');
+    invalidEmail.setAttribute('id', 'invalidformat-for-email1');
     invalidEmail.textContent = emailTypeValidationMsg;
 
     const invalidText = doc.createElement('div');
@@ -112,11 +112,9 @@ describes.realWin('form-validators', {amp: true}, env => {
   }
 
   beforeEach(() => {
-    sandbox = env.sandbox;
-
     // Force sync mutateElement to make testing easier.
-    const resources = Services.resourcesForDoc(env.ampdoc);
-    sandbox.stub(resources, 'mutateElement').callsArg(1);
+    const mutator = Services.mutatorForDoc(env.ampdoc);
+    env.sandbox.stub(mutator, 'mutateElement').callsArg(1);
   });
 
   describe('getFormValidator', () => {
@@ -157,8 +155,8 @@ describes.realWin('form-validators', {amp: true}, env => {
     });
 
     it('fireValidityEventIfNecessary()', () => {
-      sandbox.stub(form, 'checkValidity').returns(false);
-      sandbox.stub(form, 'dispatchEvent');
+      env.sandbox.stub(form, 'checkValidity').returns(false);
+      env.sandbox.stub(form, 'dispatchEvent');
 
       validator.fireValidityEventIfNecessary();
       expect(form.dispatchEvent).calledOnce;
@@ -190,13 +188,13 @@ describes.realWin('form-validators', {amp: true}, env => {
     });
 
     it('should reports form validity', () => {
-      sandbox.stub(form, 'reportValidity');
+      env.sandbox.stub(form, 'reportValidity');
       validator.report();
       expect(form.reportValidity).to.have.been.called;
     });
 
     it('should fire events on report()', () => {
-      sandbox.stub(form, 'dispatchEvent');
+      env.sandbox.stub(form, 'dispatchEvent');
 
       validator.onBlur({target: form.elements[0]});
       expect(form.dispatchEvent).to.not.be.called;
@@ -241,7 +239,7 @@ describes.realWin('form-validators', {amp: true}, env => {
 
     it('should reports form validity', () => {
       expect(validator.validationBubble_).to.be.instanceOf(ValidationBubble);
-      sandbox.stub(validator.validationBubble_, 'show');
+      env.sandbox.stub(validator.validationBubble_, 'show');
       validator.report();
       expect(doc.activeElement).to.equal(form.elements[0]);
       expect(validator.validationBubble_.show).to.be.calledOnce;
@@ -255,14 +253,14 @@ describes.realWin('form-validators', {amp: true}, env => {
       const mockEvent = {
         target: {},
       };
-      sandbox.stub(validator.validationBubble_, 'hide');
+      env.sandbox.stub(validator.validationBubble_, 'hide');
       validator.onBlur(mockEvent);
       expect(validator.validationBubble_.hide).to.be.calledOnce;
     });
 
     it('should re-validate on input if is is actively reported', () => {
-      sandbox.stub(validator.validationBubble_, 'show');
-      sandbox.stub(validator.validationBubble_, 'hide');
+      env.sandbox.stub(validator.validationBubble_, 'show');
+      env.sandbox.stub(validator.validationBubble_, 'hide');
       validator.onInput({target: form.elements[0]});
       expect(validator.validationBubble_.hide).to.not.be.called;
       expect(validator.validationBubble_.show).to.not.be.called;
@@ -275,7 +273,7 @@ describes.realWin('form-validators', {amp: true}, env => {
         form.elements[0].validationMessage
       );
 
-      sandbox.stub(validator.validationBubble_, 'isActiveOn').returns(true);
+      env.sandbox.stub(validator.validationBubble_, 'isActiveOn').returns(true);
       validator.onInput({target: form.elements[0]});
       expect(form.elements[0].getAttribute('aria-invalid')).to.equal('true');
       expect(validator.validationBubble_.show).to.be.calledTwice;
@@ -286,7 +284,7 @@ describes.realWin('form-validators', {amp: true}, env => {
     });
 
     it('should fire events on report()', () => {
-      sandbox.stub(form, 'dispatchEvent');
+      env.sandbox.stub(form, 'dispatchEvent');
 
       validator.onBlur({target: form.elements[0]});
       expect(form.dispatchEvent).to.not.be.called;
@@ -325,6 +323,25 @@ describes.realWin('form-validators', {amp: true}, env => {
       expect(validations[1].className).to.not.contain('visible');
       expect(validations[2].className).to.not.contain('visible');
       expect(validations[3].className).to.not.contain('visible');
+    });
+
+    it('should set aria-describedby to the first validation message (generated ID)', () => {
+      validator.report();
+      expect(validations[0].getAttribute('id')).to.be.a('string');
+      expect(form.elements[0].getAttribute('aria-describedby')).to.equal(
+        validations[0].getAttribute('id')
+      );
+    });
+
+    it('should set aria-describedby to the second validation message (existing ID)', () => {
+      form.elements[0].value = 'John Miller';
+      form.elements[1].value = 'invalidemail';
+      form.elements[1].validationMessage = 'Email format is wrong';
+      validator.report();
+      validator.onInput({target: form.elements[1]});
+      expect(form.elements[1].getAttribute('aria-describedby')).to.equal(
+        'invalidformat-for-email1'
+      );
     });
 
     it('should not report on interaction for non-active inputs', () => {
@@ -396,7 +413,7 @@ describes.realWin('form-validators', {amp: true}, env => {
     });
 
     it('should fire events on report()', () => {
-      sandbox.stub(form, 'dispatchEvent');
+      env.sandbox.stub(form, 'dispatchEvent');
 
       validator.onBlur({target: form.elements[0]});
       expect(form.dispatchEvent).to.not.be.called;
@@ -507,7 +524,7 @@ describes.realWin('form-validators', {amp: true}, env => {
     });
 
     it('should fire events on report()', () => {
-      sandbox.stub(form, 'dispatchEvent');
+      env.sandbox.stub(form, 'dispatchEvent');
 
       validator.onBlur({target: form.elements[0]});
       expect(form.dispatchEvent).to.not.be.called;
@@ -595,7 +612,7 @@ describes.realWin('form-validators', {amp: true}, env => {
     });
 
     it('should fire events on onBlur() and onInput()', () => {
-      sandbox.stub(validator, 'fireValidityEventIfNecessary');
+      env.sandbox.stub(validator, 'fireValidityEventIfNecessary');
 
       validator.report();
       expect(validator.fireValidityEventIfNecessary).to.not.be.called;
@@ -711,13 +728,13 @@ describes.realWin('form-validators', {amp: true}, env => {
       while (form.firstChild) {
         form.removeChild(form.firstChild);
       }
-      [name, email, submit].forEach(c => form.appendChild(c));
+      [name, email, submit].forEach((c) => form.appendChild(c));
 
-      validations.forEach(v => v.parentNode.removeChild(v));
+      validations.forEach((v) => v.parentNode.removeChild(v));
       const {noName, noEmail, invalidEmail, invalidText} = getCustomValidations(
         doc
       );
-      [noName, noEmail, invalidEmail, invalidText].forEach(c =>
+      [noName, noEmail, invalidEmail, invalidText].forEach((c) =>
         doc.body.appendChild(c)
       );
       validations = doc.querySelectorAll('[visible-when-invalid]');
@@ -731,7 +748,7 @@ describes.realWin('form-validators', {amp: true}, env => {
     });
 
     it('should fire events on report(), onBlur() and onInput()', () => {
-      sandbox.stub(validator, 'fireValidityEventIfNecessary');
+      env.sandbox.stub(validator, 'fireValidityEventIfNecessary');
 
       validator.onBlur({target: form.elements[0]});
       expect(validator.fireValidityEventIfNecessary).calledOnce;

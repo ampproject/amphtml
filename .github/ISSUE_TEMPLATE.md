@@ -3,7 +3,7 @@
 - If you have questions about how to use AMP or other general questions about AMP please ask them on Stack Overflow under the AMP HTML tag instead of filing an issue here: http://stackoverflow.com/questions/tagged/amp-html
 - If you have questions/issues related to Google Search please ask them in Google's AMP forum instead of filing an issue here: https://goo.gl/utQ1KZ
 
-If you have a bug or feature request for AMP please fill in the following template.  Delete everything except the headers (including this text).
+If you have a bug or feature request for AMP please fill in the following template. Delete everything except the headers (including this text).
 
 ## What's the issue?
 
@@ -11,13 +11,17 @@ Briefly describe the bug/feature request.
 
 ## How do we reproduce the issue?
 
-If this is a bug please provide a public URL and ideally a reduced test case (e.g. on jsbin.com) that exhibits only your issue and nothing else.  Then provide step-by-step instructions for reproducing the issue:
+If this is a bug please provide a public URL and ideally a reduced test case (e.g. on jsbin.com, codepen.io, or glitch.com) that exhibits only your issue and nothing else. Then provide step-by-step instructions for reproducing the issue:
 
 1. Step 1 to reproduce
 2. Step 2 to reproduce
 3. …
 
 If this is a feature request you can use this section to point to a prototype/mockup that will help us understand the request.
+
+### Tips on Rendering Bugs
+
+If you're reporting a bug that's the result of rendering data from an endpoint (e.g. with `<amp-list>` or `<amp-form>`), it's helpful to include sample JSON data from your endpoint. [JSONPlaceholder](https://jsonplaceholder.typicode.com/) is great for providing publicly accessible sample endpoint as well as dummy json endpoints.
 
 ## What browsers are affected?
 

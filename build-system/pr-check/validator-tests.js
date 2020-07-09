@@ -26,22 +26,21 @@ const {
   printChangeSummary,
   startTimer,
   stopTimer,
+  stopTimedJob,
   timedExecOrDie: timedExecOrDieBase,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {isTravisPullRequestBuild} = require('../travis');
+const {isTravisPullRequestBuild} = require('../common/travis');
 const {runYarnChecks} = require('./yarn-checks');
 
 const FILENAME = 'validator-tests.js';
 const FILELOGPREFIX = colors.bold(colors.yellow(`${FILENAME}:`));
-const timedExecOrDie = (cmd, unusedFileName) =>
-  timedExecOrDieBase(cmd, FILENAME);
+const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
 
 function main() {
   const startTime = startTimer(FILENAME, FILENAME);
   if (!runYarnChecks(FILENAME)) {
-    stopTimer(FILENAME, FILENAME, startTime);
-    process.exitCode = 1;
+    stopTimedJob(FILENAME, startTime);
     return;
   }
 
@@ -50,17 +49,12 @@ function main() {
     timedExecOrDie('gulp validator-webui');
   } else {
     printChangeSummary(FILENAME);
-    const buildTargets = new Set();
-    if (!determineBuildTargets(buildTargets, FILENAME)) {
-      stopTimer(FILENAME, FILENAME, startTime);
-      process.exitCode = 1;
-      return;
-    }
-
+    const buildTargets = determineBuildTargets(FILENAME);
     if (
       !buildTargets.has('RUNTIME') &&
       !buildTargets.has('VALIDATOR') &&
-      !buildTargets.has('VALIDATOR_WEBUI')
+      !buildTargets.has('VALIDATOR_WEBUI') &&
+      !buildTargets.has('VALIDATOR_JAVA')
     ) {
       console.log(
         `${FILELOGPREFIX} Skipping`,

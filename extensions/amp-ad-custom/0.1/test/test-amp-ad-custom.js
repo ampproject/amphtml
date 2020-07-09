@@ -30,14 +30,16 @@ const realWinConfig = {
   allowExternalResources: true,
 };
 
-describes.realWin('TemplateRenderer', realWinConfig, env => {
+describes.realWin('TemplateRenderer', realWinConfig, (env) => {
   const templateUrl = '/adzerk/1';
 
+  let doc;
   let containerElement;
   let impl;
 
   beforeEach(() => {
-    containerElement = document.createElement('div');
+    doc = env.win.document;
+    containerElement = doc.createElement('div');
     containerElement.setAttribute('height', 50);
     containerElement.setAttribute('width', 320);
     containerElement.setAttribute('src', templateUrl);
@@ -60,7 +62,7 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
     containerElement.getIntersectionChangeEntry = () => ({});
     containerElement.isInViewport = () => true;
     containerElement.getAmpDoc = () => env.ampdoc;
-    document.body.appendChild(containerElement);
+    doc.body.appendChild(containerElement);
 
     impl = new AmpAdTemplate(containerElement);
     impl.attemptChangeSize = (width, height) => {
@@ -71,8 +73,7 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
   });
 
   afterEach(() => {
-    sandbox.restore();
-    document.body.removeChild(containerElement);
+    doc.body.removeChild(containerElement);
   });
 
   describe('Iframe Rendering', () => {
@@ -90,7 +91,7 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
             )
           ),
         headers: {
-          get: header => {
+          get: (header) => {
             switch (header) {
               case AMP_TEMPLATED_CREATIVE_HEADER_NAME:
                 return 'amp-mustache';
@@ -103,10 +104,12 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
         },
       });
 
-      sandbox.stub(getAmpAdTemplateHelper(env.win), 'fetch').callsFake(url => {
-        expect(url).to.equal(templateUrl);
-        return Promise.resolve(data.adTemplate);
-      });
+      env.sandbox
+        .stub(getAmpAdTemplateHelper(env.win), 'fetch')
+        .callsFake((url) => {
+          expect(url).to.equal(templateUrl);
+          return Promise.resolve(data.adTemplate);
+        });
 
       impl.buildCallback();
       impl.getRequestUrl();
@@ -126,7 +129,7 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
       impl.adResponsePromise_ = Promise.resolve({
         arrayBuffer: () => Promise.resolve(utf8Encode(mockCreative)),
         headers: {
-          get: header => {
+          get: (header) => {
             switch (header) {
               case AMP_TEMPLATED_CREATIVE_HEADER_NAME:
                 return 'amp-mustache';
@@ -154,7 +157,7 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
       impl.adResponsePromise_ = Promise.resolve({
         arrayBuffer: () => Promise.resolve(utf8Encode(mockCreative)),
         headers: {
-          get: header => {
+          get: (header) => {
             switch (header) {
               case 'AMP-Ad-Response-Type':
                 return 'template';
@@ -190,6 +193,14 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
       impl.baseRequestUrl_ = 'https://foo.com';
       expect(impl.getRequestUrl()).to.equal(
         'https://foo.com?bar=123&baz=456&camelCase=789'
+      );
+    });
+    it('should substitute macros', () => {
+      impl.buildCallback();
+      impl.baseRequestUrl_ = 'https://foo.com?location=CANONICAL_URL';
+      expect(impl.getRequestUrl()).to.equal(
+        'https://foo.com?location=' +
+          'http%3A%2F%2Flocalhost%3A9876%2Fcontext.html'
       );
     });
   });

@@ -21,16 +21,16 @@ import {installDocumentInfoServiceForDoc} from '../../../../src/service/document
 describe('A4AVariableSource', () => {
   let varSource;
 
-  beforeEach(() => {
-    return createIframePromise().then(iframe => {
-      iframe.doc.title = 'Pixel Test';
-      const link = iframe.doc.createElement('link');
-      link.setAttribute('href', 'https://pinterest.com:8080/pin1');
-      link.setAttribute('rel', 'canonical');
-      iframe.doc.head.appendChild(link);
-      installDocumentInfoServiceForDoc(iframe.ampdoc);
-      varSource = new A4AVariableSource(iframe.ampdoc, iframe.win);
-    });
+  beforeEach(async () => {
+    const iframe = await createIframePromise();
+    iframe.doc.title = 'Pixel Test';
+    const link = iframe.doc.createElement('link');
+    link.setAttribute('href', 'https://pinterest.com:8080/pin1');
+    link.setAttribute('rel', 'canonical');
+    iframe.doc.head.appendChild(link);
+    iframe.win.__AMP_SERVICES.documentInfo = null;
+    installDocumentInfoServiceForDoc(iframe.ampdoc);
+    varSource = new A4AVariableSource(iframe.ampdoc, iframe.win);
   });
 
   function expandAsync(varName, opt_params) {
@@ -51,11 +51,10 @@ describe('A4AVariableSource', () => {
     );
   });
 
-  it('should replace NAV_TIMING', () => {
+  it('should replace NAV_TIMING', async () => {
     expect(expandSync('NAV_TIMING', ['navigationStart'])).to.match(/\d+/);
-    return expandAsync('NAV_TIMING', ['navigationStart']).then(val =>
-      expect(val).to.match(/\d+/)
-    );
+    const val = await expandAsync('NAV_TIMING', ['navigationStart']);
+    return expect(val).to.match(/\d+/);
   });
 
   it('should replace NAV_TYPE', () => {

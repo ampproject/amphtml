@@ -132,10 +132,10 @@ describes.realWin(
       extensions: ['amp-ad-exit'],
     },
   },
-  env => {
-    let sandbox;
+  (env) => {
     let win;
     let element;
+    let clock;
 
     function makeClickEvent(
       time = 0,
@@ -143,9 +143,9 @@ describes.realWin(
       y = 0,
       target = win.document.body
     ) {
-      sandbox.clock.tick(time);
+      clock.tick(time);
       return {
-        preventDefault: sandbox.spy(),
+        preventDefault: env.sandbox.spy(),
         clientX: x,
         clientY: y,
         target,
@@ -175,21 +175,37 @@ describes.realWin(
       win.document.body.appendChild(adDiv);
     }
 
+    function pointTo(target) {
+      element.implementation_.executeAction({
+        method: 'setVariable',
+        args: {name: 'indirect', target},
+        satisfiesTrust: () => true,
+      });
+    }
+
+    function exitIndirect() {
+      element.implementation_.executeAction({
+        method: 'exit',
+        args: {variable: 'indirect', default: 'simple'},
+        event: makeClickEvent(1001),
+        satisfiesTrust: () => true,
+      });
+    }
+
     beforeEach(() => {
-      sandbox = sinon.createSandbox({useFakeTimers: true});
+      clock = env.sandbox.useFakeTimers();
       win = env.win;
       toggleExperiment(win, 'amp-ad-exit', true);
       addAdDiv();
       // TEST_3P_VENDOR must be in IFRAME_TRANSPORTS
       // *before* makeElementWithConfig
       IFRAME_TRANSPORTS[TEST_3P_VENDOR] = '/nowhere.html';
-      return makeElementWithConfig(EXIT_CONFIG).then(el => {
+      return makeElementWithConfig(EXIT_CONFIG).then((el) => {
         element = el;
       });
     });
 
     afterEach(() => {
-      sandbox.restore();
       env.win.document.body.removeChild(element);
       env.win.document.body.removeChild(env.win.document.getElementById('ad'));
       element = undefined;
@@ -207,7 +223,7 @@ describes.realWin(
     });
 
     it('should do nothing for missing targets', () => {
-      const open = sandbox.stub(win, 'open');
+      const open = env.sandbox.stub(win, 'open');
       try {
         allowConsoleError(() =>
           element.implementation_.executeAction({
@@ -233,7 +249,7 @@ describes.realWin(
     });
 
     it('should reject fast clicks', () => {
-      const open = sandbox.stub(win, 'open');
+      const open = env.sandbox.stub(win, 'open');
 
       element.implementation_.executeAction({
         method: 'exit',
@@ -267,7 +283,7 @@ describes.realWin(
             delay: 2000,
           },
         },
-      }).then(el => {
+      }).then((el) => {
         expect(el.implementation_.defaultFilters_.length).to.equal(2);
         let clickFilter = el.implementation_.defaultFilters_[0];
         expect(clickFilter.spec.type).to.equal(FilterType.CLICK_DELAY);
@@ -280,7 +296,7 @@ describes.realWin(
     });
 
     it('should attempt new-tab navigation', () => {
-      const open = sandbox.stub(win, 'open').callsFake(() => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
         return {name: 'fakeWin'};
       });
 
@@ -299,7 +315,7 @@ describes.realWin(
     });
 
     it('should fall back to top navigation', () => {
-      const open = sandbox.stub(win, 'open').callsFake(() => null);
+      const open = env.sandbox.stub(win, 'open').callsFake(() => null);
 
       element.implementation_.executeAction({
         method: 'exit',
@@ -320,7 +336,7 @@ describes.realWin(
     });
 
     it('should attempt same-tab navigation', () => {
-      const open = sandbox.stub(win, 'open').callsFake(() => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
         return {name: 'fakeWin'};
       });
 
@@ -339,10 +355,10 @@ describes.realWin(
     });
 
     it('should ping tracking URLs with sendBeacon', () => {
-      const open = sandbox.stub(win, 'open').callsFake(() => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
         return {name: 'fakeWin'};
       });
-      const sendBeacon = sandbox
+      const sendBeacon = env.sandbox
         .stub(win.navigator, 'sendBeacon')
         .callsFake(() => true);
 
@@ -370,17 +386,17 @@ describes.realWin(
     });
 
     it('should ping tracking URLs with image requests (no sendBeacon)', () => {
-      const open = sandbox.stub(win, 'open').callsFake(() => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
         return {name: 'fakeWin'};
       });
 
       let sendBeacon;
       if (win.navigator.sendBeacon) {
-        sendBeacon = sandbox
+        sendBeacon = env.sandbox
           .stub(win.navigator, 'sendBeacon')
           .callsFake(() => true);
       }
-      const createElement = sandbox.spy(win.document, 'createElement');
+      const createElement = env.sandbox.spy(win.document, 'createElement');
 
       element.implementation_.executeAction({
         method: 'exit',
@@ -402,14 +418,14 @@ describes.realWin(
     });
 
     it('should ping tracking URLs with image requests (sendBeacon fails)', () => {
-      const open = sandbox.stub(win, 'open').callsFake(() => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
         return {name: 'fakeWin'};
       });
 
-      const sendBeacon = sandbox
+      const sendBeacon = env.sandbox
         .stub(win.navigator, 'sendBeacon')
         .callsFake(() => false);
-      const createElement = sandbox.spy(win.document, 'createElement');
+      const createElement = env.sandbox.spy(win.document, 'createElement');
 
       element.implementation_.executeAction({
         method: 'exit',
@@ -435,15 +451,15 @@ describes.realWin(
           beacon: false,
         },
       };
-      return makeElementWithConfig(config).then(el => {
-        const open = sandbox.stub(win, 'open').callsFake(() => {
+      return makeElementWithConfig(config).then((el) => {
+        const open = env.sandbox.stub(win, 'open').callsFake(() => {
           return {name: 'fakeWin'};
         });
 
-        const sendBeacon = sandbox
+        const sendBeacon = env.sandbox
           .stub(win.navigator, 'sendBeacon')
           .callsFake(() => true);
-        const createElement = sandbox.spy(win.document, 'createElement');
+        const createElement = env.sandbox.spy(win.document, 'createElement');
 
         el.implementation_.executeAction({
           method: 'exit',
@@ -463,14 +479,14 @@ describes.realWin(
     });
 
     it('should replace standard URL variables', () => {
-      const open = sandbox.stub(win, 'open').callsFake(() => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
         return {name: 'fakeWin'};
       });
 
       if (!win.navigator) {
         win.navigator = {sendBeacon: () => false};
       }
-      const sendBeacon = sandbox
+      const sendBeacon = env.sandbox
         .stub(win.navigator, 'sendBeacon')
         .callsFake(() => true);
 
@@ -481,7 +497,7 @@ describes.realWin(
         satisfiesTrust: () => true,
       });
 
-      const urlMatcher = sinon.match(
+      const urlMatcher = env.sandbox.match(
         new RegExp(
           'http:\\/\\/localhost:8000\\/vars\\?' +
             'foo=bar&ampdoc=AMPDOC_HOST&r=[0-9\\.]+&x=101&y=102'
@@ -489,21 +505,21 @@ describes.realWin(
       );
       expect(open).to.have.been.calledWith(urlMatcher, '_blank');
 
-      const trackingMatcher = sinon.match(
+      const trackingMatcher = env.sandbox.match(
         /http:\/\/localhost:8000\/tracking\?r=[0-9\.]+&x=101&y=102/
       );
       expect(sendBeacon).to.have.been.calledWith(trackingMatcher, '');
     });
 
     it('should replace custom URL variables with vars', () => {
-      const open = sandbox.stub(win, 'open').callsFake(() => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
         return {name: 'fakeWin'};
       });
 
       if (!win.navigator) {
         win.navigator = {sendBeacon: () => false};
       }
-      const sendBeacon = sandbox
+      const sendBeacon = env.sandbox
         .stub(win.navigator, 'sendBeacon')
         .callsFake(() => true);
 
@@ -535,7 +551,7 @@ describes.realWin(
     });
 
     it('border protection', () => {
-      const open = sandbox.stub(win, 'open').callsFake(() => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
         return {name: 'fakeWin'};
       });
 
@@ -543,7 +559,7 @@ describes.realWin(
       win.innerHeight = 2000;
       // Replace the getVsync function so that the measure can happen at once.
       element.implementation_.getVsync = () => {
-        return {measure: callback => callback()};
+        return {measure: (callback) => callback()};
       };
       element.implementation_.onLayoutMeasure();
 
@@ -597,13 +613,13 @@ describes.realWin(
     });
 
     it('border protection relative to div', () => {
-      const open = sandbox.stub(win, 'open').callsFake(() => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
         return {name: 'fakeWin'};
       });
 
       // Replace the getVsync function so that the measure can happen at once.
       element.implementation_.getVsync = () => {
-        return {measure: callback => callback()};
+        return {measure: (callback) => callback()};
       };
       element.implementation_.onLayoutMeasure();
 
@@ -657,7 +673,7 @@ describes.realWin(
     });
 
     it('should not trigger for amp-carousel buttons', () => {
-      const open = sandbox.stub(win, 'open');
+      const open = env.sandbox.stub(win, 'open');
       const fakeCarouselButton = document.createElement('div');
       fakeCarouselButton.classList.add('amp-carousel-button');
       element.implementation_.executeAction({
@@ -670,7 +686,7 @@ describes.realWin(
     });
 
     it('should not trigger for elements matching InactiveElementFilter', () => {
-      const open = sandbox.stub(win, 'open');
+      const open = env.sandbox.stub(win, 'open');
       const unclickable = document.createElement('span');
       unclickable.id = 'unclickable';
       element.implementation_.executeAction({
@@ -690,7 +706,7 @@ describes.realWin(
     });
 
     it('should replace custom URL variables with 3P Analytics defaults', () => {
-      const open = sandbox.stub(win, 'open').returns({name: 'fakeWin'});
+      const open = env.sandbox.stub(win, 'open').returns({name: 'fakeWin'});
 
       element.implementation_.executeAction({
         method: 'exit',
@@ -706,7 +722,7 @@ describes.realWin(
     });
 
     it('should replace custom URL variables with 3P Analytics signals', () => {
-      const open = sandbox.stub(win, 'open').callsFake(() => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
         return {name: 'fakeWin'};
       });
 
@@ -756,6 +772,146 @@ describes.realWin(
       setParentWindow(adFrame.contentWindow, frame.contentWindow);
       expect(new AmpAdExit(ampAdExitElement).getAmpAdResourceId_()).to.equal(
         '12345'
+      );
+    });
+
+    it('should exit to the default target if varible target is never set', () => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
+        return {name: 'fakeWin'};
+      });
+      exitIndirect();
+      expect(open).to.have.been.calledOnce;
+      expect(open).to.have.been.calledWith(
+        EXIT_CONFIG.targets.simple.finalUrl,
+        '_blank'
+      );
+    });
+
+    it('should cause error when variable target is never set and default value is not provided', () => {
+      try {
+        allowConsoleError(() => {
+          element.implementation_.executeAction({
+            method: 'exit',
+            args: {
+              variable: 'indirect',
+            },
+            event: makeClickEvent(1001),
+            satisfiesTrust: () => true,
+          });
+        });
+      } catch (expected) {
+        return;
+      }
+      expect.fail();
+    });
+
+    it('should cause error when variable target was pointed to an invalid target', () => {
+      try {
+        allowConsoleError(() => {
+          pointTo('not-a-real-target');
+        });
+      } catch (expected) {
+        return;
+      }
+      expect.fail();
+    });
+
+    it('should cause error when exiting to an invalid variable target', () => {
+      try {
+        allowConsoleError(() => {
+          element.implementation_.executeAction({
+            method: 'exit',
+            args: {variable: 'not-a-real-target', default: 'not-a-real-target'},
+            event: makeClickEvent(1001),
+            satisfiesTrust: () => true,
+          });
+        });
+      } catch (expected) {
+        return;
+      }
+      expect.fail();
+    });
+
+    it('should cause error when neither "target" nor "variable" is provided in arguments', () => {
+      try {
+        allowConsoleError(() => {
+          element.implementation_.executeAction({
+            method: 'exit',
+            args: {},
+            event: makeClickEvent(1001),
+            satisfiesTrust: () => true,
+          });
+        });
+      } catch (expected) {
+        return;
+      }
+      expect.fail();
+    });
+
+    it('should cause error when both "target" and "variable" are provided in arguments', () => {
+      try {
+        allowConsoleError(() => {
+          element.implementation_.executeAction({
+            method: 'exit',
+            args: {
+              target: 'customVars',
+              variable: 'indirect',
+              default: 'simple',
+            },
+            event: makeClickEvent(1001),
+            satisfiesTrust: () => true,
+          });
+        });
+      } catch (expected) {
+        return;
+      }
+      expect.fail();
+    });
+
+    it('should exit to the pointed-to target and work with custom URL variables', () => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
+        return {name: 'fakeWin'};
+      });
+      if (!win.navigator) {
+        win.navigator = {sendBeacon: () => false};
+      }
+      const sendBeacon = env.sandbox
+        .stub(win.navigator, 'sendBeacon')
+        .callsFake(() => true);
+
+      pointTo('clickTargetTest');
+      exitIndirect();
+      expect(open).to.have.been.calledOnce;
+      expect(open).to.have.been.calledWith(
+        EXIT_CONFIG.targets.clickTargetTest.finalUrl,
+        '_top'
+      );
+
+      pointTo('customVars');
+      element.implementation_.executeAction({
+        method: 'exit',
+        args: {
+          variable: 'indirect',
+          _foo: 'foo',
+          _bar: 'bar',
+          _numVar: 0,
+          _boolVar: false,
+        },
+        event: makeClickEvent(1001, 101, 102),
+        satisfiesTrust: () => true,
+      });
+      expect(open).to.have.been.calledTwice;
+      expect(open).to.have.been.calledWith(
+        'http://localhost:8000/vars?foo=foo',
+        '_blank'
+      );
+      expect(sendBeacon).to.have.been.calledWith(
+        'http://localhost:8000/tracking?bar=bar',
+        ''
+      );
+      expect(sendBeacon).to.have.been.calledWith(
+        'http://localhost:8000/tracking?numVar=0&boolVar=false',
+        ''
       );
     });
   }

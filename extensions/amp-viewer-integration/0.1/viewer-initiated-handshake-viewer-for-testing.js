@@ -42,9 +42,6 @@ export class WebviewViewerForTesting {
     this.alreadyLoaded_ = false;
 
     /** @private {string} */
-    this.viewportType_ = 'natural';
-
-    /** @private {string} */
     this.visibilityState_ = visible ? 'visible' : 'hidden';
 
     /** @type {Element} */
@@ -56,19 +53,13 @@ export class WebviewViewerForTesting {
     /** @type {Element} */
     this.iframe = document.createElement('iframe');
     this.iframe.setAttribute('id', 'AMP_DOC_' + id);
-
-    const isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
-    if (this.viewportType_ == 'natural' && !isIos_) {
-      this.iframe.setAttribute('scrolling', 'yes');
-    } else {
-      this.iframe.setAttribute('scrolling', 'no');
-    }
+    this.iframe.setAttribute('scrolling', 'yes');
 
     this.pollingIntervalIds_ = [];
     this.intervalCtr = 0;
 
     /** @private @const {!Promise} */
-    this.handshakeReceivedPromise_ = new Promise(resolve => {
+    this.handshakeReceivedPromise_ = new Promise((resolve) => {
       /** @private {?function()} */
       this.handshakeResponseResolve_ = resolve;
     });
@@ -81,14 +72,13 @@ export class WebviewViewerForTesting {
   waitForHandshakeResponse() {
     const params = {
       history: 1,
-      viewportType: this.viewportType_,
       width: this.containerEl./*OK*/ offsetWidth,
       height: this.containerEl./*OK*/ offsetHeight,
       visibilityState: this.visibilityState_,
       prerenderSize: 1,
       origin: parseUrlDeprecated(window.location.href).origin,
       csi: 1,
-      cap: 'foo,a2a,handshakepoll',
+      cap: 'foo,a2a,handshakepoll,iframeScroll',
     };
 
     let ampdocUrl = this.ampdocUrl + '#' + serializeQueryString(params);
@@ -122,7 +112,7 @@ export class WebviewViewerForTesting {
     if (!this.iframe) {
       return;
     }
-    const listener = function(e) {
+    const listener = function (e) {
       if (this.isChannelOpen_(e)) {
         //stop polling
         window.clearInterval(this.pollingIntervalIds_[intervalCtr]);
@@ -142,6 +132,7 @@ export class WebviewViewerForTesting {
   /**
    * Fake docs for testing
    * @param {*} e
+   * @return {*} TODO(#23582): Specify return type
    */
   isChannelOpen_(e) {
     return (
@@ -194,6 +185,7 @@ export class WebviewViewerForTesting {
   /**
    * Fake docs for testing
    * @param {*} eventData
+   * @return {*} TODO(#23582): Specify return type
    * @visibleForTesting
    */
   processRequest_(eventData) {

@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-const {transformableMethods} = require('../log-module-metadata');
-
-/**
- * @typedef {{
- *   name: string.
- *   variadle: boolean,
- *   startPos: number
- * }}
- */
-let LogMethodMetadataDef;
+const {
+  assertAliases,
+  definitionFile,
+  singletonFunctions,
+  transformableMethods,
+} = require('../babel-plugins/log-module-metadata.js');
 
 /**
  * @param {!Node} node
@@ -50,45 +46,48 @@ function hasTemplateLiteral(node) {
   return false;
 }
 
-/**
- * @param {string} name
- * @return {!LogMethodMetadataDef}
- */
-function getMetadata(name) {
-  return transformableMethods.find(cur => cur.name === name);
-}
-
-const selector = transformableMethods
-  .map(method => {
-    return `CallExpression[callee.property.name=${method.name}]`;
-  })
+const selector = Object.keys(transformableMethods)
+  .map((name) => `CallExpression[callee.property.name=${name}]`)
+  .concat(assertAliases.map((name) => `CallExpression[callee.name=${name}]`))
   .join(',');
 
 module.exports = {
   create(context) {
     return {
-      [selector]: function(node) {
+      [selector]: function (node) {
         // Don't evaluate or transform log.js
-        if (context.getFilename().endsWith('src/log.js')) {
+        if (context.getFilename().endsWith(definitionFile)) {
           return;
         }
-        // Make sure that callee is a CallExpression as well.
-        // dev().assert() // enforce rule
-        // dev.assert() // ignore
+
+        let methodInvokedName;
+
         const {callee} = node;
-        const calleeObject = callee.object;
-        if (!calleeObject || calleeObject.type !== 'CallExpression') {
-          return;
+
+        // userAssert() and devAssert() aliases
+        if (
+          callee.type == 'Identifier' &&
+          assertAliases.includes(callee.name)
+        ) {
+          methodInvokedName = 'assert';
+        } else {
+          // dev().assert() // enforce rule
+          // dev.assert() // ignore
+          const calleeObject = callee.object;
+          if (!calleeObject || calleeObject.type !== 'CallExpression') {
+            return;
+          }
+
+          // Make sure that the CallExpression is one of dev() or user().
+          if (!singletonFunctions.includes(calleeObject.callee.name)) {
+            return;
+          }
+
+          methodInvokedName = callee.property.name;
         }
 
-        // Make sure that the CallExpression is one of dev() or user().
-        if (!['dev', 'user'].includes(calleeObject.callee.name)) {
-          return;
-        }
-
-        const methodInvokedName = callee.property.name;
         // Find the position of the argument we care about.
-        const metadata = getMetadata(methodInvokedName);
+        const metadata = transformableMethods[methodInvokedName];
 
         // If there's no metadata, this is most likely a test file running
         // private methods on log.
@@ -96,26 +95,25 @@ module.exports = {
           return;
         }
 
-        const argToEval = node.arguments[metadata.startPos];
+        const {variadic, messageArgPos} = metadata;
+        // If method is not variadic we don't need to check.
+        if (!variadic) {
+          return;
+        }
 
+        const argToEval = node.arguments[messageArgPos];
         if (!argToEval) {
           return;
         }
 
         const errMsg = [
           'Mixing Template Strings and %s interpolation for log methods is',
-          `not supported on ${metadata.name}. Please either use template `,
-          'literals or use the log strformat(%s) style interpolation ',
+          `not supported on ${methodInvokedName}. Please either use template`,
+          'literals or use the log strformat(%s) style interpolation',
           'exclusively',
         ].join(' ');
 
-        // If method is not variadic we don't need to check.
-        if (!metadata.variadic) {
-          return;
-        }
-
         const hasVariadicInterpolation = node.arguments[metadata.startPos + 1];
-
         if (hasVariadicInterpolation && hasTemplateLiteral(argToEval)) {
           context.report({
             node: argToEval,
