@@ -76,7 +76,7 @@ async function getTransform(inputFile) {
   const transformDir = path.dirname(path.dirname(inputFile));
   const parsed = path.parse(transformDir);
   const transformPath = path.join(parsed.dir, 'dist', parsed.base);
-  const transformFile = (await (globby(path.resolve(transformPath, '*.js'))))[0];
+  const transformFile = (await globby(path.resolve(transformPath, '*.js')))[0];
   // TODO(rsimha): Change require to import when node v14 is the active LTS.
   return require(transformFile).default;
 }
@@ -89,7 +89,7 @@ async function getTransform(inputFile) {
  * @return {string}
  */
 async function getOutput(transform, input) {
-  return (await (posthtml(transform).process(input))).html;
+  return (await posthtml(transform).process(input)).html;
 }
 
 /**

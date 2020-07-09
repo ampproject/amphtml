@@ -48,8 +48,10 @@ app.use('/inabox-(friendly|safeframe)', (req, res) => {
   const templatePath = '/build-system/server/server-inabox-template.html';
   (async () => {
     try {
-      let template = await fs.promises
-        .readFile(process.cwd() + templatePath, 'utf8');
+      let template = await fs.promises.readFile(
+        process.cwd() + templatePath,
+        'utf8'
+      );
 
       const url = getInaboxUrl(req);
       if (req.baseUrl == '/inabox-friendly') {
@@ -86,8 +88,10 @@ app.use('/a4a(|-3p)/', (req, res) => {
   const templatePath = '/build-system/server/server-a4a-template.html';
   const url = getInaboxUrl(req);
   (async () => {
-    const template = await fs.promises
-      .readFile(process.cwd() + templatePath, 'utf8');
+    const template = await fs.promises.readFile(
+      process.cwd() + templatePath,
+      'utf8'
+    );
 
     const content = fillTemplate(template, url.href, req.query)
       .replace(/CHECKSIG/g, force3p || '')
@@ -178,21 +182,23 @@ function fillTemplate(template, url, query, body) {
   } else {
     length = 0;
   }
-  return template
-    .replace(/BODY/g, newBody)
-    .replace(/LENGTH/g, length)
-    .replace(/AD_URL/g, url)
-    .replace(/OFFSET/g, query.offset || '0px')
-    .replace(/AD_WIDTH/g, query.width || '300')
-    .replace(/AD_HEIGHT/g, query.height || '250')
-    .replace(
-      'INABOX_ADS_TAG_INTEGRATION',
-      '<script src="/examples/amphtml-ads/ads-tag-integration.js"></script>'
-    )
-    // Clear out variables that are not already replaced beforehand.
-    .replace(/NAME/g, 'inabox')
-    .replace(/SOURCE/g, '')
-    .replace('SRCDOC_ATTRIBUTE', '');
+  return (
+    template
+      .replace(/BODY/g, newBody)
+      .replace(/LENGTH/g, length)
+      .replace(/AD_URL/g, url)
+      .replace(/OFFSET/g, query.offset || '0px')
+      .replace(/AD_WIDTH/g, query.width || '300')
+      .replace(/AD_HEIGHT/g, query.height || '250')
+      .replace(
+        'INABOX_ADS_TAG_INTEGRATION',
+        '<script src="/examples/amphtml-ads/ads-tag-integration.js"></script>'
+      )
+      // Clear out variables that are not already replaced beforehand.
+      .replace(/NAME/g, 'inabox')
+      .replace(/SOURCE/g, '')
+      .replace('SRCDOC_ATTRIBUTE', '')
+  );
 }
 
 module.exports = app;

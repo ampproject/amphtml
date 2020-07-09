@@ -79,7 +79,7 @@ function reportClosedIssue(file, issueId, todo) {
   if (issueCache[issueId] !== undefined) {
     return issueCache[issueId];
   }
-  return issueCache[issueId] = (async () => {
+  return (issueCache[issueId] = (async () => {
     const response = await githubRequest('/issues/' + issueId);
     const issue = JSON.parse(response.body);
     const value = issue.state == 'closed' ? 1 : 0;
@@ -87,7 +87,7 @@ function reportClosedIssue(file, issueId, todo) {
       log(colors.red(todo, 'in', file.path));
     }
     return await value;
-  })();
+  })());
 }
 
 /**

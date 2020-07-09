@@ -73,8 +73,9 @@ async function waitFor(driver, valueFn, condition, opt_mutate) {
     return condition(value) ? {value} : null;
   };
 
-  const result = await driver
-    .wait(expectCondition(valueFn, conditionValue, opt_mutate));
+  const result = await driver.wait(
+    expectCondition(valueFn, conditionValue, opt_mutate)
+  );
 
   return result.value; // Unbox the value.
 }

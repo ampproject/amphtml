@@ -168,7 +168,7 @@ function overwriteAlwaysUseSuper(utils) {
   const {flag} = utils;
 
   return function (_super) {
-    return async function() {
+    return async function () {
       const obj = this._obj;
       const isControllerPromise = obj instanceof ControllerPromise;
       if (!isControllerPromise) {
