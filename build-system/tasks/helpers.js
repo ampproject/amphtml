@@ -223,8 +223,18 @@ function toEsmName(name) {
   return name.replace(/\.js$/, '.mjs');
 }
 
-function maybeToEsmName(name) {
-  return argv.esm ? toEsmName(name) : name;
+function toSxgName(name){
+  return name.replace(/\.js$/, '.sxg.js');
+}
+
+function maybeToEsmOrSxgName(name) {
+  if(argv.sxg){
+    return toSxgName(name);
+  }
+  else if(argv.esm){
+    return toEsmName(name);
+  }
+  return name;
 }
 
 /**
@@ -238,7 +248,7 @@ function maybeToEsmName(name) {
 async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
   const timeInfo = {};
   const entryPoint = path.join(srcDir, srcFilename);
-  const minifiedName = maybeToEsmName(options.minifiedName);
+  const minifiedName = maybeToEsmOrSxgName(options.minifiedName);
 
   if (options.watch) {
     const watchFunc = async () => {
@@ -268,20 +278,20 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
     if (options.latestName) {
       fs.copySync(
         destPath,
-        path.join(destDir, maybeToEsmName(options.latestName))
+        path.join(destDir, maybeToEsmOrSxgName(options.latestName))
       );
     }
 
     let name = minifiedName;
     if (options.latestName) {
-      name += ` → ${maybeToEsmName(options.latestName)}`;
+      name += ` → ${maybeToEsmOrSxgName(options.latestName)}`;
     }
     endBuildStep('Minified', name, timeInfo.startTime);
 
     const target = path.basename(minifiedName, path.extname(minifiedName));
     if (!argv.noconfig && MINIFIED_TARGETS.includes(target)) {
       await applyAmpConfig(
-        maybeToEsmName(`${destDir}/${minifiedName}`),
+        maybeToEsmOrSxgName(`${destDir}/${minifiedName}`),
         /* localDev */ options.fortesting,
         /* fortesting */ options.fortesting
       );
@@ -654,7 +664,7 @@ module.exports = {
   compileTs,
   doBuildJs,
   endBuildStep,
-  maybeToEsmName,
+  maybeToEsmName: maybeToEsmOrSxgName,
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,
