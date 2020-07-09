@@ -499,11 +499,14 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.animationManager_.cancelAll();
     }
 
-    this.story360components_.forEach(componentPromise => {
-      componentPromise.then(component => {
-        component.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
-          component.pause();
-        });
+    this.story360components_.forEach((componentPromise) => {
+      componentPromise.then((component) => {
+        component
+          .signals()
+          .whenSignal(CommonSignals.LOAD_END)
+          .then(() => {
+            component.pause();
+          });
       });
     });
   }
@@ -535,14 +538,17 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.checkPageHasElementWithPlayback_();
       this.renderOpenAttachmentUI_();
       this.findAndPrepareEmbeddedComponents_();
-      this.story360components_.forEach(componentPromise => {
-        componentPromise.then(component => {
-          component.signals().whenSignal(CommonSignals.LOAD_END).then(() => {
-            if (component.canAnimate) {
-              component.rewind();
-              component.play();
-            }
-          })
+      this.story360components_.forEach((componentPromise) => {
+        componentPromise.then((component) => {
+          component
+            .signals()
+            .whenSignal(CommonSignals.LOAD_END)
+            .then(() => {
+              if (component.canAnimate) {
+                component.rewind();
+                component.play();
+              }
+            });
         });
       });
     }
@@ -564,10 +570,13 @@ export class AmpStoryPage extends AMP.BaseElement {
         )
       );
     }
-    this.story360components_ = toArray(scopedQuerySelectorAll(
-        this.element, Selectors.ALL_STORY_360))
-        .map(element => whenUpgradedToCustomElement(element)
-            .then(customEl => customEl.getImpl()));
+    this.story360components_ = toArray(
+      scopedQuerySelectorAll(this.element, Selectors.ALL_STORY_360)
+    ).map((element) =>
+      whenUpgradedToCustomElement(element).then((customEl) =>
+        customEl.getImpl()
+      )
+    );
     this.muteAllMedia();
     this.getViewport().onResize(
       debounce(this.win, () => this.onResize_(), RESIZE_TIMEOUT_MS)
