@@ -129,7 +129,6 @@ async function doDist(extraArgs = {}) {
     fortesting: extraArgs.fortesting || argv.fortesting,
     minify: true,
     watch: argv.watch,
-    sxg: argv.sxg,
   };
   printNobuildHelp();
   printDistHelp(options);

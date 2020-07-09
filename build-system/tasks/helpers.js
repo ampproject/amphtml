@@ -224,7 +224,9 @@ function toEsmName(name) {
 }
 
 function toSxgName(name) {
-  return name.replace(/\.js$/, '.sxg.js');
+  // For certain files during compilation, there seems to be files that get the extension written twice,
+  // e.g. sxg.sxg.js. This is the quickest fix for now.
+  return name.includes('.sxg.js') ? name : name.replace(/\.js$/, '.sxg.js');
 }
 
 function maybeToEsmOrSxgName(name) {
