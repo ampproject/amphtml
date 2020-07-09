@@ -371,7 +371,44 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       );
     });
 
-    it('navigate to stories given a number', async () => {
+    it('navigate forward given a positive number in range', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      win.requestAnimationFrame(() => {
+        const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+        
+        player.go(2);
+        expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+        expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+        expect(iframes[3].getAttribute('i-amphtml-iframe-position')).to.eql('1');
+      });
+    });
+
+    it('navigate backward given a negative number in range', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      win.requestAnimationFrame(() => {
+        const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+        
+        player.go(3);
+        player.go(-1);
+        expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+        expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+        expect(iframes[3].getAttribute('i-amphtml-iframe-position')).to.eql('1');
+      });
+    });
+
+    it('not navigate given zero', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
 
@@ -384,10 +421,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         
         player.go(0);
         expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('0');
-        player.go(1);
-        expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
-        player.go(-1);
-        expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+        expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('1');
       });
     });
 
