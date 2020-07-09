@@ -18,6 +18,7 @@ import {CSS} from '../../../build/amp-story-360-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
 import {Services} from '../../../src/services';
+import {StateProperty} from '../../../extensions/amp-story/1.0/amp-story-store-service';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
 import {user, userAssert} from '../../../src/log';
@@ -52,7 +53,7 @@ class CameraOrientation {
     const deg2rad = (deg) => (deg * Math.PI) / 180;
     return new CameraOrientation(
       deg2rad(-pitch - 90),
-      deg2rad(heading),
+      deg2rad(90 + heading),
       1 / zoom
     );
   }
@@ -179,9 +180,9 @@ export class AmpStory360 extends AMP.BaseElement {
       attr('pitch-end') !== undefined ||
       attr('zoom-end') !== undefined
     ) {
-      const endHeading = parseFloat(attr('heading-end') || 0);
-      const endPitch = parseFloat(attr('pitch-end') || 0);
-      const endZoom = parseFloat(attr('zoom-end') || 1);
+      const endHeading = parseFloat(attr('heading-end') || startHeading);
+      const endPitch = parseFloat(attr('pitch-end') || startPitch);
+      const endZoom = parseFloat(attr('zoom-end') || startZoom);
       this.orientations_.push(
         CameraOrientation.fromDegrees(endHeading, endPitch, endZoom)
       );
@@ -192,6 +193,15 @@ export class AmpStory360 extends AMP.BaseElement {
     this.element.appendChild(container);
     container.appendChild(this.canvas_);
     this.applyFillContent(container, /* replacedContent */ true);
+
+    return Services.storyStoreServiceForOrNull(this.win).then(
+      (storeService) => {
+        storeService.subscribe(
+          StateProperty.PAGE_SIZE,
+          this.resizeRenderer_.bind(this),
+          false /* callToInitialize */
+        );
+      });
   }
 
   /** @override */
@@ -227,8 +237,9 @@ export class AmpStory360 extends AMP.BaseElement {
       );
   }
 
-  /** @override */
-  onMeasureChanged() {
+  /** @private */
+  resizeRenderer_() {
+    console.log('resizing');
     this.mutateElement(() => {
       if (this.renderer_) {
         this.renderer_.resize();
@@ -289,11 +300,13 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @public */
   pause() {
+    console.log('pause', this);
     this.isPlaying_ = false;
   }
 
   /** @public */
   play() {
+    console.log('play', this);
     userAssert(
       this.canAnimate,
       'amp-story-360 is either not configured to play an animation or ' +
