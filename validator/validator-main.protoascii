@@ -5778,6 +5778,12 @@ attr_lists: {
     name: "subscriptions-service"
     requires_extension: "amp-subscriptions"
   }
+  # amp-subscriptions-google specific attributes, see
+  # https://amp.dev/documentation/components/amp-subscriptions-google
+  attrs: {
+    name: "subscriptions-google-rtc"
+    requires_extension: "amp-subscriptions-google"
+  }
   # amp-next-page specific attributes, see
   # https://amp.dev/documentation/components/amp-next-page
   attrs: {
