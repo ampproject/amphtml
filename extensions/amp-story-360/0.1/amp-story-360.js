@@ -201,7 +201,8 @@ export class AmpStory360 extends AMP.BaseElement {
           this.resizeRenderer_.bind(this),
           false /* callToInitialize */
         );
-      });
+      }
+    );
   }
 
   /** @override */
