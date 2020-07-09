@@ -24,7 +24,14 @@ import {toChildArray, useRef, useState} from '../../../src/preact';
  * @return {PreactDef.Renderable}
  */
 export function BaseCarousel(props) {
-  const {style, arrowPrev, arrowNext, children, currentSlide, loop} = props;
+  const {
+    'arrowPrev': arrowPrev,
+    'arrowNext': arrowNext,
+    'children': children,
+    'currentSlide': currentSlide,
+    'loop': loop,
+    ...rest
+  } = props;
   const {length} = toChildArray(children);
   const {0: curSlide, 1: setCurSlide} = useState(currentSlide || 0);
   const ignoreProgrammaticScroll = useRef(true);
@@ -36,7 +43,7 @@ export function BaseCarousel(props) {
   const disableForDir = (dir) =>
     !loop && (curSlide + dir < 0 || curSlide + dir >= length);
   return (
-    <div style={style}>
+    <div {...rest}>
       <Scroller
         ignoreProgrammaticScroll={ignoreProgrammaticScroll}
         loop={loop}

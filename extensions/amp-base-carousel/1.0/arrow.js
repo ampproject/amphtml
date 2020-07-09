@@ -16,18 +16,26 @@
 
 import * as Preact from '../../../src/preact';
 import * as styles from './base-carousel.css';
+import {dict} from '../../../src/utils/object';
 
 /**
  * @param {!JsonObject} props
  * @return {PreactDef.Renderable}
  */
 export function Arrow(props) {
-  const {customArrow, dir, onClick, disabled} = props;
-  const button = customArrow ? customArrow : renderDefaultArrow({dir});
   const {
-    children,
+    'customArrow': customArrow,
+    'dir': dir,
+    'onClick': onClick,
+    'disabled': disabled,
+  } = props;
+  const button = customArrow
+    ? customArrow
+    : renderDefaultArrow(dict({'dir': dir}));
+  const {
+    'children': children,
     'disabled': customDisabled,
-    onCustomClick,
+    'onCustomClick': onCustomClick,
     ...rest
   } = button.props;
   const isDisabled = disabled || customDisabled;
@@ -66,7 +74,7 @@ export function Arrow(props) {
 function renderDefaultArrow(props) {
   return (
     <button style={styles.defaultArrowButton}>
-      {props.dir < 0 ? '<<' : '>>'}
+      {props['dir'] < 0 ? '<<' : '>>'}
     </button>
   );
 }

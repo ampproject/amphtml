@@ -17,6 +17,7 @@ import * as Preact from '../../../src/preact';
 import * as styles from './base-carousel.css';
 import {WithAmpContext} from '../../../src/preact/context';
 import {debounce} from '../../../src/utils/rate-limit';
+import {dict} from '../../../src/utils/object';
 import {mod} from '../../../src/utils/math';
 import {
   toChildArray,
@@ -41,11 +42,11 @@ const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
  */
 export function Scroller(props) {
   const {
-    children,
-    ignoreProgrammaticScroll,
-    loop,
-    restingIndex,
-    setRestingIndex,
+    'children': children,
+    'ignoreProgrammaticScroll': ignoreProgrammaticScroll,
+    'loop': loop,
+    'restingIndex': restingIndex,
+    'setRestingIndex': setRestingIndex,
   } = props;
 
   /**
@@ -59,14 +60,16 @@ export function Scroller(props) {
    * is with respect to its scrolling order. Only needed if loop=true.
    */
   const offsetRef = useRef(restingIndex);
-  const containerRef = useRef();
-  const slides = renderSlides({
-    children,
-    loop,
-    offsetRef,
-    pivotIndex,
-    restingIndex,
-  });
+  const containerRef = useRef(null);
+  const slides = renderSlides(
+    dict({
+      'children': children,
+      'loop': loop,
+      'offsetRef': offsetRef,
+      'pivotIndex': pivotIndex,
+      'restingIndex': restingIndex,
+    })
+  );
   const currentIndex = useRef(restingIndex);
 
   // useLayoutEffect needed to avoid FOUC while scrolling
@@ -194,7 +197,13 @@ export function Scroller(props) {
  * @return {PreactDef.Renderable}
  */
 function renderSlides(props) {
-  const {children, restingIndex, offsetRef, pivotIndex, loop} = props;
+  const {
+    'children': children,
+    'restingIndex': restingIndex,
+    'offsetRef': offsetRef,
+    'pivotIndex': pivotIndex,
+    'loop': loop,
+  } = props;
   const {length} = children;
   const slides = [];
 
