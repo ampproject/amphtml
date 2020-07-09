@@ -168,7 +168,7 @@ function overwriteAlwaysUseSuper(utils) {
   const {flag} = utils;
 
   return function (_super) {
-    return function () {
+    return async function() {
       const obj = this._obj;
       const isControllerPromise = obj instanceof ControllerPromise;
       if (!isControllerPromise) {
@@ -176,10 +176,9 @@ function overwriteAlwaysUseSuper(utils) {
       }
       const {waitForValue} = obj;
       if (!waitForValue) {
-        return obj.then((result) => {
-          flag(this, 'object', result);
-          return _super.apply(this, arguments);
-        });
+        const result = await obj;
+        flag(this, 'object', result);
+        return _super.apply(this, arguments);
       }
 
       /**
