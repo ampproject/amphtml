@@ -254,14 +254,10 @@ import {sortable} from '../ads/sortable';
 import {sovrn} from '../ads/sovrn';
 import {speakol} from '../ads/speakol';
 import {spotx} from '../ads/spotx';
-<<<<<<< HEAD
-import {strossle} from '../ads/strossle';
-=======
 import {springAds} from '../ads/springAds';
 import {ssp} from '../ads/ssp';
 import {strossle} from '../ads/strossle';
 import {sulvo} from '../ads/sulvo';
->>>>>>> upstream/master
 import {sunmedia} from '../ads/sunmedia';
 import {svknative} from '../ads/svknative';
 import {swoop} from '../ads/swoop';
@@ -568,13 +564,9 @@ register('sogouad', sogouad);
 register('sortable', sortable);
 register('sovrn', sovrn);
 register('spotx', spotx);
-<<<<<<< HEAD
-register('strossle', strossle);
-=======
 register('springAds', springAds);
 register('strossle', strossle);
 register('sulvo', sulvo);
->>>>>>> upstream/master
 register('sunmedia', sunmedia);
 register('svknative', svknative);
 register('swoop', swoop);

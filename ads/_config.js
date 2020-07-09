@@ -1048,8 +1048,6 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
-<<<<<<< HEAD
-=======
   'springAds': {
     prefetch: 'https://www.asadcdn.com/adlib/adlib_seq.js',
     preconnect: ['https://ib.adnxs.com'],
@@ -1062,7 +1060,6 @@ const adConfig = jsonConfiguration({
     consentHandlingOverride: true,
   },
 
->>>>>>> upstream/master
   'strossle': {
     preconnect: [
       'https://amp.spklw.com',

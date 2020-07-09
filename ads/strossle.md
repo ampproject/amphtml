@@ -21,13 +21,7 @@ Strossle provides technologies and revenue drivers helping publishers monetize t
 ## Example
 
 ```html
-<<<<<<< HEAD
-<amp-embed height="580"
-    type="strossle"
-    data-widgetid="widget-5b583cae934ad">
-=======
 <amp-embed height="580" type="strossle" data-widgetid="widget-5b583cae934ad">
->>>>>>> upstream/master
 </amp-embed>
 ```
 
@@ -38,8 +32,4 @@ For details on the configuration semantics, please contact [Strossle](https://st
 ### Required parameters
 
 - `data-widgetid` - past your unique widget id here
-<<<<<<< HEAD
 - `height` - widget height
-=======
-- `height` - widget height
->>>>>>> upstream/master
