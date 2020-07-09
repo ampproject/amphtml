@@ -567,7 +567,6 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.story360components_ = toArray(scopedQuerySelectorAll(
         this.element, Selectors.ALL_STORY_360))
         .map(element => whenUpgradedToCustomElement(element)
-            // .then((el) =>el.signals().whenSignal(CommonSignals.LOAD_END))
             .then(customEl => customEl.getImpl()));
     this.muteAllMedia();
     this.getViewport().onResize(
