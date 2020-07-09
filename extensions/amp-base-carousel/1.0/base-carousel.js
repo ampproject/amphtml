@@ -43,8 +43,7 @@ export function BaseCarousel(props) {
     const container = scrollRef.current;
     // Modify scrollLeft is preferred to `setCurSlide` to enable smooth scroll.
     // Note: `setCurSlide` will still be called on debounce by scroll handler.
-    container./* OK */ scrollLeft =
-      container./* OK */ scrollLeft + container./* OK */ offsetWidth * dir;
+    container./* OK */ scrollLeft += container./* OK */ offsetWidth * dir;
   };
   const disableForDir = (dir) =>
     !loop && (curSlide + dir < 0 || curSlide + dir >= length);

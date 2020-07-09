@@ -38,11 +38,9 @@ export const scrollContainer = {
   display: 'flex',
   flexDirection: 'row',
   flexWrap: 'nowrap',
-  // TBD: smooth behavior causes a lot of `setState` problems.
-  // scrollBehavior: 'smooth',
+  scrollBehavior: 'smooth',
   WebkitOverflowScrolling: 'touch',
   scrollSnapType: 'x mandatory',
-  scrollBehavior: 'smooth',
 };
 
 export const arrowPlacement = {

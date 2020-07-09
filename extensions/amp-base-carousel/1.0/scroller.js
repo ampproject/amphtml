@@ -19,6 +19,7 @@ import {WithAmpContext} from '../../../src/preact/context';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dict} from '../../../src/utils/object';
 import {mod} from '../../../src/utils/math';
+import {setStyle} from '../../../src/style';
 import {
   toChildArray,
   useLayoutEffect,
@@ -81,9 +82,11 @@ export function Scroller(props) {
     // TODO: We should use forwardRef to dedup scrollRef and containerRef.
     const container = (scrollRef.current = containerRef.current);
     ignoreProgrammaticScroll.current = true;
+    setStyle(container, 'scrollBehavior', 'auto');
     container./* OK */ scrollLeft = loop
       ? container./* OK */ offsetWidth * pivotIndex
       : container./* OK */ offsetWidth * restingIndex;
+    setStyle(container, 'scrollBehavior', 'smooth');
   }, [ignoreProgrammaticScroll, loop, restingIndex, pivotIndex, scrollRef]);
 
   // Trigger render by setting the resting index to the current scroll state.
