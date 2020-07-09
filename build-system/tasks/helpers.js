@@ -223,15 +223,14 @@ function toEsmName(name) {
   return name.replace(/\.js$/, '.mjs');
 }
 
-function toSxgName(name){
+function toSxgName(name) {
   return name.replace(/\.js$/, '.sxg.js');
 }
 
 function maybeToEsmOrSxgName(name) {
-  if(argv.sxg){
+  if (argv.sxg) {
     return toSxgName(name);
-  }
-  else if(argv.esm){
+  } else if (argv.esm) {
     return toEsmName(name);
   }
   return name;
