@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.108 */
+/** Version: 0.1.22.110 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -5660,7 +5660,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.108',
+    '_client': 'SwG 0.1.22.110',
   });
 }
 
@@ -6779,7 +6779,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.108',
+        '_client': 'SwG 0.1.22.110',
         'supportsEventManager': true,
       },
       args || {}
@@ -7179,6 +7179,13 @@ const ExperimentFlags = {
    *  changed from '<uuid>' to '<uuid>.swg'.
    */
   UPDATE_GOOGLE_TRANSACTION_ID: 'update-google-transaction-id',
+
+  /**
+   * Enables PayClient to be instantiated within start() instead of upon instantiation.
+   * Also moves google preconnects to Runtime from PayClient, and runs Pay
+   * preloads upon start() instead of within the ctor.
+   */
+  PAY_CLIENT_LAZYLOAD: 'pay-client-lazyload',
 };
 
 /**
@@ -7621,7 +7628,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.108');
+    context.setClientVersion('SwG 0.1.22.110');
 
     const utmParams = parseQueryString$1(this.getQueryString_());
     const campaign = utmParams['utm_campaign'];
@@ -14991,6 +14998,79 @@ function isNativeDisabledInRequest(request) {
  * limitations under the License.
  */
 
+class Preconnect {
+  /**
+   * @param {!Document} doc
+   */
+  constructor(doc) {
+    /** @private @const {!Document} */
+    this.doc_ = doc;
+  }
+
+  /**
+   * @param {string} url
+   */
+  preconnect(url) {
+    this.pre_(url, 'preconnect');
+  }
+
+  /**
+   * @param {string} url
+   */
+  dnsPrefetch(url) {
+    this.pre_(url, 'dns-prefetch');
+  }
+
+  /**
+   * @param {string} url
+   */
+  prefetch(url) {
+    this.pre_(url, 'preconnect prefetch');
+  }
+
+  /**
+   * @param {string} url
+   * @param {string} as
+   */
+  preload(url, as) {
+    this.pre_(url, 'preconnect preload', as);
+  }
+
+  /**
+   * @param {string} url
+   * @param {string} rel
+   * @param {?string=} as
+   * @private
+   */
+  pre_(url, rel, as) {
+    // <link rel="prefetch" href="..." as="">
+    const linkEl = createElement(this.doc_, 'link', {
+      'rel': rel,
+      'href': url,
+    });
+    if (as) {
+      linkEl.setAttribute('as', as);
+    }
+    this.doc_.head.appendChild(linkEl);
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const REDIRECT_STORAGE_KEY = 'subscribe.google.com:rk';
 
 /**
@@ -15035,18 +15115,25 @@ class PayClient {
     /** @private @const {!RedirectVerifierHelper} */
     this.redirectVerifierHelper_ = new RedirectVerifierHelper(this.win_);
 
-    /** @private @const {!PaymentsAsyncClient} */
-    this.client_ = this.createClient_(
-      /** @type {!PaymentOptions} */
-      ({
-        environment: 'PRODUCTION',
-        'i': {
-          'redirectKey': this.redirectVerifierHelper_.restoreKey(),
-        },
-      }),
-      this.analytics_.getTransactionId(),
-      this.handleResponse_.bind(this)
-    );
+    /** @private {?PaymentsAsyncClient} */
+    this.client_ = null;
+
+    if (!isExperimentOn(this.win_, ExperimentFlags.PAY_CLIENT_LAZYLOAD)) {
+      this.client_ = this.createClient_(
+        /** @type {!PaymentOptions} */
+        ({
+          environment: 'PRODUCTION',
+          'i': {
+            'redirectKey': this.redirectVerifierHelper_.restoreKey(),
+          },
+        }),
+        this.analytics_.getTransactionId(),
+        this.handleResponse_.bind(this)
+      );
+    } else {
+      /** @private @const {!Preconnect} */
+      this.preconnect_ = new Preconnect(this.win_.document);
+    }
 
     // Prepare new verifier pair.
     this.redirectVerifierHelper_.prepare();
@@ -15083,9 +15170,6 @@ class PayClient {
       'https://payments.google.com/payments/v4/js/integrator.js?ss=md'
     );
     pre.prefetch('https://clients2.google.com/gr/gr_full_2.0.6.js');
-    pre.preconnect('https://www.gstatic.com/');
-    pre.preconnect('https://fonts.googleapis.com/');
-    pre.preconnect('https://www.google.com/');
   }
 
   /**
@@ -15103,6 +15187,23 @@ class PayClient {
   start(paymentRequest, options = {}) {
     this.request_ = paymentRequest;
 
+    if (
+      isExperimentOn(this.win_, ExperimentFlags.PAY_CLIENT_LAZYLOAD) &&
+      !this.client_
+    ) {
+      this.preconnect(this.preconnect_);
+      this.client_ = this.createClient_(
+        /** @type {!PaymentOptions} */
+        ({
+          environment: 'PRODUCTION',
+          'i': {
+            'redirectKey': this.redirectVerifierHelper_.restoreKey(),
+          },
+        }),
+        this.analytics_.getTransactionId(),
+        this.handleResponse_.bind(this)
+      );
+    }
     if (options.forceRedirect) {
       paymentRequest = Object.assign(paymentRequest, {
         'forceRedirect': options.forceRedirect || false,
@@ -15395,79 +15496,6 @@ function setInternalParam(paymentRequest, param, value) {
   paymentRequest['i'] = Object.assign(paymentRequest['i'] || {}, {
     [param]: value,
   });
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-class Preconnect {
-  /**
-   * @param {!Document} doc
-   */
-  constructor(doc) {
-    /** @private @const {!Document} */
-    this.doc_ = doc;
-  }
-
-  /**
-   * @param {string} url
-   */
-  preconnect(url) {
-    this.pre_(url, 'preconnect');
-  }
-
-  /**
-   * @param {string} url
-   */
-  dnsPrefetch(url) {
-    this.pre_(url, 'dns-prefetch');
-  }
-
-  /**
-   * @param {string} url
-   */
-  prefetch(url) {
-    this.pre_(url, 'preconnect prefetch');
-  }
-
-  /**
-   * @param {string} url
-   * @param {string} as
-   */
-  preload(url, as) {
-    this.pre_(url, 'preconnect preload', as);
-  }
-
-  /**
-   * @param {string} url
-   * @param {string} rel
-   * @param {?string=} as
-   * @private
-   */
-  pre_(url, rel, as) {
-    // <link rel="prefetch" href="..." as="">
-    const linkEl = createElement(this.doc_, 'link', {
-      'rel': rel,
-      'href': url,
-    });
-    if (as) {
-      linkEl.setAttribute('as', as);
-    }
-    this.doc_.head.appendChild(linkEl);
-  }
 }
 
 /**
@@ -16127,9 +16155,14 @@ class ConfiguredRuntime {
     const preconnect = new Preconnect(this.win_.document);
 
     preconnect.prefetch('https://news.google.com/swg/js/v1/loader.svg');
+    preconnect.preconnect('https://www.gstatic.com/');
+    preconnect.preconnect('https://fonts.googleapis.com/');
+    preconnect.preconnect('https://www.google.com/');
     LinkCompleteFlow.configurePending(this);
     PayCompleteFlow.configurePending(this);
-    this.payClient_.preconnect(preconnect);
+    if (!isExperimentOn(this.win_, ExperimentFlags.PAY_CLIENT_LAZYLOAD)) {
+      this.payClient_.preconnect(preconnect);
+    }
 
     injectStyleSheet(this.doc_, CSS$1);
 
