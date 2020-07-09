@@ -381,10 +381,12 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
 
       expect(
-        playerEl.shadowRoot.querySelector('a.amp-story-player-back-button')
+        playerEl.shadowRoot.querySelector('button.amp-story-player-back-button')
       ).to.exist;
       expect(
-        playerEl.shadowRoot.querySelector('a.amp-story-player-close-button')
+        playerEl.shadowRoot.querySelector(
+          'button.amp-story-player-close-button'
+        )
       ).to.not.exist;
     });
 
@@ -398,10 +400,12 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
 
       expect(
-        playerEl.shadowRoot.querySelector('a.amp-story-player-close-button')
+        playerEl.shadowRoot.querySelector(
+          'button.amp-story-player-close-button'
+        )
       ).to.exist;
       expect(
-        playerEl.shadowRoot.querySelector('a.amp-story-player-back-button')
+        playerEl.shadowRoot.querySelector('button.amp-story-player-back-button')
       ).to.not.exist;
     });
 
@@ -415,10 +419,12 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
 
       expect(
-        playerEl.shadowRoot.querySelector('a.amp-story-player-close-button')
+        playerEl.shadowRoot.querySelector(
+          'button.amp-story-player-close-button'
+        )
       ).to.not.exist;
       expect(
-        playerEl.shadowRoot.querySelector('a.amp-story-player-back-button')
+        playerEl.shadowRoot.querySelector('button.amp-story-player-back-button')
       ).to.not.exist;
     });
 
@@ -435,7 +441,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       playerEl.addEventListener('amp-story-player-back', readySpy);
 
       playerEl.shadowRoot
-        .querySelector('a.amp-story-player-back-button')
+        .querySelector('button.amp-story-player-back-button')
         .click();
 
       expect(readySpy).to.have.been.calledOnce;
@@ -454,7 +460,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       playerEl.addEventListener('amp-story-player-close', readySpy);
 
       playerEl.shadowRoot
-        .querySelector('a.amp-story-player-close-button')
+        .querySelector('button.amp-story-player-close-button')
         .click();
 
       expect(readySpy).to.have.been.calledOnce;
