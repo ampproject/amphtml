@@ -341,16 +341,21 @@ function collectProps(Ctor, element, defaultProps) {
 
       const {single, name, props: slotProps = {}} = def;
 
-      // TBD: assign keys, reuse slots, etc.
+      // TBD: assign keys, etc.
       if (single) {
-        props[name] = createSlot(childElement, `i-amphtml-${name}`, slotProps);
+        props[name] = createSlot(
+          childElement,
+          childElement.getAttribute('slot') || `i-amphtml-${name}`,
+          slotProps
+        );
       } else {
         const list =
           name == 'children' ? children : props[name] || (props[name] = []);
         list.push(
           createSlot(
             childElement,
-            `i-amphtml-${name}-${list.length}`,
+            childElement.getAttribute('slot') ||
+              `i-amphtml-${name}-${list.length}`,
             slotProps
           )
         );

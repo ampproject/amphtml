@@ -16,7 +16,7 @@
 import * as Preact from '../../../src/preact';
 import {Arrow} from './arrow';
 import {Scroller} from './scroller';
-import {toChildArray, useRef, useState} from '../../../src/preact';
+import {toChildArray, useEffect, useRef, useState} from '../../../src/preact';
 
 /**
  * @param {!JsonObject} props
@@ -29,6 +29,7 @@ export function BaseCarousel(props) {
     'children': children,
     'defaultSlide': defaultSlide,
     'loop': loop,
+    'onUpdate': onUpdate,
     ...rest
   } = props;
   const childrenArray = toChildArray(children);
@@ -48,6 +49,11 @@ export function BaseCarousel(props) {
   };
   const disableForDir = (dir) =>
     !loop && (curSlide + dir < 0 || curSlide + dir >= length);
+  useEffect(() => {
+    if (onUpdate) {
+      onUpdate();
+    }
+  }, [onUpdate]);
   return (
     <div {...rest}>
       <Scroller
