@@ -1138,12 +1138,28 @@ app.use('/subscription/:id/entitlements', (req, res) => {
   cors.assertCors(req, res, ['GET']);
   res.json({
     source: 'local' + req.params.id,
-    granted: true,
+    granted: req.params.id > 0 ? true : false,
     grantedReason: 'NOT_SUBSCRIBED',
     data: {
       login: true,
     },
     decryptedDocumentKey: decryptDocumentKey(req.query.crypt),
+  });
+});
+
+app.use('/subscriptions/skumap', (req, res) => {
+  cors.assertCors(req, res, ['GET']);
+  res.json({
+    'subscribe.google.com': {
+      'subscribeButtonSimple': {
+        'sku': 'basic',
+      },
+      'subscribeButtonCarousel': {
+        'carouselOptions': {
+          'skus': ['basic', 'premium_monthly'],
+        },
+      },
+    },
   });
 });
 
