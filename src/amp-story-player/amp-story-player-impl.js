@@ -286,6 +286,12 @@ export class AmpStoryPlayer {
           messaging.registerHandler('selectDocument', (event, data) => {
             this.onSelectDocument_(data);
           });
+
+          messaging.registerHandler('setDocumentState', (event, data) => {
+            console.log(event);
+            console.log(data);
+          });
+
           resolve(messaging);
         },
         (err) => {
@@ -376,20 +382,20 @@ export class AmpStoryPlayer {
     this.assignIframesForStoryIdx_(storyIdx);
   }
 
-  /** */
+  /** Sends a message muting the current story. */
   mute() {
-    // dispatch(this.win_, this.iframes_[0].contentWindow, EventType.MUTE);
+    const iframeIdx = this.stories_[this.currentIdx_][IFRAME_IDX];
+    this.updateMutedState_(iframeIdx, true);
   }
 
-  /** */
+  /** Sends a message unmuting the current story. */
   unmute() {
-    // is it this window or the story's window? probably this window
-    // then have to get the story window because target
-    // dispatch(what window goes here?, EventType.UNMUTE);
+    const iframeIdx = this.stories_[this.currentIdx_][IFRAME_IDX];
+    this.updateMutedState_(iframeIdx, false);
   }
 
   /**
-   * Evicts stories from iframes
+   * Evicts stories from iframes.
    * @private
    */
   evictStoriesFromIframes_() {
@@ -650,6 +656,19 @@ export class AmpStoryPlayer {
     });
   }
 
+  /**
+   * Updates the muted state of the story inside the iframe.
+   * @param {!number} iframeIdx
+   * @param {!boolean} mutedValue
+   * @private
+   */
+  updateMutedState_(iframeIdx, mutedValue) {
+    this.messagingPromises_[iframeIdx].then((messaging) => {
+      messaging.sendRequest('setDocumentState', {state: 'MUTED_STATE', value: mutedValue}, true);
+      // .then(m => console.log(m))
+    })
+  }
+    
   /**
    * React to selectDocument events.
    * @param {!Object} data
