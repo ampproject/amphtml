@@ -28,7 +28,7 @@ const {
 const {endBuildStep, watchDebounceDelay} = require('./helpers');
 const {isTravisBuild} = require('../common/travis');
 const {jsifyCssAsync} = require('./jsify-css');
-const {maybeToEsmName, compileJs, mkdirSync} = require('./helpers');
+const {maybeToEsmOrSxgName, compileJs, mkdirSync} = require('./helpers');
 const {vendorConfigs} = require('./vendor-configs');
 
 const {green, red, cyan} = colors;
@@ -550,10 +550,10 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
   const aliasBundle = extensionAliasBundles[name];
   const isAliased = aliasBundle && aliasBundle.version == version;
   if (isAliased) {
-    const src = maybeToEsmName(
+    const src = maybeToEsmOrSxgName(
       `${name}-${version}${options.minify ? '' : '.max'}.js`
     );
-    const dest = maybeToEsmName(
+    const dest = maybeToEsmOrSxgName(
       `${name}-${aliasBundle.aliasedVersion}${options.minify ? '' : '.max'}.js`
     );
     fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
