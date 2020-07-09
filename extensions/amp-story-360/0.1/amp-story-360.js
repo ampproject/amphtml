@@ -239,7 +239,6 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @private */
   resizeRenderer_() {
-    console.log('resizing');
     this.mutateElement(() => {
       if (this.renderer_) {
         this.renderer_.resize();
@@ -300,13 +299,11 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @public */
   pause() {
-    console.log('pause', this);
     this.isPlaying_ = false;
   }
 
   /** @public */
   play() {
-    console.log('play', this);
     userAssert(
       this.canAnimate,
       'amp-story-360 is either not configured to play an animation or ' +
