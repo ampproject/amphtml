@@ -16,7 +16,6 @@
 import * as Preact from '../../../src/preact';
 import {Arrow} from './arrow';
 import {Scroller} from './scroller';
-import {mod} from '../../../src/utils/math';
 import {toChildArray, useRef, useState} from '../../../src/preact';
 
 /**
@@ -39,7 +38,14 @@ export function BaseCarousel(props) {
     ignoreProgrammaticScroll.current = true;
     setCurSlide(i);
   };
-  const advance = (dir) => setRestingIndex(mod(curSlide + dir, length));
+  const scrollRef = useRef(null);
+  const advance = (dir) => {
+    const container = scrollRef.current;
+    // Modify scrollLeft is preferred to `setCurSlide` to enable smooth scroll.
+    // Note: `setCurSlide` will still be called on debounce by scroll handler.
+    container./* OK */ scrollLeft =
+      container./* OK */ scrollLeft + container./* OK */ offsetWidth * dir;
+  };
   const disableForDir = (dir) =>
     !loop && (curSlide + dir < 0 || curSlide + dir >= length);
   return (
@@ -49,6 +55,7 @@ export function BaseCarousel(props) {
         loop={loop}
         restingIndex={curSlide}
         setRestingIndex={setRestingIndex}
+        scrollRef={scrollRef}
       >
         {children}
       </Scroller>

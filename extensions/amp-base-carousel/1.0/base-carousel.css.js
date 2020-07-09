@@ -42,6 +42,7 @@ export const scrollContainer = {
   // scrollBehavior: 'smooth',
   WebkitOverflowScrolling: 'touch',
   scrollSnapType: 'x mandatory',
+  scrollBehavior: 'smooth',
 };
 
 export const arrowPlacement = {
