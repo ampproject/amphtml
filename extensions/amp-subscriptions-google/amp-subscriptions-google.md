@@ -66,7 +66,7 @@ The `amp-subscriptions-google` is configured as part of `amp-subscriptions` conf
 
 ## Real Time Config (rtc)
 
-Real Time Config allows the publisher to spcify the sku or sku's for a subscribe button at page load time. The allows user spscifc offers, time limited offers etc.
+Real Time Config allows the publisher to specify the sku or sku's for a subscribe button at page load time. The allows user specific offers, time limited offers etc.
 
 To enable rtc add a `skuMapUrl` to the `subscribe.google.com` service.
 
