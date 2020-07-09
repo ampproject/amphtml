@@ -94,13 +94,12 @@ export function processHead(win, adElement, head) {
   const fonts = [];
   const images = [];
 
-  let element = head.firstChild;
+  let element = head.firstElementChild;
   while (element) {
     // Store next element here as the following code will remove
     // certain elements from the detached DOM.
     const nextElement = element.nextElementSibling;
-
-    switch (element.tagName) {
+    switch (element.tagName.toUpperCase()) {
       case 'SCRIPT':
         handleScript(extensions, element);
         break;
