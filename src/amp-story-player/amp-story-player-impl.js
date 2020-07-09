@@ -32,6 +32,7 @@ import {dict, map} from '../utils/object';
 import {cssText} from '../../build/amp-story-player-iframe.css';
 import {resetStyles, setStyle, setStyles} from '../style';
 import {toArray} from '../types';
+import {tryFocus} from '../dom';
 
 /** @enum {string} */
 const LoadStateClass = {
@@ -505,7 +506,7 @@ export class AmpStoryPlayer {
   updateCurrentIframe_(iframeIdx) {
     this.updateVisibilityState_(iframeIdx, VisibilityState.VISIBLE);
     this.updateIframePosition_(iframeIdx, IframePosition.CURRENT);
-    this.iframes_[iframeIdx].focus();
+    tryFocus(this.iframes_[iframeIdx]);
   }
 
   /**
