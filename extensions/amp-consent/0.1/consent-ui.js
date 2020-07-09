@@ -65,6 +65,7 @@ export const consentUiClasses = {
   placeholder: 'i-amphtml-consent-ui-placeholder',
   mask: 'i-amphtml-consent-ui-mask',
   enableBorder: 'i-amphtml-consent-ui-enable-border',
+  enableBorderLightbox: 'i-amphtml-consent-ui-enable-border-lightbox',
   screenReaderDialog: 'i-amphtml-consent-alertdialog',
 };
 
@@ -165,7 +166,7 @@ export class ConsentUI {
     this.enableBorder_ = DEFAULT_ENABLE_BORDER;
 
     /** @private {boolean} */
-    this.isLightbox_ = false;
+    this.lightboxEnabled_ = false;
 
     /** @private {boolean} */
     this.isActionPromptTrigger_ = false;
@@ -355,7 +356,7 @@ export class ConsentUI {
   handleReady_(data) {
     this.initialHeight_ = DEFAULT_INITIAL_HEIGHT;
     this.enableBorder_ = DEFAULT_ENABLE_BORDER;
-    this.isLightbox_ = false;
+    this.lightboxEnabled_ = false;
 
     // Set our initial height
     if (data['initialHeight']) {
@@ -367,9 +368,9 @@ export class ConsentUI {
 
         if (dataHeight >= 10 && dataHeight <= 80) {
           this.initialHeight_ = `${dataHeight}vh`;
-          this.isLightbox_ = dataHeight > 60;
+          this.lightboxEnabled_ = dataHeight > 60;
           // Force overlay if lightbox is enabled.
-          this.overlayEnabled_ = this.isLightbox_ || this.overlayEnabled_;
+          this.overlayEnabled_ = this.lightboxEnabled_ || this.overlayEnabled_;
         } else {
           user().error(
             TAG,
@@ -402,7 +403,7 @@ export class ConsentUI {
       !this.ui_ ||
       !this.isVisible_ ||
       this.isFullscreen_ ||
-      this.isLightbox_
+      this.lightboxEnabled_
     ) {
       return;
     }
@@ -547,7 +548,7 @@ export class ConsentUI {
   showIframe_() {
     const {classList} = this.parent_;
     classList.add(
-      this.isLightbox_
+      this.lightboxEnabled_
         ? consentUiClasses.iframeActiveLightbox
         : consentUiClasses.iframeActive
     );
@@ -587,10 +588,18 @@ export class ConsentUI {
 
     // Remove the iframe active (lightbox) to go back to our normal height
     classList.remove(
-      this.isLightbox_
+      this.lightboxEnabled_
         ? consentUiClasses.iframeActiveLightbox
         : consentUiClasses.iframeActive
     );
+
+    // Remove border if enabled
+    if (this.enableBorder_) {
+      classList.remove(consentUiClasses.enableBorder);
+      if (this.lightboxEnabled_) {
+        classList.remove(consentUiClasses.enableBorderLightbox);
+      }
+    }
 
     this.win_.removeEventListener('message', this.boundHandleIframeMessages_);
     classList.remove(consentUiClasses.iframeFullscreen);
@@ -690,6 +699,9 @@ export class ConsentUI {
     if (this.enableBorder_) {
       const {classList} = this.parent_;
       classList.add(consentUiClasses.enableBorder);
+      if (this.lightboxEnabled_) {
+        classList.add(consentUiClasses.enableBorderLightbox);
+      }
     }
   }
 

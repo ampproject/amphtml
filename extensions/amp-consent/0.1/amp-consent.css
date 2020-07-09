@@ -124,6 +124,11 @@ amp-consent.i-amphtml-consent-ui-enable-border {
   box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2) !important;
 }
 
+amp-consent.i-amphtml-consent-ui-enable-border-lightbox {
+  border-bottom-left-radius: 8px !important;
+  border-bottom-right-radius: 8px !important;
+}
+
 amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-in {
   transition: transform 0.5s ease-out !important;
   /* Initial height transform will be set through styles */
@@ -133,7 +138,7 @@ amp-consent.i-amphtml-consent-ui-iframe-active-lightbox {
   box-sizing: border-box;
   top: 0;
   right: 0;
-  animation: 0.5s appear;
+  animation: 0.5s lightbox-appear;
   animation-fill-mode: both;
   background: white;
   flex-direction: column;
@@ -160,7 +165,7 @@ amp-consent.i-amphtml-consent-ui-in.i-amphtml-consent-ui-iframe-fullscreen > .i-
   100% {opacity: 0.2;}
 }
 
-@keyframes appear {
+@keyframes lightbox-appear {
   0% {
     transform: translate(0, 100vh);
     opacity: 0;

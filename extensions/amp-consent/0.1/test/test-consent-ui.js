@@ -645,7 +645,7 @@ describes.realWin(
         });
 
         expect(consentUI.initialHeight_).to.be.equal('30vh');
-        expect(consentUI.isLightbox_).to.be.false;
+        expect(consentUI.lightboxEnabled_).to.be.false;
         expect(consentUI.overlayEnabled_).to.be.undefined;
 
         consentUI.show(true);
@@ -660,7 +660,7 @@ describes.realWin(
         await macroTask();
 
         expect(consentUI.initialHeight_).to.be.equal('80vh');
-        expect(consentUI.isLightbox_).to.be.true;
+        expect(consentUI.lightboxEnabled_).to.be.true;
         expect(consentUI.overlayEnabled_).to.be.true;
         expect(
           consentUI.parent_.classList.contains(
@@ -673,6 +673,8 @@ describes.realWin(
         expect(
           consentUI.parent_.style.getPropertyValue('--lightbox-height')
         ).to.equal('80vh');
+        expect(consentUI.maskElement_.classList.contains(consentUiClasses.mask))
+          .to.be.true;
 
         // Hide
         consentUI.hide();
@@ -684,6 +686,7 @@ describes.realWin(
             consentUiClasses.iframeActiveLightbox
           )
         ).to.be.false;
+        expect(consentUI.maskElement_.hasAttribute('hidden')).to.be.true;
       });
 
       it('should throw an error on an invalid initial height', () => {
