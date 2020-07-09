@@ -19,7 +19,6 @@ import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-servi
 import {createElementWithAttributes} from '../../../../src/dom';
 import {registerServiceBuilder} from '../../../../src/service';
 
-
 describes.realWin(
   'amp-story-360',
   {
