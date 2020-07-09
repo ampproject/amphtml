@@ -663,7 +663,7 @@ module.exports = {
   compileTs,
   doBuildJs,
   endBuildStep,
-  maybeToEsmName: maybeToEsmOrSxgName,
+  maybeToEsmOrSxgName,
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,
