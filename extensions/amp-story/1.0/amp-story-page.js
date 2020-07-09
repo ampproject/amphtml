@@ -1860,12 +1860,17 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   initializeImgAltTags_() {
-    Array.prototype.forEach.call(
-      this.element.querySelectorAll('amp-img'),
-      (imageTag) => {
-        !imageTag.getAttribute('alt') && imageTag.setAttribute('alt', ' ');
+    toArray(this.element.querySelectorAll('amp-img')).forEach((ampImgNode) => {
+      if (!ampImgNode.getAttribute('alt')) {
+        ampImgNode.setAttribute('alt', ' ');
+        // If the child img element is in the dom, propogate the attribute to it.
+        const childImgNode = ampImgNode.querySelector('img');
+        childImgNode &&
+          ampImgNode
+            .getImpl()
+            .then((ampImg) => ampImg.propagateAttributes('alt', childImgNode));
       }
-    );
+    });
   }
 
   /**
