@@ -97,7 +97,7 @@ export const Selectors = {
   ALL_AMP_MEDIA:
     'amp-story-grid-layer amp-audio, ' +
     'amp-story-grid-layer amp-video, amp-story-grid-layer amp-img, ' +
-    'amp-story-grid-layer amp-anim,' +
+    'amp-story-grid-layer amp-anim, ' +
     'amp-story-grid-layer amp-story-360',
   ALL_AMP_VIDEO: 'amp-story-grid-layer amp-video',
   ALL_IFRAMED_MEDIA: 'audio, video',
