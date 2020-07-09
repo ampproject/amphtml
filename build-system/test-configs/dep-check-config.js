@@ -278,7 +278,7 @@ exports.rules = [
       'extensions/amp-a4a/0.1/amp-a4a.js->' +
         'src/service/url-replacements-impl.js',
       // Parsing extension urls.
-      'extensions/amp-a4a/0.1/head-validation.js' +
+      'extensions/amp-a4a/0.1/head-validation.js->' +
         'src/service/extension-location.js',
       'extensions/amp-video/0.1/amp-video.js->' +
         'src/service/video-manager-impl.js',
