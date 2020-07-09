@@ -313,85 +313,6 @@ export class SubscriptionService {
   }
 
   /**
-   * Reset all platforms and re-fetch entitlements after an
-   * external event (for example a login)
-   * @return {!Promise}
-   */
-  resetPlatforms() {
-    return this.initialize_().then(() => {
-      this.platformStore_ = this.platformStore_.resetPlatformStore();
-      this.maybeAddFreeEntitlement_(this.platformStore_);
-
-      this.renderer_.toggleLoading(true);
-
-      this.platformStore_
-        .getAvailablePlatforms()
-        .forEach((subscriptionPlatform) => {
-          this.fetchEntitlements_(subscriptionPlatform);
-        });
-      this.subscriptionAnalytics_.serviceEvent(
-        SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED,
-        ''
-      );
-      // deprecated event fired for backward compatibility
-      this.subscriptionAnalytics_.serviceEvent(
-        SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED_DEPRECATED,
-        ''
-      );
-      this.startAuthorizationFlow_();
-    });
-  }
-
-  /**
-   * Delegates an action to local platform.
-   * @param {string} action
-   * @return {!Promise<boolean>}
-   */
-  delegateActionToLocal(action) {
-    return this.delegateActionToService(action, 'local');
-  }
-
-  /**
-   * Delegates an action to specified platform.
-   * @param {string} action
-   * @param {string} serviceId
-   * @return {!Promise<boolean>}
-   */
-  delegateActionToService(action, serviceId) {
-    return new Promise((resolve) => {
-      this.platformStore_.onPlatformResolves(serviceId, (platform) => {
-        devAssert(platform, 'Platform is not registered');
-        this.subscriptionAnalytics_.event(
-          SubscriptionAnalyticsEvents.ACTION_DELEGATED,
-          dict({
-            'action': action,
-            'serviceId': serviceId,
-          }),
-          dict({
-            'action': action,
-            'status': ActionStatus.STARTED,
-          })
-        );
-        resolve(platform.executeAction(action));
-      });
-    });
-  }
-
-  /**
-   * Delegate UI decoration to another service.
-   * @param {!Element} element
-   * @param {string} serviceId
-   * @param {string} action
-   * @param {?JsonObject} options
-   */
-  decorateServiceAction(element, serviceId, action, options) {
-    this.platformStore_.onPlatformResolves(serviceId, (platform) => {
-      devAssert(platform, 'Platform is not registered');
-      platform.decorateUI(element, action, options);
-    });
-  }
-
-  /**
    * Returns promise that resolves when page and platform configs are processed.
    * @return {!Promise}
    * @private
@@ -698,6 +619,82 @@ export class SubscriptionService {
         });
     }
     return null;
+  }
+
+  /**
+   * Reset all platforms and re-fetch entitlements after an
+   * external event (for example a login)
+   */
+  resetPlatforms() {
+    this.platformStore_ = this.platformStore_.resetPlatformStore();
+    this.renderer_.toggleLoading(true);
+
+    this.platformStore_
+      .getAvailablePlatforms()
+      .forEach((subscriptionPlatform) => {
+        this.fetchEntitlements_(subscriptionPlatform);
+      });
+    this.subscriptionAnalytics_.serviceEvent(
+      SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED,
+      ''
+    );
+    // deprecated event fired for backward compatibility
+    this.subscriptionAnalytics_.serviceEvent(
+      SubscriptionAnalyticsEvents.PLATFORM_REAUTHORIZED_DEPRECATED,
+      ''
+    );
+    this.startAuthorizationFlow_();
+  }
+
+  /**
+   * Delegates an action to local platform.
+   * @param {string} action
+   * @param {?string} sourceId
+   * @return {!Promise<boolean>}
+   */
+  delegateActionToLocal(action, sourceId) {
+    return this.delegateActionToService(action, 'local', sourceId);
+  }
+
+  /**
+   * Delegates an action to specified platform.
+   * @param {string} action
+   * @param {string} serviceId
+   * @param {?string} sourceId
+   * @return {!Promise<boolean>}
+   */
+  delegateActionToService(action, serviceId, sourceId = null) {
+    return new Promise((resolve) => {
+      this.platformStore_.onPlatformResolves(serviceId, (platform) => {
+        devAssert(platform, 'Platform is not registered');
+        this.subscriptionAnalytics_.event(
+          SubscriptionAnalyticsEvents.ACTION_DELEGATED,
+          dict({
+            'action': action,
+            'serviceId': serviceId,
+          }),
+          dict({
+            'action': action,
+            'status': ActionStatus.STARTED,
+          })
+        );
+        resolve(platform.executeAction(action, sourceId));
+      });
+    });
+  }
+
+  /**
+   * Delegate UI decoration to another service.
+   * @param {!Element} element
+   * @param {string} serviceId
+   * @param {string} action
+   * @param {?JsonObject} options
+   */
+  decorateServiceAction(element, serviceId, action, options) {
+    this.platformStore_.onPlatformResolves(serviceId, (platform) => {
+      devAssert(platform, 'Platform is not registered');
+      platform.decorateUI(element, action, options);
+    });
   }
 
   /**
