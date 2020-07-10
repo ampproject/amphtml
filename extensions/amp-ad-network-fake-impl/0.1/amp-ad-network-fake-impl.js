@@ -17,7 +17,7 @@
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {AmpAdMetadataTransformer} from './amp-ad-metadata-transformer';
 import {ExternalReorderHeadTransformer} from './external-reorder-head-transformer';
-import {startsWith} from '../../../src/string';
+import {includes, startsWith} from '../../../src/string';
 import {user, userAssert} from '../../../src/log';
 
 const TAG = 'AMP-AD-NETWORK-FAKE-IMPL';
@@ -33,15 +33,12 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
     this.reorderHeadTransformer_ = new ExternalReorderHeadTransformer();
     /** @private {!./amp-ad-metadata-transformer.AmpAdMetadataTransformer} */
     this.metadataTransformer_ = new AmpAdMetadataTransformer();
-    /** @private {boolean} */
-    this.creativeInlined_ = false;
   }
 
   /** @override */
   buildCallback() {
-    this.creativeInlined_ = this.element.hasAttribute('srcdoc');
     userAssert(
-      this.element.hasAttribute('src') || this.creativeInlined_,
+      this.element.hasAttribute('src') || this.element.hasAttribute('srcdoc'),
       'Attribute src or srcdoc required for <amp-ad type="fake">: %s',
       this.element
     );
@@ -63,18 +60,17 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
 
   /** @override */
   getAdUrl() {
-    return (
-      this.element.getAttribute('src') || this.element.getAttribute('srcdoc')
-    );
+    const src = this.element.getAttribute('src');
+    if (src) {
+      return src;
+    }
+    const srcdoc = this.element.getAttribute('srcdoc');
+    return `data:text/html,${encodeURI(srcdoc)}`;
   }
 
   /** @override */
   sendXhrRequest(adUrl) {
-    const contentPromise = this.creativeInlined_
-      ? Promise.resolve(new Response(adUrl))
-      : super.sendXhrRequest(adUrl);
-
-    return contentPromise.then((response) => {
+    return super.sendXhrRequest(adUrl).then((response) => {
       if (!response) {
         return null;
       }
@@ -87,13 +83,17 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
       // This mode is primarily used for A4A Envelope for testing.
       // See DEVELOPING.md for more info.
       if (this.element.getAttribute('a4a-conversion') == 'true') {
-        return response.text().then(
-          (responseText) =>
-            new Response(this.transformCreative_(responseText), {
-              status,
-              headers,
-            })
-        );
+        return response.text().then((responseText) => {
+          // When using data: url the legacy amp cors param is interpreted as
+          // part of the body, so remove it.
+          if (includes(responseText, '?__amp_source_origin=')) {
+            responseText = responseText.split('?__amp_source_origin=')[0];
+          }
+          return new Response(this.transformCreative_(responseText), {
+            status,
+            headers,
+          });
+        });
       }
 
       // Normal mode: Expect the creative is already transformed and includes
