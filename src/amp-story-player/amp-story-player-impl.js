@@ -146,7 +146,6 @@ export class AmpStoryPlayer {
     this.element_.show = this.show.bind(this);
     this.element_.play = this.play.bind(this);
     this.element_.pause = this.pause.bind(this);
-    this.element_.togglePaused = this.togglePaused.bind(this);
   }
 
   /**
@@ -162,14 +161,14 @@ export class AmpStoryPlayer {
    * Makes the current story play its content/auto-advance
    */
   play() {
-    this.togglePaused(false);
+    this.togglePaused_(false);
   }
 
   /**
    * Makes the current story pause its content/auto-advance
    */
   pause() {
-    this.togglePaused(true);
+    this.togglePaused_(true);
   }
 
   /**
@@ -177,7 +176,7 @@ export class AmpStoryPlayer {
    *
    * @param {boolean} paused If true, the story will be paused, and it will be played otherwise
    */
-  togglePaused(paused) {
+  togglePaused_(paused) {
     const currentStory = this.stories_[this.currentIdx_];
     const iframeIdx = currentStory[IFRAME_IDX];
 
