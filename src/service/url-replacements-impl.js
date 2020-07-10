@@ -34,10 +34,7 @@ import {
   removeFragment,
 } from '../url';
 import {dev, devAssert, user, userAssert} from '../log';
-import {
-  installServiceInEmbedScope,
-  registerServiceBuilderForDoc,
-} from '../service';
+import {registerServiceBuilderForDoc} from '../service';
 
 import {Expander} from './url-expander/expander';
 import {Services} from '../services';
@@ -1143,19 +1140,6 @@ export function installUrlReplacementsServiceForDoc(ampdoc) {
   registerServiceBuilderForDoc(ampdoc, 'url-replace', function (doc) {
     return new UrlReplacements(doc, new GlobalVariableSource(doc));
   });
-}
-
-/**
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
- * @param {!Window} embedWin
- * @param {!VariableSource} varSource
- */
-export function installUrlReplacementsForEmbed(ampdoc, embedWin, varSource) {
-  installServiceInEmbedScope(
-    embedWin,
-    'url-replace',
-    new UrlReplacements(ampdoc, varSource)
-  );
 }
 
 /**
