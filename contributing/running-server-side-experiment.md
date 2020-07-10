@@ -24,7 +24,7 @@ _Refer to [enabling AMP experimental features doc](https://amp.dev/documentation
 
 ## Before you start
 
-Because real traffic can be automatically assigned to the experiment, plus the experiment slots are limited. Any experiment declarition and launch requires an issue tracker and at least one approval from @ampproject/wg-approvers or @ampprojeg/wg-ads depending on the type of experiment environment(#environment).
+Because real traffic can be automatically assigned to the experiment, plus the experiment slots are limited. Any experiment declaration and launch requires an issue tracker and at least one approval from @ampproject/wg-approvers or @ampprojeg/wg-ads depending on the type of experiment environment(#environment).
 
 ## Run an Experiment
 
@@ -87,7 +87,7 @@ Please keep the expiration date 30 days within the start date unless otherwise i
 
 After a new experiment slot has been added, AMP's release framework will respect the config and build additional experimental binaries. E2E tests will be ran with these experiment binaries.
 
-Once the experimental bianries are shipped, once can access those with different RTV prefix.
+Once the experimental binaries are shipped, once can access those with different RTV prefix.
 
 For Experiment with `environment = AMP`. The Beta version that has prefix (03) will be used as control group for all experiments.
 
