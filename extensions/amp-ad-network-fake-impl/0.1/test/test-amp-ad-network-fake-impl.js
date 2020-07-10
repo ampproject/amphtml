@@ -226,6 +226,8 @@ describes.realWin(
     });
 
     it('renders using srcdoc', async () => {
+      // Allow real fetching of data url, fetch-mock is unable to handle it.
+      env.win.fetch = env.fetchMock.realFetch;
       const creative = `
       <!doctype html>
       <html ⚡4ads>
@@ -250,8 +252,10 @@ describes.realWin(
       fakeImpl.buildCallback();
 
       expect(fakeImpl.isValidElement()).to.be.true;
-      expect(fakeImpl.getAdUrl()).to.equal(creative);
-      const response = await fakeImpl.sendXhrRequest(creative);
+      expect(fakeImpl.getAdUrl()).to.equal(
+        'data:text/html,' + encodeURI(creative)
+      );
+      const response = await fakeImpl.sendXhrRequest(fakeImpl.getAdUrl());
       const responseText = await response.text();
       expect(responseText).to.contain('<p>Hello, AMP4ADS world.</p>');
       expect(responseText).to.contain(
