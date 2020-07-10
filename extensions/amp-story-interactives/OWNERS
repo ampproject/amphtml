@@ -6,7 +6,10 @@
     {
       owners: [
         {name: 'enriqe'},
-        {name: 'gmajoulet'},
+        {
+          name: 'gmajoulet',
+          notify: true,
+        },
         {
           name: 'mszylkowski',
           notify: true,
