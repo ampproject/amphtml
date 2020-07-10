@@ -722,7 +722,7 @@ export class Performance {
     ) {
       return;
     }
-    this.mark_(lable, detail);
+    this.mark_(label, detail);
   }
 
   /**
