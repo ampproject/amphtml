@@ -259,7 +259,7 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
     page.buildCallback();
     await page.layoutCallback();
     expect(
-      scopedQuerySelectorAll(element, Selectors.ALL_MEDIA)[0].tagName
+      scopedQuerySelectorAll(element, Selectors.ALL_PLAYBACK_MEDIA)[0].tagName
     ).to.equal('AUDIO');
   });
 
@@ -270,7 +270,10 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
     const mediaPoolRegister = env.sandbox.stub(mediaPool, 'register');
     await page.layoutCallback();
 
-    const audioEl = scopedQuerySelectorAll(element, Selectors.ALL_MEDIA)[0];
+    const audioEl = scopedQuerySelectorAll(
+      element,
+      Selectors.ALL_PLAYBACK_MEDIA
+    )[0];
     expect(mediaPoolRegister).to.have.been.calledOnceWithExactly(audioEl);
   });
 
@@ -281,7 +284,10 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
     const mediaPoolPreload = env.sandbox.stub(mediaPool, 'preload');
     await page.layoutCallback();
 
-    const audioEl = scopedQuerySelectorAll(element, Selectors.ALL_MEDIA)[0];
+    const audioEl = scopedQuerySelectorAll(
+      element,
+      Selectors.ALL_PLAYBACK_MEDIA
+    )[0];
     expect(mediaPoolPreload).to.have.been.calledOnceWithExactly(audioEl);
   });
 
