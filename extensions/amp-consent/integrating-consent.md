@@ -87,6 +87,7 @@ window.parent.postMessage(
     type: 'consent-response',
     action: 'accept',
     info: /string/ /* optional */,
+    consentMetadata: /object/ /* optional */,
   },
   '*'
 );
@@ -102,6 +103,7 @@ window.parent.postMessage(
     type: 'consent-response',
     action: 'reject',
     info: /string/ /* optional */,
+    consentMetadata: /object/ /* optional */,
   },
   '*'
 );
