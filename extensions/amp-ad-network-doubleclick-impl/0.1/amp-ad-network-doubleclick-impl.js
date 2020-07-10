@@ -54,7 +54,6 @@ import {
 } from '../../../ads/google/a4a/utils';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
-import {FIE_INIT_CHUNKING_EXP} from '../../../src/friendly-iframe-embed';
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
@@ -461,36 +460,29 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT,
         ],
       },
-      [[FIE_INIT_CHUNKING_EXP.id]]: {
+      [EXPAND_JSON_TARGETING_EXP.ID]: {
         isTrafficEligible: () => true,
         branches: [
-          [FIE_INIT_CHUNKING_EXP.control],
-          [FIE_INIT_CHUNKING_EXP.experiment],
+          EXPAND_JSON_TARGETING_EXP.CONTROL,
+          EXPAND_JSON_TARGETING_EXP.EXPERIMENT,
         ],
       },
-      [[EXPAND_JSON_TARGETING_EXP.ID]]: {
+      [RENDER_ON_IDLE_FIX_EXP.id]: {
         isTrafficEligible: () => true,
         branches: [
-          [EXPAND_JSON_TARGETING_EXP.CONTROL],
-          [EXPAND_JSON_TARGETING_EXP.EXPERIMENT],
-        ],
-      },
-      [[RENDER_ON_IDLE_FIX_EXP.id]]: {
-        isTrafficEligible: () => true,
-        branches: [
-          [RENDER_ON_IDLE_FIX_EXP.control],
-          [RENDER_ON_IDLE_FIX_EXP.experiment],
+          RENDER_ON_IDLE_FIX_EXP.control,
+          RENDER_ON_IDLE_FIX_EXP.experiment,
         ],
       },
       [NO_SIGNING_EXP.id]: {
         isTrafficEligible: () => true,
-        branches: [[NO_SIGNING_EXP.control], [NO_SIGNING_EXP.experiment]],
+        branches: [NO_SIGNING_EXP.control, NO_SIGNING_EXP.experiment],
       },
       [STICKY_AD_PADDING_BOTTOM_EXP.id]: {
         isTrafficEligible: () => true,
         branches: [
-          [STICKY_AD_PADDING_BOTTOM_EXP.control],
-          [STICKY_AD_PADDING_BOTTOM_EXP.experiment],
+          STICKY_AD_PADDING_BOTTOM_EXP.control,
+          STICKY_AD_PADDING_BOTTOM_EXP.experiment,
         ],
       },
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,

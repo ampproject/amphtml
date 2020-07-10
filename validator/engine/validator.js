@@ -2135,6 +2135,35 @@ const SelectorSpecVisitor = class extends parse_css.SelectorVisitor {
     attrSelector.copyPosTo(errorToken);
     this.errorBuffer_.push(errorToken);
   }
+
+  /**
+   * @override
+   * @param {!parse_css.PseudoSelector} selector
+   */
+  visitPseudoSelector(selector) {
+    if (selector.isClass) {  // pseudo-class
+      for (const allowedPseudoClass of this.selectorSpec_.pseudoClass) {
+        if (allowedPseudoClass === '*' || allowedPseudoClass === selector.name)
+          return;
+      }
+      const errorToken = new tokenize_css.ErrorToken(
+          generated.ValidationError.Code.CSS_SYNTAX_DISALLOWED_PSEUDO_CLASS,
+          ['', selector.name]);
+      selector.copyPosTo(errorToken);
+      this.errorBuffer_.push(errorToken);
+    } else {  // pseudo-element
+      for (const allowedPseudoElement of this.selectorSpec_.pseudoElement) {
+        if (allowedPseudoElement === '*' ||
+            allowedPseudoElement === selector.name)
+          return;
+      }
+      const errorToken = new tokenize_css.ErrorToken(
+          generated.ValidationError.Code.CSS_SYNTAX_DISALLOWED_PSEUDO_ELEMENT,
+          ['', selector.name]);
+      selector.copyPosTo(errorToken);
+      this.errorBuffer_.push(errorToken);
+    }
+  }
 };
 
 /**

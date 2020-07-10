@@ -15,93 +15,110 @@
  */
 
 .i-amphtml-story-interactive-poll-container {
-  display: flex !important;
-  justify-content: center !important;
-  height: 90px !important;
-  max-width: 296px !important;
-  border-radius: 16px !important;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.12) !important;
-  color: var(--interactive-accent-color) !important;
-  background: var(--interactive-background-color) !important;
-  overflow: hidden !important;
-
-  --post-select-scale: 0.5 !important;
-  --post-select-scale-variable: 1 !important;
+  background-color: var(--interactive-prompt-background-color) !important;
 }
 
-.i-amphtml-story-interactive-poll-container:not(.i-amphtml-story-interactive-post-selection) {
-  cursor: pointer !important;
+.i-amphtml-story-interactive-option-container {
+  background-color: var(--i-amphtml-interactive-option-background-color) !important;
+  border-radius: 16px !important;
+  color: var(--i-amphtml-interactive-strong-text-color) !important;
+  font-weight: bold !important;
+  padding: 8px !important;
 }
 
 .i-amphtml-story-interactive-option {
   display: flex !important;
   align-items: center !important;
-  justify-content: center !important;
-  text-align: center !important;
-  flex-direction: column !important;
-  flex-grow: 50 !important;
-  flex: 100 !important;
+  justify-content: space-between !important;
+  height: 58px !important;
   overflow: hidden !important;
+  padding: 0px 12px !important;
   position: relative !important;
+  box-shadow: var(--i-amphtml-interactive-chip-shadow), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
+  -webkit-box-shadow: var(--i-amphtml-interactive-chip-shadow), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
+  -moz-box-shadow: var(--i-amphtml-interactive-chip-shadow), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
+  border-radius: 8px !important;
 }
 
-.i-amphtml-story-interactive-poll-container:not(.i-amphtml-story-interactive-post-selection)
-  .i-amphtml-story-interactive-option-divider {
-  height: 100% !important;
-  width: 1px !important;
-  opacity: 0.3 !important;
-  background-color: var(--interactive-accent-color) !important;
+.i-amphtml-story-interactive-option:not(:first-child) {
+  margin-top: 8px !important;
 }
 
-.i-amphtml-story-interactive-post-selection
-  .i-amphtml-story-interactive-option.i-amphtml-story-interactive-option-selected::before {
+.i-amphtml-story-interactive-option.i-amphtml-story-interactive-option-selected {
+  background-color: var(--i-amphtml-interactive-theme-shading);
+  box-shadow: var(--i-amphtml-interactive-chip-shadow-inset), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
+  -webkit-box-shadow: var(--i-amphtml-interactive-chip-shadow-inset), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
+  -moz-box-shadow: var(--i-amphtml-interactive-chip-shadow-inset), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
+  animation: i-amphtml-interactive-animation-flash-background-color forwards var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
+}
+
+.i-amphtml-story-interactive-option::after {
   content: '' !important;
-  background-color: var(--interactive-accent-color) !important;
-  opacity: 0.2 !important;
+  background-color: var(--i-amphtml-interactive-theme-shading) !important;
   position: absolute !important;
-  left: 0px !important;
-  right: 0px !important;
   height: 100% !important;
+  width: 100% !important;
+  left: 0 !important;
+  top: 0 !important;
+  transform: translateX(-100%) !important;
+  transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
-.i-amphtml-story-interactive-option-title {
-  font-weight: 800 !important;
+.i-amphtml-story-interactive-poll-container[dir="rtl"] .i-amphtml-story-interactive-option::after {
+  transform: translateX(100%)!important;
+}
+
+.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-option::after {
+  transform: translateX(calc(var(--option-percentage) - 100%)) !important;
+}
+
+.i-amphtml-story-interactive-poll-container.i-amphtml-story-interactive-post-selection[dir="rtl"] .i-amphtml-story-interactive-option::after {
+  transform: translateX(calc(100% - var(--option-percentage)))!important;
+}
+
+.i-amphtml-story-interactive-option-text {
+  font-size: 22px !important;
+  margin: 0 !important;
+  z-index: 1 !important;
+  transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
+  transform-origin: left !important;
+}
+
+.i-amphtml-story-interactive-poll-container[dir="rtl"] .i-amphtml-story-interactive-option-text{
+  transform-origin: right !important;
+}
+
+.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-option-text {
+  transform: scale(0.72) !important;
+}
+
+.i-amphtml-story-interactive-option-percentage {
+  font-weight: 700 !important;
   font-size: 28px !important;
   margin: 0 !important;
-  line-height: 36px !important;
-  width: 124px !important;
-  height: 66px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+  opacity: 0 !important;
+  transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
+  transform: translateX(60px) !important;
+  /* Percentage sign always goes to the right of the number, regardless of language. TODO(mszylkowski): rtl for arabic */
+  direction: ltr !important;
 }
 
-.i-amphtml-story-interactive-post-selection
-  .i-amphtml-story-interactive-option-title {
-  transform: scale(var(--post-select-scale)) !important;
-  height: 33px !important;
+.i-amphtml-story-interactive-poll-container[dir="rtl"] .i-amphtml-story-interactive-option-percentage {
+  transform: translateX(-60px) !important;
 }
 
-.i-amphtml-story-interactive-option-title-text {
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  display: -webkit-box !important;
-  -webkit-line-clamp: 2 !important;
-  -webkit-box-orient: vertical !important;
+.i-amphtml-story-interactive-poll-container.i-amphtml-story-interactive-post-selection[dir="rtl"] .i-amphtml-story-interactive-option-percentage,
+.i-amphtml-story-interactive-poll-container.i-amphtml-story-interactive-post-selection:not([dir="rtl"]) .i-amphtml-story-interactive-option-percentage {
+  opacity: 1 !important;
+  transform: translateX(0px) !important;
 }
 
-.i-amphtml-story-interactive-post-selection
-  .i-amphtml-story-interactive-option-title-text {
-  transform: scale(var(--post-select-scale-variable)) !important;
+.i-amphtml-story-interactive-option-percentage-sign {
+  font-size: 16px !important;
+  margin-left: -5px !important;
+  display: inline-block !important;
 }
 
-.i-amphtml-story-interactive-option-percentage-text {
-  font-weight: 700 !important;
-  font-size: 22px !important;
+.i-amphtml-story-interactive-poll-container:not(.i-amphtml-story-interactive-has-data) .i-amphtml-story-interactive-option-percentage {
   display: none !important;
-}
-
-.i-amphtml-story-interactive-post-selection
-  .i-amphtml-story-interactive-option-percentage-text {
-  display: block !important;
 }

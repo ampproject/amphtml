@@ -19,13 +19,14 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+import * as experiments from '../../../../src/experiments';
 import {AD_SIZE_OPTIMIZATION_EXP} from '../responsive-state';
 import {AmpA4A} from '../../../amp-a4a/0.1/amp-a4a';
-import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
+import {AmpAd} from '../../../amp-ad/0.1/amp-ad'; // eslint-disable-line no-unused-vars
 import {
   AmpAdNetworkAdsenseImpl,
   resetSharedState,
-} from '../amp-ad-network-adsense-impl'; // eslint-disable-line no-unused-vars
+} from '../amp-ad-network-adsense-impl';
 import {
   AmpAdXOriginIframeHandler, // eslint-disable-line no-unused-vars
 } from '../../../amp-ad/0.1/amp-ad-xorigin-iframe-handler';
@@ -554,14 +555,11 @@ describes.realWin(
     });
 
     describe('#getAdUrl', () => {
-      const adsenseFormatExpName = 'as-use-attr-for-format';
-
       beforeEach(() => {
         resetSharedState();
       });
 
       afterEach(() => {
-        toggleExperiment(impl.win, adsenseFormatExpName, false);
         toggleExperiment(
           impl.win,
           'ADSENSE_AMP_AUTO_ADS_HOLDOUT_EXPERIMENT_NAME',
@@ -623,8 +621,7 @@ describes.realWin(
         element.setAttribute('width', 'auto');
         expect(impl.element.getAttribute('width')).to.equal('auto');
         return impl.getAdUrl().then((url) =>
-          // With exp as-use-attr-for-format off, we can't test for specific
-          // numbers, but we know that the values should be numeric.
+          // The values should be numeric.
           expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/)
         );
       });
@@ -632,13 +629,11 @@ describes.realWin(
         element.setAttribute('height', 'auto');
         expect(impl.element.getAttribute('height')).to.equal('auto');
         return impl.getAdUrl().then((url) =>
-          // With exp as-use-attr-for-format off, we can't test for specific
-          // numbers, but we know that the values should be numeric.
+          // The values should be numeric.
           expect(url).to.match(/format=\d+x\d+&w=\d+&h=\d+/)
         );
       });
-      it('has correct format when as-use-attr-for-format is on', () => {
-        forceExperimentBranch(impl.win, adsenseFormatExpName, '21062004');
+      it('has correct format when width and height are specified', () => {
         impl.divertExperiments();
         const width = element.getAttribute('width');
         const height = element.getAttribute('height');
@@ -649,20 +644,6 @@ describes.realWin(
               new RegExp(`format=${width}x${height}&w=${width}&h=${height}`)
             )
           );
-      });
-      it('has experiment eid in adsense frmt exp and width/height numeric', () => {
-        forceExperimentBranch(impl.win, adsenseFormatExpName, '21062004');
-        impl.divertExperiments();
-        return impl
-          .getAdUrl()
-          .then((url) => expect(url).to.match(/eid=[^&]*21062004/));
-      });
-      it('has control eid in adsense frmt exp and width/height numeric', () => {
-        forceExperimentBranch(impl.win, adsenseFormatExpName, '21062003');
-        impl.divertExperiments();
-        return impl
-          .getAdUrl()
-          .then((url) => expect(url).to.match(/eid=[^&]*21062003/));
       });
       it('returns the right URL', () => {
         env.sandbox.stub(impl, 'isXhrAllowed').returns(true);
@@ -782,7 +763,6 @@ describes.realWin(
         const impl1 = new AmpAdNetworkAdsenseImpl(elem1);
         const impl2 = new AmpAdNetworkAdsenseImpl(elem2);
         const impl3 = new AmpAdNetworkAdsenseImpl(elem3);
-        toggleExperiment(impl1.win, 'as-use-attr-for-format', true);
         return impl1.getAdUrl().then((adUrl1) => {
           expect(adUrl1).to.match(/pv=2/);
           expect(adUrl1).to.not.match(/prev_fmts/);
@@ -1414,6 +1394,26 @@ describes.realWin(
         doc.body.appendChild(ampStickyAd);
         const letCreativeTriggerRenderStart = impl.letCreativeTriggerRenderStart();
         expect(letCreativeTriggerRenderStart).to.equal(false);
+      });
+    });
+
+    describe('#divertExperiments', () => {
+      it('should have correctly formatted experiment map', () => {
+        const randomlySelectUnsetExperimentsStub = env.sandbox.stub(
+          experiments,
+          'randomlySelectUnsetExperiments'
+        );
+        randomlySelectUnsetExperimentsStub.returns({});
+        impl.divertExperiments();
+        const experimentMap =
+          randomlySelectUnsetExperimentsStub.firstCall.args[1];
+        Object.keys(experimentMap).forEach((key) => {
+          expect(key).to.be.a('string');
+          const {branches} = experimentMap[key];
+          expect(branches).to.exist;
+          expect(branches).to.be.a('array');
+          branches.forEach((branch) => expect(branch).to.be.a('string'));
+        });
       });
     });
   }

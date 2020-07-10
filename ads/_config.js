@@ -907,6 +907,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'recreativ': {
+    prefetch: 'https://go.rcvlink.com/static/amp.js',
+    renderStartImplemented: true,
+  },
+
   'relap': {
     renderStartImplemented: true,
   },
@@ -986,6 +991,10 @@ const adConfig = jsonConfiguration({
       'https://video.freeskreen.com',
     ],
     renderStartImplemented: true,
+  },
+
+  'smartads': {
+    prefetch: 'https://smart-ads.biz/amp.js',
   },
 
   'smartadserver': {
@@ -1222,7 +1231,7 @@ const adConfig = jsonConfiguration({
   },
 
   'yandex': {
-    prefetch: 'https://yastatic.net/partner-code/loaders/context_amp.js',
+    prefetch: 'https://an.yandex.ru/system/context_amp.js',
     renderStartImplemented: true,
   },
 

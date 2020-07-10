@@ -27,15 +27,15 @@ limitations under the License.
 
 # amp-autocomplete
 
+## Usage
+
+The `amp-autocomplete` extension should be used for suggesting completed items based on user input to help users carry out their task more quickly.
+
 [filter formats="email"]
 
 Warning: This component is currently experimental in the AMP for Email format as email clients add support for the feature. Until the component is publicly available in the format, you will notice the component is in some cases valid and sendable in emails but may be only functioning in its fallback behavior capacity across email clients as well as in their respective playgrounds. The fallback for the component does not display autocomplete suggestions, and will behave as the unenhanced `input` or `textarea` field it is given.
 
 [/filter] <!-- formats="email" -->
-
-## Behavior
-
-The `amp-autocomplete` extension should be used for suggesting completed items based on user input to help users carry out their task more quickly.
 
 This can be used to power search experiences, in cases where the user may not know the full range of potential inputs, or in forms to help ensure inputs where there may be multiple ways to express the same intent (using a state abbreviation instead of its full name, for example) yield more predictable results.
 
@@ -80,7 +80,7 @@ The filtering mechanism applied to source data to produce filtered results for u
 - `prefix`: if the user input is a prefix of an item, then the item gets suggested
 - `token-prefix`: if the user input is a prefix of any word in a multi-worded item, then the item gets suggested; example “je” is a token-prefix in “blue jeans”
 - `fuzzy`: typos in the input field can result in partial match items appearing in the filtered results—need further research
-- `none`: no client-side filter; renders retrieved data based on bound <code>[src]</code> attribute; truncates to <code>max-entries</code> attribute if provided
+- `none`: no client-side filter; renders retrieved data based on bound <code>[src]</code> attribute; truncates to <code>max-items</code> attribute if provided
 - `custom`: a conditional statement involving an item and a user input to be applied to each item such that evaluating to true implies the item gets suggested; using this filter requires including <code>amp-bind</code> if <code>filter==custom</code>, an additional attribute <code>filter-expr</code> is required to specify a boolean expression by which to perform the custom filter
 
 ### `filter-expr`
@@ -105,7 +105,7 @@ The query parameter to generate a static remote endpoint that returns the JSON t
 
 The min character length of a user input to provide results, default 1
 
-### `max-entries`
+### `max-items`
 
 The max specified number of items to suggest at once based on a user input, displays all if unspecified
 
@@ -156,16 +156,14 @@ Whether the <code>amp-autocomplete</code> should autosuggest on the full user in
 
 ## Events
 
-Events may trigger actions on other AMP components using the `on` attribute.
-e.g. `on="select: my-tab.show"`
+### `select`
 
-Read more about [AMP Actions and Events](../../spec/amp-actions-and-events.md).
+`amp-autocomplete` triggers the `select` event when the user selects an option
+via click, tap, keyboard navigation or accepting typeahead. It also fires the
+`select` event if a user keyboard navigates to an item and Tabs away from the
+input field. `event` contains the `value` attribute value of the selected
+element.
 
-<table>
-  <tr>
-    <td width="40%"><strong>select</strong></td>
-    <td><code>amp-autocomplete</code> triggers the <code>select</code> event when the user selects an option via click, tap, keyboard navigation or accepting typeahead. It also fires the <code>select</code> event if a user keyboard navigates to an item and Tabs away from the input field.
-    <code>event</code> contains the <code>value</code> attribute value of the selected element.</td>
-  </tr>
+## Validation
 
-</table>
+See [amp-autocomplete rules](validator-amp-autocomplete.protoascii) in the AMP validator specification.

@@ -16,7 +16,12 @@
 'use strict';
 
 const minimist = require('minimist');
-const {gitCherryMaster, gitCommitFormattedTime} = require('../common/git');
+const {
+  gitBranchContains,
+  gitCherryMaster,
+  gitCommitMessage,
+  gitCommitFormattedTime,
+} = require('../common/git');
 
 // Allow leading zeros in --version_override, e.g. 0000000000001
 const argv = minimist(process.argv.slice(2), {
@@ -89,9 +94,23 @@ function getVersion() {
 
   let numberOfCherryPicks = 0;
   const commitCherriesInfo = gitCherryMaster().reverse();
-  for (const {isCherryPick} of commitCherriesInfo) {
+  for (const {isCherryPick, sha} of commitCherriesInfo) {
     if (!isCherryPick) {
-      break;
+      // Sometimes cherry-picks are mistaken for new commits. Double-check here
+      // by looking for the hard-coded message at the end of the commit that
+      // indicates that it was a cherry-pick. Requires that the cherry-pick was
+      // performed with the `-x` flag.
+      const commitMessage = gitCommitMessage(sha);
+      const cherryPickedMatch = /\(cherry picked from commit ([0-9a-f]{40})\)/.exec(
+        commitMessage
+      );
+      if (!cherryPickedMatch) {
+        break;
+      }
+
+      if (!gitBranchContains(cherryPickedMatch[1])) {
+        break;
+      }
     }
     numberOfCherryPicks++;
   }

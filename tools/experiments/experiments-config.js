@@ -86,12 +86,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3824',
   },
   {
-    id: 'amp-share-tracking',
-    name: 'AMP Share Tracking',
-    spec: 'https://github.com/ampproject/amphtml/issues/3135',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5167',
-  },
-  {
     id: 'amp-viz-vega',
     name: 'AMP Visualization using Vega grammar',
     spec: 'https://github.com/ampproject/amphtml/issues/3991',
@@ -157,10 +151,6 @@ export const EXPERIMENTS = [
   {
     id: 'jank-meter',
     name: 'Display jank meter',
-  },
-  {
-    id: 'as-use-attr-for-format',
-    name: 'Use slot width/height attribute for AdSense size format',
   },
   {
     id: 'input-debounced',
@@ -312,11 +302,6 @@ export const EXPERIMENTS = [
     name: 'AMP Analytics Break long tasks to chunks (AMP Ads only)',
     spec: 'https://github.com/ampproject/amphtml/issues/28435',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/28435',
-  },
-  {
-    id: 'fie-init-chunking',
-    name: 'More chunking for friendly iframe initialization',
-    spec: 'https://github.com/ampproject/amphtml/issues/27584',
   },
   {
     id: 'a4a-no-signing',
