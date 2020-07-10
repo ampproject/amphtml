@@ -314,7 +314,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?number} Time at which an audio element failed playing. */
     this.playAudioElementFromTimestamp_ = null;
 
-    /** @private {?Array<!Promise<!../../amp-story-360/AmpStory360>>}*/
+    /** @private {?Array<!Promise<!../../amp-story-360/0.1/amp-story-360.AmpStory360>>}*/
     this.story360componentsCache_ = null;
   }
 
@@ -1845,7 +1845,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {!Array<!Promise<!../../amp-story-360/AmpStory360>>}
+   * @return {!Array<!Promise<!../../amp-story-360/0.1/amp-story-360.AmpStory360>>}
    */
   get story360components_() {
     if (!this.story360componentsCache_) {
