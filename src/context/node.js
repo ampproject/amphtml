@@ -15,6 +15,7 @@
  */
 
 import {Values} from './values';
+import {devAssert} from '../log';
 import {getMode} from '../mode';
 import {pushIfNotExist, removeItem} from '../utils/array';
 import {startsWith} from '../string';
@@ -256,6 +257,7 @@ export class ContextNode {
    * @protected Used cross-binary.
    */
   updateRoot(root) {
+    devAssert(!root || root.isRoot);
     const oldRoot = this.root;
     if (root != oldRoot) {
       // The root has changed.

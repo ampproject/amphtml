@@ -111,15 +111,9 @@ export class Values {
    */
   set(prop, setter, value) {
     devAssert(setter);
+    devAssert(value !== undefined);
 
     const {key} = prop;
-
-    // An input has been added to a node for a first time. This might
-    // affect all values in this and child nodes. The simplest algorithm
-    // here is to deep scan all descendants and refresh them.
-    // Optimization opportunity: in simple but common manipulations the
-    // deepscan can be avoided.
-    deepScan(this.contextNode_, scan, prop);
 
     const inputsByKey = this.inputsByKey_ || (this.inputsByKey_ = new Map());
     let inputs = inputsByKey.get(key);
@@ -131,11 +125,24 @@ export class Values {
       inputsByKey.set(key, inputs);
     }
     const index = inputs.setters.indexOf(setter);
-    if (index != -1) {
-      inputs.values[index] = value;
-    } else {
+    const changed = index == -1 || inputs.values[index] !== value;
+    if (index == -1) {
       inputs.setters.push(setter);
       inputs.values.push(value);
+    } else if (changed) {
+      inputs.values[index] = value;
+    }
+
+    if (changed) {
+      // An input has been added to a node for a first time. This might
+      // affect all values in this and child nodes. The simplest algorithm
+      // here is to deep scan all descendants and refresh them.
+      // Optimization opportunity: in simple but common manipulations the
+      // deepscan can be avoided.
+      this.ping(prop, false);
+      if (isResursive(prop)) {
+        deepScan(this.contextNode_, scan, prop, true, false);
+      }
     }
   }
 
@@ -146,6 +153,8 @@ export class Values {
    * @param {*} setter
    */
   remove(prop, setter) {
+    devAssert(setter);
+
     const {key} = prop;
     const inputsByKey = this.inputsByKey_;
     const inputs = inputsByKey && inputsByKey.get(key);

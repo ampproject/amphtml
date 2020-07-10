@@ -204,6 +204,19 @@ describes.realWin('ContextNode - values', {}, (env) => {
       expect(cousin1Stub).to.not.be.called;
       expect(calcSpy).to.have.callCount(1);
     });
+
+    it('should not update the same value twice', async () => {
+      grandparent.values.set(NonRecursive, 'OWNER1', 'A');
+      clock.runAll();
+
+      expect(grandparentStub).to.be.calledOnce.calledWith('A');
+      expect(calcSpy).to.have.callCount(1);
+
+      grandparent.values.set(NonRecursive, 'OWNER1', 'A');
+      clock.runAll();
+      expect(grandparentStub).to.be.calledOnce; // no change.
+      expect(calcSpy).to.have.callCount(1); // no change.
+    });
   });
 
   describe('connected, recursive', () => {
@@ -276,11 +289,11 @@ describes.realWin('ContextNode - values', {}, (env) => {
       parent.values.set(Recursive, 'OWNER1', 'B');
       clock.runAll();
 
-      expect(grandparentStub).to.be.calledOnce.calledWith('A');
       expect(parentStub).to.be.calledTwice.calledWith('B');
       expect(sibling1Stub).to.be.calledTwice.calledWith('B');
       expect(sibling2Stub).to.be.calledTwice.calledWith('B');
-      expect(cousin1Stub).to.be.calledOnce.calledWith('A');
+      expect(grandparentStub).to.be.calledOnce; // no change.
+      expect(cousin1Stub).to.be.calledOnce; // no change.
       expect(calcSpy).to.have.callCount(3);
     });
   });
@@ -332,22 +345,22 @@ describes.realWin('ContextNode - values', {}, (env) => {
       parent.values.set(Concat, 'OWNER1', 'B');
       clock.runAll();
 
-      expect(grandparentStub).to.be.calledOnce.calledWith('A');
       expect(parentStub).to.be.calledTwice.calledWith('AB');
       expect(sibling1Stub).to.be.calledTwice.calledWith('AB');
       expect(sibling2Stub).to.be.calledTwice.calledWith('AB');
-      expect(cousin1Stub).to.be.calledOnce.calledWith('A');
+      expect(grandparentStub).to.be.calledOnce; // no change.
+      expect(cousin1Stub).to.be.calledOnce; // no change.
       expect(calcSpy).to.have.callCount(3);
 
       calcSpy.resetHistory();
       sibling1.values.set(Concat, 'OWNER1', 'C');
       clock.runAll();
 
-      expect(grandparentStub).to.be.calledOnce.calledWith('A');
-      expect(parentStub).to.be.calledTwice.calledWith('AB');
       expect(sibling1Stub).to.be.calledThrice.calledWith('ABC');
-      expect(sibling2Stub).to.be.calledTwice.calledWith('AB');
-      expect(cousin1Stub).to.be.calledOnce.calledWith('A');
+      expect(grandparentStub).to.be.calledOnce; // no change.
+      expect(parentStub).to.be.calledTwice; // no change.
+      expect(sibling2Stub).to.be.calledTwice; // no change.
+      expect(cousin1Stub).to.be.calledOnce; // no change.
       expect(calcSpy).to.have.callCount(1);
     });
 
@@ -414,8 +427,8 @@ describes.realWin('ContextNode - values', {}, (env) => {
       expect(sibling1Stub).to.be.calledThrice.calledWith('ABC');
       expect(parentStub).to.be.calledTwice.calledWith('AB');
       expect(sibling2Stub).to.be.calledTwice.calledWith('AB');
-      expect(grandparentStub).to.be.calledOnce;
-      expect(cousin1Stub).to.be.calledOnce;
+      expect(grandparentStub).to.be.calledOnce; // no change.
+      expect(cousin1Stub).to.be.calledOnce; // no change.
       expect(calcSpy).to.have.callCount(3);
     });
 
@@ -476,8 +489,8 @@ describes.realWin('ContextNode - values', {}, (env) => {
       expect(parentStub).to.be.calledThrice.calledWith('A');
       expect(sibling1Stub).to.be.calledThrice.calledWith('AC');
       expect(sibling2Stub).to.be.calledThrice.calledWith('A');
-      expect(grandparentStub).to.be.calledOnce;
-      expect(cousin1Stub).to.be.calledOnce;
+      expect(grandparentStub).to.be.calledOnce; // no change.
+      expect(cousin1Stub).to.be.calledOnce; // no change.
       expect(calcSpy).to.have.callCount(3);
     });
 
@@ -502,8 +515,8 @@ describes.realWin('ContextNode - values', {}, (env) => {
       expect(parentStub).to.be.calledTwice.calledWith('B');
       expect(sibling1Stub).to.be.calledTwice.calledWith('BC');
       expect(sibling2Stub).to.be.calledTwice.calledWith('B');
-      expect(grandparentStub).to.be.calledOnce;
-      expect(cousin1Stub).to.be.calledOnce;
+      expect(grandparentStub).to.be.calledOnce; // no change.
+      expect(cousin1Stub).to.be.calledOnce; // no change.
       expect(calcSpy).to.have.callCount(3);
     });
 
@@ -533,9 +546,9 @@ describes.realWin('ContextNode - values', {}, (env) => {
 
       expect(grandparentStub).to.be.calledTwice.calledWith('Z');
       expect(cousin1Stub).to.be.calledTwice.calledWith('Z');
-      expect(parentStub).to.be.calledOnce;
-      expect(sibling1Stub).to.be.calledOnce;
-      expect(sibling2Stub).to.be.calledOnce;
+      expect(parentStub).to.be.calledOnce; // no change.
+      expect(sibling1Stub).to.be.calledOnce; // no change.
+      expect(sibling2Stub).to.be.calledOnce; // no change.
       expect(calcSpy).to.have.callCount(2);
 
       calcSpy.resetHistory();
@@ -546,8 +559,8 @@ describes.realWin('ContextNode - values', {}, (env) => {
       expect(parentStub).to.be.calledTwice.calledWith('ZY');
       expect(sibling1Stub).to.be.calledTwice.calledWith('ZYC');
       expect(sibling2Stub).to.be.calledTwice.calledWith('ZY');
-      expect(grandparentStub).to.be.calledTwice;
-      expect(cousin1Stub).to.be.calledTwice;
+      expect(grandparentStub).to.be.calledTwice; // no change.
+      expect(cousin1Stub).to.be.calledTwice; // no change.
       expect(calcSpy).to.have.callCount(3);
     });
 
@@ -717,7 +730,7 @@ describes.realWin('ContextNode - values', {}, (env) => {
       expect(parentStub).to.be.calledTwice.calledWith(
         'no-input/non-recursiveZ/recursive/A'
       );
-      expect(sibling1Stub).to.be.calledOnce;
+      expect(sibling1Stub).to.be.calledOnce; // no change.
       expect(grandparentStub).to.not.be.called;
       expect(sibling2Stub).to.not.be.called;
       expect(cousin1Stub).to.not.be.called;
@@ -776,8 +789,8 @@ describes.realWin('ContextNode - values', {}, (env) => {
       expect(parentStub).to.be.calledOnce.calledWith('AB');
       expect(sibling1Stub).to.be.calledTwice.calledWith('ABC');
       expect(sibling2Stub).to.be.calledTwice.calledWith('AB');
-      expect(grandparentStub).to.be.calledOnce;
-      expect(cousin1Stub).to.be.calledOnce;
+      expect(grandparentStub).to.be.calledOnce; // no change.
+      expect(cousin1Stub).to.be.calledOnce; // no change.
       expect(calcSpy).to.have.callCount(3);
     });
   });
