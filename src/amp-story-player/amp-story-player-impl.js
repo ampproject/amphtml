@@ -159,6 +159,7 @@ export class AmpStoryPlayer {
 
   /**
    * Makes the current story play its content/auto-advance
+   * @public
    */
   play() {
     this.togglePaused_(false);
@@ -166,6 +167,7 @@ export class AmpStoryPlayer {
 
   /**
    * Makes the current story pause its content/auto-advance
+   * @public
    */
   pause() {
     this.togglePaused_(true);
@@ -175,6 +177,7 @@ export class AmpStoryPlayer {
    * Makes the current story play or pause its content/auto-advance
    *
    * @param {boolean} paused If true, the story will be paused, and it will be played otherwise
+   * @private
    */
   togglePaused_(paused) {
     const currentStory = this.stories_[this.currentIdx_];
