@@ -60,6 +60,7 @@ import {installUrlReplacementsForEmbed} from '../../../src/service/url-replaceme
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
+import {processHead} from './head-validation';
 import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {streamResponseToWriter} from '../../../src/utils/stream-response';
@@ -897,12 +898,12 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Prepare the creative <head> by removing any non-secure elements and
+   * exracting extensions
    * @param {!Element} head
-   * @return {?Element} head or null if we should fall back to xdomain.
+   * @return {?./head-validation.ValidatedHeadDef} head data or null if we should fall back to xdomain.
    */
   validateHead_(head) {
-    // TODO(ccordry): Implement client side head validation.
-    return head;
+    return processHead(this.win, this.element, head);
   }
 
   /**
