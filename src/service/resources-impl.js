@@ -259,7 +259,7 @@ export class ResourcesImpl {
         this.intersectionObserver_ = new IntersectionObserver(
           (e) => this.intersect(e),
           // rootMargin matches size of loadRect: (150vw 300vh) * 1.25.
-          {root, rootMargin: '250% 32%'}
+          {root, rootMargin: '250% 31.25%'}
         );
 
         // Wait for intersection callback instead of measuring all elements
