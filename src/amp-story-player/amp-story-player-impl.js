@@ -660,7 +660,7 @@ export class AmpStoryPlayer {
   updateMutedState_(iframeIdx, mutedValue) {
     this.messagingPromises_[iframeIdx].then((messaging) => {
       messaging.sendRequest('setDocumentState', {state: 'MUTED_STATE', value: mutedValue}, true);
-    })
+    });
   }
     
   /**
