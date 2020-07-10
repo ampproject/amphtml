@@ -381,11 +381,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       win.requestAnimationFrame(() => {
         const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-        
         player.go(2);
-        expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-        expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('0');
-        expect(iframes[3].getAttribute('i-amphtml-iframe-position')).to.eql('1');
+        expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql(-1);
+        expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql(0);
+        expect(iframes[3].getAttribute('i-amphtml-iframe-position')).to.eql(1);
       });
     });
 
@@ -399,12 +398,11 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       win.requestAnimationFrame(() => {
         const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-        
         player.go(3);
         player.go(-1);
-        expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-        expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('0');
-        expect(iframes[3].getAttribute('i-amphtml-iframe-position')).to.eql('1');
+        expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql(-1);
+        expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql(0);
+        expect(iframes[3].getAttribute('i-amphtml-iframe-position')).to.eql(1);
       });
     });
 
@@ -418,10 +416,9 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       win.requestAnimationFrame(() => {
         const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-        
         player.go(0);
-        expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('0');
-        expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('1');
+        expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql(0);
+        expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql(1);
       });
     });
 

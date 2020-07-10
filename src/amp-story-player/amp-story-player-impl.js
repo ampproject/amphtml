@@ -493,12 +493,11 @@ export class AmpStoryPlayer {
    */
   go(storyDelta) {
     if (
-      this.currentIdx_ + storyDelta >= this.stories_.length || 
+      this.currentIdx_ + storyDelta >= this.stories_.length ||
       this.currentIdx_ + storyDelta < 0
     ) {
-      throw new Error('Out of Story range.')
+      throw new Error('Out of Story range.');
     }
-    
     if (storyDelta === 0) {
       return;
     }
