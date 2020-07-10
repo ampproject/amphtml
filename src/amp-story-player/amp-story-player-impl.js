@@ -286,12 +286,6 @@ export class AmpStoryPlayer {
           messaging.registerHandler('selectDocument', (event, data) => {
             this.onSelectDocument_(data);
           });
-
-          messaging.registerHandler('setDocumentState', (event, data) => {
-            console.log(event);
-            console.log(data);
-          });
-
           resolve(messaging);
         },
         (err) => {
@@ -665,7 +659,6 @@ export class AmpStoryPlayer {
   updateMutedState_(iframeIdx, mutedValue) {
     this.messagingPromises_[iframeIdx].then((messaging) => {
       messaging.sendRequest('setDocumentState', {state: 'MUTED_STATE', value: mutedValue}, true);
-      // .then(m => console.log(m))
     })
   }
     
