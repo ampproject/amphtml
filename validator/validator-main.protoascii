@@ -4693,6 +4693,11 @@ tags: {
   attr_lists: "mandatory-src-or-srcset"
   # SSR requires these explicit attributes
   attrs: {
+    name: "class"
+    value_regex: "i-amphtml-fill-content\s+i-amphtml-replaced-content|i-amphtml-replaced-content\s+i-amphtml-fill-content"
+    mandatory: true
+  }
+  attrs: {
     name: "decoding"
     value: "async"
     mandatory: true
