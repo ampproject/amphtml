@@ -20,7 +20,10 @@ import {
   getVariableService,
 } from '../../../amp-story/1.0/variable-service';
 import {Services} from '../../../../src/services';
-import {StateProperty, getStoreService} from '../amp-story-store-service';
+import {
+  StateProperty,
+  getStoreService,
+} from '../../../amp-story/1.0/amp-story-store-service';
 import {dict} from '../../../../src/utils/object';
 import {getAnalyticsService} from '../../../amp-story/1.0/story-analytics';
 import {getRequestService} from '../../../amp-story/1.0/amp-story-request-service';
