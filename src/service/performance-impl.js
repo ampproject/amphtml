@@ -707,7 +707,7 @@ export class Performance {
    * These are for example exposed in WPT.
    * See https://developer.mozilla.org/en-US/docs/Web/API/Performance/mark
    * @param {string} label
-   * @param {Object=} detail
+   * @param {*=} detail
    */
   mark(label, detail) {
     // Bail if marking is unsupported.
@@ -722,7 +722,22 @@ export class Performance {
     ) {
       return;
     }
+    this.mark_(lable, detail);
+  }
 
+  /**
+   * A thin wrapper around performance.mark created to minimize the amount of
+   * code with typechecking suppressed. We need to suppress typechecking because
+   * Closure does not know about Performance.prototype.mark's second argument.
+   * 
+   * TODO(samouri): inline this function once Closure's types are updated.
+   *
+   * @suppress {checkTypes}
+   * @param {string} label
+   * @param {*=} detail
+   * @private
+   */
+  mark_(label, detail) {
     this.win.performance.mark(label, {detail});
   }
 
