@@ -123,15 +123,20 @@ class CameraAnimation {
         return this.orientations[this.currentHeadingIndex];
       }
     }
+    const toNext = this.orientations[this.currentHeadingIndex + 1];
+    const from = this.orientations[this.currentHeadingIndex];
+    if (!toNext) {
+      // End of animation.
+      this.currentHeadingIndex = -1;
+      return null;
+    }
     const easing = this.easeInOutQuad_(
       (this.currentFrame % this.framesPerSection) / this.framesPerSection
     );
-    const from = this.orientations[this.currentHeadingIndex];
-    const to = this.orientations[this.currentHeadingIndex + 1];
     return new CameraOrientation(
-      from.theta + (to.theta - from.theta) * easing,
-      from.phi + (to.phi - from.phi) * easing,
-      from.scale + (to.scale - from.scale) * easing
+      from.theta + (toNext.theta - from.theta) * easing,
+      from.phi + (toNext.phi - from.phi) * easing,
+      from.scale + (toNext.scale - from.scale) * easing
     );
   }
 }
@@ -230,7 +235,6 @@ export class AmpStory360 extends AMP.BaseElement {
             return;
           }
           this.renderInitialPosition_();
-          this.canAnimate && this.play();
         },
         () => {
           user().error(TAG, 'Failed to load the amp-img.');
