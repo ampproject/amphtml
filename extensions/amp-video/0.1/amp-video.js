@@ -338,7 +338,13 @@ class AmpVideo extends AMP.BaseElement {
           // load.
           return Services.timerFor(this.win)
             .promise(1)
-            .then(() => this.loadPromise(this.video_));
+            .then(() => {
+              // Don't wait for the source to load if media pool is taking over.
+              if (this.isManagedByPool_()) {
+                return;
+              }
+              return this.loadPromise(this.video_);
+            });
         });
     } else {
       this.propagateLayoutChildren_();
@@ -361,10 +367,10 @@ class AmpVideo extends AMP.BaseElement {
       return;
     }
 
-    // Resolve layoutCallback right away if the video is within a story, so it
-    // can be handled by the media pool as soon as possible.
+    // Resolve layoutCallback as soon as all sources are appended when within a
+    // story, so it can be handled by the media pool as soon as possible.
     if (this.isManagedByPool_()) {
-      return;
+      return pendingOriginPromise;
     }
 
     return promise;
