@@ -402,3 +402,15 @@ gulp e2e
 The task will kick off `gulp build` and then `gulp serve` before running the tests. To skip building the runtime, use `--nobuild`.
 
 [Consult the E2E testing documentation](../build-system/tasks/e2e/README.md) to learn how to create your own end-to-end tests.
+
+## Performance Testing Node Build Tools
+
+You can create flamecharts for any node process used by the build system by leveraging `0x` which is included as a `devDepenendency`.
+
+Here's an example for `gulp dist --closure_concurrency=1`:
+
+```sh
+yarn 0x -o node_modules/.bin/gulp dist --closure_concurrency=1
+```
+
+Important to node is `0x` will automatically create a flamechart and a serving folder locally within the repository, please don't add them to PRs!
