@@ -314,7 +314,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?number} Time at which an audio element failed playing. */
     this.playAudioElementFromTimestamp_ = null;
 
-    this.story360components_ = [];
+    /** @private {?Array<!Promise<!../../amp-story-360/AmpStory360>>}*/
+    this.story360componentsCache_ = null;
   }
 
   /**
@@ -506,6 +507,7 @@ export class AmpStoryPage extends AMP.BaseElement {
           .whenSignal(CommonSignals.LOAD_END)
           .then(() => {
             component.pause();
+            component.rewind();
           });
       });
     });
@@ -545,7 +547,6 @@ export class AmpStoryPage extends AMP.BaseElement {
             .whenSignal(CommonSignals.LOAD_END)
             .then(() => {
               if (component.canAnimate) {
-                component.rewind();
                 component.play();
               }
             });
@@ -570,13 +571,6 @@ export class AmpStoryPage extends AMP.BaseElement {
         )
       );
     }
-    this.story360components_ = toArray(
-      scopedQuerySelectorAll(this.element, Selectors.ALL_STORY_360)
-    ).map((element) =>
-      whenUpgradedToCustomElement(element).then((customEl) =>
-        customEl.getImpl()
-      )
-    );
     this.muteAllMedia();
     this.getViewport().onResize(
       debounce(this.win, () => this.onResize_(), RESIZE_TIMEOUT_MS)
@@ -1847,5 +1841,22 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   isAutoAdvance() {
     return this.advancement_.isAutoAdvance();
+  }
+
+  /**
+   * @private
+   * @return {!Array<!Promise<!../../amp-story-360/AmpStory360>>}
+   */
+  get story360components_() {
+    if (!this.story360componentsCache_) {
+      this.story360componentsCache_ = toArray(
+        scopedQuerySelectorAll(this.element, Selectors.ALL_STORY_360)
+      ).map((element) =>
+        whenUpgradedToCustomElement(element).then((customEl) =>
+          customEl.getImpl()
+        )
+      );
+    }
+    return this.story360componentsCache_;
   }
 }
