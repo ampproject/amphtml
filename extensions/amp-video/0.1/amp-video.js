@@ -361,6 +361,12 @@ class AmpVideo extends AMP.BaseElement {
       return;
     }
 
+    // Resolve layoutCallback right away if the video is within a story, so it
+    // can be handled by the media pool as soon as possible.
+    if (this.isManagedByPool_()) {
+      return;
+    }
+
     return promise;
   }
 
