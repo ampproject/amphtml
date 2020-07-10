@@ -415,18 +415,18 @@ export class ResponsiveState {
    * @return {boolean}
    */
   static isInAdSizeOptimizationExperimentBranch_(element) {
-    const experimentInfoMap = /** @type {!Object<string,
-        !../../../src/experiments.ExperimentInfo>} */ ({
-      [[AD_SIZE_OPTIMIZATION_EXP.branch]]: {
+    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
+      {
+        experimentId: AD_SIZE_OPTIMIZATION_EXP.branch,
         isTrafficEligible: () => true,
         branches: [
-          [AD_SIZE_OPTIMIZATION_EXP.control],
-          [AD_SIZE_OPTIMIZATION_EXP.experiment],
+          AD_SIZE_OPTIMIZATION_EXP.control,
+          AD_SIZE_OPTIMIZATION_EXP.experiment,
         ],
       },
-    });
+    ]);
     const win = toWin(element.ownerDocument.defaultView);
-    const setExps = randomlySelectUnsetExperiments(win, experimentInfoMap);
+    const setExps = randomlySelectUnsetExperiments(win, experimentInfoList);
     Object.keys(setExps).forEach((expName) =>
       addExperimentIdToElement(setExps[expName], element)
     );
@@ -442,16 +442,16 @@ export class ResponsiveState {
    * @private
    */
   isInResponsiveHeightFixExperimentBranch_() {
-    const experimentInfoMap = /** @type {!Object<string,
-        !../../../src/experiments.ExperimentInfo>} */ ({
-      [[MAX_HEIGHT_EXP.branch]]: {
+    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
+      {
+        experimentId: MAX_HEIGHT_EXP.branch,
         isTrafficEligible: () => true,
-        branches: [[MAX_HEIGHT_EXP.control], [MAX_HEIGHT_EXP.experiment]],
+        branches: [MAX_HEIGHT_EXP.control, MAX_HEIGHT_EXP.experiment],
       },
-    });
+    ]);
     const setExps = randomlySelectUnsetExperiments(
       this.win_,
-      experimentInfoMap
+      experimentInfoList
     );
     Object.keys(setExps).forEach((expName) =>
       addExperimentIdToElement(setExps[expName], this.element_)
