@@ -313,7 +313,7 @@ _Example_: Displays a prompt user interface
 
 AMP displays prompt UI on page load or by user interaction. The prompt UI is hidden based on the three user actions described below.
 
-AMP also supports external consent UI flow with the usage of `<amp-iframe>`. More information about the communication of user actions can be found [below](#prompt-actions-from-external-consent-ui).
+AMP also supports external consent UI flow via `promptUiSrc` which will load your custom iframe. More information about the communication of user actions can be found [below](#prompt-actions-from-external-consent-ui).
 
 #### Prompt UI for Stories
 
