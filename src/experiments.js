@@ -37,6 +37,7 @@ const TOGGLES_WINDOW_PROPERTY = '__AMP__EXPERIMENT_TOGGLES';
 
 /**
  * @typedef {{
+ *   experimentId: string,
  *   isTrafficEligible: function(!Window):boolean,
  *   branches: !Array<string>
  * }}
@@ -295,7 +296,7 @@ export const RANDOM_NUMBER_GENERATORS = {
  */
 function selectRandomItem(arr) {
   const rn = RANDOM_NUMBER_GENERATORS.accuratePrng();
-  return arr[Math.floor(rn * arr.length)] || null;
+  return dev().assertString(arr[Math.floor(rn * arr.length)]) || null;
 }
 
 /**
@@ -309,7 +310,7 @@ function selectRandomItem(arr) {
  *
  * @param {!Window} win Window context on which to save experiment
  *     selection state.
- * @param {!Object<string, !ExperimentInfo>} experiments  Set of experiments to
+ * @param {!Array<!ExperimentInfo>} experiments  Set of experiments to
  *     configure for this page load.
  * @return {!Object<string, string>} Map of experiment names to selected
  *     branches.
@@ -317,22 +318,16 @@ function selectRandomItem(arr) {
 export function randomlySelectUnsetExperiments(win, experiments) {
   win.__AMP_EXPERIMENT_BRANCHES = win.__AMP_EXPERIMENT_BRANCHES || {};
   const selectedExperiments = {};
-  for (const experimentName in experiments) {
-    // Skip experimentName if it is not a key of experiments object or if it
-    // has already been populated by some other property.
-    if (!hasOwn(experiments, experimentName)) {
-      continue;
-    }
+  for (let i = 0; i < experiments.length; i++) {
+    const experiment = experiments[i];
+    const experimentName = experiment.experimentId;
     if (hasOwn(win.__AMP_EXPERIMENT_BRANCHES, experimentName)) {
       selectedExperiments[experimentName] =
         win.__AMP_EXPERIMENT_BRANCHES[experimentName];
       continue;
     }
 
-    if (
-      !experiments[experimentName].isTrafficEligible ||
-      !experiments[experimentName].isTrafficEligible(win)
-    ) {
+    if (!experiment.isTrafficEligible || !experiment.isTrafficEligible(win)) {
       win.__AMP_EXPERIMENT_BRANCHES[experimentName] = null;
       continue;
     }
@@ -344,9 +339,8 @@ export function randomlySelectUnsetExperiments(win, experiments) {
       !win.__AMP_EXPERIMENT_BRANCHES[experimentName] &&
       isExperimentOn(win, /*OK*/ experimentName)
     ) {
-      const {branches} = experiments[experimentName];
       win.__AMP_EXPERIMENT_BRANCHES[experimentName] = selectRandomItem(
-        branches
+        experiment.branches
       );
       selectedExperiments[experimentName] =
         win.__AMP_EXPERIMENT_BRANCHES[experimentName];

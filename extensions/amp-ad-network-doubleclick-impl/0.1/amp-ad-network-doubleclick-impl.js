@@ -21,7 +21,7 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import '../../amp-a4a/0.1/real-time-config-manager';
-import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../src/ampdoc-fie';
+import {EXPERIMENT_INFO_LIST as AMPDOC_FIE_EXPERIMENT_INFO_LIST} from '../../../src/ampdoc-fie';
 import {
   AmpA4A,
   ConsentTupleDef,
@@ -436,8 +436,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.experimentIds.push(forcedExperimentId);
       }
     }
-    const experimentInfoMap = /** @type {!Object<string, !../../../src/experiments.ExperimentInfo>} */ ({
-      [DOUBLECLICK_SRA_EXP]: {
+    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
+      {
+        experimentId: DOUBLECLICK_SRA_EXP,
         isTrafficEligible: () =>
           !forcedExperimentId &&
           !this.win.document./*OK*/ querySelector(
@@ -449,45 +450,50 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           (key) => DOUBLECLICK_SRA_EXP_BRANCHES[key]
         ),
       },
-      [ZINDEX_EXP]: {
+      {
+        experimentId: ZINDEX_EXP,
         isTrafficEligible: () => true,
         branches: Object.values(ZINDEX_EXP_BRANCHES),
       },
-      [RANDOM_SUBDOMAIN_SAFEFRAME_EXP]: {
+      {
+        experimentId: RANDOM_SUBDOMAIN_SAFEFRAME_EXP,
         isTrafficEligible: () => true,
         branches: [
           RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.CONTROL,
           RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT,
         ],
       },
-      [EXPAND_JSON_TARGETING_EXP.ID]: {
+      {
+        experimentId: EXPAND_JSON_TARGETING_EXP.ID,
         isTrafficEligible: () => true,
         branches: [
           EXPAND_JSON_TARGETING_EXP.CONTROL,
           EXPAND_JSON_TARGETING_EXP.EXPERIMENT,
         ],
       },
-      [RENDER_ON_IDLE_FIX_EXP.id]: {
+      {
+        experimentId: RENDER_ON_IDLE_FIX_EXP.id,
         isTrafficEligible: () => true,
         branches: [
           RENDER_ON_IDLE_FIX_EXP.control,
           RENDER_ON_IDLE_FIX_EXP.experiment,
         ],
       },
-      [NO_SIGNING_EXP.id]: {
+      {
+        experimentId: NO_SIGNING_EXP.id,
         isTrafficEligible: () => true,
         branches: [NO_SIGNING_EXP.control, NO_SIGNING_EXP.experiment],
       },
-      [STICKY_AD_PADDING_BOTTOM_EXP.id]: {
+      {
+        experimentId: STICKY_AD_PADDING_BOTTOM_EXP.id,
         isTrafficEligible: () => true,
         branches: [
           STICKY_AD_PADDING_BOTTOM_EXP.control,
           STICKY_AD_PADDING_BOTTOM_EXP.experiment,
         ],
       },
-      ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
-    });
-    const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
+    ]).concat(AMPDOC_FIE_EXPERIMENT_INFO_LIST);
+    const setExps = this.randomlySelectUnsetExperiments_(experimentInfoList);
     Object.keys(setExps).forEach(
       (expName) => setExps[expName] && this.experimentIds.push(setExps[expName])
     );
@@ -498,11 +504,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * For easier unit testing.
-   * @param {!Object<string, !../../../src/experiments.ExperimentInfo>} experimentInfoMap
+   * @param {!Array<!../../../src/experiments.ExperimentInfo>} experimentInfoList
    * @return {!Object<string, string>}
    */
-  randomlySelectUnsetExperiments_(experimentInfoMap) {
-    return randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+  randomlySelectUnsetExperiments_(experimentInfoList) {
+    return randomlySelectUnsetExperiments(this.win, experimentInfoList);
   }
 
   /**
