@@ -33,13 +33,16 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
     this.reorderHeadTransformer_ = new ExternalReorderHeadTransformer();
     /** @private {!./amp-ad-metadata-transformer.AmpAdMetadataTransformer} */
     this.metadataTransformer_ = new AmpAdMetadataTransformer();
+    /** @private {boolean} */
+    this.creativeInlined_ = false;
   }
 
   /** @override */
   buildCallback() {
+    this.creativeInlined_ = this.element.hasAttribute('srcdoc');
     userAssert(
-      this.element.hasAttribute('src'),
-      'Attribute src required for <amp-ad type="fake">: %s',
+      this.element.hasAttribute('src') || this.creativeInlined_,
+      'Attribute src or srcdoc required for <amp-ad type="fake">: %s',
       this.element
     );
     super.buildCallback();
@@ -60,12 +63,18 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
 
   /** @override */
   getAdUrl() {
-    return this.element.getAttribute('src');
+    return (
+      this.element.getAttribute('src') || this.element.getAttribute('srcdoc')
+    );
   }
 
   /** @override */
   sendXhrRequest(adUrl) {
-    return super.sendXhrRequest(adUrl).then((response) => {
+    const contentPromise = this.creativeInlined_
+      ? Promise.resolve(new Response(adUrl))
+      : super.sendXhrRequest(adUrl);
+
+    return contentPromise.then((response) => {
       if (!response) {
         return null;
       }
@@ -75,7 +84,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
       } = /** @type {{status: number, headers: !Headers}} */ (response);
 
       // In the convert creative mode the content is the plain AMP HTML.
-      // This mode is primarily used for A4A Envelop for testing.
+      // This mode is primarily used for A4A Envelope for testing.
       // See DEVELOPING.md for more info.
       if (this.element.getAttribute('a4a-conversion') == 'true') {
         return response.text().then(
@@ -87,7 +96,8 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
         );
       }
 
-      // Normal mode: Expect the creative is written in AMP4ADS doc.
+      // Normal mode: Expect the creative is already transformed and includes
+      // amp-ad-metadata
       return response;
     });
   }
