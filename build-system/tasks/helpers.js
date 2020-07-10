@@ -229,7 +229,7 @@ function toSxgName(name) {
   return name.includes('.sxg.js') ? name : name.replace(/\.js$/, '.sxg.js');
 }
 
-function maybeToEsmOrSxgName(name) {
+function chooseExtension(name) {
   if (argv.sxg) {
     return toSxgName(name);
   } else if (argv.esm) {
@@ -249,7 +249,7 @@ function maybeToEsmOrSxgName(name) {
 async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
   const timeInfo = {};
   const entryPoint = path.join(srcDir, srcFilename);
-  const minifiedName = maybeToEsmOrSxgName(options.minifiedName);
+  const minifiedName = chooseExtension(options.minifiedName);
 
   if (options.watch) {
     const watchFunc = async () => {
@@ -279,20 +279,20 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
     if (options.latestName) {
       fs.copySync(
         destPath,
-        path.join(destDir, maybeToEsmOrSxgName(options.latestName))
+        path.join(destDir, chooseExtension(options.latestName))
       );
     }
 
     let name = minifiedName;
     if (options.latestName) {
-      name += ` → ${maybeToEsmOrSxgName(options.latestName)}`;
+      name += ` → ${chooseExtension(options.latestName)}`;
     }
     endBuildStep('Minified', name, timeInfo.startTime);
 
     const target = path.basename(minifiedName, path.extname(minifiedName));
     if (!argv.noconfig && MINIFIED_TARGETS.includes(target)) {
       await applyAmpConfig(
-        maybeToEsmOrSxgName(`${destDir}/${minifiedName}`),
+        chooseExtension(`${destDir}/${minifiedName}`),
         /* localDev */ options.fortesting,
         /* fortesting */ options.fortesting
       );
@@ -665,7 +665,7 @@ module.exports = {
   compileTs,
   doBuildJs,
   endBuildStep,
-  maybeToEsmOrSxgName,
+  chooseExtension,
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,
