@@ -1214,17 +1214,17 @@ export class ResourcesImpl {
       return;
     }
     this.divertedRenderOnIdleFixExperiment_ = true;
-    const experimentInfoMap = /** @type {!Object<string,
-        !../experiments.ExperimentInfo>} */ ({
-      [RENDER_ON_IDLE_FIX_EXP.id]: {
+    const experimentInfoList = /** @type {!Array<!../experiments.ExperimentInfo>} */ ([
+      {
+        experimentId: RENDER_ON_IDLE_FIX_EXP.id,
         isTrafficEligible: () => true,
         branches: [
           RENDER_ON_IDLE_FIX_EXP.control,
           RENDER_ON_IDLE_FIX_EXP.experiment,
         ],
       },
-    });
-    randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+    ]);
+    randomlySelectUnsetExperiments(this.win, experimentInfoList);
   }
 
   /**
