@@ -442,7 +442,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         isTrafficEligible: () => true,
         branches: Object.values(ZINDEX_EXP_BRANCHES),
       },
-      [[EXPAND_JSON_TARGETING_EXP.ID]]: {
+      {
+        experimentId: EXPAND_JSON_TARGETING_EXP.ID,
         isTrafficEligible: () => true,
         branches: [
           EXPAND_JSON_TARGETING_EXP.CONTROL,
