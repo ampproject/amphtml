@@ -35,14 +35,15 @@ const EXPERIMENT = {
 };
 
 /**
- * @const {!Object<string, !./experiments.ExperimentInfo>}
+ * @const {!Array<!./experiments.ExperimentInfo>}
  */
-export const EXPERIMENT_INFO_MAP = {
-  [EXPERIMENT_ID]: {
+export const EXPERIMENT_INFO_LIST = [
+  {
+    experimentId: EXPERIMENT_ID,
     isTrafficEligible: () => true,
     branches: [EXPERIMENT.control, EXPERIMENT.experiment],
   },
-};
+];
 
 /**
  * @param {!Window} win
@@ -61,6 +62,6 @@ export function isInAmpdocFieExperiment(win) {
   if (!isExperimentOn(win, 'ampdoc-fie')) {
     return false;
   }
-  randomlySelectUnsetExperiments(win, EXPERIMENT_INFO_MAP);
+  randomlySelectUnsetExperiments(win, EXPERIMENT_INFO_LIST);
   return getExperimentBranch(win, EXPERIMENT_ID) === EXPERIMENT.experiment;
 }
