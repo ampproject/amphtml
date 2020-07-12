@@ -243,5 +243,26 @@ describes.endtoend(
         });
       });
     });
+
+    describe('gotoSlide', function () {
+      it('should go to slide 1', async function () {
+        this.timeout(testTimeout);
+        const goToSlideButton = await controller.findElement('#goToSlide1');
+        const firstSlide = await getSlide(controller, 0);
+
+        // Wait for the first and last slides to load.
+        await waitForCarouselImg(controller, 0);
+        await waitForCarouselImg(controller, SLIDE_COUNT - 1);
+
+        // Press a button to go back to the first slide.
+        await controller.click(goToSlideButton);
+        const slideWidth = await prop(firstSlide, 'offsetWidth');
+
+        await expect(controller.getElementRect(firstSlide)).to.include({
+          x: 0,
+          width: slideWidth,
+        });
+      });
+    });
   }
 );

@@ -30,6 +30,7 @@ import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
+import {isFiniteNumber, toArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {
   isRTL,
@@ -37,7 +38,6 @@ import {
   scopedQuerySelectorAll,
   toggleAttribute,
 } from '../../../src/dom';
-import {toArray} from '../../../src/types';
 
 /**
  * @enum {number}
@@ -448,9 +448,12 @@ class AmpCarousel extends AMP.BaseElement {
       'goToSlide',
       (actionInvocation) => {
         const {args, trust} = actionInvocation;
-        this.carousel_.goToSlide(args['index'] || -1, {
-          actionSource: this.getActionSource_(trust),
-        });
+        this.carousel_.goToSlide(
+          isFiniteNumber(args['index']) ? args['index'] : -1,
+          {
+            actionSource: this.getActionSource_(trust),
+          }
+        );
       },
       ActionTrust.LOW
     );
