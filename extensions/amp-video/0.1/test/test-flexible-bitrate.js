@@ -209,7 +209,7 @@ describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
 
   function causeWait(video, opt_time) {
     callEvent(video, 'waiting');
-    clock.tick(opt_time || 50);
+    clock.tick(opt_time || 100);
   }
 
   function getVideo(rates, opt_types) {

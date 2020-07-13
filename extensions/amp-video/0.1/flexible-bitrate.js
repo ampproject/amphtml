@@ -46,7 +46,7 @@ export function getBitrateManager(win) {
 /**
  * Manages the sources of video elements by bitrate.
  *
- * Expects all sources to have a `data-bittrate` attribute with an integer
+ * Expects all sources to have a `data-bitrate` attribute with an integer
  * value in Kilobits/s.
  *
  * Initializes based on the effective connection type. See BITRATE_BY_EFFECTIVE_TYPE
@@ -144,7 +144,7 @@ export class BitrateManager {
     sources.sort((a, b) => {
       // Biggest first, bitrates above threshold to the back
       return (
-        this.getBitrateForComparisson_(b) - this.getBitrateForComparisson_(a)
+        this.getBitrateForComparison_(b) - this.getBitrateForComparison_(a)
       );
     });
     sources.forEach((source) => {
@@ -159,7 +159,7 @@ export class BitrateManager {
    * @return {number}
    * @private
    */
-  getBitrateForComparisson_(source) {
+  getBitrateForComparison_(source) {
     let rate = source.bitrate_;
     if (rate > this.getAcceptableBitrate_()) {
       // We make bitrates higher than the acceptable rate negative. That means,
@@ -224,7 +224,7 @@ function onNontrivialWait(video, callback) {
     timer = setTimeout(() => {
       unlisten();
       callback();
-    }, 50);
+    }, 100);
   });
 }
 
