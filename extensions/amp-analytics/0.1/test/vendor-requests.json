@@ -95,15 +95,9 @@
   "deepbi": {
 <<<<<<< HEAD
 <<<<<<< HEAD
-<<<<<<< HEAD
     "base": "https://api.deep.bi/v1/pixel/!datasetKey/p.gif?accessKey=!accessKey&gdpr=true&page_href=_source_url_&referrer_href=_document_referrer_&page_title=_title_&deepbiampid=_client_id(deepbi_amp)_&amp=true",
     "pageview": "https://api.deep.bi/v1/pixel/!datasetKey/p.gif?accessKey=!accessKey&gdpr=true&page_href=_source_url_&referrer_href=_document_referrer_&page_title=_title_&deepbiampid=_client_id(deepbi_amp)_&amp=true&event_type=page-open",
     "event": "https://api.deep.bi/v1/pixel/!datasetKey/p.gif?accessKey=!accessKey&gdpr=true&page_href=_source_url_&referrer_href=_document_referrer_&page_title=_title_&deepbiampid=_client_id(deepbi_amp)_&amp=true&event_type=event"
-=======
-    "base": "https://api.deep.bi/v1/pixel/!datasetKey/p.gif?accessKey=!accessKey&gdpr=true&page_href=_source_url_&referrer_href=_document_referrer_&page_title=_title_&amp=true",
-    "pageview": "https://api.deep.bi/v1/pixel/!datasetKey/p.gif?accessKey=!accessKey&gdpr=true&page_href=_source_url_&referrer_href=_document_referrer_&page_title=_title_&amp=true&event_type=page-open",
-    "event": "https://api.deep.bi/v1/pixel/!datasetKey/p.gif?accessKey=!accessKey&gdpr=true&page_href=_source_url_&referrer_href=_document_referrer_&page_title=_title_&amp=true&event_type=event"
->>>>>>> parent of 245530633... Update vendor-requests.json
 =======
     "base": "https://api.deep.bi/v1/pixel/!datasetKey/p.gif?accessKey=!accessKey&gdpr=true&page_href=_source_url_&referrer_href=_document_referrer_&page_title=_title_&amp=true",
     "pageview": "https://api.deep.bi/v1/pixel/!datasetKey/p.gif?accessKey=!accessKey&gdpr=true&page_href=_source_url_&referrer_href=_document_referrer_&page_title=_title_&amp=true&event_type=page-open",
