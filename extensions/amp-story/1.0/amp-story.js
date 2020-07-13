@@ -2184,6 +2184,7 @@ export class AmpStory extends AMP.BaseElement {
       if (
         pageId === this.pages_[0].element.id &&
         this.activePage_ === this.pages_[this.pages_.length - 1] &&
+        this.pages_.length > 1 &&
         !this.viewer_.hasCapability('swipe')
       ) {
         distance = 1;
