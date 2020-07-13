@@ -2035,7 +2035,9 @@ function constructSRARequest_(a4a, instances) {
       googlePageParameters(
         a4a,
         startTime,
-        a4a.experimentIds.includes(ROUND_LOCATION_PARAMS_EXP.EXPERIMENT)
+        instances[0].experimentIds.includes(
+          ROUND_LOCATION_PARAMS_EXP.EXPERIMENT
+        )
       )
     )
     .then((googPageLevelParameters) => {
