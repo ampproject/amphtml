@@ -25,7 +25,7 @@ const {
   extensionBundles,
   verifyExtensionBundles,
 } = require('../compile/bundles.config');
-const {chooseExtension, compileJs, mkdirSync} = require('./helpers');
+const {getMinifiedName, compileJs, mkdirSyn, getMinifiedNamec} = require('./helpers');
 const {endBuildStep, watchDebounceDelay} = require('./helpers');
 const {isTravisBuild} = require('../common/travis');
 const {jsifyCssAsync} = require('./jsify-css');
@@ -550,10 +550,10 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
   const aliasBundle = extensionAliasBundles[name];
   const isAliased = aliasBundle && aliasBundle.version == version;
   if (isAliased) {
-    const src = chooseExtension(
+    const src = getMinifiedName(
       `${name}-${version}${options.minify ? '' : '.max'}.js`
     );
-    const dest = chooseExtension(
+    const dest = getMinifiedName(
       `${name}-${aliasBundle.aliasedVersion}${options.minify ? '' : '.max'}.js`
     );
     fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
