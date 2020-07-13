@@ -46,7 +46,7 @@ async function clean() {
     dryRun: argv.dry_run,
   });
   if (deletedPaths.length > 0) {
-    log(argv.dry_run ? 'Paths that will be deleted:' : 'Deleted paths:');
+    log(argv.dry_run ? "Paths that would've been deleted:" : 'Deleted paths:');
     deletedPaths.forEach((deletedPath) => {
       log('\t' + cyan(path.relative(ROOT_DIR, deletedPath)));
     });
