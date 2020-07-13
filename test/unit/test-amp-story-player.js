@@ -371,25 +371,26 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       );
     });
 
-    it.only('calling mute should set story muted state to true', async () => {
+    it('calling mute should set story muted state to true', async () => {
       buildStoryPlayer();
       await manager.loadPlayers();
+
       await playerEl.mute();
 
-      const response = await fakeMessaging.sendRequest(
-        'getDocumentState',
-        {state: 'MUTED_STATE'}, 
-        true
-      );
-
-      expect(response).to.deep.equal({
-        state: 'MUTED_STATE',
-        value: true,
-      });
+      messagingMock
+        .expects('sendRequest')
+        .withArgs('setDocumentState', {state: 'MUTED_STATE', value: true});
     });
 
     it('calling unmute should set the story muted state to false', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
 
+      await playerEl.unmute();
+
+      messagingMock
+        .expects('sendRequest')
+        .withArgs('setDocumentState', {state: 'MUTED_STATE', value: false});
     });
   });
 });
