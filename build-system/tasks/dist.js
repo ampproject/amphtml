@@ -30,7 +30,6 @@ const {
   printConfigHelp,
   printNobuildHelp,
   toPromise,
-  getMinifiedName,
 } = require('./helpers');
 const {
   createCtrlcHandler,

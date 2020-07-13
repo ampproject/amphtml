@@ -25,7 +25,7 @@ const {
   extensionBundles,
   verifyExtensionBundles,
 } = require('../compile/bundles.config');
-const {getMinifiedName, compileJs, mkdirSyn, getMinifiedNamec} = require('./helpers');
+const {getMinifiedName, compileJs, mkdirSync} = require('./helpers');
 const {endBuildStep, watchDebounceDelay} = require('./helpers');
 const {isTravisBuild} = require('../common/travis');
 const {jsifyCssAsync} = require('./jsify-css');
