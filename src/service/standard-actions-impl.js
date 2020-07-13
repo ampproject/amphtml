@@ -174,12 +174,8 @@ export class StandardActions {
         return this.handleScrollTo_(invocation);
 
       case 'goBack':
-        Services.historyForDoc(this.ampdoc).goBack();
-        return null;
-
-      case 'windowBack':
         Services.historyForDoc(this.ampdoc).goBack(
-          /* canPerformWindowBack */ true
+          /*canPerforWindowBack*/ !!args && args.navigate
         );
         return null;
 
