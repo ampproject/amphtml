@@ -1102,11 +1102,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   registerAllMedia_() {
     if (!this.registerAllMediaPromise_) {
       this.registerAllMediaPromise_ = this.waitForPlaybackMediaLayout_().then(
-        () => {
-          return this.whenAllMediaElements_((mediaPool, mediaEl) => {
-            return this.registerMedia_(mediaPool, mediaEl);
-          });
-        }
+        () => this.whenAllMediaElements_((p, e) => this.registerMedia_(p, e))
       );
     }
 
