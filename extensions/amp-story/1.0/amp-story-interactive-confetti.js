@@ -76,7 +76,9 @@ export function emojiBurst(rootEl, confettiEmoji) {
       );
       particle.textContent = confettiEmoji;
 
-      const fontSize = randomInRange(...FONT_SIZE_RANDOM_RANGE) + 'px';
+      const fontSize =
+        randomInRange(FONT_SIZE_RANDOM_RANGE[0], FONT_SIZE_RANDOM_RANGE[1]) +
+        'px';
       const angle =
         SLICE * i + randomInRange(-ANGLE_RANDOMNESS, ANGLE_RANDOMNESS);
       const clientRect = rootEl.getBoundingClientRect();

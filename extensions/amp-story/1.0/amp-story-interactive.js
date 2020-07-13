@@ -32,9 +32,9 @@ import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {emojiBurst} from './amp-story-interactive-confetti';
 import {getRequestService} from './amp-story-request-service';
 import {toArray} from '../../../src/types';
-import {emojiBurst} from './amp-story-interactive-confetti';
 
 /** @const {string} */
 const TAG = 'amp-story-interactive';
