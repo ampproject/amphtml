@@ -259,7 +259,7 @@ The `amp-story` component represents an entire story. The component itself imple
     <td width="40%"><strong>background-audio [optional]</strong></td>
     <td>A URL to an audio file that plays throughout the story.</td>
   </tr>
-  <tr id="live-story">
+  <tr id="live-story-live-optional">
     <td width="40%"><strong>live-story [optional]</strong></td>
     <td>Enables the <a href="#Live-story">Live story</a> functionality.</td>
   </tr>
