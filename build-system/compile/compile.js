@@ -240,14 +240,19 @@ function compile(
     // the release process automatically. Since this experiment is actually on the
     // build system instead of runtime, we never run it through babel and therefore
     // must compute it here.
-    const STRICT_COMPILATION =
+    const isStrict =
       argv.define_experiment_constant &&
       argv.define_experiment_constant === 'STRICT_COMPILATION';
-    let target = STRICT_COMPILATION ? 'ECMASCRIPT5_STRICT' : 'ECMASCRIPT5';
-    if (argv.esm) {
+    let isEsm = argv.esm;
+    let language;
+    if (isEsm) {
       // Do not transpile down to ES5 if running with `--esm`, since we do
       // limited transpilation in Babel.
-      target = 'NO_TRANSPILE';
+      language = 'NO_TRANSPILE';
+    } else if (isStrict) {
+      language = 'ECMASCRIPT5_STRICT';
+    } else {
+      language = 'ECMASCRIPT5';
     }
 
     /* eslint "google-camelcase/google-camelcase": 0*/
@@ -256,7 +261,7 @@ function compile(
       // Turns on more optimizations.
       assume_function_wrapper: true,
       language_in: 'ECMASCRIPT_2020',
-      language_out: target,
+      language_out: language,
       // We do not use the polyfills provided by closure compiler.
       // If you need a polyfill. Manually include them in the
       // respective top level polyfills.js files.
