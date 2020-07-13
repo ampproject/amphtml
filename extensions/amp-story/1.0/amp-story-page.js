@@ -693,15 +693,13 @@ export class AmpStoryPage extends AMP.BaseElement {
     const mediaPromises = mediaSet.map((mediaEl) => {
       return new Promise((resolve) => {
         switch (mediaEl.tagName.toLowerCase()) {
-          case 'audio': // Already laid out.
-            resolve();
-            break;
           case 'amp-audio':
           case 'amp-video':
             whenUpgradedToCustomElement(mediaEl)
               .then((el) => el.signals().whenSignal(CommonSignals.LOAD_END))
               .then(resolve, resolve);
             break;
+          case 'audio': // Already laid out as built from background-audio attr.
           default:
             // Any other tags should not block loading.
             resolve();

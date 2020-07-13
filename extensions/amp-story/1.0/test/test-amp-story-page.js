@@ -221,10 +221,6 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
 
       let mediaPoolMock;
 
-      env.sandbox
-        .stub(page.resources_, 'getResourceForElement')
-        .returns({isDisplayed: () => true});
-
       page.buildCallback();
       page
         .layoutCallback()
