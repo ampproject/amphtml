@@ -19,5 +19,13 @@
     "beacon": false,
     "xhrpost": false,
     "image": true
+  },
+  "linkers": {
+    "deepbi": {
+      "ids": {
+        "deepbiampid": "CLIENT_ID(deepbiamp)"
+      },
+      "proxyOnly": false
+    }
   }
 }
