@@ -63,8 +63,7 @@
   }
 }
 
-
-.particle-holder {
+.i-amphtml-story-interactive-particle-wrapper {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -76,6 +75,6 @@
   transition: transform .5s cubic-bezier(.3, 0, 0, 1), opacity .5s cubic-bezier(.3, 0, 0, 1);
 }
 
-.particle {
+.i-amphtml-story-interactive-particle {
   position: absolute;
 }
