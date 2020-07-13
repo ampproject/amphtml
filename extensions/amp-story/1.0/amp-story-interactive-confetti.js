@@ -66,6 +66,9 @@ export function emojiBurst(rootEl, confettiEmoji) {
   const ANIMATION_IN_DELAY = 300;
   const ANIMATION_OUT_DELAY = 1000;
 
+  // To calculate particle transform distance.
+  const ROOT_EL_RECT = rootEl./*OK*/ getBoundingClientRect();
+
   let particleWrapper = rootEl.appendChild(buildWrapperTemplate(rootEl));
 
   setTimeout(() => {
@@ -81,9 +84,10 @@ export function emojiBurst(rootEl, confettiEmoji) {
         'px';
       const angle =
         SLICE * i + randomInRange(-ANGLE_RANDOMNESS, ANGLE_RANDOMNESS);
-      const clientRect = rootEl.getBoundingClientRect();
-      const x = Math.sin(angle) * (clientRect.width / 2 + ADDITIONAL_DISTANCE);
-      const y = Math.cos(angle) * (clientRect.height / 2 + ADDITIONAL_DISTANCE);
+      const x =
+        Math.sin(angle) * (ROOT_EL_RECT.width / 2 + ADDITIONAL_DISTANCE);
+      const y =
+        Math.cos(angle) * (ROOT_EL_RECT.height / 2 + ADDITIONAL_DISTANCE);
       const rotation = randomInRange(-ROTATION_RANDOMNESS, ROTATION_RANDOMNESS);
       setStyles(particle, {
         fontSize,
