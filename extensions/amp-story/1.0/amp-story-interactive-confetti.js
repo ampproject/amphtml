@@ -50,11 +50,11 @@ const buildParticleTemplate = (element) => {
  * animates to the edges of the parent element.
  * Nodes are removed from the dom at the end of the animation.
  *
- * @param {!Element} element
+ * @param {!Element} rootEl
  * @param {string} confettiEmoji
  * @return {void}
  */
-export function emojiBurst(element, confettiEmoji) {
+export function emojiBurst(rootEl, confettiEmoji) {
   const PARTICLE_COUNT = 5;
   const SLICE = (Math.PI * 2) / PARTICLE_COUNT;
 
@@ -66,20 +66,20 @@ export function emojiBurst(element, confettiEmoji) {
   const ANIMATION_IN_DELAY = 300;
   const ANIMATION_OUT_DELAY = 1000;
 
-  let particleWrapper = element.appendChild(buildWrapperTemplate(element));
+  let particleWrapper = rootEl.appendChild(buildWrapperTemplate(rootEl));
 
   setTimeout(() => {
     // Generate particles. Set their ending position, size and rotation.
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       const particle = particleWrapper.appendChild(
-        buildParticleTemplate(element)
+        buildParticleTemplate(rootEl)
       );
       particle.textContent = confettiEmoji;
 
       const fontSize = randomInRange(...FONT_SIZE_RANDOM_RANGE) + 'px';
       const angle =
         SLICE * i + randomInRange(-ANGLE_RANDOMNESS, ANGLE_RANDOMNESS);
-      const clientRect = element.getBoundingClientRect();
+      const clientRect = rootEl.getBoundingClientRect();
       const x = Math.sin(angle) * (clientRect.width / 2 + ADDITIONAL_DISTANCE);
       const y = Math.cos(angle) * (clientRect.height / 2 + ADDITIONAL_DISTANCE);
       const rotation = randomInRange(-ROTATION_RANDOMNESS, ROTATION_RANDOMNESS);
@@ -99,7 +99,7 @@ export function emojiBurst(element, confettiEmoji) {
       });
 
       particleWrapper.addEventListener('transitionend', () => {
-        particleWrapper && element.removeChild(particleWrapper);
+        particleWrapper && rootEl.removeChild(particleWrapper);
         // Set to null so removeChild is not fired twice.
         particleWrapper = null;
       });
