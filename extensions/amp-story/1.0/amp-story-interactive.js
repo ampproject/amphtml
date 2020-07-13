@@ -36,6 +36,7 @@ import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {emojiBurst} from './amp-story-interactive-confetti';
 import {getRequestService} from './amp-story-request-service';
 import {toArray} from '../../../src/types';
 
@@ -737,6 +738,11 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     if (this.optionsData_) {
       this.rootEl_.classList.add('i-amphtml-story-interactive-has-data');
       this.updateOptionPercentages_(this.optionsData_);
+    }
+
+    const confettiEmoji = this.options_[selectedOption.optionIndex_].confetti;
+    if (confettiEmoji) {
+      emojiBurst(this.rootEl_, confettiEmoji);
     }
   }
 

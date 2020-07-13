@@ -62,3 +62,19 @@
     background-color: var(--i-amphtml-interactive-theme-shading);
   }
 }
+
+.i-amphtml-story-interactive-particle-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  transform: scale(0);
+  transition: transform .5s var(--i-amphtml-interactive-ease-out-curve), opacity .5s var(--i-amphtml-interactive-ease-out-curve);
+}
+
+.i-amphtml-story-interactive-particle {
+  position: absolute;
+}
