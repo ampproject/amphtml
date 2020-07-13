@@ -23,7 +23,7 @@
   "linkers": {
     "deepbi": {
       "ids": {
-        "deepbiampid": "CLIENT_ID(deepbiamp)"
+        "deepbiampid": "CLIENT_ID(deepbi_amp)"
       },
       "proxyOnly": false,
       "enabled": true
