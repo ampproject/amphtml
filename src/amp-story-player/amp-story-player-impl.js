@@ -32,7 +32,6 @@ import {dict, map} from '../utils/object';
 import {cssText} from '../../build/amp-story-player-iframe.css';
 import {resetStyles, setStyle, setStyles} from '../style';
 import {toArray} from '../types';
-import { dispatch } from '../../extensions/amp-story/1.0/events';
 
 /** @enum {string} */
 const LoadStateClass = {
@@ -653,16 +652,20 @@ export class AmpStoryPlayer {
 
   /**
    * Updates the muted state of the story inside the iframe.
-   * @param {!number} iframeIdx
-   * @param {!boolean} mutedValue
+   * @param {number} iframeIdx
+   * @param {boolean} mutedValue
    * @private
    */
   updateMutedState_(iframeIdx, mutedValue) {
     this.messagingPromises_[iframeIdx].then((messaging) => {
-      messaging.sendRequest('setDocumentState', {state: 'MUTED_STATE', value: mutedValue}, true);
+      messaging.sendRequest(
+        'setDocumentState',
+        {state: 'MUTED_STATE', value: mutedValue},
+        true
+      );
     });
   }
-    
+
   /**
    * React to selectDocument events.
    * @param {!Object} data
