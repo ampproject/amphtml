@@ -921,6 +921,7 @@ exports.extensionBundles = [
     version: '1.0',
     latestVersion: '1.0',
     options: {
+      hasCss: true,
       cssBinaries: [
         'amp-story-interactive',
         'amp-story-interactive-binary-poll',
