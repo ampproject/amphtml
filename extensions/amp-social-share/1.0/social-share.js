@@ -192,12 +192,10 @@ function getQueryString(endpoint) {
  * @return {boolean}
  */
 function isIos() {
-  return (
-    window &&
+  return /** @type {boolean} */ (window &&
     window.navigator &&
     window.navigator.userAgent &&
-    window.navigator.userAgent.search(/iPhone|iPad|iPod/i) >= 0
-  );
+    window.navigator.userAgent.search(/iPhone|iPad|iPod/i) >= 0);
 }
 
 /**
