@@ -25,11 +25,12 @@ const {
   compileCoreRuntime,
   compileJs,
   endBuildStep,
-  chooseExtension,
+  getMinifiedName,
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,
   toPromise,
+  getMinifiedName,
 } = require('./helpers');
 const {
   createCtrlcHandler,
@@ -167,7 +168,7 @@ function buildExperiments() {
       watch: argv.watch,
       minify: true,
       includePolyfills: true,
-      minifiedName: chooseExtension('experiments.js'),
+      minifiedName: getMinifiedName('experiments.js'),
       esmPassCompilation: argv.esm || false,
     }
   );
@@ -208,7 +209,7 @@ async function buildWebPushPublisherFiles() {
     WEB_PUSH_PUBLISHER_FILES.forEach((fileName) => {
       const tempBuildDir = `build/all/amp-web-push-${version}/`;
       const builtName = fileName + '.js';
-      const minifiedName = chooseExtension(fileName + '.js');
+      const minifiedName = getMinifiedName(fileName + '.js');
       const p = compileJs('./' + tempBuildDir, builtName, './' + distDir, {
         watch: argv.watch,
         includePolyfills: true,
@@ -299,7 +300,7 @@ function postBuildWebPushPublisherFilesVersion() {
   WEB_PUSH_PUBLISHER_VERSIONS.forEach((version) => {
     const basePath = `extensions/amp-web-push/${version}/`;
     WEB_PUSH_PUBLISHER_FILES.forEach((fileName) => {
-      const minifiedName = chooseExtension(fileName + '.js');
+      const minifiedName = getMinifiedName(fileName + '.js');
       if (!fs.existsSync(distDir + '/' + minifiedName)) {
         throw new Error(`Cannot find ${distDir}/${minifiedName}`);
       }
