@@ -50,6 +50,7 @@ export class AmpViralizePlayer extends AMP.BaseElement {
       this.element.getAttribute('data-extra') || '{}'
     );
     this.extraParams_['vip_mode'] = 'no';
+    this.extraParams_['location'] = 'inline';
   }
 
   /** @override */

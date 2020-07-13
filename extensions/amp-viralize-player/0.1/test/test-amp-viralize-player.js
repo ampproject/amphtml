@@ -170,5 +170,67 @@ describes.realWin(
       await layoutPromise;
       expect(element.querySelector('script').src).to.contain(`u=viralize.com`);
     });
+
+    it('should set vip_mode param to `no`, when not specified in data-extra', async () => {
+      const element = appendNewViralizeElement({
+        layout: 'responsive',
+        'data-zid': 'a-zid-value',
+        height: 180,
+        width: 320,
+      });
+      await element.build();
+      const layoutPromise = element.layoutCallback();
+      const simulateEvent = viralizeVPTMock(win);
+      simulateEvent(win.vpt.EVENTS.AD_SESSION_START);
+      await layoutPromise;
+      expect(element.querySelector('script').src).to.contain(`vip_mode=no`);
+    });
+
+    it('should force vip_mode param to `no`, if a distinct value is specified', async () => {
+      const element = appendNewViralizeElement({
+        layout: 'responsive',
+        'data-zid': 'a-zid-value',
+        height: 180,
+        width: 320,
+        'data-extra': '{"vip_mode": "always"}',
+      });
+      await element.build();
+      const layoutPromise = element.layoutCallback();
+      const simulateEvent = viralizeVPTMock(win);
+      simulateEvent(win.vpt.EVENTS.AD_SESSION_START);
+      await layoutPromise;
+      expect(element.querySelector('script').src).to.contain(`vip_mode=no`);
+    });
+
+    it('should set location param to `inline`, when not specified in data-extra', async () => {
+      const element = appendNewViralizeElement({
+        layout: 'responsive',
+        'data-zid': 'a-zid-value',
+        height: 180,
+        width: 320,
+      });
+      await element.build();
+      const layoutPromise = element.layoutCallback();
+      const simulateEvent = viralizeVPTMock(win);
+      simulateEvent(win.vpt.EVENTS.AD_SESSION_START);
+      await layoutPromise;
+      expect(element.querySelector('script').src).to.contain(`location=inline`);
+    });
+
+    it('should force location param to `inline`, if a distinct value is specified', async () => {
+      const element = appendNewViralizeElement({
+        layout: 'responsive',
+        'data-zid': 'a-zid-value',
+        height: 180,
+        width: 320,
+        'data-extra': '{"location": "auto"}',
+      });
+      await element.build();
+      const layoutPromise = element.layoutCallback();
+      const simulateEvent = viralizeVPTMock(win);
+      simulateEvent(win.vpt.EVENTS.AD_SESSION_START);
+      await layoutPromise;
+      expect(element.querySelector('script').src).to.contain(`location=inline`);
+    });
   }
 );
