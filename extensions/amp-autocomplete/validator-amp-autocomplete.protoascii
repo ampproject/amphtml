@@ -63,6 +63,7 @@ tags: {  # <amp-autocomplete>
   attrs: { name: "inline" }
   attrs: { name: "items" }
   attrs: { name: "max-entries" }
+  attrs: { name: "max-items" }
   attrs: { name: "min-characters" }
   attrs: {
     name: "query"
@@ -87,7 +88,7 @@ tags: {  # <amp-autocomplete>
     name: "[src]"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-autocomplete"
+  spec_url: "https://amp.dev/documentation/components/amp-autocomplete/"
   amp_layout: {
     supported_layouts: CONTAINER
   }
@@ -105,6 +106,7 @@ tags: {  # <amp-autocomplete>
   attrs: { name: "inline" }
   attrs: { name: "items" }
   attrs: { name: "max-entries" }
+  attrs: { name: "max-items" }
   attrs: { name: "min-characters" }
   attrs: {
     name: "query"

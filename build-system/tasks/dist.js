@@ -38,11 +38,6 @@ const {
 const {
   displayLifecycleDebugging,
 } = require('../compile/debug-compilation-lifecycle');
-const {
-  distNailgunPort,
-  startNailgunServer,
-  stopNailgunServer,
-} = require('./nailgun');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
@@ -111,7 +106,6 @@ async function runPreDistSteps(options) {
   await copyCss();
   await copyParsers();
   await bootstrapThirdPartyFrames(options);
-  await startNailgunServer(distNailgunPort, /* detached */ false);
   displayLifecycleDebugging();
 }
 
@@ -150,13 +144,9 @@ async function doDist(extraArgs = {}) {
     await compileAllJs(options);
     await buildExtensions(options);
   }
-  if (!argv.watch) {
-    await stopNailgunServer(distNailgunPort);
-  }
 
   if (!argv.core_runtime_only) {
     await formatExtractedMessages();
-    await generateFileListing();
   }
   if (!argv.watch) {
     exitCtrlcHandler(handlerProcess);
@@ -269,39 +259,6 @@ function copyParsers() {
   return fs.copy('build/parsers', 'dist/v0').then(() => {
     endBuildStep('Copied', 'build/parsers/ to dist/v0', startTime);
   });
-}
-
-/**
- * Obtain a recursive file listing of a directory
- * @param {string} dest - Directory to be scanned
- * @return {Array} - All files found in directory
- */
-async function walk(dest) {
-  const filelist = [];
-  const files = await fs.readdir(dest);
-
-  for (let i = 0; i < files.length; i++) {
-    const file = `${dest}/${files[i]}`;
-
-    fs.statSync(file).isDirectory()
-      ? Array.prototype.push.apply(filelist, await walk(file))
-      : filelist.push(file);
-  }
-
-  return filelist;
-}
-
-/**
- * Generate a listing of all files in dist/ and save as dist/files.txt
- */
-async function generateFileListing() {
-  const startTime = Date.now();
-  const distDir = 'dist';
-  const filesOut = `${distDir}/files.txt`;
-  fs.writeFileSync(filesOut, '');
-  const files = (await walk(distDir)).map((f) => f.replace(`${distDir}/`, ''));
-  fs.writeFileSync(filesOut, files.join('\n') + '\n');
-  endBuildStep('Generated', filesOut, startTime);
 }
 
 /**
@@ -468,8 +425,6 @@ dist.flags = {
   noextensions: '  Builds with no extensions.',
   core_runtime_only: '  Builds only the core runtime.',
   full_sourcemaps: '  Includes source code content in sourcemaps',
-  disable_nailgun:
-    "  Doesn't use nailgun to invoke closure compiler (much slower)",
   sourcemap_url: '  Sets a custom sourcemap URL with placeholder {version}',
   type: '  Points sourcemap to fetch files from the correct GitHub tag',
   esm: '  Does not transpile down to ES5',

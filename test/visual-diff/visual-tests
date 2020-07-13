@@ -183,6 +183,10 @@
       "interactive_tests": "examples/visual-tests/font.amp.404/font.amp.js"
     },
     {
+      "url": "examples/visual-tests/css.amp/css.amp.html",
+      "name": "unbuilt css",
+    },
+    {
       "url": "examples/visual-tests/article.amp/article.amp.html",
       "name": "AMP Article",
       "loading_complete_selectors": [
@@ -666,8 +670,8 @@
       ],
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-reaction-quiz-sizing-positioning.html",
-      "name": "amp-story-reaction-quiz: sizing and positioning",
+      "url": "examples/visual-tests/amp-story/amp-story-interactive-quiz-sizing-positioning.html",
+      "name": "amp-story-interactive-quiz: sizing and positioning",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",

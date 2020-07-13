@@ -216,7 +216,7 @@ export class ConsentUI {
         this.parent_,
         promptUISrc
       );
-      this.ui_ = this.createPromptIframe_();
+      this.ui_ = this.createPromptIframe_(promptUISrc);
       this.placeholder_ = this.createPlaceholder_();
       this.clientConfig_ = config['clientConfig'] || null;
     }
@@ -229,6 +229,10 @@ export class ConsentUI {
   show(isActionPromptTrigger) {
     if (!this.ui_) {
       // No prompt UI specified, nothing to do
+      return;
+    }
+    if (this.isPostPrompt_ && !this.parent_.contains(this.ui_)) {
+      toggle(this.ui_, true);
       return;
     }
     toggle(dev().assertElement(this.parent_), true);
@@ -422,12 +426,13 @@ export class ConsentUI {
 
   /**
    * Create the iframe if promptUISrc is valid
+   * @param {string} promptUISrc
    * @return {!Element}
    */
-  createPromptIframe_() {
+  createPromptIframe_(promptUISrc) {
     const iframe = this.parent_.ownerDocument.createElement('iframe');
     const sandbox = ['allow-scripts', 'allow-popups'];
-    const allowSameOrigin = this.allowSameOrigin_(iframe.src);
+    const allowSameOrigin = this.allowSameOrigin_(promptUISrc);
     if (allowSameOrigin) {
       sandbox.push('allow-same-origin');
     }
@@ -447,7 +452,6 @@ export class ConsentUI {
     const urlService = Services.urlForDoc(this.parent_);
     const srcUrl = urlService.parse(src);
     const containerUrl = urlService.parse(this.ampdoc_.getUrl());
-
     return srcUrl.origin != containerUrl.origin;
   }
 

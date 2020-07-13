@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import {AmpStoryComponentManager} from './amp-story-component-manager';
 import {AmpStoryPlayer} from './amp-story-player-impl';
-import {AmpStoryPlayerManager} from './amp-story-player-manager';
 
 self.onload = () => {
-  const manager = new AmpStoryPlayerManager(self);
+  const manager = new AmpStoryComponentManager(self);
   manager.loadPlayers();
 };
 

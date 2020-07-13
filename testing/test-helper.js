@@ -143,8 +143,8 @@ export function assertScreenReaderElement(element, {index = 0} = {}) {
   expect(computedStyle.getPropertyValue('visibility')).to.equal('visible');
 }
 
-// Use a browserId to avoid cross-browser race conditions
-// when testing in Saucelabs.
+// Use a browserId to avoid cross-browser race conditions.
+// TODO(amphtml): Remove browserId now that we no longer test on Sauce Labs.
 /** @const {string} */
 const browserId = (Date.now() + Math.random()).toString(32);
 
@@ -183,7 +183,9 @@ export class RequestBank {
    */
   static withdraw(requestId) {
     const url = `${REQUEST_URL}/withdraw/${requestId}/`;
-    return this.fetch_(url, 'withdraw').then((res) => res.json());
+    return this.fetch_(url, `withdraw(${requestId ?? ''})`).then((res) =>
+      res.json()
+    );
   }
 
   static tearDown() {

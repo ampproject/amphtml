@@ -327,12 +327,8 @@ _Example_: Displays a prompt user interface on an AMP Story
 <amp-consent layout="nodisplay" id="consent-element">
   <script type="application/json">
     {
-      "consents": {
-        "my-consent": {
-          "checkConsentHref": "https://foo.com/api/show-consent",
-          "promptUI": "consent-ui"
-        }
-      }
+      "checkConsentHref": "https://foo.com/api/show-consent",
+      "promptUI": "consent-ui"
     }
   </script>
   <amp-story-consent id="consent-ui" layout="nodisplay">
@@ -380,7 +376,7 @@ window.parent.postMessage(
 
 ### Post-prompt UI (optional)
 
-You can provide a UI after collecting the initial consent. For example, you can provide a UI for the user to manage their consent (e.g., change their "reject" to "accept"). The post-prompt UI is defined with the `<amp-consent>` JSON configuration object. The `postPromptUI` refers to a child element of `<amp-consent>` by id.
+You can provide a UI after collecting the initial consent. For example, you can provide a UI for the user to manage their consent (e.g., change their "reject" to "accept"). The post-prompt UI is defined with the `<amp-consent>` JSON configuration object. The `postPromptUI` refers to an element by id. If the element is a child element of the `<amp-consent>`, it will be fixed to the bottom of the page same as prompt UIs. You can also inline the `postPromptUI` in the document, but please be aware of the potential layout shift caused by toggling the display of this element.
 
 When defined, the post-prompt UI is shown when all prompt UIs have been hidden, or initially on page load if no prompt UI was triggered.
 
@@ -616,6 +612,11 @@ You can use the response of `checkConsentHref` to show a consent to the user if 
 ##### Can amp-geo work with amp-consent so that it only shows consent for a user that's accessing my content from a certain country?
 
 Yes. See example [here](https://amp.dev/documentation/examples/user-consent/geolocation-based_consent_flow/).
+
+##### Does AMP support the IAB TCF?
+
+AMP supports popular transparency consent frameworks including the IAB TCF v1, TCF v2 and the IAB US Privacy String.
+Please check with your consent management platform (CMP) and ad networks on their AMP support. AMP will read and pass the strings passed by the frameworks (IAB TCF v1, TCF v2 and the IAB US Privacy String) when received by CMPs/ad networks.
 
 ##### I can't see feature X being supported, what can I do?
 

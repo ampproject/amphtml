@@ -20,38 +20,13 @@ const fs = require('fs');
 const log = require('fancy-log');
 const opn = require('opn');
 const path = require('path');
-const {
-  reportTestErrored,
-  reportTestFinished,
-  reportTestRunComplete,
-} = require('../report-test-status');
 const {green, yellow, cyan} = require('ansi-colors');
 const {isTravisBuild} = require('../../common/travis');
+const {reportTestRunComplete} = require('../report-test-status');
 const {Server} = require('karma');
 
-// Number of Sauce Lab browsers. Three was determined to be the lowest number we
-// could set without causing a significant increase in Travis job time. See
-// https://github.com/ampproject/amphtml/pull/27016 for the relevant discussion.
-const BATCHSIZE = 3;
 const CHROMEBASE = argv.chrome_canary ? 'ChromeCanary' : 'Chrome';
 const chromeFlags = [];
-
-/**
- * Validates arguments before test runs
- * @return {boolean}
- */
-function shouldNotRun() {
-  if (argv.saucelabs) {
-    if (!process.env.SAUCE_USERNAME) {
-      throw new Error('Missing SAUCE_USERNAME Env variable');
-    }
-    if (!process.env.SAUCE_ACCESS_KEY) {
-      throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
-    }
-  }
-
-  return false;
-}
 
 /**
  * Returns an array of ad types.
@@ -108,7 +83,6 @@ function maybePrintArgvMessages() {
     edge: 'Running tests on Edge.',
     // eslint-disable-next-line
     chrome_canary: 'Running tests on Chrome Canary.',
-    saucelabs: 'Running tests on Sauce Labs browsers.',
     nobuild: 'Skipping build.',
     watch:
       'Enabling watch mode. Editing and saving a file will cause the' +
@@ -216,160 +190,7 @@ function karmaBrowsersReady_() {
  * @private
  */
 function karmaRunStart_() {
-  if (!argv.saucelabs) {
-    log(green('Running tests locally...'));
-  }
-}
-
-/**
- * Runs tests in Sauce Labs in batches.
- *
- * If --stable is provided, runs tests only on stable browsers in Sauce Labs.
- * If --beta is provided, runs tests only on beta browsers in Sauce Labs. Does not fail the build.
- * If neither --stable nor --beta are provided, runs test on all browsers in Sauce Labs.
- *
- * @param {Object} config karma config
- * @return {!Promise<number>} exitCode
- */
-async function runTestInSauceLabs(config) {
-  const flagSet = argv.stable || argv.beta;
-  const useStable = argv.stable || !flagSet;
-  const useBeta = argv.beta || !flagSet;
-
-  const isBeta = (browserId) => browserId.toLowerCase().endsWith('_beta');
-  const isStable = (browserId) => !isBeta(browserId);
-
-  return await runTestInBatches_(config, {
-    beta: useBeta ? config.browsers.filter(isBeta) : [],
-    stable: useStable ? config.browsers.filter(isStable) : [],
-  });
-}
-
-/**
- * Runs tests in batches.
- *
- * Splits stable and beta browsers to separate batches. Test failures in any
- * of the stable browsers will return an exit code of 1, whereas test failures
- * in any of the beta browsers will only print error messages, but will return
- * an exit code of 0.
- *
- * @param {Object} config karma config
- * @param {!Array<string>} browsers browsers
- * @return {number} exitCode
- * @private
- */
-async function runTestInBatches_(config, browsers) {
-  let errored = false;
-  let totalSuccess = 0;
-  let totalFailed = 0;
-  const partialTestRunCompleteFn = async (browsers, results) => {
-    if (results.error) {
-      errored = true;
-    } else {
-      totalSuccess += results.success;
-      totalFailed += results.failed;
-    }
-  };
-
-  const reportResults = async () => {
-    if (errored) {
-      await reportTestErrored();
-    } else {
-      await reportTestFinished(totalSuccess, totalFailed);
-    }
-  };
-
-  if (browsers.stable.length) {
-    const allBatchesExitCodes = await runTestInBatchesWithBrowsers_(
-      'stable',
-      browsers.stable,
-      config,
-      partialTestRunCompleteFn
-    );
-    if (allBatchesExitCodes || errored) {
-      await reportResults();
-      log(
-        yellow('Some tests have failed on'),
-        cyan('stable'),
-        yellow('browsers, so skipping running them on'),
-        cyan('beta'),
-        yellow('browsers.')
-      );
-      return allBatchesExitCodes || Number(errored);
-    }
-  }
-
-  if (browsers.beta.length) {
-    const allBatchesExitCodes = await runTestInBatchesWithBrowsers_(
-      'beta',
-      browsers.beta,
-      config,
-      partialTestRunCompleteFn
-    );
-    if (allBatchesExitCodes) {
-      log(
-        yellow('Some tests have failed on'),
-        cyan('beta'),
-        yellow('browsers.')
-      );
-      log(
-        yellow('This is not currently a fatal error, but will become an'),
-        yellow('error once the beta browsers are released as next stable'),
-        yellow('version!')
-      );
-    }
-  }
-
-  await reportResults();
-  return 0;
-}
-
-/**
- * Runs tests in named batch(es), with the specified browsers.
- *
- * @param {string} batchName a human readable name for the batch.
- * @param {!Array{string}} browsers list of SauceLabs browsers as
- *     customLaunchers IDs. *
- * @param {Object} config karma config
- * @param {function()} runCompleteFn a function to execute on the
- *     `run_complete` event. It should take two arguments, (browser, results),
- *     and return nothing.
- * @return {number} processExitCode
- * @private
- */
-async function runTestInBatchesWithBrowsers_(
-  batchName,
-  browsers,
-  config,
-  runCompleteFn
-) {
-  let batch = 1;
-  let startIndex = 0;
-  let endIndex = BATCHSIZE;
-  const batchExitCodes = [];
-
-  log(
-    green('Running tests on'),
-    cyan(browsers.length),
-    green('Sauce Labs'),
-    cyan(batchName),
-    green('browser(s)...')
-  );
-  while (startIndex < endIndex) {
-    const configBatch = {...config};
-    configBatch.browsers = browsers.slice(startIndex, endIndex);
-    log(
-      green('Batch'),
-      cyan(`#${batch}`) + green(':'),
-      cyan(configBatch.browsers.join(', '))
-    );
-    batchExitCodes.push(await createKarmaServer(configBatch, runCompleteFn));
-    startIndex = batch * BATCHSIZE;
-    batch++;
-    endIndex = Math.min(batch * BATCHSIZE, browsers.length);
-  }
-
-  return batchExitCodes.every((exitCode) => exitCode == 0) ? 0 : 1;
+  log(green('Running tests locally...'));
 }
 
 /**
@@ -409,6 +230,4 @@ module.exports = {
   createKarmaServer,
   getAdTypes,
   maybePrintArgvMessages,
-  runTestInSauceLabs,
-  shouldNotRun,
 };

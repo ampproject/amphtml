@@ -20,9 +20,12 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
-import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../src/ampdoc-fie';
+import {EXPERIMENT_INFO_LIST as AMPDOC_FIE_EXPERIMENT_INFO_LIST} from '../../../src/ampdoc-fie';
+import {AdsenseSharedState} from './adsense-shared-state';
+import {AmpA4A, NO_SIGNING_EXP} from '../../amp-a4a/0.1/amp-a4a';
+import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
+import {Navigation} from '../../../src/service/navigation';
 import {
-  AMP_AD_NO_CENTER_CSS_EXP,
   QQID_HEADER,
   RENDER_ON_IDLE_FIX_EXP,
   SANDBOX_HEADER,
@@ -40,11 +43,6 @@ import {
   isReportingEnabled,
   maybeAppendErrorParameter,
 } from '../../../ads/google/a4a/utils';
-import {AdsenseSharedState} from './adsense-shared-state';
-import {AmpA4A, NO_SIGNING_EXP} from '../../amp-a4a/0.1/amp-a4a';
-import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {FIE_INIT_CHUNKING_EXP} from '../../../src/friendly-iframe-embed';
-import {Navigation} from '../../../src/service/navigation';
 import {ResponsiveState} from './responsive-state';
 import {Services} from '../../../src/services';
 import {
@@ -57,13 +55,9 @@ import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {getAmpAdRenderOutsideViewport} from '../../amp-ad/0.1/concurrent-load';
 import {getData} from '../../../src/event-helper';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
-import {
-  getExperimentBranch,
-  isExperimentOn,
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
+import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {removeElement} from '../../../src/dom';
 import {stringHash32} from '../../../src/string';
 import {utf8Decode} from '../../../src/utils/bytes';
@@ -85,9 +79,6 @@ const sharedState = new AdsenseSharedState();
 export function resetSharedState() {
   sharedState.reset();
 }
-
-/** @type {string} */
-const FORMAT_EXP = 'as-use-attr-for-format';
 
 /** @final */
 export class AmpAdNetworkAdsenseImpl extends AmpA4A {
@@ -219,50 +210,33 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    * @visibleForTesting
    */
   divertExperiments() {
-    const experimentInfoMap = /** @type {!Object<string,
-        !../../../src/experiments.ExperimentInfo>} */ ({
-      [FORMAT_EXP]: {
-        isTrafficEligible: () =>
-          !this.responsiveState_ &&
-          Number(this.element.getAttribute('width')) > 0 &&
-          Number(this.element.getAttribute('height')) > 0,
-        branches: ['21062003', '21062004'],
-      },
-      [AMP_AD_NO_CENTER_CSS_EXP.id]: {
+    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
+      {
+        experimentId: RENDER_ON_IDLE_FIX_EXP.id,
         isTrafficEligible: () => true,
         branches: [
-          AMP_AD_NO_CENTER_CSS_EXP.control,
-          AMP_AD_NO_CENTER_CSS_EXP.experiment,
+          RENDER_ON_IDLE_FIX_EXP.control,
+          RENDER_ON_IDLE_FIX_EXP.experiment,
         ],
       },
-      [[FIE_INIT_CHUNKING_EXP.id]]: {
+      {
+        experimentId: NO_SIGNING_EXP.id,
+        isTrafficEligible: () => true,
+        branches: [NO_SIGNING_EXP.control, NO_SIGNING_EXP.experiment],
+      },
+      {
+        experimentId: STICKY_AD_PADDING_BOTTOM_EXP.id,
         isTrafficEligible: () => true,
         branches: [
-          [FIE_INIT_CHUNKING_EXP.control],
-          [FIE_INIT_CHUNKING_EXP.experiment],
+          STICKY_AD_PADDING_BOTTOM_EXP.control,
+          STICKY_AD_PADDING_BOTTOM_EXP.experiment,
         ],
       },
-      [[RENDER_ON_IDLE_FIX_EXP.id]]: {
-        isTrafficEligible: () => true,
-        branches: [
-          [RENDER_ON_IDLE_FIX_EXP.control],
-          [RENDER_ON_IDLE_FIX_EXP.experiment],
-        ],
-      },
-      [NO_SIGNING_EXP.id]: {
-        isTrafficEligible: () => true,
-        branches: [[NO_SIGNING_EXP.control], [NO_SIGNING_EXP.experiment]],
-      },
-      [STICKY_AD_PADDING_BOTTOM_EXP.id]: {
-        isTrafficEligible: () => true,
-        branches: [
-          [STICKY_AD_PADDING_BOTTOM_EXP.control],
-          [STICKY_AD_PADDING_BOTTOM_EXP.experiment],
-        ],
-      },
-      ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
-    });
-    const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+    ]).concat(AMPDOC_FIE_EXPERIMENT_INFO_LIST);
+    const setExps = randomlySelectUnsetExperiments(
+      this.win,
+      experimentInfoList
+    );
     Object.keys(setExps).forEach((expName) =>
       addExperimentIdToElement(setExps[expName], this.element)
     );
@@ -307,19 +281,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const adTestOn =
       this.element.getAttribute('data-adtest') ||
       isInManualExperiment(this.element);
+
+    // By default, the ad uses full-width. It will be overwritten
+    // if the publisher uses fixed size tag or it's converted to container-width.
+    this.size_ = this.getIntersectionElementLayoutBox();
     const width = Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('height'));
-
-    if (
-      this.responsiveState_ != null &&
-      this.responsiveState_.isContainerWidthState()
-    ) {
+    if (!isNaN(width) && !isNaN(height)) {
       this.size_ = {width, height};
-    } else {
-      this.size_ =
-        getExperimentBranch(this.win, FORMAT_EXP) == '21062004'
-          ? {width, height}
-          : this.getIntersectionElementLayoutBox();
     }
 
     const sizeToSend = this.isSinglePageStoryAd
@@ -545,18 +514,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       height: `${this.size_.height}px`,
     });
 
-    // Set the centering CSS if the experiment is off
-    if (
-      !isExperimentOn(this.win, 'amp-ad-no-center-css') ||
-      getExperimentBranch(this.win, AMP_AD_NO_CENTER_CSS_EXP.id) ===
-        AMP_AD_NO_CENTER_CSS_EXP.control
-    ) {
-      setStyles(dev().assertElement(this.iframe), {
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-      });
-    }
     if (this.qqid_) {
       this.element.setAttribute('data-google-query-id', this.qqid_);
     }

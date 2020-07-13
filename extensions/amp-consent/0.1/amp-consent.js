@@ -245,15 +245,14 @@ export class AmpConsent extends AMP.BaseElement {
       this.handleAction_(ACTION_TYPE.DISMISS);
     });
 
-    this.registerAction('prompt', () => {
-      this.scheduleDisplay_(true);
-    });
+    this.registerAction('prompt', (invocation) =>
+      this.handleReprompt_(invocation)
+    );
 
     this.enableExternalInteractions_();
   }
 
   /**
-   * TODO(micajuineho) add gdprApplies here
    * Listen to external consent flow iframe's response
    * with consent string and metadata.
    */
@@ -434,11 +433,23 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
+   * Handle the prompt action to re-prompt.
+   * Accpet arg expireCache=true
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   */
+  handleReprompt_(invocation) {
+    const {args} = invocation;
+    if (args && args['expireCache'] === true) {
+      this.consentStateManager_.setDirtyBit();
+    }
+    this.scheduleDisplay_(true);
+  }
+
+  /**
    * Init the amp-consent by registering and initiate consent instance.
    */
   init_() {
     this.passSharedData_();
-    this.setGdprApplies();
     this.syncRemoteConsentState_();
 
     this.getConsentRequiredPromise_()
@@ -502,30 +513,6 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
-   * Create and set gdprApplies promise form consent manager.
-   * Default value to remote `consentRequired`, if no
-   * `gdprApplies` value is provided.
-   *
-   * TODO(micajuinho) remove this method (and subsequent methods
-   * in consent-state-manager) in favor of consolidation with
-   * consentString
-   */
-  setGdprApplies() {
-    const responsePromise = this.getConsentRemote_();
-    const gdprAppliesPromise = responsePromise.then((response) => {
-      if (!response) {
-        return null;
-      }
-      const gdprApplies = response['gdprApplies'];
-      return gdprApplies === undefined || typeof gdprApplies !== 'boolean'
-        ? response['consentRequired']
-        : gdprApplies;
-    });
-
-    this.consentStateManager_.setConsentInstanceGdprApplies(gdprAppliesPromise);
-  }
-
-  /**
    * Clear cache for server side decision and then sync.
    */
   syncRemoteConsentState_() {
@@ -540,8 +527,6 @@ export class AmpConsent extends AMP.BaseElement {
         this.consentStateManager_.setDirtyBit();
       }
 
-      // TODO(micajuineho) When we consolidate, add gdprApplies field
-      // to be set with consentString.
       // Decision from promptUI takes precedence over consent decision from response
       if (
         !!response['consentRequired'] &&
@@ -741,7 +726,8 @@ export class AmpConsent extends AMP.BaseElement {
     assertMetadataValues(opt_metadata);
     return constructMetadata(
       opt_metadata['consentStringType'],
-      opt_metadata['additionalConsent']
+      opt_metadata['additionalConsent'],
+      opt_metadata['gdprApplies']
     );
   }
 }

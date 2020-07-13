@@ -197,9 +197,31 @@ function gitCherryMaster() {
  * @return {string}
  */
 function gitCommitFormattedTime(ref = 'HEAD') {
+  const envPrefix = process.platform == 'win32' ? 'set TZ=UTC &&' : 'TZ=UTC';
   return getStdout(
-    `TZ=UTC git log ${ref} -1 --pretty="%cd" --date=format-local:%y%m%d%H%M%S`
+    `${envPrefix} git log ${ref} -1 --pretty="%cd" --date=format-local:%y%m%d%H%M%S`
   ).trim();
+}
+
+/**
+ * Returns the commit message of a given ref.
+ * @param {string} ref a Git reference (commit SHA, branch name, etc.) for the
+ *   commit to get the time of.
+ * @return {string}
+ */
+function gitCommitMessage(ref = 'HEAD') {
+  return getStdout(`git log ${ref} -n 1 --pretty="%B"`);
+}
+
+/**
+ * Checks if a branch contains a specific ref.
+ * @param {string} ref a Git reference (commit SHA, branch name, etc.) for the
+ *   commit to get the time of.
+ * @param {string} branch the branch to check.
+ * @return {boolean}
+ */
+function gitBranchContains(ref, branch = 'master') {
+  return Boolean(getStdout(`git branch ${branch} --contains ${ref}`).trim());
 }
 
 /**
@@ -233,11 +255,13 @@ function gitDiffPath(path, commit) {
 }
 
 module.exports = {
+  gitBranchContains,
   gitBranchCreationPoint,
   gitBranchName,
   gitCherryMaster,
   gitCommitFormattedTime,
   gitCommitHash,
+  gitCommitMessage,
   gitCommitterEmail,
   gitDiffAddedNameOnlyMaster,
   gitDiffColor,

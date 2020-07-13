@@ -201,6 +201,7 @@ import {nend} from '../ads/nend';
 import {netletix} from '../ads/netletix';
 import {noddus} from '../ads/noddus';
 import {nokta} from '../ads/nokta';
+import {oblivki} from '../ads/oblivki';
 import {onead} from '../ads/onead';
 import {onnetwork} from '../ads/onnetwork';
 import {openadstream} from '../ads/openadstream';
@@ -228,6 +229,7 @@ import {rbinfox} from '../ads/rbinfox';
 import {readmo} from '../ads/readmo';
 import {realclick} from '../ads/realclick';
 import {recomad} from '../ads/recomad';
+import {recreativ} from '../ads/recreativ';
 import {relap} from '../ads/relap';
 import {relappro} from '../ads/relappro';
 import {revcontent} from '../ads/revcontent';
@@ -333,6 +335,7 @@ const AMP_EMBED_ALLOWED = {
   pubexchange: true,
   rbinfox: true,
   readmo: true,
+  recreativ: true,
   runative: true,
   smartclip: true,
   smi2: true,
@@ -506,6 +509,7 @@ register('netletix', netletix);
 register('noddus', noddus);
 register('nokta', nokta);
 register('nws', nws);
+register('oblivki', oblivki);
 register('onead', onead);
 register('onnetwork', onnetwork);
 register('openadstream', openadstream);
@@ -534,6 +538,7 @@ register('readmo', readmo);
 register('realclick', realclick);
 register('reddit', reddit);
 register('recomad', recomad);
+register('recreativ', recreativ);
 register('relap', relap);
 register('relappro', relappro);
 register('revcontent', revcontent);

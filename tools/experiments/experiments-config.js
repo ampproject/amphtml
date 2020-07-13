@@ -86,12 +86,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3824',
   },
   {
-    id: 'amp-share-tracking',
-    name: 'AMP Share Tracking',
-    spec: 'https://github.com/ampproject/amphtml/issues/3135',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5167',
-  },
-  {
     id: 'amp-viz-vega',
     name: 'AMP Visualization using Vega grammar',
     spec: 'https://github.com/ampproject/amphtml/issues/3991',
@@ -157,10 +151,6 @@ export const EXPERIMENTS = [
   {
     id: 'jank-meter',
     name: 'Display jank meter',
-  },
-  {
-    id: 'as-use-attr-for-format',
-    name: 'Use slot width/height attribute for AdSense size format',
   },
   {
     id: 'input-debounced',
@@ -314,16 +304,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/28435',
   },
   {
-    id: 'amp-ad-no-center-css',
-    name: 'Removing the centering css rule for amp-ad',
-    spec: 'https://github.com/ampproject/amphtml/issues/27095',
-  },
-  {
-    id: 'fie-init-chunking',
-    name: 'More chunking for friendly iframe initialization',
-    spec: 'https://github.com/ampproject/amphtml/issues/27584',
-  },
-  {
     id: 'a4a-no-signing',
     name: 'Remove signing requirement for AMPHTML ads',
     spec: 'https://github.com/ampproject/amphtml/issues/27189',
@@ -332,5 +312,10 @@ export const EXPERIMENTS = [
     id: 'sticky-ad-padding-bottom',
     name: 'Add a bottom padding for edgeless iPhones',
     spec: 'https://github.com/ampproject/amphtml/issues/22251',
+  },
+  {
+    id: 'expand-json-targeting',
+    name: 'Allow CLIENT_ID in doubleclick json targeting feature',
+    spec: 'https://github.com/ampproject/amphtml/issues/25190',
   },
 ];

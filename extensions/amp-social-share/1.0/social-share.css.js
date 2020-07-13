@@ -54,6 +54,3 @@ export const SMS = {'backgroundColor': 'ca2b63'};
 
 /* "system" styling */
 export const SYSTEM = {'backgroundColor': '000000'};
-
-/* "default" styling */
-export const DEFAULT = {'backgroundColor': 'd3d3d3'};
