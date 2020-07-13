@@ -114,6 +114,10 @@ describes.realWin(
       img.setAttribute('animate-in', animationName);
       img.setAttribute('layout', 'fill');
 
+      env.sandbox
+        .stub(img, 'signals')
+        .callsFake({whenSignal: () => Promise.resolve()});
+
       const gridLayer = win.document.createElement('amp-story-grid-layer');
       opt_gridLayerTempalate = opt_gridLayerTempalate.length
         ? opt_gridLayerTempalate
