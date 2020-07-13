@@ -93,9 +93,9 @@
     "pageview": "https://scomcluster.cxense.com/Repo/rep.gif?ver=1&typ=pgv&sid=!siteId&ckp=_client_id(cX_P)_&loc=_source_url_&rnd=_random_&ref=_document_referrer_&ltm=_timestamp_&wsz=_screen_width_x_screen_height_&bln=_browser_language_&chs=_document_charset_&col=_screen_color_depth_&tzo=_timezone_&cp_cx_channel=amp"
   },
   "deepbi": {
-    "base": "https://api.deep.bi/v1/pixel/!datasetKey/p.gif?accessKey=!accessKey&gdpr=true&page_href=_source_url_&referrer_href=_document_referrer_&page_title=_title_&amp=true",
-    "pageview": "https://api.deep.bi/v1/pixel/!datasetKey/p.gif?accessKey=!accessKey&gdpr=true&page_href=_source_url_&referrer_href=_document_referrer_&page_title=_title_&amp=true&event_type=page-open",
-    "event": "https://api.deep.bi/v1/pixel/!datasetKey/p.gif?accessKey=!accessKey&gdpr=true&page_href=_source_url_&referrer_href=_document_referrer_&page_title=_title_&amp=true&event_type=event"
+    "base": "https://api.deep.bi/v1/pixel/!datasetKey/p.gif?accessKey=!accessKey&gdpr=true&page_href=_source_url_&referrer_href=_document_referrer_&page_title=_title_&ampid=_client_id(deepbi)_&amp=true",
+    "pageview": "https://api.deep.bi/v1/pixel/!datasetKey/p.gif?accessKey=!accessKey&gdpr=true&page_href=_source_url_&referrer_href=_document_referrer_&page_title=_title_&ampid=_client_id(deepbi)_&amp=true&event_type=page-open",
+    "event": "https://api.deep.bi/v1/pixel/!datasetKey/p.gif?accessKey=!accessKey&gdpr=true&page_href=_source_url_&referrer_href=_document_referrer_&page_title=_title_&ampid=_client_id(deepbi)_&amp=true&event_type=event"
   },
   "dynatrace": {
     "endpoint": "https://!tenant.live.dynatrace.com:443/ampbf/!tenantpath",
@@ -130,7 +130,9 @@
     "eventLead": "https://www.facebook.com/tr?noscript=1&ev=Lead&id=PIXEL-ID&cd[value]=!value&cd[currency]=!currency&cd[content_name]=!content_name&cd[content_category]=!content_category",
     "eventCompleteRegistration": "https://www.facebook.com/tr?noscript=1&ev=CompleteRegistration&id=PIXEL-ID&cd[value]=!value&cd[currency]=!currency&cd[content_name]=!content_name&cd[status]=!status"
   },
-  "gemius": {
+  "
+  
+  ": {
     "base": "https://!prefix.hit.gemius.pl/__timestamp_/redot.gif?l=91&id=!identifier&tz=_timezone_&col=_screen_color_depth_&screen=_screen_width_x_screen_height_&window=_viewport_width_x_viewport_height_&fr=1&href=_source_url_&ref=_document_referrer_&sarg=_canonical_url_&extra=gemamp%3D1%7Campid%3D_client_id(gemius)_%7C!extraparams&nc=0",
     "pageview": "https://!prefix.hit.gemius.pl/__timestamp_/redot.gif?l=91&id=!identifier&tz=_timezone_&col=_screen_color_depth_&screen=_screen_width_x_screen_height_&window=_viewport_width_x_viewport_height_&fr=1&href=_source_url_&ref=_document_referrer_&sarg=_canonical_url_&extra=gemamp%3D1%7Campid%3D_client_id(gemius)_%7C!extraparams&nc=0&et=view&hsrc=1",
     "event": "https://!prefix.hit.gemius.pl/__timestamp_/redot.gif?l=91&id=!identifier&tz=_timezone_&col=_screen_color_depth_&screen=_screen_width_x_screen_height_&window=_viewport_width_x_viewport_height_&fr=1&href=_source_url_&ref=_document_referrer_&sarg=_canonical_url_&extra=gemamp%3D1%7Campid%3D_client_id(gemius)_%7C!extraparams&nc=0&et=action&hsrc=3"
