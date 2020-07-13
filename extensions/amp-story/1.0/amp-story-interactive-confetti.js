@@ -15,6 +15,7 @@
  */
 
 import {htmlFor} from '../../../src/static-template';
+import {removeChildren} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
 
 /**
@@ -69,14 +70,14 @@ export function emojiBurst(rootEl, confettiEmoji) {
   // To calculate particle transform distance.
   const ROOT_EL_RECT = rootEl./*OK*/ getBoundingClientRect();
 
-  let particleWrapper = rootEl.appendChild(buildWrapperTemplate(rootEl));
+  const particleWrapper = buildWrapperTemplate(rootEl);
+  rootEl.appendChild(particleWrapper);
 
   setTimeout(() => {
     // Generate particles. Set their ending position, size and rotation.
     for (let i = 0; i < PARTICLE_COUNT; i++) {
-      const particle = particleWrapper.appendChild(
-        buildParticleTemplate(rootEl)
-      );
+      const particle = buildParticleTemplate(rootEl);
+      particleWrapper.appendChild(particle);
       particle.textContent = confettiEmoji;
 
       const fontSize =
@@ -97,7 +98,7 @@ export function emojiBurst(rootEl, confettiEmoji) {
     // Scale up particle container.
     setStyles(particleWrapper, {transform: 'scale(1)'});
 
-    // Animate out the particle wrapper and remove it from the dom.
+    // Animate out the particle wrapper and remove particles from the dom.
     setTimeout(() => {
       setStyles(particleWrapper, {
         transform: `scale(1.2)`,
@@ -105,9 +106,7 @@ export function emojiBurst(rootEl, confettiEmoji) {
       });
 
       particleWrapper.addEventListener('transitionend', () => {
-        particleWrapper && rootEl.removeChild(particleWrapper);
-        // Set to null so removeChild is not fired twice.
-        particleWrapper = null;
+        removeChildren(particleWrapper);
       });
     }, ANIMATION_OUT_DELAY);
   }, ANIMATION_IN_DELAY);
