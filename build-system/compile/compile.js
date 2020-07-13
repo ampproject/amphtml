@@ -236,6 +236,13 @@ function compile(
     }
     externs.push('build-system/externs/amp.multipass.extern.js');
 
+    // Normally setting this server-side experiment flag would be handled by
+    // the release process automatically. Since this experiment is actually on the
+    // build system instead of runtime, we never run it through babel and therefore
+    // must compute it here.
+    const STRICT_COMPILATION =
+      argv.define_experiment_constant &&
+      argv.define_experiment_constant === 'STRICT_COMPILATION';
     let target = STRICT_COMPILATION ? 'ECMASCRIPT5_STRICT' : 'ECMASCRIPT5';
     if (argv.esm) {
       // Do not transpile down to ES5 if running with `--esm`, since we do
