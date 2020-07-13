@@ -1025,7 +1025,6 @@ export class AmpStory extends AMP.BaseElement {
       });
 
     this.maybeLoadStoryEducation_();
-    this.maybeInitializeInteractives_();
 
     // Story is being prerendered: resolve the layoutCallback when the first
     // page is built. Other pages will only build if the document becomes
@@ -2325,33 +2324,6 @@ export class AmpStory extends AMP.BaseElement {
       this.getAmpDoc(),
       'amp-story-education'
     );
-  }
-
-  /**
-   * Loads and initializes the amp-story-interactive components if any.
-   * @private
-   */
-  maybeInitializeInteractives_() {
-    const interactives = this.element.querySelectorAll(
-      'amp-story-interactive-quiz, amp-story-interactive-binary-poll, amp-story-interactive-poll'
-    );
-    if (interactives.length > 0) {
-      Services.extensionsFor(this.win)
-        .installExtensionForDoc(
-          this.getAmpDoc(),
-          'amp-story-interactives',
-          '1.0'
-        )
-        .then(() => {
-          toArray(interactives).forEach((element) => {
-            whenUpgradedToCustomElement(element).then((el) =>
-              el.getImpl().then((unusedImpl) => {
-                // TODO(mszylkowski): Initialize impl
-              })
-            );
-          });
-        });
-    }
   }
 
   /**
