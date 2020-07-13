@@ -223,7 +223,7 @@ function getMinifiedName(name) {
   if (argv.sxg) {
     // For certain files during compilation, there seems to be files that get the extension written twice,
     // e.g. sxg.sxg.js. This is the quickest fix for now.
-    return name.includes('.sxg.js') ? name : name.replace(/\.js$/, '.sxg.js');
+    return name.endsWith('.sxg.js') ? name : name.replace(/\.js$/, '.sxg.js');
   }
   if (argv.esm) {
     return name.replace(/\.js$/, '.mjs');
