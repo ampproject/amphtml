@@ -186,8 +186,9 @@ function getQueryString(endpoint) {
 }
 
 /**
- * Checks whether or not the userAgent of the current device indicates
- * that this is an Ios device
+ * Checks whether or not the userAgent of the current device indicates that
+ * this is an Ios device.  Checked for 'mailto:' and 'sms:' protocols which
+ * break when opened in _blank on iOS Safari.
  * @return {boolean}
  */
 function isIos() {
