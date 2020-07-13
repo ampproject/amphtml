@@ -370,5 +370,26 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         'Story URL not found in the player: https://example.com/story6.html'
       );
     });
+
+    it.only('calling mute should set story muted state to true', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+      await playerEl.mute();
+
+      const response = await fakeMessaging.sendRequest(
+        'getDocumentState',
+        {state: 'MUTED_STATE'}, 
+        true
+      );
+
+      expect(response).to.deep.equal({
+        state: 'MUTED_STATE',
+        value: true,
+      });
+    });
+
+    it('calling unmute should set the story muted state to false', async () => {
+
+    });
   });
 });
