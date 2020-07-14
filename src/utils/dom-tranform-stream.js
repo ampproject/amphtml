@@ -51,11 +51,11 @@ export class DomTransformStream {
     const targetBodyDefer = new Deferred();
     /**
      * Resolves when target body is ready to receive elements.
-     * @private {!Promise<!element>}
+     * @private {!Promise<!Element>}
      */
     this.targetBodyPromise_ = targetBodyDefer.promise;
 
-    /** @const @private {!function(!Promise)} */
+    /** @const @private {!function(!Element)} */
     this.targetBodyResolver_ = targetBodyDefer.resolve;
 
     /** @private {?Promise} */
