@@ -374,5 +374,69 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         'Story URL not found in the player: https://example.com/story6.html'
       );
     });
+
+    it('adds stories programmatically', async () => {
+      buildStoryPlayer(3);
+      await manager.loadPlayers();
+
+      const storyObjects = createStoryObjects(1);
+      playerEl.addStories(storyObjects);
+
+      const stories = toArray(playerEl.querySelectorAll('a'));
+
+      expect(stories.length).to.eql(4);
+    });
+
+    it('adds no stories when sending an empty array of new stories', async () => {
+      buildStoryPlayer(3);
+      await manager.loadPlayers();
+
+      const storyObjects = createStoryObjects(0);
+      playerEl.addStories(storyObjects);
+
+      const stories = toArray(playerEl.querySelectorAll('a'));
+
+      expect(stories.length).to.eql(3);
+    });
+
+    it(
+      'creates and assigns iframes to added stories when there are ' +
+        'less than the maximum iframes set up',
+      async () => {
+        buildStoryPlayer();
+        await manager.loadPlayers();
+
+        const storyObjects = createStoryObjects(2);
+        playerEl.addStories(storyObjects);
+
+        const stories = toArray(playerEl.querySelectorAll('a'));
+
+        expect(stories[0][IFRAME_IDX]).to.not.be.undefined;
+        expect(stories[1][IFRAME_IDX]).to.not.be.undefined;
+        expect(stories[2][IFRAME_IDX]).to.not.be.undefined;
+      }
+    );
+
+    it(
+      'assigns an existing iframe to the first added story when the current ' +
+        'story is the last one, and the maximum number of iframes has been set up',
+      async () => {
+        buildStoryPlayer(3);
+        await manager.loadPlayers();
+
+        swipeLeft();
+        swipeLeft();
+
+        win.requestAnimationFrame(() => {
+          const storyObjects = createStoryObjects(2);
+          playerEl.addStories(storyObjects);
+
+          const stories = toArray(playerEl.querySelectorAll('a'));
+
+          expect(stories[3][IFRAME_IDX]).to.not.be.undefined;
+          expect(stories[4][IFRAME_IDX]).to.be.undefined;
+        });
+      }
+    );
   });
 });
