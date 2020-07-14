@@ -297,6 +297,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       }
     }
 
+    function createStoryObjects(numberOfStories) {
+      return Array(numberOfStories).fill({href: DEFAULT_ORIGIN_URL});
+    }
+
     it('signals when its ready to be interacted with', async () => {
       buildStoryPlayer();
       const readySpy = env.sandbox.spy();
