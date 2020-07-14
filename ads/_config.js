@@ -1035,6 +1035,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'sona': {
+    renderStartImplemented: true,
+  },
+
   'sovrn': {
     prefetch: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
   },
