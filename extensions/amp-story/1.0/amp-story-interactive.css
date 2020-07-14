@@ -65,16 +65,27 @@
 
 .i-amphtml-story-interactive-particle-wrapper {
   position: absolute !important;
-  top: 50%;
-  left: 50%;
-  display: flex;
-  align-items: center;
+  top: 50% !important;
+  left: 50% !important;
+  display: flex !important;
+  align-items: center !important;
   justify-content: center;
-  z-index: 1;
-  transform: scale(0);
-  transition: transform .5s var(--i-amphtml-interactive-ease-out-curve), opacity .5s var(--i-amphtml-interactive-ease-out-curve);
+  z-index: 1 !important;
+  transform: scale(0) !important;
+  transition: transform .5s var(--i-amphtml-interactive-ease-out-curve), opacity .5s var(--i-amphtml-interactive-ease-out-curve) !important;
+}
+
+.i-amphtml-story-interactive-particle-wrapper
+  .i-amphtml-story-interactive-particle-wrapper-animate-in {
+  transform: scale(1) !important;
+}
+
+.i-amphtml-story-interactive-particle-wrapper
+  .i-amphtml-story-interactive-particle-wrapper-animate-out {
+  transform: scale(1.2) !important;
+  opacity: 0 !important;
 }
 
 .i-amphtml-story-interactive-particle {
-  position: absolute;
+  position: absolute !important;
 }

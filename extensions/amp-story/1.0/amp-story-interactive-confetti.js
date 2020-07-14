@@ -96,15 +96,15 @@ export function emojiBurst(rootEl, confettiEmoji) {
       });
     }
     // Scale up particle container.
-    setStyles(particleWrapper, {transform: 'scale(1)'});
+    particleWrapper.classList.add(
+      'i-amphtml-story-interactive-particle-wrapper-animate-in'
+    );
 
     // Animate out the particle wrapper and remove particles from the dom.
     setTimeout(() => {
-      setStyles(particleWrapper, {
-        transform: `scale(1.2)`,
-        opacity: `0`,
-      });
-
+      particleWrapper.classList.add(
+        'i-amphtml-story-interactive-particle-wrapper-animate-out'
+      );
       particleWrapper.addEventListener('transitionend', () => {
         removeChildren(particleWrapper);
       });
