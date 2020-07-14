@@ -175,7 +175,6 @@ export class AmpStoryPlayer {
 
   /**
    * Makes the current story play or pause its content/auto-advance
-   *
    * @param {boolean} paused If true, the story will be paused, and it will be played otherwise
    * @private
    */
