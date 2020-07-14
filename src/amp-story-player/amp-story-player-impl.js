@@ -156,6 +156,26 @@ export class AmpStoryPlayer {
   }
 
   /**
+  /**
+   * Given a story object, creates an appropiate anchor element.
+   *
+   * @param {{href: string, title: ?string}} story
+   *
+   * @return {HTMLAnchorElement}
+   */
+  createStoryAnchor_(story) {
+    const anchor = this.doc_.createElement('a');
+    anchor.href = story.href;
+
+    const title = this.doc_.createElement('span');
+    title.classList.add('title');
+    title.textContent = story.title;
+
+    anchor.append(title);
+
+    return anchor;
+  }
+
    * @public
    * @return {!Element}
    */
