@@ -471,6 +471,9 @@ export class AmpStory extends AMP.BaseElement {
       StateProperty.PAUSED_STATE
     );
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+    if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+      this.pauseBackgroundAudio_();
+    }
   }
 
   /**
@@ -483,6 +486,9 @@ export class AmpStory extends AMP.BaseElement {
       Action.TOGGLE_PAUSED,
       this.pausedStateToRestore_
     );
+    if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+      this.playBackgroundAudio_();
+    }
   }
 
   /**
@@ -2178,6 +2184,7 @@ export class AmpStory extends AMP.BaseElement {
       if (
         pageId === this.pages_[0].element.id &&
         this.activePage_ === this.pages_[this.pages_.length - 1] &&
+        this.pages_.length > 1 &&
         !this.viewer_.hasCapability('swipe')
       ) {
         distance = 1;
