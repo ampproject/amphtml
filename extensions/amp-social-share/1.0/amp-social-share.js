@@ -164,6 +164,7 @@ AmpSocialShare['passthrough'] = true;
 AmpSocialShare['props'] = {
   'tabIndex': {attr: 'tabindex'},
   'type': {attr: 'type'},
+  'customIcon': {attr: 'custom-icon', type: 'boolean'},
 };
 
 AMP.extension(TAG, '1.0', (AMP) => {
