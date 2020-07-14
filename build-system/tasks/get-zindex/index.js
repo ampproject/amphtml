@@ -19,6 +19,7 @@ const fs = require('fs');
 const gulp = require('gulp');
 const PluginError = require('plugin-error');
 const postcss = require('postcss');
+const prettier = require('prettier');
 const table = require('text-table');
 const through = require('through2');
 
@@ -137,14 +138,22 @@ function getZindex(cb) {
     .on('data', (chunk) => {
       filesData[chunk.name] = chunk.selectors;
     })
-    .on('end', () => {
+    .on('end', async () => {
+      const filename = 'css/Z_INDEX.md';
       const rows = createTable(filesData);
       rows.unshift.apply(rows, tableHeaders);
       const tbl = table(rows, tableOptions);
       const output = `Run \`gulp get-zindex\` to generate this file.\n\n${tbl}`;
-      fs.writeFileSync('css/Z_INDEX.md', output);
+      fs.writeFileSync(filename, await prettierFormat(filename, output));
       cb();
     });
+}
+
+async function prettierFormat(filename, output) {
+  return prettier.format(output, {
+    ...(await prettier.resolveConfig(filename)),
+    parser: 'markdown',
+  });
 }
 
 module.exports = {
