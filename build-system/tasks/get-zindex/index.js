@@ -102,7 +102,19 @@ function createTable(filesData) {
   rows.sort((a, b) => {
     const aZIndex = parseInt(a[1], 10);
     const bZIndex = parseInt(b[1], 10);
-    return aZIndex - bZIndex;
+    // Word values sorted lexicographically.
+    if (isNaN(aZIndex) && isNaN(bZIndex)) {
+      return a[1].localeCompare(b[1]);
+    }
+    // Word values before length values.
+    if (isNaN(aZIndex)) {
+      return -1;
+    }
+    if (isNaN(bZIndex)) {
+      return 1;
+    }
+    // By length descending.
+    return bZIndex - aZIndex;
   });
   return rows;
 }
@@ -129,7 +141,8 @@ function getZindex(cb) {
       const rows = createTable(filesData);
       rows.unshift.apply(rows, tableHeaders);
       const tbl = table(rows, tableOptions);
-      fs.writeFileSync('css/Z_INDEX.md', tbl);
+      const output = `Run \`gulp get-zindex\` to generate this file.\n\n${tbl}`;
+      fs.writeFileSync('css/Z_INDEX.md', output);
       cb();
     });
 }
