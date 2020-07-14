@@ -133,6 +133,17 @@ describes.realWin(
         expect(consentUI.ui_.id).to.equal('test1');
       });
 
+      it('should ignore promptUISrc w/ amp-story-consent', () => {
+        const config = dict({
+          'promptUISrc': 'https://promptUISrc',
+        });
+        const ampStoryConsent = doc.createElement('amp-story-consent');
+        parent.appendChild(ampStoryConsent);
+
+        consentUI = new ConsentUI(mockInstance, config);
+        expect(consentUI.ui_).to.be.null;
+      });
+
       it('should create iframe from promptUISrc', function* () {
         const config = dict({
           'promptUISrc': 'https://promptUISrc',
