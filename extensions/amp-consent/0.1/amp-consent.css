@@ -125,8 +125,8 @@ amp-consent.i-amphtml-consent-ui-enable-border {
 }
 
 amp-consent.i-amphtml-consent-ui-enable-border-lightbox {
-  border-bottom-left-radius: 8px !important;
-  border-bottom-right-radius: 8px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2) !important;
 }
 
 amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-in {
@@ -139,13 +139,11 @@ amp-consent.i-amphtml-consent-ui-iframe-active-lightbox {
   top: 0;
   right: 0;
   animation: 0.5s lightbox-appear;
-  animation-fill-mode: both;
-  background: white;
-  flex-direction: column;
+  animation-fill-mode: forwards;
   height: var(--lightbox-height);
   width: 90vw;
   margin: auto;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  background: white;
 }
 
 amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-in.i-amphtml-consent-ui-iframe-fullscreen {
@@ -169,10 +167,6 @@ amp-consent.i-amphtml-consent-ui-in.i-amphtml-consent-ui-iframe-fullscreen > .i-
   0% {
     transform: translate(0, 100vh);
     opacity: 0;
-  }
-  1% {
-    opacity: 1;
-    transform: translate(0, 100vh);
   }
   100% {
     transform: translate(0, 0);

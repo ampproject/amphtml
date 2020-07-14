@@ -37,13 +37,17 @@ import {setImportantStyles, setStyles, toggle} from '../../../src/style';
 const TAG = 'amp-consent-ui';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const DEFAULT_INITIAL_HEIGHT = '30vh';
+const MAX_INITIAL_HEIGHT = '80vh';
 const DEFAULT_ENABLE_BORDER = true;
 const FULLSCREEN_SUCCESS = 'Entering fullscreen.';
 const FULLSCREEN_ERROR =
   'Could not enter fullscreen. Fullscreen is only supported ' +
-  'when the iframe is visible and after user interaction.';
+  'when the iframe is visible as a bottom sheet and after ' +
+  'user interaction.';
 const CONSENT_PROMPT_CAPTION = 'User Consent Prompt';
 const BUTTON_ACTION_CAPTION = 'Focus Prompt';
+const CANCEL_OVERLAY = 'cancelFullOverlay';
+const REQUEST_OVERLAY = 'requestFullOverlay';
 
 export const actionState = {
   error: 'error',
@@ -366,6 +370,10 @@ export class ConsentUI {
       ) {
         const dataHeight = parseInt(data['initialHeight'], 10);
 
+        // Set initialHeight to max height fallback if applicable
+        this.initialHeight_ =
+          dataHeight >= 80 ? MAX_INITIAL_HEIGHT : this.initialHeight_;
+
         if (dataHeight >= 10 && dataHeight <= 80) {
           this.initialHeight_ = `${dataHeight}vh`;
           this.lightboxEnabled_ = dataHeight > 60;
@@ -387,8 +395,8 @@ export class ConsentUI {
       }
     }
 
-    // Enable/disable our border
-    if (data['border'] === false) {
+    // Disable our border if not lightbox.
+    if (data['border'] === false && !this.lightboxEnabled_) {
       this.enableBorder_ = false;
     }
 
@@ -399,22 +407,13 @@ export class ConsentUI {
    * Enter the fullscreen state for the UI
    */
   enterFullscreen_() {
-    if (
-      !this.ui_ ||
-      !this.isVisible_ ||
-      this.isFullscreen_ ||
-      this.lightboxEnabled_
-    ) {
+    if (!this.ui_ || !this.isVisible_ || this.isFullscreen_) {
       return;
     }
 
     this.resetAnimationStyles_();
 
-    this.viewer_.sendMessage(
-      'requestFullOverlay',
-      dict(),
-      /* cancelUnsent */ true
-    );
+    this.sendViewerMessage_(REQUEST_OVERLAY);
 
     const {classList} = this.parent_;
     classList.add(consentUiClasses.iframeFullscreen);
@@ -422,6 +421,14 @@ export class ConsentUI {
     this.disableScroll_();
 
     this.isFullscreen_ = true;
+  }
+
+  /**
+   * Send viewer a message.
+   * @param {string} message
+   */
+  sendViewerMessage_(message) {
+    this.viewer_.sendMessage(message, dict(), /* cancelUnsent */ true);
   }
 
   /**
@@ -594,21 +601,17 @@ export class ConsentUI {
     );
 
     // Remove border if enabled
-    if (this.enableBorder_) {
+    if (this.enableBorder_ && !this.lightboxEnabled_) {
       classList.remove(consentUiClasses.enableBorder);
-      if (this.lightboxEnabled_) {
-        classList.remove(consentUiClasses.enableBorderLightbox);
-      }
+    } else if (this.lightboxEnabled_) {
+      classList.remove(consentUiClasses.enableBorderLightbox);
     }
 
     this.win_.removeEventListener('message', this.boundHandleIframeMessages_);
     classList.remove(consentUiClasses.iframeFullscreen);
-    if (this.isFullscreen_) {
-      this.viewer_.sendMessage(
-        'cancelFullOverlay',
-        dict(),
-        /* cancelUnsent */ true
-      );
+    // Lightbox and fullscreen are mutually exclusive
+    if (this.isFullscreen_ || this.lightboxEnabled_) {
+      this.sendViewerMessage_(CANCEL_OVERLAY);
     }
     this.isFullscreen_ = false;
     classList.remove(consentUiClasses.in);
@@ -678,6 +681,7 @@ export class ConsentUI {
   resetAnimationStyles_() {
     setStyles(this.parent_, {
       transform: '',
+      transition: '',
       '--lightbox-height': '',
     });
   }
@@ -696,12 +700,12 @@ export class ConsentUI {
       transform: `translate3d(0px, calc(100% - ${this.initialHeight_}), 0px)`,
       '--lightbox-height': `${this.initialHeight_}`,
     });
-    if (this.enableBorder_) {
-      const {classList} = this.parent_;
+    const {classList} = this.parent_;
+    if (this.enableBorder_ && !this.lightboxEnabled_) {
       classList.add(consentUiClasses.enableBorder);
-      if (this.lightboxEnabled_) {
-        classList.add(consentUiClasses.enableBorderLightbox);
-      }
+    } else if (this.lightboxEnabled_) {
+      classList.add(consentUiClasses.enableBorderLightbox);
+      this.sendViewerMessage_(REQUEST_OVERLAY);
     }
   }
 
@@ -805,11 +809,13 @@ export class ConsentUI {
       // Do nothing iff:
       // - iframe not visible or
       // - iframe not active element && not called via actionPromptTrigger
+      // - iframe is not lightboxEnabled
       if (
         !this.isIframeVisible_ ||
         (this.restrictFullscreenOn_ &&
           this.document_.activeElement !== this.ui_ &&
-          !this.isActionPromptTrigger_)
+          !this.isActionPromptTrigger_) ||
+        this.lightboxEnabled_
       ) {
         user().warn(TAG, FULLSCREEN_ERROR);
         this.sendEnterFullscreenResponse_(requestType, requestAction, true);
