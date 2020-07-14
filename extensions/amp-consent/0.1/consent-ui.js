@@ -37,11 +37,13 @@ import {setImportantStyles, setStyles, toggle} from '../../../src/style';
 const TAG = 'amp-consent-ui';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const DEFAULT_INITIAL_HEIGHT = '30vh';
+const MAX_INITIAL_HEIGHT = '80vh';
 const DEFAULT_ENABLE_BORDER = true;
 const FULLSCREEN_SUCCESS = 'Entering fullscreen.';
 const FULLSCREEN_ERROR =
   'Could not enter fullscreen. Fullscreen is only supported ' +
-  'when the iframe is visible and after user interaction.';
+  'when the iframe is visible as a bottom sheet and after ' +
+  'user interaction.';
 const CONSENT_PROMPT_CAPTION = 'User Consent Prompt';
 const BUTTON_ACTION_CAPTION = 'Focus Prompt';
 
@@ -365,6 +367,8 @@ export class ConsentUI {
         data['initialHeight'].indexOf('vh') >= 0
       ) {
         const dataHeight = parseInt(data['initialHeight'], 10);
+        this.initialHeight_ =
+          dataHeight >= 80 ? MAX_INITIAL_HEIGHT : this.initialHeight_;
 
         if (dataHeight >= 10 && dataHeight <= 80) {
           this.initialHeight_ = `${dataHeight}vh`;
@@ -399,12 +403,7 @@ export class ConsentUI {
    * Enter the fullscreen state for the UI
    */
   enterFullscreen_() {
-    if (
-      !this.ui_ ||
-      !this.isVisible_ ||
-      this.isFullscreen_ ||
-      this.lightboxEnabled_
-    ) {
+    if (!this.ui_ || !this.isVisible_ || this.isFullscreen_) {
       return;
     }
 
@@ -678,6 +677,7 @@ export class ConsentUI {
   resetAnimationStyles_() {
     setStyles(this.parent_, {
       transform: '',
+      transition: '',
       '--lightbox-height': '',
     });
   }
@@ -805,11 +805,13 @@ export class ConsentUI {
       // Do nothing iff:
       // - iframe not visible or
       // - iframe not active element && not called via actionPromptTrigger
+      // - iframe is not lightboxEnabled
       if (
         !this.isIframeVisible_ ||
         (this.restrictFullscreenOn_ &&
           this.document_.activeElement !== this.ui_ &&
-          !this.isActionPromptTrigger_)
+          !this.isActionPromptTrigger_) ||
+        this.lightboxEnabled_
       ) {
         user().warn(TAG, FULLSCREEN_ERROR);
         this.sendEnterFullscreenResponse_(requestType, requestAction, true);
