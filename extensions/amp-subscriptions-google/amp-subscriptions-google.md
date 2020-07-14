@@ -90,15 +90,15 @@ The `skuMapUrl` is called on page load. It should be a map of element id's and c
 
 ```JSON
 {
-  "subscribe.google.com': {
+  "subscribe.google.com": {
     // button that goes straight to purchase flow
     "elementId": {
       "sku": "sku"
      },
     // button that launches an offer carousel
     "anotherElementId": {
-      'carouselOptions': {
-          'skus': ['basic', 'premium_monthly'],
+      "carouselOptions": {
+          "skus": ["basic", "premium_monthly"],
       }
     }
   }
