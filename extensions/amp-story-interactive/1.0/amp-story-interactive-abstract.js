@@ -22,12 +22,8 @@ import {
 import {
   Action,
   StateProperty,
-  getStoreService,
 } from '../../amp-story/1.0/amp-story-store-service';
-import {
-  AnalyticsVariable,
-  getVariableService,
-} from '../../amp-story/1.0/variable-service';
+import {AnalyticsVariable} from '../../amp-story/1.0/variable-service';
 import {CSS} from '../../../build/amp-story-interactive-1.0.css';
 import {Services} from '../../../src/services';
 import {
@@ -173,16 +169,24 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected {!../../amp-story/1.0/amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = getRequestService(this.win, this.element);
 
-    /** @const @protected {!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = getStoreService(this.win);
+    /** @const @protected {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = null;
+
+    Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
+      this.storeService_ = storeService;
+      this.updateStoryStoreState_(null);
+      this.initializeStoreListeners_();
+    });
 
     /** @protected {../../../src/service/url-impl.Url} */
     this.urlService_ = Services.urlForDoc(this.element);
 
     /** @const @protected {!../../amp-story/1.0/variable-service.AmpStoryVariableService} */
-    this.variableService_ = getVariableService(this.win);
+    this.variableService_ = null;
 
-    this.updateStoryStoreState_(null);
+    Services.storyVariableServiceForOrNull(this.win).then((variableService) => {
+      this.variableService_ = variableService;
+    });
   }
 
   /**
@@ -237,7 +241,8 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     this.rootEl_.classList.add('i-amphtml-story-interactive-container');
     this.element.classList.add('i-amphtml-story-interactive-component');
     this.adjustGridLayer_();
-    this.initializeListeners_();
+    // Add a click listener to the element to trigger the class change
+    this.rootEl_.addEventListener('click', (e) => this.handleTap_(e));
     devAssert(this.element.children.length == 0, 'Too many children');
     createShadowRootWithStyle(
       this.element,
@@ -407,7 +412,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * Attaches functions to each option to handle state transition.
    * @private
    */
-  initializeListeners_() {
+  initializeStoreListeners_() {
     // Add a listener for changes in the RTL state
     this.storeService_.subscribe(
       StateProperty.RTL_STATE,
@@ -430,9 +435,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       },
       true /** callToInitialize */
     );
-
-    // Add a click listener to the element to trigger the class change
-    this.rootEl_.addEventListener('click', (e) => this.handleTap_(e));
   }
 
   /**
