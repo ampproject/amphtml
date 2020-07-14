@@ -156,6 +156,33 @@ export class AmpStoryPlayer {
   }
 
   /**
+   * Adds stories to the player, both adding new anchor tags to the player,
+   * and creating or assigning iframes to those that are close to the
+   * current playing story.
+   *
+   * @param {!Array<!{href: string, title: ?string}>} stories
+   */
+  addStories(stories) {
+    for (let i = 0; i < stories.length; i++) {
+      const story = stories[i];
+      const anchor = this.createStoryAnchor_(story);
+
+      this.element_.append(anchor);
+      this.stories_.push(anchor);
+
+      if (this.iframes_.length < MAX_IFRAMES) {
+        this.createIframeForStory_(this.stories_.length - 1);
+        continue;
+      }
+
+      // If this story is after the current one
+      if (this.stories_[this.currentIdx_ + 1] === anchor) {
+        this.allocateIframeForStory_(this.currentIdx_ + 1);
+        continue;
+      }
+    }
+  }
+
   /**
    * Given a story object, creates an appropiate anchor element.
    *
@@ -176,6 +203,7 @@ export class AmpStoryPlayer {
     return anchor;
   }
 
+  /**
    * @public
    * @return {!Element}
    */
