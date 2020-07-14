@@ -140,7 +140,7 @@ export class Values {
       // Optimization opportunity: in simple but common manipulations the
       // deepscan can be avoided.
       this.ping(prop, false);
-      if (isResursive(prop)) {
+      if (isRecursive(prop)) {
         deepScan(this.contextNode_, scan, prop, true, false);
       }
     }
@@ -285,7 +285,7 @@ export class Values {
       // subscribers to ensure that they are not leaked.
       usedByKey.forEach((used) => {
         const {prop} = used;
-        if (isResursive(prop)) {
+        if (isRecursive(prop)) {
           this.updateParentValueNode_(used, null);
         }
       });
@@ -305,7 +305,7 @@ export class Values {
    */
   scan(prop) {
     this.ping(prop, true);
-    if (!isResursive(prop)) {
+    if (!isRecursive(prop)) {
       // Stop the deepscan. The prop doesn't propagate.
       return false;
     }
@@ -401,7 +401,7 @@ export class Values {
               })
             : EMPTY_ARRAY,
         // Schedule the value recalculation due to the parent value change.
-        pingParent: isResursive(prop)
+        pingParent: isRecursive(prop)
           ? (parentValue) => {
               used.parentValue = parentValue;
               used.ping();
@@ -498,7 +498,7 @@ export class Values {
     try {
       newValue = this.calc_(used, refreshParent);
     } catch (e) {
-      // This is the narowest catch to avoid unrelated values breaking each
+      // This is the narrowest catch to avoid unrelated values breaking each
       // other. The only exposure to the user-code are `needsParent` and
       // `compute` methods in the `ContextProp`.
       rethrowAsync(e);
@@ -583,7 +583,7 @@ export class Values {
       const {node} = this.contextNode_;
       if (inputValues && !compute) {
         newValue = inputValues[0];
-      } else if (isResursive(prop)) {
+      } else if (isRecursive(prop)) {
         if (inputValues) {
           // The node specifies its own input values and they need to be
           // recomputed with parent and dep values.
@@ -680,7 +680,7 @@ function hasInput(contextNode, prop) {
  * @param {!ContextProp} prop
  * @return {boolean}
  */
-function isResursive(prop) {
+function isRecursive(prop) {
   // Only `false` values make a value non-recursive. `true` and
   // `function` values are considered recursive.
   return !!prop.needsParent;
