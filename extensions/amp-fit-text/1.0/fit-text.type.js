@@ -18,9 +18,9 @@
 
 /**
  * @typedef {{
- *   minFontSize: number,
- *   maxFontSize: number,
- *   children: ?PreactDef.Renderable,
+ *   minFontSize: (number|undefined),
+ *   maxFontSize: (number|undefined),
+ *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
 var FitTextProps;
