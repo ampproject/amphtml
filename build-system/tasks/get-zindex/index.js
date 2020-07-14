@@ -33,6 +33,8 @@ const tableOptions = {
   hsep: '   |   ',
 };
 
+const preamble = 'Run `gulp get-zindex` to generate this file.';
+
 /**
  * @param {!Object<string, !Array<number>} acc accumulator object for selectors
  * @param {!Rules} css post css rules object
@@ -142,7 +144,7 @@ function getZindex(cb) {
       const filename = 'css/Z_INDEX.md';
       const rows = [...tableHeaders, ...createTable(filesData)];
       const tbl = table(rows, tableOptions);
-      const output = `Run \`gulp get-zindex\` to generate this file.\n\n${tbl}`;
+      const output = `${preamble}\n\n${tbl}`;
       fs.writeFileSync(filename, await prettierFormat(filename, output));
       cb();
     });
