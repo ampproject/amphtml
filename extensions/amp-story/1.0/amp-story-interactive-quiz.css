@@ -214,7 +214,7 @@
     border-radius: 0px !important;
     background: var(--i-amphtml-interactive-theme-shading) !important;
     color: var(--i-amphtml-interactive-theme-shading) !important;
-    transition: transform 1s !important;
+    transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
 .i-amphtml-story-interactive-post-selection.i-amphtml-story-interactive-has-data[dir=rtl] .i-amphtml-story-interactive-quiz-option::before {
