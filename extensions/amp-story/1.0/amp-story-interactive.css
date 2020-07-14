@@ -64,7 +64,7 @@
 }
 
 .i-amphtml-story-interactive-particle-wrapper {
-  position: absolute;
+  position: absolute !important;
   top: 50%;
   left: 50%;
   display: flex;
