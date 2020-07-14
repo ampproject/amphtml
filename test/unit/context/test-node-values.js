@@ -315,6 +315,31 @@ describes.realWin('ContextNode - values', {}, (env) => {
       clock.runAll();
       expect(calcSpy).to.have.callCount(0);
     });
+
+    it('should recompute a value when a node is reparented', async () => {
+      grandparent.values.set(Recursive, 'OWNER1', 'A');
+      parent.values.set(Recursive, 'OWNER1', 'B');
+      clock.runAll();
+
+      expect(grandparentStub).to.be.calledOnce.calledWith('A');
+      expect(parentStub).to.be.calledOnce.calledWith('B');
+      expect(sibling1Stub).to.be.calledOnce.calledWith('B');
+      expect(sibling2Stub).to.be.calledOnce.calledWith('B');
+      expect(cousin1Stub).to.be.calledOnce.calledWith('A');
+      expect(calcSpy).to.have.callCount(5);
+
+      calcSpy.resetHistory();
+      grandparent.node.appendChild(sibling1.node);
+      await rediscover(sibling1);
+      clock.runAll();
+
+      expect(sibling1Stub).to.be.calledTwice.calledWith('A');
+      expect(grandparentStub).to.be.calledOnce; // no changes.
+      expect(parentStub).to.be.calledOnce; // no changes.
+      expect(sibling2Stub).to.be.calledOnce; // no changes.
+      expect(cousin1Stub).to.be.calledOnce; // no changes.
+      expect(calcSpy).to.have.callCount(1);
+    });
   });
 
   describe('connected, computable recursive', () => {
@@ -581,6 +606,32 @@ describes.realWin('ContextNode - values', {}, (env) => {
       expect(grandparentStub).to.be.calledTwice; // no change.
       expect(cousin1Stub).to.be.calledTwice; // no change.
       expect(calcSpy).to.have.callCount(3);
+    });
+
+    it('should recompute when reparented', async () => {
+      grandparent.values.set(Concat, 'OWNER1', 'A');
+      parent.values.set(Concat, 'OWNER1', 'B');
+      sibling1.values.set(Concat, 'OWNER1', 'C');
+      clock.runAll();
+
+      expect(grandparentStub).to.be.calledOnce.calledWith('A');
+      expect(parentStub).to.be.calledOnce.calledWith('AB');
+      expect(sibling1Stub).to.be.calledOnce.calledWith('ABC');
+      expect(sibling2Stub).to.be.calledOnce.calledWith('AB');
+      expect(cousin1Stub).to.be.calledOnce.calledWith('A');
+      expect(calcSpy).to.have.callCount(5);
+
+      calcSpy.resetHistory();
+      grandparent.node.appendChild(sibling1.node);
+      await rediscover(sibling1);
+      clock.runAll();
+
+      expect(sibling1Stub).to.be.calledTwice.calledWith('AC');
+      expect(grandparentStub).to.be.calledOnce; // no change.
+      expect(cousin1Stub).to.be.calledOnce; // no change.
+      expect(parentStub).to.be.calledOnce; // no change.
+      expect(sibling2Stub).to.be.calledOnce; // no change.
+      expect(calcSpy).to.have.callCount(1);
     });
 
     it('should accept multiple inputs', async () => {
