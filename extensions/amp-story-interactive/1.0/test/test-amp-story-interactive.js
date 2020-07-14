@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {AmpStoryInteractive, InteractiveType} from '../amp-story-interactive';
+import {
+  AmpStoryInteractive,
+  InteractiveType,
+} from '../amp-story-interactive-abstract';
 import {
   AnalyticsVariable,
   getVariableService,
