@@ -146,6 +146,18 @@ One can get access to the client information via the name attribute inside the i
 info = JSON.parse(window.name);
 ```
 
+#### consentMetadata
+
+`consentMetadata` allows for additional consent information to be passed to `<amp-consent>` to be give to ad vendors and other extensions. `consentMetadata` can be received from the [external iframe consent flow](#informingconsentresponse) outlined above or from the `checkConsentHref` endpoint response. `consentMetadata` will only be updated if a `consentString` is passed in as well. `consentMetadata` will also be sent along with the information in [`onUpdateHref`](./amp-consent#onUpdateHref). `consentMetadata` will be stored in localStorage and will be affected one-off tradeoff described in [client caching](./amp-consent#Client-caching). The only fields that are valid are as follows:
+
+```
+{
+  "consentStringType": {enum} [1: TCF V1, 2: TCF V2, 3: US Privacy String] (optional),
+  "gdprApplies": {boolean} (optional),
+  "additionalConsent": {string} (optional)
+}
+```
+
 ## Adding your configuration to AMP
 
 Once you have the remote endpoint and prompt UI iframe ready, you are ready to add your configuration to the AMP runtime.

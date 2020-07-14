@@ -261,18 +261,6 @@ AMP will check client cache and server in parallel to find the previous consent 
 
 `xssiPrefix`: Causes `<amp-consent>` to strip a prefix from the `checkConsentHref` endpoint's response. If the prefix is not present in the response, then this option will have no effect. `xssiPrefix` can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
 
-#### consentMetadata
-
-`consentMetadata` provides additional consent information to `<amp-consent>` to be passed along to ad vendors and other extensions. `consentMetadata` can be received from the `checkConsentHref` endpoint response (and will be sent in the request) or from the [external iframe consent flow](./integrating-consent.md#informingconsentresponse). `consentMetadata` will only be updated if a `consentString` is passed in as well. `consentMetadata` will also be sent along with the information in [`onUpdateHref`](#onUpdateHref). `consentMetadata` will be stored in localStorage and will be affected one-off tradeoff described in [client caching](#clientcaching). The only fields that are valid are as follows:
-
-```
-{
-  "consentStringType": {enum} [1: TCF V1, 2: TCF V2, 3: US Privacy String] (optional),
-  "gdprApplies": {boolean} (optional),
-  "additionalConsent": {string} (optional)
-}
-```
-
 #### uiConfig
 
 `uiConfig` provides extra UI and behaviors to `<amp-consent>`. `uiConfig` is an optional JSON object that can contain the key `overlay` which is a boolean. `overlay: true` will add a light black overlay behind the consent prompt to help users focus on the prompt. Additionally, this will stop user interaction with the contents beneath the consent prompt (such as scrolling). `overlay: false` is the default.
@@ -379,8 +367,6 @@ window.parent.postMessage(
   {
     type: 'consent-response',
     action: 'accept/reject/dismiss',
-    info: /string/ /* optional */,
-    consentMetadata: /object/ /* optional */,
   },
   '*'
 );
@@ -630,7 +616,7 @@ Yes. See example [here](https://amp.dev/documentation/examples/user-consent/geol
 ##### Does AMP support the IAB TCF?
 
 AMP supports popular transparency consent frameworks including the IAB TCF v1, TCF v2 and the IAB US Privacy String.
-Please check with your consent management platform (CMP) and ad networks on their AMP support. AMP will read and pass the strings passed by the frameworks (IAB TCF v1, TCF v2 and the IAB US Privacy String) when received by CMPs/ad networks. Read more [here](#consentmetadata).
+Please check with your consent management platform (CMP) and ad networks on their AMP support. AMP will read and pass the strings passed by the frameworks (IAB TCF v1, TCF v2 and the IAB US Privacy String) when received by CMPs/ad networks.
 
 ##### I can't see feature X being supported, what can I do?
 

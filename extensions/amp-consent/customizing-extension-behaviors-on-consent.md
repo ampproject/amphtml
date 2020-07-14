@@ -70,3 +70,11 @@ Ways to get the consent string for ad/analytics vendors coming soon.
 In addition to the consent state and consent string, AMP extensions can also use the
 `getConsentPolicySharedData` API to receive additional consent related information about
 the user from the page owner. See [this](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#response) for details about the `shareData`.
+
+### On Consent Metadata
+
+In addition to the consent state and consent string, AMP extensions can also use the
+`getConsentMetadata` API to receive additional consent metadata information about
+the user from the page owner (`additionalConsent`, `gdprApplies`, `consentStringType`) via the `checkConsentHref` endpoint or from the CMP. AMP will pass this metadata to vendors without modification.
+
+AMP will always pass the local stored metadta if it exists. Updates to the metadata will only be reflected the next page load. Read here for more information on [metadata](./integrating-consent#consentMetadata).
