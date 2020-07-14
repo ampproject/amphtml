@@ -42,7 +42,7 @@ async function clean() {
     pathsToDelete.push('**/node_modules', '!node_modules');
   }
   const deletedPaths = await del(pathsToDelete, {
-    expandDirectories: true,
+    expandDirectories: false,
     dryRun: argv.dry_run,
   });
   if (deletedPaths.length > 0) {
