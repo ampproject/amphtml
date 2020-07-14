@@ -260,7 +260,12 @@ export class AmpStoryPlayer {
     this.iframePool_.addStoryIdx(idx);
 
     if (this.isLaidOut_) {
-      this.layoutIframe_(story, iframe, VisibilityState.PRERENDER);
+      this.layoutIframe_(
+        story,
+        iframe,
+        // In case it is the first story, it becomes immediately visibile
+        idx === 0 ? VisibilityState.VISIBLE : VisibilityState.PRERENDER
+      );
     }
   }
 
