@@ -356,9 +356,24 @@ following value scheme `on="event:idOfAmpConsentElement.accept/reject/dismiss"`
 
 - `dismiss`: instruct AMP to cancel `buildCallback` of components waiting for the consent, and hides the prompt UI.
 
+##### ready
+
+When the iframe is loaded, it must send a `'ready'` signal to `amp-consent`.
+Action `'ready'` informs the AMP runtime to hide the placeholder and show the consent prompt instead.
+
+```javascript
+window.parent.postMessage(
+  {
+    type: 'consent-ui',
+    action: 'ready',
+  },
+  '*'
+);
+```
+
 ##### Prompt Actions from External Consent UI
 
-When using iframes as consent prompt UI. Iframes can send a `consent-response` message to the parent AMP page to inform [prompt actions](#prompt-actions) on the current consent. Note the message must come from the `<amp-iframe>` created iframe. Messages from nested iframes will be ignored.
+After the consent iframe is loaded and the [ready message](#ready) is sent, the iframe can send a `consent-response` message to the parent AMP page to inform [prompt actions](#prompt-actions) on the current consent. Note the message must come from the top-level iframe; messages from nested iframes will be ignored.
 
 _Example: iframe `consent-response` request_
 
