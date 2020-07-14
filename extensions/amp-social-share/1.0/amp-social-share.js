@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-social-share-1.0.css';
 import {Layout} from '../../../src/layout';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
@@ -87,6 +88,7 @@ class AmpSocialShare extends PreactBaseElement {
       return;
     }
 
+    this.element.classList.add(`amp-social-share-${type}`);
     this.renderWithHrefAndTarget_(typeConfig, platform);
     const responsive =
       this.element.getAttribute('layout') === Layout.RESPONSIVE && '100%';
@@ -171,5 +173,5 @@ AmpSocialShare['props'] = {
 };
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpSocialShare);
+  AMP.registerElement(TAG, AmpSocialShare, CSS);
 });

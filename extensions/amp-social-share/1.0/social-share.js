@@ -52,7 +52,6 @@ export function SocialShare(props) {
 
   const type = props['type'].toUpperCase();
   const baseStyle = CSS.BASE_STYLE;
-  const backgroundStyle = CSS[type];
   const size = {
     width: checkedWidth,
     height: checkedHeight,
@@ -65,10 +64,7 @@ export function SocialShare(props) {
       onClick={() => handleActivation(finalEndpoint, checkedTarget)}
       style={{...size, ...props['style']}}
     >
-      <SocialShareIcon
-        style={{...backgroundStyle, ...baseStyle, ...size}}
-        type={type}
-      />
+      <SocialShareIcon style={{...baseStyle, ...size}} type={type} />
     </div>
   );
 }
