@@ -140,8 +140,7 @@ function getZindex(cb) {
     })
     .on('end', async () => {
       const filename = 'css/Z_INDEX.md';
-      const rows = createTable(filesData);
-      rows.unshift.apply(rows, tableHeaders);
+      const rows = [...tableHeaders, ...createTable(filesData)];
       const tbl = table(rows, tableOptions);
       const output = `Run \`gulp get-zindex\` to generate this file.\n\n${tbl}`;
       fs.writeFileSync(filename, await prettierFormat(filename, output));
