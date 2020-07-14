@@ -917,13 +917,12 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
-    name: 'amp-story-interactives',
+    name: 'amp-story-interactive',
     version: '1.0',
     latestVersion: '1.0',
     options: {
       hasCss: true,
       cssBinaries: [
-        'amp-story-interactive',
         'amp-story-interactive-binary-poll',
         'amp-story-interactive-poll',
         'amp-story-interactive-quiz',

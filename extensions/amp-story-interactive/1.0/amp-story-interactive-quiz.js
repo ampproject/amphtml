@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {AmpStoryInteractive, InteractiveType} from './amp-story-interactive';
+import {
+  AmpStoryInteractive,
+  InteractiveType,
+} from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-quiz-1.0.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {dev} from '../../../src/log';
@@ -93,8 +96,10 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
 
     // Localize the answer choice options
     this.answerChoiceOptions_ = this.answerChoiceOptions_.map((choice) => {
-      return this.localizationService_.getLocalizedString(
-        LocalizedStringId[`AMP_STORY_QUIZ_ANSWER_CHOICE_${choice}`]
+      return (
+        this.localizationService_.getLocalizedString(
+          LocalizedStringId[`AMP_STORY_QUIZ_ANSWER_CHOICE_${choice}`]
+        ) || choice
       );
     });
     this.options_.forEach((option, index) =>
@@ -107,7 +112,7 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
    * adds styling and answer choices,
    * and adds it to the quiz element.
    *
-   * @param {!./amp-story-interactive.OptionConfigType} option
+   * @param {!./amp-story-interactive-abstract.OptionConfigType} option
    * @param {number} index
    * @private
    */
