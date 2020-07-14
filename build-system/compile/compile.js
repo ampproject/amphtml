@@ -243,7 +243,7 @@ function compile(
     const isStrict =
       argv.define_experiment_constant &&
       argv.define_experiment_constant === 'STRICT_COMPILATION';
-    let isEsm = argv.esm;
+    const isEsm = argv.esm;
     let language;
     if (isEsm) {
       // Do not transpile down to ES5 if running with `--esm`, since we do
