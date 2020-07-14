@@ -214,6 +214,9 @@ export class ResourcesImpl {
     /** @const @private {boolean} */
     this.renderOnIdleFix_ = isExperimentOn(this.win, 'render-on-idle-fix');
 
+    /** @const @private {boolean} */
+    this.removeTaskTimeout_ = isExperimentOn(this.win, 'remove-task-timeout');
+
     /** @private {boolean} */
     this.divertedRenderOnIdleFixExperiment_ = false;
 
@@ -1526,7 +1529,9 @@ export class ResourcesImpl {
     let timeout = -1;
     let task = this.queue_.peek(this.boundTaskScorer_);
     while (task) {
-      timeout = this.calcTaskTimeout_(task);
+      if (!this.removeTaskTimeout_) {
+        timeout = this.calcTaskTimeout_(task);
+      }
       dev().fine(
         TAG_,
         'peek from queue:',
@@ -1538,8 +1543,10 @@ export class ResourcesImpl {
         'timeout',
         timeout
       );
-      if (timeout > 16) {
-        break;
+      if (!this.removeTaskTimeout_) {
+        if (timeout > 16) {
+          break;
+        }
       }
 
       this.queue_.dequeue(task);
@@ -1602,10 +1609,12 @@ export class ResourcesImpl {
       this.exec_.getSize()
     );
 
-    if (timeout >= 0) {
-      // Still tasks in the queue, but we took too much time.
-      // Schedule the next work pass.
-      return timeout;
+    if (!this.removeTaskTimeout_) {
+      if (timeout >= 0) {
+        // Still tasks in the queue, but we took too much time.
+        // Schedule the next work pass.
+        return timeout;
+      }
     }
 
     // No tasks left in the queue.
@@ -1861,7 +1870,11 @@ export class ResourcesImpl {
         this.queue_.dequeue(queued);
       }
       this.queue_.enqueue(task);
-      this.schedulePass(this.calcTaskTimeout_(task));
+      if (this.removeTaskTimeout_) {
+        this.schedulePass();
+      } else {
+        this.schedulePass(this.calcTaskTimeout_(task));
+      }
     }
     task.resource.layoutScheduled(task.scheduleTime);
   }
