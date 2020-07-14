@@ -296,6 +296,25 @@ describes.realWin('ContextNode - values', {}, (env) => {
       expect(cousin1Stub).to.be.calledOnce; // no change.
       expect(calcSpy).to.have.callCount(3);
     });
+
+    it('should recompute a value when a node is removed', async () => {
+      grandparent.values.set(Recursive, 'OWNER1', 'A');
+      parent.values.set(Recursive, 'OWNER1', 'B');
+      clock.runAll();
+
+      expect(grandparentStub).to.be.calledOnce.calledWith('A');
+      expect(parentStub).to.be.calledOnce.calledWith('B');
+      expect(sibling1Stub).to.be.calledOnce.calledWith('B');
+      expect(sibling2Stub).to.be.calledOnce.calledWith('B');
+      expect(cousin1Stub).to.be.calledOnce.calledWith('A');
+      expect(calcSpy).to.have.callCount(5);
+
+      calcSpy.resetHistory();
+      parent.node.remove();
+      await rediscover(parent);
+      clock.runAll();
+      expect(calcSpy).to.have.callCount(0);
+    });
   });
 
   describe('connected, computable recursive', () => {

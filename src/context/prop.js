@@ -44,7 +44,7 @@ export class ContextProp {
   /**
    * An array of dependencies that are required for the `compute` callback.
    *
-   * @return {?Array<!ContextProp>}
+   * @return {!Array<!ContextProp>}
    */
   get deps() {}
 
