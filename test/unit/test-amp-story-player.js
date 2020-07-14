@@ -225,6 +225,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
     await afterRenderPromise();
 
+    // TODO(Enriqe): replace with navigation API once ready.
     expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
     expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
   });
@@ -239,6 +240,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
     await afterRenderPromise();
 
+    // TODO(Enriqe): replace with navigation API once ready.
     expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
     expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
   });
@@ -255,6 +257,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
     await afterRenderPromise();
 
+    // TODO(Enriqe): replace with navigation API once ready.
     expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
     expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
   });
