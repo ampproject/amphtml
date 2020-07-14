@@ -18,8 +18,8 @@
 
 /**
  * @typedef {{
- *   minFontSize: (number|undefined),
- *   maxFontSize: (number|undefined),
+ *   minFontSize: number,
+ *   maxFontSize: number,
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
