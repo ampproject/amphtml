@@ -240,9 +240,7 @@ function compile(
     // the release process automatically. Since this experiment is actually on the
     // build system instead of runtime, we never run it through babel and therefore
     // must compute it here.
-    const isStrict =
-      argv.define_experiment_constant &&
-      argv.define_experiment_constant === 'STRICT_COMPILATION';
+    const isStrict = argv.define_experiment_constant === 'STRICT_COMPILATION';
     const isEsm = argv.esm;
     let language;
     if (isEsm) {
