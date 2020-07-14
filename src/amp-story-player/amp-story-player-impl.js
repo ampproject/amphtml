@@ -206,14 +206,33 @@ export class AmpStoryPlayer {
   /** @private */
   initializeIframes_() {
     for (let idx = 0; idx < MAX_IFRAMES && idx < this.stories_.length; idx++) {
-      const story = this.stories_[idx];
-      this.buildIframe_(story);
+      this.createIframeForStory_(idx);
+    }
+  }
 
-      story[IFRAME_IDX] = idx;
-      this.setUpMessagingForIframe_(story, this.iframes_[idx]);
+  /**
+   * Creates an iframe for a certain story. Should only be done if
+   * this.iframes_.length < this.MAX_IFRAMES. It is assumed that iframes
+   * are created for stories in order, starting from the first one.
+   *
+   * @param {number} idx The index of the story in this.stories_, which
+   *    will also correspond to the index of its iframe in this.iframes_.
+   * @private
+   */
+  createIframeForStory_(idx) {
+    const story = this.stories_[idx];
 
-      this.iframePool_.addIframeIdx(idx);
-      this.iframePool_.addStoryIdx(idx);
+    this.buildIframe_(story);
+    const iframe = this.iframes_[idx];
+
+    story[IFRAME_IDX] = idx;
+    this.setUpMessagingForIframe_(story, iframe);
+
+    this.iframePool_.addIframeIdx(idx);
+    this.iframePool_.addStoryIdx(idx);
+
+    if (this.isLaidOut_) {
+      this.layoutIframe_(story, iframe, VisibilityState.PRERENDER);
     }
   }
 
