@@ -20,12 +20,7 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {dict} from '../../../src/utils/object';
 import {mod} from '../../../src/utils/math';
 import {setStyle} from '../../../src/style';
-import {
-  toChildArray,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-} from '../../../src/preact';
+import {useLayoutEffect, useMemo, useRef} from '../../../src/preact';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last
@@ -43,7 +38,7 @@ const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
  */
 export function Scroller(props) {
   const {
-    'children': children,
+    'children': children, // Must be an array.
     'ignoreProgrammaticScroll': ignoreProgrammaticScroll,
     'loop': loop,
     'restingIndex': restingIndex,
@@ -212,7 +207,7 @@ function renderSlides(props) {
   const {length} = children;
   const slides = [];
 
-  toChildArray(children).forEach((child, index) => {
+  children.forEach((child, index) => {
     const key = `slide-${child.key || index}`;
     slides.push(
       <WithAmpContext

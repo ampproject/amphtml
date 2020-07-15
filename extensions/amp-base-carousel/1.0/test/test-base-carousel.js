@@ -32,7 +32,9 @@ describes.sandboxed('BaseCarousel preact component', {}, () => {
 
     const scroller = wrapper.find('Scroller');
     expect(scroller).to.have.lengthOf(1);
-    expect(scroller.props().children).to.equal(wrapper.props().children);
+    expect(scroller.props().children).to.have.ordered.members(
+      wrapper.props().children
+    );
   });
 
   it('should render custom Arrows when given', () => {

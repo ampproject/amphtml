@@ -27,12 +27,13 @@ export function BaseCarousel(props) {
     'arrowPrev': arrowPrev,
     'arrowNext': arrowNext,
     'children': children,
-    'currentSlide': currentSlide,
+    'defaultSlide': defaultSlide,
     'loop': loop,
     ...rest
   } = props;
-  const {length} = toChildArray(children);
-  const {0: curSlide, 1: setCurSlide} = useState(currentSlide || 0);
+  const childrenArray = toChildArray(children);
+  const {length} = childrenArray;
+  const [curSlide, setCurSlide] = useState(defaultSlide || 0);
   const ignoreProgrammaticScroll = useRef(true);
   const setRestingIndex = (i) => {
     ignoreProgrammaticScroll.current = true;
@@ -56,19 +57,19 @@ export function BaseCarousel(props) {
         setRestingIndex={setRestingIndex}
         scrollRef={scrollRef}
       >
-        {children}
+        {childrenArray}
       </Scroller>
       <Arrow
         customArrow={arrowPrev}
         dir={-1}
         disabled={disableForDir(-1)}
-        onClick={() => advance(-1)}
+        advance={() => advance(-1)}
       />
       <Arrow
         customArrow={arrowNext}
         dir={1}
         disabled={disableForDir(1)}
-        onClick={() => advance(1)}
+        advance={() => advance(1)}
       />
     </div>
   );

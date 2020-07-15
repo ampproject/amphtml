@@ -26,7 +26,7 @@ export function Arrow(props) {
   const {
     'customArrow': customArrow,
     'dir': dir,
-    'onClick': onClick,
+    'advance': advance,
     'disabled': disabled,
   } = props;
   const button = customArrow
@@ -35,15 +35,15 @@ export function Arrow(props) {
   const {
     'children': children,
     'disabled': customDisabled,
-    'onCustomClick': onCustomClick,
+    'onClick': onCustomClick,
     ...rest
   } = button.props;
   const isDisabled = disabled || customDisabled;
-  const handleClick = (e) => {
+  const onClick = (e) => {
     if (onCustomClick) {
       onCustomClick(e);
     }
-    onClick();
+    advance();
   };
   return (
     <div
@@ -56,8 +56,8 @@ export function Arrow(props) {
       {Preact.cloneElement(
         button,
         {
-          onClick: handleClick,
-          disabled: isDisabled,
+          'onClick': onClick,
+          'disabled': isDisabled,
           'aria-disabled': isDisabled,
           ...rest,
         },

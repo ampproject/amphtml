@@ -71,10 +71,10 @@ export const provideArrows = () => {
 export const WithLooping = () => {
   const width = number('width', 440);
   const height = number('height', 225);
-  const currentSlide = number('currentSlide', 0);
+  const defaultSlide = number('default slide', 0);
   return (
     <BaseCarousel
-      currentSlide={currentSlide}
+      defaultSlide={defaultSlide}
       loop
       style={{width, height, position: 'relative'}}
     >
