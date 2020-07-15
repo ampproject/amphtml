@@ -21,6 +21,13 @@ import {htmlFor} from '../../../src/static-template';
 import {setStyle} from '../../../src/style';
 
 /**
+ * @typedef {{
+ *    category: string,
+ * }}
+ */
+export let InteractiveResultsDef;
+
+/**
  * Generates the template for the quiz.
  *
  * @param {!Element} element
@@ -30,24 +37,43 @@ const buildResultsTemplate = (element) => {
   const html = htmlFor(element);
   return html`
     <div class="i-amphtml-story-interactive-results-container">
-      <div class="i-amphtml-story-interactive-results-pre-select">
-        <span>Come back when you're done</span>
-      </div>
-      <div class="i-amphtml-story-interactive-results-post-select">
-        <div class="i-amphtml-story-interactive-results-line"></div>
-        <div class="i-amphtml-story-interactive-results-visuals">
-          <div class="i-amphtml-story-interactive-results-dots"></div>
-          <div class="i-amphtml-story-interactive-results-image-border">
-            <div class="i-amphtml-story-interactive-results-image"></div>
-          </div>
-          <div class="i-amphtml-story-interactive-results-dots"></div>
+      <div class="i-amphtml-story-interactive-results-line"></div>
+      <div class="i-amphtml-story-interactive-results-visuals">
+        <div class="i-amphtml-story-interactive-results-dots"></div>
+        <div class="i-amphtml-story-interactive-results-image-border">
+          <div class="i-amphtml-story-interactive-results-image"></div>
         </div>
-        <div class="i-amphtml-story-interactive-results-prompt"></div>
-        <div class="i-amphtml-story-interactive-results-title"></div>
-        <div class="i-amphtml-story-interactive-results-description"></div>
+        <div class="i-amphtml-story-interactive-results-dots"></div>
       </div>
+      <div class="i-amphtml-story-interactive-results-prompt"></div>
+      <div class="i-amphtml-story-interactive-results-title"></div>
+      <div class="i-amphtml-story-interactive-results-description"></div>
     </div>
   `;
+};
+
+/**
+ * Processes the state and returns the condensed results.
+ * @param {!Map<string, {option: ?./amp-story-interactive.OptionConfigType, interactiveId: string}>} interactiveState
+ * @param {?Array<!OptionConfigType>} options needed to ensure the first options take precedence on ties
+ * @return {InteractiveResultsDef} the results
+ */
+const processResults = (interactiveState, options) => {
+  const categories = {};
+  // Add options in order to prefer earlier categories before later ones.
+  options.forEach((option) => {
+    categories[option.resultscategory] = 0;
+  });
+  Object.values(interactiveState).forEach((e) => {
+    if (e.option != null) {
+      categories[e.option.resultscategory] += 1;
+    }
+  });
+  return {
+    category: Object.keys(categories).reduce((a, b) =>
+      categories[a] >= categories[b] ? a : b
+    ),
+  };
 };
 
 export class AmpStoryInteractiveResults extends AmpStoryInteractive {
@@ -77,24 +103,17 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
       ).textContent = this.element.getAttribute('prompt-text');
     }
     this.storeService_.subscribe(
-      StateProperty.INTERACTIVE_RESULTS_STATE,
+      StateProperty.INTERACTIVE_REACT_STATE,
       (data) => {
-        if (data.finished) {
-          this.options_.forEach((e) => {
-            if (e.resultscategory === data.category) {
-              this.mutateElement(() => {
-                this.updateCategory_(e);
-                this.updateToPostSelectionState_(null);
-              });
-            }
-          });
-        } else {
-          this.mutateElement(() => {
-            this.rootEl_.classList.remove(
-              'i-amphtml-story-interactive-post-selection'
-            );
-          });
-        }
+        const results = processResults(data, this.options_);
+        this.options_.forEach((e) => {
+          if (e.resultscategory === results.category) {
+            this.mutateElement(() => {
+              this.updateCategory_(e);
+              this.updateToPostSelectionState_(null);
+            });
+          }
+        });
       },
       true
     );

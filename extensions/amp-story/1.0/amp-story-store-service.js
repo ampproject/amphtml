@@ -78,14 +78,6 @@ export let InteractiveComponentDef;
 
 /**
  * @typedef {{
- *    finished: boolean,
- *    category: ?string,
- * }}
- */
-export let InteractiveResultsDef;
-
-/**
- * @typedef {{
  *    canInsertAutomaticAd: boolean,
  *    canShowBookend: boolean,
  *    canShowAudioUi: boolean,
