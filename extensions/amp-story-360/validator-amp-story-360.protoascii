@@ -28,6 +28,7 @@ tags: {  # <amp-story-360>
   html_format: AMP
   tag_name: "AMP-STORY-360"
   requires_extension: "amp-story-360"
+  mandatory_ancestor: "AMP-STORY"
   spec_url: "https://amp.dev/documentation/components/amp-story-360"
   attrs: {
     name: "duration"
