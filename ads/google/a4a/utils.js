@@ -191,12 +191,13 @@ export function isReportingEnabled(ampElement) {
 /**
  * Has side-effect of incrementing ifi counter on window.
  * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
+ * @param {boolean} roundLocations when true scr_x & scr_y are rounded
  * @param {!Array<string>=} opt_experimentIds Any experiments IDs (in addition
  *     to those specified on the ad element) that should be included in the
  *     request.
  * @return {!Object<string,null|number|string>} block level parameters
  */
-export function googleBlockParameters(a4a, opt_experimentIds) {
+export function googleBlockParameters(a4a, roundLocations, opt_experimentIds) {
   const {element: adElement, win} = a4a;
   const slotRect = a4a.getPageLayoutBox();
   const iframeDepth = iframeNestingDepth(win);
@@ -209,8 +210,8 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
     'adf': DomFingerprint.generate(adElement),
     'nhd': iframeDepth,
     'eid': eids,
-    'adx': slotRect.left,
-    'ady': slotRect.top,
+    'adx': roundLocations ? Math.round(slotRect.left) : slotRect.left,
+    'ady': roundLocations ? Math.round(slotRect.top) : slotRect.top,
     'oid': '2',
     'act': enclosingContainers.length ? enclosingContainers.join() : null,
   };
@@ -273,9 +274,10 @@ export function groupAmpAdsByType(ampdoc, type, groupFn) {
 /**
  * @param {! ../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {number} startTime
+ * @param {boolean} roundLocations when true scr_x & scr_y are rounded
  * @return {!Promise<!Object<string,null|number|string>>}
  */
-export function googlePageParameters(a4a, startTime) {
+export function googlePageParameters(a4a, startTime, roundLocations) {
   const {win} = a4a;
   const ampDoc = a4a.getAmpDoc();
   // Do not wait longer than 1 second to retrieve referrer to ensure
@@ -328,8 +330,12 @@ export function googlePageParameters(a4a, startTime) {
       'ish': win != win.top ? viewportSize.height : null,
       'art': getAmpRuntimeTypeParameter(win),
       'vis': visibilityStateCodes[visibilityState] || '0',
-      'scr_x': viewport.getScrollLeft(),
-      'scr_y': viewport.getScrollTop(),
+      'scr_x': roundLocations
+        ? Math.round(viewport.getScrollLeft())
+        : viewport.getScrollLeft(),
+      'scr_y': roundLocations
+        ? Math.round(viewport.getScrollTop())
+        : viewport.getScrollTop(),
       'bc': getBrowserCapabilitiesBitmap(win) || null,
       'debug_experiment_id':
         (/(?:#|,)deid=([\d,]+)/i.exec(win.location.hash) || [])[1] || null,
@@ -347,6 +353,7 @@ export function googlePageParameters(a4a, startTime) {
  * @param {string} baseUrl
  * @param {number} startTime
  * @param {!Object<string,null|number|string>} parameters
+ * @param {boolean} roundLocations when true adx/ady/scr_x/scr_y are rounded
  * @param {!Array<string>=} opt_experimentIds Any experiments IDs (in addition
  *     to those specified on the ad element) that should be included in the
  *     request.
@@ -357,14 +364,21 @@ export function googleAdUrl(
   baseUrl,
   startTime,
   parameters,
+  roundLocations,
   opt_experimentIds
 ) {
   // TODO: Maybe add checks in case these promises fail.
-  const blockLevelParameters = googleBlockParameters(a4a, opt_experimentIds);
-  return googlePageParameters(a4a, startTime).then((pageLevelParameters) => {
-    Object.assign(parameters, blockLevelParameters, pageLevelParameters);
-    return truncAndTimeUrl(baseUrl, parameters, startTime);
-  });
+  const blockLevelParameters = googleBlockParameters(
+    a4a,
+    roundLocations,
+    opt_experimentIds
+  );
+  return googlePageParameters(a4a, startTime, roundLocations).then(
+    (pageLevelParameters) => {
+      Object.assign(parameters, blockLevelParameters, pageLevelParameters);
+      return truncAndTimeUrl(baseUrl, parameters, startTime);
+    }
+  );
 }
 
 /**

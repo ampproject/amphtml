@@ -29,7 +29,7 @@
   "fixed-elements-in-lightbox": 1,
   "flexAdSlots": 0.05,
   "hidden-mutation-observer": 1,
-  "intersect-resources": 1,
+  "intersect-resources": 0.1,
   "ios-fixed-no-transfer": 0,
   "layoutbox-invalidate-on-scroll": 1,
   "pump-early-frame": 1,
@@ -40,5 +40,6 @@
   "amp-ad-no-center-css": 0,
   "analytics-chunks": 1,
   "sticky-ad-padding-bottom": 0.05,
-  "render-on-idle-fix": 0.02
+  "render-on-idle-fix": 0.02,
+  "ad-adsense-gam-round-params": 0.02
 }

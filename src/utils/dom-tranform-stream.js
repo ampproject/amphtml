@@ -25,14 +25,21 @@ export class DomTransformStream {
    */
   constructor(win) {
     const headDefer = new Deferred();
-    /** @const @private {!Promise<!Element>} */
+    /**
+     * Resolves when head has been written to in memory document.
+     * @const @private {!Promise<!Element>}
+     */
     this.headPromise_ = headDefer.promise;
 
     /** @const @private {!function(!Element)} */
     this.headResolver_ = headDefer.resolve;
 
     const transferDefer = new Deferred();
-    /** @const @private {!Promise} */
+    /**
+     * Resovles when complete doc has been transfered to the target
+     * body.
+     * @const @private {!Promise}
+     */
     this.bodyTransferPromise_ = transferDefer.promise;
 
     /** @const @private {!function(!Promise)} */
@@ -41,8 +48,15 @@ export class DomTransformStream {
     /** @private {?Element} */
     this.detachedBody_ = null;
 
-    /** @private {?Element} */
-    this.targetBody_ = null;
+    const targetBodyDefer = new Deferred();
+    /**
+     * Resolves when target body is ready to receive elements.
+     * @private {!Promise<!Element>}
+     */
+    this.targetBodyPromise_ = targetBodyDefer.promise;
+
+    /** @const @private {!function(!Element)} */
+    this.targetBodyResolver_ = targetBodyDefer.resolve;
 
     /** @private {?Promise} */
     this.currentChunkTransferPromise_ = null;
@@ -109,7 +123,7 @@ export class DomTransformStream {
     );
 
     this.shouldTransfer_ = true;
-    this.targetBody_ = targetBody;
+    this.targetBodyResolver_(targetBody);
 
     this.transferBodyChunk_();
 
@@ -125,12 +139,16 @@ export class DomTransformStream {
       return this.currentChunkTransferPromise_;
     }
 
-    this.currentChunkTransferPromise_ = this.headPromise_.then(() =>
+    this.currentChunkTransferPromise_ = Promise.all([
+      this.targetBodyPromise_,
+      this.headPromise_,
+    ]).then((resolvedElements) =>
       this.vsync_.mutatePromise(() => {
         this.currentChunkTransferPromise_ = null;
+        const targetBody = resolvedElements[0];
         removeNoScriptElements(dev().assertElement(this.detachedBody_));
         while (this.detachedBody_.firstChild) {
-          this.targetBody_.appendChild(this.detachedBody_.firstChild);
+          targetBody.appendChild(this.detachedBody_.firstChild);
         }
       })
     );
