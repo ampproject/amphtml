@@ -383,7 +383,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       playerEl.addEventListener('navigation', navigationSpy);
       player.next_();
       expect(navigationSpy.firstCall.args[0].type).to.eql('navigation');
-      expect(navigationSpy.firstCall.args[0].detail).to.eql({index: 1, remaining: 3});
+      expect(navigationSpy.firstCall.args[0].detail).to.eql({
+        index: 1,
+        remaining: 3,
+      });
     });
 
     it('signals when player changed story using previous method', async () => {
@@ -399,7 +402,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       player.next_();
       player.previous_();
       expect(navigationSpy.secondCall.args[0].type).to.eql('navigation');
-      expect(navigationSpy.secondCall.args[0].detail).to.eql({index: 0, remaining: 4});
+      expect(navigationSpy.secondCall.args[0].detail).to.eql({
+        index: 0,
+        remaining: 4,
+      });
     });
   });
 });

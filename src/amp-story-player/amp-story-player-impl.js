@@ -435,14 +435,13 @@ export class AmpStoryPlayer {
    * Indicates the player changed story.
    * @private
    */
-  signalNavigation() {
-    let index = this.currentIdx_;
-    let remaining = this.stories_.length - this.currentIdx_ - 1;
-    const event = createCustomEvent(
-      this.win_, 
-      'navigation', 
-      {index, remaining}
-    );
+  signalNavigation_() {
+    const index = this.currentIdx_;
+    const remaining = this.stories_.length - this.currentIdx_ - 1;
+    const event = createCustomEvent(this.win_, 'navigation', {
+      index,
+      remaining,
+    });
     this.element_.dispatchEvent(event);
   }
 
