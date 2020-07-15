@@ -223,9 +223,9 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     fireHandler['selectDocument']('selectDocument', fakeData);
 
     const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-    await afterRenderPromise();
 
-    // TODO(Enriqe): replace with navigation API once ready.
+    // TODO(#29278): replace with navigation API once ready.
+    await afterRenderPromise();
     expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
     expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
   });
@@ -238,9 +238,9 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     swipeLeft();
 
     const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-    await afterRenderPromise();
 
-    // TODO(Enriqe): replace with navigation API once ready.
+    // TODO(#29278): replace with navigation API once ready.
+    await afterRenderPromise();
     expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
     expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
   });
@@ -255,9 +255,9 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     swipeLeft();
 
     const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-    await afterRenderPromise();
 
-    // TODO(Enriqe): replace with navigation API once ready.
+    // TODO(#29278): replace with navigation API once ready.
+    await afterRenderPromise();
     expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
     expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
   });
