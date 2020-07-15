@@ -1,8 +1,12 @@
 <html>
   <head>
     <title>Story Player (Non-AMP)</title>
+    <script>
+      // TODO(#17108): Remove this when getMode().test is set.
+      __AMP_TEST = true;
+    </script>
     <script async src="../../../dist/amp-story-player.js"></script>
-    <link href="../../build/css/amp-story-player-v0.css" rel='stylesheet' type='text/css'>
+    <link href="../../../build/css/amp-story-player-v0.css" rel='stylesheet' type='text/css'>
     <style page>
       body {
         font-family: sans-serif;
@@ -35,7 +39,7 @@
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   </head>
   <body>
-    <amp-story-player style="width: 360px; height: 600px;" exit-control="back-button">
+    <amp-story-player style="width: 360px; height: 600px;" exit-control="close-button">
       <a href="./../../amp-story/attachment.html"
       style="--story-player-poster: url('./img/overview.jpg');"
       class="story">
