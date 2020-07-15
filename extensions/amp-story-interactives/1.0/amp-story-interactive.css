@@ -19,7 +19,7 @@
 }
 
 .i-amphtml-story-interactive-container {
-  background: var(--interactive-prompt-background-color) !important;
+  background: var(--interactive-prompt-background) !important;
   border-radius: 32px !important;
 }
 

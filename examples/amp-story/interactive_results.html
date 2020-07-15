@@ -31,7 +31,7 @@
             <amp-img
                 animate-in="pan-left"
                 animate-in-duration="30s"
-                src="https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/dog-puppy-on-garden-royalty-free-image-1586966191.jpg"
+                src="https://images.unsplash.com/photo-1415369629372-26f2fe60c467?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1268&q=80"
                 layout="responsive"
                 height="1600"
                 width="900">
@@ -47,14 +47,17 @@
         </amp-story-page>
         <amp-story-page id="quiz-1">
           <amp-story-grid-layer template="fill">
-            <amp-img
-                src="img/green-stuff.jpg" layout="responsive" height="1600" width="900">
+            <amp-img style="filter:blur(4px) saturate(0.7);"
+                src="https://images.unsplash.com/photo-1546548970-71785318a17b?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1268&q=80" layout="responsive" height="1600" width="900">
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
             <amp-story-interactive-poll
                 prompt-text="Whats your favorite food?"
                 endpoint="http://localhost:3000/interactives"
+                theme="dark"
+                chip-style="shadow"
+                style="--interactive-prompt-background: linear-gradient(120deg, rgb(255,103,38), rgb(235,69,69));"
                 option-1-text="Bones" option-1-results-category="Dog" 
                 option-2-text="Fish" option-2-results-category="Cat" 
                 option-3-text="Carrots" option-3-results-category="Bunny" 
@@ -72,6 +75,8 @@
             <amp-story-interactive-poll
                 prompt-text="How do you spend your free time?"
                 endpoint="http://localhost:3000/interactives"
+                style="--interactive-prompt-background: linear-gradient(120deg, rgb(251, 255, 38), rgb(144, 235, 69)); --interactive-prompt-text-color: black"
+                chip-style="shadow"
                 option-1-text="Stretching your back" option-1-results-category="Cat" 
                 option-2-text="Caressing your mustache" option-2-results-category="Mouse" 
                 option-3-text="Jumping all over the place" option-3-results-category="Bunny" 
@@ -81,14 +86,16 @@
         </amp-story-page>
         <amp-story-page id="quiz-3">
           <amp-story-grid-layer template="fill">
-            <amp-img
-                src="img/green-stuff.jpg" layout="responsive" height="1600" width="900">
+            <amp-img style="filter:blur(4px)"
+                src="https://images.unsplash.com/photo-1534534573898-db5148bc8b0c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1275&q=80" layout="responsive" height="1600" width="900">
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
             <amp-story-interactive-poll
                 prompt-text="What would you do for holidays?"
+                style="--interactive-prompt-background: linear-gradient(120deg, rgb(83, 32, 10), rgb(143, 89, 8));"
                 endpoint="http://localhost:3000/interactives"
+                theme="dark"
                 option-1-text="Easter island" option-1-results-category="Bunny" 
                 option-2-text="Drive with your tongue out" option-2-results-category="Dog" 
                 option-3-text="Get far away from cats" option-3-results-category="Mouse" 
@@ -99,7 +106,7 @@
         <amp-story-page id="quiz-4">
           <amp-story-grid-layer template="fill">
             <amp-img
-                src="img/green-stuff.jpg" layout="responsive" height="1600" width="900">
+                src="https://images.unsplash.com/photo-1559807424-a38a6b10c833?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1268&q=80" layout="responsive" height="1600" width="900">
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
@@ -115,7 +122,7 @@
         </amp-story-page>
         <amp-story-page id="quiz-results">
           <amp-story-grid-layer template="fill">
-            <amp-img
+            <amp-img style="filter:blur(4px)"
                 src="https://www.positive.news/wp-content/uploads/2019/03/feat-1800x0-c-center.jpg"
                 layout="responsive"
                 height="1600"
@@ -135,7 +142,7 @@
 				</amp-story-page>
 				<amp-story-page id="quiz-results-2">
           <amp-story-grid-layer template="fill">
-            <amp-img
+            <amp-img style="filter:blur(4px)"
                 src="https://www.positive.news/wp-content/uploads/2019/03/feat-1800x0-c-center.jpg"
                 layout="responsive"
                 height="1600"

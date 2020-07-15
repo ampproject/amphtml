@@ -15,7 +15,6 @@
  */
 
 .i-amphtml-story-interactive-binary-poll-container {
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.12) !important;
   color: var(--i-amphtml-interactive-option-accent-color) !important;
   --post-select-scale: 0.5 !important;
   --post-select-scale-variable: 1 !important;
@@ -29,7 +28,7 @@
   justify-content: center !important;
   height: 90px !important;
 	border-radius: 16px !important;
-	overflow: hidden !important;
+  box-shadow: var(--i-amphtml-interactive-component-shadow) !important;
   /* overflow bug fix for percent bar animation on ios safari  */
   transform: translateZ(0) !important;
 }
