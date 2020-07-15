@@ -30,9 +30,9 @@ import {createCustomEvent} from '../event-helper';
 import {dict, map} from '../utils/object';
 // Source for this constant is css/amp-story-player-iframe.css
 import {cssText} from '../../build/amp-story-player-iframe.css';
+import {getMode} from '../mode';
 import {resetStyles, setStyle, setStyles} from '../style';
 import {toArray} from '../types';
-import { getMode } from '../mode';
 
 /** @enum {string} */
 const LoadStateClass = {
@@ -221,7 +221,9 @@ export class AmpStoryPlayer {
   initializeShadowRoot_() {
     this.rootEl_ = this.doc_.createElement('main');
 
-    const containerToUse = getMode().test ? this.element_ : this.element_.attachShadow({mode: 'open'});
+    const containerToUse = getMode().test
+      ? this.element_
+      : this.element_.attachShadow({mode: 'open'});
 
     // Inject default styles
     const styleEl = this.doc_.createElement('style');
