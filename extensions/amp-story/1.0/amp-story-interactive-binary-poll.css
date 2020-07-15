@@ -151,3 +151,23 @@
   .i-amphtml-story-interactive-option-percentage-text {
   transform: scale(1) !important;
 }
+
+.i-amphtml-story-interactive-active 
+  .i-amphtml-story-interactive-option
+    .i-amphtml-story-interactive-option-title-text {
+  animation: clickMe calc(var(--i-amphtml-interactive-animation-time) * 2);
+}
+
+.i-amphtml-story-interactive-active 
+  .i-amphtml-story-interactive-option:last-child 
+    .i-amphtml-story-interactive-option-title-text {
+  animation-delay: calc(var(--i-amphtml-interactive-animation-time) * .3);
+}
+@keyframes clickMe { 
+  10% {
+    transform: translateY(4px);
+  }
+  20% {
+    transform: translateY(0px);
+  }
+}
