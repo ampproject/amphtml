@@ -75,6 +75,7 @@
         suggest-first
         filter="none"
         src="/form/mention/query"
+        [src]="colorsEndpoint"
         query="q"
         on="select:AMP.setState({inlineInputSelect: event.value})"
       >
@@ -91,6 +92,11 @@
           </div>
         </template>
       </amp-autocomplete>
+      <p>
+        <button on="tap:AMP.setState({colorsEndpoint: '/form/autocomplete/query'})">
+          mutate [src]
+        </button>
+      </p>
       <amp-autocomplete
         inline="+"
         min-characters="0"
