@@ -1056,6 +1056,7 @@ const forbiddenTermsSrcInclusive = {
       'src/services.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-a4a/0.1/head-validation.js',
       'extensions/amp-a4a/0.1/template-validator.js',
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js', // eslint-disable-line max-len
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js', // eslint-disable-line max-len

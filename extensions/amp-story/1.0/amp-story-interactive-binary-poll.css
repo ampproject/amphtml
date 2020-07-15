@@ -81,7 +81,7 @@
   position: absolute !important;
   opacity: 0 !important;
   transform-origin: left !important;
-  transition: transform var(--animation-time) var(--ease-out-curve) !important;
+  transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
 [dir=rtl] .i-amphtml-story-interactive-option
