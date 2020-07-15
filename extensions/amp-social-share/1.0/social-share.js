@@ -52,7 +52,7 @@ export function SocialShare(props) {
 
   const type = props['type'].toUpperCase();
   const baseStyle = CSS.BASE_STYLE;
-  const backgroundStyle = CSS[type] || CSS.DEFAULT;
+  const backgroundStyle = CSS[type];
   const size = {
     width: checkedWidth,
     height: checkedHeight,
