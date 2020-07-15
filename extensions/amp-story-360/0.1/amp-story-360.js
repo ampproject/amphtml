@@ -163,6 +163,9 @@ export class AmpStory360 extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isPlaying_ = false;
+
+    /** @private {boolean} */
+    this.isReady_ = false;
   }
 
   /** @override */
@@ -235,6 +238,10 @@ export class AmpStory360 extends AMP.BaseElement {
             return;
           }
           this.renderInitialPosition_();
+          this.isReady_ = true;
+          if (this.isPlaying_) {
+            this.animate_();
+          }
         },
         () => {
           user().error(TAG, 'Failed to load the amp-img.');
@@ -315,7 +322,9 @@ export class AmpStory360 extends AMP.BaseElement {
         'still loading content.'
     );
     this.isPlaying_ = true;
-    this.animate_();
+    if (this.isReady_) {
+      this.animate_();
+    }
   }
 
   /** @public */
@@ -325,11 +334,15 @@ export class AmpStory360 extends AMP.BaseElement {
     }
     this.animation_ = null;
     // Let the animation loop exit, then render the initial position and resume
-    // the animation (if not paused)
-    this.win.requestAnimationFrame(() => {
-      this.renderInitialPosition_();
-      this.animate_();
-    });
+    // the animation (if applicable)
+    if (this.isReady_) {
+      this.win.requestAnimationFrame(() => {
+        this.renderInitialPosition_();
+        if (this.isPlaying_) {
+          this.animate_();
+        }
+      });
+    }
   }
 }
 

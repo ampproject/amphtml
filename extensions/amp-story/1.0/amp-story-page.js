@@ -502,13 +502,8 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     this.story360components_.forEach((componentPromise) => {
       componentPromise.then((component) => {
-        component
-          .signals()
-          .whenSignal(CommonSignals.LOAD_END)
-          .then(() => {
-            component.pause();
-            component.rewind();
-          });
+        component.pause();
+        component.rewind();
       });
     });
   }
@@ -542,14 +537,9 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.findAndPrepareEmbeddedComponents_();
       this.story360components_.forEach((componentPromise) => {
         componentPromise.then((component) => {
-          component
-            .signals()
-            .whenSignal(CommonSignals.LOAD_END)
-            .then(() => {
-              if (component.canAnimate) {
-                component.play();
-              }
-            });
+          if (component.canAnimate) {
+            component.play();
+          }
         });
       });
     }
