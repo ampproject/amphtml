@@ -509,6 +509,18 @@ export class Services {
   }
 
   /**
+   * Get promise with story request service
+   * @param {!Window} win
+   * @return {?Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService>}
+   */
+  static storyRequestServiceForOrNull(win) {
+    return (
+      /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService>} */
+      (getElementServiceIfAvailable(win, 'story-request', 'amp-story'))
+    );
+  }
+
+  /**
    * @param {!Window} win
    * @return {?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService}
    */

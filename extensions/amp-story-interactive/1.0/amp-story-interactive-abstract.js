@@ -17,7 +17,6 @@
 import {
   ANALYTICS_TAG_NAME,
   StoryAnalyticsEvent,
-  getAnalyticsService,
 } from '../../amp-story/1.0/story-analytics';
 import {
   Action,
@@ -35,7 +34,6 @@ import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getRequestService} from '../../amp-story/1.0/amp-story-request-service';
 import {toArray} from '../../../src/types';
 
 /** @const {string} */
@@ -133,8 +131,8 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected @const {InteractiveType} */
     this.interactiveType_ = type;
 
-    /** @protected @const {!../../amp-story/1.0/story-analytics.StoryAnalyticsService} */
-    this.analyticsService_ = getAnalyticsService(this.win, element);
+    /** @protected @const {?Promise<../../amp-story/1.0/story-analytics.StoryAnalyticsService>} */
+    this.analyticsServicePromise_ = null;
 
     /** @protected {?Promise<?InteractiveResponseType|?JsonObject|undefined>} */
     this.backendDataPromise_ = null;
@@ -166,17 +164,11 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected {?Element} */
     this.rootEl_ = null;
 
-    /** @protected {!../../amp-story/1.0/amp-story-request-service.AmpStoryRequestService} */
-    this.requestService_ = getRequestService(this.win, this.element);
+    /** @protected {?Promise<../../amp-story/1.0/amp-story-request-service.AmpStoryRequestService>} */
+    this.requestServicePromise_ = null;
 
-    /** @const @protected {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = null;
-
-    Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
-      this.storeService_ = storeService;
-      this.updateStoryStoreState_(null);
-      this.initializeStoreListeners_();
-    });
+    /** @const @protected {!Promise<../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService>} */
+    this.storeServicePromise_ = Services.storyStoreServiceForOrNull(this.win);
 
     /** @protected {../../../src/service/url-impl.Url} */
     this.urlService_ = Services.urlForDoc(this.element);
@@ -241,8 +233,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     this.rootEl_.classList.add('i-amphtml-story-interactive-container');
     this.element.classList.add('i-amphtml-story-interactive-component');
     this.adjustGridLayer_();
-    // Add a click listener to the element to trigger the class change
-    this.rootEl_.addEventListener('click', (e) => this.handleTap_(e));
+    this.initializeListeners_();
     devAssert(this.element.children.length == 0, 'Too many children');
     createShadowRootWithStyle(
       this.element,
@@ -346,9 +337,13 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return (this.backendDataPromise_ = this.element.hasAttribute('endpoint')
-      ? this.retrieveInteractiveData_()
-      : Promise.resolve());
+    return Promise.all([
+      (this.backendDataPromise_ = this.element.hasAttribute('endpoint')
+        ? this.retrieveInteractiveData_()
+        : Promise.resolve()),
+      (this.analyticsServicePromise_ = Services.storyAnalyticsServiceForOrNull()),
+      (this.requestServicePromise_ = Services.storyRequestServiceForOrNull()),
+    ]);
   }
 
   /**
@@ -412,29 +407,33 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * Attaches functions to each option to handle state transition.
    * @private
    */
-  initializeStoreListeners_() {
-    // Add a listener for changes in the RTL state
-    this.storeService_.subscribe(
-      StateProperty.RTL_STATE,
-      (rtlState) => {
-        this.onRtlStateUpdate_(rtlState);
-      },
-      true /** callToInitialize */
-    );
+  initializeListeners_() {
+    this.storeServicePromise_.then((storeService) => {
+      // Add a listener for changes in the RTL state
+      storeService.subscribe(
+        StateProperty.RTL_STATE,
+        (rtlState) => {
+          this.onRtlStateUpdate_(rtlState);
+        },
+        true /** callToInitialize */
+      );
 
-    // Check if the component page is active, and add class.
-    this.storeService_.subscribe(
-      StateProperty.CURRENT_PAGE_ID,
-      (currPageId) => {
-        this.mutateElement(() => {
-          this.rootEl_.classList.toggle(
-            INTERACTIVE_ACTIVE_CLASS,
-            currPageId === this.getPageId_()
-          );
-        });
-      },
-      true /** callToInitialize */
-    );
+      // Check if the component page is active, and add class.
+      storeService.subscribe(
+        StateProperty.CURRENT_PAGE_ID,
+        (currPageId) => {
+          this.mutateElement(() => {
+            this.rootEl_.classList.toggle(
+              INTERACTIVE_ACTIVE_CLASS,
+              currPageId === this.getPageId_()
+            );
+          });
+        },
+        true /** callToInitialize */
+      );
+    });
+
+    this.rootEl_.addEventListener('click', (e) => this.handleTap_(e));
   }
 
   /**
@@ -482,10 +481,12 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     );
 
     this.element[ANALYTICS_TAG_NAME] = this.element.tagName;
-    this.analyticsService_.triggerEvent(
-      StoryAnalyticsEvent.INTERACTIVE,
-      this.element
-    );
+    Services.storyAnalyticsServiceForOrNull().then((analyticsService) => {
+      analyticsService.triggerEvent(
+        StoryAnalyticsEvent.INTERACTIVE,
+        this.element
+      );
+    });
   }
 
   /**
@@ -664,9 +665,11 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         url = appendPathToUrl(this.urlService_.parse(url), '/react');
       }
       url = addParamsToUrl(url, requestParams);
-      return this.requestService_
-        .executeRequest(url, requestOptions)
-        .catch((err) => dev().error(TAG, err));
+      return this.requestServicePromise_.then((requestService) => {
+        requestService
+          .executeRequest(url, requestOptions)
+          .catch((err) => dev().error(TAG, err));
+      });
     });
   }
 
@@ -744,6 +747,12 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       this.updateOptionPercentages_(this.optionsData_);
     }
   }
+
+  /**
+   * Called by amp-story when created
+   * @public
+   */
+  onStoryCreated() {}
 
   /**
    * @public
