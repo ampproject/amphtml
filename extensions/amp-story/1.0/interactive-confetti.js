@@ -17,32 +17,33 @@
 import {htmlFor} from '../../../src/static-template';
 import {removeChildren} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
+import {Services} from '../../../src/services';
 
 /**
- * Generates the template for the particle wrapper.
+ * Generates the template for the confetti wrapper.
  *
  * @param {!Element} element
  * @return {!Element}
  */
-const buildWrapperTemplate = (element) => {
+const buildConfettiWrapperTemplate = (element) => {
   const html = htmlFor(element);
   return html`
     <div
-      class="i-amphtml-story-interactive-particle-wrapper"
+      class="i-amphtml-story-interactive-confetti-wrapper"
       aria-hidden="true"
     ></div>
   `;
 };
 
 /**
- * Generates a template for a particle.
+ * Generates a template for a confetti.
  *
  * @param {!Element} element
  * @return {!Element}
  */
-const buildParticleTemplate = (element) => {
+const buildconfettiTemplate = (element) => {
   const html = htmlFor(element);
-  return html` <div class="i-amphtml-story-interactive-particle"></div> `;
+  return html` <div class="i-amphtml-story-interactive-confetti"></div> `;
 };
 
 /**
@@ -52,33 +53,37 @@ const buildParticleTemplate = (element) => {
  * Nodes are removed from the dom at the end of the animation.
  *
  * @param {!Element} rootEl
+ * @param {!Window} win
  * @param {string} confettiEmoji
  * @return {void}
  */
-export function emojiBurst(rootEl, confettiEmoji) {
-  const PARTICLE_COUNT = 5;
-  const SLICE = (Math.PI * 2) / PARTICLE_COUNT;
+export function emojiConfetti(rootEl, win, confettiEmoji) {
+  const CONFETTI_COUNT = 5;
+  const SLICE = (Math.PI * 2) / CONFETTI_COUNT;
 
   const ANGLE_RANDOMNESS = SLICE * 0.2;
   const FONT_SIZE_RANDOM_RANGE = [30, 50];
   const ROTATION_RANDOMNESS = 20;
   const ADDITIONAL_DISTANCE = 5;
 
-  const ANIMATION_IN_DELAY = 300;
+  const ANIMATION_TIME = 300;
   const ANIMATION_OUT_DELAY = 1000;
 
-  // To calculate particle transform distance.
+  // To calculate confetti transform distance.
   const ROOT_EL_RECT = rootEl./*OK*/ getBoundingClientRect();
 
-  const particleWrapper = buildWrapperTemplate(rootEl);
-  rootEl.appendChild(particleWrapper);
+  /** @private @const {!../../../src/service/timer-impl.Timer} */
+  const timer = Services.timerFor(win);
 
-  setTimeout(() => {
-    // Generate particles. Set their ending position, size and rotation.
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      const particle = buildParticleTemplate(rootEl);
-      particleWrapper.appendChild(particle);
-      particle.textContent = confettiEmoji;
+  const confettiWrapper = buildConfettiWrapperTemplate(rootEl);
+  rootEl.appendChild(confettiWrapper);
+
+  timer.delay(() => {
+    // Generate confetti. Set their ending position, size and rotation.
+    for (let i = 0; i < CONFETTI_COUNT; i++) {
+      const confetti = buildconfettiTemplate(rootEl);
+      confettiWrapper.appendChild(confetti);
+      confetti.textContent = confettiEmoji;
 
       const fontSize =
         randomInRange(FONT_SIZE_RANDOM_RANGE[0], FONT_SIZE_RANDOM_RANGE[1]) +
@@ -90,26 +95,25 @@ export function emojiBurst(rootEl, confettiEmoji) {
       const y =
         Math.cos(angle) * (ROOT_EL_RECT.height / 2 + ADDITIONAL_DISTANCE);
       const rotation = randomInRange(-ROTATION_RANDOMNESS, ROTATION_RANDOMNESS);
-      setStyles(particle, {
+      setStyles(confetti, {
         fontSize,
         transform: `translate(${x}px, ${y}px) rotate(${rotation}deg)`,
       });
     }
-    // Scale up particle container.
-    particleWrapper.classList.add(
-      'i-amphtml-story-interactive-particle-wrapper-animate-in'
+    // Scale up confetti container.
+    confettiWrapper.classList.add(
+      'i-amphtml-story-interactive-confetti-wrapper-animate-in'
     );
 
-    // Animate out the particle wrapper and remove particles from the dom.
-    setTimeout(() => {
-      particleWrapper.classList.add(
-        'i-amphtml-story-interactive-particle-wrapper-animate-out'
+    // Animate out the wrapper
+    timer.delay(() => {
+      confettiWrapper.classList.add(
+        'i-amphtml-story-interactive-confetti-wrapper-animate-out'
       );
-      particleWrapper.addEventListener('transitionend', () => {
-        removeChildren(particleWrapper);
-      });
+      // Remove the wrapper from the dom.
+      timer.delay(() => rootEl.removeChild(confettiWrapper), ANIMATION_TIME);
     }, ANIMATION_OUT_DELAY);
-  }, ANIMATION_IN_DELAY);
+  }, ANIMATION_TIME);
 }
 
 /**
