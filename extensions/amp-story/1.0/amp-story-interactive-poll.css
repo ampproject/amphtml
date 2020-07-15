@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-.i-amphtml-story-interactive-poll-container {
-  background-color: var(--interactive-prompt-background-color) !important;
-}
 
 .i-amphtml-story-interactive-option-container {
   background-color: var(--i-amphtml-interactive-option-background-color) !important;
