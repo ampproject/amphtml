@@ -240,7 +240,7 @@ export class AmpStoryPlayer {
       return;
     }
 
-    const button = this.doc_.createElement('a');
+    const button = this.doc_.createElement('button');
     button.classList.add(BUTTON_CLASSES[option]);
 
     button.addEventListener('click', () => {
