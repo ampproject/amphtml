@@ -26,6 +26,7 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dev, userAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {
   fullscreenEnter,
   fullscreenExit,
@@ -55,7 +56,7 @@ class AmpMowplayer extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private @const {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
+    /** @private {?../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = null;
 
     /** @private {?string}  */
@@ -77,13 +78,7 @@ class AmpMowplayer extends AMP.BaseElement {
     this.unlistenMessage_ = null;
 
     /** @private {?boolean}  */
-    this.mofileFullApplied_ = false;
-
-    /** @private {?float}  */
-    this.originalHeight_ = null;
-
-    /** @private {?boolean}  */
-    this.paused_ = true;
+    this.muted_ = false;
   }
 
   /**
@@ -181,19 +176,22 @@ class AmpMowplayer extends AMP.BaseElement {
   /**
    * Sends a message to the player through postMessage.
    * @param {string} type
-   * @param {Array=} data
+   * @param {Object=} data
    * @private
    */
-  sendMessage_(type, data = {}) {
+  sendMessage_(type, data) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
-        this.iframe_.contentWindow./*OK*/ postMessage(
-          {
-            mowplayer: {
-              type,
-              data,
+        const message = JSON.stringify(
+          dict({
+            'mowplayer': {
+              'type': type,
+              'data': data,
             },
-          },
+          })
+        );
+        this.iframe_.contentWindow./*OK*/ postMessage(
+          message,
           'https://mowplayer.com'
         );
       }
@@ -221,27 +219,28 @@ class AmpMowplayer extends AMP.BaseElement {
       return; // We only process valid JSON.
     }
 
-    if (data.mowplayer === undefined) {
+    if (data['mowplayer'] === undefined) {
       return;
     }
 
-    const eventType = data.mowplayer.type;
-    const info = data.mowplayer.data || {};
+    const eventType = data['mowplayer']['type'];
+    const info = getData(data['mowplayer']) || {};
 
     const {element} = this;
 
     if (eventType === 'handshake') {
-      this.sendMessage_('handshake_done');
+      this.sendMessage_('handshake_done', {});
     } else if (eventType === 'visibility_observer') {
-      this.onVisibilityObserver_(info);
+      this.onVisibilityObserver_();
     } else if (eventType === 'pause') {
       this.pause();
     } else if (eventType === 'play') {
       this.play();
     }
 
-    const {playerState} = info;
-    if (eventType == 'infoDelivery' && playerState != null) {
+    const playerState = info['playerState'];
+
+    if (eventType == 'infoDelivery' && playerState !== undefined) {
       redispatch(element, playerState.toString(), {
         [PlayerStates.PLAYING]: VideoEvents.PLAYING,
         [PlayerStates.PAUSED]: VideoEvents.PAUSE,
@@ -251,8 +250,9 @@ class AmpMowplayer extends AMP.BaseElement {
       return;
     }
 
-    const {muted} = info;
-    if (eventType == 'infoDelivery' && info && muted != null) {
+    const muted = info['muted'];
+
+    if (eventType == 'infoDelivery' && muted !== undefined) {
       if (this.muted_ == muted) {
         return;
       }
@@ -265,13 +265,12 @@ class AmpMowplayer extends AMP.BaseElement {
   /**
    * Check player is visible or not based on breakpoint and send message to player
    * @private
-   * @param {Object} data
    */
-  onVisibilityObserver_(data) {
+  onVisibilityObserver_() {
     const worker = () => {
       const {intersectionRatio} = this.element.getIntersectionChangeEntry();
       const visible = intersectionRatio > 0.5 ? true : false;
-      this.sendMessage_('visibility_observer_visibility', {visible});
+      this.sendMessage_('visibility_observer_visibility', {'visible': visible});
     };
 
     this.viewport_.onChanged(worker);
@@ -290,14 +289,10 @@ class AmpMowplayer extends AMP.BaseElement {
   }
 
   /** @override */
-  play(unusedIsAutoplay) {
-    this.paused_ = false;
-  }
+  play() {}
 
   /** @override */
-  pause() {
-    this.paused_ = true;
-  }
+  pause() {}
 
   /** @override */
   mute() {}
