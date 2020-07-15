@@ -32,6 +32,7 @@ import {dict, map} from '../utils/object';
 import {cssText} from '../../build/amp-story-player-iframe.css';
 import {resetStyles, setStyle, setStyles} from '../style';
 import {toArray} from '../types';
+import { getMode } from '../mode';
 
 /** @enum {string} */
 const LoadStateClass = {
@@ -220,14 +221,13 @@ export class AmpStoryPlayer {
   initializeShadowRoot_() {
     this.rootEl_ = this.doc_.createElement('main');
 
-    // Create shadow root
-    const shadowRoot = this.element_.attachShadow({mode: 'open'});
+    const containerToUse = getMode().test ? this.element_.attachShadow({mode: 'open'}) : this.element_;
 
     // Inject default styles
     const styleEl = this.doc_.createElement('style');
     styleEl.textContent = cssText;
-    shadowRoot.appendChild(styleEl);
-    shadowRoot.appendChild(this.rootEl_);
+    containerToUse.appendChild(styleEl);
+    containerToUse.appendChild(this.rootEl_);
   }
 
   /**
@@ -360,10 +360,12 @@ export class AmpStoryPlayer {
     iframeEl.onload = () => {
       this.rootEl_.classList.remove(LoadStateClass.LOADING);
       this.rootEl_.classList.add(LoadStateClass.LOADED);
+      this.element_.classList.remove(LoadStateClass.LOADING);
       this.element_.classList.add(LoadStateClass.LOADED);
     };
     iframeEl.onerror = () => {
       this.rootEl_.classList.remove(LoadStateClass.LOADING);
+      this.element_.classList.remove(LoadStateClass.LOADING);
       this.rootEl_.classList.add(LoadStateClass.ERROR);
       this.element_.classList.add(LoadStateClass.ERROR);
     };
