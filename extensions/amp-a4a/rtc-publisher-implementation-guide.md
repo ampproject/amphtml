@@ -36,6 +36,7 @@ To use RTC, you must meet the following requirements:
 - Yieldbot
 - Kargo
 - Yieldlab
+- T13
 
 ### Overview
 
