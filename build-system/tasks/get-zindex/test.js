@@ -26,6 +26,8 @@ const result = {
   },
   'test-2.css': {
     '.selector-4': '80',
+    '.selector-5': 'initial',
+    '.selector-6': 'auto',
   },
 };
 
@@ -46,10 +48,12 @@ test('sync - create array of arrays with z index order', (t) => {
   t.plan(1);
   const table = m.createTable(result);
   const expected = [
-    ['.selector-2', '0', 'test.css'],
-    ['.selector-1', '1', 'test.css'],
-    ['.selector-4', '80', 'test-2.css'],
+    ['.selector-6', 'auto', 'test-2.css'],
+    ['.selector-5', 'initial', 'test-2.css'],
     ['.selector-3', '99', 'test.css'],
+    ['.selector-4', '80', 'test-2.css'],
+    ['.selector-1', '1', 'test.css'],
+    ['.selector-2', '0', 'test.css'],
   ];
   t.deepEqual(table, expected);
 });
