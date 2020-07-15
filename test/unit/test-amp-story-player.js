@@ -406,7 +406,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         .expects('sendRequest')
         .withArgs('setDocumentState', {state: 'MUTED_STATE', value: false});
     });
-    
+
     it('back button should be created and close button should not', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       playerEl.setAttribute('exit-control', 'back-button');
