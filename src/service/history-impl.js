@@ -146,12 +146,12 @@ export class History {
    * Requests navigation one step back. This first attempts to go back within
    * the context of this document.
    *
-   * @param {boolean=} canPerformWindowBack
+   * @param {boolean=} navigate
    * @return {!Promise}
    */
-  goBack(canPerformWindowBack) {
+  goBack(navigate) {
     return this.enque_(() => {
-      if (this.stackIndex_ <= 0 && !canPerformWindowBack) {
+      if (this.stackIndex_ <= 0 && !navigate) {
         return Promise.resolve();
       }
 
