@@ -15,7 +15,6 @@
  */
 
 import {htmlFor} from '../../../src/static-template';
-import {removeChildren} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
 import {Services} from '../../../src/services';
 
