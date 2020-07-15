@@ -95,6 +95,8 @@ class AmpSocialShare extends PreactBaseElement {
     return dict({
       'width': responsive || this.element.getAttribute('width'),
       'height': responsive || this.element.getAttribute('height'),
+      'color': 'currentColor',
+      'background': 'inherit',
     });
   }
 

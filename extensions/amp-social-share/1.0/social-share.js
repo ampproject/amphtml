@@ -37,6 +37,8 @@ const NAME = 'SocialShare';
  *  target: ?string,
  *  width: ?string,
  *  height: ?string,
+ *  color: ?string,
+ *  background: ?string,
  *  tabIndex: ?string,
  *  style: ?string,
  * @return {PreactDef.Renderable}
@@ -52,10 +54,15 @@ export function SocialShare(props) {
 
   const type = props['type'].toUpperCase();
   const baseStyle = CSS.BASE_STYLE;
+  const iconStyle = {
+    'color': props['color'] || CSS[type]['color'],
+    'backgroundColor': props['background'] || CSS[type]['backgroundColor'],
+  };
   const size = {
     width: checkedWidth,
     height: checkedHeight,
   };
+
   return (
     <div
       role="button"
@@ -64,7 +71,10 @@ export function SocialShare(props) {
       onClick={() => handleActivation(finalEndpoint, checkedTarget)}
       style={{...size, ...props['style']}}
     >
-      <SocialShareIcon style={{...baseStyle, ...size}} type={type} />
+      <SocialShareIcon
+        type={type}
+        style={{...iconStyle, ...baseStyle, ...size}}
+      />
     </div>
   );
 }
