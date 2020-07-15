@@ -527,6 +527,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       return Promise.resolve();
     }
     if (typeof src === 'string') {
+      this.srcBase_ = src;
       return this.getRemoteData_().then(
         (remoteData) => {
           this.sourceData_ = remoteData || [];
