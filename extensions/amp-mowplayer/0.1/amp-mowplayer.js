@@ -33,7 +33,6 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {getData, listen} from '../../../src/event-helper';
-import {getStyle, px, setStyle, setStyles, toggle} from '../../../src/style';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
@@ -56,6 +55,9 @@ class AmpMowplayer extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    /** @private @const {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
+    this.viewport_ = null;
+
     /** @private {?string}  */
     this.mediaid_ = '';
 
@@ -74,9 +76,6 @@ class AmpMowplayer extends AMP.BaseElement {
     /** @private {?Function} */
     this.unlistenMessage_ = null;
 
-    /** @private {?Function} */
-    this.stickyDisableWorker_ = null;
-
     /** @private {?boolean}  */
     this.mofileFullApplied_ = false;
 
@@ -85,9 +84,6 @@ class AmpMowplayer extends AMP.BaseElement {
 
     /** @private {?boolean}  */
     this.paused_ = true;
-
-    /** @global {?boolean}  */
-    window.mowStickyEnabled = false;
   }
 
   /**
@@ -98,11 +94,7 @@ class AmpMowplayer extends AMP.BaseElement {
     const preconnect = Services.preconnectFor(this.win);
     preconnect.url(this.getAmpDoc(), this.getVideoIframeSrc_());
     // Host that mowplayer uses to serve JS needed by player.
-    preconnect.url(
-      this.getAmpDoc(),
-      '//mowplayer.g2.gopanear.com',
-      opt_onLayout
-    );
+    preconnect.url(this.getAmpDoc(), 'https://mowplayer.com', opt_onLayout);
   }
 
   /** @override */
@@ -117,6 +109,8 @@ class AmpMowplayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.viewport_ = this.getViewport();
+
     this.mediaid_ = userAssert(
       this.element.getAttribute('data-mediaid'),
       '/The data-mediaid attribute is required for <amp-mowplayer> %s',
@@ -129,15 +123,6 @@ class AmpMowplayer extends AMP.BaseElement {
 
     installVideoManagerForDoc(this.element);
     Services.videoManagerForDoc(this.element).register(this);
-
-    const event = new CustomEvent('mowapiready', {
-      bubbles: true,
-      detail: {
-        api: this,
-      },
-    });
-
-    document.dispatchEvent(event);
   }
 
   /**
@@ -247,16 +232,8 @@ class AmpMowplayer extends AMP.BaseElement {
 
     if (eventType === 'handshake') {
       this.sendMessage_('handshake_done');
-    } else if (eventType === 'ready') {
-      this.onReady_(info);
     } else if (eventType === 'visibility_observer') {
       this.onVisibilityObserver_(info);
-    } else if (eventType === 'resize') {
-      this.onResize_(info);
-    } else if (eventType === 'stick_player') {
-      this.onStickPlayer_(info);
-    } else if (eventType === 'sticky_disable') {
-      this.onStickyDisable_();
     } else if (eventType === 'pause') {
       this.pause();
     } else if (eventType === 'play') {
@@ -286,236 +263,19 @@ class AmpMowplayer extends AMP.BaseElement {
   }
 
   /**
-   * Disable sticky player
-   * @private
-   */
-  onStickyDisable_() {
-    this.stickyDisableWorker_.call();
-  }
-
-  /**
-   * Set player height on resize
-   * @private
-   * @param {Object} data
-   */
-  onResize_(data) {
-    if (!window.mowStickyEnabled) {
-      this.attemptChangeHeight(data.state.dimensions.height + 10);
-    }
-  }
-
-  /**
-   * Set full width player on mobile when enabled from platform
-   * @private
-   * @param {Object} data
-   */
-  onReady_(data) {
-    if (
-      /(iPhone|iPad|iPod|Android|webOS|BlackBerry|Windows Phone)/gi.test(
-        navigator.userAgent
-      ) &&
-      data.state.config.mobile_full_width &&
-      !this.mofileFullApplied_
-    ) {
-      this.mofileFullApplied_ = true;
-      const repaint = () => {
-        const rect = this.element.getBoundingClientRect();
-        if (rect.width < window.screen.availWidth) {
-          const leftMargin = rect.left;
-          const rightMargin = window.screen.availWidth - rect.right;
-          setStyle(this.element, 'marginLeft', '-' + leftMargin + 'px');
-          setStyle(this.element, 'marginRight', '-' + rightMargin + 'px');
-        }
-      };
-
-      repaint();
-      window.addEventListener('resize', repaint);
-    }
-  }
-
-  /**
-   * Initialize sticky feature
-   * @private
-   * @param {Object} data
-   */
-  onStickPlayer_(data) {
-    let previousVisible = true;
-    const {breakpoint, position, margin} = data;
-    const marginStyle = `${margin}px`;
-    const fakeWrapper = document.createElement('div');
-    const fakeContainer = document.createElement('div');
-    fakeWrapper.appendChild(fakeContainer);
-    this.element.insertAdjacentElement('afterend', fakeWrapper);
-
-    setStyles(fakeWrapper, {
-      position: 'relative',
-    });
-
-    toggle(fakeWrapper, false);
-
-    const previousStyles = {};
-    const toggle_ = (enable) => {
-      window.mowStickyEnabled = enable;
-      const styles = {
-        position: 'fixed',
-        marginLeft: 0,
-        marginRight: 0,
-        zIndex: 1000000,
-        width: '100%',
-        maxWidth: '500px',
-      };
-
-      if (window.screen.availWidth <= 500) {
-        styles.right = 0;
-        styles.left = 0;
-
-        switch (position) {
-          case 'left_bottom':
-          case 'bottom_right':
-            styles.bottom = 0;
-            break;
-          case 'left_top':
-          case 'top_right':
-          default:
-            styles.top = 0;
-        }
-      } else {
-        switch (position) {
-          case 'left_top':
-            styles.top = marginStyle;
-            styles.left = marginStyle;
-            break;
-          case 'left_bottom':
-            styles.bottom = marginStyle;
-            styles.left = marginStyle;
-            break;
-          case 'bottom_right':
-            styles.bottom = marginStyle;
-            styles.right = marginStyle;
-            break;
-          case 'top_right':
-          default:
-            styles.top = marginStyle;
-            styles.right = marginStyle;
-        }
-      }
-
-      previousStyles.height = getStyle(this.element, 'height');
-      previousStyles.marginLeft = getStyle(this.element, 'marginLeft');
-      previousStyles.marginRight = getStyle(this.element, 'marginRight');
-
-      setStyles(fakeContainer, {
-        height: previousStyles.height,
-        marginLeft: previousStyles.marginLeft,
-        marginRight: previousStyles.marginRight,
-        background: '#000',
-      });
-
-      if (this.originalHeight_) {
-        setStyle(fakeContainer, 'height', px(this.originalHeight_));
-      }
-
-      toggle(fakeWrapper, enable);
-
-      if (enable) {
-        setStyles(this.element, {
-          marginLeft: 0,
-          marginRight: 0,
-          position: 'fixed',
-          top: styles.top,
-          bottom: styles.bottom,
-          left: styles.left,
-          right: styles.right,
-          zIndex: styles.zIndex,
-          width: '100%',
-          maxWidth: '500px',
-        });
-
-        if (!this.originalHeight_) {
-          this.originalHeight_ = parseInt(this.element.offsetHeight, 10);
-        }
-
-        this.attemptChangeHeight(
-          parseInt((parseInt(this.element.offsetWidth, 10) * 9) / 16, 10)
-        );
-      } else {
-        setStyles(this.element, {
-          marginLeft: previousStyles.marginLeft,
-          marginRight: previousStyles.marginRight,
-          position: 'relative',
-          top: 'auto',
-          bottom: 'auto',
-          left: 'auto',
-          right: 'auto',
-          zIndex: 'auto',
-          maxWidth: '100%',
-        });
-
-        this.attemptChangeHeight(this.originalHeight_);
-      }
-
-      this.sendMessage_('sticky_state_update', {enabled: enable});
-    };
-
-    let enabled = false;
-    const worker = () => {
-      if (this.paused_ && !enabled) {
-        return;
-      }
-
-      const rect = (enabled
-        ? fakeContainer
-        : this.element
-      ).getBoundingClientRect();
-      const height = rect.height * parseFloat(breakpoint);
-      const visible =
-        (rect.top > 0 && rect.top + height < window.innerHeight) ||
-        (rect.top < 0 && rect.top + height > 0);
-
-      if (window.mowStickyEnabled && !visible) {
-        //another sticky activated
-        return;
-      }
-
-      if (previousVisible !== visible) {
-        enabled = !visible;
-        toggle_(enabled);
-        previousVisible = visible;
-      }
-    };
-    window.addEventListener('scroll', worker);
-    window.addEventListener('resize', worker);
-
-    this.stickyDisableWorker_ = () => {
-      toggle_(false);
-      window.removeEventListener('scroll', worker);
-      window.removeEventListener('resize', worker);
-    };
-  }
-
-  /**
    * Check player is visible or not based on breakpoint and send message to player
    * @private
    * @param {Object} data
    */
   onVisibilityObserver_(data) {
-    let previousVisible = null;
     const worker = () => {
-      const rect = this.element.getBoundingClientRect();
-      const height = rect.height * parseFloat(data.breakpoint);
-      const visible =
-        (rect.top > 0 && rect.top + height < window.innerHeight) ||
-        (rect.top < 0 && rect.top + height > 0);
-
-      if (previousVisible !== visible) {
-        this.sendMessage_('visibility_observer_visibility', {
-          visible,
-        });
-        previousVisible = visible;
-      }
+      const {intersectionRatio} = this.element.getIntersectionChangeEntry();
+      const visible = intersectionRatio > 0.5 ? true : false;
+      this.sendMessage_('visibility_observer_visibility', {visible});
     };
-    window.addEventListener('scroll', worker);
-    window.addEventListener('resize', worker);
+
+    this.viewport_.onChanged(worker);
+
     worker();
   }
 
