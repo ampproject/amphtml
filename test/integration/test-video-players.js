@@ -28,9 +28,7 @@
 
 import {runVideoPlayerIntegrationTests} from './test-video-players-helper';
 
-//TODO(aghassemi,#7822): We have to skip iOS for video tests since videos
-// can't play SauceLab's iOS simulator. We need real devices instead.
-
+// TODO(aghassemi,#7822): Videos may not be playable on an iOS simulator.
 describe
   .configure()
   .skipIos()

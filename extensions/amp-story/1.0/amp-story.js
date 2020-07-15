@@ -51,6 +51,7 @@ import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryInteractiveBinaryPoll} from './amp-story-interactive-binary-poll';
+import {AmpStoryInteractivePoll} from './amp-story-interactive-poll';
 import {AmpStoryInteractiveQuiz} from './amp-story-interactive-quiz';
 import {AmpStoryInteractiveResults} from './amp-story-interactive-results';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
@@ -472,6 +473,9 @@ export class AmpStory extends AMP.BaseElement {
       StateProperty.PAUSED_STATE
     );
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+    if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+      this.pauseBackgroundAudio_();
+    }
   }
 
   /**
@@ -484,6 +488,9 @@ export class AmpStory extends AMP.BaseElement {
       Action.TOGGLE_PAUSED,
       this.pausedStateToRestore_
     );
+    if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+      this.playBackgroundAudio_();
+    }
   }
 
   /**
@@ -2196,6 +2203,7 @@ export class AmpStory extends AMP.BaseElement {
       if (
         pageId === this.pages_[0].element.id &&
         this.activePage_ === this.pages_[this.pages_.length - 1] &&
+        this.pages_.length > 1 &&
         !this.viewer_.hasCapability('swipe')
       ) {
         distance = 1;
@@ -2835,11 +2843,12 @@ AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
   AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment);
-  AMP.registerElement('amp-story-interactive-quiz', AmpStoryInteractiveQuiz);
   AMP.registerElement(
     'amp-story-interactive-binary-poll',
     AmpStoryInteractiveBinaryPoll
   );
+  AMP.registerElement('amp-story-interactive-poll', AmpStoryInteractivePoll);
+  AMP.registerElement('amp-story-interactive-quiz', AmpStoryInteractiveQuiz);
   AMP.registerElement(
     'amp-story-interactive-results',
     AmpStoryInteractiveResults

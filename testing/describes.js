@@ -220,7 +220,6 @@ export const realWin = describeEnv((spec) => [
  *   hash: (string|undefined),
  *   amp: (boolean),
  *   timeout: (number),
- *   retryOnSaucelabs: (number)
  * }} spec
  * @param {function({
  *   win: !Window,
@@ -349,9 +348,6 @@ function describeEnv(factory) {
       });
 
       let d = describe.configure();
-      if (spec.retryOnSaucelabs) {
-        d = d.retryOnSaucelabs(spec.retryOnSaucelabs);
-      }
       if (spec.ifIe) {
         d = d.ifIe();
       }
@@ -482,10 +478,6 @@ class IntegrationFixture {
     if (this.spec.timeout === undefined) {
       this.spec.timeout = 15000;
     }
-    if (this.spec.retryOnSaucelabs === undefined) {
-      this.spec.retryOnSaucelabs = 4;
-    }
-
     /** @const {string} */
     this.hash = spec.hash || '';
     delete spec.hash;
