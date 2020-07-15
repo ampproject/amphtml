@@ -147,6 +147,13 @@ describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
       expect(currentBitrates(v)).to.jsonEqual([10000, 20000, 30000, 40000]);
     });
 
+    it('should sort sources with empty sources considered 0', () => {
+      const m = getManager('4g');
+      const v = getVideo([4000, '', 3000, 2000]);
+      m.sortSources_(v);
+      expect(currentBitrates(v)).to.jsonEqual([2000, 0, 3000, 4000]);
+    });
+
     it('should retain order within a given bitrate', () => {
       const m = getManager('4g');
       const v = getVideo([4000, 1000, 3000, 2000], ['mkv', 'mp4']);
