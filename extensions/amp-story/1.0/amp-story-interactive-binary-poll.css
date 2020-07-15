@@ -40,6 +40,7 @@
   justify-content: center !important;
   text-align: center !important;
   flex-direction: column !important;
+  width: 50%;
   position: relative !important;
 }
 
