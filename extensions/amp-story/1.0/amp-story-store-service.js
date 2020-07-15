@@ -230,7 +230,10 @@ const stateComparisonFunctions = {
   [StateProperty.NAVIGATION_PATH]: (old, curr) => old.length !== curr.length,
   [StateProperty.PAGE_IDS]: (old, curr) => old.length !== curr.length,
   [StateProperty.PAGE_SIZE]: (old, curr) =>
-    old.width !== curr.width || old.height !== curr.height,
+    old === null ||
+    curr === null ||
+    old.width !== curr.width ||
+    old.height !== curr.height,
   [StateProperty.INTERACTIVE_REACT_STATE]: (old, curr) =>
     !deepEquals(old, curr, 3),
 };
