@@ -15,8 +15,6 @@
  */
 
 export const BASE_STYLE = {
-  'backgroundRepeat': 'no-repeat',
-  'backgroundPosition': 'center',
   'textDecoration': 'none',
   'cursor': 'pointer',
   'position': 'relative',

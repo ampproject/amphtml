@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-amp-social-share {
-  text-decoration: none;
-  cursor: pointer;
-  position: relative;
-}
 
 /**
   * Note: Attribute selectors were used initially here but we switched to using
@@ -48,12 +42,6 @@ amp-social-share {
 .amp-social-share-linkedin {
   color: #fff;
   background-color: #0077b5;
-}
-
-/* Google+ Styling */
-.amp-social-share-gplus {
-  color: #fff;
-  background-color: #dc4e41;
 }
 
 /* Tumblr Styling */
