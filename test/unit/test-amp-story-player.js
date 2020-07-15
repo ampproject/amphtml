@@ -37,6 +37,14 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
   const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
 
+  function afterRenderPromise() {
+    return new Promise((resolve) => {
+      requestAnimationFrame(() => {
+        setTimeout(resolve);
+      });
+    });
+  }
+
   function buildStoryPlayer(
     numStories = 1,
     url = DEFAULT_CACHE_URL,
@@ -209,43 +217,49 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     buildStoryPlayer(2);
 
     await manager.loadPlayers();
+    await nextTick();
 
     const fakeData = {next: true};
     fireHandler['selectDocument']('selectDocument', fakeData);
 
-    win.requestAnimationFrame(() => {
-      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
-    });
+    const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+
+    // TODO(#29278): replace with navigation API once ready.
+    await afterRenderPromise();
+    expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+    expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
   });
 
   it('should navigate when swiping', async () => {
     buildStoryPlayer(4);
     await manager.loadPlayers();
+    await nextTick();
 
     swipeLeft();
 
-    win.requestAnimationFrame(() => {
-      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
-    });
+    const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+
+    // TODO(#29278): replace with navigation API once ready.
+    await afterRenderPromise();
+    expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+    expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
   });
 
   it('should not navigate when swiping last story', async () => {
     buildStoryPlayer(2);
     await manager.loadPlayers();
+    await nextTick();
 
     swipeLeft();
     swipeLeft();
     swipeLeft();
 
-    win.requestAnimationFrame(() => {
-      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
-    });
+    const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+
+    // TODO(#29278): replace with navigation API once ready.
+    await afterRenderPromise();
+    expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+    expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
   });
 
   describe('Cache URLs', () => {
