@@ -138,7 +138,7 @@ export function useCallback(cb, opt_deps) {
 }
 
 /**
- * @param {PreactDef.Renderable} unusedChildren
+ * @param {!PreactDef.Renderable} unusedChildren
  * @return {!Array<PreactDef.Renderable>}
  */
 export function toChildArray(unusedChildren) {
