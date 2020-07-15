@@ -22,17 +22,6 @@
   text-align: center !important;
   max-width: 300px !important;
   box-shadow: var(--i-amphtml-interactive-component-shadow) !important;
-}
-
-.i-amphtml-story-interactive-results-container.i-amphtml-story-interactive-post-selection .i-amphtml-story-interactive-results-pre-select {
-  display: none !important;
-}
-
-.i-amphtml-story-interactive-results-container:not(.i-amphtml-story-interactive-post-selection) .i-amphtml-story-interactive-results-post-select {
-  display: none !important;
-}
-
-.i-amphtml-story-interactive-results-pre-select, .i-amphtml-story-interactive-results-post-select{
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;

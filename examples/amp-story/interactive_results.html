@@ -13,7 +13,7 @@
       font-family: 'Poppins', sans-serif;
     }
 
-    amp-story-interactive-quiz, amp-story-interactive-results {
+    amp-story-interactive-poll, amp-story-interactive-results {
       align-self: center;
       justify-self: center;
     }
@@ -52,13 +52,14 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
-            <amp-story-interactive-quiz
+            <amp-story-interactive-poll
                 prompt-text="Whats your favorite food?"
-                option-1-text="Bones" option-1-results-category="Dog" option-1-correct
-                option-2-text="Fish" option-2-results-category="Cat" option-2-correct
-                option-3-text="Carrots" option-3-results-category="Bunny" option-3-correct
-                option-4-text="Cheese" option-4-results-category="Mouse" option-4-correct>
-            </amp-story-interactive-quiz>
+                endpoint="http://localhost:3000/interactives"
+                option-1-text="Bones" option-1-results-category="Dog" 
+                option-2-text="Fish" option-2-results-category="Cat" 
+                option-3-text="Carrots" option-3-results-category="Bunny" 
+                option-4-text="Cheese" option-4-results-category="Mouse">
+            </amp-story-interactive-poll>
           </amp-story-grid-layer>
         </amp-story-page>
         <amp-story-page id="quiz-2">
@@ -68,13 +69,14 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
-            <amp-story-interactive-quiz
+            <amp-story-interactive-poll
                 prompt-text="How do you spend your free time?"
-                option-1-text="Stretching your back" option-1-results-category="Cat" option-1-correct
-                option-2-text="Caressing your mustache" option-2-results-category="Mouse" option-2-correct
-                option-3-text="Jumping all over the place" option-3-results-category="Bunny" option-3-correct
-                option-4-text="Running behind a ball" option-4-results-category="Dog" option-4-correct>
-            </amp-story-interactive-quiz>
+                endpoint="http://localhost:3000/interactives"
+                option-1-text="Stretching your back" option-1-results-category="Cat" 
+                option-2-text="Caressing your mustache" option-2-results-category="Mouse" 
+                option-3-text="Jumping all over the place" option-3-results-category="Bunny" 
+                option-4-text="Running behind a ball" option-4-results-category="Dog">
+            </amp-story-interactive-poll>
           </amp-story-grid-layer>
         </amp-story-page>
         <amp-story-page id="quiz-3">
@@ -84,13 +86,14 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
-            <amp-story-interactive-quiz
+            <amp-story-interactive-poll
                 prompt-text="What would you do for holidays?"
-                option-1-text="Easter island" option-1-results-category="Bunny" option-1-correct
-                option-2-text="Drive in a car with your tongue out" option-2-results-category="Dog" option-2-correct
-                option-3-text="Get far away from cats" option-3-results-category="Mouse" option-3-correct
-                option-4-text="Stay in bed sleeping" option-4-results-category="Cat" option-4-correct>
-            </amp-story-interactive-quiz>
+                endpoint="http://localhost:3000/interactives"
+                option-1-text="Easter island" option-1-results-category="Bunny" 
+                option-2-text="Drive with your tongue out" option-2-results-category="Dog" 
+                option-3-text="Get far away from cats" option-3-results-category="Mouse" 
+                option-4-text="Stay in bed sleeping" option-4-results-category="Cat">
+            </amp-story-interactive-poll>
           </amp-story-grid-layer>
         </amp-story-page>
         <amp-story-page id="quiz-4">
@@ -100,13 +103,14 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
-            <amp-story-interactive-quiz
+            <amp-story-interactive-poll
                 prompt-text="What's your favorite place in the house?"
-                option-1-text="Inside my spacious cage" option-1-results-category="Mouse" option-1-correct
-                option-2-text="On the backyard" option-2-results-category="Bunny" option-2-correct
-                option-3-text="Where my owner is" option-3-results-category="Dog" option-3-correct
-                option-4-text="On top of the fridge" option-4-results-category="Cat" option-4-correct>
-            </amp-story-interactive-quiz>
+                endpoint="http://localhost:3000/interactives"
+                option-1-text="Inside my spacious cage" option-1-results-category="Mouse" 
+                option-2-text="On the backyard" option-2-results-category="Bunny" 
+                option-3-text="Where my owner is" option-3-results-category="Dog" 
+                option-4-text="On top of the fridge" option-4-results-category="Cat">
+            </amp-story-interactive-poll>
           </amp-story-grid-layer>
         </amp-story-page>
         <amp-story-page id="quiz-results">
