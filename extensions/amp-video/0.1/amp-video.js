@@ -200,7 +200,7 @@ class AmpVideo extends AMP.BaseElement {
     this.configure_();
 
     this.video_ = element.ownerDocument.createElement('video');
-    if (this.element.hasAttribute('multi-bitrate')) {
+    if (this.element.querySelector('source[data-bitrate]')) {
       getBitrateManager(this.win).manage(this.video_);
     }
 
