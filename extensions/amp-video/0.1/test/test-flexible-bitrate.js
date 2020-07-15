@@ -147,11 +147,11 @@ describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
       expect(currentBitrates(v)).to.jsonEqual([10000, 20000, 30000, 40000]);
     });
 
-    it('should sort sources with empty sources considered 0', () => {
+    it('should sort sources with empty bitrate considered positive infinity', () => {
       const m = getManager('4g');
-      const v = getVideo([4000, '', 3000, 2000]);
+      const v = getVideo([4000, null, 3000, 2000]);
       m.sortSources_(v);
-      expect(currentBitrates(v)).to.jsonEqual([2000, 0, 3000, 4000]);
+      expect(currentBitrates(v)).to.jsonEqual([2000, 3000, 4000, null]);
     });
 
     it('should retain order within a given bitrate', () => {
@@ -226,7 +226,9 @@ describes.fakeWin('amp-video flexible-bitrate', {}, (env) => {
         const s = env.win.document.createElement('source');
         s.src = `${rate}.${type}`;
         s.setAttribute('type', `video/${type}`);
-        s.setAttribute('data-bitrate', rate);
+        if (rate) {
+          s.setAttribute('data-bitrate', rate);
+        }
         video.appendChild(s);
       });
     });

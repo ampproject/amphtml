@@ -139,7 +139,9 @@ export class BitrateManager {
         return;
       }
       const bitrate = source.getAttribute('data-bitrate');
-      source.bitrate_ = bitrate ? parseInt(bitrate, 10) : 0;
+      source.bitrate_ = bitrate
+        ? parseInt(bitrate, 10)
+        : Number.POSITIVE_INFINITY;
     });
     sources.sort((a, b) => {
       // Biggest first, bitrates above threshold to the back
