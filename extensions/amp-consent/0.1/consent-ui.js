@@ -369,7 +369,6 @@ export class ConsentUI {
         data['initialHeight'].indexOf('vh') >= 0
       ) {
         const dataHeight = parseInt(data['initialHeight'], 10);
-
         // Set initialHeight to max height fallback if applicable
         this.initialHeight_ =
           dataHeight >= 80 ? MAX_INITIAL_HEIGHT : this.initialHeight_;
@@ -395,7 +394,7 @@ export class ConsentUI {
       }
     }
 
-    // Disable our border if not lightbox.
+    // Disable our border, if set to false and not lightbox.
     if (data['border'] === false && !this.lightboxEnabled_) {
       this.enableBorder_ = false;
     }
