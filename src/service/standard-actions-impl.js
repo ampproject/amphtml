@@ -175,7 +175,7 @@ export class StandardActions {
 
       case 'goBack':
         Services.historyForDoc(this.ampdoc).goBack(
-          /* navigate */ args && args['navigate']
+          /* navigate */ !!(args && args['navigate'] === true)
         );
         return null;
 
