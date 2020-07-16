@@ -392,14 +392,15 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
+      await nextTick();
 
-      win.requestAnimationFrame(() => {
-        const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-        player.go(2);
-        expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql(-1);
-        expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql(0);
-        expect(iframes[3].getAttribute('i-amphtml-iframe-position')).to.eql(1);
-      });
+      player.go(2);
+
+      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+      await afterRenderPromise();
+      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+      expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('1');
     });
 
     it('navigate backward given a negative number in range', async () => {
@@ -409,15 +410,16 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
+      await nextTick();
 
-      win.requestAnimationFrame(() => {
-        const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-        player.go(3);
-        player.go(-1);
-        expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql(-1);
-        expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql(0);
-        expect(iframes[3].getAttribute('i-amphtml-iframe-position')).to.eql(1);
-      });
+      player.go(3);
+      player.go(-1);
+
+      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+      await afterRenderPromise();
+      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+      expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('1');
     });
 
     it('not navigate given zero', async () => {
@@ -427,13 +429,20 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
+      await nextTick();
 
-      win.requestAnimationFrame(() => {
-        const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-        player.go(0);
-        expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql(0);
-        expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql(1);
-      });
+      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+
+      const iframePosition = iframes[0].getAttribute(
+        'i-amphtml-iframe-position'
+      );
+
+      player.go(0);
+
+      await afterRenderPromise();
+      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql(
+        iframePosition
+      );
     });
 
     it('go should throw when negative number is out of story range', async () => {
