@@ -62,12 +62,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
-    id: 'amp-consent-restrict-fullscreen',
-    name: 'AMP consent restrict fullscreen API before user interaction',
-    spec: 'https://github.com/ampproject/amphtml/issues/26432',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26432',
-  },
-  {
     id: 'amp-sidebar-v2',
     name: 'Updated sidebar component with nested menu and animations',
     spec: 'https://github.com/ampproject/amphtml/issues/25049',
