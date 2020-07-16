@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import * as styles from './base-carousel.css';
-import {dict} from '../../../src/utils/object';
+import {useState} from '../../../src/preact';
 
 /**
  * @param {!JsonObject} props
@@ -29,15 +29,10 @@ export function Arrow(props) {
     'advance': advance,
     'disabled': disabled,
   } = props;
-  const button = customArrow
-    ? customArrow
-    : renderDefaultArrow(dict({'dir': dir}));
   const {
-    'children': children,
     'disabled': customDisabled,
     'onClick': onCustomClick,
-    ...rest
-  } = button.props;
+  } = customArrow.props;
   const isDisabled = disabled || customDisabled;
   const onClick = (e) => {
     if (onCustomClick) {
@@ -51,18 +46,15 @@ export function Arrow(props) {
         ...styles.arrowPlacement,
         // Offset button from the edge.
         [dir < 0 ? 'left' : 'right']: '0px',
+        opacity: isDisabled && 0,
+        pointerEvents: isDisabled && 'none',
       }}
     >
-      {Preact.cloneElement(
-        button,
-        {
-          'onClick': onClick,
-          'disabled': isDisabled,
-          'aria-disabled': isDisabled,
-          ...rest,
-        },
-        children
-      )}
+      {Preact.cloneElement(customArrow, {
+        'onClick': onClick,
+        'disabled': isDisabled,
+        'aria-disabled': isDisabled,
+      })}
     </div>
   );
 }
@@ -71,10 +63,95 @@ export function Arrow(props) {
  * @param {!JsonObject} props
  * @return {PreactDef.Renderable}
  */
-function renderDefaultArrow(props) {
+export function ArrowPrev(props) {
+  const {'customArrow': customArrow, ...rest} = props;
+  const [hover, setHover] = useState(false);
+  const [active, setActive] = useState(false);
   return (
-    <button style={styles.defaultArrowButton}>
-      {props['dir'] < 0 ? '<<' : '>>'}
+    <Arrow
+      dir={-1}
+      customArrow={
+        customArrow ||
+        renderDefaultArrow({dir: -1, hover, active, setHover, setActive})
+      }
+      {...rest}
+    />
+  );
+}
+
+/**
+ * @param {!JsonObject} props
+ * @return {PreactDef.Renderable}
+ */
+export function ArrowNext(props) {
+  const {'customArrow': customArrow, ...rest} = props;
+  const [hover, setHover] = useState(false);
+  const [active, setActive] = useState(false);
+  return (
+    <Arrow
+      dir={1}
+      customArrow={
+        customArrow ||
+        renderDefaultArrow({dir: 1, hover, active, setHover, setActive})
+      }
+      {...rest}
+    />
+  );
+}
+
+/**
+ * @param {!JsonObject} props
+ * @return {PreactDef.Renderable}
+ */
+function renderDefaultArrow(props) {
+  const {dir, hover, active, setHover, setActive} = props;
+  return (
+    <button
+      style={{
+        ...styles.defaultArrowButton,
+        stroke: hover ? '#222' : '#fff',
+        transitionDuration: active ? '0ms' : '',
+      }}
+      aria-label={
+        dir < 0 ? 'Previous item in carousel' : 'Next item in carousel'
+      }
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      onMouseDown={() => setActive(true)}
+      onMouseUp={() => setActive(false)}
+    >
+      <div style={styles.arrowFrosting}></div>
+      <div style={styles.arrowBackdrop}></div>
+      <div
+        style={{
+          ...styles.arrowBackground,
+          backgroundColor: active
+            ? 'rgba(255, 255, 255, 1.0)'
+            : hover
+            ? 'rgba(255, 255, 255, 0.8)'
+            : 'rgba(0, 0, 0, 0.3)',
+          transitionDuration: active ? '0ms' : '',
+        }}
+      ></div>
+      <svg style={styles.arrowIcon} viewBox="0 0 24 24">
+        {dir < 0 ? (
+          <path
+            d="M14,7.4 L9.4,12 L14,16.6"
+            fill="none"
+            stroke-width="2px"
+            stroke-linejoin="round"
+            stroke-linecap="round"
+          />
+        ) : (
+          <path
+            d="M10,7.4 L14.6,12 L10,16.6"
+            fill="none"
+            stroke-width="2px"
+            stroke-linejoin="round"
+            stroke-linecap="round"
+          />
+        )}
+      </svg>
     </button>
   );
 }

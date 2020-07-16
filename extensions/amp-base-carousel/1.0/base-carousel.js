@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import * as Preact from '../../../src/preact';
-import {Arrow} from './arrow';
+import {ArrowNext, ArrowPrev} from './arrow';
 import {Scroller} from './scroller';
 import {toChildArray, useRef, useState} from '../../../src/preact';
 
@@ -59,15 +59,13 @@ export function BaseCarousel(props) {
       >
         {childrenArray}
       </Scroller>
-      <Arrow
+      <ArrowPrev
         customArrow={arrowPrev}
-        dir={-1}
         disabled={disableForDir(-1)}
         advance={() => advance(-1)}
       />
-      <Arrow
+      <ArrowNext
         customArrow={arrowNext}
-        dir={1}
         disabled={disableForDir(1)}
         advance={() => advance(1)}
       />
