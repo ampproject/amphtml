@@ -434,7 +434,6 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
-      
       expect(
         playerEl.shadowRoot.querySelector(
           'button.amp-story-player-close-button'
@@ -489,7 +488,6 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       appendStoriesToPlayer(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
-      
       await player.load();
 
       const readySpy = env.sandbox.spy();

@@ -161,12 +161,9 @@ export class AmpStoryPlayer {
   attachCallbacksToElement_() {
     this.element_.load = this.load.bind(this);
     this.element_.show = this.show.bind(this);
-<<<<<<< HEAD
     this.element_.go = this.go.bind(this);
-=======
     this.element_.mute = this.mute.bind(this);
     this.element_.unmute = this.unmute.bind(this);
->>>>>>> master
   }
 
   /**
