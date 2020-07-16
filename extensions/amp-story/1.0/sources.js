@@ -83,6 +83,9 @@ export class Sources {
     Array.prototype.forEach.call(this.srcEls_, (srcEl) =>
       element.appendChild(srcEl)
     );
+    if (element.changedSources) {
+      element.changedSources();
+    }
 
     if (this.trackEls_.length > 0) {
       // Wait for "loadedmetadata" before adding tracks.
