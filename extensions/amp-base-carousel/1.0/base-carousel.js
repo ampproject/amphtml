@@ -16,7 +16,12 @@
 import * as Preact from '../../../src/preact';
 import {Arrow} from './arrow';
 import {Scroller} from './scroller';
-import {toChildArray, useEffect, useRef, useState} from '../../../src/preact';
+import {
+  toChildArray,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from '../../../src/preact';
 
 /**
  * @param {!JsonObject} props
@@ -29,31 +34,43 @@ export function BaseCarousel(props) {
     'children': children,
     'defaultSlide': defaultSlide,
     'loop': loop,
-    'onUpdate': onUpdate,
+    'slide': slide,
+    'onSlideChange': onSlideChange,
+    'onLayout': onLayout,
+    'setAdvance': setAdvance,
     ...rest
   } = props;
   const childrenArray = toChildArray(children);
   const {length} = childrenArray;
-  const [curSlide, setCurSlide] = useState(defaultSlide || 0);
+  const [curSlide, setCurSlide] = useState(slide ? slide : defaultSlide || 0);
+  const slideState = slide ? slide : curSlide;
   const ignoreProgrammaticScroll = useRef(true);
-  const setRestingIndex = (i) => {
-    ignoreProgrammaticScroll.current = true;
-    setCurSlide(i);
-  };
-  const scrollRef = useRef(null);
   const advance = (dir) => {
     const container = scrollRef.current;
     // Modify scrollLeft is preferred to `setCurSlide` to enable smooth scroll.
     // Note: `setCurSlide` will still be called on debounce by scroll handler.
     container./* OK */ scrollLeft += container./* OK */ offsetWidth * dir;
   };
-  const disableForDir = (dir) =>
-    !loop && (curSlide + dir < 0 || curSlide + dir >= length);
-  useEffect(() => {
-    if (onUpdate) {
-      onUpdate();
+  // Fire on first render when first slide is displayed.
+  useLayoutEffect(() => {
+    if (onLayout) {
+      onLayout();
     }
-  }, [onUpdate]);
+    if (setAdvance) {
+      setAdvance(advance);
+    }
+  }, [onLayout, setAdvance]);
+
+  const setRestingIndex = (i) => {
+    ignoreProgrammaticScroll.current = true;
+    setCurSlide(i);
+    if (onSlideChange) {
+      onSlideChange(i);
+    }
+  };
+  const scrollRef = useRef(null);
+  const disableForDir = (dir) =>
+    !loop && (slideState + dir < 0 || slideState + dir >= length);
   return (
     <div {...rest}>
       <Scroller

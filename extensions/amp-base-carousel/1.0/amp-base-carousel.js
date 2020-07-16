@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-constants';
 import {BaseCarousel} from './base-carousel';
 import {CSS} from '../../../build/amp-base-carousel-1.0.css';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
+import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -26,22 +28,70 @@ import {userAssert} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-base-carousel';
 
+/**
+ * Triggers a 'slideChange' event with one data param:
+ * 'index' - index of the current slide.
+ * @param {!Window} win
+ * @param {!../../../src/service/action-impl.ActionService} action
+ * @param {!Element} el The element that was selected or deslected.
+ * @param {number} index
+ * @param {!ActionTrust} trust
+ * @private
+ */
+function fireSlideChangeEvent(win, action, el, index, trust) {
+  const name = 'slideChange';
+  const slideChangeEvent = createCustomEvent(
+    win,
+    `amp-base-carousel.${name}`,
+    dict({'index': index})
+  );
+  action.trigger(el, name, slideChangeEvent, trust);
+}
+
 class AmpBaseCarousel extends PreactBaseElement {
   /** @override */
   init() {
+    const {element} = this;
+    const action = Services.actionServiceForDoc(element);
+    let advance = () => {};
+    this.registerAction('prev', () => advance(-1), ActionTrust.LOW);
+    this.registerAction('next', () => advance(1), ActionTrust.LOW);
+    this.registerAction(
+      'goToSlide',
+      (actionInvocation) => {
+        const {args, trust} = actionInvocation;
+        const index = args['index'];
+        this.mutateProps(dict({'slide': index}));
+        fireSlideChangeEvent(this.win, action, element, index, trust);
+      },
+      ActionTrust.LOW
+    );
+
     // TODO: This lays out all children on initialization
     // for illustrative purposes since amp-base-carousel
     // historically uses Owners System to manage its children's
     // resources. We eventually want to replace this with usage
     // of `ChildLayoutManager` for more fine-grained resource
     // control of the carousel's children AMP elements.
-    const owners = Services.ownersForDoc(this.element);
+    const owners = Services.ownersForDoc(element);
     const children = this.getRealChildren();
     children.forEach((child) => owners.setOwner(child, this.element));
     return dict({
-      'onUpdate': () => {
-        owners.scheduleLayout(this.element, children);
+      'onLayout': () => owners.scheduleLayout(this.element, children),
+      'onSlideChange': (index) => {
+        fireSlideChangeEvent(
+          this.win,
+          action,
+          element,
+          index,
+          ActionTrust.HIGH
+        );
+        this.mutateProps(dict({'slide': index}));
       },
+      'setAdvance': (a) => (advance = a),
+      // TODO: `slide` cannot be in prop defs because we mutate it later.
+      // If it is, mutations on `defaultProps_` will get overwritten in `collectProps`
+      'slide': element.getAttribute('slide') || 0,
     });
   }
 
