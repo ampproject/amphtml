@@ -385,6 +385,28 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       );
     });
 
+    it('pauses programatically', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+
+      playerEl.pause();
+
+      messagingMock
+        .expects('sendRequest')
+        .withArgs('visibilitychange', {state: 'paused'});
+    });
+
+    it('plays programatically', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+
+      playerEl.play();
+
+      messagingMock
+        .expects('sendRequest')
+        .withArgs('visibilitychange', {state: 'visible'});
+    });
+
     it('calling mute should set story muted state to true', async () => {
       buildStoryPlayer();
       await manager.loadPlayers();

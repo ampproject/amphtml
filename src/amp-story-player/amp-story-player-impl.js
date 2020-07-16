@@ -161,6 +161,8 @@ export class AmpStoryPlayer {
   attachCallbacksToElement_() {
     this.element_.load = this.load.bind(this);
     this.element_.show = this.show.bind(this);
+    this.element_.play = this.play.bind(this);
+    this.element_.pause = this.pause.bind(this);
     this.element_.go = this.go.bind(this);
     this.element_.mute = this.mute.bind(this);
     this.element_.unmute = this.unmute.bind(this);
@@ -176,6 +178,38 @@ export class AmpStoryPlayer {
   }
 
   /**
+   * Makes the current story play its content/auto-advance
+   * @public
+   */
+  play() {
+    this.togglePaused_(false);
+  }
+
+  /**
+   * Makes the current story pause its content/auto-advance
+   * @public
+   */
+  pause() {
+    this.togglePaused_(true);
+  }
+
+  /**
+   * Makes the current story play or pause its content/auto-advance
+   * @param {boolean} paused If true, the story will be paused, and it will be played otherwise
+   * @private
+   */
+  togglePaused_(paused) {
+    const currentStory = this.stories_[this.currentIdx_];
+    const iframeIdx = currentStory[IFRAME_IDX];
+
+    this.updateVisibilityState_(
+      iframeIdx,
+      paused ? VisibilityState.PAUSED : VisibilityState.VISIBLE
+    );
+  }
+
+  /**
+   *
    * @public
    * @return {!Element}
    */
