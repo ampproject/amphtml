@@ -19,8 +19,8 @@ import {AnalyticsVariable, getVariableService} from '../variable-service';
 import {Services} from '../../../../src/services';
 import {StateProperty, getStoreService} from '../amp-story-store-service';
 import {dict} from '../../../../src/utils/object';
-import {getAnalyticsService} from '../story-analytics';
-import {getRequestService} from '../amp-story-request-service';
+import {getAnalyticsService} from '../../../amp-story/1.0/story-analytics';
+import {getRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {htmlFor} from '../../../../src/static-template';
 
 /**
