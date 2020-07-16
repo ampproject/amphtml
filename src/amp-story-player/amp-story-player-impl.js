@@ -221,9 +221,10 @@ export class AmpStoryPlayer {
   initializeShadowRoot_() {
     this.rootEl_ = this.doc_.createElement('main');
 
-    const containerToUse = __AMP_VISUAL_TEST
-      ? this.element_
-      : this.element_.attachShadow({mode: 'open'});
+    const containerToUse =
+      typeof __AMP_VISUAL_TEST !== 'undefined'
+        ? this.element_
+        : this.element_.attachShadow({mode: 'open'});
 
     // Inject default styles
     const styleEl = this.doc_.createElement('style');
