@@ -19,7 +19,7 @@ import * as styles from './base-carousel.css';
 import {dict} from '../../../src/utils/object';
 
 /**
- * @param {!ArrowProps} props
+ * @param {!BaseCarouselArrowProps} props
  * @return {PreactDef.Renderable}
  */
 export function Arrow(props) {

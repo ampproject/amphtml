@@ -32,7 +32,7 @@ import {useLayoutEffect, useMemo, useRef} from '../../../src/preact';
 const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
 
 /**
- * @param {!ScrollerProps} props
+ * @param {!BaseCarouselScrollerProps} props
  * @return {PreactDef.Renderable}
  */
 export function Scroller(props) {
@@ -193,7 +193,7 @@ export function Scroller(props) {
  * The initial index can be specified, which will make the carousel scroll to
  * the desired index when it first renders.
  *
- * @param {!SlideProps} props
+ * @param {!BaseCarouselSlideProps} props
  * @return {PreactDef.Renderable}
  */
 function renderSlides(props) {

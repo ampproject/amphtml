@@ -341,7 +341,7 @@ function collectProps(Ctor, element, defaultProps) {
 
       const {single, name, props: slotProps = {}} = def;
 
-      // TBD: assign keys, etc.
+      // TBD: assign keys, reuse slots, etc.
       if (single) {
         props[name] = createSlot(
           childElement,

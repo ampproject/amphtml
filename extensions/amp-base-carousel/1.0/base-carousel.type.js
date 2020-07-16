@@ -40,14 +40,14 @@ var BaseCarouselProps;
  *   setRestingIndex: (function(number):undefined),
  * }}
  */
-var ScrollerProps;
+var BaseCarouselScrollerProps;
 
 /**
  * @typedef {{
  *   children: !Array<PreactDef.Renderable>
  * }}
  */
-var SlideProps;
+var BaseCarouselSlideProps;
 
 /**
  * @typedef {{
@@ -57,4 +57,4 @@ var SlideProps;
  *   disabled: (boolean|undefined)
  * }}
  */
-var ArrowProps;
+var BaseCarouselArrowProps;
