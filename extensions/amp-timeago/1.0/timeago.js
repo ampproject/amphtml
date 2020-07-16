@@ -14,21 +14,25 @@
  * limitations under the License.
  */
 
-import {createElement, useEffect, useRef, useState} from '../../../src/preact';
+import * as Preact from '../../../src/preact';
 import {timeago} from '../../../third_party/timeagojs/timeago';
+import {useEffect, useRef, useState} from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
+/** @const {string} */
+const DEFAULT_LOCALE = 'en';
+
 /**
- * @param {!JsonObject} props
+ * @param {!TimeagoProps} props
  * @return {PreactDef.Renderable}
  */
-export function Timeago(props) {
-  const {
-    'datetime': datetime,
-    'locale': locale,
-    'cutoff': cutoff,
-    'cutoffText': cutoffText,
-  } = props;
+export function Timeago({
+  datetime,
+  locale = DEFAULT_LOCALE,
+  cutoff,
+  cutoffText,
+  ...rest
+}) {
   const [timestamp, setTimestamp] = useState('');
   const ref = useRef(null);
 
@@ -38,7 +42,7 @@ export function Timeago(props) {
       const last = entries[entries.length - 1];
       if (last.isIntersecting) {
         setTimestamp(
-          getFuzzyTimestampValue(datetime, locale, cutoffText, cutoff)
+          getFuzzyTimestampValue(datetime, locale, cutoff, cutoffText)
         );
       }
     });
@@ -49,17 +53,21 @@ export function Timeago(props) {
   }, [datetime, locale, cutoff, cutoffText]);
 
   useResourcesNotify();
-  return createElement('time', {datetime, ref}, timestamp);
+  return (
+    <time datetime={datetime} ref={ref} {...rest}>
+      {timestamp}
+    </time>
+  );
 }
 
 /**
  * @param {string} datetime
  * @param {string} locale
- * @param {string} cutoffText
  * @param {number=} opt_cutoff
+ * @param {string=} opt_cutoffText
  * @return {string}
  */
-function getFuzzyTimestampValue(datetime, locale, cutoffText, opt_cutoff) {
+function getFuzzyTimestampValue(datetime, locale, opt_cutoff, opt_cutoffText) {
   if (!opt_cutoff) {
     return timeago(datetime, locale);
   }
@@ -67,7 +75,7 @@ function getFuzzyTimestampValue(datetime, locale, cutoffText, opt_cutoff) {
   const secondsAgo = Math.floor((Date.now() - elDate.getTime()) / 1000);
 
   if (secondsAgo > opt_cutoff) {
-    return cutoffText;
+    return opt_cutoffText || '';
   }
   return timeago(datetime, locale);
 }
