@@ -55,8 +55,11 @@ export function SocialShare(props) {
   const type = props['type'].toUpperCase();
   const baseStyle = CSS.BASE_STYLE;
   const iconStyle = {
-    'color': props['color'] || CSS[type]['color'],
-    'backgroundColor': props['background'] || CSS[type]['backgroundColor'],
+    'color': props['color'] || CSS[type] ? CSS[type]['color'] : undefined,
+    'backgroundColor':
+      props['background'] || CSS[type]
+        ? CSS[type]['backgroundColor']
+        : undefined,
   };
   const size = {
     width: checkedWidth,
