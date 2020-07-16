@@ -385,6 +385,28 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       );
     });
 
+    it('calling mute should set story muted state to true', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+
+      await playerEl.mute();
+
+      messagingMock
+        .expects('sendRequest')
+        .withArgs('setDocumentState', {state: 'MUTED_STATE', value: true});
+    });
+
+    it('calling unmute should set the story muted state to false', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+
+      await playerEl.unmute();
+
+      messagingMock
+        .expects('sendRequest')
+        .withArgs('setDocumentState', {state: 'MUTED_STATE', value: false});
+    });
+
     it('back button should be created and close button should not', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       playerEl.setAttribute('exit-control', 'back-button');
