@@ -24,7 +24,7 @@ import {
 } from '../../../src/preact';
 
 /**
- * @param {!BaseCarouselProps} props
+ * @param {!BaseCarouselDef.Props} props
  * @return {PreactDef.Renderable}
  */
 export function BaseCarousel(props) {

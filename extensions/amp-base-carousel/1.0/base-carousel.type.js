@@ -16,6 +16,9 @@
 
 /** @externs */
 
+/** @const */
+var BaseCarouselDef = {};
+
 /**
  * @typedef {{
  *   arrowNext: (?PreactDef.VNode|undefined),
@@ -29,7 +32,7 @@
  *   setAdvance: (function(function(number):undefined):undefined|undefined),
  * }}
  */
-var BaseCarouselProps;
+BaseCarouselDef.Props;
 
 /**
  * @typedef {{
@@ -40,14 +43,14 @@ var BaseCarouselProps;
  *   setRestingIndex: (function(number):undefined),
  * }}
  */
-var BaseCarouselScrollerProps;
+BaseCarouselDef.ScrollerProps;
 
 /**
  * @typedef {{
  *   children: !Array<PreactDef.Renderable>
  * }}
  */
-var BaseCarouselSlideProps;
+BaseCarouselDef.SlideProps;
 
 /**
  * @typedef {{
@@ -57,4 +60,4 @@ var BaseCarouselSlideProps;
  *   disabled: (boolean|undefined)
  * }}
  */
-var BaseCarouselArrowProps;
+BaseCarouselDef.ArrowProps;
