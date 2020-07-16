@@ -37,6 +37,14 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
   const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
 
+  function afterRenderPromise() {
+    return new Promise((resolve) => {
+      requestAnimationFrame(() => {
+        setTimeout(resolve);
+      });
+    });
+  }
+
   function buildStoryPlayer(
     numStories = 1,
     url = DEFAULT_CACHE_URL,
@@ -209,43 +217,49 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     buildStoryPlayer(2);
 
     await manager.loadPlayers();
+    await nextTick();
 
     const fakeData = {next: true};
     fireHandler['selectDocument']('selectDocument', fakeData);
 
-    win.requestAnimationFrame(() => {
-      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
-    });
+    const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+
+    // TODO(#29278): replace with navigation API once ready.
+    await afterRenderPromise();
+    expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+    expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
   });
 
   it('should navigate when swiping', async () => {
     buildStoryPlayer(4);
     await manager.loadPlayers();
+    await nextTick();
 
     swipeLeft();
 
-    win.requestAnimationFrame(() => {
-      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
-    });
+    const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+
+    // TODO(#29278): replace with navigation API once ready.
+    await afterRenderPromise();
+    expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+    expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
   });
 
   it('should not navigate when swiping last story', async () => {
     buildStoryPlayer(2);
     await manager.loadPlayers();
+    await nextTick();
 
     swipeLeft();
     swipeLeft();
     swipeLeft();
 
-    win.requestAnimationFrame(() => {
-      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
-    });
+    const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+
+    // TODO(#29278): replace with navigation API once ready.
+    await afterRenderPromise();
+    expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+    expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
   });
 
   describe('Cache URLs', () => {
@@ -370,7 +384,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         'Story URL not found in the player: https://example.com/story6.html'
       );
     });
-
+    
     it('pauses programatically', async () => {
       buildStoryPlayer();
       await manager.loadPlayers();
@@ -391,6 +405,123 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       messagingMock
         .expects('sendRequest')
         .withArgs('visibilitychange', {state: 'visible'});
+    });
+    
+    it('calling mute should set story muted state to true', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+
+      await playerEl.mute();
+
+      messagingMock
+        .expects('sendRequest')
+        .withArgs('setDocumentState', {state: 'MUTED_STATE', value: true});
+    });
+
+    it('calling unmute should set the story muted state to false', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+
+      await playerEl.unmute();
+
+      messagingMock
+        .expects('sendRequest')
+        .withArgs('setDocumentState', {state: 'MUTED_STATE', value: false});
+    });
+
+    it('back button should be created and close button should not', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      playerEl.setAttribute('exit-control', 'back-button');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      expect(
+        playerEl.shadowRoot.querySelector('button.amp-story-player-back-button')
+      ).to.exist;
+      expect(
+        playerEl.shadowRoot.querySelector(
+          'button.amp-story-player-close-button'
+        )
+      ).to.not.exist;
+    });
+
+    it('close button should be created and back button should not', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      playerEl.setAttribute('exit-control', 'close-button');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      expect(
+        playerEl.shadowRoot.querySelector(
+          'button.amp-story-player-close-button'
+        )
+      ).to.exist;
+      expect(
+        playerEl.shadowRoot.querySelector('button.amp-story-player-back-button')
+      ).to.not.exist;
+    });
+
+    it('no button should be created', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      playerEl.setAttribute('exit-control', 'brokenattribute');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      expect(
+        playerEl.shadowRoot.querySelector(
+          'button.amp-story-player-close-button'
+        )
+      ).to.not.exist;
+      expect(
+        playerEl.shadowRoot.querySelector('button.amp-story-player-back-button')
+      ).to.not.exist;
+    });
+
+    it('back button should fire back event once', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      playerEl.setAttribute('exit-control', 'back-button');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      const readySpy = env.sandbox.spy();
+      playerEl.addEventListener('amp-story-player-back', readySpy);
+
+      playerEl.shadowRoot
+        .querySelector('button.amp-story-player-back-button')
+        .click();
+
+      expect(readySpy).to.have.been.calledOnce;
+    });
+
+    it('close button should fire close event once', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      playerEl.setAttribute('exit-control', 'close-button');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      const readySpy = env.sandbox.spy();
+      playerEl.addEventListener('amp-story-player-close', readySpy);
+
+      playerEl.shadowRoot
+        .querySelector('button.amp-story-player-close-button')
+        .click();
+
+      expect(readySpy).to.have.been.calledOnce;
     });
   });
 });

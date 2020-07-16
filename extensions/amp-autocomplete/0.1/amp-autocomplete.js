@@ -527,6 +527,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       return Promise.resolve();
     }
     if (typeof src === 'string') {
+      this.srcBase_ = src;
       return this.getRemoteData_().then(
         (remoteData) => {
           this.sourceData_ = remoteData || [];
@@ -1096,25 +1097,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
       ActionTrust.HIGH
     );
 
-    // Ensure on="change" is triggered for input
-    const changeName = 'change';
-    const changeEvent = createCustomEvent(
-      this.win,
-      `amp-autocomplete.${changeName}`,
-      /** @type {!JsonObject} */ ({value})
-    );
-    this.action_.trigger(
-      dev().assertElement(this.inputElement_),
-      changeName,
-      changeEvent,
-      ActionTrust.HIGH
-    );
-
     // Ensure native change listeners are triggered
     const nativeChangeEvent = createCustomEvent(
       this.win,
       'change',
-      /** @type {!JsonObject} */ ({value})
+      /** @type {!JsonObject} */ ({value}),
+      {bubbles: true}
     );
     this.inputElement_.dispatchEvent(nativeChangeEvent);
   }
