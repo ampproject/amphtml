@@ -32,24 +32,20 @@ export const getMockInteractiveData = () => {
   return {
     options: [
       {
-        optionIndex: 0,
-        totalCount: 3,
-        selectedByUser: true,
+        count: 3,
+        selected: true,
       },
       {
-        optionIndex: 1,
-        totalCount: 3,
-        selectedByUser: false,
+        count: 3,
+        selected: false,
       },
       {
-        optionIndex: 2,
-        totalCount: 3,
-        selectedByUser: false,
+        count: 3,
+        selected: false,
       },
       {
-        optionIndex: 3,
-        totalCount: 1,
-        selectedByUser: false,
+        count: 1,
+        selected: false,
       },
     ],
   };
@@ -107,11 +103,10 @@ class InteractiveTest extends AmpStoryInteractive {
  * @param {Array<number>} responseCounts
  */
 export const generateResponseDataFor = (responseCounts) => {
-  return responseCounts.map((count, index) =>
+  return responseCounts.map((count) =>
     dict({
-      'optionIndex': index,
-      'totalCount': count,
-      'selectedByUser': false,
+      'count': count,
+      'selected': false,
     })
   );
 };

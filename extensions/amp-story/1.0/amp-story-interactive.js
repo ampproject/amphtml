@@ -60,9 +60,8 @@ const INTERACTIVE_ACTIVE_CLASS = 'i-amphtml-story-interactive-active';
 
 /**
  * @typedef {{
- *    optionIndex: number,
- *    totalCount: number,
- *    selectedByUser: boolean,
+ *    count: number,
+ *    selected: boolean,
  * }}
  */
 export let InteractiveOptionType;
@@ -594,8 +593,8 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         this.hasUserSelection_ = true;
 
         if (this.optionsData_) {
-          this.optionsData_[optionEl.optionIndex_]['totalCount']++;
-          this.optionsData_[optionEl.optionIndex_]['selectedByUser'] = true;
+          this.optionsData_[optionEl.optionIndex_]['count']++;
+          this.optionsData_[optionEl.optionIndex_]['selected'] = true;
         }
 
         this.mutateElement(() => {
@@ -657,7 +656,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       if (requestOptions['method'] === 'POST') {
         requestOptions['body'] = {'optionSelected': optionSelected};
         requestOptions['headers'] = {'Content-Type': 'application/json'};
-        url = appendPathToUrl(this.urlService_.parse(url), '/react');
+        url += ':vote';
       }
       url = addParamsToUrl(url, requestParams);
       return this.requestService_
