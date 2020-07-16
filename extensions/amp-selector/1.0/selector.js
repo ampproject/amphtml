@@ -94,13 +94,12 @@ export function Option({
   style,
   ...rest
 }) {
-  const selectorContext = useContext(SelectorContext);
   const {
-    'selected': selected,
-    'selectOption': selectOption,
-    'disabled': selectorDisabled,
-    'multiple': selectorMultiple,
-  } = selectorContext;
+    selected,
+    selectOption,
+    disabled: selectorDisabled,
+    multiple: selectorMultiple,
+  } = /** @type {SelectorDef.ContextProps} */ (useContext(SelectorContext));
   const clickHandler = (e) => {
     if (selectorDisabled || disabled) {
       return;

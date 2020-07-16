@@ -25,6 +25,7 @@ var SelectorDef = {};
  * @typedef {{
  *   as: (string|PreactDef.FunctionalComponent),
  *   disabled: (boolean|undefined),
+ *   domElement: !Element,
  *   value: (!Array|undefined),
  *   multiple: (boolean|undefined),
  *   onChange: (?function({value: !Array, option: *})|undefined),
@@ -36,21 +37,13 @@ SelectorDef.Props;
 
 /**
  * @typedef {{
- *   domElement: !Element,
- *   disabled: (boolean|undefined),
- *   multiple: (boolean|undefined),
- *   role: string,
- * }}
- */
-SelectorDef.ShimProps;
-
-/**
- * @typedef {{
  *   as: (string|PreactDef.FunctionalComponent),
  *   option: *,
  *   disabled: (boolean|undefined),
+ *   domElement: !Element,
  *   onClick: (?function(!Event)|undefined),
  *   role: string,
+ *   selected: (boolean|undefined),
  *   style: (!Object|undefined),
  * }}
  */
@@ -58,11 +51,10 @@ SelectorDef.OptionProps;
 
 /**
  * @typedef {{
- *   domElement: !Element,
- *   onClick: (?function(!Event)|undefined),
- *   selected: (boolean|undefined),
- *   isDisabled: (boolean|undefined),
- *   role: string,
+ *   disabled: (boolean|undefined),
+ *   multiple: (boolean|undefined),
+ *   selected: (!Array|undefined),
+ *   selectOption: function(*):undefined,
  * }}
  */
-SelectorDef.OptionShimProps;
+SelectorDef.ContextProps;

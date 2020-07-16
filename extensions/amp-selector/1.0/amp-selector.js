@@ -160,8 +160,6 @@ function getOptionState(element, mu) {
       const props = {
         as: OptionShim,
         option,
-        // TODO: `disabled` is always undefined for OptionShim
-        isDisabled: disabled,
         disabled,
         role: child.getAttribute('role') || 'option',
         domElement: child,
@@ -271,14 +269,14 @@ function selectByDelta(delta, value, options) {
 }
 
 /**
- * @param {!SelectorDef.OptionShimProps} props
+ * @param {!SelectorDef.OptionProps} props
  * @return {PreactDef.Renderable}
  */
 function OptionShim({
   domElement,
   onClick,
   selected,
-  isDisabled,
+  disabled,
   role = 'option',
 }) {
   useLayoutEffect(() => {
@@ -296,9 +294,9 @@ function OptionShim({
   }, [domElement, selected]);
 
   useLayoutEffect(() => {
-    toggleAttribute(domElement, 'disabled', isDisabled);
-    domElement.setAttribute('aria-disabled', !!isDisabled);
-  }, [domElement, isDisabled]);
+    toggleAttribute(domElement, 'disabled', disabled);
+    domElement.setAttribute('aria-disabled', !!disabled);
+  }, [domElement, disabled]);
 
   useLayoutEffect(() => {
     domElement.setAttribute('role', role);
@@ -308,7 +306,7 @@ function OptionShim({
 }
 
 /**
- * @param {!SelectorDef.ShimProps} props
+ * @param {!SelectorDef.Props} props
  * @return {PreactDef.Renderable}
  */
 function SelectorShim({
