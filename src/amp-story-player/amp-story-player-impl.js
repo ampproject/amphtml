@@ -85,6 +85,11 @@ const BUTTON_EVENTS = {
   [BUTTON_TYPES.CLOSE]: 'amp-story-player-close',
 };
 
+/** @enum {string} */
+const STORY_STATE_TYPE = {
+  PAGE_ATTACHMENT_STATE: 'page-attachment',
+};
+
 /** @const {string} */
 export const IFRAME_IDX = '__AMP_IFRAME_IDX__';
 
@@ -163,6 +168,8 @@ export class AmpStoryPlayer {
     this.element_.show = this.show.bind(this);
     this.element_.mute = this.mute.bind(this);
     this.element_.unmute = this.unmute.bind(this);
+    this.element_.getState = this.getState.bind(this);
+    this.element_.setState = this.setState.bind(this);
   }
 
   /**
@@ -325,6 +332,13 @@ export class AmpStoryPlayer {
           messaging.registerHandler('selectDocument', (event, data) => {
             this.onSelectDocument_(data);
           });
+          
+          messaging.sendRequest('onDocumentState', {state: 'PAGE_ATTACHMENT_STATE'});
+
+          messaging.registerHandler('documentStateUpdate', (event, data) => {
+            this.onDocumentStateUpdate_(data);
+          });
+          
           resolve(messaging);
         },
         (err) => {
@@ -425,6 +439,36 @@ export class AmpStoryPlayer {
   unmute() {
     const iframeIdx = this.stories_[this.currentIdx_][IFRAME_IDX];
     this.updateMutedState_(iframeIdx, false);
+  }
+
+  /** 
+   * 
+   */
+  getState(stateType) {
+    const iframeIdx = this.stories_[this.currentIdx_][IFRAME_IDX];
+    this.messagingPromises_[iframeIdx].then((messaging) => {
+      messaging.sendRequest(
+        'getDocumentState',
+        {state: 'PAGE_ATTACHMENT_STATE'}, 
+        true
+      ).then(event => {
+        this.dispatchPageAttachmentEvent_(event.value)
+      })
+    });
+  }
+
+  /** 
+   * 
+   */
+  setState(stateType, value) {
+    const iframeIdx = this.stories_[this.currentIdx_][IFRAME_IDX];
+    switch (stateType) {
+      case STORY_STATE_TYPE.PAGE_ATTACHMENT_STATE:
+        this.updatePageAttachmentState_(iframeIdx, value);
+        break;
+      default:
+        break;
+    }
   }
 
   /**
@@ -698,13 +742,50 @@ export class AmpStoryPlayer {
    * @private
    */
   updateMutedState_(iframeIdx, mutedValue) {
-    this.messagingPromises_[iframeIdx].then((messaging) => {
-      messaging.sendRequest(
-        'setDocumentState',
-        {state: 'MUTED_STATE', value: mutedValue},
-        true
-      );
-    });
+    this.updateStoryState_(iframeIdx, 'MUTED_STATE', mutedValue);
+  }
+
+  /**
+   * Updates the page attachment state of the story inside the iframe.
+   * @param {number} iframeIdx
+   * @param {boolean} pageAttachmentValue
+   * @private
+   */
+  updatePageAttachmentState_(iframeIdx, pageAttachmentValue) {
+    this.updateStoryState_(iframeIdx, 'PAGE_ATTACHMENT_STATE', pageAttachmentValue)
+  }
+
+  /** 
+   * React to documentStateUpdate events.
+   * @param {!Object} data
+   * @private
+   */
+  onDocumentStateUpdate_(data) {
+    const pageAttachmentOpen = data.value;
+    this.updateButtonVisibility_(!pageAttachmentOpen);
+    this.dispatchPageAttachmentEvent_(pageAttachmentOpen);
+  }
+
+  /** 
+   * Updates the visbility state of the exit control button.
+   * @param {boolean} isVisible
+   * @private
+   */
+  updateButtonVisibility_(isVisible) {
+    const button = this.rootEl_.querySelector('button');
+    if (button === null) return;
+    isVisible ? button.classList.remove('hidden') : button.classList.add('hidden');
+  }
+
+  /** 
+   * Dispatches a page attachment event.
+   * @param {boolean}  isPageAttachmentOpen
+   * @private
+   */
+  dispatchPageAttachmentEvent_(isPageAttachmentOpen){
+    isPageAttachmentOpen 
+    ? this.element_.dispatchEvent(createCustomEvent(this.win_, 'page-attachment-open'))
+    : this.element_.dispatchEvent(createCustomEvent(this.win_, 'page-attachment-close'));
   }
 
   /**
