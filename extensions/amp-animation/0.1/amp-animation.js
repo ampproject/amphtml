@@ -21,6 +21,7 @@ import {Services} from '../../../src/services';
 import {WebAnimationPlayState} from './web-animation-types';
 import {WebAnimationService} from './web-animation-service';
 import {clamp} from '../../../src/utils/math';
+import {dev, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {getDetail, listen} from '../../../src/event-helper';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
@@ -28,7 +29,6 @@ import {getParentWindowFrameElement} from '../../../src/service';
 import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
 import {isFiniteNumber} from '../../../src/types';
 import {setInitialDisplay, setStyles, toggle} from '../../../src/style';
-import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-animation';
 
@@ -125,7 +125,7 @@ export class AmpAnimation extends AMP.BaseElement {
       this.isIntersecting_ = records[records.length - 1].isIntersecting;
       this.setVisible_(this.isIntersecting_ && ampdoc.isVisible());
     });
-    io.observe(this.element.parentElement);
+    io.observe(dev().assertElement(this.element.parentElement));
     this.cleanups_.push(() => io.disconnect());
 
     // Resize.
