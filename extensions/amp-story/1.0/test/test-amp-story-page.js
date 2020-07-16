@@ -18,8 +18,10 @@ import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {Deferred} from '../../../../src/utils/promise';
+import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
 import {Services} from '../../../../src/services';
+import {Signals} from '../../../../src/utils/signals';
 import {
   createElementWithAttributes,
   scopedQuerySelectorAll,
@@ -48,7 +50,7 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
       }),
     };
 
-    const localizationService = Services.localizationForDoc(win.document.body);
+    const localizationService = new LocalizationService(win.document.body);
     env.sandbox
       .stub(Services, 'localizationForDoc')
       .returns(localizationService);
@@ -70,6 +72,8 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
     element = win.document.createElement('amp-story-page');
     gridLayerEl = win.document.createElement('amp-story-grid-layer');
     element.getAmpDoc = () => new AmpDocSingle(win);
+    const signals = new Signals();
+    element.signals = () => signals;
     element.appendChild(gridLayerEl);
     story.appendChild(element);
     win.document.body.appendChild(story);
@@ -112,14 +116,25 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
     expect(page.element).to.have.attribute('active');
   });
 
+  function resolveSignals(element) {
+    const deferred = new Deferred();
+    element.signals = () => ({
+      signal: () => {},
+      whenSignal: () => deferred.promise,
+    });
+    deferred.resolve();
+  }
+
   it('should start the advancement when state becomes active', async () => {
     page.registerAllMediaPromise_ = Promise.resolve();
     page.buildCallback();
     const advancementStartStub = env.sandbox.stub(page.advancement_, 'start');
     await page.layoutCallback();
+    resolveSignals(page);
     page.setState(PageState.PLAYING);
 
     // Microtask tick
+    await Promise.resolve();
     await Promise.resolve();
 
     expect(advancementStartStub).to.have.been.calledOnce;
@@ -156,9 +171,6 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
   });
 
   it('should perform media operations when state becomes active', (done) => {
-    env.sandbox
-      .stub(page.resources_, 'getResourceForElement')
-      .returns({isDisplayed: () => true});
     env.sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
 
     const videoEl = win.document.createElement('video');
@@ -209,10 +221,6 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
 
       let mediaPoolMock;
 
-      env.sandbox
-        .stub(page.resources_, 'getResourceForElement')
-        .returns({isDisplayed: () => true});
-
       page.buildCallback();
       page
         .layoutCallback()
@@ -243,38 +251,43 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
   });
 
   it('should build the background audio on layoutCallback', async () => {
-    env.sandbox
-      .stub(page.resources_, 'getResourceForElement')
-      .returns({isDisplayed: () => true});
-
     element.setAttribute('background-audio', 'foo.mp3');
     page.buildCallback();
     await page.layoutCallback();
     expect(
-      scopedQuerySelectorAll(element, Selectors.ALL_MEDIA)[0].tagName
+      scopedQuerySelectorAll(element, Selectors.ALL_PLAYBACK_MEDIA)[0].tagName
     ).to.equal('AUDIO');
   });
 
   it('should register the background audio on layoutCallback', async () => {
-    env.sandbox
-      .stub(page.resources_, 'getResourceForElement')
-      .returns({isDisplayed: () => true});
-
     element.setAttribute('background-audio', 'foo.mp3');
     page.buildCallback();
     const mediaPool = await page.mediaPoolPromise_;
     const mediaPoolRegister = env.sandbox.stub(mediaPool, 'register');
     await page.layoutCallback();
 
-    const audioEl = scopedQuerySelectorAll(element, Selectors.ALL_MEDIA)[0];
+    const audioEl = scopedQuerySelectorAll(
+      element,
+      Selectors.ALL_PLAYBACK_MEDIA
+    )[0];
     expect(mediaPoolRegister).to.have.been.calledOnceWithExactly(audioEl);
   });
 
-  it('should wait for media layoutCallback to register it', async () => {
-    env.sandbox
-      .stub(page.resources_, 'getResourceForElement')
-      .returns({isDisplayed: () => true});
+  it('should preload the background audio on layoutCallback', async () => {
+    element.setAttribute('background-audio', 'foo.mp3');
+    page.buildCallback();
+    const mediaPool = await page.mediaPoolPromise_;
+    const mediaPoolPreload = env.sandbox.stub(mediaPool, 'preload');
+    await page.layoutCallback();
 
+    const audioEl = scopedQuerySelectorAll(
+      element,
+      Selectors.ALL_PLAYBACK_MEDIA
+    )[0];
+    expect(mediaPoolPreload).to.have.been.calledOnceWithExactly(audioEl);
+  });
+
+  it('should wait for media layoutCallback to register it', async () => {
     const ampVideoEl = win.document.createElement('amp-video');
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp4');
@@ -301,10 +314,6 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
   });
 
   it('should not register media before its layoutCallback resolves', async () => {
-    env.sandbox
-      .stub(page.resources_, 'getResourceForElement')
-      .returns({isDisplayed: () => true});
-
     const ampVideoEl = win.document.createElement('amp-video');
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp4');
@@ -356,10 +365,6 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
   });
 
   it('should pause/rewind media when state becomes not active', (done) => {
-    env.sandbox
-      .stub(page.resources_, 'getResourceForElement')
-      .returns({isDisplayed: () => true});
-
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp3');
     gridLayerEl.appendChild(videoEl);
@@ -399,9 +404,6 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
   });
 
   it('should pause media when state becomes paused', (done) => {
-    env.sandbox
-      .stub(page.resources_, 'getResourceForElement')
-      .returns({isDisplayed: () => true});
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp3');
     gridLayerEl.appendChild(videoEl);
@@ -531,9 +533,6 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
   it('should start tracking media performance when entering the page', async () => {
     expectAsyncConsoleError(/source must start with/, 1);
 
-    env.sandbox
-      .stub(page.resources_, 'getResourceForElement')
-      .returns({isDisplayed: () => true});
     isPerformanceTrackingOn = true;
     const startMeasuringStub = env.sandbox.stub(
       page.mediaPerformanceMetricsService_,
@@ -556,9 +555,6 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
   it('should stop tracking media performance when leaving the page', async () => {
     expectAsyncConsoleError(/source must start with/, 1);
 
-    env.sandbox
-      .stub(page.resources_, 'getResourceForElement')
-      .returns({isDisplayed: () => true});
     isPerformanceTrackingOn = true;
     const stopMeasuringStub = env.sandbox.stub(
       page.mediaPerformanceMetricsService_,
@@ -584,9 +580,6 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
   it('should not start tracking media performance if tracking is off', async () => {
     expectAsyncConsoleError(/source must start with/, 1);
 
-    env.sandbox
-      .stub(page.resources_, 'getResourceForElement')
-      .returns({isDisplayed: () => true});
     isPerformanceTrackingOn = false;
     const startMeasuringStub = env.sandbox.stub(
       page.mediaPerformanceMetricsService_,

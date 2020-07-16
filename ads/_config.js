@@ -294,6 +294,16 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'anyclip': {
+    prefetch:
+      'https://player.anyclip.com/anyclip-widget/lre-widget/prod/v1/src/lre.js',
+    preconnect: [
+      'https://trafficmanager.anyclip.com',
+      'https://lreprx-server.anyclip.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   'appnexus': {
     prefetch: 'https://acdn.adnxs.com/ast/ast.js',
     preconnect: 'https://ib.adnxs.com',
@@ -567,6 +577,10 @@ const adConfig = jsonConfiguration({
     consentHandlingOverride: true,
   },
 
+  'iprom': {
+    prefetch: 'https://cdn.ipromcloud.com/ipromNS.js',
+  },
+
   'ix': {
     prefetch: ['https://js-sec.indexww.com/apl/amp.js'],
     preconnect: 'https://as-sec.casalemedia.com',
@@ -634,6 +648,12 @@ const adConfig = jsonConfiguration({
     ],
   },
 
+  'marfeel': {
+    prefetch: 'https://www.googletagservices.com/tag/js/gpt.js',
+    preconnect: 'https://live.mrf.io',
+    consentHandlingOverride: true,
+  },
+
   'mantis-recommend': {
     prefetch: 'https://assets.mantisadnetwork.com/recommend.min.js',
     preconnect: [
@@ -641,6 +661,8 @@ const adConfig = jsonConfiguration({
       'https://resize.mantisadnetwork.com',
     ],
   },
+
+  'mediaad': {},
 
   'medianet': {
     preconnect: 'https://contextual.media.net',
@@ -760,6 +782,10 @@ const adConfig = jsonConfiguration({
 
   'nws': {},
 
+  'oblivki': {
+    renderStartImplemented: true,
+  },
+
   'onead': {
     prefetch: 'https://ad-specs.guoshipartners.com/static/js/onead-amp.min.js',
     renderStartImplemented: true,
@@ -812,6 +838,10 @@ const adConfig = jsonConfiguration({
   },
 
   'postquare': {},
+
+  'ppstudio': {
+    renderStartImplemented: true,
+  },
 
   'pressboard': {
     renderStartImplemented: true,
@@ -874,6 +904,11 @@ const adConfig = jsonConfiguration({
   },
 
   'recomad': {
+    renderStartImplemented: true,
+  },
+
+  'recreativ': {
+    prefetch: 'https://go.rcvlink.com/static/amp.js',
     renderStartImplemented: true,
   },
 
@@ -958,6 +993,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'smartads': {
+    prefetch: 'https://smart-ads.biz/amp.js',
+  },
+
   'smartadserver': {
     prefetch: 'https://ec-ns.sascdn.com/diff/js/amp.v0.js',
     preconnect: 'https://static.sascdn.com',
@@ -993,6 +1032,10 @@ const adConfig = jsonConfiguration({
       'https://securepubads.g.doubleclick.net',
       'https://tpc.googlesyndication.com',
     ],
+    renderStartImplemented: true,
+  },
+
+  'sona': {
     renderStartImplemented: true,
   },
 
@@ -1054,9 +1097,10 @@ const adConfig = jsonConfiguration({
   },
 
   'teads': {
-    prefetch: 'https://a.teads.tv/media/format/v3/teads-format.min.js',
+    prefetch: 'https://s8t.teads.tv/media/format/v3/teads-format.min.js',
     preconnect: [
       'https://cdn2.teads.tv',
+      'https://a.teads.tv',
       'https://t.teads.tv',
       'https://r.teads.tv',
     ],
@@ -1174,6 +1218,10 @@ const adConfig = jsonConfiguration({
     preconnect: 'https://us.adserver.yahoo.com',
   },
 
+  'yahoofedads': {
+    renderStartImplemented: true,
+  },
+
   'yahoojp': {
     prefetch: [
       'https://s.yimg.jp/images/listing/tool/yads/ydn/amp/amp.js',
@@ -1187,7 +1235,7 @@ const adConfig = jsonConfiguration({
   },
 
   'yandex': {
-    prefetch: 'https://yastatic.net/partner-code/loaders/context_amp.js',
+    prefetch: 'https://an.yandex.ru/system/context_amp.js',
     renderStartImplemented: true,
   },
 

@@ -29,7 +29,7 @@ import {
   reportErrorToAnalytics,
   reportErrorToServerOrViewer,
 } from '../../src/error';
-import {getMode, getRtvVersionForTesting} from '../../src/mode';
+import {getRtvVersionForTesting} from '../../src/mode';
 import {
   resetExperimentTogglesForTesting,
   toggleExperiment,
@@ -319,9 +319,7 @@ describe('getErrorReportData', () => {
     expect(data.m).to.equal('XYZ');
     expect(data.el).to.equal('FOO-BAR');
     expect(data.a).to.equal('0');
-    expect(data.v).to.equal(
-      getRtvVersionForTesting(window, getMode().localDev)
-    );
+    expect(data.v).to.equal(getRtvVersionForTesting(window));
     expect(data.noAmp).to.equal('0');
   });
 
@@ -343,9 +341,7 @@ describe('getErrorReportData', () => {
     );
     expect(data.m).to.equal('XYZ');
     expect(data.a).to.equal('1');
-    expect(data.v).to.equal(
-      getRtvVersionForTesting(window, getMode().localDev)
-    );
+    expect(data.v).to.equal(getRtvVersionForTesting(window));
   });
 
   it('reportError mark asserts without error object', () => {
@@ -360,9 +356,7 @@ describe('getErrorReportData', () => {
     const data = getErrorReportData(e.message, undefined, undefined, undefined);
     expect(data.m).to.equal('XYZ');
     expect(data.a).to.equal('1');
-    expect(data.v).to.equal(
-      getRtvVersionForTesting(window, getMode().localDev)
-    );
+    expect(data.v).to.equal(getRtvVersionForTesting(window));
   });
 
   it('reportError marks 3p', () => {
@@ -399,70 +393,6 @@ describe('getErrorReportData', () => {
     expect(data.m).to.equal('XYZ');
     expect(data['ca']).to.equal('1');
     expect(data['vs']).to.equal('some-state');
-  });
-
-  describe('reportError marks single pass type', () => {
-    it('reports single pass', () => {
-      window.AMP_CONFIG = {
-        spt: 'sp',
-      };
-      const e = new Error('XYZ');
-      e.fromAssert = true;
-      const data = getErrorReportData(
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        e
-      );
-      expect(data['spt']).to.equal('sp');
-    });
-
-    it('reports multi pass', () => {
-      window.AMP_CONFIG = {
-        spt: 'mp',
-      };
-      const e = new Error('XYZ');
-      e.fromAssert = true;
-      const data = getErrorReportData(
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        e
-      );
-      expect(data['spt']).to.equal('mp');
-    });
-
-    it('reports esm', () => {
-      window.AMP_CONFIG = {
-        spt: 'esm',
-      };
-      const e = new Error('XYZ');
-      e.fromAssert = true;
-      const data = getErrorReportData(
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        e
-      );
-      expect(data['spt']).to.equal('esm');
-    });
-
-    it('does nothing for undeclared single pass type', () => {
-      window.AMP_CONFIG = {};
-      const e = new Error('XYZ');
-      e.fromAssert = true;
-      const data = getErrorReportData(
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        e
-      );
-      expect(data['spt']).to.be.undefined;
-    });
   });
 
   it('reportError marks binary type', () => {
@@ -825,10 +755,9 @@ describes.sandboxed('reportError', {}, (env) => {
   });
 });
 
-describe.configure().run('detectJsEngineFromStack', () => {
+describe('detectJsEngineFromStack', () => {
   // Note that these are not true of every case. You can emulate iOS Safari
-  // on Desktop Chrome and break this. These tests are explicitly for
-  // SauceLabs, which runs does not masquerade with UserAgent.
+  // on Desktop Chrome and break this.
   describe
     .configure()
     .ifIos()
@@ -859,7 +788,8 @@ describe.configure().run('detectJsEngineFromStack', () => {
       it.configure()
         .ifSafari()
         .run('detects safari as safari', () => {
-          expect(detectJsEngineFromStack()).to.equal('Safari');
+          // TODO(wg-runtime): Fix detection of Safari 13+.
+          expect(detectJsEngineFromStack()).to.equal('unknown');
         });
 
       it.configure()

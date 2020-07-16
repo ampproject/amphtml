@@ -232,16 +232,16 @@ describes.fakeWin('amp-story-store-service actions', {}, (env) => {
     expect(storeService.get(StateProperty.PAUSED_STATE)).to.be.true;
   });
 
-  it('should add an action to the whitelist', () => {
+  it('should add an action to the allowlist', () => {
     const action1 = {tagOrTarget: 'foo', method: 1};
     const action2 = {tagOrTarget: 'foo', method: 2};
 
-    storeService.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, action1);
+    storeService.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, action1);
 
     const actionsListenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.ACTIONS_WHITELIST, actionsListenerSpy);
+    storeService.subscribe(StateProperty.ACTIONS_ALLOWLIST, actionsListenerSpy);
 
-    storeService.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, action2);
+    storeService.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, action2);
 
     expect(actionsListenerSpy).to.have.been.calledOnceWithExactly([
       action1,
@@ -249,22 +249,122 @@ describes.fakeWin('amp-story-store-service actions', {}, (env) => {
     ]);
   });
 
-  it('should add an array of actions to the whitelist', () => {
+  it('should add an array of actions to the allowlist', () => {
     const action1 = {tagOrTarget: 'foo', method: 1};
     const action2 = {tagOrTarget: 'foo', method: 2};
     const action3 = {tagOrTarget: 'foo', method: 3};
 
-    storeService.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, action1);
+    storeService.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, action1);
 
     const actionsListenerSpy = env.sandbox.spy();
-    storeService.subscribe(StateProperty.ACTIONS_WHITELIST, actionsListenerSpy);
+    storeService.subscribe(StateProperty.ACTIONS_ALLOWLIST, actionsListenerSpy);
 
-    storeService.dispatch(Action.ADD_TO_ACTIONS_WHITELIST, [action2, action3]);
+    storeService.dispatch(Action.ADD_TO_ACTIONS_ALLOWLIST, [action2, action3]);
 
     expect(actionsListenerSpy).to.have.been.calledOnceWithExactly([
       action1,
       action2,
       action3,
     ]);
+  });
+
+  describes.fakeWin('amp-story-store-service interactive reacts', {}, (env) => {
+    let storeService;
+
+    const makeInteractive = (interactiveId, answered = false) => {
+      return {
+        interactiveId,
+        option: answered
+          ? {
+              'optionIndex': 1,
+              'resultscategory': 'cat',
+              'text': 'This is an option',
+            }
+          : null,
+      };
+    };
+
+    beforeEach(() => {
+      // Making sure we always get a new instance to isolate each test.
+      storeService = new AmpStoryStoreService(env.win);
+    });
+
+    it('should trigger the interaction subscription when initializing interactive', () => {
+      const actionsListenerSpy = env.sandbox.spy();
+      storeService.subscribe(
+        StateProperty.INTERACTIVE_REACT_STATE,
+        actionsListenerSpy
+      );
+
+      storeService.dispatch(
+        Action.ADD_INTERACTIVE_REACT,
+        makeInteractive('foo')
+      );
+      expect(actionsListenerSpy).to.have.been.calledOnce;
+    });
+
+    it('should trigger the interaction subscription when answering interactive', () => {
+      const actionsListenerSpy = env.sandbox.spy();
+      storeService.dispatch(
+        Action.ADD_INTERACTIVE_REACT,
+        makeInteractive('foo')
+      );
+      storeService.subscribe(
+        StateProperty.INTERACTIVE_REACT_STATE,
+        actionsListenerSpy
+      );
+
+      storeService.dispatch(
+        Action.ADD_INTERACTIVE_REACT,
+        makeInteractive('foo', true)
+      );
+
+      expect(actionsListenerSpy).to.have.been.calledOnce;
+    });
+
+    it('should not trigger the interaction subscription twice when not updating the interactive', () => {
+      const actionsListenerSpy = env.sandbox.spy();
+      storeService.dispatch(
+        Action.ADD_INTERACTIVE_REACT,
+        makeInteractive('foo')
+      );
+      storeService.subscribe(
+        StateProperty.INTERACTIVE_REACT_STATE,
+        actionsListenerSpy
+      );
+
+      storeService.dispatch(
+        Action.ADD_INTERACTIVE_REACT,
+        makeInteractive('foo', true)
+      );
+      storeService.dispatch(
+        Action.ADD_INTERACTIVE_REACT,
+        makeInteractive('foo', true)
+      );
+
+      expect(actionsListenerSpy).to.have.been.calledOnce;
+    });
+
+    it('should trigger the interaction subscription once for each update', () => {
+      const actionsListenerSpy = env.sandbox.spy();
+      storeService.dispatch(
+        Action.ADD_INTERACTIVE_REACT,
+        makeInteractive('bar')
+      );
+      storeService.subscribe(
+        StateProperty.INTERACTIVE_REACT_STATE,
+        actionsListenerSpy
+      );
+
+      storeService.dispatch(
+        Action.ADD_INTERACTIVE_REACT,
+        makeInteractive('foo', true)
+      );
+      storeService.dispatch(
+        Action.ADD_INTERACTIVE_REACT,
+        makeInteractive('bar', true)
+      );
+      expect(actionsListenerSpy).to.have.been.calledTwice;
+    });
   });
 });

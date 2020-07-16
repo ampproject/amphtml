@@ -18,7 +18,7 @@
 const initTestsPath = ['test/_init_tests.js'];
 
 const fixturesExamplesPaths = [
-  'test/fixtures/*.html',
+  'test-bin/test/fixtures/*.html',
   {
     pattern: 'test/fixtures/served/*.html',
     included: false,
@@ -81,11 +81,8 @@ const unitTestPaths = [
   'extensions/**/test/unit/*.js',
 ];
 
-const unitTestOnSaucePaths = [
-  'test/unit/**/*.js',
-  'ads/**/test/test-*.js',
-  'ads/**/test/unit/test-*.js',
-];
+// TODO(rsimha, #28838): Refine this opt-in mechanism.
+const unitTestCrossBrowserPaths = ['test/unit/test-error.js'];
 
 const integrationTestPaths = [
   'test/integration/**/*.js',
@@ -123,6 +120,8 @@ const presubmitGlobs = [
   '!validator/webui/node_modules/**/*.*',
   '!build-system/server/new-server/transforms/dist/**/*.*',
   '!build-system/tasks/e2e/node_modules/**/*.*',
+  '!build-system/tasks/performance/node_modules/**/*.*',
+  '!build-system/tasks/performance/cache/**/*.*',
   '!build-system/tasks/presubmit-checks.js',
   '!build-system/runner/build/**/*.*',
   '!build-system/tasks/visual-diff/node_modules/**/*.*',
@@ -151,10 +150,10 @@ const prettifyGlobs = [
   '.lando.yml',
   '.lgtm.yml',
   '.travis.yml',
-  '**/.eslintrc',
   '.prettierrc',
   '.renovaterc.json',
   '.vscode/settings.json',
+  '.github/workflows/continuous-integration-workflow.yml',
   '**/*.json',
   '**/OWNERS',
   '**/*.md',
@@ -217,6 +216,6 @@ module.exports = {
   prettifyGlobs,
   testPaths,
   thirdPartyFrames,
-  unitTestOnSaucePaths,
+  unitTestCrossBrowserPaths,
   unitTestPaths,
 };

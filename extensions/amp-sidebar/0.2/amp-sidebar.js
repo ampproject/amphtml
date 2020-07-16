@@ -138,6 +138,11 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /** @override */
+  prerenderAllowed() {
+    return true;
+  }
+
+  /** @override */
   buildCallback() {
     // TODO(#25022): remove this assert when cleaning up experiment post launch.
     userAssert(
@@ -154,6 +159,16 @@ export class AmpSidebar extends AMP.BaseElement {
     this.viewport_ = this.getViewport();
 
     this.action_ = Services.actionServiceForDoc(element);
+
+    if (
+      this.element.parentNode != this.element.ownerDocument.body &&
+      this.element.parentNode != this.getAmpDoc().getBody()
+    ) {
+      this.user().warn(
+        TAG,
+        `${TAG} is recommended to be a direct child of the <body> element to preserve a logical DOM order.`
+      );
+    }
 
     if (this.side_ != Side.LEFT && this.side_ != Side.RIGHT) {
       this.side_ = this.setSideAttribute_(

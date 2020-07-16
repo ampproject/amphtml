@@ -33,16 +33,14 @@ import {
   WebKeyframesDef,
 } from './animation-types';
 import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
-import {
-  childElementsByTag,
-  scopedQuerySelector,
-  scopedQuerySelectorAll,
-} from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getChildJsonConfig} from '../../../src/json';
 import {map, omit} from '../../../src/utils/object';
+import {scopedQuerySelector, scopedQuerySelectorAll} from '../../../src/dom';
 import {timeStrToMillis, unscaledClientRect} from './utils';
+
+const TAG = 'AMP-STORY';
 
 /** @const {string} */
 export const ANIMATE_IN_ATTRIBUTE_NAME = 'animate-in';
@@ -87,13 +85,16 @@ function getSequencingStartAfterId(root, element) {
   }
   const dependencyId = element.getAttribute(ANIMATE_IN_AFTER_ATTRIBUTE_NAME);
 
-  user().assertElement(
-    root.querySelector(`#${escapeCssSelectorIdent(dependencyId)}`),
-    `The attribute '${ANIMATE_IN_AFTER_ATTRIBUTE_NAME}' in tag ` +
-      `'${element.tagName}' is set to the invalid value ` +
-      `'${dependencyId}'. No children of parenting 'amp-story-page' ` +
-      `exist with id ${dependencyId}.`
-  );
+  if (!root.querySelector(`#${escapeCssSelectorIdent(dependencyId)}`)) {
+    user().warn(
+      TAG,
+      `The attribute '${ANIMATE_IN_AFTER_ATTRIBUTE_NAME}' in tag ` +
+        `'${element.tagName}' is set to the invalid value ` +
+        `'${dependencyId}'. No children of parenting 'amp-story-page' ` +
+        `exist with id ${dependencyId}.`
+    );
+    return null;
+  }
 
   return dependencyId;
 }
@@ -378,9 +379,12 @@ export class AnimationRunner {
     }
 
     if (this.runner_) {
-      // Init or no-op if the runner was already running.
-      this.runner_.start();
-      this.runner_.pause();
+      try {
+        this.runner_.pause();
+      } catch (e) {
+        // This fails when the animation is finished explicitly
+        // (runner.finish()) since this destroys internal players. This is fine.
+      }
     }
   }
 
@@ -627,6 +631,9 @@ export class AnimationManager {
           scopedQuerySelectorAll(this.page_, ANIMATABLE_ELEMENTS_SELECTOR),
           (el) => {
             const preset = this.getPreset_(el);
+            if (!preset) {
+              return null;
+            }
             return this.createRunner_({
               preset,
               source: el,
@@ -638,7 +645,9 @@ export class AnimationManager {
         )
         .concat(
           Array.prototype.map.call(
-            childElementsByTag(this.page_, 'amp-story-animation'),
+            this.page_.querySelectorAll(
+              'amp-story-animation[trigger=visibility]'
+            ),
             (el) =>
               this.createRunner_({
                 source: el,
@@ -648,7 +657,8 @@ export class AnimationManager {
                 spec: /** @type {!WebAnimationDef} */ (getChildJsonConfig(el)),
               })
           )
-        );
+        )
+        .filter((presetOrNull) => !!presetOrNull);
     }
     return devAssert(this.runners_);
   }
@@ -687,13 +697,15 @@ export class AnimationManager {
 
     if (el.hasAttribute(ANIMATE_IN_DURATION_ATTRIBUTE_NAME)) {
       animationDef.duration = timeStrToMillis(
-        el.getAttribute(ANIMATE_IN_DURATION_ATTRIBUTE_NAME)
+        el.getAttribute(ANIMATE_IN_DURATION_ATTRIBUTE_NAME),
+        animationDef.duration
       );
     }
 
     if (el.hasAttribute(ANIMATE_IN_DELAY_ATTRIBUTE_NAME)) {
       animationDef.delay = timeStrToMillis(
-        el.getAttribute(ANIMATE_IN_DELAY_ATTRIBUTE_NAME)
+        el.getAttribute(ANIMATE_IN_DELAY_ATTRIBUTE_NAME),
+        animationDef.delay
       );
     }
 
@@ -717,27 +729,35 @@ export class AnimationManager {
       .then((webAnimationService) =>
         webAnimationService.createBuilder({
           scope: this.page_,
+          scaleByScope: true,
         })
       );
   }
 
   /**
    * @param {!Element} el
-   * @return {!StoryAnimationPresetDef}
+   * @return {?StoryAnimationPresetDef}
    */
   getPreset_(el) {
     const name = el.getAttribute(ANIMATE_IN_ATTRIBUTE_NAME);
 
+    if (!presets[name]) {
+      user().warn(
+        TAG,
+        'Invalid',
+        ANIMATE_IN_ATTRIBUTE_NAME,
+        'preset',
+        name,
+        'for element',
+        el
+      );
+      return null;
+    }
+
     // TODO(alanorozco): This should be part of a mutate cycle.
     setStyleForPreset(el, name);
 
-    return /** @type {StoryAnimationPresetDef} */ (userAssert(
-      presets[name],
-      'Invalid %s preset "%s" for element %s',
-      ANIMATE_IN_ATTRIBUTE_NAME,
-      name,
-      el
-    ));
+    return presets[name];
   }
 
   /**
@@ -754,13 +774,15 @@ export class AnimationManager {
       }
       const value = parseFloat(el.getAttribute(name));
 
-      userAssert(
-        value > 0,
-        '"%s" attribute must be a ' +
-          'positive number. Found negative or zero in element %s',
-        name,
-        el
-      );
+      if (isNaN(value) || value <= 0) {
+        user().warn(
+          TAG,
+          name,
+          'attribute must be a positive number. Found negative or zero in element',
+          el
+        );
+        return;
+      }
 
       options[name] = value;
     });

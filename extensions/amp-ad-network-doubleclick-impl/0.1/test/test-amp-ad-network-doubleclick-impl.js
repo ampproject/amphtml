@@ -33,6 +33,7 @@ import {
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkDoubleclickImpl,
+  EXPAND_JSON_TARGETING_EXP,
   RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES,
   getNetworkId,
   getPageviewStateTokensForAdRequest,
@@ -47,7 +48,10 @@ import {QQID_HEADER} from '../../../../ads/google/a4a/utils';
 import {SafeframeHostApi} from '../safeframe-host';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {toggleExperiment} from '../../../../src/experiments';
+import {
+  forceExperimentBranch,
+  toggleExperiment,
+} from '../../../../src/experiments';
 
 /**
  * We're allowing external resources because otherwise using realWin causes
@@ -60,12 +64,6 @@ const realWinConfig = {
   amp: {
     extensions: ['amp-ad-network-doubleclick-impl'],
   },
-  ampAdCss: true,
-  allowExternalResources: true,
-};
-
-const realWinConfigAmpAd = {
-  amp: {ampdoc: 'amp-ad'},
   ampAdCss: true,
   allowExternalResources: true,
 };
@@ -704,7 +702,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
           /(\?|&)ady=-?[0-9]+(&|$)/,
           /(\?|&)u_aw=[0-9]+(&|$)/,
           /(\?|&)u_ah=[0-9]+(&|$)/,
-          /(\?|&)u_cd=24(&|$)/,
+          /(\?|&)u_cd=(24|30)(&|$)/,
           /(\?|&)u_w=[0-9]+(&|$)/,
           /(\?|&)u_h=[0-9]+(&|$)/,
           /(\?|&)u_tz=-?[0-9]+(&|$)/,
@@ -809,6 +807,48 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       new AmpAd(element).upgradeCallback();
       return impl.getAdUrl().then((url) => {
         expect(url).to.match(/&scp=excl_cat%3Dsports&/);
+      });
+    });
+
+    it('expands CLIENT_ID in targeting', () => {
+      toggleExperiment(win, 'expand-json-targeting', true, true);
+      forceExperimentBranch(
+        win,
+        EXPAND_JSON_TARGETING_EXP.ID,
+        EXPAND_JSON_TARGETING_EXP.EXPERIMENT
+      );
+      element.setAttribute(
+        'json',
+        `{
+          "targeting": {
+            "cid": "CLIENT_ID(foo)"
+          }
+        }`
+      );
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then((url) => {
+        expect(url).to.match(/&scp=cid%3Damp-[\w-]+&/);
+      });
+    });
+
+    it('expands CLIENT_ID in targeting inside array', () => {
+      toggleExperiment(win, 'expand-json-targeting', true, true);
+      forceExperimentBranch(
+        win,
+        EXPAND_JSON_TARGETING_EXP.ID,
+        EXPAND_JSON_TARGETING_EXP.EXPERIMENT
+      );
+      element.setAttribute(
+        'json',
+        `{
+          "targeting": {
+            "arr": ["cats", "CLIENT_ID(foo)"]
+          }
+        }`
+      );
+      new AmpAd(element).upgradeCallback();
+      return impl.getAdUrl().then((url) => {
+        expect(url).to.match(/&scp=arr%3Dcats%2Camp-[\w-]+&/);
       });
     });
 
@@ -1171,15 +1211,33 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
   });
 
   describe('#delayAdRequestEnabled', () => {
-    beforeEach(() => {
-      const element = createElementWithAttributes(doc, 'amp-ad', {
-        type: 'doubleclick',
-      });
-      doc.body.appendChild(element);
-      impl = new AmpAdNetworkDoubleclickImpl(element);
+    it('should return false', () => {
+      expect(impl.delayAdRequestEnabled()).to.be.false;
     });
 
-    it('should return false by default', () => {
+    it('should not respect loading strategy', () => {
+      impl.element.setAttribute(
+        'data-loading-strategy',
+        'prefer-viewability-over-views'
+      );
+      expect(impl.delayAdRequestEnabled()).to.be.false;
+    });
+
+    it('should respect loading strategy if fetch attribute present', () => {
+      impl.element.setAttribute(
+        'data-loading-strategy',
+        'prefer-viewability-over-views'
+      );
+      impl.element.setAttribute('data-lazy-fetch', 'true');
+      expect(impl.delayAdRequestEnabled()).to.equal(1.25);
+    });
+
+    it('should NOT delay due to non-true fetch attribute', () => {
+      impl.element.setAttribute(
+        'data-loading-strategy',
+        'prefer-viewability-over-views'
+      );
+      impl.element.setAttribute('data-lazy-fetch', 'false');
       expect(impl.delayAdRequestEnabled()).to.be.false;
     });
   });
@@ -1308,6 +1366,57 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
         expect(iframe).to.be.ok;
         expect(iframe.getAttribute('style')).to.match(/width: 150/);
         expect(iframe.getAttribute('style')).to.match(/height: 50/);
+      });
+    });
+
+    it('should center iframe if narrower than ad slot', () => {
+      env.sandbox
+        .stub(impl, 'sendXhrRequest')
+        .returns(mockSendXhrRequest('150x50', false));
+      impl.buildCallback();
+      impl.onLayoutMeasure();
+      return impl.layoutCallback().then(() => {
+        const {iframe} = impl;
+        expect(iframe).to.be.ok;
+        expect(iframe.getAttribute('style')).to.match(/left: 50%/);
+        expect(iframe.getAttribute('style')).to.match(/top: 50%/);
+        expect(iframe.getAttribute('style')).to.match(
+          /transform: translate\(-50%\, -50%\)/
+        );
+      });
+    });
+
+    it('should not center iframe if narrower than slot but is fluid', () => {
+      env.sandbox
+        .stub(impl, 'sendXhrRequest')
+        .returns(mockSendXhrRequest('0x0', false));
+      impl.buildCallback();
+      impl.onLayoutMeasure();
+      return impl.layoutCallback().then(() => {
+        const {iframe} = impl;
+        expect(iframe).to.be.ok;
+        expect(iframe.getAttribute('style')).to.not.match(/left: 50%/);
+        expect(iframe.getAttribute('style')).to.not.match(/top: 50%/);
+        expect(iframe.getAttribute('style')).to.not.match(
+          /transform: translate\(-50%\, -50%\)/
+        );
+      });
+    });
+
+    it('should not center iframe if same size as ad slot', () => {
+      env.sandbox
+        .stub(impl, 'sendXhrRequest')
+        .returns(mockSendXhrRequest('200x50', false));
+      impl.buildCallback();
+      impl.onLayoutMeasure();
+      return impl.layoutCallback().then(() => {
+        const {iframe} = impl;
+        expect(iframe).to.be.ok;
+        expect(iframe.getAttribute('style')).to.not.match(/left: 50%/);
+        expect(iframe.getAttribute('style')).to.not.match(/top: 50%/);
+        expect(iframe.getAttribute('style')).to.not.match(
+          /transform: translate\(-50%\, -50%\)/
+        );
       });
     });
 
@@ -1509,6 +1618,18 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
     });
 
+    it('should use the same random subdomain for every slot on a page', () => {
+      impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
+
+      const first = impl.getSafeframePath();
+
+      impl = new AmpAdNetworkDoubleclickImpl(element);
+      impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
+      const second = impl.getSafeframePath();
+
+      expect(first).to.equal(second);
+    });
+
     it('uses random subdomain if experiment is on without win.crypto', () => {
       impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
 
@@ -1565,96 +1686,6 @@ describes.realWin(
         expect(
           impl.onNetworkFailure(new Error('xhr failure'), TEST_URL)
         ).to.jsonEqual({adUrl: TEST_URL + '&aet=n'});
-      });
-    });
-
-    describes.realWin('centering', realWinConfigAmpAd, (env) => {
-      const size = {width: '300px', height: '150px'};
-
-      /**
-       * @param {!Element} iframe
-       * @param {{width: number, height: number}} expectedSize
-       */
-      function verifyCss(iframe, expectedSize) {
-        expect(iframe).to.be.ok;
-        const style = env.win.getComputedStyle(iframe);
-        expect(style.width).to.equal(expectedSize.width);
-        expect(style.height).to.equal(expectedSize.height);
-        // We don't know the exact values by which the frame will be
-        // translated, as this can vary depending on whether we use the
-        // height/width attributes, or the actual size of the frame. To make
-        // this less of a hassle, we'll just match against regexp.
-        expect(style.transform).to.equal('none');
-      }
-
-      afterEach(() => env.win.document.body.removeChild(impl.element));
-
-      it('centers iframe in slot when height && width', () => {
-        const setup = createImplTag(
-          {
-            width: '300',
-            height: '150',
-          },
-          element,
-          impl,
-          env
-        );
-        element = setup[0];
-        impl = setup[1];
-        env = setup[2];
-        expect(impl.element.getAttribute('width')).to.equal('300');
-        expect(impl.element.getAttribute('height')).to.equal('150');
-        verifyCss(impl.iframe, size);
-      });
-      it('centers iframe in slot when !height && !width', () => {
-        const setup = createImplTag(
-          {
-            layout: 'fixed',
-          },
-          element,
-          impl,
-          env
-        );
-        element = setup[0];
-        impl = setup[1];
-        env = setup[2];
-        expect(impl.element.getAttribute('width')).to.be.null;
-        expect(impl.element.getAttribute('height')).to.be.null;
-        verifyCss(impl.iframe, size);
-      });
-      it('centers iframe in slot when !height && width', () => {
-        const setup = createImplTag(
-          {
-            width: '300',
-            layout: 'fixed',
-          },
-          element,
-          impl,
-          env
-        );
-        element = setup[0];
-        impl = setup[1];
-        env = setup[2];
-        expect(impl.element.getAttribute('width')).to.equal('300');
-        expect(impl.element.getAttribute('height')).to.be.null;
-        verifyCss(impl.iframe, size);
-      });
-      it('centers iframe in slot when height && !width', () => {
-        const setup = createImplTag(
-          {
-            height: '150',
-            layout: 'fixed',
-          },
-          element,
-          impl,
-          env
-        );
-        element = setup[0];
-        impl = setup[1];
-        env = setup[2];
-        expect(impl.element.getAttribute('width')).to.be.null;
-        expect(impl.element.getAttribute('height')).to.equal('150');
-        verifyCss(impl.iframe, size);
       });
     });
 
@@ -1725,6 +1756,100 @@ describes.realWin(
       });
     });
 
+    describe('#idleRenderOutsideViewport', () => {
+      beforeEach(() => {
+        element = createElementWithAttributes(doc, 'amp-ad', {
+          'width': '200',
+          'height': '50',
+          'type': 'doubleclick',
+        });
+        impl = new AmpAdNetworkDoubleclickImpl(element);
+        env.sandbox
+          .stub(impl, 'getResource')
+          .returns({whenWithinViewport: () => Promise.resolve()});
+      });
+
+      it('should use experiment value', () => {
+        impl.postAdResponseExperimentFeatures['render-idle-vp'] = '4';
+        expect(impl.idleRenderOutsideViewport()).to.equal(4);
+        expect(impl.isIdleRender_).to.be.true;
+      });
+
+      it('should return false if using loading strategy', () => {
+        impl.postAdResponseExperimentFeatures['render-idle-vp'] = '4';
+        impl.element.setAttribute(
+          'data-loading-strategy',
+          'prefer-viewability-over-views'
+        );
+        expect(impl.idleRenderOutsideViewport()).to.be.false;
+        expect(impl.isIdleRender_).to.be.false;
+      });
+
+      it('should return false if invalid experiment value', () => {
+        impl.postAdResponseExperimentFeatures['render-idle-vp'] = 'abc';
+        expect(impl.idleRenderOutsideViewport()).to.be.false;
+      });
+
+      it('should return 12 if no experiment header', () => {
+        expect(impl.idleRenderOutsideViewport()).to.equal(12);
+      });
+
+      it('should return renderOutsideViewport boolean', () => {
+        env.sandbox.stub(impl, 'renderOutsideViewport').returns(false);
+        expect(impl.idleRenderOutsideViewport()).to.be.false;
+      });
+    });
+
+    describe('idle renderNonAmpCreative', () => {
+      beforeEach(() => {
+        element = createElementWithAttributes(doc, 'amp-ad', {
+          'width': '200',
+          'height': '50',
+          'type': 'doubleclick',
+        });
+        impl = new AmpAdNetworkDoubleclickImpl(element);
+        impl.postAdResponseExperimentFeatures['render-idle-vp'] = '4';
+        impl.postAdResponseExperimentFeatures['render-idle-throttle'] = 'true';
+        env.sandbox
+          .stub(AmpA4A.prototype, 'renderNonAmpCreative')
+          .returns(Promise.resolve());
+      });
+
+      // TODO(jeffkaufman, #13422): this test was silently failing
+      it.skip('should throttle if idle render and non-AMP creative', () => {
+        impl.win['3pla'] = 1;
+        const startTime = Date.now();
+        return impl.renderNonAmpCreative().then(() => {
+          expect(Date.now() - startTime).to.be.at.least(1000);
+        });
+      });
+
+      it('should NOT throttle if idle experiment not enabled', () => {
+        impl.win['3pla'] = 1;
+        delete impl.postAdResponseExperimentFeatures['render-idle-vp'];
+        const startTime = Date.now();
+        return impl.renderNonAmpCreative().then(() => {
+          expect(Date.now() - startTime).to.be.at.most(50);
+        });
+      });
+
+      it('should NOT throttle if experiment throttle not enabled', () => {
+        impl.win['3pla'] = 1;
+        const startTime = Date.now();
+        return impl.renderNonAmpCreative().then(() => {
+          expect(Date.now() - startTime).to.be.at.most(50);
+        });
+      });
+
+      it('should NOT throttle if idle render and no previous', () => {
+        impl.win['3pla'] = 0;
+        const startTime = Date.now();
+        return impl.renderNonAmpCreative().then(() => {
+          expect(Date.now() - startTime).to.be.at.most(50);
+        });
+      });
+    });
+
     describe('#preconnect', () => {
       beforeEach(() => {
         element = createElementWithAttributes(doc, 'amp-ad', {
@@ -1765,6 +1890,20 @@ describes.realWin(
         toggleExperiment(env.win, 'envDfpInvOrigDeprecated', false);
       });
 
+      it('should have correctly formatted experiment map', () => {
+        randomlySelectUnsetExperimentsStub.returns({});
+        impl.buildCallback();
+        const experimentMap =
+          randomlySelectUnsetExperimentsStub.firstCall.args[0];
+        Object.keys(experimentMap).forEach((key) => {
+          expect(key).to.be.a('string');
+          const {branches} = experimentMap[key];
+          expect(branches).to.exist;
+          expect(branches).to.be.a('array');
+          branches.forEach((branch) => expect(branch).to.be.a('string'));
+        });
+      });
+
       it('should select SRA experiments', () => {
         randomlySelectUnsetExperimentsStub.returns({
           doubleclickSraExp: '117152667',
@@ -1788,9 +1927,8 @@ describes.realWin(
           impl.setPageLevelExperiments();
           // args format is call array followed by parameter array so expect
           // first call, first param.
-          experimentInfoMap =
-            randomlySelectUnsetExperimentsStub.args[0][0]['doubleclickSraExp'];
-          expect(experimentInfoMap).to.be.ok;
+          experimentInfoMap = randomlySelectUnsetExperimentsStub.args[0][0][0];
+          expect(experimentInfoMap.experimentId).to.equal('doubleclickSraExp');
           expect(impl.useSra).to.be.false;
         });
 

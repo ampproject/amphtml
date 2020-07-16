@@ -127,6 +127,29 @@ describes.realWin(
           });
       });
 
+      it('should mutate expected src value with "query" attribute', () => {
+        return impl
+          .layoutCallback()
+          .then(() => {
+            impl.queryKey_ = 'q';
+            impl.srcBase_ = 'https://www.data.com/';
+            expect(impl.generateSrc_('')).to.equal('https://www.data.com/?q=');
+            expect(impl.generateSrc_('abc')).to.equal(
+              'https://www.data.com/?q=abc'
+            );
+            return impl.mutatedAttributesCallback({
+              'src': 'https://example.com',
+            });
+          })
+          .then(() => {
+            expect(impl.srcBase_).to.equal('https://example.com');
+            expect(impl.generateSrc_('')).to.equal('https://example.com?q=');
+            expect(impl.generateSrc_('abc')).to.equal(
+              'https://example.com?q=abc'
+            );
+          });
+      });
+
       it('should pass on calls when src is type object with "items"', () => {
         return impl
           .mutatedAttributesCallback({'src': {'items': ['a', 'b', 'c']}})
@@ -422,18 +445,18 @@ describes.realWin(
       expect(impl.tokenPrefixMatch_(item, 'd c')).to.be.false;
     });
 
-    it('truncateToMaxEntries_() should truncate given data', () => {
+    it('truncateToMaxItems_() should truncate given data', () => {
       expect(
-        impl.truncateToMaxEntries_(['a', 'b', 'c', 'd'])
+        impl.truncateToMaxItems_(['a', 'b', 'c', 'd'])
       ).to.have.ordered.members(['a', 'b', 'c', 'd']);
-      impl.maxEntries_ = 3;
+      impl.maxItems_ = 3;
       expect(
-        impl.truncateToMaxEntries_(['a', 'b', 'c', 'd'])
+        impl.truncateToMaxItems_(['a', 'b', 'c', 'd'])
       ).to.have.ordered.members(['a', 'b', 'c']);
       expect(
-        impl.truncateToMaxEntries_(['a', 'b', 'c'])
+        impl.truncateToMaxItems_(['a', 'b', 'c'])
       ).to.have.ordered.members(['a', 'b', 'c']);
-      expect(impl.truncateToMaxEntries_(['a', 'b'])).to.have.ordered.members([
+      expect(impl.truncateToMaxItems_(['a', 'b'])).to.have.ordered.members([
         'a',
         'b',
       ]);

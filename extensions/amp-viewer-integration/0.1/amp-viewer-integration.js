@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {FixedLayer} from '../../../src/service/fixed-layer';
 import {FocusHandler} from './focus-handler';
 import {
   HighlightHandler,
@@ -87,6 +88,11 @@ export class AmpViewerIntegration {
 
     if (!this.isWebView_ && !origin) {
       return Promise.resolve();
+    }
+
+    if (MOVE_FIXED_LAYER) {
+      const viewport = Services.viewportForDoc(ampdoc);
+      viewport.createFixedLayer(FixedLayer);
     }
 
     if (this.isWebView_ || this.isHandShakePoll_) {

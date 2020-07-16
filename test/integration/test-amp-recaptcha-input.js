@@ -18,11 +18,12 @@ import {BrowserController, RequestBank} from '../../testing/test-helper';
 import {Deferred} from '../../src/utils/promise';
 import {poll} from '../../testing/iframe';
 
-// TODO(torch2424, #20541): These tests fail on firefox and Edge.
+// TODO(wg-ui-and-a11y): These tests are broken on Firefox (as of v77). They
+// also fail on Safari.
 describe
   .configure()
   .skipFirefox()
-  .skipEdge()
+  .skipSafari()
   .run('amp-recaptcha-input', function () {
     describes.integration(
       'with form and amp-mustache',
@@ -219,6 +220,10 @@ describe
           return browserController.waitForElementLayout('amp-recaptcha-input');
         });
 
+        afterEach(() => {
+          return RequestBank.tearDown();
+        });
+
         it('should make a request with correct parameters', function () {
           return submitForm(doc).then(() => {
             return RequestBank.withdraw(recaptchaRequestId.GET).then((req) => {
@@ -268,6 +273,10 @@ describe
 
           const browserController = new BrowserController(env.win);
           return browserController.waitForElementLayout('amp-recaptcha-input');
+        });
+
+        afterEach(() => {
+          return RequestBank.tearDown();
         });
 
         it('should make a request with correct parameters', function () {

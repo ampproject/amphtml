@@ -20,37 +20,37 @@ import {getAdContainer, isAdPositionAllowed} from '../../src/ad-helper';
 
 describe('ad-helper', () => {
   describe('isAdPositionAllowed function', () => {
-    it('should allow position fixed element that is whitelisted', () => {
+    it('should allow position fixed element that is allowlisted', () => {
       return createIframePromise().then((iframe) => {
-        const whitelistedElement = iframe.doc.createElement('amp-lightbox');
-        whitelistedElement.style.position = 'fixed';
-        iframe.doc.body.appendChild(whitelistedElement);
-        expect(isAdPositionAllowed(whitelistedElement, iframe.win)).to.be.true;
+        const allowlistedElement = iframe.doc.createElement('amp-lightbox');
+        allowlistedElement.style.position = 'fixed';
+        iframe.doc.body.appendChild(allowlistedElement);
+        expect(isAdPositionAllowed(allowlistedElement, iframe.win)).to.be.true;
       });
     });
 
-    it('should allow position fixed element inside whitelisted element', () => {
+    it('should allow position fixed element inside allowlisted element', () => {
       return createIframePromise().then((iframe) => {
-        const whitelistedElement = iframe.doc.createElement('amp-lightbox');
-        whitelistedElement.style.position = 'fixed';
+        const allowlistedElement = iframe.doc.createElement('amp-lightbox');
+        allowlistedElement.style.position = 'fixed';
         const childElement = iframe.doc.createElement('div');
         const childChildElement = iframe.doc.createElement('div');
         childElement.appendChild(childChildElement);
-        whitelistedElement.appendChild(childElement);
-        iframe.doc.body.appendChild(whitelistedElement);
+        allowlistedElement.appendChild(childElement);
+        iframe.doc.body.appendChild(allowlistedElement);
         expect(isAdPositionAllowed(childChildElement, iframe.win)).to.be.true;
       });
     });
 
     it(
-      'should not allow position fixed element that is non-whitelisted ' +
+      'should not allow position fixed element that is non-allowlisted ' +
         'element',
       () => {
         return createIframePromise().then((iframe) => {
-          const nonWhitelistedElement = iframe.doc.createElement('foo-bar');
-          nonWhitelistedElement.style.position = 'fixed';
-          iframe.doc.body.appendChild(nonWhitelistedElement);
-          expect(isAdPositionAllowed(nonWhitelistedElement, iframe.win)).to.be
+          const nonAllowlistedElement = iframe.doc.createElement('foo-bar');
+          nonAllowlistedElement.style.position = 'fixed';
+          iframe.doc.body.appendChild(nonAllowlistedElement);
+          expect(isAdPositionAllowed(nonAllowlistedElement, iframe.win)).to.be
             .false;
         });
       }
@@ -58,35 +58,35 @@ describe('ad-helper', () => {
 
     it(
       'should not allow position sticky-fixed element that is ' +
-        'non-whitelisted element',
+        'non-allowlisted element',
       () => {
         return createIframePromise().then((iframe) => {
-          const nonWhitelistedElement = iframe.doc.createElement('foo-bar');
-          nonWhitelistedElement.style.position = 'sticky';
+          const nonAllowlistedElement = iframe.doc.createElement('foo-bar');
+          nonAllowlistedElement.style.position = 'sticky';
           // Check if browser support position:sticky
-          const styles = computedStyle(iframe.win, nonWhitelistedElement);
+          const styles = computedStyle(iframe.win, nonAllowlistedElement);
           if (styles.position != 'sticky') {
             return;
           }
-          iframe.doc.body.appendChild(nonWhitelistedElement);
-          expect(isAdPositionAllowed(nonWhitelistedElement, iframe.win)).to.be
+          iframe.doc.body.appendChild(nonAllowlistedElement);
+          expect(isAdPositionAllowed(nonAllowlistedElement, iframe.win)).to.be
             .false;
         });
       }
     );
 
     it(
-      'should not allow position fixed element inside non-whitelisted ' +
+      'should not allow position fixed element inside non-allowlisted ' +
         'element',
       () => {
         return createIframePromise().then((iframe) => {
-          const nonWhitelistedElement = iframe.doc.createElement('foo-bar');
-          nonWhitelistedElement.style.position = 'fixed';
+          const nonAllowlistedElement = iframe.doc.createElement('foo-bar');
+          nonAllowlistedElement.style.position = 'fixed';
           const childElement = iframe.doc.createElement('div');
           const childChildElement = iframe.doc.createElement('div');
           childElement.appendChild(childChildElement);
-          nonWhitelistedElement.appendChild(childElement);
-          iframe.doc.body.appendChild(nonWhitelistedElement);
+          nonAllowlistedElement.appendChild(childElement);
+          iframe.doc.body.appendChild(nonAllowlistedElement);
           expect(isAdPositionAllowed(childChildElement, iframe.win)).to.be
             .false;
         });

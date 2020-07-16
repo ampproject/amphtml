@@ -62,12 +62,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
-    id: 'amp-consent-restrict-fullscreen',
-    name: 'AMP consent restrict fullscreen API before user interaction',
-    spec: 'https://github.com/ampproject/amphtml/issues/26432',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26432',
-  },
-  {
     id: 'amp-sidebar-v2',
     name: 'Updated sidebar component with nested menu and animations',
     spec: 'https://github.com/ampproject/amphtml/issues/25049',
@@ -84,12 +78,6 @@ export const EXPERIMENTS = [
     name: 'Delay amp-access auth request until doc becomes visible.',
     spec: '',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3824',
-  },
-  {
-    id: 'amp-share-tracking',
-    name: 'AMP Share Tracking',
-    spec: 'https://github.com/ampproject/amphtml/issues/3135',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5167',
   },
   {
     id: 'amp-viz-vega',
@@ -159,10 +147,6 @@ export const EXPERIMENTS = [
     name: 'Display jank meter',
   },
   {
-    id: 'as-use-attr-for-format',
-    name: 'Use slot width/height attribute for AdSense size format',
-  },
-  {
     id: 'input-debounced',
     name: 'A debounced input event for AMP actions',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/9413',
@@ -214,12 +198,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14263',
   },
   {
-    id: 'blurry-placeholder',
-    name: 'Enables a blurred image placeholder as an amp-img loads',
-    spec: 'https://github.com/ampproject/amphtml/issues/15146',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
-  },
-  {
     id: 'amp-carousel-chrome-scroll-snap',
     name: 'Enables scroll snap on carousel on Chrome browsers',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
@@ -240,14 +218,6 @@ export const EXPERIMENTS = [
     name: "Enables FixedLayer's hidden-attribute mutation observer",
     spec: 'https://github.com/ampproject/amphtml/issues/17475',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
-  },
-  {
-    id: 'inabox-viewport-friendly',
-    name:
-      'Inabox viewport measures the host window directly if ' +
-      'within friendly iframe',
-    spec: 'https://github.com/ampproject/amphtml/issues/19869',
-    cleanupIssue: 'TODO',
   },
   {
     id: 'amp-user-location',
@@ -317,18 +287,29 @@ export const EXPERIMENTS = [
   },
   {
     id: 'analytics-chunks',
-    name: 'AMP Analytics Break long tasks to chunks',
-    spec: 'TODO: add before merge',
-    cleanupIssue: 'TODO: create issue before merge',
+    name: 'AMP Analytics Break long tasks to chunks (AMP docs only)',
+    spec: 'https://github.com/ampproject/amphtml/issues/28435',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/28435',
   },
   {
-    id: 'amp-ad-no-center-css',
-    name: 'Removing the centering css rule for amp-ad',
-    spec: 'https://github.com/ampproject/amphtml/issues/27095',
+    id: 'analytics-chunks-inabox',
+    name: 'AMP Analytics Break long tasks to chunks (AMP Ads only)',
+    spec: 'https://github.com/ampproject/amphtml/issues/28435',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/28435',
   },
   {
-    id: 'fie-init-chunking',
-    name: 'More chunking for friendly iframe initialization',
-    spec: 'https://github.com/ampproject/amphtml/issues/27584',
+    id: 'a4a-no-signing',
+    name: 'Remove signing requirement for AMPHTML ads',
+    spec: 'https://github.com/ampproject/amphtml/issues/27189',
+  },
+  {
+    id: 'sticky-ad-padding-bottom',
+    name: 'Add a bottom padding for edgeless iPhones',
+    spec: 'https://github.com/ampproject/amphtml/issues/22251',
+  },
+  {
+    id: 'expand-json-targeting',
+    name: 'Allow CLIENT_ID in doubleclick json targeting feature',
+    spec: 'https://github.com/ampproject/amphtml/issues/25190',
   },
 ];

@@ -458,6 +458,7 @@ describes.realWin('amp-story animations', {}, (env) => {
         webAnimationService.createBuilder.withArgs(
           env.sandbox.match({
             scope: page,
+            scaleByScope: true,
           })
         )
       ).to.have.been.calledOnce;
@@ -495,10 +496,10 @@ describes.realWin('amp-story animations', {}, (env) => {
 
       const page = html`
         <div>
-          <amp-story-animation ref="spec1source">
+          <amp-story-animation trigger="visibility" ref="spec1source">
             <script type="application/json"></script>
           </amp-story-animation>
-          <amp-story-animation ref="spec2source">
+          <amp-story-animation trigger="visibility" ref="spec2source">
             <script type="application/json"></script>
           </amp-story-animation>
         </div>
@@ -532,7 +533,7 @@ describes.realWin('amp-story animations', {}, (env) => {
       ).to.have.been.calledOnce;
     });
 
-    it('fails when using unknown presets', () => {
+    it('ignores unknown presets', async () => {
       const animationManager = new AnimationManager(
         html`
           <div>
@@ -541,7 +542,8 @@ describes.realWin('amp-story animations', {}, (env) => {
         `,
         ampdoc
       );
-      return expect(() => animationManager.applyFirstFrame()).to.throw();
+      await animationManager.applyFirstFrame();
+      expect(createAnimationRunner).to.not.have.been.called;
     });
 
     it('passes keyframeOptions to runner', async () => {
@@ -570,6 +572,16 @@ describes.realWin('amp-story animations', {}, (env) => {
           `,
           expectedOptions: {'scale-end': 0.1, 'scale-start': 0.5},
         },
+        {
+          target: html`
+            <div
+              animate-in="zoom-in"
+              scale-end="invalid"
+              scale-start="invalid"
+            ></div>
+          `,
+          expectedOptions: {},
+        },
       ];
 
       targetsWithOptions.forEach(({target}) => {
@@ -585,7 +597,10 @@ describes.realWin('amp-story animations', {}, (env) => {
             page,
             env.sandbox.match({
               source: target,
-              keyframeOptions: expectedOptions,
+              keyframeOptions: env.sandbox.match((passedOptions) => {
+                expect(passedOptions).to.eql(expectedOptions);
+                return true;
+              }),
               spec: {target},
             }),
             env.sandbox.match.any,
@@ -611,15 +626,59 @@ describes.realWin('amp-story animations', {}, (env) => {
       );
     });
 
-    it('fails when animate-in-after element does not exist', async () => {
+    it('sets fallback value for invalid animate-in-duration', async () => {
       const page = html`
         <div>
-          <div animate-in="fly-in-left" animate-in-after="does-not-exist"></div>
+          <div animate-in="fly-in-left" animate-in-duration="invalid"></div>
         </div>
       `;
+
+      const {firstElementChild} = page;
+
       env.win.document.body.appendChild(page);
       const animationManager = new AnimationManager(page, ampdoc);
-      expect(() => animationManager.applyFirstFrame()).to.throw();
+      await animationManager.applyFirstFrame();
+
+      expect(
+        createAnimationRunner.withArgs(
+          env.sandbox.match.any,
+          env.sandbox.match({
+            spec: {
+              target: firstElementChild,
+              duration: presets['fly-in-left'].duration,
+            },
+          }),
+          env.sandbox.match.any,
+          env.sandbox.match.any,
+          env.sandbox.match.any
+        )
+      ).to.have.been.calledOnce;
+    });
+
+    it('sets fallback value for invalid animate-in-delay', async () => {
+      const page = html`
+        <div>
+          <div animate-in="fly-in-left" animate-in-delay="invalid"></div>
+        </div>
+      `;
+
+      const {firstElementChild} = page;
+
+      env.win.document.body.appendChild(page);
+      const animationManager = new AnimationManager(page, ampdoc);
+      await animationManager.applyFirstFrame();
+
+      expect(
+        createAnimationRunner.withArgs(
+          env.sandbox.match.any,
+          env.sandbox.match({
+            spec: {target: firstElementChild, delay: 0},
+          }),
+          env.sandbox.match.any,
+          env.sandbox.match.any,
+          env.sandbox.match.any
+        )
+      ).to.have.been.calledOnce;
     });
 
     it('passes animate-in-after id in definition', async () => {
@@ -639,13 +698,14 @@ describes.realWin('amp-story animations', {}, (env) => {
           <div
             id="animated-third"
             ref="animatedThird"
-            animate-in-after="animated-second"
+            animate-in-after="does-not-exist-should-be-null"
             animate-in="fly-in-right"
           ></div>
           <amp-story-animation
             id="animated-fourth"
             ref="animatedFourth"
             animate-in-after="animated-third"
+            trigger="visibility"
           >
             <script type="application/json">
               {}
@@ -698,7 +758,7 @@ describes.realWin('amp-story animations', {}, (env) => {
           env.sandbox.match.any,
           env.sandbox.match({
             source: animatedThird,
-            startAfterId: 'animated-second',
+            startAfterId: null,
             spec: {target: animatedThird},
           }),
           env.sandbox.match.any,

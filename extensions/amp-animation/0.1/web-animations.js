@@ -28,7 +28,7 @@ import {
   WebKeyframesDef,
   WebMultiAnimationDef,
   WebSwitchAnimationDef,
-  isWhitelistedProp,
+  isAllowlistedProp,
 } from './web-animation-types';
 import {NativeWebAnimationRunner} from './runners/native-web-animation-runner';
 import {ScrollTimelineWorkletRunner} from './runners/scrolltimeline-worklet-runner';
@@ -48,6 +48,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {isInFie} from '../../../src/iframe-helper';
+import {layoutRectLtwh} from '../../../src/layout-rect';
 import {map} from '../../../src/utils/object';
 import {parseCss} from './parsers/css-expr';
 
@@ -485,7 +486,7 @@ export class MeasureScanner extends Scanner {
     if (isObject(specKeyframes)) {
       // Property -> keyframes form.
       // The object is cloned, while properties are verified to be
-      // whitelisted. Additionally, the `offset:0` frames are inserted
+      // allowlisted. Additionally, the `offset:0` frames are inserted
       // to polyfill partial keyframes per spec.
       // See https://github.com/w3c/web-animations/issues/187
       const object = /** @type {!Object<string, *>} */ (specKeyframes);
@@ -515,7 +516,7 @@ export class MeasureScanner extends Scanner {
 
     if (isArray(specKeyframes) && specKeyframes.length > 0) {
       // Keyframes -> property form.
-      // The array is cloned, while properties are verified to be whitelisted.
+      // The array is cloned, while properties are verified to be allowlisted.
       // Additionally, if the `offset:0` properties are inserted when absent
       // to polyfill partial keyframes per spec.
       // See https://github.com/w3c/web-animations/issues/187 and
@@ -576,8 +577,8 @@ export class MeasureScanner extends Scanner {
       return;
     }
     userAssert(
-      isWhitelistedProp(prop),
-      'Property is not whitelisted for animation: %s',
+      isAllowlistedProp(prop),
+      'Property is not allowlisted for animation: %s',
       prop
     );
   }
@@ -852,15 +853,19 @@ class CssContextImpl {
    * @param {!./web-animation-types.WebAnimationBuilderOptionsDef} options
    */
   constructor(win, rootNode, baseUrl, options) {
+    const {scope = null, scaleByScope = false} = options;
+
     /** @const @private */
     this.win_ = win;
 
     /** @const @private {!Document|!ShadowRoot} */
     this.rootNode_ = rootNode;
 
-    const {scope = null} = options;
     /** @const @private {?Element} */
     this.scope_ = scope;
+
+    /** @const @private {boolean} */
+    this.scaleByScope_ = scaleByScope;
 
     /** @const @private */
     this.baseUrl_ = baseUrl;
@@ -889,8 +894,15 @@ class CssContextImpl {
     /** @private {?string} */
     this.dim_ = null;
 
-    /** @private {?{width: number, height: number}} */
-    this.viewportSize_ = null;
+    /**
+     * @private {?{
+     *   size: {width: number, height: number},
+     *   offset: {x: number, y: number},
+     *   scaleFactorX: number,
+     *   scaleFactorY: number,
+     * }}
+     */
+    this.viewportParams_ = null;
   }
 
   /** @return {!Document|!ShadowRoot} */
@@ -1179,13 +1191,32 @@ class CssContextImpl {
 
   /** @override */
   getViewportSize() {
-    if (!this.viewportSize_) {
-      this.viewportSize_ = {
-        width: this.win_./*OK*/ innerWidth,
-        height: this.win_./*OK*/ innerHeight,
-      };
+    return this.getViewportParams_().size;
+  }
+
+  /** @private */
+  getViewportParams_() {
+    if (!this.viewportParams_) {
+      if (this.scope_ && this.scaleByScope_) {
+        const rect = this.scope_./*OK*/ getBoundingClientRect();
+        const {offsetWidth, offsetHeight} = this.scope_;
+        this.viewportParams_ = {
+          offset: {x: rect.x, y: rect.y},
+          size: {width: offsetWidth, height: offsetHeight},
+          scaleFactorX: offsetWidth / (rect.width || 1),
+          scaleFactorY: offsetHeight / (rect.height || 1),
+        };
+      } else {
+        const {innerWidth, innerHeight} = this.win_;
+        this.viewportParams_ = {
+          offset: {x: 0, y: 0},
+          size: {width: innerWidth, height: innerHeight},
+          scaleFactorX: 1,
+          scaleFactorY: 1,
+        };
+      }
     }
-    return this.viewportSize_;
+    return this.viewportParams_;
   }
 
   /** @override */
@@ -1220,13 +1251,13 @@ class CssContextImpl {
   }
 
   /** @override */
-  getCurrentElementSize() {
-    return this.getElementSize_(this.requireTarget_());
+  getCurrentElementRect() {
+    return this.getElementRect_(this.requireTarget_());
   }
 
   /** @override */
-  getElementSize(selector, selectionMethod) {
-    return this.getElementSize_(this.getElement_(selector, selectionMethod));
+  getElementRect(selector, selectionMethod) {
+    return this.getElementRect_(this.getElement_(selector, selectionMethod));
   }
 
   /**
@@ -1265,12 +1296,20 @@ class CssContextImpl {
 
   /**
    * @param {!Element} target
-   * @return {!{width: number, height: number}}
+   * @return {!../../../src/layout-rect.LayoutRectDef}
    * @private
    */
-  getElementSize_(target) {
-    const b = target./*OK*/ getBoundingClientRect();
-    return {width: b.width, height: b.height};
+  getElementRect_(target) {
+    const {offset, scaleFactorX, scaleFactorY} = this.getViewportParams_();
+    const {x, y, width, height} = target./*OK*/ getBoundingClientRect();
+
+    // This assumes default `transform-origin: center center`
+    return layoutRectLtwh(
+      (x - offset.x) * scaleFactorX,
+      (y - offset.y) * scaleFactorY,
+      width * scaleFactorX,
+      height * scaleFactorY
+    );
   }
 
   /** @override */

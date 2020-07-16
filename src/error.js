@@ -215,14 +215,7 @@ export function reportError(error, opt_associatedElement) {
 
     // 'call' to make linter happy. And .call to make compiler happy
     // that expects some @this.
-    onError['call'](
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      error
-    );
+    onError['call'](self, undefined, undefined, undefined, undefined, error);
   } catch (errorReportingError) {
     setTimeout(function () {
       throw errorReportingError;
@@ -311,8 +304,8 @@ export function installErrorReporting(win) {
  * @this {!Window|undefined}
  */
 function onError(message, filename, line, col, error) {
-  // Make an attempt to unhide the body.
-  if (this && this.document) {
+  // Make an attempt to unhide the body but don't if the error is actually expected.
+  if (this && this.document && (!error || !error.expected)) {
     makeBodyVisibleRecovery(this.document);
   }
   if (getMode().localDev || getMode().development || getMode().test) {
@@ -376,6 +369,12 @@ export function reportErrorToServerOrViewer(win, data) {
   // Report the error to viewer if it has the capability. The data passed
   // to the viewer is exactly the same as the data passed to the server
   // below.
+
+  // Throttle reports from Stable by 90%.
+  if (data['pt'] && Math.random() < 0.9) {
+    return Promise.resolve();
+  }
+
   return maybeReportErrorToViewer(win, data).then((reportedErrorToViewer) => {
     if (!reportedErrorToViewer) {
       const xhr = new XMLHttpRequest();
@@ -438,6 +437,7 @@ export function errorReportingDataForViewer(errorReportData) {
     'el': errorReportData['el'], // tagName
     'ex': errorReportData['ex'], // expected error?
     'v': errorReportData['v'], // runtime
+    'pt': errorReportData['pt'], // is pre-throttled
     'jse': errorReportData['jse'], // detectedJsEngine
   });
 }
@@ -551,10 +551,6 @@ export function getErrorReportData(
     runtime = getMode().runtime;
   }
 
-  if (getMode().singlePassType) {
-    data['spt'] = getMode().singlePassType;
-  }
-
   data['rt'] = runtime;
 
   // Add our a4a id if we are inabox
@@ -631,6 +627,15 @@ export function getErrorReportData(
   data['ae'] = accumulatedErrorMessages.join(',');
   data['fr'] = self.location.originalHash || self.location.hash;
 
+  // TODO(https://github.com/ampproject/error-tracker/issues/129): Remove once
+  // all clients are serving a version with pre-throttling.
+  if (data['bt'] === 'production') {
+    // Setting this field allows the error reporting service to know that this
+    // error has already been pre-throttled for Stable, so it doesn't need to
+    // throttle again.
+    data['pt'] = '1';
+  }
+
   pushLimit(accumulatedErrorMessages, message, 25);
 
   return data;
@@ -683,7 +688,7 @@ export function detectJsEngineFromStack() {
   } catch (e) {
     const {stack} = e;
 
-    // Safari only mentions the method name.
+    // Safari 12 and under only mentions the method name.
     if (startsWith(stack, 't@')) {
       return 'Safari';
     }
@@ -725,7 +730,12 @@ export function reportErrorToAnalytics(error, win) {
       'errorName': error.name,
       'errorMessage': error.message,
     });
-    triggerAnalyticsEvent(getRootElement_(win), 'user-error', vars);
+    triggerAnalyticsEvent(
+      getRootElement_(win),
+      'user-error',
+      vars,
+      /** enableDataVars */ false
+    );
   }
 }
 

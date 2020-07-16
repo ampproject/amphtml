@@ -1,12 +1,17 @@
 {
-  "experimentA": {
-    "name": "IntersectionObserverPolyfill",
+  "experimentA": {},
+  "experimentB": {
+    "name": "MoveFixedLayer",
     "environment": "AMP",
-    "command": "gulp dist --define_experiment_constant=INTERSECTION_OBSERVER_POLYFILL",
-    "issue": "https://github.com/ampproject/amphtml/issues/27807",
-    "expirationDateUTC": "2020-05-31",
-    "defineExperimentConstant": "INTERSECTION_OBSERVER_POLYFILL"
+    "issue": "https://github.com/ampproject/amphtml/issues/27120",
+    "expiration_date_utc": "2021-01-01",
+    "define_experiment_constant": "MOVE_FIXED_LAYER"
   },
-  "experimentB": {},
-  "experimentC": {}
+  "experimentC": {
+    "name": "StrictCompilation",
+    "environment": "AMP",
+    "issue": "https://github.com/ampproject/amphtml/issues/19380",
+    "expiration_date_utc": "2020-08-07",
+    "define_experiment_constant": "STRICT_COMPILATION"
+  }
 }

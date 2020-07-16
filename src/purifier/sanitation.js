@@ -75,7 +75,7 @@ export function markElementForDiffing(element, generateKey) {
  * @const {!Object<string, boolean>}
  * @see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md
  */
-export const BLACKLISTED_TAGS = {
+export const DENYLISTED_TAGS = {
   'applet': true,
   'audio': true,
   'base': true,
@@ -98,7 +98,7 @@ export const BLACKLISTED_TAGS = {
  * @const {!Object<string, boolean>}
  * @see https://github.com/ampproject/amphtml/blob/master/spec/email/amp-email-components.md
  */
-export const EMAIL_WHITELISTED_AMP_TAGS = {
+export const EMAIL_ALLOWLISTED_AMP_TAGS = {
   'amp-accordion': true,
   'amp-anim': true,
   'amp-bind-macro': true,
@@ -112,21 +112,24 @@ export const EMAIL_WHITELISTED_AMP_TAGS = {
 };
 
 /**
- * Whitelist of tags allowed in triple mustache e.g. {{{name}}}.
+ * Allowlist of tags allowed in triple mustache e.g. {{{name}}}.
  * Very restrictive by design since the triple mustache renders unescaped HTML
  * which, unlike double mustache, won't be processed by the AMP Validator.
  * @const {!Array<string>}
  */
-export const TRIPLE_MUSTACHE_WHITELISTED_TAGS = [
+export const TRIPLE_MUSTACHE_ALLOWLISTED_TAGS = [
   'a',
   'b',
   'br',
   'caption',
+  'code',
   'col',
   'colgroup',
-  'code',
+  'dd',
   'del',
   'div',
+  'dl',
+  'dt',
   'em',
   'hr',
   'i',
@@ -144,21 +147,21 @@ export const TRIPLE_MUSTACHE_WHITELISTED_TAGS = [
   'sup',
   'table',
   'tbody',
-  'time',
   'td',
+  'tfoot',
   'th',
   'thead',
-  'tfoot',
+  'time',
   'tr',
   'u',
   'ul',
 ];
 
 /**
- * Tag-agnostic attribute whitelisted used by both Caja and DOMPurify.
+ * Tag-agnostic attribute allowlisted used by both Caja and DOMPurify.
  * @const {!Array<string>}
  */
-export const WHITELISTED_ATTRS = [
+export const ALLOWLISTED_ATTRS = [
   // AMP-only attributes that don't exist in HTML.
   'amp-fx',
   'fallback',
@@ -189,6 +192,8 @@ export const WHITELISTED_ATTRS = [
   'subscriptions-display',
   'subscriptions-section',
   'subscriptions-service',
+  // Attributes for amp-subscriptions-google.
+  'subscriptions-google-rtc',
   // Attributes for amp-nested-menu.
   'amp-nested-submenu',
   'amp-nested-submenu-open',
@@ -199,10 +204,10 @@ export const WHITELISTED_ATTRS = [
 ];
 
 /**
- * Attributes that are only whitelisted for specific, non-AMP elements.
+ * Attributes that are only allowlisted for specific, non-AMP elements.
  * @const {!Object<string, !Array<string>>}
  */
-export const WHITELISTED_ATTRS_BY_TAGS = {
+export const ALLOWLISTED_ATTRS_BY_TAGS = {
   'a': ['rel', 'target'],
   'div': ['template'],
   'form': ['action-xhr', 'verify-xhr', 'custom-validation-reporting', 'target'],
@@ -212,19 +217,19 @@ export const WHITELISTED_ATTRS_BY_TAGS = {
 };
 
 /** @const {!Array<string>} */
-export const WHITELISTED_TARGETS = ['_top', '_blank'];
+export const ALLOWLISTED_TARGETS = ['_top', '_blank'];
 
 // Extended from IS_SCRIPT_OR_DATA in https://github.com/cure53/DOMPurify/blob/master/src/regexp.js.
-const BLACKLISTED_PROTOCOLS = /^(?:\w+script|data|blob):/i;
+const DENYLISTED_PROTOCOLS = /^(?:\w+script|data|blob):/i;
 
-// Same as BLACKLISTED_PROTOCOLS modulo those handled by DOMPurify.
-const EXTENDED_BLACKLISTED_PROTOCOLS = /^(?:blob):/i;
+// Same as DENYLISTED_PROTOCOLS modulo those handled by DOMPurify.
+const EXTENDED_DENYLISTED_PROTOCOLS = /^(?:blob):/i;
 
 // From https://github.com/cure53/DOMPurify/blob/master/src/regexp.js.
 const ATTR_WHITESPACE = /[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205f\u3000]/g;
 
 /** @const {!Object<string, !Object<string, !RegExp>>} */
-const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze(
+const DENYLISTED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze(
   dict({
     'input': {
       'type': /(?:image|button)/i,
@@ -233,10 +238,10 @@ const BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze(
 );
 
 /**
- * Rules in addition to BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES for AMP4EMAIL.
+ * Rules in addition to DENYLISTED_TAG_SPECIFIC_ATTR_VALUES for AMP4EMAIL.
  * @const {!Object<string, !Object<string, !RegExp>>}
  */
-const EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze(
+const EMAIL_DENYLISTED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze(
   dict({
     'input': {
       'type': /(?:button|file|image|password)/i,
@@ -245,7 +250,7 @@ const EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES = Object.freeze(
 );
 
 /** @const {!Array<string>} */
-const BLACKLISTED_FIELDS_ATTR = Object.freeze([
+const DENYLISTED_FIELDS_ATTR = Object.freeze([
   'form',
   'formaction',
   'formmethod',
@@ -255,19 +260,19 @@ const BLACKLISTED_FIELDS_ATTR = Object.freeze([
 ]);
 
 /** @const {!Object<string, !Array<string>>} */
-const BLACKLISTED_TAG_SPECIFIC_ATTRS = Object.freeze(
+const DENYLISTED_TAG_SPECIFIC_ATTRS = Object.freeze(
   dict({
-    'input': BLACKLISTED_FIELDS_ATTR,
-    'textarea': BLACKLISTED_FIELDS_ATTR,
-    'select': BLACKLISTED_FIELDS_ATTR,
+    'input': DENYLISTED_FIELDS_ATTR,
+    'textarea': DENYLISTED_FIELDS_ATTR,
+    'select': DENYLISTED_FIELDS_ATTR,
   })
 );
 
 /**
- * Rules in addition to BLACKLISTED_TAG_SPECIFIC_ATTRS for AMP4EMAIL.
+ * Rules in addition to denylistED_TAG_SPECIFIC_ATTRS for AMP4EMAIL.
  * @const {!Object<string, !Array<string>>}
  */
-const EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTRS = Object.freeze(
+const EMAIL_DENYLISTED_TAG_SPECIFIC_ATTRS = Object.freeze(
   dict({
     'amp-anim': ['controls'],
     'form': ['name'],
@@ -323,7 +328,7 @@ export function isValidAttr(
     }
 
     // Don't allow protocols like "javascript:".
-    if (BLACKLISTED_PROTOCOLS.test(attrValueWithoutWhitespace)) {
+    if (DENYLISTED_PROTOCOLS.test(attrValueWithoutWhitespace)) {
       return false;
     }
   }
@@ -333,7 +338,7 @@ export function isValidAttr(
   // allows them in special cases (data URIs in images, data-* attrs).
   // So, just handle the other "extended" protocols here to avoid
   // banning "javascript:" in known-safe ARIA attributes, for example.
-  if (EXTENDED_BLACKLISTED_PROTOCOLS.test(attrValueWithoutWhitespace)) {
+  if (EXTENDED_DENYLISTED_PROTOCOLS.test(attrValueWithoutWhitespace)) {
     return false;
   }
 
@@ -354,28 +359,28 @@ export function isValidAttr(
 
   const isEmail = isAmp4Email(doc);
 
-  // Remove blacklisted attributes from specific tags e.g. input[formaction].
-  const attrBlacklist = Object.assign(
+  // Remove denylisted attributes from specific tags e.g. input[formaction].
+  const attrDenylist = Object.assign(
     map(),
-    BLACKLISTED_TAG_SPECIFIC_ATTRS,
-    isEmail ? EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTRS : {}
+    DENYLISTED_TAG_SPECIFIC_ATTRS,
+    isEmail ? EMAIL_DENYLISTED_TAG_SPECIFIC_ATTRS : {}
   )[tagName];
-  if (attrBlacklist && attrBlacklist.indexOf(attrName) != -1) {
+  if (attrDenylist && attrDenylist.indexOf(attrName) != -1) {
     return false;
   }
 
-  // Remove blacklisted values for specific attributes for specific tags
+  // Remove denylisted values for specific attributes for specific tags
   // e.g. input[type=image].
-  const attrValueBlacklist = Object.assign(
+  const attrValueDenylist = Object.assign(
     map(),
-    BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES,
-    isEmail ? EMAIL_BLACKLISTED_TAG_SPECIFIC_ATTR_VALUES : {}
+    DENYLISTED_TAG_SPECIFIC_ATTR_VALUES,
+    isEmail ? EMAIL_DENYLISTED_TAG_SPECIFIC_ATTR_VALUES : {}
   )[tagName];
-  if (attrValueBlacklist) {
-    const blacklistedValuesRegex = attrValueBlacklist[attrName];
+  if (attrValueDenylist) {
+    const denylistedValuesRegex = attrValueDenylist[attrName];
     if (
-      blacklistedValuesRegex &&
-      attrValue.search(blacklistedValuesRegex) != -1
+      denylistedValuesRegex &&
+      attrValue.search(denylistedValuesRegex) != -1
     ) {
       return false;
     }
