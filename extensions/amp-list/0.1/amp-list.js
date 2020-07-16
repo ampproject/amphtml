@@ -75,6 +75,7 @@ const TABBABLE_ELEMENTS_QUERY =
 
 // Technically the ':' is not considered part of the scheme, but it is useful to include.
 const AMP_STATE_URI_SCHEME = 'amp-state:';
+const AMP_SCRIPT_URI_SCHEME = 'amp-script:';
 
 /**
  * @typedef {{
@@ -411,6 +412,20 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
+   * Returns true if element's src points to an amp-script function.
+   *
+   * @param {string} src
+   * @return {boolean}
+   * @private
+   */
+  isAmpScriptSrc_(src) {
+    return (
+      isExperimentOn(this.win, 'protocol-adapters') &&
+      startsWith(src, AMP_SCRIPT_URI_SCHEME)
+    );
+  }
+
+  /**
    * Gets the json an amp-list that has an "amp-state:" uri. For example,
    * src="amp-state:json.path".
    *
@@ -445,6 +460,35 @@ export class AmpList extends AMP.BaseElement {
         return json;
       });
   }
+  
+  /**
+   * Gets the json from an amp-script uri.
+   *
+   * @param {string} src
+   * @return {Promise<!JsonObject>}
+   * @private
+   */
+  getAmpScriptJson_(src) {
+    return Services.scriptForDocOrNull(this.element)
+      .then((ampScript) => {
+        userAssert(ampScript, '"amp-script:" URLs require amp-script to be installed.');
+        userAssert(
+          !this.ssrTemplateHelper_.isEnabled(),
+          '[amp-list]: "amp-script" URIs cannot be used in SSR mode.'
+        );
+
+        const [ampScriptId, fnIdentifier ] = src.slice(AMP_SCRIPT_URI_SCHEME.length).split('.');
+        return ampScript.callFunction(ampScriptId, fnIdentifier);
+      })
+      .then((json) => {
+        userAssert(
+          typeof json === 'object',
+          `[amp-list] ${src} must return json, but instead returned: ${typeof json}`
+        );
+        return json;
+      });
+  }
+
 
   /** @override */
   mutatedAttributesCallback(mutations) {
@@ -693,6 +737,8 @@ export class AmpList extends AMP.BaseElement {
     } else {
       fetch = this.isAmpStateSrc_(elementSrc)
         ? this.getAmpStateJson_(elementSrc)
+        : this.isAmpScriptSrc_(elementSrc)
+        ? this.getAmpScriptJson_(elementSrc)
         : this.prepareAndSendFetch_(opt_refresh);
       fetch = fetch.then((data) => {
         // Bail if the src has changed while resolving the xhr request.
