@@ -452,7 +452,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         });
       }
     );
-    
+
     it('pauses programatically', async () => {
       buildStoryPlayer();
       await manager.loadPlayers();
