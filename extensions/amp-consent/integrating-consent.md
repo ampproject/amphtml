@@ -148,7 +148,7 @@ info = JSON.parse(window.name);
 
 #### consentMetadata
 
-`consentMetadata` allows for additional consent information to be passed to `<amp-consent>` to be give to ad vendors and other extensions. `consentMetadata` can be received from the [external iframe consent flow](#informingconsentresponse) outlined above or from the `checkConsentHref` endpoint response. `consentMetadata` will only be updated if a `consentString` is passed in as well. `consentMetadata` will also be sent along with the information in [`onUpdateHref`](./amp-consent#onUpdateHref). `consentMetadata` will be stored in localStorage and will be affected one-off tradeoff described in [client caching](./amp-consent#Client-caching). The only fields that are valid are as follows:
+`<amp-consent>` [caches](./amp-consent.md#Client-caching) and passes consent information to vendors via `consentMetadata` objects as well as a non-empty `consentString`. You can find and example of the `consentMetadata` object and its supported fields below.
 
 ```
 {

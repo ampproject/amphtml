@@ -73,8 +73,14 @@ the user from the page owner. See [this](https://github.com/ampproject/amphtml/b
 
 ### On Consent Metadata
 
-In addition to the consent state and consent string, AMP extensions can also use the
-`getConsentMetadata` API to receive additional consent metadata information about
-the user from the page owner (`additionalConsent`, `gdprApplies`, `consentStringType`) via the `checkConsentHref` endpoint or from the CMP. AMP will pass this metadata to vendors without modification.
+In addition to the consent state and consent string, AMP extensions can also use the `getConsentMetadata` to receive additional consent metadata information AMP receives from `checkConsentHref` or the CMP.
 
-AMP will always pass the local stored metadta if it exists. Updates to the metadata will only be reflected the next page load. Read here for more information on [metadata](./integrating-consent#consentMetadata).
+Similar to the consent string, AMP will always pass the local stored consent metadata object if there's one. Update will only be reflected on the next page load. Below is an example `consentMetadata` object and its supported fields.
+
+```
+{
+  "consentStringType": {enum} [CONSENT_STRING_TYPE.TCF_V1, CONSENT_STRING_TYPE.TCF_V2, CONSENT_STRING_TYPE.US_PRIVACY_STRING] (optional),
+  "gdprApplies": {boolean} (optional),
+  "additionalConsent": {string} (optional)
+}
+```
