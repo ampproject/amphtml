@@ -121,7 +121,10 @@ export class Performance {
 
     // If Paint Timing API is not supported, cannot determine first contentful paint
     if (!supportedEntryTypes.includes('paint')) {
-      this.metrics_.rejectSignal(TickLabel.FIRST_CONTENTFUL_PAINT);
+      this.metrics_.rejectSignal(
+        TickLabel.FIRST_CONTENTFUL_PAINT,
+        dev().createExpectedError('First Contentful Paint not supported')
+      );
     }
 
     /**
@@ -133,7 +136,10 @@ export class Performance {
     this.supportsLayoutShift_ = supportedEntryTypes.includes('layout-shift');
 
     if (!this.supportsLayoutShift_) {
-      this.metrics_.rejectSignal(TickLabel.CUMULATIVE_LAYOUT_SHIFT);
+      this.metrics_.rejectSignal(
+        TickLabel.CUMULATIVE_LAYOUT_SHIFT,
+        dev().createExpectedError('Cumulative Layout Shift not supported')
+      );
     }
 
     /**
@@ -145,7 +151,10 @@ export class Performance {
     this.supportsEventTiming_ = supportedEntryTypes.includes('first-input');
 
     if (!this.supportsEventTiming_) {
-      this.metrics_.rejectSignal(TickLabel.FIRST_INPUT_DELAY);
+      this.metrics_.rejectSignal(
+        TickLabel.FIRST_INPUT_DELAY,
+        dev().createExpectedError('First Input Delay not supported')
+      );
     }
 
     /**
@@ -158,7 +167,10 @@ export class Performance {
     );
 
     if (!this.supportsLargestContentfulPaint_) {
-      this.metrics_.rejectSignal(TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE);
+      this.metrics_.rejectSignal(
+        TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE,
+        dev().createExpectedError('Largest Contentful Paint not supported')
+      );
     }
 
     /**
