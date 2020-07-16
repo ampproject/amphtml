@@ -10,7 +10,7 @@
   "timezone": "America/Los_Angeles",
   "schedule": "after 12am every weekday",
 
-  "dependencyDashboard": true,
+  "masterIssue": true,
   "prBodyColumns": ["Package", "Update", "Type", "Change", "Package file"],
   "separateMinorPatch": true,
   "packageRules": [
