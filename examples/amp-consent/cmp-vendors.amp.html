@@ -79,7 +79,6 @@
     }
 
     </style>
-
     <script async custom-element="amp-geo" src="https://cdn.ampproject.org/v0/amp-geo-0.1.js"></script>
     <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
     <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
@@ -192,14 +191,9 @@
         <script type="application/json">
           {
             "consentRequired": true,
-            "promptUI": "iubenda-consent-ui"
+            "promptUISrc": "https://cdn.iubenda.com/cs/test/cs-for-amp.html"
           }
         </script>
-        <div id="iubenda-consent-ui" class="popupOverlay">
-          <amp-iframe layout="fill" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" src="https://cdn.iubenda.com/cs/test/cs-for-amp.html">
-            <div placeholder>Loading</div>
-          </amp-iframe>
-        </div>
       </amp-consent>
       <!-- End iubenda example -->
 
