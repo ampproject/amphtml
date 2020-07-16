@@ -19,8 +19,9 @@ import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import {listenOncePromise} from '../../../../src/event-helper';
 
-const EXAMPLE_VIDEOID = 'v-myfwarfx4tb';
-const EXAMPLE_VIDEOID_URL = 'https://mowplayer.com/watch/v-myfwarfx4tb';
+const EXAMPLE_VIDEOID = 'v-h-_ED0btjZs';
+const EXAMPLE_VIDEOID_URL =
+  'https://mowplayer.com/watch/v-h-_ED0btjZs?script=1';
 
 describes.realWin(
   'amp-mowplayer',
@@ -30,7 +31,7 @@ describes.realWin(
     },
   },
   function (env) {
-    this.timeout(5000);
+    this.timeout(20000);
     let win, doc;
     let timer;
 
@@ -40,7 +41,7 @@ describes.realWin(
       timer = Services.timerFor(win);
     });
 
-    function getMowPlayer(
+    async function getMowPlayer(
       attributes,
       opt_responsive,
       opt_beforeLayoutCallback
@@ -49,43 +50,32 @@ describes.realWin(
       for (const key in attributes) {
         mp.setAttribute(key, attributes[key]);
       }
-<<<<<<< HEAD
-      return mp.layoutCallback();
-    }).then(() => {
-      const mpIframe = mp.querySelector('iframe');
-      mp.implementation_.handleMowMessage_({
-        origin: 'https://mowplayer.com',
-        source: mpIframe.contentWindow,
-        data: JSON.stringify({event: 'onReady'}),
-      });
-    }).then(() => mp);
-  }
-=======
       mp.setAttribute('width', '250');
       mp.setAttribute('height', '180');
       if (opt_responsive) {
         mp.setAttribute('layout', 'responsive');
       }
       doc.body.appendChild(mp);
-      return mp
-        .build()
-        .then(() => {
-          if (opt_beforeLayoutCallback) {
-            opt_beforeLayoutCallback(mp);
-          }
-          return mp.layoutCallback();
-        })
-        .then(() => {
-          const mpIframe = mp.querySelector('iframe');
-          mp.implementation_.handleMowMessage_({
-            origin: 'https://mowplayer.com',
-            source: mpIframe.contentWindow,
-            data: JSON.stringify({event: 'onReady'}),
-          });
-        })
-        .then(() => mp);
+      await mp.build();
+      await mp.layoutCallback();
+      return mp;
+      // .build()
+      // .then(() => {
+      //   if (opt_beforeLayoutCallback) {
+      //     opt_beforeLayoutCallback(mp);
+      //   }
+      //   return mp.layoutCallback();
+      // })
+      // .then(() => {
+      //   const mpIframe = mp.querySelector('iframe');
+      //   mp.implementation_.handleMowMessage_({
+      //     origin: 'https://mowplayer.com',
+      //     source: mpIframe.contentWindow,
+      //     data: JSON.stringify({event: 'ready'}),
+      //   });
+      // })
+      // .then(() => mp);
     }
->>>>>>> c1f5c662acc2ab16ca7445a7c64d00a8bd8bb077
 
     describe('with data-mediaid', function () {
       runTestsForDatasource(EXAMPLE_VIDEOID);
@@ -101,7 +91,6 @@ describes.realWin(
         return getMowPlayer({'data-mediaid': EXAMPLE_VIDEOID}, true).then(
           (mp) => {
             const iframe = mp.querySelector('iframe');
-            expect(iframe).to.not.be.null;
             expect(iframe.tagName).to.equal('IFRAME');
             expect(iframe.src).to.equal(EXAMPLE_VIDEOID_URL);
           }
@@ -160,27 +149,17 @@ describes.realWin(
       });
     }
 
-<<<<<<< HEAD
-  function sendFakeInfoDeliveryMessage(mp, iframe, info) {
-    mp.implementation_.handleMowMessage_({
-      origin: 'https://mowplayer.com',
-      source: iframe.contentWindow,
-      data: JSON.stringify({
-        event: 'infoDelivery',
-        info,
-      }),
-    });
-=======
     function sendFakeInfoDeliveryMessage(mp, iframe, info) {
       mp.implementation_.handleMowMessage_({
         origin: 'https://mowplayer.com',
         source: iframe.contentWindow,
         data: JSON.stringify({
-          event: 'infoDelivery',
-          info,
+          mowplayer: {
+            type: 'infoDelivery',
+            data: info,
+          },
         }),
       });
     }
->>>>>>> c1f5c662acc2ab16ca7445a7c64d00a8bd8bb077
   }
 );

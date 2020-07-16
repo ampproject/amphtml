@@ -56,11 +56,11 @@ class AmpMowplayer extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    /** @private {?../../../src/service/viewport/viewport-interface.ViewportInterface} */
+    this.viewport_ = null;
+
     /** @private {?string}  */
     this.mediaid_ = '';
-
-    /** @private {?boolean}  */
-    this.muted_ = false;
 
     /** @private {?Element} */
     this.iframe_ = null;
@@ -76,6 +76,9 @@ class AmpMowplayer extends AMP.BaseElement {
 
     /** @private {?Function} */
     this.unlistenMessage_ = null;
+
+    /** @private {?boolean}  */
+    this.muted_ = false;
   }
 
   /**
@@ -101,6 +104,8 @@ class AmpMowplayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.viewport_ = this.getViewport();
+
     this.mediaid_ = userAssert(
       this.element.getAttribute('data-mediaid'),
       '/The data-mediaid attribute is required for <amp-mowplayer> %s',
@@ -116,6 +121,7 @@ class AmpMowplayer extends AMP.BaseElement {
   }
 
   /**
+   * Get iframe src url
    * @return {string}
    * @private
    */
@@ -125,7 +131,7 @@ class AmpMowplayer extends AMP.BaseElement {
     }
 
     return (this.videoIframeSrc_ =
-      'https://mowplayer.com/watch/' + this.mediaid_);
+      'https://mowplayer.com/watch/' + this.mediaid_ + '?script=1');
   }
 
   /** @override */
@@ -139,7 +145,6 @@ class AmpMowplayer extends AMP.BaseElement {
     );
     const loaded = this.loadPromise(this.iframe_).then(() => {
       // Tell mowplayer that we want to receive messages
-      this.listenToFrame_();
       this.element.dispatchCustomEvent(VideoEvents.LOAD);
     });
     this.playerReadyResolver_(loaded);
@@ -168,31 +173,21 @@ class AmpMowplayer extends AMP.BaseElement {
     }
   }
 
-  /** @override */
-  mutatedAttributesCallback(mutations) {
-    if (mutations['data-mediaid'] == null) {
-      return;
-    }
-    if (!this.iframe_) {
-      return;
-    }
-    this.sendCommand_('loadVideoById', [this.mediaid_]);
-  }
-
   /**
-   * Sends a command to the player through postMessage.
-   * @param {string} command
-   * @param {Array=} opt_args
+   * Sends a message to the player through postMessage.
+   * @param {string} type
+   * @param {Object=} data
    * @private
    */
-  sendCommand_(command, opt_args) {
+  sendMessage_(type, data) {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
         const message = JSON.stringify(
           dict({
-            'event': 'command',
-            'func': command,
-            'args': opt_args || '',
+            'mowplayer': {
+              'type': type,
+              'data': data,
+            },
           })
         );
         this.iframe_.contentWindow./*OK*/ postMessage(
@@ -204,6 +199,7 @@ class AmpMowplayer extends AMP.BaseElement {
   }
 
   /**
+   * Receive messages from player
    * @param {!Event} event
    * @private
    */
@@ -223,17 +219,28 @@ class AmpMowplayer extends AMP.BaseElement {
       return; // We only process valid JSON.
     }
 
-    const eventType = data['event'];
-    const info = data['info'] || {};
+    if (data['mowplayer'] === undefined) {
+      return;
+    }
+
+    const eventType = data['mowplayer']['type'];
+    const info = getData(data['mowplayer']) || {};
 
     const {element} = this;
 
-    if (eventType === 'set_aspect_ratio') {
-      this.attemptChangeHeight(info['new_height']).catch(() => {});
+    if (eventType === 'handshake') {
+      this.sendMessage_('handshake_done', {});
+    } else if (eventType === 'visibility_observer') {
+      this.onVisibilityObserver_();
+    } else if (eventType === 'pause') {
+      this.pause();
+    } else if (eventType === 'play') {
+      this.play();
     }
 
     const playerState = info['playerState'];
-    if (eventType == 'infoDelivery' && playerState != null) {
+
+    if (eventType == 'infoDelivery' && playerState !== undefined) {
       redispatch(element, playerState.toString(), {
         [PlayerStates.PLAYING]: VideoEvents.PLAYING,
         [PlayerStates.PAUSED]: VideoEvents.PAUSE,
@@ -244,7 +251,8 @@ class AmpMowplayer extends AMP.BaseElement {
     }
 
     const muted = info['muted'];
-    if (eventType == 'infoDelivery' && info && muted != null) {
+
+    if (eventType == 'infoDelivery' && muted !== undefined) {
       if (this.muted_ == muted) {
         return;
       }
@@ -255,20 +263,19 @@ class AmpMowplayer extends AMP.BaseElement {
   }
 
   /**
-   * Sends 'listening' message to the Mowplayer iframe to listen for events.
+   * Check player is visible or not based on breakpoint and send message to player
    * @private
    */
-  listenToFrame_() {
-    if (!this.iframe_) {
-      return;
-    }
+  onVisibilityObserver_() {
+    const worker = () => {
+      const {intersectionRatio} = this.element.getIntersectionChangeEntry();
+      const visible = intersectionRatio > 0.5 ? true : false;
+      this.sendMessage_('visibility_observer_visibility', {'visible': visible});
+    };
 
-    this.sendCommand_('listening', [
-      'amp',
-      window.location.href,
-      window.location.origin,
-      true,
-    ]);
+    this.viewport_.onChanged(worker);
+
+    worker();
   }
 
   /** @override */
@@ -282,24 +289,16 @@ class AmpMowplayer extends AMP.BaseElement {
   }
 
   /** @override */
-  play(unusedIsAutoplay) {
-    this.sendCommand_('playVideo');
-  }
+  play() {}
 
   /** @override */
-  pause() {
-    this.sendCommand_('pauseVideo');
-  }
+  pause() {}
 
   /** @override */
-  mute() {
-    this.sendCommand_('mute');
-  }
+  mute() {}
 
   /** @override */
-  unmute() {
-    this.sendCommand_('unMute');
-  }
+  unmute() {}
 
   /** @override */
   showControls() {
