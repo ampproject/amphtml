@@ -18,6 +18,7 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
 } from '../../../src/consent-state';
+import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
@@ -63,7 +64,6 @@ import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {streamResponseToWriter} from '../../../src/utils/stream-response';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryResolve} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @type {Array<string>} */
@@ -366,22 +366,24 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.isSinglePageStoryAd = false;
 
+    const sanitizedHeadPromise = new Deferred();
     /**
      * Promise that will resolve with processed <head> from ad server response.
-     * @private {?Promise<!Element>}
+     * @private {Promise<!Element>}
      */
-    this.sanitizedHeadPromise_ = null;
+    this.sanitizedHeadPromise_ = sanitizedHeadPromise.promise;
+
+    /**
+     * Resolves the promise that the head has been processed.
+     * @private {function(!Element)}
+     */
+    this.sanitizedHeadResolver_ = sanitizedHeadPromise.resolve;
 
     /**
      * Transfers elements from the detached body to the given body element.
      * @private {?function(!Element)}
      */
     this.transferBody_ = null;
-
-    /**
-     * @private {boolean}
-     */
-    this.isInNoSigningExp_ = false;
   }
 
   /** @override */
@@ -837,8 +839,7 @@ export class AmpA4A extends AMP.BaseElement {
         return fetchResponse;
       })
       .then((fetchResponse) =>
-        getExperimentBranch(this.win, NO_SIGNING_EXP.id) ===
-        NO_SIGNING_EXP.experiment
+        this.isInNoSigningExp()
           ? this.streamResponse_(fetchResponse)
           : this.startValidationFlow_(fetchResponse, checkStillCurrent)
       )
@@ -864,13 +865,22 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * @visibleForTesting
+   * @return {boolean}
+   */
+  isInNoSigningExp() {
+    return (
+      getExperimentBranch(this.win, NO_SIGNING_EXP.id) ===
+      NO_SIGNING_EXP.experiment
+    );
+  }
+
+  /**
    * Start streaming response into the detached document.
    * @param {!Response} response
    * @return {boolean}
    */
   streamResponse_(response) {
-    debugger;
-    this.isInNoSigningExp_ = true;
     // TODO(ccordry): handle fallback case and set isVerifiedAmpCreative and
     // creativeBody appropriately.
     this.isVerifiedAmpCreative_ = true;
@@ -894,9 +904,9 @@ export class AmpA4A extends AMP.BaseElement {
     // DetachedDomStream.
     streamResponseToWriter(this.win, response, detachedStream);
 
-    this.sanitizedHeadPromise_ = transformStream
-      .waitForHead()
-      .then((head) => this.validateHead_(head));
+    this.sanitizedHeadResolver_(
+      transformStream.waitForHead().then((head) => this.validateHead_(head))
+    );
 
     this.transferBody_ = (body) => transformStream.transferBody(body);
 
@@ -1231,14 +1241,14 @@ export class AmpA4A extends AMP.BaseElement {
           return Promise.resolve();
         }
 
-        if (!this.isInNoSigningExp_ && !creativeMetaData) {
+        if (!creativeMetaData) {
           // Non-AMP creative case, will verify ad url existence.
           return this.renderNonAmpCreative();
         }
 
         let friendlyRenderPromise;
 
-        if (this.isInNoSigningExp_) {
+        if (this.isInNoSigningExp()) {
           friendlyRenderPromise = this.renderFriendlyTrustless_(
             checkStillCurrent
           );
