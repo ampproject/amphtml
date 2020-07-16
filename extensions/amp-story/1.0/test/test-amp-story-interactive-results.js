@@ -81,14 +81,16 @@ describes.realWin(
     });
 
     it('should update to category when all quizzes are completed', async () => {
-      const update = env.sandbox.stub(ampStoryResults, 'updateCategory_');
       addConfigToInteractive(ampStoryResults, 3);
       ampStoryResults.buildCallback();
       await ampStoryResults.layoutCallback();
+      const update = env.sandbox.stub(ampStoryResults, 'updateCategory_');
+
       storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'i',
         'option': {'resultscategory': 'results-category 1'},
       });
+
       expect(update).to.be.calledOnce;
     });
 
