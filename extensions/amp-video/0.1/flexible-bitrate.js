@@ -23,8 +23,12 @@ const TAG = 'amp-video';
 
 /** @const {!Object<string, number>} */
 const BITRATE_BY_EFFECTIVE_TYPE = {
+  // We assign low values to 2G in general. None of these will likely be able
+  // to stream any bitrates we see in the wild.
   'slow-2g': 50,
   '2g': 50,
+  // Commonly found bitrates that should typically fit into the spectrum of
+  // these connections. Further tuning may be needed.
   '3g': 1000,
   '4g': 2500,
   '5g': 5000,
