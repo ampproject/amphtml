@@ -30,6 +30,7 @@ import {
 } from '../../../src/dom';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert, user} from '../../../src/log';
+import {getBitrateManager} from './flexible-bitrate';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
@@ -199,6 +200,9 @@ class AmpVideo extends AMP.BaseElement {
     this.configure_();
 
     this.video_ = element.ownerDocument.createElement('video');
+    if (this.element.querySelector('source[data-bitrate]')) {
+      getBitrateManager(this.win).manage(this.video_);
+    }
 
     const poster = element.getAttribute('poster');
     if (!poster && getMode().development) {
@@ -455,6 +459,10 @@ class AmpVideo extends AMP.BaseElement {
         this.video_.appendChild(source);
       }
     });
+
+    if (this.video_.changedSources) {
+      this.video_.changedSources();
+    }
   }
 
   /**
@@ -500,6 +508,10 @@ class AmpVideo extends AMP.BaseElement {
     tracks.forEach((track) => {
       this.video_.appendChild(track);
     });
+
+    if (this.video_.changedSources) {
+      this.video_.changedSources();
+    }
   }
 
   /**
