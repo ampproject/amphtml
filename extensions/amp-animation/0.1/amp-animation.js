@@ -41,6 +41,9 @@ export class AmpAnimation extends AMP.BaseElement {
     this.triggerOnVisibility_ = false;
 
     /** @private {boolean} */
+    this.isIntersecting_ = false;
+
+    /** @private {boolean} */
     this.visible_ = false;
 
     /** @private {boolean} */
@@ -48,6 +51,9 @@ export class AmpAnimation extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.triggered_ = false;
+
+    /** @private {!Array<!UnlistenDef>} */
+    this.cleanups_ = [];
 
     /** @private {?../../../src/friendly-iframe-embed.FriendlyIframeEmbed} */
     this.embed_ = null;
@@ -76,17 +82,6 @@ export class AmpAnimation extends AMP.BaseElement {
         trigger == 'visibility',
         'Only allowed value for "trigger" is "visibility": %s',
         this.element
-      );
-    }
-
-    // TODO(dvoytenko): Remove once we support direct parent visibility.
-    if (trigger == 'visibility') {
-      userAssert(
-        this.element.parentNode == this.element.ownerDocument.body ||
-          this.element.parentNode == ampdoc.getBody(),
-        '%s is only allowed as a direct child of <body> element when trigger' +
-          ' is visibility. This restriction will be removed soon.',
-        TAG
       );
     }
 
@@ -121,28 +116,25 @@ export class AmpAnimation extends AMP.BaseElement {
     );
 
     // Visibility.
+    this.cleanups_.push(ampdoc.onVisibilityChanged(() => {
+      this.setVisible_(this.isIntersecting_ && ampdoc.isVisible());
+    }));
+    const io = new ampdoc.win.IntersectionObserver((records) => {
+      this.isIntersecting_ = records[records.length - 1].isIntersecting;
+      this.setVisible_(this.isIntersecting_ && ampdoc.isVisible());
+    });
+    io.observe(this.element.parentElement);
+    this.cleanups_.push(() => io.disconnect());
+
+    // Resize.
+    this.cleanups_.push(listen(this.win, 'resize', () => this.onResize_()));
+
+    // TODO(#22733): remove when ampdoc-fie is launched.
     const frameElement = getParentWindowFrameElement(this.element, ampdoc.win);
     const embed = frameElement
       ? getFriendlyIframeEmbedOptional(frameElement)
       : null;
-    if (embed) {
-      this.embed_ = embed;
-      this.setVisible_(embed.isVisible());
-      embed.onVisibilityChanged(() => {
-        this.setVisible_(embed.isVisible());
-      });
-      listen(this.embed_.win, 'resize', () => this.onResize_());
-    } else {
-      this.setVisible_(ampdoc.isVisible());
-      ampdoc.onVisibilityChanged(() => {
-        this.setVisible_(ampdoc.isVisible());
-      });
-      this.getViewport().onResize((e) => {
-        if (e.relayoutAll) {
-          this.onResize_();
-        }
-      });
-    }
+    this.embed_ = embed;
 
     // Actions.
     this.registerDefaultAction(
@@ -186,6 +178,13 @@ export class AmpAnimation extends AMP.BaseElement {
       this.cancelAction_.bind(this),
       ActionTrust.LOW
     );
+  }
+
+  /** @override */
+  detachedCallback() {
+    const cleanups = this.cleanups_.slice(0);
+    this.cleanups_.length = 0;
+    cleanups.forEach(cleanup => cleanup());
   }
 
   /**
