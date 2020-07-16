@@ -161,6 +161,7 @@ export class AmpStoryPlayer {
   attachCallbacksToElement_() {
     this.element_.load = this.load.bind(this);
     this.element_.show = this.show.bind(this);
+    this.element_.go = this.go.bind(this);
     this.element_.mute = this.mute.bind(this);
     this.element_.unmute = this.unmute.bind(this);
   }
@@ -538,6 +539,26 @@ export class AmpStoryPlayer {
     ) {
       this.allocateIframeForStory_(nextStoryIdx, true /** reverse */);
     }
+  }
+
+  /**
+   * Navigates stories given a number.
+   * @param {number} storyDelta
+   */
+  go(storyDelta) {
+    if (
+      this.currentIdx_ + storyDelta >= this.stories_.length ||
+      this.currentIdx_ + storyDelta < 0
+    ) {
+      throw new Error('Out of Story range.');
+    }
+    if (storyDelta === 0) {
+      return;
+    }
+
+    const currentStory = this.stories_[this.currentIdx_ + storyDelta];
+
+    this.show(currentStory.href);
   }
 
   /**
