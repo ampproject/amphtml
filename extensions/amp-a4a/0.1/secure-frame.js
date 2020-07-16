@@ -40,7 +40,7 @@ const sandboxVals = [
 
 const createSecureDocSkeleton = (sanitizedHeadElements) =>
   `<!DOCTYPE html>
-  <html lang="en">
+  <html ⚡4ads lang="en">
   <head>
     <meta charset="UTF-8">
     <meta http-equiv=Content-Security-Policy content="
@@ -58,11 +58,14 @@ const createSecureDocSkeleton = (sanitizedHeadElements) =>
   </html>`;
 
 /**
- * @param document
- * @param head
- * @param height
- * @param width
- * @param title
+ * Create iframe with predefined CSP and sandbox attributes for security.
+ * @param {!Document} document
+ * @param {!Element} head
+ * @param {string} title
+ * @param {string} height
+ * @param {string} width
+ * @return {!Element}
+ *
  */
 export function createSecureFrame(document, head, title, height, width) {
   const iframe = createElementWithAttributes(
