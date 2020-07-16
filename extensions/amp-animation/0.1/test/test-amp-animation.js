@@ -33,8 +33,10 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
         ioCallback = callback;
         ioCallbacks.push(callback);
       }
-      observe(element) {
-        ioCallback([{isIntersecting: (config && config.isIntersecting) ?? true}]);
+      observe() {
+        ioCallback([
+          {isIntersecting: (config && config.isIntersecting) ?? true},
+        ]);
       }
       unobserve() {}
       disconnect() {}
@@ -165,7 +167,10 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
       });
 
       it('should update visibility from intersection observer', function* () {
-        const anim = yield createAnim({}, {duration: 1001, isIntersecting: false});
+        const anim = yield createAnim(
+          {},
+          {duration: 1001, isIntersecting: false}
+        );
         expect(anim.visible_).to.be.false;
 
         viewer.setVisibilityState_('visible');
@@ -350,7 +355,6 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
       it('should resize from ampdoc viewport', function* () {
         const anim = yield createAnim({}, {duration: 1001});
         const stub = env.sandbox.stub(anim, 'onResize_');
-        const viewport = win.__AMP_SERVICES.viewport.obj;
 
         // Size has changed.
         win.eventListeners.fire({type: 'resize'});

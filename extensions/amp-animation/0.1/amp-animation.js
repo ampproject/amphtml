@@ -116,9 +116,11 @@ export class AmpAnimation extends AMP.BaseElement {
     );
 
     // Visibility.
-    this.cleanups_.push(ampdoc.onVisibilityChanged(() => {
-      this.setVisible_(this.isIntersecting_ && ampdoc.isVisible());
-    }));
+    this.cleanups_.push(
+      ampdoc.onVisibilityChanged(() => {
+        this.setVisible_(this.isIntersecting_ && ampdoc.isVisible());
+      })
+    );
     const io = new ampdoc.win.IntersectionObserver((records) => {
       this.isIntersecting_ = records[records.length - 1].isIntersecting;
       this.setVisible_(this.isIntersecting_ && ampdoc.isVisible());
@@ -184,7 +186,7 @@ export class AmpAnimation extends AMP.BaseElement {
   detachedCallback() {
     const cleanups = this.cleanups_.slice(0);
     this.cleanups_.length = 0;
-    cleanups.forEach(cleanup => cleanup());
+    cleanups.forEach((cleanup) => cleanup());
   }
 
   /**
