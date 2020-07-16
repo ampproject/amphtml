@@ -24,20 +24,20 @@ import {
 } from '../../../src/preact';
 
 /**
- * @param {!JsonObject} props
+ * @param {!BaseCarouselProps} props
  * @return {PreactDef.Renderable}
  */
 export function BaseCarousel(props) {
   const {
-    'arrowPrev': arrowPrev,
-    'arrowNext': arrowNext,
-    'children': children,
-    'defaultSlide': defaultSlide,
-    'loop': loop,
-    'slide': slide,
-    'onSlideChange': onSlideChange,
-    'onLayout': onLayout,
-    'setAdvance': setAdvance,
+    arrowPrev,
+    arrowNext,
+    children,
+    defaultSlide,
+    loop,
+    slide,
+    onSlideChange,
+    onLayout,
+    setAdvance,
     ...rest
   } = props;
   const childrenArray = toChildArray(children);
@@ -73,27 +73,26 @@ export function BaseCarousel(props) {
     !loop && (slideState + dir < 0 || slideState + dir >= length);
   return (
     <div {...rest}>
-      <Scroller
-        ignoreProgrammaticScroll={ignoreProgrammaticScroll}
-        loop={loop}
-        restingIndex={curSlide}
-        setRestingIndex={setRestingIndex}
-        scrollRef={scrollRef}
-      >
-        {childrenArray}
-      </Scroller>
-      <Arrow
-        customArrow={arrowPrev}
-        dir={-1}
-        disabled={disableForDir(-1)}
-        advance={() => advance(-1)}
-      />
-      <Arrow
-        customArrow={arrowNext}
-        dir={1}
-        disabled={disableForDir(1)}
-        advance={() => advance(1)}
-      />
+      {Scroller({
+        ignoreProgrammaticScroll,
+        loop,
+        restingIndex: slideState,
+        setRestingIndex,
+        scrollRef,
+        children: childrenArray,
+      })}
+      {Arrow({
+        customArrow: arrowPrev,
+        dir: -1,
+        disabled: disableForDir(-1),
+        advance: () => advance(-1),
+      })}
+      {Arrow({
+        customArrow: arrowNext,
+        dir: 1,
+        disabled: disableForDir(1),
+        advance: () => advance(1),
+      })}
     </div>
   );
 }

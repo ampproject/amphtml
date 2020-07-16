@@ -17,7 +17,6 @@ import * as Preact from '../../../src/preact';
 import * as styles from './base-carousel.css';
 import {WithAmpContext} from '../../../src/preact/context';
 import {debounce} from '../../../src/utils/rate-limit';
-import {dict} from '../../../src/utils/object';
 import {mod} from '../../../src/utils/math';
 import {setStyle} from '../../../src/style';
 import {useLayoutEffect, useMemo, useRef} from '../../../src/preact';
@@ -33,17 +32,17 @@ import {useLayoutEffect, useMemo, useRef} from '../../../src/preact';
 const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
 
 /**
- * @param {!JsonObject} props
+ * @param {!ScrollerProps} props
  * @return {PreactDef.Renderable}
  */
 export function Scroller(props) {
   const {
-    'children': children, // Must be an array.
-    'ignoreProgrammaticScroll': ignoreProgrammaticScroll,
-    'loop': loop,
-    'restingIndex': restingIndex,
-    'setRestingIndex': setRestingIndex,
-    'scrollRef': scrollRef,
+    children,
+    ignoreProgrammaticScroll,
+    loop,
+    restingIndex,
+    setRestingIndex,
+    scrollRef,
   } = props;
 
   /**
@@ -58,15 +57,13 @@ export function Scroller(props) {
    */
   const offsetRef = useRef(restingIndex);
   const containerRef = useRef(null);
-  const slides = renderSlides(
-    dict({
-      'children': children,
-      'loop': loop,
-      'offsetRef': offsetRef,
-      'pivotIndex': pivotIndex,
-      'restingIndex': restingIndex,
-    })
-  );
+  const slides = renderSlides({
+    children,
+    loop,
+    offsetRef,
+    pivotIndex,
+    restingIndex,
+  });
   const currentIndex = useRef(restingIndex);
 
   // useLayoutEffect needed to avoid FOUC while scrolling
@@ -92,7 +89,10 @@ export function Scroller(props) {
         () => {
           // Check if the resting index we are centered around is the same as where
           // we stopped scrolling. If so, we do not need to move anything.
-          if (currentIndex.current === restingIndex) {
+          if (
+            currentIndex.current === null ||
+            currentIndex.current === restingIndex
+          ) {
             return;
           }
           setRestingIndex(currentIndex.current);
@@ -193,7 +193,7 @@ export function Scroller(props) {
  * The initial index can be specified, which will make the carousel scroll to
  * the desired index when it first renders.
  *
- * @param {!JsonObject} props
+ * @param {!SlideProps} props
  * @return {PreactDef.Renderable}
  */
 function renderSlides(props) {
