@@ -17,8 +17,9 @@
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {
-  childElementByTag,
   elementByTag,
   insertAtStart,
   isAmpElement,
@@ -26,8 +27,6 @@ import {
   tryFocus,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
-import {dev, user} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
 import {expandConsentEndpointUrl} from './consent-config';
 import {getConsentStateValue} from './consent-info';
 import {getData} from '../../../src/event-helper';
@@ -37,7 +36,6 @@ import {isExperimentOn} from '../../../src/experiments';
 import {setImportantStyles, setStyles, toggle} from '../../../src/style';
 
 const TAG = 'amp-consent-ui';
-const AMP_STORY_CONSENT_TAG = 'amp-story-consent';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const DEFAULT_INITIAL_HEIGHT = '30vh';
 const DEFAULT_ENABLE_BORDER = true;
@@ -198,11 +196,6 @@ export class ConsentUI {
     }
     const promptUI = config['promptUI'];
     const promptUISrc = config['promptUISrc'];
-    const isStoryConsent = !!childElementByTag(
-      this.parent_,
-      AMP_STORY_CONSENT_TAG
-    );
-
     if (promptUI) {
       // Always respect promptUI first
       const promptElement = this.ampdoc_.getElementById(promptUI);
@@ -214,7 +207,7 @@ export class ConsentUI {
         );
       }
       this.ui_ = dev().assertElement(promptElement);
-    } else if (promptUISrc && !isStoryConsent) {
+    } else if (promptUISrc) {
       // Create an iframe element with the provided src
       this.isCreatedIframe_ = true;
       assertHttpsUrl(promptUISrc, this.parent_);
