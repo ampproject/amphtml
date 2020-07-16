@@ -59,22 +59,6 @@ describes.realWin(
       await mp.build();
       await mp.layoutCallback();
       return mp;
-      // .build()
-      // .then(() => {
-      //   if (opt_beforeLayoutCallback) {
-      //     opt_beforeLayoutCallback(mp);
-      //   }
-      //   return mp.layoutCallback();
-      // })
-      // .then(() => {
-      //   const mpIframe = mp.querySelector('iframe');
-      //   mp.implementation_.handleMowMessage_({
-      //     origin: 'https://mowplayer.com',
-      //     source: mpIframe.contentWindow,
-      //     data: JSON.stringify({event: 'ready'}),
-      //   });
-      // })
-      // .then(() => mp);
     }
 
     describe('with data-mediaid', function () {
