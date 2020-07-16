@@ -223,8 +223,8 @@ export class AmpStoryPlayer {
     this.rootEl_ = this.doc_.createElement('main');
 
     const containerToUse = getMode().test
-    ? this.element_
-    : this.element_.attachShadow({mode: 'open'});
+      ? this.element_
+      : this.element_.attachShadow({mode: 'open'});
 
     // Inject default styles
     const styleEl = this.doc_.createElement('style');
