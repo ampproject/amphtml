@@ -38,6 +38,7 @@ export function BaseCarousel(props) {
     onSlideChange,
     onLayout,
     setAdvance,
+    ...rest
   } = props;
   const childrenArray = toChildArray(children);
   const {length} = childrenArray;
@@ -71,27 +72,28 @@ export function BaseCarousel(props) {
   const disableForDir = (dir) =>
     !loop && (slideState + dir < 0 || slideState + dir >= length);
   return (
-    <div>
-      {Scroller({
-        ignoreProgrammaticScroll,
-        loop,
-        restingIndex: slideState,
-        setRestingIndex,
-        scrollRef,
-        children: childrenArray,
-      })}
-      {Arrow({
-        customArrow: arrowPrev,
-        dir: -1,
-        disabled: disableForDir(-1),
-        advance: () => advance(-1),
-      })}
-      {Arrow({
-        customArrow: arrowNext,
-        dir: 1,
-        disabled: disableForDir(1),
-        advance: () => advance(1),
-      })}
+    <div {...rest}>
+      <Scroller
+        ignoreProgrammaticScroll={ignoreProgrammaticScroll}
+        loop={loop}
+        restingIndex={slideState}
+        setRestingIndex={setRestingIndex}
+        scrollRef={scrollRef}
+      >
+        {childrenArray}
+      </Scroller>
+      <Arrow
+        customArrow={arrowPrev}
+        dir={-1}
+        disabled={disableForDir(-1)}
+        advance={() => advance(-1)}
+      />
+      <Arrow
+        customArrow={arrowNext}
+        dir={1}
+        disabled={disableForDir(1)}
+        advance={() => advance(1)}
+      />
     </div>
   );
 }
