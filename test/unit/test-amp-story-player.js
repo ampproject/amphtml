@@ -434,7 +434,6 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
-
       expect(
         playerEl.shadowRoot.querySelector(
           'button.amp-story-player-close-button'
@@ -489,7 +488,6 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       appendStoriesToPlayer(playerEl, 5);
 
       const player = new AmpStoryPlayer(win, playerEl);
-
       await player.load();
 
       const readySpy = env.sandbox.spy();
@@ -500,6 +498,88 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         .click();
 
       expect(readySpy).to.have.been.calledOnce;
+    });
+
+    it('navigate forward given a positive number in range', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      player.go(2);
+
+      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+      await afterRenderPromise();
+      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+      expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('1');
+    });
+
+    it('navigate backward given a negative number in range', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      player.go(3);
+      player.go(-1);
+
+      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+      await afterRenderPromise();
+      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+      expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('1');
+    });
+
+    it('not navigate given zero', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+
+      const iframePosition = iframes[0].getAttribute(
+        'i-amphtml-iframe-position'
+      );
+
+      player.go(0);
+
+      await afterRenderPromise();
+      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql(
+        iframePosition
+      );
+    });
+
+    it('go should throw when positive number is out of story range', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      return expect(() => player.go(6)).to.throw('Out of Story range.');
+    });
+
+    it('go should throw when negative number is out of story range', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      return expect(() => player.go(-1)).to.throw('Out of Story range.');
     });
   });
 });
