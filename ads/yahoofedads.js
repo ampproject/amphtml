@@ -46,7 +46,7 @@ export function yahoofedads(global, data) {
 
   loadScript(
     global,
-    'https://s.yimg.com/aaq/ampyahoofedads/build/yahoofedads.js',
+    'https://s.yimg.com/aaq/ampyahoofedads/yahoofedads.js',
     () => global.context.renderStart()
   );
 }
