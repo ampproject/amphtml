@@ -96,7 +96,7 @@ function getDelayPromiseProducer() {
  * Returns `true` if the Friendly Iframes are supported.
  * @return {boolean}
  */
-function isSrcdocSupported() {
+export function isSrcdocSupported() {
   if (srcdocSupported === undefined) {
     srcdocSupported = 'srcdoc' in HTMLIFrameElement.prototype;
   }
@@ -112,13 +112,15 @@ function isSrcdocSupported() {
  * @param {!Element} container
  * @param {!FriendlyIframeSpec} spec
  * @param {function(!Window, ?./service/ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
+ * @param {boolean} isInUnsignedExp
  * @return {!Promise<!FriendlyIframeEmbed>}
  */
 export function installFriendlyIframeEmbed(
   iframe,
   container,
   spec,
-  opt_preinstallCallback // TODO(#22733): remove "window" argument.
+  opt_preinstallCallback, // TODO(#22733): remove "window" argument.
+  isInUnsignedExp
 ) {
   /** @const {!Window} */
   const win = getTopWindow(toWin(iframe.ownerDocument.defaultView));
@@ -142,7 +144,7 @@ export function installFriendlyIframeEmbed(
     );
   }
 
-  const html = mergeHtml(spec);
+  const html = isInUnsignedExp ? null : mergeHtml(spec);
 
   // Receive the signal when iframe is ready: it's document is formed.
   iframe.onload = () => {
@@ -159,7 +161,9 @@ export function installFriendlyIframeEmbed(
   };
   let loadedPromise;
   if (isSrcdocSupported()) {
-    iframe.srcdoc = html;
+    if (!isInUnsignedExp) {
+      iframe.srcdoc = html;
+    }
     loadedPromise = loadPromise(iframe);
     container.appendChild(iframe);
     registerViolationListener();
@@ -167,9 +171,11 @@ export function installFriendlyIframeEmbed(
     iframe.src = 'about:blank';
     container.appendChild(iframe);
     const childDoc = iframe.contentWindow.document;
-    childDoc.open();
     registerViolationListener();
-    childDoc.write(html);
+    if (!isInUnsignedExp) {
+      childDoc.open();
+      childDoc.write(html);
+    }
     // With document.write, `iframe.onload` arrives almost immediately, thus
     // we need to wait for child's `window.onload`.
     loadedPromise = loadPromise(iframe.contentWindow);

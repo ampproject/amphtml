@@ -31,6 +31,7 @@ import {
 import {assertHttpsUrl, tryDecodeUriComponent} from '../../../src/url';
 import {cancellation, isCancellation} from '../../../src/error';
 import {createElementWithAttributes} from '../../../src/dom';
+import {createSecureFrame} from './secure-frame';
 import {
   dev,
   devAssert,
@@ -367,17 +368,20 @@ export class AmpA4A extends AMP.BaseElement {
 
     /**
      * Promise that will resolve with processed <head> from ad server response.
-     * @visibleForTesting temporary to satisfy linter while implementing.
      * @private {?Promise<!Element>}
      */
     this.sanitizedHeadPromise_ = null;
 
     /**
      * Transfers elements from the detached body to the given body element.
-     * @visibleForTesting temporary to satisfy linter while implementing.
      * @private {?function(!Element)}
      */
     this.transferBody_ = null;
+
+    /**
+     * @private {boolean}
+     */
+    this.isInNoSigningExp_ = false;
   }
 
   /** @override */
@@ -865,9 +869,17 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {boolean}
    */
   streamResponse_(response) {
-    // TODO(ccordry): get size from headers equivalent to
-    // validation flow, and double check any other values
-    // that might be set.
+    debugger;
+    this.isInNoSigningExp_ = true;
+    // TODO(ccordry): handle fallback case and set isVerifiedAmpCreative and
+    // creativeBody appropriately.
+    this.isVerifiedAmpCreative_ = true;
+
+    const size = this.extractSize(response.headers);
+    this.creativeSize_ = size || this.creativeSize_;
+
+    // Update priority.
+    this.updateLayoutPriority(LayoutPriority.CONTENT);
 
     // This transformation consumes the detached DOM chunks and
     // exposes our waitForHead and transferBody methods.
@@ -886,7 +898,7 @@ export class AmpA4A extends AMP.BaseElement {
       .waitForHead()
       .then((head) => this.validateHead_(head));
 
-    this.transferBody_ = transformStream.transferBody;
+    this.transferBody_ = (body) => transformStream.transferBody(body);
 
     // TODO(ccordry): throw NO_CONTENT_RESPONSE if body is empty. Only gets
     // here if amp-ff-empty-creative header is not present.
@@ -1219,17 +1231,23 @@ export class AmpA4A extends AMP.BaseElement {
           return Promise.resolve();
         }
 
-        // TODO(ccordry): split rendering flow in exp
-        //  Create iframe with CSP
-        //  Wait for sanitized head, transfer it to created iframe or fallback.
-        //  call this.transferBody_(iframeBody) when ready to render.
-
-        if (!creativeMetaData) {
+        if (!this.isInNoSigningExp_ && !creativeMetaData) {
           // Non-AMP creative case, will verify ad url existence.
           return this.renderNonAmpCreative();
         }
+
+        let friendlyRenderPromise;
+
+        if (this.isInNoSigningExp_) {
+          friendlyRenderPromise = this.renderFriendlyTrustless_(
+            checkStillCurrent
+          );
+        } else {
+          friendlyRenderPromise = this.renderAmpCreative_(creativeMetaData);
+        }
+
         // Must be an AMP creative.
-        return this.renderAmpCreative_(creativeMetaData).catch((err) => {
+        return friendlyRenderPromise.catch((err) => {
           checkStillCurrent();
           // Failed to render via AMP creative path so fallback to non-AMP
           // rendering within cross domain iframe.
@@ -1583,6 +1601,83 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * @param {function()} checkStillCurrent
+   * @return {!Promise} Whether the creative was successfully rendered.
+   */
+  renderFriendlyTrustless_(checkStillCurrent) {
+    return this.sanitizedHeadPromise_.then((headData) => {
+      checkStillCurrent();
+      devAssert(this.element.ownerDocument);
+      this.maybeTriggerAnalyticsEvent_('renderFriendlyStart');
+
+      const {height, width} = this.creativeSize_;
+      const {extensions, fonts, head} = headData;
+      this.iframe = createSecureFrame(
+        this.element.ownerDocument,
+        head,
+        this.getIframeTitle(),
+        height,
+        width
+      );
+      this.applyFillContent(this.iframe);
+
+      // TODO(ccordry): FIE does not handle extension versioning, but we have
+      // it accessible here.
+      const extensionIds = extensions.map((extension) => extension.extensionId);
+
+      return installFriendlyIframeEmbed(
+        this.iframe,
+        this.element,
+        {
+          host: this.element,
+          url: devAssert(this.adUrl_),
+          html: null,
+          extensionIds,
+          fonts,
+        },
+        (embedWin, ampdoc) => this.preinstallCallback_(embedWin, ampdoc),
+        true // is in no-signing experiment
+      ).then((friendlyIframeEmbed) => {
+        checkStillCurrent();
+
+        this.friendlyIframeEmbed_ = friendlyIframeEmbed;
+        const frameDoc =
+          friendlyIframeEmbed.iframe.contentDocument ||
+          friendlyIframeEmbed.win.document;
+        const {body} = frameDoc;
+        this.transferBody_(body);
+
+        setFriendlyIframeEmbedVisible(friendlyIframeEmbed, this.isInViewport());
+        // Ensure visibility hidden has been removed (set by boilerplate).
+        setStyle(frameDoc.body, 'visibility', 'visible');
+
+        protectFunctionWrapper(this.onCreativeRender, this, (err) => {
+          dev().error(
+            TAG,
+            this.element.getAttribute('type'),
+            'Error executing onCreativeRender',
+            err
+          );
+        })(
+          // TODO(ccordry): subclasses are passed creativeMetadata which does
+          // not exist in unsigned case. All it is currently used for is to
+          // check if it is an AMP creative, and extension list.
+          {customElementExtensions: extensionIds},
+          friendlyIframeEmbed.whenWindowLoaded()
+        );
+
+        friendlyIframeEmbed.whenIniLoaded().then(() => {
+          checkStillCurrent();
+          this.maybeTriggerAnalyticsEvent_('friendlyIframeIniLoad');
+        });
+
+        // There's no need to wait for all resources to load.
+        // StartRender is enough
+      });
+    });
+  }
+
+  /**
    * Render a validated AMP creative directly in the parent page.
    * @param {!CreativeMetaDataDef} creativeMetaData Metadata required to render
    *     AMP creative.
@@ -1631,15 +1726,7 @@ export class AmpA4A extends AMP.BaseElement {
         extensionIds: creativeMetaData.customElementExtensions || [],
         fonts: fontsArray,
       },
-      (embedWin, ampdoc) => {
-        const parentAmpdoc = this.getAmpDoc();
-        installUrlReplacementsForEmbed(
-          // TODO(#22733): Cleanup `parentAmpdoc` once ampdoc-fie is launched.
-          ampdoc || parentAmpdoc,
-          embedWin,
-          new A4AVariableSource(parentAmpdoc, embedWin)
-        );
-      }
+      (embedWin, ampdoc) => this.preinstallCallback_(embedWin, ampdoc)
     ).then((friendlyIframeEmbed) => {
       checkStillCurrent();
       this.friendlyIframeEmbed_ = friendlyIframeEmbed;
@@ -1664,6 +1751,21 @@ export class AmpA4A extends AMP.BaseElement {
       // There's no need to wait for all resources to load.
       // StartRender is enough
     });
+  }
+
+  /**
+   *
+   * @param {!Window} embedWin
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   */
+  preinstallCallback_(embedWin, ampdoc) {
+    const parentAmpdoc = this.getAmpDoc();
+    installUrlReplacementsForEmbed(
+      // TODO(#22733): Cleanup `parentAmpdoc` once ampdoc-fie is launched.
+      ampdoc || parentAmpdoc,
+      embedWin,
+      new A4AVariableSource(parentAmpdoc, embedWin)
+    );
   }
 
   /**
