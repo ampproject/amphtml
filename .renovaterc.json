@@ -79,6 +79,12 @@
     },
 
     {
+      "packagePatterns": ["renovate"],
+      "depTypeList": ["devDependencies"],
+      "groupName": "Renovate Bot"
+    },
+
+    {
       "excludePackagePatterns": ["^@ampproject/"],
       "depTypeList": ["dependencies"],
       "enabled": false
