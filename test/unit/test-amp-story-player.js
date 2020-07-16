@@ -384,7 +384,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         'Story URL not found in the player: https://example.com/story6.html'
       );
     });
-    
+
     it('pauses programatically', async () => {
       buildStoryPlayer();
       await manager.loadPlayers();
@@ -406,7 +406,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         .expects('sendRequest')
         .withArgs('visibilitychange', {state: 'visible'});
     });
-    
+
     it('calling mute should set story muted state to true', async () => {
       buildStoryPlayer();
       await manager.loadPlayers();

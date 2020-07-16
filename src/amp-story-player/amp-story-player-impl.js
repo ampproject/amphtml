@@ -207,7 +207,6 @@ export class AmpStoryPlayer {
     );
   }
 
-
   /**
    *
    * @public
