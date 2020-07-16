@@ -161,6 +161,8 @@ export class AmpStoryPlayer {
   attachCallbacksToElement_() {
     this.element_.load = this.load.bind(this);
     this.element_.show = this.show.bind(this);
+    this.element_.mute = this.mute.bind(this);
+    this.element_.unmute = this.unmute.bind(this);
   }
 
   /**
@@ -413,8 +415,20 @@ export class AmpStoryPlayer {
     this.assignIframesForStoryIdx_(storyIdx);
   }
 
+  /** Sends a message muting the current story. */
+  mute() {
+    const iframeIdx = this.stories_[this.currentIdx_][IFRAME_IDX];
+    this.updateMutedState_(iframeIdx, true);
+  }
+
+  /** Sends a message unmuting the current story. */
+  unmute() {
+    const iframeIdx = this.stories_[this.currentIdx_][IFRAME_IDX];
+    this.updateMutedState_(iframeIdx, false);
+  }
+
   /**
-   * Evicts stories from iframes
+   * Evicts stories from iframes.
    * @private
    */
   evictStoriesFromIframes_() {
@@ -674,6 +688,22 @@ export class AmpStoryPlayer {
   updateVisibilityState_(iframeIdx, visibilityState) {
     this.messagingPromises_[iframeIdx].then((messaging) => {
       messaging.sendRequest('visibilitychange', {state: visibilityState}, true);
+    });
+  }
+
+  /**
+   * Updates the muted state of the story inside the iframe.
+   * @param {number} iframeIdx
+   * @param {boolean} mutedValue
+   * @private
+   */
+  updateMutedState_(iframeIdx, mutedValue) {
+    this.messagingPromises_[iframeIdx].then((messaging) => {
+      messaging.sendRequest(
+        'setDocumentState',
+        {state: 'MUTED_STATE', value: mutedValue},
+        true
+      );
     });
   }
 
