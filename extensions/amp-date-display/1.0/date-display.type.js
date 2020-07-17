@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-import {useResourcesNotify} from '../../../src/preact/utils';
-import {useState} from '../../../src/preact';
+/** @externs */
+
+/** @const */
+var DateDisplayDef = {};
 
 /**
- * Renders the children prop, waiting for it to resolve if it is a promise.
- *
- * @param {!DateDisplayDef.AsyncRenderProps} props
- * @return {PreactDef.Renderable}
+ * @typedef {{
+ *   children: (?PreactDef.Renderable|undefined),
+ * }}
  */
-export function AsyncRender({children}) {
-  const [state, set] = useState(children);
-  useResourcesNotify();
+DateDisplayDef.AsyncRenderProps;
 
-  if (state && state.then) {
-    Promise.resolve(children).then(set);
-    return null;
-  }
-
-  return state;
-}
+/**
+ * @typedef {{
+ *   dom: !Element,
+ *   host: !Element,
+ * }}
+ */
+DateDisplayDef.RenderDomTreeProps;
