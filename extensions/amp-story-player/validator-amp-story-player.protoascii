@@ -28,4 +28,7 @@ tags: {  # <amp-story-player>
   html_format: AMP
   tag_name: "AMP-STORY-PLAYER"
   requires_extension: "amp-story-player"
+  child_tags: {
+    child_tag_name_oneof: "A"
+  }
 }
