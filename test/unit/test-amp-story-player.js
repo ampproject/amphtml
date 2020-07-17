@@ -603,5 +603,42 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       return expect(() => player.go(-1)).to.throw('Out of Story range.');
     });
+
+    it('signals when player changed story using next method', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      const navigationSpy = env.sandbox.spy();
+      playerEl.addEventListener('navigation', navigationSpy);
+      player.next_();
+      expect(navigationSpy.firstCall.args[0].type).to.eql('navigation');
+      expect(navigationSpy.firstCall.args[0].detail).to.eql({
+        index: 1,
+        remaining: 3,
+      });
+    });
+
+    it('signals when player changed story using previous method', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      const navigationSpy = env.sandbox.spy();
+      playerEl.addEventListener('navigation', navigationSpy);
+      player.next_();
+      player.previous_();
+      expect(navigationSpy.secondCall.args[0].type).to.eql('navigation');
+      expect(navigationSpy.secondCall.args[0].detail).to.eql({
+        index: 0,
+        remaining: 4,
+      });
+    });
   });
 });
