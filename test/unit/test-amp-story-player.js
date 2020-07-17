@@ -590,6 +590,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       await player.load();
 
+      playerEl.setAttribute('enable-circular-wrapping', false);
+
       return expect(() => player.go(6)).to.throw('Out of Story range.');
     });
 
@@ -601,7 +603,50 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       await player.load();
 
+      playerEl.setAttribute('enable-circular-wrapping', false);
+
       return expect(() => player.go(-1)).to.throw('Out of Story range.');
+    });
+
+    it('last story call to next_() is the first story', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      playerEl.setAttribute('enable-circular-wrapping', true);
+
+      player.go(4);
+      player.next_();
+
+      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+      await afterRenderPromise();
+      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('1');
+      expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('1');
+    });
+
+    it('first story call to previous_() is the last story', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      playerEl.setAttribute('enable-circular-wrapping', true);
+
+      player.previous_();
+
+      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+      await afterRenderPromise();
+      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+      expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('0');
     });
 
     it('navigate to first story when last story is finished', async () => {
@@ -613,14 +658,36 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
       await nextTick();
 
-      player.go(3);
+      playerEl.setAttribute('enable-circular-wrapping', true);
+
+      player.go(4);
+      player.go(1);
+
+      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+      await afterRenderPromise();
+      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('1');
+      expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('1');
+    });
+
+    it('navigate to last story when first story is requested to go back', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      playerEl.setAttribute('enable-circular-wrapping', true);
+
       player.go(-1);
 
       const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
       await afterRenderPromise();
       expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
-      expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('1');
+      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+      expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('0');
     });
   });
 });

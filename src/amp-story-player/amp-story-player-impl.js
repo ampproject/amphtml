@@ -583,10 +583,32 @@ export class AmpStoryPlayer {
     if (storyDelta === 0) {
       return;
     }
+    if (this.element_.getAttribute('enable-circular-wrapping') === false) {
+      if (
+        this.currentIdx_ + storyDelta >= this.stories_.length ||
+        this.currentIdx_ + storyDelta < 0
+      ) {
+        throw new Error('Out of Story range.');
+      }
+      const currentStory = this.stories_[this.currentIdx_ + storyDelta];
 
-    const currentStory = this.stories_[this.currentIdx_ + storyDelta];
+      this.show(currentStory.href);
+    }
+    if (this.element_.getAttribute('enable-circular-wrapping') === true) {
+      if (this.currentIdx_ + storyDelta >= this.stories_.length) {
+        const currentStory = this.stories_[this.currentIdx_ + storyDelta - this.stories_.length];
+        
+        this.show(currentStory.href);
+      }
+      if (this.currentIdx_ + storyDelta < 0) {
+        const currentStory = this.stories_[this.currentIdx_ + storyDelta + this.stories_.length];
+  
+        this.show(currentStory.href);
+      }
+      const currentStory = this.stories_[this.currentIdx_ + storyDelta];
 
-    this.show(currentStory.href);
+      this.show(currentStory.href);
+    }
   }
 
   /**
@@ -961,6 +983,7 @@ export class AmpStoryPlayer {
 
   /**
    * Sets circular wrapping to be enabled or disabled.
+   * @private
    */
   circularWrapping() {
     const option = this.element_.getAttribute('enable-circular-wrapping');
