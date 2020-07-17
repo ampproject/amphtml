@@ -33,6 +33,7 @@ export function yahoofedads(global, data) {
 
   global.amp = true;
   global.adConfig = {
+    'adPositionOverride': data.adPositionOverride,
     'adUnit': data.adUnit,
     'forceSource': data.forceSource,
     'lang': data.lang,
@@ -46,7 +47,7 @@ export function yahoofedads(global, data) {
 
   loadScript(
     global,
-    'https://s.yimg.com/aaq/ampyahoofedads/build/yahoofedads.js',
+    'https://s.yimg.com/aaq/ampyahoofedads/yahoofedads.js',
     () => global.context.renderStart()
   );
 }
