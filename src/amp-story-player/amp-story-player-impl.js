@@ -198,7 +198,6 @@ export class AmpStoryPlayer {
       const story = stories[i];
       const anchor = this.createStoryAnchor_(story);
 
-      this.element_.append(anchor);
       this.stories_.push(anchor);
 
       if (this.iframes_.length < MAX_IFRAMES) {
