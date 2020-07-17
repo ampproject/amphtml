@@ -1648,8 +1648,7 @@ export class AmpA4A extends AMP.BaseElement {
           extensionIds,
           fonts,
         },
-        (embedWin, ampdoc) => this.preinstallCallback_(embedWin, ampdoc),
-        true // is in no-signing experiment
+        (embedWin, ampdoc) => this.preinstallCallback_(embedWin, ampdoc)
       ).then((friendlyIframeEmbed) => {
         checkStillCurrent();
         const fieBody = this.getFieBody_(friendlyIframeEmbed);

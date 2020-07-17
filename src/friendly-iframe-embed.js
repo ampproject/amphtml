@@ -112,15 +112,13 @@ export function isSrcdocSupported() {
  * @param {!Element} container
  * @param {!FriendlyIframeSpec} spec
  * @param {function(!Window, ?./service/ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
- * @param {boolean=} isInUnsignedExp
  * @return {!Promise<!FriendlyIframeEmbed>}
  */
 export function installFriendlyIframeEmbed(
   iframe,
   container,
   spec,
-  opt_preinstallCallback, // TODO(#22733): remove "window" argument.
-  isInUnsignedExp
+  opt_preinstallCallback // TODO(#22733): remove "window" argument.
 ) {
   /** @const {!Window} */
   const win = getTopWindow(toWin(iframe.ownerDocument.defaultView));
@@ -144,7 +142,8 @@ export function installFriendlyIframeEmbed(
     );
   }
 
-  const html = isInUnsignedExp ? null : mergeHtml(spec);
+  const isInUnsignedExp = !spec.html;
+  const html = isInUnsignedExp ? spec.html : mergeHtml(spec);
 
   // Receive the signal when iframe is ready: it's document is formed.
   iframe.onload = () => {
