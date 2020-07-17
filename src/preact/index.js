@@ -22,7 +22,7 @@ import * as preact from /*OK*/ 'preact';
 
 /**
  * @param {!PreactDef.FunctionalComponent|string} unusedType
- * @param {(!Object|null)=} unusedProps
+ * @param {?Object=} unusedProps
  * @param {...*} var_args
  * @return {!PreactDef.VNode}
  */
@@ -32,7 +32,7 @@ export function createElement(unusedType, unusedProps, var_args) {
 
 /**
  * @param {!PreactDef.VNode} unusedElement
- * @param {(!Object|null)=} unusedProps
+ * @param {?Object=} unusedProps
  * @param {...PreactDef.Renderable} unusedChildren
  * @return {!PreactDef.VNode}
  */
@@ -49,7 +49,7 @@ export function render(vnode, container) {
 }
 
 /**
- * @param {!JsonObject} props
+ * @param {?Object=} props
  * @return {PreactDef.Renderable}
  */
 export function Fragment(props) {

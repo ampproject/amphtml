@@ -25,8 +25,8 @@ import {
   toggleAttribute,
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, userAssert} from '../../../src/log';
-import {dict, omit} from '../../../src/utils/object';
+import {dev, devAssert, userAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
 import {toArray} from '../../../src/types';
@@ -271,24 +271,23 @@ function selectByDelta(delta, value, options) {
 }
 
 /**
- * @param {!JsonObject} props
+ * @param {!SelectorDef.OptionShimProps} props
  * @return {PreactDef.Renderable}
  */
-function OptionShim(props) {
-  const {
-    'domElement': domElement,
-    'onClick': onClick,
-    'selected': selected,
-    'isDisabled': isDisabled,
-    'role': role = 'option',
-  } = props;
+function OptionShim({
+  domElement,
+  onClick,
+  selected,
+  isDisabled,
+  role = 'option',
+}) {
   useLayoutEffect(() => {
     if (!onClick) {
       return;
     }
     domElement.addEventListener('click', onClick);
     return () => {
-      domElement.removeEventListener('click', onClick);
+      domElement.removeEventListener('click', devAssert(onClick));
     };
   }, [domElement, onClick]);
 
@@ -309,17 +308,16 @@ function OptionShim(props) {
 }
 
 /**
- * @param {!JsonObject} props
+ * @param {!SelectorDef.ShimProps} props
  * @return {PreactDef.Renderable}
  */
-function SelectorShim(props) {
-  const {
-    'domElement': domElement,
-    'role': role = 'listbox',
-    'multiple': multiple,
-    'disabled': disabled,
-  } = props;
-
+function SelectorShim({
+  domElement,
+  multiple,
+  disabled,
+  role = 'listbox',
+  ...rest
+}) {
   useLayoutEffect(() => {
     toggleAttribute(domElement, 'multiple', multiple);
     domElement.setAttribute('aria-multiselectable', !!multiple);
@@ -334,8 +332,9 @@ function SelectorShim(props) {
     domElement.setAttribute('role', role);
   }, [domElement, role]);
 
-  const rest = omit(props, ['domElement']);
-  return <Selector {...rest}></Selector>;
+  return (
+    <Selector role={role} multiple={multiple} disabled={disabled} {...rest} />
+  );
 }
 
 /** @override */
