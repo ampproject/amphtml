@@ -917,8 +917,6 @@ describes.repeated(
             });
 
             it('"amp-state:" uri should skip rendering and emit an error', () => {
-              toggleExperiment(win, 'amp-list-init-from-state', true);
-
               const ampStateEl = doc.createElement('amp-state');
               ampStateEl.setAttribute('id', 'okapis');
               const ampStateJson = doc.createElement('script');
@@ -1335,24 +1333,14 @@ describes.repeated(
           });
 
           describe('Using amp-state: protocol', () => {
-            const experimentName = 'amp-list-init-from-state';
-
             beforeEach(() => {
-              resetExperimentTogglesForTesting(win);
               element = createAmpListElement();
               element.setAttribute('src', 'amp-state:okapis');
               element.toggleLoading = () => {};
               list = createAmpList(element);
             });
 
-            it('should throw an error if used without the experiment enabled', async () => {
-              const errorMsg = /Invalid value: amp-state:okapis/;
-              expectAsyncConsoleError(errorMsg);
-              expect(list.layoutCallback()).to.eventually.throw(errorMsg);
-            });
-
             it('should throw error if there is no associated amp-state el', async () => {
-              toggleExperiment(win, experimentName, true);
               bind.getStateAsync = () => Promise.reject();
 
               const errorMsg = /element with id 'okapis' was not found/;
@@ -1361,7 +1349,6 @@ describes.repeated(
             });
 
             it('should log an error if amp-bind was not included', async () => {
-              toggleExperiment(win, experimentName, true);
               Services.bindForDocOrNull.returns(Promise.resolve(null));
 
               const ampStateEl = doc.createElement('amp-state');
@@ -1377,7 +1364,6 @@ describes.repeated(
             });
 
             it('should render a list using local data', async () => {
-              toggleExperiment(win, experimentName, true);
               bind.getStateAsync = () => Promise.resolve({items: [1, 2, 3]});
 
               const ampStateEl = doc.createElement('amp-state');
@@ -1397,7 +1383,6 @@ describes.repeated(
             });
 
             it('should render a list using async data', async () => {
-              toggleExperiment(win, experimentName, true);
               const {resolve, promise} = new Deferred();
               bind.getStateAsync = () => promise;
 
