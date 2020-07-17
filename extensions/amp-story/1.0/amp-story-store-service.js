@@ -88,6 +88,7 @@ export let InteractiveComponentDef;
  *    canShowSystemLayerButtons: boolean,
  *    accessState: boolean,
  *    adState: boolean,
+ *    attachmentPageId: ?number,
  *    affiliateLinkState: !Element,
  *    bookendState: boolean,
  *    desktopState: boolean,
@@ -137,6 +138,7 @@ export const StateProperty = {
   // App States.
   ACCESS_STATE: 'accessState', // amp-access paywall.
   AD_STATE: 'adState',
+  ATTACHMENT_PAGE_ID: 'attachmentPageId',
   BOOKEND_STATE: 'bookendState',
   AFFILIATE_LINK_STATE: 'affiliateLinkState',
   DESKTOP_STATE: 'desktopState',
@@ -184,6 +186,7 @@ export const Action = {
   ADD_TO_ACTIONS_ALLOWLIST: 'addToActionsAllowlist',
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
+  SET_ATTACHMENT_PAGE_ID: 'setAttachmentPageId',
   SET_ADVANCEMENT_MODE: 'setAdvancementMode',
   SET_NAVIGATION_PATH: 'setNavigationPath',
   SET_PAGE_IDS: 'setPageIds',
@@ -280,6 +283,12 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.ACCESS_STATE]: !!data,
         [StateProperty.PAUSED_STATE]: !!data,
+      });
+    case Action.SET_ATTACHMENT_PAGE_ID:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.ATTACHMENT_PAGE_ID]: data,
+        [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: !data,
       });
     // Triggers the ad UI.
     case Action.TOGGLE_AD:
@@ -557,6 +566,7 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: true,
       [StateProperty.CAN_SHOW_SHARING_UIS]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
+      [StateProperty.ATTACHMENT_PAGE_ID]: null,
       [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
       [StateProperty.AFFILIATE_LINK_STATE]: null,

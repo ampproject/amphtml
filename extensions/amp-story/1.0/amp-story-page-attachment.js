@@ -228,7 +228,8 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     super.open(shouldAnimate);
 
-    this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
+    const pageId = this.storeService_.get(StateProperty.CURRENT_PAGE_ID);
+    this.storeService_.dispatch(Action.SET_ATTACHMENT_PAGE_ID, pageId);
 
     // Don't create a new history entry for remote attachment as user is
     // navigating away.
@@ -238,9 +239,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       ));
       const historyState = {
         ...currentHistoryState,
-        [HistoryState.ATTACHMENT_PAGE_ID]: this.storeService_.get(
-          StateProperty.CURRENT_PAGE_ID
-        ),
+        [HistoryState.ATTACHMENT_PAGE_ID]: pageId,
       };
       this.historyService_.push(() => this.closeInternal_(), historyState);
     }
@@ -264,7 +263,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     const animationEl = this.win.document.createElement('div');
     animationEl.classList.add('i-amphtml-story-page-attachment-expand');
     const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
-    this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, false);
 
     this.mutateElement(() => {
       storyEl.appendChild(animationEl);
@@ -313,7 +311,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     super.closeInternal_(shouldAnimate);
 
-    this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
+    this.storeService_.dispatch(Action.SET_ATTACHMENT_PAGE_ID, null);
 
     const storyEl = closest(this.element, (el) => el.tagName === 'AMP-STORY');
     const animationEl = storyEl.querySelector(
