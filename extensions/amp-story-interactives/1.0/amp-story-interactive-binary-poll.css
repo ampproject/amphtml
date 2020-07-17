@@ -27,7 +27,8 @@
 	display: flex !important;
   justify-content: center !important;
   height: 90px !important;
-	border-radius: 16px !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
   box-shadow: var(--i-amphtml-interactive-component-shadow) !important;
   /* overflow bug fix for percent bar animation on ios safari  */
   transform: translateZ(0) !important;
