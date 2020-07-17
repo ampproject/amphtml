@@ -743,11 +743,13 @@ export class AmpList extends AMP.BaseElement {
     if (this.ssrTemplateHelper_.isEnabled()) {
       fetch = this.ssrTemplate_(opt_refresh);
     } else {
-      fetch = this.isAmpStateSrc_(elementSrc)
-        ? this.getAmpStateJson_(elementSrc)
-        : this.isAmpScriptSrc_(elementSrc)
-        ? this.getAmpScriptJson_(elementSrc)
-        : this.prepareAndSendFetch_(opt_refresh);
+      if (this.isAmpStateSrc_(elementSrc)) {
+        fetch = this.getAmpStateJson_(elementSrc);
+      } else if (this.isAmpScriptSrc_(elementSrc)) {
+        fetch = this.getAmpScriptJson_(elementSrc);
+      } else {
+        fetch = this.prepareAndSendFetch_(opt_refresh);
+      }
       fetch = fetch.then((data) => {
         // Bail if the src has changed while resolving the xhr request.
         if (elementSrc !== this.element.getAttribute('src')) {
