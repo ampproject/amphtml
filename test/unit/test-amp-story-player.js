@@ -401,7 +401,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       expect(stories.length).to.eql(4);
     });
 
-    it.only('throws an error if the add method is not passed an array', async () => {
+    it('throws an error if the add method is not passed an array', async () => {
       buildStoryPlayer();
       await manager.loadPlayers();
 
@@ -410,7 +410,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       );
     });
 
-    it.only('throws an error if the add method is passed an array with incorrectly structured story objects', async () => {
+    it('throws an error if the add method is passed an array with incorrectly structured story objects', async () => {
       buildStoryPlayer();
       await manager.loadPlayers();
 
