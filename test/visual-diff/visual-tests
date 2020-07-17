@@ -783,7 +783,7 @@
       "url": "examples/visual-tests/amp-story-player/player.html",
       "name": "amp-story-player basic page",
       "viewport": {"width": 800, "height": 600},
-      "loading_complete_selectors": [/* TODO(): Add story loaded selector. */]
+      "loading_complete_selectors": [/* TODO(): Add story loaded selector. */ "story-loaded"]
     }
   ]
 }
