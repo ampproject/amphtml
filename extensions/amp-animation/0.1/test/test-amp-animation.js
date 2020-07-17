@@ -818,7 +818,6 @@ describes.sandboxed('AmpAnimation', {}, (env) => {
 
       beforeEach(() => {
         embed = env.embed;
-        embed.setVisible_(false);
       });
 
       function createAnim(attrs, config) {
