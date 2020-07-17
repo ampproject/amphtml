@@ -763,42 +763,39 @@
       "name": "amp-video-docking (left-to-right)",
       "viewport": {"width": 800, "height": 600},
       "interactive_tests": "examples/visual-tests/amp-video-docking/amp-video-docking.js",
-      "loading_complete_selectors": [".i-amphtml-video-interface"],
+      "loading_complete_selectors": [".i-amphtml-video-interface"]
     },
     {
       "url": "examples/visual-tests/amp-video-docking/rtl.html",
       "name": "amp-video-docking (right-to-left)",
       "viewport": {"width": 800, "height": 600},
       "interactive_tests": "examples/visual-tests/amp-video-docking/amp-video-docking.js",
-      "loading_complete_selectors": [".i-amphtml-video-interface"],
+      "loading_complete_selectors": [".i-amphtml-video-interface"]
     },
     {
       "url": "examples/visual-tests/amp-video-docking/slot.html",
       "name": "amp-video-docking (slot)",
       "viewport": {"width": 800, "height": 600},
       "interactive_tests": "examples/visual-tests/amp-video-docking/amp-video-docking.js",
-      "loading_complete_selectors": [".i-amphtml-video-interface"],
+      "loading_complete_selectors": [".i-amphtml-video-interface"]
     },
     {
       "url": "examples/visual-tests/amp-story-player/back-button.html",
       "name": "amp-story-player back button",
-      "loading_complete_selectors": [".amp-story-player-back-button", ".i-amphtml-story-player-loaded"],
-      "loading_incomplete_selectors": [".i-amphtml-story-player-loading"],
-      "loading_complete_delay_ms": 1000,
+      "loading_complete_selectors": [".i-amphtml-story-player-loaded"],
+      "loading_incomplete_selectors": [".i-amphtml-story-player-loading"]
     },
     {
       "url": "examples/visual-tests/amp-story-player/close-button.html",
       "name": "amp-story-player close button",
-      "loading_complete_selectors": [".amp-story-player-close-button", ".i-amphtml-story-player-loaded"],
-      "loading_incomplete_selectors": [".i-amphtml-story-player-loading"],
-      "loading_complete_delay_ms": 1000,
+      "loading_complete_selectors": [".i-amphtml-story-player-loaded"],
+      "loading_incomplete_selectors": [".i-amphtml-story-player-loading"]
     },
     {
       "url": "examples/visual-tests/amp-story-player/multiple-stories-back-button.html",
       "name": "amp-story-player multiple stories back button",
-      "loading_complete_selectors": [".amp-story-player-back-button", ".i-amphtml-story-player-loaded"],
-      "loading_incomplete_selectors": [".i-amphtml-story-player-loading"],
-      "loading_complete_delay_ms": 1000,
-    },
+      "loading_complete_selectors": [".i-amphtml-story-player-loaded"],
+      "loading_incomplete_selectors": [".i-amphtml-story-player-loading"]
+    }
   ]
 }
