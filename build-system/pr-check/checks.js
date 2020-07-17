@@ -59,6 +59,7 @@ async function main() {
     timedExecOrDie('gulp dep-check');
     timedExecOrDie('gulp check-types');
     timedExecOrDie('gulp check-sourcemaps');
+    timedExecOrDie('gulp report-test-results');
     timedExecOrDie('gulp performance-urls');
   } else {
     printChangeSummary(FILENAME);
