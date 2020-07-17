@@ -78,7 +78,7 @@ export function installRuntimeServices(global) {
  * @restricted
  */
 export function installAmpdocServices(ampdoc) {
-  const isEmbedded = !!ampdoc.getParent();
+  const isEmbedded = !IS_SXG && !!ampdoc.getParent();
 
   // When making changes to this method:
   // 1. Order is important!
