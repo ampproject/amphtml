@@ -21,7 +21,6 @@ import {
   installFriendlyIframeEmbed,
   installStandardServicesInEmbed,
   mergeHtmlForTesting,
-  setFriendlyIframeEmbedVisible,
   setSrcdocSupportedForTesting,
 } from '../../src/friendly-iframe-embed';
 import {Services} from '../../src/services';
@@ -419,30 +418,6 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       .then(() => {
         expect(ampdoc.dispose).to.be.calledOnce;
       });
-  });
-
-  it('should start invisible by default and update on request', () => {
-    const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
-      url: 'https://acme.org/url1',
-      html: '',
-      extensionIds: [],
-    });
-    return embedPromise.then((embed) => {
-      expect(preInstallExtensionsInChildWindowStub).to.be.calledOnce;
-      expect(doInstallExtensionsInChildWindowStub).to.be.calledOnce;
-      expect(embed.isVisible()).to.be.false;
-      const spy = env.sandbox.spy();
-      embed.onVisibilityChanged(spy);
-
-      setFriendlyIframeEmbedVisible(embed, false);
-      expect(embed.isVisible()).to.be.false;
-      expect(spy).to.not.be.called;
-
-      setFriendlyIframeEmbedVisible(embed, true);
-      expect(embed.isVisible()).to.be.true;
-      expect(spy).to.be.calledOnce;
-      expect(spy.args[0][0]).to.equal(true);
-    });
   });
 
   it.skip('should support host', () => {
