@@ -401,6 +401,26 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       expect(stories.length).to.eql(4);
     });
 
+    it.only('throws an error if the add method is not passed an array', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+
+      return expect(() => playerEl.add(7)).to.throw(
+        '"stories" parameter has the wrong structure'
+      );
+    });
+
+    it.only('throws an error if the add method is passed an array with incorrectly structured story objects', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+
+      const wrongStoryObjects = [{notHref: true}];
+
+      return expect(() => playerEl.add(wrongStoryObjects)).to.throw(
+        '"stories" parameter has the wrong structure'
+      );
+    });
+
     it('adds no stories when sending an empty array of new stories', async () => {
       buildStoryPlayer(3);
       await manager.loadPlayers();
