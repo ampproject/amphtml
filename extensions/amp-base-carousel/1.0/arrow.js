@@ -25,7 +25,7 @@ import {useState} from '../../../src/preact';
 export function Arrow(props) {
   const {
     'customArrow': customArrow,
-    'dir': dir,
+    'by': by,
     'advance': advance,
     'disabled': disabled,
   } = props;
@@ -38,14 +38,14 @@ export function Arrow(props) {
     if (onCustomClick) {
       onCustomClick(e);
     }
-    advance();
+    advance(by);
   };
   return (
     <div
       style={{
         ...styles.arrowPlacement,
         // Offset button from the edge.
-        [dir < 0 ? 'left' : 'right']: '0px',
+        [by < 0 ? 'left' : 'right']: '0px',
         opacity: isDisabled && 0,
         pointerEvents: isDisabled && 'none',
       }}
@@ -67,8 +67,8 @@ export function ArrowPrev(props) {
   const {'customArrow': customArrow, ...rest} = props;
   return (
     <Arrow
-      dir={-1}
-      customArrow={customArrow || <DefaultArrow dir={-1} />}
+      by={-1}
+      customArrow={customArrow || <DefaultArrow by={-1} />}
       {...rest}
     />
   );
@@ -82,8 +82,8 @@ export function ArrowNext(props) {
   const {'customArrow': customArrow, ...rest} = props;
   return (
     <Arrow
-      dir={1}
-      customArrow={customArrow || <DefaultArrow dir={1} />}
+      by={1}
+      customArrow={customArrow || <DefaultArrow by={1} />}
       {...rest}
     />
   );
@@ -94,7 +94,7 @@ export function ArrowNext(props) {
  * @return {PreactDef.Renderable}
  */
 function DefaultArrow(props) {
-  const {dir} = props;
+  const {by} = props;
   const [hover, setHover] = useState(false);
   const [active, setActive] = useState(false);
   return (
@@ -105,7 +105,7 @@ function DefaultArrow(props) {
         transitionDuration: active ? '0ms' : '',
       }}
       aria-label={
-        dir < 0 ? 'Previous item in carousel' : 'Next item in carousel'
+        by < 0 ? 'Previous item in carousel' : 'Next item in carousel'
       }
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
@@ -127,7 +127,7 @@ function DefaultArrow(props) {
         }}
       ></div>
       <svg style={styles.arrowIcon} viewBox="0 0 24 24">
-        {dir < 0 ? (
+        {by < 0 ? (
           <path
             d="M14,7.4 L9.4,12 L14,16.6"
             fill="none"

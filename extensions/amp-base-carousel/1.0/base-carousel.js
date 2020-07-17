@@ -62,12 +62,12 @@ export function BaseCarousel(props) {
       <ArrowPrev
         customArrow={arrowPrev}
         disabled={disableForDir(-1)}
-        advance={() => advance(-1)}
+        advance={advance}
       />
       <ArrowNext
         customArrow={arrowNext}
         disabled={disableForDir(1)}
-        advance={() => advance(1)}
+        advance={advance}
       />
     </div>
   );
