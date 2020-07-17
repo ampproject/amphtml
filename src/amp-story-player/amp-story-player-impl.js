@@ -174,8 +174,8 @@ export class AmpStoryPlayer {
     this.element_.show = this.show.bind(this);
     this.element_.mute = this.mute.bind(this);
     this.element_.unmute = this.unmute.bind(this);
-    this.element_.getState = this.getState.bind(this);
-    this.element_.setState = this.setState.bind(this);
+    this.element_.getStoryState = this.getStoryState.bind(this);
+    this.element_.setStoryState = this.setStoryState.bind(this);
   }
 
   /**
@@ -450,10 +450,10 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Sends a message asking for the story's state and dispatches the appropriate event.
+   * Sends a message asking for the current story's state and dispatches the appropriate event.
    * @param {string} storyStateType
    */
-  getState(storyStateType) {
+  getStoryState(storyStateType) {
     switch (storyStateType) {
       case STORY_STATE_TYPE.PAGE_ATTACHMENT_STATE:
         this.getPageAttachmentState_();
@@ -464,11 +464,11 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Sends a mesage updating the story's state with provided value.
+   * Sends a mesage updating the current story's state with provided value.
    * @param {string} storyStateType
    * @param {boolean|null} value
    */
-  setState(storyStateType, value) {
+  setStoryState(storyStateType, value) {
     const iframeIdx = this.stories_[this.currentIdx_][IFRAME_IDX];
     switch (storyStateType) {
       case STORY_STATE_TYPE.PAGE_ATTACHMENT_STATE:
@@ -797,7 +797,7 @@ export class AmpStoryPlayer {
           {state: STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE},
           true
         )
-        .then((event) => this.dispatchPageAttachmentEvent_(!!(event.value)));
+        .then((event) => this.dispatchPageAttachmentEvent_(!!event.value));
     });
   }
 
@@ -840,21 +840,6 @@ export class AmpStoryPlayer {
     isVisible
       ? button.classList.remove('amp-story-player-hide-button')
       : button.classList.add('amp-story-player-hide-button');
-  }
-
-  /**
-   * Dispatch custom events based on the state type.
-   * @param {string} storyStateType
-   * @param {boolean|null} value
-   * @private
-   */
-  dispatchStateEvent_(storyStateType, value) {
-    switch (storyStateType) {
-      case STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE:
-        this.dispatchPageAttachmentEvent_(!!(value));
-      default:
-        break;
-    }
   }
 
   /**
