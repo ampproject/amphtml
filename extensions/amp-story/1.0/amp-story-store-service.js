@@ -560,7 +560,6 @@ export class AmpStoryStoreService {
       [StateProperty.EDUCATION_STATE]: false,
       [StateProperty.HAS_SIDEBAR_STATE]: false,
       [StateProperty.INFO_DIALOG_STATE]: false,
-      [StateProperty.INTERACTIVE_REACT_STATE]: {},
       [StateProperty.INTERACTIVE_COMPONENT_STATE]: {
         state: EmbeddedComponentState.HIDDEN,
       },
