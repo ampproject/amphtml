@@ -340,7 +340,7 @@ export class AmpStoryPlayer {
           });
 
           messaging.sendRequest('onDocumentState', {
-            state: 'PAGE_ATTACHMENT_STATE',
+            state: STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE,
           });
 
           messaging.registerHandler('documentStateUpdate', (event, data) => {
@@ -466,7 +466,7 @@ export class AmpStoryPlayer {
   /**
    * Sends a mesage updating the story's state with provided value.
    * @param {string} storyStateType
-   * @param {booleam} value
+   * @param {boolean|null} value
    */
   setState(storyStateType, value) {
     const iframeIdx = this.stories_[this.currentIdx_][IFRAME_IDX];
@@ -797,7 +797,7 @@ export class AmpStoryPlayer {
           {state: STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE},
           true
         )
-        .then((event) => this.dispatchStateEvent_(event.state, event.value));
+        .then((event) => this.dispatchPageAttachmentEvent_(!!(event.value)));
     });
   }
 
@@ -809,7 +809,7 @@ export class AmpStoryPlayer {
   onDocumentStateUpdate_(data) {
     switch (data.state) {
       case STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE:
-        this.onPageAttachmentStateUpdate_(data.value);
+        this.onPageAttachmentStateUpdate_(!!data.value);
         break;
       default:
         break;
@@ -823,10 +823,7 @@ export class AmpStoryPlayer {
    */
   onPageAttachmentStateUpdate_(pageAttachmentOpen) {
     this.updateButtonVisibility_(!pageAttachmentOpen);
-    this.dispatchStateEvent_(
-      STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE,
-      pageAttachmentOpen
-    );
+    this.dispatchPageAttachmentEvent_(pageAttachmentOpen);
   }
 
   /**
@@ -839,6 +836,7 @@ export class AmpStoryPlayer {
     if (button === null) {
       return;
     }
+
     isVisible
       ? button.classList.remove('amp-story-player-hide-button')
       : button.classList.add('amp-story-player-hide-button');
@@ -847,13 +845,13 @@ export class AmpStoryPlayer {
   /**
    * Dispatch custom events based on the state type.
    * @param {string} storyStateType
-   * @param {boolean} value
+   * @param {boolean|null} value
    * @private
    */
   dispatchStateEvent_(storyStateType, value) {
     switch (storyStateType) {
       case STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE:
-        this.dispatchPageAttachmentEvent_(value);
+        this.dispatchPageAttachmentEvent_(!!(value));
       default:
         break;
     }
@@ -861,7 +859,7 @@ export class AmpStoryPlayer {
 
   /**
    * Dispatch a page attachment event.
-   * @param {boolean}  isPageAttachmentOpen
+   * @param {boolean} isPageAttachmentOpen
    * @private
    */
   dispatchPageAttachmentEvent_(isPageAttachmentOpen) {
