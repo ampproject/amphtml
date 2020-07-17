@@ -65,11 +65,11 @@ const createSecureDocSkeleton = (sanitizedHeadElements) =>
  * @param {string} title
  * @param {string} height
  * @param {string} width
- * @return {!Element}
+ * @return {!HTMLIFrameElement}
  *
  */
 export function createSecureFrame(document, head, title, height, width) {
-  const iframe = createElementWithAttributes(
+  const iframe = /** @type {HTMLIFrameElement} */ (createElementWithAttributes(
     document,
     'iframe',
     dict({
@@ -84,7 +84,7 @@ export function createSecureFrame(document, head, title, height, width) {
       'scrolling': 'no',
       'sandbox': sandboxVals.join(' '),
     })
-  );
+  ));
 
   const secureDoc = createSecureDocSkeleton(head./*OK*/ innerHTML);
   // TODO(ccordry): add violation reporting here or in fie.

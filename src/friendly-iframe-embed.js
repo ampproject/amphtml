@@ -61,7 +61,7 @@ import {whenContentIniLoad} from './ini-load';
  * @typedef {{
  *   host: (?AmpElement|undefined),
  *   url: string,
- *   html: string,
+ *   html: ?string,
  *   extensionIds: (?Array<string>|undefined),
  *   fonts: (?Array<string>|undefined),
  * }}
@@ -112,7 +112,7 @@ export function isSrcdocSupported() {
  * @param {!Element} container
  * @param {!FriendlyIframeSpec} spec
  * @param {function(!Window, ?./service/ampdoc-impl.AmpDoc=)=} opt_preinstallCallback
- * @param {boolean} isInUnsignedExp
+ * @param {boolean=} isInUnsignedExp
  * @return {!Promise<!FriendlyIframeEmbed>}
  */
 export function installFriendlyIframeEmbed(
@@ -174,7 +174,7 @@ export function installFriendlyIframeEmbed(
     registerViolationListener();
     if (!isInUnsignedExp) {
       childDoc.open();
-      childDoc.write(html);
+      childDoc.write(devAssert(html));
     }
     // With document.write, `iframe.onload` arrives almost immediately, thus
     // we need to wait for child's `window.onload`.

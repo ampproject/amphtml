@@ -369,13 +369,13 @@ export class AmpA4A extends AMP.BaseElement {
     const sanitizedHeadPromise = new Deferred();
     /**
      * Promise that will resolve with processed <head> from ad server response.
-     * @private {Promise<!Element>}
+     * @private {!Promise}
      */
     this.sanitizedHeadPromise_ = sanitizedHeadPromise.promise;
 
     /**
      * Resolves the promise that the head has been processed.
-     * @private {function(!Element)}
+     * @private {function()}
      */
     this.sanitizedHeadResolver_ = sanitizedHeadPromise.resolve;
 
@@ -904,9 +904,10 @@ export class AmpA4A extends AMP.BaseElement {
     // DetachedDomStream.
     streamResponseToWriter(this.win, response, detachedStream);
 
-    this.sanitizedHeadResolver_(
-      transformStream.waitForHead().then((head) => this.validateHead_(head))
-    );
+    transformStream
+      .waitForHead()
+      .then((head) => this.validateHead_(head))
+      .then(this.sanitizedHeadResolver_);
 
     this.transferBody_ = (body) => transformStream.transferBody(body);
 
@@ -1636,7 +1637,7 @@ export class AmpA4A extends AMP.BaseElement {
       const extensionIds = extensions.map((extension) => extension.extensionId);
 
       return installFriendlyIframeEmbed(
-        this.iframe,
+        devAssert(this.iframe),
         this.element,
         {
           host: this.element,
@@ -1645,7 +1646,8 @@ export class AmpA4A extends AMP.BaseElement {
           extensionIds,
           fonts,
         },
-        (embedWin, ampdoc) => this.preinstallCallback_(embedWin, ampdoc),
+        (embedWin, ampdoc) =>
+          this.preinstallCallback_(embedWin, devAssert(ampdoc)),
         true // is in no-signing experiment
       ).then((friendlyIframeEmbed) => {
         checkStillCurrent();
@@ -1656,7 +1658,7 @@ export class AmpA4A extends AMP.BaseElement {
           friendlyIframeEmbed.win.document;
         const {body} = frameDoc;
 
-        const renderComplete = this.transferBody_(body);
+        const renderComplete = this.transferBody_(devAssert(body));
 
         setFriendlyIframeEmbedVisible(friendlyIframeEmbed, this.isInViewport());
         // Ensure visibility hidden has been removed (set by boilerplate).
@@ -1736,7 +1738,8 @@ export class AmpA4A extends AMP.BaseElement {
         extensionIds: creativeMetaData.customElementExtensions || [],
         fonts: fontsArray,
       },
-      (embedWin, ampdoc) => this.preinstallCallback_(embedWin, ampdoc)
+      (embedWin, ampdoc) =>
+        this.preinstallCallback_(embedWin, devAssert(ampdoc))
     ).then((friendlyIframeEmbed) => {
       checkStillCurrent();
       this.friendlyIframeEmbed_ = friendlyIframeEmbed;
