@@ -189,7 +189,7 @@ export class AmpStoryPlayer {
     const isStoryObject = (story) =>
       typeof story === 'object' && story !== null && story.href;
 
-    if (!Array.isArray(stories) || stories.every(isStoryObject)) {
+    if (!Array.isArray(stories) || !stories.every(isStoryObject)) {
       throw new Error('"stories" parameter has the wrong structure');
     }
 
