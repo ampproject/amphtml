@@ -16,10 +16,11 @@
 
 import {AmpStoryComponentManager} from './amp-story-component-manager';
 import {AmpStoryPlayer} from './amp-story-player-impl';
+import {onDocumentReady} from '../document-ready';
 
-self.onload = () => {
+onDocumentReady(self.document, () => {
   const manager = new AmpStoryComponentManager(self);
   manager.loadPlayers();
-};
+});
 
 globalThis.AmpStoryPlayer = AmpStoryPlayer;
