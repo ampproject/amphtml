@@ -15,7 +15,7 @@
  */
 
 import {AmpStoryPlayer} from '../../../src/amp-story-player/amp-story-player-impl';
-import {Layout} from '../../../src/layout';
+import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {cssText} from '../../../build/amp-story-player.css';
 
 class AmpStoryPlayerWrapper extends AMP.BaseElement {
@@ -33,11 +33,12 @@ class AmpStoryPlayerWrapper extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.player_.layoutCallback();
+    return Promise.resolve();
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout == Layout.CONTAINER || isLayoutSizeDefined(layout);
   }
 }
 
