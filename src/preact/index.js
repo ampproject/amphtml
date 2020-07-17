@@ -65,8 +65,9 @@ export function createRef() {
 }
 
 /**
- * @param {!Object} value
- * @return {!PreactDef.Context}
+ * @param {T} value
+ * @return {!PreactDef.Context<T>}
+ * @template T
  */
 export function createContext(value) {
   return preact.createContext(value);
@@ -110,8 +111,9 @@ export function useLayoutEffect(effect, opt_deps) {
 }
 
 /**
- * @param {PreactDef.Context} context
- * @return {!JsonObject}
+ * @param {PreactDef.Context<T>} context
+ * @return {T}
+ * @template T
  */
 export function useContext(context) {
   return hooks.useContext(context);
