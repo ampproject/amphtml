@@ -28,6 +28,7 @@ t.run('AMPHTML ad on AMP Page', () => {
     {
       amp: true,
       extensions: ['amp-ad'],
+      experiments: ['ampdoc-fie'],
       body: `
   <amp-ad
       width="300" height="250"
@@ -57,6 +58,7 @@ t.run('AMPHTML ad on AMP Page', () => {
     {
       amp: true,
       extensions: ['amp-ad'],
+      experiments: ['ampdoc-fie'],
       frameStyle: 'height: 100vh',
       body: `
   <div style="height: 100vh"></div>
