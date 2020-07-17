@@ -1646,8 +1646,7 @@ export class AmpA4A extends AMP.BaseElement {
           extensionIds,
           fonts,
         },
-        (embedWin, ampdoc) =>
-          this.preinstallCallback_(embedWin, devAssert(ampdoc)),
+        (embedWin, ampdoc) => this.preinstallCallback_(embedWin, ampdoc),
         true // is in no-signing experiment
       ).then((friendlyIframeEmbed) => {
         checkStillCurrent();
@@ -1738,8 +1737,7 @@ export class AmpA4A extends AMP.BaseElement {
         extensionIds: creativeMetaData.customElementExtensions || [],
         fonts: fontsArray,
       },
-      (embedWin, ampdoc) =>
-        this.preinstallCallback_(embedWin, devAssert(ampdoc))
+      (embedWin, ampdoc) => this.preinstallCallback_(embedWin, ampdoc)
     ).then((friendlyIframeEmbed) => {
       checkStillCurrent();
       this.friendlyIframeEmbed_ = friendlyIframeEmbed;
@@ -1769,7 +1767,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    *
    * @param {!Window} embedWin
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {?../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   preinstallCallback_(embedWin, ampdoc) {
     const parentAmpdoc = this.getAmpDoc();
