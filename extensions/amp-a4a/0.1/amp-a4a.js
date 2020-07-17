@@ -888,6 +888,8 @@ export class AmpA4A extends AMP.BaseElement {
     const size = this.extractSize(response.headers);
     this.creativeSize_ = size || this.creativeSize_;
 
+    // TODO(ccordry): handle fallback and ensure this is only set for creatives
+    // that can be rendered friendly.
     // Update priority.
     this.updateLayoutPriority(LayoutPriority.CONTENT);
 
@@ -909,7 +911,7 @@ export class AmpA4A extends AMP.BaseElement {
       .then((head) => this.validateHead_(head))
       .then(this.sanitizedHeadResolver_);
 
-    this.transferBody_ = (body) => transformStream.transferBody(body);
+    this.transferBody_ = transformStream.transferBody.bind(transformStream);
 
     // TODO(ccordry): throw NO_CONTENT_RESPONSE if body is empty. Only gets
     // here if amp-ff-empty-creative header is not present.
