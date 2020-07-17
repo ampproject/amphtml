@@ -65,7 +65,7 @@ export function createRef() {
 }
 
 /**
- * @param {T=} value
+ * @param {T} value
  * @return {!PreactDef.Context<T>}
  * @template T
  */
