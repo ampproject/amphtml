@@ -22,7 +22,7 @@ var DateDisplayDef = {};
 /**
  * @typedef {{
  *   children: (?PreactDef.Renderable|undefined),
- *   dateTime: (string|undefined),
+ *   datetime: (string|undefined),
  *   displayIn: (string|undefined),
  *   locale: (string|undefined),
  *   render: (function(!JsonObject, (?PreactDef.Renderable|undefined)):PreactDef.Renderable),
