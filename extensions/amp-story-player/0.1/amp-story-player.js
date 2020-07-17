@@ -38,7 +38,7 @@ class AmpStoryPlayerWrapper extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER || isLayoutSizeDefined(layout);
+    return isLayoutSizeDefined(layout);
   }
 }
 
