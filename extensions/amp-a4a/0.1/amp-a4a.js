@@ -52,10 +52,7 @@ import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getExperimentBranch} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {
-  installFriendlyIframeEmbed,
-  setFriendlyIframeEmbedVisible,
-} from '../../../src/friendly-iframe-embed';
+import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
@@ -1349,9 +1346,6 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   viewportCallback(inViewport) {
-    if (this.friendlyIframeEmbed_) {
-      setFriendlyIframeEmbedVisible(this.friendlyIframeEmbed_, inViewport);
-    }
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
     }
@@ -1649,7 +1643,6 @@ export class AmpA4A extends AMP.BaseElement {
     ).then((friendlyIframeEmbed) => {
       checkStillCurrent();
       this.friendlyIframeEmbed_ = friendlyIframeEmbed;
-      setFriendlyIframeEmbedVisible(friendlyIframeEmbed, this.isInViewport());
       // Ensure visibility hidden has been removed (set by boilerplate).
       const frameDoc =
         friendlyIframeEmbed.iframe.contentDocument ||

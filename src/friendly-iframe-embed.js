@@ -17,7 +17,6 @@
 import {CommonSignals} from './common-signals';
 import {FIE_EMBED_PROP} from './iframe-helper';
 import {LEGACY_ELEMENTS, stubLegacyElements} from './service/extensions-impl';
-import {Observable} from './observable';
 import {Services} from './services';
 import {Signals} from './utils/signals';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
@@ -109,18 +108,6 @@ function isSrcdocSupported() {
     srcdocSupported = 'srcdoc' in HTMLIFrameElement.prototype;
   }
   return srcdocSupported;
-}
-
-/**
- * Sets whether the embed is currently visible. The interpretation of visibility
- * is up to the embed parent. However, most of typical cases would rely on
- * whether the embed is currently in the viewport.
- * @param {!FriendlyIframeEmbed} embed
- * @param {boolean} visible
- * TODO(dvoytenko): Re-evaluate and probably drop once layers are ready.
- */
-export function setFriendlyIframeEmbedVisible(embed, visible) {
-  embed.setVisible_(visible);
 }
 
 /**
@@ -413,16 +400,6 @@ export class FriendlyIframeEmbed {
     /** @const @private {time} */
     this.startTime_ = Date.now();
 
-    /**
-     * Starts out as invisible. The interpretation of this flag is up to
-     * the emded parent.
-     * @private {boolean}
-     */
-    this.visible_ = false;
-
-    /** @private {!Observable<boolean>} */
-    this.visibilityObservable_ = new Observable();
-
     /** @private @const */
     this.signals_ = this.ampdoc
       ? this.ampdoc.signals()
@@ -535,38 +512,6 @@ export class FriendlyIframeEmbed {
     ]).then(() => {
       this.signals_.signal(CommonSignals.INI_LOAD);
     });
-  }
-
-  /**
-   * Whether the embed is currently visible. The interpretation of visibility
-   * is up to the embed parent. However, most of typical cases would rely on
-   * whether the embed is currently in the viewport.
-   * @return {boolean}
-   * TODO(dvoytenko): Re-evaluate and probably drop once layers are ready.
-   */
-  isVisible() {
-    return this.visible_;
-  }
-
-  /**
-   * See `isVisible` for more info.
-   * @param {function(boolean)} handler
-   * @return {!UnlistenDef}
-   */
-  onVisibilityChanged(handler) {
-    return this.visibilityObservable_.add(handler);
-  }
-
-  /**
-   * @param {boolean} visible
-   * @private
-   * @restricted
-   */
-  setVisible_(visible) {
-    if (this.visible_ != visible) {
-      this.visible_ = visible;
-      this.visibilityObservable_.fire(this.visible_);
-    }
   }
 
   /**
