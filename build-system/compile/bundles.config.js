@@ -924,6 +924,7 @@ exports.extensionBundles = [
     name: 'amp-story-player',
     version: '0.1',
     latestVersion: '0.1',
+    options: {hasCss: true},
     type: TYPES.MISC,
   },
   {
