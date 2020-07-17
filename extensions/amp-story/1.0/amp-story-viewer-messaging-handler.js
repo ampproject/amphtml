@@ -37,7 +37,7 @@ const DataSources = {
 /**
  * @typedef {{
  *   dataSource: !DataSources,
- *   property: (!StateProperty|!HistoryState|!AnalyticsVariable)
+ *   property: (!StateProperty|!AnalyticsVariable)
  * }}
  */
 let GetStateConfigurationDef;
