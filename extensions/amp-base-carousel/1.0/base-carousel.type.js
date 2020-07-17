@@ -27,7 +27,7 @@ var BaseCarouselDef = {};
  *   defaultSlide: (number|undefined),
  *   loop: (boolean|undefined),
  *   slide: (number|undefined),
- *   onLayout: (function():undefined|undefined),
+ *   onMount: (function():undefined|undefined),
  *   onSlideChange: (function(number):undefined|undefined),
  *   setAdvance: (function(function(number):undefined):undefined|undefined),
  * }}

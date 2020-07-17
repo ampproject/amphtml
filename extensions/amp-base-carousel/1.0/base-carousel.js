@@ -16,12 +16,8 @@
 import * as Preact from '../../../src/preact';
 import {Arrow} from './arrow';
 import {Scroller} from './scroller';
-import {
-  toChildArray,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from '../../../src/preact';
+import {toChildArray, useRef, useState} from '../../../src/preact';
+import {useMountEffect} from '../../../src/preact/utils';
 
 /**
  * @param {!BaseCarouselDef.Props} props
@@ -36,7 +32,7 @@ export function BaseCarousel(props) {
     loop,
     slide,
     onSlideChange,
-    onLayout,
+    onMount,
     setAdvance,
     ...rest
   } = props;
@@ -51,15 +47,14 @@ export function BaseCarousel(props) {
     // Note: `setCurSlide` will still be called on debounce by scroll handler.
     container./* OK */ scrollLeft += container./* OK */ offsetWidth * dir;
   };
-  // Fire on first render when first slide is displayed.
-  useLayoutEffect(() => {
-    if (onLayout) {
-      onLayout();
+  useMountEffect(() => {
+    if (onMount) {
+      onMount();
     }
     if (setAdvance) {
       setAdvance(advance);
     }
-  }, [onLayout, setAdvance]);
+  });
 
   const setRestingIndex = (i) => {
     ignoreProgrammaticScroll.current = true;

@@ -77,7 +77,7 @@ class AmpBaseCarousel extends PreactBaseElement {
     const children = this.getRealChildren();
     children.forEach((child) => owners.setOwner(child, this.element));
     return dict({
-      'onLayout': () => owners.scheduleLayout(this.element, children),
+      'onMount': () => owners.scheduleLayout(this.element, children),
       'onSlideChange': (index) => {
         fireSlideChangeEvent(
           this.win,
