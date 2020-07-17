@@ -612,24 +612,6 @@ describes.realWin('no signing', {amp: true}, (env) => {
           verifyA4aAnalyticsTriggersWereFired(a4a, triggerAnalyticsEventSpy);
         });
 
-        it('should update embed visibility', async () => {
-          window.sandbox.stub(a4a, 'isInViewport').callsFake(() => false);
-          a4a.buildCallback();
-          a4a.onLayoutMeasure();
-          await a4a.layoutCallback();
-          expect(a4a.friendlyIframeEmbed_).to.exist;
-          expect(a4a.friendlyIframeEmbed_.isVisible()).to.be.false;
-
-          a4a.viewportCallback(true);
-          expect(a4a.friendlyIframeEmbed_.isVisible()).to.be.true;
-
-          a4a.viewportCallback(false);
-          expect(a4a.friendlyIframeEmbed_.isVisible()).to.be.false;
-
-          a4a.viewportCallback(true);
-          expect(a4a.friendlyIframeEmbed_.isVisible()).to.be.true;
-        });
-
         it('for requests from insecure HTTP pages', async () => {
           // TODO(ccordry): implement fallback and enable for signing experiment.
           if (branch === NO_SIGNING_EXP.experiment) {

@@ -1769,7 +1769,6 @@ export class AmpA4A extends AMP.BaseElement {
   makeFieVisible_(friendlyIframeEmbed, creativeMetaData, checkStillCurrent) {
     checkStillCurrent();
     this.friendlyIframeEmbed_ = friendlyIframeEmbed;
-    setFriendlyIframeEmbedVisible(friendlyIframeEmbed, this.isInViewport());
     // Ensure visibility hidden has been removed (set by boilerplate).
     const frameBody = this.getFieBody_(friendlyIframeEmbed);
     setStyle(frameBody, 'visibility', 'visible');
