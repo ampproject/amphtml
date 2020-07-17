@@ -571,6 +571,10 @@ describes.realWin('no signing', {amp: true}, (env) => {
         });
 
         it('for A4A layout should resolve once FIE is created', async () => {
+          // This test calls renderAmpCreative before onlayoutMeasure has
+          // populated adUrl_. This cannot happen in real world because rendering
+          // is blocked by A4A.adPromise_.
+          a4a.adUrl_ = 'https://adnetwork.com';
           a4a.buildCallback();
           a4a.onLayoutMeasure();
 

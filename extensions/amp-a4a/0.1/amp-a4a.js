@@ -1708,10 +1708,10 @@ export class AmpA4A extends AMP.BaseElement {
       });
     }
     const checkStillCurrent = this.verifyStillCurrent();
-    const {minifiedCreative, extensionIds} = creativeMetaData;
+    const {minifiedCreative, customElementExtensions} = creativeMetaData;
     return this.installFriendlyIframeEmbed_(
-      minifiedCreative, // html
-      extensionIds,
+      minifiedCreative,
+      customElementExtensions,
       fontsArray || []
     ).then((friendlyIframeEmbed) =>
       this.makeFieVisible_(
@@ -1727,11 +1727,11 @@ export class AmpA4A extends AMP.BaseElement {
    * @param {string} html
    * @param {!Array<string>} extensionIds
    * @param {!Array<string>} fonts
-   * @return {!Promise<!FriendlyIframeEmbed>}
+   * @return {!Promise<!../../../src/friendly-iframe-embed.FriendlyIframeEmbed>}
    */
   installFriendlyIframeEmbed_(html, extensionIds, fonts) {
     return installFriendlyIframeEmbed(
-      this.iframe,
+      devAssert(this.iframe),
       this.element,
       {
         host: this.element,
@@ -1800,7 +1800,7 @@ export class AmpA4A extends AMP.BaseElement {
     const frameDoc =
       friendlyIframeEmbed.iframe.contentDocument ||
       friendlyIframeEmbed.win.document;
-    return frameDoc.body;
+    return devAssert(frameDoc.body);
   }
 
   /**
