@@ -184,6 +184,7 @@ export class AmpStoryPlayer {
    * current playing story.
    *
    * @param {!Array<!{href: string, title: ?string}>} stories
+   * @public
    */
   add(stories) {
     for (let i = 0; i < stories.length; i++) {
@@ -212,6 +213,7 @@ export class AmpStoryPlayer {
    * @param {{href: string, title: ?string}} story
    *
    * @return {HTMLAnchorElement}
+   * @private
    */
   createStoryAnchor_(story) {
     const anchor = this.doc_.createElement('a');
