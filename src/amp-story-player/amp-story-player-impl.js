@@ -183,7 +183,7 @@ export class AmpStoryPlayer {
    * and creating or assigning iframes to those that are close to the
    * current playing story.
    *
-   * @param {!Array<!{href: string, title: ?string}>} stories
+   * @param {!Array<!{href: string, title: ?string, posterImage: ?string}>} stories
    * @public
    */
   add(stories) {
@@ -210,7 +210,7 @@ export class AmpStoryPlayer {
   /**
    * Given a story object, creates an appropiate anchor element.
    *
-   * @param {{href: string, title: ?string}} story
+   * @param {{href: string, title: ?string, posterImage: ?string}} story
    *
    * @return {HTMLAnchorElement}
    * @private
@@ -218,6 +218,8 @@ export class AmpStoryPlayer {
   createStoryAnchor_(story) {
     const anchor = this.doc_.createElement('a');
     anchor.href = story.href;
+    story.posterImage &&
+      anchor.setAttribute('data-poster-portrait-src', story.posterImage);
 
     const title = this.doc_.createElement('span');
     title.classList.add('title');
