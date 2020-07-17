@@ -112,7 +112,7 @@ export function useLayoutEffect(effect, opt_deps) {
 
 /**
  * @param {PreactDef.Context<T>} context
- * @return {T|undefined}
+ * @return {T}
  * @template T
  */
 export function useContext(context) {
