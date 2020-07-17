@@ -603,5 +603,24 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       return expect(() => player.go(-1)).to.throw('Out of Story range.');
     });
+
+    it('navigate to first story when last story is finished', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      player.go(3);
+      player.go(-1);
+
+      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+      await afterRenderPromise();
+      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+      expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('1');
+    });
   });
 });

@@ -580,12 +580,6 @@ export class AmpStoryPlayer {
    * @param {number} storyDelta
    */
   go(storyDelta) {
-    if (
-      this.currentIdx_ + storyDelta >= this.stories_.length ||
-      this.currentIdx_ + storyDelta < 0
-    ) {
-      throw new Error('Out of Story range.');
-    }
     if (storyDelta === 0) {
       return;
     }
@@ -963,5 +957,28 @@ export class AmpStoryPlayer {
 
     const {screenX: x, screenY: y} = touches[0];
     return {x, y};
+  }
+
+  /**
+   * Sets circular wrapping to be enabled or disabled.
+   */
+  circularWrapping() {
+    const option = this.element_.getAttribute('enable-circular-wrapping');
+    
+    const currentStory = this.stories_[this.currentIdx_];
+    this.updateCurrentIframe_(currentStory[IFRAME_IDX]);
+    
+    if (option.value === false) {
+      return;
+    }
+    else {
+      if (this.currentIdx_ === this.stories_.length - 1) {
+        this.allocateIframeForStory_(0);
+      }
+      if (this.currentIdx_ === 0) {
+        const previousStory = this.stories_[this.stories_.length - 1];
+        this.updatePreviousIframe_(previousStory[IFRAME_IDX], IframePosition.NEXT);
+      }
+    }
   }
 }
