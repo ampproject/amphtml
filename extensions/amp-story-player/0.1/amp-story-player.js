@@ -16,8 +16,9 @@
 
 import {AmpStoryPlayer} from '../../../src/amp-story-player/amp-story-player-impl';
 import {Layout} from '../../../src/layout';
+import {cssText} from '../../../build/amp-story-player.css';
 
-class AmpStoryPlayerProxy extends AMP.BaseElement {
+class AmpStoryPlayerWrapper extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -41,5 +42,5 @@ class AmpStoryPlayerProxy extends AMP.BaseElement {
 }
 
 AMP.extension('amp-story-player', '0.1', (AMP) => {
-  AMP.registerElement('amp-story-player', AmpStoryPlayerProxy);
+  AMP.registerElement('amp-story-player', AmpStoryPlayerWrapper, cssText);
 });
