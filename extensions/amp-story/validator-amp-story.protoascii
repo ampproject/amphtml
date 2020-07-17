@@ -639,6 +639,7 @@ descendant_tag_list: {
   tag: "AMP-LIVE-LIST"
   tag: "AMP-PIXEL"
   tag: "AMP-STATE"
+  tag: "AMP-STORY-360"
   tag: "AMP-TIMEAGO"
   tag: "AMP-TWITTER"
   tag: "AMP-VIDEO"
