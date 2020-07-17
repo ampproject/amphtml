@@ -239,6 +239,7 @@ exports.rules = [
       // AMP Story
       'extensions/amp-story/1.0/animation-types.js->extensions/amp-animation/0.1/web-animation-types.js',
       // AMP Story 360
+      'extensions/amp-story-360/0.1/amp-story-360.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-360/0.1/amp-story-360.js->extensions/amp-story/1.0/utils.js',
       // Story ads
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/amp-story-store-service.js',
