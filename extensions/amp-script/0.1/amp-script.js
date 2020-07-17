@@ -38,6 +38,15 @@ import {utf8Encode} from '../../../src/utils/bytes';
 const TAG = 'amp-script';
 
 /**
+ * @typedef {{
+ *   terminate: function():void,
+ *   callFunction: function(string, ...*):Promise<*>,
+ *   onerror: ?function(!ErrorEvent):void
+ * }}
+ */
+let WorkerDOMWorker;
+
+/**
  * Max cumulative size of author scripts from all amp-script elements on page.
  * @const {number}
  */
@@ -74,7 +83,7 @@ export class AmpScript extends AMP.BaseElement {
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win);
 
-    /** @private {?Worker} */
+    /** @private {?WorkerDOMWorker} */
     this.workerDom_ = null;
 
     /** @private {?UserActivationTracker} */
@@ -166,8 +175,8 @@ export class AmpScript extends AMP.BaseElement {
   /**
    * Calls the specified function on this amp-script's worker-dom instance.
    *
-   * @param {*} functionIdentifier
-   * @return {!Promise}
+   * @param {string} functionIdentifier
+   * @return {!Promise<*>}
    */
   callFunction(functionIdentifier) {
     return this.initializationCompleted_.promise.then(() => {

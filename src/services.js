@@ -206,7 +206,7 @@ export class Services {
 
   /**
    * @param {!Element|!ShadowRoot} element
-   * @return {!Promise<?../extensions/amp-bind/0.1/amp-script.AmpScriptService>}
+   * @return {!Promise<?../extensions/amp-script/0.1/amp-script.AmpScriptService>}
    */
   static scriptForDocOrNull(element) {
     return /** @type {!Promise<?../extensions/amp-script/0.1/amp-script.AmpScriptService>} */ (getElementServiceIfAvailableForDocInEmbedScope(
