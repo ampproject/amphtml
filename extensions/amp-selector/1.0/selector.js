@@ -109,7 +109,7 @@ export function Option({
     }
     selectOption(option);
   };
-  const isSelected = /** @type {!Array} */ (selected).includes(option);
+  const isSelected = selected.includes(option);
   const statusStyle =
     disabled || selectorDisabled
       ? CSS.DISABLED
