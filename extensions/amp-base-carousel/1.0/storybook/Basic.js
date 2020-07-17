@@ -57,7 +57,11 @@ export const provideArrows = () => {
   };
   const MyButton = (props) => {
     const {children} = props;
-    return <button style={myButtonStyle}>{children}</button>;
+    return (
+      <button style={myButtonStyle} {...props}>
+        {children}
+      </button>
+    );
   };
   return (
     <BaseCarousel

@@ -65,15 +65,10 @@ export function Arrow(props) {
  */
 export function ArrowPrev(props) {
   const {'customArrow': customArrow, ...rest} = props;
-  const [hover, setHover] = useState(false);
-  const [active, setActive] = useState(false);
   return (
     <Arrow
       dir={-1}
-      customArrow={
-        customArrow ||
-        renderDefaultArrow({dir: -1, hover, active, setHover, setActive})
-      }
+      customArrow={customArrow || <DefaultArrow dir={-1} />}
       {...rest}
     />
   );
@@ -85,15 +80,10 @@ export function ArrowPrev(props) {
  */
 export function ArrowNext(props) {
   const {'customArrow': customArrow, ...rest} = props;
-  const [hover, setHover] = useState(false);
-  const [active, setActive] = useState(false);
   return (
     <Arrow
       dir={1}
-      customArrow={
-        customArrow ||
-        renderDefaultArrow({dir: 1, hover, active, setHover, setActive})
-      }
+      customArrow={customArrow || <DefaultArrow dir={1} />}
       {...rest}
     />
   );
@@ -103,8 +93,10 @@ export function ArrowNext(props) {
  * @param {!JsonObject} props
  * @return {PreactDef.Renderable}
  */
-function renderDefaultArrow(props) {
-  const {dir, hover, active, setHover, setActive} = props;
+function DefaultArrow(props) {
+  const {dir} = props;
+  const [hover, setHover] = useState(false);
+  const [active, setActive] = useState(false);
   return (
     <button
       style={{
@@ -119,6 +111,7 @@ function renderDefaultArrow(props) {
       onMouseLeave={() => setHover(false)}
       onMouseDown={() => setActive(true)}
       onMouseUp={() => setActive(false)}
+      {...props}
     >
       <div style={styles.arrowFrosting}></div>
       <div style={styles.arrowBackdrop}></div>
