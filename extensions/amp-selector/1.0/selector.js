@@ -21,7 +21,7 @@ import {useContext, useMemo, useState} from '../../../src/preact';
 const SelectorContext = Preact.createContext({});
 
 /**
- * @param {!SelectorDef.SelectorProps} props
+ * @param {!SelectorDef.Props} props
  * @return {PreactDef.Renderable}
  */
 export function Selector({
@@ -36,7 +36,7 @@ export function Selector({
 }) {
   const [selectedState, setSelectedState] = useState(value ? value : []);
   // TBD: controlled values require override of properties.
-  const selected = /** @type {!Array} */ (value ? value : selectedState);
+  const selected = value ? value : selectedState;
   const context = useMemo(
     () => ({
       selected,

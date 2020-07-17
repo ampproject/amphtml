@@ -35,7 +35,7 @@ PreactDef.VNode = function () {};
 PreactDef.Context = function () {};
 
 /**
- * @param {{value: ?}} props
+ * @param {{value: ?, children: (?PreactDef.Renderable|undefined)}} props
  * @return {PreactDef.Renderable}
  */
 PreactDef.Context.prototype.Provider = function (props) {};

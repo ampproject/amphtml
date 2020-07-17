@@ -16,6 +16,8 @@
 
 /** @externs */
 
+// TODO(#29293): Make "as" and "role" optional.
+
 /** @const */
 var SelectorDef = {};
 
@@ -23,24 +25,24 @@ var SelectorDef = {};
  * @typedef {{
  *   as: (string|PreactDef.FunctionalComponent),
  *   disabled: (boolean|undefined),
- *   value: (*|undefined),
+ *   value: (!Array|undefined),
  *   multiple: (boolean|undefined),
- *   onChange: (?function({value: *, option: *})|undefined),
- *   role: (string|undefined),
+ *   onChange: (?function({value: !Array, option: *})|undefined),
+ *   role: string,
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
-SelectorDef.SelectorProps;
+SelectorDef.Props;
 
 /**
  * @typedef {{
  *   domElement: !Element,
  *   disabled: (boolean|undefined),
  *   multiple: (boolean|undefined),
- *   role: (string|undefined),
+ *   role: string,
  * }}
  */
-SelectorDef.SelectorShimProps;
+SelectorDef.ShimProps;
 
 /**
  * @typedef {{
@@ -48,7 +50,7 @@ SelectorDef.SelectorShimProps;
  *   option: *,
  *   disabled: (boolean|undefined),
  *   onClick: (?function(!Event)|undefined),
- *   role: (string|undefined),
+ *   role: string,
  *   style: (!Object|undefined),
  * }}
  */
@@ -60,7 +62,7 @@ SelectorDef.OptionProps;
  *   onClick: (?function(!Event)|undefined),
  *   selected: (boolean|undefined),
  *   isDisabled: (boolean|undefined),
- *   role: (string|undefined),
+ *   role: string,
  * }}
  */
 SelectorDef.OptionShimProps;

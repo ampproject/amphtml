@@ -301,16 +301,14 @@ function OptionShim({
   }, [domElement, isDisabled]);
 
   useLayoutEffect(() => {
-    if (role) {
-      domElement.setAttribute('role', role);
-    }
+    domElement.setAttribute('role', role);
   }, [domElement, role]);
 
   return <div></div>;
 }
 
 /**
- * @param {!SelectorDef.SelectorShimProps} props
+ * @param {!SelectorDef.ShimProps} props
  * @return {PreactDef.Renderable}
  */
 function SelectorShim({
@@ -331,9 +329,7 @@ function SelectorShim({
   }, [domElement, disabled]);
 
   useLayoutEffect(() => {
-    if (role) {
-      domElement.setAttribute('role', role);
-    }
+    domElement.setAttribute('role', role);
   }, [domElement, role]);
 
   return (
