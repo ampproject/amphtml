@@ -297,10 +297,6 @@ export class AmpAnimation extends AMP.BaseElement {
    * @private
    */
   seekToAction_(invocation) {
-    // The animation will be triggered (in paused state) and seek will happen
-    // regardless of visibility
-    this.triggered_ = true;
-
     let positionObserverData = null;
     if (invocation.event) {
       const detail = getDetail(/** @type {!Event} */ (invocation.event));
@@ -310,6 +306,9 @@ export class AmpAnimation extends AMP.BaseElement {
     }
 
     return this.createRunnerIfNeeded_(null, positionObserverData).then(() => {
+      // The animation will be triggered (in paused state) and seek will happen
+      // regardless of visibility
+      this.triggered_ = true;
       this.pause_();
       this.pausedByAction_ = true;
       // time based seek
