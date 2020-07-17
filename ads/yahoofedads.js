@@ -33,6 +33,7 @@ export function yahoofedads(global, data) {
 
   global.amp = true;
   global.adConfig = {
+    'adPositionOverride': data.adPositionOverride,
     'adUnit': data.adUnit,
     'forceSource': data.forceSource,
     'lang': data.lang,
