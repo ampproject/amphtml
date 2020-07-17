@@ -1650,39 +1650,20 @@ export class AmpA4A extends AMP.BaseElement {
         true // is in no-signing experiment
       ).then((friendlyIframeEmbed) => {
         checkStillCurrent();
-
-        this.friendlyIframeEmbed_ = friendlyIframeEmbed;
-        const frameDoc =
-          friendlyIframeEmbed.iframe.contentDocument ||
-          friendlyIframeEmbed.win.document;
-        const {body} = frameDoc;
-
-        const renderComplete = this.transferBody_(devAssert(body));
-
-        setFriendlyIframeEmbedVisible(friendlyIframeEmbed, this.isInViewport());
-        // Ensure visibility hidden has been removed (set by boilerplate).
-        setStyle(frameDoc.body, 'visibility', 'visible');
-
-        protectFunctionWrapper(this.onCreativeRender, this, (err) => {
-          dev().error(
-            TAG,
-            this.element.getAttribute('type'),
-            'Error executing onCreativeRender',
-            err
-          );
-        })(
+        const fieBody = this.getFieBody_(friendlyIframeEmbed);
+        const renderComplete = this.transferBody_(devAssert(fieBody));
+        this.makeFieVisible_(
+          friendlyIframeEmbed,
           // TODO(ccordry): subclasses are passed creativeMetadata which does
           // not exist in unsigned case. All it is currently used for is to
           // check if it is an AMP creative, and extension list.
-          {customElementExtensions: extensionIds},
-          friendlyIframeEmbed.whenWindowLoaded()
+          {
+            minifiedCreative: '',
+            customStylesheets: [],
+            customElementExtensions: extensionIds,
+          },
+          checkStillCurrent
         );
-
-        friendlyIframeEmbed.whenIniLoaded().then(() => {
-          checkStillCurrent();
-          this.maybeTriggerAnalyticsEvent_('friendlyIframeIniLoad');
-        });
-
         return renderComplete;
       });
     });
@@ -1726,48 +1707,47 @@ export class AmpA4A extends AMP.BaseElement {
       });
     }
     const checkStillCurrent = this.verifyStillCurrent();
+    const {minifiedCreative, extensionIds} = creativeMetaData;
+    return this.installFriendlyIframeEmbed_(
+      minifiedCreative, // html
+      extensionIds,
+      fontsArray || []
+    ).then((friendlyIframeEmbed) =>
+      this.makeFieVisible_(
+        friendlyIframeEmbed,
+        creativeMetaData,
+        checkStillCurrent
+      )
+    );
+  }
+
+  /**
+   * Convert the iframe to FIE impl and append to DOM.
+   * @param {string} html
+   * @param {!Array<string>} extensionIds
+   * @param {!Array<string>} fonts
+   * @return {!Promise<!FriendlyIframeEmbed>}
+   */
+  installFriendlyIframeEmbed_(html, extensionIds, fonts) {
     return installFriendlyIframeEmbed(
       this.iframe,
       this.element,
       {
         host: this.element,
         // Need to guarantee that this is no longer null
-        url: /** @type {string} */ (this.adUrl_),
-        html: creativeMetaData.minifiedCreative,
-        extensionIds: creativeMetaData.customElementExtensions || [],
-        fonts: fontsArray,
+        url: devAssert(this.adUrl_),
+        html,
+        extensionIds,
+        fonts,
       },
       (embedWin, ampdoc) => this.preinstallCallback_(embedWin, ampdoc)
-    ).then((friendlyIframeEmbed) => {
-      checkStillCurrent();
-      this.friendlyIframeEmbed_ = friendlyIframeEmbed;
-      // Ensure visibility hidden has been removed (set by boilerplate).
-      const frameDoc =
-        friendlyIframeEmbed.iframe.contentDocument ||
-        friendlyIframeEmbed.win.document;
-      setStyle(frameDoc.body, 'visibility', 'visible');
-      protectFunctionWrapper(this.onCreativeRender, this, (err) => {
-        dev().error(
-          TAG,
-          this.element.getAttribute('type'),
-          'Error executing onCreativeRender',
-          err
-        );
-      })(creativeMetaData, friendlyIframeEmbed.whenWindowLoaded());
-      friendlyIframeEmbed.whenIniLoaded().then(() => {
-        checkStillCurrent();
-        this.maybeTriggerAnalyticsEvent_('friendlyIframeIniLoad');
-      });
-
-      // There's no need to wait for all resources to load.
-      // StartRender is enough
-    });
+    );
   }
 
   /**
    *
    * @param {!Window} embedWin
-   * @param {?../../../src/service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {../../../src/service/ampdoc-impl.AmpDoc=} ampdoc
    */
   preinstallCallback_(embedWin, ampdoc) {
     const parentAmpdoc = this.getAmpDoc();
@@ -1777,6 +1757,49 @@ export class AmpA4A extends AMP.BaseElement {
       embedWin,
       new A4AVariableSource(parentAmpdoc, embedWin)
     );
+  }
+
+  /**
+   * Make FIE visible and execute any loading / rendering complete callbacks.
+   * @param {!../../../src/friendly-iframe-embed.FriendlyIframeEmbed} friendlyIframeEmbed
+   * @param {CreativeMetaDataDef} creativeMetaData
+   * @param {function()} checkStillCurrent
+   */
+  makeFieVisible_(friendlyIframeEmbed, creativeMetaData, checkStillCurrent) {
+    checkStillCurrent();
+    this.friendlyIframeEmbed_ = friendlyIframeEmbed;
+    setFriendlyIframeEmbedVisible(friendlyIframeEmbed, this.isInViewport());
+    // Ensure visibility hidden has been removed (set by boilerplate).
+    const frameBody = this.getFieBody_(friendlyIframeEmbed);
+    setStyle(frameBody, 'visibility', 'visible');
+
+    protectFunctionWrapper(this.onCreativeRender, this, (err) => {
+      dev().error(
+        TAG,
+        this.element.getAttribute('type'),
+        'Error executing onCreativeRender',
+        err
+      );
+    })(creativeMetaData, friendlyIframeEmbed.whenWindowLoaded());
+
+    friendlyIframeEmbed.whenIniLoaded().then(() => {
+      checkStillCurrent();
+      this.maybeTriggerAnalyticsEvent_('friendlyIframeIniLoad');
+    });
+
+    // There's no need to wait for all resources to load.
+    // StartRender is enough
+  }
+
+  /**
+   * @param {!../../../src/friendly-iframe-embed.FriendlyIframeEmbed} friendlyIframeEmbed
+   * @return {!Element}
+   */
+  getFieBody_(friendlyIframeEmbed) {
+    const frameDoc =
+      friendlyIframeEmbed.iframe.contentDocument ||
+      friendlyIframeEmbed.win.document;
+    return frameDoc.body;
   }
 
   /**
