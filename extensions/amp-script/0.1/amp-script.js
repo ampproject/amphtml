@@ -162,9 +162,13 @@ export class AmpScript extends AMP.BaseElement {
     return this.userActivation_;
   }
 
+  /**
+   * Calls the specified function on this amp-script's worker-dom instance.
+   *
+   * @param {*} functionIdentifier
+   */
   callFunction(functionIdentifier) {
     return this.initializationCompleted_.promise.then(() => {
-      console.log('made it past the promise');
       return this.workerDom_.callFunction(functionIdentifier)
     });
   }
@@ -557,7 +561,7 @@ export class AmpScriptService {
 
   /**
    * Calls an exported function on a specific amp-script worker and returns the result.
-   * 
+   *
    * @param {string} ampScriptId
    * @param {string} fnIdentifier
    * @return {Promise<*>}
