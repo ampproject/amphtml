@@ -31,11 +31,12 @@ PreactDef.VNode = function () {};
 
 /**
  * @interface
+ * @template T
  */
 PreactDef.Context = function () {};
 
 /**
- * @param {{value: ?, children: (?PreactDef.Renderable|undefined)}} props
+ * @param {{value: T, children: (?PreactDef.Renderable|undefined)}} props
  * @return {PreactDef.Renderable}
  */
 PreactDef.Context.prototype.Provider = function (props) {};
