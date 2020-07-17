@@ -87,6 +87,7 @@ window.parent.postMessage(
     type: 'consent-response',
     action: 'accept',
     info: /string/ /* optional */,
+    consentMetadata: /object/ /* optional */,
   },
   '*'
 );
@@ -102,6 +103,7 @@ window.parent.postMessage(
     type: 'consent-response',
     action: 'reject',
     info: /string/ /* optional */,
+    consentMetadata: /object/ /* optional */,
   },
   '*'
 );
@@ -142,6 +144,18 @@ One can get access to the client information via the name attribute inside the i
  * };
  */
 info = JSON.parse(window.name);
+```
+
+#### consentMetadata
+
+`<amp-consent>` [caches](./amp-consent.md#Client-caching) and passes consent information to vendors via `consentMetadata` objects as well as a non-empty `consentString`. You can find and example of the `consentMetadata` object and its supported fields below.
+
+```
+{
+  "consentStringType": {enum} [1: TCF V1, 2: TCF V2, 3: US Privacy String] (optional),
+  "gdprApplies": {boolean} (optional),
+  "additionalConsent": {string} (optional)
+}
 ```
 
 ## Adding your configuration to AMP
