@@ -201,6 +201,7 @@ import {nend} from '../ads/nend';
 import {netletix} from '../ads/netletix';
 import {noddus} from '../ads/noddus';
 import {nokta} from '../ads/nokta';
+import {oblivki} from '../ads/oblivki';
 import {onead} from '../ads/onead';
 import {onnetwork} from '../ads/onnetwork';
 import {openadstream} from '../ads/openadstream';
@@ -228,6 +229,7 @@ import {rbinfox} from '../ads/rbinfox';
 import {readmo} from '../ads/readmo';
 import {realclick} from '../ads/realclick';
 import {recomad} from '../ads/recomad';
+import {recreativ} from '../ads/recreativ';
 import {relap} from '../ads/relap';
 import {relappro} from '../ads/relappro';
 import {revcontent} from '../ads/revcontent';
@@ -248,6 +250,7 @@ import {smartclip} from '../ads/smartclip';
 import {smi2} from '../ads/smi2';
 import {smilewanted} from '../ads/smilewanted';
 import {sogouad} from '../ads/sogouad';
+import {sona} from '../ads/sona';
 import {sortable} from '../ads/sortable';
 import {sovrn} from '../ads/sovrn';
 import {speakol} from '../ads/speakol';
@@ -333,6 +336,7 @@ const AMP_EMBED_ALLOWED = {
   pubexchange: true,
   rbinfox: true,
   readmo: true,
+  recreativ: true,
   runative: true,
   smartclip: true,
   smi2: true,
@@ -506,6 +510,7 @@ register('netletix', netletix);
 register('noddus', noddus);
 register('nokta', nokta);
 register('nws', nws);
+register('oblivki', oblivki);
 register('onead', onead);
 register('onnetwork', onnetwork);
 register('openadstream', openadstream);
@@ -534,6 +539,7 @@ register('readmo', readmo);
 register('realclick', realclick);
 register('reddit', reddit);
 register('recomad', recomad);
+register('recreativ', recreativ);
 register('relap', relap);
 register('relappro', relappro);
 register('revcontent', revcontent);
@@ -556,6 +562,7 @@ register('smi2', smi2);
 register('smilewanted', smilewanted);
 register('sogouad', sogouad);
 register('sortable', sortable);
+register('sona', sona);
 register('sovrn', sovrn);
 register('spotx', spotx);
 register('springAds', springAds);

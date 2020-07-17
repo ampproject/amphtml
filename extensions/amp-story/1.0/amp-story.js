@@ -50,10 +50,11 @@ import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
+import {AmpStoryInteractiveBinaryPoll} from './amp-story-interactive-binary-poll';
+import {AmpStoryInteractivePoll} from './amp-story-interactive-poll';
+import {AmpStoryInteractiveQuiz} from './amp-story-interactive-quiz';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
-import {AmpStoryReactionPoll} from './amp-story-reaction-poll';
-import {AmpStoryReactionQuiz} from './amp-story-reaction-quiz';
 import {AmpStoryRenderService} from './amp-story-render-service';
 import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
 import {AnalyticsVariable, getVariableService} from './variable-service';
@@ -458,7 +459,6 @@ export class AmpStory extends AMP.BaseElement {
         );
       });
     }
-    this.element.setAttribute('aria-live', 'polite');
   }
 
   /**
@@ -471,6 +471,9 @@ export class AmpStory extends AMP.BaseElement {
       StateProperty.PAUSED_STATE
     );
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
+    if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+      this.pauseBackgroundAudio_();
+    }
   }
 
   /**
@@ -483,6 +486,9 @@ export class AmpStory extends AMP.BaseElement {
       Action.TOGGLE_PAUSED,
       this.pausedStateToRestore_
     );
+    if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+      this.playBackgroundAudio_();
+    }
   }
 
   /**
@@ -2173,7 +2179,16 @@ export class AmpStory extends AMP.BaseElement {
     // Transpose the map into a 2D array.
     const pagesByDistance = [];
     Object.keys(distanceMap).forEach((pageId) => {
-      const distance = distanceMap[pageId];
+      let distance = distanceMap[pageId];
+      // If on last page, mark first page with distance 1.
+      if (
+        pageId === this.pages_[0].element.id &&
+        this.activePage_ === this.pages_[this.pages_.length - 1] &&
+        this.pages_.length > 1 &&
+        !this.viewer_.hasCapability('swipe')
+      ) {
+        distance = 1;
+      }
       if (!pagesByDistance[distance]) {
         pagesByDistance[distance] = [];
       }
@@ -2673,6 +2688,11 @@ export class AmpStory extends AMP.BaseElement {
       dev().assertElement(this.pages_[0].element).id,
       NavigationDirection.NEXT
     );
+    // Restart page media, advancements, etc (#27742).
+    if (this.pages_.length === 1) {
+      this.pages_[0].setState(PageState.NOT_ACTIVE);
+      this.pages_[0].setState(PageState.PLAYING);
+    }
 
     // Reset all pages so that they are offscreen to right instead of left in
     // desktop view.
@@ -2804,7 +2824,11 @@ AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
   AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment);
-  AMP.registerElement('amp-story-reaction-quiz', AmpStoryReactionQuiz);
-  AMP.registerElement('amp-story-reaction-poll', AmpStoryReactionPoll);
+  AMP.registerElement(
+    'amp-story-interactive-binary-poll',
+    AmpStoryInteractiveBinaryPoll
+  );
+  AMP.registerElement('amp-story-interactive-poll', AmpStoryInteractivePoll);
+  AMP.registerElement('amp-story-interactive-quiz', AmpStoryInteractiveQuiz);
   AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });

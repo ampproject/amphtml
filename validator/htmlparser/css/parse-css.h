@@ -842,23 +842,23 @@ class AttrSelector : public Selector {
 // http://www.w3.org/TR/css3-selectors/#pseudo-elements.
 //
 // Typically written as ':visited', ':lang(fr)', and '::first-line'.
-//
-//
-// func: If it's a function style pseudo selector, like lang(fr), then func
-// the function tokens. TODO(johannes): parse this in more detail.
 class PseudoSelector : public Selector {
  public:
   // |is_class|: Pseudo selectors with a single colon (e.g., ':visited')
   // are pseudo class selectors. Selectors with two colons (e.g.,
   // '::first-line') are pseudo elements.
   // |func|: If it's a function style pseudo selector, like lang(fr), then func
-  // the function tokens. TODO(johannes): parse this in more detail.
+  // is the function tokens.
   PseudoSelector(bool is_class, const std::string& name,
                  const htmlparser::json::JsonArray& func);
   std::unique_ptr<Token> Clone() const override;
 
   htmlparser::json::JsonDict ToJson() const override;
   void Accept(SelectorVisitor* visitor) const override;
+
+  const std::string& name() const { return name_; }
+  bool is_pseudo_class() const { return is_class_; }
+  bool is_pseudo_element() const { return !is_class_; }
 
  private:
   const bool is_class_;
@@ -970,11 +970,15 @@ class SelectorsGroup : public Selector {
 // SelectorsGroup, SimpleSelectorSequence, or Combinator.
 ErrorTokenOr<Selector> ParseASelectorsGroup(TokenStream* token_stream);
 
-// A super class for making visitors (by overriding the types of interest).
-// The parse_css::TraverseSelectors function can be used to visit nodes in a
-// parsed CSS selector.
-class SelectorVisitor {
+// A super class for making visitors (by overriding the types of interest) of
+// Selector fields. The standard RuleVisitor does not recursively parse the
+// prelude of qualified rules for the components of a selectors. This Visitor
+// re-parses these preludes and then visits the fields within. The parse step
+// has the possibility of emitting new CSS ErrorTokens.
+class SelectorVisitor : public RuleVisitor {
  public:
+  explicit SelectorVisitor(std::vector<std::unique_ptr<ErrorToken>>* errors)
+      : errors_(errors) {}
   virtual ~SelectorVisitor() = default;
 
   virtual void VisitTypeSelector(const TypeSelector& selector) {}
@@ -986,11 +990,18 @@ class SelectorVisitor {
       const SimpleSelectorSequence& sequence) {}
   virtual void VisitCombinator(const Combinator& combinator) {}
   virtual void VisitSelectorsGroup(const SelectorsGroup& group) {}
-};
 
-// Visits |selector| and its children, recursively, by calling the appropriate
-// methods on the provided visitor.
-void TraverseSelectors(const Selector& selector, SelectorVisitor* visitor);
+ private:
+  void VisitStylesheet(const Stylesheet& stylesheet) final {}
+  void LeaveStylesheet(const Stylesheet& stylesheet) final {}
+  void VisitAtRule(const AtRule& at_rule) final {}
+  void LeaveAtRule(const AtRule& at_rule) final {}
+  void VisitQualifiedRule(const QualifiedRule& qualified_rule) final;
+  void LeaveQualifiedRule(const QualifiedRule& qualified_rule) final {}
+  void VisitDeclaration(const Declaration& declaration) final {}
+  void LeaveDeclaration(const Declaration& declaration) final {}
+  std::vector<std::unique_ptr<ErrorToken>>* errors_;
+};
 }  // namespace htmlparser::css
 
 #endif  // HTMLPARSER__CSS_PARSE_CSS_H_

@@ -23,7 +23,7 @@ import {
 import {Services} from '../../../src/services';
 import {addExperimentIdToElement} from '../../../ads/google/a4a/traffic-experiments';
 import {clamp} from '../../../src/utils/math';
-import {computedStyle, setStyle} from '../../../src/style';
+import {computedStyle, getStyle, setStyle} from '../../../src/style';
 import {dev, devAssert, user} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
 import {hasOwn} from '../../../src/utils/object';
@@ -351,6 +351,11 @@ export class ResponsiveState {
     this.isAlignedToViewport_ = true;
     const vsync = Services.vsyncFor(this.win_);
     const layoutBox = this.element_.getLayoutBox();
+    const viewportSize = Services.viewportForDoc(
+      this.element_.getAmpDoc()
+    ).getSize();
+    const elementStyleWidth =
+      parseInt(getStyle(this.element_, 'width'), 10) || 0;
     // Nudge into the correct horizontal position by changing side margin.
     vsync.run(
       {
@@ -368,6 +373,10 @@ export class ResponsiveState {
           if (this.isContainerWidth_) {
             setStyle(this.element_, 'width', '100%');
           } else {
+            // Exit if the full-width resize did not succeed before.
+            if (elementStyleWidth != viewportSize.width) {
+              return;
+            }
             if (state.direction == 'rtl') {
               setStyle(this.element_, 'marginRight', layoutBox.left, 'px');
             } else {
@@ -406,18 +415,18 @@ export class ResponsiveState {
    * @return {boolean}
    */
   static isInAdSizeOptimizationExperimentBranch_(element) {
-    const experimentInfoMap = /** @type {!Object<string,
-        !../../../src/experiments.ExperimentInfo>} */ ({
-      [[AD_SIZE_OPTIMIZATION_EXP.branch]]: {
+    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
+      {
+        experimentId: AD_SIZE_OPTIMIZATION_EXP.branch,
         isTrafficEligible: () => true,
         branches: [
-          [AD_SIZE_OPTIMIZATION_EXP.control],
-          [AD_SIZE_OPTIMIZATION_EXP.experiment],
+          AD_SIZE_OPTIMIZATION_EXP.control,
+          AD_SIZE_OPTIMIZATION_EXP.experiment,
         ],
       },
-    });
+    ]);
     const win = toWin(element.ownerDocument.defaultView);
-    const setExps = randomlySelectUnsetExperiments(win, experimentInfoMap);
+    const setExps = randomlySelectUnsetExperiments(win, experimentInfoList);
     Object.keys(setExps).forEach((expName) =>
       addExperimentIdToElement(setExps[expName], element)
     );
@@ -433,16 +442,16 @@ export class ResponsiveState {
    * @private
    */
   isInResponsiveHeightFixExperimentBranch_() {
-    const experimentInfoMap = /** @type {!Object<string,
-        !../../../src/experiments.ExperimentInfo>} */ ({
-      [[MAX_HEIGHT_EXP.branch]]: {
+    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
+      {
+        experimentId: MAX_HEIGHT_EXP.branch,
         isTrafficEligible: () => true,
-        branches: [[MAX_HEIGHT_EXP.control], [MAX_HEIGHT_EXP.experiment]],
+        branches: [MAX_HEIGHT_EXP.control, MAX_HEIGHT_EXP.experiment],
       },
-    });
+    ]);
     const setExps = randomlySelectUnsetExperiments(
       this.win_,
-      experimentInfoMap
+      experimentInfoList
     );
     Object.keys(setExps).forEach((expName) =>
       addExperimentIdToElement(setExps[expName], this.element_)
@@ -462,16 +471,16 @@ export class ResponsiveState {
     // Attempt to resize to the correct height. The width should already be
     // 100vw, but is fixed here so that future resizes of the viewport don't
     // affect it.
-    return this.element_
-      .getImpl(/* waitForBuild= */ false)
-      .then((impl) =>
-        impl
-          .attemptChangeSize(
-            this.getResponsiveHeight_(viewportSize),
-            viewportSize.width
-          )
-          .catch(() => {})
-      );
+    return this.element_.getImpl(/* waitForBuild= */ false).then((impl) =>
+      impl
+        .attemptChangeSize(
+          this.getResponsiveHeight_(viewportSize),
+          viewportSize.width
+        )
+        .catch(() => {
+          dev().info(TAG, `Change size attempt failed.`);
+        })
+    );
   }
 
   /**

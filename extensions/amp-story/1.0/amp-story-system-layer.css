@@ -101,6 +101,17 @@
   visibility: hidden !important;
 }
 
+[ad-showing] .i-amphtml-story-share-control {
+  display: none !important;
+}
+
+[ad-showing]:not([i-amphtml-current-page-has-audio])
+.i-amphtml-story-mute-audio-control,
+[ad-showing]:not([i-amphtml-current-page-has-audio])
+.i-amphtml-story-unmute-audio-control {
+  visibility: hidden !important;
+}
+
 .i-amphtml-story-page-progress-bar {
   background: rgba(255, 255, 255, 0.4) !important;
   border-radius: 1px !important;
@@ -195,6 +206,10 @@
   display: inline-block !important;
   height: 46px !important;
   position: relative !important;
+}
+
+.i-amphtml-story-no-audio-ui .i-amphtml-story-sound-display {
+  display: none !important;
 }
 
 .i-amphtml-story-mute-audio-control,

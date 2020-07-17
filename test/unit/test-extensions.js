@@ -21,6 +21,7 @@ import {Extensions} from '../../src/service/extensions-impl';
 import {Services} from '../../src/services';
 import {getServiceForDoc} from '../../src/service';
 import {installTimerService} from '../../src/service/timer-impl';
+import {user} from '../../src/log';
 
 class AmpTest extends BaseElement {}
 class AmpTestSub extends BaseElement {}
@@ -643,14 +644,18 @@ describes.sandboxed('Extensions', {}, () => {
       env.sandbox.stub(Services, 'ampdocServiceFor').returns(null);
       extensions = new Extensions(win);
       env.sandbox.stub(extensions, 'preloadExtension');
+      env.sandbox.stub(user(), 'error');
     });
 
     describe('regular scripts', () => {
       it('should devAssert if script cannot be found', () => {
-        expect(() => {
-          allowConsoleError(() => extensions.reloadExtension('amp-list'));
-        }).to.throw('Cannot find script for extension: amp-list');
+        extensions.reloadExtension('amp-list');
 
+        expect(user().error).to.be.calledWith(
+          'reloadExtension',
+          'Extension script for "%s" is missing or was already reloaded.',
+          'amp-list'
+        );
         expect(extensions.preloadExtension).to.not.be.called;
       });
 
@@ -664,10 +669,13 @@ describes.sandboxed('Extensions', {}, () => {
         list.setAttribute('i-amphtml-inserted', '');
         win.document.head.appendChild(list);
 
-        expect(() => {
-          allowConsoleError(() => extensions.reloadExtension('amp-list'));
-        }).to.throw('Cannot find script for extension: amp-list');
+        extensions.reloadExtension('amp-list');
 
+        expect(user().error).to.be.calledWith(
+          'reloadExtension',
+          'Extension script for "%s" is missing or was already reloaded.',
+          'amp-list'
+        );
         expect(list.hasAttribute('i-amphtml-loaded-new-version')).to.be.false;
         expect(extensions.preloadExtension).to.not.be.called;
       });
@@ -751,10 +759,13 @@ describes.sandboxed('Extensions', {}, () => {
 
     describe('module/nomdule script pairs', () => {
       it('should devAssert if script cannot be found', () => {
-        expect(() => {
-          allowConsoleError(() => extensions.reloadExtension('amp-list'));
-        }).to.throw('Cannot find script for extension: amp-list');
+        extensions.reloadExtension('amp-list');
 
+        expect(user().error).to.be.calledWith(
+          'reloadExtension',
+          'Extension script for "%s" is missing or was already reloaded.',
+          'amp-list'
+        );
         expect(extensions.preloadExtension).to.not.be.called;
       });
 
@@ -779,10 +790,13 @@ describes.sandboxed('Extensions', {}, () => {
         nomod.setAttribute('nomodule', '');
         win.document.head.appendChild(nomod);
 
-        expect(() => {
-          allowConsoleError(() => extensions.reloadExtension('amp-list'));
-        }).to.throw('Cannot find script for extension: amp-list');
+        extensions.reloadExtension('amp-list');
 
+        expect(user().error).to.be.calledWith(
+          'reloadExtension',
+          'Extension script for "%s" is missing or was already reloaded.',
+          'amp-list'
+        );
         expect(mod.hasAttribute('i-amphtml-loaded-new-version')).to.be.false;
         expect(nomod.hasAttribute('i-amphtml-loaded-new-version')).to.be.false;
         expect(extensions.preloadExtension).to.not.be.called;

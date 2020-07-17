@@ -334,8 +334,8 @@ class ParsedAttrSpec {
 }
 
 /**
- * For creating error messages, we either find the specName in the tag spec or
- * fall back to the tagName.
+ * For uniquely identifying a tag spec, we either find the specName in the tag
+ * spec or fall back to the tagName.
  * @param {!generated.TagSpec} tagSpec generated.TagSpec instance from the
  *   validator.protoscii file.
  * @return {string}
@@ -344,6 +344,19 @@ class ParsedAttrSpec {
 function getTagSpecName(tagSpec) {
   return (tagSpec.specName !== null) ? tagSpec.specName :
                                        tagSpec.tagName.toLowerCase();
+}
+
+/**
+ * For creating error messages, we either find the descriptiveName in the tag
+ * spec or fall back to the tagName.
+ * @param {!generated.TagSpec} tagSpec generated.TagSpec instance from the
+ *   validator.protoscii file.
+ * @return {string}
+ * @private
+ */
+function getTagDescriptiveName(tagSpec) {
+  return (tagSpec.descriptiveName !== null) ? tagSpec.descriptiveName :
+                                              tagSpec.tagName.toLowerCase();
 }
 
 /**
@@ -1142,7 +1155,7 @@ class ChildTagMatcher {
             /* params */
             [
               encounteredTag.lowerName(),
-              getTagSpecName(this.parentSpec_),
+              getTagDescriptiveName(this.parentSpec_),
               allowedNames.toLowerCase(),
             ],
             getTagSpecUrl(this.parentSpec_), result);
@@ -1162,7 +1175,7 @@ class ChildTagMatcher {
             /* params */
             [
               encounteredTag.lowerName(),
-              getTagSpecName(this.parentSpec_),
+              getTagDescriptiveName(this.parentSpec_),
               allowedNames.toLowerCase(),
             ],
             getTagSpecUrl(this.parentSpec_), result);
@@ -1184,7 +1197,7 @@ class ChildTagMatcher {
           this.getLineCol(),
           /* params */
           [
-            getTagSpecName(this.parentSpec_),
+            getTagDescriptiveName(this.parentSpec_),
             expectedNumChildTags.toString(),
             context.getTagStack().parentChildCount().toString(),
           ],
@@ -1201,7 +1214,7 @@ class ChildTagMatcher {
           this.getLineCol(),
           /* params */
           [
-            getTagSpecName(this.parentSpec_),
+            getTagDescriptiveName(this.parentSpec_),
             expectedMinNumChildTags.toString(),
             context.getTagStack().parentChildCount().toString(),
           ],
@@ -2007,7 +2020,7 @@ class InvalidRuleVisitor extends parse_css.RuleVisitor {
       this.context.addError(
           generated.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE,
           new LineCol(atRule.line, atRule.col),
-          /* params */[getTagSpecName(this.tagSpec), atRule.name],
+          /* params */[getTagDescriptiveName(this.tagSpec), atRule.name],
           /* url */ '', this.result);
     }
   }
@@ -2020,7 +2033,7 @@ class InvalidRuleVisitor extends parse_css.RuleVisitor {
         this.context.addError(
             generated.ValidationError.Code.CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
             new LineCol(declaration.line, declaration.col),
-            /* params */[getTagSpecName(this.tagSpec), declaration.name],
+            /* params */[getTagDescriptiveName(this.tagSpec), declaration.name],
             /* url */ '', this.result);
 
       } else {
@@ -2029,7 +2042,7 @@ class InvalidRuleVisitor extends parse_css.RuleVisitor {
             new LineCol(declaration.line, declaration.col),
             /* params */
             [
-              getTagSpecName(this.tagSpec),
+              getTagDescriptiveName(this.tagSpec),
               declaration.name,
               AllowedDeclarationsString(this.cssSpec),
             ],
@@ -2122,6 +2135,35 @@ const SelectorSpecVisitor = class extends parse_css.SelectorVisitor {
     attrSelector.copyPosTo(errorToken);
     this.errorBuffer_.push(errorToken);
   }
+
+  /**
+   * @override
+   * @param {!parse_css.PseudoSelector} selector
+   */
+  visitPseudoSelector(selector) {
+    if (selector.isClass) {  // pseudo-class
+      for (const allowedPseudoClass of this.selectorSpec_.pseudoClass) {
+        if (allowedPseudoClass === '*' || allowedPseudoClass === selector.name)
+          return;
+      }
+      const errorToken = new tokenize_css.ErrorToken(
+          generated.ValidationError.Code.CSS_SYNTAX_DISALLOWED_PSEUDO_CLASS,
+          ['', selector.name]);
+      selector.copyPosTo(errorToken);
+      this.errorBuffer_.push(errorToken);
+    } else {  // pseudo-element
+      for (const allowedPseudoElement of this.selectorSpec_.pseudoElement) {
+        if (allowedPseudoElement === '*' ||
+            allowedPseudoElement === selector.name)
+          return;
+      }
+      const errorToken = new tokenize_css.ErrorToken(
+          generated.ValidationError.Code.CSS_SYNTAX_DISALLOWED_PSEUDO_ELEMENT,
+          ['', selector.name]);
+      selector.copyPosTo(errorToken);
+      this.errorBuffer_.push(errorToken);
+    }
+  }
 };
 
 /**
@@ -2177,7 +2219,7 @@ class CdataMatcher {
         context.addError(
             generated.ValidationError.Code.MANDATORY_CDATA_MISSING_OR_INCORRECT,
             context.getLineCol(),
-            /* params */[getTagSpecName(this.tagSpec_)],
+            /* params */[getTagDescriptiveName(this.tagSpec_)],
             getTagSpecUrl(this.tagSpec_), validationResult);
       }
       // We return early if the cdata has an exact match rule. The
@@ -2190,7 +2232,7 @@ class CdataMatcher {
         context.addError(
             generated.ValidationError.Code.MANDATORY_CDATA_MISSING_OR_INCORRECT,
             context.getLineCol(),
-            /* params */[getTagSpecName(this.tagSpec_)],
+            /* params */[getTagDescriptiveName(this.tagSpec_)],
             getTagSpecUrl(this.tagSpec_), validationResult);
         return;
       }
@@ -2204,7 +2246,7 @@ class CdataMatcher {
         context.addError(
             generated.ValidationError.Code.NON_WHITESPACE_CDATA_ENCOUNTERED,
             context.getLineCol(),
-            /* params */[getTagSpecName(this.tagSpec_)],
+            /* params */[getTagDescriptiveName(this.tagSpec_)],
             getTagSpecUrl(this.tagSpec_), validationResult);
       }
     }
@@ -2225,7 +2267,7 @@ class CdataMatcher {
           context.getLineCol(),
           /* params */
           [
-            getTagSpecName(this.tagSpec_),
+            getTagDescriptiveName(this.tagSpec_),
             adjustedCdataLength.toString(),
             cdataSpec.maxBytes.toString(),
           ],
@@ -2257,7 +2299,7 @@ class CdataMatcher {
             generated.ValidationError.Code.CDATA_VIOLATES_DENYLIST,
             context.getLineCol(),
             /* params */
-            [getTagSpecName(this.tagSpec_), denylist.errorMessage],
+            [getTagDescriptiveName(this.tagSpec_), denylist.errorMessage],
             getTagSpecUrl(this.tagSpec_), validationResult);
       }
     }
@@ -2381,7 +2423,7 @@ class CdataMatcher {
       // Override the first parameter with the name of this style tag.
       const {params} = errorToken;
       // Override the first parameter with the name of this style tag.
-      params[0] = getTagSpecName(this.tagSpec_);
+      params[0] = getTagDescriptiveName(this.tagSpec_);
       context.addError(
           errorToken.code, new LineCol(errorToken.line, errorToken.col), params,
           /* url */ '', validationResult);
@@ -2390,7 +2432,7 @@ class CdataMatcher {
       // Override the first parameter with the name of this style tag.
       const {params} = errorToken;
       // Override the first parameter with the name of this style tag.
-      params[0] = getTagSpecName(this.tagSpec_);
+      params[0] = getTagDescriptiveName(this.tagSpec_);
       context.addError(
           errorToken.code, new LineCol(errorToken.line, errorToken.col), params,
           /* url */ '', validationResult);
@@ -2406,7 +2448,7 @@ class CdataMatcher {
             generated.ValidationError.Code.CDATA_VIOLATES_DENYLIST,
             new LineCol(decl.important_line, decl.important_col),
             /* params */
-            [getTagSpecName(this.tagSpec_), 'CSS !important'],
+            [getTagDescriptiveName(this.tagSpec_), 'CSS !important'],
             getTagSpecUrl(this.tagSpec_), validationResult);
       }
     }
@@ -2529,7 +2571,7 @@ class ExtensionsContext {
         const error = new generated.ValidationError();
         error.severity = generated.ValidationError.Severity.ERROR;
         error.code = generated.ValidationError.Code.MISSING_REQUIRED_EXTENSION;
-        error.params = [getTagSpecName(tagSpec), requiredExtension];
+        error.params = [getTagDescriptiveName(tagSpec), requiredExtension];
         error.line = lineCol.getLine();
         error.col = lineCol.getCol();
         error.specUrl = getTagSpecUrl(tagSpec);
@@ -3290,7 +3332,8 @@ class UrlErrorInStylesheetAdapter {
   missingUrl(context, tagSpec, result) {
     context.addError(
         generated.ValidationError.Code.CSS_SYNTAX_MISSING_URL, this.lineCol_,
-        /* params */[getTagSpecName(tagSpec)], getTagSpecUrl(tagSpec), result);
+        /* params */[getTagDescriptiveName(tagSpec)], getTagSpecUrl(tagSpec),
+        result);
   }
 
   /**
@@ -3302,8 +3345,8 @@ class UrlErrorInStylesheetAdapter {
   invalidUrl(context, url, tagSpec, result) {
     context.addError(
         generated.ValidationError.Code.CSS_SYNTAX_INVALID_URL, this.lineCol_,
-        /* params */[getTagSpecName(tagSpec), url], getTagSpecUrl(tagSpec),
-        result);
+        /* params */[getTagDescriptiveName(tagSpec), url],
+        getTagSpecUrl(tagSpec), result);
   }
 
   /**
@@ -3316,8 +3359,8 @@ class UrlErrorInStylesheetAdapter {
     context.addError(
         generated.ValidationError.Code.CSS_SYNTAX_INVALID_URL_PROTOCOL,
         this.lineCol_,
-        /* params */[getTagSpecName(tagSpec), protocol], getTagSpecUrl(tagSpec),
-        result);
+        /* params */[getTagDescriptiveName(tagSpec), protocol],
+        getTagSpecUrl(tagSpec), result);
   }
 
   /**
@@ -3330,8 +3373,8 @@ class UrlErrorInStylesheetAdapter {
     context.addError(
         generated.ValidationError.Code.CSS_SYNTAX_DISALLOWED_RELATIVE_URL,
         this.lineCol_,
-        /* params */[getTagSpecName(tagSpec), url], getTagSpecUrl(tagSpec),
-        result);
+        /* params */[getTagDescriptiveName(tagSpec), url],
+        getTagSpecUrl(tagSpec), result);
   }
 }
 
@@ -3352,7 +3395,7 @@ class UrlErrorInAttrAdapter {
   missingUrl(context, tagSpec, result) {
     context.addError(
         generated.ValidationError.Code.MISSING_URL, context.getLineCol(),
-        /* params */[this.attrName_, getTagSpecName(tagSpec)],
+        /* params */[this.attrName_, getTagDescriptiveName(tagSpec)],
         getTagSpecUrl(tagSpec), result);
   }
 
@@ -3365,7 +3408,7 @@ class UrlErrorInAttrAdapter {
   invalidUrl(context, url, tagSpec, result) {
     context.addError(
         generated.ValidationError.Code.INVALID_URL, context.getLineCol(),
-        /* params */[this.attrName_, getTagSpecName(tagSpec), url],
+        /* params */[this.attrName_, getTagDescriptiveName(tagSpec), url],
         getTagSpecUrl(tagSpec), result);
   }
 
@@ -3379,7 +3422,7 @@ class UrlErrorInAttrAdapter {
     context.addError(
         generated.ValidationError.Code.INVALID_URL_PROTOCOL,
         context.getLineCol(),
-        /* params */[this.attrName_, getTagSpecName(tagSpec), protocol],
+        /* params */[this.attrName_, getTagDescriptiveName(tagSpec), protocol],
         getTagSpecUrl(tagSpec), result);
   }
 
@@ -3393,7 +3436,7 @@ class UrlErrorInAttrAdapter {
     context.addError(
         generated.ValidationError.Code.DISALLOWED_RELATIVE_URL,
         context.getLineCol(),
-        /* params */[this.attrName_, getTagSpecName(tagSpec), url],
+        /* params */[this.attrName_, getTagDescriptiveName(tagSpec), url],
         getTagSpecUrl(tagSpec), result);
   }
 }
@@ -3415,7 +3458,7 @@ function validateAttrValueUrl(parsedAttrSpec, context, attr, tagSpec, result) {
     if (attr.value === '') {
       context.addError(
           generated.ValidationError.Code.MISSING_URL, context.getLineCol(),
-          /* params */[attr.name, getTagSpecName(tagSpec)],
+          /* params */[attr.name, getTagDescriptiveName(tagSpec)],
           getTagSpecUrl(tagSpec), result);
       return;
     }
@@ -3428,12 +3471,12 @@ function validateAttrValueUrl(parsedAttrSpec, context, attr, tagSpec, result) {
           generated.ValidationError.Code.DUPLICATE_DIMENSION) {
         context.addError(
             parseResult.errorCode, context.getLineCol(),
-            /* params */[attr.name, getTagSpecName(tagSpec)],
+            /* params */[attr.name, getTagDescriptiveName(tagSpec)],
             getTagSpecUrl(tagSpec), result);
       } else {
         context.addError(
             parseResult.errorCode, context.getLineCol(),
-            /* params */[attr.name, getTagSpecName(tagSpec), attr.value],
+            /* params */[attr.name, getTagDescriptiveName(tagSpec), attr.value],
             getTagSpecUrl(tagSpec), result);
       }
       return;
@@ -3447,7 +3490,7 @@ function validateAttrValueUrl(parsedAttrSpec, context, attr, tagSpec, result) {
   if (maybeUris.length === 0) {
     context.addError(
         generated.ValidationError.Code.MISSING_URL, context.getLineCol(),
-        /* params */[attr.name, getTagSpecName(tagSpec)],
+        /* params */[attr.name, getTagDescriptiveName(tagSpec)],
         getTagSpecUrl(tagSpec), result);
     return;
   }
@@ -3565,7 +3608,7 @@ function validateAttrValueProperties(
       context.addError(
           generated.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE,
           context.getLineCol(),
-          /* params */[name, attr.name, getTagSpecName(tagSpec)],
+          /* params */[name, attr.name, getTagDescriptiveName(tagSpec)],
           getTagSpecUrl(tagSpec), result);
       continue;
     }
@@ -3575,7 +3618,8 @@ function validateAttrValueProperties(
         context.addError(
             generated.ValidationError.Code.INVALID_PROPERTY_VALUE_IN_ATTR_VALUE,
             context.getLineCol(),
-            /* params */[name, attr.name, getTagSpecName(tagSpec), value],
+            /* params */
+            [name, attr.name, getTagDescriptiveName(tagSpec), value],
             getTagSpecUrl(tagSpec), result);
       }
     } else if (propertySpec.valueDouble !== null) {
@@ -3583,7 +3627,8 @@ function validateAttrValueProperties(
         context.addError(
             generated.ValidationError.Code.INVALID_PROPERTY_VALUE_IN_ATTR_VALUE,
             context.getLineCol(),
-            /* params */[name, attr.name, getTagSpecName(tagSpec), value],
+            /* params */
+            [name, attr.name, getTagDescriptiveName(tagSpec), value],
             getTagSpecUrl(tagSpec), result);
       }
     }
@@ -3595,7 +3640,7 @@ function validateAttrValueProperties(
         generated.ValidationError.Code
             .MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE,
         context.getLineCol(),
-        /* params */[name, attr.name, getTagSpecName(tagSpec)],
+        /* params */[name, attr.name, getTagDescriptiveName(tagSpec)],
         getTagSpecUrl(tagSpec), result);
   }
 }
@@ -3630,7 +3675,7 @@ function validateNonTemplateAttrValueAgainstSpec(
     requirement.errorIfUnsatisfied = populateError(
         generated.ValidationError.Severity.ERROR,
         generated.ValidationError.Code.VALUE_SET_MISMATCH, context.getLineCol(),
-        /* params */[attr.name, getTagSpecName(tagSpec)],
+        /* params */[attr.name, getTagDescriptiveName(tagSpec)],
         getTagSpecUrl(tagSpec));
     result.valueSetRequirements.push(requirement);
   }
@@ -3642,7 +3687,7 @@ function validateNonTemplateAttrValueAgainstSpec(
     }
     context.addError(
         generated.ValidationError.Code.INVALID_ATTR_VALUE, context.getLineCol(),
-        /* params */[attr.name, getTagSpecName(tagSpec), attr.value],
+        /* params */[attr.name, getTagDescriptiveName(tagSpec), attr.value],
         getTagSpecUrl(tagSpec), result);
   } else if (spec.valueCasei.length > 0) {
     for (const value of spec.valueCasei) {
@@ -3652,7 +3697,7 @@ function validateNonTemplateAttrValueAgainstSpec(
     }
     context.addError(
         generated.ValidationError.Code.INVALID_ATTR_VALUE, context.getLineCol(),
-        /* params */[attr.name, getTagSpecName(tagSpec), attr.value],
+        /* params */[attr.name, getTagDescriptiveName(tagSpec), attr.value],
         getTagSpecUrl(tagSpec), result);
   } else if (spec.valueRegex !== null || spec.valueRegexCasei !== null) {
     const valueRegex = (spec.valueRegex !== null) ?
@@ -3663,7 +3708,7 @@ function validateNonTemplateAttrValueAgainstSpec(
       context.addError(
           generated.ValidationError.Code.INVALID_ATTR_VALUE,
           context.getLineCol(),
-          /* params */[attr.name, getTagSpecName(tagSpec), attr.value],
+          /* params */[attr.name, getTagDescriptiveName(tagSpec), attr.value],
           getTagSpecUrl(tagSpec), result);
     }
   } else if (spec.valueUrl !== null) {
@@ -4014,7 +4059,7 @@ function validateParentTag(parsedTagSpec, context, validationResult) {
         generated.ValidationError.Code.WRONG_PARENT_TAG, context.getLineCol(),
         /* params */
         [
-          getTagSpecName(spec),
+          getTagDescriptiveName(spec),
           context.getTagStack().parentTagName().toLowerCase(),
           spec.mandatoryParent.toLowerCase(),
         ],
@@ -4125,7 +4170,7 @@ function validateRequiredExtensions(parsedTagSpec, context, validationResult) {
           generated.ValidationError.Code.MISSING_REQUIRED_EXTENSION,
           context.getLineCol(),
           /* params */
-          [getTagSpecName(parsedTagSpec.getSpec()), requiredExtension],
+          [getTagDescriptiveName(parsedTagSpec.getSpec()), requiredExtension],
           getTagSpecUrl(parsedTagSpec), validationResult);
     }
   }
@@ -4168,8 +4213,8 @@ function validateUniqueness(parsedTagSpec, context, validationResult) {
     context.addError(
         generated.ValidationError.Code.DUPLICATE_UNIQUE_TAG,
         context.getLineCol(),
-        /* params */[getTagSpecName(tagSpec)], getTagSpecUrl(parsedTagSpec),
-        validationResult);
+        /* params */[getTagDescriptiveName(tagSpec)],
+        getTagSpecUrl(parsedTagSpec), validationResult);
   }
 }
 
@@ -4195,7 +4240,7 @@ function checkForReferencePointCollision(
       context.getLineCol(),
       /* params */
       [
-        getTagSpecName(tagSpec.getSpec()),
+        getTagDescriptiveName(tagSpec.getSpec()),
         refPointSpec.getReferencePoints().parentTagSpecName(),
       ],
       refPointSpec.getReferencePoints().parentSpecUrl(), validationResult);
@@ -4218,7 +4263,7 @@ function validateAncestorTags(parsedTagSpec, context, validationResult) {
             context.getLineCol(),
             /* params */
             [
-              getTagSpecName(spec),
+              getTagDescriptiveName(spec),
               mandatoryAncestor.toLowerCase(),
               spec.mandatoryAncestorSuggestedAlternative.toLowerCase(),
             ],
@@ -4228,7 +4273,7 @@ function validateAncestorTags(parsedTagSpec, context, validationResult) {
             generated.ValidationError.Code.MANDATORY_TAG_ANCESTOR,
             context.getLineCol(),
             /* params */
-            [getTagSpecName(spec), mandatoryAncestor.toLowerCase()],
+            [getTagDescriptiveName(spec), mandatoryAncestor.toLowerCase()],
             getTagSpecUrl(spec), validationResult);
       }
       return;
@@ -4240,7 +4285,7 @@ function validateAncestorTags(parsedTagSpec, context, validationResult) {
           generated.ValidationError.Code.DISALLOWED_TAG_ANCESTOR,
           context.getLineCol(),
           /* params */
-          [getTagSpecName(spec), disallowedAncestor.toLowerCase()],
+          [getTagDescriptiveName(spec), disallowedAncestor.toLowerCase()],
           getTagSpecUrl(spec), validationResult);
       return;
     }
@@ -4297,7 +4342,7 @@ function validateSsrLayout(
         context.addError(
             generated.ValidationError.Code.INVALID_ATTR_VALUE,
             context.getLineCol(),
-            /* params */['class', getTagSpecName(spec), classAttr],
+            /* params */['class', getTagDescriptiveName(spec), classAttr],
             getTagSpecUrl(spec), result);
       }
     }
@@ -4315,7 +4360,7 @@ function validateSsrLayout(
           [
             ssrAttr,
             'i-amphtml-layout',
-            getTagSpecName(spec),
+            getTagDescriptiveName(spec),
             layoutName.toUpperCase(),
             layoutName,
           ],
@@ -4361,7 +4406,7 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
       inputLayout === generated.AmpLayout.Layout.UNKNOWN) {
     context.addError(
         generated.ValidationError.Code.INVALID_ATTR_VALUE, context.getLineCol(),
-        /* params */['layout', getTagSpecName(spec), layoutAttr],
+        /* params */['layout', getTagDescriptiveName(spec), layoutAttr],
         getTagSpecUrl(spec), result);
     return;
   }
@@ -4371,7 +4416,7 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
   if (!inputWidth.isValid) {
     context.addError(
         generated.ValidationError.Code.INVALID_ATTR_VALUE, context.getLineCol(),
-        /* params */['width', getTagSpecName(spec), widthAttr],
+        /* params */['width', getTagDescriptiveName(spec), widthAttr],
         getTagSpecUrl(spec), result);
     return;
   }
@@ -4381,7 +4426,7 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
   if (!inputHeight.isValid) {
     context.addError(
         generated.ValidationError.Code.INVALID_ATTR_VALUE, context.getLineCol(),
-        /* params */['height', getTagSpecName(spec), heightAttr],
+        /* params */['height', getTagDescriptiveName(spec), heightAttr],
         getTagSpecUrl(spec), result);
     return;
   }
@@ -4401,7 +4446,7 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
   if (height.isAuto && layout !== generated.AmpLayout.Layout.FLEX_ITEM) {
     context.addError(
         generated.ValidationError.Code.INVALID_ATTR_VALUE, context.getLineCol(),
-        /* params */['height', getTagSpecName(spec), heightAttr],
+        /* params */['height', getTagDescriptiveName(spec), heightAttr],
         getTagSpecUrl(spec), result);
     return;
   }
@@ -4425,12 +4470,13 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
       context.addError(
           generated.ValidationError.Code.MISSING_LAYOUT_ATTRIBUTES,
           context.getLineCol(),
-          /*params=*/[getTagSpecName(spec)], getTagSpecUrl(spec), result);
+          /*params=*/[getTagDescriptiveName(spec)], getTagSpecUrl(spec),
+          result);
       return;
     }
     context.addError(
         code, context.getLineCol(),
-        /* params */[layout, getTagSpecName(spec)], getTagSpecUrl(spec),
+        /* params */[layout, getTagDescriptiveName(spec)], getTagSpecUrl(spec),
         result);
     return;
   }
@@ -4443,8 +4489,8 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
     context.addError(
         generated.ValidationError.Code.MANDATORY_ATTR_MISSING,
         context.getLineCol(),
-        /* params */['height', getTagSpecName(spec)], getTagSpecUrl(spec),
-        result);
+        /* params */['height', getTagDescriptiveName(spec)],
+        getTagSpecUrl(spec), result);
     return;
   }
   // For FIXED_HEIGHT if width is set it must be auto.
@@ -4454,7 +4500,10 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
         generated.ValidationError.Code.ATTR_VALUE_REQUIRED_BY_LAYOUT,
         context.getLineCol(),
         /* params */
-        [widthAttr, 'width', getTagSpecName(spec), 'FIXED_HEIGHT', 'auto'],
+        [
+          widthAttr, 'width', getTagDescriptiveName(spec), 'FIXED_HEIGHT',
+          'auto'
+        ],
         getTagSpecUrl(spec), result);
     return;
   }
@@ -4466,14 +4515,14 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
       context.addError(
           generated.ValidationError.Code.MANDATORY_ATTR_MISSING,
           context.getLineCol(),
-          /* params */['width', getTagSpecName(spec)], getTagSpecUrl(spec),
-          result);
+          /* params */['width', getTagDescriptiveName(spec)],
+          getTagSpecUrl(spec), result);
       return;
     } else if (width.isAuto) {
       context.addError(
           generated.ValidationError.Code.INVALID_ATTR_VALUE,
           context.getLineCol(),
-          /* params */['width', getTagSpecName(spec), 'auto'],
+          /* params */['width', getTagDescriptiveName(spec), 'auto'],
           getTagSpecUrl(spec), result);
       return;
     }
@@ -4485,7 +4534,7 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
     context.addError(
         generated.ValidationError.Code.INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT,
         context.getLineCol(),
-        /* params */[getTagSpecName(spec), width.unit, height.unit],
+        /* params */[getTagDescriptiveName(spec), width.unit, height.unit],
         getTagSpecUrl(spec), result);
     return;
   }
@@ -4497,7 +4546,7 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
         generated.ValidationError.Code.ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT;
     context.addError(
         code, context.getLineCol(),
-        /* params */['heights', getTagSpecName(spec), layout],
+        /* params */['heights', getTagDescriptiveName(spec), layout],
         getTagSpecUrl(spec), result);
     return;
   }
@@ -4535,12 +4584,12 @@ function validateAttrNotFoundInSpec(parsedTagSpec, context, attrName, result) {
     context.addError(
         generated.ValidationError.Code.TEMPLATE_IN_ATTR_NAME,
         context.getLineCol(),
-        /* params */[attrName, getTagSpecName(parsedTagSpec.getSpec())],
+        /* params */[attrName, getTagDescriptiveName(parsedTagSpec.getSpec())],
         context.getRules().getTemplateSpecUrl(), result);
   } else {
     context.addError(
         generated.ValidationError.Code.DISALLOWED_ATTR, context.getLineCol(),
-        /* params */[attrName, getTagSpecName(parsedTagSpec.getSpec())],
+        /* params */[attrName, getTagDescriptiveName(parsedTagSpec.getSpec())],
         getTagSpecUrl(parsedTagSpec), result);
   }
 }
@@ -4559,14 +4608,14 @@ function validateAttrValueBelowTemplateTag(
     context.addError(
         generated.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE,
         context.getLineCol(),
-        /* params */[attr.name, getTagSpecName(spec), attr.value],
+        /* params */[attr.name, getTagDescriptiveName(spec), attr.value],
         context.getRules().getTemplateSpecUrl(), result);
   } else if (attrValueHasPartialsTemplateSyntax(attr.value)) {
     const spec = parsedTagSpec.getSpec();
     context.addError(
         generated.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE,
         context.getLineCol(),
-        /* params */[attr.name, getTagSpecName(spec), attr.value],
+        /* params */[attr.name, getTagDescriptiveName(spec), attr.value],
         context.getRules().getTemplateSpecUrl(), result);
   }
 }
@@ -4640,7 +4689,7 @@ function validateAttributeInExtension(tagSpec, context, attr, result) {
     }
     context.addError(
         generated.ValidationError.Code.INVALID_ATTR_VALUE, context.getLineCol(),
-        /* params */[attr.name, getTagSpecName(tagSpec), attr.value],
+        /* params */[attr.name, getTagDescriptiveName(tagSpec), attr.value],
         getTagSpecUrl(tagSpec), result);
     return true;
   }
@@ -4720,7 +4769,7 @@ function validateAttrCss(
     // Override the first parameter with the name of this style tag.
     const {params} = errorToken;
     // Override the first parameter with the name of this style tag.
-    params[0] = getTagSpecName(tagSpec);
+    params[0] = getTagDescriptiveName(tagSpec);
     context.addError(
         errorToken.code, context.getLineCol(), params, /* url */ '',
         result.validationResult);
@@ -4743,7 +4792,7 @@ function validateAttrCss(
             generated.ValidationError.Code.INLINE_STYLE_TOO_LONG,
             context.getLineCol(), /* params */
             [
-              getTagSpecName(tagSpec), attrByteLen.toString(),
+              getTagDescriptiveName(tagSpec), attrByteLen.toString(),
               maybeSpec.spec().maxBytesPerInlineStyle.toString()
             ],
             maybeSpec.spec().maxBytesSpecUrl, result.validationResult);
@@ -4752,7 +4801,7 @@ function validateAttrCss(
             generated.ValidationError.Code.INLINE_STYLE_TOO_LONG,
             context.getLineCol(), /* params */
             [
-              getTagSpecName(tagSpec), attrByteLen.toString(),
+              getTagDescriptiveName(tagSpec), attrByteLen.toString(),
               maybeSpec.spec().maxBytesPerInlineStyle.toString()
             ],
             maybeSpec.spec().maxBytesSpecUrl, result.validationResult);
@@ -4774,7 +4823,7 @@ function validateAttrCss(
         context.addError(
             generated.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE,
             context.getLineCol(), /* params */
-            [declaration.name, attrName, getTagSpecName(tagSpec)],
+            [declaration.name, attrName, getTagDescriptiveName(tagSpec)],
             context.getRules().getStylesSpecUrl(), result.validationResult);
         // Don't emit additional errors for this declaration.
         continue;
@@ -4793,7 +4842,7 @@ function validateAttrCss(
               generated.ValidationError.Code
                   .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
               context.getLineCol(), /* params */
-              [getTagSpecName(tagSpec), declaration.name, firstIdent],
+              [getTagDescriptiveName(tagSpec), declaration.name, firstIdent],
               context.getRules().getStylesSpecUrl(), result.validationResult);
         }
       }
@@ -4805,7 +4854,7 @@ function validateAttrCss(
               generated.ValidationError.Code.INVALID_ATTR_VALUE,
               context.getLineCol(),
               /* params */
-              [attrName, getTagSpecName(tagSpec), 'CSS !important'],
+              [attrName, getTagDescriptiveName(tagSpec), 'CSS !important'],
               context.getRules().getStylesSpecUrl(), result.validationResult);
       }
       /** @type {!Array<!tokenize_css.ErrorToken>} */
@@ -4817,7 +4866,7 @@ function validateAttrCss(
         // Override the first parameter with the name of the tag.
         /** @type {!Array<string>} */
         let params = errorToken.params;
-        params[0] = getTagSpecName(tagSpec);
+        params[0] = getTagDescriptiveName(tagSpec);
         context.addError(
             errorToken.code, context.getLineCol(), params, /* spec_url*/ '',
             result.validationResult);
@@ -5071,8 +5120,8 @@ function validateAttributes(
             context.getTypeIdentifiers())) {
       context.addError(
           generated.ValidationError.Code.DISALLOWED_ATTR, context.getLineCol(),
-          /* params */[attr.name, getTagSpecName(spec)], getTagSpecUrl(spec),
-          result.validationResult);
+          /* params */[attr.name, getTagDescriptiveName(spec)],
+          getTagSpecUrl(spec), result.validationResult);
       continue;
     }
     const attrSpec = parsedAttrSpec.getSpec();
@@ -5080,7 +5129,7 @@ function validateAttributes(
       context.addWarning(
           generated.ValidationError.Code.DEPRECATED_ATTR, context.getLineCol(),
           /* params */
-          [attr.name, getTagSpecName(spec), attrSpec.deprecation],
+          [attr.name, getTagDescriptiveName(spec), attrSpec.deprecation],
           attrSpec.deprecationUrl, result.validationResult);
       // Deprecation is only a warning, so we don't return.
     }
@@ -5093,8 +5142,8 @@ function validateAttributes(
           parsedAttrSpec, context, spec, attr.name, attr.value, result);
     } else if (attrSpec.cssDeclaration.length > 0) {
       validateAttrDeclaration(
-          parsedAttrSpec, context, getTagSpecName(spec), attr.name, attr.value,
-          result.validationResult);
+          parsedAttrSpec, context, getTagDescriptiveName(spec), attr.name,
+          attr.value, result.validationResult);
     }
     if (!hasTemplateAncestor || !attrValueHasTemplateSyntax(attr.value)) {
       validateNonTemplateAttrValueAgainstSpec(
@@ -5111,7 +5160,7 @@ function validateAttributes(
         context.addError(
             generated.ValidationError.Code.INVALID_ATTR_VALUE,
             context.getLineCol(),
-            /* params */[attr.name, getTagSpecName(spec), attr.value],
+            /* params */[attr.name, getTagDescriptiveName(spec), attr.value],
             getTagSpecUrl(spec), result.validationResult);
         continue;
       }
@@ -5139,7 +5188,7 @@ function validateAttributes(
             context.getLineCol(),
             /* params */
             [
-              getTagSpecName(spec),
+              getTagDescriptiveName(spec),
               context.getRules().getInternedString(mandatoryOneof),
             ],
             getTagSpecUrl(spec), result.validationResult);
@@ -5163,7 +5212,7 @@ function validateAttributes(
             /* params */
             [
               attr.name,
-              getTagSpecName(spec),
+              getTagDescriptiveName(spec),
             ],
             getTagSpecUrl(spec), result.validationResult);
         continue;
@@ -5201,7 +5250,7 @@ function validateAttributes(
           context.getLineCol(),
           /* params */
           [
-            getTagSpecName(spec),
+            getTagDescriptiveName(spec),
             context.getRules().getInternedString(mandatoryOneof),
           ],
           getTagSpecUrl(spec), result.validationResult);
@@ -5216,7 +5265,7 @@ function validateAttributes(
           context.getLineCol(),
           /* params */
           [
-            getTagSpecName(spec),
+            getTagDescriptiveName(spec),
             context.getRules().getInternedString(mandatoryAnyof),
           ],
           getTagSpecUrl(spec), result.validationResult);
@@ -5236,7 +5285,7 @@ function validateAttributes(
             [
               context.getRules().getParsedAttrSpecs().getNameByAttrSpecId(
                   attrId),
-              getTagSpecName(spec),
+              getTagDescriptiveName(spec),
               attrSpec.name,
             ],
             getTagSpecUrl(spec), result.validationResult);
@@ -5257,15 +5306,15 @@ function validateAttributes(
     context.addError(
         generated.ValidationError.Code.MANDATORY_ATTR_MISSING,
         context.getLineCol(),
-        /* params */[missingAttr, getTagSpecName(spec)], getTagSpecUrl(spec),
-        result.validationResult);
+        /* params */[missingAttr, getTagDescriptiveName(spec)],
+        getTagSpecUrl(spec), result.validationResult);
   }
   // Extension specs mandate the 'src' attribute.
   if (spec.extensionSpec !== null && !seenExtensionSrcAttr) {
     context.addError(
         generated.ValidationError.Code.MANDATORY_ATTR_MISSING,
         context.getLineCol(),
-        /* params */['src', getTagSpecName(spec)], getTagSpecUrl(spec),
+        /* params */['src', getTagDescriptiveName(spec)], getTagSpecUrl(spec),
         result.validationResult);
   }
 }
@@ -5464,7 +5513,7 @@ function validateTagAgainstSpec(
     if (tagSpec.deprecation !== null) {
       context.addWarning(
           generated.ValidationError.Code.DEPRECATED_TAG, context.getLineCol(),
-          /* params */[getTagSpecName(tagSpec), tagSpec.deprecation],
+          /* params */[getTagDescriptiveName(tagSpec), tagSpec.deprecation],
           tagSpec.deprecationUrl, attempt.validationResult);
     }
     if (tagSpec.uniqueWarning &&
@@ -5472,7 +5521,7 @@ function validateTagAgainstSpec(
       context.addWarning(
           generated.ValidationError.Code.DUPLICATE_UNIQUE_TAG_WARNING,
           context.getLineCol(),
-          /* params */[getTagSpecName(tagSpec)], getTagSpecUrl(tagSpec),
+          /* params */[getTagDescriptiveName(tagSpec)], getTagSpecUrl(tagSpec),
           attempt.validationResult);
     }
   }
@@ -5724,6 +5773,8 @@ class ParsedValidatorRules {
         if (tagSpec.specName === null)
           tagSpec.specName =
               tagSpec.extensionSpec.name + ' extension .js script';
+        if (tagSpec.descriptiveName === null)
+          tagSpec.descriptiveName = tagSpec.specName;
         tagSpec.mandatoryParent = 'HEAD';
         if (tagSpec.extensionSpec.deprecatedAllowDuplicates)
           tagSpec.uniqueWarning = true;
@@ -6197,7 +6248,7 @@ class ParsedValidatorRules {
         context.addError(
             generated.ValidationError.Code.MANDATORY_TAG_MISSING,
             context.getLineCol(),
-            /* params */[getTagSpecName(spec)], getTagSpecUrl(spec),
+            /* params */[getTagDescriptiveName(spec)], getTagSpecUrl(spec),
             validationResult);
       }
     }
@@ -6230,7 +6281,7 @@ class ParsedValidatorRules {
               /* params */
               [
                 context.getRules().getInternedString(condition),
-                getTagSpecName(parsedTagSpec.getSpec()),
+                getTagDescriptiveName(parsedTagSpec.getSpec()),
               ],
               getTagSpecUrl(parsedTagSpec), validationResult);
         }
@@ -6242,7 +6293,7 @@ class ParsedValidatorRules {
               context.getLineCol(),
               /* params */
               [
-                getTagSpecName(parsedTagSpec.getSpec()),
+                getTagDescriptiveName(parsedTagSpec.getSpec()),
                 context.getRules().getInternedString(condition),
               ],
               getTagSpecUrl(parsedTagSpec), validationResult);
@@ -6256,8 +6307,8 @@ class ParsedValidatorRules {
               context.getLineCol(),
               /* params */
               [
-                getTagSpecName(alsoRequiresTagspec.getSpec()),
-                getTagSpecName(parsedTagSpec.getSpec()),
+                getTagDescriptiveName(alsoRequiresTagspec.getSpec()),
+                getTagDescriptiveName(parsedTagSpec.getSpec()),
               ],
               getTagSpecUrl(parsedTagSpec), validationResult);
         }

@@ -205,16 +205,6 @@ class TestConfig {
     return this;
   }
 
-  retryOnSaucelabs(times = 4) {
-    if (!window.ampTestRuntimeConfig.saucelabs) {
-      return this;
-    }
-    this.configTasks.push((mocha) => {
-      mocha.retries(times);
-    });
-    return this;
-  }
-
   /**
    * @param {string} desc
    * @param {function()} fn
@@ -486,7 +476,7 @@ afterEach(function () {
   cancelTimersForTesting();
 });
 
-chai.use(require('chai-as-promised')); // eslint-disable-line 
+chai.use(require('chai-as-promised')); // eslint-disable-line
 
 chai.Assertion.addMethod('attribute', function (attr) {
   const obj = this._obj;

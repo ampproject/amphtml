@@ -158,11 +158,18 @@ export class SaveButton {
       }
     }
 
+    const text = this.lang === 'ja' ? '保存' : 'Save';
+
+    const textContent = this.round ? '' : text;
+
     const saveButton = Util.make(this.element.ownerDocument, {
       'a': {
         class: clazz.join(' '),
         href: this.href,
-        textContent: this.round ? '' : this.lang === 'ja' ? '保存' : 'Save',
+        textContent,
+        ...(!textContent && {
+          'aria-label': text,
+        }),
       },
     });
 

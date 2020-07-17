@@ -34,7 +34,8 @@ import {
 import {getMode} from '../mode';
 import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
-import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
+import {ieIntrinsicCheckAndFix} from './ie-intrinsic-bug';
+import {ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error';
 import {listen, loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
@@ -213,6 +214,9 @@ export class ResourcesImpl {
     /** @const @private {boolean} */
     this.renderOnIdleFix_ = isExperimentOn(this.win, 'render-on-idle-fix');
 
+    /** @const @private {boolean} */
+    this.removeTaskTimeout_ = isExperimentOn(this.win, 'remove-task-timeout');
+
     /** @private {boolean} */
     this.divertedRenderOnIdleFixExperiment_ = false;
 
@@ -256,8 +260,9 @@ export class ResourcesImpl {
         : null);
       try {
         this.intersectionObserver_ = new IntersectionObserver(
-          (e) => this.intersects_(e),
-          {root, rootMargin: '200% 25%'}
+          (e) => this.intersect(e),
+          // rootMargin matches size of loadRect: (150vw 300vh) * 1.25.
+          {root, rootMargin: '250% 31.25%'}
         );
 
         // Wait for intersection callback instead of measuring all elements
@@ -331,9 +336,9 @@ export class ResourcesImpl {
 
   /**
    * @param {!Array<!IntersectionObserverEntry>} entries
-   * @private
+   * @visibleForTesting
    */
-  intersects_(entries) {
+  intersect(entries) {
     devAssert(this.intersectionObserver_);
 
     // TODO(willchou): Remove assert once #27167 is fixed.
@@ -373,6 +378,12 @@ export class ResourcesImpl {
 
       const input = Services.inputFor(this.win);
       input.setupInputModeClasses(this.ampdoc);
+
+      if (IS_ESM) {
+        return;
+      }
+
+      ieIntrinsicCheckAndFix(this.win);
 
       // With IntersectionObserver, no need for remeasuring hacks.
       if (!this.intersectionObserver_) {
@@ -1206,14 +1217,17 @@ export class ResourcesImpl {
       return;
     }
     this.divertedRenderOnIdleFixExperiment_ = true;
-    const experimentInfoMap = /** @type {!Object<string,
-        !../experiments.ExperimentInfo>} */ ({
-      [RENDER_ON_IDLE_FIX_EXP.experiment]: {
+    const experimentInfoList = /** @type {!Array<!../experiments.ExperimentInfo>} */ ([
+      {
+        experimentId: RENDER_ON_IDLE_FIX_EXP.id,
         isTrafficEligible: () => true,
-        branches: [RENDER_ON_IDLE_FIX_EXP.control, RENDER_ON_IDLE_FIX_EXP],
+        branches: [
+          RENDER_ON_IDLE_FIX_EXP.control,
+          RENDER_ON_IDLE_FIX_EXP.experiment,
+        ],
       },
-    });
-    randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+    ]);
+    randomlySelectUnsetExperiments(this.win, experimentInfoList);
   }
 
   /**
@@ -1515,7 +1529,9 @@ export class ResourcesImpl {
     let timeout = -1;
     let task = this.queue_.peek(this.boundTaskScorer_);
     while (task) {
-      timeout = this.calcTaskTimeout_(task);
+      if (!this.removeTaskTimeout_) {
+        timeout = this.calcTaskTimeout_(task);
+      }
       dev().fine(
         TAG_,
         'peek from queue:',
@@ -1527,8 +1543,10 @@ export class ResourcesImpl {
         'timeout',
         timeout
       );
-      if (timeout > 16) {
-        break;
+      if (!this.removeTaskTimeout_) {
+        if (timeout > 16) {
+          break;
+        }
       }
 
       this.queue_.dequeue(task);
@@ -1591,10 +1609,12 @@ export class ResourcesImpl {
       this.exec_.getSize()
     );
 
-    if (timeout >= 0) {
-      // Still tasks in the queue, but we took too much time.
-      // Schedule the next work pass.
-      return timeout;
+    if (!this.removeTaskTimeout_) {
+      if (timeout >= 0) {
+        // Still tasks in the queue, but we took too much time.
+        // Schedule the next work pass.
+        return timeout;
+      }
     }
 
     // No tasks left in the queue.
@@ -1850,7 +1870,11 @@ export class ResourcesImpl {
         this.queue_.dequeue(queued);
       }
       this.queue_.enqueue(task);
-      this.schedulePass(this.calcTaskTimeout_(task));
+      if (this.removeTaskTimeout_) {
+        this.schedulePass();
+      } else {
+        this.schedulePass(this.calcTaskTimeout_(task));
+      }
     }
     task.resource.layoutScheduled(task.scheduleTime);
   }

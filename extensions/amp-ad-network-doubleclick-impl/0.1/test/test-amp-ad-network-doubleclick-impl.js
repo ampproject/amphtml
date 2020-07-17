@@ -68,12 +68,6 @@ const realWinConfig = {
   allowExternalResources: true,
 };
 
-const realWinConfigAmpAd = {
-  amp: {ampdoc: 'amp-ad'},
-  ampAdCss: true,
-  allowExternalResources: true,
-};
-
 /**
  * Creates an iframe promise, and instantiates element and impl, adding the
  * former to the document of the iframe.
@@ -1375,6 +1369,57 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
       });
     });
 
+    it('should center iframe if narrower than ad slot', () => {
+      env.sandbox
+        .stub(impl, 'sendXhrRequest')
+        .returns(mockSendXhrRequest('150x50', false));
+      impl.buildCallback();
+      impl.onLayoutMeasure();
+      return impl.layoutCallback().then(() => {
+        const {iframe} = impl;
+        expect(iframe).to.be.ok;
+        expect(iframe.getAttribute('style')).to.match(/left: 50%/);
+        expect(iframe.getAttribute('style')).to.match(/top: 50%/);
+        expect(iframe.getAttribute('style')).to.match(
+          /transform: translate\(-50%\, -50%\)/
+        );
+      });
+    });
+
+    it('should not center iframe if narrower than slot but is fluid', () => {
+      env.sandbox
+        .stub(impl, 'sendXhrRequest')
+        .returns(mockSendXhrRequest('0x0', false));
+      impl.buildCallback();
+      impl.onLayoutMeasure();
+      return impl.layoutCallback().then(() => {
+        const {iframe} = impl;
+        expect(iframe).to.be.ok;
+        expect(iframe.getAttribute('style')).to.not.match(/left: 50%/);
+        expect(iframe.getAttribute('style')).to.not.match(/top: 50%/);
+        expect(iframe.getAttribute('style')).to.not.match(
+          /transform: translate\(-50%\, -50%\)/
+        );
+      });
+    });
+
+    it('should not center iframe if same size as ad slot', () => {
+      env.sandbox
+        .stub(impl, 'sendXhrRequest')
+        .returns(mockSendXhrRequest('200x50', false));
+      impl.buildCallback();
+      impl.onLayoutMeasure();
+      return impl.layoutCallback().then(() => {
+        const {iframe} = impl;
+        expect(iframe).to.be.ok;
+        expect(iframe.getAttribute('style')).to.not.match(/left: 50%/);
+        expect(iframe.getAttribute('style')).to.not.match(/top: 50%/);
+        expect(iframe.getAttribute('style')).to.not.match(
+          /transform: translate\(-50%\, -50%\)/
+        );
+      });
+    });
+
     it('amp creative - should force iframe to match size of slot', () => {
       stubForAmpCreative();
       env.sandbox
@@ -1644,96 +1689,6 @@ describes.realWin(
       });
     });
 
-    describes.realWin('centering', realWinConfigAmpAd, (env) => {
-      const size = {width: '300px', height: '150px'};
-
-      /**
-       * @param {!Element} iframe
-       * @param {{width: number, height: number}} expectedSize
-       */
-      function verifyCss(iframe, expectedSize) {
-        expect(iframe).to.be.ok;
-        const style = env.win.getComputedStyle(iframe);
-        expect(style.width).to.equal(expectedSize.width);
-        expect(style.height).to.equal(expectedSize.height);
-        // We don't know the exact values by which the frame will be
-        // translated, as this can vary depending on whether we use the
-        // height/width attributes, or the actual size of the frame. To make
-        // this less of a hassle, we'll just match against regexp.
-        expect(style.transform).to.equal('none');
-      }
-
-      afterEach(() => env.win.document.body.removeChild(impl.element));
-
-      it('centers iframe in slot when height && width', () => {
-        const setup = createImplTag(
-          {
-            width: '300',
-            height: '150',
-          },
-          element,
-          impl,
-          env
-        );
-        element = setup[0];
-        impl = setup[1];
-        env = setup[2];
-        expect(impl.element.getAttribute('width')).to.equal('300');
-        expect(impl.element.getAttribute('height')).to.equal('150');
-        verifyCss(impl.iframe, size);
-      });
-      it('centers iframe in slot when !height && !width', () => {
-        const setup = createImplTag(
-          {
-            layout: 'fixed',
-          },
-          element,
-          impl,
-          env
-        );
-        element = setup[0];
-        impl = setup[1];
-        env = setup[2];
-        expect(impl.element.getAttribute('width')).to.be.null;
-        expect(impl.element.getAttribute('height')).to.be.null;
-        verifyCss(impl.iframe, size);
-      });
-      it('centers iframe in slot when !height && width', () => {
-        const setup = createImplTag(
-          {
-            width: '300',
-            layout: 'fixed',
-          },
-          element,
-          impl,
-          env
-        );
-        element = setup[0];
-        impl = setup[1];
-        env = setup[2];
-        expect(impl.element.getAttribute('width')).to.equal('300');
-        expect(impl.element.getAttribute('height')).to.be.null;
-        verifyCss(impl.iframe, size);
-      });
-      it('centers iframe in slot when height && !width', () => {
-        const setup = createImplTag(
-          {
-            height: '150',
-            layout: 'fixed',
-          },
-          element,
-          impl,
-          env
-        );
-        element = setup[0];
-        impl = setup[1];
-        env = setup[2];
-        expect(impl.element.getAttribute('width')).to.be.null;
-        expect(impl.element.getAttribute('height')).to.equal('150');
-        verifyCss(impl.iframe, size);
-      });
-    });
-
     describe('#fireDelayedImpressions', () => {
       let isSecureStub;
       beforeEach(() => {
@@ -1935,6 +1890,20 @@ describes.realWin(
         toggleExperiment(env.win, 'envDfpInvOrigDeprecated', false);
       });
 
+      it('should have correctly formatted experiment map', () => {
+        randomlySelectUnsetExperimentsStub.returns({});
+        impl.buildCallback();
+        const experimentMap =
+          randomlySelectUnsetExperimentsStub.firstCall.args[0];
+        Object.keys(experimentMap).forEach((key) => {
+          expect(key).to.be.a('string');
+          const {branches} = experimentMap[key];
+          expect(branches).to.exist;
+          expect(branches).to.be.a('array');
+          branches.forEach((branch) => expect(branch).to.be.a('string'));
+        });
+      });
+
       it('should select SRA experiments', () => {
         randomlySelectUnsetExperimentsStub.returns({
           doubleclickSraExp: '117152667',
@@ -1958,9 +1927,8 @@ describes.realWin(
           impl.setPageLevelExperiments();
           // args format is call array followed by parameter array so expect
           // first call, first param.
-          experimentInfoMap =
-            randomlySelectUnsetExperimentsStub.args[0][0]['doubleclickSraExp'];
-          expect(experimentInfoMap).to.be.ok;
+          experimentInfoMap = randomlySelectUnsetExperimentsStub.args[0][0][0];
+          expect(experimentInfoMap.experimentId).to.equal('doubleclickSraExp');
           expect(impl.useSra).to.be.false;
         });
 

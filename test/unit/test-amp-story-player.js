@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import {AmpStoryComponentManager} from '../../src/amp-story-player/amp-story-component-manager';
 import {
   AmpStoryPlayer,
   IFRAME_IDX,
 } from '../../src/amp-story-player/amp-story-player-impl';
-import {AmpStoryPlayerManager} from '../../src/amp-story-player/amp-story-player-manager';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {toArray} from '../../src/types';
 
@@ -37,6 +37,14 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
   const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
 
+  function afterRenderPromise() {
+    return new Promise((resolve) => {
+      requestAnimationFrame(() => {
+        setTimeout(resolve);
+      });
+    });
+  }
+
   function buildStoryPlayer(
     numStories = 1,
     url = DEFAULT_CACHE_URL,
@@ -53,7 +61,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       playerEl.appendChild(storyAnchor);
     }
     win.document.body.appendChild(playerEl);
-    manager = new AmpStoryPlayerManager(win);
+    manager = new AmpStoryComponentManager(win);
 
     env.sandbox
       .stub(Messaging, 'waitForHandshakeFromDocument')
@@ -209,43 +217,49 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     buildStoryPlayer(2);
 
     await manager.loadPlayers();
+    await nextTick();
 
     const fakeData = {next: true};
     fireHandler['selectDocument']('selectDocument', fakeData);
 
-    win.requestAnimationFrame(() => {
-      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
-    });
+    const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+
+    // TODO(#29278): replace with navigation API once ready.
+    await afterRenderPromise();
+    expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+    expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
   });
 
   it('should navigate when swiping', async () => {
     buildStoryPlayer(4);
     await manager.loadPlayers();
+    await nextTick();
 
     swipeLeft();
 
-    win.requestAnimationFrame(() => {
-      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
-    });
+    const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+
+    // TODO(#29278): replace with navigation API once ready.
+    await afterRenderPromise();
+    expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+    expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
   });
 
   it('should not navigate when swiping last story', async () => {
     buildStoryPlayer(2);
     await manager.loadPlayers();
+    await nextTick();
 
     swipeLeft();
     swipeLeft();
     swipeLeft();
 
-    win.requestAnimationFrame(() => {
-      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
-    });
+    const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+
+    // TODO(#29278): replace with navigation API once ready.
+    await afterRenderPromise();
+    expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+    expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
   });
 
   describe('Cache URLs', () => {
@@ -289,6 +303,14 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   });
 
   describe('Player API', () => {
+    function appendStoriesToPlayer(playerEl, numStories) {
+      for (let i = 0; i < numStories; i++) {
+        const story = win.document.createElement('a');
+        story.setAttribute('href', `https://example.com/story${i}.html`);
+        playerEl.appendChild(story);
+      }
+    }
+
     it('signals when its ready to be interacted with', async () => {
       buildStoryPlayer();
       const readySpy = env.sandbox.spy();
@@ -326,6 +348,297 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
 
       expect(playerEl.shadowRoot.querySelector('iframe')).to.exist;
+    });
+
+    it('show callback builds corresponding adjacent iframes', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      await player.show('https://example.com/story3.html');
+
+      const stories = toArray(playerEl.querySelectorAll('a'));
+
+      expect(stories[0][IFRAME_IDX]).to.eql(undefined);
+      expect(stories[1][IFRAME_IDX]).to.eql(undefined);
+      expect(stories[2][IFRAME_IDX]).to.eql(0);
+      expect(stories[3][IFRAME_IDX]).to.eql(1);
+      expect(stories[4][IFRAME_IDX]).to.eql(2);
+    });
+
+    // TODO(proyectoramirez): delete once add() is implemented.
+    it('show callback should throw when story is not found', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      return expect(() =>
+        player.show('https://example.com/story6.html')
+      ).to.throw(
+        'Story URL not found in the player: https://example.com/story6.html'
+      );
+    });
+
+    it('pauses programatically', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+
+      playerEl.pause();
+
+      messagingMock
+        .expects('sendRequest')
+        .withArgs('visibilitychange', {state: 'paused'});
+    });
+
+    it('plays programatically', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+
+      playerEl.play();
+
+      messagingMock
+        .expects('sendRequest')
+        .withArgs('visibilitychange', {state: 'visible'});
+    });
+
+    it('calling mute should set story muted state to true', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+
+      await playerEl.mute();
+
+      messagingMock
+        .expects('sendRequest')
+        .withArgs('setDocumentState', {state: 'MUTED_STATE', value: true});
+    });
+
+    it('calling unmute should set the story muted state to false', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+
+      await playerEl.unmute();
+
+      messagingMock
+        .expects('sendRequest')
+        .withArgs('setDocumentState', {state: 'MUTED_STATE', value: false});
+    });
+
+    it('back button should be created and close button should not', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      playerEl.setAttribute('exit-control', 'back-button');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      expect(
+        playerEl.shadowRoot.querySelector('button.amp-story-player-back-button')
+      ).to.exist;
+      expect(
+        playerEl.shadowRoot.querySelector(
+          'button.amp-story-player-close-button'
+        )
+      ).to.not.exist;
+    });
+
+    it('close button should be created and back button should not', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      playerEl.setAttribute('exit-control', 'close-button');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      expect(
+        playerEl.shadowRoot.querySelector(
+          'button.amp-story-player-close-button'
+        )
+      ).to.exist;
+      expect(
+        playerEl.shadowRoot.querySelector('button.amp-story-player-back-button')
+      ).to.not.exist;
+    });
+
+    it('no button should be created', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      playerEl.setAttribute('exit-control', 'brokenattribute');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      expect(
+        playerEl.shadowRoot.querySelector(
+          'button.amp-story-player-close-button'
+        )
+      ).to.not.exist;
+      expect(
+        playerEl.shadowRoot.querySelector('button.amp-story-player-back-button')
+      ).to.not.exist;
+    });
+
+    it('back button should fire back event once', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      playerEl.setAttribute('exit-control', 'back-button');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      const readySpy = env.sandbox.spy();
+      playerEl.addEventListener('amp-story-player-back', readySpy);
+
+      playerEl.shadowRoot
+        .querySelector('button.amp-story-player-back-button')
+        .click();
+
+      expect(readySpy).to.have.been.calledOnce;
+    });
+
+    it('close button should fire close event once', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      playerEl.setAttribute('exit-control', 'close-button');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+      await player.load();
+
+      const readySpy = env.sandbox.spy();
+      playerEl.addEventListener('amp-story-player-close', readySpy);
+
+      playerEl.shadowRoot
+        .querySelector('button.amp-story-player-close-button')
+        .click();
+
+      expect(readySpy).to.have.been.calledOnce;
+    });
+
+    it('navigate forward given a positive number in range', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      player.go(2);
+
+      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+      await afterRenderPromise();
+      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+      expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('1');
+    });
+
+    it('navigate backward given a negative number in range', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      player.go(3);
+      player.go(-1);
+
+      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+      await afterRenderPromise();
+      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+      expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('1');
+    });
+
+    it('not navigate given zero', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+
+      const iframePosition = iframes[0].getAttribute(
+        'i-amphtml-iframe-position'
+      );
+
+      player.go(0);
+
+      await afterRenderPromise();
+      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql(
+        iframePosition
+      );
+    });
+
+    it('go should throw when positive number is out of story range', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      return expect(() => player.go(6)).to.throw('Out of Story range.');
+    });
+
+    it('go should throw when negative number is out of story range', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      return expect(() => player.go(-1)).to.throw('Out of Story range.');
+    });
+
+    it('signals when player changed story using next method', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      const navigationSpy = env.sandbox.spy();
+      playerEl.addEventListener('navigation', navigationSpy);
+      player.next_();
+      expect(navigationSpy.firstCall.args[0].type).to.eql('navigation');
+      expect(navigationSpy.firstCall.args[0].detail).to.eql({
+        index: 1,
+        remaining: 3,
+      });
+    });
+
+    it('signals when player changed story using previous method', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      const navigationSpy = env.sandbox.spy();
+      playerEl.addEventListener('navigation', navigationSpy);
+      player.next_();
+      player.previous_();
+      expect(navigationSpy.secondCall.args[0].type).to.eql('navigation');
+      expect(navigationSpy.secondCall.args[0].detail).to.eql({
+        index: 0,
+        remaining: 4,
+      });
     });
   });
 });

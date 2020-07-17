@@ -19,7 +19,7 @@ import {Layout} from '../layout';
 import {Services} from '../services';
 import {computedStyle, toggle} from '../style';
 import {dev, devAssert} from '../log';
-import {isBlockedByConsent} from '../error';
+import {isBlockedByConsent, reportError} from '../error';
 import {
   layoutRectLtwh,
   layoutRectSizeEquals,
@@ -895,6 +895,17 @@ export class Resource {
     );
     devAssert(this.isDisplayed(), 'Not displayed for layout: %s', this.debugid);
 
+    if (this.state_ != ResourceState.LAYOUT_SCHEDULED) {
+      const err = dev().createError(
+        'startLayout called but not LAYOUT_SCHEDULED',
+        'currently: ',
+        this.state_
+      );
+      err.associatedElement = this.element;
+      reportError(err);
+      return Promise.reject(err);
+    }
+
     // Unwanted re-layouts are ignored.
     if (this.layoutCount_ > 0 && !this.element.isRelayoutNeeded()) {
       dev().fine(
@@ -1015,7 +1026,13 @@ export class Resource {
     this.setInViewport(false);
     if (this.element.unlayoutCallback()) {
       this.element.togglePlaceholder(true);
-      this.state_ = ResourceState.NOT_LAID_OUT;
+      // With IntersectionObserver, the element won't receive another
+      // measurement if/when the document becomes active again.
+      // Therefore, its post-unlayout state must be READY_FOR_LAYOUT
+      // (built and measured) to become eligible for relayout later.
+      this.state_ = this.intersect_
+        ? ResourceState.READY_FOR_LAYOUT
+        : ResourceState.NOT_LAID_OUT;
       this.layoutCount_ = 0;
       this.layoutPromise_ = null;
     }

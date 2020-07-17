@@ -84,9 +84,10 @@ export class SubscriptionPlatform {
   /**
    * Executes action for the local platform.
    * @param {string} unusedAction
+   * @param {?string} unusedSourceId
    * @return {!Promise<boolean>}
    */
-  executeAction(unusedAction) {}
+  executeAction(unusedAction, unusedSourceId) {}
 
   /**
    * Returns the base score configured for the platform.

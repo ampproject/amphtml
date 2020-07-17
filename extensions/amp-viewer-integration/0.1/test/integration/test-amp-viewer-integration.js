@@ -72,7 +72,7 @@ describes.sandboxed('AmpViewerIntegration', {}, (env) => {
         },
       },
       (env) => {
-        describe.configure().run('Open Channel', () => {
+        describe('Open Channel', () => {
           class Messaging {
             constructor() {}
             sendRequest() {}

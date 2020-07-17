@@ -24,23 +24,33 @@ import {install as installDocContains} from './polyfills/document-contains';
 import {install as installFetch} from './polyfills/fetch';
 import {install as installGetBoundingClientRect} from './get-bounding-client-rect';
 import {install as installIntersectionObserver} from './polyfills/intersection-observer';
+import {install as installMapSet} from './polyfills/map-set';
 import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installObjectValues} from './polyfills/object-values';
 import {install as installPromise} from './polyfills/promise';
+import {install as installSetAdd} from './polyfills/set-add';
+import {install as installWeakMapSet} from './polyfills/weakmap-set';
 
-installFetch(self);
-installMathSign(self);
-installObjectAssign(self);
-installObjectValues(self);
-installPromise(self);
-installArrayIncludes(self);
+if (!IS_ESM) {
+  installFetch(self);
+  installMathSign(self);
+  installObjectAssign(self);
+  installObjectValues(self);
+  installPromise(self);
+  installArrayIncludes(self);
+  installMapSet(self);
+  installWeakMapSet(self);
+  installSetAdd(self);
+}
 
 // Polyfills that depend on DOM availability
 if (self.document) {
-  installDOMTokenList(self);
-  installDocContains(self);
-  installGetBoundingClientRect(self);
+  if (!IS_ESM) {
+    installDOMTokenList(self);
+    installDocContains(self);
+    installGetBoundingClientRect(self);
+  }
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
   installCustomElements(self, class {});

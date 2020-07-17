@@ -143,7 +143,6 @@ amp-consent.i-amphtml-consent-ui-iframe-active-lightbox {
   height: var(--lightbox-height);
   width: 90vw;
   margin: auto;
-  background: white;
 }
 
 amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-in.i-amphtml-consent-ui-iframe-fullscreen {
