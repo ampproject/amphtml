@@ -461,15 +461,15 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         swipeLeft();
         swipeLeft();
 
-        win.requestAnimationFrame(() => {
-          const storyObjects = createStoryObjects(2);
-          playerEl.add(storyObjects);
+        await afterRenderPromise();
 
-          const stories = toArray(playerEl.querySelectorAll('a'));
+        const storyObjects = createStoryObjects(2);
+        playerEl.add(storyObjects);
 
-          expect(stories[3][IFRAME_IDX]).to.not.be.undefined;
-          expect(stories[4][IFRAME_IDX]).to.be.undefined;
-        });
+        const stories = toArray(playerEl.querySelectorAll('a'));
+
+        expect(stories[3][IFRAME_IDX]).to.not.be.undefined;
+        expect(stories[4][IFRAME_IDX]).to.be.undefined;
       }
     );
 
