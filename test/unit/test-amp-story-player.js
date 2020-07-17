@@ -502,84 +502,84 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       expect(readySpy).to.have.been.calledOnce;
     });
 
-    it('set page attachment state should send message', async () => {
-      buildStoryPlayer();
-      await manager.loadPlayers();
+    // it('set page attachment state should send message', async () => {
+    //   buildStoryPlayer();
+    //   await manager.loadPlayers();
 
-      await playerEl.setStoryState('page-attachment', true);
+    //   await playerEl.setStoryState('page-attachment', true);
 
-      messagingMock
-        .expects('sendRequest')
-        .withArgs('setDocumentState', {state: 'PAGE_ATTACHMENT_STATE', value: true});
-    });
+    //   messagingMock
+    //     .expects('sendRequest')
+    //     .withArgs('setDocumentState', {state: 'PAGE_ATTACHMENT_STATE', value: true});
+    // });
     
-    it('get page attachment state should send message', async () => {
-      buildStoryPlayer();
-      await manager.loadPlayers();
+    // it('get page attachment state should send message', async () => {
+    //   buildStoryPlayer();
+    //   await manager.loadPlayers();
 
-      await playerEl.getStoryState('page-attachment');
+    //   await playerEl.getStoryState('page-attachment');
 
-      messagingMock
-        .expects('sendRequest')
-        .withArgs('getDocumentState', {state: 'PAGE_ATTACHMENT_STATE'});
-    });
+    //   messagingMock
+    //     .expects('sendRequest')
+    //     .withArgs('getDocumentState', {state: 'PAGE_ATTACHMENT_STATE'});
+    // });
     
-    it('open page attachment should cause button to disappear', async () => {
-      //open page attachment
+    // it('open page attachment should cause button to disappear', async () => {
+    //   //open page attachment
     
-      expect(playerEl.shadowRoot.querySelector('button.amp-story-player-hide-button')).to.exist;
-    });
+    //   expect(playerEl.shadowRoot.querySelector('button.amp-story-player-hide-button')).to.exist;
+    // });
 
-    it('close page attachment should cause button to reappear', async () => {
-      //open page attachment
-      //close page attachment
+    // it('close page attachment should cause button to reappear', async () => {
+    //   //open page attachment
+    //   //close page attachment
 
-      expect(playerEl.shadowRoot.querySelector('button.amp-story-player-hide-button')).to.not.exist;
-    });
+    //   expect(playerEl.shadowRoot.querySelector('button.amp-story-player-hide-button')).to.not.exist;
+    // });
 
-    it('open page attachment should cause fire page-attachment-open event once', async () => {
-      //open page attachment
+    // it('open page attachment should cause fire page-attachment-open event once', async () => {
+    //   //open page attachment
     
-      const readySpy = env.sandbox.spy();
-      playerEl.addEventListener('page-attachment-open', readySpy);
+    //   const readySpy = env.sandbox.spy();
+    //   playerEl.addEventListener('page-attachment-open', readySpy);
 
-      expect(readySpy).to.have.been.calledOnce;
-    });
+    //   expect(readySpy).to.have.been.calledOnce;
+    // });
 
-    it('close page attachment should cause fire page-attachment-close event once', async () => {
-      //open page attachment
-      //close page attachment
+    // it('close page attachment should cause fire page-attachment-close event once', async () => {
+    //   //open page attachment
+    //   //close page attachment
 
-      const readySpy = env.sandbox.spy();
-      playerEl.addEventListener('page-attachment-close', readySpy);
+    //   const readySpy = env.sandbox.spy();
+    //   playerEl.addEventListener('page-attachment-close', readySpy);
 
-      expect(readySpy).to.have.been.calledOnce;
-    });
+    //   expect(readySpy).to.have.been.calledOnce;
+    // });
 
-    it('get page attachment state on open attachment should fire page-attachment-open event once', async () => {
-      //open page attachment
+    // it('get page attachment state on open attachment should fire page-attachment-open event once', async () => {
+    //   //open page attachment
       
-      const readySpy = env.sandbox.spy();
-      playerEl.addEventListener('page-attachment-open', readySpy);
+    //   const readySpy = env.sandbox.spy();
+    //   playerEl.addEventListener('page-attachment-open', readySpy);
       
-      expect(readySpy).to.have.been.calledOnce;
-    });
+    //   expect(readySpy).to.have.been.calledOnce;
+    // });
 
-    it('get page attachment state on closed attachment should fire page-attachment-close event once', async () => {
-      const playerEl = win.document.createElement('amp-story-player');
-      appendStoriesToPlayer(playerEl, 1);
+    // it('get page attachment state on closed attachment should fire page-attachment-close event once', async () => {
+    //   const playerEl = win.document.createElement('amp-story-player');
+    //   appendStoriesToPlayer(playerEl, 1);
 
-      const player = new AmpStoryPlayer(win, playerEl);
+    //   const player = new AmpStoryPlayer(win, playerEl);
 
-      await player.load();
+    //   await player.load();
 
-      const readySpy = env.sandbox.spy();
-      playerEl.addEventListener('page-attachment-close', readySpy);
+    //   const readySpy = env.sandbox.spy();
+    //   playerEl.addEventListener('page-attachment-close', readySpy);
 
-      await player.getStoryState('page-attachment');
+    //   await player.getStoryState('page-attachment');
 
-      expect(readySpy).to.have.been.calledOnce;
-    });
+    //   expect(readySpy).to.have.been.calledOnce;
+    // });
     
   });
 });
