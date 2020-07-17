@@ -96,11 +96,6 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
   },
   {
-    id: 'amp-list-init-from-state',
-    name: 'Allows amp-list to initialize off of amp-state',
-    spec: 'https://github.com/ampproject/amphtml/issues/26009',
-  },
-  {
     id: 'amp-playbuzz',
     name: 'AMP extension for playbuzz items (launched)',
     spec: 'https://github.com/ampproject/amphtml/issues/6106',
