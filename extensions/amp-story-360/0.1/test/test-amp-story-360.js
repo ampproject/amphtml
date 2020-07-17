@@ -15,7 +15,9 @@
  */
 
 import '../amp-story-360';
+import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin(
   'amp-story-360',
@@ -28,6 +30,7 @@ describes.realWin(
   (env) => {
     let win;
     let element;
+    let storeService;
     let threesixty;
 
     function appendAmpImg(parent, path) {
@@ -55,6 +58,11 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
+
+      storeService = new AmpStoryStoreService(win);
+      registerServiceBuilder(win, 'story-store', function () {
+        return storeService;
+      });
     });
 
     it('should build', async () => {
