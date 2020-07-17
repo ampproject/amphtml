@@ -25,7 +25,7 @@
   <amp-script width=1 height=1 script="local-script" data-ampdevmode></amp-script>
   <script type="text/plain" target="amp-script" id="local-script">
     function fetchData() {
-      return {items: [1, 2, 3, 4, 5]};
+      return Promise.resolve({items: [1, 2, 3, 4, 5]});
     }
     exportFunction('fetchData', fetchData);
   </script>
