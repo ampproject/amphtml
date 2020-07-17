@@ -29,7 +29,7 @@ const fontProviderAllowList = [
   'https://pro.fontawesome.com',
   'https://use.fontawesome.com',
   'https://use.typekit.net',
-];
+].join(' ');
 
 const sandboxVals = [
   'allow-forms',
@@ -51,7 +51,7 @@ const createSecureDocSkeleton = (sanitizedHeadElements) =>
       object-src 'none';
       child-src 'none';
       default-src 'none';
-      style-src ${fontProviderAllowList.join(' ')} 'unsafe-inline';
+      style-src ${fontProviderAllowList} 'unsafe-inline';
     ">
     ${sanitizedHeadElements}
   </head>
