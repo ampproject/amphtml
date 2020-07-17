@@ -445,9 +445,9 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
         const stories = toArray(playerEl.querySelectorAll('a'));
 
-        expect(stories[0][IFRAME_IDX]).to.not.be.undefined;
-        expect(stories[1][IFRAME_IDX]).to.not.be.undefined;
-        expect(stories[2][IFRAME_IDX]).to.not.be.undefined;
+        expect(stories[0][IFRAME_IDX]).to.exist;
+        expect(stories[1][IFRAME_IDX]).to.exist;
+        expect(stories[2][IFRAME_IDX]).to.exist;
       }
     );
 
@@ -468,8 +468,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
         const stories = toArray(playerEl.querySelectorAll('a'));
 
-        expect(stories[3][IFRAME_IDX]).to.not.be.undefined;
-        expect(stories[4][IFRAME_IDX]).to.be.undefined;
+        expect(stories[3][IFRAME_IDX]).to.exist;
+        expect(stories[4][IFRAME_IDX]).to.not.exist;
       }
     );
 
