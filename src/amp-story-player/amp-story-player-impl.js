@@ -187,6 +187,13 @@ export class AmpStoryPlayer {
    * @public
    */
   add(stories) {
+    const isStoryObject = (story) =>
+      typeof story === 'object' && story !== null && story.href;
+
+    if (!Array.isArray(stories) || stories.every(isStoryObject)) {
+      throw new Error('"stories" parameter has the wrong structure');
+    }
+
     for (let i = 0; i < stories.length; i++) {
       const story = stories[i];
       const anchor = this.createStoryAnchor_(story);
