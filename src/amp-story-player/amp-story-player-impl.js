@@ -90,6 +90,12 @@ const STORY_STATE_TYPE = {
   PAGE_ATTACHMENT_STATE: 'page-attachment',
 };
 
+/** @enum {string} */
+const STORY_MESSAGE_STATE_TYPE = {
+  PAGE_ATTACHMENT_STATE: 'PAGE_ATTACHMENT_STATE',
+  MUTED_STATE: 'MUTED_STATE',
+};
+
 /** @const {string} */
 export const IFRAME_IDX = '__AMP_IFRAME_IDX__';
 
@@ -332,13 +338,15 @@ export class AmpStoryPlayer {
           messaging.registerHandler('selectDocument', (event, data) => {
             this.onSelectDocument_(data);
           });
-          
-          messaging.sendRequest('onDocumentState', {state: 'PAGE_ATTACHMENT_STATE'});
+
+          messaging.sendRequest('onDocumentState', {
+            state: 'PAGE_ATTACHMENT_STATE',
+          });
 
           messaging.registerHandler('documentStateUpdate', (event, data) => {
             this.onDocumentStateUpdate_(data);
           });
-          
+
           resolve(messaging);
         },
         (err) => {
@@ -441,28 +449,28 @@ export class AmpStoryPlayer {
     this.updateMutedState_(iframeIdx, false);
   }
 
-  /** 
-   * 
+  /**
+   * Sends a message asking for the story's state and dispatches the appropriate event.
+   * @param {string} storyStateType
    */
-  getState(stateType) {
-    const iframeIdx = this.stories_[this.currentIdx_][IFRAME_IDX];
-    this.messagingPromises_[iframeIdx].then((messaging) => {
-      messaging.sendRequest(
-        'getDocumentState',
-        {state: 'PAGE_ATTACHMENT_STATE'}, 
-        true
-      ).then(event => {
-        this.dispatchPageAttachmentEvent_(event.value)
-      })
-    });
+  getState(storyStateType) {
+    switch (storyStateType) {
+      case STORY_STATE_TYPE.PAGE_ATTACHMENT_STATE:
+        this.getPageAttachmentState_();
+        break;
+      default:
+        break;
+    }
   }
 
-  /** 
-   * 
+  /**
+   * Sends a mesage updating the story's state with provided value.
+   * @param {string} storyStateType
+   * @param {booleam} value
    */
-  setState(stateType, value) {
+  setState(storyStateType, value) {
     const iframeIdx = this.stories_[this.currentIdx_][IFRAME_IDX];
-    switch (stateType) {
+    switch (storyStateType) {
       case STORY_STATE_TYPE.PAGE_ATTACHMENT_STATE:
         this.updatePageAttachmentState_(iframeIdx, value);
         break;
@@ -736,56 +744,134 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Updates the muted state of the story inside the iframe.
+   * Updates the specified iframe's story state with given value.
+   * @param {number} iframeIdx
+   * @param {string} state
+   * @param {boolean} value
+   * @private
+   */
+  updateStoryState_(iframeIdx, state, value) {
+    this.messagingPromises_[iframeIdx].then((messaging) => {
+      messaging.sendRequest('setDocumentState', {state, value});
+    });
+  }
+
+  /**
+   * Update the muted state of the story inside the iframe.
    * @param {number} iframeIdx
    * @param {boolean} mutedValue
    * @private
    */
   updateMutedState_(iframeIdx, mutedValue) {
-    this.updateStoryState_(iframeIdx, 'MUTED_STATE', mutedValue);
+    this.updateStoryState_(
+      iframeIdx,
+      STORY_MESSAGE_STATE_TYPE.MUTED_STATE,
+      mutedValue
+    );
   }
 
   /**
-   * Updates the page attachment state of the story inside the iframe.
+   * Update the page attachment state of the story inside the iframe.
    * @param {number} iframeIdx
    * @param {boolean} pageAttachmentValue
    * @private
    */
   updatePageAttachmentState_(iframeIdx, pageAttachmentValue) {
-    this.updateStoryState_(iframeIdx, 'PAGE_ATTACHMENT_STATE', pageAttachmentValue)
+    this.updateStoryState_(
+      iframeIdx,
+      STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE,
+      pageAttachmentValue
+    );
   }
 
-  /** 
+  /**
+   * Send message to story asking for page attachment state.
+   * @private
+   */
+  getPageAttachmentState_() {
+    const iframeIdx = this.stories_[this.currentIdx_][IFRAME_IDX];
+    this.messagingPromises_[iframeIdx].then((messaging) => {
+      messaging
+        .sendRequest(
+          'getDocumentState',
+          {state: STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE},
+          true
+        )
+        .then((event) => this.dispatchStateEvent_(event.state, event.value));
+    });
+  }
+
+  /**
    * React to documentStateUpdate events.
    * @param {!Object} data
    * @private
    */
   onDocumentStateUpdate_(data) {
-    const pageAttachmentOpen = data.value;
-    this.updateButtonVisibility_(!pageAttachmentOpen);
-    this.dispatchPageAttachmentEvent_(pageAttachmentOpen);
+    switch (data.state) {
+      case STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE:
+        this.onPageAttachmentStateUpdate_(data.value);
+        break;
+      default:
+        break;
+    }
   }
 
-  /** 
+  /**
+   * React to page attachment update events.
+   * @param {boolean} pageAttachmentOpen
+   * @private
+   */
+  onPageAttachmentStateUpdate_(pageAttachmentOpen) {
+    this.updateButtonVisibility_(!pageAttachmentOpen);
+    this.dispatchStateEvent_(
+      STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE,
+      pageAttachmentOpen
+    );
+  }
+
+  /**
    * Updates the visbility state of the exit control button.
    * @param {boolean} isVisible
    * @private
    */
   updateButtonVisibility_(isVisible) {
     const button = this.rootEl_.querySelector('button');
-    if (button === null) return;
-    isVisible ? button.classList.remove('hidden') : button.classList.add('hidden');
+    if (button === null) {
+      return;
+    }
+    isVisible
+      ? button.classList.remove('amp-story-player-hide-button')
+      : button.classList.add('amp-story-player-hide-button');
   }
 
-  /** 
-   * Dispatches a page attachment event.
+  /**
+   * Dispatch custom events based on the state type.
+   * @param {string} storyStateType
+   * @param {boolean} value
+   * @private
+   */
+  dispatchStateEvent_(storyStateType, value) {
+    switch (storyStateType) {
+      case STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE:
+        this.dispatchPageAttachmentEvent_(value);
+      default:
+        break;
+    }
+  }
+
+  /**
+   * Dispatch a page attachment event.
    * @param {boolean}  isPageAttachmentOpen
    * @private
    */
-  dispatchPageAttachmentEvent_(isPageAttachmentOpen){
-    isPageAttachmentOpen 
-    ? this.element_.dispatchEvent(createCustomEvent(this.win_, 'page-attachment-open'))
-    : this.element_.dispatchEvent(createCustomEvent(this.win_, 'page-attachment-close'));
+  dispatchPageAttachmentEvent_(isPageAttachmentOpen) {
+    isPageAttachmentOpen
+      ? this.element_.dispatchEvent(
+          createCustomEvent(this.win_, 'page-attachment-open')
+        )
+      : this.element_.dispatchEvent(
+          createCustomEvent(this.win_, 'page-attachment-close')
+        );
   }
 
   /**
