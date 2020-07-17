@@ -394,7 +394,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await manager.loadPlayers();
 
       const storyObjects = createStoryObjects(1);
-      playerEl.addStories(storyObjects);
+      playerEl.add(storyObjects);
 
       const stories = toArray(playerEl.querySelectorAll('a'));
 
@@ -406,7 +406,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await manager.loadPlayers();
 
       const storyObjects = createStoryObjects(0);
-      playerEl.addStories(storyObjects);
+      playerEl.add(storyObjects);
 
       const stories = toArray(playerEl.querySelectorAll('a'));
 
@@ -421,7 +421,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         await manager.loadPlayers();
 
         const storyObjects = createStoryObjects(2);
-        playerEl.addStories(storyObjects);
+        playerEl.add(storyObjects);
 
         const stories = toArray(playerEl.querySelectorAll('a'));
 
@@ -443,7 +443,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
         win.requestAnimationFrame(() => {
           const storyObjects = createStoryObjects(2);
-          playerEl.addStories(storyObjects);
+          playerEl.add(storyObjects);
 
           const stories = toArray(playerEl.querySelectorAll('a'));
 

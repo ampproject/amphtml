@@ -161,7 +161,7 @@ export class AmpStoryPlayer {
   attachCallbacksToElement_() {
     this.element_.load = this.load.bind(this);
     this.element_.show = this.show.bind(this);
-    this.element_.addStories = this.addStories.bind(this);
+    this.element_.add = this.add.bind(this);
     this.element_.play = this.play.bind(this);
     this.element_.pause = this.pause.bind(this);
     this.element_.go = this.go.bind(this);
@@ -185,7 +185,7 @@ export class AmpStoryPlayer {
    *
    * @param {!Array<!{href: string, title: ?string}>} stories
    */
-  addStories(stories) {
+  add(stories) {
     for (let i = 0; i < stories.length; i++) {
       const story = stories[i];
       const anchor = this.createStoryAnchor_(story);
