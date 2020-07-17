@@ -32,31 +32,31 @@ tags: {  # <amp-story-360>
   spec_url: "https://amp.dev/documentation/components/amp-story-360"
   attrs: {
     name: "duration"
-    value_regex: "([0-9\.]+)\s*(s|ms)"
+    value_regex: "([0-9\\.]+)\\s*(s|ms)"
   }
   attrs: {
     name: "heading-start"
-    value_regex: "-?\d+\.?\d*"
+    value_regex: "-?\\d+\\.?\\d*"
   }
   attrs: {
     name: "pitch-start"
-    value_regex: "-?\d+\.?\d*"
+    value_regex: "-?\\d+\\.?\\d*"
   }
   attrs: {
     name: "zoom-start"
-    value_regex: "\d+\.?\d*"
+    value_regex: "\\d+\\.?\\d*"
   }
   attrs: {
     name: "heading-end"
-    value_regex: "-?\d+\.?\d*"
+    value_regex: "-?\\d+\\.?\\d*"
   }
   attrs: {
     name: "pitch-end"
-    value_regex: "-?\d+\.?\d*"
+    value_regex: "-?\\d+\\.?\\d*"
   }
   attrs: {
     name: "zoom-end"
-    value_regex: "\d+\.?\d*"
+    value_regex: "\\d+\\.?\\d*"
   }
   child_tags: {
     mandatory_num_child_tags: 1
