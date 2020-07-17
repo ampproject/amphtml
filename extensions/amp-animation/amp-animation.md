@@ -111,8 +111,9 @@ Trigger the start of one or multiple animations via the `trigger` attribute or
 an [action](#actions).
 
 You may place `amp-animation` controlled via actions anywhere in the DOM. If the
-animation contains `trigger="visibility"` it must be a direct child of the
-`<body>`.
+animation contains `trigger="visibility"` it will be triggered when
+the parent element comes into the viewport, and paused when it leaves the
+viewport.
 
 ### Defining effects
 
