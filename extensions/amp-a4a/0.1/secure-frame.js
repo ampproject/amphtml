@@ -46,6 +46,7 @@ const createSecureDocSkeleton = (sanitizedHeadElements) =>
     <meta http-equiv=Content-Security-Policy content="
       img-src *;
       media-src *;
+      font-src *;
       script-src 'none';
       object-src 'none';
       child-src 'none';

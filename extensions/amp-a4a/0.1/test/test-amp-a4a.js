@@ -56,6 +56,10 @@ import {createElementWithAttributes} from '../../../../src/dom';
 import {createIframePromise} from '../../../../testing/iframe';
 import {dev, user} from '../../../../src/log';
 import {
+  forceExperimentBranch,
+  toggleExperiment,
+} from '../../../../src/experiments';
+import {
   incrementLoadingAds,
   is3pThrottled,
 } from '../../../amp-ad/0.1/concurrent-load';
@@ -64,6 +68,84 @@ import {resetScheduledElementForTesting} from '../../../../src/service/custom-el
 import {data as testFragments} from './testdata/test_fragments';
 import {toggleAmpdocFieForTesting} from '../../../../src/ampdoc-fie';
 import {data as validCSSAmp} from './testdata/valid_css_at_rules_amp.reserialized';
+
+describes.realWin('no signing', {amp: true}, (env) => {
+  let doc;
+  let element;
+  let a4a;
+
+  beforeEach(() => {
+    doc = env.win.document;
+    toggleExperiment(env.win, 'a4a-no-signing', true);
+    forceExperimentBranch(
+      env.win,
+      NO_SIGNING_EXP.id,
+      NO_SIGNING_EXP.experiment
+    );
+    element = createElementWithAttributes(env.win.document, 'amp-ad', {
+      'width': '300',
+      'height': '250',
+      'type': 'doubleclick',
+      'layout': 'fixed',
+    });
+    doc.body.appendChild(element);
+    a4a = new AmpA4A(element);
+    // Make the ad think it has size.
+    env.sandbox.stub(a4a, 'getIntersectionElementLayoutBox').returns({
+      height: 250,
+      width: 300,
+    });
+    env.sandbox.stub(a4a, 'getAdUrl').returns('https://adnetwork.com');
+    env.fetchMock.mock(
+      'begin:https://adnetwork.com',
+      validCSSAmp.minifiedCreative
+    );
+  });
+
+  it('should contain the correct security features', async () => {
+    await a4a.buildCallback();
+    a4a.onLayoutMeasure();
+    await a4a.layoutCallback();
+    const fie = doc.body.querySelector('iframe[srcdoc]');
+    expect(fie.getAttribute('sandbox')).to.equal(
+      'allow-forms allow-popups-to-escape-sandbox allow-same-origin ' +
+        'allow-top-navigation'
+    );
+    const cspMeta = fie.contentDocument.querySelector(
+      'meta[http-equiv=Content-Security-Policy]'
+    );
+    expect(cspMeta).to.be.ok;
+    expect(cspMeta.content).to.include('img-src *;');
+    expect(cspMeta.content).to.include('media-src *;');
+    expect(cspMeta.content).to.include('font-src *;');
+    expect(cspMeta.content).to.include("script-src 'none';");
+    expect(cspMeta.content).to.include("object-src 'none';");
+    expect(cspMeta.content).to.include("child-src 'none';");
+    expect(cspMeta.content).to.include("default-src 'none';");
+    expect(cspMeta.content).to.include(
+      'style-src ' +
+        'https://cdn.materialdesignicons.com ' +
+        'https://cloud.typography.com ' +
+        'https://fast.fonts.net ' +
+        'https://fonts.googleapis.com ' +
+        'https://maxcdn.bootstrapcdn.com https://p.typekit.net https://pro.fontawesome.com ' +
+        'https://use.fontawesome.com ' +
+        'https://use.typekit.net ' +
+        "'unsafe-inline';"
+    );
+  });
+
+  it('should complete the rendering', async () => {
+    await a4a.buildCallback();
+    a4a.onLayoutMeasure();
+    await a4a.layoutCallback();
+    const fie = doc.body.querySelector('iframe[srcdoc]');
+    expect(fie).to.be.ok;
+    expect(fie.contentDocument.body.textContent).to.contain.string(
+      'Hello, world.'
+    );
+  });
+});
 
 [NO_SIGNING_EXP.control, NO_SIGNING_EXP.experiment].forEach((branch) => {
   describe(`no-signing: ${branch === NO_SIGNING_EXP.experiment}`, () => {

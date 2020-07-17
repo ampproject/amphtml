@@ -1655,7 +1655,8 @@ export class AmpA4A extends AMP.BaseElement {
           friendlyIframeEmbed.iframe.contentDocument ||
           friendlyIframeEmbed.win.document;
         const {body} = frameDoc;
-        this.transferBody_(body);
+
+        const renderComplete = this.transferBody_(body);
 
         setFriendlyIframeEmbedVisible(friendlyIframeEmbed, this.isInViewport());
         // Ensure visibility hidden has been removed (set by boilerplate).
@@ -1681,8 +1682,7 @@ export class AmpA4A extends AMP.BaseElement {
           this.maybeTriggerAnalyticsEvent_('friendlyIframeIniLoad');
         });
 
-        // There's no need to wait for all resources to load.
-        // StartRender is enough
+        return renderComplete;
       });
     });
   }
