@@ -38,7 +38,7 @@ export function BaseCarousel(props) {
   } = props;
   const childrenArray = toChildArray(children);
   const {length} = childrenArray;
-  const [curSlide, setCurSlide] = useState(slide ? slide : defaultSlide || 0);
+  const [curSlide, setCurSlide] = useState(defaultSlide || 0);
   const slideState = slide ? slide : curSlide;
   const ignoreProgrammaticScroll = useRef(true);
   const advance = (dir) => {

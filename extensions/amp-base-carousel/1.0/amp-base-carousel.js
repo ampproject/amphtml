@@ -112,7 +112,7 @@ AmpBaseCarousel['Component'] = BaseCarousel;
 AmpBaseCarousel['children'] = {
   'children': {
     name: 'children',
-    selector: ':not([slot="prev-arrow"]):not([slot="next-arrow"])',
+    selector: '*',
     single: false,
   },
   'arrowPrev': {
