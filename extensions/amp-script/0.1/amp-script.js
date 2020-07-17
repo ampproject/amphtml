@@ -16,6 +16,7 @@
 
 import * as WorkerDOM from '@ampproject/worker-dom/dist/amp/main.mjs';
 import {CSS} from '../../../build/amp-script-0.1.css';
+import {Deferred} from '../../../src/utils/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Purifier} from '../../../src/purifier/purifier';
 import {Services} from '../../../src/services';
@@ -24,6 +25,7 @@ import {calculateExtensionScriptUrl} from '../../../src/service/extension-locati
 import {cancellation} from '../../../src/error';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
 import {getService, registerServiceBuilder} from '../../../src/service';
@@ -31,7 +33,6 @@ import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
 import {utf8Encode} from '../../../src/utils/bytes';
-import {Deferred} from '../../../src/utils/promise'
 
 /** @const {string} */
 const TAG = 'amp-script';
@@ -166,10 +167,11 @@ export class AmpScript extends AMP.BaseElement {
    * Calls the specified function on this amp-script's worker-dom instance.
    *
    * @param {*} functionIdentifier
+   * @return {!Promise}
    */
   callFunction(functionIdentifier) {
     return this.initializationCompleted_.promise.then(() => {
-      return this.workerDom_.callFunction(functionIdentifier)
+      return this.workerDom_.callFunction(functionIdentifier);
     });
   }
 
@@ -520,7 +522,7 @@ export class AmpScriptService {
 
     /** @private @const {!../../../src/service/crypto-impl.Crypto} */
     this.crypto_ = Services.cryptoFor(ampdoc.win);
-   
+
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
   }
@@ -567,9 +569,18 @@ export class AmpScriptService {
    * @return {Promise<*>}
    */
   callFunction(ampScriptId, fnIdentifier) {
-    const ampScriptEl = this.ampdoc_.getRootNode().querySelector(`amp-script[script=${ampScriptId}]`);
-    userAssert(ampScriptEl, `[amp-script]: could not find amp-script with script set to ${ampScriptId}`);
-    return ampScriptEl.getImpl().then(impl => impl.callFunction(fnIdentifier));
+    const ampScriptEl = this.ampdoc_
+      .getRootNode()
+      .querySelector(
+        `amp-script[script=${escapeCssSelectorIdent(ampScriptId)}]`
+      );
+    userAssert(
+      ampScriptEl,
+      `[amp-script]: could not find amp-script with script set to ${ampScriptId}`
+    );
+    return ampScriptEl
+      .getImpl()
+      .then((impl) => impl.callFunction(fnIdentifier));
   }
 }
 

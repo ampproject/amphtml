@@ -460,7 +460,7 @@ export class AmpList extends AMP.BaseElement {
         return json;
       });
   }
-  
+
   /**
    * Gets the json from an amp-script uri.
    *
@@ -471,13 +471,18 @@ export class AmpList extends AMP.BaseElement {
   getAmpScriptJson_(src) {
     return Services.scriptForDocOrNull(this.element)
       .then((ampScript) => {
-        userAssert(ampScript, '"amp-script:" URLs require amp-script to be installed.');
+        userAssert(
+          ampScript,
+          '"amp-script:" URLs require amp-script to be installed.'
+        );
         userAssert(
           !this.ssrTemplateHelper_.isEnabled(),
           '[amp-list]: "amp-script" URIs cannot be used in SSR mode.'
         );
 
-        const [ampScriptId, fnIdentifier ] = src.slice(AMP_SCRIPT_URI_SCHEME.length).split('.');
+        const args = src.slice(AMP_SCRIPT_URI_SCHEME.length).split('.');
+        const ampScriptId = args[0];
+        const fnIdentifier = args[1];
         return ampScript.callFunction(ampScriptId, fnIdentifier);
       })
       .then((json) => {
@@ -488,7 +493,6 @@ export class AmpList extends AMP.BaseElement {
         return json;
       });
   }
-
 
   /** @override */
   mutatedAttributesCallback(mutations) {

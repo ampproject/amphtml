@@ -203,7 +203,7 @@ export class Services {
       'amp-bind'
     ));
   }
-  
+
   /**
    * @param {!Element|!ShadowRoot} element
    * @return {!Promise<?../extensions/amp-bind/0.1/amp-script.AmpScriptService>}
