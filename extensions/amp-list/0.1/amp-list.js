@@ -481,6 +481,10 @@ export class AmpList extends AMP.BaseElement {
         );
 
         const args = src.slice(AMP_SCRIPT_URI_SCHEME.length).split('.');
+        userAssert(
+          args.length === 2,
+          '[amp-list]: "amp-script" URIs must be of the format "scriptId.functionIdentifier".'
+        );
         const ampScriptId = args[0];
         const fnIdentifier = args[1];
         return ampScript.callFunction(ampScriptId, fnIdentifier);

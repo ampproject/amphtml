@@ -1,7 +1,7 @@
 <!--
   ## Introduction
 
-  The [`amp-list`](https://amp.dev/documentation/components/amp-list) component fetches dynamic content from a CORS JSON endpoint and renders it using a supplied template. This is good for embedding a dynamic list of related articles.
+  The [`amp-list`](https://amp.dev/documentation/components/amp-list) component can fetch dynamic content by calling in to custom JS Functions.
 -->
 <!-- -->
 <!doctype html>
@@ -27,9 +27,10 @@
     function fetchData() {
       return Promise.resolve({items: [1, 2, 3, 4, 5]});
     }
+
     exportFunction('fetchData', fetchData);
   </script>
-  <amp-list id="list1" width="auto" height="100" layout="fixed-height" src="amp-script:local-script.fetchData" class="m1" reset-on-refresh>
+  <amp-list id="list1" width="auto" height="100" layout="fixed-height" src="amp-script:local-script.fetchData">
     <template type="amp-mustache" id="amp-template-id">
       <div>{{.}}</div>
     </template>

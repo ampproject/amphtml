@@ -44,7 +44,7 @@ const TAG = 'amp-script';
  *   onerror: ?function(!ErrorEvent):void
  * }}
  */
-let WorkerDOMWorker;
+let WorkerDOMWorkerDef;
 
 /**
  * Max cumulative size of author scripts from all amp-script elements on page.
@@ -83,7 +83,7 @@ export class AmpScript extends AMP.BaseElement {
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win);
 
-    /** @private {?WorkerDOMWorker} */
+    /** @private {?WorkerDOMWorkerDef} */
     this.workerDom_ = null;
 
     /** @private {?UserActivationTracker} */

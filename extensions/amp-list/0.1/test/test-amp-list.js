@@ -929,6 +929,17 @@ describes.repeated(
               expect(list.layoutCallback()).eventually.rejectedWith(errorMsg);
             });
 
+            it('"amp-script:" uri should skip rendering and emit an error', () => {
+              toggleExperiment(win, 'protocol-adapters', true);
+              list.element.setAttribute('src', 'amp-script:fetchData');
+
+              listMock.expects('scheduleRender_').never();
+
+              const errorMsg = /cannot be used in SSR mode/;
+              expectAsyncConsoleError(errorMsg);
+              expect(list.layoutCallback()).eventually.rejectedWith(errorMsg);
+            });
+
             it('Bound [src] should skip rendering and emit an error', async () => {
               listMock.expects('scheduleRender_').never();
               allowConsoleError(async () => {
@@ -971,6 +982,67 @@ describes.repeated(
               listMock.expects('togglePlaceholder').withExactArgs(false).once();
               listMock.expects('toggleFallback').withExactArgs(true).once();
               return list.layoutCallback().catch(() => {});
+            });
+          });
+          describe.only('Using amp-script: protocol', () => {
+            beforeEach(() => {
+              env.sandbox.stub(Services, 'scriptForDocOrNull');
+              resetExperimentTogglesForTesting(win);
+              element = createAmpListElement();
+              element.setAttribute('src', 'amp-script:example.fetchData');
+              element.toggleLoading = () => {};
+              list = createAmpList(element);
+            });
+
+            it('should throw an error if used without the experiment enabled', async () => {
+              const errorMsg = /Invalid value: amp-script:example.fetchData/;
+              expectAsyncConsoleError(errorMsg);
+              expect(list.layoutCallback()).to.eventually.throw(errorMsg);
+            });
+
+            it('should throw an error if given an invalid format', async () => {
+              toggleExperiment(win, 'protocol-adapters', true);
+              Services.scriptForDocOrNull.returns(Promise.resolve({}));
+              const errorMsg = /URIs must be of the format/;
+
+              element.setAttribute('src', 'amp-script:fetchData');
+              expectAsyncConsoleError(errorMsg);
+              expect(list.layoutCallback()).to.eventually.throw(errorMsg);
+
+              element.setAttribute('src', 'amp-script:too.many.dots');
+              expectAsyncConsoleError(errorMsg);
+              expect(list.layoutCallback()).to.eventually.throw(errorMsg);
+            });
+
+            it('should log an error if amp-script was not included', async () => {
+              toggleExperiment(win, 'protocol-adapters', true);
+              Services.scriptForDocOrNull.returns(Promise.resolve(null));
+
+              const errorMsg = /amp-script to be installed/;
+              expectAsyncConsoleError(errorMsg);
+              expect(list.layoutCallback()).eventually.rejectedWith(errorMsg);
+            });
+
+            it('should render a list from AmpScriptService provided data', async () => {
+              toggleExperiment(win, 'protocol-adapters', true);
+              Services.scriptForDocOrNull.returns(
+                Promise.resolve({
+                  callFunction(scriptId, fnId) {
+                    if (scriptId === 'example' && fnId === 'fetchData') {
+                      return Promise.resolve({items: [3, 2, 1]});
+                    }
+                    return Promise.reject('Invalid function scriptId/fnId');
+                  },
+                })
+              );
+
+              listMock
+                .expects('scheduleRender_')
+                .withExactArgs([3, 2, 1], /*append*/ false, {items: [3, 2, 1]})
+                .returns(Promise.resolve())
+                .once();
+
+              await list.layoutCallback();
             });
           });
         }); // without amp-bind
