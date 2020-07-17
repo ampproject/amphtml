@@ -182,7 +182,6 @@ export class AmpStoryPlayer {
    * Adds stories to the player, both adding new anchor tags to the player,
    * and creating or assigning iframes to those that are close to the
    * current playing story.
-   *
    * @param {!Array<!{href: string, title: ?string, posterImage: ?string}>} stories
    * @public
    */
@@ -215,9 +214,7 @@ export class AmpStoryPlayer {
 
   /**
    * Given a story object, creates an appropiate anchor element.
-   *
    * @param {{href: string, title: ?string, posterImage: ?string}} story
-   *
    * @return {HTMLAnchorElement}
    * @private
    */
@@ -308,7 +305,6 @@ export class AmpStoryPlayer {
    * Creates an iframe for a certain story. Should only be done if
    * this.iframes_.length < this.MAX_IFRAMES. It is assumed that iframes
    * are created for stories in order, starting from the first one.
-   *
    * @param {number} idx The index of the story in this.stories_, which
    *    will also correspond to the index of its iframe in this.iframes_.
    * @private
