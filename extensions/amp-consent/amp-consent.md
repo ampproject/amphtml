@@ -313,7 +313,7 @@ _Example_: Displays a prompt user interface
 
 AMP displays prompt UI on page load or by user interaction. The prompt UI is hidden based on the three user actions described below.
 
-AMP also supports external consent UI flow with the usage of `<amp-iframe>`. More information about the communication of user actions can be found [below](#prompt-actions-from-external-consent-ui).
+AMP also supports external consent UI flow via `promptUiSrc` which will load your custom iframe. More information about the communication of user actions can be found [here](./integrating-consent.md#Informing-Consent-response).
 
 #### Prompt UI for Stories
 
@@ -355,24 +355,6 @@ following value scheme `on="event:idOfAmpConsentElement.accept/reject/dismiss"`
 - `reject`: publisher instructs AMP to remember the reject decision to the consent, cancels `buildCallback` (AMP lifecycle callback to [build AMP components](https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md#buildcallback)) of components waiting for the consent, and hides the prompt UI.
 
 - `dismiss`: instruct AMP to cancel `buildCallback` of components waiting for the consent, and hides the prompt UI.
-
-##### Prompt Actions from External Consent UI
-
-When using iframes as consent prompt UI. Iframes can send a `consent-response` message to the parent AMP page to inform [prompt actions](#prompt-actions) on the current consent. Note the message must come from the `<amp-iframe>` created iframe. Messages from nested iframes will be ignored.
-
-_Example: iframe `consent-response` request_
-
-```javascript
-window.parent.postMessage(
-  {
-    type: 'consent-response',
-    action: 'accept/reject/dismiss',
-  },
-  '*'
-);
-```
-
-<a name="post-prompt"></a>
 
 ### Post-prompt UI (optional)
 
