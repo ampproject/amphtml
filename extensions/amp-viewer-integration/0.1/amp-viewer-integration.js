@@ -90,7 +90,7 @@ export class AmpViewerIntegration {
       return Promise.resolve();
     }
 
-    if (MOVE_FIXED_LAYER) {
+    if (MOVE_FIXED_LAYER || IS_SXG) {
       const viewport = Services.viewportForDoc(ampdoc);
       viewport.createFixedLayer(FixedLayer);
     }
