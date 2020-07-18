@@ -63,7 +63,6 @@ function getReplacePlugin() {
   const replacements = [
     createReplacement('IS_ESM', argv.esm || argv.sxg),
     createReplacement('IS_SXG', argv.sxg),
-    //createReplacement('MOVE_FIXED_LAYER', argv.sxg),
   ];
 
   const experimentConstant = getExperimentConstant();
