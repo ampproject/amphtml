@@ -3785,6 +3785,19 @@ TEST(ParseCssTest, ParseSelectors_ReportsErrorForUnparsedRemainderOfInput) {
 })"");
 }
 
+TEST(ParseCssTest, SelectorParserRecordsOneParsingError) {
+  vector<char32_t> css = htmlparser::Strings::Utf8ToCodepoints("/*error*/ {}");
+  vector<unique_ptr<ErrorToken>> errors;
+  vector<unique_ptr<Token>> tokens =
+      Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
+  unique_ptr<Stylesheet> stylesheet =
+      ParseAStylesheet(&tokens, AmpCssParsingConfig(), &errors);
+  EXPECT_EQ(0, errors.size());
+  SelectorVisitor visitor(&errors);
+  stylesheet->Accept(&visitor);
+  EXPECT_EQ(1, errors.size());
+}
+
 class CollectCombinatorNodes : public SelectorVisitor {
  public:
   CollectCombinatorNodes() : SelectorVisitor(&errors_) {}
