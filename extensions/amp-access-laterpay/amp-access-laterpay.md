@@ -115,7 +115,7 @@ The following resources provide further documentation on using LaterPay with AMP
 - [LaterPay: How we do MicroPayments](https://docs.laterpay.net/how_we_do_micropayments/)
 - [LaterPay Connector](https://docs.laterpay.net/connector/) - Similar to `amp-access-laterpay` but for non AMP pages.
 
-[tip]
+[/tip]
 
 ### Using Access Content Markup and showing the purchase list
 
