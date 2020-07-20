@@ -782,8 +782,8 @@
     {
       "url": "examples/visual-tests/amp-story-player/player.html",
       "name": "amp-story-player basic page",
-      "viewport": {"width": 800, "height": 600},
-      "loading_complete_selectors": [/* TODO(): Add story loaded selector. */ "story-loaded"]
+      "loading_complete_selectors": [/* TODO(): Add story loaded selector. */ ".i-amphtml-story-player-loaded"],
+      loading_complete_delay_ms: 500
     }
   ]
 }
