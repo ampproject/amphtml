@@ -110,11 +110,6 @@ AmpBaseCarousel['Component'] = BaseCarousel;
 
 /** @override */
 AmpBaseCarousel['children'] = {
-  'children': {
-    name: 'children',
-    selector: '*',
-    single: false,
-  },
   'arrowPrev': {
     name: 'arrowPrev',
     selector: '[slot="prev-arrow"]',
@@ -124,6 +119,11 @@ AmpBaseCarousel['children'] = {
     name: 'arrowNext',
     selector: '[slot="next-arrow"]',
     single: true,
+  },
+  'children': {
+    name: 'children',
+    selector: '*', // This should be last as catch-all.
+    single: false,
   },
 };
 
