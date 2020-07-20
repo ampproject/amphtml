@@ -287,7 +287,7 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_PAGE_ATTACHMENT_STATE:
       return /** @type {!State} */ ({
         ...state,
-        [StateProperty.PAGE_ATTACHMENT_STATE]: data,
+        [StateProperty.PAGE_ATTACHMENT_STATE]: !!data,
       });
     // Triggers the ad UI.
     case Action.TOGGLE_AD:
