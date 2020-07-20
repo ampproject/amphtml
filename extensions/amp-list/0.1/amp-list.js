@@ -419,6 +419,13 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   isAmpScriptSrc_(src) {
+    if (getMode().development) {
+      devAssert(
+        startsWith(src, AMP_SCRIPT_URI_SCHEME) ===
+          isExperimentOn(this.win, 'protocol-adapters'),
+        'Must enable "protocol-adapters" experiment to use an amp-script src.'
+      );
+    }
     return (
       isExperimentOn(this.win, 'protocol-adapters') &&
       startsWith(src, AMP_SCRIPT_URI_SCHEME)
