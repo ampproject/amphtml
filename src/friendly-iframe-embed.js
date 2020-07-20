@@ -20,7 +20,7 @@ import {LegacyInstaller} from './friendly-iframe-embed-legacy';
 import {Services} from './services';
 import {Signals} from './utils/signals';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
-import {dev, rethrowAsync, userAssert} from './log';
+import {dev, devAssert, rethrowAsync, userAssert} from './log';
 import {
   disposeServicesForEmbed,
   getTopWindow,
@@ -61,7 +61,7 @@ import {whenContentIniLoad} from './ini-load';
  * @typedef {{
  *   host: (?AmpElement|undefined),
  *   url: string,
- *   html: string,
+ *   html: ?string,
  *   extensionIds: (?Array<string>|undefined),
  *   fonts: (?Array<string>|undefined),
  * }}
@@ -96,7 +96,7 @@ function getDelayPromiseProducer() {
  * Returns `true` if the Friendly Iframes are supported.
  * @return {boolean}
  */
-function isSrcdocSupported() {
+export function isSrcdocSupported() {
   if (srcdocSupported === undefined) {
     srcdocSupported = 'srcdoc' in HTMLIFrameElement.prototype;
   }
@@ -142,7 +142,8 @@ export function installFriendlyIframeEmbed(
     );
   }
 
-  const html = mergeHtml(spec);
+  const isInUnsignedExp = !spec.html;
+  const html = isInUnsignedExp ? spec.html : mergeHtml(spec);
 
   // Receive the signal when iframe is ready: it's document is formed.
   iframe.onload = () => {
@@ -159,7 +160,9 @@ export function installFriendlyIframeEmbed(
   };
   let loadedPromise;
   if (isSrcdocSupported()) {
-    iframe.srcdoc = html;
+    if (!isInUnsignedExp) {
+      iframe.srcdoc = html;
+    }
     loadedPromise = loadPromise(iframe);
     container.appendChild(iframe);
     registerViolationListener();
@@ -167,9 +170,11 @@ export function installFriendlyIframeEmbed(
     iframe.src = 'about:blank';
     container.appendChild(iframe);
     const childDoc = iframe.contentWindow.document;
-    childDoc.open();
     registerViolationListener();
-    childDoc.write(html);
+    if (!isInUnsignedExp) {
+      childDoc.open();
+      childDoc.write(devAssert(html));
+    }
     // With document.write, `iframe.onload` arrives almost immediately, thus
     // we need to wait for child's `window.onload`.
     loadedPromise = loadPromise(iframe.contentWindow);
