@@ -19,7 +19,7 @@ import {Layout} from '../layout';
 import {Services} from '../services';
 import {computedStyle, toggle} from '../style';
 import {dev, devAssert} from '../log';
-import {isBlockedByConsent, reportError} from '../error';
+import {isBlockedByConsent} from '../error';
 import {
   layoutRectLtwh,
   layoutRectSizeEquals,
@@ -902,7 +902,6 @@ export class Resource {
         this.state_
       );
       err.associatedElement = this.element;
-      reportError(err);
       return Promise.reject(err);
     }
 
