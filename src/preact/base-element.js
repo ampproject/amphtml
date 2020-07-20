@@ -263,7 +263,8 @@ PreactBaseElement['passthrough'] = false;
  * mode except that when there are no children elements, the returned
  * prop['children'] will be null instead of the unnamed <slot>.  This allows
  * the Preact environment to have conditional behavior depending on whether
- * or not there are children.
+ * or not there are children.  Consider using a Mutation Observer in your
+ * component for detailed control of rerender when children are updated.
  *
  * @protected {boolean}
  */
@@ -346,8 +347,15 @@ function collectProps(Ctor, element, defaultProps) {
     props['children'] = [<Slot />];
   } else if (passthroughNonEmpty) {
     devAssert(!childrenDefs, errorMessage);
-    props['children'] =
-      element.getRealChildNodes().length > 0 ? [<Slot />] : null;
+    // If all children are whitespace text nodes, consider the element as
+    // having no children
+    props['children'] = element
+      .getRealChildNodes()
+      .every(
+        (node) => node.nodeType === 3 && node.nodeValue.trim().length === 0
+      )
+      ? null
+      : [<Slot />];
   } else if (childrenDefs) {
     const children = [];
     props['children'] = children;
