@@ -224,11 +224,13 @@ export class AmpStoryPlayer {
     story.posterImage &&
       anchor.setAttribute('data-poster-portrait-src', story.posterImage);
 
-    const title = this.doc_.createElement('span');
-    title.classList.add('title');
-    title.textContent = story.title;
+    if (story.title) {
+      const title = this.doc_.createElement('span');
+      title.classList.add('title');
+      title.textContent = story.title;
 
-    anchor.append(title);
+      anchor.append(title);
+    }
 
     return anchor;
   }
