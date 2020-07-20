@@ -20,7 +20,7 @@ import {LegacyInstaller} from './friendly-iframe-embed-legacy';
 import {Services} from './services';
 import {Signals} from './utils/signals';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
-import {dev, rethrowAsync, userAssert} from './log';
+import {dev, devAssert, rethrowAsync, userAssert} from './log';
 import {
   disposeServicesForEmbed,
   getTopWindow,
