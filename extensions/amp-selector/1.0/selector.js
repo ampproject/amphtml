@@ -18,7 +18,9 @@ import * as CSS from './selector.css';
 import * as Preact from '../../../src/preact';
 import {useContext, useMemo, useState} from '../../../src/preact';
 
-const SelectorContext = Preact.createContext({});
+const SelectorContext = Preact.createContext(
+  /** @type {SelectorDef.ContextProps} */ ({})
+);
 
 /**
  * @param {!SelectorDef.Props} props
@@ -99,7 +101,7 @@ export function Option({
     selectOption,
     disabled: selectorDisabled,
     multiple: selectorMultiple,
-  } = /** @type {SelectorDef.ContextProps} */ (useContext(SelectorContext));
+  } = useContext(SelectorContext);
   const clickHandler = (e) => {
     if (selectorDisabled || disabled) {
       return;
@@ -109,7 +111,7 @@ export function Option({
     }
     selectOption(option);
   };
-  const isSelected = selected.includes(option);
+  const isSelected = /** @type {!Array} */ (selected).includes(option);
   const statusStyle =
     disabled || selectorDisabled
       ? CSS.DISABLED
