@@ -530,10 +530,14 @@ export class AmpStoryPlayer {
   signalNavigation_() {
     const index = this.currentIdx_;
     const remaining = this.stories_.length - this.currentIdx_ - 1;
-    const event = createCustomEvent(this.win_, 'navigation', {
-      index,
-      remaining,
-    });
+    const event = createCustomEvent(
+      this.win_,
+      'navigation',
+      dict({
+        'index': index,
+        'remaining': remaining,
+      })
+    );
     this.element_.dispatchEvent(event);
   }
 
