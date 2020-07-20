@@ -396,7 +396,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const storyObjects = createStoryObjects(1);
       playerEl.add(storyObjects);
 
-      const stories = toArray(playerEl.querySelectorAll('a'));
+      const stories = playerEl.getStories();
 
       expect(stories.length).to.eql(4);
     });
@@ -428,7 +428,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const storyObjects = createStoryObjects(0);
       playerEl.add(storyObjects);
 
-      const stories = toArray(playerEl.querySelectorAll('a'));
+      const stories = playerEl.getStories();
 
       expect(stories.length).to.eql(3);
     });
@@ -443,7 +443,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         const storyObjects = createStoryObjects(2);
         playerEl.add(storyObjects);
 
-        const stories = toArray(playerEl.querySelectorAll('a'));
+        const stories = playerEl.getStories();
 
         expect(stories[0][IFRAME_IDX]).to.exist;
         expect(stories[1][IFRAME_IDX]).to.exist;
@@ -466,7 +466,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         const storyObjects = createStoryObjects(2);
         playerEl.add(storyObjects);
 
-        const stories = toArray(playerEl.querySelectorAll('a'));
+        const stories = playerEl.getStories();
 
         expect(stories[3][IFRAME_IDX]).to.exist;
         expect(stories[4][IFRAME_IDX]).to.not.exist;
