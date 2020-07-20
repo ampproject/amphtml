@@ -224,9 +224,9 @@ export class AmpStoryPlayer {
     // TODO(): Update unit tests to work without shadow root,
     // then update condition to getMode.test and update visual tests.
     const containerToUse =
-      // typeof __AMP_VISUAL_TEST !== 'undefined'
-      //   ? this.element_ :
-      this.element_.attachShadow({mode: 'open'});
+      typeof __AMP_VISUAL_TEST !== 'undefined'
+      ? this.element_ 
+      : this.element_.attachShadow({mode: 'open'});
 
     // Inject default styles
     const styleEl = this.doc_.createElement('style');
@@ -365,13 +365,11 @@ export class AmpStoryPlayer {
     iframeEl.onload = () => {
       this.rootEl_.classList.remove(LoadStateClass.LOADING);
       this.rootEl_.classList.add(LoadStateClass.LOADED);
-      this.element_.classList.remove(LoadStateClass.LOADING);
       this.element_.classList.add(LoadStateClass.LOADED);
     };
     iframeEl.onerror = () => {
       this.rootEl_.classList.remove(LoadStateClass.LOADING);
       this.rootEl_.classList.add(LoadStateClass.ERROR);
-      this.element_.classList.remove(LoadStateClass.LOADING);
       this.element_.classList.add(LoadStateClass.ERROR);
     };
   }
