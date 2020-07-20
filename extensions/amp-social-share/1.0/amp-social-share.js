@@ -24,7 +24,7 @@ import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getSocialConfig} from './social-share-config';
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
-import {user, userAssert} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-social-share';
@@ -113,10 +113,7 @@ class AmpSocialShare extends PreactBaseElement {
    */
   renderWithHrefAndTarget_(typeConfig) {
     const customEndpoint = this.element.getAttribute('data-share-endpoint');
-    const shareEndpoint = user().assertString(
-      customEndpoint || typeConfig['shareEndpoint'],
-      'The data-share-endpoint attribute is required. %s'
-    );
+    const shareEndpoint = customEndpoint || typeConfig['shareEndpoint'] || '';
     const urlParams = typeConfig['defaultParams'] || dict();
     Object.assign(urlParams, getDataParamsFromAttributes(this.element));
     const hrefWithVars = addParamsToUrl(shareEndpoint, urlParams);
