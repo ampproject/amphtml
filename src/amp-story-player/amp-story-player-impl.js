@@ -365,11 +365,13 @@ export class AmpStoryPlayer {
     iframeEl.onload = () => {
       this.rootEl_.classList.remove(LoadStateClass.LOADING);
       this.rootEl_.classList.add(LoadStateClass.LOADED);
+      this.element_.classList.remove(LoadStateClass.LOADING);
       this.element_.classList.add(LoadStateClass.LOADED);
     };
     iframeEl.onerror = () => {
       this.rootEl_.classList.remove(LoadStateClass.LOADING);
       this.rootEl_.classList.add(LoadStateClass.ERROR);
+      this.element_.classList.remove(LoadStateClass.LOADING);
       this.element_.classList.add(LoadStateClass.ERROR);
     };
   }
