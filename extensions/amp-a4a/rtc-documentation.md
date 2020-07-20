@@ -141,6 +141,7 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 - Yieldbot
 - Kargo
 - Yieldlab
+- [Freestar](https://freestar.com)
 
 ### RTC Callout Request Specification
 
