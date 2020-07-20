@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import {DomBasedWeakRef} from '../../../src/utils/dom-based-weakref';
 import {childElement, childElementsByTag} from '../../../src/dom';
 import {dev, devAssert} from '../../../src/log';
 import {listen, listenOnce} from '../../../src/event-helper';
 import {toArray} from '../../../src/types';
-import {DomBasedWeakRef} from '../../../src/utils/dom-based-weakref';
 
 const TAG = 'amp-video';
 
@@ -226,9 +226,13 @@ export class BitrateManager {
    * as we never want to interrupt playing videos if we don't have to.
    */
   updateOtherManagedAndPausedVideos_() {
-    this.videos_.forEach((weakref) => {
+    this.videos_.forEach((weakref, index) => {
       const video = weakref.deref();
-      if (!video || !video.paused) {
+      if (!video) {
+        this.videos_.splice(index, 1);
+        return;
+      }
+      if (!video.paused) {
         return;
       }
       this.sortSources_(video);
