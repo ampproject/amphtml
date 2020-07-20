@@ -43,7 +43,7 @@ export class DomBasedWeakRef {
    */
   static make(win, element) {
     if (win.WeakRef) {
-      return new WeakRef(element);
+      return new win.WeakRef(element);
     }
     if (!element.id) {
       const index = (win.__AMP_weakrefId = (win.__AMP_weakrefId || 0) + 1);

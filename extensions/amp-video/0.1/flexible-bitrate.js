@@ -226,7 +226,8 @@ export class BitrateManager {
    * as we never want to interrupt playing videos if we don't have to.
    */
   updateOtherManagedAndPausedVideos_() {
-    this.videos_.forEach((weakref, index) => {
+    for (let i = this.videos_.length - 1; i >= 0; i--) {
+      const weakref = this.videos_[i];
       const video = weakref.deref();
       if (!video) {
         this.videos_.splice(index, 1);
@@ -237,7 +238,7 @@ export class BitrateManager {
       }
       this.sortSources_(video);
       video.load();
-    });
+    }
   }
 }
 
