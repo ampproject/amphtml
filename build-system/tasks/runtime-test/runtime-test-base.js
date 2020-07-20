@@ -28,12 +28,11 @@ const {createKarmaServer, getAdTypes} = require('./helpers');
 const {getFilesFromArgv} = require('../../common/utils');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isGithubActionsBuild} = require('../../common/github-actions');
-const {isTravisBuild, isTravisPushBuild} = require('../../common/travis');
+const {isTravisBuild} = require('../../common/travis');
 const {reportTestStarted} = require('.././report-test-status');
+const {resultFilename} = require('../report-test-results');
 const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');
-
-const JSON_REPORT_TEST_TYPES = new Set(['unit', 'integration']);
 
 /**
  * Updates the browsers based off of the test type
@@ -168,10 +167,10 @@ function updateReporters(config) {
     config.reporters.push('coverage-istanbul');
   }
 
-  if (isTravisPushBuild() && JSON_REPORT_TEST_TYPES.has(config.testType)) {
+  if (argv.report) {
     config.reporters.push('json-result');
     config.jsonResultReporter = {
-      outputFile: `results_${config.testType}.json`,
+      outputFile: resultFilename(config.testType),
     };
   }
 }
