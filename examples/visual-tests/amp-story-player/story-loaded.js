@@ -17,10 +17,10 @@
 
 module.exports = {
   'story loaded': async page => {
-    await page.$('amp-story-player', e => {
-      // await new Promise(resolve => {
-      //   e.addEventListener('ready', (readyEvent) => resolve(readyEvent));
-      // })
+    await page.$eval('amp-story-player', e => {
+      new Promise(resolve => {
+        e.addEventListener('ready', (readyEvent) => resolve(readyEvent));
+      })
     });
   }
 };

@@ -783,13 +783,14 @@
       "url": "examples/visual-tests/amp-story-player/back-button.html",
       "name": "amp-story-player back button",
       "loading_complete_selectors": [".i-amphtml-story-player-loaded"],
-       "interactive_tests": "examples/visual-tests/amp-story-player/story-loaded.js",
+      "interactive_tests": "examples/visual-tests/amp-story-player/story-loaded.js",
       "loading_incomplete_selectors": [".i-amphtml-story-player-loading"],
       "no_base_test": true
     },
     {
       "url": "examples/visual-tests/amp-story-player/close-button.html",
       "name": "amp-story-player close button",
+      "interactive_tests": "examples/visual-tests/amp-story-player/story-loaded.js",
       "loading_complete_selectors": [".i-amphtml-story-player-loaded"],
       "loading_incomplete_selectors": [".i-amphtml-story-player-loading"],
       "no_base_test": true
@@ -797,6 +798,7 @@
     {
       "url": "examples/visual-tests/amp-story-player/multiple-stories-back-button.html",
       "name": "amp-story-player multiple stories back button",
+      "interactive_tests": "examples/visual-tests/amp-story-player/story-loaded.js",
       "loading_complete_selectors": [".i-amphtml-story-player-loaded"],
       "loading_incomplete_selectors": [".i-amphtml-story-player-loading"],
       "no_base_test": true
