@@ -273,6 +273,14 @@ export class AmpStoryPlayer {
     return this.element_;
   }
 
+  /**
+   * @return {!Array<!HTMLAnchorElement>}
+   * @public
+   */
+  getStories() {
+    return this.stories_;
+  }
+
   /** @public */
   buildCallback() {
     if (this.isBuilt_) {
