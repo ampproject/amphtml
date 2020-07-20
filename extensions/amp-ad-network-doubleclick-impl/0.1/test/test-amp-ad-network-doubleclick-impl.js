@@ -34,7 +34,6 @@ import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkDoubleclickImpl,
   EXPAND_JSON_TARGETING_EXP,
-  RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES,
   getNetworkId,
   getPageviewStateTokensForAdRequest,
   resetLocationQueryParametersForTesting,
@@ -1609,8 +1608,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
     });
 
     it('should use random subdomain when experiment is enabled', () => {
-      impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
-
       const expectedPath =
         '^https:\\/\\/[\\w\\d]{32}.safeframe.googlesyndication.com' +
         '\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$';
@@ -1619,32 +1616,19 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
     });
 
     it('should use the same random subdomain for every slot on a page', () => {
-      impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
-
       const first = impl.getSafeframePath();
 
       impl = new AmpAdNetworkDoubleclickImpl(element);
-      impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
       const second = impl.getSafeframePath();
 
       expect(first).to.equal(second);
     });
 
     it('uses random subdomain if experiment is on without win.crypto', () => {
-      impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
-
       env.sandbox.stub(bytesUtils, 'getCryptoRandomBytesArray').returns(null);
 
       const expectedPath =
         '^https:\\/\\/[\\w\\d]{32}.safeframe.googlesyndication.com' +
-        '\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$';
-
-      expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
-    });
-
-    it('should use constant subdomain when experiment is disabled', () => {
-      const expectedPath =
-        '^https://tpc.googlesyndication.com' +
         '\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$';
 
       expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
