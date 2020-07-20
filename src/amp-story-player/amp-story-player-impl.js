@@ -525,8 +525,12 @@ export class AmpStoryPlayer {
    * @private
    */
   next_() {
-    if (this.currentIdx_ + 1 >= this.stories_.length) {
+    if (this.currentIdx_ + 1 >= this.stories_.length && this.element_.getAttribute('enable-circular-wrapping') != true) {
       return;
+    }
+
+    if (this.currentIdx_ + 1 >= this.stories_.length && this.element_.getAttribute('enable-circular-wrapping') === true) {
+      this.currentIdx_ == -1;
     }
 
     this.currentIdx_++;
@@ -554,8 +558,12 @@ export class AmpStoryPlayer {
    * @private
    */
   previous_() {
-    if (this.currentIdx_ - 1 < 0) {
+    if (this.currentIdx_ - 1 < 0 && this.element_.getAttribute('enable-circular-wrapping') != true) {
       return;
+    }
+
+    if (this.currentIdx_ - 1 < 0 && this.element_.getAttribute('enable-circular-wrapping') === true) {
+      this.currentIdx_ = this.stories_.length;
     }
 
     this.currentIdx_--;
@@ -995,7 +1003,7 @@ export class AmpStoryPlayer {
     if (option.value === false || option.value === null) {
       return;
     }
-    else {
+    if (option.value == true) {
       if (this.currentIdx_ === this.stories_.length - 1) {
         this.allocateIframeForStory_(0);
       }
