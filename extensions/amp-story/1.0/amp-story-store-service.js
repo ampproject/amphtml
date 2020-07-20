@@ -88,7 +88,7 @@ export let InteractiveComponentDef;
  *    canShowSystemLayerButtons: boolean,
  *    accessState: boolean,
  *    adState: boolean,
- *    attachmentPageId: ?number,
+ *    pageAttachmentState: boolean,
  *    affiliateLinkState: !Element,
  *    bookendState: boolean,
  *    desktopState: boolean,
@@ -138,7 +138,7 @@ export const StateProperty = {
   // App States.
   ACCESS_STATE: 'accessState', // amp-access paywall.
   AD_STATE: 'adState',
-  ATTACHMENT_PAGE_ID: 'attachmentPageId',
+  PAGE_ATTACHMENT_STATE: 'pageAttachmentState',
   BOOKEND_STATE: 'bookendState',
   AFFILIATE_LINK_STATE: 'affiliateLinkState',
   DESKTOP_STATE: 'desktopState',
@@ -186,7 +186,6 @@ export const Action = {
   ADD_TO_ACTIONS_ALLOWLIST: 'addToActionsAllowlist',
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
-  SET_ATTACHMENT_PAGE_ID: 'setAttachmentPageId',
   SET_ADVANCEMENT_MODE: 'setAdvancementMode',
   SET_NAVIGATION_PATH: 'setNavigationPath',
   SET_PAGE_IDS: 'setPageIds',
@@ -200,6 +199,7 @@ export const Action = {
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
   TOGGLE_INTERACTIVE_COMPONENT: 'toggleInteractiveComponent',
   TOGGLE_MUTED: 'toggleMuted',
+  TOGGLE_PAGE_ATTACHMENT_STATE: 'togglePageAttachmentState',
   TOGGLE_PAGE_HAS_AUDIO: 'togglePageHasAudio',
   TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK: 'togglePageHasElementWithPlayblack',
   TOGGLE_PAUSED: 'togglePaused',
@@ -284,11 +284,10 @@ const actions = (state, action, data) => {
         [StateProperty.ACCESS_STATE]: !!data,
         [StateProperty.PAUSED_STATE]: !!data,
       });
-    case Action.SET_ATTACHMENT_PAGE_ID:
+    case Action.TOGGLE_PAGE_ATTACHMENT_STATE:
       return /** @type {!State} */ ({
         ...state,
-        [StateProperty.ATTACHMENT_PAGE_ID]: data,
-        [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: !data,
+        [StateProperty.PAGE_ATTACHMENT_STATE]: data,
       });
     // Triggers the ad UI.
     case Action.TOGGLE_AD:
@@ -566,7 +565,6 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: true,
       [StateProperty.CAN_SHOW_SHARING_UIS]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
-      [StateProperty.ATTACHMENT_PAGE_ID]: null,
       [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
       [StateProperty.AFFILIATE_LINK_STATE]: null,
@@ -580,6 +578,7 @@ export class AmpStoryStoreService {
       },
       [StateProperty.INTERACTIVE_REACT_STATE]: {},
       [StateProperty.MUTED_STATE]: true,
+      [StateProperty.PAGE_ATTACHMENT_STATE]: false,
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
       [StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: false,
       [StateProperty.PAUSED_STATE]: false,

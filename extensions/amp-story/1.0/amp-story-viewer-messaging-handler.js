@@ -22,7 +22,6 @@ import {
 import {AnalyticsVariable, getVariableService} from './variable-service';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getHistoryState} from './history';
 
 /** @type {string} */
 const TAG = 'amp-story-viewer-messaging-handler';
@@ -30,7 +29,6 @@ const TAG = 'amp-story-viewer-messaging-handler';
 /** @enum {number} */
 const DataSources = {
   STORE_SERVICE: 0,
-  HISTORY: 1,
   VARIABLE_SERVICE: 2,
 };
 
@@ -58,7 +56,7 @@ const GET_STATE_CONFIGURATIONS = {
   },
   'PAGE_ATTACHMENT_STATE': {
     dataSource: DataSources.STORE_SERVICE,
-    property: StateProperty.ATTACHMENT_PAGE_ID,
+    property: StateProperty.PAGE_ATTACHMENT_STATE,
   },
   'STORY_PROGRESS': {
     dataSource: DataSources.VARIABLE_SERVICE,
@@ -94,9 +92,6 @@ export class AmpStoryViewerMessagingHandler {
 
     /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = viewer;
-
-    /** @private @const {!Window} */
-    this.win_ = win;
   }
 
   /**
@@ -140,9 +135,6 @@ export class AmpStoryViewerMessagingHandler {
     let value;
 
     switch (config.dataSource) {
-      case DataSources.HISTORY:
-        value = !!getHistoryState(this.win_, config.property);
-        break;
       case DataSources.STORE_SERVICE:
         value = this.storeService_.get(config.property);
         break;
