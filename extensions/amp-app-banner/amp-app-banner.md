@@ -117,7 +117,7 @@ The protocol, host, and pathname are calculated from the canonical URL of the
 AMP document. Your native app needs to register the links in their manifest. For
 more information, read up on
 [mobile deep linking](https://en.wikipedia.org/wiki/Mobile_deep_linking).
-[/type]
+[/tip]
 
 #### Example app manifest <a name="example-for-manifest-json"></a>
 
