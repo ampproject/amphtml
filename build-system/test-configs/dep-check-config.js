@@ -434,6 +434,10 @@ exports.rules = [
       'src/friendly-iframe-embed.js->src/polyfills/document-contains.js',
       'src/friendly-iframe-embed.js->src/polyfills/domtokenlist.js',
       'src/friendly-iframe-embed.js->src/polyfills/intersection-observer.js',
+      'src/friendly-iframe-embed-legacy.js->src/polyfills/custom-elements.js',
+      'src/friendly-iframe-embed-legacy.js->src/polyfills/document-contains.js',
+      'src/friendly-iframe-embed-legacy.js->src/polyfills/domtokenlist.js',
+      'src/friendly-iframe-embed-legacy.js->src/polyfills/intersection-observer.js',
     ],
   },
   {
@@ -451,6 +455,17 @@ exports.rules = [
     filesMatching: 'src/**/*.js',
     mustNotDependOn: 'ads/**/*.js',
     allowlist: 'src/ad-cid.js->ads/_config.js',
+  },
+  {
+    filesMatching: '**/*.js',
+    mustNotDependOn: 'src/service/custom-element-registry.js',
+    allowlist: [
+      'builtins/**->src/service/custom-element-registry.js',
+      'src/amp.js->src/service/custom-element-registry.js',
+      'src/friendly-iframe-embed-legacy.js->src/service/custom-element-registry.js',
+      'src/runtime.js->src/service/custom-element-registry.js',
+      'src/service/extensions-impl.js->src/service/custom-element-registry.js',
+    ],
   },
 
   // A4A
