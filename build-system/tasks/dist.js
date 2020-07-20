@@ -436,4 +436,5 @@ dist.flags = {
     '  Builds runtime with the EXPERIMENT constant set to true',
   sanitize_vars_for_diff:
     '  Sanitize the output to diff build results. Requires --pseudo_names',
+  sxg: '  Outputs the compiled code for the SxG build',
 };
