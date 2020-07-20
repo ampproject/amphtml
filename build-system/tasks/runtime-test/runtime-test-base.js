@@ -170,7 +170,7 @@ function updateReporters(config) {
   if (argv.report) {
     config.reporters.push('json-result');
     config.jsonResultReporter = {
-      outputFile: resultFilename(config.testType),
+      outputFile: `result-reports/${config.testType}.json`,
     };
   }
 }
