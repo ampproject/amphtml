@@ -583,7 +583,8 @@ export class AmpStoryPlayer {
     if (storyDelta === 0) {
       return;
     }
-    if (this.element_.getAttribute('enable-circular-wrapping') === false) {
+    if (this.element_.getAttribute('enable-circular-wrapping') === false ||
+    this.element_.getAttribute('enable-circular-wrapping') === null) {
       if (
         this.currentIdx_ + storyDelta >= this.stories_.length ||
         this.currentIdx_ + storyDelta < 0
@@ -991,7 +992,7 @@ export class AmpStoryPlayer {
     const currentStory = this.stories_[this.currentIdx_];
     this.updateCurrentIframe_(currentStory[IFRAME_IDX]);
     
-    if (option.value === false) {
+    if (option.value === false || option.value === null) {
       return;
     }
     else {
@@ -999,6 +1000,7 @@ export class AmpStoryPlayer {
         this.allocateIframeForStory_(0);
       }
       if (this.currentIdx_ === 0) {
+        this.allocateIframeForStory_(this.stories_.length - 1);
         const previousStory = this.stories_[this.stories_.length - 1];
         this.updatePreviousIframe_(previousStory[IFRAME_IDX], IframePosition.NEXT);
       }
