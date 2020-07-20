@@ -46,13 +46,14 @@ function numConfigs(str) {
 /**
  * Checks that only 1 AMP_CONFIG should exist after append.
  *
+ * @param {string} filename
  * @param {string} str
  */
-function sanityCheck(str) {
+function sanityCheck(filename, str) {
   const numMatches = numConfigs(str);
   if (numMatches != 1) {
     throw new Error(
-      'Found ' + numMatches + ' AMP_CONFIG(s) before write. Aborting!'
+      `Found ${numMatches} AMP_CONFIG(s) in ${filename} before write. Aborting!`
     );
   }
 }
@@ -175,7 +176,7 @@ function applyConfig(
       return prependConfig(configString, targetString);
     })
     .then((fileString) => {
-      sanityCheck(fileString);
+      sanityCheck(target, fileString);
       return writeTarget(target, fileString, argv.dryrun);
     })
     .then(() => {
