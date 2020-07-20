@@ -30,6 +30,7 @@ import {createCustomEvent} from '../event-helper';
 import {dict, map} from '../utils/object';
 // Source for this constant is css/amp-story-player-iframe.css
 import {cssText} from '../../build/amp-story-player-iframe.css';
+import {dev} from '../log';
 import {findIndex} from '../utils/array';
 import {resetStyles, setStyle, setStyles} from '../style';
 import {toArray} from '../types';
@@ -901,7 +902,7 @@ export class AmpStoryPlayer {
     ];
 
     requestAnimationFrame(() => {
-      resetStyles(/** @type {!Element} */ (currentIframe), [
+      resetStyles(dev().assertElement(currentIframe), [
         'transform',
         'transition',
       ]);
@@ -910,7 +911,7 @@ export class AmpStoryPlayer {
     const secondaryIframe = this.getSecondaryIframe_();
     if (secondaryIframe) {
       requestAnimationFrame(() => {
-        resetStyles(/** @type {!Element} */ (secondaryIframe), [
+        resetStyles(dev().assertElement(secondaryIframe), [
           'transform',
           'transition',
         ]);
@@ -957,7 +958,7 @@ export class AmpStoryPlayer {
     const translate = `translate3d(${deltaX}px, 0, 0)`;
 
     requestAnimationFrame(() => {
-      setStyles(/** @type {!Element} */ (iframe), {
+      setStyles(dev().assertElement(iframe), {
         transform: translate,
         transition: 'none',
       });
@@ -969,7 +970,7 @@ export class AmpStoryPlayer {
     }
 
     requestAnimationFrame(() => {
-      setStyles(/** @type {!Element} */ (secondaryIframe), {
+      setStyles(dev().assertElement(secondaryIframe), {
         transform: secondaryTranslate,
         transition: 'none',
       });
