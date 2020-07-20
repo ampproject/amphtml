@@ -609,6 +609,7 @@ export class AmpStoryPlayer {
     const currentStory = this.stories_[this.currentIdx_ + storyDelta];
 
     this.show(currentStory.href);
+    this.signalNavigation_();
   }
 
   /**
