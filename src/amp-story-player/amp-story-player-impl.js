@@ -180,9 +180,8 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Adds stories to the player, both adding new anchor tags to the player,
-   * and creating or assigning iframes to those that are close to the
-   * current playing story.
+   * Adds stories to the player. Additionally, creates or assigns
+   * iframes to those that are close to the current playing story.
    * @param {!Array<!{href: string, title: ?string, posterImage: ?string}>} stories
    * @public
    */
