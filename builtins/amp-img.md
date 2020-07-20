@@ -306,6 +306,7 @@ corresponding to a media condition. It will influence the intrinsic display size
 of the underlying `<img>` based on
 [browser behavior](https://gist.github.com/cathyxz/f17d12c07d60bcef52591e64e5e684fb).
 
+
 [/tip]
 
 See [Responsive images with srcset, sizes & heights](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/art_direction)

@@ -26,7 +26,7 @@ min_validator_revision_required: 474
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 1059
+spec_file_revision: 1060
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed"
@@ -4476,6 +4476,7 @@ tags: {  # <amp-img>
   tag_name: "AMP-IMG"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
+  attrs: { name: "crossorigin" }
   attrs: { name: "object-fit" }
   attrs: { name: "object-position" }
   attrs: { name: "placeholder" }
@@ -5776,6 +5777,12 @@ attr_lists: {
   attrs: {
     name: "subscriptions-service"
     requires_extension: "amp-subscriptions"
+  }
+  # amp-subscriptions-google specific attributes, see
+  # https://amp.dev/documentation/components/amp-subscriptions-google
+  attrs: {
+    name: "subscriptions-google-rtc"
+    requires_extension: "amp-subscriptions-google"
   }
   # amp-next-page specific attributes, see
   # https://amp.dev/documentation/components/amp-next-page

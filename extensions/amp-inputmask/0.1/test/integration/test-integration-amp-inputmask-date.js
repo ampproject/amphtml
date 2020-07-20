@@ -16,7 +16,7 @@
 
 import {simulateKeyboardInteraction} from './utils';
 
-const config = describe.configure().retryOnSaucelabs().ifChrome();
+const config = describe.configure().ifChrome();
 config.skip('amp-inputmask', () => {
   const {testServerPort} = window.ampTestRuntimeConfig;
 

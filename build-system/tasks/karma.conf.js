@@ -21,8 +21,8 @@ const crypto = require('crypto');
 const fs = require('fs');
 const globby = require('globby');
 
-const {gitCommitterEmail} = require('../common/git');
-const {isTravisBuild, travisJobNumber} = require('../common/travis');
+const {isGithubActionsBuild} = require('../common/github-actions');
+const {isTravisBuild} = require('../common/travis');
 
 const TEST_SERVER_PORT = 8081;
 
@@ -99,9 +99,6 @@ module.exports = {
     stripPrefix: 'test-bin/',
   },
 
-  // TODO(rsimha, #15510): Sauce labs on Safari doesn't reliably support
-  // 'localhost' addresses. See #14848 for more info.
-  // Details: https://support.saucelabs.com/hc/en-us/articles/115010079868
   hostname: 'localhost',
 
   browserify: {
@@ -116,7 +113,10 @@ module.exports = {
     persistentCache,
   },
 
-  reporters: ['super-dots', 'karmaSimpleReporter'],
+  reporters: [
+    isGithubActionsBuild() ? 'dots' : 'super-dots',
+    'karmaSimpleReporter',
+  ],
 
   superDotsReporter: {
     nbDotsPerLine: 100000,
@@ -174,8 +174,6 @@ module.exports = {
 
   autoWatch: true,
 
-  browsers: [isTravisBuild() ? 'Chrome_travis_ci' : 'Chrome_no_extensions'],
-
   customLaunchers: {
     /* eslint "google-camelcase/google-camelcase": 0*/
     Chrome_travis_ci: {
@@ -197,64 +195,6 @@ module.exports = {
         '--proxy-bypass-list=*',
       ].concat(COMMON_CHROME_FLAGS),
     },
-    // SauceLabs configurations.
-    // New configurations can be created here:
-    // https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
-    SL_Chrome: {
-      base: 'SauceLabs',
-      browserName: 'chrome',
-      browserVersion: 'latest',
-      platformName: 'Windows 10',
-    },
-    SL_Chrome_Beta: {
-      base: 'SauceLabs',
-      browserName: 'chrome',
-      browserVersion: 'beta',
-      platformName: 'Windows 10',
-    },
-    SL_Firefox: {
-      base: 'SauceLabs',
-      browserName: 'firefox',
-      browserVersion: 'latest',
-      platformName: 'macOS 10.15',
-    },
-    SL_Firefox_Beta: {
-      base: 'SauceLabs',
-      browserName: 'firefox',
-      browserVersion: 'beta',
-      platformName: 'Windows 10',
-    },
-    SL_Safari: {
-      base: 'SauceLabs',
-      browserName: 'safari',
-      browserVersion: 'latest',
-      platformName: 'macOS 10.15',
-    },
-    SL_Edge: {
-      base: 'SauceLabs',
-      browserName: 'MicrosoftEdge',
-      platformName: 'Windows 10',
-    },
-    SL_IE: {
-      base: 'SauceLabs',
-      browserName: 'internet explorer',
-      platformName: 'Windows 10',
-    },
-  },
-
-  sauceLabs: {
-    testName: 'AMP HTML on Sauce',
-    // Identifier used in build-system/sauce_connect/start_sauce_connect.sh.
-    tunnelIdentifier: isTravisBuild() ? travisJobNumber() : gitCommitterEmail(),
-    startConnect: false,
-    connectOptions: {
-      noSslBumpDomains: 'all',
-    },
-    // Reduces the odds of Sauce labs timing out during tests. See #16135 and #24286.
-    // Reference: https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-Timeouts
-    maxDuration: 30 * 60,
-    commandTimeout: 10 * 60,
-    idleTimeout: 30 * 60,
   },
 
   client: {
@@ -262,8 +202,8 @@ module.exports = {
       reporter: 'html',
       // Longer timeout on Travis; fail quickly during local runs.
       timeout: isTravisBuild() ? 10000 : 2000,
-      // Run tests up to 3 times before failing them on Travis.
-      retries: isTravisBuild() ? 2 : 0,
+      // Run tests up to 3 times before failing them on Travis / GH Actions.
+      retries: isGithubActionsBuild() || isTravisBuild() ? 2 : 0,
     },
     captureConsole: false,
     verboseLogging: false,
@@ -301,8 +241,7 @@ module.exports = {
     'karma-structured-json-reporter',
     'karma-mocha',
     'karma-mocha-reporter',
-    'karma-safari-launcher',
-    'karma-sauce-launcher',
+    'karma-safarinative-launcher',
     'karma-simple-reporter',
     'karma-sinon-chai',
     'karma-source-map-support',
