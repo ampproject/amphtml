@@ -39,7 +39,7 @@ export class DomBasedWeakRef {
    * is not available.
    * @param {!Window} win
    * @param {!Element} element
-   * @return {!WeakRef<!Element>|DomBasedWeakRef<!Element}
+   * @return {!WeakRef<!Element>|!DomBasedWeakRef<!Element>}
    */
   static make(win, element) {
     if (win.WeakRef) {

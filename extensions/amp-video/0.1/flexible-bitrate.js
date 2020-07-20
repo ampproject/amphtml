@@ -78,7 +78,7 @@ export class BitrateManager {
     /** @private {number} */
     this.acceptableBitrate_ = this.getAcceptableBitrate_();
 
-    /** @private {!Array<WeakRef<!Element>|string>} */
+    /** @private {!Array<!WeakRef<!Element>|!../../../src/utils/dom-based-weakref.DomBasedWeakRef<!Element>>} */
     this.videos_ = [];
   }
 
