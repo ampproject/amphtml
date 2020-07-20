@@ -20,11 +20,78 @@
 
 'use strict';
 
+const fetch = require('node-fetch');
+const fs = require('fs').promises;
 const log = require('fancy-log');
-const {green} = require('ansi-colors');
+const path = require('path');
+const {
+  travisBuildNumber,
+  travisJobNumber,
+  travisCommitSha,
+} = require('../common/travis');
+const {cyan, green, yellow} = require('ansi-colors');
+
+const REPORTING_API_URL = 'https://amp-test-cases.appspot.com/report';
+
+async function getReport(testType) {
+  const karmaReportString = await fs.readFile(
+    `result-reports/${testType}.json`
+  );
+  const karmaReportJson = JSON.parse(karmaReportString);
+
+  const travisReport = addJobAndBuildInfo(testType, karmaReportJson);
+
+  return travisReport;
+}
+
+function addJobAndBuildInfo(testType, reportJson) {
+  const build = {
+    buildNumber: travisBuildNumber(),
+    commitSha: travisCommitSha(),
+  };
+
+  const job = {
+    jobNumber: travisJobNumber(),
+    testSuiteType: testType,
+  };
+
+  return {build, job, results: reportJson};
+}
+
+async function sendTravisKarmaReport(testType) {
+  const body = await getReport(testType);
+
+  const response = await fetch(REPORTING_API_URL, {
+    method: 'post',
+    body: JSON.stringify(body),
+    headers: {'Content-Type': 'application/json'},
+  });
+
+  if (response.ok) {
+    log(
+      green('INFO:'),
+      `Test results of type`,
+      cyan(testType),
+      'reported to',
+      cyan(REPORTING_API_URL)
+    );
+  } else {
+    log(
+      yellow('WARNING:'),
+      'failed to report results of type',
+      cyan(testType),
+      ': \n',
+      yellow(response.statusText).substr(0, 100)
+    );
+  }
+}
 
 async function reportTestResults() {
-  log('Hello,', green('gulped'), 'world');
+  const filenames = await fs.readdir('result-reports/');
+  const testTypes = filenames.map((filename) => path.parse(filename).name);
+  for (const testType of testTypes) {
+    sendTravisKarmaReport(testType);
+  }
 }
 
 module.exports = {
