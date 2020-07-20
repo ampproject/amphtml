@@ -19,7 +19,6 @@ import {devAssert, rethrowAsync} from '../log';
 import {pushIfNotExist, removeItem} from '../utils/array';
 import {throttleTail} from './scheduler';
 
-const MAX_DEPS = 3;
 const EMPTY_ARRAY = [];
 const EMPTY_FUNC = () => {};
 
@@ -55,7 +54,7 @@ let InputDef;
  *   counter: number,
  *   depsValues: !Array,
  *   parentValue: *,
- *   parentValueNode: ?ContextNode,
+ *   parentValueNode: ?./node.ContextNode,
  *   ping: function(boolean),
  *   pingDep: !Array<function(*)>,
  *   pingParent: ?function(*),
@@ -70,16 +69,16 @@ let UsedDef;
  */
 export class Values {
   /**
-   * @param {!ContextNode} contextNode
+   * @param {!./node.ContextNode} contextNode
    */
   constructor(contextNode) {
-    /** @private @const {!ContextNode} */
+    /** @private @const {!./node.ContextNode} */
     this.contextNode_ = contextNode;
 
-    /** @private {!Map<string, !InputDef>} */
+    /** @private {?Map<string, !InputDef>} */
     this.inputsByKey_ = null;
 
-    /** @private {!Map<string, !UsedDef>} */
+    /** @private {?Map<string, !UsedDef>} */
     this.usedByKey_ = null;
 
     // Schedulers.
@@ -179,7 +178,7 @@ export class Values {
    */
   has(prop) {
     const inputsByKey = this.inputsByKey_;
-    return inputsByKey && inputsByKey.has(prop.key);
+    return !!inputsByKey && inputsByKey.has(prop.key);
   }
 
   /**
@@ -191,6 +190,7 @@ export class Values {
    *
    * @param {!ContextProp<T>} prop
    * @param {function(T)} handler
+   * @template T
    */
   subscribe(prop, handler) {
     const used = this.startUsed_(prop);
@@ -202,7 +202,7 @@ export class Values {
 
     // The handler is notified right away if the value is available.
     const existingValue = used.value;
-    if (defined(existingValue) && this.isConnected_()) {
+    if (isDefined(existingValue) && this.isConnected_()) {
       handler(existingValue);
     }
   }
@@ -211,8 +211,8 @@ export class Values {
    * Unsubscribes a previously added handler. If there are no other subscribers
    * the property tracking is stopped and the used value is removed.
    *
-   * @param {!ContextProp<T>} prop
-   * @param {function(T)} handler
+   * @param {!ContextProp} prop
+   * @param {function(?)} handler
    */
   unsubscribe(prop, handler) {
     const {key} = prop;
@@ -371,7 +371,6 @@ export class Values {
     const usedByKey = this.usedByKey_ || (this.usedByKey_ = new Map());
     let used = usedByKey.get(key);
     if (!used) {
-      devAssert(deps.length <= MAX_DEPS);
       used = {
         prop,
         subscribers: [],
@@ -414,7 +413,7 @@ export class Values {
       deps.forEach((dep, index) => this.subscribe(dep, used.pingDep[index]));
 
       // Schedule the first refresh.
-      used.ping();
+      used.ping(false);
     }
     return used;
   }
@@ -465,11 +464,13 @@ export class Values {
       used.counter = 0;
     });
 
+    // Recompute all "pinged" values for this node. It checks if dependencies
+    // are satisfied and recomputes values accordingly.
     let updated;
     do {
       updated = 0;
       usedByKey.forEach((used) => {
-        if (used.pending) {
+        if (used.pending != Pending.NOT_PENDING) {
           const {key} = used.prop;
           used.counter++;
           if (used.counter > 5) {
@@ -569,16 +570,16 @@ export class Values {
     }
 
     // If no parent node is found, use the default value.
-    const parentValue = defined(used.parentValue)
+    const parentValue = isDefined(used.parentValue)
       ? used.parentValue
-      : needsParent && !used.parentValueNode && inputValues
+      : needsParent && !used.parentValueNode
       ? defaultValue
       : undefined;
 
     // Calculate the "used" value.
     let newValue = undefined;
     const ready =
-      depValues.every(defined) && (!needsParent || defined(parentValue));
+      depValues.every(isDefined) && (!needsParent || isDefined(parentValue));
     if (ready) {
       const {node} = this.contextNode_;
       if (inputValues && !compute) {
@@ -587,28 +588,24 @@ export class Values {
         if (inputValues) {
           // The node specifies its own input values and they need to be
           // recomputed with parent and dep values.
-          newValue = compute(
+          newValue = callRecursiveCompute(
+            compute,
             node,
             inputValues,
             parentValue,
-            // This is `...depValues`, but faster. See MAX_DEPS.
-            depValues[0],
-            depValues[1],
-            depValues[2]
+            depValues
           );
-        } else if (defined(parentValue)) {
+        } else if (isDefined(parentValue)) {
           // The node doesn't specify its own value, but parent is available.
           // Since parent is available, it means that the node is recursive.
           newValue = parentValue;
         }
       } else if (compute) {
-        newValue = compute(
+        newValue = callCompute(
+          compute,
           node,
           inputValues || EMPTY_ARRAY,
-          // This is `...depValues`, but faster. See MAX_DEPS.
-          depValues[0],
-          depValues[1],
-          depValues[2]
+          depValues
         );
       }
     }
@@ -620,7 +617,7 @@ export class Values {
    * Update the node from which the parent value is used.
    *
    * @param {!UsedDef} used
-   * @param {!ContextNode} newParentValueNode
+   * @param {?./node.ContextNode} newParentValueNode
    * @private
    */
   updateParentValueNode_(used, newParentValueNode) {
@@ -630,11 +627,11 @@ export class Values {
       used.parentValue = undefined;
 
       if (oldParentValueNode) {
-        oldParentValueNode.values.unsubscribe(prop, pingParent);
+        oldParentValueNode.values.unsubscribe(prop, devAssert(pingParent));
       }
 
       if (newParentValueNode) {
-        newParentValueNode.values.subscribe(prop, pingParent);
+        newParentValueNode.values.subscribe(prop, devAssert(pingParent));
       }
     }
   }
@@ -643,7 +640,7 @@ export class Values {
 /**
  * See `Values.scan()` method.
  *
- * @param {!ContextNode} contextNode
+ * @param {!./node.ContextNode} contextNode
  * @param {!ContextProp} prop
  * @return {boolean}
  */
@@ -654,7 +651,7 @@ function scan(contextNode, prop) {
 /**
  * See `Values.scanAll()` method.
  *
- * @param {!ContextNode} contextNode
+ * @param {!./node.ContextNode} contextNode
  * @param {*} unusedArg
  * @param {!Array<string>} state
  * @return {!Array<string>}
@@ -666,7 +663,7 @@ function scanAll(contextNode, unusedArg, state) {
 /**
  * See `Values.has()` method.
  *
- * @param {!ContextNode} contextNode
+ * @param {!./node.ContextNode} contextNode
  * @param {!ContextProp} prop
  * @return {boolean}
  */
@@ -690,7 +687,7 @@ function isRecursive(prop) {
  * Whether the parent value is required to calculate the used value.
  *
  * @param {!ContextProp} prop
- * @param {!Array} inputs
+ * @param {?Array} inputs
  * @return {boolean}
  */
 function calcNeedsParent(prop, inputs) {
@@ -707,6 +704,55 @@ function calcNeedsParent(prop, inputs) {
 }
 
 /**
+ * A substitute for `compute(...deps)`, but faster.
+ *
+ * @param {function(!Node, !Array, ...*):*} compute See `ContextProp.compute()`.
+ * @param {!Node} node
+ * @param {!Array} inputValues
+ * @param {!Array} deps
+ * @return {*}
+ */
+function callCompute(compute, node, inputValues, deps) {
+  switch (deps.length) {
+    case 0:
+      return compute(node, inputValues);
+    case 1:
+      return compute(node, inputValues, deps[0]);
+    case 2:
+      return compute(node, inputValues, deps[0], deps[1]);
+    case 3:
+      return compute(node, inputValues, deps[0], deps[1], deps[2]);
+    default:
+      return compute.apply(null, [node, inputValues].concat(deps));
+  }
+}
+
+/**
+ * A substitute for `compute(parentValue, ...deps)`, but faster.
+ *
+ * @param {function(!Node, !Array, ...*):*} compute See `ContextProp.compute()`.
+ * @param {!Node} node
+ * @param {!Array} inputValues
+ * @param {*} parentValue
+ * @param {!Array} deps
+ * @return {*}
+ */
+function callRecursiveCompute(compute, node, inputValues, parentValue, deps) {
+  switch (deps.length) {
+    case 0:
+      return compute(node, inputValues, parentValue);
+    case 1:
+      return compute(node, inputValues, parentValue, deps[0]);
+    case 2:
+      return compute(node, inputValues, parentValue, deps[0], deps[1]);
+    case 3:
+      return compute(node, inputValues, parentValue, deps[0], deps[1], deps[2]);
+    default:
+      return compute.apply(null, [node, inputValues, parentValue].concat(deps));
+  }
+}
+
+/**
  * Whether the value is defined.
  *
  * This function only exists to avoid function allocation when calling
@@ -715,6 +761,6 @@ function calcNeedsParent(prop, inputs) {
  * @param {*} v
  * @return {boolean}
  */
-function defined(v) {
+function isDefined(v) {
   return v !== undefined;
 }

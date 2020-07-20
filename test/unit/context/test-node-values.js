@@ -297,7 +297,7 @@ describes.realWin('ContextNode - values', {}, (env) => {
       expect(calcSpy).to.have.callCount(3);
     });
 
-    it('should recompute a value when a node is removed', async () => {
+    it('should stop recompute a value when a node is removed', async () => {
       grandparent.values.set(Recursive, 'OWNER1', 'A');
       parent.values.set(Recursive, 'OWNER1', 'B');
       clock.runAll();
@@ -372,6 +372,11 @@ describes.realWin('ContextNode - values', {}, (env) => {
       grandparent.values.subscribe(Concat, grandparentStub);
       clock.runAll();
       calcSpy.resetHistory();
+      sibling1Stub.resetHistory();
+      sibling2Stub.resetHistory();
+      cousin1Stub.resetHistory();
+      parentStub.resetHistory();
+      grandparentStub.resetHistory();
     });
 
     it('should override a computed value on the node', async () => {
@@ -835,6 +840,10 @@ describes.realWin('ContextNode - values', {}, (env) => {
       grandparent.values.subscribe(Concat, grandparentStub);
       clock.runAll();
       calcSpy.resetHistory();
+      sibling1Stub.resetHistory();
+      sibling2Stub.resetHistory();
+      cousin1Stub.resetHistory();
+      grandparentStub.resetHistory();
     });
 
     it('should override a computed value on a new node', async () => {
