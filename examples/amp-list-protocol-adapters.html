@@ -1,19 +1,10 @@
-<!--
-  ## Introduction
-
-  The [`amp-list`](https://amp.dev/documentation/components/amp-list) component can fetch dynamic content by calling in to custom JS Functions.
--->
-<!-- -->
 <!doctype html>
 <html ⚡>
 <head>
   <meta charset="utf-8">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <!-- ## Setup -->
-  <!-- Import the `amp-list` component ... -->
   <script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js"></script>
   <script async custom-element="amp-script" src="https://cdn.ampproject.org/v0/amp-script-0.1.js"></script>
-  <!-- ... and the `amp-mustache` component in the header -->
   <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-latest.js"></script>
   <link rel="canonical" href="https://amp.dev/documentation/examples/components/amp-list/">
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
@@ -21,19 +12,44 @@
 </head>
 <body>
 
-  <h3>PROTOCOL ADAPTERS</h3>
+  <h1>PROTOCOL ADAPTERS</h1>
+
+  <h3>single-item example</h3>
   <amp-script width=1 height=1 script="local-script" data-ampdevmode></amp-script>
   <script type="text/plain" target="amp-script" id="local-script">
     function fetchData() {
-      return Promise.resolve({items: [1, 2, 3, 4, 5]});
+      const items = [{name: 'apple'}, {name: 'banana'}, {name: 'pear'}];
+      return Promise.resolve({items});
+    }
+
+    function fetchSingleItem() {
+      const title = 'The Animals That Could';
+      const price = 99.99;
+      return Promise.resolve({ items: {title, price} });
     }
 
     exportFunction('fetchData', fetchData);
+    exportFunction('fetchSingleItem', fetchSingleItem);
   </script>
   <amp-list id="list1" width="auto" height="100" layout="fixed-height" src="amp-script:local-script.fetchData">
     <template type="amp-mustache" id="amp-template-id">
-      <div>{{.}}</div>
+      <div>{{name}}</div>
     </template>
-  </amp-list> 
+  </amp-list>
+
+  <h3>single-item example</h3>
+  <amp-list
+    id="list1"
+    width="auto"
+    height="100"
+    layout="fixed-height"
+    src="amp-script:local-script.fetchSingleItem"
+    single-item
+  >
+    <template type="amp-mustache" id="amp-template-id">
+      <div><b>Title</b>: {{title}}</div>
+      <div><b>Price</b>: {{price}}</div>
+    </template>
+  </amp-list>
 </body>
 </html>

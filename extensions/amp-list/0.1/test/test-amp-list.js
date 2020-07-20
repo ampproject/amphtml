@@ -984,7 +984,7 @@ describes.repeated(
               return list.layoutCallback().catch(() => {});
             });
           });
-          describe.only('Using amp-script: protocol', () => {
+          describe('Using amp-script: protocol', () => {
             beforeEach(() => {
               env.sandbox.stub(Services, 'scriptForDocOrNull');
               resetExperimentTogglesForTesting(win);
@@ -1021,6 +1021,20 @@ describes.repeated(
               const errorMsg = /amp-script to be installed/;
               expectAsyncConsoleError(errorMsg);
               expect(list.layoutCallback()).eventually.rejectedWith(errorMsg);
+            });
+            it('should fail if function call rejects', async () => {
+              toggleExperiment(win, 'protocol-adapters', true);
+              Services.scriptForDocOrNull.returns(
+                Promise.resolve({
+                  callFunction: () =>
+                    Promise.reject('Invalid function identifier.'),
+                })
+              );
+
+              listMock.expects('toggleLoading').withExactArgs(false).once();
+              return expect(
+                list.layoutCallback()
+              ).to.eventually.be.rejectedWith(/Invalid function identifier/);
             });
 
             it('should render a list from AmpScriptService provided data', async () => {
