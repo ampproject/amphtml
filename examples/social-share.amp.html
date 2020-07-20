@@ -16,7 +16,16 @@
         ]
       }
     </script>
-    <script custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js" async></script>
+    <script>
+      (self.AMP = self.AMP || []).push(AMP => {
+        AMP.toggleExperiment('amp-social-share-bento', true);
+      });
+    </script>
+    <script
+      custom-element="amp-social-share"
+      src="https://cdn.ampproject.org/v0/amp-social-share-1.0.js"
+      async
+    ></script>
     <style amp-custom>
       .social-box {
         max-width: 300px;

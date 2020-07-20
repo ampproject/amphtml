@@ -55,7 +55,7 @@ const schemaTemplate = `
 }
 `;
 
-describes.sandboxed('MediaSessionAPI Helper Functions', {}, env => {
+describes.sandboxed('MediaSessionAPI Helper Functions', {}, (env) => {
   let element;
   let ampdoc;
   let favicon;

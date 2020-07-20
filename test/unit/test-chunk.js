@@ -29,7 +29,7 @@ describe('chunk2', () => {
     activateChunkingForTesting();
   });
 
-  const resolvingIdleCallbackWithTimeRemaining = timeRemaining => fn => {
+  const resolvingIdleCallbackWithTimeRemaining = (timeRemaining) => (fn) => {
     Promise.resolve({
       timeRemaining: () => timeRemaining,
     }).then(fn);
@@ -53,8 +53,8 @@ describe('chunk2', () => {
       }
     });
 
-    it('should execute a chunk', done => {
-      startupChunk(fakeWin.document, unusedIdleDeadline => {
+    it('should execute a chunk', (done) => {
+      startupChunk(fakeWin.document, (unusedIdleDeadline) => {
         done();
       });
     });
@@ -62,9 +62,9 @@ describe('chunk2', () => {
     it('should execute chunks', () => {
       let count = 0;
       let progress = '';
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         function complete(str) {
-          return function(unusedIdleDeadline) {
+          return function (unusedIdleDeadline) {
             progress += str;
             if (++count == 6) {
               resolve();
@@ -73,9 +73,9 @@ describe('chunk2', () => {
         }
         startupChunk(fakeWin.document, complete('a'));
         startupChunk(fakeWin.document, complete('b'));
-        startupChunk(fakeWin.document, function() {
+        startupChunk(fakeWin.document, function () {
           complete('c')();
-          startupChunk(fakeWin.document, function() {
+          startupChunk(fakeWin.document, function () {
             complete('d')();
             startupChunk(fakeWin.document, complete('e'));
             startupChunk(fakeWin.document, complete('f'));
@@ -92,7 +92,7 @@ describe('chunk2', () => {
     {
       amp: false,
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         installDocService(env.win, /* isSingleDoc */ true);
         expect(env.win.__AMP_SERVICES.viewer).to.be.undefined;
@@ -101,7 +101,7 @@ describe('chunk2', () => {
 
       basicTests(env);
 
-      it('should support nested micro tasks in chunks', done => {
+      it('should support nested micro tasks in chunks', (done) => {
         let progress = '';
         startupChunk(env.win.document, () => {
           progress += '1';
@@ -124,15 +124,15 @@ describe('chunk2', () => {
     {
       amp: false,
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         installDocService(env.win, /* isSingleDoc */ true);
         expect(env.win.__AMP_SERVICES.viewer).to.be.undefined;
         env.win.document.hidden = true;
-        env.win.requestIdleCallback = function() {
+        env.win.requestIdleCallback = function () {
           throw new Error('Should not be called');
         };
-        env.win.postMessage = function(data, targetOrigin) {
+        env.win.postMessage = function (data, targetOrigin) {
           expect(targetOrigin).to.equal('*');
           Promise.resolve().then(() => {
             const event = {
@@ -153,7 +153,7 @@ describe('chunk2', () => {
     {
       amp: true,
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         expect(env.win.__AMP_SERVICES.viewer).to.exist;
         env.win.document.hidden = false;
@@ -167,8 +167,8 @@ describe('chunk2', () => {
           });
         });
 
-        it('should execute a chunk with an ampdoc', done => {
-          startupChunk(env.ampdoc, unusedIdleDeadline => {
+        it('should execute a chunk with an ampdoc', (done) => {
+          startupChunk(env.ampdoc, (unusedIdleDeadline) => {
             done();
           });
         });
@@ -201,7 +201,7 @@ describe('chunk2', () => {
             window.removeEventListener('unhandledrejection', onReject);
           });
 
-          it('should proceed on error and rethrowAsync', d => {
+          it('should proceed on error and rethrowAsync', (d) => {
             startupChunk(fakeWin.document, () => {
               throw new Error('test async');
             });
@@ -328,7 +328,7 @@ describe('chunk2', () => {
     {
       amp: true,
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         env.sandbox.defineProperty(env.win.document, 'hidden', {
           get: () => false,
@@ -343,7 +343,7 @@ describe('chunk2', () => {
     {
       amp: true,
     },
-    env => {
+    (env) => {
       beforeEach(() => {
         env.win.requestIdleCallback = null;
         expect(env.win.requestIdleCallback).to.be.null;
@@ -366,14 +366,14 @@ describe('long tasks', () => {
     {
       amp: false,
     },
-    env => {
+    (env) => {
       let subscriptions;
       let clock;
       let progress;
       let postMessageCalls;
 
       function complete(str, long) {
-        return function(unusedIdleDeadline) {
+        return function (unusedIdleDeadline) {
           if (long) {
             // Ensure this task takes a long time beyond the 5ms buffer.
             clock.tick(100);
@@ -385,7 +385,7 @@ describe('long tasks', () => {
       function runSubs() {
         subscriptions['message']
           .slice()
-          .forEach(method => method({data: 'amp-macro-task'}));
+          .forEach((method) => method({data: 'amp-macro-task'}));
       }
 
       beforeEach(() => {
@@ -394,7 +394,7 @@ describe('long tasks', () => {
         clock = env.sandbox.useFakeTimers();
         installDocService(env.win, /* isSingleDoc */ true);
 
-        env.win.addEventListener = function(type, handler) {
+        env.win.addEventListener = function (type, handler) {
           if (subscriptions[type] && !subscriptions[type].includes(handler)) {
             subscriptions[type].push(handler);
           } else {
@@ -402,7 +402,7 @@ describe('long tasks', () => {
           }
         };
 
-        env.win.postMessage = function(key) {
+        env.win.postMessage = function (key) {
           expect(key).to.equal('amp-macro-task');
           postMessageCalls++;
           runSubs();
@@ -414,7 +414,7 @@ describe('long tasks', () => {
         ).macroAfterLongTask_ = true;
       });
 
-      it('should not run macro tasks with invisible bodys', done => {
+      it('should not run macro tasks with invisible bodys', (done) => {
         startupChunk(env.win.document, complete('init', true));
         startupChunk(env.win.document, complete('a', true));
         startupChunk(env.win.document, complete('b', true));
@@ -424,12 +424,12 @@ describe('long tasks', () => {
         });
       });
 
-      it('should execute chunks after long task in a macro task', done => {
+      it('should execute chunks after long task in a macro task', (done) => {
         startupChunk(env.win.document, complete('1', true));
         startupChunk(env.win.document, complete('2', false));
         startupChunk(
           env.win.document,
-          function() {
+          function () {
             complete('3', false)();
             expect(progress).to.equal('123');
             expect(postMessageCalls).to.equal(0);
@@ -457,8 +457,8 @@ describe('long tasks', () => {
       // the async-await polyfill that this test relies on.
       it.configure()
         .skipFirefox()
-        .run('should not issue a macro task after having been idle', done => {
-          (async function() {
+        .run('should not issue a macro task after having been idle', (done) => {
+          (async function () {
             startupChunk(
               env.win.document,
               complete('1', false),

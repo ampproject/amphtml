@@ -30,7 +30,7 @@ const realWinConfig = {
   allowExternalResources: true,
 };
 
-describes.realWin('CryptographicValidator', realWinConfig, env => {
+describes.realWin('CryptographicValidator', realWinConfig, (env) => {
   const headers = {'Content-Type': 'application/jwk-set+json'};
   let userErrorStub;
   let validator;
@@ -48,7 +48,7 @@ describes.realWin('CryptographicValidator', realWinConfig, env => {
     };
     return validator
       .validate({win: env.win}, utf8Encode(data.reserialized), headers)
-      .then(validatorOutput => {
+      .then((validatorOutput) => {
         expect(validatorOutput).to.be.ok;
         expect(validatorOutput.type).to.equal(ValidatorResult.AMP);
         expect(validatorOutput.adResponseType).to.equal(AdResponseType.CRYPTO);
@@ -67,7 +67,7 @@ describes.realWin('CryptographicValidator', realWinConfig, env => {
     };
     return validator
       .validate({win: env.win}, utf8Encode(data.reserialized), headers)
-      .then(validatorOutput => {
+      .then((validatorOutput) => {
         expect(validatorOutput).to.be.ok;
         expect(validatorOutput.type).to.equal(ValidatorResult.NON_AMP);
         expect(validatorOutput.adResponseType).to.equal(AdResponseType.CRYPTO);
@@ -91,7 +91,7 @@ describes.realWin('CryptographicValidator', realWinConfig, env => {
         utf8Encode(data.reserializedInvalidOffset),
         headers
       )
-      .then(validatorOutput => {
+      .then((validatorOutput) => {
         expect(validatorOutput).to.be.ok;
         expect(validatorOutput.type).to.equal(ValidatorResult.NON_AMP);
         expect(validatorOutput.adResponseType).to.equal(AdResponseType.CRYPTO);

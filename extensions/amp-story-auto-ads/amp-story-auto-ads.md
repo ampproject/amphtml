@@ -1,7 +1,7 @@
 ---
 $category@: presentation
 formats:
-  - websites
+  - stories
 teaser:
   text: Dynamically inserts ads into a Story.
 ---
@@ -58,11 +58,11 @@ looks like the following:
   <amp-story-auto-ads>
     <script type="application/json">
       {
-         "ad-attributes": {
-           "type": "doubleclick",
-           "data-slot": "/30497360/a4a/amp_story_dfp_example"
-         }
-       }
+        "ad-attributes": {
+          "type": "doubleclick",
+          "data-slot": "/30497360/a4a/amp_story_dfp_example"
+        }
+      }
     </script>
   </amp-story-auto-ads>
   ...
@@ -101,7 +101,7 @@ A common use case is to pass targeting data or RTC configuration to the underlyi
         "rtc-config": {
           "urls": ["https://rtcEndpoint.biz/"]
         },
-        json: {
+        "json": {
           "targeting": {
             "loc": "usa",
             "animal": "cat"

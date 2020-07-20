@@ -24,7 +24,7 @@ limitations under the License.
 
 # amp-story-page-attachment
 
-Story page attachments allow you to provide additional AMPHTML content to specific pages. This content can be revealed by users through a "swipe up" gesture, or a tap on the call to action element.
+Story page attachments allow you to provide additional content in the form of a link or inline AMPHTML content to specific pages. This content can be revealed by users through a "swipe up" gesture, or a tap on the call to action element.
 A UI prompt to open the attachment will automatically be added at the bottom of every page that configured an attachment.
 
 <amp-img alt="AMP Story page attachment" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-page-attachment.gif" width="240" height="480">
@@ -67,12 +67,23 @@ Enables light or dark mode for the page attachment header and content background
 Values: "light" (default), "dark"
 
 ```html
-<amp-story-page-attachment layout="nodisplay" theme="dark"
-  >...</amp-story-page-attachment
->
+<amp-story-page-attachment layout="nodisplay" theme="dark">
+  ...
+</amp-story-page-attachment>
 ```
 
-## Allowed content and components
+## Linked content
+
+When providing a `href` attribute as page attachment, the respective URL is opened when the user activates the page attachment.
+
+```html
+<amp-story-page-attachment layout="nodisplay" href="https://www.example.com">
+</amp-story-page-attachment>
+```
+
+## Inline content
+
+As an alternative to linking a page attachment, you may also provide inline AMP HTML as the page attachment.
 
 Story page attachments allow the same HTML elements as AMP Story along with additional components listed below, such as third party video players or social media embeds. This means you can add additional content that is too verbose or disallowed in an AMP Story page.
 

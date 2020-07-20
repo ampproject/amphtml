@@ -13,15 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Services} from '../../../src/services';
 import {installWebAnimations} from 'web-animations-js/web-animations.install';
 
 const POLYFILLED = '__AMP_WA';
+
+/**
+ * Force Web Animations polyfill on Safari.
+ * Native Web Animations on WebKit do not respect easing for individual
+ * keyframes and break overall timing. See https://go.amp.dev/issue/27762 and
+ * https://bugs.webkit.org/show_bug.cgi?id=210526
+ * @param {!Window} win
+ */
+function forceOnSafari(win) {
+  if (Services.platformFor(win).isSafari()) {
+    // Using string access syntax to bypass typecheck.
+    win.Element.prototype['animate'] = null;
+  }
+}
 
 /**
  * @param {!Window} win
  */
 export function installWebAnimationsIfNecessary(win) {
   if (!win[POLYFILLED]) {
+    forceOnSafari(win);
     win[POLYFILLED] = true;
     installWebAnimations(win);
   }

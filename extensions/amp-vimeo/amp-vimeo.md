@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a [Vimeo](https://vimeo.com) video.
+  text: Displays a Vimeo video.
 ---
 
 <!---

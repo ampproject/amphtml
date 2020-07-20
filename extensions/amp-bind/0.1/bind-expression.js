@@ -33,16 +33,16 @@ const MAX_AST_SIZE = 100;
 const CUSTOM_FUNCTIONS = 'custom-functions';
 
 /**
- * Map of object type to function name to whitelisted function.
+ * Map of object type to function name to allowlisted function.
  * @private {!Object<string, !Object<string, Function>>}
  */
-let FUNCTION_WHITELIST;
+let FUNCTION_ALLOWLIST;
 
 /**
  * @return {!Object<string, !Object<string, Function>>}
  * @private
  */
-function generateFunctionWhitelist() {
+function generateFunctionAllowlist() {
   /**
    * Deprecated. Static, not-in-place variant of Array#splice.
    * @param {!Array} array
@@ -116,7 +116,7 @@ function generateFunctionWhitelist() {
   }
 
   // Prototype functions.
-  const whitelist = dict({
+  const allowlist = dict({
     '[object Array]': {
       // TODO(choumx): Polyfill Array#find and Array#findIndex for IE.
       'concat': Array.prototype.concat,
@@ -155,7 +155,7 @@ function generateFunctionWhitelist() {
   });
 
   // Un-namespaced static functions.
-  whitelist[CUSTOM_FUNCTIONS] = {
+  allowlist[CUSTOM_FUNCTIONS] = {
     'encodeURI': encodeURI,
     'encodeURIComponent': encodeURIComponent,
     'abs': Math.abs,
@@ -176,11 +176,11 @@ function generateFunctionWhitelist() {
   // Creates a map of function name to the function itself.
   // This makes function lookups faster (compared to Array.indexOf).
   const out = map();
-  Object.keys(whitelist).forEach(type => {
+  Object.keys(allowlist).forEach((type) => {
     out[type] = map();
 
-    const functionsForType = whitelist[type];
-    Object.keys(functionsForType).forEach(name => {
+    const functionsForType = allowlist[type];
+    Object.keys(functionsForType).forEach((name) => {
       const func = functionsForType[name];
       if (func) {
         devAssert(
@@ -216,8 +216,8 @@ export class BindExpression {
    * @throws {Error} On malformed expressions.
    */
   constructor(expressionString, macros, opt_maxAstSize) {
-    if (!FUNCTION_WHITELIST) {
-      FUNCTION_WHITELIST = generateFunctionWhitelist();
+    if (!FUNCTION_ALLOWLIST) {
+      FUNCTION_ALLOWLIST = generateFunctionAllowlist();
     }
 
     /** @const {string} */
@@ -263,7 +263,7 @@ export class BindExpression {
     if (this.isMacroInvocationNode_(ast)) {
       const macro = this.macros_[String(ast.value)];
       let nodes = macro.getExpressionSize();
-      this.argumentsForInvocation_(ast).forEach(arg => {
+      this.argumentsForInvocation_(ast).forEach((arg) => {
         if (arg) {
           nodes += this.numberOfNodesInAst_(arg) - 1;
         }
@@ -272,7 +272,7 @@ export class BindExpression {
     } else {
       let nodes = 1;
       if (ast.args) {
-        ast.args.forEach(arg => {
+        ast.args.forEach((arg) => {
           if (arg) {
             nodes += this.numberOfNodesInAst_(arg);
           }
@@ -363,14 +363,14 @@ export class BindExpression {
         if (isBuiltInOrMacro) {
           const macro = this.macros_[method];
           if (macro) {
-            validFunction = function() {
+            validFunction = function () {
               return macro.evaluate(
                 scope,
                 Array.prototype.slice.call(arguments)
               );
             };
           } else {
-            validFunction = FUNCTION_WHITELIST[CUSTOM_FUNCTIONS][method];
+            validFunction = FUNCTION_ALLOWLIST[CUSTOM_FUNCTIONS][method];
           }
           if (!validFunction) {
             unsupportedError = `${method} is not a supported function.`;
@@ -384,13 +384,13 @@ export class BindExpression {
             return null;
           }
           const callerType = Object.prototype.toString.call(caller);
-          const whitelist = FUNCTION_WHITELIST[callerType];
-          if (whitelist) {
+          const allowlist = FUNCTION_ALLOWLIST[callerType];
+          if (allowlist) {
             const f = caller[method];
-            if (f && f === whitelist[method]) {
+            if (f && f === allowlist[method]) {
               validFunction = f;
             } else if (this.isCustomInstanceFunction_(method)) {
-              validFunction = whitelist[method];
+              validFunction = allowlist[method];
             }
           }
           if (!validFunction) {
@@ -444,14 +444,14 @@ export class BindExpression {
         return args.length > 0 ? this.eval_(args[0], scope) : [];
 
       case AstNodeType.ARRAY:
-        return args.map(element => this.eval_(element, scope));
+        return args.map((element) => this.eval_(element, scope));
 
       case AstNodeType.OBJECT_LITERAL:
         return args.length > 0 ? this.eval_(args[0], scope) : map();
 
       case AstNodeType.OBJECT:
         const object = map();
-        args.forEach(keyValue => {
+        args.forEach((keyValue) => {
           const {k, v} = this.eval_(keyValue, scope);
           object[k] = v;
         });
@@ -542,7 +542,7 @@ export class BindExpression {
 
           const names = this.eval_(args[0], scope);
           if (names) {
-            names.forEach((name, i) => {
+            /** @type {!Array} */ (names).forEach((name, i) => {
               functionScope[name] = values[i];
             });
           }

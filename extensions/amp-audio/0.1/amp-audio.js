@@ -103,14 +103,13 @@ export class AmpAudio extends AMP.BaseElement {
   }
 
   /**
-   * Builds the internal <audio> element
-   * @return {*} TODO(#23582): Specify return type
+   * Builds the internal <audio> element.
    */
   buildAudioElement() {
     const audio = this.element.ownerDocument.createElement('audio');
     if (!audio.play) {
       this.toggleFallback(true);
-      return Promise.resolve();
+      return;
     }
 
     // Force controls otherwise there is no player UI.
@@ -135,7 +134,7 @@ export class AmpAudio extends AMP.BaseElement {
     );
 
     this.applyFillContent(audio);
-    this.getRealChildNodes().forEach(child => {
+    this.getRealChildNodes().forEach((child) => {
       if (child.getAttribute && child.getAttribute('src')) {
         assertHttpsUrl(child.getAttribute('src'), dev().assertElement(child));
       }
@@ -300,6 +299,6 @@ export class AmpAudio extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpAudio);
 });

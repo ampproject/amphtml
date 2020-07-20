@@ -26,7 +26,7 @@ describes.realWin(
       extensions: ['amp-date-picker'],
     },
   },
-  env => {
+  (env) => {
     let clock;
     let document;
 

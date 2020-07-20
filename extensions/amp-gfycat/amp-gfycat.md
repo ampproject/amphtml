@@ -2,9 +2,8 @@
 $category@: social
 formats:
   - websites
-  - stories
 teaser:
-  text: Displays a [Gfycat](https://gfycat.com/) video GIF.
+  text: Displays a Gfycat video GIF.
 ---
 
 <!---

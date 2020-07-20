@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays an [Ooyala](https://www.ooyala.com/) video.
+  text: Displays an Ooyala video.
 ---
 
 <!---

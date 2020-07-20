@@ -36,7 +36,7 @@ const SHARE = 300;
  * }} pjson
  * @return {{amp: number, cb: number, dc: number, dest: *, gen: number, mk: string, pub: *, rb: number, sid, url}}
  */
-const getPjsonData = pjson => {
+const getPjsonData = (pjson) => {
   const {loc, referrer, title, ampDoc, pubId, data} = pjson;
   const {href, hostname, search, pathname, hash, protocol, port} = loc;
   /** @typedef {{
@@ -85,7 +85,7 @@ const getPjsonData = pjson => {
   };
 };
 
-export const callPjson = props => {
+export const callPjson = (props) => {
   const data = getPjsonData(props);
   const endpoint = `${API_SERVER}/live/red_pjson`;
 

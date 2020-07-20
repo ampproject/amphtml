@@ -880,7 +880,7 @@ export class Carousel {
    */
   resetSlideTransforms_(totalLength) {
     const revolutions = 0; // Sets the slide back to the initial position.
-    this.slides_.forEach(slide => {
+    this.slides_.forEach((slide) => {
       this.setElementTransform_(slide, revolutions, totalLength);
     });
   }
@@ -890,7 +890,7 @@ export class Carousel {
    * @private
    */
   getSlideLengths_() {
-    return this.slides_.map(s => getDimension(this.axis_, s).length);
+    return this.slides_.map((s) => getDimension(this.axis_, s).length);
   }
 
   /**
@@ -967,7 +967,7 @@ export class Carousel {
     const count = this.isLooping() ? slides_.length : 0;
 
     // Replace the before spacers.
-    this.beforeSpacers_.forEach(spacer => {
+    this.beforeSpacers_.forEach((spacer) => {
       this.scrollContainer_.removeChild(spacer);
     });
     this.beforeSpacers_ = this.createSpacers_(count);
@@ -977,7 +977,7 @@ export class Carousel {
     });
 
     // Replace the replacement spacers.
-    this.replacementSpacers_.forEach(spacer => {
+    this.replacementSpacers_.forEach((spacer) => {
       this.scrollContainer_.removeChild(spacer);
     });
     this.replacementSpacers_ = this.createSpacers_(count);
@@ -989,7 +989,7 @@ export class Carousel {
     });
 
     // Replace the after spacers.
-    this.afterSpacers_.forEach(spacer => {
+    this.afterSpacers_.forEach((spacer) => {
       this.scrollContainer_.removeChild(spacer);
     });
     this.afterSpacers_ = this.createSpacers_(count);

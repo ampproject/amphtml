@@ -189,24 +189,31 @@ export class InaboxResources {
     return this.firstPassDone_.promise;
   }
 
+  /** @override */
+  isIntersectionExperimentOn() {
+    return false;
+  }
+
   /**
    * @private
    */
   doPass_() {
+    const now = Date.now();
     dev().fine(TAG, 'doPass');
     // measure in a batch
-    this.resources_.forEach(resource => {
+    this.resources_.forEach((resource) => {
       if (!resource.isLayoutPending()) {
         return;
       }
       resource.measure();
     });
     // mutation in a batch
-    this.resources_.forEach(resource => {
+    this.resources_.forEach((resource) => {
       if (
         resource.getState() === ResourceState.READY_FOR_LAYOUT &&
         resource.isDisplayed()
       ) {
+        resource.layoutScheduled(now);
         resource.startLayout();
       }
     });
@@ -228,7 +235,7 @@ export class InaboxResources {
       return null;
     }
     if (this.inViewportObserver_ === null) {
-      this.inViewportObserver_ = new IntersectionObserver(entries =>
+      this.inViewportObserver_ = new IntersectionObserver((entries) =>
         entries.forEach(triggerViewportCallbackFromIntersection)
       );
     }
@@ -248,6 +255,11 @@ export class InaboxResources {
     if (observer) {
       observer.observe(element);
     }
+  }
+
+  /** @override */
+  getSlowElementRatio() {
+    return 0;
   }
 }
 

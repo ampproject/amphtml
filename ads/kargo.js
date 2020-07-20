@@ -43,7 +43,7 @@ export function kargo(global, data) {
   computeInMasterFrame(
     global,
     'kargo-load',
-    function(done) {
+    function (done) {
       // load AdTag in Master window
       loadScript(this, kargoScriptUrl, () => {
         let success = false;
@@ -54,7 +54,7 @@ export function kargo(global, data) {
         done(success);
       });
     },
-    success => {
+    (success) => {
       if (success) {
         const w = options.source_window;
 

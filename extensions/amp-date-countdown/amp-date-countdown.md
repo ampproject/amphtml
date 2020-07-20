@@ -3,7 +3,7 @@ $category@: presentation
 formats:
   - websites
 teaser:
-  text: Displays GL Transmission Format (gITF) 3D models.
+  text: Displays a countdown sequence to a specified date.
 ---
 
 <!--
@@ -169,10 +169,10 @@ _Example: Demonstrating usage of timeout event_
 <amp-animation id="hide-timeout-event" layout="nodisplay">
   <script type="application/json">
     {
-        "duration": "1s",
-        "fill": "both",
-        "selector": "#ampdate, #sample",
-        "keyframes": { "visibility": "hidden"}
+      "duration": "1s",
+      "fill": "both",
+      "selector": "#ampdate, #sample",
+      "keyframes": {"visibility": "hidden"}
     }
   </script>
 </amp-animation>

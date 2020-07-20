@@ -22,13 +22,13 @@ describes.fakeWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let hiddenObserver;
     let MutationObserver;
 
     function setupSingletonMutationObserver(opt_cb = () => {}) {
       const mo = new FakeMutationObserver(opt_cb);
-      MutationObserver = env.sandbox.stub().callsFake(function() {
+      MutationObserver = env.sandbox.stub().callsFake(function () {
         return mo;
       });
       env.win.MutationObserver = MutationObserver;
@@ -86,7 +86,7 @@ describes.fakeWin(
       expect(disconnect).to.have.been.calledOnce;
     });
 
-    it('passes MutationRecords to handler', function*() {
+    it('passes MutationRecords to handler', function* () {
       const stub = env.sandbox.stub();
       const mo = setupSingletonMutationObserver(stub);
 

@@ -19,8 +19,8 @@ import {devAssert} from '../../log';
 import {
   layoutRectEquals,
   layoutRectLtwh,
-  layoutRectsOverlap,
   layoutRectsRelativePos,
+  rectsOverlap,
 } from '../../layout-rect';
 
 /** @enum {number} */
@@ -64,7 +64,7 @@ export class PositionObserverWorker {
 
     /** @type {number} */
     this.turn =
-      (fidelity == PositionObserverFidelity.LOW)
+      fidelity == PositionObserverFidelity.LOW
         ? Math.floor(Math.random() * LOW_FIDELITY_FRAME_COUNT)
         : 0;
 
@@ -95,15 +95,14 @@ export class PositionObserverWorker {
       position.positionRect,
       'PositionObserver should always trigger entry with clientRect'
     );
-    const positionRect =
-      /** @type {!../../layout-rect.LayoutRectDef} */ (position.positionRect);
+    const positionRect = /** @type {!../../layout-rect.LayoutRectDef} */ (position.positionRect);
     // Add the relative position of the element to its viewport
     position.relativePos = layoutRectsRelativePos(
       positionRect,
       position.viewportRect
     );
 
-    if (layoutRectsOverlap(positionRect, position.viewportRect)) {
+    if (rectsOverlap(positionRect, position.viewportRect)) {
       // Update position
       this.prevPosition_ = position;
       // Only call handler if entry element overlap with viewport.
@@ -141,7 +140,7 @@ export class PositionObserverWorker {
       viewportSize.width,
       viewportSize.height
     );
-    this.viewport_.getClientRectAsync(this.element).then(elementBox => {
+    this.viewport_.getClientRectAsync(this.element).then((elementBox) => {
       this.trigger_(
         /** @type {./position-observer-worker.PositionInViewportEntryDef}*/ ({
           positionRect: elementBox,

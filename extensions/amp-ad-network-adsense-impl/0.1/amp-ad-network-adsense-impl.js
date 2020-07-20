@@ -20,14 +20,16 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
-import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../src/ampdoc-fie';
+import {EXPERIMENT_INFO_LIST as AMPDOC_FIE_EXPERIMENT_INFO_LIST} from '../../../src/ampdoc-fie';
 import {AdsenseSharedState} from './adsense-shared-state';
-import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
+import {AmpA4A, NO_SIGNING_EXP} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Navigation} from '../../../src/service/navigation';
 import {
   QQID_HEADER,
+  RENDER_ON_IDLE_FIX_EXP,
   SANDBOX_HEADER,
+  STICKY_AD_PADDING_BOTTOM_EXP,
   ValidAdContainerTypes,
   addCsiSignalsToAmpAnalyticsConfig,
   additionalDimensions,
@@ -45,6 +47,7 @@ import {ResponsiveState} from './responsive-state';
 import {Services} from '../../../src/services';
 import {
   addExperimentIdToElement,
+  isInExperiment,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {computedStyle, setStyles} from '../../../src/style';
@@ -53,12 +56,9 @@ import {domFingerprintPlain} from '../../../src/utils/dom-fingerprint';
 import {getAmpAdRenderOutsideViewport} from '../../amp-ad/0.1/concurrent-load';
 import {getData} from '../../../src/event-helper';
 import {getDefaultBootstrapBaseUrl} from '../../../src/3p-frame';
-import {
-  getExperimentBranch,
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
+import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {removeElement} from '../../../src/dom';
 import {stringHash32} from '../../../src/string';
 import {utf8Decode} from '../../../src/utils/bytes';
@@ -68,6 +68,13 @@ const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
 
 /** @const {string} */
 const TAG = 'amp-ad-network-adsense-impl';
+
+/** @const @enum {string} */
+const ROUND_LOCATION_PARAMS_EXP = {
+  ID: 'ad-adsense-gam-round-params',
+  CONTROL: '21066726',
+  EXPERIMENT: '21066727',
+};
 
 /**
  * Shared state for AdSense ad slots. This is used primarily for ad request url
@@ -80,9 +87,6 @@ const sharedState = new AdsenseSharedState();
 export function resetSharedState() {
   sharedState.reset();
 }
-
-/** @type {string} */
-const FORMAT_EXP = 'as-use-attr-for-format';
 
 /** @final */
 export class AmpAdNetworkAdsenseImpl extends AmpA4A {
@@ -186,17 +190,19 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     return ResponsiveState.maybeUpgradeToResponsive(
       this.element,
       this.getAdClientId_()
-    ).then(state => {
+    ).then((state) => {
       if (state != null) {
         this.responsiveState_ = state;
       }
-      if (this.responsiveState_ != null) {
-        return this.responsiveState_.attemptChangeSize();
+      if (
+        this.responsiveState_ != null &&
+        !this.responsiveState_.isContainerWidthState()
+      ) {
+        return this.responsiveState_.attemptToMatchResponsiveHeight();
       }
       // This should happen last, as some diversion criteria rely on some of the
       // preceding logic (specifically responsive logic).
       this.divertExperiments();
-      this.maybeAddSinglePassExperiment();
     });
   }
 
@@ -212,19 +218,42 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    * @visibleForTesting
    */
   divertExperiments() {
-    const experimentInfoMap = /** @type {!Object<string,
-        !../../../src/experiments.ExperimentInfo>} */ ({
-      [FORMAT_EXP]: {
-        isTrafficEligible: () =>
-          !this.responsiveState_ &&
-          Number(this.element.getAttribute('width')) > 0 &&
-          Number(this.element.getAttribute('height')) > 0,
-        branches: ['21062003', '21062004'],
+    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
+      {
+        experimentId: RENDER_ON_IDLE_FIX_EXP.id,
+        isTrafficEligible: () => true,
+        branches: [
+          RENDER_ON_IDLE_FIX_EXP.control,
+          RENDER_ON_IDLE_FIX_EXP.experiment,
+        ],
       },
-      ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
-    });
-    const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
-    Object.keys(setExps).forEach(expName =>
+      {
+        experimentId: NO_SIGNING_EXP.id,
+        isTrafficEligible: () => true,
+        branches: [NO_SIGNING_EXP.control, NO_SIGNING_EXP.experiment],
+      },
+      {
+        experimentId: STICKY_AD_PADDING_BOTTOM_EXP.id,
+        isTrafficEligible: () => true,
+        branches: [
+          STICKY_AD_PADDING_BOTTOM_EXP.control,
+          STICKY_AD_PADDING_BOTTOM_EXP.experiment,
+        ],
+      },
+      {
+        experimentId: ROUND_LOCATION_PARAMS_EXP.ID,
+        isTrafficEligible: () => true,
+        branches: [
+          ROUND_LOCATION_PARAMS_EXP.CONTROL,
+          ROUND_LOCATION_PARAMS_EXP.EXPERIMENT,
+        ],
+      },
+    ]).concat(AMPDOC_FIE_EXPERIMENT_INFO_LIST);
+    const setExps = randomlySelectUnsetExperiments(
+      this.win,
+      experimentInfoList
+    );
+    Object.keys(setExps).forEach((expName) =>
       addExperimentIdToElement(setExps[expName], this.element)
     );
   }
@@ -244,7 +273,15 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 
   /** @override */
-  getAdUrl(consentState) {
+  getAdUrl(consentTuple) {
+    let consentState = undefined;
+    let consentString = undefined;
+    let gdprApplies = undefined;
+    if (consentTuple) {
+      consentState = consentTuple.consentState;
+      consentString = consentTuple.consentString;
+      gdprApplies = consentTuple.gdprApplies;
+    }
     if (
       consentState == CONSENT_POLICY_STATE.UNKNOWN &&
       this.element.getAttribute('data-npa-on-unknown-consent') != 'true'
@@ -260,13 +297,16 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const adTestOn =
       this.element.getAttribute('data-adtest') ||
       isInManualExperiment(this.element);
+
+    // By default, the ad uses full-width. It will be overwritten
+    // if the publisher uses fixed size tag or it's converted to container-width.
+    this.size_ = this.getIntersectionElementLayoutBox();
     const width = Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('height'));
+    if (!isNaN(width) && !isNaN(height)) {
+      this.size_ = {width, height};
+    }
 
-    this.size_ =
-      getExperimentBranch(this.win, FORMAT_EXP) == '21062004'
-        ? {width, height}
-        : this.getIntersectionElementLayoutBox();
     const sizeToSend = this.isSinglePageStoryAd
       ? {width: 1, height: 1}
       : this.size_;
@@ -330,6 +370,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         this.responsiveState_ != null
           ? this.responsiveState_.getRafmtParam()
           : null,
+      'gdpr': gdprApplies === true ? '1' : gdprApplies === false ? '0' : null,
+      'gdpr_consent': consentString,
       'pfx': pfx ? '1' : '0',
       'aanf': /^(true|false)$/i.test(this.element.getAttribute('data-no-fill'))
         ? this.element.getAttribute('data-no-fill')
@@ -349,11 +391,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const experimentIds = [];
     const identityPromise = Services.timerFor(this.win)
       .timeoutPromise(1000, this.identityTokenPromise_)
-      .catch(unusedErr => {
+      .catch((unusedErr) => {
         // On error/timeout, proceed.
         return /**@type {!../../../ads/google/a4a/utils.IdentityToken}*/ ({});
       });
-    return identityPromise.then(identity => {
+    return identityPromise.then((identity) => {
       return googleAdUrl(
         this,
         ADSENSE_BASE_URL,
@@ -364,6 +406,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           'pucrd': identity.pucrd || null,
           ...parameters,
         },
+        isInExperiment(this.element, ROUND_LOCATION_PARAMS_EXP.EXPERIMENT),
         experimentIds
       );
     });
@@ -487,6 +530,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       width: `${this.size_.width}px`,
       height: `${this.size_.height}px`,
     });
+
     if (this.qqid_) {
       this.element.setAttribute('data-google-query-id', this.qqid_);
     }
@@ -550,7 +594,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       this.element.parentElement &&
       this.element.parentElement.tagName == 'AMP-STICKY-AD'
     ) {
-      const stickyMsgListener = event => {
+      const stickyMsgListener = (event) => {
         if (
           getData(event) == 'fill_sticky' &&
           event['source'] == this.iframe.contentWindow
@@ -567,6 +611,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpAdNetworkAdsenseImpl);
 });

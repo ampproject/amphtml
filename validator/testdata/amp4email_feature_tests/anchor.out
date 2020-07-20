@@ -29,23 +29,23 @@ FAIL
 |    <!-- URLs must be absolute. -->
 |    <a href="somelink.com">disallowed</a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:29:2 The relative URL 'somelink.com' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:29:2 The relative URL 'somelink.com' for attribute 'href' in tag 'a' is disallowed.
 |
-|    <!-- The protocol can only be http, https or mailto. -->
+|    <!-- The protocol can only be http, https, mailto or tel. -->
 |    <a href="ftp://somelink.com">disallowed</a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:32:2 Invalid URL protocol 'ftp:' for attribute 'href' in tag 'A (AMP4EMAIL)'.
+amp4email_feature_tests/anchor.html:32:2 Invalid URL protocol 'ftp:' for attribute 'href' in tag 'a'.
 |
 |    <!-- href of anchor is not bindable. -->
 |    <a [href]="evil">disallowed</a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:35:2 The attribute '[href]' may not appear in tag 'A (AMP4EMAIL)'.
+amp4email_feature_tests/anchor.html:35:2 The attribute '[href]' may not appear in tag 'a'.
 |
 |
 |    <!-- This is allowed. -->
 |    <a href="{{allowed}}">allowed</a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:39:2 The relative URL '{{allowed}}' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:39:2 The relative URL '{{allowed}}' for attribute 'href' in tag 'a' is disallowed.
 |
 |    <!--
 |      Mustache sections are not allowed in attribute values. This is currently only disallowed
@@ -56,13 +56,13 @@ amp4email_feature_tests/anchor.html:39:2 The relative URL '{{allowed}}' for attr
 |    <!-- These are disallowed -->
 |    <a href="{{#foo}}"></a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:48:2 The relative URL '{{#foo}}' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:48:2 The relative URL '{{#foo}}' for attribute 'href' in tag 'a' is disallowed.
 |    <a href="{{/foo}}"></a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:49:2 The relative URL '{{/foo}}' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:49:2 The relative URL '{{/foo}}' for attribute 'href' in tag 'a' is disallowed.
 |    <a href="{{^foo}}"></a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:50:2 The relative URL '{{^foo}}' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:50:2 The relative URL '{{^foo}}' for attribute 'href' in tag 'a' is disallowed.
 |
 |    <!--
 |      Mustache delimiters must be balanced. This is currently only disallowed
@@ -73,64 +73,64 @@ amp4email_feature_tests/anchor.html:50:2 The relative URL '{{^foo}}' for attribu
 |    <!-- These are disallowed -->
 |    <a href="{{disallowed"></a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:59:2 The relative URL '{{disallowed' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:59:2 The relative URL '{{disallowed' for attribute 'href' in tag 'a' is disallowed.
 |    <a href="disallowed}}"></a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:60:2 The relative URL 'disallowed}}' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:60:2 The relative URL 'disallowed}}' for attribute 'href' in tag 'a' is disallowed.
 |    <a href="}}"></a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:61:2 The relative URL '}}' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:61:2 The relative URL '}}' for attribute 'href' in tag 'a' is disallowed.
 |    <a href="{{"></a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:62:2 The relative URL '{{' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:62:2 The relative URL '{{' for attribute 'href' in tag 'a' is disallowed.
 |
 |    <a href="{{ "></a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:64:2 The relative URL '{{ ' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:64:2 The relative URL '{{ ' for attribute 'href' in tag 'a' is disallowed.
 |    <a href=" {{"></a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:65:2 The relative URL ' {{' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:65:2 The relative URL ' {{' for attribute 'href' in tag 'a' is disallowed.
 |    <a href=" }}"></a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:66:2 The relative URL ' }}' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:66:2 The relative URL ' }}' for attribute 'href' in tag 'a' is disallowed.
 |    <a href="}} "></a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:67:2 The relative URL '}} ' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:67:2 The relative URL '}} ' for attribute 'href' in tag 'a' is disallowed.
 |
 |    <!-- A combination of mustache tags and text should not calculate href values. -->
 |    <a href="{{bar}}{{foo}}">disallowed</a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:70:2 The relative URL '{{bar}}{{foo}}' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:70:2 The relative URL '{{bar}}{{foo}}' for attribute 'href' in tag 'a' is disallowed.
 |    <p id="{{bar}}{{foo}}">allowed</p>
 |
 |    <a href="bar{{foo}}">disallowed</a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:73:2 The relative URL 'bar{{foo}}' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:73:2 The relative URL 'bar{{foo}}' for attribute 'href' in tag 'a' is disallowed.
 |    <p id="bar{{foo}}">allowed</p>
 |
 |
 |    <a href="{{foo}}bar">disallowed</a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:77:2 The relative URL '{{foo}}bar' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:77:2 The relative URL '{{foo}}bar' for attribute 'href' in tag 'a' is disallowed.
 |    <p id="{{foo}}bar">allowed</p>
 |
 |    <a href="{{foo}} bar">disallowed</a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:80:2 The relative URL '{{foo}} bar' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:80:2 The relative URL '{{foo}} bar' for attribute 'href' in tag 'a' is disallowed.
 |    <p id="{{foo}} bar">allowed</p>
 |
 |    <a href="bar {{foo}}">disallowed</a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:83:2 The relative URL 'bar {{foo}}' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:83:2 The relative URL 'bar {{foo}}' for attribute 'href' in tag 'a' is disallowed.
 |
 |    <a href="{{foo}} ">disallowed</a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:85:2 The relative URL '{{foo}} ' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:85:2 The relative URL '{{foo}} ' for attribute 'href' in tag 'a' is disallowed.
 |    <p id="{{foo}} ">allowed</p>
 |
 |    <a href=" {{foo}}">disallowed</a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:88:2 The relative URL ' {{foo}}' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:88:2 The relative URL ' {{foo}}' for attribute 'href' in tag 'a' is disallowed.
 |    <p id=" {{foo}}">allowed</p>
 |
 |    <!-- Mustache delimiters cannot appear in the middle of href's value. -->
@@ -138,10 +138,10 @@ amp4email_feature_tests/anchor.html:88:2 The relative URL ' {{foo}}' for attribu
 |    <!-- These are disallowed. -->
 |    <a href="foo}}bar"></a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:94:2 The relative URL 'foo}}bar' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:94:2 The relative URL 'foo}}bar' for attribute 'href' in tag 'a' is disallowed.
 |    <a href="foo{{bar"></a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:95:2 The relative URL 'foo{{bar' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:95:2 The relative URL 'foo{{bar' for attribute 'href' in tag 'a' is disallowed.
 |
 |    <!--
 |      All the requirements hold when quotation is
@@ -151,25 +151,26 @@ amp4email_feature_tests/anchor.html:95:2 The relative URL 'foo{{bar' for attribu
 |    <!-- These are disallowed. -->
 |    <a href={{bar}}{{foo}}></a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:103:2 The relative URL '{{bar}}{{foo}}' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:103:2 The relative URL '{{bar}}{{foo}}' for attribute 'href' in tag 'a' is disallowed.
 |    <a href=bar{{foo}}></a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:104:2 The relative URL 'bar{{foo}}' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:104:2 The relative URL 'bar{{foo}}' for attribute 'href' in tag 'a' is disallowed.
 |    <a href={{foo}}bar></a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:105:2 The relative URL '{{foo}}bar' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:105:2 The relative URL '{{foo}}bar' for attribute 'href' in tag 'a' is disallowed.
 |    <a href={{#foo}}></a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:106:2 The relative URL '{{#foo}}' for attribute 'href' in tag 'A (AMP4EMAIL)' is disallowed.
+amp4email_feature_tests/anchor.html:106:2 The relative URL '{{#foo}}' for attribute 'href' in tag 'a' is disallowed.
 |
 |    <!-- These are allowed. -->
 |    <a href="http://www.somelink.com">http allowed</a>
 |    <a href="https://www.somelink.com">https allowed</a>
 |    <a href="mailto:user@example.com">mailto allowed</a>
+|    <a href="tel:4156667777">tel allowed</a>
 |
 |    <!-- 'name' attribute is deprecated. -->
 |    <a name="protocol"></a>
 >>   ^~~~~~~~~
-amp4email_feature_tests/anchor.html:114:2 The attribute 'name' may not appear in tag 'A (AMP4EMAIL)'.
+amp4email_feature_tests/anchor.html:115:2 The attribute 'name' may not appear in tag 'a'.
 |  </body>
 |  </html>

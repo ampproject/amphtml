@@ -112,6 +112,16 @@ The value for `action-xhr` can be the same or a different endpoint than `action`
 
 To learn about redirecting the user after successfully submitting the form, see the [Redirecting after a submission](#redirecting-after-a-submission) section below.
 
+##### enctype (optional)
+
+The enctype attribute specifies how form-data should be encoded before sending it to the server via the `method=POST` submission. The default encoding is set to `multipart/form-data`. This and `application/x-www-form-urlencoded` encoding types are currently supported.
+
+Summary of enctype values:
+
+- `application/x-www-form-urlencoded` - Sets the encoding type to `application/x-www-form-urlencoded`.
+- `multipart/form-data` - Sets the encoding type to `multipart/form-data`.
+- `any value` or unspecified - Setting the `enctype` attribute to a value not specified above or not setting the attribute at all will result in the default encoding type of `multipart/form-data`.
+
 ##### data-initialize-from-url (optional)
 
 Initializes form fields from the window URL's search string, where the query parameter name matches the field's name. When this attribute is present, `<input>`, `<select>`, and `<textarea>` fields can optionally be initialized.
@@ -361,6 +371,10 @@ You can render success or error responses in your form by using [extended templa
 - Apply a response attribute to any descendent of the `<form>` element.
 - Render the response in the child element by including a template via `<template></template>` or `<script type="text/plain"></script>` tag inside it or by referencing a template with a `template="id_of_other_template"` attribute.
 - Provide a valid JSON object for responses to `submit-success` and `submit-error`. Both success and error responses should have a `Content-Type: application/json` header.
+
+[tip type="note"]
+When using `<amp-form>` in tandem with another templating AMP component, such as `<amp-list>`, note that templates may not nest in valid AMP documents. In this case a valid workaround is to provide the template by `id` via the `template` attribute. Learn more about [nested templates in `<amp-mustache>`](https://amp.dev/documentation/components/amp-mustache/#nested-templates).
+[/tip]
 
 <a id="example-submitting"></a>
 
@@ -709,7 +723,7 @@ Once the user tries to submit the form, AMP will try to resolve the variables an
 </form>
 ```
 
-Note how `CANONICAL_HOSTNAME` above did not get replaced because it was not in the whitelist through `data-amp-replace` attribute on the first field.
+Note how `CANONICAL_HOSTNAME` above did not get replaced because it was not in the allowlist through `data-amp-replace` attribute on the first field.
 
 Substitutions will happen on every subsequent submission. Read more about [variable substitutions in AMP](../../spec/amp-var-substitutions.md).
 

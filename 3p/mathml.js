@@ -29,7 +29,7 @@ import {writeScript} from './3p';
  * @param {function(*)} cb
  */
 function getMathmlJs(global, scriptSource, cb) {
-  writeScript(global, scriptSource, function() {
+  writeScript(global, scriptSource, function () {
     cb(global.MathJax);
   });
 }
@@ -48,7 +48,7 @@ export function mathml(global, data) {
   getMathmlJs(
     global,
     'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML',
-    mathjax => {
+    (mathjax) => {
       // Dimensions are given by the parent frame.
       delete data.width;
       delete data.height;
@@ -59,8 +59,14 @@ export function mathml(global, data) {
       global.document.body.appendChild(div);
       mathjax.Hub.Config({
         showMathMenu: false,
+        // (#26082): From a11y perspective, user should not be able to tab to
+        // the math formula which has no functionality to interact with.  This
+        // configuration removes the formula from the tab-index.
+        menuSettings: {
+          inTabOrder: false,
+        },
       });
-      mathjax.Hub.Queue(function() {
+      mathjax.Hub.Queue(function () {
         const rendered = document.getElementById('MathJax-Element-1-Frame');
         // Remove built in mathjax margins.
         let display = document.getElementsByClassName('MJXc-display');

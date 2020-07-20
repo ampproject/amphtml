@@ -27,7 +27,7 @@ describes.realWin(
     },
     allowExternalResources: true,
   },
-  function(env) {
+  function (env) {
     this.timeout(4000);
     let win, doc;
 
@@ -44,7 +44,7 @@ describes.realWin(
     }
 
     it.skip('test-get-data', () => {
-      return getViqeo().then(p => {
+      return getViqeo().then((p) => {
         const {viqeoElement, entry, viqeo} = p;
         expect(entry.video.element).to.equal(viqeoElement);
         expect(entry.video instanceof AmpViqeoPlayer).to.equal(true);
@@ -73,7 +73,7 @@ describes.realWin(
 
     describe.skip('test-playing-actions', () => {
       it('renders responsively', () => {
-        return getViqeo().then(p => {
+        return getViqeo().then((p) => {
           const iframe = p.viqeoElement.querySelector('iframe');
           expect(iframe).to.not.be.null;
           expect(iframe.className).to.match(/i-amphtml-fill-content/);
@@ -81,7 +81,7 @@ describes.realWin(
       });
 
       it('should propagate autoplay to ad iframe', () => {
-        return getViqeo({opt_params: {autoplay: ''}}).then(p => {
+        return getViqeo({opt_params: {autoplay: ''}}).then((p) => {
           const iframe = p.viqeoElement.querySelector('iframe');
           const data = JSON.parse(iframe.name).attributes;
           expect(data).to.be.ok;
@@ -94,7 +94,7 @@ describes.realWin(
         'should propagate autoplay=false ' +
           'if element has not autoplay attribute to ad iframe',
         () => {
-          return getViqeo().then(p => {
+          return getViqeo().then((p) => {
             const iframe = p.viqeoElement.querySelector('iframe');
             const data = JSON.parse(iframe.name).attributes;
             expect(data).to.be.ok;
@@ -105,7 +105,7 @@ describes.realWin(
       );
 
       it('should paused without autoplay', () => {
-        return getViqeo().then(p => {
+        return getViqeo().then((p) => {
           const curState = p.videoManager.getPlayingState(p.viqeo);
           return expect(curState).to.equal(PlayingStates.PAUSED);
         });
@@ -114,7 +114,7 @@ describes.realWin(
 
     describe('createPlaceholderCallback', () => {
       it('should create a placeholder image', () => {
-        return getViqeo().then(p => {
+        return getViqeo().then((p) => {
           const img = p.viqeoElement.querySelector('amp-img');
           expect(img).to.not.be.null;
           expect(img.getAttribute('src')).to.equal(
@@ -197,7 +197,7 @@ describes.realWin(
       height && viqeoElement.setAttribute('height', height);
 
       opt_params &&
-        Object.keys(opt_params).forEach(key => {
+        Object.keys(opt_params).forEach((key) => {
           viqeoElement.setAttribute(key, opt_params[key]);
         });
 
@@ -207,7 +207,7 @@ describes.realWin(
         .then(() => viqeoElement.layoutCallback())
         .then(() => {
           const videoManager = Services.videoManagerForDoc(doc);
-          const entry = videoManager.getEntryForElement_(viqeoElement);
+          const entry = videoManager.getEntry_(viqeoElement);
           return Promise.resolve({
             viqeoElement,
             videoManager,

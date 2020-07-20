@@ -20,7 +20,6 @@ import {
   cloneLayoutMarginsChangeDef,
 } from '../../../src/layout-rect';
 import {Services} from '../../../src/services';
-import {addExperimentIdToElement} from '../../../ads/google/a4a/traffic-experiments';
 import {
   closestAncestorElementBySelector,
   createElementWithAttributes,
@@ -30,18 +29,9 @@ import {
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getElementLayoutBox} from './utils';
-import {getExperimentBranch} from '../../../src/experiments';
 
 /** @const */
 const TAG = 'amp-auto-ads';
-
-/** @const {!{branch: string, control: string, experiment: string}}
- */
-export const NO_OP_EXP = {
-  branch: 'amp-auto-ads-no-op-experiment',
-  control: '44710302',
-  experiment: '44710303',
-};
 
 /**
  * @typedef {{
@@ -84,7 +74,7 @@ const Position = {
  * extensions/amp-ad/.../validator-amp-ad.protoascii.
  * @const {!Array<string>}
  */
-const BLACKLISTED_ANCESTOR_TAGS = ['AMP-SIDEBAR', 'AMP-APP-BANNER'];
+const DENYLISTED_ANCESTOR_TAGS = ['AMP-SIDEBAR', 'AMP-APP-BANNER'];
 
 /**
  * @const {!Object<!Position, function(!Element, !Element)>}
@@ -168,7 +158,7 @@ export class Placement {
    * @return {!Promise<number>}
    */
   getEstimatedPosition() {
-    return getElementLayoutBox(this.anchorElement_).then(layoutBox => {
+    return getElementLayoutBox(this.anchorElement_).then((layoutBox) => {
       return this.getEstimatedPositionFromAchorLayout_(layoutBox);
     });
   }
@@ -203,25 +193,23 @@ export class Placement {
    * @return {!Promise<!PlacementState>}
    */
   placeAd(baseAttributes, sizing, adTracker, isResponsiveEnabled) {
-    return this.getEstimatedPosition().then(yPosition => {
-      return adTracker.isTooNearAnAd(yPosition).then(tooNear => {
+    return this.getEstimatedPosition().then((yPosition) => {
+      return adTracker.isTooNearAnAd(yPosition).then((tooNear) => {
         if (tooNear) {
           this.state_ = PlacementState.TOO_NEAR_EXISTING_AD;
           return this.state_;
         }
-        this.adElement_ = isResponsiveEnabled
-          ? this.createResponsiveAdElement_(baseAttributes)
+
+        const shouldUseFullWidthResponsive =
+          isResponsiveEnabled &&
+          this.isLayoutViewportNarrow_(this.anchorElement_);
+        this.adElement_ = shouldUseFullWidthResponsive
+          ? this.createFullWidthResponsiveAdElement_(baseAttributes)
           : this.createAdElement_(baseAttributes, sizing.width);
-        const noOpExpBranch = getExperimentBranch(
-          this.ampdoc.win,
-          NO_OP_EXP.branch
-        );
-        if (noOpExpBranch) {
-          addExperimentIdToElement(noOpExpBranch, this.adElement_);
-        }
+
         this.injector_(this.anchorElement_, this.getAdElement());
 
-        if (isResponsiveEnabled) {
+        if (shouldUseFullWidthResponsive) {
           return (
             whenUpgradedToCustomElement(this.getAdElement())
               // Responsive ads set their own size when built.
@@ -238,14 +226,14 @@ export class Placement {
           );
         }
 
-        return this.getPlacementSizing_(sizing).then(placement => {
+        return this.getPlacementSizing_(sizing).then((placement) => {
           // CustomElement polyfill does not call connectedCallback
           // synchronously. So we explicitly wait for CustomElement to be
           // ready.
           return whenUpgradedToCustomElement(this.getAdElement())
             .then(() => this.getAdElement().whenBuilt())
             .then(() => {
-              return this.mutator_.attemptChangeSize(
+              return this.mutator_.requestChangeSize(
                 this.getAdElement(),
                 placement.height,
                 placement.width,
@@ -312,7 +300,7 @@ export class Placement {
    * @return {!Element}
    * @private
    */
-  createResponsiveAdElement_(baseAttributes) {
+  createFullWidthResponsiveAdElement_(baseAttributes) {
     const attributes = /** @type {!JsonObject} */ (Object.assign(
       dict({
         'width': '100vw',
@@ -331,6 +319,20 @@ export class Placement {
       attributes
     );
   }
+
+  /**
+   * Estimate if the viewport has a narrow layout.
+   * @param {!Element} element
+   * @return {boolean}
+   * @private
+   */
+  isLayoutViewportNarrow_(element) {
+    const viewportSize = Services.viewportForDoc(element).getSize();
+
+    // The threshold aligns with the one for Non-AMP website. Checkout
+    // isLayoutViewportNarrow in responsive_util.js for internal reference.
+    return viewportSize.width < 488;
+  }
 }
 
 /**
@@ -339,13 +341,13 @@ export class Placement {
  * @return {!Array<!Placement>}
  */
 export function getPlacementsFromConfigObj(ampdoc, configObj) {
-  const placementObjs = configObj['placements'];
+  const placementObjs = /** @type {Array} */ (configObj['placements']);
   if (!placementObjs) {
     user().info(TAG, 'No placements in config');
     return [];
   }
   const placements = [];
-  placementObjs.forEach(placementObj => {
+  placementObjs.forEach((placementObj) => {
     getPlacementsFromObject(ampdoc, placementObj, placements);
   });
   return placements;
@@ -385,7 +387,7 @@ function getPlacementsFromObject(ampdoc, placementObj, placements) {
       };
     }
   }
-  anchorElements.forEach(anchorElement => {
+  anchorElements.forEach((anchorElement) => {
     if (!isPositionValid(anchorElement, placementObj['pos'])) {
       return;
     }
@@ -425,7 +427,7 @@ function getAnchorElements(rootElement, anchorObj) {
 
   const minChars = anchorObj['min_c'] || 0;
   if (minChars > 0) {
-    elements = elements.filter(el => {
+    elements = elements.filter((el) => {
       return el.textContent.length >= minChars;
     });
   }
@@ -441,7 +443,7 @@ function getAnchorElements(rootElement, anchorObj) {
 
   if (anchorObj['sub']) {
     let subElements = [];
-    elements.forEach(el => {
+    elements.forEach((el) => {
       subElements = subElements.concat(getAnchorElements(el, anchorObj['sub']));
     });
     return subElements;
@@ -464,9 +466,9 @@ function isPositionValid(anchorElement, position) {
     return false;
   }
   const elementToCheck = dev().assertElement(elementToCheckOrNull);
-  return !BLACKLISTED_ANCESTOR_TAGS.some(tagName => {
+  return !DENYLISTED_ANCESTOR_TAGS.some((tagName) => {
     if (closestAncestorElementBySelector(elementToCheck, tagName)) {
-      user().warn(TAG, 'Placement inside blacklisted ancestor: ' + tagName);
+      user().warn(TAG, 'Placement inside denylisted ancestor: ' + tagName);
       return true;
     }
     return false;

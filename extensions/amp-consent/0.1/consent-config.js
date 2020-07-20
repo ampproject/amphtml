@@ -31,6 +31,16 @@ const ALLOWED_DEPR_CONSENTINSTANCE_ATTRS = {
   'onUpdateHref': true,
 };
 
+/** @const @type {!Object<string, boolean>} */
+const CONSENT_VARS_ALLOWED_LIST = {
+  'CLIENT_ID': true,
+  'PAGE_VIEW_ID': true,
+  'PAGE_VIEW_ID_64': true,
+};
+
+/** @const @type {string} */
+export const CID_SCOPE = 'AMP-CONSENT';
+
 export class ConsentConfig {
   /** @param {!Element} element */
   constructor(element) {
@@ -168,7 +178,7 @@ export class ConsentConfig {
       config['consentRequired'] = 'remote';
     }
 
-    return this.mergeGeoOverride_(config).then(mergedConfig =>
+    return this.mergeGeoOverride_(config).then((mergedConfig) =>
       this.validateMergedGeoOverride_(mergedConfig)
     );
   }
@@ -182,7 +192,7 @@ export class ConsentConfig {
     if (!config['geoOverride']) {
       return Promise.resolve(config);
     }
-    return Services.geoForDocOrNull(this.element_).then(geoService => {
+    return Services.geoForDocOrNull(this.element_).then((geoService) => {
       userAssert(
         geoService,
         '%s: requires <amp-geo> to use `geoOverride`',
@@ -287,6 +297,36 @@ export class ConsentConfig {
       devAssert(config[attribute], 'CMP config must specify %s', attribute);
     }
   }
+}
+
+/**
+ * Expand consent endpoint url
+ * @param {!Element|!ShadowRoot} element
+ * @param {string} url
+ * @return {!Promise<string>}
+ */
+export function expandConsentEndpointUrl(element, url) {
+  return Services.urlReplacementsForDoc(element).expandUrlAsync(
+    url,
+    {
+      'CLIENT_ID': getConsentCID(element),
+    },
+    CONSENT_VARS_ALLOWED_LIST
+  );
+}
+
+/**
+ * Return AMP CONSENT scoped CID
+ * @param {!Element|!ShadowRoot|!../../../src/service/ampdoc-impl.AmpDoc} node
+ * @return {!Promise<string>}
+ */
+export function getConsentCID(node) {
+  return Services.cidForDoc(node).then((cid) => {
+    return cid.get(
+      {scope: CID_SCOPE, createCookieIfNotPresent: true},
+      /** consent */ Promise.resolve()
+    );
+  });
 }
 
 /**

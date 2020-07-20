@@ -91,7 +91,7 @@ export class ScrollManager {
     // Trigger an event to fire events that might have already happened.
     const size = this.viewport_.getSize();
 
-    this.getInitRootElementRect_().then(initRootElementRect => {
+    this.getInitRootElementRect_().then((initRootElementRect) => {
       // In the case of shadow/embedded documents, the root element's
       // layoutRect is relative to the parent doc's origin
       const {
@@ -138,7 +138,7 @@ export class ScrollManager {
       this.getInitRootElementRect_(),
       // Current root layout rectangle
       this.measureRootElement_(),
-    ]).then(rects => {
+    ]).then((rects) => {
       // Initial root layout rectangle
       const {height: initialScrollHeight, width: initialScrollWidth} = rects[0];
       // Current root layout rectangle

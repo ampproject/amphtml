@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-autocomplete'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -81,7 +81,7 @@ describes.realWin(
       return getAutocomplete({
         'filter': 'substring',
         'query': 'q',
-      }).then(ampAutocomplete => {
+      }).then((ampAutocomplete) => {
         const impl = ampAutocomplete.implementation_;
         expect(impl.queryKey_).to.equal('q');
       });
@@ -92,7 +92,7 @@ describes.realWin(
       return getAutocomplete({
         'filter': 'substring',
       })
-        .then(ampAutocomplete => {
+        .then((ampAutocomplete) => {
           impl = ampAutocomplete.implementation_;
           const expectedItems = ['apple', 'banana', 'orange'];
           expect(impl.sourceData_).to.have.ordered.members(expectedItems);
@@ -120,7 +120,7 @@ describes.realWin(
         'filter': 'substring',
         'min-characters': '0',
       })
-        .then(ampAutocomplete => {
+        .then((ampAutocomplete) => {
           impl = ampAutocomplete.implementation_;
           const expectedItems = ['apple', 'banana', 'orange'];
           expect(impl.sourceData_).to.have.ordered.members(expectedItems);
@@ -155,7 +155,7 @@ describes.realWin(
         '{ "items" : ["apple", "banana", "orange"] }',
         false
       )
-        .then(ampAutocomplete => {
+        .then((ampAutocomplete) => {
           impl = ampAutocomplete.implementation_;
           expect(impl.sourceData_).to.be.null;
           expect(impl.inputElement_).not.to.be.null;
@@ -176,14 +176,6 @@ describes.realWin(
         });
     });
 
-    it('should require filter attribute', () => {
-      return allowConsoleError(() => {
-        return expect(getAutocomplete({})).to.be.rejectedWith(
-          /requires "filter" attribute/
-        );
-      });
-    });
-
     it('should require valid filter attribute', () => {
       return allowConsoleError(() => {
         return expect(
@@ -198,7 +190,7 @@ describes.realWin(
       return getAutocomplete({
         'filter': 'substring',
         'min-characters': '3',
-      }).then(ampAutocomplete => {
+      }).then((ampAutocomplete) => {
         expect(ampAutocomplete.implementation_.minChars_).to.equal(3);
       });
     });
@@ -207,11 +199,19 @@ describes.realWin(
       return getAutocomplete({
         'filter': 'substring',
         'max-entries': '10',
-      }).then(ampAutocomplete => {
-        expect(ampAutocomplete.implementation_.maxEntries_).to.equal(10);
+      }).then((ampAutocomplete) => {
+        expect(ampAutocomplete.implementation_.maxItems_).to.equal(10);
       });
     });
 
+    it('should render with max-items passed', () => {
+      return getAutocomplete({
+        'filter': 'substring',
+        'max-items': '10',
+      }).then((ampAutocomplete) => {
+        expect(ampAutocomplete.implementation_.maxItems_).to.equal(10);
+      });
+    });
     it('should error with invalid JSON script', () => {
       expectAsyncConsoleError(
         'Unexpected token o in JSON at position 32 [object HTMLElement]'
@@ -232,7 +232,7 @@ describes.realWin(
           'filter': 'substring',
         },
         '{}'
-      ).then(ampAutocomplete => {
+      ).then((ampAutocomplete) => {
         const impl = ampAutocomplete.implementation_;
         expect(impl.sourceData_).to.be.an('array').that.is.empty;
       });
@@ -244,7 +244,7 @@ describes.realWin(
           'filter': 'substring',
         },
         '{ "items" : [] }'
-      ).then(ampAutocomplete => {
+      ).then((ampAutocomplete) => {
         const impl = ampAutocomplete.implementation_;
         expect(impl.sourceData_).to.be.an('array').that.is.empty;
       });
@@ -257,7 +257,7 @@ describes.realWin(
           'items': 'fruit',
         },
         '{ "fruit" : [ "apples", "bananas", "pears" ] }'
-      ).then(ampAutocomplete => {
+      ).then((ampAutocomplete) => {
         const impl = ampAutocomplete.implementation_;
         expect(impl.sourceData_).to.have.ordered.members([
           'apples',
@@ -284,7 +284,7 @@ describes.realWin(
         },
         data,
         false
-      ).then(ampAutocomplete => {
+      ).then((ampAutocomplete) => {
         ampAutocomplete.layoutCallback().then(() => {
           const impl = ampAutocomplete.implementation_;
           expect(impl.sourceData_).to.be.null;
@@ -310,7 +310,7 @@ describes.realWin(
         },
         data,
         false
-      ).then(ampAutocomplete => {
+      ).then((ampAutocomplete) => {
         ampAutocomplete.layoutCallback().then(() => {
           const impl = ampAutocomplete.implementation_;
           expect(impl.sourceData_).to.be.null;
@@ -340,7 +340,7 @@ describes.realWin(
         },
         data,
         false
-      ).then(ampAutocomplete => {
+      ).then((ampAutocomplete) => {
         ampAutocomplete.layoutCallback().then(() => {
           const impl = ampAutocomplete.implementation_;
           expect(impl.sourceData_).be.null;
@@ -355,15 +355,17 @@ describes.realWin(
     });
 
     it('should read the autocomplete attribute on the form as null', () => {
-      return getAutocomplete({'filter': 'substring'}).then(ampAutocomplete => {
-        const impl = ampAutocomplete.implementation_;
-        expect(impl.initialAutocompleteAttr_).to.be.null;
-      });
+      return getAutocomplete({'filter': 'substring'}).then(
+        (ampAutocomplete) => {
+          const impl = ampAutocomplete.implementation_;
+          expect(impl.initialAutocompleteAttr_).to.be.null;
+        }
+      );
     });
 
     it('should read the autocomplete attribute on the form as on', () => {
       return getAutocomplete({'filter': 'substring'}, '{}', true, 'on').then(
-        ampAutocomplete => {
+        (ampAutocomplete) => {
           const impl = ampAutocomplete.implementation_;
           expect(impl.initialAutocompleteAttr_).to.equal('on');
         }
@@ -372,7 +374,7 @@ describes.realWin(
 
     it('should read the autocomplete attribute on the form as off', () => {
       return getAutocomplete({'filter': 'substring'}, '{}', true, 'off').then(
-        ampAutocomplete => {
+        (ampAutocomplete) => {
           const impl = ampAutocomplete.implementation_;
           expect(impl.initialAutocompleteAttr_).to.equal('off');
         }

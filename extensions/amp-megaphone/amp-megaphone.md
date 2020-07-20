@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a [Megaphone.fm](https://megaphone.fm/) podcast episode or playlist.
+  text: Displays a Megaphone.fm podcast episode or playlist.
 ---
 
 <!---

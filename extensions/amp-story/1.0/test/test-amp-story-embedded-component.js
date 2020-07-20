@@ -28,7 +28,7 @@ import {StoryAnalyticsEvent} from '../story-analytics';
 import {addAttributesToElement} from '../../../../src/dom';
 import {registerServiceBuilder} from '../../../../src/service';
 
-describes.realWin('amp-story-embedded-component', {amp: true}, env => {
+describes.realWin('amp-story-embedded-component', {amp: true}, (env) => {
   let component;
   let win;
   let parentEl;
@@ -42,6 +42,11 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
 
+    const localizationService = new LocalizationService(win.document.body);
+    env.sandbox
+      .stub(Services, 'localizationForDoc')
+      .returns(localizationService);
+
     // Making sure mutator tasks run synchronously.
     env.sandbox.stub(Services, 'mutatorForDoc').returns({
       mutateElement: (element, callback) => {
@@ -49,15 +54,8 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
         return Promise.resolve();
       },
       measureMutateElement: (measure, mutate) => {
-        return Promise.resolve()
-          .then(measure)
-          .then(mutate);
+        return Promise.resolve().then(measure).then(mutate);
       },
-    });
-
-    const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', function() {
-      return localizationService;
     });
 
     parentEl = win.document.createElement('div');
@@ -86,7 +84,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
       'triggerAnalyticsEvent'
     );
     storeService = getStoreService(win);
-    registerServiceBuilder(win, 'story-store', function() {
+    registerServiceBuilder(win, 'story-store', function () {
       return storeService;
     });
   });
@@ -282,7 +280,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     const tooltip = component
       .getShadowRootForTesting()
       .querySelector('a.i-amphtml-story-tooltip');
-    tooltip.onclick = e => {
+    tooltip.onclick = (e) => {
       e.preventDefault(); // Make the test not actually navigate.
     };
 
@@ -309,7 +307,7 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     const tooltip = component
       .getShadowRootForTesting()
       .querySelector('a.i-amphtml-story-tooltip');
-    tooltip.onclick = e => {
+    tooltip.onclick = (e) => {
       e.preventDefault(); // Make the test not actually navigate.
     };
 
@@ -327,5 +325,5 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
  * @return {!Promise}
  */
 function timeout(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

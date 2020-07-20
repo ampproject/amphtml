@@ -282,6 +282,18 @@ export const VideoEvents = {
   LOADEDMETADATA: 'loadedmetadata',
 
   /**
+   * play
+   *
+   * Fired when the video plays (either because of autoplay or the play method).
+   *
+   * Note: Because this event was not originally present in this interface, we
+   * cannot rely on all all implementations to emit it.
+   *
+   * @event play
+   */
+  PLAY: 'play',
+
+  /**
    * playing
    *
    * Fired when the video begins playing.
@@ -528,7 +540,7 @@ export const videoAnalyticsCustomEventTypeKey = '__amp:eventType';
  * Helper union type to be used internally, so that the compiler treats
  * `VideoInterface` objects as `BaseElement`s, which they should be anyway.
  *
- * WARNING: Don't use this at the service level. Its `register` method should
+ * WARNING: Don't use to `register` at the Service level. Registering should
  * only allow `VideoInterface` as a guarding measure.
  *
  * @typedef {!VideoInterface|!./base-element.BaseElement}
@@ -546,13 +558,13 @@ export function isDockable(element) {
 /** @enum {string} */
 export const VideoServiceSignals = {
   USER_INTERACTED: 'user-interacted',
-  AUTOPLAY_DELEGATED: 'autoplay-delegated',
+  PLAYBACK_DELEGATED: 'playback-delegated',
 };
 
 /** @param {!AmpElement|!VideoOrBaseElementDef} video */
 export function delegateAutoplay(video) {
-  whenUpgradedToCustomElement(dev().assertElement(video)).then(el => {
-    el.signals().signal(VideoServiceSignals.AUTOPLAY_DELEGATED);
+  whenUpgradedToCustomElement(dev().assertElement(video)).then((el) => {
+    el.signals().signal(VideoServiceSignals.PLAYBACK_DELEGATED);
   });
 }
 

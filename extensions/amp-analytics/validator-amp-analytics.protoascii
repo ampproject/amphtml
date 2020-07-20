@@ -35,6 +35,7 @@ tags: {  # amp-analytics (json)
   html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "amp-analytics extension .json script"
+  descriptive_name: "amp-analytics extension .json script"
   requires_extension: "amp-analytics"
   mandatory_parent: "AMP-ANALYTICS"
   attrs: {
@@ -45,12 +46,12 @@ tags: {  # amp-analytics (json)
   }
   attr_lists: "nonce-attr"
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
   }
-  spec_url: "https://amp.dev/documentation/components/amp-analytics"
+  spec_url: "https://amp.dev/documentation/components/amp-analytics/"
 }
 tags: {  # <amp-analytics>
   html_format: AMP
@@ -65,9 +66,8 @@ tags: {  # <amp-analytics>
       allow_relative: true  # Will be set to false at a future date.
       allow_empty: true
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attrs: { name: "type" }
-  spec_url: "https://amp.dev/documentation/components/amp-analytics"
+  spec_url: "https://amp.dev/documentation/components/amp-analytics/"
 }
-

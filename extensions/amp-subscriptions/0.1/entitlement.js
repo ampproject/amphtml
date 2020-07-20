@@ -19,6 +19,7 @@ import {dict} from '../../../src/utils/object';
 export const GrantReason = {
   'SUBSCRIBER': 'SUBSCRIBER',
   'METERING': 'METERING',
+  'UNLOCKED': 'UNLOCKED',
 };
 
 /**

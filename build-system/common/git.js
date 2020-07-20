@@ -65,15 +65,22 @@ function shortSha(sha) {
 }
 
 /**
+ * Returns the list of files changed but not committed to the local branch, one
+ * on each line.
+ * @return {!Array<string>}
+ */
+function gitDiffNameOnly() {
+  return getStdout('git diff --name-only').trim().split('\n');
+}
+
+/**
  * Returns the list of files changed relative to the branch point off of master,
  * one on each line.
  * @return {!Array<string>}
  */
 function gitDiffNameOnlyMaster() {
   const masterBaseline = gitMasterBaseline();
-  return getStdout(`git diff --name-only ${masterBaseline}`)
-    .trim()
-    .split('\n');
+  return getStdout(`git diff --name-only ${masterBaseline}`).trim().split('\n');
 }
 
 /**
@@ -162,13 +169,59 @@ function gitCommitterEmail() {
 }
 
 /**
- * Returns the timestamp of the latest commit on the local branch.
- * @return {number}
+ * Returns list of commit SHAs and their cherry-pick status from master.
+ *
+ * `git cherry <branch>` returns a list of commit SHAs. While the exact
+ * mechanism is too complicated for this comment (run `git help cherry` for a
+ * full explanation), the gist of it is that commits that were cherry-picked
+ * from <branch> are prefixed with '- ', and those that were not are prefixed
+ * with '+ '.
+ *
+ * @return {!Array<{sha: string, isCherryPick: boolean}>}
  */
-function gitCommitFormattedTime() {
+function gitCherryMaster() {
+  return getStdout('git cherry master')
+    .trim()
+    .split('\n')
+    .map((line) => ({
+      isCherryPick: line.substring(0, 2) == '- ',
+      sha: line.substring(2),
+    }));
+}
+
+/**
+ * Returns (UTC) time of a commit on the local branch, in %y%m%d%H%M%S format.
+ *
+ * @param {string} ref a Git reference (commit SHA, branch name, etc.) for the
+ *   commit to get the time of.
+ * @return {string}
+ */
+function gitCommitFormattedTime(ref = 'HEAD') {
+  const envPrefix = process.platform == 'win32' ? 'set TZ=UTC &&' : 'TZ=UTC';
   return getStdout(
-    'TZ=UTC git log -1 --pretty="%cd" --date=format-local:%y%m%d%H%M%S'
+    `${envPrefix} git log ${ref} -1 --pretty="%cd" --date=format-local:%y%m%d%H%M%S`
   ).trim();
+}
+
+/**
+ * Returns the commit message of a given ref.
+ * @param {string} ref a Git reference (commit SHA, branch name, etc.) for the
+ *   commit to get the time of.
+ * @return {string}
+ */
+function gitCommitMessage(ref = 'HEAD') {
+  return getStdout(`git log ${ref} -n 1 --pretty="%B"`);
+}
+
+/**
+ * Checks if a branch contains a specific ref.
+ * @param {string} ref a Git reference (commit SHA, branch name, etc.) for the
+ *   commit to get the time of.
+ * @param {string} branch the branch to check.
+ * @return {boolean}
+ */
+function gitBranchContains(ref, branch = 'master') {
+  return Boolean(getStdout(`git branch ${branch} --contains ${ref}`).trim());
 }
 
 /**
@@ -202,15 +255,19 @@ function gitDiffPath(path, commit) {
 }
 
 module.exports = {
+  gitBranchContains,
   gitBranchCreationPoint,
   gitBranchName,
+  gitCherryMaster,
   gitCommitFormattedTime,
   gitCommitHash,
+  gitCommitMessage,
   gitCommitterEmail,
   gitDiffAddedNameOnlyMaster,
   gitDiffColor,
   gitDiffCommitLog,
   gitDiffFileMaster,
+  gitDiffNameOnly,
   gitDiffNameOnlyMaster,
   gitDiffPath,
   gitDiffStatMaster,

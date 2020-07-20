@@ -32,7 +32,7 @@ describes.realWin(
       extensions: ['amp-youtube'],
     },
   },
-  function(env) {
+  function (env) {
     this.timeout(5000);
     let win, doc;
     let timer;
@@ -68,11 +68,11 @@ describes.realWin(
       return yt;
     }
 
-    describe('with data-videoid', function() {
+    describe('with data-videoid', function () {
       runTestsForDatasource(EXAMPLE_VIDEOID);
     });
 
-    describe('with data-live-channelid', function() {
+    describe('with data-live-channelid', function () {
       runTestsForDatasource(EXAMPLE_LIVE_CHANNELID);
     });
 
@@ -239,7 +239,7 @@ describes.realWin(
     });
 
     it('adds an img placeholder in prerender mode if source is videoid', async () => {
-      const yt = await getYt({'data-videoid': EXAMPLE_VIDEOID}, true, function(
+      const yt = await getYt({'data-videoid': EXAMPLE_VIDEOID}, true, function (
         yt
       ) {
         const iframe = yt.querySelector('iframe');
@@ -268,7 +268,7 @@ describes.realWin(
           'aria-label': 'kind video',
         },
         true,
-        function(yt) {
+        function (yt) {
           const iframe = yt.querySelector('iframe');
           expect(iframe).to.be.null;
           const imgPlaceholder = yt.querySelector('img[placeholder]');
@@ -284,7 +284,7 @@ describes.realWin(
     });
 
     it('loads only sddefault when it exists if source is videoid', async () => {
-      const yt = await getYt({'data-videoid': EXAMPLE_VIDEOID}, true, function(
+      const yt = await getYt({'data-videoid': EXAMPLE_VIDEOID}, true, function (
         yt
       ) {
         const iframe = yt.querySelector('iframe');
@@ -307,7 +307,7 @@ describes.realWin(
     });
 
     it('loads hqdefault thumbnail source when sddefault fails', async () => {
-      const yt = await getYt({'data-videoid': 'FAKE'}, true, function(yt) {
+      const yt = await getYt({'data-videoid': 'FAKE'}, true, function (yt) {
         const iframe = yt.querySelector('iframe');
         expect(iframe).to.be.null;
         const imgPlaceholder = yt.querySelector('img[placeholder]');

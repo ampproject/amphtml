@@ -28,7 +28,7 @@ describes.endtoend(
     experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
   },
-  async env => {
+  async (env) => {
     let controller;
 
     beforeEach(async () => {

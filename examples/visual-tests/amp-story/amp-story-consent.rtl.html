@@ -46,14 +46,11 @@
 
       <amp-consent id="myConsent" layout="nodisplay">
         <script type="application/json">
-            {
-              "consents": {
-                "myConsent": {
-                  "checkConsentHref": "http://localhost:8000/get-consent-v1",
-                  "promptUI": "consentUI"
-                }
-              }
-            }
+          {
+            "consentInstanceId": "myConsent",
+            "checkConsentHref": "http://localhost:8000/get-consent-v1",
+            "promptUI": "consentUI"
+          }
           </script>
         <amp-story-consent id="consentUI" layout="nodisplay">
           <script type="application/json">
@@ -79,8 +76,7 @@
 
       <amp-story-page id="cover">
         <amp-story-grid-layer template="fill">
-          <amp-video autoplay layout="fill" poster="/examples/visual-tests/picsum.photos/image981_1600x900.jpg">
-          </amp-video>
+          <amp-img layout="fill" src="../../amp-story/img/poster2.jpg"></amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="vertical">
           <h1 id="hello-world">مرحبا بالعالم</h1>

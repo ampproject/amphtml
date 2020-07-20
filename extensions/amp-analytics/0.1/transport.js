@@ -142,7 +142,7 @@ export class Transport {
 
   /**
    * amp-analytics will create an iframe for vendors in
-   * extensions/amp-analytics/0.1/vendors.js who have transport/iframe defined.
+   * extensions/amp-analytics/0.1/vendors/* who have transport/iframe defined.
    * This is limited to MRC-accreddited vendors. The frame is removed if the
    * user navigates/swipes away from the page, and is recreated if the user
    * navigates back to the page.
@@ -188,7 +188,7 @@ export class Transport {
    * Sends a ping request using an iframe, that is removed 5 seconds after
    * it is loaded.
    * This is not available as a standard transport, but rather used for
-   * specific, whitelisted requests.
+   * specific, allowlisted requests.
    * Note that this is unrelated to the iframeTransport
    *
    * @param {string} url
@@ -316,7 +316,7 @@ export class Transport {
  */
 function cacheFuncResult(func) {
   const cachedValue = {};
-  return arg => {
+  return (arg) => {
     const key = String(arg);
     if (cachedValue[key] === undefined) {
       cachedValue[key] = func(arg);

@@ -28,7 +28,7 @@ import {Services} from './services';
  */
 export function getConsentPolicyState(element, policyId = 'default') {
   return Services.consentPolicyServiceForDocOrNull(element).then(
-    consentPolicy => {
+    (consentPolicy) => {
       if (!consentPolicy) {
         return null;
       }
@@ -46,7 +46,7 @@ export function getConsentPolicyState(element, policyId = 'default') {
  */
 export function getConsentPolicySharedData(element, policyId) {
   return Services.consentPolicyServiceForDocOrNull(element).then(
-    consentPolicy => {
+    (consentPolicy) => {
       if (!consentPolicy) {
         return null;
       }
@@ -58,8 +58,6 @@ export function getConsentPolicySharedData(element, policyId) {
 }
 
 /**
- * TODO(zhouyx): Combine with getConsentPolicyState and return a consentInfo
- * object.
  * @param {!Element|!ShadowRoot} element
  * @param {string} policyId
  * @return {!Promise<string>}
@@ -67,11 +65,30 @@ export function getConsentPolicySharedData(element, policyId) {
 export function getConsentPolicyInfo(element, policyId) {
   // Return the stored consent string.
   return Services.consentPolicyServiceForDocOrNull(element).then(
-    consentPolicy => {
+    (consentPolicy) => {
       if (!consentPolicy) {
         return null;
       }
       return consentPolicy.getConsentStringInfo(
+        /** @type {string} */ (policyId)
+      );
+    }
+  );
+}
+
+/**
+ * @param {!Element|!ShadowRoot} element
+ * @param {string} policyId
+ * @return {!Promise<?Object|undefined>}
+ */
+export function getConsentMetadata(element, policyId) {
+  // Return the stored consent metadata.
+  return Services.consentPolicyServiceForDocOrNull(element).then(
+    (consentPolicy) => {
+      if (!consentPolicy) {
+        return null;
+      }
+      return consentPolicy.getConsentMetadataInfo(
         /** @type {string} */ (policyId)
       );
     }

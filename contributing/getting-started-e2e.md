@@ -363,7 +363,7 @@ Note that you _can_ add changes into an existing commit but that opens up some a
 AMP uses the following tools for code quality and style:
 
 - [Eslint](https://eslint.org/) is used to ensure the code quality of JS files.
-  - Default rules can be found in [.eslintrc](../.eslintrc) files across the repo.
+  - Default rules can be found in [.eslintrc.js](../.eslintrc.js) files across the repo.
   - Custom rules can be found in [build-system/eslint-rules/](../build-system/eslint-rules/index.js).
 - [Prettier](https://prettier.io/) is used to standardize the code style and formatting of JS files and several non-JS files.
   - Default and file-specific rules can be found in [.prettierrc](../.prettierrc).
@@ -410,7 +410,7 @@ gulp prettify --local_changes --fix
 
 Before sending your code changes for review, please make sure that all of the affected tests are passing. You may be expected to add/modify some tests as well.
 
-Note: You can automatically run critical checks before `git push` by enabling our pre-push hook. To do so, run `./build-system/enable-git-pre-push.sh`.
+Note: You can automatically run critical checks before `git push` by enabling our pre-push hook. To do so, run `./build-system/common/enable-git-pre-push.sh`.
 
 ## Running tests locally
 
@@ -437,7 +437,7 @@ Notes:
 - This will force a clean build and run all the PR checks one by one.
 - Just like on Travis, a failing check will prevent subsequent checks from being run.
 - The `gulp visual-diff` check will be skipped unless you have set up a Percy account as described in the [Testing](TESTING.md#running-visual-diff-tests-locally) guide.
-- Unit and integration tests will be run on local Chrome unless you have set up a Sauce Labs account as described in the [Testing](TESTING.md#testing-on-sauce-labs) guide.
+- Unit and integration tests will be run on local Chrome.
 
 ## Adding tests
 
