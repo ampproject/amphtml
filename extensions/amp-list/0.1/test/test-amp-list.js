@@ -1037,6 +1037,34 @@ describes.repeated(
               ).to.eventually.be.rejectedWith(/Invalid function identifier/);
             });
 
+            it('should render non-array if single-item is set', async () => {
+              const callFunctionResult = {'items': {title: 'Title'}};
+              element.setAttribute('single-item', 'true');
+              toggleExperiment(win, 'protocol-adapters', true);
+              Services.scriptForDocOrNull.returns(
+                Promise.resolve({
+                  callFunction(scriptId, fnId) {
+                    if (scriptId === 'example' && fnId === 'fetchData') {
+                      return Promise.resolve(callFunctionResult);
+                    }
+                    return Promise.reject('Invalid function scriptId/fnId');
+                  },
+                })
+              );
+
+              listMock
+                .expects('scheduleRender_')
+                .withExactArgs(
+                  [{title: 'Title'}],
+                  /*append*/ false,
+                  callFunctionResult
+                )
+                .returns(Promise.resolve())
+                .once();
+
+              await list.layoutCallback();
+            });
+
             it('should render a list from AmpScriptService provided data', async () => {
               toggleExperiment(win, 'protocol-adapters', true);
               Services.scriptForDocOrNull.returns(
