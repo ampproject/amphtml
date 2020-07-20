@@ -63,19 +63,19 @@ export function Timeago({
 /**
  * @param {string} datetime
  * @param {string} locale
- * @param {number=} opt_cutoff
- * @param {string=} opt_cutoffText
+ * @param {number|undefined} cutoff
+ * @param {string|undefined} cutoffText
  * @return {string}
  */
-function getFuzzyTimestampValue(datetime, locale, opt_cutoff, opt_cutoffText) {
-  if (!opt_cutoff) {
+function getFuzzyTimestampValue(datetime, locale, cutoff, cutoffText) {
+  if (!cutoff) {
     return timeago(datetime, locale);
   }
   const elDate = new Date(datetime);
   const secondsAgo = Math.floor((Date.now() - elDate.getTime()) / 1000);
 
-  if (secondsAgo > opt_cutoff) {
-    return opt_cutoffText || '';
+  if (secondsAgo > cutoff) {
+    return cutoffText || '';
   }
   return timeago(datetime, locale);
 }
