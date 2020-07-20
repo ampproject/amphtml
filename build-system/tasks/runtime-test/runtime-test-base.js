@@ -30,7 +30,6 @@ const {green, yellow, cyan, red} = require('ansi-colors');
 const {isGithubActionsBuild} = require('../../common/github-actions');
 const {isTravisBuild} = require('../../common/travis');
 const {reportTestStarted} = require('.././report-test-status');
-const {resultFilename} = require('../report-test-results');
 const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');
 
