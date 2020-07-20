@@ -24,7 +24,7 @@ export class IframePool {
     /** @private @const {!Array<number>} */
     this.iframePool_ = [];
 
-    /** @private @const {!Array<number>} */
+    /** @private {!Array<number>} */
     this.storyIdsWithIframe_ = [];
   }
 

@@ -30,6 +30,8 @@ import {createCustomEvent} from '../event-helper';
 import {dict, map} from '../utils/object';
 // Source for this constant is css/amp-story-player-iframe.css
 import {cssText} from '../../build/amp-story-player-iframe.css';
+import {dev} from '../log';
+import {findIndex} from '../utils/array';
 import {resetStyles, setStyle, setStyles} from '../style';
 import {toArray} from '../types';
 import {tryFocus} from '../dom';
@@ -96,7 +98,6 @@ export class AmpStoryPlayer {
   /**
    * @param {!Window} win
    * @param {!Element} element
-   * @constructor
    */
   constructor(win, element) {
     console./*OK*/ assert(
@@ -134,7 +135,7 @@ export class AmpStoryPlayer {
     /** @private {!IframePool} */
     this.iframePool_ = new IframePool();
 
-    /** @private {!Object<string, !Promise>} */
+    /** @private {!Object<number, !Promise>} */
     this.messagingPromises_ = map();
 
     /** @private {number} */
@@ -234,7 +235,9 @@ export class AmpStoryPlayer {
 
   /** @private */
   signalReady_() {
-    this.element_.dispatchEvent(createCustomEvent(this.win_, 'ready', {}));
+    this.element_.dispatchEvent(
+      createCustomEvent(this.win_, 'ready', dict({}))
+    );
     this.element_.isReady = true;
   }
 
@@ -281,7 +284,7 @@ export class AmpStoryPlayer {
 
     button.addEventListener('click', () => {
       this.element_.dispatchEvent(
-        createCustomEvent(this.win_, BUTTON_EVENTS[option], {})
+        createCustomEvent(this.win_, BUTTON_EVENTS[option], dict({}))
       );
     });
 
@@ -346,11 +349,11 @@ export class AmpStoryPlayer {
         (messaging) => {
           messaging.setDefaultHandler(() => Promise.resolve());
           messaging.registerHandler('touchstart', (event, data) => {
-            this.onTouchStart_(data);
+            this.onTouchStart_(/** @type {!Event} */ (data));
           });
 
           messaging.registerHandler('touchmove', (event, data) => {
-            this.onTouchMove_(data);
+            this.onTouchMove_(/** @type {!Event} */ (data));
           });
 
           messaging.registerHandler('touchend', () => {
@@ -358,7 +361,7 @@ export class AmpStoryPlayer {
           });
 
           messaging.registerHandler('selectDocument', (event, data) => {
-            this.onSelectDocument_(data);
+            this.onSelectDocument_(/** @type {!Object} */ (data));
           });
           resolve(messaging);
         },
@@ -433,7 +436,7 @@ export class AmpStoryPlayer {
    */
   show(storyUrl) {
     // TODO(enriqe): sanitize URLs for matching.
-    const storyIdx = this.stories_.findIndex(({href}) => href === storyUrl);
+    const storyIdx = findIndex(this.stories_, ({href}) => href === storyUrl);
 
     // TODO(proyectoramirez): replace for add() once implemented.
     if (!this.stories_[storyIdx]) {
@@ -527,10 +530,14 @@ export class AmpStoryPlayer {
   signalNavigation_() {
     const index = this.currentIdx_;
     const remaining = this.stories_.length - this.currentIdx_ - 1;
-    const event = createCustomEvent(this.win_, 'navigation', {
-      index,
-      remaining,
-    });
+    const event = createCustomEvent(
+      this.win_,
+      'navigation',
+      dict({
+        'index': index,
+        'remaining': remaining,
+      })
+    );
     this.element_.dispatchEvent(event);
   }
 
@@ -748,7 +755,10 @@ export class AmpStoryPlayer {
     };
     inputUrl = inputUrl.replace(/[?&]amp_js_v=0.1&/, prependFragment);
 
-    return parseUrlWithA(this.cachedA_, inputUrl);
+    return parseUrlWithA(
+      /** @type {!HTMLAnchorElement} */ (this.cachedA_),
+      inputUrl
+    );
   }
 
   /**
@@ -897,13 +907,19 @@ export class AmpStoryPlayer {
     ];
 
     requestAnimationFrame(() => {
-      resetStyles(currentIframe, ['transform', 'transition']);
+      resetStyles(dev().assertElement(currentIframe), [
+        'transform',
+        'transition',
+      ]);
     });
 
     const secondaryIframe = this.getSecondaryIframe_();
     if (secondaryIframe) {
       requestAnimationFrame(() => {
-        resetStyles(secondaryIframe, ['transform', 'transition']);
+        resetStyles(dev().assertElement(secondaryIframe), [
+          'transform',
+          'transition',
+        ]);
       });
     }
   }
@@ -911,7 +927,7 @@ export class AmpStoryPlayer {
   /**
    * Gets accompanying iframe for the currently swiped iframe if any.
    * @private
-   * @return {?IframeElement}
+   * @return {?Element}
    */
   getSecondaryIframe_() {
     const nextStoryIdx =
@@ -920,7 +936,7 @@ export class AmpStoryPlayer {
         : this.currentIdx_ - 1;
 
     if (nextStoryIdx < 0 || nextStoryIdx >= this.stories_.length) {
-      return;
+      return null;
     }
 
     return this.iframes_[this.stories_[nextStoryIdx][IFRAME_IDX]];
@@ -947,7 +963,7 @@ export class AmpStoryPlayer {
     const translate = `translate3d(${deltaX}px, 0, 0)`;
 
     requestAnimationFrame(() => {
-      setStyles(iframe, {
+      setStyles(dev().assertElement(iframe), {
         transform: translate,
         transition: 'none',
       });
@@ -959,7 +975,7 @@ export class AmpStoryPlayer {
     }
 
     requestAnimationFrame(() => {
-      setStyles(secondaryIframe, {
+      setStyles(dev().assertElement(secondaryIframe), {
         transform: secondaryTranslate,
         transition: 'none',
       });
