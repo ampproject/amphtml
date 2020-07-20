@@ -10,7 +10,7 @@
   "timezone": "America/Los_Angeles",
   "schedule": "after 12am every weekday",
 
-  "dependencyDashboard": true,
+  "masterIssue": true,
   "prBodyColumns": ["Package", "Update", "Type", "Change", "Package file"],
   "separateMinorPatch": true,
   "packageRules": [
@@ -68,7 +68,11 @@
     {
       "packagePatterns": ["\\b(prettier|eslint)\\b"],
       "prBodyNotes": [
-        "This PR upgrades one or more packages used to ensure code formatting. In case there are new errors, you will need to check out this branch, make sure `gulp lint` and `gulp prettify` pass (try using `--fix`), and commit the fixes to ensure a green Travis build."
+        "<details>",
+        "<summary>How to resolve breaking changes</summary>",
+        "This PR may introduce breaking changes, suchs lint rules or other updates that require manual intervention. In case there are new errors, you will need to check out this branch, make sure `gulp lint` and `gulp prettify` pass (try using `--fix`), and commit the fixes to ensure a green Travis build. To check out and update this PR, follow the steps below:",
+        "```sh\n# Check out the PR branch (these steps are from GitHub)\ngit checkout -b renovate-bot-{{{branchName}}} master\ngit pull https://github.com/renovate-bot/amphtml.git {{{branchName}}}\n\n# Directly make fixes and commit them\n\n# Push the changes to the branch\ngit push git@github.com:renovate-bot/amphtml.git renovate-bot-{{{branchName}}}:{{{branchName}}}\n```",
+        "</details>"
       ],
 
       "groupName": "linting devDependencies",

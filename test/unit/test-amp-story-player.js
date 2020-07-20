@@ -684,5 +684,41 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       //expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
       expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('0');
     });
+    
+    it('signals when player changed story using next method', async () => {
+
+        const navigationSpy = env.sandbox.spy();
+        playerEl.addEventListener('navigation', navigationSpy);
+        player.next_();
+        expect(navigationSpy.firstCall.args[0].type).to.eql('navigation');
+        expect(navigationSpy.firstCall.args[0].detail).to.eql({
+          index: 1,
+          remaining: 3,
+        });
+      });
+  
+    it('signals when player changed story using previous method', async () => {
+      const navigationSpy = env.sandbox.spy();
+      playerEl.addEventListener('navigation', navigationSpy);
+      player.next_();
+      player.previous_();
+      expect(navigationSpy.secondCall.args[0].type).to.eql('navigation');
+      expect(navigationSpy.secondCall.args[0].detail).to.eql({
+        index: 0,
+        remaining: 4,
+      });
+    });
+
+    it('signals when player changed story using go method', async () => {
+
+      const navigationSpy = env.sandbox.spy();
+      playerEl.addEventListener('navigation', navigationSpy);
+      player.go(1);
+      expect(navigationSpy.firstCall.args[0].type).to.eql('navigation');
+      expect(navigationSpy.firstCall.args[0].detail).to.eql({
+        index: 1,
+        remaining: 3,
+      });
+    });
   });
 });
