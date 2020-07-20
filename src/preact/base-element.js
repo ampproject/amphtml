@@ -352,7 +352,9 @@ function collectProps(Ctor, element, defaultProps) {
     props['children'] = element
       .getRealChildNodes()
       .every(
-        (node) => node.nodeType === 3 && node.nodeValue.trim().length === 0
+        (node) =>
+          node.nodeType === /* TEXT_NODE */ 3 &&
+          node.nodeValue.trim().length === 0
       )
       ? null
       : [<Slot />];
