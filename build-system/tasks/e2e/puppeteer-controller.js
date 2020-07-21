@@ -173,7 +173,7 @@ class PuppeteerController {
    */
   async evaluate(fn, ...args) {
     const frame = await this.getCurrentFrame_();
-    return await evaluate(frame, fn, ...args);
+    return evaluate(frame, fn, ...args);
   }
 
   /**
@@ -342,7 +342,7 @@ class PuppeteerController {
   async type(handle, keys) {
     const targetElement = handle
       ? handle.getElement()
-      : (await this.getActiveElement()).getElement();
+      : (await (this.getActiveElement())).getElement();
 
     const key = KeyToPuppeteerMap[keys];
     if (key) {
@@ -555,8 +555,10 @@ class PuppeteerController {
    */
   getTitle() {
     const title = this.getCurrentFrame_().then((frame) => frame.title());
-    return new ControllerPromise(title, () =>
-      this.getCurrentFrame_().then((frame) => frame.title())
+    return new ControllerPromise(title, async () => {
+      const frame = await this.getCurrentFrame_();
+      return frame.title();
+    }
     );
   }
 
@@ -624,7 +626,7 @@ class PuppeteerController {
    */
   async takeScreenshot(path) {
     const root = new ElementHandle(await this.getRoot_());
-    return await this.takeElementScreenshot(root, path);
+    return this.takeElementScreenshot(root, path);
   }
 
   /**
@@ -648,7 +650,7 @@ class PuppeteerController {
       type: 'png',
     };
     const element = handle.getElement();
-    return await element.screenshot(options);
+    return element.screenshot(options);
   }
 
   /**
@@ -715,7 +717,7 @@ class PuppeteerController {
       return this.shadowRoot_;
     }
 
-    return await this.evaluate(() => document.documentElement);
+    return this.evaluate(() => document.documentElement);
   }
 
   /**

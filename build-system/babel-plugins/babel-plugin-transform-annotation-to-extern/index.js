@@ -79,9 +79,7 @@ module.exports = function (babel) {
         }
 
         const typedefComment = node.leadingComments.find((comment) => {
-          return (
-            comment.type === 'CommentBlock' && /@typedef/.test(comment.value)
-          );
+          return comment.type === 'CommentBlock' && /@typedef/.test(comment.value);
         });
 
         if (!typedefComment) {

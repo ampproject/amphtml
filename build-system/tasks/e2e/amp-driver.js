@@ -32,9 +32,7 @@ const HOST = 'http://localhost:8000';
 
 const EnvironmentBehaviorMap = {
   [AmpdocEnvironment.SINGLE]: {
-    ready(unusedController) {
-      return Promise.resolve();
-    },
+    async ready(unusedController) {},
 
     url(url) {
       return url;
@@ -42,10 +40,11 @@ const EnvironmentBehaviorMap = {
   },
 
   [AmpdocEnvironment.VIEWER_DEMO]: {
-    ready(controller) {
-      return controller
-        .findElement('#viewer[data-loaded]')
-        .then((frame) => controller.switchToFrame(frame));
+    async ready(controller) {
+      const frame = await controller
+        .findElement('#viewer[data-loaded]');
+
+      return controller.switchToFrame(frame);
     },
 
     url(url) {
@@ -88,9 +87,10 @@ const EnvironmentBehaviorMap = {
 
   [AmpdocEnvironment.A4A_FIE]: {
     async ready(controller) {
-      return controller
-        .findElement('amp-ad > iframe')
-        .then((frame) => controller.switchToFrame(frame));
+      const frame = await controller
+        .findElement('amp-ad > iframe');
+
+      return controller.switchToFrame(frame);
     },
 
     url(url) {
@@ -100,9 +100,10 @@ const EnvironmentBehaviorMap = {
 
   [AmpdocEnvironment.A4A_INABOX]: {
     async ready(controller) {
-      return controller
-        .findElement('#inabox-frame')
-        .then((frame) => controller.switchToFrame(frame));
+      const frame = await controller
+        .findElement('#inabox-frame');
+
+      return controller.switchToFrame(frame);
     },
 
     url(url) {
@@ -112,9 +113,10 @@ const EnvironmentBehaviorMap = {
 
   [AmpdocEnvironment.A4A_INABOX_FRIENDLY]: {
     async ready(controller) {
-      return controller
-        .findElement('#inabox-frame')
-        .then((frame) => controller.switchToFrame(frame));
+      const frame = await controller
+        .findElement('#inabox-frame');
+
+      return controller.switchToFrame(frame);
     },
 
     url(url) {
@@ -124,9 +126,10 @@ const EnvironmentBehaviorMap = {
 
   [AmpdocEnvironment.A4A_INABOX_SAFEFRAME]: {
     async ready(controller) {
-      return controller
-        .findElement('#inabox-frame')
-        .then((frame) => controller.switchToFrame(frame));
+      const frame = await controller
+        .findElement('#inabox-frame');
+
+      return controller.switchToFrame(frame);
     },
 
     url(url) {

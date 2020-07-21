@@ -31,7 +31,7 @@ const {endBuildStep} = require('../tasks/helpers');
  * @param {string} srcFilename
  * @return {!Promise}
  */
-exports.transpileTs = function (srcDir, srcFilename) {
+exports.transpileTs = async function(srcDir, srcFilename) {
   const startTime = Date.now();
   const tsEntry = path.join(srcDir, srcFilename).replace(/\.js$/, '.ts');
   const tsConfig = ts.convertCompilerOptionsFromJson(
@@ -67,7 +67,8 @@ exports.transpileTs = function (srcDir, srcFilename) {
     shouldSkipTsickleProcessing: () => false,
     transformTypesToClosure: true,
   };
-  return tsickle
+
+  const emitResult = await tsickle
     .emitWithTsickle(
       program,
       transformerHost,
@@ -77,14 +78,13 @@ exports.transpileTs = function (srcDir, srcFilename) {
       (filePath, contents) => {
         fs.writeFileSync(filePath, contents, {encoding: 'utf-8'});
       }
-    )
-    .then((emitResult) => {
-      const diagnostics = ts
-        .getPreEmitDiagnostics(program)
-        .concat(emitResult.diagnostics);
-      if (diagnostics.length) {
-        log(colors.red('TSickle:'), tsickle.formatDiagnostics(diagnostics));
-      }
-      endBuildStep('Transpiled', srcFilename, startTime);
-    });
+    );
+
+  const diagnostics = ts
+    .getPreEmitDiagnostics(program)
+    .concat(emitResult.diagnostics);
+  if (diagnostics.length) {
+    log(colors.red('TSickle:'), tsickle.formatDiagnostics(diagnostics));
+  }
+  endBuildStep('Transpiled', srcFilename, startTime);
 };
