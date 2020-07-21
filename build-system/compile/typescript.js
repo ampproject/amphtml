@@ -31,7 +31,7 @@ const {endBuildStep} = require('../tasks/helpers');
  * @param {string} srcFilename
  * @return {!Promise}
  */
-exports.transpileTs = async function(srcDir, srcFilename) {
+exports.transpileTs = async function (srcDir, srcFilename) {
   const startTime = Date.now();
   const tsEntry = path.join(srcDir, srcFilename).replace(/\.js$/, '.ts');
   const tsConfig = ts.convertCompilerOptionsFromJson(
@@ -68,17 +68,16 @@ exports.transpileTs = async function(srcDir, srcFilename) {
     transformTypesToClosure: true,
   };
 
-  const emitResult = await tsickle
-    .emitWithTsickle(
-      program,
-      transformerHost,
-      compilerHost,
-      tsOptions,
-      undefined,
-      (filePath, contents) => {
-        fs.writeFileSync(filePath, contents, {encoding: 'utf-8'});
-      }
-    );
+  const emitResult = await tsickle.emitWithTsickle(
+    program,
+    transformerHost,
+    compilerHost,
+    tsOptions,
+    undefined,
+    (filePath, contents) => {
+      fs.writeFileSync(filePath, contents, {encoding: 'utf-8'});
+    }
+  );
 
   const diagnostics = ts
     .getPreEmitDiagnostics(program)

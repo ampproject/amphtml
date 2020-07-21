@@ -41,8 +41,7 @@ const EnvironmentBehaviorMap = {
 
   [AmpdocEnvironment.VIEWER_DEMO]: {
     async ready(controller) {
-      const frame = await controller
-        .findElement('#viewer[data-loaded]');
+      const frame = await controller.findElement('#viewer[data-loaded]');
 
       return controller.switchToFrame(frame);
     },
@@ -87,8 +86,7 @@ const EnvironmentBehaviorMap = {
 
   [AmpdocEnvironment.A4A_FIE]: {
     async ready(controller) {
-      const frame = await controller
-        .findElement('amp-ad > iframe');
+      const frame = await controller.findElement('amp-ad > iframe');
 
       return controller.switchToFrame(frame);
     },
@@ -100,8 +98,7 @@ const EnvironmentBehaviorMap = {
 
   [AmpdocEnvironment.A4A_INABOX]: {
     async ready(controller) {
-      const frame = await controller
-        .findElement('#inabox-frame');
+      const frame = await controller.findElement('#inabox-frame');
 
       return controller.switchToFrame(frame);
     },
@@ -113,8 +110,7 @@ const EnvironmentBehaviorMap = {
 
   [AmpdocEnvironment.A4A_INABOX_FRIENDLY]: {
     async ready(controller) {
-      const frame = await controller
-        .findElement('#inabox-frame');
+      const frame = await controller.findElement('#inabox-frame');
 
       return controller.switchToFrame(frame);
     },
@@ -126,8 +122,7 @@ const EnvironmentBehaviorMap = {
 
   [AmpdocEnvironment.A4A_INABOX_SAFEFRAME]: {
     async ready(controller) {
-      const frame = await controller
-        .findElement('#inabox-frame');
+      const frame = await controller.findElement('#inabox-frame');
 
       return controller.switchToFrame(frame);
     },

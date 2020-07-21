@@ -244,7 +244,7 @@ async function fetchAmpSw_(distFlavors, tempDir) {
     filter: (path) => path.startsWith('package/dist'),
     strip: 2, // to strip "package/dist/".
   });
-  (await (fetch(ampSwTarballUrl))).body.pipe(tarWritableStream);
+  (await fetch(ampSwTarballUrl)).body.pipe(tarWritableStream);
   await new Promise((resolve) => {
     tarWritableStream.on('end', resolve);
   });

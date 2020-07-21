@@ -342,7 +342,7 @@ class PuppeteerController {
   async type(handle, keys) {
     const targetElement = handle
       ? handle.getElement()
-      : (await (this.getActiveElement())).getElement();
+      : (await this.getActiveElement()).getElement();
 
     const key = KeyToPuppeteerMap[keys];
     if (key) {
@@ -558,8 +558,7 @@ class PuppeteerController {
     return new ControllerPromise(title, async () => {
       const frame = await this.getCurrentFrame_();
       return frame.title();
-    }
-    );
+    });
   }
 
   /**
