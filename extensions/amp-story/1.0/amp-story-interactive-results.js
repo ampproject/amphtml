@@ -110,7 +110,7 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
   }
 
   /**
-   * Receives state updates and updates DOM
+   * Receives state updates and fills up DOM with the result
    * @param {!Map<string, {option: ?./amp-story-interactive.OptionConfigType, interactiveId: string}>} interactiveState
    * @private
    */
