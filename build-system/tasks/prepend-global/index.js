@@ -142,7 +142,7 @@ async function applyConfig(
 ) {
   await checkoutBranchConfigs(filename, opt_localBranch, opt_branch);
 
-  let configString = fs.promises.readFile(filename, 'utf8');
+  let configString = await fs.promises.readFile(filename, 'utf8');
   const [targetString, overlayString] = await Promise.all([
     fs.promises.readFile(target, 'utf8'),
     fs.promises.readFile(customConfigFile, 'utf8').catch(() => {}),
