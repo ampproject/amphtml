@@ -102,3 +102,34 @@ export const WithLooping = () => {
     </BaseCarousel>
   );
 };
+
+export const WithCaptions = () => {
+  return (
+    <BaseCarousel
+      loop
+      style={{width: '500px', height: '400px', position: 'relative'}}
+    >
+      <figure>
+        <img
+          style={{width: '500px', height: '300px'}}
+          src="https://amp.dev/static/samples/img/landscape_lake_1280x857.jpg"
+        />
+        <figcaption>Each image has a different caption.</figcaption>
+      </figure>
+      <figure>
+        <img
+          style={{width: '600px', height: '300px'}}
+          src="https://amp.dev/static/samples/img/landscape_village_1280x853.jpg"
+        />
+        <figcaption>This caption is different.</figcaption>
+      </figure>
+      <figure>
+        <img
+          style={{width: '500px', height: '300px'}}
+          src="https://amp.dev/static/samples/img/landscape_desert_1280x853.jpg"
+        />
+        <figcaption>The third image has its caption.</figcaption>
+      </figure>
+    </BaseCarousel>
+  );
+};

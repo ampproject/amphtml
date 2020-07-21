@@ -20,6 +20,10 @@ amp-base-carousel {
 }
 
 amp-base-carousel > * {
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  flex-shrink: 0 !important;
   height: 100%;
   width: 100%;
+  scroll-snap-stop: always;
 }
