@@ -88,36 +88,30 @@ function processChildren(props, size) {
     'color': propsColor,
     'background': propsBackground,
   } = props;
-  const uType = type.toUpperCase();
   const typeConfig =
     getSocialConfig(type) ||
     dict({
-      'canChangeColor': true,
-      'canHaveChildren': true,
+      'canCustomize': true,
     });
 
-  if (typeConfig['canHaveChildren'] && children) {
+  if (typeConfig['canCustomize'] && children) {
     return children;
   } else {
     const baseStyle = CSS.BASE_STYLE;
     const iconStyle = dict({
       'color':
-        typeConfig['canChangeColor'] && propsColor
+        typeConfig['canCustomize'] && propsColor
           ? propsColor
-          : CSS[uType]
-          ? CSS[uType]['color']
-          : undefined,
+          : typeConfig['defaultColor'],
       'backgroundColor':
-        typeConfig['canChangeColor'] && propsBackground
+        typeConfig['canCustomize'] && propsBackground
           ? propsBackground
-          : CSS[uType]
-          ? CSS[uType]['backgroundColor']
-          : undefined,
+          : typeConfig['defaultBackgroundColor'],
     });
     return (
       <SocialShareIcon
         style={{...iconStyle, ...baseStyle, ...size}}
-        type={uType}
+        type={type.toUpperCase()}
       />
     );
   }
