@@ -1150,7 +1150,6 @@ export class AmpStory extends AMP.BaseElement {
     });
     if (this.viewerMessagingHandler_) {
       this.viewerMessagingHandler_.send('storyLoad', dict({}));
-      return;
     }
   }
 
