@@ -15,8 +15,10 @@
  */
 
 import {Services} from '../../../src/services';
+import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {setStyles} from '../../../src/style';
+import {emojiRegex} from '../../../third_party/emoji-regex';
 
 /**
  * Generates the template for the confetti wrapper.
@@ -57,6 +59,8 @@ const buildconfettiTemplate = (element) => {
  * @return {void}
  */
 export function emojiConfetti(rootEl, win, confettiEmoji) {
+  if (!validateEmoji(confettiEmoji)) return;
+
   const confettiCount = 5;
   const angleSlice = (Math.PI * 2) / confettiCount;
 
@@ -121,4 +125,28 @@ export function emojiConfetti(rootEl, win, confettiEmoji) {
  */
 function randomInRange(min, max) {
   return Math.random() * (max - min) + min;
+}
+
+/**
+ * Checks if the input is a single emoji.
+ *
+ * @param {string} emojiInput
+ * @return {boolean}
+ */
+function validateEmoji(emojiInput) {
+  const matches = emojiInput.match(emojiRegex);
+  if (
+    matches &&
+    matches.length === 1 &&
+    emojiInput.startsWith(matches[0]) &&
+    emojiInput.endsWith(matches[0])
+  ) {
+    return true;
+  } else {
+    dev().error(
+      'emojiConfetti',
+      `Expected A single emoji but got ${emojiInput}.`
+    );
+    return false;
+  }
 }

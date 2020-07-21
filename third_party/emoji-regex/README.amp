@@ -1,0 +1,15 @@
+- emoji-regex (from https://github.com/mathiasbynens/emoji-regex)
+
+License: MIT License
+License File: https://github.com/mathiasbynens/emoji-regex/blob/master/LICENSE-MIT.txt
+
+Description:
+emoji-regex - Offers a regular expression to match all emoji symbols (including textual representations of emoji) as per the Unicode Standard.
+
+The emojiConfetti method in interactive-confetti uses emoji-regex to validate its input.
+
+Files in this directory (copied from https://github.com/mathiasbynens/emoji-regex):
+- intex.js (from https://github.com/mathiasbynens/emoji-regex/blob/master/index.js)
+
+Local Modifications:
+- Exports the regex as a const instead of a function.
