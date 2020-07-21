@@ -20,13 +20,11 @@ describes.endtoend(
   'amp-consent',
   {
     testUrl:
-      'http://localhost:8000/test/manual/amp-consent/amp-consent-cmp-overlay.html',
-    experiments: ['amp-consent-restrict-fullscreen'],
+      'http://localhost:8000/test/fixtures/e2e/amp-consent/fullscreen-cmp.html',
     environments: ['single'],
   },
-  env => {
+  (env) => {
     let controller;
-    let dialogs;
 
     beforeEach(() => {
       controller = env.controller;
@@ -43,26 +41,23 @@ describes.endtoend(
         controller.getElementAttribute(consentPrompt, 'class')
       ).to.not.match(/i-amphtml-consent-ui-iframe-fullscreen/);
 
-      await controller.findElement('iframe').then(async iframe => {
+      await controller.findElement('iframe').then(async (iframe) => {
         await controller.switchToFrame(iframe);
       });
 
+      // Verify that it's fullscreen
       await controller.click(await controller.findElement('#consent-wrapper'));
-      await sleep(500);
+      await sleep(1000);
       await controller.switchToParent();
       await expect(
         controller.getElementAttribute(consentPrompt, 'class')
       ).to.match(/i-amphtml-consent-ui-iframe-fullscreen/);
 
-      // Verify SR
-      dialogs = await controller.findElements('[role=alertdialog]');
-      await expect(dialogs.length).length.to.equal(1);
-
-      await controller.findElement('iframe').then(async iframe => {
+      await controller.findElement('iframe').then(async (iframe) => {
         await controller.switchToFrame(iframe);
       });
 
-      // Close
+      // Close prompt
       await controller.click(await controller.findElement('#d'));
       await controller.switchToParent();
       await expect(
