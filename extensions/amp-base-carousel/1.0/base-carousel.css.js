@@ -67,6 +67,7 @@ export const defaultArrowButton = {
   backgroundColor: 'transparent',
   border: 'none',
   outline: 'none',
+  stroke: 'currentColor',
   transition: '200ms stroke',
 };
 
@@ -100,7 +101,6 @@ export const arrowBackground = {
 
 export const arrowIcon = {
   position: 'relative',
-  zIndex: 1,
   width: '24px',
   height: '24px',
 };

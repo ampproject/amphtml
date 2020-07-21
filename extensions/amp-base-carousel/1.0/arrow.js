@@ -101,7 +101,7 @@ function DefaultArrow(props) {
     <button
       style={{
         ...styles.defaultArrowButton,
-        stroke: hover ? '#222' : '#fff',
+        color: hover ? '#222' : '#fff',
         transitionDuration: active ? '0ms' : '',
       }}
       aria-label={

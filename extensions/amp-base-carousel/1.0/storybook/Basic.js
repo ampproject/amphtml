@@ -67,7 +67,7 @@ export const provideArrows = () => {
     <BaseCarousel
       style={{width, height, position: 'relative'}}
       arrowPrev={<MyButton>←</MyButton>}
-      arrowNext={MyButton({children: '→'})}
+      arrowNext={<MyButton>→</MyButton>}
     >
       {['lightcoral', 'peachpuff', 'lavender'].map((color) => (
         <div style={{backgroundColor: color, width, height}}></div>
