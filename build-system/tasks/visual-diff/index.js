@@ -469,61 +469,59 @@ async function snapshotWebpages(browser, webpages) {
       // since Puppeteer doesn't always understand Chrome's network activity, so
       // ignore timeouts again.
       const pagePromise = (async () => {
-        try {
-          try {
-            await (async () => {
-              const responseWatcher = new Promise((resolve, reject) => {
-                const responseTimeout = setTimeout(() => {
-                  reject(
-                    new puppeteer.TimeoutError(
-                      `Response was not received in test ${testName} for page ` +
-                        `${webpage.url} after ${NAVIGATE_TIMEOUT_MS}ms`
-                    )
-                  );
-                }, NAVIGATE_TIMEOUT_MS);
+        const responseWatcher = new Promise((resolve, reject) => {
+          const responseTimeout = setTimeout(() => {
+            reject(
+              new puppeteer.TimeoutError(
+                `Response was not received in test ${testName} for page ` +
+                  `${webpage.url} after ${NAVIGATE_TIMEOUT_MS}ms`
+              )
+            );
+          }, NAVIGATE_TIMEOUT_MS);
 
-                page.once('response', async (response) => {
-                  log(
-                    'verbose',
-                    'Response for url',
-                    colors.yellow(response.url()),
-                    'with status',
-                    colors.cyan(response.status()),
-                    colors.cyan(response.statusText())
-                  );
-                  clearTimeout(responseTimeout);
-                  resolve();
-                });
-              });
-
-              log('verbose', 'Navigating to page', colors.yellow(webpage.url));
-              await Promise.all([
-                responseWatcher,
-                page.goto(fullUrl, {waitUntil: 'networkidle2'}),
-              ]);
-            })();
-
+          page.once('response', async (response) => {
             log(
               'verbose',
-              'Page navigation of test',
-              colors.yellow(name),
-              'is done, verifying page'
+              'Response for url',
+              colors.yellow(response.url()),
+              'with status',
+              colors.cyan(response.status()),
+              colors.cyan(response.statusText())
             );
-          } catch (navigationError) {
-            hasWarnings = true;
-            addTestError(
-              testErrors,
-              name,
-              'The browser test runner failed to complete the navigation ' +
-                'to the test page',
-              navigationError,
-              consoleMessages
-            );
-            if (!isTravisBuild()) {
-              log('warning', 'Continuing to verify page regardless...');
-            }
-          }
+            clearTimeout(responseTimeout);
+            resolve();
+          });
+        });
 
+        log('verbose', 'Navigating to page', colors.yellow(webpage.url));
+        await Promise.all([
+          responseWatcher,
+          page.goto(fullUrl, {waitUntil: 'networkidle2'}),
+        ]);
+      })()
+        .then(() => {
+          log(
+            'verbose',
+            'Page navigation of test',
+            colors.yellow(name),
+            'is done, verifying page'
+          );
+        })
+        .catch((navigationError) => {
+          hasWarnings = true;
+          addTestError(
+            testErrors,
+            name,
+            'The browser test runner failed to complete the navigation ' +
+              'to the test page',
+            navigationError,
+            consoleMessages
+          );
+          if (!isTravisBuild()) {
+            log('warning', 'Continuing to verify page regardless...');
+          }
+        })
+        .then(async () => {
           // Perform visibility checks: wait for all AMP built-in loader dots
           // to disappear (i.e., all visible components are finished being
           // layed out and external resources such as images are loaded and
@@ -588,7 +586,8 @@ async function snapshotWebpages(browser, webpages) {
 
           // Finally, send the snapshot to percy.
           await percySnapshot(page, name, snapshotOptions);
-        } catch (testError) {
+        })
+        .catch(async (testError) => {
           addTestError(
             testErrors,
             name,
@@ -609,7 +608,8 @@ async function snapshotWebpages(browser, webpages) {
               .replace('__HTML_SNAPSHOT__', escapeHtml(htmlSnapshot))
           );
           await percySnapshot(page, name, SNAPSHOT_SINGLE_BUILD_OPTIONS);
-        } finally {
+        })
+        .finally(async () => {
           log(
             hasWarnings ? 'warning' : 'info',
             'Finished test',
@@ -618,8 +618,7 @@ async function snapshotWebpages(browser, webpages) {
           );
           page.removeListener('console', consoleLogger);
           availablePages.push(page);
-        }
-      })();
+        });
       pagePromises.push(pagePromise);
     }
   }
