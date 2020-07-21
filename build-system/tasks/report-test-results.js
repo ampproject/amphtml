@@ -78,7 +78,7 @@ async function sendTravisKarmaReport(testType) {
       'failed to report results of type',
       cyan(testType),
       ': \n',
-      yellow(response.statusText).substr(0, 100)
+      yellow(response.statusText)
     );
   }
 }
