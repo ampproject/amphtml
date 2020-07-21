@@ -1,50 +1,1056 @@
-(self.AMP=self.AMP||[]).push({n:"amp-lightbox",v:"2007180235000",f:(function(AMP,_){
-var f,aa="function"==typeof Object.create?Object.create:function(a){function b(){}b.prototype=a;return new b};function ba(a){for(var b=["object"==typeof globalThis&&globalThis,a,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global],c=0;c<b.length;++c){var d=b[c];if(d&&d.Math==Math)return}(function(){throw Error("Cannot find global object");})()}ba(this);"function"===typeof Symbol&&Symbol("x");var m;
-if("function"==typeof Object.setPrototypeOf)m=Object.setPrototypeOf;else{var n;a:{var ca={a:!0},p={};try{p.__proto__=ca;n=p.a;break a}catch(a){}n=!1}m=n?function(a,b){a.__proto__=b;if(a.__proto__!==b)throw new TypeError(a+" is not extensible");return a}:null}var q=m;
-function r(a,b){a.prototype=aa(b.prototype);a.prototype.constructor=a;if(q)q(a,b);else for(var c in b)if("prototype"!=c)if(Object.defineProperties){var d=Object.getOwnPropertyDescriptor(b,c);d&&Object.defineProperty(a,c,d)}else a[c]=b[c];a.Pa=b.prototype}var t;function u(a,b){b=void 0===b?"":b;try{return decodeURIComponent(a)}catch(c){return b}};var da=/(?:^[#?]?|&)([^=&]+)(?:=([^&]*))?/g;function v(a){var b=Object.create(null);if(!a)return b;for(var c;c=da.exec(a);){var d=u(c[1],c[1]),e=c[2]?u(c[2].replace(/\+/g," "),c[2]):"";b[d]=e}return b};var w="";
-function x(a){var b=a||self;if(b.__AMP_MODE)var c=b.__AMP_MODE;else{c=v(b.location.originalHash||b.location.hash);var d=v(b.location.search);w||(w=b.AMP_CONFIG&&b.AMP_CONFIG.v?b.AMP_CONFIG.v:"012007180235000");c={localDev:!1,development:!!(0<=["1","actions","amp","amp4ads","amp4email"].indexOf(c.development)||b.AMP_DEV_MODE),examiner:"2"==c.development,esm:!1,geoOverride:c["amp-geo"],minified:!0,lite:void 0!=d.amp_lite,test:!1,log:c.log,version:"2007180235000",rtvVersion:w};c=b.__AMP_MODE=c}return c}
-;function ea(a){return a?Array.prototype.slice.call(a):[]};var y=self.AMP_CONFIG||{},fa=("string"==typeof y.cdnProxyRegex?new RegExp(y.cdnProxyRegex):y.cdnProxyRegex)||/^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org$/;function ha(a){if(self.document&&self.document.head&&(!self.location||!fa.test(self.location.origin))){var b=self.document.head.querySelector('meta[name="'+a+'"]');b&&b.getAttribute("content")}}y.cdnUrl||ha("runtime-host");y.geoApiUrl||ha("amp-geo-api");self.__AMP_LOG=self.__AMP_LOG||{user:null,dev:null,userForEmbed:null};var z=self.__AMP_LOG;function ia(){if(!z.user)throw Error("failed to call initLogConstructor");return z.user}function A(){if(z.dev)return z.dev;throw Error("failed to call initLogConstructor");};function ja(){var a,b;this.promise=new Promise(function(c,d){a=c;b=d});this.resolve=a;this.reject=b};function B(){this.o=null}f=B.prototype;f.add=function(a){var b=this;this.o||(this.o=[]);this.o.push(a);return function(){b.remove(a)}};f.remove=function(a){this.o&&(a=this.o.indexOf(a),-1<a&&this.o.splice(a,1))};f.removeAll=function(){this.o&&(this.o.length=0)};f.fire=function(a){if(this.o)for(var b=this.o,c=0;c<b.length;c++)(0,b[c])(a)};f.getHandlerCount=function(){return this.o?this.o.length:0};var ka=Object.prototype.hasOwnProperty;function C(a){return a||{}};C({c:!0,v:!0,a:!0,ad:!0,action:!0});function la(a){if(a.__AMP__EXPERIMENT_TOGGLES)return a.__AMP__EXPERIMENT_TOGGLES;a.__AMP__EXPERIMENT_TOGGLES=Object.create(null);var b=a.__AMP__EXPERIMENT_TOGGLES;if(a.AMP_CONFIG)for(var c in a.AMP_CONFIG){var d=a.AMP_CONFIG[c];"number"===typeof d&&0<=d&&1>=d&&(b[c]=Math.random()<d)}if(a.AMP_CONFIG&&Array.isArray(a.AMP_CONFIG["allow-doc-opt-in"])&&0<a.AMP_CONFIG["allow-doc-opt-in"].length){var e=a.AMP_CONFIG["allow-doc-opt-in"],g=a.document.head.querySelector('meta[name="amp-experiments-opt-in"]');
-if(g){var h=g.getAttribute("content").split(",");for(c=0;c<h.length;c++)-1!=e.indexOf(h[c])&&(b[h[c]]=!0)}}Object.assign(b,ma(a));if(a.AMP_CONFIG&&Array.isArray(a.AMP_CONFIG["allow-url-opt-in"])&&0<a.AMP_CONFIG["allow-url-opt-in"].length){c=a.AMP_CONFIG["allow-url-opt-in"];a=v(a.location.originalHash||a.location.hash);for(var k=0;k<c.length;k++){var l=a["e-"+c[k]];"1"==l&&(b[c[k]]=!0);"0"==l&&(b[c[k]]=!1)}}return b}
-function ma(a){var b="";try{"localStorage"in a&&(b=a.localStorage.getItem("amp-experiment-toggles"))}catch(e){A().warn("EXPERIMENTS","Failed to retrieve experiments from localStorage.")}var c=b?b.split(/\s*,\s*/g):[];a=Object.create(null);for(var d=0;d<c.length;d++)0!=c[d].length&&("-"==c[d][0]?a[c[d].substr(1)]=!1:a[c[d]]=!0);return a};var na=[{experimentId:"ampdoc-fie",isTrafficEligible:function(){return!0},branches:["21065001","21065002"]}];function oa(a){var b=a.ownerDocument.defaultView,c=b.__AMP_TOP||(b.__AMP_TOP=b),d=b!=c,e;if(la(c)["ampdoc-fie"]){c.__AMP_EXPERIMENT_BRANCHES=c.__AMP_EXPERIMENT_BRANCHES||{};for(e=0;e<na.length;e++){var g=na[e],h=g.experimentId;ka.call(c.__AMP_EXPERIMENT_BRANCHES,h)||(g.isTrafficEligible&&g.isTrafficEligible(c)?!c.__AMP_EXPERIMENT_BRANCHES[h]&&la(c)[h]&&(g=g.branches,c.__AMP_EXPERIMENT_BRANCHES[h]=g[Math.floor(Math.random()*g.length)]||null):c.__AMP_EXPERIMENT_BRANCHES[h]=null)}e="21065002"===(c.__AMP_EXPERIMENT_BRANCHES?
-c.__AMP_EXPERIMENT_BRANCHES["ampdoc-fie"]:null)}else e=!1;var k=e;d&&!k?a=D(b,"action")?F(b,"action"):null:(a=G(a),a=pa(a),a=D(a,"action")?F(a,"action"):null);return a}function H(a,b){a=a.__AMP_TOP||(a.__AMP_TOP=a);return F(a,b)}function I(a,b){var c=G(a);c=pa(c);return F(c,b)}function G(a){return a.nodeType?H((a.ownerDocument||a).defaultView,"ampdoc").getAmpDoc(a):a}function pa(a){a=G(a);return a.isSingleDoc()?a.win:a}
-function F(a,b){D(a,b);var c=a.__AMP_SERVICES;c||(c=a.__AMP_SERVICES={});a=c[b];a.obj||(a.obj=new a.ctor(a.context),a.ctor=null,a.context=null,a.resolve&&a.resolve(a.obj));return a.obj}function D(a,b){a=a.__AMP_SERVICES&&a.__AMP_SERVICES[b];return!(!a||!a.ctor&&!a.obj)};/*
+(self.AMP=self.AMP||[]).push({n:"amp-lightbox",v:"2007210308000",f:(function(AMP,_){
+var $JSCompiler_prototypeAlias$$, $$jscomp$objectCreate$$ = "function" == typeof Object.create ? Object.create : function($prototype$$) {
+  function $ctor$$() {
+  }
+  $ctor$$.prototype = $prototype$$;
+  return new $ctor$$;
+};
+function $$jscomp$getGlobal$$($passedInThis$$) {
+  for (var $possibleGlobals$$ = ["object" == typeof globalThis && globalThis, $passedInThis$$, "object" == typeof window && window, "object" == typeof self && self, "object" == typeof global && global, ], $i$jscomp$4$$ = 0; $i$jscomp$4$$ < $possibleGlobals$$.length; ++$i$jscomp$4$$) {
+    var $maybeGlobal$$ = $possibleGlobals$$[$i$jscomp$4$$];
+    if ($maybeGlobal$$ && $maybeGlobal$$.Math == Math) {
+      return;
+    }
+  }
+  (function() {
+    throw Error("Cannot find global object");
+  })();
+}
+$$jscomp$getGlobal$$(this);
+"function" === typeof Symbol && Symbol("x");
+var $JSCompiler_temp$jscomp$21$$;
+if ("function" == typeof Object.setPrototypeOf) {
+  $JSCompiler_temp$jscomp$21$$ = Object.setPrototypeOf;
+} else {
+  var $JSCompiler_inline_result$jscomp$22$$;
+  a: {
+    var $JSCompiler_x$jscomp$inline_42$$ = {a:!0}, $JSCompiler_y$jscomp$inline_43$$ = {};
+    try {
+      $JSCompiler_y$jscomp$inline_43$$.__proto__ = $JSCompiler_x$jscomp$inline_42$$;
+      $JSCompiler_inline_result$jscomp$22$$ = $JSCompiler_y$jscomp$inline_43$$.a;
+      break a;
+    } catch ($JSCompiler_e$jscomp$inline_44$$) {
+    }
+    $JSCompiler_inline_result$jscomp$22$$ = !1;
+  }
+  $JSCompiler_temp$jscomp$21$$ = $JSCompiler_inline_result$jscomp$22$$ ? function($target$jscomp$95$$, $proto$jscomp$3$$) {
+    $target$jscomp$95$$.__proto__ = $proto$jscomp$3$$;
+    if ($target$jscomp$95$$.__proto__ !== $proto$jscomp$3$$) {
+      throw new TypeError($target$jscomp$95$$ + " is not extensible");
+    }
+    return $target$jscomp$95$$;
+  } : null;
+}
+var $$jscomp$setPrototypeOf$$ = $JSCompiler_temp$jscomp$21$$;
+function $$jscomp$inherits$$($childCtor$$, $parentCtor$$) {
+  $childCtor$$.prototype = $$jscomp$objectCreate$$($parentCtor$$.prototype);
+  $childCtor$$.prototype.constructor = $childCtor$$;
+  if ($$jscomp$setPrototypeOf$$) {
+    $$jscomp$setPrototypeOf$$($childCtor$$, $parentCtor$$);
+  } else {
+    for (var $p$$ in $parentCtor$$) {
+      if ("prototype" != $p$$) {
+        if (Object.defineProperties) {
+          var $descriptor$jscomp$2$$ = Object.getOwnPropertyDescriptor($parentCtor$$, $p$$);
+          $descriptor$jscomp$2$$ && Object.defineProperty($childCtor$$, $p$$, $descriptor$jscomp$2$$);
+        } else {
+          $childCtor$$[$p$$] = $parentCtor$$[$p$$];
+        }
+      }
+    }
+  }
+  $childCtor$$.$superClass_$ = $parentCtor$$.prototype;
+}
+var $resolved$$module$src$resolved_promise$$;
+function $tryDecodeUriComponent_$$module$src$url_try_decode_uri_component$$($component$jscomp$4$$, $fallback$$) {
+  $fallback$$ = void 0 === $fallback$$ ? "" : $fallback$$;
+  try {
+    return decodeURIComponent($component$jscomp$4$$);
+  } catch ($e$jscomp$8$$) {
+    return $fallback$$;
+  }
+}
+;var $regex$$module$src$url_parse_query_string$$ = /(?:^[#?]?|&)([^=&]+)(?:=([^&]*))?/g;
+function $parseQueryString_$$module$src$url_parse_query_string$$($queryString$$) {
+  var $params$jscomp$1$$ = Object.create(null);
+  if (!$queryString$$) {
+    return $params$jscomp$1$$;
+  }
+  for (var $match$$; $match$$ = $regex$$module$src$url_parse_query_string$$.exec($queryString$$);) {
+    var $name$jscomp$71$$ = $tryDecodeUriComponent_$$module$src$url_try_decode_uri_component$$($match$$[1], $match$$[1]), $value$jscomp$88$$ = $match$$[2] ? $tryDecodeUriComponent_$$module$src$url_try_decode_uri_component$$($match$$[2].replace(/\+/g, " "), $match$$[2]) : "";
+    $params$jscomp$1$$[$name$jscomp$71$$] = $value$jscomp$88$$;
+  }
+  return $params$jscomp$1$$;
+}
+;var $rtvVersion$$module$src$mode$$ = "";
+function $getMode$$module$src$mode$$($opt_win$$) {
+  var $win$$ = $opt_win$$ || self;
+  if ($win$$.__AMP_MODE) {
+    var $JSCompiler_hashQuery$jscomp$inline_47_JSCompiler_inline_result$jscomp$25_JSCompiler_temp$jscomp$24$$ = $win$$.__AMP_MODE;
+  } else {
+    $JSCompiler_hashQuery$jscomp$inline_47_JSCompiler_inline_result$jscomp$25_JSCompiler_temp$jscomp$24$$ = $parseQueryString_$$module$src$url_parse_query_string$$($win$$.location.originalHash || $win$$.location.hash);
+    var $JSCompiler_searchQuery$jscomp$inline_48$$ = $parseQueryString_$$module$src$url_parse_query_string$$($win$$.location.search);
+    $rtvVersion$$module$src$mode$$ || ($rtvVersion$$module$src$mode$$ = $win$$.AMP_CONFIG && $win$$.AMP_CONFIG.v ? $win$$.AMP_CONFIG.v : "012007210308000");
+    $JSCompiler_hashQuery$jscomp$inline_47_JSCompiler_inline_result$jscomp$25_JSCompiler_temp$jscomp$24$$ = {localDev:!1, development:!!(0 <= ["1", "actions", "amp", "amp4ads", "amp4email"].indexOf($JSCompiler_hashQuery$jscomp$inline_47_JSCompiler_inline_result$jscomp$25_JSCompiler_temp$jscomp$24$$.development) || $win$$.AMP_DEV_MODE), examiner:"2" == $JSCompiler_hashQuery$jscomp$inline_47_JSCompiler_inline_result$jscomp$25_JSCompiler_temp$jscomp$24$$.development, esm:!1, geoOverride:$JSCompiler_hashQuery$jscomp$inline_47_JSCompiler_inline_result$jscomp$25_JSCompiler_temp$jscomp$24$$["amp-geo"], 
+    minified:!0, lite:void 0 != $JSCompiler_searchQuery$jscomp$inline_48$$.amp_lite, test:!1, log:$JSCompiler_hashQuery$jscomp$inline_47_JSCompiler_inline_result$jscomp$25_JSCompiler_temp$jscomp$24$$.log, version:"2007210308000", rtvVersion:$rtvVersion$$module$src$mode$$};
+    $JSCompiler_hashQuery$jscomp$inline_47_JSCompiler_inline_result$jscomp$25_JSCompiler_temp$jscomp$24$$ = $win$$.__AMP_MODE = $JSCompiler_hashQuery$jscomp$inline_47_JSCompiler_inline_result$jscomp$25_JSCompiler_temp$jscomp$24$$;
+  }
+  return $JSCompiler_hashQuery$jscomp$inline_47_JSCompiler_inline_result$jscomp$25_JSCompiler_temp$jscomp$24$$;
+}
+;function $toArray$$module$src$types$$($arrayLike$jscomp$1$$) {
+  return $arrayLike$jscomp$1$$ ? Array.prototype.slice.call($arrayLike$jscomp$1$$) : [];
+}
+;var $env$$module$src$config$$ = self.AMP_CONFIG || {}, $cdnProxyRegex$$module$src$config$$ = ("string" == typeof $env$$module$src$config$$.cdnProxyRegex ? new RegExp($env$$module$src$config$$.cdnProxyRegex) : $env$$module$src$config$$.cdnProxyRegex) || /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org$/;
+function $getMetaUrl$$module$src$config$$($name$jscomp$72$$) {
+  if (self.document && self.document.head && (!self.location || !$cdnProxyRegex$$module$src$config$$.test(self.location.origin))) {
+    var $metaEl$$ = self.document.head.querySelector('meta[name="' + $name$jscomp$72$$ + '"]');
+    $metaEl$$ && $metaEl$$.getAttribute("content");
+  }
+}
+$env$$module$src$config$$.cdnUrl || $getMetaUrl$$module$src$config$$("runtime-host");
+$env$$module$src$config$$.geoApiUrl || $getMetaUrl$$module$src$config$$("amp-geo-api");
+self.__AMP_LOG = self.__AMP_LOG || {user:null, dev:null, userForEmbed:null};
+var $logs$$module$src$log$$ = self.__AMP_LOG;
+function $user$$module$src$log$$() {
+  if (!$logs$$module$src$log$$.user) {
+    throw Error("failed to call initLogConstructor");
+  }
+  return $logs$$module$src$log$$.user;
+}
+function $dev$$module$src$log$$() {
+  if ($logs$$module$src$log$$.dev) {
+    return $logs$$module$src$log$$.dev;
+  }
+  throw Error("failed to call initLogConstructor");
+}
+;function $Deferred$$module$src$utils$promise$$() {
+  var $resolve$$, $reject$$;
+  this.promise = new Promise(function($res$$, $rej$$) {
+    $resolve$$ = $res$$;
+    $reject$$ = $rej$$;
+  });
+  this.resolve = $resolve$$;
+  this.reject = $reject$$;
+}
+;function $Observable$$module$src$observable$$() {
+  this.$handlers_$ = null;
+}
+$JSCompiler_prototypeAlias$$ = $Observable$$module$src$observable$$.prototype;
+$JSCompiler_prototypeAlias$$.add = function($handler$jscomp$3$$) {
+  var $$jscomp$this$jscomp$2$$ = this;
+  this.$handlers_$ || (this.$handlers_$ = []);
+  this.$handlers_$.push($handler$jscomp$3$$);
+  return function() {
+    $$jscomp$this$jscomp$2$$.remove($handler$jscomp$3$$);
+  };
+};
+$JSCompiler_prototypeAlias$$.remove = function($handler$jscomp$4_index$jscomp$74$$) {
+  this.$handlers_$ && ($handler$jscomp$4_index$jscomp$74$$ = this.$handlers_$.indexOf($handler$jscomp$4_index$jscomp$74$$), -1 < $handler$jscomp$4_index$jscomp$74$$ && this.$handlers_$.splice($handler$jscomp$4_index$jscomp$74$$, 1));
+};
+$JSCompiler_prototypeAlias$$.removeAll = function() {
+  this.$handlers_$ && (this.$handlers_$.length = 0);
+};
+$JSCompiler_prototypeAlias$$.fire = function($opt_event$$) {
+  if (this.$handlers_$) {
+    for (var $handlers$$ = this.$handlers_$, $i$jscomp$11$$ = 0; $i$jscomp$11$$ < $handlers$$.length; $i$jscomp$11$$++) {
+      (0,$handlers$$[$i$jscomp$11$$])($opt_event$$);
+    }
+  }
+};
+$JSCompiler_prototypeAlias$$.getHandlerCount = function() {
+  return this.$handlers_$ ? this.$handlers_$.length : 0;
+};
+var $hasOwn_$$module$src$utils$object$$ = Object.prototype.hasOwnProperty;
+function $dict$$module$src$utils$object$$($opt_initial$jscomp$1$$) {
+  return $opt_initial$jscomp$1$$ || {};
+}
+;$dict$$module$src$utils$object$$({c:!0, v:!0, a:!0, ad:!0, action:!0});
+function $experimentToggles$$module$src$experiments$$($params$jscomp$5_win$jscomp$12$$) {
+  if ($params$jscomp$5_win$jscomp$12$$.__AMP__EXPERIMENT_TOGGLES) {
+    return $params$jscomp$5_win$jscomp$12$$.__AMP__EXPERIMENT_TOGGLES;
+  }
+  $params$jscomp$5_win$jscomp$12$$.__AMP__EXPERIMENT_TOGGLES = Object.create(null);
+  var $toggles$jscomp$2$$ = $params$jscomp$5_win$jscomp$12$$.__AMP__EXPERIMENT_TOGGLES;
+  if ($params$jscomp$5_win$jscomp$12$$.AMP_CONFIG) {
+    for (var $allowed$3_experimentId$jscomp$2_i$jscomp$16$$ in $params$jscomp$5_win$jscomp$12$$.AMP_CONFIG) {
+      var $frequency$$ = $params$jscomp$5_win$jscomp$12$$.AMP_CONFIG[$allowed$3_experimentId$jscomp$2_i$jscomp$16$$];
+      "number" === typeof $frequency$$ && 0 <= $frequency$$ && 1 >= $frequency$$ && ($toggles$jscomp$2$$[$allowed$3_experimentId$jscomp$2_i$jscomp$16$$] = Math.random() < $frequency$$);
+    }
+  }
+  if ($params$jscomp$5_win$jscomp$12$$.AMP_CONFIG && Array.isArray($params$jscomp$5_win$jscomp$12$$.AMP_CONFIG["allow-doc-opt-in"]) && 0 < $params$jscomp$5_win$jscomp$12$$.AMP_CONFIG["allow-doc-opt-in"].length) {
+    var $allowed$$ = $params$jscomp$5_win$jscomp$12$$.AMP_CONFIG["allow-doc-opt-in"], $meta$$ = $params$jscomp$5_win$jscomp$12$$.document.head.querySelector('meta[name="amp-experiments-opt-in"]');
+    if ($meta$$) {
+      var $optedInExperiments$$ = $meta$$.getAttribute("content").split(",");
+      for ($allowed$3_experimentId$jscomp$2_i$jscomp$16$$ = 0; $allowed$3_experimentId$jscomp$2_i$jscomp$16$$ < $optedInExperiments$$.length; $allowed$3_experimentId$jscomp$2_i$jscomp$16$$++) {
+        -1 != $allowed$$.indexOf($optedInExperiments$$[$allowed$3_experimentId$jscomp$2_i$jscomp$16$$]) && ($toggles$jscomp$2$$[$optedInExperiments$$[$allowed$3_experimentId$jscomp$2_i$jscomp$16$$]] = !0);
+      }
+    }
+  }
+  Object.assign($toggles$jscomp$2$$, $getExperimentToggles$$module$src$experiments$$($params$jscomp$5_win$jscomp$12$$));
+  if ($params$jscomp$5_win$jscomp$12$$.AMP_CONFIG && Array.isArray($params$jscomp$5_win$jscomp$12$$.AMP_CONFIG["allow-url-opt-in"]) && 0 < $params$jscomp$5_win$jscomp$12$$.AMP_CONFIG["allow-url-opt-in"].length) {
+    $allowed$3_experimentId$jscomp$2_i$jscomp$16$$ = $params$jscomp$5_win$jscomp$12$$.AMP_CONFIG["allow-url-opt-in"];
+    $params$jscomp$5_win$jscomp$12$$ = $parseQueryString_$$module$src$url_parse_query_string$$($params$jscomp$5_win$jscomp$12$$.location.originalHash || $params$jscomp$5_win$jscomp$12$$.location.hash);
+    for (var $i$4$$ = 0; $i$4$$ < $allowed$3_experimentId$jscomp$2_i$jscomp$16$$.length; $i$4$$++) {
+      var $param$jscomp$6$$ = $params$jscomp$5_win$jscomp$12$$["e-" + $allowed$3_experimentId$jscomp$2_i$jscomp$16$$[$i$4$$]];
+      "1" == $param$jscomp$6$$ && ($toggles$jscomp$2$$[$allowed$3_experimentId$jscomp$2_i$jscomp$16$$[$i$4$$]] = !0);
+      "0" == $param$jscomp$6$$ && ($toggles$jscomp$2$$[$allowed$3_experimentId$jscomp$2_i$jscomp$16$$[$i$4$$]] = !1);
+    }
+  }
+  return $toggles$jscomp$2$$;
+}
+function $getExperimentToggles$$module$src$experiments$$($toggles$jscomp$3_win$jscomp$14$$) {
+  var $experimentsString$$ = "";
+  try {
+    "localStorage" in $toggles$jscomp$3_win$jscomp$14$$ && ($experimentsString$$ = $toggles$jscomp$3_win$jscomp$14$$.localStorage.getItem("amp-experiment-toggles"));
+  } catch ($e$jscomp$11$$) {
+    $dev$$module$src$log$$().warn("EXPERIMENTS", "Failed to retrieve experiments from localStorage.");
+  }
+  var $tokens$$ = $experimentsString$$ ? $experimentsString$$.split(/\s*,\s*/g) : [];
+  $toggles$jscomp$3_win$jscomp$14$$ = Object.create(null);
+  for (var $i$jscomp$17$$ = 0; $i$jscomp$17$$ < $tokens$$.length; $i$jscomp$17$$++) {
+    0 != $tokens$$[$i$jscomp$17$$].length && ("-" == $tokens$$[$i$jscomp$17$$][0] ? $toggles$jscomp$3_win$jscomp$14$$[$tokens$$[$i$jscomp$17$$].substr(1)] = !1 : $toggles$jscomp$3_win$jscomp$14$$[$tokens$$[$i$jscomp$17$$]] = !0);
+  }
+  return $toggles$jscomp$3_win$jscomp$14$$;
+}
+;var $EXPERIMENT_INFO_LIST$$module$src$ampdoc_fie$$ = [{experimentId:"ampdoc-fie", isTrafficEligible:function() {
+  return !0;
+}, branches:["21065001", "21065002"]}];
+function $getExistingServiceForDocInEmbedScope$$module$src$service$$($JSCompiler_ampdoc$jscomp$inline_142_JSCompiler_holder$jscomp$inline_143_JSCompiler_temp$jscomp$132_element$jscomp$13$$) {
+  var $win$jscomp$23$$ = $JSCompiler_ampdoc$jscomp$inline_142_JSCompiler_holder$jscomp$inline_143_JSCompiler_temp$jscomp$132_element$jscomp$13$$.ownerDocument.defaultView, $topWin$$ = $win$jscomp$23$$.__AMP_TOP || ($win$jscomp$23$$.__AMP_TOP = $win$jscomp$23$$), $isEmbed$$ = $win$jscomp$23$$ != $topWin$$, $JSCompiler_i$jscomp$inline_161_JSCompiler_inline_result$jscomp$131$$;
+  if ($experimentToggles$$module$src$experiments$$($topWin$$)["ampdoc-fie"]) {
+    $topWin$$.__AMP_EXPERIMENT_BRANCHES = $topWin$$.__AMP_EXPERIMENT_BRANCHES || {};
+    for ($JSCompiler_i$jscomp$inline_161_JSCompiler_inline_result$jscomp$131$$ = 0; $JSCompiler_i$jscomp$inline_161_JSCompiler_inline_result$jscomp$131$$ < $EXPERIMENT_INFO_LIST$$module$src$ampdoc_fie$$.length; $JSCompiler_i$jscomp$inline_161_JSCompiler_inline_result$jscomp$131$$++) {
+      var $JSCompiler_arr$jscomp$inline_176_JSCompiler_experiment$jscomp$inline_162$$ = $EXPERIMENT_INFO_LIST$$module$src$ampdoc_fie$$[$JSCompiler_i$jscomp$inline_161_JSCompiler_inline_result$jscomp$131$$], $JSCompiler_experimentName$jscomp$inline_163$$ = $JSCompiler_arr$jscomp$inline_176_JSCompiler_experiment$jscomp$inline_162$$.experimentId;
+      $hasOwn_$$module$src$utils$object$$.call($topWin$$.__AMP_EXPERIMENT_BRANCHES, $JSCompiler_experimentName$jscomp$inline_163$$) || ($JSCompiler_arr$jscomp$inline_176_JSCompiler_experiment$jscomp$inline_162$$.isTrafficEligible && $JSCompiler_arr$jscomp$inline_176_JSCompiler_experiment$jscomp$inline_162$$.isTrafficEligible($topWin$$) ? !$topWin$$.__AMP_EXPERIMENT_BRANCHES[$JSCompiler_experimentName$jscomp$inline_163$$] && $experimentToggles$$module$src$experiments$$($topWin$$)[$JSCompiler_experimentName$jscomp$inline_163$$] && 
+      ($JSCompiler_arr$jscomp$inline_176_JSCompiler_experiment$jscomp$inline_162$$ = $JSCompiler_arr$jscomp$inline_176_JSCompiler_experiment$jscomp$inline_162$$.branches, $topWin$$.__AMP_EXPERIMENT_BRANCHES[$JSCompiler_experimentName$jscomp$inline_163$$] = $JSCompiler_arr$jscomp$inline_176_JSCompiler_experiment$jscomp$inline_162$$[Math.floor(Math.random() * $JSCompiler_arr$jscomp$inline_176_JSCompiler_experiment$jscomp$inline_162$$.length)] || null) : $topWin$$.__AMP_EXPERIMENT_BRANCHES[$JSCompiler_experimentName$jscomp$inline_163$$] = 
+      null);
+    }
+    $JSCompiler_i$jscomp$inline_161_JSCompiler_inline_result$jscomp$131$$ = "21065002" === ($topWin$$.__AMP_EXPERIMENT_BRANCHES ? $topWin$$.__AMP_EXPERIMENT_BRANCHES["ampdoc-fie"] : null);
+  } else {
+    $JSCompiler_i$jscomp$inline_161_JSCompiler_inline_result$jscomp$131$$ = !1;
+  }
+  var $ampdocFieExperimentOn$$ = $JSCompiler_i$jscomp$inline_161_JSCompiler_inline_result$jscomp$131$$;
+  $isEmbed$$ && !$ampdocFieExperimentOn$$ ? $JSCompiler_ampdoc$jscomp$inline_142_JSCompiler_holder$jscomp$inline_143_JSCompiler_temp$jscomp$132_element$jscomp$13$$ = $isServiceRegistered$$module$src$service$$($win$jscomp$23$$, "action") ? $getServiceInternal$$module$src$service$$($win$jscomp$23$$, "action") : null : ($JSCompiler_ampdoc$jscomp$inline_142_JSCompiler_holder$jscomp$inline_143_JSCompiler_temp$jscomp$132_element$jscomp$13$$ = $getAmpdoc$$module$src$service$$($JSCompiler_ampdoc$jscomp$inline_142_JSCompiler_holder$jscomp$inline_143_JSCompiler_temp$jscomp$132_element$jscomp$13$$), 
+  $JSCompiler_ampdoc$jscomp$inline_142_JSCompiler_holder$jscomp$inline_143_JSCompiler_temp$jscomp$132_element$jscomp$13$$ = $getAmpdocServiceHolder$$module$src$service$$($JSCompiler_ampdoc$jscomp$inline_142_JSCompiler_holder$jscomp$inline_143_JSCompiler_temp$jscomp$132_element$jscomp$13$$), $JSCompiler_ampdoc$jscomp$inline_142_JSCompiler_holder$jscomp$inline_143_JSCompiler_temp$jscomp$132_element$jscomp$13$$ = $isServiceRegistered$$module$src$service$$($JSCompiler_ampdoc$jscomp$inline_142_JSCompiler_holder$jscomp$inline_143_JSCompiler_temp$jscomp$132_element$jscomp$13$$, 
+  "action") ? $getServiceInternal$$module$src$service$$($JSCompiler_ampdoc$jscomp$inline_142_JSCompiler_holder$jscomp$inline_143_JSCompiler_temp$jscomp$132_element$jscomp$13$$, "action") : null);
+  return $JSCompiler_ampdoc$jscomp$inline_142_JSCompiler_holder$jscomp$inline_143_JSCompiler_temp$jscomp$132_element$jscomp$13$$;
+}
+function $getService$$module$src$service$$($win$jscomp$25$$, $id$jscomp$13$$) {
+  $win$jscomp$25$$ = $win$jscomp$25$$.__AMP_TOP || ($win$jscomp$25$$.__AMP_TOP = $win$jscomp$25$$);
+  return $getServiceInternal$$module$src$service$$($win$jscomp$25$$, $id$jscomp$13$$);
+}
+function $getServiceForDoc$$module$src$service$$($elementOrAmpDoc$$, $id$jscomp$17$$) {
+  var $ampdoc$jscomp$3_holder$jscomp$2$$ = $getAmpdoc$$module$src$service$$($elementOrAmpDoc$$);
+  $ampdoc$jscomp$3_holder$jscomp$2$$ = $getAmpdocServiceHolder$$module$src$service$$($ampdoc$jscomp$3_holder$jscomp$2$$);
+  return $getServiceInternal$$module$src$service$$($ampdoc$jscomp$3_holder$jscomp$2$$, $id$jscomp$17$$);
+}
+function $getAmpdoc$$module$src$service$$($nodeOrDoc$jscomp$2$$) {
+  return $nodeOrDoc$jscomp$2$$.nodeType ? $getService$$module$src$service$$(($nodeOrDoc$jscomp$2$$.ownerDocument || $nodeOrDoc$jscomp$2$$).defaultView, "ampdoc").getAmpDoc($nodeOrDoc$jscomp$2$$) : $nodeOrDoc$jscomp$2$$;
+}
+function $getAmpdocServiceHolder$$module$src$service$$($ampdoc$jscomp$5_nodeOrDoc$jscomp$3$$) {
+  $ampdoc$jscomp$5_nodeOrDoc$jscomp$3$$ = $getAmpdoc$$module$src$service$$($ampdoc$jscomp$5_nodeOrDoc$jscomp$3$$);
+  return $ampdoc$jscomp$5_nodeOrDoc$jscomp$3$$.isSingleDoc() ? $ampdoc$jscomp$5_nodeOrDoc$jscomp$3$$.win : $ampdoc$jscomp$5_nodeOrDoc$jscomp$3$$;
+}
+function $getServiceInternal$$module$src$service$$($holder$jscomp$4_s$jscomp$9$$, $id$jscomp$21$$) {
+  $isServiceRegistered$$module$src$service$$($holder$jscomp$4_s$jscomp$9$$, $id$jscomp$21$$);
+  var $JSCompiler_services$jscomp$inline_54$$ = $holder$jscomp$4_s$jscomp$9$$.__AMP_SERVICES;
+  $JSCompiler_services$jscomp$inline_54$$ || ($JSCompiler_services$jscomp$inline_54$$ = $holder$jscomp$4_s$jscomp$9$$.__AMP_SERVICES = {});
+  $holder$jscomp$4_s$jscomp$9$$ = $JSCompiler_services$jscomp$inline_54$$[$id$jscomp$21$$];
+  $holder$jscomp$4_s$jscomp$9$$.obj || ($holder$jscomp$4_s$jscomp$9$$.obj = new $holder$jscomp$4_s$jscomp$9$$.ctor($holder$jscomp$4_s$jscomp$9$$.context), $holder$jscomp$4_s$jscomp$9$$.ctor = null, $holder$jscomp$4_s$jscomp$9$$.context = null, $holder$jscomp$4_s$jscomp$9$$.resolve && $holder$jscomp$4_s$jscomp$9$$.resolve($holder$jscomp$4_s$jscomp$9$$.obj));
+  return $holder$jscomp$4_s$jscomp$9$$.obj;
+}
+function $isServiceRegistered$$module$src$service$$($holder$jscomp$12_service$jscomp$5$$, $id$jscomp$30$$) {
+  $holder$jscomp$12_service$jscomp$5$$ = $holder$jscomp$12_service$jscomp$5$$.__AMP_SERVICES && $holder$jscomp$12_service$jscomp$5$$.__AMP_SERVICES[$id$jscomp$30$$];
+  return !(!$holder$jscomp$12_service$jscomp$5$$ || !$holder$jscomp$12_service$jscomp$5$$.ctor && !$holder$jscomp$12_service$jscomp$5$$.obj);
+}
+;/*
  https://mths.be/cssescape v1.5.1 by @mathias | MIT license */
-function qa(a,b){for(;a&&void 0!==a;a=a.parentElement)if(b(a))return a;return null}function sa(a){return a.closest?a.closest(".i-amphtml-fie"):qa(a,function(a){var b=a.matches||a.webkitMatchesSelector||a.mozMatchesSelector||a.msMatchesSelector||a.oMatchesSelector;return b?b.call(a,".i-amphtml-fie"):!1})}function J(a){try{a.focus()}catch(b){}};function K(a){return I(a,"owners")};function L(a,b){var c=this;this.ya=H(a,"timer");this.Fa=b;this.Ea=0;this.O=-1;this.ca=0;this.ia=!1;this.Aa=function(){c.Z()}}L.prototype.isPending=function(){return-1!=this.O};L.prototype.schedule=function(a){var b=a||this.Ea;this.ia&&10>b&&(b=10);var c=Date.now()+b;return!this.isPending()||-10>c-this.ca?(this.cancel(),this.ca=c,this.O=this.ya.delay(this.Aa,b),!0):!1};L.prototype.Z=function(){this.O=-1;this.ca=0;this.ia=!0;this.Fa();this.ia=!1};
-L.prototype.cancel=function(){this.isPending()&&(this.ya.cancel(this.O),this.O=-1)};function ta(a,b){for(var c=0;c<a.length;c++)if(b(a[c],c,a))return c;return-1};var M;function ua(a){if(void 0!==M)return M;M=!1;try{var b={get passive(){M=!0;return!1}};a.addEventListener("test-options",null,b);a.removeEventListener("test-options",null,b)}catch(c){}return M};function va(a,b,c,d){this.type=a;this.data=b;this.time=c;this.event=d}
-function wa(a,b,c){this.C=a;this.h=[];this.K=[];this.w=[];this.j=[];this.l=null;this.Ma=b;this.Na=c;this.$=!1;this.Z=new L(a.ownerDocument.defaultView,this.sa.bind(this));this.va=new B;this.N=Object.create(null);this.qa=this.La.bind(this);this.oa=this.Ja.bind(this);this.pa=this.Ka.bind(this);this.na=this.Ia.bind(this);var d=ua(a.ownerDocument.defaultView);this.C.addEventListener("touchstart",this.qa,d?{passive:!0}:!1);this.C.addEventListener("touchend",this.oa);this.C.addEventListener("touchmove",
-this.pa,d?{passive:!0}:!1);this.C.addEventListener("touchcancel",this.na);this.ea=!1}function xa(a){var b=void 0===b?!1:b;var c=void 0===c?!1:c;var d=a.__AMP_Gestures;d||(d=new wa(a,b,c),a.__AMP_Gestures=d);return d}f=wa.prototype;f.cleanup=function(){this.C.removeEventListener("touchstart",this.qa);this.C.removeEventListener("touchend",this.oa);this.C.removeEventListener("touchmove",this.pa);this.C.removeEventListener("touchcancel",this.na);delete this.C.__AMP_Gestures;this.Z.cancel()};
-f.onGesture=function(a,b){var c=new a(this),d=c.getType(),e=this.N[d];e||(this.h.push(c),e=new B,this.N[d]=e);return e.add(b)};f.removeGesture=function(a){var b=(new a(this)).getType();if(a=this.N[b]){a.removeAll();a=ta(this.h,function(a){return a.getType()==b});if(0>a)return!1;this.h.splice(a,1);this.w.splice(a,1);this.j.splice(a,1);this.K.splice(a,1);delete this.N[b];return!0}return!1};f.onPointerDown=function(a){return this.va.add(a)};
-f.La=function(a){var b=Date.now();this.$=!1;this.va.fire(a);for(var c=0;c<this.h.length;c++)if(!this.w[c]&&(this.j[c]&&this.j[c]<b&&N(this,c),this.h[c].onTouchStart(a))){var d=c;this.K[d]=!0;this.j[d]=0}O(this,a)};f.Ka=function(a){for(var b=Date.now(),c=0;c<this.h.length;c++)this.K[c]&&(this.j[c]&&this.j[c]<b?N(this,c):this.h[c].onTouchMove(a)||N(this,c));O(this,a)};
-f.Ja=function(a){for(var b=Date.now(),c=0;c<this.h.length;c++)if(this.K[c])if(this.j[c]&&this.j[c]<b)N(this,c);else{this.h[c].onTouchEnd(a);var d=!this.j[c],e=this.j[c]<b;this.l!=this.h[c]&&(d||e)&&N(this,c)}O(this,a)};f.Ia=function(a){for(var b=0;b<this.h.length;b++){var c=b;this.w[c]=0;N(this,c)}O(this,a)};
-function O(a,b){var c=!!a.l||a.$;a.$=!1;if(!c)for(var d=Date.now(),e=0;e<a.h.length;e++)if(a.w[e]||a.j[e]&&a.j[e]>=d){c=!0;break}c?(b.stopPropagation(),a.Ma||b.preventDefault()):a.Na&&b.stopPropagation();a.ea&&(a.ea=!1,a.sa())}
-f.sa=function(){for(var a=Date.now(),b=-1,c=0;c<this.h.length;c++)if(!this.w[c])this.j[c]&&this.j[c]<a&&N(this,c);else if(-1==b||this.w[c]>this.w[b])b=c;if(-1!=b){var d=0;for(c=0;c<this.h.length;c++)!this.w[c]&&this.K[c]&&(d=Math.max(d,this.j[c]-a));if(2>d){a=b;c=this.h[a];for(var e=0;e<this.h.length;e++)if(e!=a){var g=e;this.w[g]=0;N(this,g)}this.w[a]=0;this.j[a]=0;this.l=c;c.acceptStart()}else this.Z.schedule(d)}};function N(a,b){a.K[b]=!1;a.j[b]=0;a.w[b]||a.h[b].acceptCancel()}
-function P(a,b){this.Oa=a;this.Y=b}f=P.prototype;f.getType=function(){return this.Oa};f.signalReady=function(a){var b=this.Y;if(b.l)this.acceptCancel();else{for(var c=Date.now(),d=0;d<b.h.length;d++)b.h[d]==this&&(b.w[d]=c+a,b.j[d]=0);b.ea=!0}};f.signalPending=function(a){var b=this.Y;if(b.l)this.acceptCancel();else for(var c=Date.now(),d=0;d<b.h.length;d++)b.h[d]==this&&(b.j[d]=c+a)};f.signalEnd=function(){var a=this.Y;a.l==this&&(a.l=null,a.$=!0)};
-f.signalEmit=function(a,b){var c=this.Y.N[this.getType()];c&&c.fire(new va(this.getType(),a,Date.now(),b))};f.acceptStart=function(){};f.acceptCancel=function(){};f.onTouchStart=function(){return!1};f.onTouchMove=function(){return!1};f.onTouchEnd=function(){};function ya(a,b,c){1>b&&(b=1);var d=.5+Math.min(b/33.34,.5);return a/b*d+c*(1-d)};function Q(a,b,c,d){P.call(this,a,b);this.ta=c;this.za=d;this.l=!1;this.ma=this.la=this.fa=this.X=this.xa=this.ha=this.ga=this.H=this.G=this.J=this.I=0}r(Q,P);f=Q.prototype;f.onTouchStart=function(a){a=a.touches;return this.l&&a&&1<a.length?!0:a&&1==a.length?(this.xa=Date.now(),this.I=a[0].clientX,this.J=a[0].clientY,!0):!1};
-f.onTouchMove=function(a){var b=a.touches;if(b&&1<=b.length){var c=b[0];b=c.clientX;c=c.clientY;this.G=b;this.H=c;if(this.l)R(this,!1,!1,a);else if(a=Math.abs(b-this.I),b=Math.abs(c-this.J),this.ta&&this.za)(8<=a||8<=b)&&this.signalReady(-10);else if(this.ta)if(8<=a&&a>b)this.signalReady(-10);else{if(8<=b)return!1}else if(this.za)if(8<=b&&b>a)this.signalReady(-10);else{if(8<=a)return!1}else return!1;return!0}return!1};
-f.onTouchEnd=function(a){var b=a.touches;b&&0==b.length&&this.l&&(this.l=!1,R(this,!1,!0,a),this.signalEnd())};f.acceptStart=function(){this.l=!0;this.ga=this.I;this.ha=this.J;this.fa=this.xa;this.I=this.G;this.J=this.H;R(this,!0,!1,null)};f.acceptCancel=function(){this.l=!1};
-function R(a,b,c,d){a.X=Date.now();var e=a.X-a.fa;if(!c&&4<e||c&&16<e){var g=ya(a.G-a.ga,e,a.la),h=ya(a.H-a.ha,e,a.ma);if(!c||32<e||0!=g||0!=h)a.la=1E-4<Math.abs(g)?g:0,a.ma=1E-4<Math.abs(h)?h:0;a.ga=a.G;a.ha=a.H;a.fa=a.X}a.signalEmit({first:b,last:c,time:a.X,deltaX:a.G-a.I,deltaY:a.H-a.J,startX:a.I,startY:a.J,lastX:a.G,lastY:a.H,velocityX:a.la,velocityY:a.ma},d)}function za(a){Q.call(this,"swipe-xy",a,!0,!0)}r(za,Q);var S,Aa="Webkit webkit Moz moz ms O o".split(" ");function Ba(a,b,c){if(2>b.length?0:0==b.lastIndexOf("--",0))return b;S||(S=Object.create(null));var d=S[b];if(!d||c){d=b;if(void 0===a[b]){var e=b.charAt(0).toUpperCase()+b.slice(1);a:{for(var g=0;g<Aa.length;g++){var h=Aa[g]+e;if(void 0!==a[h]){e=h;break a}}e=""}var k=e;void 0!==a[k]&&(d=k)}c||(S[b]=d)}return d}function Ca(a,b){a=a.style;for(var c in b)a.setProperty(Ba(a,c),b[c].toString(),"important")}
-function T(a,b,c){(b=Ba(a.style,b,void 0))&&((2>b.length?0:0==b.lastIndexOf("--",0))?a.style.setProperty(b,c):a.style[b]=c)}function U(a,b){for(var c in b)T(a,c,b[c])}function V(a){"display"in a&&A().error("STYLE","`display` style detected in styles. You must use toggle instead.");return a}function Da(a){var b=!0;void 0===b&&(b=a.hasAttribute("hidden"));b?a.removeAttribute("hidden"):a.setAttribute("hidden","")}function Ea(a){for(var b=["transition"],c=0;c<b.length;c++)T(a,b[c],null)};function Fa(a,b){function c(){d=0;var h=500-(a.Date.now()-e);if(0<h)d=a.setTimeout(c,h);else{var k=g;g=null;b.apply(null,k)}}var d=0,e=0,g=null;return function(b){for(var h=[],l=0;l<arguments.length;++l)h[l-0]=arguments[l];e=a.Date.now();g=h;d||(d=a.setTimeout(c,500))}};var W;function Ga(a){return a.classList.contains("i-amphtml-fie")||!!sa(a)};var Ha=['<i-amphtml-ad-close-header role=button tabindex=0 aria-label="Close Ad"><div>Ad</div><i-amphtml-ad-close-button class=amp-ad-close-button></i-amphtml-ad-close-button></i-amphtml-ad-close-header>'],X={"fade-in":{openStyle:C({opacity:1}),closedStyle:C({opacity:0}),durationSeconds:.1},"fly-in-bottom":{openStyle:C({transform:"translate(0, 0)"}),closedStyle:C({transform:"translate(0, 100%)"}),durationSeconds:.2},"fly-in-top":{openStyle:C({transform:"translate(0, 0)"}),closedStyle:C({transform:"translate(0, -100%)"}),
-durationSeconds:.2}};
-function Y(a){var b=AMP.BaseElement.call(this,a)||this;b.ka=null;b.A=null;b.M=b.win.document;b.P=null;b.ba=-1;b.R=!1;b.U=null;b.T=null;b.W=null;b.V=null;b.da=null;b.F=!1;b.B=0;b.ua=0;b.aa=0;b.ja=null;b.S=(a.getAttribute("animate-in")||"fade-in").toLowerCase();b.m=null;b.D=null;b.L=null;var c=H(b.win,"platform");b.Ga=c.isIos();b.ra=Fa(b.win,function(){var a=ia().assertElement(b.A,"E#19457 this.container_"),c=K(b.element);c.scheduleLayout(b.element,a);c.scheduleResume(b.element,a)});return b}r(Y,AMP.BaseElement);
-f=Y.prototype;f.buildCallback=function(){var a=this;this.user().assert(ka.call(X,this.S),"Invalid `animate-in` value %s",this.S);this.element.classList.add("i-amphtml-overlay");this.P=oa(this.element);Ia(this);this.registerDefaultAction(function(b){return Ja(a,b.trust,b.caller)},"open");this.registerAction("close",function(b){return a.close(b.trust)});this.P.addToAllowlist("AMP-LIGHTBOX",["open","close"],["email"])};
-function Ka(a){ea(a.element.getElementsByClassName("i-amphtml-element")).forEach(function(b){K(a.element).setOwner(b,a.element)})}
-function La(a){if(!a.A){var b=a.element;a.F=b.hasAttribute("scrollable");var c=a.getRealChildren();a.A=b.ownerDocument.createElement("div");a.F||a.applyFillContent(a.A);b.appendChild(a.A);c.forEach(function(b){a.A.appendChild(b)});a.F&&(Ka(a),b.classList.add("i-amphtml-scrollable"),b.addEventListener("amp:dom-update",function(){Ka(a);Z(a,a.B,a.B)}),b.addEventListener("scroll",a.wa.bind(a)));if(!a.F)xa(b).onGesture(za,function(){});Ma(a)}}
-f.layoutCallback=function(){t||(t=Promise.resolve(void 0));var a=t;return a};function Ja(a,b,c){if(!a.R){La(a);a.U=a.Da.bind(a);a.M.documentElement.addEventListener("keydown",a.U);a.W=a.Ha.bind(a);a.M.documentElement.addEventListener("focusin",a.W);c&&(a.da=c);var d=new ja,e=d.promise,g=d.resolve;a.getViewport().enterLightboxMode(a.element,e).then(function(){return Na(a,g,b)})}}f.mutatedAttributesCallback=function(a){var b=a.open;void 0!==b&&(b?Ja(this,2,document.activeElement):this.close(2))};
-function Oa(a){var b=a.A.querySelector("[autofocus]");b&&J(b)}
-function Na(a,b,c){function d(){a.ra();b()}var e=a.element,g=X[a.S],h=g.durationSeconds,k=g.openStyle,l=g.closedStyle,E=Object.keys(k).map(function(a){return a+" "+h+"s ease-in"}).join(",");a.aa++;a.F&&T(e,"webkitOverflowScrolling","touch");T(e,"transition",E);U(e,V(l));Da(e);a.mutateElement(function(){e.scrollTop=0});Oa(a);a.mutateElement(function(){U(e,V(k))});g=a.A;a.F?(a.wa(),Z(a,a.B,a.B)):K(a.element).updateInViewport(a.element,g,!0);e.addEventListener("transitionend",d);e.addEventListener("animationend",
-d);var ra=K(a.element);ra.scheduleLayout(a.element,g);ra.scheduleResume(a.element,g);Pa(a,"lightboxOpen",c);I(a.getAmpDoc(),"history").push(a.close.bind(a)).then(function(b){a.ba=b});Qa(a);Ra(a);Sa(a);a.R=!0}function Ma(a){var b=a.element;if(null!=b.getAttribute("close-button")){var c=b.ownerDocument||b;W&&W.ownerDocument===c||(W=c.createElement("div"));c=W;c.innerHTML=Ha[0];var d=c.firstElementChild;c.removeChild(d);a.m=d;b.insertBefore(a.m,a.A)}}
-function Qa(a){if(a.m){a.T=a.Ca.bind(a);a.m.addEventListener("keydown",a.T);var b;a.measureMutateElement(function(){b=a.m.getBoundingClientRect().height},function(){a.m.classList.add("amp-ad-close-header");Ca(a.A,{"margin-top":b+"px","min-height":"calc(100vh - "+(b+"px)")})})}}function Sa(a){if(a.L||a.m)a.V=a.Ba.bind(a),a.D.addEventListener("click",a.V)}function Ta(a){if(a.L||a.m)a.D.removeEventListener("click",a.V),a.V=null,a.m&&(a.m.removeEventListener("keydown",a.T),a.T=null)}f.Ba=function(){this.close(3)};
-f.Da=function(a){"Escape"==a.key&&(a.preventDefault(),this.close(3))};f.Ca=function(a){"Enter"==a.key&&(a.preventDefault(),this.close(3))};f.close=function(a){var b=this;this.R&&(this.F&&T(this.element,"webkitOverflowScrolling",""),this.getViewport().leaveLightboxMode(this.element).then(function(){return Ua(b,a)}))};
-function Ua(a,b){function c(){e==a.aa&&(a.collapse(),a.ra())}var d=a.element,e=++a.aa;Va(a)?(Ea(d),c()):(d.addEventListener("transitionend",c),d.addEventListener("animationend",c));U(d,V(X[a.S].closedStyle));-1!=a.ba&&I(a.getAmpDoc(),"history").pop(a.ba);a.M.documentElement.removeEventListener("keydown",a.U);a.U=null;a.M.documentElement.removeEventListener("focusin",a.W);a.W=null;Ta(a);K(a.element).schedulePause(a.element,a.A);a.R=!1;Pa(a,"lightboxClose",b);a.da&&J(a.da)}
-function Va(a){return"inabox"==x(a.win).runtime||Ga(a.element)}f.Ha=function(){this.element.contains(document.activeElement)||this.close(3)};
-function Ra(a){if(!a.element.contains(document.activeElement)){a:if(a.D)var b=a.D;else if(a.m)b=a.m;else{b=a.element;for(var c=b.querySelectorAll("[on]"),d=0;d<c.length;d++){var e=c[d];if(a.P.hasResolvableActionForTarget(e,"tap",b,e.parentElement)){b=e;break a}}b=void 0}a.D=b;a.D||(b=a.element.getAttribute("data-close-button-aria-label")||"Close the modal",c=a.M.createElement("button"),c.textContent=b,c.classList.add("i-amphtml-screen-reader"),c.tabIndex=-1,a.L=c,a.element.insertBefore(a.L,a.element.firstChild),
-a.D=a.L);J(a.D)}}f.wa=function(){var a=this.element.scrollTop;this.Ga&&(0==a?this.element.scrollTop=1:this.element.scrollHeight==a+this.element.offsetHeight&&(this.element.scrollTop=a-1));this.B=a;null===this.ja&&Wa(this,a)};
-function Wa(a,b){a.ja=H(a.win,"timer").delay(function(){if(30>Math.abs(b-a.B)){A().fine("amp-lightbox","slow scrolling: %s - %s",b,a.B);a.ja=null;var c=a.B;A().fine("amp-lightbox","update_");Z(a,c,a.ua);a.ua=c;a.B=c}else A().fine("amp-lightbox","fast scrolling: %s - %s",b,a.B),Wa(a,a.B)},100)}
-function Z(a,b,c){var d=[];Xa(a,b,function(b){d.push(b);var c=K(a.element);c.updateInViewport(a.element,b,!0);c.scheduleLayout(a.element,b)});c!=b&&Xa(a,c,function(b){d.includes(b)||K(a.element).updateInViewport(a.element,b,!1)})}
-function Xa(a,b,c){a.ka||(a.ka={width:a.element.clientWidth,height:a.element.clientHeight});for(var d=a.ka.height,e=ea(a.element.getElementsByClassName("i-amphtml-element")),g=0;g<e.length;g++){for(var h=e[g],k=0,l=h;l&&a.element.contains(l);l=l.offsetParent)k+=l.offsetTop;var E=2*d;k+h.offsetHeight>=b-E&&k<=b+E&&c(h)}}function Ia(a){var b=a.win;Ga(a.element)&&Ya(b,b.document.body)}
-function Pa(a,b,c){var d=a.win;var e="amp-lightbox."+b;var g=C({}),h={detail:g};Object.assign(h,void 0);"function"==typeof d.CustomEvent?e=new d.CustomEvent(e,h):(d=d.document.createEvent("CustomEvent"),d.initCustomEvent(e,!!h.bubbles,!!h.cancelable,g),e=d);a.P.trigger(a.element,b,e,c)}
-function Ya(a,b){var c={},d=H(a,"ampdoc").getAmpDoc(b);I(d,"mutator").measureMutateElement(b,function(){c.alreadyTransparent="rgba(0, 0, 0, 0)"==(a.getComputedStyle(b)||Object.create(null))["background-color"]},function(){c.alreadyTransparent||ia().warn("amp-lightbox","The background of the <body> element has been forced to transparent. If you need to set background, use an intermediate container.");Ca(b,{background:"transparent"})})}
-(function(a){"inabox"==x().runtime&&Ya(window,document.body);a.registerElement("amp-lightbox",Y,"amp-lightbox{display:none;position:fixed!important;z-index:1000;top:0!important;left:0!important;bottom:0!important;right:0!important}amp-lightbox[scrollable]{overflow-y:auto!important;overflow-x:hidden!important}i-amphtml-ad-close-header{height:60px!important;display:block!important;visibility:visible!important;opacity:0;position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:1000!important;display:-ms-flexbox!important;display:flex!important;-ms-flex-align:center!important;align-items:center!important;-ms-flex-pack:right!important;justify-content:right!important;transition:opacity 0.1s ease-in}[animate-in=fly-in-bottom]>i-amphtml-ad-close-header,[animate-in=fly-in-top]>i-amphtml-ad-close-header{transition-delay:0.2s}.amp-ad-close-header{opacity:1!important;box-sizing:border-box;padding:5px;line-height:40px;background-color:#000;color:#fff;font-family:Helvetica,sans-serif;font-size:12px;cursor:pointer}.amp-ad-close-header>:first-child{margin-left:auto!important;pointer-events:none!important}.amp-ad-close-button{display:block!important;background:url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='%23fff'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3C/svg%3E\") no-repeat;background-position:50%;width:40px;height:40px;pointer-events:none!important;border-radius:40px;margin-left:5px}.amp-ad-close-header:active>.amp-ad-close-button{background-color:hsla(0,0%,100%,0.3)}\n/*# sourceURL=/extensions/amp-lightbox/0.1/amp-lightbox.css*/")})(self.AMP);
+function $closest$$module$src$dom$$($el$jscomp$2_element$jscomp$20$$, $callback$jscomp$53$$) {
+  for (; $el$jscomp$2_element$jscomp$20$$ && void 0 !== $el$jscomp$2_element$jscomp$20$$; $el$jscomp$2_element$jscomp$20$$ = $el$jscomp$2_element$jscomp$20$$.parentElement) {
+    if ($callback$jscomp$53$$($el$jscomp$2_element$jscomp$20$$)) {
+      return $el$jscomp$2_element$jscomp$20$$;
+    }
+  }
+  return null;
+}
+function $closestAncestorElementBySelector$$module$src$dom$$($element$jscomp$21$$) {
+  return $element$jscomp$21$$.closest ? $element$jscomp$21$$.closest(".i-amphtml-fie") : $closest$$module$src$dom$$($element$jscomp$21$$, function($element$jscomp$21$$) {
+    var $el$jscomp$3$$ = $element$jscomp$21$$.matches || $element$jscomp$21$$.webkitMatchesSelector || $element$jscomp$21$$.mozMatchesSelector || $element$jscomp$21$$.msMatchesSelector || $element$jscomp$21$$.oMatchesSelector;
+    return $el$jscomp$3$$ ? $el$jscomp$3$$.call($element$jscomp$21$$, ".i-amphtml-fie") : !1;
+  });
+}
+function $tryFocus$$module$src$dom$$($element$jscomp$27$$) {
+  try {
+    $element$jscomp$27$$.focus();
+  } catch ($e$jscomp$17$$) {
+  }
+}
+;function $Services$$module$src$services$ownersForDoc$$($elementOrAmpDoc$jscomp$10$$) {
+  return $getServiceForDoc$$module$src$service$$($elementOrAmpDoc$jscomp$10$$, "owners");
+}
+;function $Pass$$module$src$pass$$($win$jscomp$54$$, $handler$jscomp$6$$) {
+  var $$jscomp$this$jscomp$3$$ = this;
+  this.$timer_$ = $getService$$module$src$service$$($win$jscomp$54$$, "timer");
+  this.$handler_$ = $handler$jscomp$6$$;
+  this.$defaultDelay_$ = 0;
+  this.$scheduled_$ = -1;
+  this.$nextTime_$ = 0;
+  this.$running_$ = !1;
+  this.$boundPass_$ = function() {
+    $$jscomp$this$jscomp$3$$.$pass_$();
+  };
+}
+$Pass$$module$src$pass$$.prototype.isPending = function() {
+  return -1 != this.$scheduled_$;
+};
+$Pass$$module$src$pass$$.prototype.schedule = function($opt_delay$jscomp$2$$) {
+  var $delay$$ = $opt_delay$jscomp$2$$ || this.$defaultDelay_$;
+  this.$running_$ && 10 > $delay$$ && ($delay$$ = 10);
+  var $nextTime$$ = Date.now() + $delay$$;
+  return !this.isPending() || -10 > $nextTime$$ - this.$nextTime_$ ? (this.cancel(), this.$nextTime_$ = $nextTime$$, this.$scheduled_$ = this.$timer_$.delay(this.$boundPass_$, $delay$$), !0) : !1;
+};
+$Pass$$module$src$pass$$.prototype.$pass_$ = function() {
+  this.$scheduled_$ = -1;
+  this.$nextTime_$ = 0;
+  this.$running_$ = !0;
+  this.$handler_$();
+  this.$running_$ = !1;
+};
+$Pass$$module$src$pass$$.prototype.cancel = function() {
+  this.isPending() && (this.$timer_$.cancel(this.$scheduled_$), this.$scheduled_$ = -1);
+};
+function $findIndex$$module$src$utils$array$$($array$jscomp$10$$, $predicate$jscomp$1$$) {
+  for (var $i$jscomp$23$$ = 0; $i$jscomp$23$$ < $array$jscomp$10$$.length; $i$jscomp$23$$++) {
+    if ($predicate$jscomp$1$$($array$jscomp$10$$[$i$jscomp$23$$], $i$jscomp$23$$, $array$jscomp$10$$)) {
+      return $i$jscomp$23$$;
+    }
+  }
+  return -1;
+}
+;var $passiveSupported$$module$src$event_helper_listen$$;
+function $supportsPassiveEventListener$$module$src$event_helper_listen$$($win$jscomp$55$$) {
+  if (void 0 !== $passiveSupported$$module$src$event_helper_listen$$) {
+    return $passiveSupported$$module$src$event_helper_listen$$;
+  }
+  $passiveSupported$$module$src$event_helper_listen$$ = !1;
+  try {
+    var $options$jscomp$34$$ = {get passive() {
+      $passiveSupported$$module$src$event_helper_listen$$ = !0;
+      return !1;
+    }};
+    $win$jscomp$55$$.addEventListener("test-options", null, $options$jscomp$34$$);
+    $win$jscomp$55$$.removeEventListener("test-options", null, $options$jscomp$34$$);
+  } catch ($err$jscomp$4$$) {
+  }
+  return $passiveSupported$$module$src$event_helper_listen$$;
+}
+;function $Gesture$$module$src$gesture$$($type$jscomp$148$$, $data$jscomp$77$$, $time$jscomp$1$$, $event$jscomp$6$$) {
+  this.type = $type$jscomp$148$$;
+  this.data = $data$jscomp$77$$;
+  this.time = $time$jscomp$1$$;
+  this.event = $event$jscomp$6$$;
+}
+function $Gestures$$module$src$gesture$$($element$jscomp$63$$, $shouldNotPreventDefault$$, $shouldStopPropagation$$) {
+  this.$element_$ = $element$jscomp$63$$;
+  this.$recognizers_$ = [];
+  this.$tracking_$ = [];
+  this.$ready_$ = [];
+  this.$pending_$ = [];
+  this.$eventing_$ = null;
+  this.$shouldNotPreventDefault_$ = $shouldNotPreventDefault$$;
+  this.$shouldStopPropagation_$ = $shouldStopPropagation$$;
+  this.$wasEventing_$ = !1;
+  this.$pass_$ = new $Pass$$module$src$pass$$($element$jscomp$63$$.ownerDocument.defaultView, this.$doPass_$.bind(this));
+  this.$pointerDownObservable_$ = new $Observable$$module$src$observable$$;
+  this.$overservers_$ = Object.create(null);
+  this.$boundOnTouchStart_$ = this.$onTouchStart_$.bind(this);
+  this.$boundOnTouchEnd_$ = this.$onTouchEnd_$.bind(this);
+  this.$boundOnTouchMove_$ = this.$onTouchMove_$.bind(this);
+  this.$boundOnTouchCancel_$ = this.$onTouchCancel_$.bind(this);
+  var $passiveSupported$$ = $supportsPassiveEventListener$$module$src$event_helper_listen$$($element$jscomp$63$$.ownerDocument.defaultView);
+  this.$element_$.addEventListener("touchstart", this.$boundOnTouchStart_$, $passiveSupported$$ ? {passive:!0} : !1);
+  this.$element_$.addEventListener("touchend", this.$boundOnTouchEnd_$);
+  this.$element_$.addEventListener("touchmove", this.$boundOnTouchMove_$, $passiveSupported$$ ? {passive:!0} : !1);
+  this.$element_$.addEventListener("touchcancel", this.$boundOnTouchCancel_$);
+  this.$passAfterEvent_$ = !1;
+}
+function $Gestures$$module$src$gesture$get$$($element$jscomp$64$$) {
+  var $opt_shouldNotPreventDefault$$ = void 0 === $opt_shouldNotPreventDefault$$ ? !1 : $opt_shouldNotPreventDefault$$;
+  var $opt_shouldStopPropagation$$ = void 0 === $opt_shouldStopPropagation$$ ? !1 : $opt_shouldStopPropagation$$;
+  var $res$jscomp$2$$ = $element$jscomp$64$$.__AMP_Gestures;
+  $res$jscomp$2$$ || ($res$jscomp$2$$ = new $Gestures$$module$src$gesture$$($element$jscomp$64$$, $opt_shouldNotPreventDefault$$, $opt_shouldStopPropagation$$), $element$jscomp$64$$.__AMP_Gestures = $res$jscomp$2$$);
+  return $res$jscomp$2$$;
+}
+$JSCompiler_prototypeAlias$$ = $Gestures$$module$src$gesture$$.prototype;
+$JSCompiler_prototypeAlias$$.cleanup = function() {
+  this.$element_$.removeEventListener("touchstart", this.$boundOnTouchStart_$);
+  this.$element_$.removeEventListener("touchend", this.$boundOnTouchEnd_$);
+  this.$element_$.removeEventListener("touchmove", this.$boundOnTouchMove_$);
+  this.$element_$.removeEventListener("touchcancel", this.$boundOnTouchCancel_$);
+  delete this.$element_$.__AMP_Gestures;
+  this.$pass_$.cancel();
+};
+$JSCompiler_prototypeAlias$$.onGesture = function($recognizerConstr$$, $handler$jscomp$7$$) {
+  var $recognizer$$ = new $recognizerConstr$$(this), $type$jscomp$149$$ = $recognizer$$.getType(), $overserver$$ = this.$overservers_$[$type$jscomp$149$$];
+  $overserver$$ || (this.$recognizers_$.push($recognizer$$), $overserver$$ = new $Observable$$module$src$observable$$, this.$overservers_$[$type$jscomp$149$$] = $overserver$$);
+  return $overserver$$.add($handler$jscomp$7$$);
+};
+$JSCompiler_prototypeAlias$$.removeGesture = function($index$jscomp$81_overserver$jscomp$1_recognizerConstr$jscomp$1$$) {
+  var $type$jscomp$150$$ = (new $index$jscomp$81_overserver$jscomp$1_recognizerConstr$jscomp$1$$(this)).getType();
+  if ($index$jscomp$81_overserver$jscomp$1_recognizerConstr$jscomp$1$$ = this.$overservers_$[$type$jscomp$150$$]) {
+    $index$jscomp$81_overserver$jscomp$1_recognizerConstr$jscomp$1$$.removeAll();
+    $index$jscomp$81_overserver$jscomp$1_recognizerConstr$jscomp$1$$ = $findIndex$$module$src$utils$array$$(this.$recognizers_$, function($index$jscomp$81_overserver$jscomp$1_recognizerConstr$jscomp$1$$) {
+      return $index$jscomp$81_overserver$jscomp$1_recognizerConstr$jscomp$1$$.getType() == $type$jscomp$150$$;
+    });
+    if (0 > $index$jscomp$81_overserver$jscomp$1_recognizerConstr$jscomp$1$$) {
+      return !1;
+    }
+    this.$recognizers_$.splice($index$jscomp$81_overserver$jscomp$1_recognizerConstr$jscomp$1$$, 1);
+    this.$ready_$.splice($index$jscomp$81_overserver$jscomp$1_recognizerConstr$jscomp$1$$, 1);
+    this.$pending_$.splice($index$jscomp$81_overserver$jscomp$1_recognizerConstr$jscomp$1$$, 1);
+    this.$tracking_$.splice($index$jscomp$81_overserver$jscomp$1_recognizerConstr$jscomp$1$$, 1);
+    delete this.$overservers_$[$type$jscomp$150$$];
+    return !0;
+  }
+  return !1;
+};
+$JSCompiler_prototypeAlias$$.onPointerDown = function($handler$jscomp$8$$) {
+  return this.$pointerDownObservable_$.add($handler$jscomp$8$$);
+};
+$JSCompiler_prototypeAlias$$.$onTouchStart_$ = function($event$jscomp$7$$) {
+  var $now$$ = Date.now();
+  this.$wasEventing_$ = !1;
+  this.$pointerDownObservable_$.fire($event$jscomp$7$$);
+  for (var $i$jscomp$24$$ = 0; $i$jscomp$24$$ < this.$recognizers_$.length; $i$jscomp$24$$++) {
+    if (!this.$ready_$[$i$jscomp$24$$] && (this.$pending_$[$i$jscomp$24$$] && this.$pending_$[$i$jscomp$24$$] < $now$$ && $JSCompiler_StaticMethods_stopTracking_$$(this, $i$jscomp$24$$), this.$recognizers_$[$i$jscomp$24$$].onTouchStart($event$jscomp$7$$))) {
+      var $JSCompiler_index$jscomp$inline_61$$ = $i$jscomp$24$$;
+      this.$tracking_$[$JSCompiler_index$jscomp$inline_61$$] = !0;
+      this.$pending_$[$JSCompiler_index$jscomp$inline_61$$] = 0;
+    }
+  }
+  $JSCompiler_StaticMethods_afterEvent_$$(this, $event$jscomp$7$$);
+};
+$JSCompiler_prototypeAlias$$.$onTouchMove_$ = function($event$jscomp$8$$) {
+  for (var $now$jscomp$1$$ = Date.now(), $i$jscomp$25$$ = 0; $i$jscomp$25$$ < this.$recognizers_$.length; $i$jscomp$25$$++) {
+    this.$tracking_$[$i$jscomp$25$$] && (this.$pending_$[$i$jscomp$25$$] && this.$pending_$[$i$jscomp$25$$] < $now$jscomp$1$$ ? $JSCompiler_StaticMethods_stopTracking_$$(this, $i$jscomp$25$$) : this.$recognizers_$[$i$jscomp$25$$].onTouchMove($event$jscomp$8$$) || $JSCompiler_StaticMethods_stopTracking_$$(this, $i$jscomp$25$$));
+  }
+  $JSCompiler_StaticMethods_afterEvent_$$(this, $event$jscomp$8$$);
+};
+$JSCompiler_prototypeAlias$$.$onTouchEnd_$ = function($event$jscomp$9$$) {
+  for (var $now$jscomp$2$$ = Date.now(), $i$jscomp$26$$ = 0; $i$jscomp$26$$ < this.$recognizers_$.length; $i$jscomp$26$$++) {
+    if (this.$tracking_$[$i$jscomp$26$$]) {
+      if (this.$pending_$[$i$jscomp$26$$] && this.$pending_$[$i$jscomp$26$$] < $now$jscomp$2$$) {
+        $JSCompiler_StaticMethods_stopTracking_$$(this, $i$jscomp$26$$);
+      } else {
+        this.$recognizers_$[$i$jscomp$26$$].onTouchEnd($event$jscomp$9$$);
+        var $isReady$$ = !this.$pending_$[$i$jscomp$26$$], $isExpired$$ = this.$pending_$[$i$jscomp$26$$] < $now$jscomp$2$$;
+        this.$eventing_$ != this.$recognizers_$[$i$jscomp$26$$] && ($isReady$$ || $isExpired$$) && $JSCompiler_StaticMethods_stopTracking_$$(this, $i$jscomp$26$$);
+      }
+    }
+  }
+  $JSCompiler_StaticMethods_afterEvent_$$(this, $event$jscomp$9$$);
+};
+$JSCompiler_prototypeAlias$$.$onTouchCancel_$ = function($event$jscomp$10$$) {
+  for (var $i$jscomp$27$$ = 0; $i$jscomp$27$$ < this.$recognizers_$.length; $i$jscomp$27$$++) {
+    var $JSCompiler_index$jscomp$inline_146$$ = $i$jscomp$27$$;
+    this.$ready_$[$JSCompiler_index$jscomp$inline_146$$] = 0;
+    $JSCompiler_StaticMethods_stopTracking_$$(this, $JSCompiler_index$jscomp$inline_146$$);
+  }
+  $JSCompiler_StaticMethods_afterEvent_$$(this, $event$jscomp$10$$);
+};
+function $JSCompiler_StaticMethods_afterEvent_$$($JSCompiler_StaticMethods_afterEvent_$self$$, $event$jscomp$12$$) {
+  var $cancelEvent$$ = !!$JSCompiler_StaticMethods_afterEvent_$self$$.$eventing_$ || $JSCompiler_StaticMethods_afterEvent_$self$$.$wasEventing_$;
+  $JSCompiler_StaticMethods_afterEvent_$self$$.$wasEventing_$ = !1;
+  if (!$cancelEvent$$) {
+    for (var $now$jscomp$5$$ = Date.now(), $i$jscomp$30$$ = 0; $i$jscomp$30$$ < $JSCompiler_StaticMethods_afterEvent_$self$$.$recognizers_$.length; $i$jscomp$30$$++) {
+      if ($JSCompiler_StaticMethods_afterEvent_$self$$.$ready_$[$i$jscomp$30$$] || $JSCompiler_StaticMethods_afterEvent_$self$$.$pending_$[$i$jscomp$30$$] && $JSCompiler_StaticMethods_afterEvent_$self$$.$pending_$[$i$jscomp$30$$] >= $now$jscomp$5$$) {
+        $cancelEvent$$ = !0;
+        break;
+      }
+    }
+  }
+  $cancelEvent$$ ? ($event$jscomp$12$$.stopPropagation(), $JSCompiler_StaticMethods_afterEvent_$self$$.$shouldNotPreventDefault_$ || $event$jscomp$12$$.preventDefault()) : $JSCompiler_StaticMethods_afterEvent_$self$$.$shouldStopPropagation_$ && $event$jscomp$12$$.stopPropagation();
+  $JSCompiler_StaticMethods_afterEvent_$self$$.$passAfterEvent_$ && ($JSCompiler_StaticMethods_afterEvent_$self$$.$passAfterEvent_$ = !1, $JSCompiler_StaticMethods_afterEvent_$self$$.$doPass_$());
+}
+$JSCompiler_prototypeAlias$$.$doPass_$ = function() {
+  for (var $JSCompiler_index$jscomp$inline_64_now$jscomp$6$$ = Date.now(), $readyIndex$$ = -1, $JSCompiler_recognizer$jscomp$inline_65_i$5_i$jscomp$31$$ = 0; $JSCompiler_recognizer$jscomp$inline_65_i$5_i$jscomp$31$$ < this.$recognizers_$.length; $JSCompiler_recognizer$jscomp$inline_65_i$5_i$jscomp$31$$++) {
+    if (!this.$ready_$[$JSCompiler_recognizer$jscomp$inline_65_i$5_i$jscomp$31$$]) {
+      this.$pending_$[$JSCompiler_recognizer$jscomp$inline_65_i$5_i$jscomp$31$$] && this.$pending_$[$JSCompiler_recognizer$jscomp$inline_65_i$5_i$jscomp$31$$] < $JSCompiler_index$jscomp$inline_64_now$jscomp$6$$ && $JSCompiler_StaticMethods_stopTracking_$$(this, $JSCompiler_recognizer$jscomp$inline_65_i$5_i$jscomp$31$$);
+    } else {
+      if (-1 == $readyIndex$$ || this.$ready_$[$JSCompiler_recognizer$jscomp$inline_65_i$5_i$jscomp$31$$] > this.$ready_$[$readyIndex$$]) {
+        $readyIndex$$ = $JSCompiler_recognizer$jscomp$inline_65_i$5_i$jscomp$31$$;
+      }
+    }
+  }
+  if (-1 != $readyIndex$$) {
+    var $waitTime$$ = 0;
+    for ($JSCompiler_recognizer$jscomp$inline_65_i$5_i$jscomp$31$$ = 0; $JSCompiler_recognizer$jscomp$inline_65_i$5_i$jscomp$31$$ < this.$recognizers_$.length; $JSCompiler_recognizer$jscomp$inline_65_i$5_i$jscomp$31$$++) {
+      !this.$ready_$[$JSCompiler_recognizer$jscomp$inline_65_i$5_i$jscomp$31$$] && this.$tracking_$[$JSCompiler_recognizer$jscomp$inline_65_i$5_i$jscomp$31$$] && ($waitTime$$ = Math.max($waitTime$$, this.$pending_$[$JSCompiler_recognizer$jscomp$inline_65_i$5_i$jscomp$31$$] - $JSCompiler_index$jscomp$inline_64_now$jscomp$6$$));
+    }
+    if (2 > $waitTime$$) {
+      $JSCompiler_index$jscomp$inline_64_now$jscomp$6$$ = $readyIndex$$;
+      $JSCompiler_recognizer$jscomp$inline_65_i$5_i$jscomp$31$$ = this.$recognizers_$[$JSCompiler_index$jscomp$inline_64_now$jscomp$6$$];
+      for (var $JSCompiler_i$jscomp$inline_66$$ = 0; $JSCompiler_i$jscomp$inline_66$$ < this.$recognizers_$.length; $JSCompiler_i$jscomp$inline_66$$++) {
+        if ($JSCompiler_i$jscomp$inline_66$$ != $JSCompiler_index$jscomp$inline_64_now$jscomp$6$$) {
+          var $JSCompiler_index$jscomp$inline_149$$ = $JSCompiler_i$jscomp$inline_66$$;
+          this.$ready_$[$JSCompiler_index$jscomp$inline_149$$] = 0;
+          $JSCompiler_StaticMethods_stopTracking_$$(this, $JSCompiler_index$jscomp$inline_149$$);
+        }
+      }
+      this.$ready_$[$JSCompiler_index$jscomp$inline_64_now$jscomp$6$$] = 0;
+      this.$pending_$[$JSCompiler_index$jscomp$inline_64_now$jscomp$6$$] = 0;
+      this.$eventing_$ = $JSCompiler_recognizer$jscomp$inline_65_i$5_i$jscomp$31$$;
+      $JSCompiler_recognizer$jscomp$inline_65_i$5_i$jscomp$31$$.acceptStart();
+    } else {
+      this.$pass_$.schedule($waitTime$$);
+    }
+  }
+};
+function $JSCompiler_StaticMethods_stopTracking_$$($JSCompiler_StaticMethods_stopTracking_$self$$, $index$jscomp$84$$) {
+  $JSCompiler_StaticMethods_stopTracking_$self$$.$tracking_$[$index$jscomp$84$$] = !1;
+  $JSCompiler_StaticMethods_stopTracking_$self$$.$pending_$[$index$jscomp$84$$] = 0;
+  $JSCompiler_StaticMethods_stopTracking_$self$$.$ready_$[$index$jscomp$84$$] || $JSCompiler_StaticMethods_stopTracking_$self$$.$recognizers_$[$index$jscomp$84$$].acceptCancel();
+}
+function $GestureRecognizer$$module$src$gesture$$($type$jscomp$151$$, $manager$$) {
+  this.$type_$ = $type$jscomp$151$$;
+  this.$manager_$ = $manager$$;
+}
+$JSCompiler_prototypeAlias$$ = $GestureRecognizer$$module$src$gesture$$.prototype;
+$JSCompiler_prototypeAlias$$.getType = function() {
+  return this.$type_$;
+};
+$JSCompiler_prototypeAlias$$.signalReady = function($offset$jscomp$27$$) {
+  var $JSCompiler_StaticMethods_signalReady_$self$jscomp$inline_68$$ = this.$manager_$;
+  if ($JSCompiler_StaticMethods_signalReady_$self$jscomp$inline_68$$.$eventing_$) {
+    this.acceptCancel();
+  } else {
+    for (var $JSCompiler_now$jscomp$inline_71$$ = Date.now(), $JSCompiler_i$jscomp$inline_72$$ = 0; $JSCompiler_i$jscomp$inline_72$$ < $JSCompiler_StaticMethods_signalReady_$self$jscomp$inline_68$$.$recognizers_$.length; $JSCompiler_i$jscomp$inline_72$$++) {
+      $JSCompiler_StaticMethods_signalReady_$self$jscomp$inline_68$$.$recognizers_$[$JSCompiler_i$jscomp$inline_72$$] == this && ($JSCompiler_StaticMethods_signalReady_$self$jscomp$inline_68$$.$ready_$[$JSCompiler_i$jscomp$inline_72$$] = $JSCompiler_now$jscomp$inline_71$$ + $offset$jscomp$27$$, $JSCompiler_StaticMethods_signalReady_$self$jscomp$inline_68$$.$pending_$[$JSCompiler_i$jscomp$inline_72$$] = 0);
+    }
+    $JSCompiler_StaticMethods_signalReady_$self$jscomp$inline_68$$.$passAfterEvent_$ = !0;
+  }
+};
+$JSCompiler_prototypeAlias$$.signalPending = function($timeLeft$jscomp$1$$) {
+  var $JSCompiler_StaticMethods_signalPending_$self$jscomp$inline_74$$ = this.$manager_$;
+  if ($JSCompiler_StaticMethods_signalPending_$self$jscomp$inline_74$$.$eventing_$) {
+    this.acceptCancel();
+  } else {
+    for (var $JSCompiler_now$jscomp$inline_77$$ = Date.now(), $JSCompiler_i$jscomp$inline_78$$ = 0; $JSCompiler_i$jscomp$inline_78$$ < $JSCompiler_StaticMethods_signalPending_$self$jscomp$inline_74$$.$recognizers_$.length; $JSCompiler_i$jscomp$inline_78$$++) {
+      $JSCompiler_StaticMethods_signalPending_$self$jscomp$inline_74$$.$recognizers_$[$JSCompiler_i$jscomp$inline_78$$] == this && ($JSCompiler_StaticMethods_signalPending_$self$jscomp$inline_74$$.$pending_$[$JSCompiler_i$jscomp$inline_78$$] = $JSCompiler_now$jscomp$inline_77$$ + $timeLeft$jscomp$1$$);
+    }
+  }
+};
+$JSCompiler_prototypeAlias$$.signalEnd = function() {
+  var $JSCompiler_StaticMethods_signalEnd_$self$jscomp$inline_80$$ = this.$manager_$;
+  $JSCompiler_StaticMethods_signalEnd_$self$jscomp$inline_80$$.$eventing_$ == this && ($JSCompiler_StaticMethods_signalEnd_$self$jscomp$inline_80$$.$eventing_$ = null, $JSCompiler_StaticMethods_signalEnd_$self$jscomp$inline_80$$.$wasEventing_$ = !0);
+};
+$JSCompiler_prototypeAlias$$.signalEmit = function($data$jscomp$79$$, $event$jscomp$13$$) {
+  var $JSCompiler_overserver$jscomp$inline_87$$ = this.$manager_$.$overservers_$[this.getType()];
+  $JSCompiler_overserver$jscomp$inline_87$$ && $JSCompiler_overserver$jscomp$inline_87$$.fire(new $Gesture$$module$src$gesture$$(this.getType(), $data$jscomp$79$$, Date.now(), $event$jscomp$13$$));
+};
+$JSCompiler_prototypeAlias$$.acceptStart = function() {
+};
+$JSCompiler_prototypeAlias$$.acceptCancel = function() {
+};
+$JSCompiler_prototypeAlias$$.onTouchStart = function() {
+  return !1;
+};
+$JSCompiler_prototypeAlias$$.onTouchMove = function() {
+  return !1;
+};
+$JSCompiler_prototypeAlias$$.onTouchEnd = function() {
+};
+function $calcVelocity$$module$src$motion$$($deltaV$$, $deltaTime$$, $prevVelocity$$) {
+  1 > $deltaTime$$ && ($deltaTime$$ = 1);
+  var $depr$$ = 0.5 + Math.min($deltaTime$$ / 33.34, 0.5);
+  return $deltaV$$ / $deltaTime$$ * $depr$$ + $prevVelocity$$ * (1 - $depr$$);
+}
+;function $SwipeRecognizer$$module$src$gesture_recognizers$$($type$jscomp$152$$, $manager$jscomp$3$$, $horiz$$, $vert$$) {
+  $GestureRecognizer$$module$src$gesture$$.call(this, $type$jscomp$152$$, $manager$jscomp$3$$);
+  this.$horiz_$ = $horiz$$;
+  this.$vert_$ = $vert$$;
+  this.$eventing_$ = !1;
+  this.$velocityY_$ = this.$velocityX_$ = this.$prevTime_$ = this.$lastTime_$ = this.$startTime_$ = this.$prevY_$ = this.$prevX_$ = this.$lastY_$ = this.$lastX_$ = this.$startY_$ = this.$startX_$ = 0;
+}
+$$jscomp$inherits$$($SwipeRecognizer$$module$src$gesture_recognizers$$, $GestureRecognizer$$module$src$gesture$$);
+$JSCompiler_prototypeAlias$$ = $SwipeRecognizer$$module$src$gesture_recognizers$$.prototype;
+$JSCompiler_prototypeAlias$$.onTouchStart = function($e$jscomp$26_touches$jscomp$6$$) {
+  $e$jscomp$26_touches$jscomp$6$$ = $e$jscomp$26_touches$jscomp$6$$.touches;
+  return this.$eventing_$ && $e$jscomp$26_touches$jscomp$6$$ && 1 < $e$jscomp$26_touches$jscomp$6$$.length ? !0 : $e$jscomp$26_touches$jscomp$6$$ && 1 == $e$jscomp$26_touches$jscomp$6$$.length ? (this.$startTime_$ = Date.now(), this.$startX_$ = $e$jscomp$26_touches$jscomp$6$$[0].clientX, this.$startY_$ = $e$jscomp$26_touches$jscomp$6$$[0].clientY, !0) : !1;
+};
+$JSCompiler_prototypeAlias$$.onTouchMove = function($dx$jscomp$6_e$jscomp$27$$) {
+  var $dy$jscomp$6_touches$jscomp$7_x$jscomp$83$$ = $dx$jscomp$6_e$jscomp$27$$.touches;
+  if ($dy$jscomp$6_touches$jscomp$7_x$jscomp$83$$ && 1 <= $dy$jscomp$6_touches$jscomp$7_x$jscomp$83$$.length) {
+    var $$jscomp$destructuring$var16_y$jscomp$68$$ = $dy$jscomp$6_touches$jscomp$7_x$jscomp$83$$[0];
+    $dy$jscomp$6_touches$jscomp$7_x$jscomp$83$$ = $$jscomp$destructuring$var16_y$jscomp$68$$.clientX;
+    $$jscomp$destructuring$var16_y$jscomp$68$$ = $$jscomp$destructuring$var16_y$jscomp$68$$.clientY;
+    this.$lastX_$ = $dy$jscomp$6_touches$jscomp$7_x$jscomp$83$$;
+    this.$lastY_$ = $$jscomp$destructuring$var16_y$jscomp$68$$;
+    if (this.$eventing_$) {
+      $JSCompiler_StaticMethods_emit_$$(this, !1, !1, $dx$jscomp$6_e$jscomp$27$$);
+    } else {
+      if ($dx$jscomp$6_e$jscomp$27$$ = Math.abs($dy$jscomp$6_touches$jscomp$7_x$jscomp$83$$ - this.$startX_$), $dy$jscomp$6_touches$jscomp$7_x$jscomp$83$$ = Math.abs($$jscomp$destructuring$var16_y$jscomp$68$$ - this.$startY_$), this.$horiz_$ && this.$vert_$) {
+        (8 <= $dx$jscomp$6_e$jscomp$27$$ || 8 <= $dy$jscomp$6_touches$jscomp$7_x$jscomp$83$$) && this.signalReady(-10);
+      } else {
+        if (this.$horiz_$) {
+          if (8 <= $dx$jscomp$6_e$jscomp$27$$ && $dx$jscomp$6_e$jscomp$27$$ > $dy$jscomp$6_touches$jscomp$7_x$jscomp$83$$) {
+            this.signalReady(-10);
+          } else {
+            if (8 <= $dy$jscomp$6_touches$jscomp$7_x$jscomp$83$$) {
+              return !1;
+            }
+          }
+        } else {
+          if (this.$vert_$) {
+            if (8 <= $dy$jscomp$6_touches$jscomp$7_x$jscomp$83$$ && $dy$jscomp$6_touches$jscomp$7_x$jscomp$83$$ > $dx$jscomp$6_e$jscomp$27$$) {
+              this.signalReady(-10);
+            } else {
+              if (8 <= $dx$jscomp$6_e$jscomp$27$$) {
+                return !1;
+              }
+            }
+          } else {
+            return !1;
+          }
+        }
+      }
+    }
+    return !0;
+  }
+  return !1;
+};
+$JSCompiler_prototypeAlias$$.onTouchEnd = function($e$jscomp$28$$) {
+  var $touches$jscomp$8$$ = $e$jscomp$28$$.touches;
+  $touches$jscomp$8$$ && 0 == $touches$jscomp$8$$.length && this.$eventing_$ && (this.$eventing_$ = !1, $JSCompiler_StaticMethods_emit_$$(this, !1, !0, $e$jscomp$28$$), this.signalEnd());
+};
+$JSCompiler_prototypeAlias$$.acceptStart = function() {
+  this.$eventing_$ = !0;
+  this.$prevX_$ = this.$startX_$;
+  this.$prevY_$ = this.$startY_$;
+  this.$prevTime_$ = this.$startTime_$;
+  this.$startX_$ = this.$lastX_$;
+  this.$startY_$ = this.$lastY_$;
+  $JSCompiler_StaticMethods_emit_$$(this, !0, !1, null);
+};
+$JSCompiler_prototypeAlias$$.acceptCancel = function() {
+  this.$eventing_$ = !1;
+};
+function $JSCompiler_StaticMethods_emit_$$($JSCompiler_StaticMethods_emit_$self$$, $first$jscomp$6$$, $last$$, $event$jscomp$14$$) {
+  $JSCompiler_StaticMethods_emit_$self$$.$lastTime_$ = Date.now();
+  var $deltaTime$jscomp$1$$ = $JSCompiler_StaticMethods_emit_$self$$.$lastTime_$ - $JSCompiler_StaticMethods_emit_$self$$.$prevTime_$;
+  if (!$last$$ && 4 < $deltaTime$jscomp$1$$ || $last$$ && 16 < $deltaTime$jscomp$1$$) {
+    var $velocityX$$ = $calcVelocity$$module$src$motion$$($JSCompiler_StaticMethods_emit_$self$$.$lastX_$ - $JSCompiler_StaticMethods_emit_$self$$.$prevX_$, $deltaTime$jscomp$1$$, $JSCompiler_StaticMethods_emit_$self$$.$velocityX_$), $velocityY$$ = $calcVelocity$$module$src$motion$$($JSCompiler_StaticMethods_emit_$self$$.$lastY_$ - $JSCompiler_StaticMethods_emit_$self$$.$prevY_$, $deltaTime$jscomp$1$$, $JSCompiler_StaticMethods_emit_$self$$.$velocityY_$);
+    if (!$last$$ || 32 < $deltaTime$jscomp$1$$ || 0 != $velocityX$$ || 0 != $velocityY$$) {
+      $JSCompiler_StaticMethods_emit_$self$$.$velocityX_$ = 1e-4 < Math.abs($velocityX$$) ? $velocityX$$ : 0, $JSCompiler_StaticMethods_emit_$self$$.$velocityY_$ = 1e-4 < Math.abs($velocityY$$) ? $velocityY$$ : 0;
+    }
+    $JSCompiler_StaticMethods_emit_$self$$.$prevX_$ = $JSCompiler_StaticMethods_emit_$self$$.$lastX_$;
+    $JSCompiler_StaticMethods_emit_$self$$.$prevY_$ = $JSCompiler_StaticMethods_emit_$self$$.$lastY_$;
+    $JSCompiler_StaticMethods_emit_$self$$.$prevTime_$ = $JSCompiler_StaticMethods_emit_$self$$.$lastTime_$;
+  }
+  $JSCompiler_StaticMethods_emit_$self$$.signalEmit({first:$first$jscomp$6$$, last:$last$$, time:$JSCompiler_StaticMethods_emit_$self$$.$lastTime_$, deltaX:$JSCompiler_StaticMethods_emit_$self$$.$lastX_$ - $JSCompiler_StaticMethods_emit_$self$$.$startX_$, deltaY:$JSCompiler_StaticMethods_emit_$self$$.$lastY_$ - $JSCompiler_StaticMethods_emit_$self$$.$startY_$, startX:$JSCompiler_StaticMethods_emit_$self$$.$startX_$, startY:$JSCompiler_StaticMethods_emit_$self$$.$startY_$, lastX:$JSCompiler_StaticMethods_emit_$self$$.$lastX_$, 
+  lastY:$JSCompiler_StaticMethods_emit_$self$$.$lastY_$, velocityX:$JSCompiler_StaticMethods_emit_$self$$.$velocityX_$, velocityY:$JSCompiler_StaticMethods_emit_$self$$.$velocityY_$}, $event$jscomp$14$$);
+}
+function $SwipeXYRecognizer$$module$src$gesture_recognizers$$($manager$jscomp$4$$) {
+  $SwipeRecognizer$$module$src$gesture_recognizers$$.call(this, "swipe-xy", $manager$jscomp$4$$, !0, !0);
+}
+$$jscomp$inherits$$($SwipeXYRecognizer$$module$src$gesture_recognizers$$, $SwipeRecognizer$$module$src$gesture_recognizers$$);
+var $propertyNameCache$$module$src$style$$, $vendorPrefixes$$module$src$style$$ = "Webkit webkit Moz moz ms O o".split(" ");
+function $getVendorJsPropertyName$$module$src$style$$($style$jscomp$1$$, $camelCase$jscomp$1$$, $opt_bypassCache$$) {
+  if (2 > $camelCase$jscomp$1$$.length ? 0 : 0 == $camelCase$jscomp$1$$.lastIndexOf("--", 0)) {
+    return $camelCase$jscomp$1$$;
+  }
+  $propertyNameCache$$module$src$style$$ || ($propertyNameCache$$module$src$style$$ = Object.create(null));
+  var $propertyName$jscomp$9$$ = $propertyNameCache$$module$src$style$$[$camelCase$jscomp$1$$];
+  if (!$propertyName$jscomp$9$$ || $opt_bypassCache$$) {
+    $propertyName$jscomp$9$$ = $camelCase$jscomp$1$$;
+    if (void 0 === $style$jscomp$1$$[$camelCase$jscomp$1$$]) {
+      var $JSCompiler_inline_result$jscomp$32_JSCompiler_inline_result$jscomp$33$$ = $camelCase$jscomp$1$$.charAt(0).toUpperCase() + $camelCase$jscomp$1$$.slice(1);
+      a: {
+        for (var $JSCompiler_i$jscomp$inline_96$$ = 0; $JSCompiler_i$jscomp$inline_96$$ < $vendorPrefixes$$module$src$style$$.length; $JSCompiler_i$jscomp$inline_96$$++) {
+          var $JSCompiler_propertyName$jscomp$inline_97$$ = $vendorPrefixes$$module$src$style$$[$JSCompiler_i$jscomp$inline_96$$] + $JSCompiler_inline_result$jscomp$32_JSCompiler_inline_result$jscomp$33$$;
+          if (void 0 !== $style$jscomp$1$$[$JSCompiler_propertyName$jscomp$inline_97$$]) {
+            $JSCompiler_inline_result$jscomp$32_JSCompiler_inline_result$jscomp$33$$ = $JSCompiler_propertyName$jscomp$inline_97$$;
+            break a;
+          }
+        }
+        $JSCompiler_inline_result$jscomp$32_JSCompiler_inline_result$jscomp$33$$ = "";
+      }
+      var $prefixedPropertyName$$ = $JSCompiler_inline_result$jscomp$32_JSCompiler_inline_result$jscomp$33$$;
+      void 0 !== $style$jscomp$1$$[$prefixedPropertyName$$] && ($propertyName$jscomp$9$$ = $prefixedPropertyName$$);
+    }
+    $opt_bypassCache$$ || ($propertyNameCache$$module$src$style$$[$camelCase$jscomp$1$$] = $propertyName$jscomp$9$$);
+  }
+  return $propertyName$jscomp$9$$;
+}
+function $setImportantStyles$$module$src$style$$($element$jscomp$65_style$jscomp$2$$, $styles$$) {
+  $element$jscomp$65_style$jscomp$2$$ = $element$jscomp$65_style$jscomp$2$$.style;
+  for (var $k$jscomp$3$$ in $styles$$) {
+    $element$jscomp$65_style$jscomp$2$$.setProperty($getVendorJsPropertyName$$module$src$style$$($element$jscomp$65_style$jscomp$2$$, $k$jscomp$3$$), $styles$$[$k$jscomp$3$$].toString(), "important");
+  }
+}
+function $setStyle$$module$src$style$$($element$jscomp$66$$, $property$jscomp$7_propertyName$jscomp$10$$, $value$jscomp$97$$) {
+  ($property$jscomp$7_propertyName$jscomp$10$$ = $getVendorJsPropertyName$$module$src$style$$($element$jscomp$66$$.style, $property$jscomp$7_propertyName$jscomp$10$$, void 0)) && ((2 > $property$jscomp$7_propertyName$jscomp$10$$.length ? 0 : 0 == $property$jscomp$7_propertyName$jscomp$10$$.lastIndexOf("--", 0)) ? $element$jscomp$66$$.style.setProperty($property$jscomp$7_propertyName$jscomp$10$$, $value$jscomp$97$$) : $element$jscomp$66$$.style[$property$jscomp$7_propertyName$jscomp$10$$] = $value$jscomp$97$$);
+}
+function $setStyles$$module$src$style$$($element$jscomp$68$$, $styles$jscomp$1$$) {
+  for (var $k$jscomp$4$$ in $styles$jscomp$1$$) {
+    $setStyle$$module$src$style$$($element$jscomp$68$$, $k$jscomp$4$$, $styles$jscomp$1$$[$k$jscomp$4$$]);
+  }
+}
+function $assertDoesNotContainDisplay$$module$src$style$$($styles$jscomp$2$$) {
+  "display" in $styles$jscomp$2$$ && $dev$$module$src$log$$().error("STYLE", "`display` style detected in styles. You must use toggle instead.");
+  return $styles$jscomp$2$$;
+}
+function $toggle$$module$src$style$$($element$jscomp$69$$) {
+  var $opt_display$$ = !0;
+  void 0 === $opt_display$$ && ($opt_display$$ = $element$jscomp$69$$.hasAttribute("hidden"));
+  $opt_display$$ ? $element$jscomp$69$$.removeAttribute("hidden") : $element$jscomp$69$$.setAttribute("hidden", "");
+}
+function $resetStyles$$module$src$style$$($element$jscomp$70$$) {
+  for (var $properties$jscomp$3$$ = ["transition"], $i$jscomp$34$$ = 0; $i$jscomp$34$$ < $properties$jscomp$3$$.length; $i$jscomp$34$$++) {
+    $setStyle$$module$src$style$$($element$jscomp$70$$, $properties$jscomp$3$$[$i$jscomp$34$$], null);
+  }
+}
+;function $debounce$$module$src$utils$rate_limit$$($win$jscomp$60$$, $callback$jscomp$63$$) {
+  function $waiter$jscomp$1$$() {
+    $locker$jscomp$1$$ = 0;
+    var $remaining$$ = 500 - ($win$jscomp$60$$.Date.now() - $timestamp$$);
+    if (0 < $remaining$$) {
+      $locker$jscomp$1$$ = $win$jscomp$60$$.setTimeout($waiter$jscomp$1$$, $remaining$$);
+    } else {
+      var $JSCompiler_args$jscomp$inline_99$$ = $nextCallArgs$jscomp$1$$;
+      $nextCallArgs$jscomp$1$$ = null;
+      $callback$jscomp$63$$.apply(null, $JSCompiler_args$jscomp$inline_99$$);
+    }
+  }
+  var $locker$jscomp$1$$ = 0, $timestamp$$ = 0, $nextCallArgs$jscomp$1$$ = null;
+  return function($callback$jscomp$63$$) {
+    for (var $args$jscomp$6$$ = [], $$jscomp$restIndex$jscomp$2$$ = 0; $$jscomp$restIndex$jscomp$2$$ < arguments.length; ++$$jscomp$restIndex$jscomp$2$$) {
+      $args$jscomp$6$$[$$jscomp$restIndex$jscomp$2$$ - 0] = arguments[$$jscomp$restIndex$jscomp$2$$];
+    }
+    $timestamp$$ = $win$jscomp$60$$.Date.now();
+    $nextCallArgs$jscomp$1$$ = $args$jscomp$6$$;
+    $locker$jscomp$1$$ || ($locker$jscomp$1$$ = $win$jscomp$60$$.setTimeout($waiter$jscomp$1$$, 500));
+  };
+}
+;var $htmlContainer$$module$src$static_template$$;
+function $isInFie$$module$src$iframe_helper$$($element$jscomp$79$$) {
+  return $element$jscomp$79$$.classList.contains("i-amphtml-fie") || !!$closestAncestorElementBySelector$$module$src$dom$$($element$jscomp$79$$);
+}
+;var $_template$$module$extensions$amp_lightbox$0_1$amp_lightbox$$ = ['<i-amphtml-ad-close-header role=button tabindex=0 aria-label="Close Ad"><div>Ad</div><i-amphtml-ad-close-button class=amp-ad-close-button></i-amphtml-ad-close-button></i-amphtml-ad-close-header>'], $AnimationPresets$$module$extensions$amp_lightbox$0_1$amp_lightbox$$ = {"fade-in":{openStyle:$dict$$module$src$utils$object$$({opacity:1}), closedStyle:$dict$$module$src$utils$object$$({opacity:0}), durationSeconds:0.1}, "fly-in-bottom":{openStyle:$dict$$module$src$utils$object$$({transform:"translate(0, 0)"}), 
+closedStyle:$dict$$module$src$utils$object$$({transform:"translate(0, 100%)"}), durationSeconds:0.2}, "fly-in-top":{openStyle:$dict$$module$src$utils$object$$({transform:"translate(0, 0)"}), closedStyle:$dict$$module$src$utils$object$$({transform:"translate(0, -100%)"}), durationSeconds:0.2}};
+function $AmpLightbox$$module$extensions$amp_lightbox$0_1$amp_lightbox$$($element$jscomp$80$$) {
+  var $$jscomp$super$this$$ = AMP.BaseElement.call(this, $element$jscomp$80$$) || this;
+  $$jscomp$super$this$$.$size_$ = null;
+  $$jscomp$super$this$$.$container_$ = null;
+  $$jscomp$super$this$$.$document_$ = $$jscomp$super$this$$.win.document;
+  $$jscomp$super$this$$.$action_$ = null;
+  $$jscomp$super$this$$.$historyId_$ = -1;
+  $$jscomp$super$this$$.$active_$ = !1;
+  $$jscomp$super$this$$.$boundCloseOnEscape_$ = null;
+  $$jscomp$super$this$$.$boundCloseOnEnter_$ = null;
+  $$jscomp$super$this$$.$boundFocusin_$ = null;
+  $$jscomp$super$this$$.$boundClose_$ = null;
+  $$jscomp$super$this$$.$openerElement_$ = null;
+  $$jscomp$super$this$$.$isScrollable_$ = !1;
+  $$jscomp$super$this$$.$pos_$ = 0;
+  $$jscomp$super$this$$.$oldPos_$ = 0;
+  $$jscomp$super$this$$.$eventCounter_$ = 0;
+  $$jscomp$super$this$$.$scrollTimerId_$ = null;
+  $$jscomp$super$this$$.$animationPreset_$ = ($element$jscomp$80$$.getAttribute("animate-in") || "fade-in").toLowerCase();
+  $$jscomp$super$this$$.$closeButtonHeader_$ = null;
+  $$jscomp$super$this$$.$closeButton_$ = null;
+  $$jscomp$super$this$$.$closeButtonSR_$ = null;
+  var $platform$$ = $getService$$module$src$service$$($$jscomp$super$this$$.win, "platform");
+  $$jscomp$super$this$$.$isIos_$ = $platform$$.isIos();
+  $$jscomp$super$this$$.$boundReschedule_$ = $debounce$$module$src$utils$rate_limit$$($$jscomp$super$this$$.win, function() {
+    var $element$jscomp$80$$ = $user$$module$src$log$$().assertElement($$jscomp$super$this$$.$container_$, "E#19457 this.container_"), $platform$$ = $Services$$module$src$services$ownersForDoc$$($$jscomp$super$this$$.element);
+    $platform$$.scheduleLayout($$jscomp$super$this$$.element, $element$jscomp$80$$);
+    $platform$$.scheduleResume($$jscomp$super$this$$.element, $element$jscomp$80$$);
+  });
+  return $$jscomp$super$this$$;
+}
+$$jscomp$inherits$$($AmpLightbox$$module$extensions$amp_lightbox$0_1$amp_lightbox$$, AMP.BaseElement);
+$JSCompiler_prototypeAlias$$ = $AmpLightbox$$module$extensions$amp_lightbox$0_1$amp_lightbox$$.prototype;
+$JSCompiler_prototypeAlias$$.buildCallback = function() {
+  var $$jscomp$this$jscomp$6$$ = this;
+  this.user().assert($hasOwn_$$module$src$utils$object$$.call($AnimationPresets$$module$extensions$amp_lightbox$0_1$amp_lightbox$$, this.$animationPreset_$), "Invalid `animate-in` value %s", this.$animationPreset_$);
+  this.element.classList.add("i-amphtml-overlay");
+  this.$action_$ = $getExistingServiceForDocInEmbedScope$$module$src$service$$(this.element);
+  $JSCompiler_StaticMethods_maybeSetTransparentBody_$$(this);
+  this.registerDefaultAction(function($i$jscomp$45$$) {
+    return $JSCompiler_StaticMethods_open_$$($$jscomp$this$jscomp$6$$, $i$jscomp$45$$.trust, $i$jscomp$45$$.caller);
+  }, "open");
+  this.registerAction("close", function($i$jscomp$46$$) {
+    return $$jscomp$this$jscomp$6$$.close($i$jscomp$46$$.trust);
+  });
+  this.$action_$.addToAllowlist("AMP-LIGHTBOX", ["open", "close"], ["email"]);
+};
+function $JSCompiler_StaticMethods_takeOwnershipOfDescendants_$$($JSCompiler_StaticMethods_takeOwnershipOfDescendants_$self$$) {
+  $toArray$$module$src$types$$($JSCompiler_StaticMethods_takeOwnershipOfDescendants_$self$$.element.getElementsByClassName("i-amphtml-element")).forEach(function($child$jscomp$7$$) {
+    $Services$$module$src$services$ownersForDoc$$($JSCompiler_StaticMethods_takeOwnershipOfDescendants_$self$$.element).setOwner($child$jscomp$7$$, $JSCompiler_StaticMethods_takeOwnershipOfDescendants_$self$$.element);
+  });
+}
+function $JSCompiler_StaticMethods_initialize_$$($JSCompiler_StaticMethods_initialize_$self$$) {
+  if (!$JSCompiler_StaticMethods_initialize_$self$$.$container_$) {
+    var $element$jscomp$81$$ = $JSCompiler_StaticMethods_initialize_$self$$.element;
+    $JSCompiler_StaticMethods_initialize_$self$$.$isScrollable_$ = $element$jscomp$81$$.hasAttribute("scrollable");
+    var $children$jscomp$129$$ = $JSCompiler_StaticMethods_initialize_$self$$.getRealChildren();
+    $JSCompiler_StaticMethods_initialize_$self$$.$container_$ = $element$jscomp$81$$.ownerDocument.createElement("div");
+    $JSCompiler_StaticMethods_initialize_$self$$.$isScrollable_$ || $JSCompiler_StaticMethods_initialize_$self$$.applyFillContent($JSCompiler_StaticMethods_initialize_$self$$.$container_$);
+    $element$jscomp$81$$.appendChild($JSCompiler_StaticMethods_initialize_$self$$.$container_$);
+    $children$jscomp$129$$.forEach(function($element$jscomp$81$$) {
+      $JSCompiler_StaticMethods_initialize_$self$$.$container_$.appendChild($element$jscomp$81$$);
+    });
+    $JSCompiler_StaticMethods_initialize_$self$$.$isScrollable_$ && ($JSCompiler_StaticMethods_takeOwnershipOfDescendants_$$($JSCompiler_StaticMethods_initialize_$self$$), $element$jscomp$81$$.classList.add("i-amphtml-scrollable"), $element$jscomp$81$$.addEventListener("amp:dom-update", function() {
+      $JSCompiler_StaticMethods_takeOwnershipOfDescendants_$$($JSCompiler_StaticMethods_initialize_$self$$);
+      $JSCompiler_StaticMethods_updateChildrenInViewport_$$($JSCompiler_StaticMethods_initialize_$self$$, $JSCompiler_StaticMethods_initialize_$self$$.$pos_$, $JSCompiler_StaticMethods_initialize_$self$$.$pos_$);
+    }), $element$jscomp$81$$.addEventListener("scroll", $JSCompiler_StaticMethods_initialize_$self$$.$scrollHandler_$.bind($JSCompiler_StaticMethods_initialize_$self$$)));
+    if (!$JSCompiler_StaticMethods_initialize_$self$$.$isScrollable_$) {
+      $Gestures$$module$src$gesture$get$$($element$jscomp$81$$).onGesture($SwipeXYRecognizer$$module$src$gesture_recognizers$$, function() {
+      });
+    }
+    $JSCompiler_StaticMethods_maybeCreateCloseButtonHeader_$$($JSCompiler_StaticMethods_initialize_$self$$);
+  }
+}
+$JSCompiler_prototypeAlias$$.layoutCallback = function() {
+  $resolved$$module$src$resolved_promise$$ || ($resolved$$module$src$resolved_promise$$ = Promise.resolve(void 0));
+  var $JSCompiler_inline_result$jscomp$23$$ = $resolved$$module$src$resolved_promise$$;
+  return $JSCompiler_inline_result$jscomp$23$$;
+};
+function $JSCompiler_StaticMethods_open_$$($JSCompiler_StaticMethods_open_$self$$, $trust$$, $openerElement$$) {
+  if (!$JSCompiler_StaticMethods_open_$self$$.$active_$) {
+    $JSCompiler_StaticMethods_initialize_$$($JSCompiler_StaticMethods_open_$self$$);
+    $JSCompiler_StaticMethods_open_$self$$.$boundCloseOnEscape_$ = $JSCompiler_StaticMethods_open_$self$$.$closeOnEscape_$.bind($JSCompiler_StaticMethods_open_$self$$);
+    $JSCompiler_StaticMethods_open_$self$$.$document_$.documentElement.addEventListener("keydown", $JSCompiler_StaticMethods_open_$self$$.$boundCloseOnEscape_$);
+    $JSCompiler_StaticMethods_open_$self$$.$boundFocusin_$ = $JSCompiler_StaticMethods_open_$self$$.$onFocusin_$.bind($JSCompiler_StaticMethods_open_$self$$);
+    $JSCompiler_StaticMethods_open_$self$$.$document_$.documentElement.addEventListener("focusin", $JSCompiler_StaticMethods_open_$self$$.$boundFocusin_$);
+    $openerElement$$ && ($JSCompiler_StaticMethods_open_$self$$.$openerElement_$ = $openerElement$$);
+    var $$jscomp$destructuring$var31$$ = new $Deferred$$module$src$utils$promise$$, $promise$jscomp$2$$ = $$jscomp$destructuring$var31$$.promise, $resolve$jscomp$10$$ = $$jscomp$destructuring$var31$$.resolve;
+    $JSCompiler_StaticMethods_open_$self$$.getViewport().enterLightboxMode($JSCompiler_StaticMethods_open_$self$$.element, $promise$jscomp$2$$).then(function() {
+      return $JSCompiler_StaticMethods_finalizeOpen_$$($JSCompiler_StaticMethods_open_$self$$, $resolve$jscomp$10$$, $trust$$);
+    });
+  }
+}
+$JSCompiler_prototypeAlias$$.mutatedAttributesCallback = function($mutations$$) {
+  var $open$jscomp$2$$ = $mutations$$.open;
+  void 0 !== $open$jscomp$2$$ && ($open$jscomp$2$$ ? $JSCompiler_StaticMethods_open_$$(this, 2, document.activeElement) : this.close(2));
+};
+function $JSCompiler_StaticMethods_handleAutofocus_$$($JSCompiler_StaticMethods_handleAutofocus_$self$$) {
+  var $autofocusElement$$ = $JSCompiler_StaticMethods_handleAutofocus_$self$$.$container_$.querySelector("[autofocus]");
+  $autofocusElement$$ && $tryFocus$$module$src$dom$$($autofocusElement$$);
+}
+function $JSCompiler_StaticMethods_finalizeOpen_$$($JSCompiler_StaticMethods_finalizeOpen_$self$$, $callback$jscomp$65$$, $trust$jscomp$1$$) {
+  function $onAnimationEnd$$() {
+    $JSCompiler_StaticMethods_finalizeOpen_$self$$.$boundReschedule_$();
+    $callback$jscomp$65$$();
+  }
+  var $element$jscomp$82$$ = $JSCompiler_StaticMethods_finalizeOpen_$self$$.element, $$jscomp$destructuring$var33_container$jscomp$6$$ = $AnimationPresets$$module$extensions$amp_lightbox$0_1$amp_lightbox$$[$JSCompiler_StaticMethods_finalizeOpen_$self$$.$animationPreset_$], $durationSeconds$$ = $$jscomp$destructuring$var33_container$jscomp$6$$.durationSeconds, $openStyle$$ = $$jscomp$destructuring$var33_container$jscomp$6$$.openStyle, $closedStyle$$ = $$jscomp$destructuring$var33_container$jscomp$6$$.closedStyle, 
+  $transition$$ = Object.keys($openStyle$$).map(function($JSCompiler_StaticMethods_finalizeOpen_$self$$) {
+    return $JSCompiler_StaticMethods_finalizeOpen_$self$$ + " " + $durationSeconds$$ + "s ease-in";
+  }).join(",");
+  $JSCompiler_StaticMethods_finalizeOpen_$self$$.$eventCounter_$++;
+  $JSCompiler_StaticMethods_finalizeOpen_$self$$.$isScrollable_$ && $setStyle$$module$src$style$$($element$jscomp$82$$, "webkitOverflowScrolling", "touch");
+  $setStyle$$module$src$style$$($element$jscomp$82$$, "transition", $transition$$);
+  $setStyles$$module$src$style$$($element$jscomp$82$$, $assertDoesNotContainDisplay$$module$src$style$$($closedStyle$$));
+  $toggle$$module$src$style$$($element$jscomp$82$$);
+  $JSCompiler_StaticMethods_finalizeOpen_$self$$.mutateElement(function() {
+    $element$jscomp$82$$.scrollTop = 0;
+  });
+  $JSCompiler_StaticMethods_handleAutofocus_$$($JSCompiler_StaticMethods_finalizeOpen_$self$$);
+  $JSCompiler_StaticMethods_finalizeOpen_$self$$.mutateElement(function() {
+    $setStyles$$module$src$style$$($element$jscomp$82$$, $assertDoesNotContainDisplay$$module$src$style$$($openStyle$$));
+  });
+  $$jscomp$destructuring$var33_container$jscomp$6$$ = $JSCompiler_StaticMethods_finalizeOpen_$self$$.$container_$;
+  $JSCompiler_StaticMethods_finalizeOpen_$self$$.$isScrollable_$ ? ($JSCompiler_StaticMethods_finalizeOpen_$self$$.$scrollHandler_$(), $JSCompiler_StaticMethods_updateChildrenInViewport_$$($JSCompiler_StaticMethods_finalizeOpen_$self$$, $JSCompiler_StaticMethods_finalizeOpen_$self$$.$pos_$, $JSCompiler_StaticMethods_finalizeOpen_$self$$.$pos_$)) : $Services$$module$src$services$ownersForDoc$$($JSCompiler_StaticMethods_finalizeOpen_$self$$.element).updateInViewport($JSCompiler_StaticMethods_finalizeOpen_$self$$.element, 
+  $$jscomp$destructuring$var33_container$jscomp$6$$, !0);
+  $element$jscomp$82$$.addEventListener("transitionend", $onAnimationEnd$$);
+  $element$jscomp$82$$.addEventListener("animationend", $onAnimationEnd$$);
+  var $owners$jscomp$1$$ = $Services$$module$src$services$ownersForDoc$$($JSCompiler_StaticMethods_finalizeOpen_$self$$.element);
+  $owners$jscomp$1$$.scheduleLayout($JSCompiler_StaticMethods_finalizeOpen_$self$$.element, $$jscomp$destructuring$var33_container$jscomp$6$$);
+  $owners$jscomp$1$$.scheduleResume($JSCompiler_StaticMethods_finalizeOpen_$self$$.element, $$jscomp$destructuring$var33_container$jscomp$6$$);
+  $JSCompiler_StaticMethods_triggerEvent_$$($JSCompiler_StaticMethods_finalizeOpen_$self$$, "lightboxOpen", $trust$jscomp$1$$);
+  $getServiceForDoc$$module$src$service$$($JSCompiler_StaticMethods_finalizeOpen_$self$$.getAmpDoc(), "history").push($JSCompiler_StaticMethods_finalizeOpen_$self$$.close.bind($JSCompiler_StaticMethods_finalizeOpen_$self$$)).then(function($callback$jscomp$65$$) {
+    $JSCompiler_StaticMethods_finalizeOpen_$self$$.$historyId_$ = $callback$jscomp$65$$;
+  });
+  $JSCompiler_StaticMethods_maybeRenderCloseButtonHeader_$$($JSCompiler_StaticMethods_finalizeOpen_$self$$);
+  $JSCompiler_StaticMethods_focusInModal_$$($JSCompiler_StaticMethods_finalizeOpen_$self$$);
+  $JSCompiler_StaticMethods_tieCloseButton_$$($JSCompiler_StaticMethods_finalizeOpen_$self$$);
+  $JSCompiler_StaticMethods_finalizeOpen_$self$$.$active_$ = !0;
+}
+function $JSCompiler_StaticMethods_maybeCreateCloseButtonHeader_$$($JSCompiler_StaticMethods_maybeCreateCloseButtonHeader_$self$$) {
+  var $element$jscomp$83$$ = $JSCompiler_StaticMethods_maybeCreateCloseButtonHeader_$self$$.element;
+  if (null != $element$jscomp$83$$.getAttribute("close-button")) {
+    var $JSCompiler_container$jscomp$inline_168_JSCompiler_doc$jscomp$inline_152$$ = $element$jscomp$83$$.ownerDocument || $element$jscomp$83$$;
+    $htmlContainer$$module$src$static_template$$ && $htmlContainer$$module$src$static_template$$.ownerDocument === $JSCompiler_container$jscomp$inline_168_JSCompiler_doc$jscomp$inline_152$$ || ($htmlContainer$$module$src$static_template$$ = $JSCompiler_container$jscomp$inline_168_JSCompiler_doc$jscomp$inline_152$$.createElement("div"));
+    $JSCompiler_container$jscomp$inline_168_JSCompiler_doc$jscomp$inline_152$$ = $htmlContainer$$module$src$static_template$$;
+    $JSCompiler_container$jscomp$inline_168_JSCompiler_doc$jscomp$inline_152$$.innerHTML = $_template$$module$extensions$amp_lightbox$0_1$amp_lightbox$$[0];
+    var $JSCompiler_el$jscomp$inline_169$$ = $JSCompiler_container$jscomp$inline_168_JSCompiler_doc$jscomp$inline_152$$.firstElementChild;
+    $JSCompiler_container$jscomp$inline_168_JSCompiler_doc$jscomp$inline_152$$.removeChild($JSCompiler_el$jscomp$inline_169$$);
+    $JSCompiler_StaticMethods_maybeCreateCloseButtonHeader_$self$$.$closeButtonHeader_$ = $JSCompiler_el$jscomp$inline_169$$;
+    $element$jscomp$83$$.insertBefore($JSCompiler_StaticMethods_maybeCreateCloseButtonHeader_$self$$.$closeButtonHeader_$, $JSCompiler_StaticMethods_maybeCreateCloseButtonHeader_$self$$.$container_$);
+  }
+}
+function $JSCompiler_StaticMethods_maybeRenderCloseButtonHeader_$$($JSCompiler_StaticMethods_maybeRenderCloseButtonHeader_$self$$) {
+  if ($JSCompiler_StaticMethods_maybeRenderCloseButtonHeader_$self$$.$closeButtonHeader_$) {
+    $JSCompiler_StaticMethods_maybeRenderCloseButtonHeader_$self$$.$boundCloseOnEnter_$ = $JSCompiler_StaticMethods_maybeRenderCloseButtonHeader_$self$$.$closeOnEnter_$.bind($JSCompiler_StaticMethods_maybeRenderCloseButtonHeader_$self$$);
+    $JSCompiler_StaticMethods_maybeRenderCloseButtonHeader_$self$$.$closeButtonHeader_$.addEventListener("keydown", $JSCompiler_StaticMethods_maybeRenderCloseButtonHeader_$self$$.$boundCloseOnEnter_$);
+    var $headerHeight$$;
+    $JSCompiler_StaticMethods_maybeRenderCloseButtonHeader_$self$$.measureMutateElement(function() {
+      $headerHeight$$ = $JSCompiler_StaticMethods_maybeRenderCloseButtonHeader_$self$$.$closeButtonHeader_$.getBoundingClientRect().height;
+    }, function() {
+      $JSCompiler_StaticMethods_maybeRenderCloseButtonHeader_$self$$.$closeButtonHeader_$.classList.add("amp-ad-close-header");
+      $setImportantStyles$$module$src$style$$($JSCompiler_StaticMethods_maybeRenderCloseButtonHeader_$self$$.$container_$, {"margin-top":$headerHeight$$ + "px", "min-height":"calc(100vh - " + ($headerHeight$$ + "px)")});
+    });
+  }
+}
+function $JSCompiler_StaticMethods_tieCloseButton_$$($JSCompiler_StaticMethods_tieCloseButton_$self$$) {
+  if ($JSCompiler_StaticMethods_tieCloseButton_$self$$.$closeButtonSR_$ || $JSCompiler_StaticMethods_tieCloseButton_$self$$.$closeButtonHeader_$) {
+    $JSCompiler_StaticMethods_tieCloseButton_$self$$.$boundClose_$ = $JSCompiler_StaticMethods_tieCloseButton_$self$$.$closeOnClick_$.bind($JSCompiler_StaticMethods_tieCloseButton_$self$$), $JSCompiler_StaticMethods_tieCloseButton_$self$$.$closeButton_$.addEventListener("click", $JSCompiler_StaticMethods_tieCloseButton_$self$$.$boundClose_$);
+  }
+}
+function $JSCompiler_StaticMethods_untieCloseButton_$$($JSCompiler_StaticMethods_untieCloseButton_$self$$) {
+  if ($JSCompiler_StaticMethods_untieCloseButton_$self$$.$closeButtonSR_$ || $JSCompiler_StaticMethods_untieCloseButton_$self$$.$closeButtonHeader_$) {
+    $JSCompiler_StaticMethods_untieCloseButton_$self$$.$closeButton_$.removeEventListener("click", $JSCompiler_StaticMethods_untieCloseButton_$self$$.$boundClose_$), $JSCompiler_StaticMethods_untieCloseButton_$self$$.$boundClose_$ = null, $JSCompiler_StaticMethods_untieCloseButton_$self$$.$closeButtonHeader_$ && ($JSCompiler_StaticMethods_untieCloseButton_$self$$.$closeButtonHeader_$.removeEventListener("keydown", $JSCompiler_StaticMethods_untieCloseButton_$self$$.$boundCloseOnEnter_$), $JSCompiler_StaticMethods_untieCloseButton_$self$$.$boundCloseOnEnter_$ = 
+    null);
+  }
+}
+$JSCompiler_prototypeAlias$$.$closeOnClick_$ = function() {
+  this.close(3);
+};
+$JSCompiler_prototypeAlias$$.$closeOnEscape_$ = function($event$jscomp$27$$) {
+  "Escape" == $event$jscomp$27$$.key && ($event$jscomp$27$$.preventDefault(), this.close(3));
+};
+$JSCompiler_prototypeAlias$$.$closeOnEnter_$ = function($event$jscomp$28$$) {
+  "Enter" == $event$jscomp$28$$.key && ($event$jscomp$28$$.preventDefault(), this.close(3));
+};
+$JSCompiler_prototypeAlias$$.close = function($trust$jscomp$2$$) {
+  var $$jscomp$this$jscomp$12$$ = this;
+  this.$active_$ && (this.$isScrollable_$ && $setStyle$$module$src$style$$(this.element, "webkitOverflowScrolling", ""), this.getViewport().leaveLightboxMode(this.element).then(function() {
+    return $JSCompiler_StaticMethods_finalizeClose_$$($$jscomp$this$jscomp$12$$, $trust$jscomp$2$$);
+  }));
+};
+function $JSCompiler_StaticMethods_finalizeClose_$$($JSCompiler_StaticMethods_finalizeClose_$self$$, $trust$jscomp$3$$) {
+  function $collapseAndReschedule$$() {
+    $event$jscomp$29$$ == $JSCompiler_StaticMethods_finalizeClose_$self$$.$eventCounter_$ && ($JSCompiler_StaticMethods_finalizeClose_$self$$.collapse(), $JSCompiler_StaticMethods_finalizeClose_$self$$.$boundReschedule_$());
+  }
+  var $element$jscomp$84$$ = $JSCompiler_StaticMethods_finalizeClose_$self$$.element, $event$jscomp$29$$ = ++$JSCompiler_StaticMethods_finalizeClose_$self$$.$eventCounter_$;
+  $JSCompiler_StaticMethods_isInAd_$$($JSCompiler_StaticMethods_finalizeClose_$self$$) ? ($resetStyles$$module$src$style$$($element$jscomp$84$$), $collapseAndReschedule$$()) : ($element$jscomp$84$$.addEventListener("transitionend", $collapseAndReschedule$$), $element$jscomp$84$$.addEventListener("animationend", $collapseAndReschedule$$));
+  $setStyles$$module$src$style$$($element$jscomp$84$$, $assertDoesNotContainDisplay$$module$src$style$$($AnimationPresets$$module$extensions$amp_lightbox$0_1$amp_lightbox$$[$JSCompiler_StaticMethods_finalizeClose_$self$$.$animationPreset_$].closedStyle));
+  -1 != $JSCompiler_StaticMethods_finalizeClose_$self$$.$historyId_$ && $getServiceForDoc$$module$src$service$$($JSCompiler_StaticMethods_finalizeClose_$self$$.getAmpDoc(), "history").pop($JSCompiler_StaticMethods_finalizeClose_$self$$.$historyId_$);
+  $JSCompiler_StaticMethods_finalizeClose_$self$$.$document_$.documentElement.removeEventListener("keydown", $JSCompiler_StaticMethods_finalizeClose_$self$$.$boundCloseOnEscape_$);
+  $JSCompiler_StaticMethods_finalizeClose_$self$$.$boundCloseOnEscape_$ = null;
+  $JSCompiler_StaticMethods_finalizeClose_$self$$.$document_$.documentElement.removeEventListener("focusin", $JSCompiler_StaticMethods_finalizeClose_$self$$.$boundFocusin_$);
+  $JSCompiler_StaticMethods_finalizeClose_$self$$.$boundFocusin_$ = null;
+  $JSCompiler_StaticMethods_untieCloseButton_$$($JSCompiler_StaticMethods_finalizeClose_$self$$);
+  $Services$$module$src$services$ownersForDoc$$($JSCompiler_StaticMethods_finalizeClose_$self$$.element).schedulePause($JSCompiler_StaticMethods_finalizeClose_$self$$.element, $JSCompiler_StaticMethods_finalizeClose_$self$$.$container_$);
+  $JSCompiler_StaticMethods_finalizeClose_$self$$.$active_$ = !1;
+  $JSCompiler_StaticMethods_triggerEvent_$$($JSCompiler_StaticMethods_finalizeClose_$self$$, "lightboxClose", $trust$jscomp$3$$);
+  $JSCompiler_StaticMethods_finalizeClose_$self$$.$openerElement_$ && $tryFocus$$module$src$dom$$($JSCompiler_StaticMethods_finalizeClose_$self$$.$openerElement_$);
+}
+function $JSCompiler_StaticMethods_isInAd_$$($JSCompiler_StaticMethods_isInAd_$self$$) {
+  return "inabox" == $getMode$$module$src$mode$$($JSCompiler_StaticMethods_isInAd_$self$$.win).runtime || $isInFie$$module$src$iframe_helper$$($JSCompiler_StaticMethods_isInAd_$self$$.element);
+}
+$JSCompiler_prototypeAlias$$.$onFocusin_$ = function() {
+  this.element.contains(document.activeElement) || this.close(3);
+};
+function $JSCompiler_StaticMethods_focusInModal_$$($JSCompiler_StaticMethods_focusInModal_$self$$) {
+  if (!$JSCompiler_StaticMethods_focusInModal_$self$$.element.contains(document.activeElement)) {
+    a: {
+      if ($JSCompiler_StaticMethods_focusInModal_$self$$.$closeButton_$) {
+        var $JSCompiler_ariaLabel$jscomp$inline_115_JSCompiler_element$jscomp$inline_109_JSCompiler_inline_result$jscomp$38$$ = $JSCompiler_StaticMethods_focusInModal_$self$$.$closeButton_$;
+      } else {
+        if ($JSCompiler_StaticMethods_focusInModal_$self$$.$closeButtonHeader_$) {
+          $JSCompiler_ariaLabel$jscomp$inline_115_JSCompiler_element$jscomp$inline_109_JSCompiler_inline_result$jscomp$38$$ = $JSCompiler_StaticMethods_focusInModal_$self$$.$closeButtonHeader_$;
+        } else {
+          $JSCompiler_ariaLabel$jscomp$inline_115_JSCompiler_element$jscomp$inline_109_JSCompiler_inline_result$jscomp$38$$ = $JSCompiler_StaticMethods_focusInModal_$self$$.element;
+          for (var $JSCompiler_candidates$jscomp$inline_110_JSCompiler_screenReaderCloseButton$jscomp$inline_116$$ = $JSCompiler_ariaLabel$jscomp$inline_115_JSCompiler_element$jscomp$inline_109_JSCompiler_inline_result$jscomp$38$$.querySelectorAll("[on]"), $JSCompiler_i$jscomp$inline_111$$ = 0; $JSCompiler_i$jscomp$inline_111$$ < $JSCompiler_candidates$jscomp$inline_110_JSCompiler_screenReaderCloseButton$jscomp$inline_116$$.length; $JSCompiler_i$jscomp$inline_111$$++) {
+            var $JSCompiler_candidate$jscomp$inline_112$$ = $JSCompiler_candidates$jscomp$inline_110_JSCompiler_screenReaderCloseButton$jscomp$inline_116$$[$JSCompiler_i$jscomp$inline_111$$];
+            if ($JSCompiler_StaticMethods_focusInModal_$self$$.$action_$.hasResolvableActionForTarget($JSCompiler_candidate$jscomp$inline_112$$, "tap", $JSCompiler_ariaLabel$jscomp$inline_115_JSCompiler_element$jscomp$inline_109_JSCompiler_inline_result$jscomp$38$$, $JSCompiler_candidate$jscomp$inline_112$$.parentElement)) {
+              $JSCompiler_ariaLabel$jscomp$inline_115_JSCompiler_element$jscomp$inline_109_JSCompiler_inline_result$jscomp$38$$ = $JSCompiler_candidate$jscomp$inline_112$$;
+              break a;
+            }
+          }
+          $JSCompiler_ariaLabel$jscomp$inline_115_JSCompiler_element$jscomp$inline_109_JSCompiler_inline_result$jscomp$38$$ = void 0;
+        }
+      }
+    }
+    $JSCompiler_StaticMethods_focusInModal_$self$$.$closeButton_$ = $JSCompiler_ariaLabel$jscomp$inline_115_JSCompiler_element$jscomp$inline_109_JSCompiler_inline_result$jscomp$38$$;
+    $JSCompiler_StaticMethods_focusInModal_$self$$.$closeButton_$ || ($JSCompiler_ariaLabel$jscomp$inline_115_JSCompiler_element$jscomp$inline_109_JSCompiler_inline_result$jscomp$38$$ = $JSCompiler_StaticMethods_focusInModal_$self$$.element.getAttribute("data-close-button-aria-label") || "Close the modal", $JSCompiler_candidates$jscomp$inline_110_JSCompiler_screenReaderCloseButton$jscomp$inline_116$$ = $JSCompiler_StaticMethods_focusInModal_$self$$.$document_$.createElement("button"), $JSCompiler_candidates$jscomp$inline_110_JSCompiler_screenReaderCloseButton$jscomp$inline_116$$.textContent = 
+    $JSCompiler_ariaLabel$jscomp$inline_115_JSCompiler_element$jscomp$inline_109_JSCompiler_inline_result$jscomp$38$$, $JSCompiler_candidates$jscomp$inline_110_JSCompiler_screenReaderCloseButton$jscomp$inline_116$$.classList.add("i-amphtml-screen-reader"), $JSCompiler_candidates$jscomp$inline_110_JSCompiler_screenReaderCloseButton$jscomp$inline_116$$.tabIndex = -1, $JSCompiler_StaticMethods_focusInModal_$self$$.$closeButtonSR_$ = $JSCompiler_candidates$jscomp$inline_110_JSCompiler_screenReaderCloseButton$jscomp$inline_116$$, 
+    $JSCompiler_StaticMethods_focusInModal_$self$$.element.insertBefore($JSCompiler_StaticMethods_focusInModal_$self$$.$closeButtonSR_$, $JSCompiler_StaticMethods_focusInModal_$self$$.element.firstChild), $JSCompiler_StaticMethods_focusInModal_$self$$.$closeButton_$ = $JSCompiler_StaticMethods_focusInModal_$self$$.$closeButtonSR_$);
+    $tryFocus$$module$src$dom$$($JSCompiler_StaticMethods_focusInModal_$self$$.$closeButton_$);
+  }
+}
+$JSCompiler_prototypeAlias$$.$scrollHandler_$ = function() {
+  var $currentScrollTop$$ = this.element.scrollTop;
+  this.$isIos_$ && (0 == $currentScrollTop$$ ? this.element.scrollTop = 1 : this.element.scrollHeight == $currentScrollTop$$ + this.element.offsetHeight && (this.element.scrollTop = $currentScrollTop$$ - 1));
+  this.$pos_$ = $currentScrollTop$$;
+  null === this.$scrollTimerId_$ && $JSCompiler_StaticMethods_waitForScroll_$$(this, $currentScrollTop$$);
+};
+function $JSCompiler_StaticMethods_waitForScroll_$$($JSCompiler_StaticMethods_waitForScroll_$self$$, $startingScrollTop$$) {
+  $JSCompiler_StaticMethods_waitForScroll_$self$$.$scrollTimerId_$ = $getService$$module$src$service$$($JSCompiler_StaticMethods_waitForScroll_$self$$.win, "timer").delay(function() {
+    if (30 > Math.abs($startingScrollTop$$ - $JSCompiler_StaticMethods_waitForScroll_$self$$.$pos_$)) {
+      $dev$$module$src$log$$().fine("amp-lightbox", "slow scrolling: %s - %s", $startingScrollTop$$, $JSCompiler_StaticMethods_waitForScroll_$self$$.$pos_$);
+      $JSCompiler_StaticMethods_waitForScroll_$self$$.$scrollTimerId_$ = null;
+      var $JSCompiler_pos$jscomp$inline_119$$ = $JSCompiler_StaticMethods_waitForScroll_$self$$.$pos_$;
+      $dev$$module$src$log$$().fine("amp-lightbox", "update_");
+      $JSCompiler_StaticMethods_updateChildrenInViewport_$$($JSCompiler_StaticMethods_waitForScroll_$self$$, $JSCompiler_pos$jscomp$inline_119$$, $JSCompiler_StaticMethods_waitForScroll_$self$$.$oldPos_$);
+      $JSCompiler_StaticMethods_waitForScroll_$self$$.$oldPos_$ = $JSCompiler_pos$jscomp$inline_119$$;
+      $JSCompiler_StaticMethods_waitForScroll_$self$$.$pos_$ = $JSCompiler_pos$jscomp$inline_119$$;
+    } else {
+      $dev$$module$src$log$$().fine("amp-lightbox", "fast scrolling: %s - %s", $startingScrollTop$$, $JSCompiler_StaticMethods_waitForScroll_$self$$.$pos_$), $JSCompiler_StaticMethods_waitForScroll_$$($JSCompiler_StaticMethods_waitForScroll_$self$$, $JSCompiler_StaticMethods_waitForScroll_$self$$.$pos_$);
+    }
+  }, 100);
+}
+function $JSCompiler_StaticMethods_updateChildrenInViewport_$$($JSCompiler_StaticMethods_updateChildrenInViewport_$self$$, $newPos$$, $oldPos$$) {
+  var $seen$jscomp$1$$ = [];
+  $JSCompiler_StaticMethods_forEachVisibleChild_$$($JSCompiler_StaticMethods_updateChildrenInViewport_$self$$, $newPos$$, function($newPos$$) {
+    $seen$jscomp$1$$.push($newPos$$);
+    var $oldPos$$ = $Services$$module$src$services$ownersForDoc$$($JSCompiler_StaticMethods_updateChildrenInViewport_$self$$.element);
+    $oldPos$$.updateInViewport($JSCompiler_StaticMethods_updateChildrenInViewport_$self$$.element, $newPos$$, !0);
+    $oldPos$$.scheduleLayout($JSCompiler_StaticMethods_updateChildrenInViewport_$self$$.element, $newPos$$);
+  });
+  $oldPos$$ != $newPos$$ && $JSCompiler_StaticMethods_forEachVisibleChild_$$($JSCompiler_StaticMethods_updateChildrenInViewport_$self$$, $oldPos$$, function($newPos$$) {
+    $seen$jscomp$1$$.includes($newPos$$) || $Services$$module$src$services$ownersForDoc$$($JSCompiler_StaticMethods_updateChildrenInViewport_$self$$.element).updateInViewport($JSCompiler_StaticMethods_updateChildrenInViewport_$self$$.element, $newPos$$, !1);
+  });
+}
+function $JSCompiler_StaticMethods_forEachVisibleChild_$$($JSCompiler_StaticMethods_forEachVisibleChild_$self$$, $pos$jscomp$2$$, $callback$jscomp$66$$) {
+  $JSCompiler_StaticMethods_forEachVisibleChild_$self$$.$size_$ || ($JSCompiler_StaticMethods_forEachVisibleChild_$self$$.$size_$ = {width:$JSCompiler_StaticMethods_forEachVisibleChild_$self$$.element.clientWidth, height:$JSCompiler_StaticMethods_forEachVisibleChild_$self$$.element.clientHeight});
+  for (var $containerHeight$$ = $JSCompiler_StaticMethods_forEachVisibleChild_$self$$.$size_$.height, $descendants$$ = $toArray$$module$src$types$$($JSCompiler_StaticMethods_forEachVisibleChild_$self$$.element.getElementsByClassName("i-amphtml-element")), $i$jscomp$48$$ = 0; $i$jscomp$48$$ < $descendants$$.length; $i$jscomp$48$$++) {
+    for (var $descendant$jscomp$1$$ = $descendants$$[$i$jscomp$48$$], $offsetTop$$ = 0, $n$jscomp$7$$ = $descendant$jscomp$1$$; $n$jscomp$7$$ && $JSCompiler_StaticMethods_forEachVisibleChild_$self$$.element.contains($n$jscomp$7$$); $n$jscomp$7$$ = $n$jscomp$7$$.offsetParent) {
+      $offsetTop$$ += $n$jscomp$7$$.offsetTop;
+    }
+    var $visibilityMargin$$ = 2 * $containerHeight$$;
+    $offsetTop$$ + $descendant$jscomp$1$$.offsetHeight >= $pos$jscomp$2$$ - $visibilityMargin$$ && $offsetTop$$ <= $pos$jscomp$2$$ + $visibilityMargin$$ && $callback$jscomp$66$$($descendant$jscomp$1$$);
+  }
+}
+function $JSCompiler_StaticMethods_maybeSetTransparentBody_$$($JSCompiler_StaticMethods_maybeSetTransparentBody_$self$$) {
+  var $win$jscomp$63$$ = $JSCompiler_StaticMethods_maybeSetTransparentBody_$self$$.win;
+  $isInFie$$module$src$iframe_helper$$($JSCompiler_StaticMethods_maybeSetTransparentBody_$self$$.element) && $setTransparentBody$$module$extensions$amp_lightbox$0_1$amp_lightbox$$($win$jscomp$63$$, $win$jscomp$63$$.document.body);
+}
+function $JSCompiler_StaticMethods_triggerEvent_$$($JSCompiler_StaticMethods_triggerEvent_$self$$, $name$jscomp$79$$, $trust$jscomp$4$$) {
+  var $JSCompiler_e$jscomp$inline_128_JSCompiler_win$jscomp$inline_123$$ = $JSCompiler_StaticMethods_triggerEvent_$self$$.win;
+  var $JSCompiler_inline_result$jscomp$34_JSCompiler_type$jscomp$inline_124$$ = "amp-lightbox." + $name$jscomp$79$$;
+  var $JSCompiler_detail$jscomp$inline_125$$ = $dict$$module$src$utils$object$$({}), $JSCompiler_eventInit$jscomp$inline_127$$ = {detail:$JSCompiler_detail$jscomp$inline_125$$};
+  Object.assign($JSCompiler_eventInit$jscomp$inline_127$$, void 0);
+  "function" == typeof $JSCompiler_e$jscomp$inline_128_JSCompiler_win$jscomp$inline_123$$.CustomEvent ? $JSCompiler_inline_result$jscomp$34_JSCompiler_type$jscomp$inline_124$$ = new $JSCompiler_e$jscomp$inline_128_JSCompiler_win$jscomp$inline_123$$.CustomEvent($JSCompiler_inline_result$jscomp$34_JSCompiler_type$jscomp$inline_124$$, $JSCompiler_eventInit$jscomp$inline_127$$) : ($JSCompiler_e$jscomp$inline_128_JSCompiler_win$jscomp$inline_123$$ = $JSCompiler_e$jscomp$inline_128_JSCompiler_win$jscomp$inline_123$$.document.createEvent("CustomEvent"), 
+  $JSCompiler_e$jscomp$inline_128_JSCompiler_win$jscomp$inline_123$$.initCustomEvent($JSCompiler_inline_result$jscomp$34_JSCompiler_type$jscomp$inline_124$$, !!$JSCompiler_eventInit$jscomp$inline_127$$.bubbles, !!$JSCompiler_eventInit$jscomp$inline_127$$.cancelable, $JSCompiler_detail$jscomp$inline_125$$), $JSCompiler_inline_result$jscomp$34_JSCompiler_type$jscomp$inline_124$$ = $JSCompiler_e$jscomp$inline_128_JSCompiler_win$jscomp$inline_123$$);
+  $JSCompiler_StaticMethods_triggerEvent_$self$$.$action_$.trigger($JSCompiler_StaticMethods_triggerEvent_$self$$.element, $name$jscomp$79$$, $JSCompiler_inline_result$jscomp$34_JSCompiler_type$jscomp$inline_124$$, $trust$jscomp$4$$);
+}
+function $setTransparentBody$$module$extensions$amp_lightbox$0_1$amp_lightbox$$($win$jscomp$64$$, $body$jscomp$2$$) {
+  var $state$$ = {}, $ampdoc$jscomp$12$$ = $getService$$module$src$service$$($win$jscomp$64$$, "ampdoc").getAmpDoc($body$jscomp$2$$);
+  $getServiceForDoc$$module$src$service$$($ampdoc$jscomp$12$$, "mutator").measureMutateElement($body$jscomp$2$$, function() {
+    $state$$.alreadyTransparent = "rgba(0, 0, 0, 0)" == ($win$jscomp$64$$.getComputedStyle($body$jscomp$2$$) || Object.create(null))["background-color"];
+  }, function() {
+    $state$$.alreadyTransparent || $user$$module$src$log$$().warn("amp-lightbox", "The background of the <body> element has been forced to transparent. If you need to set background, use an intermediate container.");
+    $setImportantStyles$$module$src$style$$($body$jscomp$2$$, {background:"transparent"});
+  });
+}
+(function($AMP$jscomp$1$$) {
+  "inabox" == $getMode$$module$src$mode$$().runtime && $setTransparentBody$$module$extensions$amp_lightbox$0_1$amp_lightbox$$(window, document.body);
+  $AMP$jscomp$1$$.registerElement("amp-lightbox", $AmpLightbox$$module$extensions$amp_lightbox$0_1$amp_lightbox$$, "amp-lightbox{display:none;position:fixed!important;z-index:1000;top:0!important;left:0!important;bottom:0!important;right:0!important}amp-lightbox[scrollable]{overflow-y:auto!important;overflow-x:hidden!important}i-amphtml-ad-close-header{height:60px!important;display:block!important;visibility:visible!important;opacity:0;position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:1000!important;display:-ms-flexbox!important;display:flex!important;-ms-flex-align:center!important;align-items:center!important;-ms-flex-pack:right!important;justify-content:right!important;transition:opacity 0.1s ease-in}[animate-in=fly-in-bottom]>i-amphtml-ad-close-header,[animate-in=fly-in-top]>i-amphtml-ad-close-header{transition-delay:0.2s}.amp-ad-close-header{opacity:1!important;box-sizing:border-box;padding:5px;line-height:40px;background-color:#000;color:#fff;font-family:Helvetica,sans-serif;font-size:12px;cursor:pointer}.amp-ad-close-header>:first-child{margin-left:auto!important;pointer-events:none!important}.amp-ad-close-button{display:block!important;background:url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='%23fff'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3C/svg%3E\") no-repeat;background-position:50%;width:40px;height:40px;pointer-events:none!important;border-radius:40px;margin-left:5px}.amp-ad-close-header:active>.amp-ad-close-button{background-color:hsla(0,0%,100%,0.3)}\n/*# sourceURL=/extensions/amp-lightbox/0.1/amp-lightbox.css*/");
+})(self.AMP);
+
 })});
 
 //# sourceMappingURL=amp-lightbox-0.1.js.map
