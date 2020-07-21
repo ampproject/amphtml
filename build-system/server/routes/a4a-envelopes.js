@@ -28,7 +28,8 @@ const {red} = require('ansi-colors');
 app.use(['/inabox', '/inabox-mraid'], (req, res) => {
   const templatePath =
     process.cwd() + '/build-system/server/server-inabox-template.html';
-  fs.promises.readFile(templatePath, 'utf8').then((template) => {
+  (async () => {
+    let template = await fs.promises.readFile(templatePath, 'utf8');
     template = template.replace(/SOURCE/g, 'AD_URL');
     if (req.baseUrl == '/inabox-mraid') {
       // MRAID does not load amp4ads-host-v0.js
@@ -36,7 +37,7 @@ app.use(['/inabox', '/inabox-mraid'], (req, res) => {
     }
     const url = getInaboxUrl(req);
     res.end(fillTemplate(template, url.href, req.query));
-  });
+  })();
 });
 
 // In-a-box friendly iframe and safeframe envelope.
@@ -45,9 +46,11 @@ app.use(['/inabox', '/inabox-mraid'], (req, res) => {
 // http://localhost:8000/inabox-friendly/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
 app.use('/inabox-(friendly|safeframe)', (req, res) => {
   const templatePath = '/build-system/server/server-inabox-template.html';
-  fs.promises
-    .readFile(process.cwd() + templatePath, 'utf8')
-    .then((template) => {
+  (async () => {
+    try {
+      let template = await fs.promises
+        .readFile(process.cwd() + templatePath, 'utf8');
+
       const url = getInaboxUrl(req);
       if (req.baseUrl == '/inabox-friendly') {
         template = template
@@ -64,16 +67,14 @@ app.use('/inabox-(friendly|safeframe)', (req, res) => {
             url.origin + '/test/fixtures/served/iframe-safeframe.html'
           );
       }
-      return requestFromUrl(template, url.href, req.query);
-    })
-    .then((result) => {
+      const result = await requestFromUrl(template, url.href, req.query);
       res.end(result);
-    })
-    .catch((err) => {
+    } catch (err) {
       log(red('Error:'), err);
       res.status(500);
       res.end();
-    });
+    }
+  })();
 });
 
 // A4A envelope.
@@ -84,14 +85,15 @@ app.use('/a4a(|-3p)/', (req, res) => {
   const force3p = req.baseUrl.startsWith('/a4a-3p');
   const templatePath = '/build-system/server/server-a4a-template.html';
   const url = getInaboxUrl(req);
-  fs.promises
-    .readFile(process.cwd() + templatePath, 'utf8')
-    .then((template) => {
-      const content = fillTemplate(template, url.href, req.query)
-        .replace(/CHECKSIG/g, force3p || '')
-        .replace(/DISABLE3PFALLBACK/g, !force3p);
-      res.end(replaceUrls(getServeMode(), content));
-    });
+  (async () => {
+    const template = await fs.promises
+      .readFile(process.cwd() + templatePath, 'utf8');
+
+    const content = fillTemplate(template, url.href, req.query)
+      .replace(/CHECKSIG/g, force3p || '')
+      .replace(/DISABLE3PFALLBACK/g, !force3p);
+    res.end(replaceUrls(getServeMode(), content));
+  })();
 });
 
 /**
@@ -176,23 +178,21 @@ function fillTemplate(template, url, query, body) {
   } else {
     length = 0;
   }
-  return (
-    template
-      .replace(/BODY/g, newBody)
-      .replace(/LENGTH/g, length)
-      .replace(/AD_URL/g, url)
-      .replace(/OFFSET/g, query.offset || '0px')
-      .replace(/AD_WIDTH/g, query.width || '300')
-      .replace(/AD_HEIGHT/g, query.height || '250')
-      .replace(
-        'INABOX_ADS_TAG_INTEGRATION',
-        '<script src="/examples/amphtml-ads/ads-tag-integration.js"></script>'
-      )
-      // Clear out variables that are not already replaced beforehand.
-      .replace(/NAME/g, 'inabox')
-      .replace(/SOURCE/g, '')
-      .replace('SRCDOC_ATTRIBUTE', '')
-  );
+  return template
+    .replace(/BODY/g, newBody)
+    .replace(/LENGTH/g, length)
+    .replace(/AD_URL/g, url)
+    .replace(/OFFSET/g, query.offset || '0px')
+    .replace(/AD_WIDTH/g, query.width || '300')
+    .replace(/AD_HEIGHT/g, query.height || '250')
+    .replace(
+      'INABOX_ADS_TAG_INTEGRATION',
+      '<script src="/examples/amphtml-ads/ads-tag-integration.js"></script>'
+    )
+    // Clear out variables that are not already replaced beforehand.
+    .replace(/NAME/g, 'inabox')
+    .replace(/SOURCE/g, '')
+    .replace('SRCDOC_ATTRIBUTE', '');
 }
 
 module.exports = app;
