@@ -22,13 +22,15 @@ import {xhrServiceForTesting} from '../../src/service/xhr-impl';
 // TODO(wg-ads, #29112): Unskip on Safari.
 const t = describe.configure().skipSafari();
 
-t.run('AMPHTML ad on AMP Page', () => {
-  describes.integration(
-    'ATF',
-    {
-      amp: true,
-      extensions: ['amp-ad'],
-      body: `
+['a4a-no-signing:21066324', 'a4a-no-signing:21066325'].forEach((branch) => {
+  t.run(`AMPHTML ad on AMP Page: ${branch}`, () => {
+    describes.integration(
+      'ATF',
+      {
+        amp: true,
+        experiments: [branch],
+        extensions: ['amp-ad'],
+        body: `
   <amp-ad
       width="300" height="250"
       id="i-amphtml-demo-id"
@@ -36,29 +38,30 @@ t.run('AMPHTML ad on AMP Page', () => {
       a4a-conversion="true"
       checksig=""
       disable3pfallback="true"
+      data-experiment-id=${branch}
       src="//ads.localhost:9876/amp4test/a4a/${RequestBank.getBrowserId()}">
   </amp-ad>
       `,
-    },
-    () => {
-      afterEach(() => {
-        return RequestBank.tearDown();
-      });
+      },
+      () => {
+        afterEach(() => {
+          return RequestBank.tearDown();
+        });
 
-      it('should layout amp-img, amp-pixel, amp-analytics', () => {
-        // Open http://ads.localhost:9876/amp4test/a4a/12345 to see ad content
-        return testAmpComponents();
-      });
-    }
-  );
+        it('should layout amp-img, amp-pixel, amp-analytics', () => {
+          // Open http://ads.localhost:9876/amp4test/a4a/12345 to see ad content
+          return testAmpComponents();
+        });
+      }
+    );
 
-  describes.integration(
-    'BTF',
-    {
-      amp: true,
-      extensions: ['amp-ad'],
-      frameStyle: 'height: 100vh',
-      body: `
+    describes.integration(
+      'BTF',
+      {
+        amp: true,
+        extensions: ['amp-ad'],
+        frameStyle: 'height: 100vh',
+        body: `
   <div style="height: 100vh"></div>
   <amp-ad
       width="300" height="250"
@@ -67,22 +70,24 @@ t.run('AMPHTML ad on AMP Page', () => {
       a4a-conversion="true"
       checksig=""
       disable3pfallback="true"
+      data-experiment-id=${branch}
       src="//ads.localhost:9876/amp4test/a4a/${RequestBank.getBrowserId()}">
   </amp-ad>
       `,
-    },
-    (env) => {
-      afterEach(() => {
-        return RequestBank.tearDown();
-      });
+      },
+      (env) => {
+        afterEach(() => {
+          return RequestBank.tearDown();
+        });
 
-      // TODO(#24657): Flaky on Travis.
-      it.skip('should layout amp-img, amp-pixel, amp-analytics', () => {
-        // Open http://ads.localhost:9876/amp4test/a4a/12345 to see ad content
-        return testAmpComponentsBTF(env.win);
-      });
-    }
-  );
+        // TODO(#24657): Flaky on Travis.
+        it.skip('should layout amp-img, amp-pixel, amp-analytics', () => {
+          // Open http://ads.localhost:9876/amp4test/a4a/12345 to see ad content
+          return testAmpComponentsBTF(env.win);
+        });
+      }
+    );
+  });
 });
 
 t.run('AMPHTML ad on non-AMP page (inabox)', () => {
