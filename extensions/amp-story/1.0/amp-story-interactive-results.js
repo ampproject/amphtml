@@ -104,7 +104,7 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
     }
     this.storeService_.subscribe(
       StateProperty.INTERACTIVE_REACT_STATE,
-      this.onInteractiveReactStateUpdate_,
+      (data) => this.onInteractiveReactStateUpdate_(data),
       true
     );
   }
