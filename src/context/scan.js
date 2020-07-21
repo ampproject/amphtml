@@ -18,11 +18,11 @@
  * Performs the `closest()` scan through context nodes to find the one that
  * matches the predicate with an optional argument.
  *
- * @param {!ContextNode} startNode
- * @param {function(!ContextNode, *):boolean} predicate
- * @param {*=} arg
+ * @param {!./node.ContextNode} startNode
+ * @param {function(!./node.ContextNode, ?):boolean} predicate
+ * @param {?=} arg
  * @param {boolean=} includeSelf
- * @return {?ContextNode}
+ * @return {?./node.ContextNode}
  */
 export function findParent(
   startNode,
@@ -44,12 +44,12 @@ export function findParent(
  * subtree by returning a falsy result. Otherwise, the subtree will be scanned
  * and the result value will be passed to the children callbacks.
  *
- * @param {!ContextNode} startNode
- * @param {function(!ContextNode, *, *):*} callback
- * @param {*=} arg
- * @param {*=} state
+ * @param {!./node.ContextNode} startNode
+ * @param {function(!./node.ContextNode, ?, ?):*} callback
+ * @param {?=} arg
+ * @param {?=} state
  * @param {boolean=} includeSelf
- * @return {*}
+ * @return {?}
  */
 export function deepScan(
   startNode,
