@@ -88,6 +88,7 @@ async function postReport(type, action) {
         cyan(`${type}/${action}`),
         'to the test-status GitHub App'
       );
+
       if (body.length > 0) {
         log(
           green('INFO:'),
@@ -95,7 +96,6 @@ async function postReport(type, action) {
           cyan(body.substr(0, 100))
         );
       }
-      return;
     } catch (error) {
       log(
         yellow('WARNING:'),
@@ -104,7 +104,6 @@ async function postReport(type, action) {
         'to the test-status GitHub App:\n',
         error.message.substr(0, 100)
       );
-      return;
     }
   }
 }
