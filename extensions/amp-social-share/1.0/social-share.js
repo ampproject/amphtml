@@ -76,7 +76,6 @@ export function SocialShare(props) {
  * type can have its color / background changed, set those to color /
  * background specified in props, otherwise use defaults, or do not set if
  * defaults do not exist.
- * @param {?PreactDef.Renderable} children
  * @param {!JsonObject} props
  * @param {JsonObject} size
  * @return {PreactDef.Renderable}
