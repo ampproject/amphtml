@@ -522,18 +522,19 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       expect(readySpy).to.have.been.calledOnce;
     });
 
-    it('set page attachment state should send message', async () => {
+    it.only('set page attachment state should send message', async () => {
       buildStoryPlayer();
       await manager.loadPlayers();
 
       await playerEl.setStoryState('page-attachment', true);
 
-      messagingMock
-        .expects('sendRequest')
-        .withArgs('setDocumentState', {state: 'PAGE_ATTACHMENT_STATE', value: true});
+      messagingMock.expects('sendRequest').withArgs('setDocumentState', {
+        state: 'PAGE_ATTACHMENT_STATE',
+        value: true,
+      });
     });
-    
-    it('get page attachment state should send message', async () => {
+
+    it.only('get page attachment state should send message', async () => {
       buildStoryPlayer();
       await manager.loadPlayers();
 
@@ -543,51 +544,24 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         .expects('sendRequest')
         .withArgs('getDocumentState', {state: 'PAGE_ATTACHMENT_STATE'});
     });
-    
-    it('open page attachment should cause button to disappear', async () => {
-      //open page attachment
-    
-      expect(playerEl.shadowRoot.querySelector('button.amp-story-player-hide-button')).to.exist;
-    });
 
-    it('close page attachment should cause button to reappear', async () => {
-      //open page attachment
-      //close page attachment
-
-      expect(playerEl.shadowRoot.querySelector('button.amp-story-player-hide-button')).to.not.exist;
-    });
-
-    it('open page attachment should cause fire page-attachment-open event once', async () => {
-      //open page attachment
-    
-      const readySpy = env.sandbox.spy();
-      playerEl.addEventListener('page-attachment-open', readySpy);
-
-      expect(readySpy).to.have.been.calledOnce;
-    });
-
-    it('close page attachment should cause fire page-attachment-close event once', async () => {
-      //open page attachment
-      //close page attachment
-
-      const readySpy = env.sandbox.spy();
-      playerEl.addEventListener('page-attachment-close', readySpy);
-
-      expect(readySpy).to.have.been.calledOnce;
-    });
-
-    it('get page attachment state on open attachment should fire page-attachment-open event once', async () => {
-      //open page attachment
-      
-      const readySpy = env.sandbox.spy();
-      playerEl.addEventListener('page-attachment-open', readySpy);
-      
-      expect(readySpy).to.have.been.calledOnce;
-    });
-
-    it('get page attachment state on closed attachment should fire page-attachment-close event once', async () => {
+    it.only('close page attachment means button is displayed', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 1);
+      new AmpStoryPlayer(win, playerEl);
+
+      expect(
+        playerEl.shadowRoot.querySelector('button.amp-story-player-hide-button')
+      ).to.not.exist;
+    });
+
+    it.only('get page attachment state fires page-attachment-close event once', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 1);
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
       const readySpy = env.sandbox.spy();
       playerEl.addEventListener('page-attachment-close', readySpy);
 
@@ -684,7 +658,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       const player = new AmpStoryPlayer(win, playerEl);
 
-      await player.load();    
+      await player.load();
 
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('navigation', navigationSpy);
