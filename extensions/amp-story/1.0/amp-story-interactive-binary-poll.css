@@ -40,11 +40,8 @@
   justify-content: center !important;
   text-align: center !important;
   flex-direction: column !important;
-  flex-grow: 50 !important;
-  flex: 100 !important;
-  min-width: 0 !important;
+  width: 50%;
   position: relative !important;
-  transition: flex-grow var(--i-amphtml-interactive-animation-time) calc(var(--i-amphtml-interactive-animation-time) * .12) var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
 .i-amphtml-story-interactive-prompt {
@@ -81,7 +78,7 @@
   position: absolute !important;
   opacity: 0 !important;
   transform-origin: left !important;
-  transition: transform var(--animation-time) var(--ease-out-curve) !important;
+  transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
 }
 
 [dir=rtl] .i-amphtml-story-interactive-option

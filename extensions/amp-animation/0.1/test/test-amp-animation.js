@@ -19,8 +19,30 @@ import {DEFAULT_ACTION} from '../../../../src/action-constants';
 import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';
 import {WebAnimationPlayState} from '../web-animation-types';
 
-describes.sandboxed('AmpAnimation', {}, () => {
+describes.sandboxed('AmpAnimation', {}, (env) => {
+  let ioCallbacks;
+
+  beforeEach(() => {
+    ioCallbacks = [];
+  });
+
   function createAnimInWindow(win, attrs, config) {
+    let ioCallback;
+    class IoStub {
+      constructor(callback) {
+        ioCallback = callback;
+        ioCallbacks.push(callback);
+      }
+      observe() {
+        ioCallback([
+          {isIntersecting: (config && config.isIntersecting) ?? true},
+        ]);
+      }
+      unobserve() {}
+      disconnect() {}
+    }
+    env.sandbox.stub(win, 'IntersectionObserver').value(IoStub);
+
     const element = win.document.createElement('amp-animation');
     element.setAttribute('id', 'anim1');
     element.setAttribute('layout', 'nodisplay');
@@ -41,6 +63,12 @@ describes.sandboxed('AmpAnimation', {}, () => {
 
     win.document.body.appendChild(element);
     return element.build().then(() => element.implementation_);
+  }
+
+  function updateIntersection(isIntersecting) {
+    ioCallbacks.forEach((callback) => {
+      callback([{isIntersecting}]);
+    });
   }
 
   describes.realWin(
@@ -135,6 +163,20 @@ describes.sandboxed('AmpAnimation', {}, () => {
         expect(anim.visible_).to.be.false;
 
         viewer.setVisibilityState_('visible');
+        expect(anim.visible_).to.be.true;
+      });
+
+      it('should update visibility from intersection observer', function* () {
+        const anim = yield createAnim(
+          {},
+          {duration: 1001, isIntersecting: false}
+        );
+        expect(anim.visible_).to.be.false;
+
+        viewer.setVisibilityState_('visible');
+        expect(anim.visible_).to.be.false;
+
+        updateIntersection(true);
         expect(anim.visible_).to.be.true;
       });
 
@@ -313,14 +355,9 @@ describes.sandboxed('AmpAnimation', {}, () => {
       it('should resize from ampdoc viewport', function* () {
         const anim = yield createAnim({}, {duration: 1001});
         const stub = env.sandbox.stub(anim, 'onResize_');
-        const viewport = win.__AMP_SERVICES.viewport.obj;
-
-        // No size changes.
-        viewport.resizeObservable_.fire({relayoutAll: false});
-        expect(stub).to.not.be.called;
 
         // Size has changed.
-        viewport.resizeObservable_.fire({relayoutAll: true});
+        win.eventListeners.fire({type: 'resize'});
         expect(stub).to.be.calledOnce;
       });
 
@@ -781,20 +818,11 @@ describes.sandboxed('AmpAnimation', {}, () => {
 
       beforeEach(() => {
         embed = env.embed;
-        embed.setVisible_(false);
       });
 
       function createAnim(attrs, config) {
         return createAnimInWindow(embed.win, attrs, config);
       }
-
-      it('should update visibility from embed', function* () {
-        const anim = yield createAnim({}, {duration: 1001});
-        expect(anim.visible_).to.be.false;
-
-        embed.setVisible_(true);
-        expect(anim.visible_).to.be.true;
-      });
 
       it('should find target in the embed only via selector', function* () {
         const parentWin = env.ampdoc.win;

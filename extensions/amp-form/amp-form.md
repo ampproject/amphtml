@@ -26,17 +26,17 @@ limitations under the License.
 
 # amp-form
 
-## Behavior
+## Useage
 
 The `amp-form` extension allows you to create forms (`<form>`) to submit input fields in an AMP document. The `amp-form` extension also provides [polyfills](#polyfills) for some missing behaviors in browsers.
 
-{% call callout('Important', type='caution') %}
+[tip type="important"]
+
 If you're submitting data in your form, your server endpoint must implement the requirements for [CORS security](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests#cors-security-in-amp).
-{% endcall %}
+
+[/tip]
 
 Before creating a `<form>`, you must include the required script for the `<amp-form>` extension, otherwise your document will be invalid. If you're using `input` tags for purposes other than submitting their values (e.g., inputs not inside a `<form>`), you do not need to load the `amp-form` extension.
-
-Here's an example of a basic form:
 
 [example preview="inline" playground="true" imports="amp-form" template="amp-mustache"]
 
@@ -77,118 +77,15 @@ Here's an example of a basic form:
 
 [/example]
 
-## Attributes
+### Inputs and fields
 
-[filter formats="websites, ads"]
-
-##### target
-
-Indicates where to display the form response after submitting the form. The value must be `_blank` or `_top`.
-
-##### action
-
-Specifies a server endpoint to handle the form input. The value must be an `https` URL (absolute or relative) and must not be a link to a CDN.
-
-- For `method=GET`: use this attribute or [`action-xhr`](#action-xhr).
-- For `method=POST`: use the [`action-xhr`](#action-xhr) attribute.
-
-[tip type="note"]
-The `target` and `action` attributes are only used for non-xhr GET requests. The AMP runtime will use `action-xhr` to make the request and will ignore `action` and `target`. When `action-xhr` is not provided, AMP makes a GET request to the `action` endpoint and uses `target` to open a new window (if `_blank`). The AMP runtime might also fallback to using `action` and `target` in cases where the `amp-form` extension fails to load.
-[/tip][/filter] <!-- formats="websites, ads" -->
-
-##### action-xhr
-
-Specifies a server endpoint to handle the form input and submit the form via XMLHttpRequest (XHR). An XHR request (sometimes called an AJAX request) is where the browser would make the request without a full load of the page or opening a new page. Browsers will send the request in the background using the [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) when available and fallback to [XMLHttpRequest API](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) for older browsers.
-
-{% call callout('Important', type='caution') %}
-Your XHR endpoint must implement the requirements for [CORS security](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp).
-{% endcall %}
-
-This attribute is required for `method=POST`, and is optional for `method=GET`.
-
-The value for `action-xhr` can be the same or a different endpoint than `action` and has the same `action` requirements above.
-
-[filter formats="websites, ads"]
-
-To learn about redirecting the user after successfully submitting the form, see the [Redirecting after a submission](#redirecting-after-a-submission) section below.
-
-##### enctype (optional)
-
-The enctype attribute specifies how form-data should be encoded before sending it to the server via the `method=POST` submission. The default encoding is set to `multipart/form-data`. This and `application/x-www-form-urlencoded` encoding types are currently supported.
-
-Summary of enctype values:
-
-- `application/x-www-form-urlencoded` - Sets the encoding type to `application/x-www-form-urlencoded`.
-- `multipart/form-data` - Sets the encoding type to `multipart/form-data`.
-- `any value` or unspecified - Setting the `enctype` attribute to a value not specified above or not setting the attribute at all will result in the default encoding type of `multipart/form-data`.
-
-##### data-initialize-from-url (optional)
-
-Initializes form fields from the window URL's search string, where the query parameter name matches the field's name. When this attribute is present, `<input>`, `<select>`, and `<textarea>` fields can optionally be initialized.
-
-Individual fields are opted-in if they contain attribute `data-allow-initialization`. On page load, if the URL contains a query parameter with name matching an opted-in field's `name` attribute, the value or checked-state of that field will be updated based on the value of that query parameter. For example, `<input type="search" name="q" data-allow-initialization>` would display "my search" if the AMP page is visited with URL `https://example.com/search?q=my+search`.
-
-Sample:
-
-```html
-<form data-initialize-from-url
-    method="get"
-    action="https://example.com/search"{% if not format=='email'%}
-    target="_top"{% endif %}>
-  <label>Search: <input type="search" name="q" data-allow-initialization></label>
-</form>
-<!-- display search results using amp-list -->
-```
-
-Limitations:
-
-- Supported `<input>` types include `checkbox`, `color`, `date`, `datetime-local`, `email`, `hidden`, `month`, `number`, `radio`, `range`, `search`, `tel`, `text`, `time`, `url`, and `week`.
-- Fields that take advantage of [variable substitutions](#variable-substitutions) (fields with attribute `data-amp-replace`) are not supported.
-- This feature is not supported on AMP pages delivered by an [AMP cache](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/how_amp_pages_are_cached/). The `data-initialize-from-url` and `data-allow-initialization` attributes will not cause AMP validation failures, but the form fields will not be initialized from the URL.
-
-##### xssi-prefix (optional)
-
-Specifies that a prefix should be stripped prior to parsing the fetched json from the `action-xhr` endpoint. If the prefix is not present in the response, then this attribute will have no effect.
-This can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
-
-[/filter] <!-- formats="websites, ads" -->
-
-##### Other form attributes
-
-All other [form attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form) are optional.
-
-[filter formats="websites, ads"]
-
-##### custom-validation-reporting
-
-This is an optional attribute that enables and selects a custom validation reporting strategy. Valid values are one of: `show-first-on-submit`, `show-all-on-submit` or `as-you-go`.
-
-See the [Custom Validation](#custom-validations) section for more details.
-
-[/filter] <!-- formats="websites, ads" -->
-
-[filter formats="email"]
-
-##### Invalid AMP email attributes
-
-The AMP for Email spec disallows the use of the following attributes on the AMP email format.
-
-- `action`
-- `name`
-- `target`
-- `verify-xhr`
-
-[/filter]<!-- formats="email" -->
-
-## Inputs and fields
-
-**Allowed**:
+#### Allowed
 
 - Other form-related elements, including: `<textarea>`, `<select>`, `<option>`, `<fieldset>`, `<label>`, `<input type=text>`, `<input type=submit>`, and so on.
 - `<input type=password>` and `<input type=file>` inside of `<form method=POST action-xhr>`.
 - [`amp-selector`](https://amp.dev/documentation/components/amp-selector)
 
-**Not Allowed**:
+#### Not Allowed
 
 - `<input type=button>`, `<input type=image>`
 - Most of the form-related attributes on inputs including: `form`, `formaction`, `formtarget`, `formmethod` and others.
@@ -197,168 +94,9 @@ The AMP for Email spec disallows the use of the following attributes on the AMP 
 
 For details on valid inputs and fields, see [amp-form rules](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii) in the AMP validator specification.
 
-## Actions
+### Success and error response rendering
 
-The `amp-form` element exposes the following actions:
-
-| Action   | Description                                                                                                                                         |
-| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `submit` | Allows you to trigger the form submission on a specific action, for example, tapping a link, or [submitting a form on input change](#input-events). |
-| `clear`  | Empties the values from each input in the form. This can allow users to quickly fill out forms a second time.                                       |
-
-{% call callout('Read on', type='read') %}
-Learn more about [Actions and Events in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events).
-{% endcall %}
-
-## Events
-
-Use `amp-form` events with the [`on` attribute](https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#on)
-
-The following example listens to both the `submit-success` and `submit-error` events and shows different lightboxes depending on the event:
-
-```html
-<form
-  ...
-  on="submit-success:success-lightbox;submit-error:error-lightbox"
-  ...
-></form>
-```
-
-### `amp-form` event list
-
-#### `submit`
-
-The form is submitted and before the submission is complete.
-
-#### `submit-success`
-
-The form submission is done and the response is a success.
-
-#### `submit-error`
-
-The form submission is done and the response is an error.
-
-[filter formats="websites, ads"]
-
-#### `verify`
-
-Asynchronous verification is initiated.
-
-#### `verify-error`
-
-Asynchronous verification is done and the response is an error.
-
-#### `valid`
-
-The form's validation state changes to "valid" (in accordance with its [reporting strategy](#reporting-strategies)).
-
-#### `invalid`
-
-The form's validation state to "invalid" (in accordance with its [reporting strategy](#reporting-strategies)).
-[/filter]<!-- formats="websites, ads" -->
-
-#### Input events
-
-AMP exposes `change` and `input-debounced` events on child `<input>` elements. This allows you to use the [`on` attribute](https://www.ampproject.org/docs/fundamentals/spec#on) to execute an action on any element when an input value changes.
-
-For example, a common use case is to submit a form on input change (selecting a radio button to answer a poll, choosing a language from a `select` input to translate a page, etc.).
-
-[example preview="inline" playground="true" imports="amp-form"]
-
-```html
-<form id="myform"
-    method="post"
-    action-xhr="https://example.com/myform"{% if not format=='email'%}
-    target="_blank"{% endif %}>
-    <fieldset>
-      <label>
-        <input name="answer1"
-          value="Value 1"
-          type="radio"
-          on="change:myform.submit">Value 1
-      </label>
-      <label>
-        <input name="answer1"
-          value="Value 2"
-          type="radio"
-          on="change:myform.submit">Value 2
-      </label>
-    </fieldset>
-  </form>
-```
-
-[/example]
-
-See the [full example here](../../examples/forms.amp.html).
-
-[filter formats="websites, ads"]
-
-### Analytics triggers
-
-The `amp-form` extension triggers the following events that you can track in your [amp-analytics](https://amp.dev/documentation/components/amp-analytics) config:
-
-| Event                     | Fired when                                                                                    |
-| ------------------------- | --------------------------------------------------------------------------------------------- |
-| `amp-form-submit`         | A form request is initiated.                                                                  |
-| `amp-form-submit-success` | A successful response is received (i.e, when the response has a status of `2XX`).             |
-| `amp-form-submit-error`   | An unsuccessful response is received (i.e, when the response doesn't have a status of `2XX`). |
-
-You can configure your analytics to send these events as in the following example:
-
-```html
-<amp-analytics>
-  <script type="application/json">
-    {
-      "requests": {
-        "event": "https://www.example.com/analytics/event?eid=${eventId}",
-        "searchEvent": "https://www.example.com/analytics/search?formId=${formId}&query=${formFields[query]}"
-      },
-      "triggers": {
-        "formSubmit": {
-          "on": "amp-form-submit",
-          "request": "searchEvent"
-        },
-        "formSubmitSuccess": {
-          "on": "amp-form-submit-success",
-          "request": "event",
-          "vars": {
-            "eventId": "form-submit-success"
-          }
-        },
-        "formSubmitError": {
-          "on": "amp-form-submit-error",
-          "request": "event",
-          "vars": {
-            "eventId": "form-submit-error"
-          }
-        }
-      }
-    }
-  </script>
-</amp-analytics>
-```
-
-All three events generate a set of variables that correspond to the specific form and the fields in the form. These variables can be used for analytics.
-
-For example, the following form has one field:
-
-```html
-<form action-xhr="/comment" method="POST" id="submit_form">
-  <input type="text" name="comment" />
-  <input type="submit" value="Comment" />
-</form>
-```
-
-When the `amp-form-submit`, `amp-form-submit-success`, or `amp-form-submit-error` event fires, it generates the following variables containing the values that were specified in the form:
-
-- `formId`
-- `formFields[comment]`
-
-[/filter]<!-- formats="websites, ads" -->
-
-## Success/error response rendering
-
-You can render success or error responses in your form by using [extended templates](https://www.ampproject.org/docs/fundamentals/spec#extended-templates), such as [amp-mustache](https://amp.dev/documentation/components/amp-mustache), or success responses through data binding with [amp-bind](https://amp.dev/documentation/components/amp-bind) and the following response attributes:
+You can render success or error responses in your form by using [amp-mustache](../amp-mustache/amp-mustache.md), or success responses through data binding with [amp-bind](../amp-bind/amp-bind.md) and the following response attributes:
 
 | Response attribute | Description                                                                                                                                                                                                                                                            |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -366,7 +104,7 @@ You can render success or error responses in your form by using [extended templa
 | `submit-error`     | Can be used to display a submission error if the response is unsuccessful (i.e., does not have a status of `2XX`).                                                                                                                                                     |
 | `submitting`       | Can be used to display a message when the form is submitting. The template for this attribute has access to the form's input fields for any display purposes. Please see the [full form example below](#example-submitting) for how to use the `submitting` attribute. |
 
-### To render responses with templating:
+#### To render responses with templating:
 
 - Apply a response attribute to any descendent of the `<form>` element.
 - Render the response in the child element by including a template via `<template></template>` or `<script type="text/plain"></script>` tag inside it or by referencing a template with a `template="id_of_other_template"` attribute.
@@ -377,8 +115,6 @@ When using `<amp-form>` in tandem with another templating AMP component, such as
 [/tip]
 
 <a id="example-submitting"></a>
-
-##### Example: Form displays success, error, and submitting messages
 
 In the following example, the responses are rendered in an inline template inside the form.
 
@@ -462,7 +198,7 @@ See the [full example here](../../examples/forms.amp.html).
 - Use the `event` property to capture the response data.
 - Add the state attribute to the desired element to bind the form response.
 
-The following example demonstrates a form `submit-success` response with [`amp-bind`](https://amp.dev/documentation/components/amp-bind):
+The following example demonstrates a form `submit-success` response with [`amp-bind`](../amp-bind/amp-bind.md):
 
 ```html
 <p [text]="'Thanks, ' + subscribe +'! You have successfully subscribed.'">
@@ -503,7 +239,7 @@ Then `amp-bind` updates the `<p>` element's text to match the `subscibe` state:
 
 [filter formats="websites, ads"]
 
-### Redirecting after a submission
+#### Redirecting after a submission
 
 You can redirect users to a new page after a successful form submission by setting the `AMP-Redirect-To` response header and specifying a redirect URL. The redirect URL must be a HTTPS URL, otherwise AMP will throw an error and redirection won't occur. HTTP response headers are configured via your server.
 
@@ -520,7 +256,7 @@ Access-Control-Expose-Headers: AMP-Redirect-To
 Check out AMP By Example's [Form Submission with Update](https://amp.dev/documentation/examples/components/amp-form/#form-submission-with-page-update) and [Product Page](https://amp.dev/documentation/examples/e-commerce/product_page/#product-page) that demonstrate using redirection after a form submission.
 {% endcall %}
 
-## Custom validations
+### Custom validations
 
 The `amp-form` extension allows you to build your own custom validation UI by using the `custom-validation-reporting` attribute along with one the following reporting strategies: `show-first-on-submit`, `show-all-on-submit` or `as-you-go`.
 
@@ -574,35 +310,33 @@ Here's an example:
 
 [/example]
 
-For more examples, see [examples/forms.amp.html](../../examples/forms.amp.html).
-
 For validation messages, if your element contains no text content inside, AMP will fill it out with the browser's default validation message. In the example above, when the `name5` input is empty and validation is kicked off (i.e., user tried to submit the form) AMP will fill `<span visible-when-invalid="valueMissing" validation-for="name5"></span>` with the browser's validation message and show that `span` to the user.
 
 {% call callout('Important', type='caution') %}
 You must provide your own validation UI for each kind of invalid state that the input could have. If these are not present, users will not see any `custom-validation-reporting` for the missing error state. The validity states can be found in the [official W3C HTML validation reporting documentation](https://www.w3.org/TR/html50/forms.html#validitystate).
 {% endcall %}
 
-### Reporting strategies
+#### Reporting strategies
 
 Specify one of the following reporting options for the `custom-validation-reporting` attribute:
 
-#### Show First on Submit
+##### Show First on Submit
 
 The `show-first-on-submit` reporting option mimics the browser's default behavior when default validation kicks in. It shows the first validation error it finds and stops there.
 
-#### Show All on Submit
+##### Show All on Submit
 
 The `show-all-on-submit` reporting option shows all validation errors on all invalid inputs when the form is submitted. This is useful if you'd like to show a summary of validations.
 
-#### As You Go
+##### As You Go
 
 The `as-you-go` reporting option allows your user to see validation messages as they're interacting with the input. For example, if the user types an invalid email address, the user will see the error right away. Once they correct the value, the error goes away.
 
-#### Interact and Submit
+##### Interact and Submit
 
 The `interact-and-submit` reporting option combines the behavior of `show-all-on-submit` and `as-you-go`. Individual fields will show any errors immediately after interactions, and on submit the form will show errors on all invalid fields.
 
-## Verification
+### Verification
 
 HTML5 validation gives feedback based only on information available on the page, such as if a value matches a certain pattern. With `amp-form` verification you can give the user feedback that HTML5 validation alone cannot. For example, a form can use verification to check if an email address has already been registered. Another use-case is verifying that a city field and a zip code field match each other.
 
@@ -675,7 +409,7 @@ to the input element.
 
 For more examples, see [examples/forms.amp.html](../../examples/forms.amp.html).
 
-## Variable substitutions
+### Variable substitutions
 
 The `amp-form` extension allows [platform variable substitutions](../../spec/amp-var-substitutions.md) for inputs that are hidden and that have the `data-amp-replace` attribute. On each form submission, `amp-form` finds all `input[type=hidden][data-amp-replace]` inside the form and applies variable substitutions to its `value` attribute and replaces it with the result of the substitution.
 
@@ -729,7 +463,7 @@ Substitutions will happen on every subsequent submission. Read more about [varia
 
 [/filter]<!-- formats="websites, ads" -->
 
-## Polyfills
+### Polyfills
 
 The `amp-form` extension provide polyfills for behaviors and functionality missing from some browsers or being implemented in the next version of CSS.
 
@@ -756,6 +490,279 @@ to expand and shrink to accomodate the user's rows of input, up to the field's m
 <textarea autoexpand></textarea>
 ```
 
+### Security considerations
+
+#### Protecting against XSRF
+
+In addition to following the details in the [AMP CORS spec](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests), please pay extra attention to the section on ["Processing state changing requests" ](https://www.ampproject.org/docs/fundamentals/amp-cors-requests.html#processing-state-changing-requests) to protect against [XSRF attacks](https://en.wikipedia.org/wiki/Cross-site_request_forgery) where an attacker can execute unauthorized commands using the current user session without the user knowledge.
+
+In general, keep in mind the following points when accepting input from the user:
+
+- Only use POST for state changing requests.
+- Use non-XHR GET for navigational purposes only (e.g. search).
+  - Non-XHR GET requests are will not receive accurate origin/headers and backends won't be able to protect against XSRF with the above mechanism.
+  - In general, use XHR/non-XHR GET requests for navigational or information retrieval only.
+- Non-XHR POST requests are not allowed in AMP documents. This is due to inconsistencies of setting `Origin` header on these requests across browsers, and the complications supporting it would introduce in protecting against XSRF. This might be reconsidered and introduced later &mdash; please file an issue if you think this is needed.
+
+## Attributes
+
+[filter formats="websites, ads"]
+
+### `target`
+
+Indicates where to display the form response after submitting the form. The value must be `_blank` or `_top`.
+
+### `action`
+
+Specifies a server endpoint to handle the form input. The value must be an `https` URL (absolute or relative) and must not be a link to a CDN.
+
+- For `method=GET`: use this attribute or [`action-xhr`](#action-xhr).
+- For `method=POST`: use the [`action-xhr`](#action-xhr) attribute.
+
+[tip type="note"]
+The `target` and `action` attributes are only used for non-xhr GET requests. The AMP runtime will use `action-xhr` to make the request and will ignore `action` and `target`. When `action-xhr` is not provided, AMP makes a GET request to the `action` endpoint and uses `target` to open a new window (if `_blank`). The AMP runtime might also fallback to using `action` and `target` in cases where the `amp-form` extension fails to load.
+[/tip][/filter] <!-- formats="websites, ads" -->
+
+### `action-xhr`
+
+Specifies a server endpoint to handle the form input and submit the form via XMLHttpRequest (XHR). An XHR request (sometimes called an AJAX request) is where the browser would make the request without a full load of the page or opening a new page. Browsers will send the request in the background using the [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) when available and fallback to [XMLHttpRequest API](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) for older browsers.
+
+{% call callout('Important', type='caution') %}
+Your XHR endpoint must implement the requirements for [CORS security](https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp).
+{% endcall %}
+
+This attribute is required for `method=POST`, and is optional for `method=GET`.
+
+The value for `action-xhr` can be the same or a different endpoint than `action` and has the same `action` requirements above.
+
+[filter formats="websites, ads"]
+
+To learn about redirecting the user after successfully submitting the form, see the [Redirecting after a submission](#redirecting-after-a-submission) section below.
+
+### `enctype`
+
+The enctype attribute specifies how form-data should be encoded before sending it to the server via the `method=POST` submission. The default encoding is set to `multipart/form-data`. This and `application/x-www-form-urlencoded` encoding types are currently supported.
+
+Summary of enctype values:
+
+- `application/x-www-form-urlencoded` - Sets the encoding type to `application/x-www-form-urlencoded`.
+- `multipart/form-data` - Sets the encoding type to `multipart/form-data`.
+- `any value` or unspecified - Setting the `enctype` attribute to a value not specified above or not setting the attribute at all will result in the default encoding type of `multipart/form-data`.
+
+### `data-initialize-from-url`
+
+Initializes form fields from the window URL's search string, where the query parameter name matches the field's name. When this attribute is present, `<input>`, `<select>`, and `<textarea>` fields can optionally be initialized.
+
+Individual fields are opted-in if they contain attribute `data-allow-initialization`. On page load, if the URL contains a query parameter with name matching an opted-in field's `name` attribute, the value or checked-state of that field will be updated based on the value of that query parameter. For example, `<input type="search" name="q" data-allow-initialization>` would display "my search" if the AMP page is visited with URL `https://example.com/search?q=my+search`.
+
+Sample:
+
+```html
+<form data-initialize-from-url
+    method="get"
+    action="https://example.com/search"{% if not format=='email'%}
+    target="_top"{% endif %}>
+  <label>Search: <input type="search" name="q" data-allow-initialization></label>
+</form>
+<!-- display search results using amp-list -->
+```
+
+Limitations:
+
+- Supported `<input>` types include `checkbox`, `color`, `date`, `datetime-local`, `email`, `hidden`, `month`, `number`, `radio`, `range`, `search`, `tel`, `text`, `time`, `url`, and `week`.
+- Fields that take advantage of [variable substitutions](#variable-substitutions) (fields with attribute `data-amp-replace`) are not supported.
+- This feature is not supported on AMP pages delivered by an [AMP cache](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/how_amp_pages_are_cached/). The `data-initialize-from-url` and `data-allow-initialization` attributes will not cause AMP validation failures, but the form fields will not be initialized from the URL.
+
+### `xssi-prefix`
+
+Specifies that a prefix should be stripped prior to parsing the fetched json from the `action-xhr` endpoint. If the prefix is not present in the response, then this attribute will have no effect.
+This can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
+
+[/filter] <!-- formats="websites, ads" -->
+
+### Other form attributes
+
+All other [form attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form) are optional.
+
+[filter formats="websites, ads"]
+
+### `custom-validation-reporting`
+
+This is an optional attribute that enables and selects a custom validation reporting strategy. Valid values are one of: `show-first-on-submit`, `show-all-on-submit` or `as-you-go`.
+
+See the [Custom Validation](#custom-validations) section for more details.
+
+[/filter] <!-- formats="websites, ads" -->
+
+[filter formats="email"]
+
+### Invalid AMP email attributes
+
+The AMP for Email spec disallows the use of the following attributes on the AMP email format.
+
+- `action`
+- `name`
+- `target`
+- `verify-xhr`
+
+[/filter]<!-- formats="email" -->
+
+## Actions
+
+The `amp-form` element exposes the following actions.
+
+### `submit`
+
+Allows you to trigger the form submission on a specific action, for example, tapping a link, or [submitting a form on input change](#input-events).
+
+### `clear`
+
+Empties the values from each input in the form. This can allow users to quickly fill out forms a second time.
+
+## Events
+
+Use `amp-form` events with the [`on` attribute](https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#on)
+
+The following example listens to both the `submit-success` and `submit-error` events and shows different lightboxes depending on the event:
+
+```html
+<form
+  ...
+  on="submit-success:success-lightbox;submit-error:error-lightbox"
+  ...
+></form>
+```
+
+### `submit`
+
+The form is submitted and before the submission is complete.
+
+### `submit-success`
+
+The form submission is done and the response is a success.
+
+### `submit-error`
+
+The form submission is done and the response is an error.
+
+[filter formats="websites, ads"]
+
+### `verify`
+
+Asynchronous verification is initiated.
+
+### `verify-error`
+
+Asynchronous verification is done and the response is an error.
+
+### `valid`
+
+The form's validation state changes to "valid" (in accordance with its [reporting strategy](#reporting-strategies)).
+
+### `invalid`
+
+The form's validation state to "invalid" (in accordance with its [reporting strategy](#reporting-strategies)).
+[/filter]<!-- formats="websites, ads" -->
+
+### Input events
+
+AMP exposes `change` and `input-debounced` events on child `<input>` elements. This allows you to use the [`on` attribute](https://www.ampproject.org/docs/fundamentals/spec#on) to execute an action on any element when an input value changes.
+
+For example, a common use case is to submit a form on input change (selecting a radio button to answer a poll, choosing a language from a `select` input to translate a page, etc.).
+
+[example preview="inline" playground="true" imports="amp-form"]
+
+```html
+<form id="myform"
+    method="post"
+    action-xhr="https://example.com/myform"{% if not format=='email'%}
+    target="_blank"{% endif %}>
+    <fieldset>
+      <label>
+        <input name="answer1"
+          value="Value 1"
+          type="radio"
+          on="change:myform.submit">Value 1
+      </label>
+      <label>
+        <input name="answer1"
+          value="Value 2"
+          type="radio"
+          on="change:myform.submit">Value 2
+      </label>
+    </fieldset>
+  </form>
+```
+
+[/example]
+
+See the [full example here](../../examples/forms.amp.html).
+
+[filter formats="websites, ads"]
+
+## Analytics
+
+The `amp-form` extension triggers the following events that you can track in your [amp-analytics](https://amp.dev/documentation/components/amp-analytics) config:
+
+| Event                     | Fired when                                                                                    |
+| ------------------------- | --------------------------------------------------------------------------------------------- |
+| `amp-form-submit`         | A form request is initiated.                                                                  |
+| `amp-form-submit-success` | A successful response is received (i.e, when the response has a status of `2XX`).             |
+| `amp-form-submit-error`   | An unsuccessful response is received (i.e, when the response doesn't have a status of `2XX`). |
+
+You can configure your analytics to send these events as in the following example:
+
+```html
+<amp-analytics>
+  <script type="application/json">
+    {
+      "requests": {
+        "event": "https://www.example.com/analytics/event?eid=${eventId}",
+        "searchEvent": "https://www.example.com/analytics/search?formId=${formId}&query=${formFields[query]}"
+      },
+      "triggers": {
+        "formSubmit": {
+          "on": "amp-form-submit",
+          "request": "searchEvent"
+        },
+        "formSubmitSuccess": {
+          "on": "amp-form-submit-success",
+          "request": "event",
+          "vars": {
+            "eventId": "form-submit-success"
+          }
+        },
+        "formSubmitError": {
+          "on": "amp-form-submit-error",
+          "request": "event",
+          "vars": {
+            "eventId": "form-submit-error"
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+```
+
+All three events generate a set of variables that correspond to the specific form and the fields in the form. These variables can be used for analytics.
+
+For example, the following form has one field:
+
+```html
+<form action-xhr="/comment" method="POST" id="submit_form">
+  <input type="text" name="comment" />
+  <input type="submit" value="Comment" />
+</form>
+```
+
+When the `amp-form-submit`, `amp-form-submit-success`, or `amp-form-submit-error` event fires, it generates the following variables containing the values that were specified in the form:
+
+- `formId`
+- `formFields[comment]`
+
+[/filter]<!-- formats="websites, ads" -->
+
 ## Styling
 
 ### Classes and CSS hooks
@@ -780,20 +787,6 @@ Publishers can use these classes to style their inputs and fieldsets to be respo
 
 See the [full example here](../../examples/forms.amp.html) on using these.
 
-{% call callout('Tip', type='success') %}
-Visit [AMP Start](https://ampstart.com/components#form-elements) for responsive, pre-styled AMP form elements that you can use in your AMP pages.
-{% endcall %}
+## Validation
 
-## Security considerations
-
-### Protecting against XSRF
-
-In addition to following the details in the [AMP CORS spec](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests), please pay extra attention to the section on ["Processing state changing requests" ](https://www.ampproject.org/docs/fundamentals/amp-cors-requests.html#processing-state-changing-requests) to protect against [XSRF attacks](https://en.wikipedia.org/wiki/Cross-site_request_forgery) where an attacker can execute unauthorized commands using the current user session without the user knowledge.
-
-In general, keep in mind the following points when accepting input from the user:
-
-- Only use POST for state changing requests.
-- Use non-XHR GET for navigational purposes only (e.g. search).
-  - Non-XHR GET requests are will not receive accurate origin/headers and backends won't be able to protect against XSRF with the above mechanism.
-  - In general, use XHR/non-XHR GET requests for navigational or information retrieval only.
-- Non-XHR POST requests are not allowed in AMP documents. This is due to inconsistencies of setting `Origin` header on these requests across browsers, and the complications supporting it would introduce in protecting against XSRF. This might be reconsidered and introduced later &mdash; please file an issue if you think this is needed.
+See [amp-form rules](validator-amp-form.protoascii) in the AMP validator specification.
