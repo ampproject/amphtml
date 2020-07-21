@@ -230,7 +230,7 @@ export class BitrateManager {
       const weakref = this.videos_[i];
       const video = weakref.deref();
       if (!video) {
-        this.videos_.splice(index, 1);
+        this.videos_.splice(i, 1);
         return;
       }
       if (!video.paused) {

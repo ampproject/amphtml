@@ -27,7 +27,7 @@ describes.realWin('dom-based-weakref', {}, (env) => {
       return;
     }
     const weakref = DomBasedWeakRef.make(env.win, element);
-    expect(weakref).to.be.instanceof(WeakRef);
+    expect(weakref).to.be.instanceof(env.win.WeakRef);
     expect(weakref.deref()).to.equal(element);
   });
 

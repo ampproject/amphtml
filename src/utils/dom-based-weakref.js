@@ -26,7 +26,7 @@ export class DomBasedWeakRef {
   /**
    * @param {!Window} win
    * @param {string} id
-   * @private
+   * @package
    */
   constructor(win, id) {
     this.win = win;
@@ -46,7 +46,7 @@ export class DomBasedWeakRef {
       return new win.WeakRef(element);
     }
     if (!element.id) {
-      const index = (win.__AMP_weakrefId = (win.__AMP_weakrefId || 0) + 1);
+      const index = (win.__AMP_WEAKREF_ID = (win.__AMP_WEAKREF_ID || 0) + 1);
       element.id = 'weakref-id-' + index;
     }
     return new DomBasedWeakRef(win, element.id);
