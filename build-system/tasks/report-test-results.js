@@ -86,9 +86,8 @@ async function sendTravisKarmaReport(testType) {
 async function reportTestResults() {
   const filenames = await fs.readdir('result-reports/');
   const testTypes = filenames.map((filename) => path.parse(filename).name);
-  for (const testType of testTypes) {
-    sendTravisKarmaReport(testType);
-  }
+
+  await Promise.all(testTypes.map(sendTravisKarmaReport));
 }
 
 module.exports = {
