@@ -842,6 +842,7 @@ tags: {  # `<style amp-boilerplate>`, transformed [AMP, ACTIONS]
   descriptive_name: "head > style[amp-boilerplate]"
   unique: true
   mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
   attrs: {
     name: "amp-boilerplate"
     mandatory: true
@@ -940,6 +941,7 @@ tags: {  # `<style amp-boilerplate>`, transformed [AMP, ACTIONS]
   unique: true
   mandatory_parent: "NOSCRIPT"
   mandatory_ancestor: "HEAD"
+  attr_lists: "nonce-attr"
   attrs: {
     name: "amp-boilerplate"
     mandatory: true
@@ -999,6 +1001,7 @@ tags: {  # '<style amp-runtime>`, transformed AMP
   mandatory: true
   unique: true
   mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
   attrs: {
     name: "amp-runtime"
     mandatory: true

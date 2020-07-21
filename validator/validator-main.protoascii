@@ -26,7 +26,7 @@ min_validator_revision_required: 475
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 1066
+spec_file_revision: 1067
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed"
@@ -4737,7 +4737,6 @@ attr_lists: {
   name: "nonce-attr"
   attrs: {
     disabled_by: "amp4email"
-    disabled_by: "transformed"
     name: "nonce"
   }
 }
@@ -4756,7 +4755,6 @@ attr_lists: {
     value: "anonymous"
   }
   attrs: {
-    disabled_by: "transformed"
     disabled_by: "amp4email"
     name: "nonce"
   }
