@@ -27,6 +27,7 @@ const TAG = 'amp-consent/consent-config';
 const ALLOWED_DEPR_CONSENTINSTANCE_ATTRS = {
   'promptUI': true,
   'checkConsentHref': true,
+  // `promptIfUnknownForGeoGroup` is legacy field
   'promptIfUnknownForGeoGroup': true,
   'onUpdateHref': true,
 };
@@ -161,8 +162,7 @@ export class ConsentConfig {
       }
     }
 
-    // TODO(micajuineho): delete promptIfUnknownForGeoGroup, once we migrate fully
-    // Migrate to geoOverride
+    // `promptIfUnknownForGeoGroup` is legacy field
     const group = config['promptIfUnknownForGeoGroup'];
     if (typeof group === 'string') {
       config['consentRequired'] = false;
