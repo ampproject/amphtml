@@ -90,6 +90,28 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     fireHandler['touchend']('touchend', touchEndEvent);
   }
 
+  function swipeUp() {
+    const touchStartEvent = {touches: [{screenX: 150, screenY: 200}]};
+    fireHandler['touchstart']('touchstart', touchStartEvent);
+    
+    const touchMove = {touches: [{screenX: 150, screenY: 100}]};
+    fireHandler['touchmove']('touchmove', touchMove);
+
+    const touchEndEvent = {touches: [{screenX: 150, screenY: 100}]};
+    fireHandler['touchend']('touchend', touchEndEvent);
+  }
+
+  function swipeDown() {
+    const touchStartEvent = {touches: [{screenX: 150, screenY: 100}]};
+    fireHandler['touchstart']('touchstart', touchStartEvent);
+    
+    const touchMove = {touches: [{screenX: 150, screenY: 200}]};
+    fireHandler['touchmove']('touchmove', touchMove);
+
+    const touchEndEvent = {touches: [{screenX: 150, screenY: 200}]};
+    fireHandler['touchend']('touchend', touchEndEvent);
+  }
+
   beforeEach(() => {
     win = env.win;
     fakeMessaging = {
@@ -522,52 +544,31 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       expect(readySpy).to.have.been.calledOnce;
     });
 
-    it.only('set page attachment state should send message', async () => {
-      buildStoryPlayer();
-      await manager.loadPlayers();
-
-      await playerEl.setStoryState('page-attachment', true);
-
-      messagingMock.expects('sendRequest').withArgs('setDocumentState', {
-        state: 'PAGE_ATTACHMENT_STATE',
-        value: true,
-      });
-    });
-
-    it.only('get page attachment state should send message', async () => {
+    it('get page attachment state should send message', async () => {
       buildStoryPlayer();
       await manager.loadPlayers();
 
       await playerEl.getStoryState('page-attachment');
 
       messagingMock
+      .expects('sendRequest');
+
+      messagingMock
         .expects('sendRequest')
         .withArgs('getDocumentState', {state: 'PAGE_ATTACHMENT_STATE'});
     });
 
-    it.only('close page attachment means button is displayed', async () => {
+    it('close page attachment means button is displayed', async () => {
       const playerEl = win.document.createElement('amp-story-player');
+      playerEl.setAttribute('exit-control', 'back-button');
       appendStoriesToPlayer(playerEl, 1);
-      new AmpStoryPlayer(win, playerEl);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+      await player.load();
 
       expect(
         playerEl.shadowRoot.querySelector('button.amp-story-player-hide-button')
       ).to.not.exist;
-    });
-
-    it.only('get page attachment state fires page-attachment-close event once', async () => {
-      const playerEl = win.document.createElement('amp-story-player');
-      appendStoriesToPlayer(playerEl, 1);
-      const player = new AmpStoryPlayer(win, playerEl);
-
-      await player.load();
-
-      const readySpy = env.sandbox.spy();
-      playerEl.addEventListener('page-attachment-close', readySpy);
-
-      await player.getStoryState('page-attachment');
-
-      expect(readySpy).to.have.been.calledOnce;
     });
 
     it('navigate forward given a positive number in range', async () => {

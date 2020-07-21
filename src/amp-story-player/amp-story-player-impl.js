@@ -179,7 +179,6 @@ export class AmpStoryPlayer {
     this.element_.mute = this.mute.bind(this);
     this.element_.unmute = this.unmute.bind(this);
     this.element_.getStoryState = this.getStoryState.bind(this);
-    this.element_.setStoryState = this.setStoryState.bind(this);
   }
 
   /**
@@ -499,22 +498,6 @@ export class AmpStoryPlayer {
     switch (storyStateType) {
       case STORY_STATE_TYPE.PAGE_ATTACHMENT_STATE:
         this.getPageAttachmentState_();
-        break;
-      default:
-        break;
-    }
-  }
-
-  /**
-   * Sends a mesage updating the current story's state with provided value.
-   * @param {string} storyStateType
-   * @param {boolean|null} value
-   */
-  setStoryState(storyStateType, value) {
-    const iframeIdx = this.stories_[this.currentIdx_][IFRAME_IDX];
-    switch (storyStateType) {
-      case STORY_STATE_TYPE.PAGE_ATTACHMENT_STATE:
-        this.updatePageAttachmentState_(iframeIdx, value);
         break;
       default:
         break;
@@ -853,20 +836,6 @@ export class AmpStoryPlayer {
       iframeIdx,
       STORY_MESSAGE_STATE_TYPE.MUTED_STATE,
       mutedValue
-    );
-  }
-
-  /**
-   * Update the page attachment state of the story inside the iframe.
-   * @param {number} iframeIdx
-   * @param {boolean} pageAttachmentValue
-   * @private
-   */
-  updatePageAttachmentState_(iframeIdx, pageAttachmentValue) {
-    this.updateStoryState_(
-      iframeIdx,
-      STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE,
-      pageAttachmentValue
     );
   }
 
