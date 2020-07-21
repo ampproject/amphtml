@@ -1,0 +1,230 @@
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Code coverage report for dist/v0/amp-lightbox-0.1.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../prettify.css" />
+    <link rel="stylesheet" href="../../base.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="../../favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+    
+<body>
+<div class='wrapper'>
+    <div class='pad1'>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">dist/v0</a> amp-lightbox-0.1.js</h1>
+        <div class='clearfix'>
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">11.76% </span>
+                <span class="quiet">Statements</span>
+                <span class='fraction'>6/51</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>89/89</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>0/0</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">11.76% </span>
+                <span class="quiet">Lines</span>
+                <span class='fraction'>6/51</span>
+            </div>
+        
+            
+        </div>
+        <p class="quiet">
+            Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+        </p>
+    </div>
+    <div class='status-line low'></div>
+    <pre><table class="coverage">
+<tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
+<a name='L2'></a><a href='#L2'>2</a>
+<a name='L3'></a><a href='#L3'>3</a>
+<a name='L4'></a><a href='#L4'>4</a>
+<a name='L5'></a><a href='#L5'>5</a>
+<a name='L6'></a><a href='#L6'>6</a>
+<a name='L7'></a><a href='#L7'>7</a>
+<a name='L8'></a><a href='#L8'>8</a>
+<a name='L9'></a><a href='#L9'>9</a>
+<a name='L10'></a><a href='#L10'>10</a>
+<a name='L11'></a><a href='#L11'>11</a>
+<a name='L12'></a><a href='#L12'>12</a>
+<a name='L13'></a><a href='#L13'>13</a>
+<a name='L14'></a><a href='#L14'>14</a>
+<a name='L15'></a><a href='#L15'>15</a>
+<a name='L16'></a><a href='#L16'>16</a>
+<a name='L17'></a><a href='#L17'>17</a>
+<a name='L18'></a><a href='#L18'>18</a>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a>
+<a name='L40'></a><a href='#L40'>40</a>
+<a name='L41'></a><a href='#L41'>41</a>
+<a name='L42'></a><a href='#L42'>42</a>
+<a name='L43'></a><a href='#L43'>43</a>
+<a name='L44'></a><a href='#L44'>44</a>
+<a name='L45'></a><a href='#L45'>45</a>
+<a name='L46'></a><a href='#L46'>46</a>
+<a name='L47'></a><a href='#L47'>47</a>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >(self.AMP=self.AMP||[]).push({n:"amp-lightbox",v:"2007180235000",f:(function(AMP,_){</span>
+<span class="cstat-no" title="statement not covered" >var f,aa="function"==typeof Object.create?Object.create:function(a){function b(){}b.prototype=a;return new b};function ba(a){for(var b=["object"==typeof globalThis&amp;&amp;globalThis,a,"object"==typeof window&amp;&amp;window,"object"==typeof self&amp;&amp;self,"object"==typeof global&amp;&amp;global],c=0;c&lt;b.length;++c){var d=b[c];if(d&amp;&amp;d.Math==Math)return}(function(){throw Error("Cannot find global object");})()}ba(this);"function"===typeof Symbol&amp;&amp;Symbol("x");var m;</span>
+<span class="cstat-no" title="statement not covered" >if("function"==typeof Object.setPrototypeOf)m=Object.setPrototypeOf;else{var n;a:{var ca={a:!0},p={};try{p.__proto__=ca;n=p.a;break a}catch(a){}n=!1}m=n?function(a,b){a.__proto__=b;if(a.__proto__!==b)throw new TypeError(a+" is not extensible");return a}:null}var q=m;</span>
+<span class="cstat-no" title="statement not covered" >function r(a,b){a.prototype=aa(b.prototype);a.prototype.constructor=a;if(q)q(a,b);else for(var c in b)if("prototype"!=c)if(Object.defineProperties){var d=Object.getOwnPropertyDescriptor(b,c);d&amp;&amp;Object.defineProperty(a,c,d)}else a[c]=b[c];a.Pa=b.prototype}var t;function u(a,b){b=void 0===b?"":b;try{return decodeURIComponent(a)}catch(c){return b}};var da=/(?:^[#?]?|&amp;)([^=&amp;]+)(?:=([^&amp;]*))?/g;function v(a){var b=Object.create(null);if(!a)return b;for(var c;c=da.exec(a);){var d=u(c[1],c[1]),e=c[2]?u(c[2].replace(/\+/g," "),c[2]):"";b[d]=e}return b};var w="";</span>
+<span class="cstat-no" title="statement not covered" >function x(a){var b=a||self;if(b.__AMP_MODE)var c=b.__AMP_MODE;else{c=v(b.location.originalHash||b.location.hash);var d=v(b.location.search);w||(w=b.AMP_CONFIG&amp;&amp;b.AMP_CONFIG.v?b.AMP_CONFIG.v:"012007180235000");c={localDev:!1,development:!!(0&lt;=["1","actions","amp","amp4ads","amp4email"].indexOf(c.development)||b.AMP_DEV_MODE),examiner:"2"==c.development,esm:!1,geoOverride:c["amp-geo"],minified:!0,lite:void 0!=d.amp_lite,test:!1,log:c.log,version:"2007180235000",rtvVersion:w};c=b.__AMP_MODE=c}return c}</span>
+<span class="cstat-no" title="statement not covered" >;function ea(a){return a?Array.prototype.slice.call(a):[]};var y=self.AMP_CONFIG||{},fa=("string"==typeof y.cdnProxyRegex?new RegExp(y.cdnProxyRegex):y.cdnProxyRegex)||/^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org$/;function ha(a){if(self.document&amp;&amp;self.document.head&amp;&amp;(!self.location||!fa.test(self.location.origin))){var b=self.document.head.querySelector('meta[name="'+a+'"]');b&amp;&amp;b.getAttribute("content")}}y.cdnUrl||ha("runtime-host");y.geoApiUrl||ha("amp-geo-api");self.__AMP_LOG=self.__AMP_LOG||{user:null,dev:null,userForEmbed:null};var z=self.__AMP_LOG;function ia(){if(!z.user)throw Error("failed to call initLogConstructor");return z.user}function A(){if(z.dev)return z.dev;throw Error("failed to call initLogConstructor");};function ja(){var a,b;this.promise=new Promise(function(c,d){a=c;b=d});this.resolve=a;this.reject=b};function B(){this.o=null}f=B.prototype;f.add=function(a){var b=this;this.o||(this.o=[]);this.o.push(a);return function(){b.remove(a)}};f.remove=function(a){this.o&amp;&amp;(a=this.o.indexOf(a),-1&lt;a&amp;&amp;this.o.splice(a,1))};f.removeAll=function(){this.o&amp;&amp;(this.o.length=0)};f.fire=function(a){if(this.o)for(var b=this.o,c=0;c&lt;b.length;c++)(0,b[c])(a)};f.getHandlerCount=function(){return this.o?this.o.length:0};var ka=Object.prototype.hasOwnProperty;function C(a){return a||{}};C({c:!0,v:!0,a:!0,ad:!0,action:!0});function la(a){if(a.__AMP__EXPERIMENT_TOGGLES)return a.__AMP__EXPERIMENT_TOGGLES;a.__AMP__EXPERIMENT_TOGGLES=Object.create(null);var b=a.__AMP__EXPERIMENT_TOGGLES;if(a.AMP_CONFIG)for(var c in a.AMP_CONFIG){var d=a.AMP_CONFIG[c];"number"===typeof d&amp;&amp;0&lt;=d&amp;&amp;1&gt;=d&amp;&amp;(b[c]=Math.random()&lt;d)}if(a.AMP_CONFIG&amp;&amp;Array.isArray(a.AMP_CONFIG["allow-doc-opt-in"])&amp;&amp;0&lt;a.AMP_CONFIG["allow-doc-opt-in"].length){var e=a.AMP_CONFIG["allow-doc-opt-in"],g=a.document.head.querySelector('meta[name="amp-experiments-opt-in"]');</span>
+<span class="cstat-no" title="statement not covered" >if(g){var h=g.getAttribute("content").split(",");for(c=0;c&lt;h.length;c++)-1!=e.indexOf(h[c])&amp;&amp;(b[h[c]]=!0)}}Object.assign(b,ma(a));if(a.AMP_CONFIG&amp;&amp;Array.isArray(a.AMP_CONFIG["allow-url-opt-in"])&amp;&amp;0&lt;a.AMP_CONFIG["allow-url-opt-in"].length){c=a.AMP_CONFIG["allow-url-opt-in"];a=v(a.location.originalHash||a.location.hash);for(var k=0;k&lt;c.length;k++){var l=a["e-"+c[k]];"1"==l&amp;&amp;(b[c[k]]=!0);"0"==l&amp;&amp;(b[c[k]]=!1)}}return b}</span>
+<span class="cstat-no" title="statement not covered" >function ma(a){var b="";try{"localStorage"in a&amp;&amp;(b=a.localStorage.getItem("amp-experiment-toggles"))}catch(e){A().warn("EXPERIMENTS","Failed to retrieve experiments from localStorage.")}var c=b?b.split(/\s*,\s*/g):[];a=Object.create(null);for(var d=0;d&lt;c.length;d++)0!=c[d].length&amp;&amp;("-"==c[d][0]?a[c[d].substr(1)]=!1:a[c[d]]=!0);return a};var na=[{experimentId:"ampdoc-fie",isTrafficEligible:function(){return!0},branches:["21065001","21065002"]}];function oa(a){var b=a.ownerDocument.defaultView,c=b.__AMP_TOP||(b.__AMP_TOP=b),d=b!=c,e;if(la(c)["ampdoc-fie"]){c.__AMP_EXPERIMENT_BRANCHES=c.__AMP_EXPERIMENT_BRANCHES||{};for(e=0;e&lt;na.length;e++){var g=na[e],h=g.experimentId;ka.call(c.__AMP_EXPERIMENT_BRANCHES,h)||(g.isTrafficEligible&amp;&amp;g.isTrafficEligible(c)?!c.__AMP_EXPERIMENT_BRANCHES[h]&amp;&amp;la(c)[h]&amp;&amp;(g=g.branches,c.__AMP_EXPERIMENT_BRANCHES[h]=g[Math.floor(Math.random()*g.length)]||null):c.__AMP_EXPERIMENT_BRANCHES[h]=null)}e="21065002"===(c.__AMP_EXPERIMENT_BRANCHES?</span>
+<span class="cstat-no" title="statement not covered" >c.__AMP_EXPERIMENT_BRANCHES["ampdoc-fie"]:null)}else e=!1;var k=e;d&amp;&amp;!k?a=D(b,"action")?F(b,"action"):null:(a=G(a),a=pa(a),a=D(a,"action")?F(a,"action"):null);return a}function H(a,b){a=a.__AMP_TOP||(a.__AMP_TOP=a);return F(a,b)}function I(a,b){var c=G(a);c=pa(c);return F(c,b)}function G(a){return a.nodeType?H((a.ownerDocument||a).defaultView,"ampdoc").getAmpDoc(a):a}function pa(a){a=G(a);return a.isSingleDoc()?a.win:a}</span>
+<span class="cstat-no" title="statement not covered" >function F(a,b){D(a,b);var c=a.__AMP_SERVICES;c||(c=a.__AMP_SERVICES={});a=c[b];a.obj||(a.obj=new a.ctor(a.context),a.ctor=null,a.context=null,a.resolve&amp;&amp;a.resolve(a.obj));return a.obj}function D(a,b){a=a.__AMP_SERVICES&amp;&amp;a.__AMP_SERVICES[b];return!(!a||!a.ctor&amp;&amp;!a.obj)};/*</span>
+ https://mths.be/cssescape v1.5.1 by @mathias | MIT license */
+<span class="cstat-no" title="statement not covered" >function qa(a,b){for(;a&amp;&amp;void 0!==a;a=a.parentElement)if(b(a))return a;return null}function sa(a){return a.closest?a.closest(".i-amphtml-fie"):qa(a,function(a){var b=a.matches||a.webkitMatchesSelector||a.mozMatchesSelector||a.msMatchesSelector||a.oMatchesSelector;return b?b.call(a,".i-amphtml-fie"):!1})}function J(a){try{a.focus()}catch(b){}};function K(a){return I(a,"owners")};function L(a,b){var c=this;this.ya=H(a,"timer");this.Fa=b;this.Ea=0;this.O=-1;this.ca=0;this.ia=!1;this.Aa=function(){c.Z()}}L.prototype.isPending=function(){return-1!=this.O};L.prototype.schedule=function(a){var b=a||this.Ea;this.ia&amp;&amp;10&gt;b&amp;&amp;(b=10);var c=Date.now()+b;return!this.isPending()||-10&gt;c-this.ca?(this.cancel(),this.ca=c,this.O=this.ya.delay(this.Aa,b),!0):!1};L.prototype.Z=function(){this.O=-1;this.ca=0;this.ia=!0;this.Fa();this.ia=!1};</span>
+<span class="cstat-no" title="statement not covered" >L.prototype.cancel=function(){this.isPending()&amp;&amp;(this.ya.cancel(this.O),this.O=-1)};function ta(a,b){for(var c=0;c&lt;a.length;c++)if(b(a[c],c,a))return c;return-1};var M;function ua(a){if(void 0!==M)return M;M=!1;try{var b={get passive(){M=!0;return!1}};a.addEventListener("test-options",null,b);a.removeEventListener("test-options",null,b)}catch(c){}return M};function va(a,b,c,d){this.type=a;this.data=b;this.time=c;this.event=d}</span>
+<span class="cstat-no" title="statement not covered" >function wa(a,b,c){this.C=a;this.h=[];this.K=[];this.w=[];this.j=[];this.l=null;this.Ma=b;this.Na=c;this.$=!1;this.Z=new L(a.ownerDocument.defaultView,this.sa.bind(this));this.va=new B;this.N=Object.create(null);this.qa=this.La.bind(this);this.oa=this.Ja.bind(this);this.pa=this.Ka.bind(this);this.na=this.Ia.bind(this);var d=ua(a.ownerDocument.defaultView);this.C.addEventListener("touchstart",this.qa,d?{passive:!0}:!1);this.C.addEventListener("touchend",this.oa);this.C.addEventListener("touchmove",</span>
+<span class="cstat-no" title="statement not covered" >this.pa,d?{passive:!0}:!1);this.C.addEventListener("touchcancel",this.na);this.ea=!1}function xa(a){var b=void 0===b?!1:b;var c=void 0===c?!1:c;var d=a.__AMP_Gestures;d||(d=new wa(a,b,c),a.__AMP_Gestures=d);return d}f=wa.prototype;f.cleanup=function(){this.C.removeEventListener("touchstart",this.qa);this.C.removeEventListener("touchend",this.oa);this.C.removeEventListener("touchmove",this.pa);this.C.removeEventListener("touchcancel",this.na);delete this.C.__AMP_Gestures;this.Z.cancel()};</span>
+<span class="cstat-no" title="statement not covered" >f.onGesture=function(a,b){var c=new a(this),d=c.getType(),e=this.N[d];e||(this.h.push(c),e=new B,this.N[d]=e);return e.add(b)};f.removeGesture=function(a){var b=(new a(this)).getType();if(a=this.N[b]){a.removeAll();a=ta(this.h,function(a){return a.getType()==b});if(0&gt;a)return!1;this.h.splice(a,1);this.w.splice(a,1);this.j.splice(a,1);this.K.splice(a,1);delete this.N[b];return!0}return!1};f.onPointerDown=function(a){return this.va.add(a)};</span>
+<span class="cstat-no" title="statement not covered" >f.La=function(a){var b=Date.now();this.$=!1;this.va.fire(a);for(var c=0;c&lt;this.h.length;c++)if(!this.w[c]&amp;&amp;(this.j[c]&amp;&amp;this.j[c]&lt;b&amp;&amp;N(this,c),this.h[c].onTouchStart(a))){var d=c;this.K[d]=!0;this.j[d]=0}O(this,a)};f.Ka=function(a){for(var b=Date.now(),c=0;c&lt;this.h.length;c++)this.K[c]&amp;&amp;(this.j[c]&amp;&amp;this.j[c]&lt;b?N(this,c):this.h[c].onTouchMove(a)||N(this,c));O(this,a)};</span>
+<span class="cstat-no" title="statement not covered" >f.Ja=function(a){for(var b=Date.now(),c=0;c&lt;this.h.length;c++)if(this.K[c])if(this.j[c]&amp;&amp;this.j[c]&lt;b)N(this,c);else{this.h[c].onTouchEnd(a);var d=!this.j[c],e=this.j[c]&lt;b;this.l!=this.h[c]&amp;&amp;(d||e)&amp;&amp;N(this,c)}O(this,a)};f.Ia=function(a){for(var b=0;b&lt;this.h.length;b++){var c=b;this.w[c]=0;N(this,c)}O(this,a)};</span>
+<span class="cstat-no" title="statement not covered" >function O(a,b){var c=!!a.l||a.$;a.$=!1;if(!c)for(var d=Date.now(),e=0;e&lt;a.h.length;e++)if(a.w[e]||a.j[e]&amp;&amp;a.j[e]&gt;=d){c=!0;break}c?(b.stopPropagation(),a.Ma||b.preventDefault()):a.Na&amp;&amp;b.stopPropagation();a.ea&amp;&amp;(a.ea=!1,a.sa())}</span>
+<span class="cstat-no" title="statement not covered" >f.sa=function(){for(var a=Date.now(),b=-1,c=0;c&lt;this.h.length;c++)if(!this.w[c])this.j[c]&amp;&amp;this.j[c]&lt;a&amp;&amp;N(this,c);else if(-1==b||this.w[c]&gt;this.w[b])b=c;if(-1!=b){var d=0;for(c=0;c&lt;this.h.length;c++)!this.w[c]&amp;&amp;this.K[c]&amp;&amp;(d=Math.max(d,this.j[c]-a));if(2&gt;d){a=b;c=this.h[a];for(var e=0;e&lt;this.h.length;e++)if(e!=a){var g=e;this.w[g]=0;N(this,g)}this.w[a]=0;this.j[a]=0;this.l=c;c.acceptStart()}else this.Z.schedule(d)}};function N(a,b){a.K[b]=!1;a.j[b]=0;a.w[b]||a.h[b].acceptCancel()}</span>
+<span class="cstat-no" title="statement not covered" >function P(a,b){this.Oa=a;this.Y=b}f=P.prototype;f.getType=function(){return this.Oa};f.signalReady=function(a){var b=this.Y;if(b.l)this.acceptCancel();else{for(var c=Date.now(),d=0;d&lt;b.h.length;d++)b.h[d]==this&amp;&amp;(b.w[d]=c+a,b.j[d]=0);b.ea=!0}};f.signalPending=function(a){var b=this.Y;if(b.l)this.acceptCancel();else for(var c=Date.now(),d=0;d&lt;b.h.length;d++)b.h[d]==this&amp;&amp;(b.j[d]=c+a)};f.signalEnd=function(){var a=this.Y;a.l==this&amp;&amp;(a.l=null,a.$=!0)};</span>
+<span class="cstat-no" title="statement not covered" >f.signalEmit=function(a,b){var c=this.Y.N[this.getType()];c&amp;&amp;c.fire(new va(this.getType(),a,Date.now(),b))};f.acceptStart=function(){};f.acceptCancel=function(){};f.onTouchStart=function(){return!1};f.onTouchMove=function(){return!1};f.onTouchEnd=function(){};function ya(a,b,c){1&gt;b&amp;&amp;(b=1);var d=.5+Math.min(b/33.34,.5);return a/b*d+c*(1-d)};function Q(a,b,c,d){P.call(this,a,b);this.ta=c;this.za=d;this.l=!1;this.ma=this.la=this.fa=this.X=this.xa=this.ha=this.ga=this.H=this.G=this.J=this.I=0}r(Q,P);f=Q.prototype;f.onTouchStart=function(a){a=a.touches;return this.l&amp;&amp;a&amp;&amp;1&lt;a.length?!0:a&amp;&amp;1==a.length?(this.xa=Date.now(),this.I=a[0].clientX,this.J=a[0].clientY,!0):!1};</span>
+<span class="cstat-no" title="statement not covered" >f.onTouchMove=function(a){var b=a.touches;if(b&amp;&amp;1&lt;=b.length){var c=b[0];b=c.clientX;c=c.clientY;this.G=b;this.H=c;if(this.l)R(this,!1,!1,a);else if(a=Math.abs(b-this.I),b=Math.abs(c-this.J),this.ta&amp;&amp;this.za)(8&lt;=a||8&lt;=b)&amp;&amp;this.signalReady(-10);else if(this.ta)if(8&lt;=a&amp;&amp;a&gt;b)this.signalReady(-10);else{if(8&lt;=b)return!1}else if(this.za)if(8&lt;=b&amp;&amp;b&gt;a)this.signalReady(-10);else{if(8&lt;=a)return!1}else return!1;return!0}return!1};</span>
+<span class="cstat-no" title="statement not covered" >f.onTouchEnd=function(a){var b=a.touches;b&amp;&amp;0==b.length&amp;&amp;this.l&amp;&amp;(this.l=!1,R(this,!1,!0,a),this.signalEnd())};f.acceptStart=function(){this.l=!0;this.ga=this.I;this.ha=this.J;this.fa=this.xa;this.I=this.G;this.J=this.H;R(this,!0,!1,null)};f.acceptCancel=function(){this.l=!1};</span>
+<span class="cstat-no" title="statement not covered" >function R(a,b,c,d){a.X=Date.now();var e=a.X-a.fa;if(!c&amp;&amp;4&lt;e||c&amp;&amp;16&lt;e){var g=ya(a.G-a.ga,e,a.la),h=ya(a.H-a.ha,e,a.ma);if(!c||32&lt;e||0!=g||0!=h)a.la=1E-4&lt;Math.abs(g)?g:0,a.ma=1E-4&lt;Math.abs(h)?h:0;a.ga=a.G;a.ha=a.H;a.fa=a.X}a.signalEmit({first:b,last:c,time:a.X,deltaX:a.G-a.I,deltaY:a.H-a.J,startX:a.I,startY:a.J,lastX:a.G,lastY:a.H,velocityX:a.la,velocityY:a.ma},d)}function za(a){Q.call(this,"swipe-xy",a,!0,!0)}r(za,Q);var S,Aa="Webkit webkit Moz moz ms O o".split(" ");function Ba(a,b,c){if(2&gt;b.length?0:0==b.lastIndexOf("--",0))return b;S||(S=Object.create(null));var d=S[b];if(!d||c){d=b;if(void 0===a[b]){var e=b.charAt(0).toUpperCase()+b.slice(1);a:{for(var g=0;g&lt;Aa.length;g++){var h=Aa[g]+e;if(void 0!==a[h]){e=h;break a}}e=""}var k=e;void 0!==a[k]&amp;&amp;(d=k)}c||(S[b]=d)}return d}function Ca(a,b){a=a.style;for(var c in b)a.setProperty(Ba(a,c),b[c].toString(),"important")}</span>
+<span class="cstat-no" title="statement not covered" >function T(a,b,c){(b=Ba(a.style,b,void 0))&amp;&amp;((2&gt;b.length?0:0==b.lastIndexOf("--",0))?a.style.setProperty(b,c):a.style[b]=c)}function U(a,b){for(var c in b)T(a,c,b[c])}function V(a){"display"in a&amp;&amp;A().error("STYLE","`display` style detected in styles. You must use toggle instead.");return a}function Da(a){var b=!0;void 0===b&amp;&amp;(b=a.hasAttribute("hidden"));b?a.removeAttribute("hidden"):a.setAttribute("hidden","")}function Ea(a){for(var b=["transition"],c=0;c&lt;b.length;c++)T(a,b[c],null)};function Fa(a,b){function c(){d=0;var h=500-(a.Date.now()-e);if(0&lt;h)d=a.setTimeout(c,h);else{var k=g;g=null;b.apply(null,k)}}var d=0,e=0,g=null;return function(b){for(var h=[],l=0;l&lt;arguments.length;++l)h[l-0]=arguments[l];e=a.Date.now();g=h;d||(d=a.setTimeout(c,500))}};var W;function Ga(a){return a.classList.contains("i-amphtml-fie")||!!sa(a)};var Ha=['&lt;i-amphtml-ad-close-header role=button tabindex=0 aria-label="Close Ad"&gt;&lt;div&gt;Ad&lt;/div&gt;&lt;i-amphtml-ad-close-button class=amp-ad-close-button&gt;&lt;/i-amphtml-ad-close-button&gt;&lt;/i-amphtml-ad-close-header&gt;'],X={"fade-in":{openStyle:C({opacity:1}),closedStyle:C({opacity:0}),durationSeconds:.1},"fly-in-bottom":{openStyle:C({transform:"translate(0, 0)"}),closedStyle:C({transform:"translate(0, 100%)"}),durationSeconds:.2},"fly-in-top":{openStyle:C({transform:"translate(0, 0)"}),closedStyle:C({transform:"translate(0, -100%)"}),</span>
+durationSeconds:.2}};
+<span class="cstat-no" title="statement not covered" >function Y(a){var b=AMP.BaseElement.call(this,a)||this;b.ka=null;b.A=null;b.M=b.win.document;b.P=null;b.ba=-1;b.R=!1;b.U=null;b.T=null;b.W=null;b.V=null;b.da=null;b.F=!1;b.B=0;b.ua=0;b.aa=0;b.ja=null;b.S=(a.getAttribute("animate-in")||"fade-in").toLowerCase();b.m=null;b.D=null;b.L=null;var c=H(b.win,"platform");b.Ga=c.isIos();b.ra=Fa(b.win,function(){var a=ia().assertElement(b.A,"E#19457 this.container_"),c=K(b.element);c.scheduleLayout(b.element,a);c.scheduleResume(b.element,a)});return b}r(Y,AMP.BaseElement);</span>
+<span class="cstat-no" title="statement not covered" >f=Y.prototype;f.buildCallback=function(){var a=this;this.user().assert(ka.call(X,this.S),"Invalid `animate-in` value %s",this.S);this.element.classList.add("i-amphtml-overlay");this.P=oa(this.element);Ia(this);this.registerDefaultAction(function(b){return Ja(a,b.trust,b.caller)},"open");this.registerAction("close",function(b){return a.close(b.trust)});this.P.addToAllowlist("AMP-LIGHTBOX",["open","close"],["email"])};</span>
+<span class="cstat-no" title="statement not covered" >function Ka(a){ea(a.element.getElementsByClassName("i-amphtml-element")).forEach(function(b){K(a.element).setOwner(b,a.element)})}</span>
+<span class="cstat-no" title="statement not covered" >function La(a){if(!a.A){var b=a.element;a.F=b.hasAttribute("scrollable");var c=a.getRealChildren();a.A=b.ownerDocument.createElement("div");a.F||a.applyFillContent(a.A);b.appendChild(a.A);c.forEach(function(b){a.A.appendChild(b)});a.F&amp;&amp;(Ka(a),b.classList.add("i-amphtml-scrollable"),b.addEventListener("amp:dom-update",function(){Ka(a);Z(a,a.B,a.B)}),b.addEventListener("scroll",a.wa.bind(a)));if(!a.F)xa(b).onGesture(za,function(){});Ma(a)}}</span>
+<span class="cstat-no" title="statement not covered" >f.layoutCallback=function(){t||(t=Promise.resolve(void 0));var a=t;return a};function Ja(a,b,c){if(!a.R){La(a);a.U=a.Da.bind(a);a.M.documentElement.addEventListener("keydown",a.U);a.W=a.Ha.bind(a);a.M.documentElement.addEventListener("focusin",a.W);c&amp;&amp;(a.da=c);var d=new ja,e=d.promise,g=d.resolve;a.getViewport().enterLightboxMode(a.element,e).then(function(){return Na(a,g,b)})}}f.mutatedAttributesCallback=function(a){var b=a.open;void 0!==b&amp;&amp;(b?Ja(this,2,document.activeElement):this.close(2))};</span>
+<span class="cstat-no" title="statement not covered" >function Oa(a){var b=a.A.querySelector("[autofocus]");b&amp;&amp;J(b)}</span>
+<span class="cstat-no" title="statement not covered" >function Na(a,b,c){function d(){a.ra();b()}var e=a.element,g=X[a.S],h=g.durationSeconds,k=g.openStyle,l=g.closedStyle,E=Object.keys(k).map(function(a){return a+" "+h+"s ease-in"}).join(",");a.aa++;a.F&amp;&amp;T(e,"webkitOverflowScrolling","touch");T(e,"transition",E);U(e,V(l));Da(e);a.mutateElement(function(){e.scrollTop=0});Oa(a);a.mutateElement(function(){U(e,V(k))});g=a.A;a.F?(a.wa(),Z(a,a.B,a.B)):K(a.element).updateInViewport(a.element,g,!0);e.addEventListener("transitionend",d);e.addEventListener("animationend",</span>
+<span class="cstat-no" title="statement not covered" >d);var ra=K(a.element);ra.scheduleLayout(a.element,g);ra.scheduleResume(a.element,g);Pa(a,"lightboxOpen",c);I(a.getAmpDoc(),"history").push(a.close.bind(a)).then(function(b){a.ba=b});Qa(a);Ra(a);Sa(a);a.R=!0}function Ma(a){var b=a.element;if(null!=b.getAttribute("close-button")){var c=b.ownerDocument||b;W&amp;&amp;W.ownerDocument===c||(W=c.createElement("div"));c=W;c.innerHTML=Ha[0];var d=c.firstElementChild;c.removeChild(d);a.m=d;b.insertBefore(a.m,a.A)}}</span>
+<span class="cstat-no" title="statement not covered" >function Qa(a){if(a.m){a.T=a.Ca.bind(a);a.m.addEventListener("keydown",a.T);var b;a.measureMutateElement(function(){b=a.m.getBoundingClientRect().height},function(){a.m.classList.add("amp-ad-close-header");Ca(a.A,{"margin-top":b+"px","min-height":"calc(100vh - "+(b+"px)")})})}}function Sa(a){if(a.L||a.m)a.V=a.Ba.bind(a),a.D.addEventListener("click",a.V)}function Ta(a){if(a.L||a.m)a.D.removeEventListener("click",a.V),a.V=null,a.m&amp;&amp;(a.m.removeEventListener("keydown",a.T),a.T=null)}f.Ba=function(){this.close(3)};</span>
+<span class="cstat-no" title="statement not covered" >f.Da=function(a){"Escape"==a.key&amp;&amp;(a.preventDefault(),this.close(3))};f.Ca=function(a){"Enter"==a.key&amp;&amp;(a.preventDefault(),this.close(3))};f.close=function(a){var b=this;this.R&amp;&amp;(this.F&amp;&amp;T(this.element,"webkitOverflowScrolling",""),this.getViewport().leaveLightboxMode(this.element).then(function(){return Ua(b,a)}))};</span>
+<span class="cstat-no" title="statement not covered" >function Ua(a,b){function c(){e==a.aa&amp;&amp;(a.collapse(),a.ra())}var d=a.element,e=++a.aa;Va(a)?(Ea(d),c()):(d.addEventListener("transitionend",c),d.addEventListener("animationend",c));U(d,V(X[a.S].closedStyle));-1!=a.ba&amp;&amp;I(a.getAmpDoc(),"history").pop(a.ba);a.M.documentElement.removeEventListener("keydown",a.U);a.U=null;a.M.documentElement.removeEventListener("focusin",a.W);a.W=null;Ta(a);K(a.element).schedulePause(a.element,a.A);a.R=!1;Pa(a,"lightboxClose",b);a.da&amp;&amp;J(a.da)}</span>
+<span class="cstat-no" title="statement not covered" >function Va(a){return"inabox"==x(a.win).runtime||Ga(a.element)}f.Ha=function(){this.element.contains(document.activeElement)||this.close(3)};</span>
+<span class="cstat-no" title="statement not covered" >function Ra(a){if(!a.element.contains(document.activeElement)){a:if(a.D)var b=a.D;else if(a.m)b=a.m;else{b=a.element;for(var c=b.querySelectorAll("[on]"),d=0;d&lt;c.length;d++){var e=c[d];if(a.P.hasResolvableActionForTarget(e,"tap",b,e.parentElement)){b=e;break a}}b=void 0}a.D=b;a.D||(b=a.element.getAttribute("data-close-button-aria-label")||"Close the modal",c=a.M.createElement("button"),c.textContent=b,c.classList.add("i-amphtml-screen-reader"),c.tabIndex=-1,a.L=c,a.element.insertBefore(a.L,a.element.firstChild),</span>
+<span class="cstat-no" title="statement not covered" >a.D=a.L);J(a.D)}}f.wa=function(){var a=this.element.scrollTop;this.Ga&amp;&amp;(0==a?this.element.scrollTop=1:this.element.scrollHeight==a+this.element.offsetHeight&amp;&amp;(this.element.scrollTop=a-1));this.B=a;null===this.ja&amp;&amp;Wa(this,a)};</span>
+<span class="cstat-no" title="statement not covered" >function Wa(a,b){a.ja=H(a.win,"timer").delay(function(){if(30&gt;Math.abs(b-a.B)){A().fine("amp-lightbox","slow scrolling: %s - %s",b,a.B);a.ja=null;var c=a.B;A().fine("amp-lightbox","update_");Z(a,c,a.ua);a.ua=c;a.B=c}else A().fine("amp-lightbox","fast scrolling: %s - %s",b,a.B),Wa(a,a.B)},100)}</span>
+<span class="cstat-no" title="statement not covered" >function Z(a,b,c){var d=[];Xa(a,b,function(b){d.push(b);var c=K(a.element);c.updateInViewport(a.element,b,!0);c.scheduleLayout(a.element,b)});c!=b&amp;&amp;Xa(a,c,function(b){d.includes(b)||K(a.element).updateInViewport(a.element,b,!1)})}</span>
+<span class="cstat-no" title="statement not covered" >function Xa(a,b,c){a.ka||(a.ka={width:a.element.clientWidth,height:a.element.clientHeight});for(var d=a.ka.height,e=ea(a.element.getElementsByClassName("i-amphtml-element")),g=0;g&lt;e.length;g++){for(var h=e[g],k=0,l=h;l&amp;&amp;a.element.contains(l);l=l.offsetParent)k+=l.offsetTop;var E=2*d;k+h.offsetHeight&gt;=b-E&amp;&amp;k&lt;=b+E&amp;&amp;c(h)}}function Ia(a){var b=a.win;Ga(a.element)&amp;&amp;Ya(b,b.document.body)}</span>
+<span class="cstat-no" title="statement not covered" >function Pa(a,b,c){var d=a.win;var e="amp-lightbox."+b;var g=C({}),h={detail:g};Object.assign(h,void 0);"function"==typeof d.CustomEvent?e=new d.CustomEvent(e,h):(d=d.document.createEvent("CustomEvent"),d.initCustomEvent(e,!!h.bubbles,!!h.cancelable,g),e=d);a.P.trigger(a.element,b,e,c)}</span>
+<span class="cstat-no" title="statement not covered" >function Ya(a,b){var c={},d=H(a,"ampdoc").getAmpDoc(b);I(d,"mutator").measureMutateElement(b,function(){c.alreadyTransparent="rgba(0, 0, 0, 0)"==(a.getComputedStyle(b)||Object.create(null))["background-color"]},function(){c.alreadyTransparent||ia().warn("amp-lightbox","The background of the &lt;body&gt; element has been forced to transparent. If you need to set background, use an intermediate container.");Ca(b,{background:"transparent"})})}</span>
+<span class="cstat-no" title="statement not covered" >(function(a){"inabox"==x().runtime&amp;&amp;Ya(window,document.body);a.registerElement("amp-lightbox",Y,"amp-lightbox{display:none;position:fixed!important;z-index:1000;top:0!important;left:0!important;bottom:0!important;right:0!important}amp-lightbox[scrollable]{overflow-y:auto!important;overflow-x:hidden!important}i-amphtml-ad-close-header{height:60px!important;display:block!important;visibility:visible!important;opacity:0;position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:1000!important;display:-ms-flexbox!important;display:flex!important;-ms-flex-align:center!important;align-items:center!important;-ms-flex-pack:right!important;justify-content:right!important;transition:opacity 0.1s ease-in}[animate-in=fly-in-bottom]&gt;i-amphtml-ad-close-header,[animate-in=fly-in-top]&gt;i-amphtml-ad-close-header{transition-delay:0.2s}.amp-ad-close-header{opacity:1!important;box-sizing:border-box;padding:5px;line-height:40px;background-color:#000;color:#fff;font-family:Helvetica,sans-serif;font-size:12px;cursor:pointer}.amp-ad-close-header&gt;:first-child{margin-left:auto!important;pointer-events:none!important}.amp-ad-close-button{display:block!important;background:url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='%23fff'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3C/svg%3E\") no-repeat;background-position:50%;width:40px;height:40px;pointer-events:none!important;border-radius:40px;margin-left:5px}.amp-ad-close-header:active&gt;.amp-ad-close-button{background-color:hsla(0,0%,100%,0.3)}\n/*# sourceURL=/extensions/amp-lightbox/0.1/amp-lightbox.css*/")})(self.AMP);</span>
+})});
+&nbsp;
+//# sourceMappingURL=amp-lightbox-0.1.js.map
+&nbsp;</pre></td></tr></table></pre>
+
+                <div class='push'></div><!-- for sticky footer -->
+            </div><!-- /wrapper -->
+            <div class='footer quiet pad2 space-top1 center small'>
+                Code coverage generated by
+                <a href="https://istanbul.js.org/" target="_blank">istanbul</a>
+                at Mon Jul 20 2020 19:48:39 GMT-0700 (Pacific Daylight Time)
+            </div>
+        </div>
+        <script src="../../prettify.js"></script>
+        <script>
+            window.onload = function () {
+                prettyPrint();
+            };
+        </script>
+        <script src="../../sorter.js"></script>
+        <script src="../../block-navigation.js"></script>
+    </body>
+</html>
+    
