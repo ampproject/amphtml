@@ -108,8 +108,8 @@ describes.realWin('no signing', {amp: true}, (env) => {
     await a4a.layoutCallback();
     const fie = doc.body.querySelector('iframe[srcdoc]');
     expect(fie.getAttribute('sandbox')).to.equal(
-      'allow-forms allow-popups-to-escape-sandbox allow-same-origin ' +
-        'allow-top-navigation'
+      'allow-forms allow-popups allow-popups-to-escape-sandbox ' +
+        'allow-same-origin allow-top-navigation'
     );
     const cspMeta = fie.contentDocument.querySelector(
       'meta[http-equiv=Content-Security-Policy]'
@@ -118,6 +118,7 @@ describes.realWin('no signing', {amp: true}, (env) => {
     expect(cspMeta.content).to.include('img-src *;');
     expect(cspMeta.content).to.include('media-src *;');
     expect(cspMeta.content).to.include('font-src *;');
+    expect(cspMeta.content).to.include('connect-src *;');
     expect(cspMeta.content).to.include("script-src 'none';");
     expect(cspMeta.content).to.include("object-src 'none';");
     expect(cspMeta.content).to.include("child-src 'none';");
