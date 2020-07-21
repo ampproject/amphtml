@@ -200,6 +200,7 @@ export class AmpStoryPlayer {
   /** @private */
   signalReady_() {
     this.element_.dispatchEvent(createCustomEvent(this.win_, 'ready', {}));
+    debugger;
     this.element_.isReady = true;
   }
 
@@ -246,6 +247,8 @@ export class AmpStoryPlayer {
     }
 
     const button = this.doc_.createElement('button');
+    this.rootEl_.appendChild(button);
+
     button.classList.add(BUTTON_CLASSES[option]);
 
     button.addEventListener('click', () => {
@@ -253,8 +256,6 @@ export class AmpStoryPlayer {
         createCustomEvent(this.win_, BUTTON_EVENTS[option], {})
       );
     });
-
-    this.rootEl_.appendChild(button);
   }
 
   /**
