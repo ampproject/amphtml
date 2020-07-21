@@ -88,6 +88,7 @@ export let InteractiveComponentDef;
  *    canShowSystemLayerButtons: boolean,
  *    accessState: boolean,
  *    adState: boolean,
+ *    pageAttachmentState: boolean,
  *    affiliateLinkState: !Element,
  *    bookendState: boolean,
  *    desktopState: boolean,
@@ -137,6 +138,7 @@ export const StateProperty = {
   // App States.
   ACCESS_STATE: 'accessState', // amp-access paywall.
   AD_STATE: 'adState',
+  PAGE_ATTACHMENT_STATE: 'pageAttachmentState',
   BOOKEND_STATE: 'bookendState',
   AFFILIATE_LINK_STATE: 'affiliateLinkState',
   DESKTOP_STATE: 'desktopState',
@@ -197,6 +199,7 @@ export const Action = {
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
   TOGGLE_INTERACTIVE_COMPONENT: 'toggleInteractiveComponent',
   TOGGLE_MUTED: 'toggleMuted',
+  TOGGLE_PAGE_ATTACHMENT_STATE: 'togglePageAttachmentState',
   TOGGLE_PAGE_HAS_AUDIO: 'togglePageHasAudio',
   TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK: 'togglePageHasElementWithPlayblack',
   TOGGLE_PAUSED: 'togglePaused',
@@ -229,6 +232,11 @@ const stateComparisonFunctions = {
     (old, curr) => old.element !== curr.element || old.state !== curr.state,
   [StateProperty.NAVIGATION_PATH]: (old, curr) => old.length !== curr.length,
   [StateProperty.PAGE_IDS]: (old, curr) => old.length !== curr.length,
+  [StateProperty.PAGE_SIZE]: (old, curr) =>
+    old === null ||
+    curr === null ||
+    old.width !== curr.width ||
+    old.height !== curr.height,
   [StateProperty.INTERACTIVE_REACT_STATE]: (old, curr) =>
     !deepEquals(old, curr, 3),
 };
@@ -275,6 +283,11 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.ACCESS_STATE]: !!data,
         [StateProperty.PAUSED_STATE]: !!data,
+      });
+    case Action.TOGGLE_PAGE_ATTACHMENT_STATE:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.PAGE_ATTACHMENT_STATE]: !!data,
       });
     // Triggers the ad UI.
     case Action.TOGGLE_AD:
@@ -565,6 +578,7 @@ export class AmpStoryStoreService {
       },
       [StateProperty.INTERACTIVE_REACT_STATE]: {},
       [StateProperty.MUTED_STATE]: true,
+      [StateProperty.PAGE_ATTACHMENT_STATE]: false,
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
       [StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: false,
       [StateProperty.PAUSED_STATE]: false,
