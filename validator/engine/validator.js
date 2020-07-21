@@ -4336,9 +4336,9 @@ function validateSsrLayout(
       validInternalClasses[getLayoutSizeDefinedClass()] = 0;
     }
     const classes = classAttr.split(/[\s+]/);
-    for (const classValue of classes) {
-      if (googString./*OK*/ startsWith(classValue, 'i-amphtml-') &&
-          !(classValue in validInternalClasses)) {
+    for (const classToken of classes) {
+      if (googString./*OK*/ startsWith(classToken, 'i-amphtml-') &&
+          !(classToken in validInternalClasses)) {
         context.addError(
             generated.ValidationError.Code.INVALID_ATTR_VALUE,
             context.getLineCol(),
@@ -4697,6 +4697,25 @@ function validateAttributeInExtension(tagSpec, context, attr, result) {
 }
 
 /**
+ * Validates that the reserved `i-amphtml-` prefix is not used in a class
+ * token.
+ * @param {!parserInterface.ParsedAttr} attr
+ * @param {!generated.TagSpec} tagSpec
+ * @param {!Context} context
+ * @param {!generated.ValidationResult} result
+ */
+function validateClassAttr(attr, tagSpec, context, result) {
+  const re = /(^|[\t\n\f\r ])i-amphtml-/;
+  if (re.test(attr.value)) {
+    context.addError(
+        generated.ValidationError.Code.INVALID_ATTR_VALUE, context.getLineCol(),
+        /* params */[attr.name, getTagDescriptiveName(tagSpec), attr.value],
+        'https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/#disallowed-styles',
+        result);
+  }
+}
+
+/**
  * Validates that LTS is used for either all script sources or none.
  * @param {!parserInterface.ParsedAttr} srcAttr
  * @param {!generated.TagSpec} tagSpec
@@ -4997,7 +5016,7 @@ function ShouldSuppressDevModeErrors(encounteredTag, context) {
  * Validates whether the attributes set on |encountered_tag| conform to this
  * tag specification. All mandatory attributes must appear. Only attributes
  * explicitly mentioned by this tag spec may appear.
- * Returns true iff the validation is successful.
+ * Sets result->validation_result.status to FAIL if unsuccessful.
  * @param {!ParsedTagSpec} parsedTagSpec
  * @param {?ParsedTagSpec} bestMatchReferencePoint
  * @param {!Context} context
@@ -5037,12 +5056,15 @@ function validateAttributes(
   // values. We skip over this array 2 at a time to iterate over the keys.
   const attrsByName = parsedTagSpec.getAttrsByName();
   for (const attr of encounteredTag.attrs()) {
-    // For transformed AMP, attributes `class` and `i-amphtml-layout` are
-    // handled within validateSsrLayout for non-sizer elements.
-    if (context.isTransformed() &&
-        encounteredTag.lowerName() !== 'i-amphtml-sizer' &&
-        (attr.name === 'class' || attr.name === 'i-amphtml-layout')) {
-      continue;
+    if (context.isTransformed()) {
+      // For transformed AMP, `i-amphtml-layout` is handled within
+      // validateSsrLayout, called by validateLayout above.
+      if (attr.name === 'i-amphtml-layout') {
+        continue;
+      }
+    } else if (attr.name === 'class') {
+      // For non-transformed AMP, `class` must not contain 'i-amphtml-' prefix.
+      validateClassAttr(attr, spec, context, result.validationResult);
     }
 
     // If |spec| is the runtime or an extension script, validate that LTS is

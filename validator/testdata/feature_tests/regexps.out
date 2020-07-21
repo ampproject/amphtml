@@ -170,10 +170,10 @@ feature_tests/regexps.html:122:2 The text inside tag 'style amp-custom' contains
 |    <div class="example-amp-font"></div>
 |    <div class="example-amp-font i-amphtml-hidden"></div>
 >>   ^~~~~~~~~
-feature_tests/regexps.html:140:2 The attribute 'class' in tag 'div' is set to the invalid value 'example-amp-font i-amphtml-hidden'.
+feature_tests/regexps.html:140:2 The attribute 'class' in tag 'div' is set to the invalid value 'example-amp-font i-amphtml-hidden'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/#disallowed-styles)
 |    <div class="i-amphtml-hidden example-amp-font"></div>
 >>   ^~~~~~~~~
-feature_tests/regexps.html:141:2 The attribute 'class' in tag 'div' is set to the invalid value 'i-amphtml-hidden example-amp-font'.
+feature_tests/regexps.html:141:2 The attribute 'class' in tag 'div' is set to the invalid value 'i-amphtml-hidden example-amp-font'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/#disallowed-styles)
 |
 |    <!--
 |    id disallowed_value_regex: lengthy, see protoascii
