@@ -219,7 +219,10 @@ export class AmpStoryPlayer {
    * @private
    */
   createStoryAnchor_(story) {
-    const anchor = this.doc_.createElement('a');
+    const anchor =
+      /** @type {!HTMLAnchorElement} */
+      (this.doc_.createElement('a'));
+
     anchor.href = story.href;
     story.posterImage &&
       anchor.setAttribute('data-poster-portrait-src', story.posterImage);
