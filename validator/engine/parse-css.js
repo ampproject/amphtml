@@ -1426,8 +1426,10 @@ const SelectorVisitor = class extends RuleVisitor {
     const tokenStream = new TokenStream(qualifiedRule.prelude);
     tokenStream.consume();
     const maybeSelector = parseASelectorsGroup(tokenStream);
-    if (maybeSelector instanceof tokenize_css.ErrorToken)
+    if (maybeSelector instanceof tokenize_css.ErrorToken) {
       this.errors_.push(maybeSelector);
+      return;
+    }
 
     /** @type {!Array<!Selector>} */
     const toVisit = [maybeSelector];
