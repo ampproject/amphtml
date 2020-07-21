@@ -104,19 +104,26 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
     }
     this.storeService_.subscribe(
       StateProperty.INTERACTIVE_REACT_STATE,
-      (data) => {
-        const results = processResults(data, this.options_);
-        this.options_.forEach((e) => {
-          if (e.resultscategory === results.category) {
-            this.mutateElement(() => {
-              this.updateCategory_(e);
-              this.updateToPostSelectionState_(null);
-            });
-          }
-        });
-      },
+      this.onInteractiveReactStateUpdate_,
       true
     );
+  }
+
+  /**
+   * Receives state updates and updates DOM
+   * @param {!Map<string, {option: ?./amp-story-interactive.OptionConfigType, interactiveId: string}>} interactiveState
+   * @private
+   */
+  onInteractiveReactStateUpdate_(interactiveState) {
+    const results = processResults(interactiveState, this.options_);
+    this.options_.forEach((e) => {
+      if (e.resultscategory === results.category) {
+        this.mutateElement(() => {
+          this.updateCategory_(e);
+          this.updateToPostSelectionState_(null);
+        });
+      }
+    });
   }
 
   /**
