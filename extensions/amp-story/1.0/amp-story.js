@@ -1654,7 +1654,7 @@ export class AmpStory extends AMP.BaseElement {
   triggerActiveEventForPage_() {
     // TODO(alanorozco): pass event priority once amphtml-story repo is merged
     // with upstream.
-    if (this.viewerMessagingHandler_) {
+    if (this.viewerMessagingHandler_ && this.activePage_) {
       const pageIndex = this.getPageIndex(this.activePage_);
       this.viewerMessagingHandler_.send(
         'storyPageView',
