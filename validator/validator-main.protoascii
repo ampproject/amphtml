@@ -20,13 +20,13 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii, etc) are always released together.
-min_validator_revision_required: 474
+min_validator_revision_required: 475
 
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 1060
+spec_file_revision: 1061
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed"
@@ -4627,6 +4627,11 @@ tags: {
     mandatory: true
   }
   attrs: {
+    name: "class"
+    value: "i-amphtml-intrinsic-sizer"
+    mandatory: true
+  }
+  attrs: {
     name: "role"
     value: "presentation"
     mandatory: true
@@ -5478,12 +5483,11 @@ attr_lists: {
   # 3.2.5 HTML5 Global attributes.
   attrs: { name: "accesskey" }
   attrs: {
-    # attribute "class" for transformed is handled within the Validator engine.
-    # If this changes, please be sure to also update:
-    # amp-experiment 1.0 implementation.
-    disabled_by: "transformed"
     name: "class"
-    disallowed_value_regex: "(^|\\W)i-amphtml-"
+    # attribute "class" is handled within the Validator engine, since we need to
+    # handle transformed and non-transformed cases while still allowing "class"
+    # attribute generically.
+    # disallowed_value_regex: "(^|[\t\n\f\r ])i-amphtml-"
   }
   attrs: { name: "dir" }
   attrs: { name: "draggable" }
