@@ -539,12 +539,38 @@ export class AmpStoryPlayer {
    * @private
    */
   next_() {
-    if (this.currentIdx_ + 1 >= this.stories_.length && this.element_.getAttribute('enable-circular-wrapping') != true) {
+    if (
+      this.currentIdx_ + 1 >= this.stories_.length &&
+      (this.element_.getAttribute('enable-circular-wrapping') === false ||
+        this.element_.getAttribute('enable-circular-wrapping') === null)
+    ) {
       return;
     }
 
-    if (this.currentIdx_ + 1 >= this.stories_.length && this.element_.getAttribute('enable-circular-wrapping') === true) {
-      this.currentIdx_ == -1;
+    if (
+      this.currentIdx_ + 1 >= this.stories_.length &&
+      this.element_.getAttribute('enable-circular-wrapping') === true
+    ) {
+      this.currentIdx_ = 0;
+
+      const previousStory = this.stories_[this.stories_.length - 1];
+      this.updatePreviousIframe_(
+        previousStory[IFRAME_IDX],
+        IframePosition.PREVIOUS
+      );
+
+      const currentStory = this.stories_[this.currentIdx_];
+      this.updateCurrentIframe_(currentStory[IFRAME_IDX]);
+
+      const nextStoryIdx = this.currentIdx_ + 1;
+      if (
+        nextStoryIdx < this.stories_.length &&
+        this.stories_[nextStoryIdx][IFRAME_IDX] === undefined
+      ) {
+        this.allocateIframeForStory_(nextStoryIdx);
+      }
+      this.signalNavigation_();
+      return;
     }
 
     this.currentIdx_++;
@@ -573,12 +599,38 @@ export class AmpStoryPlayer {
    * @private
    */
   previous_() {
-    if (this.currentIdx_ - 1 < 0 && this.element_.getAttribute('enable-circular-wrapping') != true) {
+    if (
+      this.currentIdx_ - 1 < 0 &&
+      (this.element_.getAttribute('enable-circular-wrapping') === false ||
+        this.element_.getAttribute('enable-circular-wrapping') === null)
+    ) {
       return;
     }
 
-    if (this.currentIdx_ - 1 < 0 && this.element_.getAttribute('enable-circular-wrapping') === true) {
-      this.currentIdx_ = this.stories_.length;
+    if (
+      this.currentIdx_ - 1 < 0 &&
+      this.element_.getAttribute('enable-circular-wrapping') === true
+    ) {
+      this.currentIdx_ = this.stories_.length - 1;
+
+      const previousStory = this.stories_[0];
+      this.updatePreviousIframe_(
+        previousStory[IFRAME_IDX],
+        IframePosition.NEXT
+      );
+
+      const currentStory = this.stories_[this.currentIdx_];
+      this.updateCurrentIframe_(currentStory[IFRAME_IDX]);
+
+      const nextStoryIdx = this.currentIdx_ - 1;
+      if (
+        nextStoryIdx >= 0 &&
+        this.stories_[nextStoryIdx][IFRAME_IDX] === undefined
+      ) {
+        this.allocateIframeForStory_(nextStoryIdx, true /** reverse */);
+      }
+      this.signalNavigation_();
+      return;
     }
 
     this.currentIdx_--;
@@ -607,8 +659,10 @@ export class AmpStoryPlayer {
     if (storyDelta === 0) {
       return;
     }
-    if (this.element_.getAttribute('enable-circular-wrapping') === false ||
-    this.element_.getAttribute('enable-circular-wrapping') === null) {
+    if (
+      this.element_.getAttribute('enable-circular-wrapping') === false ||
+      this.element_.getAttribute('enable-circular-wrapping') === null
+    ) {
       if (
         this.currentIdx_ + storyDelta >= this.stories_.length ||
         this.currentIdx_ + storyDelta < 0
@@ -618,22 +672,32 @@ export class AmpStoryPlayer {
       const currentStory = this.stories_[this.currentIdx_ + storyDelta];
 
       this.show(currentStory.href);
+      this.signalNavigation_();
     }
     if (this.element_.getAttribute('enable-circular-wrapping') === true) {
       if (this.currentIdx_ + storyDelta >= this.stories_.length) {
-        const currentStory = this.stories_[this.currentIdx_ + storyDelta - this.stories_.length];
-        
+        const currentStory = this.stories_[
+          this.currentIdx_ + storyDelta - this.stories_.length
+        ];
+
         this.show(currentStory.href);
+        this.signalNavigation_();
+        return;
       }
       if (this.currentIdx_ + storyDelta < 0) {
-        const currentStory = this.stories_[this.currentIdx_ + storyDelta + this.stories_.length];
-  
+        const currentStory = this.stories_[
+          this.currentIdx_ + storyDelta + this.stories_.length
+        ];
+
         this.show(currentStory.href);
+        this.signalNavigation_();
+        return;
       }
       const currentStory = this.stories_[this.currentIdx_ + storyDelta];
 
-    this.show(currentStory.href);
-    this.signalNavigation_();
+      this.show(currentStory.href);
+      this.signalNavigation_();
+    }
   }
 
   /**
@@ -1004,30 +1068,5 @@ export class AmpStoryPlayer {
 
     const {screenX: x, screenY: y} = touches[0];
     return {x, y};
-  }
-
-  /**
-   * Sets circular wrapping to be enabled or disabled.
-   * @private
-   */
-  circularWrapping() {
-    const option = this.element_.getAttribute('enable-circular-wrapping');
-    
-    const currentStory = this.stories_[this.currentIdx_];
-    this.updateCurrentIframe_(currentStory[IFRAME_IDX]);
-    
-    if (option.value === false || option.value === null) {
-      return;
-    }
-    if (option.value == true) {
-      if (this.currentIdx_ === this.stories_.length - 1) {
-        this.allocateIframeForStory_(0);
-      }
-      if (this.currentIdx_ === 0) {
-        this.allocateIframeForStory_(this.stories_.length - 1);
-        const previousStory = this.stories_[this.stories_.length - 1];
-        this.updatePreviousIframe_(previousStory[IFRAME_IDX], IframePosition.NEXT);
-      }
-    }
   }
 }

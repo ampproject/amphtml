@@ -604,6 +604,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       return expect(() => player.go(-1)).to.throw('Out of Story range.');
     });
 
+    //FAILS
     it('last story call to next_() is the first story', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
@@ -613,17 +614,19 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
       await nextTick();
 
+      const navigationSpy = env.sandbox.spy();
+      playerEl.addEventListener('navigation', navigationSpy);
       playerEl.setAttribute('enable-circular-wrapping', true);
-
       player.go(4);
       player.next_();
-
-      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-      await afterRenderPromise();
-      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+      expect(navigationSpy.firstCall.args[0].type).to.eql('navigation');
+      expect(navigationSpy.firstCall.args[0].detail).to.eql({
+        index: 0,
+        remaining: 4,
+      });
     });
 
+    //FAILS
     it('first story call to previous_() is the last story', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
@@ -633,17 +636,18 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
       await nextTick();
 
+      const navigationSpy = env.sandbox.spy();
+      playerEl.addEventListener('navigation', navigationSpy);
       playerEl.setAttribute('enable-circular-wrapping', true);
-
       player.previous_();
-
-      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-      await afterRenderPromise();
-      //expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-      //expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-      expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+      expect(navigationSpy.firstCall.args[0].type).to.eql('navigation');
+      expect(navigationSpy.firstCall.args[0].detail).to.eql({
+        index: 4,
+        remaining: 0,
+      });
     });
 
+    //FAILS
     it('navigate to first story when last story is finished', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
@@ -653,18 +657,19 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
       await nextTick();
 
+      const navigationSpy = env.sandbox.spy();
+      playerEl.addEventListener('navigation', navigationSpy);
       playerEl.setAttribute('enable-circular-wrapping', true);
-
       player.go(4);
       player.go(1);
-
-      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-      await afterRenderPromise();
-      //expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('0');
-      //expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('1');
-      expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('1');
+      expect(navigationSpy.firstCall.args[0].type).to.eql('navigation');
+      expect(navigationSpy.firstCall.args[0].detail).to.eql({
+        index: 0,
+        remaining: 4,
+      });
     });
 
+    //FAILS
     it('navigate to last story when first story is requested to go back', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
@@ -674,30 +679,43 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
       await nextTick();
 
+      const navigationSpy = env.sandbox.spy();
+      playerEl.addEventListener('navigation', navigationSpy);
       playerEl.setAttribute('enable-circular-wrapping', true);
-
       player.go(-1);
-
-      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-      await afterRenderPromise();
-      //expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-      //expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-      expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('0');
-    });
-    
-    it('signals when player changed story using next method', async () => {
-
-        const navigationSpy = env.sandbox.spy();
-        playerEl.addEventListener('navigation', navigationSpy);
-        player.next_();
-        expect(navigationSpy.firstCall.args[0].type).to.eql('navigation');
-        expect(navigationSpy.firstCall.args[0].detail).to.eql({
-          index: 1,
-          remaining: 3,
-        });
+      expect(navigationSpy.firstCall.args[0].type).to.eql('navigation');
+      expect(navigationSpy.firstCall.args[0].detail).to.eql({
+        index: 4,
+        remaining: 0,
       });
-  
+    });
+
+    it('signals when player changed story using next method', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
+      const navigationSpy = env.sandbox.spy();
+      playerEl.addEventListener('navigation', navigationSpy);
+      player.next_();
+      expect(navigationSpy.firstCall.args[0].type).to.eql('navigation');
+      expect(navigationSpy.firstCall.args[0].detail).to.eql({
+        index: 1,
+        remaining: 3,
+      });
+    });
+
     it('signals when player changed story using previous method', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('navigation', navigationSpy);
       player.next_();
@@ -710,6 +728,12 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     });
 
     it('signals when player changed story using go method', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
 
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('navigation', navigationSpy);
