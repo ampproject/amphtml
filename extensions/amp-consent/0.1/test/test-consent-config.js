@@ -80,6 +80,19 @@ describes.realWin('ConsentConfig', {amp: 1}, (env) => {
       );
     });
 
+    it('should ignore promptUISrc w/ amp-story-consent', async () => {
+      appendConfigScriptElement(doc, element, dict({}));
+      element.setAttribute('type', '_ping_');
+      element.appendChild(doc.createElement('amp-story-consent'));
+      const expectedError =
+        'amp-consent/consent-config: ' +
+        '`promptUiSrc` cannot be specified while using' +
+        ' amp-story-consent.';
+      await expect(
+        new ConsentConfig(element).getConsentConfigPromise()
+      ).to.be.rejectedWith(expectedError);
+    });
+
     it('converts deprecated format to new format', async () => {
       appendConfigScriptElement(
         doc,
