@@ -48,12 +48,16 @@ const BUILTINS = {
       'text': 'TITLE',
       'url': 'CANONICAL_URL',
     }),
+    'canChangeColor': true,
+    'canHaveChildren': true,
   },
   'facebook': {
     'shareEndpoint': 'https://www.facebook.com/dialog/share',
     'defaultParams': dict({
       'href': 'CANONICAL_URL',
     }),
+    'canChangeColor': true,
+    'canHaveChildren': true,
   },
   'pinterest': {
     'shareEndpoint': 'https://www.pinterest.com/pin/create/button/',
@@ -61,6 +65,8 @@ const BUILTINS = {
       'url': 'CANONICAL_URL',
       'description': 'TITLE',
     }),
+    'canChangeColor': true,
+    'canHaveChildren': true,
   },
   'linkedin': {
     'shareEndpoint': 'https://www.linkedin.com/shareArticle',
@@ -68,6 +74,8 @@ const BUILTINS = {
       'url': 'CANONICAL_URL',
       'mini': 'true',
     }),
+    'canChangeColor': true,
+    'canHaveChildren': true,
   },
   'email': {
     'bindings': ['recipient'],
@@ -77,6 +85,8 @@ const BUILTINS = {
       'body': 'CANONICAL_URL',
       'recipient': '',
     }),
+    'canChangeColor': true,
+    'canHaveChildren': true,
   },
   'tumblr': {
     'shareEndpoint': 'https://www.tumblr.com/share/link',
@@ -84,12 +94,16 @@ const BUILTINS = {
       'name': 'TITLE',
       'url': 'CANONICAL_URL',
     }),
+    'canChangeColor': true,
+    'canHaveChildren': true,
   },
   'whatsapp': {
     'shareEndpoint': 'https://api.whatsapp.com/send',
     'defaultParams': dict({
       'text': 'TITLE - CANONICAL_URL',
     }),
+    'canChangeColor': true,
+    'canHaveChildren': true,
   },
   'line': {
     'shareEndpoint': 'https://social-plugins.line.me/lineit/share',
@@ -97,12 +111,16 @@ const BUILTINS = {
       'text': 'TITLE',
       'url': 'CANONICAL_URL',
     }),
+    'canChangeColor': true,
+    'canHaveChildren': true,
   },
   'sms': {
     'shareEndpoint': 'sms:',
     'defaultParams': dict({
       'body': 'TITLE - CANONICAL_URL',
     }),
+    'canChangeColor': true,
+    'canHaveChildren': true,
   },
   'system': {
     'shareEndpoint': 'navigator-share:',
@@ -110,5 +128,7 @@ const BUILTINS = {
       'text': 'TITLE',
       'url': 'CANONICAL_URL',
     }),
+    'canChangeColor': true,
+    'canHaveChildren': true,
   },
 };

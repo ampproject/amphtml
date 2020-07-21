@@ -34,7 +34,6 @@ const NAME = 'SocialShare';
  *  type: !string,
  *  endpoint: ?string,
  *  params: ?JsonObject,
- *  customIcon: ?boolean,
  *  target: ?string,
  *  width: ?string,
  *  height: ?string,
@@ -53,29 +52,10 @@ export function SocialShare(props) {
     checkedTarget,
   } = checkProps(props);
 
-  const type = props['type'].toUpperCase();
-  const baseStyle = CSS.BASE_STYLE;
-  const iconStyle = {
-    'color': props['color'] || CSS[type] ? CSS[type]['color'] : undefined,
-    'backgroundColor':
-      props['background'] || CSS[type]
-        ? CSS[type]['backgroundColor']
-        : undefined,
-  };
-  const size = {
-    width: checkedWidth,
-    height: checkedHeight,
-  };
-
-  const icon =
-    !getSocialConfig(props['type']) || props['customIcon'] ? (
-      props['children']
-    ) : (
-      <SocialShareIcon
-        style={{...backgroundStyle, ...baseStyle, ...size}}
-        type={type}
-      />
-    );
+  const size = dict({
+    'width': checkedWidth,
+    'height': checkedHeight,
+  });
 
   return (
     <div
@@ -85,9 +65,60 @@ export function SocialShare(props) {
       onClick={() => handleActivation(finalEndpoint, checkedTarget)}
       style={{...size, ...props['style']}}
     >
-      {icon}
+      {processChildren(props, size)}
     </div>
   );
+}
+
+/**
+ * If the specified type can have children and children exist return children.
+ * Otherwise return the default icon for the specified type.  If the specified
+ * type can have its color / background changed, set those to color /
+ * background specified in props, otherwise use defaults, or do not set if
+ * defaults do not exist.
+ * @param {?PreactDef.Renderable} children
+ * @param {!JsonObject} props
+ * @param {JsonObject} size
+ * @return {PreactDef.Renderable}
+ */
+function processChildren(props, size) {
+  const {
+    'type': type,
+    'children': children,
+    'color': propsColor,
+    'background': propsBackground,
+  } = props;
+  const uType = type.toUpperCase();
+  const typeConfig =
+    getSocialConfig(type) ||
+    dict({
+      'canChangeColor': true,
+      'canHaveChildren': true,
+    });
+
+  if (typeConfig['canHaveChildren'] && children) {
+    return children;
+  } else {
+    const baseStyle = CSS.BASE_STYLE;
+    const iconStyle = dict({
+      'color': typeConfig['canChangeColor']
+        ? propsColor
+        : CSS[uType]
+        ? CSS[uType]['color']
+        : undefined,
+      'backgroundColor': typeConfig['canChangeColor']
+        ? propsBackground
+        : CSS[uType]
+        ? CSS[uType]['backgroundColor']
+        : undefined,
+    });
+    return (
+      <SocialShareIcon
+        style={{...iconStyle, ...baseStyle, ...size}}
+        type={uType}
+      />
+    );
+  }
 }
 
 /**
