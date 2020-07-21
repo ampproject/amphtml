@@ -95,6 +95,7 @@ integration.flags = {
   'ie': '  Runs tests on IE',
   'nobuild': '  Skips build step',
   'nohelp': '  Silence help messages that are printed prior to test run',
+  'report': '  Write test result report to a local file',
   'safari': '  Runs tests on Safari',
   'testnames': '  Lists the name of each test being run',
   'verbose': '  With logging enabled',
