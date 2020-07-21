@@ -84,8 +84,9 @@ function parseSizeFile(file) {
       const columns = line.split('|').map((x) => x.trim());
       let name = columns[columns.length - 1];
 
-      // Older size.txt files contained duplicate entries of the same "entity",
-      // for example a file had an entry for its .min and its .max file.
+      // Older size.txt files contained duplicate entries of the same
+      // "entity", for example a file had an entry for its .min and its .max
+      // file.
       const shouldSkip =
         (name.endsWith('max.js') &&
           !name.endsWith('alp.max.js') &&
@@ -99,8 +100,8 @@ function parseSizeFile(file) {
         return null;
       }
 
-      // Normalize names. We made mistakes at some point with duplicate entries
-      // or renamed entries so we make sure to identify these entities
+      // Normalize names. We made mistakes at some point with duplicate
+      // entries or renamed entries so we make sure to identify these entities
       // and put then into the same column.
       if (name == 'v0.js / amp.js' || name == 'current-min/v0.js') {
         name = 'v0.js';
@@ -222,36 +223,38 @@ function reversePrettyBytes(prettyBytes) {
  */
 async function serializeCheckout(logs) {
   const tables = [];
-  const promise = logs.reduce(async (acc, cur, i) => {
-    const parts = logs[i].split(' ');
-    const sha = parts.shift();
-    const dateTime = parts.join(' ');
 
-    const tables0 = await acc;
+  for (const log of logs) {
+    const [sha, ...dateParts] = log.split(' ');
+    const dateTime = dateParts.join(' ');
 
     try {
+      // We checkout all the known commits for the file and accumulate
+      // all the tables.
       await exec(`git checkout ${sha} ${filePath}`);
       const file = await fs.promises.readFile(`${filePath}`);
+
       const quotedDateTime = `"${dateTime}"`;
       dateTimes.push(quotedDateTime);
+
       // We convert the read file string into an Table objects
       const fields = parseSizeFile(file.toString()).map((field) => {
         field.dateTime = quotedDateTime;
         return field;
       });
-      tables0.push(fields);
-      return tables0;
+      tables.push(fields);
     } catch (e) {
       // Ignore if pathspec error. This can happen if the file was
       // deleted in git.
       if (/error: pathspec/.test(e.message)) {
-        tables0.push([]);
-        return tables0;
+        tables.push([]);
       }
+
       log(colors.red(e.message));
     }
-  }, Promise.resolve(tables));
-  return promise.then(mergeTables.bind(null, dateTimes));
+  }
+
+  return mergeTables(dateTimes, tables);
 }
 
 async function csvifySize() {
