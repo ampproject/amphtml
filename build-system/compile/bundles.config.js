@@ -1030,6 +1030,7 @@ exports.extensionBundles = [
     name: 'amp-social-share',
     version: '1.0',
     latestVersion: '0.1',
+    options: {hasCss: true},
     type: TYPES.MISC,
   },
   {
