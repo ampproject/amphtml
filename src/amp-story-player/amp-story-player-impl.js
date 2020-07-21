@@ -214,7 +214,7 @@ export class AmpStoryPlayer {
 
   /**
    * Given a story object, creates an appropiate anchor element.
-   * @param {{href: string, title: ?string, posterImage: ?string}} story
+   * @param {!{href: string, title: ?string, posterImage: ?string}} story
    * @return {!HTMLAnchorElement}
    * @private
    */
