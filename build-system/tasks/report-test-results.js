@@ -34,14 +34,11 @@ const {cyan, green, yellow} = require('ansi-colors');
 const REPORTING_API_URL = 'https://amp-test-cases.appspot.com/report';
 
 async function getReport(testType) {
-  const karmaReportString = await fs.readFile(
-    `result-reports/${testType}.json`
-  );
-  const karmaReportJson = JSON.parse(karmaReportString);
+  const report = await fs
+    .readFile(`result-reports/${testType}.json`)
+    .then(JSON.parse);
 
-  const travisReport = addJobAndBuildInfo(testType, karmaReportJson);
-
-  return travisReport;
+  return addJobAndBuildInfo(testType, report);
 }
 
 function addJobAndBuildInfo(testType, reportJson) {
