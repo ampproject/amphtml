@@ -6,7 +6,7 @@
   
     // Enable both JavaScript and CSS coverage
     await Promise.all([
-      page.coverage.startJSCoverage(),
+      page.coverage.startJSCoverage()
     ]);
     // Navigate to page
     await page.goto('http://localhost:8000/examples/everything.amp.html');
