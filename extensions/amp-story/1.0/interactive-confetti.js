@@ -16,9 +16,9 @@
 
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
+import {emojiRegex} from '../../../third_party/emoji-regex';
 import {htmlFor} from '../../../src/static-template';
 import {setStyles} from '../../../src/style';
-import {emojiRegex} from '../../../third_party/emoji-regex';
 
 /**
  * Generates the template for the confetti wrapper.
@@ -59,7 +59,9 @@ const buildconfettiTemplate = (element) => {
  * @return {void}
  */
 export function emojiConfetti(rootEl, win, confettiEmoji) {
-  if (!validateEmoji(confettiEmoji)) return;
+  if (!validateEmoji(confettiEmoji)) {
+    return;
+  }
 
   const confettiCount = 5;
   const angleSlice = (Math.PI * 2) / confettiCount;
