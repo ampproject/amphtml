@@ -80,32 +80,19 @@ describes.realWin(
       });
     });
 
-    it('should update to category when all quizzes are completed', async () => {
-      addConfigToInteractive(ampStoryResults, 3);
-      ampStoryResults.buildCallback();
-      await ampStoryResults.layoutCallback();
-      const update = env.sandbox.stub(ampStoryResults, 'updateCategory_');
-
-      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
-        'interactiveId': 'i',
-        'option': {'resultscategory': 'results-category 1'},
-      });
-
-      expect(update).to.be.calledOnce;
-    });
-
     it('should set the text for the category on update', async () => {
       addConfigToInteractive(ampStoryResults, 3);
       ampStoryResults.buildCallback();
-      ampStoryResults.updateCategory_({
-        'resultscategory': 'a',
-        'text': 'b',
+      await ampStoryResults.layoutCallback();
+      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+        'interactiveId': 'i',
+        'option': {'resultscategory': 'results-category 2'},
       });
       expect(
         ampStoryResults.rootEl_.querySelector(
           '.i-amphtml-story-interactive-results-title'
         ).textContent
-      ).to.equal('a');
+      ).to.equal('results-category 2');
     });
   }
 );
