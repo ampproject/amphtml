@@ -205,8 +205,7 @@ _Example: Demonstrating usage of timeout event_
   <template type="amp-mustache">
     <h1>Countdown Clock</h1>
     <div>
-      &#123;&#123;dd&#125;&#125; : &#123;&#123;hh&#125;&#125; :
-      &#123;&#123;mm&#125;&#125; : &#123;&#123;ss&#125;&#125;
+      {{dd}} : {{hh)) : {{mm}} : {{ss}}
     </div>
   </template>
 </amp-date-countdown>
