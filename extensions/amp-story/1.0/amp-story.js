@@ -1148,6 +1148,10 @@ export class AmpStory extends AMP.BaseElement {
     this.mutateElement(() => {
       this.element.classList.add(STORY_LOADED_CLASS_NAME);
     });
+    if (this.viewerMessagingHandler_) {
+      this.viewerMessagingHandler_.send('storyLoad', dict({}));
+      return;
+    }
   }
 
   /**
@@ -1651,6 +1655,19 @@ export class AmpStory extends AMP.BaseElement {
   triggerActiveEventForPage_() {
     // TODO(alanorozco): pass event priority once amphtml-story repo is merged
     // with upstream.
+    if (this.viewerMessagingHandler_) {
+      const pageIndex = this.getPageIndex(this.activePage_);
+      this.viewerMessagingHandler_.send(
+        'storyPageView',
+        dict({
+          'index': pageIndex,
+          'id': this.activePage_.element.id,
+        })
+      );
+      if (pageIndex + 1 === this.getPageCount()) {
+        this.viewerMessagingHandler_.send('storyEnd', dict({}));
+      }
+    }
     Services.actionServiceForDoc(this.element).trigger(
       this.activePage_.element,
       'active',
