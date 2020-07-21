@@ -71,7 +71,6 @@ main .story-player-iframe[i-amphtml-iframe-position="-1"] {
   background-size: 28px;
   border: 0px;
   background-color: cornflowerblue;
-  /* background-color: transparent; */
   outline: transparent;
 }
 
