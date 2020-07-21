@@ -779,5 +779,5 @@
       "interactive_tests": "examples/visual-tests/amp-video-docking/amp-video-docking.js",
       "loading_complete_selectors": [".i-amphtml-video-interface"],
     },
-  ] 
+  ]
 }
