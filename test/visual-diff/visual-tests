@@ -782,8 +782,8 @@
     {
       "url": "examples/visual-tests/amp-story-player/player.html",
       "name": "amp-story-player basic page",
-      "loading_complete_selectors": [/* TODO(): Add story loaded selector. */ ".i-amphtml-story-player-loaded"],
-      loading_complete_delay_ms: 500
+      "interactive_tests": "examples/visual-tests/amp-story-player/story-loaded.js",
+      "no_base_test": true
     }
   ]
 }
