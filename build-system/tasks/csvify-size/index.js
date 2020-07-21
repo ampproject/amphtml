@@ -49,9 +49,10 @@ const dateTimes = [];
  * @param {string} format
  * @return {!Array<string>}
  */
-async function getLog(format) {
-  const logs = await exec(`git log --format="${format}" ${filePath}`);
-  return logs.trim().split('\n');
+function getLog(format) {
+  return exec(`git log --format="${format}" ${filePath}`).then((logs) =>
+    logs.trim().split('\n')
+  );
 }
 
 /**
@@ -220,47 +221,55 @@ function reversePrettyBytes(prettyBytes) {
  * @param {!Array<string>} logs
  * @return {!Promise}
  */
-async function serializeCheckout(logs) {
+function serializeCheckout(logs) {
   const tables = [];
-  const promise = logs.reduce(async (acc, cur, i) => {
+  const promise = logs.reduce((acc, cur, i) => {
     const parts = logs[i].split(' ');
     const sha = parts.shift();
     const dateTime = parts.join(' ');
 
-    const tables0 = await acc;
-
-    try {
-      await exec(`git checkout ${sha} ${filePath}`);
-      const file = await fs.promises.readFile(`${filePath}`);
-      const quotedDateTime = `"${dateTime}"`;
-      dateTimes.push(quotedDateTime);
-      // We convert the read file string into an Table objects
-      const fields = parseSizeFile(file.toString()).map((field) => {
-        field.dateTime = quotedDateTime;
-        return field;
-      });
-      tables0.push(fields);
-      return tables0;
-    } catch (e) {
-      // Ignore if pathspec error. This can happen if the file was
-      // deleted in git.
-      if (/error: pathspec/.test(e.message)) {
-        tables0.push([]);
-        return tables0;
-      }
-      log(colors.red(e.message));
-    }
+    return acc.then((tables) => {
+      // We checkout all the known commits for the file and accumulate
+      // all the tables.
+      return exec(`git checkout ${sha} ${filePath}`)
+        .then(() => {
+          return fs.promises.readFile(`${filePath}`);
+        })
+        .then((file) => {
+          const quotedDateTime = `"${dateTime}"`;
+          dateTimes.push(quotedDateTime);
+          // We convert the read file string into an Table objects
+          const fields = parseSizeFile(file.toString()).map((field) => {
+            field.dateTime = quotedDateTime;
+            return field;
+          });
+          tables.push(fields);
+          return tables;
+        })
+        .catch((e) => {
+          // Ignore if pathspec error. This can happen if the file was
+          // deleted in git.
+          if (/error: pathspec/.test(e.message)) {
+            tables.push([]);
+            return tables;
+          }
+          log(colors.red(e.message));
+        });
+    });
   }, Promise.resolve(tables));
   return promise.then(mergeTables.bind(null, dateTimes));
 }
 
 async function csvifySize() {
   const shaAndDate = '%H %ai';
-  const logs = await getLog(shaAndDate);
-  const rows = await serializeCheckout(logs.reverse());
-  rows.unshift.apply(rows, tableHeaders);
-  const tbl = rows.map((row) => row.join(',')).join('\n');
-  return fs.promises.writeFile('test/size.csv', `${tbl}\n`);
+  return getLog(shaAndDate).then((logs) => {
+    // Reverse it from oldest to newest
+    return serializeCheckout(logs.reverse()).then((rows) => {
+      rows.unshift.apply(rows, tableHeaders);
+      const tbl = rows.map((row) => row.join(',')).join('\n');
+      return fs.promises.writeFile('test/size.csv', `${tbl}\n`);
+    });
+  });
 }
 
 module.exports = {

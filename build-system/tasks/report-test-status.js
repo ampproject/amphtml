@@ -65,48 +65,47 @@ function inferTestType() {
   }
 }
 
-async function postReport(type, action) {
+function postReport(type, action) {
   if (type !== null && isTravisPullRequestBuild()) {
     const commitHash = gitCommitHash();
-
-    try {
-      const body = await requestPromise({
-        method: 'POST',
-        uri: `${reportBaseUrl}/${commitHash}/${type}/${action}`,
-        body: JSON.stringify({
-          travisJobUrl: travisJobUrl(),
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        // Do not use `json: true` because the response is a string, not JSON.
-      });
-
-      log(
-        green('INFO:'),
-        'reported',
-        cyan(`${type}/${action}`),
-        'to the test-status GitHub App'
-      );
-      if (body.length > 0) {
+    return requestPromise({
+      method: 'POST',
+      uri: `${reportBaseUrl}/${commitHash}/${type}/${action}`,
+      body: JSON.stringify({
+        travisJobUrl: travisJobUrl(),
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // Do not use `json: true` because the response is a string, not JSON.
+    })
+      .then((body) => {
         log(
           green('INFO:'),
-          'response from test-status was',
-          cyan(body.substr(0, 100))
+          'reported',
+          cyan(`${type}/${action}`),
+          'to the test-status GitHub App'
         );
-      }
-      return;
-    } catch (error) {
-      log(
-        yellow('WARNING:'),
-        'failed to report',
-        cyan(`${type}/${action}`),
-        'to the test-status GitHub App:\n',
-        error.message.substr(0, 100)
-      );
-      return;
-    }
+        if (body.length > 0) {
+          log(
+            green('INFO:'),
+            'response from test-status was',
+            cyan(body.substr(0, 100))
+          );
+        }
+      })
+      .catch((error) => {
+        log(
+          yellow('WARNING:'),
+          'failed to report',
+          cyan(`${type}/${action}`),
+          'to the test-status GitHub App:\n',
+          error.message.substr(0, 100)
+        );
+        return;
+      });
   }
+  return Promise.resolve();
 }
 
 function reportTestErrored() {

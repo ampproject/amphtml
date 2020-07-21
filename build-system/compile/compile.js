@@ -61,23 +61,20 @@ exports.closureCompile = async function (
   return new Promise(function (resolve, reject) {
     function start() {
       inProgress++;
-      (async () => {
-        try {
-          await compile(
-            entryModuleFilename,
-            outputDir,
-            outputFilename,
-            options,
-            timeInfo
-          );
-
+      compile(
+        entryModuleFilename,
+        outputDir,
+        outputFilename,
+        options,
+        timeInfo
+      ).then(
+        function () {
           inProgress--;
           next();
           resolve();
-        } catch (reason) {
-          return reject(reason);
-        }
-      })();
+        },
+        (reason) => reject(reason)
+      );
     }
     function next() {
       if (!queue.length) {

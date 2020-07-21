@@ -120,7 +120,7 @@ function calculateReviewer() {
  * Main function for auto triaging
  * @return {!Promise|undefined}
  */
-async function process3pGithubPr() {
+function process3pGithubPr() {
   if (!GITHUB_ACCESS_TOKEN) {
     log(colors.red('You have not set the GITHUB_ACCESS_TOKEN env var.'));
     log(
@@ -141,20 +141,25 @@ async function process3pGithubPr() {
   for (let batch = 1; batch < NUM_BATCHES; batch++) {
     arrayPromises.push(getIssues(batch));
   }
-  const requests = await Promise.all(arrayPromises);
-  const issues = await [].concat.apply([], requests);
-  const allIssues = issues;
-  const allTasks = [];
-  allIssues.forEach(function (issue) {
-    allTasks.push(handleIssue(issue));
-  });
-  await Promise.all(allTasks);
-  log(colors.blue('auto triaging succeed!'));
+  return Promise.all(arrayPromises)
+    .then((requests) => [].concat.apply([], requests))
+    .then((issues) => {
+      const allIssues = issues;
+      const allTasks = [];
+      allIssues.forEach(function (issue) {
+        allTasks.push(handleIssue(issue));
+      });
+      return Promise.all(allTasks);
+    })
+    .then(() => {
+      log(colors.blue('auto triaging succeed!'));
+    });
 }
 
-async function handleIssue(issue) {
-  const outcome = await isQualifiedPR(issue);
-  return replyToPR(issue, outcome);
+function handleIssue(issue) {
+  return isQualifiedPR(issue).then((outcome) => {
+    return replyToPR(issue, outcome);
+  });
 }
 
 /**
@@ -163,7 +168,7 @@ async function handleIssue(issue) {
  * @param {number=} opt_page
  * @return {!Promise<!Array>}
  */
-async function getIssues(opt_page) {
+function getIssues(opt_page) {
   // We need to use the issue API because assignee is only available with it.
   const options = extend({}, defaultOption);
   options.url = 'https://api.github.com/repos/ampproject/amphtml/issues';
@@ -174,10 +179,11 @@ async function getIssues(opt_page) {
     'per_page': 100,
     'access_token': GITHUB_ACCESS_TOKEN,
   };
-  const res = await request(options);
-  const issues = JSON.parse(res.body);
-  assert(Array.isArray(issues), 'issues must be an array.');
-  return issues;
+  return request(options).then((res) => {
+    const issues = JSON.parse(res.body);
+    assert(Array.isArray(issues), 'issues must be an array.');
+    return issues;
+  });
 }
 
 /**
@@ -185,18 +191,19 @@ async function getIssues(opt_page) {
  * @param {!Object} pr
  * @return {?Array<string>}
  */
-async function getPullRequestFiles(pr) {
+function getPullRequestFiles(pr) {
   const options = extend({}, defaultOption);
   const {number} = pr;
   options.url =
     'https://api.github.com/repos/ampproject/amphtml/pulls/' +
     `${number}/files`;
-  const res = await request(options);
-  const files = JSON.parse(res.body);
-  if (!Array.isArray(files)) {
-    return null;
-  }
-  return files;
+  return request(options).then((res) => {
+    const files = JSON.parse(res.body);
+    if (!Array.isArray(files)) {
+      return null;
+    }
+    return files;
+  });
 }
 
 /**
@@ -237,23 +244,24 @@ function analyzeChangedFiles(files) {
  * @param {!Object} issue
  * @return {!Promise}
  */
-async function isQualifiedPR(issue) {
+function isQualifiedPR(issue) {
   // All issues are opened has no assignee
   if (!issue.pull_request) {
     // Is not a pull request
-    return null;
+    return Promise.resolve(null);
   }
 
   const author = issue.user.login;
   if (internalContributors.indexOf(author) > -1) {
     // If it is a pull request from internal contributor
-    return null;
+    return Promise.resolve(null);
   }
-  const files = await getPullRequestFiles(issue);
   // get pull request reviewer API is not working as expected. Skip
 
   // Get changed files of this PR
-  return analyzeChangedFiles(files);
+  return getPullRequestFiles(issue).then((files) => {
+    return analyzeChangedFiles(files);
+  });
 }
 
 /**
@@ -265,14 +273,16 @@ async function isQualifiedPR(issue) {
 function replyToPR(pr, outcome) {
   let promise = Promise.resolve();
   if (outcome == ANALYZE_OUTCOME.AD) {
-    promise = (async () => {
-      await promise;
-      // We should be good with rate limit given the number of
-      // 3p integration PRs today.
-      const comment = AD_COMMENT + `Thank you! Ping @${reviewer} for review`;
-      await applyComment(pr, comment);
-      return await assignIssue(pr, [reviewer]);
-    })();
+    promise = promise
+      .then(() => {
+        // We should be good with rate limit given the number of
+        // 3p integration PRs today.
+        const comment = AD_COMMENT + `Thank you! Ping @${reviewer} for review`;
+        return applyComment(pr, comment);
+      })
+      .then(() => {
+        return assignIssue(pr, [reviewer]);
+      });
   }
   return promise;
 }
@@ -283,7 +293,7 @@ function replyToPR(pr, outcome) {
  * @param {string} comment
  * @return {!Promise}
  */
-async function applyComment(issue, comment) {
+function applyComment(issue, comment) {
   const {number} = issue;
   const options = extend(
     {
@@ -299,7 +309,7 @@ async function applyComment(issue, comment) {
   );
   if (isDryrun) {
     log(colors.blue(`apply comment to PR #${number}, comment is ${comment}`));
-    return;
+    return Promise.resolve();
   }
   return request(options);
 }
@@ -310,7 +320,7 @@ async function applyComment(issue, comment) {
  * @param {!Array<string>} assignees
  * @return {!Promise}
  */
-async function assignIssue(issue, assignees) {
+function assignIssue(issue, assignees) {
   const {number} = issue;
   const options = extend(
     {
@@ -326,7 +336,7 @@ async function assignIssue(issue, assignees) {
   );
   if (isDryrun) {
     log(colors.blue(`assign PR #${number}, to ${assignees}`));
-    return;
+    return Promise.resolve();
   }
   return request(options);
 }
