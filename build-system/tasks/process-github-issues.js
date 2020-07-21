@@ -186,10 +186,7 @@ async function updateGitHubIssues() {
             label.name.startsWith('P3')
           ) {
             hasPriority = true;
-            if (
-              label.name.startsWith('P0') ||
-              label.name.startsWith('P1')
-            ) {
+            if (label.name.startsWith('P0') || label.name.startsWith('P1')) {
               if (biweeklyUpdate == false) {
                 biweeklyUpdate = true;
                 updates.push(
@@ -202,10 +199,7 @@ async function updateGitHubIssues() {
                   )
                 );
               }
-            } else if (
-              label.name.startsWith('P2') &&
-              quartelyUpdate == false
-            ) {
+            } else if (label.name.startsWith('P2') && quartelyUpdate == false) {
               quartelyUpdate = true;
               updates.push(
                 applyComment(

@@ -224,8 +224,8 @@ function reversePrettyBytes(prettyBytes) {
 async function serializeCheckout(logs) {
   const tables = [];
 
-  for (const log of logs) {
-    const [sha, ...dateParts] = log.split(' ');
+  for (const logLine of logs) {
+    const [sha, ...dateParts] = logLine.split(' ');
     const dateTime = dateParts.join(' ');
 
     try {
