@@ -141,13 +141,9 @@ async function process3pGithubPr() {
   for (let batch = 1; batch < NUM_BATCHES; batch++) {
     arrayPromises.push(getIssues(batch));
   }
-  const requests = await Promise.all(arrayPromises);
-  const issues = await [].concat.apply([], requests);
-  const allIssues = issues;
-  const allTasks = [];
-  allIssues.forEach(function (issue) {
-    allTasks.push(handleIssue(issue));
-  });
+  const responses = await Promise.all(arrayPromises);
+  const allIssues = [].concat.apply([], responses);
+  const allTasks = allIssues.map(handleIssue);
   await Promise.all(allTasks);
   log(colors.blue('auto triaging succeed!'));
 }
@@ -249,10 +245,10 @@ async function isQualifiedPR(issue) {
     // If it is a pull request from internal contributor
     return null;
   }
-  const files = await getPullRequestFiles(issue);
   // get pull request reviewer API is not working as expected. Skip
 
   // Get changed files of this PR
+  const files = await getPullRequestFiles(issue);
   return analyzeChangedFiles(files);
 }
 
@@ -262,19 +258,14 @@ async function isQualifiedPR(issue) {
  * @param {ANALYZE_OUTCOME} outcome
  * @return {!Promise}
  */
-function replyToPR(pr, outcome) {
-  let promise = Promise.resolve();
+async function replyToPR(pr, outcome) {
   if (outcome == ANALYZE_OUTCOME.AD) {
-    promise = (async () => {
-      await promise;
-      // We should be good with rate limit given the number of
-      // 3p integration PRs today.
-      const comment = AD_COMMENT + `Thank you! Ping @${reviewer} for review`;
-      await applyComment(pr, comment);
-      return await assignIssue(pr, [reviewer]);
-    })();
+    // We should be good with rate limit given the number of
+    // 3p integration PRs today.
+    const comment = AD_COMMENT + `Thank you! Ping @${reviewer} for review`;
+    await applyComment(pr, comment);
+    return assignIssue(pr, [reviewer]);
   }
-  return promise;
 }
 
 /**
