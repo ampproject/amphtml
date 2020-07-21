@@ -1,0 +1,53 @@
+<!--
+  Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS-IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the license.
+-->
+<!--
+  Test Description:
+  This tests that <img> is allowed as child tag for <amp-img>.
+-->
+<!doctype html>
+<html ⚡ transformed="google;v=1">
+<head>
+  <meta charset="utf-8">
+  <style amp-runtime i-amphtml-version=123456789012345>.omitted-for-brevity{}</style>
+  <meta name="viewport" content="width=device-width">
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <link rel="canonical" href="./regular-html-version.html">
+</head>
+<body>
+  <!-- Valid: amp-img > img -->
+  <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="responsive" width="900" height="600" i-amphtml-ssr>
+    <img src="/img/canoe_900x600.jpg" alt="An image about canoeing" decoding="async">
+  </amp-img>
+
+  <!-- Valid: amp-img[layout=intrinsic] > img -->
+  <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="intrinsic" width="900" height="600" i-amphtml-layout="intrinsic" i-amphtml-ssr>
+    <i-amphtml-sizer class="i-amphtml-sizer">
+      <img alt aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;charset=utf-8,<svg height=&quot;600&quot; width=&quot;900&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; version=&quot;1.1&quot;/>">
+    </i-amphtml-sizer>
+    <img src="/img/canoe_900x600.jpg" alt="An image about canoeing" decoding="async">
+  </amp-img>
+
+  <!-- Invalid: amp-img > img, missing i-amphtml-ssr attr -->
+  <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="responsive" width="900" height="600">
+    <img src="/img/canoe_900x600.jpg" alt="An image about canoeing" decoding="async">
+  </amp-img>
+
+  <!-- Invalid: amp-img > img, missing decoding attr -->
+  <amp-img src="/img/canoe_900x600.jpg" alt="An image about canoeing" layout="responsive" width="900" height="600" i-amphtml-ssr>
+    <img src="/img/canoe_900x600.jpg" alt="An image about canoeing">
+  </amp-img>
+</body>
+</html>
