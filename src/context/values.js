@@ -54,7 +54,7 @@ let InputDef;
  *   counter: number,
  *   depsValues: !Array,
  *   parentValue: *,
- *   parentValueNode: ?./node.ContextNode,
+ *   parentContextNode: ?./node.ContextNode,
  *   ping: function(boolean),
  *   pingDep: !Array<function(*)>,
  *   pingParent: ?function(*),
@@ -286,7 +286,7 @@ export class Values {
       usedByKey.forEach((used) => {
         const {prop} = used;
         if (isRecursive(prop)) {
-          this.updateParentValueNode_(used, null);
+          this.updateParentContextNode_(used, null);
         }
       });
     }
@@ -379,7 +379,7 @@ export class Values {
         counter: 0,
         depValues: deps.length > 0 ? deps.map(EMPTY_FUNC) : EMPTY_ARRAY,
         parentValue: undefined,
-        parentValueNode: null,
+        parentContextNode: null,
         // Schedule the value recalculation, optionally with the parent
         // refresh.
         ping: (refreshParent) => {
@@ -435,7 +435,7 @@ export class Values {
     this.usedByKey_.delete(key);
 
     // Unsubscribe itself.
-    this.updateParentValueNode_(used, null);
+    this.updateParentContextNode_(used, null);
     if (deps.length > 0) {
       deps.forEach((dep, index) => {
         this.unsubscribe(dep, pingDep[index]);
@@ -562,17 +562,17 @@ export class Values {
     const needsParent = calcNeedsParent(prop, inputValues);
 
     // Refresh parent if requested.
-    if (refreshParent || needsParent != Boolean(used.parentValueNode)) {
-      const newParentValueNode = needsParent
+    if (refreshParent || needsParent != Boolean(used.parentContextNode)) {
+      const newParentContextNode = needsParent
         ? findParent(this.contextNode_, hasInput, prop, /* includeSelf */ false)
         : null;
-      this.updateParentValueNode_(used, newParentValueNode);
+      this.updateParentContextNode_(used, newParentContextNode);
     }
 
     // If no parent node is found, use the default value.
     const parentValue = isDefined(used.parentValue)
       ? used.parentValue
-      : needsParent && !used.parentValueNode
+      : needsParent && !used.parentContextNode
       ? defaultValue
       : undefined;
 
@@ -617,21 +617,21 @@ export class Values {
    * Update the node from which the parent value is used.
    *
    * @param {!UsedDef} used
-   * @param {?./node.ContextNode} newParentValueNode
+   * @param {?./node.ContextNode} newParentContextNode
    * @private
    */
-  updateParentValueNode_(used, newParentValueNode) {
-    const {prop, parentValueNode: oldParentValueNode, pingParent} = used;
-    if (newParentValueNode != oldParentValueNode) {
-      used.parentValueNode = newParentValueNode;
+  updateParentContextNode_(used, newParentContextNode) {
+    const {prop, parentContextNode: oldParentContextNode, pingParent} = used;
+    if (newParentContextNode != oldParentContextNode) {
+      used.parentContextNode = newParentContextNode;
       used.parentValue = undefined;
 
-      if (oldParentValueNode) {
-        oldParentValueNode.values.unsubscribe(prop, devAssert(pingParent));
+      if (oldParentContextNode) {
+        oldParentContextNode.values.unsubscribe(prop, devAssert(pingParent));
       }
 
-      if (newParentValueNode) {
-        newParentValueNode.values.subscribe(prop, devAssert(pingParent));
+      if (newParentContextNode) {
+        newParentContextNode.values.subscribe(prop, devAssert(pingParent));
       }
     }
   }
@@ -696,7 +696,8 @@ function calcNeedsParent(prop, inputs) {
     return inputs ? needsParent(inputs) : true;
   }
   if (needsParent && inputs && !compute) {
-    // The default `compute` function is OR. Thus, when inputs are specified,
+    // The default `compute` function is to pick the input value when available
+    // and to fallback to the parent. Thus, when inputs are specified,
     // there's no longer a need for the parent.
     return false;
   }
