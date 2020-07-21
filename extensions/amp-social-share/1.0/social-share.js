@@ -101,16 +101,18 @@ function processChildren(props, size) {
   } else {
     const baseStyle = CSS.BASE_STYLE;
     const iconStyle = dict({
-      'color': typeConfig['canChangeColor']
-        ? propsColor
-        : CSS[uType]
-        ? CSS[uType]['color']
-        : undefined,
-      'backgroundColor': typeConfig['canChangeColor']
-        ? propsBackground
-        : CSS[uType]
-        ? CSS[uType]['backgroundColor']
-        : undefined,
+      'color':
+        typeConfig['canChangeColor'] && propsColor
+          ? propsColor
+          : CSS[uType]
+          ? CSS[uType]['color']
+          : undefined,
+      'backgroundColor':
+        typeConfig['canChangeColor'] && propsBackground
+          ? propsBackground
+          : CSS[uType]
+          ? CSS[uType]['backgroundColor']
+          : undefined,
     });
     return (
       <SocialShareIcon
