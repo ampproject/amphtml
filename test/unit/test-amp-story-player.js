@@ -457,11 +457,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       async () => {
         buildStoryPlayer(3);
         await manager.loadPlayers();
+        await nextTick();
 
         swipeLeft();
         swipeLeft();
-
-        await afterRenderPromise();
 
         const storyObjects = createStoryObjects(2);
         playerEl.add(storyObjects);
