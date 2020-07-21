@@ -883,7 +883,7 @@ export class AmpStoryPlayer {
           {state: STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE},
           true
         )
-        .then((event) => this.dispatchPageAttachmentEvent_(!!event.value));
+        .then((event) => this.dispatchPageAttachmentEvent_(event.value));
     });
   }
 
@@ -895,7 +895,7 @@ export class AmpStoryPlayer {
   onDocumentStateUpdate_(data) {
     switch (data.state) {
       case STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE:
-        this.onPageAttachmentStateUpdate_(!!data.value);
+        this.onPageAttachmentStateUpdate_(data.value);
         break;
       default:
         break;

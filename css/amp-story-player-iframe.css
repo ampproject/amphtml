@@ -72,6 +72,7 @@ main .story-player-iframe[i-amphtml-iframe-position="-1"] {
   border: 0px;
   background-color: transparent;
   outline: transparent;
+  cursor: pointer;
 }
 
 .amp-story-player-close-button {
