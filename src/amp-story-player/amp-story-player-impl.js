@@ -367,6 +367,10 @@ export class AmpStoryPlayer {
           messaging.registerHandler('selectDocument', (event, data) => {
             this.onSelectDocument_(/** @type {!Object} */ (data));
           });
+
+          messaging.registerHandler('storyLoaded', () => {
+            this.element_.classList.add('i-amphtml-story-loaded');
+          });
           resolve(messaging);
         },
         (err) => {
