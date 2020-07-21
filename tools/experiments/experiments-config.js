@@ -62,12 +62,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
-    id: 'amp-consent-restrict-fullscreen',
-    name: 'AMP consent restrict fullscreen API before user interaction',
-    spec: 'https://github.com/ampproject/amphtml/issues/26432',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26432',
-  },
-  {
     id: 'amp-sidebar-v2',
     name: 'Updated sidebar component with nested menu and animations',
     spec: 'https://github.com/ampproject/amphtml/issues/25049',
@@ -100,11 +94,6 @@ export const EXPERIMENTS = [
     id: 'amp-lightbox-a4a-proto',
     name: 'Allows the new lightbox experience to be used in A4A (prototype).',
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
-  },
-  {
-    id: 'amp-list-init-from-state',
-    name: 'Allows amp-list to initialize off of amp-state',
-    spec: 'https://github.com/ampproject/amphtml/issues/26009',
   },
   {
     id: 'amp-playbuzz',

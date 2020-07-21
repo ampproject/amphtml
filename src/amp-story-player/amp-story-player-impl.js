@@ -172,6 +172,9 @@ export class AmpStoryPlayer {
   attachCallbacksToElement_() {
     this.element_.load = this.load.bind(this);
     this.element_.show = this.show.bind(this);
+    this.element_.play = this.play.bind(this);
+    this.element_.pause = this.pause.bind(this);
+    this.element_.go = this.go.bind(this);
     this.element_.mute = this.mute.bind(this);
     this.element_.unmute = this.unmute.bind(this);
     this.element_.getStoryState = this.getStoryState.bind(this);
@@ -188,6 +191,38 @@ export class AmpStoryPlayer {
   }
 
   /**
+   * Makes the current story play its content/auto-advance
+   * @public
+   */
+  play() {
+    this.togglePaused_(false);
+  }
+
+  /**
+   * Makes the current story pause its content/auto-advance
+   * @public
+   */
+  pause() {
+    this.togglePaused_(true);
+  }
+
+  /**
+   * Makes the current story play or pause its content/auto-advance
+   * @param {boolean} paused If true, the story will be paused, and it will be played otherwise
+   * @private
+   */
+  togglePaused_(paused) {
+    const currentStory = this.stories_[this.currentIdx_];
+    const iframeIdx = currentStory[IFRAME_IDX];
+
+    this.updateVisibilityState_(
+      iframeIdx,
+      paused ? VisibilityState.PAUSED : VisibilityState.VISIBLE
+    );
+  }
+
+  /**
+   *
    * @public
    * @return {!Element}
    */
@@ -234,14 +269,18 @@ export class AmpStoryPlayer {
   initializeShadowRoot_() {
     this.rootEl_ = this.doc_.createElement('main');
 
-    // Create shadow root
-    const shadowRoot = this.element_.attachShadow({mode: 'open'});
+    // TODO(): Update unit tests to work without shadow root,
+    // then update condition to getMode.test and update visual tests.
+    const containerToUse =
+      typeof __AMP_VISUAL_TEST !== 'undefined'
+        ? this.element_
+        : this.element_.attachShadow({mode: 'open'});
 
     // Inject default styles
     const styleEl = this.doc_.createElement('style');
     styleEl.textContent = cssText;
-    shadowRoot.appendChild(styleEl);
-    shadowRoot.appendChild(this.rootEl_);
+    containerToUse.appendChild(styleEl);
+    containerToUse.appendChild(this.rootEl_);
   }
 
   /**
@@ -538,6 +577,20 @@ export class AmpStoryPlayer {
   }
 
   /**
+   * Indicates the player changed story.
+   * @private
+   */
+  signalNavigation_() {
+    const index = this.currentIdx_;
+    const remaining = this.stories_.length - this.currentIdx_ - 1;
+    const event = createCustomEvent(this.win_, 'navigation', {
+      index,
+      remaining,
+    });
+    this.element_.dispatchEvent(event);
+  }
+
+  /**
    * Navigates to the next story in the player.
    * @private
    */
@@ -564,6 +617,7 @@ export class AmpStoryPlayer {
     ) {
       this.allocateIframeForStory_(nextStoryIdx);
     }
+    this.signalNavigation_();
   }
 
   /**
@@ -590,6 +644,27 @@ export class AmpStoryPlayer {
     ) {
       this.allocateIframeForStory_(nextStoryIdx, true /** reverse */);
     }
+    this.signalNavigation_();
+  }
+
+  /**
+   * Navigates stories given a number.
+   * @param {number} storyDelta
+   */
+  go(storyDelta) {
+    if (
+      this.currentIdx_ + storyDelta >= this.stories_.length ||
+      this.currentIdx_ + storyDelta < 0
+    ) {
+      throw new Error('Out of Story range.');
+    }
+    if (storyDelta === 0) {
+      return;
+    }
+
+    const currentStory = this.stories_[this.currentIdx_ + storyDelta];
+
+    this.show(currentStory.href);
   }
 
   /**
