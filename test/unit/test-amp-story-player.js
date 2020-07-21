@@ -388,6 +388,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('pauses programatically', async () => {
       buildStoryPlayer();
       await manager.loadPlayers();
+      messagingMock.expects('sendRequest');
 
       playerEl.pause();
 
@@ -399,6 +400,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('plays programatically', async () => {
       buildStoryPlayer();
       await manager.loadPlayers();
+      messagingMock.expects('sendRequest');
 
       playerEl.play();
 
@@ -410,6 +412,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('calling mute should set story muted state to true', async () => {
       buildStoryPlayer();
       await manager.loadPlayers();
+      messagingMock.expects('sendRequest');
 
       await playerEl.mute();
 
@@ -421,6 +424,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('calling unmute should set the story muted state to false', async () => {
       buildStoryPlayer();
       await manager.loadPlayers();
+      messagingMock.expects('sendRequest');
 
       await playerEl.unmute();
 
