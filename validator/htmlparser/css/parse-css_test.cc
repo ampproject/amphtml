@@ -3892,8 +3892,7 @@ TEST(ParseCssTest, SelectorParserImplementsVisitorPattern) {
 })"");
 }
 
-// Collects type selectors that match a body tag. This is useful for the
-// A4A project (http://go/a4areserializer).
+// Collects type selectors that match a body tag.
 class CollectBodyTypeSelectors : public SelectorVisitor {
  public:
   CollectBodyTypeSelectors() : SelectorVisitor(&errors_) {}
