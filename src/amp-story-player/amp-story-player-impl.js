@@ -32,7 +32,6 @@ import {dict, map} from '../utils/object';
 import {cssText} from '../../build/amp-story-player-iframe.css';
 import {dev} from '../log';
 import {findIndex} from '../utils/array';
-import {getMode} from '../mode';
 import {resetStyles, setStyle, setStyles} from '../style';
 import {toArray} from '../types';
 import {tryFocus} from '../dom';
