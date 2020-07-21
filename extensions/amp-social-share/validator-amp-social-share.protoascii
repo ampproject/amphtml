@@ -66,6 +66,9 @@ tags: {  # <amp-social-share>
     name: "type"
     mandatory: true
   }
+  attrs: {
+    name: "custom-icon"
+  }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: CONTAINER

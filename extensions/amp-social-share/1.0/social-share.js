@@ -34,6 +34,7 @@ const NAME = 'SocialShare';
  *  type: !string,
  *  endpoint: ?string,
  *  params: ?JsonObject,
+ *  customIcon: ?boolean,
  *  target: ?string,
  *  width: ?string,
  *  height: ?string,
@@ -66,6 +67,16 @@ export function SocialShare(props) {
     height: checkedHeight,
   };
 
+  const icon =
+    !getSocialConfig(props['type']) || props['customIcon'] ? (
+      props['children']
+    ) : (
+      <SocialShareIcon
+        style={{...backgroundStyle, ...baseStyle, ...size}}
+        type={type}
+      />
+    );
+
   return (
     <div
       role="button"
@@ -74,10 +85,7 @@ export function SocialShare(props) {
       onClick={() => handleActivation(finalEndpoint, checkedTarget)}
       style={{...size, ...props['style']}}
     >
-      <SocialShareIcon
-        type={type}
-        style={{...iconStyle, ...baseStyle, ...size}}
-      />
+      {icon}
     </div>
   );
 }
