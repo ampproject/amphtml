@@ -407,10 +407,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   isAmpStateSrc_(src) {
-    return (
-      isExperimentOn(this.win, 'amp-list-init-from-state') &&
-      startsWith(src, AMP_STATE_URI_SCHEME)
-    );
+    return startsWith(src, AMP_STATE_URI_SCHEME);
   }
 
   /**
