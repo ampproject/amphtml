@@ -90,28 +90,6 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     fireHandler['touchend']('touchend', touchEndEvent);
   }
 
-  function swipeUp() {
-    const touchStartEvent = {touches: [{screenX: 150, screenY: 200}]};
-    fireHandler['touchstart']('touchstart', touchStartEvent);
-    
-    const touchMove = {touches: [{screenX: 150, screenY: 100}]};
-    fireHandler['touchmove']('touchmove', touchMove);
-
-    const touchEndEvent = {touches: [{screenX: 150, screenY: 100}]};
-    fireHandler['touchend']('touchend', touchEndEvent);
-  }
-
-  function swipeDown() {
-    const touchStartEvent = {touches: [{screenX: 150, screenY: 100}]};
-    fireHandler['touchstart']('touchstart', touchStartEvent);
-    
-    const touchMove = {touches: [{screenX: 150, screenY: 200}]};
-    fireHandler['touchmove']('touchmove', touchMove);
-
-    const touchEndEvent = {touches: [{screenX: 150, screenY: 200}]};
-    fireHandler['touchend']('touchend', touchEndEvent);
-  }
-
   beforeEach(() => {
     win = env.win;
     fakeMessaging = {
