@@ -229,7 +229,7 @@ export class AmpStoryPlayer {
       title.classList.add('title');
       title.textContent = story.title;
 
-      anchor.append(title);
+      anchor.appendChild(title);
     }
 
     return anchor;
