@@ -483,7 +483,7 @@ async function snapshotWebpages(browser, webpages) {
                 );
               }, NAVIGATE_TIMEOUT_MS);
 
-              page.once('response', async (response) => {
+              page.once('response', (response) => {
                 log(
                   'verbose',
                   'Response for url',
