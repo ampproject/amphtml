@@ -19,33 +19,3 @@ export const BASE_STYLE = {
   'cursor': 'pointer',
   'position': 'relative',
 };
-
-/* Twitter Styling */
-export const TWITTER = {'color': 'ffffff', 'backgroundColor': '1da1f2'};
-
-/* Facebook Styling */
-export const FACEBOOK = {'color': 'ffffff', 'backgroundColor': '32529f'};
-
-/* Pinterest Styling */
-export const PINTEREST = {'color': 'ffffff', 'backgroundColor': 'e60023'};
-
-/* LinkedIn Styling */
-export const LINKEDIN = {'color': 'ffffff', 'backgroundColor': '0077b5'};
-
-/* Tumblr Styling */
-export const TUMBLR = {'color': 'ffffff', 'backgroundColor': '3c5a77'};
-
-/* Email Styling */
-export const EMAIL = {'color': 'ffffff', 'backgroundColor': '000000'};
-
-/* Whatsapp Styling */
-export const WHATSAPP = {'color': 'ffffff', 'backgroundColor': '25d366'};
-
-/* Line Styling */
-export const LINE = {'color': 'ffffff', 'backgroundColor': '52b448'};
-
-/* SMS Styling */
-export const SMS = {'color': 'ffffff', 'backgroundColor': 'ca2b63'};
-
-/* "system" styling */
-export const SYSTEM = {'color': 'ffffff', 'backgroundColor': '000000'};

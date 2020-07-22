@@ -52,19 +52,10 @@ export function SocialShare(props) {
     checkedTarget,
   } = checkProps(props);
 
-  const type = props['type'].toUpperCase();
-  const baseStyle = CSS.BASE_STYLE;
-  const iconStyle = {
-    'color': props['color'] || CSS[type] ? CSS[type]['color'] : undefined,
-    'backgroundColor':
-      props['background'] || CSS[type]
-        ? CSS[type]['backgroundColor']
-        : undefined,
-  };
-  const size = {
-    width: checkedWidth,
-    height: checkedHeight,
-  };
+  const size = dict({
+    'width': checkedWidth,
+    'height': checkedHeight,
+  });
 
   return (
     <div
@@ -74,12 +65,55 @@ export function SocialShare(props) {
       onClick={() => handleActivation(finalEndpoint, checkedTarget)}
       style={{...size, ...props['style']}}
     >
-      <SocialShareIcon
-        type={type}
-        style={{...iconStyle, ...baseStyle, ...size}}
-      />
+      {processChildren(props, size)}
     </div>
   );
+}
+
+/**
+ * If the specified type 'canCustomize' (see config file), allow children
+ * to be rendered and color / background to be passed in via props.  If the
+ * specified type cannot be customized (canCustomize = false), children
+ * will not be rendered and color / background will always be set to default
+ * values.
+ * @param {!JsonObject} props
+ * @param {JsonObject} size
+ * @return {PreactDef.Renderable}
+ */
+function processChildren(props, size) {
+  const {
+    'type': type,
+    'children': children,
+    'color': propsColor,
+    'background': propsBackground,
+  } = props;
+  const typeConfig =
+    getSocialConfig(type) ||
+    dict({
+      'canCustomize': true,
+    });
+
+  if (typeConfig['canCustomize'] && children) {
+    return children;
+  } else {
+    const baseStyle = CSS.BASE_STYLE;
+    const iconStyle = dict({
+      'color':
+        typeConfig['canCustomize'] && propsColor
+          ? propsColor
+          : typeConfig['defaultColor'],
+      'backgroundColor':
+        typeConfig['canCustomize'] && propsBackground
+          ? propsBackground
+          : typeConfig['defaultBackgroundColor'],
+    });
+    return (
+      <SocialShareIcon
+        style={{...iconStyle, ...baseStyle, ...size}}
+        type={type.toUpperCase()}
+      />
+    );
+  }
 }
 
 /**

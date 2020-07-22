@@ -158,6 +158,8 @@ class AmpSocialShare extends PreactBaseElement {
 /** @override */
 AmpSocialShare['Component'] = SocialShare;
 
+AmpSocialShare['passthroughNonEmpty'] = true;
+
 /** @override */
 AmpSocialShare['props'] = {
   'tabIndex': {attr: 'tabindex'},
