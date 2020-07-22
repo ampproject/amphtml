@@ -42,13 +42,12 @@ let AmpElementPropDef;
  */
 let ChildDef;
 
-/** @const {Object} */
-const MUTATION_OBSERVER_OPTIONS = {
-  passthroughNonEmpty: {
-    childList: true,
-    characterData: true,
-  },
+/** @const {!MutationObserverInit} */
+const PASSTHROUGH_NON_EMPTY_MUTATION_INIT = {
+  childList: true,
+  characterData: true,
 };
+
 /**
  * Wraps a Preact Component in a BaseElement class.
  *
@@ -136,10 +135,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     this.context_.playable = true;
     this.scheduleRender_();
     if (this.observer_) {
-      this.observer_.observe(
-        this.element,
-        MUTATION_OBSERVER_OPTIONS.passthroughNonEmpty
-      );
+      this.observer_.observe(this.element, PASSTHROUGH_NON_EMPTY_MUTATION_INIT);
     }
     return deferred.promise;
   }
