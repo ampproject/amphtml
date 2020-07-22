@@ -224,6 +224,7 @@ export class BitrateManager {
    * Update other managed videos when we learn that the current selected
    * bandwidth wasn't good. Only operates on videos that are currently paused
    * as we never want to interrupt playing videos if we don't have to.
+   * @private
    */
   updateOtherManagedAndPausedVideos_() {
     for (let i = this.videos_.length - 1; i >= 0; i--) {
