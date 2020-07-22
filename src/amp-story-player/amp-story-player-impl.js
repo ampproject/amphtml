@@ -929,11 +929,16 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Reacts to touchstart events and caches its coordinates.
+   * Reacts to touchstart events, caches its coordinates,
+   * and ends the autoplay mode if activated.
    * @param {!Event} event
    * @private
    */
   onTouchStart_(event) {
+    if (this.isAutoplaying_) {
+      this.toggleAutoplayMode_(false);
+    }
+
     const coordinates = this.getClientTouchCoordinates_(event);
     if (!coordinates) {
       return;
