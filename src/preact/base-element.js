@@ -42,6 +42,13 @@ let AmpElementPropDef;
  */
 let ChildDef;
 
+/** @const {Object} */
+const MUTATION_OBSERVER_OPTIONS = {
+  passthroughNonEmpty: {
+    childList: true,
+    characterData: true,
+  },
+};
 /**
  * Wraps a Preact Component in a BaseElement class.
  *
@@ -131,7 +138,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     if (this.observer_) {
       this.observer_.observe(
         this.element,
-        this.constructor['mutationObserverOptions']['passthroughNonEmpty']
+        MUTATION_OBSERVER_OPTIONS.passthroughNonEmpty
       );
     }
     return deferred.promise;
@@ -290,18 +297,6 @@ PreactBaseElement['passthrough'] = false;
  * @protected {boolean}
  */
 PreactBaseElement['passthroughNonEmpty'] = false;
-
-/**
- * A static map for storing sets of options to be used in the Mutation Observer
- *
- * @protected {Object<string, Object<string, boolean|Array<string>>>}
- */
-PreactBaseElement['mutationObserverOptions'] = {
-  'passthroughNonEmpty': {
-    'childList': true,
-    'characterData': true,
-  },
-};
 
 /**
  * Enabling detached mode alters the children to be rendered in an
