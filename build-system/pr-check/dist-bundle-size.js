@@ -66,7 +66,10 @@ async function main() {
     ) {
       timedExecOrDie('gulp update-packages');
 
-      const process = timedExecWithError('gulp dist --fortesting', FILENAME);
+      const process = timedExecWithError(
+        'gulp dist --fortesting --noextensions',
+        FILENAME
+      );
       if (process.error) {
         console.log(colors.red('ERROR'), colors.yellow(process.error.message));
         await signalDistUpload('errored');
