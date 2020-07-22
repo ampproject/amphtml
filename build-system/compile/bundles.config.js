@@ -922,16 +922,10 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
-    name: 'amp-story-interactives',
-    version: '1.0',
-    latestVersion: '1.0',
-    options: {
-      cssBinaries: [
-        'amp-story-interactive',
-        'amp-story-interactive-binary-poll',
-        'amp-story-interactive-quiz',
-      ],
-    },
+    name: 'amp-story-player',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {hasCss: true},
     type: TYPES.MISC,
   },
   {
@@ -1037,6 +1031,7 @@ exports.extensionBundles = [
     name: 'amp-social-share',
     version: '1.0',
     latestVersion: '0.1',
+    options: {hasCss: true},
     type: TYPES.MISC,
   },
   {

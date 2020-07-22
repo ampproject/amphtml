@@ -1045,6 +1045,7 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       'src/element-stub.js',
       'src/friendly-iframe-embed.js',
+      'src/friendly-iframe-embed-legacy.js',
       'src/polyfillstub/intersection-observer-stub.js',
       'src/runtime.js',
       'src/service/extensions-impl.js',
@@ -1085,6 +1086,7 @@ const forbiddenTermsSrcInclusive = {
       'src/base-element.js',
       'src/event-helper.js',
       'src/friendly-iframe-embed.js',
+      'src/friendly-iframe-embed-legacy.js',
       'src/service/performance-impl.js',
       'src/service/resources-impl.js',
       'src/service/url-replacements-impl.js',
