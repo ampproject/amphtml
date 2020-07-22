@@ -36,6 +36,7 @@ import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {emojiConfetti} from './interactive-confetti';
 import {getRequestService} from './amp-story-request-service';
 import {toArray} from '../../../src/types';
 
@@ -81,6 +82,7 @@ export let InteractiveResponseType;
  *    correct: ?string,
  *    resultscategory: ?string,
  *    image: ?string,
+ *    confetti: ?string,
  * }}
  */
 export let OptionConfigType;
@@ -737,6 +739,10 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       selectedOption.classList.add(
         'i-amphtml-story-interactive-option-selected'
       );
+      const confettiEmoji = this.options_[selectedOption.optionIndex_].confetti;
+      if (confettiEmoji) {
+        emojiConfetti(this.rootEl_, this.win, confettiEmoji);
+      }
     }
 
     if (this.optionsData_) {
