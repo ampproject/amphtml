@@ -32,6 +32,7 @@ import {
   appendPathToUrl,
   assertAbsoluteHttpOrHttpsUrl,
 } from '../../../src/url';
+import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev, devAssert} from '../../../src/log';
@@ -180,8 +181,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
     /** @const @protected {!./variable-service.AmpStoryVariableService} */
     this.variableService_ = getVariableService(this.win);
-
-    this.updateStoryStoreState_(null);
   }
 
   /**
@@ -212,6 +211,12 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @return {string}
    */
   getInteractiveId_() {
+    if (!AmpStoryInteractive.canonicalUrl64) {
+      AmpStoryInteractive.canonicalUrl64 = base64UrlEncodeFromString(
+        Services.documentInfoForDoc(this.element).canonicalUrl
+      );
+      console.log(AmpStoryInteractive.canonicalUrl64);
+    }
     return `CANONICAL_URL+${this.getPageId_()}`;
   }
 
@@ -226,6 +231,14 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       }).getAttribute('id');
     }
     return this.pageId_;
+  }
+
+  /**
+   * Initializes the component when the amp-story is created.
+   * @public
+   */
+  initializeState() {
+    this.updateStoryStoreState_(null);
   }
 
   /** @override */

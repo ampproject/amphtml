@@ -416,6 +416,7 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeListeners_();
     this.initializeListenersForDev_();
     this.initializePageIds_();
+    this.initializeInteractives_();
     this.initializeStoryPlayer_();
 
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
@@ -567,6 +568,34 @@ export class AmpStory extends AMP.BaseElement {
       pageIds[i] = newId;
     }
     this.storeService_.dispatch(Action.SET_PAGE_IDS, pageIds);
+  }
+
+  /**
+   * Initializes interactives by deduplicating their IDs and calling initializeState().
+   * @private
+   */
+  initializeInteractives_() {
+    const interactiveEls = this.element.querySelectorAll(
+      'amp-story-interactive-binary-poll, amp-story-interactive-poll, amp-story-interactive-quiz'
+    );
+    const interactiveIds = Array.prototype.map.call(
+      interactiveEls,
+      (el) => el.id || 'interactive-id'
+    );
+    const idsMap = map();
+    for (let i = 0; i < interactiveIds.length; i++) {
+      if (idsMap[interactiveIds[i]] === undefined) {
+        idsMap[interactiveIds[i]] = 0;
+        continue;
+      }
+      user().error(TAG, `Duplicate interactive ID ${interactiveIds[i]}`);
+      const newId = `${interactiveIds[i]}__${++idsMap[interactiveIds[i]]}`;
+      interactiveEls[i].id = newId;
+      interactiveIds[i] = newId;
+      whenUpgradedToCustomElement(interactiveEls[i]).then((el) => {
+        el.getImpl().then((e) => e.initializeState());
+      });
+    }
   }
 
   /**
