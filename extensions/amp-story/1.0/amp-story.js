@@ -2862,5 +2862,9 @@ AMP.extension('amp-story', '1.0', (AMP) => {
   );
   AMP.registerElement('amp-story-interactive-poll', AmpStoryInteractivePoll);
   AMP.registerElement('amp-story-interactive-quiz', AmpStoryInteractiveQuiz);
+  AMP.registerElement(
+    'amp-story-interactive-results',
+    AmpStoryInteractiveResults
+  );
   AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });

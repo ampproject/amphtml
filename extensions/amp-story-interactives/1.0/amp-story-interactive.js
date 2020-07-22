@@ -206,6 +206,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   }
 
   /**
+   * Gets the interactive ID
    * @private
    * @return {string}
    */
