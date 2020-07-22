@@ -45,7 +45,6 @@ function main() {
     timedExecOrDie('gulp integration --nobuild --headless --coverage');
     timedExecOrDie('gulp unit --nobuild --headless --coverage');
     timedExecOrDie('gulp codecov-upload');
-    timedExecOrDie('gulp report-test-results');
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
