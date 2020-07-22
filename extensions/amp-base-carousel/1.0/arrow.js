@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import * as styles from './base-carousel.css';
-import {useState} from '../../../src/preact';
+import {useEffect, useState} from '../../../src/preact';
 
 /**
  * @param {!JsonObject} props
@@ -94,10 +94,19 @@ export function ArrowNext(props) {
  * @return {PreactDef.Renderable}
  */
 function DefaultArrow(props) {
-  const {by} = props;
+  const {by, disabled} = props;
   // TODO(wg-bento#7): Replace with :hover and :active pseudoselectors.
   const [hover, setHover] = useState(false);
   const [active, setActive] = useState(false);
+
+  // Component should reset hover and active states when disabled.
+  useEffect(() => {
+    if (disabled) {
+      setHover(false);
+      setActive(false);
+    }
+  }, [disabled]);
+
   return (
     <button
       style={{
