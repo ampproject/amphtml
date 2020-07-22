@@ -56,7 +56,14 @@ function getReplacePlugin() {
     };
   }
 
-  const replacements = [createReplacement('IS_ESM', argv.esm)];
+  // We build on the idea that SxG is an upgrade to the ESM build.
+  // Therefore, all conditions set by ESM will also hold for SxG.
+  // However, we will also need to introduce a separate IS_SxG flag
+  // for conditions only true for SxG.
+  const replacements = [
+    createReplacement('IS_ESM', argv.esm || argv.sxg),
+    createReplacement('IS_SXG', argv.sxg),
+  ];
 
   const experimentConstant = getExperimentConstant();
   if (experimentConstant) {

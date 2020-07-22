@@ -106,7 +106,7 @@ class JsonObject;
 
 class JsonDict {
  public:
-  // TODO(amaltas): Add support for vararg:
+  // TODO: Add support for vararg:
   // my_dict.Insert({"foo", "bar"}, {"hello", 1}, {"bar": false});
   template <typename V>
   void Insert(std::string key, V value) {
