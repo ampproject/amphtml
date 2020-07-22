@@ -48,7 +48,9 @@ const {waitUntilUsed} = require('tcp-port-used');
 let puppeteer;
 let percySnapshot;
 
-const SNAPSHOT_SINGLE_BUILD_OPTIONS = {widths: [375]};
+const SNAPSHOT_SINGLE_BUILD_OPTIONS = {
+  widths: [375],
+};
 const VIEWPORT_WIDTH = 1400;
 const VIEWPORT_HEIGHT = 100000;
 const HOST = 'localhost';
@@ -471,37 +473,35 @@ async function snapshotWebpages(browser, webpages) {
       const pagePromise = (async () => {
         try {
           try {
-            await (async () => {
-              const responseWatcher = new Promise((resolve, reject) => {
-                const responseTimeout = setTimeout(() => {
-                  reject(
-                    new puppeteer.TimeoutError(
-                      `Response was not received in test ${testName} for page ` +
-                        `${webpage.url} after ${NAVIGATE_TIMEOUT_MS}ms`
-                    )
-                  );
-                }, NAVIGATE_TIMEOUT_MS);
+            const responseWatcher = new Promise((resolve, reject) => {
+              const responseTimeout = setTimeout(() => {
+                reject(
+                  new puppeteer.TimeoutError(
+                    `Response was not received in test ${testName} for page ` +
+                      `${webpage.url} after ${NAVIGATE_TIMEOUT_MS}ms`
+                  )
+                );
+              }, NAVIGATE_TIMEOUT_MS);
 
-                page.once('response', async (response) => {
-                  log(
-                    'verbose',
-                    'Response for url',
-                    colors.yellow(response.url()),
-                    'with status',
-                    colors.cyan(response.status()),
-                    colors.cyan(response.statusText())
-                  );
-                  clearTimeout(responseTimeout);
-                  resolve();
-                });
+              page.once('response', async (response) => {
+                log(
+                  'verbose',
+                  'Response for url',
+                  colors.yellow(response.url()),
+                  'with status',
+                  colors.cyan(response.status()),
+                  colors.cyan(response.statusText())
+                );
+                clearTimeout(responseTimeout);
+                resolve();
               });
+            });
 
-              log('verbose', 'Navigating to page', colors.yellow(webpage.url));
-              await Promise.all([
-                responseWatcher,
-                page.goto(fullUrl, {waitUntil: 'networkidle2'}),
-              ]);
-            })();
+            log('verbose', 'Navigating to page', colors.yellow(webpage.url));
+            await Promise.all([
+              responseWatcher,
+              page.goto(fullUrl, {waitUntil: 'networkidle2'}),
+            ]);
 
             log(
               'verbose',
@@ -663,13 +663,13 @@ async function createEmptyBuild() {
   const browser = await launchBrowser();
   const page = await newPage(browser);
 
-  await page
-    .goto(`http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`)
-    .then(
-      () => {},
-      () => {}
+  try {
+    await page.goto(
+      `http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`
     );
-  await percySnapshot(page, 'Blank page', SNAPSHOT_SINGLE_BUILD_OPTIONS);
+  } finally {
+    await percySnapshot(page, 'Blank page', SNAPSHOT_SINGLE_BUILD_OPTIONS);
+  }
 }
 
 /**
