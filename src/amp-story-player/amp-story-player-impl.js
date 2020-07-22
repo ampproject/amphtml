@@ -797,11 +797,18 @@ export class AmpStoryPlayer {
    * @param {!Element} story
    * @param {!Element} iframe
    * @param {!VisibilityState} visibilityState
+   * @param {EmbedMode=} embedMode
    * @private
    */
-  layoutIframe_(story, iframe, visibilityState) {
+  layoutIframe_(
+    story,
+    iframe,
+    visibilityState,
+    embedMode = EmbedMode.NOT_EMBEDDED
+  ) {
     this.maybeGetCacheUrl_(story.href).then((url) => {
-      const {href} = this.getEncodedLocation_(url, visibilityState);
+      const {href} = this.getEncodedLocation_(url, visibilityState, embedMode);
+
       iframe.setAttribute('src', href);
       iframe.setAttribute('title', story.textContent.trim());
     });
