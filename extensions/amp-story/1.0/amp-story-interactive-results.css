@@ -25,7 +25,7 @@
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
-	padding: 20px 5px !important;
+  padding: 20px 5px !important;
 }
 
 .i-amphtml-story-interactive-results-line {
@@ -37,10 +37,13 @@
 }
 
 .i-amphtml-story-interactive-results-dots {
-  background-image: radial-gradient(var(--interactive-accent-color) 20%, transparent 20%) !important;
-	width: 52px !important;
-	height: 94px !important;
-	background-position: top !important;
+  background-image: radial-gradient(
+    var(--interactive-accent-color) 20%,
+    transparent 20%
+  ) !important;
+  width: 52px !important;
+  height: 94px !important;
+  background-position: top !important;
   background-size: 8px 8px !important;
 }
 
@@ -59,7 +62,11 @@
 }
 
 .i-amphtml-story-interactive-results-image-border {
-  background: linear-gradient(180deg, transparent 56%, var(--interactive-accent-color) 56%);
+  background: linear-gradient(
+    180deg,
+    transparent 56%,
+    var(--interactive-accent-color) 56%
+  );
   margin: 0px 10px !important;
   padding: 10px !important;
   border-radius: 50% !important;
@@ -83,6 +90,6 @@
   font-size: 14px !important;
   text-align: center !important;
   color: var(--i-amphtml-interactive-option-text-color) !important;
-	margin-top: 8px !important;
-	padding: 0px 20px !important;
+  margin-top: 8px !important;
+  padding: 0px 20px !important;
 }

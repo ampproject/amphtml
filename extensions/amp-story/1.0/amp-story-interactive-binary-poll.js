@@ -28,10 +28,10 @@ export const FontSize = {
   DOUBLE_LINE: 14,
 };
 
-/**	
- * Minimum transformX value.	
- * Prevents small percentages from moving outside of poll.	
- *	
+/**
+ * Minimum transformX value.
+ * Prevents small percentages from moving outside of poll.
+ *
 /** @const {number} */
 const MIN_HORIZONTAL_TRANSFORM = -20;
 
