@@ -294,7 +294,7 @@ PreactBaseElement['passthroughNonEmpty'] = false;
 /**
  * A static map for storing sets of options to be used in the Mutation Observer
  *
- * @protected {boolean}
+ * @protected {Object<string, Object<string, boolean|Array<string>>>}
  */
 PreactBaseElement['mutationObserverOptions'] = {
   'passthroughNonEmpty': {
