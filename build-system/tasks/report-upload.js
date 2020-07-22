@@ -15,7 +15,8 @@
  */
 
 /**
- * @fileoverview This file implements the `gulp report-test-results` task, which [[does something]]
+ * @fileoverview This file implements the `gulp report-upload` task, which POSTs test result reports
+ * to an API endpoint that stores them in the database.
  */
 
 'use strict';
@@ -83,7 +84,7 @@ async function sendTravisKarmaReport(testType) {
   }
 }
 
-async function reportTestResults() {
+async function reportUpload() {
   const filenames = await fs.readdir('result-reports/');
   const testTypes = filenames.map((filename) => path.parse(filename).name);
 
@@ -91,7 +92,7 @@ async function reportTestResults() {
 }
 
 module.exports = {
-  reportTestResults,
+  reportUpload,
 };
 
-reportTestResults.description = 'Reports test results to test result database';
+reportUpload.description = 'Sends test results to test result database';
