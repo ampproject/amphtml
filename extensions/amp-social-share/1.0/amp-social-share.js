@@ -78,7 +78,7 @@ class AmpSocialShare extends PreactBaseElement {
 
     /** @private {MutationObserver} */
     this.observer_ = new MutationObserver(() => {
-      this.mutateProps(dict({}));
+      this.scheduleRender_();
     });
   }
 
