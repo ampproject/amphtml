@@ -1309,19 +1309,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
       const value = await perf.getMetric('mbv');
       expect(value).to.eq(1);
     });
-
-    describe('when API not supported', () => {
-      it('throws an error', async () => {
-        const perf = getPerformance();
-        try {
-          await perf.getMetric('lcpv');
-        } catch (error) {
-          expect(error.message).to.equal(
-            'Largest Contentful Paint not supported'
-          );
-        }
-      });
-    });
   });
 
   describe('forwards navigation metrics', () => {
