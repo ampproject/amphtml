@@ -68,7 +68,7 @@ void AppendValue(htmlparser::json::JsonDict* dict, const std::string& key,
 //
 // Token implementations.
 //
-// TODO(honeybadgerdontcare): Use either StringValue or ToString, not both.
+// TODO: Use either StringValue or ToString, not both.
 const std::string& Token::StringValue() const {
   static const std::string* empty = new std::string;
   return *empty;

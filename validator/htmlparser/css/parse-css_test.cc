@@ -30,7 +30,7 @@ using std::unique_ptr;
 using std::vector;
 
 // Helper routine for implementing json serialization.
-// TODO(johannes): Replace with something better, it's only used
+// TODO: Replace with something better, it's only used
 // for serializing lists of errors at this point.
 template <class T>
 std::string JsonFromList(const vector<unique_ptr<T>>& list) {
@@ -2146,7 +2146,7 @@ TEST(ParseCssTest, ParseAStyleSheet_NastyEscaping) {
   // after the string http://esc.com/'\\ there are some stray tokens. This is
   // difficult to read in the C++ source due to the double escaping, but the
   // parser deals with it OK.
-  // TODO(johannes): Should we verify the parameters for the function token?
+  // TODO: Should we verify the parameters for the function token?
   vector<char32_t> css = htmlparser::Strings::Utf8ToCodepoints(
       ".a { background-image:url(\"http://esc.com/'\\\\\"/c.png\") } ");
   vector<unique_ptr<ErrorToken>> errors;
@@ -3785,6 +3785,19 @@ TEST(ParseCssTest, ParseSelectors_ReportsErrorForUnparsedRemainderOfInput) {
 })"");
 }
 
+TEST(ParseCssTest, SelectorParserRecordsOneParsingError) {
+  vector<char32_t> css = htmlparser::Strings::Utf8ToCodepoints("/*error*/ {}");
+  vector<unique_ptr<ErrorToken>> errors;
+  vector<unique_ptr<Token>> tokens =
+      Tokenize(&css, /*line=*/1, /*col=*/0, &errors);
+  unique_ptr<Stylesheet> stylesheet =
+      ParseAStylesheet(&tokens, AmpCssParsingConfig(), &errors);
+  EXPECT_EQ(0, errors.size());
+  SelectorVisitor visitor(&errors);
+  stylesheet->Accept(&visitor);
+  EXPECT_EQ(1, errors.size());
+}
+
 class CollectCombinatorNodes : public SelectorVisitor {
  public:
   CollectCombinatorNodes() : SelectorVisitor(&errors_) {}
@@ -3879,8 +3892,7 @@ TEST(ParseCssTest, SelectorParserImplementsVisitorPattern) {
 })"");
 }
 
-// Collects type selectors that match a body tag. This is useful for the
-// A4A project (http://go/a4areserializer).
+// Collects type selectors that match a body tag.
 class CollectBodyTypeSelectors : public SelectorVisitor {
  public:
   CollectBodyTypeSelectors() : SelectorVisitor(&errors_) {}
