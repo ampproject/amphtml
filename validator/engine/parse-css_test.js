@@ -1857,6 +1857,19 @@ describe('css_selectors', () => {
         selector);
   });
 
+  it('records one selector parsing error', () => {
+    const css = '/*error*/ {}';
+    const errors = [];
+    const tokenlist = tokenize_css.tokenize(css, 1, 0, errors);
+    const sheet = parse_css.parseAStylesheet(
+        tokenlist, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+        errors);
+    assertStrictEqual(0, errors.length);
+    const visitor = new parse_css.SelectorVisitor(errors);
+    sheet.accept(visitor);
+    assertStrictEqual(1, errors.length);
+  });
+
   it('implements visitor pattern', () => {
     class CollectCombinatorNodes extends parse_css.SelectorVisitor {
       constructor() {
@@ -1884,6 +1897,7 @@ describe('css_selectors', () => {
         errors);
     const visitor = new CollectCombinatorNodes();
     sheet.accept(visitor);
+    assertStrictEqual(0, errors.length);
     assertStrictEqual(4, visitor.combinatorNodes.length);
     assertStrictEqual(
         'GENERAL_SIBLING', visitor.combinatorNodes[0].combinatorType);
