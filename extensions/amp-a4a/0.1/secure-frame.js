@@ -33,6 +33,7 @@ const fontProviderAllowList = [
 
 const sandboxVals = [
   'allow-forms',
+  'allow-popups',
   'allow-popups-to-escape-sandbox',
   'allow-same-origin',
   'allow-top-navigation',
@@ -47,6 +48,7 @@ const createSecureDocSkeleton = (sanitizedHeadElements) =>
       img-src *;
       media-src *;
       font-src *;
+      connect-src *;
       script-src 'none';
       object-src 'none';
       child-src 'none';
