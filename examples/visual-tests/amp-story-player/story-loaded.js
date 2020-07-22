@@ -18,11 +18,13 @@
 module.exports = {
   'story loaded': async page => {
     await page.waitForSelector('.i-amphtml-story-player-loaded');
-    await page.waitForSelector('.i-amphtml-story-loaded');
+    await page.waitFor(10000); // For animations to finish.
     await page.$eval('iframe', (iframe) => {
       const contents = iframe.contentDocument.documentElement.outerHTML;
       iframe.src = '';
       iframe.srcdoc = contents;
     });
+
+    await page.waitFor(10000); // For animations to finish.
   }
 };
