@@ -41,6 +41,7 @@ export class AmpAutoAds extends AMP.BaseElement {
     const type = this.element.getAttribute('type');
     userAssert(type, 'Missing type attribute');
 
+    /** @private {?./ad-network-config.AdNetworkConfigDef} */
     this.adNetwork_ = getAdNetworkConfig(type, this.element);
     userAssert(this.adNetwork_, 'No AdNetworkConfig for type: ' + type);
 
@@ -54,6 +55,7 @@ export class AmpAutoAds extends AMP.BaseElement {
       AD_TAG
     );
 
+    /** @private {!Promise<!JsonObject>} */
     this.configPromise_ = this.getAmpDoc()
       .whenFirstVisible()
       .then(() => {
@@ -73,8 +75,9 @@ export class AmpAutoAds extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     if (this.isAutoAdsLayoutCallbackExperimentOn_()) {
-      this.placeAds_();
+      return this.placeAds_();
     }
+    return Promise.resolve();
   }
 
   /**
@@ -109,11 +112,12 @@ export class AmpAutoAds extends AMP.BaseElement {
   }
 
   /**
+   * @return {!Promise}
    * @private
    */
   placeAds_() {
     const ampdoc = this.getAmpDoc();
-    this.configPromise_.then((configObj) => {
+    return this.configPromise_.then((configObj) => {
       if (!configObj) {
         return;
       }
