@@ -34,12 +34,6 @@ if (getMode().test || getMode().localDev) {
     'promptUISrc':
       '/examples/amp-consent/diy-consent.html?cid=CLIENT_ID&pid=PAGE_VIEW_ID',
   };
-
-  CMP_CONFIG['_test_'] = {
-    'consentInstanceId': '_test_',
-    'checkConsentHref': '/get-consent-v1?cid=CLIENT_ID&pid=PAGE_VIEW_ID',
-    'promptUISrc': '/test/fixtures/served/cmp-iframe.html',
-  };
 }
 
 CMP_CONFIG['appconsent'] = {
