@@ -29,6 +29,7 @@ import {applySandbox} from '../3p-frame';
 import {createCustomEvent} from '../event-helper';
 import {dict, map} from '../utils/object';
 // Source for this constant is css/amp-story-player-iframe.css
+import {EmbedMode} from '../../extensions/amp-story/1.0/embed-mode';
 import {cssText} from '../../build/amp-story-player-iframe.css';
 import {dev} from '../log';
 import {findIndex} from '../utils/array';
@@ -836,10 +837,15 @@ export class AmpStoryPlayer {
    * Gets encoded url for player usage.
    * @param {string} href
    * @param {VisibilityState=} visibilityState
+   * @param {EmbedMode=} embedMode
    * @return {!Location}
    * @private
    */
-  getEncodedLocation_(href, visibilityState = VisibilityState.INACTIVE) {
+  getEncodedLocation_(
+    href,
+    visibilityState = VisibilityState.INACTIVE,
+    embedMode = EmbedMode.NOT_EMBEDDED
+  ) {
     const params = dict({
       'amp_js_v': '0.1',
       'visibilityState': visibilityState,
@@ -847,6 +853,7 @@ export class AmpStoryPlayer {
       'showStoryUrlInfo': '0',
       'storyPlayer': 'v0',
       'cap': 'swipe',
+      'embedMode': embedMode,
     });
 
     const fragmentParam = getFragment(href);
