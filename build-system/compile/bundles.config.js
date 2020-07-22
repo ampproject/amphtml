@@ -1183,6 +1183,12 @@ exports.extensionBundles = [
     latestVersion: '0.1',
     type: TYPES.MEDIA,
   },
+  {
+    name: 'amp-slike',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
+  },
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 /**
