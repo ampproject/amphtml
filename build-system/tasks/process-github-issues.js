@@ -71,7 +71,7 @@ const QUARTERLY_DAYS = 89;
 const NUM_BATCHES = 14;
 
 // We start processing the issues by checking token first
-async function processGithubIssues() {
+function processGithubIssues() {
   if (!GITHUB_ACCESS_TOKEN) {
     log(colors.red('You have not set the GITHUB_ACCESS_TOKEN env var.'));
     log(
@@ -84,8 +84,9 @@ async function processGithubIssues() {
     );
     return;
   }
-  await updateGitHubIssues();
-  log(colors.blue('automation applied'));
+  return updateGitHubIssues().then(function () {
+    log(colors.blue('automation applied'));
+  });
 }
 /**
  * Fetches issues?page=${opt_page}
@@ -93,7 +94,7 @@ async function processGithubIssues() {
  * @param {number=} opt_page
  * @return {!Promise<!Array<}
  */
-async function getIssues(opt_page) {
+function getIssues(opt_page) {
   const options = extend({}, issuesOptions);
   options.qs = {
     'state': 'open',
@@ -101,10 +102,11 @@ async function getIssues(opt_page) {
     'per_page': 100,
     'access_token': GITHUB_ACCESS_TOKEN,
   };
-  const res = await request(options);
-  const issues = JSON.parse(res.body);
-  assert(Array.isArray(issues), 'issues must be an array.');
-  return issues;
+  return request(options).then((res) => {
+    const issues = JSON.parse(res.body);
+    assert(Array.isArray(issues), 'issues must be an array.');
+    return issues;
+  });
 }
 /**
  * Function goes through all the gitHub issues,
@@ -113,199 +115,220 @@ async function getIssues(opt_page) {
  * tasks applied as per design go/ampgithubautomation
  * @return {!Promise}
  */
-async function updateGitHubIssues() {
+function updateGitHubIssues() {
+  let promise = Promise.resolve();
   const arrayPromises = [];
   // we need to pull issues in batches
   for (let batch = 1; batch < NUM_BATCHES; batch++) {
     arrayPromises.push(getIssues(batch));
   }
-  const responses = await Promise.all(arrayPromises);
-  const allIssues = [].concat.apply([], responses);
-  for (const issue of allIssues) {
-    const {
-      labels,
-      milestone,
-      assignee,
-      'pull_request': pullRequest,
-      'updated_at': issueLastUpdate,
-    } = issue;
-    let issueType;
-    let milestoneTitle;
-    let milestoneState;
-    let hasPriority = false;
-    let hasCategory = false;
-    let issueNewMilestone = MILESTONE_PENDING_TRIAGE;
-    let assigneeName = '';
-    let biweeklyUpdate = true;
-    let quartelyUpdate = true;
-    // if an issue is a pull request, we'll skip it
-    if (pullRequest) {
-      if (isDryrun) {
-        log(colors.red(issue.number + ' is a pull request'));
-      }
-      return;
-    }
-    if (getLastUpdate(issueLastUpdate) > QUARTERLY_DAYS) {
-      quartelyUpdate = false;
-      biweeklyUpdate = false;
-    } else if (getLastUpdate(issueLastUpdate) > BIWEEKLY_DAYS) {
-      biweeklyUpdate = false;
-    }
-    // Get the assignee
-    if (assignee) {
-      assigneeName = '@' + assignee.login;
-    }
-    // Get the title and state of the milestone
-    if (milestone) {
-      milestoneTitle = milestone.title;
-      milestoneState = milestone.state;
-      issueNewMilestone = milestone.number;
-    }
-
-    log('Update ' + issue.number);
-    const updates = [];
-    // Get the labels we want to check
-    labels.filter(Boolean).forEach((label) => {
-      // Check if the issues has type
-      if (label.name.startsWith('Type') || label.name.startsWith('Related')) {
-        issueType = label.name;
-      } else if (
-        // Check if the issues has Priority
-        label.name.startsWith('P0') ||
-        label.name.startsWith('P1') ||
-        label.name.startsWith('P2') ||
-        label.name.startsWith('P3')
-      ) {
-        hasPriority = true;
-        if (label.name.startsWith('P0') || label.name.startsWith('P1')) {
-          if (biweeklyUpdate == false) {
-            biweeklyUpdate = true;
-            updates.push(
-              applyComment(
-                issue,
-                'This is a high priority' +
-                  " issue but it hasn't been updated in awhile. " +
-                  assigneeName +
-                  ' Do you have any updates?'
-              )
-            );
+  return Promise.all(arrayPromises)
+    .then((requests) => [].concat.apply([], requests))
+    .then((issues) => {
+      const allIssues = issues;
+      allIssues.forEach(function (issue) {
+        const {
+          labels,
+          milestone,
+          assignee,
+          'pull_request': pullRequest,
+          'updated_at': issueLastUpdate,
+        } = issue;
+        let issueType;
+        let milestoneTitle;
+        let milestoneState;
+        let hasPriority = false;
+        let hasCategory = false;
+        let issueNewMilestone = MILESTONE_PENDING_TRIAGE;
+        let assigneeName = '';
+        let biweeklyUpdate = true;
+        let quartelyUpdate = true;
+        // if an issue is a pull request, we'll skip it
+        if (pullRequest) {
+          if (isDryrun) {
+            log(colors.red(issue.number + ' is a pull request'));
           }
-        } else if (label.name.startsWith('P2') && quartelyUpdate == false) {
-          quartelyUpdate = true;
-          updates.push(
-            applyComment(
-              issue,
-              "This issue hasn't been " +
-                ' updated in awhile. ' +
-                assigneeName +
-                ' Do you have any updates?'
-            )
-          );
+          return;
         }
-      }
-      if (
-        label.name.startsWith('Category') ||
-        label.name.startsWith('Related to') ||
-        label.name.startsWith('GFI') ||
-        label.name.startsWith('good first issue')
-      ) {
-        hasCategory = true;
-      }
+        if (getLastUpdate(issueLastUpdate) > QUARTERLY_DAYS) {
+          quartelyUpdate = false;
+          biweeklyUpdate = false;
+        } else if (getLastUpdate(issueLastUpdate) > BIWEEKLY_DAYS) {
+          biweeklyUpdate = false;
+        }
+        // Get the assignee
+        if (assignee) {
+          assigneeName = '@' + assignee.login;
+        }
+        // Get the title and state of the milestone
+        if (milestone) {
+          milestoneTitle = milestone.title;
+          milestoneState = milestone.state;
+          issueNewMilestone = milestone.number;
+        }
+        // promise starts
+        promise = promise.then(function () {
+          log('Update ' + issue.number);
+          const updates = [];
+          // Get the labels we want to check
+          labels.forEach(function (label) {
+            if (label) {
+              // Check if the issues has type
+              if (
+                label.name.startsWith('Type') ||
+                label.name.startsWith('Related')
+              ) {
+                issueType = label.name;
+              }
+              // Check if the issues has Priority
+              if (
+                label.name.startsWith('P0') ||
+                label.name.startsWith('P1') ||
+                label.name.startsWith('P2') ||
+                label.name.startsWith('P3')
+              ) {
+                hasPriority = true;
+                if (
+                  label.name.startsWith('P0') ||
+                  label.name.startsWith('P1')
+                ) {
+                  if (biweeklyUpdate == false) {
+                    biweeklyUpdate = true;
+                    updates.push(
+                      applyComment(
+                        issue,
+                        'This is a high priority' +
+                          " issue but it hasn't been updated in awhile. " +
+                          assigneeName +
+                          ' Do you have any updates?'
+                      )
+                    );
+                  }
+                } else if (
+                  label.name.startsWith('P2') &&
+                  quartelyUpdate == false
+                ) {
+                  quartelyUpdate = true;
+                  updates.push(
+                    applyComment(
+                      issue,
+                      "This issue hasn't been " +
+                        ' updated in awhile. ' +
+                        assigneeName +
+                        ' Do you have any updates?'
+                    )
+                  );
+                }
+              }
+              if (
+                label.name.startsWith('Category') ||
+                label.name.startsWith('Related to') ||
+                label.name.startsWith('GFI') ||
+                label.name.startsWith('good first issue')
+              ) {
+                hasCategory = true;
+              }
+            }
+          });
+          // Milestone task: move issues from closed milestone
+          if (milestone) {
+            if (milestoneState === 'closed') {
+              issueNewMilestone = MILESTONE_BACKLOG_BUGS;
+              updates.push(applyMilestone(issue, issueNewMilestone));
+            }
+          }
+          if (issueNewMilestone === MILESTONE_PENDING_TRIAGE) {
+            if (quartelyUpdate == false) {
+              quartelyUpdate = true;
+              updates.push(
+                applyComment(
+                  issue,
+                  'This issue seems to be in ' +
+                    ' Pending Triage for awhile. ' +
+                    assigneeName +
+                    ' Please triage this to ' +
+                    'an appropriate milestone.'
+                )
+              );
+            }
+          }
+          // if issueType is not null, add correct milestones
+          if (issueType != null) {
+            if (
+              issueNewMilestone === MILESTONE_PENDING_TRIAGE ||
+              milestone == null
+            ) {
+              if (issueType === 'Type: Feature Request') {
+                issueNewMilestone = MILESTONE_NEW_FRS;
+                updates.push(applyMilestone(issue, issueNewMilestone));
+              } else if (
+                issueType === 'Related to: Documentation' ||
+                issueType === 'Type: Design Review' ||
+                issueType === 'Type: Status Update'
+              ) {
+                issueNewMilestone = MILESTONE_DOCS_UPDATES;
+                updates.push(applyMilestone(issue, issueNewMilestone));
+              } else if (
+                issueType === 'Type: Bug' ||
+                issueType === 'Related to: Flaky Tests'
+              ) {
+                issueNewMilestone = MILESTONE_BACKLOG_BUGS;
+                updates.push(applyMilestone(issue, issueNewMilestone));
+              } else if (milestone == null) {
+                updates.push(applyMilestone(issue, issueNewMilestone));
+              }
+            }
+          } else if (milestone == null) {
+            updates.push(applyMilestone(issue, issueNewMilestone));
+          } else if (
+            issueNewMilestone === MILESTONE_PRIORITIZED_FRS ||
+            issueNewMilestone === MILESTONE_NEW_FRS
+          ) {
+            updates.push(applyLabel(issue, 'Type: Feature Request'));
+          } else if (
+            issueNewMilestone === MILESTONE_BACKLOG_BUGS ||
+            milestoneTitle.startsWith('Sprint')
+          ) {
+            updates.push(applyLabel(issue, 'Type: Bug'));
+          }
+          // Apply default priority if no priority
+          if (
+            hasPriority == false &&
+            issueNewMilestone != MILESTONE_NEW_FRS &&
+            issueNewMilestone !== MILESTONE_3P_IMPLEMENTATION &&
+            issueNewMilestone !== MILESTONE_PENDING_TRIAGE &&
+            milestone != null
+          ) {
+            updates.push(applyLabel(issue, 'P2: Soon'));
+          }
+          // Add comment with missing Category
+          if (hasCategory == false) {
+            if (
+              issueNewMilestone === MILESTONE_PENDING_TRIAGE ||
+              issueNewMilestone === MILESTONE_DOCS_UPDATES ||
+              issueNewMilestone == null ||
+              issueNewMilestone === MILESTONE_GREAT_ISSUES
+            ) {
+              if (isDryrun) {
+                log(colors.green('No comment needed  for #' + issue.number));
+              }
+            } else {
+              updates.push(
+                applyComment(
+                  issue,
+                  "This issue doesn't have a category" +
+                    ' which makes it harder for us to keep track of it. ' +
+                    assigneeName +
+                    ' Please add an appropriate category.'
+                )
+              );
+            }
+          }
+          return Promise.all(updates);
+        });
+      });
+      return promise;
     });
-    // Milestone task: move issues from closed milestone
-    if (milestone) {
-      if (milestoneState === 'closed') {
-        issueNewMilestone = MILESTONE_BACKLOG_BUGS;
-        updates.push(applyMilestone(issue, issueNewMilestone));
-      }
-    }
-    if (issueNewMilestone === MILESTONE_PENDING_TRIAGE) {
-      if (quartelyUpdate == false) {
-        quartelyUpdate = true;
-        updates.push(
-          applyComment(
-            issue,
-            'This issue seems to be in ' +
-              ' Pending Triage for awhile. ' +
-              assigneeName +
-              ' Please triage this to ' +
-              'an appropriate milestone.'
-          )
-        );
-      }
-    }
-    // if issueType is not null, add correct milestones
-    if (issueType != null) {
-      if (issueNewMilestone === MILESTONE_PENDING_TRIAGE || milestone == null) {
-        if (issueType === 'Type: Feature Request') {
-          issueNewMilestone = MILESTONE_NEW_FRS;
-          updates.push(applyMilestone(issue, issueNewMilestone));
-        } else if (
-          issueType === 'Related to: Documentation' ||
-          issueType === 'Type: Design Review' ||
-          issueType === 'Type: Status Update'
-        ) {
-          issueNewMilestone = MILESTONE_DOCS_UPDATES;
-          updates.push(applyMilestone(issue, issueNewMilestone));
-        } else if (
-          issueType === 'Type: Bug' ||
-          issueType === 'Related to: Flaky Tests'
-        ) {
-          issueNewMilestone = MILESTONE_BACKLOG_BUGS;
-          updates.push(applyMilestone(issue, issueNewMilestone));
-        } else if (milestone == null) {
-          updates.push(applyMilestone(issue, issueNewMilestone));
-        }
-      }
-    } else if (milestone == null) {
-      updates.push(applyMilestone(issue, issueNewMilestone));
-    } else if (
-      issueNewMilestone === MILESTONE_PRIORITIZED_FRS ||
-      issueNewMilestone === MILESTONE_NEW_FRS
-    ) {
-      updates.push(applyLabel(issue, 'Type: Feature Request'));
-    } else if (
-      issueNewMilestone === MILESTONE_BACKLOG_BUGS ||
-      milestoneTitle.startsWith('Sprint')
-    ) {
-      updates.push(applyLabel(issue, 'Type: Bug'));
-    }
-    // Apply default priority if no priority
-    if (
-      hasPriority == false &&
-      issueNewMilestone != MILESTONE_NEW_FRS &&
-      issueNewMilestone !== MILESTONE_3P_IMPLEMENTATION &&
-      issueNewMilestone !== MILESTONE_PENDING_TRIAGE &&
-      milestone != null
-    ) {
-      updates.push(applyLabel(issue, 'P2: Soon'));
-    }
-    // Add comment with missing Category
-    if (hasCategory == false) {
-      if (
-        issueNewMilestone === MILESTONE_PENDING_TRIAGE ||
-        issueNewMilestone === MILESTONE_DOCS_UPDATES ||
-        issueNewMilestone == null ||
-        issueNewMilestone === MILESTONE_GREAT_ISSUES
-      ) {
-        if (isDryrun) {
-          log(colors.green('No comment needed  for #' + issue.number));
-        }
-      } else {
-        updates.push(
-          applyComment(
-            issue,
-            "This issue doesn't have a category" +
-              ' which makes it harder for us to keep track of it. ' +
-              assigneeName +
-              ' Please add an appropriate category.'
-          )
-        );
-      }
-    }
-
-    await Promise.all(updates);
-  }
 }
 
 /**
@@ -369,10 +392,7 @@ function applyLabel(issue, label) {
  * @param {string} comment
  * @return {!Promise<*>}
  */
-async function applyComment(issue, comment) {
-  // TODO(rcebulko): Waiting two full minutes between requests seems excessive,
-  // and possibly wouldn't be necessary if `updateGitHubIssues` didn't try to
-  // queue and execute this in a loop and instead awaited each call separately.
+function applyComment(issue, comment) {
   const options = extend({}, issuesOptions);
   options.qs = {
     'state': 'open',
@@ -380,26 +400,29 @@ async function applyComment(issue, comment) {
     'access_token': GITHUB_ACCESS_TOKEN,
   };
   // delay the comment request so we don't reach github rate limits requests
-  await new Promise((resolve) => setTimeout(resolve, 120000));
-  if (isDryrun) {
-    log(colors.blue('waited 2 minutes to avoid gh rate limits'));
-    log(
-      colors.green(
-        'Comment applied after ' +
-          'waiting 2 minutes to avoid github rate limits: ' +
-          comment +
-          ' for #' +
-          issue.number
-      )
-    );
-  } else {
-    createGithubRequest(
-      '/issues/' + issue.number + '/comments',
-      'POST',
-      comment,
-      'comment'
-    );
-  }
+  const promise = new Promise((resolve) => setTimeout(resolve, 120000));
+  return promise.then(function () {
+    if (isDryrun) {
+      log(colors.blue('waited 2 minutes to avoid gh rate limits'));
+      log(
+        colors.green(
+          'Comment applied after ' +
+            'waiting 2 minutes to avoid github rate limits: ' +
+            comment +
+            ' for #' +
+            issue.number
+        )
+      );
+      return;
+    } else {
+      createGithubRequest(
+        '/issues/' + issue.number + '/comments',
+        'POST',
+        comment,
+        'comment'
+      );
+    }
+  });
 }
 // calculate number of days since the latest update
 function getLastUpdate(issueLastUpdate) {
@@ -422,7 +445,7 @@ function getLastUpdate(issueLastUpdate) {
  * @param {string} typeRequest
  * @return {!Promise<*>}
  */
-async function createGithubRequest(path, opt_method, opt_data, typeRequest) {
+function createGithubRequest(path, opt_method, opt_data, typeRequest) {
   const options = {
     url: 'https://api.github.com/repos/ampproject/amphtml' + path,
     body: {},
