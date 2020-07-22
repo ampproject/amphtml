@@ -46,8 +46,8 @@ export function Arrow(props) {
         ...styles.arrowPlacement,
         // Offset button from the edge.
         [by < 0 ? 'left' : 'right']: '0px',
-        opacity: isDisabled && 0,
-        pointerEvents: isDisabled && 'none',
+        opacity: isDisabled ? 0 : 1,
+        pointerEvents: isDisabled ? 'none' : 'auto',
       }}
     >
       {Preact.cloneElement(customArrow, {
@@ -95,6 +95,7 @@ export function ArrowNext(props) {
  */
 function DefaultArrow(props) {
   const {by} = props;
+  // TODO(wg-bento#7): Replace with :hover and :active pseudoselectors.
   const [hover, setHover] = useState(false);
   const [active, setActive] = useState(false);
   return (
