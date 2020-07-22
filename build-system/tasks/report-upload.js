@@ -43,13 +43,21 @@ async function getReport(testType) {
 }
 
 function addJobAndBuildInfo(testType, reportJson) {
+  const buildNumber = travisBuildNumber();
+  const commitSha = travisCommitSha();
+  const jobNumber = travisJobNumber();
+
+  if (!buildNumber || !commitSha || !jobNumber) {
+    throw new ReferenceError('Travis fields are not defined.');
+  }
+
   const build = {
-    buildNumber: travisBuildNumber(),
-    commitSha: travisCommitSha(),
+    buildNumber,
+    commitSha,
   };
 
   const job = {
-    jobNumber: travisJobNumber(),
+    jobNumber,
     testSuiteType: testType,
   };
 
