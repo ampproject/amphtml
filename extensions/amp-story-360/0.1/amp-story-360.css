@@ -16,6 +16,7 @@
  */
 
 amp-story-360 canvas {
+  position: absolute; /* fixes Safari bug */
  	width: 100% !important;
  	height: 100% !important;
 }
