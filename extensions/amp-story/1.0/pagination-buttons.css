@@ -47,21 +47,13 @@
   left: 0 !important;
 }
 
-/* [dir=rtl] .i-amphtml-story-button-container.prev-container > .i-amphtml-story-page-sentinel {
-  left: auto !important;
-  right: 0 !important;
-} */
-
 .i-amphtml-story-page-sentinel {
   position: absolute !important;
-  /* width: 100vw !important; */
   width: calc(50vw - 20vh - 64px) !important;
-  /* height: 100vh !important; */
   height: 75vh !important;
   top: 0 !important;
   bottom: 0 !important;
   margin: auto;
-  /* margin-left: -32px !important; */
   z-index: 100002 !important;
   cursor: pointer;
   border: 1px solid red;
