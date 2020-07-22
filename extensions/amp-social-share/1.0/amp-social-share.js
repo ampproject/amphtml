@@ -159,15 +159,7 @@ class AmpSocialShare extends PreactBaseElement {
 AmpSocialShare['Component'] = SocialShare;
 
 /** @override */
-AmpSocialShare['passthroughNonEmpty'] = dict({
-  'callback': function () {
-    this.scheduleRender_();
-  },
-  'options': {
-    'childList': true,
-    'characterData': true,
-  },
-});
+AmpSocialShare['passthroughNonEmpty'] = true;
 
 /** @override */
 AmpSocialShare['props'] = {

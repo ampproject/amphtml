@@ -82,11 +82,11 @@ export class PreactBaseElement extends AMP.BaseElement {
     /** @private {boolean} */
     this.mounted_ = true;
 
-    /** @private {MutationObserver|null} */
+    /** @private {?MutationObserver} */
     this.observer_ = this.constructor['passthroughNonEmpty']
-      ? new MutationObserver(
-          this.constructor['passthroughNonEmpty']['callback'].bind(this)
-        )
+      ? new MutationObserver(() => {
+          this.scheduleRender_();
+        })
       : null;
   }
 
@@ -131,7 +131,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     if (this.observer_) {
       this.observer_.observe(
         this.element,
-        this.constructor['passthroughNonEmpty']['options']
+        this.constructor['mutationObserverOptions']['passthroughNonEmpty']
       );
     }
     return deferred.promise;
@@ -287,17 +287,21 @@ PreactBaseElement['passthrough'] = false;
  * the Preact environment to have conditional behavior depending on whether
  * or not there are children.
  *
- * The base-element provides support for a mutation observer when using
- * passthroughNonEmpty.  Provide the following two properties in an object
- *  - callback: This will be called when a mutation is observed.  Use an
- *      anonymous function (not an arrow function) if the callback references
- *      other methods within this class.
- *  - options: Specify the types of mutations to observe.  More information:
- *      https://developer.mozilla.org/en-US/docs/Web/API/MutationObserverInit
- *
- * @protected {JsonObject|null}
+ * @protected {boolean}
  */
-PreactBaseElement['passthroughNonEmpty'] = null;
+PreactBaseElement['passthroughNonEmpty'] = false;
+
+/**
+ * A static map for storing sets of options to be used in the Mutation Observer
+ *
+ * @protected {boolean}
+ */
+PreactBaseElement['mutationObserverOptions'] = {
+  'passthroughNonEmpty': {
+    'childList': true,
+    'characterData': true,
+  },
+};
 
 /**
  * Enabling detached mode alters the children to be rendered in an
