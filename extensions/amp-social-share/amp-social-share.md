@@ -232,6 +232,8 @@ amp-social-share[type='twitter'] {
 }
 ```
 
+When customizing the style of an `amp-social-share` icon please ensure that the customized icon meets the branding guidelines set out by the provider (e.g Twitter, Facebook, etc.)
+
 ## Variable Substitution
 
 You can use [global AMP variables substitution](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md) in the `<amp-social-share>` element. In the example below, `TITLE` is substituted with the page title and `CANONICAL_URL` with the document's canonical URL.
