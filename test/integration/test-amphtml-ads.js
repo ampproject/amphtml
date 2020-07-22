@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {NO_SIGNING_EXP} from '../../extensions/amp-a4a/0.1/amp-a4a';
 import {RequestBank} from '../../testing/test-helper';
 import {maybeSwitchToCompiledJs} from '../../testing/iframe';
 import {parseQueryString} from '../../src/url';
@@ -22,13 +23,12 @@ import {xhrServiceForTesting} from '../../src/service/xhr-impl';
 // TODO(wg-ads, #29112): Unskip on Safari.
 const t = describe.configure().skipSafari();
 
-['a4a-no-signing:21066324', 'a4a-no-signing:21066325'].forEach((branch) => {
-  t.run(`AMPHTML ad on AMP Page: ${branch}`, () => {
+[NO_SIGNING_EXP.control, NO_SIGNING_EXP.experiment].forEach((branch) => {
+  t.run(`AMPHTML ad on AMP Page ${NO_SIGNING_EXP.id}:${branch}`, () => {
     describes.integration(
       'ATF',
       {
         amp: true,
-        experiments: [branch],
         extensions: ['amp-ad'],
         body: `
   <amp-ad
@@ -38,7 +38,7 @@ const t = describe.configure().skipSafari();
       a4a-conversion="true"
       checksig=""
       disable3pfallback="true"
-      data-experiment-id=${branch}
+      data-experiment-id=${NO_SIGNING_EXP.id}:${branch}
       src="//ads.localhost:9876/amp4test/a4a/${RequestBank.getBrowserId()}">
   </amp-ad>
       `,
