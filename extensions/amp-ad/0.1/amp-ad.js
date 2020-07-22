@@ -50,7 +50,7 @@ export class AmpAd extends AMP.BaseElement {
     /** @const {string} */
     const consentId = this.element.getAttribute('data-consent-notification-id');
     const consent = consentId
-      ? Services.userNotificationManagerForDoc(this.element).then(service =>
+      ? Services.userNotificationManagerForDoc(this.element).then((service) =>
           service.get(consentId)
         )
       : Promise.resolve();
@@ -70,7 +70,7 @@ export class AmpAd extends AMP.BaseElement {
       this.win.ampAdSlotIdCounter = this.win.ampAdSlotIdCounter || 0;
       const slotId = this.win.ampAdSlotIdCounter++;
 
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         this.getVsync().mutate(() => {
           this.element.setAttribute('data-amp-slot-index', slotId);
 
@@ -96,8 +96,8 @@ export class AmpAd extends AMP.BaseElement {
           resolve(
             Services.extensionsFor(this.win)
               .loadElementClass(extensionTagName)
-              .then(ctor => new ctor(this.element))
-              .catch(error => {
+              .then((ctor) => new ctor(this.element))
+              .catch((error) => {
                 // Work around presubmit restrictions.
                 const TAG = this.element.tagName;
                 // Report error and fallback to 3p
@@ -117,7 +117,7 @@ export class AmpAd extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-ad', '0.1', AMP => {
+AMP.extension('amp-ad', '0.1', (AMP) => {
   AMP.registerElement('amp-ad', AmpAd, CSS);
   AMP.registerElement('amp-embed', AmpAd);
 });

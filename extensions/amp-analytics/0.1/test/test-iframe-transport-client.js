@@ -124,7 +124,7 @@ describe('iframe-transport-client', () => {
 
   it('calls onNewContextInstance', () => {
     const onNewContextInstanceSpy = window.sandbox.spy();
-    window.onNewContextInstance = ctx => onNewContextInstanceSpy(ctx);
+    window.onNewContextInstance = (ctx) => onNewContextInstanceSpy(ctx);
     const ctx = new IframeTransportContext(
       window,
       iframeTransportClient.iframeMessagingClient_,
@@ -138,7 +138,7 @@ describe('iframe-transport-client', () => {
 
   it('Sets listener and baseMessage properly', () => {
     const onNewContextInstanceSpy = window.sandbox.spy();
-    window.onNewContextInstance = ctx => onNewContextInstanceSpy(ctx);
+    window.onNewContextInstance = (ctx) => onNewContextInstanceSpy(ctx);
     const ctx = new IframeTransportContext(
       window,
       iframeTransportClient.iframeMessagingClient_,
@@ -160,7 +160,7 @@ describe('iframe-transport-client', () => {
 
   it('dispatches event', () => {
     const onNewContextInstanceSpy = window.sandbox.spy();
-    window.onNewContextInstance = ctx => onNewContextInstanceSpy(ctx);
+    window.onNewContextInstance = (ctx) => onNewContextInstanceSpy(ctx);
     const ctx = new IframeTransportContext(
       window,
       iframeTransportClient.iframeMessagingClient_,
@@ -178,7 +178,7 @@ describe('iframe-transport-client', () => {
 
   it('sends response', () => {
     const onNewContextInstanceSpy = window.sandbox.spy();
-    window.onNewContextInstance = ctx => onNewContextInstanceSpy(ctx);
+    window.onNewContextInstance = (ctx) => onNewContextInstanceSpy(ctx);
     // This const exists solely to avoid triggering a false positive on the
     // presubmit rule that says you can't call stub() on a cross-domain iframe.
     const imc = iframeTransportClient.iframeMessagingClient_;

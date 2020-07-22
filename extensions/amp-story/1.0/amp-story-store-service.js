@@ -17,6 +17,7 @@
 import {EmbedMode, parseEmbedMode} from './embed-mode';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
+import {deepEquals} from '../../../src/json';
 import {dev} from '../../../src/log';
 import {hasOwn} from '../../../src/utils/object';
 import {registerServiceBuilder} from '../../../src/service';
@@ -31,12 +32,12 @@ const TAG = 'amp-story';
  * @param  {!Window} win
  * @return {!AmpStoryStoreService}
  */
-export const getStoreService = win => {
+export const getStoreService = (win) => {
   let service = Services.storyStoreService(win);
 
   if (!service) {
     service = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', function() {
+    registerServiceBuilder(win, 'story-store', function () {
       return service;
     });
   }
@@ -79,12 +80,15 @@ export let InteractiveComponentDef;
  * @typedef {{
  *    canInsertAutomaticAd: boolean,
  *    canShowBookend: boolean,
+ *    canShowAudioUi: boolean,
  *    canShowNavigationOverlayHint: boolean,
+ *    canShowPaginationButtons: boolean,
  *    canShowPreviousPageHelp: boolean,
  *    canShowSharingUis: boolean,
  *    canShowSystemLayerButtons: boolean,
  *    accessState: boolean,
  *    adState: boolean,
+ *    pageAttachmentState: boolean,
  *    affiliateLinkState: !Element,
  *    bookendState: boolean,
  *    desktopState: boolean,
@@ -92,20 +96,23 @@ export let InteractiveComponentDef;
  *    hasSidebarState: boolean,
  *    infoDialogState: boolean,
  *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
+ *    interactiveReactState: !Map<string, {option: ?./amp-story-interactive.OptionConfigType, interactiveId: string}>,
  *    mutedState: boolean,
  *    pageAudioState: boolean,
+ *    pageHasElementsWithPlaybackState: boolean,
  *    pausedState: boolean,
  *    previewState: boolean,
  *    rtlState: boolean,
  *    shareMenuState: boolean,
  *    sidebarState: boolean,
  *    storyHasAudioState: boolean,
+ *    storyHasPlaybackUiState: boolean,
  *    storyHasBackgroundAudioState: boolean,
  *    supportedBrowserState: boolean,
  *    systemUiIsVisibleState: boolean,
  *    uiState: !UIType,
  *    viewportWarningState: boolean,
- *    actionsWhitelist: !Array<{tagOrTarget: string, method: string}>,
+ *    actionsAllowlist: !Array<{tagOrTarget: string, method: string}>,
  *    consentId: ?string,
  *    currentPageId: string,
  *    currentPageIndex: number,
@@ -121,7 +128,9 @@ export const StateProperty = {
   // Embed options.
   CAN_INSERT_AUTOMATIC_AD: 'canInsertAutomaticAd',
   CAN_SHOW_BOOKEND: 'canShowBookend',
+  CAN_SHOW_AUDIO_UI: 'canShowAudioUi',
   CAN_SHOW_NAVIGATION_OVERLAY_HINT: 'canShowNavigationOverlayHint',
+  CAN_SHOW_PAGINATION_BUTTONS: 'canShowPaginationButtons',
   CAN_SHOW_PREVIOUS_PAGE_HELP: 'canShowPreviousPageHelp',
   CAN_SHOW_SHARING_UIS: 'canShowSharingUis',
   CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'canShowSystemLayerButtons',
@@ -129,6 +138,7 @@ export const StateProperty = {
   // App States.
   ACCESS_STATE: 'accessState', // amp-access paywall.
   AD_STATE: 'adState',
+  PAGE_ATTACHMENT_STATE: 'pageAttachmentState',
   BOOKEND_STATE: 'bookendState',
   AFFILIATE_LINK_STATE: 'affiliateLinkState',
   DESKTOP_STATE: 'desktopState',
@@ -136,8 +146,11 @@ export const StateProperty = {
   HAS_SIDEBAR_STATE: 'hasSidebarState',
   INFO_DIALOG_STATE: 'infoDialogState',
   INTERACTIVE_COMPONENT_STATE: 'interactiveEmbeddedComponentState',
+  // State of interactive components (polls, quizzes) on the story.
+  INTERACTIVE_REACT_STATE: 'interactiveReactState',
   MUTED_STATE: 'mutedState',
   PAGE_HAS_AUDIO_STATE: 'pageAudioState',
+  PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE: 'pageHasElementsWithPlaybackState',
   PAUSED_STATE: 'pausedState',
   // Story preview state.
   PREVIEW_STATE: 'previewState',
@@ -149,12 +162,14 @@ export const StateProperty = {
   STORY_HAS_AUDIO_STATE: 'storyHasAudioState',
   // amp-story has a `background-audio` attribute.
   STORY_HAS_BACKGROUND_AUDIO_STATE: 'storyHasBackgroundAudioState',
+  // Any page has elements with playback.
+  STORY_HAS_PLAYBACK_UI_STATE: 'storyHasPlaybackUiState',
   SYSTEM_UI_IS_VISIBLE_STATE: 'systemUiIsVisibleState',
   UI_STATE: 'uiState',
   VIEWPORT_WARNING_STATE: 'viewportWarningState',
 
   // App data.
-  ACTIONS_WHITELIST: 'actionsWhitelist',
+  ACTIONS_ALLOWLIST: 'actionsAllowlist',
   CONSENT_ID: 'consentId',
   CURRENT_PAGE_ID: 'currentPageId',
   CURRENT_PAGE_INDEX: 'currentPageIndex',
@@ -167,7 +182,8 @@ export const StateProperty = {
 
 /** @const @enum {string} */
 export const Action = {
-  ADD_TO_ACTIONS_WHITELIST: 'addToActionsWhitelist',
+  ADD_INTERACTIVE_REACT: 'addInteractiveReact',
+  ADD_TO_ACTIONS_ALLOWLIST: 'addToActionsAllowlist',
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
   SET_ADVANCEMENT_MODE: 'setAdvancementMode',
@@ -183,7 +199,9 @@ export const Action = {
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
   TOGGLE_INTERACTIVE_COMPONENT: 'toggleInteractiveComponent',
   TOGGLE_MUTED: 'toggleMuted',
+  TOGGLE_PAGE_ATTACHMENT_STATE: 'togglePageAttachmentState',
   TOGGLE_PAGE_HAS_AUDIO: 'togglePageHasAudio',
+  TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK: 'togglePageHasElementWithPlayblack',
   TOGGLE_PAUSED: 'togglePaused',
   TOGGLE_RTL: 'toggleRtl',
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
@@ -191,6 +209,7 @@ export const Action = {
   TOGGLE_SUPPORTED_BROWSER: 'toggleSupportedBrowser',
   TOGGLE_STORY_HAS_AUDIO: 'toggleStoryHasAudio',
   TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
+  TOGGLE_STORY_HAS_PLAYBACK_UI: 'toggleStoryHasPlaybackUi',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
   TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
@@ -204,7 +223,7 @@ export const Action = {
  * @private @const {!Object<string, !function(*, *):boolean>}
  */
 const stateComparisonFunctions = {
-  [StateProperty.ACTIONS_WHITELIST]: (old, curr) => old.length !== curr.length,
+  [StateProperty.ACTIONS_ALLOWLIST]: (old, curr) => old.length !== curr.length,
   [StateProperty.INTERACTIVE_COMPONENT_STATE]:
     /**
      * @param {InteractiveComponentDef} old
@@ -213,6 +232,13 @@ const stateComparisonFunctions = {
     (old, curr) => old.element !== curr.element || old.state !== curr.state,
   [StateProperty.NAVIGATION_PATH]: (old, curr) => old.length !== curr.length,
   [StateProperty.PAGE_IDS]: (old, curr) => old.length !== curr.length,
+  [StateProperty.PAGE_SIZE]: (old, curr) =>
+    old === null ||
+    curr === null ||
+    old.width !== curr.width ||
+    old.height !== curr.height,
+  [StateProperty.INTERACTIVE_REACT_STATE]: (old, curr) =>
+    !deepEquals(old, curr, 3),
 };
 
 /**
@@ -224,19 +250,27 @@ const stateComparisonFunctions = {
  */
 const actions = (state, action, data) => {
   switch (action) {
+    case Action.ADD_INTERACTIVE_REACT:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.INTERACTIVE_REACT_STATE]: {
+          ...state[StateProperty.INTERACTIVE_REACT_STATE],
+          [data['interactiveId']]: data,
+        },
+      });
     case Action.ADD_NEW_PAGE_ID:
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.NEW_PAGE_AVAILABLE_ID]: data,
       });
-    case Action.ADD_TO_ACTIONS_WHITELIST:
-      const newActionsWhitelist = [].concat(
-        state[StateProperty.ACTIONS_WHITELIST],
+    case Action.ADD_TO_ACTIONS_ALLOWLIST:
+      const newActionsAllowlist = [].concat(
+        state[StateProperty.ACTIONS_ALLOWLIST],
         data
       );
       return /** @type {!State} */ ({
         ...state,
-        [StateProperty.ACTIONS_WHITELIST]: newActionsWhitelist,
+        [StateProperty.ACTIONS_ALLOWLIST]: newActionsAllowlist,
       });
     // Triggers the amp-acess paywall.
     case Action.TOGGLE_ACCESS:
@@ -249,6 +283,11 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.ACCESS_STATE]: !!data,
         [StateProperty.PAUSED_STATE]: !!data,
+      });
+    case Action.TOGGLE_PAGE_ATTACHMENT_STATE:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.PAGE_ATTACHMENT_STATE]: !!data,
       });
     // Triggers the ad UI.
     case Action.TOGGLE_AD:
@@ -312,6 +351,12 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: !!data,
       });
+    // Shows or hides the play/pause controls.
+    case Action.TOGGLE_STORY_HAS_PLAYBACK_UI:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.STORY_HAS_PLAYBACK_UI_STATE]: !!data,
+      });
     // Mutes or unmutes the story media.
     case Action.TOGGLE_MUTED:
       return /** @type {!State} */ ({
@@ -322,6 +367,11 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.PAGE_HAS_AUDIO_STATE]: !!data,
+      });
+    case Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: !!data,
       });
     case Action.TOGGLE_PAUSED:
       return /** @type {!State} */ ({
@@ -486,7 +536,7 @@ export class AmpStoryStoreService {
     this.state_ = actions(this.state_, action, data);
 
     let comparisonFn;
-    Object.keys(this.listeners_).forEach(key => {
+    Object.keys(this.listeners_).forEach((key) => {
       comparisonFn = stateComparisonFunctions[key];
       if (
         comparisonFn
@@ -509,8 +559,10 @@ export class AmpStoryStoreService {
     return /** @type {!State} */ ({
       [StateProperty.CAN_INSERT_AUTOMATIC_AD]: true,
       [StateProperty.CAN_SHOW_BOOKEND]: true,
+      [StateProperty.CAN_SHOW_AUDIO_UI]: true,
       [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: true,
       [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
+      [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: true,
       [StateProperty.CAN_SHOW_SHARING_UIS]: true,
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.ACCESS_STATE]: false,
@@ -524,8 +576,11 @@ export class AmpStoryStoreService {
       [StateProperty.INTERACTIVE_COMPONENT_STATE]: {
         state: EmbeddedComponentState.HIDDEN,
       },
+      [StateProperty.INTERACTIVE_REACT_STATE]: {},
       [StateProperty.MUTED_STATE]: true,
+      [StateProperty.PAGE_ATTACHMENT_STATE]: false,
       [StateProperty.PAGE_HAS_AUDIO_STATE]: false,
+      [StateProperty.PAGE_HAS_ELEMENTS_WITH_PLAYBACK_STATE]: false,
       [StateProperty.PAUSED_STATE]: false,
       [StateProperty.RTL_STATE]: false,
       [StateProperty.SHARE_MENU_STATE]: false,
@@ -533,12 +588,13 @@ export class AmpStoryStoreService {
       [StateProperty.SUPPORTED_BROWSER_STATE]: true,
       [StateProperty.STORY_HAS_AUDIO_STATE]: false,
       [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: false,
+      [StateProperty.STORY_HAS_PLAYBACK_UI_STATE]: false,
       [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: true,
       [StateProperty.UI_STATE]: UIType.MOBILE,
       [StateProperty.VIEWPORT_WARNING_STATE]: false,
       // amp-story only allows actions on a case-by-case basis to preserve UX
       // behaviors. By default, no actions are allowed.
-      [StateProperty.ACTIONS_WHITELIST]: [],
+      [StateProperty.ACTIONS_ALLOWLIST]: [],
       [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
       [StateProperty.CURRENT_PAGE_INDEX]: 0,
@@ -565,6 +621,7 @@ export class AmpStoryStoreService {
           [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
           [StateProperty.CAN_SHOW_BOOKEND]: false,
           [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
+          [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: false,
           [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
           [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
           [StateProperty.MUTED_STATE]: false,
@@ -579,8 +636,14 @@ export class AmpStoryStoreService {
           [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
           [StateProperty.CAN_SHOW_BOOKEND]: false,
           [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
+          [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: false,
           [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: false,
           [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
+        };
+      case EmbedMode.NO_SHARING_NOR_AUDIO_UI:
+        return {
+          [StateProperty.CAN_SHOW_AUDIO_UI]: false,
+          [StateProperty.CAN_SHOW_SHARING_UIS]: false,
         };
       default:
         return {};

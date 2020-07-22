@@ -183,7 +183,7 @@ function onBindReadyAndRescan(env, bind, added, removed, options) {
  * @return {!Promise}
  */
 function waitForEvent(env, name) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const callback = () => {
       resolve();
       env.win.removeEventListener(name, callback);
@@ -200,7 +200,7 @@ const FORM_VALUE_CHANGE_EVENT_ARGUMENTS = {
 describe
   .configure()
   .ifChrome()
-  .run('Bind', function() {
+  .run('Bind', function () {
     // Give more than default 2000ms timeout for local testing.
     const TIMEOUT = Math.max(window.ampTestRuntimeConfig.mochaTimeout, 4000);
     this.timeout(TIMEOUT);
@@ -214,7 +214,7 @@ describe
         },
         mockFetch: false,
       },
-      env => {
+      (env) => {
         let fieBind;
         let fieBody;
         let fieWindow;
@@ -309,7 +309,7 @@ describe
         },
         mockFetch: false,
       },
-      env => {
+      (env) => {
         let bind;
         let container;
 
@@ -356,7 +356,7 @@ describe
         },
         mockFetch: false,
       },
-      env => {
+      (env) => {
         let bind;
         let clock;
         let container;
@@ -649,7 +649,7 @@ describe
           });
         });
 
-        it('should update properties for empty strings', function*() {
+        it('should update properties for empty strings', function* () {
           const element = createElement(
             env,
             container,
@@ -970,7 +970,7 @@ describe
           });
           return promise.then(() => {
             return onBindReadyAndGetState(env, bind, 'mystate.mykey').then(
-              result => {
+              (result) => {
                 expect(result).to.equal('myval');
               }
             );
@@ -997,7 +997,7 @@ describe
               env,
               container,
               'irrelevant',
-              new Promise(unused => {})
+              new Promise((unused) => {})
             );
 
             const state = await bind.getStateAsync('mystate.myKey');
@@ -1362,6 +1362,31 @@ describe
             expect(toAdd.textContent).to.equal('2');
             // The `toRemove` element's bindings should have been removed.
             expect(toRemove.textContent).to.not.equal('bar');
+          });
+
+          it('{update: "evaluate"}', async () => {
+            toAdd = createElement(env, /* container */ null, '[text]="x"');
+            const options = {update: 'evaluate', fast: false};
+
+            // `toRemove` is updated normally before removal.
+            await onBindReadyAndSetState(env, bind, {foo: 'foo', x: '1'});
+            expect(toRemove.textContent).to.equal('foo');
+
+            // `toAdd` should be scanned but not updated. With {update: 'evaluate'},
+            // its expression "x" is now cached on the element.
+            await onBindReadyAndRescan(env, bind, [toAdd], [toRemove], options);
+            expect(toAdd.textContent).to.equal('');
+
+            await onBindReadyAndSetState(env, bind, {foo: 'bar', x: '1'});
+            // `toAdd` should _not_ update since the value of its expression "x"
+            // hasn't changed (due to caching).
+            expect(toAdd.textContent).to.equal('');
+            // `toRemove`'s bindings have been removed and remains unchanged.
+            expect(toRemove.textContent).to.equal('foo');
+
+            await onBindReadyAndSetState(env, bind, {x: '2'});
+            // toAdd changes now that its expression "x"'s value has changed.
+            expect(toAdd.textContent).to.equal('2');
           });
         });
 

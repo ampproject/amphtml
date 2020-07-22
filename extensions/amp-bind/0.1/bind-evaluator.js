@@ -53,7 +53,7 @@ export class BindEvaluator {
   addBindings(bindings) {
     const errors = Object.create(null);
     // Create BindExpression objects from expression strings.
-    bindings.forEach(binding => {
+    bindings.forEach((binding) => {
       const parsed = this.parse_(binding.expressionString);
       if (parsed.error) {
         errors[binding.expressionString] = parsed.error;
@@ -71,14 +71,14 @@ export class BindEvaluator {
   removeBindingsWithExpressionStrings(expressionStrings) {
     const expressionsToRemove = Object.create(null);
 
-    expressionStrings.forEach(expressionString => {
+    expressionStrings.forEach((expressionString) => {
       delete this.expressions_[expressionString];
       expressionsToRemove[expressionString] = true;
     });
 
     remove(
       this.bindings_,
-      binding => !!expressionsToRemove[binding.expressionString]
+      (binding) => !!expressionsToRemove[binding.expressionString]
     );
   }
 
@@ -121,7 +121,7 @@ export class BindEvaluator {
     this.setGlobals_(scope);
 
     // First, evaluate all of the expression strings in the bindings.
-    this.bindings_.forEach(binding => {
+    this.bindings_.forEach((binding) => {
       const {expressionString} = binding;
       // Skip if we've already evaluated this expression string.
       if (cache[expressionString] !== undefined || errors[expressionString]) {
@@ -144,7 +144,7 @@ export class BindEvaluator {
     });
 
     // Then, validate each binding and delete invalid expression results.
-    this.bindings_.forEach(binding => {
+    this.bindings_.forEach((binding) => {
       const {tagName, property, expressionString} = binding;
       const result = cache[expressionString];
       if (result === undefined) {

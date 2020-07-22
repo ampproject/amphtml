@@ -211,7 +211,7 @@ export class Gestures {
     const overserver = this.overservers_[type];
     if (overserver) {
       overserver.removeAll();
-      const index = findIndex(this.recognizers_, e => e.getType() == type);
+      const index = findIndex(this.recognizers_, (e) => e.getType() == type);
       if (index < 0) {
         return false;
       }

@@ -143,13 +143,13 @@ export class AmpAdExit extends AMP.BaseElement {
     if (target.trackingUrls) {
       target.trackingUrls
         .map(substituteVariables)
-        .forEach(url => this.pingTrackingUrl_(url));
+        .forEach((url) => this.pingTrackingUrl_(url));
     }
     const finalUrl = substituteVariables(target.finalUrl);
     if (HostServices.isAvailable(this.getAmpDoc())) {
       HostServices.exitForDoc(this.getAmpDoc())
-        .then(exitService => exitService.openUrl(finalUrl))
-        .catch(error => {
+        .then((exitService) => exitService.openUrl(finalUrl))
+        .catch((error) => {
           // TODO: reporting on errors
           dev().fine(TAG, 'ExitServiceError - fallback=' + error.fallback);
           if (error.fallback) {
@@ -189,7 +189,7 @@ export class AmpAdExit extends AMP.BaseElement {
       'CLICK_Y': () => event.clientY,
     };
     const replacements = Services.urlReplacementsForDoc(this.element);
-    const whitelist = {
+    const allowlist = {
       'RANDOM': true,
       'CLICK_X': true,
       'CLICK_Y': true,
@@ -199,8 +199,9 @@ export class AmpAdExit extends AMP.BaseElement {
         if (customVarName[0] != '_') {
           continue;
         }
-        const customVar =
-          /** @type {!./config.VariableDef} */ (target['vars'][customVarName]);
+        const customVar = /** @type {!./config.VariableDef} */ (target['vars'][
+          customVarName
+        ]);
         if (!customVar) {
           continue;
         }
@@ -265,16 +266,11 @@ export class AmpAdExit extends AMP.BaseElement {
             ? args[customVarName]
             : customVar.defaultValue;
         };
-        whitelist[customVarName] = true;
+        allowlist[customVarName] = true;
       }
     }
-    return url =>
-      replacements.expandUrlSync(
-        url,
-        substitutionFunctions,
-        undefined /* opt_collectVars */,
-        whitelist
-      );
+    return (url) =>
+      replacements.expandUrlSync(url, substitutionFunctions, allowlist);
   }
 
   /**
@@ -309,7 +305,7 @@ export class AmpAdExit extends AMP.BaseElement {
    * @return {boolean}
    */
   filter_(filters, event) {
-    return filters.every(filter => {
+    return filters.every((filter) => {
       const result = filter.filter(event);
       user().info(TAG, `Filter '${filter.name}': ${result ? 'pass' : 'fail'}`);
       return result;
@@ -378,8 +374,8 @@ export class AmpAdExit extends AMP.BaseElement {
           trackingUrls: target['trackingUrls'] || [],
           vars: target['vars'] || {},
           filters: (target['filters'] || [])
-            .map(f => this.userFilters_[f])
-            .filter(f => f),
+            .map((f) => this.userFilters_[f])
+            .filter((f) => f),
           behaviors: target['behaviors'] || {},
         };
         // Build a map of {vendor, origin} for 3p custom variables in the config
@@ -439,7 +435,7 @@ export class AmpAdExit extends AMP.BaseElement {
 
   /**
    * amp-analytics will create an iframe for vendors in
-   * extensions/amp-analytics/0.1/vendors.js who have transport/iframe defined.
+   * extensions/amp-analytics/0.1/vendors/* who have transport/iframe defined.
    * This is limited to MRC-accreddited vendors. The frame is removed in
    * amp-analytics, and the listener is destroyed here, if the user
    * navigates/swipes away from the page. Both are recreated if the user
@@ -461,7 +457,7 @@ export class AmpAdExit extends AMP.BaseElement {
       return;
     }
     devAssert(!this.unlisten_, 'Unlistener should not already exist.');
-    this.unlisten_ = listen(this.getAmpDoc().win, 'message', event => {
+    this.unlisten_ = listen(this.getAmpDoc().win, 'message', (event) => {
       // We shouldn't deserialize just any message...it would be too
       // expensive to parse ones that aren't for amp-ad-exit.
       if (!this.expectedOriginToVendor_[event.origin]) {
@@ -527,6 +523,6 @@ export class AmpAdExit extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpAdExit);
 });

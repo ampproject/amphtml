@@ -23,9 +23,9 @@ import {
   AnalyticsEvent,
   ConfiguredRuntime,
   EventOriginator,
-  Fetcher,
+  Fetcher as FetcherInterface,
   FilterResult,
-  SubscribeResponse,
+  SubscribeResponse as SubscribeResponseInterface,
 } from '../../../third_party/subscriptions-project/swg';
 import {CSS} from '../../../build/amp-subscriptions-google-0.1.css';
 import {DocImpl} from '../../amp-subscriptions/0.1/doc-impl';
@@ -33,20 +33,26 @@ import {
   Entitlement,
   GrantReason,
 } from '../../amp-subscriptions/0.1/entitlement';
-import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/constants.js';
+import {UrlBuilder} from '../../amp-subscriptions/0.1/url-builder';
 import {WindowInterface} from '../../../src/window-interface';
+import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
 import {experimentToggles, isExperimentOn} from '../../../src/experiments';
 import {getData} from '../../../src/event-helper';
+import {getMode} from '../../../src/mode';
+import {getValueForExpr} from '../../../src/json';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {parseUrlDeprecated} from '../../../src/url';
+
+import {devAssert, user, userAssert} from '../../../src/log';
 import {startsWith} from '../../../src/string';
-import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-subscriptions-google';
 const PLATFORM_ID = 'subscribe.google.com';
 const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
+
+/** @const */
+const SERVICE_TIMEOUT = 3000;
 
 const SWG_EVENTS_TO_SUPPRESS = {
   [AnalyticsEvent.IMPRESSION_PAYWALL]: true,
@@ -105,6 +111,12 @@ export class GoogleSubscriptionsPlatform {
      */
     this.serviceAdapter_ = serviceAdapter;
 
+    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
+    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(ampdoc.win);
+
     /**
      * @private @const
      * {!../../amp-subscriptions/0.1/analytics.SubscriptionAnalytics}
@@ -114,12 +126,25 @@ export class GoogleSubscriptionsPlatform {
       this.handleAnalyticsEvent_.bind(this)
     );
 
+    /** @private @const {!UrlBuilder} */
+    this.urlBuilder_ = new UrlBuilder(
+      this.ampdoc_,
+      this.serviceAdapter_.getReaderId('local')
+    );
+
+    /** @const @private {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(this.ampdoc_.win);
+
+    //* @const @private */
+    this.fetcher_ = new AmpFetcher(ampdoc.win);
+
     // Map AMP experiments prefixed with 'swg-' to SwG experiments.
     const ampExperimentsForSwg = Object.keys(experimentToggles(ampdoc.win))
       .filter(
-        exp => startsWith(exp, 'swg-') && isExperimentOn(ampdoc.win, /*OK*/ exp)
+        (exp) =>
+          startsWith(exp, 'swg-') && isExperimentOn(ampdoc.win, /*OK*/ exp)
       )
-      .map(exp => exp.substring(4));
+      .map((exp) => exp.substring(4));
 
     const swgConfig = {'experiments': ampExperimentsForSwg};
     let resolver = null;
@@ -129,7 +154,7 @@ export class GoogleSubscriptionsPlatform {
       serviceAdapter.getPageConfig(),
       {
         fetcher: new AmpFetcher(ampdoc.win),
-        configPromise: new Promise(resolve => (resolver = resolve)),
+        configPromise: new Promise((resolve) => (resolver = resolve)),
       },
       swgConfig
     );
@@ -148,7 +173,7 @@ export class GoogleSubscriptionsPlatform {
     this.runtime_.analytics().setUrl(ampdoc.getUrl());
     resolver();
 
-    this.runtime_.setOnLoginRequest(request => {
+    this.runtime_.setOnLoginRequest((request) => {
       this.onLoginRequest_(request && request.linkRequested);
     });
     this.runtime_.setOnLinkComplete(() => {
@@ -164,7 +189,7 @@ export class GoogleSubscriptionsPlatform {
         this.getServiceId()
       );
     });
-    this.runtime_.setOnFlowStarted(e => {
+    this.runtime_.setOnFlowStarted((e) => {
       // This information is used by Propensity.
       const params = /** @type {!JsonObject} */ ({});
       const data = /** @type {!JsonObject} */ (getData(e) || {});
@@ -194,7 +219,7 @@ export class GoogleSubscriptionsPlatform {
         );
       }
     });
-    this.runtime_.setOnFlowCanceled(e => {
+    this.runtime_.setOnFlowCanceled((e) => {
       if (e.flow == 'linkAccount') {
         this.onLinkComplete_();
         this.subscriptionAnalytics_.actionEvent(
@@ -223,8 +248,8 @@ export class GoogleSubscriptionsPlatform {
     this.runtime_.setOnNativeSubscribeRequest(() => {
       this.onNativeSubscribeRequest_();
     });
-    this.runtime_.setOnPaymentResponse(promise => {
-      promise.then(response => {
+    this.runtime_.setOnPaymentResponse((promise) => {
+      promise.then((response) => {
         this.onSubscribeResponse_(
           response,
           response.productType === 'CONTRIBUTION'
@@ -246,6 +271,15 @@ export class GoogleSubscriptionsPlatform {
 
     // Install styles.
     installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
+
+    /** @private @const {string} */
+    this.skuMapUrl_ = this.serviceConfig_['skuMapUrl'] || null;
+
+    /** @private {JsonObject} */
+    this.skuMap_ = /** @type {!JsonObject} */ ({});
+
+    /** @private {!Promise} */
+    this.rtcPromise_ = this.maybeFetchRealTimeConfig();
   }
 
   /**
@@ -309,7 +343,9 @@ export class GoogleSubscriptionsPlatform {
         this.getServiceId()
       );
     } else {
-      this.maybeComplete_(this.serviceAdapter_.delegateActionToLocal('login'));
+      this.maybeComplete_(
+        this.serviceAdapter_.delegateActionToLocal('login', null)
+      );
     }
   }
 
@@ -319,7 +355,7 @@ export class GoogleSubscriptionsPlatform {
    */
   loginWithAmpReaderId_() {
     // Get local AMP reader ID, to match the ID sent to local entitlement endpoints.
-    this.serviceAdapter_.getReaderId('local').then(ampReaderId => {
+    this.serviceAdapter_.getReaderId('local').then((ampReaderId) => {
       this.runtime_.linkAccount({ampReaderId});
     });
   }
@@ -333,7 +369,7 @@ export class GoogleSubscriptionsPlatform {
   /** @private */
   onNativeSubscribeRequest_() {
     this.maybeComplete_(
-      this.serviceAdapter_.delegateActionToLocal(Action.SUBSCRIBE)
+      this.serviceAdapter_.delegateActionToLocal(Action.SUBSCRIBE, null)
     );
   }
 
@@ -342,7 +378,7 @@ export class GoogleSubscriptionsPlatform {
    * @private
    */
   maybeComplete_(promise) {
-    promise.then(result => {
+    promise.then((result) => {
       if (result) {
         this.runtime_.reset();
       }
@@ -350,7 +386,60 @@ export class GoogleSubscriptionsPlatform {
   }
 
   /**
-   * @param {!SubscribeResponse} response
+   * Fetch a real time config if appropriate.
+   *
+   * Note that we don't return the skuMap, instead we save it.
+   * The creates an intentional race condition.  If the server
+   * doesn't return a skuMap before the user clicks the subscribe button
+   * the button wil lbe disabled.
+   *
+   * We can't wait for the skumap in the button click becasue it will be popup blocked.
+   *
+   * @return {!Promise}
+   */
+  maybeFetchRealTimeConfig() {
+    let timeout = SERVICE_TIMEOUT;
+    if (getMode().development || getMode().localDev) {
+      timeout = SERVICE_TIMEOUT * 2;
+    }
+
+    if (!this.skuMapUrl_) {
+      return Promise.resolve();
+    }
+
+    assertHttpsUrl(this.skuMapUrl_, 'skuMapUrl must be valid https Url');
+    // RTC is never pre-render safe
+    return this.ampdoc_
+      .whenFirstVisible()
+      .then(() =>
+        this.urlBuilder_.buildUrl(
+          /**  @type {string } */ (this.skuMapUrl_),
+          /* useAuthData */ false
+        )
+      )
+      .then((url) =>
+        this.timer_.timeoutPromise(
+          timeout,
+          this.fetcher_.fetchCredentialedJson(url)
+        )
+      )
+      .then((resJson) => {
+        userAssert(
+          resJson['subscribe.google.com'],
+          'skuMap does not contain subscribe.google.com section'
+        );
+        this.skuMap_ = resJson['subscribe.google.com'];
+      })
+      .catch((reason) => {
+        throw user().createError(
+          `fetch skuMap failed for ${PLATFORM_ID}`,
+          reason
+        );
+      });
+  }
+
+  /**
+   * @param {!SubscribeResponseInterface} response
    * @param {string} eventType
    * @private
    */
@@ -398,7 +487,7 @@ export class GoogleSubscriptionsPlatform {
     );
     return this.runtime_
       .getEntitlements(encryptedDocumentKey)
-      .then(swgEntitlements => {
+      .then((swgEntitlements) => {
         // Get and store the isReadyToPay signal which is independent of
         // any entitlments existing.
         if (swgEntitlements.isReadyToPay) {
@@ -505,7 +594,7 @@ export class GoogleSubscriptionsPlatform {
       // This can only be resolved asynchronously in this case. However, the
       // action execution must be done synchronously. Thus we have to allow
       // a minimal race condition here.
-      viewer.getViewerOrigin().then(origin => {
+      viewer.getViewerOrigin().then((origin) => {
         if (origin) {
           this.isGoogleViewer_ = GOOGLE_DOMAIN_RE.test(
             parseUrlDeprecated(origin).hostname
@@ -521,30 +610,69 @@ export class GoogleSubscriptionsPlatform {
   }
 
   /** @override */
-  executeAction(action) {
+  executeAction(action, sourceId) {
     /**
-     * The contribute and subscribe flows are not called
-     * directly with a sku to avoid baking sku detail into
-     * a page that may be cached for an extended time.
-     * Instead we use showOffers and showContributionOptions
-     * which get sku info from the server.
-     *
      * Note: we do handle events form the contribute and
      * subscribe flows elsewhere since they are invoked after
      * offer selection.
      */
+    let mappedSku, carouselOptions;
+    /*
+     * If the id of the source element (sourceId) is in a map supplied via
+     * the skuMap Url we use that to lookup which sku to associate this button
+     * with.
+     */
+    const rtcPending = sourceId
+      ? this.ampdoc_
+          .getElementById(sourceId)
+          .hasAttribute('subscriptions-google-rtc')
+      : false;
+    // if subscriptions-google-rtc is set then this element is configured by the
+    // rtc url but has not yet been configured so we ignore it.
+    // Once the rtc resolves the attribute is changed to subscriptions-google-rtc-set.
+    if (rtcPending) {
+      return;
+    }
+    if (sourceId && this.skuMap_) {
+      mappedSku = getValueForExpr(this.skuMap_, `${sourceId}.sku`);
+      carouselOptions = getValueForExpr(
+        this.skuMap_,
+        `${sourceId}.carouselOptions`
+      );
+    }
     if (action == Action.SUBSCRIBE) {
-      this.runtime_.showOffers({
-        list: 'amp',
-        isClosable: true,
-      });
+      if (mappedSku) {
+        // publisher provided single sku
+        this.runtime_.subscribe(mappedSku);
+      } else if (carouselOptions) {
+        // publisher provided carousel options, must always be closable
+        carouselOptions.isClosable = true;
+        this.runtime_.showOffers(carouselOptions);
+      } else {
+        // no mapping just use the amp carousel
+        this.runtime_.showOffers({
+          list: 'amp',
+          isClosable: true,
+        });
+      }
       return Promise.resolve(true);
     }
+    // Same idea as above but it's contribute instead of subscribe
     if (action == Action.CONTRIBUTE) {
-      this.runtime_.showContributionOptions({
-        list: 'amp',
-        isClosable: true,
-      });
+      if (mappedSku) {
+        // publisher provided single sku
+        this.runtime_.contribute(mappedSku);
+      } else if (carouselOptions) {
+        // publisher provided carousel options, must always be closable
+        carouselOptions.isClosable = true;
+        this.runtime_.showContributionOptions(carouselOptions);
+      } else {
+        // no mapping just use the amp carousel
+        this.runtime_.showContributionOptions({
+          list: 'amp',
+          isClosable: true,
+        });
+      }
       return Promise.resolve(true);
     }
     if (action == Action.LOGIN) {
@@ -578,19 +706,49 @@ export class GoogleSubscriptionsPlatform {
         if (messageTextColor) {
           opts.messageTextColor = messageTextColor;
         }
+        const messageNumber = element.getAttribute(
+          'subscriptions-message-number'
+        );
+        if (messageNumber) {
+          opts.messageNumber = messageNumber;
+        }
         this.runtime_.attachSmartButton(element, opts, () => {});
         break;
       default:
       // do nothing
     }
+    // enable any real time buttons once it's resolved.
+    this.rtcPromise_.then(() => {
+      this.vsync_.mutate(() =>
+        Object.keys(/** @type {!Object} */ (this.skuMap_)).forEach(
+          (elementId) => {
+            const element = this.ampdoc_.getElementById(elementId);
+            if (element) {
+              devAssert(
+                element.hasAttribute('subscriptions-google-rtc'),
+                `Trying to set real time config on element '${elementId}' with missing 'subscriptions-google-rtc' attrbute`
+              );
+              element.setAttribute('subscriptions-google-rtc-set', '');
+              element.removeAttribute('subscriptions-google-rtc');
+            } else {
+              user().warn(
+                TAG,
+                `Element "{elemendId}" in real time config not found`
+              );
+            }
+          }
+        )
+      );
+    });
   }
 }
 
 /**
  * Adopts fetcher protocol required for SwG to AMP fetching rules.
- * @implements {Fetcher}
+ * @implements {FetcherInterface}
+ * @visibleForTesting
  */
-class AmpFetcher {
+export class AmpFetcher {
   /**
    * @param {!Window} win
    */
@@ -609,7 +767,7 @@ class AmpFetcher {
         credentials: 'include',
         prerenderSafe: true,
       })
-      .then(response => response.json());
+      .then((response) => response.json());
   }
 
   /** @override */
@@ -647,17 +805,17 @@ class AmpFetcher {
 }
 
 // Register the extension services.
-AMP.extension(TAG, '0.1', function(AMP) {
+AMP.extension(TAG, '0.1', function (AMP) {
   AMP.registerServiceForDoc(
     'subscriptions-google',
     /**
      * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-     * @return {*} TODO(#23582): Specify return type
+     * @return {!GoogleSubscriptionsPlatformService}
      */
-    function(ampdoc) {
+    function (ampdoc) {
       const platformService = new GoogleSubscriptionsPlatformService(ampdoc);
       const element = ampdoc.getHeadNode();
-      Services.subscriptionsServiceForDoc(element).then(service => {
+      Services.subscriptionsServiceForDoc(element).then((service) => {
         service.registerPlatform(
           PLATFORM_ID,
           (platformConfig, serviceAdapter) => {
@@ -672,43 +830,3 @@ AMP.extension(TAG, '0.1', function(AMP) {
     }
   );
 });
-
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package
- * @visibleForTesting
- * @return {*} TODO(#23582): Specify return type
- */
-export function getFetcherClassForTesting() {
-  return Fetcher;
-}
-
-/**
- * TODO(mborof): remove once not required by test-amp-subscriptions-google.js
- * @package
- * @visibleForTesting
- * @return {*}
- */
-export function getAmpFetcherClassForTesting() {
-  return AmpFetcher;
-}
-
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package
- * @visibleForTesting
- * @return {*} TODO(#23582): Specify return type
- */
-export function getPageConfigClassForTesting() {
-  return PageConfig;
-}
-
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package
- * @visibleForTesting
- * @return {*} TODO(#23582): Specify return type
- */
-export function getSubscribeResponseClassForTesting() {
-  return SubscribeResponse;
-}

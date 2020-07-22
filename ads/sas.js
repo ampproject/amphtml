@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {getMultiSizeDimensions} from '../ads/google/utils';
 import {parseJson} from '../src/json';
 import {validateData, writeScript} from '../3p/3p';
 
@@ -22,12 +23,12 @@ import {validateData, writeScript} from '../3p/3p';
  * @param {!Object} data
  */
 export function sas(global, data) {
-  let url, adHost;
-  const fields = ['site', 'size', 'area'];
+  let url, adHost, whSize;
+  const plainFields = ['site', 'area', 'mid'];
   validateData(
     data,
     ['customerName'],
-    ['adHost', 'site', 'size', 'area', 'mid', 'tags']
+    ['adHost', 'site', 'size', 'area', 'mid', 'tags', 'multiSize']
   );
 
   if (typeof data.adHost === 'undefined') {
@@ -38,14 +39,55 @@ export function sas(global, data) {
 
   url = '//' + adHost + '/' + data['customerName'] + '/jserver';
 
-  for (let idx = 0; idx < fields.length; idx++) {
-    if (data[fields[idx]]) {
-      if (typeof data[fields[idx]] !== 'undefined') {
-        url += '/' + fields[idx] + '=' + encodeURIComponent(data[fields[idx]]);
+  const {multiSize} = data;
+  const primaryWidth = parseInt(data.width, 10);
+  const primaryHeight = parseInt(data.height, 10);
+  let dimensions;
+  let multiSizeValid = false;
+
+  if (multiSize) {
+    try {
+      dimensions = getMultiSizeDimensions(
+        multiSize,
+        primaryWidth,
+        primaryHeight,
+        true
+      );
+      multiSizeValid = true;
+      dimensions.unshift([primaryWidth, primaryHeight]);
+    } catch (e) {
+      // okay to error here
+    }
+  }
+
+  for (let idx = 0; idx < plainFields.length; idx++) {
+    if (data[plainFields[idx]]) {
+      if (typeof data[plainFields[idx]] !== 'undefined') {
+        url +=
+          '/' +
+          plainFields[idx] +
+          '=' +
+          encodeURIComponent(data[plainFields[idx]]);
       }
     }
   }
 
+  //Size and multi-size
+  if (typeof data.size !== 'undefined') {
+    url += '/SIZE=' + encodeURIComponent(data.size);
+    if (typeof multiSize !== 'undefined' && multiSizeValid) {
+      url += ',' + encodeURIComponent(multiSize);
+    }
+  } else if (typeof multiSize !== 'undefined' && multiSizeValid) {
+    whSize = primaryWidth + 'x' + primaryHeight;
+    url +=
+      '/SIZE=' +
+      encodeURIComponent(whSize) +
+      ',' +
+      encodeURIComponent(multiSize);
+  }
+
+  // Tags
   if (typeof data.tags !== 'undefined') {
     const tags = parseJson(data.tags);
     for (const tag in tags) {

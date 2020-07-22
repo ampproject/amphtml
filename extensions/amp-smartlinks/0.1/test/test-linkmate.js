@@ -20,7 +20,7 @@ import {Linkmate} from '../linkmate';
 import {Services} from '../../../../src/services';
 import {TwoStepsResponse} from '../../../amp-skimlinks/0.1/link-rewriter/two-steps-response';
 
-const helpersFactory = env => {
+const helpersFactory = (env) => {
   const {win} = env;
 
   return {
@@ -46,7 +46,7 @@ const helpersFactory = env => {
 describes.fakeWin(
   'amp-smartlinks',
   {amp: {extensions: ['amp-smartlinks']}},
-  env => {
+  (env) => {
     let helpers, xhr, linkmate;
 
     beforeEach(() => {

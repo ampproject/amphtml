@@ -320,9 +320,8 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 
   /** @override */
   getPlayedRanges() {
-    return (
-      /** @type {!Array<!Array<number>>} */ (this.meta_['playedRanges'] || [])
-    );
+    return /** @type {!Array<!Array<number>>} */ (this.meta_['playedRanges'] ||
+      []);
   }
 
   /**
@@ -353,7 +352,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpViqeoPlayer);
 });
 

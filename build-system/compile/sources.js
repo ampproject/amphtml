@@ -20,10 +20,6 @@
  * for both the babel and closure sources to be as close as possible.
  */
 
-const tempy = require('tempy');
-
-const SRC_TEMP_DIR = tempy.directory();
-
 const COMMON_GLOBS = [
   'third_party/amp-toolbox-cache-url/**/*.js',
   'third_party/caja/html-sanitizer.js',
@@ -40,16 +36,22 @@ const COMMON_GLOBS = [
   'third_party/timeagojs/**/*.js',
   'third_party/vega/**/*.js',
   'third_party/webcomponentsjs/ShadowCSS.js',
+  'third_party/zuho/**/*.js',
   'node_modules/dompurify/package.json',
   'node_modules/dompurify/dist/purify.es.js',
+  'node_modules/intersection-observer/package.json',
+  'node_modules/intersection-observer/intersection-observer.install.js',
   'node_modules/promise-pjs/package.json',
   'node_modules/promise-pjs/promise.mjs',
+  'node_modules/rrule/dist/es5/rrule.min.js',
   'node_modules/web-animations-js/package.json',
   'node_modules/web-animations-js/web-animations.install.js',
   'node_modules/web-activities/package.json',
   'node_modules/web-activities/activity-ports.js',
   'node_modules/@ampproject/animations/package.json',
   'node_modules/@ampproject/animations/dist/animations.mjs',
+  'node_modules/@ampproject/toolbox-cache-url/package.json',
+  'node_modules/@ampproject/toolbox-cache-url/dist/amp-toolbox-cache-url.esm.js',
   'node_modules/@ampproject/viewer-messaging/package.json',
   'node_modules/@ampproject/viewer-messaging/messaging.js',
   'node_modules/@ampproject/worker-dom/package.json',
@@ -154,6 +156,5 @@ const THIRD_PARTY_TRANSFORM_GLOBS = [
 module.exports = {
   BABEL_SRC_GLOBS,
   CLOSURE_SRC_GLOBS,
-  SRC_TEMP_DIR,
   THIRD_PARTY_TRANSFORM_GLOBS,
 };

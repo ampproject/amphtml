@@ -38,7 +38,7 @@ const {
   gitTravisMasterBaseline,
   shortSha,
 } = require('../../common/git');
-const {buildMinifiedRuntime, installPackages} = require('../../common/utils');
+const {buildRuntime, installPackages} = require('../../common/utils');
 const {execScriptAsync} = require('../../common/exec');
 const {isTravisBuild} = require('../../common/travis');
 const {startServer, stopServer} = require('../serve');
@@ -89,7 +89,7 @@ let percyAgentProcess_;
  * Override PERCY_* environment variables if passed via gulp task parameters.
  */
 function maybeOverridePercyEnvironmentVariables() {
-  ['percy_token', 'percy_branch'].forEach(variable => {
+  ['percy_token', 'percy_branch'].forEach((variable) => {
     if (variable in argv) {
       process.env[variable.toUpperCase()] = argv[variable];
     }
@@ -157,7 +157,7 @@ async function launchWebServer() {
   await startServer(
     {host: HOST, port: PORT},
     {quiet: !argv.webserver_debug},
-    {compiled: true}
+    {compiled: argv.compiled}
   );
 }
 
@@ -182,12 +182,6 @@ async function launchBrowser() {
     log('fatal', error);
   }
 
-  // Every action on the browser or its pages adds a listener to the
-  // Puppeteer.Connection.Events.Disconnected event. This is a temporary
-  // workaround for the Node runtime warning that is emitted once 11 listeners
-  // are added to the same object.
-  browser_._connection.setMaxListeners(9999);
-
   return browser_;
 }
 
@@ -206,7 +200,7 @@ async function newPage(browser, viewport = null) {
   page.setDefaultNavigationTimeout(0);
   await page.setJavaScriptEnabled(true);
   await page.setRequestInterception(true);
-  page.on('request', interceptedRequest => {
+  page.on('request', (interceptedRequest) => {
     const requestUrl = new URL(interceptedRequest.url());
     const mockedFilepath = path.join(
       path.dirname(__filename),
@@ -342,7 +336,7 @@ async function runVisualTests(webpages) {
  */
 async function generateSnapshots(webpages) {
   const numUnfilteredPages = webpages.length;
-  webpages = webpages.filter(webpage => !webpage.flaky);
+  webpages = webpages.filter((webpage) => !webpage.flaky);
   if (numUnfilteredPages != webpages.length) {
     log(
       'info',
@@ -352,7 +346,7 @@ async function generateSnapshots(webpages) {
     );
   }
   if (argv.grep) {
-    webpages = webpages.filter(webpage => argv.grep.test(webpage.name));
+    webpages = webpages.filter((webpage) => argv.grep.test(webpage.name));
     log(
       'info',
       colors.cyan(`--grep ${argv.grep}`),
@@ -459,7 +453,7 @@ async function snapshotWebpages(browser, webpages) {
       await resetPage(page, viewport);
 
       const consoleMessages = [];
-      const consoleLogger = consoleMessage => {
+      const consoleLogger = (consoleMessage) => {
         consoleMessages.push(consoleMessage);
       };
       page.on('console', consoleLogger);
@@ -485,7 +479,7 @@ async function snapshotWebpages(browser, webpages) {
             );
           }, NAVIGATE_TIMEOUT_MS);
 
-          page.once('response', async response => {
+          page.once('response', async (response) => {
             log(
               'verbose',
               'Response for url',
@@ -513,7 +507,7 @@ async function snapshotWebpages(browser, webpages) {
             'is done, verifying page'
           );
         })
-        .catch(navigationError => {
+        .catch((navigationError) => {
           hasWarnings = true;
           addTestError(
             testErrors,
@@ -593,7 +587,7 @@ async function snapshotWebpages(browser, webpages) {
           // Finally, send the snapshot to percy.
           await percySnapshot(page, name, snapshotOptions);
         })
-        .catch(async testError => {
+        .catch(async (testError) => {
           addTestError(
             testErrors,
             name,
@@ -683,7 +677,7 @@ async function createEmptyBuild() {
  */
 async function visualDiff() {
   const handlerProcess = createCtrlcHandler('visual-diff');
-  ensureOrBuildAmpRuntimeInTestMode_();
+  await ensureOrBuildAmpRuntimeInTestMode_();
   installPercy_();
   setupCleanup_();
   maybeOverridePercyEnvironmentVariables();
@@ -753,14 +747,14 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
       log(
         'fatal',
         'The AMP runtime was not built in test mode. Run',
-        colors.cyan('gulp dist --fortesting'),
+        colors.cyan('gulp build|dist --fortesting'),
         'or remove the',
         colors.cyan('--nobuild'),
         'option from this command'
       );
     }
   } else {
-    buildMinifiedRuntime();
+    await buildRuntime();
   }
 }
 
@@ -783,7 +777,7 @@ function setupCleanup_() {
 async function exitPercyAgent_() {
   if (percyAgentProcess_ && !percyAgentProcess_.killed) {
     let resolver;
-    const percyAgentExited_ = new Promise(resolverIn => {
+    const percyAgentExited_ = new Promise((resolverIn) => {
       resolver = resolverIn;
     });
     percyAgentProcess_.on('exit', () => {
@@ -799,7 +793,7 @@ async function cleanup_() {
   if (browser_) {
     await browser_.close();
   }
-  stopServer();
+  await stopServer();
   await exitPercyAgent_();
 }
 
@@ -825,4 +819,5 @@ visualDiff.flags = {
     '  Disables Percy integration (for testing local changes only)',
   'nobuild': '  Skip build',
   'noyarn': '  Skip calling yarn to install dependencies',
+  'compiled': '  Runs tests against minified JS',
 };

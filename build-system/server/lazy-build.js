@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
+
+const argv = require('minimist')(process.argv.slice(2));
 const {
   doBuildExtension,
   maybeInitializeExtensions,
@@ -25,6 +28,30 @@ const extensionBundles = {};
 maybeInitializeExtensions(extensionBundles, /* includeLatest */ true);
 
 /**
+ * Gets the unminified name of the bundle if it can be lazily built.
+ *
+ * @param {!Object} bundles
+ * @param {string} name
+ * @return {string}
+ */
+function maybeGetUnminifiedName(bundles, name) {
+  if (argv.compiled) {
+    for (const key of Object.keys(bundles)) {
+      if (
+        key == name ||
+        (bundles[key].options && bundles[key].options.minifiedName == name)
+      ) {
+        return key;
+      }
+    }
+  }
+  return name;
+}
+
+/**
+ * Checks for a previously triggered build for a bundle, and triggers one if
+ * required.
+ *
  * @param {string} url
  * @param {string} matcher
  * @param {!Object} bundles
@@ -34,53 +61,63 @@ maybeInitializeExtensions(extensionBundles, /* includeLatest */ true);
 async function lazyBuild(url, matcher, bundles, buildFunc, next) {
   const match = url.match(matcher);
   if (match && match.length == 2) {
-    const bundle = match[1];
-    if (bundles[bundle]) {
-      if (bundles[bundle].pendingBuild) {
-        await bundles[bundle].pendingBuild;
-      } else if (!bundles[bundle].watched) {
-        await build(bundles, bundle, buildFunc);
-      }
+    const name = maybeGetUnminifiedName(bundles, match[1]);
+    const bundle = bundles[name];
+    if (bundle) {
+      await build(bundles, name, buildFunc);
     }
   }
   next();
 }
 
 /**
- * Actually build a bundle.
- * Marks the bundle as watched and stores the pendingBuild property whenever
- * a build is pending.
+ * Actually build a JS file or extension. Only will allow one build per
+ * bundle at a time.
+ *
  * @param {!Object} bundles
- * @param {string} bundle
+ * @param {string} name
  * @param {function()} buildFunc
+ * @return {Promise|undefined}
  */
-async function build(bundles, bundle, buildFunc) {
-  bundles[bundle].pendingBuild = buildFunc(bundles, bundle, {
+async function build(bundles, name, buildFunc) {
+  const bundle = bundles[name];
+  if (bundle.pendingBuild) {
+    return await bundle.pendingBuild;
+  }
+  if (bundle.watched) {
+    return;
+  }
+  bundle.watched = true;
+  bundle.pendingBuild = buildFunc(bundles, name, {
     watch: true,
-    onWatchBuild: async bundlePromise => {
-      bundles[bundle].pendingBuild = bundlePromise;
+    minify: argv.compiled,
+    onWatchBuild: async (bundlePromise) => {
+      bundle.pendingBuild = bundlePromise;
       await bundlePromise;
-      bundles[bundle].pendingBuild = undefined;
+      bundle.pendingBuild = undefined;
     },
   });
-  await bundles[bundle].pendingBuild;
-  bundles[bundle].pendingBuild = undefined;
-  bundles[bundle].watched = true;
+  await bundle.pendingBuild;
+  bundle.pendingBuild = undefined;
 }
 
 /**
  * Lazy builds the correct version of an extension when requested.
+ *
  * @param {!Object} req
  * @param {!Object} res
  * @param {function()} next
  */
 async function lazyBuildExtensions(req, res, next) {
-  const matcher = /\/dist\/v0\/([^\/]*)\.max\.js/;
+  const matcher = argv.compiled
+    ? /\/dist\/v0\/([^\/]*)\.js/ // '/dist/v0/*.js'
+    : /\/dist\/v0\/([^\/]*)\.max\.js/; // '/dist/v0/*.max.js'
   await lazyBuild(req.url, matcher, extensionBundles, doBuildExtension, next);
 }
 
 /**
  * Lazy builds a non-extension JS file when requested.
+ *
  * @param {!Object} req
  * @param {!Object} res
  * @param {function()} next

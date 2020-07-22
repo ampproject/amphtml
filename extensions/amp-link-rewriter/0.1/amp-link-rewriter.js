@@ -42,7 +42,7 @@ export class AmpLinkRewriter extends AMP.BaseElement {
     return this.getAmpDoc()
       .whenReady()
       .then(() => viewer.getReferrerUrl())
-      .then(referrer => (this.referrer_ = referrer))
+      .then((referrer) => (this.referrer_ = referrer))
       .then(this.letsRockIt_.bind(this));
   }
 
@@ -65,7 +65,7 @@ export class AmpLinkRewriter extends AMP.BaseElement {
    */
   attachClickEvent_() {
     const nav = Services.navigationForDoc(this.getAmpDoc());
-    nav.registerAnchorMutator(anchor => {
+    nav.registerAnchorMutator((anchor) => {
       this.rewriter_.handleClick(anchor);
     }, Priority.LINK_REWRITER_MANAGER);
 
@@ -78,6 +78,6 @@ export class AmpLinkRewriter extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-link-rewriter', '0.1', AMP => {
+AMP.extension('amp-link-rewriter', '0.1', (AMP) => {
   AMP.registerElement('amp-link-rewriter', AmpLinkRewriter);
 });

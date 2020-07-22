@@ -26,7 +26,7 @@ describes.endtoend(
     environments: ['single'],
     deviceName: 'iPhone X', // bookend appears only on mobile
   },
-  async env => {
+  async (env) => {
     /** @type {SeleniumWebDriverController} */
     let controller;
 
@@ -66,21 +66,18 @@ describes.endtoend(
       // give shadow dom half a second to be interactable
       await sleep(500);
       await controller.click(getLinkButton);
-
-      // go to amp bind page with form
-      await controller.navigateTo(
-        'http://localhost:8000/test/manual/amp-story/input-form.html'
-      );
+      await controller.switchToLight();
 
       // paste link
-      const input = await controller.findElement('#name-input');
-      await controller.type(input, Key.CtrlV);
-
-      // give amp-bind half a second to magic
+      const input = await controller.findElement('.input-field');
+      await controller.click(input);
       await sleep(500);
-      const div = await controller.findElement('#name-input-value');
-      await expect(controller.getElementText(div)).to.equal(
-        'Hello http://localhost:8000/test/manual/amp-story/amp-story.amp.html'
+      await controller.type(input, Key.CtrlV);
+      await sleep(500);
+
+      const output = await controller.getElementProperty(input, 'value');
+      await expect(output).to.equal(
+        'http://localhost:8000/test/manual/amp-story/amp-story.amp.html'
       );
     });
 

@@ -15,9 +15,10 @@
  */
 
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
+import {Services} from '../../../src/services';
 import {macroTask} from '../../../testing/yield';
 
-describes.fakeWin('DomTransformStream', {amp: true}, env => {
+describes.fakeWin('DomTransformStream', {amp: true}, (env) => {
   async function flush() {
     await macroTask();
     env.flushVsync();
@@ -32,6 +33,41 @@ describes.fakeWin('DomTransformStream', {amp: true}, env => {
     win = env.win;
     detachedDoc = win.document.implementation.createHTMLDocument().open();
     transformer = new DomTransformStream(win);
+  });
+
+  describe('#onEnd', () => {
+    it('should only transfer after targetBody is ready', async () => {
+      const mutateSpy = env.sandbox.spy(
+        Services.vsyncFor(env.win),
+        'mutatePromise'
+      );
+      const {body} = win.document;
+
+      detachedDoc.write(`
+        <!doctype html>
+        <html ⚡>
+        <head>
+        <script async src="https://cdn.ampproject.org/v0.js"></script>
+        </head>
+        <body>
+        <child-one></child-one>
+        <child-two></child-two>
+        </body>
+      `);
+
+      transformer.onChunk(detachedDoc);
+      transformer.onEnd();
+      await flush();
+
+      expect(mutateSpy).not.to.have.been.called;
+      transformer.transferBody(body /* targetBody */);
+
+      await flush();
+
+      expect(mutateSpy).to.have.been.calledOnce;
+      expect(body.querySelector('child-one')).to.exist;
+      expect(body.querySelector('child-two')).to.exist;
+    });
   });
 
   describe('#waitForHead', () => {

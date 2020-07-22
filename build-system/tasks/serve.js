@@ -16,6 +16,7 @@
 'use strict';
 
 const connect = require('gulp-connect');
+const debounce = require('debounce');
 const globby = require('globby');
 const header = require('connect-header');
 const log = require('fancy-log');
@@ -24,6 +25,10 @@ const morgan = require('morgan');
 const path = require('path');
 const watch = require('gulp-watch');
 const {
+  buildNewServer,
+  SERVER_TRANSFORM_PATH,
+} = require('../server/typescript-compile');
+const {
   lazyBuildExtensions,
   lazyBuildJs,
   preBuildRuntimeFiles,
@@ -31,14 +36,10 @@ const {
 } = require('../server/lazy-build');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green, red} = require('ansi-colors');
-const {exec} = require('../common/exec');
 const {logServeMode, setServeMode} = require('../server/app-utils');
+const {watchDebounceDelay} = require('./helpers');
 
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
-
-// Used by new server implementation
-const typescriptBinary = './node_modules/typescript/bin/tsc';
-const transformsPath = 'build-system/server/new-server/transforms';
 
 // Used for logging.
 let url = null;
@@ -47,7 +48,7 @@ let quiet = !!argv.quiet;
 // Used for live reload.
 const serverFiles = globby.sync([
   'build-system/server/**',
-  `!${transformsPath}/dist/**`,
+  `!${SERVER_TRANSFORM_PATH}/dist/**`,
 ]);
 
 // Used to enable / disable lazy building.
@@ -92,7 +93,7 @@ async function startServer(
   }
 
   let started;
-  const startedPromise = new Promise(resolve => {
+  const startedPromise = new Promise((resolve) => {
     started = resolve;
   });
   setServeMode(modeOptions);
@@ -115,25 +116,6 @@ async function startServer(
 }
 
 /**
- * Builds the new server by converting typescript transforms to JS
- */
-function buildNewServer() {
-  const buildCmd = `${typescriptBinary} -p ${transformsPath}/tsconfig.json`;
-  log(
-    green('Building'),
-    cyan('AMP Dev Server'),
-    green('at'),
-    cyan(`${transformsPath}/dist`) + green('...')
-  );
-  const result = exec(buildCmd, {'stdio': ['inherit', 'inherit', 'pipe']});
-  if (result.status != 0) {
-    const err = new Error('Could not build AMP Dev Server');
-    err.showStack = false;
-    throw err;
-  }
-}
-
-/**
  * Clears server files from the require cache to allow for in-process server
  * live-reload.
  */
@@ -146,7 +128,7 @@ function resetServerFiles() {
 /**
  * Stops the currently running server
  */
-function stopServer() {
+async function stopServer() {
   if (url) {
     connect.serverClose();
     log(green('Stopped server at'), cyan(url));
@@ -157,8 +139,7 @@ function stopServer() {
 /**
  * Closes the existing server and restarts it
  */
-function restartServer() {
-  stopServer();
+async function restartServer() {
   if (argv.new_server) {
     try {
       buildNewServer();
@@ -192,7 +173,10 @@ async function serve() {
  */
 async function doServe(lazyBuild = false) {
   createCtrlcHandler('serve');
-  watch(serverFiles, restartServer);
+  const watchFunc = async () => {
+    await restartServer();
+  };
+  watch(serverFiles, debounce(watchFunc, watchDebounceDelay));
   if (argv.new_server) {
     buildNewServer();
   }
@@ -203,7 +187,6 @@ async function doServe(lazyBuild = false) {
 }
 
 module.exports = {
-  buildNewServer,
   serve,
   doServe,
   startServer,

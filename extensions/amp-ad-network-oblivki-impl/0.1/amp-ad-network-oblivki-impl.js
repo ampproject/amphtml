@@ -35,7 +35,7 @@ const OBLIVKI_BASE_A4A_URL_ = 'https://oblivki.biz/amp/a4a/';
 
 export class AmpAdNetworkOblivkiImpl extends AmpA4A {
   /** @override */
-  getAdUrl(unusedConsentState, opt_rtcResponsesPromise) {
+  getAdUrl(unusedConsentTuple, opt_rtcResponsesPromise) {
     return this.element
       .getAttribute('src')
       .replace(OBLIVKI_BASE_URL_, OBLIVKI_BASE_A4A_URL_);
@@ -57,6 +57,6 @@ export class AmpAdNetworkOblivkiImpl extends AmpA4A {
   }
 }
 
-AMP.extension('amp-ad-network-oblivki-impl', '0.1', AMP => {
+AMP.extension('amp-ad-network-oblivki-impl', '0.1', (AMP) => {
   AMP.registerElement('amp-ad-network-oblivki-impl', AmpAdNetworkOblivkiImpl);
 });

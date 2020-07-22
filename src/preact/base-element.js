@@ -19,6 +19,7 @@ import {Deferred} from '../utils/promise';
 import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
 import {devAssert} from '../log';
+import {hasOwn} from '../utils/object';
 import {matches} from '../dom';
 import {render} from './index';
 
@@ -98,7 +99,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     // context-changed is fired on each child element to notify it that the
     // parent has changed the wrapping context. This is equivalent to
     // updating the Context.Provider with new data and having it propagate.
-    this.element.addEventListener('i-amphtml-context-changed', e => {
+    this.element.addEventListener('i-amphtml-context-changed', (e) => {
       e.stopPropagation();
       this.scheduleRender_();
     });
@@ -106,7 +107,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     // unmounted is fired on each child element to notify it that the parent
     // has removed the element from the DOM tree. This is equivalent to React
     // recursively calling componentWillUnmount.
-    this.element.addEventListener('i-amphtml-unmounted', e => {
+    this.element.addEventListener('i-amphtml-unmounted', (e) => {
       e.stopPropagation();
       this.unmount_();
     });
@@ -169,13 +170,30 @@ export class PreactBaseElement extends AMP.BaseElement {
     const Ctor = this.constructor;
 
     if (!this.container_) {
-      if (Ctor['children'] || Ctor['passthrough']) {
+      if (
+        Ctor['children'] ||
+        Ctor['passthrough'] ||
+        Ctor['passthroughNonEmpty']
+      ) {
+        devAssert(
+          !Ctor['detached'],
+          'The AMP element cannot be rendered in detached mode ' +
+            'when configured with "children", "passthrough", or ' +
+            '"passthroughNonEmpty" properties.'
+        );
         this.container_ = this.element.attachShadow({mode: 'open'});
+
+        // Create a slot for internal service elements i.e. "i-amphtml-sizer"
+        const serviceSlot = this.win.document.createElement('slot');
+        serviceSlot.setAttribute('name', 'i-amphtml-svc');
+        this.container_.appendChild(serviceSlot);
       } else {
         const container = this.win.document.createElement('i-amphtml-c');
         this.container_ = container;
         this.applyFillContent(container);
-        this.element.appendChild(container);
+        if (!Ctor['detached']) {
+          this.element.appendChild(container);
+        }
       }
     }
 
@@ -198,6 +216,19 @@ export class PreactBaseElement extends AMP.BaseElement {
       this.scheduledRenderDeferred_ = null;
     }
   }
+
+  /**
+   * @protected
+   * @param {string} prop
+   * @param {*} opt_fallback
+   * @return {*}
+   */
+  getProp(prop, opt_fallback) {
+    if (!hasOwn(this.defaultProps_, prop)) {
+      return opt_fallback;
+    }
+    return this.defaultProps_[prop];
+  }
 }
 
 // Ideally, these would be Static Class Fields. But Closure can't even.
@@ -207,7 +238,7 @@ export class PreactBaseElement extends AMP.BaseElement {
  *
  * @protected {!PreactDef.FunctionalComponent}
  */
-PreactBaseElement['Component'] = function() {
+PreactBaseElement['Component'] = function () {
   devAssert(false, 'Must provide Component');
 };
 
@@ -226,6 +257,26 @@ PreactBaseElement['className'] = '';
  * @protected {boolean}
  */
 PreactBaseElement['passthrough'] = false;
+
+/**
+ * Handling children with passthroughNonEmpty mode is the same as passthrough
+ * mode except that when there are no children elements, the returned
+ * prop['children'] will be null instead of the unnamed <slot>.  This allows
+ * the Preact environment to have conditional behavior depending on whether
+ * or not there are children.  Consider using a Mutation Observer in your
+ * component for detailed control of rerender when children are updated.
+ *
+ * @protected {boolean}
+ */
+PreactBaseElement['passthroughNonEmpty'] = false;
+
+/**
+ * Enabling detached mode alters the children to be rendered in an
+ * unappended container. By default the children will be attached to the DOM.
+ *
+ * @protected {boolean}
+ */
+PreactBaseElement['detached'] = false;
 
 /**
  * Provides a mapping of Preact prop to AmpElement DOM attributes.
@@ -252,6 +303,7 @@ function collectProps(Ctor, element, defaultProps) {
     'className': className,
     'props': propDefs,
     'passthrough': passthrough,
+    'passthroughNonEmpty': passthroughNonEmpty,
     'children': childrenDefs,
   } = Ctor;
 
@@ -263,7 +315,10 @@ function collectProps(Ctor, element, defaultProps) {
   // Props.
   for (const name in propDefs) {
     const def = propDefs[name];
-    const value = element.getAttribute(def.attr);
+    const value =
+      def.type == 'boolean'
+        ? element.hasAttribute(def.attr)
+        : element.getAttribute(def.attr);
     if (value == null) {
       props[name] = def.default;
     } else {
@@ -284,12 +339,25 @@ function collectProps(Ctor, element, defaultProps) {
   // as separate properties. Thus in a carousel the plain "children" are
   // slides, and the "arrowNext" children are passed via a "arrowNext"
   // property.
+  const errorMessage =
+    'only one of "passthrough", "passthroughNonEmpty"' +
+    ' or "children" may be given';
   if (passthrough) {
-    devAssert(
-      !childrenDefs,
-      'only one of "passthrough" or "children" may be given'
-    );
+    devAssert(!childrenDefs && !passthroughNonEmpty, errorMessage);
     props['children'] = [<Slot />];
+  } else if (passthroughNonEmpty) {
+    devAssert(!childrenDefs, errorMessage);
+    // If all children are whitespace text nodes, consider the element as
+    // having no children
+    props['children'] = element
+      .getRealChildNodes()
+      .every(
+        (node) =>
+          node.nodeType === /* TEXT_NODE */ 3 &&
+          node.nodeValue.trim().length === 0
+      )
+      ? null
+      : [<Slot />];
   } else if (childrenDefs) {
     const children = [];
     props['children'] = children;

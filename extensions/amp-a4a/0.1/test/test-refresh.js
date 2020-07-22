@@ -21,7 +21,7 @@ import {
   RefreshManager,
   getPublisherSpecifiedRefreshInterval,
 } from '../refresh-manager';
-import {RefreshIntersectionObserverWrapper} from '../refresh-intersection-observer-wrapper';
+import {RefreshIntersectionObserverPolyfillWrapper} from '../refresh-intersection-observer-polyfill-wrapper';
 import {Services} from '../../../../src/services';
 
 describe('refresh', () => {
@@ -40,7 +40,7 @@ describe('refresh', () => {
     window.sandbox.replaceGetter(div, 'isConnected', () => true);
     div.getAmpDoc = () => {
       return {
-        getMetaByName: name => {
+        getMetaByName: (name) => {
           const metaTag = window.document.head.querySelector(
             `[name="${name}"]`
           );
@@ -124,7 +124,7 @@ describe('refresh', () => {
       it('should stay in INITIAL state', () => {
         const ioEntry = {
           target: {
-            getAttribute: name => (name == DATA_MANAGER_ID_NAME ? '0' : null),
+            getAttribute: (name) => (name == DATA_MANAGER_ID_NAME ? '0' : null),
           },
           intersectionRatio: refreshManager.config_.visiblePercentageMin,
         };
@@ -188,7 +188,7 @@ describe('refresh', () => {
     });
   });
 
-  describe('RefreshIntersectionObserverWrapper', () => {
+  describe('RefreshIntersectionObserverPolyfillWrapper', () => {
     let callback;
     let callbackPromise;
     let getRect;
@@ -230,11 +230,11 @@ describe('refresh', () => {
       mockA4a.getViewport = () => ({getRect});
 
       let resolver;
-      callbackPromise = new Promise(resolve => {
+      callbackPromise = new Promise((resolve) => {
         resolver = resolve;
       });
-      callback = entries => resolver(entries);
-      observerWrapper = new RefreshIntersectionObserverWrapper(
+      callback = (entries) => resolver(entries);
+      observerWrapper = new RefreshIntersectionObserverPolyfillWrapper(
         callback,
         mockA4a,
         {threshold: 0.5}
@@ -243,7 +243,7 @@ describe('refresh', () => {
 
     it('should invoke callback with intersection ratio 1', () => {
       observerWrapper.observe(mockA4a.element);
-      return callbackPromise.then(entries => {
+      return callbackPromise.then((entries) => {
         expect(entries).to.be.ok;
         expect(entries[0]).to.be.ok;
         expect(entries[0].intersectionRatio).to.equal(1);
@@ -264,7 +264,7 @@ describe('refresh', () => {
         }),
       };
       observerWrapper.observe(mockA4a.element);
-      return callbackPromise.then(entries => {
+      return callbackPromise.then((entries) => {
         expect(entries).to.be.ok;
         expect(entries[0]).to.be.ok;
         expect(entries[0].intersectionRatio).to.equal(0.5);

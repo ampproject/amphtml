@@ -24,7 +24,7 @@ import {
 import {createElementWithAttributes} from '../../../../src/dom';
 import {oblivkiIsA4AEnabled} from '../../../amp-ad-network-oblivki-impl/0.1/oblivki-a4a-config';
 
-describes.realWin('oblivki-a4a-config', {amp: false}, env => {
+describes.realWin('oblivki-a4a-config', {amp: false}, (env) => {
   let win, doc;
   beforeEach(() => {
     win = env.win;
@@ -80,7 +80,7 @@ describes.realWin(
       extensions: ['amp-ad-network-oblivki-impl'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let oblivkiImpl;
     let oblivkiImplElem;

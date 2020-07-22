@@ -1,0 +1,19 @@
+// For an explanation of the OWNERS rules and syntax, see:
+// https://github.com/ampproject/amp-github-apps/blob/master/owners/OWNERS.example
+
+{
+  rules: [
+    {
+      owners: [
+        {name: 'ampproject/wg-infra'},
+        {name: 'ampproject/wg-ui-and-a11y'},
+        {name: 'ampproject/wg-performance'},
+        {name: 'wassgha', notify: true},
+      ],
+    },
+    {
+      pattern: '**/*.{js,md}',
+      owners: [{name: 'ampproject/working-groups'}],
+    },
+  ],
+}

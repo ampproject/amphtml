@@ -23,10 +23,10 @@ import {
 import {ViewerForTesting} from '../../viewer-for-testing';
 import {getSourceUrl} from '../../../../../src/url';
 
-describes.sandboxed('AmpViewerIntegration', {}, env => {
+describes.sandboxed('AmpViewerIntegration', {}, (env) => {
   const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';
   // TODO(aghassemi): Investigate failure in beforeEach. #10974.
-  describe.skip('Handshake', function() {
+  describe.skip('Handshake', function () {
     let viewerEl;
     let viewer;
     let ampDocUrl;
@@ -71,8 +71,8 @@ describes.sandboxed('AmpViewerIntegration', {}, env => {
           },
         },
       },
-      env => {
-        describe.configure().run('Open Channel', () => {
+      (env) => {
+        describe('Open Channel', () => {
           class Messaging {
             constructor() {}
             sendRequest() {}
@@ -224,7 +224,7 @@ describes.sandboxed('AmpViewerIntegration', {}, env => {
     .run('Unit Tests for messaging.js', () => {
       const viewerOrigin = 'http://localhost:9876';
       const messagingToken = '32q4pAwei09W845V3j24o8OJIO3fE9l3q49p';
-      const requestProcessor = function() {
+      const requestProcessor = function () {
         return Promise.resolve({});
       };
       let messaging;
@@ -233,13 +233,13 @@ describes.sandboxed('AmpViewerIntegration', {}, env => {
 
       beforeEach(() => {
         let postMessageResolve;
-        postMessagePromise = new Promise(resolve => {
+        postMessagePromise = new Promise((resolve) => {
           postMessageResolve = resolve;
         });
 
         const port = new WindowPortEmulator(window, viewerOrigin);
-        port.addEventListener = function() {};
-        port.postMessage = function() {};
+        port.addEventListener = function () {};
+        port.postMessage = function () {};
 
         postMessageSpy = env.sandbox.stub(port, 'postMessage').callsFake(() => {
           postMessageResolve();
@@ -269,7 +269,7 @@ describes.sandboxed('AmpViewerIntegration', {}, env => {
 
         messaging.handleMessage_(event);
 
-        return postMessagePromise.then(function() {
+        return postMessagePromise.then(function () {
           expect(postMessageSpy).to.have.been.calledOnce;
           expect(postMessageSpy).to.have.been.calledWith({
             app: '__AMPHTML__',
@@ -401,7 +401,7 @@ describes.sandboxed('AmpViewerIntegration', {}, env => {
         const payload = {};
         messaging.sendRequest(message, payload, awaitResponse);
 
-        return postMessagePromise.then(function() {
+        return postMessagePromise.then(function () {
           expect(postMessageSpy).to.have.been.calledOnce;
           expect(postMessageSpy).to.have.been.calledWith({
             app: '__AMPHTML__',
@@ -421,7 +421,7 @@ describes.sandboxed('AmpViewerIntegration', {}, env => {
         const requestId = 1;
         messaging.sendResponse_(requestId, mName, payload);
 
-        return postMessagePromise.then(function() {
+        return postMessagePromise.then(function () {
           expect(postMessageSpy).to.have.been.calledOnce;
           expect(postMessageSpy).to.have.been.calledWith({
             app: '__AMPHTML__',
@@ -442,7 +442,7 @@ describes.sandboxed('AmpViewerIntegration', {}, env => {
         const logErrorSpy = env.sandbox.stub(messaging, 'logError_');
         messaging.sendResponseError_(requestId, mName, err);
 
-        return postMessagePromise.then(function() {
+        return postMessagePromise.then(function () {
           expect(postMessageSpy).to.have.been.calledOnce;
           expect(postMessageSpy).to.have.been.calledWith({
             app: '__AMPHTML__',

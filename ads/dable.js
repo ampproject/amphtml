@@ -26,7 +26,7 @@ export function dable(global, data) {
 
   global.dable =
     global.dable ||
-    function() {
+    function () {
       (global.dable.q = global.dable.q || []).push(arguments);
     };
   global.dable(
@@ -55,7 +55,7 @@ export function dable(global, data) {
   }
 
   // call render widget
-  global.dable('renderWidget', slot.id, itemId, opts, function(hasAd) {
+  global.dable('renderWidget', slot.id, itemId, opts, function (hasAd) {
     if (hasAd) {
       global.context.renderStart();
     } else {

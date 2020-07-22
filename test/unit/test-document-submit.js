@@ -20,7 +20,7 @@ import {
   onDocumentFormSubmit_,
 } from '../../src/document-submit';
 
-describes.sandboxed('test-document-submit', {}, env => {
+describes.sandboxed('test-document-submit', {}, (env) => {
   describe('installGlobalSubmitListenerForDoc', () => {
     let ampdoc;
     let headNode;
@@ -38,7 +38,7 @@ describes.sandboxed('test-document-submit', {}, env => {
     /**
      * @param {string} extension
      */
-    const createScript = extension => {
+    const createScript = (extension) => {
       const script = document.createElement('script');
       script.setAttribute(
         'src',
@@ -65,7 +65,7 @@ describes.sandboxed('test-document-submit', {}, env => {
     });
   });
 
-  describes.realWin('onDocumentFormSubmit_', {amp: true}, env => {
+  describes.realWin('onDocumentFormSubmit_', {amp: true}, (env) => {
     let window, document;
     let evt;
     let tgt;
@@ -131,7 +131,7 @@ describes.sandboxed('test-document-submit', {}, env => {
       tgt.setAttribute('action', 'https://valid.example.com');
       tgt.__AMP_INIT_ACTION__ = undefined;
       tgt.setAttribute('target', '_blank');
-      expect(() => onDocumentFormSubmit_(evt)).to.not.throw;
+      expect(() => onDocumentFormSubmit_(evt)).to.not.throw();
     });
 
     it('should assert none of the inputs named __amp_source_origin', () => {

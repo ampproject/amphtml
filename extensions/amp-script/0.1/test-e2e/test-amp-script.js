@@ -23,7 +23,7 @@ describes.endtoend(
     environments: ['single'],
     browsers: ['chrome', 'safari'],
   },
-  async env => {
+  async (env) => {
     let controller;
 
     beforeEach(async () => {

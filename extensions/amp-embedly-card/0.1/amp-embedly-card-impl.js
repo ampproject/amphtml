@@ -80,7 +80,7 @@ export class AmpEmbedlyCard extends AMP.BaseElement {
     listenFor(
       iframe,
       'embed-size',
-      data => {
+      (data) => {
         this.forceChangeHeight(data['height']);
       },
       opt_is3P

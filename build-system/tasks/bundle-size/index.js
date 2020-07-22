@@ -18,7 +18,6 @@
 const argv = require('minimist')(process.argv.slice(2));
 const globby = require('globby');
 const log = require('fancy-log');
-const packageJson = require('../../../package.json');
 const path = require('path');
 const url = require('url');
 const util = require('util');
@@ -37,11 +36,12 @@ const {
   VERSION: internalRuntimeVersion,
 } = require('../../compile/internal-version');
 const {cyan, green, red, yellow} = require('ansi-colors');
-const {serialReport} = require('@ampproject/filesize');
+const {report, Report} = require('@ampproject/filesize');
 
 const requestPost = util.promisify(require('request').post);
 
-const fileGlobs = packageJson.filesize.track;
+const filesizeConfigPath = require.resolve('./filesize.json');
+const fileGlobs = require(filesizeConfigPath).filesize.track;
 const normalizedRtvNumber = '1234567890123';
 
 const expectedGitHubRepoSlug = 'ampproject/amphtml';
@@ -58,18 +58,22 @@ async function getBrotliBundleSizes() {
   const bundleSizes = {};
 
   log(cyan('brotli'), 'bundle sizes are:');
-  const values = serialReport(process.cwd(), content =>
-    content.replace(replacementExpression, normalizedRtvNumber)
+  await report(
+    filesizeConfigPath,
+    (content) => content.replace(replacementExpression, normalizedRtvNumber),
+    class extends Report {
+      update(context) {
+        const completed = super.getUpdated(context);
+        for (const complete of completed) {
+          const [filePath, sizeMap] = complete;
+          const relativePath = path.relative('.', filePath);
+          const reportedSize = parseFloat((sizeMap[0][0] / 1024).toFixed(2));
+          log(' ', cyan(relativePath) + ':', green(reportedSize + 'KB'));
+          bundleSizes[relativePath] = reportedSize;
+        }
+      }
+    }
   );
-  let next = await values.next();
-  while (!next.done) {
-    const [filePath, brotliSize] = next.value;
-    const relativePath = path.relative('.', filePath);
-    const reportedSize = parseFloat((brotliSize / 1024).toFixed(2));
-    log(' ', cyan(relativePath) + ':', green(reportedSize + 'KB'));
-    bundleSizes[relativePath] = reportedSize;
-    next = await values.next();
-  }
 
   return bundleSizes;
 }

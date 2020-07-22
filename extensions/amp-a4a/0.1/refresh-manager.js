@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {RefreshIntersectionObserverWrapper} from './refresh-intersection-observer-wrapper';
+import {RefreshIntersectionObserverPolyfillWrapper} from './refresh-intersection-observer-polyfill-wrapper';
 import {Services} from '../../../src/services';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -132,7 +132,7 @@ const RefreshLifecycleState = {
  * Each IO is configured to a different threshold, and all elements that
  * share the same visiblePercentageMin will be monitored by the same IO.
  *
- * @const {!Object<string, (!IntersectionObserver|!RefreshIntersectionObserverWrapper)>}
+ * @const {!Object<string, (!IntersectionObserver|!RefreshIntersectionObserverPolyfillWrapper)>}
  */
 const observers = {};
 
@@ -226,7 +226,7 @@ export class RefreshManager {
    * one if one does not yet exist.
    *
    * @param {number} threshold
-   * @return {(!IntersectionObserver|!RefreshIntersectionObserverWrapper)}
+   * @return {(!IntersectionObserver|!RefreshIntersectionObserverPolyfillWrapper)}
    */
   getIntersectionObserverWithThreshold_(threshold) {
     const thresholdString = String(threshold);
@@ -235,7 +235,7 @@ export class RefreshManager {
       (observers[thresholdString] =
         'IntersectionObserver' in this.win_
           ? new this.win_['IntersectionObserver'](this.ioCallback_, {threshold})
-          : new RefreshIntersectionObserverWrapper(
+          : new RefreshIntersectionObserverPolyfillWrapper(
               this.ioCallback_,
               this.a4a_,
               {threshold}
@@ -251,7 +251,7 @@ export class RefreshManager {
    * @param {!Array<!IntersectionObserverEntry>} entries
    */
   ioCallback_(entries) {
-    entries.forEach(entry => {
+    entries.forEach((entry) => {
       const refreshManagerId = entry.target.getAttribute(DATA_MANAGER_ID_NAME);
       devAssert(refreshManagerId);
       const refreshManager = managers[refreshManagerId];
@@ -324,7 +324,7 @@ export class RefreshManager {
    *    refresh timer elapses successfully.
    */
   startRefreshTimer_() {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       this.refreshTimeoutId_ = this.timer_.delay(() => {
         this.state_ = RefreshLifecycleState.INITIAL;
         this.unobserve();

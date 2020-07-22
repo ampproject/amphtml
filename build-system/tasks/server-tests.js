@@ -22,7 +22,7 @@ const log = require('fancy-log');
 const path = require('path');
 const posthtml = require('posthtml');
 const through = require('through2');
-const {buildNewServer} = require('../tasks/serve');
+const {buildNewServer} = require('../server/typescript-compile');
 const {cyan, green, red} = require('ansi-colors');
 const {isTravisBuild} = require('../common/travis');
 
@@ -102,12 +102,7 @@ function logError(testName, err) {
   const {message} = err;
   console.log(red('✖'), 'Failed', cyan(testName));
   console.group();
-  console.log(
-    message
-      .split('\n')
-      .splice(3)
-      .join('\n')
-  );
+  console.log(message.split('\n').splice(3).join('\n'));
   console.groupEnd();
 }
 
@@ -164,10 +159,7 @@ function runTest() {
  */
 function serverTests() {
   buildNewServer();
-  return gulp
-    .src(inputPaths)
-    .pipe(runTest())
-    .on('end', reportResult);
+  return gulp.src(inputPaths).pipe(runTest()).on('end', reportResult);
 }
 
 module.exports = {

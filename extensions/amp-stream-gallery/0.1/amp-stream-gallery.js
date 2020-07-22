@@ -151,40 +151,40 @@ class AmpStreamGallery extends AMP.BaseElement {
    */
   getAttributeConfig_() {
     return {
-      'extra-space': newValue => {
+      'extra-space': (newValue) => {
         this.updateExtraSpace_(newValue);
       },
-      'inset-arrow-visibility': newValue => {
+      'inset-arrow-visibility': (newValue) => {
         this.updateInsetArrowVisibility_(newValue);
       },
-      'loop': newValue => {
+      'loop': (newValue) => {
         this.updateLoop_(newValue == 'true');
       },
-      'outset-arrows': newValue => {
+      'outset-arrows': (newValue) => {
         this.updateOutsetArrows_(newValue == 'true');
       },
-      'peek': newValue => {
+      'peek': (newValue) => {
         this.updatePeek_(Number(newValue));
       },
-      'slide': newValue => {
+      'slide': (newValue) => {
         this.carousel_.goToSlide(Number(newValue));
       },
-      'slide-align': newValue => {
+      'slide-align': (newValue) => {
         this.carousel_.updateAlignment(newValue);
       },
-      'snap': newValue => {
+      'snap': (newValue) => {
         this.carousel_.updateSnap(newValue != 'false');
       },
-      'max-item-width': newValue => {
+      'max-item-width': (newValue) => {
         this.updateMaxItemWidth_(Number(newValue));
       },
-      'max-visible-count': newValue => {
+      'max-visible-count': (newValue) => {
         this.updateMaxVisibleCount_(Number(newValue));
       },
-      'min-item-width': newValue => {
+      'min-item-width': (newValue) => {
         this.updateMinItemWidth_(Number(newValue));
       },
-      'min-visible-count': newValue => {
+      'min-visible-count': (newValue) => {
         this.updateMinVisibleCount_(Number(newValue));
       },
     };
@@ -197,7 +197,7 @@ class AmpStreamGallery extends AMP.BaseElement {
   initializeActions_() {
     this.registerAction(
       'prev',
-      invocation => {
+      (invocation) => {
         const {trust} = invocation;
         this.carousel_.prev(this.getActionSource_(trust));
       },
@@ -205,7 +205,7 @@ class AmpStreamGallery extends AMP.BaseElement {
     );
     this.registerAction(
       'next',
-      invocation => {
+      (invocation) => {
         const {trust} = invocation;
         this.carousel_.next(this.getActionSource_(trust));
       },
@@ -213,7 +213,7 @@ class AmpStreamGallery extends AMP.BaseElement {
     );
     this.registerAction(
       'goToSlide',
-      invocation => {
+      (invocation) => {
         const {args, trust} = invocation;
         this.carousel_.goToSlide(args['index'] || -1, {
           actionSource: this.getActionSource_(trust),
@@ -227,7 +227,7 @@ class AmpStreamGallery extends AMP.BaseElement {
    * @private
    */
   initializeListeners_() {
-    this.element.addEventListener(CarouselEvents.INDEX_CHANGE, event => {
+    this.element.addEventListener(CarouselEvents.INDEX_CHANGE, (event) => {
       this.onIndexChanged_(event);
     });
     this.element.addEventListener(CarouselEvents.SCROLL_START, () => {
@@ -239,14 +239,14 @@ class AmpStreamGallery extends AMP.BaseElement {
         this.onScrollPositionChanged_();
       }
     );
-    this.prevArrowSlot_.addEventListener('click', event => {
+    this.prevArrowSlot_.addEventListener('click', (event) => {
       // Make sure the slot itself was not clicked, since that fills the
       // entire height of the gallery.
       if (event.target != event.currentTarget) {
         this.carousel_.prev(ActionSource.GENERIC_HIGH_TRUST);
       }
     });
-    this.nextArrowSlot_.addEventListener('click', event => {
+    this.nextArrowSlot_.addEventListener('click', (event) => {
       // Make sure the slot itself was not clicked, since that fills the
       // entire height of the gallery.
       if (event.target != event.currentTarget) {
@@ -269,6 +269,11 @@ class AmpStreamGallery extends AMP.BaseElement {
   }
 
   /** @override */
+  prerenderAllowed() {
+    return true;
+  }
+
+  /** @override */
   buildCallback() {
     userAssert(
       isExperimentOn(this.win, 'amp-stream-gallery'),
@@ -286,7 +291,7 @@ class AmpStreamGallery extends AMP.BaseElement {
       element: this.element,
       scrollContainer: dev().assertElement(this.scrollContainer_),
       initialIndex: this.getInitialIndex_(),
-      runMutate: cb => this.mutateElement(cb),
+      runMutate: (cb) => this.mutateElement(cb),
     });
     this.carousel_.updateSnap(false);
     // This is not correct, we really get the computed style of the element
@@ -296,7 +301,7 @@ class AmpStreamGallery extends AMP.BaseElement {
     );
 
     // Handle the initial set of attributes
-    toArray(this.element.attributes).forEach(attr => {
+    toArray(this.element.attributes).forEach((attr) => {
       this.attributeMutated_(attr.name, attr.value);
     });
 
@@ -318,7 +323,7 @@ class AmpStreamGallery extends AMP.BaseElement {
     let nextArrow;
 
     // Figure out which "slot" the children go into.
-    children.forEach(c => {
+    children.forEach((c) => {
       const slot = c.getAttribute('slot');
       if (slot == 'prev-arrow') {
         prevArrow = c;
@@ -344,7 +349,7 @@ class AmpStreamGallery extends AMP.BaseElement {
     );
 
     // Do some manual "slot" distribution
-    this.slides_.forEach(slide => {
+    this.slides_.forEach((slide) => {
       slide.classList.add('i-amphtml-carousel-slotted');
       this.scrollContainer_.appendChild(slide);
     });
@@ -672,10 +677,10 @@ class AmpStreamGallery extends AMP.BaseElement {
   updateUi_() {
     // TODO(sparhami) for Shadow DOM, we will need to get the assigned nodes
     // instead.
-    iterateCursor(this.prevArrowSlot_.children, child => {
+    iterateCursor(this.prevArrowSlot_.children, (child) => {
       toggleAttribute(child, 'disabled', this.carousel_.isAtStart());
     });
-    iterateCursor(this.nextArrowSlot_.children, child => {
+    iterateCursor(this.nextArrowSlot_.children, (child) => {
       toggleAttribute(child, 'disabled', this.carousel_.isAtEnd());
     });
     toggleAttribute(
@@ -780,6 +785,6 @@ class AmpStreamGallery extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpStreamGallery, CSS);
 });

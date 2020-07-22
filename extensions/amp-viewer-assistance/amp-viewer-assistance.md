@@ -241,8 +241,8 @@ Wrapping up the above, here is an example implementation of a page utilizing sig
   {
     "myConfigItem1": {
       "foo": 123,
-      "bar": 456,
-    },
+      "bar": 456
+    }
   }
 </script>
 <button on="tap:amp-viewer-assistance.signIn">

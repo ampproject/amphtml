@@ -19,6 +19,7 @@ import {AmpStory} from '../amp-story';
 import {AmpStoryPage} from '../amp-story-page';
 import {CommonSignals} from '../../../../src/common-signals';
 import {LiveStoryManager} from '../live-story-manager';
+import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {addAttributesToElement} from '../../../../src/dom';
 import {registerServiceBuilder} from '../../../../src/service';
@@ -31,7 +32,7 @@ describes.realWin(
       extensions: ['amp-story:1.0'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let liveStoryManager;
     let ampStory;
@@ -50,7 +51,7 @@ describes.realWin(
           const page = win.document.createElement('amp-story-page');
           page.id = opt_ids && opt_ids[i] ? opt_ids[i] : `-page-${i}`;
           const storyPage = new AmpStoryPage(page);
-          env.sandbox.stub(storyPage, 'mutateElement').callsFake(fn => fn());
+          env.sandbox.stub(storyPage, 'mutateElement').callsFake((fn) => fn());
           container.appendChild(page);
           return page;
         });
@@ -58,11 +59,17 @@ describes.realWin(
 
     beforeEach(async () => {
       win = env.win;
+
+      const localizationService = new LocalizationService(win.document.body);
+      env.sandbox
+        .stub(Services, 'localizationForDoc')
+        .returns(localizationService);
+
       const viewer = Services.viewerForDoc(env.ampdoc);
       env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
       env.sandbox.stub(win.history, 'replaceState');
 
-      registerServiceBuilder(win, 'performance', function() {
+      registerServiceBuilder(win, 'performance', function () {
         return {
           isPerformanceTrackingOn: () => false,
         };

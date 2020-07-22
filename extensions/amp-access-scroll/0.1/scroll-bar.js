@@ -28,10 +28,9 @@ export class ScrollBar extends ScrollComponent {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} doc
    * @param {!../../amp-access/0.1/amp-access-source.AccessSource} accessSource
    * @param {string} baseUrl
-   * @param {boolean} holdback
    */
-  constructor(doc, accessSource, baseUrl, holdback) {
-    super(doc, holdback);
+  constructor(doc, accessSource, baseUrl) {
+    super(doc);
 
     /** @protected */
     this.accessSource_ = accessSource;
@@ -81,15 +80,12 @@ export class ScrollBar extends ScrollComponent {
       [this.frame_]
     );
 
-    this.toggleClass(this.HOLDBACK_CLASS, this.holdback_);
     this.mount();
 
     // Set iframe to scrollbar URL.
     this.accessSource_
       .buildUrl(
-        `${this.baseUrl_}/html/amp/${
-          this.holdback_ ? 'scrollbar' : 'scrolltab'
-        }` +
+        `${this.baseUrl_}/html/amp/scrolltab` +
           '?rid=READER_ID' +
           '&cid=CLIENT_ID(scroll1)' +
           '&c=CANONICAL_URL' +
@@ -98,7 +94,7 @@ export class ScrollBar extends ScrollComponent {
           '&x=QUERY_PARAM(scrollx)',
         false
       )
-      .then(scrollbarUrl => {
+      .then((scrollbarUrl) => {
         this.frame_.setAttribute('src', scrollbarUrl);
       });
   }

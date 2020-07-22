@@ -82,13 +82,13 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
     this.totalChildren_ = this.visibileChildren_(childNodes).length;
 
     const owners = Services.ownersForDoc(this.element);
-    this.children_.forEach(child => owners.setOwner(child, this.element));
+    this.children_.forEach((child) => owners.setOwner(child, this.element));
 
     const clip = doc.createElement('div');
     clip.setAttribute('class', 'i-amphtml-fx-flying-carpet-clip');
     container.setAttribute('class', 'i-amphtml-fx-flying-carpet-container');
 
-    childNodes.forEach(child => container.appendChild(child));
+    childNodes.forEach((child) => container.appendChild(child));
     clip.appendChild(container);
     this.element.appendChild(clip);
 
@@ -173,7 +173,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
    * @private
    */
   observeNewChildren_() {
-    const observer = new MutationObserver(changes => {
+    const observer = new MutationObserver((changes) => {
       for (let i = 0; i < changes.length; i++) {
         const {addedNodes} = changes[i];
         if (!addedNodes) {
@@ -240,7 +240,7 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
    * @private
    */
   visibileChildren_(nodes) {
-    return nodes.filter(node => {
+    return nodes.filter((node) => {
       if (node.nodeType === /* Element */ 1) {
         return true;
       }
@@ -255,6 +255,6 @@ export class AmpFlyingCarpet extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpFlyingCarpet, CSS);
 });

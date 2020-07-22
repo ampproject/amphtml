@@ -19,12 +19,12 @@ import {dict} from '../../../src/utils/object';
 import {getService, registerServiceBuilder} from '../../../src/service';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
+import {user} from '../../../src/log';
 import mustache from '../../../third_party/mustache/mustache';
 
 const TAG = 'amp-mustache';
 
-const BaseTemplate =
-  /** @type {typeof ../../../src/service/template-impl.BaseTemplate} */ (AMP.BaseTemplate);
+const BaseTemplate = /** @type {typeof ../../../src/service/template-impl.BaseTemplate} */ (AMP.BaseTemplate);
 
 /**
  * Implements an AMP template for Mustache.js.
@@ -40,14 +40,14 @@ export class AmpMustache extends BaseTemplate {
   constructor(element, win) {
     super(element, win);
 
-    registerServiceBuilder(win, 'purifier', function() {
+    registerServiceBuilder(win, 'purifier', function () {
       return new Purifier(win.document, dict(), rewriteAttributeValue);
     });
     /** @private @const {!Purifier} */
     this.purifier_ = getService(win, 'purifier');
 
     // Unescaped templating (triple mustache) has a special, strict sanitizer.
-    mustache.setUnescapedSanitizer(value =>
+    mustache.setUnescapedSanitizer((value) =>
       this.purifier_.purifyTagsForTripleMustache(value)
     );
   }
@@ -66,7 +66,11 @@ export class AmpMustache extends BaseTemplate {
     /** @private @const {string} */
     this.template_ = this.initTemplateString_();
 
-    mustache.parse(this.template_, /* tags */ undefined);
+    try {
+      mustache.parse(this.template_, /* tags */ undefined);
+    } catch (err) {
+      user().error(TAG, err.message, this.element);
+    }
   }
 
   /**
@@ -143,6 +147,6 @@ export class AmpMustache extends BaseTemplate {
   }
 }
 
-AMP.extension(TAG, '0.2', function(AMP) {
+AMP.extension(TAG, '0.2', function (AMP) {
   AMP.registerTemplate(TAG, AmpMustache);
 });

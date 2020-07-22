@@ -24,7 +24,7 @@ describes.fakeWin(
   {
     amp: true,
   },
-  env => {
+  (env) => {
     let ampdoc;
     let clock;
     let validConfig;
@@ -216,7 +216,7 @@ describes.fakeWin(
             .withExactArgs('authorize', {})
             .returns(Promise.resolve({a: 1}))
             .once();
-          return adapter.authorize().then(result => {
+          return adapter.authorize().then((result) => {
             expect(result).to.deep.equal({a: 1});
           });
         });
@@ -229,7 +229,7 @@ describes.fakeWin(
             .once();
           const p = adapter.authorize();
           clock.tick(3001);
-          return p.then(result => {
+          return p.then((result) => {
             expect(result).to.deep.equal({response: 'default'});
           });
         });
@@ -280,7 +280,7 @@ describes.fakeWin(
             .once();
           const p = adapter.authorize();
           clock.tick(3001);
-          return p.then(result => {
+          return p.then((result) => {
             expect(result).to.deep.equal(data);
           });
         });
@@ -304,7 +304,7 @@ describes.fakeWin(
             .once();
           const p = adapter.authorize();
           clock.tick(3001);
-          return p.then(result => {
+          return p.then((result) => {
             expect(result).to.deep.equal({response: 'default'});
           });
         });
@@ -329,7 +329,7 @@ describes.fakeWin(
             .once();
           const p = adapter.authorize();
           clock.tick(3001);
-          return p.then(result => {
+          return p.then((result) => {
             expect(result).to.deep.equal({response: 'default'});
             expect(devErrorStub).to.be.calledOnce;
             expect(devErrorStub.args[0][1]).to.match(/failed to restore/);
@@ -350,7 +350,7 @@ describes.fakeWin(
             .once();
           const p = adapter.authorize();
           clock.tick(3001);
-          return p.then(result => {
+          return p.then((result) => {
             expect(result).to.deep.equal({response: 'default'});
           });
         });

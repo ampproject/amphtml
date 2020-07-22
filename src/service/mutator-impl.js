@@ -55,7 +55,7 @@ export class MutatorImpl {
     /** @private @const {!FocusHistory} */
     this.activeHistory_ = new FocusHistory(this.win, FOCUS_HISTORY_TIMEOUT_);
 
-    this.activeHistory_.onFocus(element => {
+    this.activeHistory_.onFocus((element) => {
       this.checkPendingChangeSize_(element);
     });
 
@@ -86,7 +86,7 @@ export class MutatorImpl {
         opt_newMargins,
         opt_event,
         /* force */ false,
-        success => {
+        (success) => {
           if (success) {
             resolve();
           } else {
@@ -120,7 +120,7 @@ export class MutatorImpl {
         /* newMargin */ undefined,
         /* event */ undefined,
         /* force */ false,
-        success => {
+        (success) => {
           if (success) {
             const resource = Resource.forElement(element);
             resource.completeCollapse();
@@ -164,8 +164,13 @@ export class MutatorImpl {
   }
 
   /** @override */
-  mutateElement(element, mutator) {
-    return this.measureMutateElement(element, null, mutator);
+  mutateElement(element, mutator, skipRemeasure) {
+    return this.measureMutateElementResources_(
+      element,
+      null,
+      mutator,
+      skipRemeasure
+    );
   }
 
   /** @override */
@@ -195,9 +200,15 @@ export class MutatorImpl {
    * @param {!Element} element
    * @param {?function()} measurer
    * @param {function()} mutator
+   * @param {boolean} skipRemeasure
    * @return {!Promise}
    */
-  measureMutateElementResources_(element, measurer, mutator) {
+  measureMutateElementResources_(
+    element,
+    measurer,
+    mutator,
+    skipRemeasure = false
+  ) {
     const calcRelayoutTop = () => {
       const box = this.viewport_.getLayoutRect(element);
       if (box.width != 0 && box.height != 0) {
@@ -214,23 +225,16 @@ export class MutatorImpl {
         }
         // With IntersectionObserver, "relayout top" is no longer needed since
         // relative positional changes won't affect correctness.
-        if (!this.intersect_) {
+        if (!this.intersect_ && !skipRemeasure) {
           relayoutTop = calcRelayoutTop();
         }
       },
       mutate: () => {
         mutator();
 
-        // TODO(willchou): IntersectionObserver won't catch size changes,
-        // which means layout boxes may be stale. However, always requesting
-        // measure after any mutation is overkill and probably expensive.
-        // Instead, survey measureMutateElement() callers to determine which
-        // should explicitly call requestMeasure() to fix this.
-
-        // With IntersectionObserver, no need to remeasure and set relayout
-        // on element size changes since enter/exit viewport will be detected.
-        if (this.intersect_) {
-          this.resources_.maybeHeightChanged();
+        // `skipRemeasure` is set by callers when we know that `mutator`
+        // cannot cause a change in size/position e.g. toggleLoading().
+        if (skipRemeasure) {
           return;
         }
 
@@ -243,11 +247,17 @@ export class MutatorImpl {
           const r = Resource.forElement(ampElements[i]);
           r.requestMeasure();
         }
+        this.resources_.schedulePass(FOUR_FRAME_DELAY_);
+
+        // With IntersectionObserver, no need to set relayout top.
+        if (this.intersect_) {
+          this.resources_.maybeHeightChanged();
+          return;
+        }
+
         if (relayoutTop != -1) {
           this.resources_.setRelayoutTop(relayoutTop);
         }
-        this.resources_.schedulePass(FOUR_FRAME_DELAY_);
-
         // Need to measure again in case the element has become visible or
         // shifted.
         this.vsync_.measure(() => {
@@ -295,7 +305,7 @@ export class MutatorImpl {
   checkPendingChangeSize_(element) {
     const resourceElement = closest(
       element,
-      el => !!Resource.forElementOptional(el)
+      (el) => !!Resource.forElementOptional(el)
     );
     if (!resourceElement) {
       return;
@@ -433,10 +443,9 @@ export class MutatorImpl {
         callback: opt_callback,
       }
     );
-    // With IntersectionObserver, remeasuring after size changes are no longer needed.
-    if (!this.intersect_) {
-      this.resources_.schedulePassVsync();
-    }
+    // With IntersectionObserver, we still want to schedule a pass to execute
+    // the requested measures of the newly resized element(s).
+    this.resources_.schedulePassVsync();
   }
 }
 

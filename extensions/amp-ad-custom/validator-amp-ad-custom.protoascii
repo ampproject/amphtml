@@ -33,11 +33,12 @@ tags: {  # <amp-ad-custom>
   disallowed_ancestor: "AMP-APP-BANNER"
   attrs: {
     name: "src"
+    mandatory: true
     value_url: {
       protocol: "https"
       allow_relative: false
     }
-    blacklisted_value_regex: "__amp_source_origin"
+    disallowed_value_regex: "__amp_source_origin"
   }
   attr_lists: "extended-amp-global"
   amp_layout: {

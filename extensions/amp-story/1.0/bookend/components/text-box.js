@@ -75,10 +75,8 @@ export class TextBoxComponent {
       type: BOOKEND_COMPONENT_TYPES.TEXTBOX,
     };
 
-    let textSeed = html`
-      <h3 class="i-amphtml-story-bookend-text"></h3>
-    `;
-    textboxData['text'].forEach(currentLine => {
+    let textSeed = html` <h3 class="i-amphtml-story-bookend-text"></h3> `;
+    /** @type {!Array} */ (textboxData['text']).forEach((currentLine) => {
       const el = textSeed.cloneNode(/* deep */ true);
       el.textContent = currentLine;
       container.appendChild(el);

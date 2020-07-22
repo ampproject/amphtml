@@ -45,7 +45,7 @@ export function bidtellect(global, data) {
   if (data.height) {
     params += '&h=' + encodeURIComponent(data.height);
   }
-  optionalParams.forEach(function(param) {
+  optionalParams.forEach(function (param) {
     if (data[param]) {
       params += '&' + param + '=' + encodeURIComponent(data[param]);
     }

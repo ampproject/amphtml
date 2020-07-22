@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import {Services} from '../../src/services';
 import {
   addMissingParamsToUrl,
   addParamToUrl,
   addParamsToUrl,
+  appendPathToUrl,
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
   getCorsUrl,
@@ -934,12 +936,6 @@ describe('resolveRelativeUrl', () => {
     'http://acme.org/path/file?f=0#h'
   );
 
-  // TODO(camelburrito, #11827): This resolves to file:// on Sauce Labs.
-  // testRelUrl(
-  //     '\\\\acme.org/path/file?f=0#h',
-  //     'http://base.org/bpath/bfile?bf=0#bh',
-  //     'http://acme.org/path/file?f=0#h');
-
   // Absolute path.
   testRelUrl(
     '/path/file?f=0#h',
@@ -995,8 +991,9 @@ describe('getCorsUrl', () => {
         getCorsUrl(window, 'http://example.com/?__amp_source_origin')
       ).to.throw(/Source origin is not allowed in/);
     });
-    expect(() => getCorsUrl(window, 'http://example.com/?name=hello')).to.not
-      .throw;
+    expect(() =>
+      getCorsUrl(window, 'http://example.com/?name=hello')
+    ).to.not.throw();
   });
 
   it('should set __amp_source_origin as a url param', () => {
@@ -1106,5 +1103,60 @@ describe('getProxyServingType', () => {
     expect(
       getProxyServingType('https://not.cdn.ampproject.org/test/blah.com/foo/')
     ).to.equal('test');
+  });
+});
+
+describes.realWin('appendPathToUrl', {'amp': true}, (env) => {
+  let urlService;
+  beforeEach(() => {
+    urlService = Services.urlForDoc(env.win.document.body);
+  });
+
+  it('should properly join url and path', () => {
+    expect(
+      appendPathToUrl(urlService.parse('https://cdn.ampproject.org'), '/foo')
+    ).to.be.equal('https://cdn.ampproject.org/foo');
+  });
+
+  it('should join url and path if none contain /', () => {
+    expect(
+      appendPathToUrl(urlService.parse('https://cdn.ampproject.org'), 'foo')
+    ).to.be.equal('https://cdn.ampproject.org/foo');
+  });
+
+  it('should properly join url with path, and path', () => {
+    expect(
+      appendPathToUrl(
+        urlService.parse('https://cdn.ampproject.org/bar/'),
+        '/foo'
+      )
+    ).to.be.equal('https://cdn.ampproject.org/bar/foo');
+  });
+
+  it('should add path before query params', () => {
+    expect(
+      appendPathToUrl(
+        urlService.parse('https://cdn.ampproject.org?a=b'),
+        '/foo'
+      )
+    ).to.be.equal('https://cdn.ampproject.org/foo?a=b');
+  });
+
+  it('should add path before fragment', () => {
+    expect(
+      appendPathToUrl(
+        urlService.parse('https://cdn.ampproject.org/#hello'),
+        '/foo'
+      )
+    ).to.be.equal('https://cdn.ampproject.org/foo#hello');
+  });
+
+  it('should add path before query params and fragment', () => {
+    expect(
+      appendPathToUrl(
+        urlService.parse('https://cdn.ampproject.org?a=b#hello'),
+        'foo'
+      )
+    ).to.be.equal('https://cdn.ampproject.org/foo?a=b#hello');
   });
 });

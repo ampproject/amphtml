@@ -42,7 +42,7 @@ function clickLinkAndNavigate_(doc, selector) {
 }
 
 // TODO(@slocka) Disabled due to #22154, re-enable
-describe.skip('amp-skimlinks', function() {
+describe.skip('amp-skimlinks', function () {
   const setupBasic = {
     extensions: ['amp-skimlinks'],
     body: `
@@ -66,12 +66,12 @@ describe.skip('amp-skimlinks', function() {
     </div>
   `,
   };
-  describes.integration('Basic features', setupBasic, env => {
+  describes.integration('Basic features', setupBasic, (env) => {
     let browser = null;
     let clickLinkAndNavigate = null;
 
     beforeEach(() => {
-      clickLinkAndNavigate = selector => {
+      clickLinkAndNavigate = (selector) => {
         return clickLinkAndNavigate_(env.win.document, selector);
       };
       browser = new BrowserController(env.win);
@@ -79,8 +79,12 @@ describe.skip('amp-skimlinks', function() {
       return browser.waitForElementBuild('amp-skimlinks');
     });
 
+    afterEach(() => {
+      return RequestBank.tearDown();
+    });
+
     it('Should send the page impression tracking request', () => {
-      return RequestBank.withdraw('pageTrackingUrl').then(req => {
+      return RequestBank.withdraw('pageTrackingUrl').then((req) => {
         const regex = /^\/track\.php\?data=([^&]*)&?.*$/;
         const match = regex.exec(req.url);
 
@@ -95,7 +99,7 @@ describe.skip('amp-skimlinks', function() {
     });
 
     it('Should send the links impression tracking request', () => {
-      return RequestBank.withdraw('linksTrackingUrl').then(req => {
+      return RequestBank.withdraw('linksTrackingUrl').then((req) => {
         const regex = /^\/link\?data=([^&]*)&?.*$/;
         const match = regex.exec(req.url);
 
@@ -116,10 +120,7 @@ describe.skip('amp-skimlinks', function() {
 
     // TODO(alanorozco): Unskip on firefox
     const itSkipFirefox = (desc, cb) =>
-      it
-        .configure()
-        .skipFirefox()
-        .run(desc, cb);
+      it.configure().skipFirefox().run(desc, cb);
 
     // TODO(alanorozco): Unskip on firefox
     itSkipFirefox('should send NA-tracking on non-merchant link click ', () => {
@@ -127,7 +128,7 @@ describe.skip('amp-skimlinks', function() {
       return browser.wait(500).then(() => {
         clickLinkAndNavigate('#non-merchant-link');
 
-        return RequestBank.withdraw('nonAffiliateTrackingUrl').then(req => {
+        return RequestBank.withdraw('nonAffiliateTrackingUrl').then((req) => {
           const regex = /^\/\?call=track&data=([^&]*)&?.*$/;
           const match = regex.exec(req.url);
           expect(match).to.have.lengthOf(2);
@@ -145,7 +146,7 @@ describe.skip('amp-skimlinks', function() {
       // Give 500ms for amp-skimlinks to set up.
       return browser.wait(500).then(() => {
         clickLinkAndNavigate('#merchant-link');
-        return RequestBank.withdraw('waypointUrl').then(req => {
+        return RequestBank.withdraw('waypointUrl').then((req) => {
           // Remove "/?" in the url.
           const queryString = req.url.slice(2);
           const queryParams = parseQueryString(queryString);
@@ -181,7 +182,7 @@ describe.skip('amp-skimlinks', function() {
   // injected (similar to live environment).
   // Since the JSON config is not set we can not use the proxy and
   // therefore can only test a small subset of features.
-  describes.integration('Works without test config', setupNoConfig, env => {
+  describes.integration('Works without test config', setupNoConfig, (env) => {
     let browser = null;
 
     beforeEach(() => {
@@ -228,7 +229,7 @@ describe.skip('amp-skimlinks', function() {
         </div>
     `,
   };
-  describes.integration('Affiliate unknown links', setupUnknownLinks, env => {
+  describes.integration('Affiliate unknown links', setupUnknownLinks, (env) => {
     let browser = null;
 
     beforeEach(() => {

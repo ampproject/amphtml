@@ -36,7 +36,7 @@ describes.repeated(
         'getServiceForDoc'
       );
       getServiceForDocStub.returns({
-        hasCapability: unused => viewerCanRenderTemplates,
+        hasCapability: (unused) => viewerCanRenderTemplates,
       });
     });
 
@@ -58,14 +58,14 @@ describes.repeated(
       template = new AmpMustache(templateElement, window);
       isTemplateTypeScript = templateType == 'script';
       isTemplateType = templateType == 'template';
-      textContentSetup = contents => {
+      textContentSetup = (contents) => {
         if (isTemplateType) {
           templateElement.content.textContent = contents;
         } else if (isTemplateTypeScript) {
           templateElement.textContent = contents;
         }
       };
-      innerHtmlSetup = html => {
+      innerHtmlSetup = (html) => {
         if (isTemplateType) {
           templateElement./*OK*/ innerHTML = html;
         } else if (isTemplateTypeScript) {
@@ -433,7 +433,7 @@ describes.repeated(
       }
 
       // Need to test this since DOMPurify doesn't have an required-attribute
-      // tag whitelist API. Instead, we hack around it with custom hooks.
+      // tag allowlist API. Instead, we hack around it with custom hooks.
       it('should not allow unsupported templates after a supported one', () => {
         const html =
           '1<template type="amp-mustache">2</template>3<template>' +

@@ -142,7 +142,7 @@ export function getIframe(
   iframe.setAttribute('scrolling', 'no');
   setStyle(iframe, 'border', 'none');
   /** @this {!Element} */
-  iframe.onload = function() {
+  iframe.onload = function () {
     // Chrome does not reflect the iframe readystate.
     this.readyState = 'complete';
   };

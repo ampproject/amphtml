@@ -42,7 +42,7 @@ const returnFocusToInput = 'Return to the date input field.';
  * @param {!JsonObject} obj
  * @return {string}
  */
-const chooseAvailableStartDate = obj => {
+const chooseAvailableStartDate = (obj) => {
   return `Choose ${obj['date']} as the first date.`;
 };
 
@@ -50,7 +50,7 @@ const chooseAvailableStartDate = obj => {
  * @param {!JsonObject} obj
  * @return {string}
  */
-const chooseAvailableEndDate = obj => {
+const chooseAvailableEndDate = (obj) => {
   return `Choose ${obj['date']} as the last date.`;
 };
 
@@ -58,7 +58,7 @@ const chooseAvailableEndDate = obj => {
  * @param {!JsonObject} obj
  * @return {string}
  */
-const chooseAvailableDate = obj => {
+const chooseAvailableDate = (obj) => {
   return obj['date'];
 };
 
@@ -66,7 +66,7 @@ const chooseAvailableDate = obj => {
  * @param {!JsonObject} obj
  * @return {string}
  */
-const dateIsUnavailable = obj => {
+const dateIsUnavailable = (obj) => {
   return `Not available. ${obj['date']}`;
 };
 

@@ -26,7 +26,7 @@ import {
   calculateTargetScalingFactor,
   targetFitsWithinPage,
 } from '../animation-presets-utils';
-import {getPresetDef} from '../animation-presets';
+import {presets} from '../animation-presets';
 import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin(
@@ -37,7 +37,7 @@ describes.realWin(
       extensions: ['amp-story:1.0'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let storyEl;
     let ampStory;
@@ -53,28 +53,28 @@ describes.realWin(
       const viewer = Services.viewerForDoc(env.ampdoc);
       env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
 
-      registerServiceBuilder(win, 'performance', function() {
+      registerServiceBuilder(win, 'performance', function () {
         return {
           isPerformanceTrackingOn: () => false,
         };
       });
 
+      const localizationService = new LocalizationService(win.document.body);
+      env.sandbox
+        .stub(Services, 'localizationForDoc')
+        .returns(localizationService);
+
       const storeService = new AmpStoryStoreService(win);
-      registerServiceBuilder(win, 'story-store', function() {
+      registerServiceBuilder(win, 'story-store', function () {
         return storeService;
       });
 
       storyEl = win.document.createElement('amp-story');
       win.document.body.appendChild(storyEl);
 
-      const localizationService = new LocalizationService(win);
-      registerServiceBuilder(win, 'localization', function() {
-        return localizationService;
-      });
-
       AmpStory.isBrowserSupported = () => true;
 
-      return storyEl.getImpl().then(impl => {
+      return storyEl.getImpl().then((impl) => {
         ampStory = impl;
       });
     });
@@ -113,6 +113,10 @@ describes.realWin(
       const img = win.document.createElement('amp-img');
       img.setAttribute('animate-in', animationName);
       img.setAttribute('layout', 'fill');
+
+      env.sandbox
+        .stub(img, 'signals')
+        .callsFake({whenSignal: () => Promise.resolve()});
 
       const gridLayer = win.document.createElement('amp-story-grid-layer');
       opt_gridLayerTempalate = opt_gridLayerTempalate.length
@@ -242,8 +246,11 @@ describes.realWin(
       const factor = factorThatWillMakeTargetFitPage * 1.25;
       expect(calculateTargetScalingFactor(dimensions)).to.equal(factor);
 
-      const calculatedKeyframes = getPresetDef('pan-up', {});
-      calculatedKeyframes.keyframes = calculatedKeyframes.keyframes(dimensions);
+      const calculatedKeyframes = presets['pan-up'];
+      calculatedKeyframes.keyframes = calculatedKeyframes.keyframes(
+        dimensions,
+        /* options */ {}
+      );
 
       const offsetX = -dimensions.targetWidth / 2;
       const offsetY = dimensions.pageHeight - dimensions.targetHeight;

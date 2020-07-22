@@ -68,6 +68,9 @@ const strings = {
   [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS]: {
     string: 'Tip 1/2',
   },
+  [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS_SINGLE]: {
+    string: 'Tip',
+  },
   [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_INSTRUCTIONS]: {
     string: 'Tap to go to the next screen',
   },
@@ -76,6 +79,18 @@ const strings = {
   },
   [LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT]: {
     string: 'Updated',
+  },
+  [LocalizedStringId.AMP_STORY_QUIZ_ANSWER_CHOICE_A]: {
+    string: 'A',
+  },
+  [LocalizedStringId.AMP_STORY_QUIZ_ANSWER_CHOICE_B]: {
+    string: 'B',
+  },
+  [LocalizedStringId.AMP_STORY_QUIZ_ANSWER_CHOICE_C]: {
+    string: 'C',
+  },
+  [LocalizedStringId.AMP_STORY_QUIZ_ANSWER_CHOICE_D]: {
+    string: 'D',
   },
   [LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT]: {
     string: ':(',

@@ -46,6 +46,7 @@ function initMasterFrame(data, global) {
     tn: 'amp',
     amp: true,
     consent: consent ? 1 : 0,
+    siteid: Number(data['siteid']) || undefined,
   };
   global['__ATA'] = global['__ATA'] || {};
   global['__ATA']['cmd'] = global['__ATA']['cmd'] || [];
@@ -87,7 +88,7 @@ export function pubmine(global, data) {
     initMasterFrame(data, global);
   }
   const master = isMaster ? global : global.context.master;
-  master['__ATA']['cmd']['push'](function() {
+  master['__ATA']['cmd']['push'](function () {
     master['__ATA']['insertStyles'](global);
     master['__ATA']['initSlot'](slotId, slotConfig);
   });

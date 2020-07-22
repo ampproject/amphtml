@@ -43,7 +43,7 @@ function enableYield(fn, message, runnable) {
   ) {
     return fn(message, runnable);
   }
-  return fn(message, done => {
+  return fn(message, (done) => {
     const iterator = runnable();
     function step(method, result) {
       let state;

@@ -55,7 +55,7 @@ const SUPPORTED_CSS_GRID_ATTRIBUTES = {
 const SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR = Object.keys(
   SUPPORTED_CSS_GRID_ATTRIBUTES
 )
-  .map(key => `[${key}]`)
+  .map((key) => `[${key}]`)
   .join(',');
 
 /**
@@ -171,7 +171,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   }
 
   /**
-   * Copies the whitelisted CSS grid styles for descendants of the
+   * Copies the allowlisted CSS grid styles for descendants of the
    * <amp-story-grid-layer> element.
    * @private
    */
@@ -181,13 +181,13 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
       SUPPORTED_CSS_GRID_ATTRIBUTES_SELECTOR
     );
 
-    Array.prototype.forEach.call(elementsToUpgradeStyles, element => {
+    Array.prototype.forEach.call(elementsToUpgradeStyles, (element) => {
       this.setCssGridStyles_(element);
     });
   }
 
   /**
-   * Copies the whitelisted CSS grid styles for the <amp-story-grid-layer>
+   * Copies the allowlisted CSS grid styles for the <amp-story-grid-layer>
    * element itself.
    * @private
    */
@@ -197,7 +197,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
 
   /**
    * Copies the values of an element's attributes to its styles, if the
-   * attributes/properties are in the whitelist.
+   * attributes/properties are in the allowlist.
    *
    * @param {!Element} element The element whose styles should be copied from
    *     its attributes.

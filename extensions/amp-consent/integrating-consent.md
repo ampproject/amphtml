@@ -14,7 +14,7 @@ To add your consent management service to AMP runtime, it is expected that you:
 - Meet the restrictions that the AMP runtime applies to ensure a good user experience. These includes
   - Enforce the size of the consent prompt. The only two allowed sizes are the initial size (`width: 100vw`, `height: 30vh`), and the full screen size (`width: 100vw`, `height: 100%`) after user interactions.
   - A default placeholder will be displayed before the consent prompt iframe is ready.
-  - Enforce the size of the stored consent information. 200 character length is the current limit. Please [file an issue](https://github.com/ampproject/amphtml/issues/new) if you find that not sufficient.
+  - Enforce the size of the stored consent information. 1200 character length including storage key, consent string and additional metadata is the limit. Please [file an issue](https://github.com/ampproject/amphtml/issues/new) if you find that not sufficient.
 - Understand that including `<amp-consent type='yourName'></amp-consent>` on the page won't block any components by default. **Please make sure to inform your service users to block AMP components either by the `<meta name="amp-consent-blocking">` metaTag, or the `data-block-on-consent` attribute.**
 - Understand that AMP Consent doesn't attempt to interpret the consent info string from the CMP. Vendors can access the consent info string from CMPs via [provided APIs](https://github.com/ampproject/amphtml/blob/master/ads/README.md#amp-consent-integration). It's up to the CMP and service provider vendors to agree on the format of the consent info string.
 - Create an [Intent-To-Implement issue](../../CONTRIBUTING.md#contributing-features) stating that you'll be adding support to your CMP service to AMP. A great start point is to follow the `_ping_` CMP service implementation that the AMP team creates for testing purpose.
@@ -87,6 +87,7 @@ window.parent.postMessage(
     type: 'consent-response',
     action: 'accept',
     info: /string/ /* optional */,
+    consentMetadata: /object/ /* optional */,
   },
   '*'
 );
@@ -102,6 +103,7 @@ window.parent.postMessage(
     type: 'consent-response',
     action: 'reject',
     info: /string/ /* optional */,
+    consentMetadata: /object/ /* optional */,
   },
   '*'
 );
@@ -142,6 +144,18 @@ One can get access to the client information via the name attribute inside the i
  * };
  */
 info = JSON.parse(window.name);
+```
+
+#### consentMetadata
+
+`<amp-consent>` [caches](./amp-consent.md#Client-caching) and passes consent information to vendors via `consentMetadata` objects as well as a non-empty `consentString`. You can find and example of the `consentMetadata` object and its supported fields below.
+
+```
+{
+  "consentStringType": {enum} [1: TCF V1, 2: TCF V2, 3: US Privacy String] (optional),
+  "gdprApplies": {boolean} (optional),
+  "additionalConsent": {string} (optional)
+}
 ```
 
 ## Adding your configuration to AMP

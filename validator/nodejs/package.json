@@ -1,6 +1,6 @@
 {
   "name": "amphtml-validator",
-  "version": "1.0.30",
+  "version": "1.0.31",
   "description": "Official validator for AMP HTML (www.ampproject.org)",
   "keywords": [
     "AMP",
@@ -16,7 +16,7 @@
     "url": "https://github.com/ampproject/amphtml/tree/master/validator/nodejs/"
   },
   "bin": {
-    "amphtml-validator": "index.js"
+    "amphtml-validator": "./cli.js"
   },
   "dependencies": {
     "colors": "1.2.5",
@@ -24,6 +24,6 @@
     "promise": "8.0.1"
   },
   "devDependencies": {
-    "jasmine": "3.1.0"
+    "jasmine": "3.5.0"
   }
 }

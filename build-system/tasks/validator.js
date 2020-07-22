@@ -27,14 +27,20 @@ if (argv.update_tests) {
  * Simple wrapper around the python based validator build.
  */
 async function validator() {
-  execOrDie('cd validator && python build.py' + validatorArgs);
+  execOrDie('python build.py' + validatorArgs, {
+    cwd: 'validator',
+    stdio: 'inherit',
+  });
 }
 
 /**
  * Simple wrapper around the python based validator webui build.
  */
 async function validatorWebui() {
-  execOrDie('cd validator/webui && python build.py' + validatorArgs);
+  execOrDie('python build.py' + validatorArgs, {
+    cwd: 'validator/webui',
+    stdio: 'inherit',
+  });
 }
 
 module.exports = {

@@ -15,7 +15,7 @@
  */
 
 // Ensure comments in minified build output is minimal.
-module.exports = function() {
+module.exports = function () {
   return {
     visitor: {
       Statement(path) {
@@ -31,7 +31,7 @@ module.exports = function() {
         }
 
         node.trailingComments = null;
-        const formattedComments = (trailingComments || []).map(comment => ({
+        const formattedComments = (trailingComments || []).map((comment) => ({
           ...comment,
           value: comment.value.replace(/\n +/g, `\n`),
         }));

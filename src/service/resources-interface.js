@@ -181,8 +181,13 @@ export class ResourcesInterface {
   /**
    * https://github.com/ampproject/amphtml/issues/25428
    * @return {boolean}
-   * @package
    */
   isIntersectionExperimentOn() {}
+
+  /**
+   * Returns the percent of resources that were laid out after entering viewport.
+   * @return {number}
+   */
+  getSlowElementRatio() {}
 }
 /* eslint-enable no-unused-vars */

@@ -22,7 +22,7 @@ describes.endtoend(
     // TODO(powerivq): Reenable for all environments
     environments: 'amp4ads-preset',
   },
-  env => {
+  (env) => {
     let controller;
 
     beforeEach(async () => {

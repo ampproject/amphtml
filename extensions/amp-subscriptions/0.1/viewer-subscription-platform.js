@@ -17,7 +17,7 @@
 import {ENTITLEMENTS_REQUEST_TIMEOUT} from './constants';
 import {Entitlement, GrantReason} from './entitlement';
 import {JwtHelper} from '../../amp-access/0.1/jwt';
-import {PageConfig} from '../../../third_party/subscriptions-project/config';
+import {PageConfig as PageConfigInterface} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -42,7 +42,7 @@ export class ViewerSubscriptionPlatform {
     /** @private @const */
     this.serviceAdapter_ = serviceAdapter;
 
-    /** @private @const {!PageConfig} */
+    /** @private @const {!PageConfigInterface} */
     this.pageConfig_ = serviceAdapter.getPageConfig();
 
     /** @private @const {!./subscription-platform.SubscriptionPlatform} */
@@ -116,15 +116,16 @@ export class ViewerSubscriptionPlatform {
         ENTITLEMENTS_REQUEST_TIMEOUT,
         this.viewer_.sendMessageAwaitResponse('auth', authRequest)
       )
-      .then(entitlementData => {
+      .then((entitlementData) => {
         entitlementData = entitlementData || {};
 
-        const error = entitlementData['error'];
+        /** Note to devs: Send error at top level of postMessage instead. */
+        const deprecatedError = entitlementData['error'];
         const authData = entitlementData['authorization'];
         const decryptedDocumentKey = entitlementData['decryptedDocumentKey'];
 
-        if (error) {
-          throw new Error(error.message);
+        if (deprecatedError) {
+          throw new Error(deprecatedError.message);
         }
 
         if (!authData) {
@@ -132,7 +133,7 @@ export class ViewerSubscriptionPlatform {
         }
 
         return this.verifyAuthToken_(authData, decryptedDocumentKey).catch(
-          reason => {
+          (reason) => {
             this.sendAuthTokenErrorToViewer_(reason.message);
             throw reason;
           }
@@ -148,7 +149,7 @@ export class ViewerSubscriptionPlatform {
    * @private
    */
   verifyAuthToken_(token, decryptedDocumentKey) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const origin = getWinOrigin(this.ampdoc_.win);
       const sourceOrigin = getSourceOrigin(this.ampdoc_.win.location);
       const decodedData = this.jwtHelper_.decode(token);
@@ -267,8 +268,8 @@ export class ViewerSubscriptionPlatform {
   }
 
   /** @override */
-  executeAction(action) {
-    return this.platform_.executeAction(action);
+  executeAction(action, sourceId) {
+    return this.platform_.executeAction(action, sourceId);
   }
 
   /** @override */
@@ -284,14 +285,4 @@ export class ViewerSubscriptionPlatform {
   subscriptionChange_() {
     this.serviceAdapter_.resetPlatforms();
   }
-}
-
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package
- * @visibleForTesting
- * @return {*} TODO(#23582): Specify return type
- */
-export function getPageConfigClassForTesting() {
-  return PageConfig;
 }

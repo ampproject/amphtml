@@ -119,6 +119,11 @@ const strings = {
     description:
       'Label for a hint indicating progress on a multistep onboarding user education tutorial.',
   },
+  [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS_SINGLE]: {
+    string: 'Tip',
+    description:
+      'Label for a hint in the context of an onboarding user education tutorial.',
+  },
   [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_INSTRUCTIONS]: {
     string: 'Tap to go to the next screen',
     description:
