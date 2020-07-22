@@ -71,11 +71,11 @@ export function SocialShare(props) {
 }
 
 /**
- * If the specified type can have children and children exist return children.
- * Otherwise return the default icon for the specified type.  If the specified
- * type can have its color / background changed, set those to color /
- * background specified in props, otherwise use defaults, or do not set if
- * defaults do not exist.
+ * If the specified type 'canCustomize' (see config file), allow children
+ * to be rendered and color / background to be passed in via props.  If the
+ * specified type cannot be customized (canCustomize = false), children
+ * will not be rendered and color / background will always be set to default
+ * values.
  * @param {!JsonObject} props
  * @param {JsonObject} size
  * @return {PreactDef.Renderable}
