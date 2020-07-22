@@ -81,6 +81,13 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.mounted_ = true;
+
+    /** @private {MutationObserver|null} */
+    this.observer_ = this.constructor['passthroughNonEmpty']
+      ? new MutationObserver(
+          this.constructor['passthroughNonEmpty']['callback'].bind(this)
+        )
+      : null;
   }
 
   /**
@@ -121,7 +128,22 @@ export class PreactBaseElement extends AMP.BaseElement {
     this.context_.renderable = true;
     this.context_.playable = true;
     this.scheduleRender_();
+    if (this.observer_) {
+      this.observer_.observe(
+        this.element,
+        this.constructor['passthroughNonEmpty']['options']
+      );
+    }
     return deferred.promise;
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.observer_) {
+      this.observer_.disconnect();
+      return true;
+    }
+    return false;
   }
 
   /** @override */
@@ -259,16 +281,23 @@ PreactBaseElement['className'] = '';
 PreactBaseElement['passthrough'] = false;
 
 /**
- * Handling children with passthroughNonEmpty mode is the same as passthrough
+ * Handling children with passthroughNonEmpty mode is similar to passthrough
  * mode except that when there are no children elements, the returned
  * prop['children'] will be null instead of the unnamed <slot>.  This allows
  * the Preact environment to have conditional behavior depending on whether
- * or not there are children.  Consider using a Mutation Observer in your
- * component for detailed control of rerender when children are updated.
+ * or not there are children.
  *
- * @protected {boolean}
+ * The base-element provides support for a mutation observer when using
+ * passthroughNonEmpty.  Provide the following two properties in an object
+ *  - callback: This will be called when a mutation is observed.  Use an
+ *      anonymous function (not an arrow function) if the callback references
+ *      other methods within this class.
+ *  - options: Specify the types of mutations to observe.  More information:
+ *      https://developer.mozilla.org/en-US/docs/Web/API/MutationObserverInit
+ *
+ * @protected {JsonObject|null}
  */
-PreactBaseElement['passthroughNonEmpty'] = false;
+PreactBaseElement['passthroughNonEmpty'] = null;
 
 /**
  * Enabling detached mode alters the children to be rendered in an

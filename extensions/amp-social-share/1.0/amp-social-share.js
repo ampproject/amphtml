@@ -73,16 +73,6 @@ const systemShareSupported = (viewer, platform) => {
 
 class AmpSocialShare extends PreactBaseElement {
   /** @override */
-  constructor(element) {
-    super(element);
-
-    /** @private {MutationObserver} */
-    this.observer_ = new MutationObserver(() => {
-      this.scheduleRender_();
-    });
-  }
-
-  /** @override */
   init() {
     const viewer = Services.viewerForDoc(this.element);
     const platform = Services.platformFor(window);
@@ -116,20 +106,6 @@ class AmpSocialShare extends PreactBaseElement {
       isExperimentOn(this.win, 'amp-social-share-bento'),
       'expected amp-social-share-bento experiment to be enabled'
     );
-    return true;
-  }
-
-  /** @override */
-  layoutCallback() {
-    this.observer_.observe(this.element, {
-      childList: true,
-      characterData: true,
-    });
-  }
-
-  /** @override */
-  unlayoutCallback() {
-    this.observer_.disconnect();
     return true;
   }
 
@@ -183,7 +159,15 @@ class AmpSocialShare extends PreactBaseElement {
 AmpSocialShare['Component'] = SocialShare;
 
 /** @override */
-AmpSocialShare['passthroughNonEmpty'] = true;
+AmpSocialShare['passthroughNonEmpty'] = dict({
+  'callback': function () {
+    this.scheduleRender_();
+  },
+  'options': {
+    'childList': true,
+    'characterData': true,
+  },
+});
 
 /** @override */
 AmpSocialShare['props'] = {
