@@ -311,6 +311,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       }
     }
 
+    function createStoryObjects(numberOfStories) {
+      return Array(numberOfStories).fill({href: DEFAULT_ORIGIN_URL});
+    }
+
     it('signals when its ready to be interacted with', async () => {
       buildStoryPlayer();
       const readySpy = env.sandbox.spy();
@@ -384,6 +388,89 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         'Story URL not found in the player: https://example.com/story6.html'
       );
     });
+
+    it('adds stories programmatically', async () => {
+      buildStoryPlayer(3);
+      await manager.loadPlayers();
+
+      const storyObjects = createStoryObjects(1);
+      playerEl.add(storyObjects);
+
+      const stories = playerEl.getStories();
+
+      expect(stories.length).to.eql(4);
+    });
+
+    it('throws an error if the add method is not passed an array', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+
+      return expect(() => playerEl.add(7)).to.throw(
+        '"stories" parameter has the wrong structure'
+      );
+    });
+
+    it('throws an error if the add method is passed an array with incorrectly structured story objects', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+
+      const wrongStoryObjects = [{notHref: true}];
+
+      return expect(() => playerEl.add(wrongStoryObjects)).to.throw(
+        '"stories" parameter has the wrong structure'
+      );
+    });
+
+    it('adds no stories when sending an empty array of new stories', async () => {
+      buildStoryPlayer(3);
+      await manager.loadPlayers();
+
+      const storyObjects = createStoryObjects(0);
+      playerEl.add(storyObjects);
+
+      const stories = playerEl.getStories();
+
+      expect(stories.length).to.eql(3);
+    });
+
+    it(
+      'creates and assigns iframes to added stories when there are ' +
+        'less than the maximum iframes set up',
+      async () => {
+        buildStoryPlayer();
+        await manager.loadPlayers();
+
+        const storyObjects = createStoryObjects(2);
+        playerEl.add(storyObjects);
+
+        const stories = playerEl.getStories();
+
+        expect(stories[0][IFRAME_IDX]).to.exist;
+        expect(stories[1][IFRAME_IDX]).to.exist;
+        expect(stories[2][IFRAME_IDX]).to.exist;
+      }
+    );
+
+    it(
+      'assigns an existing iframe to the first added story when the current ' +
+        'story is the last one, and the maximum number of iframes has been set up',
+      async () => {
+        buildStoryPlayer(3);
+        await manager.loadPlayers();
+        await nextTick();
+
+        swipeLeft();
+        swipeLeft();
+
+        const storyObjects = createStoryObjects(2);
+        playerEl.add(storyObjects);
+
+        const stories = playerEl.getStories();
+
+        expect(stories[3][IFRAME_IDX]).to.exist;
+        expect(stories[4][IFRAME_IDX]).to.not.exist;
+      }
+    );
 
     it('pauses programatically', async () => {
       buildStoryPlayer();
