@@ -39,6 +39,7 @@ import {dict, hasOwn} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {isInFie} from '../../../src/iframe-helper';
+import {parseQueryString} from '../../../src/url';
 import {toArray} from '../../../src/types';
 import {tryFocus} from '../../../src/dom';
 
@@ -199,6 +200,13 @@ class AmpLightbox extends AMP.BaseElement {
     this.registerAction('close', (i) => this.close(i.trust));
     /** If the element is in an email document, allow its `open` and `close` actions. */
     this.action_.addToAllowlist('AMP-LIGHTBOX', ['open', 'close'], ['email']);
+
+    if (
+      this.element.hasAttribute('data-allow-open-via-url') &&
+      parseQueryString(this.win.location.hash)['open'] == this.element.id
+    ) {
+      this.open_(ActionTrust.HIGH, null);
+    }
   }
 
   /**
