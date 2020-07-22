@@ -1123,4 +1123,16 @@ export class AmpStoryPlayer {
     const {screenX: x, screenY: y} = touches[0];
     return {x, y};
   }
+
+  /**
+   * @param {*} isAutoplaying
+   */
+  toggleAutoplayMode_(isAutoplaying) {
+    this.isAutoplaying_ = isAutoplaying;
+    isAutoplaying
+      ? this.element_.setAttribute('autoplay', '')
+      : this.element_.removeAttribute('autoplay');
+
+    // TODO: Include call to update embedMode of current story
+  }
 }
