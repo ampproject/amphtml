@@ -729,6 +729,10 @@ interval. Use `timerSpec` to control when this will fire.
   will be infinity.
 - `immediate` trigger timer immediately or not. Boolean, defaults to true
 
+[tip type="note"]
+If `maxTimerLength` has not been defined, the trigger will continue to send out pings until the page is fully closed (and not just hidden).
+[/tip]
+
 See the following example:
 
 ```json
