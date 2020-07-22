@@ -2860,6 +2860,10 @@ AMP.extension('amp-story', '1.0', (AMP) => {
     'amp-story-interactive-results',
     AmpStoryInteractiveResults
   );
+  AMP.registerElement(
+    'amp-story-interactive-binary-poll',
+    AmpStoryInteractiveBinaryPoll
+  );
   AMP.registerElement('amp-story-interactive-poll', AmpStoryInteractivePoll);
   AMP.registerElement('amp-story-interactive-quiz', AmpStoryInteractiveQuiz);
   AMP.registerElement(
