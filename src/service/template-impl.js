@@ -124,10 +124,10 @@ export class BaseTemplate {
    * element contents are unwrapped as an array of elements. Any text node
    * children are normalized inside a <div>.
    * @param {!Element} root
-   * @return {!Array<!Element>}
+   * @return {!Element|!Array<!Element>}
    * @protected @final
    */
-  unwrapAsArray(root) {
+  forceUnwrap(root) {
     const elements = [];
     for (let n = root.firstChild; n != null; n = n.nextSibling) {
       if (n.nodeType == /* TEXT */ 3) {
@@ -143,7 +143,7 @@ export class BaseTemplate {
         elements.push(dev().assertElement(n));
       }
     }
-    return elements;
+    return elements.length === 1 ? elements[0] : elements;
   }
 
   /**

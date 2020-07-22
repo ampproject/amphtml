@@ -607,6 +607,14 @@ describes.repeated(
         expect(result./*OK*/ innerHTML).to.equal('abc');
       });
 
+      it('should be undefined for singular text node output', () => {
+        templateElement./*OK*/ innerHTML = 'abc';
+        template.compileCallback();
+        const result = template.setHtml('abc');
+        expect(result.tagName).to.equal('DIV');
+        expect(result./*OK*/ innerHTML).to.equal('abc');
+      });
+
       it('should unwrap output with many elements', () => {
         templateElement./*OK*/ innerHTML = '<a>abc</a><a>def</a>';
         template.compileCallback();
