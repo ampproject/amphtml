@@ -309,8 +309,10 @@ export class AmpStoryPlayer {
     iframeEl.classList.add('story-player-iframe');
     this.iframes_.push(iframeEl);
 
-    applySandbox(iframeEl);
-    this.addSandboxFlags_(iframeEl);
+    if (typeof __AMP_VISUAL_TEST === 'undefined') {
+      applySandbox(iframeEl);
+      this.addSandboxFlags_(iframeEl);
+    }
     this.initializeLoadingListeners_(iframeEl);
     this.rootEl_.appendChild(iframeEl);
   }
