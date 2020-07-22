@@ -27,7 +27,7 @@ var BaseCarouselDef = {};
  *   defaultSlide: (number|undefined),
  *   loop: (boolean|undefined),
  *   slide: (number|undefined),
- *   onMount: (function():undefined|undefined),
+ *   onMount_: (function():undefined|undefined),
  *   onSlideChange: (function(number):undefined|undefined),
  *   setAdvance: (function(function(number):undefined):undefined|undefined),
  * }}
@@ -37,7 +37,7 @@ BaseCarouselDef.Props;
 /**
  * @typedef {{
  *   children: !Array<PreactDef.Renderable>,
- *   ignoreProgrammaticScroll: {current: (boolean|null)},
+ *   ignoreProgrammaticScrollRef: {current: (boolean|null)},
  *   loop: (boolean|undefined),
  *   restingIndex: number,
  *   setRestingIndex: (function(number):undefined),

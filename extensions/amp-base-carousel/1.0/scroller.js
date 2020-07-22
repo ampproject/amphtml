@@ -38,7 +38,7 @@ const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
 export function Scroller(props) {
   const {
     children,
-    ignoreProgrammaticScroll,
+    ignoreProgrammaticScrollRef,
     loop,
     restingIndex,
     setRestingIndex,
@@ -73,13 +73,13 @@ export function Scroller(props) {
     }
     // TODO: We should use forwardRef to dedup scrollRef and containerRef.
     const container = (scrollRef.current = containerRef.current);
-    ignoreProgrammaticScroll.current = true;
+    ignoreProgrammaticScrollRef.current = true;
     setStyle(container, 'scrollBehavior', 'auto');
     container./* OK */ scrollLeft = loop
       ? container./* OK */ offsetWidth * pivotIndex
       : container./* OK */ offsetWidth * restingIndex;
     setStyle(container, 'scrollBehavior', 'smooth');
-  }, [ignoreProgrammaticScroll, loop, restingIndex, pivotIndex, scrollRef]);
+  }, [ignoreProgrammaticScrollRef, loop, restingIndex, pivotIndex, scrollRef]);
 
   // Trigger render by setting the resting index to the current scroll state.
   const debouncedResetScrollReferencePoint = useMemo(
@@ -116,8 +116,8 @@ export function Scroller(props) {
   };
 
   const handleScroll = () => {
-    if (ignoreProgrammaticScroll.current) {
-      ignoreProgrammaticScroll.current = false;
+    if (ignoreProgrammaticScrollRef.current) {
+      ignoreProgrammaticScrollRef.current = false;
       return;
     }
     updateCurrentIndex();

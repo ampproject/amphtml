@@ -32,7 +32,7 @@ export function BaseCarousel(props) {
     loop,
     slide,
     onSlideChange,
-    onMount,
+    onMount_,
     setAdvance,
     ...rest
   } = props;
@@ -40,7 +40,7 @@ export function BaseCarousel(props) {
   const {length} = childrenArray;
   const [curSlide, setCurSlide] = useState(defaultSlide || 0);
   const slideState = slide ?? curSlide;
-  const ignoreProgrammaticScroll = useRef(true);
+  const ignoreProgrammaticScrollRef = useRef(true);
   const advance = (dir) => {
     const container = scrollRef.current;
     // Modify scrollLeft is preferred to `setCurSlide` to enable smooth scroll.
@@ -48,8 +48,8 @@ export function BaseCarousel(props) {
     container./* OK */ scrollLeft += container./* OK */ offsetWidth * dir;
   };
   useMountEffect(() => {
-    if (onMount) {
-      onMount();
+    if (onMount_) {
+      onMount_();
     }
     if (setAdvance) {
       setAdvance(advance);
@@ -57,7 +57,7 @@ export function BaseCarousel(props) {
   });
 
   const setRestingIndex = (i) => {
-    ignoreProgrammaticScroll.current = true;
+    ignoreProgrammaticScrollRef.current = true;
     setCurSlide(i);
     if (onSlideChange) {
       onSlideChange(i);
@@ -69,7 +69,7 @@ export function BaseCarousel(props) {
   return (
     <div {...rest}>
       <Scroller
-        ignoreProgrammaticScroll={ignoreProgrammaticScroll}
+        ignoreProgrammaticScrollRef={ignoreProgrammaticScrollRef}
         loop={loop}
         restingIndex={slideState}
         setRestingIndex={setRestingIndex}
