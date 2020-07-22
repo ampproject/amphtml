@@ -882,7 +882,7 @@ amp-story .amp-video-eq,
   max-width: 400px !important;
   /* Properties overrideable by user */
   --interactive-accent-color: #005AF0;
-  --interactive-prompt-background-color: var(--interactive-accent-color);
+  --interactive-prompt-background: var(--interactive-accent-color);
   --interactive-prompt-text-color: white;
   --interactive-prompt-alignment: initial;
   /* Shared properties by interactives */
@@ -903,6 +903,7 @@ amp-story .amp-video-eq,
   --i-amphtml-interactive-animation-time: .3s !important;
   --i-amphtml-interactive-ease-out-curve: cubic-bezier(.3, 0, 0, 1) !important;
   --i-amphtml-interactive-animation-delay: 0s !important;
+  --i-amphtml-interactive-component-shadow: 0px 4px 12px rgba(60, 64, 67, 0.08), 0px 2px 4px rgba(60, 64, 67, 0.12);
 }
 
 .i-amphtml-story-interactive-component[theme="dark"] {
