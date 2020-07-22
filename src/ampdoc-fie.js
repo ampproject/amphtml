@@ -30,8 +30,8 @@ const EXPERIMENT_ID = 'ampdoc-fie';
  */
 const EXPERIMENT = {
   branch: EXPERIMENT_ID,
-  control: '21065001',
-  experiment: '21065002',
+  control: '21066823',
+  experiment: '21066824',
 };
 
 /**
