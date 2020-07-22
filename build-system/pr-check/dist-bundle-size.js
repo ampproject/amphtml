@@ -67,7 +67,7 @@ async function main() {
       timedExecOrDie('gulp update-packages');
 
       const process = timedExecWithError(
-        'gulp dist --fortesting --noextensions',
+        'gulp dist --fortesting --extensions=amp-story',
         FILENAME
       );
       if (process.error) {
