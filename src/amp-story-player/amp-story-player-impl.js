@@ -279,11 +279,21 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * @return {!Array<!HTMLAnchorElement>}
+   * @return {!Array<!{href: string, title: ?string, posterImage: ?string}>}
    * @public
    */
   getStories() {
-    return this.stories_;
+    // TODO: replace this with a proper conversion method when story objects are defined
+    const storyObjects = this.stories_.map((anchor) => {
+      return {
+        href: anchor.href,
+        title: anchor.textContent || undefined,
+        posterImage: anchor.getAttribute('data-poster-portrait-src'),
+        [IFRAME_IDX]: anchor[IFRAME_IDX],
+      };
+    });
+
+    return storyObjects;
   }
 
   /** @public */
