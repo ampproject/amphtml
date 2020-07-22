@@ -292,6 +292,7 @@ import {yahoofedads} from '../ads/yahoofedads';
 import {yahoojp} from '../ads/yahoojp';
 import {yahoonativeads} from '../ads/yahoonativeads';
 import {yandex} from '../ads/yandex';
+import {yektanet} from '../ads/yektanet';
 import {yengo} from '../ads/yengo';
 import {yieldbot} from '../ads/yieldbot';
 import {yieldmo} from '../ads/yieldmo';
@@ -348,6 +349,7 @@ const AMP_EMBED_ALLOWED = {
   whopainfeed: true,
   yahoofedads: true,
   yahoonativeads: true,
+  yektanet: true,
   zen: true,
   zergnet: true,
 };
@@ -603,6 +605,7 @@ register('yahoofedads', yahoofedads);
 register('yahoojp', yahoojp);
 register('yahoonativeads', yahoonativeads);
 register('yandex', yandex);
+register('yektanet', yektanet);
 register('yengo', yengo);
 register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
