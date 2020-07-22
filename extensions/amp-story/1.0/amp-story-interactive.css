@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-.i-amphtml-story-interactive-container {
+ .i-amphtml-story-interactive-container {
   font-family: 'Poppins', sans-serif !important;
 }
 
 .i-amphtml-story-interactive-container {
-  background: var(--interactive-prompt-background-color) !important;
+  background: var(--interactive-prompt-background) !important;
   border-radius: 32px !important;
 }
 
