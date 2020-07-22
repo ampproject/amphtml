@@ -604,7 +604,6 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       return expect(() => player.go(-1)).to.throw('Out of Story range.');
     });
 
-    //FAILS
     it('last story call to next_() is the first story', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
@@ -619,14 +618,13 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       playerEl.setAttribute('enable-circular-wrapping', true);
       player.go(4);
       player.next_();
-      expect(navigationSpy.firstCall.args[0].type).to.eql('navigation');
-      expect(navigationSpy.firstCall.args[0].detail).to.eql({
+      expect(navigationSpy.secondCall.args[0].type).to.eql('navigation');
+      expect(navigationSpy.secondCall.args[0].detail).to.eql({
         index: 0,
         remaining: 4,
       });
     });
 
-    //FAILS
     it('first story call to previous_() is the last story', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
@@ -647,7 +645,6 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       });
     });
 
-    //FAILS
     it('navigate to first story when last story is finished', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
@@ -662,14 +659,13 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       playerEl.setAttribute('enable-circular-wrapping', true);
       player.go(4);
       player.go(1);
-      expect(navigationSpy.firstCall.args[0].type).to.eql('navigation');
-      expect(navigationSpy.firstCall.args[0].detail).to.eql({
+      expect(navigationSpy.secondCall.args[0].type).to.eql('navigation');
+      expect(navigationSpy.secondCall.args[0].detail).to.eql({
         index: 0,
         remaining: 4,
       });
     });
 
-    //FAILS
     it('navigate to last story when first story is requested to go back', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
