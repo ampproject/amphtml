@@ -1239,6 +1239,19 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'yektanet': {
+    preconnect: [
+      'https://cdn.yektanet.com',
+      'https://cg-sc.yektanet.com',
+      'https://native.yektanet.com',
+      'https://nfetch.yektanet.net',
+      'https://rfetch.yektanet.net',
+      'https://scrapper.yektanet.com',
+      'https://ua.yektanet.com',
+    ],
+    renderStartImplemented: true,
+  },
+
   'yengo': {
     renderStartImplemented: true,
   },

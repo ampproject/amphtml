@@ -466,6 +466,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 - [Yahoo](../../ads/yahoo.md)
 - [YahooJP](../../ads/yahoojp.md)
 - [Yandex](../../ads/yandex.md)
+- [Yektanet](../../ads/yektanet.md)
 - [Yengo](../../ads/yengo.md)
 - [Yieldbot](../../ads/yieldbot.md)
 - [Yieldmo](../../ads/yieldmo.md)
