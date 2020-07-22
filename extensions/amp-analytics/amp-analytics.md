@@ -730,7 +730,7 @@ interval. Use `timerSpec` to control when this will fire.
 - `immediate` trigger timer immediately or not. Boolean, defaults to true
 
 [tip type="note"]
-If `maxTimerLength` has not been defined, the trigger will continue to send out pings until the page is fully closed (and not just hidden).
+The timer trigger will continue to send out requests regardless of document state (inactive or hidden), until the `maxTimerLength` has been reached or `stopSpec` has been met. In the case of no `startSpec`, the `maxTimerLength` will default to infinity.
 [/tip]
 
 See the following example:
@@ -779,7 +779,34 @@ To configure a timer which times user events use:
 
 See the spec on [triggers](#triggers) for details on creating nested timer
 triggers. Note that using a timer trigger to start or stop a timer is not
-allowed.
+allowed. Please refer to the examples below on how to configure triggers based on a documents `hidden` and `visible` events.
+
+```json
+"triggers": {
+  "stopOnHiddenTimer": {
+    "on": "timer",
+    "timerSpec": {
+      "interval": 5,
+      "stopSpec": {
+        "on": "hidden",
+        "selector": ":root"
+      }
+    },
+    "request": "timerRequest"
+  },
+  "stopOnVisibleTimer": {
+    "on": "timer",
+    "timerSpec": {
+      "interval": 5,
+      "stopSpec": {
+        "on": "visible",
+        "selector": ":root"
+      }
+    },
+    "request": "timerRequest"
+  }
+}
+```
 
 ###### `"on": "visible"` trigger
 
