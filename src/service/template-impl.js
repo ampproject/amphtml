@@ -70,7 +70,7 @@ export class BaseTemplate {
    * Bypasses template rendering and directly sets HTML. Should only be used
    * for server-side rendering case. To be implemented by subclasses.
    * @param {string} unusedData
-   * @return {!Element}
+   * @return {!Element|!Array<Element>}
    */
   setHtml(unusedData) {
     throw new Error('Not implemented');
@@ -120,6 +120,33 @@ export class BaseTemplate {
   }
 
   /**
+   * Helps the template implementation to unwrap the root element. The root
+   * element contents are unwrapped as an array of elements. Any text node
+   * children are normalized inside a <div>.
+   * @param {!Element} root
+   * @return {!Array<!Element>}
+   * @protected @final
+   */
+  unwrapAsArray(root) {
+    const elements = [];
+    for (let n = root.firstChild; n != null; n = n.nextSibling) {
+      if (n.nodeType == /* TEXT */ 3) {
+        const content = n.textContent.trim();
+        if (content) {
+          const element = this.win.document.createElement('div');
+          element.textContent = content;
+          elements.push(element);
+        }
+      } else if (n.nodeType == /* COMMENT */ 8) {
+        // Ignore comments.
+      } else if (n.nodeType == /* ELEMENT */ 1) {
+        elements.push(dev().assertElement(n));
+      }
+    }
+    return elements;
+  }
+
+  /**
    * @protected @final
    * @return {boolean}
    */
@@ -154,7 +181,7 @@ export class Templates {
    * Inserts the specified template element.
    * @param {!Element} templateElement
    * @param {string} html
-   * @return {!Promise<!Element>}
+   * @return {!Promise<(!Element|!Array<!Element>)>}
    */
   setHtmlForTemplate(templateElement, html) {
     return this.getImplementation_(templateElement).then((impl) => {
@@ -217,7 +244,7 @@ export class Templates {
    * @param {!Element} parent
    * @param {string} html
    * @param {string=} opt_querySelector
-   * @return {!Promise<!Element>}
+   * @return {!Promise<(!Element|!Array<!Element>)>}
    */
   findAndSetHtmlForTemplate(parent, html, opt_querySelector) {
     return this.setHtmlForTemplate(
@@ -388,7 +415,7 @@ export class Templates {
   /**
    * @param {!BaseTemplate} impl
    * @param {string} html
-   * @return {!Element}
+   * @return {!Element|!Array<!Element>}
    * @private
    */
   setHtml_(impl, html) {

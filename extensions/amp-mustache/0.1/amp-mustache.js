@@ -113,7 +113,10 @@ export class AmpMustache extends BaseTemplate {
 
   /** @override */
   setHtml(html) {
-    return this.serializeHtml_(html);
+    const wrapped = `<div>${html}</div>`;
+    const serialized = this.serializeHtml_(wrapped);
+    const unwrapped = this.unwrap(serialized);
+    return unwrapped == serialized ? this.unwrapAsArray(serialized) : unwrapped;
   }
 
   /** @override */

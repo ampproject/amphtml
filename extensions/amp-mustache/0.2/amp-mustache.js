@@ -116,7 +116,10 @@ export class AmpMustache extends BaseTemplate {
 
   /** @override */
   setHtml(html) {
-    return this.purifyAndSetHtml_(html);
+    const wrapped = `<div>${html}</div>`;
+    const purified = this.purifyAndSetHtml_(wrapped);
+    const unwrapped = this.unwrap(purified);
+    return unwrapped == purified ? this.unwrapAsArray(purified) : unwrapped;
   }
 
   /** @override */
