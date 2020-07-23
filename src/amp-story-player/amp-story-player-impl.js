@@ -734,33 +734,38 @@ export class AmpStoryPlayer {
     if (storyDelta === 0) {
       return;
     }
-    if (this.element_.getAttribute('enable-circular-wrapping') !== 'true') {
-      if (this.isIndexOutofBounds_(storyDelta)) {
-        throw new Error('Out of Story range.');
-      }
+    if (
+      this.element_.getAttribute('enable-circular-wrapping') !== 'true' &&
+      this.isIndexOutofBounds_(storyDelta)
+    ) {
+      throw new Error('Out of Story range.');
+    }
+    if (!this.isIndexOutofBounds_(storyDelta)) {
       const currentStory = this.stories_[this.currentIdx_ + storyDelta];
       this.show(currentStory.href);
       this.signalNavigation_();
       return;
     }
-    if (this.element_.getAttribute('enable-circular-wrapping') === 'true') {
-      if (this.isIndexOutofBounds_(storyDelta) && storyDelta > 0) {
-        const currentStory = this.stories_[
-          this.currentIdx_ + storyDelta - this.stories_.length
-        ];
-        this.show(currentStory.href);
-        this.signalNavigation_();
-        return;
-      }
-      if (this.isIndexOutofBounds_(storyDelta) && storyDelta < 0) {
-        const currentStory = this.stories_[
-          this.currentIdx_ + storyDelta + this.stories_.length
-        ];
-        this.show(currentStory.href);
-        this.signalNavigation_();
-        return;
-      }
-      const currentStory = this.stories_[this.currentIdx_ + storyDelta];
+    if (
+      this.element_.getAttribute('enable-circular-wrapping') === 'true' &&
+      this.isIndexOutofBounds_(storyDelta) &&
+      storyDelta > 0
+    ) {
+      const currentStory = this.stories_[
+        this.currentIdx_ + storyDelta - this.stories_.length
+      ];
+      this.show(currentStory.href);
+      this.signalNavigation_();
+      return;
+    }
+    if (
+      this.element_.getAttribute('enable-circular-wrapping') === 'true' &&
+      this.isIndexOutofBounds_(storyDelta) &&
+      storyDelta < 0
+    ) {
+      const currentStory = this.stories_[
+        this.currentIdx_ + storyDelta + this.stories_.length
+      ];
       this.show(currentStory.href);
       this.signalNavigation_();
       return;
