@@ -3434,6 +3434,7 @@ tags {  # <form method=GET ...>
     value: "show-first-on-submit"
   }
   attrs: { name: "enctype" }
+  attrs: { name: "xssi-prefix" }
   attrs: {
     name: "method"
     # Default value is GET, so if method attribute is missing,
