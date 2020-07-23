@@ -19,9 +19,10 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
+import {Deferred} from '../../../../src/utils/promise';
 import * as experiments from '../../../../src/experiments';
 import {AD_SIZE_OPTIMIZATION_EXP} from '../responsive-state';
-import {AmpA4A} from '../../../amp-a4a/0.1/amp-a4a';
+import {AmpA4A, MODULE_NOMODULE_PARAMS_EXP} from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad'; // eslint-disable-line no-unused-vars
 import {
   AmpAdNetworkAdsenseImpl,
@@ -876,6 +877,16 @@ describes.realWin(
           expect(url).to.match(/h=1/);
           expect(url).to.match(/w=1/);
           expect(url).to.match(/spsa=\d+?x\d+?/);
+        });
+      });
+
+      it('should have module nomodule control', () => {
+        env.sandbox.stub(impl, 'getAmpDoc').returns({
+          getMetaByName: () => '2',
+        });
+        return impl.getAdUrl().then((url) => {
+          console.log(url);
+          expect(url).to.contain(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT);
         });
       });
     });

@@ -256,6 +256,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     Object.keys(setExps).forEach((expName) =>
       addExperimentIdToElement(setExps[expName], this.element)
     );
+    const moduleNomoduleExpId = this._getAddModuleNomoduleExpIds();
+    if (moduleNomoduleExpId) {
+      addExperimentIdToElement(moduleNomoduleExpId, this.element);
+    }
   }
 
   /**
