@@ -888,9 +888,7 @@ export class AmpStoryPlayer {
       return;
     }
 
-    isVisible
-      ? button.classList.remove('amp-story-player-hide-button')
-      : button.classList.add('amp-story-player-hide-button');
+    button.classList.toggle('amp-story-player-hide-button', isVisible);
   }
 
   /**
