@@ -399,6 +399,8 @@ export class FriendlyIframeEmbed {
     if (this.ampdoc) {
       this.whenReady().then(() => this.ampdoc.setReady());
     }
+
+    this.win.addEventListener('resize', () => this.handleResize_());
   }
 
   /**
@@ -509,6 +511,17 @@ export class FriendlyIframeEmbed {
     return /** @type {!HTMLBodyElement} */ ((
       this.iframe.contentDocument || this.iframe.contentWindow.document
     ).body);
+  }
+
+  /**
+   * Force remeasure inside FIE doc when iframe is resized.
+   * @private
+   */
+  handleResize_() {
+    this.getMutator_().mutateElement(
+      this.win.document.documentElement,
+      () => {} // NOOP.
+    );
   }
 
   /**
