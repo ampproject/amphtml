@@ -1130,7 +1130,8 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * @param {*} isAutoplaying
+   * @param {boolean} isAutoplaying
+   * @private
    */
   toggleAutoplayMode_(isAutoplaying) {
     this.isAutoplaying_ = isAutoplaying;
