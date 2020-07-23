@@ -20,6 +20,10 @@ import {
   SubscriptionAnalytics,
 } from '../../../amp-subscriptions/0.1/analytics';
 import {
+  AmpFetcher,
+  GoogleSubscriptionsPlatform,
+} from '../amp-subscriptions-google';
+import {
   ConfiguredRuntime,
   Entitlements,
   SubscribeResponse,
@@ -29,21 +33,17 @@ import {
   Entitlement,
   GrantReason,
 } from '../../../amp-subscriptions/0.1/entitlement';
-import {
-  GoogleSubscriptionsPlatform,
-  getAmpFetcherClassForTesting,
-} from '../amp-subscriptions-google';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../../src/services';
-import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/score-factors';
+import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/constants';
 import {WindowInterface} from '../../../../src/window-interface';
 import {toggleExperiment} from '../../../../src/experiments';
 
 const PLATFORM_ID = 'subscribe.google.com';
 const AMP_URL = 'myAMPurl.amp';
 
-describes.realWin('AmpFetcher', {amp: true}, env => {
+describes.realWin('AmpFetcher', {amp: true}, (env) => {
   let fetcher;
   let xhr;
 
@@ -62,13 +62,12 @@ describes.realWin('AmpFetcher', {amp: true}, env => {
     'baseUrl',
   ];
   const sentMessage = {
-    toArray: function() {
+    toArray: function () {
       return sentArray;
     },
   };
   const contentType = 'application/x-www-form-urlencoded;charset=UTF-8';
   const expectedBodyString = 'f.req=' + JSON.stringify(sentArray);
-  const AmpFetcher = getAmpFetcherClassForTesting();
 
   beforeEach(() => {
     const {win} = env.ampdoc;
@@ -117,7 +116,7 @@ describes.realWin('AmpFetcher', {amp: true}, env => {
   });
 });
 
-describes.realWin('amp-subscriptions-google', {amp: true}, env => {
+describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
   let ampdoc;
   let pageConfig;
   let platform;
@@ -132,6 +131,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   let ackStub;
   let element;
   let entitlementResponse;
+  let rtcButtonElement;
   let win;
 
   beforeEach(() => {
@@ -150,6 +150,9 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     env.sandbox
       .stub(serviceAdapter, 'getPageConfig')
       .callsFake(() => pageConfig);
+    env.sandbox
+      .stub(serviceAdapter, 'getReaderId')
+      .callsFake(() => Promise.resolve('ari1'));
     const analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
     env.sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
     analyticsMock = env.sandbox.mock(analytics);
@@ -195,6 +198,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
         ConfiguredRuntime.prototype,
         'showContributionOptions'
       ),
+      subscribe: env.sandbox.stub(ConfiguredRuntime.prototype, 'subscribe'),
       showOffers: env.sandbox.stub(ConfiguredRuntime.prototype, 'showOffers'),
       showAbbrvOffer: env.sandbox.stub(
         ConfiguredRuntime.prototype,
@@ -388,11 +392,6 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should start linking flow when requested', async () => {
-    serviceAdapterMock
-      .expects('getReaderId')
-      .withExactArgs('local')
-      .returns(Promise.resolve('ari1'))
-      .once();
     serviceAdapterMock.expects('delegateActionToLocal').never();
     callback(callbacks.loginRequest)({linkRequested: true});
     await 'Event loop tick';
@@ -404,7 +403,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   it('should delegate login when linking not requested', () => {
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs(Action.LOGIN)
+      .withExactArgs(Action.LOGIN, null)
       .returns(Promise.resolve(false))
       .once();
     callback(callbacks.loginRequest)({linkRequested: false});
@@ -415,7 +414,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     platform.isGoogleViewer_ = false;
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs(Action.LOGIN)
+      .withExactArgs(Action.LOGIN, null)
       .returns(Promise.resolve(false))
       .once();
     callback(callbacks.loginRequest)({linkRequested: true});
@@ -502,7 +501,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
         () => promise,
         null
       );
-      const resetPlatformsPromise = new Promise(resolve => {
+      const resetPlatformsPromise = new Promise((resolve) => {
         env.sandbox.stub(serviceAdapter, 'resetPlatforms').callsFake(() => {
           resolve();
         });
@@ -544,7 +543,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   it('should delegate native subscribe request', () => {
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs(Action.SUBSCRIBE)
+      .withExactArgs(Action.SUBSCRIBE, null)
       .returns(Promise.resolve(false))
       .once();
     callback(callbacks.subscribeRequest)();
@@ -554,7 +553,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     const loginResult = Promise.resolve(true);
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs(Action.LOGIN)
+      .withExactArgs(Action.LOGIN, null)
       .returns(loginResult)
       .once();
     callback(callbacks.loginRequest)({linkRequested: false});
@@ -567,7 +566,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     const loginResult = Promise.resolve(false);
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs(Action.LOGIN)
+      .withExactArgs(Action.LOGIN, null)
       .returns(loginResult)
       .once();
     callback(callbacks.loginRequest)({linkRequested: false});
@@ -580,7 +579,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     const loginResult = Promise.resolve(true);
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs(Action.SUBSCRIBE)
+      .withExactArgs(Action.SUBSCRIBE, null)
       .returns(loginResult)
       .once();
     callback(callbacks.subscribeRequest)();
@@ -687,6 +686,20 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     });
   });
 
+  it('should use message number', () => {
+    const elem = env.win.document.createElement('div');
+    const attachStub = env.sandbox.stub(platform.runtime_, 'attachSmartButton');
+    elem.textContent = 'some html';
+    elem.setAttribute('subscriptions-lang', 'en');
+    elem.setAttribute('subscriptions-message-number', 1);
+    platform.decorateUI(elem, 'subscribe-smartbutton');
+    expect(attachStub).to.be.calledWith(elem, {
+      lang: 'en',
+      theme: 'light',
+      messageNumber: '1', // Message is 'Subscribe with just a few taps' on smartbox button.
+    });
+  });
+
   it('should throw if smartButton language is missing', () => {
     //expectAsyncConsoleError(/must have a language attrbiute​​​/);
     const elem = env.win.document.createElement('div');
@@ -704,6 +717,57 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
   });
 
+  it('should do nothing if rtc mapped button is not read ', () => {
+    // rtc button
+    rtcButtonElement = env.win.document.createElement('button');
+    rtcButtonElement.setAttribute('subscriptions-google-rtc', '');
+    rtcButtonElement.id = 'rtcTestButton';
+    env.win.document.body.appendChild(rtcButtonElement);
+    platform.skuMap_ = {
+      rtcTestButton: {
+        sku: 'testSku',
+      },
+    };
+    const executeStub = platform.runtime_.subscribe;
+    platform.executeAction(Action.SUBSCRIBE, 'rtcTestButton');
+    expect(executeStub).to.not.be.called;
+  });
+
+  it('should show subscribe flow if single sku is mapped ', () => {
+    // rtc button
+    rtcButtonElement = env.win.document.createElement('button');
+    rtcButtonElement.setAttribute('subscriptions-google-rtc-set', '');
+    rtcButtonElement.id = 'rtcTestButton';
+    env.win.document.body.appendChild(rtcButtonElement);
+    platform.skuMap_ = {
+      rtcTestButton: {
+        sku: 'testSku',
+      },
+    };
+    const executeStub = platform.runtime_.subscribe;
+    platform.executeAction(Action.SUBSCRIBE, 'rtcTestButton');
+    expect(executeStub).to.be.calledWith('testSku');
+  });
+
+  it("should show offers if multiple sku's are mapped", () => {
+    // rtc button
+    rtcButtonElement = env.win.document.createElement('button');
+    rtcButtonElement.setAttribute('subscriptions-google-rtc-set', '');
+    rtcButtonElement.id = 'rtcTestButton';
+    env.win.document.body.appendChild(rtcButtonElement);
+    platform.skuMap_ = {
+      rtcTestButton: {
+        carouselOptions: {skus: ['testSku1', 'testsku2']},
+      },
+    };
+    const executeStub = platform.runtime_.showOffers;
+    platform.executeAction(Action.SUBSCRIBE, 'rtcTestButton');
+    expect(executeStub).to.be.calledWith({
+      isClosable: true,
+      skus: ['testSku1', 'testsku2'],
+    });
+  });
+
   it('should show contributions if contribute action is delegated', () => {
     const executeStub = platform.runtime_.showContributionOptions;
     platform.executeAction(Action.CONTRIBUTE);
@@ -711,11 +775,6 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   it('should link accounts if login action is delegated', async () => {
-    serviceAdapterMock
-      .expects('getReaderId')
-      .withExactArgs('local')
-      .returns(Promise.resolve('ari1'))
-      .once();
     const executeStub = platform.runtime_.linkAccount;
     platform.executeAction(Action.LOGIN);
     await 'Event loop tick';
