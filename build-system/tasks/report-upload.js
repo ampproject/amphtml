@@ -92,7 +92,7 @@ async function sendTravisKarmaReport(testType) {
   }
 }
 
-async function reportUpload() {
+async function testReportUpload() {
   const filenames = await fs.readdir('result-reports/');
   const testTypes = filenames.map((filename) => path.parse(filename).name);
 
@@ -100,7 +100,7 @@ async function reportUpload() {
 }
 
 module.exports = {
-  reportUpload,
+  testReportUpload,
 };
 
-reportUpload.description = 'Sends test results to test result database';
+testReportUpload.description = 'Sends test results to test result database';
