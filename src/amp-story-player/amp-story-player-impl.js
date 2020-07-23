@@ -897,7 +897,12 @@ export class AmpStoryPlayer {
    * @private
    */
   dispatchPageAttachmentEvent_(isPageAttachmentOpen) {
-    this.element_.dispatchEvent(createCustomEvent(this.win_, isPageAttachmentOpen ? 'page-attachment-open' : 'page-attachment-closed');
+    this.element_.dispatchEvent(
+      createCustomEvent(
+        this.win_,
+        isPageAttachmentOpen ? 'page-attachment-open' : 'page-attachment-closed'
+      )
+    );
   }
 
   /**
