@@ -112,7 +112,7 @@ describes.realWin('AmpFetcher', {amp: true}, (env) => {
       });
     });
 
-    fetcher.postMessage(sentUrl, sentMessage);
+    fetcher.sendPost(sentUrl, sentMessage);
   });
 });
 
