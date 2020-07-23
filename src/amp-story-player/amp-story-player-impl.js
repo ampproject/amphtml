@@ -1022,6 +1022,10 @@ export class AmpStoryPlayer {
    * @param {!Object} gesture
    */
   onSwipeX_(gesture) {
+    if (this.stories_.length <= 1) {
+      return;
+    }
+
     const {deltaX} = gesture;
 
     if (gesture.last === true) {

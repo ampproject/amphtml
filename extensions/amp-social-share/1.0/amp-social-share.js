@@ -158,6 +158,7 @@ class AmpSocialShare extends PreactBaseElement {
 /** @override */
 AmpSocialShare['Component'] = SocialShare;
 
+/** @override */
 AmpSocialShare['passthroughNonEmpty'] = true;
 
 /** @override */
