@@ -98,6 +98,10 @@ const STORY_MESSAGE_STATE_TYPE = {
   MUTED_STATE: 'MUTED_STATE',
 };
 
+/** @typedef {{ state:string, value:boolean }} */
+// eslint-disable-next-line no-unused-vars
+let DocumentStateType;
+
 /** @const {string} */
 export const IFRAME_IDX = '__AMP_IFRAME_IDX__';
 
@@ -378,12 +382,14 @@ export class AmpStoryPlayer {
 
           messaging.sendRequest(
             'onDocumentState',
-            dict({state: 'PAGE_ATTACHMENT_STATE'}),
+            dict({'state': 'PAGE_ATTACHMENT_STATE'}),
             false
           );
 
           messaging.registerHandler('documentStateUpdate', (event, data) => {
-            this.onDocumentStateUpdate_(/** @type {!Object} */ (data));
+            this.onDocumentStateUpdate_(
+              /** @type {!DocumentStateType} */ (data)
+            );
           });
 
           resolve(messaging);
@@ -856,12 +862,11 @@ export class AmpStoryPlayer {
 
   /**
    * React to documentStateUpdate events.
-   * @param {!Object} data
+   * @param {!DocumentStateType} data
    * @private
    */
   onDocumentStateUpdate_(data) {
-    const state = data.state;
-    switch (state) {
+    switch (data.state /*OK*/) {
       case STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE:
         this.onPageAttachmentStateUpdate_(data.value);
         break;
