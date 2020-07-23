@@ -376,9 +376,11 @@ export class AmpStoryPlayer {
             this.onSelectDocument_(/** @type {!Object} */ (data));
           });
 
-          messaging.sendRequest('onDocumentState', 
-          {'state': 'PAGE_ATTACHMENT_STATE'}, 
-          false);
+          messaging.sendRequest(
+            'onDocumentState',
+            dict({state: 'PAGE_ATTACHMENT_STATE'}),
+            false
+          );
 
           messaging.registerHandler('documentStateUpdate', (event, data) => {
             this.onDocumentStateUpdate_(/** @type {!Object} */ (data));
@@ -901,7 +903,9 @@ export class AmpStoryPlayer {
     this.element_.dispatchEvent(
       createCustomEvent(
         this.win_,
-        isPageAttachmentOpen ? 'page-attachment-open' : 'page-attachment-closed',
+        isPageAttachmentOpen
+          ? 'page-attachment-open'
+          : 'page-attachment-closed',
         dict({})
       )
     );
