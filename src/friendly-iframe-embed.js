@@ -400,7 +400,7 @@ export class FriendlyIframeEmbed {
       this.whenReady().then(() => this.ampdoc.setReady());
     }
 
-    this.iframe.onresize = () => this.handleResize_();
+    this.win.onresize = () => this.handleResize_();
   }
 
   /**
@@ -518,8 +518,10 @@ export class FriendlyIframeEmbed {
    * @private
    */
   handleResize_() {
-    debugger;
-    this.getMutator_().mutateElement(this.win.document, () => {} /* NOOP */);
+    this.getMutator_().mutateElement(
+      this.win.document.documentElement,
+      () => {} // NOOP.
+    );
   }
 
   /**
