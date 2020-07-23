@@ -17,17 +17,10 @@
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {AmpAdMetadataTransformer} from './amp-ad-metadata-transformer';
 import {ExternalReorderHeadTransformer} from './external-reorder-head-transformer';
-import {forceExperimentBranch} from '../../../src/experiments';
 import {includes, startsWith} from '../../../src/string';
 import {user, userAssert} from '../../../src/log';
 
 const TAG = 'AMP-AD-NETWORK-FAKE-IMPL';
-
-/**
- * Allow elements to opt into an experiment branch.
- * @const {string}
- */
-const EXPERIMENT_BRANCH_ATTR = 'data-experiment-id';
 
 export class AmpAdNetworkFakeImpl extends AmpA4A {
   /**
@@ -49,15 +42,6 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
       'Attribute src or srcdoc required for <amp-ad type="fake">: %s',
       this.element
     );
-    if (this.element.hasAttribute(EXPERIMENT_BRANCH_ATTR)) {
-      this.element
-        .getAttribute(EXPERIMENT_BRANCH_ATTR)
-        .split(',')
-        .forEach((experiment) => {
-          const expParts = experiment.split(':');
-          forceExperimentBranch(this.win, expParts[0], expParts[1]);
-        });
-    }
     super.buildCallback();
   }
 
