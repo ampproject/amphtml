@@ -788,7 +788,7 @@ export class AmpFetcher {
         JSON.stringify(/** @type {JsonObject} */ (message.toArray(false))),
     });
     return this.fetch(url, init).then(
-      response => (response && response.json()) || {}
+      (response) => (response && response.json()) || {}
     );
   }
 
