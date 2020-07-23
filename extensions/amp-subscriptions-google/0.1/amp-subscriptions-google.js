@@ -777,7 +777,7 @@ export class AmpFetcher {
 
   /** @override */
   sendPost(url, message) {
-    const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
+    const init = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
@@ -786,7 +786,7 @@ export class AmpFetcher {
       body:
         'f.req=' +
         JSON.stringify(/** @type {JsonObject} */ (message.toArray(false))),
-    });
+    };
     return this.fetch(url, init).then(
       (response) => (response && response.json()) || {}
     );
