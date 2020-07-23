@@ -376,12 +376,12 @@ export class AmpStoryPlayer {
             this.onSelectDocument_(/** @type {!Object} */ (data));
           });
 
-          messaging.sendRequest('onDocumentState', {
-            state: STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE,
-          });
+          messaging.sendRequest('onDocumentState', 
+          {'state': 'PAGE_ATTACHMENT_STATE'}, 
+          false);
 
           messaging.registerHandler('documentStateUpdate', (event, data) => {
-            this.onDocumentStateUpdate_(data);
+            this.onDocumentStateUpdate_(/** @type {!Object} */ (data));
           });
 
           resolve(messaging);
@@ -858,7 +858,8 @@ export class AmpStoryPlayer {
    * @private
    */
   onDocumentStateUpdate_(data) {
-    switch (data.state) {
+    const state = data.state;
+    switch (state) {
       case STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE:
         this.onPageAttachmentStateUpdate_(data.value);
         break;
@@ -900,7 +901,8 @@ export class AmpStoryPlayer {
     this.element_.dispatchEvent(
       createCustomEvent(
         this.win_,
-        isPageAttachmentOpen ? 'page-attachment-open' : 'page-attachment-closed'
+        isPageAttachmentOpen ? 'page-attachment-open' : 'page-attachment-closed',
+        dict({})
       )
     );
   }
