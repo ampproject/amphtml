@@ -2118,7 +2118,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @param {!Array} experimentIds
    * @return {?number}
    */
-  _getAddModuleNomoduleExpIds(experimentIds) {
+  getModuleNomoduleExpIds_(experimentIds) {
     const runtimeType = this.getAmpDoc().getMetaByName('runtime-type');
     // ModuleNomoduleControl = 10 (current default, just nomodule)
     if (runtimeType === '10') {

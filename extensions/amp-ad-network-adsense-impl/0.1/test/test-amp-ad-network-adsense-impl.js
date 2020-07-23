@@ -880,12 +880,36 @@ describes.realWin(
         });
       });
 
-      it('should have module nomodule control', () => {
+      //it.only('should have module nomodule control', () => {
+        //env.sandbox.stub(impl, 'getAmpDoc').returns({
+          //whenFirstVisible: () => new Deferred().promise,
+          //getMetaByName: () => '2',
+          //isSingleDoc: () => true,
+        //});
+        //env.sandbox.stub(impl, 'getViewport').returns({
+          //getSize: () => ({width: 375, height: 667}),
+        //});
+        //return impl.buildCallback().then(() => {
+          //return impl.getAdUrl().then((url) => {
+            //console.log(url);
+            //expect(url).to.contain(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT);
+          //});
+        //});
+      //});
+
+      it.only('should have module nomodule control', () => {
         env.sandbox.stub(impl, 'getAmpDoc').returns({
+          whenFirstVisible: () => new Deferred().promise,
           getMetaByName: () => '2',
+          isSingleDoc: () => true,
         });
+        env.sandbox.stub(impl.getViewport(), 'getSize').return({
+          width: 375,
+          height: 667,
+        });
+        impl.win['goog_identity_prom'] = Promise.resolve({});
+        impl.buildCallback();
         return impl.getAdUrl().then((url) => {
-          console.log(url);
           expect(url).to.contain(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT);
         });
       });

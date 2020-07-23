@@ -1972,7 +1972,9 @@ describes.realWin(
           });
           randomlySelectUnsetExperimentsStub.returns({});
           impl.setPageLevelExperiments();
-          expect(impl.experimentIds.includes(MODULE_NOMODULE_PARAMS_EXP.CONTROL)).to.be.true;
+          expect(
+            impl.experimentIds.includes(MODULE_NOMODULE_PARAMS_EXP.CONTROL)
+          ).to.be.true;
         });
 
         it('should identify module/nomodule experiment when runtime-type is 2', () => {
@@ -1983,7 +1985,9 @@ describes.realWin(
           });
           randomlySelectUnsetExperimentsStub.returns({});
           impl.setPageLevelExperiments();
-          expect(impl.experimentIds.includes(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT)).to.be.true;
+          expect(
+            impl.experimentIds.includes(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT)
+          ).to.be.true;
         });
 
         it('should identify module/nomodule experiment when runtime-type is 4', () => {
@@ -1994,7 +1998,9 @@ describes.realWin(
           });
           randomlySelectUnsetExperimentsStub.returns({});
           impl.setPageLevelExperiments();
-          expect(impl.experimentIds.includes(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT)).to.be.true;
+          expect(
+            impl.experimentIds.includes(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT)
+          ).to.be.true;
         });
 
         // Only 2, 4, 10 should be recognized.
@@ -2006,8 +2012,12 @@ describes.realWin(
           });
           randomlySelectUnsetExperimentsStub.returns({});
           impl.setPageLevelExperiments();
-          expect(impl.experimentIds.includes(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT)).to.be.false;
-          expect(impl.experimentIds.includes(MODULE_NOMODULE_PARAMS_EXP.CONTROL)).to.be.false;
+          expect(
+            impl.experimentIds.includes(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT)
+          ).to.be.false;
+          expect(
+            impl.experimentIds.includes(MODULE_NOMODULE_PARAMS_EXP.CONTROL)
+          ).to.be.false;
         });
       });
     });
