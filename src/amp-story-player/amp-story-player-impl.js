@@ -143,7 +143,7 @@ export class AmpStoryPlayer {
     this.currentIdx_ = 0;
 
     /** @private {boolean} */
-    this.isAutoplaying_ = !!this.element_.attributes.autoplay;
+    this.isAutoplaying_ = !!this.element_.getAttribute('autoplay');
 
     /** @private {!SwipingState} */
     this.swipingState_ = SwipingState.NOT_SWIPING;
