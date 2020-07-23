@@ -42,6 +42,12 @@ let AmpElementPropDef;
  */
 let ChildDef;
 
+/** @const {!MutationObserverInit} */
+const PASSTHROUGH_NON_EMPTY_MUTATION_INIT = {
+  childList: true,
+  characterData: true,
+};
+
 /**
  * Wraps a Preact Component in a BaseElement class.
  *
@@ -81,6 +87,13 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.mounted_ = true;
+
+    /** @private {?MutationObserver} */
+    this.observer_ = this.constructor['passthroughNonEmpty']
+      ? new MutationObserver(() => {
+          this.scheduleRender_();
+        })
+      : null;
   }
 
   /**
@@ -121,7 +134,19 @@ export class PreactBaseElement extends AMP.BaseElement {
     this.context_.renderable = true;
     this.context_.playable = true;
     this.scheduleRender_();
+    if (this.observer_) {
+      this.observer_.observe(this.element, PASSTHROUGH_NON_EMPTY_MUTATION_INIT);
+    }
     return deferred.promise;
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.observer_) {
+      this.observer_.disconnect();
+      return true;
+    }
+    return false;
   }
 
   /** @override */
@@ -259,12 +284,11 @@ PreactBaseElement['className'] = '';
 PreactBaseElement['passthrough'] = false;
 
 /**
- * Handling children with passthroughNonEmpty mode is the same as passthrough
+ * Handling children with passthroughNonEmpty mode is similar to passthrough
  * mode except that when there are no children elements, the returned
  * prop['children'] will be null instead of the unnamed <slot>.  This allows
  * the Preact environment to have conditional behavior depending on whether
- * or not there are children.  Consider using a Mutation Observer in your
- * component for detailed control of rerender when children are updated.
+ * or not there are children.
  *
  * @protected {boolean}
  */
