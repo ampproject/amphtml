@@ -15,6 +15,7 @@
  */
 
 import {BaseElement} from '../../src/base-element';
+import {Deferred} from '../../src/utils/promise';
 import {ElementStub} from '../../src/element-stub';
 import {
   FriendlyIframeEmbed,
@@ -42,6 +43,7 @@ import {isAnimationNone} from '../../testing/test-helper';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 import {resetScheduledElementForTesting} from '../../src/service/custom-element-registry';
+import {setStyles} from '../../src/style';
 import {toggleAmpdocFieForTesting} from '../../src/ampdoc-fie';
 import {updateFieModeForTesting} from '../../src/service/ampdoc-impl';
 
@@ -63,6 +65,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
     const resources = Services.resourcesForDoc(window.document);
     const ampdocService = {
       installFieDoc: () => {},
+      getAmpDoc: () => env.ampdoc,
     };
     extensionsMock = env.sandbox.mock(extensions);
     resourcesMock = env.sandbox.mock(resources);
@@ -555,6 +558,29 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       });
   });
 
+  it('should call for remeasure upon resize', async () => {
+    const iframe = document.createElement('iframe');
+    const {promise, resolve} = new Deferred();
+    const mutateSpy = env.sandbox.stub(
+      Services.mutatorForDoc(env.ampdoc),
+      'mutateElement'
+    );
+
+    await installFriendlyIframeEmbed(iframe, document.body, {
+      url: 'https://acme.org/url1',
+      html: '<a id="a1"></a>',
+    });
+
+    expect(mutateSpy).to.not.be.called;
+    setStyles(iframe, {height: '100px', width: '100px'});
+    // Need to wait for resize event.
+    iframe.contentWindow.addEventListener('resize', () => {
+      resolve();
+    });
+    await promise;
+    expect(mutateSpy).to.be.called;
+  });
+
   describe('mergeHtml', () => {
     let spec;
 
@@ -928,6 +954,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
       const parent = document.createElement(parentType);
 
       parent.appendChild(iframe);
+      document.body.appendChild(parent);
 
       env.sandbox
         ./*OK*/ stub(iframe, 'getBoundingClientRect')
