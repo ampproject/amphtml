@@ -25,7 +25,6 @@ import {calculateExtensionScriptUrl} from '../../../src/service/extension-locati
 import {cancellation} from '../../../src/error';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
 import {getService, registerServiceBuilder} from '../../../src/service';
@@ -99,7 +98,7 @@ export class AmpScript extends AMP.BaseElement {
     this.layoutCompleted_ = false;
 
     /** @private {Deferred} */
-    this.initializationCompleted_ = new Deferred();
+    this.initialize_ = new Deferred();
 
     /**
      * If true, most production constraints are disabled including script size,
@@ -179,7 +178,7 @@ export class AmpScript extends AMP.BaseElement {
    * @return {!Promise<*>}
    */
   callFunction(functionIdentifier) {
-    return this.initializationCompleted_.promise.then(() => {
+    return this.initialize_.promise.then(() => {
       return this.workerDom_.callFunction(functionIdentifier);
     });
   }
@@ -273,7 +272,7 @@ export class AmpScript extends AMP.BaseElement {
       config
     ).then((workerDom) => {
       this.workerDom_ = workerDom;
-      this.initializationCompleted_.resolve();
+      this.initialize_.resolve();
       this.workerDom_.onerror = (errorEvent) => {
         errorEvent.preventDefault();
         user().error(
@@ -531,9 +530,6 @@ export class AmpScriptService {
 
     /** @private @const {!../../../src/service/crypto-impl.Crypto} */
     this.crypto_ = Services.cryptoFor(ampdoc.win);
-
-    /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
   }
 
   /**
@@ -568,28 +564,6 @@ export class AmpScriptService {
   sizeLimitExceeded(size) {
     this.cumulativeSize_ += size;
     return this.cumulativeSize_ > MAX_TOTAL_SCRIPT_SIZE;
-  }
-
-  /**
-   * Calls an exported function on a specific amp-script worker and returns the result.
-   *
-   * @param {string} ampScriptId
-   * @param {string} fnIdentifier
-   * @return {Promise<*>}
-   */
-  callFunction(ampScriptId, fnIdentifier) {
-    const ampScriptEl = this.ampdoc_
-      .getRootNode()
-      .querySelector(
-        `amp-script[script=${escapeCssSelectorIdent(ampScriptId)}]`
-      );
-    userAssert(
-      ampScriptEl,
-      `[amp-script]: could not find amp-script with script set to ${ampScriptId}`
-    );
-    return ampScriptEl
-      .getImpl()
-      .then((impl) => impl.callFunction(fnIdentifier));
   }
 }
 

@@ -113,6 +113,21 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     expect(service.checkSha384).to.be.called;
   });
 
+  it('callFunction waits for initialization to complete before returning', async () => {
+    element.setAttribute('script', 'local-script');
+    const result = script.callFunction('fetchData');
+    script.workerDom_ = {
+      callFunction(fnIdent) {
+        if (fnIdent === 'fetchData') {
+          return Promise.resolve(42);
+        }
+        return Promise.reject();
+      },
+    };
+    script.initialize_.resolve();
+    expect(await result).to.equal(42);
+  });
+
   describe('Initialization skipped warning due to zero height/width', () => {
     it('should not warn when there is positive width/height', () => {
       const warnStub = env.sandbox.stub(user(), 'warn');
@@ -292,48 +307,6 @@ describes.repeated(
 
             const promise = service.checkSha384('alert(1)', 'foo');
             return promise.should.be.rejected;
-          });
-        });
-
-        describe('callFunction', () => {
-          let script;
-          let service;
-          let element;
-
-          beforeEach(() => {
-            // Sets up <script>, <amp-script>, and the AmpScriptService.
-            const local = document.createElement('script');
-            local.setAttribute('id', 'local-script');
-            local.setAttribute('target', 'amp-script');
-            env.ampdoc.getBody().appendChild(local);
-
-            element = document.createElement('amp-script');
-            env.ampdoc.getBody().appendChild(element);
-            script = new AmpScript(element);
-            element.getImpl = () => Promise.resolve(script);
-            script.getAmpDoc = () => env.ampdoc;
-            service = new AmpScriptService(env.ampdoc);
-            script.setService(service);
-          });
-
-          it('should throw if there is no amp-script with the proper target', async () => {
-            const call = () =>
-              service.callFunction('local-script', 'fetchData');
-            const errorMessage = /could not find amp-script with/;
-            expectAsyncConsoleError(errorMessage);
-            expect(call).to.throw(errorMessage);
-          });
-
-          it('Waits for initialization to complete before returning', async () => {
-            element.setAttribute('script', 'local-script');
-            const result = service.callFunction('local-script', 'fetchData');
-            script.workerDom_ = {
-              callFunction() {
-                return Promise.resolve(42);
-              },
-            };
-            script.initializationCompleted_.resolve();
-            expect(await result).to.equal(42);
           });
         });
       }

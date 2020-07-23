@@ -988,9 +988,15 @@ describes.repeated(
             });
           });
           describe('Using amp-script: protocol', () => {
+            let ampScriptEl;
             beforeEach(() => {
-              env.sandbox.stub(Services, 'scriptForDocOrNull');
               resetExperimentTogglesForTesting(win);
+
+              env.sandbox.stub(Services, 'scriptForDocOrNull');
+              ampScriptEl = document.createElement('amp-script');
+              ampScriptEl.setAttribute('script', 'example');
+              doc.body.appendChild(ampScriptEl);
+
               element = createAmpListElement();
               element.setAttribute('src', 'amp-script:example.fetchData');
               element.toggleLoading = () => {};
@@ -1015,6 +1021,10 @@ describes.repeated(
               element.setAttribute('src', 'amp-script:too.many.dots');
               expectAsyncConsoleError(errorMsg);
               expect(list.layoutCallback()).to.eventually.throw(errorMsg);
+
+              element.setAttribute('src', 'amp-script:zeroLengthSecondArg.');
+              expectAsyncConsoleError(errorMsg);
+              expect(list.layoutCallback()).to.eventually.throw(errorMsg);
             });
 
             it('should log an error if amp-script was not included', async () => {
@@ -1025,14 +1035,22 @@ describes.repeated(
               expectAsyncConsoleError(errorMsg);
               expect(list.layoutCallback()).eventually.rejectedWith(errorMsg);
             });
+
+            it('should throw if specified amp-script does not exist', () => {
+              const errorMsg = /could not find amp-script with/;
+              element.setAttribute('src', 'amp-script:doesnotexist.fn');
+              expectAsyncConsoleError(errorMsg);
+              expect(list.layoutCallback()).to.eventually.throw(errorMsg);
+            });
+
             it('should fail if function call rejects', async () => {
               toggleExperiment(win, 'protocol-adapters', true);
-              Services.scriptForDocOrNull.returns(
+              Services.scriptForDocOrNull.returns(Promise.resolve({}));
+              ampScriptEl.getImpl = () => 
                 Promise.resolve({
                   callFunction: () =>
                     Promise.reject('Invalid function identifier.'),
-                })
-              );
+                }); 
 
               listMock.expects('toggleLoading').withExactArgs(false).once();
               return expect(
@@ -1044,16 +1062,16 @@ describes.repeated(
               const callFunctionResult = {'items': {title: 'Title'}};
               element.setAttribute('single-item', 'true');
               toggleExperiment(win, 'protocol-adapters', true);
-              Services.scriptForDocOrNull.returns(
+              Services.scriptForDocOrNull.returns(Promise.resolve({}));
+              ampScriptEl.getImpl = () => 
                 Promise.resolve({
-                  callFunction(scriptId, fnId) {
-                    if (scriptId === 'example' && fnId === 'fetchData') {
+                  callFunction(fnId) {
+                    if (fnId === 'fetchData') {
                       return Promise.resolve(callFunctionResult);
                     }
-                    return Promise.reject('Invalid function scriptId/fnId');
+                    return Promise.reject(new Error(`Invalid fnId: ${fnId}`));
                   },
-                })
-              );
+                });
 
               listMock
                 .expects('scheduleRender_')
@@ -1070,16 +1088,15 @@ describes.repeated(
 
             it('should render a list from AmpScriptService provided data', async () => {
               toggleExperiment(win, 'protocol-adapters', true);
-              Services.scriptForDocOrNull.returns(
-                Promise.resolve({
-                  callFunction(scriptId, fnId) {
-                    if (scriptId === 'example' && fnId === 'fetchData') {
+              Services.scriptForDocOrNull.returns(Promise.resolve({}));
+              ampScriptEl.getImpl = () => Promise.resolve({
+                  callFunction(fnId) {
+                    if (fnId === 'fetchData') {
                       return Promise.resolve({items: [3, 2, 1]});
                     }
-                    return Promise.reject('Invalid function scriptId/fnId');
+                    return Promise.reject(new Error(`Invalid fnId: ${fnId}`));
                   },
-                })
-              );
+                });
 
               listMock
                 .expects('scheduleRender_')

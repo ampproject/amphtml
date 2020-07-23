@@ -65,6 +65,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {px, setImportantStyles, setStyles, toggle} from '../../../src/style';
 import {setDOM} from '../../../third_party/set-dom/set-dom';
 import {startsWith} from '../../../src/string';
+import {escapeCssSelectorIdent} from '../../../src/css';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -480,7 +481,7 @@ export class AmpList extends AMP.BaseElement {
       .then((ampScript) => {
         userAssert(
           ampScript,
-          '"amp-script:" URLs require amp-script to be installed.'
+          '[amp-list]: "amp-script" URLs require amp-script to be installed.'
         );
         userAssert(
           !this.ssrTemplateHelper_.isEnabled(),
@@ -489,12 +490,24 @@ export class AmpList extends AMP.BaseElement {
 
         const args = src.slice(AMP_SCRIPT_URI_SCHEME.length).split('.');
         userAssert(
-          args.length === 2,
+          args.length === 2 && args[0].length > 0 && args[1].length > 0,
           '[amp-list]: "amp-script" URIs must be of the format "scriptId.functionIdentifier".'
         );
+
         const ampScriptId = args[0];
         const fnIdentifier = args[1];
-        return ampScript.callFunction(ampScriptId, fnIdentifier);
+        const ampScriptEl = this.element.getAmpDoc()
+          .getRootNode()
+          .querySelector(
+            `amp-script[script=${escapeCssSelectorIdent(ampScriptId)}]`
+          );
+        userAssert(
+          ampScriptEl,
+          `[amp-list]: could not find <amp-script> with script set to ${ampScriptId}`
+          );
+        return ampScriptEl
+          .getImpl()
+          .then((impl) => impl.callFunction(fnIdentifier));
       })
       .then((json) => {
         userAssert(
