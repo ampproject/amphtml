@@ -96,6 +96,7 @@ describes.realWin('AmpFetcher', {amp: true}, (env) => {
         credentials: 'include',
         body: expectedBodyString,
       });
+      return Promise.resolve({});
     });
 
     fetcher.sendBeacon(sentUrl, sentMessage);
