@@ -941,6 +941,7 @@ describes.repeated(
               const errorMsg = /cannot be used in SSR mode/;
               expectAsyncConsoleError(errorMsg);
               expect(list.layoutCallback()).eventually.rejectedWith(errorMsg);
+              toggleExperiment(win, 'protocol-adapters', false);
             });
 
             it('Bound [src] should skip rendering and emit an error', async () => {
@@ -1037,8 +1038,11 @@ describes.repeated(
             });
 
             it('should throw if specified amp-script does not exist', () => {
-              const errorMsg = /could not find amp-script with/;
+              toggleExperiment(win, 'protocol-adapters', true);
+              Services.scriptForDocOrNull.returns(Promise.resolve({}));
               element.setAttribute('src', 'amp-script:doesnotexist.fn');
+
+              const errorMsg = /could not find <amp-script> with/;
               expectAsyncConsoleError(errorMsg);
               expect(list.layoutCallback()).to.eventually.throw(errorMsg);
             });
@@ -1046,11 +1050,11 @@ describes.repeated(
             it('should fail if function call rejects', async () => {
               toggleExperiment(win, 'protocol-adapters', true);
               Services.scriptForDocOrNull.returns(Promise.resolve({}));
-              ampScriptEl.getImpl = () => 
+              ampScriptEl.getImpl = () =>
                 Promise.resolve({
                   callFunction: () =>
                     Promise.reject('Invalid function identifier.'),
-                }); 
+                });
 
               listMock.expects('toggleLoading').withExactArgs(false).once();
               return expect(
@@ -1063,7 +1067,7 @@ describes.repeated(
               element.setAttribute('single-item', 'true');
               toggleExperiment(win, 'protocol-adapters', true);
               Services.scriptForDocOrNull.returns(Promise.resolve({}));
-              ampScriptEl.getImpl = () => 
+              ampScriptEl.getImpl = () =>
                 Promise.resolve({
                   callFunction(fnId) {
                     if (fnId === 'fetchData') {

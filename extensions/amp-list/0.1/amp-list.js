@@ -77,6 +77,7 @@ const TABBABLE_ELEMENTS_QUERY =
 // Technically the ':' is not considered part of the scheme, but it is useful to include.
 const AMP_STATE_URI_SCHEME = 'amp-state:';
 const AMP_SCRIPT_URI_SCHEME = 'amp-script:';
+const PROTOCOL_ADAPTERS = 'protocol-adapters';
 
 /**
  * @typedef {{
@@ -420,17 +421,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   isAmpScriptSrc_(src) {
-    if (getMode().development) {
-      devAssert(
-        startsWith(src, AMP_SCRIPT_URI_SCHEME) ===
-          isExperimentOn(this.win, 'protocol-adapters'),
-        'Must enable "protocol-adapters" experiment to use an amp-script src.'
-      );
-    }
-    return (
-      isExperimentOn(this.win, 'protocol-adapters') &&
-      startsWith(src, AMP_SCRIPT_URI_SCHEME)
-    );
+    return startsWith(src, AMP_SCRIPT_URI_SCHEME);
   }
 
   /**
@@ -477,6 +468,11 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   getAmpScriptJson_(src) {
+    if (!isExperimentOn(this.win, PROTOCOL_ADAPTERS)) {
+      return Promise.reject(
+        `Experiment ${PROTOCOL_ADAPTERS} is not turned on.`
+      );
+    }
     return Services.scriptForDocOrNull(this.element)
       .then((ampScript) => {
         userAssert(
@@ -496,7 +492,8 @@ export class AmpList extends AMP.BaseElement {
 
         const ampScriptId = args[0];
         const fnIdentifier = args[1];
-        const ampScriptEl = this.element.getAmpDoc()
+        const ampScriptEl = this.element
+          .getAmpDoc()
           .getRootNode()
           .querySelector(
             `amp-script[script=${escapeCssSelectorIdent(ampScriptId)}]`
@@ -504,7 +501,7 @@ export class AmpList extends AMP.BaseElement {
         userAssert(
           ampScriptEl,
           `[amp-list]: could not find <amp-script> with script set to ${ampScriptId}`
-          );
+        );
         return ampScriptEl
           .getImpl()
           .then((impl) => impl.callFunction(fnIdentifier));
