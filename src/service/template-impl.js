@@ -94,29 +94,8 @@ export class BaseTemplate {
    * @protected @final
    */
   unwrap(root) {
-    let singleElement = null;
-    for (let n = root.firstChild; n != null; n = n.nextSibling) {
-      if (n.nodeType == /* TEXT */ 3) {
-        if (n.textContent.trim()) {
-          // Non-empty text node - can't unwrap.
-          singleElement = null;
-          break;
-        }
-      } else if (n.nodeType == /* COMMENT */ 8) {
-        // Ignore comments.
-      } else if (n.nodeType == /* ELEMENT */ 1) {
-        if (!singleElement) {
-          singleElement = dev().assertElement(n);
-        } else {
-          // This is not the first element - can't unwrap.
-          singleElement = null;
-          break;
-        }
-      } else {
-        singleElement = null;
-      }
-    }
-    return singleElement || root;
+    const unwrapped = this.forceUnwrap(root);
+    return dev().assertElement(unwrapped.length ? root : unwrapped);
   }
 
   /**
