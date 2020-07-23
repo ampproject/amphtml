@@ -400,7 +400,7 @@ export class FriendlyIframeEmbed {
       this.whenReady().then(() => this.ampdoc.setReady());
     }
 
-    this.win.onresize = () => this.handleResize_();
+    this.win.addEventListener('resize', () => this.handleResize_());
   }
 
   /**
