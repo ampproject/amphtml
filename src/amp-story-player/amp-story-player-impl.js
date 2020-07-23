@@ -15,6 +15,7 @@
  */
 
 import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
+import {EmbedMode} from '../../extensions/amp-story/1.0/embed-mode';
 import {IframePool} from './amp-story-player-iframe-pool';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {VisibilityState} from '../visibility-state';
@@ -29,7 +30,6 @@ import {applySandbox} from '../3p-frame';
 import {createCustomEvent} from '../event-helper';
 import {dict, map} from '../utils/object';
 // Source for this constant is css/amp-story-player-iframe.css
-import {EmbedMode} from '../../extensions/amp-story/1.0/embed-mode';
 import {cssText} from '../../build/amp-story-player-iframe.css';
 import {dev} from '../log';
 import {findIndex} from '../utils/array';
