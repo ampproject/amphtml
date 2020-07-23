@@ -532,8 +532,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       await playerEl.getStoryState('page-attachment');
 
-      messagingMock
-      .expects('sendRequest');
+      messagingMock.expects('sendRequest');
 
       messagingMock
         .expects('sendRequest')
