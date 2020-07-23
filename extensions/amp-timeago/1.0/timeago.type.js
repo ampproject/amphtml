@@ -16,34 +16,14 @@
 
 /** @externs */
 
-/** @const */
-var DateDisplayDef = {};
+// TODO(#29293): Make "locale" optional.
 
 /**
  * @typedef {{
- *   children: (?PreactDef.Renderable|undefined),
- *   datetime: (string|undefined),
- *   displayIn: (string|undefined),
- *   locale: (string|undefined),
- *   render: (function(!JsonObject, (?PreactDef.Renderable|undefined)):PreactDef.Renderable),
- *   offsetSeconds: (number|undefined),
- *   timestampMs: (number|undefined),
- *   timestampSeconds: (number|undefined),
+ *   datetime: string,
+ *   locale: string,
+ *   cutoff: (number|undefined),
+ *   cutoffText: (string|undefined),
  * }}
  */
-DateDisplayDef.Props;
-
-/**
- * @typedef {{
- *   children: (?PreactDef.Renderable|undefined),
- * }}
- */
-DateDisplayDef.AsyncRenderProps;
-
-/**
- * @typedef {{
- *   dom: !Element,
- *   host: !Element,
- * }}
- */
-DateDisplayDef.RenderDomTreeProps;
+var TimeagoProps;
