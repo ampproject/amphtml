@@ -1,5 +1,7 @@
+const fs = require('fs');
+
 (async () => {
-    const pti = require('puppeteer-to-istanbul')
+    //const pti = require('puppeteer-to-istanbul')
     const puppeteer = require('puppeteer')
     const browser = await puppeteer.launch()
     const page = await browser.newPage()
@@ -16,6 +18,9 @@
     const [jsCoverage] = await Promise.all([
       page.coverage.stopJSCoverage(),
     ]);
-    pti.write([...jsCoverage], { includeHostname: true , storagePath: './.nyc_output' })
+    const data = JSON.stringify(jsCoverage);
+    fs.writeFileSync('test.json', data);
+    // Enable for istanbul output
+    //pti.write([...jsCoverage], { includeHostname: true , storagePath: './.nyc_output' })
     await browser.close()
   })()
