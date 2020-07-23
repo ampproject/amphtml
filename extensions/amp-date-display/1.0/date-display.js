@@ -62,26 +62,26 @@ let VariablesV2Def;
 let EnhancedVariablesV2Def;
 
 /**
- * @param {!JsonObject} props
+ * @param {!DateDisplayDef.Props} props
  * @return {PreactDef.Renderable}
  */
 export function DateDisplay(props) {
-  const render = props['render'];
+  const {render, children} = props;
   const data = /** @type {!JsonObject} */ (getDataForTemplate(props));
   useResourcesNotify();
 
-  return render(data, props['children']);
+  return render(data, children);
 }
 
 /**
- * @param {!JsonObject} props
+ * @param {!DateDisplayDef.Props} props
  * @return {!EnhancedVariablesV2Def}
  */
 function getDataForTemplate(props) {
   const {
-    'displayIn': displayIn = '',
-    'locale': locale = DEFAULT_LOCALE,
-    'offsetSeconds': offsetSeconds = DEFAULT_OFFSET_SECONDS,
+    displayIn = '',
+    locale = DEFAULT_LOCALE,
+    offsetSeconds = DEFAULT_OFFSET_SECONDS,
   } = props;
 
   const epoch = getEpoch(props);
@@ -97,16 +97,10 @@ function getDataForTemplate(props) {
 }
 
 /**
- * @param {!JsonObject} props
+ * @param {!DateDisplayDef.Props} props
  * @return {number|undefined}
  */
-function getEpoch(props) {
-  const {
-    'datetime': datetime = '',
-    'timestampMs': timestampMs = 0,
-    'timestampSeconds': timestampSeconds = 0,
-  } = props;
-
+function getEpoch({datetime = '', timestampMs = 0, timestampSeconds = 0}) {
   let epoch;
   if (datetime.toLowerCase() === 'now') {
     epoch = Date.now();
