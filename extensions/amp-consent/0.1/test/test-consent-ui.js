@@ -29,7 +29,6 @@ import {
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service';
-import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
 import {whenCalled} from '../../../../testing/test-helper.js';
 
@@ -139,6 +138,9 @@ describes.realWin(
         });
         consentUI = new ConsentUI(mockInstance, config);
         expect(consentUI.ui_.tagName).to.equal('IFRAME');
+        expect(consentUI.ui_.getAttribute('sandbox')).to.equal(
+          'allow-scripts allow-popups allow-same-origin'
+        );
       });
     });
 
@@ -311,14 +313,6 @@ describes.realWin(
       });
 
       describe('fullscreen user interaction experiment', () => {
-        beforeEach(() => {
-          toggleExperiment(win, 'amp-consent-restrict-fullscreen', true);
-        });
-
-        afterEach(() => {
-          toggleExperiment(win, 'amp-consent-restrict-fullscreen', false);
-        });
-
         it('should focus on the SR alert button', () => {
           consentUI = new ConsentUI(mockInstance, {
             'promptUISrc': 'https://promptUISrc',
@@ -690,19 +684,6 @@ describes.realWin(
     });
 
     describe('fullscreen', () => {
-      it('should respond to the fullscreen event', () => {
-        return getReadyIframeCmpConsentUi().then((consentUI) => {
-          const enterFullscreenStub = env.sandbox.stub(
-            consentUI,
-            'enterFullscreen_'
-          );
-
-          sendMessageConsentUi(consentUI, 'enter-fullscreen');
-
-          expect(enterFullscreenStub).to.be.calledOnce;
-        });
-      });
-
       it(
         'should not handle the fullscreen event, ' +
           "if the iframe wasn't visible",

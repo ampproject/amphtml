@@ -24,7 +24,7 @@ import {
 } from '../../../src/utils/base64';
 import {stringToBytes, utf8Decode, utf8Encode} from '../../../src/utils/bytes';
 
-// TODO(amphtml, #25621): Cannot find atob / btoa on Safari on Sauce Labs.
+// TODO(amphtml, #25621): Cannot find atob / btoa on Safari.
 describe
   .configure()
   .skipSafari()

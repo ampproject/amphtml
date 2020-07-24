@@ -272,6 +272,15 @@ i-amphtml-sizer {
   display: none;
 }
 
+/** Hide all text node children of non-container elements. */
+.i-amphtml-notbuilt:not(.i-amphtml-layout-container),
+[layout]:not([layout='container']):not(.i-amphtml-element),
+[width][height][sizes]:not([layout]):not(.i-amphtml-element),
+[width][height][heights]:not([layout]):not(.i-amphtml-element) {
+  color: transparent !important;
+  line-height: 0 !important;
+}
+
 .i-amphtml-ghost {
   visibility: hidden !important;
 }
@@ -393,9 +402,11 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
   z-index: 2;
   visibility: hidden;
   /* display:initial overrides display:none from the "hide all children of
-     non-container elements" rule. This avoids a minor content jump after
+     non-container elements" rule. Similarly, line-height:normal overrides
+     line-height:0 for text node children. This avoids a minor content jump after
      element build since overflows increase the height of their parents. */
   display: initial;
+  line-height: normal;
 }
 
 .i-amphtml-element > [overflow].amp-visible {
@@ -426,7 +437,7 @@ amp-pixel {
 /**
  * Analytics & amp-story-auto-ads tags should never be visible. keep them hidden.
  */
-amp-analytics, amp-story-auto-ads {
+amp-analytics, amp-story-auto-ads, amp-auto-ads {
   /* Fixed to make position independent of page other elements. */
   position: fixed !important;
   top: 0 !important;

@@ -1502,7 +1502,7 @@ export class AnalyticsPercentageTracker {
       return;
     }
     while (this.unlisteners_.length > 0) {
-      this.unlisteners_.pop().call();
+      this.unlisteners_.pop()();
     }
     this.triggerId_++;
   }

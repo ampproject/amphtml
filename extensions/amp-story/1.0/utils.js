@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Layout} from '../../../src/layout';
+
 import {Services} from '../../../src/services';
 import {
   closestAncestorElementBySelector,
@@ -32,24 +32,21 @@ import {user, userAssert} from '../../../src/log';
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)
  * @param {string} time
+ * @param {number=} fallbackMs Used when `time` is not a valid time string.
  * @return {number|undefined}
  */
-export function timeStrToMillis(time) {
+export function timeStrToMillis(time, fallbackMs = NaN) {
   const match = time.toLowerCase().match(/^([0-9\.]+)\s*(s|ms)$/);
-  if (!match) {
-    return NaN;
+
+  const num = match ? match[1] : undefined;
+  const units = match ? match[2] : undefined;
+
+  if (!match || match.length !== 3 || (units !== 's' && units !== 'ms')) {
+    user().warn('AMP-STORY', 'Invalid time string', time);
+    return fallbackMs;
   }
 
-  const num = match[1];
-  const units = match[2];
-
-  userAssert(
-    match && match.length == 3 && (units == 's' || units == 'ms'),
-    'Invalid time string %s',
-    time
-  );
-
-  return units == 's' ? parseFloat(num) * 1000 : parseInt(num, 10);
+  return Math.round((units == 's' ? 1000 : 1) * parseFloat(num));
 }
 
 /**
@@ -249,23 +246,6 @@ export function resolveImgSrc(win, url) {
     urlSrc = urlSrc.replace('/c/s/', '/i/s/');
   }
   return urlSrc;
-}
-
-/**
- * Returns a boolean indicating whether the media element is visible or has to
- * play, or hidden by any publisher CSS rule.
- * @param {!Element} ampMediaEl amp-video or amp-audio
- * @param {!../../../src/service/resource.Resource} resource
- * @return {boolean}
- */
-export function isMediaDisplayed(ampMediaEl, resource) {
-  // Considers amp-audio elements with a layout=nodisplay attribute as
-  // displayed, since they are expected to play when the page is active.
-  return (
-    resource.isDisplayed() ||
-    (ampMediaEl.tagName === 'AMP-AUDIO' &&
-      ampMediaEl.getLayout() === Layout.NODISPLAY)
-  );
 }
 
 /**

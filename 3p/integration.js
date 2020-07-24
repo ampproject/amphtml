@@ -250,6 +250,7 @@ import {smartclip} from '../ads/smartclip';
 import {smi2} from '../ads/smi2';
 import {smilewanted} from '../ads/smilewanted';
 import {sogouad} from '../ads/sogouad';
+import {sona} from '../ads/sona';
 import {sortable} from '../ads/sortable';
 import {sovrn} from '../ads/sovrn';
 import {speakol} from '../ads/speakol';
@@ -291,6 +292,7 @@ import {yahoofedads} from '../ads/yahoofedads';
 import {yahoojp} from '../ads/yahoojp';
 import {yahoonativeads} from '../ads/yahoonativeads';
 import {yandex} from '../ads/yandex';
+import {yektanet} from '../ads/yektanet';
 import {yengo} from '../ads/yengo';
 import {yieldbot} from '../ads/yieldbot';
 import {yieldmo} from '../ads/yieldmo';
@@ -347,6 +349,7 @@ const AMP_EMBED_ALLOWED = {
   whopainfeed: true,
   yahoofedads: true,
   yahoonativeads: true,
+  yektanet: true,
   zen: true,
   zergnet: true,
 };
@@ -561,6 +564,7 @@ register('smi2', smi2);
 register('smilewanted', smilewanted);
 register('sogouad', sogouad);
 register('sortable', sortable);
+register('sona', sona);
 register('sovrn', sovrn);
 register('spotx', spotx);
 register('springAds', springAds);
@@ -601,6 +605,7 @@ register('yahoofedads', yahoofedads);
 register('yahoojp', yahoojp);
 register('yahoonativeads', yahoonativeads);
 register('yandex', yandex);
+register('yektanet', yektanet);
 register('yengo', yengo);
 register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);

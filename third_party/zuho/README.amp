@@ -13,3 +13,5 @@ Files in this directory (copied from https://github.com/y-fujii/zuho):
 Local Modifications:
 - Removed all event handling, CSS, menu UI and unused projection mappings
 - Refactored into module, exporting Renderer and Matrix classes
+- Removed String.raw calls (breaks the build)
+- Swapped X-axis projection (original code was horizontally mirroring the source image)

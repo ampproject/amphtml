@@ -15,45 +15,7 @@
  */
 
 export const BASE_STYLE = {
-  'backgroundRepeat': 'no-repeat',
-  'backgroundPosition': 'center',
   'textDecoration': 'none',
   'cursor': 'pointer',
   'position': 'relative',
 };
-
-/* Twitter Styling */
-export const TWITTER = {'backgroundColor': '1da1f2'};
-
-/* Facebook Styling */
-export const FACEBOOK = {'backgroundColor': '#32529f'};
-
-/* Pinterest Styling */
-export const PINTEREST = {'backgroundColor': 'e60023'};
-
-/* LinkedIn Styling */
-export const LINKEDIN = {'backgroundColor': '0077b5'};
-
-/* Google+ Styling */
-export const GPLUS = {'backgroundColor': 'dc4e41'};
-
-/* Tumblr Styling */
-export const TUMBLR = {'backgroundColor': '3c5a77'};
-
-/* Email Styling */
-export const EMAIL = {'backgroundColor': '000000'};
-
-/* Whatsapp Styling */
-export const WHATSAPP = {'backgroundColor': '25d366'};
-
-/* line Styling */
-export const LINE = {'backgroundColor': '52b448'};
-
-/* SMS Styling */
-export const SMS = {'backgroundColor': 'ca2b63'};
-
-/* "system" styling */
-export const SYSTEM = {'backgroundColor': '000000'};
-
-/* "default" styling */
-export const DEFAULT = {'backgroundColor': 'd3d3d3'};
