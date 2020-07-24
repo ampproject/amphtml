@@ -31,9 +31,6 @@ const {
   process3pGithubPr,
 } = require('./build-system/tasks/process-3p-github-pr');
 const {
-  processGithubIssues,
-} = require('./build-system/tasks/process-github-issues');
-const {
   storybookAmp,
   storybookPreact,
 } = require('./build-system/tasks/storybook');
@@ -74,6 +71,7 @@ const {release} = require('./build-system/tasks/release');
 const {serverTests} = require('./build-system/tasks/server-tests');
 const {serve} = require('./build-system/tasks/serve.js');
 const {size} = require('./build-system/tasks/size');
+const {testReportUpload} = require('./build-system/tasks/test-report-upload');
 const {todosFindClosed} = require('./build-system/tasks/todos');
 const {unit} = require('./build-system/tasks/unit');
 const {updatePackages} = require('./build-system/tasks/update-packages');
@@ -167,8 +165,8 @@ createTask('prepend-global', prependGlobal);
 createTask('presubmit', presubmit);
 createTask('prettify', prettify);
 createTask('process-3p-github-pr', process3pGithubPr);
-createTask('process-github-issues', processGithubIssues);
 createTask('release', release);
+createTask('test-report-upload', testReportUpload);
 createTask('serve', serve);
 createTask('server-tests', serverTests);
 createTask('size', size);

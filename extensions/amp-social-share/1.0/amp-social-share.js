@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-social-share-1.0.css';
 import {Layout} from '../../../src/layout';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
@@ -87,12 +88,15 @@ class AmpSocialShare extends PreactBaseElement {
       return;
     }
 
+    this.element.classList.add(`amp-social-share-${type}`);
     this.renderWithHrefAndTarget_(typeConfig);
     const responsive =
       this.element.getAttribute('layout') === Layout.RESPONSIVE && '100%';
     return dict({
       'width': responsive || this.element.getAttribute('width'),
       'height': responsive || this.element.getAttribute('height'),
+      'color': 'currentColor',
+      'background': 'inherit',
     });
   }
 
@@ -155,11 +159,14 @@ class AmpSocialShare extends PreactBaseElement {
 AmpSocialShare['Component'] = SocialShare;
 
 /** @override */
+AmpSocialShare['passthroughNonEmpty'] = true;
+
+/** @override */
 AmpSocialShare['props'] = {
   'tabIndex': {attr: 'tabindex'},
   'type': {attr: 'type'},
 };
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpSocialShare);
+  AMP.registerElement(TAG, AmpSocialShare, CSS);
 });
