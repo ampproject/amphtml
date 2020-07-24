@@ -3,7 +3,7 @@ $category@: dynamic-content
 formats:
   - websites
 teaser:
-  text: Allows running custom JavaScript to render UI.
+  text: Runs custom JavaScript in a Web Worker.
 experimental: true
 ---
 
@@ -23,37 +23,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# amp-script
 
-## Overview
+The `amp-script` component allows you to run custom JavaScript. To maintain AMP's performance guarantees, your code runs in a Web Worker, and certain restrictions apply.
 
-The `amp-script` component allows you run custom JavaScript to render UI elements, such as a React component.
-
-### A simple example
+## Usage
 
 An `amp-script` element can load JavaScript in two ways:
 
-- Remotely, from a URL to a JavaScript file.
-- Locally, from a `script[type=text/plain][target=amp-script]` element on the page.
+- remotely, from a URL
+- locally, from a `<script>` element on the page
 
-#### Load JavaScript from a remote URL
+#### From a remote URL
 
-Use the `src` attribute to load remote JavaScript.
+Use the `src` attribute to load JavaScript from a URL:
 
-```html
+[sourcecode:html]
 <amp-script layout="container" src="https://example.com/hello-world.js">
   <button>Hello amp-script!</button>
 </amp-script>
-```
+[/sourcecode]
 
-If `src` points to a cross-origin URL, then a ["script hash"](#security-features) must also be added to the document head.
+#### From a local element
 
-#### Load JavaScript from a local element
+Use the `script` attribute to reference a local `script` element by `id`. You must also specify `type="text/plain"` so that the browser doesn't execute your script immediately. Instead, `<amp-script>` finds it. Also include `target="amp-script"`, like this:
 
-Use the `script` attribute to reference a local `script` element by `id`.
-
-```html
-<!-- Using the "script" attribute also requires adding a "script hash" to the document head. -->
+[sourcecode:html]
+<!-- To use inline JavaScript, you must add a script hash to the document head. -->
 <head>
   <meta
     name="amp-script-src"
@@ -63,45 +58,43 @@ Use the `script` attribute to reference a local `script` element by `id`.
 
 ...
 
-<amp-script width="200" height="50" script="hello-world">
+<amp-script width="200" height="100" script="hello-world">
   <button>Hello amp-script!</button>
 </amp-script>
 
-<!-- Also add [target="amp-script"] to the <script> element. -->
+<!-- Add [target="amp-script"] to the <script> element. -->
 <script id="hello-world" type="text/plain" target="amp-script">
   const btn = document.querySelector('button');
   btn.addEventListener('click', () => {
     document.body.textContent = 'Hello World!';
   });
 </script>
-```
+[/sourcecode]
 
 [tip type="default"]
-`amp-script` elements that have a `script` or cross-origin `src` attribute require a ["script hash"](#security-features). Script hashes are specified in a `<meta name="amp-script-src" content="...">` element in the document head.
-
-A console error will be thrown with the expected `content` value -- you can copy/paste from the error to create the appropriate `<meta>` tag.
+For security reasons, `amp-script` elements with a `script` or cross-origin `src` attribute require a [script hash](#script-hash) in a `<meta name="amp-script-src" content="...">` tag. Also, same-origin `src` files must have [`Content-Type`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type): `application/javascript` or `text/javascript`.
 [/tip]
 
 ### How does it work?
 
-`amp-script` runs your custom JavaScript in a [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers) that contains a virtual DOM. When your JavaScript code modifies this virtual DOM, `amp-script` forwards these changes to the main thread and applies them to the `amp-script` element subtree.
+`amp-script` runs your custom JavaScript in a [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers) that has access to a virtual DOM. When your JavaScript code modifies this virtual DOM, `amp-script` forwards these changes to the main thread and applies them to the `amp-script` element subtree.
 
 For example, adding an element to `document.body`:
 
-```js
+[sourcecode:js]
 // my-script.js
 const p = document.createElement('p');
 p.textContent = 'I am added to the body!';
 document.body.appendChild(p);
-```
+[/sourcecode]
 
 Will be reflected on the page as a new child of the `amp-script` element:
 
-```html
+[sourcecode:html]
 <amp-script src="http://example.com/my-script.js" width="300" height="100">
   <p>I am added to the body!</p>
 </amp-script>
-```
+[/sourcecode]
 
 Under the hood, `amp-script` uses [@ampproject/worker-dom](https://github.com/ampproject/worker-dom/). For design details, see the ["Intent to Implement" issue](https://github.com/ampproject/amphtml/issues/13471).
 
@@ -115,7 +108,7 @@ This enables advanced interactions between `amp-script` and other AMP elements o
 `AMP.setState()` requires the [`amp-bind`](https://amp.dev/documentation/components/amp-bind) extension script to be included in the document head.
 [/tip]
 
-```js
+[sourcecode:js]
 /**
  * Deep-merges `json` into the current amp-state.
  * @param {!Object} json A JSON object e.g. must not contain circular references.
@@ -128,11 +121,11 @@ AMP.setState(json) {}
  * @return {!Promise<!Object>}
  */
 AMP.getState(expr) {}
-```
+[/sourcecode]
 
 ##### Example with WebSocket and AMP.setState()
 
-```html
+[sourcecode:html]
 <amp-script width="1" height="1" script="webSocketDemo"> </amp-script>
 
 <!--
@@ -145,7 +138,7 @@ AMP.getState(expr) {}
     AMP.setState({socketData: event.data});
   };
 </script>
-```
+[/sourcecode]
 
 ### Restrictions
 
@@ -155,14 +148,14 @@ Currently, most DOM elements and their properties are supported. DOM query APIs 
 
 If there's an API you'd like to see supported, please [file an issue](https://github.com/ampproject/amphtml/issues/new) and mention `@choumx` and `@kristoferbaxter`.
 
-#### Size of JavaScript code
+#### Size of JavaScript code <a name="size-of-javascript-code"></a>
 
 `amp-script` has the following restrictions on JavaScript file size:
 
 - Maximum of 10,000 bytes per `amp-script` element that uses a local script via `script[type=text/plain][target=amp-script]`.
 - Maximum total of 150,000 bytes for all `amp-script` elements on the page.
 
-#### User gestures
+#### User gestures <a name="user-gestures"></a>
 
 In some cases, `amp-script` requires a user gesture to apply changes triggered by your JavaScript code (we call these "mutations") to the `amp-script`'s DOM children. This helps avoid poor user experience from unexpected content jumping.
 
@@ -173,18 +166,40 @@ The rules for mutations are as follows:
 
 #### Creating AMP elements
 
-With regard to dynamic creation of AMP elements (e.g. via `document.createElement()`), only `amp-img` and `amp-layout` are currently allowed. Please upvote or comment on [#25344](https://github.com/ampproject/amphtml/issues/25344) with your use case.
+With regard to dynamic creation of AMP elements (e.g. via `document.createElement()`), only `amp-img` and `amp-layout` are currently allowed. Please upvote or comment on {{'[% raw %]'}}[#{{'{% endraw %}'}}25344](https://github.com/ampproject/amphtml/issues/25344) with your use case.
 
-#### Security features
+### Calculating the script hash <a name="script-hash"></a>
 
-Since custom JS run in `amp-script` is not subject to normal [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP), we've included some additional measures that are checked at runtime:
+Since custom JS run in `amp-script` is not subject to normal [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP), you need to add this script hash:
 
-1. Same-origin `src` must have [`Content-Type`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type): `application/javascript` or `text/javascript`.
-2. Cross-origin `src` and `script` must have matching script hashes in a `meta[name=amp-script-src]` element in the document head. A console error will be emitted with the expected hash string.
+- for inline JavaScript 
+- for JavaScript loaded from a cross-origin source
 
-Example of script hashes:
+Include the script hash in a `meta[name=amp-script-src]` element in the document head. Here are a few ways to build the hash:
 
-```html
+1. If you omit the `<meta>` tag, AMP will output a console error containing the expected hash string. You can copy this to create the appropriate `<meta>` tag.
+1. The [AMP Optimizer node module](https://www.npmjs.com/package/@ampproject/toolbox-optimizer) generates this hash and inserts the `<meta>` tag automatically.
+1. Build it yourself, using the following steps:
+  1. Compute the SHA384 hash sum of the script's contents. This sum should be expressed in hexadecimal.
+  1. base64url-encode the result.
+  1. Prefix that with `sha384-`.
+
+Here's you might build the hash in node.js:
+
+```js
+function generateCSPHash(script) {
+  const hash = crypto.createHash('sha384');
+  const data = hash.update(script, 'utf-8');
+  return 'sha384-' + data.digest('base64')
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+}
+```
+
+This example shows how to use the script hash in HTML:
+
+[sourcecode:html]
 <head>
   <!--
     A meta[name="amp-script-src"] element contains all script hashes for
@@ -219,10 +234,10 @@ Example of script hashes:
     document.body.textContent += 'Hello world!';
   </script>
 </body>
-```
+[/sourcecode]
 
 [tip type="default"]
-The JavaScript size and script hash requirements can be disabled during development by adding a `data-ampdevmode` attribute to either the `amp-script` element or the root html node.
+During development, you can disable the JavaScript size and script hash requirements by adding a `data-ampdevmode` attribute to either the `amp-script` element or the root html node. Adding this to the root html node will suppress all validation errors on the page. Adding it to the `amp-script` element will simply suppress errors about the size and the script hash.
 [/tip]
 
 ## Attributes
@@ -273,7 +288,7 @@ There are several types of runtime errors that may be encountered when using `am
 
 #### "Script hash not found."
 
-Local scripts and cross-origin `src` require adding a special `<meta>` tag to be used. See [Security features](#security-features) above.
+For local scripts and cross-origin scripts, you need to add a [script hash](#script-hash) for security.
 
 #### "amp-script... was terminated due to illegal mutation"
 
