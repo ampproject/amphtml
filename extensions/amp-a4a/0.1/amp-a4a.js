@@ -2123,8 +2123,8 @@ export class AmpA4A extends AMP.BaseElement {
     if (runtimeType === '10') {
       return MODULE_NOMODULE_PARAMS_EXP.CONTROL;
     }
-    // ES6 = 2, ES6 No Preload = 4 (module/nomodule mode)
-    if (runtimeType === '2' || runtimeType === '4') {
+    // ES6 = 2 (module/nomodule mode)
+    if (runtimeType === '2') {
       return MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT;
     }
     return null;

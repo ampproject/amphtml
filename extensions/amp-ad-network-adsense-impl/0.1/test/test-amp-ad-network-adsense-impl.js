@@ -887,14 +887,6 @@ describes.realWin(
         });
       });
 
-      it('should have module nomodule experiment id in url when runtime type is 4', () => {
-        env.sandbox.stub(ampdoc, 'getMetaByName').returns('4');
-        impl.buildCallback();
-        return impl.getAdUrl().then((url) => {
-          expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT);
-        });
-      });
-
       it('should have module nomodule experiment id in url when runtime type is 10', () => {
         env.sandbox.stub(ampdoc, 'getMetaByName').returns('10');
         impl.buildCallback();

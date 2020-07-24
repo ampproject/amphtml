@@ -1988,19 +1988,6 @@ describes.realWin(
           ).to.be.true;
         });
 
-        it('should identify module/nomodule experiment when runtime-type is 4', () => {
-          getAmpDocStub./*OK*/ restore();
-          env.sandbox.stub(impl, 'getAmpDoc').returns({
-            whenFirstVisible: () => new Deferred().promise,
-            getMetaByName: () => '4',
-          });
-          randomlySelectUnsetExperimentsStub.returns({});
-          impl.setPageLevelExperiments();
-          expect(
-            impl.experimentIds.includes(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT)
-          ).to.be.true;
-        });
-
         // Only 2, 4, 10 should be recognized.
         it('should ignore module/nomodule experiment when runtime-type is 6', () => {
           getAmpDocStub./*OK*/ restore();
