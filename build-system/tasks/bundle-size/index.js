@@ -222,13 +222,13 @@ async function getLocalBundleSize() {
 
 async function bundleSize() {
   if (argv.on_skipped_build) {
-    return await skipBundleSize();
+    return skipBundleSize();
   } else if (argv.on_push_build) {
-    return await storeBundleSize();
+    return storeBundleSize();
   } else if (argv.on_pr_build) {
-    return await reportBundleSize();
+    return reportBundleSize();
   } else if (argv.on_local_build) {
-    return await getLocalBundleSize();
+    return getLocalBundleSize();
   } else {
     log(red('Called'), cyan('gulp bundle-size'), red('with no task.'));
     process.exitCode = 1;
