@@ -37,6 +37,13 @@ module.exports = {
         query: {
           presets: [
             [
+              '@babel/preset-env',
+              {
+                bugfixes: true,
+                targets: {'browsers': ['Last 2 versions']},
+              },
+            ],
+            [
               '@babel/preset-react',
               {
                 pragma: 'Preact.createElement',

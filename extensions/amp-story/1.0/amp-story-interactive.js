@@ -36,6 +36,7 @@ import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {emojiConfetti} from './interactive-confetti';
 import {getRequestService} from './amp-story-request-service';
 import {toArray} from '../../../src/types';
 
@@ -81,6 +82,7 @@ export let InteractiveResponseType;
  *    correct: ?string,
  *    resultscategory: ?string,
  *    image: ?string,
+ *    confetti: ?string,
  * }}
  */
 export let OptionConfigType;
@@ -206,6 +208,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   }
 
   /**
+   * Gets the interactive ID
    * @private
    * @return {string}
    */
@@ -435,7 +438,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   /**
    * Handles a tap event on the quiz element.
    * @param {Event} e
-   * @private
+   * @protected
    */
   handleTap_(e) {
     if (this.hasUserSelection_) {
@@ -726,13 +729,21 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   }
 
   /**
-   * Updates the selected classes on option selected.
-   * @param {!Element} selectedOption
-   * @private
+   * Updates the selected classes on component and option selected.
+   * @param {?Element} selectedOption
+   * @protected
    */
   updateToPostSelectionState_(selectedOption) {
     this.rootEl_.classList.add('i-amphtml-story-interactive-post-selection');
-    selectedOption.classList.add('i-amphtml-story-interactive-option-selected');
+    if (selectedOption != null) {
+      selectedOption.classList.add(
+        'i-amphtml-story-interactive-option-selected'
+      );
+      const confettiEmoji = this.options_[selectedOption.optionIndex_].confetti;
+      if (confettiEmoji) {
+        emojiConfetti(this.rootEl_, this.win, confettiEmoji);
+      }
+    }
 
     if (this.optionsData_) {
       this.rootEl_.classList.add('i-amphtml-story-interactive-has-data');
