@@ -25,7 +25,9 @@ To use RTC, you must meet the following requirements:
 - Browsi
 - Criteo
 - FLUX
+- [Freestar](https://freestar.com)
 - IndexExchange
+- Kargo
 - Lotame
 - Media.net
 - The Ozone Project
@@ -34,9 +36,7 @@ To use RTC, you must meet the following requirements:
 - Rubicon
 - Salesforce
 - Yieldbot
-- Kargo
 - Yieldlab
-- [Freestar](https://freestar.com)
 
 ### Overview
 
