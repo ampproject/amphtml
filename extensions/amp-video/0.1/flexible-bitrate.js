@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {DomBasedWeakRef} from '../../../src/utils/dom-based-weakref';
 import {childElement, childElementsByTag} from '../../../src/dom';
 import {dev, devAssert} from '../../../src/log';
 import {listen, listenOnce} from '../../../src/event-helper';
@@ -76,6 +77,9 @@ export class BitrateManager {
     this.effectiveConnectionType_ = '';
     /** @private {number} */
     this.acceptableBitrate_ = this.getAcceptableBitrate_();
+
+    /** @private {!Array<!WeakRef<!Element>|!../../../src/utils/dom-based-weakref.DomBasedWeakRef<!Element>>} */
+    this.videos_ = [];
   }
 
   /**
@@ -91,10 +95,12 @@ export class BitrateManager {
       const current = currentSource(video);
       this.acceptableBitrate_ = current.bitrate_ - 1;
       this.switchToLowerBitrate_(video, current.bitrate_);
+      this.updateOtherManagedAndPausedVideos_();
     });
     video.changedSources = () => {
       this.sortSources_(video);
     };
+    this.videos_.push(DomBasedWeakRef.make(this.win, video));
   }
 
   /**
@@ -212,6 +218,28 @@ export class BitrateManager {
       video.play();
       dev().fine(TAG, 'Playing at lower bitrate %s', video.currentSrc);
     });
+  }
+
+  /**
+   * Update other managed videos when we learn that the current selected
+   * bandwidth wasn't good. Only operates on videos that are currently paused
+   * as we never want to interrupt playing videos if we don't have to.
+   * @private
+   */
+  updateOtherManagedAndPausedVideos_() {
+    for (let i = this.videos_.length - 1; i >= 0; i--) {
+      const weakref = this.videos_[i];
+      const video = weakref.deref();
+      if (!video) {
+        this.videos_.splice(i, 1);
+        return;
+      }
+      if (!video.paused) {
+        return;
+      }
+      this.sortSources_(video);
+      video.load();
+    }
   }
 }
 
