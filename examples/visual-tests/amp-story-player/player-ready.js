@@ -22,5 +22,6 @@ module.exports = {
         e.addEventListener('ready', (readyEvent) => resolve(readyEvent));
       })
     });
+    await page.waitFor(10000);
   }
 };

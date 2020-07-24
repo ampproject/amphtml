@@ -24,5 +24,11 @@ module.exports = {
     });
     await page.waitFor(5000);
     await page.waitForSelector('.i-amphtml-story-loaded');
+    await page.$eval('iframe', (iframe) => {
+      const contents = iframe.contentDocument.documentElement.outerHTML;
+      iframe.src = '';
+      iframe.srcdoc = contents;
+    });
+    await page.waitFor(5000);
   }
 };
