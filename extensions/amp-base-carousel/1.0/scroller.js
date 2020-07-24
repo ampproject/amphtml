@@ -126,7 +126,7 @@ export function Scroller(props) {
 
   return (
     <>
-      <style>{styles.hideScrollbarPseudo}</style>
+      <style>{styles.scrollerStyles}</style>
       <div
         hide-scrollbar
         key="container"
@@ -215,7 +215,9 @@ function renderSlides(props) {
         renderable={index == restingIndex}
         playable={index == restingIndex}
       >
-        <div style={styles.slideElement}>{child}</div>
+        <div style={styles.slideElement} className="i-amphtml-carousel-slide">
+          {child}
+        </div>
       </WithAmpContext>
     );
   });
