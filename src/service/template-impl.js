@@ -101,13 +101,17 @@ export class BaseTemplate {
   /**
    * Helps the template implementation to unwrap the root element. The root
    * element contents are unwrapped as an array of elements. Any text node
-   * children are normalized inside a <div>.
+   * children are normalized inside a <div>. Any root with non-element children
+   * is returned as is to preserve the root tag rather than replaceed with <div>.
    * @param {!Element} root
    * @return {!Element|!Array<!Element>}
    * @protected @final
    */
   unwrapChildren(root) {
     const elements = [];
+    if (!root.firstElementChild) {
+      return root;
+    }
     for (let n = root.firstChild; n != null; n = n.nextSibling) {
       if (n.nodeType == /* TEXT */ 3) {
         const content = n.textContent.trim();
