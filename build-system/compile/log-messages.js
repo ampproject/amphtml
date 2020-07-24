@@ -37,7 +37,8 @@ const formats = {
 };
 
 /** @return {!Promise<!Array<!Object>>} */
-const extractedItems = () => fs.readJson(extractedPath).then(Object.values);
+const extractedItems = async () =>
+  fs.readJson(extractedPath).then(Object.values);
 
 /**
  * Format extracted messages table in multiple outputs, keyed by id.

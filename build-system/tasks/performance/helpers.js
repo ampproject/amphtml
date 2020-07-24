@@ -93,16 +93,15 @@ function getLocalPathFromExtension(extension) {
  * @param {string} version
  * @return {!Promise<string>} Resolves with relative path to file
  */
-function downloadToDisk(url, version = CONTROL) {
+async function downloadToDisk(url, version = CONTROL) {
   touchDirs();
 
-  return fetch(url)
-    .then((response) => response.text())
-    .then((document) => {
-      const filepath = urlToCachePath(url, version);
-      fs.writeFileSync(filepath, document);
-      return filepath.split(`performance/cache/${version}/`)[1];
-    });
+  const response = await fetch(url);
+  const document = await response.text();
+  const filepath = urlToCachePath(url, version);
+  fs.writeFileSync(filepath, document);
+
+  return filepath.split(`performance/cache/${version}/`)[1];
 }
 
 /**
@@ -112,7 +111,7 @@ function downloadToDisk(url, version = CONTROL) {
  * @param {string} version
  * @return {!Promise<string>} Resolves with relative path to file
  */
-function copyToCache(filePath, version = EXPERIMENT) {
+async function copyToCache(filePath, version = EXPERIMENT) {
   touchDirs();
 
   const fromPath = path.join(__dirname, '../../../dist/', filePath);
@@ -122,7 +121,7 @@ function copyToCache(filePath, version = EXPERIMENT) {
 
   fs.copyFileSync(fromPath, destPath);
 
-  return Promise.resolve(filePath);
+  return filePath;
 }
 
 /**
@@ -172,8 +171,8 @@ function getLocalVendorConfig(vendor) {
  * @param {string} filePath
  * @return {!Promise<string>} Resolves with relative path to file
  */
-function getFileFromAbsolutePath(filePath) {
-  return Promise.resolve(fs.readFileSync(filePath));
+async function getFileFromAbsolutePath(filePath) {
+  return fs.readFileSync(filePath);
 }
 
 /**
