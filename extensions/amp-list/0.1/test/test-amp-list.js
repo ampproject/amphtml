@@ -1093,7 +1093,8 @@ describes.repeated(
             it('should render a list from AmpScriptService provided data', async () => {
               toggleExperiment(win, 'protocol-adapters', true);
               Services.scriptForDocOrNull.returns(Promise.resolve({}));
-              ampScriptEl.getImpl = () => Promise.resolve({
+              ampScriptEl.getImpl = () =>
+                Promise.resolve({
                   callFunction(fnId) {
                     if (fnId === 'fetchData') {
                       return Promise.resolve({items: [3, 2, 1]});

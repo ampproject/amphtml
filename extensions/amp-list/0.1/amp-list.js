@@ -50,6 +50,7 @@ import {
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
 import {getValueForExpr} from '../../../src/json';
@@ -65,7 +66,6 @@ import {isExperimentOn} from '../../../src/experiments';
 import {px, setImportantStyles, setStyles, toggle} from '../../../src/style';
 import {setDOM} from '../../../third_party/set-dom/set-dom';
 import {startsWith} from '../../../src/string';
-import {escapeCssSelectorIdent} from '../../../src/css';
 
 /** @const {string} */
 const TAG = 'amp-list';
@@ -77,7 +77,6 @@ const TABBABLE_ELEMENTS_QUERY =
 // Technically the ':' is not considered part of the scheme, but it is useful to include.
 const AMP_STATE_URI_SCHEME = 'amp-state:';
 const AMP_SCRIPT_URI_SCHEME = 'amp-script:';
-const PROTOCOL_ADAPTERS = 'protocol-adapters';
 
 /**
  * @typedef {{
@@ -468,10 +467,8 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   getAmpScriptJson_(src) {
-    if (!isExperimentOn(this.win, PROTOCOL_ADAPTERS)) {
-      return Promise.reject(
-        `Experiment ${PROTOCOL_ADAPTERS} is not turned on.`
-      );
+    if (!isExperimentOn(this.win, 'protocol-adapters')) {
+      return Promise.reject(`Experiment 'protocol-adapters' is not turned on.`);
     }
     return Services.scriptForDocOrNull(this.element)
       .then((ampScript) => {
