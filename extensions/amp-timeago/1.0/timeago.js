@@ -15,6 +15,7 @@
  */
 
 import * as Preact from '../../../src/preact';
+import {ContainWrapper} from '../../../src/preact/component';
 import {timeago} from '../../../third_party/timeagojs/timeago';
 import {useEffect, useRef, useState} from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
@@ -31,6 +32,7 @@ export function Timeago({
   locale = DEFAULT_LOCALE,
   cutoff,
   cutoffText,
+  containSize = false,
   ...rest
 }) {
   const [timestamp, setTimestamp] = useState('');
@@ -53,10 +55,19 @@ export function Timeago({
   }, [datetime, locale, cutoff, cutoffText]);
 
   useResourcesNotify();
+
   return (
-    <time datetime={datetime} ref={ref} {...rest}>
+    <ContainWrapper
+      as="time"
+      size={containSize}
+      layout={true}
+      paint={true}
+      contentRef={ref}
+      datetime={datetime}
+      {...rest}
+    >
       {timestamp}
-    </time>
+    </ContainWrapper>
   );
 }
 
