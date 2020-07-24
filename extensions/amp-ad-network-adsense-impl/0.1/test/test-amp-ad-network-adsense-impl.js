@@ -880,37 +880,41 @@ describes.realWin(
         });
       });
 
-      //it.only('should have module nomodule control', () => {
-        //env.sandbox.stub(impl, 'getAmpDoc').returns({
-          //whenFirstVisible: () => new Deferred().promise,
-          //getMetaByName: () => '2',
-          //isSingleDoc: () => true,
-        //});
-        //env.sandbox.stub(impl, 'getViewport').returns({
-          //getSize: () => ({width: 375, height: 667}),
-        //});
-        //return impl.buildCallback().then(() => {
-          //return impl.getAdUrl().then((url) => {
-            //console.log(url);
-            //expect(url).to.contain(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT);
-          //});
-        //});
-      //});
-
-      it.only('should have module nomodule control', () => {
-        env.sandbox.stub(impl, 'getAmpDoc').returns({
-          whenFirstVisible: () => new Deferred().promise,
-          getMetaByName: () => '2',
-          isSingleDoc: () => true,
-        });
-        env.sandbox.stub(impl.getViewport(), 'getSize').return({
-          width: 375,
-          height: 667,
-        });
-        impl.win['goog_identity_prom'] = Promise.resolve({});
+      it('should have module nomodule experiment id in url when runtime type is 2', () => {
+        env.sandbox.stub(ampdoc, 'getMetaByName').returns('2');
         impl.buildCallback();
         return impl.getAdUrl().then((url) => {
-          expect(url).to.contain(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT);
+          console.log(url);
+          expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT);
+        });
+      });
+
+      it('should have module nomodule experiment id in url when runtime type is 4', () => {
+        env.sandbox.stub(ampdoc, 'getMetaByName').returns('4');
+        impl.buildCallback();
+        return impl.getAdUrl().then((url) => {
+          console.log(url);
+          expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT);
+        });
+      });
+
+      it('should have module nomodule experiment id in url when runtime type is 10', () => {
+        env.sandbox.stub(ampdoc, 'getMetaByName').returns('10');
+        impl.buildCallback();
+        return impl.getAdUrl().then((url) => {
+          console.log(url);
+          expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.CONTROL);
+        });
+      });
+
+      // 2, 4, and 10 should the only one that triggers this experiment diversion.
+      it('should not have module nomodule experiment id in url when runtime type is 0', () => {
+        env.sandbox.stub(ampdoc, 'getMetaByName').returns('0');
+        impl.buildCallback();
+        return impl.getAdUrl().then((url) => {
+          console.log(url);
+          expect(url).to.not.have.string(MODULE_NOMODULE_PARAMS_EXP.CONTROL);
+          expect(url).to.not.have.string(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT);
         });
       });
     });
