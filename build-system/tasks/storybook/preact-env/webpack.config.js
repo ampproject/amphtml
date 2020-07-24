@@ -40,7 +40,6 @@ module.exports = {
               '@babel/preset-env',
               {
                 bugfixes: true,
-                loose: true,
                 targets: {'browsers': ['Last 2 versions']},
               },
             ],
