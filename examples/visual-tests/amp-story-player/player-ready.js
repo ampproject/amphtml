@@ -16,10 +16,6 @@
 'use strict';
 
 module.exports = {
-  'story loaded': async page => {
-    await page.waitForSelector('.i-amphtml-story-player-loaded');
-  },
-
   'player ready': async page => {
     await page.$eval('amp-story-player', e => {
       new Promise(resolve => {
