@@ -176,12 +176,13 @@ Since custom JS run in `amp-script` is not subject to normal [Content Security P
 
 Include the script hash in a `meta[name=amp-script-src]` element in the document head. Here are a few ways to build the hash:
 
-1. If you omit the `<meta>` tag, AMP will output a console error containing the expected hash string. You can copy this to create the appropriate `<meta>` tag.
-1. The [AMP Optimizer node module](https://www.npmjs.com/package/@ampproject/toolbox-optimizer) generates this hash and inserts the `<meta>` tag automatically.
-1. Build it yourself, using the following steps:
-   a. Compute the SHA384 hash sum of the script's contents. This sum should be expressed in hexadecimal.
-   a. base64url-encode the result.
-   a. Prefix that with `sha384-`.
+- If you omit the `<meta>` tag, AMP will output a console error containing the expected hash string. You can copy this to create the appropriate `<meta>` tag.
+- The [AMP Optimizer node module](https://www.npmjs.com/package/@ampproject/toolbox-optimizer) generates this hash and inserts the `<meta>` tag automatically.
+- Build it yourself, using the following steps:
+
+  1.  Compute the SHA384 hash sum of the script's contents. This sum should be expressed in hexadecimal.
+  1.  base64url-encode the result.
+  1.  Prefix that with `sha384-`.
 
 Here's you might build the hash in node.js:
 
