@@ -18,7 +18,6 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
 } from '../../../src/consent-state';
-import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
@@ -64,6 +63,7 @@ import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {streamResponseToWriter} from '../../../src/utils/stream-response';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {tryResolve} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @type {Array<string>} */
@@ -365,19 +365,6 @@ export class AmpA4A extends AMP.BaseElement {
      * @type {boolean}
      */
     this.isSinglePageStoryAd = false;
-
-    const sanitizedHeadPromise = new Deferred();
-    /**
-     * Promise that will resolve with processed <head> from ad server response.
-     * @private {!Promise}
-     */
-    this.sanitizedHeadPromise_ = sanitizedHeadPromise.promise;
-
-    /**
-     * Resolves the promise that the head has been processed.
-     * @private {function()}
-     */
-    this.sanitizedHeadResolver_ = sanitizedHeadPromise.resolve;
 
     /**
      * Transfers elements from the detached body to the given body element.
@@ -920,9 +907,7 @@ export class AmpA4A extends AMP.BaseElement {
         }
         this.updateLayoutPriority(LayoutPriority.CONTENT);
         this.isVerifiedAmpCreative_ = true;
-        this.sanitizedHeadResolver_(sanitizedHead);
-        // WIP: maybe return sanitized head and get rid of resolver
-        return true;
+        return sanitizedHead;
       });
   }
 
@@ -1275,6 +1260,7 @@ export class AmpA4A extends AMP.BaseElement {
 
         if (this.isInNoSigningExp()) {
           friendlyRenderPromise = this.renderFriendlyTrustless_(
+            creativeMetaData,
             checkStillCurrent
           );
         } else {
@@ -1636,59 +1622,58 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * @param {ValidatedHeadDef} headData
    * @param {function()} checkStillCurrent
    * @return {!Promise} Whether the creative was successfully rendered.
    */
-  renderFriendlyTrustless_(checkStillCurrent) {
-    return this.sanitizedHeadPromise_.then((headData) => {
+  renderFriendlyTrustless_(headData, checkStillCurrent) {
+    checkStillCurrent();
+    devAssert(this.element.ownerDocument);
+    this.maybeTriggerAnalyticsEvent_('renderFriendlyStart');
+
+    const {height, width} = this.creativeSize_;
+    const {extensions, fonts, head} = headData;
+    this.iframe = createSecureFrame(
+      this.element.ownerDocument,
+      head,
+      this.getIframeTitle(),
+      height,
+      width
+    );
+    this.applyFillContent(this.iframe);
+
+    // TODO(ccordry): FIE does not handle extension versioning, but we have
+    // it accessible here.
+    const extensionIds = extensions.map((extension) => extension.extensionId);
+
+    return installFriendlyIframeEmbed(
+      devAssert(this.iframe),
+      this.element,
+      {
+        host: this.element,
+        url: devAssert(this.adUrl_),
+        html: null,
+        extensionIds,
+        fonts,
+      },
+      (embedWin, ampdoc) => this.preinstallCallback_(embedWin, ampdoc)
+    ).then((friendlyIframeEmbed) => {
       checkStillCurrent();
-      devAssert(this.element.ownerDocument);
-      this.maybeTriggerAnalyticsEvent_('renderFriendlyStart');
-
-      const {height, width} = this.creativeSize_;
-      const {extensions, fonts, head} = headData;
-      this.iframe = createSecureFrame(
-        this.element.ownerDocument,
-        head,
-        this.getIframeTitle(),
-        height,
-        width
-      );
-      this.applyFillContent(this.iframe);
-
-      // TODO(ccordry): FIE does not handle extension versioning, but we have
-      // it accessible here.
-      const extensionIds = extensions.map((extension) => extension.extensionId);
-
-      return installFriendlyIframeEmbed(
-        devAssert(this.iframe),
-        this.element,
+      const fieBody = this.getFieBody_(friendlyIframeEmbed);
+      const renderComplete = this.transferBody_(devAssert(fieBody));
+      this.makeFieVisible_(
+        friendlyIframeEmbed,
+        // TODO(ccordry): subclasses are passed creativeMetadata which does
+        // not exist in unsigned case. All it is currently used for is to
+        // check if it is an AMP creative, and extension list.
         {
-          host: this.element,
-          url: devAssert(this.adUrl_),
-          html: null,
-          extensionIds,
-          fonts,
+          minifiedCreative: '',
+          customStylesheets: [],
+          customElementExtensions: extensionIds,
         },
-        (embedWin, ampdoc) => this.preinstallCallback_(embedWin, ampdoc)
-      ).then((friendlyIframeEmbed) => {
-        checkStillCurrent();
-        const fieBody = this.getFieBody_(friendlyIframeEmbed);
-        const renderComplete = this.transferBody_(devAssert(fieBody));
-        this.makeFieVisible_(
-          friendlyIframeEmbed,
-          // TODO(ccordry): subclasses are passed creativeMetadata which does
-          // not exist in unsigned case. All it is currently used for is to
-          // check if it is an AMP creative, and extension list.
-          {
-            minifiedCreative: '',
-            customStylesheets: [],
-            customElementExtensions: extensionIds,
-          },
-          checkStillCurrent
-        );
-        return renderComplete;
-      });
+        checkStillCurrent
+      );
+      return renderComplete;
     });
   }
 
