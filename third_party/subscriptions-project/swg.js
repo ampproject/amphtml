@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.110 */
+/** Version: 0.1.22.113 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -73,6 +73,9 @@ const AnalyticsEvent = {
   ACTION_SWG_BUTTON_SELECT_OFFER_CLICK: 1018,
   ACTION_SWG_BUTTON_SHOW_CONTRIBUTIONS_CLICK: 1019,
   ACTION_SWG_BUTTON_SELECT_CONTRIBUTION_CLICK: 1020,
+  ACTION_USER_CONSENT_DEFERRED_ACCOUNT: 1021,
+  ACTION_USER_DENY_DEFERRED_ACCOUNT: 1022,
+  ACTION_DEFERRED_ACCOUNT_REDIRECT: 1023,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
@@ -124,12 +127,12 @@ class AccountCreationRequest {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.complete_, // field 1 - complete
+        this.complete_, // field 1 - complete
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -194,13 +197,13 @@ class AlreadySubscribedResponse {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.subscriberOrMember_, // field 1 - subscriber_or_member
-      this.linkRequested_, // field 2 - link_requested
+        this.subscriberOrMember_, // field 1 - subscriber_or_member
+        this.linkRequested_, // field 2 - link_requested
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -418,22 +421,22 @@ class AnalyticsContext {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.embedderOrigin_, // field 1 - embedder_origin
-      this.transactionId_, // field 2 - transaction_id
-      this.referringOrigin_, // field 3 - referring_origin
-      this.utmSource_, // field 4 - utm_source
-      this.utmCampaign_, // field 5 - utm_campaign
-      this.utmMedium_, // field 6 - utm_medium
-      this.sku_, // field 7 - sku
-      this.readyToPay_, // field 8 - ready_to_pay
-      this.label_, // field 9 - label
-      this.clientVersion_, // field 10 - client_version
-      this.url_, // field 11 - url
+        this.embedderOrigin_, // field 1 - embedder_origin
+        this.transactionId_, // field 2 - transaction_id
+        this.referringOrigin_, // field 3 - referring_origin
+        this.utmSource_, // field 4 - utm_source
+        this.utmCampaign_, // field 5 - utm_campaign
+        this.utmMedium_, // field 6 - utm_medium
+        this.sku_, // field 7 - sku
+        this.readyToPay_, // field 8 - ready_to_pay
+        this.label_, // field 9 - label
+        this.clientVersion_, // field 10 - client_version
+        this.url_, // field 11 - url
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -498,13 +501,13 @@ class AnalyticsEventMeta {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.eventOriginator_, // field 1 - event_originator
-      this.isFromUserAction_, // field 2 - is_from_user_action
+        this.eventOriginator_, // field 1 - event_originator
+        this.isFromUserAction_, // field 2 - is_from_user_action
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -612,15 +615,15 @@ class AnalyticsRequest {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.context_ ? this.context_.toArray(includeLabel) : [], // field 1 - context
-      this.event_, // field 2 - event
-      this.meta_ ? this.meta_.toArray(includeLabel) : [], // field 3 - meta
-      this.params_ ? this.params_.toArray(includeLabel) : [], // field 4 - params
+        this.context_ ? this.context_.toArray(includeLabel) : [], // field 1 - context
+        this.event_, // field 2 - event
+        this.meta_ ? this.meta_.toArray(includeLabel) : [], // field 3 - meta
+        this.params_ ? this.params_.toArray(includeLabel) : [], // field 4 - params
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -634,6 +637,117 @@ class AnalyticsRequest {
    */
   label() {
     return 'AnalyticsRequest';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class EntitlementsPingbackRequest {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
+
+    /** @private {?string} */
+    this.hashedCanonicalUrl_ = data[base] == null ? null : data[base];
+
+    /** @private {?string} */
+    this.publisherUserId_ = data[1 + base] == null ? null : data[1 + base];
+
+    /** @private {?Timestamp} */
+    this.clientEventTime_ =
+      data[2 + base] == null || data[2 + base] == undefined
+        ? null
+        : new Timestamp(data[2 + base], includesLabel);
+
+    /** @private {?string} */
+    this.signedMeter_ = data[3 + base] == null ? null : data[3 + base];
+  }
+
+  /**
+   * @return {?string}
+   */
+  getHashedCanonicalUrl() {
+    return this.hashedCanonicalUrl_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setHashedCanonicalUrl(value) {
+    this.hashedCanonicalUrl_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getPublisherUserId() {
+    return this.publisherUserId_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setPublisherUserId(value) {
+    this.publisherUserId_ = value;
+  }
+
+  /**
+   * @return {?Timestamp}
+   */
+  getClientEventTime() {
+    return this.clientEventTime_;
+  }
+
+  /**
+   * @param {!Timestamp} value
+   */
+  setClientEventTime(value) {
+    this.clientEventTime_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getSignedMeter() {
+    return this.signedMeter_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setSignedMeter(value) {
+    this.signedMeter_ = value;
+  }
+
+  /**
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
+   * @override
+   */
+  toArray(includeLabel = true) {
+    const arr = [
+      this.hashedCanonicalUrl_,  // field 1 - hashed_canonical_url
+      this.publisherUserId_,     // field 2 - publisher_user_id
+      this.clientEventTime_ ? this.clientEventTime_.toArray(includeLabel) :
+                              [],  // field 3 - client_event_time
+      this.signedMeter_,           // field 4 - signed_meter
+    ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'EntitlementsPingbackRequest';
   }
 }
 
@@ -668,12 +782,12 @@ class EntitlementsResponse {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.jwt_, // field 1 - jwt
+        this.jwt_, // field 1 - jwt
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -789,16 +903,16 @@ class EventParams {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.smartboxMessage_, // field 1 - smartbox_message
-      this.gpayTransactionId_, // field 2 - gpay_transaction_id
-      this.hadLogged_, // field 3 - had_logged
-      this.sku_, // field 4 - sku
-      this.oldTransactionId_, // field 5 - old_transaction_id
+        this.smartboxMessage_, // field 1 - smartbox_message
+        this.gpayTransactionId_, // field 2 - gpay_transaction_id
+        this.hadLogged_, // field 3 - had_logged
+        this.sku_, // field 4 - sku
+        this.oldTransactionId_, // field 5 - old_transaction_id
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -863,13 +977,13 @@ class FinishedLoggingResponse {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.complete_, // field 1 - complete
-      this.error_, // field 2 - error
+        this.complete_, // field 1 - complete
+        this.error_, // field 2 - error
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -934,13 +1048,13 @@ class LinkSaveTokenRequest {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.authCode_, // field 1 - auth_code
-      this.token_, // field 2 - token
+        this.authCode_, // field 1 - auth_code
+        this.token_, // field 2 - token
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -988,12 +1102,12 @@ class LinkingInfoResponse {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.requested_, // field 1 - requested
+        this.requested_, // field 1 - requested
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1109,16 +1223,16 @@ class SkuSelectedResponse {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.sku_, // field 1 - sku
-      this.oldSku_, // field 2 - old_sku
-      this.oneTime_, // field 3 - one_time
-      this.playOffer_, // field 4 - play_offer
-      this.oldPlayOffer_, // field 5 - old_play_offer
+        this.sku_, // field 1 - sku
+        this.oldSku_, // field 2 - old_sku
+        this.oneTime_, // field 3 - one_time
+        this.playOffer_, // field 4 - play_offer
+        this.oldPlayOffer_, // field 5 - old_play_offer
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1166,12 +1280,12 @@ class SmartBoxMessage {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.isClicked_, // field 1 - is_clicked
+        this.isClicked_, // field 1 - is_clicked
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1219,12 +1333,12 @@ class SubscribeResponse {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.subscribe_, // field 1 - subscribe
+        this.subscribe_, // field 1 - subscribe
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1238,6 +1352,77 @@ class SubscribeResponse {
    */
   label() {
     return 'SubscribeResponse';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class Timestamp {
+  /**
+   * @param {!Array<*>=} data
+   * @param {boolean=} includesLabel
+   */
+  constructor(data = [], includesLabel = true) {
+    const base = includesLabel ? 1 : 0;
+
+    /** @private {?number} */
+    this.seconds_ = data[base] == null ? null : data[base];
+
+    /** @private {?number} */
+    this.nanos_ = data[1 + base] == null ? null : data[1 + base];
+  }
+
+  /**
+   * @return {?number}
+   */
+  getSeconds() {
+    return this.seconds_;
+  }
+
+  /**
+   * @param {number} value
+   */
+  setSeconds(value) {
+    this.seconds_ = value;
+  }
+
+  /**
+   * @return {?number}
+   */
+  getNanos() {
+    return this.nanos_;
+  }
+
+  /**
+   * @param {number} value
+   */
+  setNanos(value) {
+    this.nanos_ = value;
+  }
+
+  /**
+   * @param {boolean} includeLabel
+   * @return {!Array<?>}
+   * @override
+   */
+  toArray(includeLabel = true) {
+    const arr = [
+        this.seconds_, // field 1 - seconds
+        this.nanos_, // field 2 - nanos
+    ];
+    if (includeLabel) {
+      arr.unshift(this.label());
+    }
+    return arr;
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'Timestamp';
   }
 }
 
@@ -1272,12 +1457,12 @@ class ViewSubscriptionsResponse {
 
   /**
    * @param {boolean} includeLabel
-   * @return {!Array}
+   * @return {!Array<?>}
    * @override
    */
   toArray(includeLabel = true) {
     const arr = [
-      this.native_, // field 1 - native
+        this.native_, // field 1 - native
     ];
     if (includeLabel) {
       arr.unshift(this.label());
@@ -1300,6 +1485,7 @@ const PROTO_MAP = {
   'AnalyticsContext': AnalyticsContext,
   'AnalyticsEventMeta': AnalyticsEventMeta,
   'AnalyticsRequest': AnalyticsRequest,
+  'EntitlementsPingbackRequest': EntitlementsPingbackRequest,
   'EntitlementsResponse': EntitlementsResponse,
   'EventParams': EventParams,
   'FinishedLoggingResponse': FinishedLoggingResponse,
@@ -1308,6 +1494,7 @@ const PROTO_MAP = {
   'SkuSelectedResponse': SkuSelectedResponse,
   'SmartBoxMessage': SmartBoxMessage,
   'SubscribeResponse': SubscribeResponse,
+  'Timestamp': Timestamp,
   'ViewSubscriptionsResponse': ViewSubscriptionsResponse,
 };
 
@@ -5660,7 +5847,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.110',
+    '_client': 'SwG 0.1.22.113',
   });
 }
 
@@ -6779,7 +6966,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.110',
+        '_client': 'SwG 0.1.22.113',
         'supportsEventManager': true,
       },
       args || {}
@@ -7628,7 +7815,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.110');
+    context.setClientVersion('SwG 0.1.22.113');
 
     const utmParams = parseQueryString$1(this.getQueryString_());
     const campaign = utmParams['utm_campaign'];
@@ -11043,6 +11230,14 @@ class Fetcher {
    * @param {!string|!Object} unusedData
    */
   sendBeacon(unusedUrl, unusedData) {}
+
+  /**
+   * POST data to a URL endpoint, get a Promise for a response
+   * @param {!string} unusedUrl
+   * @param {!string|!Object} unusedMessage
+   * @return {!Promise<!../utils/xhr.FetchResponse>}
+   */
+  sendPost(unusedUrl, unusedMessage) {}
 }
 
 /**
@@ -11067,6 +11262,20 @@ class XhrFetcher {
     return this.fetch(url, init).then((response) => response.json());
   }
 
+  sendPost(url, message) {
+    const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+      },
+      credentials: 'include',
+      body: 'f.req=' + serializeProtoMessageForUrl(message),
+    });
+    return this.fetch(url, init).then(
+      (response) => (response && response.json()) || {}
+    );
+  }
+
   /** @override */
   fetch(url, init) {
     return this.xhr_.fetch(url, init);
@@ -11074,22 +11283,17 @@ class XhrFetcher {
 
   /** @override */
   sendBeacon(url, data) {
-    const contentType = 'application/x-www-form-urlencoded;charset=UTF-8';
-    const body = 'f.req=' + serializeProtoMessageForUrl(data);
     if (navigator.sendBeacon) {
-      const blob = new Blob([body], {type: contentType});
+      const headers = {type: 'application/x-www-form-urlencoded;charset=UTF-8'};
+      const blob = new Blob(
+        ['f.req=' + serializeProtoMessageForUrl(data)],
+        headers
+      );
       navigator.sendBeacon(url, blob);
       return;
     }
-
     // Only newer browsers support beacon.  Fallback to standard XHR POST.
-    const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
-      method: 'POST',
-      headers: {'Content-Type': contentType},
-      credentials: 'include',
-      body,
-    });
-    this.fetch(url, init);
+    this.sendPost(url, data);
   }
 }
 
@@ -13109,9 +13313,6 @@ class PayFrameHelper {
   }
 }
 
-// Start loading pay frame early
-PayFrameHelper.load();
-
 /**
  * @license
  * Copyright 2018 Google Inc. All Rights Reserved.
@@ -14578,6 +14779,9 @@ class PaymentsAsyncClient {
 
     this.webActivityDelegate_.onResult(this.onResult_.bind(this));
     this.delegate_.onResult(this.onResult_.bind(this));
+
+    // Load PayFrameHelper upon client construction.
+    PayFrameHelper.load();
 
     // If web delegate is used anyway then this is overridden in the web
     // activity delegate when load payment data is called.
