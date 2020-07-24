@@ -1106,13 +1106,8 @@ export class AmpStoryPlayer {
    * @return {boolean}
    */
   isIndexOutofBounds_(index) {
-    if (
-      this.currentIdx_ + index >= this.stories_.length ||
-      this.currentIdx_ + index < 0
-    ) {
-      return true;
-    }
-    return false;
+    return this.currentIdx_ + index >= this.stories_.length ||
+    this.currentIdx_ + index < 0;
   }
 
   /**
