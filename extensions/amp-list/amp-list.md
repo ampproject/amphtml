@@ -317,7 +317,8 @@ It can be templated via `amp-mustache`.
   ...
   <amp-list-load-more load-more-button>
     <template type="amp-mustache">
-      Showing {% raw %}{{#count}}{% endraw %} out of {% raw %}{{#total}}{% endraw %} items
+      Showing {% raw %}{{#count}}{% endraw %} out of {% raw %}{{#total}}{%
+      endraw %} items
       <button>Click here to see more!</button>
     </template>
   </amp-list-load-more>
