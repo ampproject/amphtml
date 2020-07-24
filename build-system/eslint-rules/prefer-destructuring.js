@@ -193,12 +193,13 @@ module.exports = {
               const names = setStruct(variables, base, decl, node);
               const {properties} = id;
               for (let k = 0; k < properties.length; k++) {
-                const {key} = properties[k];
-                if (key.type !== 'Identifier') {
-                  // Deep destructuring, too complicated.
-                  return;
+                const prop = properties[k];
+                names.add(sourceCode.getText(prop));
+                if (!prop.key) {
+                  // rest element
+                  processMaps([letMap, constMap]);
+                  break;
                 }
-                names.add(key.name);
               }
             }
           }
