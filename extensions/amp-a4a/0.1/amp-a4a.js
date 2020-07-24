@@ -908,7 +908,7 @@ export class AmpA4A extends AMP.BaseElement {
         // `amp-ff-empty-creative` header is not present, and body is empty.
         if (!hasContent) {
           this.forceCollapse();
-          Promise.reject(NO_CONTENT_RESPONSE);
+          return Promise.reject(NO_CONTENT_RESPONSE);
         }
       })
       .then(() => transformStream.waitForHead())

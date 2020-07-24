@@ -25,7 +25,7 @@ import {Deferred} from './promise';
  * @return {!Promise<boolean>} Indicates if the response is empty.
  */
 export function streamResponseToWriter(win, response, writer) {
-  const hasContent = new Deferred();
+  const hasContentDeferred = new Deferred();
   // Try native streaming first.
   if (win.TextDecoder && win.ReadableStream) {
     let firstRead = true;
@@ -33,13 +33,10 @@ export function streamResponseToWriter(win, response, writer) {
     const decoder = new TextDecoder();
 
     reader.read().then(function handleChunk({value, done}) {
-      // Body has no content.
-      if (firstRead && done) {
-        hasContent.resolve(false);
+      if (firstRead) {
+        hasContentDeferred.resolve(!done);
+        firstRead = false;
       }
-      // WIP fix double resolve here and in fallback.
-      hasContent.resolve(true);
-      firstRead = false;
 
       // We need to close and flush the decoder on the last chunk even if
       // we have no more bytes and `decode` will throw if not given an
@@ -60,14 +57,11 @@ export function streamResponseToWriter(win, response, writer) {
   } else {
     // Fallback case waits for the complete response before writing.
     response.text().then((text) => {
-      if (!text) {
-        hasContent.resolve(false);
-      }
-      hasContent.resolve(true);
+      hasContentDeferred.resolve(!!text);
       writer.write(text);
       writer.close();
     });
   }
 
-  return hasContent.promise;
+  return hasContentDeferred.promise;
 }
