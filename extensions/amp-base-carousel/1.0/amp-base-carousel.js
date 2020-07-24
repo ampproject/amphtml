@@ -35,26 +35,12 @@ class AmpBaseCarousel extends PreactBaseElement {
     let advance = () => {};
     this.registerAction('prev', () => advance(-1), ActionTrust.LOW);
     this.registerAction('next', () => advance(1), ActionTrust.LOW);
-    this.registerAction(
-      'goToSlide',
-      (actionInvocation) => {
-        const {args, trust} = actionInvocation;
-        const index = args['index'];
-        this.mutateProps(dict({'slide': index}));
-        fireSlideChangeEvent(this.win, element, index, trust);
-      },
-      ActionTrust.LOW
-    );
-
     return dict({
       'onSlideChange': (index) => {
         fireSlideChangeEvent(this.win, element, index, ActionTrust.HIGH);
         this.mutateProps(dict({'slide': index}));
       },
       'setAdvance': (a) => (advance = a),
-      // TODO: `slide` cannot be in prop defs because we mutate it later.
-      // If it is, mutations on `defaultProps_` will get overwritten in `collectProps`
-      'slide': element.getAttribute('slide') || 0,
     });
   }
 

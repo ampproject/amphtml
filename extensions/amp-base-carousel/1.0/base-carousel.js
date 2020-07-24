@@ -27,17 +27,14 @@ export function BaseCarousel({
   arrowPrev,
   arrowNext,
   children,
-  defaultSlide,
   loop,
-  slide,
   onSlideChange,
   setAdvance,
   ...rest
 }) {
   const childrenArray = toChildArray(children);
   const {length} = childrenArray;
-  const [curSlide, setCurSlide] = useState(defaultSlide || 0);
-  const slideState = slide ?? curSlide;
+  const [curSlide, setCurSlide] = useState(0);
   const advance = (dir) => {
     const container = scrollRef.current;
     // Modify scrollLeft is preferred to `setCurSlide` to enable smooth scroll.
@@ -58,12 +55,12 @@ export function BaseCarousel({
   };
   const scrollRef = useRef(null);
   const disableForDir = (dir) =>
-    !loop && (slideState + dir < 0 || slideState + dir >= length);
+    !loop && (curSlide + dir < 0 || curSlide + dir >= length);
   return (
     <div {...rest}>
       <Scroller
         loop={loop}
-        restingIndex={slideState}
+        restingIndex={curSlide}
         setRestingIndex={setRestingIndex}
         scrollRef={scrollRef}
       >
