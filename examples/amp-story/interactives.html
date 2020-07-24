@@ -10,7 +10,7 @@
       body {
         font-family: 'Rubik', sans-serif;
       }
-      amp-story-interactive-quiz, amp-story-interactive-binary-poll {
+      amp-story-interactive-quiz, amp-story-interactive-binary-poll, amp-story-interactive-poll {
         justify-self: center;
       }
     </style>
@@ -55,12 +55,13 @@
             <amp-story-interactive-quiz
                 id="first-cup-dark"
                 endpoint="http://localhost:3000/interactives"
-                style="--interactive-accent-color: rgb(16, 218, 93);--interactive-prompt-background-color: rgb(4, 41, 18);--interactive-prompt-text-color: rgb(16, 218, 93);"
+                style="--interactive-accent-color: rgb(16, 218, 93);--interactive-prompt-background: rgb(4, 41, 18);--interactive-prompt-text-color: rgb(16, 218, 93);"
                 theme="dark"
                 prompt-text="Is this an international quiz?"
                 option-1-text="你好，这是马蒂亚斯"
                 option-2-text="مرحبا هذا ماتياس"
                 option-3-text="Yes it is" option-3-correct
+                option-3-confetti="🌎"
                 option-4-text="ब्राज़ील यहाँ होना चाहिए">
             </amp-story-interactive-quiz>
           </amp-story-grid-layer>
@@ -85,6 +86,7 @@
                 option-1-text="France"
                 option-2-text="Spain"
                 option-3-text="Uruguay" option-3-correct
+                option-3-confetti="🇺🇾"
                 option-4-text="Brazil">
             </amp-story-interactive-quiz>
           </amp-story-grid-layer>
@@ -101,9 +103,12 @@
           <amp-story-grid-layer template="center">
             <amp-story-interactive-quiz
                 id="last-cup-dark"
+                endpoint="http://localhost:3000/interactives"
                 theme="dark"
-                style="--interactive-accent-color: rgb(221, 17, 228);"
+                style="--interactive-accent-color: rgb(221, 17, 229);"
+                endpoint="http://localhost:3000/interactives"
                 option-1-text="France" option-1-correct
+                option-1-confetti="🇫🇷"
                 option-2-text="Spain"
                 option-3-text="Uruguay"
                 option-4-text="Brazil">
@@ -125,6 +130,7 @@
                 endpoint="http://localhost:3000/interactives"
                 prompt-text="What is the largest mammal?"
                 option-1-text="Blue whale" option-1-correct
+                option-1-confetti="🐳"
                 option-2-text="Etruscan shrew">
             </amp-story-interactive-quiz>
           </amp-story-grid-layer>
@@ -144,7 +150,8 @@
                 endpoint="http://localhost:3000/interactives"
                 prompt-text="What is the smallest mammal?"
                 option-1-text="Blue whale"
-                option-2-text="Etruscan shrew" option-2-correct>
+                option-2-text="Etruscan shrew" option-2-correct
+                option-2-confetti="🐀">
             </amp-story-interactive-quiz>
           </amp-story-grid-layer>
         </amp-story-page>
@@ -163,16 +170,15 @@
 								endpoint="http://localhost:3000/interactives"
 								prompt-text="What is your favorite movie?"
 								id="movie-light-connected"
-								style="--interactive-accent-color: rgb(16, 218, 93);--interactive-prompt-background-color: rgb(4, 41, 18);--interactive-prompt-text-color: rgb(16, 218, 93);"
+								style="--interactive-accent-color: rgb(16, 218, 93);--interactive-prompt-background: rgb(4, 41, 18);--interactive-prompt-text-color: rgb(16, 218, 93);"
                 theme="dark"
                 option-1-text="דוקטור מוזר"
-                option-2-text="פנתר שחור">
+                option-2-text="פנתר שחור"
+                option-1-confetti="🎥"
+                option-2-confetti="🎬">
               </amp-story-interactive-binary-poll>
             </div>
           </amp-story-grid-layer>
-          <amp-story-page-attachment layout="nodisplay" data-cta-text="Read more">
-            <iframe src="https://www.amp.dev" style="width:100%;height:100%"></iframe>
-          </amp-story-page-attachment>
         </amp-story-page>
         <amp-story-page id="poll-binary-2">
           <amp-story-grid-layer template="fill">
@@ -189,7 +195,9 @@
               id="movie-light-connected"
               theme="dark"
               option-1-text="Doctor Strange"
-              option-2-text="Black Panther">
+              option-2-text="Black Panther"
+              option-1-confetti="😺"
+              option-2-confetti="🐶">
             </amp-story-interactive-binary-poll>
           </amp-story-grid-layer>
         </amp-story-page>
@@ -210,7 +218,9 @@
                 id="movie-light-connected"
                 style="--interactive-accent-color: #FFC700;"
                 option-1-text="🧛"
-                option-2-text="🐆">
+                option-2-text="🐆"
+                option-1-confetti="🧛"
+                option-2-confetti="🐆">
               </amp-story-interactive-binary-poll>
             </div>
           </amp-story-grid-layer>
@@ -232,7 +242,9 @@
                 id="movie-light-connected"
                 style="--interactive-accent-color: rgb(0, 0, 0);"
                 option-1-text="Doctor"
-                option-2-text="Panther">
+                option-2-text="Panther"
+                option-1-confetti="🎥"
+                option-2-confetti="🎬">
               </amp-story-interactive-binary-poll>
             </div>
           </amp-story-grid-layer>
@@ -253,8 +265,101 @@
               theme="dark"
               style="--interactive-accent-color: #FFFFFF;"
               option-1-text="This is a really long text"
-              option-2-text="Panther">
+              option-2-text="Panther"
+              option-1-confetti="🎥"
+              option-2-confetti="🎬">
             </amp-story-interactive-binary-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-1">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-poll
+              id="poll-1"
+              theme="dark"
+              endpoint="http://localhost:3000/interactives"
+              prompt-text="What city do you like the most?"
+              option-1-text="Montevideo"
+              option-2-text="Paris"
+              option-1-confetti="🇺🇾"
+              option-2-confetti="🇫🇷">
+            </amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-2">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-poll
+              id="poll-2"
+              theme="dark"
+              endpoint="http://localhost:3000/interactives"
+              chip-style="shadow"
+              style="--interactive-accent-color: #f5aa42"
+              prompt-text="What city do you like the most?"
+              option-1-text="Montevideo"
+              option-2-text="Paris"
+              option-1-confetti="🇺🇾"
+              option-2-confetti="🇫🇷">
+            </amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-3">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-poll
+              id="poll-3"
+              endpoint="http://localhost:3000/interactives"
+              style="--interactive-accent-color: rgb(255, 152, 152); --interactive-prompt-text-color: black"
+              prompt-text="What city do you like the most?"
+              option-1-text="Montevideo"
+              option-2-text="Paris"
+              option-1-confetti="🇺🇾"
+              option-2-confetti="🇫🇷">
+            </amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-4">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-poll
+              id="poll-4"
+              chip-style="shadow"
+              endpoint="http://localhost:3000/interactives"
+              style="--interactive-accent-color: #eb50a8"
+              prompt-text="What city do you like the most?"
+              option-1-text="Montevideo"
+              option-2-text="Paris"
+              option-1-confetti="🇺🇾"
+              option-2-confetti="🇫🇷">
+            </amp-story-interactive-poll>
           </amp-story-grid-layer>
         </amp-story-page>
     </amp-story>

@@ -185,7 +185,7 @@ export class AmpVideoIntegration {
     if (!(method in this.methods_)) {
       return;
     }
-    this.methods_[method].call();
+    this.methods_[method]();
   }
 
   /**

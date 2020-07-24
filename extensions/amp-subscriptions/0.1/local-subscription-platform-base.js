@@ -146,7 +146,7 @@ export class LocalSubscriptionBasePlatform {
       const action = element.getAttribute('subscriptions-action');
       const serviceAttr = element.getAttribute('subscriptions-service');
       if (serviceAttr == 'local') {
-        this.executeAction(action);
+        this.executeAction(action, element.id);
       } else if ((serviceAttr || 'auto') == 'auto') {
         if (action == Action.LOGIN) {
           // The "login" action is somewhat special b/c viewers can
@@ -154,13 +154,18 @@ export class LocalSubscriptionBasePlatform {
           const platform = this.serviceAdapter_.selectPlatformForLogin();
           this.serviceAdapter_.delegateActionToService(
             action,
-            platform.getServiceId()
+            platform.getServiceId(),
+            element.id
           );
         } else {
-          this.executeAction(action);
+          this.executeAction(action, element.id);
         }
       } else if (serviceAttr) {
-        this.serviceAdapter_.delegateActionToService(action, serviceAttr);
+        this.serviceAdapter_.delegateActionToService(
+          action,
+          serviceAttr,
+          element.id
+        );
       }
     }
   }

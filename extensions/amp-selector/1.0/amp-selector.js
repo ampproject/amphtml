@@ -25,8 +25,8 @@ import {
   toggleAttribute,
 } from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
-import {dev, userAssert} from '../../../src/log';
-import {dict, omit} from '../../../src/utils/object';
+import {dev, devAssert, userAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
 import {toArray} from '../../../src/types';
@@ -114,7 +114,7 @@ class AmpSelector extends PreactBaseElement {
       'options': options,
     } = getOptionState(element, mu);
     return dict({
-      'domElement': element,
+      'shimDomElement': element,
       'children': children,
       'value': value,
       'onChange': (e) => {
@@ -160,11 +160,9 @@ function getOptionState(element, mu) {
       const props = {
         as: OptionShim,
         option,
-        // TODO: `disabled` is always undefined for OptionShim
-        isDisabled: disabled,
         disabled,
         role: child.getAttribute('role') || 'option',
-        domElement: child,
+        shimDomElement: child,
         // TODO(wg-bento): This implementation causes infinite loops on DOM mutation.
         // See https://github.com/ampproject/amp-react-prototype/issues/40.
         postRender: () => {
@@ -271,71 +269,70 @@ function selectByDelta(delta, value, options) {
 }
 
 /**
- * @param {!JsonObject} props
+ * @param {!SelectorDef.OptionProps} props
  * @return {PreactDef.Renderable}
  */
-function OptionShim(props) {
-  const {
-    'domElement': domElement,
-    'onClick': onClick,
-    'selected': selected,
-    'isDisabled': isDisabled,
-    'role': role = 'option',
-  } = props;
+function OptionShim({
+  shimDomElement,
+  onClick,
+  selected,
+  disabled,
+  role = 'option',
+}) {
   useLayoutEffect(() => {
     if (!onClick) {
       return;
     }
-    domElement.addEventListener('click', onClick);
+    shimDomElement.addEventListener('click', onClick);
     return () => {
-      domElement.removeEventListener('click', onClick);
+      shimDomElement.removeEventListener('click', devAssert(onClick));
     };
-  }, [domElement, onClick]);
+  }, [shimDomElement, onClick]);
 
   useLayoutEffect(() => {
-    toggleAttribute(domElement, 'selected', selected);
-  }, [domElement, selected]);
+    toggleAttribute(shimDomElement, 'selected', selected);
+  }, [shimDomElement, selected]);
 
   useLayoutEffect(() => {
-    toggleAttribute(domElement, 'disabled', isDisabled);
-    domElement.setAttribute('aria-disabled', !!isDisabled);
-  }, [domElement, isDisabled]);
+    toggleAttribute(shimDomElement, 'disabled', disabled);
+    shimDomElement.setAttribute('aria-disabled', !!disabled);
+  }, [shimDomElement, disabled]);
 
   useLayoutEffect(() => {
-    domElement.setAttribute('role', role);
-  }, [domElement, role]);
+    shimDomElement.setAttribute('role', role);
+  }, [shimDomElement, role]);
 
   return <div></div>;
 }
 
 /**
- * @param {!JsonObject} props
+ * @param {!SelectorDef.Props} props
  * @return {PreactDef.Renderable}
  */
-function SelectorShim(props) {
-  const {
-    'domElement': domElement,
-    'role': role = 'listbox',
-    'multiple': multiple,
-    'disabled': disabled,
-  } = props;
+function SelectorShim({
+  shimDomElement,
+  multiple,
+  disabled,
+  role = 'listbox',
+  ...rest
+}) {
+  useLayoutEffect(() => {
+    toggleAttribute(shimDomElement, 'multiple', multiple);
+    shimDomElement.setAttribute('aria-multiselectable', !!multiple);
+  }, [shimDomElement, multiple]);
 
   useLayoutEffect(() => {
-    toggleAttribute(domElement, 'multiple', multiple);
-    domElement.setAttribute('aria-multiselectable', !!multiple);
-  }, [domElement, multiple]);
+    toggleAttribute(shimDomElement, 'disabled', disabled);
+    shimDomElement.setAttribute('aria-disabled', !!disabled);
+  }, [shimDomElement, disabled]);
 
   useLayoutEffect(() => {
-    toggleAttribute(domElement, 'disabled', disabled);
-    domElement.setAttribute('aria-disabled', !!disabled);
-  }, [domElement, disabled]);
+    shimDomElement.setAttribute('role', role);
+  }, [shimDomElement, role]);
 
-  useLayoutEffect(() => {
-    domElement.setAttribute('role', role);
-  }, [domElement, role]);
-
-  const rest = omit(props, ['domElement']);
-  return <Selector {...rest}></Selector>;
+  return (
+    <Selector role={role} multiple={multiple} disabled={disabled} {...rest} />
+  );
 }
 
 /** @override */

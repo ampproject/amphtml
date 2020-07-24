@@ -197,8 +197,9 @@ function gitCherryMaster() {
  * @return {string}
  */
 function gitCommitFormattedTime(ref = 'HEAD') {
+  const envPrefix = process.platform == 'win32' ? 'set TZ=UTC &&' : 'TZ=UTC';
   return getStdout(
-    `TZ=UTC git log ${ref} -1 --pretty="%cd" --date=format-local:%y%m%d%H%M%S`
+    `${envPrefix} git log ${ref} -1 --pretty="%cd" --date=format-local:%y%m%d%H%M%S`
   ).trim();
 }
 

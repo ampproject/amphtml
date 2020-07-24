@@ -48,12 +48,18 @@ const BUILTINS = {
       'text': 'TITLE',
       'url': 'CANONICAL_URL',
     }),
+    'canCustomize': false,
+    'defaultColor': 'ffffff',
+    'defaultBackgroundColor': '1da1f2',
   },
   'facebook': {
     'shareEndpoint': 'https://www.facebook.com/dialog/share',
     'defaultParams': dict({
       'href': 'CANONICAL_URL',
     }),
+    'canCustomize': false,
+    'defaultColor': 'ffffff',
+    'defaultBackgroundColor': '32529f',
   },
   'pinterest': {
     'shareEndpoint': 'https://www.pinterest.com/pin/create/button/',
@@ -61,6 +67,9 @@ const BUILTINS = {
       'url': 'CANONICAL_URL',
       'description': 'TITLE',
     }),
+    'canCustomize': false,
+    'defaultColor': 'ffffff',
+    'defaultBackgroundColor': 'e60023',
   },
   'linkedin': {
     'shareEndpoint': 'https://www.linkedin.com/shareArticle',
@@ -68,6 +77,9 @@ const BUILTINS = {
       'url': 'CANONICAL_URL',
       'mini': 'true',
     }),
+    'canCustomize': false,
+    'defaultColor': 'ffffff',
+    'defaultBackgroundColor': '0077b5',
   },
   'email': {
     'bindings': ['recipient'],
@@ -77,6 +89,9 @@ const BUILTINS = {
       'body': 'CANONICAL_URL',
       'recipient': '',
     }),
+    'canCustomize': true,
+    'defaultColor': 'ffffff',
+    'defaultBackgroundColor': '000000',
   },
   'tumblr': {
     'shareEndpoint': 'https://www.tumblr.com/share/link',
@@ -84,12 +99,18 @@ const BUILTINS = {
       'name': 'TITLE',
       'url': 'CANONICAL_URL',
     }),
+    'canCustomize': false,
+    'defaultColor': 'ffffff',
+    'defaultBackgroundColor': '3c5a77',
   },
   'whatsapp': {
     'shareEndpoint': 'https://api.whatsapp.com/send',
     'defaultParams': dict({
       'text': 'TITLE - CANONICAL_URL',
     }),
+    'canCustomize': false,
+    'defaultColor': 'ffffff',
+    'defaultBackgroundColor': '25d366',
   },
   'line': {
     'shareEndpoint': 'https://social-plugins.line.me/lineit/share',
@@ -97,12 +118,18 @@ const BUILTINS = {
       'text': 'TITLE',
       'url': 'CANONICAL_URL',
     }),
+    'canCustomize': false,
+    'defaultColor': 'ffffff',
+    'defaultBackgroundColor': '52b448',
   },
   'sms': {
     'shareEndpoint': 'sms:',
     'defaultParams': dict({
       'body': 'TITLE - CANONICAL_URL',
     }),
+    'canCustomize': true,
+    'defaultColor': 'ffffff',
+    'defaultBackgroundColor': 'ca2b63',
   },
   'system': {
     'shareEndpoint': 'navigator-share:',
@@ -110,5 +137,8 @@ const BUILTINS = {
       'text': 'TITLE',
       'url': 'CANONICAL_URL',
     }),
+    'canCustomize': true,
+    'defaultColor': 'ffffff',
+    'defaultBackgroundColor': '000000',
   },
 };

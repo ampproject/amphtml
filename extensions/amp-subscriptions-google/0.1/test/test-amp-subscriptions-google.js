@@ -117,6 +117,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
   let ackStub;
   let element;
   let entitlementResponse;
+  let rtcButtonElement;
   let win;
 
   beforeEach(() => {
@@ -135,6 +136,9 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     env.sandbox
       .stub(serviceAdapter, 'getPageConfig')
       .callsFake(() => pageConfig);
+    env.sandbox
+      .stub(serviceAdapter, 'getReaderId')
+      .callsFake(() => Promise.resolve('ari1'));
     const analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
     env.sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
     analyticsMock = env.sandbox.mock(analytics);
@@ -180,6 +184,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
         ConfiguredRuntime.prototype,
         'showContributionOptions'
       ),
+      subscribe: env.sandbox.stub(ConfiguredRuntime.prototype, 'subscribe'),
       showOffers: env.sandbox.stub(ConfiguredRuntime.prototype, 'showOffers'),
       showAbbrvOffer: env.sandbox.stub(
         ConfiguredRuntime.prototype,
@@ -373,11 +378,6 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
   });
 
   it('should start linking flow when requested', async () => {
-    serviceAdapterMock
-      .expects('getReaderId')
-      .withExactArgs('local')
-      .returns(Promise.resolve('ari1'))
-      .once();
     serviceAdapterMock.expects('delegateActionToLocal').never();
     callback(callbacks.loginRequest)({linkRequested: true});
     await 'Event loop tick';
@@ -389,7 +389,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
   it('should delegate login when linking not requested', () => {
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs(Action.LOGIN)
+      .withExactArgs(Action.LOGIN, null)
       .returns(Promise.resolve(false))
       .once();
     callback(callbacks.loginRequest)({linkRequested: false});
@@ -400,7 +400,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     platform.isGoogleViewer_ = false;
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs(Action.LOGIN)
+      .withExactArgs(Action.LOGIN, null)
       .returns(Promise.resolve(false))
       .once();
     callback(callbacks.loginRequest)({linkRequested: true});
@@ -529,7 +529,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
   it('should delegate native subscribe request', () => {
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs(Action.SUBSCRIBE)
+      .withExactArgs(Action.SUBSCRIBE, null)
       .returns(Promise.resolve(false))
       .once();
     callback(callbacks.subscribeRequest)();
@@ -539,7 +539,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     const loginResult = Promise.resolve(true);
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs(Action.LOGIN)
+      .withExactArgs(Action.LOGIN, null)
       .returns(loginResult)
       .once();
     callback(callbacks.loginRequest)({linkRequested: false});
@@ -552,7 +552,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     const loginResult = Promise.resolve(false);
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs(Action.LOGIN)
+      .withExactArgs(Action.LOGIN, null)
       .returns(loginResult)
       .once();
     callback(callbacks.loginRequest)({linkRequested: false});
@@ -565,7 +565,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     const loginResult = Promise.resolve(true);
     serviceAdapterMock
       .expects('delegateActionToLocal')
-      .withExactArgs(Action.SUBSCRIBE)
+      .withExactArgs(Action.SUBSCRIBE, null)
       .returns(loginResult)
       .once();
     callback(callbacks.subscribeRequest)();
@@ -703,6 +703,57 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     expect(executeStub).to.be.calledWith({list: 'amp', isClosable: true});
   });
 
+  it('should do nothing if rtc mapped button is not read ', () => {
+    // rtc button
+    rtcButtonElement = env.win.document.createElement('button');
+    rtcButtonElement.setAttribute('subscriptions-google-rtc', '');
+    rtcButtonElement.id = 'rtcTestButton';
+    env.win.document.body.appendChild(rtcButtonElement);
+    platform.skuMap_ = {
+      rtcTestButton: {
+        sku: 'testSku',
+      },
+    };
+    const executeStub = platform.runtime_.subscribe;
+    platform.executeAction(Action.SUBSCRIBE, 'rtcTestButton');
+    expect(executeStub).to.not.be.called;
+  });
+
+  it('should show subscribe flow if single sku is mapped ', () => {
+    // rtc button
+    rtcButtonElement = env.win.document.createElement('button');
+    rtcButtonElement.setAttribute('subscriptions-google-rtc-set', '');
+    rtcButtonElement.id = 'rtcTestButton';
+    env.win.document.body.appendChild(rtcButtonElement);
+    platform.skuMap_ = {
+      rtcTestButton: {
+        sku: 'testSku',
+      },
+    };
+    const executeStub = platform.runtime_.subscribe;
+    platform.executeAction(Action.SUBSCRIBE, 'rtcTestButton');
+    expect(executeStub).to.be.calledWith('testSku');
+  });
+
+  it("should show offers if multiple sku's are mapped", () => {
+    // rtc button
+    rtcButtonElement = env.win.document.createElement('button');
+    rtcButtonElement.setAttribute('subscriptions-google-rtc-set', '');
+    rtcButtonElement.id = 'rtcTestButton';
+    env.win.document.body.appendChild(rtcButtonElement);
+    platform.skuMap_ = {
+      rtcTestButton: {
+        carouselOptions: {skus: ['testSku1', 'testsku2']},
+      },
+    };
+    const executeStub = platform.runtime_.showOffers;
+    platform.executeAction(Action.SUBSCRIBE, 'rtcTestButton');
+    expect(executeStub).to.be.calledWith({
+      isClosable: true,
+      skus: ['testSku1', 'testsku2'],
+    });
+  });
+
   it('should show contributions if contribute action is delegated', () => {
     const executeStub = platform.runtime_.showContributionOptions;
     platform.executeAction(Action.CONTRIBUTE);
@@ -710,11 +761,6 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
   });
 
   it('should link accounts if login action is delegated', async () => {
-    serviceAdapterMock
-      .expects('getReaderId')
-      .withExactArgs('local')
-      .returns(Promise.resolve('ari1'))
-      .once();
     const executeStub = platform.runtime_.linkAccount;
     platform.executeAction(Action.LOGIN);
     await 'Event loop tick';

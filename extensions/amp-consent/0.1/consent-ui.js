@@ -32,7 +32,6 @@ import {getConsentStateValue} from './consent-info';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {htmlFor} from '../../../src/static-template';
-import {isExperimentOn} from '../../../src/experiments';
 import {setImportantStyles, setStyles, toggle} from '../../../src/style';
 
 const TAG = 'amp-consent-ui';
@@ -112,12 +111,6 @@ export class ConsentUI {
 
     /** @private {boolean} */
     this.srAlertShown_ = false;
-
-    /** @private {boolean} */
-    this.restrictFullscreenOn_ = isExperimentOn(
-      baseInstance.win,
-      'amp-consent-restrict-fullscreen'
-    );
 
     /** @private {boolean} */
     this.scrollEnabled_ = true;
@@ -216,7 +209,7 @@ export class ConsentUI {
         this.parent_,
         promptUISrc
       );
-      this.ui_ = this.createPromptIframe_();
+      this.ui_ = this.createPromptIframe_(promptUISrc);
       this.placeholder_ = this.createPlaceholder_();
       this.clientConfig_ = config['clientConfig'] || null;
     }
@@ -229,6 +222,10 @@ export class ConsentUI {
   show(isActionPromptTrigger) {
     if (!this.ui_) {
       // No prompt UI specified, nothing to do
+      return;
+    }
+    if (this.isPostPrompt_ && !this.parent_.contains(this.ui_)) {
+      toggle(this.ui_, true);
       return;
     }
     toggle(dev().assertElement(this.parent_), true);
@@ -258,10 +255,6 @@ export class ConsentUI {
           this.maybeShowSrAlert_();
 
           this.showIframe_();
-
-          if (!this.isPostPrompt_ && !this.restrictFullscreenOn_) {
-            this.ui_./*OK*/ focus();
-          }
         });
       });
     } else {
@@ -422,12 +415,13 @@ export class ConsentUI {
 
   /**
    * Create the iframe if promptUISrc is valid
+   * @param {string} promptUISrc
    * @return {!Element}
    */
-  createPromptIframe_() {
+  createPromptIframe_(promptUISrc) {
     const iframe = this.parent_.ownerDocument.createElement('iframe');
     const sandbox = ['allow-scripts', 'allow-popups'];
-    const allowSameOrigin = this.allowSameOrigin_(iframe.src);
+    const allowSameOrigin = this.allowSameOrigin_(promptUISrc);
     if (allowSameOrigin) {
       sandbox.push('allow-same-origin');
     }
@@ -447,7 +441,6 @@ export class ConsentUI {
     const urlService = Services.urlForDoc(this.parent_);
     const srcUrl = urlService.parse(src);
     const containerUrl = urlService.parse(this.ampdoc_.getUrl());
-
     return srcUrl.origin != containerUrl.origin;
   }
 
@@ -605,41 +598,39 @@ export class ConsentUI {
    * Clicking on the button will transfer focus to the iframe.
    */
   maybeShowSrAlert_() {
-    if (this.restrictFullscreenOn_) {
-      // If the SR alert has been shown, don't show it again
-      if (this.srAlertShown_) {
-        return;
-      }
-
-      const alertDialog = this.document_.createElement('div');
-      const button = this.document_.createElement('button');
-      const titleDiv = this.document_.createElement('div');
-
-      alertDialog.setAttribute('role', 'alertdialog');
-
-      titleDiv.textContent = this.consentPromptCaption_;
-      button.textContent = this.buttonActionCaption_;
-      button.onclick = () => {
-        tryFocus(dev().assertElement(this.ui_));
-      };
-
-      alertDialog.appendChild(titleDiv);
-      alertDialog.appendChild(button);
-
-      // Style to be visiblly hidden, but not hidden from the SR
-      const {classList} = alertDialog;
-      classList.add(consentUiClasses.screenReaderDialog);
-
-      this.baseInstance_.element.appendChild(alertDialog);
-      tryFocus(button);
-
-      // SR alert was shown when consent prompt loaded for
-      // the first time. Don't show it again
-      this.srAlertShown_ = true;
-
-      // Keep reference of the SR alert to remove later
-      this.srAlert_ = alertDialog;
+    // If the SR alert has been shown, don't show it again
+    if (this.srAlertShown_) {
+      return;
     }
+
+    const alertDialog = this.document_.createElement('div');
+    const button = this.document_.createElement('button');
+    const titleDiv = this.document_.createElement('div');
+
+    alertDialog.setAttribute('role', 'alertdialog');
+
+    titleDiv.textContent = this.consentPromptCaption_;
+    button.textContent = this.buttonActionCaption_;
+    button.onclick = () => {
+      tryFocus(dev().assertElement(this.ui_));
+    };
+
+    alertDialog.appendChild(titleDiv);
+    alertDialog.appendChild(button);
+
+    // Style to be visiblly hidden, but not hidden from the SR
+    const {classList} = alertDialog;
+    classList.add(consentUiClasses.screenReaderDialog);
+
+    this.baseInstance_.element.appendChild(alertDialog);
+    tryFocus(button);
+
+    // SR alert was shown when consent prompt loaded for
+    // the first time. Don't show it again
+    this.srAlertShown_ = true;
+
+    // Keep reference of the SR alert to remove later
+    this.srAlert_ = alertDialog;
   }
 
   /**
@@ -784,8 +775,7 @@ export class ConsentUI {
       // - iframe not active element && not called via actionPromptTrigger
       if (
         !this.isIframeVisible_ ||
-        (this.restrictFullscreenOn_ &&
-          this.document_.activeElement !== this.ui_ &&
+        (this.document_.activeElement !== this.ui_ &&
           !this.isActionPromptTrigger_)
       ) {
         user().warn(TAG, FULLSCREEN_ERROR);

@@ -42,6 +42,12 @@ let AmpElementPropDef;
  */
 let ChildDef;
 
+/** @const {!MutationObserverInit} */
+const PASSTHROUGH_NON_EMPTY_MUTATION_INIT = {
+  childList: true,
+  characterData: true,
+};
+
 /**
  * Wraps a Preact Component in a BaseElement class.
  *
@@ -81,6 +87,13 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.mounted_ = true;
+
+    /** @private {?MutationObserver} */
+    this.observer_ = this.constructor['passthroughNonEmpty']
+      ? new MutationObserver(() => {
+          this.scheduleRender_();
+        })
+      : null;
   }
 
   /**
@@ -121,7 +134,19 @@ export class PreactBaseElement extends AMP.BaseElement {
     this.context_.renderable = true;
     this.context_.playable = true;
     this.scheduleRender_();
+    if (this.observer_) {
+      this.observer_.observe(this.element, PASSTHROUGH_NON_EMPTY_MUTATION_INIT);
+    }
     return deferred.promise;
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.observer_) {
+      this.observer_.disconnect();
+      return true;
+    }
+    return false;
   }
 
   /** @override */
@@ -170,11 +195,16 @@ export class PreactBaseElement extends AMP.BaseElement {
     const Ctor = this.constructor;
 
     if (!this.container_) {
-      if (Ctor['children'] || Ctor['passthrough']) {
+      if (
+        Ctor['children'] ||
+        Ctor['passthrough'] ||
+        Ctor['passthroughNonEmpty']
+      ) {
         devAssert(
           !Ctor['detached'],
           'The AMP element cannot be rendered in detached mode ' +
-            'when configured with "children" or "passthrough" properties.'
+            'when configured with "children", "passthrough", or ' +
+            '"passthroughNonEmpty" properties.'
         );
         this.container_ = this.element.attachShadow({mode: 'open'});
 
@@ -254,6 +284,17 @@ PreactBaseElement['className'] = '';
 PreactBaseElement['passthrough'] = false;
 
 /**
+ * Handling children with passthroughNonEmpty mode is similar to passthrough
+ * mode except that when there are no children elements, the returned
+ * prop['children'] will be null instead of the unnamed <slot>.  This allows
+ * the Preact environment to have conditional behavior depending on whether
+ * or not there are children.
+ *
+ * @protected {boolean}
+ */
+PreactBaseElement['passthroughNonEmpty'] = false;
+
+/**
  * Enabling detached mode alters the children to be rendered in an
  * unappended container. By default the children will be attached to the DOM.
  *
@@ -286,6 +327,7 @@ function collectProps(Ctor, element, defaultProps) {
     'className': className,
     'props': propDefs,
     'passthrough': passthrough,
+    'passthroughNonEmpty': passthroughNonEmpty,
     'children': childrenDefs,
   } = Ctor;
 
@@ -321,12 +363,25 @@ function collectProps(Ctor, element, defaultProps) {
   // as separate properties. Thus in a carousel the plain "children" are
   // slides, and the "arrowNext" children are passed via a "arrowNext"
   // property.
+  const errorMessage =
+    'only one of "passthrough", "passthroughNonEmpty"' +
+    ' or "children" may be given';
   if (passthrough) {
-    devAssert(
-      !childrenDefs,
-      'only one of "passthrough" or "children" may be given'
-    );
+    devAssert(!childrenDefs && !passthroughNonEmpty, errorMessage);
     props['children'] = [<Slot />];
+  } else if (passthroughNonEmpty) {
+    devAssert(!childrenDefs, errorMessage);
+    // If all children are whitespace text nodes, consider the element as
+    // having no children
+    props['children'] = element
+      .getRealChildNodes()
+      .every(
+        (node) =>
+          node.nodeType === /* TEXT_NODE */ 3 &&
+          node.nodeValue.trim().length === 0
+      )
+      ? null
+      : [<Slot />];
   } else if (childrenDefs) {
     const children = [];
     props['children'] = children;

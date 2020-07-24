@@ -15,7 +15,6 @@
  */
 'use strict';
 
-const crypto = require('crypto');
 const globby = require('globby');
 const gulpBabel = require('gulp-babel');
 const log = require('fancy-log');
@@ -35,9 +34,9 @@ const filesToTransform = getFilesToTransform();
 /**
  * Used to cache babel transforms.
  *
- * @private @const {!Object<string, string>}
+ * @private @const {!Map<string, File>}
  */
-const cache = Object.create(null);
+const cache = new Map();
 
 /**
  * Computes the set of files on which to run pre-closure babel transforms.
@@ -48,16 +47,6 @@ function getFilesToTransform() {
   return globby
     .sync([...BABEL_SRC_GLOBS, '!node_modules/', '!third_party/'])
     .concat(globby.sync(THIRD_PARTY_TRANSFORM_GLOBS));
-}
-
-/**
- * @param {!Buffer} contents
- * @return {string}
- */
-function sha256(contents) {
-  const hash = crypto.createHash('sha256');
-  hash.update(contents);
-  return hash.digest('hex');
 }
 
 /**
@@ -78,10 +67,8 @@ function preClosureBabel() {
       return next(null, file);
     }
 
-    const hash = sha256(file.contents);
-    const cached = cache[path];
-    if (cached && cached.hash === hash) {
-      return next(null, cached.file.clone());
+    if (cache.has(path)) {
+      return next(null, cache.get(path));
     }
 
     let data, err;
@@ -112,11 +99,8 @@ function preClosureBabel() {
         data.contents,
         data.sourceMap
       );
-      cache[path] = {
-        file: data,
-        hash,
-      };
-      next(null, data.clone());
+      cache.set(file.path, data);
+      next(null, data);
     });
   });
 }

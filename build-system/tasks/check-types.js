@@ -16,11 +16,6 @@
 
 const log = require('fancy-log');
 const {
-  checkTypesNailgunPort,
-  startNailgunServer,
-  stopNailgunServer,
-} = require('./nailgun');
-const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
@@ -67,9 +62,6 @@ async function checkTypes() {
     })
     .sort();
   return compileCss()
-    .then(async () => {
-      await startNailgunServer(checkTypesNailgunPort, /* detached */ false);
-    })
     .then(() => {
       log('Checking types...');
       return Promise.all([
@@ -120,9 +112,6 @@ async function checkTypes() {
         ),
       ]);
     })
-    .then(async () => {
-      await stopNailgunServer(checkTypesNailgunPort);
-    })
     .then(() => exitCtrlcHandler(handlerProcess));
 }
 
@@ -135,6 +124,4 @@ module.exports = {
 checkTypes.description = 'Check source code for JS type errors';
 checkTypes.flags = {
   closure_concurrency: '  Sets the number of concurrent invocations of closure',
-  disable_nailgun:
-    "  Doesn't use nailgun to invoke closure compiler (much slower)",
 };

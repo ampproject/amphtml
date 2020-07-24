@@ -372,6 +372,22 @@ describes.realWin('Resource', {amp: true}, (env) => {
     expect(resource.getLayoutBox().width).to.equal(111 + 10);
   });
 
+  it('should not relayout if element has not completed layout', () => {
+    elementMock.expects('isUpgraded').returns(true).atLeast(1);
+    resource.state_ = ResourceState.LAYOUT_SCHEDULED;
+    resource.layoutBox_ = {left: 11, top: 12, width: 111, height: 222};
+
+    // Width changed.
+    elementMock
+      .expects('getBoundingClientRect')
+      .returns({left: 11, top: 12, width: 111 + 10, height: 222})
+      .once();
+    elementMock.expects('isRelayoutNeeded').returns(true).atLeast(0);
+    resource.measure();
+    expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
+    expect(resource.getLayoutBox().width).to.equal(111 + 10);
+  });
+
   it('should calculate NOT fixed for non-displayed elements', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock

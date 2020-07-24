@@ -20,8 +20,9 @@ import posthtml from 'posthtml';
 import transformModules from './modules/modules-transform';
 import transformScriptPaths from './scripts/scripts-transform';
 import transformStories from './stories/stories-transform';
+import transformCss from './css/css-transform';
 
-const transforms = [transformStories, transformScriptPaths];
+const transforms = [transformStories, transformScriptPaths, transformCss];
 
 const argv = minimist(process.argv.slice(2));
 if (argv.esm) {
