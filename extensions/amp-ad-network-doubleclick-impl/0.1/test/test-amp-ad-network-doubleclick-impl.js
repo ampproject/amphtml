@@ -1963,7 +1963,7 @@ describes.realWin(
 
       describe('detect module/nomodule experiment', () => {
         it('should identify module/nomodule control when runtime-type is 10', () => {
-          getAmpDocStub./*OK*/restore();
+          getAmpDocStub./*OK*/ restore();
           env.sandbox.stub(impl, 'getAmpDoc').returns({
             whenFirstVisible: () => new Deferred().promise,
             getMetaByName: () => '10',
@@ -1976,7 +1976,7 @@ describes.realWin(
         });
 
         it('should identify module/nomodule experiment when runtime-type is 2', () => {
-          getAmpDocStub./*OK*/restore();
+          getAmpDocStub./*OK*/ restore();
           env.sandbox.stub(impl, 'getAmpDoc').returns({
             whenFirstVisible: () => new Deferred().promise,
             getMetaByName: () => '2',
@@ -1989,7 +1989,7 @@ describes.realWin(
         });
 
         it('should identify module/nomodule experiment when runtime-type is 4', () => {
-          getAmpDocStub./*OK*/restore();
+          getAmpDocStub./*OK*/ restore();
           env.sandbox.stub(impl, 'getAmpDoc').returns({
             whenFirstVisible: () => new Deferred().promise,
             getMetaByName: () => '4',
@@ -2003,7 +2003,7 @@ describes.realWin(
 
         // Only 2, 4, 10 should be recognized.
         it('should ignore module/nomodule experiment when runtime-type is 6', () => {
-          getAmpDocStub./*OK*/restore();
+          getAmpDocStub./*OK*/ restore();
           env.sandbox.stub(impl, 'getAmpDoc').returns({
             whenFirstVisible: () => new Deferred().promise,
             getMetaByName: () => '6',
