@@ -261,7 +261,7 @@ async function addHandlerMetric(handlerOptions, page) {
       return getAnalyticsMetrics(handlerOptions);
     case 'defaultHandler':
     default:
-      return await readMetrics(page);
+      return readMetrics(page);
   }
 }
 

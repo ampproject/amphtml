@@ -358,42 +358,41 @@ function checkPythonVersion() {
   }
 }
 
-function main() {
+async function main() {
   // Yarn is already used by default on Travis, so there is nothing more to do.
   if (process.env.TRAVIS) {
     return 0;
   }
   ensureYarn();
-  return checkNodeVersion().then(() => {
-    runGulpChecks();
-    checkPythonVersion();
-    checkYarnVersion();
-    if (!process.env.TRAVIS && updatesNeeded.size > 0) {
-      console.log(
-        yellow('\nWARNING: Detected problems with'),
-        cyan(Array.from(updatesNeeded).join(', '))
-      );
-      console.log(
-        yellow('⤷ Continuing install in'),
-        cyan(warningDelaySecs),
-        yellow('seconds...')
-      );
-      console.log(
-        yellow('⤷ Press'),
-        cyan('Ctrl + C'),
-        yellow('to abort and fix...')
-      );
-      let resolver;
-      const deferred = new Promise((resolverIn) => {
-        resolver = resolverIn;
-      });
-      setTimeout(() => {
-        console.log(yellow('\nAttempting to install packages...'));
-        resolver();
-      }, warningDelaySecs * 1000);
-      return deferred;
-    }
-  });
+  await checkNodeVersion();
+  runGulpChecks();
+  checkPythonVersion();
+  checkYarnVersion();
+  if (!process.env.TRAVIS && updatesNeeded.size > 0) {
+    console.log(
+      yellow('\nWARNING: Detected problems with'),
+      cyan(Array.from(updatesNeeded).join(', '))
+    );
+    console.log(
+      yellow('⤷ Continuing install in'),
+      cyan(warningDelaySecs),
+      yellow('seconds...')
+    );
+    console.log(
+      yellow('⤷ Press'),
+      cyan('Ctrl + C'),
+      yellow('to abort and fix...')
+    );
+    let resolver;
+    const deferred = new Promise((resolverIn) => {
+      resolver = resolverIn;
+    });
+    setTimeout(() => {
+      console.log(yellow('\nAttempting to install packages...'));
+      resolver();
+    }, warningDelaySecs * 1000);
+    return deferred;
+  }
 }
 
 main();

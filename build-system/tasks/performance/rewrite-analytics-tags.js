@@ -95,7 +95,7 @@ async function alterAnalyticsTags(url, version, extraUrlParams) {
  * @param {?Object} handlers
  * @return {Promise}
  */
-function rewriteAnalyticsConfig(handlers) {
+async function rewriteAnalyticsConfig(handlers) {
   const handlerPromises = [];
   handlers.forEach((handler) => {
     const {handlerName, adsUrls, urls, extraUrlParam} = handler;
