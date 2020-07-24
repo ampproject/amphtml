@@ -606,7 +606,7 @@ Single-parameter arrow functions can't have parentheses, e.g. use `x => x + 1` i
     }
   </script>
 </amp-state>
-<p [text]="'concat: ' + myArrayState.foo.concat()">concat: 1, 2, 3</p>
+<p [text]="'concat: ' + myArrayState.foo.concat(4)">concat: 1, 2, 3</p>
 <p [text]="'filter: ' + myArrayState.bar.filter(word => word.length > 3)">
   filter: words with less than three letter
 </p>
