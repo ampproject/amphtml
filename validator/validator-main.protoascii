@@ -3441,6 +3441,7 @@ tags {  # <form method=GET ...>
     value_casei: "get"
   }
   attrs: { name: "novalidate" }
+  attrs: { name: "xssi-prefix" }
 }
 tags {  # <form method=POST ...>
   html_format: AMP4EMAIL
@@ -3476,6 +3477,7 @@ tags {  # <form method=POST ...>
     dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: { name: "novalidate" }
+  attrs: { name: "xssi-prefix" }
 }
 # Will add verify state template if requested by users
 tags {
