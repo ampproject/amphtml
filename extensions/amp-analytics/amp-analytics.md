@@ -730,7 +730,7 @@ interval. Use `timerSpec` to control when this will fire.
 - `immediate` trigger timer immediately or not. Boolean, defaults to true
 
 [tip type="note"]
-The timer trigger will continue to send out requests regardless of document state (inactive or hidden), until the `maxTimerLength` has been reached or `stopSpec` has been met. In the case of no `startSpec`, the `maxTimerLength` will default to infinity.
+The timer trigger will continue to send out requests regardless of document state (inactive or hidden), until the `maxTimerLength` has been reached or `stopSpec` has been met. In the case of no `stopSpec`, the `maxTimerLength` will default to infinity.
 [/tip]
 
 See the following example:
@@ -794,11 +794,11 @@ allowed. Please refer to the examples below on how to configure triggers based o
     },
     "request": "timerRequest"
   },
-  "stopOnVisibleTimer": {
+  "startOnVisible": {
     "on": "timer",
     "timerSpec": {
       "interval": 5,
-      "stopSpec": {
+      "startSpec": {
         "on": "visible",
         "selector": ":root"
       }
