@@ -58,13 +58,13 @@ export function Timeago({
 
   return (
     <ContainWrapper
+      {...rest}
       as="time"
       size={containSize}
       layout={true}
       paint={true}
       contentRef={ref}
       datetime={datetime}
-      {...rest}
     >
       {timestamp}
     </ContainWrapper>
