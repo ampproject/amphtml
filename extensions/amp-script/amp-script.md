@@ -23,7 +23,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-
 The `amp-script` component allows you to run custom JavaScript. To maintain AMP's performance guarantees, your code runs in a Web Worker, and certain restrictions apply.
 
 ## Usage
@@ -37,17 +36,17 @@ An `amp-script` element can load JavaScript in two ways:
 
 Use the `src` attribute to load JavaScript from a URL:
 
-[sourcecode:html]
+```html
 <amp-script layout="container" src="https://example.com/hello-world.js">
   <button>Hello amp-script!</button>
 </amp-script>
-[/sourcecode]
+```
 
 #### From a local element
 
 Use the `script` attribute to reference a local `script` element by `id`. You must also specify `type="text/plain"` so that the browser doesn't execute your script immediately. Instead, `<amp-script>` finds it. Also include `target="amp-script"`, like this:
 
-[sourcecode:html]
+```html
 <!-- To use inline JavaScript, you must add a script hash to the document head. -->
 <head>
   <meta
@@ -69,7 +68,7 @@ Use the `script` attribute to reference a local `script` element by `id`. You mu
     document.body.textContent = 'Hello World!';
   });
 </script>
-[/sourcecode]
+```
 
 [tip type="default"]
 For security reasons, `amp-script` elements with a `script` or cross-origin `src` attribute require a [script hash](#script-hash) in a `<meta name="amp-script-src" content="...">` tag. Also, same-origin `src` files must have [`Content-Type`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type): `application/javascript` or `text/javascript`.
@@ -81,20 +80,20 @@ For security reasons, `amp-script` elements with a `script` or cross-origin `src
 
 For example, adding an element to `document.body`:
 
-[sourcecode:js]
+```js
 // my-script.js
 const p = document.createElement('p');
 p.textContent = 'I am added to the body!';
 document.body.appendChild(p);
-[/sourcecode]
+```
 
 Will be reflected on the page as a new child of the `amp-script` element:
 
-[sourcecode:html]
+```html
 <amp-script src="http://example.com/my-script.js" width="300" height="100">
   <p>I am added to the body!</p>
 </amp-script>
-[/sourcecode]
+```
 
 Under the hood, `amp-script` uses [@ampproject/worker-dom](https://github.com/ampproject/worker-dom/). For design details, see the ["Intent to Implement" issue](https://github.com/ampproject/amphtml/issues/13471).
 
@@ -108,7 +107,7 @@ This enables advanced interactions between `amp-script` and other AMP elements o
 `AMP.setState()` requires the [`amp-bind`](https://amp.dev/documentation/components/amp-bind) extension script to be included in the document head.
 [/tip]
 
-[sourcecode:js]
+```js
 /**
  * Deep-merges `json` into the current amp-state.
  * @param {!Object} json A JSON object e.g. must not contain circular references.
@@ -121,11 +120,11 @@ AMP.setState(json) {}
  * @return {!Promise<!Object>}
  */
 AMP.getState(expr) {}
-[/sourcecode]
+```
 
 ##### Example with WebSocket and AMP.setState()
 
-[sourcecode:html]
+```html
 <amp-script width="1" height="1" script="webSocketDemo"> </amp-script>
 
 <!--
@@ -138,7 +137,7 @@ AMP.getState(expr) {}
     AMP.setState({socketData: event.data});
   };
 </script>
-[/sourcecode]
+```
 
 ### Restrictions
 
@@ -172,7 +171,7 @@ With regard to dynamic creation of AMP elements (e.g. via `document.createElemen
 
 Since custom JS run in `amp-script` is not subject to normal [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP), you need to add this script hash:
 
-- for inline JavaScript 
+- for inline JavaScript
 - for JavaScript loaded from a cross-origin source
 
 Include the script hash in a `meta[name=amp-script-src]` element in the document head. Here are a few ways to build the hash:
@@ -180,9 +179,9 @@ Include the script hash in a `meta[name=amp-script-src]` element in the document
 1. If you omit the `<meta>` tag, AMP will output a console error containing the expected hash string. You can copy this to create the appropriate `<meta>` tag.
 1. The [AMP Optimizer node module](https://www.npmjs.com/package/@ampproject/toolbox-optimizer) generates this hash and inserts the `<meta>` tag automatically.
 1. Build it yourself, using the following steps:
-  1. Compute the SHA384 hash sum of the script's contents. This sum should be expressed in hexadecimal.
-  1. base64url-encode the result.
-  1. Prefix that with `sha384-`.
+   a. Compute the SHA384 hash sum of the script's contents. This sum should be expressed in hexadecimal.
+   a. base64url-encode the result.
+   a. Prefix that with `sha384-`.
 
 Here's you might build the hash in node.js:
 
@@ -190,16 +189,20 @@ Here's you might build the hash in node.js:
 function generateCSPHash(script) {
   const hash = crypto.createHash('sha384');
   const data = hash.update(script, 'utf-8');
-  return 'sha384-' + data.digest('base64')
-    .replace(/=/g, '')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_');
+  return (
+    'sha384-' +
+    data
+      .digest('base64')
+      .replace(/=/g, '')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+  );
 }
 ```
 
 This example shows how to use the script hash in HTML:
 
-[sourcecode:html]
+```html
 <head>
   <!--
     A meta[name="amp-script-src"] element contains all script hashes for
@@ -218,9 +221,10 @@ This example shows how to use the script hash in HTML:
 
     If the hash of remote.js's contents is "fake_hash_of_remote_js",
     we'll add "sha384-fake_hash_of_remote_js" to the <meta> tag above.
-  -->
-  <amp-script src="cross.origin/remote.js" layout=container>
-  </amp-script>
+
+-->
+<amp-script src="cross.origin/remote.js" layout=container>
+</amp-script>
 
   <!--
     A "script" attribute also requires adding a script hash.
@@ -234,7 +238,7 @@ This example shows how to use the script hash in HTML:
     document.body.textContent += 'Hello world!';
   </script>
 </body>
-[/sourcecode]
+```
 
 [tip type="default"]
 During development, you can disable the JavaScript size and script hash requirements by adding a `data-ampdevmode` attribute to either the `amp-script` element or the root html node. Adding this to the root html node will suppress all validation errors on the page. Adding it to the `amp-script` element will simply suppress errors about the size and the script hash.
