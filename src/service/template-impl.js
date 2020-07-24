@@ -93,8 +93,8 @@ export class BaseTemplate {
    * @return {!Element}
    * @protected @final
    */
-  unwrap(root) {
-    const unwrapped = this.forceUnwrap(root);
+  tryUnwrap(root) {
+    const unwrapped = this.unwrapChildren(root);
     return dev().assertElement(unwrapped.length ? root : unwrapped);
   }
 
@@ -106,7 +106,7 @@ export class BaseTemplate {
    * @return {!Element|!Array<!Element>}
    * @protected @final
    */
-  forceUnwrap(root) {
+  unwrapChildren(root) {
     const elements = [];
     for (let n = root.firstChild; n != null; n = n.nextSibling) {
       if (n.nodeType == /* TEXT */ 3) {

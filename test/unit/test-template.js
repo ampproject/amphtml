@@ -359,7 +359,9 @@ describes.realWin('BaseTemplate', {amp: true}, (env) => {
     const root = doc.createElement('div');
     const element1 = doc.createElement('div');
     root.appendChild(element1);
-    expect(new BaseTemplate(templateElement).unwrap(root)).to.equal(element1);
+    expect(new BaseTemplate(templateElement).tryUnwrap(root)).to.equal(
+      element1
+    );
   });
 
   it('should unwrap with empty/whitespace text', () => {
@@ -368,20 +370,22 @@ describes.realWin('BaseTemplate', {amp: true}, (env) => {
     root.appendChild(doc.createTextNode('   '));
     root.appendChild(element1);
     root.appendChild(doc.createTextNode(' \n\t  '));
-    expect(new BaseTemplate(templateElement).unwrap(root)).to.equal(element1);
+    expect(new BaseTemplate(templateElement).tryUnwrap(root)).to.equal(
+      element1
+    );
   });
 
   it('should NOT unwrap multiple elements', () => {
     const root = doc.createElement('div');
     root.appendChild(doc.createElement('div'));
     root.appendChild(doc.createElement('div'));
-    expect(new BaseTemplate(templateElement).unwrap(root)).to.equal(root);
+    expect(new BaseTemplate(templateElement).tryUnwrap(root)).to.equal(root);
   });
 
   it('should NOT unwrap with non-empty/whitespace text', () => {
     const root = doc.createElement('div');
     root.appendChild(doc.createTextNode('a'));
     root.appendChild(doc.createElement('div'));
-    expect(new BaseTemplate(templateElement).unwrap(root)).to.equal(root);
+    expect(new BaseTemplate(templateElement).tryUnwrap(root)).to.equal(root);
   });
 });

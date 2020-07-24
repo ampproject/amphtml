@@ -115,7 +115,7 @@ export class AmpMustache extends BaseTemplate {
   setHtml(html) {
     const wrapped = `<div>${html}</div>`;
     const serialized = this.serializeHtml_(wrapped);
-    return this.forceUnwrap(serialized);
+    return this.unwrapChildren(serialized);
   }
 
   /** @override */
@@ -143,7 +143,7 @@ export class AmpMustache extends BaseTemplate {
     const root = doc.createElement('div');
     const sanitized = sanitizeHtml(html, doc);
     root./*OK*/ innerHTML = sanitized;
-    return this.unwrap(root);
+    return this.tryUnwrap(root);
   }
 }
 
