@@ -90,7 +90,10 @@ export function processHead(win, adElement, head) {
 
   const root = rootNodeFor(head);
   const htmlTag = root.documentElement;
-  if (!htmlTag.hasAttribute('amp4ads') && !htmlTag.hasAttribute('⚡️4ads')) {
+  if (
+    !htmlTag ||
+    (!htmlTag.hasAttribute('amp4ads') && !htmlTag.hasAttribute('⚡️4ads'))
+  ) {
     return null;
   }
 
