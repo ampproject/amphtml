@@ -106,6 +106,54 @@ describes.realWin(
       expect(video.hasAttribute('controls')).to.be.false;
     });
 
+    it('should load a cached video', async () => {
+      const v = await getVideo({
+        src: 'https://example-com.cdn.ampproject.org/m/s/video.mp4',
+        'amp-orig-src': 'https://example.com/video.mp4',
+        width: 160,
+        height: 90,
+      });
+      const video = v.querySelector('video');
+      expect(video.getAttribute('src')).to.be.null;
+      const sources = video.querySelectorAll('source');
+      expect(sources.length).to.equal(2);
+      expect(sources[0].getAttribute('src')).to.equal(
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+      );
+      expect(sources[1].getAttribute('src')).to.equal(
+        'https://example.com/video.mp4'
+      );
+    });
+
+    it('should load a cached video and bitrate', async () => {
+      const source = doc.createElement('source');
+      source.setAttribute(
+        'src',
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+      );
+      source.setAttribute('amp-orig-src', 'https://example.com/video.mp4');
+      source.setAttribute('data-bitrate', '1000');
+      const v = await getVideo(
+        {
+          width: 160,
+          height: 90,
+        },
+        [source]
+      );
+      const video = v.querySelector('video');
+      expect(video.getAttribute('src')).to.be.null;
+      const sources = video.querySelectorAll('source');
+      expect(sources.length).to.equal(2);
+      expect(sources[0].getAttribute('src')).to.equal(
+        'https://example-com.cdn.ampproject.org/m/s/video.mp4'
+      );
+      expect(sources[1].getAttribute('src')).to.equal(
+        'https://example.com/video.mp4'
+      );
+      expect(sources[0].getAttribute('data-bitrate')).to.equal('1000');
+      expect(sources[1].getAttribute('data-bitrate')).to.equal('1000');
+    });
+
     it('should load a video', async () => {
       const v = await getVideo({
         src: 'video.mp4',

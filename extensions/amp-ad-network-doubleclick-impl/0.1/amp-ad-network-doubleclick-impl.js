@@ -148,19 +148,6 @@ const ZINDEX_EXP_BRANCHES = {
   HOLDBACK: '21065357',
 };
 
-/** @const {string} */
-const RANDOM_SUBDOMAIN_SAFEFRAME_EXP = 'random-subdomain-for-safeframe';
-
-/**
- * Branches of the random subdomain for SafeFrame experiment.
- * @const @enum{string}
- * @visibleForTesting
- */
-export const RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES = {
-  CONTROL: '21065817',
-  EXPERIMENT: '21065818',
-};
-
 /**
  * @const @enum {string}
  * @visibleForTesting
@@ -463,14 +450,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         branches: Object.values(ZINDEX_EXP_BRANCHES),
       },
       {
-        experimentId: RANDOM_SUBDOMAIN_SAFEFRAME_EXP,
-        isTrafficEligible: () => true,
-        branches: [
-          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.CONTROL,
-          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT,
-        ],
-      },
-      {
         experimentId: EXPAND_JSON_TARGETING_EXP.ID,
         isTrafficEligible: () => true,
         branches: [
@@ -512,6 +491,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     Object.keys(setExps).forEach(
       (expName) => setExps[expName] && this.experimentIds.push(setExps[expName])
     );
+    const moduleNomoduleExpId = this.getModuleNomoduleExpIds_();
+    if (moduleNomoduleExpId) {
+      this.experimentIds.push(moduleNomoduleExpId);
+    }
     if (setExps[ZINDEX_EXP] == ZINDEX_EXP_BRANCHES.HOLDBACK) {
       this.inZIndexHoldBack_ = true;
     }
@@ -1240,11 +1223,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getSafeframePath() {
-    const randomSubdomainExperimentBranch =
-      RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT;
-    if (!this.experimentIds.includes(randomSubdomainExperimentBranch)) {
-      return super.getSafeframePath();
-    }
     safeFrameRandomSubdomain =
       safeFrameRandomSubdomain || this.getRandomString_();
 

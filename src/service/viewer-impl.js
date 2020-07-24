@@ -17,7 +17,6 @@
 import {Deferred, tryResolve} from '../utils/promise';
 import {Observable} from '../observable';
 import {Services} from '../services';
-import {ViewerInterface} from './viewer-interface';
 import {VisibilityState} from '../visibility-state';
 import {
   dev,
@@ -41,6 +40,8 @@ import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
 import {urls} from '../config';
+
+import {ViewerInterface} from './viewer-interface';
 
 const TAG_ = 'Viewer';
 
@@ -895,7 +896,7 @@ export class ViewerImpl {
     const makeVisible = () => {
       this.setVisibilityState_(VisibilityState.VISIBLE);
       doUnlisten();
-      dev().error(TAG_, 'Received user action in non-visible doc');
+      dev().expectedError(TAG_, 'Received user action in non-visible doc');
     };
     const options = {
       capture: true,

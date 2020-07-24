@@ -497,6 +497,10 @@ class AmpVideo extends AMP.BaseElement {
       const origSrc = cachedSource.getAttribute('amp-orig-src');
       const origType = cachedSource.getAttribute('type');
       const origSource = this.createSourceElement_(origSrc, origType);
+      const bitrate = cachedSource.getAttribute('data-bitrate');
+      if (bitrate) {
+        origSource.setAttribute('data-bitrate', bitrate);
+      }
       insertAfterOrAtStart(
         dev().assertElement(this.video_),
         origSource,
