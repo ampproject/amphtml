@@ -28,31 +28,10 @@ import {userAssert} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-base-carousel';
 
-/**
- * Triggers a 'slideChange' event with one data param:
- * 'index' - index of the current slide.
- * @param {!Window} win
- * @param {!../../../src/service/action-impl.ActionService} action
- * @param {!Element} el The element that was selected or deslected.
- * @param {number} index
- * @param {!ActionTrust} trust
- * @private
- */
-function fireSlideChangeEvent(win, action, el, index, trust) {
-  const name = 'slideChange';
-  const slideChangeEvent = createCustomEvent(
-    win,
-    `amp-base-carousel.${name}`,
-    dict({'index': index})
-  );
-  action.trigger(el, name, slideChangeEvent, trust);
-}
-
 class AmpBaseCarousel extends PreactBaseElement {
   /** @override */
   init() {
     const {element} = this;
-    const action = Services.actionServiceForDoc(element);
     let advance = () => {};
     this.registerAction('prev', () => advance(-1), ActionTrust.LOW);
     this.registerAction('next', () => advance(1), ActionTrust.LOW);
@@ -62,7 +41,7 @@ class AmpBaseCarousel extends PreactBaseElement {
         const {args, trust} = actionInvocation;
         const index = args['index'];
         this.mutateProps(dict({'slide': index}));
-        fireSlideChangeEvent(this.win, action, element, index, trust);
+        fireSlideChangeEvent(this.win, element, index, trust);
       },
       ActionTrust.LOW
     );
@@ -82,13 +61,7 @@ class AmpBaseCarousel extends PreactBaseElement {
     return dict({
       'onMount_': () => owners.scheduleLayout(this.element, children),
       'onSlideChange': (index) => {
-        fireSlideChangeEvent(
-          this.win,
-          action,
-          element,
-          index,
-          ActionTrust.HIGH
-        );
+        fireSlideChangeEvent(this.win, element, index, ActionTrust.HIGH);
         this.mutateProps(dict({'slide': index}));
       },
       'setAdvance': (a) => (advance = a),
@@ -134,6 +107,25 @@ AmpBaseCarousel['children'] = {
 AmpBaseCarousel['props'] = {
   'loop': {attr: 'loop', type: 'boolean'},
 };
+
+/**
+ * Triggers a 'slideChange' event with one data param:
+ * 'index' - index of the current slide.
+ * @param {!Window} win
+ * @param {!Element} el The element that was selected or deslected.
+ * @param {number} index
+ * @param {!ActionTrust} trust
+ * @private
+ */
+function fireSlideChangeEvent(win, el, index, trust) {
+  const name = 'slideChange';
+  const slideChangeEvent = createCustomEvent(
+    win,
+    `amp-base-carousel.${name}`,
+    dict({'index': index})
+  );
+  Services.actionServiceForDoc(el).trigger(el, name, slideChangeEvent, trust);
+}
 
 AMP.extension(TAG, '1.0', (AMP) => {
   AMP.registerElement(TAG, AmpBaseCarousel, CSS);

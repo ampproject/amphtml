@@ -23,24 +23,22 @@ import {useMountEffect} from '../../../src/preact/utils';
  * @param {!BaseCarouselDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function BaseCarousel(props) {
-  const {
-    arrowPrev,
-    arrowNext,
-    children,
-    defaultSlide,
-    loop,
-    slide,
-    onSlideChange,
-    onMount_,
-    setAdvance,
-    ...rest
-  } = props;
+export function BaseCarousel({
+  arrowPrev,
+  arrowNext,
+  children,
+  defaultSlide,
+  loop,
+  slide,
+  onSlideChange,
+  onMount_,
+  setAdvance,
+  ...rest
+}) {
   const childrenArray = toChildArray(children);
   const {length} = childrenArray;
   const [curSlide, setCurSlide] = useState(defaultSlide || 0);
   const slideState = slide ?? curSlide;
-  const ignoreProgrammaticScrollRef = useRef(true);
   const advance = (dir) => {
     const container = scrollRef.current;
     // Modify scrollLeft is preferred to `setCurSlide` to enable smooth scroll.
@@ -57,7 +55,6 @@ export function BaseCarousel(props) {
   });
 
   const setRestingIndex = (i) => {
-    ignoreProgrammaticScrollRef.current = true;
     setCurSlide(i);
     if (onSlideChange) {
       onSlideChange(i);
@@ -69,7 +66,6 @@ export function BaseCarousel(props) {
   return (
     <div {...rest}>
       <Scroller
-        ignoreProgrammaticScrollRef={ignoreProgrammaticScrollRef}
         loop={loop}
         restingIndex={slideState}
         setRestingIndex={setRestingIndex}

@@ -37,7 +37,6 @@ BaseCarouselDef.Props;
 /**
  * @typedef {{
  *   children: !Array<PreactDef.Renderable>,
- *   ignoreProgrammaticScrollRef: {current: (boolean|null)},
  *   loop: (boolean|undefined),
  *   restingIndex: number,
  *   setRestingIndex: (function(number):undefined),

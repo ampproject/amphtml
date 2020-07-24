@@ -35,16 +35,13 @@ const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
  * @param {!BaseCarouselDef.ScrollerProps} props
  * @return {PreactDef.Renderable}
  */
-export function Scroller(props) {
-  const {
-    children,
-    ignoreProgrammaticScrollRef,
-    loop,
-    restingIndex,
-    setRestingIndex,
-    scrollRef,
-  } = props;
-
+export function Scroller({
+  children,
+  loop,
+  restingIndex,
+  setRestingIndex,
+  scrollRef,
+}) {
   /**
    * The number of slides we want to place before the
    * reference or resting index. Only needed if loop=true.
@@ -56,6 +53,7 @@ export function Scroller(props) {
    * is with respect to its scrolling order. Only needed if loop=true.
    */
   const offsetRef = useRef(restingIndex);
+  const ignoreProgrammaticScrollRef = useRef(true);
   const containerRef = useRef(null);
   const slides = renderSlides({
     children,
@@ -95,6 +93,7 @@ export function Scroller(props) {
           ) {
             return;
           }
+          ignoreProgrammaticScrollRef.current = true;
           setRestingIndex(currentIndex.current);
         },
         RESET_SCROLL_REFERENCE_POINT_WAIT_MS
@@ -196,14 +195,7 @@ export function Scroller(props) {
  * @param {!BaseCarouselDef.SlideProps} props
  * @return {PreactDef.Renderable}
  */
-function renderSlides(props) {
-  const {
-    'children': children,
-    'restingIndex': restingIndex,
-    'offsetRef': offsetRef,
-    'pivotIndex': pivotIndex,
-    'loop': loop,
-  } = props;
+function renderSlides({children, restingIndex, offsetRef, pivotIndex, loop}) {
   const {length} = children;
   const slides = [];
 
