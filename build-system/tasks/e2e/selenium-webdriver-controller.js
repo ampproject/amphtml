@@ -66,15 +66,18 @@ function expectCondition(valueFn, condition, opt_mutate) {
  * @return {!Promise<?T>}
  * @template T
  */
-function waitFor(driver, valueFn, condition, opt_mutate) {
+async function waitFor(driver, valueFn, condition, opt_mutate) {
   const conditionValue = (value) => {
     // Box the value in an object, so values that are present but falsy
     // (like "") do not cause driver.wait to continue waiting.
     return condition(value) ? {value} : null;
   };
-  return driver
-    .wait(expectCondition(valueFn, conditionValue, opt_mutate))
-    .then((result) => result.value); // Unbox the value.
+
+  const result = await driver.wait(
+    expectCondition(valueFn, conditionValue, opt_mutate)
+  );
+
+  return result.value; // Unbox the value.
 }
 
 /** @implements {FunctionalTestController} */
@@ -283,7 +286,7 @@ class SeleniumWebDriverController {
    * @override
    */
   async navigateTo(location) {
-    return await this.driver.get(location);
+    return this.driver.get(location);
   }
 
   /**
@@ -298,15 +301,15 @@ class SeleniumWebDriverController {
       : await this.driver.switchTo().activeElement();
 
     if (keys === Key.CtrlV) {
-      return await this.pasteFromClipboard();
+      return this.pasteFromClipboard();
     }
 
     const key = KeyToSeleniumMap[keys];
     if (key) {
-      return await targetElement.sendKeys(key);
+      return targetElement.sendKeys(key);
     }
 
-    return await targetElement.sendKeys(keys);
+    return targetElement.sendKeys(keys);
   }
 
   /**
@@ -450,7 +453,7 @@ class SeleniumWebDriverController {
    * @override
    */
   async getAllWindows() {
-    return await this.driver.getAllWindowHandles();
+    return this.driver.getAllWindowHandles();
   }
 
   /**
@@ -555,7 +558,7 @@ class SeleniumWebDriverController {
    * @override
    */
   async click(handle) {
-    return await handle.getElement().click();
+    return handle.getElement().click();
   }
 
   /**
@@ -570,11 +573,7 @@ class SeleniumWebDriverController {
       element./*OK*/ scrollBy(opt_scrollToOptions);
     };
 
-    return await this.driver.executeScript(
-      scrollBy,
-      webElement,
-      opt_scrollToOptions
-    );
+    return this.driver.executeScript(scrollBy, webElement, opt_scrollToOptions);
   }
 
   /**
@@ -589,11 +588,7 @@ class SeleniumWebDriverController {
       element./*OK*/ scrollTo(opt_scrollToOptions);
     };
 
-    return await this.driver.executeScript(
-      scrollTo,
-      webElement,
-      opt_scrollToOptions
-    );
+    return this.driver.executeScript(scrollTo, webElement, opt_scrollToOptions);
   }
 
   /**
