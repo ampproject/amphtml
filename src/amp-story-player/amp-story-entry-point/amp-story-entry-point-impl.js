@@ -17,7 +17,6 @@
 // Source for this constant is css/amp-story-entry-point.css
 import {createCustomEvent} from '../../event-helper';
 import {cssText} from '../../../build/amp-story-entry-point.css';
-import {escapeCssSelectorIdent} from '../../css';
 import {setStyle} from '../../style';
 import {toArray} from '../../types';
 
@@ -79,9 +78,7 @@ export class AmpStoryEntryPoint {
     }
 
     const playerId = this.element_.getAttribute('player-id');
-    this.player_ = this.doc_.querySelector(
-      escapeCssSelectorIdent(`#${playerId}`)
-    );
+    this.player_ = this.doc_.querySelector(`#${playerId}`);
     this.stories_ = toArray(this.player_.querySelectorAll('a'));
 
     this.initializeShadowRoot_();
