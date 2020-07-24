@@ -100,21 +100,6 @@ describes.realWin('AmpFetcher', {amp: true}, (env) => {
 
     fetcher.sendBeacon(sentUrl, sentMessage);
   });
-
-  it('should send a post', async () => {
-    env.sandbox.stub(xhr, 'fetch').callsFake((url, init) => {
-      expect(url).to.equal(sentUrl);
-      expect(init).to.deep.equal({
-        method: 'POST',
-        headers: {'Content-Type': contentType},
-        credentials: 'include',
-        body: expectedBodyString,
-      });
-      return Promise.resolve({});
-    });
-
-    fetcher.sendPost(sentUrl, sentMessage);
-  });
 });
 
 describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
