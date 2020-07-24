@@ -29,9 +29,7 @@ export const _default = () => {
   const dateTime = date('Date/time', new Date());
   return (
     <DateDisplay
-      timestampSeconds={dateTime}
-      layout="fixed-height"
-      height="20"
+      timestampMs={dateTime}
       render={(date) => <span>{`The ISO date is ${date.iso}`}</span>}
     />
   );
