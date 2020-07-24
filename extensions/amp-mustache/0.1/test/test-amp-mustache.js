@@ -599,7 +599,6 @@ describes.repeated(
 
     describe('setHtml()', () => {
       it('should unwrap singular element output', () => {
-        templateElement./*OK*/ innerHTML = '<a>abc</a>';
         template.compileCallback();
         const result = template.setHtml('<a>abc</a>');
         expect(result.tagName).to.equal('A');
@@ -607,7 +606,6 @@ describes.repeated(
       });
 
       it('should wrap singular text node output', () => {
-        templateElement./*OK*/ innerHTML = 'abc';
         template.compileCallback();
         const result = template.setHtml('abc');
         expect(result.tagName).to.equal('DIV');
@@ -615,7 +613,6 @@ describes.repeated(
       });
 
       it('should unwrap output with many elements', () => {
-        templateElement./*OK*/ innerHTML = `<a>abc</a><a>def</a>`;
         template.compileCallback();
         const result = template.setHtml('<a>abc</a><a>def</a>');
         expect(result).to.have.length(2);
@@ -630,7 +627,6 @@ describes.repeated(
         const html = `<a>abc</a>
         def
         <a>ghi  </a>`;
-        templateElement./*OK*/ innerHTML = html;
         template.compileCallback();
         const result = template.setHtml(html);
         expect(result).to.have.length(3);
@@ -650,7 +646,6 @@ describes.repeated(
         </div>
         def
         <a>ghi  </a>`;
-        templateElement./*OK*/ innerHTML = html;
         template.compileCallback();
         const result = template.setHtml(html);
         expect(result).to.have.length(3);
