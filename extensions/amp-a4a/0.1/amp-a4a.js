@@ -240,7 +240,10 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?Promise<undefined>} */
     this.keysetPromise_ = null;
 
-    /** @private {?Promise<?CreativeMetaDataDef>} */
+    /**
+     * In no signing experiment metadata will be data from head validation.
+     * @private {?Promise<?CreativeMetaDataDef|?./head-validation.ValidatedHeadDef>}
+     */
     this.adPromise_ = null;
 
     /**
@@ -866,7 +869,7 @@ export class AmpA4A extends AMP.BaseElement {
    * Start streaming response into the detached document.
    * @param {!Response} response
    * @param {function()} checkStillCurrent
-   * @return {boolean}
+   * @return {Promise<?./head-validation.ValidatedHeadDef>}
    */
   streamResponse_(response, checkStillCurrent) {
     console.log('***experiment***');
@@ -926,7 +929,7 @@ export class AmpA4A extends AMP.BaseElement {
    * attemptToRenderCreative
    * @param {!Response} fallbackResponse
    * @param {function()} checkStillCurrent
-   * @return {null}
+   * @return {!Promise<null>}
    */
   handleFallback_(fallbackResponse, checkStillCurrent) {
     return fallbackResponse.arrayBuffer().then((textContent) => {
@@ -1271,11 +1274,13 @@ export class AmpA4A extends AMP.BaseElement {
 
         if (this.isInNoSigningExp()) {
           friendlyRenderPromise = this.renderFriendlyTrustless_(
-            creativeMetaData,
+            /** @type {!./head-validation.ValidatedHeadDef} */ (creativeMetaData),
             checkStillCurrent
           );
         } else {
-          friendlyRenderPromise = this.renderAmpCreative_(creativeMetaData);
+          friendlyRenderPromise = this.renderAmpCreative_(
+            /** @type {!CreativeMetaDataDef} */ (creativeMetaData)
+          );
         }
 
         // Must be an AMP creative.
@@ -1633,7 +1638,7 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * @param {ValidatedHeadDef} headData
+   * @param {!./head-validation.ValidatedHeadDef} headData
    * @param {function()} checkStillCurrent
    * @return {!Promise} Whether the creative was successfully rendered.
    */
