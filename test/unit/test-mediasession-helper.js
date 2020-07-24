@@ -21,6 +21,7 @@ import {
   parseOgImage,
   parseSchemaImage,
   setMediaSession,
+  validateMediaMetadata,
 } from '../../src/mediasession-helper';
 
 const schemaTemplate = `
@@ -147,6 +148,17 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, (env) => {
     expect(newMetaData).to.deep.equal(fakeMetaData);
   });
 
+  it('validate correct metadata', () => {
+    expect(() =>
+      validateMediaMetadata(element, {
+        'artist': 'Some artist',
+        'album': 'Some album',
+        'artwork': ['http://example.com/image.png'],
+        'title': 'Some title',
+      })
+    ).to.not.throw();
+  });
+
   it('should throw if artwork src is invalid - object', () => {
     const fakeMetaData = {
       'artist': '',
@@ -159,7 +171,7 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, (env) => {
     };
     return allowConsoleError(() => {
       expect(() => {
-        setMediaSession(element, ampdoc.win, fakeMetaData);
+        validateMediaMetadata(element, fakeMetaData);
       }).to.throw();
     });
   });
@@ -176,7 +188,7 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, (env) => {
     };
     return allowConsoleError(() => {
       expect(() => {
-        setMediaSession(element, ampdoc.win, fakeMetaData);
+        validateMediaMetadata(element, fakeMetaData);
       }).to.throw();
     });
   });
@@ -190,7 +202,7 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, (env) => {
     };
     return allowConsoleError(() => {
       expect(() => {
-        setMediaSession(element, ampdoc.win, fakeMetaData);
+        validateMediaMetadata(element, fakeMetaData);
       }).to.throw();
     });
   });
