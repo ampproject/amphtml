@@ -26,17 +26,17 @@ To use RTC, you must meet the following requirements:
 - Criteo
 - FLUX
 - IndexExchange
+- Kargo
 - Lotame
 - Media.net
-- The Ozone Project
 - PubMatic OpenWrap
 - Purch
 - Rubicon
 - Salesforce
-- Yieldbot
-- Kargo
-- Yieldlab
 - T13
+- The Ozone Project
+- Yieldbot
+- Yieldlab
 
 ### Overview
 
