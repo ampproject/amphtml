@@ -95,8 +95,7 @@ let BoundElementDef;
  */
 const BIND_ONLY_ATTRIBUTES = map({
   'AMP-CAROUSEL': ['slide'],
-  // TODO (#18875): add is-layout-container to validator file for amp-list
-  'AMP-LIST': ['state', 'is-layout-container'],
+  'AMP-LIST': ['is-layout-container'],
   'AMP-SELECTOR': ['selected'],
 });
 
