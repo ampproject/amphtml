@@ -22,7 +22,8 @@ import {setStyle} from '../../../src/style';
 
 /**
  * @typedef {{
- *    category: string,
+ *    category: ?string,
+ *    percentage: ?number,
  * }}
  */
 export let InteractiveResultsDef;
@@ -37,7 +38,11 @@ const buildResultsTemplate = (element) => {
   const html = htmlFor(element);
   return html`
     <div class="i-amphtml-story-interactive-results-container">
-      <div class="i-amphtml-story-interactive-results-line"></div>
+      <div class="i-amphtml-story-interactive-results-top">
+        <div class="i-amphtml-story-interactive-results-top-score">SCORE</div>
+        <div class="i-amphtml-story-interactive-results-top-line"></div>
+        <div class="i-amphtml-story-interactive-results-top-value">100</div>
+      </div>
       <div class="i-amphtml-story-interactive-results-visuals">
         <div class="i-amphtml-story-interactive-results-dots"></div>
         <div class="i-amphtml-story-interactive-results-image-border">
@@ -56,23 +61,70 @@ const buildResultsTemplate = (element) => {
  * Processes the state and returns the condensed results.
  * @param {!Map<string, {option: ?./amp-story-interactive.OptionConfigType, interactiveId: string}>} interactiveState
  * @param {?Array<!./amp-story-interactive.OptionConfigType>} options needed to ensure the first options take precedence on ties
+ * @param {string} strategy
  * @return {InteractiveResultsDef} the results
  */
-const processResults = (interactiveState, options) => {
+const processResults = (interactiveState, options, strategy) => {
   const categories = {};
+  let quizCount = 0;
+  let quizCorrect = 0;
   // Add options in order to prefer earlier categories before later ones.
   options.forEach((option) => {
-    categories[option.resultscategory] = 0;
-  });
-  Object.values(interactiveState).forEach((e) => {
-    if (e.option != null) {
-      categories[e.option.resultscategory] += 1;
+    if (option.resultscategory) {
+      categories[option.resultscategory] = 0;
     }
   });
-  return {
-    category: Object.keys(categories).reduce((a, b) =>
+  Object.values(interactiveState).forEach((e) => {
+    if (e.type == InteractiveType.POLL) {
+      if (
+        e.option &&
+        e.option.resultscategory &&
+        categories[e.option.resultscategory] != null
+      ) {
+        categories[e.option.resultscategory] += 1;
+      }
+    } else if (e.type == InteractiveType.QUIZ) {
+      quizCount += 1;
+      if (e.option && e.option.correct != null) {
+        quizCorrect += 1;
+      }
+    }
+  });
+  let category = null;
+  let percentage = null;
+  // Decide category based on strategy
+  if (strategy === 'percentage') {
+    percentage = quizCount == 0 ? 0 : 100 * (quizCorrect / quizCount);
+    options.forEach((option) => {
+      console.log(
+        option.resultscategory,
+        parseFloat(option.resultsthreshold),
+        parseFloat(option.resultsthreshold) <= percentage
+      );
+      if (
+        category == null &&
+        parseFloat(option.resultsthreshold) <= percentage
+      ) {
+        category = option.resultscategory;
+      }
+    });
+  } else if (strategy === 'category') {
+    Object.keys(categories).reduce((a, b) =>
       categories[a] >= categories[b] ? a : b
-    ),
+    );
+  } else {
+    // Recalculate with explicit category if there was at least one category that matched (or if there are no quizzes), otherwise percentage.
+    return processResults(
+      interactiveState,
+      options,
+      Object.values(categories).reduce((a, b) => a + b, 0) > 0 || quizCount == 0
+        ? 'category'
+        : 'percentage'
+    );
+  }
+  return {
+    category,
+    percentage,
   };
 };
 
@@ -115,7 +167,18 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
    * @private
    */
   onInteractiveReactStateUpdate_(interactiveState) {
-    const results = processResults(interactiveState, this.options_);
+    const results = processResults(
+      interactiveState,
+      this.options_,
+      this.element.getAttribute('strategy')
+    );
+    this.rootEl_.classList.toggle(
+      'i-amphtml-story-interactive-results-show-score',
+      results.percentage != null
+    );
+    this.rootEl_.querySelector(
+      '.i-amphtml-story-interactive-results-top-value'
+    ).textContent = results.percentage | 0;
     this.options_.forEach((e) => {
       if (e.resultscategory === results.category) {
         this.mutateElement(() => {

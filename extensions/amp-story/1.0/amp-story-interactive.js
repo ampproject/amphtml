@@ -759,6 +759,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     const update = {
       'option': option != null ? this.options_[option] : null,
       'interactiveId': this.getInteractiveId_(),
+      'type': this.interactiveType_,
     };
     this.storeService_.dispatch(Action.ADD_INTERACTIVE_REACT, update);
   }
