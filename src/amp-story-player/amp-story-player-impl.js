@@ -649,15 +649,15 @@ export class AmpStoryPlayer {
    */
   next_() {
     if (
-      this.element_.getAttribute('enable-circular-wrapping') != 'true' &&
-      this.isIndexOutofBounds_(1)
+      !this.circularWrapping_() &&
+      this.isIndexOutofBounds_(this.currentIdx_ + 1)
     ) {
       return;
     }
 
     if (
-      this.element_.getAttribute('enable-circular-wrapping') === 'true' &&
-      this.isIndexOutofBounds_(1)
+      this.circularWrapping_() &&
+      this.isIndexOutofBounds_(this.currentIdx_ + 1)
     ) {
       const currentStory = this.stories_[0];
       this.show(currentStory.href);
@@ -692,15 +692,15 @@ export class AmpStoryPlayer {
    */
   previous_() {
     if (
-      this.element_.getAttribute('enable-circular-wrapping') != 'true' &&
-      this.isIndexOutofBounds_(-1)
+      !this.circularWrapping_() &&
+      this.isIndexOutofBounds_(this.currentIdx_ - 1)
     ) {
       return;
     }
 
     if (
-      this.element_.getAttribute('enable-circular-wrapping') === 'true' &&
-      this.isIndexOutofBounds_(-1)
+      this.circularWrapping_() &&
+      this.isIndexOutofBounds_(this.currentIdx_ - 1)
     ) {
       const currentStory = this.stories_[this.stories_.length - 1];
       this.show(currentStory.href);
@@ -734,10 +734,7 @@ export class AmpStoryPlayer {
     if (storyDelta === 0) {
       return;
     }
-    if (
-      this.element_.getAttribute('enable-circular-wrapping') !== 'true' &&
-      this.isIndexOutofBounds_(storyDelta)
-    ) {
+    if (!this.circularWrapping_() && this.isIndexOutofBounds_(storyDelta)) {
       throw new Error('Out of Story range.');
     }
     if (!this.isIndexOutofBounds_(storyDelta)) {
@@ -746,30 +743,13 @@ export class AmpStoryPlayer {
       this.signalNavigation_();
       return;
     }
-    if (
-      this.element_.getAttribute('enable-circular-wrapping') === 'true' &&
-      this.isIndexOutofBounds_(storyDelta) &&
+    const currentStory =
       storyDelta > 0
-    ) {
-      const currentStory = this.stories_[
-        this.currentIdx_ + storyDelta - this.stories_.length
-      ];
-      this.show(currentStory.href);
-      this.signalNavigation_();
-      return;
-    }
-    if (
-      this.element_.getAttribute('enable-circular-wrapping') === 'true' &&
-      this.isIndexOutofBounds_(storyDelta) &&
-      storyDelta < 0
-    ) {
-      const currentStory = this.stories_[
-        this.currentIdx_ + storyDelta + this.stories_.length
-      ];
-      this.show(currentStory.href);
-      this.signalNavigation_();
-      return;
-    }
+        ? this.stories_[this.currentIdx_ + storyDelta - this.stories_.length]
+        : this.stories_[this.currentIdx_ + storyDelta + this.stories_.length];
+
+    this.show(currentStory.href);
+    this.signalNavigation_();
   }
 
   /**
@@ -1110,6 +1090,15 @@ export class AmpStoryPlayer {
       this.currentIdx_ + index >= this.stories_.length ||
       this.currentIdx_ + index < 0
     );
+  }
+
+  /**
+   * Checks if circular wrapping is set
+   * @private
+   * @return {boolean}
+   */
+  circularWrapping_() {
+    return this.element_.getAttribute('enable-circular-wrapping') === 'true';
   }
 
   /**
