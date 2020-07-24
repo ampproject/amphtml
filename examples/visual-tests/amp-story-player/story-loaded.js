@@ -16,15 +16,13 @@
 'use strict';
 
 module.exports = {
-  'story loaded': async page => {
-    await page.waitForSelector('.i-amphtml-story-player-loaded');
-  },
-
-  'player ready': async page => {
+  'story loaded and player ready': async page => {
     await page.$eval('amp-story-player', e => {
       new Promise(resolve => {
         e.addEventListener('ready', (readyEvent) => resolve(readyEvent));
       })
     });
+    await page.waitFor(5000);
+    await page.waitForSelector('.i-amphtml-story-loaded');
   }
 };
