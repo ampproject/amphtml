@@ -42,7 +42,6 @@ export function timeStrToMillis(time, fallbackMs = NaN) {
   const units = match ? match[2] : undefined;
 
   if (!match || match.length !== 3 || (units !== 's' && units !== 'ms')) {
-    user().warn('AMP-STORY', 'Invalid time string', time);
     return fallbackMs;
   }
 

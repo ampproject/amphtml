@@ -714,6 +714,12 @@ export class AmpStoryPage extends AMP.BaseElement {
       return new Promise((resolve) => {
         switch (mediaEl.tagName.toLowerCase()) {
           case 'amp-audio':
+            if (mediaEl.getAttribute('layout') === Layout.NODISPLAY) {
+              whenUpgradedToCustomElement(mediaEl)
+                .then((el) => el.signals().whenSignal(CommonSignals.BUILT))
+                .then(resolve, resolve);
+              break;
+            }
           case 'amp-video':
             whenUpgradedToCustomElement(mediaEl)
               .then((el) => el.signals().whenSignal(CommonSignals.LOAD_END))
@@ -1067,6 +1073,7 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @return {!Promise} Promise that resolves after the callbacks are called.
    */
   unmuteAllMedia() {
+    this.playAudioElementFromTimestamp_ = Date.now();
     return this.whenAllMediaElements_((mediaPool, mediaEl) => {
       this.unmuteMedia_(mediaPool, mediaEl);
     });
