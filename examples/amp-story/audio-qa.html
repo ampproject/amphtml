@@ -51,22 +51,25 @@
             <source type="audio/mpeg" src="./video/p1.mp4" />
           </amp-audio>
           <ol>
-            <li>amp-story-page background-audio</li>
+            <li>amp-story-page using amp-audio</li>
             <li>When clicking the “unmute” sound icon, the audio should play</li>
             <li>The Story should auto advance to the next page at the end of the audio</li>
           </ol>
         </amp-story-grid-layer>
       </amp-story-page>
 
-      <!-- <amp-story-page id="page2" background-audio="./video/p1.mp4" auto-advance-after="page2">
+      <amp-story-page id="page2">
         <amp-story-grid-layer template="vertical" class="instructions">
+          <amp-audio autoplay id="audio1" layout="nodisplay">
+            <source type="audio/mpeg" src="./video/p1.mp4" />
+          </amp-audio>
           <ol>
-            <li>amp-story-page background-audio</li>
+            <li>amp-story-page amp-audio</li>
             <li>After auto-advancing to this page by waiting for the previous audio to finish, the new audio should autoplay</li>
             <li>When clicking the “mute” sound icon, the audio should stop playing</li>
           </ol>
         </amp-story-grid-layer>
-      </amp-story-page> -->
+      </amp-story-page>
 
     </amp-story>
   </body>
