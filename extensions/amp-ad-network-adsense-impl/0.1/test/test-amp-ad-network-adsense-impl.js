@@ -19,7 +19,6 @@
 // always available for them. However, when we test an impl in isolation,
 // AmpAd is not loaded already, so we need to load it separately.
 import '../../../amp-ad/0.1/amp-ad';
-import {Deferred} from '../../../../src/utils/promise';
 import * as experiments from '../../../../src/experiments';
 import {AD_SIZE_OPTIMIZATION_EXP} from '../responsive-state';
 import {AmpA4A, MODULE_NOMODULE_PARAMS_EXP} from '../../../amp-a4a/0.1/amp-a4a';
@@ -884,7 +883,6 @@ describes.realWin(
         env.sandbox.stub(ampdoc, 'getMetaByName').returns('2');
         impl.buildCallback();
         return impl.getAdUrl().then((url) => {
-          console.log(url);
           expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT);
         });
       });
@@ -893,7 +891,6 @@ describes.realWin(
         env.sandbox.stub(ampdoc, 'getMetaByName').returns('4');
         impl.buildCallback();
         return impl.getAdUrl().then((url) => {
-          console.log(url);
           expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT);
         });
       });
@@ -902,7 +899,6 @@ describes.realWin(
         env.sandbox.stub(ampdoc, 'getMetaByName').returns('10');
         impl.buildCallback();
         return impl.getAdUrl().then((url) => {
-          console.log(url);
           expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.CONTROL);
         });
       });
@@ -912,7 +908,6 @@ describes.realWin(
         env.sandbox.stub(ampdoc, 'getMetaByName').returns('0');
         impl.buildCallback();
         return impl.getAdUrl().then((url) => {
-          console.log(url);
           expect(url).to.not.have.string(MODULE_NOMODULE_PARAMS_EXP.CONTROL);
           expect(url).to.not.have.string(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT);
         });

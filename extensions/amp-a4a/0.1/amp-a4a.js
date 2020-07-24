@@ -2114,11 +2114,10 @@ export class AmpA4A extends AMP.BaseElement {
    * 2, 4, 10 (which corresponds to module/nomodule or its control diversion)
    * and returns the correct experiment ID.
    *
-   * @private
-   * @param {!Array} experimentIds
-   * @return {?number}
+   * @protected
+   * @return {?string}
    */
-  getModuleNomoduleExpIds_(experimentIds) {
+  getModuleNomoduleExpIds_() {
     const runtimeType = this.getAmpDoc().getMetaByName('runtime-type');
     // ModuleNomoduleControl = 10 (current default, just nomodule)
     if (runtimeType === '10') {
