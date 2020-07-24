@@ -15,20 +15,23 @@
  */
 
 // Source for this constant is css/amp-story-entry-point.css
+import {createCustomEvent} from '../../event-helper';
 import {cssText} from '../../../build/amp-story-entry-point.css';
+import {escapeCssSelectorIdent} from '../../css';
+import {setStyle} from '../../style';
 import {toArray} from '../../types';
 
 /** @enum {string} */
 const STYLE_TYPES = {
   RECTANGULAR: 'rectangle',
   CIRCULAR: 'circle',
-}
+};
 
 /** @enum {string} */
 const STYLE_CLASSES = {
   [STYLE_TYPES.RECTANGULAR]: 'rectangular-entry-point',
   [STYLE_TYPES.CIRCULAR]: 'circular-entry-point',
-}
+};
 
 /**
  * <amp-story-entry-point> component for embedding stories and launching them in
@@ -76,7 +79,9 @@ export class AmpStoryEntryPoint {
     }
 
     const playerId = this.element_.getAttribute('player-id');
-    this.player_ = this.doc_.querySelector('#' + playerId)
+    this.player_ = this.doc_.querySelector(
+      escapeCssSelectorIdent(`#${playerId}`)
+    );
     this.stories_ = toArray(this.player_.querySelectorAll('a'));
 
     this.initializeShadowRoot_();
@@ -111,31 +116,36 @@ export class AmpStoryEntryPoint {
   /** @private */
   initializeCarousel_() {
     const style = this.element_.getAttribute('entry-point-style');
-    const styleClass = 
-    !Object.values(STYLE_TYPES).includes(style)
-    ?  STYLE_CLASSES["rectangle"]
-    : STYLE_CLASSES[style];
+    const styleClass = !Object.values(STYLE_TYPES).includes(style)
+      ? STYLE_CLASSES['rectangle']
+      : STYLE_CLASSES[style];
 
     const entryPointsContainer = this.doc_.createElement('div');
     entryPointsContainer.classList.add('entry-points');
 
-    for (let i = 0; i < this.stories_.length; i ++) {
+    for (let i = 0; i < this.stories_.length; i++) {
       const story = this.stories_[i];
       const posterSrc = story.getAttribute('data-poster-portrait-src');
-      const poster = this.initializePoster_(posterSrc, styleClass, story.href, i);
+      const poster = this.initializePoster_(
+        posterSrc,
+        styleClass,
+        story.href,
+        i
+      );
       entryPointsContainer.append(poster);
     }
 
     this.rootEl_.append(entryPointsContainer);
   }
-  
-  /** 
+
+  /**
    * Initializes an image element to be displayed.
    * @param {string} posterSrc
-   * @param {string} href 
-   * @param {number} index 
-   * @returns {HTMLImageElement} poster
-   * @private 
+   * @param {string} styleClass
+   * @param {string} href
+   * @param {number} index
+   * @return {HTMLImageElement} poster
+   * @private
    */
   initializePoster_(posterSrc, styleClass, href, index) {
     const poster = this.doc_.createElement('img');
@@ -149,7 +159,7 @@ export class AmpStoryEntryPoint {
 
   /**
    * Sets the correct height and width for poster based on client height.
-   * @param {HTMLImageElement} poster 
+   * @param {HTMLImageElement} poster
    * @param {string} styleClass
    * @private
    */
@@ -162,8 +172,8 @@ export class AmpStoryEntryPoint {
 
   /**
    * Reacts to on click event for an entry point.
-   * @param {HTMLImageElement} poster 
-   * @param {string} href 
+   * @param {HTMLImageElement} poster
+   * @param {string} href
    * @param {number} index
    * @private
    */
@@ -171,12 +181,11 @@ export class AmpStoryEntryPoint {
     poster.addEventListener('click', () => {
       this.player_.show(href);
       this.element_.dispatchEvent(
-        createCustomEvent(this.win_, 'entryPointClicked', dict({href, index}))
+        createCustomEvent(this.win_, 'entryPointClicked', {href, index})
       );
     });
   }
 
-  
   /** @private */
   initializeCarouselArrow_() {
     // check if desktop mode
@@ -185,10 +194,10 @@ export class AmpStoryEntryPoint {
     leftButton.classList.add('entry-point-left-arrow');
     rightButton.classList.add('entry-point-right-arrow');
 
-    leftButton.style.top = this.element_.clientHeight/2 - 20;
-    rightButton.style.top = leftButton.style.top;
-    rightButton.style.left = this.element_.clientWidth - 10;
-
+    const top = this.element_.clientHeight / 2 - 20;
+    setStyle(leftButton, 'top', top);
+    setStyle(rightButton, 'top', top);
+    setStyle(rightButton, 'left', this.element_.clientWidth - 10);
 
     this.rootEl_.append(leftButton);
     this.rootEl_.append(rightButton);
