@@ -827,7 +827,7 @@ export class AmpA4A extends AMP.BaseElement {
       })
       .then((fetchResponse) =>
         this.isInNoSigningExp()
-          ? this.streamResponse_(fetchResponse)
+          ? this.streamResponse_(fetchResponse, checkStillCurrent)
           : this.startValidationFlow_(fetchResponse, checkStillCurrent)
       )
       .catch((error) => {
@@ -865,9 +865,10 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Start streaming response into the detached document.
    * @param {!Response} response
+   * @param {function()} checkStillCurrent
    * @return {boolean}
    */
-  streamResponse_(response) {
+  streamResponse_(response, checkStillCurrent) {
     console.log('***experiment***');
     // Duplicating response stream as safeframe/nameframe rending will need the
     // unaltered response content.
@@ -892,18 +893,26 @@ export class AmpA4A extends AMP.BaseElement {
     // DetachedDomStream.
     return streamResponseToWriter(this.win, response, detachedStream)
       .then((hasContent) => {
+        checkStillCurrent();
         // `amp-ff-empty-creative` header is not present, and body is empty.
         if (!hasContent) {
           this.forceCollapse();
           return Promise.reject(NO_CONTENT_RESPONSE);
         }
       })
-      .then(() => transformStream.waitForHead())
-      .then((head) => this.validateHead_(head))
+      .then(() => {
+        checkStillCurrent();
+        return transformStream.waitForHead();
+      })
+      .then((head) => {
+        checkStillCurrent();
+        return this.validateHead_(head);
+      })
       .then((sanitizedHead) => {
+        checkStillCurrent();
         // We should not render as FIE.
         if (!sanitizedHead) {
-          return this.handleFallback_(fallbackResponse);
+          return this.handleFallback_(fallbackResponse, checkStillCurrent);
         }
         this.updateLayoutPriority(LayoutPriority.CONTENT);
         this.isVerifiedAmpCreative_ = true;
@@ -916,13 +925,15 @@ export class AmpA4A extends AMP.BaseElement {
    * safely in FIE. Returning null forces x-domain render in
    * attemptToRenderCreative
    * @param {!Response} fallbackResponse
+   * @param {function()} checkStillCurrent
    * @return {null}
    */
-  handleFallback_(fallbackResponse) {
-    return fallbackResponse
-      .arrayBuffer()
-      .then((textContent) => (this.creativeBody_ = textContent))
-      .then(() => null);
+  handleFallback_(fallbackResponse, checkStillCurrent) {
+    return fallbackResponse.arrayBuffer().then((textContent) => {
+      checkStillCurrent();
+      this.creativeBody_ = textContent;
+      return null;
+    });
   }
 
   /**
@@ -1339,11 +1350,11 @@ export class AmpA4A extends AMP.BaseElement {
 
     // Remove rendering frame, if it exists.
     this.destroyFrame();
-    // TODO: ad destruction of head promise.
     this.adPromise_ = null;
     this.adUrl_ = null;
     this.creativeBody_ = null;
     this.isVerifiedAmpCreative_ = false;
+    this.transferBody_ = null;
     this.fromResumeCallback = false;
     this.experimentalNonAmpCreativeRenderMethod_ = this.getNonAmpCreativeRenderingMethod();
     this.postAdResponseExperimentFeatures = {};
