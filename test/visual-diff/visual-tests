@@ -783,7 +783,6 @@
       "url": "examples/visual-tests/amp-story-player/player.html",
       "name": "amp-story-player basic page",
       "interactive_tests": "examples/visual-tests/amp-story-player/story-loaded.js",
-      "loading_complete_selectors": ["i-amphtml-story-player-loaded"],
       "loading_incomplete_selectors": ["i-amphtml-story-player-loading"],
       "no_base_test": true
     }
