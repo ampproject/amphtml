@@ -32,7 +32,9 @@ const HOST = 'http://localhost:8000';
 
 const EnvironmentBehaviorMap = {
   [AmpdocEnvironment.SINGLE]: {
-    async ready(unusedController) {},
+    ready(unusedController) {
+      return Promise.resolve();
+    },
 
     url(url) {
       return url;
@@ -40,10 +42,10 @@ const EnvironmentBehaviorMap = {
   },
 
   [AmpdocEnvironment.VIEWER_DEMO]: {
-    async ready(controller) {
-      const frame = await controller.findElement('#viewer[data-loaded]');
-
-      return controller.switchToFrame(frame);
+    ready(controller) {
+      return controller
+        .findElement('#viewer[data-loaded]')
+        .then((frame) => controller.switchToFrame(frame));
     },
 
     url(url) {
@@ -86,9 +88,9 @@ const EnvironmentBehaviorMap = {
 
   [AmpdocEnvironment.A4A_FIE]: {
     async ready(controller) {
-      const frame = await controller.findElement('amp-ad > iframe');
-
-      return controller.switchToFrame(frame);
+      return controller
+        .findElement('amp-ad > iframe')
+        .then((frame) => controller.switchToFrame(frame));
     },
 
     url(url) {
@@ -98,9 +100,9 @@ const EnvironmentBehaviorMap = {
 
   [AmpdocEnvironment.A4A_INABOX]: {
     async ready(controller) {
-      const frame = await controller.findElement('#inabox-frame');
-
-      return controller.switchToFrame(frame);
+      return controller
+        .findElement('#inabox-frame')
+        .then((frame) => controller.switchToFrame(frame));
     },
 
     url(url) {
@@ -110,9 +112,9 @@ const EnvironmentBehaviorMap = {
 
   [AmpdocEnvironment.A4A_INABOX_FRIENDLY]: {
     async ready(controller) {
-      const frame = await controller.findElement('#inabox-frame');
-
-      return controller.switchToFrame(frame);
+      return controller
+        .findElement('#inabox-frame')
+        .then((frame) => controller.switchToFrame(frame));
     },
 
     url(url) {
@@ -122,9 +124,9 @@ const EnvironmentBehaviorMap = {
 
   [AmpdocEnvironment.A4A_INABOX_SAFEFRAME]: {
     async ready(controller) {
-      const frame = await controller.findElement('#inabox-frame');
-
-      return controller.switchToFrame(frame);
+      return controller
+        .findElement('#inabox-frame')
+        .then((frame) => controller.switchToFrame(frame));
     },
 
     url(url) {
