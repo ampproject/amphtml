@@ -99,8 +99,7 @@ const STORY_MESSAGE_STATE_TYPE = {
 };
 
 /** @typedef {{ state:string, value:boolean }} */
-// eslint-disable-next-line no-unused-vars
-let DocumentStateType;
+let DocumentStateTypeDef;
 
 /** @const {string} */
 export const IFRAME_IDX = '__AMP_IFRAME_IDX__';
@@ -388,7 +387,7 @@ export class AmpStoryPlayer {
 
           messaging.registerHandler('documentStateUpdate', (event, data) => {
             this.onDocumentStateUpdate_(
-              /** @type {!DocumentStateType} */ (data)
+              /** @type {!DocumentStateTypeDef} */ (data)
             );
           });
 
@@ -862,7 +861,7 @@ export class AmpStoryPlayer {
 
   /**
    * React to documentStateUpdate events.
-   * @param {!DocumentStateType} data
+   * @param {!DocumentStateTypeDef} data
    * @private
    */
   onDocumentStateUpdate_(data) {
