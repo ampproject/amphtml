@@ -881,17 +881,13 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {boolean}
    */
   streamResponse_(response) {
-    // TODO(ccordry): handle fallback case and set isVerifiedAmpCreative and
-    // creativeBody appropriately.
-    this.isVerifiedAmpCreative_ = true;
+    console.log('***experiment***');
+    // Duplicating response stream as safeframe/nameframe rending will need the
+    // unaltered response content.
+    const fallbackResponse = response.clone();
 
     const size = this.extractSize(response.headers);
     this.creativeSize_ = size || this.creativeSize_;
-
-    // TODO(ccordry): handle fallback and ensure this is only set for creatives
-    // that can be rendered friendly.
-    // Update priority.
-    this.updateLayoutPriority(LayoutPriority.CONTENT);
 
     // This transformation consumes the detached DOM chunks and
     // exposes our waitForHead and transferBody methods.
@@ -902,20 +898,46 @@ export class AmpA4A extends AMP.BaseElement {
       (chunk) => transformStream.onChunk(chunk),
       (doc) => transformStream.onEnd(doc)
     );
-    // Decodes our response bytes and pipes them to the
-    // DetachedDomStream.
-    streamResponseToWriter(this.win, response, detachedStream);
-
-    transformStream
-      .waitForHead()
-      .then((head) => this.validateHead_(head))
-      .then(this.sanitizedHeadResolver_);
 
     this.transferBody_ = transformStream.transferBody.bind(transformStream);
 
-    // TODO(ccordry): throw NO_CONTENT_RESPONSE if body is empty. Only gets
-    // here if amp-ff-empty-creative header is not present.
-    return true;
+    // Decodes our response bytes and pipes them to the
+    // DetachedDomStream.
+    return streamResponseToWriter(this.win, response, detachedStream)
+      .then((hasContent) => {
+        // `amp-ff-empty-creative` header is not present, and body is empty.
+        if (!hasContent) {
+          this.forceCollapse();
+          Promise.reject(NO_CONTENT_RESPONSE);
+        }
+      })
+      .then(() => transformStream.waitForHead())
+      .then((head) => this.validateHead_(head))
+      .then((sanitizedHead) => {
+        // We should not render as FIE.
+        if (!sanitizedHead) {
+          return this.handleFallback_(fallbackResponse);
+        }
+        this.updateLayoutPriority(LayoutPriority.CONTENT);
+        this.isVerifiedAmpCreative_ = true;
+        this.sanitizedHeadResolver_(sanitizedHead);
+        // WIP: maybe return sanitized head and get rid of resolver
+        return true;
+      });
+  }
+
+  /**
+   * Handles case where creative cannot or has chosen not to be rendered
+   * safely in FIE. Returning null forces x-domain render in
+   * attemptToRenderCreative
+   * @param {!Response} fallbackResponse
+   * @return {null}
+   */
+  handleFallback_(fallbackResponse) {
+    return fallbackResponse
+      .arrayBuffer()
+      .then((textContent) => (this.creativeBody_ = textContent))
+      .then(() => null);
   }
 
   /**
@@ -1331,7 +1353,7 @@ export class AmpA4A extends AMP.BaseElement {
 
     // Remove rendering frame, if it exists.
     this.destroyFrame();
-
+    // TODO: ad destruction of head promise.
     this.adPromise_ = null;
     this.adUrl_ = null;
     this.creativeBody_ = null;
