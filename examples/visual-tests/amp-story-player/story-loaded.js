@@ -19,7 +19,7 @@ module.exports = {
   'story loaded': async page => {
     await page.$eval('amp-story-player', e => {
       new Promise(resolve => {
-        e.addEventListener('ampstory:load', (readyEvent) => resolve(readyEvent));
+        e.addEventListener('ready', (readyEvent) => resolve(readyEvent));
       })
     });
   }

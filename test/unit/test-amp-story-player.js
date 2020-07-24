@@ -208,6 +208,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     messagingMock.expects('registerHandler').withArgs('touchstart');
     messagingMock.expects('registerHandler').withArgs('touchmove');
     messagingMock.expects('registerHandler').withArgs('touchend');
+    messagingMock.expects('registerHandler').withArgs('ampstory:load');
     messagingMock.expects('setDefaultHandler');
 
     await manager.loadPlayers();

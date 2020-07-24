@@ -366,7 +366,7 @@ export class AmpStoryPlayer {
           });
 
           messaging.registerHandler('ampstory:load', () => {
-            this.onStoryLoad_();
+            this.element_.classList.add('i-amphtml-story-loaded');
           });
 
           resolve(messaging);
@@ -865,16 +865,6 @@ export class AmpStoryPlayer {
     this.touchEventState_.lastX = 0;
     this.touchEventState_.isSwipeX = null;
     this.swipingState_ = SwipingState.NOT_SWIPING;
-  }
-
-  /**
-   * Reacts to storyload events.
-   * @private
-   */
-  onStoryLoad_() {
-    this.element_.dispatchEvent(
-      createCustomEvent(this.win_, 'ampstory:load', {})
-    );
   }
 
   /**
