@@ -31,7 +31,6 @@ export function BaseCarousel({
   loop,
   slide,
   onSlideChange,
-  onMount_,
   setAdvance,
   ...rest
 }) {
@@ -46,9 +45,6 @@ export function BaseCarousel({
     container./* OK */ scrollLeft += container./* OK */ offsetWidth * dir;
   };
   useMountEffect(() => {
-    if (onMount_) {
-      onMount_();
-    }
     if (setAdvance) {
       setAdvance(advance);
     }

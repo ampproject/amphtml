@@ -46,20 +46,7 @@ class AmpBaseCarousel extends PreactBaseElement {
       ActionTrust.LOW
     );
 
-    // TODO: This lays out all children on initialization
-    // for illustrative purposes since amp-base-carousel
-    // historically uses Owners System to manage its children's
-    // resources. We eventually want to replace this with usage
-    // of `ChildLayoutManager` for more fine-grained resource
-    // control of the carousel's children AMP elements.
-    const owners = Services.ownersForDoc(element);
-    const children = this.getRealChildren();
-    children.forEach((child) => {
-      owners.setOwner(child, this.element);
-      child.classList.add('i-amphtml-carousel-slide');
-    });
     return dict({
-      'onMount_': () => owners.scheduleLayout(this.element, children),
       'onSlideChange': (index) => {
         fireSlideChangeEvent(this.win, element, index, ActionTrust.HIGH);
         this.mutateProps(dict({'slide': index}));
