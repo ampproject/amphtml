@@ -73,7 +73,9 @@ async function autoScroll(page) {
 }
 
 async function generateHeatMap() {
-  await exec(`source-map-explorer v0.js v0.js.map -m --coverage ${coverageJsonName}`);
+  await exec(
+    `source-map-explorer v0.js v0.js.map -m --coverage ${coverageJsonName}`
+  );
   // Maybe I can ask the user to Control+C?
 }
 

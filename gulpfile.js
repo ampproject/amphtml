@@ -48,6 +48,7 @@ const {cherryPick} = require('./build-system/tasks/cherry-pick');
 const {clean} = require('./build-system/tasks/clean');
 const {codecovUpload} = require('./build-system/tasks/codecov-upload');
 const {compileJison} = require('./build-system/tasks/compile-jison');
+const {coverageMap} = require('./build-system/tasks/coverage-map');
 const {createGoldenCss} = require('./build-system/tasks/create-golden-css');
 const {css} = require('./build-system/tasks/css');
 const {csvifySize} = require('./build-system/tasks/csvify-size');
@@ -78,7 +79,6 @@ const {updatePackages} = require('./build-system/tasks/update-packages');
 const {validator, validatorWebui} = require('./build-system/tasks/validator');
 const {vendorConfigs} = require('./build-system/tasks/vendor-configs');
 const {visualDiff} = require('./build-system/tasks/visual-diff');
-const coverageMap = require('./build-system/tasks/coverage-map');
 
 /**
  * Creates a gulp task using the given name and task function.
