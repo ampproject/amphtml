@@ -767,6 +767,7 @@ export class AmpA4A extends AMP.BaseElement {
         if (
           !fetchResponse ||
           !fetchResponse.arrayBuffer ||
+          !fetchResponse.body ||
           fetchResponse.headers.has('amp-ff-empty-creative')
         ) {
           this.forceCollapse();
@@ -872,7 +873,6 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {Promise<?./head-validation.ValidatedHeadDef>}
    */
   streamResponse_(response, checkStillCurrent) {
-    console.log('***experiment***');
     // Duplicating response stream as safeframe/nameframe rending will need the
     // unaltered response content.
     const fallbackResponse = response.clone();
@@ -932,6 +932,11 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!Promise<null>}
    */
   handleFallback_(fallbackResponse, checkStillCurrent) {
+    // Experiment to give non-AMP creatives same benefits as AMP so
+    // update priority.
+    if (this.inNonAmpPreferenceExp()) {
+      this.updateLayoutPriority(LayoutPriority.CONTENT);
+    }
     return fallbackResponse.arrayBuffer().then((textContent) => {
       checkStillCurrent();
       this.creativeBody_ = textContent;

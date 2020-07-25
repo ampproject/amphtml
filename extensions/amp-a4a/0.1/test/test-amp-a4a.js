@@ -502,11 +502,8 @@ describes.realWin('no signing', {amp: true}, (env) => {
         });
 
         it('for SafeFrame rendering case', async () => {
-          // TODO(ccordry): implement fallback and enable for signing experiment.
-          if (branch === NO_SIGNING_EXP.experiment) {
-            return;
-          }
           // Make sure there's no signature, so that we go down the 3p iframe path.
+          adResponse.body = adResponse.body.replace('⚡4ads', '');
           delete adResponse.headers['AMP-Fast-Fetch-Signature'];
           delete adResponse.headers[AMP_SIGNATURE_HEADER];
           // If rendering type is safeframe, we SHOULD attach a SafeFrame.
@@ -526,14 +523,11 @@ describes.realWin('no signing', {amp: true}, (env) => {
         });
 
         it('for ios defaults to SafeFrame rendering', async () => {
-          // TODO(ccordry): implement fallback and enable for signing experiment.
-          if (branch === NO_SIGNING_EXP.experiment) {
-            return;
-          }
           const platform = Services.platformFor(fixture.win);
           window.sandbox.stub(platform, 'isIos').returns(true);
           a4a = new MockA4AImpl(a4aElement);
           // Make sure there's no signature, so that we go down the 3p iframe path.
+          adResponse.body = adResponse.body.replace('⚡4ads', '');
           delete adResponse.headers['AMP-Fast-Fetch-Signature'];
           delete adResponse.headers[AMP_SIGNATURE_HEADER];
           // Ensure no rendering type header (ios on safari will default to
@@ -550,11 +544,8 @@ describes.realWin('no signing', {amp: true}, (env) => {
         });
 
         it('for cached content iframe rendering case', async () => {
-          // TODO(ccordry): implement fallback and enable for signing experiment.
-          if (branch === NO_SIGNING_EXP.experiment) {
-            return;
-          }
           // Make sure there's no signature, so that we go down the 3p iframe path.
+          adResponse.body = adResponse.body.replace('⚡4ads', '');
           delete adResponse.headers['AMP-Fast-Fetch-Signature'];
           delete adResponse.headers[AMP_SIGNATURE_HEADER];
           a4a.buildCallback();
@@ -647,7 +638,7 @@ describes.realWin('no signing', {amp: true}, (env) => {
         });
 
         it('for requests from insecure HTTP pages', async () => {
-          // TODO(ccordry): implement fallback and enable for signing experiment.
+          // TODO(ccordry): delete this test when we remove crypto.
           if (branch === NO_SIGNING_EXP.experiment) {
             return;
           }
@@ -793,6 +784,7 @@ describes.realWin('no signing', {amp: true}, (env) => {
         let a4a;
         beforeEach(async () => {
           // Make sure there's no signature, so that we go down the 3p iframe path.
+          adResponse.body = adResponse.body.replace('⚡4ads', '');
           delete adResponse.headers['AMP-Fast-Fetch-Signature'];
           delete adResponse.headers[AMP_SIGNATURE_HEADER];
           // If rendering type is safeframe, we SHOULD attach a SafeFrame.
@@ -820,11 +812,6 @@ describes.realWin('no signing', {amp: true}, (env) => {
             adResponse.headers[RENDERING_TYPE_HEADER] = 'client_cache';
             a4a.onLayoutMeasure();
           });
-
-          // TODO(ccordry): implement fallback and enable for signing experiment.
-          if (branch === NO_SIGNING_EXP.experiment) {
-            return;
-          }
 
           it('should attach a client cached iframe when set', async () => {
             await a4a.layoutCallback();
@@ -878,10 +865,6 @@ describes.realWin('no signing', {amp: true}, (env) => {
           });
 
           it('should render via cached iframe', async () => {
-            // TODO(ccordry): implement fallback and enable for signing experiment.
-            if (branch === NO_SIGNING_EXP.experiment) {
-              return;
-            }
             const triggerAnalyticsEventSpy = window.sandbox.spy(
               analytics,
               'triggerAnalyticsEvent'
@@ -916,10 +899,6 @@ describes.realWin('no signing', {amp: true}, (env) => {
         });
 
         describe('#renderViaNameFrame', () => {
-          // TODO(ccordry): implement fallback and enable for signing experiment.
-          if (branch === NO_SIGNING_EXP.experiment) {
-            return;
-          }
           beforeEach(() => {
             // If rendering type is nameframe, we SHOULD attach a NameFrame.
             adResponse.headers[RENDERING_TYPE_HEADER] = 'nameframe';
@@ -1017,10 +996,6 @@ describes.realWin('no signing', {amp: true}, (env) => {
         });
 
         describe('#renderViaSafeFrame', () => {
-          // TODO(ccordry): implement fallback and enable for signing experiment.
-          if (branch === NO_SIGNING_EXP.experiment) {
-            return;
-          }
           beforeEach(() => {
             // If rendering type is safeframe, we SHOULD attach a SafeFrame.
             adResponse.headers[RENDERING_TYPE_HEADER] = 'safeframe';
@@ -1197,11 +1172,8 @@ describes.realWin('no signing', {amp: true}, (env) => {
       });
 
       it('should set height/width on iframe matching header value', async () => {
-        // TODO(ccordry): implement fallback and enable for signing experiment.
-        if (branch === NO_SIGNING_EXP.experiment) {
-          return;
-        }
         // Make sure there's no signature, so that we go down the 3p iframe path.
+        adResponse.body = adResponse.body.replace('⚡4ads', '');
         delete adResponse.headers['AMP-Fast-Fetch-Signature'];
         delete adResponse.headers[AMP_SIGNATURE_HEADER];
         adResponse.headers['X-CreativeSize'] = '320x50';
@@ -1230,11 +1202,8 @@ describes.realWin('no signing', {amp: true}, (env) => {
       });
 
       it('should set a default title on the iframe', async () => {
-        // TODO(ccordry): implement fallback and enable for signing experiment.
-        if (branch === NO_SIGNING_EXP.experiment) {
-          return;
-        }
         // Make sure there's no signature, so that we go down the 3p iframe path.
+        adResponse.body = adResponse.body.replace('⚡4ads', '');
         delete adResponse.headers['AMP-Fast-Fetch-Signature'];
         delete adResponse.headers[AMP_SIGNATURE_HEADER];
         adResponse.headers['X-CreativeSize'] = '320x50';
@@ -1262,11 +1231,8 @@ describes.realWin('no signing', {amp: true}, (env) => {
       });
 
       it('should use the amp-ad title on the iframe if set', async () => {
-        // TODO(ccordry): implement fallback and enable for signing experiment.
-        if (branch === NO_SIGNING_EXP.experiment) {
-          return;
-        }
         // Make sure there's no signature, so that we go down the 3p iframe path.
+        adResponse.body = adResponse.body.replace('⚡4ads', '');
         delete adResponse.headers['AMP-Fast-Fetch-Signature'];
         delete adResponse.headers[AMP_SIGNATURE_HEADER];
         adResponse.headers['X-CreativeSize'] = '320x50';
@@ -1296,11 +1262,8 @@ describes.realWin('no signing', {amp: true}, (env) => {
 
       describe('#onLayoutMeasure', () => {
         it('resumeCallback calls onLayoutMeasure', async () => {
-          // TODO(ccordry): implement fallback and enable for signing experiment.
-          if (branch === NO_SIGNING_EXP.experiment) {
-            return;
-          }
           // Force non-FIE
+          adResponse.body = adResponse.body.replace('⚡4ads', '');
           delete adResponse.headers['AMP-Fast-Fetch-Signature'];
           delete adResponse.headers[AMP_SIGNATURE_HEADER];
           const fixture = await createIframePromise();
@@ -1373,11 +1336,8 @@ describes.realWin('no signing', {amp: true}, (env) => {
           expect(a4a.fromResumeCallback).to.be.false;
         });
         it('resumeCallback w/ measure required no onLayoutMeasure', async () => {
-          // TODO(ccordry): implement fallback and enable for signing experiment.
-          if (branch === NO_SIGNING_EXP.experiment) {
-            return;
-          }
           // Force non-FIE
+          adResponse.body = adResponse.body.replace('⚡4ads', '');
           delete adResponse.headers['AMP-Fast-Fetch-Signature'];
           delete adResponse.headers[AMP_SIGNATURE_HEADER];
           const fixture = await createIframePromise();
@@ -1528,12 +1488,9 @@ describes.realWin('no signing', {amp: true}, (env) => {
           );
         });
         it('should update priority for non AMP if in experiment', async () => {
-          // TODO(ccordry): implement fallback and enable for signing experiment.
-          if (branch === NO_SIGNING_EXP.experiment) {
-            return;
-          }
           const fixture = await createIframePromise();
           setupForAdTesting(fixture);
+          adResponse.body = adResponse.body.replace('⚡4ads', '');
           delete adResponse.headers['AMP-Fast-Fetch-Signature'];
           delete adResponse.headers[AMP_SIGNATURE_HEADER];
           adResponse.headers[EXPERIMENT_FEATURE_HEADER_NAME] =
@@ -1728,13 +1685,18 @@ describes.realWin('no signing', {amp: true}, (env) => {
             'updateLayoutPriority'
           );
           if (!isValidCreative) {
+            adResponse.body = adResponse.body.replace('⚡4ads', '');
             delete adResponse.headers['AMP-Fast-Fetch-Signature'];
             delete adResponse.headers[AMP_SIGNATURE_HEADER];
           }
           a4a.promiseErrorHandler_ = () => {};
           if (opt_failAmpRender) {
+            // TODO(ccordry): remove renderAmpCreative_ when no signing launched.
             window.sandbox
               .stub(a4a, 'renderAmpCreative_')
+              .returns(Promise.reject('amp render failure'));
+            window.sandbox
+              .stub(a4a, 'renderFriendlyTrustless_')
               .returns(Promise.reject('amp render failure'));
           }
           a4a.buildCallback();
@@ -1781,17 +1743,9 @@ describes.realWin('no signing', {amp: true}, (env) => {
           return executeLayoutCallbackTest(true);
         });
         it('#layoutCallback not valid AMP', () => {
-          // TODO(ccordry): implement fallback and enable for signing experiment.
-          if (branch === NO_SIGNING_EXP.experiment) {
-            return;
-          }
           return executeLayoutCallbackTest(false);
         });
         it('#layoutCallback AMP render fail, recover non-AMP', () => {
-          // TODO(ccordry): implement fallback and enable for signing experiment.
-          if (branch === NO_SIGNING_EXP.experiment) {
-            return;
-          }
           return executeLayoutCallbackTest(true, true);
         });
         it('should run end-to-end in the presence of an XHR error', async () => {
@@ -1961,14 +1915,13 @@ describes.realWin('no signing', {amp: true}, (env) => {
           },
           {
             name: 'no fill header',
-            fn: () => (adResponse.headers['amp-ff-empty-creative'] = ''),
+            fn: () => {
+              adResponse.body = adResponse.body.replace('⚡4ads', '');
+              adResponse.headers['amp-ff-empty-creative'] = '';
+            },
           },
         ].forEach((test) => {
           it(`should collapse ${test.name}`, async () => {
-            // TODO(ccordry): implement fallback and enable for signing experiment.
-            if (branch === NO_SIGNING_EXP.experiment) {
-              return;
-            }
             const fixture = await createIframePromise();
             setupForAdTesting(fixture);
             test.fn();
@@ -2026,12 +1979,9 @@ describes.realWin('no signing', {amp: true}, (env) => {
         });
 
         it('should process safeframe version header properly', async () => {
-          // TODO(ccordry): implement fallback and enable for signing experiment.
-          if (branch === NO_SIGNING_EXP.experiment) {
-            return;
-          }
           adResponse.headers[SAFEFRAME_VERSION_HEADER] = '1-2-3';
           adResponse.headers[RENDERING_TYPE_HEADER] = 'safeframe';
+          adResponse.body = adResponse.body.replace('⚡4ads', '');
           delete adResponse.headers['AMP-Fast-Fetch-Signature'];
           delete adResponse.headers[AMP_SIGNATURE_HEADER];
           const fixture = await createIframePromise();
@@ -2124,12 +2074,9 @@ describes.realWin('no signing', {amp: true}, (env) => {
           });
         });
         it('should ignore invalid safeframe version header', async () => {
-          // TODO(ccordry): implement fallback and enable for signing experiment.
-          if (branch === NO_SIGNING_EXP.experiment) {
-            return;
-          }
           adResponse.headers[SAFEFRAME_VERSION_HEADER] = 'some-bad-item';
           adResponse.headers[RENDERING_TYPE_HEADER] = 'safeframe';
+          adResponse.body = adResponse.body.replace('⚡4ads', '');
           delete adResponse.headers['AMP-Fast-Fetch-Signature'];
           delete adResponse.headers[AMP_SIGNATURE_HEADER];
           const fixture = await createIframePromise();
