@@ -37,6 +37,7 @@ import {
   assignAdUrlToError,
   protectFunctionWrapper,
 } from '../amp-a4a';
+import {AmpAdXOriginIframeHandler} from '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import {
   AmpDoc,
   installDocService,
@@ -136,7 +137,8 @@ describes.realWin('no signing', {amp: true}, (env) => {
     );
   });
 
-  it('should complete the rendering', async () => {
+  it('should complete the rendering FIE', async () => {
+    const prioritySpy = env.sandbox.spy(a4a, 'updateLayoutPriority');
     await a4a.buildCallback();
     a4a.onLayoutMeasure();
     await a4a.layoutCallback();
@@ -145,6 +147,37 @@ describes.realWin('no signing', {amp: true}, (env) => {
     expect(fie.contentDocument.body.textContent).to.contain.string(
       'Hello, world.'
     );
+    expect(prioritySpy).to.be.calledWith(LayoutPriority.CONTENT);
+  });
+
+  it('should collapse on no content', async () => {
+    env.fetchMock.config.overwriteRoutes = true;
+    env.fetchMock.mock('begin:https://adnetwork.com', ''); // no content.
+    const iframe3pInit = env.sandbox
+      .stub(AmpAdXOriginIframeHandler.prototype, 'init')
+      .resolves();
+    const collapseSpy = env.sandbox.spy(a4a, 'forceCollapse');
+
+    await a4a.buildCallback();
+    a4a.onLayoutMeasure();
+    await a4a.layoutCallback();
+    expect(collapseSpy).to.be.called;
+    expect(iframe3pInit).not.to.be.called;
+  });
+
+  it('should fallback to x-domain without ⚡️4ads', async () => {
+    env.fetchMock.config.overwriteRoutes = true;
+    env.fetchMock.mock(
+      'begin:https://adnetwork.com',
+      testFragments.minimalDocOneStyle
+    );
+    const iframe3pInit = env.sandbox
+      .stub(AmpAdXOriginIframeHandler.prototype, 'init')
+      .resolves();
+    await a4a.buildCallback();
+    a4a.onLayoutMeasure();
+    await a4a.layoutCallback();
+    expect(iframe3pInit).to.be.called;
   });
 });
 

@@ -92,7 +92,9 @@ export function processHead(win, adElement, head) {
   const htmlTag = root.documentElement;
   if (
     !htmlTag ||
-    (!htmlTag.hasAttribute('amp4ads') && !htmlTag.hasAttribute('⚡️4ads'))
+    (!htmlTag.hasAttribute('amp4ads') &&
+      !htmlTag.hasAttribute('⚡️4ads') &&
+      !htmlTag.hasAttribute('⚡4ads')) // Unicode weirdness.
   ) {
     return null;
   }
