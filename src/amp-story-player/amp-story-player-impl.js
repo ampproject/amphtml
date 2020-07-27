@@ -316,6 +316,19 @@ export class AmpStoryPlayer {
     this.isBuilt_ = true;
   }
 
+  /**
+   * Sets up a listener disable autoplay mode on
+   * the first user interaction.
+   * @private
+   */
+  setUpAutoplayClickShield_() {
+    this.element_.addEventListener(
+      'click',
+      () => this.toggleAutoplayMode_(false),
+      {once: true}
+    );
+  }
+
   /** @private */
   signalReady_() {
     this.element_.dispatchEvent(
