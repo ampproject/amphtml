@@ -3734,7 +3734,6 @@ bool ValidateAttrInExtension(const TagSpec& tag_spec, const Context& context,
   // if it contains upper-case letters.
   if (GetExtensionNameAttribute(extension_spec) == attr_name) {
     if (extension_spec.name() != attr_value) {
-      DCHECK_EQ(extension_spec.name(), AsciiStrToLower(attr_value));
       return false;
     }
     return true;
