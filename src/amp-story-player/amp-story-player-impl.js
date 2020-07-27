@@ -659,9 +659,7 @@ export class AmpStoryPlayer {
       this.circularWrapping_() &&
       this.isIndexOutofBounds_(this.currentIdx_ + 1)
     ) {
-      const currentStory = this.stories_[0];
-      this.show(currentStory.href);
-      this.signalNavigation_();
+      this.go(1);
       return;
     }
 
@@ -702,9 +700,7 @@ export class AmpStoryPlayer {
       this.circularWrapping_() &&
       this.isIndexOutofBounds_(this.currentIdx_ - 1)
     ) {
-      const currentStory = this.stories_[this.stories_.length - 1];
-      this.show(currentStory.href);
-      this.signalNavigation_();
+      this.go(-1);
       return;
     }
 
@@ -1099,6 +1095,16 @@ export class AmpStoryPlayer {
    */
   circularWrapping_() {
     return this.element_.getAttribute('enable-circular-wrapping') === 'true';
+  }
+
+  /**
+   * Internal navigation using show() method
+   * @private
+   * @param {this.stories_} story
+   */
+  navigateTo_(story) {
+    this.show(story.href);
+    this.signalNavigation_();
   }
 
   /**
