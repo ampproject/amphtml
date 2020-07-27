@@ -86,6 +86,27 @@ export class BaseTemplate {
   }
 
   /**
+   * Iterate through the child nodes of the given root, applying the
+   * given callback to non-empty text nodes and elements.
+   * @param {!Element} root
+   * @param {function((!Element|string))} callback
+   */
+  visitChildren_(root, callback) {
+    for (let n = root.firstChild; n != null; n = n.nextSibling) {
+      if (n.nodeType == /* TEXT */ 3) {
+        const text = n.textContent.trim();
+        if (text) {
+          callback(text);
+        }
+      } else if (n.nodeType == /* COMMENT */ 8) {
+        // Ignore comments.
+      } else if (n.nodeType == /* ELEMENT */ 1) {
+        callback(dev().assertElement(n));
+      }
+    }
+  }
+
+  /**
    * Helps the template implementation to unwrap the root element. The root
    * element can be unwrapped only when it contains a single element or a
    * single element surrounded by empty text nodes.
@@ -94,8 +115,15 @@ export class BaseTemplate {
    * @protected @final
    */
   tryUnwrap(root) {
-    const unwrapped = this.unwrapChildren(root);
-    return dev().assertElement(unwrapped.length ? root : unwrapped);
+    let onlyChild;
+    this.visitChildren_(root, (c) => {
+      if (onlyChild === undefined && c.nodeType) {
+        onlyChild = c;
+      } else {
+        onlyChild = null;
+      }
+    });
+    return onlyChild || root;
   }
 
   /**
@@ -108,25 +136,20 @@ export class BaseTemplate {
    * @protected @final
    */
   unwrapChildren(root) {
-    const elements = [];
+    const children = [];
     if (!root.firstElementChild) {
       return root;
     }
-    for (let n = root.firstChild; n != null; n = n.nextSibling) {
-      if (n.nodeType == /* TEXT */ 3) {
-        const content = n.textContent.trim();
-        if (content) {
-          const element = this.win.document.createElement('div');
-          element.textContent = content;
-          elements.push(element);
-        }
-      } else if (n.nodeType == /* COMMENT */ 8) {
-        // Ignore comments.
-      } else if (n.nodeType == /* ELEMENT */ 1) {
-        elements.push(dev().assertElement(n));
+    this.visitChildren_(root, (c) => {
+      if (typeof c == 'string') {
+        const element = this.win.document.createElement('div');
+        element.textContent = c;
+        children.push(element);
+      } else {
+        children.push(c);
       }
-    }
-    return elements.length === 1 ? elements[0] : elements;
+    });
+    return children.length === 1 ? children[0] : children;
   }
 
   /**
