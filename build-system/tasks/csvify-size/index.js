@@ -49,10 +49,9 @@ const dateTimes = [];
  * @param {string} format
  * @return {!Array<string>}
  */
-function getLog(format) {
-  return exec(`git log --format="${format}" ${filePath}`).then((logs) =>
-    logs.trim().split('\n')
-  );
+async function getLog(format) {
+  const logs = await exec(`git log --format="${format}" ${filePath}`);
+  return logs.trim().split('\n');
 }
 
 /**
@@ -85,8 +84,9 @@ function parseSizeFile(file) {
       const columns = line.split('|').map((x) => x.trim());
       let name = columns[columns.length - 1];
 
-      // Older size.txt files contained duplicate entries of the same "entity",
-      // for example a file had an entry for its .min and its .max file.
+      // Older size.txt files contained duplicate entries of the same
+      // "entity", for example a file had an entry for its .min and its .max
+      // file.
       const shouldSkip =
         (name.endsWith('max.js') &&
           !name.endsWith('alp.max.js') &&
@@ -100,8 +100,8 @@ function parseSizeFile(file) {
         return null;
       }
 
-      // Normalize names. We made mistakes at some point with duplicate entries
-      // or renamed entries so we make sure to identify these entities
+      // Normalize names. We made mistakes at some point with duplicate
+      // entries or renamed entries so we make sure to identify these entities
       // and put then into the same column.
       if (name == 'v0.js / amp.js' || name == 'current-min/v0.js') {
         name = 'v0.js';
@@ -221,55 +221,49 @@ function reversePrettyBytes(prettyBytes) {
  * @param {!Array<string>} logs
  * @return {!Promise}
  */
-function serializeCheckout(logs) {
+async function serializeCheckout(logs) {
   const tables = [];
-  const promise = logs.reduce((acc, cur, i) => {
-    const parts = logs[i].split(' ');
-    const sha = parts.shift();
-    const dateTime = parts.join(' ');
 
-    return acc.then((tables) => {
+  for (const logLine of logs) {
+    const [sha, ...dateParts] = logLine.split(' ');
+    const dateTime = dateParts.join(' ');
+
+    try {
       // We checkout all the known commits for the file and accumulate
       // all the tables.
-      return exec(`git checkout ${sha} ${filePath}`)
-        .then(() => {
-          return fs.promises.readFile(`${filePath}`);
-        })
-        .then((file) => {
-          const quotedDateTime = `"${dateTime}"`;
-          dateTimes.push(quotedDateTime);
-          // We convert the read file string into an Table objects
-          const fields = parseSizeFile(file.toString()).map((field) => {
-            field.dateTime = quotedDateTime;
-            return field;
-          });
-          tables.push(fields);
-          return tables;
-        })
-        .catch((e) => {
-          // Ignore if pathspec error. This can happen if the file was
-          // deleted in git.
-          if (/error: pathspec/.test(e.message)) {
-            tables.push([]);
-            return tables;
-          }
-          log(colors.red(e.message));
-        });
-    });
-  }, Promise.resolve(tables));
-  return promise.then(mergeTables.bind(null, dateTimes));
+      await exec(`git checkout ${sha} ${filePath}`);
+      const file = await fs.promises.readFile(`${filePath}`);
+
+      const quotedDateTime = `"${dateTime}"`;
+      dateTimes.push(quotedDateTime);
+
+      // We convert the read file string into an Table objects
+      const fields = parseSizeFile(file.toString()).map((field) => {
+        field.dateTime = quotedDateTime;
+        return field;
+      });
+      tables.push(fields);
+    } catch (e) {
+      // Ignore if pathspec error. This can happen if the file was
+      // deleted in git.
+      if (/error: pathspec/.test(e.message)) {
+        tables.push([]);
+      }
+
+      log(colors.red(e.message));
+    }
+  }
+
+  return mergeTables(dateTimes, tables);
 }
 
 async function csvifySize() {
   const shaAndDate = '%H %ai';
-  return getLog(shaAndDate).then((logs) => {
-    // Reverse it from oldest to newest
-    return serializeCheckout(logs.reverse()).then((rows) => {
-      rows.unshift.apply(rows, tableHeaders);
-      const tbl = rows.map((row) => row.join(',')).join('\n');
-      return fs.promises.writeFile('test/size.csv', `${tbl}\n`);
-    });
-  });
+  const logs = await getLog(shaAndDate);
+  const rows = await serializeCheckout(logs.reverse());
+  rows.unshift.apply(rows, tableHeaders);
+  const tbl = rows.map((row) => row.join(',')).join('\n');
+  return fs.promises.writeFile('test/size.csv', `${tbl}\n`);
 }
 
 module.exports = {
