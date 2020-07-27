@@ -77,6 +77,8 @@ const BUTTON_TYPES = {
 
 /** @enum {string} */
 const BUTTON_CLASSES = {
+  BASE: 'amp-story-player-exit-control-button',
+  HIDDEN: 'amp-story-player-hide-button',
   [BUTTON_TYPES.BACK]: 'amp-story-player-back-button',
   [BUTTON_TYPES.CLOSE]: 'amp-story-player-close-button',
 };
@@ -296,6 +298,7 @@ export class AmpStoryPlayer {
 
     const button = this.doc_.createElement('button');
     button.classList.add(BUTTON_CLASSES[option]);
+    button.classList.add(BUTTON_CLASSES.BASE);
 
     button.addEventListener('click', () => {
       this.element_.dispatchEvent(
@@ -890,12 +893,16 @@ export class AmpStoryPlayer {
    * @private
    */
   updateButtonVisibility_(isVisible) {
-    const button = this.rootEl_.querySelector('button');
+    const button = this.rootEl_.querySelector(
+      'button.amp-story-player-exit-control-button'
+    );
     if (button === null) {
       return;
     }
 
-    button.classList.toggle('amp-story-player-hide-button', isVisible);
+    isVisible
+      ? button.classList.remove(BUTTON_CLASSES.HIDDEN)
+      : button.classList.add(BUTTON_CLASSES.HIDDEN);
   }
 
   /**
@@ -907,9 +914,7 @@ export class AmpStoryPlayer {
     this.element_.dispatchEvent(
       createCustomEvent(
         this.win_,
-        isPageAttachmentOpen
-          ? 'page-attachment-open'
-          : 'page-attachment-closed',
+        isPageAttachmentOpen ? 'page-attachment-open' : 'page-attachment-close',
         dict({})
       )
     );

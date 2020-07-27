@@ -90,6 +90,16 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     fireHandler['touchend']('touchend', touchEndEvent);
   }
 
+  function openPageAttachment() {
+    const openEvent = {state: 'PAGE_ATTACHMENT_STATE', value: true};
+    fireHandler['documentStateUpdate']('documentStateUpdate', openEvent);
+  }
+
+  function closePageAttachment() {
+    const closeEvent = {state: 'PAGE_ATTACHMENT_STATE', value: false};
+    fireHandler['documentStateUpdate']('documentStateUpdate', closeEvent);
+  }
+
   beforeEach(() => {
     win = env.win;
     fakeMessaging = {
@@ -551,6 +561,45 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       expect(
         playerEl.shadowRoot.querySelector('button.amp-story-player-hide-button')
       ).to.not.exist;
+    });
+
+    it('open page attachment means button is hidden', async () => {
+      buildStoryPlayer();
+      playerEl.setAttribute('exit-control', 'back-button');
+      await manager.loadPlayers();
+      await nextTick();
+
+      openPageAttachment();
+
+      expect(
+        playerEl.shadowRoot.querySelector('button.amp-story-player-hide-button')
+      ).to.exist;
+    });
+
+    it('open page attachment should fire page attachment open event once', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+      await nextTick();
+
+      const readySpy = env.sandbox.spy();
+      playerEl.addEventListener('page-attachment-open', readySpy);
+
+      openPageAttachment();
+
+      expect(readySpy).to.have.been.calledOnce;
+    });
+
+    it('close page attachment should fire page attachment close event once', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+      await nextTick();
+
+      const readySpy = env.sandbox.spy();
+      playerEl.addEventListener('page-attachment-close', readySpy);
+
+      closePageAttachment();
+
+      expect(readySpy).to.have.been.calledOnce;
     });
 
     it('navigate forward given a positive number in range', async () => {

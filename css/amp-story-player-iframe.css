@@ -60,8 +60,7 @@ main .story-player-iframe[i-amphtml-iframe-position="-1"] {
   transform: translate3d(-100%, 0, 0);
 }
 
-.amp-story-player-close-button,
-.amp-story-player-back-button {
+.amp-story-player-exit-control-button {
   position: absolute;
   height: 48px;
   width: 48px;
