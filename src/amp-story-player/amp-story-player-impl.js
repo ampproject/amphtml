@@ -313,6 +313,9 @@ export class AmpStoryPlayer {
     this.initializeIframes_();
     this.initializeButton_();
     this.signalReady_();
+    if (this.isAutoplaying_) {
+      this.setUpAutoplayClickShield_();
+    }
     this.isBuilt_ = true;
   }
 
@@ -940,17 +943,6 @@ export class AmpStoryPlayer {
       this.previous_();
     }
   }
-
-  /**
-   * Reacts to touchstart events, caches its coordinates,
-   * and ends the autoplay mode if activated.
-   * @param {!Event} event
-   * @private
-   */
-  onTouchStart_(event) {
-    if (this.isAutoplaying_) {
-      this.toggleAutoplayMode_(false);
-    }
 
   /**
    * Reacts to touchstart events and caches its coordinates.
