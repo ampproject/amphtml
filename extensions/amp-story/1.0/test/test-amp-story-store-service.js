@@ -20,7 +20,7 @@ import {
   StateProperty,
   UIType,
 } from '../amp-story-store-service';
-import {EmbedMode, EmbedModeParam} from '../embed-mode';
+import {EmbedMode, EmbedModeParam} from '../../../../src/embed-mode';
 
 describes.fakeWin('amp-story-store-service', {}, (env) => {
   let storeService;
