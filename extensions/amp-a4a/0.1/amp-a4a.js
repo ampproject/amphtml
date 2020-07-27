@@ -767,7 +767,6 @@ export class AmpA4A extends AMP.BaseElement {
         if (
           !fetchResponse ||
           !fetchResponse.arrayBuffer ||
-          !fetchResponse.body ||
           fetchResponse.headers.has('amp-ff-empty-creative')
         ) {
           this.forceCollapse();
@@ -873,6 +872,11 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {Promise<?./head-validation.ValidatedHeadDef>}
    */
   streamResponse_(response, checkStillCurrent) {
+    if (!response.body) {
+      this.forceCollapse();
+      return Promise.reject(NO_CONTENT_RESPONSE);
+    }
+
     // Duplicating response stream as safeframe/nameframe rending will need the
     // unaltered response content.
     const fallbackResponse = response.clone();
