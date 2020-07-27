@@ -103,6 +103,7 @@
   opacity: 0 !important;
   transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
   transform: translateX(60px) !important;
+  flex-shrink: 0 !important;
   /* Percentage sign always goes to the right of the number, regardless of language. TODO(mszylkowski): rtl for arabic */
   direction: ltr !important;
 }

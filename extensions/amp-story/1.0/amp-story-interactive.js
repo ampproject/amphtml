@@ -32,6 +32,7 @@ import {
   appendPathToUrl,
   assertAbsoluteHttpOrHttpsUrl,
 } from '../../../src/url';
+import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev, devAssert} from '../../../src/log';
@@ -61,9 +62,9 @@ const INTERACTIVE_ACTIVE_CLASS = 'i-amphtml-story-interactive-active';
 
 /**
  * @typedef {{
- *    optionIndex: number,
- *    totalCount: number,
- *    selectedByUser: boolean,
+ *    index: number,
+ *    count: number,
+ *    selected: boolean,
  * }}
  */
 export let InteractiveOptionType;
@@ -180,8 +181,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
     /** @const @protected {!./variable-service.AmpStoryVariableService} */
     this.variableService_ = getVariableService(this.win);
-
-    this.updateStoryStoreState_(null);
   }
 
   /**
@@ -213,7 +212,12 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @return {string}
    */
   getInteractiveId_() {
-    return `CANONICAL_URL+${this.getPageId_()}`;
+    if (!AmpStoryInteractive.canonicalUrl64) {
+      AmpStoryInteractive.canonicalUrl64 = base64UrlEncodeFromString(
+        Services.documentInfoForDoc(this.element).canonicalUrl
+      );
+    }
+    return `${AmpStoryInteractive.canonicalUrl64}+${this.element.id}`;
   }
 
   /**
@@ -227,6 +231,14 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       }).getAttribute('id');
     }
     return this.pageId_;
+  }
+
+  /**
+   * Initializes the component when the amp-story is created.
+   * @public
+   */
+  initializeState() {
+    this.updateStoryStoreState_(null);
   }
 
   /** @override */
@@ -506,12 +518,12 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    */
   preprocessPercentages_(optionsData) {
     const totalResponseCount = optionsData.reduce(
-      (acc, response) => acc + response['totalCount'],
+      (acc, response) => acc + response['count'],
       0
     );
 
     let percentages = optionsData.map((e) =>
-      ((100 * e['totalCount']) / totalResponseCount).toFixed(2)
+      ((100 * e['count']) / totalResponseCount).toFixed(2)
     );
     let total = percentages.reduce((acc, x) => acc + Math.round(x), 0);
 
@@ -596,8 +608,8 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         this.hasUserSelection_ = true;
 
         if (this.optionsData_) {
-          this.optionsData_[optionEl.optionIndex_]['totalCount']++;
-          this.optionsData_[optionEl.optionIndex_]['selectedByUser'] = true;
+          this.optionsData_[optionEl.optionIndex_]['count']++;
+          this.optionsData_[optionEl.optionIndex_]['selected'] = true;
         }
 
         this.mutateElement(() => {
@@ -649,17 +661,17 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     return this.getClientId_().then((clientId) => {
       const requestOptions = {'method': method};
       const requestParams = dict({
-        'interactiveType': this.interactiveType_,
-        'clientId': clientId,
+        'type': this.interactiveType_,
+        'client': clientId,
       });
       url = appendPathToUrl(
         this.urlService_.parse(url),
         this.getInteractiveId_()
       );
       if (requestOptions['method'] === 'POST') {
-        requestOptions['body'] = {'optionSelected': optionSelected};
+        requestOptions['body'] = {'option_selected': optionSelected};
         requestOptions['headers'] = {'Content-Type': 'application/json'};
-        url = appendPathToUrl(this.urlService_.parse(url), '/react');
+        url = appendPathToUrl(this.urlService_.parse(url), ':vote');
       }
       url = addParamsToUrl(url, requestParams);
       return this.requestService_
@@ -675,9 +687,9 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * {
    *  options: [
    *    {
-   *      optionIndex:
-   *      totalCount:
-   *      selectedByUser:
+   *      index:
+   *      count:
+   *      selected:
    *    },
    *    ...
    *  ]
@@ -718,7 +730,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
     this.optionsData_ = data;
     data.forEach((response, index) => {
-      if (response.selectedByUser) {
+      if (response.selected) {
         this.hasUserSelection_ = true;
         this.updateStoryStoreState_(index);
         this.mutateElement(() => {
