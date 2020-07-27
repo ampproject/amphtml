@@ -35,3 +35,4 @@ build-system/tasks/performance/results.json
 build-system/global-configs/custom-config.json
 export
 validator/export
+result-reports/**
