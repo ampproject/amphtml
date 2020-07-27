@@ -14,8 +14,19 @@
  * limitations under the License.
  */
 
-export const BASE_STYLE = {
-  'textDecoration': 'none',
-  'cursor': 'pointer',
-  'position': 'relative',
-};
+/**
+ * @fileoverview Delete this file when Closure Compiler ships with the
+ * WeakRef extern.
+ */
+
+/** @externs */
+
+/**
+ * @param {T} target
+ * @constructor
+ * @template T
+ */
+function WeakRef(target) {}
+
+/** @return {T|undefined} */
+WeakRef.prototype.deref = function () {};

@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 
-export const BASE_STYLE = {
-  'textDecoration': 'none',
-  'cursor': 'pointer',
-  'position': 'relative',
-};
+/** @externs */
+
+// TODO(#29293): Make "locale" optional.
+
+/**
+ * @typedef {{
+ *   datetime: string,
+ *   locale: string,
+ *   cutoff: (number|undefined),
+ *   cutoffText: (string|undefined),
+ * }}
+ */
+var TimeagoProps;
