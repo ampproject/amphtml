@@ -656,10 +656,6 @@ amp-story[standalone] .i-amphtml-story-developer-log {
   white-space: nowrap !important;
 }
 
-.i-amphtml-story-button-container {
-  display: none !important;
-}
-
 /* Default loading spinner */
 
 amp-story .amp-video-eq,

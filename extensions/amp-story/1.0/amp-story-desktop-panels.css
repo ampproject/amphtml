@@ -132,3 +132,11 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
   min-width: 320px !important;
   min-height: 533px !important;
 }
+
+.i-amphtml-story-page-sentinel {
+  display: none;
+}
+
+.i-amphtml-story-desktop-panels .i-amphtml-story-page-sentinel {
+  display: block;
+}

@@ -1039,6 +1039,8 @@ export class AmpStory extends AMP.BaseElement {
       });
     }
 
+    this.buildPaginationButtons_();
+
     // Will resolve when all pages are built.
     return storyLayoutPromise;
   }
@@ -1831,7 +1833,6 @@ export class AmpStory extends AMP.BaseElement {
         break;
       case UIType.DESKTOP_PANELS:
         this.setDesktopPositionAttributes_(this.activePage_);
-        this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
           this.element.classList.add('i-amphtml-story-desktop-panels');
@@ -1839,7 +1840,6 @@ export class AmpStory extends AMP.BaseElement {
         });
         break;
       case UIType.DESKTOP_FULLBLEED:
-        this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
           this.element.classList.add('i-amphtml-story-desktop-fullbleed');

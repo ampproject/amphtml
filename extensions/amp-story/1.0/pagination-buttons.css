@@ -158,6 +158,7 @@
   cursor: default !important;
   pointer-events: none !important;
   opacity: 0 !important;
+  display: none !important;
 }
 
 /* On forward (next) button mouseover */
@@ -174,4 +175,14 @@
     .i-amphtml-story-button-move {
   transform: translateX(-8px)!important;
   opacity: 1!important;
+}
+
+/* Navigation buttons for screen readers */
+amp-story:not(.i-amphtml-story-desktop-panels) .i-amphtml-story-button-move {
+  margin: auto 0 !important;
+  border-radius: 0 !important;
+  height: calc(100vh - 150px) !important;
+  background: none !important;
+  width: 10px !important;
+  cursor: default !important;
 }
