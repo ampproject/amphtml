@@ -89,7 +89,6 @@ class Amp3QPlayer extends AMP.BaseElement {
 
   /** @private */
   generateIframeSrc_() {
-
     const explicitParamsAttributes = ['key', 'timestamp', 'controls'];
 
     let iframeSrc = 'https://playout.3qsdn.com/';
@@ -103,11 +102,12 @@ class Amp3QPlayer extends AMP.BaseElement {
         '/';
     }
 
-    iframeSrc += dev().assertString(this.dataId) +
+    iframeSrc +=
+      dev().assertString(this.dataId) +
       // Autoplay is handled by VideoManager
       '?autoplay=false&amp=true';
 
-    explicitParamsAttributes.forEach(explicitParam => {
+    explicitParamsAttributes.forEach((explicitParam) => {
       const val = this.element.getAttribute(`data-${explicitParam}`);
       if (val) {
         iframeSrc = addParamToUrl(iframeSrc, explicitParam, val);
