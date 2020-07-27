@@ -943,3 +943,20 @@ amp-story-interactive-binary-poll[theme="dark"], amp-story-interactive-poll[them
 amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-component {
   --i-amphtml-interactive-animation-delay: 350ms !important;
 }
+
+.i-amphtml-story-screen-reader-back-button {
+  width: 10px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  height: calc(100vh - 150px);
+  margin: auto 0;
+  background: none;
+  border: none;
+}
+
+.i-amphtml-story-desktop-panels .i-amphtml-story-screen-reader-back-button,
+.i-amphtml-story-screen-reader-back-button .i-amphtml-story-screen-reader-back-button-hidden {
+  display: none;
+}

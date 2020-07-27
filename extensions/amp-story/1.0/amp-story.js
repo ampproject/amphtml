@@ -1039,8 +1039,37 @@ export class AmpStory extends AMP.BaseElement {
       });
     }
 
+    this.buildScreenReaderBackButton_();
+
     // Will resolve when all pages are built.
     return storyLayoutPromise;
+  }
+
+  /**
+   * Creates a focusable button for screen readers to navigate back.
+   * @private
+   */
+  buildScreenReaderBackButton_() {
+    const backButton = this.element.appendChild(
+      document.createElement('button')
+    );
+    backButton.classList.add('i-amphtml-story-screen-reader-back-button');
+    backButton.setAttribute('aria-label', 'Previous page');
+
+    backButton.addEventListener('click', () => this.previous_());
+
+    this.storeService_.subscribe(
+      StateProperty.CURRENT_PAGE_INDEX,
+      (pageIndex) => {
+        pageIndex === 0
+          ? backButton.classList.add(
+              'i-amphtml-story-screen-reader-back-button-hidden'
+            )
+          : backButton.classList.remove(
+              'i-amphtml-story-screen-reader-back-button-hidden'
+            );
+      }
+    );
   }
 
   /**
