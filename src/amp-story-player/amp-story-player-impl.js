@@ -15,7 +15,10 @@
  */
 
 import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
-import {EmbedMode} from '../../extensions/amp-story/1.0/embed-mode';
+import {
+  EmbedMode,
+  EmbedModeParam,
+} from '../../extensions/amp-story/1.0/embed-mode';
 import {IframePool} from './amp-story-player-iframe-pool';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {VisibilityState} from '../visibility-state';
@@ -883,7 +886,7 @@ export class AmpStoryPlayer {
       'showStoryUrlInfo': '0',
       'storyPlayer': 'v0',
       'cap': 'swipe',
-      'embedMode': embedMode,
+      [EmbedModeParam]: embedMode,
     });
 
     const fragmentParam = getFragment(href);
