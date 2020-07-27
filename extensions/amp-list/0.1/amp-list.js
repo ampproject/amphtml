@@ -467,14 +467,11 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   getAmpScriptJson_(src) {
-    if (!isExperimentOn(this.win, 'protocol-adapters')) {
-      return Promise.reject(`Experiment 'protocol-adapters' is not turned on.`);
-    }
-    return Services.scriptForDocOrNull(this.element)
-      .then((ampScript) => {
+    return Promise.resolve()
+      .then(() => {
         userAssert(
-          ampScript,
-          '[amp-list]: "amp-script" URLs require amp-script to be installed.'
+          isExperimentOn(this.win, 'protocol-adapters'),
+          `Experiment 'protocol-adapters' is not turned on.`
         );
         userAssert(
           !this.ssrTemplateHelper_.isEnabled(),
@@ -491,12 +488,9 @@ export class AmpList extends AMP.BaseElement {
         const fnIdentifier = args[1];
         const ampScriptEl = this.element
           .getAmpDoc()
-          .getRootNode()
-          .querySelector(
-            `amp-script[script=${escapeCssSelectorIdent(ampScriptId)}]`
-          );
+          .getElementById(ampScriptId);
         userAssert(
-          ampScriptEl,
+          ampScriptEl && ampScriptEl.tagName === 'AMP-SCRIPT',
           `[amp-list]: could not find <amp-script> with script set to ${ampScriptId}`
         );
         return ampScriptEl

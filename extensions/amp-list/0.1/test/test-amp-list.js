@@ -995,7 +995,7 @@ describes.repeated(
 
               env.sandbox.stub(Services, 'scriptForDocOrNull');
               ampScriptEl = document.createElement('amp-script');
-              ampScriptEl.setAttribute('script', 'example');
+              ampScriptEl.setAttribute('id', 'example');
               doc.body.appendChild(ampScriptEl);
 
               element = createAmpListElement();
@@ -1012,7 +1012,6 @@ describes.repeated(
 
             it('should throw an error if given an invalid format', async () => {
               toggleExperiment(win, 'protocol-adapters', true);
-              Services.scriptForDocOrNull.returns(Promise.resolve({}));
               const errorMsg = /URIs must be of the format/;
 
               element.setAttribute('src', 'amp-script:fetchData');
@@ -1028,18 +1027,8 @@ describes.repeated(
               expect(list.layoutCallback()).to.eventually.throw(errorMsg);
             });
 
-            it('should log an error if amp-script was not included', async () => {
-              toggleExperiment(win, 'protocol-adapters', true);
-              Services.scriptForDocOrNull.returns(Promise.resolve(null));
-
-              const errorMsg = /amp-script to be installed/;
-              expectAsyncConsoleError(errorMsg);
-              expect(list.layoutCallback()).eventually.rejectedWith(errorMsg);
-            });
-
             it('should throw if specified amp-script does not exist', () => {
               toggleExperiment(win, 'protocol-adapters', true);
-              Services.scriptForDocOrNull.returns(Promise.resolve({}));
               element.setAttribute('src', 'amp-script:doesnotexist.fn');
 
               const errorMsg = /could not find <amp-script> with/;
@@ -1049,7 +1038,6 @@ describes.repeated(
 
             it('should fail if function call rejects', async () => {
               toggleExperiment(win, 'protocol-adapters', true);
-              Services.scriptForDocOrNull.returns(Promise.resolve({}));
               ampScriptEl.getImpl = () =>
                 Promise.resolve({
                   callFunction: () =>
@@ -1066,7 +1054,6 @@ describes.repeated(
               const callFunctionResult = {'items': {title: 'Title'}};
               element.setAttribute('single-item', 'true');
               toggleExperiment(win, 'protocol-adapters', true);
-              Services.scriptForDocOrNull.returns(Promise.resolve({}));
               ampScriptEl.getImpl = () =>
                 Promise.resolve({
                   callFunction(fnId) {
@@ -1092,7 +1079,6 @@ describes.repeated(
 
             it('should render a list from AmpScriptService provided data', async () => {
               toggleExperiment(win, 'protocol-adapters', true);
-              Services.scriptForDocOrNull.returns(Promise.resolve({}));
               ampScriptEl.getImpl = () =>
                 Promise.resolve({
                   callFunction(fnId) {

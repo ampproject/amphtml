@@ -15,7 +15,7 @@
   <h1>PROTOCOL ADAPTERS</h1>
 
   <h3>basic example</h3>
-  <amp-script width=1 height=1 script="local-script" data-ampdevmode></amp-script>
+  <amp-script id="fns" width=1 height=1 script="local-script" data-ampdevmode></amp-script>
   <script type="text/plain" target="amp-script" id="local-script">
     function fetchData() {
       const items = [{name: 'apple'}, {name: 'banana'}, {name: 'pear'}];
@@ -31,7 +31,7 @@
     exportFunction('fetchData', fetchData);
     exportFunction('fetchSingleItem', fetchSingleItem);
   </script>
-  <amp-list id="list1" width="auto" height="100" layout="fixed-height" src="amp-script:local-script.fetchData">
+  <amp-list id="list1" width="auto" height="100" layout="fixed-height" src="amp-script:fns.fetchData">
     <template type="amp-mustache" id="amp-template-id">
       <div>{{name}}</div>
     </template>
@@ -43,7 +43,7 @@
     width="auto"
     height="100"
     layout="fixed-height"
-    src="amp-script:local-script.fetchSingleItem"
+    src="amp-script:fns.fetchSingleItem"
     single-item
   >
     <template type="amp-mustache" id="amp-template-id">
