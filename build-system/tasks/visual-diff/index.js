@@ -665,9 +665,11 @@ async function createEmptyBuild() {
     await page.goto(
       `http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`
     );
-  } finally {
-    await percySnapshot(page, 'Blank page', SNAPSHOT_SINGLE_BUILD_OPTIONS);
+  } catch {
+    // Ignore failures
   }
+
+  await percySnapshot(page, 'Blank page', SNAPSHOT_SINGLE_BUILD_OPTIONS);
 }
 
 /**
