@@ -96,14 +96,10 @@ const processResults = (interactiveState, options, strategy) => {
   if (strategy === 'percentage') {
     percentage = quizCount == 0 ? 0 : 100 * (quizCorrect / quizCount);
     options.forEach((option) => {
-      console.log(
-        option.resultscategory,
-        parseFloat(option.resultsthreshold),
-        parseFloat(option.resultsthreshold) <= percentage
-      );
       if (
         category == null &&
-        parseFloat(option.resultsthreshold) <= percentage
+        (parseFloat(option.resultsthreshold) <= percentage ||
+          option.resultsthreshold == null)
       ) {
         category = option.resultscategory;
       }
@@ -133,7 +129,7 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
    * @param {!AmpElement} element
    */
   constructor(element) {
-    super(element, InteractiveType.RESULTS, [2, 4]);
+    super(element, InteractiveType.RESULTS, [1, 4]);
   }
 
   /** @override */
