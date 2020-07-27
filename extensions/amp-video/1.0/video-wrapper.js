@@ -197,7 +197,7 @@ function Autoplay({
             zIndex: 1,
           }}
           role="button"
-          onClick={() => onOverlayClick()}
+          onClick={onOverlayClick}
         ></div>
       )}
 
