@@ -73,11 +73,9 @@ const VideoTagPlayer = forwardRef((props, ref) => {
       onPlaying={onPlaying}
       onPause={onPause}
       poster={poster}
+      onLoadedMetadata={onLoadedMetadata}
+      onCanPlay={onLoad}
       style={{position: 'relative', width: '100%', height: '100%'}}
-      onLoadedMetadata={() => {
-        onLoad();
-        onLoadedMetadata();
-      }}
     >
       {children}
     </video>
@@ -106,18 +104,35 @@ export const _default = () => {
   const autoplay = boolean('autoplay', true, componentGroup);
   const controls = boolean('controls', true, componentGroup);
   const mediasession = boolean('mediasession', true, componentGroup);
+  const noaudio = boolean('noaudio', false, componentGroup);
   const loop = boolean('loop', false, componentGroup);
+  const poster = text(
+    'poster',
+    'https://amp.dev//static/inline-examples/images/kitten-playing.png',
+    componentGroup
+  );
   const sources = object(
     'sources',
     [
       {
         src:
-          'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+          'https://amp.dev/static/inline-examples/videos/kitten-playing.webm',
+        type: 'video/webm',
+      },
+      {
+        src: 'https://amp.dev/static/inline-examples/videos/kitten-playing.mp4',
         type: 'video/mp4',
       },
     ],
     componentGroup
   );
+
+  const metadataGroup = 'Metadata';
+
+  const artist = text('artist', '', metadataGroup);
+  const album = text('album', '', metadataGroup);
+  const artwork = text('artwork', '', metadataGroup);
+  const title = text('title', '', metadataGroup);
 
   const containerGroup = 'Container';
 
@@ -130,8 +145,14 @@ export const _default = () => {
       {scrollSpacers && <ScrollSpacer />}
       <VideoWrapper
         component={VideoTagPlayer}
+        artist={artist}
+        album={album}
+        artwork={artwork}
+        title={title}
         autoplay={autoplay}
         controls={controls}
+        noaudio={noaudio}
+        poster={poster}
         loop={loop}
         mediasession={mediasession}
         aria-label={ariaLabel}
