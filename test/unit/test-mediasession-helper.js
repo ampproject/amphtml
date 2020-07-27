@@ -143,7 +143,7 @@ describes.sandboxed('MediaSessionAPI Helper Functions', {}, (env) => {
       'artwork': ['http://example.com/image.png'],
       'title': 'Some title',
     };
-    setMediaSession(element, ampdoc.win, fakeMetaData);
+    setMediaSession(ampdoc.win, fakeMetaData);
     const newMetaData = ampdoc.win.navigator.mediaSession.metadata;
     expect(newMetaData).to.deep.equal(fakeMetaData);
   });
