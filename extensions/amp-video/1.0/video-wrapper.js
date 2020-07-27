@@ -126,7 +126,7 @@ export function VideoWrapper(props) {
           displayOverlay={controls}
           onOverlayClick={() => {
             setMuted(false);
-            setUserInteracted(false);
+            setUserInteracted(true);
           }}
         />
       )}
