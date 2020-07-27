@@ -19,31 +19,32 @@ import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
 import {useEffect, useRef, useState} from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
 // Source for this constant is css/video-autoplay.css
-import {cssText as autoplayCss} from '../../../build/video-autoplay.css';
 import {Deferred} from '../../../src/utils/promise';
 import {
   EMPTY_METADATA,
+  parseFavicon,
+  parseOgImage,
+  parseSchemaImage,
   setMediaSession,
 } from '../../../src/mediasession-helper';
+import {cssText as autoplayCss} from '../../../build/video-autoplay.css';
 
 /**
  * @param {!VideoWrapperProps} props
  * @return {PreactDef.Renderable}
  */
-export function VideoWrapper(props) {
+export function VideoWrapper({
+  component: Component,
+  autoplay = false,
+  controls = false,
+  noaudio = false,
+  mediasession = true,
+  children,
+  // Prevent override in passthroughProps.
+  muted: unusedMuted,
+  ...passthroughProps
+}) {
   useResourcesNotify();
-
-  const {
-    component: Component,
-    autoplay = false,
-    controls = false,
-    noaudio = false,
-    mediasession = true,
-    children,
-    // Prevent override in passthroughProps.
-    muted: unusedMuted,
-    ...passthroughProps
-  } = props;
 
   const [muted, setMuted] = useState(autoplay);
   const [metadata, setMetadata] = useState(null);
@@ -165,7 +166,7 @@ function Autoplay({
       observer.disconnect();
       observer = null;
     };
-  }, []);
+  }, [wrapperRef, play, pause]);
 
   return (
     <>
