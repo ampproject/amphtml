@@ -71,13 +71,8 @@ export const provideArrows = () => {
 export const WithLooping = () => {
   const width = number('width', 440);
   const height = number('height', 225);
-  const defaultSlide = number('default slide', 0);
   return (
-    <BaseCarousel
-      defaultSlide={defaultSlide}
-      loop
-      style={{width, height, position: 'relative'}}
-    >
+    <BaseCarousel loop style={{width, height, position: 'relative'}}>
       {[
         'lightpink',
         'lightcoral',
