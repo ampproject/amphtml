@@ -50,7 +50,6 @@ import {
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
 import {getValueForExpr} from '../../../src/json';
