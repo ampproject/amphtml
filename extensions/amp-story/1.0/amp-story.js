@@ -417,7 +417,7 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeListeners_();
     this.initializeListenersForDev_();
     this.initializePageIds_();
-    this.initializeInteractives_();
+    this.initializeInteractiveComponents_();
     this.initializeStoryPlayer_();
 
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
@@ -553,10 +553,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   initializePageIds_() {
     const pageEls = this.element.querySelectorAll('amp-story-page');
-    const pageIds = Array.prototype.map.call(
-      pageEls,
-      (el) => el.id || 'default-page'
-    );
+    const pageIds = toArray(pageEls).map((el) => el.id || 'default-page');
     const idsMap = map();
     for (let i = 0; i < pageIds.length; i++) {
       if (idsMap[pageIds[i]] === undefined) {
@@ -575,12 +572,11 @@ export class AmpStory extends AMP.BaseElement {
    * Initializes interactives by deduplicating their IDs and calling initializeState().
    * @private
    */
-  initializeInteractives_() {
+  initializeInteractiveComponents_() {
     const interactiveEls = this.element.querySelectorAll(
       'amp-story-interactive-binary-poll, amp-story-interactive-poll, amp-story-interactive-quiz'
     );
-    const interactiveIds = Array.prototype.map.call(
-      interactiveEls,
+    const interactiveIds = toArray(interactiveEls).map(
       (el) => el.id || 'interactive-id'
     );
     const idsMap = map();
