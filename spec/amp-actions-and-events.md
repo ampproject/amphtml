@@ -172,7 +172,7 @@ event.value</pre>
   </tr>
 </table>
 
-### amp-accordion <a name="amp-accordion"></a>
+### amp-accordion > section <a name="amp-accordion"></a>
 
 <table>
   <tr>
