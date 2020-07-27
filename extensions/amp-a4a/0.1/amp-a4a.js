@@ -373,7 +373,7 @@ export class AmpA4A extends AMP.BaseElement {
      * Transfers elements from the detached body to the given body element.
      * @private {?function(!Element)}
      */
-    this.transferBody_ = null;
+    this.transferDomBody_ = null;
   }
 
   /** @override */
@@ -867,21 +867,21 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Start streaming response into the detached document.
-   * @param {!Response} response
+   * @param {!Response} httpResponse
    * @param {function()} checkStillCurrent
    * @return {Promise<?./head-validation.ValidatedHeadDef>}
    */
-  streamResponse_(response, checkStillCurrent) {
-    if (!response.body) {
+  streamResponse_(httpResponse, checkStillCurrent) {
+    if (!httpResponse.body) {
       this.forceCollapse();
       return Promise.reject(NO_CONTENT_RESPONSE);
     }
 
-    // Duplicating response stream as safeframe/nameframe rending will need the
-    // unaltered response content.
-    const fallbackResponse = response.clone();
+    // Duplicating httpResponse stream as safeframe/nameframe rending will need the
+    // unaltered httpResponse content.
+    const fallbackHttpResponse = httpResponse.clone();
 
-    const size = this.extractSize(response.headers);
+    const size = this.extractSize(httpResponse.headers);
     this.creativeSize_ = size || this.creativeSize_;
 
     // This transformation consumes the detached DOM chunks and
@@ -894,15 +894,16 @@ export class AmpA4A extends AMP.BaseElement {
       (doc) => transformStream.onEnd(doc)
     );
 
-    this.transferBody_ = transformStream.transferBody.bind(transformStream);
+    this.transferDomBody_ = transformStream.transferBody.bind(transformStream);
 
-    // Decodes our response bytes and pipes them to the
+    // Decodes our httpResponse bytes and pipes them to the
     // DetachedDomStream.
-    return streamResponseToWriter(this.win, response, detachedStream)
-      .then((hasContent) => {
+    return streamResponseToWriter(this.win, httpResponse, detachedStream)
+      .then((responseBodyHasContent) => {
         checkStillCurrent();
-        // `amp-ff-empty-creative` header is not present, and body is empty.
-        if (!hasContent) {
+        // `amp-ff-empty-creative` header is not present, and httpResponse.body
+        // is empty.
+        if (!responseBodyHasContent) {
           this.forceCollapse();
           return Promise.reject(NO_CONTENT_RESPONSE);
         }
@@ -913,17 +914,17 @@ export class AmpA4A extends AMP.BaseElement {
       })
       .then((head) => {
         checkStillCurrent();
-        return this.validateHead_(head);
+        return this.validateHeadElement_(head);
       })
-      .then((sanitizedHead) => {
+      .then((sanitizedHeadElement) => {
         checkStillCurrent();
         // We should not render as FIE.
-        if (!sanitizedHead) {
-          return this.handleFallback_(fallbackResponse, checkStillCurrent);
+        if (!sanitizedHeadElement) {
+          return this.handleFallback_(fallbackHttpResponse, checkStillCurrent);
         }
         this.updateLayoutPriority(LayoutPriority.CONTENT);
         this.isVerifiedAmpCreative_ = true;
-        return sanitizedHead;
+        return sanitizedHeadElement;
       });
   }
 
@@ -931,19 +932,19 @@ export class AmpA4A extends AMP.BaseElement {
    * Handles case where creative cannot or has chosen not to be rendered
    * safely in FIE. Returning null forces x-domain render in
    * attemptToRenderCreative
-   * @param {!Response} fallbackResponse
+   * @param {!Response} fallbackHttpResponse
    * @param {function()} checkStillCurrent
    * @return {!Promise<null>}
    */
-  handleFallback_(fallbackResponse, checkStillCurrent) {
+  handleFallback_(fallbackHttpResponse, checkStillCurrent) {
     // Experiment to give non-AMP creatives same benefits as AMP so
     // update priority.
     if (this.inNonAmpPreferenceExp()) {
       this.updateLayoutPriority(LayoutPriority.CONTENT);
     }
-    return fallbackResponse.arrayBuffer().then((textContent) => {
+    return fallbackHttpResponse.arrayBuffer().then((domTextContent) => {
       checkStillCurrent();
-      this.creativeBody_ = textContent;
+      this.creativeBody_ = domTextContent;
       return null;
     });
   }
@@ -951,11 +952,11 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Prepare the creative <head> by removing any non-secure elements and
    * exracting extensions
-   * @param {!Element} head
+   * @param {!Element} headElement
    * @return {?./head-validation.ValidatedHeadDef} head data or null if we should fall back to xdomain.
    */
-  validateHead_(head) {
-    return processHead(this.win, this.element, head);
+  validateHeadElement_(headElement) {
+    return processHead(this.win, this.element, headElement);
   }
 
   /**
@@ -1368,7 +1369,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.adUrl_ = null;
     this.creativeBody_ = null;
     this.isVerifiedAmpCreative_ = false;
-    this.transferBody_ = null;
+    this.transferDomBody_ = null;
     this.fromResumeCallback = false;
     this.experimentalNonAmpCreativeRenderMethod_ = this.getNonAmpCreativeRenderingMethod();
     this.postAdResponseExperimentFeatures = {};
@@ -1685,7 +1686,7 @@ export class AmpA4A extends AMP.BaseElement {
     ).then((friendlyIframeEmbed) => {
       checkStillCurrent();
       const fieBody = this.getFieBody_(friendlyIframeEmbed);
-      const renderComplete = this.transferBody_(devAssert(fieBody));
+      const renderComplete = this.transferDomBody_(devAssert(fieBody));
       this.makeFieVisible_(
         friendlyIframeEmbed,
         // TODO(ccordry): subclasses are passed creativeMetadata which does
