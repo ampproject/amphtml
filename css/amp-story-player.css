@@ -65,3 +65,14 @@ amp-story-player::after {
 .i-amphtml-story-player-loaded::after {
   visibility: hidden;
 }
+
+/** Apply click shield on the player if it is on autoplay mode. */
+.i-amphtml-story-player-loaded[autoplay]::after {
+  all: unset;
+  content: "" !important;
+  position: absolute !important;
+  height: 100% !important;
+  width: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
+}
