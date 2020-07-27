@@ -23,16 +23,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-The `amp-script` component allows you to run custom JavaScript. To maintain AMP's performance guarantees, your code runs in a Web Worker, and certain restrictions apply.
-
 ## Usage
+
+The `amp-script` component allows you to run custom JavaScript. To maintain AMP's performance guarantees, your code runs in a Web Worker, and certain restrictions apply.
 
 An `amp-script` element can load JavaScript in two ways:
 
 - remotely, from a URL
 - locally, from a `<script>` element on the page
 
-#### From a remote URL
+#### Load JavaScript from a remote URL
 
 Use the `src` attribute to load JavaScript from a URL:
 
@@ -42,9 +42,13 @@ Use the `src` attribute to load JavaScript from a URL:
 </amp-script>
 ```
 
-#### From a local element
+#### Load JavaScript from a local element
 
-Use the `script` attribute to reference a local `script` element by `id`. You must also specify `type="text/plain"` so that the browser doesn't execute your script immediately. Instead, `<amp-script>` finds it. Also include `target="amp-script"`, like this:
+You can also include your JavaScript inline, in a `script` tag. You must:
+
+- Set the `script` attribute of your `amp-script` to the local `script` element's `id`.
+- Include `target="amp-script"` in your `amp-script`.
+- Include `type="text/plain"` in your `script`. This way, the browser won't execute your script, allowing amp-script to control it.
 
 ```html
 <!-- To use inline JavaScript, you must add a script hash to the document head. -->
@@ -180,9 +184,9 @@ Include the script hash in a `meta[name=amp-script-src]` element in the document
 - The [AMP Optimizer node module](https://www.npmjs.com/package/@ampproject/toolbox-optimizer) generates this hash and inserts the `<meta>` tag automatically.
 - Build it yourself, using the following steps:
 
-  1.  Compute the SHA384 hash sum of the script's contents. This sum should be expressed in hexadecimal.
-  1.  base64url-encode the result.
-  1.  Prefix that with `sha384-`.
+1. Compute the SHA384 hash sum of the script's contents. This sum should be expressed in hexadecimal.
+2. base64url-encode the result.
+3. Prefix that with `sha384-`.
 
 Here's you might build the hash in node.js:
 
