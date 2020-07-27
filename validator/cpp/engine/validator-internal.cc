@@ -5208,10 +5208,9 @@ class ParsedValidatorRulesProvider {
       case HtmlFormat::AMP4EMAIL:
         return amp4_email_rules_.get();
       case HtmlFormat::ACTIONS:
-        return amp4_ads_rules_.get();
+        return amp4_actions_rules_.get();
       default:
         return amp_rules_.get();
-        // or, return nullptr;
     }
   }
 
