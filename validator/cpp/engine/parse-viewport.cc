@@ -19,8 +19,9 @@
 #include <map>
 
 #include "base/integral_types.h"
-#include "utf8-util.h"
 #include "strings/case.h"
+#include "absl/strings/ascii.h"
+#include "utf8-util.h"
 #include "strings.h"
 
 using std::map;
@@ -58,7 +59,7 @@ int ParseProperty(const std::vector<char32_t>& content, int pos,
     ++pos;
   std::vector<char32_t> property_value(content.begin() + start,
                                        content.begin() + pos);
-  (*value_by_name)[strings::ToLower(
+  (*value_by_name)[absl::AsciiStrToLower(
       htmlparser::Strings::CodepointsToUtf8String(property_name))] =
       htmlparser::Strings::CodepointsToUtf8String(property_value);
   return pos;
