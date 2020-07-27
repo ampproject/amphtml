@@ -307,6 +307,7 @@ describes.realWin(
           text: 'text 3',
         },
         interactiveId: 'id',
+        type: InteractiveType.QUIZ,
       });
     });
   }

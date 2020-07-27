@@ -60,20 +60,37 @@ const buildResultsTemplate = (element) => {
 /**
  * Processes the state and returns the condensed results.
  * @param {!Map<string, {option: ?./amp-story-interactive.OptionConfigType, interactiveId: string}>} interactiveState
- * @param {?Array<!./amp-story-interactive.OptionConfigType>} options needed to ensure the first options take precedence on ties
- * @param {string} strategy
+ * @param {?Array<!./amp-story-interactive.OptionConfigType>} options the attributes on the component
  * @return {InteractiveResultsDef} the results
  */
-const processResults = (interactiveState, options, strategy) => {
+const processResults = (interactiveState, options) => {
+  const strategy = decideStrategy(options);
+  if (strategy === 'category') {
+    return processResultsCategory(interactiveState, options);
+  } else if (strategy === 'percentage') {
+    return processResultsPercentage(interactiveState);
+  }
+};
+
+/**
+ * Processes the state and returns the condensed results for a category strategy
+ * @param {!Map<string, {option: ?./amp-story-interactive.OptionConfigType, interactiveId: string}>} interactiveState
+ * @param {?Array<!./amp-story-interactive.OptionConfigType>} options the attributes on the component
+ * @return {InteractiveResultsDef} the results
+ * @package
+ */
+export const processResultsCategory = (interactiveState, options) => {
+  const result = {'percentage': null, 'category': null};
+
+  // Add all categories in order to the map with value 0
   const categories = {};
-  let quizCount = 0;
-  let quizCorrect = 0;
-  // Add options in order to prefer earlier categories before later ones.
   options.forEach((option) => {
     if (option.resultscategory) {
       categories[option.resultscategory] = 0;
     }
   });
+
+  // Vote for category for each answered poll
   Object.values(interactiveState).forEach((e) => {
     if (e.type == InteractiveType.POLL) {
       if (
@@ -83,45 +100,77 @@ const processResults = (interactiveState, options, strategy) => {
       ) {
         categories[e.option.resultscategory] += 1;
       }
-    } else if (e.type == InteractiveType.QUIZ) {
+    }
+  });
+
+  // Returns category with most votes, first ones take precedence in ties
+  result.category = Object.keys(categories).reduce((a, b) =>
+    categories[a] >= categories[b] ? a : b
+  );
+  return result;
+};
+
+/**
+ * Processes the state and returns the condensed results for a percentage strategy
+ * @param {!Map<string, {option: ?./amp-story-interactive.OptionConfigType, interactiveId: string}>} interactiveState
+ * @param {?Array<!./amp-story-interactive.OptionConfigType>} options the attributes on the component
+ * @return {InteractiveResultsDef} the results
+ * @package
+ */
+export const processResultsPercentage = (interactiveState, options) => {
+  const result = {'percentage': null, 'category': null};
+
+  // Count quizzes and correct quizzes
+  let quizCount = 0;
+  let quizCorrect = 0;
+  Object.values(interactiveState).forEach((e) => {
+    if (e.type == InteractiveType.QUIZ) {
       quizCount += 1;
       if (e.option && e.option.correct != null) {
         quizCorrect += 1;
       }
     }
   });
-  let category = null;
-  let percentage = null;
-  // Decide category based on strategy
-  if (strategy === 'percentage') {
-    percentage = quizCount == 0 ? 0 : 100 * (quizCorrect / quizCount);
-    options.forEach((option) => {
-      if (
-        category == null &&
-        (parseFloat(option.resultsthreshold) <= percentage ||
-          option.resultsthreshold == null)
-      ) {
-        category = option.resultscategory;
-      }
-    });
-  } else if (strategy === 'category') {
-    Object.keys(categories).reduce((a, b) =>
-      categories[a] >= categories[b] ? a : b
-    );
-  } else {
-    // Recalculate with explicit category if there was at least one category that matched (or if there are no quizzes), otherwise percentage.
-    return processResults(
-      interactiveState,
-      options,
-      Object.values(categories).reduce((a, b) => a + b, 0) > 0 || quizCount == 0
-        ? 'category'
-        : 'percentage'
-    );
-  }
-  return {
-    category,
-    percentage,
-  };
+
+  // Percentage = (correct / total) but avoid divide by 0 error
+  result.percentage = quizCount == 0 ? 0 : 100 * (quizCorrect / quizCount);
+
+  // Get closest threshold that is lower than percentage, or lowest one if percentage is too low
+  let minThresholdDiff = -100;
+  options.forEach((option) => {
+    const currThresholdDiff =
+      result.percentage - parseFloat(option.resultsthreshold);
+    if (
+      // Curr meets the requirement and (is better or min doesnt meet)
+      (currThresholdDiff >= 0 &&
+        (minThresholdDiff > currThresholdDiff || minThresholdDiff < 0)) ||
+      // Min and curr threshold dont meet requirements but curr is better than min
+      (currThresholdDiff < 0 &&
+        minThresholdDiff < 0 &&
+        currThresholdDiff > minThresholdDiff)
+    ) {
+      result.category = option.resultscategory;
+      minThresholdDiff = currThresholdDiff;
+    }
+  });
+  return result;
+};
+
+/**
+ * Decides what strategy to use.
+ * If there are thresholds specified, it uses percentage; otherwise it uses category.
+ * @param {?Array<!./amp-story-interactive.OptionConfigType>} options the attributes on the component
+ * @return {string} the strategy
+ * @package
+ */
+export const decideStrategy = (options) => {
+  let strategy = 'category';
+  options.forEach((o) => {
+    if (o.resultsthreshold != null) {
+      strategy = 'percentage';
+    }
+  });
+  return strategy;
 };
 
 export class AmpStoryInteractiveResults extends AmpStoryInteractive {
@@ -129,7 +178,7 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
    * @param {!AmpElement} element
    */
   constructor(element) {
-    super(element, InteractiveType.RESULTS, [1, 4]);
+    super(element, InteractiveType.RESULTS, [2, 4]);
   }
 
   /** @override */
