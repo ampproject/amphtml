@@ -28,7 +28,7 @@ export const slideElement = {
 
 export const scrollContainer = {
   height: '100%',
-  position: 'absolute',
+  position: 'relative',
   top: 0,
   left: 0,
   right: 0,
@@ -88,6 +88,7 @@ export const horizontalScroll = {
   scrollSnapTypeX: 'mandatory',
   scrollSnapType: 'x mandatory',
   /* Hide scrollbar */
+  marginBottom: '-20px',
   paddingBottom: '20px',
   overflowY: 'hidden',
 };

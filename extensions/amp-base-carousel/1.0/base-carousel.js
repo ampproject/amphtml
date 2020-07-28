@@ -52,29 +52,27 @@ export function BaseCarousel(props) {
     !loop && (curSlide + dir < 0 || curSlide + dir >= length);
   return (
     <div {...rest}>
-      <div style={{width: '100%', height: '100%'}}>
-        <Scroller
-          ignoreProgrammaticScroll={ignoreProgrammaticScroll}
-          loop={loop}
-          restingIndex={curSlide}
-          setRestingIndex={setRestingIndex}
-          scrollRef={scrollRef}
-        >
-          {childrenArray}
-        </Scroller>
-        <Arrow
-          customArrow={arrowPrev}
-          dir={-1}
-          disabled={disableForDir(-1)}
-          advance={() => advance(-1)}
-        />
-        <Arrow
-          customArrow={arrowNext}
-          dir={1}
-          disabled={disableForDir(1)}
-          advance={() => advance(1)}
-        />
-      </div>
+      <Scroller
+        ignoreProgrammaticScroll={ignoreProgrammaticScroll}
+        loop={loop}
+        restingIndex={curSlide}
+        setRestingIndex={setRestingIndex}
+        scrollRef={scrollRef}
+      >
+        {childrenArray}
+      </Scroller>
+      <Arrow
+        customArrow={arrowPrev}
+        dir={-1}
+        disabled={disableForDir(-1)}
+        advance={() => advance(-1)}
+      />
+      <Arrow
+        customArrow={arrowNext}
+        dir={1}
+        disabled={disableForDir(1)}
+        advance={() => advance(1)}
+      />
       {pagination && (
         <Pagination current={curSlide} goTo={setRestingIndex} {...pagination}>
           {childrenArray}

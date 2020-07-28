@@ -32,16 +32,19 @@ export const _default = () => {
   const slideCount = number('slide count', 5, {min: 0, max: 99});
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   return (
-    <BaseCarousel style={{width, height, position: 'relative'}}>
-      {Array.from({length: slideCount}, (x, i) => {
-        const v = colorIncrement * (i + 1);
-        return (
-          <div
-            style={{backgroundColor: `rgb(${v}, 100, 100)`, width, height}}
-          ></div>
-        );
-      })}
-    </BaseCarousel>
+    <>
+      <BaseCarousel style={{width, height, position: 'relative'}}>
+        {Array.from({length: slideCount}, (x, i) => {
+          const v = colorIncrement * (i + 1);
+          return (
+            <div
+              style={{backgroundColor: `rgb(${v}, 100, 100)`, width, height}}
+            ></div>
+          );
+        })}
+      </BaseCarousel>
+      Content right below carousel.
+    </>
   );
 };
 
@@ -57,15 +60,18 @@ export const provideArrows = () => {
     height: '30px',
   };
   return (
-    <BaseCarousel
-      style={{width, height, position: 'relative'}}
-      arrowPrev={<button style={myButtonStyle}>←</button>}
-      arrowNext={<button style={myButtonStyle}>→</button>}
-    >
-      {['lightcoral', 'peachpuff', 'lavender'].map((color) => (
-        <div style={{backgroundColor: color, width, height}}></div>
-      ))}
-    </BaseCarousel>
+    <>
+      <BaseCarousel
+        style={{width, height, position: 'relative'}}
+        arrowPrev={<button style={myButtonStyle}>←</button>}
+        arrowNext={<button style={myButtonStyle}>→</button>}
+      >
+        {['lightcoral', 'peachpuff', 'lavender'].map((color) => (
+          <div style={{backgroundColor: color, width, height}}></div>
+        ))}
+      </BaseCarousel>
+      Content right below carousel.
+    </>
   );
 };
 
@@ -74,33 +80,36 @@ export const WithLooping = () => {
   const height = number('height', 225);
   const defaultSlide = number('default slide', 0);
   return (
-    <BaseCarousel
-      defaultSlide={defaultSlide}
-      loop
-      style={{width, height, position: 'relative'}}
-    >
-      {[
-        'lightpink',
-        'lightcoral',
-        'peachpuff',
-        'powderblue',
-        'lavender',
-        'thistle',
-      ].map((color, index) => (
-        <div
-          style={{
-            backgroundColor: color,
-            width,
-            height,
-            textAlign: 'center',
-            fontSize: '48pt',
-            lineHeight: height + 'px',
-          }}
-        >
-          {index}
-        </div>
-      ))}
-    </BaseCarousel>
+    <>
+      <BaseCarousel
+        defaultSlide={defaultSlide}
+        loop
+        style={{width, height, position: 'relative'}}
+      >
+        {[
+          'lightpink',
+          'lightcoral',
+          'peachpuff',
+          'powderblue',
+          'lavender',
+          'thistle',
+        ].map((color, index) => (
+          <div
+            style={{
+              backgroundColor: color,
+              width,
+              height,
+              textAlign: 'center',
+              fontSize: '48pt',
+              lineHeight: height + 'px',
+            }}
+          >
+            {index}
+          </div>
+        ))}
+      </BaseCarousel>
+      Content right below carousel.
+    </>
   );
 };
 
