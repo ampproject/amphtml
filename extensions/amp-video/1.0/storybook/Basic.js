@@ -96,7 +96,7 @@ const VideoTagPlayer = ({i}) => {
   const loop = boolean('loop', false, group);
   const poster = text(
     'poster',
-    'https://amp.dev//static/inline-examples/images/kitten-playing.png',
+    'https://amp.dev/static/inline-examples/images/kitten-playing.png',
     group
   );
 
