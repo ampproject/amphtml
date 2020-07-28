@@ -39,7 +39,7 @@ let failed = 0;
  * @return {string}
  */
 async function getInput(inputFile) {
-  return await fs.promises.readFile(inputFile, 'utf8');
+  return fs.promises.readFile(inputFile, 'utf8');
 }
 
 /**
@@ -63,7 +63,7 @@ function getTestName(inputFile) {
  */
 async function getExpectedOutput(inputFile) {
   const expectedOutputFile = inputFile.replace('input.html', 'output.html');
-  return await fs.promises.readFile(expectedOutputFile, 'utf8');
+  return fs.promises.readFile(expectedOutputFile, 'utf8');
 }
 
 /**

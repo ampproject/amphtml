@@ -16,6 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import * as styles from './fit-text.css';
+import {ContainWrapper} from '../../../src/preact/component';
 import {px, resetStyles, setStyle, setStyles} from '../../../src/style';
 import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
 
@@ -68,20 +69,18 @@ export function FitText({
   }, [children, resize]);
 
   return (
-    <div {...rest}>
-      <div
-        ref={contentRef}
-        style={{
-          ...styles.fitTextContent,
-          'width': '100%',
-          'height': '100%',
-        }}
-      >
-        <div ref={measurerRef} style={styles.fitTextContentWrapper}>
-          {children}
-        </div>
+    <ContainWrapper
+      size={true}
+      layout={true}
+      paint={true}
+      contentRef={contentRef}
+      contentStyle={styles.fitTextContent}
+      {...rest}
+    >
+      <div ref={measurerRef} style={styles.fitTextContentWrapper}>
+        {children}
       </div>
-    </div>
+    </ContainWrapper>
   );
 }
 

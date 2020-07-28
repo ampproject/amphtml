@@ -26,7 +26,7 @@ min_validator_revision_required: 475
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 1069
+spec_file_revision: 1071
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed"
@@ -3441,6 +3441,7 @@ tags {  # <form method=GET ...>
     value_casei: "get"
   }
   attrs: { name: "novalidate" }
+  attrs: { name: "xssi-prefix" }
 }
 tags {  # <form method=POST ...>
   html_format: AMP4EMAIL
@@ -3476,6 +3477,7 @@ tags {  # <form method=POST ...>
     dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: { name: "novalidate" }
+  attrs: { name: "xssi-prefix" }
 }
 # Will add verify state template if requested by users
 tags {

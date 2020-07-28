@@ -17,7 +17,6 @@
 export const LINE_HEIGHT_EM_ = 1.15;
 
 export const fitTextContent = {
-  'contain': 'content',
   'display': 'flex',
   'flexDirection': 'column',
   'flexWrap': 'nowrap',

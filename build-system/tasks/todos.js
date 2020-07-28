@@ -87,7 +87,7 @@ function reportClosedIssue(file, issueId, todo) {
     if (value) {
       log(colors.red(todo, 'in', file.path));
     }
-    return await value;
+    return value;
   })());
 }
 
