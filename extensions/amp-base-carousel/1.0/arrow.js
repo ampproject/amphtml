@@ -19,16 +19,10 @@ import * as styles from './base-carousel.css';
 import {useEffect, useState} from '../../../src/preact';
 
 /**
- * @param {!JsonObject} props
+ * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-export function Arrow(props) {
-  const {
-    'customArrow': customArrow,
-    'by': by,
-    'advance': advance,
-    'disabled': disabled,
-  } = props;
+export function Arrow({customArrow, by, advance, disabled}) {
   const {
     'disabled': customDisabled,
     'onClick': onCustomClick,
@@ -60,11 +54,10 @@ export function Arrow(props) {
 }
 
 /**
- * @param {!JsonObject} props
- * @return {PreactDef.Renderable}
+ * @param {!BaseCarouselDef.ArrowProps} props
+ * @return {PreactDef.VNode}
  */
-export function ArrowPrev(props) {
-  const {'customArrow': customArrow, ...rest} = props;
+export function ArrowPrev({customArrow, ...rest}) {
   return (
     <Arrow
       by={-1}
@@ -75,11 +68,10 @@ export function ArrowPrev(props) {
 }
 
 /**
- * @param {!JsonObject} props
+ * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-export function ArrowNext(props) {
-  const {'customArrow': customArrow, ...rest} = props;
+export function ArrowNext({customArrow, ...rest}) {
   return (
     <Arrow
       by={1}
@@ -90,11 +82,10 @@ export function ArrowNext(props) {
 }
 
 /**
- * @param {!JsonObject} props
+ * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-function DefaultArrow(props) {
-  const {by, disabled} = props;
+function DefaultArrow({by, disabled, ...rest}) {
   // TODO(wg-bento#7): Replace with :hover and :active pseudoselectors.
   const [hover, setHover] = useState(false);
   const [active, setActive] = useState(false);
@@ -121,12 +112,13 @@ function DefaultArrow(props) {
       onMouseLeave={() => setHover(false)}
       onMouseDown={() => setActive(true)}
       onMouseUp={() => setActive(false)}
-      {...props}
+      {...rest}
     >
-      <div style={styles.arrowFrosting}></div>
-      <div style={styles.arrowBackdrop}></div>
+      <div style={{...styles.arrowBaseStyle, ...styles.arrowFrosting}}></div>
+      <div style={{...styles.arrowBaseStyle, ...styles.arrowBackdrop}}></div>
       <div
         style={{
+          ...styles.arrowBaseStyle,
           ...styles.arrowBackground,
           backgroundColor: active
             ? 'rgba(255, 255, 255, 1.0)'

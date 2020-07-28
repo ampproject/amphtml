@@ -33,7 +33,7 @@ storiesOf('amp-timeago', module)
         layout="responsive"
         width="100"
         height="100"
-        datetime={datetime}
+        datetime={String(datetime)}
         locale="en"
       >
         Saturday 11 April 2018 00.37
