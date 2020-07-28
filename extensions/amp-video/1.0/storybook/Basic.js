@@ -159,7 +159,7 @@ const Spacer = ({height}) => {
 
 export const Default = () => {
   const amount = number('Amount', 1, {}, 'Page');
-  const spacerHeight = text('Space', '100vh', 'Page');
+  const spacerHeight = text('Space', '80vh', 'Page');
   const spaceAbove = boolean('Space above', false, 'Page');
   const spaceBelow = boolean('Space below', false, 'Page');
 
