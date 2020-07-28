@@ -15,6 +15,7 @@
  */
 import * as Preact from '../../../src/preact';
 import {Arrow} from './arrow';
+import {Pagination} from './pagination';
 import {Scroller} from './scroller';
 import {toChildArray, useRef, useState} from '../../../src/preact';
 
@@ -29,6 +30,7 @@ export function BaseCarousel(props) {
     'children': children,
     'defaultSlide': defaultSlide,
     'loop': loop,
+    'pagination': pagination,
     ...rest
   } = props;
   const childrenArray = toChildArray(children);
@@ -50,27 +52,34 @@ export function BaseCarousel(props) {
     !loop && (curSlide + dir < 0 || curSlide + dir >= length);
   return (
     <div {...rest}>
-      <Scroller
-        ignoreProgrammaticScroll={ignoreProgrammaticScroll}
-        loop={loop}
-        restingIndex={curSlide}
-        setRestingIndex={setRestingIndex}
-        scrollRef={scrollRef}
-      >
-        {childrenArray}
-      </Scroller>
-      <Arrow
-        customArrow={arrowPrev}
-        dir={-1}
-        disabled={disableForDir(-1)}
-        advance={() => advance(-1)}
-      />
-      <Arrow
-        customArrow={arrowNext}
-        dir={1}
-        disabled={disableForDir(1)}
-        advance={() => advance(1)}
-      />
+      <div style={{width: '100%', height: '100%'}}>
+        <Scroller
+          ignoreProgrammaticScroll={ignoreProgrammaticScroll}
+          loop={loop}
+          restingIndex={curSlide}
+          setRestingIndex={setRestingIndex}
+          scrollRef={scrollRef}
+        >
+          {childrenArray}
+        </Scroller>
+        <Arrow
+          customArrow={arrowPrev}
+          dir={-1}
+          disabled={disableForDir(-1)}
+          advance={() => advance(-1)}
+        />
+        <Arrow
+          customArrow={arrowNext}
+          dir={1}
+          disabled={disableForDir(1)}
+          advance={() => advance(1)}
+        />
+      </div>
+      {pagination && (
+        <Pagination current={curSlide} goTo={setRestingIndex} {...pagination}>
+          {childrenArray}
+        </Pagination>
+      )}
     </div>
   );
 }

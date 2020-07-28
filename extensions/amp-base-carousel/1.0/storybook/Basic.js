@@ -16,7 +16,8 @@
 
 import * as Preact from '../../../../src/preact';
 import {BaseCarousel} from '../base-carousel';
-import {number, withKnobs} from '@storybook/addon-knobs';
+import {boolean, number, withKnobs} from '@storybook/addon-knobs';
+
 import {withA11y} from '@storybook/addon-a11y';
 
 export default {
@@ -100,5 +101,40 @@ export const WithLooping = () => {
         </div>
       ))}
     </BaseCarousel>
+  );
+};
+
+export const Pagination = () => {
+  const width = number('width', 440);
+  const height = number('height', 225);
+  const slideCount = number('slide count', 5, {min: 0, max: 99});
+  const loop = boolean(' loop', false);
+  const colorIncrement = Math.floor(255 / (slideCount + 1));
+  const inset = boolean('inset pagination', false);
+  const paginationHeight = number('pagination height', 20);
+  return (
+    <>
+      <BaseCarousel
+        pagination={{inset, height: paginationHeight}}
+        loop={loop}
+        style={{
+          width,
+          height,
+          position: 'relative',
+          marginBottom: inset ? 0 : paginationHeight,
+        }}
+      >
+        {Array.from({length: slideCount}, (x, i) => {
+          const v = colorIncrement * (i + 1);
+          return (
+            <div
+              style={{backgroundColor: `rgb(${v}, 100, 100)`, width, height}}
+            ></div>
+          );
+        })}
+      </BaseCarousel>
+      Content right below carousel. Note: User specifies `margin-bottom` to make
+      room for outset pagination.
+    </>
   );
 };
