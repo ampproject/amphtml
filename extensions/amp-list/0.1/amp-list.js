@@ -75,6 +75,7 @@ const TABBABLE_ELEMENTS_QUERY =
 
 // Technically the ':' is not considered part of the scheme, but it is useful to include.
 const AMP_STATE_URI_SCHEME = 'amp-state:';
+const AMP_SCRIPT_URI_SCHEME = 'amp-script:';
 
 /**
  * @typedef {{
@@ -411,6 +412,17 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
+   * Returns true if element's src points to an amp-script function.
+   *
+   * @param {string} src
+   * @return {boolean}
+   * @private
+   */
+  isAmpScriptSrc_(src) {
+    return startsWith(src, AMP_SCRIPT_URI_SCHEME);
+  }
+
+  /**
    * Gets the json an amp-list that has an "amp-state:" uri. For example,
    * src="amp-state:json.path".
    *
@@ -441,6 +453,53 @@ export class AmpList extends AMP.BaseElement {
         userAssert(
           typeof json !== 'undefined',
           `[amp-list] No data was found at provided uri: ${src}`
+        );
+        return json;
+      });
+  }
+
+  /**
+   * Gets the json from an amp-script uri.
+   *
+   * @param {string} src
+   * @return {Promise<!JsonObject>}
+   * @private
+   */
+  getAmpScriptJson_(src) {
+    return Promise.resolve()
+      .then(() => {
+        userAssert(
+          isExperimentOn(this.win, 'protocol-adapters'),
+          `Experiment 'protocol-adapters' is not turned on.`
+        );
+        userAssert(
+          !this.ssrTemplateHelper_.isEnabled(),
+          '[amp-list]: "amp-script" URIs cannot be used in SSR mode.'
+        );
+
+        const args = src.slice(AMP_SCRIPT_URI_SCHEME.length).split('.');
+        userAssert(
+          args.length === 2 && args[0].length > 0 && args[1].length > 0,
+          '[amp-list]: "amp-script" URIs must be of the format "scriptId.functionIdentifier".'
+        );
+
+        const ampScriptId = args[0];
+        const fnIdentifier = args[1];
+        const ampScriptEl = this.element
+          .getAmpDoc()
+          .getElementById(ampScriptId);
+        userAssert(
+          ampScriptEl && ampScriptEl.tagName === 'AMP-SCRIPT',
+          `[amp-list]: could not find <amp-script> with script set to ${ampScriptId}`
+        );
+        return ampScriptEl
+          .getImpl()
+          .then((impl) => impl.callFunction(fnIdentifier));
+      })
+      .then((json) => {
+        userAssert(
+          typeof json === 'object',
+          `[amp-list] ${src} must return json, but instead returned: ${typeof json}`
         );
         return json;
       });
@@ -691,9 +750,13 @@ export class AmpList extends AMP.BaseElement {
     if (this.ssrTemplateHelper_.isEnabled()) {
       fetch = this.ssrTemplate_(opt_refresh);
     } else {
-      fetch = this.isAmpStateSrc_(elementSrc)
-        ? this.getAmpStateJson_(elementSrc)
-        : this.prepareAndSendFetch_(opt_refresh);
+      if (this.isAmpStateSrc_(elementSrc)) {
+        fetch = this.getAmpStateJson_(elementSrc);
+      } else if (this.isAmpScriptSrc_(elementSrc)) {
+        fetch = this.getAmpScriptJson_(elementSrc);
+      } else {
+        fetch = this.prepareAndSendFetch_(opt_refresh);
+      }
       fetch = fetch.then((data) => {
         // Bail if the src has changed while resolving the xhr request.
         if (elementSrc !== this.element.getAttribute('src')) {
