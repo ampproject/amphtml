@@ -138,13 +138,14 @@ export const processResultsPercentage = (interactiveState, options) => {
   // Get closest threshold that is lower than percentage, or lowest one if percentage is too low
   let minThresholdDiff = -100;
   options.forEach((option) => {
+    // ThresholdDiff is positive if it's lower than percentage (desired)
     const currThresholdDiff =
       result.percentage - parseFloat(option.resultsthreshold);
     if (
       // Curr meets the requirement and (is better or min doesnt meet)
       (currThresholdDiff >= 0 &&
         (minThresholdDiff > currThresholdDiff || minThresholdDiff < 0)) ||
-      // Min and curr threshold dont meet requirements but curr is better than min
+      // Curr doesnt meet the requirement, but min also doesnt and curr is better than min
       (currThresholdDiff < 0 &&
         minThresholdDiff < 0 &&
         currThresholdDiff > minThresholdDiff)
