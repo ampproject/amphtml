@@ -70,7 +70,9 @@ async function autoScroll(page) {
 }
 
 async function generateMap() {
-  log(`Generating heat map in dist/${outHtml}, based on ${coverageJsonName}...`);
+  log(
+    `Generating heat map in dist/${outHtml}, based on ${coverageJsonName}...`
+  );
   exec(
     `source-map-explorer v0.js v0.js.map -m --coverage ${coverageJsonName} --html ${outHtml}`,
     {cwd: 'dist/'}
@@ -91,8 +93,10 @@ coverageMap.description =
   'Generates a code coverage "heat map" on v0.js based on code traversed during puppeteer test via source map explorer';
 
 coverageMap.flags = {
-  json: '  Customize the name of the JSON output from puppeteer (out.json by default).',
+  json:
+    '  Customize the name of the JSON output from puppeteer (out.json by default).',
   url:
     '  Set the URL for puppeteer testing, starting with  "http://localhost:8000..." (http://localhost:8000/examples/everything.amp.html by default).',
-  html: '  Customize the name of the HTML output from source map explorer (out.html by default).'
+  html:
+    '  Customize the name of the HTML output from source map explorer (out.html by default).',
 };
