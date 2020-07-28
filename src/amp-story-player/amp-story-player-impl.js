@@ -730,20 +730,22 @@ export class AmpStoryPlayer {
     if (storyDelta === 0) {
       return;
     }
-    if (!this.circularWrapping_() && this.isIndexOutofBounds_(storyDelta)) {
+    if (
+      !this.circularWrapping_() &&
+      this.isIndexOutofBounds_(this.currentIdx_ + storyDelta)
+    ) {
       throw new Error('Out of Story range.');
     }
-    if (!this.isIndexOutofBounds_(storyDelta)) {
-      const currentStory = this.stories_[this.currentIdx_ + storyDelta];
-      this.show(currentStory.href);
-      this.signalNavigation_();
-      return;
+    let currentStory;
+    const newIdx = this.currentIdx_ + storyDelta;
+    if (!this.isIndexOutofBounds_(newIdx)) {
+      currentStory = this.stories_[newIdx];
+    } else {
+      currentStory =
+        storyDelta > 0
+          ? this.stories_[this.currentIdx_ + storyDelta - this.stories_.length]
+          : this.stories_[this.currentIdx_ + storyDelta + this.stories_.length];
     }
-    const currentStory =
-      storyDelta > 0
-        ? this.stories_[this.currentIdx_ + storyDelta - this.stories_.length]
-        : this.stories_[this.currentIdx_ + storyDelta + this.stories_.length];
-
     this.show(currentStory.href);
     this.signalNavigation_();
   }
@@ -1082,29 +1084,16 @@ export class AmpStoryPlayer {
    * @return {boolean}
    */
   isIndexOutofBounds_(index) {
-    return (
-      this.currentIdx_ + index >= this.stories_.length ||
-      this.currentIdx_ + index < 0
-    );
+    return index >= this.stories_.length || index < 0;
   }
 
   /**
-   * Checks if circular wrapping is set
+   * Checks if circular wrapping artibute is present
    * @private
    * @return {boolean}
    */
   circularWrapping_() {
-    return this.element_.getAttribute('enable-circular-wrapping') === 'true';
-  }
-
-  /**
-   * Internal navigation using show() method
-   * @private
-   * @param {this.stories_} story
-   */
-  navigateTo_(story) {
-    this.show(story.href);
-    this.signalNavigation_();
+    return this.element_.hasAttribute('enable-circular-wrapping');
   }
 
   /**
