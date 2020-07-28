@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import {Action, AmpStoryStoreService} from '../amp-story-store-service';
 import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
-import {AmpStoryStoreService} from '../amp-story-store-service';
 import {Deferred} from '../../../../src/utils/promise';
 import {LocalizationService} from '../../../../src/service/localization';
 import {MediaType} from '../media-pool';
@@ -38,6 +38,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   let element;
   let gridLayerEl;
   let page;
+  let storeService;
   let isPerformanceTrackingOn;
 
   const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
@@ -59,7 +60,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
       .stub(Services, 'localizationForDoc')
       .returns(localizationService);
 
-    const storeService = new AmpStoryStoreService(win);
+    storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', function () {
       return storeService;
     });
@@ -204,6 +205,34 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
         // `setState` runs code that creates subtasks (Promise callbacks).
         // Waits for the next frame to make sure all the subtasks are
         // already executed when we run the assertions.
+        win.requestAnimationFrame(() => {
+          mediaPoolMock.verify();
+          done();
+        });
+      });
+  });
+
+  it('should unmute audio when state becomes active', (done) => {
+    env.sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
+
+    storeService.dispatch(Action.TOGGLE_MUTED, false);
+
+    const videoEl = win.document.createElement('video');
+    videoEl.setAttribute('src', 'https://example.com/video.mp3');
+    gridLayerEl.appendChild(videoEl);
+
+    let mediaPoolMock;
+
+    page.buildCallback();
+    page
+      .layoutCallback()
+      .then(() => page.mediaPoolPromise_)
+      .then((mediaPool) => {
+        mediaPoolMock = env.sandbox.mock(mediaPool);
+        mediaPoolMock.expects('unmute').once();
+
+        page.setState(PageState.PLAYING);
+
         win.requestAnimationFrame(() => {
           mediaPoolMock.verify();
           done();
@@ -422,6 +451,32 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
         // `setState` runs code that creates subtasks (Promise callbacks).
         // Waits for the next frame to make sure all the subtasks are
         // already executed when we run the assertions.
+        win.requestAnimationFrame(() => {
+          mediaPoolMock.verify();
+          done();
+        });
+      });
+  });
+
+  it('should mute audio when state becomes active', (done) => {
+    storeService.dispatch(Action.TOGGLE_MUTED, false);
+
+    const videoEl = win.document.createElement('video');
+    videoEl.setAttribute('src', 'https://example.com/video.mp3');
+    gridLayerEl.appendChild(videoEl);
+
+    let mediaPoolMock;
+
+    page.buildCallback();
+    page
+      .layoutCallback()
+      .then(() => page.mediaPoolPromise_)
+      .then((mediaPool) => {
+        mediaPoolMock = env.sandbox.mock(mediaPool);
+        mediaPoolMock.expects('mute').withExactArgs(videoEl).once();
+
+        page.setState(PageState.NOT_ACTIVE);
+
         win.requestAnimationFrame(() => {
           mediaPoolMock.verify();
           done();
