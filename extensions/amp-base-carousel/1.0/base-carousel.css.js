@@ -82,18 +82,15 @@ export const arrowBaseStyle = {
 };
 
 export const arrowFrosting = {
-  ...arrowBaseStyle,
   backdropFilter: 'blur(3px)',
 };
 
 export const arrowBackdrop = {
-  ...arrowBaseStyle,
   backdropFilter: 'blur(12px) invert(1) grayscale(0.6) brightness(0.8)',
   opacity: 0.5,
 };
 
 export const arrowBackground = {
-  ...arrowBaseStyle,
   boxShadow: `0 0 0px 1px rgba(0, 0, 0, 0.08) inset,
       0 1px 4px 1px rgba(0, 0, 0, 0.2)`,
   transition: '200ms background-color',
