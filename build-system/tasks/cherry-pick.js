@@ -134,8 +134,8 @@ function cherryPick() {
 
   const branch = cherryPickBranchName(onto);
   try {
-    // prepareBranch(onto, commits, branch, remote);
-    // commits.forEach(performCherryPick);
+    prepareBranch(onto, commits, branch, remote);
+    commits.forEach(performCherryPick);
 
     if (push) {
       log(
