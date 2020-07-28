@@ -107,9 +107,8 @@ export class BaseTemplate {
   }
 
   /**
-   * Helps the template implementation to unwrap the root element. The root
-   * element can be unwrapped only when it contains a single element or a
-   * single element surrounded by empty text nodes.
+   * Unwraps the root element. If root has a single element child,
+   * returns the child. Otherwise, returns root.
    * @param {!Element} root
    * @return {!Element}
    * @protected @final
@@ -127,19 +126,14 @@ export class BaseTemplate {
   }
 
   /**
-   * Helps the template implementation to unwrap the root element. The root
-   * element contents are unwrapped as an array of elements. Any text node
-   * children are normalized inside a <div>. Any root with non-element children
-   * is returned as is to preserve the root tag rather than replaceed with <div>.
+   * Unwraps the root element and returns any children in an array.
+   * Text node children are normalized inside a <div>.
    * @param {!Element} root
    * @return {!Element|!Array<!Element>}
    * @protected @final
    */
   unwrapChildren(root) {
     const children = [];
-    if (!root.firstElementChild) {
-      return root;
-    }
     this.visitChildren_(root, (c) => {
       if (typeof c == 'string') {
         const element = this.win.document.createElement('div');
@@ -149,7 +143,7 @@ export class BaseTemplate {
         children.push(c);
       }
     });
-    return children.length === 1 ? children[0] : children;
+    return children;
   }
 
   /**

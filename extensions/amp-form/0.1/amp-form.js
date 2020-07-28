@@ -1296,10 +1296,15 @@ export class AmpForm {
         p = this.ssrTemplateHelper_
           .applySsrOrCsrTemplate(devAssert(container), data)
           .then((rendered) => {
+            // TODO(caroqliu): Simplify section appending rendered contents to DOM.
             let renderContainer;
             if (isArray(rendered)) {
-              renderContainer = document.createElement('div');
-              rendered.forEach((child) => renderContainer.appendChild(child));
+              if (rendered.length === 1) {
+                renderContainer = rendered[0];
+              } else {
+                renderContainer = document.createElement('div');
+                rendered.forEach((child) => renderContainer.appendChild(child));
+              }
             } else {
               renderContainer = rendered;
             }

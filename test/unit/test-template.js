@@ -402,17 +402,18 @@ describes.realWin('BaseTemplate', {amp: true}, (env) => {
       const root = doc.createElement('div');
       const element1 = doc.createElement('div');
       root.appendChild(element1);
-      expect(new BaseTemplate(templateElement).unwrapChildren(root)).to.equal(
-        element1
-      );
+      expect(
+        new BaseTemplate(templateElement).unwrapChildren(root)
+      ).to.have.ordered.members([element1]);
     });
 
-    it('should NOT unwrap single non-div element', () => {
+    it('should unwrap single non-div element', () => {
       const root = doc.createElement('a');
       root.textContent = 'abc';
-      expect(new BaseTemplate(templateElement).unwrapChildren(root)).to.equal(
-        root
-      );
+      const result = new BaseTemplate(templateElement).unwrapChildren(root);
+      expect(result).to.have.length(1);
+      expect(result[0].tagName).to.equal('DIV');
+      expect(result[0].textContent).to.equal('abc');
     });
 
     it('should unwrap with empty/whitespace text', () => {
@@ -421,9 +422,9 @@ describes.realWin('BaseTemplate', {amp: true}, (env) => {
       root.appendChild(doc.createTextNode('   '));
       root.appendChild(element1);
       root.appendChild(doc.createTextNode(' \n\t  '));
-      expect(new BaseTemplate(templateElement).unwrapChildren(root)).to.equal(
-        element1
-      );
+      expect(
+        new BaseTemplate(templateElement).unwrapChildren(root)
+      ).to.have.ordered.members([element1]);
     });
 
     it('should unwrap multiple elements', () => {
