@@ -77,7 +77,7 @@ export function Scroller({
       ? container./* OK */ offsetWidth * pivotIndex
       : container./* OK */ offsetWidth * restingIndex;
     setStyle(container, 'scrollBehavior', 'smooth');
-  }, [ignoreProgrammaticScrollRef, loop, restingIndex, pivotIndex, scrollRef]);
+  }, [loop, restingIndex, pivotIndex, scrollRef]);
 
   // Trigger render by setting the resting index to the current scroll state.
   const debouncedResetScrollReferencePoint = useMemo(
