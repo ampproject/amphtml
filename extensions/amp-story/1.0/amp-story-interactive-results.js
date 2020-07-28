@@ -22,7 +22,7 @@ import {setStyle} from '../../../src/style';
 
 /**
  * @typedef {{
- *    category: ?string,
+ *    category: string,
  *    percentage: ?number,
  * }}
  */
