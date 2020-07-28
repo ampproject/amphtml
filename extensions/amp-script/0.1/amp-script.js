@@ -142,6 +142,18 @@ export class AmpScript extends AMP.BaseElement {
       );
     }
 
+    if (
+      this.nodom_ &&
+      (this.element.hasAttribute('width') ||
+        this.element.hasAttribute('height'))
+    ) {
+      user().warn(
+        TAG,
+        'Cannot set width or height of a nodom <amp-script>',
+        this.element
+      );
+    }
+
     return getElementServiceForDoc(this.element, TAG, TAG).then((service) => {
       this.setService(/** @type {!AmpScriptService} */ (service));
     });
