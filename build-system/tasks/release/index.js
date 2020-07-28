@@ -406,18 +406,6 @@ async function cleanup_(tempDir) {
 }
 
 async function release() {
-  // TODO(#28168, danielrozenberg): remove when this is no longer
-  log.warn(Array(55).fill('*').join(''));
-  log.warn(
-    '* Work on the',
-    cyan('gulp release'),
-    'task is still',
-    `${yellow('in progress')}!`,
-    '*'
-  );
-  log.warn(Array(55).fill('*').join(''));
-  logSeparator_();
-
   // TODO(#27771, danielrozenberg): fail this release quickly if there are
   // commits in the tree that are not from the `master` branch.
 
