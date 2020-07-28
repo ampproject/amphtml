@@ -68,7 +68,7 @@ const processResults = (interactiveState, options) => {
   if (strategy === 'category') {
     return processResultsCategory(interactiveState, options);
   } else if (strategy === 'percentage') {
-    return processResultsPercentage(interactiveState);
+    return processResultsPercentage(interactiveState, options);
   }
 };
 
@@ -213,11 +213,7 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
    * @private
    */
   onInteractiveReactStateUpdate_(interactiveState) {
-    const results = processResults(
-      interactiveState,
-      this.options_,
-      this.element.getAttribute('strategy')
-    );
+    const results = processResults(interactiveState, this.options_);
     this.rootEl_.classList.toggle(
       'i-amphtml-story-interactive-results-show-score',
       results.percentage != null
