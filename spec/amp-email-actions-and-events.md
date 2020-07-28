@@ -379,15 +379,15 @@ event.response</pre></td>
   </tr>
   <tr>
     <td><code>toggle(section=STRING)</code></td>
-    <td>Toggles the <code>expanded</code> and <code>collapsed</code> states of <code>amp-accordion</code> sections. When called with no arguments, it toggles all sections of the accordion. To specify a specific section, add the <code>section</code> argument and use its corresponding <code>id</code> as the value.</td>
+    <td>Toggles the <code>expanded</code> and <code>collapsed</code> states of <code>amp-accordion</code> sections. When called with no arguments, it toggles all sections of the accordion. Trigger on a specific section by providing the section id: <code>on="tap:myAccordion.toggle(section='section-id')"</code>.
   </tr>
   <tr>
     <td><code>expand(section=STRING)</code></td>
-    <td>Expands the sections of the accordion. If a section is already expanded, it stays expanded. When called with no arguments, it expands all sections of the accordion. To specify a specific section, add the <code>section</code> argument and use its corresponding <code>id</code> as the value.</td>
+    <td>Expands the sections of the accordion. If a section is already expanded, it stays expanded. When called with no arguments, it expands all sections of the accordion. Trigger on a specific section by providing the section id: <code>on="tap:myAccordion.expand(section='section-id')"</code>.</td>
   </tr>
   <tr>
     <td><code>collapse(section=STRING)</code></td>
-    <td>Collapses the sections of the accordion. If a section is already collapsed, it stays collapsed. When called with no arguments, it collapses all sections of the accordion. To specify a specific section, add the <code>section</code> argument and use its corresponding <code>id</code> as the value.</td>
+    <td>Collapses the sections of the accordion. If a section is already collapsed, it stays collapsed. When called with no arguments, it collapses all sections of the accordion. Trigger on a specific section by providing the section id: <code>on="tap:myAccordion.collapse(section='section-id')"</code>.</td>
   </tr>
 </table>
 
