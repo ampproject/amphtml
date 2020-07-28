@@ -378,9 +378,15 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-base-carousel',
-    version: ['0.1', '1.0'],
+    version: '0.1',
     latestVersion: '0.1',
     options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-base-carousel',
+    version: '1.0',
+    latestVersion: '0.1',
     type: TYPES.MISC,
   },
   {
