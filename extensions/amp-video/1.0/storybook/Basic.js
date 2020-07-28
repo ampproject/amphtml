@@ -31,22 +31,14 @@ const VideoTagPlayerInternal = forwardRef((props, ref) => {
   const {
     children,
 
-    src,
-    muted,
-    loop,
-    controls,
     poster,
-
-    'aria-label': ariaLabel,
     album,
     artist,
     artwork,
     title,
 
     onLoad,
-    onLoadedMetadata,
-    onPause,
-    onPlaying,
+    ...rest
   } = props;
 
   const videoNodeRef = useRef();
@@ -65,17 +57,14 @@ const VideoTagPlayerInternal = forwardRef((props, ref) => {
   return (
     <video
       ref={videoNodeRef}
-      aria-label={ariaLabel}
-      src={src}
-      muted={muted}
-      loop={loop}
-      controls={controls}
-      onPlaying={onPlaying}
-      onPause={onPause}
-      poster={poster}
-      onLoadedMetadata={onLoadedMetadata}
-      onCanPlay={onLoad}
       style={{position: 'relative', width: '100%', height: '100%'}}
+      poster={poster}
+      album={album}
+      artist={artist}
+      artwork={artwork}
+      title={title}
+      onCanPlay={onLoad}
+      {...rest}
     >
       {children}
     </video>
