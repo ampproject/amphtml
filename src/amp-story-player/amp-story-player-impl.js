@@ -743,8 +743,8 @@ export class AmpStoryPlayer {
     } else {
       currentStory =
         storyDelta > 0
-          ? this.stories_[this.currentIdx_ + storyDelta - this.stories_.length]
-          : this.stories_[this.currentIdx_ + storyDelta + this.stories_.length];
+          ? this.stories_[newIdx % this.stories_.length]
+          : this.stories_[(newIdx % this.stories_.length + this.stories_.length) % this.stories_.length];
     }
     this.show(currentStory.href);
     this.signalNavigation_();
