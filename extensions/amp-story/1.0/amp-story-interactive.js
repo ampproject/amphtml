@@ -637,36 +637,11 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @private
    */
   retrieveInteractiveData_() {
-    this.handleSuccessfulDataRetrieval_({
-      'options': [
-        {
-          'optionIndex': 0,
-          'selectedByUser': false,
-          'totalCount': Math.random() * 100,
-        },
-        {
-          'optionIndex': 1,
-          'selectedByUser': false,
-          'totalCount': Math.random() * 100,
-        },
-        {
-          'optionIndex': 2,
-          'selectedByUser': false,
-          'totalCount': Math.random() * 100,
-        },
-        {
-          'optionIndex': 3,
-          'selectedByUser': false,
-          'totalCount': Math.random() * 100,
-        },
-      ],
+    return this.executeInteractiveRequest_('GET').then((response) => {
+      this.handleSuccessfulDataRetrieval_(
+        /** @type {InteractiveResponseType} */ (response)
+      );
     });
-    return Promise.resolve();
-    // return this.executeInteractiveRequest_('GET').then((response) => {
-    //   this.handleSuccessfulDataRetrieval_(
-    //     /** @type {InteractiveResponseType} */ (response)
-    //   );
-    // });
   }
 
   /**
