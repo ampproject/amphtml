@@ -156,6 +156,7 @@ descendant_tag_list {
   tag: "P"
   tag: "PATH"
   tag: "SECTION"
+  tag: "SELECT"
   tag: "SPAN"
   tag: "STRIKE"
   tag: "STRONG"
@@ -172,4 +173,5 @@ descendant_tag_list {
   tag: "TR"
   tag: "U"
   tag: "UL"
+  tag: "USE"
 }
