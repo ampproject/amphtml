@@ -24,6 +24,7 @@ export const slideElement = {
   alignItems: 'center',
   justifyContent: 'center',
   scrollSnapAlign: 'start',
+  scrollSnapStop: 'always',
 };
 
 export const scrollContainer = {
@@ -78,7 +79,7 @@ export const hideScrollbar = {
   scrollbarWidth: 'none',
 };
 /* Chrome, Safari */
-export const hideScrollbarPseudo = `[hide-scrollbar]::-webkit-scrollbar {
+const hideScrollbarPseudo = `[hide-scrollbar]::-webkit-scrollbar {
   display: none;
   box-sizing: content-box !important;
   }`;
@@ -91,3 +92,17 @@ export const horizontalScroll = {
   paddingBottom: '20px',
   overflowY: 'hidden',
 };
+
+/** Slides only have one child */
+const slideSizing = `
+.i-amphtml-carousel-slide > :first-child, .i-amphtml-carousel-slide > ::slotted(*) {
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  flex-shrink: 0 !important;
+  max-height: 100%;
+  max-width: 100%;
+}
+.i-amphtml-carousel-slide > ::slotted(*) {
+  width: 100%;
+}`;
+export const scrollerStyles = hideScrollbarPseudo + slideSizing;

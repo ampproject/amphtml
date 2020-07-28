@@ -384,6 +384,12 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-base-carousel',
+    version: '1.0',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-beopinion',
     version: '0.1',
     latestVersion: '0.1',

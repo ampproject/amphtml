@@ -17,7 +17,6 @@ import * as Preact from '../../../src/preact';
 import * as styles from './base-carousel.css';
 import {WithAmpContext} from '../../../src/preact/context';
 import {debounce} from '../../../src/utils/rate-limit';
-import {dict} from '../../../src/utils/object';
 import {mod} from '../../../src/utils/math';
 import {setStyle} from '../../../src/style';
 import {useLayoutEffect, useMemo, useRef} from '../../../src/preact';
@@ -33,19 +32,16 @@ import {useLayoutEffect, useMemo, useRef} from '../../../src/preact';
 const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
 
 /**
- * @param {!JsonObject} props
+ * @param {!BaseCarouselDef.ScrollerProps} props
  * @return {PreactDef.Renderable}
  */
-export function Scroller(props) {
-  const {
-    'children': children, // Must be an array.
-    'ignoreProgrammaticScroll': ignoreProgrammaticScroll,
-    'loop': loop,
-    'restingIndex': restingIndex,
-    'setRestingIndex': setRestingIndex,
-    'scrollRef': scrollRef,
-  } = props;
-
+export function Scroller({
+  children,
+  loop,
+  restingIndex,
+  setRestingIndex,
+  scrollRef,
+}) {
   /**
    * The number of slides we want to place before the
    * reference or resting index. Only needed if loop=true.
@@ -57,16 +53,15 @@ export function Scroller(props) {
    * is with respect to its scrolling order. Only needed if loop=true.
    */
   const offsetRef = useRef(restingIndex);
+  const ignoreProgrammaticScrollRef = useRef(true);
   const containerRef = useRef(null);
-  const slides = renderSlides(
-    dict({
-      'children': children,
-      'loop': loop,
-      'offsetRef': offsetRef,
-      'pivotIndex': pivotIndex,
-      'restingIndex': restingIndex,
-    })
-  );
+  const slides = renderSlides({
+    children,
+    loop,
+    offsetRef,
+    pivotIndex,
+    restingIndex,
+  });
   const currentIndex = useRef(restingIndex);
 
   // useLayoutEffect needed to avoid FOUC while scrolling
@@ -76,13 +71,13 @@ export function Scroller(props) {
     }
     // TODO: We should use forwardRef to dedup scrollRef and containerRef.
     const container = (scrollRef.current = containerRef.current);
-    ignoreProgrammaticScroll.current = true;
+    ignoreProgrammaticScrollRef.current = true;
     setStyle(container, 'scrollBehavior', 'auto');
     container./* OK */ scrollLeft = loop
       ? container./* OK */ offsetWidth * pivotIndex
       : container./* OK */ offsetWidth * restingIndex;
     setStyle(container, 'scrollBehavior', 'smooth');
-  }, [ignoreProgrammaticScroll, loop, restingIndex, pivotIndex, scrollRef]);
+  }, [loop, restingIndex, pivotIndex, scrollRef]);
 
   // Trigger render by setting the resting index to the current scroll state.
   const debouncedResetScrollReferencePoint = useMemo(
@@ -92,9 +87,13 @@ export function Scroller(props) {
         () => {
           // Check if the resting index we are centered around is the same as where
           // we stopped scrolling. If so, we do not need to move anything.
-          if (currentIndex.current === restingIndex) {
+          if (
+            currentIndex.current === null ||
+            currentIndex.current === restingIndex
+          ) {
             return;
           }
+          ignoreProgrammaticScrollRef.current = true;
           setRestingIndex(currentIndex.current);
         },
         RESET_SCROLL_REFERENCE_POINT_WAIT_MS
@@ -116,8 +115,8 @@ export function Scroller(props) {
   };
 
   const handleScroll = () => {
-    if (ignoreProgrammaticScroll.current) {
-      ignoreProgrammaticScroll.current = false;
+    if (ignoreProgrammaticScrollRef.current) {
+      ignoreProgrammaticScrollRef.current = false;
       return;
     }
     updateCurrentIndex();
@@ -126,7 +125,7 @@ export function Scroller(props) {
 
   return (
     <>
-      <style>{styles.hideScrollbarPseudo}</style>
+      <style>{styles.scrollerStyles}</style>
       <div
         hide-scrollbar
         key="container"
@@ -193,17 +192,10 @@ export function Scroller(props) {
  * The initial index can be specified, which will make the carousel scroll to
  * the desired index when it first renders.
  *
- * @param {!JsonObject} props
+ * @param {!BaseCarouselDef.SlideProps} props
  * @return {PreactDef.Renderable}
  */
-function renderSlides(props) {
-  const {
-    'children': children,
-    'restingIndex': restingIndex,
-    'offsetRef': offsetRef,
-    'pivotIndex': pivotIndex,
-    'loop': loop,
-  } = props;
+function renderSlides({children, restingIndex, offsetRef, pivotIndex, loop}) {
   const {length} = children;
   const slides = [];
 
@@ -215,7 +207,9 @@ function renderSlides(props) {
         renderable={index == restingIndex}
         playable={index == restingIndex}
       >
-        <div style={styles.slideElement}>{child}</div>
+        <div style={styles.slideElement} className="i-amphtml-carousel-slide">
+          {child}
+        </div>
       </WithAmpContext>
     );
   });
