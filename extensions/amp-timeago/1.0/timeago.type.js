@@ -24,6 +24,7 @@
  *   locale: string,
  *   cutoff: (number|undefined),
  *   cutoffText: (string|undefined),
+ *   containSize: (boolean|undefined),
  * }}
  */
 var TimeagoProps;

@@ -49,6 +49,16 @@ const PASSTHROUGH_NON_EMPTY_MUTATION_INIT = {
 };
 
 /**
+ * The same as `applyFillContent`, but inside the shadow.
+ * @const {!Object}
+ */
+const SIZE_DEFINED_STYLE = {
+  'position': 'absolute',
+  'width': '100%',
+  'height': '100%',
+};
+
+/**
  * Wraps a Preact Component in a BaseElement class.
  *
  * Most functionality should be done in Preact. We don't expose the BaseElement
@@ -268,6 +278,15 @@ PreactBaseElement['Component'] = function () {
 };
 
 /**
+ * An override to specify that the component requires `layoutSizeDefined`.
+ * This typically means that the element's `isLayoutSupported()` is
+ * implemented via `isLayoutSizeDefined()`.
+ *
+ * @protected {string}
+ */
+PreactBaseElement['layoutSizeDefined'] = false;
+
+/**
  * An override to specify an exact className prop to Preact.
  *
  * @protected {string}
@@ -325,6 +344,7 @@ function collectProps(Ctor, element, defaultProps) {
 
   const {
     'className': className,
+    'layoutSizeDefined': layoutSizeDefined,
     'props': propDefs,
     'passthrough': passthrough,
     'passthroughNonEmpty': passthroughNonEmpty,
@@ -334,6 +354,12 @@ function collectProps(Ctor, element, defaultProps) {
   // Class.
   if (className) {
     props['className'] = className;
+  }
+
+  // Common styles.
+  if (layoutSizeDefined) {
+    props['style'] = SIZE_DEFINED_STYLE;
+    props['containSize'] = true;
   }
 
   // Props.
