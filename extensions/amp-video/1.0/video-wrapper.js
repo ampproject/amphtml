@@ -51,8 +51,8 @@ export function VideoWrapper({
   const [playing, setPlaying] = useState(false);
   const [userInteracted, setUserInteracted] = useState(false);
 
-  const wrapperRef = useRef();
-  const playerRef = useRef();
+  const wrapperRef = useRef(null);
+  const playerRef = useRef(null);
 
   const readyDeferredRef = useRef(new Deferred());
 
