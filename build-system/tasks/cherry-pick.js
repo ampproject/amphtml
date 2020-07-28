@@ -160,7 +160,7 @@ async function cherryPick() {
     log('Deleting branch', cyan(branch));
     getOutput(`git checkout master && git branch -d ${branch}`);
     throw e;
-  }  
+  }
 }
 
 module.exports = {cherryPick};
