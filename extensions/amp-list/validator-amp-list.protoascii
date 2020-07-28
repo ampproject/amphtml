@@ -92,13 +92,13 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
     value: "fetch"
   }
   attrs: { name: "single-item" }
-  attrs: { name: "xssi-prefix" }
   attrs: {
     name: "src"
     mandatory_anyof: "['src','[src]','data-amp-bind-src']"
     value_url: {
       protocol: "https"
       protocol: "amp-state"
+      protocol: "amp-script"
       allow_relative: true  # Will be set to false at a future date.
     }
     disallowed_value_regex: "__amp_source_origin"
@@ -107,6 +107,7 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
     name: "template"
     value_oneof_set: TEMPLATE_IDS
   }
+  attrs: { name: "xssi-prefix" }
   # <amp-bind>
   attrs: {
     name: "[is-layout-container]"
@@ -222,7 +223,6 @@ tags: {  # <amp-list>
   attrs: { name: "items" }
   attrs: { name: "max-items" }
   attrs: { name: "single-item" }
-  attrs: { name: "xssi-prefix" }
   attrs: {
     name: "src"
     mandatory: true
@@ -237,6 +237,7 @@ tags: {  # <amp-list>
     name: "template"
     value_oneof_set: TEMPLATE_IDS
   }
+  attrs: { name: "xssi-prefix" }
   # <amp-bind>
   attrs: {
     name: "[is-layout-container]"
