@@ -24,9 +24,10 @@ const {startServer, stopServer} = require('./serve');
 const coverageJsonName = argv.json || 'out.json';
 const testUrl =
   argv.url || 'http://localhost:8000/examples/everything.amp.html';
+const outHtml = argv.html || 'out.html';
 
 async function doTest() {
-  log('Opening browser and navigating to everything.amp.html...');
+  log(`Opening browser and navigating to ${testUrl}...`);
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
@@ -43,8 +44,8 @@ async function doTest() {
   log('Testing completed.');
   const jsCoverage = await page.coverage.stopJSCoverage();
   const data = JSON.stringify(jsCoverage);
-  log('Writing to test.json in working directory...');
-  fs.writeFile(coverageJsonName, data, () => {});
+  log(`Writing to ${coverageJsonName} in dist/${coverageJsonName}...`);
+  fs.writeFile(`dist/${coverageJsonName}`, data, () => {});
   await browser.close();
 }
 
@@ -69,17 +70,19 @@ async function autoScroll(page) {
 }
 
 async function generateMap() {
-  await exec(
-    `source-map-explorer v0.js v0.js.map -m --coverage ${coverageJsonName}`
+  log(`Generating heat map in dist/${outHtml}, based on ${coverageJsonName}...`);
+  exec(
+    `source-map-explorer v0.js v0.js.map -m --coverage ${coverageJsonName} --html ${outHtml}`,
+    {cwd: 'dist/'}
   );
 }
 
 async function coverageMap() {
   await dist();
-  await startServer();
+  await startServer({quiet: true, compiled: true});
   await doTest();
-  await stopServer();
   await generateMap();
+  await stopServer();
 }
 
 module.exports = {coverageMap};
@@ -88,7 +91,8 @@ coverageMap.description =
   'Generates a code coverage "heat map" on v0.js based on code traversed during puppeteer test via source map explorer';
 
 coverageMap.flags = {
-  json: '  Customize the name of the JSON output (out.json by default).',
+  json: '  Customize the name of the JSON output from puppeteer (out.json by default).',
   url:
-    "  Set the URL for puppeteer testing, starting with  'http://localhost:8000...' (http://localhost:8000/examples/everything.amp.html by default).",
+    '  Set the URL for puppeteer testing, starting with  "http://localhost:8000..." (http://localhost:8000/examples/everything.amp.html by default).',
+  html: '  Customize the name of the HTML output from source map explorer (out.html by default).'
 };
