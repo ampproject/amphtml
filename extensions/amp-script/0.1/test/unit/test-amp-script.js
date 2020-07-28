@@ -113,6 +113,21 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     expect(service.checkSha384).to.be.called;
   });
 
+  it('callFunction waits for initialization to complete before returning', async () => {
+    element.setAttribute('script', 'local-script');
+    const result = script.callFunction('fetchData');
+    script.workerDom_ = {
+      callFunction(fnIdent) {
+        if (fnIdent === 'fetchData') {
+          return Promise.resolve(42);
+        }
+        return Promise.reject();
+      },
+    };
+    script.initialize_.resolve();
+    expect(await result).to.equal(42);
+  });
+
   describe('Initialization skipped warning due to zero height/width', () => {
     it('should not warn when there is positive width/height', () => {
       const warnStub = env.sandbox.stub(user(), 'warn');
