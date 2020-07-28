@@ -81,11 +81,11 @@ export const arrowBaseStyle = {
   borderRadius: '50%',
 };
 
-export const arrowFrosting = {
+export const frosting = {
   backdropFilter: 'blur(3px)',
 };
 
-export const arrowBackdrop = {
+export const backdrop = {
   backdropFilter: 'blur(12px) invert(1) grayscale(0.6) brightness(0.8)',
   opacity: 0.5,
 };
@@ -218,7 +218,7 @@ export const insetPaginationDotProgress = {
   backgroundColor: '#fff',
 };
 
-export const insetPaginationBase = {
+export const insetPaginationBaseStyle = {
   position: 'absolute',
   top: 0,
   left: 0,
@@ -227,19 +227,8 @@ export const insetPaginationBase = {
   borderRadius: '12px',
 };
 
-export const insetPaginationFrosting = {
-  ...insetPaginationBase,
-  backdropFilter: 'blur(3px)',
-};
-
-export const insetPaginationBackdrop = {
-  ...insetPaginationBase,
-  backdropFilter: 'blur(12px) invert(1) grayscale(0.6) brightness(0.8)',
-  opacity: 0.5,
-};
-
 export const insetPaginationBackground = {
-  ...insetPaginationBase,
+  ...insetPaginationBaseStyle,
   backgroundColor: 'rgba(0, 0, 0, 0.3)',
 };
 

@@ -114,8 +114,8 @@ function DefaultArrow({by, disabled, ...rest}) {
       onMouseUp={() => setActive(false)}
       {...rest}
     >
-      <div style={{...styles.arrowBaseStyle, ...styles.arrowFrosting}}></div>
-      <div style={{...styles.arrowBaseStyle, ...styles.arrowBackdrop}}></div>
+      <div style={{...styles.arrowBaseStyle, ...styles.frosting}}></div>
+      <div style={{...styles.arrowBaseStyle, ...styles.backdrop}}></div>
       <div
         style={{
           ...styles.arrowBaseStyle,

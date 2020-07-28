@@ -112,8 +112,8 @@ function Numbers({current, inset, total}) {
 
 const insetStylingBase = (
   <>
-    <div style={styles.insetPaginationFrosting}></div>
-    <div style={styles.insetPaginationBackdrop}></div>
+    <div style={{...styles.insetPaginationBaseStyle, ...styles.frosting}}></div>
+    <div style={{...styles.insetPaginationBaseStyle, ...styles.backdrop}}></div>
     <div style={styles.insetPaginationBackground}></div>
   </>
 );
