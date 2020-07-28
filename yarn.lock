@@ -14619,7 +14619,7 @@ punycode@^1.3.2, punycode@^1.4.1:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-1.4.1.tgz#c0d5a63b2718800ad8e1eb0fa5269c84dd41845e"
   integrity sha1-wNWmOycYgArY4esPpSachN1BhF4=
 
-puppeteer@^5.2.1:
+puppeteer@5.2.1:
   version "5.2.1"
   resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-5.2.1.tgz#7f0564f0a5384f352a38c8cc42af875cd87f4ea6"
   integrity sha512-PZoZG7u+T6N1GFWBQmGVG162Ak5MAy8nYSVpeeQrwJK2oYUlDWpHEJPcd/zopyuEMTv7DiztS1blgny1txR2qw==
