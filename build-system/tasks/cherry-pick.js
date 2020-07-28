@@ -134,8 +134,8 @@ function cherryPick() {
 
   const branch = cherryPickBranchName(onto);
   try {
-    prepareBranch(onto, commits, branch, remote);
-    commits.forEach(performCherryPick);
+    // prepareBranch(onto, commits, branch, remote);
+    // commits.forEach(performCherryPick);
 
     if (push) {
       log(
@@ -156,11 +156,13 @@ function cherryPick() {
       `Cherry-picked ${commits.length} commits onto release ${onto}`
     );
     process.exitCode = 0;
+    return Promise.resolve();
   } catch (e) {
     log(red('ERROR:'), e.message);
     log('Deleting branch', cyan(branch));
     getOutput(`git checkout master && git branch -d ${branch}`);
     process.exitCode = 1;
+    return Promise.reject();
   }
 }
 
