@@ -25,7 +25,7 @@ storiesOf('amp-base-carousel', module)
   .addDecorator(withKnobs)
   .addDecorator(withA11y)
   .addDecorator(withAmp)
-  .addParameters({extensions: [{name: 'amp-base-carousel', version: '0.1'}]})
+  .addParameters({extensions: [{name: 'amp-base-carousel', version: '1.0'}]})
   .add('default', () => {
     return (
       <amp-base-carousel width="440" height="225">
