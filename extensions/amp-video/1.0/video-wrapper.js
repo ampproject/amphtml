@@ -172,9 +172,6 @@ function Autoplay({
     <>
       {displayIcon && (
         <div
-          // TODO(alanorozco): animation-play-state won't work on iOS, this
-          // needs an `unpausable` classname to optionally remove animation on
-          // platform.
           class={`amp-video-eq ${playing ? `amp-video-eq-play` : ''}`}
           style={{display: 'flex'}}
         >
