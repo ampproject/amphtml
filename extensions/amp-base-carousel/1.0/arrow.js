@@ -19,16 +19,11 @@ import * as styles from './base-carousel.css';
 import {dict} from '../../../src/utils/object';
 
 /**
- * @param {!JsonObject} props
+ * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
 export function Arrow(props) {
-  const {
-    'customArrow': customArrow,
-    'dir': dir,
-    'advance': advance,
-    'disabled': disabled,
-  } = props;
+  const {customArrow, dir, advance, disabled} = props;
   const button = customArrow
     ? customArrow
     : renderDefaultArrow(dict({'dir': dir}));
@@ -69,7 +64,7 @@ export function Arrow(props) {
 
 /**
  * @param {!JsonObject} props
- * @return {PreactDef.Renderable}
+ * @return {PreactDef.VNode}
  */
 function renderDefaultArrow(props) {
   return (

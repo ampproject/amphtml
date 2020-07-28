@@ -71,13 +71,8 @@ export const provideArrows = () => {
 export const WithLooping = () => {
   const width = number('width', 440);
   const height = number('height', 225);
-  const defaultSlide = number('default slide', 0);
   return (
-    <BaseCarousel
-      defaultSlide={defaultSlide}
-      loop
-      style={{width, height, position: 'relative'}}
-    >
+    <BaseCarousel loop style={{width, height, position: 'relative'}}>
       {[
         'lightpink',
         'lightcoral',
@@ -99,6 +94,37 @@ export const WithLooping = () => {
           {index}
         </div>
       ))}
+    </BaseCarousel>
+  );
+};
+
+export const WithCaptions = () => {
+  return (
+    <BaseCarousel
+      loop
+      style={{width: '500px', height: '400px', position: 'relative'}}
+    >
+      <figure>
+        <img
+          style={{width: '500px', height: '300px'}}
+          src="https://amp.dev/static/samples/img/landscape_lake_1280x857.jpg"
+        />
+        <figcaption>Each image has a different caption.</figcaption>
+      </figure>
+      <figure>
+        <img
+          style={{width: '600px', height: '300px'}}
+          src="https://amp.dev/static/samples/img/landscape_village_1280x853.jpg"
+        />
+        <figcaption>This caption is different.</figcaption>
+      </figure>
+      <figure>
+        <img
+          style={{width: '500px', height: '300px'}}
+          src="https://amp.dev/static/samples/img/landscape_desert_1280x853.jpg"
+        />
+        <figcaption>The third image has its caption.</figcaption>
+      </figure>
     </BaseCarousel>
   );
 };

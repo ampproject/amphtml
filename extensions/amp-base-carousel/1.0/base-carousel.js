@@ -17,41 +17,48 @@ import * as Preact from '../../../src/preact';
 import {Arrow} from './arrow';
 import {Scroller} from './scroller';
 import {toChildArray, useRef, useState} from '../../../src/preact';
+import {useMountEffect} from '../../../src/preact/utils';
 
 /**
- * @param {!JsonObject} props
+ * @param {!BaseCarouselDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function BaseCarousel(props) {
-  const {
-    'arrowPrev': arrowPrev,
-    'arrowNext': arrowNext,
-    'children': children,
-    'defaultSlide': defaultSlide,
-    'loop': loop,
-    ...rest
-  } = props;
+export function BaseCarousel({
+  arrowPrev,
+  arrowNext,
+  children,
+  loop,
+  onSlideChange,
+  setAdvance,
+  ...rest
+}) {
   const childrenArray = toChildArray(children);
   const {length} = childrenArray;
-  const [curSlide, setCurSlide] = useState(defaultSlide || 0);
-  const ignoreProgrammaticScroll = useRef(true);
-  const setRestingIndex = (i) => {
-    ignoreProgrammaticScroll.current = true;
-    setCurSlide(i);
-  };
-  const scrollRef = useRef(null);
+  const [curSlide, setCurSlide] = useState(0);
   const advance = (dir) => {
     const container = scrollRef.current;
     // Modify scrollLeft is preferred to `setCurSlide` to enable smooth scroll.
     // Note: `setCurSlide` will still be called on debounce by scroll handler.
     container./* OK */ scrollLeft += container./* OK */ offsetWidth * dir;
   };
+  useMountEffect(() => {
+    if (setAdvance) {
+      setAdvance(advance);
+    }
+  });
+
+  const setRestingIndex = (i) => {
+    setCurSlide(i);
+    if (onSlideChange) {
+      onSlideChange(i);
+    }
+  };
+  const scrollRef = useRef(null);
   const disableForDir = (dir) =>
     !loop && (curSlide + dir < 0 || curSlide + dir >= length);
   return (
     <div {...rest}>
       <Scroller
-        ignoreProgrammaticScroll={ignoreProgrammaticScroll}
         loop={loop}
         restingIndex={curSlide}
         setRestingIndex={setRestingIndex}
