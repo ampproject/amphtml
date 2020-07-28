@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {VideoWrapper} from '../video-wrapper';
-import {boolean, object, text, withKnobs} from '@storybook/addon-knobs';
+import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
 const {forwardRef, useRef, useImperativeHandle} = Preact;
@@ -27,7 +27,7 @@ export default {
   decorators: [withA11y, withKnobs],
 };
 
-const VideoTagPlayer = forwardRef((props, ref) => {
+const VideoTagPlayerInternal = forwardRef((props, ref) => {
   const {
     children,
 
@@ -82,35 +82,29 @@ const VideoTagPlayer = forwardRef((props, ref) => {
   );
 });
 
-/**
- * @return {PreactDef.Renderable}
- */
-function ScrollSpacer() {
-  return (
-    <div
-      style={{
-        height: '100vh',
-        background: `linear-gradient(to bottom, #bbb, #bbb 10%, #fff 10%, #fff)`,
-        backgroundSize: '100% 10px',
-      }}
-    ></div>
-  );
-}
+const VideoTagPlayer = ({i}) => {
+  const group = `Player ${i + 1}`;
 
-export const _default = () => {
-  const componentGroup = 'Component';
+  const width = text('width', '640px', group);
+  const height = text('height', '360px', group);
 
-  const ariaLabel = text('aria-label', 'Video Player', componentGroup);
-  const autoplay = boolean('autoplay', true, componentGroup);
-  const controls = boolean('controls', true, componentGroup);
-  const mediasession = boolean('mediasession', true, componentGroup);
-  const noaudio = boolean('noaudio', false, componentGroup);
-  const loop = boolean('loop', false, componentGroup);
+  const ariaLabel = text('aria-label', 'Video Player', group);
+  const autoplay = boolean('autoplay', true, group);
+  const controls = boolean('controls', true, group);
+  const mediasession = boolean('mediasession', true, group);
+  const noaudio = boolean('noaudio', false, group);
+  const loop = boolean('loop', false, group);
   const poster = text(
     'poster',
     'https://amp.dev//static/inline-examples/images/kitten-playing.png',
-    componentGroup
+    group
   );
+
+  const artist = text('artist', '', group);
+  const album = text('album', '', group);
+  const artwork = text('artwork', '', group);
+  const title = text('title', '', group);
+
   const sources = object(
     'sources',
     [
@@ -124,44 +118,60 @@ export const _default = () => {
         type: 'video/mp4',
       },
     ],
-    componentGroup
+    group
   );
-
-  const metadataGroup = 'Metadata';
-
-  const artist = text('artist', '', metadataGroup);
-  const album = text('album', '', metadataGroup);
-  const artwork = text('artwork', '', metadataGroup);
-  const title = text('title', '', metadataGroup);
-
-  const containerGroup = 'Container';
-
-  const width = text('Width', '640px', containerGroup);
-  const height = text('Height', '360px', containerGroup);
-  const scrollSpacers = boolean('Scroll spacers', false, containerGroup);
 
   return (
     <div style={{width, height}}>
-      {scrollSpacers && <ScrollSpacer />}
       <VideoWrapper
-        component={VideoTagPlayer}
+        component={VideoTagPlayerInternal}
+        ariaLabel={ariaLabel}
+        autoplay={autoplay}
+        controls={controls}
+        mediasession={mediasession}
+        noaudio={noaudio}
+        loop={loop}
+        poster={poster}
         artist={artist}
         album={album}
         artwork={artwork}
         title={title}
-        autoplay={autoplay}
-        controls={controls}
-        noaudio={noaudio}
-        poster={poster}
-        loop={loop}
-        mediasession={mediasession}
-        aria-label={ariaLabel}
       >
         {sources.map((props) => (
           <source {...props}></source>
         ))}
       </VideoWrapper>
-      {scrollSpacers && <ScrollSpacer />}
     </div>
+  );
+};
+
+const Spacer = ({height}) => {
+  return (
+    <div
+      style={{
+        height,
+        background: `linear-gradient(to bottom, #bbb, #bbb 10%, #fff 10%, #fff)`,
+        backgroundSize: '100% 10px',
+      }}
+    ></div>
+  );
+};
+
+export const Default = () => {
+  const amount = number('Amount', 1, {}, 'Page');
+  const spacerHeight = text('Space', '100vh', 'Page');
+  const spaceAbove = boolean('Space above', false, 'Page');
+  const spaceBelow = boolean('Space below', false, 'Page');
+
+  return (
+    <>
+      {spaceAbove && <Spacer height={spacerHeight} />}
+      {new Array(amount).fill(null).map((_, i) => (
+        <>
+          <VideoTagPlayer key={i} i={i} />
+          {(i < amount - 1 || spaceBelow) && <Spacer height={spacerHeight} />}
+        </>
+      ))}
+    </>
   );
 };
