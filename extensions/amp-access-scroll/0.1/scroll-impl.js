@@ -244,7 +244,7 @@ class ScrollContentBlocker {
     } else {
       // Prompt to activate.
       const baseUrl = connectHostname(this.accessSource_.getAdapterConfig());
-      const bar = new ScrollBar(this.ampdoc_, this.accessSource_, baseUrl);
+      const bar = new ScrollBar(this.ampdoc_, this.accessSource_);
       const relay = new Relay(baseUrl);
       relay.register(bar.window, (message) => {
         if (message['_scramp'] === 'st') {
