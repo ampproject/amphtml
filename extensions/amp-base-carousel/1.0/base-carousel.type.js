@@ -50,9 +50,9 @@ BaseCarouselDef.SlideProps;
 
 /**
  * @typedef {{
- *   advance: (function():undefined|undefined),
+ *   advance: (function(number):undefined|undefined),
  *   customArrow: (PreactDef.VNode|undefined),
- *   dir: number,
+ *   by: number,
  *   disabled: (boolean|undefined)
  * }}
  */
