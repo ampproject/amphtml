@@ -24,7 +24,7 @@ import {Services} from '../../../src/services';
 import {Sheet} from './scroll-sheet';
 import {addParamToUrl, isProxyOrigin, parseQueryString} from '../../../src/url';
 import {buildUrl, connectHostname} from './scroll-url';
-import {createElementWithAttributes, openWindowDialog} from '../../../src/dom';
+import {createElementWithAttributes} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
 import {installStylesForDoc} from '../../../src/style-installer';
 
@@ -234,10 +234,10 @@ class ScrollContentBlocker {
     if (this.redirect_ && !isProxyOrigin(this.ampdoc_.win.location)) {
       buildUrl(this.accessSource_, 'https://scroll.com/loginwithapp').then(
         (url) => {
-          openWindowDialog(
+          const navigationService = Services.navigationForDoc(this.ampdoc_);
+          navigationService.navigateTo(
             this.ampdoc_.win,
-            addParamToUrl(url, 'feature', 'r'),
-            '_top'
+            addParamToUrl(url, 'feature', 'r')
           );
         }
       );
