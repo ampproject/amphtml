@@ -295,7 +295,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     env.sandbox.stub(mediaPool, 'preload');
 
     await page.layoutCallback();
-    // debugger;
+
     page.setState(PageState.PLAYING);
 
     await nextTick();
@@ -304,7 +304,7 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
       element,
       Selectors.ALL_PLAYBACK_MEDIA
     )[0];
-    // debugger;
+
     expect(mediaPoolRegister).to.have.been.calledOnceWithExactly(audioEl);
   });
 
