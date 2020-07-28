@@ -102,68 +102,65 @@ function performCherryPick(sha) {
   }
 }
 
-function cherryPick() {
-  return new Promise((resolve, reject) => {
-    const {push, remote = 'origin'} = argv;
-    const commits = (argv.commits || '').split(',').filter(Boolean);
-    let onto = String(argv.onto || '');
+async function cherryPick() {
+  const {push, remote = 'origin'} = argv;
+  const commits = (argv.commits || '').split(',').filter(Boolean);
+  let onto = String(argv.onto || '');
 
-    if (!commits.length) {
-      const error = new Error('Must provide commit list with --commits');
-      error.showStack = false;
-      return reject(error);
-    }
-    if (!onto) {
-      const error = new Error('Must provide 13-digit AMP version with --onto');
-      error.showStack = false;
-      return reject(error);
-    }
-    if (onto.length === 15) {
+  if (!commits.length) {
+    const error = new Error('Must provide commit list with --commits');
+    error.showStack = false;
+    throw error;
+  }
+  if (!onto) {
+    const error = new Error('Must provide 13-digit AMP version with --onto');
+    error.showStack = false;
+    throw error;
+  }
+  if (onto.length === 15) {
+    log(
+      yellow('WARNING:'),
+      'Expected a 13-digit AMP version but got a 15-digit RTV;',
+      'ignoring channel prefix'
+    );
+    // Be forgiving if someone provides a version instead of a full RTV.
+    onto = onto.substr(2);
+  }
+  if (onto.length !== 13) {
+    const error = new Error('Expected 13-digit AMP version');
+    error.showStack = false;
+    throw error;
+  }
+
+  const branch = cherryPickBranchName(onto);
+  try {
+    prepareBranch(onto, commits, branch, remote);
+    commits.forEach(performCherryPick);
+
+    if (push) {
       log(
-        yellow('WARNING:'),
-        'Expected a 13-digit AMP version but got a 15-digit RTV;',
-        'ignoring channel prefix'
+        green('INFO:'),
+        'Pushing branch',
+        cyan(branch),
+        'to remote',
+        cyan(remote)
       );
-      // Be forgiving if someone provides a version instead of a full RTV.
-      onto = onto.substr(2);
-    }
-    if (onto.length !== 13) {
-      const error = new Error('Expected 13-digit AMP version');
-      error.showStack = false;
-      return reject(error);
-    }
-
-    const branch = cherryPickBranchName(onto);
-    try {
-      prepareBranch(onto, commits, branch, remote);
-      commits.forEach(performCherryPick);
-
-      if (push) {
-        log(
-          green('INFO:'),
-          'Pushing branch',
-          cyan(branch),
-          'to remote',
-          cyan(remote)
-        );
-        execOrThrow(
-          `git push --set-upstream ${remote} ${branch}`,
-          `Failed to push branch ${cyan(branch)} to remote ${cyan(remote)}`
-        );
-      }
-
-      log(
-        green('SUCCESS:'),
-        `Cherry-picked ${commits.length} commits onto release ${onto}`
+      execOrThrow(
+        `git push --set-upstream ${remote} ${branch}`,
+        `Failed to push branch ${cyan(branch)} to remote ${cyan(remote)}`
       );
-      return resolve();
-    } catch (e) {
-      log(red('ERROR:'), e.message);
-      log('Deleting branch', cyan(branch));
-      getOutput(`git checkout master && git branch -d ${branch}`);
-      return reject(e.message);
     }
-  });
+
+    log(
+      green('SUCCESS:'),
+      `Cherry-picked ${commits.length} commits onto release ${onto}`
+    );
+  } catch (e) {
+    log(red('ERROR:'), e.message);
+    log('Deleting branch', cyan(branch));
+    getOutput(`git checkout master && git branch -d ${branch}`);
+    throw e;
+  }  
 }
 
 module.exports = {cherryPick};
