@@ -169,9 +169,10 @@ export const Default = () => {
       {new Array(amount).fill(null).map((_, i) => (
         <>
           <VideoTagPlayer key={i} i={i} />
-          {(i < amount - 1 || spaceBelow) && <Spacer height={spacerHeight} />}
+          {i < amount - 1 && <Spacer height={spacerHeight} />}
         </>
       ))}
+      {spaceBelow && <Spacer height={spacerHeight} />}
     </>
   );
 };
