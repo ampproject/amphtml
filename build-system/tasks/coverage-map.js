@@ -90,7 +90,7 @@ async function coverageMap() {
 module.exports = {coverageMap};
 
 coverageMap.description =
-  'Generates a code coverage "heat map" on v0.js based on code traversed during puppeteer test via source map explorer';
+  'Generates a code coverage "heat map" HTML visualization on v0.js based on code traversed during puppeteer test via source map explorer';
 
 coverageMap.flags = {
   json:
