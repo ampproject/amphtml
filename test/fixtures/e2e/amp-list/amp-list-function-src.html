@@ -1,5 +1,5 @@
 <!doctype html>
-<html ⚡ allow-viewer-render-template>
+<html ⚡>
 <head>
     <meta charset="utf-8">
     <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -10,7 +10,7 @@
 </head>
 <body>
 
-  <amp-script id="fns" width="1" height="1" script="fruit-script" nodom data-ampdevmode></amp-script>
+  <amp-script id="fns" script="fruit-script" nodom data-ampdevmode height="1" width="1"></amp-script>
   <script id="fruit-script" type="text/plain" target="amp-script">
     exportFunction('getFruit', () => ({items: [{name: 'Pineapple'}, {name: 'Mango'}]}));
   </script> 

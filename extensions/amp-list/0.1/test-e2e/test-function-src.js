@@ -17,7 +17,8 @@
 describes.endtoend(
   'amp-list "amp-script:" uri',
   {
-    testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-list/amp-list-function-src.html',
+    testUrl:
+      'http://localhost:8000/test/fixtures/e2e/amp-list/amp-list-function-src.html',
     experiments: ['protocol-adapters'],
     environments: ['single'],
   },
@@ -28,15 +29,17 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it.configure()
-      .run('should render list backed by amp-script data', async function () {
+    it.configure().run(
+      'should render list backed by amp-script data',
+      async function () {
         const container = await getListContainer(controller);
         await verifyContainer(controller, container);
 
         // Verify that all items rendered.
         const listItems = await getListItems(controller);
         await expect(listItems).to.have.length(2);
-      });
+      }
+    );
   }
 );
 
