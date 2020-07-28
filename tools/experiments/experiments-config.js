@@ -237,6 +237,11 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24113',
   },
   {
+    id: 'protocol-adapters',
+    name: 'Allow amp-list to get its data from amp-script functions.',
+    spec: 'https://github.com/ampproject/amphtml/issues/26474',
+  },
+  {
     id: 'adsense-ad-size-optimization',
     name:
       'Per publisher server side settings for changing the ad size ' +
