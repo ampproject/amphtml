@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-export const LINE_HEIGHT_EM_ = 1.15;
+/** @externs */
 
-export const fitTextContent = {
-  'display': 'flex',
-  'flexDirection': 'column',
-  'flexWrap': 'nowrap',
-  'justifyContent': 'center',
-};
-
-/* Legacy comment: We have to use the old-style flex box with line clamping. It will only
-    work in WebKit, but unfortunately there's no alternative. */
-export const fitTextContentWrapper = {
-  lineHeight: `${LINE_HEIGHT_EM_}em`,
-  'display': '-webkit-box',
-  '-webkit-box-orient': 'vertical',
-  'overflow': 'hidden',
-  'textOverflow': 'ellipsis',
-};
+/**
+ * See https://developer.mozilla.org/en-US/docs/Web/CSS/contain
+ *
+ * @typedef {{
+ *   as: (string|!Function|undefined),
+ *   size: (boolean|undefined),
+ *   layout: (boolean|undefined),
+ *   paint: (boolean|undefined),
+ *   wrapperStyle: (?Object|undefined),
+ *   contentRef: ({current: ?}|function(!Element)|undefined),
+ *   contentStyle: (?Object|undefined),
+ *   children: (?PreactDef.Renderable|undefined),
+ * }}
+ */
+var ContainWrapperProps;
