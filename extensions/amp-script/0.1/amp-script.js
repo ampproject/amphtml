@@ -109,6 +109,15 @@ export class AmpScript extends AMP.BaseElement {
      * @private {boolean}
      */
     this.development_ = false;
+
+    /**
+     * If true, signals that the `nodom` variant of worker-dom should be used.
+     * The worker js will have a much smaller bundle size, but no access to dom
+     * functions.
+     *
+     * @private {boolean}
+     */
+    this.nodom_ = false;
   }
 
   /** @override */
@@ -118,6 +127,7 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.nodom_ = this.element.hasAttribute('nodom');
     this.development_ =
       this.element.hasAttribute('data-ampdevmode') ||
       this.element.ownerDocument.documentElement.hasAttribute(
@@ -297,7 +307,7 @@ export class AmpScript extends AMP.BaseElement {
     const useLocal = getMode().localDev || getMode().test;
     const workerUrl = calculateExtensionScriptUrl(
       location,
-      'amp-script-worker',
+      this.nodom_ ? 'amp-script-worker-nodom' : 'amp-script-worker',
       '0.1',
       useLocal
     );
