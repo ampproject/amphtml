@@ -16,6 +16,7 @@
 
 import * as WorkerDOM from '@ampproject/worker-dom/dist/amp/main.mjs';
 import {CSS} from '../../../build/amp-script-0.1.css';
+import {Deferred} from '../../../src/utils/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Purifier} from '../../../src/purifier/purifier';
 import {Services} from '../../../src/services';
@@ -34,6 +35,15 @@ import {utf8Encode} from '../../../src/utils/bytes';
 
 /** @const {string} */
 const TAG = 'amp-script';
+
+/**
+ * @typedef {{
+ *   terminate: function():void,
+ *   callFunction: function(string, ...*):Promise<*>,
+ *   onerror: ?function(!ErrorEvent):void
+ * }}
+ */
+let WorkerDOMWorkerDef;
 
 /**
  * Max cumulative size of author scripts from all amp-script elements on page.
@@ -72,7 +82,7 @@ export class AmpScript extends AMP.BaseElement {
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win);
 
-    /** @private {?Worker} */
+    /** @private {?WorkerDOMWorkerDef} */
     this.workerDom_ = null;
 
     /** @private {?UserActivationTracker} */
@@ -86,6 +96,9 @@ export class AmpScript extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.layoutCompleted_ = false;
+
+    /** @private {Deferred} */
+    this.initialize_ = new Deferred();
 
     /**
      * If true, most production constraints are disabled including script size,
@@ -156,6 +169,18 @@ export class AmpScript extends AMP.BaseElement {
    */
   getUserActivation() {
     return this.userActivation_;
+  }
+
+  /**
+   * Calls the specified function on this amp-script's worker-dom instance.
+   *
+   * @param {string} functionIdentifier
+   * @return {!Promise<*>}
+   */
+  callFunction(functionIdentifier) {
+    return this.initialize_.promise.then(() => {
+      return this.workerDom_.callFunction(functionIdentifier);
+    });
   }
 
   /** @override */
@@ -247,6 +272,7 @@ export class AmpScript extends AMP.BaseElement {
       config
     ).then((workerDom) => {
       this.workerDom_ = workerDom;
+      this.initialize_.resolve();
       this.workerDom_.onerror = (errorEvent) => {
         errorEvent.preventDefault();
         user().error(

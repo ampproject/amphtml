@@ -25,7 +25,10 @@ import {
   createElementWithAttributes,
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
-import {toggleExperiment} from '../../../../src/experiments';
+import {
+  resetExperimentTogglesForTesting,
+  toggleExperiment,
+} from '../../../../src/experiments';
 
 describes.repeated(
   'amp-list',
@@ -929,6 +932,18 @@ describes.repeated(
               expect(list.layoutCallback()).eventually.rejectedWith(errorMsg);
             });
 
+            it('"amp-script:" uri should skip rendering and emit an error', () => {
+              toggleExperiment(win, 'protocol-adapters', true);
+              list.element.setAttribute('src', 'amp-script:fetchData');
+
+              listMock.expects('scheduleRender_').never();
+
+              const errorMsg = /cannot be used in SSR mode/;
+              expectAsyncConsoleError(errorMsg);
+              expect(list.layoutCallback()).eventually.rejectedWith(errorMsg);
+              toggleExperiment(win, 'protocol-adapters', false);
+            });
+
             it('Bound [src] should skip rendering and emit an error', async () => {
               listMock.expects('scheduleRender_').never();
               allowConsoleError(async () => {
@@ -971,6 +986,116 @@ describes.repeated(
               listMock.expects('togglePlaceholder').withExactArgs(false).once();
               listMock.expects('toggleFallback').withExactArgs(true).once();
               return list.layoutCallback().catch(() => {});
+            });
+          });
+          describe('Using amp-script: protocol', () => {
+            let ampScriptEl;
+            beforeEach(() => {
+              resetExperimentTogglesForTesting(win);
+
+              env.sandbox.stub(Services, 'scriptForDocOrNull');
+              ampScriptEl = document.createElement('amp-script');
+              ampScriptEl.setAttribute('id', 'example');
+              doc.body.appendChild(ampScriptEl);
+
+              element = createAmpListElement();
+              element.setAttribute('src', 'amp-script:example.fetchData');
+              element.toggleLoading = () => {};
+              list = createAmpList(element);
+            });
+
+            it('should throw an error if used without the experiment enabled', async () => {
+              const errorMsg = /Invalid value: amp-script:example.fetchData/;
+              expectAsyncConsoleError(errorMsg);
+              expect(list.layoutCallback()).to.eventually.throw(errorMsg);
+            });
+
+            it('should throw an error if given an invalid format', async () => {
+              toggleExperiment(win, 'protocol-adapters', true);
+              const errorMsg = /URIs must be of the format/;
+
+              element.setAttribute('src', 'amp-script:fetchData');
+              expectAsyncConsoleError(errorMsg);
+              expect(list.layoutCallback()).to.eventually.throw(errorMsg);
+
+              element.setAttribute('src', 'amp-script:too.many.dots');
+              expectAsyncConsoleError(errorMsg);
+              expect(list.layoutCallback()).to.eventually.throw(errorMsg);
+
+              element.setAttribute('src', 'amp-script:zeroLengthSecondArg.');
+              expectAsyncConsoleError(errorMsg);
+              expect(list.layoutCallback()).to.eventually.throw(errorMsg);
+            });
+
+            it('should throw if specified amp-script does not exist', () => {
+              toggleExperiment(win, 'protocol-adapters', true);
+              element.setAttribute('src', 'amp-script:doesnotexist.fn');
+
+              const errorMsg = /could not find <amp-script> with/;
+              expectAsyncConsoleError(errorMsg);
+              expect(list.layoutCallback()).to.eventually.throw(errorMsg);
+            });
+
+            it('should fail if function call rejects', async () => {
+              toggleExperiment(win, 'protocol-adapters', true);
+              ampScriptEl.getImpl = () =>
+                Promise.resolve({
+                  callFunction: () =>
+                    Promise.reject('Invalid function identifier.'),
+                });
+
+              listMock.expects('toggleLoading').withExactArgs(false).once();
+              return expect(
+                list.layoutCallback()
+              ).to.eventually.be.rejectedWith(/Invalid function identifier/);
+            });
+
+            it('should render non-array if single-item is set', async () => {
+              const callFunctionResult = {'items': {title: 'Title'}};
+              element.setAttribute('single-item', 'true');
+              toggleExperiment(win, 'protocol-adapters', true);
+              ampScriptEl.getImpl = () =>
+                Promise.resolve({
+                  callFunction(fnId) {
+                    if (fnId === 'fetchData') {
+                      return Promise.resolve(callFunctionResult);
+                    }
+                    return Promise.reject(new Error(`Invalid fnId: ${fnId}`));
+                  },
+                });
+
+              listMock
+                .expects('scheduleRender_')
+                .withExactArgs(
+                  [{title: 'Title'}],
+                  /*append*/ false,
+                  callFunctionResult
+                )
+                .returns(Promise.resolve())
+                .once();
+
+              await list.layoutCallback();
+            });
+
+            it('should render a list from AmpScriptService provided data', async () => {
+              toggleExperiment(win, 'protocol-adapters', true);
+              ampScriptEl.getImpl = () =>
+                Promise.resolve({
+                  callFunction(fnId) {
+                    if (fnId === 'fetchData') {
+                      return Promise.resolve({items: [3, 2, 1]});
+                    }
+                    return Promise.reject(new Error(`Invalid fnId: ${fnId}`));
+                  },
+                });
+
+              listMock
+                .expects('scheduleRender_')
+                .withExactArgs([3, 2, 1], /*append*/ false, {items: [3, 2, 1]})
+                .returns(Promise.resolve())
+                .once();
+
+              await list.layoutCallback();
             });
           });
         }); // without amp-bind
