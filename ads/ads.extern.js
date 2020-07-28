@@ -338,7 +338,15 @@ data.siteId;
 // aduptech.js
 window.uAd = {};
 window.uAd.embed;
+data.amp;
 data.responsive;
+data.placementkey;
+data.mincpc;
+data.query;
+data.pageurl;
+data.gdpr;
+data.gdpr_consent;
+data.adtest;
 data.onAds;
 data.onNoAds;
 
