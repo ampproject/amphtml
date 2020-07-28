@@ -83,7 +83,6 @@ export const arrowBaseStyle = {
 export const arrowFrosting = {
   ...arrowBaseStyle,
   backdropFilter: 'blur(3px)',
-  backgroundColor: 'cyan',
 };
 
 export const arrowBackdrop = {
