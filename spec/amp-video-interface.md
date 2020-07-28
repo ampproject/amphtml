@@ -23,6 +23,7 @@ these players implement.
 - [amp-delight-player](https://amp.dev/documentation/components/amp-delight-player)
 - [amp-gfycat](https://amp.dev/documentation/components/amp-gfycat)
 - [amp-ima-video](https://amp.dev/documentation/components/amp-ima-video)
+- [amp-jwplayer](https://amp.dev/documentation/components/amp-jwplayer)
 - [amp-minute-media-player](https://amp.dev/documentation/components/amp-minute-media-player)
 - [amp-mowplayer](https://amp.dev/documentation/components/amp-mowplayer)
 - [amp-nexxtv-player](https://amp.dev/documentation/components/amp-nexxtv-player)
@@ -61,7 +62,7 @@ For an example, visit [AMP By Example](https://amp.dev/documentation/examples/co
 
 attribute: **`dock`**
 
-This attribute is currently only supported for `amp-brightcove`, `amp-dailymotion`, `amp-delight-player`, `amp-ima-video`, `amp-video`, `amp-video-iframe` and `amp-youtube`.
+This attribute is currently only supported for `amp-brightcove`, `amp-dailymotion`, `amp-delight-player`, `amp-ima-video`, `amp-jwplayer`, `amp-video`, `amp-video-iframe` and `amp-youtube`.
 
 If this attribute is present and the video is playing manually, the video will
 be "minimized" and fixed to a corner when the user scrolls out of the video
