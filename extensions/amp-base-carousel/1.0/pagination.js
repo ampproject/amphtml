@@ -18,10 +18,11 @@ import * as Preact from '../../../src/preact';
 import * as styles from './base-carousel.css';
 
 /**
- * @param {!JsonObject} props
+ * @param {!BaseCarouselDef.PaginationProps} props
  * @return {PreactDef.Renderable}
  */
 export function Pagination({current, goTo, height = 20, inset, children}) {
+  const Comp = children.length <= 8 ? Dots : Numbers;
   return (
     <div
       aria-hidden="true"
@@ -32,25 +33,18 @@ export function Pagination({current, goTo, height = 20, inset, children}) {
         height,
       }}
     >
-      {children.length <= 8 ? (
-        <Dots
-          inset={inset}
-          current={current}
-          total={children.length}
-          goTo={goTo}
-        />
-      ) : (
-        <Numbers current={current} inset={inset} total={children.length} />
-      )}
+      <Comp current={current} inset={inset} goTo={goTo}>
+        {children}
+      </Comp>
     </div>
   );
 }
 
 /**
- * @param {!JsonObject} props
+ * @param {!BaseCarouselDef.PaginationProps} props
  * @return {PreactDef.Renderable}
  */
-function Dots({current, goTo, inset, total}) {
+function Dots({current, goTo, inset, children}) {
   return (
     <div
       class="i-amphtml-carousel-pagination-dots"
@@ -60,7 +54,7 @@ function Dots({current, goTo, inset, total}) {
       }}
     >
       {inset && insetStylingBase}
-      {Array.from({length: total}, (_, i) => (
+      {children.map((_, i) => (
         <div
           class="i-amphtml-carousel-pagination-dot-container"
           style={styles.paginationDotContainer}
@@ -89,10 +83,10 @@ function Dots({current, goTo, inset, total}) {
 }
 
 /**
- * @param {!JsonObject} props
+ * @param {!BaseCarouselDef.PaginationProps} props
  * @return {PreactDef.Renderable}
  */
-function Numbers({current, inset, total}) {
+function Numbers({current, inset, children}) {
   return (
     <div
       style={{
@@ -102,9 +96,11 @@ function Numbers({current, inset, total}) {
     >
       {inset && insetStylingBase}
       <div style={{zIndex: 1}}>
-        <span class="i-amphtml-carousel-pagination-index">{current}</span>
+        <span class="i-amphtml-carousel-pagination-index">{current + 1}</span>
         <span> / </span>
-        <span class="i-amphtml-carousel-pagination-total">{total}</span>
+        <span class="i-amphtml-carousel-pagination-total">
+          {children.length}
+        </span>
       </div>
     </div>
   );
@@ -114,6 +110,11 @@ const insetStylingBase = (
   <>
     <div style={{...styles.insetPaginationBaseStyle, ...styles.frosting}}></div>
     <div style={{...styles.insetPaginationBaseStyle, ...styles.backdrop}}></div>
-    <div style={styles.insetPaginationBackground}></div>
+    <div
+      style={{
+        ...styles.insetPaginationBaseStyle,
+        ...styles.insetPaginationBackground,
+      }}
+    ></div>
   </>
 );

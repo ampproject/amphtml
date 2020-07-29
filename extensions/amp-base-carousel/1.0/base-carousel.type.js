@@ -26,6 +26,7 @@ var BaseCarouselDef = {};
  *   children: (!PreactDef.Renderable),
  *   loop: (boolean|undefined),
  *   onSlideChange: (function(number):undefined|undefined),
+ *   pagination: ({inset:(boolean|undefined), height:(number|undefined)}),
  *   setAdvance: (function(function(number):undefined):undefined|undefined),
  * }}
  */
@@ -57,3 +58,14 @@ BaseCarouselDef.SlideProps;
  * }}
  */
 BaseCarouselDef.ArrowProps;
+
+/**
+ * @typedef {{
+ *   current: number,
+ *   height: (number|undefined),
+ *   inset: (boolean|undefined),
+ *   goTo: (function(number):undefined),
+ *   children: !Array<PreactDef.Renderable>
+ * }}
+ */
+BaseCarouselDef.PaginationProps;

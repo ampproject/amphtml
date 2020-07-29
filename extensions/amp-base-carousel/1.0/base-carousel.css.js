@@ -228,7 +228,6 @@ export const insetPaginationBaseStyle = {
 };
 
 export const insetPaginationBackground = {
-  ...insetPaginationBaseStyle,
   backgroundColor: 'rgba(0, 0, 0, 0.3)',
 };
 
