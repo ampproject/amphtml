@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 const argv = require('minimist')(process.argv.slice(2));
-const fs = require('fs');
+const fs = require('fs').promises;
 const log = require('fancy-log');
 const puppeteer = require('puppeteer');
 const {dist} = require('./dist');
@@ -45,7 +45,7 @@ async function doTest() {
   const jsCoverage = await page.coverage.stopJSCoverage();
   const data = JSON.stringify(jsCoverage);
   log(`Writing to ${coverageJsonName} in dist/${coverageJsonName}...`);
-  fs.writeFile(`dist/${coverageJsonName}`, data, () => {});
+  await fs.writeFile(`dist/${coverageJsonName}`, data, () => {});
   await browser.close();
 }
 
@@ -81,7 +81,11 @@ async function generateMap() {
 
 async function coverageMap() {
   await dist();
-  await startServer({quiet: true, compiled: true});
+  await startServer(
+    {host: 'localhost', port: 8000},
+    {quiet: true},
+    {compiled: true}
+  );
   await doTest();
   await generateMap();
   await stopServer();
