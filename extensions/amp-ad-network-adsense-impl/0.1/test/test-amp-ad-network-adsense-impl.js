@@ -21,7 +21,7 @@
 import '../../../amp-ad/0.1/amp-ad';
 import * as experiments from '../../../../src/experiments';
 import {AD_SIZE_OPTIMIZATION_EXP} from '../responsive-state';
-import {AmpA4A} from '../../../amp-a4a/0.1/amp-a4a';
+import {AmpA4A, MODULE_NOMODULE_PARAMS_EXP} from '../../../amp-a4a/0.1/amp-a4a';
 import {AmpAd} from '../../../amp-ad/0.1/amp-ad'; // eslint-disable-line no-unused-vars
 import {
   AmpAdNetworkAdsenseImpl,
@@ -96,6 +96,18 @@ describes.realWin(
           return Promise.reject(new Error('No token'));
         },
       });
+      env.sandbox
+        .stub(impl, 'getIntersectionElementLayoutBox')
+        .callsFake(() => {
+          return {
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            width: 320,
+            height: 50,
+          };
+        });
     });
 
     /**
@@ -876,6 +888,32 @@ describes.realWin(
           expect(url).to.match(/h=1/);
           expect(url).to.match(/w=1/);
           expect(url).to.match(/spsa=\d+?x\d+?/);
+        });
+      });
+
+      it('should have module nomodule experiment id in url when runtime type is 2', () => {
+        env.sandbox.stub(ampdoc, 'getMetaByName').returns('2');
+        impl.buildCallback();
+        return impl.getAdUrl().then((url) => {
+          expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT);
+        });
+      });
+
+      it('should have module nomodule experiment id in url when runtime type is 10', () => {
+        env.sandbox.stub(ampdoc, 'getMetaByName').returns('10');
+        impl.buildCallback();
+        return impl.getAdUrl().then((url) => {
+          expect(url).to.have.string(MODULE_NOMODULE_PARAMS_EXP.CONTROL);
+        });
+      });
+
+      // 2, 4, and 10 should the only one that triggers this experiment diversion.
+      it('should not have module nomodule experiment id in url when runtime type is 0', () => {
+        env.sandbox.stub(ampdoc, 'getMetaByName').returns('0');
+        impl.buildCallback();
+        return impl.getAdUrl().then((url) => {
+          expect(url).to.not.have.string(MODULE_NOMODULE_PARAMS_EXP.CONTROL);
+          expect(url).to.not.have.string(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT);
         });
       });
     });

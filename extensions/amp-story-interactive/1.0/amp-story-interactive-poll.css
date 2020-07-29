@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-.i-amphtml-story-interactive-poll-container {
-  background-color: var(--interactive-prompt-background-color) !important;
-}
 
 .i-amphtml-story-interactive-option-container {
   background-color: var(--i-amphtml-interactive-option-background-color) !important;
@@ -76,12 +73,19 @@
   transform: translateX(calc(100% - var(--option-percentage)))!important;
 }
 
+.i-amphtml-story-interactive-poll-container:not(.i-amphtml-story-interactive-has-data) .i-amphtml-story-interactive-option::after {
+  display: none !important;
+}
+
 .i-amphtml-story-interactive-option-text {
   font-size: 22px !important;
   margin: 0 !important;
   z-index: 1 !important;
   transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
   transform-origin: left !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 .i-amphtml-story-interactive-poll-container[dir="rtl"] .i-amphtml-story-interactive-option-text{
@@ -99,6 +103,7 @@
   opacity: 0 !important;
   transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
   transform: translateX(60px) !important;
+  flex-shrink: 0 !important;
   /* Percentage sign always goes to the right of the number, regardless of language. TODO(mszylkowski): rtl for arabic */
   direction: ltr !important;
 }

@@ -205,6 +205,18 @@ export class Services {
   }
 
   /**
+   * @param {!Element|!ShadowRoot} element
+   * @return {!Promise<?../extensions/amp-script/0.1/amp-script.AmpScriptService>}
+   */
+  static scriptForDocOrNull(element) {
+    return /** @type {!Promise<?../extensions/amp-script/0.1/amp-script.AmpScriptService>} */ (getElementServiceIfAvailableForDocInEmbedScope(
+      element,
+      'amp-script',
+      'amp-script'
+    ));
+  }
+
+  /**
    * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!./service/cid-impl.CidDef>}
    */

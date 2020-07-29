@@ -598,12 +598,70 @@ describes.repeated(
       });
     });
 
-    it('should unwrap output', () => {
-      templateElement./*OK*/ innerHTML = '<a>abc</a>';
-      template.compileCallback();
-      const result = template.setHtml('<a>abc</a>');
-      expect(result.tagName).to.equal('A');
-      expect(result./*OK*/ innerHTML).to.equal('abc');
+    describe('setHtml()', () => {
+      it('should unwrap singular element output', () => {
+        template.compileCallback();
+        const result = template.setHtml('<a>abc</a>');
+        expect(result).to.have.length(1);
+        expect(result[0].tagName).to.equal('A');
+        expect(result[0]./*OK*/ innerHTML).to.equal('abc');
+      });
+
+      it('should be undefined for singular text node output', () => {
+        template.compileCallback();
+        const result = template.setHtml('abc');
+        expect(result).to.have.length(1);
+        expect(result[0].tagName).to.equal('DIV');
+        expect(result[0]./*OK*/ innerHTML).to.equal('abc');
+      });
+
+      it('should unwrap output with many elements', () => {
+        template.compileCallback();
+        const result = template.setHtml('<a>abc</a><a>def</a>');
+        expect(result).to.have.length(2);
+        const {0: first, 1: second} = result;
+        expect(first.tagName).to.equal('A');
+        expect(first./*OK*/ innerHTML).to.equal('abc');
+        expect(second.tagName).to.equal('A');
+        expect(second./*OK*/ innerHTML).to.equal('def');
+      });
+
+      it('should unwrap output with many elements and wrap text nodes', () => {
+        const html = `<a>abc</a>
+        def
+        <a>ghi  </a>`;
+        template.compileCallback();
+        const result = template.setHtml(html);
+        expect(result).to.have.length(3);
+        const {0: first, 1: second, 2: third} = result;
+        expect(first.tagName).to.equal('A');
+        expect(first./*OK*/ innerHTML).to.equal('abc');
+        expect(second.tagName).to.equal('DIV');
+        expect(second./*OK*/ innerHTML).to.equal('def');
+        expect(third.tagName).to.equal('A');
+        expect(third./*OK*/ innerHTML).to.equal('ghi  ');
+      });
+
+      it('should unwrap output with many elements and preserve subtrees', () => {
+        const html = `
+        <div>
+          <a>abc</a>
+        </div>
+        def
+        <a>ghi  </a>`;
+        template.compileCallback();
+        const result = template.setHtml(html);
+        expect(result).to.have.length(3);
+        const {0: first, 1: second, 2: third} = result;
+        expect(first.tagName).to.equal('DIV');
+        expect(first.children).to.have.length(1);
+        expect(first.firstElementChild.tagName).to.equal('A');
+        expect(first.firstElementChild./*OK*/ innerHTML).to.equal('abc');
+        expect(second.tagName).to.equal('DIV');
+        expect(second./*OK*/ innerHTML).to.equal('def');
+        expect(third.tagName).to.equal('A');
+        expect(third./*OK*/ innerHTML).to.equal('ghi  ');
+      });
     });
   }
 );

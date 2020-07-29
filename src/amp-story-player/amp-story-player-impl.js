@@ -30,8 +30,11 @@ import {createCustomEvent} from '../event-helper';
 import {dict, map} from '../utils/object';
 // Source for this constant is css/amp-story-player-iframe.css
 import {cssText} from '../../build/amp-story-player-iframe.css';
+import {dev} from '../log';
+import {findIndex} from '../utils/array';
 import {resetStyles, setStyle, setStyles} from '../style';
 import {toArray} from '../types';
+import {tryFocus} from '../dom';
 
 /** @enum {string} */
 const LoadStateClass = {
@@ -53,9 +56,7 @@ const SUPPORTED_CACHES = ['cdn.ampproject.org', 'www.bing-amp.com'];
 /** @const @type {!Array<string>} */
 const SANDBOX_MIN_LIST = ['allow-top-navigation'];
 
-/**
- * @enum {number}
- */
+/** @enum {number} */
 const SwipingState = {
   NOT_SWIPING: 0,
   SWIPING_TO_LEFT: 1,
@@ -68,6 +69,24 @@ const TOGGLE_THRESHOLD_PX = 50;
 /** @const {number} */
 const MAX_IFRAMES = 3;
 
+/** @enum {string} */
+const BUTTON_TYPES = {
+  BACK: 'back-button',
+  CLOSE: 'close-button',
+};
+
+/** @enum {string} */
+const BUTTON_CLASSES = {
+  [BUTTON_TYPES.BACK]: 'amp-story-player-back-button',
+  [BUTTON_TYPES.CLOSE]: 'amp-story-player-close-button',
+};
+
+/** @enum {string} */
+const BUTTON_EVENTS = {
+  [BUTTON_TYPES.BACK]: 'amp-story-player-back',
+  [BUTTON_TYPES.CLOSE]: 'amp-story-player-close',
+};
+
 /** @const {string} */
 export const IFRAME_IDX = '__AMP_IFRAME_IDX__';
 
@@ -79,7 +98,6 @@ export class AmpStoryPlayer {
   /**
    * @param {!Window} win
    * @param {!Element} element
-   * @constructor
    */
   constructor(win, element) {
     console./*OK*/ assert(
@@ -117,7 +135,7 @@ export class AmpStoryPlayer {
     /** @private {!IframePool} */
     this.iframePool_ = new IframePool();
 
-    /** @private {!Object<string, !Promise>} */
+    /** @private {!Object<number, !Promise>} */
     this.messagingPromises_ = map();
 
     /** @private {number} */
@@ -142,8 +160,15 @@ export class AmpStoryPlayer {
    * @private
    */
   attachCallbacksToElement_() {
+    this.element_.getStories = this.getStories.bind(this);
     this.element_.load = this.load.bind(this);
     this.element_.show = this.show.bind(this);
+    this.element_.add = this.add.bind(this);
+    this.element_.play = this.play.bind(this);
+    this.element_.pause = this.pause.bind(this);
+    this.element_.go = this.go.bind(this);
+    this.element_.mute = this.mute.bind(this);
+    this.element_.unmute = this.unmute.bind(this);
   }
 
   /**
@@ -156,11 +181,120 @@ export class AmpStoryPlayer {
   }
 
   /**
+   * Adds stories to the player. Additionally, creates or assigns
+   * iframes to those that are close to the current playing story.
+   * @param {!Array<!{href: string, title: ?string, posterImage: ?string}>} stories
+   * @public
+   */
+  add(stories) {
+    const isStoryObject = (story) =>
+      typeof story === 'object' && story !== null && story.href;
+
+    if (!Array.isArray(stories) || !stories.every(isStoryObject)) {
+      throw new Error('"stories" parameter has the wrong structure');
+    }
+
+    for (let i = 0; i < stories.length; i++) {
+      const story = stories[i];
+      const anchor = this.createStoryAnchor_(story);
+
+      this.stories_.push(anchor);
+
+      if (this.iframes_.length < MAX_IFRAMES) {
+        this.createIframeForStory_(this.stories_.length - 1);
+        continue;
+      }
+
+      // If this story is after the current one
+      if (this.stories_[this.currentIdx_ + 1] === anchor) {
+        this.allocateIframeForStory_(this.currentIdx_ + 1);
+        continue;
+      }
+    }
+  }
+
+  /**
+   * Given a story object, creates an appropiate anchor element.
+   * @param {!{href: string, title: ?string, posterImage: ?string}} story
+   * @return {!HTMLAnchorElement}
+   * @private
+   */
+  createStoryAnchor_(story) {
+    const anchor =
+      /** @type {!HTMLAnchorElement} */
+      (this.doc_.createElement('a'));
+
+    anchor.href = story.href;
+    story.posterImage &&
+      anchor.setAttribute('data-poster-portrait-src', story.posterImage);
+
+    if (story.title) {
+      const title = this.doc_.createElement('span');
+      title.classList.add('title');
+      title.textContent = story.title;
+
+      anchor.appendChild(title);
+    }
+
+    return anchor;
+  }
+
+  /**
+   * Makes the current story play its content/auto-advance
+   * @public
+   */
+  play() {
+    this.togglePaused_(false);
+  }
+
+  /**
+   * Makes the current story pause its content/auto-advance
+   * @public
+   */
+  pause() {
+    this.togglePaused_(true);
+  }
+
+  /**
+   * Makes the current story play or pause its content/auto-advance
+   * @param {boolean} paused If true, the story will be paused, and it will be played otherwise
+   * @private
+   */
+  togglePaused_(paused) {
+    const currentStory = this.stories_[this.currentIdx_];
+    const iframeIdx = currentStory[IFRAME_IDX];
+
+    this.updateVisibilityState_(
+      iframeIdx,
+      paused ? VisibilityState.PAUSED : VisibilityState.VISIBLE
+    );
+  }
+
+  /**
+   *
    * @public
    * @return {!Element}
    */
   getElement() {
     return this.element_;
+  }
+
+  /**
+   * @return {!Array<!{href: string, title: ?string, posterImage: ?string}>}
+   * @public
+   */
+  getStories() {
+    // TODO: replace this with a proper conversion method when story objects are defined
+    const storyObjects = this.stories_.map((anchor) => {
+      return {
+        href: anchor.href,
+        title: anchor.textContent || undefined,
+        posterImage: anchor.getAttribute('data-poster-portrait-src'),
+        [IFRAME_IDX]: anchor[IFRAME_IDX],
+      };
+    });
+
+    return storyObjects;
   }
 
   /** @public */
@@ -173,27 +307,53 @@ export class AmpStoryPlayer {
 
     this.initializeShadowRoot_();
     this.initializeIframes_();
+    this.initializeButton_();
     this.signalReady_();
     this.isBuilt_ = true;
   }
 
   /** @private */
   signalReady_() {
-    this.element_.dispatchEvent(createCustomEvent(this.win_, 'ready', {}));
+    this.element_.dispatchEvent(
+      createCustomEvent(this.win_, 'ready', dict({}))
+    );
     this.element_.isReady = true;
   }
 
   /** @private */
   initializeIframes_() {
     for (let idx = 0; idx < MAX_IFRAMES && idx < this.stories_.length; idx++) {
-      const story = this.stories_[idx];
-      this.buildIframe_(story);
+      this.createIframeForStory_(idx);
+    }
+  }
 
-      story[IFRAME_IDX] = idx;
-      this.setUpMessagingForIframe_(story, this.iframes_[idx]);
+  /**
+   * Creates an iframe for a certain story. Should only be done if
+   * this.iframes_.length < this.MAX_IFRAMES. It is assumed that iframes
+   * are created for stories in order, starting from the first one.
+   * @param {number} idx The index of the story in this.stories_, which
+   *    will also correspond to the index of its iframe in this.iframes_.
+   * @private
+   */
+  createIframeForStory_(idx) {
+    const story = this.stories_[idx];
 
-      this.iframePool_.addIframeIdx(idx);
-      this.iframePool_.addStoryIdx(idx);
+    this.buildIframe_(story);
+    const iframe = this.iframes_[idx];
+
+    story[IFRAME_IDX] = idx;
+    this.setUpMessagingForIframe_(story, iframe);
+
+    this.iframePool_.addIframeIdx(idx);
+    this.iframePool_.addStoryIdx(idx);
+
+    if (this.isLaidOut_) {
+      this.layoutIframe_(
+        story,
+        iframe,
+        // In case it is the first story, it becomes immediately visibile
+        idx === 0 ? VisibilityState.VISIBLE : VisibilityState.PRERENDER
+      );
     }
   }
 
@@ -209,6 +369,28 @@ export class AmpStoryPlayer {
     styleEl.textContent = cssText;
     shadowRoot.appendChild(styleEl);
     shadowRoot.appendChild(this.rootEl_);
+  }
+
+  /**
+   * Helper to create a button.
+   * @private
+   */
+  initializeButton_() {
+    const option = this.element_.getAttribute('exit-control');
+    if (!Object.values(BUTTON_TYPES).includes(option)) {
+      return;
+    }
+
+    const button = this.doc_.createElement('button');
+    button.classList.add(BUTTON_CLASSES[option]);
+
+    button.addEventListener('click', () => {
+      this.element_.dispatchEvent(
+        createCustomEvent(this.win_, BUTTON_EVENTS[option], dict({}))
+      );
+    });
+
+    this.rootEl_.appendChild(button);
   }
 
   /**
@@ -269,11 +451,11 @@ export class AmpStoryPlayer {
         (messaging) => {
           messaging.setDefaultHandler(() => Promise.resolve());
           messaging.registerHandler('touchstart', (event, data) => {
-            this.onTouchStart_(data);
+            this.onTouchStart_(/** @type {!Event} */ (data));
           });
 
           messaging.registerHandler('touchmove', (event, data) => {
-            this.onTouchMove_(data);
+            this.onTouchMove_(/** @type {!Event} */ (data));
           });
 
           messaging.registerHandler('touchend', () => {
@@ -281,7 +463,7 @@ export class AmpStoryPlayer {
           });
 
           messaging.registerHandler('selectDocument', (event, data) => {
-            this.onSelectDocument_(data);
+            this.onSelectDocument_(/** @type {!Object} */ (data));
           });
           resolve(messaging);
         },
@@ -356,7 +538,7 @@ export class AmpStoryPlayer {
    */
   show(storyUrl) {
     // TODO(enriqe): sanitize URLs for matching.
-    const storyIdx = this.stories_.findIndex(({href}) => href === storyUrl);
+    const storyIdx = findIndex(this.stories_, ({href}) => href === storyUrl);
 
     // TODO(proyectoramirez): replace for add() once implemented.
     if (!this.stories_[storyIdx]) {
@@ -373,8 +555,20 @@ export class AmpStoryPlayer {
     this.assignIframesForStoryIdx_(storyIdx);
   }
 
+  /** Sends a message muting the current story. */
+  mute() {
+    const iframeIdx = this.stories_[this.currentIdx_][IFRAME_IDX];
+    this.updateMutedState_(iframeIdx, true);
+  }
+
+  /** Sends a message unmuting the current story. */
+  unmute() {
+    const iframeIdx = this.stories_[this.currentIdx_][IFRAME_IDX];
+    this.updateMutedState_(iframeIdx, false);
+  }
+
   /**
-   * Evicts stories from iframes
+   * Evicts stories from iframes.
    * @private
    */
   evictStoriesFromIframes_() {
@@ -432,6 +626,24 @@ export class AmpStoryPlayer {
   }
 
   /**
+   * Indicates the player changed story.
+   * @private
+   */
+  signalNavigation_() {
+    const index = this.currentIdx_;
+    const remaining = this.stories_.length - this.currentIdx_ - 1;
+    const event = createCustomEvent(
+      this.win_,
+      'navigation',
+      dict({
+        'index': index,
+        'remaining': remaining,
+      })
+    );
+    this.element_.dispatchEvent(event);
+  }
+
+  /**
    * Navigates to the next story in the player.
    * @private
    */
@@ -458,6 +670,7 @@ export class AmpStoryPlayer {
     ) {
       this.allocateIframeForStory_(nextStoryIdx);
     }
+    this.signalNavigation_();
   }
 
   /**
@@ -484,6 +697,28 @@ export class AmpStoryPlayer {
     ) {
       this.allocateIframeForStory_(nextStoryIdx, true /** reverse */);
     }
+    this.signalNavigation_();
+  }
+
+  /**
+   * Navigates stories given a number.
+   * @param {number} storyDelta
+   */
+  go(storyDelta) {
+    if (
+      this.currentIdx_ + storyDelta >= this.stories_.length ||
+      this.currentIdx_ + storyDelta < 0
+    ) {
+      throw new Error('Out of Story range.');
+    }
+    if (storyDelta === 0) {
+      return;
+    }
+
+    const currentStory = this.stories_[this.currentIdx_ + storyDelta];
+
+    this.show(currentStory.href);
+    this.signalNavigation_();
   }
 
   /**
@@ -505,6 +740,7 @@ export class AmpStoryPlayer {
   updateCurrentIframe_(iframeIdx) {
     this.updateVisibilityState_(iframeIdx, VisibilityState.VISIBLE);
     this.updateIframePosition_(iframeIdx, IframePosition.CURRENT);
+    tryFocus(this.iframes_[iframeIdx]);
   }
 
   /**
@@ -621,7 +857,10 @@ export class AmpStoryPlayer {
     };
     inputUrl = inputUrl.replace(/[?&]amp_js_v=0.1&/, prependFragment);
 
-    return parseUrlWithA(this.cachedA_, inputUrl);
+    return parseUrlWithA(
+      /** @type {!HTMLAnchorElement} */ (this.cachedA_),
+      inputUrl
+    );
   }
 
   /**
@@ -633,6 +872,22 @@ export class AmpStoryPlayer {
   updateVisibilityState_(iframeIdx, visibilityState) {
     this.messagingPromises_[iframeIdx].then((messaging) => {
       messaging.sendRequest('visibilitychange', {state: visibilityState}, true);
+    });
+  }
+
+  /**
+   * Updates the muted state of the story inside the iframe.
+   * @param {number} iframeIdx
+   * @param {boolean} mutedValue
+   * @private
+   */
+  updateMutedState_(iframeIdx, mutedValue) {
+    this.messagingPromises_[iframeIdx].then((messaging) => {
+      messaging.sendRequest(
+        'setDocumentState',
+        {state: 'MUTED_STATE', value: mutedValue},
+        true
+      );
     });
   }
 
@@ -721,6 +976,10 @@ export class AmpStoryPlayer {
    * @param {!Object} gesture
    */
   onSwipeX_(gesture) {
+    if (this.stories_.length <= 1) {
+      return;
+    }
+
     const {deltaX} = gesture;
 
     if (gesture.last === true) {
@@ -754,13 +1013,19 @@ export class AmpStoryPlayer {
     ];
 
     requestAnimationFrame(() => {
-      resetStyles(currentIframe, ['transform', 'transition']);
+      resetStyles(dev().assertElement(currentIframe), [
+        'transform',
+        'transition',
+      ]);
     });
 
     const secondaryIframe = this.getSecondaryIframe_();
     if (secondaryIframe) {
       requestAnimationFrame(() => {
-        resetStyles(secondaryIframe, ['transform', 'transition']);
+        resetStyles(dev().assertElement(secondaryIframe), [
+          'transform',
+          'transition',
+        ]);
       });
     }
   }
@@ -768,7 +1033,7 @@ export class AmpStoryPlayer {
   /**
    * Gets accompanying iframe for the currently swiped iframe if any.
    * @private
-   * @return {?IframeElement}
+   * @return {?Element}
    */
   getSecondaryIframe_() {
     const nextStoryIdx =
@@ -777,7 +1042,7 @@ export class AmpStoryPlayer {
         : this.currentIdx_ - 1;
 
     if (nextStoryIdx < 0 || nextStoryIdx >= this.stories_.length) {
-      return;
+      return null;
     }
 
     return this.iframes_[this.stories_[nextStoryIdx][IFRAME_IDX]];
@@ -804,7 +1069,7 @@ export class AmpStoryPlayer {
     const translate = `translate3d(${deltaX}px, 0, 0)`;
 
     requestAnimationFrame(() => {
-      setStyles(iframe, {
+      setStyles(dev().assertElement(iframe), {
         transform: translate,
         transition: 'none',
       });
@@ -816,7 +1081,7 @@ export class AmpStoryPlayer {
     }
 
     requestAnimationFrame(() => {
-      setStyles(secondaryIframe, {
+      setStyles(dev().assertElement(secondaryIframe), {
         transform: secondaryTranslate,
         transition: 'none',
       });
