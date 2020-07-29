@@ -317,7 +317,9 @@ It can be templated via `amp-mustache`.
   ...
   <amp-list-load-more load-more-button>
     <template type="amp-mustache">
+    {% raw %}
       Showing {{#count}} out of {{#total}} items
+    {% endraw %}
       <button>Click here to see more!</button>
     </template>
   </amp-list-load-more>
@@ -578,3 +580,5 @@ The AMP for Email spec disallows the use of the following attributes on the AMP 
 ## Validation
 
 See [amp-list rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/validator-amp-list.protoascii) in the AMP validator specification.
+
+[/filter] <!-- formats="websites, stories" -->
