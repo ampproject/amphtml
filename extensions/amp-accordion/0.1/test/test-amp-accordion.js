@@ -15,12 +15,18 @@
  */
 
 import '../amp-accordion';
+import {ActionService} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {Keys} from '../../../../src/utils/key-codes';
+import {Services} from '../../../../src/services';
 import {computedStyle} from '../../../../src/style';
+import {
+  createElementWithAttributes,
+  tryFocus,
+  whenUpgradedToCustomElement,
+} from '../../../../src/dom';
 import {poll} from '../../../../testing/iframe';
 import {toggleExperiment} from '../../../../src/experiments';
-import {tryFocus} from '../../../../src/dom';
 
 describes.realWin(
   'amp-accordion',
@@ -851,6 +857,62 @@ describes.realWin(
           'expand',
           /* event */ env.sandbox.match.has('detail'),
           /* trust */ 456
+        );
+      });
+    });
+  }
+);
+
+describes.realWin(
+  'amp-accordion component with runtime on',
+  {
+    amp: {
+      extensions: ['amp-accordion:0.1'],
+      runtimeOn: true,
+    },
+  },
+  (env) => {
+    it('should allow default actions in email documents', async () => {
+      env.win.document.documentElement.setAttribute('amp4email', '');
+      const action = new ActionService(env.ampdoc, env.win.document);
+      env.sandbox.stub(Services, 'actionServiceForDoc').returns(action);
+
+      const element = createElementWithAttributes(
+        env.win.document,
+        'amp-accordion',
+        {'layout': 'container'}
+      );
+      const section = env.win.document.createElement('section');
+      section.appendChild(env.win.document.createElement('h1'));
+      section.appendChild(env.win.document.createElement('p'));
+      element.appendChild(section);
+      env.win.document.body.appendChild(element);
+      env.sandbox.spy(element, 'enqueAction');
+      env.sandbox.stub(element, 'getDefaultActionAlias');
+      await whenUpgradedToCustomElement(element);
+      await element.whenBuilt();
+
+      ['toggle', 'expand', 'collapse'].forEach((method) => {
+        action.execute(
+          element,
+          method,
+          null,
+          'source',
+          'caller',
+          'event',
+          ActionTrust.HIGH
+        );
+        expect(element.enqueAction).to.be.calledWith(
+          env.sandbox.match({
+            actionEventType: '?',
+            args: null,
+            caller: 'caller',
+            event: 'event',
+            method,
+            node: element,
+            source: 'source',
+            trust: ActionTrust.HIGH,
+          })
         );
       });
     });
