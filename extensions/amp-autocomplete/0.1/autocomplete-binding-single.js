@@ -1,5 +1,3 @@
-import {userAssert} from '../../../src/log';
-
 /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
@@ -28,9 +26,6 @@ export class AutocompleteBindingSingle {
    */
   constructor(ampElement) {
     const {element} = ampElement;
-    /** @private {!Element} */
-    this.element_ = element;
-
     /**
      * The Single implementation of autocomplete should highlight
      * the diff between the user input and the active suggestion
@@ -38,15 +33,9 @@ export class AutocompleteBindingSingle {
      * See displayActiveItemInInput() for more.
      * @private {boolean}
      */
-    this.shouldSuggestFirst_ = element.hasAttribute('suggest-first');
-    const filter = element.getAttribute('filter');
-    userAssert(
-      !this.shouldSuggestFirst_ || filter === 'prefix',
-      '"suggest-first" requires "filter" type "prefix". ' +
-        ' Unexpected "filter" type: %s, %s',
-      filter,
-      this.element_
-    );
+    this.shouldSuggestFirst_ =
+      element.hasAttribute('suggest-first') &&
+      element.getAttribute('filter') === 'prefix';
 
     /**
      * The Single implementation of autocomplete will allow form
