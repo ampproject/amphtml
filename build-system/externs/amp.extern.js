@@ -905,3 +905,12 @@ class FeaturePolicy {
  * @type {?FeaturePolicy}
  */
 HTMLIFrameElement.prototype.featurePolicy;
+
+/**
+ * Going through the standardization process now.
+ *
+ * See https://developers.google.com/web/updates/2019/02/constructable-stylesheets.
+ *
+ * @param {string} cssText
+ */
+CSSStyleSheet.prototype.replaceSync = function(cssText) {};

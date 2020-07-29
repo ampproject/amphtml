@@ -26,6 +26,8 @@ import {
   createShadowRoot,
   getShadowRootNode,
   importShadowBody,
+  installShadowStyle,
+  resetShadowStyleCacheForTesting,
   scopeShadowCss,
   setShadowDomStreamingSupportedForTesting,
 } from '../../src/shadow-embed';
@@ -313,6 +315,59 @@ describes.sandboxed('shadow-embed', {}, () => {
       expect(scope('body-x {}')).to.equal('.h body-x {}');
       expect(scope('body_x {}')).to.equal('.h body_x {}');
       expect(scope('body1 {}')).to.equal('.h body1 {}');
+    });
+  });
+
+  describe('installShadowStyle', () => {
+    let shadowRoot, shadowRoot2;
+
+    beforeEach(() => {
+      shadowRoot = document.createElement('div');
+      shadowRoot2 = document.createElement('div');
+      resetShadowStyleCacheForTesting(window);
+    });
+
+    afterEach(() => {
+      resetShadowStyleCacheForTesting(window);
+    });
+
+    it('should re-use constructable stylesheet when supported', () => {
+      try {
+        new CSSStyleSheet();
+      } catch (e) {
+        // Leave. Not supported.
+        return;
+      }
+
+      shadowRoot.adoptedStyleSheets = [];
+      installShadowStyle(shadowRoot, 'A', '* {color: red}');
+
+      expect(shadowRoot.adoptedStyleSheets).to.have.length(1);
+      const styleSheet1 = shadowRoot.adoptedStyleSheets[0];
+      expect(styleSheet1.rules).to.have.length(1);
+      expect(styleSheet1.rules[0].cssText.replace(/(\s|;)/g, '')).to.equal(
+        '*{color:red}'
+      );
+      expect(shadowRoot.querySelector('style')).to.be.null;
+
+      // Repeated call uses the cache.
+      shadowRoot2.adoptedStyleSheets = [];
+      installShadowStyle(shadowRoot2, 'A', 'not even CSS');
+      expect(shadowRoot2.adoptedStyleSheets).to.have.length(1);
+      expect(shadowRoot2.adoptedStyleSheets[0]).to.equal(styleSheet1);
+
+      // A different stylesheet.
+      shadowRoot2.adoptedStyleSheets = [];
+      installShadowStyle(shadowRoot2, 'B', '* {color: blue}');
+      expect(shadowRoot2.adoptedStyleSheets).to.have.length(1);
+      expect(shadowRoot2.adoptedStyleSheets[0]).to.not.equal(styleSheet1);
+    });
+
+    it('should create a legacy stylesheet when constructable not supported', () => {
+      installShadowStyle(shadowRoot, 'A', '* {color: red}');
+
+      const styleEl = shadowRoot.querySelector('style');
+      expect(styleEl.textContent).to.equal('* {color: red}');
     });
   });
 
