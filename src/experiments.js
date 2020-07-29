@@ -365,6 +365,16 @@ export function getExperimentBranch(win, experimentName) {
 }
 
 /**
+ * Returns an object containing all active experiment branches.
+ *
+ * @param {!Window} win Window context to check for experiment state.
+ * @return {?Object} contains all experiment branches and their ids.
+ */
+export function getActiveExperimentBranches(win) {
+  return win.__AMP_EXPERIMENT_BRANCHES ? win.__AMP_EXPERIMENT_BRANCHES : null;
+}
+
+/**
  * Force enable (or disable) a specific branch of a given experiment name.
  * Disables the experiment name altogether if branchId is falseish.
  *

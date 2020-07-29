@@ -21,6 +21,7 @@ import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {cookieReader} from './cookie-reader';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getActiveExperimentBranches} from '../../../src/experiments';
 import {getConsentPolicyState} from '../../../src/consent';
 import {
   getServiceForDoc,
@@ -174,6 +175,17 @@ function matchMacro(string, matchPattern, opt_matchingGroupIndexStr) {
 }
 
 /**
+ * Returns a comma separated list of active experiment branches or null
+ * if none are active.
+ * @param {!Window} win
+ * @return {?string}
+ */
+function experimentBranchesMacro(win) {
+  const branches = getActiveExperimentBranches(win);
+  return branches ? Object.values(branches).join(',') : null;
+}
+
+/**
  * Provides support for processing of advanced variable syntax like nested
  * expansions macros etc.
  */
@@ -235,6 +247,10 @@ export class VariableService {
     // Returns a promise resolving to viewport.getScrollLeft.
     this.register_('SCROLL_LEFT', () =>
       Math.round(Services.viewportForDoc(this.ampdoc_).getScrollLeft())
+    );
+
+    this.register_('EXPERIMENT_BRANCHES', () =>
+      experimentBranchesMacro(this.ampdoc_.win)
     );
   }
 
