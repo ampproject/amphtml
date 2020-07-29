@@ -523,7 +523,7 @@ export class Services {
   /**
    * Get promise with story request service
    * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService>}
+   * @return {?Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryRequestService>}
    */
   static storyRequestServiceForOrNull(win) {
     return (

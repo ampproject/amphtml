@@ -579,12 +579,12 @@ export class AmpStory extends AMP.BaseElement {
     for (let i = 0; i < interactiveIds.length; i++) {
       if (idsMap[interactiveIds[i]] === undefined) {
         idsMap[interactiveIds[i]] = 0;
-        continue;
+      } else {
+        user().error(TAG, `Duplicate interactive ID ${interactiveIds[i]}`);
+        const newId = `${interactiveIds[i]}__${++idsMap[interactiveIds[i]]}`;
+        interactiveEls[i].id = newId;
+        interactiveIds[i] = newId;
       }
-      user().error(TAG, `Duplicate interactive ID ${interactiveIds[i]}`);
-      const newId = `${interactiveIds[i]}__${++idsMap[interactiveIds[i]]}`;
-      interactiveEls[i].id = newId;
-      interactiveIds[i] = newId;
       whenUpgradedToCustomElement(interactiveEls[i]).then((el) => {
         el.getImpl().then((e) => e.initializeState());
       });

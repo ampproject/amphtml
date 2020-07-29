@@ -935,6 +935,7 @@ exports.extensionBundles = [
         'amp-story-interactive-results',
       ],
     },
+    type: TYPES.MISC,
   },
   {
     name: 'amp-story-player',

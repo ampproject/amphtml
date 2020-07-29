@@ -256,7 +256,6 @@ exports.rules = [
       'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/amp-story-localization-service.js',
 
       // Interactive components that depend on story functionality.
-      'extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js->extensions/amp-story/1.0/amp-story-request-service.js',
       'extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js->extensions/amp-story/1.0/story-analytics.js',
       'extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js->extensions/amp-story/1.0/utils.js',

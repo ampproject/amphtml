@@ -16,7 +16,7 @@
 
 import {AmpStoryInteractive, InteractiveType} from './amp-story-interactive';
 import {CSS} from '../../../build/amp-story-interactive-results-1.0.css';
-import {StateProperty} from './amp-story-store-service';
+import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 import {htmlFor} from '../../../src/static-template';
 import {setStyle} from '../../../src/style';
 

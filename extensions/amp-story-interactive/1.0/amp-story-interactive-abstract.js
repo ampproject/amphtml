@@ -36,7 +36,6 @@ import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {emojiConfetti} from './interactive-confetti';
-import {getRequestService} from './amp-story-request-service';
 import {toArray} from '../../../src/types';
 
 /** @const {string} */
@@ -150,6 +149,14 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected {boolean} */
     this.hasUserSelection_ = false;
 
+    /** @private {?function(?any): void} */
+    this.initializePromiseResolve_ = null;
+
+    /** @private {!Promise} */
+    this.initializePromise_ = new Promise((resolve) => {
+      this.initializePromiseResolve_ = resolve;
+    });
+
     /** @private {!Array<number>} min and max number of options, inclusive */
     this.optionBounds_ = bounds;
 
@@ -171,13 +178,13 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected {?../../amp-story/1.0/amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = null;
 
-    /** @const @protected {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    /** @protected {?../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
 
     /** @protected {../../../src/service/url-impl.Url} */
     this.urlService_ = Services.urlForDoc(this.element);
 
-    /** @const @protected {!../../amp-story/1.0/variable-service.AmpStoryVariableService} */
+    /** @protected {?../../amp-story/1.0/variable-service.AmpStoryVariableService} */
     this.variableService_ = null;
   }
 
@@ -236,15 +243,17 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @public
    */
   initializeState() {
-    Services.storyVariableServiceForOrNull(this.win).then((variableService) => {
-      this.variableService_ = variableService;
-    });
-    Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
-      this.storeService_ = storeService;
-      this.updateStoryStoreState_(null);
-    });
-    Services.storyRequestServiceForOrNull(this.win).then((requestService) => {
-      this.requestService_ = requestService;
+    this.variableService_ = Services.storyVariableService(this.win);
+    Promise.all([
+      Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
+        this.storeService_ = storeService;
+        this.updateStoryStoreState_(null);
+      }),
+      Services.storyRequestServiceForOrNull(this.win).then((requestService) => {
+        this.requestService_ = requestService;
+      }),
+    ]).then(() => {
+      this.initializePromiseResolve_(null);
     });
   }
 
@@ -360,13 +369,9 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    return Promise.all([
-      (this.backendDataPromise_ = this.element.hasAttribute('endpoint')
-        ? this.retrieveInteractiveData_()
-        : Promise.resolve()),
-      (this.analyticsServicePromise_ = Services.storyAnalyticsServiceForOrNull()),
-      (this.requestServicePromise_ = Services.storyRequestServiceForOrNull()),
-    ]);
+    return (this.backendDataPromise_ = this.element.hasAttribute('endpoint')
+      ? this.retrieveInteractiveData_()
+      : Promise.resolve());
   }
 
   /**
@@ -431,9 +436,9 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @private
    */
   initializeListeners_() {
-    this.storeServicePromise_.then((storeService) => {
+    this.initializePromise_.then(() => {
       // Add a listener for changes in the RTL state
-      storeService.subscribe(
+      this.storeService_.subscribe(
         StateProperty.RTL_STATE,
         (rtlState) => {
           this.onRtlStateUpdate_(rtlState);
@@ -442,7 +447,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       );
 
       // Check if the component page is active, and add class.
-      storeService.subscribe(
+      this.storeService_.subscribe(
         StateProperty.CURRENT_PAGE_ID,
         (currPageId) => {
           this.mutateElement(() => {
@@ -504,12 +509,14 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     );
 
     this.element[ANALYTICS_TAG_NAME] = this.element.tagName;
-    Services.storyAnalyticsServiceForOrNull().then((analyticsService) => {
-      analyticsService.triggerEvent(
-        StoryAnalyticsEvent.INTERACTIVE,
-        this.element
-      );
-    });
+    Services.storyAnalyticsServiceForOrNull(this.win).then(
+      (analyticsService) => {
+        analyticsService.triggerEvent(
+          StoryAnalyticsEvent.INTERACTIVE,
+          this.element
+        );
+      }
+    );
   }
 
   /**
@@ -688,11 +695,11 @@ export class AmpStoryInteractive extends AMP.BaseElement {
         url = appendPathToUrl(this.urlService_.parse(url), ':vote');
       }
       url = addParamsToUrl(url, requestParams);
-      return this.requestServicePromise_.then((requestService) => {
-        requestService
+      return this.initializePromise_.then(() =>
+        this.requestService_
           .executeRequest(url, requestOptions)
-          .catch((err) => dev().error(TAG, err));
-      });
+          .catch((err) => dev().error(TAG, err))
+      );
     });
   }
 
@@ -714,6 +721,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @private
    */
   handleSuccessfulDataRetrieval_(response) {
+    console.log('handleSuccessfulDataRetrieval_', response);
     if (!(response && response['options'])) {
       devAssert(
         response && 'options' in response,
@@ -790,10 +798,12 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @param {?number} option
    */
   updateStoryStoreState_(option = null) {
-    const update = {
-      'option': option != null ? this.options_[option] : null,
-      'interactiveId': this.getInteractiveId_(),
-    };
-    this.storeService_.dispatch(Action.ADD_INTERACTIVE_REACT, update);
+    this.initializePromise_.then(() => {
+      const update = {
+        'option': option != null ? this.options_[option] : null,
+        'interactiveId': this.getInteractiveId_(),
+      };
+      this.storeService_.dispatch(Action.ADD_INTERACTIVE_REACT, update);
+    });
   }
 }
