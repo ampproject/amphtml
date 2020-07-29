@@ -17,7 +17,7 @@
 import * as Preact from '../../../src/preact';
 import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
 import {useEffect, useRef, useState} from '../../../src/preact';
-import {useResourcesNotify} from '../../../src/preact/utils';
+import {useMountEffect, useResourcesNotify} from '../../../src/preact/utils';
 // Source for this constant is css/video-autoplay.css
 import {Deferred} from '../../../src/utils/promise';
 import {
@@ -148,7 +148,7 @@ function Autoplay({
   play,
   pause,
 }) {
-  useEffect(() => {
+  useMountEffect(() => {
     let observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
@@ -166,7 +166,7 @@ function Autoplay({
       observer.disconnect();
       observer = null;
     };
-  }, [wrapperRef, play, pause]);
+  });
 
   return (
     <>
