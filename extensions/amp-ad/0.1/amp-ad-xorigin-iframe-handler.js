@@ -43,6 +43,9 @@ const VISIBILITY_TIMEOUT = 10000;
 
 const MIN_INABOX_POSITION_EVENT_INTERVAL = 100;
 
+/** @type {string} */
+const TAG = 'amp-ad-xorigin-iframe';
+
 export class AmpAdXOriginIframeHandler {
   /**
    * @param {!./amp-ad-3p-impl.AmpAd3PImpl|!../../amp-a4a/0.1/amp-a4a.AmpA4A} baseInstance
@@ -190,7 +193,10 @@ export class AmpAdXOriginIframeHandler {
         this.iframe,
         MessageType.USER_ERROR_IN_IFRAME,
         (data) => {
-          this.userErrorForAnalytics_(data['message']);
+          this.userErrorForAnalytics_(
+            data['message'],
+            data['expected'] == true
+          );
         },
         true,
         true /* opt_includingNestedWindows */
@@ -592,10 +598,16 @@ export class AmpAdXOriginIframeHandler {
 
   /**
    * @param {string} message
+   * @param {boolean} expected
    * @private
    */
-  userErrorForAnalytics_(message) {
-    if (typeof message == 'string') {
+  userErrorForAnalytics_(message, expected) {
+    if (typeof message != 'string') {
+      return;
+    }
+    if (expected) {
+      dev().expectedError(TAG, message);
+    } else {
       const e = new Error(message);
       e.name = '3pError';
       reportErrorToAnalytics(e, this.baseInstance_.win);
