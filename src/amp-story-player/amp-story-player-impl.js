@@ -126,6 +126,9 @@ export class AmpStoryPlayer {
     /** @private {?Element} */
     this.rootEl_ = null;
 
+    /** @private {number} */
+    this.interval_ = 0;
+
     /** @private {boolean} */
     this.isLaidOut_ = false;
 
@@ -308,6 +311,7 @@ export class AmpStoryPlayer {
     this.initializeShadowRoot_();
     this.initializeIframes_();
     this.initializeButton_();
+    this.initializeUpNext_();
     this.signalReady_();
     this.isBuilt_ = true;
   }
@@ -391,6 +395,100 @@ export class AmpStoryPlayer {
     });
 
     this.rootEl_.appendChild(button);
+  }
+
+  /**
+   * 
+   * @private
+   */
+  initializeUpNext_() {
+    if (this.stories_.length === 1) {
+      return;
+    }
+
+    const {container, card, text, title, author} = this.createUpNextElement_();
+
+    this.element_.addEventListener('storyEnd', (e) => {
+      if (this.currentIdx_ + 1 >= this.stories_.length) {
+        return;
+      }
+      
+      this.updateUpNextInfo_(card, title, author);
+      this.startUpNext_(container, text);
+    });
+    
+    this.element_.addEventListener('navigation', (e) => this.endUpNext_(container));
+  }
+
+  updateUpNextInfo_(card, title, author) {
+    const story = this.stories_[this.currentIdx_ + 1];
+    card.src = story.getAttribute('data-poster-portrait-src');
+    title.textContent = story.querySelector('span').textContent;
+    author.textContent = 'Placeholder';
+  }
+
+  startUpNext_(container, text) {
+    let counter = 10;
+    container.classList.remove('story-player-hide');
+
+    this.interval_ = setInterval(function() {
+      counter -= 1;
+      text.textContent = 'UP NEXT in ' + counter;
+      if (counter === 0) {
+        const next = this.next_.bind(this);
+        next();
+      }
+    }, 1000);
+  }
+
+  endUpNext_(container) {
+    clearInterval(this.interval_);
+    container.classList.add('story-player-hide');
+  }
+
+  createUpNextElement_() {
+    const container = this.doc_.createElement('div');
+    container.classList.add('story-player-up-next-container');
+    container.classList.add('story-player-hide');
+
+    const card = this.doc_.createElement('img');
+    card.classList.add('story-player-up-next-card');
+
+    const cancel = this.doc_.createElement('button');
+    cancel.addEventListener('click', (e) => this.endUpNext_(container));
+    cancel.classList.add('story-player-up-next-cancel-button')
+
+    const textContainer = this.doc_.createElement('div');
+    const textElements = this.createUpNextTexts_(textContainer);
+
+    container.appendChild(card);
+    container.appendChild(cancel);
+    container.appendChild(textContainer);
+    this.rootEl_.appendChild(container);
+
+    return {container, card, ...textElements};
+  }
+
+  createUpNextTexts_(textContainer) {
+    textContainer.classList.add('story-player-up-next-text-container');
+    
+    const text = this.doc_.createElement('p');
+    text.classList.add('story-player-up-next-text');
+    text.textContent = 'UP NEXT in 10';
+    
+    const title = this.doc_.createElement('p');
+    title.classList.add('story-player-up-next-title');
+    title.textContent = 'Title placeholder';
+    
+    const author = this.doc_.createElement('p');
+    author.classList.add('story-player-up-next-author');
+    author.textContent = 'Placeholder';
+  
+    textContainer.appendChild(text);
+    textContainer.appendChild(title);
+    textContainer.appendChild(author);
+
+    return {text, title, author};
   }
 
   /**
