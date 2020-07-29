@@ -820,25 +820,5 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         },
       });
     });
-
-    it('signals when player changed story using go method', async () => {
-      const playerEl = win.document.createElement('amp-story-player');
-      appendStoriesToPlayer(playerEl, 5);
-
-      const player = new AmpStoryPlayer(win, playerEl);
-
-      await player.load();
-
-      const navigationSpy = env.sandbox.spy();
-      playerEl.addEventListener('navigation', navigationSpy);
-      player.go(1);
-      expect(navigationSpy).to.have.been.calledWithMatch({
-        type: 'navigation',
-        detail: {
-          index: 1,
-          remaining: 3,
-        },
-      });
-    });
   });
 });
