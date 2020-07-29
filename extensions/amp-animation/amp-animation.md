@@ -743,6 +743,14 @@ For instance:
 <button on="tap:anim1.start">Animate</button>
 ```
 
+### Accessibility considerations for animations
+
+If you are using animations to convey meaning or content, make sure that this is also conveyed in some other form for users who may not be able to see those animations. At the most basic level, make sure that your text content conveys the same information as the animation. For instance, if you're using an `<amp-animation>` to illustrate a sequence of steps in a process, make sure that there is also text (either on the same page, or in a linked page) that describes the same sequence of steps in words.
+
+Animations can't usually be paused/stopped by users. This can, depending on the type of animation, its size, and whether it loops/repeats or not, be a minor distraction, or a major problem for certain user groups - particularly, if the animation contains fast strobing color changes. In general, we recommend avoiding the use of large, infinitely repeating animations, unless you are certain that they won't have an adverse impact on users. Consider providing a control to allow users to pause an animation. Consider taking advantage of the [`prefers-reduced-motion`](https://www.w3.org/TR/mediaqueries-5/#prefers-reduced-motion) media query (either in CSS, or using JavaScript to evaluate the query). If the user has indicated a preference for reduced motion/animations, your animation could either be hidden completely, or at least paused by default (with the option for users to explicitly re-enable it using a "Play/Pause" control if they wish). See [MDN - `prefers-reduced-motion`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion) and this introductory article on [web.dev - prefers-reduced-motion: Sometimes less movement is more](https://web.dev/prefers-reduced-motion/) for further details.
+
+For animations that are not purely decorative/visual effects, but actually convey information, make sure that any important text and graphical/non-text elements have sufficient color contrast. See [web.dev color and contrast accessibility](https://web.dev/color-and-contrast-accessibility/) for an introduction (primarily around text contrast) and [Knowbility: Exploring WCAG 2.1 — 1.4.11 Non‑text Contrast](https://knowbility.org/blog/2018/WCAG21-1411Contrast/) for more details around non-text elements.
+
 ## Attributes
 
 ### `trigger`
