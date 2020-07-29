@@ -576,10 +576,6 @@ The AMP for Email spec disallows the use of the following attributes on the AMP 
 
 [/filter] <!-- formats="email" -->
 
-[filter formats="websites, stories"]
-
 ## Validation
 
 See [amp-list rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/validator-amp-list.protoascii) in the AMP validator specification.
-
-[/filter]
