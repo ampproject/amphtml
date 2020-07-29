@@ -64,7 +64,7 @@
 }
 
 .i-amphtml-story-interactive-option {
-  cursor: pointer;
+  cursor: pointer !important;
 }
 
 .i-amphtml-story-interactive-confetti-wrapper {
