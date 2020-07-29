@@ -223,6 +223,20 @@ export class AbstractAmpContext {
   }
 
   /**
+   * @param {string} endpoint Method being called
+   * @private
+   */
+  sendDeprecationNotice_(endpoint) {
+    this.client_.sendMessage(
+      MessageType.USER_ERROR_IN_IFRAME,
+      dict({
+        'message': `${endpoint} is deprecated`,
+        'expected': true,
+      })
+    );
+  }
+
+  /**
    *  Allows a creative to set the callback function for when the resize
    *    request returns a success. The callback should be set before resizeAd
    *    is ever called.
@@ -233,6 +247,7 @@ export class AbstractAmpContext {
     this.client_.registerCallback(MessageType.EMBED_SIZE_CHANGED, (obj) => {
       callback(obj['requestedHeight'], obj['requestedWidth']);
     });
+    this.sendDeprecationNotice_('onResizeSuccess');
   }
 
   /**
@@ -246,6 +261,7 @@ export class AbstractAmpContext {
     this.client_.registerCallback(MessageType.EMBED_SIZE_DENIED, (obj) => {
       callback(obj['requestedHeight'], obj['requestedWidth']);
     });
+    this.sendDeprecationNotice_('onResizeDenied');
   }
 
   /**
