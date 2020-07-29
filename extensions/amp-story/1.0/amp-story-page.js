@@ -495,6 +495,10 @@ export class AmpStoryPage extends AMP.BaseElement {
       this.pauseAllMedia_(true /** rewindToBeginning */);
     }
 
+    if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+      this.muteAllMedia();
+    }
+
     if (this.animationManager_) {
       this.animationManager_.cancelAll();
     }
@@ -525,7 +529,12 @@ export class AmpStoryPage extends AMP.BaseElement {
         this.startMeasuringAllVideoPerformance_();
         this.preloadAllMedia_()
           .then(() => this.startListeningToVideoEvents_())
-          .then(() => this.playAllMedia_());
+          .then(() => {
+            this.playAllMedia_();
+            if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
+              this.unmuteAllMedia();
+            }
+          });
       });
       this.prefersReducedMotion_()
         ? this.maybeFinishAnimations_()

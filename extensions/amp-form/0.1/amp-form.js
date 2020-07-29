@@ -1296,12 +1296,24 @@ export class AmpForm {
         p = this.ssrTemplateHelper_
           .applySsrOrCsrTemplate(devAssert(container), data)
           .then((rendered) => {
-            rendered.id = messageId;
-            rendered.setAttribute('i-amphtml-rendered', '');
+            // TODO(#29566): Simplify section appending rendered contents to DOM.
+            let renderContainer;
+            if (isArray(rendered)) {
+              if (rendered.length === 1) {
+                renderContainer = rendered[0];
+              } else {
+                renderContainer = document.createElement('div');
+                rendered.forEach((child) => renderContainer.appendChild(child));
+              }
+            } else {
+              renderContainer = rendered;
+            }
+            renderContainer.id = messageId;
+            renderContainer.setAttribute('i-amphtml-rendered', '');
             return this.mutator_.mutateElement(
               dev().assertElement(container),
               () => {
-                container.appendChild(rendered);
+                container.appendChild(dev().assertElement(renderContainer));
                 const renderedEvent = createCustomEvent(
                   this.win_,
                   AmpEvents.DOM_UPDATE,
