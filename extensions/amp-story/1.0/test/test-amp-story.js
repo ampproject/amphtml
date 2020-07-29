@@ -1030,30 +1030,6 @@ describes.realWin(
           expect(unmuteStub).not.to.have.been.called;
           expect(playStub).not.to.have.been.called;
         });
-
-        it('should mute the page and unmute the next page upon navigation', async () => {
-          await createStoryWithPages(4, [
-            'cover',
-            'page-1',
-            'page-2',
-            'page-3',
-          ]);
-
-          story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
-
-          await story.layoutCallback();
-          const coverMuteStub = env.sandbox.stub(
-            story.getPageById('cover'),
-            'muteAllMedia'
-          );
-          const firstPageUnmuteStub = env.sandbox.stub(
-            story.getPageById('page-1'),
-            'unmuteAllMedia'
-          );
-          await story.switchTo_('page-1');
-          expect(coverMuteStub).to.have.been.calledOnce;
-          expect(firstPageUnmuteStub).to.have.been.calledOnce;
-        });
       });
 
       it('should remove the muted attribute on unmuted state change', async () => {
