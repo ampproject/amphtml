@@ -721,7 +721,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @private
    */
   handleSuccessfulDataRetrieval_(response) {
-    console.log('handleSuccessfulDataRetrieval_', response);
     if (!(response && response['options'])) {
       devAssert(
         response && 'options' in response,
