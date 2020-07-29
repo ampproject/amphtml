@@ -736,16 +736,14 @@ export class AmpStoryPlayer {
     ) {
       throw new Error('Out of Story range.');
     }
-    let currentStory;
     const newIdx = this.currentIdx_ + storyDelta;
-    if (!this.isIndexOutofBounds_(newIdx)) {
-      currentStory = this.stories_[newIdx];
-    } else {
-      currentStory =
-        storyDelta > 0
-          ? this.stories_[newIdx % this.stories_.length]
-          : this.stories_[(newIdx % this.stories_.length + this.stories_.length) % this.stories_.length];
-    }
+    const currentStory =
+      storyDelta > 0
+        ? this.stories_[newIdx % this.stories_.length]
+        : this.stories_[
+            ((newIdx % this.stories_.length) + this.stories_.length) %
+              this.stories_.length
+          ];
     this.show(currentStory.href);
     this.signalNavigation_();
   }
