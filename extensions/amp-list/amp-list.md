@@ -299,7 +299,7 @@ An `<amp-list-load-more>` element with the `load-more-button` attribute, which s
   ...
   <amp-list-load-more load-more-button>
     <!-- My custom see more button -->
-    <button>See More</button> 
+    <button>See More</button>
   </amp-list-load-more>
 </amp-list>
 ```
