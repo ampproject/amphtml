@@ -649,14 +649,14 @@ export class AmpStoryPlayer {
    */
   next_() {
     if (
-      !this.circularWrapping_() &&
+      !this.isCircularWrappingEnabled_() &&
       this.isIndexOutofBounds_(this.currentIdx_ + 1)
     ) {
       return;
     }
 
     if (
-      this.circularWrapping_() &&
+      this.isCircularWrappingEnabled_() &&
       this.isIndexOutofBounds_(this.currentIdx_ + 1)
     ) {
       this.go(1);
@@ -690,14 +690,14 @@ export class AmpStoryPlayer {
    */
   previous_() {
     if (
-      !this.circularWrapping_() &&
+      !this.isCircularWrappingEnabled_() &&
       this.isIndexOutofBounds_(this.currentIdx_ - 1)
     ) {
       return;
     }
 
     if (
-      this.circularWrapping_() &&
+      this.isCircularWrappingEnabled_() &&
       this.isIndexOutofBounds_(this.currentIdx_ - 1)
     ) {
       this.go(-1);
@@ -731,11 +731,12 @@ export class AmpStoryPlayer {
       return;
     }
     if (
-      !this.circularWrapping_() &&
+      !this.isCircularWrappingEnabled_() &&
       this.isIndexOutofBounds_(this.currentIdx_ + storyDelta)
     ) {
       throw new Error('Out of Story range.');
     }
+
     const newIdx = this.currentIdx_ + storyDelta;
     const currentStory =
       storyDelta > 0
@@ -744,6 +745,7 @@ export class AmpStoryPlayer {
             ((newIdx % this.stories_.length) + this.stories_.length) %
               this.stories_.length
           ];
+
     this.show(currentStory.href);
     this.signalNavigation_();
   }
@@ -1013,13 +1015,15 @@ export class AmpStoryPlayer {
       const delta = Math.abs(deltaX);
 
       if (this.swipingState_ === SwipingState.SWIPING_TO_LEFT) {
-        delta > TOGGLE_THRESHOLD_PX && this.getSecondaryIframe_()
+        delta > TOGGLE_THRESHOLD_PX &&
+        (this.getSecondaryIframe_() || this.isCircularWrappingEnabled_)
           ? this.next_()
           : this.resetIframeStyles_();
       }
 
       if (this.swipingState_ === SwipingState.SWIPING_TO_RIGHT) {
-        delta > TOGGLE_THRESHOLD_PX && this.getSecondaryIframe_()
+        delta > TOGGLE_THRESHOLD_PX &&
+        (this.getSecondaryIframe_() || this.isCircularWrappingEnabled_)
           ? this.previous_()
           : this.resetIframeStyles_();
       }
@@ -1090,7 +1094,7 @@ export class AmpStoryPlayer {
    * @private
    * @return {boolean}
    */
-  circularWrapping_() {
+  isCircularWrappingEnabled_() {
     return this.element_.hasAttribute('enable-circular-wrapping');
   }
 
