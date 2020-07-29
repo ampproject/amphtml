@@ -228,7 +228,7 @@ with the following nuances:
   `-moz-transform` for broad-platform support. Vendor prefixes are not needed
   and not allowed in the JSON format, but in CSS they could be necessary.
 
-- In unsupported platforms, `amp-animation`'s pollyfills will fail when using
+- In unsupported platforms, `amp-animation`'s polyfills will fail when using
   `calc()` and `var()` with keyframes specified in CSS. Use fallback values in
   CSS to avoid this.
 
@@ -399,7 +399,7 @@ In the example above:
   It defaults to `0px` if the query does not find it defined as CSS
   within the `<amp style-custom>` tags.
 
-Pollyfills apply to both `var()` and `calc()` on supported platforms. As
+Polyfills apply to both `var()` and `calc()` on supported platforms. As
 a best practice, include default values for `var()`.
 
 ```html
@@ -501,7 +501,7 @@ The returned value is in pixels, e.g. `100px`.
 
 The `width()` and `height()` are especially useful for transforms. The `left`,
 `top` and similar CSS properties that can use `%` values to express animations
-proportional to container size. However, `transform` property interpretes `%`
+proportional to container size. However, `transform` property interprets `%`
 values differently - as a percent of the selected element. Thus, the `width()`
 and `height()` can be used to express transform animations in terms of container
 elements and similar.
@@ -585,7 +585,7 @@ CSS keyframe properties, with the following nuances:
   important on IE/Edge, it's recommended to duplicate it via
   [SVG `transform` attribute](https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform).
 
-- It is impossible to pollyfill `transform-origin` for IE/Edge. For
+- It is impossible to polyfill `transform-origin` for IE/Edge. For
   compatibility, use only the default `transform-origin`.
 
 - Use [CSS `transform-box`](https://developer.mozilla.org/en-US/docs/Web/CSS/transform-box)
