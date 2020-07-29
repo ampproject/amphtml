@@ -93,8 +93,8 @@ export class AmpStoryEntryPoint {
     }
 
     this.initializeGrid_();
-    this.initializeCarousel_();
-    this.initializeCarouselArrow_();
+    //this.initializeCarousel_();
+    //this.initializeCarouselArrow_();
     this.isLaidOut_ = true;
   }
 
@@ -132,9 +132,11 @@ export class AmpStoryEntryPoint {
         story.href,
         i
       );
-      const cardContainer = this.doc_.createElement('div');
-      cardContainer.append(card);
-      cardsContainer.append(cardContainer);
+      cardsContainer.append(card);
+      if (i % 4 === 0) {
+        cardsContainer.append('\n');
+      }
+    }
   }
 
   /** @private */
