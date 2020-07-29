@@ -298,7 +298,7 @@ An `<amp-list-load-more>` element with the `load-more-button` attribute, which s
 >
   ...
   <amp-list-load-more load-more-button>
-    <button>See More</button> /* My custom see more button */
+    <button>See More</button> <!-- My custom see more button -->
   </amp-list-load-more>
 </amp-list>
 ```
@@ -337,7 +337,7 @@ This element is a loader that will be displayed if the user reaches the end of t
 >
   ...
   <amp-list-load-more load-more-loading>
-    <svg>...</svg> /* My custom loader */
+    <svg>...</svg> <!-- My custom loader -->
   </amp-list-load-more>
 </amp-list>
 ```
@@ -392,7 +392,7 @@ This element is not provided by default, but if a `<amp-list-load-more>` element
 >
   ...
   <amp-list-load-more load-more-end>
-    Congratulations! You've reached the end. /* Custom load-end element */
+    Congratulations! You've reached the end. <!-- Custom load-end element -->
   </amp-list-load-more>
 </amp-list>
 ```
@@ -578,3 +578,5 @@ The AMP for Email spec disallows the use of the following attributes on the AMP 
 ## Validation
 
 See [amp-list rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/validator-amp-list.protoascii) in the AMP validator specification.
+
+[/filter]
