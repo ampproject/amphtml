@@ -15,7 +15,7 @@
  */
 
 import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
-import {EmbedMode, EmbedModeParam} from '../embed-mode';
+import {EmbedMode, EmbedModeParam} from '../amp-story-embed-mode';
 import {IframePool} from './amp-story-player-iframe-pool';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {VisibilityState} from '../visibility-state';
