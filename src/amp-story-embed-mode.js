@@ -83,7 +83,6 @@ export const EmbedModeParam = 'embedMode';
 /**
  * @param {string} str
  * @return {!EmbedMode}
- * @package
  */
 export function parseEmbedMode(str) {
   const params = parseQueryString(str);
