@@ -80,7 +80,7 @@ You can specify a template in one of two ways:
 For more details on templates, see [AMP HTML Templates](../../spec/amp-html-templates.md).
 
 [tip type="note"]
-Note also that template contents will place multiple top-level elements into an outer wrapping `<div>`. This means the following input:
+Note also that a good practice is to place these in a single top-level element to prevent unintended side effects. Some possible consequences of providing multiple top-level elements: each top-level element could be treated as a distinct item in a list, or all same-level elements could be wrapped by an additional <div> layer, potentially breaking structure-based CSS rules. This means the following input:
 
 ```html
 <template type="amp-mustache">
@@ -91,7 +91,7 @@ Note also that template contents will place multiple top-level elements into an 
 </template>
 ```
 
-Will effectively be treated as the following:
+Might be effectively treated as is OR as following, depending on the template renderer being employed:
 
 ```html
 <template type="amp-mustache">
@@ -104,7 +104,7 @@ Will effectively be treated as the following:
 </template>
 ```
 
-A best practice is to ensure the provided template contains a singular top-level element so that [`data-value` and `data-disabled`](https://amp.dev/documentation/examples/components/amp-autocomplete/#suggesting-rich-content) attributes can be provided accordingly on the delimiting element.
+A best practice is to ensure the provided template contains a singular top-level element to avoid unpredictable behavior, as well as so that [`data-value` and `data-disabled`](https://amp.dev/documentation/examples/components/amp-autocomplete/#suggesting-rich-content) attributes can be provided accordingly on the delimiting element.
 
 [/tip]
 
