@@ -73,13 +73,11 @@ describes.realWin(
 
     function getRenderedSuggestions() {
       const html = htmlFor(doc);
-      return html`
-        <div>
-          <div data-value="apple"></div>
-          <div data-value="mango"></div>
-          <div data-value="pear"></div>
-        </div>
-      `;
+      return [
+        html`<div data-value="apple"></div>`,
+        html`<div data-value="mango"></div>`,
+        html`<div data-value="pear"></div>`,
+      ];
     }
 
     describe('mutatedAttributesCallback_()', () => {
@@ -956,8 +954,8 @@ describes.realWin(
       impl = await buildAmpAutocomplete(true);
       const sourceData = ['apple', 'mango', 'pear'];
       const rendered = getRenderedSuggestions();
-      rendered.children[2].removeAttribute('data-value', '');
-      rendered.children[2].setAttribute('data-disabled', '');
+      rendered[2].removeAttribute('data-value', '');
+      rendered[2].setAttribute('data-disabled', '');
       env.sandbox
         .stub(impl.getSsrTemplateHelper(), 'applySsrOrCsrTemplate')
         .returns(Promise.resolve(rendered));
