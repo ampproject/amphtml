@@ -150,7 +150,7 @@ See [Responsive images with srcset, sizes & heights](https://amp.dev/documentati
 
 ### alt
 
-A string of alternate text, similar to the `alt` attribute on `img`.
+A string of alternate text, similar to the `alt` attribute on `img`. Always provide an appropriate alternative text whenever you use `amp-img`. Otherwise, assistive technologies (such as screen readers) will announce the element as "unlabelled graphic" or similar. If the image is purely decorative and does not convey any content, you can use an empty `alt=""` - in this case, assistive technologies will simply ignore/not announce the element at all.
 
 ### attribution
 
@@ -241,6 +241,10 @@ For example, instead of specifying `width="900"` and `height="675"`, you can jus
 ```
 
 [/example]
+
+#### Choosing an appropriate text alternative
+
+For suggestions and advice on how to choose an appropriate text alternative for images, you can refer to the [W3C WAI tutorial "An alt Decision Tree"](https://www.w3.org/WAI/tutorials/images/decision-tree/) and the [HTML5.2 Requirements for providing text to act as an alternative for images](https://www.w3.org/TR/html52/semantics-embedded-content.html#alt-text).
 
 #### Setting multiple source files for different screen resolutions
 
