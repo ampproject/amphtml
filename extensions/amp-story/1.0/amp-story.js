@@ -1080,20 +1080,33 @@ export class AmpStory extends AMP.BaseElement {
     backButton.classList.add('i-amphtml-story-screen-reader-back-button');
     backButton.setAttribute('aria-label', 'Previous page');
 
-    backButton.addEventListener('click', () => this.previous_());
-    createElementWithAttributes;
+    const pageIndex = this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX);
+    checkBackButton(pageIndex);
+
+    backButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      this.previous_();
+    });
+
+    this.storeService_.dispatch(
+      Action.SET_ADVANCEMENT_MODE,
+      AdvancementMode.MANUAL_ADVANCE
+    );
+
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_INDEX,
-      (pageIndex) => {
-        pageIndex === 0
-          ? backButton.classList.add(
-              'i-amphtml-story-screen-reader-back-button-hidden'
-            )
-          : backButton.classList.remove(
-              'i-amphtml-story-screen-reader-back-button-hidden'
-            );
-      }
+      (pageIndex) => checkBackButton(pageIndex)
     );
+
+    function checkBackButton(pageIndex) {
+      pageIndex === 0
+        ? backButton.classList.add(
+            'i-amphtml-story-screen-reader-back-button-hidden'
+          )
+        : backButton.classList.remove(
+            'i-amphtml-story-screen-reader-back-button-hidden'
+          );
+    }
   }
 
   /**

@@ -945,18 +945,23 @@ amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-compo
 }
 
 .i-amphtml-story-screen-reader-back-button {
-  width: 10px;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  z-index: 1;
-  height: calc(100vh - 150px);
-  margin: auto 0;
-  background: none;
-  border: none;
+  width: 10px !important;
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  z-index: 1 !important;
+  height: calc(100vh - 150px) !important;
+  margin: auto 0 !important;
+  background: none !important;
+  border: none !important;
+  border: 1px solid red !important;
+}
+
+[dir=rtl]amp-story .i-amphtml-story-screen-reader-back-button {
+  right: 0 !important;
 }
 
 .i-amphtml-story-desktop-panels .i-amphtml-story-screen-reader-back-button,
-.i-amphtml-story-screen-reader-back-button .i-amphtml-story-screen-reader-back-button-hidden {
-  display: none;
+.i-amphtml-story-screen-reader-back-button.i-amphtml-story-screen-reader-back-button-hidden {
+  display: none !important;
 }
