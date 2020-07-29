@@ -417,7 +417,9 @@ export class AmpStoryPlayer {
       this.startUpNext_(container, text);
     });
     
-    this.element_.addEventListener('navigation', (e) => this.endUpNext_(container));
+    this.element_.addEventListener('navigation', (e) => {
+      this.endUpNext_(container);
+    });
   }
 
   updateUpNextInfo_(card, title, author) {
@@ -429,16 +431,20 @@ export class AmpStoryPlayer {
 
   startUpNext_(container, text) {
     let counter = 10;
+    text.textContent = 'UP NEXT in ' + counter;
     container.classList.remove('story-player-hide');
 
-    this.interval_ = setInterval(function() {
+    this.interval_ = setInterval(function(next) {
       counter -= 1;
+
       text.textContent = 'UP NEXT in ' + counter;
+      
       if (counter === 0) {
-        const next = this.next_.bind(this);
         next();
       }
-    }, 1000);
+    }, 
+    1000,
+    this.next_.bind(this));
   }
 
   endUpNext_(container) {
@@ -455,7 +461,10 @@ export class AmpStoryPlayer {
     card.classList.add('story-player-up-next-card');
 
     const cancel = this.doc_.createElement('button');
-    cancel.addEventListener('click', (e) => this.endUpNext_(container));
+    cancel.addEventListener('click', (e) => {
+      this.endUpNext_(container);
+    });
+    cancel.textContent = 'Cancel';
     cancel.classList.add('story-player-up-next-cancel-button')
 
     const textContainer = this.doc_.createElement('div');
