@@ -172,6 +172,26 @@ event.value</pre>
   </tr>
 </table>
 
+### amp-accordion > section <a name="amp-accordion"></a>
+
+<table>
+  <tr>
+    <th width="25%">Event</th>
+    <th width="35%">Description</th>
+    <th width="40%">Data</th>
+  </tr>
+  <tr>
+    <td><code>expand</code></td>
+    <td>Fired when an accordion section expands.</td>
+    <td>None.</td>
+  </tr>
+  <tr>
+    <td><code>collapse</code></td>
+    <td>Fired when an accordion section collapses.</td>
+    <td>None.</td>
+  </tr>
+</table>
+
 ### amp-carousel[type="slides"] <a name="amp-carouseltypeslides"></a>
 
 <table>
@@ -430,6 +450,27 @@ event.response</pre></td>
   <tr>
     <td><code>seekTo(percent=[0,1])</code></td>
     <td>Uses the given percentage value to determine the currentTime of the animation to the specified value and pauses animation. </td>
+  </tr>
+</table>
+
+### amp-accordion <a name="amp-accordion-1"></a>
+
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>toggle(section=STRING)</code></td>
+    <td>Toggles the <code>expanded</code> and <code>collapsed</code> states of <code>amp-accordion</code> sections. When called with no arguments, it toggles all sections of the accordion. Trigger on a specific section by providing the section id: <code>on="tap:myAccordion.toggle(section='section-id')"</code>.
+  </tr>
+  <tr>
+    <td><code>expand(section=STRING)</code></td>
+    <td>Expands the sections of the accordion. If a section is already expanded, it stays expanded. When called with no arguments, it expands all sections of the accordion. Trigger on a specific section by providing the section id: <code>on="tap:myAccordion.expand(section='section-id')"</code>.</td>
+  </tr>
+  <tr>
+    <td><code>collapse(section=STRING)</code></td>
+    <td>Collapses the sections of the accordion. If a section is already collapsed, it stays collapsed. When called with no arguments, it collapses all sections of the accordion. Trigger on a specific section by providing the section id: <code>on="tap:myAccordion.collapse(section='section-id')"</code>.</td>
   </tr>
 </table>
 
