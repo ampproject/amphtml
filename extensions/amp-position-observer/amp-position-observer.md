@@ -29,7 +29,7 @@ limitations under the License.
 
 The `amp-position-observer` component monitors the position of an
 element within the viewport as a user scrolls, and dispatches
-`enter`, `exit` and `scroll:<Position In Viewport As a Percentage>` events (**Low Trust Level**), which can be used to trigger actions (**Only Low Trust Actions**) on other components (e.g., [amp-animation](https://amp.dev/documentation/components/amp-animation).
+`enter`, `exit` and `scroll:<Position In Viewport As a Percentage>` events (**Low Trust Level**), which can be used to trigger actions (**Only Low Trust Actions**) on other components (e.g., [amp-animation](https://amp.dev/documentation/components/amp-animation)).
 
 {% call callout('Note', type='note') %}
 The `amp-position-observer` component is only useful when used with other components and does not do anything on its own.
@@ -171,6 +171,10 @@ as clock becomes less than 50% visible.
   </amp-img>
 </div>
 ```
+
+### Accessibility considerations for scroll-bound and visibility-based animations
+
+Animations in general can present an issue for certain user groups. Scroll-bound and parallax animations in particular can be [problematic for users with vestibular disorders](https://web.dev/prefers-reduced-motion/#motion-triggered-vestibular-spectrum-disorder). Make sure to review the advice provided in the [accessibility considerations for `amp-animation`](https://amp.dev/documentation/components/amp-animation/?format=websites#accessibility-considerations-for-animations).
 
 ## Attributes
 
