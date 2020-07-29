@@ -159,7 +159,7 @@
   transform: scale(1) !important;
 }
 
-.i-amphtml-story-interactive-binary-poll-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
   .i-amphtml-story-interactive-option:before {
   background-color: var(--i-amphtml-interactive-theme-shading-flash);
   content: '' !important;
@@ -172,19 +172,19 @@
   animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el1) !important;
 }
 
-.i-amphtml-story-interactive-binary-poll-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
   .i-amphtml-story-interactive-option:nth-of-type(2):before {
   animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el2) !important;
 } 
 
-.i-amphtml-story-interactive-binary-poll-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option
     .i-amphtml-story-interactive-option-title-text {
     animation: i-amphtml-story-interactive-option-title-text-landing-animation var(--i-amphtml-interactive-animation-time) !important;
     animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el1) !important;
 }
 
-.i-amphtml-story-interactive-binary-poll-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option:nth-of-type(2) 
     .i-amphtml-story-interactive-option-title-text {
     animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el2) !important;
