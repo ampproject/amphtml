@@ -129,7 +129,7 @@ export class BaseTemplate {
    * Unwraps the root element and returns any children in an array.
    * Text node children are normalized inside a <div>.
    * @param {!Element} root
-   * @return {!Element|!Array<!Element>}
+   * @return {!Array<!Element>}
    * @protected @final
    */
   unwrapChildren(root) {
