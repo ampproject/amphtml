@@ -258,11 +258,14 @@ describe('3p ampcontext.js', () => {
     // Resetting since a message is sent on construction.
     windowPostMessageSpy.resetHistory();
 
+    context.sendDeprecationNotice_ = window.sandbox.spy();
+
     const successCallbackSpy = window.sandbox.spy();
     const deniedCallbackSpy = window.sandbox.spy();
 
     context.onResizeSuccess(successCallbackSpy);
     context.onResizeDenied(deniedCallbackSpy);
+    expect(context.sendDeprecationNotice_).to.be.calledTwice;
 
     const height = 100;
     const width = 200;
@@ -316,7 +319,6 @@ describe('3p ampcontext.js', () => {
     context.requestResize(height, width);
 
     // window.context should have sent resize request postMessage
-    expect(windowPostMessageSpy).to.be.calledOnce;
     expect(windowPostMessageSpy).to.be.calledWith(
       'amp-01$internalRuntimeVersion$' +
         '{"width":100,"height":200,"type":"embed-size","sentinel":"1-291921"}',
