@@ -1,12 +1,10 @@
 ---
 $category: dynamic-content
 formats:
-
-- websites
-- email
-  teaser:
+  - websites
+  - email
+teaser:
   text: Suggests completed results corresponding to the user input as they type into the input field.
-
 ---
 
 <!--
@@ -96,6 +94,12 @@ If data is an array of JsonObjects, the filter-value is the property name that w
 ### `src`
 
 The URL of the remote endpoint that returns the JSON that will be filtered and rendered within this <code>amp-autocomplete</code>. This must be a CORS HTTP service and the URL's protocol must be HTTPS. The endpoint must implement the requirements specified in the <a href="https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests?referrer=ampproject.org">CORS Requests in AMP</a> spec. If fetching the data at the src URL fails, the <code>amp-autocomplete</code> triggers a fallback. The src attribute may be omitted if the <code>[src]</code> attribute exists.
+
+[filter formats="email"]
+
+Please note when personalizing autocomplete items with a server endpoint, it is good practice to <a href="https://amp.dev/documentation/guides-and-tutorials/learn/email_fundamentals/#authenticating-requests">authenticate requests</a> containing user data.
+
+[/filter] <!-- formats="email" -->
 
 ### `query`
 
