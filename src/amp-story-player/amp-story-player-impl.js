@@ -868,7 +868,7 @@ export class AmpStoryPlayer {
    * @private
    */
   onDocumentStateUpdate_(data) {
-    switch (data.state /*OK*/) {
+    switch (data.state) {
       case STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE:
         this.onPageAttachmentStateUpdate_(data.value);
         break;
