@@ -618,13 +618,16 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
       await nextTick();
 
+      const navigationSpy = env.sandbox.spy();
+      playerEl.addEventListener('navigation', navigationSpy);
       player.go(2);
-
-      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-      await afterRenderPromise();
-      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
-      expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('1');
+      expect(navigationSpy).to.have.been.calledWithMatch({
+        type: 'navigation',
+        detail: {
+          index: 2,
+          remaining: 2,
+        },
+      });
     });
 
     it('navigate backward given a negative number in range', async () => {
@@ -636,14 +639,17 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
       await nextTick();
 
+      const navigationSpy = env.sandbox.spy();
+      playerEl.addEventListener('navigation', navigationSpy);
       player.go(3);
       player.go(-1);
-
-      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-      await afterRenderPromise();
-      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
-      expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('1');
+      expect(navigationSpy).to.have.been.calledWithMatch({
+        type: 'navigation',
+        detail: {
+          index: 2,
+          remaining: 2,
+        },
+      });
     });
 
     it('not navigate given zero', async () => {
@@ -655,18 +661,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
       await nextTick();
 
-      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-
-      const iframePosition = iframes[0].getAttribute(
-        'i-amphtml-iframe-position'
-      );
-
+      const navigationSpy = env.sandbox.spy();
+      playerEl.addEventListener('navigation', navigationSpy);
       player.go(0);
-
-      await afterRenderPromise();
-      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql(
-        iframePosition
-      );
+      expect(navigationSpy).to.have.not.been.called;
     });
 
     it('go should throw when positive number is out of story range', async () => {
@@ -700,14 +698,18 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
       await nextTick();
 
+      const navigationSpy = env.sandbox.spy();
+      playerEl.addEventListener('navigation', navigationSpy);
       playerEl.setAttribute('enable-circular-wrapping', '');
       player.go(4);
       swipeLeft();
-      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-      await afterRenderPromise();
-      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-      expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+      expect(navigationSpy).to.have.been.calledWithMatch({
+        type: 'navigation',
+        detail: {
+          index: 4,
+          remaining: 0,
+        },
+      });
     });
 
     it('first story call to previous_() is the last story', async () => {
@@ -719,14 +721,18 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
       await nextTick();
 
+      const navigationSpy = env.sandbox.spy();
+      playerEl.addEventListener('navigation', navigationSpy);
       playerEl.setAttribute('enable-circular-wrapping', '');
       player.go(5);
       swipeRight();
-      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-      await afterRenderPromise();
-      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('0');
-      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('1');
-      expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('1');
+      expect(navigationSpy).to.have.been.calledWithMatch({
+        type: 'navigation',
+        detail: {
+          index: 0,
+          remaining: 4,
+        },
+      });
     });
 
     it('navigate to first story when last story is finished', async () => {
@@ -743,10 +749,12 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       playerEl.setAttribute('enable-circular-wrapping', '');
       player.go(4);
       player.go(1);
-      expect(navigationSpy.secondCall.args[0].type).to.eql('navigation');
-      expect(navigationSpy.secondCall.args[0].detail).to.eql({
-        index: 0,
-        remaining: 4,
+      expect(navigationSpy).to.have.been.calledWithMatch({
+        type: 'navigation',
+        detail: {
+          index: 0,
+          remaining: 4,
+        },
       });
     });
 
@@ -763,10 +771,12 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       playerEl.addEventListener('navigation', navigationSpy);
       playerEl.setAttribute('enable-circular-wrapping', '');
       player.go(-1);
-      expect(navigationSpy.firstCall.args[0].type).to.eql('navigation');
-      expect(navigationSpy.firstCall.args[0].detail).to.eql({
-        index: 4,
-        remaining: 0,
+      expect(navigationSpy).to.have.been.calledWithMatch({
+        type: 'navigation',
+        detail: {
+          index: 4,
+          remaining: 0,
+        },
       });
     });
 
@@ -781,10 +791,12 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('navigation', navigationSpy);
       player.next_();
-      expect(navigationSpy.firstCall.args[0].type).to.eql('navigation');
-      expect(navigationSpy.firstCall.args[0].detail).to.eql({
-        index: 1,
-        remaining: 3,
+      expect(navigationSpy).to.have.been.calledWithMatch({
+        type: 'navigation',
+        detail: {
+          index: 1,
+          remaining: 3,
+        },
       });
     });
 
@@ -800,10 +812,12 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       playerEl.addEventListener('navigation', navigationSpy);
       player.next_();
       player.previous_();
-      expect(navigationSpy.secondCall.args[0].type).to.eql('navigation');
-      expect(navigationSpy.secondCall.args[0].detail).to.eql({
-        index: 0,
-        remaining: 4,
+      expect(navigationSpy).to.have.been.calledWithMatch({
+        type: 'navigation',
+        detail: {
+          index: 0,
+          remaining: 4,
+        },
       });
     });
 
@@ -818,10 +832,12 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('navigation', navigationSpy);
       player.go(1);
-      expect(navigationSpy.firstCall.args[0].type).to.eql('navigation');
-      expect(navigationSpy.firstCall.args[0].detail).to.eql({
-        index: 1,
-        remaining: 3,
+      expect(navigationSpy).to.have.been.calledWithMatch({
+        type: 'navigation',
+        detail: {
+          index: 1,
+          remaining: 3,
+        },
       });
     });
   });
