@@ -102,20 +102,20 @@ function performCherryPick(sha) {
   }
 }
 
-function cherryPick() {
+async function cherryPick() {
   const {push, remote = 'origin'} = argv;
   const commits = (argv.commits || '').split(',').filter(Boolean);
   let onto = String(argv.onto || '');
 
   if (!commits.length) {
-    log(red('ERROR:'), 'Must provide commit list with --commits');
-    process.exitCode = 1;
-    return;
+    const error = new Error('Must provide commit list with --commits');
+    error.showStack = false;
+    throw error;
   }
   if (!onto) {
-    log(red('ERROR:'), 'Must provide 13-digit AMP version with --onto');
-    process.exitCode = 1;
-    return;
+    const error = new Error('Must provide 13-digit AMP version with --onto');
+    error.showStack = false;
+    throw error;
   }
   if (onto.length === 15) {
     log(
@@ -127,9 +127,9 @@ function cherryPick() {
     onto = onto.substr(2);
   }
   if (onto.length !== 13) {
-    log(red('ERROR:'), 'Expected 13-digit AMP version; got', cyan(onto));
-    process.exitCode = 1;
-    return;
+    const error = new Error('Expected 13-digit AMP version');
+    error.showStack = false;
+    throw error;
   }
 
   const branch = cherryPickBranchName(onto);
@@ -155,12 +155,11 @@ function cherryPick() {
       green('SUCCESS:'),
       `Cherry-picked ${commits.length} commits onto release ${onto}`
     );
-    process.exitCode = 0;
   } catch (e) {
     log(red('ERROR:'), e.message);
     log('Deleting branch', cyan(branch));
     getOutput(`git checkout master && git branch -d ${branch}`);
-    process.exitCode = 1;
+    throw e;
   }
 }
 
