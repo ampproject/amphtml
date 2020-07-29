@@ -246,6 +246,14 @@ For example, instead of specifying `width="900"` and `height="675"`, you can jus
 
 For suggestions and advice on how to choose an appropriate text alternative for images, you can refer to the [W3C WAI tutorial "An alt Decision Tree"](https://www.w3.org/WAI/tutorials/images/decision-tree/) and the [HTML5.2 Requirements for providing text to act as an alternative for images](https://www.w3.org/TR/html52/semantics-embedded-content.html#alt-text).
 
+### Accessibility considerations for images
+
+`<amp-img>` allows you to include animated images, like GIF or APNG. However, remember that animations included this way can't usually be paused/stopped by users. This can, depending on the image and its size, be a minor distraction, or a major problem for certain user groups - particularly, if the animation contains fast strobing color changes. In general, we recommend avoiding the use of animated images altogether, unless you are certain that they won't have an adverse impact.
+
+`<amp-img>` can also be used to include images of text. It is usually preferable to use actual HTML text, rather than images of text, whenever possible. If an image of text must be used (for instance, because a specific typefaces is mandated by corporate identity/brand guidelines), make sure that the `alt` accurately reflects the text visible in the image.
+
+Lastly, if images contain text or important non-text elements (such as bar charts, infographics, icons) that are essential to understanding the content of the image, make sure that they have sufficient color contrast. See [web.dev color and contrast accessibility](https://web.dev/color-and-contrast-accessibility/) for an introduction (primarily around text contrast) and [Knowbility: Exploring WCAG 2.1 — 1.4.11 Non‑text Contrast](https://knowbility.org/blog/2018/WCAG21-1411Contrast/) for more details around non-text elements.
+
 #### Setting multiple source files for different screen resolutions
 
 [filter formats="websites, stories, ads"]
