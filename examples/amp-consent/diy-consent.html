@@ -195,7 +195,7 @@ setTimeout(() => {
   // Check if we should randomly do some custom stuff
   const shouldApplyCustom = Math.random() > 0.5;
   if (shouldApplyCustom) {
-    // 30-60 is bottom pane, 60 > is lightbox
+    // 30-60 is bottom pane, 60 > is modal
     const initialHeight = 30 + Math.floor(Math.random() * 50);
     readyObject.initialHeight = `${initialHeight}vh`;
     readyObject.border = Math.random() < 0.5

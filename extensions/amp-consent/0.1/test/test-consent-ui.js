@@ -646,13 +646,13 @@ describes.realWin(
         });
       });
 
-      it('should trigger lightbox with certain vh', async () => {
+      it('should trigger modal with certain vh', async () => {
         consentUI = new ConsentUI(mockInstance, {
           'promptUISrc': 'https//promptUISrc',
         });
 
         expect(consentUI.initialHeight_).to.be.equal('30vh');
-        expect(consentUI.lightboxEnabled_).to.be.false;
+        expect(consentUI.modalEnabled_).to.be.false;
         expect(consentUI.overlayEnabled_).to.be.undefined;
 
         consentUI.show(true);
@@ -667,46 +667,40 @@ describes.realWin(
         await macroTask();
 
         expect(consentUI.initialHeight_).to.be.equal('80vh');
-        expect(consentUI.lightboxEnabled_).to.be.true;
+        expect(consentUI.modalEnabled_).to.be.true;
         expect(consentUI.overlayEnabled_).to.be.true;
+        expect(consentUI.parent_.classList.contains(consentUiClasses.modal)).to
+          .be.true;
         expect(
           consentUI.parent_.classList.contains(
-            consentUiClasses.iframeActiveLightbox
-          )
-        ).to.be.true;
-        expect(
-          consentUI.parent_.classList.contains(
-            consentUiClasses.enableBorderLightbox
+            consentUiClasses.borderEnabledModal
           )
         ).to.be.true;
         expect(
           consentUI.parent_.classList.contains(consentUiClasses.iframeActive)
-        ).to.be.false;
+        ).to.be.true;
         expect(
-          consentUI.parent_.style.getPropertyValue('--lightbox-height')
+          consentUI.parent_.style.getPropertyValue('--modal-height')
         ).to.equal('80vh');
         expect(consentUI.maskElement_.classList.contains(consentUiClasses.mask))
           .to.be.true;
 
         // Hide
         consentUI.hide();
-        expect(
-          consentUI.parent_.style.getPropertyValue('--lightbox-height')
-        ).to.equal('');
+        expect(consentUI.parent_.classList.contains(consentUiClasses.modal)).to
+          .be.false;
         expect(
           consentUI.parent_.classList.contains(
-            consentUiClasses.iframeActiveLightbox
+            consentUiClasses.borderEnabledModal
           )
         ).to.be.false;
         expect(
-          consentUI.parent_.classList.contains(
-            consentUiClasses.enableBorderLightbox
-          )
+          consentUI.parent_.classList.contains(consentUiClasses.iframeActive)
         ).to.be.false;
         expect(consentUI.maskElement_.hasAttribute('hidden')).to.be.true;
       });
 
-      it('should trigger lightbox and force overlay and borders', async () => {
+      it('should trigger modal view and force overlay and borders', async () => {
         consentUI = new ConsentUI(mockInstance, {
           'promptUISrc': 'https//promptUISrc',
           'uiConfig': {},
@@ -727,7 +721,7 @@ describes.realWin(
         expect(consentUI.overlayEnabled_).to.be.true;
         expect(
           consentUI.parent_.classList.contains(
-            consentUiClasses.enableBorderLightbox
+            consentUiClasses.borderEnabledModal
           )
         ).to.be.true;
       });
@@ -753,7 +747,7 @@ describes.realWin(
 
       it('should handle a border value', () => {
         return getReadyIframeCmpConsentUi().then((consentUI) => {
-          expect(consentUI.enableBorder_).to.be.equal(true);
+          expect(consentUI.borderEnabled_).to.be.equal(true);
 
           consentUI.handleIframeMessages_({
             source: consentUI.ui_.contentWindow,
@@ -764,7 +758,7 @@ describes.realWin(
             },
           });
 
-          expect(consentUI.enableBorder_).to.be.equal(false);
+          expect(consentUI.borderEnabled_).to.be.equal(false);
         });
       });
     });
@@ -788,14 +782,14 @@ describes.realWin(
         }
       );
 
-      it('should not enter fullscreen in lightbox mode', async () => {
+      it('should not enter fullscreen in modal view', async () => {
         const errorSpy = env.sandbox.spy(user(), 'warn');
 
         consentUI = new ConsentUI(mockInstance, {
           'promptUISrc': 'https//promptUISrc',
         });
 
-        // trigger lightboxmode
+        // trigger modal view
         consentUI.show(true);
         consentUI.handleIframeMessages_({
           source: consentUI.ui_.contentWindow,
@@ -890,14 +884,18 @@ describes.realWin(
       }
     );
 
-    it('should hide the viewer in lightbox and show the viewer on hide', async () => {
+    it('should hide the viewer when modal enabled and show the viewer on hide', async () => {
       consentUI = new ConsentUI(mockInstance, {
         'promptUISrc': 'https//promptUISrc',
       });
 
-      const sendMessageStub = env.sandbox.stub(
-        consentUI.viewer_,
-        'sendMessage'
+      const enterLightboxStub = env.sandbox.stub(
+        consentUI.viewport_,
+        'enterLightboxMode'
+      );
+      const leaveLightboxStub = env.sandbox.stub(
+        consentUI.viewport_,
+        'leaveLightboxMode'
       );
 
       consentUI.show(true);
@@ -910,11 +908,11 @@ describes.realWin(
         },
       });
       await macroTask();
-      expect(sendMessageStub).to.be.calledOnce;
+      expect(enterLightboxStub).to.be.calledOnce;
 
       // Hide
       consentUI.hide();
-      expect(sendMessageStub).to.be.calledTwice;
+      expect(leaveLightboxStub).to.be.calledOnce;
     });
   }
 );

@@ -49,7 +49,7 @@ window.parent.postMessage(
 
 Action `'ready'` informs the AMP runtime to hide the placeholder and show the consent prompt instead.
 
-The `initialHeight` property is used to set the size of consent prompt. Valid values are `30vh` to `80vh`. A valid value below `60vh` (inclusive) will result in amp-consent rendering the consent dialog as a bottom sheet, and a valid value above `60vh` will style the consent prompt as a lightbox popup.
+The `initialHeight` property is used to set the size of consent prompt. Valid values are `30vh` to `80vh`. A valid value below `60vh` (inclusive) will result in amp-consent rendering the consent dialog as a bottom sheet, and a valid value above `60vh` will style the consent prompt as a modal.
 
 The `enableBorder` property determines if the top corners of the consent prompt will be rounded for consent prompts that have an `initialHeight` less than or equal to `60vh`.
 

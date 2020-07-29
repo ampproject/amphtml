@@ -118,13 +118,25 @@ amp-consent.i-amphtml-consent-ui-iframe-active {
   transform: translate3d(0px, 100vh, 0px) !important;
 }
 
-amp-consent.i-amphtml-consent-ui-enable-border {
+amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-modal {
+  box-sizing: border-box;
+  top: 0;
+  right: 0;
+  animation: 0.5s i-amphtml-modal-appear;
+  animation-fill-mode: forwards;
+  height: var(--modal-height) !important;
+  width: 90vw !important;
+  margin: auto !important;
+  max-width: 760px;
+}
+
+amp-consent.i-amphtml-consent-ui-border-enabled {
   border-top-left-radius: 8px !important;
   border-top-right-radius: 8px !important;
   box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2) !important;
 }
 
-amp-consent.i-amphtml-consent-ui-enable-border-lightbox {
+amp-consent.i-amphtml-consent-ui-border-enabled-modal {
   border-radius: 8px !important;
   box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2) !important;
 }
@@ -132,17 +144,6 @@ amp-consent.i-amphtml-consent-ui-enable-border-lightbox {
 amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-in {
   transition: transform 0.5s ease-out !important;
   /* Initial height transform will be set through styles */
-}
-
-amp-consent.i-amphtml-consent-ui-iframe-active-lightbox {
-  box-sizing: border-box;
-  top: 0;
-  right: 0;
-  animation: 0.5s lightbox-appear;
-  animation-fill-mode: forwards;
-  height: var(--lightbox-height);
-  width: 90vw;
-  margin: auto;
 }
 
 amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-in.i-amphtml-consent-ui-iframe-fullscreen {
@@ -162,7 +163,7 @@ amp-consent.i-amphtml-consent-ui-in.i-amphtml-consent-ui-iframe-fullscreen > .i-
   100% {opacity: 0.2;}
 }
 
-@keyframes lightbox-appear {
+@keyframes i-amphtml-modal-appear {
   0% {
     transform: translate(0, 100vh);
     opacity: 0;
