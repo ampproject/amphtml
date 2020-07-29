@@ -72,6 +72,8 @@ The example below contains an `amp-accordion` with three sections. The
 [filter formats="websites, ads"]Include the `disable-session-state` attribute
 to preserve the collapsed/expanded state.[/filter]
 
+[example preview="top-frame" playground="true"]
+
 ````html
 <amp-accordion id="my-accordion"{% if not format=='email'%} disable-session-states{% endif %}>
   <section>
@@ -89,7 +91,9 @@ to preserve the collapsed/expanded state.[/filter]
       height="256"></amp-img>
   </section>
 </amp-accordion>
+```
 
+[/example]
 
 ## Attributes
 
@@ -97,6 +101,8 @@ to preserve the collapsed/expanded state.[/filter]
 
 Include the `animate` attribute in `<amp-accordion>` to add a "roll down"
 animation when the content is expanded and "roll up" animation when collapsed.
+
+[example preview="top-frame" playground="true"]
 
 ```html
 <amp-accordion animate>
@@ -119,6 +125,8 @@ animation when the content is expanded and "roll up" animation when collapsed.
 </amp-accordion>
 ````
 
+[/example]
+
 [filter formats="websites"]
 
 ### disable-session-states
@@ -137,6 +145,8 @@ Apply the `expanded` attribute to a nested `<section>` to expand that section wh
 Apply the `expand-single-section` attribute to `amp-accordion` to specify that
 only one `<section>` can expand at a time. If the user clicks or taps on a
 collapsed `<section>`, any currently expanded `<section>` collapses.
+
+[example preview="top-frame" playground="true"]
 
 ```html
 <amp-accordion expand-single-section>
@@ -159,12 +169,16 @@ collapsed `<section>`, any currently expanded `<section>` collapses.
 </amp-accordion>
 ```
 
+[/example]
+
 ### [data-expand]
 
 Bind the `[data-expand]` attribute to a `<section>` to expand or collapse that
 section. An expanded section collapses if the expression evaluates as false. A
 collapsed section expands if the expression evaluates as anything other than
 false.
+
+[example preview="top-frame" playground="true"]
 
 ```html
 <amp-accordion>
@@ -188,6 +202,8 @@ false.
 <button on="tap:AMP.setState({sectionOne: false})">Collapse section 1</button>
 ```
 
+[/example]
+
 [filter formats="websites"]
 
 ## Actions
@@ -198,6 +214,8 @@ The `toggle` action switches the `expanded` and `collapsed` states of
 `amp-accordion` sections. When called with no arguments, it toggles all sections
 of the accordion. To specify a specific section, add the `section` argument and
 use its corresponding `id` as the value.
+
+[example preview="top-frame" playground="true"]
 
 ```html
 <amp-accordion id="myAccordion">
@@ -219,6 +237,8 @@ use its corresponding `id` as the value.
   Toggle Section 1
 </button>
 ```
+
+[/example]
 
 ### expand
 
@@ -260,6 +280,8 @@ The `expand` event triggers the targeted `amp-accordion` section to change from
 the collapsed state to the expanded state. Call `expand` on an already expanded
 section to trigger the `expand` event.
 
+[example preview="top-frame" playground="true"]
+
 ```html
 <amp-accordion id="myAccordion">
   <section id="section1" on="expand:myAccordion.expand(section='section2')">
@@ -273,11 +295,15 @@ section to trigger the `expand` event.
 </amp-accordion>
 ```
 
+[/example]
+
 ### collapse
 
 The `collapse` event triggers the targeted `amp-accordion` section to change
 from the expanded state to the collapsed state. Call `collapse` on an already
 collapsed section to trigger the event.
+
+[example preview="top-frame" playground="true"]
 
 ```html
 <amp-accordion id="myAccordion">
@@ -291,6 +317,8 @@ collapsed section to trigger the event.
   </section>
 </amp-accordion>
 ```
+
+[/example]
 
 ## Styling
 
