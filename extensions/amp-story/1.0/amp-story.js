@@ -1075,14 +1075,13 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   buildScreenReaderBackButton_() {
-    const backButton = this.element.appendChild(
-      document.createElement('button')
-    );
+    const backButton = document.createElement('button');
+    this.element.appendChild(backButton);
     backButton.classList.add('i-amphtml-story-screen-reader-back-button');
     backButton.setAttribute('aria-label', 'Previous page');
 
     backButton.addEventListener('click', () => this.previous_());
-
+    createElementWithAttributes;
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_INDEX,
       (pageIndex) => {
