@@ -35,7 +35,7 @@ import {dict, hasOwn, map, ownProperty} from '../../../src/utils/object';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {includes, startsWith} from '../../../src/string';
 import {isAmp4Email} from '../../../src/format';
-import {isArray, isEnumValue, toArray} from '../../../src/types';
+import {isArray, isEnumValue} from '../../../src/types';
 import {mod} from '../../../src/utils/math';
 import {once} from '../../../src/utils/function';
 import {removeChildren, tryFocus} from '../../../src/dom';
@@ -725,9 +725,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       renderPromise = this.getSsrTemplateHelper()
         .applySsrOrCsrTemplate(this.element, filteredData)
         .then((rendered) => {
-          const elements = isArray(rendered)
-            ? rendered
-            : toArray(rendered.children);
+          const elements = isArray(rendered) ? rendered : [rendered];
           elements.forEach((child) => {
             if (child.hasAttribute('data-disabled')) {
               child.setAttribute('aria-disabled', 'true');
