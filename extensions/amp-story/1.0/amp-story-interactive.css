@@ -94,8 +94,12 @@
 
 /* landing animations */
 .i-amphtml-story-interactive-active {
-  --landing-animation-delay: .5s;
-  --landing-animation-offset: .9;
+  --i-amphtml-interactive-landing-animation-delay: .5s;
+  --i-amphtml-interactive-landing-animation-offset: .9;
+  --i-amphtml-interactive-landing-animation-delay-offset-el1: var(--i-amphtml-interactive-landing-animation-delay);
+  --i-amphtml-interactive-landing-animation-delay-offset-el2: calc(var(--i-amphtml-interactive-landing-animation-delay) + var(--i-amphtml-interactive-animation-time) * var(--i-amphtml-interactive-landing-animation-offset) * 1);
+  --i-amphtml-interactive-landing-animation-delay-offset-el3: calc(var(--i-amphtml-interactive-landing-animation-delay) + var(--i-amphtml-interactive-animation-time) * var(--i-amphtml-interactive-landing-animation-offset) * 2);
+  --i-amphtml-interactive-landing-animation-delay-offset-el4: calc(var(--i-amphtml-interactive-landing-animation-delay) + var(--i-amphtml-interactive-animation-time) * var(--i-amphtml-interactive-landing-animation-offset) * 3);
 }
 
 @keyframes i-amphtml-interactive-animation-landing-animation-flash-background {
@@ -105,32 +109,32 @@
 }
 
 /* quizzes */
-.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+.i-amphtml-story-interactive-quiz-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option
     .i-amphtml-story-interactive-quiz-answer-choice {
-  animation: quizzes-landing-animation-text var(--i-amphtml-interactive-animation-time);
-  animation-delay: var(--landing-animation-delay);
+  animation: i-amphtml-story-interactive-quiz-answer-choice-landing-animation var(--i-amphtml-interactive-animation-time);
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el1);
 }
 
-.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+.i-amphtml-story-interactive-quiz-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option:nth-of-type(2) 
     .i-amphtml-story-interactive-quiz-answer-choice {
-  animation-delay: calc(var(--landing-animation-delay) + var(--i-amphtml-interactive-animation-time) * var(--landing-animation-offset) * 1);
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el2);
 }
 
-.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+.i-amphtml-story-interactive-quiz-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option:nth-of-type(3) 
     .i-amphtml-story-interactive-quiz-answer-choice {
-  animation-delay: calc(var(--landing-animation-delay) + var(--i-amphtml-interactive-animation-time) * var(--landing-animation-offset) * 2);
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el3);
 }
 
-.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+.i-amphtml-story-interactive-quiz-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option:nth-of-type(4) 
     .i-amphtml-story-interactive-quiz-answer-choice {
-  animation-delay: calc(var(--landing-animation-delay) + var(--i-amphtml-interactive-animation-time) * var(--landing-animation-offset) * 3);
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el4);
 }
 
-@keyframes quizzes-landing-animation-text {
+@keyframes i-amphtml-story-interactive-quiz-answer-choice-landing-animation {
   33% {
     transform: scale(.8);
   }
@@ -147,39 +151,39 @@
   left: 0;
   opacity: 0;
   animation: i-amphtml-interactive-animation-landing-animation-flash-background var(--i-amphtml-interactive-animation-time);
-  animation-delay: var(--landing-animation-delay);
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el1);
 }
 
 .i-amphtml-story-interactive-binary-poll-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
   .i-amphtml-story-interactive-option:nth-of-type(2):before {
-  animation-delay: calc(var(--landing-animation-delay) + var(--i-amphtml-interactive-animation-time) * var(--landing-animation-offset) * 1);
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el2);
 } 
 
 .i-amphtml-story-interactive-binary-poll-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
   .i-amphtml-story-interactive-option:nth-of-type(3):before {
-  animation-delay: calc(var(--landing-animation-delay) + var(--i-amphtml-interactive-animation-time) * var(--landing-animation-offset) * 2);
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el3);
 } 
 
 .i-amphtml-story-interactive-binary-poll-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
   .i-amphtml-story-interactive-option:nth-of-type(4):before {
-  animation-delay: calc(var(--landing-animation-delay) + var(--i-amphtml-interactive-animation-time) * var(--landing-animation-offset) * 3);
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el4);
 } 
 
 /* binary polls - scale text */
-.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+.i-amphtml-story-interactive-binary-poll-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option
     .i-amphtml-story-interactive-option-title-text {
-    animation: binary-polls-landing-animation-text var(--i-amphtml-interactive-animation-time);
-    animation-delay: var(--landing-animation-delay);
+    animation: i-amphtml-story-interactive-option-title-text-landing-animation var(--i-amphtml-interactive-animation-time);
+    animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el1);
 }
 
-.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+.i-amphtml-story-interactive-binary-poll-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option:nth-of-type(2) 
     .i-amphtml-story-interactive-option-title-text {
-    animation-delay: calc(var(--landing-animation-delay) + var(--i-amphtml-interactive-animation-time) * var(--landing-animation-offset) * 1);
+    animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el2);
 }
 
-@keyframes binary-polls-landing-animation-text {
+@keyframes i-amphtml-story-interactive-option-title-text-landing-animation {
   33% {
     transform: scale(.95);
   }
@@ -196,52 +200,52 @@
   left: 0;
   opacity: 0;
   animation: i-amphtml-interactive-animation-landing-animation-flash-background var(--i-amphtml-interactive-animation-time);
-  animation-delay: var(--landing-animation-delay);
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el1);
 }
 
 .i-amphtml-story-interactive-poll-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
   .i-amphtml-story-interactive-option:nth-of-type(2):before {
-  animation-delay: calc(var(--landing-animation-delay) + var(--i-amphtml-interactive-animation-time) * var(--landing-animation-offset) * 1);
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el2);
 } 
 
 .i-amphtml-story-interactive-poll-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
   .i-amphtml-story-interactive-option:nth-of-type(3):before {
-  animation-delay: calc(var(--landing-animation-delay) + var(--i-amphtml-interactive-animation-time) * var(--landing-animation-offset) * 2);
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el3);
 } 
 
 .i-amphtml-story-interactive-poll-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
   .i-amphtml-story-interactive-option:nth-of-type(4):before {
-  animation-delay: calc(var(--landing-animation-delay) + var(--i-amphtml-interactive-animation-time) * var(--landing-animation-offset) * 3);
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el4);
 } 
 
 /* multi polls - scale text */
-.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+.i-amphtml-story-interactive-poll-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option
     .i-amphtml-story-interactive-option-text {
     transform-origin: center !important;
-    animation: multi-polls-landing-animation-text var(--i-amphtml-interactive-animation-time);
-    animation-delay: var(--landing-animation-delay);
+    animation: i-amphtml-story-interactive-option-text-landing-text var(--i-amphtml-interactive-animation-time);
+    animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el1);
 }
 
-.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+.i-amphtml-story-interactive-poll-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option:nth-of-type(2) 
     .i-amphtml-story-interactive-option-text {
-    animation-delay: calc(var(--landing-animation-delay) + var(--i-amphtml-interactive-animation-time) * var(--landing-animation-offset) * 1);
+    animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el2);
 }
 
-.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+.i-amphtml-story-interactive-poll-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option:nth-of-type(3) 
     .i-amphtml-story-interactive-option-text {
-    animation-delay: calc(var(--landing-animation-delay) + var(--i-amphtml-interactive-animation-time) * var(--landing-animation-offset) * 2);
+    animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el3);
 }
 
-.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+.i-amphtml-story-interactive-poll-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option:nth-of-type(4) 
     .i-amphtml-story-interactive-option-text {
-    animation-delay: calc(var(--landing-animation-delay) + var(--i-amphtml-interactive-animation-time) * var(--landing-animation-offset) * 3);
+    animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el4);
 }
 
-@keyframes multi-polls-landing-animation-text {
+@keyframes i-amphtml-story-interactive-option-text-landing-text {
   33% {
     transform: translateY(3px);
   }
