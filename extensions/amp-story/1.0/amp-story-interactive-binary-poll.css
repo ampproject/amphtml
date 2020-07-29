@@ -166,38 +166,38 @@
   position: absolute !important;
   width: 100% !important;
   height: 100% !important;
-  left: 0;
-  opacity: 0;
-  animation: i-amphtml-interactive-animation-landing-animation-flash-background var(--i-amphtml-interactive-animation-time);
-  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el1);
+  left: 0 !important;
+  opacity: 0 !important;
+  animation: i-amphtml-interactive-animation-landing-animation-flash-background var(--i-amphtml-interactive-animation-time) !important;
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el1) !important;
 }
 
 .i-amphtml-story-interactive-binary-poll-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
   .i-amphtml-story-interactive-option:nth-of-type(2):before {
-  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el2);
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el2) !important;
 } 
 
 .i-amphtml-story-interactive-binary-poll-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
   .i-amphtml-story-interactive-option:nth-of-type(3):before {
-  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el3);
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el3) !important;
 } 
 
 .i-amphtml-story-interactive-binary-poll-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
   .i-amphtml-story-interactive-option:nth-of-type(4):before {
-  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el4);
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el4) !important;
 } 
 
 .i-amphtml-story-interactive-binary-poll-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option
     .i-amphtml-story-interactive-option-title-text {
-    animation: i-amphtml-story-interactive-option-title-text-landing-animation var(--i-amphtml-interactive-animation-time);
-    animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el1);
+    animation: i-amphtml-story-interactive-option-title-text-landing-animation var(--i-amphtml-interactive-animation-time) !important;
+    animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el1) !important;
 }
 
 .i-amphtml-story-interactive-binary-poll-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
   .i-amphtml-story-interactive-option:nth-of-type(2) 
     .i-amphtml-story-interactive-option-title-text {
-    animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el2);
+    animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el2) !important;
 }
 
 @keyframes i-amphtml-story-interactive-option-title-text-landing-animation {
