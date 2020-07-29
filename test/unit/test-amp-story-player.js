@@ -700,16 +700,14 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
       await nextTick();
 
-      const navigationSpy = env.sandbox.spy();
-      playerEl.addEventListener('navigation', navigationSpy);
-      playerEl.setAttribute('enable-circular-wrapping', true);
+      playerEl.setAttribute('enable-circular-wrapping', '');
       player.go(4);
-      player.next_();
-      expect(navigationSpy.secondCall.args[0].type).to.eql('navigation');
-      expect(navigationSpy.secondCall.args[0].detail).to.eql({
-        index: 0,
-        remaining: 4,
-      });
+      swipeLeft();
+      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+      await afterRenderPromise();
+      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+      expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('0');
     });
 
     it('first story call to previous_() is the last story', async () => {
@@ -721,15 +719,14 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
       await nextTick();
 
-      const navigationSpy = env.sandbox.spy();
-      playerEl.addEventListener('navigation', navigationSpy);
-      playerEl.setAttribute('enable-circular-wrapping', true);
-      player.previous_();
-      expect(navigationSpy.firstCall.args[0].type).to.eql('navigation');
-      expect(navigationSpy.firstCall.args[0].detail).to.eql({
-        index: 4,
-        remaining: 0,
-      });
+      playerEl.setAttribute('enable-circular-wrapping', '');
+      player.go(5);
+      swipeRight();
+      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+      await afterRenderPromise();
+      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('1');
+      expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('1');
     });
 
     it('navigate to first story when last story is finished', async () => {
@@ -743,7 +740,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('navigation', navigationSpy);
-      playerEl.setAttribute('enable-circular-wrapping', true);
+      playerEl.setAttribute('enable-circular-wrapping', '');
       player.go(4);
       player.go(1);
       expect(navigationSpy.secondCall.args[0].type).to.eql('navigation');
@@ -764,7 +761,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('navigation', navigationSpy);
-      playerEl.setAttribute('enable-circular-wrapping', true);
+      playerEl.setAttribute('enable-circular-wrapping', '');
       player.go(-1);
       expect(navigationSpy.firstCall.args[0].type).to.eql('navigation');
       expect(navigationSpy.firstCall.args[0].detail).to.eql({
