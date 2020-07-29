@@ -5596,4 +5596,16 @@ ValidationResult Validate(std::string_view html,
   return validator.Validate(html);
 }
 
+ValidatorInfo Info() {
+  auto rules = ParsedValidatorRulesProvider::Instance().Get(HtmlFormat::AMP);
+  ValidatorInfo info;
+  // The following field is deprecated and can contain any value. Treat this as
+  // undefined. Do not depend on this.
+  // TODO(amaltas): Remove this field once usage of this is removed.
+  info.set_validator_revision(488  /* Keep in sync with q/d/v/valdiator.cc */);
+  info.set_spec_file_revision(rules->SpecFileRevision());
+  info.set_rules_path("<Embedded>");
+  return info;
+}
+
 }  // namespace amp::validator

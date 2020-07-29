@@ -11,7 +11,8 @@ import "../../validator.proto";
 message ValidatorInfo {
   // Path from which the spec file was loaded.
   optional string rules_path = 1;
-  // The file revision of validator.cc.
+  // The validator revisions are deprecated and new code should not depend on
+  // this. It can contain any value and should be treated as undefined value.
   optional int32 validator_revision = 2 [default = -1];
   // The file revision of the spec file (validator.protoascii).
   optional int32 spec_file_revision = 3 [default = -1];
