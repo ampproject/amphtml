@@ -355,33 +355,96 @@ describes.realWin('BaseTemplate', {amp: true}, (env) => {
     }).to.throw(/Not implemented/);
   });
 
-  it('should unwrap single element', () => {
-    const root = doc.createElement('div');
-    const element1 = doc.createElement('div');
-    root.appendChild(element1);
-    expect(new BaseTemplate(templateElement).unwrap(root)).to.equal(element1);
+  describe('tryUnwrap()', () => {
+    it('should unwrap single element', () => {
+      const root = doc.createElement('div');
+      const element1 = doc.createElement('div');
+      root.appendChild(element1);
+      expect(new BaseTemplate(templateElement).tryUnwrap(root)).to.equal(
+        element1
+      );
+    });
+
+    it('should unwrap with empty/whitespace text', () => {
+      const root = doc.createElement('div');
+      const element1 = doc.createElement('div');
+      root.appendChild(doc.createTextNode('   '));
+      root.appendChild(element1);
+      root.appendChild(doc.createTextNode(' \n\t  '));
+      expect(new BaseTemplate(templateElement).tryUnwrap(root)).to.equal(
+        element1
+      );
+    });
+
+    it('should NOT unwrap single non-div element', () => {
+      const root = doc.createElement('a');
+      root.textContent = 'abc';
+      expect(new BaseTemplate(templateElement).tryUnwrap(root)).to.equal(root);
+    });
+
+    it('should NOT unwrap multiple elements', () => {
+      const root = doc.createElement('div');
+      root.appendChild(doc.createElement('div'));
+      root.appendChild(doc.createElement('div'));
+      expect(new BaseTemplate(templateElement).tryUnwrap(root)).to.equal(root);
+    });
+
+    it('should NOT unwrap with non-empty/whitespace text', () => {
+      const root = doc.createElement('div');
+      root.appendChild(doc.createTextNode('a'));
+      root.appendChild(doc.createElement('div'));
+      expect(new BaseTemplate(templateElement).tryUnwrap(root)).to.equal(root);
+    });
   });
 
-  it('should unwrap with empty/whitespace text', () => {
-    const root = doc.createElement('div');
-    const element1 = doc.createElement('div');
-    root.appendChild(doc.createTextNode('   '));
-    root.appendChild(element1);
-    root.appendChild(doc.createTextNode(' \n\t  '));
-    expect(new BaseTemplate(templateElement).unwrap(root)).to.equal(element1);
-  });
+  describe('unwrapChildren()', () => {
+    it('should unwrap single element', () => {
+      const root = doc.createElement('div');
+      const element1 = doc.createElement('div');
+      root.appendChild(element1);
+      expect(
+        new BaseTemplate(templateElement).unwrapChildren(root)
+      ).to.have.ordered.members([element1]);
+    });
 
-  it('should NOT unwrap multiple elements', () => {
-    const root = doc.createElement('div');
-    root.appendChild(doc.createElement('div'));
-    root.appendChild(doc.createElement('div'));
-    expect(new BaseTemplate(templateElement).unwrap(root)).to.equal(root);
-  });
+    it('should unwrap single non-div element', () => {
+      const root = doc.createElement('a');
+      root.textContent = 'abc';
+      const result = new BaseTemplate(templateElement).unwrapChildren(root);
+      expect(result).to.have.length(1);
+      expect(result[0].tagName).to.equal('DIV');
+      expect(result[0].textContent).to.equal('abc');
+    });
 
-  it('should NOT unwrap with non-empty/whitespace text', () => {
-    const root = doc.createElement('div');
-    root.appendChild(doc.createTextNode('a'));
-    root.appendChild(doc.createElement('div'));
-    expect(new BaseTemplate(templateElement).unwrap(root)).to.equal(root);
+    it('should unwrap with empty/whitespace text', () => {
+      const root = doc.createElement('div');
+      const element1 = doc.createElement('div');
+      root.appendChild(doc.createTextNode('   '));
+      root.appendChild(element1);
+      root.appendChild(doc.createTextNode(' \n\t  '));
+      expect(
+        new BaseTemplate(templateElement).unwrapChildren(root)
+      ).to.have.ordered.members([element1]);
+    });
+
+    it('should unwrap multiple elements', () => {
+      const root = doc.createElement('div');
+      const children = [doc.createElement('div'), doc.createElement('div')];
+      children.forEach((child) => root.appendChild(child));
+      expect(
+        new BaseTemplate(templateElement).unwrapChildren(root)
+      ).to.have.ordered.members(children);
+    });
+
+    it('should unwrap multiple elements and wrap any non-empty/whitespace text', () => {
+      const root = doc.createElement('div');
+      const children = [doc.createTextNode('a'), doc.createElement('div')];
+      children.forEach((child) => root.appendChild(child));
+      const result = new BaseTemplate(templateElement).unwrapChildren(root);
+      expect(result).to.have.length(2);
+      expect(result[0].tagName).to.equal('DIV');
+      expect(result[0].textContent).to.equal('a');
+      expect(result[1]).to.equal(children[1]);
+    });
   });
 });
