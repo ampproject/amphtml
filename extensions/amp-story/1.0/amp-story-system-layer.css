@@ -208,6 +208,10 @@
   position: relative !important;
 }
 
+.i-amphtml-story-no-audio-ui .i-amphtml-story-sound-display {
+  display: none !important;
+}
+
 .i-amphtml-story-mute-audio-control,
 .i-amphtml-story-unmute-audio-control,
 .i-amphtml-paused-display,

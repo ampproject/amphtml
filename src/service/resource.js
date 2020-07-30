@@ -498,13 +498,19 @@ export class Resource {
       oldBox.top != newBox.top ||
       sizeChanges
     ) {
-      if (
-        this.element.isUpgraded() &&
-        this.state_ != ResourceState.NOT_BUILT &&
-        (this.state_ == ResourceState.NOT_LAID_OUT ||
-          this.element.isRelayoutNeeded())
-      ) {
-        this.state_ = ResourceState.READY_FOR_LAYOUT;
+      if (this.element.isUpgraded()) {
+        if (this.state_ == ResourceState.NOT_LAID_OUT) {
+          // If the element isn't laid out yet, then we're now ready for layout.
+          this.state_ = ResourceState.READY_FOR_LAYOUT;
+        } else if (
+          (this.state_ == ResourceState.LAYOUT_COMPLETE ||
+            this.state_ == ResourceState.LAYOUT_FAILED) &&
+          this.element.isRelayoutNeeded()
+        ) {
+          // If the element was already laid out and we need to relayout, then
+          // go back to ready for layout.
+          this.state_ = ResourceState.READY_FOR_LAYOUT;
+        }
       }
     }
 
@@ -897,9 +903,12 @@ export class Resource {
 
     if (this.state_ != ResourceState.LAYOUT_SCHEDULED) {
       const err = dev().createError(
-        'startLayout called but not LAYOUT_SCHEDULED'
+        'startLayout called but not LAYOUT_SCHEDULED',
+        'currently: ',
+        this.state_
       );
-      reportError(err, this.element);
+      err.associatedElement = this.element;
+      reportError(err);
       return Promise.reject(err);
     }
 

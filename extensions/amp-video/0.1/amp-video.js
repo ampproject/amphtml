@@ -30,6 +30,7 @@ import {
 } from '../../../src/dom';
 import {descendsFromStory} from '../../../src/utils/story';
 import {dev, devAssert, user} from '../../../src/log';
+import {getBitrateManager} from './flexible-bitrate';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
@@ -199,6 +200,9 @@ class AmpVideo extends AMP.BaseElement {
     this.configure_();
 
     this.video_ = element.ownerDocument.createElement('video');
+    if (this.element.querySelector('source[data-bitrate]')) {
+      getBitrateManager(this.win).manage(this.video_);
+    }
 
     const poster = element.getAttribute('poster');
     if (!poster && getMode().development) {
@@ -338,7 +342,13 @@ class AmpVideo extends AMP.BaseElement {
           // load.
           return Services.timerFor(this.win)
             .promise(1)
-            .then(() => this.loadPromise(this.video_));
+            .then(() => {
+              // Don't wait for the source to load if media pool is taking over.
+              if (this.isManagedByPool_()) {
+                return;
+              }
+              return this.loadPromise(this.video_);
+            });
         });
     } else {
       this.propagateLayoutChildren_();
@@ -359,6 +369,12 @@ class AmpVideo extends AMP.BaseElement {
     // Resolve layoutCallback right away if the video won't preload.
     if (this.element.getAttribute('preload') === 'none') {
       return;
+    }
+
+    // Resolve layoutCallback as soon as all sources are appended when within a
+    // story, so it can be handled by the media pool as soon as possible.
+    if (this.isManagedByPool_()) {
+      return pendingOriginPromise;
     }
 
     return promise;
@@ -443,6 +459,10 @@ class AmpVideo extends AMP.BaseElement {
         this.video_.appendChild(source);
       }
     });
+
+    if (this.video_.changedSources) {
+      this.video_.changedSources();
+    }
   }
 
   /**
@@ -477,6 +497,10 @@ class AmpVideo extends AMP.BaseElement {
       const origSrc = cachedSource.getAttribute('amp-orig-src');
       const origType = cachedSource.getAttribute('type');
       const origSource = this.createSourceElement_(origSrc, origType);
+      const bitrate = cachedSource.getAttribute('data-bitrate');
+      if (bitrate) {
+        origSource.setAttribute('data-bitrate', bitrate);
+      }
       insertAfterOrAtStart(
         dev().assertElement(this.video_),
         origSource,
@@ -488,6 +512,10 @@ class AmpVideo extends AMP.BaseElement {
     tracks.forEach((track) => {
       this.video_.appendChild(track);
     });
+
+    if (this.video_.changedSources) {
+      this.video_.changedSources();
+    }
   }
 
   /**

@@ -22,16 +22,15 @@ import {useCallback, useLayoutEffect, useRef} from '../../../src/preact';
 const {LINE_HEIGHT_EM_} = styles;
 
 /**
- * @param {!JsonObject} props
+ * @param {!FitTextProps} props
  * @return {PreactDef.Renderable}
  */
-export function FitText(props) {
-  const {
-    'children': children,
-    'minFontSize': minFontSize = 6,
-    'maxFontSize': maxFontSize = 72,
-    ...rest
-  } = props;
+export function FitText({
+  children,
+  minFontSize = 6,
+  maxFontSize = 72,
+  ...rest
+}) {
   const contentRef = useRef(null);
   const measurerRef = useRef(null);
 

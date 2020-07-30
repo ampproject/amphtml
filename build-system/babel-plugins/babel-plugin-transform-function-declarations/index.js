@@ -125,7 +125,7 @@ module.exports = function ({types: t}) {
     (path) => referencesAreOnlyCallExpressions(path, path.get('id').node.name),
   ];
 
-  // If CallExpression names should be exhempt from arrow conversion, denote them here.
+  // If CallExpression names should be exempt from arrow conversion, denote them here.
   const EXEMPTED_EXPRESSION_NAME_REGEXS = [/registerService/];
 
   const EXPRESSION_BAIL_OUT_CONDITIONS = [
@@ -137,11 +137,13 @@ module.exports = function ({types: t}) {
     (path) => {
       const callExpression = path.findParent((p) => p.isCallExpression());
       if (callExpression) {
-        const {name} = (callExpression.node && callExpression.node.callee) || {
+        const {name, property} = (callExpression.node &&
+          callExpression.node.callee) || {
           name: null,
+          property: null,
         };
-        return EXEMPTED_EXPRESSION_NAME_REGEXS.every((regexp) =>
-          regexp.test(name)
+        return EXEMPTED_EXPRESSION_NAME_REGEXS.every(
+          (regexp) => regexp.test(name) || regexp.test(property.name)
         );
       }
 

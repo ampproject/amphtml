@@ -15,30 +15,51 @@
  */
 'use strict';
 
+const argv = require('minimist')(process.argv.slice(2));
 const del = require('del');
+const log = require('fancy-log');
+const path = require('path');
+const {cyan} = require('ansi-colors');
+
+const ROOT_DIR = path.resolve(__dirname, '../../');
 
 /**
- * Clean up the build artifacts
- * @return {!Promise}
+ * Cleans up various build and test artifacts
  */
 async function clean() {
-  return del([
+  const pathsToDelete = [
+    '.amp-build',
+    '.karma-cache',
+    'build',
+    'build-system/server/new-server/transforms/dist',
+    'deps.txt',
     'dist',
     'dist.3p',
     'dist.tools',
-    'build',
-    '.amp-build',
-    '.karma-cache',
-    'deps.txt',
-    'build-system/runner/build',
-    'build-system/runner/dist',
-    'build-system/server/new-server/transforms/dist',
     'test-bin',
-  ]);
+  ];
+  if (argv.include_subpackages) {
+    pathsToDelete.push('**/node_modules', '!node_modules');
+  }
+  const deletedPaths = await del(pathsToDelete, {
+    expandDirectories: false,
+    dryRun: argv.dry_run,
+  });
+  if (deletedPaths.length > 0) {
+    log(argv.dry_run ? "Paths that would've been deleted:" : 'Deleted paths:');
+    deletedPaths.forEach((deletedPath) => {
+      log('\t' + cyan(path.relative(ROOT_DIR, deletedPath)));
+    });
+  }
 }
 
 module.exports = {
   clean,
 };
 
-clean.description = 'Removes build output';
+clean.description = 'Cleans up various build and test artifacts';
+clean.flags = {
+  'dry_run': '  Does a dry run without actually deleting anything',
+  'include_subpackages':
+    '  Also cleans up inner node_modules package directories',
+};

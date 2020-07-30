@@ -20,15 +20,12 @@ const fs = require('fs-extra');
 const globby = require('globby');
 const log = require('fancy-log');
 const {
-  maybePrintArgvMessages,
-  shouldNotRun,
-} = require('./runtime-test/helpers');
-const {
   RuntimeTestRunner,
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
 const {buildRuntime} = require('../common/utils');
 const {cyan, green} = require('ansi-colors');
+const {maybePrintArgvMessages} = require('./runtime-test/helpers');
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -64,10 +61,6 @@ async function buildTransformedHtml() {
 }
 
 async function integration() {
-  if (shouldNotRun()) {
-    return;
-  }
-
   await buildTransformedHtml();
 
   maybePrintArgvMessages();
@@ -102,10 +95,8 @@ integration.flags = {
   'ie': '  Runs tests on IE',
   'nobuild': '  Skips build step',
   'nohelp': '  Silence help messages that are printed prior to test run',
+  'report': '  Write test result report to a local file',
   'safari': '  Runs tests on Safari',
-  'saucelabs': '  Runs tests on Sauce Labs (requires setup)',
-  'stable': '  Runs Sauce Labs tests on stable browsers',
-  'beta': '  Runs Sauce Labs tests on beta browsers',
   'testnames': '  Lists the name of each test being run',
   'verbose': '  With logging enabled',
   'watch': '  Watches for changes in files, runs corresponding test(s)',

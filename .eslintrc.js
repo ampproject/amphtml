@@ -311,7 +311,7 @@ module.exports = {
       },
     },
     {
-      'files': ['**/*.extern.js'],
+      'files': ['**/*.extern.js', '**/*.type.js'],
       'rules': {
         'no-var': 0,
         'no-undef': 0,

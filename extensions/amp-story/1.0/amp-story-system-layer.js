@@ -406,6 +406,14 @@ export class SystemLayer {
     });
 
     this.storeService_.subscribe(
+      StateProperty.CAN_SHOW_AUDIO_UI,
+      (show) => {
+        this.onCanShowAudioUiUpdate_(show);
+      },
+      true /** callToInitialize */
+    );
+
+    this.storeService_.subscribe(
       StateProperty.CAN_SHOW_SHARING_UIS,
       (show) => {
         this.onCanShowSharingUisUpdate_(show);
@@ -557,6 +565,21 @@ export class SystemLayer {
     } else {
       this.getShadowRoot().removeAttribute(HAS_SIDEBAR_ATTRIBUTE);
     }
+  }
+
+  /**
+   * Reacts to updates to whether audio UI may be shown, and updates the UI
+   * accordingly.
+   * @param {boolean} canShowAudioUi
+   * @private
+   */
+  onCanShowAudioUiUpdate_(canShowAudioUi) {
+    this.vsync_.mutate(() => {
+      this.getShadowRoot().classList.toggle(
+        'i-amphtml-story-no-audio-ui',
+        !canShowAudioUi
+      );
+    });
   }
 
   /**

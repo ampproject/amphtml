@@ -181,13 +181,13 @@ window.context.tagName;
 
 // Safeframe
 // TODO(bradfrizzell) Move to its own extern. Not relevant to all AMP.
-/* @type {?Object} */
+/** @type {?Object} */
 window.sf_ = {};
-/* @type {?Object} */
+/** @type {?Object} */
 window.sf_.cfg;
 
 // Exposed to custom ad iframes.
-/* @type {!Function} */
+/** @type {function(function(!Object, function(!Object)), !Array<string>=, !Array<string>=)} */
 window.draw3p;
 
 // AMP's globals
@@ -314,7 +314,7 @@ let VegaParser;
  * @typedef {{parse: VegaParser}}
  */
 let VegaObject;
-/* @type {!VegaObject} */
+/** @type {!VegaObject} */
 window.vg;
 
 // amp-date-picker externs
@@ -322,6 +322,21 @@ window.vg;
  * @type {function(*)}
  */
 let ReactRender = function () {};
+
+/** @constructor */
+let RRule;
+/**
+ * @param {Date} unusedDt
+ * @param {boolean=} unusedInc
+ * @return {?Date}
+ */
+RRule.prototype.before = function (unusedDt, unusedInc) {};
+/**
+ * @param {Date} unusedDt
+ * @param {boolean=} unusedInc
+ * @return {?Date}
+ */
+RRule.prototype.after = function (unusedDt, unusedInc) {};
 
 /**
  * @dict

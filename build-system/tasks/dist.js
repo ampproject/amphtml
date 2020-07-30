@@ -38,11 +38,6 @@ const {
 const {
   displayLifecycleDebugging,
 } = require('../compile/debug-compilation-lifecycle');
-const {
-  distNailgunPort,
-  startNailgunServer,
-  stopNailgunServer,
-} = require('./nailgun');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
@@ -111,7 +106,6 @@ async function runPreDistSteps(options) {
   await copyCss();
   await copyParsers();
   await bootstrapThirdPartyFrames(options);
-  await startNailgunServer(distNailgunPort, /* detached */ false);
   displayLifecycleDebugging();
 }
 
@@ -149,9 +143,6 @@ async function doDist(extraArgs = {}) {
     await buildWebPushPublisherFiles();
     await compileAllJs(options);
     await buildExtensions(options);
-  }
-  if (!argv.watch) {
-    await stopNailgunServer(distNailgunPort);
   }
 
   if (!argv.core_runtime_only) {
@@ -434,8 +425,6 @@ dist.flags = {
   noextensions: '  Builds with no extensions.',
   core_runtime_only: '  Builds only the core runtime.',
   full_sourcemaps: '  Includes source code content in sourcemaps',
-  disable_nailgun:
-    "  Doesn't use nailgun to invoke closure compiler (much slower)",
   sourcemap_url: '  Sets a custom sourcemap URL with placeholder {version}',
   type: '  Points sourcemap to fetch files from the correct GitHub tag',
   esm: '  Does not transpile down to ES5',
@@ -447,4 +436,5 @@ dist.flags = {
     '  Builds runtime with the EXPERIMENT constant set to true',
   sanitize_vars_for_diff:
     '  Sanitize the output to diff build results. Requires --pseudo_names',
+  sxg: '  Outputs the compiled code for the SxG build',
 };

@@ -17,7 +17,13 @@
       "options": {"parser": "json"}
     },
     {
-      "files": [".codecov.yml", ".lando.yml", ".lgtm.yml", ".travis.yml"],
+      "files": [
+        ".codecov.yml",
+        ".github/workflows/continuous-integration-workflow.yml",
+        ".lando.yml",
+        ".lgtm.yml",
+        ".travis.yml"
+      ],
       "options": {"parser": "yaml"}
     }
   ]

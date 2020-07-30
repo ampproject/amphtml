@@ -30,8 +30,8 @@ const {
   handleTypeCheckError,
 } = require('./closure-compile');
 const {checkForUnknownDeps} = require('./check-for-unknown-deps');
-const {checkTypesNailgunPort, distNailgunPort} = require('../tasks/nailgun');
 const {CLOSURE_SRC_GLOBS} = require('./sources');
+const {cpus} = require('os');
 const {isTravisBuild} = require('../common/travis');
 const {postClosureBabel} = require('./post-closure-babel');
 const {preClosureBabel, handlePreClosureError} = require('./pre-closure-babel');
@@ -42,12 +42,9 @@ const {writeSourcemaps} = require('./helpers');
 const queue = [];
 let inProgress = 0;
 
-// There's a race in the gulp plugin of closure compiler that gets exposed
-// during various local development scenarios.
-// See https://github.com/google/closure-compiler-npm/issues/9
 const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild()
-  ? 2
-  : parseInt(argv.closure_concurrency, 10) || 1;
+  ? 10
+  : parseInt(argv.closure_concurrency, 10) || cpus().length;
 
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
@@ -239,15 +236,30 @@ function compile(
     }
     externs.push('build-system/externs/amp.multipass.extern.js');
 
+    // Normally setting this server-side experiment flag would be handled by
+    // the release process automatically. Since this experiment is actually on the
+    // build system instead of runtime, we never run it through babel and therefore
+    // must compute it here.
+    const isStrict = argv.define_experiment_constant === 'STRICT_COMPILATION';
+    const isEsm = argv.esm;
+    let language;
+    if (isEsm) {
+      // Do not transpile down to ES5 if running with `--esm`, since we do
+      // limited transpilation in Babel.
+      language = 'NO_TRANSPILE';
+    } else if (isStrict) {
+      language = 'ECMASCRIPT5_STRICT';
+    } else {
+      language = 'ECMASCRIPT5';
+    }
+
     /* eslint "google-camelcase/google-camelcase": 0*/
     const compilerOptions = {
       compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
       // Turns on more optimizations.
       assume_function_wrapper: true,
       language_in: 'ECMASCRIPT_2020',
-      // Do not transpile down to ES5 if running with `--esm`, since we do
-      // limited transpilation in Babel.
-      language_out: argv.esm ? 'NO_TRANSPILE' : 'ECMASCRIPT5',
+      language_out: language,
       // We do not use the polyfills provided by closure compiler.
       // If you need a polyfill. Manually include them in the
       // respective top level polyfills.js files.
@@ -341,7 +353,7 @@ function compile(
         .pipe(sourcemaps.init())
         .pipe(preClosureBabel())
         .on('error', (err) => handlePreClosureError(err, outputFilename))
-        .pipe(gulpClosureCompile(compilerOptionsArray, checkTypesNailgunPort))
+        .pipe(gulpClosureCompile(compilerOptionsArray))
         .on('error', (err) => handleTypeCheckError(err))
         .pipe(nop())
         .on('end', resolve);
@@ -354,7 +366,7 @@ function compile(
         .on('error', (err) =>
           handlePreClosureError(err, outputFilename, options, resolve)
         )
-        .pipe(gulpClosureCompile(compilerOptionsArray, distNailgunPort))
+        .pipe(gulpClosureCompile(compilerOptionsArray))
         .on('error', (err) =>
           handleCompilerError(err, outputFilename, options, resolve)
         )
