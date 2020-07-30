@@ -143,7 +143,6 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 - Yieldbot
 - Yieldlab
 
-
 ### RTC Callout Request Specification
 
 RTC callout requests are sent from the AMP runtime with the following headers:
