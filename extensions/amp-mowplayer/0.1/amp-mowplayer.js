@@ -56,9 +56,6 @@ class AmpMowplayer extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?../../../src/service/viewport/viewport-interface.ViewportInterface} */
-    this.viewport_ = null;
-
     /** @private {?string}  */
     this.mediaid_ = '';
 
@@ -104,8 +101,6 @@ class AmpMowplayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.viewport_ = this.getViewport();
-
     this.mediaid_ = userAssert(
       this.element.getAttribute('data-mediaid'),
       '/The data-mediaid attribute is required for <amp-mowplayer> %s',
@@ -232,10 +227,6 @@ class AmpMowplayer extends AMP.BaseElement {
       this.sendMessage_('handshake_done', {});
     } else if (eventType === 'visibility_observer') {
       this.onVisibilityObserver_();
-    } else if (eventType === 'pause') {
-      this.pause();
-    } else if (eventType === 'play') {
-      this.play();
     }
 
     const playerState = info['playerState'];
@@ -267,15 +258,9 @@ class AmpMowplayer extends AMP.BaseElement {
    * @private
    */
   onVisibilityObserver_() {
-    const worker = () => {
-      const {intersectionRatio} = this.element.getIntersectionChangeEntry();
-      const visible = intersectionRatio > 0.5 ? true : false;
-      this.sendMessage_('visibility_observer_visibility', {'visible': visible});
-    };
-
-    this.viewport_.onChanged(worker);
-
-    worker();
+    const {intersectionRatio} = this.element.getIntersectionChangeEntry();
+    const visible = intersectionRatio > 0.5 ? true : false;
+    this.sendMessage_('visibility_observer_visibility', {'visible': visible});
   }
 
   /** @override */
@@ -289,16 +274,24 @@ class AmpMowplayer extends AMP.BaseElement {
   }
 
   /** @override */
-  play() {}
+  play(unusedIsAutoplay) {
+    this.sendCommand_('playVideo');
+  }
 
   /** @override */
-  pause() {}
+  pause() {
+    this.sendCommand_('pauseVideo');
+  }
 
   /** @override */
-  mute() {}
+  mute() {
+    this.sendCommand_('mute');
+  }
 
   /** @override */
-  unmute() {}
+  unmute() {
+    this.sendCommand_('unMute');
+  }
 
   /** @override */
   showControls() {
