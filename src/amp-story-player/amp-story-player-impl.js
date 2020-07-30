@@ -696,6 +696,7 @@ export class AmpStoryPlayer {
 
     this.evictStoriesFromIframes_();
     this.assignIframesForStoryIdx_(storyIdx);
+    this.signalNavigation_();
   }
 
   /** Sends a message muting the current story. */
@@ -861,7 +862,6 @@ export class AmpStoryPlayer {
     const currentStory = this.stories_[this.currentIdx_ + storyDelta];
 
     this.show(currentStory.href);
-    this.signalNavigation_();
   }
 
   /**
