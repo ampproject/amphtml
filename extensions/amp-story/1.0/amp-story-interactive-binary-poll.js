@@ -84,7 +84,9 @@ const buildOptionTemplate = (element) => {
  */
 const buildBinaryOptionDividerTemplate = (element) => {
   const html = htmlFor(element);
-  return html` <div class="i-amphtml-story-interactive-option-divider"></div> `;
+  return html`
+    <span class="i-amphtml-story-interactive-option-divider"></span>
+  `;
 };
 
 export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {
