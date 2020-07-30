@@ -113,7 +113,7 @@ If `<amp-list>` needs more space after loading, it requests the AMP runtime to u
 By default, `<amp-list>` adds a `list` ARIA role to the list element and a `listitem` role to item elements rendered via the template. If the list element or any of its children are not "tabbable" (accessible by keyboard keys such as the `a` and `button` elements or any elements with a positive `tabindex`), a `tabindex` of `0` will be added by default to the list item.
 
 [tip type="note"]
-Note also that a good practice is to provide templates a single top-level element to prevent unintended side effects. Some possible consequences of providing multiple top-level elements: each top-level element could be treated as a distinct item in a list, or all same-level elements could be wrapped by an additional <div> layer, potentially breaking structure-based CSS rules. This means the following input:
+Note also that a good practice is to provide templates a single top-level element to prevent unintended side effects. This means the following input:
 
 ```html
 <template type="amp-mustache">
@@ -124,7 +124,7 @@ Note also that a good practice is to provide templates a single top-level elemen
 </template>
 ```
 
-Might be effectively treated as is OR as following, depending on the template renderer being employed:
+Would most predictably be applied and rendered if instead provided as follows:
 
 ```html
 <template type="amp-mustache">
@@ -136,8 +136,6 @@ Might be effectively treated as is OR as following, depending on the template re
   {% endraw %}
 </template>
 ```
-
-A best practice is to ensure the provided template contains a singular top-level element to avoid unpredictable behavior.
 
 [/tip]
 
