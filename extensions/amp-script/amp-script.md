@@ -4,7 +4,6 @@ formats:
   - websites
 teaser:
   text: Runs custom JavaScript in a Web Worker.
-experimental: true
 ---
 
 <!---
@@ -32,7 +31,7 @@ An `amp-script` element can load JavaScript in two ways:
 - remotely, from a URL
 - locally, from a `<script>` element on the page
 
-#### Load JavaScript from a remote URL
+### Load JavaScript from a remote URL
 
 Use the `src` attribute to load JavaScript from a URL:
 
@@ -42,7 +41,7 @@ Use the `src` attribute to load JavaScript from a URL:
 </amp-script>
 ```
 
-#### Load JavaScript from a local element
+### Load JavaScript from a local element
 
 You can also include your JavaScript inline, in a `script` tag. You must:
 
@@ -78,7 +77,7 @@ You can also include your JavaScript inline, in a `script` tag. You must:
 For security reasons, `amp-script` elements with a `script` or cross-origin `src` attribute require a [script hash](#script-hash) in a `<meta name="amp-script-src" content="...">` tag. Also, same-origin `src` files must have [`Content-Type`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type): `application/javascript` or `text/javascript`.
 [/tip]
 
-### How does it work?
+## How does it work?
 
 `amp-script` runs your custom JavaScript in a [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers) that has access to a virtual DOM. When your JavaScript code modifies this virtual DOM, `amp-script` forwards these changes to the main thread and applies them to the `amp-script` element subtree.
 
@@ -101,7 +100,7 @@ Will be reflected on the page as a new child of the `amp-script` element:
 
 Under the hood, `amp-script` uses [@ampproject/worker-dom](https://github.com/ampproject/worker-dom/). For design details, see the ["Intent to Implement" issue](https://github.com/ampproject/amphtml/issues/13471).
 
-### State manipulation
+## State manipulation
 
 `amp-script` supports getting and setting [`amp-state`](https://amp.dev/documentation/components/amp-bind/#initializing-state-with-amp-state) JSON via JavaScript.
 
@@ -126,7 +125,7 @@ AMP.setState(json) {}
 AMP.getState(expr) {}
 ```
 
-##### Example with WebSocket and AMP.setState()
+### Example with WebSocket and AMP.setState()
 
 ```html
 <amp-script width="1" height="1" script="webSocketDemo"> </amp-script>
@@ -143,22 +142,22 @@ AMP.getState(expr) {}
 </script>
 ```
 
-### Restrictions
+## Restrictions
 
-#### Allowed APIs
+### Allowed APIs
 
 Currently, most DOM elements and their properties are supported. DOM query APIs like `querySelector` have partial support. Browser APIs like `History` are not implemented yet. See the [API compatibility table](https://github.com/ampproject/worker-dom/blob/master/web_compat_table.md) for details.
 
 If there's an API you'd like to see supported, please [file an issue](https://github.com/ampproject/amphtml/issues/new) and mention `@choumx` and `@kristoferbaxter`.
 
-#### Size of JavaScript code <a name="size-of-javascript-code"></a>
+### Size of JavaScript code <a name="size-of-javascript-code"></a>
 
 `amp-script` has the following restrictions on JavaScript file size:
 
 - Maximum of 10,000 bytes per `amp-script` element that uses a local script via `script[type=text/plain][target=amp-script]`.
 - Maximum total of 150,000 bytes for all `amp-script` elements on the page.
 
-#### User gestures <a name="user-gestures"></a>
+### User gestures <a name="user-gestures"></a>
 
 In some cases, `amp-script` requires a user gesture to apply changes triggered by your JavaScript code (we call these "mutations") to the `amp-script`'s DOM children. This helps avoid poor user experience from unexpected content jumping.
 
@@ -167,11 +166,11 @@ The rules for mutations are as follows:
 1. For `amp-script` elements with [non-container layout](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#supported-values-for-the-layout-attribute), mutations are always allowed.
 2. For `amp-script` elements with container layout, mutations are allowed for five seconds following a user gesture. This five second window is extended once if a `fetch()` is triggered.
 
-#### Creating AMP elements
+### Creating AMP elements
 
-With regard to dynamic creation of AMP elements (e.g. via `document.createElement()`), only `amp-img` and `amp-layout` are currently allowed. Please upvote or comment on {{'[% raw %]'}}[#{{'{% endraw %}'}}25344](https://github.com/ampproject/amphtml/issues/25344) with your use case.
+With regard to dynamic creation of AMP elements (e.g. via `document.createElement()`), only `amp-img` and `amp-layout` are currently allowed. Please upvote or comment on [&#35;25344](https://github.com/ampproject/amphtml/issues/25344) with your use case.
 
-### Calculating the script hash <a name="script-hash"></a>
+## Calculating the script hash <a name="script-hash"></a>
 
 Since custom JS run in `amp-script` is not subject to normal [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP), you need to add this script hash:
 
@@ -188,21 +187,19 @@ Include the script hash in a `meta[name=amp-script-src]` element in the document
 2. base64url-encode the result.
 3. Prefix that with `sha384-`.
 
-Here's you might build the hash in node.js:
+Here's you might build the hash in Node.js using the [@ampproject/toolbox-script-csp](https://www.npmjs.com/package/@ampproject/toolbox-script-csp) package:
 
 ```js
-function generateCSPHash(script) {
-  const hash = crypto.createHash('sha384');
-  const data = hash.update(script, 'utf-8');
-  return (
-    'sha384-' +
-    data
-      .digest('base64')
-      .replace(/=/g, '')
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-  );
-}
+const {calculateHash} = require('@ampproject/toolbox-script-csp');
+
+const script = `
+    const subject = 'world';
+    console.log('Hello, ' + subject);
+    `;
+
+const hash = calculateHash(script);
+
+console.log(hash); // sha384-xRxb5sv13at6tVgZET4JLmf89TSZP10HjCGXVqO9bKWVXB0asV2jLrsDN8v4zX6j
 ```
 
 This example shows how to use the script hash in HTML:
