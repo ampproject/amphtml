@@ -469,6 +469,48 @@ const actions = (state, action, data) => {
   }
 };
 
+// @TODO(gmajoulet): These should get their own file if they start growing.
+/**
+ * Provides the state configuration for a given embed mode
+ * @param {?EmbedMode} embedMode
+ * @return {!Object<StateProperty, *>} Partial state
+ */
+const getEmbedOverrides = (embedMode) => {
+  switch (embedMode) {
+    case EmbedMode.NAME_TBD:
+      return {
+        [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
+        [StateProperty.CAN_SHOW_BOOKEND]: false,
+        [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
+        [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: false,
+        [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
+        [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
+        [StateProperty.MUTED_STATE]: false,
+      };
+    case EmbedMode.NO_SHARING:
+      return {
+        [StateProperty.CAN_SHOW_SHARING_UIS]: false,
+      };
+    case EmbedMode.PREVIEW:
+      return {
+        [StateProperty.PREVIEW_STATE]: true,
+        [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
+        [StateProperty.CAN_SHOW_BOOKEND]: false,
+        [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
+        [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: false,
+        [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: false,
+        [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
+      };
+    case EmbedMode.NO_SHARING_NOR_AUDIO_UI:
+      return {
+        [StateProperty.CAN_SHOW_AUDIO_UI]: false,
+        [StateProperty.CAN_SHOW_SHARING_UIS]: false,
+      };
+    default:
+      return {};
+  }
+};
+
 /**
  * Store service.
  */
@@ -486,7 +528,7 @@ export class AmpStoryStoreService {
     /** @private {!State} */
     this.state_ = /** @type {!State} */ ({
       ...this.getDefaultState_(),
-      ...this.getEmbedOverrides_(),
+      ...this.getDefaultEmbedOverrides_(),
     });
   }
 
@@ -607,46 +649,14 @@ export class AmpStoryStoreService {
     });
   }
 
-  // @TODO(gmajoulet): These should get their own file if they start growing.
   /**
-   * Retrieves the embed mode config, that will override the default state.
+   * Retrieves the embed mode config based on the fragment provided in the story URL,
+   * which will override the default state.
    * @return {!Object<StateProperty, *>} Partial state
    * @protected
    */
-  getEmbedOverrides_() {
+  getDefaultEmbedOverrides_() {
     const embedMode = parseEmbedMode(this.win_.location.hash);
-    switch (embedMode) {
-      case EmbedMode.NAME_TBD:
-        return {
-          [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
-          [StateProperty.CAN_SHOW_BOOKEND]: false,
-          [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
-          [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: false,
-          [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
-          [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
-          [StateProperty.MUTED_STATE]: false,
-        };
-      case EmbedMode.NO_SHARING:
-        return {
-          [StateProperty.CAN_SHOW_SHARING_UIS]: false,
-        };
-      case EmbedMode.PREVIEW:
-        return {
-          [StateProperty.PREVIEW_STATE]: true,
-          [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
-          [StateProperty.CAN_SHOW_BOOKEND]: false,
-          [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
-          [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: false,
-          [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: false,
-          [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
-        };
-      case EmbedMode.NO_SHARING_NOR_AUDIO_UI:
-        return {
-          [StateProperty.CAN_SHOW_AUDIO_UI]: false,
-          [StateProperty.CAN_SHOW_SHARING_UIS]: false,
-        };
-      default:
-        return {};
-    }
+    return getEmbedOverrides(embedMode);
   }
 }
