@@ -829,18 +829,6 @@ describes.sandboxed('AmpDoc.visibilityState', {}, (env) => {
     expect(embedChild.getVisibilityState()).to.equal('hidden');
   });
 
-  it('should configure visibilityState for prerender', () => {
-    top = new AmpDocSingle(win, {
-      params: {
-        'visibilityState': 'prerender',
-        'prerenderSize': '3',
-      },
-    });
-    expect(top.getVisibilityState()).to.equal('prerender');
-    expect(top.isVisible()).to.equal(false);
-    expect(top.getParam('prerenderSize')).to.equal('3');
-  });
-
   it('should be hidden when the browser document is unknown state', () => {
     updateDocumentVisibility(doc, 'what is this');
     expect(top.getVisibilityState()).to.equal('hidden');
