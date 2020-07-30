@@ -110,7 +110,13 @@ The request is always made from the client, even if the document was served from
 
 If `<amp-list>` needs more space after loading, it requests the AMP runtime to update its height using the normal AMP flow. If the AMP runtime cannot satisfy the request for the new height, it will display the `overflow` element when available. Notice however, that the typical placement of `<amp-list>` elements at the bottom of the document almost always guarantees that the AMP runtime can resize them.
 
-By default, `<amp-list>` adds a `list` ARIA role to the list element and a `listitem` role to item elements rendered via the template. If the list element or any of its children are not "tabbable" (accessible by keyboard keys such as the `a` and `button` elements or any elements with a positive `tabindex`), a `tabindex` of `0` will be added by default to the list item.
+### Accessibility considerations for `amp-list`
+
+By default, `<amp-list>` adds a `list` ARIA role to the list element and a `listitem` role to item elements rendered via the template. If the list element or any of its children are not "tabbable" (accessible by keyboard keys such as the `a` and `button` elements or any elements with a positive `tabindex`), a `tabindex` of `0` will be added by default to the list item. This behaviour is arguably not always appropriate - generally, only interactive controls/content should be focusable. If you want to suppress this behaviour, make sure to include `tabindex="-1"` as part of the outermost element of your template.
+
+[tip type="important"]
+Currently, the rendered list element is declared as an ARIA live region (using `aria-live="polite"`), meaning that any change to the content of the list results in the entire list being read out/announced by assistive technologies (such as screen readers). Due to the way lists are initially rendered, this can also result in lists being announced in their entirety when a page is loaded. To work around this issue for now, you can add `aria-live="off"` to `<amp-list>`, which will override the addition of `aria-live="polite"`.
+[/tip]
 
 ### XHR batching
 
@@ -286,6 +292,10 @@ Without `useInitialPageSize`, the `100%` scroll trigger point might never fire a
 #### load-more-button
 
 An `<amp-list-load-more>` element with the `load-more-button` attribute, which shows up at the end of the list (for the manual load-more) if there are more elements to be loaded. Clicking on this element will trigger a fetch to load more elements from the url contained in the `load-more-src` field or the field of the data returned corresponding to the `load-more-bookmark` attribute. This element can be customized by providing `<amp-list>` with a child element that has the attribute `load-more-button`.
+
+### Accessibility considerations for infinite scroll lists
+
+Be careful when using infinite scroll lists - if there is any content after the list (including a standard footer or similar), users won't be able to reach it until all list items have been loaded/displayed. This can make the experience frustrating or even impossible to overcome for users. See [Adrian Roselli: So you think you've built a good infinite scroll](https://adrianroselli.com/2014/05/so-you-think-you-built-good-infinite.html).
 
 ##### Example:
 
