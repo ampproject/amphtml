@@ -298,7 +298,8 @@ An `<amp-list-load-more>` element with the `load-more-button` attribute, which s
 >
   ...
   <amp-list-load-more load-more-button>
-    <button>See More</button> /* My custom see more button */
+    <!-- My custom see more button -->
+    <button>See More</button>
   </amp-list-load-more>
 </amp-list>
 ```
@@ -337,7 +338,8 @@ This element is a loader that will be displayed if the user reaches the end of t
 >
   ...
   <amp-list-load-more load-more-loading>
-    <svg>...</svg> /* My custom loader */
+    <!-- My custom loader -->
+    <svg>...</svg>
   </amp-list-load-more>
 </amp-list>
 ```
@@ -392,7 +394,8 @@ This element is not provided by default, but if a `<amp-list-load-more>` element
 >
   ...
   <amp-list-load-more load-more-end>
-    Congratulations! You've reached the end. /* Custom load-end element */
+    <!-- Custom load-end element -->
+    Congratulations! You've reached the end.
   </amp-list-load-more>
 </amp-list>
 ```
@@ -572,8 +575,6 @@ The AMP for Email spec disallows the use of the following attributes on the AMP 
 - `xssi-prefix`
 
 [/filter] <!-- formats="email" -->
-
-[filter formats="websites, stories"]
 
 ## Validation
 
