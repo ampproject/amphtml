@@ -153,6 +153,10 @@ corresponding carousel item displays.
 
 [/example]
 
+### Accessibility considerations for `amp-carousel`
+
+Autoplaying, and particularly infinitely looping, carousels can be very distracting and confusing for users - especially for users with cognitive impairments. In general, we recommend avoiding autoplaying carousels. While autoplaying carousels stop once the user has interacted with the carousel, consider consider also adding an explicit "Play/Pause" control.
+
 ## Attributes
 
 ### type
