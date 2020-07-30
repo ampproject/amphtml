@@ -157,6 +157,8 @@ corresponding carousel item displays.
 
 Autoplaying, and particularly infinitely looping, carousels can be very distracting and confusing for users - especially for users with cognitive impairments. In general, we recommend avoiding autoplaying carousels. While autoplaying carousels stop once the user has interacted with the carousel, consider consider also adding an explicit "Play/Pause" control.
 
+Depending on the content of the slides, it's possible that using a `delay` that is below ~350ms can result in strobing effects that, in extreme cases, can trigger seizures in users with photosensitive seizure disorders. As a general rule, never use `delay` values below `1000`.
+
 ## Attributes
 
 ### type
