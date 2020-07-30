@@ -1081,10 +1081,9 @@ export class AmpStory extends AMP.BaseElement {
     backButton.setAttribute('aria-label', 'Previous page');
 
     const pageIndex = this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX);
-    checkBackButton(pageIndex);
+    hideOnFirstPage(pageIndex);
 
-    backButton.addEventListener('click', (e) => {
-      e.preventDefault();
+    backButton.addEventListener('click', () => {
       this.previous_();
     });
 
@@ -1095,10 +1094,16 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_INDEX,
-      (pageIndex) => checkBackButton(pageIndex)
+      (pageIndex) => hideOnFirstPage(pageIndex)
     );
 
-    function checkBackButton(pageIndex) {
+    /**
+     * Append class to hide button if on first page.
+     * @param {string} pageIndex
+     * @return {void}
+     * @private
+     */
+    function hideOnFirstPage(pageIndex) {
       pageIndex === 0
         ? backButton.classList.add(
             'i-amphtml-story-screen-reader-back-button-hidden'
