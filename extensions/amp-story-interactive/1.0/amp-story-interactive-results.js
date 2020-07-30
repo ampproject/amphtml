@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {AmpStoryInteractive, InteractiveType} from './amp-story-interactive';
+import {
+  AmpStoryInteractive,
+  InteractiveType,
+} from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-results-1.0.css';
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 import {htmlFor} from '../../../src/static-template';
