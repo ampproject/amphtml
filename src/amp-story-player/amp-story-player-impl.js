@@ -398,7 +398,7 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * 
+   *
    * @private
    */
   initializeUpNext_() {
@@ -408,16 +408,16 @@ export class AmpStoryPlayer {
 
     const {container, card, text, title, author} = this.createUpNextElement_();
 
-    this.element_.addEventListener('storyEnd', (e) => {
+    this.element_.addEventListener('storyEnd', () => {
       if (this.currentIdx_ + 1 >= this.stories_.length) {
         return;
       }
-      
+
       this.updateUpNextInfo_(card, title, author);
       this.startUpNext_(container, text);
     });
-    
-    this.element_.addEventListener('navigation', (e) => {
+
+    this.element_.addEventListener('navigation', () => {
       this.endUpNext_(container);
     });
   }
@@ -434,17 +434,19 @@ export class AmpStoryPlayer {
     text.textContent = 'UP NEXT in ' + counter;
     container.classList.remove('story-player-hide');
 
-    this.interval_ = setInterval(function(next) {
-      counter -= 1;
+    this.interval_ = setInterval(
+      function (next) {
+        counter -= 1;
 
-      text.textContent = 'UP NEXT in ' + counter;
-      
-      if (counter === 0) {
-        next();
-      }
-    }, 
-    1000,
-    this.next_.bind(this));
+        text.textContent = 'UP NEXT in ' + counter;
+
+        if (counter === 0) {
+          next();
+        }
+      },
+      1000,
+      this.next_.bind(this)
+    );
   }
 
   endUpNext_(container) {
@@ -461,11 +463,11 @@ export class AmpStoryPlayer {
     card.classList.add('story-player-up-next-card');
 
     const cancel = this.doc_.createElement('button');
-    cancel.addEventListener('click', (e) => {
+    cancel.addEventListener('click', () => {
       this.endUpNext_(container);
     });
     cancel.textContent = 'Cancel';
-    cancel.classList.add('story-player-up-next-cancel-button')
+    cancel.classList.add('story-player-up-next-cancel-button');
 
     const textContainer = this.doc_.createElement('div');
     const textElements = this.createUpNextTexts_(textContainer);
@@ -480,19 +482,19 @@ export class AmpStoryPlayer {
 
   createUpNextTexts_(textContainer) {
     textContainer.classList.add('story-player-up-next-text-container');
-    
+
     const text = this.doc_.createElement('p');
     text.classList.add('story-player-up-next-text');
     text.textContent = 'UP NEXT in 10';
-    
+
     const title = this.doc_.createElement('p');
     title.classList.add('story-player-up-next-title');
     title.textContent = 'Title placeholder';
-    
+
     const author = this.doc_.createElement('p');
     author.classList.add('story-player-up-next-author');
     author.textContent = 'Placeholder';
-  
+
     textContainer.appendChild(text);
     textContainer.appendChild(title);
     textContainer.appendChild(author);
