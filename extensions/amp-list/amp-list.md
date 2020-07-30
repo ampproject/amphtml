@@ -282,7 +282,7 @@ See below for a full example,
 
 ### Using amp-script as a data source
 
-In the ideal case, the servers powering your `<amp-list>` would return perfectly formatted JSON for your use case. However, for situation in which you may not have access to create or modify backend servers, it is also possible to provide data to an `<amp-list>` component using JavaScript via exported `<amp-script>` functions.
+In the ideal case, the servers powering your `<amp-list>` would return perfectly formatted JSON for your use case. However, for situations in which you may not have access to create or modify backend servers, it is also possible to provide data to an `<amp-list>` component using JavaScript via exported `<amp-script>` functions.
 
 Here are the steps for specifying an `<amp-script>` functions as your data source:
 
