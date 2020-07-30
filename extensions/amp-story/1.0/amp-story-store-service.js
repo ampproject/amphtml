@@ -215,6 +215,7 @@ export const Action = {
   TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
   ADD_NEW_PAGE_ID: 'addNewPageId',
   SET_PAGE_SIZE: 'updatePageSize',
+  SET_EMBED_MODE: 'updateEmbedMode',
 };
 
 /**
@@ -463,6 +464,11 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.PAGE_SIZE]: data,
       });
+    case Action.SET_EMBED_MODE:
+      return {
+        ...state,
+        ...getEmbedOverrides(data),
+      };
     default:
       dev().error(TAG, 'Unknown action %s.', action);
       return state;
