@@ -142,7 +142,26 @@ AMP.getState(expr) {}
 </script>
 ```
 
+<<<<<<< HEAD
 ## Restrictions
+=======
+### Exporting functions for use in <amp-list>
+
+You may export functions to act as the data source for an `<amp-list>`.
+The exported function must return either JSON, or a Promise which will eventually contain JSON.
+
+The API is available on the global scope, and has the following signature:
+
+```js
+/**
+ * @param {string} name the name to identify the function by.
+ * @param {Function} function the function to export.
+ */
+function exportFunction(name, function) {}
+```
+
+### Restrictions
+>>>>>>> 028539ec4... amp-script docs
 
 ### Allowed APIs
 
