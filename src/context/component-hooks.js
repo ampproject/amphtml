@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {areEqualOrdered} from '../utils/array';
 import {devAssert} from '../log';
 import {protectedNoInline} from './scheduler';
 
@@ -51,12 +52,12 @@ function getComponent() {
 /**
  * A reusable reference value hook. Mostly the same as the React's `useHook`.
  *
- * @param {T} def
+ * @param {T} initialValue
  * @return {{current: T}}
  * @template T
  */
-export function useRef(def = undefined) {
-  return getComponent().allocRef(def);
+export function useRef(initialValue = undefined) {
+  return getComponent().allocRef(initialValue);
 }
 
 /**
@@ -85,22 +86,16 @@ export function useMemo(compute, deps) {
  * @return {T}
  * @template T
  */
-export function useDisposable(factory, deps = undefined) {
+export function useDisposableMemo(factory, deps = undefined) {
   deps = deps || EMPTY_DEPS;
   const component = getComponent();
-  const ref = component.allocRef();
+  const ref = useRef();
   useSyncEffect(() => {
-    const result = callFactory(
+    const {value, dispose} = callFactory(
       factory,
       component.contextNode.node,
       devAssert(deps)
     );
-    let value, dispose;
-    if (typeof result == 'function') {
-      dispose = result;
-    } else {
-      ({value, dispose} = result);
-    }
     ref.current = value;
     return () => {
       ref.current = undefined;
@@ -132,41 +127,27 @@ export function useSyncEffect(callback, deps = undefined) {
       cleanupRef.current = undefined;
     });
   }
-  const changed = !depRef.current || !eq(depRef.current, deps);
-  if (changed) {
-    depRef.current = deps.slice(0);
 
-    // Cleanup.
-    const cleanup = cleanupRef.current;
-    if (cleanup) {
-      cleanupRef.current = null;
-      component.popCleanup(cleanup);
-      protectedNoInline(cleanup);
-    }
+  const changed = !depRef.current || !areEqualOrdered(depRef.current, deps);
+  if (!changed) {
+    return;
+  }
 
-    const newCleanup = callback();
-    if (newCleanup) {
-      cleanupRef.current = newCleanup;
-      component.pushCleanup(newCleanup);
-    }
-  }
-}
+  depRef.current = deps.slice(0);
 
-/**
- * @param {!Array} a1
- * @param {!Array} a2
- * @return {boolean}
- */
-function eq(a1, a2) {
-  if (a1.length != a2.length) {
-    return false;
+  // Cleanup.
+  const cleanup = cleanupRef.current;
+  if (cleanup) {
+    cleanupRef.current = null;
+    component.popCleanup(cleanup);
+    protectedNoInline(cleanup);
   }
-  for (let i = 0; i < a1.length; i++) {
-    if (a1[i] !== a2[i]) {
-      return false;
-    }
+
+  const newCleanup = callback();
+  if (newCleanup) {
+    cleanupRef.current = newCleanup;
+    component.pushCleanup(newCleanup);
   }
-  return true;
 }
 
 /**

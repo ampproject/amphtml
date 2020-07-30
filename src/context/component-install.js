@@ -84,7 +84,7 @@ export function unsubscribe(node, callback) {
 }
 
 /**
- * Creates an input-based comonent.
+ * Creates an input-based component.
  *
  * @param {*} id
  * @param {!./node.ContextNode} contextNode

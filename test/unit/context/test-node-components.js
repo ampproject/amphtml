@@ -23,7 +23,7 @@ import {
   unsubscribe,
 } from '../../../src/context/component-install';
 import {
-  useDisposable,
+  useDisposableMemo,
   useMemo,
   useRef,
   useSyncEffect,
@@ -52,21 +52,7 @@ describes.realWin('ContextNode - components', {}, (env) => {
     doc = win.document;
     clock = sandbox.useFakeTimers();
 
-    tree = (() => {
-      function createSubtree(id, children, depth) {
-        const el = doc.createElement('div');
-        el.id = id;
-        el.textContent = id;
-        if (depth > 1) {
-          for (let i = 0; i < children; i++) {
-            const child = createSubtree(`${id}-${i + 1}`, children, depth - 1);
-            el.appendChild(child);
-          }
-        }
-        return el;
-      }
-      return createSubtree('T', 4, 4);
-    })();
+    tree = createSubtree('T', 4, 4);
 
     discoverWrapper = wrapper(ContextNode.prototype, 'discover_');
 
@@ -80,6 +66,19 @@ describes.realWin('ContextNode - components', {}, (env) => {
   afterEach(() => {
     delete ContextNode.prototype.inspect;
   });
+
+  function createSubtree(id, children, depth) {
+    const el = doc.createElement('div');
+    el.id = id;
+    el.textContent = id;
+    if (depth > 1) {
+      for (let i = 0; i < children; i++) {
+        const child = createSubtree(`${id}-${i + 1}`, children, depth - 1);
+        el.appendChild(child);
+      }
+    }
+    return el;
+  }
 
   function el(id) {
     if (id == 'T') {
@@ -481,12 +480,12 @@ describes.realWin('ContextNode - components', {}, (env) => {
         expect(memoSpy).to.be.calledTwice;
       });
 
-      it('should initialize and reuse useDisposable', () => {
+      it('should initialize and reuse useDisposableMemo', () => {
         const values = [];
         const initSpy = env.sandbox.spy();
         const disposeSpy = env.sandbox.spy();
         const Comp = (node, input) => {
-          const value = useDisposable(() => {
+          const value = useDisposableMemo(() => {
             initSpy(input);
             return {
               value: Math.floor(input / 10),
@@ -525,41 +524,6 @@ describes.realWin('ContextNode - components', {}, (env) => {
         clock.runAll();
         expect(disposeSpy).to.be.calledTwice;
         expect(values).to.have.length(3); // no change.
-        expect(initSpy).to.be.calledTwice; // no change.
-      });
-
-      it('should initialize and reuse cleanup-only useDisposable', () => {
-        const initSpy = env.sandbox.spy();
-        const disposeSpy = env.sandbox.spy();
-        const Comp = (node, input) => {
-          useDisposable(() => {
-            initSpy(input);
-            return disposeSpy;
-          }, [Math.floor(input / 10)]);
-        };
-
-        // 1st call: init.
-        setComponent(parent.node, Comp, 1);
-        clock.runAll();
-        expect(initSpy).to.be.calledOnce.calledWith(1);
-        expect(disposeSpy).to.not.be.called;
-
-        // 2nd call: reuse.
-        setComponent(parent.node, Comp, 2);
-        clock.runAll();
-        expect(initSpy).to.be.calledOnce; // no change.
-        expect(disposeSpy).to.not.be.called; // no change.
-
-        // 3rd call: re-init.
-        setComponent(parent.node, Comp, 12);
-        clock.runAll();
-        expect(initSpy).to.be.calledTwice.calledWith(12);
-        expect(disposeSpy).to.be.calledOnce;
-
-        // Remove.
-        removeComponent(parent.node, Comp);
-        clock.runAll();
-        expect(disposeSpy).to.be.calledTwice;
         expect(initSpy).to.be.calledTwice; // no change.
       });
 

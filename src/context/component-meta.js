@@ -15,6 +15,7 @@
  */
 
 import {devAssert} from '../log';
+import {isArray} from '../types';
 
 const EMPTY_DEPS = [];
 
@@ -37,8 +38,10 @@ export function withMetaData(...args) {
       func = arg;
     } else if (typeof arg == 'string') {
       key = arg;
-    } else {
+    } else if (isArray(arg)) {
       deps = arg;
+    } else {
+      devAssert(false);
     }
   }
   devAssert(func);

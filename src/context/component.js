@@ -65,7 +65,7 @@ export class Component {
     /** @private @const {!Array<function(*)>} */
     this.depSubscribers_ =
       deps.length > 0
-        ? deps.map((dep, index) => (value) => {
+        ? deps.map((unusedDep, index) => (value) => {
             this.depValues_[index] = value;
             this.update_();
           })

@@ -24,7 +24,12 @@ export {
   subscribe,
   unsubscribe,
 } from './component-install';
-export {useRef, useMemo, useDisposable, useSyncEffect} from './component-hooks';
+export {
+  useRef,
+  useMemo,
+  useDisposableMemo,
+  useSyncEffect,
+} from './component-hooks';
 
 /**
  * Direct slot assignment. Works the same way as shadow slots, but does not
