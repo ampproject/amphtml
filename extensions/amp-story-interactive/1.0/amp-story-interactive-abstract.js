@@ -134,7 +134,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected @const {InteractiveType} */
     this.interactiveType_ = type;
 
-    /** @protected @const {?../../amp-story/1.0/story-analytics.StoryAnalyticsService} */
+    /** @protected {?../../amp-story/1.0/story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = null;
 
     /** @protected {?Promise<?InteractiveResponseType|?JsonObject|undefined>} */
@@ -149,7 +149,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected {boolean} */
     this.hasUserSelection_ = false;
 
-    /** @private {?function(?any): void} */
+    /** @protected {?function(*): void} */
     this.initializePromiseResolve_ = null;
 
     /** @private {!Promise} */

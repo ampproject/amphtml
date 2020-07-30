@@ -58,7 +58,7 @@ const buildResultsTemplate = (element) => {
 /**
  * Processes the state and returns the condensed results.
  * @param {!Map<string, {option: ?./amp-story-interactive.OptionConfigType, interactiveId: string}>} interactiveState
- * @param {?Array<!./amp-story-interactive.OptionConfigType>} options needed to ensure the first options take precedence on ties
+ * @param {?Array<!./amp-story-interactive-abstract.OptionConfigType>} options needed to ensure the first options take precedence on ties
  * @return {InteractiveResultsDef} the results
  */
 const processResults = (interactiveState, options) => {
@@ -114,7 +114,7 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
 
   /**
    * Receives state updates and fills up DOM with the result
-   * @param {!Map<string, {option: ?./amp-story-interactive.OptionConfigType, interactiveId: string}>} interactiveState
+   * @param {!Map<string, {option: ?./amp-story-interactive-abstract.OptionConfigType, interactiveId: string}>} interactiveState
    * @private
    */
   onInteractiveReactStateUpdate_(interactiveState) {
@@ -131,7 +131,7 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
 
   /**
    * Updates the element with the correct category
-   * @param {./amp-story-interactive.OptionConfigType} categorySelected
+   * @param {./amp-story-interactive-abstract.OptionConfigType} categorySelected
    * @private
    */
   updateCategory_(categorySelected) {
