@@ -18,7 +18,7 @@ const fs = require('fs').promises;
 const log = require('fancy-log');
 const puppeteer = require('puppeteer');
 const {dist} = require('./dist');
-const {exec} = require('../common/exec');
+const {explore} = require('source-map-explorer');
 const {startServer, stopServer} = require('./serve');
 
 const coverageJsonName = argv.json || 'out.json';
@@ -26,19 +26,18 @@ const testUrl =
   argv.url || 'http://localhost:8000/examples/everything.amp.html';
 const outHtml = argv.html || 'out.html';
 
-async function doTest() {
+async function collectCoverage() {
   log(`Opening browser and navigating to ${testUrl}...`);
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    defaultViewport: {width: 1200, height: 800},
+  });
   const page = await browser.newPage();
 
   // Enable JavaScript coverage
   await page.coverage.startJSCoverage();
   // Navigate to page
   await page.goto(testUrl);
-  await page.setViewport({
-    width: 1200,
-    height: 800,
-  });
+  await page.waitFor(() => !!document.querySelector('body'));
   log('Scrolling to the end of the page...');
   await autoScroll(page);
   log('Testing completed.');
@@ -73,10 +72,11 @@ async function generateMap() {
   log(
     `Generating heat map in dist/${outHtml}, based on ${coverageJsonName}...`
   );
-  exec(
-    `source-map-explorer v0.js v0.js.map -m --coverage ${coverageJsonName} --html ${outHtml}`,
-    {cwd: 'dist/'}
-  );
+  explore('dist/v0.js', {
+    output: {format: 'html', filename: `${outHtml}`},
+    coverage: `dist/${coverageJsonName}`,
+    onlyMapped: true,
+  }).then();
 }
 
 async function coverageMap() {
@@ -86,7 +86,7 @@ async function coverageMap() {
     {quiet: true},
     {compiled: true}
   );
-  await doTest();
+  await collectCoverage();
   await generateMap();
   await stopServer();
 }
