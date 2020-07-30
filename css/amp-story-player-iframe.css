@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap');
 
 :host {
   all: initial;
@@ -111,20 +110,20 @@ main .story-player-iframe[i-amphtml-iframe-position="-1"] {
   font-size: 12px;
   letter-spacing: 0.5px;
   color: #9AA0A6;
-  margin: 12px 0px 3px 0px;
+  margin: 12px 0px 0px;
 }
 
 .story-player-up-next-title {
   font-size: 14px;
   line-height: 20px;
   color: #FFFFFF;
-  margin: 4px 0px;
+  margin: 0px;
 }
 
 .story-player-up-next-author {
   font-size: 12px;
   color: #9AA0A6;
-  margin: 0px 0px 10px;
+  margin: 2px 0px 0px;
 }
 
 .story-player-up-next-cancel-button {

@@ -87,6 +87,22 @@ const BUTTON_EVENTS = {
   [BUTTON_TYPES.CLOSE]: 'amp-story-player-close',
 };
 
+/** @const {Array<Object>} fontFaces with urls from https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap */
+const fontsToLoad = [
+  {
+    family: 'Poppins',
+    weight: '400',
+    src:
+      "url(https://fonts.gstatic.com/s/poppins/v9/pxiEyp8kv8JHgFVrJJfecnFHGPc.woff2) format('woff2')",
+  },
+  {
+    family: 'Poppins',
+    weight: '700',
+    src:
+      "url(https://fonts.gstatic.com/s/poppins/v9/pxiByp8kv8JHgFVrLCz7Z1xlFd2JQEk.woff2) format('woff2')",
+  },
+];
+
 /** @const {string} */
 export const IFRAME_IDX = '__AMP_IFRAME_IDX__';
 
@@ -308,12 +324,30 @@ export class AmpStoryPlayer {
 
     this.stories_ = toArray(this.element_.querySelectorAll('a'));
 
+    this.loadFonts_();
     this.initializeShadowRoot_();
     this.initializeIframes_();
     this.initializeButton_();
     this.initializeUpNext_();
     this.signalReady_();
     this.isBuilt_ = true;
+  }
+
+  /**
+   * @private
+   */
+  loadFonts_() {
+    if (this.doc_.fonts && FontFace) {
+      fontsToLoad.forEach((fontProperties) => {
+        const font = new FontFace(fontProperties.family, fontProperties.src, {
+          weight: fontProperties.weight,
+          style: 'normal',
+        });
+        font.load().then(() => {
+          this.doc_.fonts.add(font);
+        });
+      });
+    }
   }
 
   /** @private */
