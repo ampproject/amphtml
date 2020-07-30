@@ -206,7 +206,7 @@ function generateCSPHash(script) {
 }
 ```
 
-There also a node module available which does it for you: [@ampproject/toolbox-script-csp](https://www.npmjs.com/package/@ampproject/toolbox-script-csp).
+There is also a node module available which does it for you: [@ampproject/toolbox-script-csp](https://www.npmjs.com/package/@ampproject/toolbox-script-csp).
 
 This example shows how to use the script hash in HTML:
 
