@@ -876,6 +876,22 @@ export class AmpStoryPlayer {
   }
 
   /**
+   * Updates the embed mode of the story inside the iframe.
+   * @param {number} iframeIdx
+   * @param {!EmbedMode} embedMode
+   * @private
+   */
+  updateEmbedMode_(iframeIdx, embedMode) {
+    this.messagingPromises_[iframeIdx].then((messaging) => {
+      messaging.sendRequest(
+        'setDocumentState',
+        {state: 'EMBED_MODE', value: embedMode},
+        true
+      );
+    });
+  }
+
+  /**
    * Updates the muted state of the story inside the iframe.
    * @param {number} iframeIdx
    * @param {boolean} mutedValue
