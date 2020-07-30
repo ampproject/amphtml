@@ -75,7 +75,6 @@ export class WebviewViewerForTesting {
       width: this.containerEl./*OK*/ offsetWidth,
       height: this.containerEl./*OK*/ offsetHeight,
       visibilityState: this.visibilityState_,
-      prerenderSize: 1,
       origin: parseUrlDeprecated(window.location.href).origin,
       csi: 1,
       cap: 'foo,a2a,handshakepoll,iframeScroll',
@@ -158,7 +157,6 @@ export class WebviewViewerForTesting {
 
     this.sendRequest_('visibilitychange', {
       state: this.visibilityState_,
-      prerenderSize: this.prerenderSize,
     });
 
     this.handshakeResponseResolve_();

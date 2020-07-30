@@ -107,9 +107,6 @@ export class ResourcesImpl {
     /** @private {boolean} */
     this.visible_ = this.ampdoc.isVisible();
 
-    /** @private {number} */
-    this.prerenderSize_ = this.viewer_.getPrerenderSize();
-
     /** @private {boolean} */
     this.documentReady_ = false;
 
@@ -340,9 +337,6 @@ export class ResourcesImpl {
    */
   intersect(entries) {
     devAssert(this.intersectionObserver_);
-
-    // TODO(willchou): Remove assert once #27167 is fixed.
-    devAssert(this.prerenderSize_ == 1);
 
     if (getMode().localDev) {
       const inside = [];
@@ -755,7 +749,6 @@ export class ResourcesImpl {
     }
 
     this.visible_ = this.ampdoc.isVisible();
-    this.prerenderSize_ = this.viewer_.getPrerenderSize();
     this.buildsThisPass_ = 0;
 
     const firstPassAfterDocumentReady =
@@ -802,9 +795,7 @@ export class ResourcesImpl {
       this.relayoutTop_,
       ', viewportSize=',
       viewportSize.width,
-      viewportSize.height,
-      ', prerenderSize=',
-      this.prerenderSize_
+      viewportSize.height
     );
     this.pass_.cancel();
     this.vsyncScheduled_ = false;
@@ -1378,15 +1369,12 @@ export class ResourcesImpl {
     }
 
     const viewportRect = this.viewport_.getRect();
-    // Load viewport = viewport + 3x up/down when document is visible or
-    // depending on prerenderSize in pre-render mode.
+    // Load viewport = viewport + 3x up/down when document is visible.
     let loadRect;
     if (this.visible_) {
       loadRect = expandLayoutRect(viewportRect, 0.25, 2);
-    } else if (this.prerenderSize_ > 0) {
-      loadRect = expandLayoutRect(viewportRect, 0, this.prerenderSize_ - 1);
     } else {
-      loadRect = null;
+      loadRect = viewportRect;
     }
 
     const visibleRect = this.visible_

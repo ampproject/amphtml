@@ -315,10 +315,6 @@ describes.sandboxed('Viewer', {}, (env) => {
     );
   });
 
-  it('should configure prerenderSize by default', () => {
-    expect(viewer.getPrerenderSize()).to.equal(1);
-  });
-
   it('should return promise that resolve on visible', function* () {
     const viewer = new ViewerImpl(ampdoc);
     expect(ampdoc.isVisible()).to.be.true;
@@ -336,7 +332,6 @@ describes.sandboxed('Viewer', {}, (env) => {
   });
 
   it('should initialize firstVisibleTime when doc becomes visible', () => {
-    params['prerenderSize'] = '3';
     const viewer = new ViewerImpl(ampdoc);
     expect(ampdoc.isVisible()).to.be.true;
     expect(ampdoc.getFirstVisibleTime()).to.equal(0);
@@ -368,12 +363,6 @@ describes.sandboxed('Viewer', {}, (env) => {
     expect(ampdoc.isVisible()).to.be.false;
     expect(ampdoc.getFirstVisibleTime()).to.equal(0);
     expect(ampdoc.getLastVisibleTime()).to.equal(2);
-  });
-
-  it('should configure prerenderSize', () => {
-    params['prerenderSize'] = '3';
-    const viewer = new ViewerImpl(ampdoc);
-    expect(viewer.getPrerenderSize()).to.equal(3);
   });
 
   it('should receive viewport event', () => {
@@ -500,13 +489,6 @@ describes.sandboxed('Viewer', {}, (env) => {
   });
 
   describe('should receive the visibilitychange event', () => {
-    it('should change prerenderSize', () => {
-      viewer.receiveMessage('visibilitychange', {
-        prerenderSize: 4,
-      });
-      expect(viewer.getPrerenderSize()).to.equal(4);
-    });
-
     it('should change visibilityState', () => {
       viewer.receiveMessage('visibilitychange', {
         state: 'paused',
