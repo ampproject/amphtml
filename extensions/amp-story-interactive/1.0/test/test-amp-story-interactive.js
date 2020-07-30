@@ -18,19 +18,20 @@ import {
   AmpStoryInteractive,
   InteractiveType,
 } from '../amp-story-interactive-abstract';
+import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {
+  AmpStoryStoreService,
+  StateProperty,
+} from '../../../amp-story/1.0/amp-story-store-service';
+import {
+  AmpStoryVariableService,
   AnalyticsVariable,
-  getVariableService,
 } from '../../../amp-story/1.0/variable-service';
 import {Services} from '../../../../src/services';
-import {
-  StateProperty,
-  getStoreService,
-} from '../../../amp-story/1.0/amp-story-store-service';
+import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
 import {dict} from '../../../../src/utils/object';
-import {getAnalyticsService} from '../../../amp-story/1.0/story-analytics';
-import {getRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {htmlFor} from '../../../../src/static-template';
+import {registerServiceBuilder} from '../../../../src/service';
 
 /**
  * Returns mock interactive data.
@@ -153,10 +154,22 @@ describes.realWin(
       ampStoryInteractiveEl.getResources = () =>
         win.__AMP_SERVICES.resources.obj;
 
-      analyticsVars = getVariableService(win);
-      analytics = getAnalyticsService(win, win.document.body);
-      requestService = getRequestService(win, ampStoryInteractiveEl);
-      storeService = getStoreService(win);
+      analyticsVars = new AmpStoryVariableService(win);
+      registerServiceBuilder(win, 'story-variable', function () {
+        return analyticsVars;
+      });
+      analytics = new StoryAnalyticsService(win, win.document.body);
+      registerServiceBuilder(win, 'story-analytics', function () {
+        return analytics;
+      });
+      requestService = new AmpStoryRequestService(win);
+      registerServiceBuilder(win, 'story-request', function () {
+        return requestService;
+      });
+      storeService = new AmpStoryStoreService(win);
+      registerServiceBuilder(win, 'story-store', function () {
+        return storeService;
+      });
 
       storyEl = win.document.createElement('amp-story');
       const storyPage = win.document.createElement('amp-story-page');

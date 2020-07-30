@@ -149,10 +149,10 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected {boolean} */
     this.hasUserSelection_ = false;
 
-    /** @protected {?function(*): void} */
+    /** @private {?function(*): void} */
     this.initializePromiseResolve_ = null;
 
-    /** @private {!Promise} */
+    /** @protected {!Promise} */
     this.initializePromise_ = new Promise((resolve) => {
       this.initializePromiseResolve_ = resolve;
     });
@@ -788,12 +788,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       this.updateOptionPercentages_(this.optionsData_);
     }
   }
-
-  /**
-   * Called by amp-story when created
-   * @public
-   */
-  onStoryCreated() {}
 
   /**
    * @public

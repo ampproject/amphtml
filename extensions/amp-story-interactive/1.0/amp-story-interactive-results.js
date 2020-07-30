@@ -57,7 +57,7 @@ const buildResultsTemplate = (element) => {
 
 /**
  * Processes the state and returns the condensed results.
- * @param {!Map<string, {option: ?./amp-story-interactive.OptionConfigType, interactiveId: string}>} interactiveState
+ * @param {!Map<string, {option: ?./amp-story-interactive-abstract.OptionConfigType, interactiveId: string}>} interactiveState
  * @param {?Array<!./amp-story-interactive-abstract.OptionConfigType>} options needed to ensure the first options take precedence on ties
  * @return {InteractiveResultsDef} the results
  */
