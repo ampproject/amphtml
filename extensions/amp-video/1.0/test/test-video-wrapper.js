@@ -93,8 +93,8 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
         <VideoWrapper component={TestPlayer} mediasession={false} />
       );
 
-      await wrapper.find(TestPlayer).invoke('onLoadedMetadata')();
       await wrapper.find(TestPlayer).invoke('onPlaying')();
+      await wrapper.find(TestPlayer).invoke('onLoadedMetadata')();
 
       expect(navigator.mediaSession.metadata).to.be.undefined;
       expect(navigator.mediaSession.setActionHandler).to.not.have.been.called;
@@ -103,8 +103,8 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
     it('should set mediasession when playing', async () => {
       const wrapper = mount(<VideoWrapper component={TestPlayer} />);
 
-      await wrapper.find(TestPlayer).invoke('onLoadedMetadata')();
       await wrapper.find(TestPlayer).invoke('onPlaying')();
+      await wrapper.find(TestPlayer).invoke('onLoadedMetadata')();
 
       expect(navigator.mediaSession.metadata).to.eql(metadata);
       expect(
@@ -131,8 +131,8 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
           <VideoWrapper component={TestPlayer} {...{[prop]: title}} />
         );
 
-        await wrapper.find(TestPlayer).invoke('onLoadedMetadata')();
         await wrapper.find(TestPlayer).invoke('onPlaying')();
+        await wrapper.find(TestPlayer).invoke('onLoadedMetadata')();
 
         expect(navigator.mediaSession.metadata.title).to.eql(title);
       });
@@ -145,8 +145,8 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
 
       const wrapper = mount(<VideoWrapper component={TestPlayer} />);
 
-      await wrapper.find(TestPlayer).invoke('onLoadedMetadata')();
       await wrapper.find(TestPlayer).invoke('onPlaying')();
+      await wrapper.find(TestPlayer).invoke('onLoadedMetadata')();
 
       expect(navigator.mediaSession.metadata.title).to.eql(document.title);
     });
@@ -272,5 +272,3 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
     });
   });
 });
-
-describes.sandboxed('Nested Autoplay component', {}, () => {});
