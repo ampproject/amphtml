@@ -461,11 +461,7 @@ export class ResourcesImpl {
       resource.getState() != ResourceState.NOT_BUILT &&
       !element.reconstructWhenReparented()
     ) {
-      // With IntersectionObserver, no need to request remeasure
-      // on reuse since initial intersection callback will trigger soon.
-      if (!this.intersectionObserver_) {
-        resource.requestMeasure();
-      }
+      resource.requestMeasure();
       dev().fine(TAG_, 'resource reused:', resource.debugid);
     } else {
       // Create and add a new resource.
@@ -650,7 +646,7 @@ export class ResourcesImpl {
       resource.pauseOnRemove();
     }
     if (this.intersectionObserver_) {
-      // TODO(willchou): Fix observe/unobserve churn due to reparenting.
+      // TODO(willchou): Fix observe/unobserve/remeasure churn in reparenting.
       this.intersectionObserver_.unobserve(resource.element);
     }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
@@ -660,8 +656,6 @@ export class ResourcesImpl {
   /** @override */
   upgraded(element) {
     const resource = Resource.forElement(element);
-    // TODO(willchou): Delay this until after 1vp loads. This should improve
-    // LCP and be safe since we already do something similar in prerender mode.
     this.buildOrScheduleBuildForResource_(resource);
     dev().fine(TAG_, 'resource upgraded:', resource.debugid);
   }
@@ -1298,17 +1292,20 @@ export class ResourcesImpl {
       // that ignores `relayoutTop` and `elementsThatScrolled`.
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
-        if (r.hasOwner()) {
+        const requested = r.isMeasureRequested();
+        if (r.hasOwner() && !requested) {
           continue;
         }
-        // Difference: if we have a "premeasured" client rect, consume it
-        // as the element's new measurements even if the element isn't built.
-        const requested = r.isMeasureRequested();
+        const premeasured = r.hasBeenPremeasured();
         if (requested) {
           dev().fine(TAG_, 'force remeasure:', r.debugid);
         }
-        const premeasured = r.hasBeenPremeasured();
-        const needsMeasure = premeasured || requested || this.relayoutAll_;
+        // Immediately measure (vs. waiting for async premeasure) for certain
+        // elements with sensitive time-to-measure.
+        const expediteFirstMeasure =
+          !r.hasBeenMeasured() && r.element.tagName == 'AMP-AD';
+        const needsMeasure =
+          premeasured || requested || this.relayoutAll_ || expediteFirstMeasure;
         if (needsMeasure) {
           const isDisplayed = this.measureResource_(
             r,
