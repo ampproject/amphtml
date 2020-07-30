@@ -1098,7 +1098,7 @@ export class AmpStory extends AMP.BaseElement {
 
     /**
      * Append class to hide button if on first page.
-     * @param {string} pageIndex
+     * @param {number} pageIndex
      * @return {void}
      * @private
      */
