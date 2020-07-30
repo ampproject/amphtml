@@ -280,6 +280,46 @@ See below for a full example,
 </amp-list>
 ```
 
+### Using amp-script as a data source
+
+In the ideal case, the servers powering your `<amp-list>` would return perfectly formatted JSON for your use case. However, for situation in which you may not have access to create or modify backend servers, it is also possible to provide data to an `<amp-list>` component using custom functions written in an `<amp-script>` component.
+
+Here are the steps for specifying an `<amp-script>` functions as your data source:
+
+1. Follow the directions in the [amp-script](https://amp.dev/documentation/components/amp-script/) docs to setup the component and create you function. This includes:
+   a. Adding the extension script to your document's `<head>`.
+   b. Writing your custom functions.
+   c. Exporting the function using `exportFunction(name: string, fn: Function)`
+2. Use the `amp-script:` protocol in your `<amp-list>`'s src attribute. The correct format for specifying a function is the `<amp-script>`'s ID followed by the exported function name, like this:
+   `<amp-list src="amp-script:id.fnName">`
+   In cases where you do not have the ability to modify an API serving `<amp-list>` JSON, you may need to modify the server response before handing it to the `<amp-list>`.
+
+See below for an example:
+
+```html
+<amp-script id="fns" script="local-script" nodom data-ampdevmode></amp-script>
+<script id="local-script" type="text/plain" target="amp-script">
+  function getRemoteData() {
+    return fetch('https://example.com')
+      .then(resp => resp.json())
+      .then(transformData)
+  }
+  exportFunction('getRemoteData', getRemoteData);
+</script>
+
+<amp-list
+  id="amp-list"
+  width="auto"
+  height="100"
+  layout="fixed-height"
+  src="amp-script:fns.getRemoteData"
+>
+  <template type="amp-mustache">
+    <div>{{name}}</div>
+  </template>
+</amp-list>
+```
+
 ### Load more and infinite scroll
 
 We've introduced the `load-more` attributes with options `manual` and `auto` to allow pagination and infinite scroll.
@@ -448,7 +488,11 @@ may make a request to something like `https://foo.com/list.json?0.8390278471201`
 ### `src` (required)
 
 The URL of the remote endpoint that returns the JSON that will be rendered
-within this `<amp-list>`. This must be a CORS HTTP service. The URL's protocol must be HTTPS.
+within this `<amp-list>`. There are three valid protocols for the `src` attribute.
+
+1. **https**: This must refer to a CORS HTTP service. Insecure http is not supportedInsecure http is not supported.
+2. **amp-state**: This is for initializing from amp-state data. See [Initialization from amp-state](#initialization-from-amp-state) for more details.
+3. **amp-script**: Enables uses `<amp-script>` functions as the data source. See [Using amp-script as a data source](#using-amp-script-as-a-data-source) for more details.
 
 [tip type="important"]
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
