@@ -22,7 +22,7 @@ import * as preact from /*OK*/ 'preact';
 
 /**
  * @param {!PreactDef.FunctionalComponent|string} unusedType
- * @param {(!Object|null)=} unusedProps
+ * @param {?Object=} unusedProps
  * @param {...*} var_args
  * @return {!PreactDef.VNode}
  */
@@ -32,7 +32,7 @@ export function createElement(unusedType, unusedProps, var_args) {
 
 /**
  * @param {!PreactDef.VNode} unusedElement
- * @param {(!Object|null)=} unusedProps
+ * @param {?Object=} unusedProps
  * @param {...PreactDef.Renderable} unusedChildren
  * @return {!PreactDef.VNode}
  */
@@ -49,7 +49,7 @@ export function render(vnode, container) {
 }
 
 /**
- * @param {!JsonObject} props
+ * @param {?Object=} props
  * @return {PreactDef.Renderable}
  */
 export function Fragment(props) {
@@ -65,8 +65,9 @@ export function createRef() {
 }
 
 /**
- * @param {!Object} value
- * @return {!PreactDef.Context}
+ * @param {T} value
+ * @return {!PreactDef.Context<T>}
+ * @template T
  */
 export function createContext(value) {
   return preact.createContext(value);
@@ -110,8 +111,9 @@ export function useLayoutEffect(effect, opt_deps) {
 }
 
 /**
- * @param {PreactDef.Context} context
- * @return {!JsonObject}
+ * @param {PreactDef.Context<T>} context
+ * @return {T}
+ * @template T
  */
 export function useContext(context) {
   return hooks.useContext(context);
