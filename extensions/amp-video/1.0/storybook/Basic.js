@@ -59,9 +59,6 @@ const VideoTagPlayerInternal = forwardRef((props, ref) => {
       ref={videoNodeRef}
       style={{position: 'relative', width: '100%', height: '100%'}}
       poster={poster}
-      album={album}
-      artist={artist}
-      artwork={artwork}
       title={title}
       onCanPlay={onLoad}
       {...rest}
