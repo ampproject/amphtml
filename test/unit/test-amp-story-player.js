@@ -772,7 +772,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       swipeLeft();
 
-      expect(playerEl.getAttribute('autoplay')).to.not.exist;
+      expect(playerEl.hasAttribute('autoplay')).to.be.false;
     });
 
     it(
