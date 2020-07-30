@@ -20,13 +20,13 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii, etc) are always released together.
-min_validator_revision_required: 474
+min_validator_revision_required: 475
 
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 1059
+spec_file_revision: 1069
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed"
@@ -1776,7 +1776,7 @@ tags: {
 
 # 4.7 Embedded Content
 # AMP HTML allows embedded content only via its own tags (e.g. amp-img), with
-# the exception of tags inside of a <noscript> ancestor.
+# the exception of tags inside of a <noscript> ancestor and transformed amp-img.
 # 4.7.1 The img element
 tags: {
   html_format: AMP  # Disallowed in AMP4ADS because <noscript> is disallowed.
@@ -4476,6 +4476,43 @@ tags: {  # <amp-img>
   tag_name: "AMP-IMG"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
+  attrs: { name: "crossorigin" }
+  attrs: { name: "object-fit" }
+  attrs: { name: "object-position" }
+  attrs: { name: "placeholder" }
+  attrs: { name: "referrerpolicy" }
+  # <amp-bind>
+  attrs: { name: "[alt]" }
+  attrs: { name: "[attribution]" }
+  attrs: { name: "[src]" }
+  attrs: { name: "[srcset]" }
+  attr_lists: "extended-amp-global"
+  attr_lists: "lightboxable-elements"
+  attr_lists: "mandatory-src-or-srcset"
+  spec_url: "https://amp.dev/documentation/components/amp-img/"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+# A duplicate of amp-img, but requires i-amphtml-ssr flag.
+tags: {  # <amp-img i-amphtml-ssr>
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "AMP-IMG"
+  spec_name: "amp-img (transformed)"
+  attrs: {
+    dispatch_key: NAME_DISPATCH
+    name: "i-amphtml-ssr"
+    mandatory: true
+  }
+  attrs: { name: "alt" }
+  attrs: { name: "attribution" }
   attrs: { name: "object-fit" }
   attrs: { name: "object-position" }
   attrs: { name: "placeholder" }
@@ -4508,7 +4545,6 @@ tags: {  # <amp-img>
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "placeholder" }
-  attrs: { name: "referrerpolicy" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-amp4email"
   # <amp-bind>
@@ -4626,6 +4662,11 @@ tags: {
     mandatory: true
   }
   attrs: {
+    name: "class"
+    value: "i-amphtml-intrinsic-sizer"
+    mandatory: true
+  }
+  attrs: {
     name: "role"
     value: "presentation"
     mandatory: true
@@ -4633,6 +4674,37 @@ tags: {
   attrs: {
     name: "src"
     value_regex: "data:image\\/svg\\+xml;charset=utf-8,\\s*<svg height=\"\\d+(\\.\\d+)?\" width=\"\\d+(\\.\\d+)?\" xmlns=\"http:\\/\\/www\\.w3\\.org\\/2000\\/svg\" version=\"1\\.1\"\\/>|data:image\\/svg\\+xml;charset=utf-8,\\s*<svg height='\\d+(\\.\\d+)?\' width='\\d+(\\.\\d+)?\' xmlns='http:\\/\\/www\\.w3\\.org\\/2000\\/svg' version='1\\.1'\\/>|data:image\\/svg\\+xml;base64,[a-zA-Z0-9+\\/=]+"
+    mandatory: true
+  }
+}
+
+tags: {
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "IMG"
+  spec_name: "amp-img > img (transformed)"
+  # Ideally we'd be able to use regular amp-img parent, but runtime currently
+  # requires an i-amphtml-ssr attribute on the amp-img. We could do away with
+  # that, though.
+  mandatory_parent: "amp-img (transformed)"
+  attrs: { name: "alt" }
+  attrs: { name: "attribution" }
+  attrs: { name: "object-fit" }
+  attrs: { name: "object-position" }
+  attrs: { name: "referrerpolicy" }
+  attrs: { name: "sizes" }
+  attrs: { name: "title" }
+  attr_lists: "mandatory-src-or-srcset"
+  # SSR requires these explicit attributes
+  attrs: {
+    name: "class"
+    value_regex: "i-amphtml-fill-content\\s+i-amphtml-replaced-content|"
+        "i-amphtml-replaced-content\\s+i-amphtml-fill-content"
+    mandatory: true
+  }
+  attrs: {
+    name: "decoding"
+    value: "async"
     mandatory: true
   }
 }
@@ -4665,7 +4737,6 @@ attr_lists: {
   name: "nonce-attr"
   attrs: {
     disabled_by: "amp4email"
-    disabled_by: "transformed"
     name: "nonce"
   }
 }
@@ -4684,7 +4755,6 @@ attr_lists: {
     value: "anonymous"
   }
   attrs: {
-    disabled_by: "transformed"
     disabled_by: "amp4email"
     name: "nonce"
   }
@@ -5477,12 +5547,11 @@ attr_lists: {
   # 3.2.5 HTML5 Global attributes.
   attrs: { name: "accesskey" }
   attrs: {
-    # attribute "class" for transformed is handled within the Validator engine.
-    # If this changes, please be sure to also update:
-    # amp-experiment 1.0 implementation.
-    disabled_by: "transformed"
     name: "class"
-    disallowed_value_regex: "(^|\\W)i-amphtml-"
+    # attribute "class" is handled within the Validator engine, since we need to
+    # handle transformed and non-transformed cases while still allowing "class"
+    # attribute generically.
+    # disallowed_value_regex: "(^|[\t\n\f\r ])i-amphtml-"
   }
   attrs: { name: "dir" }
   attrs: { name: "draggable" }
@@ -5776,6 +5845,12 @@ attr_lists: {
   attrs: {
     name: "subscriptions-service"
     requires_extension: "amp-subscriptions"
+  }
+  # amp-subscriptions-google specific attributes, see
+  # https://amp.dev/documentation/components/amp-subscriptions-google
+  attrs: {
+    name: "subscriptions-google-rtc"
+    requires_extension: "amp-subscriptions-google"
   }
   # amp-next-page specific attributes, see
   # https://amp.dev/documentation/components/amp-next-page

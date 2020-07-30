@@ -127,6 +127,29 @@ describes.realWin(
           });
       });
 
+      it('should mutate expected src value with "query" attribute', () => {
+        return impl
+          .layoutCallback()
+          .then(() => {
+            impl.queryKey_ = 'q';
+            impl.srcBase_ = 'https://www.data.com/';
+            expect(impl.generateSrc_('')).to.equal('https://www.data.com/?q=');
+            expect(impl.generateSrc_('abc')).to.equal(
+              'https://www.data.com/?q=abc'
+            );
+            return impl.mutatedAttributesCallback({
+              'src': 'https://example.com',
+            });
+          })
+          .then(() => {
+            expect(impl.srcBase_).to.equal('https://example.com');
+            expect(impl.generateSrc_('')).to.equal('https://example.com?q=');
+            expect(impl.generateSrc_('abc')).to.equal(
+              'https://example.com?q=abc'
+            );
+          });
+      });
+
       it('should pass on calls when src is type object with "items"', () => {
         return impl
           .mutatedAttributesCallback({'src': {'items': ['a', 'b', 'c']}})

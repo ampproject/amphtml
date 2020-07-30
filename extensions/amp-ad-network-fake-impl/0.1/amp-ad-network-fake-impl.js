@@ -17,7 +17,7 @@
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {AmpAdMetadataTransformer} from './amp-ad-metadata-transformer';
 import {ExternalReorderHeadTransformer} from './external-reorder-head-transformer';
-import {startsWith} from '../../../src/string';
+import {includes, startsWith} from '../../../src/string';
 import {user, userAssert} from '../../../src/log';
 
 const TAG = 'AMP-AD-NETWORK-FAKE-IMPL';
@@ -38,8 +38,8 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
   /** @override */
   buildCallback() {
     userAssert(
-      this.element.hasAttribute('src'),
-      'Attribute src required for <amp-ad type="fake">: %s',
+      this.element.hasAttribute('src') || this.element.hasAttribute('srcdoc'),
+      'Attribute src or srcdoc required for <amp-ad type="fake">: %s',
       this.element
     );
     super.buildCallback();
@@ -60,7 +60,12 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
 
   /** @override */
   getAdUrl() {
-    return this.element.getAttribute('src');
+    const src = this.element.getAttribute('src');
+    if (src) {
+      return src;
+    }
+    const srcdoc = this.element.getAttribute('srcdoc');
+    return `data:text/html,${encodeURI(srcdoc)}`;
   }
 
   /** @override */
@@ -75,19 +80,24 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
       } = /** @type {{status: number, headers: !Headers}} */ (response);
 
       // In the convert creative mode the content is the plain AMP HTML.
-      // This mode is primarily used for A4A Envelop for testing.
+      // This mode is primarily used for A4A Envelope for testing.
       // See DEVELOPING.md for more info.
       if (this.element.getAttribute('a4a-conversion') == 'true') {
-        return response.text().then(
-          (responseText) =>
-            new Response(this.transformCreative_(responseText), {
-              status,
-              headers,
-            })
-        );
+        return response.text().then((responseText) => {
+          // When using data: url the legacy amp cors param is interpreted as
+          // part of the body, so remove it.
+          if (includes(responseText, '?__amp_source_origin=')) {
+            responseText = responseText.split('?__amp_source_origin=')[0];
+          }
+          return new Response(this.transformCreative_(responseText), {
+            status,
+            headers,
+          });
+        });
       }
 
-      // Normal mode: Expect the creative is written in AMP4ADS doc.
+      // Normal mode: Expect the creative is already transformed and includes
+      // amp-ad-metadata
       return response;
     });
   }

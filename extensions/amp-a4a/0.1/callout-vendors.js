@@ -189,6 +189,12 @@ const RTC_VENDORS = jsonConfiguration({
       'https://events.browsiprod.com/events/amp?e=ERROR_TYPE&h=HREF&et=predict_error',
     disableKeyAppend: true,
   },
+  hubvisor: {
+    url:
+      'https://pbs.hubvisor.io/openrtb2/amp?tag_id=PLACEMENT_ID&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adcid=ADCID&purl=HREF&gdpr_consent=CONSENT_STRING',
+    macros: ['PLACEMENT_ID', 'CONSENT_STRING'],
+    disableKeyAppend: true,
+  },
 });
 
 // DO NOT MODIFY: Setup for tests

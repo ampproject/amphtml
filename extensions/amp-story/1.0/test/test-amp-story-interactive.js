@@ -15,14 +15,13 @@
  */
 
 import {AmpStoryInteractive, InteractiveType} from '../amp-story-interactive';
-import {AmpStoryStoreService} from '../amp-story-store-service';
 import {AnalyticsVariable, getVariableService} from '../variable-service';
 import {Services} from '../../../../src/services';
+import {StateProperty, getStoreService} from '../amp-story-store-service';
 import {dict} from '../../../../src/utils/object';
 import {getAnalyticsService} from '../story-analytics';
 import {getRequestService} from '../amp-story-request-service';
 import {htmlFor} from '../../../../src/static-template';
-import {registerServiceBuilder} from '../../../../src/service';
 
 /**
  * Returns mock interactive data.
@@ -59,10 +58,16 @@ export const getMockInteractiveData = () => {
 export const addConfigToInteractive = (
   interactive,
   options = 4,
-  correct = undefined
+  correct = undefined,
+  attributes = ['text', 'results-category', 'image']
 ) => {
   for (let i = 0; i < options; i++) {
-    interactive.element.setAttribute(`option-${i + 1}-text`, `text ${i + 1}`);
+    attributes.forEach((attr) => {
+      interactive.element.setAttribute(
+        `option-${i + 1}-${attr}`,
+        `${attr} ${i + 1}`
+      );
+    });
   }
   if (correct) {
     interactive.element.setAttribute(`option-${correct}-correct`, 'correct');
@@ -88,6 +93,11 @@ class InteractiveTest extends AmpStoryInteractive {
       root.appendChild(newOption);
     }
     return root;
+  }
+
+  /** @override */
+  getInteractiveId_() {
+    return 'id';
   }
 }
 
@@ -118,6 +128,7 @@ describes.realWin(
     let analytics;
     let analyticsVars;
     let requestService;
+    let storeService;
 
     beforeEach(() => {
       win = env.win;
@@ -136,14 +147,11 @@ describes.realWin(
       analyticsVars = getVariableService(win);
       analytics = getAnalyticsService(win, win.document.body);
       requestService = getRequestService(win, ampStoryInteractiveEl);
-
-      const storeService = new AmpStoryStoreService(win);
-      registerServiceBuilder(win, 'story-store', function () {
-        return storeService;
-      });
+      storeService = getStoreService(win);
 
       storyEl = win.document.createElement('amp-story');
       const storyPage = win.document.createElement('amp-story-page');
+      storyPage.id = 'page-1';
       const gridLayer = win.document.createElement('amp-story-grid-layer');
       gridLayer.appendChild(ampStoryInteractiveEl);
       storyPage.appendChild(gridLayer);
@@ -283,6 +291,23 @@ describes.realWin(
       );
 
       expect(percentages4).to.deep.equal([33, 33, 33]);
+    });
+
+    it('should update the store property correctly', async () => {
+      addConfigToInteractive(ampStoryInteractive, 4, null, ['text']);
+      ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.layoutCallback();
+      await ampStoryInteractive.getOptionElements()[2].click();
+
+      expect(
+        storeService.get(StateProperty.INTERACTIVE_REACT_STATE)['id']
+      ).to.be.deep.equals({
+        option: {
+          optionIndex: 2,
+          text: 'text 3',
+        },
+        interactiveId: 'id',
+      });
     });
   }
 );

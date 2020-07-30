@@ -17,16 +17,12 @@ npm-debug.log
 .settings
 typings
 typings.json
-build-system/runner/dist
 /test/manual/amp-ad.adtech.html
 test/coverage
 ./package-lock.json
 *.swp
 *.swo
 yarn-error.log
-sc-*-linux*
-sc-*-osx*
-sauce_connect_*
 deps.txt
 firebase
 .firebaserc

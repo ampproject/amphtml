@@ -18,6 +18,7 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
 } from '../../../src/consent-state';
+import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
@@ -31,6 +32,7 @@ import {
 import {assertHttpsUrl, tryDecodeUriComponent} from '../../../src/url';
 import {cancellation, isCancellation} from '../../../src/error';
 import {createElementWithAttributes} from '../../../src/dom';
+import {createSecureFrame} from './secure-frame';
 import {
   dev,
   devAssert,
@@ -52,19 +54,16 @@ import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getExperimentBranch} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {
-  installFriendlyIframeEmbed,
-  setFriendlyIframeEmbedVisible,
-} from '../../../src/friendly-iframe-embed';
+import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
 import {parseJson} from '../../../src/json';
+import {processHead} from './head-validation';
 import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {streamResponseToWriter} from '../../../src/utils/stream-response';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
-import {tryResolve} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @type {Array<string>} */
@@ -78,7 +77,7 @@ const METADATA_STRINGS = [
 // acceptable solution to the 'Safari on iOS doesn't fetch iframe src from
 // cache' issue.  See https://github.com/ampproject/amphtml/issues/5614
 /** @type {string} */
-export const DEFAULT_SAFEFRAME_VERSION = '1-0-23';
+export const DEFAULT_SAFEFRAME_VERSION = '1-0-37';
 
 /** @const {string} */
 export const CREATIVE_SIZE_HEADER = 'X-CreativeSize';
@@ -367,16 +366,21 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.isSinglePageStoryAd = false;
 
+    const sanitizedHeadPromise = new Deferred();
     /**
      * Promise that will resolve with processed <head> from ad server response.
-     * @visibleForTesting temporary to satisfy linter while implementing.
-     * @private {?Promise<!Element>}
+     * @private {!Promise}
      */
-    this.sanitizedHeadPromise_ = null;
+    this.sanitizedHeadPromise_ = sanitizedHeadPromise.promise;
+
+    /**
+     * Resolves the promise that the head has been processed.
+     * @private {function()}
+     */
+    this.sanitizedHeadResolver_ = sanitizedHeadPromise.resolve;
 
     /**
      * Transfers elements from the detached body to the given body element.
-     * @visibleForTesting temporary to satisfy linter while implementing.
      * @private {?function(!Element)}
      */
     this.transferBody_ = null;
@@ -612,7 +616,7 @@ export class AmpA4A extends AMP.BaseElement {
       user().warn(
         TAG,
         `<${this.element.tagName}> is not allowed to be ` +
-          `placed in elements with position:fixed: ${this.element}`
+          `placed in elements with position: fixed or sticky: ${this.element}`
       );
       return false;
     }
@@ -835,8 +839,7 @@ export class AmpA4A extends AMP.BaseElement {
         return fetchResponse;
       })
       .then((fetchResponse) =>
-        getExperimentBranch(this.win, NO_SIGNING_EXP.id) ===
-        NO_SIGNING_EXP.experiment
+        this.isInNoSigningExp()
           ? this.streamResponse_(fetchResponse)
           : this.startValidationFlow_(fetchResponse, checkStillCurrent)
       )
@@ -862,14 +865,33 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * @visibleForTesting
+   * @return {boolean}
+   */
+  isInNoSigningExp() {
+    return (
+      getExperimentBranch(this.win, NO_SIGNING_EXP.id) ===
+      NO_SIGNING_EXP.experiment
+    );
+  }
+
+  /**
    * Start streaming response into the detached document.
    * @param {!Response} response
    * @return {boolean}
    */
   streamResponse_(response) {
-    // TODO(ccordry): get size from headers equivalent to
-    // validation flow, and double check any other values
-    // that might be set.
+    // TODO(ccordry): handle fallback case and set isVerifiedAmpCreative and
+    // creativeBody appropriately.
+    this.isVerifiedAmpCreative_ = true;
+
+    const size = this.extractSize(response.headers);
+    this.creativeSize_ = size || this.creativeSize_;
+
+    // TODO(ccordry): handle fallback and ensure this is only set for creatives
+    // that can be rendered friendly.
+    // Update priority.
+    this.updateLayoutPriority(LayoutPriority.CONTENT);
 
     // This transformation consumes the detached DOM chunks and
     // exposes our waitForHead and transferBody methods.
@@ -884,11 +906,12 @@ export class AmpA4A extends AMP.BaseElement {
     // DetachedDomStream.
     streamResponseToWriter(this.win, response, detachedStream);
 
-    this.sanitizedHeadPromise_ = transformStream
+    transformStream
       .waitForHead()
-      .then((head) => this.validateHead_(head));
+      .then((head) => this.validateHead_(head))
+      .then(this.sanitizedHeadResolver_);
 
-    this.transferBody_ = transformStream.transferBody;
+    this.transferBody_ = transformStream.transferBody.bind(transformStream);
 
     // TODO(ccordry): throw NO_CONTENT_RESPONSE if body is empty. Only gets
     // here if amp-ff-empty-creative header is not present.
@@ -897,12 +920,12 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Prepare the creative <head> by removing any non-secure elements and
+   * exracting extensions
    * @param {!Element} head
-   * @return {?Element} head or null if we should fall back to xdomain.
+   * @return {?./head-validation.ValidatedHeadDef} head data or null if we should fall back to xdomain.
    */
   validateHead_(head) {
-    // TODO(ccordry): Implement client side head validation.
-    return head;
+    return processHead(this.win, this.element, head);
   }
 
   /**
@@ -1221,17 +1244,23 @@ export class AmpA4A extends AMP.BaseElement {
           return Promise.resolve();
         }
 
-        // TODO(ccordry): split rendering flow in exp
-        //  Create iframe with CSP
-        //  Wait for sanitized head, transfer it to created iframe or fallback.
-        //  call this.transferBody_(iframeBody) when ready to render.
-
         if (!creativeMetaData) {
           // Non-AMP creative case, will verify ad url existence.
           return this.renderNonAmpCreative();
         }
+
+        let friendlyRenderPromise;
+
+        if (this.isInNoSigningExp()) {
+          friendlyRenderPromise = this.renderFriendlyTrustless_(
+            checkStillCurrent
+          );
+        } else {
+          friendlyRenderPromise = this.renderAmpCreative_(creativeMetaData);
+        }
+
         // Must be an AMP creative.
-        return this.renderAmpCreative_(creativeMetaData).catch((err) => {
+        return friendlyRenderPromise.catch((err) => {
           checkStillCurrent();
           // Failed to render via AMP creative path so fallback to non-AMP
           // rendering within cross domain iframe.
@@ -1348,9 +1377,6 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override  */
   viewportCallback(inViewport) {
-    if (this.friendlyIframeEmbed_) {
-      setFriendlyIframeEmbedVisible(this.friendlyIframeEmbed_, inViewport);
-    }
     if (this.xOriginIframeHandler_) {
       this.xOriginIframeHandler_.viewportCallback(inViewport);
     }
@@ -1588,6 +1614,63 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * @param {function()} checkStillCurrent
+   * @return {!Promise} Whether the creative was successfully rendered.
+   */
+  renderFriendlyTrustless_(checkStillCurrent) {
+    return this.sanitizedHeadPromise_.then((headData) => {
+      checkStillCurrent();
+      devAssert(this.element.ownerDocument);
+      this.maybeTriggerAnalyticsEvent_('renderFriendlyStart');
+
+      const {height, width} = this.creativeSize_;
+      const {extensions, fonts, head} = headData;
+      this.iframe = createSecureFrame(
+        this.element.ownerDocument,
+        head,
+        this.getIframeTitle(),
+        height,
+        width
+      );
+      this.applyFillContent(this.iframe);
+
+      // TODO(ccordry): FIE does not handle extension versioning, but we have
+      // it accessible here.
+      const extensionIds = extensions.map((extension) => extension.extensionId);
+
+      return installFriendlyIframeEmbed(
+        devAssert(this.iframe),
+        this.element,
+        {
+          host: this.element,
+          url: devAssert(this.adUrl_),
+          html: null,
+          extensionIds,
+          fonts,
+        },
+        (embedWin, ampdoc) => this.preinstallCallback_(embedWin, ampdoc)
+      ).then((friendlyIframeEmbed) => {
+        checkStillCurrent();
+        const fieBody = this.getFieBody_(friendlyIframeEmbed);
+        const renderComplete = this.transferBody_(devAssert(fieBody));
+        this.makeFieVisible_(
+          friendlyIframeEmbed,
+          // TODO(ccordry): subclasses are passed creativeMetadata which does
+          // not exist in unsigned case. All it is currently used for is to
+          // check if it is an AMP creative, and extension list.
+          {
+            minifiedCreative: '',
+            customStylesheets: [],
+            customElementExtensions: extensionIds,
+          },
+          checkStillCurrent
+        );
+        return renderComplete;
+      });
+    });
+  }
+
+  /**
    * Render a validated AMP creative directly in the parent page.
    * @param {!CreativeMetaDataDef} creativeMetaData Metadata required to render
    *     AMP creative.
@@ -1625,51 +1708,98 @@ export class AmpA4A extends AMP.BaseElement {
       });
     }
     const checkStillCurrent = this.verifyStillCurrent();
+    const {minifiedCreative, customElementExtensions} = creativeMetaData;
+    return this.installFriendlyIframeEmbed_(
+      minifiedCreative,
+      customElementExtensions,
+      fontsArray || []
+    ).then((friendlyIframeEmbed) =>
+      this.makeFieVisible_(
+        friendlyIframeEmbed,
+        creativeMetaData,
+        checkStillCurrent
+      )
+    );
+  }
+
+  /**
+   * Convert the iframe to FIE impl and append to DOM.
+   * @param {string} html
+   * @param {!Array<string>} extensionIds
+   * @param {!Array<string>} fonts
+   * @return {!Promise<!../../../src/friendly-iframe-embed.FriendlyIframeEmbed>}
+   */
+  installFriendlyIframeEmbed_(html, extensionIds, fonts) {
     return installFriendlyIframeEmbed(
-      this.iframe,
+      devAssert(this.iframe),
       this.element,
       {
         host: this.element,
         // Need to guarantee that this is no longer null
-        url: /** @type {string} */ (this.adUrl_),
-        html: creativeMetaData.minifiedCreative,
-        extensionIds: creativeMetaData.customElementExtensions || [],
-        fonts: fontsArray,
+        url: devAssert(this.adUrl_),
+        html,
+        extensionIds,
+        fonts,
       },
-      (embedWin, ampdoc) => {
-        const parentAmpdoc = this.getAmpDoc();
-        installUrlReplacementsForEmbed(
-          // TODO(#22733): Cleanup `parentAmpdoc` once ampdoc-fie is launched.
-          ampdoc || parentAmpdoc,
-          embedWin,
-          new A4AVariableSource(parentAmpdoc, embedWin)
-        );
-      }
-    ).then((friendlyIframeEmbed) => {
-      checkStillCurrent();
-      this.friendlyIframeEmbed_ = friendlyIframeEmbed;
-      setFriendlyIframeEmbedVisible(friendlyIframeEmbed, this.isInViewport());
-      // Ensure visibility hidden has been removed (set by boilerplate).
-      const frameDoc =
-        friendlyIframeEmbed.iframe.contentDocument ||
-        friendlyIframeEmbed.win.document;
-      setStyle(frameDoc.body, 'visibility', 'visible');
-      protectFunctionWrapper(this.onCreativeRender, this, (err) => {
-        dev().error(
-          TAG,
-          this.element.getAttribute('type'),
-          'Error executing onCreativeRender',
-          err
-        );
-      })(creativeMetaData, friendlyIframeEmbed.whenWindowLoaded());
-      friendlyIframeEmbed.whenIniLoaded().then(() => {
-        checkStillCurrent();
-        this.maybeTriggerAnalyticsEvent_('friendlyIframeIniLoad');
-      });
+      (embedWin, ampdoc) => this.preinstallCallback_(embedWin, ampdoc)
+    );
+  }
 
-      // There's no need to wait for all resources to load.
-      // StartRender is enough
+  /**
+   *
+   * @param {!Window} embedWin
+   * @param {../../../src/service/ampdoc-impl.AmpDoc=} ampdoc
+   */
+  preinstallCallback_(embedWin, ampdoc) {
+    const parentAmpdoc = this.getAmpDoc();
+    installUrlReplacementsForEmbed(
+      // TODO(#22733): Cleanup `parentAmpdoc` once ampdoc-fie is launched.
+      ampdoc || parentAmpdoc,
+      embedWin,
+      new A4AVariableSource(parentAmpdoc, embedWin)
+    );
+  }
+
+  /**
+   * Make FIE visible and execute any loading / rendering complete callbacks.
+   * @param {!../../../src/friendly-iframe-embed.FriendlyIframeEmbed} friendlyIframeEmbed
+   * @param {CreativeMetaDataDef} creativeMetaData
+   * @param {function()} checkStillCurrent
+   */
+  makeFieVisible_(friendlyIframeEmbed, creativeMetaData, checkStillCurrent) {
+    checkStillCurrent();
+    this.friendlyIframeEmbed_ = friendlyIframeEmbed;
+    // Ensure visibility hidden has been removed (set by boilerplate).
+    const frameBody = this.getFieBody_(friendlyIframeEmbed);
+    setStyle(frameBody, 'visibility', 'visible');
+
+    protectFunctionWrapper(this.onCreativeRender, this, (err) => {
+      dev().error(
+        TAG,
+        this.element.getAttribute('type'),
+        'Error executing onCreativeRender',
+        err
+      );
+    })(creativeMetaData, friendlyIframeEmbed.whenWindowLoaded());
+
+    friendlyIframeEmbed.whenIniLoaded().then(() => {
+      checkStillCurrent();
+      this.maybeTriggerAnalyticsEvent_('friendlyIframeIniLoad');
     });
+
+    // There's no need to wait for all resources to load.
+    // StartRender is enough
+  }
+
+  /**
+   * @param {!../../../src/friendly-iframe-embed.FriendlyIframeEmbed} friendlyIframeEmbed
+   * @return {!Element}
+   */
+  getFieBody_(friendlyIframeEmbed) {
+    const frameDoc =
+      friendlyIframeEmbed.iframe.contentDocument ||
+      friendlyIframeEmbed.win.document;
+    return devAssert(frameDoc.body);
   }
 
   /**

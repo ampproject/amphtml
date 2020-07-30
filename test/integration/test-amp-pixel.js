@@ -18,7 +18,7 @@ import {AmpPixel} from '../../builtins/amp-pixel';
 import {BrowserController, RequestBank} from '../../testing/test-helper';
 import {createElementWithAttributes} from '../../src/dom';
 
-describe.configure().run('amp-pixel', function () {
+describe('amp-pixel', function () {
   describes.integration(
     'amp-pixel macro integration test',
     {
