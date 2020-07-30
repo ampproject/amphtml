@@ -15,13 +15,13 @@
  */
 
 import {AmpStoryInteractiveQuiz} from '../amp-story-interactive-quiz';
+import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
 import {Services} from '../../../../src/services';
 import {
   addConfigToInteractive,
   getMockInteractiveData,
 } from './test-amp-story-interactive';
-import {getRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {registerServiceBuilder} from '../../../../src/service';
 
 /**
@@ -68,7 +68,10 @@ describes.realWin(
         'amp-story-interactive-quiz'
       );
       ampStoryQuizEl.getResources = () => win.__AMP_SERVICES.resources.obj;
-      requestService = getRequestService(win, ampStoryQuizEl);
+      requestService = new AmpStoryRequestService(win);
+      registerServiceBuilder(win, 'story-request', function () {
+        return requestService;
+      });
 
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
