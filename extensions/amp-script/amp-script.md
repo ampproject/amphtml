@@ -187,20 +187,26 @@ Include the script hash in a `meta[name=amp-script-src]` element in the document
 2. base64url-encode the result.
 3. Prefix that with `sha384-`.
 
-Here's you might build the hash in Node.js using the [@ampproject/toolbox-script-csp](https://www.npmjs.com/package/@ampproject/toolbox-script-csp) package:
+Here's how you calculate the hash in Node.js:
 
 ```js
-const {calculateHash} = require('@ampproject/toolbox-script-csp');
+const crypto = require('crypto');
+const hash = crypto.createHash('sha384');
 
-const script = `
-    const subject = 'world';
-    console.log('Hello, ' + subject);
-    `;
-
-const hash = calculateHash(script);
-
-console.log(hash); // sha384-xRxb5sv13at6tVgZET4JLmf89TSZP10HjCGXVqO9bKWVXB0asV2jLrsDN8v4zX6j
+function generateCSPHash(script) {
+  const data = hash.update(script, 'utf-8');
+  return (
+    'sha384-' +
+    data
+      .digest('base64')
+      .replace(/=/g, '')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+  );
+}
 ```
+
+There also a node module available which does it for you: [@ampproject/toolbox-script-csp](https://www.npmjs.com/package/@ampproject/toolbox-script-csp).
 
 This example shows how to use the script hash in HTML:
 
