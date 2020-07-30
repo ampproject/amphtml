@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap');
 
 :host {
   all: initial;
@@ -100,7 +101,7 @@ main .story-player-iframe[i-amphtml-iframe-position="-1"] {
   width: 50%;
   padding-left: 10px;
   float: left;
-  font-family: Roboto;
+  font-family: 'Poppins', sans-serif;
   font-style: normal;
   font-weight: 500;
 }
@@ -142,6 +143,7 @@ main .story-player-iframe[i-amphtml-iframe-position="-1"] {
   float: right;
   margin: 35px 15px 35px 0px;
   padding: 3px 9px;
+  font-family: 'Roboto', sans-serif;
 }
 
 .story-player-hide {
