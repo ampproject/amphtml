@@ -158,3 +158,40 @@
   .i-amphtml-story-interactive-option-percentage-text {
   transform: scale(1) !important;
 }
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
+  .i-amphtml-story-interactive-option:before {
+  background-color: var(--i-amphtml-interactive-theme-shading-flash) !important;
+  content: '' !important;
+  position: absolute !important;
+  width: 100% !important;
+  height: 100% !important;
+  left: 0 !important;
+  opacity: 0 !important;
+  animation: i-amphtml-interactive-animation-landing-animation-flash-background var(--i-amphtml-interactive-animation-time) !important;
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el1) !important;
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
+  .i-amphtml-story-interactive-option:nth-of-type(2):before {
+  animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el2) !important;
+} 
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-option
+    .i-amphtml-story-interactive-option-title-text {
+    animation: i-amphtml-story-interactive-option-title-text-landing-animation var(--i-amphtml-interactive-animation-time) !important;
+    animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el1) !important;
+}
+
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection)
+  .i-amphtml-story-interactive-option:nth-of-type(2) 
+    .i-amphtml-story-interactive-option-title-text {
+    animation-delay: var(--i-amphtml-interactive-landing-animation-delay-offset-el2) !important;
+}
+
+@keyframes i-amphtml-story-interactive-option-title-text-landing-animation {
+  33% {
+    transform: scale(.95);
+  }
+}
