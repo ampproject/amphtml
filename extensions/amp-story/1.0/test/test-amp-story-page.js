@@ -15,6 +15,7 @@
  */
 
 import {Action, AmpStoryStoreService} from '../amp-story-store-service';
+import {AmpAudio} from '../../../amp-audio/0.1/amp-audio';
 import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpStoryPage, PageState, Selectors} from '../amp-story-page';
 import {Deferred} from '../../../../src/utils/promise';
@@ -23,13 +24,16 @@ import {MediaType} from '../media-pool';
 import {Services} from '../../../../src/services';
 import {Signals} from '../../../../src/utils/signals';
 import {
+  addAttributesToElement,
   createElementWithAttributes,
   scopedQuerySelectorAll,
 } from '../../../../src/dom';
 import {installFriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {registerServiceBuilder} from '../../../../src/service';
 
-describes.realWin('amp-story-page', {amp: true}, (env) => {
+const extensions = ['amp-story:1.0', 'amp-audio'];
+
+describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
   let win;
   let element;
   let gridLayerEl;
@@ -299,6 +303,37 @@ describes.realWin('amp-story-page', {amp: true}, (env) => {
       element,
       Selectors.ALL_PLAYBACK_MEDIA
     )[0];
+    expect(mediaPoolRegister).to.have.been.calledOnceWithExactly(audioEl);
+  });
+
+  it('should register amp-audio on layoutCallback', async () => {
+    const ampAudioEl = win.document.createElement('amp-audio');
+    addAttributesToElement(ampAudioEl, {
+      'src': 'foo.mp3',
+      'layout': 'nodisplay',
+    });
+
+    page.element.querySelector('amp-story-grid-layer').appendChild(ampAudioEl);
+
+    new AmpAudio(ampAudioEl);
+    ampAudioEl.build();
+    page.buildCallback();
+
+    const mediaPool = await page.mediaPoolPromise_;
+    const mediaPoolRegister = env.sandbox.stub(mediaPool, 'register');
+    env.sandbox.stub(mediaPool, 'preload');
+
+    await page.layoutCallback();
+
+    page.setState(PageState.PLAYING);
+
+    await nextTick();
+
+    const audioEl = scopedQuerySelectorAll(
+      element,
+      Selectors.ALL_PLAYBACK_MEDIA
+    )[0];
+
     expect(mediaPoolRegister).to.have.been.calledOnceWithExactly(audioEl);
   });
 
