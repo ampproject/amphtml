@@ -37,7 +37,12 @@ async function collectCoverage() {
   await page.coverage.startJSCoverage();
   // Navigate to page
   await page.goto(testUrl);
-  await page.waitFor(() => !!document.querySelector('body'));
+  await page.waitFor(() => !!document.querySelector('style[amp-runtime]'));
+  await page.waitFor(
+    () =>
+      !!document.body &&
+      getComputedStyle(document.body).visibility === 'visible'
+  );
   log('Scrolling to the end of the page...');
   await autoScroll(page);
   log('Testing completed.');
