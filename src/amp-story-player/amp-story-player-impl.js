@@ -511,7 +511,7 @@ export class AmpStoryPlayer {
 
   /**
    * Creates all elements necessary for up next.
-   * @return {Object<string, Element}
+   * @return {Object<string, Element>}
    * @private
    */
   createUpNextElement_() {
