@@ -20,8 +20,8 @@ import {
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-quiz-1.0.css';
 import {LocalizedStringId} from '../../../src/localized-strings';
+import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
-import {getLocalizationService} from '../../amp-story/1.0/amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
 import {setStyles} from '../../../src/style';
 
@@ -67,9 +67,6 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
 
     /** @private {!Array<string>} */
     this.answerChoiceOptions_ = ['A', 'B', 'C', 'D'];
-
-    /** @private {!../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = getLocalizationService(element);
   }
 
   /** @override */
@@ -94,17 +91,17 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
   attachContent_(root) {
     this.attachPrompt_(root);
 
-    // Localize the answer choice options
-    this.answerChoiceOptions_ = this.answerChoiceOptions_.map((choice) => {
-      return (
-        this.localizationService_.getLocalizedString(
+    this.initializePromise_.then(() => {
+      // Localize the answer choice options
+      this.answerChoiceOptions_ = this.answerChoiceOptions_.map((choice) => {
+        return Services.localizationForDoc(this.element).getLocalizedString(
           LocalizedStringId[`AMP_STORY_QUIZ_ANSWER_CHOICE_${choice}`]
-        ) || choice
+        );
+      });
+      this.options_.forEach((option, index) =>
+        this.configureOption_(option, index)
       );
     });
-    this.options_.forEach((option, index) =>
-      this.configureOption_(option, index)
-    );
   }
 
   /**

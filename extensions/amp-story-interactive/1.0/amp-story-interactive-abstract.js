@@ -134,8 +134,8 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected @const {InteractiveType} */
     this.interactiveType_ = type;
 
-    /** @protected @const {?Promise<../../amp-story/1.0/story-analytics.StoryAnalyticsService>} */
-    this.analyticsServicePromise_ = null;
+    /** @protected @const {?../../amp-story/1.0/story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = null;
 
     /** @protected {?Promise<?InteractiveResponseType|?JsonObject|undefined>} */
     this.backendDataPromise_ = null;
@@ -252,6 +252,11 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       Services.storyRequestServiceForOrNull(this.win).then((requestService) => {
         this.requestService_ = requestService;
       }),
+      Services.storyAnalyticsServiceForOrNull(this.win).then(
+        (analyticsService) => {
+          this.analyticsService_ = analyticsService;
+        }
+      ),
     ]).then(() => {
       this.initializePromiseResolve_(null);
     });
@@ -495,28 +500,26 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @private
    */
   triggerAnalytics_(optionEl) {
-    this.variableService_.onVariableUpdate(
-      AnalyticsVariable.STORY_INTERACTIVE_ID,
-      this.element.getAttribute('id')
-    );
-    this.variableService_.onVariableUpdate(
-      AnalyticsVariable.STORY_INTERACTIVE_RESPONSE,
-      optionEl.optionIndex_
-    );
-    this.variableService_.onVariableUpdate(
-      AnalyticsVariable.STORY_INTERACTIVE_TYPE,
-      this.interactiveType_
-    );
+    this.initializePromise_.then(() => {
+      this.variableService_.onVariableUpdate(
+        AnalyticsVariable.STORY_INTERACTIVE_ID,
+        this.element.getAttribute('id')
+      );
+      this.variableService_.onVariableUpdate(
+        AnalyticsVariable.STORY_INTERACTIVE_RESPONSE,
+        optionEl.optionIndex_
+      );
+      this.variableService_.onVariableUpdate(
+        AnalyticsVariable.STORY_INTERACTIVE_TYPE,
+        this.interactiveType_
+      );
 
-    this.element[ANALYTICS_TAG_NAME] = this.element.tagName;
-    Services.storyAnalyticsServiceForOrNull(this.win).then(
-      (analyticsService) => {
-        analyticsService.triggerEvent(
-          StoryAnalyticsEvent.INTERACTIVE,
-          this.element
-        );
-      }
-    );
+      this.element[ANALYTICS_TAG_NAME] = this.element.tagName;
+      this.analyticsService_.triggerEvent(
+        StoryAnalyticsEvent.INTERACTIVE,
+        this.element
+      );
+    });
   }
 
   /**
