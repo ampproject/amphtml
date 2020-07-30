@@ -288,14 +288,14 @@ This element includes [common attributes](https://amp.dev/documentation/guides-a
 
 There are several types of runtime errors that may be encountered when using `amp-script`.
 
-#### "Maximum total script size exceeded (...)"
+### "Maximum total script size exceeded (...)"
 
 `amp-script` limits the size of the JS source that may be used. See [Size of JavaScript code](#size-of-javascript-code) above.
 
-#### "Script hash not found."
+### "Script hash not found."
 
 For local scripts and cross-origin scripts, you need to add a [script hash](#script-hash) for security.
 
-#### "amp-script... was terminated due to illegal mutation"
+### "amp-script... was terminated due to illegal mutation"
 
 To avoid unexpected content jumping, `amp-script` generally requires user gestures for DOM changes. See [User gestures](#user-gestures) above.
