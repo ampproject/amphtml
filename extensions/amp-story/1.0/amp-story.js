@@ -1080,9 +1080,6 @@ export class AmpStory extends AMP.BaseElement {
     backButton.classList.add('i-amphtml-story-screen-reader-back-button');
     backButton.setAttribute('aria-label', 'Previous page');
 
-    const pageIndex = this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX);
-    hideOnFirstPage(pageIndex);
-
     backButton.addEventListener('click', () => {
       this.previous_();
     });
@@ -1091,6 +1088,8 @@ export class AmpStory extends AMP.BaseElement {
       Action.SET_ADVANCEMENT_MODE,
       AdvancementMode.MANUAL_ADVANCE
     );
+
+    hideOnFirstPage(this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX));
 
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_INDEX,
