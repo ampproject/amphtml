@@ -15,13 +15,13 @@
  */
 
 import {AmpStoryInteractiveBinaryPoll} from '../amp-story-interactive-binary-poll';
+import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
 import {Services} from '../../../../src/services';
 import {
   addConfigToInteractive,
   getMockInteractiveData,
 } from './test-amp-story-interactive';
-import {getRequestService} from '../../../amp-story/1.0/amp-story-request-service';
 import {measureMutateElementStub} from '../../../../testing/test-helper';
 import {registerServiceBuilder} from '../../../../src/service';
 
@@ -47,7 +47,10 @@ describes.realWin(
         'amp-story-interactive-binary-poll'
       );
       ampStoryPollEl.getResources = () => win.__AMP_SERVICES.resources.obj;
-      requestService = getRequestService(win, ampStoryPollEl);
+      requestService = new AmpStoryRequestService(win);
+      registerServiceBuilder(win, 'story-request', function () {
+        return requestService;
+      });
 
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
