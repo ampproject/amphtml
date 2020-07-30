@@ -324,18 +324,18 @@ describes.sandboxed('shadow-embed', {}, () => {
     beforeEach(() => {
       shadowRoot = document.createElement('div');
       shadowRoot2 = document.createElement('div');
-      resetShadowStyleCacheForTesting(window);
     });
 
     afterEach(() => {
       resetShadowStyleCacheForTesting(window);
     });
 
-    it('should re-use constructable stylesheet when supported', () => {
+    it('should re-use constructable stylesheet when supported', function () {
       try {
         new CSSStyleSheet();
       } catch (e) {
         // Leave. Not supported.
+        this.skip();
         return;
       }
 
@@ -350,13 +350,17 @@ describes.sandboxed('shadow-embed', {}, () => {
       );
       expect(shadowRoot.querySelector('style')).to.be.null;
 
+      // A different stylesheet.
+      installShadowStyle(shadowRoot, 'B', '* {color: blue}');
+      expect(shadowRoot.adoptedStyleSheets).to.have.length(2);
+
       // Repeated call uses the cache.
       shadowRoot2.adoptedStyleSheets = [];
       installShadowStyle(shadowRoot2, 'A', 'not even CSS');
       expect(shadowRoot2.adoptedStyleSheets).to.have.length(1);
       expect(shadowRoot2.adoptedStyleSheets[0]).to.equal(styleSheet1);
 
-      // A different stylesheet.
+      // A different stylesheet in a differet root.
       shadowRoot2.adoptedStyleSheets = [];
       installShadowStyle(shadowRoot2, 'B', '* {color: blue}');
       expect(shadowRoot2.adoptedStyleSheets).to.have.length(1);

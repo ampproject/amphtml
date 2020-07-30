@@ -324,8 +324,10 @@ function getStylesheetRules(doc, css) {
 export function installShadowStyle(shadowRoot, name, cssText) {
   const doc = shadowRoot.ownerDocument;
   const win = toWin(doc.defaultView);
-  if (shadowRoot.adoptedStyleSheets !== undefined &&
-      CSSStyleSheet.prototype.replaceSync !== undefined) {
+  if (
+    shadowRoot.adoptedStyleSheets !== undefined &&
+    CSSStyleSheet.prototype.replaceSync !== undefined
+  ) {
     const cache = win[SHADOW_CSS_CACHE] || (win[SHADOW_CSS_CACHE] = {});
     let styleSheet = cache[name];
     if (!styleSheet) {
@@ -333,7 +335,9 @@ export function installShadowStyle(shadowRoot, name, cssText) {
       styleSheet.replaceSync(cssText);
       cache[name] = styleSheet;
     }
-    shadowRoot.adoptedStyleSheets = [styleSheet];
+    shadowRoot.adoptedStyleSheets = shadowRoot.adoptedStyleSheets.concat(
+      styleSheet
+    );
   } else {
     const styleEl = doc.createElement('style');
     styleEl.setAttribute('data-name', name);

@@ -913,4 +913,4 @@ HTMLIFrameElement.prototype.featurePolicy;
  *
  * @param {string} cssText
  */
-CSSStyleSheet.prototype.replaceSync = function(cssText) {};
+CSSStyleSheet.prototype.replaceSync = function (cssText) {};
