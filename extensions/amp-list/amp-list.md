@@ -282,7 +282,7 @@ See below for a full example,
 
 ### Using amp-script as a data source
 
-In the ideal case, the servers powering your `<amp-list>` would return perfectly formatted JSON for your use case. However, for situations in which you may not have access to create or modify backend servers, it is also possible to provide data to an `<amp-list>` component using JavaScript via exported `<amp-script>` functions.
+In the ideal case, the servers powering your `<amp-list>` would return perfectly formatted JSON for your use case. However, for situations in which you may not have access to create or modify backend servers, it is also possible to provide data to an `<amp-list>` component using JavaScript via exported `<amp-script>` functions. Those functions may transform the data before returning.
 
 Here are the steps for specifying an `<amp-script>` functions as your data source:
 
@@ -292,7 +292,6 @@ Here are the steps for specifying an `<amp-script>` functions as your data sourc
    c. Exporting the function using `exportFunction(name: string, fn: Function)`
 2. Use the `amp-script:` protocol in your `<amp-list>`'s src attribute. The correct format for specifying a function is the `<amp-script>`'s ID followed by the exported function name, like this:
    `<amp-list src="amp-script:id.fnName">`
-   In cases where you do not have the ability to modify an API serving `<amp-list>` JSON, you may need to modify the server response before handing it to the `<amp-list>`.
 
 See below for an example:
 
