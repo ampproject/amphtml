@@ -63,7 +63,7 @@
   <script>
     const player = document.querySelector("amp-story-player");
     player.addEventListener("amp-story-player-close", (e) => alert("Hello!"));
-    document.querySelector('div').addEventListener((e) => player.dispatchEvent(new CustomEvent('storyEnd')));
+    document.querySelector('div').addEventListener('click', (e) => player.dispatchEvent(new CustomEvent('storyEnd')));
   </script>  
   </body>
 </html>
