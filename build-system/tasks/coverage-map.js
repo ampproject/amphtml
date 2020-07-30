@@ -77,11 +77,11 @@ async function generateMap() {
   log(
     `Generating heat map in dist/${outHtml}, based on ${coverageJsonName}...`
   );
-  explore('dist/v0.js', {
+  await explore('dist/v0.js', {
     output: {format: 'html', filename: `${outHtml}`},
     coverage: `dist/${coverageJsonName}`,
     onlyMapped: true,
-  }).then();
+  });
 }
 
 async function coverageMap() {
