@@ -18,11 +18,14 @@ import {Deferred} from './promise';
 
 /**
  * Decodes readable stream from response and writes to given writeable stream.
+ * Returns a promise that resolves when first bytes are received from the
+ * response, or we learn that the response is empty.
  * This function should be replaced with transform stream when well supported.
  * @param {!Window} win
  * @param {!Response} response
  * @param {!./detached-dom-stream.DetachedDomStream} writer
- * @return {!Promise<boolean>} Indicates if the response is empty.
+ * @return {!Promise<boolean>} true if response has content, false if
+ * the response is empty.
  */
 export function streamResponseToWriter(win, response, writer) {
   const hasContentDeferred = new Deferred();
