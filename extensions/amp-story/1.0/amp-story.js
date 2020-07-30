@@ -1089,7 +1089,9 @@ export class AmpStory extends AMP.BaseElement {
       AdvancementMode.MANUAL_ADVANCE
     );
 
-    hideOnFirstPage(this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX));
+    hideOnFirstPage(
+      Number(this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX))
+    );
 
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_INDEX,
@@ -1103,6 +1105,7 @@ export class AmpStory extends AMP.BaseElement {
      * @private
      */
     function hideOnFirstPage(pageIndex) {
+      console.log(typeof pageIndex);
       pageIndex === 0
         ? backButton.classList.add(
             'i-amphtml-story-screen-reader-back-button-hidden'
