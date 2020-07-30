@@ -770,7 +770,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
       await nextTick();
 
-      swipeLeft();
+      playerEl.click();
 
       expect(playerEl.hasAttribute('autoplay')).to.be.false;
     });
