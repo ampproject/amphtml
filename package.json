@@ -26,6 +26,7 @@
     "prop-types": "15.7.2",
     "react-dates": "15.5.3",
     "rrule": "2.6.4",
+    "source-map-explorer": "2.4.2",
     "web-activities": "1.13.0",
     "web-animations-js": "2.3.1"
   },
