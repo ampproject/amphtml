@@ -56,8 +56,9 @@
             <amp-story-interactive-quiz
                 id="international-quiz-dark"
                 endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
-                style="--interactive-accent-color: rgb(16, 218, 93);--interactive-prompt-background: rgb(4, 41, 18);--interactive-prompt-text-color: rgb(16, 218, 93);"
+                style="--interactive-accent-color: #ffa600;--interactive-prompt-background: linear-gradient(150deg, #da450b, #ffa600)"
                 theme="dark"
+                chip-style="shadow"
                 prompt-text="Is this an international quiz?"
                 option-1-text="你好，这是马蒂亚斯"
                 option-2-text="مرحبا هذا ماتياس"
@@ -104,14 +105,15 @@
           <amp-story-grid-layer template="center">
             <amp-story-interactive-quiz
                 id="last-cup-dark"
+                prompt-text="Who won the last soccer world cup?"
                 endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
-                theme="dark"
                 style="--interactive-accent-color: rgb(221, 17, 229);"
                 option-1-text="France" option-1-correct
                 option-1-confetti="🇫🇷"
                 option-2-text="Spain"
                 option-3-text="Uruguay"
-                option-4-text="Brazil">
+                option-4-text="Brazil"
+                chip-style="shadow">
             </amp-story-interactive-quiz>
           </amp-story-grid-layer>
         </amp-story-page>
