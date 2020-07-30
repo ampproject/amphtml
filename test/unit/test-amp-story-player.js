@@ -774,26 +774,5 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       expect(playerEl.hasAttribute('autoplay')).to.be.false;
     });
-
-    it(
-      'sets the Embed Mode of an added story to PREVIEW when it ' +
-        'is the first one in a player in autoplay mode',
-      async () => {
-        const playerEl = win.document.createElement('amp-story-player');
-        playerEl.setAttribute('autoplay', '');
-
-        const player = new AmpStoryPlayer(win, playerEl);
-        await player.load();
-
-        const stories = createStoryObjects(3);
-        playerEl.add(stories);
-
-        const storyIframes = playerEl.shadowRoot.querySelectorAll('iframe');
-
-        expect(storyIframes[0].getAttribute('src')).to.include('embedMode=3');
-        expect(storyIframes[1].getAttribute('src')).to.include('embedMode=0');
-        expect(storyIframes[2].getAttribute('src')).to.include('embedMode=0');
-      }
-    );
   });
 });
