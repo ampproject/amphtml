@@ -38,7 +38,6 @@
 #ifndef AMPVALIDATOR__VALIDATOR_H_
 #define AMPVALIDATOR__VALIDATOR_H_
 
-#include "validator.proto.h"
 #include "../../validator.proto.h"
 
 namespace amp::validator {
@@ -47,7 +46,7 @@ ValidationResult Validate(std::string_view html,
                           HtmlFormat_Code html_format = HtmlFormat::AMP,
                           int max_errors = -1);
 
-ValidatorInfo Info();
+int RulesSpecVersion();
 
 }  // namespace amp::validator
 
