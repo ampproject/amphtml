@@ -1569,7 +1569,7 @@ describes.fakeWin('Resources.add/upgrade/remove', {amp: true}, (env) => {
 
     resources.add(child1);
 
-    expect(resource1.requestMeasure).to.not.be.called;
+    expect(resource1.requestMeasure).to.be.calledOnce;
     expect(observer.observe).to.be.calledOnceWith(child1);
   });
 
