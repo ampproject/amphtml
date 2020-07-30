@@ -305,6 +305,9 @@ The value of `max-age` should be chosen carefully:
 
 If you don't publish signed exchanges, `max-age` does nothing.
 
+**nodom (optional)**
+There are situations in which you may wish to use `<amp-script>` as solely a data-layer, rather than using it to manipulate dom. The `nodom` attribute removes the ability for the `<amp-script>` to make dom modifications, in favor of a signficantly smaller bundle size and therefore better performance. It also renders the `<amp-script>` invisible, removing the need for specifying height and width.
+
 **common attributes**
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.

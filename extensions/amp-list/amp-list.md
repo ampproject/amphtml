@@ -296,7 +296,7 @@ Here are the steps for specifying an `<amp-script>` functions as your data sourc
 See below for an example:
 
 ```html
-<amp-script id="fns" script="local-script" nodom data-ampdevmode></amp-script>
+<amp-script id="fns" script="local-script" nodom></amp-script>
 <script id="local-script" type="text/plain" target="amp-script">
   function getRemoteData() {
     return fetch('https://example.com')
@@ -318,6 +318,10 @@ See below for an example:
   </template>
 </amp-list>
 ```
+
+[tip type="important"]
+When using `<amp-script>` as merely a data-layer with no dom manipulation, you may benefit from attaching the `nodom` attribute. This signicantly improves some of the performance characteristics of the `<amp-script>`, as well as removes the need to specify a size since the component should have no appearance.
+[/tip]
 
 ### Load more and infinite scroll
 
