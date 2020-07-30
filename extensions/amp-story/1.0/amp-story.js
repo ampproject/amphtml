@@ -1105,7 +1105,6 @@ export class AmpStory extends AMP.BaseElement {
      * @private
      */
     function hideOnFirstPage(pageIndex) {
-      console.log(typeof pageIndex);
       pageIndex === 0
         ? backButton.classList.add(
             'i-amphtml-story-screen-reader-back-button-hidden'
