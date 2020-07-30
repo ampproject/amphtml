@@ -5192,23 +5192,19 @@ ValidationResult CreateResultPrototype(const ParsedValidatorRules& rules) {
 
 class ParsedValidatorRulesProvider {
  public:
-  static ParsedValidatorRulesProvider& Instance() {
+  static const ParsedValidatorRules* Get(HtmlFormat::Code format) {
     static ParsedValidatorRulesProvider provider;
-    return provider;
-  }
-
-  const ParsedValidatorRules* Get(HtmlFormat::Code format) {
     switch (format) {
       case HtmlFormat::AMP:
-        return amp_rules_.get();
+        return provider.amp_rules_.get();
       case HtmlFormat::AMP4ADS:
-        return amp4_ads_rules_.get();
+        return provider.amp4_ads_rules_.get();
       case HtmlFormat::AMP4EMAIL:
-        return amp4_email_rules_.get();
+        return provider.amp4_email_rules_.get();
       case HtmlFormat::ACTIONS:
-        return amp4_actions_rules_.get();
+        return provider.amp4_actions_rules_.get();
       default:
-        return amp_rules_.get();
+        return provider.amp_rules_.get();
     }
   }
 
@@ -5590,13 +5586,13 @@ class Validator {
 ValidationResult Validate(std::string_view html,
                           HtmlFormat_Code html_format,
                           int max_errors) {
-  Validator validator(ParsedValidatorRulesProvider::Instance().Get(html_format),
+  Validator validator(ParsedValidatorRulesProvider::Get(html_format),
                       max_errors);
   return validator.Validate(html);
 }
 
 int RulesSpecVersion() {
-  auto rules = ParsedValidatorRulesProvider::Instance().Get(HtmlFormat::AMP);
+  auto rules = ParsedValidatorRulesProvider::Get(HtmlFormat::AMP);
   return rules->SpecFileRevision();
 }
 
