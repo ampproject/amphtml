@@ -128,7 +128,7 @@
   visibility: hidden !important;
 }
 
-.i-amphtml-story-interactive-poll-container.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
+.i-amphtml-story-interactive-active:not(.i-amphtml-story-interactive-post-selection) 
   .i-amphtml-story-interactive-option:before {
   background-color: var(--i-amphtml-interactive-theme-shading-flash) !important;
   content: '' !important;
