@@ -432,7 +432,11 @@ export class AmpStoryPlayer {
   }
 
   /**
-   *
+   * Creates the up next elements, attaches event listeners so the
+   * countdown will begin when a user reaches the end of the story and
+   * be cleared after navigation or the cancel button is triggered.
+   * If the countdown successfully reaches 0, the player will display
+   * the next story.
    * @private
    */
   initializeUpNext_() {
@@ -456,6 +460,12 @@ export class AmpStoryPlayer {
     });
   }
 
+  /**
+   * Updates the up next elements with the next story's values.
+   * @param {Element} card
+   * @param {Element} title
+   * @param {Element} author
+   */
   updateUpNextInfo_(card, title, author) {
     const story = this.stories_[this.currentIdx_ + 1];
     card.src = story.getAttribute('data-poster-portrait-src');
@@ -463,6 +473,12 @@ export class AmpStoryPlayer {
     author.textContent = 'Placeholder';
   }
 
+  /**
+   * Starts the countdown, displays and updates the up next elements.
+   * @param {Element} container
+   * @param {Element} text
+   * @private
+   */
   startUpNext_(container, text) {
     let counter = 10;
     text.textContent = 'UP NEXT in ' + counter;
@@ -483,11 +499,21 @@ export class AmpStoryPlayer {
     );
   }
 
+  /**
+   * Clears the countdown and hides the up next elements.
+   * @param {Element} container
+   * @private
+   */
   endUpNext_(container) {
     clearInterval(this.interval_);
     container.classList.add('story-player-hide');
   }
 
+  /**
+   * Creates all elements necessary for up next.
+   * @return {Object<string, Element}
+   * @private
+   */
   createUpNextElement_() {
     const container = this.doc_.createElement('div');
     container.classList.add('story-player-up-next-container');
@@ -514,6 +540,13 @@ export class AmpStoryPlayer {
     return {container, card, ...textElements};
   }
 
+  /**
+   * Creates up next text elements: timer, title, and author and appends
+   * those elements to the container provided.
+   * @param {!Element} textContainer
+   * @return {Object<string, Element>}
+   * @private
+   */
   createUpNextTexts_(textContainer) {
     textContainer.classList.add('story-player-up-next-text-container');
 
