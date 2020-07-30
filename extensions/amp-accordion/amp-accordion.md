@@ -123,7 +123,7 @@ animation when the content is expanded and "roll up" animation when collapsed.
     ></amp-img>
   </section>
 </amp-accordion>
-````
+```
 
 [/example]
 
