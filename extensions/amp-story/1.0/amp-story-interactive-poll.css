@@ -74,7 +74,7 @@
 }
 
 .i-amphtml-story-interactive-poll-container:not(.i-amphtml-story-interactive-has-data) .i-amphtml-story-interactive-option::after {
-  visibility: hidden;
+  visibility: hidden !important;
 }
 
 .i-amphtml-story-interactive-option-text {
