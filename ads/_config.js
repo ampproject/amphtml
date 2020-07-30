@@ -210,6 +210,10 @@ const adConfig = jsonConfiguration({
     preconnect: ['https://mads.at.atwola.com', 'https://aka-cdn.adtechus.com'],
   },
 
+  'adtelligent': {
+    preconnect: ['https://s.adtelligent.com'],
+  },
+
   'adthrive': {
     prefetch: ['https://www.googletagservices.com/tag/js/gpt.js'],
     preconnect: [
