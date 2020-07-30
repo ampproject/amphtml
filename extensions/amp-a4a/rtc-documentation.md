@@ -135,11 +135,12 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 - Kargo
 - Lotame
 - Media.net
-- The Ozone Project
 - PubMatic OpenWrap
 - Purch
 - Rubicon
 - Salesforce
+- T13
+- The Ozone Project
 - Yieldbot
 - Yieldlab
 

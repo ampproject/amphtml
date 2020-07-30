@@ -30,11 +30,12 @@ To use RTC, you must meet the following requirements:
 - Kargo
 - Lotame
 - Media.net
-- The Ozone Project
 - PubMatic OpenWrap
 - Purch
 - Rubicon
 - Salesforce
+- T13
+- The Ozone Project
 - Yieldbot
 - Yieldlab
 

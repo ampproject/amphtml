@@ -184,6 +184,13 @@ export const NO_SIGNING_EXP = {
   experiment: '21066325',
 };
 
+/** @const @enum {string} */
+export const MODULE_NOMODULE_PARAMS_EXP = {
+  ID: 'module-nomodule',
+  CONTROL: '21066677',
+  EXPERIMENT: '21066678',
+};
+
 /**
  * Utility function that ensures any error thrown is handled by optional
  * onError handler (if none provided or handler throws, error is swallowed and
@@ -2236,6 +2243,27 @@ export class AmpA4A extends AMP.BaseElement {
    */
   getIframeTitle() {
     return this.element.getAttribute('title') || '3rd party ad content';
+  }
+
+  /**
+   * Queries the dom through the `runtime-type` meta. If the value is one of
+   * 2, 4, 10 (which corresponds to module/nomodule or its control diversion)
+   * and returns the correct experiment ID.
+   *
+   * @protected
+   * @return {?string}
+   */
+  getModuleNomoduleExpIds_() {
+    const runtimeType = this.getAmpDoc().getMetaByName('runtime-type');
+    // ModuleNomoduleControl = 10 (current default, just nomodule)
+    if (runtimeType === '10') {
+      return MODULE_NOMODULE_PARAMS_EXP.CONTROL;
+    }
+    // ES6 = 2 (module/nomodule mode)
+    if (runtimeType === '2') {
+      return MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT;
+    }
+    return null;
   }
 }
 
