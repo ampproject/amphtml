@@ -74,7 +74,7 @@ to preserve the collapsed/expanded state.[/filter]
 
 [example preview="top-frame" playground="true"]
 
-````html
+```html
 <amp-accordion id="my-accordion"{% if not format=='email'%} disable-session-states{% endif %}>
   <section>
     <h2>Section 1</h2>
