@@ -177,10 +177,12 @@ function matchMacro(string, matchPattern, opt_matchingGroupIndexStr) {
 /**
  * Returns a comma separated list of active experiment branches or null
  * if none are active.
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {?string}
  */
-function experimentBranchesMacro(win) {
+function experimentBranchesMacro(ampdoc) {
+  const parent = ampdoc.getParent();
+  const win = parent ? parent.win : ampdoc.win;
   const branches = getActiveExperimentBranches(win);
   return branches ? Object.values(branches).join(',') : null;
 }
@@ -250,7 +252,7 @@ export class VariableService {
     );
 
     this.register_('EXPERIMENT_BRANCHES', () =>
-      experimentBranchesMacro(this.ampdoc_.win)
+      experimentBranchesMacro(this.ampdoc_)
     );
   }
 
