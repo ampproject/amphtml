@@ -20,6 +20,7 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AnalyticsVariable, getVariableService} from './variable-service';
+import {EmbedMode} from './embed-mode';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
@@ -72,6 +73,10 @@ const SET_STATE_CONFIGURATIONS = {
   'MUTED_STATE': {
     action: Action.TOGGLE_MUTED,
     isValueValid: (value) => typeof value === 'boolean',
+  },
+  'EMBED_MODE': {
+    action: Action.SET_EMBED_MODE,
+    isValueValid: (value) => value in EmbedMode,
   },
 };
 
