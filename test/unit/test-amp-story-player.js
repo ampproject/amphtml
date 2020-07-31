@@ -724,7 +724,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('navigation', navigationSpy);
       playerEl.setAttribute('enable-circular-wrapping', '');
-      swipeLeft();
+      swipeRight();
       expect(navigationSpy).to.have.been.calledWithMatch({
         type: 'navigation',
         detail: {
