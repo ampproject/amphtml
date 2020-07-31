@@ -1016,14 +1016,14 @@ export class AmpStoryPlayer {
 
       if (this.swipingState_ === SwipingState.SWIPING_TO_LEFT) {
         delta > TOGGLE_THRESHOLD_PX &&
-        (this.getSecondaryIframe_() || this.isCircularWrappingEnabled_)
+        (this.getSecondaryIframe_() || this.isCircularWrappingEnabled_())
           ? this.next_()
           : this.resetIframeStyles_();
       }
 
       if (this.swipingState_ === SwipingState.SWIPING_TO_RIGHT) {
         delta > TOGGLE_THRESHOLD_PX &&
-        (this.getSecondaryIframe_() || this.isCircularWrappingEnabled_)
+        (this.getSecondaryIframe_() || this.isCircularWrappingEnabled_())
           ? this.previous_()
           : this.resetIframeStyles_();
       }
