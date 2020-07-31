@@ -124,23 +124,20 @@ export function Scroller({
   };
 
   return (
-    <>
-      <style>{styles.scrollerStyles}</style>
-      <div
-        hide-scrollbar
-        key="container"
-        ref={containerRef}
-        onScroll={handleScroll}
-        style={{
-          ...styles.scrollContainer,
-          ...styles.hideScrollbar,
-          ...styles.horizontalScroll,
-        }}
-        tabindex={0}
-      >
-        {slides}
-      </div>
-    </>
+    <div
+      hide-scrollbar
+      key="container"
+      ref={containerRef}
+      onScroll={handleScroll}
+      style={{
+        ...styles.scrollContainer,
+        ...styles.hideScrollbar,
+        ...styles.horizontalScroll,
+      }}
+      tabindex={0}
+    >
+      {slides}
+    </div>
   );
 }
 
