@@ -18,7 +18,6 @@ import {A4AVariableSource} from './a4a-variable-source';
 import {
   CONSENT_POLICY_STATE, // eslint-disable-line no-unused-vars
 } from '../../../src/consent-state';
-import {Deferred, tryResolve} from '../../../src/utils/promise';
 import {DetachedDomStream} from '../../../src/utils/detached-dom-stream';
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {Layout, LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
@@ -64,6 +63,7 @@ import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {streamResponseToWriter} from '../../../src/utils/stream-response';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {tryResolve} from '../../../src/utils/promise';
 import {utf8Decode} from '../../../src/utils/bytes';
 
 /** @type {Array<string>} */
@@ -247,7 +247,10 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?Promise<undefined>} */
     this.keysetPromise_ = null;
 
-    /** @private {?Promise<?CreativeMetaDataDef>} */
+    /**
+     * In no signing experiment metadata will be data from head validation.
+     * @private {?Promise<?CreativeMetaDataDef|?./head-validation.ValidatedHeadDef>}
+     */
     this.adPromise_ = null;
 
     /**
@@ -373,24 +376,11 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.isSinglePageStoryAd = false;
 
-    const sanitizedHeadPromise = new Deferred();
-    /**
-     * Promise that will resolve with processed <head> from ad server response.
-     * @private {!Promise}
-     */
-    this.sanitizedHeadPromise_ = sanitizedHeadPromise.promise;
-
-    /**
-     * Resolves the promise that the head has been processed.
-     * @private {function()}
-     */
-    this.sanitizedHeadResolver_ = sanitizedHeadPromise.resolve;
-
     /**
      * Transfers elements from the detached body to the given body element.
      * @private {?function(!Element)}
      */
-    this.transferBody_ = null;
+    this.transferDomBody_ = null;
   }
 
   /** @override */
@@ -847,7 +837,7 @@ export class AmpA4A extends AMP.BaseElement {
       })
       .then((fetchResponse) =>
         this.isInNoSigningExp()
-          ? this.streamResponse_(fetchResponse)
+          ? this.streamResponse_(fetchResponse, checkStillCurrent)
           : this.startValidationFlow_(fetchResponse, checkStillCurrent)
       )
       .catch((error) => {
@@ -884,21 +874,22 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Start streaming response into the detached document.
-   * @param {!Response} response
-   * @return {boolean}
+   * @param {!Response} httpResponse
+   * @param {function()} checkStillCurrent
+   * @return {Promise<?./head-validation.ValidatedHeadDef>}
    */
-  streamResponse_(response) {
-    // TODO(ccordry): handle fallback case and set isVerifiedAmpCreative and
-    // creativeBody appropriately.
-    this.isVerifiedAmpCreative_ = true;
+  streamResponse_(httpResponse, checkStillCurrent) {
+    if (!httpResponse.body) {
+      this.forceCollapse();
+      return Promise.reject(NO_CONTENT_RESPONSE);
+    }
 
-    const size = this.extractSize(response.headers);
+    // Duplicating httpResponse stream as safeframe/nameframe rending will need the
+    // unaltered httpResponse content.
+    const fallbackHttpResponse = httpResponse.clone();
+
+    const size = this.extractSize(httpResponse.headers);
     this.creativeSize_ = size || this.creativeSize_;
-
-    // TODO(ccordry): handle fallback and ensure this is only set for creatives
-    // that can be rendered friendly.
-    // Update priority.
-    this.updateLayoutPriority(LayoutPriority.CONTENT);
 
     // This transformation consumes the detached DOM chunks and
     // exposes our waitForHead and transferBody methods.
@@ -909,30 +900,70 @@ export class AmpA4A extends AMP.BaseElement {
       (chunk) => transformStream.onChunk(chunk),
       (doc) => transformStream.onEnd(doc)
     );
-    // Decodes our response bytes and pipes them to the
+
+    this.transferDomBody_ = transformStream.transferBody.bind(transformStream);
+
+    // Decodes our httpResponse bytes and pipes them to the
     // DetachedDomStream.
-    streamResponseToWriter(this.win, response, detachedStream);
+    return streamResponseToWriter(this.win, httpResponse, detachedStream)
+      .then((responseBodyHasContent) => {
+        checkStillCurrent();
+        // `amp-ff-empty-creative` header is not present, and httpResponse.body
+        // is empty.
+        if (!responseBodyHasContent) {
+          this.forceCollapse();
+          return Promise.reject(NO_CONTENT_RESPONSE);
+        }
+      })
+      .then(() => {
+        checkStillCurrent();
+        return transformStream.waitForHead();
+      })
+      .then((head) => {
+        checkStillCurrent();
+        return this.validateHeadElement_(head);
+      })
+      .then((sanitizedHeadElement) => {
+        checkStillCurrent();
+        // We should not render as FIE.
+        if (!sanitizedHeadElement) {
+          return this.handleFallback_(fallbackHttpResponse, checkStillCurrent);
+        }
+        this.updateLayoutPriority(LayoutPriority.CONTENT);
+        this.isVerifiedAmpCreative_ = true;
+        return sanitizedHeadElement;
+      });
+  }
 
-    transformStream
-      .waitForHead()
-      .then((head) => this.validateHead_(head))
-      .then(this.sanitizedHeadResolver_);
-
-    this.transferBody_ = transformStream.transferBody.bind(transformStream);
-
-    // TODO(ccordry): throw NO_CONTENT_RESPONSE if body is empty. Only gets
-    // here if amp-ff-empty-creative header is not present.
-    return true;
+  /**
+   * Handles case where creative cannot or has chosen not to be rendered
+   * safely in FIE. Returning null forces x-domain render in
+   * attemptToRenderCreative
+   * @param {!Response} fallbackHttpResponse
+   * @param {function()} checkStillCurrent
+   * @return {!Promise<null>}
+   */
+  handleFallback_(fallbackHttpResponse, checkStillCurrent) {
+    // Experiment to give non-AMP creatives same benefits as AMP so
+    // update priority.
+    if (this.inNonAmpPreferenceExp()) {
+      this.updateLayoutPriority(LayoutPriority.CONTENT);
+    }
+    return fallbackHttpResponse.arrayBuffer().then((domTextContent) => {
+      checkStillCurrent();
+      this.creativeBody_ = domTextContent;
+      return null;
+    });
   }
 
   /**
    * Prepare the creative <head> by removing any non-secure elements and
    * exracting extensions
-   * @param {!Element} head
+   * @param {!Element} headElement
    * @return {?./head-validation.ValidatedHeadDef} head data or null if we should fall back to xdomain.
    */
-  validateHead_(head) {
-    return processHead(this.win, this.element, head);
+  validateHeadElement_(headElement) {
+    return processHead(this.win, this.element, headElement);
   }
 
   /**
@@ -1260,10 +1291,13 @@ export class AmpA4A extends AMP.BaseElement {
 
         if (this.isInNoSigningExp()) {
           friendlyRenderPromise = this.renderFriendlyTrustless_(
+            /** @type {!./head-validation.ValidatedHeadDef} */ (creativeMetaData),
             checkStillCurrent
           );
         } else {
-          friendlyRenderPromise = this.renderAmpCreative_(creativeMetaData);
+          friendlyRenderPromise = this.renderAmpCreative_(
+            /** @type {!CreativeMetaDataDef} */ (creativeMetaData)
+          );
         }
 
         // Must be an AMP creative.
@@ -1338,11 +1372,11 @@ export class AmpA4A extends AMP.BaseElement {
 
     // Remove rendering frame, if it exists.
     this.destroyFrame();
-
     this.adPromise_ = null;
     this.adUrl_ = null;
     this.creativeBody_ = null;
     this.isVerifiedAmpCreative_ = false;
+    this.transferDomBody_ = null;
     this.fromResumeCallback = false;
     this.experimentalNonAmpCreativeRenderMethod_ = this.getNonAmpCreativeRenderingMethod();
     this.postAdResponseExperimentFeatures = {};
@@ -1621,59 +1655,58 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * @param {!./head-validation.ValidatedHeadDef} headData
    * @param {function()} checkStillCurrent
    * @return {!Promise} Whether the creative was successfully rendered.
    */
-  renderFriendlyTrustless_(checkStillCurrent) {
-    return this.sanitizedHeadPromise_.then((headData) => {
+  renderFriendlyTrustless_(headData, checkStillCurrent) {
+    checkStillCurrent();
+    devAssert(this.element.ownerDocument);
+    this.maybeTriggerAnalyticsEvent_('renderFriendlyStart');
+
+    const {height, width} = this.creativeSize_;
+    const {extensions, fonts, head} = headData;
+    this.iframe = createSecureFrame(
+      this.element.ownerDocument,
+      head,
+      this.getIframeTitle(),
+      height,
+      width
+    );
+    this.applyFillContent(this.iframe);
+
+    // TODO(ccordry): FIE does not handle extension versioning, but we have
+    // it accessible here.
+    const extensionIds = extensions.map((extension) => extension.extensionId);
+
+    return installFriendlyIframeEmbed(
+      devAssert(this.iframe),
+      this.element,
+      {
+        host: this.element,
+        url: devAssert(this.adUrl_),
+        html: null,
+        extensionIds,
+        fonts,
+      },
+      (embedWin, ampdoc) => this.preinstallCallback_(embedWin, ampdoc)
+    ).then((friendlyIframeEmbed) => {
       checkStillCurrent();
-      devAssert(this.element.ownerDocument);
-      this.maybeTriggerAnalyticsEvent_('renderFriendlyStart');
-
-      const {height, width} = this.creativeSize_;
-      const {extensions, fonts, head} = headData;
-      this.iframe = createSecureFrame(
-        this.element.ownerDocument,
-        head,
-        this.getIframeTitle(),
-        height,
-        width
-      );
-      this.applyFillContent(this.iframe);
-
-      // TODO(ccordry): FIE does not handle extension versioning, but we have
-      // it accessible here.
-      const extensionIds = extensions.map((extension) => extension.extensionId);
-
-      return installFriendlyIframeEmbed(
-        devAssert(this.iframe),
-        this.element,
+      const fieBody = this.getFieBody_(friendlyIframeEmbed);
+      const renderComplete = this.transferDomBody_(devAssert(fieBody));
+      this.makeFieVisible_(
+        friendlyIframeEmbed,
+        // TODO(ccordry): subclasses are passed creativeMetadata which does
+        // not exist in unsigned case. All it is currently used for is to
+        // check if it is an AMP creative, and extension list.
         {
-          host: this.element,
-          url: devAssert(this.adUrl_),
-          html: null,
-          extensionIds,
-          fonts,
+          minifiedCreative: '',
+          customStylesheets: [],
+          customElementExtensions: extensionIds,
         },
-        (embedWin, ampdoc) => this.preinstallCallback_(embedWin, ampdoc)
-      ).then((friendlyIframeEmbed) => {
-        checkStillCurrent();
-        const fieBody = this.getFieBody_(friendlyIframeEmbed);
-        const renderComplete = this.transferBody_(devAssert(fieBody));
-        this.makeFieVisible_(
-          friendlyIframeEmbed,
-          // TODO(ccordry): subclasses are passed creativeMetadata which does
-          // not exist in unsigned case. All it is currently used for is to
-          // check if it is an AMP creative, and extension list.
-          {
-            minifiedCreative: '',
-            customStylesheets: [],
-            customElementExtensions: extensionIds,
-          },
-          checkStillCurrent
-        );
-        return renderComplete;
-      });
+        checkStillCurrent
+      );
+      return renderComplete;
     });
   }
 
