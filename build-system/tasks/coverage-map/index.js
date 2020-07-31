@@ -16,11 +16,12 @@
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs').promises;
 const log = require('fancy-log');
-const puppeteer = require('puppeteer');
 const {dist} = require('../dist');
-const {explore} = require('source-map-explorer');
 const {installPackages} = require('../../common/utils');
 const {startServer, stopServer} = require('../serve');
+
+let puppeteer;
+let explore;
 
 const coverageJsonName = argv.json || 'out.json';
 const testUrl =
@@ -87,6 +88,10 @@ async function generateMap() {
 
 async function coverageMap() {
   installPackages(__dirname);
+
+  puppeteer = require('puppeteer');
+  explore = require('source-map-explorer').explore;
+
   await dist();
   await startServer(
     {host: 'localhost', port: 8000},
