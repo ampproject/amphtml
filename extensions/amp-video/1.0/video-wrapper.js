@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../src/preact';
 import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
-import {useEffect, useRef, useState} from '../../../src/preact';
+import {useEffect, useMemo, useRef, useState} from '../../../src/preact';
 import {useMountEffect, useResourcesNotify} from '../../../src/preact/utils';
 // Source for this constant is css/video-autoplay.css
 import {Deferred} from '../../../src/utils/promise';
@@ -28,6 +28,7 @@ import {
   setMediaSession,
 } from '../../../src/mediasession-helper';
 import {cssText as autoplayCss} from '../../../build/video-autoplay.css';
+import {fillContentOverlay} from './video-wrapper.css';
 
 /**
  * @param {!VideoWrapperProps} props
@@ -40,9 +41,7 @@ export function VideoWrapper({
   noaudio = false,
   mediasession = true,
   children,
-  // Prevent override in passthroughProps.
-  muted: unusedMuted,
-  ...passthroughProps
+  ...rest
 }) {
   useResourcesNotify();
 
@@ -54,26 +53,32 @@ export function VideoWrapper({
   const wrapperRef = useRef(null);
   const playerRef = useRef(null);
 
-  const readyDeferredRef = useRef(new Deferred());
+  const readyDeferred = useMemo(() => new Deferred(), []);
 
-  const play = () => {
-    readyDeferredRef.current.promise.then(() => {
-      playerRef.current.play();
-    });
-  };
+  const play = useMemo(
+    () => () => {
+      readyDeferred.promise.then(() => {
+        playerRef.current.play();
+      });
+    },
+    [readyDeferred]
+  );
 
-  const pause = () => {
-    readyDeferredRef.current.promise.then(() => {
-      playerRef.current.pause();
-    });
-  };
+  const pause = useMemo(
+    () => () => {
+      readyDeferred.promise.then(() => {
+        playerRef.current.pause();
+      });
+    },
+    [readyDeferred]
+  );
 
   useEffect(() => {
     if (!mediasession || !metadata || !playing) {
       return;
     }
     setMediaSession(window, metadata, play, pause);
-  }, [mediasession, playing, metadata]);
+  }, [mediasession, playing, metadata, play, pause]);
 
   return (
     <div
@@ -81,12 +86,11 @@ export function VideoWrapper({
       style={{position: 'relative', width: '100%', height: '100%'}}
     >
       <Component
+        {...rest}
         ref={playerRef}
-        // Ensure that props controlled here are excluded from passthroughProps,
-        // see destructuring statement above.
         muted={muted}
         controls={controls && (!autoplay || userInteracted)}
-        onLoad={() => readyDeferredRef.current.resolve()}
+        onLoad={() => readyDeferred.resolve()}
         onLoadedMetadata={() => {
           if (!mediasession) {
             return;
@@ -99,8 +103,8 @@ export function VideoWrapper({
 
           metadata.title =
             metadata.title ||
-            passthroughProps.title ||
-            passthroughProps['aria-label'] ||
+            rest.title ||
+            rest['aria-label'] ||
             document.title;
 
           metadata.artwork =
@@ -113,7 +117,6 @@ export function VideoWrapper({
         }}
         onPlaying={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
-        {...passthroughProps}
       >
         {children}
       </Component>
@@ -149,9 +152,9 @@ function Autoplay({
   pause,
 }) {
   useMountEffect(() => {
-    let observer = new IntersectionObserver(
+    const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
+        if (entries[entries.length - 1].isIntersecting) {
           play();
         } else {
           pause();
@@ -164,37 +167,17 @@ function Autoplay({
 
     return () => {
       observer.disconnect();
-      observer = null;
     };
   });
 
   return (
     <>
-      {displayIcon && (
-        <div
-          class={`amp-video-eq ${playing ? `amp-video-eq-play` : ''}`}
-          style={{display: 'flex'}}
-        >
-          {[1, 2, 3, 4].map((i) => (
-            <div class="amp-video-eq-col" key={i}>
-              <div class={`amp-video-eq-filler amp-video-eq-${i}-1`}></div>
-              <div class={`amp-video-eq-filler amp-video-eq-${i}-2`}></div>
-            </div>
-          ))}
-        </div>
-      )}
+      {displayIcon && <AutoplayIcon playing={playing} />}
 
       {displayOverlay && (
         <div
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            top: 0,
-            zIndex: 1,
-          }}
           role="button"
+          style={fillContentOverlay}
           onClick={onOverlayClick}
         ></div>
       )}
@@ -203,5 +186,31 @@ function Autoplay({
           https://github.com/ampproject/wg-bento/issues/7 */}
       <style>{autoplayCss}</style>
     </>
+  );
+}
+
+/**
+ * @param {!VideoAutoplayIconProps} props
+ * @return {PreactDef.Renderable}
+ */
+function AutoplayIcon({playing}) {
+  const columns = useMemo(
+    () =>
+      [1, 2, 3, 4].map((i) => (
+        <div class="amp-video-eq-col" key={i}>
+          <div class={`amp-video-eq-filler amp-video-eq-${i}-1`}></div>
+          <div class={`amp-video-eq-filler amp-video-eq-${i}-2`}></div>
+        </div>
+      )),
+    []
+  );
+
+  return (
+    <div
+      class={`amp-video-eq ${playing ? `amp-video-eq-play` : ''}`}
+      style={{display: 'flex'}}
+    >
+      {columns}
+    </div>
   );
 }

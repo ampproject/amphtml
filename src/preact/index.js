@@ -158,7 +158,7 @@ export function forwardRef(fn) {
 }
 
 /**
- * @param {{current: (T|null)}} ref
+ * @param {{current: (T|undefined)}} ref
  * @param {!Function} init
  * @param {!Array<*>=} opt_deps
  * @template T

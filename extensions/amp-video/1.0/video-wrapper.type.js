@@ -16,11 +16,14 @@
 
 /** @externs */
 
-var PlayerDef;
+/**
+ * @typedef {function():PreactDef.Renderable|string}
+ */
+var VideoPlayerDef;
 
 /**
  * @typedef {{
- *   component: !PlayerDef,
+ *   component: !VideoPlayerDef,
  *   autoplay: (boolean|undefined),
  *   controls: (boolean|undefined),
  *   noaudio: (boolean|undefined),
@@ -41,4 +44,11 @@ var VideoWrapperProps;
  *   pause: !Function,
  * }}
  */
-var AutoplayProps;
+var VideoAutoplayProps;
+
+/**
+ * @typedef {{
+ *   playing: boolean,
+ * }}
+ */
+var VideoAutoplayIconProps;
