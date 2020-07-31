@@ -17,11 +17,7 @@
     },
     {
       pattern: '**/*.md',
-      owners: [
-        {name: 'mrjoro'},
-        {name: 'ampproject/wg-outreach'},
-        {name: 'ampproject/reviewers-amphtml'},
-      ],
+      owners: [{name: '*'},],
     },
     {
       pattern: '{.*,gulpfile.js}',
