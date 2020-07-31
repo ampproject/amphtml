@@ -359,7 +359,7 @@ describes.sandboxed('shadow-embed', {}, () => {
         expect(shadowRoot2.adoptedStyleSheets).to.have.length(1);
         expect(shadowRoot2.adoptedStyleSheets[0]).to.equal(styleSheet1);
 
-        // A different stylesheet in a differet root.
+        // A different stylesheet in a different root.
         shadowRoot2.adoptedStyleSheets = [];
         installShadowStyle(shadowRoot2, 'B', '* {color: blue}');
         expect(shadowRoot2.adoptedStyleSheets).to.have.length(1);

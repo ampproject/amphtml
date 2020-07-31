@@ -326,12 +326,12 @@ export function installShadowStyle(shadowRoot, name, cssText) {
   const win = toWin(doc.defaultView);
   if (
     shadowRoot.adoptedStyleSheets !== undefined &&
-    CSSStyleSheet.prototype.replaceSync !== undefined
+    win.CSSStyleSheet.prototype.replaceSync !== undefined
   ) {
     const cache = win[SHADOW_CSS_CACHE] || (win[SHADOW_CSS_CACHE] = {});
     let styleSheet = cache[name];
     if (!styleSheet) {
-      styleSheet = new CSSStyleSheet();
+      styleSheet = new win.CSSStyleSheet();
       styleSheet.replaceSync(cssText);
       cache[name] = styleSheet;
     }
