@@ -31,7 +31,7 @@ limitations under the License.
 - An `amp-iframe` may not appear close to the top of the document (except for iframes that use `placeholder` as described [below](#iframe-with-placeholder)). The iframe must be either 600 px away from the top or not within the first 75% of the viewport when scrolled to the top, whichever is smaller.
 - By default, an amp-iframe is sandboxed (see [details](#sandbox)).
 - An `amp-iframe` must only request resources via HTTPS, from a data-URI, or via the `srcdoc` attribute.
-- An `amp-iframe` must not be in the same origin as the container unless they do not allow `allow-same-origin` in the `sandbox` attribute. See the ["Iframe origin policy"](../../spec/amp-iframe-origin-policy.md) doc for further details on allowed origins for iframes.
+- An `amp-iframe` must be on a different origin than its host document, unless the `amp-iframe` removes the `allow-same-origin` value from it's `sandbox` attribute. See the ["Iframe origin policy"](https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/../../spec/amp-iframe-origin-policy.md) doc for further details on allowed origins for iframes.
 
 _Example: Embedded a Google Map in an amp-iframe_
 
