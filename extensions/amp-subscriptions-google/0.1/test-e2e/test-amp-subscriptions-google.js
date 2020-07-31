@@ -53,17 +53,17 @@ describes.endtoend(
 
       const basicAccessText = await controller.findElement('.amekj');
       await expect(controller.getElementText(basicAccessText)).to.equal(
-        'Weekly'
+        'Basic Access!'
       );
 
       const basicAccessDesc = await controller.findElement('.a02uaf');
       await expect(controller.getElementText(basicAccessDesc)).to.equal(
-        'Weekly'
+        'Basic access charged weekly..'
       );
 
       const basicAccessPrice = await controller.findElement('.mojnzf');
       await expect(controller.getElementText(basicAccessPrice)).to.equal(
-        '$0.99/3 days*'
+        '$1.99/week*'
       );
     });
   }
