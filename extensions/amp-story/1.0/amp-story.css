@@ -961,6 +961,6 @@ amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-compo
 }
 
 .i-amphtml-story-desktop-panels .i-amphtml-story-screen-reader-back-button,
-.i-amphtml-story-screen-reader-back-button.i-amphtml-story-screen-reader-back-button-hidden {
+.i-amphtml-story-screen-reader-back-button-hidden {
   display: none !important;
 }
