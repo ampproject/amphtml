@@ -689,7 +689,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       return expect(() => player.go(-1)).to.throw('Out of Story range.');
     });
 
-    it('last story call to next_() is the first story', async () => {
+    it('takes to first story when swiping on the last one with circular wrapping', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
 
@@ -706,13 +706,13 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       expect(navigationSpy).to.have.been.calledWithMatch({
         type: 'navigation',
         detail: {
-          index: 4,
-          remaining: 0,
+          index: 0,
+          remaining: 4,
         },
       });
     });
 
-    it('first story call to previous_() is the last story', async () => {
+    it('takes to last story when swiping on the first one with circular wrapping', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
 
@@ -724,13 +724,12 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('navigation', navigationSpy);
       playerEl.setAttribute('enable-circular-wrapping', '');
-      player.go(5);
-      swipeRight();
+      swipeLeft();
       expect(navigationSpy).to.have.been.calledWithMatch({
         type: 'navigation',
         detail: {
-          index: 0,
-          remaining: 4,
+          index: 4,
+          remaining: 0,
         },
       });
     });
@@ -776,47 +775,6 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         detail: {
           index: 4,
           remaining: 0,
-        },
-      });
-    });
-
-    it('signals when player changed story using next method', async () => {
-      const playerEl = win.document.createElement('amp-story-player');
-      appendStoriesToPlayer(playerEl, 5);
-
-      const player = new AmpStoryPlayer(win, playerEl);
-
-      await player.load();
-
-      const navigationSpy = env.sandbox.spy();
-      playerEl.addEventListener('navigation', navigationSpy);
-      player.next_();
-      expect(navigationSpy).to.have.been.calledWithMatch({
-        type: 'navigation',
-        detail: {
-          index: 1,
-          remaining: 3,
-        },
-      });
-    });
-
-    it('signals when player changed story using previous method', async () => {
-      const playerEl = win.document.createElement('amp-story-player');
-      appendStoriesToPlayer(playerEl, 5);
-
-      const player = new AmpStoryPlayer(win, playerEl);
-
-      await player.load();
-
-      const navigationSpy = env.sandbox.spy();
-      playerEl.addEventListener('navigation', navigationSpy);
-      player.next_();
-      player.previous_();
-      expect(navigationSpy).to.have.been.calledWithMatch({
-        type: 'navigation',
-        detail: {
-          index: 0,
-          remaining: 4,
         },
       });
     });
