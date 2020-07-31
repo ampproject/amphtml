@@ -98,7 +98,7 @@ Would most predictably be applied and rendered if instead provided as follows:
 <template type="amp-mustache">
   {% raw %}
   <!-- RECOMMENDED -->
-  <div>
+  <div data-value="{{items}}">
     <div class="item">{{item}}</div>
     <div class="price">{{price}}</div>
   </div>
