@@ -68,6 +68,10 @@ import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {LiveStoryManager} from './live-story-manager';
+import {
+  LocalizedStringId,
+  createPseudoLocale,
+} from '../../../src/localized-strings';
 import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
@@ -94,7 +98,7 @@ import {
   setImportantStyles,
   toggle,
 } from '../../../src/style';
-import {createPseudoLocale} from '../../../src/localized-strings';
+
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
@@ -1078,7 +1082,12 @@ export class AmpStory extends AMP.BaseElement {
     const backButton = document.createElement('button');
     this.element.appendChild(backButton);
     backButton.classList.add('i-amphtml-story-screen-reader-back-button');
-    backButton.setAttribute('aria-label', 'Previous page');
+    backButton.setAttribute(
+      'aria-label',
+      this.localizationService_.getLocalizedString(
+        LocalizedStringId.AMP_STORY_PAGINATION_BUTTON_PREVIOUS_PAGE_LABEL
+      )
+    );
 
     backButton.addEventListener('click', () => {
       this.storeService_.dispatch(
