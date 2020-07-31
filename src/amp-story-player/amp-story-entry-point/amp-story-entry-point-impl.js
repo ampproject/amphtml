@@ -120,7 +120,7 @@ export class AmpStoryEntryPoint {
       : STYLE_CLASSES[style];
 
       const cardsContainer = this.doc_.createElement('div');
-      cardsContainer.classList.add('entry-points');
+      cardsContainer.classList.add('grid');
       this.rootEl_.append(cardsContainer);
 
     for (let i = 0; i < this.stories_.length; i++) {
@@ -133,9 +133,6 @@ export class AmpStoryEntryPoint {
         i
       );
       cardsContainer.append(card);
-      if (i % 4 === 0) {
-        cardsContainer.append('\n');
-      }
     }
   }
 
