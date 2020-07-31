@@ -150,7 +150,7 @@ AMP.getState(expr) {}
 You may export functions to act as the data source for an `<amp-list>`.
 The exported function must return either JSON, or a Promise which will eventually contain JSON.
 
-The API is available on the global scope, and has the following signature:
+The export API is available on the global scope, and has the following signature:
 
 ```js
 /**

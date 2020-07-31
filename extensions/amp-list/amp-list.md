@@ -284,7 +284,7 @@ See below for a full example,
 
 In the ideal case, the servers powering your `<amp-list>` would return perfectly formatted JSON for your use case. However, for situations in which you may not have access to create or modify backend servers, it is also possible to provide data to an `<amp-list>` component using JavaScript via exported `<amp-script>` functions. Those functions may transform the data before returning.
 
-Here are the steps for specifying an `<amp-script>` functions as your data source:
+Here are the steps for specifying an `<amp-script>` function as your data source:
 
 1. Follow the directions in the [amp-script](https://amp.dev/documentation/components/amp-script/) docs to setup the component and create you function. This includes:
    a. Adding the extension script to your document's `<head>`.
@@ -314,7 +314,7 @@ See below for an example:
   src="amp-script:fns.getRemoteData"
 >
   <template type="amp-mustache">
-    <div>{{name}}</div>
+    <div>{{.}}</div>
   </template>
 </amp-list>
 ```
@@ -493,9 +493,9 @@ may make a request to something like `https://foo.com/list.json?0.8390278471201`
 The URL of the remote endpoint that returns the JSON that will be rendered
 within this `<amp-list>`. There are three valid protocols for the `src` attribute.
 
-1. **https**: This must refer to a CORS HTTP service. Insecure http is not supportedInsecure http is not supported.
+1. **https**: This must refer to a CORS HTTP service. Insecure http is not supported.
 2. **amp-state**: This is for initializing from amp-state data. See [Initialization from amp-state](#initialization-from-amp-state) for more details.
-3. **amp-script**: Enables uses `<amp-script>` functions as the data source. See [Using amp-script as a data source](#using-amp-script-as-a-data-source) for more details.
+3. **amp-script**: Enables using `<amp-script>` functions as the data source. See [Using amp-script as a data source](#using-amp-script-as-a-data-source) for more details.
 
 [tip type="important"]
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
