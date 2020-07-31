@@ -498,10 +498,10 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
       return check('CUMULATIVE_LAYOUT_SHIFT', '1');
     });
 
-    it('should expand EXPERIMENT_BRANCHES to comma separated list', () => {
+    it('should expand EXPERIMENT_BRANCHES to name:value comma separated list', () => {
       forceExperimentBranch(env.win, 'exp1', '1234');
       forceExperimentBranch(env.win, 'exp2', '5678');
-      return check('EXPERIMENT_BRANCHES', '1234%2C5678');
+      return check('EXPERIMENT_BRANCHES', 'exp1%3A1234%2Cexp2%3A5678');
     });
 
     it('EXPERIMENT_BRANCHES should be empty string if no branches', () => {
