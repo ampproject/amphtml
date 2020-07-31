@@ -64,12 +64,11 @@ const buildResultsTemplate = (element) => {
  * @return {InteractiveResultsDef} the results
  */
 const processResults = (interactiveState, options) => {
-  const strategy = decideStrategy(options);
-  if (strategy === 'category') {
-    return processResultsCategory(interactiveState, options);
-  } else if (strategy === 'percentage') {
-    return processResultsPercentage(interactiveState, options);
-  }
+  const processStrategy =
+    decideStrategy(options) === 'category'
+      ? processResultsCategory
+      : processResultsPercentage;
+  return processStrategy(interactiveState, options);
 };
 
 /**
@@ -80,7 +79,7 @@ const processResults = (interactiveState, options) => {
  * @package
  */
 export const processResultsCategory = (interactiveState, options) => {
-  const result = {'percentage': null, 'category': null};
+  const result = {};
 
   // Add all categories in order to the map with value 0
   const categories = {};
@@ -118,7 +117,7 @@ export const processResultsCategory = (interactiveState, options) => {
  * @package
  */
 export const processResultsPercentage = (interactiveState, options) => {
-  const result = {'percentage': null, 'category': null};
+  const result = {};
 
   // Count quizzes and correct quizzes
   let quizCount = 0;
@@ -165,13 +164,11 @@ export const processResultsPercentage = (interactiveState, options) => {
  * @package
  */
 export const decideStrategy = (options) => {
-  let strategy = 'category';
-  options.forEach((o) => {
-    if (o.resultsthreshold != null) {
-      strategy = 'percentage';
-    }
-  });
-  return strategy;
+  return options.some((o) => {
+    return o.resultsthreshold != undefined;
+  })
+    ? 'percentage'
+    : 'category';
 };
 
 export class AmpStoryInteractiveResults extends AmpStoryInteractive {
@@ -220,7 +217,7 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
     );
     this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-results-top-value'
-    ).textContent = results.percentage | 0;
+    ).textContent = (results.percentage || 0).toFixed(0);
     this.options_.forEach((e) => {
       if (e.resultscategory === results.category) {
         this.mutateElement(() => {
