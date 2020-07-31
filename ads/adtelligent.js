@@ -36,7 +36,7 @@ export function adtelligent(global, data) {
       `&content_page_url=${encodeURIComponent(window.context.location)}` +
       `&width=${data.width}` +
       `&height=${data.height}` +
-      `&cb=${new Date().getTime().toString()}` +
+      `&cb=${Date.now()}` +
       `&aid=${data.source}`;
     container.id = 'PDS' + data.source;
     loadScript(global, url);
