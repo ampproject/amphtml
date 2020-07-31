@@ -424,14 +424,19 @@ function collectProps(Ctor, element, defaultProps) {
 
       // TBD: assign keys, reuse slots, etc.
       if (single) {
-        props[name] = createSlot(childElement, `i-amphtml-${name}`, slotProps);
+        props[name] = createSlot(
+          childElement,
+          childElement.getAttribute('slot') || `i-amphtml-${name}`,
+          slotProps
+        );
       } else {
         const list =
           name == 'children' ? children : props[name] || (props[name] = []);
         list.push(
           createSlot(
             childElement,
-            `i-amphtml-${name}-${list.length}`,
+            childElement.getAttribute('slot') ||
+              `i-amphtml-${name}-${list.length}`,
             slotProps
           )
         );

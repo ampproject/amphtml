@@ -1,12 +1,10 @@
 ---
 $category: dynamic-content
 formats:
-
-- websites
-- email
-  teaser:
+  - websites
+  - email
+teaser:
   text: Suggests completed results corresponding to the user input as they type into the input field.
-
 ---
 
 <!--
@@ -58,15 +56,55 @@ Example:
 
 ```html
 <amp-autocomplete
-  filter="substring"
   id="myAutocomplete"
-  src="/static/samples/json/amp-autocomplete-cities.json"
+  src="{{server_for_email}}/static/samples/json/amp-autocomplete-cities.json"
 >
   <input />
+  <template type="amp-mustache">
+    <div data-value="{{.}}">{{.}}</div>
+  </template>
 </amp-autocomplete>
 ```
 
 [/filter] <!-- formats="email" -->
+
+When using the `src` attribute with `amp-autocomplete`, the response from the endpoint contains data to be rendered in the specified template.
+
+You can specify a template in one of two ways:
+
+- a `template` attribute that references an ID of an existing templating element.
+- a templating element nested directly inside the `amp-autocomplete` element.
+
+For more details on templates, see [AMP HTML Templates](../../spec/amp-html-templates.md).
+
+[tip type="note"]
+Note also that a good practice is to provide templates a single top-level element to prevent unintended side effects. This also guarantees control of the [`data-value` or `data-disabled`](https://amp.dev/documentation/examples/components/amp-autocomplete/#suggesting-rich-content) attribute on the delimiting element. As an example, the following input:
+
+```html
+<template type="amp-mustache">
+  {% raw %}
+  <!-- NOT RECOMMENDED -->
+  <div class="item">{{item}}</div>
+  <div class="price">{{price}}</div>
+  {% endraw %}
+</template>
+```
+
+Would most predictably be applied and rendered if instead provided as follows:
+
+```html
+<template type="amp-mustache">
+  {% raw %}
+  <!-- RECOMMENDED -->
+  <div data-value="{{items}}">
+    <div class="item">{{item}}</div>
+    <div class="price">{{price}}</div>
+  </div>
+  {% endraw %}
+</template>
+```
+
+[/tip]
 
 ## Attributes
 
@@ -96,6 +134,12 @@ If data is an array of JsonObjects, the filter-value is the property name that w
 ### `src`
 
 The URL of the remote endpoint that returns the JSON that will be filtered and rendered within this <code>amp-autocomplete</code>. This must be a CORS HTTP service and the URL's protocol must be HTTPS. The endpoint must implement the requirements specified in the <a href="https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests?referrer=ampproject.org">CORS Requests in AMP</a> spec. If fetching the data at the src URL fails, the <code>amp-autocomplete</code> triggers a fallback. The src attribute may be omitted if the <code>[src]</code> attribute exists.
+
+[filter formats="email"]
+
+Please note when personalizing autocomplete items with a server endpoint, it is good practice to <a href="https://amp.dev/documentation/guides-and-tutorials/learn/email_fundamentals/#authenticating-requests">authenticate requests</a> containing user data.
+
+[/filter] <!-- formats="email" -->
 
 ### `query`
 
