@@ -252,7 +252,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
 
       intersectionObserverCallback([{isIntersecting: true}]);
 
-      await wrapper.find(TestPlayer).invoke('onLoad')();
+      await wrapper.find(TestPlayer).invoke('onCanPlay')();
 
       expect(play).to.have.been.calledOnce;
       expect(pause).to.not.have.been.called;
@@ -265,7 +265,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
 
       intersectionObserverCallback([{isIntersecting: false}]);
 
-      await wrapper.find(TestPlayer).invoke('onLoad')();
+      await wrapper.find(TestPlayer).invoke('onCanPlay')();
 
       expect(play).to.not.have.been.called;
       expect(pause).to.have.been.calledOnce;

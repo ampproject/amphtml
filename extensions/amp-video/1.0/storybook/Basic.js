@@ -37,7 +37,6 @@ const VideoTagPlayerInternal = forwardRef((props, ref) => {
     artwork,
     title,
 
-    onLoad,
     ...rest
   } = props;
 
@@ -60,7 +59,6 @@ const VideoTagPlayerInternal = forwardRef((props, ref) => {
       style={{position: 'relative', width: '100%', height: '100%'}}
       poster={poster}
       title={title}
-      onCanPlay={onLoad}
       {...rest}
     >
       {children}

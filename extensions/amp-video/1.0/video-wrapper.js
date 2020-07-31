@@ -90,7 +90,7 @@ export function VideoWrapper({
         ref={playerRef}
         muted={muted}
         controls={controls && (!autoplay || userInteracted)}
-        onLoad={() => readyDeferred.resolve()}
+        onCanPlay={() => readyDeferred.resolve()}
         onLoadedMetadata={() => {
           if (!mediasession) {
             return;
