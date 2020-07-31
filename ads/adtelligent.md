@@ -19,21 +19,24 @@ limitations under the License.
 ## Examples
 
 ### For DSP/SSP Clients
-````
+
+```
 <amp-embed width="300" height="250"
     type="adtelligent"
     data-source="350975">
 </amp-embed>
-````
+```
+
 ### For HBMP Clients
-````
+
+```
 <amp-embed width="300" height="250"
     type="adtelligent"
     data-hbmp-site-id="29"
     data-hbmp-pub-id="269911"
     data-hbmp-unit-id="58">
 </amp-embed>
-````
+```
 
 ## Configuration
 
@@ -41,10 +44,12 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Required parameters
 
-#### DSP/SSP clients
+For DSP/SSP clients
+
 - `data-source`
 
-#### HBMP clients
+For HBMP clients
+
 - `data-hbmp-site-id`
 - `data-hbmp-pub-id`
 - `data-hbmp-unit-id`
