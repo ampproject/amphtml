@@ -39,7 +39,10 @@ export class AutocompleteBindingSingle {
     const filter = element.getAttribute('filter');
     if (this.shouldSuggestFirst_ && filter !== 'prefix') {
       this.shouldSuggestFirst_ = false;
-      user().warn('"suggest-first" expected "filter" type "prefix".');
+      user().warn(
+        'AMP-AUTOCOMPLETE',
+        '"suggest-first" expected "filter" type "prefix".'
+      );
     }
 
     /**
