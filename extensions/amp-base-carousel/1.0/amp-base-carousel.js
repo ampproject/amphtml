@@ -22,6 +22,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {scrollerStyles} from './base-carousel.css';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -79,6 +80,9 @@ AmpBaseCarousel['children'] = {
 AmpBaseCarousel['props'] = {
   'loop': {attr: 'loop', type: 'boolean'},
 };
+
+/** @override */
+AmpBaseCarousel['shadowCss'] = scrollerStyles;
 
 /**
  * Triggers a 'slideChange' event with one data param:
