@@ -17,7 +17,7 @@
     },
     {
       pattern: '**/*.md',
-      owners: [{name: '*'},],
+      owners: [{name: '*'}],
     },
     {
       pattern: '{.*,gulpfile.js}',
