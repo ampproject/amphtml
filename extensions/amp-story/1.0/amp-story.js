@@ -1082,12 +1082,10 @@ export class AmpStory extends AMP.BaseElement {
     const backButton = document.createElement('button');
     this.element.appendChild(backButton);
     backButton.classList.add('i-amphtml-story-screen-reader-back-button');
-    backButton.setAttribute(
-      'aria-label',
-      this.localizationService_.getLocalizedString(
-        LocalizedStringId.AMP_STORY_PAGINATION_BUTTON_PREVIOUS_PAGE_LABEL
-      )
+    const label = this.localizationService_.getLocalizedString(
+      LocalizedStringId.AMP_STORY_PAGINATION_BUTTON_PREVIOUS_PAGE_LABEL
     );
+    label && backButton.setAttribute('aria-label', label);
 
     backButton.addEventListener('click', () => {
       this.storeService_.dispatch(
