@@ -100,9 +100,9 @@ async function startServer(
   const options = {
     name: 'AMP Dev Server',
     root: process.cwd(),
-    host: argv.host || 'localhost',
+    host: argv.host || '192.168.44.47',
     port: argv.port || 8000,
-    https: argv.https,
+    https: true,
     preferHttp1: true,
     silent: true,
     middleware: getMiddleware,

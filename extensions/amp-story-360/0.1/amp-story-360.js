@@ -220,6 +220,64 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    const button = document.createElement('button');
+    document.body.appendChild(button);
+    button.style.position = 'fixed';
+    button.style.top = '10px';
+    button.style.left = '10px';
+    button.style.zIndex = '100000000';
+    button.textContent = 'test';
+
+    button.addEventListener('click', () => {
+      onClick();
+    });
+
+    function onClick() {
+      // feature detect
+      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission()
+          .then((permissionState) => {
+            alert(permissionState);
+            if (permissionState === 'granted') {
+              window.addEventListener('deviceorientation', () => {});
+            }
+          })
+          .catch(alert.error);
+      } else {
+        // handle regular non iOS 13+ devices
+      }
+    }
+
+    // function testDeviceOrientation() {
+    //   if (typeof DeviceOrientationEvent !== 'function') {
+    //     return setResult('DeviceOrientationEvent not detected');
+    //   }
+    //   if (typeof DeviceOrientationEvent.requestPermission !== 'function') {
+    //     return setResult(
+    //       'DeviceOrientationEvent.requestPermission not detected'
+    //     );
+    //   }
+    //   DeviceOrientationEvent.requestPermission().then(function (result) {
+    //     return setResult(result);
+    //   });
+    // }
+
+    // function setResult(result) {
+    //   alert(result);
+    //   // document.getElementById('result').innerHTML = 'RESULT: ' + result;
+    // }
+
+    // DeviceOrientationEvent.requestPermission()
+    //   .then((response) => {
+    //     alert(response);
+    //     if (response == 'granted') {
+    //       window.addEventListener('deviceorientation', (e) => {
+    //         // do something with e
+    //       });
+    //     }
+    //   })
+    //   .catch(console.error);
+
     const ampImgEl = this.element.querySelector('amp-img');
     userAssert(ampImgEl, 'amp-story-360 must contain an amp-img element.');
     const owners = Services.ownersForDoc(this.element);
