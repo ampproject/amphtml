@@ -143,8 +143,11 @@ AMP.getState(expr) {}
 ```
 
 <<<<<<< HEAD
+
 ## Restrictions
+
 =======
+
 ### Exporting functions for use in <amp-list>
 
 You may export functions to act as the data source for an `<amp-list>`.
@@ -160,8 +163,15 @@ The export API is available on the global scope, and has the following signature
 function exportFunction(name, function) {}
 ```
 
+<<<<<<< HEAD
+
 ### Restrictions
->>>>>>> 028539ec4... amp-script docs
+
+> > > > > > > # 028539ec4... amp-script docs
+
+## Restrictions
+
+> > > > > > > a5dcf61d7... gulp prettify --fix
 
 ### Allowed APIs
 
