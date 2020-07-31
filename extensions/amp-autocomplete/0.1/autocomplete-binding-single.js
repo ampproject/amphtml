@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {user} from '../../../src/log';
+
 /**
  * Single implementation of autocomplete. This supports autocompleting
  * a single input value in its entirety.
@@ -33,9 +35,12 @@ export class AutocompleteBindingSingle {
      * See displayActiveItemInInput() for more.
      * @private {boolean}
      */
-    this.shouldSuggestFirst_ =
-      element.hasAttribute('suggest-first') &&
-      element.getAttribute('filter') === 'prefix';
+    this.shouldSuggestFirst_ = element.hasAttribute('suggest-first');
+    const filter = element.getAttribute('filter');
+    if (this.shouldSuggestFirst_ && filter !== 'prefix') {
+      this.shouldSuggestFirst_ = false;
+      user().warn('"suggest-first" expected "filter" type "prefix".');
+    }
 
     /**
      * The Single implementation of autocomplete will allow form
