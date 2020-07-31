@@ -5596,4 +5596,8 @@ int RulesSpecVersion() {
   return rules->SpecFileRevision();
 }
 
+int ValidatorVersion() {
+  return ValidatorRevision();
+}
+
 }  // namespace amp::validator

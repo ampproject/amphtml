@@ -47,6 +47,7 @@ ValidationResult Validate(std::string_view html,
                           int max_errors = -1);
 
 int RulesSpecVersion();
+int ValidatorVersion();
 
 }  // namespace amp::validator
 
