@@ -183,7 +183,9 @@ export class RequestHandler {
         });
     }
 
-    const params = {...configParams, ...trigger['extraUrlParams']};
+    const triggerCopy = JSON.parse(JSON.stringify(trigger['extraUrlParams']));
+    const configParamsCopy = JSON.parse(JSON.stringify(configParams));
+    const params = {...configParamsCopy, ...triggerCopy};
     const timestamp = this.win.Date.now();
     const batchSegmentPromise = expandExtraUrlParams(
       this.variableService_,
