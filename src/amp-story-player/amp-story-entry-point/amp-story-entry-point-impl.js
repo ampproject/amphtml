@@ -23,13 +23,11 @@ import {toArray} from '../../types';
 /** @enum {string} */
 const STYLE_TYPES = {
   RECTANGULAR: 'rectangle',
-  CIRCULAR: 'circle',
 };
 
 /** @enum {string} */
 const STYLE_CLASSES = {
   [STYLE_TYPES.RECTANGULAR]: 'rectangular-entry-point',
-  [STYLE_TYPES.CIRCULAR]: 'circular-entry-point',
 };
 
 /**
@@ -93,8 +91,6 @@ export class AmpStoryEntryPoint {
     }
 
     this.initializeGrid_();
-    //this.initializeCarousel_();
-    //this.initializeCarouselArrow_();
     this.isLaidOut_ = true;
   }
 
@@ -115,9 +111,7 @@ export class AmpStoryEntryPoint {
   /** @private */
   initializeGrid_() {
     const style = this.element_.getAttribute('entry-point-style');
-    const styleClass = !Object.values(STYLE_TYPES).includes(style)
-      ? STYLE_CLASSES['rectangle']
-      : STYLE_CLASSES[style];
+    const styleClass = STYLE_CLASSES['rectangle'];
 
       const cardsContainer = this.doc_.createElement('div');
       cardsContainer.classList.add('grid');
@@ -136,32 +130,6 @@ export class AmpStoryEntryPoint {
     }
   }
 
-  /** @private */
-  initializeCarousel_() {
-    const style = this.element_.getAttribute('entry-point-style');
-    const styleClass = !Object.values(STYLE_TYPES).includes(style)
-      ? STYLE_CLASSES['rectangle']
-      : STYLE_CLASSES[style];
-
-    const cardsContainer = this.doc_.createElement('div');
-    cardsContainer.classList.add('entry-points');
-    this.rootEl_.append(cardsContainer);
-
-    for (let i = 0; i < this.stories_.length; i++) {
-      const story = this.stories_[i];
-      const src = story.getAttribute('data-poster-portrait-src');
-      const card = this.initializeCard_(
-        src,
-        styleClass,
-        story.href,
-        i
-      );
-      const cardContainer = this.doc_.createElement('div');
-      cardContainer.append(card);
-      cardsContainer.append(cardContainer);
-    }
-  }
-
   /**
    * Initializes an image element to be displayed.
    * @param {string} src
@@ -176,7 +144,7 @@ export class AmpStoryEntryPoint {
     card.src = src;
     card.classList.add(styleClass);
     card.classList.add('entry-point');
-    this.setCardWidthHeight_(card, styleClass);
+    //this.setCardWidthHeight_(card, styleClass);
     this.onCardClick_(card, href, index);
     return card;
   }
@@ -188,10 +156,7 @@ export class AmpStoryEntryPoint {
    * @private
    */
   setCardWidthHeight_(card, styleClass) {
-    card.height = this.element_.clientHeight;
-    if (styleClass === 'circular-entry-point') {
-      card.width = this.element_.clientHeight;
-    }
+    card.width = this.element_.clientWidth/4;
   }
 
   /**
@@ -208,44 +173,6 @@ export class AmpStoryEntryPoint {
         createCustomEvent(this.win_, 'entryPointClicked', {href, index})
       );
     });
-  }
-
-  /** @private */
-  initializeCarouselArrow_() {
-    // check if desktop mode
-    const leftButton = this.doc_.createElement('button');
-    const rightButton = this.doc_.createElement('button');
-    leftButton.classList.add('entry-point-left-arrow');
-    rightButton.classList.add('entry-point-right-arrow');
-
-    const top = this.element_.clientHeight / 2 - 20;
-    setStyle(leftButton, 'top', top);
-    setStyle(rightButton, 'top', top);
-    setStyle(rightButton, 'left', this.element_.clientWidth - 10);
-    const container = this.rootEl_.querySelector('div.entry-points');
-
-    let interval;
-
-    rightButton.addEventListener('mousedown', (e) => {
-      interval = setInterval( function() {
-        container.scrollLeft += 5;
-      }, 100);
-    });
-
-    leftButton.addEventListener('mousedown', (e) => {
-      interval = setInterval( function() {
-        container.scrollLeft -= 5;
-      }, 100);
-    });
-
-    rightButton.addEventListener('mouseout', (e) => clearInterval(interval));
-    leftButton.addEventListener('mouseout', (e) => clearInterval(interval));
-
-    rightButton.addEventListener('mouseup', (e) => clearInterval(interval));
-    leftButton.addEventListener('mouseup', (e) => clearInterval(interval));
-
-    this.rootEl_.append(leftButton);
-    this.rootEl_.append(rightButton);
   }
 
   /**
