@@ -62,10 +62,6 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     }
     win.document.body.appendChild(playerEl);
     manager = new AmpStoryComponentManager(win);
-
-    env.sandbox
-      .stub(Messaging, 'waitForHandshakeFromDocument')
-      .resolves(fakeMessaging);
   }
 
   function swipeLeft() {
@@ -101,6 +97,9 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       },
     };
     messagingMock = env.sandbox.mock(fakeMessaging);
+    env.sandbox
+      .stub(Messaging, 'waitForHandshakeFromDocument')
+      .resolves(fakeMessaging);
   });
 
   afterEach(() => {
@@ -620,7 +619,9 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('navigation', navigationSpy);
+
       player.go(2);
+
       expect(navigationSpy).to.have.been.calledWithMatch({
         type: 'navigation',
         detail: {
@@ -641,8 +642,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('navigation', navigationSpy);
+
       player.go(3);
       player.go(-1);
+
       expect(navigationSpy).to.have.been.calledWithMatch({
         type: 'navigation',
         detail: {
@@ -692,6 +695,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('takes to first story when swiping on the last one with circular wrapping', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
+      playerEl.setAttribute('enable-circular-wrapping', '');
 
       const player = new AmpStoryPlayer(win, playerEl);
 
@@ -700,9 +704,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('navigation', navigationSpy);
-      playerEl.setAttribute('enable-circular-wrapping', '');
+
       player.go(4);
       swipeLeft();
+
       expect(navigationSpy).to.have.been.calledWithMatch({
         type: 'navigation',
         detail: {
@@ -715,6 +720,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('takes to last story when swiping on the first one with circular wrapping', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
+      playerEl.setAttribute('enable-circular-wrapping', '');
 
       const player = new AmpStoryPlayer(win, playerEl);
 
@@ -723,8 +729,9 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('navigation', navigationSpy);
-      playerEl.setAttribute('enable-circular-wrapping', '');
+
       swipeRight();
+
       expect(navigationSpy).to.have.been.calledWithMatch({
         type: 'navigation',
         detail: {
@@ -737,6 +744,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('navigate to first story when last story is finished', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
+      playerEl.setAttribute('enable-circular-wrapping', '');
 
       const player = new AmpStoryPlayer(win, playerEl);
 
@@ -745,9 +753,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('navigation', navigationSpy);
-      playerEl.setAttribute('enable-circular-wrapping', '');
+
       player.go(4);
       player.go(1);
+
       expect(navigationSpy).to.have.been.calledWithMatch({
         type: 'navigation',
         detail: {
@@ -760,6 +769,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('navigate to last story when first story is requested to go back', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
+      playerEl.setAttribute('enable-circular-wrapping', '');
 
       const player = new AmpStoryPlayer(win, playerEl);
 
@@ -768,8 +778,9 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('navigation', navigationSpy);
-      playerEl.setAttribute('enable-circular-wrapping', '');
+
       player.go(-1);
+
       expect(navigationSpy).to.have.been.calledWithMatch({
         type: 'navigation',
         detail: {
