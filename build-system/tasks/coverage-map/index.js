@@ -23,10 +23,11 @@ const {startServer, stopServer} = require('../serve');
 let puppeteer;
 let explore;
 
-const coverageJsonName = argv.json || 'out.json';
+const coverageJsonName = argv.json || 'coverage.json';
 const testUrl =
   argv.url || 'http://localhost:8000/examples/everything.amp.html';
-const outHtml = argv.html || 'out.html';
+const outHtml = argv.html || 'coverage.html';
+const scrollDistance = 100;
 
 async function collectCoverage() {
   log(`Opening browser and navigating to ${testUrl}...`);
@@ -39,9 +40,9 @@ async function collectCoverage() {
   await page.coverage.startJSCoverage();
   // Navigate to page
   await page.goto(testUrl);
-  await page.waitFor(() => !!document.querySelector('style[amp-runtime]'));
   await page.waitFor(
     () =>
+      !!document.querySelector('style[amp-runtime]') &&
       !!document.body &&
       getComputedStyle(document.body).visibility === 'visible'
   );
@@ -60,7 +61,7 @@ async function autoScroll(page) {
   await page.evaluate(async () => {
     await new Promise((resolve, opt_) => {
       let totalHeight = 0;
-      const distance = 100;
+      const distance = scrollDistance;
       const timer = setInterval(() => {
         const {scrollHeight} = document.body;
         window./*OK*/ scrollBy(0, distance);
