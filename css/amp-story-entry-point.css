@@ -17,8 +17,8 @@
 amp-story-entry-point {
   position: relative;
   display: block;
-  height: 250px;
-  width: 600px;
+  height: 300px;
+  width: 800px;
   margin: 15px 0px;
 }
 
@@ -28,71 +28,20 @@ main {
   padding-bottom: 10px;
 }
 
-.entry-points {
+.grid {
   height: 100%;
   width: 100%;
-  overflow: hidden;
-  display: flex;
-  overflow-x: scroll;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-  margin-left: 10px;
-  padding-bottom: 10px;
-}
-
-::-webkit-scrollbar {
-  display: none;
+  overflow-y: scroll;
 }
 
 .entry-point {
-  float: left;
-  padding-left: 3px;
-  padding-right: 3px;
-  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
+  display: inline-block;
+  box-sizing: border-box;
+  height: auto;
+  width: 25%;
+  padding: 3px;
 }
 
 .rectangular-entry-point {
   border-radius: 16px;
-}
-
-.circular-entry-point {
-  border-radius: 100%;
-}
-
-.entry-point-hover {
-  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
-}
-
-.entry-point-left-arrow, .entry-point-right-arrow {
-  background-repeat: no-repeat;
-  background-position: 50%;
-  background-size: 28px;
-  border: 0px;
-  background-color: #ffffff;
-  outline: transparent;
-  height: 40px;
-  width: 40px;
-  position: absolute;
-  border-radius: 50%;
-  padding: 0px;
-  box-shadow: 0px 0px 10px rgba(60, 64, 67, 0.3);
-}
-
-.entry-point-right-arrow {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" fill="#1B1B1B"><path d="M0 0h24v24H0z" fill="none"/><path d="M10 17l5-5-5-5v10z"/></svg>');
-}
-
-.entry-point-left-arrow {
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" fill="#1B1B1B"><path d="M0 0h24v24H0z" fill="none"/><path d="M14 7l-5 5 5 5V7z"/></svg>');
-}
-
-.headline {
-  color: white;
-}
-
-.grid {
-  height: 100%;
-  width: 100%;
-  overflow: scroll;
-  display: flex;
 }
