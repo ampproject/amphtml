@@ -221,8 +221,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     const navigationSpy = env.sandbox.spy();
     playerEl.addEventListener('navigation', navigationSpy);
+
     const fakeData = {next: true};
     fireHandler['selectDocument']('selectDocument', fakeData);
+
     expect(navigationSpy).to.have.been.calledWithMatch({
       type: 'navigation',
       detail: {
@@ -239,7 +241,9 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     const navigationSpy = env.sandbox.spy();
     playerEl.addEventListener('navigation', navigationSpy);
+
     swipeLeft();
+
     expect(navigationSpy).to.have.been.calledWithMatch({
       type: 'navigation',
       detail: {
@@ -256,9 +260,11 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     const navigationSpy = env.sandbox.spy();
     playerEl.addEventListener('navigation', navigationSpy);
+
     swipeLeft();
     swipeLeft();
     swipeLeft();
+
     expect(navigationSpy).to.have.been.calledWithMatch({
       type: 'navigation',
       detail: {
