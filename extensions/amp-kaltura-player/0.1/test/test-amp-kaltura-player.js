@@ -65,6 +65,24 @@ describes.realWin(
       });
     });
 
+    it('renders with serviceUrl', () => {
+      return getKaltura(
+        {
+          'data-serviceUrl': 'front.video.funke.press',
+          'data-partner': '106',
+          'data-entryid': '0_b87xdluw',
+          'data-uiconf': '23464665',
+        }
+      ).then((bc) => {
+        const iframe = bc.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.tagName).to.equal('IFRAME');
+        expect(iframe.src).to.equal(
+          'https://front.video.funke.press/p/106/sp/10600/embedIframeJs/uiconf_id/23464665/partner_id/106?iframeembed=true&playerId=kaltura_player_amp&entry_id=0_b87xdluw&flashvars%5Bstreamertype%5D=auto'
+        );
+      });
+    });
+
     it('renders responsively', () => {
       return getKaltura(
         {
