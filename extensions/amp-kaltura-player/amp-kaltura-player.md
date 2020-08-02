@@ -32,6 +32,7 @@ Example:
 
 ```html
 <amp-kaltura-player
+  data-serviceUrl="cdnapisec.kaltura.com"
   data-uiconf="33502051"
   data-partner="1281471"
   data-entryid="1_3ts1ms9c"
@@ -46,6 +47,10 @@ Example:
 ## Attributes
 
 <table>
+  <tr>
+    <td width="40%"><strong>data-serviceUrl</strong></td>
+    <td>The Kaltura service url. This attribute is optional.</td>
+  </tr>
   <tr>
     <td width="40%"><strong>data-partner</strong></td>
     <td>The Kaltura partner id. This attribute is mandatory.</td>

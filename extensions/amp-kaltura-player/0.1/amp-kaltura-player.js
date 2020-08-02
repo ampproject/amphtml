@@ -31,6 +31,9 @@ class AmpKaltura extends AMP.BaseElement {
     this.iframe_ = null;
 
     /** @private {string} */
+    this.serviceUrl_ = '';
+
+    /** @private {string} */
     this.partnerId_ = '';
 
     /** @private {string} */
@@ -44,8 +47,7 @@ class AmpKaltura extends AMP.BaseElement {
   preconnectCallback(opt_onLayout) {
     Services.preconnectFor(this.win).url(
       this.getAmpDoc(),
-      'https://cdnapisec.kaltura.com',
-      opt_onLayout
+      `https://${encodeURIComponent(this.serviceUrl_)}${opt_onLayout}`
     );
   }
 
@@ -65,6 +67,7 @@ class AmpKaltura extends AMP.BaseElement {
     setIsMediaComponent(this.element);
 
     this.entryId_ = this.element.getAttribute('data-entryid') || 'default';
+    this.serviceUrl_ = this.element.getAttribute('data-serviceUrl') || 'cdnapisec.kaltura.com';
   }
 
   /** @override */
@@ -74,7 +77,9 @@ class AmpKaltura extends AMP.BaseElement {
       this.element.getAttribute('data-uiconf-id') ||
       'default';
     const iframe = this.element.ownerDocument.createElement('iframe');
-    let src = `https://cdnapisec.kaltura.com/p/${encodeURIComponent(
+    let src = `https://${encodeURIComponent(
+      this.serviceUrl_
+    )}/p/${encodeURIComponent(
       this.partnerId_
     )}/sp/${encodeURIComponent(
       this.partnerId_
@@ -105,7 +110,9 @@ class AmpKaltura extends AMP.BaseElement {
     this.propagateAttributes(['aria-label'], placeholder);
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
-    let src = `https://cdnapisec.kaltura.com/p/${encodeURIComponent(
+    let src = `https://${encodeURIComponent(
+      this.serviceUrl_
+    )}/p/${encodeURIComponent(
       this.partnerId_
     )}/thumbnail/entry_id/${encodeURIComponent(this.entryId_)}`;
     if (width) {
