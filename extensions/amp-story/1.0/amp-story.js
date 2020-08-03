@@ -1097,7 +1097,7 @@ export class AmpStory extends AMP.BaseElement {
         this.mutateElement(() =>
           backButton.classList.toggle(
             'i-amphtml-story-screen-reader-back-button-hidden',
-            pageIndex === 0
+            pageIndex === 0 && !this.viewer_.hasCapability('swipe')
           )
         ),
       true /** callToInitialize */
