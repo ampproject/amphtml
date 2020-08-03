@@ -56,15 +56,55 @@ Example:
 
 ```html
 <amp-autocomplete
-  filter="substring"
   id="myAutocomplete"
-  src="/static/samples/json/amp-autocomplete-cities.json"
+  src="{{server_for_email}}/static/samples/json/amp-autocomplete-cities.json"
 >
   <input />
+  <template type="amp-mustache">
+    <div data-value="{{.}}">{{.}}</div>
+  </template>
 </amp-autocomplete>
 ```
 
 [/filter] <!-- formats="email" -->
+
+When using the `src` attribute with `amp-autocomplete`, the response from the endpoint contains data to be rendered in the specified template.
+
+You can specify a template in one of two ways:
+
+- a `template` attribute that references an ID of an existing templating element.
+- a templating element nested directly inside the `amp-autocomplete` element.
+
+For more details on templates, see [AMP HTML Templates](../../spec/amp-html-templates.md).
+
+[tip type="note"]
+Note also that a good practice is to provide templates a single top-level element to prevent unintended side effects. This also guarantees control of the [`data-value` or `data-disabled`](https://amp.dev/documentation/examples/components/amp-autocomplete/#suggesting-rich-content) attribute on the delimiting element. As an example, the following input:
+
+```html
+<template type="amp-mustache">
+  {% raw %}
+  <!-- NOT RECOMMENDED -->
+  <div class="item">{{item}}</div>
+  <div class="price">{{price}}</div>
+  {% endraw %}
+</template>
+```
+
+Would most predictably be applied and rendered if instead provided as follows:
+
+```html
+<template type="amp-mustache">
+  {% raw %}
+  <!-- RECOMMENDED -->
+  <div data-value="{{items}}">
+    <div class="item">{{item}}</div>
+    <div class="price">{{price}}</div>
+  </div>
+  {% endraw %}
+</template>
+```
+
+[/tip]
 
 ## Attributes
 

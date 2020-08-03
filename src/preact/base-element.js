@@ -20,6 +20,7 @@ import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
 import {devAssert} from '../log';
 import {hasOwn} from '../utils/object';
+import {installShadowStyle} from '../shadow-embed';
 import {matches} from '../dom';
 import {render} from './index';
 
@@ -216,7 +217,13 @@ export class PreactBaseElement extends AMP.BaseElement {
             'when configured with "children", "passthrough", or ' +
             '"passthroughNonEmpty" properties.'
         );
-        this.container_ = this.element.attachShadow({mode: 'open'});
+        const shadowRoot = this.element.attachShadow({mode: 'open'});
+        this.container_ = shadowRoot;
+
+        const shadowCss = Ctor['shadowCss'];
+        if (shadowCss) {
+          installShadowStyle(shadowRoot, this.element.tagName, shadowCss);
+        }
 
         // Create a slot for internal service elements i.e. "i-amphtml-sizer"
         const serviceSlot = this.win.document.createElement('slot');
@@ -312,6 +319,13 @@ PreactBaseElement['passthrough'] = false;
  * @protected {boolean}
  */
 PreactBaseElement['passthroughNonEmpty'] = false;
+
+/**
+ * The CSS for shadow stylesheets.
+ *
+ * @protected {?string}
+ */
+PreactBaseElement['shadowCss'] = null;
 
 /**
  * Enabling detached mode alters the children to be rendered in an

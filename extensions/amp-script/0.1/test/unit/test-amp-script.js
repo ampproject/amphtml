@@ -84,6 +84,33 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
     return script.layoutCallback().should.be.rejected;
   });
 
+  it('should support nodom variant', async () => {
+    element.setAttribute('nodom', '');
+    element.setAttribute('src', 'https://foo.example/foo.txt');
+    env.sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
+    stubFetch(
+      'https://foo.example/foo.txt',
+      {'Content-Type': 'text/javascript; charset=UTF-8'}, // Valid content-type.
+      'alert(1)'
+    );
+
+    xhr.fetchText
+      .withArgs(env.sandbox.match(/amp-script-worker-0.1.js/))
+      .rejects();
+    xhr.fetchText
+      .withArgs(env.sandbox.match(/amp-script-worker-nodom-0.1.js/))
+      .resolves({text: () => Promise.resolve('/* noop */')});
+    registerServiceBuilderForDoc(
+      env.win.document,
+      'amp-script',
+      AmpScriptService
+    );
+
+    await script.buildCallback();
+    await script.layoutCallback();
+    resetServiceForTesting(env.win, 'amp-script');
+  });
+
   it('should work with "text/javascript" content-type for same-origin src', () => {
     env.sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
     element.setAttribute('src', 'https://foo.example/foo.txt');
