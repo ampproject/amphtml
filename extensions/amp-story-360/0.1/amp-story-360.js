@@ -29,7 +29,7 @@ import {htmlFor} from '../../../src/static-template';
 const TAG = 'AMP_STORY_360';
 
 /**
- * Generates the template for the binary poll option.
+ * Generates the template for the permission button.
  *
  * @param {!Element} element
  * @return {!Element}
