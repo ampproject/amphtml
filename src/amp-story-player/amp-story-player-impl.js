@@ -384,7 +384,7 @@ export class AmpStoryPlayer {
 
           messaging.sendRequest(
             'onDocumentState',
-            dict({'state': 'PAGE_ATTACHMENT_STATE'}),
+            dict({'state': STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE}),
             false
           );
 
