@@ -37,7 +37,7 @@ const TAG = 'AMP_STORY_360';
 const buildPermissionButtonTemplate = (element) => {
   const html = htmlFor(element);
   return html`
-    <button class="i-amp-story-360-permissions-button">
+    <button class="i-amp-story-360-permissions-button" role="button">
       Activate
       <span class="i-amp-story-360-permissions-button-icon"
         >360°
@@ -67,6 +67,37 @@ const buildPermissionButtonTemplate = (element) => {
         </svg>
       </span>
     </button>
+  `;
+};
+
+/**
+ * Generates the template for the permission dialog box.
+ *
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildPermissionDialogBoxTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <div class="i-amp-story-360-permissions-dialog">
+      <p>
+        This immersive story requires access to your devices motion sensors.
+      </p>
+      <div class="i-amp-story-360-permissions-dialog-button-container">
+        <button
+          class="i-amp-story-360-permissions-dialog-button-enable"
+          role="button"
+        >
+          enable
+        </button>
+        <button
+          class="i-amp-story-360-permissions-dialog-button-disable"
+          role="button"
+        >
+          disable
+        </button>
+      </div>
+    </div>
   `;
 };
 
@@ -261,30 +292,40 @@ export class AmpStory360 extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
-  /** @override */
-  layoutCallback() {
-    const button = buildPermissionButtonTemplate(this.element);
-    this.element.appendChild(button);
+  requestPermissions() {
+    const dialogBox = buildPermissionDialogBoxTemplate(this.element);
+    this.element.appendChild(dialogBox);
 
-    button.addEventListener('click', () => {
-      onClick();
+    const enableButton = dialogBox.querySelector(
+      '.i-amp-story-360-permissions-dialog-button-enable'
+    );
+    const disableButton = dialogBox.querySelector(
+      '.i-amp-story-360-permissions-dialog-button-disable'
+    );
+
+    enableButton.addEventListener('click', () => {
+      DeviceOrientationEvent.requestPermission()
+        .then((permissionState) => {
+          alert(permissionState);
+          if (permissionState === 'granted') {
+            window.addEventListener('deviceorientation', () => {});
+          }
+        })
+        .catch(alert.error);
+      dialogBox.remove();
     });
 
-    function onClick() {
-      // feature detect
-      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-        DeviceOrientationEvent.requestPermission()
-          .then((permissionState) => {
-            alert(permissionState);
-            if (permissionState === 'granted') {
-              window.addEventListener('deviceorientation', () => {});
-            }
-          })
-          .catch(alert.error);
-      } else {
-        // handle regular non iOS 13+ devices
-      }
-    }
+    disableButton.addEventListener('click', () => dialogBox.remove());
+  }
+
+  /** @override */
+  layoutCallback() {
+    const permissionButton = buildPermissionButtonTemplate(this.element);
+    this.element.appendChild(permissionButton);
+
+    permissionButton.addEventListener('click', () => {
+      this.requestPermissions();
+    });
 
     const ampImgEl = this.element.querySelector('amp-img');
     userAssert(ampImgEl, 'amp-story-360 must contain an amp-img element.');

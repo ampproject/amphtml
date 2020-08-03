@@ -74,3 +74,38 @@ amp-story-360 amp-img {
     transform: rotate(360deg);
   }
 }
+
+.i-amp-story-360-permissions-dialog {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: black;
+  color: white;
+  width: 240px;
+  border-radius: 16px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.i-amp-story-360-permissions-dialog p {
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 20px;
+  font-size: 16px;
+}
+
+.i-amp-story-360-permissions-dialog-button-container {
+  font-family: 'Open Sans', sans-serif;
+  border-top: 1px solid #1B1B1B;
+  white-space: nowrap;
+}
+
+.i-amp-story-360-permissions-dialog-button-container button {
+  padding: 20px;
+  font-size: 20px;
+  background: none;
+  color: white;
+  border: none;
+  width: 50%;
+}
