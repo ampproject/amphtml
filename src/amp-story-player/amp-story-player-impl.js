@@ -499,6 +499,7 @@ export class AmpStoryPlayer {
   /**
    * Sends a message asking for the current story's state and dispatches the appropriate event.
    * @param {string} storyStateType
+   * @public
    */
   getStoryState(storyStateType) {
     switch (storyStateType) {
