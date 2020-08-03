@@ -120,11 +120,9 @@ export function VideoWrapper({
         controls={controls && (!autoplay || userInteracted)}
         onCanPlay={readyDeferred.resolve}
         onLoadedMetadata={() => {
-          if (!mediasession) {
-            return;
+          if (mediasession) {
+            setMetadata(getMetadata(playerRef.current, rest));
           }
-
-          setMetadata(getMetadata(playerRef.current, rest));
         }}
         onPlaying={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
