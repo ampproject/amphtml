@@ -208,5 +208,52 @@ describes.realWin(
       expect(results.category).to.equal('results-category 2');
       expect(results.percentage).to.equal(0);
     });
+
+    it('should set the text for the percentage category on update', async () => {
+      addThresholdsToInteractive(ampStoryResults, [80, 20, 50]);
+      ampStoryResults.buildCallback();
+      await ampStoryResults.layoutCallback();
+      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+        'interactiveId': 'i',
+        'option': {correct: 'correct'},
+        'type': InteractiveType.QUIZ,
+      });
+      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+        'interactiveId': 'j',
+        'option': {},
+        'type': InteractiveType.QUIZ,
+      });
+      expect(
+        ampStoryResults.rootEl_.querySelector(
+          '.i-amphtml-story-interactive-results-title'
+        ).textContent
+      ).to.equal('results-category 3');
+    });
+
+    it('should set the percentage for the percentage category on update', async () => {
+      addThresholdsToInteractive(ampStoryResults, [80, 20, 50]);
+      ampStoryResults.buildCallback();
+      await ampStoryResults.layoutCallback();
+      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+        'interactiveId': 'i',
+        'option': {correct: 'correct'},
+        'type': InteractiveType.QUIZ,
+      });
+      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+        'interactiveId': 'j',
+        'option': {},
+        'type': InteractiveType.QUIZ,
+      });
+      storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
+        'interactiveId': 'k',
+        'option': {},
+        'type': InteractiveType.QUIZ,
+      });
+      expect(
+        ampStoryResults.rootEl_.querySelector(
+          '.i-amphtml-story-interactive-results-top-value'
+        ).textContent
+      ).to.equal('33');
+    });
   }
 );
