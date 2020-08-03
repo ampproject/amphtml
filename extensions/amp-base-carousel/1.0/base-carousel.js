@@ -16,7 +16,8 @@
 import * as Preact from '../../../src/preact';
 import {ArrowNext, ArrowPrev} from './arrow';
 import {Scroller} from './scroller';
-import {toChildArray, useRef, useState} from '../../../src/preact';
+import {createRef, toChildArray, useState} from '../../../src/preact';
+import {forwardRef} from '../../../src/preact/compat';
 import {useMountEffect} from '../../../src/preact/utils';
 
 /**
@@ -35,6 +36,7 @@ export function BaseCarousel({
   const childrenArray = toChildArray(children);
   const {length} = childrenArray;
   const [curSlide, setCurSlide] = useState(0);
+  const scrollRef = createRef();
   const advance = (dir) => {
     const container = scrollRef.current;
     // Modify scrollLeft is preferred to `setCurSlide` to enable smooth scroll.
@@ -53,19 +55,18 @@ export function BaseCarousel({
       onSlideChange(i);
     }
   };
-  const scrollRef = useRef(null);
   const disableForDir = (dir) =>
     !loop && (curSlide + dir < 0 || curSlide + dir >= length);
   return (
     <div {...rest}>
-      <Scroller
+      <ScrollerWithRef
         loop={loop}
         restingIndex={curSlide}
         setRestingIndex={setRestingIndex}
-        scrollRef={scrollRef}
+        ref={scrollRef}
       >
         {childrenArray}
-      </Scroller>
+      </ScrollerWithRef>
       <ArrowPrev
         customArrow={arrowPrev}
         disabled={disableForDir(-1)}
@@ -79,3 +80,8 @@ export function BaseCarousel({
     </div>
   );
 }
+
+const ScrollerWithRef = forwardRef((props, ref) =>
+  Scroller(/** @type {BaseCarouselDef.ScrollerProps} */ ({ref, ...props}))
+);
+ScrollerWithRef.displayName = 'Scroller'; // Make findable for tests.

@@ -35,13 +35,7 @@ const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
  * @param {!BaseCarouselDef.ScrollerProps} props
  * @return {PreactDef.Renderable}
  */
-export function Scroller({
-  children,
-  loop,
-  restingIndex,
-  setRestingIndex,
-  scrollRef,
-}) {
+export function Scroller({children, loop, ref, restingIndex, setRestingIndex}) {
   /**
    * The number of slides we want to place before the
    * reference or resting index. Only needed if loop=true.
@@ -54,7 +48,6 @@ export function Scroller({
    */
   const offsetRef = useRef(restingIndex);
   const ignoreProgrammaticScrollRef = useRef(true);
-  const containerRef = useRef(null);
   const slides = renderSlides({
     children,
     loop,
@@ -66,18 +59,17 @@ export function Scroller({
 
   // useLayoutEffect needed to avoid FOUC while scrolling
   useLayoutEffect(() => {
-    if (!containerRef.current) {
+    if (!ref.current) {
       return;
     }
-    // TODO: We should use forwardRef to dedup scrollRef and containerRef.
-    const container = (scrollRef.current = containerRef.current);
+    const container = ref.current;
     ignoreProgrammaticScrollRef.current = true;
     setStyle(container, 'scrollBehavior', 'auto');
     container./* OK */ scrollLeft = loop
       ? container./* OK */ offsetWidth * pivotIndex
       : container./* OK */ offsetWidth * restingIndex;
     setStyle(container, 'scrollBehavior', 'smooth');
-  }, [loop, restingIndex, pivotIndex, scrollRef]);
+  }, [loop, restingIndex, pivotIndex, ref]);
 
   // Trigger render by setting the resting index to the current scroll state.
   const debouncedResetScrollReferencePoint = useMemo(
@@ -105,7 +97,7 @@ export function Scroller({
   // This is necessary for smooth scrolling because
   // intermediary renders will interupt scroll and cause jank.
   const updateCurrentIndex = () => {
-    const container = containerRef.current;
+    const container = ref.current;
     const slideOffset = Math.round(
       (container./* OK */ scrollLeft -
         offsetRef.current * container./* OK */ offsetWidth) /
@@ -127,7 +119,7 @@ export function Scroller({
     <div
       hide-scrollbar
       key="container"
-      ref={containerRef}
+      ref={ref}
       onScroll={handleScroll}
       style={{
         ...styles.scrollContainer,
