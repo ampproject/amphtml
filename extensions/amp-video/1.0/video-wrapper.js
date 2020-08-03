@@ -17,18 +17,43 @@
 import * as Preact from '../../../src/preact';
 import {ContainWrapper} from '../../../src/preact/component';
 import {Deferred} from '../../../src/utils/promise';
+import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
+import {cssText as autoplayCss} from '../../../build/video-autoplay.css';
+import {fillContentOverlay} from './video-wrapper.css';
 import {
-  EMPTY_METADATA,
   parseFavicon,
   parseOgImage,
   parseSchemaImage,
   setMediaSession,
 } from '../../../src/mediasession-helper';
-import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
-import {cssText as autoplayCss} from '../../../build/video-autoplay.css';
-import {fillContentOverlay} from './video-wrapper.css';
 import {useEffect, useMemo, useRef, useState} from '../../../src/preact';
 import {useMountEffect, useResourcesNotify} from '../../../src/preact/utils';
+
+/**
+ * @param {{getMetadata: (function():!Object|undefined)}} player
+ * @param {!VideoWrapperProps} props
+ * @return {!Object};
+ */
+function getMetadata(player, props) {
+  const metadata = player.getMetadata
+    ? player.getMetadata()
+    : {
+        title: props.title || '',
+        artist: props.artist || '',
+        album: props.album || '',
+        artwork: [{src: props.artwork || props.poster || ''}],
+      };
+
+  metadata.title = metadata.title || props['aria-label'] || document.title;
+
+  metadata.artwork =
+    metadata.artwork ||
+    parseSchemaImage(document) ||
+    parseOgImage(document) ||
+    parseFavicon(document);
+
+  return metadata;
+}
 
 /**
  * @param {!VideoWrapperProps} props
@@ -40,6 +65,7 @@ export function VideoWrapper({
   controls = false,
   noaudio = false,
   mediasession = true,
+  style,
   children,
   ...rest
 }) {
@@ -98,27 +124,16 @@ export function VideoWrapper({
             return;
           }
 
-          const metadata = playerRef.current.getMetadata() || {
-            ...EMPTY_METADATA,
-            artwork: undefined,
-          };
-
-          metadata.title =
-            metadata.title ||
-            rest.title ||
-            rest['aria-label'] ||
-            document.title;
-
-          metadata.artwork =
-            metadata.artwork ||
-            parseSchemaImage(document) ||
-            parseOgImage(document) ||
-            parseFavicon(document);
-
-          setMetadata(metadata);
+          setMetadata(getMetadata(playerRef.current, rest));
         }}
         onPlaying={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
+        style={{
+          ...style,
+          'position': 'relative',
+          'width': '100%',
+          'height': '100%',
+        }}
       >
         {children}
       </Component>

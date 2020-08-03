@@ -19,52 +19,11 @@ import {VideoWrapper} from '../video-wrapper';
 import {boolean, number, object, text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
-const {forwardRef, useRef, useImperativeHandle} = Preact;
-
 export default {
   title: 'Video Wrapper',
   component: VideoWrapper,
   decorators: [withA11y, withKnobs],
 };
-
-const VideoTagPlayerInternal = forwardRef((props, ref) => {
-  const {
-    children,
-
-    poster,
-    album,
-    artist,
-    artwork,
-    title,
-
-    ...rest
-  } = props;
-
-  const videoNodeRef = useRef();
-
-  useImperativeHandle(ref, () => ({
-    play: () => videoNodeRef.current.play(),
-    pause: () => videoNodeRef.current.pause(),
-    getMetadata: () => ({
-      title: title || '',
-      artist: artist || '',
-      album: album || '',
-      artwork: [{src: artwork || poster || ''}],
-    }),
-  }));
-
-  return (
-    <video
-      ref={videoNodeRef}
-      style={{position: 'relative', width: '100%', height: '100%'}}
-      poster={poster}
-      title={title}
-      {...rest}
-    >
-      {children}
-    </video>
-  );
-});
 
 const VideoTagPlayer = ({i}) => {
   const group = `Player ${i + 1}`;
@@ -108,7 +67,7 @@ const VideoTagPlayer = ({i}) => {
   return (
     <div style={{width, height}}>
       <VideoWrapper
-        component={VideoTagPlayerInternal}
+        component="video"
         ariaLabel={ariaLabel}
         autoplay={autoplay}
         controls={controls}
