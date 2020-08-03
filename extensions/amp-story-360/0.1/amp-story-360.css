@@ -24,3 +24,53 @@ amp-story-360 canvas {
 amp-story-360 amp-img {
   opacity: 0 !important;
 }
+
+.i-amp-story-360-permissions-button {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, .8);
+  color: white;
+  outline: none;
+  border: none;
+  padding: 6px;
+  padding-left: 10px;
+  border-radius: 18px;
+  font-size: 12px;
+  font-family: 'Roboto', sans-serif;
+  display: flex;
+  align-items: center;
+}
+
+.i-amp-story-360-permissions-button-icon {
+  box-sizing: border-box;
+  margin-left: 5px;
+  font-size: 6px;
+  width: 24px;
+  height: 24px;
+  border: 1px solid white;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  position: relative;
+}
+
+.i-amp-story-360-permissions-button-icon-svg {
+  position: absolute;
+  width: calc(100% + 2px);
+  height: calc(100% + 2px);
+  left: -1px;
+  top: -1px;
+}
+
+[active] .i-amp-story-360-permissions-button-icon-svg {
+  animation: rotate 1s 1.5s;
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}

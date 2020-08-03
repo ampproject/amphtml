@@ -475,6 +475,11 @@ export class ManualAdvancement extends AdvancementConfig {
           return true;
         }
 
+        if (el.classList.contains('i-amp-story-360-permissions-button')) {
+          shouldHandleEvent = false;
+          return true;
+        }
+
         return false;
       },
       /* opt_stopAt */ this.element_

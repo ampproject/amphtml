@@ -23,9 +23,61 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
 import {user, userAssert} from '../../../src/log';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
+import {htmlFor} from '../../../src/static-template';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_360';
+
+/**
+ * Generates the template for the binary poll option.
+ *
+ * @param {!Element} element
+ * @return {!Element}
+ */
+const buildPermissionButtonTemplate = (element) => {
+  const html = htmlFor(element);
+  return html`
+    <button class="i-amp-story-360-permissions-button">
+      Activate
+      <span class="i-amp-story-360-permissions-button-icon"
+        >360°
+        <svg
+          class="i-amp-story-360-permissions-button-icon-svg"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <defs>
+            <linearGradient id="gradient1">
+              <stop stop-color="white" stop-opacity=".3" />
+              <stop offset="1" stop-color="white" />
+            </linearGradient>
+            <linearGradient id="gradient2" gradientTransform="rotate(90)">
+              <stop stop-color="white" stop-opacity=".3" />
+              <stop offset="1" stop-color="white" />
+            </linearGradient>
+          </defs>
+          <ellipse
+            ry="11.5"
+            rx="7.5"
+            cy="12"
+            cx="12"
+            stroke="url(#gradient1)"
+          />
+          <ellipse
+            ry="7.5"
+            rx="11.5"
+            cy="12"
+            cx="12"
+            stroke="url(#gradient2)"
+          />
+        </svg>
+      </span>
+    </button>
+  `;
+};
 
 /**
  * Internal helper class representing a camera orientation (POV) in polar
@@ -220,13 +272,8 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const button = document.createElement('button');
-    document.body.appendChild(button);
-    button.style.position = 'fixed';
-    button.style.top = '10px';
-    button.style.left = '10px';
-    button.style.zIndex = '100000000';
-    button.textContent = 'test';
+    const button = buildPermissionButtonTemplate(this.element);
+    this.element.appendChild(button);
 
     button.addEventListener('click', () => {
       onClick();
@@ -247,36 +294,6 @@ export class AmpStory360 extends AMP.BaseElement {
         // handle regular non iOS 13+ devices
       }
     }
-
-    // function testDeviceOrientation() {
-    //   if (typeof DeviceOrientationEvent !== 'function') {
-    //     return setResult('DeviceOrientationEvent not detected');
-    //   }
-    //   if (typeof DeviceOrientationEvent.requestPermission !== 'function') {
-    //     return setResult(
-    //       'DeviceOrientationEvent.requestPermission not detected'
-    //     );
-    //   }
-    //   DeviceOrientationEvent.requestPermission().then(function (result) {
-    //     return setResult(result);
-    //   });
-    // }
-
-    // function setResult(result) {
-    //   alert(result);
-    //   // document.getElementById('result').innerHTML = 'RESULT: ' + result;
-    // }
-
-    // DeviceOrientationEvent.requestPermission()
-    //   .then((response) => {
-    //     alert(response);
-    //     if (response == 'granted') {
-    //       window.addEventListener('deviceorientation', (e) => {
-    //         // do something with e
-    //       });
-    //     }
-    //   })
-    //   .catch(console.error);
 
     const ampImgEl = this.element.querySelector('amp-img');
     userAssert(ampImgEl, 'amp-story-360 must contain an amp-img element.');
