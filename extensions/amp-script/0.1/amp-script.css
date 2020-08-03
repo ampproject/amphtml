@@ -21,3 +21,9 @@ amp-script {
 amp-script.i-amphtml-hydrated {
   opacity: 1;
 }
+amp-script[nodom] {
+  position: fixed !important;
+  visibility: hidden !important;
+  width: 1px;
+  height: 1px;
+}

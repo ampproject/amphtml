@@ -568,6 +568,11 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
     fs.copyFileSync(dir + 'worker.js', `${file}.js`);
     // The "mjs" output is unminified ES6 and has debugging flags enabled.
     fs.copyFileSync(dir + 'worker.mjs', `${file}.max.js`);
+
+    // Same as above but for the nodom worker variant.
+    const noDomFile = `dist/v0/amp-script-worker-nodom-${version}`;
+    fs.copyFileSync(dir + 'worker.nodom.js', `${noDomFile}.js`);
+    fs.copyFileSync(dir + 'worker.nodom.mjs', `${noDomFile}.max.js`);
   }
 }
 
