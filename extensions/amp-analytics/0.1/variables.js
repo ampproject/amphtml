@@ -21,7 +21,10 @@ import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {cookieReader} from './cookie-reader';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getActiveExperimentBranches} from '../../../src/experiments';
+import {
+  getActiveExperimentBranches,
+  getExperimentBranch,
+} from '../../../src/experiments';
 import {getConsentPolicyState} from '../../../src/consent';
 import {
   getServiceForDoc,
@@ -175,12 +178,17 @@ function matchMacro(string, matchPattern, opt_matchingGroupIndexStr) {
 }
 
 /**
- * Returns a comma separated list of active branch experiment values and their
- * names, or an empty string if none exist.
+ * If given an experiment name returns the branch id if a branch is selected.
+ * If no branch name given, it returns a comma separated list of active branch
+ * experiment ids and their names or an empty string if none exist.
  * @param {!Window} win
+ * @param {string=} opt_expName
  * @return {string}
  */
-function experimentBranchesMacro(win) {
+function experimentBranchesMacro(win, opt_expName) {
+  if (opt_expName) {
+    return getExperimentBranch(win, opt_expName) || '';
+  }
   const branches = getActiveExperimentBranches(win);
   return Object.keys(branches)
     .map((expName) => `${expName}:${branches[expName]}`)
@@ -251,8 +259,8 @@ export class VariableService {
       Math.round(Services.viewportForDoc(this.ampdoc_).getScrollLeft())
     );
 
-    this.register_('EXPERIMENT_BRANCHES', () =>
-      experimentBranchesMacro(this.ampdoc_.win)
+    this.register_('EXPERIMENT_BRANCHES', (opt_expName) =>
+      experimentBranchesMacro(this.ampdoc_.win, opt_expName)
     );
   }
 
