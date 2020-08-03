@@ -30,10 +30,13 @@ iubenda makes your sites & apps legally compliant across multiple languages and 
   </script>
   <div id="iubendaPostPromptUI">
     Post Prompt UI
-    <button on="tap:iubenda.prompt(consent=iubenda)" role="button">Manage</button>
+    <button on="tap:iubenda.prompt(consent=iubenda)" role="button">
+      Manage
+    </button>
   </div>
 </amp-consent>
 ```
 
 ## Contacts for future maintenance
 @Facens, @Vasile-Peste
+
