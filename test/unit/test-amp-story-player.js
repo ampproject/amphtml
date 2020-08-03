@@ -265,13 +265,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     swipeLeft();
     swipeLeft();
 
-    expect(navigationSpy).to.have.been.calledWithMatch({
-      type: 'navigation',
-      detail: {
-        index: 1,
-        remaining: 0,
-      },
-    });
+    expect(navigationSpy).to.have.been.calledOnce;
   });
 
   describe('Cache URLs', () => {
