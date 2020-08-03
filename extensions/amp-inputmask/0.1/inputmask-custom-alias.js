@@ -54,10 +54,6 @@ export function getAliasDefinition() {
        * @return {string}
        */
       'onBeforeMask': function (value, opts) {
-        if (value === undefined) {
-          return '';
-        }
-
         const prefixes = opts['prefixes'];
         const trimZeros = opts['trimZeros'] || 0;
 
