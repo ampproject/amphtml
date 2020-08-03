@@ -65,6 +65,7 @@ export function VideoWrapper({
   controls = false,
   noaudio = false,
   mediasession = true,
+  'class': className,
   style,
   children,
   ...rest
@@ -108,6 +109,7 @@ export function VideoWrapper({
   return (
     <ContainWrapper
       contentRef={wrapperRef}
+      class={className}
       style={style}
       size={true}
       layout={true}
