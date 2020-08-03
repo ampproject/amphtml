@@ -998,7 +998,11 @@ const forbiddenTermsSrcInclusive = {
     message:
       'Due to various bugs in Firefox, you must use the computedStyle ' +
       'helper in style.js.',
-    allowlist: ['src/style.js', 'dist.3p/current/integration.js'],
+    allowlist: [
+      'src/style.js',
+      'dist.3p/current/integration.js',
+      'build-system/tasks/coverage-map/index.js',
+    ],
   },
   'decodeURIComponent\\(': {
     message:
