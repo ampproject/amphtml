@@ -224,7 +224,6 @@ function getQueryString(endpoint) {
  * this is an Ios device.  Checked for 'mailto:' and 'sms:' protocols which
  * break when opened in _blank on iOS Safari.
  * @return {boolean}
- * @visibleForTesting
  */
 function isIos() {
   return /** @type {boolean} */ (window &&
