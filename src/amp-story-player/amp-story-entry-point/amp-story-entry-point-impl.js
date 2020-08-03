@@ -77,8 +77,8 @@ export class AmpStoryEntryPoint {
       return;
     }
 
-    const playerId = this.element_.getAttribute('player-id');
-    this.player_ = this.doc_.querySelector(`#${playerId}`);
+    const playerId = `#${this.element_.getAttribute('player-id')}`;
+    this.player_ = this.doc_.querySelector(playerId);
     this.stories_ = toArray(this.player_.querySelectorAll('a'));
 
     this.initializeShadowRoot_();
@@ -135,21 +135,15 @@ export class AmpStoryEntryPoint {
         this.initializeCardTitle_(cardContainer, story);
         this.initializeCardLogo_(cardContainer);
       }
-      
-      const card = this.initializeCard_(
-        cardContainer,
-        src,
-        styleClass,
-        story.href,
-        i
-      );
+
+      this.initializeCard_(cardContainer, src, styleClass, story.href, i);
     }
   }
 
   /**
    * Initializes the card's title to be displayed.
-   * @param {Element} cardContainer 
-   * @param {HTMLAnchorElement} story 
+   * @param {Element} cardContainer
+   * @param {HTMLAnchorElement} story
    */
   initializeCardTitle_(cardContainer, story) {
     const title = this.doc_.createElement('span');
@@ -160,7 +154,7 @@ export class AmpStoryEntryPoint {
 
   /**
    * Initializes the logo to be displayed.
-   * @param {Element} cardContainer 
+   * @param {Element} cardContainer
    */
   initializeCardLogo_(cardContainer) {
     const src = this.element_.getAttribute('logo');
@@ -169,7 +163,7 @@ export class AmpStoryEntryPoint {
     }
 
     const logo = this.doc_.createElement('img');
-    logo.classList.add('entry-point-card-logo')
+    logo.classList.add('entry-point-card-logo');
     logo.src = src;
     cardContainer.append(logo);
   }
@@ -241,23 +235,23 @@ export class AmpStoryEntryPoint {
 
     let interval;
 
-    rightButton.addEventListener('mousedown', (e) => {
-      interval = setInterval( function() {
+    rightButton.addEventListener('mousedown', () => {
+      interval = setInterval(function () {
         container.scrollLeft += 10;
       }, 50);
     });
-    
-    leftButton.addEventListener('mousedown', (e) => {
-      interval = setInterval( function() {
+
+    leftButton.addEventListener('mousedown', () => {
+      interval = setInterval(function () {
         container.scrollLeft -= 10;
       }, 50);
     });
 
-    rightButton.addEventListener('mouseout', (e) => clearInterval(interval));
-    leftButton.addEventListener('mouseout', (e) => clearInterval(interval));
+    rightButton.addEventListener('mouseout', () => clearInterval(interval));
+    leftButton.addEventListener('mouseout', () => clearInterval(interval));
 
-    rightButton.addEventListener('mouseup', (e) => clearInterval(interval));
-    leftButton.addEventListener('mouseup', (e) => clearInterval(interval));
+    rightButton.addEventListener('mouseup', () => clearInterval(interval));
+    leftButton.addEventListener('mouseup', () => clearInterval(interval));
 
     this.rootEl_.append(leftButton);
     this.rootEl_.append(rightButton);
