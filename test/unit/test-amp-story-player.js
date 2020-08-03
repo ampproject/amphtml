@@ -581,7 +581,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await manager.loadPlayers();
       await nextTick();
 
-      const readySpy = env.sandbox.spy();
+      const pageAttachmentSpy = env.sandbox.spy();
       playerEl.addEventListener('page-attachment-open', readySpy);
 
       openPageAttachment();
