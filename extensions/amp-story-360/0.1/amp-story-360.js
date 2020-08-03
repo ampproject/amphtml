@@ -50,28 +50,19 @@ const buildPermissionButtonTemplate = (element) => {
           fill="none"
         >
           <defs>
-            <linearGradient id="gradient1">
-              <stop stop-color="white" stop-opacity=".3" />
-              <stop offset="1" stop-color="white" />
-            </linearGradient>
-            <linearGradient id="gradient2" gradientTransform="rotate(90)">
+            <linearGradient id="gradient">
               <stop stop-color="white" stop-opacity=".3" />
               <stop offset="1" stop-color="white" />
             </linearGradient>
           </defs>
+          <ellipse ry="11.5" rx="7.5" cy="12" cx="12" stroke="url(#gradient)" />
           <ellipse
             ry="11.5"
             rx="7.5"
             cy="12"
             cx="12"
-            stroke="url(#gradient1)"
-          />
-          <ellipse
-            ry="7.5"
-            rx="11.5"
-            cy="12"
-            cx="12"
-            stroke="url(#gradient2)"
+            stroke="url(#gradient)"
+            transform="rotate(90, 12, 12)"
           />
         </svg>
       </span>
