@@ -88,6 +88,7 @@ using amp::validator::CssSpec;
 using amp::validator::DeclarationList;
 using amp::validator::DescendantTagList;
 using amp::validator::DocCssSpec;
+using amp::validator::DocSpec;
 using amp::validator::ErrorSpecificity;
 using amp::validator::ExtensionSpec;
 using amp::validator::GetTypeIdentifier;
@@ -515,6 +516,30 @@ class ParsedReferencePoints {
  private:
   const TagSpec* parent_;
   vector<ParsedReferencePoint> parsed_;
+};
+
+class ParsedDocSpec {
+ public:
+  explicit ParsedDocSpec(const DocSpec& spec) : spec_(spec) {
+    // Store the enum of the TagSpec's type identifiers.
+    for (const std::string& disabled_by : spec.disabled_by()) {
+      disabled_by_.push_back(GetTypeIdentifier(disabled_by));
+    }
+    for (const std::string& enabled_by : spec.enabled_by()) {
+      enabled_by_.push_back(GetTypeIdentifier(enabled_by));
+    }
+  }
+
+  const DocSpec& spec() const { return spec_; }
+
+  const vector<TypeIdentifier>& disabled_by() const { return disabled_by_; }
+
+  const vector<TypeIdentifier>& enabled_by() const { return enabled_by_; }
+
+ private:
+  const DocSpec& spec_;
+  vector<TypeIdentifier> disabled_by_;
+  vector<TypeIdentifier> enabled_by_;
 };
 
 class ParsedDocCssSpec {
@@ -1237,6 +1262,10 @@ class ParsedValidatorRules {
 
   // Returns true iff `spec` is usable for the HTML Format these rules are built
   // for.
+  bool IsDocSpecCorrectHtmlFormat(const DocSpec& spec) const;
+
+  // Returns true iff `spec` is usable for the HTML Format these rules are built
+  // for.
   bool IsDocCssSpecCorrectHtmlFormat(const DocCssSpec& spec) const;
 
   absl::Status status() const;
@@ -1275,6 +1304,8 @@ class ParsedValidatorRules {
   void MaybeEmitMandatoryAlternativesSatisfiedErrors(
       Context* context, ValidationResult* result) const;
 
+  void MaybeEmitDocSizeErrors(Context* context, ValidationResult* result) const;
+
   void MaybeEmitCssLengthErrors(Context* context,
                                 ValidationResult* result) const;
 
@@ -1293,6 +1324,7 @@ class ParsedValidatorRules {
   const std::string& styles_spec_url() const {
     return rules_.styles_spec_url();
   }
+  const vector<ParsedDocSpec>& doc() const { return parsed_doc_; }
   const RepeatedPtrField<DescendantTagList>& descendant_tag_list() const {
     return rules_.descendant_tag_list();
   }
@@ -1329,6 +1361,7 @@ class ParsedValidatorRules {
   vector<int32> mandatory_tagspecs_;
   vector<ErrorCodeMetaData> error_codes_;
   unique_ptr<ParsedAttrSpecs> parsed_attr_specs_;
+  vector<ParsedDocSpec> parsed_doc_;
   vector<ParsedDocCssSpec> parsed_css_;
   std::set<std::string> tags_with_cdata_;
   ParsedValidatorRules(const ParsedValidatorRules&) = delete;
@@ -2150,6 +2183,10 @@ class Context {
       AddError(to_merge.errors(i), merged);
   }
 
+  void SetDocByteSize(int32 byte_size) { doc_byte_size_ = byte_size; }
+
+  const int32& doc_byte_size() const { return doc_byte_size_; }
+
   // These methods keep track of how much of the document is used towards
   // CSS style elements, via <style amp-custom> and inline styles (style
   // attribute on any tag).
@@ -2173,6 +2210,40 @@ class Context {
 
   const vector<TypeIdentifier>& type_identifiers() const {
     return type_identifiers_;
+  }
+  // Returns true iff |spec| should be used for the type identifiers recorded
+  // in this context, as seen in the document so far. If called before type
+  // identifiers have been recorded, will always return false.
+  bool IsDocSpecValidForTypeIdentifiers(const ParsedDocSpec& spec) const {
+    return ::amp::validator::IsUsedForTypeIdentifiers(
+        type_identifiers(), spec.enabled_by(), spec.disabled_by());
+  }
+
+  // Returns the first (there should at most one) DocSpec which matches both
+  // the html format and type identifiers recorded so far in this context. If
+  // called before identifiers have been recorded, it may return an incorrect
+  // selection. Returns nullopt if no match.
+  std::optional<const ParsedDocSpec*> MatchingDocSpec() const {
+    // The specs are usually already filtered by HTML format, so this loop
+    // should be very short, often 1.
+    std::optional<const ParsedDocSpec*> out = std::nullopt;
+    for (const ParsedDocSpec& spec : rules().doc()) {
+      if (rules().IsDocSpecCorrectHtmlFormat(spec.spec()) &&
+          IsDocSpecValidForTypeIdentifiers(spec)) {
+        DCHECK(!out.has_value())
+            << "Panic: Two DocSpec's match the same document.";
+        return &spec;
+      }
+    }
+    // Some simple tests load a tiny rules file to test one feature of the code.
+    // These tests won't have any DocSpec rules defined. This is OK. The DLOG
+    // is to verify that a particular format hasn't been ignored in the real
+    // rule set.
+    if (!rules().doc().empty()) {
+      DLOG(FATAL) << "Panic: No ParsedDocSpec for this document setting "
+                  << rules().html_format();
+    }
+    return std::nullopt;
   }
 
   // Returns true iff |spec| should be used for the type identifiers recorded
@@ -2359,6 +2430,7 @@ class Context {
   set<std::string> mandatory_alternatives_satisfied_;
   set<std::string> conditions_satisfied_;
   set<int32> tagspecs_validated_;
+  int32 doc_byte_size_ = 0;
   int32 style_tag_byte_size_ = 0;
   int32 inline_style_byte_size_ = 0;
   bool exit_early_ = false;
@@ -4360,6 +4432,10 @@ ParsedValidatorRules::ParsedValidatorRules(HtmlFormat::Code html_format)
 
   parsed_attr_specs_ = make_unique<ParsedAttrSpecs>(rules_.attr_lists());
 
+  for (const DocSpec& spec : rules_.doc()) {
+    parsed_doc_.emplace_back(spec);
+  }
+
   for (const DocCssSpec& css_spec : rules_.css()) {
     parsed_css_.emplace_back(css_spec, rules_.declaration_list());
   }
@@ -4468,6 +4544,11 @@ void ParsedValidatorRules::FilterRules(const ValidatorRules& all_rules,
     if (IsTagSpecCorrectHtmlFormat(tagspec))
       *filtered_rules->mutable_tags()->Add() = tagspec;
   }
+  filtered_rules->clear_doc();
+  for (const DocSpec& spec : all_rules.doc()) {
+    if (IsDocSpecCorrectHtmlFormat(spec))
+      *filtered_rules->mutable_doc()->Add() = spec;
+  }
   filtered_rules->clear_css();
   for (const DocCssSpec& doc_css : all_rules.css()) {
     if (IsDocCssSpecCorrectHtmlFormat(doc_css))
@@ -4503,6 +4584,14 @@ void ParsedValidatorRules::ExpandExtensionSpec(ValidatorRules* rules) const {
 bool ParsedValidatorRules::IsTagSpecCorrectHtmlFormat(
     const TagSpec& tagspec) const {
   const auto& formats = tagspec.html_format();
+  return std::find(formats.begin(), formats.end(), html_format_) !=
+         formats.end();
+}
+
+// True iff `spec`'s html_format matches the validator html_format.
+bool ParsedValidatorRules::IsDocSpecCorrectHtmlFormat(
+    const DocSpec& spec) const {
+  const auto& formats = spec.html_format();
   return std::find(formats.begin(), formats.end(), html_format_) !=
          formats.end();
 }
@@ -4844,6 +4933,23 @@ void ParsedValidatorRules::MaybeEmitMandatoryAlternativesSatisfiedErrors(
   }
 }
 
+// Emits errors for doc size limitations across entire document.
+void ParsedValidatorRules::MaybeEmitDocSizeErrors(
+    Context* context, ValidationResult* result) const {
+  if (auto maybe_doc_spec = context->MatchingDocSpec(); maybe_doc_spec) {
+    const ParsedDocSpec& doc_spec = **maybe_doc_spec;
+    const int32 bytes_used = context->doc_byte_size();
+    if (doc_spec.spec().has_max_bytes() && doc_spec.spec().max_bytes() != -2 &&
+        bytes_used > doc_spec.spec().max_bytes()) {
+      context->AddError(
+          ValidationError::DOCUMENT_SIZE_LIMIT_EXCEEDED, context->line_col(),
+          /*params=*/
+          {absl::StrCat(doc_spec.spec().max_bytes()), absl::StrCat(bytes_used)},
+          /*spec_url=*/doc_spec.spec().max_bytes_spec_url(), result);
+    }
+  }
+}
+
 // Emits errors for css size limitations across entire document.
 void ParsedValidatorRules::MaybeEmitCssLengthErrors(
     Context* context, ValidationResult* result) const {
@@ -4899,6 +5005,8 @@ void ParsedValidatorRules::MaybeEmitGlobalTagValidationErrors(
   MaybeEmitRequiresOrExcludesValidationErrors(context, result);
   if (context->Progress(*result).complete) return;
   MaybeEmitMandatoryAlternativesSatisfiedErrors(context, result);
+  if (context->Progress(*result).complete) return;
+  MaybeEmitDocSizeErrors(context, result);
   if (context->Progress(*result).complete) return;
   MaybeEmitCssLengthErrors(context, result);
   if (context->Progress(*result).complete) return;
@@ -5270,6 +5378,11 @@ class Validator {
         // Validator need disallwed/deprecated elements for error reporting.
         .allow_deprecated_tags = true,
     };
+    // The validation check for document size can't be done here since
+    // the Type Identifiers on the html tag have not been parsed yet and
+    // we wouldn't know which rule to apply. It's set to the context
+    // so that when those things are known it can be checked.
+    context_.SetDocByteSize(html.length());
     auto parser = std::make_unique<htmlparser::Parser>(html, options);
     auto doc = parser->Parse();
 
