@@ -1089,10 +1089,6 @@ export class AmpStory extends AMP.BaseElement {
     this.mutateElement(() => {
       this.element.appendChild(backButton);
     });
-    const label = this.localizationService_.getLocalizedString(
-      LocalizedStringId.AMP_STORY_PAGINATION_BUTTON_PREVIOUS_PAGE_LABEL
-    );
-    label && backButton.setAttribute('aria-label', label);
 
     backButton.addEventListener('click', () => {
       this.storeService_.dispatch(
