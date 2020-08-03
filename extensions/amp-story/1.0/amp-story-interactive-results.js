@@ -79,7 +79,7 @@ const processResults = (interactiveState, options) => {
  * @package
  */
 export const processResultsCategory = (interactiveState, options) => {
-  const result = {};
+  const result = {category: null, percentage: null};
 
   // Add all categories in order to the map with value 0
   const categories = {};
@@ -117,7 +117,7 @@ export const processResultsCategory = (interactiveState, options) => {
  * @package
  */
 export const processResultsPercentage = (interactiveState, options) => {
-  const result = {};
+  const result = {category: null, percentage: null};
 
   // Count quizzes and correct quizzes
   let quizCount = 0;
