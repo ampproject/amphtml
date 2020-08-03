@@ -261,7 +261,9 @@ export class ViewerImpl {
       this.maybeUpdateFragmentForCct();
     });
 
-    this.visibleOnUserAction_();
+    if (this.ampdoc.isSingleDoc()) {
+      this.visibleOnUserAction_();
+    }
   }
 
   /**
