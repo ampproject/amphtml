@@ -896,7 +896,7 @@ export class AmpStoryPlayer {
     const button = this.rootEl_.querySelector(
       'button.amp-story-player-exit-control-button'
     );
-    if (button === null) {
+    if (!button) {
       return;
     }
 
