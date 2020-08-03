@@ -16,7 +16,7 @@
 
 // Source for this constant is css/amp-story-entry-point.css
 import {createCustomEvent} from '../../event-helper';
-import {cssText} from '../../../build/amp-story-entry-point.css';
+import {cssText} from '../../../build/amp-story-entry-point-card.css';
 import {setStyle} from '../../style';
 import {toArray} from '../../types';
 
@@ -117,6 +117,8 @@ export class AmpStoryEntryPoint {
       ? STYLE_CLASSES['rectangle']
       : STYLE_CLASSES[style];
 
+    this.element_.classList.add(styleClass);
+
     const cardsContainer = this.doc_.createElement('div');
     cardsContainer.classList.add('entry-points');
     this.rootEl_.append(cardsContainer);
@@ -124,36 +126,71 @@ export class AmpStoryEntryPoint {
     for (let i = 0; i < this.stories_.length; i++) {
       const story = this.stories_[i];
       const src = story.getAttribute('data-poster-portrait-src');
+
+      const cardContainer = this.doc_.createElement('div');
+      cardContainer.classList.add('entry-point-card-container');
+      cardsContainer.append(cardContainer);
+
+      if (styleClass !== 'circular-entry-point') {
+        this.initializeCardTitle_(cardContainer, story);
+        this.initializeCardLogo_(cardContainer);
+      }
+      
       const card = this.initializeCard_(
+        cardContainer,
         src,
         styleClass,
         story.href,
         i
       );
-
-      const cardContainer = this.doc_.createElement('div');
-      cardContainer.append(card);
-      cardsContainer.append(cardContainer);
     }
   }
 
   /**
+   * Initializes the card's title to be displayed.
+   * @param {Element} cardContainer 
+   * @param {HTMLAnchorElement} story 
+   */
+  initializeCardTitle_(cardContainer, story) {
+    const title = this.doc_.createElement('span');
+    title.classList.add('entry-point-card-headline');
+    title.textContent = story.querySelector('span').textContent;
+    cardContainer.append(title);
+  }
+
+  /**
+   * Initializes the logo to be displayed.
+   * @param {Element} cardContainer 
+   */
+  initializeCardLogo_(cardContainer) {
+    const src = this.element_.getAttribute('logo');
+    if (!src) {
+      return;
+    }
+
+    const logo = this.doc_.createElement('img');
+    logo.classList.add('entry-point-card-logo')
+    logo.src = src;
+    cardContainer.append(logo);
+  }
+
+  /**
    * Initializes an image element to be displayed.
+   * @param {Element} cardContainer
    * @param {string} src
    * @param {string} styleClass
    * @param {string} href
    * @param {number} index
-   * @return {HTMLImageElement} poster
    * @private
    */
-  initializeCard_(src, styleClass, href, index) {
+  initializeCard_(cardContainer, src, styleClass, href, index) {
     const card = this.doc_.createElement('img');
     card.src = src;
     card.classList.add(styleClass);
     card.classList.add('entry-point');
     this.setCardWidthHeight_(card, styleClass);
     this.onCardClick_(card, href, index);
-    return card;
+    cardContainer.append(card);
   }
 
   /**
@@ -163,9 +200,10 @@ export class AmpStoryEntryPoint {
    * @private
    */
   setCardWidthHeight_(card, styleClass) {
-    card.height = this.element_.clientHeight;
+    card.height = 233;
     if (styleClass === 'circular-entry-point') {
-      card.width = this.element_.clientHeight;
+      card.width = 100;
+      card.height = 100;
     }
   }
 
@@ -191,7 +229,9 @@ export class AmpStoryEntryPoint {
     const leftButton = this.doc_.createElement('button');
     const rightButton = this.doc_.createElement('button');
     leftButton.classList.add('entry-point-left-arrow');
+    leftButton.classList.add('entry-point-arrow');
     rightButton.classList.add('entry-point-right-arrow');
+    rightButton.classList.add('entry-point-arrow');
 
     const top = this.element_.clientHeight / 2 - 20;
     setStyle(leftButton, 'top', top);
@@ -203,14 +243,14 @@ export class AmpStoryEntryPoint {
 
     rightButton.addEventListener('mousedown', (e) => {
       interval = setInterval( function() {
-        container.scrollLeft += 5;
-      }, 100);
+        container.scrollLeft += 10;
+      }, 50);
     });
     
     leftButton.addEventListener('mousedown', (e) => {
       interval = setInterval( function() {
-        container.scrollLeft -= 5;
-      }, 100);
+        container.scrollLeft -= 10;
+      }, 50);
     });
 
     rightButton.addEventListener('mouseout', (e) => clearInterval(interval));

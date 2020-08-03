@@ -66,6 +66,11 @@ const cssEntryPoints = [
     outCss: 'amp-story-entry-point-v0.css',
   },
   {
+    path: 'amp-story-entry-point-card.css',
+    outJs: 'amp-story-entry-point-card.css.js',
+    outCss: 'amp-story-entry-point-card-v0.css',
+  },
+  {
     // Publisher imported CSS for `src/amp-story-player/amp-story-player.js`.
     path: 'amp-story-player.css',
     outJs: 'amp-story-player.css.js',
