@@ -1090,14 +1090,6 @@ export class AmpStory extends AMP.BaseElement {
       this.element.appendChild(backButton);
     });
 
-    backButton.addEventListener('click', () => {
-      this.storeService_.dispatch(
-        Action.SET_ADVANCEMENT_MODE,
-        AdvancementMode.MANUAL_ADVANCE
-      );
-      this.previous_();
-    });
-
     // Append class to hide button if on first page.
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_INDEX,
