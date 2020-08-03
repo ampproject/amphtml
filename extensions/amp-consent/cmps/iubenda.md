@@ -38,5 +38,6 @@ iubenda makes your sites & apps legally compliant across multiple languages and 
 ```
 
 ## Contacts for future maintenance
-@Facens, @Vasile-Peste
 
+@Facens
+@Vasile-Peste
