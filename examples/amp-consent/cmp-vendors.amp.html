@@ -97,6 +97,7 @@
           <option>_ping_</option>
           <option>appconsent</option>
           <option>didomi</option>
+          <option>iubenda</option>
           <option>sirdata</option>
           <option>Marfeel</option>
           <option>Ogury</option>
@@ -185,6 +186,21 @@
           </div>
         </amp-consent>
         <!-- End didomi example -->
+
+      <!-- iubenda example -->
+      <amp-consent id="iubenda" layout="nodisplay" type="iubenda">
+        <script type="application/json">
+          {
+            "promptUISrc": "https://cdn.iubenda.com/cs/test/cs-for-amp.html",
+            "postPromptUI": "iubendaPostPromptUI"
+          }
+        </script>
+        <div id="iubendaPostPromptUI">
+          Post Prompt UI
+          <button on="tap:iubenda.prompt(consent=iubenda)" role="button">Manage</button>
+        </div>
+      </amp-consent>
+      <!-- End iubenda example -->
 
       <!-- sirdata example -->
       <amp-consent id="consent" layout="nodisplay" type="sirdata">
