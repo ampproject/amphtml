@@ -142,12 +142,6 @@ AMP.getState(expr) {}
 </script>
 ```
 
-<<<<<<< HEAD
-
-## Restrictions
-
-=======
-
 ### Exporting functions for use in <amp-list>
 
 You may export functions to act as the data source for an `<amp-list>`.
@@ -163,15 +157,10 @@ The export API is available on the global scope, and has the following signature
 function exportFunction(name, function) {}
 ```
 
-<<<<<<< HEAD
-
-### Restrictions
-
-> > > > > > > # 028539ec4... amp-script docs
+**nodom (optional)**
+There are situations in which you may wish to use `<amp-script>` as solely a data-layer, rather than using it to manipulate dom. The `nodom` attribute removes the ability for the `<amp-script>` to make dom modifications, in favor of a signficantly smaller bundle size and therefore better performance. It also renders the `<amp-script>` invisible, removing the need for specifying height and width.
 
 ## Restrictions
-
-> > > > > > > a5dcf61d7... gulp prettify --fix
 
 ### Allowed APIs
 
@@ -314,9 +303,6 @@ The value of `max-age` should be chosen carefully:
 - A shorter `max-age` may prevent inclusion in AMP Caches that have a minimum SXG lifetime. For instance, the Google AMP Cache requires at least [4 days](https://github.com/ampproject/amppackager/blob/releases/docs/cache_requirements.md#google-amp-cache) (345600 seconds). Note that there's currently no reason to select `max-age` longer than 7 days (604800 seconds), due to the [maximum](https://wicg.github.io/webpackage/draft-yasskin-http-origin-signed-responses.html#name-signature-validity) set by the SXG spec.
 
 If you don't publish signed exchanges, `max-age` does nothing.
-
-**nodom (optional)**
-There are situations in which you may wish to use `<amp-script>` as solely a data-layer, rather than using it to manipulate dom. The `nodom` attribute removes the ability for the `<amp-script>` to make dom modifications, in favor of a signficantly smaller bundle size and therefore better performance. It also renders the `<amp-script>` invisible, removing the need for specifying height and width.
 
 **common attributes**
 
