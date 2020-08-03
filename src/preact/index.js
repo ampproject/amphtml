@@ -149,15 +149,6 @@ export function toChildArray(unusedChildren) {
 }
 
 /**
- * @param {function(JsonObject, {current: (T|null)}):PreactDef.Renderable} fn
- * @return {PreactDef.Renderable}
- * @template T
- */
-export function forwardRef(fn) {
-  return compat.forwardRef(fn);
-}
-
-/**
  * @param {{current: (T|undefined)}} ref
  * @param {!Function} init
  * @param {!Array<*>=} opt_deps
