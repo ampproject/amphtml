@@ -1080,7 +1080,7 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Checks if index is out of bounds
+   * Checks if index is out of bounds.
    * @private
    * @param {number} index
    * @return {boolean}
@@ -1090,7 +1090,7 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Checks if circular wrapping artibute is present
+   * Checks if circular wrapping attribute is present.
    * @private
    * @return {boolean}
    */
