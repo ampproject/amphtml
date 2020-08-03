@@ -108,7 +108,8 @@ export function VideoWrapper({
   return (
     <ContainWrapper
       contentRef={wrapperRef}
-      size={false}
+      style={style}
+      size={true}
       layout={true}
       paint={true}
     >
@@ -126,7 +127,6 @@ export function VideoWrapper({
         onPlaying={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
         style={{
-          ...style,
           'position': 'relative',
           'width': '100%',
           'height': '100%',

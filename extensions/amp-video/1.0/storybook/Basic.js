@@ -65,26 +65,25 @@ const VideoTagPlayer = ({i}) => {
   );
 
   return (
-    <div style={{width, height}}>
-      <VideoWrapper
-        component="video"
-        ariaLabel={ariaLabel}
-        autoplay={autoplay}
-        controls={controls}
-        mediasession={mediasession}
-        noaudio={noaudio}
-        loop={loop}
-        poster={poster}
-        artist={artist}
-        album={album}
-        artwork={artwork}
-        title={title}
-      >
-        {sources.map((props) => (
-          <source {...props}></source>
-        ))}
-      </VideoWrapper>
-    </div>
+    <VideoWrapper
+      component="video"
+      ariaLabel={ariaLabel}
+      autoplay={autoplay}
+      controls={controls}
+      mediasession={mediasession}
+      noaudio={noaudio}
+      loop={loop}
+      poster={poster}
+      artist={artist}
+      album={album}
+      artwork={artwork}
+      title={title}
+      style={{width, height}}
+    >
+      {sources.map((props) => (
+        <source {...props}></source>
+      ))}
+    </VideoWrapper>
   );
 };
 
