@@ -463,14 +463,13 @@ export class Services {
   }
 
   /**
-   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
    * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>}
+   * @return {?Promise<?../extensions/amp-story/1.0/variable-service.AmpStoryVariableService>}
    */
   static storyVariableServiceForOrNull(win) {
     return (
-      /** @type {!Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>} */
-      (getElementServiceIfAvailable(win, 'story-variable', 'amp-story', true))
+      /** @type {!Promise<?../extensions/amp-story/1.0/variable-service.AmpStoryVariableService>} */
+      (getElementServiceIfAvailable(win, 'story-variable', 'amp-story'))
     );
   }
 

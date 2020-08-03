@@ -111,6 +111,7 @@ import {
   shouldShowStoryUrlInfo,
 } from './utils';
 import {toArray} from '../../../src/types';
+import {updateInteractiveStoreState} from '../../amp-story-interactive/1.0/utils';
 import {upgradeBackgroundAudio} from './audio';
 import LocalizedStringsAr from './_locales/ar';
 import LocalizedStringsDe from './_locales/de';
@@ -565,7 +566,7 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * Initializes interactives by deduplicating their IDs and calling initializeState().
+   * Initializes interactives by deduplicating their IDs and updating the store.
    * @private
    */
   initializeInteractiveComponents_() {
@@ -586,7 +587,9 @@ export class AmpStory extends AMP.BaseElement {
         interactiveIds[i] = newId;
       }
       whenUpgradedToCustomElement(interactiveEls[i]).then((el) => {
-        el.getImpl().then((e) => e.initializeState());
+        el.getImpl().then((e) =>
+          updateInteractiveStoreState(this.storeService_, e)
+        );
       });
     }
   }
