@@ -102,6 +102,7 @@ exports.rules = [
     allowlist: [
       '3p/**->src/utils/function.js',
       '3p/**->src/utils/object.js',
+      '3p/**->src/utils/promise.js',
       '3p/**->src/log.js',
       '3p/**->src/types.js',
       '3p/**->src/string.js',
