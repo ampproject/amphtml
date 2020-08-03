@@ -478,7 +478,7 @@ export class ManualAdvancement extends AdvancementConfig {
         if (
           el.classList.contains('i-amphtml-story-screen-reader-back-button')
         ) {
-          shouldHandleEvent = false;
+          shouldHandleEvent = true;
           return true;
         }
 
