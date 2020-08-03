@@ -16,7 +16,10 @@
 
 import '../amp-social-share';
 import {toggleExperiment} from '../../../../src/experiments';
-import {waitForChildPromise} from '../../../../src/dom';
+import {
+  waitForChildPromise,
+  whenUpgradedToCustomElement,
+} from '../../../../src/dom';
 import {whenCalled} from '../../../../testing/test-helper.js';
 
 const BUTTON_SELECTOR = 'div[role="button"]';
@@ -61,21 +64,13 @@ describes.realWin(
       //expectAsyncConsoleError(/An endpoint/, 1);
       element = win.document.createElement('amp-social-share');
       element.setAttribute('type', 'unknown-provider');
-      win.document.body.appendChild(element);
-
-      //await whenUpgradedToCustomElement(element);
-      //await element.whenBuilt();
       //win.document.body.appendChild(element);
-
-      expect(
-        Promise.resolve(() => {
-          //win.document.body.appendChild(element);
-          //await element.whenBuilt();
+      await whenUpgradedToCustomElement(element);
+      await allowConsoleError(() =>
+        element.build().catch((err) => {
+          expect(err.message).to.include('blah!');
         })
-      ).to.eventually.throw('test error');
-
-      //to try
-      //expect(() => {}).to.throw('test error');
+      );
     });
 
     //in progress
