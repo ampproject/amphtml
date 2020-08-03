@@ -5193,37 +5193,41 @@ ValidationResult CreateResultPrototype(const ParsedValidatorRules& rules) {
 class ParsedValidatorRulesProvider {
  public:
   static const ParsedValidatorRules* Get(HtmlFormat::Code format) {
-    static ParsedValidatorRulesProvider provider;
+    static std::once_flag load_amp_rules_once;
+    static std::once_flag load_ads_rules_once;
+    static std::once_flag load_actions_rules_once;
+    static std::once_flag load_email_rules_once;
+    static ParsedValidatorRules* amp_rules_;
+    static ParsedValidatorRules* amp4_actions_rules_;
+    static ParsedValidatorRules* amp4_ads_rules_;
+    static ParsedValidatorRules* amp4_email_rules_;
     switch (format) {
-      case HtmlFormat::AMP:
-        return provider.amp_rules_.get();
-      case HtmlFormat::AMP4ADS:
-        return provider.amp4_ads_rules_.get();
-      case HtmlFormat::AMP4EMAIL:
-        return provider.amp4_email_rules_.get();
-      case HtmlFormat::ACTIONS:
-        return provider.amp4_actions_rules_.get();
-      default:
-        return provider.amp_rules_.get();
+      case HtmlFormat::AMP4ADS: {
+        std::call_once(load_ads_rules_once, []() {
+          amp4_ads_rules_ = new ParsedValidatorRules(HtmlFormat::AMP4ADS);
+        });
+        return amp4_ads_rules_;
+      }
+      case HtmlFormat::AMP4EMAIL: {
+        std::call_once(load_email_rules_once, []() {
+          amp4_email_rules_ = new ParsedValidatorRules(HtmlFormat::AMP4EMAIL);
+        });
+        return amp4_email_rules_;
+      }
+      case HtmlFormat::ACTIONS: {
+        std::call_once(load_actions_rules_once, []() {
+          amp4_actions_rules_ = new ParsedValidatorRules(HtmlFormat::ACTIONS);
+        });
+        return amp4_actions_rules_;
+      }
+      default: {
+        std::call_once(load_amp_rules_once, []() {
+          amp_rules_ = new ParsedValidatorRules(HtmlFormat::AMP);
+        });
+        return amp_rules_;
+      }
     }
   }
-
- private:
-  ParsedValidatorRulesProvider() {
-    amp_rules_ = std::make_unique<ParsedValidatorRules>(HtmlFormat::AMP);
-    amp4_ads_rules_ = std::make_unique<ParsedValidatorRules>(
-        HtmlFormat::AMP4ADS);
-    amp4_email_rules_ = std::make_unique<ParsedValidatorRules>(
-        HtmlFormat::AMP4EMAIL);
-    amp4_actions_rules_ = std::make_unique<ParsedValidatorRules>(
-        HtmlFormat::ACTIONS);
-  }
-
- private:
-  std::unique_ptr<ParsedValidatorRules> amp_rules_;
-  std::unique_ptr<ParsedValidatorRules> amp4_ads_rules_;
-  std::unique_ptr<ParsedValidatorRules> amp4_email_rules_;
-  std::unique_ptr<ParsedValidatorRules> amp4_actions_rules_;
 };
 
 namespace {
