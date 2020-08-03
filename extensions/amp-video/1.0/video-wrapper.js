@@ -60,7 +60,7 @@ function getMetadata(player, props) {
  * @return {PreactDef.Renderable}
  */
 export function VideoWrapper({
-  component: Component,
+  component: Component = 'video',
   autoplay = false,
   controls = false,
   noaudio = false,
