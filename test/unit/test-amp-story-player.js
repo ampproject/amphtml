@@ -219,15 +219,19 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     await manager.loadPlayers();
     await nextTick();
 
+    const navigationSpy = env.sandbox.spy();
+    playerEl.addEventListener('navigation', navigationSpy);
+
     const fakeData = {next: true};
     fireHandler['selectDocument']('selectDocument', fakeData);
 
-    const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-
-    // TODO(#29278): replace with navigation API once ready.
-    await afterRenderPromise();
-    expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-    expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+    expect(navigationSpy).to.have.been.calledWithMatch({
+      type: 'navigation',
+      detail: {
+        index: 1,
+        remaining: 0,
+      },
+    });
   });
 
   it('should navigate when swiping', async () => {
@@ -235,14 +239,18 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     await manager.loadPlayers();
     await nextTick();
 
+    const navigationSpy = env.sandbox.spy();
+    playerEl.addEventListener('navigation', navigationSpy);
+
     swipeLeft();
 
-    const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-
-    // TODO(#29278): replace with navigation API once ready.
-    await afterRenderPromise();
-    expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-    expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+    expect(navigationSpy).to.have.been.calledWithMatch({
+      type: 'navigation',
+      detail: {
+        index: 1,
+        remaining: 2,
+      },
+    });
   });
 
   it('should not navigate when swiping last story', async () => {
@@ -250,16 +258,14 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     await manager.loadPlayers();
     await nextTick();
 
+    const navigationSpy = env.sandbox.spy();
+    playerEl.addEventListener('navigation', navigationSpy);
+
     swipeLeft();
     swipeLeft();
     swipeLeft();
 
-    const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-
-    // TODO(#29278): replace with navigation API once ready.
-    await afterRenderPromise();
-    expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-    expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+    expect(navigationSpy).to.have.been.calledOnce;
   });
 
   describe('Cache URLs', () => {
