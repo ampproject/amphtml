@@ -28,6 +28,8 @@ import {htmlFor} from '../../../src/static-template';
 /** @const {string} */
 const TAG = 'AMP_STORY_360';
 
+let gyroscopeControls = false;
+
 /**
  * Generates the template for the permission button.
  *
@@ -292,6 +294,27 @@ export class AmpStory360 extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
+  onDeviceOrientation(ev) {
+    let rot = Matrix.identity(3);
+    rot = Matrix.mul(
+      3,
+      Matrix.rotation(3, 1, 0, (Math.PI / 180.0) * ev.alpha),
+      rot
+    );
+    rot = Matrix.mul(
+      3,
+      Matrix.rotation(3, 2, 1, (Math.PI / 180.0) * ev.beta),
+      rot
+    );
+    rot = Matrix.mul(
+      3,
+      Matrix.rotation(3, 0, 2, (Math.PI / 180.0) * ev.gamma),
+      rot
+    );
+    this.renderer_.setCamera(rot, 1);
+    this.renderer_.render(true);
+  }
+
   requestPermissions() {
     const dialogBox = buildPermissionDialogBoxTemplate(this.element);
     this.element.appendChild(dialogBox);
@@ -308,7 +331,10 @@ export class AmpStory360 extends AMP.BaseElement {
         .then((permissionState) => {
           alert(permissionState);
           if (permissionState === 'granted') {
-            window.addEventListener('deviceorientation', () => {});
+            gyroscopeControls = true;
+            window.addEventListener('deviceorientation', (e) => {
+              this.onDeviceOrientation(e);
+            });
           }
         })
         .catch(alert.error);
@@ -397,7 +423,12 @@ export class AmpStory360 extends AMP.BaseElement {
         return;
       }
       const nextOrientation = this.animation_.getNextOrientation();
-      if (nextOrientation) {
+      if (gyroscopeControls) {
+        this.win.requestAnimationFrame(() => {
+          this.renderer_.render(true);
+          loop();
+        });
+      } else if (nextOrientation) {
         // mutateElement causes inaccurate animation speed here, so we use rAF.
         this.win.requestAnimationFrame(() => {
           this.renderer_.setCamera(
