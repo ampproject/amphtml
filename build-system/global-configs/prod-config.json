@@ -21,7 +21,7 @@
   "chunked-amp": 1,
   "doubleclickSraExp": 0.01,
   "doubleclickSraReportExcludedBlock": 0.1,
-  "expand-json-targeting": 0.01,
+  "expand-json-targeting": 0.1,
   "fix-inconsistent-responsive-height-selection": 0,
   "fixed-elements-in-lightbox": 1,
   "flexAdSlots": 0.05,
@@ -37,5 +37,5 @@
   "analytics-chunks": 1,
   "sticky-ad-padding-bottom": 0.05,
   "render-on-idle-fix": 0.02,
-  "ad-adsense-gam-round-params": 0.02
+  "ad-adsense-gam-round-params": 0.2
 }
