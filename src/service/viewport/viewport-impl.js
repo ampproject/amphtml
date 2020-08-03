@@ -142,7 +142,7 @@ export class ViewportImpl {
     /** @private {?FixedLayer} */
     this.fixedLayer_ = null;
 
-    if (!MOVE_FIXED_LAYER) {
+    if (!MOVE_FIXED_LAYER && !IS_SXG) {
       this.createFixedLayer(FixedLayer);
     }
 
