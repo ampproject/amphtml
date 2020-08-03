@@ -920,8 +920,8 @@ describe('experiment branch tests', () => {
 });
 
 describes.fakeWin('getActiveExperimentBranches', {}, (env) => {
-  it('should return null if no active branches', () => {
-    expect(getActiveExperimentBranches(env.win)).to.be.null;
+  it('should return an empty object if no active branches', () => {
+    expect(getActiveExperimentBranches(env.win)).to.eql({});
   });
 
   it('should return obj containing all branches', () => {
