@@ -23,12 +23,16 @@ var VideoPlayerDef;
 
 /**
  * @typedef {{
- *   component: !VideoPlayerDef,
+ *   component: (!VideoPlayerDef|undefined),
+ *   children: (?PreactDef.Renderable|undefined),
  *   autoplay: (boolean|undefined),
  *   controls: (boolean|undefined),
  *   noaudio: (boolean|undefined),
  *   mediasession: (boolean|undefined)
- *   children: (?PreactDef.Renderable|undefined),
+ *   title: (string|undefined),
+ *   artist: (string|undefined),
+ *   album: (string|undefined),
+ *   artwork: (string|undefined),
  * }}
  */
 var VideoWrapperProps;

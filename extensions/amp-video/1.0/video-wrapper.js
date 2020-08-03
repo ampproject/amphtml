@@ -19,7 +19,9 @@ import {ContainWrapper} from '../../../src/preact/component';
 import {Deferred} from '../../../src/utils/promise';
 import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
 import {cssText as autoplayCss} from '../../../build/video-autoplay.css';
+import {dict} from '../../../src/utils/object';
 import {fillContentOverlay} from './video-wrapper.css';
+import {once} from '../../../src/utils/function';
 import {
   parseFavicon,
   parseOgImage,
@@ -30,19 +32,20 @@ import {useEffect, useMemo, useRef, useState} from '../../../src/preact';
 import {useMountEffect, useResourcesNotify} from '../../../src/preact/utils';
 
 /**
- * @param {{getMetadata: (function():!Object|undefined)}} player
+ * @param {?{getMetadata: (function():!Object|undefined)}} player
  * @param {!VideoWrapperProps} props
- * @return {!Object};
+ * @return {!JsonObject}
  */
 function getMetadata(player, props) {
-  const metadata = player.getMetadata
-    ? player.getMetadata()
-    : {
-        title: props.title || '',
-        artist: props.artist || '',
-        album: props.album || '',
-        artwork: [{src: props.artwork || props.poster || ''}],
-      };
+  const metadata =
+    player && player.getMetadata
+      ? player.getMetadata()
+      : dict({
+          'title': props.title || '',
+          'artist': props.artist || '',
+          'album': props.album || '',
+          'artwork': [{'src': props.artwork || props.poster || ''}],
+        });
 
   metadata.title = metadata.title || props['aria-label'] || document.title;
 
@@ -65,8 +68,7 @@ export function VideoWrapper({
   controls = false,
   noaudio = false,
   mediasession = true,
-  'class': className,
-  style,
+  'aria-label': ariaLabel,
   children,
   ...rest
 }) {
@@ -108,31 +110,28 @@ export function VideoWrapper({
 
   return (
     <ContainWrapper
+      {...rest}
       contentRef={wrapperRef}
-      class={className}
-      style={style}
       size={true}
       layout={true}
       paint={true}
     >
       <Component
         {...rest}
+        aria-label={ariaLabel}
         ref={playerRef}
         muted={muted}
         controls={controls && (!autoplay || userInteracted)}
         onCanPlay={readyDeferred.resolve}
         onLoadedMetadata={() => {
           if (mediasession) {
-            setMetadata(getMetadata(playerRef.current, rest));
+            readyDeferred.promise.then(() => {
+              setMetadata(getMetadata(playerRef.current, rest));
+            });
           }
         }}
         onPlaying={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
-        style={{
-          'position': 'relative',
-          'width': '100%',
-          'height': '100%',
-        }}
       >
         {children}
       </Component>
@@ -188,7 +187,14 @@ function Autoplay({
 
   return (
     <>
-      {displayIcon && <AutoplayIcon playing={playing} />}
+      {displayIcon && (
+        <div
+          class={`amp-video-eq ${playing ? `amp-video-eq-play` : ''}`}
+          style={{display: 'flex'}}
+        >
+          <AutoplayIconContent />
+        </div>
+      )}
 
       {displayOverlay && (
         <div
@@ -206,27 +212,13 @@ function Autoplay({
 }
 
 /**
- * @param {!VideoAutoplayIconProps} props
- * @return {PreactDef.Renderable}
+ * @return {!PreactDef.Renderable}
  */
-function AutoplayIcon({playing}) {
-  const columns = useMemo(
-    () =>
-      [1, 2, 3, 4].map((i) => (
-        <div class="amp-video-eq-col" key={i}>
-          <div class={`amp-video-eq-filler amp-video-eq-${i}-1`}></div>
-          <div class={`amp-video-eq-filler amp-video-eq-${i}-2`}></div>
-        </div>
-      )),
-    []
-  );
-
-  return (
-    <div
-      class={`amp-video-eq ${playing ? `amp-video-eq-play` : ''}`}
-      style={{display: 'flex'}}
-    >
-      {columns}
+const AutoplayIconContent = once(() =>
+  [1, 2, 3, 4].map((i) => (
+    <div class="amp-video-eq-col" key={i}>
+      <div class={`amp-video-eq-filler amp-video-eq-${i}-1`}></div>
+      <div class={`amp-video-eq-filler amp-video-eq-${i}-2`}></div>
     </div>
-  );
-}
+  ))
+);

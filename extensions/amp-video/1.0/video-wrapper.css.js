@@ -20,5 +20,4 @@ export const fillContentOverlay = {
   right: 0,
   bottom: 0,
   top: 0,
-  zIndex: 1,
 };
