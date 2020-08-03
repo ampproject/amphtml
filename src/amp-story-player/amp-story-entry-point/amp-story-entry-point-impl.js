@@ -219,20 +219,37 @@ export class AmpStoryEntryPoint {
 
   /** @private */
   initializeCarouselArrow_() {
-    // check if desktop mode
-    const leftButton = this.doc_.createElement('button');
-    const rightButton = this.doc_.createElement('button');
-    leftButton.classList.add('entry-point-left-arrow');
-    leftButton.classList.add('entry-point-arrow');
-    rightButton.classList.add('entry-point-right-arrow');
-    rightButton.classList.add('entry-point-arrow');
+    const leftButton = this.createCarouselArrow_(true);
+    const rightButton = this.createCarouselArrow_(false);
 
-    const top = this.element_.clientHeight / 2 - 20;
-    setStyle(leftButton, 'top', top);
-    setStyle(rightButton, 'top', top);
-    setStyle(rightButton, 'left', this.element_.clientWidth - 10);
+    this.addScrollingToArrows_(leftButton, rightButton);
+
+    this.rootEl_.append(leftButton);
+    this.rootEl_.append(rightButton);
+  }
+
+
+  /**
+   * Creates a button element.
+   * @param {boolean} isLeft 
+   * @return {Element}
+   * @private
+   */
+  createCarouselArrow_(isLeft) {
+    const button = this.doc_.createElement('button');
+    button.classList.add(isLeft ? 'entry-point-left-arrow' : 'entry-point-right-arrow');
+    button.classList.add('entry-point-arrow');
+    return button;
+  }
+
+  /**
+   * Add ability to scroll to both buttons.
+   * @param {Element} leftButton 
+   * @param {Element} rightButton 
+   * @private
+   */
+  addScrollingToArrows_(leftButton, rightButton) {
     const container = this.rootEl_.querySelector('div.entry-points');
-
     let interval;
 
     rightButton.addEventListener('mousedown', () => {
@@ -252,9 +269,6 @@ export class AmpStoryEntryPoint {
 
     rightButton.addEventListener('mouseup', () => clearInterval(interval));
     leftButton.addEventListener('mouseup', () => clearInterval(interval));
-
-    this.rootEl_.append(leftButton);
-    this.rootEl_.append(rightButton);
   }
 
   /**
