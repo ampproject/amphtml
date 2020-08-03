@@ -230,6 +230,44 @@ window.addEventListener('message', function (event) {
 
 The intersection message would be sent by the parent to the iframe when the iframe moves in or out of the viewport (or is partially visible), when the iframe is scrolled or resized.
 
+## Iframe & Consent Data
+
+Iframes can send a `send-consent-data` message to receive consent data if a CMP is present on their parents page.
+
+_Note: In the following examples, we assume the script is in the created iframe, where `window.parent` is the top window. If the script lives in a nested iframe, change `window.parent` to the top AMP window._
+
+_Example: iframe `send-consent-data` request_
+
+```javascript
+window.parent.postMessage(
+  {
+    sentinel: 'amp',
+    type: 'send-consent-data',
+  },
+  '*'
+);
+```
+
+The iframe can receive the consent data response by listening to the `consent-data` message.
+
+_Example: iframe `send-consent-data` request_
+
+```javascript
+window.addEventListener('message', function (event) {
+  if (
+    event.source != window.parent ||
+    event.origin == window.location.origin ||
+    !event.data ||
+    event.data.sentinel != 'amp' ||
+    event.data.type != 'consent-data'
+  ) {
+    return;
+  }
+  console.log(event.data.consentMetadata);
+  console.log(event.data.consentString);
+});
+```
+
 ## Tracking/analytics iframes
 
 We strongly recommend using [`amp-analytics`](https://amp.dev/documentation/components/amp-analytics) for analytics purposes, because it is significantly more robust, complete and an efficient solution which can be configured for a wide range of analytics vendors.
