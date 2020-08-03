@@ -67,7 +67,9 @@ class AmpKaltura extends AMP.BaseElement {
     setIsMediaComponent(this.element);
 
     this.entryId_ = this.element.getAttribute('data-entryid') || 'default';
-    this.serviceUrl_ = this.element.getAttribute('data-serviceUrl') || 'cdnapisec.kaltura.com';
+
+    this.serviceUrl_ =
+      this.element.getAttribute('data-service-url') || 'cdnapisec.kaltura.com';
   }
 
   /** @override */
@@ -79,9 +81,7 @@ class AmpKaltura extends AMP.BaseElement {
     const iframe = this.element.ownerDocument.createElement('iframe');
     let src = `https://${encodeURIComponent(
       this.serviceUrl_
-    )}/p/${encodeURIComponent(
-      this.partnerId_
-    )}/sp/${encodeURIComponent(
+    )}/p/${encodeURIComponent(this.partnerId_)}/sp/${encodeURIComponent(
       this.partnerId_
     )}00/embedIframeJs/uiconf_id/${encodeURIComponent(
       uiconfId

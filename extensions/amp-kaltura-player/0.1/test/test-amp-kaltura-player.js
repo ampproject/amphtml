@@ -65,15 +65,13 @@ describes.realWin(
       });
     });
 
-    it('renders with serviceUrl', () => {
-      return getKaltura(
-        {
-          'data-serviceUrl': 'front.video.funke.press',
-          'data-partner': '106',
-          'data-entryid': '0_b87xdluw',
-          'data-uiconf': '23464665',
-        }
-      ).then((bc) => {
+    it('renders with service-url', () => {
+      return getKaltura({
+        'data-service-url': 'front.video.funke.press',
+        'data-partner': '106',
+        'data-entryid': '0_b87xdluw',
+        'data-uiconf': '23464665',
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');

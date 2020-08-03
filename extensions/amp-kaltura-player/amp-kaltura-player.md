@@ -32,7 +32,7 @@ Example:
 
 ```html
 <amp-kaltura-player
-  data-serviceUrl="cdnapisec.kaltura.com"
+  data-service-url="cdnapisec.kaltura.com"
   data-uiconf="33502051"
   data-partner="1281471"
   data-entryid="1_3ts1ms9c"
