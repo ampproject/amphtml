@@ -15,10 +15,7 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
-import {useEffect, useMemo, useRef, useState} from '../../../src/preact';
-import {useMountEffect, useResourcesNotify} from '../../../src/preact/utils';
-// Source for this constant is css/video-autoplay.css
+import {ContainWrapper} from '../../../src/preact/component';
 import {Deferred} from '../../../src/utils/promise';
 import {
   EMPTY_METADATA,
@@ -27,8 +24,11 @@ import {
   parseSchemaImage,
   setMediaSession,
 } from '../../../src/mediasession-helper';
+import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
 import {cssText as autoplayCss} from '../../../build/video-autoplay.css';
 import {fillContentOverlay} from './video-wrapper.css';
+import {useEffect, useMemo, useRef, useState} from '../../../src/preact';
+import {useMountEffect, useResourcesNotify} from '../../../src/preact/utils';
 
 /**
  * @param {!VideoWrapperProps} props
@@ -81,9 +81,11 @@ export function VideoWrapper({
   }, [mediasession, playing, metadata, play, pause]);
 
   return (
-    <div
-      ref={wrapperRef}
-      style={{position: 'relative', width: '100%', height: '100%'}}
+    <ContainWrapper
+      contentRef={wrapperRef}
+      size={false}
+      layout={true}
+      paint={true}
     >
       <Component
         {...rest}
@@ -134,7 +136,7 @@ export function VideoWrapper({
           }}
         />
       )}
-    </div>
+    </ContainWrapper>
   );
 }
 
