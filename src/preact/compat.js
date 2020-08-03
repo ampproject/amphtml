@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-amp-script {
-  opacity: 0.7;
-}
+import * as compat from /*OK*/ 'preact/compat';
 
-amp-script.i-amphtml-hydrated {
-  opacity: 1;
-}
-amp-script[nodom] {
-  position: fixed !important;
-  visibility: hidden !important;
-  width: 1px;
-  height: 1px;
+/**
+ * @param {function(JsonObject, {current: (T|null)}):PreactDef.Renderable} fn
+ * @return {PreactDef.Renderable}
+ * @template T
+ */
+export function forwardRef(fn) {
+  return compat.forwardRef(fn);
 }
