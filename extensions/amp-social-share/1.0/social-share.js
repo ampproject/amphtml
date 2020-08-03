@@ -87,25 +87,16 @@ function processChildren(props, size) {
     'color': propsColor,
     'background': propsBackground,
   } = props;
-  const typeConfig =
-    getSocialConfig(type) ||
-    dict({
-      'canCustomize': true,
-    });
 
-  if (typeConfig['canCustomize'] && children) {
+  if (children) {
     return children;
   } else {
+    const typeConfig = getSocialConfig(type) || dict();
     const baseStyle = CSS.BASE_STYLE;
     const iconStyle = dict({
-      'color':
-        typeConfig['canCustomize'] && propsColor
-          ? propsColor
-          : typeConfig['defaultColor'],
+      'color': propsColor || typeConfig['defaultColor'],
       'backgroundColor':
-        typeConfig['canCustomize'] && propsBackground
-          ? propsBackground
-          : typeConfig['defaultBackgroundColor'],
+        propsBackground || typeConfig['defaultBackgroundColor'],
     });
     return (
       <SocialShareIcon
@@ -233,6 +224,7 @@ function getQueryString(endpoint) {
  * this is an Ios device.  Checked for 'mailto:' and 'sms:' protocols which
  * break when opened in _blank on iOS Safari.
  * @return {boolean}
+ * @visibleForTesting
  */
 function isIos() {
   return /** @type {boolean} */ (window &&
