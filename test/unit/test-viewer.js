@@ -660,6 +660,18 @@ describes.sandboxed('Viewer', {}, (env) => {
     it('should become visible on mousedown', eventTest.bind(null, 'mousedown'));
 
     it('should become visible on keydown', eventTest.bind(null, 'keydown'));
+
+    it('should not become visible when not a single doc', () => {
+      env.sandbox.stub(ampdoc, 'isSingleDoc').callsFake(() => false);
+      ampdoc.overrideVisibilityState('prerender');
+
+      viewer = new ViewerImpl(ampdoc);
+
+      expect(ampdoc.getVisibilityState()).to.equal('prerender');
+      expect(events.touchstart).to.be.undefined;
+      expect(events.keydown).to.be.undefined;
+      expect(events.mousedown).to.be.undefined;
+    });
   });
 
   describe('Messaging not embedded', () => {
