@@ -131,6 +131,9 @@ export class AmpIframe extends AMP.BaseElement {
      * @private {boolean}
      */
     this.hasErroredEmbedSize_ = false;
+
+    /** @private {?SubscriptionApi} */
+    this.subscriptionApiConsent_ = null;
   }
 
   /** @override */
@@ -496,7 +499,7 @@ export class AmpIframe extends AMP.BaseElement {
     this.subscriptionApiConsent_ = new SubscriptionApi(
       iframe,
       'send-consent-data',
-      /*opt_is3P*/ undefined,
+      /*opt_is3P*/ false,
       () => {
         this.sendConsentData_();
       }
@@ -564,10 +567,7 @@ export class AmpIframe extends AMP.BaseElement {
       ? getConsentMetadata(this.element, consentPolicyId)
       : Promise.resolve(null);
 
-    this.layoutPromise_ = Promise.all([
-      metadataPromise,
-      consentStringPromise,
-    ]).then((consents) => {
+    Promise.all([metadataPromise, consentStringPromise]).then((consents) => {
       this.subscriptionApiConsent_.send(
         'consent-data',
         dict({
