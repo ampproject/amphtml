@@ -91,17 +91,15 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
   attachContent_(root) {
     this.attachPrompt_(root);
 
-    this.initializePromise_.then(() => {
-      // Localize the answer choice options
-      this.answerChoiceOptions_ = this.answerChoiceOptions_.map((choice) => {
-        return Services.localizationForDoc(this.element).getLocalizedString(
-          LocalizedStringId[`AMP_STORY_QUIZ_ANSWER_CHOICE_${choice}`]
-        );
-      });
-      this.options_.forEach((option, index) =>
-        this.configureOption_(option, index)
+    // Localize the answer choice options
+    this.answerChoiceOptions_ = this.answerChoiceOptions_.map((choice) => {
+      return Services.localizationForDoc(this.element).getLocalizedString(
+        LocalizedStringId[`AMP_STORY_QUIZ_ANSWER_CHOICE_${choice}`]
       );
     });
+    this.options_.forEach((option, index) =>
+      this.configureOption_(option, index)
+    );
   }
 
   /**

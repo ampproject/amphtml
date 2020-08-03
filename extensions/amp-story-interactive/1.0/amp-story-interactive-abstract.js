@@ -223,12 +223,16 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @package
    */
   getOptionSelected() {
+    if (this.options_ == null || this.optionsData_ == null) {
+      return null;
+    }
+    let optionSelected = null;
     this.optionsData_.forEach((option, index) => {
       if (option.selected) {
-        return this.options_[index];
+        optionSelected = this.options_[index];
       }
     });
-    return null;
+    return optionSelected;
   }
 
   /**
