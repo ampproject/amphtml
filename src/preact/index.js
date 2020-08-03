@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as compat from /*OK*/ 'preact/compat';
 import * as hooks from /*OK*/ 'preact/hooks';
 import * as preact from /*OK*/ 'preact';
 
