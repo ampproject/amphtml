@@ -100,10 +100,9 @@ export function VideoWrapper({
   );
 
   useEffect(() => {
-    if (!mediasession || !metadata || !playing) {
-      return;
+    if (mediasession && metadata && playing) {
+      setMediaSession(window, metadata, play, pause);
     }
-    setMediaSession(window, metadata, play, pause);
   }, [mediasession, playing, metadata, play, pause]);
 
   return (
