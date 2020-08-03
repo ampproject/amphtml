@@ -152,7 +152,7 @@ function checkProps(props) {
 
   // Special case when type is 'email'
   if (type === 'email' && !endpoint) {
-    baseEndpoint = `mailto:${params['recipient'] || ''}`;
+    baseEndpoint = `mailto:${(params && params['recipient']) || ''}`;
   }
 
   // Add params to baseEndpoint
