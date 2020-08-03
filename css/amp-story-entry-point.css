@@ -45,9 +45,7 @@ main {
 }
 
 .entry-point {
-  float: left;
-  padding-left: 3px;
-  padding-right: 3px;
+  padding: 0px 3px;
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
 }
 
