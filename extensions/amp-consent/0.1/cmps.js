@@ -48,6 +48,12 @@ CMP_CONFIG['didomi'] = {
   'promptUISrc': 'https://sdk-amp.privacy-center.org/loader.html',
 };
 
+CMP_CONFIG['iubenda'] = {
+  'consentInstanceId': 'iubenda',
+  'checkConsentHref': 'https://cdn.iubenda.com/cs/amp/checkConsent',
+  'promptUISrc': 'https://www.iubenda.com/en/help/22135-cookie-solution-amp',
+};
+
 CMP_CONFIG['sirdata'] = {
   'consentInstanceId': 'sirdata',
   'checkConsentHref': 'https://sddan.mgr.consensu.org/api/v1/public/amp/check',
