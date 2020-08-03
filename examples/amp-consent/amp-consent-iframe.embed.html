@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<body style="background-color:#EEEEEE">
+  <script>
+    window.addEventListener('message', (event) => {
+      if (event.origin !== 'http://localhost:8000') {
+        return;
+      }
+      console.log('message', event);
+      document.getElementById('consent').innerText = JSON.stringify(event.data, null, 2);
+    }, false);
+
+    window.parent.postMessage({
+      sentinel: 'amp',
+      type: 'send-consent-data'
+    }, '*');
+  </script>
+  <pre id="consent"></pre>
+</body>
+</html>

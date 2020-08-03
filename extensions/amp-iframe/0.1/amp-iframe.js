@@ -19,12 +19,8 @@ import {ActionTrust} from '../../../src/action-constants';
 import {IntersectionObserverHostApi} from '../../../src/utils/intersection-observer-polyfill';
 import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
-import {createCustomEvent, getData, listen} from '../../../src/event-helper';
-import {devAssert, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
-import {endsWith, startsWith} from '../../../src/string';
 import {
+  SubscriptionApi,
   isAdLike,
   isPausable,
   listenFor,
@@ -32,6 +28,12 @@ import {
   makePausable,
   setPaused,
 } from '../../../src/iframe-helper';
+import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
+import {createCustomEvent, getData, listen} from '../../../src/event-helper';
+import {devAssert, user, userAssert} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {endsWith, startsWith} from '../../../src/string';
+import {getConsentMetadata, getConsentPolicyInfo} from '../../../src/consent';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isExperimentOn} from '../../../src/experiments';
 import {moveLayoutRect} from '../../../src/layout-rect';
@@ -491,6 +493,15 @@ export class AmpIframe extends AMP.BaseElement {
       listenFor(iframe, 'embed-ready', this.activateIframe_.bind(this));
     }
 
+    this.subscriptionApiConsent_ = new SubscriptionApi(
+      iframe,
+      'send-consent-data',
+      /*opt_is3P*/ undefined,
+      () => {
+        this.sendConsentData_();
+      }
+    );
+
     this.container_.appendChild(iframe);
 
     return this.loadPromise(iframe).then(() => {
@@ -536,6 +547,35 @@ export class AmpIframe extends AMP.BaseElement {
     } else {
       user().warn(TAG_, `Unsupported Pym.js message: ${data}`);
     }
+  }
+
+  /**
+   * Requests consent data from consent module
+   * and forwards information to iframe
+   *
+   * @private
+   */
+  sendConsentData_() {
+    const consentPolicyId = super.getConsentPolicy();
+    const consentStringPromise = consentPolicyId
+      ? getConsentPolicyInfo(this.element, consentPolicyId)
+      : Promise.resolve(null);
+    const metadataPromise = consentPolicyId
+      ? getConsentMetadata(this.element, consentPolicyId)
+      : Promise.resolve(null);
+
+    this.layoutPromise_ = Promise.all([
+      metadataPromise,
+      consentStringPromise,
+    ]).then((consents) => {
+      this.subscriptionApiConsent_.send(
+        'consent-data',
+        dict({
+          'consentMetadata': consents[0],
+          'consentString': consents[1],
+        })
+      );
+    });
   }
 
   /** @override */
