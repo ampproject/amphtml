@@ -68,7 +68,7 @@ export function VideoWrapper({
   controls = false,
   noaudio = false,
   mediasession = true,
-  'class': className,
+  className,
   style,
   children,
   ...rest
@@ -112,7 +112,7 @@ export function VideoWrapper({
   return (
     <ContainWrapper
       contentRef={wrapperRef}
-      class={className}
+      className={className}
       style={style}
       size={true}
       layout={true}
@@ -191,7 +191,7 @@ function Autoplay({
     <>
       {displayIcon && (
         <div
-          class={`amp-video-eq ${playing ? `amp-video-eq-play` : ''}`}
+          className={`amp-video-eq ${playing ? `amp-video-eq-play` : ''}`}
           // Legacy AMP (VideoManager) toggles this icon by a CSS selector.
           // We need display: flex here to override VideoManager's default
           // styling, since we're rendering this only when necessary, e.g.
@@ -224,9 +224,9 @@ function Autoplay({
  */
 const AutoplayIconContent = once(() =>
   [1, 2, 3, 4].map((i) => (
-    <div class="amp-video-eq-col" key={i}>
-      <div class={`amp-video-eq-filler amp-video-eq-${i}-1`}></div>
-      <div class={`amp-video-eq-filler amp-video-eq-${i}-2`}></div>
+    <div className="amp-video-eq-col" key={i}>
+      <div className={`amp-video-eq-filler amp-video-eq-${i}-1`}></div>
+      <div className={`amp-video-eq-filler amp-video-eq-${i}-2`}></div>
     </div>
   ))
 );
