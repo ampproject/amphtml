@@ -19,9 +19,3 @@ main {
     border-radius: 7px;
     height: 100px;
   }
-
-  .circular-entry-point {
-    border-radius: 100%;
-    width: 100px;
-    height: 100px;
-  }
