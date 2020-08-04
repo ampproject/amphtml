@@ -365,10 +365,6 @@ export class AmpStoryPlayer {
             this.onSelectDocument_(data);
           });
 
-          messaging.registerHandler('ampstory:load', () => {
-            this.element_.classList.add('i-amphtml-story-loaded');
-          });
-
           resolve(messaging);
         },
         (err) => {
