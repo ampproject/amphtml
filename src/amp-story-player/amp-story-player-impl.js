@@ -865,7 +865,7 @@ export class AmpStoryPlayer {
   getEncodedLocation_(
     href,
     visibilityState = VisibilityState.INACTIVE,
-    embedMode = null
+    embedMode
   ) {
     const noFragmentUrl = removeFragment(href);
     const originalFragmentString = getFragment(href);
