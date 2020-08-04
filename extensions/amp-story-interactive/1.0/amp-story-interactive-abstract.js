@@ -252,8 +252,18 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   buildCallback(concreteCSS = '') {
     this.loadFonts_();
     this.options_ = this.parseOptions_();
+    this.rootEl_ = this.buildComponent();
     this.adjustGridLayer_();
+    this.rootEl_.classList.add('i-amphtml-story-interactive-container');
+    this.element.classList.add('i-amphtml-story-interactive-component');
     devAssert(this.element.children.length == 0, 'Too many children');
+    createShadowRootWithStyle(
+      this.element,
+      dev().assertElement(this.rootEl_),
+      CSS + concreteCSS
+    );
+
+    // Initialize all the services before proceeding, and update store with state
     return Promise.all([
       Services.storyVariableServiceForOrNull(this.win).then((service) => {
         this.variableService_ = service;
@@ -268,17 +278,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       Services.storyAnalyticsServiceForOrNull(this.win).then((service) => {
         this.analyticsService_ = service;
       }),
-    ]).then(() => {
-      this.rootEl_ = this.buildComponent();
-      this.rootEl_.classList.add('i-amphtml-story-interactive-container');
-      this.element.classList.add('i-amphtml-story-interactive-component');
-      this.initializeListeners_();
-      createShadowRootWithStyle(
-        this.element,
-        dev().assertElement(this.rootEl_),
-        CSS + concreteCSS
-      );
-    });
+    ]);
   }
 
   /**
@@ -376,6 +376,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.initializeListeners_();
     return (this.backendDataPromise_ = this.element.hasAttribute('endpoint')
       ? this.retrieveInteractiveData_()
       : Promise.resolve());
@@ -790,8 +791,9 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    */
   updateStoryStoreState_(option = null) {
     const update = {
-      'option': option != null ? this.options_[option] : null,
-      'interactiveId': this.getInteractiveId_(),
+      option: option != null ? this.options_[option] : null,
+      interactiveId: this.getInteractiveId_(),
+      type: this.interactiveType_,
     };
     this.storeService_.dispatch(Action.ADD_INTERACTIVE_REACT, update);
   }

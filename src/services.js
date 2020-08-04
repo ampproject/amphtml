@@ -554,6 +554,17 @@ export class Services {
   }
 
   /**
+   * @param {!Element} el
+   * @return {!Promise<./service/localization.LocalizationService>}
+   */
+  static localizationServiceForOrNull(el) {
+    return /** @type {!Promise<?./service/localization.LocalizationService>} */ (getServicePromiseForDoc(
+      el,
+      'localization'
+    ));
+  }
+
+  /**
    * @param {!Element} element
    * @return {?./service/localization.LocalizationService}
    */

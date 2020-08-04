@@ -69,7 +69,7 @@ export class AmpStoryInteractivePoll extends AmpStoryInteractive {
 
   /** @override */
   buildCallback() {
-    super.buildCallback(CSS);
+    return super.buildCallback(CSS);
   }
 
   /** @override */

@@ -71,7 +71,7 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
 
   /** @override */
   buildCallback() {
-    super.buildCallback(CSS);
+    return super.buildCallback(CSS);
   }
 
   /** @override */
@@ -92,13 +92,17 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
     this.attachPrompt_(root);
 
     // Localize the answer choice options
-    this.answerChoiceOptions_ = this.answerChoiceOptions_.map((choice) => {
-      return Services.localizationForDoc(this.element).getLocalizedString(
-        LocalizedStringId[`AMP_STORY_QUIZ_ANSWER_CHOICE_${choice}`]
-      );
-    });
-    this.options_.forEach((option, index) =>
-      this.configureOption_(option, index)
+    Services.localizationServiceForOrNull(this.element).then(
+      (localizationService) => {
+        this.answerChoiceOptions_ = this.answerChoiceOptions_.map((choice) => {
+          return localizationService.getLocalizedString(
+            LocalizedStringId[`AMP_STORY_QUIZ_ANSWER_CHOICE_${choice}`]
+          );
+        });
+        this.options_.forEach((option, index) =>
+          this.configureOption_(option, index)
+        );
+      }
     );
   }
 

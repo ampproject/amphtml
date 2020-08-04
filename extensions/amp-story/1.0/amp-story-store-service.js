@@ -78,6 +78,15 @@ export let InteractiveComponentDef;
 
 /**
  * @typedef {{
+ *    option: ?../../amp-story-interactive/1.0/amp-story-interactive-abstract.OptionConfigType,
+ *    interactiveId: string,
+ *    type: ../../amp-story-interactive/1.0/amp-story-interactive-abstract.InteractiveType
+ * }}
+ */
+export let InteractiveReactData;
+
+/**
+ * @typedef {{
  *    canInsertAutomaticAd: boolean,
  *    canShowBookend: boolean,
  *    canShowAudioUi: boolean,
@@ -96,7 +105,7 @@ export let InteractiveComponentDef;
  *    hasSidebarState: boolean,
  *    infoDialogState: boolean,
  *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
- *    interactiveReactState: !Map<string, {option: ?../../amp-story-interactive/1.0/amp-story-interactive-abstract.OptionConfigType, interactiveId: string}>,
+ *    interactiveReactState: !Map<string, !InteractiveReactData>,
  *    mutedState: boolean,
  *    pageAudioState: boolean,
  *    pageHasElementsWithPlaybackState: boolean,
