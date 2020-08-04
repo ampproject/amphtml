@@ -16,8 +16,8 @@
 import * as Preact from '../../../src/preact';
 import {ArrowNext, ArrowPrev} from './arrow';
 import {Scroller} from './scroller';
-import {createRef, toChildArray, useState} from '../../../src/preact';
 import {forwardRef} from '../../../src/preact/compat';
+import {toChildArray, useRef, useState} from '../../../src/preact';
 import {useMountEffect} from '../../../src/preact/utils';
 
 /**
@@ -36,7 +36,7 @@ export function BaseCarousel({
   const childrenArray = toChildArray(children);
   const {length} = childrenArray;
   const [curSlide, setCurSlide] = useState(0);
-  const scrollRef = createRef();
+  const scrollRef = useRef(null);
   const advance = (dir) => {
     const container = scrollRef.current;
     // Modify scrollLeft is preferred to `setCurSlide` to enable smooth scroll.
