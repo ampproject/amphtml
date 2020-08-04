@@ -377,7 +377,7 @@ export function getActiveExperimentBranches(win) {
   if (!topWin.__AMP_EXPERIMENT_BRANCHES) {
     topWin.__AMP_EXPERIMENT_BRANCHES = {};
   }
-  return topWin.__AMP_EXPERIMENT_BRANCHES;
+  return {...topWin.__AMP_EXPERIMENT_BRANCHES};
 }
 
 /**
