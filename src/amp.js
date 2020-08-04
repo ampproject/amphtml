@@ -93,7 +93,7 @@ function bootstrap(ampdoc, perf) {
   startupChunk(
     self.document,
     function final() {
-      if(!IS_SXG){
+      if (!IS_SXG) {
         installPullToRefreshBlocker(self);
       }
       installAutoLightboxExtension(ampdoc);

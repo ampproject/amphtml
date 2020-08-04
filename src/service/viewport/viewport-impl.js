@@ -1169,7 +1169,8 @@ function createViewport(ampdoc) {
   let binding;
   if (
     ampdoc.isSingleDoc() &&
-    getViewportType(win, viewer) == ViewportType.NATURAL_IOS_EMBED
+    getViewportType(win, viewer) == ViewportType.NATURAL_IOS_EMBED &&
+    !IS_SXG
   ) {
     binding = new ViewportBindingIosEmbedWrapper_(win);
   } else {
