@@ -53,8 +53,8 @@ export function ScrollerWithRef(
     // Expose "advance" action for navigating between slides by the given quantity of slides.
     advance: (by) => {
       const container = containerRef.current;
-      // Modify scrollLeft is preferred to `setCurSlide` to enable smooth scroll.
-      // Note: `setCurSlide` will still be called on debounce by scroll handler.
+      // Modify scrollLeft is preferred to `setRestingIndex` to enable smooth scroll.
+      // Note: `setRestingIndex` will still be called on debounce by scroll handler.
       container./* OK */ scrollLeft += container./* OK */ offsetWidth * by;
     },
   }));
