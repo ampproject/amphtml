@@ -574,7 +574,7 @@ export class AmpScriptService {
         throw user().createError(
           TAG,
           `Script hash not found. ${debugId} must have "sha384-${hash}" in meta[name="amp-script-src"].` +
-            ' See https://amp.dev/documentation/components/amp-script/#security-features.'
+            ' See https://amp.dev/documentation/components/amp-script/#script-hash.'
         );
       }
     });
