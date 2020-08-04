@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {Action, AmpStoryStoreService} from '../amp-story-store-service';
+import {
+  Action,
+  AmpStoryStoreService,
+} from '../../../amp-story/1.0/amp-story-store-service';
 import {AmpStoryInteractiveResults} from '../amp-story-interactive-results';
 import {addConfigToInteractive} from './test-amp-story-interactive';
 import {registerServiceBuilder} from '../../../../src/service';
