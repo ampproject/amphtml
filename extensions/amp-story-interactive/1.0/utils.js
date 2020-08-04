@@ -28,11 +28,11 @@ export const updateInteractiveStoreState = (storeService, interactive) => {
 };
 
 /** @private Whether ids are deduplicated or not */
-const deduplicatedIds = false;
+let deduplicatedIds = false;
 
 /**
  * Deduplicates the interactive Ids, only called once
- * @param {Element} doc
+ * @param {!Document} doc
  */
 export const deduplicateInteractiveIds = (doc) => {
   if (deduplicatedIds) {
@@ -42,21 +42,18 @@ export const deduplicateInteractiveIds = (doc) => {
   const interactiveEls = doc.querySelectorAll(
     'amp-story-interactive-binary-poll, amp-story-interactive-poll, amp-story-interactive-quiz'
   );
-  const interactiveIds = toArray(interactiveEls).map(
-    (el) => el.id || 'interactive-id'
-  );
   const idsMap = map();
-  for (let i = 0; i < interactiveIds.length; i++) {
-    if (idsMap[interactiveIds[i]] === undefined) {
-      idsMap[interactiveIds[i]] = 0;
+  for (let i = 0; i < interactiveEls.length; i++) {
+    const currId = interactiveEls[i].id || 'interactive-id';
+    if (idsMap[currId] === undefined) {
+      idsMap[currId] = 0;
     } else {
       user().error(
         'AMP-STORY-INTERACTIVE',
-        `Duplicate interactive ID ${interactiveIds[i]}`
+        `Duplicate interactive ID ${currId}`
       );
-      const newId = `${interactiveIds[i]}__${++idsMap[interactiveIds[i]]}`;
+      const newId = `${currId}__${++idsMap[currId]}`;
       interactiveEls[i].id = newId;
-      interactiveIds[i] = newId;
     }
   }
 };
