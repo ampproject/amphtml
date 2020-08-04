@@ -638,7 +638,9 @@ export class AmpAnalytics extends AMP.BaseElement {
       }
     }
     this.checkTriggerEnabled_(trigger, event).then((enabled) => {
-      if (!enabled) {
+      const isConnected =
+        this.element.ownerDocument && this.element.ownerDocument.defaultView;
+      if (!enabled || !isConnected) {
         return;
       }
       this.expandAndSendRequest_(request, trigger, event);
