@@ -202,9 +202,8 @@ function Autoplay({
           // We need display: flex here to override VideoManager's default
           // styling, since we're rendering this only when necessary, e.g.
           // visible.
-          // TODO(alanorozco): We can probably simplify this by normalizing
-          // tree presence in legacy AMP (or if we no longer need the
-          // VideoManager).
+          // TODO(alanorozco): We can simplify by also removing/adding element
+          // in legacy AMP (or if we no longer need the VideoManager).
           style={{'display': 'flex'}}
         >
           <AutoplayIconContent />
