@@ -16,6 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {VideoWrapper} from '../video-wrapper';
+import {forwardRef} from '../../../../src/preact/compat';
 import {mount} from 'enzyme';
 import {omit} from '../../../../src/utils/object';
 
@@ -33,7 +34,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
     'artwork': [{'src': 'http://test/image.jpg'}],
   };
 
-  const TestPlayer = Preact.forwardRef(({}, ref) => {
+  const TestPlayer = forwardRef(({}, ref) => {
     Preact.useImperativeHandle(ref, () => ({
       play,
       pause,
