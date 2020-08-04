@@ -14,9 +14,22 @@
  * limitations under the License.
  */
 
-export {contextProp} from './prop';
-
 import {ContextNode} from './node';
+
+export {contextProp} from './prop';
+export {withMetaData} from './component-meta';
+export {
+  setComponent,
+  removeComponent,
+  subscribe,
+  unsubscribe,
+} from './component-install';
+export {
+  useRef,
+  useMemo,
+  useDisposableMemo,
+  useSyncEffect,
+} from './component-hooks';
 
 /**
  * Direct slot assignment. Works the same way as shadow slots, but does not
