@@ -586,7 +586,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       openPageAttachment();
 
-      expect(readySpy).to.have.been.calledOnce;
+      expect(pageAttachmentSpy).to.have.been.calledOnce;
     });
 
     it('should fire page attachment close event once', async () => {
@@ -599,7 +599,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       closePageAttachment();
 
-      expect(readySpy).to.have.been.calledOnce;
+      expect(pageAttachmentSpy).to.have.been.calledOnce;
     });
 
     it('navigate forward given a positive number in range', async () => {
