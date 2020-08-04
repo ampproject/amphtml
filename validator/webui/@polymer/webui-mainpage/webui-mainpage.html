@@ -80,23 +80,6 @@
       '\x3C/body>\n' +
       '\x3C/html>\n';
 
-    var minimumValidActions =
-      '\x3C!--\n' +
-      '     This is the minimum valid AMP HTML actions document. Type away\n' +
-      '     here and the AMP Validator will re-check your document on the fly.\n' +
-      '-->\n' +
-      '\x3C!doctype html>\n' +
-      '\x3Chtml ⚡ actions>\n' +
-      '\x3Chead>\n' +
-      '  \x3Cmeta charset="utf-8">\n' +
-      '  \x3Clink rel="canonical" href="self.html">\n' +
-      '  \x3Cmeta name="viewport" content="width=device-width,minimum-scale=1">\n' +
-      '  \x3Cstyle amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}\x3C/style>\x3Cnoscript>\x3Cstyle amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}\x3C/style>\x3C/noscript>\n' +
-      '  \x3Cscript async src="https://cdn.ampproject.org/v0.js">\x3C/script>\n' +
-      '\x3C/head>\n' +
-      '\x3Cbody>Hello, AMP world.\x3C/body>\n' +
-      '\x3C/html>\n';
-
     Polymer({
       is: 'webui-mainpage',
       ready: function() {
@@ -250,8 +233,7 @@
             params['htmlFormat'] = 'AMP4ADS';
             setLocationHashParams(params);
             if (editorValue === minimumValidAmp ||
-                editorValue === minimumValidAmp4Email ||
-                editorValue === minimumValidActions) {
+                editorValue === minimumValidAmp4Email) {
               editor.setEditorValue(minimumValidAmp4Ads);
             } else {
               refreshEditorAndErrors();
@@ -261,28 +243,15 @@
             params['htmlFormat'] = 'AMP4EMAIL';
             setLocationHashParams(params);
             if (editorValue === minimumValidAmp ||
-                editorValue === minimumValidAmp4Ads ||
-                editorValue === minimumValidActions) {
+              editorValue === minimumValidAmp4Ads) {
               editor.setEditorValue(minimumValidAmp4Email);
-            } else {
-              refreshEditorAndErrors();
-            }
-          } else if (e.detail.htmlFormat === 'ACTIONS') {
-            var params = getLocationHashParams();
-            params['htmlFormat'] = 'ACTIONS';
-            setLocationHashParams(params);
-            if (editorValue === minimumValidAmp ||
-                editorValue === minimumValidAmp4Ads ||
-                editorValue === minimumValidAmp4Email) {
-              editor.setEditorValue(minimumValidActions);
             } else {
               refreshEditorAndErrors();
             }
           } else {
             removeParamFromLocationHashParams('htmlFormat');
             if (editorValue === minimumValidAmp4Ads ||
-                editorValue === minimumValidAmp4Email ||
-                editorValue === minimumValidActions) {
+                editorValue === minimumValidAmp4Email) {
               editor.setEditorValue(minimumValidAmp);
             } else {
               refreshEditorAndErrors();
@@ -312,10 +281,6 @@
                    params['htmlFormat'] === 'AMP4EMAIL' ) {
           urlForm.setHtmlFormat('AMP4EMAIL');
           editor.setEditorValue(minimumValidAmp4Email);
-        } else if (params.hasOwnProperty('htmlFormat') &&
-                   params['htmlFormat'] === 'ACTIONS' ) {
-          urlForm.setHtmlFormat('ACTIONS');
-          editor.setEditorValue(minimumValidActions);
         } else {
           urlForm.setHtmlFormat('AMP');
           editor.setEditorValue(minimumValidAmp);
