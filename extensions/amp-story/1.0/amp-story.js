@@ -1085,7 +1085,6 @@ export class AmpStory extends AMP.BaseElement {
     );
 
     backButton.classList.add('i-amphtml-story-screen-reader-back-button');
-    backButton.setAttribute('role', 'button');
     label && backButton.setAttribute('aria-label', label);
     this.mutateElement(() => {
       this.element.appendChild(backButton);
