@@ -37,14 +37,6 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
   const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
 
-  function afterRenderPromise() {
-    return new Promise((resolve) => {
-      requestAnimationFrame(() => {
-        setTimeout(resolve);
-      });
-    });
-  }
-
   function buildStoryPlayer(
     numStories = 1,
     url = DEFAULT_CACHE_URL,
@@ -62,10 +54,6 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     }
     win.document.body.appendChild(playerEl);
     manager = new AmpStoryComponentManager(win);
-
-    env.sandbox
-      .stub(Messaging, 'waitForHandshakeFromDocument')
-      .resolves(fakeMessaging);
   }
 
   function swipeLeft() {
@@ -90,6 +78,16 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     fireHandler['touchend']('touchend', touchEndEvent);
   }
 
+  function openPageAttachment() {
+    const openEvent = {state: 'PAGE_ATTACHMENT_STATE', value: true};
+    fireHandler['documentStateUpdate']('documentStateUpdate', openEvent);
+  }
+
+  function closePageAttachment() {
+    const closeEvent = {state: 'PAGE_ATTACHMENT_STATE', value: false};
+    fireHandler['documentStateUpdate']('documentStateUpdate', closeEvent);
+  }
+
   beforeEach(() => {
     win = env.win;
     fakeMessaging = {
@@ -101,6 +99,9 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       },
     };
     messagingMock = env.sandbox.mock(fakeMessaging);
+    env.sandbox
+      .stub(Messaging, 'waitForHandshakeFromDocument')
+      .resolves(fakeMessaging);
   });
 
   afterEach(() => {
@@ -208,6 +209,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     messagingMock.expects('registerHandler').withArgs('touchstart');
     messagingMock.expects('registerHandler').withArgs('touchmove');
     messagingMock.expects('registerHandler').withArgs('touchend');
+    messagingMock.expects('registerHandler').withArgs('documentStateUpdate');
     messagingMock.expects('setDefaultHandler');
 
     await manager.loadPlayers();
@@ -219,15 +221,19 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     await manager.loadPlayers();
     await nextTick();
 
+    const navigationSpy = env.sandbox.spy();
+    playerEl.addEventListener('navigation', navigationSpy);
+
     const fakeData = {next: true};
     fireHandler['selectDocument']('selectDocument', fakeData);
 
-    const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-
-    // TODO(#29278): replace with navigation API once ready.
-    await afterRenderPromise();
-    expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-    expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+    expect(navigationSpy).to.have.been.calledWithMatch({
+      type: 'navigation',
+      detail: {
+        index: 1,
+        remaining: 0,
+      },
+    });
   });
 
   it('should navigate when swiping', async () => {
@@ -235,14 +241,18 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     await manager.loadPlayers();
     await nextTick();
 
+    const navigationSpy = env.sandbox.spy();
+    playerEl.addEventListener('navigation', navigationSpy);
+
     swipeLeft();
 
-    const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-
-    // TODO(#29278): replace with navigation API once ready.
-    await afterRenderPromise();
-    expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-    expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+    expect(navigationSpy).to.have.been.calledWithMatch({
+      type: 'navigation',
+      detail: {
+        index: 1,
+        remaining: 2,
+      },
+    });
   });
 
   it('should not navigate when swiping last story', async () => {
@@ -250,16 +260,14 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     await manager.loadPlayers();
     await nextTick();
 
+    const navigationSpy = env.sandbox.spy();
+    playerEl.addEventListener('navigation', navigationSpy);
+
     swipeLeft();
     swipeLeft();
     swipeLeft();
 
-    const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-
-    // TODO(#29278): replace with navigation API once ready.
-    await afterRenderPromise();
-    expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-    expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+    expect(navigationSpy).to.have.been.calledOnce;
   });
 
   describe('Cache URLs', () => {
@@ -475,6 +483,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('pauses programatically', async () => {
       buildStoryPlayer();
       await manager.loadPlayers();
+      messagingMock.expects('sendRequest');
 
       playerEl.pause();
 
@@ -486,6 +495,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('plays programatically', async () => {
       buildStoryPlayer();
       await manager.loadPlayers();
+      messagingMock.expects('sendRequest');
 
       playerEl.play();
 
@@ -497,6 +507,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('calling mute should set story muted state to true', async () => {
       buildStoryPlayer();
       await manager.loadPlayers();
+      messagingMock.expects('sendRequest');
 
       await playerEl.mute();
 
@@ -508,6 +519,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('calling unmute should set the story muted state to false', async () => {
       buildStoryPlayer();
       await manager.loadPlayers();
+      messagingMock.expects('sendRequest');
 
       await playerEl.unmute();
 
@@ -609,6 +621,71 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       expect(readySpy).to.have.been.calledOnce;
     });
 
+    it('get page attachment state should send message', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+
+      await playerEl.getStoryState('page-attachment');
+
+      messagingMock.expects('sendRequest');
+
+      messagingMock
+        .expects('sendRequest')
+        .withArgs('getDocumentState', {state: 'PAGE_ATTACHMENT_STATE'});
+    });
+
+    it('should display button when page attachment is closed', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      playerEl.setAttribute('exit-control', 'back-button');
+      appendStoriesToPlayer(playerEl, 1);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+      await player.load();
+
+      expect(
+        playerEl.shadowRoot.querySelector('button.amp-story-player-hide-button')
+      ).to.not.exist;
+    });
+
+    it('should hide button when page attachment is open', async () => {
+      buildStoryPlayer();
+      playerEl.setAttribute('exit-control', 'back-button');
+      await manager.loadPlayers();
+      await nextTick();
+
+      openPageAttachment();
+
+      expect(
+        playerEl.shadowRoot.querySelector('button.amp-story-player-hide-button')
+      ).to.exist;
+    });
+
+    it('should fire page attachment open event once', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+      await nextTick();
+
+      const pageAttachmentSpy = env.sandbox.spy();
+      playerEl.addEventListener('page-attachment-open', pageAttachmentSpy);
+
+      openPageAttachment();
+
+      expect(pageAttachmentSpy).to.have.been.calledOnce;
+    });
+
+    it('should fire page attachment close event once', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+      await nextTick();
+
+      const pageAttachmentSpy = env.sandbox.spy();
+      playerEl.addEventListener('page-attachment-close', pageAttachmentSpy);
+
+      closePageAttachment();
+
+      expect(pageAttachmentSpy).to.have.been.calledOnce;
+    });
+
     it('navigate forward given a positive number in range', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
@@ -618,13 +695,18 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
       await nextTick();
 
+      const navigationSpy = env.sandbox.spy();
+      playerEl.addEventListener('navigation', navigationSpy);
+
       player.go(2);
 
-      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-      await afterRenderPromise();
-      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
-      expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('1');
+      expect(navigationSpy).to.have.been.calledWithMatch({
+        type: 'navigation',
+        detail: {
+          index: 2,
+          remaining: 2,
+        },
+      });
     });
 
     it('navigate backward given a negative number in range', async () => {
@@ -636,14 +718,19 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
       await nextTick();
 
+      const navigationSpy = env.sandbox.spy();
+      playerEl.addEventListener('navigation', navigationSpy);
+
       player.go(3);
       player.go(-1);
 
-      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-      await afterRenderPromise();
-      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
-      expect(iframes[2].getAttribute('i-amphtml-iframe-position')).to.eql('1');
+      expect(navigationSpy).to.have.been.calledWithMatch({
+        type: 'navigation',
+        detail: {
+          index: 2,
+          remaining: 2,
+        },
+      });
     });
 
     it('not navigate given zero', async () => {
@@ -655,18 +742,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
       await nextTick();
 
-      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-
-      const iframePosition = iframes[0].getAttribute(
-        'i-amphtml-iframe-position'
-      );
-
+      const navigationSpy = env.sandbox.spy();
+      playerEl.addEventListener('navigation', navigationSpy);
       player.go(0);
-
-      await afterRenderPromise();
-      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql(
-        iframePosition
-      );
+      expect(navigationSpy).to.have.not.been.called;
     });
 
     it('go should throw when positive number is out of story range', async () => {
@@ -691,58 +770,101 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       return expect(() => player.go(-1)).to.throw('Out of Story range.');
     });
 
-    it('signals when player changed story using next method', async () => {
+    it('takes to first story when swiping on the last one with circular wrapping', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
+      playerEl.setAttribute('enable-circular-wrapping', '');
 
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
+      await nextTick();
 
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('navigation', navigationSpy);
-      player.next_();
-      expect(navigationSpy.firstCall.args[0].type).to.eql('navigation');
-      expect(navigationSpy.firstCall.args[0].detail).to.eql({
-        index: 1,
-        remaining: 3,
+
+      player.go(4);
+      swipeLeft();
+
+      expect(navigationSpy).to.have.been.calledWithMatch({
+        type: 'navigation',
+        detail: {
+          index: 0,
+          remaining: 4,
+        },
       });
     });
 
-    it('signals when player changed story using previous method', async () => {
+    it('takes to last story when swiping on the first one with circular wrapping', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
+      playerEl.setAttribute('enable-circular-wrapping', '');
 
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
+      await nextTick();
 
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('navigation', navigationSpy);
-      player.next_();
-      player.previous_();
-      expect(navigationSpy.secondCall.args[0].type).to.eql('navigation');
-      expect(navigationSpy.secondCall.args[0].detail).to.eql({
-        index: 0,
-        remaining: 4,
+
+      swipeRight();
+
+      expect(navigationSpy).to.have.been.calledWithMatch({
+        type: 'navigation',
+        detail: {
+          index: 4,
+          remaining: 0,
+        },
       });
     });
 
-    it('signals when player changed story using go method', async () => {
+    it('navigate to first story when last story is finished', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       appendStoriesToPlayer(playerEl, 5);
+      playerEl.setAttribute('enable-circular-wrapping', '');
 
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
+      await nextTick();
 
       const navigationSpy = env.sandbox.spy();
       playerEl.addEventListener('navigation', navigationSpy);
+
+      player.go(4);
       player.go(1);
-      expect(navigationSpy.firstCall.args[0].type).to.eql('navigation');
-      expect(navigationSpy.firstCall.args[0].detail).to.eql({
-        index: 1,
-        remaining: 3,
+
+      expect(navigationSpy).to.have.been.calledWithMatch({
+        type: 'navigation',
+        detail: {
+          index: 0,
+          remaining: 4,
+        },
+      });
+    });
+
+    it('navigate to last story when first story is requested to go back', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 5);
+      playerEl.setAttribute('enable-circular-wrapping', '');
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      const navigationSpy = env.sandbox.spy();
+      playerEl.addEventListener('navigation', navigationSpy);
+
+      player.go(-1);
+
+      expect(navigationSpy).to.have.been.calledWithMatch({
+        type: 'navigation',
+        detail: {
+          index: 4,
+          remaining: 0,
+        },
       });
     });
   });

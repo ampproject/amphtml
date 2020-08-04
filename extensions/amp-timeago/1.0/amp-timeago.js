@@ -47,9 +47,12 @@ AmpTimeago['Component'] = Timeago;
 AmpTimeago['passthrough'] = true;
 
 /** @override */
+AmpTimeago['layoutSizeDefined'] = true;
+
+/** @override */
 AmpTimeago['props'] = {
   'datetime': {attr: 'datetime'},
-  'locale': {attr: 'locale'},
+  'locale': {attr: 'locale', default: 'en'},
   'cutoff': {attr: 'cutoff', type: 'number'},
 };
 

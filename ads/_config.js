@@ -227,8 +227,13 @@ const adConfig = jsonConfiguration({
 
   'aduptech': {
     prefetch: 'https://s.d.adup-tech.com/jsapi',
-    preconnect: ['https://d.adup-tech.com', 'https://m.adup-tech.com'],
+    preconnect: [
+      'https://d.adup-tech.com',
+      'https://m.adup-tech.com',
+      'https://v.adup-tech.com',
+    ],
     renderStartImplemented: true,
+    consentHandlingOverride: true,
   },
 
   'adventive': {
@@ -1053,7 +1058,6 @@ const adConfig = jsonConfiguration({
   },
 
   'springAds': {
-    prefetch: 'https://www.asadcdn.com/adlib/adlib_seq.js',
     preconnect: ['https://ib.adnxs.com'],
     renderStartImplemented: true,
   },

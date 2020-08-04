@@ -15,11 +15,9 @@
  */
 
 import {Services} from '../../../src/services';
-import {getMode} from '../../../src/mode';
-import {includes} from '../../../src/string';
 import {map} from '../../../src/utils/object';
 import {parseExtensionUrl} from '../../../src/service/extension-location';
-import {removeElement} from '../../../src/dom';
+import {removeElement, rootNodeFor} from '../../../src/dom';
 import {urls} from '../../../src/config';
 
 /**
@@ -90,6 +88,17 @@ export function processHead(win, adElement, head) {
     return null;
   }
 
+  const root = rootNodeFor(head);
+  const htmlTag = root.documentElement;
+  if (
+    !htmlTag ||
+    (!htmlTag.hasAttribute('amp4ads') &&
+      !htmlTag.hasAttribute('⚡️4ads') &&
+      !htmlTag.hasAttribute('⚡4ads')) // Unicode weirdness.
+  ) {
+    return null;
+  }
+
   const extensionService = Services.extensionsFor(win);
   const urlService = Services.urlForDoc(adElement);
   const extensions = [];
@@ -156,12 +165,7 @@ function handleScript(extensions, script) {
   }
 
   const {src} = script;
-  const isTesting = getMode().test || getMode().localDev;
-  if (
-    EXTENSION_URL_PREFIX.test(src) ||
-    // Integration tests point to local files.
-    (isTesting && includes(src, '/dist/'))
-  ) {
+  if (EXTENSION_URL_PREFIX.test(src)) {
     const extensionInfo = parseExtensionUrl(src);
     if (EXTENSION_ALLOWLIST[extensionInfo.extensionId]) {
       extensions.push(extensionInfo);

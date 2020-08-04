@@ -55,7 +55,7 @@ async function vendorConfigs(opt_options) {
 
   const startTime = Date.now();
 
-  return toPromise(
+  await toPromise(
     gulp
       .src(srcPath)
       .pipe(gulpif(options.minify, jsonminify()))
@@ -74,15 +74,15 @@ async function vendorConfigs(opt_options) {
         )
       )
       .pipe(gulp.dest(destPath))
-  ).then(() => {
-    if (globby.sync(srcPath).length > 0) {
-      endBuildStep(
-        'Compiled all analytics vendor configs into',
-        destPath,
-        startTime
-      );
-    }
-  });
+  );
+
+  if (globby.sync(srcPath).length > 0) {
+    endBuildStep(
+      'Compiled all analytics vendor configs into',
+      destPath,
+      startTime
+    );
+  }
 }
 
 module.exports = {
