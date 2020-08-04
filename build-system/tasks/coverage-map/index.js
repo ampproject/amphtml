@@ -24,9 +24,11 @@ let puppeteer;
 let explore;
 
 const coverageJsonName = argv.json || 'coverage.json';
+const serverPort = argv.port || 8000;
 const testUrl =
-  argv.url || 'http://localhost:8000/examples/everything.amp.html';
+  argv.url || `http://localhost:${serverPort}/examples/everything.amp.html`;
 const outHtml = argv.html || 'coverage.html';
+const inputJs = argv.file || 'v0.js';
 const scrollDistance = 100;
 
 async function collectCoverage() {
@@ -80,7 +82,7 @@ async function generateMap() {
   log(
     `Generating heat map in dist/${outHtml}, based on ${coverageJsonName}...`
   );
-  await explore('dist/v0.js', {
+  await explore(`dist/${inputJs}`, {
     output: {format: 'html', filename: `${outHtml}`},
     coverage: `dist/${coverageJsonName}`,
     onlyMapped: true,
@@ -93,9 +95,11 @@ async function coverageMap() {
   puppeteer = require('puppeteer');
   explore = require('source-map-explorer').explore;
 
-  await dist();
+  if (!argv.nodist) {
+    await dist();
+  }
   await startServer(
-    {host: 'localhost', port: 8000},
+    {host: 'localhost', port: serverPort},
     {quiet: true},
     {compiled: true}
   );
@@ -113,7 +117,13 @@ coverageMap.flags = {
   json:
     '  Customize the name of the JSON output from puppeteer (out.json by default).',
   url:
-    '  Set the URL for puppeteer testing, starting with  "http://localhost:8000..." (http://localhost:8000/examples/everything.amp.html by default).',
+    '  Set the URL for puppeteer testing, starting with  "http://localhost:[port number]..." (http://localhost:[port number]/examples/everything.amp.html by default).',
   html:
     '  Customize the name of the HTML output from source map explorer (out.html by default).',
+  nodist:
+    "  Skips dist build. Your working directory should be dist if you're using this flag.",
+  port:
+    '  Customize the port number of the local AMP server (8000 by default).',
+  file:
+    '  Designate which JS file to view in coverage map, or *.js for all files (v0.js by default). If the JS file is not in the top level dist directory, you need to indicate the path to the JS file relative to dist.',
 };
