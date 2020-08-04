@@ -33,10 +33,6 @@ tags: {  # <amp-kaltura-player>
   tag_name: "AMP-KALTURA-PLAYER"
   requires_extension: "amp-kaltura-player"
   attrs: {
-    name: "data-service-url"
-    mandatory: false
-  }
-  attrs: {
     name: "data-partner"
     mandatory: true
   }
