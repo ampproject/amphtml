@@ -114,9 +114,9 @@ export function VideoWrapper({
       contentRef={wrapperRef}
       className={className}
       style={style}
-      size={true}
-      layout={true}
-      paint={true}
+      size
+      layout
+      paint
     >
       <Component
         {...rest}
