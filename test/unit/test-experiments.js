@@ -17,6 +17,8 @@
 import {
   RANDOM_NUMBER_GENERATORS,
   experimentToggles,
+  forceExperimentBranch,
+  getActiveExperimentBranches,
   getBinaryType,
   getExperimentBranch,
   getExperimentTogglesForTesting,
@@ -913,6 +915,21 @@ describe('experiment branch tests', () => {
         'expt_0': '0_3',
         'expt_2': '2_1',
       });
+    });
+  });
+});
+
+describes.fakeWin('getActiveExperimentBranches', {}, (env) => {
+  it('should return an empty object if no active branches', () => {
+    expect(getActiveExperimentBranches(env.win)).to.eql({});
+  });
+
+  it('should return obj containing all branches', () => {
+    forceExperimentBranch(env.win, 'exp1', '1234');
+    forceExperimentBranch(env.win, 'exp2', '5678');
+    expect(getActiveExperimentBranches(env.win)).to.eql({
+      exp1: '1234',
+      exp2: '5678',
     });
   });
 });
