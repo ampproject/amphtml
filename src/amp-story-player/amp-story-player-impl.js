@@ -263,8 +263,8 @@ export class AmpStoryPlayer {
     // then update condition to getMode.test and update visual tests.
     const containerToUse =
       typeof __AMP_VISUAL_TEST !== 'undefined'
-      ? this.element_ 
-      : this.element_.attachShadow({mode: 'open'});
+        ? this.element_
+        : this.element_.attachShadow({mode: 'open'});
 
     // Inject default styles
     const styleEl = this.doc_.createElement('style');
