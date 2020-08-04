@@ -17,18 +17,12 @@
 
 module.exports = {
   'story loaded and player ready': async page => {
-    await page.$eval('amp-story-player', e => {
-      new Promise(resolve => {
-        e.addEventListener('ready', (readyEvent) => resolve(readyEvent));
-      })
-    });
     await page.waitFor(5000);
-    await page.waitForSelector('.i-amphtml-story-loaded');
     await page.$eval('iframe', (iframe) => {
       const contents = iframe.contentDocument.documentElement.outerHTML;
       iframe.src = '';
       iframe.srcdoc = contents;
     });
-    await page.waitFor(5000);
+    await page.waitFor(2000);
   }
 };
