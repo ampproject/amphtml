@@ -115,8 +115,7 @@ These are the low-trust level events that the `amp-orientation-observer` compone
 
 ### `alpha`
 
-Represents the motion of the device around the z axis.  
-
+Represents the motion of the device around the z axis.
 
 ### `beta`
 
