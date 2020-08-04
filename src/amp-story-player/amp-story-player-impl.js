@@ -870,7 +870,7 @@ export class AmpStoryPlayer {
     const noFragmentUrl = removeFragment(href);
     const originalFragmentString = getFragment(href);
     const {
-      embedMode: originalEmbedMode, // Original embedMode is treated separately so we don't override it
+      [EmbedModeParam]: originalEmbedMode, // Original embedMode is treated separately so we don't override it
       ...originalFragments
     } = parseQueryString(originalFragmentString);
 
