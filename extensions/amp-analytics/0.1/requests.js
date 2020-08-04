@@ -572,7 +572,7 @@ function reportErrorTemp(url, info) {
     if (elementWidth == 0 || elementHeight == 0) {
       dev().error(
         GOOGLE_ACTIVEVIEW_ERROR_TAG,
-        'zero element size',
+        'Debugging: Activeview request with zero element size',
         elementWidth,
         elementHeight,
         url,
@@ -587,7 +587,7 @@ function reportErrorTemp(url, info) {
     if (viewportWidth == 0 || viewportHeight == 0) {
       dev().error(
         GOOGLE_ACTIVEVIEW_ERROR_TAG,
-        'zero viewport size',
+        'Debugging: Activeview request with zero viewport size',
         viewportWidth,
         viewportHeight,
         url,
