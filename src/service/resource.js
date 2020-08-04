@@ -683,17 +683,18 @@ export class Resource {
    * @return {boolean}
    */
   isDisplayed(usePremeasuredRect = false) {
+    const isConnected =
+      this.element.ownerDocument && this.element.ownerDocument.defaultView;
+    if (!isConnected) {
+      return false;
+    }
     devAssert(!usePremeasuredRect || this.intersect_);
     const isFluid = this.element.getLayout() == Layout.FLUID;
     const box = usePremeasuredRect
       ? devAssert(this.premeasuredRect_)
       : this.getLayoutBox();
     const hasNonZeroSize = box.height > 0 && box.width > 0;
-    return (
-      (isFluid || hasNonZeroSize) &&
-      !!this.element.ownerDocument &&
-      !!this.element.ownerDocument.defaultView
-    );
+    return isFluid || hasNonZeroSize;
   }
 
   /**
