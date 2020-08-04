@@ -874,7 +874,7 @@ export class AmpStoryPlayer {
       ...originalFragments
     } = parseQueryString(originalFragmentString);
 
-    const newFragments = dict({
+    const newFragments = {
       'visibilityState': visibilityState,
       'origin': this.win_.origin,
       'showStoryUrlInfo': '0',
@@ -882,13 +882,17 @@ export class AmpStoryPlayer {
       'cap': 'swipe',
       [EmbedModeParam]:
         embedMode ?? originalEmbedMode ?? EmbedMode.NOT_EMBEDDED,
+    };
+
+    // Type is overriden because linting breaks if this were to be put inside the dict function
+    const fragmentParams = /** @type {!JsonObject} */ ({
+      ...originalFragments,
+      ...newFragments,
     });
 
     const queryParams = dict({
       'amp_js_v': '0.1',
     });
-
-    const fragmentParams = Object.assign(originalFragments, newFragments);
 
     const inputUrl =
       addParamsToUrl(noFragmentUrl, queryParams) +
