@@ -20,7 +20,12 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {forwardRef} from '../../../src/preact/compat';
 import {mod} from '../../../src/utils/math';
 import {setStyle} from '../../../src/style';
-import {useLayoutEffect, useMemo, useRef} from '../../../src/preact';
+import {
+  useImperativeHandle,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+} from '../../../src/preact';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last
@@ -34,13 +39,26 @@ const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
 
 /**
  * @param {!BaseCarouselDef.ScrollerProps} props
- * @param {{current: (Element|null)}} ref
+ * @param {{current: (T|null)}} ref
  * @return {PreactDef.Renderable}
+ * @template T
  */
 export function ScrollerWithRef(
   {children, loop, restingIndex, setRestingIndex},
   ref
 ) {
+  // We still need our own ref that we can always rely on to be there.
+  const containerRef = useRef(null);
+  useImperativeHandle(ref, () => ({
+    // Expose "advance" action for navigating between slides by the given quantity of slides.
+    advance: (by) => {
+      const container = containerRef.current;
+      // Modify scrollLeft is preferred to `setCurSlide` to enable smooth scroll.
+      // Note: `setCurSlide` will still be called on debounce by scroll handler.
+      container./* OK */ scrollLeft += container./* OK */ offsetWidth * by;
+    },
+  }));
+
   /**
    * The number of slides we want to place before the
    * reference or resting index. Only needed if loop=true.
@@ -64,10 +82,10 @@ export function ScrollerWithRef(
 
   // useLayoutEffect needed to avoid FOUC while scrolling
   useLayoutEffect(() => {
-    if (!ref.current) {
+    if (!containerRef.current) {
       return;
     }
-    const container = ref.current;
+    const container = containerRef.current;
     ignoreProgrammaticScrollRef.current = true;
     setStyle(container, 'scrollBehavior', 'auto');
     container./* OK */ scrollLeft = loop
@@ -102,7 +120,7 @@ export function ScrollerWithRef(
   // This is necessary for smooth scrolling because
   // intermediary renders will interupt scroll and cause jank.
   const updateCurrentIndex = () => {
-    const container = ref.current;
+    const container = containerRef.current;
     const slideOffset = Math.round(
       (container./* OK */ scrollLeft -
         offsetRef.current * container./* OK */ offsetWidth) /
@@ -124,7 +142,7 @@ export function ScrollerWithRef(
     <div
       hide-scrollbar
       key="container"
-      ref={ref}
+      ref={containerRef}
       onScroll={handleScroll}
       style={{
         ...styles.scrollContainer,

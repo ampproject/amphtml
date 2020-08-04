@@ -36,12 +36,7 @@ export function BaseCarousel({
   const {length} = childrenArray;
   const [curSlide, setCurSlide] = useState(0);
   const scrollRef = useRef(null);
-  const advance = (dir) => {
-    const container = scrollRef.current;
-    // Modify scrollLeft is preferred to `setCurSlide` to enable smooth scroll.
-    // Note: `setCurSlide` will still be called on debounce by scroll handler.
-    container./* OK */ scrollLeft += container./* OK */ offsetWidth * dir;
-  };
+  const advance = (by) => scrollRef.current.advance(by);
   useMountEffect(() => {
     if (setAdvance) {
       setAdvance(advance);
