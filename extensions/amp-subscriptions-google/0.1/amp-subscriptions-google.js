@@ -775,6 +775,23 @@ export class AmpFetcher {
     return this.xhr_.fetch(input, opt_init); //needed to kepp closure happy
   }
 
+  /** @override */
+  sendPost(url, message) {
+    const init = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+      },
+      credentials: 'include',
+      body:
+        'f.req=' +
+        JSON.stringify(/** @type {JsonObject} */ (message.toArray(false))),
+    };
+    return this.fetch(url, init).then(
+      (response) => (response && response.json()) || {}
+    );
+  }
+
   /**
    * POST data to a URL endpoint, do not wait for a response.
    * @param {string} url

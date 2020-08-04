@@ -62,12 +62,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
-    id: 'amp-consent-restrict-fullscreen',
-    name: 'AMP consent restrict fullscreen API before user interaction',
-    spec: 'https://github.com/ampproject/amphtml/issues/26432',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26432',
-  },
-  {
     id: 'amp-sidebar-v2',
     name: 'Updated sidebar component with nested menu and animations',
     spec: 'https://github.com/ampproject/amphtml/issues/25049',
@@ -100,11 +94,6 @@ export const EXPERIMENTS = [
     id: 'amp-lightbox-a4a-proto',
     name: 'Allows the new lightbox experience to be used in A4A (prototype).',
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
-  },
-  {
-    id: 'amp-list-init-from-state',
-    name: 'Allows amp-list to initialize off of amp-state',
-    spec: 'https://github.com/ampproject/amphtml/issues/26009',
   },
   {
     id: 'amp-playbuzz',
@@ -248,6 +237,11 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24113',
   },
   {
+    id: 'protocol-adapters',
+    name: 'Allow amp-list to get its data from amp-script functions.',
+    spec: 'https://github.com/ampproject/amphtml/issues/26474',
+  },
+  {
     id: 'adsense-ad-size-optimization',
     name:
       'Per publisher server side settings for changing the ad size ' +
@@ -288,10 +282,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26823',
   },
   {
-    id: 'random-subdomains-for-safeframe',
-    name: 'Enable Random Subdomains for SafeFrame',
-  },
-  {
     id: 'analytics-chunks',
     name: 'AMP Analytics Break long tasks to chunks (AMP docs only)',
     spec: 'https://github.com/ampproject/amphtml/issues/28435',
@@ -317,5 +307,10 @@ export const EXPERIMENTS = [
     id: 'expand-json-targeting',
     name: 'Allow CLIENT_ID in doubleclick json targeting feature',
     spec: 'https://github.com/ampproject/amphtml/issues/25190',
+  },
+  {
+    id: 'auto-ads-layout-callback',
+    name: 'Move ads placement into layoutCallback',
+    spec: 'https://github.com/ampproject/amphtml/issues/27068',
   },
 ];

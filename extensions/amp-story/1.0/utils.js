@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Layout} from '../../../src/layout';
+
 import {Services} from '../../../src/services';
 import {
   closestAncestorElementBySelector,
@@ -42,7 +42,6 @@ export function timeStrToMillis(time, fallbackMs = NaN) {
   const units = match ? match[2] : undefined;
 
   if (!match || match.length !== 3 || (units !== 's' && units !== 'ms')) {
-    user().warn('AMP-STORY', 'Invalid time string', time);
     return fallbackMs;
   }
 
@@ -246,23 +245,6 @@ export function resolveImgSrc(win, url) {
     urlSrc = urlSrc.replace('/c/s/', '/i/s/');
   }
   return urlSrc;
-}
-
-/**
- * Returns a boolean indicating whether the media element is visible or has to
- * play, or hidden by any publisher CSS rule.
- * @param {!Element} ampMediaEl amp-video or amp-audio
- * @param {!../../../src/service/resource.Resource} resource
- * @return {boolean}
- */
-export function isMediaDisplayed(ampMediaEl, resource) {
-  // Considers amp-audio elements with a layout=nodisplay attribute as
-  // displayed, since they are expected to play when the page is active.
-  return (
-    resource.isDisplayed() ||
-    (ampMediaEl.tagName === 'AMP-AUDIO' &&
-      ampMediaEl.getLayout() === Layout.NODISPLAY)
-  );
 }
 
 /**

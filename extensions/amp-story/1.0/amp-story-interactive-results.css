@@ -1,0 +1,95 @@
+/**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.i-amphtml-story-interactive-results-container {
+  font-family: 'Poppins', sans-serif !important;
+  background: var(--i-amphtml-interactive-option-background-color) !important;
+  border-radius: var(--i-amphtml-interactive-chip-radius) !important;
+  color: var(--i-amphtml-interactive-strong-text-color) !important;
+  text-align: center !important;
+  max-width: 300px !important;
+  box-shadow: var(--i-amphtml-interactive-component-shadow) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  padding: 20px 5px !important;
+}
+
+.i-amphtml-story-interactive-results-line {
+  background-color: var(--interactive-accent-color) !important;
+  width: 30px !important;
+  height: 4px !important;
+  margin-bottom: 20px !important;
+  border-radius: 2px !important;
+}
+
+.i-amphtml-story-interactive-results-dots {
+  background-image: radial-gradient(
+    var(--interactive-accent-color) 20%,
+    transparent 20%
+  ) !important;
+  width: 52px !important;
+  height: 94px !important;
+  background-position: top !important;
+  background-size: 8px 8px !important;
+}
+
+.i-amphtml-story-interactive-results-visuals {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+}
+
+.i-amphtml-story-interactive-results-image {
+  width: 130px !important;
+  height: 130px !important;
+  background-size: cover !important;
+  background-position: center !important;
+  border-radius: 50% !important;
+}
+
+.i-amphtml-story-interactive-results-image-border {
+  background: linear-gradient(
+    180deg,
+    transparent 56%,
+    var(--interactive-accent-color) 56%
+  );
+  margin: 0px 10px !important;
+  padding: 10px !important;
+  border-radius: 50% !important;
+  border: 2px solid var(--interactive-accent-color) !important;
+}
+
+.i-amphtml-story-interactive-results-prompt {
+  text-transform: uppercase !important;
+  font-size: 12px !important;
+  margin-top: 20px !important;
+  font-weight: bold !important;
+  letter-spacing: 2px !important;
+}
+
+.i-amphtml-story-interactive-results-title {
+  font-size: 28px !important;
+  font-weight: bold !important;
+}
+
+.i-amphtml-story-interactive-results-description {
+  font-size: 14px !important;
+  text-align: center !important;
+  color: var(--i-amphtml-interactive-option-text-color) !important;
+  margin-top: 8px !important;
+  padding: 0px 20px !important;
+}

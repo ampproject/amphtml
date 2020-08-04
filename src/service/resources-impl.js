@@ -107,9 +107,6 @@ export class ResourcesImpl {
     /** @private {boolean} */
     this.visible_ = this.ampdoc.isVisible();
 
-    /** @private {number} */
-    this.prerenderSize_ = this.viewer_.getPrerenderSize();
-
     /** @private {boolean} */
     this.documentReady_ = false;
 
@@ -213,6 +210,9 @@ export class ResourcesImpl {
 
     /** @const @private {boolean} */
     this.renderOnIdleFix_ = isExperimentOn(this.win, 'render-on-idle-fix');
+
+    /** @const @private {boolean} */
+    this.removeTaskTimeout_ = isExperimentOn(this.win, 'remove-task-timeout');
 
     /** @private {boolean} */
     this.divertedRenderOnIdleFixExperiment_ = false;
@@ -338,9 +338,6 @@ export class ResourcesImpl {
   intersect(entries) {
     devAssert(this.intersectionObserver_);
 
-    // TODO(willchou): Remove assert once #27167 is fixed.
-    devAssert(this.prerenderSize_ == 1);
-
     if (getMode().localDev) {
       const inside = [];
       const outside = [];
@@ -458,11 +455,7 @@ export class ResourcesImpl {
       resource.getState() != ResourceState.NOT_BUILT &&
       !element.reconstructWhenReparented()
     ) {
-      // With IntersectionObserver, no need to request remeasure
-      // on reuse since initial intersection callback will trigger soon.
-      if (!this.intersectionObserver_) {
-        resource.requestMeasure();
-      }
+      resource.requestMeasure();
       dev().fine(TAG_, 'resource reused:', resource.debugid);
     } else {
       // Create and add a new resource.
@@ -647,7 +640,7 @@ export class ResourcesImpl {
       resource.pauseOnRemove();
     }
     if (this.intersectionObserver_) {
-      // TODO(willchou): Fix observe/unobserve churn due to reparenting.
+      // TODO(willchou): Fix observe/unobserve/remeasure churn in reparenting.
       this.intersectionObserver_.unobserve(resource.element);
     }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
@@ -657,8 +650,6 @@ export class ResourcesImpl {
   /** @override */
   upgraded(element) {
     const resource = Resource.forElement(element);
-    // TODO(willchou): Delay this until after 1vp loads. This should improve
-    // LCP and be safe since we already do something similar in prerender mode.
     this.buildOrScheduleBuildForResource_(resource);
     dev().fine(TAG_, 'resource upgraded:', resource.debugid);
   }
@@ -752,7 +743,6 @@ export class ResourcesImpl {
     }
 
     this.visible_ = this.ampdoc.isVisible();
-    this.prerenderSize_ = this.viewer_.getPrerenderSize();
     this.buildsThisPass_ = 0;
 
     const firstPassAfterDocumentReady =
@@ -799,9 +789,7 @@ export class ResourcesImpl {
       this.relayoutTop_,
       ', viewportSize=',
       viewportSize.width,
-      viewportSize.height,
-      ', prerenderSize=',
-      this.prerenderSize_
+      viewportSize.height
     );
     this.pass_.cancel();
     this.vsyncScheduled_ = false;
@@ -1295,17 +1283,20 @@ export class ResourcesImpl {
       // that ignores `relayoutTop` and `elementsThatScrolled`.
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
-        if (r.hasOwner()) {
+        const requested = r.isMeasureRequested();
+        if (r.hasOwner() && !requested) {
           continue;
         }
-        // Difference: if we have a "premeasured" client rect, consume it
-        // as the element's new measurements even if the element isn't built.
-        const requested = r.isMeasureRequested();
+        const premeasured = r.hasBeenPremeasured();
         if (requested) {
           dev().fine(TAG_, 'force remeasure:', r.debugid);
         }
-        const premeasured = r.hasBeenPremeasured();
-        const needsMeasure = premeasured || requested || this.relayoutAll_;
+        // Immediately measure (vs. waiting for async premeasure) for certain
+        // elements with sensitive time-to-measure.
+        const expediteFirstMeasure =
+          !r.hasBeenMeasured() && r.element.tagName == 'AMP-AD';
+        const needsMeasure =
+          premeasured || requested || this.relayoutAll_ || expediteFirstMeasure;
         if (needsMeasure) {
           const isDisplayed = this.measureResource_(
             r,
@@ -1375,15 +1366,12 @@ export class ResourcesImpl {
     }
 
     const viewportRect = this.viewport_.getRect();
-    // Load viewport = viewport + 3x up/down when document is visible or
-    // depending on prerenderSize in pre-render mode.
+    // Load viewport = viewport + 3x up/down when document is visible.
     let loadRect;
     if (this.visible_) {
       loadRect = expandLayoutRect(viewportRect, 0.25, 2);
-    } else if (this.prerenderSize_ > 0) {
-      loadRect = expandLayoutRect(viewportRect, 0, this.prerenderSize_ - 1);
     } else {
-      loadRect = null;
+      loadRect = viewportRect;
     }
 
     const visibleRect = this.visible_
@@ -1526,7 +1514,9 @@ export class ResourcesImpl {
     let timeout = -1;
     let task = this.queue_.peek(this.boundTaskScorer_);
     while (task) {
-      timeout = this.calcTaskTimeout_(task);
+      if (!this.removeTaskTimeout_) {
+        timeout = this.calcTaskTimeout_(task);
+      }
       dev().fine(
         TAG_,
         'peek from queue:',
@@ -1538,8 +1528,10 @@ export class ResourcesImpl {
         'timeout',
         timeout
       );
-      if (timeout > 16) {
-        break;
+      if (!this.removeTaskTimeout_) {
+        if (timeout > 16) {
+          break;
+        }
       }
 
       this.queue_.dequeue(task);
@@ -1602,10 +1594,12 @@ export class ResourcesImpl {
       this.exec_.getSize()
     );
 
-    if (timeout >= 0) {
-      // Still tasks in the queue, but we took too much time.
-      // Schedule the next work pass.
-      return timeout;
+    if (!this.removeTaskTimeout_) {
+      if (timeout >= 0) {
+        // Still tasks in the queue, but we took too much time.
+        // Schedule the next work pass.
+        return timeout;
+      }
     }
 
     // No tasks left in the queue.
@@ -1861,7 +1855,11 @@ export class ResourcesImpl {
         this.queue_.dequeue(queued);
       }
       this.queue_.enqueue(task);
-      this.schedulePass(this.calcTaskTimeout_(task));
+      if (this.removeTaskTimeout_) {
+        this.schedulePass();
+      } else {
+        this.schedulePass(this.calcTaskTimeout_(task));
+      }
     }
     task.resource.layoutScheduled(task.scheduleTime);
   }

@@ -37,6 +37,8 @@ const NAME = 'SocialShare';
  *  target: ?string,
  *  width: ?string,
  *  height: ?string,
+ *  color: ?string,
+ *  background: ?string,
  *  tabIndex: ?string,
  *  style: ?string,
  * @return {PreactDef.Renderable}
@@ -50,13 +52,11 @@ export function SocialShare(props) {
     checkedTarget,
   } = checkProps(props);
 
-  const type = props['type'].toUpperCase();
-  const baseStyle = CSS.BASE_STYLE;
-  const backgroundStyle = CSS[type];
-  const size = {
-    width: checkedWidth,
-    height: checkedHeight,
-  };
+  const size = dict({
+    'width': checkedWidth,
+    'height': checkedHeight,
+  });
+
   return (
     <div
       role="button"
@@ -65,12 +65,46 @@ export function SocialShare(props) {
       onClick={() => handleActivation(finalEndpoint, checkedTarget)}
       style={{...size, ...props['style']}}
     >
-      <SocialShareIcon
-        style={{...backgroundStyle, ...baseStyle, ...size}}
-        type={type}
-      />
+      {processChildren(props, size)}
     </div>
   );
+}
+
+/**
+ * If the specified type 'canCustomize' (see config file), allow children
+ * to be rendered and color / background to be passed in via props.  If the
+ * specified type cannot be customized (canCustomize = false), children
+ * will not be rendered and color / background will always be set to default
+ * values.
+ * @param {!JsonObject} props
+ * @param {JsonObject} size
+ * @return {PreactDef.Renderable}
+ */
+function processChildren(props, size) {
+  const {
+    'type': type,
+    'children': children,
+    'color': propsColor,
+    'background': propsBackground,
+  } = props;
+
+  if (children) {
+    return children;
+  } else {
+    const typeConfig = getSocialConfig(type) || dict();
+    const baseStyle = CSS.BASE_STYLE;
+    const iconStyle = dict({
+      'color': propsColor || typeConfig['defaultColor'],
+      'backgroundColor':
+        propsBackground || typeConfig['defaultBackgroundColor'],
+    });
+    return (
+      <SocialShareIcon
+        style={{...iconStyle, ...baseStyle, ...size}}
+        type={type.toUpperCase()}
+      />
+    );
+  }
 }
 
 /**
@@ -109,7 +143,7 @@ function checkProps(props) {
 
   // Special case when type is 'email'
   if (type === 'email' && !endpoint) {
-    baseEndpoint = `mailto:${params['recipient'] || ''}`;
+    baseEndpoint = `mailto:${(params && params['recipient']) || ''}`;
   }
 
   // Add params to baseEndpoint
@@ -160,11 +194,11 @@ function handleActivation(finalEndpoint, target) {
         `Could not complete system share.  Navigator unavailable. ${NAME}`
       );
     }
-  } else if (protocol === 'sms') {
+  } else if (protocol === 'sms' || protocol === 'mailto') {
     openWindowDialog(
       window,
-      finalEndpoint.replace('?', '?&'),
-      target,
+      protocol === 'sms' ? finalEndpoint.replace('?', '?&') : finalEndpoint,
+      isIos() ? '_top' : target,
       windowFeatures
     );
   } else {
@@ -183,6 +217,19 @@ function getQueryString(endpoint) {
   q = q === -1 ? endpoint.length : q;
   h = h === -1 ? endpoint.length : h;
   return endpoint.slice(q, h);
+}
+
+/**
+ * Checks whether or not the userAgent of the current device indicates that
+ * this is an Ios device.  Checked for 'mailto:' and 'sms:' protocols which
+ * break when opened in _blank on iOS Safari.
+ * @return {boolean}
+ */
+function isIos() {
+  return /** @type {boolean} */ (window &&
+    window.navigator &&
+    window.navigator.userAgent &&
+    window.navigator.userAgent.search(/iPhone|iPad|iPod/i) >= 0);
 }
 
 /**

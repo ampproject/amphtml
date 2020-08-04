@@ -47,6 +47,7 @@ import {ResponsiveState} from './responsive-state';
 import {Services} from '../../../src/services';
 import {
   addExperimentIdToElement,
+  isInExperiment,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {computedStyle, setStyles} from '../../../src/style';
@@ -67,6 +68,13 @@ const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
 
 /** @const {string} */
 const TAG = 'amp-ad-network-adsense-impl';
+
+/** @const @enum {string} */
+const ROUND_LOCATION_PARAMS_EXP = {
+  ID: 'ad-adsense-gam-round-params',
+  CONTROL: '21066726',
+  EXPERIMENT: '21066727',
+};
 
 /**
  * Shared state for AdSense ad slots. This is used primarily for ad request url
@@ -232,6 +240,14 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           STICKY_AD_PADDING_BOTTOM_EXP.experiment,
         ],
       },
+      {
+        experimentId: ROUND_LOCATION_PARAMS_EXP.ID,
+        isTrafficEligible: () => true,
+        branches: [
+          ROUND_LOCATION_PARAMS_EXP.CONTROL,
+          ROUND_LOCATION_PARAMS_EXP.EXPERIMENT,
+        ],
+      },
     ]).concat(AMPDOC_FIE_EXPERIMENT_INFO_LIST);
     const setExps = randomlySelectUnsetExperiments(
       this.win,
@@ -240,6 +256,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     Object.keys(setExps).forEach((expName) =>
       addExperimentIdToElement(setExps[expName], this.element)
     );
+    const moduleNomoduleExpId = this.getModuleNomoduleExpIds_();
+    if (moduleNomoduleExpId) {
+      addExperimentIdToElement(moduleNomoduleExpId, this.element);
+    }
   }
 
   /**
@@ -282,13 +302,15 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       this.element.getAttribute('data-adtest') ||
       isInManualExperiment(this.element);
 
-    // By default, the ad uses full-width. It will be overwritten
-    // if the publisher uses fixed size tag or it's converted to container-width.
-    this.size_ = this.getIntersectionElementLayoutBox();
     const width = Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('height'));
-    if (!isNaN(width) && !isNaN(height)) {
+    if (
+      this.responsiveState_ != null &&
+      this.responsiveState_.isContainerWidthState()
+    ) {
       this.size_ = {width, height};
+    } else {
+      this.size_ = this.getIntersectionElementLayoutBox();
     }
 
     const sizeToSend = this.isSinglePageStoryAd
@@ -390,6 +412,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           'pucrd': identity.pucrd || null,
           ...parameters,
         },
+        isInExperiment(this.element, ROUND_LOCATION_PARAMS_EXP.EXPERIMENT),
         experimentIds
       );
     });

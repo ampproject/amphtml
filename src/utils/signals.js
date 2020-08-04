@@ -126,6 +126,7 @@ export class Signals {
     const promiseStruct = this.promiseMap_ && this.promiseMap_[name];
     if (promiseStruct && promiseStruct.reject) {
       promiseStruct.reject(error);
+      promiseStruct.promise.catch(() => {});
       promiseStruct.resolve = undefined;
       promiseStruct.reject = undefined;
     }

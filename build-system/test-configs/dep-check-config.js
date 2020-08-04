@@ -102,6 +102,7 @@ exports.rules = [
     allowlist: [
       '3p/**->src/utils/function.js',
       '3p/**->src/utils/object.js',
+      '3p/**->src/utils/promise.js',
       '3p/**->src/log.js',
       '3p/**->src/types.js',
       '3p/**->src/string.js',
@@ -117,6 +118,7 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/polyfills.js->src/polyfills/object-values.js',
+      '3p/polyfills.js->src/polyfills/promise.js',
       '3p/messaging.js->src/event-helper.js',
       '3p/bodymovinanimation.js->src/event-helper.js',
       '3p/iframe-messaging-client.js->src/event-helper.js',
@@ -239,6 +241,7 @@ exports.rules = [
       // AMP Story
       'extensions/amp-story/1.0/animation-types.js->extensions/amp-animation/0.1/web-animation-types.js',
       // AMP Story 360
+      'extensions/amp-story-360/0.1/amp-story-360.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-360/0.1/amp-story-360.js->extensions/amp-story/1.0/utils.js',
       // Story ads
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/amp-story-store-service.js',
@@ -416,6 +419,7 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/polyfills.js->src/polyfills/object-values.js',
+      '3p/polyfills.js->src/polyfills/promise.js',
       'src/polyfills.js->src/polyfills/domtokenlist.js',
       'src/polyfills.js->src/polyfills/document-contains.js',
       'src/polyfills.js->src/polyfills/fetch.js',
@@ -433,6 +437,10 @@ exports.rules = [
       'src/friendly-iframe-embed.js->src/polyfills/document-contains.js',
       'src/friendly-iframe-embed.js->src/polyfills/domtokenlist.js',
       'src/friendly-iframe-embed.js->src/polyfills/intersection-observer.js',
+      'src/friendly-iframe-embed-legacy.js->src/polyfills/custom-elements.js',
+      'src/friendly-iframe-embed-legacy.js->src/polyfills/document-contains.js',
+      'src/friendly-iframe-embed-legacy.js->src/polyfills/domtokenlist.js',
+      'src/friendly-iframe-embed-legacy.js->src/polyfills/intersection-observer.js',
     ],
   },
   {
@@ -450,6 +458,17 @@ exports.rules = [
     filesMatching: 'src/**/*.js',
     mustNotDependOn: 'ads/**/*.js',
     allowlist: 'src/ad-cid.js->ads/_config.js',
+  },
+  {
+    filesMatching: '**/*.js',
+    mustNotDependOn: 'src/service/custom-element-registry.js',
+    allowlist: [
+      'builtins/**->src/service/custom-element-registry.js',
+      'src/amp.js->src/service/custom-element-registry.js',
+      'src/friendly-iframe-embed-legacy.js->src/service/custom-element-registry.js',
+      'src/runtime.js->src/service/custom-element-registry.js',
+      'src/service/extensions-impl.js->src/service/custom-element-registry.js',
+    ],
   },
 
   // A4A

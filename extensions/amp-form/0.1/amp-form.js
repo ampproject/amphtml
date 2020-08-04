@@ -988,18 +988,8 @@ export class AmpForm {
    * @private
    */
   trustForSubmitResponse_(incomingTrust) {
-    // TODO(choumx): Remove this expected error before Q1 2020.
-    if (incomingTrust <= ActionTrust.DEFAULT) {
-      dev().expectedError(
-        TAG,
-        'Recursive form submissions are scheduled to be deprecated by 1/1/2020. ' +
-          'See https://github.com/ampproject/amphtml/issues/24894.'
-      );
-    }
-    // Only degrade trust across form submission in AMP4EMAIL for now.
-    return this.isAmp4Email_
-      ? /** @type {!ActionTrust} */ (incomingTrust - 1)
-      : incomingTrust;
+    // Degrade trust across form submission.
+    return /** @type {!ActionTrust} */ (incomingTrust - 1);
   }
 
   /**
@@ -1296,12 +1286,24 @@ export class AmpForm {
         p = this.ssrTemplateHelper_
           .applySsrOrCsrTemplate(devAssert(container), data)
           .then((rendered) => {
-            rendered.id = messageId;
-            rendered.setAttribute('i-amphtml-rendered', '');
+            // TODO(#29566): Simplify section appending rendered contents to DOM.
+            let renderContainer;
+            if (isArray(rendered)) {
+              if (rendered.length === 1) {
+                renderContainer = rendered[0];
+              } else {
+                renderContainer = document.createElement('div');
+                rendered.forEach((child) => renderContainer.appendChild(child));
+              }
+            } else {
+              renderContainer = rendered;
+            }
+            renderContainer.id = messageId;
+            renderContainer.setAttribute('i-amphtml-rendered', '');
             return this.mutator_.mutateElement(
               dev().assertElement(container),
               () => {
-                container.appendChild(rendered);
+                container.appendChild(dev().assertElement(renderContainer));
                 const renderedEvent = createCustomEvent(
                   this.win_,
                   AmpEvents.DOM_UPDATE,
