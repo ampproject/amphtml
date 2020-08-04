@@ -818,15 +818,10 @@ export class AmpStoryPlayer {
    * @param {!Element} story
    * @param {!Element} iframe
    * @param {!VisibilityState} visibilityState
-   * @param {EmbedMode=} embedMode
+   * @param {?EmbedMode} embedMode
    * @private
    */
-  layoutIframe_(
-    story,
-    iframe,
-    visibilityState,
-    embedMode = EmbedMode.NOT_EMBEDDED
-  ) {
+  layoutIframe_(story, iframe, visibilityState, embedMode) {
     this.maybeGetCacheUrl_(story.href).then((url) => {
       const {href} = this.getEncodedLocation_(url, visibilityState, embedMode);
 
