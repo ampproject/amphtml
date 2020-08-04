@@ -265,7 +265,7 @@ class LoaderBuilder {
       };
     }
 
-    return this.element_.createLoaderLogo();
+    return this.element_.implementation_.createLoaderLogoCallback();
   }
 
   /**

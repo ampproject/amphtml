@@ -106,7 +106,9 @@ function bootstrap(ampdoc, perf) {
   );
   startupChunk(self.document, function finalTick() {
     perf.tick(TickLabel.END_INSTALL_STYLES);
-    Services.resourcesForDoc(ampdoc).ampInitComplete();
+    if (!RUNTIME2) {
+      Services.resourcesForDoc(ampdoc).ampInitComplete();
+    }
     // TODO(erwinm): move invocation of the `flush` method when we have the
     // new ticks in place to batch the ticks properly.
     perf.flush();

@@ -328,7 +328,8 @@ amp-img:not(.i-amphtml-element)[i-amphtml-ssr] > img.i-amphtml-fill-content
 }
 
 .i-amphtml-element > [placeholder].hidden,
-.i-amphtml-element > [placeholder].amp-hidden {
+.i-amphtml-element > [placeholder].amp-hidden,
+.i-amphtml-element.i-amphtml-hide-placeholder > [placeholder] {
   visibility: hidden;
 }
 /* Placeholder, by design, expands layout=container unlike other layouts where
@@ -336,7 +337,8 @@ amp-img:not(.i-amphtml-element)[i-amphtml-ssr] > img.i-amphtml-fill-content
    However, when it goes away it should no longer expand the parent, so instead
    of visibility:hidden it must be display:none */
 .i-amphtml-layout-container > [placeholder].hidden,
-.i-amphtml-layout-container > [placeholder].amp-hidden {
+.i-amphtml-layout-container > [placeholder].amp-hidden,
+.i-amphtml-layout-container.i-amphtml-hide-placeholder > [placeholder] {
   display: none;
 }
 

@@ -78,8 +78,10 @@ export class StandardActions {
       ? opt_win.document.documentElement
       : ampdoc.getHeadNode();
 
-    /** @const @private {!./mutator-interface.MutatorInterface} */
-    this.mutator_ = Services.mutatorForDoc(ampdoc);
+    if (!RUNTIME2) {
+      /** @const @private {!./mutator-interface.MutatorInterface} */
+      this.mutator_ = Services.mutatorForDoc(ampdoc);
+    }
 
     /** @const @private {!./viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(ampdoc);

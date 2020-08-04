@@ -15,7 +15,8 @@
  */
 
 import {ElementStub, stubbedElements} from '../element-stub';
-import {createCustomElementClass} from '../custom-element';
+// import {createCustomElementClass} from '../custom-element';
+import {createCustomElementClass as createCustomElementClass2} from '../runtime2';
 import {extensionScriptsInNode} from '../element-service';
 import {reportError} from '../error';
 import {userAssert} from '../log';
@@ -140,7 +141,7 @@ export function copyElementToChildWindow(parentWin, childWin, name) {
 export function registerElement(win, name, implementationClass) {
   const knownElements = getExtendedElements(win);
   knownElements[name] = implementationClass;
-  const klass = createCustomElementClass(win);
+  const klass = RUNTIME2 ? createCustomElementClass2(win) : null; // createCustomElementClass(win);
   win['customElements'].define(name, klass);
 }
 

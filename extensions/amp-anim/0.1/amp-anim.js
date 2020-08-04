@@ -15,6 +15,7 @@
  */
 
 import * as st from '../../../src/style';
+import {CanPlay, LoadedState, subscribe} from '../../../src/context';
 import {dev} from '../../../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../../../src/utils/img';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -75,6 +76,27 @@ export class AmpAnim extends AMP.BaseElement {
     st.toggle(dev().assertElement(this.img_), !this.getPlaceholder());
 
     this.element.appendChild(this.img_);
+
+    subscribe(this.element, [CanPlay, LoadedState], (canPlay, loadedState) => {
+      console.log('amp-anim: [CanPlay, LoadedState] ', canPlay, loadedState);
+      if (canPlay && loadedState) {
+        const togglePlaying = (inViewport) => {
+          console.log('amp-anim: togglePlaying: ', inViewport);
+          this.togglePlaceholder(!inViewport);
+          st.toggle(dev().assertElement(this.img_), inViewport);
+        };
+        const io = new IntersectionObserver((records) => {
+          const last = records[records.length - 1];
+          togglePlaying(last.isIntersecting);
+        });
+        io.observe(this.element);
+        return () => {
+          console.log('amp-anim: [CanPlay] cleanup');
+          togglePlaying(false);
+          io.disconnect();
+        };
+      }
+    });
   }
 
   /** @override */
@@ -100,7 +122,9 @@ export class AmpAnim extends AMP.BaseElement {
   firstLayoutCompleted() {
     // Keep the placeholder: amp-anim is using it to start/stop playing.
     this.hasLoaded_ = true;
-    this.updateInViewport_();
+    if (!RUNTIME2) {
+      this.updateInViewport_();
+    }
   }
 
   /** @override */
@@ -115,6 +139,7 @@ export class AmpAnim extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     // Release memory held by the image - animations are typically large.
+    console.log('amp-anim: unlayoutCallback');
     this.img_.src = SRC_PLACEHOLDER;
     this.img_.srcset = SRC_PLACEHOLDER;
     this.hasLoaded_ = false;

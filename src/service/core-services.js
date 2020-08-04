@@ -16,6 +16,7 @@
 
 import {adoptServiceForEmbedDoc} from '../service';
 import {installActionServiceForDoc} from './action-impl';
+import {installAmpdocServices as installAmpdocServices2} from '../runtime2';
 import {installBatchedXhrService} from './batched-xhr-impl';
 import {installCidService} from './cid-impl';
 import {installCryptoService} from './crypto-impl';
@@ -78,6 +79,11 @@ export function installRuntimeServices(global) {
  * @restricted
  */
 export function installAmpdocServices(ampdoc) {
+  if (RUNTIME2) {
+    installAmpdocServices2(ampdoc);
+    return;
+  }
+
   const isEmbedded = !!ampdoc.getParent();
 
   // When making changes to this method:

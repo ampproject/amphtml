@@ -17,6 +17,7 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
+import {CanRender, setProp} from '../../../src/context';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
@@ -192,7 +193,9 @@ export class AmpSlideScroll extends BaseSlides {
       this.dataSlideIdArr_.push(
         slide.getAttribute('data-slide-id') || index.toString()
       );
-      Services.ownersForDoc(this.element).setOwner(slide, this.element);
+      if (!RUNTIME2) {
+        Services.ownersForDoc(this.element).setOwner(slide, this.element);
+      }
       slide.classList.add('amp-carousel-slide');
 
       const slideWrapper = this.win.document.createElement('div');
@@ -329,14 +332,16 @@ export class AmpSlideScroll extends BaseSlides {
         'E#19457 this.slideIndex_'
       );
       const scrollLeft = this.getScrollLeftForIndex_(index);
-      // When display is toggled on a partcular media or element resizes,
-      // it will need to be re-laid-out. This is only needed when the slide
-      // does not change (example when browser window size changes,
-      // or orientation changes)
-      Services.ownersForDoc(this.element).scheduleLayout(
-        this.element,
-        this.slides_[index]
-      );
+      if (!RUNTIME2) {
+        // When display is toggled on a partcular media or element resizes,
+        // it will need to be re-laid-out. This is only needed when the slide
+        // does not change (example when browser window size changes,
+        // or orientation changes)
+        Services.ownersForDoc(this.element).scheduleLayout(
+          this.element,
+          this.slides_[index]
+        );
+      }
       // Reset scrollLeft on orientationChange or anything that changes the
       // size of the carousel.
       this.slidesContainer_./*OK*/ scrollLeft = scrollLeft;
@@ -353,14 +358,16 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   updateViewportState(inViewport) {
-    if (this.slideIndex_ !== null) {
-      Services.ownersForDoc(this.element).updateInViewport(
-        this.element,
-        this.slides_[
-          user().assertNumber(this.slideIndex_, 'E#19457 this.slideIndex_')
-        ],
-        inViewport
-      );
+    if (!RUNTIME2) {
+      if (this.slideIndex_ !== null) {
+        Services.ownersForDoc(this.element).updateInViewport(
+          this.element,
+          this.slides_[
+            user().assertNumber(this.slideIndex_, 'E#19457 this.slideIndex_')
+          ],
+          inViewport
+        );
+      }
     }
   }
 
@@ -690,13 +697,15 @@ export class AmpSlideScroll extends BaseSlides {
       showIndexArr.push(nextIndex);
     }
     if (this.slideIndex_ !== null) {
-      Services.ownersForDoc(this.element).updateInViewport(
-        this.element,
-        this.slides_[
-          user().assertNumber(this.slideIndex_, 'E#19457 this.slideIndex_')
-        ],
-        false
-      );
+      if (!RUNTIME2) {
+        Services.ownersForDoc(this.element).updateInViewport(
+          this.element,
+          this.slides_[
+            user().assertNumber(this.slideIndex_, 'E#19457 this.slideIndex_')
+          ],
+          false
+        );
+      }
     }
     const newSlideInView = this.slides_[newIndex];
 
@@ -709,24 +718,39 @@ export class AmpSlideScroll extends BaseSlides {
       );
       return false;
     }
-    Services.ownersForDoc(this.element).updateInViewport(
-      this.element,
-      newSlideInView,
-      true
-    );
+    if (!RUNTIME2) {
+      Services.ownersForDoc(this.element).updateInViewport(
+        this.element,
+        newSlideInView,
+        true
+      );
+    }
     showIndexArr.forEach((showIndex, loopIndex) => {
       if (this.shouldLoop) {
         setStyle(this.slideWrappers_[showIndex], 'order', loopIndex + 1);
       }
       this.slideWrappers_[showIndex].classList.add(SHOWN_CSS_CLASS);
-      const owners = Services.ownersForDoc(this.element);
-      if (showIndex == newIndex) {
-        owners.scheduleLayout(this.element, this.slides_[showIndex]);
-        owners.scheduleResume(this.element, this.slides_[showIndex]);
-        this.slides_[showIndex].setAttribute('aria-hidden', 'false');
+      if (RUNTIME2) {
+        this.slides_[showIndex].setAttribute(
+          'aria-hidden',
+          String(showIndex != newIndex)
+        );
+        setProp(
+          this.slides_[showIndex],
+          CanRender,
+          this,
+          showIndex == newIndex
+        );
       } else {
-        owners.schedulePreload(this.element, this.slides_[showIndex]);
-        this.slides_[showIndex].setAttribute('aria-hidden', 'true');
+        const owners = Services.ownersForDoc(this.element);
+        if (showIndex == newIndex) {
+          owners.scheduleLayout(this.element, this.slides_[showIndex]);
+          owners.scheduleResume(this.element, this.slides_[showIndex]);
+          this.slides_[showIndex].setAttribute('aria-hidden', 'false');
+        } else {
+          owners.schedulePreload(this.element, this.slides_[showIndex]);
+          this.slides_[showIndex].setAttribute('aria-hidden', 'true');
+        }
       }
     });
     this.slidesContainer_./*OK*/ scrollLeft = this.getScrollLeftForIndex_(
@@ -817,10 +841,12 @@ export class AmpSlideScroll extends BaseSlides {
       }
       // Pause if not the current slide
       if (this.slideIndex_ != i) {
-        Services.ownersForDoc(this.element).schedulePause(
-          this.element,
-          this.slides_[i]
-        );
+        if (!RUNTIME2) {
+          Services.ownersForDoc(this.element).schedulePause(
+            this.element,
+            this.slides_[i]
+          );
+        }
       }
     }
   }
