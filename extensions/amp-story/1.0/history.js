@@ -81,8 +81,12 @@ export function getHistoryState(win, stateName) {
  */
 function getLocalStorageState(win) {
   // We definitely don't want to restore state from localStorage if the URL
-  // is explicit about the page that should be shown.
-  if (win.location.hash.indexOf('page=') != -1) {
+  // is explicit about it.
+  const {hash} = win.location;
+  if (
+    hash.indexOf('page=') != -1 ||
+    hash.indexOf('disableLocalStorage') != -1
+  ) {
     return undefined;
   }
   const container = getLocalStorageStateContainer(win);
