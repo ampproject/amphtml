@@ -814,7 +814,7 @@ export class AmpStoryPlayer {
    * @param {!Element} story
    * @param {!Element} iframe
    * @param {!VisibilityState} visibilityState
-   * @param {?EmbedMode} embedMode
+   * @param {EmbedMode=} embedMode
    * @private
    */
   layoutIframe_(story, iframe, visibilityState, embedMode) {
@@ -856,7 +856,7 @@ export class AmpStoryPlayer {
    * Gets encoded url for player usage.
    * @param {string} href
    * @param {VisibilityState=} visibilityState
-   * @param {?EmbedMode} embedMode If not provided, it will keep
+   * @param {?EmbedMode=} embedMode If not provided, it will keep
    *    the value provided by the user on the story URL. If not
    *    defined, the value EmbedMode.NOT_EMBEDDED will be used.
    * @return {!Location}
@@ -865,7 +865,7 @@ export class AmpStoryPlayer {
   getEncodedLocation_(
     href,
     visibilityState = VisibilityState.INACTIVE,
-    embedMode
+    embedMode = null
   ) {
     const noFragmentUrl = removeFragment(href);
     const originalFragmentString = getFragment(href);
