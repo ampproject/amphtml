@@ -71,9 +71,6 @@ export function VideoWrapper({
   'class': className,
   style,
   children,
-  'aria-label': ariaLabel,
-  'aria-labelledby': ariaLabelledby,
-  'aria-describedby': ariaDescribedby,
   ...rest
 }) {
   useResourcesNotify();
@@ -123,9 +120,6 @@ export function VideoWrapper({
     >
       <Component
         {...rest}
-        aria-label={ariaLabel}
-        aria-labelledby={ariaLabelledby}
-        aria-describedby={ariaDescribedby}
         ref={playerRef}
         muted={muted}
         controls={controls && (!autoplay || userInteracted)}
