@@ -7,7 +7,7 @@
       owners: [
         {name: 'itaykinnrot'},
         {name: 'ampproject/wg-ui-and-a11y'},
-        {name: '@mrhein'},
+        {name: 'mrhein'},
       ],
     },
   ],
