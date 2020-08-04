@@ -37,14 +37,6 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
   const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
 
-  function afterRenderPromise() {
-    return new Promise((resolve) => {
-      requestAnimationFrame(() => {
-        setTimeout(resolve);
-      });
-    });
-  }
-
   function buildStoryPlayer(
     numStories = 1,
     url = DEFAULT_CACHE_URL,
