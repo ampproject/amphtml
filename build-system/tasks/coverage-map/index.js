@@ -117,7 +117,7 @@ coverageMap.flags = {
   json:
     '  Customize the name of the JSON output from puppeteer (out.json by default).',
   url:
-    '  Set the URL for puppeteer testing, starting with  "http://localhost:[port number]..." (http://localhost:[port number]/examples/everything.amp.html by default).',
+    '  Set the URL for puppeteer testing, starting with  "http://localhost[:port_number]..." (http://localhost[:port_number]/examples/everything.amp.html by default).',
   html:
     '  Customize the name of the HTML output from source map explorer (out.html by default).',
   nodist:
