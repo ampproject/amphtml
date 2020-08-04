@@ -85,7 +85,7 @@ function getLocalStorageState(win) {
   const {hash} = win.location;
   if (
     hash.indexOf('page=') != -1 ||
-    hash.indexOf('disableLocalStorage') != -1
+    hash.indexOf('ignoreLocalStorageHistory') != -1
   ) {
     return undefined;
   }
