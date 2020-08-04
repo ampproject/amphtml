@@ -271,6 +271,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       Services.storyStoreServiceForOrNull(this.win).then((service) => {
         this.storeService_ = service;
         this.updateStoryStoreState_(null);
+        this.initializeListeners_();
       }),
       Services.storyRequestServiceForOrNull(this.win).then((service) => {
         this.requestService_ = service;
@@ -376,7 +377,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.initializeListeners_();
     return (this.backendDataPromise_ = this.element.hasAttribute('endpoint')
       ? this.retrieveInteractiveData_()
       : Promise.resolve());
