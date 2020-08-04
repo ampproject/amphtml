@@ -237,6 +237,11 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24113',
   },
   {
+    id: 'protocol-adapters',
+    name: 'Allow amp-list to get its data from amp-script functions.',
+    spec: 'https://github.com/ampproject/amphtml/issues/26474',
+  },
+  {
     id: 'adsense-ad-size-optimization',
     name:
       'Per publisher server side settings for changing the ad size ' +
@@ -277,10 +282,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26823',
   },
   {
-    id: 'random-subdomains-for-safeframe',
-    name: 'Enable Random Subdomains for SafeFrame',
-  },
-  {
     id: 'analytics-chunks',
     name: 'AMP Analytics Break long tasks to chunks (AMP docs only)',
     spec: 'https://github.com/ampproject/amphtml/issues/28435',
@@ -306,5 +307,10 @@ export const EXPERIMENTS = [
     id: 'expand-json-targeting',
     name: 'Allow CLIENT_ID in doubleclick json targeting feature',
     spec: 'https://github.com/ampproject/amphtml/issues/25190',
+  },
+  {
+    id: 'auto-ads-layout-callback',
+    name: 'Move ads placement into layoutCallback',
+    spec: 'https://github.com/ampproject/amphtml/issues/27068',
   },
 ];

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-social-share-1.0.css';
 import {Layout} from '../../../src/layout';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
@@ -24,7 +25,7 @@ import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getSocialConfig} from './social-share-config';
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
-import {user, userAssert} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-social-share';
@@ -87,12 +88,15 @@ class AmpSocialShare extends PreactBaseElement {
       return;
     }
 
+    this.element.classList.add(`amp-social-share-${type}`);
     this.renderWithHrefAndTarget_(typeConfig);
     const responsive =
       this.element.getAttribute('layout') === Layout.RESPONSIVE && '100%';
     return dict({
       'width': responsive || this.element.getAttribute('width'),
       'height': responsive || this.element.getAttribute('height'),
+      'color': 'currentColor',
+      'background': 'inherit',
     });
   }
 
@@ -113,10 +117,7 @@ class AmpSocialShare extends PreactBaseElement {
    */
   renderWithHrefAndTarget_(typeConfig) {
     const customEndpoint = this.element.getAttribute('data-share-endpoint');
-    const shareEndpoint = user().assertString(
-      customEndpoint || typeConfig['shareEndpoint'],
-      'The data-share-endpoint attribute is required. %s'
-    );
+    const shareEndpoint = customEndpoint || typeConfig['shareEndpoint'] || '';
     const urlParams = typeConfig['defaultParams'] || dict();
     Object.assign(urlParams, getDataParamsFromAttributes(this.element));
     const hrefWithVars = addParamsToUrl(shareEndpoint, urlParams);
@@ -158,11 +159,14 @@ class AmpSocialShare extends PreactBaseElement {
 AmpSocialShare['Component'] = SocialShare;
 
 /** @override */
+AmpSocialShare['passthroughNonEmpty'] = true;
+
+/** @override */
 AmpSocialShare['props'] = {
   'tabIndex': {attr: 'tabindex'},
   'type': {attr: 'type'},
 };
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpSocialShare);
+  AMP.registerElement(TAG, AmpSocialShare, CSS);
 });

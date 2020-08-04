@@ -998,7 +998,11 @@ const forbiddenTermsSrcInclusive = {
     message:
       'Due to various bugs in Firefox, you must use the computedStyle ' +
       'helper in style.js.',
-    allowlist: ['src/style.js', 'dist.3p/current/integration.js'],
+    allowlist: [
+      'src/style.js',
+      'dist.3p/current/integration.js',
+      'build-system/tasks/coverage-map/index.js',
+    ],
   },
   'decodeURIComponent\\(': {
     message:
@@ -1045,6 +1049,7 @@ const forbiddenTermsSrcInclusive = {
     allowlist: [
       'src/element-stub.js',
       'src/friendly-iframe-embed.js',
+      'src/friendly-iframe-embed-legacy.js',
       'src/polyfillstub/intersection-observer-stub.js',
       'src/runtime.js',
       'src/service/extensions-impl.js',
@@ -1085,6 +1090,7 @@ const forbiddenTermsSrcInclusive = {
       'src/base-element.js',
       'src/event-helper.js',
       'src/friendly-iframe-embed.js',
+      'src/friendly-iframe-embed-legacy.js',
       'src/service/performance-impl.js',
       'src/service/resources-impl.js',
       'src/service/url-replacements-impl.js',

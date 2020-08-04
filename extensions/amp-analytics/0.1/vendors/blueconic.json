@@ -2,9 +2,14 @@
   "requests": {
     "event": "https://${tenantId}/s/${pixelId}.gif?",
     "trackingIdentifier": "${event}property=${property}&${property}=${clientId(cid-scope-cookie-fallback-name)}${extraTrackingValues}",
-    "defaultTrackingValues": "${trackingIdentifier}&sourceUrl=${sourceUrl}&canonicalUrl=${canonicalUrl}&referrer=${documentReferrer}&title=${title}&visitDate=${timestamp}&geoLocation=${ampGeo}&userAgent=${userAgent}"
+    "defaultTrackingValues": "${trackingIdentifier}&sourceUrl=${sourceUrl}&canonicalUrl=${canonicalUrl}&referrer=${documentReferrer}&title=${title}&visitDate=${timestamp}&geoLocation=${ampGeo(ISOCountry)}&userAgent=${userAgent}"
   },
   "vars": {
     "extraTrackingValues": ""
+  },
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
   }
 }
