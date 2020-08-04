@@ -172,9 +172,10 @@ describes.realWin('head validation', {amp: true}, (env) => {
       head.innerHTML = `
         <style amp-custom></style>
         <style amp-keyframes></style>
+        <style amp4ads-boilerplate></style>
       `;
       const validated = processHead(env.win, adElement, head);
-      expect(validated.head.querySelectorAll('style')).to.have.length(2);
+      expect(validated.head.querySelectorAll('style')).to.have.length(3);
     });
 
     it('removes other styles', () => {
