@@ -95,7 +95,7 @@ async function coverageMap() {
   puppeteer = require('puppeteer');
   explore = require('source-map-explorer').explore;
 
-  if (!argv.nodist) {
+  if (!argv.nobuild) {
     await dist();
   }
   await startServer(
@@ -120,7 +120,7 @@ coverageMap.flags = {
     '  Set the URL for puppeteer testing, starting with  "http://localhost:[port number]..." (http://localhost:[port number]/examples/everything.amp.html by default).',
   html:
     '  Customize the name of the HTML output from source map explorer (out.html by default).',
-  nodist:
+  nobuild:
     "  Skips dist build. Your working directory should be dist if you're using this flag.",
   port:
     '  Customize the port number of the local AMP server (8000 by default).',
