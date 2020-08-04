@@ -44,7 +44,9 @@ export class AmpInputmaskService {
    * Install the inputmask service and controllers.
    */
   install() {
-    const maskElements = this.ampdoc.getRootNode().querySelectorAll('[mask]');
+    const maskElements = this.ampdoc
+      .getRootNode()
+      .querySelectorAll('input[mask]');
     iterateCursor(maskElements, (element) => {
       if (TextMask.isMasked(element)) {
         return;
