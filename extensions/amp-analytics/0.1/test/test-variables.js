@@ -23,6 +23,7 @@ import {
   variableServiceForDoc,
 } from '../variables';
 import {Services} from '../../../../src/services';
+import {forceExperimentBranch} from '../../../../src/experiments';
 import {
   installLinkerReaderService,
   linkerReaderServiceFor,
@@ -495,6 +496,25 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
 
     it('should replace CUMULATIVE_LAYOUT_SHIFT', () => {
       return check('CUMULATIVE_LAYOUT_SHIFT', '1');
+    });
+
+    it('should expand EXPERIMENT_BRANCHES to name:value comma separated list', () => {
+      forceExperimentBranch(env.win, 'exp1', '1234');
+      forceExperimentBranch(env.win, 'exp2', '5678');
+      return check('EXPERIMENT_BRANCHES', 'exp1%3A1234%2Cexp2%3A5678');
+    });
+
+    it('EXPERIMENT_BRANCHES should be empty string if no branches', () => {
+      return check('EXPERIMENT_BRANCHES', '');
+    });
+
+    it('should expand EXPERIMENT_BRANCHES(expName) to experiment value', () => {
+      forceExperimentBranch(env.win, 'exp1', '1234');
+      return check('EXPERIMENT_BRANCHES(exp1)', '1234');
+    });
+
+    it('EXPERIMENT_BRANCHES(expName) should be empty string if not set', () => {
+      return check('EXPERIMENT_BRANCHES(exp1)', '');
     });
 
     describe('$MATCH', () => {
