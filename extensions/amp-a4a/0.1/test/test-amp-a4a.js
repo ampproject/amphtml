@@ -137,6 +137,16 @@ describes.realWin('no signing', {amp: true}, (env) => {
     );
   });
 
+  it('FIE should contain <base> with adurl', async () => {
+    await a4a.buildCallback();
+    a4a.onLayoutMeasure();
+    await a4a.layoutCallback();
+    const fie = doc.body.querySelector('iframe[srcdoc]');
+    const base = fie.contentDocument.querySelector('base');
+    expect(base).to.be.ok;
+    expect(base.href).to.equal('https://adnetwork.com/');
+  });
+
   it('should complete the rendering FIE', async () => {
     const prioritySpy = env.sandbox.spy(a4a, 'updateLayoutPriority');
     await a4a.buildCallback();
