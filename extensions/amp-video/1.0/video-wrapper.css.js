@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
+export const fillStretch = {
+  'position': 'relative',
+  'width': '100%',
+  'height': '100%',
+};
+
 export const fillContentOverlay = {
-  position: 'absolute',
-  left: 0,
-  right: 0,
-  bottom: 0,
-  top: 0,
-  zIndex: 1,
+  'position': 'absolute',
+  'left': 0,
+  'right': 0,
+  'bottom': 0,
+  'top': 0,
 };

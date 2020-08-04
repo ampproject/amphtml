@@ -20,7 +20,7 @@ import {Deferred} from '../../../src/utils/promise';
 import {MIN_VISIBILITY_RATIO_FOR_AUTOPLAY} from '../../../src/video-interface';
 import {cssText as autoplayCss} from '../../../build/video-autoplay.css';
 import {dict} from '../../../src/utils/object';
-import {fillContentOverlay} from './video-wrapper.css';
+import {fillContentOverlay, fillStretch} from './video-wrapper.css';
 import {once} from '../../../src/utils/function';
 import {
   parseFavicon,
@@ -68,8 +68,12 @@ export function VideoWrapper({
   controls = false,
   noaudio = false,
   mediasession = true,
-  'aria-label': ariaLabel,
+  'class': className,
+  style,
   children,
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledby,
+  'aria-describedby': ariaDescribedby,
   ...rest
 }) {
   useResourcesNotify();
@@ -110,8 +114,9 @@ export function VideoWrapper({
 
   return (
     <ContainWrapper
-      {...rest}
       contentRef={wrapperRef}
+      class={className}
+      style={style}
       size={true}
       layout={true}
       paint={true}
@@ -119,6 +124,8 @@ export function VideoWrapper({
       <Component
         {...rest}
         aria-label={ariaLabel}
+        aria-labelledby={ariaLabelledby}
+        aria-describedby={ariaDescribedby}
         ref={playerRef}
         muted={muted}
         controls={controls && (!autoplay || userInteracted)}
@@ -132,6 +139,7 @@ export function VideoWrapper({
         }}
         onPlaying={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
+        style={fillStretch}
       >
         {children}
       </Component>
@@ -190,7 +198,14 @@ function Autoplay({
       {displayIcon && (
         <div
           class={`amp-video-eq ${playing ? `amp-video-eq-play` : ''}`}
-          style={{display: 'flex'}}
+          // Legacy AMP (VideoManager) toggles this icon by a CSS selector.
+          // We need display: flex here to override VideoManager's default
+          // styling, since we're rendering this only when necessary, e.g.
+          // visible.
+          // TODO(alanorozco): We can probably simplify this by normalizing
+          // tree presence in legacy AMP (or if we no longer need the
+          // VideoManager).
+          style={{'display': 'flex'}}
         >
           <AutoplayIconContent />
         </div>
