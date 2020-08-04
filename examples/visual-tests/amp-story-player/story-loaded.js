@@ -16,11 +16,12 @@
 'use strict';
 
 module.exports = {
-  'story loaded': async page => {
-    await page.$eval('amp-story-player', e => {
-      new Promise(resolve => {
-        e.addEventListener('ready', (readyEvent) => resolve(readyEvent));
-      })
+  'player ready': async page => {
+    await page.waitFor(2000);
+    await page.$eval('iframe', (iframe) => {
+      iframe.src = '';
+      iframe.srcdoc = '<html><head></head><body style=\"background: darkgray;\"></body></html>';
     });
+    await page.waitFor(1000);
   }
 };
