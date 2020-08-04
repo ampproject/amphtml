@@ -184,7 +184,7 @@ export class ContextNode {
 
     /**
      * Parent should be mostly meaningless to most API clients, because
-     * it's an async concept: a parent context node can can be insantiated at
+     * it's an async concept: a parent context node can can be instantiated at
      * any time and it doesn't mean that this node has to change. This is
      * why the API is declared as package-private. However, it needs to be
      * unobfuscated to avoid cross-binary issues.
@@ -202,6 +202,9 @@ export class ContextNode {
 
     /** @package {!Values} */
     this.values = new Values(this);
+
+    /** @private {?Map<*, !./component.Component>} */
+    this.components_ = null;
 
     /** @private {boolean} */
     this.parentOverridden_ = false;
@@ -224,6 +227,14 @@ export class ContextNode {
     if (this.isDiscoverable()) {
       this.scheduleDiscover_();
     }
+  }
+
+  /**
+   * @return {boolean}
+   * @protected Used cross-binary.
+   */
+  isDiscoverable() {
+    return !this.isRoot && !this.parentOverridden_;
   }
 
   /**
@@ -266,6 +277,14 @@ export class ContextNode {
       // Make sure the tree changes have been reflected for values.
       this.values.rootUpdated();
 
+      // Make sure the tree changes have been reflected for components.
+      const components = this.components_;
+      if (components) {
+        components.forEach((comp) => {
+          comp.rootUpdated();
+        });
+      }
+
       // Propagate the root to the subtree.
       if (this.children) {
         this.children.forEach((child) => child.updateRoot(root));
@@ -274,11 +293,38 @@ export class ContextNode {
   }
 
   /**
-   * @return {boolean}
-   * @protected Used cross-binary.
+   * Add or update a component with a specified ID. If component doesn't
+   * yet exist, it will be created using the specified factory. The use
+   * of factory is important to reduce bundling costs for context node.
+   *
+   * @param {*} id
+   * @param {./component.ComponentFactoryDef} factory
+   * @param {!Function} func
+   * @param {!Array<!ContextProp>} deps
+   * @param {*} input
    */
-  isDiscoverable() {
-    return !this.isRoot && !this.parentOverridden_;
+  setComponent(id, factory, func, deps, input) {
+    const components = this.components_ || (this.components_ = new Map());
+    let comp = components.get(id);
+    if (!comp) {
+      comp = factory(id, this, func, deps);
+      components.set(id, comp);
+    }
+    comp.set(input);
+  }
+
+  /**
+   * Removes the component previously set with `setComponent`.
+   *
+   * @param {*} id
+   */
+  removeComponent(id) {
+    const components = this.components_;
+    const comp = components && components.get(id);
+    if (comp) {
+      comp.dispose();
+      components.delete(id);
+    }
   }
 
   /**
