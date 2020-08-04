@@ -168,13 +168,12 @@
 #ifndef HTMLPARSER__ALLOCATOR_H_
 #define HTMLPARSER__ALLOCATOR_H_
 
-#include <array>
 #include <unistd.h>  // For getpagesize()
+
+#include <array>
 #include <vector>
 
 namespace htmlparser {
-
-class AllocatorTest;
 
 template <class T>
 class Allocator {
