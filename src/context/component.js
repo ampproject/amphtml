@@ -59,7 +59,12 @@ export class Component {
     /** @private @const {!Array<!ContextProp>} */
     this.deps_ = deps;
 
-    /** @private @const {!Array} */
+    /**
+     * @private @const {!Array}
+     *
+     * Start with a pre-allocated array filled with `undefined`. The filling
+     * is important to ensure the correct `Array.every` execution.
+     */
     this.depValues_ = deps.length > 0 ? deps.map(EMPTY_FUNC) : EMPTY_ARRAY;
 
     /** @private @const {!Array<function(*)>} */

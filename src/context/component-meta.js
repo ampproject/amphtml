@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import {devAssert} from '../log';
-import {isArray} from '../types';
-
 const EMPTY_DEPS = [];
 
 /**
@@ -27,25 +24,13 @@ const EMPTY_DEPS = [];
  *
  * Returns the provided function with metadata attached to it.
  *
- * @param {...?} args
+ * @param {!Array<!ContextProp>} deps
+ * @param {function(...?):?} func
+ * @param {string=} opt_key
  * @return {function(...?):?}
  */
-export function withMetaData(...args) {
-  let func, deps, key;
-  for (let i = 0; i < args.length; i++) {
-    const arg = args[i];
-    if (typeof arg == 'function') {
-      func = arg;
-    } else if (typeof arg == 'string') {
-      key = arg;
-    } else if (isArray(arg)) {
-      deps = arg;
-    } else {
-      devAssert(false);
-    }
-  }
-  devAssert(func);
-  return setMetaData(func, deps, key);
+export function withMetaData(deps, func, opt_key) {
+  return setMetaData(func, deps, opt_key);
 }
 
 /**

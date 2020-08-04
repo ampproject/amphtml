@@ -35,7 +35,7 @@ const NonRecursive = contextProp('NonRecursive');
 const Concat = contextProp('Concat', {
   needsParent: true,
   compute: (contextNode, inputs, parentValue) =>
-    `${parentValue}${inputs.length > 1 ? `(${inputs.join('|')})` : inputs[0]}`,
+    `${parentValue}${inputs.join('|')}`,
   defaultValue: '',
 });
 
@@ -162,7 +162,7 @@ describes.realWin('ContextNode - components', {}, (env) => {
 
       beforeEach(() => {
         component1Spy = sandbox.spy();
-        Component1 = withMetaData(component1Spy);
+        Component1 = withMetaData([], component1Spy);
 
         componentWithDepsSpy = sandbox.spy();
         ComponentWithDeps = withMetaData(
