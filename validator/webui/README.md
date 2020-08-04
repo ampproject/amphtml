@@ -52,7 +52,6 @@ By default this tool will assume you want to validate an `AMPHTML` document. If 
 ```http
 #htmlFormat=AMP4ADS
 #htmlFormat=AMP4EMAIL
-#htmlFormat=ACTIONS
 ```
 
 If you wish to use both the `doc=` and `htmlFormat=` together make sure to include an `&` between the key-value pairs.
