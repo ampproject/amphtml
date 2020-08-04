@@ -49,10 +49,3 @@ var VideoWrapperProps;
  * }}
  */
 var VideoAutoplayProps;
-
-/**
- * @typedef {{
- *   playing: boolean,
- * }}
- */
-var VideoAutoplayIconProps;
