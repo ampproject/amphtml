@@ -128,16 +128,19 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   });
 
   it('should correctly append params at the end of a story url with existing params', async () => {
-    const existingParams = '?testParam=true#myhash=hashValue';
-    buildStoryPlayer(1, DEFAULT_CACHE_URL + existingParams);
+    const existingQuery = '?testParam=true';
+    const existingHash = '#myhash=hashValue';
+    buildStoryPlayer(1, DEFAULT_CACHE_URL + existingQuery + existingHash);
     await manager.loadPlayers();
 
     const storyIframe = playerEl.shadowRoot.querySelector('iframe');
 
     expect(storyIframe.getAttribute('src')).to.equals(
       DEFAULT_CACHE_URL +
-        existingParams +
-        '&amp_js_v=0.1#visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
+        existingQuery +
+        '&amp_js_v=0.1' +
+        existingHash +
+        '&visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
         '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe&embedMode=0'
     );
   });
