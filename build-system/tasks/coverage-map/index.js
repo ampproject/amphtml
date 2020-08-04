@@ -29,7 +29,6 @@ const testUrl =
   argv.url || `http://localhost:${serverPort}/examples/everything.amp.html`;
 const outHtml = argv.html || 'coverage.html';
 const inputJs = argv.file || 'v0.js';
-const scrollDistance = 100;
 
 async function collectCoverage() {
   log(`Opening browser and navigating to ${testUrl}...`);
@@ -63,6 +62,7 @@ async function autoScroll(page) {
   await page.evaluate(async () => {
     await new Promise((resolve, opt_) => {
       let totalHeight = 0;
+      const scrollDistance = 100;
       const distance = scrollDistance;
       const timer = setInterval(() => {
         const {scrollHeight} = document.body;
@@ -80,7 +80,7 @@ async function autoScroll(page) {
 
 async function generateMap() {
   log(
-    `Generating heat map in dist/${outHtml}, based on ${coverageJsonName}...`
+    `Generating heat map in dist/${outHtml} of ${inputJs}, based on ${coverageJsonName}...`
   );
   await explore(`dist/${inputJs}`, {
     output: {format: 'html', filename: `${outHtml}`},
