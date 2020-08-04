@@ -69,6 +69,9 @@ export class AmpStoryEntryPoint {
 
     /** @private {!Array<!HTMLAnchorElement>} */
     this.stories_ = [];
+
+
+    this.scrollX_ = 0;
   }
 
   /** @public */
@@ -249,26 +252,24 @@ export class AmpStoryEntryPoint {
    * @private
    */
   addScrollingToArrows_(leftButton, rightButton) {
-    const container = this.rootEl_.querySelector('div.entry-points');
-    let interval;
+    const cards = this.rootEl_.querySelectorAll('div.entry-point-card-container');
+    let card;
 
-    rightButton.addEventListener('mousedown', () => {
-      interval = setInterval(function () {
-        container.scrollLeft += 10;
-      }, 50);
+    rightButton.addEventListener('click', () => {
+      this.scrollX_ = this.scrollX_ <= -100 ? -100 : this.scrollX_ - 50;
+
+      for(card of cards){
+        card.style.transform = 'translateX(' + this.scrollX_ + 'px)';
+      }
     });
 
-    leftButton.addEventListener('mousedown', () => {
-      interval = setInterval(function () {
-        container.scrollLeft -= 10;
-      }, 50);
+    leftButton.addEventListener('click', () => {
+      this.scrollX_ = this.scrollX_ >= 0 ? 0 : this.scrollX_ + 50;
+
+      for(card of cards){
+        card.style.transform = 'translateX(' + this.scrollX_ + 'px)';
+      }
     });
-
-    rightButton.addEventListener('mouseout', () => clearInterval(interval));
-    leftButton.addEventListener('mouseout', () => clearInterval(interval));
-
-    rightButton.addEventListener('mouseup', () => clearInterval(interval));
-    leftButton.addEventListener('mouseup', () => clearInterval(interval));
   }
 
   /**
