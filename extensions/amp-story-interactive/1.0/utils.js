@@ -16,7 +16,6 @@
 
 import {Action} from '../../amp-story/1.0/amp-story-store-service';
 import {map} from '../../../src/utils/object';
-import {toArray} from '../../../src/types';
 import {user} from '../../../src/log';
 
 export const updateInteractiveStoreState = (storeService, interactive) => {
