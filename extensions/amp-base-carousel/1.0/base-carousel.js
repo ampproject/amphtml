@@ -16,7 +16,6 @@
 import * as Preact from '../../../src/preact';
 import {ArrowNext, ArrowPrev} from './arrow';
 import {Scroller} from './scroller';
-import {forwardRef} from '../../../src/preact/compat';
 import {toChildArray, useRef, useState} from '../../../src/preact';
 import {useMountEffect} from '../../../src/preact/utils';
 
@@ -59,14 +58,14 @@ export function BaseCarousel({
     !loop && (curSlide + dir < 0 || curSlide + dir >= length);
   return (
     <div {...rest}>
-      <ScrollerWithRef
+      <Scroller
         loop={loop}
         restingIndex={curSlide}
         setRestingIndex={setRestingIndex}
         ref={scrollRef}
       >
         {childrenArray}
-      </ScrollerWithRef>
+      </Scroller>
       <ArrowPrev
         customArrow={arrowPrev}
         disabled={disableForDir(-1)}
@@ -80,8 +79,3 @@ export function BaseCarousel({
     </div>
   );
 }
-
-const ScrollerWithRef = forwardRef((props, ref) =>
-  Scroller(/** @type {BaseCarouselDef.ScrollerProps} */ ({ref, ...props}))
-);
-ScrollerWithRef.displayName = 'Scroller'; // Make findable for tests.

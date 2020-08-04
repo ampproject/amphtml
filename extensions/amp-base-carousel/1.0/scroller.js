@@ -17,6 +17,7 @@ import * as Preact from '../../../src/preact';
 import * as styles from './base-carousel.css';
 import {WithAmpContext} from '../../../src/preact/context';
 import {debounce} from '../../../src/utils/rate-limit';
+import {forwardRef} from '../../../src/preact/compat';
 import {mod} from '../../../src/utils/math';
 import {setStyle} from '../../../src/style';
 import {useLayoutEffect, useMemo, useRef} from '../../../src/preact';
@@ -33,9 +34,13 @@ const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
 
 /**
  * @param {!BaseCarouselDef.ScrollerProps} props
+ * @param {{current: (Element|null)}} ref
  * @return {PreactDef.Renderable}
  */
-export function Scroller({children, loop, ref, restingIndex, setRestingIndex}) {
+export function ScrollerWithRef(
+  {children, loop, restingIndex, setRestingIndex},
+  ref
+) {
   /**
    * The number of slides we want to place before the
    * reference or resting index. Only needed if loop=true.
@@ -132,6 +137,11 @@ export function Scroller({children, loop, ref, restingIndex, setRestingIndex}) {
     </div>
   );
 }
+
+export const Scroller = forwardRef((props, ref) =>
+  ScrollerWithRef(/** @type {BaseCarouselDef.ScrollerProps} */ (props), ref)
+);
+Scroller.displayName = 'Scroller'; // Make findable for tests.
 
 /**
  * How the slides are ordered when looping:
