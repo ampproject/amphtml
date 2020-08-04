@@ -23,8 +23,10 @@ import {
   addParamsToUrl,
   getFragment,
   isProxyOrigin,
+  parseQueryString,
   parseUrlWithA,
   removeFragment,
+  serializeQueryString,
 } from '../url';
 import {applySandbox} from '../3p-frame';
 import {createCustomEvent} from '../event-helper';
@@ -870,28 +872,33 @@ export class AmpStoryPlayer {
   getEncodedLocation_(
     href,
     visibilityState = VisibilityState.INACTIVE,
-    embedMode = EmbedMode.NOT_EMBEDDED
+    embedMode
   ) {
-    const params = dict({
+    const noFragmentUrl = removeFragment(href);
+    const originalFragmentString = getFragment(href);
+    const {originalEmbedMode, ...originalFragments} = parseQueryString(
+      originalFragmentString
+    ); // Predefined embedMode is treated separately so we don't override it
+
+    const queryParams = dict({
       'amp_js_v': '0.1',
+    });
+
+    const fragmentParams = dict({
+      ...originalFragments,
       'visibilityState': visibilityState,
       'origin': this.win_.origin,
       'showStoryUrlInfo': '0',
       'storyPlayer': 'v0',
       'cap': 'swipe',
-      [EmbedModeParam]: embedMode,
+      [EmbedModeParam]:
+        embedMode ?? originalEmbedMode ?? EmbedMode.NOT_EMBEDDED,
     });
 
-    const fragmentParam = getFragment(href);
-    const noFragmentUrl = removeFragment(href);
-    let inputUrl = addParamsToUrl(noFragmentUrl, params);
-
-    // Prepend fragment of original url.
-    const prependFragment = (match) => {
-      // Remove the last '&' after amp_js_v=0.1 and replace with a '#'.
-      return fragmentParam + match.slice(0, -1) + '#';
-    };
-    inputUrl = inputUrl.replace(/[?&]amp_js_v=0.1&/, prependFragment);
+    let inputUrl =
+      addParamsToUrl(noFragmentUrl, queryParams) +
+      '#' +
+      serializeQueryString(fragmentParams);
 
     return parseUrlWithA(
       /** @type {!HTMLAnchorElement} */ (this.cachedA_),
