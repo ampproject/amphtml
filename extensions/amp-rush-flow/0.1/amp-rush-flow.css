@@ -1,0 +1,363 @@
+/**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+ amp-rush-flow {
+    overflow: hidden !important;
+    background: rgba(81, 255, 0, 0.7);
+ }
+
+ amp-rush-flow.top {
+    top: 0;
+    position: fixed;
+    z-index: 99;
+}
+
+amp-rush-flow.top-right {
+    top: 0;
+    right: 0;
+    position: fixed;
+    z-index: 99;
+}
+
+amp-rush-flow.top-center {
+    top: 0;
+    width: 100%;
+    position: fixed;
+    z-index: 99;
+}
+
+amp-rush-flow.bottom {
+    bottom: 0;
+    position: fixed;
+    z-index: 99;
+}
+
+amp-rush-flow.bottom-right {
+    bottom: 0;
+    right:0;
+    position: fixed;
+    z-index: 99;
+}
+
+amp-rush-flow.bottom-center {
+    bottom: 0;
+    width: 100%;
+    position: fixed;
+    z-index: 99;
+}
+
+amp-rush-flow.hidden {
+    display: none;
+}
+
+amp-rush-flow.visible {
+    display: block;
+}
+
+.ext-rush-flow__full-width {
+    width: 100%;
+}
+  
+.ext-rush-flow__mt-10 {
+    margin-top: 10px;
+}
+  
+.ext-rush-flow__mt-20 {
+    margin-top: 20px;
+}
+  
+.ext-rush-flow__mt-30 {
+    margin-top: 30px;
+}
+  
+.ext-rush-flow__mt-40 {
+    margin-top: 40px;
+}
+  
+.ext-rush-flow__mt-50 {
+    margin-top: 50px;
+}
+  
+.ext-rush-flow__mt-60 {
+    margin-top: 60px;
+}
+  
+.ext-rush-flow__mt-70 {
+    margin-top: 70px;
+}
+  
+.ext-rush-flow__mt-80 {
+    margin-top: 80px;
+}
+  
+.ext-rush-flow__mt-90 {
+    margin-top: 90px;
+}
+  
+.ext-rush-flow__mt-100 {
+    margin-top: 100px;
+}
+  
+.ext-rush-flow__mr-10 {
+    margin-right: 10px;
+}
+  
+.ext-rush-flow__mr-20 {
+    margin-right: 20px;
+}
+  
+.ext-rush-flow__mr-30 {
+    margin-right: 30px;
+}
+  
+.ext-rush-flow__mr-40 {
+    margin-right: 40px;
+}
+  
+.ext-rush-flow__mr-50 {
+    margin-right: 50px;
+}
+  
+.ext-rush-flow__mr-60 {
+    margin-right: 60px;
+}
+  
+.ext-rush-flow__mr-70 {
+    margin-right: 70px;
+}
+  
+.ext-rush-flow__mr-80 {
+    margin-right: 80px;
+}
+  
+.ext-rush-flow__mr-90 {
+    margin-right: 90px;
+}
+  
+.ext-rush-flow__mr-100 {
+    margin-right: 100px;
+}
+  
+.ext-rush-flow__mb-10 {
+    margin-bottom: 10px;
+}
+  
+.ext-rush-flow__mb-20 {
+    margin-bottom: 20px;
+}
+  
+.ext-rush-flow__mb-30 {
+    margin-bottom: 30px;
+}
+  
+.ext-rush-flow__mb-40 {
+    margin-bottom: 40px;
+}
+  
+.ext-rush-flow__mb-50 {
+    margin-bottom: 50px;
+}
+  
+.ext-rush-flow__mb-60 {
+    margin-bottom: 60px;
+}
+  
+.ext-rush-flow__mb-70 {
+    margin-bottom: 70px;
+}
+  
+.ext-rush-flow__mb-80 {
+    margin-bottom: 80px;
+}
+  
+.ext-rush-flow__mb-90 {
+    margin-bottom: 90px;
+}
+  
+.ext-rush-flow__mb-100 {
+    margin-bottom: 100px;
+}
+  
+.ext-rush-flow__ml-10 {
+    margin-left: 10px;
+}
+  
+.ext-rush-flow__ml-20 {
+    margin-left: 20px;
+}
+  
+.ext-rush-flow__ml-30 {
+    margin-left: 30px;
+}
+  
+.ext-rush-flow__ml-40 {
+    margin-left: 40px;
+}
+  
+.ext-rush-flow__ml-50 {
+    margin-left: 50px;
+}
+  
+.ext-rush-flow__ml-60 {
+    margin-left: 60px;
+}
+  
+.ext-rush-flow__ml-70 {
+    margin-left: 70px;
+}
+  
+.ext-rush-flow__ml-80 {
+    margin-left: 80px;
+}
+  
+.ext-rush-flow__ml-90 {
+    margin-left: 90px;
+}
+  
+.ext-rush-flow__ml-100 {
+    margin-left: 100px;
+}
+  
+.ext-rush-flow_slide-in-top {
+    animation: slide-in-top 1s;
+    animation-timing-function: cubic-bezier(.82, .1, .14, 1.12);
+}
+  
+@keyframes slide-in-top {
+    0% {
+      opacity: 0;
+      transform: translateY(-200%);
+}
+    75% {
+      opacity: 1;
+}
+    100% {
+      transform: translateY(0);
+    }
+}
+  
+.ext-rush-flow_slide-in-right {
+    animation: slide-in-right 1s;
+    animation-timing-function: cubic-bezier(.82, .1, .14, 1.12);
+}
+  
+@keyframes slide-in-right {
+    0% {
+      opacity: 0;
+      transform: translateX(200%);
+}
+    75% {
+      opacity: 1;
+}
+    100% {
+      transform: translateX(0);
+    }
+}
+  
+.ext-rush-flow_slide-in-bottom {
+    animation: slide-in-bottom 1s;
+    animation-timing-function: cubic-bezier(.82, .1, .14, 1.12);
+}
+  
+@keyframes slide-in-bottom {
+    0% {
+      opacity: 0;
+      transform: translateY(200%);
+}
+    75% {
+      opacity: 1;
+}
+    100% {
+      transform: translateY(0);
+    }
+}
+  
+.ext-rush-flow_slide-in-left {
+    animation: slide-in-left 1s;
+    animation-timing-function: cubic-bezier(.82, .1, .14, 1.12);
+}
+
+@keyframes slide-in-left {
+    0% {
+      opacity: 0;
+      transform: translateX(-200%);
+}
+    75% {
+      opacity: 1;
+}
+    100% {
+      transform: translateX(0);
+    }
+}
+  
+.ext-rush-flow_slide-out-top {
+    opacity: 0;
+    transform: translateY(-200%);
+    transition: transform 1.5s  ease-out, opacity 1.5s;
+}
+  
+.ext-rush-flow_slide-out-right {
+    opacity: 0;
+    transform: translateX(200%);
+    transition: transform 1.5s  ease-out, opacity 1.5s;
+}
+  
+.ext-rush-flow_slide-out-bottom {
+    opacity: 0;
+    transform: translateY(200%);
+    transition: transform 1.5s  ease-out, opacity 1.5s;
+}
+  
+.ext-rush-flow_slide-out-left {
+    opacity: 0;
+    transform: translateX(-200%);
+    transition: transform 1.5s  ease-out, opacity 1.5s;
+}
+  
+.ext-rush-flow_fade-in {
+    animation: fade-in 1s;
+}
+  
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+      transform: scale(1.25);
+}
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+}
+  
+.ext-rush-flow_fade-out {
+    opacity: 0;
+    transform: scale(1.25);
+    transition: transform .5s  ease-out, opacity .5s;
+}
+  
+.ext-rush-flow_gradient-fade-top {
+    padding-bottom: 150px;
+    background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 75%);
+}
+  
+.ext-rush-flow_gradient-fade-bottom {
+    padding-top: 150px;
+    background: linear-gradient(0deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 75%);
+}
+  
+.ext-rush-flow_gradient-fade-bottom .widget-container{
+    height: 50%;
+}
