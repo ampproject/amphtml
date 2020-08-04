@@ -23,6 +23,7 @@
 
 import {dev, user} from './log';
 import {getMode} from './mode';
+import {getTopWindow} from './service';
 import {hasOwn} from './utils/object';
 import {parseQueryString} from './url';
 
@@ -362,6 +363,21 @@ export function getExperimentBranch(win, experimentName) {
   return win.__AMP_EXPERIMENT_BRANCHES
     ? win.__AMP_EXPERIMENT_BRANCHES[experimentName]
     : null;
+}
+
+/**
+ * Returns an object containing all active experiment branches on the
+ * top Window.
+ *
+ * @param {!Window} win Window context to check for experiment state.
+ * @return {!Object} contains all experiment branches and their ids.
+ */
+export function getActiveExperimentBranches(win) {
+  const topWin = getTopWindow(win);
+  if (!topWin.__AMP_EXPERIMENT_BRANCHES) {
+    topWin.__AMP_EXPERIMENT_BRANCHES = {};
+  }
+  return {...topWin.__AMP_EXPERIMENT_BRANCHES};
 }
 
 /**
