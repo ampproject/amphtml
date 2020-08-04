@@ -202,7 +202,11 @@ function handleLink(fonts, images, link) {
  * @param {!Element} style
  */
 function handleStyle(style) {
-  if (style.hasAttribute('amp-custom') || style.hasAttribute('amp-keyframes')) {
+  if (
+    style.hasAttribute('amp-custom') ||
+    style.hasAttribute('amp-keyframes') ||
+    style.hasAttribute('amp4ads-boilerplate')
+  ) {
     return;
   }
   removeElement(style);
