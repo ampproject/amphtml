@@ -869,16 +869,12 @@ export class AmpStoryPlayer {
   ) {
     const noFragmentUrl = removeFragment(href);
     const originalFragmentString = getFragment(href);
-    const {originalEmbedMode, ...originalFragments} = parseQueryString(
-      originalFragmentString
-    ); // Predefined embedMode is treated separately so we don't override it
+    const {
+      embedMode: originalEmbedMode, // Original embedMode is treated separately so we don't override it
+      ...originalFragments
+    } = parseQueryString(originalFragmentString);
 
-    const queryParams = dict({
-      'amp_js_v': '0.1',
-    });
-
-    const fragmentParams = dict({
-      ...originalFragments,
+    const newFragments = dict({
       'visibilityState': visibilityState,
       'origin': this.win_.origin,
       'showStoryUrlInfo': '0',
@@ -888,7 +884,13 @@ export class AmpStoryPlayer {
         embedMode ?? originalEmbedMode ?? EmbedMode.NOT_EMBEDDED,
     });
 
-    let inputUrl =
+    const queryParams = dict({
+      'amp_js_v': '0.1',
+    });
+
+    const fragmentParams = Object.assign(originalFragments, newFragments);
+
+    const inputUrl =
       addParamsToUrl(noFragmentUrl, queryParams) +
       '#' +
       serializeQueryString(fragmentParams);
