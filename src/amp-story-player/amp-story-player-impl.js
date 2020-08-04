@@ -372,9 +372,7 @@ export class AmpStoryPlayer {
         // In case it is the first story, it becomes immediately visibile
         idx === 0 ? VisibilityState.VISIBLE : VisibilityState.PRERENDER,
         // Autoplaying is applied even if the first story is added dynamically
-        idx === 0 && this.isAutoplaying_
-          ? EmbedMode.PREVIEW
-          : EmbedMode.NOT_EMBEDDED
+        idx === 0 && this.isAutoplaying_ ? EmbedMode.PREVIEW : undefined
       );
     }
   }
@@ -548,9 +546,7 @@ export class AmpStoryPlayer {
         story,
         iframe,
         idx === 0 ? VisibilityState.VISIBLE : VisibilityState.PRERENDER,
-        idx === 0 && this.isAutoplaying_
-          ? EmbedMode.PREVIEW
-          : EmbedMode.NOT_EMBEDDED
+        idx === 0 && this.isAutoplaying_ ? EmbedMode.PREVIEW : undefined
       );
     }
 
