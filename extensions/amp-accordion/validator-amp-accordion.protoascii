@@ -35,8 +35,6 @@ tags: {  # amp-accordion
     name: "amp-accordion"
     # AMP4EMAIL doesn't allow version: "latest".
     version: "0.1"
-    requires_usage: EXEMPTED
-    deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
 }
