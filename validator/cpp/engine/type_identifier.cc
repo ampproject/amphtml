@@ -31,8 +31,6 @@ std::string TypeIdentifierToString(TypeIdentifier type_identifier) {
       return "amp4ads";
     case TypeIdentifier::kEmail:
       return "amp4email";
-    case TypeIdentifier::kActions:
-      return "actions";
     case TypeIdentifier::kTransformed:
       return "transformed";
     case TypeIdentifier::kExperimental:
@@ -75,9 +73,6 @@ TypeIdentifier GetTypeIdentifier(absl::string_view type_identifier) {
       CaseEqual(type_identifier, "\u26a14email") ||
       CaseEqual(type_identifier, "\u26a1\ufe0f4email")) {
     return TypeIdentifier::kEmail;
-  }
-  if (CaseEqual(type_identifier, "actions")) {
-    return TypeIdentifier::kActions;
   }
   if (CaseEqual(type_identifier, "transformed")) {
     return TypeIdentifier::kTransformed;

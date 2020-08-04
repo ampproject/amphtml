@@ -33,9 +33,6 @@ TEST(TypeIdentifier, TypeIdentifierToString) {
           amp::validator::TypeIdentifier::kEmail),
       "amp4email");
   EXPECT_EQ(amp::validator::TypeIdentifierToString(
-                amp::validator::TypeIdentifier::kActions),
-            "actions");
-  EXPECT_EQ(amp::validator::TypeIdentifierToString(
                 amp::validator::TypeIdentifier::kTransformed),
             "transformed");
   EXPECT_EQ(amp::validator::TypeIdentifierToString(
@@ -74,8 +71,6 @@ TEST(TypeIdentifier, GetTypeIdentifierFromString) {
             amp::validator::TypeIdentifier::kEmail);
   EXPECT_EQ(amp::validator::GetTypeIdentifier("\u26a1\ufe0f4email"),
             amp::validator::TypeIdentifier::kEmail);
-  EXPECT_EQ(amp::validator::GetTypeIdentifier("actions"),
-            amp::validator::TypeIdentifier::kActions);
   EXPECT_EQ(amp::validator::GetTypeIdentifier("transformed"),
             amp::validator::TypeIdentifier::kTransformed);
   EXPECT_EQ(amp::validator::GetTypeIdentifier("experimental"),

@@ -4645,8 +4645,7 @@ void ParsedValidatorRules::ValidateTypeIdentifiers(
         }
         // These type identifiers are not considered mandatory unlike
         // other type identifiers.
-        if (type_identifier != TypeIdentifier::kActions &&
-            type_identifier != TypeIdentifier::kTransformed &&
+        if (type_identifier != TypeIdentifier::kTransformed &&
             type_identifier != TypeIdentifier::kDevMode &&
             type_identifier != TypeIdentifier::kCssStrict)
           has_mandatory_type_identifier = true;
@@ -4689,8 +4688,7 @@ void ParsedValidatorRules::ValidateTypeIdentifiers(
     }
   }
   if (!has_mandatory_type_identifier) {
-    // Missing mandatory type identifier (any AMP variant but "actions" or
-    // "transformed").
+    // Missing mandatory type identifier (any AMP variant but "transformed").
     context->AddError(
         ValidationError::MANDATORY_ATTR_MISSING, context->line_col(),
         /*params=*/
@@ -4731,18 +4729,6 @@ void ParsedValidatorRules::ValidateHtmlTag(const ParsedHtmlTag& html_tag,
                               {TypeIdentifier::kEmail, TypeIdentifier::kDevMode,
                                TypeIdentifier::kCssStrict},
                               context, result);
-      break;
-    case HtmlFormat::ACTIONS:
-      ValidateTypeIdentifiers(html_tag,
-                              {TypeIdentifier::kAmp, TypeIdentifier::kActions,
-                               TypeIdentifier::kDevMode},
-                              context, result);
-      if (c_find(context->type_identifiers(), TypeIdentifier::kActions) ==
-          context->type_identifiers().end()) {
-        context->AddError(
-            ValidationError::MANDATORY_ATTR_MISSING, context->line_col(),
-            /*params=*/{"actions", "html"}, /*spec_url=*/"", result);
-      }
       break;
     default:
       // This should never happen as validator must be called with a valid
@@ -5303,10 +5289,8 @@ class ParsedValidatorRulesProvider {
   static const ParsedValidatorRules* Get(HtmlFormat::Code format) {
     static std::once_flag load_amp_rules_once;
     static std::once_flag load_ads_rules_once;
-    static std::once_flag load_actions_rules_once;
     static std::once_flag load_email_rules_once;
     static ParsedValidatorRules* amp_rules_;
-    static ParsedValidatorRules* amp4_actions_rules_;
     static ParsedValidatorRules* amp4_ads_rules_;
     static ParsedValidatorRules* amp4_email_rules_;
     switch (format) {
@@ -5321,12 +5305,6 @@ class ParsedValidatorRulesProvider {
           amp4_email_rules_ = new ParsedValidatorRules(HtmlFormat::AMP4EMAIL);
         });
         return amp4_email_rules_;
-      }
-      case HtmlFormat::ACTIONS: {
-        std::call_once(load_actions_rules_once, []() {
-          amp4_actions_rules_ = new ParsedValidatorRules(HtmlFormat::ACTIONS);
-        });
-        return amp4_actions_rules_;
       }
       default: {
         std::call_once(load_amp_rules_once, []() {

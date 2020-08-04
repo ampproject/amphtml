@@ -32,7 +32,6 @@ enum TypeIdentifier {
   kAmp,
   kAds,
   kEmail,
-  kActions,
   kTransformed,
   kExperimental,
   kDevMode,
