@@ -36,6 +36,6 @@
   "amp-ad-no-center-css": 0,
   "analytics-chunks": 1,
   "sticky-ad-padding-bottom": 0.05,
-  "render-on-idle-fix": 0.02,
+  "render-on-idle-fix": 1,
   "ad-adsense-gam-round-params": 0.2
 }
