@@ -282,7 +282,7 @@ See below for a full example,
 
 ### Using amp-script as a data source
 
-You may use an exported `<amp-script>` function as the data source for `<amp-list>`. This enables you to flexibly combine and transform server responses before handoff to `<amp-list>`. The required format is the `<amp-script>` ID and the function name separated by a `.`, e.g. `amp-script:id.functionName`.
+You may use an exported `<amp-script>` function as the data source for `<amp-list>`. This enables you to flexibly combine and transform server responses before handoff to `<amp-list>`. The required format is the `<amp-script>` ID and the function name separated by a period, e.g. `amp-script:id.functionName`.
 
 See below for an example:
 
