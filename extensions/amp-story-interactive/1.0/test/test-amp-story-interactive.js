@@ -27,15 +27,11 @@ import {
   AmpStoryVariableService,
   AnalyticsVariable,
 } from '../../../amp-story/1.0/variable-service';
-import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
 import {dict} from '../../../../src/utils/object';
 import {htmlFor} from '../../../../src/static-template';
-import {
-  registerServiceBuilder,
-  registerServiceBuilderForDoc,
-} from '../../../../src/service';
+import {registerServiceBuilder} from '../../../../src/service';
 
 /**
  * Returns mock interactive data.
