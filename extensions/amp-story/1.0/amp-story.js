@@ -68,6 +68,10 @@ import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {LiveStoryManager} from './live-story-manager';
+import {
+  LocalizedStringId,
+  createPseudoLocale,
+} from '../../../src/localized-strings';
 import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
@@ -94,7 +98,6 @@ import {
   setImportantStyles,
   toggle,
 } from '../../../src/style';
-import {createPseudoLocale} from '../../../src/localized-strings';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
@@ -1064,8 +1067,41 @@ export class AmpStory extends AMP.BaseElement {
       });
     }
 
+    this.buildScreenReaderBackButton_();
+
     // Will resolve when all pages are built.
     return storyLayoutPromise;
+  }
+
+  /**
+   * Creates a focusable button for screen readers to navigate back.
+   * @private
+   */
+  buildScreenReaderBackButton_() {
+    const backButton = document.createElement('button');
+
+    const label = this.localizationService_.getLocalizedString(
+      LocalizedStringId.AMP_STORY_PAGINATION_BUTTON_PREVIOUS_PAGE_LABEL
+    );
+
+    backButton.classList.add('i-amphtml-story-screen-reader-back-button');
+    label && backButton.setAttribute('aria-label', label);
+    this.mutateElement(() => {
+      this.element.appendChild(backButton);
+    });
+
+    // Append class to hide button if on first page.
+    this.storeService_.subscribe(
+      StateProperty.CURRENT_PAGE_INDEX,
+      (pageIndex) =>
+        this.mutateElement(() =>
+          backButton.classList.toggle(
+            'i-amphtml-story-screen-reader-back-button-hidden',
+            pageIndex === 0 && !this.viewer_.hasCapability('swipe')
+          )
+        ),
+      true /** callToInitialize */
+    );
   }
 
   /**
