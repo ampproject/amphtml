@@ -4,7 +4,6 @@
 
 #include "file/base/helpers.h"
 #include "file/base/options.h"
-#include "quality/dni/validator/validator.h"
 #include "validator_pb.h"
 #include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
