@@ -86,10 +86,7 @@ export class ResponsiveState {
    *  corresponds to a responsive ad, otherwise null.
    */
   static createIfResponsive(element) {
-    if (
-      !this.isContainerWidth_ &&
-      !hasOwn(RAFMT_PARAMS, element.getAttribute('data-auto-format'))
-    ) {
+    if (!hasOwn(RAFMT_PARAMS, element.getAttribute('data-auto-format'))) {
       return null;
     }
     return new ResponsiveState(element);
