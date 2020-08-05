@@ -32,6 +32,7 @@ import {dict, map} from '../utils/object';
 import {cssText} from '../../build/amp-story-player-iframe.css';
 import {dev} from '../log';
 import {findIndex} from '../utils/array';
+import {getMode} from '../../src/mode';
 import {resetStyles, setStyle, setStyles} from '../style';
 import {toArray} from '../types';
 import {tryFocus} from '../dom';
@@ -378,9 +379,9 @@ export class AmpStoryPlayer {
   initializeShadowRoot_() {
     this.rootEl_ = this.doc_.createElement('main');
 
-    const containerToUse = getMode().test 
-        ? this.element_
-        : this.element_.attachShadow({mode: 'open'});
+    const containerToUse = getMode().test
+      ? this.element_
+      : this.element_.attachShadow({mode: 'open'});
 
     // Inject default styles
     const styleEl = this.doc_.createElement('style');

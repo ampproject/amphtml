@@ -537,14 +537,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       await player.load();
 
-      expect(
-        playerEl.querySelector('button.amp-story-player-back-button')
-      ).to.exist;
-      expect(
-        playerEl.querySelector(
-          'button.amp-story-player-close-button'
-        )
-      ).to.not.exist;
+      expect(playerEl.querySelector('button.amp-story-player-back-button')).to
+        .exist;
+      expect(playerEl.querySelector('button.amp-story-player-close-button')).to
+        .not.exist;
     });
 
     it('close button should be created and back button should not', async () => {
@@ -555,14 +551,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
-      expect(
-        playerEl.querySelector(
-          'button.amp-story-player-close-button'
-        )
-      ).to.exist;
-      expect(
-        playerEl.querySelector('button.amp-story-player-back-button')
-      ).to.not.exist;
+      expect(playerEl.querySelector('button.amp-story-player-close-button')).to
+        .exist;
+      expect(playerEl.querySelector('button.amp-story-player-back-button')).to
+        .not.exist;
     });
 
     it('no button should be created', async () => {
@@ -574,14 +566,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       await player.load();
 
-      expect(
-        playerEl.querySelector(
-          'button.amp-story-player-close-button'
-        )
-      ).to.not.exist;
-      expect(
-        playerEl.querySelector('button.amp-story-player-back-button')
-      ).to.not.exist;
+      expect(playerEl.querySelector('button.amp-story-player-close-button')).to
+        .not.exist;
+      expect(playerEl.querySelector('button.amp-story-player-back-button')).to
+        .not.exist;
     });
 
     it('back button should fire back event once', async () => {
@@ -642,9 +630,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
       await player.load();
 
-      expect(
-        playerEl.querySelector('button.amp-story-player-hide-button')
-      ).to.not.exist;
+      expect(playerEl.querySelector('button.amp-story-player-hide-button')).to
+        .not.exist;
     });
 
     it('should hide button when page attachment is open', async () => {
@@ -655,9 +642,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       openPageAttachment();
 
-      expect(
-        playerEl.querySelector('button.amp-story-player-hide-button')
-      ).to.exist;
+      expect(playerEl.querySelector('button.amp-story-player-hide-button')).to
+        .exist;
     });
 
     it('should fire page attachment open event once', async () => {
