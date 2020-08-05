@@ -25,8 +25,8 @@
 #include "absl/algorithm/container.h"
 #include "absl/base/integral_types.h"
 #include "absl/base/thread_annotations.h"
-#include "absl/container/flat_hash_set.h"
 #include "absl/container/flat_hash_map.h"
+#include "absl/container/flat_hash_set.h"
 #include "absl/container/node_hash_map.h"
 #include "absl/container/node_hash_set.h"
 #include "absl/flags/flag.h"
@@ -162,7 +162,6 @@ class LineCol {
   int col_;
 };
 
-
 ValidationError PopulateError(ValidationError::Severity severity,
                               ValidationError::Code code, LineCol line_col,
                               const vector<std::string>& params,
@@ -286,9 +285,7 @@ class ParsedHtmlTag {
 
   bool IsEmpty() const { return node_->Data().empty(); }
 
-  const vector<ParsedHtmlTagAttr>& Attributes() const {
-    return attributes_;
-  }
+  const vector<ParsedHtmlTagAttr>& Attributes() const { return attributes_; }
 
   std::optional<string_view> GetAttr(string_view attr_name) const {
     // Since tags don't have lots of attrs, linear search is probably ok.
@@ -447,8 +444,8 @@ class ParsedAttrSpec {
   // on the AttrSpec's disabled_by or enabled_by fields.
   bool IsUsedForTypeIdentifiers(
       const vector<TypeIdentifier>& type_identifiers) const {
-    return ::amp::validator::IsUsedForTypeIdentifiers(type_identifiers,
-                                                   enabled_by_, disabled_by_);
+    return ::amp::validator::IsUsedForTypeIdentifiers(
+        type_identifiers, enabled_by_, disabled_by_);
   }
 
  private:
@@ -1001,8 +998,8 @@ class ParsedTagSpec {
   // on the TagSpec's disabled_by or enabled_by fields.
   bool IsUsedForTypeIdentifiers(
       const vector<TypeIdentifier>& type_identifiers) const {
-    return ::amp::validator::IsUsedForTypeIdentifiers(type_identifiers,
-                                                   enabled_by_, disabled_by_);
+    return ::amp::validator::IsUsedForTypeIdentifiers(
+        type_identifiers, enabled_by_, disabled_by_);
   }
 
   // A dispatch key is a combination of attribute name, attribute value and/or
@@ -2033,8 +2030,7 @@ class Context {
     // max_errors. But note that some of them (or all of them!) may be warnings,
     // so whether or not we're complete is still dependent on whether the
     // status is FAIL.
-    bool wants_more_errors =
-        result.errors_size() < max_errors_ && !exit_early_;
+    bool wants_more_errors = result.errors_size() < max_errors_ && !exit_early_;
     return {/*complete=*/(result.status() == ValidationResult::FAIL &&
                           !wants_more_errors),
             /*wants_more_errors=*/wants_more_errors};
@@ -2678,71 +2674,113 @@ CdataMatcher::CdataMatcher(const ParsedCdataSpec* parsed_cdata_spec,
 
 class InvalidRuleVisitor : public htmlparser::css::RuleVisitor {
  public:
-  InvalidRuleVisitor(const ParsedCdataSpec* spec, Context* context,
+  InvalidRuleVisitor(const ParsedCdataSpec* cdata_spec, Context* context,
                      ValidationResult* result)
-      : spec_(spec), context_(context), result_(result) {}
+      : cdata_spec_(cdata_spec), context_(context), result_(result) {}
 
   void VisitAtRule(const htmlparser::css::AtRule& at_rule) override {
-    if (!spec_->IsAtRuleValid(at_rule.name())) {
+    if (!cdata_spec_->IsAtRuleValid(at_rule.name())) {
       context_->AddError(
           ValidationError::CSS_SYNTAX_INVALID_AT_RULE,
           LineCol(at_rule.line(), at_rule.col()),
           /*params=*/
-          {TagDescriptiveName(spec_->ParentTagSpec()), at_rule.name()},
+          {TagDescriptiveName(cdata_spec_->ParentTagSpec()), at_rule.name()},
           /*spec_url=*/"", result_);
     }
   }
 
   void VisitDeclaration(
       const htmlparser::css::Declaration& declaration) override {
-    if (!spec_->IsDeclarationValid(declaration.name())) {
-      std::string allowed_declarations_str = spec_->AllowedDeclarationsString();
+    if (!cdata_spec_->IsDeclarationValid(declaration.name())) {
+      std::string allowed_declarations_str =
+          cdata_spec_->AllowedDeclarationsString();
       if (allowed_declarations_str.empty()) {
-        context_->AddError(
-            ValidationError::CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
-            LineCol(declaration.line(), declaration.col()),
-            /*params=*/
-            {TagDescriptiveName(spec_->ParentTagSpec()), declaration.name()},
-            /*spec_url=*/"", result_);
+        context_->AddError(ValidationError::CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
+                           LineCol(declaration.line(), declaration.col()),
+                           /*params=*/
+                           {TagDescriptiveName(cdata_spec_->ParentTagSpec()),
+                            declaration.name()},
+                           /*spec_url=*/"", result_);
 
       } else {
         context_->AddError(
             ValidationError::CSS_SYNTAX_INVALID_PROPERTY,
             LineCol(declaration.line(), declaration.col()),
             /*params=*/
-            {TagDescriptiveName(spec_->ParentTagSpec()), declaration.name(),
-             spec_->AllowedDeclarationsString()},
+            {TagDescriptiveName(cdata_spec_->ParentTagSpec()),
+             declaration.name(), cdata_spec_->AllowedDeclarationsString()},
             /*spec_url=*/"", result_);
       }
     }
   }
 
  private:
-  const ParsedCdataSpec* spec_;
+  const ParsedCdataSpec* cdata_spec_;
   Context* context_;
   ValidationResult* result_;
 };
 
 class InvalidDeclVisitor : public htmlparser::css::RuleVisitor {
  public:
-  InvalidDeclVisitor(const ParsedDocCssSpec& spec, Context* context,
+  InvalidDeclVisitor(const ParsedDocCssSpec& css_spec, Context* context,
+                     const string& tag_decriptive_name,
                      ValidationResult* result)
-      : spec_(spec), context_(context), result_(result) {}
+      : css_spec_(css_spec),
+        context_(context),
+        tag_descriptive_name_(tag_decriptive_name),
+        result_(result) {}
 
   void VisitDeclaration(
       const htmlparser::css::Declaration& declaration) override {
-    if (!spec_.CssDeclarationByName(declaration.name())) {
+    const CssDeclaration* css_declaration =
+        css_spec_.CssDeclarationByName(declaration.name());
+    if (!css_declaration) {
       context_->AddError(ValidationError::CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
                          LineCol(declaration.line(), declaration.col()),
                          /*params=*/
-                         {"style amp-custom", declaration.name()},
-                         spec_.spec().spec_url(), result_);
+                         {tag_descriptive_name_, declaration.name()},
+                         css_spec_.spec().spec_url(), result_);
+      // Don't emit additional errors for this declaration.
+      return;
+    }
+    if (css_declaration->value_casei_size() > 0) {
+      bool has_valid_value = false;
+      const std::string first_ident = declaration.FirstIdent();
+      for (auto& value : css_declaration->value_casei()) {
+        if (CaseEqual(first_ident, value)) {
+          has_valid_value = true;
+          break;
+        }
+      }
+      if (!has_valid_value) {
+        // Declaration value not allowed.
+        context_->AddError(
+            ValidationError::CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+            LineCol(declaration.line(), declaration.col()),
+            /*params=*/
+            {tag_descriptive_name_, declaration.name(), first_ident},
+            css_spec_.spec().spec_url(), result_);
+      }
+    } else if (css_declaration->has_value_regex_casei()) {
+      RE2::Options options;
+      options.set_case_sensitive(false);
+      RE2 pattern(css_declaration->value_regex_casei(), options);
+      const std::string first_ident = declaration.FirstIdent();
+      if (!RE2::FullMatch(first_ident, pattern)) {
+        context_->AddError(
+            ValidationError::CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+            LineCol(declaration.line(), declaration.col()),
+            /*params=*/
+            {tag_descriptive_name_, declaration.name(), first_ident},
+            css_spec_.spec().spec_url(), result_);
+      }
     }
   }
 
  private:
-  const ParsedDocCssSpec& spec_;
+  const ParsedDocCssSpec& css_spec_;
   Context* context_;
+  const string& tag_descriptive_name_;
   ValidationResult* result_;
 };
 
@@ -3049,7 +3087,9 @@ void CdataMatcher::MatchCss(absl::string_view cdata, const CssSpec& css_spec,
   // Validate the allowed CSS declarations (eg: `background-color`)
   if (maybe_doc_css_spec &&
       !(**maybe_doc_css_spec).spec().allow_all_declaration_in_style_tag()) {
-    InvalidDeclVisitor visitor(**maybe_doc_css_spec, context, result);
+    InvalidDeclVisitor visitor(
+        **maybe_doc_css_spec, context,
+        TagDescriptiveName(parsed_cdata_spec_->ParentTagSpec()), result);
     stylesheet->Accept(&visitor);
   }
 }
@@ -3990,6 +4030,19 @@ void ValidateAttrCss(const ParsedAttrSpec& parsed_attr_spec,
               /*spec_url=*/context.rules().styles_spec_url(),
               &result->validation_result);
         }
+      } else if (css_declaration->has_value_regex_casei()) {
+        RE2::Options options;
+        options.set_case_sensitive(false);
+        RE2 pattern(css_declaration->value_regex_casei(), options);
+        const std::string first_ident = declaration->FirstIdent();
+        if (!RE2::FullMatch(first_ident, pattern)) {
+          context.AddError(
+              ValidationError::CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+              context.line_col(),
+              /*params=*/{tag_description, declaration->name(), first_ident},
+              /*spec_url=*/context.rules().styles_spec_url(),
+              &result->validation_result);
+        }
       }
       if (!spec.spec().allow_important()) {
         if (declaration->important()) {
@@ -4019,7 +4072,6 @@ void ValidateAttrCss(const ParsedAttrSpec& parsed_attr_spec,
         // Only image specs apply for inline styles. Fonts are only defined in
         // @font-face rules which we require a full stylesheet to define.
         if (spec.spec().has_image_url_spec()) {
-          UrlErrorInAttrAdapter adapter(&attr_name);
           ValidateUrlAndProtocol(
               spec.image_url_spec(),
               UrlErrorInStylesheetAdapter(context.line_col()), context,
@@ -4096,6 +4148,18 @@ void ValidateAttrDeclaration(const ParsedAttrSpec& parsed_attr_spec,
       }
       if (!has_valid_value) {
         // Declaration value not allowed.
+        context.AddError(
+            ValidationError::CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+            context.line_col(),
+            /*params=*/{tag_spec_name, declaration->name(), first_ident},
+            /*spec_url=*/context.rules().styles_spec_url(), result);
+      }
+    } else if (css_declaration->has_value_regex_casei()) {
+      RE2::Options options;
+      options.set_case_sensitive(false);
+      RE2 pattern(css_declaration->value_regex_casei(), options);
+      const std::string first_ident = declaration->FirstIdent();
+      if (!RE2::FullMatch(first_ident, pattern)) {
         context.AddError(
             ValidationError::CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
             context.line_col(),
@@ -4510,9 +4574,8 @@ ParsedValidatorRules::ParsedValidatorRules(HtmlFormat::Code html_format)
 // Loads validator rules into the |rules_| proto, stub or actual (embedded).
 // Returns false on any failure, setting status_ to the relevant error.
 absl::Status ParsedValidatorRules::LoadRules(ValidatorRules* rules) const {
-  if (!rules->ParseFromArray(
-      amp::validator::data::kValidatorProtoBytes,
-      amp::validator::data::kValidatorProtoBytesSize)) {
+  if (!rules->ParseFromArray(amp::validator::data::kValidatorProtoBytes,
+                             amp::validator::data::kValidatorProtoBytesSize)) {
     return absl::InvalidArgumentError("Parsing embedded proto failed");
   }
   return absl::OkStatus();
@@ -5338,13 +5401,11 @@ HeadChildrenAllowingExtendedWhitespace() {
 
 class Validator {
  public:
-  Validator(const ParsedValidatorRules* rules,
-            int max_errors = -1)
+  Validator(const ParsedValidatorRules* rules, int max_errors = -1)
       : rules_(rules),
         max_errors_(max_errors),
         context_(rules_, max_errors_),
-        result_prototype_(CreateResultPrototype(*rules_)) {
-  }
+        result_prototype_(CreateResultPrototype(*rules_)) {}
 
   ValidationResult Validate(std::string_view html) {
     Clear();
@@ -5678,8 +5739,7 @@ class Validator {
 
 }  // namespace
 
-ValidationResult Validate(std::string_view html,
-                          HtmlFormat_Code html_format,
+ValidationResult Validate(std::string_view html, HtmlFormat_Code html_format,
                           int max_errors) {
   Validator validator(ParsedValidatorRulesProvider::Get(html_format),
                       max_errors);
@@ -5691,8 +5751,6 @@ int RulesSpecVersion() {
   return rules->SpecFileRevision();
 }
 
-int ValidatorVersion() {
-  return ValidatorRevision();
-}
+int ValidatorVersion() { return ValidatorRevision(); }
 
 }  // namespace amp::validator
