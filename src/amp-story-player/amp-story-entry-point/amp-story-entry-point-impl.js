@@ -144,19 +144,8 @@ export class AmpStoryEntryPoint {
     card.src = src;
     card.classList.add(styleClass);
     card.classList.add('entry-point');
-    //this.setCardWidthHeight_(card, styleClass);
     this.onCardClick_(card, href, index);
     return card;
-  }
-
-  /**
-   * Sets the correct height and width for poster based on client height.
-   * @param {HTMLImageElement} card
-   * @param {string} styleClass
-   * @private
-   */
-  setCardWidthHeight_(card, styleClass) {
-    card.width = this.element_.clientWidth/4;
   }
 
   /**
