@@ -46,7 +46,7 @@ aspect ratio.
 
 ## Attributes
 
-### data-id 
+### data-id
 
 The `data-id` attribute specifies the appropriate `sdnPlayoutId` from 3Q SDN.
 
