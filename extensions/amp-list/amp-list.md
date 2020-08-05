@@ -488,7 +488,7 @@ may make a request to something like `https://foo.com/list.json?0.8390278471201`
 The URL of the remote endpoint that returns the JSON that will be rendered
 within this `<amp-list>`. There are three valid protocols for the `src` attribute.
 
-1. **https**: This must refer to a CORS HTTP service. Insecure http is not supported.
+1. **https**: This must refer to a CORS HTTP service. Insecure HTTP is not supported.
 2. **amp-state**: This is for initializing from amp-state data. See [Initialization from <amp-state>](#initialization-from-amp-state) for more details.
 3. **amp-script**: Enables using `<amp-script>` functions as the data source. See [Using <amp-script> as a data source](#using-amp-script-as-a-data-source) for more details.
 
