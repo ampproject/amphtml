@@ -24,6 +24,8 @@ limitations under the License.
 
 # amp-story-page
 
+## Usage
+
 The `<amp-story-page>` component represents the content to display on a single page of a story.
 
 <figure class="centered-fig">
@@ -40,8 +42,6 @@ The `<amp-story-page>` component represents the content to display on a single p
   </noscript>
   </amp-anim>
 </figure>
-
-## Example
 
 ```html
 <amp-story-page id="cover">
@@ -69,6 +69,10 @@ The `<amp-story-page>` component represents the content to display on a single p
   </amp-story-grid-layer>
 </amp-story-page>
 ```
+
+## Valid children
+
+The `<amp-story-page>` component contains one or more [layers](amp-story-grid-layer.md). Layers are stacked bottom-up (the first layer specified in the DOM is at the bottom; the last layer specified in the DOM is at the top).
 
 ## Attributes
 
@@ -101,7 +105,3 @@ For example:
   background-audio="./media/switzerland.mp3"
 ></amp-story-page>
 ```
-
-## Children (of amp-story-page)
-
-The `<amp-story-page>` component contains one or more [layers](amp-story-grid-layer.md). Layers are stacked bottom-up (the first layer specified in the DOM is at the bottom; the last layer specified in the DOM is at the top).
