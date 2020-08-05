@@ -312,10 +312,7 @@ export class ResourcesImpl {
 
     this.rebuildDomWhenReady_();
 
-    if (
-      !this.intersectionObserver_ &&
-      isExperimentOn(this.win, 'layoutbox-invalidate-on-scroll')
-    ) {
+    if (!this.intersectionObserver_) {
       /** @private @const */
       this.throttledScroll_ = throttle(this.win, (e) => this.scrolled_(e), 250);
 
