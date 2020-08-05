@@ -315,7 +315,7 @@ See below for an example:
 ```
 
 [tip type="important"]
-When using `<amp-script>` as merely a data-layer with no DOM manipulation, you may benefit from attaching the `nodom` attribute. This signicantly improves performance characteristics of the `<amp-script>`. It also removes the need to specify width and height, since the component is not displayed.
+When using `<amp-script>` as merely a data-layer with no DOM manipulation, you may benefit from the [nodom](https://amp.dev/documentation/components/amp-script/#attributes) attribute. It improves the performance of the `<amp-script>`.
 [/tip]
 
 ### Load more and infinite scroll
