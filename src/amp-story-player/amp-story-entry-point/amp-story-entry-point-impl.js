@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-// Source for this constant is css/amp-story-entry-point.css
-import {createCustomEvent} from '../../event-helper';
+// Source for this constant is css/amp-story-entry-point-card.css
 import {cssText} from '../../../build/amp-story-entry-point-card.css';
+import {createCustomEvent} from '../../event-helper';
 import {setStyle} from '../../style';
 import {toArray} from '../../types';
 
@@ -70,6 +70,7 @@ export class AmpStoryEntryPoint {
     /** @private {!Array<!HTMLAnchorElement>} */
     this.stories_ = [];
 
+    /** @private {number} */
     this.scrollX_ = 0;
   }
 

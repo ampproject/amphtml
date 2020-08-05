@@ -17,84 +17,84 @@
 main {
     height: 100%;
     position: relative;
-  }
-  
-  .entry-points {
-    width: 100%;
-    display: flex;
-    overflow-x: scroll;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-    padding-bottom: 10px;
-  }
-  
-  ::-webkit-scrollbar {
-    display: none;
-  }
-  
-  .entry-point-card-img {
-    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
-  }
-  
-  .rectangular-entry-point {
-    border-radius: 16px;
-  }
-  
-  .circular-entry-point {
-    border-radius: 100%;
-  }
-  
-  .entry-point-hover {
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
-  }
-  
-  .entry-point-arrow {
-    background-repeat: no-repeat;
-    background-position: 50%;
-    background-size: 28px;
-    border: 0px;
-    background-color: #ffffff;
-    outline: transparent;
-    height: 40px;
-    width: 40px;
-    position: absolute;
-    border-radius: 50%;
-    padding: 0px;
-    box-shadow: 0px 0px 10px rgba(60, 64, 67, 0.3);
-    top: 50%;
-    transform: translateY(-50%);
-  }
-  
-  .entry-point-right-arrow {
-    right: 0px;
-    background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" fill="#1B1B1B"><path d="M0 0h24v24H0z" fill="none"/><path d="M10 17l5-5-5-5v10z"/></svg>');
-  }
-  
-  .entry-point-left-arrow {
-    background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" fill="#1B1B1B"><path d="M0 0h24v24H0z" fill="none"/><path d="M14 7l-5 5 5 5V7z"/></svg>');
-  }
-  
-  .entry-point-card-container{
-    position: relative;
-    transition: transform 0.3s;
-    padding-right: 6px;
-  }
+}
 
-  .entry-point-card-headline {
-    position: absolute;
-    bottom: 5px;
-    color: #fff;
-    padding: 0px 15px 5px;
-    font-family: 'Poppins', sans-serif;
-    font-weight: bold;
-    font-size: 16px;
-    line-height: 20px;
-  }
-  
-  .entry-point-card-logo {
-    width: 80%;
-    position: absolute;
-    margin-left: 10%;
-    color: #fff;
-    top: 25px;
-  }
+.entry-points {
+  width: 100%;
+  display: flex;
+  overflow-x: scroll;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  padding-bottom: 10px;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+.entry-point-card-img {
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.rectangular-entry-point {
+  border-radius: 16px;
+}
+
+.circular-entry-point {
+  border-radius: 100%;
+}
+
+.entry-point-hover {
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.entry-point-arrow {
+  background-repeat: no-repeat;
+  background-position: 50%;
+  background-size: 28px;
+  border: 0px;
+  background-color: #ffffff;
+  outline: transparent;
+  height: 40px;
+  width: 40px;
+  position: absolute;
+  border-radius: 50%;
+  padding: 0px;
+  box-shadow: 0px 0px 10px rgba(60, 64, 67, 0.3);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.entry-point-right-arrow {
+  right: 0px;
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" fill="#1B1B1B"><path d="M0 0h24v24H0z" fill="none"/><path d="M10 17l5-5-5-5v10z"/></svg>');
+}
+
+.entry-point-left-arrow {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" fill="#1B1B1B"><path d="M0 0h24v24H0z" fill="none"/><path d="M14 7l-5 5 5 5V7z"/></svg>');
+}
+
+.entry-point-card-container{
+  position: relative;
+  transition: transform 0.3s;
+  padding-right: 6px;
+}
+
+.entry-point-card-headline {
+  position: absolute;
+  bottom: 5px;
+  color: #fff;
+  padding: 0px 15px 5px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 20px;
+}
+
+.entry-point-card-logo {
+  width: 80%;
+  position: absolute;
+  margin-left: 10%;
+  color: #fff;
+  top: 25px;
+}
