@@ -315,7 +315,11 @@ export class AmpStoryPlayer {
     this.initializeIframes_();
     this.initializeButton_();
     this.signalReady_();
-    this.setUpAutoplayClickShield_();
+
+    if (this.isAutoplaying_) {
+      this.setUpAutoplayClickShield_();
+    }
+
     this.isBuilt_ = true;
   }
 
