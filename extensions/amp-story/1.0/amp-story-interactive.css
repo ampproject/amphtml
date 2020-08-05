@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- .i-amphtml-story-interactive-container {
+.i-amphtml-story-interactive-container {
   font-family: 'Poppins', sans-serif !important;
 }
 
@@ -63,6 +63,11 @@
   }
 }
 
+.i-amphtml-story-interactive-container:not(.i-amphtml-story-interactive-post-selection) 
+  .i-amphtml-story-interactive-option {
+  cursor: pointer !important;
+}
+
 .i-amphtml-story-interactive-confetti-wrapper {
   position: absolute !important;
   top: 50% !important;
@@ -86,4 +91,20 @@
 
 .i-amphtml-story-interactive-confetti {
   position: absolute !important;
+}
+
+/* landing animations variables */
+.i-amphtml-story-interactive-active {
+  --i-amphtml-interactive-landing-animation-delay: .5s;
+  --i-amphtml-interactive-landing-animation-offset: .9;
+  --i-amphtml-interactive-landing-animation-delay-offset-el1: var(--i-amphtml-interactive-landing-animation-delay);
+  --i-amphtml-interactive-landing-animation-delay-offset-el2: calc(var(--i-amphtml-interactive-landing-animation-delay) + var(--i-amphtml-interactive-animation-time) * var(--i-amphtml-interactive-landing-animation-offset) * 1);
+  --i-amphtml-interactive-landing-animation-delay-offset-el3: calc(var(--i-amphtml-interactive-landing-animation-delay) + var(--i-amphtml-interactive-animation-time) * var(--i-amphtml-interactive-landing-animation-offset) * 2);
+  --i-amphtml-interactive-landing-animation-delay-offset-el4: calc(var(--i-amphtml-interactive-landing-animation-delay) + var(--i-amphtml-interactive-animation-time) * var(--i-amphtml-interactive-landing-animation-offset) * 3);
+}
+
+@keyframes i-amphtml-interactive-animation-landing-animation-flash-background {
+  30% {
+    opacity: .4;
+  }
 }
