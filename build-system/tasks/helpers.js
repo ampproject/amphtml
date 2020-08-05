@@ -24,7 +24,6 @@ const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
 const gulpIf = require('gulp-if');
-const gulpWatch = require('gulp-watch');
 const istanbul = require('gulp-istanbul');
 const log = require('fancy-log');
 const path = require('path');
@@ -45,6 +44,7 @@ const {isTravisBuild} = require('../common/travis');
 const {jsBundles} = require('../compile/bundles.config');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
+const {watch: gulpWatch} = require('gulp');
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -128,7 +128,10 @@ async function bootstrapThirdPartyFrames(options) {
       const watchFunc = () => {
         thirdPartyBootstrap(frameObject.max, frameObject.min, options);
       };
-      gulpWatch(frameObject.max, debounce(watchFunc, watchDebounceDelay));
+      gulpWatch(frameObject.max).on(
+        'change',
+        debounce(watchFunc, watchDebounceDelay)
+      );
     });
   }
   await Promise.all(promises);
@@ -249,7 +252,7 @@ async function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
         options.onWatchBuild(compileComplete);
       }
     };
-    gulpWatch(entryPoint, debounce(watchFunc, watchDebounceDelay));
+    gulpWatch(entryPoint).on('change', debounce(watchFunc, watchDebounceDelay));
   }
 
   async function doCompileMinifiedJs(continueOnError) {
