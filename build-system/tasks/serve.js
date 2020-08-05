@@ -23,7 +23,6 @@ const log = require('fancy-log');
 const minimist = require('minimist');
 const morgan = require('morgan');
 const path = require('path');
-const watch = require('gulp-watch');
 const {
   buildNewServer,
   SERVER_TRANSFORM_PATH,
@@ -38,6 +37,7 @@ const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green, red} = require('ansi-colors');
 const {logServeMode, setServeMode} = require('../server/app-utils');
 const {watchDebounceDelay} = require('./helpers');
+const {watch} = require('gulp');
 
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
 
@@ -176,7 +176,7 @@ async function doServe(lazyBuild = false) {
   const watchFunc = async () => {
     await restartServer();
   };
-  watch(serverFiles, debounce(watchFunc, watchDebounceDelay));
+  watch(serverFiles).on('change', debounce(watchFunc, watchDebounceDelay));
   if (argv.new_server) {
     buildNewServer();
   }
