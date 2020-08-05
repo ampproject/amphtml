@@ -68,7 +68,7 @@ amp-story-player::after {
 
 /** Apply click shield on the player if it is on autoplay mode. */
 .i-amphtml-story-player-loaded[autoplay]::after {
-  all: initial;
+  all: initial !important; /** Resets loading spinner styles set previously **/
   content: "" !important;
   position: absolute !important;
   height: 100% !important;
