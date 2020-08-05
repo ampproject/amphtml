@@ -123,7 +123,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     expect(storyIframe.getAttribute('src')).to.equals(
       DEFAULT_CACHE_URL +
         '?amp_js_v=0.1#visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
-        '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe&embedMode=0'
+        '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
     );
   });
 
@@ -141,7 +141,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         '&amp_js_v=0.1' +
         existingHash +
         '&visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
-        '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe&embedMode=0'
+        '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
     );
   });
 
@@ -277,7 +277,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       expect(storyIframe.getAttribute('src')).to.equals(
         DEFAULT_CACHE_URL +
           '?amp_js_v=0.1#visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
-          '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe&embedMode=0'
+          '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
       );
     });
 
@@ -292,7 +292,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       expect(storyIframe.getAttribute('src')).to.equals(
         DEFAULT_ORIGIN_URL +
           '?amp_js_v=0.1#visibilityState=visible&origin=http%3A%2F%2Flocalhost%3A9876' +
-          '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe&embedMode=0'
+          '&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
       );
     });
 
@@ -760,8 +760,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const storyIframes = playerEl.shadowRoot.querySelectorAll('iframe');
 
       expect(storyIframes[0].getAttribute('src')).to.include('embedMode=3');
-      expect(storyIframes[1].getAttribute('src')).to.include('embedMode=0');
-      expect(storyIframes[2].getAttribute('src')).to.include('embedMode=0');
+      expect(storyIframes[1].getAttribute('src')).to.not.include('embedMode');
+      expect(storyIframes[2].getAttribute('src')).to.not.include('embedMode');
     });
 
     it('disables autoplay mode when the player is interacted with', async () => {
