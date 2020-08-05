@@ -63,6 +63,43 @@ export const _default = () => {
   );
 };
 
+export const WithLooping = () => {
+  const width = number('width', 440);
+  const height = number('height', 225);
+  const paginationHeight = number('indicator height', 20);
+  const inset = boolean('inset?', false);
+  return (
+    <WithStyles>
+      <InlineGallery style={{width, position: 'relative'}}>
+        <BaseCarousel loop style={{height, position: 'relative'}}>
+          {[
+            'lightpink',
+            'lightcoral',
+            'peachpuff',
+            'powderblue',
+            'lavender',
+            'thistle',
+          ].map((color, index) => (
+            <div
+              style={{
+                backgroundColor: color,
+                width,
+                height,
+                textAlign: 'center',
+                fontSize: '48pt',
+                lineHeight: height + 'px',
+              }}
+            >
+              {index + 1}
+            </div>
+          ))}
+        </BaseCarousel>
+        <Pagination inset={inset} style={{height: paginationHeight}} />
+      </InlineGallery>
+    </WithStyles>
+  );
+};
+
 const WithStyles = ({children}) => {
   // TODO(wg-bento#7): remove this method once the stylesheet is bundled
   // with the component.

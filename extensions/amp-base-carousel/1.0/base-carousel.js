@@ -36,7 +36,7 @@ export function BaseCarousel({
   const childrenArray = toChildArray(children);
   const {length} = childrenArray;
   const [curSlide, setCurSlide] = useState(slide || 0);
-  const current = slide || curSlide;
+  const current = slide ?? curSlide;
   const advance = (dir) => {
     const container = scrollRef.current;
     // Modify scrollLeft is preferred to `setCurSlide` to enable smooth scroll.
