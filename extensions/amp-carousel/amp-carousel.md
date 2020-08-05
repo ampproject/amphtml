@@ -164,7 +164,7 @@ corresponding carousel item displays.
 
 ### Accessibility considerations for `amp-carousel`
 
-Autoplaying, and particularly infinitely looping, carousels can be very distracting and confusing for users - especially for users with cognitive impairments. In general, we recommend avoiding autoplaying carousels. While autoplaying carousels stop once the user has interacted with the carousel, consider consider also adding an explicit "Play/Pause" control.
+Autoplaying, and particularly infinitely looping, carousels can be very distracting and confusing for users - especially for users with cognitive impairments. In general, we recommend avoiding autoplaying carousels. While autoplaying carousels stop once the user has interacted with the carousel, consider also adding an explicit "Play/Pause" control.
 
 By default, the `<amp-carousel>` is programmatically identified as a list when rendered (using `role="list"` on the container element, and `role="listitem"` on each item). However, for `<amp-carousel type="slides">`, no specific `role` is currently provided. As a result, it will not be obvious for assistive technology users reading/navigating through a page when they reach a carousel. We recommend including an explicit `role="region"` and a descriptive `aria-label` (either a generic `aria-label="Carousel"` or a more descriptive label such as `aria-label="Latest news items"`) to `<amp-carousel>`.
 
