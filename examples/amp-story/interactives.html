@@ -53,9 +53,9 @@
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
             <amp-story-interactive-quiz
-                id="first-cup-dark"
-                endpoint="http://localhost:3000/interactives"
-                style="--interactive-accent-color: rgb(16, 218, 93);--interactive-prompt-background-color: rgb(4, 41, 18);--interactive-prompt-text-color: rgb(16, 218, 93);"
+                id="international-quiz-dark"
+                endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+                style="--interactive-accent-color: rgb(16, 218, 93);--interactive-prompt-background: rgb(4, 41, 18);--interactive-prompt-text-color: rgb(16, 218, 93);"
                 theme="dark"
                 prompt-text="Is this an international quiz?"
                 option-1-text="你好，这是马蒂亚斯"
@@ -169,8 +169,8 @@
               <amp-story-interactive-binary-poll
 								endpoint="http://localhost:3000/interactives"
 								prompt-text="What is your favorite movie?"
-								id="movie-light-connected"
-								style="--interactive-accent-color: rgb(16, 218, 93);--interactive-prompt-background-color: rgb(4, 41, 18);--interactive-prompt-text-color: rgb(16, 218, 93);"
+								id="movie-light-green"
+								style="--interactive-accent-color: rgb(16, 218, 93);--interactive-prompt-background: rgb(4, 41, 18);--interactive-prompt-text-color: rgb(16, 218, 93);"
                 theme="dark"
                 option-1-text="דוקטור מוזר"
                 option-2-text="פנתר שחור"
@@ -192,7 +192,7 @@
           <amp-story-grid-layer template="center">
             <amp-story-interactive-binary-poll
               endpoint="http://localhost:3000/interactives"
-              id="movie-light-connected"
+              id="movie-dark"
               theme="dark"
               option-1-text="Doctor Strange"
               option-2-text="Black Panther"
@@ -215,7 +215,7 @@
               <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
               <amp-story-interactive-binary-poll
                 endpoint="http://localhost:3000/interactives"
-                id="movie-light-connected"
+                id="movie-light-yellow"
                 style="--interactive-accent-color: #FFC700;"
                 option-1-text="🧛"
                 option-2-text="🐆"
@@ -239,7 +239,7 @@
               <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
               <amp-story-interactive-binary-poll
                 endpoint="http://localhost:3000/interactives"
-                id="movie-light-connected"
+                id="movie-light-black"
                 style="--interactive-accent-color: rgb(0, 0, 0);"
                 option-1-text="Doctor"
                 option-2-text="Panther"
@@ -360,6 +360,62 @@
               option-1-confetti="🇺🇾"
               option-2-confetti="🇫🇷">
             </amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-5">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-poll
+              id="poll-4"
+              chip-style="shadow"
+              endpoint="http://localhost:3000/interactives"
+              style="--interactive-accent-color: #ff6347"
+              theme="dark"
+              prompt-text="What is your favorite food?"
+              option-1-text="Tacos"
+              option-2-text="Bacon"
+              option-3-text="Broccoli"
+              option-4-text="Ice cream"
+              option-1-confetti="🌮"
+              option-2-confetti="🥓"
+              option-3-confetti="🥦"
+              option-4-confetti="🍦"
+            amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-6">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-poll
+              id="poll-4"
+              chip-style="shadow"
+              endpoint="http://localhost:3000/interactives"
+              style="--interactive-accent-color: #ff6347"
+              theme="light"
+              prompt-text="What is your favorite food?"
+              option-1-text="Tacos"
+              option-2-text="Bacon"
+              option-3-text="Broccoli"
+              option-4-text="Ice cream"
+              option-1-confetti="🌮"
+              option-2-confetti="🥓"
+              option-3-confetti="🥦"
+              option-4-confetti="🍦"
+            amp-story-interactive-poll>
           </amp-story-grid-layer>
         </amp-story-page>
     </amp-story>

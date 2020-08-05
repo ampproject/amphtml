@@ -112,6 +112,33 @@ If `<amp-list>` needs more space after loading, it requests the AMP runtime to u
 
 By default, `<amp-list>` adds a `list` ARIA role to the list element and a `listitem` role to item elements rendered via the template. If the list element or any of its children are not "tabbable" (accessible by keyboard keys such as the `a` and `button` elements or any elements with a positive `tabindex`), a `tabindex` of `0` will be added by default to the list item.
 
+[tip type="note"]
+Note also that a good practice is to provide templates a single top-level element to prevent unintended side effects. This means the following input:
+
+```html
+<template type="amp-mustache">
+  {% raw %}
+  <div class="item">{{item}}</div>
+  <div class="price">{{price}}</div>
+  {% endraw %}
+</template>
+```
+
+Would most predictably be applied and rendered if instead provided as follows:
+
+```html
+<template type="amp-mustache">
+  {% raw %}
+  <div>
+    <div class="item">{{item}}</div>
+    <div class="price">{{price}}</div>
+  </div>
+  {% endraw %}
+</template>
+```
+
+[/tip]
+
 ### XHR batching
 
 AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a single JSON data request as a data source for multiple consumers (e.g., multiple `<amp-list>` elements) on an AMP page. For example, if your `<amp-list>` makes an XHR to an endpoint, while the XHR is in flight, all subsequent XHRs to the same endpoint won't trigger and will instead return the results from the first XHR.
@@ -298,7 +325,8 @@ An `<amp-list-load-more>` element with the `load-more-button` attribute, which s
 >
   ...
   <amp-list-load-more load-more-button>
-    <button>See More</button> /* My custom see more button */
+    <!-- My custom see more button -->
+    <button>See More</button>
   </amp-list-load-more>
 </amp-list>
 ```
@@ -337,7 +365,8 @@ This element is a loader that will be displayed if the user reaches the end of t
 >
   ...
   <amp-list-load-more load-more-loading>
-    <svg>...</svg> /* My custom loader */
+    <!-- My custom loader -->
+    <svg>...</svg>
   </amp-list-load-more>
 </amp-list>
 ```
@@ -392,7 +421,8 @@ This element is not provided by default, but if a `<amp-list-load-more>` element
 >
   ...
   <amp-list-load-more load-more-end>
-    Congratulations! You've reached the end. /* Custom load-end element */
+    <!-- Custom load-end element -->
+    Congratulations! You've reached the end.
   </amp-list-load-more>
 </amp-list>
 ```
@@ -572,8 +602,6 @@ The AMP for Email spec disallows the use of the following attributes on the AMP 
 - `xssi-prefix`
 
 [/filter] <!-- formats="email" -->
-
-[filter formats="websites, stories"]
 
 ## Validation
 

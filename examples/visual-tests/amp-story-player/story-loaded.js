@@ -22,5 +22,14 @@ module.exports = {
       iframe.src = '';
       iframe.srcdoc = '<html><head></head><body style=\"background: darkgray;\"></body></html>';
     });
+
+  'story loaded and player ready': async page => {
+    await page.waitFor(5000);
+    await page.$eval('iframe', (iframe) => {
+      const contents = iframe.contentDocument.documentElement.outerHTML;
+      iframe.src = '';
+      iframe.srcdoc = contents;
+    });
+    await page.waitFor(2000);
   }
 };
