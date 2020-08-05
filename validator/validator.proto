@@ -1009,6 +1009,8 @@ message ValidationResult {
   }
   optional Status status = 2;
   repeated ValidationError errors = 1;
+  // The following field is deprecated and can return any value. Do not depend
+  // on this.
   optional int32 validator_revision = 3 [default = -1];
   optional int32 spec_file_revision = 4 [default = -1];
   // If the AMP document is a transformed AMP document, then this is the
