@@ -329,8 +329,10 @@ export class AmpStoryPlayer {
    * @private
    */
   setUpAutoplayClickShield_() {
-    this.element_.addEventListener('click', () =>
-      this.toggleAutoplayMode_(false)
+    this.element_.addEventListener(
+      'click',
+      () => this.toggleAutoplayMode_(false),
+      {once: true}
     );
   }
 
