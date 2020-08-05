@@ -639,7 +639,11 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
 
     await nextTick();
 
-    expect(startMeasuringStub).to.have.been.calledOnceWithExactly(videoEl);
+    const poolVideoEl = element.querySelector('video');
+    // Not called with the original video.
+    expect(startMeasuringStub).to.not.have.been.calledOnceWithExactly(videoEl);
+    // Called with the media pool replaced video.
+    expect(startMeasuringStub).to.have.been.calledOnceWithExactly(poolVideoEl);
   });
 
   it('should stop tracking media performance when leaving the page', async () => {
@@ -661,8 +665,9 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     await nextTick();
     page.setState(PageState.NOT_ACTIVE);
 
+    const poolVideoEl = element.querySelector('video');
     expect(stopMeasuringStub).to.have.been.calledOnceWithExactly(
-      videoEl,
+      poolVideoEl,
       true /* sendMetrics */
     );
   });
