@@ -24,6 +24,8 @@ limitations under the License.
 
 # amp-story-grid-layer
 
+## Usage
+
 The `<amp-story-grid-layer>` component lays its children out into a grid. Its implementation is based off of the [CSS Grid Spec](https://www.w3.org/TR/css-grid-1/).
 
 <div class="flex-images">
@@ -40,134 +42,7 @@ The `<amp-story-grid-layer>` component lays its children out into a grid. Its im
   <noscript><img width="200" src="https://raw.githubusercontent.com/ampproject/amphtml/master/extensions/amp-story/img/layers-layer-4.gif" /></noscript></amp-img>
 </div>
 
-## Attributes
-
-### template [required]
-
-The `template` attribute determines the layout of the grid layer. Available templates are described in the [Templates](#templates) section below.
-
-### grid-area [optional]
-
-This attribute is specified on children of `<amp-story-grid-layer>`. `grid-area` specifies the named area (from using a `template` that defines them) in which the element containing this attribute should appear.
-
-Example:
-
-```html
-<amp-story-grid-layer template="thirds">
-  <p grid-area="middle-third">Element 1</p>
-  <p grid-area="lower-third">Element 2</p>
-  <p grid-area="upper-third">Element 3</p>
-</amp-story-grid-layer>
-```
-
-### aspect-ratio [optional]
-
-The value specifies an aspect ratio in the "horizontal:vertical" format, where both "horizontal" and "vertical" are integer numbers. If this attribute is specified, the layout of the grid layer is set to conform to the specified proportions. The font size, in this case, is automatically set to the 1/10th of the resulting height to enable proportional content scaling.
-
-Example:
-
-```html
-<amp-story-grid-layer aspect-ratio="9:16" template="vertical">
-  <div style="width: 10%; height: 10%; font-size: 2em;">
-    This block will be in 9:16 aspect ratio and font size will be set at the 20%
-    of the layer's height.
-  </div>
-</amp-story-grid-layer>
-```
-
-## Templates
-
-The following are available templates to specify for the layout of the grid layer.
-
-{% call callout('Tip', type='success') %}
-To see the layout templates in use, check out the [layouts demo on AMP By Example](https://amp.dev/documentation/examples/style-layout/amp_story_layouts/).
-{% endcall %}
-
-### fill
-
-The `fill` template shows its first child full bleed. All other children are not shown.
-
-Names Areas: (none)
-
-Example:
-
-<amp-img alt="Fill template example" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-fill.png" width="145" height="255">
-  <noscript>
-    <img alt="Horizontal template example" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-fill.png" />
-  </noscript>
-</amp-img>
-
-```html
-<amp-story-grid-layer template="fill">
-  <amp-img src="cat.jpg"></amp-img>
-</amp-story-grid-layer>
-```
-
-### vertical
-
-The `vertical` template lays its elements out along the y-axis. By default, its elements are aligned to the top, and can take up the entirety of the screen along the x-axis.
-
-Names Areas: (none)
-
-<amp-img alt="Vertical template example" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-vertical.png" width="145" height="255">
-  <noscript>
-    <img alt="Horizontal template example" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-vertical.png" />
-  </noscript>
-</amp-img>
-
-```html
-<amp-story-grid-layer template="vertical">
-  <p>Element 1</p>
-  <p>Element 2</p>
-  <p>Element 3</p>
-</amp-story-grid-layer>
-```
-
-### horizontal
-
-The `horizontal` template lays its elements out along the x-axis. By default, its elements are aligned to the start of the line and can take up the entirety of the screen along the y-axis.
-
-Names Areas: (none)
-
-<amp-img alt="Horizontal template example" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-horizontal.png" width="145" height="255">
-  <noscript>
-    <img alt="Horizontal template example" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-horizontal.png" />
-  </noscript>
-</amp-img>
-
-```html
-<amp-story-grid-layer template="horizontal">
-  <p>Element 1</p>
-  <p>Element 2</p>
-  <p>Element 3</p>
-</amp-story-grid-layer>
-```
-
-### thirds
-
-The `thirds` template divides the screen into three equally-sized rows, and allows you to slot content into each area.
-
-Named Areas:
-
-- `upper-third`
-- `middle-third`
-- `lower-third`
-
-<amp-img alt="Horizontal template example" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-thirds.png" width="145" height="255">
-  <noscript>
-    <img alt="Thirds template example" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-thirds.png" />
-  </noscript>
-</amp-img>
-
-```html
-<amp-story-grid-layer template="thirds">
-  <p grid-area="middle-third">Element 1</p>
-  <p grid-area="lower-third">Element 2</p>
-  <p grid-area="upper-third">Element 3</p>
-</amp-story-grid-layer>
-```
-
-## Children
+## Valid children
 
 An `amp-story-grid-layer` can contain any of the following elements:
 
@@ -326,9 +201,138 @@ An `amp-story-grid-layer` can contain any of the following elements:
   </tr>
 </table>
 
-## Pre templated UI
+## Attributes
 
-### Landscape half-half UI
+### template [required]
+
+The `template` attribute determines the layout of the grid layer. Available templates are described in the [Templates](#templates) section below.
+
+### grid-area [optional]
+
+This attribute is specified on children of `<amp-story-grid-layer>`. `grid-area` specifies the named area (from using a `template` that defines them) in which the element containing this attribute should appear.
+
+Example:
+
+```html
+<amp-story-grid-layer template="thirds">
+  <p grid-area="middle-third">Element 1</p>
+  <p grid-area="lower-third">Element 2</p>
+  <p grid-area="upper-third">Element 3</p>
+</amp-story-grid-layer>
+```
+
+### aspect-ratio [optional]
+
+The value specifies an aspect ratio in the "horizontal:vertical" format, where both "horizontal" and "vertical" are integer numbers. If this attribute is specified, the layout of the grid layer is set to conform to the specified proportions. The font size, in this case, is automatically set to the 1/10th of the resulting height to enable proportional content scaling.
+
+Example:
+
+```html
+<amp-story-grid-layer aspect-ratio="9:16" template="vertical">
+  <div style="width: 10%; height: 10%; font-size: 2em;">
+    This block will be in 9:16 aspect ratio and font size will be set at the 20%
+    of the layer's height.
+  </div>
+</amp-story-grid-layer>
+```
+
+## Styling
+
+### Templates
+
+The following are available templates to specify for the layout of the grid layer.
+
+{% call callout('Tip', type='success') %}
+To see the layout templates in use, check out the [layouts demo on AMP By Example](https://amp.dev/documentation/examples/style-layout/amp_story_layouts/).
+{% endcall %}
+
+#### fill
+
+The `fill` template shows its first child full bleed. All other children are not shown.
+
+Names Areas: (none)
+
+Example:
+
+<amp-img alt="Fill template example" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-fill.png" width="145" height="255">
+  <noscript>
+    <img alt="Horizontal template example" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-fill.png" />
+  </noscript>
+</amp-img>
+
+```html
+<amp-story-grid-layer template="fill">
+  <amp-img src="cat.jpg"></amp-img>
+</amp-story-grid-layer>
+```
+
+#### vertical
+
+The `vertical` template lays its elements out along the y-axis. By default, its elements are aligned to the top, and can take up the entirety of the screen along the x-axis.
+
+Names Areas: (none)
+
+<amp-img alt="Vertical template example" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-vertical.png" width="145" height="255">
+  <noscript>
+    <img alt="Horizontal template example" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-vertical.png" />
+  </noscript>
+</amp-img>
+
+```html
+<amp-story-grid-layer template="vertical">
+  <p>Element 1</p>
+  <p>Element 2</p>
+  <p>Element 3</p>
+</amp-story-grid-layer>
+```
+
+#### horizontal
+
+The `horizontal` template lays its elements out along the x-axis. By default, its elements are aligned to the start of the line and can take up the entirety of the screen along the y-axis.
+
+Names Areas: (none)
+
+<amp-img alt="Horizontal template example" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-horizontal.png" width="145" height="255">
+  <noscript>
+    <img alt="Horizontal template example" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-horizontal.png" />
+  </noscript>
+</amp-img>
+
+```html
+<amp-story-grid-layer template="horizontal">
+  <p>Element 1</p>
+  <p>Element 2</p>
+  <p>Element 3</p>
+</amp-story-grid-layer>
+```
+
+#### thirds
+
+The `thirds` template divides the screen into three equally-sized rows, and allows you to slot content into each area.
+
+Named Areas:
+
+- `upper-third`
+- `middle-third`
+- `lower-third`
+
+<amp-img alt="Horizontal template example" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-thirds.png" width="145" height="255">
+  <noscript>
+    <img alt="Thirds template example" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/template-thirds.png" />
+  </noscript>
+</amp-img>
+
+```html
+<amp-story-grid-layer template="thirds">
+  <p grid-area="middle-third">Element 1</p>
+  <p grid-area="lower-third">Element 2</p>
+  <p grid-area="upper-third">Element 3</p>
+</amp-story-grid-layer>
+```
+
+### Pre templated UI
+
+#### Landscape half-half UI
 
 The landscape half-half pre templated UI will resize the `<amp-story-grid-layer>` element to take half of the screen rather than the full screen, and be positioned either on the half left or half right of the viewport. This attribute only affects landscape viewports, and is ignored on portrait viewports.
 This template makes it easier to design full bleed landscape stories: splitting the screen in two halves gives each half a portrait ratio on most devices, allowing re-using the portrait assets, design, and templates already built for portrait stories.
