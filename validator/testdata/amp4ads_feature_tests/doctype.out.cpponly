@@ -16,18 +16,17 @@ FAIL
 |  -->
 |  <!--
 |    Test Description:
-|    Verifies that type identifier `actions` is not valid on an AMP4EMAIL document.
+|    Only html attribute is allowed in <!doctype> declaration.
 |  -->
-|  <!doctype html>
-|  <html ⚡4email actions>
->> ^~~~~~~~~
-amp4email_feature_tests/amp_actions.html:21:0 The attribute 'actions' may not appear in tag 'html'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
+|  <!doctype html data-foo id=doctype>
+>>             ^~~~~~~~~
+amp4ads_feature_tests/doctype.html:20:12 Invalid or missing doctype declaration. Should be <!doctype html>. See https://amp.dev/documentation/guides-and-tutorials/start/create/basic_markup/
+|  <html ⚡4ads>
 |  <head>
 |    <meta charset="utf-8">
-|    <style amp4email-boilerplate>body{visibility:hidden}</style>
-|    <script async src="https://cdn.ampproject.org/v0.js"></script>
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
+|    <style amp4ads-boilerplate>body{visibility:hidden}</style>
+|    <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
 |  </head>
-|  <body>
-|  Hello, world.
-|  </body>
+|  <body>Hello, world.</body>
 |  </html>

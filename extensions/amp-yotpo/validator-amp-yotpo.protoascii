@@ -16,7 +16,6 @@
 
 tags: {  # amp-yotpo
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-yotpo"
@@ -28,7 +27,6 @@ tags: {  # amp-yotpo
 }
 tags: {  # <amp-yotpo>
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "AMP-YOTPO"
   requires_extension: "amp-yotpo"
   attr_lists: "extended-amp-global"

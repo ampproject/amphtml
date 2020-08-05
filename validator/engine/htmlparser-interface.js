@@ -307,6 +307,12 @@ const DocLocator = class {
    * @return {number} line The current column.
    */
   getCol() {}
+
+  /**
+   * The size of the document in bytes.
+   * @return {number}.
+   */
+  getDocByteSize() {}
 };
 exports.DocLocator = DocLocator;
 
