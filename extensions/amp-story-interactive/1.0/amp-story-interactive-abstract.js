@@ -149,7 +149,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected {boolean} */
     this.hasUserSelection_ = false;
 
-    /** @protected {?../../../../src/services/localization.LocalizationService} */
+    /** @protected {?../../../../src/service/localization.LocalizationService} */
     this.localizationService_ = null;
 
     /** @private {!Array<number>} min and max number of options, inclusive */
