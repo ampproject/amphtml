@@ -16,7 +16,6 @@
 tags: {  # amp-bind
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-bind"
@@ -48,7 +47,6 @@ tags: {  # <amp-state> (json)
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "amp-bind extension .json script"
   requires_extension: "amp-bind"
@@ -115,41 +113,8 @@ tags: {  # <amp-state>
   }
   spec_url: "https://amp.dev/documentation/components/amp-bind/"
 }
-# ACTIONS <amp-state> with POST identity
-tags: { # <amp-state>
-  html_format: ACTIONS
-  tag_name: "AMP-STATE"
-  spec_name: "AMP-STATE (ACTIONS)"
-  requires_extension: "amp-bind"
-  attrs: {
-    name: "credentials"
-  }
-  attrs: {
-    name: "crossorigin"
-    value: "amp-viewer-auth-token-via-post"
-  }
-  attrs: {
-    name: "overridable"
-  }
-  attrs: {
-    name: "src"
-    value_url: {
-      protocol: "https"
-      allow_relative: true  # Will be set to false at a future date.
-    }
-    disallowed_value_regex: "__amp_source_origin"
-  }
-  attr_lists: "mandatory-id-attr"
-  # <amp-bind>
-  attrs: { name: "[src]" }
-  child_tags: {
-    first_child_tag_name_oneof: "SCRIPT"
-  }
-  spec_url: "https://amp.dev/documentation/components/amp-bind/"
-}
 tags: {  # <amp-bind-macro>
   html_format: AMP
-  html_format: ACTIONS
   html_format: AMP4EMAIL
   tag_name: "AMP-BIND-MACRO"
   requires_extension: "amp-bind"

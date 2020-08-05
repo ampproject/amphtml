@@ -1,6 +1,6 @@
-PASS
+FAIL
 |  <!--
-|    Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+|    Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 |
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
@@ -16,26 +16,33 @@ PASS
 |  -->
 |  <!--
 |    Test Description:
-|    Verifies that type identifier `actions` is valid on an AMP actions document.
+|    This is the minimum valid AMP document; it includes all of the required
+|    fields from the spec, but nothing else.
 |  -->
 |  <!doctype html>
-|  <html ⚡ actions>
+|  <html ⚡>
 |  <head>
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">
-|    <meta name="viewport" content="width=device-width">
+|    <meta name="viewport" content="width=device-width,minimum-scale=1">
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
-|    <script async custom-element="amp-viewer-assistance" src="https://cdn.ampproject.org/v0/amp-viewer-assistance-0.1.js"></script>
-|    <script id="amp-viewer-assistance" type="application/json">
-|    {
-|      "actionsOnGoogle" : {
-|        "projectId": "0123456789"
-|      }
-|    }
-|    </script>
 |  </head>
 |  <body>
-|  Hello, world.
+|
+|    <p data-this-is-fine="">
+|    <p data-\this-is-not="">
+>>   ^~~~~~~~~
+feature_tests/slash_attrs.html:33:2 The attribute 'data-\this-is-not' may not appear in tag 'p'.
+|    <p data-/this-is-not="">
+>>   ^~~~~~~~~
+feature_tests/slash_attrs.html:34:2 The attribute 'this-is-not' may not appear in tag 'p'.
+|    <p data-\this-is-not>
+>>   ^~~~~~~~~
+feature_tests/slash_attrs.html:35:2 The attribute 'data-\this-is-not' may not appear in tag 'p'.
+|    <p data-/this-is-not>
+>>   ^~~~~~~~~
+feature_tests/slash_attrs.html:36:2 The attribute 'this-is-not' may not appear in tag 'p'.
+|
 |  </body>
 |  </html>
