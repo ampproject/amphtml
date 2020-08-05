@@ -43,10 +43,7 @@ const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
  * @return {PreactDef.Renderable}
  * @template T
  */
-export function ScrollerWithRef(
-  {children, loop, restingIndex, setRestingIndex},
-  ref
-) {
+function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
   // We still need our own ref that we can always rely on to be there.
   const containerRef = useRef(null);
   useImperativeHandle(ref, () => ({
@@ -156,10 +153,11 @@ export function ScrollerWithRef(
   );
 }
 
-export const Scroller = forwardRef((props, ref) =>
+const Scroller = forwardRef((props, ref) =>
   ScrollerWithRef(/** @type {BaseCarouselDef.ScrollerProps} */ (props), ref)
 );
 Scroller.displayName = 'Scroller'; // Make findable for tests.
+export {Scroller};
 
 /**
  * How the slides are ordered when looping:
