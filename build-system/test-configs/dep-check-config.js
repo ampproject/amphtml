@@ -450,6 +450,9 @@ exports.rules = [
   {
     filesMatching: 'src/**/*.js',
     mustNotDependOn: 'extensions/**/*.js',
+    allowlist: [
+      'src/amp-story-player/amp-story-player-impl.js->extensions/amp-story/1.0/embed-mode.js',
+    ],
   },
   {
     filesMatching: 'src/**/*.js',
