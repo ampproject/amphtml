@@ -880,8 +880,7 @@ export class AmpStoryPlayer {
       'showStoryUrlInfo': '0',
       'storyPlayer': 'v0',
       'cap': 'swipe',
-      [EmbedModeParam]:
-        embedMode ?? originalEmbedMode ?? EmbedMode.NOT_EMBEDDED,
+      [EmbedModeParam]: embedMode ?? originalEmbedMode, // Will be skipped if originalEmbedMode == undefined
     };
 
     // Type is overriden because linting breaks if this were to be put inside the dict function
