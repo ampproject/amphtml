@@ -282,20 +282,14 @@ See below for a full example,
 
 ### Using amp-script as a data source
 
-In the ideal case, the servers powering your `<amp-list>` would return perfectly formatted JSON for your use case. However, for situations in which you may not have access to create or modify backend servers, it is also possible to provide data to an `<amp-list>` component using JavaScript via exported `<amp-script>` functions. Those functions may transform the data before returning.
-
-Here are the steps for specifying an `<amp-script>` function as your data source:
-
-1. Follow the directions in the [amp-script](https://amp.dev/documentation/components/amp-script/) docs to setup the component and create you function. This includes:
-   a. Adding the extension script to your document's `<head>`.
-   b. Writing your custom functions.
-   c. Exporting the function using `exportFunction(name: string, fn: Function)`
-2. Use the `amp-script:` protocol in your `<amp-list>`'s src attribute. The correct format for specifying a function is the `<amp-script>`'s ID followed by the exported function name, like this:
-   `<amp-list src="amp-script:id.fnName">`
+You may use an exported `<amp-script>` function as the data source for `<amp-list>`. This enables you to flexibly combine and transform server responses before handoff to `<amp-list>`. The required format is the `<amp-script>` ID and the function name separated by a `.`, e.g. `amp-script:id.functionName`.
 
 See below for an example:
 
 ```html
+<!--
+  See the [amp-script](https://amp.dev/documentation/components/amp-script/) documentation to setup the component and export your function>
+-->
 <amp-script id="fns" script="local-script" nodom></amp-script>
 <script id="local-script" type="text/plain" target="amp-script">
   function getRemoteData() {
@@ -306,6 +300,7 @@ See below for an example:
   exportFunction('getRemoteData', getRemoteData);
 </script>
 
+<!-- "fns" is the <amp-script> id, and "getRemoteData" corresponds to the exported function. -->
 <amp-list
   id="amp-list"
   width="auto"
@@ -320,12 +315,12 @@ See below for an example:
 ```
 
 [tip type="important"]
-When using `<amp-script>` as merely a data-layer with no dom manipulation, you may benefit from attaching the `nodom` attribute. This signicantly improves some of the performance characteristics of the `<amp-script>`, as well as removes the need to specify a size since the component should have no appearance.
+When using `<amp-script>` as merely a data-layer with no DOM manipulation, you may benefit from attaching the `nodom` attribute. This signicantly improves performance characteristics of the `<amp-script>`. It also removes the need to specify width and height, since the component is not displayed.
 [/tip]
 
 ### Load more and infinite scroll
 
-We've introduced the `load-more` attributes with options `manual` and `auto` to allow pagination and infinite scroll.
+The `load-more` attributes has options `manual` and `auto` to allow pagination and infinite scroll.
 
 ```html
 <amp-list
@@ -494,8 +489,8 @@ The URL of the remote endpoint that returns the JSON that will be rendered
 within this `<amp-list>`. There are three valid protocols for the `src` attribute.
 
 1. **https**: This must refer to a CORS HTTP service. Insecure http is not supported.
-2. **amp-state**: This is for initializing from amp-state data. See [Initialization from amp-state](#initialization-from-amp-state) for more details.
-3. **amp-script**: Enables using `<amp-script>` functions as the data source. See [Using amp-script as a data source](#using-amp-script-as-a-data-source) for more details.
+2. **amp-state**: This is for initializing from amp-state data. See [Initialization from <amp-state>](#initialization-from-amp-state) for more details.
+3. **amp-script**: Enables using `<amp-script>` functions as the data source. See [Using <amp-script> as a data source](#using-amp-script-as-a-data-source) for more details.
 
 [tip type="important"]
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
