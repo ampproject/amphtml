@@ -320,7 +320,7 @@ When using `<amp-script>` as merely a data-layer with no DOM manipulation, you m
 
 ### Load more and infinite scroll
 
-The `load-more` attributes has options `manual` and `auto` to allow pagination and infinite scroll.
+The `load-more` attribute has options `manual` and `auto` to allow pagination and infinite scroll.
 
 ```html
 <amp-list
