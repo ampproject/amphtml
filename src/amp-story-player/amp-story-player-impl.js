@@ -551,18 +551,36 @@ export class AmpStoryPlayer {
       return;
     }
 
+    let firstStoryLoadedPromise;
     for (let idx = 0; idx < this.stories_.length && idx < MAX_IFRAMES; idx++) {
       const story = this.stories_[idx];
       const iframeIdx = story[IFRAME_IDX];
       const iframe = this.iframes_[iframeIdx];
-      this.layoutIframe_(
-        story,
-        iframe,
-        idx === 0 ? VisibilityState.VISIBLE : VisibilityState.PRERENDER
-      );
+      if (idx === 0) {
+        this.layoutIframe_(story, iframe, VisibilityState.VISIBLE);
+        firstStoryLoadedPromise = this.waitForStoryToLoadPromise_(iframeIdx);
+      } else {
+        // Only layout next story after first one is loaded.
+        firstStoryLoadedPromise.then(() => {
+          this.layoutIframe_(story, iframe, VisibilityState.PRERENDER);
+        });
+      }
     }
 
     this.isLaidOut_ = true;
+  }
+
+  /**
+   * @param {number} iframeIdx
+   * @return {!Promise}
+   * @private
+   */
+  waitForStoryToLoadPromise_(iframeIdx) {
+    return new Promise((resolve) => {
+      this.messagingPromises_[iframeIdx].then((messaging) =>
+        messaging.registerHandler('ampstory:load', () => resolve())
+      );
+    });
   }
 
   /**

@@ -148,14 +148,28 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     );
   });
 
-  it('should prerender next stories', async () => {
+  it('should prerender next story after first one is loaded', async () => {
     buildStoryPlayer(3);
     await manager.loadPlayers();
+    await nextTick();
+
+    fireHandler['ampstory:load']('ampstory:load', {});
+    await nextTick();
 
     const storyIframes = playerEl.querySelectorAll('iframe');
     expect(storyIframes[1].getAttribute('src')).to.include(
       '#visibilityState=prerender'
     );
+  });
+
+  it('should not load next story if first one hasn not finished loading', async () => {
+    buildStoryPlayer(3);
+    await manager.loadPlayers();
+    await nextTick();
+
+    const storyIframes = playerEl.querySelectorAll('iframe');
+
+    expect(storyIframes[1].getAttribute('src')).to.not.exist;
   });
 
   it(
