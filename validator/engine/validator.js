@@ -5851,7 +5851,6 @@ class ParsedValidatorRules {
     this.typeIdentifiers_['\u26a14email'] = 0;
     this.typeIdentifiers_['\u26a1\ufe0f4email'] = 0;
     this.typeIdentifiers_['amp4email'] = 0;
-    this.typeIdentifiers_['actions'] = 0;
     this.typeIdentifiers_['transformed'] = 0;
     this.typeIdentifiers_['data-ampdevmode'] = 0;
     this.typeIdentifiers_['data-css-strict'] = 0;
@@ -6125,10 +6124,9 @@ class ParsedValidatorRules {
             validationResult.typeIdentifier.push(typeIdentifier);
             context.recordTypeIdentifier(typeIdentifier);
           }
-          // The type identifier "actions" and "transformed" are not
-          // considered mandatory unlike other type identifiers.
-          if (typeIdentifier !== 'actions' &&
-              typeIdentifier !== 'transformed' &&
+          // The type identifier "transformed" is not considered mandatory
+          // unlike other type identifiers.
+          if (typeIdentifier !== 'transformed' &&
               typeIdentifier !== 'data-ampdevmode' &&
               typeIdentifier !== 'data-css-strict') {
             hasMandatoryTypeIdentifier = true;
@@ -6168,8 +6166,7 @@ class ParsedValidatorRules {
       }
     }
     if (!hasMandatoryTypeIdentifier) {
-      // Missing mandatory type identifier (any AMP variant but "actions" or
-      // "transformed").
+      // Missing mandatory type identifier (any AMP variant but "transformed").
       context.addError(
           generated.ValidationError.Code.MANDATORY_ATTR_MISSING,
           context.getLineCol(),
@@ -6207,19 +6204,6 @@ class ParsedValidatorRules {
               'data-ampdevmode', 'data-css-strict'
             ],
             context, validationResult);
-        break;
-      case 'ACTIONS':
-        this.validateTypeIdentifiers(
-            htmlTag.attrs(),
-            ['\u26a1', '\u26a1\ufe0f', 'amp', 'actions', 'data-ampdevmode'],
-            context, validationResult);
-        if (validationResult.typeIdentifier.indexOf('actions') === -1) {
-          context.addError(
-              generated.ValidationError.Code.MANDATORY_ATTR_MISSING,
-              context.getLineCol(),
-              /* params */['actions', 'html'],
-              /* url */ '', validationResult);
-        }
         break;
       default:
         // fallthrough
