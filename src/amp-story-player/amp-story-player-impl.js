@@ -378,10 +378,7 @@ export class AmpStoryPlayer {
   initializeShadowRoot_() {
     this.rootEl_ = this.doc_.createElement('main');
 
-    // TODO(): Update unit tests to work without shadow root,
-    // then update condition to getMode.test and update visual tests.
-    const containerToUse =
-      typeof __AMP_VISUAL_TEST !== 'undefined'
+    const containerToUse = getMode().test 
         ? this.element_
         : this.element_.attachShadow({mode: 'open'});
 

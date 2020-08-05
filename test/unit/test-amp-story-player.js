@@ -112,14 +112,14 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     buildStoryPlayer();
     await manager.loadPlayers();
 
-    expect(playerEl.shadowRoot.querySelector('iframe')).to.exist;
+    expect(playerEl.querySelector('iframe')).to.exist;
   });
 
   it('should correctly append params at the end of the story url', async () => {
     buildStoryPlayer();
     await manager.loadPlayers();
 
-    const storyIframe = playerEl.shadowRoot.querySelector('iframe');
+    const storyIframe = playerEl.querySelector('iframe');
 
     expect(storyIframe.getAttribute('src')).to.equals(
       DEFAULT_CACHE_URL +
@@ -133,7 +133,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     buildStoryPlayer(1, DEFAULT_CACHE_URL + existingParams);
     await manager.loadPlayers();
 
-    const storyIframe = playerEl.shadowRoot.querySelector('iframe');
+    const storyIframe = playerEl.querySelector('iframe');
 
     expect(storyIframe.getAttribute('src')).to.equals(
       DEFAULT_CACHE_URL +
@@ -147,7 +147,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     buildStoryPlayer(3);
     await manager.loadPlayers();
 
-    const storyIframes = playerEl.shadowRoot.querySelectorAll('iframe');
+    const storyIframes = playerEl.querySelectorAll('iframe');
     expect(storyIframes[0].getAttribute('src')).to.include(
       '#visibilityState=visible'
     );
@@ -157,7 +157,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     buildStoryPlayer(3);
     await manager.loadPlayers();
 
-    const storyIframes = playerEl.shadowRoot.querySelectorAll('iframe');
+    const storyIframes = playerEl.querySelectorAll('iframe');
     expect(storyIframes[1].getAttribute('src')).to.include(
       '#visibilityState=prerender'
     );
@@ -277,7 +277,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       await nextTick();
 
-      const storyIframe = playerEl.shadowRoot.querySelector('iframe');
+      const storyIframe = playerEl.querySelector('iframe');
 
       expect(storyIframe.getAttribute('src')).to.equals(
         DEFAULT_CACHE_URL +
@@ -292,7 +292,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       await nextTick();
 
-      const storyIframe = playerEl.shadowRoot.querySelector('iframe');
+      const storyIframe = playerEl.querySelector('iframe');
 
       expect(storyIframe.getAttribute('src')).to.equals(
         DEFAULT_ORIGIN_URL +
@@ -359,7 +359,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       await player.load();
 
-      expect(playerEl.shadowRoot.querySelector('iframe')).to.exist;
+      expect(playerEl.querySelector('iframe')).to.exist;
     });
 
     it('show callback builds corresponding adjacent iframes', async () => {
@@ -538,10 +538,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
 
       expect(
-        playerEl.shadowRoot.querySelector('button.amp-story-player-back-button')
+        playerEl.querySelector('button.amp-story-player-back-button')
       ).to.exist;
       expect(
-        playerEl.shadowRoot.querySelector(
+        playerEl.querySelector(
           'button.amp-story-player-close-button'
         )
       ).to.not.exist;
@@ -556,12 +556,12 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       await player.load();
       expect(
-        playerEl.shadowRoot.querySelector(
+        playerEl.querySelector(
           'button.amp-story-player-close-button'
         )
       ).to.exist;
       expect(
-        playerEl.shadowRoot.querySelector('button.amp-story-player-back-button')
+        playerEl.querySelector('button.amp-story-player-back-button')
       ).to.not.exist;
     });
 
@@ -575,12 +575,12 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
 
       expect(
-        playerEl.shadowRoot.querySelector(
+        playerEl.querySelector(
           'button.amp-story-player-close-button'
         )
       ).to.not.exist;
       expect(
-        playerEl.shadowRoot.querySelector('button.amp-story-player-back-button')
+        playerEl.querySelector('button.amp-story-player-back-button')
       ).to.not.exist;
     });
 
@@ -643,7 +643,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
 
       expect(
-        playerEl.shadowRoot.querySelector('button.amp-story-player-hide-button')
+        playerEl.querySelector('button.amp-story-player-hide-button')
       ).to.not.exist;
     });
 
@@ -656,7 +656,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       openPageAttachment();
 
       expect(
-        playerEl.shadowRoot.querySelector('button.amp-story-player-hide-button')
+        playerEl.querySelector('button.amp-story-player-hide-button')
       ).to.exist;
     });
 
