@@ -66,7 +66,7 @@ amp-story-360 amp-img {
 }
 
 [active] .i-amp-story-360-permissions-button-icon-svg {
-  animation: rotate 1s 1.5s;
+  animation: rotate 1s 1s;
 }
 
 @keyframes rotate {

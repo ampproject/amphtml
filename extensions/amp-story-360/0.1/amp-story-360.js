@@ -28,8 +28,6 @@ import {htmlFor} from '../../../src/static-template';
 /** @const {string} */
 const TAG = 'AMP_STORY_360';
 
-let gyroscopeControls = false;
-
 /**
  * Generates the template for the permission button.
  *
@@ -87,16 +85,16 @@ const buildPermissionDialogBoxTemplate = (element) => {
       </p>
       <div class="i-amp-story-360-permissions-dialog-button-container">
         <button
-          class="i-amp-story-360-permissions-dialog-button-enable"
-          role="button"
-        >
-          enable
-        </button>
-        <button
           class="i-amp-story-360-permissions-dialog-button-disable"
           role="button"
         >
           disable
+        </button>
+        <button
+          class="i-amp-story-360-permissions-dialog-button-enable"
+          role="button"
+        >
+          enable
         </button>
       </div>
     </div>
@@ -242,6 +240,9 @@ export class AmpStory360 extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.isReady_ = false;
+
+    /** @private {boolean} */
+    this.gyroscopeControls = false;
   }
 
   /** @override */
@@ -278,6 +279,9 @@ export class AmpStory360 extends AMP.BaseElement {
     container.appendChild(this.canvas_);
     this.applyFillContent(container, /* replacedContent */ true);
 
+    this.element.getAttribute('controls') === 'gyroscope' &&
+      this.checkGyroscopePermissions();
+
     return Services.storyStoreServiceForOrNull(this.win).then(
       (storeService) => {
         storeService.subscribe(
@@ -289,11 +293,34 @@ export class AmpStory360 extends AMP.BaseElement {
     );
   }
 
-  /** @override */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
+  /** @private */
+  checkGyroscopePermissions() {
+    // if gyroscope isn't supported
+    if (typeof DeviceOrientationEvent === 'undefined') {
+      return;
+    }
+
+    // if motion and no permissions like android
+    if (typeof DeviceOrientationEvent.requestPermission === 'undefined') {
+      this.enableGyroscope();
+      return;
+    }
+
+    // if motion and permissions like ios
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      this.buildPermissionUI();
+    }
   }
 
+  /** @private */
+  enableGyroscope() {
+    this.gyroscopeControls = true;
+    window.addEventListener('deviceorientation', (e) => {
+      this.onDeviceOrientation(e);
+    });
+  }
+
+  /** @private */
   onDeviceOrientation(ev) {
     let rot = Matrix.identity(3);
     rot = Matrix.mul(
@@ -315,44 +342,49 @@ export class AmpStory360 extends AMP.BaseElement {
     this.renderer_.render(true);
   }
 
-  requestPermissions() {
-    const dialogBox = buildPermissionDialogBoxTemplate(this.element);
-    this.element.appendChild(dialogBox);
+  /** @private */
+  buildPermissionUI() {
+    const buildPermissionDialgBox = () => {
+      const dialogBox = buildPermissionDialogBoxTemplate(this.element);
+      this.element.appendChild(dialogBox);
 
-    const enableButton = dialogBox.querySelector(
-      '.i-amp-story-360-permissions-dialog-button-enable'
-    );
-    const disableButton = dialogBox.querySelector(
-      '.i-amp-story-360-permissions-dialog-button-disable'
-    );
+      const enableButton = dialogBox.querySelector(
+        '.i-amp-story-360-permissions-dialog-button-enable'
+      );
+      const disableButton = dialogBox.querySelector(
+        '.i-amp-story-360-permissions-dialog-button-disable'
+      );
 
-    enableButton.addEventListener('click', () => {
-      DeviceOrientationEvent.requestPermission()
-        .then((permissionState) => {
-          alert(permissionState);
-          if (permissionState === 'granted') {
-            gyroscopeControls = true;
-            window.addEventListener('deviceorientation', (e) => {
-              this.onDeviceOrientation(e);
-            });
-          }
-        })
-        .catch(alert.error);
-      dialogBox.remove();
+      enableButton.addEventListener('click', () => {
+        DeviceOrientationEvent.requestPermission()
+          .then((permissionState) => {
+            if (permissionState === 'granted') {
+              this.enableGyroscope();
+            }
+            permissionButton.remove();
+          })
+          .catch(alert.error);
+        dialogBox.remove();
+      });
+
+      disableButton.addEventListener('click', () => dialogBox.remove());
+    };
+
+    const permissionButton = buildPermissionButtonTemplate(this.element);
+
+    this.element.appendChild(permissionButton);
+    permissionButton.addEventListener('click', () => {
+      buildPermissionDialgBox();
     });
+  }
 
-    disableButton.addEventListener('click', () => dialogBox.remove());
+  /** @override */
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout);
   }
 
   /** @override */
   layoutCallback() {
-    const permissionButton = buildPermissionButtonTemplate(this.element);
-    this.element.appendChild(permissionButton);
-
-    permissionButton.addEventListener('click', () => {
-      this.requestPermissions();
-    });
-
     const ampImgEl = this.element.querySelector('amp-img');
     userAssert(ampImgEl, 'amp-story-360 must contain an amp-img element.');
     const owners = Services.ownersForDoc(this.element);
@@ -418,17 +450,12 @@ export class AmpStory360 extends AMP.BaseElement {
       this.animation_ = new CameraAnimation(this.duration_, this.orientations_);
     }
     const loop = () => {
-      if (!this.isPlaying_ || !this.animation_) {
+      if (!this.isPlaying_ || !this.animation_ || this.gyroscopeControls) {
         this.renderer_.render(false);
         return;
       }
       const nextOrientation = this.animation_.getNextOrientation();
-      if (gyroscopeControls) {
-        this.win.requestAnimationFrame(() => {
-          this.renderer_.render(true);
-          loop();
-        });
-      } else if (nextOrientation) {
+      if (nextOrientation) {
         // mutateElement causes inaccurate animation speed here, so we use rAF.
         this.win.requestAnimationFrame(() => {
           this.renderer_.setCamera(
