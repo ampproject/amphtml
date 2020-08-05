@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import {createCustomEvent} from '../../event-helper';
 // Source for this constant is css/amp-story-entry-point-card.css
 import {cssText} from '../../../build/amp-story-entry-point-card.css';
-import {createCustomEvent} from '../../event-helper';
 import {setStyle} from '../../style';
 import {toArray} from '../../types';
 
@@ -230,7 +230,8 @@ export class AmpStoryEntryPoint {
       'div.entry-point-card-container'
     );
     const maxScroll =
-      scrollContainer.clientWidth - cards.length * cards[0].clientWidth;
+      scrollContainer./*OK*/ clientWidth -
+      cards.length * cards[0]./*OK*/ clientWidth;
     if (maxScroll >= 0) {
       return;
     }
