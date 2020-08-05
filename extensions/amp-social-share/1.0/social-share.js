@@ -25,8 +25,8 @@ import {openWindowDialog} from '../../../src/dom';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
 const NAME = 'SocialShare';
-const DEFAULT_WIDTH = '60';
-const DEFAULT_HEIGHT = '44';
+const DEFAULT_WIDTH = 60;
+const DEFAULT_HEIGHT = 44;
 const DEFAULT_TARGET = '_blank';
 const WINDOW_FEATURES = 'resizable,scrollbars,width=640,height=480';
 
@@ -74,23 +74,21 @@ export function SocialShare({
 }
 
 /**
- * If the specified type 'canCustomize' (see config file), allow children
- * to be rendered and color / background to be passed in via props.  If the
- * specified type cannot be customized (canCustomize = false), children
- * will not be rendered and color / background will always be set to default
- * values.
- * @param  {?string}               type
- * @param  {?PreactDef.Renderable} children
- * @param  {?string}               color
- * @param  {?string}               background
- * @param  {JsonObject}            size
+ * If children exist, render the children instead of the icon.  Otherwise,
+ * render the icon associated with the specified type with specified color
+ * and background (or defaults if not specified).
+ * @param {string|undefined} type
+ * @param {?PreactDef.Renderable|undefined} children
+ * @param {string|undefined} color
+ * @param {string|undefined} background
+ * @param {JsonObject} size
  * @return {PreactDef.Renderable}
  */
 function processChildren(type, children, color, background, size) {
   if (children) {
     return children;
   } else {
-    const typeConfig = getSocialConfig(type) || {};
+    const typeConfig = getSocialConfig(/** @type {string} */ (type)) || {};
     const baseStyle = CSS.BASE_STYLE;
     const iconStyle = dict({
       'color': color || typeConfig.defaultColor,
@@ -106,16 +104,18 @@ function processChildren(type, children, color, background, size) {
 }
 
 /**
- * @param {?string}                     type
- * @param {?string}                     endpoint
- * @param {?string}                     target
- * @param {?string}                     width
- * @param {?string}                     height
+ * Verify required props and throw error if necessary.  Set default values
+ * for optional props if no value specified.
+ * @param {string|undefined} type
+ * @param {string|undefined} endpoint
+ * @param {string|undefined} target
+ * @param {number|string|undefined} width
+ * @param {number|string|undefined} height
  * @param {JsonObject|Object|undefined} params
  * @return {{
  *   finalEndpoint: string,
- *   checkedWidth: string,
- *   checkedHeight: string,
+ *   checkedWidth: (number|string),
+ *   checkedHeight: (number|string),
  *   checkedTarget: string,
  * }}
  */
@@ -127,7 +127,7 @@ function checkProps(type, endpoint, target, width, height, params) {
 
   // User must provide endpoint if they choose a type that is not
   // pre-configured
-  const typeConfig = getSocialConfig(type) || {};
+  const typeConfig = getSocialConfig(/** @type {string} */ (type)) || {};
   let baseEndpoint = endpoint || typeConfig.shareEndpoint;
   if (baseEndpoint === undefined) {
     throw new Error(
@@ -170,7 +170,7 @@ function throwWarning(message) {
 /**
  * Opens a new window with the fully processed endpoint
  * @param {?string} finalEndpoint
- * @param {string}  target
+ * @param {string} target
  */
 function handleActivation(finalEndpoint, target) {
   const protocol = finalEndpoint.split(':', 1)[0];
@@ -227,9 +227,9 @@ function isIos() {
 }
 
 /**
- * @param {!Event}  event
+ * @param {!Event} event
  * @param {?string} finalEndpoint
- * @param {string}  target
+ * @param {string} target
  */
 function handleKeyPress(event, finalEndpoint, target) {
   const {key} = event;

@@ -14,129 +14,132 @@
  * limitations under the License.
  */
 
+import {dict} from '../../../src/utils/object';
+
 /**
  * Get social share configurations by supported type.
- * @param  {?string} type
- * @return {?SocialShareConfigDef}
+ * @param  {string} type
+ * @return {SocialShareConfigDef|undefined}
  */
 export function getSocialConfig(type) {
   return BUILTINS[type];
 }
 
 /**
+ * The SocialShareConfigDef contains the configuration data for pre-configured
+ * types (i.e. 'twitter', 'facebook') for the Amp Social Share component.  The
+ * config data contains the following properties:
+ *   shareEndpoint {string} - The base API endpoint for sharing to the
+ *     specified social media type.
+ *   defaultParams {Object} - Parameters to be appended to the end of the
+ *     shareEndpoint as query parameters.  The values in this object are used
+ *     as binding keys which are resolved by the AMP framework.
+ *   defaultColor {string} - Default color code for this social media type.
+ *   defaultBackgroundColor {string} - Default background color code for this
+ *     social media type.
+ *   bindings {?Array<string>} - Used for email, allows passing in an
+ *     attribute that be used in the endpoint, but not as a search param
+ *
  * @typedef {{
- *   shareEndpont:           string,
- *   defaultParams:          Object<string, string>,
- *   defaultColor:           string,
+ *   shareEndpont: string,
+ *   defaultParams: Object<string, string>,
+ *   defaultColor: string,
  *   defaultBackgroundColor: string,
- *   bindings:               ?Array<string>,
+ *   bindings: (!Array<string>|undefined),
  * }}
  */
 let SocialShareConfigDef;
 
 /**
- * This object contains the configuration data for pre-configured types (i.e.
- * 'twitter', 'facebook') for the Amp Social Share component.  The config data
- * contains the following properties:
- *   {string} shareEndpoint - The base API endpoint for sharing to the
- *     specified social media type.
- *   {Object} defaultParams - Parameters to be appended to the end of the
- *     shareEndpoint as query parameters.  The values in this object are used
- *     as binding keys which are resolved by the AMP framework.
- *   {string} defaultColor - Default color code for this social media type.
- *   {string} defaultBackgroundColor - Default background color code for this
- *     social media type.
- *   {?Array<string>} bindings - Used for email, allows passing in an
- *     attribute that be used in endpoint, but not as a search param
- * @type {Object<?string, SocialShareConfigDef>}
+ * @type {Object<string, SocialShareConfigDef>}
  */
 const BUILTINS = {
   'twitter': {
     shareEndpoint: 'https://twitter.com/intent/tweet',
-    defaultParams: {
-      text: 'TITLE',
-      url: 'CANONICAL_URL',
-    },
+    defaultParams: dict({
+      'text': 'TITLE',
+      'url': 'CANONICAL_URL',
+    }),
     defaultColor: 'ffffff',
     defaultBackgroundColor: '1da1f2',
   },
   'facebook': {
     shareEndpoint: 'https://www.facebook.com/dialog/share',
-    defaultParams: {
-      href: 'CANONICAL_URL',
-    },
+    defaultParams: dict({
+      'href': 'CANONICAL_URL',
+    }),
     defaultColor: 'ffffff',
     defaultBackgroundColor: '32529f',
   },
   'pinterest': {
     shareEndpoint: 'https://www.pinterest.com/pin/create/button/',
-    defaultParams: {
-      url: 'CANONICAL_URL',
-      description: 'TITLE',
-    },
+    defaultParams: dict({
+      'url': 'CANONICAL_URL',
+      'description': 'TITLE',
+    }),
     defaultColor: 'ffffff',
     defaultBackgroundColor: 'e60023',
   },
   'linkedin': {
     shareEndpoint: 'https://www.linkedin.com/shareArticle',
-    defaultParams: {
-      url: 'CANONICAL_URL',
-      mini: 'true',
-    },
+    defaultParams: dict({
+      'url': 'CANONICAL_URL',
+      'mini': 'true',
+    }),
     'defaultColor': 'ffffff',
     'defaultBackgroundColor': '0077b5',
   },
   'email': {
     shareEndpoint: 'mailto:RECIPIENT',
-    defaultParams: {
-      subject: 'TITLE',
-      body: 'CANONICAL_URL',
-      recipient: '',
-    },
+    defaultParams: dict({
+      'subject': 'TITLE',
+      'body': 'CANONICAL_URL',
+      'recipient': '',
+    }),
     defaultColor: 'ffffff',
     defaultBackgroundColor: '000000',
     bindings: ['recipient'],
   },
   'tumblr': {
     shareEndpoint: 'https://www.tumblr.com/share/link',
-    defaultParams: {
-      name: 'TITLE',
-      url: 'CANONICAL_URL',
-    },
+    defaultParams: dict({
+      'name': 'TITLE',
+      'url': 'CANONICAL_URL',
+    }),
     defaultColor: 'ffffff',
     defaultBackgroundColor: '3c5a77',
   },
   'whatsapp': {
     shareEndpoint: 'https://api.whatsapp.com/send',
-    defaultParams: {
-      text: 'TITLE - CANONICAL_URL',
-    },
+    defaultParams: dict({
+      'text': 'TITLE - CANONICAL_URL',
+    }),
     defaultColor: 'ffffff',
     defaultBackgroundColor: '25d366',
   },
   'line': {
     shareEndpoint: 'https://social-plugins.line.me/lineit/share',
-    defaultParams: {
-      text: 'TITLE',
-      url: 'CANONICAL_URL',
-    },
+    defaultParams: dict({
+      'text': 'TITLE',
+      'url': 'CANONICAL_URL',
+    }),
     defaultColor: 'ffffff',
     defaultBackgroundColor: '52b448',
   },
   'sms': {
     shareEndpoint: 'sms:',
-    defaultParams: {
-      body: 'TITLE - CANONICAL_URL',
-    },
+    defaultParams: dict({
+      'body': 'TITLE - CANONICAL_URL',
+    }),
     defaultColor: 'ffffff',
     defaultBackgroundColor: 'ca2b63',
   },
   'system': {
     shareEndpoint: 'navigator-share:',
-    defaultParams: {
-      text: 'TITLE',
-      url: 'CANONICAL_URL',
-    },
+    defaultParams: dict({
+      'text': 'TITLE',
+      'url': 'CANONICAL_URL',
+    }),
     defaultColor: 'ffffff',
     defaultBackgroundColor: '000000',
   },

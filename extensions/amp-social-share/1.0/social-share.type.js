@@ -18,17 +18,17 @@
 
 /**
  * @typedef {{
- *   type:       ?string,
- *   endpoint:   ?string,
- *   params:     (JsonObject|Object|undefined),
- *   target:     ?string,
- *   width:      ?string,
- *   height:     ?string,
- *   color:      ?string,
- *   background: ?string,
- *   tabIndex:   ?string,
- *   style:      ?string,
- *   children:   ?PreactDef.Renderable,
+ *   type: (string|undefined),
+ *   endpoint: (string|undefined),
+ *   params: (JsonObject|Object|undefined),
+ *   target: (string|undefined),
+ *   width: (number|string|undefined),
+ *   height: (number|string|undefined),
+ *   color: (string|undefined),
+ *   background: (string|undefined),
+ *   tabIndex: (string|undefined),
+ *   style: (string|undefined),
+ *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
 var SocialShareProps;
