@@ -26,10 +26,10 @@ const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
  * Minify passed string.
  *
  * @param {string} code
- * @return {Object<string, string>}
+ * @return {Promise<Object<string, string>>}
  */
-function terserMinify(code) {
-  const minified = terser.minify(code, {
+async function terserMinify(code) {
+  const minified = await terser.minify(code, {
     mangle: false,
     compress: {
       defaults: false,
@@ -86,22 +86,23 @@ exports.postClosureBabel = function () {
       file.contents,
       file.sourceMap
     );
-    const {compressed, terserMap} = terserMinify(code);
 
-    file.contents = Buffer.from(compressed, 'utf-8');
-    file.sourceMap = remapping(
-      [terserMap, babelMap, map],
-      () => null,
-      !argv.full_sourcemaps
-    );
+    terserMinify(code).then(({compressed, terserMap}) => {
+      file.contents = Buffer.from(compressed, 'utf-8');
+      file.sourceMap = remapping(
+        [terserMap, babelMap, map],
+        () => null,
+        !argv.full_sourcemaps
+      );
 
-    debug(
-      CompilationLifecycles['complete'],
-      file.path,
-      file.contents,
-      file.sourceMap
-    );
+      debug(
+        CompilationLifecycles['complete'],
+        file.path,
+        file.contents,
+        file.sourceMap
+      );
 
-    return next(null, file);
+      return next(null, file);
+    });
   });
 };
