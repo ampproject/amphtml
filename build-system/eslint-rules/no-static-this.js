@@ -43,7 +43,15 @@
 //
 // Foo.prop = 1;
 // ```
-module.exports = { 
+module.exports = {
+  meta: {
+    type: 'problem',
+    docs: {
+      description:
+        "Disallow using `this` within static functions, since Closure Compiler's Advanced Compilation breaks it",
+      context: 'https://github.com/google/closure-compiler/issues/2397',
+    },
+  },
   create(context) {
     return {
       'MethodDefinition[static=true] ThisExpression': function (node) {
