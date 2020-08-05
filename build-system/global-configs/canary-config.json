@@ -28,7 +28,6 @@
   "hidden-mutation-observer": 1,
   "intersect-resources": 1,
   "ios-fixed-no-transfer": 1,
-  "layoutbox-invalidate-on-scroll": 1,
   "protocol-adapters": 1,
   "pump-early-frame": 1,
   "remove-task-timeout": 0,
@@ -36,6 +35,8 @@
   "swg-gpay-native": 1,
   "version-locking": 1,
   "amp-ad-no-center-css": 0,
+  "sticky-ad-padding-bottom": 1,
   "analytics-chunks": 1,
-  "ad-adsense-gam-round-params": 0.2
+  "ad-adsense-gam-round-params": 0.2,
+  "render-on-idle-fix": 1
 }
