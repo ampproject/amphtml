@@ -85,7 +85,7 @@ describes.realWin(
 
     it('should set the text for the category on update', async () => {
       addConfigToInteractive(ampStoryResults, 3);
-      ampStoryResults.buildCallback();
+      await ampStoryResults.buildCallback();
       await ampStoryResults.layoutCallback();
       storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'i',

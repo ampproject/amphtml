@@ -554,14 +554,14 @@ export class Services {
   }
 
   /**
-   * @param {!Element} el
+   * @param {!Window} win
    * @return {!Promise<./service/localization.LocalizationService>}
    */
-  static localizationServiceForOrNull(el) {
-    return /** @type {!Promise<?./service/localization.LocalizationService>} */ (getServicePromiseForDoc(
-      el,
+  static localizationServiceForOrNull(win) {
+    return /** @type {!Promise<?./service/localization.LocalizationService>} */ getServicePromiseForDoc(
+      win,
       'localization'
-    ));
+    );
   }
 
   /**

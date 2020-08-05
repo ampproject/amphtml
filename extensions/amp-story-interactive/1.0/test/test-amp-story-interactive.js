@@ -27,11 +27,15 @@ import {
   AmpStoryVariableService,
   AnalyticsVariable,
 } from '../../../amp-story/1.0/variable-service';
+import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
 import {dict} from '../../../../src/utils/object';
 import {htmlFor} from '../../../../src/static-template';
-import {registerServiceBuilder} from '../../../../src/service';
+import {
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+} from '../../../../src/service';
 
 /**
  * Returns mock interactive data.
@@ -204,7 +208,7 @@ describes.realWin(
 
     it('should enter post-selection state on option click', async () => {
       addConfigToInteractive(ampStoryInteractive);
-      ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.buildCallback();
       await ampStoryInteractive.layoutCallback();
       await ampStoryInteractive.getOptionElements()[0].click();
       expect(ampStoryInteractive.getRootElement()).to.have.class(
@@ -217,7 +221,7 @@ describes.realWin(
 
     it('should only record first option selected', async () => {
       addConfigToInteractive(ampStoryInteractive);
-      ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.buildCallback();
       await ampStoryInteractive.layoutCallback();
       await ampStoryInteractive.getOptionElements()[0].click();
       await ampStoryInteractive.getOptionElements()[1].click();
@@ -232,7 +236,7 @@ describes.realWin(
     it('should trigger an analytics event with the right variables on selection', async () => {
       const trigger = env.sandbox.stub(analytics, 'triggerEvent');
       addConfigToInteractive(ampStoryInteractive);
-      ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.buildCallback();
       await ampStoryInteractive.layoutCallback();
       await ampStoryInteractive.getOptionElements()[1].click();
       expect(trigger).to.have.been.calledWith('story-interactive');
@@ -257,7 +261,7 @@ describes.realWin(
         'endpoint',
         'http://localhost:8000'
       );
-      ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.buildCallback();
       await ampStoryInteractive.layoutCallback();
 
       expect(ampStoryInteractive.getRootElement()).to.have.class(
@@ -317,18 +321,21 @@ describes.realWin(
 
     it('should update the store property correctly', async () => {
       addConfigToInteractive(ampStoryInteractive, 4, null, ['text']);
-      ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.buildCallback();
       await ampStoryInteractive.layoutCallback();
       await ampStoryInteractive.getOptionElements()[2].click();
 
       expect(
-        storeService.get(StateProperty.INTERACTIVE_REACT_STATE)['id']
+        ampStoryInteractive.storeService_.get(
+          StateProperty.INTERACTIVE_REACT_STATE
+        )['id']
       ).to.be.deep.equals({
         option: {
           optionIndex: 2,
           text: 'text 3',
         },
         interactiveId: 'id',
+        type: InteractiveType.QUIZ,
       });
     });
   }

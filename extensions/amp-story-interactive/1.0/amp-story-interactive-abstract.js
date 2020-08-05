@@ -149,6 +149,9 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     /** @protected {boolean} */
     this.hasUserSelection_ = false;
 
+    /** @protected {?../../../../src/services/localization.LocalizationService} */
+    this.localizationService_ = null;
+
     /** @private {!Array<number>} min and max number of options, inclusive */
     this.optionBounds_ = bounds;
 
@@ -252,16 +255,9 @@ export class AmpStoryInteractive extends AMP.BaseElement {
   buildCallback(concreteCSS = '') {
     this.loadFonts_();
     this.options_ = this.parseOptions_();
-    this.rootEl_ = this.buildComponent();
-    this.adjustGridLayer_();
-    this.rootEl_.classList.add('i-amphtml-story-interactive-container');
     this.element.classList.add('i-amphtml-story-interactive-component');
+    this.adjustGridLayer_();
     devAssert(this.element.children.length == 0, 'Too many children');
-    createShadowRootWithStyle(
-      this.element,
-      dev().assertElement(this.rootEl_),
-      CSS + concreteCSS
-    );
 
     // Initialize all the services before proceeding, and update store with state
     return Promise.all([
@@ -271,7 +267,6 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       Services.storyStoreServiceForOrNull(this.win).then((service) => {
         this.storeService_ = service;
         this.updateStoryStoreState_(null);
-        this.initializeListeners_();
       }),
       Services.storyRequestServiceForOrNull(this.win).then((service) => {
         this.requestService_ = service;
@@ -279,7 +274,16 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       Services.storyAnalyticsServiceForOrNull(this.win).then((service) => {
         this.analyticsService_ = service;
       }),
-    ]);
+    ]).then(() => {
+      this.rootEl_ = this.buildComponent();
+      this.rootEl_.classList.add('i-amphtml-story-interactive-container');
+      createShadowRootWithStyle(
+        this.element,
+        dev().assertElement(this.rootEl_),
+        CSS + concreteCSS
+      );
+      return Promise.resolve();
+    });
   }
 
   /**
@@ -377,6 +381,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.initializeListeners_();
     return (this.backendDataPromise_ = this.element.hasAttribute('endpoint')
       ? this.retrieveInteractiveData_()
       : Promise.resolve());

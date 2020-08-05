@@ -92,17 +92,17 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
     this.attachPrompt_(root);
 
     // Localize the answer choice options
-    Services.localizationServiceForOrNull(this.element).then(
-      (localizationService) => {
-        this.answerChoiceOptions_ = this.answerChoiceOptions_.map((choice) => {
-          return localizationService.getLocalizedString(
-            LocalizedStringId[`AMP_STORY_QUIZ_ANSWER_CHOICE_${choice}`]
-          );
-        });
-        this.options_.forEach((option, index) =>
-          this.configureOption_(option, index)
-        );
-      }
+    const localizationService = Services.localizationForDoc(this.element);
+    this.answerChoiceOptions_ = this.answerChoiceOptions_.map((choice) => {
+      return localizationService.getLocalizedString(
+        LocalizedStringId[`AMP_STORY_QUIZ_ANSWER_CHOICE_${choice}`]
+      );
+    });
+    const optionContainer = this.rootEl_.querySelector(
+      '.i-amphtml-story-interactive-quiz-option-container'
+    );
+    this.options_.forEach((option, index) =>
+      optionContainer.appendChild(this.configureOption_(option, index))
     );
   }
 
@@ -113,6 +113,7 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
    *
    * @param {!./amp-story-interactive-abstract.OptionConfigType} option
    * @param {number} index
+   * @return {!Element}
    * @private
    */
   configureOption_(option, index) {
@@ -140,10 +141,7 @@ export class AmpStoryInteractiveQuiz extends AmpStoryInteractive {
     if ('correct' in option) {
       convertedOption.setAttribute('correct', 'correct');
     }
-
-    this.rootEl_
-      .querySelector('.i-amphtml-story-interactive-quiz-option-container')
-      .appendChild(convertedOption);
+    return convertedOption;
   }
 
   /**
