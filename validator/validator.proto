@@ -692,17 +692,40 @@ message TagSpec {
   // reserved 14, 26;
 }
 
+// Exactly one DocSpec will match each AMP document. This spec defines some
+// default rules for the entire document scoped by it's HtmlFormat and any
+// Type Identifiers.
+// NEXT AVAILABLE TAG: 6
+message DocSpec {
+  // The html_format field tells the validator for which html formats
+  // (ie: (<html ⚡> vs <html a4⚡>) this DocSpec is defined for.
+  repeated HtmlFormat.Code html_format = 1;
+  // If a Type Identifier is in enabled_by then this DocSpec will be used
+  // in validating parsed documents with that Type Identifier. If a Type
+  // Identifier is in disabled_by then this DocSpec will not be used in
+  // validating parsed documents with that Type Identifier. An DocSpec can
+  // not have both enabled_by and disabled_by set.
+  repeated string enabled_by = 2;
+  repeated string disabled_by = 3;
+  // If set, the entire document's content cannot be greater than this length,
+  // in bytes. A value of -2 (default) indicates that there is no limit
+  // (unlimited).
+  optional int32 max_bytes = 4 [default = -2];
+  // If provided, a URL linking to a section / sentence in the AMP HTML spec.
+  optional string max_bytes_spec_url = 5;
+}
+
 // Exactly one DocCssSpec will match each AMP document. This spec defines the
 // default css rules for style attributes and publisher style tags across the
 // entire document. Rules for specific tags may be overridden by those tags.
 // NEXT AVAILABLE TAG: 20
 message DocCssSpec {
-  // The html_format field tells the val:idator for which html formats
-  // (ie: (<html ⚡> vs <html a4⚡>) this CssLengthSpec is defined for.
+  // The html_format field tells the validator for which html formats
+  // (ie: (<html ⚡> vs <html a4⚡>) this DocCssSpec is defined for.
   repeated HtmlFormat.Code html_format = 1;
   // If a Type Identifier is in enabled_by then this DocCssSpec will be used
   // in validating parsed documents with that Type Identifier. If a Type
-  // identifier is in disabled_by then this DocCssSpec will not be used in
+  // Identifier is in disabled_by then this DocCssSpec will not be used in
   // validating parsed documents;: with that Type Identifier. An DocCssSpec can
   // not have both enabled_by and disabled_by set.
   repeated string enabled_by = 2;
@@ -761,7 +784,7 @@ message DocCssSpec {
 
 // Top level message - start reading here.
 // The validator knows about a set of tag specifications.
-// NEXT AVAILABLE TAG: 21
+// NEXT AVAILABLE TAG: 22
 message ValidatorRules {
   repeated TagSpec tags = 1;
   repeated AttrList attr_lists = 7;
@@ -784,6 +807,9 @@ message ValidatorRules {
 
   repeated DescendantTagList descendant_tag_list = 16;
 
+  // The DocSpec rules are scoped by the document's HtmlFormat and Type
+  // Identifiers and defined within each DocSpec.
+  repeated DocSpec doc = 21;
   repeated DocCssSpec css = 19;
   repeated DeclarationList declaration_list = 20;
 
