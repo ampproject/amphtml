@@ -17,8 +17,8 @@
 amp-story-entry-point {
   position: relative;
   display: block;
-  height: 300px;
-  width: 800px;
+  height: 30vh;
+  width: 100vw;
   margin: 15px 0px;
 }
 
@@ -30,18 +30,31 @@ main {
 
 .grid {
   height: 100%;
-  width: 100%;
+  width: 1120px;
+  margin: auto;
   overflow-y: scroll;
 }
 
 .entry-point {
   display: inline-block;
   box-sizing: border-box;
-  height: auto;
-  width: 25%;
-  padding: 3px;
+  height: 400px;
+  width: 240px;
+  margin: 20px;
 }
 
 .rectangular-entry-point {
   border-radius: 16px;
+}
+
+@media only screen and (max-width: 1200px) {
+  .grid {
+      width: 860px;
+  }
+}
+
+@media only screen and (max-width: 900px) {
+  .grid {
+      width: 560px;
+  }
 }
