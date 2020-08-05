@@ -584,7 +584,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const readySpy = env.sandbox.spy();
       playerEl.addEventListener('amp-story-player-back', readySpy);
 
-      playerEl.shadowRoot
+      playerEl
         .querySelector('button.amp-story-player-back-button')
         .click();
 
@@ -602,7 +602,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const readySpy = env.sandbox.spy();
       playerEl.addEventListener('amp-story-player-close', readySpy);
 
-      playerEl.shadowRoot
+      playerEl
         .querySelector('button.amp-story-player-close-button')
         .click();
 
