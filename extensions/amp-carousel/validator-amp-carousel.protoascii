@@ -17,7 +17,6 @@
 tags: {  # amp-carousel
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-carousel"
@@ -86,7 +85,6 @@ tags: {  # <amp-carousel>
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "AMP-CAROUSEL"
   spec_name: "AMP-CAROUSEL"
   requires_extension: "amp-carousel"

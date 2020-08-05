@@ -1,6 +1,6 @@
-FAIL
+PASS
 |  <!--
-|    Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+|    Copyright 2020 The AMP HTML Authors. All Rights Reserved.
 |
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
@@ -16,17 +16,19 @@ FAIL
 |  -->
 |  <!--
 |    Test Description:
-|    Verifies that type identifier `actions` is not valid on an AMP4ADS document.
+|    This testcase isn't run verbatim. The template string below is replaced by
+|    the test harnesses with various lengths of valid body content. We use
+|    this test to verify the max_document_byte_length rules for AMP4EMAIL.
 |  -->
 |  <!doctype html>
-|  <html ⚡4ads actions>
->> ^~~~~~~~~
-amp4ads_feature_tests/amp_actions.html:21:0 The attribute 'actions' may not appear in tag 'html'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
+|  <html ⚡4email>
 |  <head>
 |    <meta charset="utf-8">
-|    <meta name="viewport" content="width=device-width,minimum-scale=1">
-|    <style amp4ads-boilerplate>body{visibility:hidden}</style>
-|    <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
+|    <style amp4email-boilerplate>body{visibility:hidden}</style>
+|    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
-|  <body>Hello, world.</body>
+|  <body>
+|  Hello, World!
+|  replace_body
+|  </body>
 |  </html>
