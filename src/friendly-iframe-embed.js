@@ -529,7 +529,7 @@ export class FriendlyIframeEmbed {
    * @private
    */
   getResources_() {
-    return Services.resourcesForDoc(this.iframe);
+    return Services.resourcesForDoc(this.host || this.iframe);
   }
 
   /**
@@ -537,7 +537,7 @@ export class FriendlyIframeEmbed {
    * @private
    */
   getMutator_() {
-    return Services.mutatorForDoc(this.iframe);
+    return Services.mutatorForDoc(this.host || this.iframe);
   }
 
   /**
