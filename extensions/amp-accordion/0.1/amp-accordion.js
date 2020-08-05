@@ -187,7 +187,11 @@ class AmpAccordion extends AMP.BaseElement {
         content.addEventListener('beforematch', (event) => {
           // Event occurs on the content element whose parent is the section to open.
           const parentSection = dev().assertElement(event.target.parentElement);
-          this.toggle_(parentSection, ActionTrust.LOW, /* force expand */ true);
+          this.toggle_(
+            parentSection,
+            ActionTrust.HIGH,
+            /* force expand */ true
+          );
         });
       }
     });
