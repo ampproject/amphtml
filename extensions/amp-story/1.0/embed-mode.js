@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {isEnumValue} from './types';
-import {parseQueryString} from './url';
+import {isEnumValue} from '../../../src/types';
+import {parseQueryString} from '../../../src/url';
 
 /**
  * Embed mode for AMP story.  See ../embed-modes.md for details.
@@ -83,6 +83,7 @@ export const EmbedModeParam = 'embedMode';
 /**
  * @param {string} str
  * @return {!EmbedMode}
+ * @package
  */
 export function parseEmbedMode(str) {
   const params = parseQueryString(str);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {EmbedMode, parseEmbedMode} from '../../../src/amp-story-embed-mode';
+import {EmbedMode, parseEmbedMode} from './embed-mode';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {deepEquals} from '../../../src/json';
