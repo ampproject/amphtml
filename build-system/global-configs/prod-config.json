@@ -29,6 +29,7 @@
   "intersect-resources": 0.1,
   "ios-fixed-no-transfer": 0,
   "layoutbox-invalidate-on-scroll": 1,
+  "protocol-adapters": 1,
   "pump-early-frame": 1,
   "swg-gpay-api": 1,
   "swg-gpay-native": 1,
