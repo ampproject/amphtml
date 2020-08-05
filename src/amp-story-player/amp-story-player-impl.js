@@ -499,7 +499,7 @@ export class AmpStoryPlayer {
               /** @type {!DocumentStateTypeDef} */ (data)
             );
           });
-          
+
           resolve(messaging);
         },
         (err) => {
