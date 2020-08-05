@@ -529,7 +529,9 @@ export class FriendlyIframeEmbed {
    * @private
    */
   getResources_() {
-    return Services.resourcesForDoc(this.host || this.iframe);
+    const host =
+      this.host && !this.iframe.isConnected ? this.host : this.iframe;
+    return Services.resourcesForDoc(host);
   }
 
   /**
@@ -537,7 +539,7 @@ export class FriendlyIframeEmbed {
    * @private
    */
   getMutator_() {
-    return Services.mutatorForDoc(this.host || this.iframe);
+    return Services.mutatorForDoc(this.iframe);
   }
 
   /**
