@@ -467,6 +467,38 @@ class ParsedReferencePoints {
 }
 
 /**
+ * Wrapper around DocSpec.
+ * @private
+ */
+class ParsedDocSpec {
+  /**
+   * @param {!generated.DocSpec} spec
+   */
+  constructor(spec) {
+    /**
+     * @type {!generated.DocSpec}
+     * @private
+     */
+    this.spec_ = spec;
+  }
+
+  /** @return {!generated.DocSpec} */
+  spec() {
+    return this.spec_;
+  }
+
+  /** @return {!Array<string>} */
+  disabledBy() {
+    return this.spec_.disabledBy;
+  }
+
+  /** @return {!Array<string>} */
+  enabledBy() {
+    return this.spec_.enabledBy;
+  }
+}
+
+/**
  * Wrapper around DocCssSpec.
  * @private
  */
@@ -2255,7 +2287,7 @@ class CdataMatcher {
     const maybeDocCssSpec = context.matchingDocCssSpec();
 
     /** @type {number} */
-    let adjustedCdataLength = byteLength(cdata);
+    let adjustedCdataLength = htmlparser.byteLength(cdata);
     if (maybeDocCssSpec !== null && !maybeDocCssSpec.spec().urlBytesIncluded) {
       adjustedCdataLength -= urlBytes;
     }
@@ -2460,7 +2492,7 @@ class CdataMatcher {
       // but data URLs are always counted (or in other words, they aren't
       // considered URLs).
       if (!isDataUrl(url.utf8Url)) {
-        urlBytes += byteLength(url.utf8Url);
+        urlBytes += htmlparser.byteLength(url.utf8Url);
       }
       if (maybeDocCssSpec !== null) {
         const adapter = new UrlErrorInStylesheetAdapter(url.line, url.col);
@@ -2882,6 +2914,14 @@ class Context {
     this.docLocator_ = locator;
   }
 
+  /**
+   * Returns the document size from the document locator.
+   * @return {number}
+   */
+  getDocByteSize() {
+    return this.docLocator_.getDocByteSize();
+  }
+
   /** @return {!LineCol} */
   getLineCol() {
     return new LineCol(this.docLocator_.getLine(), this.docLocator_.getCol());
@@ -3186,6 +3226,37 @@ class Context {
    */
   getTypeIdentifiers() {
     return this.typeIdentifiers_;
+  }
+
+  /**
+   * Returns true iff `spec` should be used for the type identifiers recorded
+   * in this context, as seen in the document so far. If called before type
+   * identifiers have been recorded, will always return false.
+   * @param {!ParsedDocSpec} spec
+   * @return {boolean}
+   */
+  isDocSpecValidForTypeIdentifiers(spec) {
+    return isUsedForTypeIdentifiers(
+        this.getTypeIdentifiers(), spec.enabledBy(), spec.disabledBy());
+  }
+
+  /**
+   * Returns the first (there should be at most one) DocSpec which matches
+   * both the html format and type identifiers recorded so far in this
+   * context. If called before identifiers have been recorded, it may return
+   * an incorrect selection.
+   * @return {?ParsedDocSpec}
+   */
+  matchingDocSpec() {
+    // The specs are usually already filtered by HTML format, so this loop
+    // should be very short, often 1:
+    for (const spec of this.rules_.getDoc()) {
+      if (this.rules_.isDocSpecCorrectHtmlFormat_(spec.spec()) &&
+          this.isDocSpecValidForTypeIdentifiers(spec)) {
+        return spec;
+      }
+    }
+    return null;
   }
 
   /**
@@ -4759,7 +4830,7 @@ function validateScriptSrcAttr(srcAttr, tagSpec, context, result) {
 function validateAttrCss(
     parsedAttrSpec, context, tagSpec, attrName, attrValue, result) {
   /** @type {number} */
-  const attrByteLen = byteLength(attrValue);
+  const attrByteLen = htmlparser.byteLength(attrValue);
   // Track the number of CSS bytes. If this tagspec is selected as the best
   // match, this count will be added to the overall document inline style byte
   // count for determining if that byte count has been exceeded.
@@ -4905,7 +4976,7 @@ function validateAttrCss(
         // Subtract off URL lengths from doc-level inline style bytes, if
         // specified by the DocCssSpec.
         if (!maybeSpec.spec().urlBytesIncluded && !isDataUrl(url.utf8Url))
-          result.inlineStyleCssBytes -= byteLength(url.utf8Url);
+          result.inlineStyleCssBytes -= htmlparser.byteLength(url.utf8Url);
       }
     }
   }
@@ -5780,7 +5851,6 @@ class ParsedValidatorRules {
     this.typeIdentifiers_['\u26a14email'] = 0;
     this.typeIdentifiers_['\u26a1\ufe0f4email'] = 0;
     this.typeIdentifiers_['amp4email'] = 0;
-    this.typeIdentifiers_['actions'] = 0;
     this.typeIdentifiers_['transformed'] = 0;
     this.typeIdentifiers_['data-ampdevmode'] = 0;
     this.typeIdentifiers_['data-css-strict'] = 0;
@@ -5827,6 +5897,19 @@ class ParsedValidatorRules {
     /**
      * Returns true if `spec` is usable for the HTML format these rules are
      * built for.
+     * @type {function(!generated.DocSpec) : boolean}
+     * @private
+     */
+    this.isDocSpecCorrectHtmlFormat_ = function(docSpec) {
+      const castedHtmlFormat =
+          /** @type {!generated.HtmlFormat.Code} */ (
+              /** @type {*} */ (htmlFormat));
+      return docSpec.htmlFormat == castedHtmlFormat;
+    };
+
+    /**
+     * Returns true if `spec` is usable for the HTML format these rules are
+     * built for.
      * @type {function(!generated.DocCssSpec) : boolean}
      * @private
      */
@@ -5842,6 +5925,15 @@ class ParsedValidatorRules {
      * @private
      */
     this.parsedAttrSpecs_ = new ParsedAttrSpecs(this.rules_);
+
+    /**
+     * @type {!Array<!ParsedDocSpec>}
+     * @private
+     */
+    this.parsedDoc_ = [];
+    for (const docSpec of this.rules_.doc) {
+      this.parsedDoc_.push(new ParsedDocSpec(docSpec));
+    }
 
     /**
      * @type {!Array<!ParsedDocCssSpec>}
@@ -6032,10 +6124,9 @@ class ParsedValidatorRules {
             validationResult.typeIdentifier.push(typeIdentifier);
             context.recordTypeIdentifier(typeIdentifier);
           }
-          // The type identifier "actions" and "transformed" are not
-          // considered mandatory unlike other type identifiers.
-          if (typeIdentifier !== 'actions' &&
-              typeIdentifier !== 'transformed' &&
+          // The type identifier "transformed" is not considered mandatory
+          // unlike other type identifiers.
+          if (typeIdentifier !== 'transformed' &&
               typeIdentifier !== 'data-ampdevmode' &&
               typeIdentifier !== 'data-css-strict') {
             hasMandatoryTypeIdentifier = true;
@@ -6075,8 +6166,7 @@ class ParsedValidatorRules {
       }
     }
     if (!hasMandatoryTypeIdentifier) {
-      // Missing mandatory type identifier (any AMP variant but "actions" or
-      // "transformed").
+      // Missing mandatory type identifier (any AMP variant but "transformed").
       context.addError(
           generated.ValidationError.Code.MANDATORY_ATTR_MISSING,
           context.getLineCol(),
@@ -6114,19 +6204,6 @@ class ParsedValidatorRules {
               'data-ampdevmode', 'data-css-strict'
             ],
             context, validationResult);
-        break;
-      case 'ACTIONS':
-        this.validateTypeIdentifiers(
-            htmlTag.attrs(),
-            ['\u26a1', '\u26a1\ufe0f', 'amp', 'actions', 'data-ampdevmode'],
-            context, validationResult);
-        if (validationResult.typeIdentifier.indexOf('actions') === -1) {
-          context.addError(
-              generated.ValidationError.Code.MANDATORY_ATTR_MISSING,
-              context.getLineCol(),
-              /* params */['actions', 'html'],
-              /* url */ '', validationResult);
-        }
         break;
       default:
         // fallthrough
@@ -6382,6 +6459,27 @@ class ParsedValidatorRules {
   }
 
   /**
+   * Emits errors for doc size limitations across entire document.
+   * @param {!Context} context
+   * @param {!generated.ValidationResult} validationResult
+   */
+  maybeEmitDocSizeErrors(context, validationResult) {
+    const parsedDocSpec = context.matchingDocSpec();
+    if (parsedDocSpec !== null) {
+      const bytesUsed = context.getDocByteSize();
+      /** @type {!generated.DocSpec} */
+      const docSpec = parsedDocSpec.spec();
+      if (docSpec.maxBytes !== -2 && bytesUsed > docSpec.maxBytes) {
+        context.addError(
+            generated.ValidationError.Code.DOCUMENT_SIZE_LIMIT_EXCEEDED,
+            context.getLineCol(), /* params */
+            [docSpec.maxBytes.toString(), bytesUsed.toString()],
+            docSpec.maxBytesSpecUrl, validationResult);
+      }
+    }
+  }
+
+  /**
    * Emits errors for css size limitations across entire document.
    * @param {!Context} context
    * @param {!generated.ValidationResult} validationResult
@@ -6441,6 +6539,7 @@ class ParsedValidatorRules {
     this.maybeEmitAlsoRequiresTagValidationErrors(context, validationResult);
     this.maybeEmitMandatoryAlternativesSatisfiedErrors(
         context, validationResult);
+    this.maybeEmitDocSizeErrors(context, validationResult);
     this.maybeEmitCssLengthSpecErrors(context, validationResult);
     this.maybeEmitValueSetMismatchErrors(context, validationResult);
   }
@@ -6487,6 +6586,13 @@ class ParsedValidatorRules {
   }
 
   /**
+   * @return {!Array<!ParsedDocSpec>}
+   */
+  getDoc() {
+    return this.parsedDoc_;
+  }
+
+  /**
    * @return {!Array<!ParsedDocCssSpec>}
    */
   getCss() {
@@ -6522,23 +6628,6 @@ function getParsedValidatorRules(htmlFormat) {
     return rules;
   }
   return parsedValidatorRulesByFormat[htmlFormat];
-}
-
-/**
- * Computes the byte length, rather than character length, of a utf8 string.
- * https://en.wikipedia.org/wiki/UTF-8
- * @param {string} utf8Str
- * @return {number}
- */
-function byteLength(utf8Str) {
-  // To figure out which characters are multi-byte we can abuse
-  // encodeURIComponent which will escape those specific characters.
-  const multiByteEscapedChars = encodeURIComponent(utf8Str).match(/%[89ABab]/g);
-  if (multiByteEscapedChars === null) {
-    return utf8Str.length;
-  } else {
-    return utf8Str.length + multiByteEscapedChars.length;
-  }
 }
 
 /**

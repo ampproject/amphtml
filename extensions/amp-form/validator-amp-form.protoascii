@@ -18,7 +18,6 @@ tags: {  # amp-form
   # under section "4.10 Forms"
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-form"

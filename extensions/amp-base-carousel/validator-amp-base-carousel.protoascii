@@ -16,7 +16,6 @@
 
 tags: {  # amp-base-carousel
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-base-carousel"
@@ -116,7 +115,6 @@ attr_lists: {
 
 tags: {  # <amp-base-carousel>
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "AMP-BASE-CAROUSEL"
   requires_extension: "amp-base-carousel"
   attr_lists: "amp-base-carousel-common"
@@ -135,7 +133,6 @@ tags: {  # <amp-base-carousel>
 
 tags: {  # <amp-base-carousel lightbox>
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "AMP-BASE-CAROUSEL"
   spec_name: "AMP-BASE-CAROUSEL [lightbox]"
   requires_extension: "amp-base-carousel"
@@ -166,7 +163,6 @@ tags: {  # <amp-base-carousel lightbox>
 
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-BASE-CAROUSEL lightbox [lightbox-exclude]"
   attrs: {
@@ -176,7 +172,6 @@ tags: {
 }
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-BASE-CAROUSEL lightbox [child]"
   attrs: {

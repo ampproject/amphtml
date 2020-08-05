@@ -16,7 +16,6 @@
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-selector"
@@ -43,7 +42,6 @@ tags: {  # <amp-selector> for AMP (autoplay attribute allowed)
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "AMP-SELECTOR"
   disallowed_ancestor: "AMP-SELECTOR"
   requires_extension: "amp-selector"
@@ -97,7 +95,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-SELECTOR option"
   attrs: {
@@ -118,7 +115,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-SELECTOR child"
   reference_points: {
