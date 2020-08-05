@@ -1,3 +1,5 @@
+
+
 /**
  * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
@@ -16,13 +18,11 @@
 'use strict';
 
 module.exports = {
-  'story loaded and player ready': async page => {
-    await page.waitFor(5000);
-    await page.$eval('iframe', (iframe) => {
-      const contents = iframe.contentDocument.documentElement.outerHTML;
-      iframe.src = '';
-      iframe.srcdoc = contents;
-    });
-    await page.waitFor(2000);
-  }
+    'player ready': async page => {
+        await page.waitFor(1000);
+        await page.$eval('iframe', (iframe) => {
+          iframe.src = '';
+          iframe.srcdoc = '<html><head></head><body style=\"background: darkgray;\"></body></html>';
+        });
+    }
 };
