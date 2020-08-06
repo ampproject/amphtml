@@ -84,6 +84,13 @@ const defaultArrowButton = {
   ['&:active']: {
     transitionDuration: '0ms',
   },
+  ['&:hover $arrowBackground']: {
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+  },
+  ['&:active $arrowBackground']: {
+    backgroundColor: 'rgba(255, 255, 255, 1.0)',
+    transitionDuration: '0ms',
+  },
 };
 
 const arrowBaseStyle = {
@@ -108,14 +115,7 @@ const arrowBackground = {
   boxShadow: `0 0 0px 1px rgba(0, 0, 0, 0.08) inset,
       0 1px 4px 1px rgba(0, 0, 0, 0.2)`,
   transition: '200ms background-color',
-  color: 'rgba(0, 0, 0, 0.3)',
-  ['&:active']: {
-    color: 'rgba(255, 255, 255, 1.0)',
-    transitionDuration: '0',
-  },
-  ['&:hover']: {
-    color: 'rgba(255, 255, 255, 0.8)',
-  },
+  backgroundColor: 'rgba(0, 0, 0, 0.3)',
 };
 
 const arrowIcon = {
