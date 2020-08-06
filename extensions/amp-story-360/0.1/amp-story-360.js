@@ -18,7 +18,11 @@ import {CSS} from '../../../build/amp-story-360-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
 import {Services} from '../../../src/services';
-import {StateProperty} from '../../../extensions/amp-story/1.0/amp-story-store-service';
+import {
+  StateProperty,
+  getStoreService,
+  Action,
+} from '../../../extensions/amp-story/1.0/amp-story-store-service';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
 import {user, userAssert} from '../../../src/log';
@@ -243,6 +247,9 @@ export class AmpStory360 extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.gyroscopeControls = false;
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = getStoreService(this.win);
   }
 
   /** @override */
@@ -282,14 +289,22 @@ export class AmpStory360 extends AMP.BaseElement {
     this.element.getAttribute('controls') === 'gyroscope' &&
       this.checkGyroscopePermissions();
 
-    return Services.storyStoreServiceForOrNull(this.win).then(
-      (storeService) => {
-        storeService.subscribe(
-          StateProperty.PAGE_SIZE,
-          this.resizeRenderer_.bind(this),
-          false /* callToInitialize */
-        );
+    this.initializeListeners_();
+  }
+
+  /** @private */
+  initializeListeners_() {
+    this.storeService_.subscribe(
+      StateProperty.GYROSCOPE_ENABLED_STATE,
+      (enabled) => {
+        enabled && this.enableGyroscope();
       }
+    );
+
+    this.storeService_.subscribe(
+      StateProperty.PAGE_SIZE,
+      this.resizeRenderer_.bind(this),
+      false /* callToInitialize */
     );
   }
 
@@ -318,6 +333,7 @@ export class AmpStory360 extends AMP.BaseElement {
     window.addEventListener('deviceorientation', (e) => {
       this.onDeviceOrientation(e);
     });
+    this.element.classList.add('i-amp-story-360-gyroscope-enabled');
   }
 
   /** @private */
@@ -358,10 +374,8 @@ export class AmpStory360 extends AMP.BaseElement {
       enableButton.addEventListener('click', () => {
         DeviceOrientationEvent.requestPermission()
           .then((permissionState) => {
-            if (permissionState === 'granted') {
-              this.enableGyroscope();
-            }
-            permissionButton.remove();
+            permissionState === 'granted' &&
+              this.storeService_.dispatch(Action.GYROSCOPE_ENABLED_STATE, true);
           })
           .catch(alert.error);
         dialogBox.remove();
@@ -416,6 +430,7 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @private */
   resizeRenderer_() {
+    console.log('resize');
     this.mutateElement(() => {
       if (this.renderer_) {
         this.renderer_.resize();
