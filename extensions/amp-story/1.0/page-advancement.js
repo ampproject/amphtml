@@ -475,6 +475,13 @@ export class ManualAdvancement extends AdvancementConfig {
           return true;
         }
 
+        if (
+          el.classList.contains('i-amphtml-story-screen-reader-back-button')
+        ) {
+          shouldHandleEvent = true;
+          return true;
+        }
+
         return false;
       },
       /* opt_stopAt */ this.element_

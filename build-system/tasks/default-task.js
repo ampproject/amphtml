@@ -86,6 +86,7 @@ defaultTask.flags = {
   host: '  Host to serve the project on. localhost by default.',
   https: '  Use https server. http by default.',
   port: '  Port to serve the project on. 8000 by default.',
+  https: ' Use https server. http by default.',
   define_experiment_constant:
     '  Builds runtime with the EXPERIMENT constant set to true',
 };

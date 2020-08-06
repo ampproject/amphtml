@@ -78,6 +78,16 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     fireHandler['touchend']('touchend', touchEndEvent);
   }
 
+  function openPageAttachment() {
+    const openEvent = {state: 'PAGE_ATTACHMENT_STATE', value: true};
+    fireHandler['documentStateUpdate']('documentStateUpdate', openEvent);
+  }
+
+  function closePageAttachment() {
+    const closeEvent = {state: 'PAGE_ATTACHMENT_STATE', value: false};
+    fireHandler['documentStateUpdate']('documentStateUpdate', closeEvent);
+  }
+
   beforeEach(() => {
     win = env.win;
     fakeMessaging = {
@@ -102,14 +112,14 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     buildStoryPlayer();
     await manager.loadPlayers();
 
-    expect(playerEl.shadowRoot.querySelector('iframe')).to.exist;
+    expect(playerEl.querySelector('iframe')).to.exist;
   });
 
   it('should correctly append params at the end of the story url', async () => {
     buildStoryPlayer();
     await manager.loadPlayers();
 
-    const storyIframe = playerEl.shadowRoot.querySelector('iframe');
+    const storyIframe = playerEl.querySelector('iframe');
 
     expect(storyIframe.getAttribute('src')).to.equals(
       DEFAULT_CACHE_URL +
@@ -123,7 +133,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     buildStoryPlayer(1, DEFAULT_CACHE_URL + existingParams);
     await manager.loadPlayers();
 
-    const storyIframe = playerEl.shadowRoot.querySelector('iframe');
+    const storyIframe = playerEl.querySelector('iframe');
 
     expect(storyIframe.getAttribute('src')).to.equals(
       DEFAULT_CACHE_URL +
@@ -137,7 +147,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     buildStoryPlayer(3);
     await manager.loadPlayers();
 
-    const storyIframes = playerEl.shadowRoot.querySelectorAll('iframe');
+    const storyIframes = playerEl.querySelectorAll('iframe');
     expect(storyIframes[0].getAttribute('src')).to.include(
       '#visibilityState=visible'
     );
@@ -147,7 +157,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     buildStoryPlayer(3);
     await manager.loadPlayers();
 
-    const storyIframes = playerEl.shadowRoot.querySelectorAll('iframe');
+    const storyIframes = playerEl.querySelectorAll('iframe');
     expect(storyIframes[1].getAttribute('src')).to.include(
       '#visibilityState=prerender'
     );
@@ -199,6 +209,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     messagingMock.expects('registerHandler').withArgs('touchstart');
     messagingMock.expects('registerHandler').withArgs('touchmove');
     messagingMock.expects('registerHandler').withArgs('touchend');
+    messagingMock.expects('registerHandler').withArgs('documentStateUpdate');
     messagingMock.expects('setDefaultHandler');
 
     await manager.loadPlayers();
@@ -266,7 +277,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       await nextTick();
 
-      const storyIframe = playerEl.shadowRoot.querySelector('iframe');
+      const storyIframe = playerEl.querySelector('iframe');
 
       expect(storyIframe.getAttribute('src')).to.equals(
         DEFAULT_CACHE_URL +
@@ -281,7 +292,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       await nextTick();
 
-      const storyIframe = playerEl.shadowRoot.querySelector('iframe');
+      const storyIframe = playerEl.querySelector('iframe');
 
       expect(storyIframe.getAttribute('src')).to.equals(
         DEFAULT_ORIGIN_URL +
@@ -348,7 +359,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       await player.load();
 
-      expect(playerEl.shadowRoot.querySelector('iframe')).to.exist;
+      expect(playerEl.querySelector('iframe')).to.exist;
     });
 
     it('show callback builds corresponding adjacent iframes', async () => {
@@ -472,6 +483,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('pauses programatically', async () => {
       buildStoryPlayer();
       await manager.loadPlayers();
+      messagingMock.expects('sendRequest');
 
       playerEl.pause();
 
@@ -483,6 +495,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('plays programatically', async () => {
       buildStoryPlayer();
       await manager.loadPlayers();
+      messagingMock.expects('sendRequest');
 
       playerEl.play();
 
@@ -494,6 +507,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('calling mute should set story muted state to true', async () => {
       buildStoryPlayer();
       await manager.loadPlayers();
+      messagingMock.expects('sendRequest');
 
       await playerEl.mute();
 
@@ -505,6 +519,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     it('calling unmute should set the story muted state to false', async () => {
       buildStoryPlayer();
       await manager.loadPlayers();
+      messagingMock.expects('sendRequest');
 
       await playerEl.unmute();
 
@@ -522,14 +537,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       await player.load();
 
-      expect(
-        playerEl.shadowRoot.querySelector('button.amp-story-player-back-button')
-      ).to.exist;
-      expect(
-        playerEl.shadowRoot.querySelector(
-          'button.amp-story-player-close-button'
-        )
-      ).to.not.exist;
+      expect(playerEl.querySelector('button.amp-story-player-back-button')).to
+        .exist;
+      expect(playerEl.querySelector('button.amp-story-player-close-button')).to
+        .not.exist;
     });
 
     it('close button should be created and back button should not', async () => {
@@ -540,14 +551,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const player = new AmpStoryPlayer(win, playerEl);
 
       await player.load();
-      expect(
-        playerEl.shadowRoot.querySelector(
-          'button.amp-story-player-close-button'
-        )
-      ).to.exist;
-      expect(
-        playerEl.shadowRoot.querySelector('button.amp-story-player-back-button')
-      ).to.not.exist;
+      expect(playerEl.querySelector('button.amp-story-player-close-button')).to
+        .exist;
+      expect(playerEl.querySelector('button.amp-story-player-back-button')).to
+        .not.exist;
     });
 
     it('no button should be created', async () => {
@@ -559,14 +566,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       await player.load();
 
-      expect(
-        playerEl.shadowRoot.querySelector(
-          'button.amp-story-player-close-button'
-        )
-      ).to.not.exist;
-      expect(
-        playerEl.shadowRoot.querySelector('button.amp-story-player-back-button')
-      ).to.not.exist;
+      expect(playerEl.querySelector('button.amp-story-player-close-button')).to
+        .not.exist;
+      expect(playerEl.querySelector('button.amp-story-player-back-button')).to
+        .not.exist;
     });
 
     it('back button should fire back event once', async () => {
@@ -581,9 +584,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const readySpy = env.sandbox.spy();
       playerEl.addEventListener('amp-story-player-back', readySpy);
 
-      playerEl.shadowRoot
-        .querySelector('button.amp-story-player-back-button')
-        .click();
+      playerEl.querySelector('button.amp-story-player-back-button').click();
 
       expect(readySpy).to.have.been.calledOnce;
     });
@@ -599,11 +600,72 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       const readySpy = env.sandbox.spy();
       playerEl.addEventListener('amp-story-player-close', readySpy);
 
-      playerEl.shadowRoot
-        .querySelector('button.amp-story-player-close-button')
-        .click();
+      playerEl.querySelector('button.amp-story-player-close-button').click();
 
       expect(readySpy).to.have.been.calledOnce;
+    });
+
+    it('get page attachment state should send message', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+
+      await playerEl.getStoryState('page-attachment');
+
+      messagingMock.expects('sendRequest');
+
+      messagingMock
+        .expects('sendRequest')
+        .withArgs('getDocumentState', {state: 'PAGE_ATTACHMENT_STATE'});
+    });
+
+    it('should display button when page attachment is closed', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      playerEl.setAttribute('exit-control', 'back-button');
+      appendStoriesToPlayer(playerEl, 1);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+      await player.load();
+
+      expect(playerEl.querySelector('button.amp-story-player-hide-button')).to
+        .not.exist;
+    });
+
+    it('should hide button when page attachment is open', async () => {
+      buildStoryPlayer();
+      playerEl.setAttribute('exit-control', 'back-button');
+      await manager.loadPlayers();
+      await nextTick();
+
+      openPageAttachment();
+
+      expect(playerEl.querySelector('button.amp-story-player-hide-button')).to
+        .exist;
+    });
+
+    it('should fire page attachment open event once', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+      await nextTick();
+
+      const pageAttachmentSpy = env.sandbox.spy();
+      playerEl.addEventListener('page-attachment-open', pageAttachmentSpy);
+
+      openPageAttachment();
+
+      expect(pageAttachmentSpy).to.have.been.calledOnce;
+    });
+
+    it('should fire page attachment close event once', async () => {
+      buildStoryPlayer();
+      await manager.loadPlayers();
+      await nextTick();
+
+      const pageAttachmentSpy = env.sandbox.spy();
+      playerEl.addEventListener('page-attachment-close', pageAttachmentSpy);
+
+      closePageAttachment();
+
+      expect(pageAttachmentSpy).to.have.been.calledOnce;
     });
 
     it('navigate forward given a positive number in range', async () => {
