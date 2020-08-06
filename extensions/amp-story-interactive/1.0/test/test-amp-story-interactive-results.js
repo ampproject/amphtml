@@ -18,7 +18,13 @@ import {
   Action,
   AmpStoryStoreService,
 } from '../../../amp-story/1.0/amp-story-store-service';
-import {AmpStoryInteractiveResults} from '../amp-story-interactive-results';
+import {
+  AmpStoryInteractiveResults,
+  decideStrategy,
+  processResultsCategory,
+  processResultsPercentage,
+} from '../amp-story-interactive-results';
+import {InteractiveType} from '../amp-story-interactive-abstract';
 import {addConfigToInteractive} from './test-amp-story-interactive';
 import {registerServiceBuilder} from '../../../../src/service';
 
