@@ -140,6 +140,17 @@ export function useCallback(cb, opt_deps) {
 }
 
 /**
+ * @param {{current: (T|null)}} ref
+ * @param {function():T} create
+ * @param {!Array<*>=} opt_deps
+ * @return {undefined}
+ * @template T
+ */
+export function useImperativeHandle(ref, create, opt_deps) {
+  return hooks.useImperativeHandle(ref, create, opt_deps);
+}
+
+/**
  * @param {!PreactDef.Renderable} unusedChildren
  * @return {!Array<PreactDef.Renderable>}
  */

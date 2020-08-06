@@ -18,7 +18,7 @@ import * as compat from /*OK*/ 'preact/compat';
 
 /**
  * @param {function(JsonObject, {current: (T|null)}):PreactDef.Renderable} fn
- * @return {PreactDef.Renderable}
+ * @return {function():PreactDef.Renderable}
  * @template T
  */
 export function forwardRef(fn) {
