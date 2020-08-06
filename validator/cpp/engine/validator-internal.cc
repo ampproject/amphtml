@@ -5347,33 +5347,43 @@ ValidationResult CreateResultPrototype(const ParsedValidatorRules& rules) {
   return prototype;
 }
 
+// Makes Singleton ParsedValidatorRules non destructible.
+// TSAN throw race condition errors when ~ParsedValidatorRules destructor is
+// called.
+template <typename T>
+class NoDestructor {
+ public:
+  template <typename... Ts>
+  NoDestructor(Ts&&... args) {
+    new (&space_) T(std::forward<Ts>(args)...);
+  }
+
+  const T* Get() const {
+    return reinterpret_cast<const T*>(&space_);
+  }
+
+ private:
+  alignas(T) unsigned char space_[sizeof(T)];
+};
+
 class ParsedValidatorRulesProvider {
  public:
   static const ParsedValidatorRules* Get(HtmlFormat::Code format) {
-    static std::once_flag load_amp_rules_once;
-    static std::once_flag load_ads_rules_once;
-    static std::once_flag load_email_rules_once;
-    static ParsedValidatorRules* amp_rules_;
-    static ParsedValidatorRules* amp4_ads_rules_;
-    static ParsedValidatorRules* amp4_email_rules_;
     switch (format) {
       case HtmlFormat::AMP4ADS: {
-        std::call_once(load_ads_rules_once, []() {
-          amp4_ads_rules_ = new ParsedValidatorRules(HtmlFormat::AMP4ADS);
-        });
-        return amp4_ads_rules_;
+        static const NoDestructor<ParsedValidatorRules> rules(
+            HtmlFormat::AMP4ADS);
+        return rules.Get();
       }
       case HtmlFormat::AMP4EMAIL: {
-        std::call_once(load_email_rules_once, []() {
-          amp4_email_rules_ = new ParsedValidatorRules(HtmlFormat::AMP4EMAIL);
-        });
-        return amp4_email_rules_;
+        static const NoDestructor<ParsedValidatorRules> rules(
+            HtmlFormat::AMP4EMAIL);
+        return rules.Get();
       }
       default: {
-        std::call_once(load_amp_rules_once, []() {
-          amp_rules_ = new ParsedValidatorRules(HtmlFormat::AMP);
-        });
-        return amp_rules_;
+        static const NoDestructor<ParsedValidatorRules> rules(
+            HtmlFormat::AMP);
+        return rules.Get();
       }
     }
   }
