@@ -16,10 +16,10 @@
 import * as Preact from '../../../src/preact';
 import {ArrowNext, ArrowPrev} from './arrow';
 import {Scroller} from './scroller';
-import {createUseStyles} from 'react-jss';
 import {toChildArray, useRef, useState} from '../../../src/preact';
 import {useMountEffect} from '../../../src/preact/utils';
 import styles from './base-carousel.jss';
+import {createUseStyles} from 'react-jss';
 
 // TODO discuss this sidestepping of local/no-export-side-effect
 const useStyles = createUseStyles(styles);
@@ -38,6 +38,8 @@ export function BaseCarousel({
   setAdvance,
   ...rest
 }) {
+  // const styles = useStyles();
+  const styles = {};
   const childrenArray = toChildArray(children);
   const {length} = childrenArray;
   const [curSlide, setCurSlide] = useState(0);
@@ -63,6 +65,7 @@ export function BaseCarousel({
         loop={loop}
         restingIndex={curSlide}
         setRestingIndex={setRestingIndex}
+        styles={styles}
         ref={scrollRef}
       >
         {childrenArray}
@@ -71,11 +74,13 @@ export function BaseCarousel({
         customArrow={arrowPrev}
         disabled={disableForDir(-1)}
         advance={advance}
+        styles={styles}
       />
       <ArrowNext
         customArrow={arrowNext}
         disabled={disableForDir(1)}
         advance={advance}
+        styles={styles}
       />
     </div>
   );

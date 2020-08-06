@@ -21,12 +21,11 @@ import {useStyles} from './base-carousel';
  * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-export function Arrow({customArrow, by, advance, disabled}) {
+export function Arrow({customArrow, by, advance, disabled, styles}) {
   const {
     'disabled': customDisabled,
     'onClick': onCustomClick,
   } = customArrow.props;
-  const styles = useStyles();
   const isDisabled = disabled || customDisabled;
   const onClick = (e) => {
     if (onCustomClick) {
@@ -57,11 +56,12 @@ export function Arrow({customArrow, by, advance, disabled}) {
  * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.VNode}
  */
-export function ArrowPrev({customArrow, ...rest}) {
+export function ArrowPrev({customArrow, styles, ...rest}) {
   return (
     <Arrow
       by={-1}
-      customArrow={customArrow || <DefaultArrow by={-1} />}
+      customArrow={customArrow || <DefaultArrow by={-1} styles={styles} />}
+      styles={styles}
       {...rest}
     />
   );
@@ -71,11 +71,12 @@ export function ArrowPrev({customArrow, ...rest}) {
  * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-export function ArrowNext({customArrow, ...rest}) {
+export function ArrowNext({customArrow, styles, ...rest}) {
   return (
     <Arrow
       by={1}
-      customArrow={customArrow || <DefaultArrow by={1} />}
+      customArrow={customArrow || <DefaultArrow by={1} styles={styles}/>}
+      styles={styles}
       {...rest}
     />
   );
@@ -85,9 +86,7 @@ export function ArrowNext({customArrow, ...rest}) {
  * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-function DefaultArrow({by, ...rest}) {
-  const styles = useStyles();
-
+function DefaultArrow({by, styles, ...rest}) {
   return (
     <button
       className={styles.defaultArrowButton}
