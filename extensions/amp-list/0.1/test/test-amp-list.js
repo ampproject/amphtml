@@ -314,7 +314,7 @@ describes.repeated(
                   list.getPlaceholder = () => null;
                   allowConsoleError(() => {
                     expect(() => list.isLayoutSupported('container')).to.throw(
-                      /amp-list[layout=container] requires a placeholder/
+                      /amp-list\[layout=container\] requires a placeholder/
                     );
                   });
                 });

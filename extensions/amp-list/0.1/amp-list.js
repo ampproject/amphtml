@@ -151,8 +151,8 @@ export class AmpList extends AMP.BaseElement {
      */
     this.initialSrc_ = null;
 
-    /** @private {?Element|undefined} */
-    this.diffablePlaceholder_ = undefined;
+    /** @private {?Element} */
+    this.diffablePlaceholder_ = null;
 
     /** @private {?../../../extensions/amp-bind/0.1/bind-impl.Bind} */
     this.bind_ = null;
@@ -202,8 +202,11 @@ export class AmpList extends AMP.BaseElement {
           isExperimentOn(this.win, 'amp-list-layout-container'),
         'Experiment "amp-list-layout-container" is not turned on.'
       );
+      const hasDiffablePlaceholder =
+        this.element.hasAttribute('diffable') &&
+        this.queryDiffablePlaceholder_();
       userAssert(
-        this.getPlaceholder() || this.getDiffablePlaceholder_(),
+        this.getPlaceholder() || hasDiffablePlaceholder,
         'amp-list[layout=container] requires a placeholder to establish an initial size. ' +
           'See https://go.amp.dev/c/amp-list/#placeholder-and-fallback. %s',
         this.element
@@ -248,9 +251,9 @@ export class AmpList extends AMP.BaseElement {
     if (this.element.hasAttribute('diffable')) {
       // Initialize container to the diffable placeholder, if it exists.
       // This enables DOM diffing with the rendered result.
-      const diffablePlaceholder = this.getDiffablePlaceholder_();
-      if (diffablePlaceholder) {
-        this.container_ = diffablePlaceholder;
+      this.diffablePlaceholder_ = this.queryDiffablePlaceholder_();
+      if (this.diffablePlaceholder_) {
+        this.container_ = this.diffablePlaceholder_;
       } else {
         user().warn(
           TAG,
@@ -302,7 +305,7 @@ export class AmpList extends AMP.BaseElement {
     const placeholder = this.getPlaceholder();
     if (placeholder) {
       this.attemptToFit_(placeholder);
-    } else if (this.getDiffablePlaceholder_()) {
+    } else if (this.diffablePlaceholder_) {
       this.attemptToFit_(dev().assertElement(this.container_));
     }
 
@@ -327,14 +330,11 @@ export class AmpList extends AMP.BaseElement {
    * @return {?Element}
    * @private
    */
-  getDiffablePlaceholder_() {
-    if (this.diffablePlaceholder_ === undefined) {
-      this.diffablePlaceholder_ = scopedQuerySelector(
-        this.element,
-        '> div[role=list]:not([placeholder]):not([fallback]):not([fetch-error])'
-      );
-    }
-    return this.diffablePlaceholder_;
+  queryDiffablePlaceholder_() {
+    return scopedQuerySelector(
+      this.element,
+      '> div[role=list]:not([placeholder]):not([fallback]):not([fetch-error])'
+    );
   }
 
   /**
@@ -1197,7 +1197,7 @@ export class AmpList extends AMP.BaseElement {
     // On renders N>1, diff-marking happens during template sanitization.
     // For render N=1, the placeholder already exists in DOM and is not
     // sanitized, so mark it manually to enable diffing.
-    if (this.getDiffablePlaceholder_()) {
+    if (this.diffablePlaceholder_) {
       this.markContainerForDiffing_(container);
     }
 
