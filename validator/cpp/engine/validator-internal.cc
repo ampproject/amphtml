@@ -2780,7 +2780,7 @@ class InvalidDeclVisitor : public htmlparser::css::RuleVisitor {
  private:
   const ParsedDocCssSpec& css_spec_;
   Context* context_;
-  const string& tag_descriptive_name_;
+  const string tag_descriptive_name_;
   ValidationResult* result_;
 };
 
