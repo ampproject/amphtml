@@ -15,14 +15,18 @@
  */
 
 import {AmpStoryInteractiveQuiz} from '../amp-story-interactive-quiz';
-import {AmpStoryStoreService} from '../amp-story-store-service';
+import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
+import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
+import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {
   addConfigToInteractive,
   getMockInteractiveData,
 } from './test-amp-story-interactive';
-import {getRequestService} from '../amp-story-request-service';
-import {registerServiceBuilder} from '../../../../src/service';
+import {
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+} from '../../../../src/service';
 
 /**
  * Populates the quiz with some number of prompts and some number of options.
@@ -68,7 +72,10 @@ describes.realWin(
         'amp-story-interactive-quiz'
       );
       ampStoryQuizEl.getResources = () => win.__AMP_SERVICES.resources.obj;
-      requestService = getRequestService(win, ampStoryQuizEl);
+      requestService = new AmpStoryRequestService(win);
+      registerServiceBuilder(win, 'story-request', function () {
+        return requestService;
+      });
 
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
@@ -85,24 +92,32 @@ describes.realWin(
       win.document.body.appendChild(storyEl);
       ampStoryQuiz = new AmpStoryInteractiveQuiz(ampStoryQuizEl);
 
+      const localizationService = new LocalizationService(win.document.body);
+      registerServiceBuilderForDoc(ampStoryQuizEl, 'localization', function () {
+        return localizationService;
+      });
+
       env.sandbox.stub(ampStoryQuiz, 'mutateElement').callsFake((fn) => fn());
     });
 
-    it('should create the prompt and options container if there is a prompt', () => {
+    it('should create the prompt and options container if there is a prompt', async () => {
       populateQuiz(ampStoryQuiz, 4, 'Is this a prompt?');
-      ampStoryQuiz.buildCallback();
+      await ampStoryQuiz.buildCallback();
+      await ampStoryQuiz.layoutCallback();
       expect(ampStoryQuiz.getRootElement().children.length).to.equal(2);
     });
 
-    it('should not create the prompt and options container if there no prompt', () => {
+    it('should not create the prompt and options container if there no prompt', async () => {
       populateQuiz(ampStoryQuiz, 4, undefined);
-      ampStoryQuiz.buildCallback();
+      await ampStoryQuiz.buildCallback();
+      await ampStoryQuiz.layoutCallback();
       expect(ampStoryQuiz.getRootElement().children.length).to.equal(1);
     });
 
-    it('should structure the content in the quiz element', () => {
+    it('should structure the content in the quiz element', async () => {
       populateQuiz(ampStoryQuiz, 4, 'Has prompt!?');
-      ampStoryQuiz.buildCallback();
+      await ampStoryQuiz.buildCallback();
+      await ampStoryQuiz.layoutCallback();
 
       const quizContent = ampStoryQuiz.getRootElement().children;
       expect(quizContent[0]).to.have.class(
@@ -150,26 +165,6 @@ describes.realWin(
       });
     });
 
-    it('should enter the post-selection state on option click', async () => {
-      populateQuiz(ampStoryQuiz);
-      ampStoryQuiz.buildCallback();
-      await ampStoryQuiz.layoutCallback();
-
-      const quizElement = ampStoryQuiz.getRootElement();
-      const quizOption = quizElement.querySelector(
-        '.i-amphtml-story-interactive-quiz-option'
-      );
-
-      await quizOption.click();
-
-      expect(quizElement).to.have.class(
-        'i-amphtml-story-interactive-post-selection'
-      );
-      expect(quizOption).to.have.class(
-        'i-amphtml-story-interactive-option-selected'
-      );
-    });
-
     it('should handle the percentage pipeline', async () => {
       env.sandbox
         .stub(requestService, 'executeRequest')
@@ -178,7 +173,7 @@ describes.realWin(
       ampStoryQuiz.element.setAttribute('endpoint', 'http://localhost:8000');
 
       populateQuiz(ampStoryQuiz);
-      ampStoryQuiz.buildCallback();
+      await ampStoryQuiz.buildCallback();
       await ampStoryQuiz.layoutCallback();
 
       expect(ampStoryQuiz.getOptionElements()[0].innerText).to.contain('30%');

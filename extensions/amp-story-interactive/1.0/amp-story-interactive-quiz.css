@@ -108,8 +108,11 @@
   display: flex !important;
   padding-left: 10px !important;
   margin-left: auto !important;
-  color: #aaaaaa !important;
   visibility: hidden !important;
+}
+
+.i-amphtml-story-interactive-quiz-option:not(.i-amphtml-story-interactive-option-selected) .i-amphtml-story-interactive-quiz-percentage-text {
+  opacity: 0.5 !important;
 }
 
 [dir='rtl'] .i-amphtml-story-interactive-quiz-percentage-text {

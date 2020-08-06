@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import {AmpStoryInteractive, InteractiveType} from './amp-story-interactive';
+import {
+  AmpStoryInteractive,
+  InteractiveType,
+} from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-results-1.0.css';
-import {StateProperty} from './amp-story-store-service';
+import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 import {htmlFor} from '../../../src/static-template';
 import {setStyle} from '../../../src/style';
 
@@ -54,8 +57,8 @@ const buildResultsTemplate = (element) => {
 
 /**
  * Processes the state and returns the condensed results.
- * @param {!Map<string, {option: ?./amp-story-interactive.OptionConfigType, interactiveId: string}>} interactiveState
- * @param {?Array<!./amp-story-interactive.OptionConfigType>} options needed to ensure the first options take precedence on ties
+ * @param {!Map<string, {option: ?./amp-story-interactive-abstract.OptionConfigType, interactiveId: string}>} interactiveState
+ * @param {?Array<!./amp-story-interactive-abstract.OptionConfigType>} options needed to ensure the first options take precedence on ties
  * @return {InteractiveResultsDef} the results
  */
 const processResults = (interactiveState, options) => {
@@ -86,7 +89,7 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
 
   /** @override */
   buildCallback() {
-    super.buildCallback(CSS);
+    return super.buildCallback(CSS);
   }
 
   /** @override */
@@ -111,7 +114,7 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
 
   /**
    * Receives state updates and fills up DOM with the result
-   * @param {!Map<string, {option: ?./amp-story-interactive.OptionConfigType, interactiveId: string}>} interactiveState
+   * @param {!Map<string, {option: ?./amp-story-interactive-abstract.OptionConfigType, interactiveId: string}>} interactiveState
    * @private
    */
   onInteractiveReactStateUpdate_(interactiveState) {
@@ -128,7 +131,7 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
 
   /**
    * Updates the element with the correct category
-   * @param {./amp-story-interactive.OptionConfigType} categorySelected
+   * @param {./amp-story-interactive-abstract.OptionConfigType} categorySelected
    * @private
    */
   updateCategory_(categorySelected) {

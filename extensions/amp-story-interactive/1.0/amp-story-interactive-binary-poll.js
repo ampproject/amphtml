@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {AmpStoryInteractive, InteractiveType} from './amp-story-interactive';
+import {
+  AmpStoryInteractive,
+  InteractiveType,
+} from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-binary-poll-1.0.css';
 import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
@@ -99,7 +102,7 @@ export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {
 
   /** @override */
   buildCallback() {
-    super.buildCallback(CSS);
+    return super.buildCallback(CSS);
   }
 
   /** @override */
@@ -182,7 +185,7 @@ export class AmpStoryInteractiveBinaryPoll extends AmpStoryInteractive {
 
   /**
    * Creates an option template filled with the details the attributes.
-   * @param {./amp-story-interactive.OptionConfigType} option
+   * @param {./amp-story-interactive-abstract.OptionConfigType} option
    * @return {Element} option element
    * @private
    */
