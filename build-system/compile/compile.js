@@ -184,13 +184,16 @@ function compile(
       const polyfills = fs.readdirSync('src/polyfills');
       const polyfillsShadowList = polyfills.filter((p) => {
         // custom-elements polyfill must be included.
-        return p !== 'custom-elements.js';
+        // install intersection-observer to esm build as iOS safari 11.1 to
+        // 12.1 do not have InObs.
+        return !['custom-elements.js', 'intersection-observer.js'].includes(p);
       });
       srcs.push(
         '!build/fake-module/src/polyfills.js',
         '!build/fake-module/src/polyfills/**/*.js',
         '!build/fake-polyfills/src/polyfills.js',
         'src/polyfills/custom-elements.js',
+        'src/polyfills/intersection-observer.js',
         'build/fake-polyfills/**/*.js'
       );
       polyfillsShadowList.forEach((polyfillFile) => {
