@@ -38,8 +38,8 @@ export function BaseCarousel({
   setAdvance,
   ...rest
 }) {
-  // const styles = useStyles();
-  const styles = {};
+  const styles = useStyles();
+  // const styles = {};
   const childrenArray = toChildArray(children);
   const {length} = childrenArray;
   const [curSlide, setCurSlide] = useState(0);

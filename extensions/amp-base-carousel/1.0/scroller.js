@@ -142,7 +142,7 @@ function ScrollerWithRef({children, loop, restingIndex, setRestingIndex, styles}
       key="container"
       ref={containerRef}
       onScroll={handleScroll}
-      classNames={`${styles.scrollContainer} ${styles.hideScrollbar} ${styles.horizontalScroll} ${styles.scrollerStyles}`}
+      class={`${styles.scrollContainer} ${styles.hideScrollbar} ${styles.horizontalScroll} ${styles.scrollerStyles}`}
       tabindex={0}
     >
       {slides}
