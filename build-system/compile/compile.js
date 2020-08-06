@@ -184,13 +184,14 @@ function compile(
       const polyfills = fs.readdirSync('src/polyfills');
       const polyfillsShadowList = polyfills.filter((p) => {
         // custom-elements polyfill must be included.
-        return p !== 'custom-elements.js';
+        return !['custom-elements.js', 'intersection-observer.js'].includes(p);
       });
       srcs.push(
         '!build/fake-module/src/polyfills.js',
         '!build/fake-module/src/polyfills/**/*.js',
         '!build/fake-polyfills/src/polyfills.js',
         'src/polyfills/custom-elements.js',
+        'src/polyfills/intersection-observer.js',
         'build/fake-polyfills/**/*.js'
       );
       polyfillsShadowList.forEach((polyfillFile) => {
