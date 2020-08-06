@@ -479,15 +479,14 @@ export class AmpAnimation extends AMP.BaseElement {
       null);
 
     // Ensure polyfill is installed.
-    installWebAnimationsIfNecessary(this.win);
-
+    const polyfillPromise = installWebAnimationsIfNecessary(this.win);
     const ampdoc = this.getAmpDoc();
     const readyPromise = this.embed_
       ? this.embed_.whenReady()
       : ampdoc.whenReady();
     const hostWin = this.embed_ ? this.embed_.win : this.win;
     const baseUrl = this.embed_ ? this.embed_.getUrl() : ampdoc.getUrl();
-    return readyPromise.then(() => {
+    return Promise.all([polyfillPromise, readyPromise]).then(() => {
       const builder = new Builder(
         hostWin,
         this.getRootNode_(),
