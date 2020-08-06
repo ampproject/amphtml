@@ -1,5 +1,3 @@
-
-
 /**
  * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
