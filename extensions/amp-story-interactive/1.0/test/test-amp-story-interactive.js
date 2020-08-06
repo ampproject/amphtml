@@ -14,14 +14,24 @@
  * limitations under the License.
  */
 
-import {AmpStoryInteractive, InteractiveType} from '../amp-story-interactive';
-import {AnalyticsVariable, getVariableService} from '../variable-service';
+import {
+  AmpStoryInteractive,
+  InteractiveType,
+} from '../amp-story-interactive-abstract';
+import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
+import {
+  AmpStoryStoreService,
+  StateProperty,
+} from '../../../amp-story/1.0/amp-story-store-service';
+import {
+  AmpStoryVariableService,
+  AnalyticsVariable,
+} from '../../../amp-story/1.0/variable-service';
 import {Services} from '../../../../src/services';
-import {StateProperty, getStoreService} from '../amp-story-store-service';
+import {StoryAnalyticsService} from '../../../amp-story/1.0/story-analytics';
 import {dict} from '../../../../src/utils/object';
-import {getAnalyticsService} from '../story-analytics';
-import {getRequestService} from '../amp-story-request-service';
 import {htmlFor} from '../../../../src/static-template';
+import {registerServiceBuilder} from '../../../../src/service';
 
 /**
  * Returns mock interactive data.
@@ -144,10 +154,22 @@ describes.realWin(
       ampStoryInteractiveEl.getResources = () =>
         win.__AMP_SERVICES.resources.obj;
 
-      analyticsVars = getVariableService(win);
-      analytics = getAnalyticsService(win, win.document.body);
-      requestService = getRequestService(win, ampStoryInteractiveEl);
-      storeService = getStoreService(win);
+      analyticsVars = new AmpStoryVariableService(win);
+      registerServiceBuilder(win, 'story-variable', function () {
+        return analyticsVars;
+      });
+      analytics = new StoryAnalyticsService(win, win.document.body);
+      registerServiceBuilder(win, 'story-analytics', function () {
+        return analytics;
+      });
+      requestService = new AmpStoryRequestService(win);
+      registerServiceBuilder(win, 'story-request', function () {
+        return requestService;
+      });
+      storeService = new AmpStoryStoreService(win);
+      registerServiceBuilder(win, 'story-store', function () {
+        return storeService;
+      });
 
       storyEl = win.document.createElement('amp-story');
       const storyPage = win.document.createElement('amp-story-page');
@@ -182,7 +204,7 @@ describes.realWin(
 
     it('should enter post-selection state on option click', async () => {
       addConfigToInteractive(ampStoryInteractive);
-      ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.buildCallback();
       await ampStoryInteractive.layoutCallback();
       await ampStoryInteractive.getOptionElements()[0].click();
       expect(ampStoryInteractive.getRootElement()).to.have.class(
@@ -195,7 +217,7 @@ describes.realWin(
 
     it('should only record first option selected', async () => {
       addConfigToInteractive(ampStoryInteractive);
-      ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.buildCallback();
       await ampStoryInteractive.layoutCallback();
       await ampStoryInteractive.getOptionElements()[0].click();
       await ampStoryInteractive.getOptionElements()[1].click();
@@ -210,7 +232,7 @@ describes.realWin(
     it('should trigger an analytics event with the right variables on selection', async () => {
       const trigger = env.sandbox.stub(analytics, 'triggerEvent');
       addConfigToInteractive(ampStoryInteractive);
-      ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.buildCallback();
       await ampStoryInteractive.layoutCallback();
       await ampStoryInteractive.getOptionElements()[1].click();
       expect(trigger).to.have.been.calledWith('story-interactive');
@@ -235,7 +257,7 @@ describes.realWin(
         'endpoint',
         'http://localhost:8000'
       );
-      ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.buildCallback();
       await ampStoryInteractive.layoutCallback();
 
       expect(ampStoryInteractive.getRootElement()).to.have.class(
@@ -295,18 +317,21 @@ describes.realWin(
 
     it('should update the store property correctly', async () => {
       addConfigToInteractive(ampStoryInteractive, 4, null, ['text']);
-      ampStoryInteractive.buildCallback();
+      await ampStoryInteractive.buildCallback();
       await ampStoryInteractive.layoutCallback();
       await ampStoryInteractive.getOptionElements()[2].click();
 
       expect(
-        storeService.get(StateProperty.INTERACTIVE_REACT_STATE)['id']
+        ampStoryInteractive.storeService_.get(
+          StateProperty.INTERACTIVE_REACT_STATE
+        )['id']
       ).to.be.deep.equals({
         option: {
           optionIndex: 2,
           text: 'text 3',
         },
         interactiveId: 'id',
+        type: InteractiveType.QUIZ,
       });
     });
   }

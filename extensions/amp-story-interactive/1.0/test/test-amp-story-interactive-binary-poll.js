@@ -15,13 +15,13 @@
  */
 
 import {AmpStoryInteractiveBinaryPoll} from '../amp-story-interactive-binary-poll';
-import {AmpStoryStoreService} from '../amp-story-store-service';
+import {AmpStoryRequestService} from '../../../amp-story/1.0/amp-story-request-service';
+import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
 import {Services} from '../../../../src/services';
 import {
   addConfigToInteractive,
   getMockInteractiveData,
 } from './test-amp-story-interactive';
-import {getRequestService} from '../amp-story-request-service';
 import {measureMutateElementStub} from '../../../../testing/test-helper';
 import {registerServiceBuilder} from '../../../../src/service';
 
@@ -47,7 +47,10 @@ describes.realWin(
         'amp-story-interactive-binary-poll'
       );
       ampStoryPollEl.getResources = () => win.__AMP_SERVICES.resources.obj;
-      requestService = getRequestService(win, ampStoryPollEl);
+      requestService = new AmpStoryRequestService(win);
+      registerServiceBuilder(win, 'story-request', function () {
+        return requestService;
+      });
 
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', function () {
@@ -95,28 +98,13 @@ describes.realWin(
     it('should fill the content of the options', async () => {
       ampStoryPoll.element.setAttribute('option-1-text', 'Fizz');
       ampStoryPoll.element.setAttribute('option-2-text', 'Buzz');
-      ampStoryPoll.buildCallback();
+      await ampStoryPoll.buildCallback();
       await ampStoryPoll.layoutCallback();
       expect(ampStoryPoll.getOptionElements()[0].textContent).to.contain(
         'Fizz'
       );
       expect(ampStoryPoll.getOptionElements()[1].textContent).to.contain(
         'Buzz'
-      );
-    });
-
-    it('should enter the post-interactive state on option click', async () => {
-      addConfigToInteractive(ampStoryPoll, 2);
-      ampStoryPoll.buildCallback();
-      await ampStoryPoll.layoutCallback();
-
-      await ampStoryPoll.getOptionElements()[0].click();
-
-      expect(ampStoryPoll.getRootElement()).to.have.class(
-        'i-amphtml-story-interactive-post-selection'
-      );
-      expect(ampStoryPoll.getOptionElements()[0]).to.have.class(
-        'i-amphtml-story-interactive-option-selected'
       );
     });
 
@@ -128,7 +116,7 @@ describes.realWin(
       ampStoryPoll.element.setAttribute('endpoint', 'http://localhost:8000');
 
       addConfigToInteractive(ampStoryPoll, 2);
-      ampStoryPoll.buildCallback();
+      await ampStoryPoll.buildCallback();
       await ampStoryPoll.layoutCallback();
 
       expect(ampStoryPoll.getOptionElements()[0].innerText).to.contain('50%');
@@ -138,7 +126,7 @@ describes.realWin(
     it('should change the font-size wih the emoji content', async () => {
       ampStoryPoll.element.setAttribute('option-1-text', '🧛');
       ampStoryPoll.element.setAttribute('option-2-text', '🧛');
-      ampStoryPoll.buildCallback();
+      await ampStoryPoll.buildCallback();
       await ampStoryPoll.layoutCallback();
       expect(ampStoryPoll.getRootElement().getAttribute('style')).to.contain(
         '--post-select-scale-variable:2'
@@ -148,7 +136,7 @@ describes.realWin(
     it('should change the font-size with one line content', async () => {
       ampStoryPoll.element.setAttribute('option-1-text', 'This');
       ampStoryPoll.element.setAttribute('option-2-text', 'That');
-      ampStoryPoll.buildCallback();
+      await ampStoryPoll.buildCallback();
       await ampStoryPoll.layoutCallback();
       expect(ampStoryPoll.getRootElement().getAttribute('style')).to.contain(
         '--post-select-scale-variable:1.14'
@@ -158,7 +146,7 @@ describes.realWin(
     it('should change the font-size with two line content', async () => {
       ampStoryPoll.element.setAttribute('option-1-text', 'This is one');
       ampStoryPoll.element.setAttribute('option-2-text', 'That is two');
-      ampStoryPoll.buildCallback();
+      await ampStoryPoll.buildCallback();
       await ampStoryPoll.layoutCallback();
       expect(ampStoryPoll.getRootElement().getAttribute('style')).to.contain(
         '--post-select-scale-variable:1'

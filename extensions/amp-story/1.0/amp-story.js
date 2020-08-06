@@ -50,10 +50,6 @@ import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
-import {AmpStoryInteractiveBinaryPoll} from './amp-story-interactive-binary-poll';
-import {AmpStoryInteractivePoll} from './amp-story-interactive-poll';
-import {AmpStoryInteractiveQuiz} from './amp-story-interactive-quiz';
-import {AmpStoryInteractiveResults} from './amp-story-interactive-results';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
 import {AmpStoryRenderService} from './amp-story-render-service';
@@ -420,7 +416,6 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeListeners_();
     this.initializeListenersForDev_();
     this.initializePageIds_();
-    this.initializeInteractiveComponents_();
     this.initializeStoryPlayer_();
 
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
@@ -569,33 +564,6 @@ export class AmpStory extends AMP.BaseElement {
       pageIds[i] = newId;
     }
     this.storeService_.dispatch(Action.SET_PAGE_IDS, pageIds);
-  }
-
-  /**
-   * Initializes interactives by deduplicating their IDs and calling initializeState().
-   * @private
-   */
-  initializeInteractiveComponents_() {
-    const interactiveEls = this.element.querySelectorAll(
-      'amp-story-interactive-binary-poll, amp-story-interactive-poll, amp-story-interactive-quiz'
-    );
-    const interactiveIds = toArray(interactiveEls).map(
-      (el) => el.id || 'interactive-id'
-    );
-    const idsMap = map();
-    for (let i = 0; i < interactiveIds.length; i++) {
-      if (idsMap[interactiveIds[i]] === undefined) {
-        idsMap[interactiveIds[i]] = 0;
-        continue;
-      }
-      user().error(TAG, `Duplicate interactive ID ${interactiveIds[i]}`);
-      const newId = `${interactiveIds[i]}__${++idsMap[interactiveIds[i]]}`;
-      interactiveEls[i].id = newId;
-      interactiveIds[i] = newId;
-      whenUpgradedToCustomElement(interactiveEls[i]).then((el) => {
-        el.getImpl().then((e) => e.initializeState());
-      });
-    }
   }
 
   /**
@@ -2881,15 +2849,5 @@ AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
   AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment);
-  AMP.registerElement(
-    'amp-story-interactive-binary-poll',
-    AmpStoryInteractiveBinaryPoll
-  );
-  AMP.registerElement('amp-story-interactive-poll', AmpStoryInteractivePoll);
-  AMP.registerElement('amp-story-interactive-quiz', AmpStoryInteractiveQuiz);
-  AMP.registerElement(
-    'amp-story-interactive-results',
-    AmpStoryInteractiveResults
-  );
   AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });
