@@ -31,8 +31,8 @@ const sourcemapUrlMatcher =
   'https://raw.githubusercontent.com/ampproject/amphtml/\\d{13}/';
 
 // Mapping related constants
-const expectedFirstLineFile = 'src/internal-version.js';
-const expectedFirstLineCode = 'export function internalRuntimeVersion() {';
+const expectedFirstLineFile = 'src/polyfills/array-includes.js';
+const expectedFirstLineCode = 'function includes(value, opt_fromIndex) {';
 
 /**
  * Throws an error with the given message
@@ -114,9 +114,9 @@ function checkSourcemapSources(sourcemapJson) {
  * Performs a sanity check on the mappings field in the sourcemap file.
  *
  * Today, the first line of amp.js after resolving imports comes from
- * src/internal-version.js. (The import chain is src/amp.js -> src/polyfills.js
- * -> src/mode.js -> src/internal-version.js.) This sequence is unlikely to
- * change, so we can use it as a sentinel value. Here is the process:
+ * src/polyfills/array-includes.js. (The import chain is src/amp.js -> src/polyfills.js
+ * -> src/polyfills/array-includes.js.) This sequence changes rarely, so we can
+ * use it as a sentinel value. Here is the process:
  *
  * 1. Decode the 'mappings' field into a 3d array using 'sourcemap-codec'.
  * 2. Extract the mapping for the first line of code in minified v0.js.
