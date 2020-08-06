@@ -93,32 +93,13 @@ export function ArrowNext({customArrow, ...rest}) {
  */
 function DefaultArrow({by, disabled, ...rest}) {
   const styles = useStyles();
-  // TODO(wg-bento#7): Replace with :hover and :active pseudoselectors.
-  const [hover, setHover] = useState(false);
-  const [active, setActive] = useState(false);
-
-  // Component should reset hover and active states when disabled.
-  useEffect(() => {
-    if (disabled) {
-      setHover(false);
-      setActive(false);
-    }
-  }, [disabled]);
 
   return (
     <button
       className={styles.defaultArrowButton}
-      style={{
-        color: hover ? '#222' : '#fff',
-        transitionDuration: active ? '0ms' : '',
-      }}
       aria-label={
         by < 0 ? 'Previous item in carousel' : 'Next item in carousel'
       }
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onMouseDown={() => setActive(true)}
-      onMouseUp={() => setActive(false)}
       {...rest}
     >
       <div className={`${styles.arrowBaseStyle} ${styles.arrowFrosting}`}></div>
