@@ -892,6 +892,29 @@ export class AmpStoryPlayer {
   }
 
   /**
+   * Updates the state of the features responsible for autoplay mode on the
+   * provided iframe.
+   * @param {number} iframeIdx
+   * @param {boolean} isAutoplaying
+   * @private
+   */
+  updateAutoplayState_(iframeIdx, isAutoplaying) {
+    this.messagingPromises_[iframeIdx].then((messaging) => {
+      messaging.sendRequest(
+        'setDocumentState',
+        {state: 'PREVIEW_STATE', value: isAutoplaying},
+        true
+      );
+
+      messaging.sendRequest(
+        'setDocumentState',
+        {state: 'CAN_SHOW_SYSTEM_LAYER_BUTTONS', value: !isAutoplaying},
+        true
+      );
+    });
+  }
+
+  /**
    * React to selectDocument events.
    * @param {!Object} data
    * @private
