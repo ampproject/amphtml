@@ -16,7 +16,7 @@
 import {Builder} from './web-animations';
 import {Services} from '../../../src/services';
 import {WebAnimationBuilderOptionsDef} from './web-animation-types';
-import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
+import {installWebAnimationsIfNecessary} from './install-polyfill';
 
 export class WebAnimationService {
   /**

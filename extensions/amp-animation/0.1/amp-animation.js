@@ -26,7 +26,7 @@ import {getChildJsonConfig} from '../../../src/json';
 import {getDetail, listen} from '../../../src/event-helper';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getParentWindowFrameElement} from '../../../src/service';
-import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
+import {installWebAnimationsIfNecessary} from './install-polyfill';
 import {isFiniteNumber} from '../../../src/types';
 import {setInitialDisplay, setStyles, toggle} from '../../../src/style';
 
