@@ -87,9 +87,11 @@ app.use('/a4a(|-3p)/', async (req, res) => {
     process.cwd() + templatePath,
     'utf8'
   );
+  const branchLevelExperiments = req.query.eid;
 
   const content = fillTemplate(template, url.href, req.query)
     .replace(/CHECKSIG/g, force3p || '')
+    .replace(/DATAEXPERIMENTIDS/, branchLevelExperiments || '')
     .replace(/DISABLE3PFALLBACK/g, !force3p);
   res.end(replaceUrls(getServeMode(), content));
 });
