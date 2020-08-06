@@ -24,6 +24,7 @@ export const slideElement = {
   alignItems: 'center',
   justifyContent: 'center',
   scrollSnapAlign: 'start',
+  scrollSnapStop: 'always',
 };
 
 export const scrollContainer = {
@@ -52,12 +53,53 @@ export const arrowPlacement = {
   // Center the button vertically.
   top: '50%',
   transform: 'translateY(-50%)',
+  alignItems: 'center',
 };
 
 export const defaultArrowButton = {
-  width: '32px',
-  height: '32px',
-  background: 'rgba(0, 0, 0, 0.25)',
+  position: 'relative',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  width: '36px',
+  height: '36px',
+  padding: 0,
+  margin: '12px',
+  backgroundColor: 'transparent',
+  border: 'none',
+  outline: 'none',
+  stroke: 'currentColor',
+  transition: '200ms stroke',
+};
+
+export const arrowBaseStyle = {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  width: '100%',
+  height: '100%',
+  borderRadius: '50%',
+};
+
+export const arrowFrosting = {
+  backdropFilter: 'blur(3px)',
+};
+
+export const arrowBackdrop = {
+  backdropFilter: 'blur(12px) invert(1) grayscale(0.6) brightness(0.8)',
+  opacity: 0.5,
+};
+
+export const arrowBackground = {
+  boxShadow: `0 0 0px 1px rgba(0, 0, 0, 0.08) inset,
+      0 1px 4px 1px rgba(0, 0, 0, 0.2)`,
+  transition: '200ms background-color',
+};
+
+export const arrowIcon = {
+  position: 'relative',
+  width: '24px',
+  height: '24px',
 };
 
 /*
@@ -78,7 +120,7 @@ export const hideScrollbar = {
   scrollbarWidth: 'none',
 };
 /* Chrome, Safari */
-export const hideScrollbarPseudo = `[hide-scrollbar]::-webkit-scrollbar {
+const hideScrollbarPseudo = `[hide-scrollbar]::-webkit-scrollbar {
   display: none;
   box-sizing: content-box !important;
   }`;
@@ -91,3 +133,17 @@ export const horizontalScroll = {
   paddingBottom: '20px',
   overflowY: 'hidden',
 };
+
+/** Slides only have one child */
+const slideSizing = `
+.i-amphtml-carousel-slide > :first-child, .i-amphtml-carousel-slide > ::slotted(*) {
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  flex-shrink: 0 !important;
+  max-height: 100%;
+  max-width: 100%;
+}
+.i-amphtml-carousel-slide > ::slotted(*) {
+  width: 100%;
+}`;
+export const scrollerStyles = hideScrollbarPseudo + slideSizing;

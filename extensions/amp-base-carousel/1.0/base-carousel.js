@@ -14,62 +14,62 @@
  * limitations under the License.
  */
 import * as Preact from '../../../src/preact';
-import {Arrow} from './arrow';
+import {ArrowNext, ArrowPrev} from './arrow';
 import {Scroller} from './scroller';
 import {toChildArray, useRef, useState} from '../../../src/preact';
+import {useMountEffect} from '../../../src/preact/utils';
 
 /**
- * @param {!JsonObject} props
+ * @param {!BaseCarouselDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function BaseCarousel(props) {
-  const {
-    'arrowPrev': arrowPrev,
-    'arrowNext': arrowNext,
-    'children': children,
-    'defaultSlide': defaultSlide,
-    'loop': loop,
-    ...rest
-  } = props;
+export function BaseCarousel({
+  arrowPrev,
+  arrowNext,
+  children,
+  loop,
+  onSlideChange,
+  setAdvance,
+  ...rest
+}) {
   const childrenArray = toChildArray(children);
   const {length} = childrenArray;
-  const [curSlide, setCurSlide] = useState(defaultSlide || 0);
-  const ignoreProgrammaticScroll = useRef(true);
-  const setRestingIndex = (i) => {
-    ignoreProgrammaticScroll.current = true;
-    setCurSlide(i);
-  };
+  const [curSlide, setCurSlide] = useState(0);
   const scrollRef = useRef(null);
-  const advance = (dir) => {
-    const container = scrollRef.current;
-    // Modify scrollLeft is preferred to `setCurSlide` to enable smooth scroll.
-    // Note: `setCurSlide` will still be called on debounce by scroll handler.
-    container./* OK */ scrollLeft += container./* OK */ offsetWidth * dir;
+  const advance = (by) => scrollRef.current.advance(by);
+  useMountEffect(() => {
+    if (setAdvance) {
+      setAdvance(advance);
+    }
+  });
+
+  const setRestingIndex = (i) => {
+    setCurSlide(i);
+    if (onSlideChange) {
+      onSlideChange(i);
+    }
   };
   const disableForDir = (dir) =>
     !loop && (curSlide + dir < 0 || curSlide + dir >= length);
   return (
     <div {...rest}>
       <Scroller
-        ignoreProgrammaticScroll={ignoreProgrammaticScroll}
         loop={loop}
         restingIndex={curSlide}
         setRestingIndex={setRestingIndex}
-        scrollRef={scrollRef}
+        ref={scrollRef}
       >
         {childrenArray}
       </Scroller>
-      <Arrow
+      <ArrowPrev
         customArrow={arrowPrev}
-        dir={-1}
         disabled={disableForDir(-1)}
-        advance={() => advance(-1)}
+        advance={advance}
       />
-      <Arrow
+      <ArrowNext
         customArrow={arrowNext}
-        dir={1}
         disabled={disableForDir(1)}
-        advance={() => advance(1)}
+        advance={advance}
       />
     </div>
   );

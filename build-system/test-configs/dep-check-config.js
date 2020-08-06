@@ -102,6 +102,7 @@ exports.rules = [
     allowlist: [
       '3p/**->src/utils/function.js',
       '3p/**->src/utils/object.js',
+      '3p/**->src/utils/promise.js',
       '3p/**->src/log.js',
       '3p/**->src/types.js',
       '3p/**->src/string.js',
@@ -117,6 +118,7 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/polyfills.js->src/polyfills/object-values.js',
+      '3p/polyfills.js->src/polyfills/promise.js',
       '3p/messaging.js->src/event-helper.js',
       '3p/bodymovinanimation.js->src/event-helper.js',
       '3p/iframe-messaging-client.js->src/event-helper.js',
@@ -254,6 +256,13 @@ exports.rules = [
       'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+
+      // Interactive components that depend on story functionality.
+      'extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js->extensions/amp-story/1.0/story-analytics.js',
+      'extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js->extensions/amp-story/1.0/utils.js',
+      'extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js->extensions/amp-story/1.0/variable-service.js',
+      'extensions/amp-story-interactive/1.0/amp-story-interactive-results.js->extensions/amp-story/1.0/amp-story-store-service.js',
 
       // Subscriptions.
       'extensions/amp-subscriptions/0.1/expr.js->extensions/amp-access/0.1/access-expr.js',
@@ -417,6 +426,7 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/polyfills.js->src/polyfills/object-values.js',
+      '3p/polyfills.js->src/polyfills/promise.js',
       'src/polyfills.js->src/polyfills/domtokenlist.js',
       'src/polyfills.js->src/polyfills/document-contains.js',
       'src/polyfills.js->src/polyfills/fetch.js',

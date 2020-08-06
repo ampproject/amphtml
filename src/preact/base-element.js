@@ -20,6 +20,7 @@ import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
 import {devAssert} from '../log';
 import {hasOwn} from '../utils/object';
+import {installShadowStyle} from '../shadow-embed';
 import {matches} from '../dom';
 import {render} from './index';
 
@@ -46,6 +47,16 @@ let ChildDef;
 const PASSTHROUGH_NON_EMPTY_MUTATION_INIT = {
   childList: true,
   characterData: true,
+};
+
+/**
+ * The same as `applyFillContent`, but inside the shadow.
+ * @const {!Object}
+ */
+const SIZE_DEFINED_STYLE = {
+  'position': 'absolute',
+  'width': '100%',
+  'height': '100%',
 };
 
 /**
@@ -206,7 +217,13 @@ export class PreactBaseElement extends AMP.BaseElement {
             'when configured with "children", "passthrough", or ' +
             '"passthroughNonEmpty" properties.'
         );
-        this.container_ = this.element.attachShadow({mode: 'open'});
+        const shadowRoot = this.element.attachShadow({mode: 'open'});
+        this.container_ = shadowRoot;
+
+        const shadowCss = Ctor['shadowCss'];
+        if (shadowCss) {
+          installShadowStyle(shadowRoot, this.element.tagName, shadowCss);
+        }
 
         // Create a slot for internal service elements i.e. "i-amphtml-sizer"
         const serviceSlot = this.win.document.createElement('slot');
@@ -268,6 +285,15 @@ PreactBaseElement['Component'] = function () {
 };
 
 /**
+ * An override to specify that the component requires `layoutSizeDefined`.
+ * This typically means that the element's `isLayoutSupported()` is
+ * implemented via `isLayoutSizeDefined()`.
+ *
+ * @protected {string}
+ */
+PreactBaseElement['layoutSizeDefined'] = false;
+
+/**
  * An override to specify an exact className prop to Preact.
  *
  * @protected {string}
@@ -293,6 +319,13 @@ PreactBaseElement['passthrough'] = false;
  * @protected {boolean}
  */
 PreactBaseElement['passthroughNonEmpty'] = false;
+
+/**
+ * The CSS for shadow stylesheets.
+ *
+ * @protected {?string}
+ */
+PreactBaseElement['shadowCss'] = null;
 
 /**
  * Enabling detached mode alters the children to be rendered in an
@@ -325,6 +358,7 @@ function collectProps(Ctor, element, defaultProps) {
 
   const {
     'className': className,
+    'layoutSizeDefined': layoutSizeDefined,
     'props': propDefs,
     'passthrough': passthrough,
     'passthroughNonEmpty': passthroughNonEmpty,
@@ -334,6 +368,12 @@ function collectProps(Ctor, element, defaultProps) {
   // Class.
   if (className) {
     props['className'] = className;
+  }
+
+  // Common styles.
+  if (layoutSizeDefined) {
+    props['style'] = SIZE_DEFINED_STYLE;
+    props['containSize'] = true;
   }
 
   // Props.
@@ -398,14 +438,19 @@ function collectProps(Ctor, element, defaultProps) {
 
       // TBD: assign keys, reuse slots, etc.
       if (single) {
-        props[name] = createSlot(childElement, `i-amphtml-${name}`, slotProps);
+        props[name] = createSlot(
+          childElement,
+          childElement.getAttribute('slot') || `i-amphtml-${name}`,
+          slotProps
+        );
       } else {
         const list =
           name == 'children' ? children : props[name] || (props[name] = []);
         list.push(
           createSlot(
             childElement,
-            `i-amphtml-${name}-${list.length}`,
+            childElement.getAttribute('slot') ||
+              `i-amphtml-${name}-${list.length}`,
             slotProps
           )
         );
