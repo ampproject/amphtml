@@ -27,7 +27,6 @@ import {
   setParentWindow,
 } from './service';
 import {escapeHtml} from './dom';
-import {getMode} from './mode';
 import {installAmpdocServices} from './service/core-services';
 import {install as installCustomElements} from './polyfills/custom-elements';
 import {install as installDOMTokenList} from './polyfills/domtokenlist';
@@ -765,14 +764,7 @@ function installPolyfillsInChildWindow(parentWin, childWin) {
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
   installCustomElements(childWin, class {});
-  if (
-    // eslint-disable-next-line no-undef
-    INTERSECTION_OBSERVER_POLYFILL ||
-    getMode().localDev ||
-    getMode().test
-  ) {
-    installIntersectionObserver(parentWin, childWin);
-  }
+  installIntersectionObserver(parentWin, childWin);
 }
 
 /**
