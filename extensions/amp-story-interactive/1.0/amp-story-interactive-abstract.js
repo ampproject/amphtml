@@ -33,6 +33,7 @@ import {
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from '../../amp-story/1.0/utils';
+import {deduplicateInteractiveIds} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {emojiConfetti} from './interactive-confetti';
@@ -210,29 +211,12 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    */
   getInteractiveId_() {
     if (!AmpStoryInteractive.canonicalUrl64) {
+      deduplicateInteractiveIds(this.win.document);
       AmpStoryInteractive.canonicalUrl64 = base64UrlEncodeFromString(
         Services.documentInfoForDoc(this.element).canonicalUrl
       );
     }
     return `${AmpStoryInteractive.canonicalUrl64}+${this.element.id}`;
-  }
-
-  /**
-   * Returns the option selected or null
-   * @return {?OptionConfigType}
-   * @package
-   */
-  getOptionSelected() {
-    if (this.options_ == null || this.optionsData_ == null) {
-      return null;
-    }
-    let optionSelected = null;
-    this.optionsData_.forEach((option, index) => {
-      if (option.selected) {
-        optionSelected = this.options_[index];
-      }
-    });
-    return optionSelected;
   }
 
   /**

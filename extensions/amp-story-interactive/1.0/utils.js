@@ -14,17 +14,8 @@
  * limitations under the License.
  */
 
-import {Action} from '../../amp-story/1.0/amp-story-store-service';
 import {map} from '../../../src/utils/object';
 import {user} from '../../../src/log';
-
-export const updateInteractiveStoreState = (storeService, interactive) => {
-  const update = {
-    'option': interactive.getOptionSelected(),
-    'interactiveId': interactive.getInteractiveId(),
-  };
-  storeService.dispatch(Action.ADD_INTERACTIVE_REACT, update);
-};
 
 /** @private Whether ids are deduplicated or not */
 let deduplicatedIds = false;
