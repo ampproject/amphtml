@@ -19,20 +19,13 @@ import {BaseCarousel} from './base-carousel';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
-import {createUseStyles} from 'react-jss';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {userAssert} from '../../../src/log';
-import styles from './base-carousel.jss';
 
 /** @const {string} */
 const TAG = 'amp-base-carousel';
-
-// TODO discuss this sidestepping of local/no-export-side-effect
-const useStyles = createUseStyles(styles);
-
-export {useStyles};
 
 class AmpBaseCarousel extends PreactBaseElement {
   /** @override */

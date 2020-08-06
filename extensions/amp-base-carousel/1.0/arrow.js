@@ -15,8 +15,7 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {useEffect, useState} from '../../../src/preact';
-import {useStyles} from './amp-base-carousel';
+import {useStyles} from './base-carousel';
 
 /**
  * @param {!BaseCarouselDef.ArrowProps} props
@@ -35,21 +34,16 @@ export function Arrow({customArrow, by, advance, disabled}) {
     }
     advance(by);
   };
-  let classNames = styles.arrowPlacement + ' ' + (by < 0 ? styles.arrowLeft : styles.arrowRight);
+  let classNames =
+    styles.arrowPlacement +
+    ' ' +
+    (by < 0 ? styles.arrowLeft : styles.arrowRight);
   if (isDisabled) {
     classNames += ' ' + styles.arrowDisabled;
   }
 
   return (
-    <div
-      className={classNames}
-      style={{
-        // Offset button from the edge.
-        [by < 0 ? 'left' : 'right']: '0px',
-        opacity: isDisabled ? 0 : 1,
-        pointerEvents: isDisabled ? 'none' : 'auto',
-      }}
-    >
+    <div className={classNames}>
       {Preact.cloneElement(customArrow, {
         'onClick': onClick,
         'disabled': isDisabled,
@@ -91,7 +85,7 @@ export function ArrowNext({customArrow, ...rest}) {
  * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-function DefaultArrow({by, disabled, ...rest}) {
+function DefaultArrow({by, ...rest}) {
   const styles = useStyles();
 
   return (
@@ -106,14 +100,6 @@ function DefaultArrow({by, disabled, ...rest}) {
       <div className={`${styles.arrowBaseStyle} ${styles.arrowBackdrop}`}></div>
       <div
         className={`${styles.arrowBaseStyle} ${styles.arrowBackground}`}
-        style={{
-          backgroundColor: active
-            ? 'rgba(255, 255, 255, 1.0)'
-            : hover
-            ? 'rgba(255, 255, 255, 0.8)'
-            : 'rgba(0, 0, 0, 0.3)',
-          transitionDuration: active ? '0ms' : '',
-        }}
       ></div>
       <svg className={styles.arrowIcon} viewBox="0 0 24 24">
         {by < 0 ? (
