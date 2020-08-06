@@ -529,7 +529,9 @@ export class FriendlyIframeEmbed {
    * @private
    */
   getResources_() {
-    return Services.resourcesForDoc(this.iframe);
+    const host =
+      this.host && !this.iframe.isConnected ? this.host : this.iframe;
+    return Services.resourcesForDoc(host);
   }
 
   /**
