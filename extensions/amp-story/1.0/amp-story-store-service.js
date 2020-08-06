@@ -215,6 +215,8 @@ export const Action = {
   TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
   ADD_NEW_PAGE_ID: 'addNewPageId',
   SET_PAGE_SIZE: 'updatePageSize',
+  TOGGLE_PREVIEW_STATE: 'togglePreviewState',
+  TOGGLE_CAN_SHOW_SYSTEM_LAYER_BUTTONS: 'toggleCanShowSystemLayerButtons',
 };
 
 /**
@@ -462,6 +464,16 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.PAGE_SIZE]: data,
+      });
+    case Action.TOGGLE_PREVIEW_STATE:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.PREVIEW_STATE]: data,
+      });
+    case Action.TOGGLE_CAN_SHOW_SYSTEM_LAYER_BUTTONS:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: data,
       });
     default:
       dev().error(TAG, 'Unknown action %s.', action);
