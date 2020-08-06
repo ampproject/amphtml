@@ -895,7 +895,7 @@ export class AmpList extends AMP.BaseElement {
         if (elementSrc !== this.element.getAttribute('src')) {
           return;
         }
-        this.scheduleRender_(data, /* append */ false);
+        return this.scheduleRender_(data, /* append */ false);
       });
   }
 
