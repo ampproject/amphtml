@@ -55,7 +55,6 @@ function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
       container./* OK */ scrollLeft += container./* OK */ offsetWidth * by;
     },
   }));
-  const styles = useStyles();
 
   /**
    * The number of slides we want to place before the
@@ -75,7 +74,7 @@ function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
     offsetRef,
     pivotIndex,
     restingIndex,
-    styles,
+    styles: useStyles(),
   });
   const currentIndex = useRef(restingIndex);
 
