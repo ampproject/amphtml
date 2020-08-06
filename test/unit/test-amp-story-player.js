@@ -756,6 +756,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       const player = new AmpStoryPlayer(win, playerEl);
       await player.load();
+      await nextTick();
 
       const storyIframes = playerEl.shadowRoot.querySelectorAll('iframe');
 
