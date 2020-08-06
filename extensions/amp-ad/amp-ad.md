@@ -338,6 +338,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 - [Fusion](../../ads/fusion.md)
 - [GenieeSSP](../../ads/genieessp.md)
 - [Giraff](../../ads/giraff.md)
+- [Glomex](../../ads/glomex.md)
 - [GMOSSP](../../ads/gmossp.md)
 - [GumGum](../../ads/gumgum.md)
 - [Holder](../../ads/holder.md)
