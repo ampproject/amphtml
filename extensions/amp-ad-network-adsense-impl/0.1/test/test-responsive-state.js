@@ -406,6 +406,36 @@ describes.realWin(
         expect(result).to.be.null;
       });
 
+      it('returns a valid responsive state and upgrades element when the ad unit is not responsive and ad size optimization is enabled', async () => {
+        forceExperimentBranch(
+          win,
+          AD_SIZE_OPTIMIZATION_EXP.branch,
+          AD_SIZE_OPTIMIZATION_EXP.experiment
+        );
+        const element = createElement({
+          'data-ad-client': AD_CLIENT_ID,
+          'height': '200px',
+          'width': '50vw',
+        });
+        storageContent[`aas-${AD_CLIENT_ID}`] = true;
+
+        const result = await ResponsiveState.maybeUpgradeToResponsive(
+          element,
+          AD_CLIENT_ID
+        );
+
+        expect(result).to.not.be.null;
+        expect(result.isValidElement()).to.be.true;
+        expect(element.getAttribute('height')).to.be.equal(
+          `${ADSENSE_RSPV_ALLOWED_HEIGHT}`
+        );
+        expect(element.getAttribute('width')).to.be.equal('100vw');
+        expect(element).to.have.attribute('data-full-width');
+        expect(element.getAttribute('data-auto-format')).to.be.equal('rspv');
+      });
+    });
+
+    describe('convertToContainerWidth', () => {
       it('Fall back to container width state for full-width responsive user on desktop site', async () => {
         const element = createElementWithNoStub({
           'data-ad-client': AD_CLIENT_ID,
@@ -447,35 +477,8 @@ describes.realWin(
         expect(element).to.not.have.attribute('data-full-width');
         expect(element).to.not.have.attribute('data-auto-format');
       });
-
-      it('returns a valid responsive state and upgrades element when the ad unit is not responsive and ad size optimization is enabled', async () => {
-        forceExperimentBranch(
-          win,
-          AD_SIZE_OPTIMIZATION_EXP.branch,
-          AD_SIZE_OPTIMIZATION_EXP.experiment
-        );
-        const element = createElement({
-          'data-ad-client': AD_CLIENT_ID,
-          'height': '200px',
-          'width': '50vw',
-        });
-        storageContent[`aas-${AD_CLIENT_ID}`] = true;
-
-        const result = await ResponsiveState.maybeUpgradeToResponsive(
-          element,
-          AD_CLIENT_ID
-        );
-
-        expect(result).to.not.be.null;
-        expect(result.isValidElement()).to.be.true;
-        expect(element.getAttribute('height')).to.be.equal(
-          `${ADSENSE_RSPV_ALLOWED_HEIGHT}`
-        );
-        expect(element.getAttribute('width')).to.be.equal('100vw');
-        expect(element).to.have.attribute('data-full-width');
-        expect(element.getAttribute('data-auto-format')).to.be.equal('rspv');
-      });
     });
+
     describe('maybeAttachSettingsListener', () => {
       describe('sets up a listener that', () => {
         let promise;

@@ -118,7 +118,7 @@ export class ResponsiveState {
     }
 
     // If the user already has a wide viewport layout, we don't upgrade to responsive.
-    if (!ResponsiveState.isLayoutViewportNarrow_(element)) {
+    if (!ResponsiveState.isLayoutViewportNarrow(element)) {
       return Promise.resolve(null);
     }
 
@@ -490,9 +490,8 @@ export class ResponsiveState {
    * Estimate if the viewport has a narrow layout.
    * @param {!Element} element
    * @return {boolean}
-   * @private
    */
-  static isLayoutViewportNarrow_(element) {
+  static isLayoutViewportNarrow(element) {
     const viewportSize = Services.viewportForDoc(element).getSize();
 
     return viewportSize.width < 488;

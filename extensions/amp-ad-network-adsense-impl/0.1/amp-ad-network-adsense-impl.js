@@ -190,7 +190,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     // Convert the full-width tag to container width for desktop users.
     if (
       this.element.hasAttribute('data-auto-format') &&
-      !ResponsiveState.isLayoutViewportNarrow_(this.element)
+      !ResponsiveState.isLayoutViewportNarrow(this.element)
     ) {
       return ResponsiveState.convertToContainerWidth(this.element).then(
         (state) => {
@@ -208,10 +208,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         if (state != null) {
           this.responsiveState_ = state;
         }
-        if (
-          this.responsiveState_ != null &&
-          !this.responsiveState_.isContainerWidthState()
-        ) {
+        if (this.responsiveState_ != null) {
           return this.responsiveState_.attemptToMatchResponsiveHeight();
         }
         // This should happen last, as some diversion criteria rely on some of the
