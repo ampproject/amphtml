@@ -28,9 +28,9 @@ module.exports = {
       path.join(__dirname, '../../../../node_modules'),
     ],
     alias: {
-      "react": "preact/compat",
-      "react-dom": "preact/compat",
-    }
+      'react': 'preact/compat',
+      'react-dom': 'preact/compat',
+    },
   },
   module: {
     rules: [

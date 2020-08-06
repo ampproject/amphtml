@@ -43,7 +43,7 @@ const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
  * @return {PreactDef.Renderable}
  * @template T
  */
-function ScrollerWithRef({children, loop, restingIndex, setRestingIndex, styles}, ref) {
+function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
   // We still need our own ref that we can always rely on to be there.
   const containerRef = useRef(null);
   useImperativeHandle(ref, () => ({
@@ -55,6 +55,7 @@ function ScrollerWithRef({children, loop, restingIndex, setRestingIndex, styles}
       container./* OK */ scrollLeft += container./* OK */ offsetWidth * by;
     },
   }));
+  const styles = useStyles();
 
   /**
    * The number of slides we want to place before the

@@ -21,7 +21,7 @@ import {useStyles} from './base-carousel';
  * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-export function Arrow({customArrow, by, advance, disabled, styles}) {
+export function Arrow({customArrow, by, advance, disabled}) {
   const {
     'disabled': customDisabled,
     'onClick': onCustomClick,
@@ -33,6 +33,7 @@ export function Arrow({customArrow, by, advance, disabled, styles}) {
     }
     advance(by);
   };
+  const styles = useStyles();
   let classNames =
     styles.arrowPlacement +
     ' ' +
@@ -56,12 +57,11 @@ export function Arrow({customArrow, by, advance, disabled, styles}) {
  * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.VNode}
  */
-export function ArrowPrev({customArrow, styles, ...rest}) {
+export function ArrowPrev({customArrow, ...rest}) {
   return (
     <Arrow
       by={-1}
-      customArrow={customArrow || <DefaultArrow by={-1} styles={styles} />}
-      styles={styles}
+      customArrow={customArrow || <DefaultArrow by={-1} />}
       {...rest}
     />
   );
@@ -71,12 +71,11 @@ export function ArrowPrev({customArrow, styles, ...rest}) {
  * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-export function ArrowNext({customArrow, styles, ...rest}) {
+export function ArrowNext({customArrow, ...rest}) {
   return (
     <Arrow
       by={1}
-      customArrow={customArrow || <DefaultArrow by={1} styles={styles}/>}
-      styles={styles}
+      customArrow={customArrow || <DefaultArrow by={1} />}
       {...rest}
     />
   );
@@ -86,7 +85,8 @@ export function ArrowNext({customArrow, styles, ...rest}) {
  * @param {!BaseCarouselDef.ArrowProps} props
  * @return {PreactDef.Renderable}
  */
-function DefaultArrow({by, styles, ...rest}) {
+function DefaultArrow({by, ...rest}) {
+  const styles = useStyles();
   return (
     <button
       class={styles.defaultArrowButton}
@@ -97,9 +97,7 @@ function DefaultArrow({by, styles, ...rest}) {
     >
       <div class={`${styles.arrowBaseStyle} ${styles.arrowFrosting}`}></div>
       <div class={`${styles.arrowBaseStyle} ${styles.arrowBackdrop}`}></div>
-      <div
-        class={`${styles.arrowBaseStyle} ${styles.arrowBackground}`}
-      ></div>
+      <div class={`${styles.arrowBaseStyle} ${styles.arrowBackground}`}></div>
       <svg class={styles.arrowIcon} viewBox="0 0 24 24">
         {by < 0 ? (
           <path
