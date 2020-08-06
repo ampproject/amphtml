@@ -14,9 +14,21 @@
  * limitations under the License.
  */
 import {Services} from '../../../src/services';
-import {installWebAnimations} from 'web-animations-js/web-animations.install';
 
 const POLYFILLED = '__AMP_WA';
+const polyfillPromise_ = (function () {
+  let res, rej;
+
+  const promise = new Promise((resolve, reject) => {
+    res = resolve;
+    rej = reject;
+  });
+
+  promise.resolve = res;
+  promise.reject = rej;
+
+  return promise;
+})();
 
 /**
  * Force Web Animations polyfill on Safari.
@@ -34,11 +46,17 @@ function forceOnSafari(win) {
 
 /**
  * @param {!Window} win
+ * @return {Promise<void>}
  */
 export function installWebAnimationsIfNecessary(win) {
   if (!win[POLYFILLED]) {
     forceOnSafari(win);
     win[POLYFILLED] = true;
-    installWebAnimations(win);
+
+    Services.extensionsFor(win)
+      .preloadExtension('amp-animation-polyfill')
+      .then(() => polyfillPromise_.resolve());
   }
+
+  return polyfillPromise_;
 }
