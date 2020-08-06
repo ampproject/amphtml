@@ -401,6 +401,8 @@ export class AmpStoryPlayer {
     }
 
     const button = this.doc_.createElement('button');
+    this.rootEl_.appendChild(button);
+
     button.classList.add(BUTTON_CLASSES[option]);
     button.classList.add(BUTTON_CLASSES.BASE);
 
@@ -409,8 +411,6 @@ export class AmpStoryPlayer {
         createCustomEvent(this.win_, BUTTON_EVENTS[option], dict({}))
       );
     });
-
-    this.rootEl_.appendChild(button);
   }
 
   /**
