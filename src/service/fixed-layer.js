@@ -236,9 +236,6 @@ export class FixedLayer {
    * @visibleForTesting
    */
   observeHiddenMutations() {
-    if (!isExperimentOn(this.ampdoc.win, 'hidden-mutation-observer')) {
-      return;
-    }
     this.initHiddenObserver_();
   }
 
