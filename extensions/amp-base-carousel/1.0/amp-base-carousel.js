@@ -24,17 +24,13 @@ import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {userAssert} from '../../../src/log';
-import styles from './base-carousel.css';
+import styles from './base-carousel.jss';
 
 /** @const {string} */
 const TAG = 'amp-base-carousel';
 
 // TODO discuss this sidestepping of local/no-export-side-effect
-// Probably should avoid it.
 const useStyles = createUseStyles(styles);
-
-// TODO: discuss the pattern of 1 className per class vs. multiple.
-// If multiple consider making helper for combining as long as it wont obfuscate for compiler opts.
 
 export {useStyles};
 
@@ -90,11 +86,6 @@ AmpBaseCarousel['children'] = {
 AmpBaseCarousel['props'] = {
   'loop': {attr: 'loop', type: 'boolean'},
 };
-
-// TODO: we should not need to include the whole CSS.
-// Ideally we extract just the relevant parts for shadow.
-/** @override */
-AmpBaseCarousel['shadowCss'] = ''; //scrollerStyles;
 
 /**
  * Triggers a 'slideChange' event with one data param:

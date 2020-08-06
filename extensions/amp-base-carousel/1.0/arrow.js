@@ -35,11 +35,14 @@ export function Arrow({customArrow, by, advance, disabled}) {
     }
     advance(by);
   };
+  let classNames = styles.arrowPlacement + ' ' + (by < 0 ? styles.arrowLeft : styles.arrowRight);
+  if (isDisabled) {
+    classNames += ' ' + styles.arrowDisabled;
+  }
+
   return (
-    // TODO: have these based on props using "dynamic values"?
-    // Would mean a second call to `createUseStyles`.
     <div
-      className={styles.arrowPlacement}
+      className={classNames}
       style={{
         // Offset button from the edge.
         [by < 0 ? 'left' : 'right']: '0px',
