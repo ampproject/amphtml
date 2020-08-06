@@ -544,4 +544,4 @@ actions that apply to the whole document.
   </tr>
 </table>
 
-<sup>1</sup>When used with <a href="#multiple-actions-for-one-event">multiple actions</a>, subsequent actions will wait for <code>setState()</code> or <code>pushState()</code> to complete before invocation. Only a single <code>setState()</code> or <code>pushState()</code> is allowed per event.
+<sup>1</sup>When used with <a href="#multiple-actions-for-one-event">multiple actions</a>, subsequent actions will wait for <code>setState()</code> to complete before invocation. Only a single <code>setState()</code> is allowed per event.
