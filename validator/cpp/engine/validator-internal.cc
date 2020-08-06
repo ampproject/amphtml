@@ -3049,15 +3049,10 @@ void CdataMatcher::MatchCss(absl::string_view cdata, const CssSpec& css_spec,
     vector<const htmlparser::css::Declaration*> important;
     htmlparser::css::ExtractImportantDeclarations(*stylesheet, &important);
     for (const htmlparser::css::Declaration* decl : important) {
-      // TODO(gregable): Replace this with a more specific CSS error,
-      // now that we have a mechanism in place.
-      context->AddError(
-          ValidationError::CDATA_VIOLATES_DENYLIST,
-          LineCol(decl->important_line(), decl->important_col()),
-          /*params=*/
-          {TagDescriptiveName(parsed_cdata_spec_->ParentTagSpec()),
-           "CSS !important"},
-          TagSpecUrl(parsed_cdata_spec_->ParentTagSpec()), result);
+      context->AddError(ValidationError::CSS_SYNTAX_DISALLOWED_IMPORTANT,
+                        LineCol(decl->important_line(), decl->important_col()),
+                        /*params=*/{}, context->rules().styles_spec_url(),
+                        result);
     }
   }
 
@@ -4046,12 +4041,10 @@ void ValidateAttrCss(const ParsedAttrSpec& parsed_attr_spec,
       }
       if (!spec.spec().allow_important()) {
         if (declaration->important()) {
-          // TODO(gregable): Use a more specific error message for
-          // `!important` errors.
-          context.AddError(
-              ValidationError::INVALID_ATTR_VALUE, context.line_col(),
-              /*params=*/{attr_name, tag_description, "CSS !important"},
-              context.rules().styles_spec_url(), &result->validation_result);
+          context.AddError(ValidationError::CSS_SYNTAX_DISALLOWED_IMPORTANT,
+                           context.line_col(),
+                           /*params=*/{}, context.rules().styles_spec_url(),
+                           &result->validation_result);
         }
       }
       vector<unique_ptr<htmlparser::css::ParsedCssUrl>> parsed_urls;

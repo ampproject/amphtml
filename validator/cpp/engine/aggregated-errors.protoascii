@@ -1661,6 +1661,15 @@ aggregation_rule {
   aggregated_code: DO_NOT_AGGREGATE
 }
 
+# CSS_SYNTAX_DISALLOWED_IMPORTANT Rules:
+#####################################
+# Enumerable set
+# "Usage of the !important CSS qualifier is not allowed."
+aggregation_rule {
+  validator_code: CSS_SYNTAX_DISALLOWED_IMPORTANT
+  aggregated_code: DO_NOT_AGGREGATE
+}
+
 # DISALLOWED_MANUFACTURED_BODY Rules:
 #####################################
 # Enumerable set
