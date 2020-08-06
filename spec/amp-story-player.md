@@ -135,7 +135,6 @@ CSS variable with the URL pointing to the poster image of the story.
 
 Set to `back-button` or `close-button`. The button will dispatch an `amp-story-player-back` or `amp-story-player-close` when clicked. This button will disappear when a page attachment is open and reappear when closed.
 
-
 ## Programmatic Control
 
 Call the player's various methods to programmatically control the player.
@@ -143,6 +142,7 @@ Call the player's various methods to programmatically control the player.
 ### Methods
 
 #### load
+
 Will initialize the player manually. This can be useful when the player is dynamically added such as when using frameworks like React.
 
 ```
@@ -153,7 +153,7 @@ function StoryPlayer({ url, title, poster, width = 360, height = 600 }) {
            const player = new AmpStoryPlayer(window, playerEl); // Previously exposed global var
            player.load();
 	}, []);
-	
+
 	return (
 		<div>
 		  <amp-story-player style={{ width: `${width}px`, height: `${height}px`}}>
@@ -167,33 +167,36 @@ function StoryPlayer({ url, title, poster, width = 360, height = 600 }) {
 ```
 
 #### go
+
 - number: the story in the player to which you want to move, relative to the current story.
 
 If the player is currently on the third story out of ten stories, `player.go(1)` will go forward one story to the fourth story and `player.go(-1)` will go backward one story to the second story. If no value is passed or if delta equals 0, current story will persist and no action will be taken. `player.go(10)` does the same thing as `player.go(0)`.
 
 #### show
+
 - string: the URL of the story to show.
 
 Will change the current story being displayed by the player. If the URL is not found, an error will be thrown. This will be changed later on to automatically add the story.
+
 ```
 player.show(url);
 ```
 
 #### add
+
 - array of storyObj: contains the stories to be added.
 
 StoryObj type
-- string: story URL 
-- string (optional): story title, to be dded to the anchor's title.
 
+- string: story URL
+- string (optional): story title, to be dded to the anchor's title.
 
 The player will try to load the story from the cache that was specified at the player level.
 
-
-
-#### mute/unmute 
+#### mute/unmute
 
 Will mute/unmute the current story. This will not persist across stories, eg. calling `player.mute()` on the first story will not mute the second story.
+
 ```
 player.mute();
 player.unmute();
@@ -202,6 +205,7 @@ player.unmute();
 #### play/pause
 
 Will play/pause the current story.
+
 ```
 player.play();
 player.pause();
@@ -209,8 +213,10 @@ player.pause();
 
 #### getStoryState
 
-Takes in a string: the story state, currently only `page-attachment`.
-This will cause a custom event to be fired, see `page-attachment-open` and `page-attachment-close`.
+- string: the story state, currently only `page-attachment`.
+
+Will cause a custom event to be fired, see `page-attachment-open` and `page-attachment-close`.
+
 ```
 player.getStoryState('page-attachment');
 ```
@@ -220,6 +226,7 @@ player.getStoryState('page-attachment');
 #### ready
 
 Fired when the player is ready for interaction. There is also a sync property `isReady` that can be used to avoid race conditions.
+
 ```
 player.addEventListener('ready', () => {
   console.log('Player is ready!!');
@@ -233,6 +240,7 @@ if (player.isReady) {
 #### navigation
 
 Fired when the player changes to a new story and provides the `index`, the player's story after changing, and `remaining`, the number of stories left.
+
 ```
 player.addEventListener('navigation', (event) => {
   console.log('Navigated from story 0 to story 1 of 3');
@@ -240,9 +248,11 @@ player.addEventListener('navigation', (event) => {
   console.log('Current story:' event.remaining); // 1
 })
 ```
+
 #### amp-story-player-back
 
 Fired when the exit control back button is clicked.
+
 ```
 player.addEventListener('amp-story-player-back', () => {
   console.log('Back button clicked');
@@ -252,6 +262,7 @@ player.addEventListener('amp-story-player-back', () => {
 #### amp-story-player-close
 
 Fired when the exit control close button is clicked.
+
 ```
 player.addEventListener('amp-story-player-close', () => {
   console.log('Close button clicked');
@@ -261,6 +272,7 @@ player.addEventListener('amp-story-player-close', () => {
 #### page-attachment-open
 
 Fired when a page attachment is opened or `getStoryState('page-attachment')` was called and the story's page attachment is open.
+
 ```
 player.addEventListener('page-attachment-open', () => {
   console.log('The page attachment is open');
@@ -270,13 +282,17 @@ player.addEventListener('page-attachment-open', () => {
 #### page-attachment-close
 
 Fired when a page attachment is closed or `getStoryState('page-attachment')` was called and the story's page attachment is closed.
+
 ```
 player.addEventListener('page-attachment-close', () => {
   console.log('The page attachment is closed');
 })
 ```
+
 ### Example
+
 This makes use of `page-attachment-close`, `page-attachment-open` and `amp-story-player-back`.
+
 ```
 player.addEventListener('page-attachment-close', () => {
   textEl.style.backgroundColor = 'blue';
@@ -288,4 +304,5 @@ player.addEventListener('amp-story-back', () => {
   textEl.style.backgroundColor = 'green';
 })
 ```
-![Example featuring exit control](https://github.com/ampproject/amphtml/raw/master/spec/img/amp-story-player.gif)
+
+![Example featuring exit control](https://github.com/ampproject/amphtml/raw/master/spec/img/amp-story-player-toggle-exit.gif)
