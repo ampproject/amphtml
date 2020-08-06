@@ -88,18 +88,8 @@ const buildPermissionDialogBoxTemplate = (element) => {
         This immersive story requires access to your devices motion sensors.
       </p>
       <div class="i-amp-story-360-permissions-dialog-button-container">
-        <button
-          class="i-amp-story-360-permissions-dialog-button-disable"
-          role="button"
-        >
-          disable
-        </button>
-        <button
-          class="i-amp-story-360-permissions-dialog-button-enable"
-          role="button"
-        >
-          enable
-        </button>
+        <button data-action="disable" role="button">disable</button>
+        <button data-action="enable" role="button">enable</button>
       </div>
     </div>
   `;
@@ -360,36 +350,35 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @private */
   buildPermissionUI() {
-    const buildPermissionDialgBox = () => {
+    const buildPermissionDialogBox = () => {
       const dialogBox = buildPermissionDialogBoxTemplate(this.element);
       this.element.appendChild(dialogBox);
 
-      const enableButton = dialogBox.querySelector(
-        '.i-amp-story-360-permissions-dialog-button-enable'
-      );
-      const disableButton = dialogBox.querySelector(
-        '.i-amp-story-360-permissions-dialog-button-disable'
-      );
+      dialogBox.addEventListener('click', (e) => {
+        const action = e.target.closest('[data-action]').dataset.action;
 
-      enableButton.addEventListener('click', () => {
-        DeviceOrientationEvent.requestPermission()
-          .then((permissionState) => {
-            permissionState === 'granted' &&
-              this.storeService_.dispatch(Action.GYROSCOPE_ENABLED_STATE, true);
-          })
-          .catch(alert.error);
-        dialogBox.remove();
+        if (action === 'enable') {
+          DeviceOrientationEvent.requestPermission()
+            .then((permissionState) => {
+              permissionState === 'granted' &&
+                this.storeService_.dispatch(
+                  Action.GYROSCOPE_ENABLED_STATE,
+                  true
+                );
+            })
+            .catch(alert.error);
+          dialogBox.remove();
+        }
+
+        action === 'disable' && dialogBox.remove();
       });
-
-      disableButton.addEventListener('click', () => dialogBox.remove());
     };
 
     const permissionButton = buildPermissionButtonTemplate(this.element);
-
     this.element.appendChild(permissionButton);
-    permissionButton.addEventListener('click', () => {
-      buildPermissionDialgBox();
-    });
+    permissionButton.addEventListener('click', () =>
+      buildPermissionDialogBox()
+    );
   }
 
   /** @override */
