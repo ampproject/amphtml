@@ -305,4 +305,4 @@ player.addEventListener('amp-story-back', () => {
 })
 ```
 
-![Example featuring exit control](https://github.com/ampproject/amphtml/raw/master/spec/img/amp-story-player-toggle-exit.gif)
+![Example featuring exit control](img/amp-story-player-toggle-exit.gif)
