@@ -318,6 +318,12 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
+   * A "diffable placeholder" is just a div[role=list] child without the
+   * [placeholder] attribute.
+   *
+   * It's used to display pre-fetch (stale) list content that can be
+   * DOM diffed with the fetched (fresh) content later.
+   *
    * @return {?Element}
    * @private
    */
