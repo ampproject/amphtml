@@ -73,6 +73,14 @@ const SET_STATE_CONFIGURATIONS = {
     action: Action.TOGGLE_MUTED,
     isValueValid: (value) => typeof value === 'boolean',
   },
+  'PREVIEW_STATE': {
+    action: Action.TOGGLE_PREVIEW_STATE,
+    isValueValid: (value) => typeof value === 'boolean',
+  },
+  'CAN_SHOW_SYSTEM_LAYER_BUTTONS': {
+    action: Action.TOGGLE_CAN_SHOW_SYSTEM_LAYER_BUTTONS,
+    isValueValid: (value) => typeof value === 'boolean',
+  },
 };
 
 /**
