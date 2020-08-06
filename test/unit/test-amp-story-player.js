@@ -758,7 +758,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       await player.load();
       await nextTick();
 
-      const storyIframes = playerEl.shadowRoot.querySelectorAll('iframe');
+      const storyIframes = playerEl.querySelectorAll('iframe');
 
       expect(storyIframes[0].getAttribute('src')).to.include('embedMode=3');
       expect(storyIframes[1].getAttribute('src')).to.not.include('embedMode');
