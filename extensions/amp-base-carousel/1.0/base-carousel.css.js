@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-export const slideElement = {
+const slideElement = {
   flex: '0 0 100%',
   height: '100%',
   position: 'relative',
@@ -27,7 +26,7 @@ export const slideElement = {
   scrollSnapStop: 'always',
 };
 
-export const scrollContainer = {
+const scrollContainer = {
   height: '100%',
   position: 'absolute',
   top: 0,
@@ -44,7 +43,7 @@ export const scrollContainer = {
   scrollSnapType: 'x mandatory',
 };
 
-export const arrowPlacement = {
+const arrowPlacement = {
   position: 'absolute',
   zIndex: 1,
   display: 'flex',
@@ -56,7 +55,7 @@ export const arrowPlacement = {
   alignItems: 'center',
 };
 
-export const defaultArrowButton = {
+const defaultArrowButton = {
   position: 'relative',
   display: 'flex',
   justifyContent: 'center',
@@ -72,7 +71,7 @@ export const defaultArrowButton = {
   transition: '200ms stroke',
 };
 
-export const arrowBaseStyle = {
+const arrowBaseStyle = {
   position: 'absolute',
   top: 0,
   left: 0,
@@ -81,22 +80,22 @@ export const arrowBaseStyle = {
   borderRadius: '50%',
 };
 
-export const arrowFrosting = {
+const arrowFrosting = {
   backdropFilter: 'blur(3px)',
 };
 
-export const arrowBackdrop = {
+const arrowBackdrop = {
   backdropFilter: 'blur(12px) invert(1) grayscale(0.6) brightness(0.8)',
   opacity: 0.5,
 };
 
-export const arrowBackground = {
+const arrowBackground = {
   boxShadow: `0 0 0px 1px rgba(0, 0, 0, 0.08) inset,
       0 1px 4px 1px rgba(0, 0, 0, 0.2)`,
   transition: '200ms background-color',
 };
 
-export const arrowIcon = {
+const arrowIcon = {
   position: 'relative',
   width: '24px',
   height: '24px',
@@ -116,7 +115,7 @@ export const arrowIcon = {
  * calculating the 100% height (or width) of the slide.
  */
 /* Firefox */
-export const hideScrollbar = {
+const hideScrollbar = {
   scrollbarWidth: 'none',
 };
 /* Chrome, Safari */
@@ -124,7 +123,7 @@ const hideScrollbarPseudo = `[hide-scrollbar]::-webkit-scrollbar {
   display: none;
   box-sizing: content-box !important;
   }`;
-export const horizontalScroll = {
+const horizontalScroll = {
   flexDirection: 'row',
   /* Firefox, IE */
   scrollSnapTypeX: 'mandatory',
@@ -146,4 +145,20 @@ const slideSizing = `
 .i-amphtml-carousel-slide > ::slotted(*) {
   width: 100%;
 }`;
-export const scrollerStyles = hideScrollbarPseudo + slideSizing;
+const scrollerStyles = hideScrollbarPseudo + slideSizing;
+
+export default {
+  slideElement,
+  slideContainer,
+  arrowPlacement,
+  defaultArrowButton,
+  arrowBaseStyle,
+  arrowFrosting,
+  arrowBackdrop,
+  arrowBackground,
+  arrowIcon,
+  hideScrollbar,
+  horizontalScroll,
+  slideSizing,
+  scrollerStyles,
+};
