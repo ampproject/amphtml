@@ -512,7 +512,7 @@ const adConfig = jsonConfiguration({
   },
 
   'glomex': {
-    prefetch: 'https://player.glomex.com/integration/1/addyn/amp-embed.js',
+    prefetch: 'https://player.glomex.com/integration/1/amp-embed.js',
   },
 
   'gmossp': {

@@ -22,8 +22,5 @@ import {loadScript, validateData} from '../3p/3p';
  */
 export function glomex(global, data) {
   validateData(data, ['integrationId']);
-  loadScript(
-    global,
-    'https://player.glomex.com/integration/1/addyn/amp-embed.js'
-  );
+  loadScript(global, 'https://player.glomex.com/integration/1/amp-embed.js');
 }
