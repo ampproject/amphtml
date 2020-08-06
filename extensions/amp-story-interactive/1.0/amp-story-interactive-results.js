@@ -76,8 +76,8 @@ const processResults = (interactiveState, options) => {
 
 /**
  * Processes the state and returns the condensed results for a category strategy
- * @param {!Map<string, {option: ?./amp-story-interactive.OptionConfigType, interactiveId: string}>} interactiveState
- * @param {?Array<!./amp-story-interactive.OptionConfigType>} options the attributes on the component
+ * @param {!Map<string, {option: ?./amp-story-interactive-abstract.OptionConfigType, interactiveId: string}>} interactiveState
+ * @param {?Array<!./amp-story-interactive-abstract.OptionConfigType>} options the attributes on the component
  * @return {InteractiveResultsDef} the results
  * @package
  */
@@ -114,8 +114,8 @@ export const processResultsCategory = (interactiveState, options) => {
 
 /**
  * Processes the state and returns the condensed results for a percentage strategy
- * @param {!Map<string, {option: ?./amp-story-interactive.OptionConfigType, interactiveId: string}>} interactiveState
- * @param {?Array<!./amp-story-interactive.OptionConfigType>} options the attributes on the component
+ * @param {!Map<string, {option: ?./amp-story-interactive-abstract.OptionConfigType, interactiveId: string}>} interactiveState
+ * @param {?Array<!./amp-story-interactive-abstract.OptionConfigType>} options the attributes on the component
  * @return {InteractiveResultsDef} the results
  * @package
  */
@@ -162,7 +162,7 @@ export const processResultsPercentage = (interactiveState, options) => {
 /**
  * Decides what strategy to use.
  * If there are thresholds specified, it uses percentage; otherwise it uses category.
- * @param {?Array<!./amp-story-interactive.OptionConfigType>} options the attributes on the component
+ * @param {?Array<!./amp-story-interactive-abstract.OptionConfigType>} options the attributes on the component
  * @return {string} the strategy
  * @package
  */
