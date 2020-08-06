@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import * as Preact from '../../../src/preact';
-import * as styles from './base-carousel.css';
 import {WithAmpContext} from '../../../src/preact/context';
 import {debounce} from '../../../src/utils/rate-limit';
 import {forwardRef} from '../../../src/preact/compat';
@@ -26,6 +25,7 @@ import {
   useMemo,
   useRef,
 } from '../../../src/preact';
+import {useStyles} from './amp-base-carousel';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last
@@ -56,6 +56,8 @@ function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
     },
   }));
 
+  const styles = useStyles();
+
   /**
    * The number of slides we want to place before the
    * reference or resting index. Only needed if loop=true.
@@ -74,6 +76,7 @@ function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
     offsetRef,
     pivotIndex,
     restingIndex,
+    styles,
   });
   const currentIndex = useRef(restingIndex);
 
@@ -141,11 +144,7 @@ function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
       key="container"
       ref={containerRef}
       onScroll={handleScroll}
-      style={{
-        ...styles.scrollContainer,
-        ...styles.hideScrollbar,
-        ...styles.horizontalScroll,
-      }}
+      classNames={`${styles.scrollContainer} ${styles.hideScrollbar} ${styles.horizontalScroll}`}
       tabindex={0}
     >
       {slides}
@@ -210,7 +209,14 @@ export {Scroller};
  * @param {!BaseCarouselDef.SlideProps} props
  * @return {PreactDef.Renderable}
  */
-function renderSlides({children, restingIndex, offsetRef, pivotIndex, loop}) {
+function renderSlides({
+  children,
+  restingIndex,
+  offsetRef,
+  pivotIndex,
+  loop,
+  styles,
+}) {
   const {length} = children;
   const slides = [];
 
@@ -222,7 +228,7 @@ function renderSlides({children, restingIndex, offsetRef, pivotIndex, loop}) {
         renderable={index == restingIndex}
         playable={index == restingIndex}
       >
-        <div style={styles.slideElement} className="i-amphtml-carousel-slide">
+        <div className={`i-amphtml-carousel-slide ${styles.slideElement}`}>
           {child}
         </div>
       </WithAmpContext>

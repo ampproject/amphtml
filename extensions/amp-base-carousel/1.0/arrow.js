@@ -15,8 +15,8 @@
  */
 
 import * as Preact from '../../../src/preact';
-import * as styles from './base-carousel.css';
 import {useEffect, useState} from '../../../src/preact';
+import {useStyles} from './amp-base-carousel';
 
 /**
  * @param {!BaseCarouselDef.ArrowProps} props
@@ -27,6 +27,7 @@ export function Arrow({customArrow, by, advance, disabled}) {
     'disabled': customDisabled,
     'onClick': onCustomClick,
   } = customArrow.props;
+  const styles = useStyles();
   const isDisabled = disabled || customDisabled;
   const onClick = (e) => {
     if (onCustomClick) {
@@ -35,9 +36,11 @@ export function Arrow({customArrow, by, advance, disabled}) {
     advance(by);
   };
   return (
+    // TODO: have these based on props using "dynamic values"?
+    // Would mean a second call to `createUseStyles`.
     <div
+      className={styles.arrowPlacement}
       style={{
-        ...styles.arrowPlacement,
         // Offset button from the edge.
         [by < 0 ? 'left' : 'right']: '0px',
         opacity: isDisabled ? 0 : 1,
@@ -86,6 +89,7 @@ export function ArrowNext({customArrow, ...rest}) {
  * @return {PreactDef.Renderable}
  */
 function DefaultArrow({by, disabled, ...rest}) {
+  const styles = useStyles();
   // TODO(wg-bento#7): Replace with :hover and :active pseudoselectors.
   const [hover, setHover] = useState(false);
   const [active, setActive] = useState(false);
@@ -100,8 +104,8 @@ function DefaultArrow({by, disabled, ...rest}) {
 
   return (
     <button
+      className={styles.defaultArrowButton}
       style={{
-        ...styles.defaultArrowButton,
         color: hover ? '#222' : '#fff',
         transitionDuration: active ? '0ms' : '',
       }}
@@ -114,12 +118,11 @@ function DefaultArrow({by, disabled, ...rest}) {
       onMouseUp={() => setActive(false)}
       {...rest}
     >
-      <div style={{...styles.arrowBaseStyle, ...styles.arrowFrosting}}></div>
-      <div style={{...styles.arrowBaseStyle, ...styles.arrowBackdrop}}></div>
+      <div className={`${styles.arrowBaseStyle} ${styles.arrowFrosting}`}></div>
+      <div className={`${styles.arrowBaseStyle} ${styles.arrowBackdrop}`}></div>
       <div
+        className={`${styles.arrowBaseStyle} ${styles.arrowBackground}`}
         style={{
-          ...styles.arrowBaseStyle,
-          ...styles.arrowBackground,
           backgroundColor: active
             ? 'rgba(255, 255, 255, 1.0)'
             : hover
@@ -128,7 +131,7 @@ function DefaultArrow({by, disabled, ...rest}) {
           transitionDuration: active ? '0ms' : '',
         }}
       ></div>
-      <svg style={styles.arrowIcon} viewBox="0 0 24 24">
+      <svg className={styles.arrowIcon} viewBox="0 0 24 24">
         {by < 0 ? (
           <path
             d="M14,7.4 L9.4,12 L14,16.6"

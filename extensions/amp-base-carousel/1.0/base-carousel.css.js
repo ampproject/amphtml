@@ -149,7 +149,7 @@ const scrollerStyles = hideScrollbarPseudo + slideSizing;
 
 export default {
   slideElement,
-  slideContainer,
+  scrollContainer,
   arrowPlacement,
   defaultArrowButton,
   arrowBaseStyle,
