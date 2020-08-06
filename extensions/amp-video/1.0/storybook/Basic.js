@@ -105,15 +105,18 @@ export const Default = () => {
   const spaceAbove = boolean('Space above', false, 'Page');
   const spaceBelow = boolean('Space below', false, 'Page');
 
+  const players = [];
+  for (let i = 0; i < amount; i++) {
+    players.push(<VideoTagPlayer key={i} i={i} />);
+    if (i < amount - 1) {
+      players.push(<Spacer height={spacerHeight} />);
+    }
+  }
+
   return (
     <>
       {spaceAbove && <Spacer height={spacerHeight} />}
-      {new Array(amount).fill(null).map((_, i) => (
-        <>
-          <VideoTagPlayer key={i} i={i} />
-          {i < amount - 1 && <Spacer height={spacerHeight} />}
-        </>
-      ))}
+      {players}
       {spaceBelow && <Spacer height={spacerHeight} />}
     </>
   );

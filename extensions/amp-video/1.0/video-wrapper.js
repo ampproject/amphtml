@@ -28,24 +28,29 @@ import {
   parseSchemaImage,
   setMediaSession,
 } from '../../../src/mediasession-helper';
-import {useEffect, useMemo, useRef, useState} from '../../../src/preact';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from '../../../src/preact';
 import {useMountEffect, useResourcesNotify} from '../../../src/preact/utils';
 
 /**
- * @param {?{getMetadata: (function():!Object|undefined)}} player
+ * @param {?{getMetadata: (function():?JsonObject|undefined)}} player
  * @param {!VideoWrapperProps} props
  * @return {!JsonObject}
  */
 function getMetadata(player, props) {
   const metadata =
-    player && player.getMetadata
-      ? player.getMetadata()
-      : dict({
-          'title': props.title || '',
-          'artist': props.artist || '',
-          'album': props.album || '',
-          'artwork': [{'src': props.artwork || props.poster || ''}],
-        });
+    (player && player.getMetadata && player.getMetadata()) ||
+    dict({
+      'title': props.title || '',
+      'artist': props.artist || '',
+      'album': props.album || '',
+      'artwork': [{'src': props.artwork || props.poster || ''}],
+    });
 
   metadata.title = metadata.title || props['aria-label'] || document.title;
 
@@ -83,28 +88,29 @@ export function VideoWrapper({
   const wrapperRef = useRef(null);
   const playerRef = useRef(null);
 
+  // TODO(alanorozco): We might need an API to notify reload, like when
+  // <source>s change.
   const readyDeferred = useMemo(() => new Deferred(), []);
 
-  const play = useMemo(
-    () => () => {
-      readyDeferred.promise.then(() => {
-        playerRef.current.play();
-      });
-    },
-    [readyDeferred]
-  );
+  const play = useCallback(() => {
+    readyDeferred.promise.then(() => {
+      playerRef.current.play();
+    });
+  }, [readyDeferred]);
 
-  const pause = useMemo(
-    () => () => {
-      readyDeferred.promise.then(() => {
-        playerRef.current.pause();
-      });
-    },
-    [readyDeferred]
-  );
+  const pause = useCallback(() => {
+    readyDeferred.promise.then(() => {
+      playerRef.current.pause();
+    });
+  }, [readyDeferred]);
 
   useEffect(() => {
     if (mediasession && metadata && playing) {
+      // TODO(alanorozco): Improve MediaSession support:
+      // - playbackState
+      // - setPositionState
+      // - prev/next
+      // - clearing
       setMediaSession(window, metadata, play, pause);
     }
   }, [mediasession, playing, metadata, play, pause]);

@@ -27,12 +27,7 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
   let play;
   let pause;
 
-  let metadata = {
-    'title': 'Test player title',
-    'artist': 'Test player artist',
-    'album': 'Test player album',
-    'artwork': [{'src': 'http://test/image.jpg'}],
-  };
+  let metadata;
 
   const TestPlayer = forwardRef(({}, ref) => {
     Preact.useImperativeHandle(ref, () => ({
@@ -46,6 +41,13 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
   beforeEach(() => {
     pause = env.sandbox.spy();
     play = env.sandbox.spy();
+
+    metadata = {
+      'title': 'Test player title',
+      'artist': 'Test player artist',
+      'album': 'Test player album',
+      'artwork': [{'src': 'http://test/image.jpg'}],
+    };
 
     env.sandbox.stub(window, 'IntersectionObserver').callsFake((callback) => {
       intersectionObserverObserved = [];
@@ -94,8 +96,9 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
         <VideoWrapper component={TestPlayer} mediasession={false} />
       );
 
-      await wrapper.find(TestPlayer).invoke('onPlaying')();
       await wrapper.find(TestPlayer).invoke('onLoadedMetadata')();
+      await wrapper.find(TestPlayer).invoke('onCanPlay')();
+      await wrapper.find(TestPlayer).invoke('onPlaying')();
 
       expect(navigator.mediaSession.metadata).to.be.undefined;
       expect(navigator.mediaSession.setActionHandler).to.not.have.been.called;
@@ -104,20 +107,21 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
     it('should set mediasession when playing', async () => {
       const wrapper = mount(<VideoWrapper component={TestPlayer} />);
 
-      await wrapper.find(TestPlayer).invoke('onPlaying')();
       await wrapper.find(TestPlayer).invoke('onLoadedMetadata')();
+      await wrapper.find(TestPlayer).invoke('onCanPlay')();
+      await wrapper.find(TestPlayer).invoke('onPlaying')();
 
       expect(navigator.mediaSession.metadata).to.eql(metadata);
       expect(
         navigator.mediaSession.setActionHandler.withArgs(
           'play',
-          env.sandbox.match.any
+          env.sandbox.match.typeOf('function')
         )
       ).to.have.been.calledOnce;
       expect(
         navigator.mediaSession.setActionHandler.withArgs(
           'pause',
-          env.sandbox.match.any
+          env.sandbox.match.typeOf('function')
         )
       ).to.have.been.calledOnce;
     });
@@ -132,8 +136,9 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
           <VideoWrapper component={TestPlayer} {...{[prop]: title}} />
         );
 
-        await wrapper.find(TestPlayer).invoke('onPlaying')();
         await wrapper.find(TestPlayer).invoke('onLoadedMetadata')();
+        await wrapper.find(TestPlayer).invoke('onCanPlay')();
+        await wrapper.find(TestPlayer).invoke('onPlaying')();
 
         expect(navigator.mediaSession.metadata.title).to.eql(title);
       });
@@ -146,8 +151,9 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
 
       const wrapper = mount(<VideoWrapper component={TestPlayer} />);
 
-      await wrapper.find(TestPlayer).invoke('onPlaying')();
       await wrapper.find(TestPlayer).invoke('onLoadedMetadata')();
+      await wrapper.find(TestPlayer).invoke('onCanPlay')();
+      await wrapper.find(TestPlayer).invoke('onPlaying')();
 
       expect(navigator.mediaSession.metadata.title).to.eql(document.title);
     });
@@ -216,7 +222,6 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
       const wrapper = mount(
         <VideoWrapper component={TestPlayer} controls autoplay />
       );
-
       expect(wrapper.exists('Autoplay')).to.be.true;
       wrapper.find('[role="button"]').simulate('click');
       expect(wrapper.exists('Autoplay')).to.be.false;
@@ -226,11 +231,8 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
       const wrapper = mount(
         <VideoWrapper component={TestPlayer} controls autoplay />
       );
-
       expect(intersectionObserverObserved).to.have.lengthOf(1);
-
       wrapper.unmount();
-
       expect(intersectionObserverObserved).to.be.null;
     });
 
@@ -238,11 +240,8 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
       const wrapper = mount(
         <VideoWrapper component={TestPlayer} controls autoplay />
       );
-
       expect(intersectionObserverObserved).to.have.lengthOf(1);
-
       wrapper.find('[role="button"]').simulate('click');
-
       expect(intersectionObserverObserved).to.be.null;
     });
 
@@ -250,11 +249,8 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
       const wrapper = mount(
         <VideoWrapper component={TestPlayer} controls autoplay />
       );
-
       intersectionObserverCallback([{isIntersecting: true}]);
-
       await wrapper.find(TestPlayer).invoke('onCanPlay')();
-
       expect(play).to.have.been.calledOnce;
       expect(pause).to.not.have.been.called;
     });
@@ -263,11 +259,8 @@ describes.sandboxed('VideoWrapper Preact component', {}, (env) => {
       const wrapper = mount(
         <VideoWrapper component={TestPlayer} controls autoplay />
       );
-
       intersectionObserverCallback([{isIntersecting: false}]);
-
       await wrapper.find(TestPlayer).invoke('onCanPlay')();
-
       expect(play).to.not.have.been.called;
       expect(pause).to.have.been.calledOnce;
     });
