@@ -510,6 +510,8 @@ Calling `AMP.setState()` deep-merges the provided object literal with the curren
 
 [/example]
 
+[filter formats="websites, ads"]
+
 ### Modifying history with `AMP.pushState()`
 
 `AMP.pushState()` writes state changes to the history. Navigating back, will restore the previous state. To test this, increase the count in the example below and use your browser's back button to decrease the count.
@@ -529,6 +531,8 @@ Calling `AMP.setState()` deep-merges the provided object literal with the curren
 [/example]
 
 Using `AMP.pushState()` sets the current state to the most recent pushed state.
+
+[/filter] <!-- formats="websites, ads" -->
 
 ## Expressions
 
