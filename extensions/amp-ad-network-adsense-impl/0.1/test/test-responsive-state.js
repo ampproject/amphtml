@@ -433,7 +433,7 @@ describes.realWin(
           },
         });
 
-        const result = await ResponsiveState.maybeUpgradeToResponsive(
+        const result = await ResponsiveState.convertToContainerWidth(
           element,
           AD_CLIENT_ID
         );

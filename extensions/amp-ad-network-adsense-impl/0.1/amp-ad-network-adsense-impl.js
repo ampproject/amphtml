@@ -187,23 +187,38 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         getIdentityToken(this.win, this.getAmpDoc(), super.getConsentPolicy())
       );
 
-    return ResponsiveState.maybeUpgradeToResponsive(
-      this.element,
-      this.getAdClientId_()
-    ).then((state) => {
-      if (state != null) {
-        this.responsiveState_ = state;
-      }
-      if (
-        this.responsiveState_ != null &&
-        !this.responsiveState_.isContainerWidthState()
-      ) {
-        return this.responsiveState_.attemptToMatchResponsiveHeight();
-      }
-      // This should happen last, as some diversion criteria rely on some of the
-      // preceding logic (specifically responsive logic).
-      this.divertExperiments();
-    });
+    // Convert the full-width tag to container width for desktop users.
+    if (
+      this.element.hasAttribute('data-auto-format') &&
+      !ResponsiveState.isLayoutViewportNarrow_(this.element)
+    ) {
+      return ResponsiveState.convertToContainerWidth(this.element).then(
+        (state) => {
+          if (state != null) {
+            this.responsiveState_ = state;
+          }
+          this.divertExperiments();
+        }
+      );
+    } else {
+      return ResponsiveState.maybeUpgradeToResponsive(
+        this.element,
+        this.getAdClientId_()
+      ).then((state) => {
+        if (state != null) {
+          this.responsiveState_ = state;
+        }
+        if (
+          this.responsiveState_ != null &&
+          !this.responsiveState_.isContainerWidthState()
+        ) {
+          return this.responsiveState_.attemptToMatchResponsiveHeight();
+        }
+        // This should happen last, as some diversion criteria rely on some of the
+        // preceding logic (specifically responsive logic).
+        this.divertExperiments();
+      });
+    }
   }
 
   /** @override */
