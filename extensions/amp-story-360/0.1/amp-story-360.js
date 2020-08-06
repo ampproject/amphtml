@@ -245,6 +245,9 @@ export class AmpStory360 extends AMP.BaseElement {
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
+
+    /** @private {boolean} */
+    this.recievedMotionEvent_ = false;
   }
 
   /** @override */
@@ -325,10 +328,18 @@ export class AmpStory360 extends AMP.BaseElement {
   /** @private */
   enableGyroscope() {
     this.gyroscopeControls = true;
+    this.element.classList.add('i-amp-story-360-gyroscope-enabled');
     window.addEventListener('deviceorientation', (e) => {
+      clearTimeout(checkNoMotion);
       this.onDeviceOrientation(e);
     });
-    this.element.classList.add('i-amp-story-360-gyroscope-enabled');
+
+    // If device is not in motion, cancel gyroscope controls and animate.
+    const checkNoMotion = setTimeout(() => {
+      this.gyroscopeControls = false;
+      this.element.classList.remove('i-amp-story-360-gyroscope-enabled');
+      this.animate_();
+    }, 1000);
   }
 
   /** @private */
@@ -424,7 +435,6 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @private */
   resizeRenderer_() {
-    console.log('resize');
     this.mutateElement(() => {
       if (this.renderer_) {
         this.renderer_.resize();
