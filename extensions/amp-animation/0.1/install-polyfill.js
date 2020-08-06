@@ -13,22 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 
 let polyfillRequested = false;
-const polyfillPromise_ = (function () {
-  let res, rej;
-
-  const promise = new Promise((resolve, reject) => {
-    res = resolve;
-    rej = reject;
-  });
-
-  promise.resolve = res;
-  promise.reject = rej;
-
-  return promise;
-})();
+const polyfillPromise_ = new Deferred();
 
 /**
  * @param {!Window} win
@@ -50,7 +39,9 @@ export function installWebAnimationsIfNecessary(win) {
     }
 
     if (!!win.Element.prototype['animate']) {
-      return polyfillPromise_.resolve();
+      // Native Support exists, there is no reason to load the polyfill.
+      polyfillPromise_.resolve();
+      return polyfillPromise_.promise;
     }
 
     Services.extensionsFor(win)
@@ -58,5 +49,5 @@ export function installWebAnimationsIfNecessary(win) {
       .then(() => polyfillPromise_.resolve());
   }
 
-  return polyfillPromise_;
+  return polyfillPromise_.promise;
 }
