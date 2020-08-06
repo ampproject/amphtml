@@ -544,6 +544,18 @@ A URL to the [story poster](<#poster-guidelines-(for-poster-portrait-src,-poster
 
 A URL to the [story poster](<#poster-guidelines-(for-poster-portrait-src,-poster-landscape-src,-and-poster-square-src)>) in landscape format (4x3 aspect ratio).
 
+### entity (optional)
+
+The name of the story's creating entity. For example: `entity="User"`, where User created the story on the publisher's platform.
+
+### entity-logo-src (optional)
+
+A URL to the story creating entity's logo in square format (1x1 aspect ratio). For example `entity-logo-src="https://example.com/logo/1x1.png"`, where 1x1.png is a 96x96 px logo.
+
+### entity-url (optional)
+
+A URL to the story creating entity's platform. For example `entity-url="https://example.com/profile/user"`, which links to User's profile on the publisher's platform.
+
 ### supports-landscape (optional)
 
 Enables landscape orientation support on mobile devices and a full bleed landscape experience on desktop devices.
