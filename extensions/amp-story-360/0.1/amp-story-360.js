@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * Must be served over https for permissions API to work.
+ * For local development, run gulp --host="192.168.44.47" --https --extensions=amp-story-360
+ */
+
 import {CSS} from '../../../build/amp-story-360-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
