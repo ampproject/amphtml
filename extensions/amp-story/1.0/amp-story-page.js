@@ -315,6 +315,8 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?Array<!Promise<!../../amp-story-360/0.1/amp-story-360.AmpStory360>>}*/
     this.story360componentsCache_ = null;
+
+    this.originalDuration_ = this.element.getAttribute('auto-advance-after');
   }
 
   /**
@@ -346,16 +348,12 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
     this.maybeCreateAnimationManager_();
-    this.maybeSetPreviewDuration_();
-    this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
-    this.advancement_.addPreviousListener(() => this.previous());
-    this.advancement_.addAdvanceListener(() =>
-      this.next(/* opt_isAutomaticAdvance */ true)
-    );
-    this.advancement_.addProgressListener((progress) =>
-      this.emitProgress_(progress)
-    );
     this.setDescendantCssTextStyles_();
+    this.storeService_.subscribe(
+      StateProperty.PREVIEW_STATE,
+      (previewState) => this.onPreviewStateUpdate_(previewState),
+      true /* callToInitialize */
+    );
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
       (uiState) => this.onUIStateUpdate_(uiState),
@@ -366,20 +364,68 @@ export class AmpStoryPage extends AMP.BaseElement {
     this.initializeImgAltTags_();
   }
 
+  /**
+   * @param {boolean} previewState
+   * @private
+   */
+  onPreviewStateUpdate_(previewState) {
+    if (previewState) {
+      this.setPreviewDuration_();
+    } else if (this.advancement_) {
+      // We don't want to overwrite the attributes on the first time (when there is no advancement set up)
+      this.restoreOriginalDuration_();
+    }
+
+    this.setupAdvancement_();
+  }
+
   /** @private */
-  maybeSetPreviewDuration_() {
-    if (this.storeService_.get(StateProperty.PREVIEW_STATE)) {
-      const videos = this.getAllVideos_();
+  setupAdvancement_() {
+    const previousAdvancement = this.advancement_;
+    const shouldResume = previousAdvancement?.isRunning();
+    previousAdvancement?.stop();
 
-      const autoAdvanceAttr =
-        videos.length > 0
-          ? VIDEO_PREVIEW_AUTO_ADVANCE_DURATION
-          : DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION;
+    this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
+    this.advancement_.addPreviousListener(() => this.previous());
+    this.advancement_.addAdvanceListener(() =>
+      this.next(/* opt_isAutomaticAdvance */ true)
+    );
+    this.advancement_.addProgressListener((progress) =>
+      this.emitProgress_(progress)
+    );
 
+    if (shouldResume) {
+      this.advancement_.start();
+      this.emitProgress_();
+    }
+  }
+
+  /** @private */
+  setPreviewDuration_() {
+    const videos = this.getAllVideos_();
+
+    const autoAdvanceAttr =
+      videos.length > 0
+        ? VIDEO_PREVIEW_AUTO_ADVANCE_DURATION
+        : DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION;
+
+    addAttributesToElement(
+      this.element,
+      dict({
+        'auto-advance-after': autoAdvanceAttr,
+      })
+    );
+  }
+
+  /** @private */
+  restoreOriginalDuration_() {
+    if (this.originalDuration_ == null) {
+      this.element.removeAttribute('auto-advance-after');
+    } else {
       addAttributesToElement(
         this.element,
         dict({
-          'auto-advance-after': autoAdvanceAttr,
+          'auto-advance-after': this.originalDuration_,
         })
       );
     }
