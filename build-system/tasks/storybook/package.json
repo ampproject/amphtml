@@ -15,6 +15,7 @@
     "core-js": "3.6.4",
     "preact": "10.3.4",
     "preact-render-to-string": "5.1.4",
+    "storybook-addon-amp": "1.0.0",
     "styled-jsx": "3.2.5"
   }
 }
