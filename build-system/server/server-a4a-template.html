@@ -7,10 +7,16 @@
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <style amp-custom>
+    #ad-url {
+      height: 18px;
+      overflow: hidden;
+    }
+  </style>
 </head>
 <body>
   <h1 id="title">A4A Envelope</h1>
-  <div>url: AD_URL</div>
+  <div id="ad-url">url: AD_URL</div>
   <div>size: AD_WIDTHxAD_HEIGHT</div>
 
   <div style="background: #eee; overflow: hidden; height: OFFSET;">scroll down to see the ad</div>
@@ -22,6 +28,7 @@
       a4a-conversion="true"
       checksig="CHECKSIG"
       disable3pfallback="DISABLE3PFALLBACK"
+      data-experiment-id="DATAEXPERIMENTIDS"
       src="AD_URL">
   </amp-ad>
 
