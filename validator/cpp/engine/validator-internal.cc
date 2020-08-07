@@ -5347,16 +5347,15 @@ template <typename T>
 class NoDestructor {
  public:
   template <typename... Ts>
-  NoDestructor(Ts&&... args) {
-    new (&space_) T(std::forward<Ts>(args)...);
-  }
+  NoDestructor(Ts&&... args) : t_(new (&space_) T(std::forward<Ts>(args)...)) {}
 
   const T* Get() const {
-    return reinterpret_cast<const T*>(&space_);
+    return t_;
   }
 
  private:
   alignas(T) unsigned char space_[sizeof(T)];
+  const T* t_;
 };
 
 class ParsedValidatorRulesProvider {
