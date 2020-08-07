@@ -1,6 +1,6 @@
 {
   "name": "amphtml-validator",
-  "version": "1.0.31",
+  "version": "1.0.32",
   "description": "Official validator for AMP HTML (www.ampproject.org)",
   "keywords": [
     "AMP",
@@ -24,6 +24,6 @@
     "promise": "8.0.1"
   },
   "devDependencies": {
-    "jasmine": "3.5.0"
+    "jasmine": "3.6.1"
   }
 }

@@ -182,7 +182,7 @@
   },
   "ibeatanalytics": {
     "host": "https://api.ibeat-analytics.com",
-    "track": "https://api.ibeat-analytics.com/ping-amp?url=_source_url_&sid=_client_id(_iibeat_session)_&ua=_user_agent_&ref=_document_referrer_&at=_incremental_engaged_time_&tt=!totalTime&pid=_page_view_id_&d=!d&dn=_source_hostname_&ct=!ct&pt=!pt&hid=!hid&au=!au&ag=!ag&aid=!aid&cn=_canonical_url_&pot=!timerStart&rct=1"
+    "track": "https://api.ibeat-analytics.com/ping-amp?url=_source_url_&sid=_client_id(_iibeat_session)_&ua=_user_agent_&ref=_document_referrer_&at=_incremental_engaged_time_&tt=!totalTime&pid=_page_view_id_&d=!d&dn=_source_hostname_&ct=!ct&pt=!pt&hid=!hid&au=!au&ag=!ag&aid=!aid&cn=_canonical_url_&pot=!timerStart&rct=1&id=!id&sec=!sec&tgs=!tgs&pc=!pc"
   },
   "infonline": {
     "pageview": "!url?st=!st&sv=ke&ap=1&co=!co&cp=!cp&ps=!ps&host=_canonical_host_&path=_canonical_path_&type=pageview",

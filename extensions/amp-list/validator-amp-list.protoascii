@@ -36,17 +36,6 @@ tags: {  # amp-list
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # amp-list
-  html_format: ACTIONS
-  tag_name: "SCRIPT"
-  spec_name: "SCRIPT[custom-element=amp-list] (ACTIONS)"
-  extension_spec: {
-    name: "amp-list"
-    version: "0.1"
-    version: "latest"
-  }
-  attr_lists: "common-extension-attrs"
-}
 tags: {  # <amp-list> with mandatory src and/or [src] attr
   html_format: AMP
   tag_name: "AMP-LIST"
@@ -92,13 +81,13 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
     value: "fetch"
   }
   attrs: { name: "single-item" }
-  attrs: { name: "xssi-prefix" }
   attrs: {
     name: "src"
     mandatory_anyof: "['src','[src]','data-amp-bind-src']"
     value_url: {
       protocol: "https"
       protocol: "amp-state"
+      protocol: "amp-script"
       allow_relative: true  # Will be set to false at a future date.
     }
     disallowed_value_regex: "__amp_source_origin"
@@ -107,6 +96,7 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
     name: "template"
     value_oneof_set: TEMPLATE_IDS
   }
+  attrs: { name: "xssi-prefix" }
   # <amp-bind>
   attrs: {
     name: "[is-layout-container]"
@@ -129,7 +119,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "DIV"
   spec_name: "AMP-LIST DIV [fetch-error]"
   mandatory_ancestor: "AMP-LIST"
@@ -142,7 +131,6 @@ tags: {
 
 tags: { # amp-list-load-more
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "AMP-LIST-LOAD-MORE"
   requires_extension: "amp-list"
   mandatory_parent: "AMP-LIST"
@@ -171,7 +159,6 @@ tags: { # amp-list-load-more
 # The button element variant allowed in amp-list-load-more.
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   requires_extension: "amp-list"
   tag_name: "BUTTON"
   spec_name: "amp-list-load-more button[load-more-clickable]"
@@ -236,6 +223,7 @@ tags: {  # <amp-list>
     name: "template"
     value_oneof_set: TEMPLATE_IDS
   }
+  attrs: { name: "xssi-prefix" }
   # <amp-bind>
   attrs: {
     name: "[is-layout-container]"
@@ -243,71 +231,6 @@ tags: {  # <amp-list>
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: CONTAINER # Experimental, email-only.
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: FLEX_ITEM
-    supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
-  }
-}
-# ACTIONS <amp-list> with POST identity token
-tags: {  # <amp-list>
-  html_format: ACTIONS
-  tag_name: "AMP-LIST"
-  spec_name: "AMP-LIST (ACTIONS)"
-  requires_extension: "amp-list"
-  attrs: {
-    name: "auto-resize"
-    value: ""
-    deprecation: "replacement-to-be-determined-at-a-later-date"
-    deprecation_url: "https://github.com/ampproject/amphtml/issues/18849"
-  }
-  attrs: {
-    name: "binding"
-    value: "always"
-    value: "no"
-    value: "refresh"
-  }
-  attrs: { name: "credentials" }
-  attrs: {
-    name: "crossorigin"
-    value: "amp-viewer-auth-token-via-post"
-  }
-  attrs: {
-    name: "diffable"
-    value: ""
-  }
-  attrs: { name: "items" }
-  attrs: { name: "max-items" }
-  attrs: {
-    name: "reset-on-refresh"
-    value: ""
-    value: "always"
-    value: "fetch"
-  }
-  attrs: { name: "single-item" }
-  attrs: {
-    name: "src"
-    mandatory_anyof: "['src','[src]','data-amp-bind-src']"
-    value_url: {
-      protocol: "https"
-      allow_relative: true
-    }
-    disallowed_value_regex: "__amp_source_origin"
-  }
-  attrs: { name: "template" }
-  # <amp-bind>
-  attrs: {
-    name: "[src]"
-    mandatory_anyof: "['src','[src]','data-amp-bind-src']"
-  }
-  attrs: {
-    name: "[state]"
-    deprecation: "[src]"
-  }
-  attr_lists: "extended-amp-global"
-  amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT

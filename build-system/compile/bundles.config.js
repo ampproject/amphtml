@@ -384,6 +384,12 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-base-carousel',
+    version: '1.0',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-beopinion',
     version: '0.1',
     latestVersion: '0.1',
@@ -879,10 +885,6 @@ exports.extensionBundles = [
         'amp-story-draggable-drawer-header',
         'amp-story-hint',
         'amp-story-info-dialog',
-        'amp-story-interactive',
-        'amp-story-interactive-binary-poll',
-        'amp-story-interactive-poll',
-        'amp-story-interactive-quiz',
         'amp-story-share',
         'amp-story-share-menu',
         'amp-story-system-layer',
@@ -918,6 +920,21 @@ exports.extensionBundles = [
     version: '0.1',
     latestVersion: '0.1',
     options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-story-interactive',
+    version: '1.0',
+    latestVersion: '1.0',
+    options: {
+      hasCss: true,
+      cssBinaries: [
+        'amp-story-interactive-binary-poll',
+        'amp-story-interactive-poll',
+        'amp-story-interactive-quiz',
+        'amp-story-interactive-results',
+      ],
+    },
     type: TYPES.MISC,
   },
   {

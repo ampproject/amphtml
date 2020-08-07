@@ -763,21 +763,44 @@
       "name": "amp-video-docking (left-to-right)",
       "viewport": {"width": 800, "height": 600},
       "interactive_tests": "examples/visual-tests/amp-video-docking/amp-video-docking.js",
-      "loading_complete_selectors": [".i-amphtml-video-interface"],
+      "loading_complete_selectors": [".i-amphtml-video-interface"]
     },
     {
       "url": "examples/visual-tests/amp-video-docking/rtl.html",
       "name": "amp-video-docking (right-to-left)",
       "viewport": {"width": 800, "height": 600},
       "interactive_tests": "examples/visual-tests/amp-video-docking/amp-video-docking.js",
-      "loading_complete_selectors": [".i-amphtml-video-interface"],
+      "loading_complete_selectors": [".i-amphtml-video-interface"]
     },
     {
       "url": "examples/visual-tests/amp-video-docking/slot.html",
       "name": "amp-video-docking (slot)",
       "viewport": {"width": 800, "height": 600},
       "interactive_tests": "examples/visual-tests/amp-video-docking/amp-video-docking.js",
-      "loading_complete_selectors": [".i-amphtml-video-interface"],
+      "loading_complete_selectors": [".i-amphtml-video-interface"]
     },
+    {
+      "url": "examples/visual-tests/amp-story-player/back-button.html",
+      "name": "amp-story-player exit control back button",
+      "interactive_tests": "examples/visual-tests/amp-story-player/placeholder.js",
+      "loading_complete_selectors": [".i-amphtml-story-player-loaded"],
+      "loading_incomplete_selectors": [".i-amphtml-story-player-loading"],
+      "no_base_test": true
+    },
+    {
+      "url": "examples/visual-tests/amp-story-player/close-button.html",
+      "name": "amp-story-player exit control close button",
+      "interactive_tests": "examples/visual-tests/amp-story-player/placeholder.js",
+      "loading_complete_selectors": [".i-amphtml-story-player-loaded"],
+      "loading_incomplete_selectors": [".i-amphtml-story-player-loading"],
+      "no_base_test": true
+    },
+    {
+      "url": "examples/visual-tests/amp-story-player/player-local-story.html",
+      "name": "amp-story-player local story basic page",
+      "interactive_tests": "examples/visual-tests/amp-story-player/story-loaded.js",
+      "loading_incomplete_selectors": [".i-amphtml-story-player-loading"],
+      "no_base_test": true
+    }
   ]
 }

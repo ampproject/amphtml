@@ -19,7 +19,7 @@ import {getMode} from '../../../src/mode';
 import {includes} from '../../../src/string';
 import {map} from '../../../src/utils/object';
 import {parseExtensionUrl} from '../../../src/service/extension-location';
-import {removeElement} from '../../../src/dom';
+import {removeElement, rootNodeFor} from '../../../src/dom';
 import {urls} from '../../../src/config';
 
 /**
@@ -87,6 +87,17 @@ const EXTENSION_URL_PREFIX = new RegExp(
  */
 export function processHead(win, adElement, head) {
   if (!head || !head.firstChild) {
+    return null;
+  }
+
+  const root = rootNodeFor(head);
+  const htmlTag = root.documentElement;
+  if (
+    !htmlTag ||
+    (!htmlTag.hasAttribute('amp4ads') &&
+      !htmlTag.hasAttribute('⚡️4ads') &&
+      !htmlTag.hasAttribute('⚡4ads')) // Unicode weirdness.
+  ) {
     return null;
   }
 
@@ -198,7 +209,11 @@ function handleLink(fonts, images, link) {
  * @param {!Element} style
  */
 function handleStyle(style) {
-  if (style.hasAttribute('amp-custom') || style.hasAttribute('amp-keyframes')) {
+  if (
+    style.hasAttribute('amp-custom') ||
+    style.hasAttribute('amp-keyframes') ||
+    style.hasAttribute('amp4ads-boilerplate')
+  ) {
     return;
   }
   removeElement(style);

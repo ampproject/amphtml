@@ -132,6 +132,12 @@ class AmpAccordion extends AMP.BaseElement {
       this.registerAction('toggle', (i) => this.handleAction_(i));
       this.registerAction('expand', (i) => this.handleAction_(i));
       this.registerAction('collapse', (i) => this.handleAction_(i));
+      /** If the element is in an email document, allow its `open` and `close` actions. */
+      this.action_.addToAllowlist(
+        TAG,
+        ['toggle', 'expand', 'collapse'],
+        ['email']
+      );
 
       // Listen for mutations on the 'data-expand' attribute.
       const expandObserver = new this.win.MutationObserver((mutations) => {

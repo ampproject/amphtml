@@ -729,6 +729,10 @@ interval. Use `timerSpec` to control when this will fire.
   will be infinity.
 - `immediate` trigger timer immediately or not. Boolean, defaults to true
 
+[tip type="note"]
+The timer trigger will continue to send out requests regardless of document state (inactive or hidden), until the `maxTimerLength` has been reached (default to 2 hours if `stopSpec` doesn't exist and inifity if it does) or `stopSpec` has been met. In the case of no `stopSpec`, the `maxTimerLength` will default to infinity.
+[/tip]
+
 See the following example:
 
 ```json
@@ -753,8 +757,27 @@ To configure a timer which times user events use:
   `stopSpec` but no `startSpec` will start immediately but only stop on the
   specified event.
 
+See the spec on [triggers](#triggers) for details on creating nested timer
+triggers. Note that using a timer trigger to start or stop a timer is not
+allowed. The example below demonstrates how to configure a trigger based on a documents `hidden` and `visible` events and a trigger based on a videos `play` and `pause` events.
+
 ```json
 "triggers": {
+  "startOnVisibleStopOnHiddenTimer": {
+    "on": "timer",
+    "timerSpec": {
+      "interval": 5,
+      "startSpec": {
+        "on": "visible",
+        "selector": ":root"
+      },
+      "stopSpec": {
+        "on": "hidden",
+        "selector": ":root"
+      }
+    },
+    "request": "timerRequest"
+  },
   "videoPlayTimer": {
     "on": "timer",
     "timerSpec": {
@@ -772,10 +795,6 @@ To configure a timer which times user events use:
   }
 }
 ```
-
-See the spec on [triggers](#triggers) for details on creating nested timer
-triggers. Note that using a timer trigger to start or stop a timer is not
-allowed.
 
 ###### `"on": "visible"` trigger
 

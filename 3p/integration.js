@@ -150,6 +150,7 @@ import {freewheel} from '../ads/freewheel';
 import {fusion} from '../ads/fusion';
 import {genieessp} from '../ads/genieessp';
 import {giraff} from '../ads/giraff';
+import {glomex} from '../ads/glomex';
 import {gmossp} from '../ads/gmossp';
 import {gumgum} from '../ads/gumgum';
 import {holder} from '../ads/holder';
@@ -318,6 +319,7 @@ const AMP_EMBED_ALLOWED = {
   engageya: true,
   epeex: true,
   forkmedia: true,
+  glomex: true,
   idealmedia: true,
   insticator: true,
   jubna: true,
@@ -457,6 +459,7 @@ register('fusion', fusion);
 register('genieessp', genieessp);
 register('giraff', giraff);
 register('github', github);
+register('glomex', glomex);
 register('gmossp', gmossp);
 register('gumgum', gumgum);
 register('holder', holder);

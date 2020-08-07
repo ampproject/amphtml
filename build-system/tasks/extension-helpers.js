@@ -18,7 +18,6 @@ const colors = require('ansi-colors');
 const debounce = require('debounce');
 const fs = require('fs-extra');
 const log = require('fancy-log');
-const watch = require('gulp-watch');
 const wrappers = require('../compile/compile-wrappers');
 const {
   extensionAliasBundles,
@@ -30,6 +29,7 @@ const {isTravisBuild} = require('../common/travis');
 const {jsifyCssAsync} = require('./jsify-css');
 const {maybeToEsmName, compileJs, mkdirSync} = require('./helpers');
 const {vendorConfigs} = require('./vendor-configs');
+const {watch} = require('gulp');
 
 const {green, red, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
@@ -393,7 +393,7 @@ function watchExtension(path, name, version, latestVersion, hasCss, options) {
       options.onWatchBuild(bundleComplete);
     }
   };
-  watch(path + '/**/*', debounce(watchFunc, watchDebounceDelay));
+  watch(`${path}/**/*`).on('change', debounce(watchFunc, watchDebounceDelay));
 }
 
 /**
@@ -568,6 +568,11 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
     fs.copyFileSync(dir + 'worker.js', `${file}.js`);
     // The "mjs" output is unminified ES6 and has debugging flags enabled.
     fs.copyFileSync(dir + 'worker.mjs', `${file}.max.js`);
+
+    // Same as above but for the nodom worker variant.
+    const noDomFile = `dist/v0/amp-script-worker-nodom-${version}`;
+    fs.copyFileSync(dir + 'worker.nodom.js', `${noDomFile}.js`);
+    fs.copyFileSync(dir + 'worker.nodom.mjs', `${noDomFile}.max.js`);
   }
 }
 

@@ -510,6 +510,8 @@ Calling `AMP.setState()` deep-merges the provided object literal with the curren
 
 [/example]
 
+[filter formats="websites, ads"]
+
 ### Modifying history with `AMP.pushState()`
 
 `AMP.pushState()` writes state changes to the history. Navigating back, will restore the previous state. To test this, increase the count in the example below and use your browser's back button to decrease the count.
@@ -529,6 +531,8 @@ Calling `AMP.setState()` deep-merges the provided object literal with the curren
 [/example]
 
 Using `AMP.pushState()` sets the current state to the most recent pushed state.
+
+[/filter] <!-- formats="websites, ads" -->
 
 ## Expressions
 
@@ -606,7 +610,7 @@ Single-parameter arrow functions can't have parentheses, e.g. use `x => x + 1` i
     }
   </script>
 </amp-state>
-<p [text]="'concat: ' + myArrayState.foo.concat()">concat: 1, 2, 3</p>
+<p [text]="'concat: ' + myArrayState.foo.concat(4)">concat: 1, 2, 3</p>
 <p [text]="'filter: ' + myArrayState.bar.filter(word => word.length > 3)">
   filter: words with less than three letter
 </p>

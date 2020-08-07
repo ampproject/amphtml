@@ -237,6 +237,11 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24113',
   },
   {
+    id: 'protocol-adapters',
+    name: 'Allow amp-list to get its data from amp-script functions.',
+    spec: 'https://github.com/ampproject/amphtml/issues/26474',
+  },
+  {
     id: 'adsense-ad-size-optimization',
     name:
       'Per publisher server side settings for changing the ad size ' +
@@ -255,14 +260,6 @@ export const EXPERIMENTS = [
     name: 'Use IntersectionObserver for resource scheduling.',
     spec: 'https://github.com/ampproject/amphtml/issues/25428',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26233',
-  },
-  {
-    id: 'layoutbox-invalidate-on-scroll',
-    name:
-      'Invalidate the cached layoutboxes of elements nested in a scroller ' +
-      'after that scroller scrolls.',
-    spec: 'https://github.com/ampproject/amphtml/issues/24929',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25203',
   },
   {
     id: 'amp-stream-gallery',
@@ -302,5 +299,10 @@ export const EXPERIMENTS = [
     id: 'expand-json-targeting',
     name: 'Allow CLIENT_ID in doubleclick json targeting feature',
     spec: 'https://github.com/ampproject/amphtml/issues/25190',
+  },
+  {
+    id: 'auto-ads-layout-callback',
+    name: 'Move ads placement into layoutCallback',
+    spec: 'https://github.com/ampproject/amphtml/issues/27068',
   },
 ];
