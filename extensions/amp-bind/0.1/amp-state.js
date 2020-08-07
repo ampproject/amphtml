@@ -173,7 +173,7 @@ export class AmpState extends AMP.BaseElement {
    * Transforms and prepares the fetch request.
    * @param {boolean} isInit
    * @param {boolean=} opt_refresh
-   * @return {!Promise<!JsonObject|!Array<JsonObject>>}
+   * @return {!Promise<!JsonObject|!Array<JsonObject>|undefined>}
    */
   prepareAndSendFetch_(isInit, opt_refresh) {
     const {element} = this;
