@@ -215,7 +215,7 @@ player.unmute();
 
 #### play/pause
 
-Will play/pause the current story.
+Will play/pause the current story. This will have an effect when there is either page auto-advancement or media playing. Otherwise, this has no effect.
 
 ```
 player.play();
