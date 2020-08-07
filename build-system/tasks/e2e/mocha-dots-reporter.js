@@ -20,6 +20,14 @@ const {inherits} = require('mocha').utils;
 const {reportTestFinished} = require('../report-test-status');
 const {symbols} = require('../karma.conf').mochaReporter;
 
+const {
+ EVENT_TEST_PASS,
+ EVENT_TEST_FAIL,
+ EVENT_TEST_END,
+ EVENT_RUN_END,
+ EVENT_TEST_PENDING,
+} = require('mocha').Runner;
+
 /**
  * Custom Mocha reporter for CI builds.
  * Mimics the style of the Karma reporter on Travis.
@@ -29,19 +37,19 @@ function MochaDotsReporter(runner) {
   Base.call(this, runner);
   const self = this;
 
-  runner.on('pass', function () {
+  runner.on(EVENT_TEST_PASS, function () {
     process.stdout.write(Base.color('green', symbols.success));
   });
 
-  runner.on('pending', function () {
+  runner.on(EVENT_TEST_PENDING, function () {
     process.stdout.write(Base.color('bright yellow', symbols.info));
   });
 
-  runner.on('fail', function () {
+  runner.on(EVENT_TEST_FAIL, function () {
     process.stdout.write(Base.color('fail', symbols.error));
   });
 
-  runner.on('end', function () {
+  runner.on(EVENT_RUN_END, function () {
     epilogue();
   });
 
