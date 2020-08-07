@@ -16,6 +16,10 @@
 
 #include "node.h"
 
+#ifdef HTMLPARSER_NODE_DEBUG
+#include <iostream>
+#endif
+
 #include <algorithm>
 #include <functional>
 #include <sstream>
@@ -29,8 +33,50 @@ namespace htmlparser {
 Node::Node(NodeType node_type) : node_type_(node_type) {}
 
 Node::~Node() {
-  if (first_child_) delete first_child_;
-  if (next_sibling_) delete next_sibling_;
+#ifdef HTMLPARSER_NODE_DEBUG
+  std::cout << "RecursionCounterStart: " << recursive_counter_++ << std::endl;
+#endif
+  DestroyAllChildNodes();
+  DestroyAllSiblingNodes();
+#ifdef HTMLPARSER_NODE_DEBUG
+  std::cout << "RecursionCounterEnd: " << recursive_counter_++ << std::endl;
+#endif
+}
+
+void Node::DestroyAllChildNodes() {
+  std::vector<Node*> children;
+  Node* current = first_child_;
+  while (current != nullptr) {
+#ifdef HTMLPARSER_NODE_DEBUG
+    current->recursive_counter_ = recursive_counter_;
+#endif
+    children.push_back(current);
+    auto tmp = current->next_sibling_;
+    current->next_sibling_ = nullptr;
+    current = tmp;
+  }
+
+  for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+    if (*iter != nullptr) delete *iter;
+  }
+}
+
+void Node::DestroyAllSiblingNodes() {
+  std::vector<Node*> siblings;
+  Node* current = next_sibling_;
+  while (current != nullptr) {
+#ifdef HTMLPARSER_NODE_DEBUG
+    current->recursive_counter_ = recursive_counter_;
+#endif
+    siblings.push_back(current);
+    auto tmp = current->next_sibling_;
+    current->next_sibling_ = nullptr;
+    current = tmp;
+  }
+
+  for (auto iter = siblings.rbegin(); iter != siblings.rend(); ++iter) {
+    if (*iter != nullptr) delete *iter;
+  }
 }
 
 void Node::SetData(std::string_view data) {

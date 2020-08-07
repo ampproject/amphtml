@@ -32,6 +32,8 @@
 
 namespace htmlparser {
 
+#define HTMLPARSER_NODE_DEBUG 0;
+
 class Parser;
 
 enum class NodeType {
@@ -100,6 +102,10 @@ class Node {
   // Use Node::make_node.
   explicit Node(NodeType node_type);
   ~Node();
+  // Helper functions to avoid recursion while destroying linked list of
+  // objects.
+  void DestroyAllChildNodes();
+  void DestroyAllSiblingNodes();
 
   // Allows move.
   Node(Node&&) = default;
@@ -212,6 +218,10 @@ class Node {
   Node* last_child_ = nullptr;
   Node* prev_sibling_ = nullptr;
   bool is_manufactured_{false};
+
+#ifdef HTMLPARSER_NODE_DEBUG
+  int64_t recursive_counter_ = 0;
+#endif
 
   friend class NodeStack;
   friend class Parser;
