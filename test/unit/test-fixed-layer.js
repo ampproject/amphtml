@@ -24,7 +24,6 @@ import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {toggle} from '../../src/style';
-import {toggleExperiment} from '../../src/experiments';
 import {user} from '../../src/log';
 
 describes.sandboxed('FixedLayer', {}, () => {
@@ -1180,11 +1179,6 @@ describes.sandboxed('FixedLayer', {}, () => {
       describe('hidden toggle', () => {
         let mutationObserver;
         beforeEach(() => {
-          toggleExperiment(
-            documentApi.defaultView,
-            'hidden-mutation-observer',
-            true
-          );
           fixedLayer.observeHiddenMutations();
           mutationObserver = Services.hiddenObserverForDoc(
             documentApi.documentElement
@@ -1591,11 +1585,6 @@ describes.sandboxed('FixedLayer', {}, () => {
     describe('hidden toggle', () => {
       let mutationObserver;
       beforeEach(() => {
-        toggleExperiment(
-          documentApi.defaultView,
-          'hidden-mutation-observer',
-          true
-        );
         fixedLayer.observeHiddenMutations();
         mutationObserver = Services.hiddenObserverForDoc(
           documentApi.documentElement
