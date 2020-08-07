@@ -29,7 +29,8 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it.configure().run(
+    // TODO(choumx): Unskip when #29752 is merged.
+    it.configure().skip(
       'should render list backed by amp-script data',
       async function () {
         const container = await getListContainer(controller);
