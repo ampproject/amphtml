@@ -152,7 +152,7 @@ export class MediaPerformanceMetricsService {
 
     const unlisteners = this.listen_(media);
     const mediaEntry = this.getNewMediaEntry_(media, unlisteners);
-    this.setMediaEntry_(media, mediaEntry);
+    this.mediaMap_.set(media, mediaEntry);
 
     // Checks if the media already errored (eg: could have failed the source
     // selection).
@@ -275,15 +275,6 @@ export class MediaPerformanceMetricsService {
       );
     }
     this.performanceService_.flush();
-  }
-
-  /**
-   * @param {!HTMLMediaElement} media
-   * @param {!MediaEntryDef} mediaEntry
-   * @private
-   */
-  setMediaEntry_(media, mediaEntry) {
-    this.mediaMap_.set(media, mediaEntry);
   }
 
   /**
