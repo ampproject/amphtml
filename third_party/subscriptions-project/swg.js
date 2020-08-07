@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.113 */
+/** Version: 0.1.22.116 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -1904,6 +1904,96 @@ function getRandomInts(numInts, maxVal) {
   }
 
   return arr;
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Character mapping from base64url to base64.
+ * @const {!Object<string, string>}
+ */
+const base64UrlDecodeSubs = {'-': '+', '_': '/', '.': '='};
+
+/**
+ * Converts a string which holds 8-bit code points, such as the result of atob,
+ * into a Uint8Array with the corresponding bytes.
+ * If you have a string of characters, you probably want to be using utf8Encode.
+ * @param {string} str
+ * @return {!Uint8Array}
+ */
+function stringToBytes(str) {
+  const bytes = new Uint8Array(str.length);
+  for (let i = 0; i < str.length; i++) {
+    const charCode = str.charCodeAt(i);
+    log_2(charCode <= 255, 'Characters must be in range [0,255]');
+    bytes[i] = charCode;
+  }
+  return bytes;
+}
+
+/**
+ * Converts a 8-bit bytes array into a string
+ * @param {!Uint8Array} bytes
+ * @return {string}
+ */
+function bytesToString(bytes) {
+  // Intentionally avoids String.fromCharCode.apply so we don't suffer a
+  // stack overflow. #10495, https://jsperf.com/bytesToString-2
+  const array = new Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) {
+    array[i] = String.fromCharCode(bytes[i]);
+  }
+  return array.join('');
+}
+
+/**
+ * Interpret a byte array as a UTF-8 string.
+ * @param {!Uint8Array} bytes
+ * @return {string}
+ */
+function utf8DecodeSync(bytes) {
+  if (typeof TextDecoder !== 'undefined') {
+    return new TextDecoder('utf-8').decode(bytes);
+  }
+  const asciiString = bytesToString(new Uint8Array(bytes));
+  return decodeURIComponent(escape(asciiString));
+}
+
+/**
+ * Turn a string into UTF-8 bytes.
+ * @param {string} string
+ * @return {!Uint8Array}
+ */
+function utf8EncodeSync(string) {
+  if (typeof TextEncoder !== 'undefined') {
+    return new TextEncoder('utf-8').encode(string);
+  }
+  return stringToBytes(unescape(encodeURIComponent(string)));
+}
+
+/**
+ * Converts a string which is in base64url encoding into a Uint8Array
+ * containing the decoded value.
+ * @param {string} str
+ * @return {!Uint8Array}
+ */
+function base64UrlDecodeToBytes(str) {
+  const encoded = atob(str.replace(/[-_.]/g, (ch) => base64UrlDecodeSubs[ch]));
+  return stringToBytes(encoded);
 }
 
 /**
@@ -4527,96 +4617,6 @@ class ActivityIframeView extends View {
  */
 
 /**
- * Character mapping from base64url to base64.
- * @const {!Object<string, string>}
- */
-const base64UrlDecodeSubs = {'-': '+', '_': '/', '.': '='};
-
-/**
- * Converts a string which holds 8-bit code points, such as the result of atob,
- * into a Uint8Array with the corresponding bytes.
- * If you have a string of characters, you probably want to be using utf8Encode.
- * @param {string} str
- * @return {!Uint8Array}
- */
-function stringToBytes(str) {
-  const bytes = new Uint8Array(str.length);
-  for (let i = 0; i < str.length; i++) {
-    const charCode = str.charCodeAt(i);
-    log_2(charCode <= 255, 'Characters must be in range [0,255]');
-    bytes[i] = charCode;
-  }
-  return bytes;
-}
-
-/**
- * Converts a 8-bit bytes array into a string
- * @param {!Uint8Array} bytes
- * @return {string}
- */
-function bytesToString(bytes) {
-  // Intentionally avoids String.fromCharCode.apply so we don't suffer a
-  // stack overflow. #10495, https://jsperf.com/bytesToString-2
-  const array = new Array(bytes.length);
-  for (let i = 0; i < bytes.length; i++) {
-    array[i] = String.fromCharCode(bytes[i]);
-  }
-  return array.join('');
-}
-
-/**
- * Interpret a byte array as a UTF-8 string.
- * @param {!Uint8Array} bytes
- * @return {string}
- */
-function utf8DecodeSync(bytes) {
-  if (typeof TextDecoder !== 'undefined') {
-    return new TextDecoder('utf-8').decode(bytes);
-  }
-  const asciiString = bytesToString(new Uint8Array(bytes));
-  return decodeURIComponent(escape(asciiString));
-}
-
-/**
- * Turn a string into UTF-8 bytes.
- * @param {string} string
- * @return {!Uint8Array}
- */
-function utf8EncodeSync(string) {
-  if (typeof TextEncoder !== 'undefined') {
-    return new TextEncoder('utf-8').encode(string);
-  }
-  return stringToBytes(unescape(encodeURIComponent(string)));
-}
-
-/**
- * Converts a string which is in base64url encoding into a Uint8Array
- * containing the decoded value.
- * @param {string} str
- * @return {!Uint8Array}
- */
-function base64UrlDecodeToBytes(str) {
-  const encoded = atob(str.replace(/[-_.]/g, (ch) => base64UrlDecodeSubs[ch]));
-  return stringToBytes(encoded);
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
  * @fileoverview This module declares JSON types as defined in the
  * {@link http://json.org/}.
  */
@@ -5763,6 +5763,15 @@ function serializeProtoMessageForUrl(message) {
 }
 
 /**
+ * @param {!../model/doc.Doc} doc
+ * @return {string}
+ */
+function getCanonicalUrl(doc) {
+  const node = doc.getRootNode().querySelector("link[rel='canonical']");
+  return (node && node.href) || '';
+}
+
+/**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -5847,7 +5856,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.113',
+    '_client': 'SwG 0.1.22.116',
   });
 }
 
@@ -6966,7 +6975,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.113',
+        '_client': 'SwG 0.1.22.116',
         'supportsEventManager': true,
       },
       args || {}
@@ -7815,7 +7824,8 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.113');
+    context.setClientVersion('SwG 0.1.22.116');
+    context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString$1(this.getQueryString_());
     const campaign = utmParams['utm_campaign'];
@@ -7829,13 +7839,6 @@ class AnalyticsService {
     }
     if (source) {
       context.setUtmSource(source);
-    }
-
-    const urlNode = this.doc_
-      .getRootNode()
-      .querySelector("link[rel='canonical']");
-    if (urlNode && urlNode.href) {
-      context.setUrl(urlNode.href);
     }
   }
 
@@ -16763,11 +16766,19 @@ class ConfiguredRuntime {
     return Promise.resolve(this.propensityModule_);
   }
 
-  /** @override
+  /**
+   * This one exists as an internal helper so SwG logging doesn't require a promise.
    * @return {!ClientEventManager}
    */
   eventManager() {
     return this.eventManager_;
+  }
+
+  /**
+   * This one exists as a public API so publishers can subscribe to SwG events.
+   * @override */
+  getEventManager() {
+    return Promise.resolve(this.eventManager_);
   }
 
   /** @override */
