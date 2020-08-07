@@ -16,17 +16,24 @@
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 
-let polyfillRequested = false;
-const polyfillPromise_ = new Deferred();
+const polyfillPromiseMap = new Map();
 
 /**
  * @param {!Window} win
  * @return {Promise<void>}
  */
 export function installWebAnimationsIfNecessary(win) {
-  if (!polyfillRequested) {
+  let polyfillPromise;
+  let polyfillRequested = false;
+  if (polyfillPromiseMap.has(win)) {
     polyfillRequested = true;
+    polyfillPromise = polyfillPromiseMap.get(win);
+  } else {
+    polyfillPromise = new Deferred();
+    polyfillPromiseMap.set(win, polyfillPromise);
+  }
 
+  if (!polyfillRequested) {
     if (Services.platformFor(win).isSafari()) {
       /*
       Force Web Animations polyfill on Safari.
@@ -40,14 +47,14 @@ export function installWebAnimationsIfNecessary(win) {
 
     if (!!win.Element.prototype['animate']) {
       // Native Support exists, there is no reason to load the polyfill.
-      polyfillPromise_.resolve();
-      return polyfillPromise_.promise;
+      polyfillPromise.resolve();
+      return polyfillPromise.promise;
     }
 
     Services.extensionsFor(win)
       .preloadExtension('amp-animation-polyfill')
-      .then(() => polyfillPromise_.resolve());
+      .then(() => polyfillPromise.resolve());
   }
 
-  return polyfillPromise_.promise;
+  return polyfillPromise.promise;
 }

@@ -731,8 +731,7 @@ export class AnimationManager {
           scope: this.page_,
           scaleByScope: true,
         })
-      )
-      .then((builder) => builder);
+      );
   }
 
   /**
