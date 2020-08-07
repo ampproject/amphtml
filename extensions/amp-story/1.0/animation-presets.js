@@ -187,34 +187,6 @@ export const presets = {
       },
     ],
   },
-  'scale-fade-up': {
-    duration: 600,
-    easing: `cubic-bezier(${DEFAULT_CURVE})`,
-    keyframes: [
-      {
-        opacity: 0,
-        transform: 'scale(.7)',
-      },
-      {
-        opacity: 1,
-        transform: 'scale(1)',
-      },
-    ],
-  },
-  'scale-fade-down': {
-    duration: 600,
-    easing: `cubic-bezier(${DEFAULT_CURVE})`,
-    keyframes: [
-      {
-        opacity: 0,
-        transform: 'scale(1.4)',
-      },
-      {
-        opacity: 1,
-        transform: 'scale(1)',
-      },
-    ],
-  },
   'drop': {
     duration: 1600,
     keyframes(dimensions) {
@@ -295,38 +267,6 @@ export const presets = {
     keyframes(dimensions) {
       const offsetX = dimensions.pageWidth - dimensions.targetX;
       return whooshIn(offsetX, 0, 0, 0);
-    },
-  },
-  'move-fade-in-left': {
-    duration: 600,
-    easing: `cubic-bezier(${DEFAULT_CURVE})`,
-    keyframes(dimensions) {
-      const offsetX = -(dimensions.pageWidth * 0.3);
-      return moveIn(offsetX, 0, 0, 0);
-    },
-  },
-  'move-fade-in-right': {
-    duration: 600,
-    easing: `cubic-bezier(${DEFAULT_CURVE})`,
-    keyframes(dimensions) {
-      const offsetX = dimensions.pageWidth * 0.3;
-      return moveIn(offsetX, 0, 0, 0);
-    },
-  },
-  'move-fade-in-top': {
-    duration: 600,
-    easing: `cubic-bezier(${DEFAULT_CURVE})`,
-    keyframes(dimensions) {
-      const offsetY = -(dimensions.pageWidth * 0.3);
-      return moveIn(0, offsetY, 0, 0);
-    },
-  },
-  'move-fade-in-bottom': {
-    duration: 600,
-    easing: `cubic-bezier(${DEFAULT_CURVE})`,
-    keyframes(dimensions) {
-      const offsetY = dimensions.pageWidth * 0.3;
-      return moveIn(0, offsetY, 0, 0);
     },
   },
   'pan-left': {

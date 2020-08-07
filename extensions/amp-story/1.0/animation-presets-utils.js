@@ -75,27 +75,6 @@ export function whooshIn(startX, startY, endX, endY) {
 }
 
 /**
- * Gradually shows and moves the element while translating it on the 2d plane.
- * @param {number} startX Starting point in the abscissa.
- * @param {number} startY Starting point in the ordinate.
- * @param {number} endX Ending point in the abscissa.
- * @param {number} endY Ending point in the ordinate.
- * @return {WebKeyframesDef} Keyframes that make up the animation.
- */
-export function moveIn(startX, startY, endX, endY) {
-  return [
-    {
-      opacity: 0,
-      transform: translate(startX, startY),
-    },
-    {
-      opacity: 1,
-      transform: translate(endX, endY),
-    },
-  ];
-}
-
-/**
  * Checks if either of the target's dimensions are smaller than or equal to
  * those of the page.
  * @param {StoryAnimationDimsDef} dimensions Dimensions of page and target.
