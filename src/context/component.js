@@ -365,16 +365,17 @@ export class Component {
     if (cleanupChildren) {
       const childProps = this.childProps_;
       if (childProps) {
+        this.childProps_ = null;
         childProps.forEach((props, contextNode) => {
           props.forEach((prop) => {
             contextNode.values.remove(prop, /* setter */ this);
           });
         });
-        this.childProps_ = null;
       }
 
       const childComps = this.childComps_;
       if (childComps) {
+        this.childComps_ = null;
         childComps.forEach((comps, contextNode) => {
           comps.forEach((id) => {
             contextNode.removeComponent(id);
