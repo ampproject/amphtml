@@ -26,7 +26,7 @@
   "fix-inconsistent-responsive-height-selection": 0,
   "fixed-elements-in-lightbox": 1,
   "flexAdSlots": 0.05,
-  "intersect-resources": 0.1,
+  "intersect-resources": 1,
   "ios-fixed-no-transfer": 0,
   "protocol-adapters": 1,
   "pump-early-frame": 1,
