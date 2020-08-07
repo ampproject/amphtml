@@ -44,6 +44,8 @@ const TRANSLATE_X_ATTRIBUTE_NAME = 'translate-x';
 /** @const {string} */
 const TRANSLATE_Y_ATTRIBUTE_NAME = 'translate-y';
 
+const DEFAULT_CURVE = '0.4, 0.4, 0.0, 1';
+
 /** @const {!Array<string>} */
 export const PRESET_OPTION_ATTRIBUTES = [
   SCALE_START_ATTRIBUTE_NAME,
@@ -103,8 +105,8 @@ export function setStyleForPreset(el, presetName) {
  */
 export const presets = {
   'pulse': {
-    duration: 400,
-    easing: 'cubic-bezier(0.3, 0.0, 0.0, 1)',
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
     keyframes: [
       {
         offset: 0,
@@ -125,56 +127,56 @@ export const presets = {
     ],
   },
   'fly-in-left': {
-    duration: 400,
-    easing: 'cubic-bezier(0.3, 0.0, 0.0, 1)',
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
     keyframes(dimensions) {
       const offsetX = -(dimensions.targetX + dimensions.targetWidth);
       return translate2d(offsetX, 0, 0, 0);
     },
   },
   'fly-in-right': {
-    duration: 400,
-    easing: 'cubic-bezier(0.3, 0.0, 0.0, 1)',
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
     keyframes(dimensions) {
       const offsetX = dimensions.pageWidth - dimensions.targetX;
       return translate2d(offsetX, 0, 0, 0);
     },
   },
   'fly-in-top': {
-    duration: 400,
-    easing: 'cubic-bezier(0.3, 0.0, 0.0, 1)',
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
     keyframes(dimensions) {
       const offsetY = -(dimensions.targetY + dimensions.targetHeight);
       return translate2d(0, offsetY, 0, 0);
     },
   },
   'fly-in-bottom': {
-    duration: 400,
-    easing: 'cubic-bezier(0.3, 0.0, 0.0, 1)',
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
     keyframes(dimensions) {
       const offsetY = dimensions.pageHeight - dimensions.targetY;
       return translate2d(0, offsetY, 0, 0);
     },
   },
   'rotate-in-left': {
-    duration: 600,
-    easing: 'cubic-bezier(0.3, 0.0, 0.0, 1)',
+    duration: 1000,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
     keyframes(dimensions) {
       const offsetX = -(dimensions.targetX + dimensions.targetWidth);
       return rotateAndTranslate(offsetX, 0, 0, 0, -1);
     },
   },
   'rotate-in-right': {
-    duration: 600,
-    easing: 'cubic-bezier(0.3, 0.0, 0.0, 1)',
+    duration: 1000,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
     keyframes(dimensions) {
       const offsetX = dimensions.pageWidth - dimensions.targetX;
       return rotateAndTranslate(offsetX, 0, 0, 0, 1);
     },
   },
   'fade-in': {
-    duration: 400,
-    easing: 'cubic-bezier(0, 0.0, 0.0, 1)',
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
     keyframes: [
       {
         opacity: 0,
@@ -238,7 +240,7 @@ export const presets = {
   },
   'twirl-in': {
     duration: 1000,
-    easing: 'cubic-bezier(0.4, 0.0, 0.2, 1)',
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
     keyframes: [
       {
         transform: 'rotate(-540deg) scale(0.1)',
@@ -251,16 +253,16 @@ export const presets = {
     ],
   },
   'whoosh-in-left': {
-    duration: 400,
-    easing: 'cubic-bezier(0.3, 0.0, 0.0, 1)',
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
     keyframes(dimensions) {
       const offsetX = -(dimensions.targetX + dimensions.targetWidth);
       return whooshIn(offsetX, 0, 0, 0);
     },
   },
   'whoosh-in-right': {
-    duration: 400,
-    easing: 'cubic-bezier(0.3, 0.0, 0.0, 1)',
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
     keyframes(dimensions) {
       const offsetX = dimensions.pageWidth - dimensions.targetX;
       return whooshIn(offsetX, 0, 0, 0);
