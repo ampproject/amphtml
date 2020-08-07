@@ -214,7 +214,7 @@ describes.realWin(
 
     it('should set the text for the percentage category on update', async () => {
       addThresholdsToInteractive(ampStoryResults, [80, 20, 50]);
-      ampStoryResults.buildCallback();
+      await ampStoryResults.buildCallback();
       await ampStoryResults.layoutCallback();
       storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'i',
@@ -235,7 +235,7 @@ describes.realWin(
 
     it('should set the percentage for the percentage category on update', async () => {
       addThresholdsToInteractive(ampStoryResults, [80, 20, 50]);
-      ampStoryResults.buildCallback();
+      await ampStoryResults.buildCallback();
       await ampStoryResults.layoutCallback();
       storeService.dispatch(Action.ADD_INTERACTIVE_REACT, {
         'interactiveId': 'i',
