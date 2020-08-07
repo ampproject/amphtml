@@ -42,6 +42,23 @@ tags: {  # <amp-story>
     }
   }
   attrs: {
+    name: "entity"
+  }
+  attrs: {
+    name: "entity-logo-src"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "entity-url"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
     name: "poster-landscape-src"
     value_url: {
       protocol: "http"
@@ -438,7 +455,6 @@ tags: {  # <amp-story-cta-layer>
 }
 tags: {  # amp-experiment (json)
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "amp-experiment story extension .json script"
   mandatory_parent: "AMP-EXPERIMENT"

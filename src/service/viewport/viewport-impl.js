@@ -15,7 +15,6 @@
  */
 
 import {Animation} from '../../animation';
-import {FixedLayer} from './../fixed-layer';
 import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
@@ -139,12 +138,8 @@ export class ViewportImpl {
     /** @private {string|undefined} */
     this.originalViewportMetaString_ = undefined;
 
-    /** @private {?FixedLayer} */
+    /** @private {?../fixed-layer.FixedLayer} */
     this.fixedLayer_ = null;
-
-    if (!MOVE_FIXED_LAYER && !IS_SXG) {
-      this.createFixedLayer(FixedLayer);
-    }
 
     this.viewer_.onMessage('viewport', this.updateOnViewportEvent_.bind(this));
     this.viewer_.onMessage('scroll', this.viewerSetScrollTop_.bind(this));
@@ -1169,7 +1164,8 @@ function createViewport(ampdoc) {
   let binding;
   if (
     ampdoc.isSingleDoc() &&
-    getViewportType(win, viewer) == ViewportType.NATURAL_IOS_EMBED
+    getViewportType(win, viewer) == ViewportType.NATURAL_IOS_EMBED &&
+    !IS_SXG
   ) {
     binding = new ViewportBindingIosEmbedWrapper_(win);
   } else {

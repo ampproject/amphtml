@@ -511,6 +511,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'glomex': {
+    prefetch: 'https://player.glomex.com/integration/1/amp-embed.js',
+  },
+
   'gmossp': {
     prefetch: 'https://cdn.gmossp-sp.jp/ads/amp.js',
   },

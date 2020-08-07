@@ -32,6 +32,7 @@ import {dict, map} from '../utils/object';
 import {cssText} from '../../build/amp-story-player-iframe.css';
 import {dev} from '../log';
 import {findIndex} from '../utils/array';
+import {getMode} from '../../src/mode';
 import {resetStyles, setStyle, setStyles} from '../style';
 import {toArray} from '../types';
 import {tryFocus} from '../dom';
@@ -378,14 +379,15 @@ export class AmpStoryPlayer {
   initializeShadowRoot_() {
     this.rootEl_ = this.doc_.createElement('main');
 
-    // Create shadow root
-    const shadowRoot = this.element_.attachShadow({mode: 'open'});
+    const containerToUse = getMode().test
+      ? this.element_
+      : this.element_.attachShadow({mode: 'open'});
 
     // Inject default styles
     const styleEl = this.doc_.createElement('style');
     styleEl.textContent = cssText;
-    shadowRoot.appendChild(styleEl);
-    shadowRoot.appendChild(this.rootEl_);
+    containerToUse.appendChild(styleEl);
+    containerToUse.appendChild(this.rootEl_);
   }
 
   /**
@@ -399,6 +401,8 @@ export class AmpStoryPlayer {
     }
 
     const button = this.doc_.createElement('button');
+    this.rootEl_.appendChild(button);
+
     button.classList.add(BUTTON_CLASSES[option]);
     button.classList.add(BUTTON_CLASSES.BASE);
 
@@ -407,8 +411,6 @@ export class AmpStoryPlayer {
         createCustomEvent(this.win_, BUTTON_EVENTS[option], dict({}))
       );
     });
-
-    this.rootEl_.appendChild(button);
   }
 
   /**
