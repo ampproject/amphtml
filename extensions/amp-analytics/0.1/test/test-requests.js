@@ -469,6 +469,64 @@ describes.realWin('Requests', {amp: 1}, (env) => {
         ]);
       });
 
+      it('should respect nested extraUrlParam', async () => {
+        const spy = env.sandbox.spy();
+        const r = {'baseUrl': 'r1', 'batchInterval': 1};
+        const handler = createRequestHandler(r, spy);
+
+        const expansionOptions = new ExpansionOptions({
+          'test1': 'TEST1',
+          'test2': 'TEST2',
+          'test3': 'TEST3',
+        });
+        const expansionOptions2 = new ExpansionOptions({
+          'test1': 'Test1',
+          'test2': 'Test2',
+          'test3': 'Test3',
+        });
+        const trigger = {
+          'extraUrlParams': {
+            'e1': {
+              'e2': {
+                'data': '${test1}',
+              },
+            },
+            'e3': [['${test2}'], '${test3}'],
+          },
+        };
+        handler.send({}, trigger, expansionOptions, {});
+        handler.send({}, trigger, expansionOptions2, {});
+
+        clock.tick(1000);
+        await macroTask();
+        expect(spy).to.be.calledWith('r1', [
+          {
+            extraUrlParams: {
+              e1: {
+                e2: {
+                  data: 'TEST1',
+                },
+              },
+              e3: [['TEST2'], 'TEST3'],
+            },
+            timestamp: 0,
+            trigger: undefined,
+          },
+          {
+            extraUrlParams: {
+              e1: {
+                e2: {
+                  data: 'Test1',
+                },
+              },
+              e3: [['Test2'], 'Test3'],
+            },
+            timestamp: 0,
+            trigger: undefined,
+          },
+        ]);
+      });
+
       it('should keep extraUrlParam', function* () {
         const spy = env.sandbox.spy();
         const r = {'baseUrl': 'r1&${extraUrlParams}&r2', 'batchInterval': 1};
@@ -579,10 +637,14 @@ describes.realWin('Requests', {amp: 1}, (env) => {
     beforeEach(() => {
       expansionOptions = new ExpansionOptions({
         'teste1': 'TESTE1',
+        'teste3': 3,
+        'teste4': true,
       });
       params = {
         'e1': '${teste1}',
         'e2': 'teste2',
+        'e3': '${teste3}',
+        'e4': '${teste4}',
       };
       // expandPostMessage() uses the URL replacements service scoped to the
       // passed element. Use the top-level service for testing.
@@ -620,7 +682,7 @@ describes.realWin('Requests', {amp: 1}, (env) => {
         element
       );
       return replacePromise.then((replace) => {
-        expect(replace).to.equal('test e1=TESTE1&e2=teste2 foo');
+        expect(replace).to.equal('test e1=TESTE1&e2=teste2&e3=3&e4=true foo');
         expect(appendPromise).to.eventually.equal('test foo');
       });
     });

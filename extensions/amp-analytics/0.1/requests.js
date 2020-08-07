@@ -468,6 +468,7 @@ function expandExtraUrlParams(
   element,
   opt_allowlist
 ) {
+  const newParams = {};
   const requestPromises = [];
   // Don't encode param values here,
   // as we'll do it later in the getExtraUrlParamsString call.
@@ -477,27 +478,41 @@ function expandExtraUrlParams(
     true /* noEncode */
   );
 
-  const expandObject = (params, key) => {
-    const value = params[key];
+  const expandObject = (data, key, expandedData) => {
+    const value = data[key];
 
     if (typeof value === 'string') {
+      expandedData[key] = undefined;
       const request = variableService
         .expandTemplate(value, option, element)
         .then((value) =>
           urlReplacements.expandStringAsync(value, bindings, opt_allowlist)
         )
-        .then((value) => (params[key] = value));
+        .then((value) => {
+          expandedData[key] = value;
+        });
       requestPromises.push(request);
     } else if (isArray(value)) {
-      /** @type {!Array} */ (value).forEach((_, index) =>
-        expandObject(value, index)
-      );
+      expandedData[key] = [];
+      for (let index = 0; index < value.length; index++) {
+        expandObject(value, index, expandedData[key]);
+      }
     } else if (isObject(value) && value !== null) {
-      Object.keys(value).forEach((key) => expandObject(value, key));
+      expandedData[key] = {};
+      const valueKeys = Object.keys(value);
+      for (let index = 0; index < valueKeys.length; index++) {
+        expandObject(value, valueKeys[index], expandedData[key]);
+      }
+    } else {
+      // Number, bool, null
+      expandedData[key] = value;
     }
   };
 
-  Object.keys(params).forEach((key) => expandObject(params, key));
+  const paramKeys = Object.keys(params);
+  for (let index = 0; index < paramKeys.length; index++) {
+    expandObject(params, paramKeys[index], newParams);
+  }
 
-  return Promise.all(requestPromises).then(() => params);
+  return Promise.all(requestPromises).then(() => newParams);
 }
