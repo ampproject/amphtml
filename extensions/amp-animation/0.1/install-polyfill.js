@@ -16,7 +16,8 @@
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 
-const polyfillPromiseMap = new Map();
+/** @type {!WeakMap<Window, Deferred>} */
+const polyfillPromiseMap = new WeakMap();
 
 /**
  * @param {!Window} win
