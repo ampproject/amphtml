@@ -113,6 +113,18 @@ tags: {  # <amp-story-interactive-results>
   attrs: {
     name: 'option-4-image'
   }
+  attrs: {
+    name: 'option-1-text'
+  }
+  attrs: {
+    name: 'option-2-text'
+  }
+  attrs: {
+    name: 'option-3-text'
+  }
+  attrs: {
+    name: 'option-4-text'
+  }
 }
 
 attr_lists: {
