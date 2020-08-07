@@ -27,6 +27,7 @@ import {
 import {
   AmpA4A,
   CREATIVE_SIZE_HEADER,
+  MODULE_NOMODULE_PARAMS_EXP,
   XORIGIN_MODE,
   signatureVerifierFor,
 } from '../../../amp-a4a/0.1/amp-a4a';
@@ -34,7 +35,6 @@ import {AmpAd} from '../../../amp-ad/0.1/amp-ad';
 import {
   AmpAdNetworkDoubleclickImpl,
   EXPAND_JSON_TARGETING_EXP,
-  RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES,
   getNetworkId,
   getPageviewStateTokensForAdRequest,
   resetLocationQueryParametersForTesting,
@@ -1609,8 +1609,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
     });
 
     it('should use random subdomain when experiment is enabled', () => {
-      impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
-
       const expectedPath =
         '^https:\\/\\/[\\w\\d]{32}.safeframe.googlesyndication.com' +
         '\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$';
@@ -1619,32 +1617,19 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, (env) => {
     });
 
     it('should use the same random subdomain for every slot on a page', () => {
-      impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
-
       const first = impl.getSafeframePath();
 
       impl = new AmpAdNetworkDoubleclickImpl(element);
-      impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
       const second = impl.getSafeframePath();
 
       expect(first).to.equal(second);
     });
 
     it('uses random subdomain if experiment is on without win.crypto', () => {
-      impl.experimentIds = [RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT];
-
       env.sandbox.stub(bytesUtils, 'getCryptoRandomBytesArray').returns(null);
 
       const expectedPath =
         '^https:\\/\\/[\\w\\d]{32}.safeframe.googlesyndication.com' +
-        '\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$';
-
-      expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
-    });
-
-    it('should use constant subdomain when experiment is disabled', () => {
-      const expectedPath =
-        '^https://tpc.googlesyndication.com' +
         '\\/safeframe\\/\\d+-\\d+-\\d+\\/html\\/container\\.html$';
 
       expect(impl.getSafeframePath()).to.match(new RegExp(expectedPath));
@@ -1871,6 +1856,7 @@ describes.realWin(
     describe('#setPageLevelExperiments', () => {
       let randomlySelectUnsetExperimentsStub;
       let extractUrlExperimentIdStub;
+      let getAmpDocStub;
       beforeEach(() => {
         randomlySelectUnsetExperimentsStub = env.sandbox.stub(
           impl,
@@ -1881,13 +1867,27 @@ describes.realWin(
           'extractUrlExperimentId_'
         );
         env.sandbox.stub(AmpA4A.prototype, 'buildCallback').callsFake(() => {});
-        env.sandbox.stub(impl, 'getAmpDoc').returns({
+        getAmpDocStub = env.sandbox.stub(impl, 'getAmpDoc').returns({
           whenFirstVisible: () => new Deferred().promise,
           getMetaByName: () => null,
         });
       });
       afterEach(() => {
         toggleExperiment(env.win, 'envDfpInvOrigDeprecated', false);
+      });
+
+      it('should have correctly formatted experiment map', () => {
+        randomlySelectUnsetExperimentsStub.returns({});
+        impl.buildCallback();
+        const experimentMap =
+          randomlySelectUnsetExperimentsStub.firstCall.args[0];
+        Object.keys(experimentMap).forEach((key) => {
+          expect(key).to.be.a('string');
+          const {branches} = experimentMap[key];
+          expect(branches).to.exist;
+          expect(branches).to.be.a('array');
+          branches.forEach((branch) => expect(branch).to.be.a('string'));
+        });
       });
 
       it('should select SRA experiments', () => {
@@ -1913,9 +1913,8 @@ describes.realWin(
           impl.setPageLevelExperiments();
           // args format is call array followed by parameter array so expect
           // first call, first param.
-          experimentInfoMap =
-            randomlySelectUnsetExperimentsStub.args[0][0]['doubleclickSraExp'];
-          expect(experimentInfoMap).to.be.ok;
+          experimentInfoMap = randomlySelectUnsetExperimentsStub.args[0][0][0];
+          expect(experimentInfoMap.experimentId).to.equal('doubleclickSraExp');
           expect(impl.useSra).to.be.false;
         });
 
@@ -1943,6 +1942,51 @@ describes.realWin(
         it('should not allow if block level refresh', () => {
           impl.element.setAttribute('data-enable-refresh', '');
           expect(experimentInfoMap.isTrafficEligible()).to.be.false;
+        });
+      });
+
+      describe('detect module/nomodule experiment', () => {
+        it('should identify module/nomodule control when runtime-type is 10', () => {
+          getAmpDocStub./*OK*/ restore();
+          env.sandbox.stub(impl, 'getAmpDoc').returns({
+            whenFirstVisible: () => new Deferred().promise,
+            getMetaByName: () => '10',
+          });
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
+          expect(
+            impl.experimentIds.includes(MODULE_NOMODULE_PARAMS_EXP.CONTROL)
+          ).to.be.true;
+        });
+
+        it('should identify module/nomodule experiment when runtime-type is 2', () => {
+          getAmpDocStub./*OK*/ restore();
+          env.sandbox.stub(impl, 'getAmpDoc').returns({
+            whenFirstVisible: () => new Deferred().promise,
+            getMetaByName: () => '2',
+          });
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
+          expect(
+            impl.experimentIds.includes(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT)
+          ).to.be.true;
+        });
+
+        // Only 2, 4, 10 should be recognized.
+        it('should ignore module/nomodule experiment when runtime-type is 6', () => {
+          getAmpDocStub./*OK*/ restore();
+          env.sandbox.stub(impl, 'getAmpDoc').returns({
+            whenFirstVisible: () => new Deferred().promise,
+            getMetaByName: () => '6',
+          });
+          randomlySelectUnsetExperimentsStub.returns({});
+          impl.setPageLevelExperiments();
+          expect(
+            impl.experimentIds.includes(MODULE_NOMODULE_PARAMS_EXP.EXPERIMENT)
+          ).to.be.false;
+          expect(
+            impl.experimentIds.includes(MODULE_NOMODULE_PARAMS_EXP.CONTROL)
+          ).to.be.false;
         });
       });
     });

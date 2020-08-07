@@ -21,7 +21,7 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import '../../amp-a4a/0.1/real-time-config-manager';
-import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../src/ampdoc-fie';
+import {EXPERIMENT_INFO_LIST as AMPDOC_FIE_EXPERIMENT_INFO_LIST} from '../../../src/ampdoc-fie';
 import {
   AmpA4A,
   ConsentTupleDef,
@@ -148,19 +148,6 @@ const ZINDEX_EXP_BRANCHES = {
   HOLDBACK: '21065357',
 };
 
-/** @const {string} */
-const RANDOM_SUBDOMAIN_SAFEFRAME_EXP = 'random-subdomain-for-safeframe';
-
-/**
- * Branches of the random subdomain for SafeFrame experiment.
- * @const @enum{string}
- * @visibleForTesting
- */
-export const RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES = {
-  CONTROL: '21065817',
-  EXPERIMENT: '21065818',
-};
-
 /**
  * @const @enum {string}
  * @visibleForTesting
@@ -170,6 +157,13 @@ export const EXPAND_JSON_TARGETING_EXP = {
   ID: 'expand-json-targeting',
   CONTROL: '21066261',
   EXPERIMENT: '21066262',
+};
+
+/** @const @enum {string} */
+const ROUND_LOCATION_PARAMS_HOLDBACK_EXP = {
+  ID: 'ad-adsense-gam-round-params',
+  CONTROL: '21067041',
+  EXPERIMENT: '21067042',
 };
 
 /**
@@ -436,8 +430,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.experimentIds.push(forcedExperimentId);
       }
     }
-    const experimentInfoMap = /** @type {!Object<string, !../../../src/experiments.ExperimentInfo>} */ ({
-      [DOUBLECLICK_SRA_EXP]: {
+    const experimentInfoList = /** @type {!Array<!../../../src/experiments.ExperimentInfo>} */ ([
+      {
+        experimentId: DOUBLECLICK_SRA_EXP,
         isTrafficEligible: () =>
           !forcedExperimentId &&
           !this.win.document./*OK*/ querySelector(
@@ -449,48 +444,57 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           (key) => DOUBLECLICK_SRA_EXP_BRANCHES[key]
         ),
       },
-      [ZINDEX_EXP]: {
+      {
+        experimentId: ZINDEX_EXP,
         isTrafficEligible: () => true,
         branches: Object.values(ZINDEX_EXP_BRANCHES),
       },
-      [RANDOM_SUBDOMAIN_SAFEFRAME_EXP]: {
+      {
+        experimentId: EXPAND_JSON_TARGETING_EXP.ID,
         isTrafficEligible: () => true,
         branches: [
-          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.CONTROL,
-          RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT,
+          EXPAND_JSON_TARGETING_EXP.CONTROL,
+          EXPAND_JSON_TARGETING_EXP.EXPERIMENT,
         ],
       },
-      [[EXPAND_JSON_TARGETING_EXP.ID]]: {
+      {
+        experimentId: RENDER_ON_IDLE_FIX_EXP.id,
         isTrafficEligible: () => true,
         branches: [
-          [EXPAND_JSON_TARGETING_EXP.CONTROL],
-          [EXPAND_JSON_TARGETING_EXP.EXPERIMENT],
+          RENDER_ON_IDLE_FIX_EXP.control,
+          RENDER_ON_IDLE_FIX_EXP.experiment,
         ],
       },
-      [[RENDER_ON_IDLE_FIX_EXP.id]]: {
+      {
+        experimentId: NO_SIGNING_EXP.id,
+        isTrafficEligible: () => true,
+        branches: [NO_SIGNING_EXP.control, NO_SIGNING_EXP.experiment],
+      },
+      {
+        experimentId: STICKY_AD_PADDING_BOTTOM_EXP.id,
         isTrafficEligible: () => true,
         branches: [
-          [RENDER_ON_IDLE_FIX_EXP.control],
-          [RENDER_ON_IDLE_FIX_EXP.experiment],
+          STICKY_AD_PADDING_BOTTOM_EXP.control,
+          STICKY_AD_PADDING_BOTTOM_EXP.experiment,
         ],
       },
-      [NO_SIGNING_EXP.id]: {
-        isTrafficEligible: () => true,
-        branches: [[NO_SIGNING_EXP.control], [NO_SIGNING_EXP.experiment]],
-      },
-      [STICKY_AD_PADDING_BOTTOM_EXP.id]: {
+      {
+        experimentId: ROUND_LOCATION_PARAMS_HOLDBACK_EXP.ID,
         isTrafficEligible: () => true,
         branches: [
-          [STICKY_AD_PADDING_BOTTOM_EXP.control],
-          [STICKY_AD_PADDING_BOTTOM_EXP.experiment],
+          ROUND_LOCATION_PARAMS_HOLDBACK_EXP.CONTROL,
+          ROUND_LOCATION_PARAMS_HOLDBACK_EXP.EXPERIMENT,
         ],
       },
-      ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
-    });
-    const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
+    ]).concat(AMPDOC_FIE_EXPERIMENT_INFO_LIST);
+    const setExps = this.randomlySelectUnsetExperiments_(experimentInfoList);
     Object.keys(setExps).forEach(
       (expName) => setExps[expName] && this.experimentIds.push(setExps[expName])
     );
+    const moduleNomoduleExpId = this.getModuleNomoduleExpIds_();
+    if (moduleNomoduleExpId) {
+      this.experimentIds.push(moduleNomoduleExpId);
+    }
     if (setExps[ZINDEX_EXP] == ZINDEX_EXP_BRANCHES.HOLDBACK) {
       this.inZIndexHoldBack_ = true;
     }
@@ -498,11 +502,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /**
    * For easier unit testing.
-   * @param {!Object<string, !../../../src/experiments.ExperimentInfo>} experimentInfoMap
+   * @param {!Array<!../../../src/experiments.ExperimentInfo>} experimentInfoList
    * @return {!Object<string, string>}
    */
-  randomlySelectUnsetExperiments_(experimentInfoMap) {
-    return randomlySelectUnsetExperiments(this.win, experimentInfoMap);
+  randomlySelectUnsetExperiments_(experimentInfoList) {
+    return randomlySelectUnsetExperiments(this.win, experimentInfoList);
   }
 
   /**
@@ -676,7 +680,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'spsa': this.isSinglePageStoryAd
         ? `${pageLayoutBox.width}x${pageLayoutBox.height}`
         : null,
-      ...googleBlockParameters(this),
+      ...googleBlockParameters(
+        this,
+        !this.experimentIds.includes(
+          ROUND_LOCATION_PARAMS_HOLDBACK_EXP.EXPERIMENT
+        )
+      ),
     };
   }
 
@@ -789,6 +798,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.buildIdentityParams(),
           this.getPageParameters(consentTuple, /* instances= */ undefined),
           rtcParams
+        ),
+        !this.experimentIds.includes(
+          ROUND_LOCATION_PARAMS_HOLDBACK_EXP.EXPERIMENT
         ),
         this.experimentIds
       ).then((adUrl) => this.getAdUrlDeferred.resolve(adUrl));
@@ -1215,11 +1227,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getSafeframePath() {
-    const randomSubdomainExperimentBranch =
-      RANDOM_SUBDOMAIN_SAFEFRAME_BRANCHES.EXPERIMENT;
-    if (!this.experimentIds.includes(randomSubdomainExperimentBranch)) {
-      return super.getSafeframePath();
-    }
     safeFrameRandomSubdomain =
       safeFrameRandomSubdomain || this.getRandomString_();
 
@@ -2006,7 +2013,15 @@ function constructSRARequest_(a4a, instances) {
   return Promise.all(
     instances.map((instance) => instance.getAdUrlDeferred.promise)
   )
-    .then(() => googlePageParameters(a4a, startTime))
+    .then(() =>
+      googlePageParameters(
+        a4a,
+        startTime,
+        !instances[0].experimentIds.includes(
+          ROUND_LOCATION_PARAMS_HOLDBACK_EXP.EXPERIMENT
+        )
+      )
+    )
     .then((googPageLevelParameters) => {
       const blockParameters = constructSRABlockParameters(instances);
       return truncAndTimeUrl(

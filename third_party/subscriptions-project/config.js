@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.107 */
+/** Version: 0.1.22.113 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -88,7 +88,7 @@ function onDocumentState(doc, condition, callback) {
  * @return {!Promise<!Document>}
  */
 function whenDocumentReady(doc) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     onDocumentReady(doc, resolve);
   });
 }
@@ -401,7 +401,9 @@ class ErrorLogger {
   }
 }
 
-const userLogger = new ErrorLogger(window.__AMP_TOP ? AMP_USER_ERROR_SENTINEL : '');
+const userLogger = new ErrorLogger(
+  self.__AMP_TOP ? AMP_USER_ERROR_SENTINEL : ''
+);
 
 const user = () => userLogger;
 
@@ -741,7 +743,7 @@ class PageConfigResolver {
     this.configResolver_ = null;
 
     /** @private @const {!Promise<!PageConfig>} */
-    this.configPromise_ = new Promise(resolve => {
+    this.configPromise_ = new Promise((resolve) => {
       this.configResolver_ = resolve;
     });
 
@@ -831,7 +833,7 @@ class TypeChecker {
    */
   checkArray(typeArray, expectedTypes) {
     let found = false;
-    typeArray.forEach(candidateType => {
+    typeArray.forEach((candidateType) => {
       found =
         found ||
         expectedTypes.includes(
@@ -1167,7 +1169,7 @@ class MicrodataParser {
     // Grab all the nodes with an itemtype and filter for our allowed types
     const nodeList = Array.prototype.slice
       .call(this.doc_.getRootNode().querySelectorAll('[itemscope][itemtype]'))
-      .filter(node =>
+      .filter((node) =>
         this.checkType_.checkString(
           node.getAttribute('itemtype'),
           ALLOWED_TYPES

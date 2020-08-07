@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-import {AnalyticsEventType} from '../events';
 import {FIE_EMBED_PROP} from '../../../../src/iframe-helper';
-import {
-  IntersectionObserverPolyfill,
-  nativeIntersectionObserverSupported,
-} from '../../../../src/utils/intersection-observer-polyfill';
 import {Services} from '../../../../src/services';
 import {
   VisibilityManagerForDoc,
@@ -383,67 +378,6 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
     expect(inOb.disconnected).to.be.true;
     expect(root.intersectionObserver_).to.be.null;
     expect(inOb.elements).to.not.contain(otherTarget);
-  });
-
-  it('should polyfill and dispose intersection observer', () => {
-    delete win.IntersectionObserver;
-
-    const startScrollCount = viewport.scrollObservable_.getHandlerCount();
-    const startChangeCount = viewport.changeObservable_.getHandlerCount();
-
-    // Check observer is correctly set.
-    const inOb = root.getIntersectionObserver_();
-    expect(inOb).to.be.instanceOf(IntersectionObserverPolyfill);
-    expect(viewport.scrollObservable_.getHandlerCount()).to.equal(
-      startScrollCount + 1
-    );
-    expect(viewport.changeObservable_.getHandlerCount()).to.equal(
-      startChangeCount + 1
-    );
-
-    root.dispose();
-    expect(viewport.scrollObservable_.getHandlerCount()).to.equal(
-      startScrollCount
-    );
-    expect(viewport.changeObservable_.getHandlerCount()).to.equal(
-      startChangeCount
-    );
-  });
-
-  it('should support polyfill on non-amp root element', async () => {
-    delete win.IntersectionObserver;
-    const inOb = root.getIntersectionObserver_();
-    const spy = env.sandbox.spy(root, 'onIntersectionChange_');
-
-    const rootElement = win.document.documentElement;
-    root.listenElement(rootElement, {}, null, null, eventResolver);
-    expect(root.models_).to.have.length(1);
-    const model = root.models_[0];
-    expect(inOb.observeEntries_).to.have.length(1);
-
-    // Starts as invisible.
-    expect(model.getVisibility_()).to.equal(0);
-
-    // Trigger tick.
-    env.sandbox.stub(viewport, 'getRect').callsFake(() => {
-      return layoutRectLtwh(0, 0, 100, 100);
-    });
-    env.sandbox.stub(rootElement, 'getBoundingClientRect').returns({
-      left: 0,
-      top: 50,
-      width: 100,
-      height: 100,
-    });
-    viewport.scrollObservable_.fire({type: AnalyticsEventType.SCROLL});
-
-    return eventPromise.then(() => {
-      expect(spy.args[0][0]).to.equal(rootElement);
-      // Visability
-      expect(spy.args[0][1]).to.equal(0.5);
-      // Intersection rect
-      expect(spy.args[0][2]).to.deep.equal(layoutRectLtwh(0, 50, 100, 50));
-      expect(inOb.observeEntries_).to.have.length(0);
-    });
   });
 
   it('should listen on root', () => {
@@ -1065,14 +999,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, (env) => {
         unobserve: unobserveSpy,
       };
     };
-    if (nativeIntersectionObserverSupported(ampdoc.win)) {
-      env.sandbox.stub(win, 'IntersectionObserver').callsFake(inob);
-    } else {
-      win.IntersectionObserver = inob;
-      win.IntersectionObserverEntry = function () {};
-      win.IntersectionObserverEntry.prototype.intersectionRatio = 0;
-      expect(nativeIntersectionObserverSupported(ampdoc.win)).to.be.true;
-    }
+    env.sandbox.stub(win, 'IntersectionObserver').callsFake(inob);
 
     readyPromise = new Promise((resolve) => {
       readyResolver = resolve;

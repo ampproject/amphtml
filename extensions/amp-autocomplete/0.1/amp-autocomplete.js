@@ -35,7 +35,7 @@ import {dict, hasOwn, map, ownProperty} from '../../../src/utils/object';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {includes, startsWith} from '../../../src/string';
 import {isAmp4Email} from '../../../src/format';
-import {isArray, isEnumValue, toArray} from '../../../src/types';
+import {isArray, isEnumValue} from '../../../src/types';
 import {mod} from '../../../src/utils/math';
 import {once} from '../../../src/utils/function';
 import {removeChildren, tryFocus} from '../../../src/dom';
@@ -527,6 +527,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       return Promise.resolve();
     }
     if (typeof src === 'string') {
+      this.srcBase_ = src;
       return this.getRemoteData_().then(
         (remoteData) => {
           this.sourceData_ = remoteData || [];
@@ -724,9 +725,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       renderPromise = this.getSsrTemplateHelper()
         .applySsrOrCsrTemplate(this.element, filteredData)
         .then((rendered) => {
-          const elements = isArray(rendered)
-            ? rendered
-            : toArray(rendered.children);
+          const elements = isArray(rendered) ? rendered : [rendered];
           elements.forEach((child) => {
             if (child.hasAttribute('data-disabled')) {
               child.setAttribute('aria-disabled', 'true');
@@ -1096,25 +1095,12 @@ export class AmpAutocomplete extends AMP.BaseElement {
       ActionTrust.HIGH
     );
 
-    // Ensure on="change" is triggered for input
-    const changeName = 'change';
-    const changeEvent = createCustomEvent(
-      this.win,
-      `amp-autocomplete.${changeName}`,
-      /** @type {!JsonObject} */ ({value})
-    );
-    this.action_.trigger(
-      dev().assertElement(this.inputElement_),
-      changeName,
-      changeEvent,
-      ActionTrust.HIGH
-    );
-
     // Ensure native change listeners are triggered
     const nativeChangeEvent = createCustomEvent(
       this.win,
       'change',
-      /** @type {!JsonObject} */ ({value})
+      /** @type {!JsonObject} */ ({value}),
+      {bubbles: true}
     );
     this.inputElement_.dispatchEvent(nativeChangeEvent);
   }

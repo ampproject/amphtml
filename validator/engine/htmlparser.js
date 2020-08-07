@@ -142,6 +142,24 @@ const TagRegion = {
 };
 
 /**
+ * Computes the byte length, rather than character length, of a utf8 string.
+ * https://en.wikipedia.org/wiki/UTF-8
+ * @param {string} utf8Str
+ * @return {number}
+ */
+const byteLength = function byteLength(utf8Str) {
+  // To figure out which characters are multi-byte we can abuse
+  // encodeURIComponent which will escape those specific characters.
+  const multiByteEscapedChars = encodeURIComponent(utf8Str).match(/%[89ABab]/g);
+  if (multiByteEscapedChars === null) {
+    return utf8Str.length;
+  } else {
+    return utf8Str.length + multiByteEscapedChars.length;
+  }
+};
+exports.byteLength = byteLength;
+
+/**
  * This abstraction keeps track of which tags have been opened / closed as we
  * traverse the tags in the document. Closing tags is tricky:
  * - Some tags have no end tag per spec. For example, there is no </img> tag per
@@ -1032,6 +1050,7 @@ const DocLocatorImpl = class extends parserInterface.DocLocator {
         ++currentCol;
       }
     }
+    this.docByteSize_ = byteLength(htmlText);
 
     // The current position in the htmlText.
     this.pos_ = 0;
@@ -1084,6 +1103,14 @@ const DocLocatorImpl = class extends parserInterface.DocLocator {
    */
   getCol() {
     return this.col_;
+  }
+
+  /**
+   * @inheritDoc
+   * @this {DocLocatorImpl}
+   */
+  getDocByteSize() {
+    return this.docByteSize_;
   }
 };
 

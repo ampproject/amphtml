@@ -16,6 +16,7 @@
     </style>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+    <script async src="https://cdn.ampproject.org/v0/amp-story-interactive-1.0.js"></script>
     <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
   </head>
@@ -53,14 +54,16 @@
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
             <amp-story-interactive-quiz
-                id="first-cup-dark"
-                endpoint="http://localhost:3000/interactives"
-                style="--interactive-accent-color: rgb(16, 218, 93);--interactive-prompt-background-color: rgb(4, 41, 18);--interactive-prompt-text-color: rgb(16, 218, 93);"
+                id="international-quiz-dark"
+                endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+                style="--interactive-accent-color: #ffa600;--interactive-prompt-background: linear-gradient(150deg, #da450b, #ffa600)"
                 theme="dark"
+                chip-style="shadow"
                 prompt-text="Is this an international quiz?"
                 option-1-text="你好，这是马蒂亚斯"
                 option-2-text="مرحبا هذا ماتياس"
                 option-3-text="Yes it is" option-3-correct
+                option-3-confetti="🌎"
                 option-4-text="ब्राज़ील यहाँ होना चाहिए">
             </amp-story-interactive-quiz>
           </amp-story-grid-layer>
@@ -78,13 +81,14 @@
 
             <amp-story-interactive-quiz
                 id="first-cup-dark"
-                endpoint="http://localhost:3000/interactives"
+                endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
                 style="--interactive-accent-color: #20AC5E;"
                 theme="dark"
                 prompt-text="Who won the first soccer world cup?"
                 option-1-text="France"
                 option-2-text="Spain"
                 option-3-text="Uruguay" option-3-correct
+                option-3-confetti="🇺🇾"
                 option-4-text="Brazil">
             </amp-story-interactive-quiz>
           </amp-story-grid-layer>
@@ -101,13 +105,15 @@
           <amp-story-grid-layer template="center">
             <amp-story-interactive-quiz
                 id="last-cup-dark"
-                endpoint="http://localhost:3000/interactives"
-                theme="dark"
+                prompt-text="Who won the last soccer world cup?"
+                endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
                 style="--interactive-accent-color: rgb(221, 17, 229);"
                 option-1-text="France" option-1-correct
+                option-1-confetti="🇫🇷"
                 option-2-text="Spain"
                 option-3-text="Uruguay"
-                option-4-text="Brazil">
+                option-4-text="Brazil"
+                chip-style="shadow">
             </amp-story-interactive-quiz>
           </amp-story-grid-layer>
         </amp-story-page>
@@ -123,9 +129,10 @@
           <amp-story-grid-layer template="center">
             <amp-story-interactive-quiz
                 id="largest-mammal-light"
-                endpoint="http://localhost:3000/interactives"
+                endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
                 prompt-text="What is the largest mammal?"
                 option-1-text="Blue whale" option-1-correct
+                option-1-confetti="🐳"
                 option-2-text="Etruscan shrew">
             </amp-story-interactive-quiz>
           </amp-story-grid-layer>
@@ -142,10 +149,11 @@
           <amp-story-grid-layer template="center">
             <amp-story-interactive-quiz
                 id="smallest-mammal-light"
-                endpoint="http://localhost:3000/interactives"
+                endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
                 prompt-text="What is the smallest mammal?"
                 option-1-text="Blue whale"
-                option-2-text="Etruscan shrew" option-2-correct>
+                option-2-text="Etruscan shrew" option-2-correct
+                option-2-confetti="🐀">
             </amp-story-interactive-quiz>
           </amp-story-grid-layer>
         </amp-story-page>
@@ -161,19 +169,18 @@
           <amp-story-grid-layer template="thirds">
             <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
               <amp-story-interactive-binary-poll
-								endpoint="http://localhost:3000/interactives"
+								endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
 								prompt-text="What is your favorite movie?"
-								id="movie-light-connected"
-								style="--interactive-accent-color: rgb(16, 218, 93);--interactive-prompt-background-color: rgb(4, 41, 18);--interactive-prompt-text-color: rgb(16, 218, 93);"
+								id="movie-light-green"
+								style="--interactive-accent-color: rgb(16, 218, 93);--interactive-prompt-background: rgb(4, 41, 18);--interactive-prompt-text-color: rgb(16, 218, 93);"
                 theme="dark"
                 option-1-text="דוקטור מוזר"
-                option-2-text="פנתר שחור">
+                option-2-text="פנתר שחור"
+                option-1-confetti="🎥"
+                option-2-confetti="🎬">
               </amp-story-interactive-binary-poll>
             </div>
           </amp-story-grid-layer>
-          <amp-story-page-attachment layout="nodisplay" data-cta-text="Read more">
-            <iframe src="https://www.amp.dev" style="width:100%;height:100%"></iframe>
-          </amp-story-page-attachment>
         </amp-story-page>
         <amp-story-page id="poll-binary-2">
           <amp-story-grid-layer template="fill">
@@ -186,11 +193,13 @@
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
             <amp-story-interactive-binary-poll
-              endpoint="http://localhost:3000/interactives"
-              id="movie-light-connected"
+              endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+              id="movie-dark"
               theme="dark"
               option-1-text="Doctor Strange"
-              option-2-text="Black Panther">
+              option-2-text="Black Panther"
+              option-1-confetti="😺"
+              option-2-confetti="🐶">
             </amp-story-interactive-binary-poll>
           </amp-story-grid-layer>
         </amp-story-page>
@@ -207,11 +216,13 @@
             <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
               <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
               <amp-story-interactive-binary-poll
-                endpoint="http://localhost:3000/interactives"
-                id="movie-light-connected"
+                endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+                id="movie-light-yellow"
                 style="--interactive-accent-color: #FFC700;"
                 option-1-text="🧛"
-                option-2-text="🐆">
+                option-2-text="🐆"
+                option-1-confetti="🧛"
+                option-2-confetti="🐆">
               </amp-story-interactive-binary-poll>
             </div>
           </amp-story-grid-layer>
@@ -229,11 +240,13 @@
             <div grid-area="lower-third" style="display: flex;align-items:center;justify-content:center;flex-direction:column;">
               <h1 style="color:white;text-align:center;line-height:40px;margin-bottom:10px;">What is your favorite movie?</h1>
               <amp-story-interactive-binary-poll
-                endpoint="http://localhost:3000/interactives"
-                id="movie-light-connected"
+                endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+                id="movie-light-black"
                 style="--interactive-accent-color: rgb(0, 0, 0);"
                 option-1-text="Doctor"
-                option-2-text="Panther">
+                option-2-text="Panther"
+                option-1-confetti="🎥"
+                option-2-confetti="🎬">
               </amp-story-interactive-binary-poll>
             </div>
           </amp-story-grid-layer>
@@ -249,12 +262,14 @@
           </amp-story-grid-layer>
           <amp-story-grid-layer template="vertical">
             <amp-story-interactive-binary-poll
-              endpoint="http://localhost:3000/interactives"
+              endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
               id="movie-light-connected"
               theme="dark"
               style="--interactive-accent-color: #FFFFFF;"
               option-1-text="This is a really long text"
-              option-2-text="Panther">
+              option-2-text="Panther"
+              option-1-confetti="🎥"
+              option-2-confetti="🎬">
             </amp-story-interactive-binary-poll>
           </amp-story-grid-layer>
         </amp-story-page>
@@ -271,10 +286,11 @@
             <amp-story-interactive-poll
               id="poll-1"
               theme="dark"
-              endpoint="http://localhost:3000/interactives"
+              endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
               prompt-text="What city do you like the most?"
-              option-1-text="Montevideo"
-              option-2-text="Paris">
+              option-1-text="Montevideo" option-1-confetti="🇺🇾"
+              option-2-text="Paris" option-2-confetti="🇫🇷"
+              option-3-text="Amsterdam" option-3-confetti="🇳🇱">
             </amp-story-interactive-poll>
           </amp-story-grid-layer>
         </amp-story-page>
@@ -291,12 +307,14 @@
             <amp-story-interactive-poll
               id="poll-2"
               theme="dark"
-              endpoint="http://localhost:3000/interactives"
+              endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
               chip-style="shadow"
               style="--interactive-accent-color: #f5aa42"
               prompt-text="What city do you like the most?"
-              option-1-text="Montevideo"
-              option-2-text="Paris">
+              option-1-text="Montevideo" option-1-confetti="🇺🇾"
+              option-2-text="Paris" option-2-confetti="🇫🇷"
+              option-3-text="Amsterdam" option-3-confetti="🇳🇱"
+              option-4-text="Madrid" option-4-confetti="🇪🇸">
             </amp-story-interactive-poll>
           </amp-story-grid-layer>
         </amp-story-page>
@@ -312,11 +330,11 @@
           <amp-story-grid-layer template="center">
             <amp-story-interactive-poll
               id="poll-3"
-              endpoint="http://localhost:3000/interactives"
+              endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
               style="--interactive-accent-color: rgb(255, 152, 152); --interactive-prompt-text-color: black"
               prompt-text="What city do you like the most?"
-              option-1-text="Montevideo"
-              option-2-text="Paris">
+              option-1-text="Montevideo" option-1-confetti="🇺🇾"
+              option-2-text="Paris" option-2-confetti="🇫🇷">
             </amp-story-interactive-poll>
           </amp-story-grid-layer>
         </amp-story-page>
@@ -333,12 +351,69 @@
             <amp-story-interactive-poll
               id="poll-4"
               chip-style="shadow"
-              endpoint="http://localhost:3000/interactives"
+              endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
               style="--interactive-accent-color: #eb50a8"
               prompt-text="What city do you like the most?"
-              option-1-text="Montevideo"
-              option-2-text="Paris">
+              option-1-text="Montevideo" option-1-confetti="🇺🇾"
+              option-2-text="Paris" option-2-confetti="🇫🇷"
+              option-3-text="Amsterdam" option-3-confetti="🇳🇱">
             </amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-5">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-poll
+              id="poll-4"
+              chip-style="shadow"
+              endpoint="http://localhost:3000/interactives"
+              style="--interactive-accent-color: #ff6347"
+              theme="dark"
+              prompt-text="What is your favorite food?"
+              option-1-text="Tacos"
+              option-2-text="Bacon"
+              option-3-text="Broccoli"
+              option-4-text="Ice cream"
+              option-1-confetti="🌮"
+              option-2-confetti="🥓"
+              option-3-confetti="🥦"
+              option-4-confetti="🍦"
+            amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="poll-6">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-poll
+              id="poll-4"
+              chip-style="shadow"
+              endpoint="http://localhost:3000/interactives"
+              style="--interactive-accent-color: #ff6347"
+              theme="light"
+              prompt-text="What is your favorite food?"
+              option-1-text="Tacos"
+              option-2-text="Bacon"
+              option-3-text="Broccoli"
+              option-4-text="Ice cream"
+              option-1-confetti="🌮"
+              option-2-confetti="🥓"
+              option-3-confetti="🥦"
+              option-4-confetti="🍦"
+            amp-story-interactive-poll>
           </amp-story-grid-layer>
         </amp-story-page>
     </amp-story>

@@ -26,27 +26,6 @@
   display: block !important;
 }
 
-.i-amphtml-story-desktop-panels .i-amphtml-story-button-container::before {
-  content: '';
-  position: absolute !important;
-  top: 0 !important;
-  bottom: 0 !important;
-  /* Roughly equivalent to (viewport width - active page width) / 2  */
-  width: calc(50vw - 23vh - 32px) !important;
-}
-
-.i-amphtml-story-desktop-panels .i-amphtml-story-button-container.next-container::before,
-[dir=rtl] .i-amphtml-story-desktop-panels .i-amphtml-story-button-container.prev-container::before {
-  right: 0 !important;
-  left: auto !important;
-}
-
-.i-amphtml-story-desktop-panels .i-amphtml-story-button-container.prev-container::before,
-[dir=rtl] .i-amphtml-story-desktop-panels .i-amphtml-story-button-container.next-container::before {
-  left: 0 !important;
-  right: auto !important;
-}
-
 .i-amphtml-story-button-move,
 .i-amphtml-story-fwd-next > .i-amphtml-story-page-sentinel,
 .i-amphtml-story-back-prev > .i-amphtml-story-page-sentinel {

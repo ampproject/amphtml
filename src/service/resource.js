@@ -498,13 +498,19 @@ export class Resource {
       oldBox.top != newBox.top ||
       sizeChanges
     ) {
-      if (
-        this.element.isUpgraded() &&
-        this.state_ != ResourceState.NOT_BUILT &&
-        (this.state_ == ResourceState.NOT_LAID_OUT ||
-          this.element.isRelayoutNeeded())
-      ) {
-        this.state_ = ResourceState.READY_FOR_LAYOUT;
+      if (this.element.isUpgraded()) {
+        if (this.state_ == ResourceState.NOT_LAID_OUT) {
+          // If the element isn't laid out yet, then we're now ready for layout.
+          this.state_ = ResourceState.READY_FOR_LAYOUT;
+        } else if (
+          (this.state_ == ResourceState.LAYOUT_COMPLETE ||
+            this.state_ == ResourceState.LAYOUT_FAILED) &&
+          this.element.isRelayoutNeeded()
+        ) {
+          // If the element was already laid out and we need to relayout, then
+          // go back to ready for layout.
+          this.state_ = ResourceState.READY_FOR_LAYOUT;
+        }
       }
     }
 
@@ -677,17 +683,18 @@ export class Resource {
    * @return {boolean}
    */
   isDisplayed(usePremeasuredRect = false) {
+    const isConnected =
+      this.element.ownerDocument && this.element.ownerDocument.defaultView;
+    if (!isConnected) {
+      return false;
+    }
     devAssert(!usePremeasuredRect || this.intersect_);
     const isFluid = this.element.getLayout() == Layout.FLUID;
     const box = usePremeasuredRect
       ? devAssert(this.premeasuredRect_)
       : this.getLayoutBox();
     const hasNonZeroSize = box.height > 0 && box.width > 0;
-    return (
-      (isFluid || hasNonZeroSize) &&
-      !!this.element.ownerDocument &&
-      !!this.element.ownerDocument.defaultView
-    );
+    return isFluid || hasNonZeroSize;
   }
 
   /**

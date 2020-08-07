@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-import {
-  DEFAULT_THRESHOLD,
-  IntersectionObserverPolyfill,
-  nativeIntersectionObserverSupported,
-} from '../../../src/utils/intersection-observer-polyfill';
 import {Services} from '../../../src/services';
 import {VisibilityModel} from './visibility-model';
 import {dev, user} from '../../../src/log';
@@ -38,6 +33,30 @@ const TAG = 'amp-analytics/visibility-manager';
 
 const PROP = '__AMP_VIS';
 const VISIBILITY_ID_PROP = '__AMP_VIS_ID';
+
+export const DEFAULT_THRESHOLD = [
+  0,
+  0.05,
+  0.1,
+  0.15,
+  0.2,
+  0.25,
+  0.3,
+  0.35,
+  0.4,
+  0.45,
+  0.5,
+  0.55,
+  0.6,
+  0.65,
+  0.7,
+  0.75,
+  0.8,
+  0.85,
+  0.9,
+  0.95,
+  1,
+];
 
 /** @type {number} */
 let visibilityIdCounter = 1;
@@ -595,7 +614,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
      */
     this.trackedElements_ = map();
 
-    /** @private {?IntersectionObserver|?IntersectionObserverPolyfill} */
+    /** @private {?IntersectionObserver} */
     this.intersectionObserver_ = null;
 
     if (getMode(this.ampdoc.win).runtime == 'inabox') {
@@ -727,43 +746,18 @@ export class VisibilityManagerForDoc extends VisibilityManager {
   }
 
   /**
-   * @return {!IntersectionObserver|!IntersectionObserverPolyfill}
+   * @return {!IntersectionObserver}
    * @private
    */
   getIntersectionObserver_() {
     if (!this.intersectionObserver_) {
-      this.intersectionObserver_ = this.createIntersectionObserver_();
-    }
-    return this.intersectionObserver_;
-  }
-
-  /**
-   * @return {!IntersectionObserver|!IntersectionObserverPolyfill}
-   * @private
-   */
-  createIntersectionObserver_() {
-    // Native.
-    const {win} = this.ampdoc;
-    if (nativeIntersectionObserverSupported(win)) {
-      return new win.IntersectionObserver(
+      const {win} = this.ampdoc;
+      this.intersectionObserver_ = new win.IntersectionObserver(
         this.onIntersectionChanges_.bind(this),
         {threshold: DEFAULT_THRESHOLD}
       );
     }
-
-    // Polyfill.
-    const intersectionObserverPolyfill = new IntersectionObserverPolyfill(
-      this.onIntersectionChanges_.bind(this),
-      {threshold: DEFAULT_THRESHOLD}
-    );
-    const ticker = () => {
-      intersectionObserverPolyfill.tick(this.viewport_.getRect());
-    };
-    this.unsubscribe(this.viewport_.onScroll(ticker));
-    this.unsubscribe(this.viewport_.onChanged(ticker));
-    // Tick in the next event loop. That's how native InOb works.
-    setTimeout(ticker);
-    return intersectionObserverPolyfill;
+    return this.intersectionObserver_;
   }
 
   /**

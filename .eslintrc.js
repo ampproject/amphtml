@@ -59,6 +59,7 @@ module.exports = {
   'globals': {
     ...getExperimentGlobals(),
     'IS_ESM': 'readonly',
+    'IS_SXG': 'readonly',
     'AMP': 'readonly',
     'context': 'readonly',
     'global': 'readonly',
@@ -311,7 +312,7 @@ module.exports = {
       },
     },
     {
-      'files': ['**/*.extern.js'],
+      'files': ['**/*.extern.js', '**/*.type.js'],
       'rules': {
         'no-var': 0,
         'no-undef': 0,

@@ -119,51 +119,6 @@ describe('LayoutRect', () => {
   });
 });
 
-describe('LayoutRectAsync', () => {
-  let vsync;
-  let hostViewport;
-  let element;
-
-  beforeEach(() => {
-    vsync = {
-      measurePromise: (callback) => {
-        return Promise.resolve(callback());
-      },
-    };
-    element = {
-      getBoundingClientRect: () => {
-        return {
-          x: 10,
-          y: 18,
-          width: 6,
-          height: 12,
-          top: 18,
-          right: 16,
-          bottom: 30,
-          left: 10,
-        };
-      },
-    };
-  });
-
-  it('should calculate bounding client rect via parent', async () => {
-    hostViewport = {left: 3, top: 5};
-    const asyncRect = await lr.getLayoutRectAsync(element, hostViewport, vsync);
-    expect(asyncRect.left).to.equal(13);
-    expect(asyncRect.top).to.equal(23);
-    expect(asyncRect.width).to.equal(6);
-    expect(asyncRect.height).to.equal(12);
-  });
-
-  it('should calculate boudning client rect without hostviewport', async () => {
-    const asyncRect = await lr.getLayoutRectAsync(element, undefined, vsync);
-    expect(asyncRect.left).to.equal(10);
-    expect(asyncRect.top).to.equal(18);
-    expect(asyncRect.width).to.equal(6);
-    expect(asyncRect.height).to.equal(12);
-  });
-});
-
 describe('cloneLayoutMarginsChangeDef', () => {
   it('should clone margins change correctly into new object', () => {
     const marginsChange = {
