@@ -15,7 +15,6 @@
  */
 
 import '../amp-bind';
-import * as xhrUtils from '../../../../src/utils/xhr-utils';
 import {ActionTrust} from '../../../../src/action-constants';
 import {Services} from '../../../../src/services';
 import {UrlReplacementPolicy} from '../../../../src/batched-json';
