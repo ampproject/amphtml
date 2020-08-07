@@ -161,9 +161,9 @@ export const EXPAND_JSON_TARGETING_EXP = {
 
 /** @const @enum {string} */
 const ROUND_LOCATION_PARAMS_HOLDBACK_EXP = {
-  ID: 'ad-adsense-gam-round-params',
-  CONTROL: '21067041',
-  EXPERIMENT: '21067042',
+  ID: 'ad-adsense-gam-round-params',
+  CONTROL: '21067041',
+  EXPERIMENT: '21067042',
 };
 
 /**
@@ -682,7 +682,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         : null,
       ...googleBlockParameters(
         this,
-        !this.experimentIds.includes(ROUND_LOCATION_PARAMS_HOLDBACK_EXP.EXPERIMENT)
+        !this.experimentIds.includes(
+          ROUND_LOCATION_PARAMS_HOLDBACK_EXP.EXPERIMENT
+        )
       ),
     };
   }
@@ -797,7 +799,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.getPageParameters(consentTuple, /* instances= */ undefined),
           rtcParams
         ),
-        !this.experimentIds.includes(ROUND_LOCATION_PARAMS_HOLDBACK_EXP.EXPERIMENT),
+        !this.experimentIds.includes(
+          ROUND_LOCATION_PARAMS_HOLDBACK_EXP.EXPERIMENT
+        ),
         this.experimentIds
       ).then((adUrl) => this.getAdUrlDeferred.resolve(adUrl));
     });

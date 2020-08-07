@@ -71,9 +71,9 @@ const TAG = 'amp-ad-network-adsense-impl';
 
 /** @const @enum {string} */
 const ROUND_LOCATION_PARAMS_HOLDBACK_EXP = {
-  ID: 'ad-adsense-gam-round-params',
-  CONTROL: '21067039',
-  EXPERIMENT: '21067040',
+  ID: 'ad-adsense-gam-round-params',
+  CONTROL: '21067039',
+  EXPERIMENT: '21067040',
 };
 
 /**
@@ -424,7 +424,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           'pucrd': identity.pucrd || null,
           ...parameters,
         },
-        !isInExperiment(this.element, ROUND_LOCATION_PARAMS_HOLDBACK_EXP.EXPERIMENT),
+        !isInExperiment(
+          this.element,
+          ROUND_LOCATION_PARAMS_HOLDBACK_EXP.EXPERIMENT
+        ),
         experimentIds
       );
     });
