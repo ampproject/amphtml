@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {useStyles} from './base-carousel';
+import {classes} from './base-carousel.jss';
 
 /**
  * @param {!BaseCarouselDef.ArrowProps} props
@@ -33,17 +33,14 @@ export function Arrow({customArrow, by, advance, disabled}) {
     }
     advance(by);
   };
-  const styles = useStyles();
-  let classNames =
-    styles.arrowPlacement +
-    ' ' +
-    (by < 0 ? styles.arrowLeft : styles.arrowRight);
-  if (isDisabled) {
-    classNames += ' ' + styles.arrowDisabled;
-  }
+  // TODO: uncomment when build step is done.
+  // const classes = useStyles();
+  const classNames = `${classes.arrowPlacement} ${
+    by < 0 ? classes.arrowPrev : classes.arrowNext
+  } ${isDisabled ? classes.arrowDisabled : ''}`;
 
   return (
-    <div class={classNames}>
+    <div className={classNames}>
       {Preact.cloneElement(customArrow, {
         'onClick': onClick,
         'disabled': isDisabled,
@@ -86,19 +83,26 @@ export function ArrowNext({customArrow, ...rest}) {
  * @return {PreactDef.Renderable}
  */
 function DefaultArrow({by, ...rest}) {
-  const styles = useStyles();
+  // TODO: uncomment when build step is done.
+  // const classes = useStyles();
   return (
     <button
-      class={styles.defaultArrowButton}
+      className={classes.defaultArrowButton}
       aria-label={
         by < 0 ? 'Previous item in carousel' : 'Next item in carousel'
       }
       {...rest}
     >
-      <div class={`${styles.arrowBaseStyle} ${styles.arrowFrosting}`}></div>
-      <div class={`${styles.arrowBaseStyle} ${styles.arrowBackdrop}`}></div>
-      <div class={`${styles.arrowBaseStyle} ${styles.arrowBackground}`}></div>
-      <svg class={styles.arrowIcon} viewBox="0 0 24 24">
+      <div
+        className={`${classes.arrowBaseStyle} ${classes.arrowFrosting}`}
+      ></div>
+      <div
+        className={`${classes.arrowBaseStyle} ${classes.arrowBackdrop}`}
+      ></div>
+      <div
+        className={`${classes.arrowBaseStyle} ${classes.arrowBackground}`}
+      ></div>
+      <svg className={classes.arrowIcon} viewBox="0 0 24 24">
         {by < 0 ? (
           <path
             d="M14,7.4 L9.4,12 L14,16.6"

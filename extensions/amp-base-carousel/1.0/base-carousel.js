@@ -18,12 +18,6 @@ import {ArrowNext, ArrowPrev} from './arrow';
 import {Scroller} from './scroller';
 import {toChildArray, useRef, useState} from '../../../src/preact';
 import {useMountEffect} from '../../../src/preact/utils';
-import styles from './base-carousel.jss';
-import {createUseStyles} from 'react-jss';
-
-// TODO discuss this sidestepping of local/no-export-side-effect.
-// eslint-disable-next-line local/no-export-side-effect
-export const useStyles = createUseStyles(styles);
 
 /**
  * @param {!BaseCarouselDef.Props} props
