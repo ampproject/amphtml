@@ -193,7 +193,6 @@ const forbiddenTerms = {
       'src/service/action-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-form/0.1/amp-form.js',
-      'extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.js',
     ],
   },
   'installActivityService': {
@@ -453,7 +452,6 @@ const forbiddenTerms = {
       'src/service/cid-impl.js',
       'src/impression.js',
       'src/ssr-template-helper.js',
-      'extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.js',
     ],
   },
   'prerenderSafe': {
