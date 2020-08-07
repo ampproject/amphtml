@@ -32,8 +32,6 @@
 
 namespace htmlparser {
 
-#define HTMLPARSER_NODE_DEBUG 0;
-
 class Parser;
 
 enum class NodeType {
