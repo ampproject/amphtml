@@ -131,13 +131,9 @@ CSS variable with the URL pointing to the poster image of the story.
 </amp-story-player>
 ```
 
-#### exit-control
-
-Set to `back-button` or `close-button`. The button will dispatch an `amp-story-player-back` or `amp-story-player-close` when clicked. This button will disappear when a page attachment is open and reappear when closed.
-
 ## Programmatic Control
 
-Call the player's various methods to programmatically control the player.
+Call the player's various methods to programmatically control the player. These methods are exposed on the DOM HTML element, `const playerEl = document.querySelector('amp-story-player')` and on the global class variable,`const player = new AmpStoryPlayer(window, playerEl)`.
 
 ### Methods
 
@@ -167,13 +163,13 @@ function StoryPlayer({ url, title, poster, width = 360, height = 600 }) {
 ```
 
 #### go
-
+**Parameters**
 - number: the story in the player to which you want to move, relative to the current story.
 
 If the player is currently on the third story out of ten stories, `player.go(1)` will go forward one story to the fourth story and `player.go(-1)` will go backward one story to the second story. If no value is passed or if delta equals 0, current story will persist and no action will be taken. `player.go(10)` does the same thing as `player.go(0)`.
 
 #### show
-
+**Parameters**
 - string: the URL of the story to show.
 
 Will change the current story being displayed by the player. If the URL is not found, an error will be thrown. This will be changed later on to automatically add the story.
@@ -183,10 +179,10 @@ player.show(url);
 ```
 
 #### add
-
+**Parameters**
 - array of storyObj: contains the stories to be added.
 
-StoryObj type
+**StoryObj Type**
 
 - string: story URL
 - string (optional): story title, to be dded to the anchor's title.
@@ -212,7 +208,7 @@ player.pause();
 ```
 
 #### getStoryState
-
+**Parameters**
 - string: the story state, currently only `page-attachment`.
 
 Will cause a custom event to be fired, see `page-attachment-open` and `page-attachment-close`.
