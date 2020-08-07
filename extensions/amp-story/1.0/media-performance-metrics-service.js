@@ -23,7 +23,6 @@ import {TickLabel} from '../../../src/enums';
 import {dev} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {lastChildElement} from '../../../src/dom';
-import {map} from '../../../src/utils/object';
 import {registerServiceBuilder} from '../../../src/service';
 import {urls} from '../../../src/config';
 
@@ -123,9 +122,8 @@ export class MediaPerformanceMetricsService {
     /** @private {number} */
     this.mediaId_ = 1;
 
-    // TODO(gmajoulet): switch to WeakMap once the AMPHTML project allows them.
-    /** @private @const {!Object<number, !MediaEntryDef>} */
-    this.mediaMap_ = map();
+    /** @private @const {!WeakMap<number, !MediaEntryDef>} */
+    this.mediaMap_ = new WeakMap();
 
     /** @private @const {!../../../src/service/performance-impl.Performance} */
     this.performanceService_ = Services.performanceFor(win);
@@ -180,14 +178,14 @@ export class MediaPerformanceMetricsService {
    * @param {boolean=} sendMetrics
    */
   stopMeasuring(media, sendMetrics = true) {
-    const mediaEntry = this.getMediaEntry_(media);
+    const mediaEntry = this.mediaMap_.get(media);
 
     if (!mediaEntry) {
       return;
     }
 
     mediaEntry.unlisteners.forEach((unlisten) => unlisten());
-    this.deleteMediaEntry_(media);
+    this.mediaMap_.delete(media);
 
     switch (mediaEntry.status) {
       case Status.PLAYING:
@@ -287,29 +285,12 @@ export class MediaPerformanceMetricsService {
 
   /**
    * @param {!HTMLMediaElement} media
-   * @return {!MediaEntryDef}
-   * @private
-   */
-  getMediaEntry_(media) {
-    return this.mediaMap_[media[ID_PROPERTY]];
-  }
-
-  /**
-   * @param {!HTMLMediaElement} media
    * @param {!MediaEntryDef} mediaEntry
    * @private
    */
   setMediaEntry_(media, mediaEntry) {
     media[ID_PROPERTY] = media[ID_PROPERTY] || this.mediaId_++;
-    this.mediaMap_[media[ID_PROPERTY]] = mediaEntry;
-  }
-
-  /**
-   * @param {!HTMLMediaElement} media
-   * @private
-   */
-  deleteMediaEntry_(media) {
-    delete this.mediaMap_[media[ID_PROPERTY]];
+    this.mediaMap_.set(media, mediaEntry);
   }
 
   /**
@@ -400,12 +381,9 @@ export class MediaPerformanceMetricsService {
     // Media error target could be either HTMLMediaElement or HTMLSourceElement.
     const media =
       event.target.tagName === 'SOURCE' ? event.target.parent : event.target;
-    const mediaEntry = this.getMediaEntry_(
-      /** @type {!HTMLMediaElement} */ (media)
-    );
+    const mediaEntry = this.mediaMap_.get(media);
 
     mediaEntry.metrics.error = media.error ? media.error.code : 0;
-
     mediaEntry.status = Status.ERRORED;
   }
 
@@ -414,14 +392,11 @@ export class MediaPerformanceMetricsService {
    * @private
    */
   onPauseOrEnded_(event) {
-    const mediaEntry = this.getMediaEntry_(
-      /** @type {!HTMLMediaElement} */ (event.target)
-    );
+    const mediaEntry = this.mediaMap_.get(event.target);
 
     if (mediaEntry.status === Status.PLAYING) {
       this.addWatchTime_(mediaEntry);
     }
-
     mediaEntry.status = Status.PAUSED;
   }
 
@@ -430,9 +405,7 @@ export class MediaPerformanceMetricsService {
    * @private
    */
   onPlaying_(event) {
-    const mediaEntry = this.getMediaEntry_(
-      /** @type {!HTMLMediaElement} */ (event.target)
-    );
+    const mediaEntry = this.mediaMap_.get(event.target);
     const {timeStamps, metrics} = mediaEntry;
 
     if (!metrics.jointLatency) {
@@ -452,9 +425,7 @@ export class MediaPerformanceMetricsService {
    * @private
    */
   onWaiting_(event) {
-    const mediaEntry = this.getMediaEntry_(
-      /** @type {!HTMLMediaElement} */ (event.target)
-    );
+    const mediaEntry = this.mediaMap_.get(event.target);
     const {timeStamps} = mediaEntry;
 
     if (mediaEntry.status === Status.PLAYING) {
