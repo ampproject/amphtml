@@ -1017,7 +1017,9 @@ export class AmpStoryPlayer {
         true
       );
     });
+  }
 
+  /**
    * React to documentStateUpdate events.
    * @param {!DocumentStateTypeDef} data
    * @private
