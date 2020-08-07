@@ -18,6 +18,7 @@ import {Component} from './component';
 import {ContextNode} from './node';
 import {getDeps, getId} from './component-meta';
 import {isArray} from '../types';
+import {useComponentCallback} from './component-hooks';
 
 const NO_INPUT = undefined;
 
@@ -81,6 +82,99 @@ export function subscribe(node, deps, callback) {
  */
 export function unsubscribe(node, callback) {
   removeComponent(node, callback);
+}
+
+/**
+ * This hook returns a function that can be used to set a child component. A
+ * child component can be set on this component's node or any other in the same
+ * tree. When this component is removed, all child components are also removed.
+ *
+ * See `setComponent` for more info.
+ *
+ * @return {function(function(!Node, I, ...?), I, !Node=)}
+ * @template I
+ */
+export function useSetChildComponent() {
+  return useComponentCallback(setChildComponent);
+}
+
+/**
+ * This hook returns a function that can be used to remove a child component,
+ * that was previously set by the `useSetChildComponent`.
+ *
+ * See `removeComponent` for more info.
+ *
+ * @return {function(function(...?), !Node=)}
+ */
+export function useRemoveChildComponent() {
+  return useComponentCallback(removeChildComponent);
+}
+
+/**
+ * This hook returns a function that can be used to set a child subscriber. A
+ * child subscriber can be set on this component's node or any other in the same
+ * tree. When this component is removed, all child subscribers are also removed.
+ *
+ * See `subscribe` for more info.
+ *
+ * @return {function((!ContextProp|!Array<!ContextProp>), function(...?), !Node=)}
+ */
+export function useSubscribeChild() {
+  return useComponentCallback(subscribeChild);
+}
+
+/**
+ * This hook returns a function that can be used to remove a child subscriber,
+ * that was previously set by the `useSubscribeChild`.
+ *
+ * See `unsubscribe` for more info.
+ *
+ * @return {function(function(...?), !Node=)}
+ */
+export function useUnsubscribeChild() {
+  return useComponentCallback(removeChildComponent);
+}
+
+/**
+ * @param {!Component} component
+ * @param {function(!Node, I, ...?)} func
+ * @param {I} input
+ * @param {!Node|undefined} node
+ * @template I
+ */
+function setChildComponent(component, func, input, node) {
+  const id = getId(func);
+  const deps = getDeps(func);
+  component.setComponent(
+    id,
+    componentWithInputFactory,
+    func,
+    deps,
+    input,
+    node
+  );
+}
+
+/**
+ * @param {!Component} component
+ * @param {function(...?)} func
+ * @param {!Node} node
+ */
+function removeChildComponent(component, func, node) {
+  const id = getId(func);
+  component.removeComponent(id, node);
+}
+
+/**
+ * @param {!Component} component
+ * @param {!ContextProp|!Array<!ContextProp>} deps
+ * @param {function(...?)} callback
+ * @param {!Node|undefined} node
+ */
+function subscribeChild(component, deps, callback, node) {
+  deps = isArray(deps) ? /** @type {!Array<!ContextProp>} */ (deps) : [deps];
+  const id = getId(callback);
+  component.setComponent(id, subscriberFactory, callback, deps, NO_INPUT, node);
 }
 
 /**

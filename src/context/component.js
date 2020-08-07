@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ContextNode} from './node';
 import {protectedNoInline, throttleTail} from './scheduler';
 import {pushIfNotExist, removeItem} from '../utils/array';
 import {withComponent} from './component-hooks';
@@ -94,12 +95,21 @@ export class Component {
     /** @private {?Array<function()>} */
     this.cleanups_ = null;
 
+    /** @private {?Map<!./node.ContextNode, !Array<!ContextProp>>} */
+    this.childProps_ = null;
+
+    /** @private {?Map<!./node.ContextNode, !Array<*>>} */
+    this.childComps_ = null;
+
     // Schedulers.
     /** @private @const {function()} */
     this.update_ = throttleTail(this.update_.bind(this), setTimeout);
 
     /** @private @const {function()} */
     this.run_ = this.run_.bind(this);
+
+    /** @private @const {function(!ContextNode)} */
+    this.cleanupChild_ = this.cleanupChild_.bind(this);
 
     // Subscribe to all dependencies.
     if (deps.length > 0) {
@@ -128,7 +138,7 @@ export class Component {
       );
     }
 
-    this.cleanup_();
+    this.cleanup_(/* cleanupChildren */ true);
   }
 
   /**
@@ -137,7 +147,7 @@ export class Component {
    */
   rootUpdated() {
     const isConnected = this.isConnected_();
-    this.cleanup_();
+    this.cleanup_(/* cleanupChildren */ !isConnected);
     if (isConnected) {
       this.update_();
     }
@@ -196,6 +206,119 @@ export class Component {
   }
 
   /**
+   * Sets the child prop on this or another node.
+   *
+   * @param {!ContextProp<T>} prop
+   * @param {T} value
+   * @param {!Node=} node
+   * @template T
+   * @package
+   */
+  setProp(prop, value, node = undefined) {
+    const contextNode = node ? ContextNode.get(node) : this.contextNode;
+
+    // Set the prop.
+    contextNode.values.set(prop, /* setter */ this, value);
+
+    // Track the prop on the node.
+    const childProps = this.childProps_ || (this.childProps_ = new Map());
+    let props = childProps && childProps.get(contextNode);
+    if (!props) {
+      if (contextNode != this.contextNode) {
+        // The first prop or a component set on another (not this) node:
+        // register the cleanup handler.
+        this.maybeRegisterChildCleanup_(contextNode);
+      }
+      props = [];
+      childProps.set(contextNode, props);
+    }
+    pushIfNotExist(props, prop);
+  }
+
+  /**
+   * Removes the child prop previously set by the `setProp`.
+   *
+   * @param {!ContextProp<T>} prop
+   * @param {!Node=} node
+   * @template T
+   * @package
+   */
+  removeProp(prop, node = undefined) {
+    const contextNode = node ? ContextNode.get(node) : this.contextNode;
+
+    // Remove the prop.
+    contextNode.values.remove(prop, /* setter */ this);
+
+    // Untrack the prop.
+    const childProps = this.childProps_;
+    const props = childProps && childProps.get(contextNode);
+    if (props) {
+      removeItem(props, prop);
+      if (props.length == 0 && contextNode != this.contextNode) {
+        childProps.delete(contextNode);
+        this.maybeUnregisterChildCleanup_(contextNode);
+      }
+    }
+  }
+
+  /**
+   * Sets the child component on this or another node.
+   *
+   * @param {*} id
+   * @param {ComponentFactoryDef} factory
+   * @param {!Function} func
+   * @param {!Array<!ContextProp>} deps
+   * @param {*} input
+   * @param {!Node=} node
+   * @package
+   */
+  setComponent(id, factory, func, deps, input, node = undefined) {
+    const contextNode = node ? ContextNode.get(node) : this.contextNode;
+
+    // Set the component.
+    contextNode.setComponent(id, factory, func, deps, input);
+
+    // Track the child component on the node.
+    const childComps = this.childComps_ || (this.childComps_ = new Map());
+    let comps = childComps && childComps.get(contextNode);
+    if (!comps) {
+      if (contextNode != this.contextNode) {
+        // The first comp set on another (not this) node: register the cleanup
+        // handler.
+        this.maybeRegisterChildCleanup_(contextNode);
+      }
+      comps = [];
+      childComps.set(contextNode, comps);
+    }
+    pushIfNotExist(comps, id);
+  }
+
+  /**
+   * Removes the child component previously set by the `setComponent`.
+   *
+   * @param {*} id
+   * @param {!Node=} node
+   * @package
+   */
+  removeComponent(id, node = undefined) {
+    const contextNode = node ? ContextNode.get(node) : this.contextNode;
+
+    // Remove the component.
+    contextNode.removeComponent(id);
+
+    // Untrack the child component.
+    const childComps = this.childComps_;
+    const comps = childComps && childComps.get(contextNode);
+    if (comps) {
+      removeItem(comps, id);
+      if (comps.length == 0 && contextNode != this.contextNode) {
+        childComps.delete(contextNode);
+        this.maybeUnregisterChildCleanup_(contextNode);
+      }
+    }
+  }
+
+  /**
    * @return {boolean}
    * @private
    */
@@ -216,7 +339,7 @@ export class Component {
       withComponent(this, this.run_);
     } else if (this.running_) {
       this.running_ = false;
-      this.cleanup_();
+      this.cleanup_(/* cleanupChildren */ false);
     }
   }
 
@@ -233,8 +356,33 @@ export class Component {
     this.runCleanup_ = func(this, this.input_, this.depValues_);
   }
 
-  /** @private */
-  cleanup_() {
+  /**
+   * @param {boolean} cleanupChildren
+   * @private
+   */
+  cleanup_(cleanupChildren) {
+    // Cleanup children.
+    if (cleanupChildren) {
+      const childProps = this.childProps_;
+      if (childProps) {
+        childProps.forEach((props, contextNode) => {
+          props.forEach((prop) => {
+            contextNode.values.remove(prop, /* setter */ this);
+          });
+        });
+        this.childProps_ = null;
+      }
+
+      const childComps = this.childComps_;
+      if (childComps) {
+        childComps.forEach((comps, contextNode) => {
+          comps.forEach((id) => {
+            contextNode.removeComponent(id);
+          });
+        });
+      }
+    }
+
     // The last run's cleanup.
     if (this.runCleanup_) {
       protectedNoInline(this.runCleanup_);
@@ -248,6 +396,54 @@ export class Component {
         protectedNoInline(cleanups[i]);
       }
       this.cleanups_.length = 0;
+    }
+  }
+
+  /**
+   * @param {!./node.ContextNode} child
+   * @private
+   */
+  maybeRegisterChildCleanup_(child) {
+    const {childProps_: childProps, childComps_: childComps} = this;
+    if (
+      (!childProps || !childProps.has(child)) &&
+      (!childComps || !childComps.has(child))
+    ) {
+      child.pushCleanup(this.cleanupChild_);
+    }
+  }
+
+  /**
+   * @param {!./node.ContextNode} child
+   * @private
+   */
+  maybeUnregisterChildCleanup_(child) {
+    const {childProps_: childProps, childComps_: childComps} = this;
+    if (
+      (!childProps || !childProps.has(child)) &&
+      (!childComps || !childComps.has(child))
+    ) {
+      child.popCleanup(this.cleanupChild_);
+    }
+  }
+
+  /**
+   * @param {!./node.ContextNode} child
+   * @private
+   */
+  cleanupChild_(child) {
+    const childProps = this.childProps_;
+    const props = childProps && childProps.get(child);
+    if (props) {
+      childProps.delete(child);
+      props.forEach((prop) => child.values.remove(prop, /* setter */ this));
+    }
+
+    const childComps = this.childComps_;
+    const comps = childComps && childComps.get(child);
+    if (comps) {
+      childComps.delete(child);
+      comps.forEach((id) => child.removeComponent(id));
     }
   }
 }

@@ -61,6 +61,20 @@ export function useRef(initialValue = undefined) {
 }
 
 /**
+ * @param {function(!./component.Component, ...?):?} callback
+ * @return {function(...?):?}
+ * @package
+ */
+export function useComponentCallback(callback) {
+  const ref = useRef();
+  if (!ref.current) {
+    const component = getComponent();
+    ref.current = callback.bind(null, component);
+  }
+  return ref.current;
+}
+
+/**
  * A hook to compute a persistent value. Mostly the same as the React's
  * `useMemo` API.
  *
@@ -148,6 +162,52 @@ export function useSyncEffect(callback, deps = undefined) {
     cleanupRef.current = newCleanup;
     component.pushCleanup(newCleanup);
   }
+}
+
+/**
+ * This hook returns a function that can be used to set a child property. A
+ * child property can be set on the component's node or any other in the same
+ * tree. When this component is removed, all child properties are also removed.
+ *
+ * See `setProp` for more info.
+ *
+ * @return {function(!ContextProp<T>, T, !Node=)}
+ * @template T
+ */
+export function useSetChildProp() {
+  return useComponentCallback(setChildProp);
+}
+
+/**
+ * This hook returns a function that can be used to remove a child property,
+ * that was previously set by the `useSetChildProp`.
+ *
+ * See `removeProp` for more info.
+ *
+ * @return {function(!ContextProp, !Node=)}
+ */
+export function useRemoveChildProp() {
+  return useComponentCallback(removeChildProp);
+}
+
+/**
+ * @param {!./component.Component} component
+ * @param {!ContextProp<T>} prop
+ * @param {T} value
+ * @param {!Node|undefined} node
+ * @template T
+ */
+function setChildProp(component, prop, value, node) {
+  component.setProp(prop, value, node);
+}
+
+/**
+ * @param {!./component.Component} component
+ * @param {!ContextProp} prop
+ * @param {!Node|undefined} node
+ */
+function removeChildProp(component, prop, node) {
+  component.removeProp(prop, node);
 }
 
 /**

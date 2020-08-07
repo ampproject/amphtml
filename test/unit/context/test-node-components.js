@@ -21,11 +21,17 @@ import {
   setComponent,
   subscribe,
   unsubscribe,
+  useRemoveChildComponent,
+  useSetChildComponent,
+  useSubscribeChild,
+  useUnsubscribeChild,
 } from '../../../src/context/component-install';
 import {
   useDisposableMemo,
   useMemo,
   useRef,
+  useRemoveChildProp,
+  useSetChildProp,
   useSyncEffect,
 } from '../../../src/context/component-hooks';
 import {withMetaData} from '../../../src/context/component-meta';
@@ -589,6 +595,404 @@ describes.realWin('ContextNode - components', {}, (env) => {
         clock.runAll();
         expect(cleanupSpy).to.be.calledOnce;
         expect(effectSpy).to.be.calledOnce; // no change.
+      });
+    });
+
+    describe('child props', () => {
+      let ComponentSelfProps;
+      let ComponentParentProps;
+      let sibling1Stub;
+      let parentStub;
+      let grandparentStub;
+
+      beforeEach(() => {
+        ComponentSelfProps = (unusedNode, input) => {
+          const setChildProp = useSetChildProp();
+          const removeChildProp = useRemoveChildProp();
+          if (input) {
+            setChildProp(Concat, input);
+          } else {
+            removeChildProp(Concat);
+          }
+        };
+        ComponentParentProps = (unusedNode, input) => {
+          const setChildProp = useSetChildProp();
+          const removeChildProp = useRemoveChildProp();
+          if (input) {
+            setChildProp(Concat, input, parent.node);
+          } else {
+            removeChildProp(Concat, parent.node);
+          }
+        };
+
+        sibling1Stub = sandbox.stub();
+        parentStub = sandbox.stub();
+        grandparentStub = sandbox.stub();
+        sibling1.values.subscribe(Concat, sibling1Stub);
+        parent.values.subscribe(Concat, parentStub);
+        grandparent.values.subscribe(Concat, grandparentStub);
+        clock.runAll();
+        [sibling1Stub, parentStub, grandparentStub].forEach((stub) => {
+          stub.resetHistory();
+        });
+      });
+
+      it('should set props in components', () => {
+        setComponent(grandparent.node, ComponentSelfProps, 'A');
+        clock.runAll();
+        expect(sibling1Stub).to.be.calledOnce.calledWith('A');
+        expect(parentStub).to.be.calledOnce.calledWith('A');
+        expect(grandparentStub).to.be.calledOnce.calledWith('A');
+
+        setComponent(grandparent.node, ComponentParentProps, 'B');
+        clock.runAll();
+        expect(sibling1Stub).to.be.calledTwice.calledWith('AB');
+        expect(parentStub).to.be.calledTwice.calledWith('AB');
+        expect(grandparentStub).to.be.calledOnce; // no change.
+      });
+
+      it('should remove props', () => {
+        setComponent(grandparent.node, ComponentSelfProps, 'A');
+        setComponent(grandparent.node, ComponentParentProps, 'B');
+        clock.runAll();
+        expect(sibling1Stub).to.be.calledOnce.calledWith('AB');
+        expect(parentStub).to.be.calledOnce.calledWith('AB');
+        expect(grandparentStub).to.be.calledOnce.calledWith('A');
+
+        setComponent(grandparent.node, ComponentSelfProps, null);
+        clock.runAll();
+        expect(sibling1Stub).to.be.calledTwice.calledWith('B');
+        expect(parentStub).to.be.calledTwice.calledWith('B');
+        expect(grandparentStub).to.be.calledTwice.calledWith('');
+
+        setComponent(grandparent.node, ComponentParentProps, null);
+        clock.runAll();
+        expect(sibling1Stub).to.be.calledThrice.calledWith('');
+        expect(parentStub).to.be.calledThrice.calledWith('');
+        expect(grandparentStub).to.be.calledTwice; // no change.
+      });
+
+      it('should remove props when component is disconnected', () => {
+        setComponent(grandparent.node, ComponentSelfProps, 'A');
+        setComponent(grandparent.node, ComponentParentProps, 'B');
+        clock.runAll();
+        expect(sibling1Stub).to.be.calledOnce.calledWith('AB');
+        expect(parentStub).to.be.calledOnce.calledWith('AB');
+        expect(grandparentStub).to.be.calledOnce.calledWith('A');
+
+        removeComponent(grandparent.node, ComponentSelfProps);
+        clock.runAll();
+        expect(sibling1Stub).to.be.calledTwice.calledWith('B');
+        expect(parentStub).to.be.calledTwice.calledWith('B');
+        expect(grandparentStub).to.be.calledTwice.calledWith('');
+
+        removeComponent(grandparent.node, ComponentParentProps);
+        clock.runAll();
+        expect(sibling1Stub).to.be.calledThrice.calledWith('');
+        expect(parentStub).to.be.calledThrice.calledWith('');
+        expect(grandparentStub).to.be.calledTwice; // no change.
+      });
+
+      it('should remove props when child node is disconnected', async () => {
+        setComponent(grandparent.node, ComponentSelfProps, 'A');
+        setComponent(grandparent.node, ComponentParentProps, 'B');
+        clock.runAll();
+        expect(sibling1Stub).to.be.calledOnce.calledWith('AB');
+        expect(parentStub).to.be.calledOnce.calledWith('AB');
+        expect(grandparentStub).to.be.calledOnce.calledWith('A');
+
+        parent.node.remove();
+        await rediscover(parent);
+        clock.runAll();
+        expect(grandparent.values.has(Concat)).to.be.true;
+        expect(parent.values.has(Concat)).to.be.false;
+      });
+
+      it('should remove props when the node is disconnected', async () => {
+        setComponent(grandparent.node, ComponentSelfProps, 'A');
+        setComponent(grandparent.node, ComponentParentProps, 'B');
+        clock.runAll();
+        expect(sibling1Stub).to.be.calledOnce.calledWith('AB');
+        expect(parentStub).to.be.calledOnce.calledWith('AB');
+        expect(grandparentStub).to.be.calledOnce.calledWith('A');
+
+        grandparent.node.remove();
+        await rediscover(grandparent);
+        clock.runAll();
+        expect(grandparent.values.has(Concat)).to.be.false;
+        expect(parent.values.has(Concat)).to.be.false;
+      });
+    });
+
+    describe('child components', () => {
+      let ComponentSelfChildren;
+      let ComponentParentChildren;
+      let ChildComponent, childComponentSpy, childCleanupSpy;
+
+      beforeEach(() => {
+        ComponentSelfChildren = (unusedNode, input) => {
+          const setChildComponent = useSetChildComponent();
+          const removeChildComponent = useRemoveChildComponent();
+          if (input) {
+            setChildComponent(ChildComponent, input);
+          } else {
+            removeChildComponent(ChildComponent);
+          }
+        };
+        ComponentParentChildren = (unusedNode, input) => {
+          const setChildComponent = useSetChildComponent();
+          const removeChildComponent = useRemoveChildComponent();
+          if (input) {
+            setChildComponent(ChildComponent, input, parent.node);
+          } else {
+            removeChildComponent(ChildComponent, parent.node);
+          }
+        };
+
+        childComponentSpy = sandbox.spy();
+        childCleanupSpy = sandbox.spy();
+        ChildComponent = function (...args) {
+          childComponentSpy.apply(null, args);
+          useSyncEffect(() => childCleanupSpy);
+        };
+      });
+
+      it('should set child component', () => {
+        setComponent(grandparent.node, ComponentSelfChildren, 'A');
+        clock.runAll();
+        expect(childComponentSpy).to.be.calledOnce.calledWith(
+          grandparent.node,
+          'A'
+        );
+
+        setComponent(grandparent.node, ComponentParentChildren, 'B');
+        clock.runAll();
+        expect(childComponentSpy).to.be.calledTwice.calledWith(
+          parent.node,
+          'B'
+        );
+
+        expect(childCleanupSpy).to.not.be.called;
+      });
+
+      it('should remove child component', () => {
+        setComponent(grandparent.node, ComponentSelfChildren, 'A');
+        clock.runAll();
+        expect(childComponentSpy).to.be.calledOnce.calledWith(
+          grandparent.node,
+          'A'
+        );
+
+        setComponent(grandparent.node, ComponentParentChildren, 'B');
+        clock.runAll();
+        expect(childComponentSpy).to.be.calledTwice.calledWith(
+          parent.node,
+          'B'
+        );
+
+        // Null input removes the component.
+        setComponent(grandparent.node, ComponentParentChildren, null);
+        clock.runAll();
+        expect(childComponentSpy).to.be.calledTwice; // no changes.
+        expect(childCleanupSpy).to.be.calledOnce;
+
+        setComponent(grandparent.node, ComponentSelfChildren, null);
+        clock.runAll();
+        expect(childComponentSpy).to.be.calledTwice; // no changes.
+        expect(childCleanupSpy).to.be.calledTwice;
+      });
+
+      it('should update child component', () => {
+        setComponent(grandparent.node, ComponentSelfChildren, 'A');
+        clock.runAll();
+        expect(childComponentSpy).to.be.calledOnce.calledWith(
+          grandparent.node,
+          'A'
+        );
+
+        setComponent(grandparent.node, ComponentSelfChildren, 'B');
+        clock.runAll();
+        expect(childComponentSpy).to.be.calledTwice.calledWith(
+          grandparent.node,
+          'B'
+        );
+
+        expect(childCleanupSpy).to.not.be.called;
+      });
+
+      it('should remove child component on removal', () => {
+        setComponent(grandparent.node, ComponentSelfChildren, 'A');
+        setComponent(grandparent.node, ComponentParentChildren, 'B');
+        clock.runAll();
+        expect(childComponentSpy)
+          .to.be.calledTwice.calledWith(grandparent.node, 'A')
+          .calledWith(parent.node, 'B');
+        expect(childCleanupSpy).to.not.be.called;
+
+        removeComponent(grandparent.node, ComponentSelfChildren);
+        clock.runAll();
+        expect(childCleanupSpy).to.be.calledOnce;
+
+        removeComponent(grandparent.node, ComponentParentChildren);
+        clock.runAll();
+        expect(childCleanupSpy).to.be.calledTwice;
+      });
+
+      it('should remove component when child node is disconnected', async () => {
+        setComponent(grandparent.node, ComponentSelfChildren, 'A');
+        setComponent(grandparent.node, ComponentParentChildren, 'B');
+        clock.runAll();
+        expect(childComponentSpy)
+          .to.be.calledTwice.calledWith(grandparent.node, 'A')
+          .calledWith(parent.node, 'B');
+        expect(childCleanupSpy).to.not.be.called;
+
+        parent.node.remove();
+        await rediscover(parent);
+        clock.runAll();
+        expect(childComponentSpy).to.be.calledTwice; // no changes.
+        expect(childCleanupSpy).to.be.calledOnce;
+      });
+
+      it('should remove component when the node is disconnected', async () => {
+        setComponent(grandparent.node, ComponentSelfChildren, 'A');
+        setComponent(grandparent.node, ComponentParentChildren, 'B');
+        clock.runAll();
+        expect(childComponentSpy)
+          .to.be.calledTwice.calledWith(grandparent.node, 'A')
+          .calledWith(parent.node, 'B');
+        expect(childCleanupSpy).to.not.be.called;
+
+        grandparent.node.remove();
+        await rediscover(grandparent);
+        clock.runAll();
+        expect(childComponentSpy).to.be.calledTwice; // no changes.
+        expect(childCleanupSpy).to.be.calledTwice;
+      });
+    });
+
+    describe('child subscriber', () => {
+      let ComponentSelfChildren;
+      let ComponentParentChildren;
+      let subscriber, subscriberSpy, subscriberCleanupSpy;
+
+      beforeEach(() => {
+        subscriberSpy = sandbox.spy();
+        subscriberCleanupSpy = sandbox.spy();
+
+        subscriber = (...args) => {
+          subscriberSpy.apply(null, args);
+          return subscriberCleanupSpy;
+        };
+
+        ComponentSelfChildren = (unusedNode, input) => {
+          const subscribeChild = useSubscribeChild();
+          const unsubscribeChild = useUnsubscribeChild();
+          if (input) {
+            subscribeChild([Concat], subscriber);
+          } else {
+            unsubscribeChild(subscriber);
+          }
+        };
+        ComponentParentChildren = (unusedNode, input) => {
+          const subscribeChild = useSubscribeChild();
+          const unsubscribeChild = useUnsubscribeChild();
+          if (input) {
+            subscribeChild([Concat], subscriber, parent.node);
+          } else {
+            unsubscribeChild(subscriber, parent.node);
+          }
+        };
+
+        grandparent.values.set(Concat, 'OWNER1', 'C');
+        clock.runAll();
+      });
+
+      it('should set child subscriber', () => {
+        setComponent(grandparent.node, ComponentSelfChildren, 'A');
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledOnce.calledWith('C');
+
+        setComponent(grandparent.node, ComponentParentChildren, 'B');
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledTwice.calledWith('C');
+
+        expect(subscriberCleanupSpy).to.not.be.called;
+      });
+
+      it('should remove child subscriber', () => {
+        setComponent(grandparent.node, ComponentSelfChildren, 'A');
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledOnce.calledWith('C');
+
+        setComponent(grandparent.node, ComponentParentChildren, 'B');
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledTwice.calledWith('C');
+
+        // Null input removes the subscriber.
+        setComponent(grandparent.node, ComponentParentChildren, null);
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledTwice; // no changes.
+        expect(subscriberCleanupSpy).to.be.calledOnce;
+
+        setComponent(grandparent.node, ComponentSelfChildren, null);
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledTwice; // no changes.
+        expect(subscriberCleanupSpy).to.be.calledTwice;
+      });
+
+      it('should update child subscriber', () => {
+        setComponent(grandparent.node, ComponentSelfChildren, 'A');
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledOnce.calledWith('C');
+
+        setComponent(grandparent.node, ComponentSelfChildren, 'B');
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledOnce; // no changes.
+        expect(subscriberCleanupSpy).to.not.be.called;
+      });
+
+      it('should remove child subscriber on removal', () => {
+        setComponent(grandparent.node, ComponentSelfChildren, 'A');
+        setComponent(grandparent.node, ComponentParentChildren, 'B');
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledTwice.calledWith('C');
+
+        removeComponent(grandparent.node, ComponentSelfChildren);
+        clock.runAll();
+        expect(subscriberCleanupSpy).to.be.calledOnce;
+
+        removeComponent(grandparent.node, ComponentParentChildren);
+        clock.runAll();
+        expect(subscriberCleanupSpy).to.be.calledTwice;
+      });
+
+      it('should remove subscriber when child node is disconnected', async () => {
+        setComponent(grandparent.node, ComponentSelfChildren, 'A');
+        setComponent(grandparent.node, ComponentParentChildren, 'B');
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledTwice.calledWith('C');
+        expect(subscriberCleanupSpy).to.not.be.called;
+
+        parent.node.remove();
+        await rediscover(parent);
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledTwice; // no changes.
+        expect(subscriberCleanupSpy).to.be.calledOnce;
+      });
+
+      it('should remove subscriber when the node is disconnected', async () => {
+        setComponent(grandparent.node, ComponentSelfChildren, 'A');
+        setComponent(grandparent.node, ComponentParentChildren, 'B');
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledTwice.calledWith('C');
+        expect(subscriberCleanupSpy).to.not.be.called;
+
+        grandparent.node.remove();
+        await rediscover(grandparent);
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledTwice; // no changes.
+        expect(subscriberCleanupSpy).to.be.calledTwice;
       });
     });
   });

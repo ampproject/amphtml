@@ -23,12 +23,18 @@ export {
   removeComponent,
   subscribe,
   unsubscribe,
+  useSetChildComponent,
+  useRemoveChildComponent,
+  useSubscribeChild,
+  useUnsubscribeChild,
 } from './component-install';
 export {
   useRef,
   useMemo,
   useDisposableMemo,
   useSyncEffect,
+  useSetChildProp,
+  useRemoveChildProp,
 } from './component-hooks';
 
 /**
