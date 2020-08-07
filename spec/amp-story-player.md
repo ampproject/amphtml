@@ -110,6 +110,10 @@ With this attribute set, the player will set-up its first story to 'autoplay mod
 - Hides UI elements
 - Hides ads
 
+#### circular wrapping
+
+Publishers can set `enable-circular-wrapping` which allows the user to go to the first story when the last story is finished and vice versa.
+
 ## Specify embedded story
 
 The `<amp-story-player>` component contains one `<a>` tag. Point the href attribute to the story URL.
