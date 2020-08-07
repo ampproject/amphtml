@@ -204,37 +204,37 @@ export const presets = {
         {
           offset: 0.35,
           transform: `translateY(${px((1 - 0.9801) * -maxBounceHeight)})`,
-          easing: 'cubic-bezier(0,.3,.3,0)',
+          easing: 'cubic-bezier(0, 0.3, 0.3, 0)',
         },
         {
           offset: 0.45,
           transform: `translateY(${px((1 - 0.7502) * -maxBounceHeight)})`,
-          easing: 'cubic-bezier(0,.3,.3,0)',
+          easing: 'cubic-bezier(0, 0.3, 0.3, 0)',
         },
         {
           offset: 0.75,
           transform: `translateY(${px((1 - 0.9837) * -maxBounceHeight)})`,
-          easing: 'cubic-bezier(0,.3,.3,0)',
+          easing: 'cubic-bezier(0, 0.3, 0.3, 0)',
         },
         {
           offset: 0.82,
           transform: `translateY(${px((1 - 0.9375) * -maxBounceHeight)})`,
-          easing: 'cubic-bezier(0,.3,.3,0)',
+          easing: 'cubic-bezier(0, 0.3, 0.3, 0)',
         },
         {
           offset: 0.92,
           transform: `translateY(${px((1 - 0.9934) * -maxBounceHeight)})`,
-          easing: 'cubic-bezier(0,.3,.3,0)',
+          easing: 'cubic-bezier(0, 0.3, 0.3, 0)',
         },
         {
           offset: 0.96,
           transform: `translateY(${px((1 - 0.9846) * -maxBounceHeight)})`,
-          easing: 'cubic-bezier(0,.3,.3,0)',
+          easing: 'cubic-bezier(0, 0.3, 0.3, 0)',
         },
         {
           offset: 1,
           transform: `translateY(0)`,
-          easing: 'cubic-bezier(0,.3,.3,1)',
+          easing: 'cubic-bezier(0, 0.3, 0.3, 1)',
         },
       ];
     },
