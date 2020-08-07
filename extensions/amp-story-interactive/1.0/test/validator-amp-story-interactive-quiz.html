@@ -34,16 +34,31 @@
     <amp-story-page id="1" background-audio="path/to/my.mp3" auto-advance-after="any-value">
       <amp-story-grid-layer template="fill">
         <amp-story-interactive-quiz
-          id="first-cup-dark"
+          id="complete-quiz"
           endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
-          style="--interactive-accent-color: #20AC5E;"
           theme="dark"
+          chip-style="shadow"
+          class="nice-quiz"
           prompt-text="Who won the first soccer world cup?"
           option-1-text="France"
           option-2-text="Spain"
-          option-3-text="Uruguay" option-3-correct
-          option-3-confetti="🇺🇾"
+          option-3-text="Uruguay" option-3-correct option-3-confetti="🇺🇾"
           option-4-text="Brazil">
+        </amp-story-interactive-quiz>
+        <amp-story-interactive-quiz
+          id="missing-correct-quiz"
+          endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+          option-1-text="France"
+          option-2-text="Spain"
+          option-3-text="Uruguay">
+        </amp-story-interactive-quiz>
+        <amp-story-interactive-poll
+          id="correct-poll"
+          endpoint="hi"
+          option-1-text="France"
+          option-2-text="Spain"
+          option-3-text="Uruguay"
+          option-4-text="Spain">
         </amp-story-interactive-quiz>
       </amp-story-grid-layer>
     </amp-story-page>
