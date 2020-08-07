@@ -102,6 +102,10 @@ Inline CSS properties for the width and height of the player. e.g. `style="width
 
 Set to `back-button` or `close-button`. The button will dispatch an `amp-story-player-back` or `amp-story-player-close` when clicked. This button will disappear when a page attachment is open and reappear when closed.
 
+#### circular wrapping
+
+Publishers can set `enable-circular-wrapping` which allows the user to go to the first story when the last story is finished and vice versa.
+
 ## Specify embedded story
 
 The `<amp-story-player>` component contains one `<a>` tag. Point the href attribute to the story URL.
