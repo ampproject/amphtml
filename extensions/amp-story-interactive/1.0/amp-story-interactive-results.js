@@ -25,7 +25,8 @@ import {setStyle} from '../../../src/style';
 
 /**
  * @typedef {{
- *    category: string,
+ *    category: ?string,
+ *    percentage: ?number,
  * }}
  */
 export let InteractiveResultsDef;
@@ -40,7 +41,11 @@ const buildResultsTemplate = (element) => {
   const html = htmlFor(element);
   return html`
     <div class="i-amphtml-story-interactive-results-container">
-      <div class="i-amphtml-story-interactive-results-line"></div>
+      <div class="i-amphtml-story-interactive-results-top">
+        <div class="i-amphtml-story-interactive-results-top-score">SCORE</div>
+        <div class="i-amphtml-story-interactive-results-top-line"></div>
+        <div class="i-amphtml-story-interactive-results-top-value">100</div>
+      </div>
       <div class="i-amphtml-story-interactive-results-visuals">
         <div class="i-amphtml-story-interactive-results-dots"></div>
         <div class="i-amphtml-story-interactive-results-image-border">
@@ -62,21 +67,111 @@ const buildResultsTemplate = (element) => {
  * @return {InteractiveResultsDef} the results
  */
 const processResults = (interactiveState, options) => {
+  const processStrategy =
+    decideStrategy(options) === 'category'
+      ? processResultsCategory
+      : processResultsPercentage;
+  return processStrategy(interactiveState, options);
+};
+
+/**
+ * Processes the state and returns the condensed results for a category strategy
+ * @param {!Map<string, {option: ?./amp-story-interactive-abstract.OptionConfigType, interactiveId: string}>} interactiveState
+ * @param {?Array<!./amp-story-interactive-abstract.OptionConfigType>} options the attributes on the component
+ * @return {InteractiveResultsDef} the results
+ * @package
+ */
+export const processResultsCategory = (interactiveState, options) => {
+  const result = {category: null, percentage: null};
+
+  // Add all categories in order to the map with value 0
   const categories = {};
-  // Add options in order to prefer earlier categories before later ones.
   options.forEach((option) => {
-    categories[option.resultscategory] = 0;
-  });
-  Object.values(interactiveState).forEach((e) => {
-    if (e.option != null) {
-      categories[e.option.resultscategory] += 1;
+    if (option.resultscategory) {
+      categories[option.resultscategory] = 0;
     }
   });
-  return {
-    category: Object.keys(categories).reduce((a, b) =>
-      categories[a] >= categories[b] ? a : b
-    ),
-  };
+
+  // Vote for category for each answered poll
+  Object.values(interactiveState).forEach((e) => {
+    if (e.type == InteractiveType.POLL) {
+      if (
+        e.option &&
+        e.option.resultscategory &&
+        categories[e.option.resultscategory] != null
+      ) {
+        categories[e.option.resultscategory] += 1;
+      }
+    }
+  });
+
+  // Returns category with most votes, first ones take precedence in ties
+  result.category = Object.keys(categories).reduce((a, b) =>
+    categories[a] >= categories[b] ? a : b
+  );
+  return result;
+};
+
+/**
+ * Processes the state and returns the condensed results for a percentage strategy
+ * @param {!Map<string, {option: ?./amp-story-interactive-abstract.OptionConfigType, interactiveId: string}>} interactiveState
+ * @param {?Array<!./amp-story-interactive-abstract.OptionConfigType>} options the attributes on the component
+ * @return {InteractiveResultsDef} the results
+ * @package
+ */
+export const processResultsPercentage = (interactiveState, options) => {
+  const result = {category: null, percentage: null};
+
+  // Count quizzes and correct quizzes
+  let quizCount = 0;
+  let quizCorrect = 0;
+  Object.values(interactiveState).forEach((e) => {
+    if (e.type == InteractiveType.QUIZ) {
+      quizCount += 1;
+      if (e.option && e.option.correct != null) {
+        quizCorrect += 1;
+      }
+    }
+  });
+
+  // Percentage = (correct / total) but avoid divide by 0 error
+  result.percentage = quizCount == 0 ? 0 : 100 * (quizCorrect / quizCount);
+
+  // Get closest threshold that is lower than percentage, or lowest one if percentage is too low
+  let minThresholdDiff = -100;
+  options.forEach((option) => {
+    // ThresholdDiff is positive if it's lower than percentage (desired)
+    const currThresholdDiff =
+      result.percentage - parseFloat(option.resultsthreshold);
+    if (
+      // Curr meets the requirement and (is better or min doesnt meet)
+      (currThresholdDiff >= 0 &&
+        (minThresholdDiff > currThresholdDiff || minThresholdDiff < 0)) ||
+      // Curr doesnt meet the requirement, but min also doesnt and curr is better than min
+      (currThresholdDiff < 0 &&
+        minThresholdDiff < 0 &&
+        currThresholdDiff > minThresholdDiff)
+    ) {
+      result.category = option.resultscategory;
+      minThresholdDiff = currThresholdDiff;
+    }
+  });
+  return result;
+};
+
+/**
+ * Decides what strategy to use.
+ * If there are thresholds specified, it uses percentage; otherwise it uses category.
+ * @param {?Array<!./amp-story-interactive-abstract.OptionConfigType>} options the attributes on the component
+ * @return {string} the strategy
+ * @package
+ */
+export const decideStrategy = (options) => {
+  return options.some((o) => {
+    return o.resultsthreshold != undefined;
+  })
+    ? 'percentage'
+    : 'category';
 };
 
 export class AmpStoryInteractiveResults extends AmpStoryInteractive {
@@ -119,6 +214,13 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
    */
   onInteractiveReactStateUpdate_(interactiveState) {
     const results = processResults(interactiveState, this.options_);
+    this.rootEl_.classList.toggle(
+      'i-amphtml-story-interactive-results-show-score',
+      results.percentage != null
+    );
+    this.rootEl_.querySelector(
+      '.i-amphtml-story-interactive-results-top-value'
+    ).textContent = (results.percentage || 0).toFixed(0);
     this.options_.forEach((e) => {
       if (e.resultscategory === results.category) {
         this.mutateElement(() => {

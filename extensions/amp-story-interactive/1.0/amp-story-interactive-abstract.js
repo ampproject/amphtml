@@ -82,6 +82,7 @@ export let InteractiveResponseType;
  *    resultscategory: ?string,
  *    image: ?string,
  *    confetti: ?string,
+ *    resultsthreshold: ?string,
  * }}
  */
 export let OptionConfigType;
