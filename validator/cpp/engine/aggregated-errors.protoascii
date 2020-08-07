@@ -1744,7 +1744,7 @@ aggregation_rule {
 # INVALID_DOCTYPE_HTML Rules:
 #############################
 # Enumerable set
-# "Invalid or missing doctype declaration. Should be <!doctype html>."
+# "Invalid or missing doctype declaration. Should be '!doctype html'."
 aggregation_rule {
   validator_code: INVALID_DOCTYPE_HTML
   aggregated_code: DO_NOT_AGGREGATE

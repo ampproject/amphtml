@@ -5349,9 +5349,7 @@ class NoDestructor {
   template <typename... Ts>
   NoDestructor(Ts&&... args) : t_(new (&space_) T(std::forward<Ts>(args)...)) {}
 
-  const T* Get() const {
-    return t_;
-  }
+  const T* Get() const { return t_; }
 
  private:
   alignas(T) unsigned char space_[sizeof(T)];
@@ -5373,8 +5371,7 @@ class ParsedValidatorRulesProvider {
         return rules.Get();
       }
       default: {
-        static const NoDestructor<ParsedValidatorRules> rules(
-            HtmlFormat::AMP);
+        static const NoDestructor<ParsedValidatorRules> rules(HtmlFormat::AMP);
         return rules.Get();
       }
     }
@@ -5495,7 +5492,7 @@ class Validator {
           context_.AddError(ValidationError::DISALLOWED_TAG,
                             LineCol(node->PositionInHtmlSrc()->first + 1,
                                     node->PositionInHtmlSrc()->second),
-                            {"<?"}, "", &result_);
+                            /*params=*/{"<?"}, /*spec_url=*/"", &result_);
         }
         return true;
       case htmlparser::NodeType::DOCTYPE_NODE:
@@ -5506,8 +5503,11 @@ class Validator {
             auto [line, col] = lc.value();
             linecol = LineCol(line, col > 0 ? col - 1 : col);
           }
-          context_.AddError(ValidationError::INVALID_DOCTYPE_HTML, linecol, {},
-                            "", &result_);
+          context_.AddError(ValidationError::INVALID_DOCTYPE_HTML, linecol,
+                            /*params=*/{},
+                            "https://amp.dev/documentation/"
+                            "guides-and-tutorials/start/create/basic_markup/",
+                            &result_);
         }
         // Process doctype node as if it is valid.
         StartTag(parsed_tag);
