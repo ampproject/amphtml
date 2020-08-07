@@ -25,13 +25,11 @@ limitations under the License.
 
 # amp-mega-menu
 
-Horizontal navigation bar with menu items that open/close content containers on click.
+## Usage
 
-## Overview
+Displays a horizontal navigation bar with menu items that open/close content containers on click.
 
 `<amp-mega-menu>` provides a way to organize and display large collections of navigational content at the top of an AMP page. The component is intended primarily for desktop and tablet use cases, and it can be used jointly with [`<amp-sidebar>`](../amp-sidebar/0.1/amp-sidebar.md) to create a responsive menu.
-
-## Usage
 
 The `<amp-mega-menu>` component includes a single `<nav>` element containing either a `<ul>` or `<ol>`, where each `<li>` element is a menu item.
 
@@ -247,16 +245,13 @@ The example below hides `<amp-mega-menu>` when the viewport width is less than 5
 
 ## Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>data-close-button-aria-label (optional)</strong></td>
-    <td>Optional attribute used to set ARIA label for the close buttons added for accessibility.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
-  </tr>
-</table>
+### data-close-button-aria-label (optional)
+
+Optional attribute used to set ARIA label for the close buttons added for accessibility.
+
+### Common attributes
+
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
 ## Styling
 
