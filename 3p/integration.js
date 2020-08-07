@@ -143,6 +143,7 @@ import {ezoic} from '../ads/ezoic';
 import {f1e} from '../ads/f1e';
 import {f1h} from '../ads/f1h';
 import {felmat} from '../ads/felmat';
+import {firstimpression} from '../ads/firstimpression';
 import {flite} from '../ads/flite';
 import {fluct} from '../ads/fluct';
 import {forkmedia} from '../ads/forkmedia';
@@ -150,6 +151,7 @@ import {freewheel} from '../ads/freewheel';
 import {fusion} from '../ads/fusion';
 import {genieessp} from '../ads/genieessp';
 import {giraff} from '../ads/giraff';
+import {glomex} from '../ads/glomex';
 import {gmossp} from '../ads/gmossp';
 import {gumgum} from '../ads/gumgum';
 import {holder} from '../ads/holder';
@@ -317,7 +319,9 @@ const AMP_EMBED_ALLOWED = {
   dable: true,
   engageya: true,
   epeex: true,
+  firstimpression: true,
   forkmedia: true,
+  glomex: true,
   idealmedia: true,
   insticator: true,
   jubna: true,
@@ -449,6 +453,7 @@ register('f1e', f1e);
 register('f1h', f1h);
 register('facebook', facebook);
 register('felmat', felmat);
+register('firstimpression', firstimpression);
 register('flite', flite);
 register('fluct', fluct);
 register('forkmedia', forkmedia);
@@ -457,6 +462,7 @@ register('fusion', fusion);
 register('genieessp', genieessp);
 register('giraff', giraff);
 register('github', github);
+register('glomex', glomex);
 register('gmossp', gmossp);
 register('gumgum', gumgum);
 register('holder', holder);

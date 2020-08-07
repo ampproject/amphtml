@@ -70,10 +70,10 @@ const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
 const TAG = 'amp-ad-network-adsense-impl';
 
 /** @const @enum {string} */
-const ROUND_LOCATION_PARAMS_EXP = {
+const ROUND_LOCATION_PARAMS_HOLDBACK_EXP = {
   ID: 'ad-adsense-gam-round-params',
-  CONTROL: '21066726',
-  EXPERIMENT: '21066727',
+  CONTROL: '21067039',
+  EXPERIMENT: '21067040',
 };
 
 /**
@@ -187,23 +187,35 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         getIdentityToken(this.win, this.getAmpDoc(), super.getConsentPolicy())
       );
 
-    return ResponsiveState.maybeUpgradeToResponsive(
-      this.element,
-      this.getAdClientId_()
-    ).then((state) => {
-      if (state != null) {
-        this.responsiveState_ = state;
-      }
-      if (
-        this.responsiveState_ != null &&
-        !this.responsiveState_.isContainerWidthState()
-      ) {
-        return this.responsiveState_.attemptToMatchResponsiveHeight();
-      }
-      // This should happen last, as some diversion criteria rely on some of the
-      // preceding logic (specifically responsive logic).
-      this.divertExperiments();
-    });
+    // Convert the full-width tag to container width for desktop users.
+    if (
+      this.element.hasAttribute('data-auto-format') &&
+      !ResponsiveState.isLayoutViewportNarrow(this.element)
+    ) {
+      return ResponsiveState.convertToContainerWidth(this.element).then(
+        (state) => {
+          if (state != null) {
+            this.responsiveState_ = state;
+          }
+          this.divertExperiments();
+        }
+      );
+    } else {
+      return ResponsiveState.maybeUpgradeToResponsive(
+        this.element,
+        this.getAdClientId_()
+      ).then((state) => {
+        if (state != null) {
+          this.responsiveState_ = state;
+        }
+        if (this.responsiveState_ != null) {
+          return this.responsiveState_.attemptToMatchResponsiveHeight();
+        }
+        // This should happen last, as some diversion criteria rely on some of the
+        // preceding logic (specifically responsive logic).
+        this.divertExperiments();
+      });
+    }
   }
 
   /** @override */
@@ -241,11 +253,11 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         ],
       },
       {
-        experimentId: ROUND_LOCATION_PARAMS_EXP.ID,
+        experimentId: ROUND_LOCATION_PARAMS_HOLDBACK_EXP.ID,
         isTrafficEligible: () => true,
         branches: [
-          ROUND_LOCATION_PARAMS_EXP.CONTROL,
-          ROUND_LOCATION_PARAMS_EXP.EXPERIMENT,
+          ROUND_LOCATION_PARAMS_HOLDBACK_EXP.CONTROL,
+          ROUND_LOCATION_PARAMS_HOLDBACK_EXP.EXPERIMENT,
         ],
       },
     ]).concat(AMPDOC_FIE_EXPERIMENT_INFO_LIST);
@@ -412,7 +424,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           'pucrd': identity.pucrd || null,
           ...parameters,
         },
-        isInExperiment(this.element, ROUND_LOCATION_PARAMS_EXP.EXPERIMENT),
+        !isInExperiment(
+          this.element,
+          ROUND_LOCATION_PARAMS_HOLDBACK_EXP.EXPERIMENT
+        ),
         experimentIds
       );
     });
