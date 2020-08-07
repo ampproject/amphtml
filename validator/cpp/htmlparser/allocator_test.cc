@@ -183,4 +183,43 @@ TEST(AllocatorTest, BitFields) {
   EXPECT_EQ(c, 8);  // Size.
 }
 
+TEST(AllocatorTest, VectorContainer) {
+  struct VectorData {
+    std::string s;
+    int b;
+  };
+
+  struct HasVector {
+    int a;
+    int b;
+    std::vector<VectorData> data;
+
+    ~HasVector() {
+      if (a % 2 == 0) {
+        // Checks if vector resizing impacts deallocation.
+        data.clear();
+      }
+    }
+  };
+
+  Allocator<HasVector> alloc;
+  for (int i = 0; i < 1000; ++i) {
+    auto d = alloc.Construct();
+    d->a = i;
+    d->b = 20;
+    for (int j = 0; j < 100; j++) {
+      VectorData data;
+      // One short string (so that its allocated at stack and one long string so
+      // it is allocated on heap.
+      if (j % 2 == 0) {
+        data.s = R"STR("dsfjkldsfjldsajfdlsjfldsjflkdsjfkadsjfkdjsfkjdskfljdsafljdskfjdsfjdsafjdaskfjdsfdsfdsfljadskfljdskfjdsklfjkldsjfkldsjfkljdskfjdsklfjadsljfdsajfkldsjfkljdsfjjsdfsdfjdslfjdlsfjlkdsjflksdjfldsjflkjdslfjsdklfjlksdjfkldsjfklsdjfldsjflksdjfldskjflkdsjflkdsjflkdsjflkdsjflkdsjflkjsdfkljdslfkjdslkfjsdlkfjdslkfjdslkfjldskfjklsdjflksdjflsdjfldsjfsdkjflsdjflksdjflksdjfdslfjdslfj)STR";
+      } else {
+        data.s = "foobar";
+      }
+      data.b = i;
+      d->data.push_back(data);
+    }
+  }
+}
+
 }  // namespace htmlparser
