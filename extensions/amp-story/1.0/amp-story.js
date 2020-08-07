@@ -76,6 +76,7 @@ import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {SystemLayer} from './amp-story-system-layer';
 import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
 import {ViewportWarningLayer} from './amp-story-viewport-warning-layer';
+import {VisibilityState} from '../../../src/visibility-state';
 import {
   childElement,
   childElementByTag,
@@ -342,10 +343,10 @@ export class AmpStory extends AMP.BaseElement {
 
     /**
      * Store the current paused state, to make sure the story does not play on
-     * resume if it was previously paused.
-     * @private {boolean}
+     * resume if it was previously paused. null when nothing to restore.
+     * @private {?boolean}
      */
-    this.pausedStateToRestore_ = false;
+    this.pausedStateToRestore_ = null;
 
     /** @private {?Element} */
     this.sidebar_ = null;
@@ -467,12 +468,21 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   pause_() {
-    this.pausedStateToRestore_ = !!this.storeService_.get(
-      StateProperty.PAUSED_STATE
-    );
+    // Preserve if previously set. This method can be called several times when
+    // setting the visibilitystate to paused and then inactive.
+    if (this.pausedStateToRestore_ === null) {
+      this.pausedStateToRestore_ = !!this.storeService_.get(
+        StateProperty.PAUSED_STATE
+      );
+    }
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
     if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
       this.pauseBackgroundAudio_();
+    }
+    // If viewer has navigated to the next document, reset the active page.
+    if (this.getAmpDoc().getVisibilityState() === VisibilityState.INACTIVE) {
+      this.activePage_.setState(PageState.NOT_ACTIVE);
+      this.activePage_.element.setAttribute('active', '');
     }
   }
 
@@ -486,6 +496,7 @@ export class AmpStory extends AMP.BaseElement {
       Action.TOGGLE_PAUSED,
       this.pausedStateToRestore_
     );
+    this.pausedStateToRestore_ = null;
     if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
       this.playBackgroundAudio_();
     }
@@ -1812,6 +1823,7 @@ export class AmpStory extends AMP.BaseElement {
           Action.TOGGLE_PAUSED,
           this.pausedStateToRestore_
         );
+        this.pausedStateToRestore_ = null;
         this.storeService_.dispatch(Action.TOGGLE_VIEWPORT_WARNING, false);
       }
     });
@@ -2109,6 +2121,7 @@ export class AmpStory extends AMP.BaseElement {
             Action.TOGGLE_PAUSED,
             this.pausedStateToRestore_
           );
+          this.pausedStateToRestore_ = null;
           this.mutateElement(() => {
             this.unsupportedBrowserLayer_.removeLayer();
           });
