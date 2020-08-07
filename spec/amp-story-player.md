@@ -150,7 +150,7 @@ function StoryPlayer({ url, title, poster, width = 360, height = 600 }) {
 
        useEffect(() => {
            const playerEl = document.body.querySelector('amp-story-player');
-           const player = new AmpStoryPlayer(window, playerEl); // Previously exposed global var
+           const player = new AmpStoryPlayer(window, playerEl); 
            player.load();
 	}, []);
 
