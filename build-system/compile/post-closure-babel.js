@@ -21,6 +21,7 @@ const remapping = require('@ampproject/remapping');
 const terser = require('terser');
 const through = require('through2');
 const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
+const { catch } = require('fetch-mock');
 
 /**
  * Minify passed string.
@@ -87,13 +88,17 @@ exports.postClosureBabel = function () {
       file.sourceMap
     );
 
-    const {compressed, terserMap} = await terserMinify(code);
-    file.contents = Buffer.from(compressed, 'utf-8');
-    file.sourceMap = remapping(
-      [terserMap, babelMap, map],
-      () => null,
-      !argv.full_sourcemaps
-    );
+    try {
+      const {compressed, terserMap} = await terserMinify(code);
+      file.contents = Buffer.from(compressed, 'utf-8');
+      file.sourceMap = remapping(
+        [terserMap, babelMap, map],
+        () => null,
+        !argv.full_sourcemaps
+      );
+    } catch(e) {
+      return next(e);
+    }
 
     debug(
       CompilationLifecycles['complete'],
