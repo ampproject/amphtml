@@ -191,14 +191,15 @@ player.show(url);
 **StoryObj Type**
 
 - href string: story URL
-- posterImage string (optional): story title, to be added to the anchor's title.
+- title string (optional): story title, to be added to the anchor's title
+- posterImage string (optional): a URL for the story poster. Used as a placeholder while the story loads.
 
 The player will try to load the story from the cache that was specified at the player level.
 
 ```
 player.add([
- {href: '/stories/1', posterImage: 'temp.png'},
- {href: '/stories/2'},
+ {href: '/stories/1', title: 'A great story', posterImage: 'poster1.png'},
+ {href: '/stories/2', posterImage: 'poster2.png'},
  {href: '/stories/3'},
 ]);
 ```
