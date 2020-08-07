@@ -53,17 +53,16 @@ import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
 import {getValueForExpr} from '../../../src/json';
-import {
-  getViewerAuthTokenIfAvailable,
-  setupAMPCors,
-  setupInput,
-  setupJsonFetchInit,
-} from '../../../src/utils/xhr-utils';
 import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {px, setImportantStyles, setStyles, toggle} from '../../../src/style';
 import {setDOM} from '../../../third_party/set-dom/set-dom';
+import {
+  setupAMPCors,
+  setupInput,
+  setupJsonFetchInit,
+} from '../../../src/utils/xhr-utils';
 import {startsWith} from '../../../src/string';
 
 /** @const {string} */
@@ -1553,16 +1552,14 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * @param {boolean=} refresh
-   * @param {string=} token
    * @return {!Promise<!JsonObject|!Array<JsonObject>>}
    * @private
    */
-  fetch_(refresh = false, token = undefined) {
+  fetch_(refresh = false) {
     return batchFetchJsonFor(this.getAmpDoc(), this.element, {
       expr: '.',
       urlReplacement: this.getPolicy_(),
       refresh,
-      token,
       xssiPrefix: this.element.getAttribute('xssi-prefix') || undefined,
     });
   }
@@ -1606,9 +1603,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   prepareAndSendFetch_(opt_refresh = false) {
-    return getViewerAuthTokenIfAvailable(this.element).then((token) =>
-      this.fetch_(opt_refresh, token)
-    );
+    return this.fetch_(opt_refresh);
   }
 
   /**

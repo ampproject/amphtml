@@ -61,16 +61,15 @@ import {
 } from '../../../src/form';
 import {getFormValidator, isCheckValiditySupported} from './form-validators';
 import {getMode} from '../../../src/mode';
-import {
-  getViewerAuthTokenIfAvailable,
-  setupAMPCors,
-  setupInit,
-  setupInput,
-} from '../../../src/utils/xhr-utils';
 import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray, toWin} from '../../../src/types';
+import {
+  setupAMPCors,
+  setupInit,
+  setupInput,
+} from '../../../src/utils/xhr-utils';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryParseJson} from '../../../src/json';
 
@@ -354,17 +353,7 @@ export class AmpForm {
         'headers': headers,
       }),
     };
-
-    return getViewerAuthTokenIfAvailable(this.form_).then((token) => {
-      if (token) {
-        userAssert(
-          request.fetchOpt['method'] == 'POST',
-          'Cannot attach auth token with GET request.'
-        );
-        body.append('ampViewerAuthToken', token);
-      }
-      return request;
-    });
+    return request;
   }
 
   /**
