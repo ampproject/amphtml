@@ -25,39 +25,9 @@ limitations under the License.
 
 # amp-next-page
 
+## Usage
+
 Dynamically loads more documents recommended for the user.
-
-<table>
-  <tr>
-    <td><strong>Availability</strong></td>
-    <td><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a> <a href="https://github.com/ampproject/amphtml/blob/3a06c99f259b66998b61935a5ee5f0075481bfd2/tools/experiments/README.md#enable-an-experiment-for-a-particular-document"> (Document opt-in allowed)</a></td>
-  </tr>
-  <tr>
-    <td><strong>Required Script</strong></td>
-    <td>
-      <code>
-        &lt;script async custom-element="amp-next-page"
-        src="https://cdn.ampproject.org/v0/amp-next-page-0.1.js">&lt;/script>
-      </code>
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <strong>
-        <a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a>
-      </strong>
-    </td>
-    <td>N/A</td>
-  </tr>
-  <tr>
-    <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-next-page/">amp-next-page example</a>.</td>
-  </tr>
-</table>
-
-[TOC]
-
-## Behavior
 
 Given a list of pages, `amp-next-page` tries to load them after the current
 document, providing an infinite-scroll type experience.
@@ -92,38 +62,23 @@ component will render a maximum of three documents (total) on screen at one sing
 Tracking page views is supported through [`<amp-pixel>`](../../../builtins/amp-pixel.md) or `<amp-analytics>` on the host page.
 [/tip]
 
-### Analytics triggers
+### Configuration spec
 
-Partial support for analytics is included through the initial host page via two separate events. These are triggered by `<amp-next-page>` and you can track them in your [amp-analytics](https://amp.dev/documentation/components/amp-analytics) config:
+The configuration defines the documents recommended by `amp-next-page` to
+the user as a JSON object.
 
-| Event                  | Fired when                                               |
-| ---------------------- | -------------------------------------------------------- |
-| `amp-next-page-scroll` | The user scrolls to a new page                           |
-| `amp-next-page-click`  | The user click on an article from the recommendation box |
+| Key                | Value                                                             |
+| ------------------ | ----------------------------------------------------------------- |
+| `pages` (required) | Ordered array of one or more page objects                         |
+| `hideSelectors`    | Optional array of string CSS selectors to hide in child documents |
 
-Both of the `triggers` provide the variables `fromUrl` and `toUrl` referring to the previous and current pages. They can be used as follows:
+Each page object should have the following format:
 
-```html
-<amp-analytics>
-  <script type="application/json">
-    {
-      "requests": {
-        "nextpage": "https://foo.com/pixel?RANDOM&toURL=${toURL}"
-      },
-      "triggers": {
-        "trackScrollThrough": {
-          "on": "amp-next-page-scroll",
-          "request": "nextpage"
-        },
-        "trackClickThrough": {
-          "on": "amp-next-page-click",
-          "request": "nextpage"
-        }
-      }
-    }
-  </script>
-</amp-analytics>
-```
+| Key                   | Value                                                                                                                                                            |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ampUrl` (required)   | String URL of the page. Must be on the same origin as the current document. URLs will automatically be rewritten to point to the Google AMP cache when required. |
+| `title` (required)    | String title of the page, will be used when rendering the recommendation box                                                                                     |
+| `imageUrl` (required) | String URL of the image to display in the recommendation box                                                                                                     |
 
 ### Recommendation box
 
@@ -182,39 +137,32 @@ selectors will be set to `display: none` in all child documents.
 </amp-next-page>
 ```
 
+### Substitutions
+
+The `amp-next-page` src allows all standard URL variable substitutions. See
+the [Substitutions Guide](../../../spec/amp-var-substitutions.md) for more info.
+
+For example:
+
+```html
+<amp-next-page src="https://foo.com/config.json?RANDOM"></amp-next-page>
+```
+
+may make a request to something like
+`https://foo.com/config.json?0.8390278471201` where the RANDOM value is
+randomly generated upon each impression.
+
 ## Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>src</strong></td>
-    <td>The URL of the remote endpoint that returns the JSON that will be used to
-configure this <code>amp-next-page</code> component. This must be a CORS HTTP service.
-The URL's protocol must be HTTPS.
-<br><br>
-{% call callout('Important', type='caution') %} Your endpoint must implement
-the requirements specified in the CORS Requests in AMP spec. {% endcall %}
-<br><br>
-The <code>src</code> attribute is required unless a config has been specified inline.</td>
-  </tr>
-</table>
+### `src`
 
-## Configuration spec
+The URL of the remote endpoint that returns the JSON that will be used to
+configure this `amp-next-page` component. This must be a CORS HTTP service.
+The URL's protocol must be HTTPS. Your endpoint must implement
+the requirements specified in the CORS Requests in AMP spec.
 
-The configuration defines the documents recommended by `amp-next-page` to
-the user as a JSON object.
-
-| Key                | Value                                                             |
-| ------------------ | ----------------------------------------------------------------- |
-| `pages` (required) | Ordered array of one or more page objects                         |
-| `hideSelectors`    | Optional array of string CSS selectors to hide in child documents |
-
-Each page object should have the following format:
-
-| Key                   | Value                                                                                                                                                            |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ampUrl` (required)   | String URL of the page. Must be on the same origin as the current document. URLs will automatically be rewritten to point to the Google AMP cache when required. |
-| `title` (required)    | String title of the page, will be used when rendering the recommendation box                                                                                     |
-| `imageUrl` (required) | String URL of the image to display in the recommendation box                                                                                                     |
+The `src` attribute is required unless a config has been specified inline.
+|
 
 ### Example configuration
 
@@ -239,20 +187,38 @@ read, and hides the header and footer elements from each child document.
 }
 ```
 
-## Substitutions
+## Analytics
 
-The `amp-next-page` src allows all standard URL variable substitutions. See
-the [Substitutions Guide](../../../spec/amp-var-substitutions.md) for more info.
+Partial support for analytics is included through the initial host page via two separate events. These are triggered by `<amp-next-page>` and you can track them in your [amp-analytics](https://amp.dev/documentation/components/amp-analytics) config:
 
-For example:
+| Event                  | Fired when                                               |
+| ---------------------- | -------------------------------------------------------- |
+| `amp-next-page-scroll` | The user scrolls to a new page                           |
+| `amp-next-page-click`  | The user click on an article from the recommendation box |
+
+Both of the `triggers` provide the variables `fromUrl` and `toUrl` referring to the previous and current pages. They can be used as follows:
 
 ```html
-<amp-next-page src="https://foo.com/config.json?RANDOM"></amp-next-page>
+<amp-analytics>
+  <script type="application/json">
+    {
+      "requests": {
+        "nextpage": "https://foo.com/pixel?RANDOM&toURL=${toURL}"
+      },
+      "triggers": {
+        "trackScrollThrough": {
+          "on": "amp-next-page-scroll",
+          "request": "nextpage"
+        },
+        "trackClickThrough": {
+          "on": "amp-next-page-click",
+          "request": "nextpage"
+        }
+      }
+    }
+  </script>
+</amp-analytics>
 ```
-
-may make a request to something like
-`https://foo.com/config.json?0.8390278471201` where the RANDOM value is
-randomly generated upon each impression.
 
 ## Validation
 
