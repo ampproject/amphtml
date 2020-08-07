@@ -78,9 +78,6 @@ let MetricsDef;
  */
 let MediaEntryDef;
 
-/** @type {string} */
-const ID_PROPERTY = '__AMP_MEDIA_PERFORMANCE_METRICS_ID';
-
 /** @type {number} */
 const MINIMUM_TIME_THRESHOLD_MS = 1000;
 
@@ -119,9 +116,6 @@ export class MediaPerformanceMetricsService {
    * @param {!Window} win
    */
   constructor(win) {
-    /** @private {number} */
-    this.mediaId_ = 1;
-
     /** @private @const {!WeakMap<number, !MediaEntryDef>} */
     this.mediaMap_ = new WeakMap();
 
@@ -289,7 +283,6 @@ export class MediaPerformanceMetricsService {
    * @private
    */
   setMediaEntry_(media, mediaEntry) {
-    media[ID_PROPERTY] = media[ID_PROPERTY] || this.mediaId_++;
     this.mediaMap_.set(media, mediaEntry);
   }
 
