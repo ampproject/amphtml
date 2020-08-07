@@ -22,6 +22,7 @@ import {
   scaleAndTranslate,
   translate2d,
   whooshIn,
+  moveIn,
 } from './animation-presets-utils';
 import {px} from '../../../src/style';
 import {userAssert} from '../../../src/log';
@@ -43,7 +44,7 @@ const SCALE_END_ATTRIBUTE_NAME = 'scale-end';
 const TRANSLATE_X_ATTRIBUTE_NAME = 'translate-x';
 /** @const {string} */
 const TRANSLATE_Y_ATTRIBUTE_NAME = 'translate-y';
-
+/** @const {string} */
 const DEFAULT_CURVE = '0.4, 0.4, 0.0, 1';
 
 /** @const {!Array<string>} */
@@ -106,7 +107,7 @@ export function setStyleForPreset(el, presetName) {
 export const presets = {
   'pulse': {
     duration: 600,
-    easing: `cubic-bezier(${DEFAULT_CURVE})`,
+    easing: 'cubic-bezier(0.3, 0.0, 0.0, 1)',
     keyframes: [
       {
         offset: 0,
@@ -128,7 +129,7 @@ export const presets = {
   },
   'fly-in-left': {
     duration: 600,
-    easing: `cubic-bezier(${DEFAULT_CURVE})`,
+    easing: `cubic-bezier(0.2, 0.6, 0.0, 1)`,
     keyframes(dimensions) {
       const offsetX = -(dimensions.targetX + dimensions.targetWidth);
       return translate2d(offsetX, 0, 0, 0);
@@ -136,7 +137,7 @@ export const presets = {
   },
   'fly-in-right': {
     duration: 600,
-    easing: `cubic-bezier(${DEFAULT_CURVE})`,
+    easing: `cubic-bezier(0.2, 0.6, 0.0, 1)`,
     keyframes(dimensions) {
       const offsetX = dimensions.pageWidth - dimensions.targetX;
       return translate2d(offsetX, 0, 0, 0);
@@ -144,7 +145,7 @@ export const presets = {
   },
   'fly-in-top': {
     duration: 600,
-    easing: `cubic-bezier(${DEFAULT_CURVE})`,
+    easing: `cubic-bezier(0.2, 0.6, 0.0, 1)`,
     keyframes(dimensions) {
       const offsetY = -(dimensions.targetY + dimensions.targetHeight);
       return translate2d(0, offsetY, 0, 0);
@@ -152,7 +153,7 @@ export const presets = {
   },
   'fly-in-bottom': {
     duration: 600,
-    easing: `cubic-bezier(${DEFAULT_CURVE})`,
+    easing: `cubic-bezier(0.2, 0.6, 0.0, 1)`,
     keyframes(dimensions) {
       const offsetY = dimensions.pageHeight - dimensions.targetY;
       return translate2d(0, offsetY, 0, 0);
@@ -183,6 +184,34 @@ export const presets = {
       },
       {
         opacity: 1,
+      },
+    ],
+  },
+  'scale-fade-up': {
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
+    keyframes: [
+      {
+        opacity: 0,
+        transform: 'scale(.7)',
+      },
+      {
+        opacity: 1,
+        transform: 'scale(1)',
+      },
+    ],
+  },
+  'scale-fade-down': {
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
+    keyframes: [
+      {
+        opacity: 0,
+        transform: 'scale(1.4)',
+      },
+      {
+        opacity: 1,
+        transform: 'scale(1)',
       },
     ],
   },
@@ -266,6 +295,38 @@ export const presets = {
     keyframes(dimensions) {
       const offsetX = dimensions.pageWidth - dimensions.targetX;
       return whooshIn(offsetX, 0, 0, 0);
+    },
+  },
+  'move-fade-in-left': {
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
+    keyframes(dimensions) {
+      const offsetX = -(dimensions.pageWidth * 0.3);
+      return moveIn(offsetX, 0, 0, 0);
+    },
+  },
+  'move-fade-in-right': {
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
+    keyframes(dimensions) {
+      const offsetX = dimensions.pageWidth * 0.3;
+      return moveIn(offsetX, 0, 0, 0);
+    },
+  },
+  'move-fade-in-top': {
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
+    keyframes(dimensions) {
+      const offsetY = -(dimensions.pageWidth * 0.3);
+      return moveIn(0, offsetY, 0, 0);
+    },
+  },
+  'move-fade-in-bottom': {
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
+    keyframes(dimensions) {
+      const offsetY = dimensions.pageWidth * 0.3;
+      return moveIn(0, offsetY, 0, 0);
     },
   },
   'pan-left': {
