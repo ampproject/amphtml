@@ -160,10 +160,10 @@ export const EXPAND_JSON_TARGETING_EXP = {
 };
 
 /** @const @enum {string} */
-const ROUND_LOCATION_PARAMS_EXP = {
+const ROUND_LOCATION_PARAMS_HOLDBACK_EXP = {
   ID: 'ad-adsense-gam-round-params',
-  CONTROL: '21066728',
-  EXPERIMENT: '21066729',
+  CONTROL: '21067041',
+  EXPERIMENT: '21067042',
 };
 
 /**
@@ -479,11 +479,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         ],
       },
       {
-        experimentId: ROUND_LOCATION_PARAMS_EXP.ID,
+        experimentId: ROUND_LOCATION_PARAMS_HOLDBACK_EXP.ID,
         isTrafficEligible: () => true,
         branches: [
-          ROUND_LOCATION_PARAMS_EXP.CONTROL,
-          ROUND_LOCATION_PARAMS_EXP.EXPERIMENT,
+          ROUND_LOCATION_PARAMS_HOLDBACK_EXP.CONTROL,
+          ROUND_LOCATION_PARAMS_HOLDBACK_EXP.EXPERIMENT,
         ],
       },
     ]).concat(AMPDOC_FIE_EXPERIMENT_INFO_LIST);
@@ -682,7 +682,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         : null,
       ...googleBlockParameters(
         this,
-        this.experimentIds.includes(ROUND_LOCATION_PARAMS_EXP.EXPERIMENT)
+        !this.experimentIds.includes(
+          ROUND_LOCATION_PARAMS_HOLDBACK_EXP.EXPERIMENT
+        )
       ),
     };
   }
@@ -797,7 +799,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.getPageParameters(consentTuple, /* instances= */ undefined),
           rtcParams
         ),
-        this.experimentIds.includes(ROUND_LOCATION_PARAMS_EXP.EXPERIMENT),
+        !this.experimentIds.includes(
+          ROUND_LOCATION_PARAMS_HOLDBACK_EXP.EXPERIMENT
+        ),
         this.experimentIds
       ).then((adUrl) => this.getAdUrlDeferred.resolve(adUrl));
     });
@@ -2013,8 +2017,8 @@ function constructSRARequest_(a4a, instances) {
       googlePageParameters(
         a4a,
         startTime,
-        instances[0].experimentIds.includes(
-          ROUND_LOCATION_PARAMS_EXP.EXPERIMENT
+        !instances[0].experimentIds.includes(
+          ROUND_LOCATION_PARAMS_HOLDBACK_EXP.EXPERIMENT
         )
       )
     )
