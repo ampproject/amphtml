@@ -19,15 +19,6 @@ import {ActionTrust} from '../../../src/action-constants';
 import {IntersectionObserverHostApi} from '../../../src/utils/intersection-observer-polyfill';
 import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {
-  SubscriptionApi,
-  isAdLike,
-  isPausable,
-  listenFor,
-  looksLikeTrackingIframe,
-  makePausable,
-  setPaused,
-} from '../../../src/iframe-helper';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {createCustomEvent, getData, listen} from '../../../src/event-helper';
 import {devAssert, user, userAssert} from '../../../src/log';
@@ -38,6 +29,14 @@ import {
   getConsentPolicyInfo,
   getConsentPolicyState,
 } from '../../../src/consent';
+import {
+  isAdLike,
+  isPausable,
+  listenFor,
+  looksLikeTrackingIframe,
+  makePausable,
+  setPaused,
+} from '../../../src/iframe-helper';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isExperimentOn} from '../../../src/experiments';
 import {moveLayoutRect} from '../../../src/layout-rect';
@@ -135,9 +134,6 @@ export class AmpIframe extends AMP.BaseElement {
      * @private {boolean}
      */
     this.hasErroredEmbedSize_ = false;
-
-    /** @private {?SubscriptionApi} */
-    this.subscriptionApiConsent_ = null;
   }
 
   /** @override */
@@ -493,13 +489,15 @@ export class AmpIframe extends AMP.BaseElement {
       listenFor(iframe, 'embed-ready', this.activateIframe_.bind(this));
     }
 
-    this.subscriptionApiConsent_ = new SubscriptionApi(
+    listenFor(
       iframe,
       'send-consent-data',
-      /*opt_is3P*/ false,
-      () => {
-        this.sendConsentData_();
-      }
+      (data, source, origin) => {
+        this.sendConsentData_(source, origin);
+      },
+      /*opt_is3P*/ undefined,
+      /*opt_includingNestedWindows*/ undefined,
+      /*opt_allowOpaqueOrigin*/ true
     );
 
     this.container_.appendChild(iframe);
@@ -552,18 +550,15 @@ export class AmpIframe extends AMP.BaseElement {
   /**
    * Requests consent data from consent module
    * and forwards information to iframe
-   *
+   * @param {Window} source
+   * @param {string} origin
    * @private
    */
-  sendConsentData_() {
+  sendConsentData_(source, origin) {
     const consentPolicyId = super.getConsentPolicy() || 'default';
-    const consentStringPromise = getConsentPolicyInfo(
-      this.element,
-      consentPolicyId
-    );
-    const metadataPromise = getConsentMetadata(this.element, consentPolicyId);
-    const consentPolicyStatePromise = getConsentPolicyState(
-      this.element,
+    const consentStringPromise = this.getConsentString_(consentPolicyId);
+    const metadataPromise = this.getConsentMetadata_(consentPolicyId);
+    const consentPolicyStatePromise = this.getConsentPolicyState_(
       consentPolicyId
     );
 
@@ -572,15 +567,59 @@ export class AmpIframe extends AMP.BaseElement {
       consentStringPromise,
       consentPolicyStatePromise,
     ]).then((consents) => {
-      this.subscriptionApiConsent_.send(
-        'consent-data',
+      this.sendConsentDataToIframe_(
+        source,
+        origin,
         dict({
+          'type': 'consent-data',
           'consentMetadata': consents[0],
           'consentString': consents[1],
           'consentPolicyState': consents[2],
         })
       );
     });
+  }
+
+  /**
+   * Send consent data to iframe
+   * @param {Window} source
+   * @param {string} origin
+   * @param {JsonObject} data
+   * @private
+   * @return {Promise}
+   */
+  sendConsentDataToIframe_(source, origin, data) {
+    source./*OK*/ postMessage(data, origin);
+  }
+
+  /**
+   * Get the consent string
+   * @param {string} consentPolicyId
+   * @private
+   * @return {Promise}
+   */
+  getConsentString_(consentPolicyId = 'default') {
+    return getConsentPolicyInfo(this.element, consentPolicyId);
+  }
+
+  /**
+   * Get the consent metadata
+   * @param {string} consentPolicyId
+   * @private
+   * @return {Promise}
+   */
+  getConsentMetadata_(consentPolicyId = 'default') {
+    return getConsentMetadata(this.element, consentPolicyId);
+  }
+
+  /**
+   * Get the consent policy state
+   * @param {string} consentPolicyId
+   * @private
+   * @return {Promise}
+   */
+  getConsentPolicyState_(consentPolicyId = 'default') {
+    return getConsentPolicyState(this.element, consentPolicyId);
   }
 
   /** @override */
