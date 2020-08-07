@@ -13,28 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {parseQueryString} from '../src/url';
 import {validateData, writeScript} from '../3p/3p';
+
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function firstimpression(global, data) {
   validateData(data, ['zoneId', 'websiteId']);
-
-  const getURLHashParameter_ = function (name) {
-    const result = decodeURI(
-      (RegExp('[#|&]' + name + '=(.+?)(&|$)').exec(
-        window.context.sourceUrl
-      ) || [, null])[1]
-    );
-    return result === 'null' ? null : result;
-  };
+  const locationHash = parseQueryString(global.context.location.hash);
 
   const cdnHost =
-    'https://' +
-    (getURLHashParameter_('fi_ecdnhost') || 'ecdn.firstimpression.io');
+    'https://' + (locationHash['fi_ecdnhost'] || 'ecdn.firstimpression.io');
 
-  const cdnpath = getURLHashParameter_('fi_ecdnpath') || '/static/js/fiamp.js';
+  const cdnpath = locationHash['fi_ecdnpath'] || '/static/js/fiamp.js';
 
   global.params = data;
 

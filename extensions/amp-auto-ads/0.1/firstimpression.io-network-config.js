@@ -17,6 +17,7 @@
 import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
 import {dict} from '../../../src/utils/object';
+import {parseQueryString} from '../../../src/url';
 
 /**
  * @implements {./ad-network-config.AdNetworkConfigDef}
@@ -48,36 +49,39 @@ export class FirstImpressionIoConfig {
   getConfigUrl() {
     let previewId = 0;
 
+    const {host, pathname, hash} = this.autoAmpAdsElement_.ampdoc_.win.location;
+    const hashParams = parseQueryString(hash);
+    const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
+
     const previewFlowRegex = /amp\/fi\/(\d+)\//;
-    const previewFlowParam = window.location.pathname.match(previewFlowRegex);
+    const previewFlowParam = pathname.match(previewFlowRegex);
     if (previewFlowParam != null && previewFlowParam.length == 2) {
       previewId = previewFlowParam[1];
     }
 
-    const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
-
-    const fiReveal = this.getURLHashParameter_('fi_reveal');
-    const fiDemand = this.getURLHashParameter_('fi_demand');
-    const fiGeo = this.getURLHashParameter_('fi_geo');
+    const fiReveal = hashParams['fi_reveal'];
+    const fiDemand = hashParams['fi_demand'];
+    const fiGeo = hashParams['fi_geo'];
 
     const cdnHost =
-      this.getURLHashParameter_('fi_cdnhost') ||
-      (previewId ? window.location.host : 'cdn.firstimpression.io');
+      hashParams['fi_cdnhost'] || (previewId ? host : 'cdn.firstimpression.io');
     const cdnpath =
-      this.getURLHashParameter_('fi_cdnpath') ||
+      hashParams['fi_cdnpath'] ||
       (previewId ? '/amp-preview.php' : '/delivery/amp.php');
 
     const websiteId = this.autoAmpAdsElement_.getAttribute('data-website-id');
     const targeting = this.autoAmpAdsElement_.getAttribute('data-targeting');
 
-    let queryParams = {
+    const queryParams = {
       'id': websiteId,
-      't': targeting,
       'url': docInfo.canonicalUrl,
       'w': window.screen.width,
       'h': window.screen.height,
     };
 
+    if (targeting) {
+      queryParams['targeting'] = targeting;
+    }
     if (fiReveal) {
       queryParams['fi_reveal'] = fiReveal;
     }
@@ -126,18 +130,5 @@ export class FirstImpressionIoConfig {
     return {
       height: 1,
     };
-  }
-
-  /**
-   * @param {string} name fragment parameter name to retrieve
-   */
-  getURLHashParameter_(name) {
-    const result = decodeURI(
-      (RegExp('[#|&]' + name + '=(.+?)(&|$)').exec(window.location.hash) || [
-        ,
-        null,
-      ])[1]
-    );
-    return result === 'null' ? null : result;
   }
 }
