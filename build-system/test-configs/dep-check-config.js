@@ -186,6 +186,7 @@ exports.rules = [
     mustNotDependOn: 'extensions/**/*.js',
     allowlist: [
       // a4a ads depend on a4a.
+      'extensions/amp-ad-network-nws-impl/0.1/amp-ad-network-nws-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-fake-impl/0.1/amp-ad-network-fake-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-smartads-impl/0.1/amp-ad-network-smartads-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
@@ -256,6 +257,13 @@ exports.rules = [
       'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/amp-story-localization-service.js',
+
+      // Interactive components that depend on story functionality.
+      'extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js->extensions/amp-story/1.0/story-analytics.js',
+      'extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js->extensions/amp-story/1.0/utils.js',
+      'extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js->extensions/amp-story/1.0/variable-service.js',
+      'extensions/amp-story-interactive/1.0/amp-story-interactive-results.js->extensions/amp-story/1.0/amp-story-store-service.js',
 
       // Subscriptions.
       'extensions/amp-subscriptions/0.1/expr.js->extensions/amp-access/0.1/access-expr.js',

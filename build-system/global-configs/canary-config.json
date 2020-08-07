@@ -7,7 +7,7 @@
   "allow-url-opt-in": ["pump-early-frame"],
   "canary": 1,
   "a4aProfilingRate": 0.01,
-  "adsense-ad-size-optimization": 0.01,
+  "adsense-ad-size-optimization": 0.05,
   "amp-access-iframe": 1,
   "amp-action-macro": 1,
   "amp-ad-ff-adx-ady": 0.01,
@@ -25,9 +25,9 @@
   "fix-inconsistent-responsive-height-selection": 0,
   "fixed-elements-in-lightbox": 1,
   "flexAdSlots": 0.05,
-  "hidden-mutation-observer": 1,
   "intersect-resources": 1,
   "ios-fixed-no-transfer": 1,
+  "protocol-adapters": 1,
   "pump-early-frame": 1,
   "remove-task-timeout": 0,
   "swg-gpay-api": 1,
@@ -36,6 +36,6 @@
   "amp-ad-no-center-css": 0,
   "sticky-ad-padding-bottom": 1,
   "analytics-chunks": 1,
-  "ad-adsense-gam-round-params": 0.2,
+  "ad-adsense-gam-round-params": 0.1,
   "render-on-idle-fix": 1
 }
