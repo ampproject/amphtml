@@ -16,10 +16,7 @@
 
 import '../amp-social-share';
 import {toggleExperiment} from '../../../../src/experiments';
-import {
-  waitForChildPromise,
-  whenUpgradedToCustomElement,
-} from '../../../../src/dom';
+import {waitForChildPromise} from '../../../../src/dom';
 import {whenCalled} from '../../../../testing/test-helper.js';
 
 const BUTTON_SELECTOR = 'div[role="button"]';
@@ -51,40 +48,6 @@ describes.realWin(
       doc = win.document;
       doc.title = 'Test Title';
       toggleExperiment(win, 'amp-social-share-bento', true);
-    });
-
-    it('throws an error when type is not provided', async () => {
-      expectAsyncConsoleError(/The type attribute is required./, 2);
-      element = win.document.createElement('amp-social-share');
-      win.document.body.appendChild(element);
-      // Test seems to always pass, but does throw an error if the required error is not thrown
-    });
-
-    it('custom endpoint must be provided when not using a pre-configured type', async () => {
-      //expectAsyncConsoleError(/An endpoint/, 1);
-      element = win.document.createElement('amp-social-share');
-      element.setAttribute('type', 'unknown-provider');
-      //win.document.body.appendChild(element);
-      await whenUpgradedToCustomElement(element);
-      await allowConsoleError(() =>
-        element.build().catch((err) => {
-          expect(err.message).to.include('blah!');
-        })
-      );
-    });
-
-    //in progress
-    it('blah test', async () => {
-      const share = doc.createElement('amp-social-share');
-      share.setAttribute('type', 'unknown-provider');
-      doc.body.appendChild(share);
-      //return allowConsoleError(() => {});
-
-      return allowConsoleError(() => {
-        return expect(share).to.eventually.be.rejectedWith(
-          /data-share-endpoint attribute is required/
-        );
-      });
     });
 
     it('renders custom endpoint when not using a pre-configured type', async () => {
@@ -157,9 +120,46 @@ describes.realWin(
       const openWindowDialogStub = env.sandbox.stub(window, 'open');
       element.shadowRoot.querySelector(BUTTON_SELECTOR).click();
 
-      // additional params, test and test2 are included in the url
+      // additional params, test-value and test-value2 are included in the url
       expect(openWindowDialogStub).to.be.calledWithExactly(
         'cats.com?test=test-value&test2=test-value2',
+        '_blank',
+        WINDOW_FEATURES
+      );
+    });
+
+    it('receives the recipient from the data attribute when using "email" type', async () => {
+      element = win.document.createElement('amp-social-share');
+      element.setAttribute('type', 'email');
+      element.setAttribute('data-param-recipient', 'recipient-name');
+      win.document.body.appendChild(element);
+      await waitForRender();
+
+      const openWindowDialogStub = env.sandbox.stub(window, 'open');
+      element.shadowRoot.querySelector(BUTTON_SELECTOR).click();
+
+      // the data-param-recipient attribute is included in the url after
+      // "mailto:"
+      expect(openWindowDialogStub).to.be.calledWithExactly(
+        'mailto:recipient-name?subject=Test%20Title&body=https%3A%2F%2F' +
+          'canonicalexample.com%2F&recipient=recipient-name',
+        '_blank',
+        WINDOW_FEATURES
+      );
+    });
+
+    it('uses special query symbol for "sms" type', async () => {
+      element = win.document.createElement('amp-social-share');
+      element.setAttribute('type', 'sms');
+      win.document.body.appendChild(element);
+      await waitForRender();
+
+      const openWindowDialogStub = env.sandbox.stub(window, 'open');
+      element.shadowRoot.querySelector(BUTTON_SELECTOR).click();
+
+      // the query symbol for sms should be '?&' instead of '?'
+      expect(openWindowDialogStub).to.be.calledWithExactly(
+        'sms:?&body=Test%20Title%20-%20https%3A%2F%2Fcanonicalexample.com%2F',
         '_blank',
         WINDOW_FEATURES
       );
