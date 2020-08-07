@@ -35,6 +35,14 @@ const Computed = contextProp('Computed', {
     `${inputs[0] ?? 'no-input'}/${nonRecursive}/${recursive}/${concat}`,
 });
 
+const ComputedRecursiveWithDeps = contextProp('Computed', {
+  deps: [Recursive],
+  needsParent: true,
+  defaultValue: 'DEF',
+  compute: (contextNode, inputs, parentValue, recursive) =>
+    `${inputs[0] ?? 'no-input'}/${parentValue}/${recursive}`,
+});
+
 describes.realWin('ContextNode - values', {}, (env) => {
   let sandbox;
   let win, doc;
@@ -811,6 +819,51 @@ describes.realWin('ContextNode - values', {}, (env) => {
       expect(cousin1Stub).to.not.be.called;
       // 1x `NonRecursive` + 1x `Computed`
       expect(calcSpy).to.have.callCount(2);
+    });
+  });
+
+  describe('connected, recursive, with deps', () => {
+    let sibling1, sibling1Stub;
+    let sibling2, sibling2Stub;
+    let cousin1, cousin1Stub;
+    let parent, parentStub;
+    let grandparent, grandparentStub;
+
+    beforeEach(async () => {
+      doc.body.appendChild(tree);
+      sibling1 = ContextNode.get(el('T-1-1-1'));
+      sibling2 = ContextNode.get(el('T-1-1-2'));
+      cousin1 = ContextNode.get(el('T-1-2-1'));
+      parent = ContextNode.get(el('T-1-1'));
+      grandparent = ContextNode.get(el('T-1'));
+
+      sibling1Stub = sandbox.stub();
+      sibling2Stub = sandbox.stub();
+      cousin1Stub = sandbox.stub();
+      parentStub = sandbox.stub();
+      grandparentStub = sandbox.stub();
+
+      await waitForDiscover(grandparent, parent, sibling1, sibling2, cousin1);
+
+      sibling1.values.subscribe(ComputedRecursiveWithDeps, sibling1Stub);
+      sibling2.values.subscribe(ComputedRecursiveWithDeps, sibling2Stub);
+      cousin1.values.subscribe(ComputedRecursiveWithDeps, cousin1Stub);
+      parent.values.subscribe(ComputedRecursiveWithDeps, parentStub);
+      grandparent.values.subscribe(ComputedRecursiveWithDeps, grandparentStub);
+      clock.runAll();
+      calcSpy.resetHistory();
+    });
+
+    it('should compute without input', () => {
+      expect(grandparentStub).to.not.be.called;
+      expect(parentStub).to.not.be.called;
+      expect(sibling1Stub).to.not.be.called;
+      expect(sibling2Stub).to.not.be.called;
+      expect(cousin1Stub).to.not.be.called;
+
+      grandparent.values.set(Recursive, 'OWNER1', 'A');
+      clock.runAll();
+      expect(sibling1Stub).to.be.calledOnce.calledWith('no-input/DEF/A');
     });
   });
 
