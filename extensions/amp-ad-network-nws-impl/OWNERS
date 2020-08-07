@@ -4,10 +4,7 @@
 {
   rules: [
     {
-      owners: [
-          {name: 'ampproject/wg-ads-reviewers'},
-          {name: 'danielstockton'}
-        ],
+      owners: [{name: 'ampproject/wg-ads-reviewers'}, {name: 'danielstockton'}],
     },
   ],
 }
