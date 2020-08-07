@@ -183,14 +183,14 @@ export class RequestBank {
    */
   static withdraw(requestId) {
     const url = `${REQUEST_URL}/withdraw/${requestId}/`;
-    return this.fetch_(url, `withdraw(${requestId ?? ''})`).then((res) =>
+    return RequestBank.fetch_(url, `withdraw(${requestId ?? ''})`).then((res) =>
       res.json()
     );
   }
 
   static tearDown() {
     const url = `${REQUEST_URL}/teardown/`;
-    return this.fetch_(url, 'tearDown');
+    return RequestBank.fetch_(url, 'tearDown');
   }
 
   static fetch_(url, action, timeout = 10000) {
