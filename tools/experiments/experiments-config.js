@@ -209,12 +209,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17161',
   },
   {
-    id: 'hidden-mutation-observer',
-    name: "Enables FixedLayer's hidden-attribute mutation observer",
-    spec: 'https://github.com/ampproject/amphtml/issues/17475',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
-  },
-  {
     id: 'amp-user-location',
     name:
       'Expose the browser geolocation API for latitude and longitude ' +
