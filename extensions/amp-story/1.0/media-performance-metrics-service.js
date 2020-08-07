@@ -116,7 +116,7 @@ export class MediaPerformanceMetricsService {
    * @param {!Window} win
    */
   constructor(win) {
-    /** @private @const {!WeakMap<number, !MediaEntryDef>} */
+    /** @private @const {!WeakMap<HTMLMediaElement|EventTarget|null, !MediaEntryDef>} */
     this.mediaMap_ = new WeakMap();
 
     /** @private @const {!../../../src/service/performance-impl.Performance} */
