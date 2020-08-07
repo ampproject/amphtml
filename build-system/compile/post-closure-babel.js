@@ -21,7 +21,6 @@ const remapping = require('@ampproject/remapping');
 const terser = require('terser');
 const through = require('through2');
 const {debug, CompilationLifecycles} = require('./debug-compilation-lifecycle');
-const { catch } = require('fetch-mock');
 
 /**
  * Minify passed string.
@@ -96,7 +95,7 @@ exports.postClosureBabel = function () {
         () => null,
         !argv.full_sourcemaps
       );
-    } catch(e) {
+    } catch (e) {
       return next(e);
     }
 
