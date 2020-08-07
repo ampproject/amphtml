@@ -50,10 +50,6 @@ import {AmpStoryCtaLayer} from './amp-story-cta-layer';
 import {AmpStoryEmbeddedComponent} from './amp-story-embedded-component';
 import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
-import {AmpStoryInteractiveBinaryPoll} from './amp-story-interactive-binary-poll';
-import {AmpStoryInteractivePoll} from './amp-story-interactive-poll';
-import {AmpStoryInteractiveQuiz} from './amp-story-interactive-quiz';
-import {AmpStoryInteractiveResults} from './amp-story-interactive-results';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
 import {AmpStoryRenderService} from './amp-story-render-service';
@@ -68,6 +64,10 @@ import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '../../../src/utils/key-codes';
 import {Layout} from '../../../src/layout';
 import {LiveStoryManager} from './live-story-manager';
+import {
+  LocalizedStringId,
+  createPseudoLocale,
+} from '../../../src/localized-strings';
 import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
@@ -94,7 +94,6 @@ import {
   setImportantStyles,
   toggle,
 } from '../../../src/style';
-import {createPseudoLocale} from '../../../src/localized-strings';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
@@ -552,10 +551,7 @@ export class AmpStory extends AMP.BaseElement {
    */
   initializePageIds_() {
     const pageEls = this.element.querySelectorAll('amp-story-page');
-    const pageIds = Array.prototype.map.call(
-      pageEls,
-      (el) => el.id || 'default-page'
-    );
+    const pageIds = toArray(pageEls).map((el) => el.id || 'default-page');
     const idsMap = map();
     for (let i = 0; i < pageIds.length; i++) {
       if (idsMap[pageIds[i]] === undefined) {
@@ -1039,8 +1035,41 @@ export class AmpStory extends AMP.BaseElement {
       });
     }
 
+    this.buildScreenReaderBackButton_();
+
     // Will resolve when all pages are built.
     return storyLayoutPromise;
+  }
+
+  /**
+   * Creates a focusable button for screen readers to navigate back.
+   * @private
+   */
+  buildScreenReaderBackButton_() {
+    const backButton = document.createElement('button');
+
+    const label = this.localizationService_.getLocalizedString(
+      LocalizedStringId.AMP_STORY_PAGINATION_BUTTON_PREVIOUS_PAGE_LABEL
+    );
+
+    backButton.classList.add('i-amphtml-story-screen-reader-back-button');
+    label && backButton.setAttribute('aria-label', label);
+    this.mutateElement(() => {
+      this.element.appendChild(backButton);
+    });
+
+    // Append class to hide button if on first page.
+    this.storeService_.subscribe(
+      StateProperty.CURRENT_PAGE_INDEX,
+      (pageIndex) =>
+        this.mutateElement(() =>
+          backButton.classList.toggle(
+            'i-amphtml-story-screen-reader-back-button-hidden',
+            pageIndex === 0 && !this.viewer_.hasCapability('swipe')
+          )
+        ),
+      true /** callToInitialize */
+    );
   }
 
   /**
@@ -1520,11 +1549,6 @@ export class AmpStory extends AMP.BaseElement {
         // If first navigation.
         if (!oldPage) {
           this.registerAndPreloadBackgroundAudio_();
-        }
-
-        if (!this.storeService_.get(StateProperty.MUTED_STATE)) {
-          oldPage && oldPage.muteAllMedia();
-          this.activePage_.unmuteAllMedia();
         }
       },
       // Third and last step contains all the actions that can be delayed after
@@ -2825,15 +2849,5 @@ AMP.extension('amp-story', '1.0', (AMP) => {
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
   AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment);
-  AMP.registerElement(
-    'amp-story-interactive-binary-poll',
-    AmpStoryInteractiveBinaryPoll
-  );
-  AMP.registerElement('amp-story-interactive-poll', AmpStoryInteractivePoll);
-  AMP.registerElement('amp-story-interactive-quiz', AmpStoryInteractiveQuiz);
-  AMP.registerElement(
-    'amp-story-interactive-results',
-    AmpStoryInteractiveResults
-  );
   AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });

@@ -888,10 +888,10 @@ amp-story .amp-video-eq,
   /* Shared properties by interactives */
   --i-amphtml-interactive-option-accent-color: var(--interactive-accent-color) !important;
   --i-amphtml-interactive-option-background-color: white !important;
-  --i-amphtml-interactive-option-text-color: #5F6368 !important;
-  --i-amphtml-interactive-theme-border: rgba(0, 0, 0, 0.2) !important;
-  --i-amphtml-interactive-theme-shading: rgba(95, 99, 104, 0.2) !important;
-  --i-amphtml-interactive-theme-shading-flash: rgba(95, 99, 104, 0.4) !important;
+  --i-amphtml-interactive-option-text-color: #55595E !important;
+  --i-amphtml-interactive-theme-border: rgba(85, 89, 94, 0.2) !important;
+  --i-amphtml-interactive-theme-shading: rgba(85, 89, 94, 0.2) !important;
+  --i-amphtml-interactive-theme-shading-flash: rgba(85, 89, 94, 0.5) !important;
   --i-amphtml-interactive-chip-radius: 32px !important;
   --i-amphtml-interactive-chip-shadow: 0px 0px 0px transparent !important;
   --i-amphtml-interactive-chip-shadow-inset: inset 0px 0px 0px transparent !important;
@@ -907,11 +907,11 @@ amp-story .amp-video-eq,
 }
 
 .i-amphtml-story-interactive-component[theme="dark"] {
-  --i-amphtml-interactive-option-text-color: #9AA0A6 !important;
+  --i-amphtml-interactive-option-text-color: #A7ADB4 !important;
   --i-amphtml-interactive-option-background-color: #202124 !important;
-  --i-amphtml-interactive-theme-border: rgba(255, 255, 255, 0.2) !important;
-  --i-amphtml-interactive-theme-shading: rgba(154, 160, 166, 0.2) !important;
-  --i-amphtml-interactive-theme-shading-flash: rgba(154, 160, 166, 0.4) !important;
+  --i-amphtml-interactive-theme-border: rgba(167, 173, 180, 0.2) !important;
+  --i-amphtml-interactive-theme-shading: rgba(167, 173, 180, 0.2) !important;
+  --i-amphtml-interactive-theme-shading-flash: rgba(167, 173, 180, 0.5) !important;
   --i-amphtml-interactive-strong-text-color: white !important;
 }
 
@@ -942,4 +942,26 @@ amp-story-interactive-binary-poll[theme="dark"], amp-story-interactive-poll[them
 
 amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-component {
   --i-amphtml-interactive-animation-delay: 350ms !important;
+}
+
+.i-amphtml-story-screen-reader-back-button {
+  width: 10px !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0!important;
+  bottom: 0 !important;
+  z-index: 1 !important;
+  height: calc(100vh - 150px) !important;
+  margin: auto 0 !important;
+  background: none !important;
+  border: none !important;
+}
+
+[dir=rtl]amp-story .i-amphtml-story-screen-reader-back-button {
+  right: 0 !important;
+}
+
+.i-amphtml-story-desktop-panels .i-amphtml-story-screen-reader-back-button,
+.i-amphtml-story-screen-reader-back-button-hidden {
+  display: none !important;
 }

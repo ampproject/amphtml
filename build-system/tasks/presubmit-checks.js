@@ -432,7 +432,7 @@ const forbiddenTerms = {
       'extensions/amp-experiment/1.0/variant.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
       'extensions/amp-consent/0.1/consent-config.js',
-      'extensions/amp-story/1.0/amp-story-interactive.js',
+      'extensions/amp-story-interactive/1.0/amp-story-interactive-abstract.js',
     ],
   },
   'getBaseCid': {
@@ -998,7 +998,11 @@ const forbiddenTermsSrcInclusive = {
     message:
       'Due to various bugs in Firefox, you must use the computedStyle ' +
       'helper in style.js.',
-    allowlist: ['src/style.js', 'dist.3p/current/integration.js'],
+    allowlist: [
+      'src/style.js',
+      'dist.3p/current/integration.js',
+      'build-system/tasks/coverage-map/index.js',
+    ],
   },
   'decodeURIComponent\\(': {
     message:
@@ -1062,6 +1066,7 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js', // eslint-disable-line max-len
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js', // eslint-disable-line max-len
       'extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
+      'extensions/amp-animation/0.1/install-polyfill.js',
     ],
   },
   'loadElementClass': {

@@ -187,23 +187,35 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         getIdentityToken(this.win, this.getAmpDoc(), super.getConsentPolicy())
       );
 
-    return ResponsiveState.maybeUpgradeToResponsive(
-      this.element,
-      this.getAdClientId_()
-    ).then((state) => {
-      if (state != null) {
-        this.responsiveState_ = state;
-      }
-      if (
-        this.responsiveState_ != null &&
-        !this.responsiveState_.isContainerWidthState()
-      ) {
-        return this.responsiveState_.attemptToMatchResponsiveHeight();
-      }
-      // This should happen last, as some diversion criteria rely on some of the
-      // preceding logic (specifically responsive logic).
-      this.divertExperiments();
-    });
+    // Convert the full-width tag to container width for desktop users.
+    if (
+      this.element.hasAttribute('data-auto-format') &&
+      !ResponsiveState.isLayoutViewportNarrow(this.element)
+    ) {
+      return ResponsiveState.convertToContainerWidth(this.element).then(
+        (state) => {
+          if (state != null) {
+            this.responsiveState_ = state;
+          }
+          this.divertExperiments();
+        }
+      );
+    } else {
+      return ResponsiveState.maybeUpgradeToResponsive(
+        this.element,
+        this.getAdClientId_()
+      ).then((state) => {
+        if (state != null) {
+          this.responsiveState_ = state;
+        }
+        if (this.responsiveState_ != null) {
+          return this.responsiveState_.attemptToMatchResponsiveHeight();
+        }
+        // This should happen last, as some diversion criteria rely on some of the
+        // preceding logic (specifically responsive logic).
+        this.divertExperiments();
+      });
+    }
   }
 
   /** @override */
@@ -256,6 +268,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     Object.keys(setExps).forEach((expName) =>
       addExperimentIdToElement(setExps[expName], this.element)
     );
+    const moduleNomoduleExpId = this.getModuleNomoduleExpIds_();
+    if (moduleNomoduleExpId) {
+      addExperimentIdToElement(moduleNomoduleExpId, this.element);
+    }
   }
 
   /**
@@ -298,13 +314,15 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       this.element.getAttribute('data-adtest') ||
       isInManualExperiment(this.element);
 
-    // By default, the ad uses full-width. It will be overwritten
-    // if the publisher uses fixed size tag or it's converted to container-width.
-    this.size_ = this.getIntersectionElementLayoutBox();
     const width = Number(this.element.getAttribute('width'));
     const height = Number(this.element.getAttribute('height'));
-    if (!isNaN(width) && !isNaN(height)) {
+    if (
+      this.responsiveState_ != null &&
+      this.responsiveState_.isContainerWidthState()
+    ) {
       this.size_ = {width, height};
+    } else {
+      this.size_ = this.getIntersectionElementLayoutBox();
     }
 
     const sizeToSend = this.isSinglePageStoryAd
