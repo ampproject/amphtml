@@ -17,7 +17,6 @@
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {
-  getViewerAuthTokenIfAvailable,
   getViewerInterceptResponse,
   setupAMPCors,
   setupInit,
