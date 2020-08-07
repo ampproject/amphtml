@@ -1009,11 +1009,7 @@ app.get(
 
         // Extract amp-consent for the given 'type' specified in URL query.
         if (
-          (req.path.indexOf('/examples/amp-consent/cmp-vendors.amp.html') ==
-            0 ||
-            req.path.indexOf(
-              '/examples/amp-consent/amp-consent-iframe.amp.html'
-            ) == 0) &&
+          req.path.indexOf('/examples/amp-consent/cmp-vendors.amp.html') == 0 &&
           req.query.type
         ) {
           const consent = file.match(
