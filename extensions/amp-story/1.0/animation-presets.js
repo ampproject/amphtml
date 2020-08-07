@@ -22,7 +22,6 @@ import {
   scaleAndTranslate,
   translate2d,
   whooshIn,
-  moveIn,
 } from './animation-presets-utils';
 import {px} from '../../../src/style';
 import {userAssert} from '../../../src/log';
