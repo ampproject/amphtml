@@ -270,6 +270,10 @@ window.parent.postMessage(
 
 The iframe can receive the consent data response by listening to the `consent-data` message.
 
+Please note:
+- The `consent-data` response will only be sent once and won't update the iframe when the consent state changes (for example when the user decides to reject consent by using the post prompt ui)
+- The response is delayed until the user interacts with the amp-consent ui in case iframe loading is not blocked by using `data-block-on-consent`
+
 _Example: iframe `send-consent-data` request_
 
 ```javascript

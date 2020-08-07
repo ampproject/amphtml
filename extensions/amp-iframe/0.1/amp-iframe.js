@@ -33,7 +33,11 @@ import {createCustomEvent, getData, listen} from '../../../src/event-helper';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {endsWith, startsWith} from '../../../src/string';
-import {getConsentMetadata, getConsentPolicyInfo} from '../../../src/consent';
+import {
+  getConsentMetadata,
+  getConsentPolicyInfo,
+  getConsentPolicyState,
+} from '../../../src/consent';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isExperimentOn} from '../../../src/experiments';
 import {moveLayoutRect} from '../../../src/layout-rect';
@@ -552,20 +556,28 @@ export class AmpIframe extends AMP.BaseElement {
    * @private
    */
   sendConsentData_() {
-    const consentPolicyId = super.getConsentPolicy();
-    const consentStringPromise = consentPolicyId
-      ? getConsentPolicyInfo(this.element, consentPolicyId)
-      : Promise.resolve(null);
-    const metadataPromise = consentPolicyId
-      ? getConsentMetadata(this.element, consentPolicyId)
-      : Promise.resolve(null);
+    const consentPolicyId = super.getConsentPolicy() || 'default';
+    const consentStringPromise = getConsentPolicyInfo(
+      this.element,
+      consentPolicyId
+    );
+    const metadataPromise = getConsentMetadata(this.element, consentPolicyId);
+    const consentPolicyStatePromise = getConsentPolicyState(
+      this.element,
+      consentPolicyId
+    );
 
-    Promise.all([metadataPromise, consentStringPromise]).then((consents) => {
+    Promise.all([
+      metadataPromise,
+      consentStringPromise,
+      consentPolicyStatePromise,
+    ]).then((consents) => {
       this.subscriptionApiConsent_.send(
         'consent-data',
         dict({
           'consentMetadata': consents[0],
           'consentString': consents[1],
+          'consentPolicyState': consents[2],
         })
       );
     });

@@ -3,7 +3,11 @@
 <body style="background-color:#EEEEEE">
   <script>
     window.addEventListener('message', (event) => {
-      if (event.origin !== 'http://localhost:8000') {
+      if (
+        event.origin !== 'http://localhost:8000' &&
+        event.data &&
+        event.data.type === 'consent-data'
+      ) {
         return;
       }
       console.log('message', event);
@@ -15,6 +19,8 @@
       type: 'send-consent-data'
     }, '*');
   </script>
-  <pre id="consent"></pre>
+  <pre id="consent">
+    Iframe loaded but did not receive consent
+  </pre>
 </body>
 </html>
