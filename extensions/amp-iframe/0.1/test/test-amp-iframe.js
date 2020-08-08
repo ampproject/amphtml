@@ -934,24 +934,9 @@ describes.realWin(
       });
 
       it('sends a consent-data message to the iframe', function* () {
-        const srcdoc = `
-          <!doctype html>
-          <html>
-          <body>
-            <script>
-              setTimeout(() => {
-                window.parent.postMessage({
-                  sentinel: 'amp',
-                  type: 'send-consent-data',
-                }, '*');
-              }, 100);
-            </script>
-          </body>
-          </html>
-        `;
         const ampIframe = createAmpIframe(env, {
-          srcdoc,
-          sandbox: 'allow-scripts',
+          src: iframeSrc,
+          sandbox: 'allow-scripts allow-same-origin',
           width: 100,
           height: 100,
         });
@@ -966,11 +951,19 @@ describes.realWin(
           });
 
         yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+        const iframe = ampIframe.querySelector('iframe');
 
         return new Promise((resolve, unusedReject) => {
           impl.sendConsentDataToIframe_ = (source, origin, message) => {
             resolve(message);
           };
+          iframe.contentWindow.postMessage(
+            {
+              sentinel: 'amp',
+              type: 'requestSendConsentState',
+            },
+            '*'
+          );
         }).then((message) => {
           expect(message).to.deep.equal({
             type: 'consent-data',
