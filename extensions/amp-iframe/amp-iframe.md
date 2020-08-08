@@ -273,7 +273,7 @@ The iframe can receive the consent data response by listening to the `consent-da
 **Please note:**
 
 - The `consent-data` response will only be sent once and won't update the iframe when the consent state changes (for example when the user decides to reject consent by using the post prompt ui)
-- The response is delayed until the user interacts with the amp-consent ui in case iframe loading is not blocked by using `data-block-on-consent`
+- When omitting `data-block-on-consent` the `default` policy is used and the iframe will be loaded immediately. The `consent-data` response may be delayed based on the selected policy. See [`amp-consent`](../amp-consent/amp-consent.md) for more information.
 
 _Example: iframe `send-consent-data` request_
 
