@@ -64,6 +64,7 @@ export const MessageType = {
 
   // For amp-iframe
   SEND_CONSENT_DATA: 'send-consent-data',
+  CONSENT_DATA: 'consent-data',
 };
 
 /**

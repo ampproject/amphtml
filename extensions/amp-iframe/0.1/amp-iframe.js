@@ -18,6 +18,7 @@ import {AMPDOC_SINGLETON_NAME} from '../../../src/enums';
 import {ActionTrust} from '../../../src/action-constants';
 import {IntersectionObserverHostApi} from '../../../src/utils/intersection-observer-polyfill';
 import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
+import {MessageType} from '../../../src/3p-frame-messaging';
 import {Services} from '../../../src/services';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
 import {createCustomEvent, getData, listen} from '../../../src/event-helper';
@@ -489,16 +490,9 @@ export class AmpIframe extends AMP.BaseElement {
       listenFor(iframe, 'embed-ready', this.activateIframe_.bind(this));
     }
 
-    listenFor(
-      iframe,
-      'send-consent-data',
-      (data, source, origin) => {
-        this.sendConsentData_(source, origin);
-      },
-      /*opt_is3P*/ undefined,
-      /*opt_includingNestedWindows*/ undefined,
-      /*opt_allowOpaqueOrigin*/ true
-    );
+    listenFor(iframe, MessageType.SEND_CONSENT_DATA, (data, source, origin) => {
+      this.sendConsentData_(source, origin);
+    });
 
     this.container_.appendChild(iframe);
 
@@ -571,7 +565,7 @@ export class AmpIframe extends AMP.BaseElement {
         source,
         origin,
         dict({
-          'type': 'consent-data',
+          'type': MessageType.CONSENT_DATA,
           'consentMetadata': consents[0],
           'consentString': consents[1],
           'consentPolicyState': consents[2],
@@ -586,7 +580,6 @@ export class AmpIframe extends AMP.BaseElement {
    * @param {string} origin
    * @param {JsonObject} data
    * @private
-   * @return {Promise}
    */
   sendConsentDataToIframe_(source, origin, data) {
     source./*OK*/ postMessage(data, origin);
