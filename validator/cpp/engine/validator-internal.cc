@@ -5423,7 +5423,6 @@ class Validator {
     context_.SetDocByteSize(html.length());
     auto parser = std::make_unique<htmlparser::Parser>(html, options);
     auto doc = parser->Parse();
-
     parse_accounting_ = parser->Accounting();
     if (absl::GetFlag(FLAGS_duplicate_html_body_elements_is_error) &&
         parse_accounting_.duplicate_body_elements &&
@@ -5441,8 +5440,8 @@ class Validator {
       context_.AddError(ValidationError::DUPLICATE_UNIQUE_TAG,
                         LineCol(line, col), {"HTML"}, "", &result_);
     }
-    UpdateLineColumnIndex(doc.get());
-    ValidateNode(doc.get());
+    UpdateLineColumnIndex(doc->RootNode());
+    ValidateNode(doc->RootNode());
     auto [current_line_no, current_col_no] = parser->CurrentTokenizerPosition();
     context_.SetLineCol(current_line_no, current_col_no > 0 ? current_col_no - 1
                                                             : current_col_no);
@@ -5596,13 +5595,11 @@ class Validator {
       // and populate it in the DOM.
       if (node->DataAtom() == htmlparser::Atom::NOSCRIPT &&
           c->Type() == htmlparser::NodeType::TEXT_NODE) {
-        auto dummy_node =
-            std::unique_ptr<htmlparser::Node>(htmlparser::Node::make_node(
-                htmlparser::NodeType::ELEMENT_NODE, htmlparser::Atom::BODY));
-        std::vector<htmlparser::Node*> nodes =
-            htmlparser::ParseFragment(c->Data(), dummy_node.get());
+        auto dummy_node = std::make_unique<htmlparser::Node>(
+            htmlparser::NodeType::ELEMENT_NODE, htmlparser::Atom::BODY);
+        auto doc = htmlparser::ParseFragment(c->Data(), dummy_node.get());
         // Append all the nodes to the original <noscript> parent.
-        for (htmlparser::Node* cn : nodes) {
+        for (htmlparser::Node* cn : doc->FragmentNodes()) {
           cn->UpdateChildNodesPositions(node);
           node->AppendChild(cn);
           UpdateLineColumnIndex(cn);
