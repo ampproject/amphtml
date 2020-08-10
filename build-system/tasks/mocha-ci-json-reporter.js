@@ -47,7 +47,7 @@ async function writeOutput(output, filename) {
  */
 function ciJsonReporter(runner) {
   Base.call(this, runner);
-  const testResults = [];
+  const testEvents = [];
   let suiteList = [];
 
   runner.on(EVENT_SUITE_BEGIN, function (suite) {
@@ -57,53 +57,36 @@ function ciJsonReporter(runner) {
   runner.on(EVENT_SUITE_END, function () {
     // We need a fresh copy every time we make a new suite,
     // so we can't use pop here (or the suiteList info of previous
-    // tests would be destroyed)
+    // tests would be changed)
     suiteList = suiteList.slice(0, -1);
   });
 
   runner.on(EVENT_TEST_PASS, function (test) {
-    testResults.push(
-      formatForApi(test, suiteList, {
-        success: true,
-        skipped: false,
-      })
-    );
+    testEvents.push({test, suiteList, EVENT_TEST_PASS});
   });
 
   runner.on(EVENT_TEST_FAIL, function (test) {
-    testResults.push(
-      formatForApi(test, suiteList, {
-        success: false,
-        skipped: false,
-      })
-    );
+    testEvents.push({test, suiteList, EVENT_TEST_FAIL});
   });
 
   runner.on(EVENT_TEST_PENDING, function (test) {
-    testResults.push(
-      formatForApi(test, suiteList, {
-        success: false,
-        skipped: true,
-      })
-    );
+    testEvents.push({test, suiteList, EVENT_TEST_PENDING});
   });
 
   runner.on(EVENT_RUN_END, async function () {
+    const testResults = testEvents.map(({test, suiteList, event}) => ({
+      description: test.title,
+      suite: suiteList,
+      success: event === EVENT_TEST_PASS,
+      skipped: event === EVENT_TEST_PENDING,
+      time: test.duration, // in milliseconds
+    }));
+
     // Apparently we'll need to add a --no-exit flag when calling this
     // to allow for the asynchronous reporter.
     // See https://github.com/mochajs/mocha/issues/812
     await writeOutput({testResults}, `result-reports/e2e.json`);
   });
-
-  function formatForApi(test, suite, {success, skipped}) {
-    return {
-      description: test.fullTitle(),
-      suite,
-      success,
-      skipped,
-      time: test.duration, // in milliseconds
-    };
-  }
 }
 
 inherits(ciJsonReporter, Base);
