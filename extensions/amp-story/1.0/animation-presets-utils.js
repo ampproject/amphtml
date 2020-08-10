@@ -48,7 +48,7 @@ export function translate2d(startX, startY, endX, endY) {
  */
 export function rotateAndTranslate(startX, startY, endX, endY, direction) {
   return [
-    {transform: translate(startX, startY) + ' ' + rotate(direction * 360)},
+    {transform: translate(startX, startY) + ' ' + rotate(direction * 120)},
     {transform: translate(endX, endY) + ' ' + rotate(0)},
   ];
 }
