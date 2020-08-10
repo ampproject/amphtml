@@ -142,10 +142,10 @@ const forbiddenTerms = {
       'build-system/tasks/prettify.js',
       'build-system/tasks/server-tests.js',
       'src/purifier/noop.js',
-      'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
       'validator/engine/validator.js',
+      'validator/js/nodejs/index.js', // NodeJs only.
     ],
     checkInTestFolder: true,
   },
@@ -764,7 +764,7 @@ const forbiddenTerms = {
       'validator/engine/parse-srcset_test.js',
       'validator/engine/parse-url_test.js',
       'validator/engine/validator_test.js',
-      'validator/gulpjs/test/validate.js',
+      'validator/js/gulpjs/test/validate.js',
       // Test files. TODO(#24144): Fix these and remove from the allowlist.
       'ads/google/a4a/shared/test/test-content-recommendation.js',
       'ads/google/a4a/shared/test/test-url-builder.js',
@@ -1012,7 +1012,7 @@ const forbiddenTermsSrcInclusive = {
       'examples/pwa/pwa.js',
       'validator/engine/parse-url.js',
       'validator/engine/validator.js',
-      'validator/webui/webui.js',
+      'validator/js/webui/webui.js',
       'extensions/amp-pinterest/0.1/util.js',
       'src/url.js',
       'src/url-try-decode-uri-component.js',
@@ -1177,8 +1177,8 @@ const forbiddenTermsSrcInclusive = {
       'tools/experiments/experiments.js',
       'validator/engine/validator-in-browser.js',
       'validator/engine/validator.js',
-      'validator/nodejs/index.js',
-      'validator/webui/serve-standalone.go',
+      'validator/js/nodejs/index.js',
+      'validator/js/webui/serve-standalone.go',
     ],
   },
   '\\<\\<\\<\\<\\<\\<': {
