@@ -32,7 +32,10 @@ async function writeOutput(output, filename) {
     await fs.writeFile(filename, JSON.stringify(output, null, 4));
   } catch (error) {
     process.stdout.write(
-      Base.color('fail', `Could not write test result report to file '${filename}'`)
+      Base.color(
+        'fail',
+        `Could not write test result report to file '${filename}'`
+      )
     );
   }
 }
