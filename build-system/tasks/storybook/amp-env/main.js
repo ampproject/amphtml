@@ -21,6 +21,6 @@ module.exports = {
     '@storybook/addon-a11y/register',
     '@storybook/addon-viewport/register',
     '@storybook/addon-knobs/register',
-    './amp-env/register.js',
+    'storybook-addon-amp/register.js',
   ],
 };

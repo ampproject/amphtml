@@ -18,7 +18,7 @@ import * as Preact from '../../../../src/preact';
 import {storiesOf} from '@storybook/preact';
 import {text, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
-import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
+import {withAmp} from 'storybook-addon-amp';
 
 // eslint-disable-next-line
 storiesOf('Image Slider', module)
