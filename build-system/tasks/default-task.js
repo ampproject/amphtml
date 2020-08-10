@@ -84,7 +84,6 @@ defaultTask.flags = {
   full_sourcemaps: '  Includes source code content in sourcemaps',
   version_override: '  Overrides the version written to AMP_CONFIG',
   host: '  Host to serve the project on. localhost by default.',
-  https: '  Use https server. http by default.',
   port: '  Port to serve the project on. 8000 by default.',
   https: ' Use https server. http by default.',
   define_experiment_constant:

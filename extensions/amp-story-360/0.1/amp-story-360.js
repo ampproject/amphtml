@@ -19,20 +19,20 @@
  * For local development, run gulp --host="192.168.44.47" --https --extensions=amp-story-360
  */
 
+import {
+  Action,
+  StateProperty,
+  getStoreService,
+} from '../../../extensions/amp-story/1.0/amp-story-store-service';
 import {CSS} from '../../../build/amp-story-360-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
 import {Services} from '../../../src/services';
-import {
-  StateProperty,
-  getStoreService,
-  Action,
-} from '../../../extensions/amp-story/1.0/amp-story-store-service';
+import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
 import {user, userAssert} from '../../../src/log';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
-import {htmlFor} from '../../../src/static-template';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_360';
@@ -60,11 +60,17 @@ const buildActivateButtonTemplate = (element) => {
         >
           <defs>
             <linearGradient id="gradient">
-              <stop stop-color="white" stop-opacity=".3" />
-              <stop offset="1" stop-color="white" />
+              <stop stop-color="white" stop-opacity=".3"></stop>
+              <stop offset="1" stop-color="white"></stop>
             </linearGradient>
           </defs>
-          <ellipse ry="11.5" rx="7.5" cy="12" cx="12" stroke="url(#gradient)" />
+          <ellipse
+            ry="11.5"
+            rx="7.5"
+            cy="12"
+            cx="12"
+            stroke="url(#gradient)"
+          ></ellipse>
           <ellipse
             ry="11.5"
             rx="7.5"
@@ -72,7 +78,7 @@ const buildActivateButtonTemplate = (element) => {
             cx="12"
             stroke="url(#gradient)"
             transform="rotate(90, 12, 12)"
-          />
+          ></ellipse>
         </svg>
       </span>
     </button>
@@ -284,7 +290,7 @@ export class AmpStory360 extends AMP.BaseElement {
     this.applyFillContent(container, /* replacedContent */ true);
 
     this.element.getAttribute('controls') === 'gyroscope' &&
-      this.checkGyroscopePermissions();
+      this.checkGyroscopePermissions_();
 
     this.initializeListeners_();
   }
@@ -293,7 +299,7 @@ export class AmpStory360 extends AMP.BaseElement {
   initializeListeners_() {
     this.storeService_.subscribe(
       StateProperty.GYROSCOPE_ENABLED_STATE,
-      (enabled) => enabled && this.enableGyroscope()
+      (enabled) => enabled && this.enableGyroscope_()
     );
 
     this.storeService_.subscribe(
@@ -307,7 +313,7 @@ export class AmpStory360 extends AMP.BaseElement {
    * Checks if orientation sensors and permissions exist on device.
    * @private
    */
-  checkGyroscopePermissions() {
+  checkGyroscopePermissions_() {
     // If gyroscope isn't supported, keep animating.
     if (typeof DeviceOrientationEvent === 'undefined') {
       return;
@@ -315,12 +321,12 @@ export class AmpStory360 extends AMP.BaseElement {
 
     // If motion and no permissions like android, enable gyro right away.
     if (typeof DeviceOrientationEvent.requestPermission === 'undefined') {
-      this.enableGyroscope();
+      this.enableGyroscope_();
     }
 
     // If motion and permissions like ios, build permission button to ask user.
     if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-      this.buildPermissionUI();
+      this.buildPermissionUI_();
     }
   }
 
@@ -329,13 +335,13 @@ export class AmpStory360 extends AMP.BaseElement {
    * Removes the listener and resumes animation if not called in 1000ms.
    * @private
    */
-  enableGyroscope() {
+  enableGyroscope_() {
     this.gyroscopeControls_ = true;
     this.mutateElement(() => {
       this.element.classList.add('i-amp-story-360-gyroscope-enabled');
       window.addEventListener('deviceorientation', (e) => {
         clearTimeout(checkNoMotion);
-        this.onDeviceOrientation(e);
+        this.onDeviceOrientation_(e);
       });
 
       // If device is not in motion, cancel gyroscope controls and animate.
@@ -349,22 +355,25 @@ export class AmpStory360 extends AMP.BaseElement {
     });
   }
 
-  /** @private */
-  onDeviceOrientation(ev) {
+  /**
+   * @param {Event} e
+   * @private
+   */
+  onDeviceOrientation_(e) {
     let rot = Matrix.identity(3);
     rot = Matrix.mul(
       3,
-      Matrix.rotation(3, 1, 0, (Math.PI / 180.0) * ev.alpha),
+      Matrix.rotation(3, 1, 0, (Math.PI / 180.0) * e.alpha),
       rot
     );
     rot = Matrix.mul(
       3,
-      Matrix.rotation(3, 2, 1, (Math.PI / 180.0) * ev.beta),
+      Matrix.rotation(3, 2, 1, (Math.PI / 180.0) * e.beta),
       rot
     );
     rot = Matrix.mul(
       3,
-      Matrix.rotation(3, 0, 2, (Math.PI / 180.0) * ev.gamma),
+      Matrix.rotation(3, 0, 2, (Math.PI / 180.0) * e.gamma),
       rot
     );
     this.renderer_.setCamera(rot, 1);
@@ -375,7 +384,7 @@ export class AmpStory360 extends AMP.BaseElement {
    * Creates a "activate" button and UI requesting DeviceOrientation permissions.
    * @private
    */
-  buildPermissionUI() {
+  buildPermissionUI_() {
     this.mutateElement(() => {
       const activateButton = buildActivateButtonTemplate(this.element);
       this.element.appendChild(activateButton);
@@ -387,7 +396,7 @@ export class AmpStory360 extends AMP.BaseElement {
       this.element.appendChild(dialogBox);
 
       dialogBox.addEventListener('click', (e) => {
-        const action = e.target.closest('[data-action]').dataset.action;
+        const {action} = e.target.closest('[data-action]').dataset;
 
         if (action === 'enable') {
           DeviceOrientationEvent.requestPermission()
