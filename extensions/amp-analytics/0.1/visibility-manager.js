@@ -685,9 +685,10 @@ export class VisibilityManagerForDoc extends VisibilityManager {
      */
     this.trackedElements_ = map();
 
+    /** @private {?Element} */
     this.rootElementTemp_ = null;
 
-    /** @private {?IntersectionObserver|?IntersectionObserverPolyfill} */
+    /** @private {?IntersectionObserver} */
     this.intersectionObserver_ = null;
 
     if (getMode(this.ampdoc.win).runtime == 'inabox') {
