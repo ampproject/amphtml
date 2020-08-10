@@ -337,7 +337,7 @@ def RunSmokeTest(out_dir):
   # Run cli.js on the minimum valid amp and observe that it passes.
   p = subprocess.Popen(
       [
-          'node', 'nodejs/cli.js', '--validator_js',
+          'node', 'js/nodejs/cli.js', '--validator_js',
           '%s/validator_minified.js' % out_dir,
           'testdata/feature_tests/minimum_valid_amp.html', '--format=text'
       ],
@@ -352,7 +352,7 @@ def RunSmokeTest(out_dir):
   # Run cli.js on an empty file and observe that it fails.
   p = subprocess.Popen(
       [
-          'node', 'nodejs/cli.js', '--validator_js',
+          'node', 'js/nodejs/cli.js', '--validator_js',
           '%s/validator_minified.js' % out_dir,
           'testdata/feature_tests/empty.html', '--format=text'
       ],
