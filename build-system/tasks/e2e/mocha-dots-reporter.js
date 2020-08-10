@@ -21,11 +21,10 @@ const {reportTestFinished} = require('../report-test-status');
 const {symbols} = require('../karma.conf').mochaReporter;
 
 const {
- EVENT_TEST_PASS,
- EVENT_TEST_FAIL,
- EVENT_TEST_END,
- EVENT_RUN_END,
- EVENT_TEST_PENDING,
+  EVENT_TEST_PASS,
+  EVENT_TEST_FAIL,
+  EVENT_RUN_END,
+  EVENT_TEST_PENDING,
 } = require('mocha').Runner;
 
 /**
