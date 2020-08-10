@@ -85,8 +85,6 @@ tags: {  # <amp-story-interactive-results>
   tag_name: "AMP-STORY-INTERACTIVE-RESULTS"
   requires_extension: "amp-story-interactive"
   mandatory_ancestor: "AMP-STORY-PAGE"
-  attr_lists: 'interactive-shared-configs-attrs'
-  attr_lists: 'interactive-options-text-attrs'
   attrs: {
     name: 'option-1-results-category'
     mandatory: true
@@ -124,6 +122,14 @@ tags: {  # <amp-story-interactive-results>
   }
   attrs: {
     name: 'option-4-text'
+  }
+  attrs: {
+    name: 'prompt-text'
+  }
+  attrs: {
+    name: 'theme'
+    value: 'light'
+    value: 'dark'
   }
 }
 

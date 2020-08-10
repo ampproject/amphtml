@@ -16,7 +16,7 @@ FAIL
 |  -->
 |  <!--
 |    Test Description:
-|    Correct quiz, as well as 2 incorrect quizzes
+|    Correct results, as well as 2 incorrect results
 |  -->
 |  <!doctype html>
 |  <html ⚡>
@@ -34,37 +34,40 @@ FAIL
 |    <amp-story standalone title="My Story" publisher="Me" publisher-logo-src="http://me.com/logo.png" poster-portrait-src="http://me.com/portrait.jpg" poster-square-src="http://me.com/square.jpg" poster-landscape-src="http://me.com/landscape.jpg" background-audio="http://me.com/path/to/my.mp3" entity="Someone else" entity-logo-src="http://someoneelse.com/logo.png" entity-url="http://someoneelse.com/profile">
 |      <amp-story-page id="1" background-audio="path/to/my.mp3" auto-advance-after="any-value">
 |        <amp-story-grid-layer template="fill">
-|          <amp-story-interactive-quiz
-|            id="complete-quiz"
-|            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
+|          <amp-story-interactive-results
+|            id="complete-results"
 |            theme="dark"
-|            chip-style="shadow"
 |            class="nice-quiz"
-|            prompt-text="Who won the first soccer world cup?"
-|            option-1-text="France"
-|            option-2-text="Spain"
-|            option-3-text="Uruguay" option-3-correct option-3-confetti="🇺🇾"
-|            option-4-text="Brazil">
-|          </amp-story-interactive-quiz>
-|          <amp-story-interactive-quiz
+|            prompt-text="What country do you like the most?"
+|            option-1-text="France" option-1-results-category="Dog" option-1-image="./dog.png"
+|            option-2-text="Spain" option-2-results-category="Cat" option-2-image="./cat.png"
+|            option-3-text="Uruguay" option-3-results-category="Bunny" option-3-image="./bunny.png"
+|            option-4-text="Brazil" option-4-results-category="Mouse" option-4-image="./mouse.png">
+|          </amp-story-interactive-results>
+|          <amp-story-interactive-results
 >>         ^~~~~~~~~
-amp-story-interactive/1.0/test/validator-amp-story-interactive-quiz.html:48:8 The tag 'amp-story-interactive-quiz' is missing a mandatory attribute - pick one of ['option-1-correct', 'option-2-correct', 'option-3-correct', 'option-4-correct']. (see https://amp.dev/documentation/components/amp-story-interactive)
-|            id="missing-correct-quiz"
+amp-story-interactive/1.0/test/validator-amp-story-interactive-results.html:46:8 The mandatory attribute 'option-1-results-category' is missing in tag 'amp-story-interactive-results'. (see https://amp.dev/documentation/components/amp-story-interactive)
+>>         ^~~~~~~~~
+amp-story-interactive/1.0/test/validator-amp-story-interactive-results.html:46:8 The mandatory attribute 'option-2-results-category' is missing in tag 'amp-story-interactive-results'. (see https://amp.dev/documentation/components/amp-story-interactive)
+|          id="missing-results-category"
+|          prompt-text="What country do you like the most?"
+|          option-1-text="France" option-1-image="./dog.png"
+|          option-2-text="Spain" option-2-image="./cat.png"
+|          option-3-text="Uruguay" option-3-image="./bunny.png"
+|          option-4-text="Brazil" option-4-image="./mouse.png">
+|          </amp-story-interactive-results>
+|          <amp-story-interactive-results
+>>         ^~~~~~~~~
+amp-story-interactive/1.0/test/validator-amp-story-interactive-results.html:54:8 The tag 'amp-story-interactive-results' contains the attribute 'option-1-results-category' repeated multiple times.
+>>         ^~~~~~~~~
+amp-story-interactive/1.0/test/validator-amp-story-interactive-results.html:54:8 The attribute 'endpoint' may not appear in tag 'amp-story-interactive-results'. (see https://amp.dev/documentation/components/amp-story-interactive)
+|            id="no-endpoint-results"
 |            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
-|            option-1-text="France"
-|            option-2-text="Spain"
-|            option-3-text="Uruguay">
-|          </amp-story-interactive-quiz>
-|          <amp-story-interactive-poll
->>         ^~~~~~~~~
-amp-story-interactive/1.0/test/validator-amp-story-interactive-quiz.html:55:8 The relative URL 'hi' for attribute 'endpoint' in tag 'amp-story-interactive-poll' is disallowed. (see https://amp.dev/documentation/components/amp-story-interactive)
-|            id="wrong-endpoint-quiz"
-|            endpoint="hi"
-|            option-1-text="France"
-|            option-2-text="Spain"
-|            option-3-text="Uruguay"
-|            option-4-text="Spain">
-|          </amp-story-interactive-quiz>
+|            option-1-text="France" option-1-results-category="Dog"
+|            option-2-text="Spain" option-1-results-category="Cat"
+|            option-3-text="Uruguay" option-1-results-category="Bunny"
+|            option-4-text="Spain" option-1-results-category="Mouse">
+|          </amp-story-interactive-results>
 |        </amp-story-grid-layer>
 |      </amp-story-page>
 |    </amp-story>
