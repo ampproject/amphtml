@@ -74,7 +74,7 @@
     "envify": "4.1.0",
     "enzyme": "3.11.0",
     "enzyme-adapter-preact-pure": "2.2.0",
-    "escodegen": "1.14.2",
+    "escodegen": "2.0.0",
     "eslint": "7.4.0",
     "eslint-config-prettier": "6.11.0",
     "eslint-plugin-chai-expect": "2.2.0",
