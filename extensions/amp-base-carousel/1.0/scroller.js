@@ -145,7 +145,7 @@ function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
       key="container"
       ref={containerRef}
       onScroll={handleScroll}
-      className={`${classes.scrollContainer} ${classes.hideScrollbar} ${classes.horizontalScroll}`}
+      class={`${classes.scrollContainer} ${classes.hideScrollbar} ${classes.horizontalScroll}`}
       tabindex={0}
     >
       {slides}
@@ -226,7 +226,7 @@ function renderSlides(
         renderable={index == restingIndex}
         playable={index == restingIndex}
       >
-        <div className={`${classes.slideSizing} ${classes.slideElement}`}>
+        <div class={`${classes.slideSizing} ${classes.slideElement}`}>
           {child}
         </div>
       </WithAmpContext>

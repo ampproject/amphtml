@@ -39,7 +39,7 @@ export function Arrow({customArrow, by, advance, disabled}) {
   } ${isDisabled ? classes.arrowDisabled : ''}`;
 
   return (
-    <div className={classNames}>
+    <div class={classNames}>
       {Preact.cloneElement(customArrow, {
         'onClick': onClick,
         'disabled': isDisabled,
@@ -85,22 +85,22 @@ function DefaultArrow({by, ...rest}) {
   const classes = useStyles();
   return (
     <button
-      className={classes.defaultArrowButton}
+      class={classes.defaultArrowButton}
       aria-label={
         by < 0 ? 'Previous item in carousel' : 'Next item in carousel'
       }
       {...rest}
     >
       <div
-        className={`${classes.arrowBaseStyle} ${classes.arrowFrosting}`}
+        class={`${classes.arrowBaseStyle} ${classes.arrowFrosting}`}
       ></div>
       <div
-        className={`${classes.arrowBaseStyle} ${classes.arrowBackdrop}`}
+        class={`${classes.arrowBaseStyle} ${classes.arrowBackdrop}`}
       ></div>
       <div
-        className={`${classes.arrowBaseStyle} ${classes.arrowBackground}`}
+        class={`${classes.arrowBaseStyle} ${classes.arrowBackground}`}
       ></div>
-      <svg className={classes.arrowIcon} viewBox="0 0 24 24">
+      <svg class={classes.arrowIcon} viewBox="0 0 24 24">
         {by < 0 ? (
           <path
             d="M14,7.4 L9.4,12 L14,16.6"
