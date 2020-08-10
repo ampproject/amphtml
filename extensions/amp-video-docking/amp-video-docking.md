@@ -112,7 +112,7 @@ Depending on the [docking target](#target), the corresponding event will be trig
 - **From the video element itself**, when the video is docked to a corner.
 - **From the slot element**, when the video is docked to the slot element.
 
-You can set `dock`/`undock` action triggers on either the video or the slot to alter your layout differently when [combining target types.](#combined-targets)
+You can set `dock`/`undock` action triggers on either the video or the slot to alter your layout differently when combining target types.
 
 ## Styling
 
@@ -218,4 +218,4 @@ This element also gets the classname `amp-small` when rendered in small viewport
 
 ## Validation
 
-See [amp-video-docking rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-notification/validator-amp-video-docking.protoascii) in the AMP validator specification.
+See [amp-video-docking rules](validator-amp-video-docking.protoascii) in the AMP validator specification.

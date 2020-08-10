@@ -158,7 +158,7 @@ Indicates the name/title of the video, specified as a string. If not provided, t
 
 ## Analytics
 
-`amp-video` supports analytics out of the box. See [video analytics](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-video-analytics.md) for more information.
+`amp-video` supports analytics out of the box. See [video analytics](../amp-analytics/amp-video-analytics.md) for more information.
 
 ## Styling
 
@@ -166,8 +166,6 @@ Indicates the name/title of the video, specified as a string. If not provided, t
 
 Providing a click-to-play overlay is a common UX feature for video players on the web. For example, you could display a custom play icon that the user can click, as well as include the title of the video, different sized poster images, and so on. Because the `amp-video` component supports the standard `play` AMP action, you can easily implement click-to-play.
 
-For a detailed example, visit AMP By Example's [Click-to-play overlay for amp-video](https://amp.dev/documentation/examples/multimedia-animations/click-to-play_overlay_for_amp-video/).
-
 ## Validation
 
-See [amp-video rules](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii) in the AMP validator specification.
+See [amp-video rules](validator-amp-video.protoascii) in the AMP validator specification.
