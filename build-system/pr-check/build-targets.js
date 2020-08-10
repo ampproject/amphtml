@@ -182,7 +182,7 @@ const targetMatchers = {
     );
   },
   'VALIDATOR': (file) => {
-    if (isOwnersFile(file) || file.startsWith('validator/webui/')) {
+    if (isOwnersFile(file) || file.startsWith('validator/js/webui/')) {
       return false;
     }
     return (
@@ -196,7 +196,7 @@ const targetMatchers = {
       return false;
     }
     return (
-      file.startsWith('validator/webui/') ||
+      file.startsWith('validator/js/webui/') ||
       file === 'build-system/tasks/validator.js'
     );
   },
