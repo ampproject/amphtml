@@ -192,7 +192,7 @@ export const presets = {
     keyframes: [
       {
         opacity: 0,
-        transform: 'scale(.8)',
+        transform: 'scale(0.8)',
       },
       {
         opacity: 1,
