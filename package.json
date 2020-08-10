@@ -85,7 +85,7 @@
     "eslint-plugin-local": "1.0.0",
     "eslint-plugin-notice": "0.9.10",
     "eslint-plugin-prettier": "3.1.4",
-    "eslint-plugin-react": "7.20.3",
+    "eslint-plugin-react": "7.20.5",
     "eslint-plugin-react-hooks": "4.0.8",
     "eslint-plugin-sort-imports-es6-autofix": "0.5.0",
     "eslint-plugin-sort-requires": "2.1.0",
