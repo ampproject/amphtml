@@ -15,7 +15,6 @@
  */
 import * as Preact from '../../../src/preact';
 import {WithAmpContext} from '../../../src/preact/context';
-import {classes} from './base-carousel.jss';
 import {debounce} from '../../../src/utils/rate-limit';
 import {forwardRef} from '../../../src/preact/compat';
 import {mod} from '../../../src/utils/math';
@@ -26,6 +25,7 @@ import {
   useMemo,
   useRef,
 } from '../../../src/preact';
+import {useStyles} from './base-carousel.jss';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last
@@ -55,8 +55,7 @@ function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
       container./* OK */ scrollLeft += container./* OK */ offsetWidth * by;
     },
   }));
-  // TODO: uncomment when build step is ready..
-  // const classes = useStyles();
+  const classes = useStyles();
 
   /**
    * The number of slides we want to place before the

@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {classes} from './base-carousel.jss';
+import {useStyles} from './base-carousel.jss';
 
 /**
  * @param {!BaseCarouselDef.ArrowProps} props
@@ -33,8 +33,7 @@ export function Arrow({customArrow, by, advance, disabled}) {
     }
     advance(by);
   };
-  // TODO: uncomment when build step is done.
-  // const classes = useStyles();
+  const classes = useStyles();
   const classNames = `${classes.arrowPlacement} ${
     by < 0 ? classes.arrowPrev : classes.arrowNext
   } ${isDisabled ? classes.arrowDisabled : ''}`;
@@ -83,8 +82,7 @@ export function ArrowNext({customArrow, ...rest}) {
  * @return {PreactDef.Renderable}
  */
 function DefaultArrow({by, ...rest}) {
-  // TODO: uncomment when build step is done.
-  // const classes = useStyles();
+  const classes = useStyles();
   return (
     <button
       className={classes.defaultArrowButton}
