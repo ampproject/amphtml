@@ -195,7 +195,23 @@ export const JSS = {
 // TODO: automatically generate these two via build step for amp mode.
 // As well as update the `useStyles` export.
 export const CSS = `.slideElement-0-2-1{flex:0 0 100%;height:100%;display:flex;overflow:hidden;position:relative;align-items:center;flex-direction:column;justify-content:center;scroll-snap-stop:always;scroll-snap-align:start}.scrollContainer-0-2-2{top:0;left:0;right:0;bottom:0;height:100%;display:flex;position:absolute;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;flex-direction:row;scroll-behavior:smooth;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}.arrowPlacement-0-2-3{top:50%;display:flex;z-index:1;position:absolute;transform:translateY(-50%);align-items:center;flex-direction:row;pointer-events:auto;justify-content:space-between}.arrowPrev-0-2-4{left:0}.arrowNext-0-2-5{right:0}.arrowDisabled-0-2-6{opacity:0;pointer-events:none}.defaultArrowButton-0-2-7{color:#fff;width:36px;border:none;height:36px;margin:12px;stroke:currentColor;display:flex;outline:0;padding:0;position:relative;transition:.2s stroke;align-items:center;justify-content:center;background-color:transparent}.defaultArrowButton-0-2-7:hover{color:#222}.defaultArrowButton-0-2-7:active{transition-duration:0s}.defaultArrowButton-0-2-7:hover .arrowBackground-0-2-11{background-color:rgba(255,255,255,.8)}.defaultArrowButton-0-2-7:active .arrowBackground-0-2-11{background-color:#fff;transition-duration:0s}.arrowBaseStyle-0-2-8{top:0;left:0;width:100%;height:100%;position:absolute;border-radius:50%}.arrowFrosting-0-2-9{backdrop-filter:blur(3px)}.arrowBackdrop-0-2-10{opacity:.5;backdrop-filter:blur(12px) invert(1) grayscale(.6) brightness(.8)}.arrowBackground-0-2-11{box-shadow:0 0 0 1px rgba(0,0,0,.08) inset,0 1px 4px 1px rgba(0,0,0,.2);transition:.2s background-color;background-color:rgba(0,0,0,.3)}.arrowIcon-0-2-12{width:24px;height:24px;position:relative}.hideScrollbar-0-2-13{scrollbar-width:none}.horizontalScroll-0-2-14{overflow-y:hidden;flex-direction:row;padding-bottom:20px;scroll-snap-type:x mandatory;scroll-snap-type-x:mandatory}.slideSizing-0-2-15 .slideElement-0-2-1>::slotted(*),.slideSizing-0-2-15>:first-child{margin:0!important;max-width:100%;box-sizing:border-box!important;max-height:100%;flex-shrink:0!important}.slideSizing-0-2-15>::slotted(*){width:100%}.slideSizing-0-2-15 [hide-scrollbar]::-webkit-scrollbar{display:none;box-sizing:content-box!important}`;
-const classes = {"slideElement":"slideElement-0-2-1","scrollContainer":"scrollContainer-0-2-2","arrowPlacement":"arrowPlacement-0-2-3","arrowPrev":"arrowPrev-0-2-4","arrowNext":"arrowNext-0-2-5","arrowDisabled":"arrowDisabled-0-2-6","defaultArrowButton":"defaultArrowButton-0-2-7","arrowBaseStyle":"arrowBaseStyle-0-2-8","arrowFrosting":"arrowFrosting-0-2-9","arrowBackdrop":"arrowBackdrop-0-2-10","arrowBackground":"arrowBackground-0-2-11","arrowIcon":"arrowIcon-0-2-12","hideScrollbar":"hideScrollbar-0-2-13","horizontalScroll":"horizontalScroll-0-2-14","slideSizing":"slideSizing-0-2-15"} 
+const classes = {
+  'slideElement': 'slideElement-0-2-1',
+  'scrollContainer': 'scrollContainer-0-2-2',
+  'arrowPlacement': 'arrowPlacement-0-2-3',
+  'arrowPrev': 'arrowPrev-0-2-4',
+  'arrowNext': 'arrowNext-0-2-5',
+  'arrowDisabled': 'arrowDisabled-0-2-6',
+  'defaultArrowButton': 'defaultArrowButton-0-2-7',
+  'arrowBaseStyle': 'arrowBaseStyle-0-2-8',
+  'arrowFrosting': 'arrowFrosting-0-2-9',
+  'arrowBackdrop': 'arrowBackdrop-0-2-10',
+  'arrowBackground': 'arrowBackground-0-2-11',
+  'arrowIcon': 'arrowIcon-0-2-12',
+  'hideScrollbar': 'hideScrollbar-0-2-13',
+  'horizontalScroll': 'horizontalScroll-0-2-14',
+  'slideSizing': 'slideSizing-0-2-15',
+};
 
 let styleAdded = false;
 

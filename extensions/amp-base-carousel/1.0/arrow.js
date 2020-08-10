@@ -91,15 +91,9 @@ function DefaultArrow({by, ...rest}) {
       }
       {...rest}
     >
-      <div
-        class={`${classes.arrowBaseStyle} ${classes.arrowFrosting}`}
-      ></div>
-      <div
-        class={`${classes.arrowBaseStyle} ${classes.arrowBackdrop}`}
-      ></div>
-      <div
-        class={`${classes.arrowBaseStyle} ${classes.arrowBackground}`}
-      ></div>
+      <div class={`${classes.arrowBaseStyle} ${classes.arrowFrosting}`}></div>
+      <div class={`${classes.arrowBaseStyle} ${classes.arrowBackdrop}`}></div>
+      <div class={`${classes.arrowBaseStyle} ${classes.arrowBackground}`}></div>
       <svg class={classes.arrowIcon} viewBox="0 0 24 24">
         {by < 0 ? (
           <path
