@@ -36,30 +36,46 @@ namespace htmlparser {
 namespace {
 // Internal functions forward declarations.
 std::string ExtractWhitespace(const std::string& s);
+
+#ifdef DUMP_NODES
+void DumpNode(Node* root_node) {
+  for (Node* c = root_node->FirstChild(); c; c = c->NextSibling()) {
+    std::cerr << c->NameSpace() << ": " << AtomUtil::ToString(c->DataAtom())
+              << std::endl;
+    DumpNode(c);
+  }
+}
+// Dumps the nodes in the DOM in their final order after parsing.
+void DumpDocument(Document* doc) {
+  DumpNode(doc->RootNode());
+}
+
+/
+#endif  // DUMP_NODES
+
 }  // namespace.
 
-std::unique_ptr<Node> Parse(std::string_view html) {
+std::unique_ptr<Document> Parse(std::string_view html) {
   Parser parser(html, {
     .scripting = true,
     .frameset_ok = true,
     .record_node_offsets = true,
     .record_attribute_offsets = true,
     .allow_deprecated_tags = false});
-  return std::unique_ptr<Node>(parser.Parse());
+  return parser.Parse();
 }
 
-std::unique_ptr<Node> ParseWithOptions(std::string_view html,
-                         const ParseOptions& options) {
+std::unique_ptr<Document> ParseWithOptions(
+    std::string_view html, const ParseOptions& options) {
   Parser parser(html, options);
   return parser.Parse();
 }
 
-std::vector<Node*> ParseFragmentWithOptions(std::string_view html,
-                                              const ParseOptions& options,
-                                              Node* fragment_parent) {
+std::unique_ptr<Document> ParseFragmentWithOptions(
+    std::string_view html, const ParseOptions& options, Node* fragment_parent) {
   Parser parser(html, options, fragment_parent);
-  auto root = Node::make_node(NodeType::ELEMENT_NODE, Atom::HTML);
-  parser.document_->AppendChild(root);
+  Node* root = parser.document_->NewNode(NodeType::ELEMENT_NODE, Atom::HTML);
+  parser.document_->root_node_->AppendChild(root);
   parser.open_elements_stack_.Push(root);
 
   if (fragment_parent && fragment_parent->DataAtom() == Atom::TEMPLATE) {
@@ -77,21 +93,19 @@ std::vector<Node*> ParseFragmentWithOptions(std::string_view html,
   }
 
   auto doc = parser.Parse();
-
-  Node* parent = fragment_parent ? root : doc.get();
-  std::vector<Node*> nodes;
+  Node* parent = fragment_parent ? root : doc->root_node_;
   for (Node* c = parent->FirstChild(); c;) {
     Node* next = c->NextSibling();
-    nodes.push_back(c);
-    parent->RemoveChild(c).release();
+    doc->fragment_nodes_.push_back(std::move(c));
+    parent->RemoveChild(c);
     c = next;
   }
 
-  return nodes;
+  return doc;
 }
 
-std::vector<Node*> ParseFragment(std::string_view html,
-                                   Node* fragment_parent) {
+std::unique_ptr<Document> ParseFragment(std::string_view html,
+                                        Node* fragment_parent) {
   // Expects clients to update the offsets relative to the parent which
   // this fragment belongs.
   ParseOptions options = {
@@ -111,8 +125,8 @@ Parser::Parser(std::string_view html,
         fragment_parent ?
         AtomUtil::ToString(fragment_parent->atom_) : "")),
     on_node_callback_(options.on_node_callback),
-    document_(Node::make_node(NodeType::DOCUMENT_NODE)),
-    scope_marker_(Node::make_node(NodeType::SCOPE_MARKER_NODE)),
+    document_(new Document),
+    scope_marker_(document_->NewNode(NodeType::SCOPE_MARKER_NODE)),
     scripting_(options.scripting),
     frameset_ok_(options.frameset_ok),
     record_node_offsets_(options.record_node_offsets),
@@ -123,18 +137,7 @@ Parser::Parser(std::string_view html,
   insertion_mode_ = std::bind(&Parser::InitialIM, this);
 }
 
-#ifdef DUMP_NODES
-// Dumps the entire nodes in their final order after parsing.
-void DumpDocument(Node* doc) {
-  for (Node* c = doc->FirstChild(); c; c = c->NextSibling()) {
-    std::cerr << c->NameSpace() << ": " << AtomUtil::ToString(c->DataAtom())
-              << std::endl;
-    DumpDocument(c);
-  }
-}
-#endif  // DUMP_NODES
-
-std::unique_ptr<Node> Parser::Parse() {
+std::unique_ptr<Document> Parser::Parse() {
   bool eof = tokenizer_->IsEOF();
   while (!eof) {
     Node* node = open_elements_stack_.Top();
@@ -154,7 +157,7 @@ std::unique_ptr<Node> Parser::Parse() {
   }
 
 #ifdef DUMP_NODES
-  DumpDocument(document_);
+  DumpDocument(document_->RootNode());
 #endif
 
   return std::move(document_);
@@ -166,7 +169,7 @@ Node* Parser::top() {
     return node;
   }
 
-  return document_.get();
+  return document_->root_node_;
 }  // End Parser::Top.
 
 template<typename... Args>
@@ -332,7 +335,6 @@ bool Parser::ShouldFosterParent() {
 }  // Parser::ShouldFosterParent.
 
 void Parser::FosterParent(Node* node) {
-  std::unique_ptr<Node> n(node);
   Node* table = nullptr;
   Node* parent = nullptr;
   Node* prev = nullptr;
@@ -354,7 +356,7 @@ void Parser::FosterParent(Node* node) {
   }
 
   if (tpl && (!table || j > i)) {
-    tpl->AppendChild(n.release());
+    tpl->AppendChild(node);
     return;
   }
 
@@ -377,37 +379,39 @@ void Parser::FosterParent(Node* node) {
 
   if (prev && prev->node_type_ == NodeType::TEXT_NODE &&
       node->node_type_ == NodeType::TEXT_NODE) {
-    prev->data_ += n->data_;
+    prev->data_ += node->data_;
     return;
   }
 
-  parent->InsertBefore(n.release(), table);
+  parent->InsertBefore(node, table);
 }  // Parser::FosterParent.
 
 void Parser::AddText(const std::string& text) {
   if (text.empty()) return;
 
-  auto text_node = std::unique_ptr<Node>(Node::make_node(NodeType::TEXT_NODE));
-  text_node->data_ = text;
-  text_node->position_in_html_src_ = token_.position_in_html_src;
+  auto text_node = document_->NewNode(NodeType::TEXT_NODE);
 
   if (ShouldFosterParent()) {
-    FosterParent(text_node.release());
+    text_node->data_.assign(text, 0, text.size());
+    text_node->position_in_html_src_ = token_.position_in_html_src;
+    FosterParent(text_node);
     return;
   }
 
   Node* top_node = top();
   if (top_node->LastChild() &&
       top_node->LastChild()->node_type_ == NodeType::TEXT_NODE) {
-    top_node->LastChild()->data_ += text;
+    top_node->LastChild()->data_.append(text);
     return;
   }
 
-  AddChild(text_node.release());
+  text_node->data_.assign(text, 0, text.size());
+  text_node->position_in_html_src_ = token_.position_in_html_src;
+  AddChild(text_node);
 }  // Parser::AddText.
 
 void Parser::AddElement() {
-  Node* element_node = Node::make_node(NodeType::ELEMENT_NODE, token_.atom);
+  Node* element_node = document_->NewNode(NodeType::ELEMENT_NODE, token_.atom);
   if (token_.atom == Atom::UNKNOWN) {
     element_node->data_ = token_.data;
   }
@@ -526,7 +530,7 @@ void Parser::ReconstructActiveFormattingElements() {
 
   do {
     i++;
-    auto clone = active_formatting_elements_stack_.at(i)->Clone();
+    auto clone = document_->CloneNode(active_formatting_elements_stack_.at(i));
     AddChild(clone);
     active_formatting_elements_stack_.Replace(i, clone);
   } while (i < active_formatting_elements_stack_.size() - 1);
@@ -649,22 +653,22 @@ bool Parser::InitialIM() {
       break;
     }
     case TokenType::COMMENT_TOKEN: {
-      Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->data_ = std::move(token_.data);
       if (record_node_offsets_) {
         node->position_in_html_src_ = token_.position_in_html_src;
       }
       node->SetManufactured(token_.is_manufactured);
-      document_->AppendChild(node);
+      document_->root_node_->AppendChild(node);
       return true;
     }
     case TokenType::DOCTYPE_TOKEN: {
-      auto [node, quirks_mode] = ParseDoctype(token_.data);
+      auto doctype_node = document_->NewNode(NodeType::DOCTYPE_NODE);
+      bool quirks_mode = ParseDoctype(token_.data, doctype_node);
       if (record_node_offsets_) {
-        node->position_in_html_src_ = token_.position_in_html_src;
+        doctype_node->position_in_html_src_ = token_.position_in_html_src;
       }
-      Node* doctype_node = node.release();
-      document_->AppendChild(doctype_node);
+      document_->root_node_->AppendChild(doctype_node);
       accounting_.quirks_mode = quirks_mode;
       insertion_mode_ = std::bind(&Parser::BeforeHTMLIM, this);
 
@@ -723,11 +727,11 @@ bool Parser::BeforeHTMLIM() {
       break;
     }
     case TokenType::COMMENT_TOKEN: {
-      Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
       node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = std::data(token_.data);
-      document_->AppendChild(node);
+      document_->root_node_->AppendChild(node);
       return true;
     }
     default:
@@ -780,7 +784,7 @@ bool Parser::BeforeHeadIM() {
       break;
     }
     case TokenType::COMMENT_TOKEN: {
-      Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
       node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = std::move(token_.data);
@@ -858,7 +862,7 @@ bool Parser::InHeadIM() {
         }
         case Atom::TEMPLATE: {
           AddElement();
-          active_formatting_elements_stack_.Push(scope_marker_.get());
+          active_formatting_elements_stack_.Push(scope_marker_);
           frameset_ok_ = false;
           insertion_mode_ = std::bind(&Parser::InTemplateIM, this);
           template_stack_.push_back(std::bind(&Parser::InTemplateIM, this));
@@ -912,7 +916,7 @@ bool Parser::InHeadIM() {
       break;
     }
     case TokenType::COMMENT_TOKEN: {
-      Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
       node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = std::move(token_.data);
@@ -1072,7 +1076,7 @@ bool Parser::AfterHeadIM() {
       break;
     }
     case TokenType::COMMENT_TOKEN: {
-      Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
       node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = token_.data;
@@ -1189,7 +1193,7 @@ bool Parser::InBodyIM() {
           auto body = open_elements_stack_.at(1);
           if (body->Parent()) {
             auto removed_body = body->Parent()->RemoveChild(body);
-            open_elements_stack_.Remove(removed_body.get());
+            open_elements_stack_.Remove(removed_body);
           }
           // Remove all nodes except one, the last in the stack.
           open_elements_stack_.Pop(open_elements_stack_.size() - 1);
@@ -1373,7 +1377,7 @@ bool Parser::InBodyIM() {
         case Atom::OBJECT: {
           ReconstructActiveFormattingElements();
           AddElement();
-          active_formatting_elements_stack_.Push(scope_marker_.get());
+          active_formatting_elements_stack_.Push(scope_marker_);
           frameset_ok_ = false;
           break;
         }
@@ -1484,7 +1488,8 @@ bool Parser::InBodyIM() {
             ParseImpliedToken(TokenType::START_TAG_TOKEN, Atom::LABEL,
                 AtomUtil::ToString(Atom::LABEL));
             AddText(prompt);
-            Node* node = Node::make_node(NodeType::ELEMENT_NODE, Atom::INPUT);
+            Node* node =
+                document_->NewNode(NodeType::ELEMENT_NODE, Atom::INPUT);
             std::copy(attributes.begin(), attributes.end(),
                 std::back_inserter(node->attributes_));
             AddChild(node);
@@ -1742,7 +1747,7 @@ bool Parser::InBodyIM() {
       break;
     }
     case TokenType::COMMENT_TOKEN: {
-      Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
       node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = token_.data;
@@ -1870,7 +1875,7 @@ void Parser::InBodyEndTagFormatting(Atom tag_atom, std::string_view tag_name) {
         break;
       }
       // Step 13.7.
-      Node* clone = node->Clone();
+      Node* clone = document_->CloneNode(node);
       active_formatting_elements_stack_.Replace(
           active_formatting_elements_stack_.Index(node), clone);
       open_elements_stack_.Replace(
@@ -1882,7 +1887,7 @@ void Parser::InBodyEndTagFormatting(Atom tag_atom, std::string_view tag_name) {
       }
       // Step 13.9.
       if (last_node->Parent()) {
-        last_node->Parent()->RemoveChild(last_node).release();
+        last_node = last_node->Parent()->RemoveChild(last_node);
       }
       node->AppendChild(last_node);
       // Step 13.10.
@@ -1892,7 +1897,7 @@ void Parser::InBodyEndTagFormatting(Atom tag_atom, std::string_view tag_name) {
     // Step 14. Reparent lastNode to the common ancestor,
     // or for misnested table nodes, to the foster parent.
     if (last_node->Parent()) {
-      last_node->Parent()->RemoveChild(last_node).release();
+      last_node = last_node->Parent()->RemoveChild(last_node);
     }
 
     switch (common_ancestor->atom_) {
@@ -1909,7 +1914,7 @@ void Parser::InBodyEndTagFormatting(Atom tag_atom, std::string_view tag_name) {
 
     // Steps 15-17. Reparent nodes from the furthest block's children
     // to a clone of the formatting element.
-    Node* clone = formatting_element->Clone();
+    Node* clone = document_->CloneNode(formatting_element);
     furthest_block->ReparentChildrenTo(clone);
     furthest_block->AppendChild(clone);
 
@@ -2012,7 +2017,7 @@ bool Parser::InTableIM() {
       switch (token_.atom) {
         case Atom::CAPTION: {
           ClearStackToContext(Scope::TableScope);
-          active_formatting_elements_stack_.Push(scope_marker_.get());
+          active_formatting_elements_stack_.Push(scope_marker_);
           AddElement();
           insertion_mode_ = std::bind(&Parser::InCaptionIM, this);
           return true;
@@ -2134,7 +2139,7 @@ bool Parser::InTableIM() {
       break;
     }
     case TokenType::COMMENT_TOKEN: {
-      Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
       node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = token_.data;
@@ -2248,7 +2253,7 @@ bool Parser::InColumnGroupIM() {
       break;
     }
     case TokenType::COMMENT_TOKEN: {
-      Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
       node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = token_.data;
@@ -2385,7 +2390,7 @@ bool Parser::InTableBodyIM() {
       break;
     }
     case TokenType::COMMENT_TOKEN: {
-      Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
       node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = token_.data;
@@ -2408,7 +2413,7 @@ bool Parser::InRowIM() {
         case Atom::TH:  {
           ClearStackToContext(Scope::TableRowScope);
           AddElement();
-          active_formatting_elements_stack_.Push(scope_marker_.get());
+          active_formatting_elements_stack_.Push(scope_marker_);
           insertion_mode_ = std::bind(&Parser::InCellIM, this);
           return true;
         }
@@ -2665,7 +2670,7 @@ bool Parser::InSelectIM() {
       break;
     }
     case TokenType::COMMENT_TOKEN: {
-      Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
       node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = token_.data;
@@ -2856,7 +2861,7 @@ bool Parser::AfterBodyIM() {
              open_elements_stack_.at(0)->atom_ == Atom::HTML),
             "html: bad parser state: <html> element not found, in the "
             "after-body insertion mode");
-      Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
       node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = token_.data;
@@ -2875,7 +2880,7 @@ bool Parser::AfterBodyIM() {
 bool Parser::InFramesetIM() {
   switch (token_.token_type) {
     case TokenType::COMMENT_TOKEN: {
-      Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
       node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = token_.data;
@@ -2931,7 +2936,7 @@ bool Parser::InFramesetIM() {
 bool Parser::AfterFramesetIM() {
   switch (token_.token_type) {
     case TokenType::COMMENT_TOKEN: {
-      Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
       node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = token_.data;
@@ -2988,11 +2993,11 @@ bool Parser::AfterAfterBodyIM() {
       }
       break;
     case TokenType::COMMENT_TOKEN: {
-      Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
       node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = token_.data;
-      document_->AppendChild(node);
+      document_->root_node_->AppendChild(node);
       return true;
     }
     case TokenType::DOCTYPE_TOKEN:
@@ -3009,11 +3014,11 @@ bool Parser::AfterAfterBodyIM() {
 bool Parser::AfterAfterFramesetIM() {
   switch (token_.token_type) {
     case TokenType::COMMENT_TOKEN: {
-      Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
       node->position_in_html_src_ = token_.position_in_html_src;
       node->data_ = token_.data;
-      document_->AppendChild(node);
+      document_->root_node_->AppendChild(node);
       break;
     }
     case TokenType::TEXT_TOKEN: {
@@ -3058,7 +3063,7 @@ bool Parser::ParseForeignContent() {
       AddText(token_.data);
       break;
     case TokenType::COMMENT_TOKEN: {
-      Node* node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = document_->NewNode(NodeType::COMMENT_NODE);
       node->SetManufactured(token_.is_manufactured);
       node->data_ = token_.data;
       AddChild(node);

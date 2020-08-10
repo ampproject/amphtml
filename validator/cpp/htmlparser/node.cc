@@ -16,10 +16,6 @@
 
 #include "node.h"
 
-#ifdef HTMLPARSER_NODE_DEBUG
-#include <iostream>
-#endif
-
 #include <algorithm>
 #include <functional>
 #include <sstream>
@@ -30,54 +26,8 @@
 
 namespace htmlparser {
 
-Node::Node(NodeType node_type) : node_type_(node_type) {}
-
-Node::~Node() {
-#ifdef HTMLPARSER_NODE_DEBUG
-  std::cout << "RecursionCounterStart: " << recursive_counter_++ << std::endl;
-#endif
-  DestroyAllChildNodes();
-  DestroyAllSiblingNodes();
-#ifdef HTMLPARSER_NODE_DEBUG
-  std::cout << "RecursionCounterEnd: " << recursive_counter_++ << std::endl;
-#endif
-}
-
-void Node::DestroyAllChildNodes() {
-  std::vector<Node*> children;
-  Node* current = first_child_;
-  while (current != nullptr) {
-#ifdef HTMLPARSER_NODE_DEBUG
-    current->recursive_counter_ = recursive_counter_;
-#endif
-    children.push_back(current);
-    auto tmp = current->next_sibling_;
-    current->next_sibling_ = nullptr;
-    current = tmp;
-  }
-
-  for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
-    if (*iter != nullptr) delete *iter;
-  }
-}
-
-void Node::DestroyAllSiblingNodes() {
-  std::vector<Node*> siblings;
-  Node* current = next_sibling_;
-  while (current != nullptr) {
-#ifdef HTMLPARSER_NODE_DEBUG
-    current->recursive_counter_ = recursive_counter_;
-#endif
-    siblings.push_back(current);
-    auto tmp = current->next_sibling_;
-    current->next_sibling_ = nullptr;
-    current = tmp;
-  }
-
-  for (auto iter = siblings.rbegin(); iter != siblings.rend(); ++iter) {
-    if (*iter != nullptr) delete *iter;
-  }
-}
+Node::Node(NodeType node_type, Atom atom) :
+    node_type_(node_type), atom_(atom) {}
 
 void Node::SetData(std::string_view data) {
   data_ = data;
@@ -179,7 +129,7 @@ bool Node::AppendChild(Node* new_child) {
   return true;
 }
 
-std::unique_ptr<Node> Node::RemoveChild(Node* c) {
+Node* Node::RemoveChild(Node* c) {
   // Remove child called for a non-child node.
   CHECK(c->parent_ == this, "html: RemoveChild called for a non-child Node");
 
@@ -202,23 +152,14 @@ std::unique_ptr<Node> Node::RemoveChild(Node* c) {
   c->parent_ = nullptr;
   c->prev_sibling_ = nullptr;
   c->next_sibling_ = nullptr;
-  return std::unique_ptr<Node>(c);
-}
-
-Node* Node::Clone() const {
-  Node* clone = make_node(node_type_);
-  clone->atom_ = atom_;
-  clone->data_ = data_;
-  std::copy(attributes_.begin(), attributes_.end(),
-      std::back_inserter(clone->attributes_));
-  return clone;
+  return c;
 }
 
 void Node::ReparentChildrenTo(Node* destination) {
   while (true) {
     Node* child = first_child_;
     if (!child) break;
-    destination->AppendChild(RemoveChild(child).release());
+    destination->AppendChild(RemoveChild(child));
   }
 }
 

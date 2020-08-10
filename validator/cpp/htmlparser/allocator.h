@@ -54,9 +54,9 @@
 // ---------------------------------------------------------------------------
 //                   Internals for code reviewers:
 // ---------------------------------------------------------------------------
-// The allocator maintains one or more blocks of memory buffers to be used for
-// allocation of small objects. It allocates blocks on demand, one block at a
-// time. first_blocks_ array and overflow_blocks_ list contains blocks.
+// The allocator maintains linked list of blocks of memory buffers for
+// allocation of small objects.  It allocates blocks on demand, one block at a
+// time.
 //
 // The block is always multiple of page size. It is rounded to nearest page size
 // multiple in case caller provided a different size which is not multiple of
@@ -203,7 +203,8 @@ class Allocator {
     object_size_(sizeof(T)),
     remaining_(0),
     next_free_(nullptr),
-    blocks_allocated_(0) {}
+    blocks_allocated_(0),
+    block_(nullptr) {}
 
   ~Allocator() {
     FreeBlocks();
@@ -261,66 +262,40 @@ class Allocator {
              std::size_t /*remaining*/,
              uint32_t /*blocks_allocated*/> DebugInfo() const {
     return {alignment_, block_size_, object_size_, last_alloc_, next_free_,
-      remaining_, blocks_allocated_ + (overflow_blocks_ != nullptr ?
-                                       overflow_blocks_->size() : 0)};
+      remaining_, blocks_allocated_};
   }
 
  private:
   struct Block {
+    Block* previous;
     void* buf;
   };
 
   // Deallocates the blocks.
   void FreeBlocks() {
-    // All blocks except last, last may be partially allocated.
-    for (int i = 0; i < blocks_allocated_ - 1; ++i) {
-      Destroy(&first_blocks_[i]);
-      FreeBlockMemory(&first_blocks_[i]);
-    }
-
-    // Last block may be partially allocated, so destroy objects actually
-    // allocated.
-    Destroy(&first_blocks_[blocks_allocated_ - 1], true);
-    // Free up all memory of this block.
-    FreeBlockMemory(&first_blocks_[blocks_allocated_ - 1]);
-
-    // If we initialized overflow blocks, free them too.
-    if (overflow_blocks_) {
-      // Except last block, which may be partially allocated.
-      for (int i = 0; i < overflow_blocks_->size() - 1; ++i) {
-        Block& b = overflow_blocks_->at(i);
-        Destroy(&b);
-        FreeBlockMemory(&b);
-      }
-
-      // last overflow block.
-      Destroy(&overflow_blocks_->at(overflow_blocks_->size() - 1), true);
-      FreeBlockMemory(&overflow_blocks_->at(overflow_blocks_->size() - 1));
+    Block* current_block = block_;
+    bool partial = true;
+    while (current_block != nullptr) {
+      Block* previous = current_block->previous;
+      Destroy(current_block, partial);
+      partial = false;
+      FreeBlockMemory(current_block);
+      delete current_block;
+      blocks_allocated_--;
+      current_block = previous;
     }
   }
 
   // Creates a new block.
   bool NewBlock() {
-    Block* block;
-    // Use first_blocks_ if available.
-    if (blocks_allocated_ < first_blocks_.size()) {
-      block = &first_blocks_[blocks_allocated_++];
-    } else {
-      // First time overflow block accessed.
-      if (!overflow_blocks_) {
-        overflow_blocks_.reset(new std::vector<Block>);
-      }
-      // Increase overflow blocks.
-      overflow_blocks_->resize(overflow_blocks_->size() + 1);
-      block = &overflow_blocks_->back();
-    }
-
+    Block* block = new Block;
+    block->previous = block_;
     if (alignment_ <=  __STDCPP_DEFAULT_NEW_ALIGNMENT__) {
       block->buf = ::operator new(block_size_);
     } else {
       block->buf = ::operator new(block_size_, std::align_val_t(alignment_));
     }
-
+    memset(block->buf, 0, block_size_);
     // Align the block to alignment boundary.
     //
     // The adjusted space may be lesser than block size.
@@ -338,17 +313,20 @@ class Allocator {
       }
     }
 
-    memset(block->buf, 0, block_size_);
     next_free_ = static_cast<unsigned char*>(block->buf);
     remaining_ = adjusted_space;
+    blocks_allocated_++;
+    block_ = block;
     return true;
   }
 
   void FreeBlockMemory(Block* block) {
     if (alignment_ <= __STDCPP_DEFAULT_NEW_ALIGNMENT__) {
       ::operator delete(block->buf, block_size_);
+      block->buf = nullptr;
     } else {
       ::operator delete(block->buf, block_size_, std::align_val_t(alignment_));
+      block->buf = nullptr;
     }
   }
 
@@ -396,8 +374,7 @@ class Allocator {
   unsigned char* next_free_;
   uint32_t blocks_allocated_;
 
-  std::array<Block, 32> first_blocks_;
-  std::unique_ptr<std::vector<Block>> overflow_blocks_;
+  Block* block_;
 };
 
 }  // namespace htmlparser

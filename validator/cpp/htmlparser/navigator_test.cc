@@ -28,7 +28,7 @@ TEST(NavigatorTest, BasicNavigation) {
   auto doc = Parse("<html><head><noscript>No scripting</noscript></head>"
                     "<body><div>Hello world<div>foo bar</div></div>"
                     "<h1>foo baz</h1></body></html>");
-  NodeNavigator navigator(doc.get());
+  NodeNavigator navigator(doc->RootNode());
   navigator.MoveToChild();  // <html>.
   EXPECT_EQ(navigator.Value(), "No scripting Hello world foo bar foo baz");
   EXPECT_EQ(navigator.Current()->DataAtom(), Atom::HTML);

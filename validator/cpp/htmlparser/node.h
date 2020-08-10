@@ -53,57 +53,10 @@ enum class NodeType {
 // An empty Namespace implies a "http://www.w3.org/1999/xhtml" namespace.
 // Similarly, "math" is short for "http://www.w3.org/1998/Math/MathML", and
 // "svg" is short for "http://www.w3.org/2000/svg".
-//
-// OWNERSHIP NOTES (assuming node is created on the heap):
-//  - A node is owned by it's parent if it is the first child of it's parent,
-//    else by it's previous sibling. Deleting a node deletes all of it's
-//    children and it's _next_ sibling. This is recursive, resulting in
-//    deleting all descendants, next siblings, and next sibling's descendants.
-//
-//  - A node can be parent-less. node->Parent() can be null.
-//
-//  - A node in the tree has following ownership rules:
-//   1) Destroying the root node (document node) will result in destruction of
-//      entire document tree.
-//   2) For child nodes: First child is owned by parent.
-//                       Subsequent child is owned by previous sibling.
-//
-//             +------+
-//         +---+ HTML |
-//         |   +------+
-//         v
-//        Own
-//         +
-//         |
-//     +---v--+                  +------+
-//     | HEAD +------->Own+------> BODY |
-//     +---+--+                  +------+
-//         |
-//         v
-//        Own
-//         +
-//         |
-//     +---+---+
-//     | TITLE |
-//     +-------+
-//
-// In the above example: HTML owns HEAD, HEAD owns TITLE and BODY. If HEAD is
-// removed, BODY's ownership is granted to HTML while title is deleted.
 class Node {
  public:
-  static Node* make_node(NodeType node_type, Atom atom = Atom::UNKNOWN) {
-    Node* node = new Node(node_type);
-    node->atom_ = atom;
-    return node;
-  }
-
-  // Use Node::make_node.
-  explicit Node(NodeType node_type);
-  ~Node();
-  // Helper functions to avoid recursion while destroying linked list of
-  // objects.
-  void DestroyAllChildNodes();
-  void DestroyAllSiblingNodes();
+  Node(NodeType node_type, Atom atom = Atom::UNKNOWN);
+  ~Node() = default;
 
   // Allows move.
   Node(Node&&) = default;
@@ -165,11 +118,7 @@ class Node {
 
   // RemoveChild removes child_node if it is a child of this node.
   // Afterwards, child_node will have no parent and no siblings.
-  std::unique_ptr<Node> RemoveChild(Node* child_node);
-
-  // Returns a new node with the same type, data and attributes.
-  // The clone has no parent, no siblings and no children.
-  Node* Clone() const;
+  Node* RemoveChild(Node* child_node);
 
   // Reparents all the child nodes of this node to the destination node.
   void ReparentChildrenTo(Node* destination);
@@ -221,6 +170,7 @@ class Node {
   int64_t recursive_counter_ = 0;
 #endif
 
+  friend class Document;
   friend class NodeStack;
   friend class Parser;
 };

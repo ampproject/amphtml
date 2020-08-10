@@ -174,6 +174,21 @@ cc_library(
 )
 
 cc_library(
+    name = "document",
+    srcs = [
+        "document.cc",
+    ],
+    hdrs = [
+        "document.h",
+    ],
+    deps = [
+        ":allocator",
+        ":node",
+        ":token",
+    ],
+)
+
+cc_library(
     name = "casetable",
     hdrs = [
         "casetable.h",
@@ -198,6 +213,7 @@ cc_library(
         ":comparators",
         ":defer",
         ":doctype",
+        ":document",
         ":error",
         ":foreign",
         ":logging",
@@ -291,6 +307,13 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "allocator",
+    hdrs = [
+        "allocator.h",
+    ],
+)
+
 cc_test(
     name = "atomutil_test",
     srcs = [
@@ -302,6 +325,18 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_test(
+    name = "allocator_test",
+    srcs = [
+        "allocator_test.cc",
+    ],
+    deps = [
+        ":allocator",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 
 cc_library(
     name = "testconstants",
@@ -317,6 +352,7 @@ cc_test(
     ],
     deps = [
         ":doctype",
+        ":node",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -374,6 +410,7 @@ cc_test(
     ],
     deps = [
         ":atom",
+        ":document",
         ":node",
         ":parser",
         ":renderer",

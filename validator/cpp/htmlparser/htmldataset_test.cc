@@ -331,14 +331,14 @@ TEST(HTMLDatasetTest, WebkitData) {
         if (!test_case.context.empty()) {
           Atom context_atom = AtomUtil::ToAtom(test_case.context);
           auto context_node = std::unique_ptr<Node>(
-              Node::make_node(NodeType::ELEMENT_NODE, context_atom));
+              new Node(NodeType::ELEMENT_NODE, context_atom));
           if (context_atom == Atom::UNKNOWN) {
             context_node->SetData(test_case.context);
           }
-          std::vector<Node*> nodes =
-              ParseFragmentWithOptions(html, options, context_node.get());
-          auto doc = std::unique_ptr<Node>(
-              Node::make_node(NodeType::DOCUMENT_NODE));
+          auto document =  ParseFragmentWithOptions(html, options,
+                                                    context_node.get());
+          auto nodes = document->FragmentNodes();
+          auto doc = std::unique_ptr<Node>(new Node(NodeType::DOCUMENT_NODE));
           for (Node* node : nodes) {
             doc->AppendChild(node);
           }
@@ -351,10 +351,10 @@ TEST(HTMLDatasetTest, WebkitData) {
           num_test_cases++;
         } else {
           auto doc = ParseWithOptions(html, options);
-          auto err = CheckTreeConsistency(doc.get());
+          auto err = CheckTreeConsistency(doc->RootNode());
           EXPECT_FALSE(err) << err.value().error_msg;
           std::stringbuf output_buffer;
-          Dump(doc.get(), &output_buffer);
+          Dump(doc->RootNode(), &output_buffer);
           std::string output = output_buffer.str();
           EXPECT_EQ(output, test_case.want) << test_case.ToString();
           num_test_cases++;

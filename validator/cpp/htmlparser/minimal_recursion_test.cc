@@ -18,23 +18,19 @@ std::string ReadFileContent(std::ifstream* fd) {
   fd->seekg(0, std::ios::end);
   str.reserve(fd->tellg());
   fd->seekg(0, std::ios::beg);
-
   str.assign((std::istreambuf_iterator<char>(*fd)),
             std::istreambuf_iterator<char>());
-
   return str;
 }
 
 TEST(MinimalRecursionTest, TestComplexDocument) {
-  // Very small fiber stack size.
-  absl::SetFlag(&FLAGS_fibers_default_thread_stack_size, 32 << 10 /* 32k */);
-
   std::ifstream fd(
       FLAGS_test_srcdir +
       "testdata/largehtmldoc.html");
   defer(fd.close());
   EXPECT_TRUE(fd.good());
   std::string html = ReadFileContent(&fd);
+  EXPECT_GT(html.size(), 10000);
 
   thread::Bundle bundle;
   for (int i = 0; i < 1000; ++i) {
@@ -42,6 +38,7 @@ TEST(MinimalRecursionTest, TestComplexDocument) {
       Parser parser(html);
       auto doc = parser.Parse();
       EXPECT_NOT_NULL(doc);
+      EXPECT_NOT_NULL(doc->RootNode());
     });
   }
   bundle.JoinAll();
