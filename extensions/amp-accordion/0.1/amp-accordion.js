@@ -184,10 +184,8 @@ class AmpAccordion extends AMP.BaseElement {
 
       if (isDisplayLockingEnabledForAccordion(this.win)) {
         this.element.classList.add('i-amphtml-display-locking');
-        content.addEventListener('beforematch', (event) => {
-          // Event occurs on the content element whose parent is the section to open.
-          const parentSection = dev().assertElement(event.target.parentElement);
-          this.toggle_(parentSection, ActionTrust.LOW, /* force expand */ true);
+        content.addEventListener('beforematch', () => {
+          this.toggle_(section, ActionTrust.HIGH, /* force expand */ true);
         });
       }
     });
