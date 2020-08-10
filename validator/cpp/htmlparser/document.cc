@@ -14,14 +14,18 @@
 // limitations under the license.
 //
 
+#include "absl/flags/flag.h"
 #include "document.h"
+
+ABSL_FLAG(std::size_t, htmlparser_nodes_allocator_block_size,
+          256 << 10 /* 256k */,
+          "Allocator block size for html nodes.");
 
 namespace htmlparser {
 
-constexpr std::size_t kNodeAllocatorBlockSize = 256 << 10;  // 256k.
-
 Document::Document() :
-    node_allocator_(new Allocator<Node>(kNodeAllocatorBlockSize)),
+    node_allocator_(new Allocator<Node>(
+        ::absl::GetFlag(FLAGS_htmlparser_nodes_allocator_block_size))),
     root_node_(NewNode(NodeType::DOCUMENT_NODE)) {}
 
 Node* Document::NewNode(NodeType node_type, Atom atom) {

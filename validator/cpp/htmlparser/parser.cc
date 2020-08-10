@@ -22,6 +22,7 @@
 #endif  // DUMP_NODES
 
 #include "logging.h"
+#include "absl/flags/flag.h"
 #include "atomutil.h"
 #include "comparators.h"
 #include "defer.h"
@@ -30,6 +31,13 @@
 #include "foreign.h"
 #include "parser.h"
 #include "strings.h"
+
+ABSL_FLAG(uint32_t, htmlparser_max_nodes_depth_count, UINT32_MAX,
+          "Maximum depth of open nodes. "
+          "For: <a><b><c><d></d></c></b/></a>, the stack size is 4 as <a> is "
+          "kept open until three elements <b>,<c> and <d> are closed. "
+          "For: <a>a</a><b>b</b><c>c</c><d>d</d> the depth is 1 as they are "
+          "closed immediately after one child element.");
 
 namespace htmlparser {
 
@@ -140,6 +148,17 @@ Parser::Parser(std::string_view html,
 std::unique_ptr<Document> Parser::Parse() {
   bool eof = tokenizer_->IsEOF();
   while (!eof) {
+    if (open_elements_stack_.size() >
+        ::absl::GetFlag(FLAGS_htmlparser_max_nodes_depth_count)) {
+      LOG(WARNING) << "Skipped parsing. Document too complex: "
+                   << open_elements_stack_.size()
+                   << " vs. Max allowed: ("
+                   << ::absl::GetFlag(FLAGS_htmlparser_max_nodes_depth_count)
+                   << ")";
+      delete document_.release();
+      return nullptr;
+    }
+
     Node* node = open_elements_stack_.Top();
     tokenizer_->SetAllowCDATA(node && !node->name_space_.empty());
     // Read and parse the next token.

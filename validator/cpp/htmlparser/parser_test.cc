@@ -23,10 +23,13 @@
 #include "renderer.h"
 #include "token.h"
 
+ABSL_DECLARE_FLAG(uint32_t, htmlparser_max_nodes_depth_count);
+
 // For operator""s.
 using namespace std::string_literals;
 
 #define EXPECT_NOT_NULL(p) EXPECT_TRUE((p) != nullptr)
+#define EXPECT_NULL(p) EXPECT_FALSE((p) != nullptr)
 
 // Tests manufactured tags functions.
 TEST(ParserTest, ParseManufacturedTags) {
@@ -738,4 +741,25 @@ TEST(ParserTest, VoidElementsParsedCorrectly) {
   htmlparser::Renderer::Render(doc->RootNode(), &buf);
   EXPECT_EQ(buf.str(), R"HTML(<html><head></head><body>
   <img src="foo.png"></body></html>)HTML");
+}
+
+TEST(ParserTest, DocumentComplexityTest) {
+  absl::SetFlag(&FLAGS_htmlparser_max_nodes_depth_count, 4);
+
+  // Document parsing failed, body contains 4 deeply nested nodes..
+  htmlparser::Parser p(
+      "<html><body><a><b><c><m></m></c></b></a></body></html>");
+  EXPECT_NULL(p.Parse());
+
+  // Document parsed, open elements stack less than 4.
+  htmlparser::Parser p2("<html><body><a><b>foo</b></a></body></html>");
+  EXPECT_NOT_NULL(p2.Parse());
+
+  // Child nodes closing reduces the stack size. So maximum open nodes in the
+  // following document is 4.
+  htmlparser::Parser p3("<html><body><a>"
+                        "<b>foo</b><b>foo</b><b>foo</b><b>foo</b><b>foo</b>"
+                        "<b>foo</b><b>foo</b><b>foo</b><b>foo</b><b>foo</b>"
+                        "</a></body></html>");
+  EXPECT_NOT_NULL(p3.Parse());
 }

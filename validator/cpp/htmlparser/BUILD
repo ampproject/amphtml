@@ -185,6 +185,7 @@ cc_library(
         ":allocator",
         ":node",
         ":token",
+        "@com_google_absl//absl/flags:flag",
     ],
 )
 
@@ -221,6 +222,7 @@ cc_library(
         ":strings",
         ":tokenizer",
         "@com_google_absl//absl/base",
+        "@com_google_absl//absl/flags:flag",
     ],
 )
 
