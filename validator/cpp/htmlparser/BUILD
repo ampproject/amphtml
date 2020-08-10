@@ -297,19 +297,6 @@ cc_library(
 )
 
 cc_library(
-    name = "navigator",
-    srcs = [
-        "navigator.cc",
-    ],
-    hdrs = [
-        "navigator.h",
-    ],
-    deps = [
-        ":node",
-    ],
-)
-
-cc_library(
     name = "allocator",
     hdrs = [
         "allocator.h",
@@ -439,19 +426,6 @@ cc_test(
     ],
     deps = [
         ":strings",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "navigator_test",
-    srcs = [
-        "navigator_test.cc",
-    ],
-    deps = [
-        ":navigator",
-        ":node",
-        ":parser",
         "@com_google_googletest//:gtest_main",
     ],
 )
