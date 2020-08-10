@@ -81,6 +81,7 @@ AmpBaseCarousel['props'] = {
   'loop': {attr: 'loop', type: 'boolean'},
 };
 
+/** @override */
 AmpBaseCarousel['shadowCss'] = CSS;
 
 /**
