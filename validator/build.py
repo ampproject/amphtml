@@ -141,7 +141,7 @@ def InstallNodeDependencies():
   logging.info('installing AMP Validator nodejs dependencies ...')
   subprocess.check_call(
       ['npx', 'yarn', 'install'],
-      cwd='nodejs',
+      cwd='js/nodejs',
       stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
   logging.info('... done')
 
@@ -337,7 +337,7 @@ def RunSmokeTest(out_dir):
   # Run cli.js on the minimum valid amp and observe that it passes.
   p = subprocess.Popen(
       [
-          'node', 'nodejs/cli.js', '--validator_js',
+          'node', 'js/nodejs/cli.js', '--validator_js',
           '%s/validator_minified.js' % out_dir,
           'testdata/feature_tests/minimum_valid_amp.html', '--format=text'
       ],
@@ -352,7 +352,7 @@ def RunSmokeTest(out_dir):
   # Run cli.js on an empty file and observe that it fails.
   p = subprocess.Popen(
       [
-          'node', 'nodejs/cli.js', '--validator_js',
+          'node', 'js/nodejs/cli.js', '--validator_js',
           '%s/validator_minified.js' % out_dir,
           'testdata/feature_tests/empty.html', '--format=text'
       ],
@@ -375,7 +375,7 @@ def RunIndexTest():
       ['node', './index_test.js'],
       stdout=subprocess.PIPE,
       stderr=subprocess.PIPE,
-      cwd='nodejs')
+      cwd='js/nodejs')
   (stdout, stderr) = p.communicate()
   if p.returncode != 0:
     Die('index_test.js failed. returncode=%d stdout="%s" stderr="%s"' %
