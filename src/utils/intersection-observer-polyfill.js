@@ -114,11 +114,10 @@ export class IntersectionObserverHostApi {
 
     this.intersectionObserver_ = new IntersectionObserver(
       (entries) => {
-        // Remove target info from cross origin iframe.
-        for (let i = 0; i < entries.length; i++) {
-          delete entries[i]['target'];
-        }
-        this.subscriptionApi_.send('intersection', dict({'changes': entries}));
+        this.subscriptionApi_.send(
+          'intersection',
+          dict({'changes': entries.map(cloneEntryForCrossOrigin)})
+        );
       },
       {threshold: DEFAULT_THRESHOLD}
     );
@@ -238,5 +237,19 @@ function calculateChangeEntry(element, hostViewport, intersection, ratio) {
     boundingClientRect,
     intersectionRect: intersection,
     intersectionRatio: ratio,
+  });
+}
+
+/**
+ * @param {!IntersectionObserverEntry} entry
+ * @return {!IntersectionObserverEntry}
+ */
+function cloneEntryForCrossOrigin(entry) {
+  return /** @type {!IntersectionObserverEntry} */ ({
+    'time': entry.time,
+    'rootBounds': entry.rootBounds,
+    'boundingClientRect': entry.boundingClientRect,
+    'intersectionRect': entry.intersectionRect,
+    'intersectionRatio': entry.intersectionRatio,
   });
 }
