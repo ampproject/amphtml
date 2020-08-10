@@ -16,7 +16,6 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {BaseCarousel} from './base-carousel';
-import {CSS} from './base-carousel.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -82,7 +81,7 @@ AmpBaseCarousel['props'] = {
 };
 
 /** @override */
-AmpBaseCarousel['shadowCss'] = CSS;
+AmpBaseCarousel['useJss'] = true;
 
 /**
  * Triggers a 'slideChange' event with one data param:

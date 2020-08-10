@@ -23,6 +23,10 @@ import {hasOwn} from '../utils/object';
 import {installShadowStyle} from '../shadow-embed';
 import {matches} from '../dom';
 import {render} from './index';
+import {create as createJss} from 'jss';
+import preset from 'jss-preset-default';
+
+import {JssProvider} from 'react-jss';
 
 /**
  * @typedef {{
@@ -74,6 +78,9 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     /** @private {?Node} */
     this.container_ = null;
+
+    /** @private {*} */
+    this.jss_ = null;
 
     /** @private {boolean} */
     this.scheduledRender_ = false;
@@ -225,6 +232,10 @@ export class PreactBaseElement extends AMP.BaseElement {
           installShadowStyle(shadowRoot, this.element.tagName, shadowCss);
         }
 
+        if (Ctor['useJss'] && !this.jss_) {
+          this.jss_ = createJss({...preset(), insertionPoint: this.container_});
+        }
+
         // Create a slot for internal service elements i.e. "i-amphtml-sizer"
         const serviceSlot = this.win.document.createElement('slot');
         serviceSlot.setAttribute('name', 'i-amphtml-svc');
@@ -245,9 +256,11 @@ export class PreactBaseElement extends AMP.BaseElement {
     // instance of Component. Instead, the existing one already rendered into
     // this element will be reused.
     const v = (
-      <WithAmpContext {...this.context_}>
-        {Preact.createElement(Ctor['Component'], props)}
-      </WithAmpContext>
+      <JssProvider jss={this.jss_}>
+        <WithAmpContext {...this.context_}>
+          {Preact.createElement(Ctor['Component'], props)}
+        </WithAmpContext>
+      </JssProvider>
     );
 
     render(v, this.container_);
@@ -334,6 +347,12 @@ PreactBaseElement['shadowCss'] = null;
  * @protected {boolean}
  */
 PreactBaseElement['detached'] = false;
+
+/**
+ * Whether or not to setup a JSS instance for this element.
+ * @protected {boolean}
+ */
+PreactBaseElement['useJss'] = false;
 
 /**
  * Provides a mapping of Preact prop to AmpElement DOM attributes.
