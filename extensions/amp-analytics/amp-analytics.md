@@ -811,7 +811,7 @@ page becomes visible. The firing of this trigger can be configured using
 }
 ```
 
-The element visibility trigger can be configured for any AMP element or a
+The element visibility trigger can be configured for any element or a
 document root using [`selector`](#element-selector). The trigger will fire when
 the specified element matches the visibility parameters that can be customized
 using the `visibilitySpec`.

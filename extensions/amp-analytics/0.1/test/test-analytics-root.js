@@ -323,7 +323,7 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
       });
     });
 
-    describe('get amp elements', () => {
+    describe('get elements', () => {
       let child2;
       let child3;
 
@@ -410,13 +410,23 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
         );
       });
 
-      it('should find both AMP and non AMP elements', async () => {
+      it('should find both AMP and non AMP elements within array selector', async () => {
         child.classList.remove('i-amphtml-element');
         child.classList.add('myClass');
         child2.classList.add('myClass');
         expect(await root.getElements(body, ['.myClass'], null)).to.deep.equal([
           child,
           child2,
+        ]);
+      });
+
+      it('should find non AMP element with single selector', async () => {
+        toggleExperiment(win, 'visibility-trigger-improvements', false);
+        child.classList.remove('i-amphtml-element');
+        child.removeAttribute('data-vars-id');
+        child.classList.add('myClass');
+        expect(await root.getElements(body, '.myClass', null)).to.deep.equal([
+          child,
         ]);
       });
 
@@ -816,6 +826,14 @@ describes.realWin(
         expect(await root.getElements(body, ['.myClass'], null)).to.deep.equal([
           child,
           child2,
+        ]);
+      });
+
+      it('should find non AMP element with single selector', async () => {
+        toggleExperiment(win, 'visibility-trigger-improvements', false);
+        child.classList.remove('i-amphtml-element');
+        expect(await root.getElements(body, '.myClass', null)).to.deep.equal([
+          child,
         ]);
       });
     });

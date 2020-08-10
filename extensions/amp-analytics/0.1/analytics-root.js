@@ -354,7 +354,7 @@ export class AnalyticsRoot {
         /** @type {!Array<string>} */ (selectors)
       );
     }
-    return this.getAmpElement(
+    return this.getElement(
       context,
       /** @type {string} */ (selectors),
       selectionMethod
