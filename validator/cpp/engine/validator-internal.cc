@@ -5423,6 +5423,15 @@ class Validator {
     context_.SetDocByteSize(html.length());
     auto parser = std::make_unique<htmlparser::Parser>(html, options);
     auto doc = parser->Parse();
+    // Currently parser returns nullptr only if document is too complex.
+    // NOTE: If htmlparser starts returning null document for other reasons, we
+    // must add new error types here.
+    if (doc == nullptr) {
+      context_.AddError(ValidationError::DOCUMENT_TOO_COMPLEX,
+                        LineCol(1, 0), {}, "", &result_);
+      return result_;
+    }
+
     parse_accounting_ = parser->Accounting();
     if (absl::GetFlag(FLAGS_duplicate_html_body_elements_is_error) &&
         parse_accounting_.duplicate_body_elements &&
