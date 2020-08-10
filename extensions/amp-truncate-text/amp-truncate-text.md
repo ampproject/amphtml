@@ -25,13 +25,19 @@ limitations under the License.
 
 # amp-truncate-text
 
-Truncates text within a container with an ellipsis.
-
-## Behavior
+## Usage
 
 Truncates text with an ellipsis, optionally showing an overflow element when there is overflow. The overflow element is always placed at the end of the content and must be a direct child of `<amp-truncate-text>`.
 
-## Children
+```html
+<amp-truncate-text layout="fixed" height="3em" width="20em">
+  Some text that may get truncated.
+  <button slot="collapsed">See more</button>
+  <button slot="expanded">See less</button>
+</amp-truncate-text>
+```
+
+### Valid children
 
 <table>
   <tr>
@@ -50,17 +56,7 @@ Truncates text with an ellipsis, optionally showing an overflow element when the
   </tr>
 </table>
 
-## Usage
-
-```html
-<amp-truncate-text layout="fixed" height="3em" width="20em">
-  Some text that may get truncated.
-  <button slot="collapsed">See more</button>
-  <button slot="expanded">See less</button>
-</amp-truncate-text>
-```
-
-## Using a Custom Action
+### Custom actions
 
 If you do not want to expand in place, you can use `slot="persistent"` to perform a custom acton, such as navigating to another page with additional information. This can be useful when there is more content than would make sense to expand inline.
 
