@@ -22,13 +22,9 @@ limitations under the License.
 
 # amp-social-share
 
-Displays a social share button.
+## Usage
 
-## Overview
-
-The `amp-social-share` component displays a social share button for various social platform providers.
-
-## Examples
+The `amp-social-share` component displays a social share button for social platforms.
 
 **Example: Basic social share button**
 
@@ -55,31 +51,7 @@ When you want to pass parameters to the share endpoint, you can specify `data-pa
 
 Linkedin is one of the pre-configured providers, so you do not need to provide the `data-share-endpoint` attribute.
 
-## Attributes
-
-<table>
-  <tr>
-    <td width="40%"><strong>type (required)</strong></td>
-    <td>Selects a provider type. This is required for both pre-configured and non-configured providers.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-target</strong></td>
-    <td><p>Specifies the target in which to open the target. The default is <code>_blank</code> for all cases other than email/SMS on iOS, in which case the target is set to <code>_top</code>.</p>
-<p>Please note that we only suggest using this override for email.</p></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-share-endpoint</strong></td>
-    <td>This attribute is <strong>required for non-configured providers</strong>.
-<br>
-Some popular providers have pre-configured share endpoints. For details, see the <a href="#pre-configured-providers">Pre-configured Providers</a> section. For non-configured providers, you'll need to specify the share endpoint.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-param-*</strong></td>
-    <td>All <code>data-param-*</code> prefixed attributes are turned into URL parameters and passed to the share endpoint.</td>
-  </tr>
-</table>
-
-## Pre-configured providers
+### Pre-configured providers
 
 The `amp-social-share` component provides [some pre-configured providers](0.1/amp-social-share-config.js) that know their sharing endpoints as well as some default parameters.
 
@@ -192,7 +164,7 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
   </tr>
 </table>
 
-## Non-configured providers
+### Non-configured providers
 
 In addition to pre-configured providers, you can use non-configured providers by specifying additional attributes in the `amp-social-share` component.
 
@@ -211,7 +183,41 @@ The following example creates a share button through Facebook Messenger by setti
 
 As these providers are not pre-configured, you'll need to create the appropriate button image and styles for the provider.
 
-## Styles
+### Variable Substitution
+
+You can use [global AMP variables substitution](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md) in the `<amp-social-share>` element. In the example below, `TITLE` is substituted with the page title and `CANONICAL_URL` with the document's canonical URL.
+
+```html
+<amp-social-share
+  type="whatsapp"
+  data-param-text="Check out this article: TITLE - CANONICAL_URL"
+>
+</amp-social-share>
+```
+
+## Attributes
+
+### type (required)
+
+Selects a provider type. This is required for both pre-configured and non-configured providers.
+
+### data-target
+
+Specifies the target in which to open the target. The default is `_blank` for all cases other than email/SMS on iOS, in which case the target is set to `_top`.
+
+Please note that we only suggest using this override for email.
+
+### data-share-endpoint
+
+This attribute is required for non-configured providers.
+
+Some popular providers have pre-configured share endpoints. For details, see the Pre-configured Providers section. For non-configured providers, you'll need to specify the share endpoint.
+
+### data-param-\*
+
+All `data-param-*` prefixed attributes are turned into URL parameters and passed to the share endpoint.
+
+## Styling
 
 ### Default Styles
 
@@ -233,18 +239,6 @@ amp-social-share[type='twitter'] {
 ```
 
 When customizing the style of an `amp-social-share` icon please ensure that the customized icon meets the branding guidelines set out by the provider (e.g Twitter, Facebook, etc.)
-
-## Variable Substitution
-
-You can use [global AMP variables substitution](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md) in the `<amp-social-share>` element. In the example below, `TITLE` is substituted with the page title and `CANONICAL_URL` with the document's canonical URL.
-
-```html
-<amp-social-share
-  type="whatsapp"
-  data-param-text="Check out this article: TITLE - CANONICAL_URL"
->
-</amp-social-share>
-```
 
 ## Validation
 
