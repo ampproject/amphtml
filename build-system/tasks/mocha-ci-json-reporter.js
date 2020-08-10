@@ -32,14 +32,14 @@ async function writeOutput(output, filename) {
     await fs.writeFile(filename, JSON.stringify(output, null, 4));
   } catch (error) {
     process.stdout.write(
-      Base.color('fail', `Could not write to file '${filename}'`)
+      Base.color('fail', `Could not write test result report to file '${filename}'`)
     );
   }
 }
 
 /**
  * Custom Mocha reporter for CI builds.
- * Mimics the structured karma reporter, but for Karma.
+ * Mimics the structured karma reporter, but for Mocha.
  * @param {*} runner
  */
 function ciJsonReporter(runner) {
