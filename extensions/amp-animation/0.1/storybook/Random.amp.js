@@ -17,8 +17,8 @@
 import * as Preact from '../../../../src/preact';
 import {AnimationTemplate} from './template';
 import {storiesOf} from '@storybook/preact';
+import {withAmp} from 'storybook-addon-amp';
 import {withKnobs} from '@storybook/addon-knobs';
-import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
 
 const CONTAINER_STYLE = {
   position: 'absolute',
