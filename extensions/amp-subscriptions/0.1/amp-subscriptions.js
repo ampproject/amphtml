@@ -375,7 +375,8 @@ export class SubscriptionService {
     // Hide loading animation.
     this.renderer_.toggleLoading(false);
 
-    // Track view.
+    // Set Pingback viewer timer
+
     this.viewTrackerPromise_ = this.viewerTracker_.scheduleView(2000);
 
     // If the viewer is providing a paywall we don't want the publisher
@@ -593,30 +594,38 @@ export class SubscriptionService {
   }
 
   /**
-   * Performs pingback on local platform.
+   * Performs pingback on configured platforms.
    * @return {?Promise}
    * @private
    */
   performPingback_() {
     if (this.viewTrackerPromise_) {
-      const localPlatform = this.platformStore_.getLocalPlatform();
-      return this.viewTrackerPromise_
-        .then(() => {
-          if (localPlatform.pingbackReturnsAllEntitlements()) {
-            return this.platformStore_.getAllPlatformsEntitlements();
-          }
-          return this.platformStore_
-            .getGrantEntitlement()
-            .then(
-              (grantStateEntitlement) =>
-                grantStateEntitlement || Entitlement.empty('local')
-            );
-        })
-        .then((resolveEntitlements) => {
-          if (localPlatform.isPingbackEnabled()) {
-            localPlatform.pingback(resolveEntitlements);
-          }
-        });
+      return this.viewTrackerPromise_.then(() => {
+        this.platformStore_
+          .getAvailablePlatforms()
+          .forEach((subscriptionPlatform) => {
+            // Iterate the platforms and pingback if it's enabled on that platform
+            if (subscriptionPlatform.isPingbackEnabled()) {
+              // Platforms can choose if they want all entitlments
+              // or just the granting entitlment
+              if (subscriptionPlatform.pingbackReturnsAllEntitlements()) {
+                this.platformStore_
+                  .getAllPlatformsEntitlements()
+                  .then((resolvedEntitlments) =>
+                    subscriptionPlatform.pingback(resolvedEntitlments)
+                  );
+              } else {
+                this.platformStore_
+                  .getGrantEntitlement()
+                  .then((grantStateEntitlement) =>
+                    subscriptionPlatform.pingback(
+                      grantStateEntitlement || Entitlement.empty('local')
+                    )
+                  );
+              }
+            }
+          });
+      });
     }
     return null;
   }
