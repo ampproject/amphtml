@@ -141,7 +141,7 @@ def InstallNodeDependencies():
   logging.info('installing AMP Validator nodejs dependencies ...')
   subprocess.check_call(
       ['npx', 'yarn', 'install'],
-      cwd='nodejs',
+      cwd='js/nodejs',
       stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
   logging.info('... done')
 
@@ -375,7 +375,7 @@ def RunIndexTest():
       ['node', './index_test.js'],
       stdout=subprocess.PIPE,
       stderr=subprocess.PIPE,
-      cwd='nodejs')
+      cwd='js/nodejs')
   (stdout, stderr) = p.communicate()
   if p.returncode != 0:
     Die('index_test.js failed. returncode=%d stdout="%s" stderr="%s"' %
