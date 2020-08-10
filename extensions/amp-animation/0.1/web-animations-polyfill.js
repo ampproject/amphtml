@@ -23,7 +23,7 @@ const POLYFILLED = '__AMP_WA';
  * Native Web Animations on WebKit do not respect easing for individual
  * keyframes and break overall timing. See https://go.amp.dev/issue/27762 and
  * https://bugs.webkit.org/show_bug.cgi?id=210526
- * @param {*} win
+ * @param {!Window} win
  */
 function forceOnSafari(win) {
   if (Services.platformFor(win).isSafari()) {
