@@ -187,6 +187,7 @@
 #include <unistd.h>  // For getpagesize()
 
 #include <array>
+#include <cstring>
 #include <vector>
 
 namespace htmlparser {
@@ -295,7 +296,7 @@ class Allocator {
     } else {
       block->buf = ::operator new(block_size_, std::align_val_t(alignment_));
     }
-    memset(block->buf, 0, block_size_);
+    std::memset(block->buf, 0, block_size_);
     // Align the block to alignment boundary.
     //
     // The adjusted space may be lesser than block size.
