@@ -303,39 +303,50 @@ export class AmpStory360 extends AMP.BaseElement {
     );
   }
 
-  /** @private */
+  /**
+   * Checks if orientation sensors and permissions exist on device.
+   * @private
+   */
   checkGyroscopePermissions() {
-    // if gyroscope isn't supported
+    // If gyroscope isn't supported, keep animating.
     if (typeof DeviceOrientationEvent === 'undefined') {
       return;
     }
 
-    // if motion and no permissions like android
+    // If motion and no permissions like android, enable gyro right away.
     if (typeof DeviceOrientationEvent.requestPermission === 'undefined') {
       this.enableGyroscope();
     }
 
-    // if motion and permissions like ios
+    // If motion and permissions like ios, build permission button to ask user.
     if (typeof DeviceOrientationEvent.requestPermission === 'function') {
       this.buildPermissionUI();
     }
   }
 
-  /** @private */
+  /**
+   * Creates a device orientation listener and sets gyroscopeControls state.
+   * Removes the listener and resumes animation if not called in 1000ms.
+   * @private
+   */
   enableGyroscope() {
     this.gyroscopeControls_ = true;
-    this.element.classList.add('i-amp-story-360-gyroscope-enabled');
-    window.addEventListener('deviceorientation', (e) => {
-      clearTimeout(checkNoMotion);
-      this.onDeviceOrientation(e);
-    });
+    this.mutateElement(() => {
+      this.element.classList.add('i-amp-story-360-gyroscope-enabled');
+      window.addEventListener('deviceorientation', (e) => {
+        clearTimeout(checkNoMotion);
+        this.onDeviceOrientation(e);
+      });
 
-    // If device is not in motion, cancel gyroscope controls and animate.
-    const checkNoMotion = setTimeout(() => {
-      this.gyroscopeControls_ = false;
-      this.element.classList.remove('i-amp-story-360-gyroscope-enabled');
-      this.animate_();
-    }, 1000);
+      // If device is not in motion, cancel gyroscope controls and animate.
+      const checkNoMotion = setTimeout(() => {
+        this.gyroscopeControls_ = false;
+        this.mutateElement(() => {
+          this.element.classList.remove('i-amp-story-360-gyroscope-enabled');
+        });
+        this.animate_();
+      }, 1000);
+    });
   }
 
   /** @private */
@@ -360,30 +371,38 @@ export class AmpStory360 extends AMP.BaseElement {
     this.renderer_.render(true);
   }
 
-  /** @private */
+  /**
+   * Creates a "activate" button and UI requesting DeviceOrientation permissions.
+   * @private
+   */
   buildPermissionUI() {
-    const activateButton = buildActivateButtonTemplate(this.element);
-    this.element.appendChild(activateButton);
-    activateButton.addEventListener('click', () =>
-      dialogBox.classList.toggle('i-amp-story-360-permissions-dialog-hidden')
-    );
+    this.mutateElement(() => {
+      const activateButton = buildActivateButtonTemplate(this.element);
+      this.element.appendChild(activateButton);
+      activateButton.addEventListener('click', () =>
+        dialogBox.classList.toggle('i-amp-story-360-permissions-dialog-hidden')
+      );
 
-    const dialogBox = buildPermissionDialogBoxTemplate(this.element);
-    this.element.appendChild(dialogBox);
+      const dialogBox = buildPermissionDialogBoxTemplate(this.element);
+      this.element.appendChild(dialogBox);
 
-    dialogBox.addEventListener('click', (e) => {
-      const action = e.target.closest('[data-action]').dataset.action;
+      dialogBox.addEventListener('click', (e) => {
+        const action = e.target.closest('[data-action]').dataset.action;
 
-      if (action === 'enable') {
-        DeviceOrientationEvent.requestPermission()
-          .then((permissionState) => {
-            permissionState === 'granted' &&
-              this.storeService_.dispatch(Action.GYROSCOPE_ENABLED_STATE, true);
-          })
-          .catch(alert.error);
-      }
+        if (action === 'enable') {
+          DeviceOrientationEvent.requestPermission()
+            .then((permissionState) => {
+              permissionState === 'granted' &&
+                this.storeService_.dispatch(
+                  Action.GYROSCOPE_ENABLED_STATE,
+                  true
+                );
+            })
+            .catch(alert.error);
+        }
 
-      dialogBox.classList.add('i-amp-story-360-permissions-dialog-hidden');
+        dialogBox.classList.add('i-amp-story-360-permissions-dialog-hidden');
+      });
     });
   }
 
