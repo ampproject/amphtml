@@ -30,6 +30,6 @@ The AMPHTML Validator is maintained by the
 This code requires C++17. When building with [Bazel](https://bazel.build/)
 please use the flag `--cxxopt='-std=c++17'`.
 
-For building, run: `bazel build --cxxopt='-std=c++17' parser`.
+For building, run: `bazel build --cxxopt='-std=c++17' validator`.
 
-For testing, run: `bazel test --cxxopt='-std=c++17' parser_test`.
+For testing, run: `bazel test --cxxopt='-std=c++17' validator_test`.
