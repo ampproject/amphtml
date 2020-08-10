@@ -18,7 +18,7 @@ import * as Preact from '../../../../src/preact';
 import {date, withKnobs} from '@storybook/addon-knobs';
 import {storiesOf} from '@storybook/preact';
 import {withA11y} from '@storybook/addon-a11y';
-import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
+import {withAmp} from 'storybook-addon-amp';
 
 // eslint-disable-next-line
 storiesOf('amp-timeago', module)

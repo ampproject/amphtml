@@ -65,7 +65,6 @@ const forbiddenTerms = {
       'build-system/server/app-index/boilerplate.js',
       'build-system/server/variable-substitution.js',
       'build-system/tasks/extension-generator/index.js',
-      'build-system/tasks/storybook/amp-env/decorator.js',
       'css/ampdoc.css',
       'css/ampshared.css',
       'extensions/amp-pinterest/0.1/amp-pinterest.css',
@@ -80,7 +79,6 @@ const forbiddenTerms = {
     allowlist: [
       'build-system/tasks/create-golden-css/css/main.css',
       'build-system/tasks/extension-generator/index.js',
-      'build-system/tasks/storybook/amp-env/decorator.js',
       'css/ampdoc.css',
       'css/ampshared.css',
     ],
@@ -1169,7 +1167,6 @@ const forbiddenTermsSrcInclusive = {
       'build-system/tasks/extension-generator/index.js',
       'build-system/tasks/helpers.js',
       'build-system/tasks/performance/helpers.js',
-      'build-system/tasks/storybook/amp-env/decorator.js',
       'dist.3p/current/integration.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'src/3p-frame.js',
