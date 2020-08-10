@@ -16,15 +16,20 @@ limitations under the License.
 
 # AMPHTML Validator
 
-This is the home for all things AMPHTML Validator, including:
- - C++ Validator
- - JavaScript Validator
- - Validation rules expressed as .protoascii
- - Test files used by both implementations
- - Documentation
+A C++ AMPHTML Validator for the
+[AMPHTML format](https://github.com/ampproject/amphtml/blob/master/README.md).
 
-The AMPHTML Validator is used by both large and small partners to validate
-their AMPHTML documents.
+## Maintainers
 
-It is maintained by the [AMP Working Group](https://amp.dev/community/working-groups/amp4email/):
+The AMPHTML Validator is maintained by the
+[AMP Working Group](https://amp.dev/community/working-groups/amp4email/):
 [Caching](https://amp.dev/community/working-groups/caching/)
+
+## Building and Testing with Bazel
+
+This code requires C++17. When building with [Bazel](https://bazel.build/)
+please use the flag `--cxxopt='-std=c++17'`.
+
+For building, run: `bazel build --cxxopt='-std=c++17' parser`.
+
+For testing, run: `bazel test --cxxopt='-std=c++17' parser_test`.
