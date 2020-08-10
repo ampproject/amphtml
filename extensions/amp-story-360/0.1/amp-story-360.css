@@ -25,7 +25,7 @@ amp-story-360 amp-img {
   opacity: 0 !important;
 }
 
-.i-amp-story-360-activate-button {
+.i-amphtml-story-360-activate-button {
   position: absolute;
   bottom: 8px;
   right: 8px;
@@ -42,7 +42,7 @@ amp-story-360 amp-img {
   align-items: center;
 }
 
-.i-amp-story-360-activate-button-icon {
+.i-amphtml-story-360-activate-button-icon {
   box-sizing: border-box;
   margin-left: 5px;
   font-size: 6px;
@@ -57,7 +57,7 @@ amp-story-360 amp-img {
   position: relative;
 }
 
-.i-amp-story-360-activate-button-icon-svg {
+.i-amphtml-story-360-activate-button-icon-svg {
   position: absolute;
   width: calc(100% + 2px);
   height: calc(100% + 2px);
@@ -65,7 +65,7 @@ amp-story-360 amp-img {
   top: -1px;
 }
 
-[active] .i-amp-story-360-activate-button-icon-svg {
+[active] .i-amphtml-story-360-activate-button-icon-svg {
   animation: rotate 1s 1s;
 }
 
@@ -75,12 +75,12 @@ amp-story-360 amp-img {
   }
 }
 
-.i-amp-story-360-gyroscope-enabled .i-amp-story-360-activate-button,
-.i-amp-story-360-gyroscope-enabled .i-amp-story-360-permissions-dialog {
+.i-amphtml-story-360-gyroscope-enabled .i-amphtml-story-360-activate-button,
+.i-amphtml-story-360-gyroscope-enabled .i-amphtml-story-360-permissions-dialog {
   display: none;
 }
 
-.i-amp-story-360-permissions-dialog {
+.i-amphtml-story-360-permissions-dialog {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -93,20 +93,20 @@ amp-story-360 amp-img {
   overflow: hidden;
 }
 
-.i-amp-story-360-permissions-dialog p {
+.i-amphtml-story-360-permissions-dialog p {
   font-family: 'Roboto', sans-serif;
   margin: 0;
   padding: 20px;
   font-size: 16px;
 }
 
-.i-amp-story-360-permissions-dialog-button-container {
+.i-amphtml-story-360-permissions-dialog-button-container {
   font-family: 'Open Sans', sans-serif;
   border-top: 1px solid #1B1B1B;
   white-space: nowrap;
 }
 
-.i-amp-story-360-permissions-dialog-button-container button {
+.i-amphtml-story-360-permissions-dialog-button-container button {
   padding: 20px;
   font-size: 20px;
   background: none;
@@ -115,6 +115,6 @@ amp-story-360 amp-img {
   width: 50%;
 }
 
-.i-amp-story-360-permissions-dialog-hidden {
+.i-amphtml-story-360-permissions-dialog-hidden {
   display: none;
 }

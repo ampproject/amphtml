@@ -46,12 +46,12 @@ const TAG = 'AMP_STORY_360';
 const buildActivateButtonTemplate = (element) => {
   const html = htmlFor(element);
   return html`
-    <button class="i-amp-story-360-activate-button" role="button">
+    <button class="i-amphtml-story-360-activate-button" role="button">
       Activate
-      <span class="i-amp-story-360-activate-button-icon"
+      <span class="i-amphtml-story-360-activate-button-icon"
         >360°
         <svg
-          class="i-amp-story-360-activate-button-icon-svg"
+          class="i-amphtml-story-360-activate-button-icon-svg"
           xmlns="http://www.w3.org/2000/svg"
           width="24"
           height="24"
@@ -95,12 +95,12 @@ const buildPermissionDialogBoxTemplate = (element) => {
   const html = htmlFor(element);
   return html`
     <div
-      class="i-amp-story-360-permissions-dialog i-amp-story-360-permissions-dialog-hidden"
+      class="i-amphtml-story-360-permissions-dialog i-amphtml-story-360-permissions-dialog-hidden"
     >
       <p>
         This immersive story requires access to your devices motion sensors.
       </p>
-      <div class="i-amp-story-360-permissions-dialog-button-container">
+      <div class="i-amphtml-story-360-permissions-dialog-button-container">
         <button data-action="disable" role="button">disable</button>
         <button data-action="enable" role="button">enable</button>
       </div>
@@ -338,7 +338,7 @@ export class AmpStory360 extends AMP.BaseElement {
   enableGyroscope_() {
     this.gyroscopeControls_ = true;
     this.mutateElement(() => {
-      this.element.classList.add('i-amp-story-360-gyroscope-enabled');
+      this.element.classList.add('i-amphtml-story-360-gyroscope-enabled');
       window.addEventListener('deviceorientation', (e) => {
         clearTimeout(checkNoMotion);
         this.onDeviceOrientation_(e);
@@ -348,7 +348,9 @@ export class AmpStory360 extends AMP.BaseElement {
       const checkNoMotion = setTimeout(() => {
         this.gyroscopeControls_ = false;
         this.mutateElement(() => {
-          this.element.classList.remove('i-amp-story-360-gyroscope-enabled');
+          this.element.classList.remove(
+            'i-amphtml-story-360-gyroscope-enabled'
+          );
         });
         this.animate_();
       }, 1000);
@@ -389,7 +391,9 @@ export class AmpStory360 extends AMP.BaseElement {
       const activateButton = buildActivateButtonTemplate(this.element);
       this.element.appendChild(activateButton);
       activateButton.addEventListener('click', () =>
-        dialogBox.classList.toggle('i-amp-story-360-permissions-dialog-hidden')
+        dialogBox.classList.toggle(
+          'i-amphtml-story-360-permissions-dialog-hidden'
+        )
       );
 
       const dialogBox = buildPermissionDialogBoxTemplate(this.element);
@@ -410,7 +414,9 @@ export class AmpStory360 extends AMP.BaseElement {
             .catch(alert.error);
         }
 
-        dialogBox.classList.add('i-amp-story-360-permissions-dialog-hidden');
+        dialogBox.classList.add(
+          'i-amphtml-story-360-permissions-dialog-hidden'
+        );
       });
     });
   }
