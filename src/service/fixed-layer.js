@@ -31,6 +31,7 @@ import {closest, domOrderComparator, matches} from '../dom';
 import {dev, user} from '../log';
 import {endsWith} from '../string';
 import {getMode} from '../mode';
+import {numeric} from '../../transition';
 import {remove} from '../utils/array';
 
 const TAG = 'FixedLayer';
@@ -357,6 +358,26 @@ export class FixedLayer {
   removeElement(element) {
     const fes = this.tearDownElement_(element);
     this.returnFixedElements_(fes);
+  }
+
+  animateFixedElements(lastPaddingTop, paddingTop, duration, curve, transient) {
+    this.updatePaddingTop(paddingTop, transient);
+    if (duration <= 0) {
+      return Promise.resolve();
+    }
+    // Add transit effect on position fixed element
+    const tr = numeric(lastPaddingTop - paddingTop, 0);
+    return Animation.animate(
+      this.ampdoc.getRootNode(),
+      (time) => {
+        const p = tr(time);
+        this.transformMutate(`translateY(${p}px)`);
+      },
+      duration,
+      curve
+    ).thenAlways(() => {
+      this.transformMutate(null);
+    });
   }
 
   /**
