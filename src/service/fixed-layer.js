@@ -31,7 +31,6 @@ import {closest, domOrderComparator, matches} from '../dom';
 import {dev, user} from '../log';
 import {endsWith} from '../string';
 import {getMode} from '../mode';
-import {isExperimentOn} from '../experiments';
 import {remove} from '../utils/array';
 
 const TAG = 'FixedLayer';
@@ -236,9 +235,6 @@ export class FixedLayer {
    * @visibleForTesting
    */
   observeHiddenMutations() {
-    if (!isExperimentOn(this.ampdoc.win, 'hidden-mutation-observer')) {
-      return;
-    }
     this.initHiddenObserver_();
   }
 
