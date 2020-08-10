@@ -875,7 +875,13 @@ export class ViewportImpl {
     this.lastPaddingTop_ = this.paddingTop_;
     this.paddingTop_ = paddingTop;
 
-    const animPromise = this.animateFixedElements_(duration, curve, transient);
+    const animPromise = this.fixedLayer_.animateFixedElements(
+      this.paddingTop_,
+      this.lastPaddingTop_,
+      duration,
+      curve,
+      transient
+    );
     if (paddingTop < this.lastPaddingTop_) {
       this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
       return;
@@ -895,33 +901,6 @@ export class ViewportImpl {
     } else {
       this.resetScroll();
     }
-  }
-
-  /**
-   * @param {number} duration
-   * @param {string} curve
-   * @param {boolean} transient
-   * @return {!Promise}
-   * @private
-   */
-  animateFixedElements_(duration, curve, transient) {
-    this.fixedLayer_.updatePaddingTop(this.paddingTop_, transient);
-    if (duration <= 0) {
-      return Promise.resolve();
-    }
-    // Add transit effect on position fixed element
-    const tr = numeric(this.lastPaddingTop_ - this.paddingTop_, 0);
-    return Animation.animate(
-      this.ampdoc.getRootNode(),
-      (time) => {
-        const p = tr(time);
-        this.fixedLayer_.transformMutate(`translateY(${p}px)`);
-      },
-      duration,
-      curve
-    ).thenAlways(() => {
-      this.fixedLayer_.transformMutate(null);
-    });
   }
 
   /**
