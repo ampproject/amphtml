@@ -25,7 +25,7 @@ limitations under the License.
 
 # amp-selector
 
-## Behavior
+## Usage
 
 The AMP selector is a control that presents a list of options and lets the user choose one or many options; the contents of the options aren't just limited to text.
 
@@ -100,7 +100,7 @@ Example:
 </amp-selector>
 ```
 
-## Clearing selections
+### Clearing selections
 
 To clear all selections when an element is tapped or clicked, set the [`on`](../../spec/amp-actions-and-events.md) action attribute on the element, and specify the AMP Selector `id` with the `clear` action method.
 
@@ -123,34 +123,35 @@ See live demos at [AMP By Example](https://amp.dev/documentation/examples/compon
 
 ### Attributes on `<amp-selector>`
 
-<table>
-  <tr>
-    <td width="40%"><strong>disabled, form, multiple, name</strong></td>
-    <td>The attributes above behave the same way as they do on a standard HTML [`<select>`](https://developer.mozilla.org/en/docs/Web/HTML/Element/select) element.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>keyboard-select-mode</strong></td>
-    <td>The `keyboard-select-mode` attribute dictates the keyboard navigation behavior for options inside `<amp-selector>`.
+#### disabled, form, multiple, name
 
-    <ul><li>`none` (default): The tab key changes focus between items in the `<amp-selector>`. The user must press enter or space to change the selection. Arrow keys are disabled. </li><li>
-    `focus`: Tab key gives focus to `<amp-selector>`. The user navigates between items with the arrow keys. Must press space or enter to change the selection.</li><li>
-    `select`: Tab key gives focus to `<amp-selector>`. The selection changes as the user navigates options with arrow keys. </li></ul></td>
+The attributes above behave the same way as they do on a standard HTML [`<select>`](https://developer.mozilla.org/en/docs/Web/HTML/Element/select) element.
 
-  </tr>
-</table>
+#### keyboard-select-mode
+
+The `keyboard-select-mode` attribute dictates the keyboard navigation behavior for options inside `<amp-selector>`.
+
+<ul>
+  <li>
+    `none` (default): The tab key changes focus between items in the `<amp-selector>`. The user must press enter or space to change the selection. Arrow keys are disabled.
+  </li>
+  <li>
+    `focus`: Tab key gives focus to `<amp-selector>`. The user navigates between items with the arrow keys. Must press space or enter to change the selection.
+  </li>
+  <li>
+    `select`: Tab key gives focus to `<amp-selector>`. The selection changes as the user navigates options with arrow keys.
+  </li>
+</ul>
 
 ### Attributes on `<amp-selector>` options
 
-<table>
-  <tr>
-    <td width="40%"><strong>option</strong></td>
-    <td>Indicates that the option is selectable.  If a value is specified, the contents of the value is submitted with the form.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>disabled, selected</strong></td>
-    <td>The attributes above behave the same way as they do on a standard HTML [`<option>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option) element.</td>
-  </tr>
-</table>
+#### option
+
+Indicates that the option is selectable. If a value is specified, the contents of the value is submitted with the form.
+
+#### disabled, selected
+
+The attributes above behave the same way as they do on a standard HTML [`<option>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option) element.
 
 ## Events
 
@@ -159,22 +160,19 @@ e.g. `on="select: my-tab.show"`
 
 Read more about [AMP Actions and Events](../../spec/amp-actions-and-events.md).
 
-<table>
-  <tr>
-    <td width="40%"><strong>select</strong></td>
-    <td>`amp-selector` triggers the `select` event when the user selects an option.
-    Multi-selectors and single-selectors fire this when selecting or unselecting options.
-    Tapping disabled options does not trigger the `select` event.
-    <ul>
-      <li>
-      `event.targetOption` contains the `option` attribute value of the selected element.</li>
-      <li>
-      `event.selectedOptions` contains an array of the `option` attribute values of all selected elements.
-      </li>
-    </ul></td>
-  </tr>
+### select
 
-</table>
+`amp-selector` triggers the `select` event when the user selects an option.
+Multi-selectors and single-selectors fire this when selecting or unselecting options.
+Tapping disabled options does not trigger the `select` event.
+
+<ul>
+  <li>
+  `event.targetOption` contains the `option` attribute value of the selected element.</li>
+  <li>
+  `event.selectedOptions` contains an array of the `option` attribute values of all selected elements.
+  </li>
+</ul>
 
 ## Validation
 
