@@ -26,7 +26,7 @@ import {getChildJsonConfig} from '../../../src/json';
 import {getDetail, listen} from '../../../src/event-helper';
 import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getParentWindowFrameElement} from '../../../src/service';
-import {installWebAnimationsIfNecessary} from './install-polyfill';
+import {installWebAnimationsIfNecessary} from './web-animations-polyfill';
 import {isFiniteNumber} from '../../../src/types';
 import {setInitialDisplay, setStyles, toggle} from '../../../src/style';
 
@@ -479,14 +479,15 @@ export class AmpAnimation extends AMP.BaseElement {
       null);
 
     // Ensure polyfill is installed.
-    const polyfillPromise = installWebAnimationsIfNecessary(this.win);
+    installWebAnimationsIfNecessary(this.win);
+
     const ampdoc = this.getAmpDoc();
     const readyPromise = this.embed_
       ? this.embed_.whenReady()
       : ampdoc.whenReady();
     const hostWin = this.embed_ ? this.embed_.win : this.win;
     const baseUrl = this.embed_ ? this.embed_.getUrl() : ampdoc.getUrl();
-    return Promise.all([polyfillPromise, readyPromise]).then(() => {
+    return readyPromise.then(() => {
       const builder = new Builder(
         hostWin,
         this.getRootNode_(),
