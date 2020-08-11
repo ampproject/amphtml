@@ -15,13 +15,13 @@
  */
 
 const JsonReporter = require('./mocha-custom-json-reporter');
-const KarmaMimicReporter = require('./mocha-karma-mimic-reporter');
 const mocha = require('mocha');
+const MochaDotsReporter = require('./mocha-karma-mimic-reporter');
 const {Base} = mocha.reporters;
 
 function ciReporter(runner, options) {
   Base.call(this, runner, options);
-  this._karmaMimicReporter = new KarmaMimicReporter(runner, options);
+  this._karmaMimicReporter = new MochaDotsReporter(runner, options);
   this._jsonReporter = new JsonReporter(runner, options);
   return this;
 }
