@@ -21,7 +21,7 @@ const {Base} = mocha.reporters;
 
 function ciReporter(runner, options) {
   Base.call(this, runner, options);
-  this._karmaMimicReporter = new MochaDotsReporter(runner, options);
+  this._mochaDotsReporter = new MochaDotsReporter(runner, options);
   this._jsonReporter = new JsonReporter(runner, options);
   return this;
 }
