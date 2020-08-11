@@ -14,6 +14,10 @@
         max-width: 400px;
         margin-bottom: 100px;
       }
+      .amp-lightbox-gallery-caption{
+        color: red;
+        font-size: 30px;
+      }
     </style>
   </head>
   <body>
@@ -38,10 +42,50 @@
       lightbox
       src="https://picsum.photos/id/78/400/400.jpg"
       layout="fixed"
-      width="400"
+      width="300"
       height="400"
     >
     </amp-img>
+
+    <h2>AMP lightbox gallery with caption styling.</h2>
+    <p>We set captions to be colored red and have a 30px font size.</p>
+    <figure class="dog-walking-caption">
+      <amp-img
+        lightbox
+        src="https://picsum.photos/id/494/400/400.jpg"
+        layout="fixed"
+        width="400"
+        height="400"
+      ></amp-img>
+      <figcaption>
+        Let's walk the dog.
+      </figcaption>
+    </figure>
+    <figure class="desert-caption">
+      <amp-img 
+        lightbox="caption" 
+        src="https://picsum.photos/id/525/400/400.jpg" 
+        layout="fixed"
+        width="400" 
+        height="400" 
+      ></amp-img>
+      <figcaption>
+        This is the desert.
+      </figcaption>
+    </figure>
+    <figure class="door-caption">
+      <amp-img
+        lightbox
+        src="https://picsum.photos/id/78/400/400.jpg"
+        aria-describedby="imageDescription"
+        layout="fixed"
+        width="400"
+        height="400" 
+      ></amp-img>
+      <figcaption>
+        This is a door.
+      </figcaption>
+    </figure>
 
     <h2>AMP lightbox gallery with webp and jpeg fallback.</h2>
     <p>This doesnt work in browsers that doesnt support webp</p>
