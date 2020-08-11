@@ -16,7 +16,7 @@
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 
-/** @type {!WeakMap<!../../../src/service/ampdoc-impl.AmpDoc, !Deferred>} */
+/** @type {!WeakMap<!../../../src/service/ampdoc-impl.AmpDoc, !Promise>} */
 const polyfillPromiseMap = new WeakMap();
 
 /**
@@ -25,11 +25,11 @@ const polyfillPromiseMap = new WeakMap();
  */
 export function installWebAnimationsIfNecessary(ampdoc) {
   if (polyfillPromiseMap.has(ampdoc)) {
-    return polyfillPromiseMap.get(ampdoc).promise;
+    return polyfillPromiseMap.get(ampdoc);
   }
 
-  const polyfillPromise = new Deferred();
-  polyfillPromiseMap.set(ampdoc, polyfillPromise);
+  const {promise, resolve} = new Deferred();
+  polyfillPromiseMap.set(ampdoc, promise);
 
   const {win} = ampdoc;
   if (Services.platformFor(win).isSafari()) {
@@ -43,15 +43,18 @@ export function installWebAnimationsIfNecessary(ampdoc) {
     win.Element.prototype['animate'] = null;
   }
 
-  if (!!win.Element.prototype['animate']) {
+  if (win.Element.prototype['animate']) {
     // Native Support exists, there is no reason to load the polyfill.
-    polyfillPromise.resolve();
-    return polyfillPromise.promise;
+    resolve();
+    return promise;
   }
 
-  Services.extensionsFor(win)
-    .installExtensionForDoc(ampdoc, 'amp-animation-polyfill')
-    .then(() => polyfillPromise.resolve());
+  resolve(
+    Services.extensionsFor(win).installExtensionForDoc(
+      ampdoc,
+      'amp-animation-polyfill'
+    )
+  );
 
-  return polyfillPromise.promise;
+  return promise;
 }
