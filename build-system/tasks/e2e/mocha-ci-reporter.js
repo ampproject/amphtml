@@ -16,7 +16,7 @@
 
 const JsonReporter = require('./mocha-custom-json-reporter');
 const mocha = require('mocha');
-const MochaDotsReporter = require('./mocha-karma-mimic-reporter');
+const MochaDotsReporter = require('./mocha-dots-reporter');
 const {Base} = mocha.reporters;
 
 function ciReporter(runner, options) {
