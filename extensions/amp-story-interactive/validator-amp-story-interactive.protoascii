@@ -160,6 +160,7 @@ attr_lists: {
     name: 'chip-style'
     value: 'shadow'
     value: 'flat'
+    value: 'transparent'
   }
   attrs: {
     name: 'prompt-size'
