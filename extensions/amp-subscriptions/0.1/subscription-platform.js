@@ -72,7 +72,7 @@ export class SubscriptionPlatform {
    * @param {./entitlement.Entitlement|Array<./entitlement.Entitlement>} unusedEntitlement
    * @return {!Promise|undefined}
    */
-  pingback(unusedSelectedPlatform) {}
+  pingback(unusedEntitlement) {}
 
   /**
    * Tells if the platform supports a score factor
