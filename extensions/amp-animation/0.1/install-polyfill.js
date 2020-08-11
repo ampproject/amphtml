@@ -16,26 +16,27 @@
 import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 
-/** @type {!WeakMap<Window, Deferred>} */
+/** @type {!WeakMap<!../../../src/service/ampdoc-impl.AmpDoc, !Deferred>} */
 const polyfillPromiseMap = new WeakMap();
 
 /**
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {Promise<void>}
  */
-export function installWebAnimationsIfNecessary(win) {
-  if (polyfillPromiseMap.has(win)) {
-    return polyfillPromiseMap.get(win).promise;
+export function installWebAnimationsIfNecessary(ampdoc) {
+  if (polyfillPromiseMap.has(ampdoc)) {
+    return polyfillPromiseMap.get(ampdoc).promise;
   }
 
   const polyfillPromise = new Deferred();
-  polyfillPromiseMap.set(win, polyfillPromise);
+  polyfillPromiseMap.set(ampdoc, polyfillPromise);
 
+  const {win} = ampdoc;
   if (Services.platformFor(win).isSafari()) {
     /*
       Force Web Animations polyfill on Safari.
       Native Web Animations on WebKit do not respect easing for individual
-      keyframes and break overall timing. See https://go.amp.dev/issue/27762 and 
+      keyframes and break overall timing. See https://go.amp.dev/issue/27762 and
       https://bugs.webkit.org/show_bug.cgi?id=210526
       */
     // Using string access syntax to bypass typecheck.
@@ -49,7 +50,7 @@ export function installWebAnimationsIfNecessary(win) {
   }
 
   Services.extensionsFor(win)
-    .preloadExtension('amp-animation-polyfill')
+    .installExtensionForDoc(ampdoc, 'amp-animation-polyfill')
     .then(() => polyfillPromise.resolve());
 
   return polyfillPromise.promise;
