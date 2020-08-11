@@ -18,12 +18,12 @@ import * as Preact from './index';
 import {Deferred} from '../utils/promise';
 import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
+import {create as createJss} from 'jss';
 import {devAssert} from '../log';
 import {hasOwn} from '../utils/object';
 import {installShadowStyle} from '../shadow-embed';
 import {matches} from '../dom';
 import {render} from './index';
-import {create as createJss} from 'jss';
 import preset from 'jss-preset-default';
 
 import {JssProvider} from 'react-jss';
@@ -232,10 +232,6 @@ export class PreactBaseElement extends AMP.BaseElement {
           installShadowStyle(shadowRoot, this.element.tagName, shadowCss);
         }
 
-        if (Ctor['useJss'] && !this.jss_) {
-          this.jss_ = createJss({...preset(), insertionPoint: this.container_});
-        }
-
         // Create a slot for internal service elements i.e. "i-amphtml-sizer"
         const serviceSlot = this.win.document.createElement('slot');
         serviceSlot.setAttribute('name', 'i-amphtml-svc');
@@ -250,17 +246,24 @@ export class PreactBaseElement extends AMP.BaseElement {
       }
     }
 
+    if (Ctor['useJss'] && !this.jss_) {
+      const insertionPoint = this.win.document.createElement('div');
+      insertionPoint.setAttribute('data-name', 'jssInsertionPoint');
+      this.container_.appendChild(insertionPoint);
+      this.jss_ = createJss({...preset(), insertionPoint});
+    }
+
     const props = collectProps(Ctor, this.element, this.defaultProps_);
 
     // While this "creates" a new element, diffing will not create a second
     // instance of Component. Instead, the existing one already rendered into
     // this element will be reused.
     const v = (
-      <JssProvider jss={this.jss_}>
-        <WithAmpContext {...this.context_}>
+      <WithAmpContext {...this.context_}>
+        <JssProvider jss={this.jss_}>
           {Preact.createElement(Ctor['Component'], props)}
-        </WithAmpContext>
-      </JssProvider>
+        </JssProvider>
+      </WithAmpContext>
     );
 
     render(v, this.container_);

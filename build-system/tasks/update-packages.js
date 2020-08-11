@@ -118,6 +118,21 @@ function patchRRule() {
   writeIfUpdated(path, patchedContents);
 }
 
+function patchPreactDependents() {
+  const dependents = [
+    'node_modules/react-jss/dist/react-jss.cjs.js',
+    'node_modules/theming/dist/theming.cjs.js',
+  ];
+  for (const path of dependents) {
+    const patchedContents = fs
+      .readFileSync(path)
+      .toString()
+      .replace(`require('preact/compat')`, `require('preact/compat')`);
+
+    writeIfUpdated(path, patchedContents);
+  }
+}
+
 /**
  * Does a yarn check on node_modules, and if it is outdated, runs yarn.
  */
@@ -169,6 +184,7 @@ async function updatePackages() {
   patchWebAnimations();
   patchIntersectionObserver();
   patchRRule();
+  patchPreactDependents();
 }
 
 module.exports = {

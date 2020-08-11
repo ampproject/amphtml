@@ -43,7 +43,7 @@ export function cloneElement(unusedElement, unusedProps, unusedChildren) {
 /**
  * @param {!PreactDef.VNode} vnode
  * @param {Node} container
- * @returns {Node} A reference to the rendered DOM node.
+ * @return {Node} A reference to the rendered DOM node.
  */
 export function render(vnode, container) {
   preact.render(vnode, container, undefined);
