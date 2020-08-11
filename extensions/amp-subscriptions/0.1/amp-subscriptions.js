@@ -376,7 +376,6 @@ export class SubscriptionService {
     this.renderer_.toggleLoading(false);
 
     // Set Pingback viewer timer
-
     this.viewTrackerPromise_ = this.viewerTracker_.scheduleView(2000);
 
     // If the viewer is providing a paywall we don't want the publisher
