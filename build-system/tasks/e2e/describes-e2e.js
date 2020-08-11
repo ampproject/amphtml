@@ -22,6 +22,7 @@ const chrome = require('selenium-webdriver/chrome');
 const fetch = require('node-fetch');
 const firefox = require('selenium-webdriver/firefox');
 const puppeteer = require('puppeteer');
+const safari = require('selenium-webdriver/safari');
 const {
   clearLastExpectError,
   getLastExpectError,
@@ -189,6 +190,12 @@ function createDriver(browserName, args, deviceName) {
       //which is also when `Server terminated early with status 1` began appearing. Coincidence? Maybe.
       driver.onQuit = null;
       return driver;
+    case 'safari':
+      const safariOptions = new safari.Options();
+      return new Builder()
+        .forBrowser('safari')
+        .setSafariOptions(safariOptions)
+        .build();
   }
 }
 
