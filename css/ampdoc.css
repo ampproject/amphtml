@@ -367,3 +367,16 @@ amp-autocomplete > textarea,
 [amp-fx^="fly-in"] {
   visibility: hidden;
 }
+
+/**
+ * amp-script[nodom] is an element with no UI, similar to amp-analytics.
+ */
+amp-script[nodom] {
+  /* Fixed to make position independent of page other elements. */
+  position: fixed !important;
+  top: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  visibility: hidden;
+}
