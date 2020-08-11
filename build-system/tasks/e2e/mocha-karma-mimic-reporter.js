@@ -25,7 +25,7 @@ const {symbols} = require('../karma.conf').mochaReporter;
  * Mimics the style of the Karma reporter on Travis.
  * @param {*} runner
  */
-function ciReporter(runner) {
+function KarmaMimicReporter(runner) {
   Base.call(this, runner);
   const self = this;
 
@@ -62,5 +62,5 @@ function ciReporter(runner) {
   }
 }
 
-inherits(ciReporter, Base);
-module.exports = ciReporter;
+inherits(KarmaMimicReporter, Base);
+module.exports = KarmaMimicReporter;

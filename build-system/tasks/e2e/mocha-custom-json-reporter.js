@@ -45,7 +45,7 @@ async function writeOutput(output, filename) {
  * Mimics the structured karma reporter, but for Mocha.
  * @param {*} runner
  */
-function ciJsonReporter(runner) {
+function JsonReporter(runner) {
   Base.call(this, runner);
   const testEvents = [];
   let suiteList = [];
@@ -89,5 +89,5 @@ function ciJsonReporter(runner) {
   });
 }
 
-inherits(ciJsonReporter, Base);
-module.exports = ciJsonReporter;
+inherits(JsonReporter, Base);
+module.exports = JsonReporter;
