@@ -661,7 +661,8 @@ export function getCsiAmpAnalyticsVariables(analyticsTrigger, a4a, qqid) {
 }
 
 /**
- * Extracts configuration used to build amp-analytics element for active view.
+ * Extracts configuration used to build amp-analytics element for active view
+ * and begin to render.
  *
  * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {!Headers} responseHeaders
@@ -707,6 +708,24 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
     // Security review needed here.
     config['requests'] = requests;
     config['triggers']['continuousVisible']['request'] = Object.keys(requests);
+
+    // Add begin to render requests
+    const btrUrls = analyticsConfig['btrUrl'];
+    if (Array.isArray(btrUrls) && btrUrls.length) {
+      const btrRequests = dict();
+      for (let idx = 1; idx <= btrUrls.length; idx++) {
+        // TODO: Ensure url is valid and not freeform JS?
+        btrRequests[`btr${idx}`] = `${btrUrls[idx - 1]}`;
+        config['requests'][`btr${idx}`] = `${btrUrls[idx - 1]}`;
+      }
+      config['triggers']['beginToRender'] = dict({
+        'on': 'ini-load',
+        'request': Object.keys(btrRequests),
+        'selector': 'amp-ad',
+        'selectionMethod': 'closest',
+      });
+    }
+
     return config;
   } catch (err) {
     dev().error(

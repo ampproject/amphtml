@@ -132,14 +132,43 @@ describe('Google A4A utils', () => {
       },
     };
 
-    it('should extract correct config from header', () => {
+    const btrConfig = {
+      transport: {beacon: false, xhrpost: false},
+      requests: {
+        visibility1: 'https://foo.com?hello=world',
+        visibility2: 'https://bar.com?a=b',
+        btr1: 'https://example.test?id=1',
+        btr2: 'https://example.test?id=2',
+      },
+      triggers: {
+        continuousVisible: {
+          on: 'visible',
+          request: ['visibility1', 'visibility2'],
+          visibilitySpec: {
+            selector: 'amp-ad',
+            selectionMethod: 'closest',
+            visiblePercentageMin: 50,
+            continuousTimeMin: 1000,
+          },
+        },
+        beginToRender: {
+          on: 'ini-load',
+          request: ['btr1', 'btr2'],
+          selector: 'amp-ad',
+          selectionMethod: 'closest',
+        },
+      },
+    };
+
+    it.only('should extract correct config from header', () => {
       return createIframePromise().then((fixture) => {
         setupForAdTesting(fixture);
         let url;
+        let btrUrl;
         const headers = {
           get(name) {
             if (name == 'X-AmpAnalytics') {
-              return JSON.stringify({url});
+              return JSON.stringify({url, btrUrl});
             }
             if (name == 'X-QQID') {
               return 'qqid_string';
@@ -173,8 +202,17 @@ describe('Google A4A utils', () => {
         expect(extractAmpAnalyticsConfig(a4a, headers)).to.be.null;
 
         url = ['https://foo.com?hello=world', 'https://bar.com?a=b'];
-        const config = extractAmpAnalyticsConfig(a4a, headers);
+        let config = extractAmpAnalyticsConfig(a4a, headers);
         expect(config).to.deep.equal(builtConfig);
+
+        btrUrl = [];
+        config = extractAmpAnalyticsConfig(a4a, headers);
+        expect(config).to.deep.equal(builtConfig);
+
+        btrUrl = ['https://example.test?id=1', 'https://example.test?id=2'];
+        config = extractAmpAnalyticsConfig(a4a, headers);
+        expect(config).to.deep.equal(btrConfig);
+
         headers.has = function (name) {
           expect(name).to.equal('X-AmpAnalytics');
           return false;
