@@ -53,27 +53,15 @@ function cherryPickBranchName(version) {
  * Updates tags from the remote and creates a branch at the release commit.
  *
  * @param {string} ref
- * @param {!Array<string>} commits
  * @param {string} branch
  * @param {string} remote
  */
-function prepareBranch(ref, commits, branch, remote) {
-  const needsFetch = [ref]
-    .concat(commits)
-    .some((r) => getOutput(`git rev-parse ${r}`).status);
-
-  if (needsFetch) {
-    log(green('INFO:'), 'Fetching latest tags and commits from', cyan(remote));
-    execOrThrow(
-      `git fetch ${remote}`,
-      `Failed to fetch updates from remote ${cyan(remote)}`
-    );
-  } else {
-    log(
-      green('INFO:'),
-      'Identified tag and all commits available in local repository'
-    );
-  }
+function prepareBranch(ref, branch, remote) {
+  log(green('INFO:'), 'Pulling latest from', cyan(remote));
+  execOrThrow(
+    `git pull ${remote}`,
+    `Failed to pull latest from remote ${cyan(remote)}`
+  );
 
   execOrThrow(
     `git checkout -b ${branch} ${ref}`,
@@ -134,7 +122,7 @@ async function cherryPick() {
 
   const branch = cherryPickBranchName(onto);
   try {
-    prepareBranch(onto, commits, branch, remote);
+    prepareBranch(onto, branch, remote);
     commits.forEach(performCherryPick);
 
     if (push) {
@@ -142,7 +130,7 @@ async function cherryPick() {
         green('INFO:'),
         'Pushing branch',
         cyan(branch),
-        'to remote',
+        'to remodddte',
         cyan(remote)
       );
       execOrThrow(
