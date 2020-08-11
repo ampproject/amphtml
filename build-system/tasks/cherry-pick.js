@@ -130,7 +130,7 @@ async function cherryPick() {
         green('INFO:'),
         'Pushing branch',
         cyan(branch),
-        'to remodddte',
+        'to remote',
         cyan(remote)
       );
       execOrThrow(
