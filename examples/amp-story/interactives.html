@@ -10,7 +10,7 @@
       body {
         font-family: 'Rubik', sans-serif;
       }
-      amp-story-interactive-quiz, amp-story-interactive-binary-poll, amp-story-interactive-poll {
+      amp-story-interactive-quiz, amp-story-interactive-binary-poll, amp-story-interactive-poll, amp-story-interactive-results {
         justify-self: center;
       }
     </style>
@@ -493,6 +493,48 @@
               option-3-confetti="🥦"
               option-4-confetti="🍦"
             amp-story-interactive-poll>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="results-1">
+          <amp-story-grid-layer template="fill" style="background:linear-gradient(rgb(17, 55, 87), rgb(1, 17, 20)">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900"
+                style="opacity: 0.2">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-results
+              style="--interactive-accent-color: #ffb387"
+              theme="dark"
+              chip-style="transparent"
+              prompt-text="You are an"
+              option-1-results-category="Onion" option-1-text="You are sharp and go well with many plates" option-1-image="https://images.unsplash.com/photo-1585849834908-3481231155e8?auto=format&fit=crop&w=200&q=80"
+              option-2-text="Bacon">
+            </amp-story-interactive-results>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="results-2">
+          <amp-story-grid-layer template="fill" style="background:linear-gradient(rgb(78, 167, 240), rgb(164, 227, 238)">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900"
+                style="opacity: 0.2">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-results
+              style="--interactive-accent-color: #233a5c"
+              theme="light"
+              chip-style="transparent"
+              prompt-text="You are an"
+              option-1-results-category="Onion" option-1-text="You are sharp and go well with many plates" option-1-image="https://images.unsplash.com/photo-1585849834908-3481231155e8?auto=format&fit=crop&w=200&q=80"
+              option-2-text="Bacon">
+            </amp-story-interactive-results>
           </amp-story-grid-layer>
         </amp-story-page>
     </amp-story>

@@ -43,7 +43,7 @@
 }
 
 .i-amphtml-story-interactive-option.i-amphtml-story-interactive-option-selected {
-  background-color: var(--i-amphtml-interactive-theme-shading);
+  background-color: var(--i-amphtml-interactive-theme-shading-base);
   box-shadow: var(--i-amphtml-interactive-chip-shadow-inset), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
   -webkit-box-shadow: var(--i-amphtml-interactive-chip-shadow-inset), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
   -moz-box-shadow: var(--i-amphtml-interactive-chip-shadow-inset), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
