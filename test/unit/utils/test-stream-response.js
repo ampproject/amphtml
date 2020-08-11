@@ -152,4 +152,48 @@ describes.fakeWin('streamResponseToWriter', {}, (env) => {
     expect(writeSpy).not.called;
     expect(closeSpy).calledOnce;
   });
+
+  it('resolves to true when response has content', async () => {
+    const mockRes = new Response(chunk1);
+    const hasContent = await streamResponseToWriter(
+      env.win,
+      mockRes,
+      mockWriter
+    );
+    expect(hasContent).to.be.true;
+  });
+
+  it('resolves to false when response has no content', async () => {
+    const mockRes = new Response('');
+    const hasContent = await streamResponseToWriter(
+      env.win,
+      mockRes,
+      mockWriter
+    );
+    expect(hasContent).to.be.false;
+  });
+
+  it('resolves to true when response has content [fallback]', async () => {
+    env.win.TextDecoder = undefined;
+    env.win.ReadableStream = undefined;
+    const mockRes = new Response(chunk1);
+    const hasContent = await streamResponseToWriter(
+      env.win,
+      mockRes,
+      mockWriter
+    );
+    expect(hasContent).to.be.true;
+  });
+
+  it('resolves to false when response has no content [fallback]', async () => {
+    env.win.TextDecoder = undefined;
+    env.win.ReadableStream = undefined;
+    const mockRes = new Response('');
+    const hasContent = await streamResponseToWriter(
+      env.win,
+      mockRes,
+      mockWriter
+    );
+    expect(hasContent).to.be.false;
+  });
 });

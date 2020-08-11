@@ -18,7 +18,7 @@ import * as Preact from '../../../../src/preact';
 import {AnimationTemplate} from './template';
 import {select, text, withKnobs} from '@storybook/addon-knobs';
 import {storiesOf} from '@storybook/preact';
-import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
+import {withAmp} from 'storybook-addon-amp';
 
 const KEYFRAMES_OPTIONS = {
   'rotate': {

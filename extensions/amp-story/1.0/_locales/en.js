@@ -163,6 +163,11 @@ const strings = {
       'Label for a button to open a drawer containing additional ' +
       'content via a "swipe up" user gesture.',
   },
+  [LocalizedStringId.AMP_STORY_PAGINATION_BUTTON_PREVIOUS_PAGE_LABEL]: {
+    string: 'Previous page',
+    description:
+      'Label indicating that users can navigate to the previous page.',
+  },
   [LocalizedStringId.AMP_STORY_PAGE_ERROR_VIDEO]: {
     string: 'Video failed to play',
     description:

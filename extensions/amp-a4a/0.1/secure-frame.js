@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {createElementWithAttributes} from '../../../src/dom';
+import {createElementWithAttributes, escapeHtml} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
 import {isSrcdocSupported} from '../../../src/friendly-iframe-embed';
 
@@ -39,10 +39,11 @@ const sandboxVals = [
   'allow-top-navigation',
 ];
 
-const createSecureDocSkeleton = (sanitizedHeadElements) =>
+const createSecureDocSkeleton = (url, sanitizedHeadElements) =>
   `<!DOCTYPE html>
   <html ⚡4ads lang="en">
   <head>
+    <base href="${escapeHtml(url)}">
     <meta charset="UTF-8">
     <meta http-equiv=Content-Security-Policy content="
       img-src *;
@@ -63,14 +64,14 @@ const createSecureDocSkeleton = (sanitizedHeadElements) =>
 /**
  * Create iframe with predefined CSP and sandbox attributes for security.
  * @param {!Document} document
+ * @param {string} url
  * @param {!Element} head
  * @param {string} title
  * @param {string} height
  * @param {string} width
  * @return {!HTMLIFrameElement}
- *
  */
-export function createSecureFrame(document, head, title, height, width) {
+export function createSecureFrame(document, url, head, title, height, width) {
   const iframe = /** @type {HTMLIFrameElement} */ (createElementWithAttributes(
     document,
     'iframe',
@@ -88,7 +89,7 @@ export function createSecureFrame(document, head, title, height, width) {
     })
   ));
 
-  const secureDoc = createSecureDocSkeleton(head./*OK*/ innerHTML);
+  const secureDoc = createSecureDocSkeleton(url, head./*OK*/ innerHTML);
   // TODO(ccordry): add violation reporting here or in fie.
   if (isSrcdocSupported()) {
     iframe.srcdoc = secureDoc;

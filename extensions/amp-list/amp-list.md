@@ -118,6 +118,33 @@ By default, `<amp-list>` adds a `list` ARIA role to the list element and a `list
 Currently, the rendered list element is declared as an ARIA live region (using `aria-live="polite"`), meaning that any change to the content of the list results in the entire list being read out/announced by assistive technologies (such as screen readers). Due to the way lists are initially rendered, this can also result in lists being announced in their entirety when a page is loaded. To work around this issue for now, you can add `aria-live="off"` to `<amp-list>`, which will override the addition of `aria-live="polite"`.
 [/tip]
 
+[tip type="note"]
+Note also that a good practice is to provide templates a single top-level element to prevent unintended side effects. This means the following input:
+
+```html
+<template type="amp-mustache">
+  {% raw %}
+  <div class="item">{{item}}</div>
+  <div class="price">{{price}}</div>
+  {% endraw %}
+</template>
+```
+
+Would most predictably be applied and rendered if instead provided as follows:
+
+```html
+<template type="amp-mustache">
+  {% raw %}
+  <div>
+    <div class="item">{{item}}</div>
+    <div class="price">{{price}}</div>
+  </div>
+  {% endraw %}
+</template>
+```
+
+[/tip]
+
 ### XHR batching
 
 AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a single JSON data request as a data source for multiple consumers (e.g., multiple `<amp-list>` elements) on an AMP page. For example, if your `<amp-list>` makes an XHR to an endpoint, while the XHR is in flight, all subsequent XHRs to the same endpoint won't trigger and will instead return the results from the first XHR.
@@ -308,7 +335,8 @@ Be careful when using infinite scroll lists - if there is any content after the 
 >
   ...
   <amp-list-load-more load-more-button>
-    <button>See More</button> /* My custom see more button */
+    <!-- My custom see more button -->
+    <button>See More</button>
   </amp-list-load-more>
 </amp-list>
 ```
@@ -327,7 +355,8 @@ It can be templated via `amp-mustache`.
   ...
   <amp-list-load-more load-more-button>
     <template type="amp-mustache">
-      Showing {{#count}} out of {{#total}} items
+      Showing {% raw %}{{#count}}{% endraw %} out of {% raw %}{{#total}}{%
+      endraw %} items
       <button>Click here to see more!</button>
     </template>
   </amp-list-load-more>
@@ -347,7 +376,8 @@ This element is a loader that will be displayed if the user reaches the end of t
 >
   ...
   <amp-list-load-more load-more-loading>
-    <svg>...</svg> /* My custom loader */
+    <!-- My custom loader -->
+    <svg>...</svg>
   </amp-list-load-more>
 </amp-list>
 ```
@@ -402,7 +432,8 @@ This element is not provided by default, but if a `<amp-list-load-more>` element
 >
   ...
   <amp-list-load-more load-more-end>
-    Congratulations! You've reached the end. /* Custom load-end element */
+    <!-- Custom load-end element -->
+    Congratulations! You've reached the end.
   </amp-list-load-more>
 </amp-list>
 ```
@@ -582,8 +613,6 @@ The AMP for Email spec disallows the use of the following attributes on the AMP 
 - `xssi-prefix`
 
 [/filter] <!-- formats="email" -->
-
-[filter formats="websites, stories"]
 
 ## Validation
 

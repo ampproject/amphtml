@@ -42,6 +42,23 @@ tags: {  # <amp-story>
     }
   }
   attrs: {
+    name: "entity"
+  }
+  attrs: {
+    name: "entity-logo-src"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "entity-url"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
     name: "poster-landscape-src"
     value_url: {
       protocol: "http"
@@ -219,6 +236,8 @@ tags: {
     value: "pulse"
     value: "rotate-in-left"
     value: "rotate-in-right"
+    value: "scale-fade-down"
+    value: "scale-fade-up"
     value: "twirl-in"
     value: "whoosh-in-left"
     value: "whoosh-in-right"
@@ -300,6 +319,8 @@ tags: {
     value: "pulse"
     value: "rotate-in-left"
     value: "rotate-in-right"
+    value: "scale-fade-down"
+    value: "scale-fade-up"
     value: "twirl-in"
     value: "whoosh-in-left"
     value: "whoosh-in-right"
@@ -438,7 +459,6 @@ tags: {  # <amp-story-cta-layer>
 }
 tags: {  # amp-experiment (json)
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "amp-experiment story extension .json script"
   mandatory_parent: "AMP-EXPERIMENT"
@@ -478,6 +498,8 @@ tags: {
     value: "pulse"
     value: "rotate-in-left"
     value: "rotate-in-right"
+    value: "scale-fade-down"
+    value: "scale-fade-up"
     value: "twirl-in"
     value: "whoosh-in-left"
     value: "whoosh-in-right"
@@ -640,6 +662,10 @@ descendant_tag_list: {
   tag: "AMP-PIXEL"
   tag: "AMP-STATE"
   tag: "AMP-STORY-360"
+  tag: "AMP-STORY-INTERACTIVE-BINARY-POLL"
+  tag: "AMP-STORY-INTERACTIVE-POLL"
+  tag: "AMP-STORY-INTERACTIVE-QUIZ"
+  tag: "AMP-STORY-INTERACTIVE-RESULTS"
   tag: "AMP-TIMEAGO"
   tag: "AMP-TWITTER"
   tag: "AMP-VIDEO"

@@ -314,7 +314,7 @@ describes.repeated(
                   list.getPlaceholder = () => null;
                   allowConsoleError(() => {
                     expect(() => list.isLayoutSupported('container')).to.throw(
-                      /amp-list with layout=container relies on a placeholder/
+                      /amp-list\[layout=container\] requires a placeholder/
                     );
                   });
                 });
@@ -870,26 +870,34 @@ describes.repeated(
               const listItem = document.createElement('div');
               listItem.setAttribute('role', 'item');
               listContainer.appendChild(listItem);
+
               env.sandbox
                 .stub(ssrTemplateHelper, 'ssr')
                 .returns(Promise.resolve({html}));
               ssrTemplateHelper.applySsrOrCsrTemplate.returns(
-                Promise.resolve(listContainer)
+                Promise.resolve(rendered)
               );
+
               listMock
                 .expects('updateBindings_')
                 .returns(Promise.resolve(listContainer))
                 .once();
+              const renderSpy = env.sandbox.spy();
               listMock
                 .expects('render_')
                 .withExactArgs(listContainer, false)
-                .returns(Promise.resolve());
+                .callsFake(() => {
+                  renderSpy();
+                  return Promise.resolve();
+                })
+                .once();
 
-              ssrTemplateHelper.applySsrOrCsrTemplate
-                .withArgs(element, html)
-                .returns(Promise.resolve(rendered));
-
-              yield list.layoutCallback();
+              const layoutSpy = env.sandbox.spy();
+              yield list.layoutCallback().then(() => {
+                layoutSpy();
+              });
+              // layoutCallback() should be chained to render_().
+              expect(renderSpy).to.be.calledBefore(layoutSpy);
 
               const request = env.sandbox.match({
                 xhrUrl:
