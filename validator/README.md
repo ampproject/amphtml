@@ -37,7 +37,7 @@ Please see [js/nodejs/README.md](https://github.com/ampproject/amphtml/blob/mast
 
 ## Web UI
 
-Please see [webui/README.md](https://github.com/ampproject/amphtml/blob/master/validator/js/webui/README.md).
+Please see [js/webui/README.md](https://github.com/ampproject/amphtml/blob/master/validator/js/webui/README.md).
 
 ## JSON
 
@@ -49,8 +49,8 @@ rely on them in a production environment.
 ## Building a Custom Validator
 
 This is only useful for development - e.g. when making changes to
-`engine/validator.js` or when authoring an AMP extension, and it's rough around
-the edges. Below are instructions for Linux Ubuntu 14.
+`js/engine/validator.js` or when authoring an AMP extension, and it's rough
+around the edges. Below are instructions for Linux Ubuntu 14.
 
 ## Installation
 
