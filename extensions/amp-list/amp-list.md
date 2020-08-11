@@ -290,7 +290,7 @@ See below for an example:
 <!--
   See the [amp-script](https://amp.dev/documentation/components/amp-script/) documentation to setup the component and export your function>
 -->
-<amp-script id="fns" script="local-script" nodom></amp-script>
+<amp-script id="exported-functions" script="local-script" nodom></amp-script>
 <script id="local-script" type="text/plain" target="amp-script">
   function getRemoteData() {
     return fetch('https://example.com')
@@ -300,13 +300,13 @@ See below for an example:
   exportFunction('getRemoteData', getRemoteData);
 </script>
 
-<!-- "fns" is the <amp-script> id, and "getRemoteData" corresponds to the exported function. -->
+<!-- "exported-functions" is the <amp-script> id, and "getRemoteData" corresponds to the exported function. -->
 <amp-list
   id="amp-list"
   width="auto"
   height="100"
   layout="fixed-height"
-  src="amp-script:fns.getRemoteData"
+  src="amp-script:exported-functions.getRemoteData"
 >
   <template type="amp-mustache">
     <div>{{.}}</div>
@@ -489,8 +489,8 @@ The URL of the remote endpoint that returns the JSON that will be rendered
 within this `<amp-list>`. There are three valid protocols for the `src` attribute.
 
 1. **https**: This must refer to a CORS HTTP service. Insecure HTTP is not supported.
-2. **amp-state**: This is for initializing from amp-state data. See [Initialization from <amp-state>](#initialization-from-amp-state) for more details.
-3. **amp-script**: Enables using `<amp-script>` functions as the data source. See [Using <amp-script> as a data source](#using-amp-script-as-a-data-source) for more details.
+2. **amp-state**: For initializing from `<amp-state>` data. See [Initialization from <amp-state>](#initialization-from-amp-state) for more details.
+3. **amp-script**: For using `<amp-script>` functions as the data source. See [Using <amp-script> as a data source](#using-amp-script-as-a-data-source) for more details.
 
 [tip type="important"]
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
