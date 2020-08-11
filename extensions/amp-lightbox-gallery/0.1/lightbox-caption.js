@@ -46,7 +46,11 @@ export class LightboxCaption {
     return new LightboxCaption(
       el,
       dev().assertElement(el.querySelector('.i-amphtml-lbg-caption-scroll')),
-      dev().assertElement(el.querySelector('.i-amphtml-lbg-caption-text.amp-lightbox-gallery-caption')),
+      dev().assertElement(
+        el.querySelector(
+          '.i-amphtml-lbg-caption-text.amp-lightbox-gallery-caption'
+        )
+      ),
       dev().assertElement(el.querySelector('.i-amphtml-lbg-caption-mask')),
       measureMutateElement
     );
