@@ -597,6 +597,8 @@ The following animation effects are available as presets for AMP stories:
 | `pulse`           | 500                   | 0                  |
 | `rotate-in-left`  | 700                   | 0                  |
 | `rotate-in-right` | 700                   | 0                  |
+| `scale-fade-down` | 600                   | 0                  |
+| `scale-fade-up`   | 600                   | 0                  |
 | `twirl-in`        | 1000                  | 0                  |
 | `whoosh-in-left`  | 500                   | 0                  |
 | `whoosh-in-right` | 500                   | 0                  |

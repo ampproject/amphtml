@@ -186,6 +186,34 @@ export const presets = {
       },
     ],
   },
+  'scale-fade-up': {
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
+    keyframes: [
+      {
+        opacity: 0,
+        transform: 'scale(0.8)',
+      },
+      {
+        opacity: 1,
+        transform: 'scale(1)',
+      },
+    ],
+  },
+  'scale-fade-down': {
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
+    keyframes: [
+      {
+        opacity: 0,
+        transform: 'scale(1.4)',
+      },
+      {
+        opacity: 1,
+        transform: 'scale(1)',
+      },
+    ],
+  },
   'drop': {
     duration: 1600,
     keyframes(dimensions) {
