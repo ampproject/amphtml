@@ -139,7 +139,7 @@ export class BindValidator {
         }
       }
     }
-    // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
+    // @see validator/js/engine/validator.ParsedTagSpec.validateAttributes()
     const {denylistedValueRegex} = rules;
     if (value && denylistedValueRegex) {
       const re = new RegExp(denylistedValueRegex, 'i');
@@ -159,7 +159,7 @@ export class BindValidator {
    * @private
    */
   isUrlValid_(url, rules) {
-    // @see validator/engine/validator.js#validateUrlAndProtocol()
+    // @see validator/js/engine/validator.js#validateUrlAndProtocol()
     if (url) {
       if (/__amp_source_origin/.test(url)) {
         return false;
