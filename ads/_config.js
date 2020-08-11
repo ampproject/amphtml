@@ -938,6 +938,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'remixd': {
+    preconnect: 'https://tags.remixd.com',
+  },
+
   'revcontent': {
     prefetch:
       'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
