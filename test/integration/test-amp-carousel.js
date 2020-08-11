@@ -72,7 +72,8 @@ t.run('amp-carousel', function () {
         }
       );
 
-      it(
+      // TODO(#29783): De-flake and un-skip this test.
+      it.skip(
         'should not have any buttons visible when theres only a single ' +
           'item',
         () => {
