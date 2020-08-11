@@ -888,6 +888,7 @@ amp-story .amp-video-eq,
   /* Shared properties by interactives */
   --i-amphtml-interactive-option-accent-color: var(--interactive-accent-color) !important;
   --i-amphtml-interactive-option-background-color: white !important;
+  --i-amphtml-interactive-options-chip-background-color: var(--i-amphtml-interactive-option-background-color) !important;
   --i-amphtml-interactive-option-text-color: #55595E !important;
   --i-amphtml-interactive-theme-border: rgba(85, 89, 94, 0.2) !important;
   --i-amphtml-interactive-theme-shading: rgba(85, 89, 94, 0.2) !important;
@@ -919,6 +920,16 @@ amp-story .amp-video-eq,
   --i-amphtml-interactive-chip-shadow: 0px 2px 8px rgba(60, 60, 60, 0.2) !important;
   --i-amphtml-interactive-chip-shadow-inset: inset 4px 4px 8px rgba(0, 0, 0, 0.2) !important;
   --i-amphtml-interactive-theme-border: rgba(0, 0, 0, 0) !important;
+}
+
+.i-amphtml-story-interactive-component[chip-style="transparent"] {
+  --i-amphtml-interactive-options-chip-background-color: transparent !important;
+  --interactive-prompt-background: transparent !important;
+  --interactive-prompt-alignment: center;
+  --i-amphtml-interactive-chip-shadow: 0px 2px 8px rgba(60, 60, 60, 0.2) !important;
+  --i-amphtml-interactive-chip-shadow-inset: inset 4px 4px 8px rgba(0, 0, 0, 0.2) !important;
+  --i-amphtml-interactive-theme-border: rgba(0, 0, 0, 0) !important;
+  --i-amphtml-interactive-component-shadow: none !important;
 }
 
 .i-amphtml-story-interactive-component[chip-style="shadow"][theme="dark"] {

@@ -16,7 +16,7 @@
 
 
 .i-amphtml-story-interactive-option-container {
-  background-color: var(--i-amphtml-interactive-option-background-color) !important;
+  background-color: var(--i-amphtml-interactive-options-chip-background-color) !important;
   border-radius: 16px !important;
   color: var(--i-amphtml-interactive-strong-text-color) !important;
   font-weight: bold !important;
@@ -35,6 +35,7 @@
   -webkit-box-shadow: var(--i-amphtml-interactive-chip-shadow), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
   -moz-box-shadow: var(--i-amphtml-interactive-chip-shadow), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
   border-radius: 8px !important;
+  background-color: var(--i-amphtml-interactive-option-background-color);
 }
 
 .i-amphtml-story-interactive-option:not(:first-child) {
