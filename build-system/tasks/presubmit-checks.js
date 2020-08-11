@@ -65,7 +65,6 @@ const forbiddenTerms = {
       'build-system/server/app-index/boilerplate.js',
       'build-system/server/variable-substitution.js',
       'build-system/tasks/extension-generator/index.js',
-      'build-system/tasks/storybook/amp-env/decorator.js',
       'css/ampdoc.css',
       'css/ampshared.css',
       'extensions/amp-pinterest/0.1/amp-pinterest.css',
@@ -80,7 +79,6 @@ const forbiddenTerms = {
     allowlist: [
       'build-system/tasks/create-golden-css/css/main.css',
       'build-system/tasks/extension-generator/index.js',
-      'build-system/tasks/storybook/amp-env/decorator.js',
       'css/ampdoc.css',
       'css/ampshared.css',
     ],
@@ -144,10 +142,10 @@ const forbiddenTerms = {
       'build-system/tasks/prettify.js',
       'build-system/tasks/server-tests.js',
       'src/purifier/noop.js',
-      'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
       'validator/engine/validator.js',
+      'validator/js/nodejs/index.js', // NodeJs only.
     ],
     checkInTestFolder: true,
   },
@@ -766,7 +764,7 @@ const forbiddenTerms = {
       'validator/engine/parse-srcset_test.js',
       'validator/engine/parse-url_test.js',
       'validator/engine/validator_test.js',
-      'validator/gulpjs/test/validate.js',
+      'validator/js/gulpjs/test/validate.js',
       // Test files. TODO(#24144): Fix these and remove from the allowlist.
       'ads/google/a4a/shared/test/test-content-recommendation.js',
       'ads/google/a4a/shared/test/test-url-builder.js',
@@ -1014,7 +1012,7 @@ const forbiddenTermsSrcInclusive = {
       'examples/pwa/pwa.js',
       'validator/engine/parse-url.js',
       'validator/engine/validator.js',
-      'validator/webui/webui.js',
+      'validator/js/webui/webui.js',
       'extensions/amp-pinterest/0.1/util.js',
       'src/url.js',
       'src/url-try-decode-uri-component.js',
@@ -1066,7 +1064,6 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js', // eslint-disable-line max-len
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js', // eslint-disable-line max-len
       'extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
-      'extensions/amp-animation/0.1/install-polyfill.js',
     ],
   },
   'loadElementClass': {
@@ -1169,7 +1166,6 @@ const forbiddenTermsSrcInclusive = {
       'build-system/tasks/extension-generator/index.js',
       'build-system/tasks/helpers.js',
       'build-system/tasks/performance/helpers.js',
-      'build-system/tasks/storybook/amp-env/decorator.js',
       'dist.3p/current/integration.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'src/3p-frame.js',
@@ -1180,8 +1176,8 @@ const forbiddenTermsSrcInclusive = {
       'tools/experiments/experiments.js',
       'validator/engine/validator-in-browser.js',
       'validator/engine/validator.js',
-      'validator/nodejs/index.js',
-      'validator/webui/serve-standalone.go',
+      'validator/js/nodejs/index.js',
+      'validator/js/webui/serve-standalone.go',
     ],
   },
   '\\<\\<\\<\\<\\<\\<': {
