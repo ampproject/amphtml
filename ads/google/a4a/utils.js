@@ -714,7 +714,6 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
     if (Array.isArray(btrUrls) && btrUrls.length) {
       const btrRequests = dict();
       for (let idx = 1; idx <= btrUrls.length; idx++) {
-        // TODO: Ensure url is valid and not freeform JS?
         btrRequests[`btr${idx}`] = `${btrUrls[idx - 1]}`;
         config['requests'][`btr${idx}`] = `${btrUrls[idx - 1]}`;
       }

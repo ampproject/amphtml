@@ -160,7 +160,7 @@ describe('Google A4A utils', () => {
       },
     };
 
-    it.only('should extract correct config from header', () => {
+    it('should extract correct config from header', () => {
       return createIframePromise().then((fixture) => {
         setupForAdTesting(fixture);
         let url;
