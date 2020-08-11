@@ -21,11 +21,6 @@
   <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
-  <script>
-    function mockUnload() {
-      window.dispatchEvent(new Event('unload'));
-    }
-  </script>
 </head>
 <body>
 <h1 id="top">AMP Analytics reportWhen</h1>
@@ -44,34 +39,26 @@
 <!-- The second and third triggers will fire pings on documentExit even if totalVisibleTime is 0.
      Note that ${totalVisibleTime}, etc. variables are based on visiblePercentageMin. -->
 <script type="application/json">
-{
-  "transport": {"beacon": true, "xhrpost": false},
-  "requests": {
-    "endpoint": "/analytics?totalTime=${totalTime}&totalVisibleTime=${totalVisibleTime}&maxContinuousVisibleTime=${maxContinuousVisibleTime}&minVisiblePercentage=${minVisiblePercentage}&maxVisiblePercentage=${maxVisiblePercentage}&firstVisibleTime=${firstVisibleTime}"
-  },
-  "triggers": {
-    "image_viewed": {
-      "on": "visible",
-      "request": ["endpoint"],
-      "selector": "#target",
-      "visibilitySpec": {
-        "reportWhen": "documentExit"
-      }
+  {
+    "transport": {
+      "beacon": true,
+      "xhrpost": false
     },
-    "50pct_visible_time": {
-      "on": "visible",
-      "request": ["endpoint"],
-      "selector": "#target",
-      "visibilitySpec": {
-        "reportWhen": "documentExit",
-        "visiblePercentageMin": 50
-      },
-      "extraUrlParams": {
-        "50PctMin": true
+    "requests": {
+      "ampeos": "/ampeos?o=${elementX},${elementY}&d=${elementWidth},${elementHeight}&ss=${screenWidth},${screenHeight}&bs=${viewportWidth},${viewportHeight}&mcvt=${maxContinuousVisibleTime}&mtos=0,0,${maxContinuousVisibleTime},${maxContinuousVisibleTime},${maxContinuousVisibleTime}&tos=0,0,${totalVisibleTime},0,0&tfs=${firstSeenTime}&tls=${lastSeenTime}&g=${minVisiblePercentage}&h=${maxVisiblePercentage}&pt=${pageLoadTime}&tt=${totalTime}&rpt=${navTiming(navigationStart,loadEventStart)}&rst=${navTiming(navigationStart)}&r=de&isd=${initialScrollDepth}&msd=${maxScrollDepth}&avms=ampa"
+    },
+    "triggers": {
+      "endOfSession": {
+        "on": "visible",
+        "request": "ampeos",
+        "visibilitySpec": {
+          "reportWhen": "documentExit",
+          "selector": ":root",
+          "visiblePercentageMin": 50
+        }
       }
     }
   }
-}
 </script>
 </amp-analytics>
 
