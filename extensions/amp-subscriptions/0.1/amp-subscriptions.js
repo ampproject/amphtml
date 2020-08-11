@@ -606,8 +606,8 @@ export class SubscriptionService {
           .forEach((subscriptionPlatform) => {
             // Iterate the platforms and pingback if it's enabled on that platform
             if (subscriptionPlatform.isPingbackEnabled()) {
-              // Platforms can choose if they want all entitlments
-              // or just the granting entitlment
+              // Platforms can choose if they want all entitlements
+              // or just the granting entitlement
               if (subscriptionPlatform.pingbackReturnsAllEntitlements()) {
                 this.platformStore_
                   .getAllPlatformsEntitlements()
