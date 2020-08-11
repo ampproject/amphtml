@@ -28,7 +28,7 @@ tags: {  # <amp-story-interactive-quiz>
   html_format: AMP
   tag_name: "AMP-STORY-INTERACTIVE-QUIZ"
   requires_extension: "amp-story-interactive"
-  mandatory_ancestor: "AMP-STORY-PAGE"
+  mandatory_ancestor: "AMP-STORY-GRID-LAYER"
   attr_lists: 'interactive-options-text-attrs'
   attr_lists: 'interactive-options-confetti-attrs'
   attr_lists: 'interactive-shared-configs-attrs'
@@ -53,7 +53,7 @@ tags: {  # <amp-story-interactive-poll>
   html_format: AMP
   tag_name: "AMP-STORY-INTERACTIVE-POLL"
   requires_extension: "amp-story-interactive"
-  mandatory_ancestor: "AMP-STORY-PAGE"
+  mandatory_ancestor: "AMP-STORY-GRID-LAYER"
   attr_lists: 'interactive-options-text-attrs'
   attr_lists: 'interactive-options-confetti-attrs'
   attr_lists: 'interactive-options-results-category-attrs'
@@ -63,7 +63,7 @@ tags: {  # <amp-story-interactive-binary-poll>
   html_format: AMP
   tag_name: "AMP-STORY-INTERACTIVE-BINARY-POLL"
   requires_extension: "amp-story-interactive"
-  mandatory_ancestor: "AMP-STORY-PAGE"
+  mandatory_ancestor: "AMP-STORY-GRID-LAYER"
   attr_lists: 'interactive-shared-configs-attrs'
   attrs: {
     name: 'option-1-text'
@@ -84,7 +84,7 @@ tags: {  # <amp-story-interactive-results>
   html_format: AMP
   tag_name: "AMP-STORY-INTERACTIVE-RESULTS"
   requires_extension: "amp-story-interactive"
-  mandatory_ancestor: "AMP-STORY-PAGE"
+  mandatory_ancestor: "AMP-STORY-GRID-LAYER"
   attrs: {
     name: 'option-1-results-category'
     mandatory: true
