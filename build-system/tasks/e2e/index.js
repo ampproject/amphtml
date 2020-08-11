@@ -17,7 +17,7 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const ciReporter = require('../mocha-ci-reporter');
+const ciReporter = require('./mocha-ci-reporter');
 const config = require('../../test-configs/config');
 const glob = require('glob');
 const log = require('fancy-log');

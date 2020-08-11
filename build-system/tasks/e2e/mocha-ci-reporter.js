@@ -17,8 +17,8 @@
 
 const {Base} = require('mocha').reporters;
 const {inherits} = require('mocha').utils;
-const {reportTestFinished} = require('./report-test-status');
-const {symbols} = require('./karma.conf').mochaReporter;
+const {reportTestFinished} = require('../report-test-status');
+const {symbols} = require('../karma.conf').mochaReporter;
 
 /**
  * Custom Mocha reporter for CI builds.
