@@ -59,7 +59,7 @@
     background-color: var(--i-amphtml-interactive-theme-shading-flash);
   }
   100% {
-    background-color: var(--i-amphtml-interactive-theme-shading);
+    background-color: var(--i-amphtml-interactive-theme-shading-base);
   }
 }
 
