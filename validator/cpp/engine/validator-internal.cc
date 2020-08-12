@@ -5607,7 +5607,6 @@ class Validator {
         // Append all the nodes to the original <noscript> parent.
         for (htmlparser::Node* cn : doc->FragmentNodes()) {
           cn->UpdateChildNodesPositions(node);
-          node->AppendChild(cn);
           UpdateLineColumnIndex(cn);
           ValidateNode(cn, ++stack_size);
           --stack_size;
