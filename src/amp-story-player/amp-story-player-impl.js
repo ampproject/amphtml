@@ -926,6 +926,7 @@ export class AmpStoryPlayer {
    * @param {string} storyHref
    * @param {string} iframeHref
    * @return {boolean}
+   * @private
    */
   hasSameHref_(storyHref, iframeHref) {
     if (iframeHref.length <= 0) {
