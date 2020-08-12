@@ -955,6 +955,7 @@ amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-compo
   margin: auto 0 !important;
   background: none !important;
   border: none !important;
+  pointer-events: none !important;
 }
 
 [dir=rtl]amp-story .i-amphtml-story-screen-reader-back-button {
