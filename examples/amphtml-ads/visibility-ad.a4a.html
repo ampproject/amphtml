@@ -34,7 +34,8 @@
   <script type="application/json">
     {
       "requests": {
-        "visibility": "/api/ping?type=${type}?cid=CLIENT_ID(a)&elementId=${elementId}&elementX=${elementX}&elementY=${elementY}&elementWidth=${elementWidth}&elementHeight=${elementHeight}&totalTime=${totalTime}&totalVisibleTime=${totalVisibleTime}&maxContinuousVisibleTime=${maxContinuousVisibleTime}&loadTimeVisibility=${loadTimeVisibility}&backgrounded=${backgrounded}&backgroundedAtStart=${backgroundedAtStart}&firstSeenTime=${firstSeenTime}&lastSeenTime=${lastSeenTime}&firstVisibleTime=${firstVisibleTime}&lastVisibleTime=${lastVisibleTime}&minVisiblePercentage=${minVisiblePercentage}&maxVisiblePercentage=${maxVisiblePercentage}&intersectionRatio=${intersectionRatio}&scrollHeight=${scrollHeight}&scrollWidth=${scrollWidth}"
+        "visibility": "/api/ping?type=${type}?cid=CLIENT_ID(a)&elementId=${elementId}&elementX=${elementX}&elementY=${elementY}&elementWidth=${elementWidth}&elementHeight=${elementHeight}&totalTime=${totalTime}&totalVisibleTime=${totalVisibleTime}&maxContinuousVisibleTime=${maxContinuousVisibleTime}&loadTimeVisibility=${loadTimeVisibility}&backgrounded=${backgrounded}&backgroundedAtStart=${backgroundedAtStart}&firstSeenTime=${firstSeenTime}&lastSeenTime=${lastSeenTime}&firstVisibleTime=${firstVisibleTime}&lastVisibleTime=${lastVisibleTime}&minVisiblePercentage=${minVisiblePercentage}&maxVisiblePercentage=${maxVisiblePercentage}&intersectionRatio=${intersectionRatio}&scrollHeight=${scrollHeight}&scrollWidth=${scrollWidth}",
+        "activeview": "/activeview?id=ampim&d=${elementWidth},${elementHeight}&bs=${viewportWidth},${viewportHeight}"
       },
       "triggers": {
         "visible": {
@@ -60,6 +61,16 @@
             "visiblePercentageMin": 0
           },
           "vars": { "type": "img2Visible" }
+        },
+        "activeview": {
+          "on": "visible",
+          "request": "activeview",
+          "visibilitySpec": {
+            "visiblePercentageMin": 50,
+            "selector": ":root",
+            "waitFor": "ini-load",
+            "totalTimeMin": 1000
+          }
         }
       }
     }
