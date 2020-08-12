@@ -15,7 +15,6 @@
  */
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs').promises;
-const fsExtra = require('fs-extra');
 const log = require('fancy-log');
 const {buildNewServer} = require('../../server/typescript-compile');
 const {dist} = require('../dist');
@@ -30,7 +29,7 @@ const coverageJsonName = argv.json || 'coverage.json';
 const serverPort = argv.port || 8000;
 const outHtml = argv.outputhtml || 'coverage.html';
 const inputJs = argv.file || 'v0.js';
-const inputHtml = 'everything.amp.html';
+const inputHtml = argv.inputhtml || 'everything.amp.html';
 let testUrl = `http://localhost:${serverPort}/examples/${inputHtml}`;
 
 async function collectCoverage() {
@@ -85,7 +84,7 @@ async function htmlTransform() {
   log(`Transforming ${inputHtml}...`);
   const transformed = await transform(`examples/${inputHtml}`);
   const transformedName = `transformed.${inputHtml}`;
-  await fsExtra.ensureDir('dist/transformed');
+  await fs.mkdir('dist/transformed', {recursive: true});
   await fs.writeFile(`dist/transformed/${transformedName}`, transformed);
   log(
     `Transformation complete. It can be found at "dist/transformed/${transformedName}".`
