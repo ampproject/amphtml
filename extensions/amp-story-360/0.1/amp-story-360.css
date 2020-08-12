@@ -26,47 +26,47 @@ amp-story-360 amp-img {
 }
 
 .i-amphtml-story-360-activate-button {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  background: rgba(0, 0, 0, .8);
-  color: white;
-  outline: none;
-  border: none;
-  padding: 6px;
-  padding-left: 10px;
-  border-radius: 18px;
-  font-size: 12px;
-  font-family: 'Roboto', sans-serif;
-  display: flex;
-  align-items: center;
+  position: absolute !important;
+  bottom: 8px !important;
+  right: 8px !important;
+  background: rgba(0, 0, 0, .8) !important;
+  color: white !important;
+  outline: none !important;
+  border: none !important;
+  padding: 6px !important;
+  padding-left: 10px !important;
+  border-radius: 18px !important;
+  font-size: 12px !important;
+  font-family: 'Roboto', sans-serif !important;
+  display: flex !important;
+  align-items: center !important;
 }
 
 .i-amphtml-story-360-activate-button-icon {
-  box-sizing: border-box;
-  margin-left: 5px;
-  font-size: 6px;
-  width: 24px;
-  height: 24px;
-  border: 1px solid white;
-  border-radius: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  position: relative;
+  box-sizing: border-box !important;
+  margin-left: 5px !important;
+  font-size: 6px !important;
+  width: 24px !important;
+  height: 24px !important;
+  border: 1px solid white !important;
+  border-radius: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 700 !important;
+  position: relative !important;
 }
 
 .i-amphtml-story-360-activate-button-icon-svg {
-  position: absolute;
-  width: calc(100% + 2px);
-  height: calc(100% + 2px);
-  left: -1px;
-  top: -1px;
+  position: absolute !important;
+  width: calc(100% + 2px) !important;
+  height: calc(100% + 2px) !important;
+  left: -1px !important;
+  top: -1px !important;
 }
 
 [active] .i-amphtml-story-360-activate-button-icon-svg {
-  animation: rotate 1s 1s;
+  animation: rotate 1s 1s !important;
 }
 
 @keyframes rotate {
@@ -77,44 +77,44 @@ amp-story-360 amp-img {
 
 .i-amphtml-story-360-hide-permissions-ui .i-amphtml-story-360-activate-button,
 .i-amphtml-story-360-hide-permissions-ui .i-amphtml-story-360-permissions-dialog {
-  display: none;
+  display: none !important;
 }
 
 .i-amphtml-story-360-permissions-dialog {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: black;
-  color: white;
-  width: 240px;
-  border-radius: 16px;
-  text-align: center;
-  overflow: hidden;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  background: black !important;
+  color: white !important;
+  width: 240px !important;
+  border-radius: 16px !important;
+  text-align: center !important;
+  overflow: hidden !important;
 }
 
 .i-amphtml-story-360-permissions-dialog p {
-  font-family: 'Roboto', sans-serif;
-  margin: 0;
-  padding: 20px;
-  font-size: 16px;
+  font-family: 'Roboto', sans-serif !important;
+  margin: 0 !important;
+  padding: 20px !important;
+  font-size: 16px !important;
 }
 
 .i-amphtml-story-360-permissions-dialog-button-container {
-  font-family: 'Open Sans', sans-serif;
-  border-top: 1px solid #1B1B1B;
-  white-space: nowrap;
+  font-family: 'Open Sans', sans-serif !important;
+  border-top: 1px solid #1B1B1B !important;
+  white-space: nowrap !important;
 }
 
 .i-amphtml-story-360-permissions-dialog-button-container button {
-  padding: 20px;
-  font-size: 20px;
-  background: none;
-  color: white;
-  border: none;
-  width: 50%;
+  padding: 20px !important;
+  font-size: 20px !important;
+  background: none !important;
+  color: white !important;
+  border: none !important;
+  width: 50% !important;
 }
 
 .i-amphtml-story-360-permissions-dialog-hidden {
-  display: none;
+  display: none !important;
 }
