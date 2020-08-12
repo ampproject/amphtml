@@ -701,9 +701,9 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
 
     // Discover and build visibility endpoints.
     const requests = dict();
-    for (let idx = 1; idx <= urls.length; idx++) {
+    for (let idx = 0; idx < urls.length; idx++) {
       // TODO: Ensure url is valid and not freeform JS?
-      requests[`visibility${idx}`] = `${urls[idx - 1]}`;
+      requests[`visibility${idx+1}`] = `${urls[idx]}`;
     }
     // Security review needed here.
     config['requests'] = requests;
@@ -713,9 +713,9 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
     const btrUrls = analyticsConfig['btrUrl'];
     if (Array.isArray(btrUrls) && btrUrls.length) {
       const btrRequests = dict();
-      for (let idx = 1; idx <= btrUrls.length; idx++) {
-        btrRequests[`btr${idx}`] = `${btrUrls[idx - 1]}`;
-        config['requests'][`btr${idx}`] = `${btrUrls[idx - 1]}`;
+      for (let idx = 0; idx < btrUrls.length; idx++) {
+        btrRequests[`btr${idx+1}`] = `${btrUrls[idx]}`;
+        config['requests'][`btr${idx+1}`] = `${btrUrls[idx]}`;
       }
       config['triggers']['beginToRender'] = dict({
         'on': 'ini-load',
