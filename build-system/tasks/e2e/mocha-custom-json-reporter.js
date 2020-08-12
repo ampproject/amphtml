@@ -61,16 +61,10 @@ function JsonReporter(runner) {
     suiteList = suiteList.slice(0, -1);
   });
 
-  runner.on(EVENT_TEST_PASS, function (test) {
-    testEvents.push({test, suiteList, EVENT_TEST_PASS});
-  });
-
-  runner.on(EVENT_TEST_FAIL, function (test) {
-    testEvents.push({test, suiteList, EVENT_TEST_FAIL});
-  });
-
-  runner.on(EVENT_TEST_PENDING, function (test) {
-    testEvents.push({test, suiteList, EVENT_TEST_PENDING});
+  [EVENT_TEST_PASS, EVENT_TEST_FAIL, EVENT_TEST_PENDING].forEach((event) => {
+    runner.on(event, (test) => {
+      testEvents.push({test, suiteList, event});
+    });
   });
 
   runner.on(EVENT_RUN_END, async function () {
