@@ -106,7 +106,7 @@ async function generateMap() {
   explore = require('source-map-explorer').explore;
 
   // Change source map explorer to mjs file extension if needed
-  if ((argv.esm || argv.sxg) && inputJs.indexOf('.js') != -1) {
+  if ((argv.esm && inputJs.indexOf('.js') != -1) {
     inputJs = inputJs.substr(0, inputJs.lastIndexOf('.js')) + '.mjs';
   }
 
