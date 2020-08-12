@@ -223,6 +223,7 @@ export const Action = {
   TOGGLE_STORY_HAS_PLAYBACK_UI: 'toggleStoryHasPlaybackUi',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
+  TOGGLE_GYROSCOPE: 'toggleGyroscope',
   TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
   ADD_NEW_PAGE_ID: 'addNewPageId',
   SET_PAGE_SIZE: 'updatePageSize',
@@ -438,7 +439,7 @@ const actions = (state, action, data) => {
         [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP_PANELS,
         [StateProperty.UI_STATE]: data,
       });
-    case Action.GYROSCOPE_ENABLED_STATE:
+    case Action.TOGGLE_GYROSCOPE:
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.GYROSCOPE_ENABLED_STATE]: !!data,

@@ -32,7 +32,10 @@ import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
 import {user, userAssert} from '../../../src/log';
-import {whenUpgradedToCustomElement} from '../../../src/dom';
+import {
+  closestAncestorElementBySelector,
+  whenUpgradedToCustomElement,
+} from '../../../src/dom';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_360';
@@ -251,7 +254,7 @@ export class AmpStory360 extends AMP.BaseElement {
     /** @private {boolean} */
     this.gyroscopeControls_ = false;
 
-    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    /** @private @const {!../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
   }
 
@@ -339,7 +342,7 @@ export class AmpStory360 extends AMP.BaseElement {
     this.gyroscopeControls_ = true;
     this.mutateElement(() => {
       this.element.classList.add('i-amphtml-story-360-gyroscope-enabled');
-      window.addEventListener('deviceorientation', (e) => {
+      this.win.addEventListener('deviceorientation', (e) => {
         clearTimeout(checkNoMotion);
         this.onDeviceOrientation_(e);
       });
@@ -400,18 +403,21 @@ export class AmpStory360 extends AMP.BaseElement {
       this.element.appendChild(dialogBox);
 
       dialogBox.addEventListener('click', (e) => {
-        const {action} = e.target.closest('[data-action]').dataset;
+        const {action} = closestAncestorElementBySelector(
+          e.target,
+          '[data-action]'
+        ).dataset;
 
-        if (action === 'enable') {
-          DeviceOrientationEvent.requestPermission()
+        if (
+          action === 'enable' &&
+          this.win.DeviceOrientationEvent.requestPermission
+        ) {
+          this.win.DeviceOrientationEvent.requestPermission()
             .then((permissionState) => {
               permissionState === 'granted' &&
-                this.storeService_.dispatch(
-                  Action.GYROSCOPE_ENABLED_STATE,
-                  true
-                );
+                this.storeService_.dispatch(Action.TOGGLE_GYROSCOPE, true);
             })
-            .catch(alert.error);
+            .catch((error) => console.log(error));
         }
 
         dialogBox.classList.add(
