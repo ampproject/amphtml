@@ -820,11 +820,8 @@ export class AmpStoryPlayer {
    */
   updatePreviousIframe_(story, position) {
     const iframeIdx = story[IFRAME_IDX];
-    const iframeEl = this.iframes_[iframeIdx];
-    this.layoutIframe_(story, iframeEl, VisibilityState.PRERENDER).then(() => {
-      this.updateVisibilityState_(iframeIdx, VisibilityState.INACTIVE);
-      this.updateIframePosition_(iframeIdx, position);
-    });
+    this.updateVisibilityState_(iframeIdx, VisibilityState.INACTIVE);
+    this.updateIframePosition_(iframeIdx, position);
   }
 
   /**
