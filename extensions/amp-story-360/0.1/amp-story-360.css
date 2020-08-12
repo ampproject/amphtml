@@ -75,8 +75,8 @@ amp-story-360 amp-img {
   }
 }
 
-.i-amphtml-story-360-gyroscope-enabled .i-amphtml-story-360-activate-button,
-.i-amphtml-story-360-gyroscope-enabled .i-amphtml-story-360-permissions-dialog {
+.i-amphtml-story-360-hide-permissions-ui .i-amphtml-story-360-activate-button,
+.i-amphtml-story-360-hide-permissions-ui .i-amphtml-story-360-permissions-dialog {
   display: none;
 }
 

@@ -28,10 +28,10 @@ import {CSS} from '../../../build/amp-story-360-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
 import {Services} from '../../../src/services';
-import {dev, user, userAssert} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
+import {dev, user, userAssert} from '../../../src/log';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @const {string} */
@@ -334,7 +334,7 @@ export class AmpStory360 extends AMP.BaseElement {
     this.gyroscopeControls_ = true;
 
     this.mutateElement(() => {
-      this.element.classList.add('i-amphtml-story-360-gyroscope-enabled');
+      this.element.classList.add('i-amphtml-story-360-hide-permissions-ui');
     });
 
     this.win.addEventListener('deviceorientation', (e) => {
@@ -348,7 +348,9 @@ export class AmpStory360 extends AMP.BaseElement {
     const checkNoMotion = setTimeout(() => {
       this.gyroscopeControls_ = false;
       this.mutateElement(() => {
-        this.element.classList.remove('i-amphtml-story-360-gyroscope-enabled');
+        this.element.classList.remove(
+          'i-amphtml-story-360-hide-permissions-ui'
+        );
       });
       this.animate_();
     }, 1000);
@@ -420,8 +422,14 @@ export class AmpStory360 extends AMP.BaseElement {
     if (this.win.DeviceOrientationEvent.requestPermission) {
       this.win.DeviceOrientationEvent.requestPermission()
         .then((permissionState) => {
-          permissionState === 'granted' &&
+          if (permissionState === 'granted') {
             this.storeService_.dispatch(Action.TOGGLE_GYROSCOPE, true);
+          } else if (permissionState === 'denied') {
+            // TODO: handle if user denied permissions in same window.
+            this.element.classList.add(
+              'i-amphtml-story-360-hide-permissions-ui'
+            );
+          }
         })
         .catch((error) => {
           dev().error(error.message);
