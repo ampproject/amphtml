@@ -885,12 +885,14 @@ amp-story .amp-video-eq,
   --interactive-prompt-background: var(--interactive-accent-color);
   --interactive-prompt-text-color: white;
   --interactive-prompt-alignment: initial;
-  /* Shared properties by interactives */
+  /* Shared properties by interactives (overrideable by themes) */
   --i-amphtml-interactive-option-accent-color: var(--interactive-accent-color) !important;
   --i-amphtml-interactive-option-background-color: white !important;
+  --i-amphtml-interactive-options-chip-background-color: var(--i-amphtml-interactive-option-background-color) !important;
   --i-amphtml-interactive-option-text-color: #55595E !important;
   --i-amphtml-interactive-theme-border: rgba(85, 89, 94, 0.2) !important;
   --i-amphtml-interactive-theme-shading: rgba(85, 89, 94, 0.2) !important;
+  --i-amphtml-interactive-theme-shading-base: rgb(222, 222, 225) !important;
   --i-amphtml-interactive-theme-shading-flash: rgba(85, 89, 94, 0.5) !important;
   --i-amphtml-interactive-chip-radius: 32px !important;
   --i-amphtml-interactive-chip-shadow: 0px 0px 0px transparent !important;
@@ -911,6 +913,7 @@ amp-story .amp-video-eq,
   --i-amphtml-interactive-option-background-color: #202124 !important;
   --i-amphtml-interactive-theme-border: rgba(167, 173, 180, 0.2) !important;
   --i-amphtml-interactive-theme-shading: rgba(167, 173, 180, 0.2) !important;
+  --i-amphtml-interactive-theme-shading-base: rgb(60, 61, 63) !important;
   --i-amphtml-interactive-theme-shading-flash: rgba(167, 173, 180, 0.5) !important;
   --i-amphtml-interactive-strong-text-color: white !important;
 }
@@ -919,6 +922,16 @@ amp-story .amp-video-eq,
   --i-amphtml-interactive-chip-shadow: 0px 2px 8px rgba(60, 60, 60, 0.2) !important;
   --i-amphtml-interactive-chip-shadow-inset: inset 4px 4px 8px rgba(0, 0, 0, 0.2) !important;
   --i-amphtml-interactive-theme-border: rgba(0, 0, 0, 0) !important;
+}
+
+.i-amphtml-story-interactive-component[chip-style="transparent"] {
+  --i-amphtml-interactive-options-chip-background-color: transparent !important;
+  --interactive-prompt-background: transparent !important;
+  --interactive-prompt-alignment: center;
+  --i-amphtml-interactive-chip-shadow: 0px 2px 8px rgba(60, 60, 60, 0.2) !important;
+  --i-amphtml-interactive-chip-shadow-inset: inset 4px 4px 8px rgba(0, 0, 0, 0.2) !important;
+  --i-amphtml-interactive-theme-border: rgba(0, 0, 0, 0) !important;
+  --i-amphtml-interactive-component-shadow: none !important;
 }
 
 .i-amphtml-story-interactive-component[chip-style="shadow"][theme="dark"] {
@@ -940,6 +953,14 @@ amp-story-interactive-binary-poll[theme="dark"], amp-story-interactive-poll[them
   --i-amphtml-interactive-option-accent-color: white !important;
 }
 
+amp-story-interactive-results[chip-style="transparent"] {
+  --i-amphtml-interactive-option-text-color: black !important;
+}
+
+amp-story-interactive-results[theme="dark"][chip-style="transparent"] {
+  --i-amphtml-interactive-option-text-color: white !important;
+}
+
 amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-component {
   --i-amphtml-interactive-animation-delay: 350ms !important;
 }
@@ -955,6 +976,9 @@ amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-compo
   margin: auto 0 !important;
   background: none !important;
   border: none !important;
+  /* Hiding the outline since this button is intended to be used with
+     mobile screen readers such as TalkBack which add focus lines. */
+  outline: none !important;
   pointer-events: none !important;
 }
 
