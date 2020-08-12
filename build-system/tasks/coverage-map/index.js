@@ -17,6 +17,7 @@ const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs').promises;
 const log = require('fancy-log');
 const {buildNewServer} = require('../../server/typescript-compile');
+const {cyan} = require('ansi-colors');
 const {dist} = require('../dist');
 const {installPackages} = require('../../common/utils');
 const {startServer, stopServer} = require('../serve');
@@ -33,7 +34,8 @@ const inputHtml = argv.inputhtml || 'everything.amp.html';
 let testUrl = `http://localhost:${serverPort}/examples/${inputHtml}`;
 
 async function collectCoverage() {
-  log(`Opening browser and navigating to ${testUrl}...`);
+  puppeteer = require('puppeteer');
+  log('Opening browser and navigating to', cyan(`${testUrl}`) + '...');
   const browser = await puppeteer.launch({
     defaultViewport: {width: 1200, height: 800},
   });
@@ -54,7 +56,12 @@ async function collectCoverage() {
   log('Testing completed.');
   const jsCoverage = await page.coverage.stopJSCoverage();
   const data = JSON.stringify(jsCoverage);
-  log(`Writing to ${coverageJsonName} in dist/${coverageJsonName}...`);
+  log(
+    'Writing to',
+    cyan(`${coverageJsonName}`),
+    'in',
+    cyan(`dist/${coverageJsonName}`) + '...'
+  );
   await fs.writeFile(`dist/${coverageJsonName}`, data);
   await browser.close();
 }
@@ -81,20 +88,29 @@ async function autoScroll(page) {
 }
 
 async function htmlTransform() {
-  log(`Transforming ${inputHtml}...`);
+  transform = require('../../server/new-server/transforms/dist/transform')
+    .transform;
+  log('Transforming', cyan(`${inputHtml}`) + '...');
   const transformed = await transform(`examples/${inputHtml}`);
   const transformedName = `transformed.${inputHtml}`;
   await fs.mkdir('dist/transformed', {recursive: true});
   await fs.writeFile(`dist/transformed/${transformedName}`, transformed);
   log(
-    `Transformation complete. It can be found at "dist/transformed/${transformedName}".`
+    'Transformation complete. It can be found at',
+    cyan(`dist/transformed/${transformedName}`) + '.'
   );
   testUrl = `http://localhost:${serverPort}/dist/transformed/${transformedName}`;
 }
 
 async function generateMap() {
+  explore = require('source-map-explorer').explore;
   log(
-    `Generating heat map in dist/${outHtml} of ${inputJs}, based on ${coverageJsonName}...`
+    'Generating heat map in',
+    cyan(`dist/${outHtml}`),
+    'of',
+    cyan(`${inputJs}`),
+    'based on',
+    cyan(`${coverageJsonName}`) + '...'
   );
   await explore(`dist/${inputJs}`, {
     output: {format: 'html', filename: `dist/${outHtml}`},
@@ -110,11 +126,6 @@ async function coverageMap() {
   if (!argv.nobuild) {
     await dist();
   }
-
-  puppeteer = require('puppeteer');
-  explore = require('source-map-explorer').explore;
-  transform = await require('../../server/new-server/transforms/dist/transform')
-    .transform;
 
   if (argv.esm || argv.sxg) {
     await htmlTransform();
