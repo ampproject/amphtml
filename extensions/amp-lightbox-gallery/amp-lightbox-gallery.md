@@ -165,8 +165,9 @@ that have one.
 
 ## Styling
 
-You can style the `amp-lightbox-gallery-caption` component with standard CSS. Some of the
-properties that can be styled are `font-size` and `color`.
+You can style the caption of a `amp-lightbox-gallery` component
+by targeting the `amp-lightbox-gallery-caption` class with standard CSS.
+Some of the properties that can be styled are `font-size` and `color`.
 
 ## Actions
 
