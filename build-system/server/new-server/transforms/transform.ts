@@ -25,7 +25,7 @@ import transformCss from './css/css-transform';
 const transforms = [transformStories, transformScriptPaths, transformCss];
 
 const argv = minimist(process.argv.slice(2));
-if (argv.esm || argv.sxg) {
+if (argv.esm) {
   transforms.unshift(transformModules);
 }
 
