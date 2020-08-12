@@ -297,8 +297,7 @@ class ParsedHtmlTag {
 
   // Simplification of AppendTagToString.
   std::string ToString() const {
-    // TODO(amaltas): This need some work. Make it work for text node, comment
-    // node etc.
+    // TODO: This need some work. Make it work for text node, comment node etc.
     if (node_->Type() == htmlparser::NodeType::ELEMENT_NODE) {
       return "<" +
              htmlparser::AtomUtil::ToString(node_->DataAtom(), node_->Data()) +
@@ -1134,8 +1133,7 @@ std::string TagSpecUrl(const TagSpec& spec) {
 }
 
 // Variant that accepts a ParsedTagSpec.
-// TODO(gregable): This is a bit hacky. Find a better mechanism in the
-// future.
+// TODO: Find a better mechanism for this in the future.
 std::string TagSpecUrl(const ParsedTagSpec& parsed_tag_spec) {
   return TagSpecUrl(parsed_tag_spec.spec());
 }
@@ -2602,10 +2600,9 @@ std::string UrlProtocol(const std::string& url, const URL& parsed_url) {
   // should as well when extracting it - missing a 'javascript:' or
   // similar things would open up those users with very old browsers
   // to XSS and other nastiness.
-  // TODO(gregable): This has some false positives. Instead, we should
-  // rewrite all URLs in the reserializer, which would make relative URLs
-  // into absolute URLs and avoid the risk here. At that time, we could
-  // remove this hack.
+  // TODO: This has some false positives. Instead, we should rewrite all URLs
+  // in the reserializer, which would make relative URLs into absolute URLs
+  // and avoid the risk here. At that time, we could remove this.
   static LazyRE2 protocol_re = {"([^:/?#.]+):.*"};
 
   std::string protocol;
@@ -3329,7 +3326,7 @@ void ValidateDescendantTags(const ParsedHtmlTag& encountered_tag,
     const vector<std::string>& allowed_descendant_tags =
         tag_stack.allowed_descendants_list()[ii]->allowed_tags();
 
-    // If the tag we're validating is not whitelisted for a specific ancestor,
+    // If the tag we're validating is not allowed for a specific ancestor,
     // then throw an error.
     if (!c_linear_search(allowed_descendant_tags,
                          encountered_tag.UpperName())) {
@@ -3339,7 +3336,7 @@ void ValidateDescendantTags(const ParsedHtmlTag& encountered_tag,
           {encountered_tag.LowerName(),
            AsciiStrToLower(
                tag_stack.allowed_descendants_list()[ii]->tag_name())},
-          // TODO(chenshay): Add STAMP documentation URL when it exists.
+          // TODO: Add STAMP documentation URL when it exists.
           TagSpecUrl(parsed_tag_spec), result);
     }
   }
@@ -4364,7 +4361,7 @@ void ValidateAttributes(const ParsedTagSpec& parsed_tag_spec,
         }
       }
       if (!matches_marker) {
-        // TODO(gregable): This error message should somehow indicate the
+        // TODO: This error message should somehow indicate the
         // condition under which this attribute would have been allowed.
         context.AddError(ValidationError::DISALLOWED_ATTR, context.line_col(),
                          /*params=*/{attr.name(), TagDescriptiveName(spec)},
@@ -4553,7 +4550,7 @@ ParsedValidatorRules::ParsedValidatorRules(HtmlFormat::Code html_format)
   error_codes_.resize(ValidationError::Code_MAX + 1);
   for (const ErrorSpecificity& error_specificity : rules_.error_specificity()) {
     // Guard against new specfiles being digested by old binaries.
-    // TODO(johannes): Consider a more comprehensive fix, e.g. baking
+    // TODO: Consider a more comprehensive fix, e.g. baking
     // the specificity stuff in separately from the configurable part like
     // with code generation.
     if (error_specificity.code() >= 0 &&
@@ -5482,7 +5479,7 @@ class Validator {
 
     switch (node->Type()) {
       case htmlparser::NodeType::ERROR_NODE:
-        // TODO(amaltas): Set error here.
+        // TODO: Set error here.
         break;
       case htmlparser::NodeType::DOCUMENT_NODE:
         for (htmlparser::Node* c = node->FirstChild(); c;

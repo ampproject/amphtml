@@ -27,7 +27,7 @@ namespace amp::validator::parse_layout {
 // Parses a width or height layout attribute, for the determining the layout
 // of AMP tags (e.g. <amp-img width="42px" ...) following the CSS length
 // standard found at https://developer.mozilla.org/en-US/docs/Web/CSS/length.
-// TODO(johannes): Consider using parse-css.cc for parsing some of this.
+// TODO: Consider using parse-css.cc for parsing some of this.
 struct CssLength {
   // Whether the value or unit is invalid. Note that passing
   // nullptr as |input| is considered valid.

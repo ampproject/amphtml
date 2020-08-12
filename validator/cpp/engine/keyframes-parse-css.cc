@@ -69,7 +69,7 @@ class KeyframesVisitor : public RuleVisitor {
   }
 
   void VisitAtRule(const AtRule& at_rule) override {
-    // TODO(chenshay) : Move this to protoascii.
+    // TODO: Move this to protoascii.
     if (at_rule.name() == "keyframes" || at_rule.name() == "-moz-keyframes" ||
         at_rule.name() == "-o-keyframes" ||
         at_rule.name() == "-webkit-keyframes") {

@@ -112,9 +112,9 @@ CssSizes::CssSizes(string_view input) : is_set(false), is_valid(false) {
       }
     }
     CssSize size = ExtractCssSizeFromCandidate(divider_index, candidate);
-    // TODO(honeybadgerdontcare): validate the media condition.
+    // TODO: validate the media condition.
     // Verify size is valid if not a function.
-    // TODO(honeybadgerdontcare): validate the size when it is a function.
+    // TODO: validate the size when it is a function.
     if (!is_size_a_function && !RE2::PartialMatch(size.size, *kValidSize))
       return;
     sizes.push_back(size);

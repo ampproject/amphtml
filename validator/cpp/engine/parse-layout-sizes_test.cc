@@ -99,7 +99,7 @@ TEST(ParseLayoutSizes, CssSizesInvalidComment) {
   EXPECT_THAT(parsed_too.sizes, EqCandidates({}));
 }
 
-// TODO(honeybadgerdontcare): Uncomment this test after parsing media condition fully.
+// TODO: Uncomment this test after parsing media condition fully.
 /*
 TEST(ParseLayoutSizes, CssSizesInvalidHtmlTags) {
   CssSizes parsed("(min-width:240px)</style><script>alert(1);</script> 240px"

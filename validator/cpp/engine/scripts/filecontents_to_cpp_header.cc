@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
   while (!fd.eof() && i != -1) {
     // NOTE: protobuf bytes are always little endian. If this ever changes, or
     // this script is run in big endian systems it will fail.
-    // TODO(amaltas): Add a endian attr in embed_data?
+    // TODO: Add a endian attr in embed_data?
     ofd << " 0x" << std::setfill('0') << std::setw(2) << std::hex << i;
     if (count++ % 10 == 0) {
       ofd << ",\n   ";
