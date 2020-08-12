@@ -885,7 +885,7 @@ amp-story .amp-video-eq,
   --interactive-prompt-background: var(--interactive-accent-color);
   --interactive-prompt-text-color: white;
   --interactive-prompt-alignment: initial;
-  /* Shared properties by interactives */
+  /* Shared properties by interactives (overrideable by themes) */
   --i-amphtml-interactive-option-accent-color: var(--interactive-accent-color) !important;
   --i-amphtml-interactive-option-background-color: white !important;
   --i-amphtml-interactive-options-chip-background-color: var(--i-amphtml-interactive-option-background-color) !important;
