@@ -32,7 +32,7 @@
 #include "parser.h"
 #include "strings.h"
 
-ABSL_FLAG(uint32_t, htmlparser_max_nodes_depth_count, UINT32_MAX,
+ABSL_FLAG(uint32_t, htmlparser_max_nodes_depth_count, 245,
           "Maximum depth of open nodes. "
           "For: <a><b><c><d></d></c></b/></a>, the stack size is 4 as <a> is "
           "kept open until three elements <b>,<c> and <d> are closed. "
