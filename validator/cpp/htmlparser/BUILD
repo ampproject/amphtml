@@ -14,6 +14,24 @@ licenses(["notice"])
 
 exports_files(["LICENSE"])
 
+cc_library(
+    name = "allocator",
+    hdrs = [
+        "allocator.h",
+    ],
+)
+
+cc_test(
+    name = "allocator_test",
+    srcs = [
+        "allocator_test.cc",
+    ],
+    deps = [
+        ":allocator",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 # An atom is a name in HTML source. Tag name, attribute names and namespaces.
 cc_library(
     name = "atom",
@@ -34,6 +52,18 @@ cc_library(
     deps = [
         ":atom",
         ":hash",
+    ],
+)
+
+cc_test(
+    name = "atomutil_test",
+    srcs = [
+        "atomutil_test.cc",
+    ],
+    deps = [
+        ":atomutil",
+        ":hash",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -59,6 +89,18 @@ cc_library(
     deps = [
         ":node",
         ":strings",
+    ],
+)
+
+cc_test(
+    name = "doctype_test",
+    srcs = [
+        "doctype_test.cc",
+    ],
+    deps = [
+        ":doctype",
+        ":node",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -93,6 +135,17 @@ cc_library(
         ":defer",
         ":error",
         ":strings",
+    ],
+)
+
+cc_test(
+    name = "fileutil_test",
+    srcs = [
+        "fileutil_test.cc",
+    ],
+    deps = [
+        ":fileutil",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -163,6 +216,21 @@ cc_library(
     ],
 )
 
+cc_test(
+    name = "node_test",
+    srcs = [
+        "node_test.cc",
+    ],
+    deps = [
+        ":atom",
+        ":document",
+        ":node",
+        ":parser",
+        ":renderer",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 cc_library(
     name = "htmlentities",
     hdrs = [
@@ -170,6 +238,17 @@ cc_library(
     ],
     deps = [
         ":comparators",
+    ],
+)
+
+cc_test(
+    name = "entity_test",
+    srcs = [
+        "entity_test.cc",
+    ],
+    deps = [
+        ":htmlentities",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -196,6 +275,18 @@ cc_library(
     ],
     deps = [
         ":comparators",
+    ],
+)
+
+cc_test(
+    name = "casetable_test",
+    srcs = [
+        "casetable_test.cc",
+    ],
+    deps = [
+        ":casetable",
+        ":strings",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -226,6 +317,22 @@ cc_library(
     ],
 )
 
+cc_test(
+    name = "parser_test",
+    srcs = [
+        "parser_test.cc",
+    ],
+    deps = [
+        ":atom",
+        ":atomutil",
+        ":node",
+        ":parser",
+        ":renderer",
+        ":token",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 # Renders a node tree to html string.
 cc_library(
     name = "renderer",
@@ -239,6 +346,18 @@ cc_library(
         ":atomutil",
         ":node",
         ":strings",
+    ],
+)
+
+cc_test(
+    name = "renderer_test",
+    srcs = [
+        "renderer_test.cc",
+    ],
+    deps = [
+        ":parser",
+        ":renderer",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -268,6 +387,17 @@ cc_library(
     ],
 )
 
+cc_test(
+    name = "strings_test",
+    srcs = [
+        "strings_test.cc",
+    ],
+    deps = [
+        ":strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 # Tokenizes html text.
 cc_library(
     name = "tokenizer",
@@ -286,6 +416,19 @@ cc_library(
     ],
 )
 
+cc_test(
+    name = "tokenizer_test",
+    srcs = [
+        "tokenizer_test.cc",
+    ],
+    deps = [
+        ":parser",
+        ":token",
+        ":tokenizer",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 cc_library(
     name = "url",
     srcs = [
@@ -296,64 +439,21 @@ cc_library(
     ],
 )
 
-cc_library(
-    name = "allocator",
-    hdrs = [
-        "allocator.h",
-    ],
-)
-
 cc_test(
-    name = "atomutil_test",
+    name = "url_test",
     srcs = [
-        "atomutil_test.cc",
+        "url_test.cc",
     ],
     deps = [
-        ":atomutil",
-        ":hash",
+        ":url",
         "@com_google_googletest//:gtest_main",
     ],
 )
-
-cc_test(
-    name = "allocator_test",
-    srcs = [
-        "allocator_test.cc",
-    ],
-    deps = [
-        ":allocator",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
 
 cc_library(
     name = "testconstants",
     hdrs = [
         "testconstants.h",
-    ],
-)
-
-cc_test(
-    name = "doctype_test",
-    srcs = [
-        "doctype_test.cc",
-    ],
-    deps = [
-        ":doctype",
-        ":node",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "fileutil_test",
-    srcs = [
-        "fileutil_test.cc",
-    ],
-    deps = [
-        ":fileutil",
-        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -388,107 +488,6 @@ cc_test(
         ":strings",
         ":testconstants",
         ":tokenizer",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "node_test",
-    srcs = [
-        "node_test.cc",
-    ],
-    deps = [
-        ":atom",
-        ":document",
-        ":node",
-        ":parser",
-        ":renderer",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "renderer_test",
-    srcs = [
-        "renderer_test.cc",
-    ],
-    deps = [
-        ":parser",
-        ":renderer",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "strings_test",
-    srcs = [
-        "strings_test.cc",
-    ],
-    deps = [
-        ":strings",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "parser_test",
-    srcs = [
-        "parser_test.cc",
-    ],
-    deps = [
-        ":atom",
-        ":atomutil",
-        ":node",
-        ":parser",
-        ":renderer",
-        ":token",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "tokenizer_test",
-    srcs = [
-        "tokenizer_test.cc",
-    ],
-    deps = [
-        ":parser",
-        ":token",
-        ":tokenizer",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "casetable_test",
-    srcs = [
-        "casetable_test.cc",
-    ],
-    deps = [
-        ":casetable",
-        ":strings",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "entity_test",
-    srcs = [
-        "entity_test.cc",
-    ],
-    deps = [
-        ":htmlentities",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "url_test",
-    srcs = [
-        "url_test.cc",
-    ],
-    deps = [
-        ":url",
         "@com_google_googletest//:gtest_main",
     ],
 )
