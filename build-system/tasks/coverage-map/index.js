@@ -15,20 +15,23 @@
  */
 const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs').promises;
+const fsExtra = require('fs-extra');
 const log = require('fancy-log');
+const {buildNewServer} = require('../../server/typescript-compile');
 const {dist} = require('../dist');
 const {installPackages} = require('../../common/utils');
 const {startServer, stopServer} = require('../serve');
 
 let puppeteer;
 let explore;
+let transform;
 
 const coverageJsonName = argv.json || 'coverage.json';
 const serverPort = argv.port || 8000;
-const testUrl =
-  argv.url || `http://localhost:${serverPort}/examples/everything.amp.html`;
-const outHtml = argv.html || 'coverage.html';
+const outHtml = argv.outputhtml || 'coverage.html';
 const inputJs = argv.file || 'v0.js';
+const inputHtml = 'everything.amp.html';
+let testUrl = `http://localhost:${serverPort}/examples/${inputHtml}`;
 
 async function collectCoverage() {
   log(`Opening browser and navigating to ${testUrl}...`);
@@ -53,7 +56,7 @@ async function collectCoverage() {
   const jsCoverage = await page.coverage.stopJSCoverage();
   const data = JSON.stringify(jsCoverage);
   log(`Writing to ${coverageJsonName} in dist/${coverageJsonName}...`);
-  await fs.writeFile(`dist/${coverageJsonName}`, data, () => {});
+  await fs.writeFile(`dist/${coverageJsonName}`, data);
   await browser.close();
 }
 
@@ -78,12 +81,24 @@ async function autoScroll(page) {
   });
 }
 
+async function htmlTransform() {
+  log(`Transforming ${inputHtml}...`);
+  const transformed = await transform(`examples/${inputHtml}`);
+  const transformedName = `transformed.${inputHtml}`;
+  await fsExtra.ensureDir('dist/transformed');
+  await fs.writeFile(`dist/transformed/${transformedName}`, transformed);
+  log(
+    `Transformation complete. It can be found at "dist/transformed/${transformedName}".`
+  );
+  testUrl = `http://localhost:${serverPort}/dist/transformed/${transformedName}`;
+}
+
 async function generateMap() {
   log(
     `Generating heat map in dist/${outHtml} of ${inputJs}, based on ${coverageJsonName}...`
   );
   await explore(`dist/${inputJs}`, {
-    output: {format: 'html', filename: `${outHtml}`},
+    output: {format: 'html', filename: `dist/${outHtml}`},
     coverage: `dist/${coverageJsonName}`,
     onlyMapped: true,
   });
@@ -91,13 +106,21 @@ async function generateMap() {
 
 async function coverageMap() {
   installPackages(__dirname);
-
-  puppeteer = require('puppeteer');
-  explore = require('source-map-explorer').explore;
+  buildNewServer();
 
   if (!argv.nobuild) {
     await dist();
   }
+
+  puppeteer = require('puppeteer');
+  explore = require('source-map-explorer').explore;
+  transform = await require('../../server/new-server/transforms/dist/transform')
+    .transform;
+
+  if (argv.esm || argv.sxg) {
+    await htmlTransform();
+  }
+
   await startServer(
     {host: 'localhost', port: serverPort},
     {quiet: true},
@@ -116,14 +139,17 @@ coverageMap.description =
 coverageMap.flags = {
   json:
     '  Customize the name of the JSON output from puppeteer (out.json by default).',
-  url:
-    '  Set the URL for puppeteer testing, starting with  "http://localhost[:port_number]..." (http://localhost[:port_number]/examples/everything.amp.html by default).',
-  html:
+  inputhtml:
+    '  Set the input HTML for puppeteer testing, by designating the path that leads to the HTML file, starting at "examples/" (everything.amp.html by default).',
+  outputhtml:
     '  Customize the name of the HTML output from source map explorer (out.html by default).',
-  nobuild:
-    "  Skips dist build. Your working directory should be dist if you're using this flag.",
+  nobuild: '  Skips dist build.',
   port:
     '  Customize the port number of the local AMP server (8000 by default).',
   file:
-    '  Designate which JS file to view in coverage map, or *.js for all files (v0.js by default). If the JS file is not in the top level dist directory, you need to indicate the path to the JS file relative to dist.',
+    '  Designate which JS (or MJS) file to view in coverage map, or *.js for all files (v0.js by default). If the JS file is not in the top level dist directory, you need to indicate the path to the JS file relative to dist.',
+  esm:
+    '  Perform coverage test in ESM environment. This will trigger an additional HTML transformation.',
+  sxg:
+    '  Perform coverage test in SxG environment. This will trigger an additional HTML transformation.',
 };
