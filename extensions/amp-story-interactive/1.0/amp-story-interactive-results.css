@@ -16,7 +16,7 @@
 
 .i-amphtml-story-interactive-results-container {
   font-family: 'Poppins', sans-serif !important;
-  background: var(--i-amphtml-interactive-option-background-color) !important;
+  background: var(--i-amphtml-interactive-options-chip-background-color) !important;
   border-radius: var(--i-amphtml-interactive-chip-radius) !important;
   color: var(--i-amphtml-interactive-strong-text-color) !important;
   text-align: center !important;
