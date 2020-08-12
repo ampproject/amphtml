@@ -29,9 +29,9 @@ let transform;
 const coverageJsonName = argv.json || 'coverage.json';
 const serverPort = argv.port || 8000;
 const outHtml = argv.outputhtml || 'coverage.html';
-const inputJs = argv.file || 'v0.js';
 const inputHtml = argv.inputhtml || 'everything.amp.html';
 let testUrl = `http://localhost:${serverPort}/examples/${inputHtml}`;
+let inputJs = argv.file || 'v0.js';
 
 async function collectCoverage() {
   puppeteer = require('puppeteer');
@@ -104,6 +104,12 @@ async function htmlTransform() {
 
 async function generateMap() {
   explore = require('source-map-explorer').explore;
+
+  // Change source map explorer to mjs file extension if needed
+  if ((argv.esm || argv.sxg) && inputJs.indexOf('.js') != -1) {
+    inputJs = inputJs.substr(0, inputJs.lastIndexOf('.js')) + '.mjs';
+  }
+
   log(
     'Generating heat map in',
     cyan(`dist/${outHtml}`),
@@ -112,11 +118,14 @@ async function generateMap() {
     'based on',
     cyan(`${coverageJsonName}`) + '...'
   );
-  await explore(`dist/${inputJs}`, {
-    output: {format: 'html', filename: `dist/${outHtml}`},
-    coverage: `dist/${coverageJsonName}`,
-    onlyMapped: true,
-  });
+  await explore(
+    {code: `dist/${inputJs}`, map: `dist/${inputJs}.map`},
+    {
+      output: {format: 'html', filename: `dist/${outHtml}`},
+      coverage: `dist/${coverageJsonName}`,
+      onlyMapped: true,
+    }
+  );
 }
 
 async function coverageMap() {
