@@ -180,10 +180,11 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     await manager.loadPlayers();
     await nextTick();
 
-    const storyIframes = playerEl.querySelectorAll('iframe');
+    // Swiping without waiting for story loaded event.
     swipeLeft();
     await nextTick();
 
+    const storyIframes = playerEl.querySelectorAll('iframe');
     expect(storyIframes[1].getAttribute('src')).to.exist;
   });
 

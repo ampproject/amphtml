@@ -570,6 +570,8 @@ export class AmpStoryPlayer {
   }
 
   /**
+   * Returns a promise that resolves when story in given iframe is finished
+   * loading.
    * @param {number} iframeIdx
    * @return {!Promise}
    * @private
