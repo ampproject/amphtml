@@ -219,9 +219,7 @@ cc_library(
     srcs = [
         "validator-internal.cc",
     ],
-    visibility = [
-        "//visibility:private",
-    ],
+    visibility = ["//visibility:private"],
     deps = [
         ":error-formatter",
         ":keyframes-parse-css",
