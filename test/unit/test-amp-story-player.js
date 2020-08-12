@@ -165,7 +165,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     );
   });
 
-  it('should not load next story if first one hasn not finished loading', async () => {
+  it('should not load next story if first one has not finished loading', async () => {
     buildStoryPlayer(3);
     await manager.loadPlayers();
     await nextTick();
