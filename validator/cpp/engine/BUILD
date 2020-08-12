@@ -1,8 +1,6 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
-
-load("//tools/build_defs/testing:bzl_library.bzl", "bzl_library")
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("embed_data.bzl", "embed_data")
-load("//tools/build_defs/proto/cpp:cc_proto_library.bzl", "cc_proto_library")
 
 # Requirements:
 # clang with c++17 support.
@@ -21,9 +19,8 @@ exports_files(["LICENSE"])
 proto_library(
     name = "validator-proto",
     srcs = ["validator.proto"],
-    cc_api_version = 2,
     deps = [
-        "//third_party/javascript/amp_validator:validator-proto",
+        "@validator//:validator_proto",
     ],
 )
 
@@ -52,10 +49,10 @@ cc_library(
     srcs = ["parse-layout.cc"],
     hdrs = ["parse-layout.h"],
     deps = [
-        "//third_party/absl/strings",
-        "//third_party/absl/strings:str_format",
-        "//third_party/javascript/amp_validator:validator_cc_proto",
-        "//third_party/re2",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
+        "@com_googlesource_code_re2//:re2",
+        "@validator//:validator_cc_proto",
     ],
 )
 
@@ -65,7 +62,7 @@ cc_test(
     args = ["--suppress_failure_output"],
     deps = [
         ":parse-layout",
-        "//third_party/absl/strings",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -75,9 +72,9 @@ cc_library(
     srcs = ["parse-layout-sizes.cc"],
     hdrs = ["parse-layout-sizes.h"],
     deps = [
-        "//third_party/absl/strings",
-        "//third_party/htmlparser:strings",
-        "//third_party/re2",
+        "@com_google_absl//absl/strings",
+        "@com_googlesource_code_re2//:re2",
+        "@htmlparser//:strings",
     ],
 )
 
@@ -97,10 +94,10 @@ cc_library(
     hdrs = ["parse-srcset.h"],
     deps = [
         "//strings",
-        "//third_party/absl/strings",
-        "//third_party/javascript/amp_validator:validator_cc_proto",
-        "//third_party/re2",
         "@com_google_absl//absl/base",
+        "@com_google_absl//absl/strings",
+        "@com_googlesource_code_re2//:re2",
+        "@validator//:validator_cc_proto",
     ],
 )
 
@@ -121,9 +118,9 @@ cc_library(
     deps = [
         ":utf8-util",
         "//strings",
-        "//third_party/absl/strings",
-        "//third_party/htmlparser:strings",
         "@com_google_absl//absl/base",
+        "@com_google_absl//absl/strings",
+        "@htmlparser//:strings",
     ],
 )
 
@@ -142,10 +139,10 @@ cc_library(
     srcs = ["utf8-util.cc"],
     hdrs = ["utf8-util.h"],
     deps = [
-        "//third_party/absl/strings",
-        "//third_party/absl/strings:cord",
-        "//third_party/htmlparser:strings",
         "@com_google_absl//absl/base",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:cord",
+        "@htmlparser//:strings",
     ],
 )
 
@@ -155,8 +152,8 @@ cc_test(
     args = ["--suppress_failure_output"],
     deps = [
         ":utf8-util",
-        "//third_party/htmlparser:strings",
         "@com_google_googletest//:gtest_main",
+        "@htmlparser//:strings",
     ],
 )
 
@@ -165,10 +162,10 @@ cc_library(
     srcs = ["keyframes-parse-css.cc"],
     hdrs = ["keyframes-parse-css.h"],
     deps = [
-        "//third_party/absl/memory",
-        "//third_party/absl/strings",
-        "//third_party/htmlparser/css:parse-css",
         "@com_google_absl//absl/base",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@htmlparser//css:parse-css",
     ],
 )
 
@@ -178,10 +175,10 @@ cc_test(
     deps = [
         ":keyframes-parse-css",
         "//strings",
-        "//third_party/absl/strings",
-        "//third_party/htmlparser:strings",
-        "//third_party/htmlparser/css:parse-css",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
+        "@htmlparser//:strings",
+        "@htmlparser//css:parse-css",
     ],
 )
 
@@ -190,8 +187,8 @@ cc_library(
     srcs = ["type_identifier.cc"],
     hdrs = ["type_identifier.h"],
     deps = [
-        "//third_party/absl/strings",
-        "//third_party/javascript/amp_validator:validator_cc_proto",
+        "@com_google_absl//absl/strings",
+        "@validator//:validator_cc_proto",
     ],
 )
 
@@ -200,8 +197,8 @@ cc_test(
     srcs = ["type_identifier_test.cc"],
     deps = [
         ":type_identifier",
-        "//third_party/javascript/amp_validator:validator_cc_proto",
         "@com_google_googletest//:gtest_main",
+        "@validator//:validator_cc_proto",
     ],
 )
 
@@ -230,33 +227,35 @@ cc_library(
         ":utf8-util",
         ":validator_cc_proto",
         ":validator_pb",
-        "//file/base",
-        "//third_party/absl/algorithm:container",
-        "//third_party/absl/base:core_headers",
-        "//third_party/absl/container:flat_hash_map",
-        "//third_party/absl/container:flat_hash_set",
-        "//third_party/absl/container:node_hash_map",
-        "//third_party/absl/container:node_hash_set",
-        "//third_party/absl/flags:flag",
-        "//third_party/absl/memory",
-        "//third_party/absl/status",
-        "//third_party/absl/strings",
-        "//third_party/absl/strings:cord",
-        "//third_party/absl/synchronization",
-        "//third_party/htmlparser:atom",
-        "//third_party/htmlparser:atomutil",
-        "//third_party/htmlparser:defer",
-        "//third_party/htmlparser:node",
-        "//third_party/htmlparser:parser",
-        "//third_party/htmlparser:strings",
-        "//third_party/htmlparser:url",
-        "//third_party/htmlparser/css:amp4ads-parse-css",
-        "//third_party/htmlparser/css:parse-css",
-        "//third_party/htmlparser/css:parse_css_cc_proto",
-        "//third_party/htmlparser/json:parser",
-        "//third_party/javascript/amp_validator:validator_cc_proto",
-        "//third_party/re2",
-        "//webutil/url",
+        # TODO: determine correct dep for //file/base
+        # "//file/base",
+        "@com_google_absl//absl/algorithm:container",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/container:node_hash_map",
+        "@com_google_absl//absl/container:node_hash_set",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:cord",
+        "@com_google_absl//absl/synchronization",
+        "@com_googlesource_code_re2//:re2",
+        "@htmlparser//:atom",
+        "@htmlparser//:atomutil",
+        "@htmlparser//:defer",
+        "@htmlparser//:node",
+        "@htmlparser//:parser",
+        "@htmlparser//:strings",
+        "@htmlparser//:url",
+        "@htmlparser//css:amp4ads-parse-css",
+        "@htmlparser//css:parse-css",
+        "@htmlparser//css:parse_css_cc_proto",
+        "@htmlparser//json:parser",
+        "@validator//:validator_cc_proto",
+        # TODO: determine correct dep for //webutil/url
+        # "//webutil/url",
     ],
 )
 
@@ -268,7 +267,7 @@ cc_library(
     deps = [
         ":validator-internal",
         ":validator_cc_proto",
-        "//third_party/javascript/amp_validator:validator_cc_proto",
+        "@validator//:validator_cc_proto",
     ],
     alwayslink = 1,
 )
@@ -276,6 +275,5 @@ cc_library(
 bzl_library(
     name = "embed_data_bzl",
     srcs = ["embed_data.bzl"],
-    parse_tests = False,
     visibility = ["//visibility:private"],
 )
