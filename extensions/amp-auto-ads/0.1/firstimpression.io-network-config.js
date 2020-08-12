@@ -49,7 +49,7 @@ export class FirstImpressionIoConfig {
   getConfigUrl() {
     let previewId = 0;
 
-    const {host, pathname, hash} = this.autoAmpAdsElement_.ampdoc_.win.location;
+    const {host, pathname, hash} = window.location;
     const hashParams = parseQueryString(hash);
     const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
 
