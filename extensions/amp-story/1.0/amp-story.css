@@ -955,12 +955,8 @@ amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-compo
   margin: auto 0 !important;
   background: none !important;
   border: none !important;
-}
-
-/* Hides border unless user is using a keyboard */
-/* This is okay for mobile screen readers like TalkBack since they add 
-   a focus border by default */
-body:not(.amp-mode-keyboard-active) .i-amphtml-story-screen-reader-back-button {
+  /* Hiding the outline since this button is intended to be used with
+     mobile screen readers such as TalkBack which add focus lines. */
   outline: none !important;
 }
 
