@@ -28,14 +28,11 @@ import {CSS} from '../../../build/amp-story-360-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
 import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
 import {Services} from '../../../src/services';
+import {dev, user, userAssert} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
-import {user, userAssert} from '../../../src/log';
-import {
-  closestAncestorElementBySelector,
-  whenUpgradedToCustomElement,
-} from '../../../src/dom';
+import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_360';
@@ -305,17 +302,12 @@ export class AmpStory360 extends AMP.BaseElement {
       (enabled) => enabled && this.enableGyroscope_()
     );
 
-    this.storeService_.subscribe(
-      StateProperty.PAGE_SIZE,
-      this.resizeRenderer_.bind(this),
-      false /* callToInitialize */
+    this.storeService_.subscribe(StateProperty.PAGE_SIZE, () =>
+      this.resizeRenderer_()
     );
   }
 
-  /**
-   * Checks if orientation sensors and permissions exist on device.
-   * @private
-   */
+  /** @private */
   checkGyroscopePermissions_() {
     // If gyroscope isn't supported, keep animating.
     if (typeof DeviceOrientationEvent === 'undefined') {
@@ -327,7 +319,7 @@ export class AmpStory360 extends AMP.BaseElement {
       this.enableGyroscope_();
     }
 
-    // If motion and permissions like ios, build permission button to ask user.
+    // If motion and permissions (like ios) build permission interface to ask user.
     if (typeof DeviceOrientationEvent.requestPermission === 'function') {
       this.buildPermissionUI_();
     }
@@ -335,29 +327,31 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /**
    * Creates a device orientation listener and sets gyroscopeControls state.
-   * Removes the listener and resumes animation if not called in 1000ms.
+   * Removes the listener and resumes animation if listener is not called in 1000ms.
    * @private
    */
   enableGyroscope_() {
     this.gyroscopeControls_ = true;
+
     this.mutateElement(() => {
       this.element.classList.add('i-amphtml-story-360-gyroscope-enabled');
-      this.win.addEventListener('deviceorientation', (e) => {
-        clearTimeout(checkNoMotion);
-        this.onDeviceOrientation_(e);
-      });
-
-      // If device is not in motion, cancel gyroscope controls and animate.
-      const checkNoMotion = setTimeout(() => {
-        this.gyroscopeControls_ = false;
-        this.mutateElement(() => {
-          this.element.classList.remove(
-            'i-amphtml-story-360-gyroscope-enabled'
-          );
-        });
-        this.animate_();
-      }, 1000);
     });
+
+    this.win.addEventListener('deviceorientation', (e) => {
+      this.onDeviceOrientation_(e);
+      // if this listener is called, device is in motion and checkNoMotion is cleared.
+      clearTimeout(checkNoMotion);
+    });
+
+    // If device isn't moving cancel gyroscope controls and resume animating.
+    // This happens with desktop browsers that have the motion API but are stationary.
+    const checkNoMotion = setTimeout(() => {
+      this.gyroscopeControls_ = false;
+      this.mutateElement(() => {
+        this.element.classList.remove('i-amphtml-story-360-gyroscope-enabled');
+      });
+      this.animate_();
+    }, 1000);
   }
 
   /**
@@ -386,45 +380,53 @@ export class AmpStory360 extends AMP.BaseElement {
   }
 
   /**
-   * Creates a "activate" button and UI requesting DeviceOrientation permissions.
+   * Creates a "activate" button and prompt to request DeviceOrientation permissions.
+   * Only built if device has motion sensors and needs permission.
    * @private
    */
   buildPermissionUI_() {
-    this.mutateElement(() => {
-      const activateButton = buildActivateButtonTemplate(this.element);
-      this.element.appendChild(activateButton);
-      activateButton.addEventListener('click', () =>
+    const activateButton = buildActivateButtonTemplate(this.element);
+    this.element.appendChild(activateButton);
+
+    const dialogBox = buildPermissionDialogBoxTemplate(this.element);
+    this.element.appendChild(dialogBox);
+
+    activateButton.addEventListener('click', () => {
+      this.mutateElement(() => {
         dialogBox.classList.toggle(
           'i-amphtml-story-360-permissions-dialog-hidden'
-        )
-      );
+        );
+      });
+    });
 
-      const dialogBox = buildPermissionDialogBoxTemplate(this.element);
-      this.element.appendChild(dialogBox);
+    dialogBox.addEventListener('click', (e) => {
+      dev().assertElement(e.target).dataset['action'] === 'enable' &&
+        this.requestGyroscopePermissions_();
 
-      dialogBox.addEventListener('click', (e) => {
-        const {action} = closestAncestorElementBySelector(
-          e.target,
-          '[data-action]'
-        ).dataset;
-
-        if (
-          action === 'enable' &&
-          this.win.DeviceOrientationEvent.requestPermission
-        ) {
-          this.win.DeviceOrientationEvent.requestPermission()
-            .then((permissionState) => {
-              permissionState === 'granted' &&
-                this.storeService_.dispatch(Action.TOGGLE_GYROSCOPE, true);
-            })
-            .catch((error) => console.log(error));
-        }
-
+      this.mutateElement(() => {
         dialogBox.classList.add(
           'i-amphtml-story-360-permissions-dialog-hidden'
         );
       });
     });
+  }
+
+  /**
+   * Requests permission to the gyroscope sensor.
+   * Emits an event on "granted" to update all 360 components in the story.
+   * @private
+   */
+  requestGyroscopePermissions_() {
+    if (this.win.DeviceOrientationEvent.requestPermission) {
+      this.win.DeviceOrientationEvent.requestPermission()
+        .then((permissionState) => {
+          permissionState === 'granted' &&
+            this.storeService_.dispatch(Action.TOGGLE_GYROSCOPE, true);
+        })
+        .catch((error) => {
+          dev().error(error.message);
+        });
+    }
   }
 
   /** @override */
