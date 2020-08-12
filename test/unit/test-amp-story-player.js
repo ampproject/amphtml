@@ -175,6 +175,18 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     expect(storyIframes[1].getAttribute('src')).to.not.exist;
   });
 
+  it('should load new story if user navigated before first finished loading', async () => {
+    buildStoryPlayer(3);
+    await manager.loadPlayers();
+    await nextTick();
+
+    const storyIframes = playerEl.querySelectorAll('iframe');
+    swipeLeft();
+    await nextTick();
+
+    expect(storyIframes[1].getAttribute('src')).to.exist;
+  });
+
   it(
     'should remove iframe from a story with distance > 1 from current story ' +
       'and give it to a new story that is distance <= 1 when navigating',
