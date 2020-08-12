@@ -118,13 +118,13 @@ amp-consent.i-amphtml-consent-ui-iframe-active {
   transform: translate3d(0px, 100vh, 0px) !important;
 }
 
-amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-modal {
+amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-modal {
   box-sizing: border-box;
   top: 0;
   right: 0;
   animation: 0.5s i-amphtml-modal-appear;
   animation-fill-mode: forwards;
-  height: var(--modal-height) !important;
+  height: var(--i-amphtml-modal-height) !important;
   width: 90vw !important;
   margin: auto !important;
   max-width: 760px;
@@ -136,7 +136,7 @@ amp-consent.i-amphtml-consent-ui-border-enabled {
   box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2) !important;
 }
 
-amp-consent.i-amphtml-consent-ui-border-enabled-modal {
+amp-consent.i-amphtml-consent-ui-modal.i-amphtml-consent-ui-border-enabled {
   border-radius: 8px !important;
   box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2) !important;
 }

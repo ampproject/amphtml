@@ -64,14 +64,13 @@ export const ampConsentMessageType = {
 export const consentUiClasses = {
   iframeFullscreen: 'i-amphtml-consent-ui-iframe-fullscreen',
   iframeActive: 'i-amphtml-consent-ui-iframe-active',
-  modal: 'i-amphtml-consent-modal',
+  modal: 'i-amphtml-consent-ui-modal',
   in: 'i-amphtml-consent-ui-in',
   loading: 'i-amphtml-consent-ui-loading',
   fill: 'i-amphtml-consent-ui-fill',
   placeholder: 'i-amphtml-consent-ui-placeholder',
   mask: 'i-amphtml-consent-ui-mask',
   borderEnabled: 'i-amphtml-consent-ui-border-enabled',
-  borderEnabledModal: 'i-amphtml-consent-ui-border-enabled-modal',
   screenReaderDialog: 'i-amphtml-consent-alertdialog',
 };
 
@@ -601,13 +600,10 @@ export class ConsentUI {
    */
   resetIframe_() {
     const {classList} = this.parent_;
+    // It is ok to remove classes even when they're not present
     classList.remove(consentUiClasses.iframeActive);
-    if (this.modalEnabled_) {
-      classList.remove(consentUiClasses.modal);
-      classList.remove(consentUiClasses.borderEnabledModal);
-    } else if (this.borderEnabled_) {
-      classList.remove(consentUiClasses.borderEnabled);
-    }
+    classList.remove(consentUiClasses.modal);
+    classList.remove(consentUiClasses.borderEnabled);
 
     this.win_.removeEventListener('message', this.boundHandleIframeMessages_);
     classList.remove(consentUiClasses.iframeFullscreen);
@@ -699,15 +695,15 @@ export class ConsentUI {
     }
     setImportantStyles(this.parent_, {
       transform: `translate3d(0px, calc(100% - ${this.initialHeight_}), 0px)`,
-      '--modal-height': `${this.initialHeight_}`,
+      '--i-amphtml-modal-height': `${this.initialHeight_}`,
     });
-    const {classList} = this.parent_;
     // Border is default with modal enabled and option with non-modal
-    if (this.modalEnabled_) {
-      classList.add(consentUiClasses.borderEnabledModal);
-      this.viewport_.enterLightboxMode();
-    } else if (this.borderEnabled_) {
+    if (this.borderEnabled_ || this.modalEnabled_) {
+      const {classList} = this.parent_;
       classList.add(consentUiClasses.borderEnabled);
+    }
+    if (this.modalEnabled_) {
+      this.viewport_.enterLightboxMode();
     }
   }
 

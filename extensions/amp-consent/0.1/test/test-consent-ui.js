@@ -672,15 +672,13 @@ describes.realWin(
         expect(consentUI.parent_.classList.contains(consentUiClasses.modal)).to
           .be.true;
         expect(
-          consentUI.parent_.classList.contains(
-            consentUiClasses.borderEnabledModal
-          )
+          consentUI.parent_.classList.contains(consentUiClasses.borderEnabled)
         ).to.be.true;
         expect(
           consentUI.parent_.classList.contains(consentUiClasses.iframeActive)
         ).to.be.true;
         expect(
-          consentUI.parent_.style.getPropertyValue('--modal-height')
+          consentUI.parent_.style.getPropertyValue('--i-amphtml-modal-height')
         ).to.equal('80vh');
         expect(consentUI.maskElement_.classList.contains(consentUiClasses.mask))
           .to.be.true;
@@ -690,9 +688,7 @@ describes.realWin(
         expect(consentUI.parent_.classList.contains(consentUiClasses.modal)).to
           .be.false;
         expect(
-          consentUI.parent_.classList.contains(
-            consentUiClasses.borderEnabledModal
-          )
+          consentUI.parent_.classList.contains(consentUiClasses.borderEnabled)
         ).to.be.false;
         expect(
           consentUI.parent_.classList.contains(consentUiClasses.iframeActive)
@@ -720,9 +716,7 @@ describes.realWin(
 
         expect(consentUI.overlayEnabled_).to.be.true;
         expect(
-          consentUI.parent_.classList.contains(
-            consentUiClasses.borderEnabledModal
-          )
+          consentUI.parent_.classList.contains(consentUiClasses.borderEnabled)
         ).to.be.true;
       });
 
