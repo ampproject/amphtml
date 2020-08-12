@@ -156,7 +156,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     await manager.loadPlayers();
     await nextTick();
 
-    fireHandler['ampstory:load']('ampstory:load', {});
+    fireHandler['storyLoaded']('storyLoaded', {});
     await nextTick();
 
     const storyIframes = playerEl.querySelectorAll('iframe');

@@ -577,7 +577,7 @@ export class AmpStoryPlayer {
   waitForStoryToLoadPromise_(iframeIdx) {
     return new Promise((resolve) => {
       this.messagingPromises_[iframeIdx].then((messaging) =>
-        messaging.registerHandler('ampstory:load', () => resolve())
+        messaging.registerHandler('storyLoaded', () => resolve())
       );
     });
   }
