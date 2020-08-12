@@ -43,7 +43,7 @@ export function SocialShare({
   height,
   color,
   background,
-  tabIndex,
+  tabIndex = 0,
   style,
   children,
 }) {
@@ -63,7 +63,7 @@ export function SocialShare({
   return (
     <div
       role="button"
-      tabindex={tabIndex || '0'}
+      tabindex={tabIndex}
       onKeyDown={(e) => handleKeyPress(e, finalEndpoint, checkedTarget)}
       onClick={() => handleActivation(finalEndpoint, checkedTarget)}
       style={{...size, ...style}}
