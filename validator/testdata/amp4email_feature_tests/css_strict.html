@@ -93,6 +93,14 @@
     /* Not all properties are automatically allowed */
     .a { invalid: 1px; }
 
+    /* Some properties are allowed, but only certain values */
+    .a { position: absolute; }
+    .a { position: invalid; }
+    .a { z-index: -1; }
+    .a { z-index: invalid; }
+
+    /* Important is not allowed */
+    .a { color: red !important; }
   </style>
 </head>
 <body>

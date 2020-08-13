@@ -645,6 +645,8 @@ amp4email_feature_tests/css_declarations.html:545:0 The property 'text-rendering
 |  <b style='word-wrap: foo'></b>
 |  <b style='writing-mode: foo'></b>
 |  <b style='z-index: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:572:0 CSS syntax error in tag 'b' - the property 'z-index' is set to the disallowed value 'foo'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <!-- Made-up decls -->
 |  <b style='amplitude: foo'></b>
 >> ^~~~~~~~~

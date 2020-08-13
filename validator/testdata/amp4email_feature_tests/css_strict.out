@@ -116,6 +116,20 @@ amp4email_feature_tests/css_strict.html:84:9 CSS syntax error in tag 'style amp-
 >>          ^~~~~~~~~
 amp4email_feature_tests/css_strict.html:94:9 CSS syntax error in tag 'style amp-custom' - invalid property 'invalid'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
 |
+|      /* Some properties are allowed, but only certain values */
+|      .a { position: absolute; }
+|      .a { position: invalid; }
+>>          ^~~~~~~~~
+amp4email_feature_tests/css_strict.html:98:9 CSS syntax error in tag 'style amp-custom' - the property 'position' is set to the disallowed value 'invalid'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
+|      .a { z-index: -1; }
+|      .a { z-index: invalid; }
+>>          ^~~~~~~~~
+amp4email_feature_tests/css_strict.html:100:9 CSS syntax error in tag 'style amp-custom' - the property 'z-index' is set to the disallowed value 'invalid'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
+|
+|      /* Important is not allowed */
+|      .a { color: red !important; }
+>>                     ^~~~~~~~~
+amp4email_feature_tests/css_strict.html:103:20 The text inside tag 'style amp-custom' contains 'CSS !important', which is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
 |    </style>
 |  </head>
 |  <body>
