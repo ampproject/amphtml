@@ -609,7 +609,7 @@ describes.fakeWin('Viewport', {}, (env) => {
       .withExactArgs(
         /* paddingTop */ 0,
         /* lastPaddingTop */ 19,
-        /* duration */ 0,
+        /* duration */ 300,
         /* curve */ 'ease-in',
         /* transient */ true
       )
@@ -617,7 +617,7 @@ describes.fakeWin('Viewport', {}, (env) => {
     bindingMock.expects('hideViewerHeader').withArgs(true, 19).once();
     viewerViewportHandler({
       paddingTop: 0,
-      duation: 300,
+      duration: 300,
       curve: 'ease-in',
       transient: true,
     });
