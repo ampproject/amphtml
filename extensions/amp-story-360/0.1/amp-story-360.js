@@ -472,7 +472,7 @@ export class AmpStory360 extends AMP.BaseElement {
       ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
       return canvas;
     } else {
-      return img;
+      return imgEl;
     }
   }
 
