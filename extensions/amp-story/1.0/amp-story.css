@@ -957,6 +957,9 @@ amp-story-interactive-results[chip-style="transparent"] {
   --i-amphtml-interactive-option-text-color: black !important;
 }
 
+amp-story-interactive-results[chip-style="transparent"] {
+  --interactive-prompt-background: transparent !important;
+}
 amp-story-interactive-results[theme="dark"][chip-style="transparent"] {
   --i-amphtml-interactive-option-text-color: white !important;
 }

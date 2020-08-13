@@ -42,16 +42,17 @@ const buildResultsTemplate = (element) => {
   return html`
     <div class="i-amphtml-story-interactive-results-container">
       <div class="i-amphtml-story-interactive-results-top">
-        <div class="i-amphtml-story-interactive-results-top-score">SCORE</div>
-        <div class="i-amphtml-story-interactive-results-top-line"></div>
-        <div class="i-amphtml-story-interactive-results-top-value">100</div>
+        <div class="i-amphtml-story-interactive-results-top-score">SCORE:</div>
+        <div class="i-amphtml-story-interactive-results-top-value">
+          <span class="i-amphtml-story-interactive-results-top-value-number"
+            >100</span
+          ><span>%</span>
+        </div>
       </div>
       <div class="i-amphtml-story-interactive-results-visuals">
-        <div class="i-amphtml-story-interactive-results-dots"></div>
         <div class="i-amphtml-story-interactive-results-image-border">
           <div class="i-amphtml-story-interactive-results-image"></div>
         </div>
-        <div class="i-amphtml-story-interactive-results-dots"></div>
       </div>
       <div class="i-amphtml-story-interactive-results-prompt"></div>
       <div class="i-amphtml-story-interactive-results-title"></div>
@@ -59,6 +60,9 @@ const buildResultsTemplate = (element) => {
     </div>
   `;
 };
+
+const HAS_IMAGE_CLASS = 'i-amphtml-story-interactive-has-image';
+const HAS_SCORE_CLASS = 'i-amphtml-story-interactive-has-score';
 
 /**
  * Processes the state and returns the condensed results.
@@ -214,12 +218,9 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
    */
   onInteractiveReactStateUpdate_(interactiveState) {
     const results = processResults(interactiveState, this.options_);
-    this.rootEl_.classList.toggle(
-      'i-amphtml-story-interactive-results-show-score',
-      results.percentage != null
-    );
+    this.rootEl_.classList.toggle(HAS_SCORE_CLASS, results.percentage != null);
     this.rootEl_.querySelector(
-      '.i-amphtml-story-interactive-results-top-value'
+      '.i-amphtml-story-interactive-results-top-value-number'
     ).textContent = (results.percentage || 0).toFixed(0);
     this.options_.forEach((e) => {
       if (e.resultscategory === results.category) {
@@ -237,11 +238,19 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
    * @private
    */
   updateCategory_(categorySelected) {
-    setStyle(
-      this.rootEl_.querySelector('.i-amphtml-story-interactive-results-image'),
-      'background',
-      'url(' + categorySelected.image + ')'
+    this.rootEl_.classList.toggle(
+      HAS_IMAGE_CLASS,
+      categorySelected.image != null
     );
+    if (categorySelected.image) {
+      setStyle(
+        this.rootEl_.querySelector(
+          '.i-amphtml-story-interactive-results-image'
+        ),
+        'background',
+        'url(' + categorySelected.image + ')'
+      );
+    }
     this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-results-title'
     ).textContent = categorySelected.resultscategory;
