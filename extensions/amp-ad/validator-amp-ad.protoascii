@@ -64,6 +64,7 @@ tags: {  # <amp-ad>
   }
   attrs: { name: "template" }
   attrs: { name: "type" mandatory: true }
+  attrs: { name: "sticky" value: "" }
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-ad/"
   amp_layout: {
