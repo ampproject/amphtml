@@ -4,7 +4,7 @@ This package is published and available at
 https://www.npmjs.com/package/amphtml-validator.
 
 The source code is available at
-https://github.com/ampproject/amphtml/tree/master/validator/nodejs.
+https://github.com/ampproject/amphtml/tree/master/validator/js/nodejs.
 
 ## Command Line Tool
 
