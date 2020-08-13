@@ -320,7 +320,12 @@ export class AmpStory360 extends AMP.BaseElement {
     }
 
     // If motion and permissions (like ios) build permission interface to ask user.
-    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+    // If permission has been set to denied, do not display permission UI.
+    // Permission cannot be asked for again if the user has denied it.
+    if (
+      typeof DeviceOrientationEvent.requestPermission === 'function' &&
+      this.win.localStorage.getItem('permissionDenied')
+    ) {
       this.buildPermissionUI_();
     }
   }
@@ -425,7 +430,9 @@ export class AmpStory360 extends AMP.BaseElement {
           if (permissionState === 'granted') {
             this.storeService_.dispatch(Action.TOGGLE_GYROSCOPE, true);
           } else if (permissionState === 'denied') {
-            // TODO: handle if user denied permissions in same window.
+            // Set denied state in local storage so we can hide UI if page is reloaded.
+            // This method does not work in private browsing mode.
+            this.win.localStorage.setItem('permissionDenied', true);
             this.element.classList.add(
               'i-amphtml-story-360-hide-permissions-ui'
             );
