@@ -43,7 +43,6 @@
 #include "absl/strings/strip.h"
 #include "absl/strings/substitute.h"
 #include "absl/synchronization/mutex.h"
-#include "error-formatter.h"
 #include "keyframes-parse-css.h"
 #include "parse-layout.h"
 #include "parse-srcset.h"

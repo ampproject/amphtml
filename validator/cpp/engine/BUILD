@@ -218,7 +218,6 @@ cc_library(
     ],
     visibility = ["//visibility:private"],
     deps = [
-        ":error-formatter",
         ":keyframes-parse-css",
         ":parse-layout",
         ":parse-srcset",
