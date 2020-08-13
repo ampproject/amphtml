@@ -257,6 +257,7 @@ function buildStringStyleForTweet(embedData) {
   return `{
     width: ${px(embedData.width)} !important;
     transform: ${embedData.transform} !important;
+    transform-origin: top !important;
     margin: 0 ${embedData.horizontalMargin}px !important;
     }`;
 }
@@ -271,6 +272,7 @@ function buildDefaultStringStyle(embedData) {
     width: ${px(embedData.width)} !important;
     height: ${px(embedData.height)} !important;
     transform: ${embedData.transform} !important;
+    transform-origin: top !important;
     margin: ${embedData.verticalMargin}px ${
     embedData.horizontalMargin
   }px !important;
