@@ -14,15 +14,16 @@
 
 This doc contains the developer documentation for some of the features we plan to launch on the interactive components extension for web stories in a few weeks. All the APIs are final unless noted otherwise, but more functionality will be added in the following weeks. The goal of this beta preview is to flush out any inconsistencies or bugs, and polish the behaviors.
 
-We have included in this documentation:
+This developer preview update covers:
 
-- Component explanations
-- Code examples of proper configuration
-- Backend integration details
-- Example stories showing good usage of the components
-- Demos on the variety of styles and tool integration with example WYSIWYG editor UI
-- Extra explorations and roadmap
-- FAQ section
+- Details on the new quiz and poll components
+- Code examples to show proper configuration
+- API to support a backend and integration details
+- Fully functional example Stories demonstrating good usage of these components
+- Additional demos for the variety of styling and customization options
+- Examples for how you can easily integrate these components into WYSIWYG editors and and tools
+- Additional explorations and roadmap
+- FAQs (please feel free to reach out with other questions & thoughts)
 
 ## List of interactive components
 
