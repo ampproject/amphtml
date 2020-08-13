@@ -1,8 +1,8 @@
 # Interactive components
 
-### Beta preview - August 2020
+### Developer preview - August 2020
 
-## Preview Summary
+## Summary
 
 <table>
   <tr>
