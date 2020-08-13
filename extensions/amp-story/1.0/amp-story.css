@@ -875,8 +875,9 @@ amp-story .amp-video-eq,
 
 .i-amphtml-story-interactive-component {
   align-self: center;
-  width: auto !important;
+  width: auto;
   height: auto !important;
+  pointer-events: none !important;
   /* 224px = the width of a narrow phone (320px) - tap-safe margins (48px * 2) */
   min-width: 224px !important;
   max-width: 400px !important;
