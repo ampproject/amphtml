@@ -18,8 +18,8 @@
 
 #include <algorithm>
 
-#include "absl/strings/case.h"
-#include "../../validator.proto.h"
+#include "absl/strings/match.h"
+#include "validator.pb.h"
 
 namespace amp::validator {
 
@@ -59,31 +59,31 @@ std::string TypeIdentifierToBoltString(TypeIdentifier type_identifier) {
 }
 
 TypeIdentifier GetTypeIdentifier(absl::string_view type_identifier) {
-  if (CaseEqual(type_identifier, "amp") ||
-      CaseEqual(type_identifier, "\u26a1") ||
-      CaseEqual(type_identifier, "\u26a1\ufe0f")) {
+  if (absl::EqualsIgnoreCase(type_identifier, "amp") ||
+      absl::EqualsIgnoreCase(type_identifier, "\u26a1") ||
+      absl::EqualsIgnoreCase(type_identifier, "\u26a1\ufe0f")) {
     return TypeIdentifier::kAmp;
   }
-  if (CaseEqual(type_identifier, "amp4ads") ||
-      CaseEqual(type_identifier, "\u26a14ads") ||
-      CaseEqual(type_identifier, "\u26a1\ufe0f4ads")) {
+  if (absl::EqualsIgnoreCase(type_identifier, "amp4ads") ||
+      absl::EqualsIgnoreCase(type_identifier, "\u26a14ads") ||
+      absl::EqualsIgnoreCase(type_identifier, "\u26a1\ufe0f4ads")) {
     return TypeIdentifier::kAds;
   }
-  if (CaseEqual(type_identifier, "amp4email") ||
-      CaseEqual(type_identifier, "\u26a14email") ||
-      CaseEqual(type_identifier, "\u26a1\ufe0f4email")) {
+  if (absl::EqualsIgnoreCase(type_identifier, "amp4email") ||
+      absl::EqualsIgnoreCase(type_identifier, "\u26a14email") ||
+      absl::EqualsIgnoreCase(type_identifier, "\u26a1\ufe0f4email")) {
     return TypeIdentifier::kEmail;
   }
-  if (CaseEqual(type_identifier, "transformed")) {
+  if (absl::EqualsIgnoreCase(type_identifier, "transformed")) {
     return TypeIdentifier::kTransformed;
   }
-  if (CaseEqual(type_identifier, "experimental")) {
+  if (absl::EqualsIgnoreCase(type_identifier, "experimental")) {
     return TypeIdentifier::kExperimental;
   }
-  if (CaseEqual(type_identifier, "data-ampdevmode")) {
+  if (absl::EqualsIgnoreCase(type_identifier, "data-ampdevmode")) {
     return TypeIdentifier::kDevMode;
   }
-  if (CaseEqual(type_identifier, "data-css-strict")) {
+  if (absl::EqualsIgnoreCase(type_identifier, "data-css-strict")) {
     return TypeIdentifier::kCssStrict;
   }
   return TypeIdentifier::kUnknown;

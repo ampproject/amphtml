@@ -17,7 +17,7 @@
 #include "type_identifier.h"
 
 #include "gtest/gtest.h"
-#include "../../validator.proto.h"
+#include "validator.pb.h"
 
 TEST(TypeIdentifier, TypeIdentifierToString) {
   EXPECT_EQ(
