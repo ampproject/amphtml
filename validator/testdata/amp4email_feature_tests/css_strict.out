@@ -25,39 +25,63 @@ FAIL
 |    <style amp4email-boilerplate>body{visibility:hidden}</style>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <style amp-custom>
-|      /* media queries are allowed */
+|      /* valid media queries */
+|      @media all {}
 |      @media screen {}
+|      @media (device-width: foo) {}
+|      @media (hover: foo) {}
+|      @media (max-device-width: foo) {}
+|      @media (max-resolution: foo) {}
+|      @media (max-width: foo) {}
+|      @media (min-device-width: foo) {}
+|      @media (min-resolution: foo) {}
+|      @media (min-width: foo) {}
+|      @media (orientation: foo) {}
+|      @media (pointer: foo) {}
+|      @media (resolution: foo) {}
+|      @media (width: foo) {}
+|
+|      /* invalid media queries */
+|      @media invalid {}
+>>            ^~~~~~~~~
+amp4email_feature_tests/css_strict.html:44:11 CSS syntax error in tag 'style amp-custom' - disallowed media type 'invalid'.
+|      @media (invalid: foo) {}
+>>             ^~~~~~~~~
+amp4email_feature_tests/css_strict.html:45:12 CSS syntax error in tag 'style amp-custom' - disallowed media feature 'invalid'.
 |
 |      /* all other @ rules are banned */
 |      @supports (display: flex) {}
 >>     ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:31:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@supports'.
+amp4email_feature_tests/css_strict.html:48:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@supports'.
 |      @font-face {}
 >>     ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:32:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@font-face'.
+amp4email_feature_tests/css_strict.html:49:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@font-face'.
 |      @keyframes slidein {}
 >>     ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:33:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@keyframes'.
-|      @invalid {}
+amp4email_feature_tests/css_strict.html:50:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@keyframes'.
+|      @notvalid {}
 >>     ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:34:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@invalid'.
+amp4email_feature_tests/css_strict.html:51:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@notvalid'.
+|      @page {}
+>>     ^~~~~~~~~
+amp4email_feature_tests/css_strict.html:52:4 CSS syntax error in tag 'style amp-custom' - saw invalid at rule '@page'.
 |
 |      /* Since data-css-strict is specified, we apply selector rules. */
-|      .a[invalid] {}
+|      .a[notvalid] {}
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:37:6 CSS error in tag 'style amp-custom' - disallowed attribute selector 'invalid'.
-|      .a:invalid {}
+amp4email_feature_tests/css_strict.html:55:6 CSS error in tag 'style amp-custom' - disallowed attribute selector 'notvalid'.
+|      .a:notvalid {}
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:38:6 CSS error in tag 'style amp-custom' - disallowed pseudo class 'invalid'.
-|      .a::invalid {}
+amp4email_feature_tests/css_strict.html:56:6 CSS error in tag 'style amp-custom' - disallowed pseudo class 'notvalid'.
+|      .a::notvalid {}
 >>       ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:39:6 CSS error in tag 'style amp-custom' - disallowed pseudo element 'invalid'.
-|      :invalid {}
+amp4email_feature_tests/css_strict.html:57:6 CSS error in tag 'style amp-custom' - disallowed pseudo element 'notvalid'.
+|      :notvalid {}
 >>     ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:40:4 CSS error in tag 'style amp-custom' - disallowed pseudo class 'invalid'.
-|      .a[id]:invalid {}
+amp4email_feature_tests/css_strict.html:58:4 CSS error in tag 'style amp-custom' - disallowed pseudo class 'notvalid'.
+|      .a[id]:notvalid {}
 >>           ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:41:10 CSS error in tag 'style amp-custom' - disallowed pseudo class 'invalid'.
+amp4email_feature_tests/css_strict.html:59:10 CSS error in tag 'style amp-custom' - disallowed pseudo class 'notvalid'.
 |
 |      .a[active] {}
 |      .a[alt] {}
@@ -97,12 +121,40 @@ amp4email_feature_tests/css_strict.html:41:10 CSS error in tag 'style amp-custom
 |      .a[type] {}
 |      .a[value] {}
 |      .a[width] {}
+|      .a:active {}
+|      .a:checked {}
+|      .a:default {}
+|      .a:disabled {}
+|      .a:empty {}
+|      .a:enabled {}
+|      .a:first-child {}
+|      .a:first-of-type {}
+|      .a:focus-within {}
+|      .a:hover {}
+|      .a:in-range {}
+|      .a:indeterminate {}
+|      .a:invalid {}
+|      .a:last-child {}
+|      .a:last-of-type {}
+|      .a:not {}
+|      .a:nth-child {}
+|      .a:nth-last-child {}
+|      .a:nth-last-of-type {}
+|      .a:nth-of-type {}
+|      .a:only-child {}
+|      .a:only-of-type {}
+|      .a:optional {}
+|      .a:out-of-range {}
+|      .a:read-only {}
+|      .a:read-write {}
+|      .a:required {}
+|      .a:valid {}
 |
 |      /* Vendor prefixes are not automatically expanded */
 |      .a { margin: 1px; }
 |      .a { -webkit-margin: 1px; }
 >>          ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:84:9 CSS syntax error in tag 'style amp-custom' - invalid property '-webkit-margin'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
+amp4email_feature_tests/css_strict.html:130:9 CSS syntax error in tag 'style amp-custom' - invalid property '-webkit-margin'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
 |
 |      /* Three specific prefixes are explicitly allowlisted */
 |      .a {
@@ -114,22 +166,22 @@ amp4email_feature_tests/css_strict.html:84:9 CSS syntax error in tag 'style amp-
 |      /* Not all properties are automatically allowed */
 |      .a { invalid: 1px; }
 >>          ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:94:9 CSS syntax error in tag 'style amp-custom' - invalid property 'invalid'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
+amp4email_feature_tests/css_strict.html:140:9 CSS syntax error in tag 'style amp-custom' - invalid property 'invalid'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
 |
 |      /* Some properties are allowed, but only certain values */
 |      .a { position: absolute; }
 |      .a { position: invalid; }
 >>          ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:98:9 CSS syntax error in tag 'style amp-custom' - the property 'position' is set to the disallowed value 'invalid'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
+amp4email_feature_tests/css_strict.html:144:9 CSS syntax error in tag 'style amp-custom' - the property 'position' is set to the disallowed value 'invalid'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
 |      .a { z-index: -1; }
 |      .a { z-index: invalid; }
 >>          ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:100:9 CSS syntax error in tag 'style amp-custom' - the property 'z-index' is set to the disallowed value 'invalid'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
+amp4email_feature_tests/css_strict.html:146:9 CSS syntax error in tag 'style amp-custom' - the property 'z-index' is set to the disallowed value 'invalid'. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
 |
 |      /* Important is not allowed */
 |      .a { color: red !important; }
 >>                     ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:103:20 The text inside tag 'style amp-custom' contains 'CSS !important', which is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
+amp4email_feature_tests/css_strict.html:149:20 The text inside tag 'style amp-custom' contains 'CSS !important', which is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
 |    </style>
 |  </head>
 |  <body>

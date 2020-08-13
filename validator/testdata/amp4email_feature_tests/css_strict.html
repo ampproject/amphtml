@@ -24,21 +24,39 @@
   <style amp4email-boilerplate>body{visibility:hidden}</style>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <style amp-custom>
-    /* media queries are allowed */
+    /* valid media queries */
+    @media all {}
     @media screen {}
+    @media (device-width: foo) {}
+    @media (hover: foo) {}
+    @media (max-device-width: foo) {}
+    @media (max-resolution: foo) {}
+    @media (max-width: foo) {}
+    @media (min-device-width: foo) {}
+    @media (min-resolution: foo) {}
+    @media (min-width: foo) {}
+    @media (orientation: foo) {}
+    @media (pointer: foo) {}
+    @media (resolution: foo) {}
+    @media (width: foo) {}
+
+    /* invalid media queries */
+    @media invalid {}
+    @media (invalid: foo) {}
 
     /* all other @ rules are banned */
     @supports (display: flex) {}
     @font-face {}
     @keyframes slidein {}
-    @invalid {}
+    @notvalid {}
+    @page {}
 
     /* Since data-css-strict is specified, we apply selector rules. */
-    .a[invalid] {}
-    .a:invalid {}
-    .a::invalid {}
-    :invalid {}
-    .a[id]:invalid {}
+    .a[notvalid] {}
+    .a:notvalid {}
+    .a::notvalid {}
+    :notvalid {}
+    .a[id]:notvalid {}
 
     .a[active] {}
     .a[alt] {}
@@ -78,6 +96,34 @@
     .a[type] {}
     .a[value] {}
     .a[width] {}
+    .a:active {}
+    .a:checked {}
+    .a:default {}
+    .a:disabled {}
+    .a:empty {}
+    .a:enabled {}
+    .a:first-child {}
+    .a:first-of-type {}
+    .a:focus-within {}
+    .a:hover {}
+    .a:in-range {}
+    .a:indeterminate {}
+    .a:invalid {}
+    .a:last-child {}
+    .a:last-of-type {}
+    .a:not {}
+    .a:nth-child {}
+    .a:nth-last-child {}
+    .a:nth-last-of-type {}
+    .a:nth-of-type {}
+    .a:only-child {}
+    .a:only-of-type {}
+    .a:optional {}
+    .a:out-of-range {}
+    .a:read-only {}
+    .a:read-write {}
+    .a:required {}
+    .a:valid {}
 
     /* Vendor prefixes are not automatically expanded */
     .a { margin: 1px; }
