@@ -26,7 +26,7 @@ min_validator_revision_required: 475
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 1080
+spec_file_revision: 1081
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed"
@@ -5827,26 +5827,29 @@ error_specificity {
   code: CSS_SYNTAX_DISALLOWED_PSEUDO_ELEMENT
   specificity: 122
 }
-
 error_specificity {
-  code: INVALID_UTF8
+  code: CSS_SYNTAX_DISALLOWED_IMPORTANT
   specificity: 123
 }
 error_specificity {
-  code: CSS_EXCESSIVELY_NESTED
+  code: INVALID_UTF8
   specificity: 124
 }
 error_specificity {
-  code: DOCUMENT_SIZE_LIMIT_EXCEEDED
+  code: CSS_EXCESSIVELY_NESTED
   specificity: 125
 }
 error_specificity {
-  code: VALUE_SET_MISMATCH
+  code: DOCUMENT_SIZE_LIMIT_EXCEEDED
   specificity: 126
 }
 error_specificity {
-  code: INVALID_DOCTYPE_HTML
+  code: VALUE_SET_MISMATCH
   specificity: 127
+}
+error_specificity {
+  code: INVALID_DOCTYPE_HTML
+  specificity: 128
 }
 error_specificity {
   code: DEV_MODE_ONLY
@@ -6300,6 +6303,10 @@ error_formats {
   code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT
   format: "CSS syntax error in tag '%1' - the property '%2' is set "
           "to the disallowed value '%3'. Allowed values: %4."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_IMPORTANT
+  format: "Usage of the !important CSS qualifier is not allowed."
 }
 error_formats {
   code: CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE

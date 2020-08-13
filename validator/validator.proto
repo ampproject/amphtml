@@ -849,7 +849,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [default = ERROR];
-  // NEXT AVAILABLE TAG: 117
+  // NEXT AVAILABLE TAG: 118
   enum Code {
     UNKNOWN_CODE = 0;
     INVALID_DOCTYPE_HTML = 111;
@@ -960,6 +960,7 @@ message ValidationError {
     CSS_SYNTAX_DISALLOWED_PSEUDO_CLASS = 115;
     CSS_SYNTAX_DISALLOWED_PSEUDO_ELEMENT = 116;
     CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE = 71;
+    CSS_SYNTAX_DISALLOWED_IMPORTANT = 117;
     CSS_EXCESSIVELY_NESTED = 107;
 
     // The following codes are currently used only by A4A CSS validation.

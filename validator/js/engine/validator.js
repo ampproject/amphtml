@@ -2511,11 +2511,10 @@ class CdataMatcher {
       parse_css.extractImportantDeclarations(stylesheet, important);
       for (const decl of important) {
         context.addError(
-            generated.ValidationError.Code.CDATA_VIOLATES_DENYLIST,
+            generated.ValidationError.Code.CSS_SYNTAX_DISALLOWED_IMPORTANT,
             new LineCol(decl.important_line, decl.important_col),
-            /* params */
-            [getTagDescriptiveName(this.tagSpec_), 'CSS !important'],
-            getTagSpecUrl(this.tagSpec_), validationResult);
+            /* params */[], context.getRules().getStylesSpecUrl(),
+            validationResult);
       }
     }
 
@@ -4988,13 +4987,9 @@ function validateAttrCss(
       }
       if (!maybeSpec.spec().allowImportant) {
         if (declaration.important)
-          // TODO(gregable): Use a more specific error message for
-          // `!important` errors.
           context.addError(
-              generated.ValidationError.Code.INVALID_ATTR_VALUE,
-              context.getLineCol(),
-              /* params */
-              [attrName, getTagDescriptiveName(tagSpec), 'CSS !important'],
+              generated.ValidationError.Code.CSS_SYNTAX_DISALLOWED_IMPORTANT,
+              context.getLineCol(), /* params */[],
               context.getRules().getStylesSpecUrl(), result.validationResult);
       }
       /** @type {!Array<!tokenize_css.ErrorToken>} */

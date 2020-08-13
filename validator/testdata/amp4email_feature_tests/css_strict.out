@@ -181,7 +181,7 @@ amp4email_feature_tests/css_strict.html:146:9 CSS syntax error in tag 'style amp
 |      /* Important is not allowed */
 |      .a { color: red !important; }
 >>                     ^~~~~~~~~
-amp4email_feature_tests/css_strict.html:149:20 The text inside tag 'style amp-custom' contains 'CSS !important', which is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-css)
+amp4email_feature_tests/css_strict.html:149:20 Usage of the !important CSS qualifier is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |    </style>
 |  </head>
 |  <body>
