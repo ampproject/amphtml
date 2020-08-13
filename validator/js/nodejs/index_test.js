@@ -183,7 +183,7 @@ it('also works with newInstance', function() {
   const severalErrorsHtml =
       fs.readFileSync(
           '../../testdata/feature_tests/several_errors.html', 'utf-8')
-         trim();
+         .trim();
   const resultForSeveralErrors = ampValidator.newInstance(validatorJsContents)
       .validateString(severalErrorsHtml);
 
