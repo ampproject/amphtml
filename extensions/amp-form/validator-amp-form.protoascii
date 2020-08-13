@@ -36,6 +36,8 @@ tags: {  # amp-form
     name: "amp-form"
     # AMP4EMAIL doesn't allow version: "latest".
     version: "0.1"
+    deprecated_allow_duplicates: true
+    requires_usage: EXEMPTED
   }
   attr_lists: "common-extension-attrs"
 }

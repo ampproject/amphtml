@@ -20,7 +20,7 @@ FAIL
 |  -->
 |  <!doctype html data-foo id=doctype>
 >>             ^~~~~~~~~
-amp4ads_feature_tests/doctype.html:20:12 Invalid or missing doctype declaration. Should be <!doctype html>. See https://amp.dev/documentation/guides-and-tutorials/start/create/basic_markup/
+amp4ads_feature_tests/doctype.html:20:12 Invalid or missing doctype declaration. Should be '!doctype html'. (see https://amp.dev/documentation/guides-and-tutorials/start/create/basic_markup/)
 |  <html ⚡4ads>
 |  <head>
 |    <meta charset="utf-8">

@@ -30,6 +30,9 @@ FAIL
 |    <style amp-custom>
 |      /* These declarations don't all make sense, this tests their validity, not the CSS itself. */
 |      a {
+|        -moz-appearance: foo;
+|        -webkit-appearance: foo;
+|        -webkit-tap-highlight-color: foo;
 |        align-content: foo;
 |        align-items: foo;
 |        align-self: foo;
@@ -44,6 +47,8 @@ FAIL
 |        animation-play-state: foo;
 |        animation-timing-function: foo;
 |        animation: foo;
+|        appearance: foo;
+|        azimuth: foo;
 |        backface-visibility: foo;
 |        background-attachment: foo;
 |        background-blend-mode: foo;
@@ -102,6 +107,7 @@ FAIL
 |        clip-path: foo;
 |        clip-rule: foo;
 |        clip: foo;
+|        color-adjust: foo;
 |        color-interpolation-filters: foo;
 |        color-interpolation: foo;
 |        color-profile: foo;
@@ -124,6 +130,7 @@ FAIL
 |        direction: foo;
 |        display: foo;
 |        dominant-baseline: foo;
+|        elevation: foo;
 |        empty-cells: foo;
 |        enable-background: foo;
 |        fill-opacity: foo;
@@ -156,8 +163,10 @@ FAIL
 |        font-variant-numeric: foo;
 |        font-variant-position: foo;
 |        font-variant: foo;
+|        font-variation-settings: foo;
 |        font-weight: foo;
 |        font: foo;
+|        gap: foo;
 |        glyph-orientation-horizontal: foo;
 |        glyph-orientation-vertical: foo;
 |        grid-area: foo;
@@ -181,9 +190,14 @@ FAIL
 |        hanging-punctuation: foo;
 |        height: foo;
 |        hyphens: foo;
+|        image-orientation: foo;
 |        image-rendering: foo;
+|        image-resolution: foo;
+|        inline-size: foo;
 |        isolation: foo;
 |        justify-content: foo;
+|        justify-items: foo;
+|        justify-self: foo;
 |        kerning: foo;
 |        left: foo;
 |        letter-spacing: foo;
@@ -211,6 +225,7 @@ FAIL
 |        mix-blend-mode: foo;
 |        object-fit: foo;
 |        object-position: foo;
+|        offset-distance: foo;
 |        opacity: foo;
 |        order: foo;
 |        orphans: foo;
@@ -231,17 +246,31 @@ FAIL
 |        page-break-after: foo;
 |        page-break-before: foo;
 |        page-break-inside: foo;
+|        pause: foo;
+|        pause-after: foo;
+|        pause-before: foo;
 |        perspective-origin: foo;
 |        perspective: foo;
+|        pitch: foo;
+|        pitch-range: foo;
+|        place-items: foo;
 |        pointer-events: foo;
 |        /* position has special rules. Don't use `foo` */
 |        position: initial;
 |        quotes: foo;
 |        resize: foo;
+|        richness: foo;
 |        right: foo;
+|        row-gap: foo;
 |        shape-rendering: foo;
+|        speak-header: foo;
+|        speak-numeral: foo;
+|        speak-punctuation: foo;
+|        speak: foo;
+|        speech-rate: foo;
 |        stop-color: foo;
 |        stop-opacity: foo;
+|        stress: foo;
 |        stroke-dasharray: foo;
 |        stroke-dashoffset: foo;
 |        stroke-linecap: foo;
@@ -259,8 +288,13 @@ FAIL
 |        text-decoration-color: foo;
 |        text-decoration-line: foo;
 |        text-decoration-skip-ink: foo;
+|        text-decoration-skip: foo;
 |        text-decoration-style: foo;
 |        text-decoration: foo;
+|        text-emphasis-color: foo;
+|        text-emphasis-position: foo;
+|        text-emphasis-style: foo;
+|        text-emphasis: foo;
 |        text-fill-color: foo;
 |        text-indent: foo;
 |        text-justify: foo;
@@ -274,6 +308,7 @@ FAIL
 |        text-transform: foo;
 |        text-underline-position: foo;
 |        top: foo;
+|        transform-box: foo;
 |        transform-origin: foo;
 |        transform-style: foo;
 |        transform: foo;
@@ -286,6 +321,7 @@ FAIL
 |        user-select: foo;
 |        vertical-align: foo;
 |        visibility: foo;
+|        voice-family: foo;
 |        white-space: foo;
 |        widows: foo;
 |        width: foo;
@@ -294,36 +330,64 @@ FAIL
 |        word-wrap: foo;
 |        writing-mode: foo;
 |        z-index: foo;
+|        z-index: auto;
+|        z-index: -1;
 |      }
 |      madeupdecls {
 |        amplitude: foo;
 |        barometric-pressure: foo;
 |        degrees-celsius: foo;
 |      }
-|      vendorprefix {
-|        -webkit-user-select: foo;
-|      }
 |    </style>
 |  </head>
 |  <body>
 |  <!-- Test these declaration's validity inside inline style attributes: -->
+|  <b style="-moz-appearance: foo;"></b>
+|  <b style="-webkit-appearance: foo;"></b>
+|  <b style="-webkit-tap-highlight-color: foo;"></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:346:0 The property '-webkit-tap-highlight-color' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='align-content: foo'></b>
 |  <b style='align-items: foo'></b>
 |  <b style='align-self: foo'></b>
 |  <b style='alignment-baseline: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:312:0 The property 'alignment-baseline' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:350:0 The property 'alignment-baseline' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='all: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:351:0 The property 'all' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='animation-delay: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:352:0 The property 'animation-delay' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='animation-direction: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:353:0 The property 'animation-direction' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='animation-duration: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:354:0 The property 'animation-duration' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='animation-fill-mode: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:355:0 The property 'animation-fill-mode' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='animation-iteration-count: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:356:0 The property 'animation-iteration-count' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='animation-name: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:357:0 The property 'animation-name' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='animation-play-state: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:358:0 The property 'animation-play-state' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='animation-timing-function: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:359:0 The property 'animation-timing-function' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='animation: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:360:0 The property 'animation' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+|  <b style='appearance: foo'></b>
+|  <b style='azimuth: foo'></b>
 |  <b style='backface-visibility: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:363:0 The property 'backface-visibility' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='background-attachment: foo'></b>
 |  <b style='background-blend-mode: foo'></b>
 |  <b style='background-clip: foo'></b>
@@ -336,7 +400,7 @@ amp4email_feature_tests/css_declarations.html:312:0 The property 'alignment-base
 |  <b style='background: foo'></b>
 |  <b style='baseline-shift: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:334:0 The property 'baseline-shift' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:374:0 The property 'baseline-shift' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='border-bottom-color: foo'></b>
 |  <b style='border-bottom-left-radius: foo'></b>
 |  <b style='border-bottom-right-radius: foo'></b>
@@ -346,11 +410,23 @@ amp4email_feature_tests/css_declarations.html:334:0 The property 'baseline-shift
 |  <b style='border-collapse: foo'></b>
 |  <b style='border-color: foo'></b>
 |  <b style='border-image-outset: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:383:0 The property 'border-image-outset' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='border-image-repeat: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:384:0 The property 'border-image-repeat' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='border-image-slice: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:385:0 The property 'border-image-slice' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='border-image-source: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:386:0 The property 'border-image-source' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='border-image-width: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:387:0 The property 'border-image-width' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='border-image: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:388:0 The property 'border-image' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='border-left-color: foo'></b>
 |  <b style='border-left-style: foo'></b>
 |  <b style='border-left-width: foo'></b>
@@ -372,6 +448,8 @@ amp4email_feature_tests/css_declarations.html:334:0 The property 'baseline-shift
 |  <b style='border: foo'></b>
 |  <b style='bottom: foo'></b>
 |  <b style='box-decoration-break: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:409:0 The property 'box-decoration-break' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='box-shadow: foo'></b>
 |  <b style='box-sizing: foo'></b>
 |  <b style='break-after: foo'></b>
@@ -382,23 +460,26 @@ amp4email_feature_tests/css_declarations.html:334:0 The property 'baseline-shift
 |  <b style='clear: foo'></b>
 |  <b style='clip-path: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:378:0 The property 'clip-path' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:418:0 The property 'clip-path' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='clip-rule: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:379:0 The property 'clip-rule' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:419:0 The property 'clip-rule' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='clip: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:420:0 The property 'clip' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+|  <b style='color-adjust: foo'></b>
 |  <b style='color-interpolation-filters: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:381:0 The property 'color-interpolation-filters' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:422:0 The property 'color-interpolation-filters' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='color-interpolation: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:382:0 The property 'color-interpolation' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:423:0 The property 'color-interpolation' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='color-profile: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:383:0 The property 'color-profile' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:424:0 The property 'color-profile' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='color-rendering: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:384:0 The property 'color-rendering' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:425:0 The property 'color-rendering' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='color: foo'></b>
 |  <b style='column-count: foo'></b>
 |  <b style='column-fill: foo'></b>
@@ -411,28 +492,37 @@ amp4email_feature_tests/css_declarations.html:384:0 The property 'color-renderin
 |  <b style='column-width: foo'></b>
 |  <b style='columns: foo'></b>
 |  <b style='content: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:437:0 The property 'content' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='counter-increment: foo'></b>
 |  <b style='counter-reset: foo'></b>
+|  <b style='cursor: initial'></b>
 |  <b style='cursor: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:441:0 CSS syntax error in tag 'b' - the property 'cursor' is set to the disallowed value 'foo'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='direction: foo'></b>
 |  <b style='display: foo'></b>
 |  <b style='dominant-baseline: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:402:0 The property 'dominant-baseline' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:444:0 The property 'dominant-baseline' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+|  <b style='elevation: foo'></b>
 |  <b style='empty-cells: foo'></b>
 |  <b style='enable-background: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:404:0 The property 'enable-background' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:447:0 The property 'enable-background' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='fill-opacity: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:405:0 The property 'fill-opacity' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:448:0 The property 'fill-opacity' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='fill-rule: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:406:0 The property 'fill-rule' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:449:0 The property 'fill-rule' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='fill: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:407:0 The property 'fill' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:450:0 The property 'fill' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+|  <b style='filter: blur(5px)'></b>
 |  <b style='filter: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:452:0 CSS syntax error in tag 'b' - the property 'filter' is set to the disallowed value 'foo'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='flex-basis: foo'></b>
 |  <b style='flex-direction: foo'></b>
 |  <b style='flex-flow: foo'></b>
@@ -443,14 +533,16 @@ amp4email_feature_tests/css_declarations.html:407:0 The property 'fill' in attri
 |  <b style='float: foo'></b>
 |  <b style='flood-color: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:417:0 The property 'flood-color' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:461:0 The property 'flood-color' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='flood-opacity: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:418:0 The property 'flood-opacity' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:462:0 The property 'flood-opacity' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='font-family: foo'></b>
 |  <b style='font-feature-settings: foo'></b>
 |  <b style='font-kerning: foo'></b>
 |  <b style='font-language-override: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:466:0 The property 'font-language-override' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='font-size-adjust: foo'></b>
 |  <b style='font-size: foo'></b>
 |  <b style='font-stretch: foo'></b>
@@ -462,26 +554,35 @@ amp4email_feature_tests/css_declarations.html:418:0 The property 'flood-opacity'
 |  <b style='font-variant-ligatures: foo'></b>
 |  <b style='font-variant-numeric: foo'></b>
 |  <b style='font-variant-position: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:477:0 The property 'font-variant-position' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='font-variant: foo'></b>
+|  <b style='font-variation-settings: foo'></b>
 |  <b style='font-weight: foo'></b>
 |  <b style='font: foo'></b>
 |  <b style='glyph-orientation-horizontal: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:437:0 The property 'glyph-orientation-horizontal' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:482:0 The property 'glyph-orientation-horizontal' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='glyph-orientation-vertical: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:438:0 The property 'glyph-orientation-vertical' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:483:0 The property 'glyph-orientation-vertical' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='grid-area: foo'></b>
 |  <b style='grid-auto-columns: foo'></b>
 |  <b style='grid-auto-flow: foo'></b>
 |  <b style='grid-auto-rows: foo'></b>
 |  <b style='grid-column-end: foo'></b>
 |  <b style='grid-column-gap: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:489:0 The property 'grid-column-gap' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='grid-column-start: foo'></b>
 |  <b style='grid-column: foo'></b>
 |  <b style='grid-gap: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:492:0 The property 'grid-gap' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='grid-row-end: foo'></b>
 |  <b style='grid-row-gap: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:494:0 The property 'grid-row-gap' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='grid-row-start: foo'></b>
 |  <b style='grid-row: foo'></b>
 |  <b style='grid-template-areas: foo'></b>
@@ -490,22 +591,33 @@ amp4email_feature_tests/css_declarations.html:438:0 The property 'glyph-orientat
 |  <b style='grid-template: foo'></b>
 |  <b style='grid: foo'></b>
 |  <b style='hanging-punctuation: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:502:0 The property 'hanging-punctuation' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='height: foo'></b>
 |  <b style='hyphens: foo'></b>
+|  <b style='image-orientation: foo'></b>
 |  <b style='image-rendering: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:506:0 The property 'image-rendering' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+|  <b style='image-resolution: foo'></b>
+|  <b style='inline-size: foo'></b>
 |  <b style='isolation: foo'></b>
 |  <b style='justify-content: foo'></b>
+|  <b style='justify-items: foo'></b>
+|  <b style='justify-self: foo'></b>
 |  <b style='kerning: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:463:0 The property 'kerning' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:513:0 The property 'kerning' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='left: foo'></b>
 |  <b style='letter-spacing: foo'></b>
 |  <b style='lighting-color: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:466:0 The property 'lighting-color' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:516:0 The property 'lighting-color' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='line-break: foo'></b>
 |  <b style='line-height: foo'></b>
 |  <b style='list-style-image: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:519:0 The property 'list-style-image' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='list-style-position: foo'></b>
 |  <b style='list-style-type: foo'></b>
 |  <b style='list-style: foo'></b>
@@ -516,19 +628,19 @@ amp4email_feature_tests/css_declarations.html:466:0 The property 'lighting-color
 |  <b style='margin: foo'></b>
 |  <b style='marker-end: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:478:0 The property 'marker-end' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:528:0 The property 'marker-end' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='marker-mid: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:479:0 The property 'marker-mid' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:529:0 The property 'marker-mid' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='marker-start: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:480:0 The property 'marker-start' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:530:0 The property 'marker-start' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='marker: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:481:0 The property 'marker' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:531:0 The property 'marker' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='mask: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:482:0 The property 'mask' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:532:0 The property 'mask' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='max-height: foo'></b>
 |  <b style='max-width: foo'></b>
 |  <b style='min-height: foo'></b>
@@ -536,9 +648,12 @@ amp4email_feature_tests/css_declarations.html:482:0 The property 'mask' in attri
 |  <b style='mix-blend-mode: foo'></b>
 |  <b style='object-fit: foo'></b>
 |  <b style='object-position: foo'></b>
+|  <b style='offset-distance: foo'></b>
 |  <b style='opacity: foo'></b>
 |  <b style='order: foo'></b>
 |  <b style='orphans: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:543:0 The property 'orphans' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='outline-color: foo'></b>
 |  <b style='outline-offset: foo'></b>
 |  <b style='outline-style: foo'></b>
@@ -554,108 +669,171 @@ amp4email_feature_tests/css_declarations.html:482:0 The property 'mask' in attri
 |  <b style='padding-top: foo'></b>
 |  <b style='padding: foo'></b>
 |  <b style='page-break-after: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:558:0 The property 'page-break-after' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='page-break-before: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:559:0 The property 'page-break-before' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='page-break-inside: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:560:0 The property 'page-break-inside' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+|  <b style='pause: foo'></b>
+|  <b style='pause-after: foo'></b>
+|  <b style='pause-before: foo'></b>
 |  <b style='perspective-origin: foo'></b>
 |  <b style='perspective: foo'></b>
+|  <b style='pitch: foo'></b>
+|  <b style='pitch-range: foo'></b>
+|  <b style='place-items: foo'></b>
 |  <b style='pointer-events: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:569:0 The property 'pointer-events' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <!-- position has special rules. Don't use `foo` -->
 |  <b style='position: initial'></b>
 |  <b style='quotes: foo'></b>
 |  <b style='resize: foo'></b>
+|  <b style='richness: foo'></b>
 |  <b style='right: foo'></b>
+|  <b style='row-gap: foo'></b>
 |  <b style='shape-rendering: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:518:0 The property 'shape-rendering' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:577:0 The property 'shape-rendering' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+|  <b style='speak-header: foo'></b>
+|  <b style='speak-numeral: foo'></b>
+|  <b style='speak-punctuation: foo'></b>
+|  <b style='speak: foo'></b>
+|  <b style='speech-rate: foo'></b>
 |  <b style='stop-color: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:519:0 The property 'stop-color' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:583:0 The property 'stop-color' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='stop-opacity: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:520:0 The property 'stop-opacity' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:584:0 The property 'stop-opacity' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+|  <b style='stress: foo'></b>
 |  <b style='stroke-dasharray: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:521:0 The property 'stroke-dasharray' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:586:0 The property 'stroke-dasharray' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='stroke-dashoffset: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:522:0 The property 'stroke-dashoffset' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:587:0 The property 'stroke-dashoffset' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='stroke-linecap: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:523:0 The property 'stroke-linecap' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:588:0 The property 'stroke-linecap' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='stroke-linejoin: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:524:0 The property 'stroke-linejoin' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:589:0 The property 'stroke-linejoin' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='stroke-miterlimit: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:525:0 The property 'stroke-miterlimit' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:590:0 The property 'stroke-miterlimit' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='stroke-opacity: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:526:0 The property 'stroke-opacity' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:591:0 The property 'stroke-opacity' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='stroke-width: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:527:0 The property 'stroke-width' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:592:0 The property 'stroke-width' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='stroke: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:528:0 The property 'stroke' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:593:0 The property 'stroke' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='tab-size: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:594:0 The property 'tab-size' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='table-layout: foo'></b>
 |  <b style='text-align-last: foo'></b>
 |  <b style='text-align: foo'></b>
 |  <b style='text-anchor: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:533:0 The property 'text-anchor' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:598:0 The property 'text-anchor' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='text-combine-upright: foo'></b>
 |  <b style='text-decoration-color: foo'></b>
 |  <b style='text-decoration-line: foo'></b>
 |  <b style='text-decoration-skip-ink: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:602:0 The property 'text-decoration-skip-ink' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+|  <b style='text-decoration-skip: foo'></b>
 |  <b style='text-decoration-style: foo'></b>
 |  <b style='text-decoration: foo'></b>
+|  <b style='text-emphasis-color: foo'></b>
+|  <b style='text-emphasis-position: foo'></b>
+|  <b style='text-emphasis-style: foo'></b>
+|  <b style='text-emphasis: foo'></b>
 |  <b style='text-fill-color: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:610:0 The property 'text-fill-color' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='text-indent: foo'></b>
 |  <b style='text-justify: foo'></b>
 |  <b style='text-orientation: foo'></b>
 |  <b style='text-overflow: foo'></b>
 |  <b style='text-rendering: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:545:0 The property 'text-rendering' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:615:0 The property 'text-rendering' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='text-shadow: foo'></b>
 |  <b style='text-stroke-color: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:617:0 The property 'text-stroke-color' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='text-stroke-width: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:618:0 The property 'text-stroke-width' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='text-stroke: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:619:0 The property 'text-stroke' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='text-transform: foo'></b>
 |  <b style='text-underline-position: foo'></b>
 |  <b style='top: foo'></b>
+|  <b style='transform-box: foo'></b>
 |  <b style='transform-origin: foo'></b>
 |  <b style='transform-style: foo'></b>
 |  <b style='transform: foo'></b>
 |  <b style='transition-delay: foo'></b>
 |  <b style='transition-duration: foo'></b>
 |  <b style='transition-property: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:629:0 CSS syntax error in tag 'b' - the property 'transition-property' is set to the disallowed value 'foo'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+|  <b style='transition-property: opacity, transform'></b>
 |  <b style='transition-timing-function: foo'></b>
 |  <b style='transition: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:632:0 CSS syntax error in tag 'b' - the property 'transition' is set to the disallowed value 'foo'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+|  <b style='transition: opacity 4s ease-in-out 1s;'></b>
 |  <b style='unicode-bidi: foo'></b>
 |  <b style='user-select: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:635:0 The property 'user-select' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='vertical-align: foo'></b>
 |  <b style='visibility: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:637:0 CSS syntax error in tag 'b' - the property 'visibility' is set to the disallowed value 'foo'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+|  <b style='visibility: hidden'></b>
+|  <b style='voice-family: foo'></b>
 |  <b style='white-space: foo'></b>
 |  <b style='widows: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:641:0 The property 'widows' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='width: foo'></b>
 |  <b style='word-break: foo'></b>
 |  <b style='word-spacing: foo'></b>
 |  <b style='word-wrap: foo'></b>
 |  <b style='writing-mode: foo'></b>
 |  <b style='z-index: foo'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:647:0 CSS syntax error in tag 'b' - the property 'z-index' is set to the disallowed value 'foo'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+|  <b style='z-index: auto'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:648:0 CSS syntax error in tag 'b' - the property 'z-index' is set to the disallowed value 'auto'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+|  <b style='z-index: 0'></b>
+|  <b style='z-index: +1'></b>
+|  <b style='z-index: -10'></b>
+|  <b style='z-index: -1000'></b>
+>> ^~~~~~~~~
+amp4email_feature_tests/css_declarations.html:652:0 CSS syntax error in tag 'b' - the property 'z-index' is set to the disallowed value '-1000'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <!-- Made-up decls -->
 |  <b style='amplitude: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:574:0 The property 'amplitude' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:654:0 The property 'amplitude' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='barometric-pressure: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:575:0 The property 'barometric-pressure' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+amp4email_feature_tests/css_declarations.html:655:0 The property 'barometric-pressure' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <b style='degrees-celsius: foo'></b>
 >> ^~~~~~~~~
-amp4email_feature_tests/css_declarations.html:576:0 The property 'degrees-celsius' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
-|  <!-- Vendor Prefix -->
-|  <b style="-webkit-user-select: foo;"></b>
+amp4email_feature_tests/css_declarations.html:656:0 The property 'degrees-celsius' in attribute 'style' in tag 'b' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  </body>
 |  </html>

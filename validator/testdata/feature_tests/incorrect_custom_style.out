@@ -34,10 +34,10 @@ feature_tests/incorrect_custom_style.html:29:4 CSS syntax error in tag 'style am
 |      foo.amp-class {}
 |      foo { b: red !important; }
 >>                  ^~~~~~~~~
-feature_tests/incorrect_custom_style.html:32:17 The text inside tag 'style amp-custom' contains 'CSS !important', which is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
+feature_tests/incorrect_custom_style.html:32:17 Usage of the !important CSS qualifier is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |      foo { b: red ! important; }
 >>                  ^~~~~~~~~
-feature_tests/incorrect_custom_style.html:33:17 The text inside tag 'style amp-custom' contains 'CSS !important', which is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
+feature_tests/incorrect_custom_style.html:33:17 Usage of the !important CSS qualifier is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |      /* This is ok though, since it's a comment: { b: red !important } */
 |
 |      @viewport (mumble mumble) { }
@@ -74,6 +74,6 @@ feature_tests/incorrect_custom_style.html:49:22 CSS syntax error in tag 'style a
 |    <!-- Invalid due to !important -->
 |    <b style="color: red !important"></div>
 >>   ^~~~~~~~~
-feature_tests/incorrect_custom_style.html:60:2 The attribute 'style' in tag 'b' is set to the invalid value 'CSS !important'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+feature_tests/incorrect_custom_style.html:60:2 Usage of the !important CSS qualifier is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  </body>
 |  </html>
