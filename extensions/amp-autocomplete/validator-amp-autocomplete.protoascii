@@ -105,7 +105,6 @@ tags: {  # <amp-autocomplete>
   attrs: { name: "highlight-user-entry" }
   attrs: { name: "inline" }
   attrs: { name: "items" }
-  attrs: { name: "max-entries" }
   attrs: { name: "max-items" }
   attrs: { name: "min-characters" }
   attrs: {

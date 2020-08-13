@@ -366,8 +366,7 @@ TAG_SPEC_NAME_REFERENCE_FIELD = [
 ATTR_LIST_NAME_REFERENCE_FIELD = ['amp.validator.TagSpec.attr_lists']
 
 # These fields contain messages in the .protoascii, but we replace
-# them with message ids, which are numbers. Thus far we do this for
-# the AttrSpecs.
+# them with message ids, which are numbers.
 SYNTHETIC_REFERENCE_FIELD = [
     'amp.validator.AttrList.attrs',
     'amp.validator.AttrSpec.disallowed_value_regex',
@@ -377,6 +376,7 @@ SYNTHETIC_REFERENCE_FIELD = [
     'amp.validator.AttrSpec.value_regex_casei',
     'amp.validator.AttrTriggerSpec.if_value_regex',
     'amp.validator.CdataSpec.cdata_regex',
+    'amp.validator.CssDeclaration.value_regex_casei',
     'amp.validator.TagSpec.attrs',
     'amp.validator.TagSpec.mandatory_alternatives',
     'amp.validator.TagSpec.requires',
