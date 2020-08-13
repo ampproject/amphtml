@@ -49,10 +49,8 @@ const buildResultsTemplate = (element) => {
           ><span>%</span>
         </div>
       </div>
-      <div class="i-amphtml-story-interactive-results-visuals">
-        <div class="i-amphtml-story-interactive-results-image-border">
-          <div class="i-amphtml-story-interactive-results-image"></div>
-        </div>
+      <div class="i-amphtml-story-interactive-results-image-border">
+        <div class="i-amphtml-story-interactive-results-image"></div>
       </div>
       <div class="i-amphtml-story-interactive-results-prompt"></div>
       <div class="i-amphtml-story-interactive-results-title"></div>
