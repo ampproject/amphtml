@@ -338,8 +338,8 @@ export class AmpStory360 extends AMP.BaseElement {
     });
 
     this.win.addEventListener('deviceorientation', (e) => {
-      this.onDeviceOrientation_(e);
-      // if this listener is called, device is in motion and checkNoMotion is cleared.
+      this.isReady_ && this.onDeviceOrientation_(e);
+      // If this listener is called, device is in motion and checkNoMotion is cleared.
       clearTimeout(checkNoMotion);
     });
 
