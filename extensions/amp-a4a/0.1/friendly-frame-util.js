@@ -75,6 +75,7 @@ export function renderCreativeIntoFriendlyFrame(
       html: creativeMetadata.minifiedCreative,
       extensionIds: creativeMetadata.customElementExtensions || [],
       fonts: fontsArray,
+      mergeHtml: true,
     },
     (embedWin, ampdoc) => {
       const parentAmpdoc = element.getAmpDoc();
