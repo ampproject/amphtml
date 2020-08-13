@@ -459,16 +459,8 @@ export class AmpStory360 extends AMP.BaseElement {
     if (imgEl.width > MAX_TEXTURE_SIZE || imgEl.height > MAX_TEXTURE_SIZE) {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      if (imgEl.width > MAX_TEXTURE_SIZE) {
-        const scaleFraction = MAX_TEXTURE_SIZE / imgEl.width;
-        canvas.width = MAX_TEXTURE_SIZE;
-        canvas.height = imgEl.height * scaleFraction;
-      }
-      if (imgEl.height > MAX_TEXTURE_SIZE) {
-        const scaleFraction = MAX_TEXTURE_SIZE / imgEl.height;
-        canvas.width = imgEl.width * scaleFraction;
-        canvas.height = MAX_TEXTURE_SIZE;
-      }
+      canvas.width = Math.min(imgEl.width, MAX_TEXTURE_SIZE);
+      canvas.height = Math.min(imgEl.height, MAX_TEXTURE_SIZE);
       ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
       return canvas;
     } else {
