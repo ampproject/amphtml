@@ -56,14 +56,14 @@ function JsonReporter(runner) {
   const testEvents = [];
   let suiteList = [];
 
+  // We need a fresh array copy every time we enter a new suite,
+  // so we can't use push or pop here (because the suiteList info of previous
+  // tests in the same suite would be changed)
   runner.on(EVENT_SUITE_BEGIN, function (suite) {
-    suiteList.push(suite.title);
+    suiteList = suiteList.concat([suite.title]);
   });
 
   runner.on(EVENT_SUITE_END, function () {
-    // We need a fresh copy every time we make a new suite,
-    // so we can't use pop here (or the suiteList info of previous
-    // tests would be changed)
     suiteList = suiteList.slice(0, -1);
   });
 
