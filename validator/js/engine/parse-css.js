@@ -353,7 +353,8 @@ const Declaration = class extends Rule {
 
   /**
    * For a declaration, if the first non-whitespace token is an identifier,
-   * returns its string value. Otherwise, returns the empty string.
+   * (including a number token type), returns its string value. Otherwise,
+   * returns the empty string.
    * @return {string}
    */
   firstIdent() {
@@ -364,11 +365,18 @@ const Declaration = class extends Rule {
       return /** @type {!tokenize_css.StringValuedToken} */ (this.value[0])
           .value;
     }
+    if (this.value[0].tokenType === tokenize_css.TokenType.NUMBER) {
+      return /** @type {!tokenize_css.NumberToken} */ (this.value[0]).repr;
+    }
     if (this.value.length >= 2 &&
-        (this.value[0].tokenType === tokenize_css.TokenType.WHITESPACE) &&
-        this.value[1].tokenType === tokenize_css.TokenType.IDENT) {
-      return /** @type {!tokenize_css.StringValuedToken} */ (this.value[1])
-          .value;
+        (this.value[0].tokenType === tokenize_css.TokenType.WHITESPACE)) {
+      if (this.value[1].tokenType === tokenize_css.TokenType.IDENT) {
+        return /** @type {!tokenize_css.StringValuedToken} */ (this.value[1])
+            .value;
+      }
+      if (this.value[1].tokenType === tokenize_css.TokenType.NUMBER) {
+        return /** @type {!tokenize_css.NumberToken} */ (this.value[1]).repr;
+      }
     }
     return '';
   }
