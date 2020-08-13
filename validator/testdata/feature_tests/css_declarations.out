@@ -646,6 +646,8 @@ feature_tests/css_declarations.html:548:0 The property 'text-rendering' in attri
 |  <b style='word-wrap: foo'></b>
 |  <b style='writing-mode: foo'></b>
 |  <b style='z-index: foo'></b>
+>> ^~~~~~~~~
+feature_tests/css_declarations.html:575:0 CSS syntax error in tag 'b' - the property 'z-index' is set to the disallowed value 'foo'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  <!-- Made-up decls -->
 |  <b style='amplitude: foo'></b>
 >> ^~~~~~~~~
@@ -925,6 +927,8 @@ feature_tests/css_declarations.html:579:0 The property 'degrees-celsius' in attr
 |    <path style='word-wrap: foo'></path>
 |    <path style='writing-mode: foo'></path>
 |    <path style='z-index: foo'></path>
+>>   ^~~~~~~~~
+feature_tests/css_declarations.html:848:2 CSS syntax error in tag 'path' - the property 'z-index' is set to the disallowed value 'foo'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |    <!-- Made-up decls -->
 |    <path style='amplitude: foo'></path>
 >>   ^~~~~~~~~
