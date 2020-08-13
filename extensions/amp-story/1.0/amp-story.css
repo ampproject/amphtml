@@ -979,6 +979,7 @@ amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-compo
   /* Hiding the outline since this button is intended to be used with
      mobile screen readers such as TalkBack which add focus lines. */
   outline: none !important;
+  pointer-events: none !important;
 }
 
 [dir=rtl]amp-story .i-amphtml-story-screen-reader-back-button {
