@@ -27,9 +27,9 @@ const {
 const {Base} = require('mocha').reporters;
 const {inherits} = require('mocha').utils;
 
-async function writeOutput(output, filename) {
+function writeOutput(output, filename) {
   try {
-    await fs.writeFile(filename, JSON.stringify(output, null, 4));
+    fs.writeFileSync(filename, JSON.stringify(output, null, 4));
     process.stdout.write(
       Base.color(
         'green',
@@ -73,7 +73,7 @@ function JsonReporter(runner) {
     });
   });
 
-  runner.on(EVENT_RUN_END, async function () {
+  runner.on(EVENT_RUN_END, function () {
     const testResults = testEvents.map(({test, suiteList, event}) => ({
       description: test.title,
       suite: suiteList,
@@ -85,7 +85,7 @@ function JsonReporter(runner) {
     // Apparently we'll need to add a --no-exit flag when calling this
     // to allow for the asynchronous reporter.
     // See https://github.com/mochajs/mocha/issues/812
-    await writeOutput({testResults}, `result-reports/e2e.json`);
+    writeOutput({testResults}, `result-reports/e2e.json`);
   });
 }
 
