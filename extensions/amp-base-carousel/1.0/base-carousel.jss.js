@@ -220,7 +220,7 @@ let styleAdded = false;
  * Adds the necessary <style> tag for non-AMP modes.
  * TODO: delete when build step is complete. See: https://docs.google.com/document/d/14gMbnzsTG3F1gxfbLck4kr7At62UYWa-DyrI3nDMJJw/edit?pli=1
  *
- *  @returns Object<string, string>
+ *  @return {!Object}
  */
 export function useStyles() {
   if (!styleAdded && !globalThis.AMP) {
