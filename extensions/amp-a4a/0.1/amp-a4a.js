@@ -60,6 +60,7 @@ import {
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
+import {listenOnce} from '../../../src/event-helper';
 import {parseJson} from '../../../src/json';
 import {processHead} from './head-validation';
 import {setStyle} from '../../../src/style';
@@ -1685,14 +1686,10 @@ export class AmpA4A extends AMP.BaseElement {
     } else {
       // Once skeleton doc has be written to srcdoc we start transferring
       // body chunks.
-      this.iframe.addEventListener(
-        'load',
-        () => {
-          const fieBody = this.iframe.contentDocument.body;
-          this.transferDomBody_(devAssert(fieBody));
-        },
-        {once: true}
-      );
+      listenOnce(this.iframe, 'load', () => {
+        const fieBody = this.iframe.contentDocument.body;
+        this.transferDomBody_(devAssert(fieBody));
+      });
     }
 
     const secureDoc = createSecureDocSkeleton(
