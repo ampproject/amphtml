@@ -17,15 +17,15 @@
 
 const {Base} = require('mocha').reporters;
 const {inherits} = require('mocha').utils;
-const {reportTestFinished} = require('./report-test-status');
-const {symbols} = require('./karma.conf').mochaReporter;
+const {reportTestFinished} = require('../report-test-status');
+const {symbols} = require('../karma.conf').mochaReporter;
 
 /**
  * Custom Mocha reporter for CI builds.
  * Mimics the style of the Karma reporter on Travis.
  * @param {*} runner
  */
-function ciReporter(runner) {
+function MochaDotsReporter(runner) {
   Base.call(this, runner);
   const self = this;
 
@@ -62,5 +62,5 @@ function ciReporter(runner) {
   }
 }
 
-inherits(ciReporter, Base);
-module.exports = ciReporter;
+inherits(MochaDotsReporter, Base);
+module.exports = MochaDotsReporter;
