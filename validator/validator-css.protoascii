@@ -252,7 +252,7 @@ declaration_list {
   declaration: { name: "writing-mode" }
   declaration: {
      name: "z-index"
-     value_regex_casei: "auto|initial|inherit|[-0-9]*"
+     value_regex_casei: "auto|initial|inherit|[-+]?[0-9]+"
   }
 }
 
