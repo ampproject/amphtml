@@ -8,7 +8,7 @@ cc_binary(
         "filecontents_to_cpp_header.cc",
     ],
     deps = [
-        "@htmlparser:defer",
+        "@htmlparser//:defer",
     ],
 )
 
@@ -19,7 +19,7 @@ cc_binary(
     ],
     deps = [
         "//base",
-        "@ampvalidator:validator",
-        "@ampvalidator:validator_cc_proto",
+        "@ampvalidator//:validator",
+        "@ampvalidator//:validator_cc_proto",
     ],
 )

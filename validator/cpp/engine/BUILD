@@ -202,15 +202,6 @@ cc_test(
     ],
 )
 
-genrule(
-    name = "validator-pb",
-    srcs = ["//third_party/javascript/amp_validator:validator.protoascii"],
-    outs = ["validator.pb"],
-    cmd = "$(location :validator-convert) " +
-          "--textproto_in.file=$(SRCS) --pb_out.file=$@",
-    tools = [":validator-convert"],
-)
-
 cc_library(
     name = "validator-internal",
     srcs = [

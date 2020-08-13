@@ -55,3 +55,8 @@ local_repository(
     name = "validator",
     path = "../../",
 )
+
+local_repository(
+    name = "htmlparser",
+    path = "../htmlparser/",
+)
