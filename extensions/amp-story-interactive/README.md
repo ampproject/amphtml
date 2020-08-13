@@ -14,7 +14,17 @@
 
 This doc contains the developer documentation for some of the features we plan to launch on the interactive components extension for web stories in a few weeks. All the APIs are final unless noted otherwise, but more functionality will be added in the following weeks. The goal of this beta preview is to flush out any inconsistencies or bugs, and polish the behaviors.
 
-The components are:
+We have included in this documentation:
+
+- Component explanations
+- Code examples of proper configuration
+- Backend integration details
+- Example stories showing good usage of the components
+- Demos on the variety of styles and tool integration with example WYSIWYG editor UI
+- Extra explorations and roadmap
+- FAQ section
+
+## List of interactive components
 
 <table>
 <tr>
@@ -230,7 +240,7 @@ Polls that want to count towards the categories specified, can do so with the at
 
 ## Backend API
 
-Tools are welcome to create their own backend implementations and provide the url on the **endpoint** attribute, but there will be a Google hosted backend that provides the necessary functionality to support the components out of the box. Users/creators should not be expected to set up their own backends.
+Tools are welcome to create their own backend implementations and provide the url on the **endpoint** attribute, but there will be a Google hosted backend that provides the necessary functionality to support the components out of the box (expected to be released in September). Users/creators should not be expected to set up their own backends.
 
 Meanwhile, please use:
 
@@ -246,7 +256,7 @@ The endpoint will return the JSON on a GET request, useful for testing. The publ
 
 ## Demos
 
-With these components we wanted to help users create more entertaining and immersive experiences, and to facilitate that we have created demos with good use cases of the components. Feel free to ~~steal~~ implement any ideas from these demos into your own stories (or check the source code).
+With these components we wanted to help users create more entertaining and immersive experiences, and to facilitate that, we have created demos with good use cases of the components. Feel free to ~~steal~~ implement any ideas from these demos into your own stories (or check the source code).
 
 <table>
   <tr>
