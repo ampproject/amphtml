@@ -16,7 +16,7 @@
 
 #include "keyframes-parse-css.h"
 
-#include "base/logging.h"
+#include "glog/logging.h"
 #include "absl/memory/memory.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"

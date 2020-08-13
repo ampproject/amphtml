@@ -19,7 +19,7 @@
 #include <string_view>
 
 #include "validator.h"
-#include "../../validator.proto.h"
+#include "validator.pb.h"
 
 static constexpr std::string_view kValidAMPHtml{R"HTML(
 <!--

@@ -93,7 +93,6 @@ cc_library(
     srcs = ["parse-srcset.cc"],
     hdrs = ["parse-srcset.h"],
     deps = [
-        "//strings",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/strings",
         "@com_googlesource_code_re2//:re2",
@@ -117,7 +116,6 @@ cc_library(
     hdrs = ["parse-viewport.h"],
     deps = [
         ":utf8-util",
-        "//strings",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/strings",
         "@htmlparser//:strings",
@@ -174,7 +172,6 @@ cc_test(
     srcs = ["keyframes-parse-css_test.cc"],
     deps = [
         ":keyframes-parse-css",
-        "//strings",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
         "@htmlparser//:strings",

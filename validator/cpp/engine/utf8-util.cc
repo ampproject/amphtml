@@ -16,7 +16,7 @@
 
 #include "utf8-util.h"
 
-#include "base/logging.h"
+#include "glog/logging.h"
 #include "absl/strings/cord.h"
 #include "absl/strings/string_view.h"
 #include "strings.h"
