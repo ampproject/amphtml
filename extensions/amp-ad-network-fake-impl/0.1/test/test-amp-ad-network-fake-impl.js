@@ -235,10 +235,13 @@ describes.realWin(
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width,minimum-scale=1">
         <style amp4ads-boilerplate>body{visibility:hidden}</style>
+        <style amp-custom>
+          #foo { background-color: red; }
+        </style>
         <script async src="https://cdn.ampproject.org/amp4ads-v0.js"></script>
       </head>
       <body>
-        <p>Hello, AMP4ADS world.</p>
+        <p id="foo">Hello, AMP4ADS world.</p>
       </body>
       </html>
       `;
@@ -253,11 +256,12 @@ describes.realWin(
 
       expect(fakeImpl.isValidElement()).to.be.true;
       expect(fakeImpl.getAdUrl()).to.equal(
-        'data:text/html,' + encodeURI(creative)
+        'data:text/html,' + encodeURIComponent(creative)
       );
       const response = await fakeImpl.sendXhrRequest(fakeImpl.getAdUrl());
       const responseText = await response.text();
-      expect(responseText).to.contain('<p>Hello, AMP4ADS world.</p>');
+      expect(responseText).to.contain('#foo { background-color: red; }');
+      expect(responseText).to.contain('<p id="foo">Hello, AMP4ADS world.</p>');
       expect(responseText).to.contain(
         '<script type="application/json" amp-ad-metadata>{"ampRuntimeUtf16CharOffsets":[110,183]}</script></body></html>'
       );
