@@ -102,18 +102,6 @@ Inline CSS properties for the width and height of the player. e.g. `style="width
 
 Set to `back-button` or `close-button`. The button will dispatch an `amp-story-player-back` or `amp-story-player-close` when clicked. This button will disappear when a page attachment is open and reappear when closed.
 
-#### autoplay
-
-With this attribute set, the player will set-up its first story to 'autoplay mode', which applies the embed mode #3. This has the following effect:
-
-- Overrides the story's configuration to auto-advance quickly through its pages
-- Hides UI elements
-- Hides ads
-
-#### circular wrapping
-
-Publishers can set `enable-circular-wrapping` which allows the user to go to the first story when the last story is finished and vice versa.
-
 ## Specify embedded story
 
 The `<amp-story-player>` component contains one `<a>` tag. Point the href attribute to the story URL.
@@ -180,7 +168,7 @@ function StoryPlayer({ url, title, poster, width = 360, height = 600 }) {
 
 - number: the story in the player to which you want to move, relative to the current story.
 
-If the player is currently on the third story out of ten stories, `player.go(1)` will go forward one story to the fourth story and `player.go(-1)` will go backward one story to the second story. If no value is passed or if delta equals 0, current story will persist and no action will be taken. `player.go(10)` does the same thing as `player.go(0)`.
+If the player is currently on the third story out of ten stories, `player.go(1)` will go forward one story to the fourth story and `player.go(-1)` will go backward one story to the second story. If no value is passed or if delta equals 0, current story will persist and no action will be taken.
 
 #### show
 
