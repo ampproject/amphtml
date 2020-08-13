@@ -17,6 +17,7 @@
 #include "parser.h"
 
 #include "gtest/gtest.h"
+#include "absl/flags/declare.h"
 #include "absl/flags/flag.h"
 #include "atom.h"
 #include "atomutil.h"

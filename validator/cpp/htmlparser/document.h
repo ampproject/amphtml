@@ -27,7 +27,7 @@
 namespace htmlparser {
 
 class Parser;
-class ParseOptions;
+struct ParseOptions;
 
 // The document class is a wrapper for the DOM tree exposed with RootNode().
 // All the nodes inside the document are owned by document. The nodes are
