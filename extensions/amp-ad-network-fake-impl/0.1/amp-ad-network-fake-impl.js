@@ -81,7 +81,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
       return src;
     }
     const srcdoc = this.element.getAttribute('srcdoc');
-    return `data:text/html,${encodeURI(srcdoc)}`;
+    return `data:text/html,${encodeURIComponent(srcdoc)}`;
   }
 
   /** @override */
