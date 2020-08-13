@@ -442,6 +442,40 @@ export class AmpStory360 extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
+  /**
+   * Checks if the image is larger than the GPUs max texture size.
+   * Scales the image down if neededed.
+   * Returns the image element if image is within bounds.
+   * If image is out of bounds, returns a scaled canvas element.
+   * @param {!Element} imgEl
+   * @return {!Element}
+   * @private
+   */
+  checkImageReSize(imgEl) {
+    const canvasForGL = document.createElement('canvas');
+    const gl = canvasForGL.getContext('webgl');
+    const MAX_TEXTURE_SIZE = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+
+    if (imgEl.width > MAX_TEXTURE_SIZE || imgEl.height > MAX_TEXTURE_SIZE) {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (imgEl.width > MAX_TEXTURE_SIZE) {
+        const scaleFraction = MAX_TEXTURE_SIZE / imgEl.width;
+        canvas.width = MAX_TEXTURE_SIZE;
+        canvas.height = imgEl.height * scaleFraction;
+      }
+      if (imgEl.height > MAX_TEXTURE_SIZE) {
+        const scaleFraction = MAX_TEXTURE_SIZE / imgEl.height;
+        canvas.width = imgEl.width * scaleFraction;
+        canvas.height = MAX_TEXTURE_SIZE;
+      }
+      ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
+      return canvas;
+    } else {
+      return img;
+    }
+  }
+
   /** @override */
   layoutCallback() {
     const ampImgEl = this.element.querySelector('amp-img');
@@ -456,7 +490,8 @@ export class AmpStory360 extends AMP.BaseElement {
       .then(
         () => {
           this.renderer_ = new Renderer(this.canvas_);
-          this.renderer_.setImage(this.element.querySelector('img'));
+          const img = this.checkImageReSize(this.element.querySelector('img'));
+          this.renderer_.setImage(img);
           this.renderer_.resize();
           if (this.orientations_.length < 1) {
             return;
