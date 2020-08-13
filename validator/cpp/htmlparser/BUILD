@@ -211,7 +211,6 @@ cc_library(
         ":error",
         ":logging",
         ":token",
-        "@com_google_absl//absl/base",
         "@com_github_glog//:glog",
     ],
 )

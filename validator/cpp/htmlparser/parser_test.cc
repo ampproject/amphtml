@@ -17,6 +17,7 @@
 #include "parser.h"
 
 #include "gtest/gtest.h"
+#include "absl/flags/flag.h"
 #include "atom.h"
 #include "atomutil.h"
 #include "node.h"
@@ -744,7 +745,7 @@ TEST(ParserTest, VoidElementsParsedCorrectly) {
 }
 
 TEST(ParserTest, DocumentComplexityTest) {
-  absl::SetFlag(&FLAGS_htmlparser_max_nodes_depth_count, 4);
+  ::absl::SetFlag(&FLAGS_htmlparser_max_nodes_depth_count, 4);
 
   // Document parsing failed, body contains 4 deeply nested nodes..
   htmlparser::Parser p(
