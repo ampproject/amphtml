@@ -41,6 +41,9 @@ FAIL
 |            data-aax_src="302">
 |    </amp-ad>
 |    <!-- Valid -->
+|    <amp-ad sticky width=300 height=250 type="a9" data-aax_size="300x250" data-aax_pubname="test123" data-aax_src="302">
+|    </amp-ad>
+|    <!-- Valid -->
 |    <amp-ad width=300 height=250
 |        type="custom"
 |        data-url="https://foobar.com"
@@ -62,29 +65,29 @@ FAIL
 |    <amp-fx-flying-carpet height="300">
 |      <amp-ad data-multi-size="" height="300" type="foo"></amp-ad>
 >>     ^~~~~~~~~
-amp-ad/0.1/test/validator-amp-ad.html:62:4 The tag 'amp-ad' may not appear as a descendant of tag 'amp-fx-flying-carpet'. (see https://amp.dev/documentation/components/amp-ad/)
+amp-ad/0.1/test/validator-amp-ad.html:65:4 The tag 'amp-ad' may not appear as a descendant of tag 'amp-fx-flying-carpet'. (see https://amp.dev/documentation/components/amp-ad/)
 |    </amp-fx-flying-carpet>
 |    <!-- Invalid: amp-ad in an amp ad container with data-multi-size attr -->
 |    <amp-fx-flying-carpet height="300">
 |      <amp-embed data-multi-size="" height="300" type="foo"></amp-ad>
 >>     ^~~~~~~~~
-amp-ad/0.1/test/validator-amp-ad.html:66:4 The tag 'amp-embed' may not appear as a descendant of tag 'amp-fx-flying-carpet'. (see https://amp.dev/documentation/components/amp-ad/)
+amp-ad/0.1/test/validator-amp-ad.html:69:4 The tag 'amp-embed' may not appear as a descendant of tag 'amp-fx-flying-carpet'. (see https://amp.dev/documentation/components/amp-ad/)
 |    </amp-fx-flying-carpet>
 |    <!-- Invalid: amp-ad missing layout=fluid for fluid ad -->
 |    <amp-ad type=doubleclick width="100" height="fluid"></amp-ad>
 >>   ^~~~~~~~~
-amp-ad/0.1/test/validator-amp-ad.html:69:2 The attribute 'height' in tag 'amp-ad' is set to the invalid value 'fluid'. (see https://amp.dev/documentation/components/amp-ad/)
+amp-ad/0.1/test/validator-amp-ad.html:72:2 The attribute 'height' in tag 'amp-ad' is set to the invalid value 'fluid'. (see https://amp.dev/documentation/components/amp-ad/)
 |    <!-- Invalid: amp-ad type=custom missing data-url-->
 |    <amp-ad width=300 height=250
 >>   ^~~~~~~~~
-amp-ad/0.1/test/validator-amp-ad.html:71:2 The mandatory attribute 'data-url' is missing in tag 'amp-ad'. (see https://github.com/ampproject/amphtml/blob/master/ads/custom.md)
+amp-ad/0.1/test/validator-amp-ad.html:74:2 The mandatory attribute 'data-url' is missing in tag 'amp-ad'. (see https://github.com/ampproject/amphtml/blob/master/ads/custom.md)
 |        type="custom"
 |        template="template-1">
 |    </amp-ad>
 |    <!-- Invalid: amp-ad type=custom non-https data-url-->
 |    <amp-ad width=300 height=250
 >>   ^~~~~~~~~
-amp-ad/0.1/test/validator-amp-ad.html:76:2 Invalid URL protocol 'http:' for attribute 'data-url' in tag 'amp-ad'. (see https://github.com/ampproject/amphtml/blob/master/ads/custom.md)
+amp-ad/0.1/test/validator-amp-ad.html:79:2 Invalid URL protocol 'http:' for attribute 'data-url' in tag 'amp-ad'. (see https://github.com/ampproject/amphtml/blob/master/ads/custom.md)
 |        type="custom"
 |        data-url="http://foobar.com"
 |        template="template-1">
