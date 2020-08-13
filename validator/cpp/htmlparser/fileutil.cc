@@ -24,14 +24,13 @@
 #include <sstream>
 
 #include "defer.h"
-#include "error.h"
 #include "strings.h"
 
 namespace htmlparser {
 
 std::string ReadFile(std::string_view filepath) {
   auto str = std::ostringstream{};
-  std::ifstream fd(filepath);
+  std::ifstream fd(std::string(filepath), std::ios::in);
   defer(fd.close());
   str << fd.rdbuf();
   return str.str();

@@ -133,7 +133,6 @@ cc_library(
     ],
     deps = [
         ":defer",
-        ":error",
         ":strings",
     ],
 )
@@ -213,6 +212,7 @@ cc_library(
         ":logging",
         ":token",
         "@com_google_absl//absl/base",
+        "@com_github_glog//:glog",
     ],
 )
 
@@ -306,7 +306,6 @@ cc_library(
         ":defer",
         ":doctype",
         ":document",
-        ":error",
         ":foreign",
         ":logging",
         ":node",
@@ -314,6 +313,7 @@ cc_library(
         ":tokenizer",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/flags:flag",
+        "@com_github_glog//:glog",
     ],
 )
 
@@ -379,11 +379,11 @@ cc_library(
     ],
     deps = [
         ":casetable",
-        ":error",
         ":htmlentities",
         ":logging",
         ":whitespacetable",
         "@com_google_absl//absl/base",
+        "@com_github_glog//:glog",
     ],
 )
 
