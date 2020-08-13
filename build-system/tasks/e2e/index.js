@@ -19,6 +19,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const ciReporter = require('./mocha-ci-reporter');
 const config = require('../../test-configs/config');
+const dotsReporter = require('./mocha-dots-reporter');
 const glob = require('glob');
 const log = require('fancy-log');
 const Mocha = require('mocha');
@@ -52,11 +53,20 @@ async function cleanUp_() {
 }
 
 function createMocha_() {
+  let reporter;
+  if (argv.testnames || argv.watch) {
+    reporter = '';
+  } else if (argv.report) {
+    reporter = ciReporter;
+  } else {
+    reporter = dotsReporter;
+  }
+
   const mocha = new Mocha({
     // e2e tests have a different standard for when a test is too slow,
     // so we set a non-default threshold.
     slow: SLOW_TEST_THRESHOLD_MS,
-    reporter: argv.testnames || argv.watch ? '' : ciReporter,
+    reporter,
     retries: TEST_RETRIES,
     fullStackTrace: true,
   });
@@ -163,4 +173,5 @@ e2e.flags = {
     'Options are `puppeteer` or `selenium`. Default: `selenium`',
   'headless': '  Runs the browser in headless mode',
   'debug': '  Prints debugging information while running tests',
+  'report': '  Write test result report to a local file',
 };
