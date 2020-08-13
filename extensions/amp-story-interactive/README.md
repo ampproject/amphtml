@@ -12,11 +12,11 @@
   </tr>
 </table>
 
-This doc contains the developer documentation for some of the features we plan to launch on the interactive components extension for web stories in a few weeks. All the APIs are final unless noted otherwise, but more functionality will be added in the following weeks. The goal of this beta preview is to flush out any inconsistencies or bugs, and polish the behaviors.
+This release contains the developer documentation for some of the features we plan to launch on the interactive components extension for web stories in a few weeks. All the APIs are final unless noted otherwise, but more functionality will be added in the following weeks. The goal of this beta preview is to flush out any inconsistencies or bugs, and polish the behaviors.
 
 This developer preview update covers:
 
-- Details on the new quiz and poll components
+- Details on the new quiz and poll components, as well as quiz and category results
 - Code examples to show proper configuration
 - API to support a backend and integration details
 - Fully functional example Stories demonstrating good usage of these components
