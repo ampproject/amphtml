@@ -135,6 +135,22 @@ describe('Google A4A utils', () => {
     const btrConfig = {
       transport: {beacon: false, xhrpost: false},
       requests: {
+        btr1: 'https://example.test?id=1',
+        btr2: 'https://example.test?id=2',
+      },
+      triggers: {
+        beginToRender: {
+          on: 'ini-load',
+          request: ['btr1', 'btr2'],
+          selector: 'amp-ad',
+          selectionMethod: 'closest',
+        },
+      },
+    };
+
+    const fullConfig = {
+      transport: {beacon: false, xhrpost: false},
+      requests: {
         visibility1: 'https://foo.com?hello=world',
         visibility2: 'https://bar.com?a=b',
         btr1: 'https://example.test?id=1',
@@ -197,21 +213,26 @@ describe('Google A4A utils', () => {
         allowConsoleError(
           () => expect(extractAmpAnalyticsConfig(a4a, headers)).to.be.null
         );
+
         url = [];
+        btrUrl = [];
         expect(extractAmpAnalyticsConfig(a4a, headers)).to.not.be.ok;
         expect(extractAmpAnalyticsConfig(a4a, headers)).to.be.null;
 
         url = ['https://foo.com?hello=world', 'https://bar.com?a=b'];
+        btrUrl = [];
         let config = extractAmpAnalyticsConfig(a4a, headers);
         expect(config).to.deep.equal(builtConfig);
 
-        btrUrl = [];
-        config = extractAmpAnalyticsConfig(a4a, headers);
-        expect(config).to.deep.equal(builtConfig);
-
+        url = [];
         btrUrl = ['https://example.test?id=1', 'https://example.test?id=2'];
         config = extractAmpAnalyticsConfig(a4a, headers);
         expect(config).to.deep.equal(btrConfig);
+
+        url = ['https://foo.com?hello=world', 'https://bar.com?a=b'];
+        btrUrl = ['https://example.test?id=1', 'https://example.test?id=2'];
+        config = extractAmpAnalyticsConfig(a4a, headers);
+        expect(config).to.deep.equal(fullConfig);
 
         headers.has = function (name) {
           expect(name).to.equal('X-AmpAnalytics');
