@@ -6831,6 +6831,46 @@ const ValidationHandler =
   }
 
   /**
+   * Currently, the Javascript HTML parser considers Doctype to be another HTML
+   * tag, which is not technically accurate. We have special handling for
+   * doctype in Javascript which applies to all AMP formats, as this is strict
+   * handling for all HTML in general. Specifically "attributes" are not
+   * allowed, even things like `data-foo`.
+   * @param {!parserInterface.ParsedHtmlTag} encounteredTag
+   * @param {!Context} context
+   * @param {!generated.ValidationResult} validationResult
+   */
+  validateDocType(encounteredTag, context, validationResult) {
+    // <!doctype html> - OK
+    if (encounteredTag.attrs().length === 1 &&
+        encounteredTag.attrs()[0].name === 'html')
+      return;
+    // <!doctype html lang=...> OK
+    // This is technically invalid. The 'correct' way to do this is to emit the
+    // lang attribute on the `<html>` tag. However, we observe a number of
+    // websites incorrectly emitting `lang` as part of doctype, so this specific
+    // attribute is allowed to avoid breaking existing pages.
+    if (encounteredTag.attrs().length === 2) {
+      if (encounteredTag.attrs()[0].name === 'html' &&
+          encounteredTag.attrs()[1].name === 'lang')
+        return;
+      if (encounteredTag.attrs()[0].name === 'lang' &&
+          encounteredTag.attrs()[1].name === 'html')
+        return;
+    }
+    if (encounteredTag.attrs().length !== 1 ||
+        encounteredTag.attrs()[0].name !== 'html') {
+      this.context_.addError(
+          generated.ValidationError.Code.INVALID_DOCTYPE_HTML,
+          this.context_.getLineCol(),
+          /* params */[],
+          /* specUrl */ 'https://amp.dev/documentation/' +
+              'guides-and-tutorials/start/create/basic_markup/',
+          this.validationResult_);
+    }
+  }
+
+  /**
    * Callback for a start HTML tag.
    * @param {!parserInterface.ParsedHtmlTag} encounteredTag
    * @override
@@ -6839,6 +6879,14 @@ const ValidationHandler =
     if (encounteredTag.upperName() === 'HTML') {
       this.context_.getRules().validateHtmlTag(
           encounteredTag, this.context_, this.validationResult_);
+    }
+    if (encounteredTag.upperName() === '!DOCTYPE') {
+      this.validateDocType(
+          encounteredTag, this.context_, this.validationResult_);
+      // Even though validateDocType emits all necessary errors about the tag,
+      // we continue to process it further (validateTag and such) so that we can
+      // record the tag was present and record it as the root pseudo element for
+      // the document.
     }
     /** @type {?string} */
     const maybeDuplicateAttrName = encounteredTag.hasDuplicateAttrs();

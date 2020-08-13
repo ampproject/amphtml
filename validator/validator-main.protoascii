@@ -26,7 +26,7 @@ min_validator_revision_required: 475
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 1083
+spec_file_revision: 1084
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed"
@@ -5875,8 +5875,7 @@ error_formats {
 }
 error_formats {
   code: INVALID_DOCTYPE_HTML
-  format: "Invalid or missing doctype declaration. Should be <!doctype html>. "
-          "See https://amp.dev/documentation/guides-and-tutorials/start/create/basic_markup/"
+  format: "Invalid or missing doctype declaration. Should be '!doctype html'."
 }
 error_formats {
   code: MANDATORY_TAG_MISSING
