@@ -24,6 +24,8 @@ FAIL
 |  -->
 |  <!doctype html SYSTEM "https://leaking.via/doctype">
 >> ^~~~~~~~~
+feature_tests/leaks.html:24:0 Invalid or missing doctype declaration. Should be '!doctype html'. (see https://amp.dev/documentation/guides-and-tutorials/start/create/basic_markup/)
+>> ^~~~~~~~~
 feature_tests/leaks.html:24:0 The attribute '"https://leaking.via/doctype"' may not appear in tag 'html !doctype'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
 >> ^~~~~~~~~
 feature_tests/leaks.html:24:0 The attribute 'system' may not appear in tag 'html !doctype'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#required-markup)
