@@ -25,7 +25,6 @@
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_replace.h"
 #include "absl/strings/string_view.h"
-#include "absl/strings/string_view_utils.h"
 #include "../../validator.proto.h"
 #include "re2/re2.h"  // NOLINT(build/deprecated)
 
