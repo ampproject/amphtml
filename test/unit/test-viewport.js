@@ -609,7 +609,7 @@ describes.fakeWin('Viewport', {}, (env) => {
       .withExactArgs(
         /* paddingTop */ 0,
         /* lastPaddingTop */ 19,
-        /* duration */ 300,
+        /* duration */ 0,
         /* curve */ 'ease-in',
         /* transient */ true
       )
