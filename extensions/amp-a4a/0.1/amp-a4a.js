@@ -31,7 +31,7 @@ import {
 import {assertHttpsUrl, tryDecodeUriComponent} from '../../../src/url';
 import {cancellation, isCancellation} from '../../../src/error';
 import {createElementWithAttributes} from '../../../src/dom';
-import {createSecureFrame} from './secure-frame';
+import {createSecureDocSkeleton, createSecureFrame} from './secure-frame';
 import {
   dev,
   devAssert,
@@ -53,7 +53,10 @@ import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getExperimentBranch} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
+import {
+  installFriendlyIframeEmbed,
+  isSrcdocSupported,
+} from '../../../src/friendly-iframe-embed';
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
@@ -1668,8 +1671,6 @@ export class AmpA4A extends AMP.BaseElement {
     const {extensions, fonts, head} = headData;
     this.iframe = createSecureFrame(
       this.element.ownerDocument,
-      devAssert(this.adUrl_),
-      head,
       this.getIframeTitle(),
       height,
       width
@@ -1708,8 +1709,7 @@ export class AmpA4A extends AMP.BaseElement {
       secureDoc,
       extensionIds,
       fonts,
-      false, // mergeHtml
-      (embedWin, ampdoc) => this.preinstallCallback_(embedWin, ampdoc)
+      false // mergeHtml
     ).then((friendlyIframeEmbed) => {
       checkStillCurrent();
       this.makeFieVisible_(

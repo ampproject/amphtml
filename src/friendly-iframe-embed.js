@@ -63,7 +63,7 @@ import {whenContentIniLoad} from './ini-load';
  *   html: ?string,
  *   extensionIds: (?Array<string>|undefined),
  *   fonts: (?Array<string>|undefined),
- *   mergeHtml: boolean,
+ *   mergeHtml: (boolean|undefined),
  * }}
  */
 export let FriendlyIframeSpec;
@@ -142,7 +142,7 @@ export function installFriendlyIframeEmbed(
     );
   }
 
-  const html = spec.mergeHtml ? spec.html : mergeHtml(spec);
+  const html = spec.mergeHtml ? mergeHtml(spec) : spec.html;
   // Receive the signal when iframe is ready: it's document is formed.
   iframe.onload = () => {
     // Chrome does not reflect the iframe readystate.

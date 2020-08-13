@@ -69,7 +69,7 @@ export const createSecureDocSkeleton = (url, sanitizedHeadElements, body) =>
  * @return {!HTMLIFrameElement}
  */
 export function createSecureFrame(document, title, height, width) {
-  const iframe = /** @type {HTMLIFrameElement} */ (createElementWithAttributes(
+  const iframe = /** @type {!HTMLIFrameElement} */ (createElementWithAttributes(
     document,
     'iframe',
     dict({
