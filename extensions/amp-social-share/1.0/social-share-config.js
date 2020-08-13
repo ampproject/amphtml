@@ -19,14 +19,14 @@ import {dict} from '../../../src/utils/object';
 /**
  * Get social share configurations by supported type.
  * @param  {string} type
- * @return {SocialShareConfigDef|undefined}
+ * @return {SocialShareDef.Config|undefined}
  */
 export function getSocialConfig(type) {
   return BUILTINS[type];
 }
 
 /**
- * The SocialShareConfigDef contains the configuration data for pre-configured
+ * The SocialShareDef.Config contains the configuration data for pre-configured
  * types (i.e. 'twitter', 'facebook') for the Amp Social Share component.  The
  * config data contains the following properties:
  *   shareEndpoint {string} - The base API endpoint for sharing to the
@@ -38,20 +38,13 @@ export function getSocialConfig(type) {
  *   defaultBackgroundColor {string} - Default background color code for this
  *     social media type.
  *   bindings {?Array<string>} - Used for email, allows passing in an
- *     attribute that be used in the endpoint, but not as a search param
+ *     attribute that can be used in the endpoint, but not as a search param
  *
- * @typedef {{
- *   shareEndpont: string,
- *   defaultParams: Object<string, string>,
- *   defaultColor: string,
- *   defaultBackgroundColor: string,
- *   bindings: (!Array<string>|undefined),
- * }}
+ * See social-share.types.js for typedef of this type.
  */
-let SocialShareConfigDef;
 
 /**
- * @type {Object<string, SocialShareConfigDef>}
+ * @type {Object<string, SocialShareDef.Config>}
  */
 const BUILTINS = {
   'twitter': {

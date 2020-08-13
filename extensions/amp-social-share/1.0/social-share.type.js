@@ -16,6 +16,9 @@
 
 /** @externs */
 
+/** @const */
+var SocialShareDef = {};
+
 /**
  * @typedef {{
  *   type: (string|undefined),
@@ -26,9 +29,20 @@
  *   height: (number|string|undefined),
  *   color: (string|undefined),
  *   background: (string|undefined),
- *   tabIndex: (string|undefined),
+ *   tabIndex: (number|string|undefined),
  *   style: (string|undefined),
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
-var SocialShareProps;
+SocialShareDef.Props;
+
+/**
+ * @typedef {{
+ *   shareEndpont: string,
+ *   defaultParams: Object<string, string>,
+ *   defaultColor: string,
+ *   defaultBackgroundColor: string,
+ *   bindings: (!Array<string>|undefined),
+ * }}
+ */
+SocialShareDef.Config;

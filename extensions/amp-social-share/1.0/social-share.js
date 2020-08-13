@@ -31,7 +31,7 @@ const DEFAULT_TARGET = '_blank';
 const WINDOW_FEATURES = 'resizable,scrollbars,width=640,height=480';
 
 /**
- * @param {!SocialShareProps} props
+ * @param {!SocialShareDef.Props} props
  * @return {PreactDef.Renderable}
  */
 export function SocialShare({
@@ -46,6 +46,7 @@ export function SocialShare({
   tabIndex = 0,
   style,
   children,
+  ...rest
 }) {
   useResourcesNotify();
   const {
@@ -67,8 +68,15 @@ export function SocialShare({
       onKeyDown={(e) => handleKeyPress(e, finalEndpoint, checkedTarget)}
       onClick={() => handleActivation(finalEndpoint, checkedTarget)}
       style={{...size, ...style}}
+      {...rest}
     >
-      {processChildren(type, children, color, background, size)}
+      {processChildren(
+        /** @type {string} */ (type),
+        children,
+        color,
+        background,
+        size
+      )}
     </div>
   );
 }
@@ -77,7 +85,7 @@ export function SocialShare({
  * If children exist, render the children instead of the icon.  Otherwise,
  * render the icon associated with the specified type with specified color
  * and background (or defaults if not specified).
- * @param {string|undefined} type
+ * @param {string} type
  * @param {?PreactDef.Renderable|undefined} children
  * @param {string|undefined} color
  * @param {string|undefined} background
@@ -88,7 +96,7 @@ function processChildren(type, children, color, background, size) {
   if (children) {
     return children;
   } else {
-    const typeConfig = getSocialConfig(/** @type {string} */ (type)) || {};
+    const typeConfig = getSocialConfig(type) || {};
     const baseStyle = CSS.BASE_STYLE;
     const iconStyle = dict({
       'color': color || typeConfig.defaultColor,
