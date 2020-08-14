@@ -18,8 +18,6 @@
 
 #include <map>
 
-#include "base/integral_types.h"
-#include "strings/case.h"
 #include "absl/strings/ascii.h"
 #include "utf8-util.h"
 #include "strings.h"
