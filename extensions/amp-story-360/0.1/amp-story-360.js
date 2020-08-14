@@ -458,7 +458,7 @@ export class AmpStory360 extends AMP.BaseElement {
    * @return {!Element}
    * @private
    */
-  checkImageReSize(imgEl) {
+  checkImageReSize_(imgEl) {
     const canvasForGL = document.createElement('canvas');
     const gl = canvasForGL.getContext('webgl');
     const MAX_TEXTURE_SIZE = gl.getParameter(gl.MAX_TEXTURE_SIZE);
@@ -489,7 +489,7 @@ export class AmpStory360 extends AMP.BaseElement {
       .then(
         () => {
           this.renderer_ = new Renderer(this.canvas_);
-          const img = this.checkImageReSize(this.element.querySelector('img'));
+          const img = this.checkImageReSize_(this.element.querySelector('img'));
           this.renderer_.setImage(img);
           this.renderer_.resize();
           if (this.orientations_.length < 1) {
