@@ -114,7 +114,6 @@ describes.realWin('friendly-iframe-embed', {amp: true}, (env) => {
     const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
       url: 'https://acme.org/url1',
       html: '<a href="/url2"></a>',
-      mergeHtml: true,
     });
 
     // Attributes set.

@@ -1706,7 +1706,7 @@ export class AmpA4A extends AMP.BaseElement {
       secureDoc,
       extensionIds,
       fonts,
-      false // mergeHtml
+      true // skipHtmlMerge
     ).then((friendlyIframeEmbed) => {
       checkStillCurrent();
       this.makeFieVisible_(
@@ -1767,7 +1767,7 @@ export class AmpA4A extends AMP.BaseElement {
       minifiedCreative,
       customElementExtensions,
       fontsArray || [],
-      true // mergeHtml
+      false // skipHtmlMerge
     ).then((friendlyIframeEmbed) =>
       this.makeFieVisible_(
         friendlyIframeEmbed,
@@ -1782,10 +1782,10 @@ export class AmpA4A extends AMP.BaseElement {
    * @param {string} html
    * @param {!Array<string>} extensionIds
    * @param {!Array<string>} fonts
-   * @param {boolean} mergeHtml
+   * @param {boolean} skipHtmlMerge
    * @return {!Promise<!../../../src/friendly-iframe-embed.FriendlyIframeEmbed>}
    */
-  installFriendlyIframeEmbed_(html, extensionIds, fonts, mergeHtml) {
+  installFriendlyIframeEmbed_(html, extensionIds, fonts, skipHtmlMerge) {
     return installFriendlyIframeEmbed(
       devAssert(this.iframe),
       this.element,
@@ -1796,7 +1796,7 @@ export class AmpA4A extends AMP.BaseElement {
         html,
         extensionIds,
         fonts,
-        mergeHtml,
+        skipHtmlMerge,
       },
       (embedWin, ampdoc) => this.preinstallCallback_(embedWin, ampdoc)
     );
