@@ -86,29 +86,6 @@ const buildActivateButtonTemplate = (element) => {
 };
 
 /**
- * Generates the template for the permission dialog box.
- *
- * @param {!Element} element
- * @return {!Element}
- */
-const buildPermissionDialogBoxTemplate = (element) => {
-  const html = htmlFor(element);
-  return html`
-    <div
-      class="i-amphtml-story-360-permissions-dialog i-amphtml-story-360-permissions-dialog-hidden"
-    >
-      <p>
-        This immersive story requires access to your devices motion sensors.
-      </p>
-      <div class="i-amphtml-story-360-permissions-dialog-button-container">
-        <button data-action="disable" role="button">disable</button>
-        <button data-action="enable" role="button">enable</button>
-      </div>
-    </div>
-  `;
-};
-
-/**
  * Internal helper class representing a camera orientation (POV) in polar
  * coordinates.
  */
