@@ -287,7 +287,7 @@ export class Navigation {
 
     // If we're on cache, resolve relative URLs to the publisher (non-cache) origin.
     const sourceUrl = urlService.getSourceUrl(win.location);
-    url = resolveRelativeUrl(url, sourceUrl);
+    url = urlService.resolveRelativeUrl(url, sourceUrl);
 
     // If we have a target of "_blank", we will want to open a new window. A
     // target of "_top" should behave like it would on an anchor tag and
