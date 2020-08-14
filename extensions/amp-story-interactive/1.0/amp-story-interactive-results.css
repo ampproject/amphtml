@@ -25,35 +25,35 @@
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
-  padding-bottom: 20px;
+  padding-bottom: 20px !important;
 }
 
 .i-amphtml-story-interactive-results-container.i-amphtml-story-interactive-has-image:not(.i-amphtml-story-interactive-has-score) {
-  padding-top: 40px;
+  padding-top: 40px !important;
 }
 
 .i-amphtml-story-interactive-has-score .i-amphtml-story-interactive-results-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 15px 20px;
-  box-sizing: border-box;
-  color: var(--interactive-prompt-text-color);
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 15px 20px !important;
+  box-sizing: border-box !important;
+  color: var(--interactive-prompt-text-color) !important;
 }
 
 .i-amphtml-story-interactive-has-score.i-amphtml-story-interactive-results-top-transparent .i-amphtml-story-interactive-results-top {
-  padding-bottom: 0px;
+  padding-bottom: 0px !important;
 }
 
 .i-amphtml-story-interactive-results-top {
   width: 100% !important;
   border-top-left-radius: var(--i-amphtml-interactive-chip-radius) !important;
   border-top-right-radius: var(--i-amphtml-interactive-chip-radius) !important;
-  display: none;
+  display: none !important;
 }
 
 .i-amphtml-story-interactive-has-score:not(.i-amphtml-story-interactive-has-image) .i-amphtml-story-interactive-results-top {
-  background: var(--interactive-prompt-background);
+  background: var(--interactive-prompt-background) !important;
 }
 
 .i-amphtml-story-interactive-results-top-score {
@@ -76,7 +76,7 @@
 }
 
 .i-amphtml-story-interactive-results-top-value > span:nth-child(2) {
-  font-size: 16px;
+  font-size: 16px !important;
 }
 
 [dir="rtl"] .i-amphtml-story-interactive-results-top-value {
@@ -85,7 +85,7 @@
 }
 
 .i-amphtml-story-interactive-results-container:not(.i-amphtml-story-interactive-has-score) {
-  --i-amphtml-story-interactive-score-display: none;
+  --i-amphtml-story-interactive-score-display: none !important;
 }
 
 .i-amphtml-story-interactive-results-container:not(.i-amphtml-story-interactive-has-image) .i-amphtml-story-interactive-results-image-border {

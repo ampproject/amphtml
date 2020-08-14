@@ -954,6 +954,10 @@ amp-story-interactive-binary-poll[theme="dark"], amp-story-interactive-poll[them
   --i-amphtml-interactive-option-accent-color: white !important;
 }
 
+amp-story-interactive-results:not([chip-style="transparent"]) {
+  --interactive-prompt-text-color: var(--i-amphtml-interactive-strong-text-color);
+}
+
 amp-story-interactive-results[chip-style="transparent"] {
   --i-amphtml-interactive-option-text-color: black !important;
   --i-amphtml-interactive-options-chip-background-color: transparent !important;

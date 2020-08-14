@@ -277,7 +277,7 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
   }
 
   /**
-   * If score background is transparent, remove bottom margin
+   * Check score background has a color with alpha 0, used to adjust layout
    * @return {bool}
    * @private
    **/
@@ -285,7 +285,9 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
     const bgColor = getComputedStyle(
       this.rootEl_.querySelector('.i-amphtml-story-interactive-results-top')
     )['background'];
-    if (bgColor.indexOf('rgba') == 0) {
+    // Check the background starts with rgba and doesn't contain other colors (no gradients)
+    if (bgColor.indexOf('rgba') == 0 && bgColor.lastIndexOf('rgb') == 0) {
+      // If single rgba color, return alpha == 0
       return parseFloat(bgColor.split(', ')[3].split(')')[0]) == 0;
     }
     return false;
