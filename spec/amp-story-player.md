@@ -100,11 +100,22 @@ Inline CSS properties for the width and height of the player. e.g. `style="width
 
 #### exit-control
 
+e.g. `<amp-story-player exit-control="close-button">`
+
 Set to `back-button` or `close-button`. The button will dispatch an `amp-story-player-back` or `amp-story-player-close` when clicked. This button will disappear when a page attachment is open and reappear when closed.
 
-## Specify embedded story
+#### amp-cache
 
-The `<amp-story-player>` component contains one `<a>` tag. Point the href attribute to the story URL.
+e.g. `<amp-story-player amp-cache="cdn.ampproject.org">`
+
+If specified, the player will rewrite the URL using the AMP Cache prefix provided. Currently there are two AMP Cache providers:
+
+- `cdn.ampproject.org`
+- `www.bing-amp.com`
+
+## Specify embedded stories
+
+The `<amp-story-player>` component contains one or more `<a>` tags. Point the href attribute of each to the story URL.
 
 Place the story's title within the `<a>` tag. This provides a better user experience and allows search engines to crawl embedded stories.
 
@@ -133,33 +144,18 @@ CSS variable with the URL pointing to the poster image of the story.
 
 ## Programmatic Control
 
-Call the player's various methods to programmatically control the player. These methods are exposed on the DOM HTML element, `const playerEl = document.querySelector('amp-story-player')` and on the global class variable,`const player = new AmpStoryPlayer(window, playerEl)`.
+Call the player's various methods to programmatically control the player. These methods are exposed on the HTML element, `const playerEl = document.querySelector('amp-story-player')` and on instances of the global class variable,`const player = new AmpStoryPlayer(window, playerEl)`.
 
 ### Methods
 
 #### load
 
-Will initialize the player manually. This can be useful when the player is dynamically added such as when using frameworks like React.
+Will initialize the player manually. This can be useful when the player is dynamically.
 
 ```
-function StoryPlayer({ url, title, poster, width = 360, height = 600 }) {
-
-       useEffect(() => {
-           const playerEl = document.body.querySelector('amp-story-player');
-           const player = new AmpStoryPlayer(window, playerEl);
-           player.load();
-	}, []);
-
-	return (
-		<div>
-		  <amp-story-player style={{ width: `${width}px`, height: `${height}px`}}>
-			<a href={url}>
-			    {title}
-			</a>
-		  </amp-story-player>
-		</div>
-	);
-}
+const playerEl = document.body.querySelector('amp-story-player');
+const player = new AmpStoryPlayer(window, playerEl);
+player.load();
 ```
 
 #### go
@@ -168,7 +164,11 @@ function StoryPlayer({ url, title, poster, width = 360, height = 600 }) {
 
 - number: the story in the player to which you want to move, relative to the current story.
 
-If the player is currently on the third story out of ten stories, `player.go(1)` will go forward one story to the fourth story and `player.go(-1)` will go backward one story to the second story. If no value is passed or if delta equals 0, current story will persist and no action will be taken.
+If the player is currently on the third story out of five stories:
+
+- `player.go(1)` will go forward one story to the fourth story
+- `player.go(-1)` will go backward one story to the second story
+- If no value is passed or if delta equals 0, current story will persist and no action will be taken.
 
 #### show
 
@@ -176,7 +176,7 @@ If the player is currently on the third story out of ten stories, `player.go(1)`
 
 - string: the URL of the story to show.
 
-Will change the current story being displayed by the player. If the URL is not found, an error will be thrown. This will be changed later on to automatically add the story.
+Will change the current story being displayed by the player.
 
 ```
 player.show(url);
@@ -186,15 +186,15 @@ player.show(url);
 
 **Parameters**
 
-- array of storyObj: contains the stories to be added.
+- array of story objects
 
-**StoryObj Type**
+Each story object contains the following properties:
 
 - href string: story URL
 - title string (optional): story title, to be added to the anchor's title
 - posterImage string (optional): a URL for the story poster. Used as a placeholder while the story loads.
 
-The player will try to load the story from the cache that was specified at the player level.
+The player will rewrite the URL using the AMP Cache prefix if provided in the [player level attribute](#amp-cache).
 
 ```
 player.add([
@@ -208,6 +208,8 @@ player.add([
 
 Will mute/unmute the current story. This will not persist across stories, eg. calling `player.mute()` on the first story will not mute the second story.
 
+Please note that due to web standards, the default state is muted and cannot be unmuted unless the user unmuted previously. Only webviews explicitly allowing autoplaying media with sound can use unmute right away.
+
 ```
 player.mute();
 player.unmute();
@@ -215,7 +217,7 @@ player.unmute();
 
 #### play/pause
 
-Will play/pause the current story. This will have an effect when there is either page auto-advancement or media playing. Otherwise, this has no effect.
+Will play/pause the current story. This will affect e.g. page auto-advancement or media playing.
 
 ```
 player.play();
