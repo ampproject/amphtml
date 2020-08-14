@@ -787,6 +787,7 @@ app.get('/get-variable-request', getVariableRequest);
 let forcePromptOnNext = false;
 app.post('/get-consent-v1/', (req, res) => {
   cors.assertCors(req, res, ['POST']);
+  console.log(req);
   const body = {
     'promptIfUnknown': true,
     'forcePromptOnNext': forcePromptOnNext,
