@@ -33,10 +33,10 @@ FAIL
 |    <!-- Invalid: !important is not allowed -->
 |    <amp-img layout=fill src=lemur.png style="display:block !important; width:100px;"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/inline_style.html:33:2 The attribute 'style' in tag 'amp-img' is set to the invalid value 'CSS !important'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+feature_tests/inline_style.html:33:2 Usage of the !important CSS qualifier is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |    <amp-img layout=fill src=lemur.png style="display:block ! important; width:100px;"></amp-img>
 >>   ^~~~~~~~~
-feature_tests/inline_style.html:34:2 The attribute 'style' in tag 'amp-img' is set to the invalid value 'CSS !important'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
+feature_tests/inline_style.html:34:2 Usage of the !important CSS qualifier is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |    <!-- Invalid: position:fixed is not allowed -->
 |    <amp-img layout=fill src=lemur.png style="display: block; position: fixed; width: 100px;"></amp-img>
 >>   ^~~~~~~~~

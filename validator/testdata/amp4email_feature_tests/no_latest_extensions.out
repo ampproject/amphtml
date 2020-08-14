@@ -63,15 +63,9 @@ amp4email_feature_tests/no_latest_extensions.html:36:2 The attribute 'src' in ta
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-amp4email_feature_tests/no_latest_extensions.html:41:6 The extension 'amp-accordion' was found on this page, but is unused. Please remove this extension.
->>       ^~~~~~~~~
 amp4email_feature_tests/no_latest_extensions.html:41:6 The extension 'amp-anim' was found on this page, but is unused. Please remove this extension.
 >>       ^~~~~~~~~
 amp4email_feature_tests/no_latest_extensions.html:41:6 The extension 'amp-carousel' was found on this page, but is unused. Please remove this extension.
->>       ^~~~~~~~~
-amp4email_feature_tests/no_latest_extensions.html:41:6 The extension 'amp-fit-text' was found on this page, but is unused. Please remove this extension.
->>       ^~~~~~~~~
-amp4email_feature_tests/no_latest_extensions.html:41:6 The extension 'amp-form' was found on this page, but is unused. Please remove this extension.
 >>       ^~~~~~~~~
 amp4email_feature_tests/no_latest_extensions.html:41:6 The extension 'amp-list' was found on this page, but is unused. Please remove this extension.
 >>       ^~~~~~~~~
