@@ -280,9 +280,47 @@ See below for a full example,
 </amp-list>
 ```
 
+### Using amp-script as a data source
+
+You may use an exported `<amp-script>` function as the data source for `<amp-list>`. This enables you to flexibly combine and transform server responses before handoff to `<amp-list>`. The required format is the `<amp-script>` ID and the function name separated by a period, e.g. `amp-script:id.functionName`.
+
+See below for an example:
+
+```html
+<!--
+  See the [amp-script](https://amp.dev/documentation/components/amp-script/) documentation to setup the component and export your function>
+-->
+<amp-script id="dataFunctions" script="local-script" nodom></amp-script>
+<script id="local-script" type="text/plain" target="amp-script">
+  function getRemoteData() {
+    return fetch('https://example.com')
+      .then(resp => resp.json())
+      .then(transformData)
+  }
+  exportFunction('getRemoteData', getRemoteData);
+</script>
+
+<!-- "exported-functions" is the <amp-script> id, and "getRemoteData" corresponds to the exported function. -->
+<amp-list
+  id="amp-list"
+  width="auto"
+  height="100"
+  layout="fixed-height"
+  src="amp-script:dataFunctions.getRemoteData"
+>
+  <template type="amp-mustache">
+    <div>{{.}}</div>
+  </template>
+</amp-list>
+```
+
+[tip type="important"]
+When using `<amp-script>` as merely a data-layer with no DOM manipulation, you may benefit from the [nodom](https://amp.dev/documentation/components/amp-script/#attributes) attribute. It improves the performance of the `<amp-script>`.
+[/tip]
+
 ### Load more and infinite scroll
 
-We've introduced the `load-more` attributes with options `manual` and `auto` to allow pagination and infinite scroll.
+The `load-more` attribute has options `manual` and `auto` to allow pagination and infinite scroll.
 
 ```html
 <amp-list
@@ -448,7 +486,11 @@ may make a request to something like `https://foo.com/list.json?0.8390278471201`
 ### `src` (required)
 
 The URL of the remote endpoint that returns the JSON that will be rendered
-within this `<amp-list>`. This must be a CORS HTTP service. The URL's protocol must be HTTPS.
+within this `<amp-list>`. There are three valid protocols for the `src` attribute.
+
+1. **https**: This must refer to a CORS HTTP service. Insecure HTTP is not supported.
+2. **amp-state**: For initializing from `<amp-state>` data. See [Initialization from `<amp-state>`](#initialization-from-amp-state) for more details.
+3. **amp-script**: For using `<amp-script>` functions as the data source. See [Using `<amp-script>` as a data source](#using-amp-script-as-a-data-source) for more details.
 
 [tip type="important"]
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
