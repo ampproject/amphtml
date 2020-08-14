@@ -439,7 +439,7 @@ export class AmpStory360 extends AMP.BaseElement {
           }
         })
         .catch((error) => {
-          dev().error(error.message);
+          dev().error(TAG, `Gyroscope permission error: ${error.message}`);
         });
     }
   }
