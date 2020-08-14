@@ -578,7 +578,7 @@ export class AmpScriptService {
         // extraction is ready.
         throw user().createExpectedError(
           TAG,
-          `Script hash not found for ${debugId}. You must include <meta name="amp-script-src" content="sha384-${hash}">.` +
+          `Script hash not found for ${debugId}. You must include <meta name="amp-script-src" content="sha384-${hash}">. ` +
             'See https://amp.dev/documentation/components/amp-script/#script-hash.'
         );
       }
