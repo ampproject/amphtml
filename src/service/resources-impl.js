@@ -1909,7 +1909,6 @@ export class ResourcesImpl {
         this.firstPassDone_.resolve();
       }
     };
-    const noop = () => {};
     const pause = () => {
       this.resources_.forEach((r) => r.pause());
     };
@@ -1943,13 +1942,11 @@ export class ResourcesImpl {
 
     vsm.addTransition(inactive, visible, resume);
     vsm.addTransition(inactive, hidden, resume);
-    vsm.addTransition(inactive, inactive, noop);
     vsm.addTransition(inactive, paused, doWork);
 
     vsm.addTransition(paused, visible, resume);
     vsm.addTransition(paused, hidden, doWork);
     vsm.addTransition(paused, inactive, unload);
-    vsm.addTransition(paused, paused, noop);
   }
 
   /**
