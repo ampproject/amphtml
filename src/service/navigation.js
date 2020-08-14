@@ -30,7 +30,7 @@ import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
-import {isLocalhostOrigin, resolveRelativeUrl} from '../url';
+import {isLocalhostOrigin} from '../url';
 import {toWin} from '../types';
 import PriorityQueue from '../utils/priority-queue';
 
