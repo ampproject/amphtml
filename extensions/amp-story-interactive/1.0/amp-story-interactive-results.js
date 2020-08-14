@@ -255,6 +255,10 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
     this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-results-description'
     ).textContent = categorySelected.text || '';
+    this.rootEl_.classList.toggle(
+      'i-amphtml-story-interactive-results-top-transparent',
+      this.scoreBackgroundIsTransparent_()
+    );
   }
 
   /** @override */
@@ -270,5 +274,20 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
   /** @override */
   updateStoryStoreState_(unusedOption) {
     // Prevent from updating the state.
+  }
+
+  /**
+   * If score background is transparent, remove bottom margin
+   * @return {bool}
+   * @private
+   **/
+  scoreBackgroundIsTransparent_() {
+    const bgColor = getComputedStyle(
+      this.rootEl_.querySelector('.i-amphtml-story-interactive-results-top')
+    )['background'];
+    if (bgColor.indexOf('rgba') == 0) {
+      return parseFloat(bgColor.split(', ')[3].split(')')[0]) == 0;
+    }
+    return false;
   }
 }

@@ -26,10 +26,9 @@
     }
 
     amp-story-interactive-results[chip-style="transparent"][theme="dark"] {
-      /* border: 2px solid white; */
-      background: #000000aa;
+      background: transparent;
       border-radius: 32px;
-      border: none;
+      border: 2px double white;
     }
     </style>
   </head>
@@ -102,6 +101,46 @@
           </amp-story-grid-layer>
         </amp-story-page>
 
+        <amp-story-page id="quiz-results-no-image" style="background-color:black">
+          <amp-story-grid-layer template="fill">
+            <amp-img style="opacity:0.5"
+                src="https://images.unsplash.com/photo-1522441815192-d9f04eb0615c?auto=format&fit=crop&w=1164&q=80"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer>
+            <amp-story-interactive-results
+                style="--interactive-accent-color: #F34E4E"
+								prompt-text="You are a"
+                option-1-results-category="Cat"
+                option-1-text="Everyone loves cats, and so do you! Cats are the best companion to WFH"
+                option-1-results-threshold="0"
+                option-2-results-category="Dog" option-2-results-threshold="100">
+            </amp-story-interactive-results>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="quiz-results-no-image-score" style="background-color:black">
+          <amp-story-grid-layer template="fill">
+            <amp-img style="opacity:0.5"
+                src="https://images.unsplash.com/photo-1522441815192-d9f04eb0615c?auto=format&fit=crop&w=1164&q=80"
+                layout="responsive"
+                height="1600"
+                width="900">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer>
+            <amp-story-interactive-results
+                style="--interactive-accent-color: #FFAABB"
+								prompt-text="You are a"
+                option-1-results-category="Cat"
+                option-1-text="Everyone loves cats, and so do you! Cats are the best companion to WFH"
+                option-2-results-category="Dog">
+            </amp-story-interactive-results>
+          </amp-story-grid-layer>
+        </amp-story-page>
+
         <amp-story-page id="quiz-results-transparent" style="background-color:white">
           <amp-story-grid-layer template="fill">
             <amp-img style="opacity:0.7"
@@ -146,8 +185,7 @@
             </amp-story-interactive-results>
           </amp-story-grid-layer>
         </amp-story-page>
-
-        <amp-story-page id="quiz-results-no-image" style="background-color:black">
+        <amp-story-page id="quiz-results-transparent-no-image" style="background-color:black">
           <amp-story-grid-layer template="fill">
             <amp-img style="opacity:0.5"
                 src="https://images.unsplash.com/photo-1522441815192-d9f04eb0615c?auto=format&fit=crop&w=1164&q=80"
@@ -159,31 +197,13 @@
           <amp-story-grid-layer>
             <amp-story-interactive-results
                 style="--interactive-accent-color: #F34E4E"
-								prompt-text="You are a"
+                prompt-text="You are a"
+                theme="dark"
+                chip-style="transparent"
                 option-1-results-category="Cat"
                 option-1-text="Everyone loves cats, and so do you! Cats are the best companion to WFH"
                 option-1-results-threshold="0"
                 option-2-results-category="Dog" option-2-results-threshold="100">
-            </amp-story-interactive-results>
-          </amp-story-grid-layer>
-        </amp-story-page>
-
-        <amp-story-page id="quiz-results-no-image-score" style="background-color:black">
-          <amp-story-grid-layer template="fill">
-            <amp-img style="opacity:0.5"
-                src="https://images.unsplash.com/photo-1522441815192-d9f04eb0615c?auto=format&fit=crop&w=1164&q=80"
-                layout="responsive"
-                height="1600"
-                width="900">
-            </amp-img>
-          </amp-story-grid-layer>
-          <amp-story-grid-layer>
-            <amp-story-interactive-results
-                style="--interactive-accent-color: #FFAABB"
-								prompt-text="You are a"
-                option-1-results-category="Cat"
-                option-1-text="Everyone loves cats, and so do you! Cats are the best companion to WFH"
-                option-2-results-category="Dog">
             </amp-story-interactive-results>
           </amp-story-grid-layer>
         </amp-story-page>
