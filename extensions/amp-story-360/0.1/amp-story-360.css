@@ -75,46 +75,6 @@ amp-story-360 amp-img {
   }
 }
 
-.i-amphtml-story-360-hide-permissions-ui .i-amphtml-story-360-activate-button,
-.i-amphtml-story-360-hide-permissions-ui .i-amphtml-story-360-permissions-dialog {
-  display: none !important;
-}
-
-.i-amphtml-story-360-permissions-dialog {
-  position: absolute !important;
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  background: black !important;
-  color: white !important;
-  width: 240px !important;
-  border-radius: 16px !important;
-  text-align: center !important;
-  overflow: hidden !important;
-}
-
-.i-amphtml-story-360-permissions-dialog p {
-  font-family: 'Roboto', sans-serif !important;
-  margin: 0 !important;
-  padding: 20px !important;
-  font-size: 16px !important;
-}
-
-.i-amphtml-story-360-permissions-dialog-button-container {
-  font-family: 'Open Sans', sans-serif !important;
-  border-top: 1px solid #1B1B1B !important;
-  white-space: nowrap !important;
-}
-
-.i-amphtml-story-360-permissions-dialog-button-container button {
-  padding: 20px !important;
-  font-size: 20px !important;
-  background: none !important;
-  color: white !important;
-  border: none !important;
-  width: 50% !important;
-}
-
-.i-amphtml-story-360-permissions-dialog-hidden {
+.i-amphtml-story-360-hide-permissions-ui .i-amphtml-story-360-activate-button {
   display: none !important;
 }

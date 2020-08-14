@@ -324,9 +324,9 @@ export class AmpStory360 extends AMP.BaseElement {
     // Permission cannot be asked for again if the user has denied it.
     if (
       typeof DeviceOrientationEvent.requestPermission === 'function' &&
-      this.win.localStorage.getItem('permissionDenied')
+      !this.win.localStorage.getItem('permissionDenied')
     ) {
-      this.buildPermissionUI_();
+      this.buildPermissionButton_();
     }
   }
 
@@ -387,34 +387,16 @@ export class AmpStory360 extends AMP.BaseElement {
   }
 
   /**
-   * Creates a "activate" button and prompt to request DeviceOrientation permissions.
+   * Creates a "activate" button to request DeviceOrientation permissions.
    * Only built if device has motion sensors and needs permission.
    * @private
    */
-  buildPermissionUI_() {
+  buildPermissionButton_() {
     const activateButton = buildActivateButtonTemplate(this.element);
     this.element.appendChild(activateButton);
 
-    const dialogBox = buildPermissionDialogBoxTemplate(this.element);
-    this.element.appendChild(dialogBox);
-
     activateButton.addEventListener('click', () => {
-      this.mutateElement(() => {
-        dialogBox.classList.toggle(
-          'i-amphtml-story-360-permissions-dialog-hidden'
-        );
-      });
-    });
-
-    dialogBox.addEventListener('click', (e) => {
-      dev().assertElement(e.target).dataset['action'] === 'enable' &&
-        this.requestGyroscopePermissions_();
-
-      this.mutateElement(() => {
-        dialogBox.classList.add(
-          'i-amphtml-story-360-permissions-dialog-hidden'
-        );
-      });
+      this.requestGyroscopePermissions_();
     });
   }
 
