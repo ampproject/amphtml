@@ -57,8 +57,12 @@ Optional: Most things covered here will work out of the box, but be sure to acti
 
 Also add the following import to your AMP documents:
 
-```
-<script async custom-element="amp-story-interactive" src="https://cdn.ampproject.org/v0/amp-story-interactive-1.0.js"></script>
+```html
+<script
+  async
+  custom-element="amp-story-interactive"
+  src="https://cdn.ampproject.org/v0/amp-story-interactive-1.0.js"
+></script>
 ```
 
 ## Single-Page Component APIs
