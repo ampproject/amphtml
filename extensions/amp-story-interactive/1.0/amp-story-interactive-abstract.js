@@ -49,6 +49,7 @@ export const InteractiveType = {
   QUIZ: 0,
   POLL: 1,
   RESULTS: 2,
+  TEXT: 3,
 };
 
 /** @const {string} */
