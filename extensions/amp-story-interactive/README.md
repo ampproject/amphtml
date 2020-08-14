@@ -46,7 +46,7 @@ This developer preview update covers:
 <tr>
 <td>
 <strong>amp-story-interactive-results</strong>
-<br><br>Component that can display 2-4 different states/categories depending on the options selected on the previous pages of a story.<br><br>Requires polls or quizzes in previous pages to feed into the state of the component, and the state will be calculated following the strategy specified: correctness, category-voting, etc.<br><br>Note: we're still finalizing the design for the component, but the layout will be very similar to the image on the right.</td>
+<br><br>Component that can display 2-4 different states/categories depending on the options selected on the previous pages of a story.<br><br>Requires polls or quizzes in previous pages to feed into the state of the component, and the state will be calculated following the strategy specified: correctness, category-voting, etc.<br><br>Note: we're still finalizing the design for the component, check status of #29837</td>
 <td><img src="https://user-images.githubusercontent.com/22420856/89945317-2b661b00-dbef-11ea-9319-e36bede95460.png"></td>
 </tr>
 </table>
