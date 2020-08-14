@@ -121,15 +121,6 @@ const std::map<std::string, TestCase>& TestCases() {
             "../../extensions/*/*/test/*.html",
              &html_files)) << "Test cases file pattern not found.";
 
-    CHECK(htmlparser::FileUtil::Glob(
-            "testdata/*/*.html",
-             &html_files)) << "Test cases file pattern not found.";
-
-    CHECK(htmlparser::FileUtil::Glob(
-            "search/amphtml/transformers/testdata/sxg_feature_tests/"
-            "*.html.minion",
-             &html_files)) << "Test cases file pattern not found.";
-
     std::sort(html_files.begin(), html_files.end());
     for (const std::string& html_file : html_files) {
       if (html_file.find("/js_only/") != std::string::npos) continue;
@@ -153,18 +144,18 @@ const std::map<std::string, TestCase>& TestCases() {
       absl::StripTrailingAsciiWhitespace(&test_case.input_content);
       htmlparser::Strings::StripTrailingNewline(&test_case.input_content);
       fs::path html_file_path = html_file;
-      fs::path cpp_only_out_file_path = html_file_path.parent_path();
-      cpp_only_out_file_path += html_file_path.stem();
-      cpp_only_out_file_path +=  ".out.cpponly";
-      if (!fs::exists(cpp_only_out_file_path)) {
-        fs::path output_file_path = html_file_path.parent_path();
-        output_file_path += html_file_path.stem();
-        output_file_path += ".out";
-        test_case.output_file = output_file_path.string();
-      } else {
+      fs::path output_file_path = html_file_path.parent_path();
+      output_file_path += "/";
+      output_file_path += html_file_path.stem();
+      output_file_path += ".out";
+      // Special case where cpp engine output differs from javascript.
+      fs::path cpp_only_out_file_path = output_file_path;
+      cpp_only_out_file_path += ".cpponly";
+      if (fs::exists(cpp_only_out_file_path)) {
         test_case.output_file = cpp_only_out_file_path.string();
+      } else {
+        test_case.output_file = output_file_path.string();
       }
-
       test_case.output_content =
           htmlparser::FileUtil::FileContents(test_case.output_file);
       htmlparser::Strings::StripTrailingNewline(&test_case.output_content);
