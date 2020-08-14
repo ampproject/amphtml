@@ -18,6 +18,9 @@ import {PostHTML} from 'posthtml';
 import {URL} from 'url';
 import {isValidScript, ScriptNode} from '../utilities/script';
 import {CDNURLToLocalDistURL} from '../utilities/cdn';
+import minimist from 'minimist';
+
+const argv = minimist(process.argv.slice(2));
 
 /**
  * Append a Module Script for a ScriptNode.
@@ -25,11 +28,20 @@ import {CDNURLToLocalDistURL} from '../utilities/cdn';
  * @param script
  */
 function appendModuleScript(head: PostHTML.Node, script: ScriptNode): void {
-  const modulePath = CDNURLToLocalDistURL(
-    new URL(script.attrs.src || ''),
-    undefined,
-    '.mjs'
-  ).toString();
+
+  let modulePath;
+
+  if (argv.compiled) {
+    modulePath = CDNURLToLocalDistURL(
+      new URL(script.attrs.src || ''),
+      undefined,
+      '.mjs'
+    ).toString();
+  }
+  else {
+    const urlName = script.attrs.src.toString();
+    modulePath = urlName.replace('.js', '.mjs');
+  }
 
   const insert: ScriptNode = {
     ...script,
