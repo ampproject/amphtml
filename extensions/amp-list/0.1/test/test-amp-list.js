@@ -167,7 +167,7 @@ describes.repeated(
           // Mock the actual network request.
           listMock
             .expects('fetch_')
-            .withExactArgs(!!opts.refresh, /* token */ undefined)
+            .withExactArgs(!!opts.refresh)
             .returns(Promise.resolve(fetched))
             .atLeast(1);
 

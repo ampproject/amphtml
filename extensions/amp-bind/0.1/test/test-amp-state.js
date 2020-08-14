@@ -97,8 +97,7 @@ describes.realWin(
       expect(ampState.fetch_).to.have.been.calledWithExactly(
         /* ampdoc */ env.sandbox.match.any,
         UrlReplacementPolicy.ALL,
-        /* refresh */ env.sandbox.match.falsy,
-        /* token */ env.sandbox.match.falsy
+        /* refresh */ env.sandbox.match.falsy
       );
 
       expect(bind.setState).calledWithMatch(
