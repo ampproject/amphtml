@@ -200,6 +200,29 @@ cc_test(
 )
 
 cc_library(
+    name = "error-formatter",
+    srcs = ["error-formatter.cc"],
+    hdrs = ["error-formatter.h"],
+    deps = [
+        ":validator_cc_proto",
+        ":validator_pb",
+        "@com_googlesource_code_re2//:re2",
+        "@htmlparser//:strings",
+        "@validator//:validator_cc_proto",
+    ],
+)
+
+cc_test(
+    name = "error-formatter_test",
+    srcs = ["error-formatter_test.cc"],
+    args = ["--suppress_failure_output"],
+    deps = [
+        ":error-formatter",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "validator-internal",
     srcs = [
         "validator-internal.cc",
@@ -257,6 +280,23 @@ cc_library(
         "@validator//:validator_cc_proto",
     ],
     alwayslink = 1,
+)
+
+cc_library(
+    name = "testing-utils",
+    srcs = [
+        "testing-utils.cc",
+    ],
+    hdrs = [
+        "testing-utils.h",
+    ],
+    deps = [
+        ":error-formatter",
+        "@com_google_absl//absl/strings",
+        "@htmlparser//:fileutil",
+        "@htmlparser//:strings",
+        "@validator//:validator_cc_proto",
+    ],
 )
 
 bzl_library(
