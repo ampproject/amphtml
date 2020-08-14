@@ -378,6 +378,16 @@ void Strings::Trim(std::string_view* s, std::string_view chars_to_trim) {
   TrimRight(s, chars_to_trim);
 }
 
+bool Strings::StripTrailingNewline(std::string* s) {
+  if (!s->empty() && (*s)[s->size() - 1] == '\n') {
+    if (s->size() > 1 && (*s)[s->size() - 2] == '\r')
+      s->resize(s->size() - 2);
+    else
+      s->resize(s->size() - 1);
+    return true;
+  }
+  return false;
+}
 
 void Strings::RemoveExtraSpaceChars(std::string* s) {
   int put_index = 0;
