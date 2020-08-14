@@ -2240,6 +2240,45 @@ describes.realWin('Events', {amp: 1}, (env) => {
           return promise2;
         });
       });
+
+      describe('non AMP elements', () => {
+        let element;
+
+        beforeEach(() => {
+          element = win.document.createElement('p');
+        });
+
+        it('with non AMP element and waitFor NONE', () => {
+          expect(tracker.getReadyPromise('none', element)).to.be.null;
+        });
+
+        it('error with non AMP element and waitFor not NONE', () => {
+          expect(() => tracker.getReadyPromise('ini-load', element)).to.throw(
+            /waitFor value ini-load not supported​​​/
+          );
+        });
+      });
+
+      describe('default waitFor with element', () => {
+        let element;
+
+        beforeEach(() => {
+          element = win.document.createElement('p');
+        });
+
+        it('should set default waitFor for non AMP element', () => {
+          expect(tracker.setDefaultWaitForElement_(null, element)).to.equal(
+            'none'
+          );
+        });
+
+        it('should set default waitFor for AMP element', () => {
+          element.classList.add('i-amphtml-element');
+          expect(tracker.setDefaultWaitForElement_(null, element)).to.equal(
+            'ini-load'
+          );
+        });
+      });
     });
 
     describe('should create correct reportReadyPromise', () => {

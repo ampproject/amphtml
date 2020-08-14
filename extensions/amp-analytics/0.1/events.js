@@ -1446,7 +1446,6 @@ export class VisibilityTracker extends EventTracker {
     const visibilitySpec = config['visibilitySpec'] || {};
     const selector = config['selector'] || visibilitySpec['selector'];
     const waitForSpec = visibilitySpec['waitFor'];
-    let readyPromiseWaitForSpec;
     let reportWhenSpec = visibilitySpec['reportWhen'];
     let createReportReadyPromiseFunc = null;
     if (reportWhenSpec) {
@@ -1489,7 +1488,8 @@ export class VisibilityTracker extends EventTracker {
     if (!selector || selector == ':root' || selector == ':host') {
       // When `selector` is specified, we always use "ini-load" signal as
       // a "ready" signal.
-      readyPromiseWaitForSpec = waitForSpec || (selector ? 'ini-load' : null);
+      const readyPromiseWaitForSpec =
+        waitForSpec || (selector ? 'ini-load' : null);
       return visibilityManager.listenRoot(
         visibilitySpec,
         this.getReadyPromise(readyPromiseWaitForSpec),
@@ -1508,7 +1508,6 @@ export class VisibilityTracker extends EventTracker {
     // Array selectors do not suppor the special cases: ':host' & ':root'
     const selectionMethod =
       config['selectionMethod'] || visibilitySpec['selectionMethod'];
-    readyPromiseWaitForSpec = waitForSpec || 'ini-load';
     this.assertUniqueSelectors_(selector);
     const unlistenPromise = this.root
       .getElements(context.parentElement || context, selector, selectionMethod)
@@ -1519,7 +1518,10 @@ export class VisibilityTracker extends EventTracker {
             visibilityManager.listenElement(
               elements[i],
               visibilitySpec,
-              this.getReadyPromise(readyPromiseWaitForSpec, elements[i]),
+              this.getReadyPromise(
+                this.setDefaultWaitForElement_(waitForSpec, elements[i]),
+                elements[i]
+              ),
               createReportReadyPromiseFunc,
               this.onEvent_.bind(this, eventType, listener, elements[i])
             )
@@ -1635,6 +1637,21 @@ export class VisibilityTracker extends EventTracker {
   }
 
   /**
+   * Sets the default waitForSpec based upon if the element
+   * passed in is an AMP element or not.
+   * @param {string|undefined} waitForSpec
+   * @param {!Element} element
+   * @return {string}
+   */
+  setDefaultWaitForElement_(waitForSpec, element) {
+    if (!waitForSpec) {
+      const isAmpElement = element.classList.contains('i-amphtml-element');
+      waitForSpec = isAmpElement ? 'ini-load' : 'none';
+    }
+    return waitForSpec;
+  }
+
+  /**
    * @param {string|undefined} waitForSpec
    * @param {Element=} opt_element
    * @return {?Promise}
@@ -1647,8 +1664,12 @@ export class VisibilityTracker extends EventTracker {
     }
 
     const trackerAllowlist = getTrackerTypesForParentType('visible');
+    const isAllowedWaitFor = opt_element
+      ? opt_element.classList.contains('i-amphtml-element')
+      : true;
     userAssert(
-      waitForSpec == 'none' || trackerAllowlist[waitForSpec] !== undefined,
+      waitForSpec == 'none' ||
+        (trackerAllowlist[waitForSpec] !== undefined && isAllowedWaitFor),
       'waitFor value %s not supported',
       waitForSpec
     );
