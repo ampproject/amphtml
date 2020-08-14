@@ -288,24 +288,29 @@ export class AmpScript extends AMP.BaseElement {
     };
 
     // Create worker and hydrate.
-    WorkerDOM.upgrade(
-      container || this.element,
-      workerAndAuthorScripts,
-      config
-    ).then((workerDom) => {
-      this.workerDom_ = workerDom;
-      this.initialize_.resolve();
-      // workerDom will be null if it failed to init.
-      if (this.workerDom_) {
-        this.workerDom_.onerror = (errorEvent) => {
-          errorEvent.preventDefault();
-          user().error(
-            TAG,
-            `${errorEvent.message}\n    at (${errorEvent.filename}:${errorEvent.lineno})`
-          );
-        };
-      }
-    });
+    WorkerDOM.upgrade(container || this.element, workerAndAuthorScripts, config)
+      .then((workerDom) => {
+        this.workerDom_ = workerDom;
+        this.initialize_.resolve();
+        // workerDom will be null if it failed to init.
+        if (this.workerDom_) {
+          this.workerDom_.onerror = (errorEvent) => {
+            errorEvent.preventDefault();
+            user().error(
+              TAG,
+              `${errorEvent.message}\n    at (${errorEvent.filename}:${errorEvent.lineno})`
+            );
+          };
+        }
+      })
+      .catch((err) => {
+        // Exclude all errors created via workerAndAuthorScripts rejection.
+        if (err.message.indexOf('amp-script') > -1) {
+          return;
+        }
+        throw err;
+      });
+
     return workerAndAuthorScripts;
   }
 
@@ -563,7 +568,7 @@ export class AmpScriptService {
    *
    * @param {string} script The script contents.
    * @param {string} debugId An element identifier for error messages.
-   * @return {!Promise}
+   * @return {Promise}
    */
   checkSha384(script, debugId) {
     const bytes = utf8Encode(script);
@@ -571,10 +576,10 @@ export class AmpScriptService {
       if (!hash || !this.sources_.includes('sha384-' + hash)) {
         // TODO(#24266): Refactor to %s interpolation when error string
         // extraction is ready.
-        throw user().createError(
+        throw user().createExpectedError(
           TAG,
-          `Script hash not found. ${debugId} must have "sha384-${hash}" in meta[name="amp-script-src"].` +
-            ' See https://amp.dev/documentation/components/amp-script/#script-hash.'
+          `Script hash not found for ${debugId}. You must include <meta name="amp-script-src" content="sha384-${hash}">.` +
+            'See https://amp.dev/documentation/components/amp-script/#script-hash.'
         );
       }
     });

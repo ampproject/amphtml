@@ -1572,7 +1572,7 @@ export class ResourcesImpl {
               this.taskComplete_.bind(this, task, true),
               this.taskComplete_.bind(this, task, false)
             )
-            .catch(/** @type {function (*)} */ (reportError));
+            .catch(/** @type {function (*)} */ (reportError))
         } else {
           dev().fine(TAG_, 'cancelled', task.id);
           resource.layoutCanceled();
