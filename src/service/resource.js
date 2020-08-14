@@ -626,6 +626,9 @@ export class Resource {
    * Returns a previously measured layout box adjusted to the viewport. This
    * mainly affects fixed-position elements that are adjusted to be always
    * relative to the document position in the viewport.
+   * The returned layoutBox is
+   * relative to the top of the document for non fixed element,
+   * relative to the viewport for fixed element.
    * @return {!../layout-rect.LayoutRectDef}
    */
   getLayoutBox() {
