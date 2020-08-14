@@ -28,7 +28,7 @@
 
 namespace htmlparser {
 
-std::string FileContents(std::string_view filepath) {
+std::string FileUtil::FileContents(std::string_view filepath) {
   auto str = std::ostringstream{};
   std::ifstream fd(std::string(filepath), std::ios::in);
   defer(fd.close());
