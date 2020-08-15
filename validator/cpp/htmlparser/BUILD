@@ -328,6 +328,7 @@ cc_test(
         ":parser",
         ":renderer",
         ":token",
+        "@com_google_absl//absl/flags:flag",
         "@com_google_googletest//:gtest_main",
     ],
 )
