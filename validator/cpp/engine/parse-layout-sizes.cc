@@ -29,7 +29,7 @@ namespace amp::validator::parse_layout_sizes {
 namespace {
 // Given the index for where to divide between size source and maybe a media
 // condition, update the given CssSize object with those values.
-CssSize ExtractCssSizeFromCandidate(int32 divider_index,
+CssSize ExtractCssSizeFromCandidate(int32_t divider_index,
                                     const string_view candidate) {
   CssSize size;
   if (divider_index >= 0) {
@@ -48,11 +48,11 @@ CssSize ExtractCssSizeFromCandidate(int32 divider_index,
 }
 // Given a candidate that is a function (e.g. calc(10vw + 10px)) find the
 // opening param and return it's index within candidate.
-int32 GetIndexOfOpeningParamForFunction(const string_view candidate) {
-  int32 num_parens = 1;
-  int32 index = candidate.size() - 2;
+int32_t GetIndexOfOpeningParamForFunction(const string_view candidate) {
+  int32_t num_parens = 1;
+  int32_t index = candidate.size() - 2;
   for (; index >= 0; index--) {
-    const char32 c = candidate[index];
+    const char32_t c = candidate[index];
     if (c == '(') {
       // Found an opening param.
       num_parens--;
@@ -70,7 +70,7 @@ int32 GetIndexOfOpeningParamForFunction(const string_view candidate) {
 }
 // These are the allowed characters within the source size value (CssSize.size)
 // when it is not a function.
-bool IsAllowedCharacter(char32 c) {
+bool IsAllowedCharacter(char32_t c) {
   return (c == '%' || c == '-' || c == '_' || (c >= 'a' && c <= 'z') ||
           (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'));
 }
@@ -87,18 +87,18 @@ CssSizes::CssSizes(string_view input) : is_set(false), is_valid(false) {
     htmlparser::Strings::Trim(&candidate);
     // Skip empty candidates
     if (candidate.empty()) continue;
-    int32 divider_index;
+    int32_t divider_index;
     bool is_size_a_function = false;
     // Process candidate from the end of string to the front.
     if (candidate.back() == ')') {
       is_size_a_function = true;
       divider_index = GetIndexOfOpeningParamForFunction(candidate);
       // Find the beginning of the function's name.
-      const int32 function_end_index = divider_index - 1;
+      const int32_t function_end_index = divider_index - 1;
       if (divider_index > 0) {
         divider_index--;
         for (; divider_index >= 0; divider_index--) {
-          const char32 c = candidate[divider_index];
+          const char32_t c = candidate[divider_index];
           if (!IsAllowedCharacter(c)) break;
         }
       }
@@ -107,7 +107,7 @@ CssSizes::CssSizes(string_view input) : is_set(false), is_valid(false) {
     } else {
       divider_index = candidate.size() - 2;
       for (; divider_index >= 0; divider_index--) {
-        const char32 c = candidate[divider_index];
+        const char32_t c = candidate[divider_index];
         if (!IsAllowedCharacter(c)) break;
       }
     }
