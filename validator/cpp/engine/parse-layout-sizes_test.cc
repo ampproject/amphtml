@@ -67,13 +67,6 @@ TEST(ParseLayoutSizes, CssSizesWithFunction) {
   EXPECT_THAT(parsed.sizes, EqCandidates(expected));
 }
 
-TEST(ParseLayoutSizes, CssSizesNullptr) {
-  CssSizes parsed(nullptr);
-  EXPECT_FALSE(parsed.is_set);
-  EXPECT_FALSE(parsed.is_valid);
-  EXPECT_THAT(parsed.sizes, EqCandidates({}));
-}
-
 TEST(ParseLayoutSizes, CssSizesEmpty) {
   CssSizes parsed("");
   EXPECT_FALSE(parsed.is_set);
