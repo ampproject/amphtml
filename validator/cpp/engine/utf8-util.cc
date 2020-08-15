@@ -17,7 +17,6 @@
 #include "utf8-util.h"
 
 #include "glog/logging.h"
-#include "absl/strings/cord.h"
 #include "absl/strings/string_view.h"
 #include "strings.h"
 
@@ -26,8 +25,8 @@ using std::vector;
 
 namespace amp::validator::utf8_util {
 
-int64 Utf16StrLen(string_view buf_utf8) {
-  int64 utf16_str_len = 0;
+int64_t Utf16StrLen(string_view buf_utf8) {
+  int64_t utf16_str_len = 0;
   for (int i = 0; i < buf_utf8.size(); ++i) {
     // Javascript counts strings as UTF-16 characters. 1, 2, and 3-byte UTF-8
     // characters are length 1 in UTF-16 whereas 4-byte UTF-8 characters are
@@ -66,24 +65,11 @@ int64 Utf16StrLen(string_view buf_utf8) {
   return utf16_str_len;
 }
 
-int64 Utf16StrLen(const absl::Cord& cord) {
-  string_view fragment;
-  // Shortcut for flat cords
-  if (cord.GetFlat(&fragment)) return Utf16StrLen(fragment);
-
-  int64 utf16_str_len = 0;
-  CordReader reader(cord);
-  while (reader.ReadFragment(&fragment)) {
-    utf16_str_len += Utf16StrLen(fragment);
-  }
-  return utf16_str_len;
-}
-
-int64 Utf16OffsetToByteOffset(string_view buf_utf8, int64 utf16_offset) {
-  int64 utf16_str_len = 0;
+int64_t Utf16OffsetToByteOffset(string_view buf_utf8, int64_t utf16_offset) {
+  int64_t utf16_str_len = 0;
   int byte_pos = 0;
   while (utf16_str_len < utf16_offset) {
-    if (byte_pos >= static_cast<int64>(buf_utf8.size())) return -1;
+    if (byte_pos >= static_cast<int64_t>(buf_utf8.size())) return -1;
     const int utf8_char_len =
         htmlparser::Strings::CodePointByteSequenceCount(buf_utf8[byte_pos]);
     if (utf8_char_len == 4)  // 4 byte UTF8 char -> 2 byte UTF16 char
