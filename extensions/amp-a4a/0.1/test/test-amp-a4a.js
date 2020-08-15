@@ -116,7 +116,7 @@ describes.realWin('no signing', {amp: true}, (env) => {
       'meta[http-equiv=Content-Security-Policy]'
     );
     expect(cspMeta).to.be.ok;
-    expect(cspMeta.content).to.include('img-src *;');
+    expect(cspMeta.content).to.include('img-src * data:;');
     expect(cspMeta.content).to.include('media-src *;');
     expect(cspMeta.content).to.include('font-src *;');
     expect(cspMeta.content).to.include('connect-src *;');
