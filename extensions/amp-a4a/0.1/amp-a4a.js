@@ -31,7 +31,7 @@ import {
 import {assertHttpsUrl, tryDecodeUriComponent} from '../../../src/url';
 import {cancellation, isCancellation} from '../../../src/error';
 import {createElementWithAttributes} from '../../../src/dom';
-import {createSecureFrame} from './secure-frame';
+import {createSecureDocSkeleton, createSecureFrame} from './secure-frame';
 import {
   dev,
   devAssert,
@@ -53,10 +53,14 @@ import {getContextMetadata} from '../../../src/iframe-attributes';
 import {getExperimentBranch} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
-import {installFriendlyIframeEmbed} from '../../../src/friendly-iframe-embed';
+import {
+  installFriendlyIframeEmbed,
+  isSrcdocSupported,
+} from '../../../src/friendly-iframe-embed';
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
+import {listenOnce} from '../../../src/event-helper';
 import {parseJson} from '../../../src/json';
 import {processHead} from './head-validation';
 import {setStyle} from '../../../src/style';
@@ -1668,33 +1672,43 @@ export class AmpA4A extends AMP.BaseElement {
     const {extensions, fonts, head} = headData;
     this.iframe = createSecureFrame(
       this.element.ownerDocument,
-      devAssert(this.adUrl_),
-      head,
       this.getIframeTitle(),
       height,
       width
     );
     this.applyFillContent(this.iframe);
 
+    let body = '';
+    // If srcdoc is not supported, streaming is also not supported so we
+    // can go ahead and write the ad content body.
+    if (!isSrcdocSupported()) {
+      body = head.ownerDocument.body./*OK */ outerHTML;
+    } else {
+      // Once skeleton doc has be written to srcdoc we start transferring
+      // body chunks.
+      listenOnce(this.iframe, 'load', () => {
+        const fieBody = this.iframe.contentDocument.body;
+        this.transferDomBody_(devAssert(fieBody));
+      });
+    }
+
+    const secureDoc = createSecureDocSkeleton(
+      devAssert(this.adUrl_),
+      head./*OK*/ outerHTML,
+      body
+    );
+
     // TODO(ccordry): FIE does not handle extension versioning, but we have
     // it accessible here.
     const extensionIds = extensions.map((extension) => extension.extensionId);
 
-    return installFriendlyIframeEmbed(
-      devAssert(this.iframe),
-      this.element,
-      {
-        host: this.element,
-        url: devAssert(this.adUrl_),
-        html: null,
-        extensionIds,
-        fonts,
-      },
-      (embedWin, ampdoc) => this.preinstallCallback_(embedWin, ampdoc)
+    return this.installFriendlyIframeEmbed_(
+      secureDoc,
+      extensionIds,
+      fonts,
+      true // skipHtmlMerge
     ).then((friendlyIframeEmbed) => {
       checkStillCurrent();
-      const fieBody = this.getFieBody_(friendlyIframeEmbed);
-      const renderComplete = this.transferDomBody_(devAssert(fieBody));
       this.makeFieVisible_(
         friendlyIframeEmbed,
         // TODO(ccordry): subclasses are passed creativeMetadata which does
@@ -1707,7 +1721,6 @@ export class AmpA4A extends AMP.BaseElement {
         },
         checkStillCurrent
       );
-      return renderComplete;
     });
   }
 
@@ -1753,7 +1766,8 @@ export class AmpA4A extends AMP.BaseElement {
     return this.installFriendlyIframeEmbed_(
       minifiedCreative,
       customElementExtensions,
-      fontsArray || []
+      fontsArray || [],
+      false // skipHtmlMerge
     ).then((friendlyIframeEmbed) =>
       this.makeFieVisible_(
         friendlyIframeEmbed,
@@ -1768,9 +1782,10 @@ export class AmpA4A extends AMP.BaseElement {
    * @param {string} html
    * @param {!Array<string>} extensionIds
    * @param {!Array<string>} fonts
+   * @param {boolean} skipHtmlMerge
    * @return {!Promise<!../../../src/friendly-iframe-embed.FriendlyIframeEmbed>}
    */
-  installFriendlyIframeEmbed_(html, extensionIds, fonts) {
+  installFriendlyIframeEmbed_(html, extensionIds, fonts, skipHtmlMerge) {
     return installFriendlyIframeEmbed(
       devAssert(this.iframe),
       this.element,
@@ -1781,6 +1796,7 @@ export class AmpA4A extends AMP.BaseElement {
         html,
         extensionIds,
         fonts,
+        skipHtmlMerge,
       },
       (embedWin, ampdoc) => this.preinstallCallback_(embedWin, ampdoc)
     );
