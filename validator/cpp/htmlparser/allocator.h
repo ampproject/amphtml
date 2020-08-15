@@ -188,6 +188,8 @@
 
 #include <array>
 #include <cstring>
+#include <memory>
+#include <tuple>
 #include <vector>
 
 namespace htmlparser {
