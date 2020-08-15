@@ -180,9 +180,9 @@ cc_test(
 )
 
 cc_library(
-    name = "type_identifier",
-    srcs = ["type_identifier.cc"],
-    hdrs = ["type_identifier.h"],
+    name = "type-identifier",
+    srcs = ["type-identifier.cc"],
+    hdrs = ["type-identifier.h"],
     deps = [
         "@com_google_absl//absl/strings",
         "@validator//:validator_cc_proto",
@@ -190,10 +190,10 @@ cc_library(
 )
 
 cc_test(
-    name = "type_identifier_test",
-    srcs = ["type_identifier_test.cc"],
+    name = "type-identifier_test",
+    srcs = ["type-identifier_test.cc"],
     deps = [
-        ":type_identifier",
+        ":type-identifier",
         "@com_google_googletest//:gtest_main",
         "@validator//:validator_cc_proto",
     ],

@@ -14,7 +14,7 @@
 // limitations under the license.
 //
 
-#include "type_identifier.h"
+#include "type-identifier.h"
 
 #include "gtest/gtest.h"
 #include "validator.pb.h"

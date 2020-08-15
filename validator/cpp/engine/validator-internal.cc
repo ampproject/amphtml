@@ -47,7 +47,7 @@
 #include "parse-layout.h"
 #include "parse-srcset.h"
 #include "parse-viewport.h"
-#include "type_identifier.h"
+#include "type-identifier.h"
 #include "utf8-util.h"
 #include "validator_pb.h"
 #include "atom.h"
