@@ -20,7 +20,6 @@
  */
 
 import {
-  Action,
   StateProperty,
   getStoreService,
 } from '../../../extensions/amp-story/1.0/amp-story-store-service';
@@ -266,18 +265,16 @@ export class AmpStory360 extends AMP.BaseElement {
     container.appendChild(this.canvas_);
     this.applyFillContent(container, /* replacedContent */ true);
 
-    this.element.getAttribute('controls') === 'gyroscope' &&
-      this.checkGyroscopePermissions_();
-
     this.initializeListeners_();
   }
 
   /** @private */
   initializeListeners_() {
-    this.storeService_.subscribe(
-      StateProperty.GYROSCOPE_ENABLED_STATE,
-      (enabled) => enabled && this.enableGyroscope_()
-    );
+    if (this.element.getAttribute('controls') === 'gyroscope') {
+      this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, () => {
+        this.checkGyroscopePermissions_();
+      });
+    }
 
     this.storeService_.subscribe(StateProperty.PAGE_SIZE, () =>
       this.resizeRenderer_()
@@ -286,23 +283,18 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @private */
   checkGyroscopePermissions_() {
-    // If gyroscope isn't supported, keep animating.
+    //  Browser doesn't support DeviceOrientationEvent API.
     if (typeof DeviceOrientationEvent === 'undefined') {
       return;
     }
 
-    // If motion and no permissions like android, enable gyro right away.
+    // If browser doesn't require permission, enable gyroscope.
     if (typeof DeviceOrientationEvent.requestPermission === 'undefined') {
       this.enableGyroscope_();
     }
 
-    // If motion and permissions (like ios) build permission interface to ask user.
-    // If permission has been set to denied, do not display permission UI.
-    // Permission cannot be asked for again if the user has denied it.
-    if (
-      typeof DeviceOrientationEvent.requestPermission === 'function' &&
-      !this.win.localStorage.getItem('permissionDenied')
-    ) {
+    // If DeviceOrientationEvent and permissions, build permission button.
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
       this.buildPermissionButton_();
     }
   }
@@ -365,37 +357,50 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /**
    * Creates a "activate" button to request DeviceOrientation permissions.
-   * Only built if device has motion sensors and needs permission.
+   * Simulates an event on a fake button so this will fire on page load.
    * @private
    */
   buildPermissionButton_() {
-    const activateButton = buildActivateButtonTemplate(this.element);
-    this.element.appendChild(activateButton);
+    const tempButton = document.createElement('div');
+    tempButton.addEventListener('click', () => {
+      this.win.DeviceOrientationEvent.requestPermission()
+        // Render activate button if permissions aren't set yet.
+        .catch(() => {
+          const activateButton = buildActivateButtonTemplate(this.element);
+          this.element.appendChild(activateButton);
 
-    activateButton.addEventListener('click', () => {
-      this.requestGyroscopePermissions_();
+          activateButton.addEventListener('click', () => {
+            this.requestGyroscopePermissions_();
+          });
+        })
+        // If permissions are already set, handle permission state.
+        .then((permissionState) => {
+          permissionState && this.handlePermissionState_(permissionState);
+        });
     });
+    tempButton.click();
+    tempButton.remove();
   }
 
   /**
-   * Requests permission to the gyroscope sensor.
-   * Emits an event on "granted" to update all 360 components in the story.
+   * Handles enabling gyroscope or hiding activate button
+   * @param {string} permissionState
    * @private
    */
+  handlePermissionState_(permissionState) {
+    if (permissionState === 'granted') {
+      this.enableGyroscope_();
+    } else if (permissionState === 'denied') {
+      this.element.classList.add('i-amphtml-story-360-hide-permissions-ui');
+    }
+  }
+
+  /** @private */
   requestGyroscopePermissions_() {
     if (this.win.DeviceOrientationEvent.requestPermission) {
       this.win.DeviceOrientationEvent.requestPermission()
         .then((permissionState) => {
-          if (permissionState === 'granted') {
-            this.storeService_.dispatch(Action.TOGGLE_GYROSCOPE, true);
-          } else if (permissionState === 'denied') {
-            // Set denied state in local storage so we can hide UI if page is reloaded.
-            // This method does not work in private browsing mode.
-            this.win.localStorage.setItem('permissionDenied', true);
-            this.element.classList.add(
-              'i-amphtml-story-360-hide-permissions-ui'
-            );
-          }
+          this.handlePermissionState_(permissionState);
         })
         .catch((error) => {
           dev().error(TAG, `Gyroscope permission error: ${error.message}`);
