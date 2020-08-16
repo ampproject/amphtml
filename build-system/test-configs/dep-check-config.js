@@ -102,6 +102,7 @@ exports.rules = [
     allowlist: [
       '3p/**->src/utils/function.js',
       '3p/**->src/utils/object.js',
+      '3p/**->src/utils/promise.js',
       '3p/**->src/log.js',
       '3p/**->src/types.js',
       '3p/**->src/string.js',
@@ -117,6 +118,7 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/polyfills.js->src/polyfills/object-values.js',
+      '3p/polyfills.js->src/polyfills/promise.js',
       '3p/messaging.js->src/event-helper.js',
       '3p/bodymovinanimation.js->src/event-helper.js',
       '3p/iframe-messaging-client.js->src/event-helper.js',
@@ -417,6 +419,7 @@ exports.rules = [
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
       '3p/polyfills.js->src/polyfills/object-values.js',
+      '3p/polyfills.js->src/polyfills/promise.js',
       'src/polyfills.js->src/polyfills/domtokenlist.js',
       'src/polyfills.js->src/polyfills/document-contains.js',
       'src/polyfills.js->src/polyfills/fetch.js',

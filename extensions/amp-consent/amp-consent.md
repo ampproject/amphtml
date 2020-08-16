@@ -617,6 +617,7 @@ Join in on the discussion where we are discussing [upcoming potential features](
 - AppConsent : [Website](https://appconsent.io/en) - [Documentation](./cmps/appconsent.md)
 - ConsentManager : [Website](https://www.consentmanager.net/) - [Documentation](https://help.consentmanager.net/books/cmp/page/using-the-cmp-with-amp-websites)
 - Didomi : [Website](https://www.didomi.io/) - [Documentation](https://developers.didomi.io/cmp/amp)
+- iubenda : [Website](https://www.iubenda.com/) - [Documentation](./cmps/iubenda.md)
 - Sirdata : [Website](http://www.sirdata.com/) - [Documentation](https://cmp.sirdata.com/#/docs)
 - Marfeel : [Website](https://www.marfeel.com/) - [Documentation](./cmps/marfeel.md)
 - Ogury : [Website](https://www.ogury.com/) - [Documentation](./cmps/ogury.md)
