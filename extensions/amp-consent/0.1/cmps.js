@@ -42,6 +42,12 @@ CMP_CONFIG['appconsent'] = {
   'promptUISrc': 'https://cdn.appconsent.io/loader.html',
 };
 
+CMP_CONFIG['ConsentManager'] = {
+  'consentInstanceId': 'ConsentManager',
+  'checkConsentHref': 'https://consentmanager.mgr.consensu.org/delivery/ampcheck.php',
+  'promptUISrc': 'https://consentmanager.mgr.consensu.org/delivery/ampui.php',
+};
+
 CMP_CONFIG['didomi'] = {
   'consentInstanceId': 'didomi',
   'checkConsentHref': 'https://api.privacy-center.org/amp/check-consent',
