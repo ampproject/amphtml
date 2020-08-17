@@ -318,7 +318,7 @@ You can check the roadmap in https://github.com/ampproject/amphtml/projects/110
 
 **Who can I contact if I have any questions?**
 
-We'll be answering on the Slack channel any questions, or feel free to email [mszylkowski@google.com](mailto:mszylkowski@google.com) for questions or feedback. We might update this FAQ with your questions, so everyone wins. Also feel free to leave comments on this release, or react with your favorite emoji.
+We'll be answering on the Slack channel any questions, or feel free to email [mszylkowski@google.com](mailto:mszylkowski@google.com) for questions or feedback. We might update this FAQ with your questions, so everyone wins.
 
 **Can we branch to different pages based on the option selected?**
 
