@@ -300,17 +300,17 @@ export class AmpStory360 extends AMP.BaseElement {
   /** @private */
   checkGyroscopePermissions_() {
     //  Browser doesn't support DeviceOrientationEvent API.
-    if (!this.win.DeviceOrientationEvent) {
+    if (typeof DeviceOrientationEvent === 'undefined') {
       return;
     }
 
     // If browser doesn't require permission, enable gyroscope.
-    if (!this.win.DeviceOrientationEvent.requestPermission) {
+    if (typeof DeviceOrientationEvent.requestPermission === 'undefined') {
       this.enableGyroscope_();
     }
 
     // If DeviceOrientationEvent and permissions, build permission button.
-    if (this.win.DeviceOrientationEvent.requestPermission) {
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
       this.buildPermissionButton_();
     }
   }
@@ -368,23 +368,24 @@ export class AmpStory360 extends AMP.BaseElement {
   buildPermissionButton_() {
     const tempButton = document.createElement('div');
     tempButton.addEventListener('click', () => {
-      this.win.DeviceOrientationEvent.requestPermission()
-        // Render activate button if permissions aren't set yet.
-        .catch(() => {
-          const activateButton = buildActivateButtonTemplate(this.element);
-          this.element.appendChild(activateButton);
+      if (this.win.DeviceOrientationEvent.requestPermission) {
+        this.win.DeviceOrientationEvent.requestPermission()
+          // Render activate button if permissions aren't set yet.
+          .catch(() => {
+            const activateButton = buildActivateButtonTemplate(this.element);
+            this.element.appendChild(activateButton);
 
-          activateButton.addEventListener('click', () => {
-            this.requestGyroscopePermissions_();
+            activateButton.addEventListener('click', () => {
+              this.requestGyroscopePermissions_();
+            });
+          })
+          // If permissions are already set, handle permission state.
+          .then((permissionState) => {
+            permissionState && this.setPermissionState_(permissionState);
           });
-        })
-        // If permissions are already set, handle permission state.
-        .then((permissionState) => {
-          permissionState && this.setPermissionState_(permissionState);
-        });
+      }
     });
     tempButton.click();
-    tempButton.remove();
   }
 
   /**
@@ -471,7 +472,9 @@ export class AmpStory360 extends AMP.BaseElement {
       .then(
         () => {
           this.renderer_ = new Renderer(this.canvas_);
-          const img = this.checkImageReSize_(this.element.querySelector('img'));
+          const img = this.checkImageReSize_(
+            dev().assertElement(this.element.querySelector('img'))
+          );
           this.renderer_.setImage(img);
           this.renderer_.resize();
           if (this.orientations_.length < 1) {
