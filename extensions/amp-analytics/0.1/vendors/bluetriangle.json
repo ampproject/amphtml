@@ -1,0 +1,26 @@
+{
+    "vars": {
+        "prefix": "",
+        "pageName": "",
+        "trafficSegment": "",
+        "guid":"$SUBSTR(${random},0,19)",
+        "sessionID":"$SUBSTR(${random},0,19)"
+    },
+    "request":{
+        "endpoint": "https://d.btttag.com/btt.gif",
+        "pageview":"${endpoint}?gID=${guid}&sID=${sessionID}&siteID=${prefix}&pageName=${pageName}&txnName=${trafficSegment}&thisURL=${canonicalUrl}&RefURL=${documentReferrer}&dom=0&domContentLoadedEnd=${navTiming(domContentLoadedEventEnd)}&domContentLoadedStart=${navTiming(domContentLoadedEventStart)}&domInteractive=${navTiming(domInteractive)}&domLoading=${navTiming(domLoading)}&domainLookupStart=${navTiming(domainLookupStart)}&elementCount=0&fByte=0&fCPnt=${firstContentfulPaint}&fetchStart=${navTiming(fetchStart)}&firstPaint=0&fmp=0&fps=0&fps_tti=0&loadEventStart=${navTiming(loadEventStart)}&lt_tti=0&nst=0&orderTND=0&pSz=0&pWSz=0&pageValue=&pgTm=0&redirectCount=${navRedirectCount}&redirectStart=${navTiming(redirectStart)}&requestStart=${navTiming(requestStart)}&responseStart=${navTiming(responseStart)}&secureConnectionStart=${navTiming(secureConnectionStart)}&ssl=0&tcp=0&top=0&totRD=0&tti=0&tul=0&unloadEventStart=${navTiming(unloadEventStart)}&wcd=0&eT=7&navigationType=${navType}"
+    },
+    "transport": {
+        "beacon": false,
+        "xhrpost": false,
+        "image": true
+    },
+    "triggers": {
+        "visible": {
+            "on": "visible",
+            "request": [
+                "pageview"
+            ]
+        }
+    }
+}
