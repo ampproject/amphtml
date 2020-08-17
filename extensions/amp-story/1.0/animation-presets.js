@@ -222,7 +222,7 @@ export const presets = {
         dimensions.targetY + dimensions.targetHeight
       );
 
-      // addapted from https://easings.net/#easeOutBounce
+      // Adapted from easings.net/#easeOutBounce
       return [
         {
           offset: 0,
