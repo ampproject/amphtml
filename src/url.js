@@ -36,8 +36,6 @@ const SERVING_TYPE_PREFIX = dict({
   'a': true,
   // Ad
   'ad': true,
-  // Actions viewer
-  'action': true,
 });
 
 /**

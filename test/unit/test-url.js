@@ -765,14 +765,6 @@ describe('getSourceOrigin/Url', () => {
     'https://cdn.ampproject.org/ad/www.origin.com/foo/?f=0#h',
     'http://www.origin.com/foo/?f=0#h'
   );
-  testOrigin(
-    'https://cdn.ampproject.org/action/www.origin.com/foo/?f=0#h',
-    'http://www.origin.com/foo/?f=0#h'
-  );
-  testOrigin(
-    'https://cdn.ampproject.org/action/s/www.origin.com/foo/?f=0#h',
-    'https://www.origin.com/foo/?f=0#h'
-  );
 
   // Prefixed CDN
   testOrigin(
