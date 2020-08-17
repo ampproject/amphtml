@@ -214,7 +214,7 @@ class Any {
   class WrapperBase {
    public:
     virtual JsonType ToJson() = 0;
-    virtual std::unique_ptr<WrapperBase>&& Clone() = 0;
+    virtual std::unique_ptr<WrapperBase> Clone() = 0;
     virtual ~WrapperBase() {}
   };
 
@@ -229,7 +229,7 @@ class Any {
       return apply_(*obj_);
     }
 
-    virtual std::unique_ptr<WrapperBase>&& Clone() {
+    virtual std::unique_ptr<WrapperBase> Clone() {
       return std::make_unique<Wrapper>(obj_, apply_);
     }
 
