@@ -46,6 +46,14 @@ FAIL
 |          </amp-story-interactive-results>
 |          <amp-story-interactive-results
 >>         ^~~~~~~~~
+amp-story-interactive/1.0/test/validator-amp-story-interactive-results.html:46:8 The attribute 'option-3-results-category' in tag 'amp-story-interactive-results' is missing or incorrect, but required by attribute 'option-3-image'. (see https://amp.dev/documentation/components/amp-story-interactive)
+>>         ^~~~~~~~~
+amp-story-interactive/1.0/test/validator-amp-story-interactive-results.html:46:8 The attribute 'option-3-results-category' in tag 'amp-story-interactive-results' is missing or incorrect, but required by attribute 'option-3-text'. (see https://amp.dev/documentation/components/amp-story-interactive)
+>>         ^~~~~~~~~
+amp-story-interactive/1.0/test/validator-amp-story-interactive-results.html:46:8 The attribute 'option-4-results-category' in tag 'amp-story-interactive-results' is missing or incorrect, but required by attribute 'option-4-image'. (see https://amp.dev/documentation/components/amp-story-interactive)
+>>         ^~~~~~~~~
+amp-story-interactive/1.0/test/validator-amp-story-interactive-results.html:46:8 The attribute 'option-4-results-category' in tag 'amp-story-interactive-results' is missing or incorrect, but required by attribute 'option-4-text'. (see https://amp.dev/documentation/components/amp-story-interactive)
+>>         ^~~~~~~~~
 amp-story-interactive/1.0/test/validator-amp-story-interactive-results.html:46:8 The mandatory attribute 'option-1-results-category' is missing in tag 'amp-story-interactive-results'. (see https://amp.dev/documentation/components/amp-story-interactive)
 >>         ^~~~~~~~~
 amp-story-interactive/1.0/test/validator-amp-story-interactive-results.html:46:8 The mandatory attribute 'option-2-results-category' is missing in tag 'amp-story-interactive-results'. (see https://amp.dev/documentation/components/amp-story-interactive)
@@ -65,6 +73,15 @@ amp-story-interactive/1.0/test/validator-amp-story-interactive-results.html:54:8
 |            option-2-text="Spain" option-2-results-category="Cat"
 |            option-3-text="Uruguay" option-3-results-category="Bunny"
 |            option-4-text="Spain" option-4-results-category="Mouse">
+|          </amp-story-interactive-results>
+|          <amp-story-interactive-results
+>>         ^~~~~~~~~
+amp-story-interactive/1.0/test/validator-amp-story-interactive-results.html:62:8 The attribute 'option-4-results-threshold' in tag 'amp-story-interactive-results' is set to the invalid value 'a'. (see https://amp.dev/documentation/components/amp-story-interactive)
+|            id="threshold-regex"
+|            option-1-text="France" option-1-results-category="Dog" option-1-results-threshold="100"
+|            option-2-text="Spain" option-2-results-category="Cat" option-2-results-threshold="100"
+|            option-3-text="Uruguay" option-3-results-category="Bunny" option-3-results-threshold="100"
+|            option-4-text="Spain" option-4-results-category="Mouse" option-4-results-threshold="a">
 |          </amp-story-interactive-results>
 |        </amp-story-grid-layer>
 |      </amp-story-page>
