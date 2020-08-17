@@ -61,16 +61,15 @@ import {
 } from '../../../src/form';
 import {getFormValidator, isCheckValiditySupported} from './form-validators';
 import {getMode} from '../../../src/mode';
-import {
-  getViewerAuthTokenIfAvailable,
-  setupAMPCors,
-  setupInit,
-  setupInput,
-} from '../../../src/utils/xhr-utils';
 import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray, toWin} from '../../../src/types';
+import {
+  setupAMPCors,
+  setupInit,
+  setupInput,
+} from '../../../src/utils/xhr-utils';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryParseJson} from '../../../src/json';
 
@@ -305,7 +304,7 @@ export class AmpForm {
    * @param {string} method
    * @param {!Object<string, string>=} opt_extraFields
    * @param {!Array<string>=} opt_fieldDenylist
-   * @return {!Promise<!FetchRequestDef>}
+   * @return {!FetchRequestDef}
    */
   requestForFormFetch(url, method, opt_extraFields, opt_fieldDenylist) {
     let xhrUrl, body;
@@ -354,17 +353,7 @@ export class AmpForm {
         'headers': headers,
       }),
     };
-
-    return getViewerAuthTokenIfAvailable(this.form_).then((token) => {
-      if (token) {
-        userAssert(
-          request.fetchOpt['method'] == 'POST',
-          'Cannot attach auth token with GET request.'
-        );
-        body.append('ampViewerAuthToken', token);
-      }
-      return request;
-    });
+    return request;
   }
 
   /**
@@ -771,26 +760,22 @@ export class AmpForm {
    * @private
    */
   handleSsrTemplate_(trust) {
-    let request;
     // Render template for the form submitting state.
     const values = this.getFormAsObject_();
     return this.renderTemplate_(values)
-      .then(() =>
-        this.actions_.trigger(
+      .then(() => {
+        return this.actions_.trigger(
           this.form_,
           FormEvents.SUBMIT,
           /* event */ null,
           trust
-        )
-      )
-      .then(() =>
-        this.requestForFormFetch(
+        );
+      })
+      .then(() => {
+        const request = this.requestForFormFetch(
           dev().assertString(this.xhrAction_),
           this.method_
-        )
-      )
-      .then((formRequest) => {
-        request = formRequest;
+        );
         request.fetchOpt = setupInit(request.fetchOpt);
         request.fetchOpt = setupAMPCors(
           this.win_,
@@ -973,12 +958,13 @@ export class AmpForm {
    */
   doXhr_(url, method, opt_extraFields, opt_fieldDenylist) {
     this.assertSsrTemplate_(false, 'XHRs should be proxied.');
-    return this.requestForFormFetch(
+    const request = this.requestForFormFetch(
       url,
       method,
       opt_extraFields,
       opt_fieldDenylist
-    ).then((request) => this.xhr_.fetch(request.xhrUrl, request.fetchOpt));
+    );
+    return this.xhr_.fetch(request.xhrUrl, request.fetchOpt);
   }
 
   /**
