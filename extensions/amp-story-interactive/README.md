@@ -12,7 +12,7 @@
   </tr>
 </table>
 
-This release contains the developer documentation for some of the features we plan to launch on the interactive components extension for web stories in a few weeks. All the APIs are final unless noted otherwise, but more functionality will be added in the following weeks. The goal of this beta preview is to flush out any inconsistencies or bugs, and polish the behaviors.
+This release contains the developer documentation for some of the features we plan to launch on the interactive components extension for web stories in September. All the APIs are final unless noted otherwise, but more functionality will be added in the following weeks. The goal of this beta preview is to flush out any inconsistencies or bugs, and polish the behaviors.
 
 This developer preview update covers:
 
