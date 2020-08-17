@@ -71,10 +71,15 @@ export class AmpStoryInteractiveText extends AmpStoryInteractive {
   /** @override */
   buildComponent() {
     this.rootEl_ = buildPollTemplate(this.element);
+    const textArea = this.rootEl_.querySelector('textarea');
     this.attachPrompt_(this.rootEl_);
-    this.rootEl_.querySelector(
-      'textarea'
-    ).placeholder = this.element.getAttribute('placeholder-text');
+    textArea.placeholder = this.element.getAttribute('placeholder-text');
+    textArea.onblur = (event) => {
+      console.log('BLURREDDDDD', event);
+    };
+    textArea.onfocus = () => {
+      console.log('FOCUSED');
+    };
     return this.rootEl_;
   }
 

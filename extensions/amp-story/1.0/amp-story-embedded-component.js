@@ -93,6 +93,10 @@ export const EXPANDABLE_COMPONENTS = {
     localizedStringId: LocalizedStringId.AMP_STORY_TOOLTIP_EXPAND_TWEET,
     selector: 'amp-twitter',
   },
+  'amp-story-interactive-text': {
+    selector: 'amp-story-interactive-text',
+    skipTooltip: true,
+  },
 };
 
 /**
