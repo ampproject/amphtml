@@ -381,10 +381,9 @@ export class ConsentInstance {
           [this.storageKey_]: value,
         })
       ).length;
-      
+
       // Size restriction only applies to documents servered from a cache.
       if (this.viewer_.isEmbedded() && size > CONSENT_STORAGE_MAX) {
-      // if (size > CONSENT_STORAGE_MAX) {
         // 1200 * 4/3 (base64) = 1600 bytes
         user().error(
           TAG,
