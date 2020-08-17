@@ -142,7 +142,7 @@ AMP.getState(expr) {}
 </script>
 ```
 
-### Exporting a function for use in <amp-list>
+### Exporting a function for use in `<amp-list>`
 
 You may export a function to act as the data source for an `<amp-list>`.
 The exported function must return either JSON, or a Promise that resolves with JSON.
