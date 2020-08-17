@@ -25,6 +25,7 @@ To use RTC, you must meet the following requirements:
 - Browsi
 - Criteo
 - FLUX
+- [Freestar](https://freestar.com)
 - IndexExchange
 - Kargo
 - Lotame
