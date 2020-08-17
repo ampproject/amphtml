@@ -269,7 +269,7 @@ attr_lists: {
   attrs: {
     name: "option-3-results-category"
     trigger: {
-      also_requires_attr: "option-1-results-category"
+      also_requires_attr: "option-2-results-category"
       also_requires_attr: "option-3-text"
     }
   }
