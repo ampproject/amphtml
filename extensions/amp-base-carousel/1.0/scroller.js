@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import * as Preact from '../../../src/preact';
-import * as styles from './base-carousel.css';
 import {WithAmpContext} from '../../../src/preact/context';
 import {debounce} from '../../../src/utils/rate-limit';
 import {forwardRef} from '../../../src/preact/compat';
@@ -26,6 +25,7 @@ import {
   useMemo,
   useRef,
 } from '../../../src/preact';
+import {useStyles} from './base-carousel.jss';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last
@@ -55,6 +55,7 @@ function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
       container./* OK */ scrollLeft += container./* OK */ offsetWidth * by;
     },
   }));
+  const classes = useStyles();
 
   /**
    * The number of slides we want to place before the
@@ -68,13 +69,16 @@ function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
    */
   const offsetRef = useRef(restingIndex);
   const ignoreProgrammaticScrollRef = useRef(true);
-  const slides = renderSlides({
-    children,
-    loop,
-    offsetRef,
-    pivotIndex,
-    restingIndex,
-  });
+  const slides = renderSlides(
+    {
+      children,
+      loop,
+      offsetRef,
+      pivotIndex,
+      restingIndex,
+    },
+    classes
+  );
   const currentIndex = useRef(restingIndex);
 
   // useLayoutEffect needed to avoid FOUC while scrolling
@@ -141,11 +145,7 @@ function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
       key="container"
       ref={containerRef}
       onScroll={handleScroll}
-      style={{
-        ...styles.scrollContainer,
-        ...styles.hideScrollbar,
-        ...styles.horizontalScroll,
-      }}
+      class={`${classes.scrollContainer} ${classes.hideScrollbar} ${classes.horizontalScroll}`}
       tabindex={0}
     >
       {slides}
@@ -208,9 +208,13 @@ export {Scroller};
  * the desired index when it first renders.
  *
  * @param {!BaseCarouselDef.SlideProps} props
+ * @param {!Object} classes
  * @return {PreactDef.Renderable}
  */
-function renderSlides({children, restingIndex, offsetRef, pivotIndex, loop}) {
+function renderSlides(
+  {children, restingIndex, offsetRef, pivotIndex, loop},
+  classes
+) {
   const {length} = children;
   const slides = [];
 
@@ -222,7 +226,7 @@ function renderSlides({children, restingIndex, offsetRef, pivotIndex, loop}) {
         renderable={index == restingIndex}
         playable={index == restingIndex}
       >
-        <div style={styles.slideElement} className="i-amphtml-carousel-slide">
+        <div class={`${classes.slideSizing} ${classes.slideElement}`}>
           {child}
         </div>
       </WithAmpContext>
