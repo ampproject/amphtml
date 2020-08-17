@@ -45,6 +45,19 @@
 // .   }
 // .   return;
 // }
+//
+// defer() converts the block into lambda and captures all the variables in
+// current block by reference. So instead of writing the following:
+// defer([&]() {
+//   delete mylocal_fd;
+//   fd_counter++;
+// });
+//
+// one can write:
+// defer({
+//   delete mylocal_fd;
+//   fd_counter++;
+// });
 
 #ifndef HTMLPARSER__DEFER_H_
 #define HTMLPARSER__DEFER_H_

@@ -272,6 +272,8 @@ class Strings {
   static void Trim(std::string_view* s,
       std::string_view chars_to_trim = kWhitespace);
 
+  static bool StripTrailingNewline(std::string* s);
+
   // Reduces all consecutive sequences of space characters to a single space
   // character.
   // Resulting string may be smaller (resized) than the original string.

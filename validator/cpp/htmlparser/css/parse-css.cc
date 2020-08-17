@@ -272,14 +272,17 @@ htmlparser::json::JsonDict Declaration::ToJson() const {
   return root;
 }
 
-// For a declaration, if the first non-whitespace token is an identifier,
-// returns its string value. Otherwise, returns the empty string.
+// For a declaration, if the first non-whitespace token is an identifier
+// (including a number token type), returns its string value. Otherwise,
+// returns the empty string.
 std::string Declaration::FirstIdent() const {
   if (value_.empty()) return "";
   if (value_[0]->Type() == TokenType::IDENT) return value_[0]->StringValue();
-  if (value_.size() >= 2 && value_[0]->Type() == TokenType::WHITESPACE &&
-      value_[1]->Type() == TokenType::IDENT)
-    return value_[1]->StringValue();
+  if (value_[0]->Type() == TokenType::NUMBER) return value_[0]->ToString();
+  if (value_.size() >= 2 && value_[0]->Type() == TokenType::WHITESPACE) {
+    if (value_[1]->Type() == TokenType::IDENT) return value_[1]->StringValue();
+    if (value_[1]->Type() == TokenType::NUMBER) return value_[1]->ToString();
+  }
   return "";
 }
 

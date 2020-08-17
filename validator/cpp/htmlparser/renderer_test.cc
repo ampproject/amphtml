@@ -29,7 +29,7 @@ void CheckParseRenderOutput(std::string_view input,
                             std::string_view expected_output) {
   auto doc = htmlparser::Parse(input);
   std::stringbuf buf;
-  auto err = htmlparser::Renderer::Render(doc.get(), &buf);
+  auto err = htmlparser::Renderer::Render(doc->RootNode(), &buf);
   EXPECT_EQ(err, htmlparser::RenderError::NO_ERROR);
   EXPECT_EQ(buf.str(), expected_output.data());
 }

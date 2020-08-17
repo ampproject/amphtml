@@ -19,19 +19,14 @@
 #include <algorithm>
 #include <functional>
 #include <sstream>
-
-#include "logging.h"
+#include "glog/logging.h"
 #include "atomutil.h"
 #include "elements.h"
 
 namespace htmlparser {
 
-Node::Node(NodeType node_type) : node_type_(node_type) {}
-
-Node::~Node() {
-  if (first_child_) delete first_child_;
-  if (next_sibling_) delete next_sibling_;
-}
+Node::Node(NodeType node_type, Atom atom) :
+    node_type_(node_type), atom_(atom) {}
 
 void Node::SetData(std::string_view data) {
   data_ = data;
@@ -117,8 +112,8 @@ bool Node::InsertBefore(Node* new_child, Node* old_child) {
 bool Node::AppendChild(Node* new_child) {
   CHECK(!(new_child->Parent() ||
           new_child->PrevSibling() ||
-          new_child->NextSibling()),
-        "html: AppendChild called for an attached child Node");
+          new_child->NextSibling()))
+        << "html: AppendChild called for an attached child Node";
 
   Node* last = LastChild();
   if (last) {
@@ -133,9 +128,10 @@ bool Node::AppendChild(Node* new_child) {
   return true;
 }
 
-std::unique_ptr<Node> Node::RemoveChild(Node* c) {
+Node* Node::RemoveChild(Node* c) {
   // Remove child called for a non-child node.
-  CHECK(c->parent_ == this, "html: RemoveChild called for a non-child Node");
+  CHECK(c->parent_ == this)
+      << "html: RemoveChild called for a non-child Node";
 
   if (first_child_ == c) {
     first_child_ = c->next_sibling_;
@@ -156,23 +152,14 @@ std::unique_ptr<Node> Node::RemoveChild(Node* c) {
   c->parent_ = nullptr;
   c->prev_sibling_ = nullptr;
   c->next_sibling_ = nullptr;
-  return std::unique_ptr<Node>(c);
-}
-
-Node* Node::Clone() const {
-  Node* clone = make_node(node_type_);
-  clone->atom_ = atom_;
-  clone->data_ = data_;
-  std::copy(attributes_.begin(), attributes_.end(),
-      std::back_inserter(clone->attributes_));
-  return clone;
+  return c;
 }
 
 void Node::ReparentChildrenTo(Node* destination) {
   while (true) {
     Node* child = first_child_;
     if (!child) break;
-    destination->AppendChild(RemoveChild(child).release());
+    destination->AppendChild(RemoveChild(child));
   }
 }
 

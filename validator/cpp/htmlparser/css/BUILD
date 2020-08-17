@@ -40,6 +40,19 @@ cc_library(
     ],
 )
 
+cc_test(
+    name = "parse-css_test",
+    srcs = ["parse-css_test.cc"],
+    args = ["--suppress_failure_output"],
+    deps = [
+        ":parse-css",
+        ":parse_css_cc_proto",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+        "@htmlparser//:strings",
+    ],
+)
+
 proto_library(
     name = "parse-css-urls-proto",
     srcs = ["parse-css-urls.proto"],
@@ -67,15 +80,13 @@ cc_library(
 )
 
 cc_test(
-    name = "parse-css_test",
-    srcs = ["parse-css_test.cc"],
+    name = "parse-css-urls_test",
+    srcs = ["parse-css-urls_test.cc"],
     args = ["--suppress_failure_output"],
     deps = [
-        ":parse-css",
-        ":parse_css_cc_proto",
+        ":parse-css-urls",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
-        "@htmlparser//:strings",
     ],
 )
 
@@ -100,16 +111,5 @@ cc_test(
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
         "@htmlparser//:strings",
-    ],
-)
-
-cc_test(
-    name = "parse-css-urls_test",
-    srcs = ["parse-css-urls_test.cc"],
-    args = ["--suppress_failure_output"],
-    deps = [
-        ":parse-css-urls",
-        "@com_google_absl//absl/strings",
-        "@com_google_googletest//:gtest_main",
     ],
 )
