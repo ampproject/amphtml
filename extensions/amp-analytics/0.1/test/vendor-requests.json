@@ -43,7 +43,8 @@
     "defaultTrackingValues": "https://!tenantId/s/!pixelId.gif?property=!property&!property=_client_id(cid-scope-cookie-fallback-name)_!extraTrackingValues&sourceUrl=_source_url_&canonicalUrl=_canonical_url_&referrer=_document_referrer_&title=_title_&visitDate=_timestamp_&geoLocation=_amp_geo(ISOCountry)_&userAgent=_user_agent_"
   },
   "bluetriangle": {
-    "endpoint": "https://d.btttag.com/btt.gif",
+    "host": "https://d.btttag.com",
+    "base": "https://d.btttag.com/btt.gif",
     "pageview": "https://d.btttag.com/btt.gif?gID=!guid&sID=!sessionID&siteID=!prefix&pageName=!pageName&txnName=!trafficSegment&thisURL=_canonical_url_&RefURL=_document_referrer_&dom=0&domContentLoadedEnd=_nav_timing(domContentLoadedEventEnd)_&domContentLoadedStart=_nav_timing(domContentLoadedEventStart)_&domInteractive=_nav_timing(domInteractive)_&domLoading=_nav_timing(domLoading)_&domainLookupStart=_nav_timing(domainLookupStart)_&elementCount=0&fByte=0&fCPnt=_first_contentful_paint_&fetchStart=_nav_timing(fetchStart)_&firstPaint=0&fmp=0&fps=0&fps_tti=0&loadEventStart=_nav_timing(loadEventStart)_&lt_tti=0&nst=0&orderTND=0&pSz=0&pWSz=0&pageValue=&pgTm=0&redirectCount=_nav_redirect_count_&redirectStart=_nav_timing(redirectStart)_&requestStart=_nav_timing(requestStart)_&responseStart=_nav_timing(responseStart)_&secureConnectionStart=_nav_timing(secureConnectionStart)_&ssl=0&tcp=0&top=0&totRD=0&tti=0&tul=0&unloadEventStart=_nav_timing(unloadEventStart)_&wcd=0&eT=7&navigationType=_nav_type_"
   },
   "browsi": {
