@@ -69,7 +69,7 @@ const BUILTINS = {
       'href': 'CANONICAL_URL',
     }),
     defaultColor: 'ffffff',
-    defaultBackgroundColor: '32529f',
+    defaultBackgroundColor: '1877f2',
   },
   'pinterest': {
     shareEndpoint: 'https://www.pinterest.com/pin/create/button/',
@@ -87,7 +87,7 @@ const BUILTINS = {
       'mini': 'true',
     }),
     'defaultColor': 'ffffff',
-    'defaultBackgroundColor': '0077b5',
+    'defaultBackgroundColor': '0a66c2',
   },
   'email': {
     shareEndpoint: 'mailto:RECIPIENT',
@@ -107,7 +107,7 @@ const BUILTINS = {
       'url': 'CANONICAL_URL',
     }),
     defaultColor: 'ffffff',
-    defaultBackgroundColor: '3c5a77',
+    defaultBackgroundColor: '001935',
   },
   'whatsapp': {
     shareEndpoint: 'https://api.whatsapp.com/send',
@@ -124,7 +124,7 @@ const BUILTINS = {
       'url': 'CANONICAL_URL',
     }),
     defaultColor: 'ffffff',
-    defaultBackgroundColor: '52b448',
+    defaultBackgroundColor: '25d366',
   },
   'sms': {
     shareEndpoint: 'sms:',
@@ -132,7 +132,7 @@ const BUILTINS = {
       'body': 'TITLE - CANONICAL_URL',
     }),
     defaultColor: 'ffffff',
-    defaultBackgroundColor: 'ca2b63',
+    defaultBackgroundColor: '000000',
   },
   'system': {
     shareEndpoint: 'navigator-share:',
