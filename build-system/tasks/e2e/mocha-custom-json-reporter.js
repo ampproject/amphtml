@@ -82,9 +82,6 @@ function JsonReporter(runner) {
       time: test.duration, // in milliseconds
     }));
 
-    // Apparently we'll need to add a --no-exit flag when calling this
-    // to allow for the asynchronous reporter.
-    // See https://github.com/mochajs/mocha/issues/812
     writeOutput({testResults}, `result-reports/e2e.json`);
   });
 }
