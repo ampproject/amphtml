@@ -284,7 +284,10 @@ export class AmpStory360 extends AMP.BaseElement {
     );
   }
 
-  /** @private */
+  /**
+   * @param {string} permissionState
+   * @private
+   */
   onPermissionState_(permissionState) {
     if (permissionState === 'granted') {
       this.enableGyroscope_();
