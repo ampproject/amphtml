@@ -21,7 +21,7 @@ This developer preview update covers:
 - API to support a backend and integration details
 - Fully functional example Stories demonstrating good usage of these components
 - Additional demos for the variety of styling and customization options
-- Examples for how you can easily integrate these components into WYSIWYG editors and and tools
+- Examples for how you can easily integrate these components into WYSIWYG editors and tools
 - Additional explorations and roadmap
 - FAQs (please feel free to reach out with other questions & thoughts)
 
