@@ -73,10 +73,7 @@ struct FileReadOptions {
 
 class FileUtil {
  public:
-  // Following read functions must be used for small files and mostly test cases
-  // These are not efficient and must not be used in production environment.
-  // Use buffered reading or other file util library instead.
-  static std::string ReadFile(std::string_view filepath);
+  static std::string FileContents(std::string_view filepath);
 
   // Different styles of utility functions to read text file contents.
   // All return false, if error reading/processing the file.

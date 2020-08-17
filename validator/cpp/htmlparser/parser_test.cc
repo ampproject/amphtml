@@ -17,22 +17,28 @@
 #include "parser.h"
 
 #include "gtest/gtest.h"
+#include "absl/flags/declare.h"
+#include "absl/flags/flag.h"
 #include "atom.h"
 #include "atomutil.h"
 #include "node.h"
 #include "renderer.h"
 #include "token.h"
 
+ABSL_DECLARE_FLAG(uint32_t, htmlparser_max_nodes_depth_count);
+
 // For operator""s.
 using namespace std::string_literals;
 
 #define EXPECT_NOT_NULL(p) EXPECT_TRUE((p) != nullptr)
+#define EXPECT_NULL(p) EXPECT_FALSE((p) != nullptr)
 
 // Tests manufactured tags functions.
 TEST(ParserTest, ParseManufacturedTags) {
   htmlparser::Parser parser("<html><div>Hello</div></html>");
   auto doc = parser.Parse();
   EXPECT_NOT_NULL(doc);
+  EXPECT_NOT_NULL(doc->RootNode());
   EXPECT_FALSE(parser.Accounting().has_manufactured_html);
   EXPECT_TRUE(parser.Accounting().has_manufactured_head);
   EXPECT_TRUE(parser.Accounting().has_manufactured_body);
@@ -40,6 +46,7 @@ TEST(ParserTest, ParseManufacturedTags) {
   htmlparser::Parser parser2("<html><head></head><div>Hello</div></html>");
   doc = parser2.Parse();
   EXPECT_NOT_NULL(doc);
+  EXPECT_NOT_NULL(doc->RootNode());
   EXPECT_FALSE(parser2.Accounting().has_manufactured_html);
   EXPECT_FALSE(parser2.Accounting().has_manufactured_head);
   EXPECT_TRUE(parser2.Accounting().has_manufactured_body);
@@ -48,6 +55,7 @@ TEST(ParserTest, ParseManufacturedTags) {
                              "</body></html>");
   doc = parser3.Parse();
   EXPECT_NOT_NULL(doc);
+  EXPECT_NOT_NULL(doc->RootNode());
   EXPECT_FALSE(parser3.Accounting().has_manufactured_html);
   EXPECT_FALSE(parser3.Accounting().has_manufactured_head);
   EXPECT_FALSE(parser3.Accounting().has_manufactured_body);
@@ -56,6 +64,7 @@ TEST(ParserTest, ParseManufacturedTags) {
   htmlparser::Parser parser4("<html><head><body><div>Hello</div>");
   doc = parser4.Parse();
   EXPECT_NOT_NULL(doc);
+  EXPECT_NOT_NULL(doc->RootNode());
   EXPECT_FALSE(parser4.Accounting().has_manufactured_html);
   EXPECT_FALSE(parser4.Accounting().has_manufactured_head);
   EXPECT_FALSE(parser4.Accounting().has_manufactured_body);
@@ -63,23 +72,26 @@ TEST(ParserTest, ParseManufacturedTags) {
   htmlparser::Parser parser5("hello");
   doc = parser5.Parse();
   EXPECT_NOT_NULL(doc);
+  EXPECT_NOT_NULL(doc->RootNode());
   EXPECT_TRUE(parser5.Accounting().has_manufactured_html);
   EXPECT_TRUE(parser5.Accounting().has_manufactured_head);
   EXPECT_TRUE(parser5.Accounting().has_manufactured_body);
-  EXPECT_NOT_NULL(doc);
-  EXPECT_EQ(doc->FirstChild()->DataAtom(),
+  EXPECT_NOT_NULL(doc->RootNode());
+  EXPECT_EQ(doc->RootNode()->FirstChild()->DataAtom(),
             htmlparser::Atom::HTML);
-  EXPECT_TRUE(doc->FirstChild()->IsManufactured());
+  EXPECT_TRUE(doc->RootNode()->FirstChild()->IsManufactured());
 
   htmlparser::Parser parser6("");
   doc = parser6.Parse();
+  EXPECT_NOT_NULL(doc);
+  EXPECT_NOT_NULL(doc->RootNode());
   EXPECT_TRUE(parser6.Accounting().has_manufactured_html);
   EXPECT_TRUE(parser6.Accounting().has_manufactured_head);
   EXPECT_TRUE(parser6.Accounting().has_manufactured_body);
-  EXPECT_NOT_NULL(doc);
-  EXPECT_EQ(doc->FirstChild()->DataAtom(),
+  EXPECT_NOT_NULL(doc->RootNode());
+  EXPECT_EQ(doc->RootNode()->FirstChild()->DataAtom(),
             htmlparser::Atom::HTML);
-  EXPECT_TRUE(doc->FirstChild()->IsManufactured());
+  EXPECT_TRUE(doc->RootNode()->FirstChild()->IsManufactured());
 }
 
 // Various line column recording tests.
@@ -135,7 +147,7 @@ TEST(ParserTest, LineColTest) {
        }
       });
   auto doc = parser.Parse();
-  EXPECT_NOT_NULL(doc.get());
+  EXPECT_NOT_NULL(doc->RootNode());
   EXPECT_EQ(num_callbacks, 6 /* html, head, body, div, img, a */);
 
   num_callbacks = 0;
@@ -316,10 +328,11 @@ TEST(ParserTest, SubsequentyBodyTagAttributesCopied) {
   std::string html = ("<html>\n<body id=\"bdy\">\n<div>hello</div></body>"s
                       "<body class=\"bd-cls\"><div>world</div></body></html>");
   htmlparser::Parser parser(html);
-  auto root = parser.Parse();
-  EXPECT_NOT_NULL(root);
+  auto doc = parser.Parse();
+  EXPECT_NOT_NULL(doc);
+  EXPECT_NOT_NULL(doc->RootNode());
   std::stringbuf buf;
-  htmlparser::Renderer::Render(root.get(), &buf);
+  htmlparser::Renderer::Render(doc->RootNode(), &buf);
   EXPECT_EQ(buf.str(),
             "<html><head></head><body id=\"bdy\" class=\"bd-cls\">\n"
             "<div>hello</div><div>world</div></body></html>");
@@ -331,10 +344,11 @@ TEST(ParserTest, WhitespaceTest) {
                       "<div>hello</div>                        </body>"s
                       "<body class=\"bd-cls\"><div>world</div></body></html>");
   htmlparser::Parser parser(html);
-  auto root = parser.Parse();
-  EXPECT_NOT_NULL(root);
+  auto doc = parser.Parse();
+  EXPECT_NOT_NULL(doc);
+  EXPECT_NOT_NULL(doc->RootNode());
   std::stringbuf buf;
-  htmlparser::Renderer::Render(root.get(), &buf);
+  htmlparser::Renderer::Render(doc->RootNode(), &buf);
   EXPECT_EQ(buf.str(),
             "<html><head></head><body id=\"bdy\" class=\"bd-cls\">\n"
             "                    <div>hello</div>                        "
@@ -349,10 +363,11 @@ TEST(ParserTest, NonAsciiWhitespaceNotTransformed) {
                       "white&#160;space.txt\">Whitespace in the link</a>"
                       "\xc2\xa0 \xc2\xa0 \xc2\xa0");
   htmlparser::Parser parser(html);
-  auto root = parser.Parse();
-  EXPECT_NOT_NULL(root);
+  auto doc = parser.Parse();
+  EXPECT_NOT_NULL(doc);
+  EXPECT_NOT_NULL(doc->RootNode());
   std::stringbuf buf;
-  htmlparser::Renderer::Render(root.get(), &buf);
+  htmlparser::Renderer::Render(doc->RootNode(), &buf);
   EXPECT_EQ(buf.str(),
             "<!DOCTYPE html><html><head><meta charset=\"utf-8\">"
             "</head><body><a href=\"https://s3.amazonaws.com/amaltas.backup"
@@ -370,10 +385,11 @@ TEST(ParserTest, OnlyAsciiWhitespaceInHTMLTags) {
                       "https://s3.amazonaws.com/amaltas.backup/"
                       "white&#160;space.txt\">Whitespace in the link</a>");
   htmlparser::Parser parser(html);
-  auto root = parser.Parse();
-  EXPECT_NOT_NULL(root);
+  auto doc = parser.Parse();
+  EXPECT_NOT_NULL(doc);
+  EXPECT_NOT_NULL(doc->RootNode());
   std::stringbuf buf;
-  htmlparser::Renderer::Render(root.get(), &buf);
+  htmlparser::Renderer::Render(doc->RootNode(), &buf);
   // HTML parser did the right thing. Stuffed everything in <body> as if
   // <a<space>href is a text.
   EXPECT_EQ(buf.str(),
@@ -397,7 +413,7 @@ TEST(ParserTest, ParserAccounting) {
 
   htmlparser::Parser p1(all_good);
   auto doc = p1.Parse();
-  EXPECT_NOT_NULL(doc);
+  EXPECT_NOT_NULL(doc->RootNode());
   htmlparser::ParseAccounting act = p1.Accounting();
   EXPECT_FALSE(act.has_manufactured_html);
   EXPECT_FALSE(act.has_manufactured_head);
@@ -417,7 +433,7 @@ TEST(ParserTest, ParserAccounting) {
 
   htmlparser::Parser p2(implied_html);
   doc = p2.Parse();
-  EXPECT_NOT_NULL(doc);
+  EXPECT_NOT_NULL(doc->RootNode());
   act = p2.Accounting();
   EXPECT_TRUE(act.has_manufactured_html);
   EXPECT_FALSE(act.has_manufactured_head);
@@ -437,7 +453,7 @@ TEST(ParserTest, ParserAccounting) {
 
   htmlparser::Parser p3(implied_body);
   doc = p3.Parse();
-  EXPECT_NOT_NULL(doc);
+  EXPECT_NOT_NULL(doc->RootNode());
   act = p3.Accounting();
   EXPECT_FALSE(act.has_manufactured_html);
   EXPECT_FALSE(act.has_manufactured_head);
@@ -457,7 +473,7 @@ TEST(ParserTest, ParserAccounting) {
 
   htmlparser::Parser p4(implied_head);
   doc = p4.Parse();
-  EXPECT_NOT_NULL(doc);
+  EXPECT_NOT_NULL(doc->RootNode());
   act = p4.Accounting();
   EXPECT_FALSE(act.has_manufactured_html);
   EXPECT_TRUE(act.has_manufactured_head);
@@ -481,7 +497,7 @@ TEST(ParserTest, ParserAccounting) {
 
   htmlparser::Parser p5(second_html);
   doc = p5.Parse();
-  EXPECT_NOT_NULL(doc);
+  EXPECT_NOT_NULL(doc->RootNode());
   act = p5.Accounting();
   EXPECT_FALSE(act.has_manufactured_html);
   EXPECT_FALSE(act.has_manufactured_head);
@@ -506,7 +522,7 @@ TEST(ParserTest, ParserAccounting) {
 
   htmlparser::Parser p6(second_body);
   doc = p6.Parse();
-  EXPECT_NOT_NULL(doc);
+  EXPECT_NOT_NULL(doc->RootNode());
   act = p6.Accounting();
   EXPECT_FALSE(act.has_manufactured_html);
   EXPECT_FALSE(act.has_manufactured_head);
@@ -531,7 +547,7 @@ TEST(ParserTest, ParserAccounting) {
 
   htmlparser::Parser p6a(second_body_implicit);
   doc = p6a.Parse();
-  EXPECT_NOT_NULL(doc);
+  EXPECT_NOT_NULL(doc->RootNode());
   act = p6a.Accounting();
   EXPECT_FALSE(act.has_manufactured_html);
   EXPECT_FALSE(act.has_manufactured_head);
@@ -555,7 +571,7 @@ TEST(ParserTest, ParserAccounting) {
 
   htmlparser::Parser p6b(second_body_after_manufactured);
   doc = p6b.Parse();
-  EXPECT_NOT_NULL(doc);
+  EXPECT_NOT_NULL(doc->RootNode());
   act = p6b.Accounting();
   EXPECT_FALSE(act.has_manufactured_html);
   EXPECT_FALSE(act.has_manufactured_head);
@@ -579,7 +595,7 @@ TEST(ParserTest, ParserAccounting) {
 
   htmlparser::Parser p6c(second_body_after_body_close);
   doc = p6c.Parse();
-  EXPECT_NOT_NULL(doc);
+  EXPECT_NOT_NULL(doc->RootNode());
   act = p6c.Accounting();
   EXPECT_FALSE(act.has_manufactured_html);
   EXPECT_FALSE(act.has_manufactured_head);
@@ -605,9 +621,9 @@ TEST(ParserTest, ParserAccounting) {
 
   htmlparser::Parser p7(template_html);
   doc = p7.Parse();
-  EXPECT_NOT_NULL(doc);
+  EXPECT_NOT_NULL(doc->RootNode());
   std::stringbuf output_buf;
-  htmlparser::Renderer::Render(doc.get(), &output_buf);
+  htmlparser::Renderer::Render(doc->RootNode(), &output_buf);
   EXPECT_EQ(output_buf.str(), R"HTML(<html><head>
 <title>foo</title>
 </head>
@@ -642,9 +658,9 @@ TEST(ParserTest, WhitespaceBeforeHeadIgnoredAfterBodyAppendedToBody) {
 
   htmlparser::Parser p(html, {.record_node_offsets = true});
   auto doc = p.Parse();
-  EXPECT_NOT_NULL(doc);
+  EXPECT_NOT_NULL(doc->RootNode());
   std::stringbuf output_buf;
-  htmlparser::Renderer::Render(doc.get(), &output_buf);
+  htmlparser::Renderer::Render(doc->RootNode(), &output_buf);
   EXPECT_EQ(output_buf.str(), R"HTML(<!DOCTYPE html><html><head>
 <title>foo</title>
 </head>
@@ -678,9 +694,9 @@ TEST(ParserTest, WhitespaceBeforeHeadIgnoredAfterBodyAppendedToBody) {
 
   htmlparser::Parser p2(html, {.record_node_offsets = true});
   doc = p2.Parse();
-  EXPECT_NOT_NULL(doc);
+  EXPECT_NOT_NULL(doc->RootNode());
   std::stringbuf output_buf2;
-  htmlparser::Renderer::Render(doc.get(), &output_buf2);
+  htmlparser::Renderer::Render(doc->RootNode(), &output_buf2);
   EXPECT_EQ(output_buf2.str(), R"HTML(<!-- comment 1 --><!-- comment 2 --><!DOCTYPE html><html><head>
 <title>foo</title>
 </head>
@@ -704,9 +720,9 @@ TEST(ParserTest, ImageVsImg) {
 
   htmlparser::Parser p(html);
   auto doc = p.Parse();
-  EXPECT_NOT_NULL(doc);
+  EXPECT_NOT_NULL(doc->RootNode());
   std::stringbuf buf;
-  htmlparser::Renderer::Render(doc.get(), &buf);
+  htmlparser::Renderer::Render(doc->RootNode(), &buf);
   EXPECT_EQ(buf.str(), R"HTML(<html><head></head><body>
   <img src="foo1.png">
   <img src="foo2.png">
@@ -722,9 +738,30 @@ TEST(ParserTest, VoidElementsParsedCorrectly) {
 
   htmlparser::Parser p(html);
   auto doc = p.Parse();
-  EXPECT_NOT_NULL(doc);
+  EXPECT_NOT_NULL(doc->RootNode());
   std::stringbuf buf;
-  htmlparser::Renderer::Render(doc.get(), &buf);
+  htmlparser::Renderer::Render(doc->RootNode(), &buf);
   EXPECT_EQ(buf.str(), R"HTML(<html><head></head><body>
   <img src="foo.png"></body></html>)HTML");
+}
+
+TEST(ParserTest, DocumentComplexityTest) {
+  ::absl::SetFlag(&FLAGS_htmlparser_max_nodes_depth_count, 4);
+
+  // Document parsing failed, body contains 4 deeply nested nodes..
+  htmlparser::Parser p(
+      "<html><body><a><b><c><m></m></c></b></a></body></html>");
+  EXPECT_NULL(p.Parse());
+
+  // Document parsed, open elements stack less than 4.
+  htmlparser::Parser p2("<html><body><a><b>foo</b></a></body></html>");
+  EXPECT_NOT_NULL(p2.Parse());
+
+  // Child nodes closing reduces the stack size. So maximum open nodes in the
+  // following document is 4.
+  htmlparser::Parser p3("<html><body><a>"
+                        "<b>foo</b><b>foo</b><b>foo</b><b>foo</b><b>foo</b>"
+                        "<b>foo</b><b>foo</b><b>foo</b><b>foo</b><b>foo</b>"
+                        "</a></body></html>");
+  EXPECT_NOT_NULL(p3.Parse());
 }

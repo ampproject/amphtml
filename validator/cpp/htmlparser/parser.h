@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "atom.h"
+#include "document.h"
 #include "node.h"
 #include "tokenizer.h"
 
@@ -117,14 +118,14 @@ struct ParseAccounting {
 // dropped, with no corresponding node in the resulting tree.
 //
 // The html string is assumed to be UTF-8 encoded.
-[[nodiscard]] std::unique_ptr<Node> Parse(std::string_view html);
-[[nodiscard]] std::unique_ptr<Node> ParseWithOptions(
+[[nodiscard]] std::unique_ptr<Document> Parse(std::string_view html);
+[[nodiscard]] std::unique_ptr<Document> ParseWithOptions(
     std::string_view html, const ParseOptions& options);
 
-[[nodiscard]] std::vector<Node*> ParseFragment(
+[[nodiscard]] std::unique_ptr<Document> ParseFragment(
     std::string_view html, Node* fragment_parent = nullptr);
 
-[[nodiscard]] std::vector<Node*> ParseFragmentWithOptions(
+[[nodiscard]] std::unique_ptr<Document> ParseFragmentWithOptions(
     const std::string_view html,
     const ParseOptions& options,
     Node* fragment_parent = nullptr);
@@ -135,7 +136,7 @@ class Parser {
          const ParseOptions& options = {},
          Node* fragment_parent = nullptr);
 
-  [[nodiscard]] std::unique_ptr<Node> Parse();
+  [[nodiscard]] std::unique_ptr<Document> Parse();
 
   ParseAccounting Accounting() const { return accounting_; }
 
@@ -147,15 +148,15 @@ class Parser {
   // rid of the above helper Parse methods, make constructor public to allow
   // clients to create and use Parser object.
 
-  friend std::unique_ptr<Node> Parse(std::string_view html);
+  friend std::unique_ptr<Document> Parse(std::string_view html);
 
-  friend std::unique_ptr<Node> ParseWithOptions(
+  friend std::unique_ptr<Document> ParseWithOptions(
       std::string_view html, const ParseOptions& options);
 
-  friend std::vector<Node*> ParseFragment(std::string_view html,
-                                            Node* fragment_parent);
+  friend std::unique_ptr<Document> ParseFragment(std::string_view html,
+                                                 Node* fragment_parent);
 
-  friend std::vector<Node*> ParseFragmentWithOptions(
+  friend std::unique_ptr<Document> ParseFragmentWithOptions(
       const std::string_view html,
       const ParseOptions& options,
       Node* fragment_parent);
@@ -339,7 +340,7 @@ class Parser {
   bool has_self_closing_token_ = false;
 
   // Document root element.
-  std::unique_ptr<Node> document_;
+  std::unique_ptr<Document> document_;
 
   // Section 12.2.4.3 says "The markers are inserted when entering applet,
   // object, marquee, template, td, th, and caption elements, and are used
@@ -347,7 +348,7 @@ class Parser {
   // template, td, th, and caption elements".
   //
   // TODO: This is just a marker. Consider making it static and const.
-  std::unique_ptr<Node> scope_marker_;
+  Node* scope_marker_;
 
   // The stack of open elements (section 12.2.4.2) and active formatting
   // elements (section 12.2.4.3).

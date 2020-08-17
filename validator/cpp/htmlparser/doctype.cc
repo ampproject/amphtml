@@ -108,8 +108,7 @@ void SkipLangAttribute(std::string_view* s) {
   std::string lang_val = ReadUntil(s, Strings::kWhitespace);
 }
 
-std::tuple<std::unique_ptr<Node>, bool> ParseDoctype(std::string_view s) {
-  auto n = std::unique_ptr<Node>(Node::make_node(NodeType::DOCTYPE_NODE));
+bool ParseDoctype(std::string_view s, Node* doctype_node) {
   bool quirks = false;
 
   SkipLeadingWhitespace(&s);
@@ -137,12 +136,12 @@ std::tuple<std::unique_ptr<Node>, bool> ParseDoctype(std::string_view s) {
   }
 
   Strings::ToLower(&data);
-  n->SetData(data);
+  doctype_node->SetData(data);
 
   if (s.size() < 6) {
     // It can't start with "PUBLIC" or "SYSTEM".
     // Ignore the rest of the string.
-    return std::make_tuple(std::move(n), quirks);
+    return quirks;
   }
 
   std::string key(s.data(), 6);
@@ -156,7 +155,8 @@ std::tuple<std::unique_ptr<Node>, bool> ParseDoctype(std::string_view s) {
     if (quote != '"' && quote != '\'') break;
     s.remove_prefix(1);
     std::string val = ReadUntil(&s, {quote});
-    n->AddAttribute({"" /* namespace */, key /* key */, val /* value */});
+    doctype_node->AddAttribute(
+        {"" /* namespace */, key /* key */, val /* value */});
 
     if (key == "public") {
       key = "system";
@@ -168,9 +168,9 @@ std::tuple<std::unique_ptr<Node>, bool> ParseDoctype(std::string_view s) {
   if (!key.empty() || !s.empty()) {
     quirks = true;
   } else {
-    std::string ns = n->Attributes()[0].name_space;
-    std::string k = n->Attributes()[0].key;
-    std::string v = n->Attributes()[0].value;
+    std::string ns = doctype_node->Attributes()[0].name_space;
+    std::string k = doctype_node->Attributes()[0].key;
+    std::string v = doctype_node->Attributes()[0].value;
     if (k == "public") {
       if (Strings::EqualFold(v, "-//w3o//dtd w3 html strict 3.0//en//") ||
           Strings::EqualFold(v, "-/w3d/dtd html 4.0 transitional/en") ||
@@ -187,13 +187,13 @@ std::tuple<std::unique_ptr<Node>, bool> ParseDoctype(std::string_view s) {
 
       // The following two public IDs only cause quirks mode if there is no
       // system ID.
-      if (n->Attributes().size() == 1 &&
+      if (doctype_node->Attributes().size() == 1 &&
           (Strings::StartsWith(v, "-//w3c//dtd html 4.01 frameset//") ||
            Strings::StartsWith(v, "-//w3c//dtd html 4.01 transitional//"))) {
         quirks = true;
       }
     }
-    k = n->Attributes().back().key;
+    k = doctype_node->Attributes().back().key;
     if (k == "system") {
       if (Strings::EqualFold(
           v, "http://www.ibm.com/data/dtd/v11/ibmxhtml1-transitional.dtd")) {
@@ -202,7 +202,7 @@ std::tuple<std::unique_ptr<Node>, bool> ParseDoctype(std::string_view s) {
     }
   }
 
-  return std::make_tuple(std::move(n), quirks);
+  return quirks;
 }
 
 }  // namespace htmlparser
