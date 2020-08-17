@@ -18,9 +18,10 @@
 //
 #include "error-formatter.h"
 
+#include "glog/logging.h"
 #include "validator_pb.h"
 #include "strings.h"
-#include "../../validator.proto.h"
+#include "validator.pb.h"
 #include "re2/re2.h"  // NOLINT(build/deprecated)
 
 namespace amp::validator {

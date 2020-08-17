@@ -19,13 +19,12 @@
 #include <string>
 #include <unordered_map>
 
-#include "absl/strings/case.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_replace.h"
 #include "absl/strings/string_view.h"
-#include "../../validator.proto.h"
+#include "validator.pb.h"
 #include "re2/re2.h"  // NOLINT(build/deprecated)
 
 using absl::AsciiStrToLower;

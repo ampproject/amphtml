@@ -20,7 +20,7 @@
 #include <string>
 
 #include "absl/strings/string_view.h"
-#include "../../validator.proto.h"
+#include "validator.pb.h"
 
 namespace amp::validator::parse_layout {
 

@@ -1,80 +1,29 @@
-// Converts between different representations of the validator rules.
-//
-// Example usage:
-//
-// Generating Javascript for Closure compiler:
-// bazel-bin/cpp/engine/validator-convert \
-//     --textproto_in.file=third_party/javascript/amp_validator/validator-main.protoascii \
-//     --json_out.file=rules.js
-//
-// Generating just JSON:
-// bazel-bin/cpp/engine/validator-convert \
-//     --textproto_in.file=third_party/javascript/amp_validator/validator-main.protoascii \
-//     --json_out.file=rules.js --json_out.mode=JSON_ONLY
-//
-// Generating binary proto for MPM:
-// bazel-bin/cpp/engine/validator-convert \
-//     --textproto_in.file=third_party/javascript/amp_validator/validator-main.protoascii \
-//     --pb_out.file=rules.pb
-
+#include <filesystem>
+#include <fstream>
 #include <string>
 
-#include "base/logging.h"
-#include "file/base/helpers.h"
-#include "file/base/options.h"
-#include "net/proto2/contrib/protoflags/protoflags.h"
-#include "net/proto2/util/public/json_format.h"
-#include "validator-convert.proto.h"
-#include "absl/strings/str_cat.h"
-#include "../../validator.proto.h"
+#include "glog/logging.h"
+#include "google/protobuf/text_format.h"
 
-using amp::validator::ValidatorRules;
-using proto2::contrib::protoflags::InitGoogleAndParse;
+#include "defer.h"
+#include "fileutil.h"
 
-namespace amp::validator {
-void WriteJsonOut(const ValidatorRules& rules, const JsonOutConfig& config) {
-  std::string out;
-  if (config.mode() == JsonOutConfig::WITH_CLOSURE)
-    absl::StrAppend(&out,
-                    "goog.provide('amp.validator.rules');\n"
-                    "amp.validator.rules = ");
-  proto2::util::JsonFormat formatter(
-      proto2::util::JsonFormat::ADD_WHITESPACE |
-      proto2::util::JsonFormat::DONT_QUOTE_FIELD_NAMES |
-      proto2::util::JsonFormat::SYMBOLIC_ENUMS |
-      proto2::util::JsonFormat::USE_JSON_OPT_PARAMETERS |
-      proto2::util::JsonFormat::LOWER_CAMELCASE_FIELD_NAMES);
-  formatter.PrintToString(rules, &out);
-  if (config.mode() == JsonOutConfig::WITH_CLOSURE)
-    absl::StrAppend(&out, ";\n");
-  CHECK_OK(file::SetContents(config.file(), out, file::Defaults()));
-}
+#include "validator.pb.h"
 
-void WritePbOut(const ValidatorRules& rules, const PbOutConfig& config) {
-  CHECK_OK(file::SetBinaryProto(config.file(), rules, file::Defaults()));
-}
+using google::protobuf::TextFormat;
 
-void Convert(const ValidatorConvertConfig& config) {
-  ValidatorRules rules;
-  CHECK(config.has_textproto_in()) << "must set in";
-  CHECK_OK(file::GetTextProto(config.textproto_in().file(), &rules,
-                              file::Defaults()));
-  switch (config.out_case()) {
-    case ValidatorConvertConfig::kJsonOut:
-      WriteJsonOut(rules, config.json_out());
-      break;
-    case ValidatorConvertConfig::kPbOut:
-      WritePbOut(rules, config.pb_out());
-      break;
-    case ValidatorConvertConfig::OUT_NOT_SET:
-      LOG(FATAL) << "must set out";
-  }
-}
-}  // namespace amp::validator
+namespace fs = std::filesystem;
 
 int main(int argc, char* argv[]) {
-  auto config = InitGoogleAndParse<amp::validator::ValidatorConvertConfig>(
-      argv[0], &argc, &argv, true);
-  Convert(config);
+  fs::path text_proto_path = argv[1];
+  fs::path output_file = argv[2];
+  CHECK(fs::exists(text_proto_path)) << text_proto_path << " proto not found.";
+  std::string text_proto = htmlparser::FileUtil::FileContents(argv[1]);
+  CHECK(!text_proto.empty()) << text_proto_path << " read failed.";
+  amp::validator::ValidatorRules rules;
+  TextFormat::ParseFromString(text_proto, &rules);
+  std::ofstream ofs(argv[2], std::ofstream::out);
+  htmlparser::defer(ofs.close());
+  rules.SerializeToOstream(&ofs);
   return 0;
 }

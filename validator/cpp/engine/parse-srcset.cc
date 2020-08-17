@@ -20,7 +20,7 @@
 #include <vector>
 
 #include "absl/strings/string_view.h"
-#include "re2/re2.h"  // NOLINT(build/deprecated)
+#include "re2/re2.h"
 
 using amp::validator::ValidationError;
 using std::unordered_set;

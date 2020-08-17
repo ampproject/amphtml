@@ -16,19 +16,6 @@ licenses(["notice"])
 
 exports_files(["LICENSE"])
 
-proto_library(
-    name = "validator-proto",
-    srcs = ["validator.proto"],
-    deps = [
-        "@validator//:validator_proto",
-    ],
-)
-
-cc_proto_library(
-    name = "validator_cc_proto",
-    deps = [":validator-proto"],
-)
-
 cc_library(
     name = "validator_pb",
     hdrs = [
@@ -204,9 +191,9 @@ cc_library(
     srcs = ["error-formatter.cc"],
     hdrs = ["error-formatter.h"],
     deps = [
-        ":validator_cc_proto",
         ":validator_pb",
         "@com_googlesource_code_re2//:re2",
+        "@com_github_glog//:glog",
         "@htmlparser//:strings",
         "@validator//:validator_cc_proto",
     ],
@@ -222,6 +209,26 @@ cc_test(
     ],
 )
 
+cc_binary(
+    name = "validator-convert",
+    srcs = ["validator-convert.cc"],
+    deps = [
+        "@com_google_protobuf//:protobuf",
+        "@htmlparser//:defer",
+        "@htmlparser//:fileutil",
+        "@validator//:validator_cc_proto",
+    ],
+)
+
+genrule(
+    name = "validator-pb",
+    srcs = ["@validator//:validator-protoascii"],
+    outs = ["validator.pb"],
+    cmd = "$(location :validator-convert) " +
+          "$(SRCS) $@",
+    tools = [":validator-convert"],
+)
+
 cc_library(
     name = "validator-internal",
     srcs = [
@@ -233,9 +240,8 @@ cc_library(
         ":parse-layout",
         ":parse-srcset",
         ":parse-viewport",
-        ":type_identifier",
+        ":type-identifier",
         ":utf8-util",
-        ":validator_cc_proto",
         ":validator_pb",
         # TODO: determine correct dep for //file/base
         # "//file/base",
@@ -276,7 +282,6 @@ cc_library(
     ],
     deps = [
         ":validator-internal",
-        ":validator_cc_proto",
         "@validator//:validator_cc_proto",
     ],
     alwayslink = 1,
