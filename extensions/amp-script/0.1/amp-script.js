@@ -304,11 +304,12 @@ export class AmpScript extends AMP.BaseElement {
         }
       })
       .catch((err) => {
-        // Exclude all errors created via workerAndAuthorScripts rejection.
-        if (err.message.indexOf('amp-script') > -1) {
-          return;
-        }
-        throw err;
+        // Catch errors if due to an issue with workerAndAuthorScripts rejection.
+        return workerAndAuthorScripts
+          .then(() => {
+            throw err;
+          })
+          .catch(() => {});
       });
 
     return workerAndAuthorScripts;
