@@ -129,6 +129,7 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 - Browsi
 - Criteo
 - FLUX
+- Freestar
 - Galaxie Media
 - IndexExchange
 - Kargo
