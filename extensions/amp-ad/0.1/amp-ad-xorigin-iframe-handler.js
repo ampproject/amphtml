@@ -586,6 +586,9 @@ export class AmpAdXOriginIframeHandler {
    * @param {boolean} inViewport
    */
   viewportCallback(inViewport) {
+    if (this.intersectionObserverHost_) {
+      this.intersectionObserverHost_.onViewportCallback(inViewport);
+    }
     this.sendEmbedInfo_(inViewport);
   }
 
