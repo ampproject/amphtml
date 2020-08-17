@@ -77,7 +77,7 @@ amp-story-interactive/1.0/test/validator-amp-story-interactive-results.html:54:8
 |          <amp-story-interactive-results
 >>         ^~~~~~~~~
 amp-story-interactive/1.0/test/validator-amp-story-interactive-results.html:62:8 The attribute 'option-4-results-threshold' in tag 'amp-story-interactive-results' is set to the invalid value 'a'. (see https://amp.dev/documentation/components/amp-story-interactive)
-|            id="threshold-regex"
+|            id="threshold attributes"
 |            option-1-text="France" option-1-results-category="Dog" option-1-results-threshold="100"
 |            option-2-text="Spain" option-2-results-category="Cat" option-2-results-threshold="100"
 |            option-3-text="Uruguay" option-3-results-category="Bunny" option-3-results-threshold="100"
