@@ -924,7 +924,7 @@ export class AmpStoryPlayer {
    * Compares href from the story with the href in the iframe.
    * @param {string} storyHref
    * @param {string} iframeHref
-   * @return {boolean}
+   * @return {Promise<boolean>}
    * @private
    */
   hasSameHref_(storyHref, iframeHref) {
