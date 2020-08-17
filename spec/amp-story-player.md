@@ -208,7 +208,7 @@ player.add([
 
 Will mute/unmute the current story. This will not persist across stories, eg. calling `player.mute()` on the first story will not mute the second story.
 
-Please note that due to web standards, the default state is muted and cannot be unmuted unless the user unmuted previously. Only webviews explicitly allowing autoplaying media with sound can use unmute right away.
+Please note that due to browser restrictions on autoplaying media with sound, the default state is muted and the story cannot be unmuted unless the user manually unmuted previously. Only webviews explicitly allowing autoplaying media with sound can use `unmute()` right away.
 
 ```
 player.mute();
