@@ -20,6 +20,7 @@
  */
 
 import {
+  Action,
   StateProperty,
   getStoreService,
 } from '../../../extensions/amp-story/1.0/amp-story-store-service';
@@ -265,16 +266,18 @@ export class AmpStory360 extends AMP.BaseElement {
     container.appendChild(this.canvas_);
     this.applyFillContent(container, /* replacedContent */ true);
 
+    this.element.getAttribute('controls') === 'gyroscope' &&
+      this.checkGyroscopePermissions_();
+
     this.initializeListeners_();
   }
 
   /** @private */
   initializeListeners_() {
-    if (this.element.getAttribute('controls') === 'gyroscope') {
-      this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, () => {
-        this.checkGyroscopePermissions_();
-      });
-    }
+    this.storeService_.subscribe(
+      StateProperty.GYROSCOPE_PERMISSION_STATE,
+      (permissionState) => this.onPermissionState_(permissionState)
+    );
 
     this.storeService_.subscribe(StateProperty.PAGE_SIZE, () =>
       this.resizeRenderer_()
@@ -282,50 +285,49 @@ export class AmpStory360 extends AMP.BaseElement {
   }
 
   /** @private */
+  onPermissionState_(permissionState) {
+    if (permissionState === 'granted') {
+      this.enableGyroscope_();
+    } else if (permissionState === 'denied') {
+      this.gyroscopeControls_ = false;
+      this.togglePermissionClass_(true);
+    }
+  }
+
+  /** @private */
   checkGyroscopePermissions_() {
     //  Browser doesn't support DeviceOrientationEvent API.
-    if (typeof DeviceOrientationEvent === 'undefined') {
+    if (!this.win.DeviceOrientationEvent) {
       return;
     }
 
     // If browser doesn't require permission, enable gyroscope.
-    if (typeof DeviceOrientationEvent.requestPermission === 'undefined') {
+    if (!this.win.DeviceOrientationEvent.requestPermission) {
       this.enableGyroscope_();
     }
 
     // If DeviceOrientationEvent and permissions, build permission button.
-    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+    if (this.win.DeviceOrientationEvent.requestPermission) {
       this.buildPermissionButton_();
     }
   }
 
   /**
-   * Creates a device orientation listener and sets gyroscopeControls state.
-   * Removes the listener and resumes animation if listener is not called in 1000ms.
+   * Creates a device orientation listener and sets gyroscopeControls_ state.
+   * If listener is not called in 1000ms, remove listener and resume animation.
    * @private
    */
   enableGyroscope_() {
     this.gyroscopeControls_ = true;
-
-    this.mutateElement(() => {
-      this.element.classList.add('i-amphtml-story-360-hide-permissions-ui');
-    });
+    this.togglePermissionClass_(true);
 
     this.win.addEventListener('deviceorientation', (e) => {
       this.isReady_ && this.onDeviceOrientation_(e);
-      // If this listener is called, device is in motion and checkNoMotion is cleared.
       clearTimeout(checkNoMotion);
     });
 
-    // If device isn't moving cancel gyroscope controls and resume animating.
-    // This happens with desktop browsers that have the motion API but are stationary.
     const checkNoMotion = setTimeout(() => {
       this.gyroscopeControls_ = false;
-      this.mutateElement(() => {
-        this.element.classList.remove(
-          'i-amphtml-story-360-hide-permissions-ui'
-        );
-      });
       this.animate_();
     }, 1000);
   }
@@ -357,7 +359,7 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /**
    * Creates a "activate" button to request DeviceOrientation permissions.
-   * Simulates an event on a fake button so this will fire on page load.
+   * Simulates a click event to call this method on page load.
    * @private
    */
   buildPermissionButton_() {
@@ -375,7 +377,7 @@ export class AmpStory360 extends AMP.BaseElement {
         })
         // If permissions are already set, handle permission state.
         .then((permissionState) => {
-          permissionState && this.handlePermissionState_(permissionState);
+          permissionState && this.setPermissionState_(permissionState);
         });
     });
     tempButton.click();
@@ -383,16 +385,29 @@ export class AmpStory360 extends AMP.BaseElement {
   }
 
   /**
-   * Handles enabling gyroscope or hiding activate button
    * @param {string} permissionState
    * @private
    */
-  handlePermissionState_(permissionState) {
+  setPermissionState_(permissionState) {
     if (permissionState === 'granted') {
-      this.enableGyroscope_();
+      this.storeService_.dispatch(Action.SET_GYROSCOPE_PERMISSION, 'granted');
     } else if (permissionState === 'denied') {
-      this.element.classList.add('i-amphtml-story-360-hide-permissions-ui');
+      this.storeService_.dispatch(Action.SET_GYROSCOPE_PERMISSION, 'denied');
     }
+  }
+
+  /**
+   * Toggles class on amp-story to show or hide activate button.
+   * @param {boolean} hidePermissionButton
+   * @private
+   */
+  togglePermissionClass_(hidePermissionButton) {
+    this.mutateElement(() => {
+      this.element.classList.toggle(
+        'i-amphtml-story-360-hide-permissions-ui',
+        hidePermissionButton
+      );
+    });
   }
 
   /** @private */
@@ -400,7 +415,7 @@ export class AmpStory360 extends AMP.BaseElement {
     if (this.win.DeviceOrientationEvent.requestPermission) {
       this.win.DeviceOrientationEvent.requestPermission()
         .then((permissionState) => {
-          this.handlePermissionState_(permissionState);
+          this.setPermissionState_(permissionState);
         })
         .catch((error) => {
           dev().error(TAG, `Gyroscope permission error: ${error.message}`);
