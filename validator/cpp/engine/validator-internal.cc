@@ -68,13 +68,26 @@
 
 using absl::AsciiStrToLower;
 using absl::AsciiStrToUpper;
+using absl::ByAnyChar;
+using absl::c_copy;
 using absl::c_find;
 using absl::c_linear_search;
-using absl::make_unique;
+using absl::EndsWith;
 using absl::EqualsIgnoreCase;
+using absl::flat_hash_map;
+using absl::flat_hash_set;
+using absl::GetFlag;
+using absl::InvalidArgumentError;
+using absl::make_unique;
+using absl::node_hash_set;
+using absl::OkStatus;
+using absl::StartsWith;
+using absl::Status;
 using absl::StrAppend;
 using absl::StrCat;
 using absl::string_view;
+using absl::StrJoin;
+using absl::StrSplit;
 using amp::validator::AmpLayout;
 using amp::validator::AncestorMarker;
 using amp::validator::AtRuleSpec;
@@ -332,7 +345,7 @@ class ParsedUrlSpec {
 
  private:
   const UrlSpec* spec_;
-  absl::node_hash_set<std::string> allowed_protocols_;
+  node_hash_set<std::string> allowed_protocols_;
 };
 
 // ParsedAttrTriggerSpec is used by ParsedAttrSpec to determine which
@@ -592,8 +605,7 @@ class ParsedDocCssSpec {
 
   // Returns the CssDeclaration rules for a matching css declaration name, if
   // is found, else null.
-  const CssDeclaration* CssDeclarationByName(
-      absl::string_view candidate) const {
+  const CssDeclaration* CssDeclarationByName(string_view candidate) const {
     std::string decl_key = AsciiStrToLower(candidate);
     if (spec_.expand_vendor_prefixes())
       decl_key = htmlparser::css::StripVendorPrefix(decl_key);
@@ -604,8 +616,7 @@ class ParsedDocCssSpec {
 
   // Returns the CssDeclaration rules for a matching css declaration name in SVG
   // scope, if is found, else null.
-  const CssDeclaration* CssDeclarationSvgByName(
-      absl::string_view candidate) const {
+  const CssDeclaration* CssDeclarationSvgByName(string_view candidate) const {
     std::string decl_key = AsciiStrToLower(candidate);
     if (spec_.expand_vendor_prefixes())
       decl_key = htmlparser::css::StripVendorPrefix(decl_key);
@@ -662,12 +673,12 @@ class ParsedAttrSpecs {
   // one such specification can be active. The precedence is (1), (2), (3), (4).
   // If tagspec.explicit_attrs_only is true then only collect the attributes
   // from (2) and (3).
-  absl::Status GetAttrsFor(const TagSpec& tagspec,
-                           vector<const ParsedAttrSpec*>* attrs) {
+  Status GetAttrsFor(const TagSpec& tagspec,
+                     vector<const ParsedAttrSpec*>* attrs) {
     // We implement precedence by collecting attributes from (1), (2),
     // (3), (4) in this order and avoiding to override attributes with
     // a name already seen.
-    absl::node_hash_set<std::string> names_seen;
+    node_hash_set<std::string> names_seen;
     // (1) layout attrs (except when explicit_attrs_only is true).
     if (!tagspec.explicit_attrs_only() && tagspec.has_amp_layout() &&
         tagspec.tag_name() != "$REFERENCE_POINT") {
@@ -688,7 +699,7 @@ class ParsedAttrSpecs {
     for (const std::string& key : tagspec.attr_lists()) {
       auto it = attr_lists_by_name_.find(key);
       if (it == attr_lists_by_name_.end()) {
-        return absl::InvalidArgumentError(
+        return InvalidArgumentError(
             StrCat("invalid rules - referenced attr_lists entry not found: '",
                    key, "'"));
       }
@@ -700,11 +711,11 @@ class ParsedAttrSpecs {
     if (!tagspec.explicit_attrs_only() &&
         tagspec.tag_name() != "$REFERENCE_POINT") {
       auto it = attr_lists_by_name_.find("$GLOBAL_ATTRS");
-      if (it == attr_lists_by_name_.end()) return absl::OkStatus();
+      if (it == attr_lists_by_name_.end()) return OkStatus();
       for (const ParsedAttrSpec* p : it->second)
         if (names_seen.insert(p->spec().name()).second) attrs->push_back(p);
     }
-    return absl::OkStatus();
+    return OkStatus();
   }
 
   const ParsedAttrSpec& GetById(int32 id) const {
@@ -805,7 +816,7 @@ class ParsedCdataSpec {
 
   std::string AllowedDeclarationsString() const {
     if (allowed_declarations_.size() > 5) return "";
-    return StrCat("['", absl::StrJoin(allowed_declarations_, "', '"), "']");
+    return StrCat("['", StrJoin(allowed_declarations_, "', '"), "']");
   }
 
  private:
@@ -814,7 +825,7 @@ class ParsedCdataSpec {
   const CssParsingConfig css_parsing_config_;
   unique_ptr<RE2> cdata_regex_;
   vector<pair<unique_ptr<RE2>, std::string>> denylists_with_error_msgs_;
-  absl::node_hash_set<std::string> allowed_at_rules_;
+  node_hash_set<std::string> allowed_at_rules_;
   vector<std::string> allowed_declarations_;
 };
 
@@ -947,10 +958,9 @@ class ParsedTagSpec {
     SortAndUniquify(&mandatory_oneofs_);
     SortAndUniquify(&mandatory_anyofs_);
     SortAndUniquify(&mandatory_attr_ids_);
-    absl::c_copy(spec->requires_extension(),
-                 std::back_inserter(requires_extension_));
-    absl::c_copy(spec->requires(), std::back_inserter(requires_));
-    absl::c_copy(spec->excludes(), std::back_inserter(excludes_));
+    c_copy(spec->requires_extension(), std::back_inserter(requires_extension_));
+    c_copy(spec->requires(), std::back_inserter(requires_));
+    c_copy(spec->excludes(), std::back_inserter(excludes_));
     for (const std::string& tag_spec_name : spec->also_requires_tag_warning()) {
       auto iter = tag_spec_ids_by_tag_spec_name.find(tag_spec_name);
       CHECK(iter != tag_spec_ids_by_tag_spec_name.end());
@@ -959,7 +969,7 @@ class ParsedTagSpec {
   }
   ParsedTagSpec(ParsedTagSpec&& other) = default;
 
-  absl::Status status() const { return status_; }
+  Status status() const { return status_; }
 
   int32 id() const { return id_; }
   const TagSpec& spec() const { return *spec_; }
@@ -1075,7 +1085,7 @@ class ParsedTagSpec {
   vector<int32> mandatory_attr_ids() const { return mandatory_attr_ids_; }
 
  private:
-  absl::Status status_;
+  Status status_;
   const TagSpec* spec_;
   int32 id_;
   ParsedReferencePoints reference_points_;
@@ -1242,9 +1252,9 @@ class ParsedValidatorRules {
 
   ParsedValidatorRules(const HtmlFormat::Code html_format);
 
-  absl::Status LoadRules(ValidatorRules* rules) const;
+  Status LoadRules(ValidatorRules* rules) const;
 
-  absl::Status CheckIntertags() const;
+  Status CheckIntertags() const;
 
   void FilterRules(const ValidatorRules& all_rules,
                    ValidatorRules* filtered_rules) const;
@@ -1263,7 +1273,7 @@ class ParsedValidatorRules {
   // for.
   bool IsDocCssSpecCorrectHtmlFormat(const DocCssSpec& spec) const;
 
-  absl::Status status() const;
+  Status status() const;
 
   const ParsedTagSpec* GetAuthorStylesheetTagSpec() const;
 
@@ -1347,7 +1357,7 @@ class ParsedValidatorRules {
   const HtmlFormat::Code html_format() const { return html_format_; }
 
  private:
-  absl::Status status_;
+  Status status_;
   ValidatorRules rules_;
   HtmlFormat::Code html_format_;
   vector<ParsedTagSpec> tagspec_by_id_;
@@ -1786,7 +1796,7 @@ class CdataMatcher {
                         const LineCol& line_col);
 
   // Matches |cdata| against what this CdataMatcher expects.
-  void Match(absl::string_view cdata, Context* context,
+  void Match(string_view cdata, Context* context,
              ValidationResult* result) const;
 
  private:
@@ -1794,9 +1804,8 @@ class CdataMatcher {
   // routine for match (see above). |url_bytes| contains the number of bytes
   // in the CSS string which were measured as URLs. In some validation types,
   // these bytes are not counted against byte limits.
-  void MatchCss(absl::string_view cdata, const CssSpec& css_spec,
-                int* url_bytes, Context* context,
-                ValidationResult* result) const;
+  void MatchCss(string_view cdata, const CssSpec& css_spec, int* url_bytes,
+                Context* context, ValidationResult* result) const;
 
   // Matches the provided stylesheet against a MediaQuery specification.
   // Helper routine for MatchCss.
@@ -1868,8 +1877,7 @@ class ExtensionsContext {
   }
 
   void RecordUsedExtensions(const RepeatedPtrField<std::string>& extensions) {
-    absl::c_copy(extensions,
-                 std::inserter(extensions_used_, extensions_used_.end()));
+    c_copy(extensions, std::inserter(extensions_used_, extensions_used_.end()));
   }
 
   vector<std::string> UnusedExtensionsRequired() const {
@@ -1979,14 +1987,13 @@ bool IsAsyncScriptTag(const ParsedHtmlTag& tag) {
 // google3/search/amphtml/transformers/amp_runtime_and_extensions.cc by
 // excluding amp4ads, since amp4ads does not currently support LTS
 bool IsAmpRuntimeScript(const ParsedHtmlTag& tag) {
-  const absl::string_view src = tag.GetAttr("src").value_or("");
+  const string_view src = tag.GetAttr("src").value_or("");
   return IsAsyncScriptTag(tag) && !IsExtensionScript(tag) &&
-         absl::StartsWith(src, kAmpCacheRootUrl) &&
-         absl::EndsWith(src, "/v0.js");
+         StartsWith(src, kAmpCacheRootUrl) && EndsWith(src, "/v0.js");
 }
 
-bool IsLtsScriptUrl(absl::string_view url) {
-  return absl::StartsWith(url, absl::StrCat(kAmpCacheRootUrl, "lts/"));
+bool IsLtsScriptUrl(string_view url) {
+  return StartsWith(url, StrCat(kAmpCacheRootUrl, "lts/"));
 }
 
 // The context keeps track of the line / column that the validator is
@@ -2285,11 +2292,11 @@ class Context {
            type_identifiers_.end();
   }
 
-  const absl::flat_hash_set<ValueSetProvision>& value_sets_provided() const {
+  const flat_hash_set<ValueSetProvision>& value_sets_provided() const {
     return value_sets_provided_;
   }
 
-  const absl::flat_hash_map<ValueSetProvision, std::vector<ValidationError>>&
+  const flat_hash_map<ValueSetProvision, std::vector<ValidationError>>&
   value_sets_required() const {
     return value_sets_required_;
   }
@@ -2339,8 +2346,7 @@ class Context {
       const ParsedHtmlTag& parsed_tag, const ValidateTagResult& tag_result) {
     if (script_release_version() == ScriptReleaseVersion::UNKNOWN &&
         (IsExtensionScript(parsed_tag) || IsAmpRuntimeScript(parsed_tag))) {
-      const absl::string_view script_src =
-          parsed_tag.GetAttr("src").value_or("");
+      const string_view script_src = parsed_tag.GetAttr("src").value_or("");
       script_release_version_ = IsLtsScriptUrl(script_src)
                                     ? ScriptReleaseVersion::LTS
                                     : ScriptReleaseVersion::STANDARD;
@@ -2371,9 +2377,8 @@ class Context {
 
   // Record document-level conditions which have been satisfied by the tag spec.
   void SatisfyConditionsFromTagSpec(const ParsedTagSpec& parsed_tag_spec) {
-    absl::c_copy(
-        parsed_tag_spec.spec().satisfies(),
-        std::inserter(conditions_satisfied_, conditions_satisfied_.end()));
+    c_copy(parsed_tag_spec.spec().satisfies(),
+           std::inserter(conditions_satisfied_, conditions_satisfied_.end()));
   }
 
   // Records that a Tag was seen which contains an URL. Used to note issues
@@ -2429,8 +2434,8 @@ class Context {
   int32 inline_style_byte_size_ = 0;
   bool exit_early_ = false;
   vector<TypeIdentifier> type_identifiers_;
-  absl::flat_hash_set<ValueSetProvision> value_sets_provided_;
-  absl::flat_hash_map<ValueSetProvision, std::vector<ValidationError>>
+  flat_hash_set<ValueSetProvision> value_sets_provided_;
+  flat_hash_map<ValueSetProvision, std::vector<ValidationError>>
       value_sets_required_;
   // Flag for if an LTS script is present.
   ScriptReleaseVersion script_release_version_ = ScriptReleaseVersion::UNKNOWN;
@@ -2450,8 +2455,7 @@ void ChildTagMatcher::MatchChildTagName(const ParsedHtmlTag& encountered_tag,
     const RepeatedPtrField<std::string>& names =
         child_tags.child_tag_name_oneof();
     if (!c_linear_search(names, encountered_tag.UpperName())) {
-      std::string allowed_names =
-          StrCat("['", absl::StrJoin(names, "', '"), "']");
+      std::string allowed_names = StrCat("['", StrJoin(names, "', '"), "']");
       context.AddError(
           ValidationError::DISALLOWED_CHILD_TAG_NAME, context.line_col(),
           /*params=*/
@@ -2467,8 +2471,7 @@ void ChildTagMatcher::MatchChildTagName(const ParsedHtmlTag& encountered_tag,
     const RepeatedPtrField<std::string>& names =
         child_tags.first_child_tag_name_oneof();
     if (!c_linear_search(names, encountered_tag.UpperName())) {
-      std::string allowed_names =
-          StrCat("['", absl::StrJoin(names, "', '"), "']");
+      std::string allowed_names = StrCat("['", StrJoin(names, "', '"), "']");
       context.AddError(
           ValidationError::DISALLOWED_FIRST_CHILD_TAG_NAME, context.line_col(),
           /*params=*/
@@ -2485,12 +2488,12 @@ void ChildTagMatcher::ExitTag(const Context& context,
       parent_spec_->child_tags().mandatory_num_child_tags();
   if (expected_num_child_tags != -1 &&
       expected_num_child_tags != context.tag_stack().ParentChildCount()) {
-    context.AddError(ValidationError::INCORRECT_NUM_CHILD_TAGS, line_col_,
-                     /*params=*/
-                     {TagDescriptiveName(*parent_spec_),
-                      absl::StrCat(expected_num_child_tags),
-                      absl::StrCat(context.tag_stack().ParentChildCount())},
-                     TagSpecUrl(*parent_spec_), result);
+    context.AddError(
+        ValidationError::INCORRECT_NUM_CHILD_TAGS, line_col_,
+        /*params=*/
+        {TagDescriptiveName(*parent_spec_), StrCat(expected_num_child_tags),
+         StrCat(context.tag_stack().ParentChildCount())},
+        TagSpecUrl(*parent_spec_), result);
   }
 
   int expected_min_num_child_tags =
@@ -2498,12 +2501,12 @@ void ChildTagMatcher::ExitTag(const Context& context,
 
   if (expected_min_num_child_tags != -1 &&
       context.tag_stack().ParentChildCount() < expected_min_num_child_tags) {
-    context.AddError(ValidationError::INCORRECT_MIN_NUM_CHILD_TAGS, line_col_,
-                     /*params=*/
-                     {TagDescriptiveName(*parent_spec_),
-                      absl::StrCat(expected_min_num_child_tags),
-                      absl::StrCat(context.tag_stack().ParentChildCount())},
-                     TagSpecUrl(*parent_spec_), result);
+    context.AddError(
+        ValidationError::INCORRECT_MIN_NUM_CHILD_TAGS, line_col_,
+        /*params=*/
+        {TagDescriptiveName(*parent_spec_), StrCat(expected_min_num_child_tags),
+         StrCat(context.tag_stack().ParentChildCount())},
+        TagSpecUrl(*parent_spec_), result);
   }
 }
 
@@ -2781,7 +2784,7 @@ class InvalidDeclVisitor : public htmlparser::css::RuleVisitor {
   ValidationResult* result_;
 };
 
-void CdataMatcher::Match(absl::string_view cdata, Context* context,
+void CdataMatcher::Match(string_view cdata, Context* context,
                          ValidationResult* result) const {
   if (!parsed_cdata_spec_) return;
   if (context->Progress(*result).complete) return;
@@ -2841,12 +2844,11 @@ void CdataMatcher::Match(absl::string_view cdata, Context* context,
   // Max CDATA Byte Length, specific to this CDATA (not the document limit).
   if (cdata_spec.has_max_bytes() &&
       adjusted_cdata_length > cdata_spec.max_bytes()) {
-    context->AddError(
-        ValidationError::STYLESHEET_TOO_LONG, context->line_col(),
-        /*params=*/
-        {TagDescriptiveName(parsed_cdata_spec_->ParentTagSpec()),
-         absl::StrCat(cdata.length()), absl::StrCat(cdata_spec.max_bytes())},
-        cdata_spec.max_bytes_spec_url(), result);
+    context->AddError(ValidationError::STYLESHEET_TOO_LONG, context->line_col(),
+                      /*params=*/
+                      {TagDescriptiveName(parsed_cdata_spec_->ParentTagSpec()),
+                       StrCat(cdata.length()), StrCat(cdata_spec.max_bytes())},
+                      cdata_spec.max_bytes_spec_url(), result);
     return;
   }
 
@@ -2976,7 +2978,7 @@ void CdataMatcher::MatchSelectors(
   stylesheet.Accept(&visitor);
 }
 
-void CdataMatcher::MatchCss(absl::string_view cdata, const CssSpec& css_spec,
+void CdataMatcher::MatchCss(string_view cdata, const CssSpec& css_spec,
                             int* url_bytes, Context* context,
                             ValidationResult* result) const {
   vector<unique_ptr<htmlparser::css::ErrorToken>> css_errors;
@@ -3496,7 +3498,7 @@ void ValidateSsrLayout(const TagSpec& spec,
                        ValidationResult* result) {
   // Only applies to transformed AMP and custom elements (<amp-...>).
   if (!context.is_transformed() ||
-      !absl::StartsWith(encountered_tag.LowerName(), "amp-"))
+      !StartsWith(encountered_tag.LowerName(), "amp-"))
     return;
 
   // calculate effective ssr layout
@@ -3520,8 +3522,8 @@ void ValidateSsrLayout(const TagSpec& spec,
       valid_internal_classes.push_back(
           amp::validator::parse_layout::GetLayoutSizeDefinedClass());
     for (const string_view class_token :
-         absl::StrSplit(class_attr.value(), absl::ByAnyChar("\t\n\f\r "))) {
-      if (absl::StartsWith(class_token, "i-amphtml-") &&
+         StrSplit(class_attr.value(), ByAnyChar("\t\n\f\r "))) {
+      if (StartsWith(class_token, "i-amphtml-") &&
           c_find(valid_internal_classes, class_token) ==
               valid_internal_classes.end()) {
         context.AddError(ValidationError::INVALID_ATTR_VALUE,
@@ -3874,8 +3876,8 @@ void ValidateClassAttr(const ParsedHtmlTagAttr& class_attr,
                        const TagSpec& tag_spec, const Context& context,
                        ValidationResult* result) {
   for (const string_view class_token :
-       absl::StrSplit(class_attr.value(), absl::ByAnyChar("\t\n\f\r "))) {
-    if (absl::StartsWith(class_token, "i-amphtml-")) {
+       StrSplit(class_attr.value(), ByAnyChar("\t\n\f\r "))) {
+    if (StartsWith(class_token, "i-amphtml-")) {
       context.AddError(
           ValidationError::INVALID_ATTR_VALUE, context.line_col(),
           /*params=*/
@@ -3957,26 +3959,26 @@ void ValidateAttrCss(const ParsedAttrSpec& parsed_attr_spec,
     if (spec.spec().has_max_bytes_per_inline_style() &&
         attr_value.size() > spec.spec().max_bytes_per_inline_style()) {
       if (spec.spec().max_bytes_is_warning()) {
-        context.AddWarning(
-            ValidationError::INLINE_STYLE_TOO_LONG,
-            context.line_col(), /*params=*/
-            {tag_description, absl::StrCat(attr_value.size()),
-             absl::StrCat(spec.spec().max_bytes_per_inline_style())},
-            spec.spec().max_bytes_spec_url(), &result->validation_result);
+        context.AddWarning(ValidationError::INLINE_STYLE_TOO_LONG,
+                           context.line_col(), /*params=*/
+                           {tag_description, StrCat(attr_value.size()),
+                            StrCat(spec.spec().max_bytes_per_inline_style())},
+                           spec.spec().max_bytes_spec_url(),
+                           &result->validation_result);
       } else {
-        context.AddError(
-            ValidationError::INLINE_STYLE_TOO_LONG,
-            context.line_col(), /*params=*/
-            {tag_description, absl::StrCat(attr_value.size()),
-             absl::StrCat(spec.spec().max_bytes_per_inline_style())},
-            spec.spec().max_bytes_spec_url(), &result->validation_result);
+        context.AddError(ValidationError::INLINE_STYLE_TOO_LONG,
+                         context.line_col(), /*params=*/
+                         {tag_description, StrCat(attr_value.size()),
+                          StrCat(spec.spec().max_bytes_per_inline_style())},
+                         spec.spec().max_bytes_spec_url(),
+                         &result->validation_result);
       }
     }
 
     // Allowed declarations vary by context. SVG has its own set of CSS
     // declarations not supported generally in HTML.
     bool is_svg = parsed_attr_spec.spec().value_doc_svg_css();
-    auto CssDeclarationByName = [is_svg, &spec](absl::string_view name) {
+    auto CssDeclarationByName = [is_svg, &spec](string_view name) {
       if (is_svg) {
         return spec.CssDeclarationSvgByName(name);
       } else {
@@ -4508,7 +4510,7 @@ ParsedValidatorRules::ParsedValidatorRules(HtmlFormat::Code html_format)
         << TagSpecName(tag);
     if (!tag.also_requires_tag_warning().empty())
       tag_spec_names_to_track.insert(TagSpecName(tag));
-    absl::c_copy(
+    c_copy(
         tag.also_requires_tag_warning(),
         std::inserter(tag_spec_names_to_track, tag_spec_names_to_track.end()));
   }
@@ -4558,15 +4560,15 @@ ParsedValidatorRules::ParsedValidatorRules(HtmlFormat::Code html_format)
 
 // Loads validator rules into the |rules_| proto, stub or actual (embedded).
 // Returns false on any failure, setting status_ to the relevant error.
-absl::Status ParsedValidatorRules::LoadRules(ValidatorRules* rules) const {
+Status ParsedValidatorRules::LoadRules(ValidatorRules* rules) const {
   if (!rules->ParseFromArray(amp::validator::data::kValidatorProtoBytes,
                              amp::validator::data::kValidatorProtoBytesSize)) {
-    return absl::InvalidArgumentError("Parsing embedded proto failed");
+    return InvalidArgumentError("Parsing embedded proto failed");
   }
-  return absl::OkStatus();
+  return OkStatus();
 }
 
-absl::Status ParsedValidatorRules::CheckIntertags() const {
+Status ParsedValidatorRules::CheckIntertags() const {
   // TagSpecs which have cdata to validate must also be registered in the
   // static list of parser tags to make cdata callbacks for. This check
   // verifies that the lists match up.
@@ -4574,12 +4576,12 @@ absl::Status ParsedValidatorRules::CheckIntertags() const {
   for (const std::string& tag : IntertagsToValidate()) {
     if (proxy_intertags.find(tag) == proxy_intertags.end()) {
       // If this fails we need to add to ProxyKnowsIntertagsToValidate.
-      return absl::InvalidArgumentError(
-          StrCat("invalid rules - missing from ",
-                 "ProxyKnowsIntertagsToValidate: '", tag, "'"));
+      return InvalidArgumentError(StrCat("invalid rules - missing from ",
+                                         "ProxyKnowsIntertagsToValidate: '",
+                                         tag, "'"));
     }
   }
-  return absl::OkStatus();
+  return OkStatus();
 }
 
 // Filters |all_rules|, leaving only those which match the html_format of
@@ -4652,7 +4654,7 @@ bool ParsedValidatorRules::IsDocCssSpecCorrectHtmlFormat(
          formats.end();
 }
 
-absl::Status ParsedValidatorRules::status() const { return status_; }
+Status ParsedValidatorRules::status() const { return status_; }
 
 const ParsedTagSpec* ParsedValidatorRules::GetAuthorStylesheetTagSpec() const {
   const TagSpecDispatch& tagspec_dispatch = DispatchForTagName("STYLE");
@@ -4978,7 +4980,7 @@ void ParsedValidatorRules::MaybeEmitDocSizeErrors(
       context->AddError(
           ValidationError::DOCUMENT_SIZE_LIMIT_EXCEEDED, context->line_col(),
           /*params=*/
-          {absl::StrCat(doc_spec.spec().max_bytes()), absl::StrCat(bytes_used)},
+          {StrCat(doc_spec.spec().max_bytes()), StrCat(bytes_used)},
           /*spec_url=*/doc_spec.spec().max_bytes_spec_url(), result);
     }
   }
@@ -5000,17 +5002,15 @@ void ParsedValidatorRules::MaybeEmitCssLengthErrors(
             ValidationError::STYLESHEET_AND_INLINE_STYLE_TOO_LONG,
             context->line_col(),
             /*params=*/
-            {absl::StrCat(bytes_used),
-             absl::StrCat(doc_css_spec.spec().max_bytes())},
+            {StrCat(bytes_used), StrCat(doc_css_spec.spec().max_bytes())},
             /*spec_url=*/doc_css_spec.spec().max_bytes_spec_url(), result);
       } else {
-        context->AddError(ValidationError::STYLESHEET_AND_INLINE_STYLE_TOO_LONG,
-                          context->line_col(),
-                          /*params=*/
-                          {absl::StrCat(bytes_used),
-                           absl::StrCat(doc_css_spec.spec().max_bytes())},
-                          /*spec_url=*/doc_css_spec.spec().max_bytes_spec_url(),
-                          result);
+        context->AddError(
+            ValidationError::STYLESHEET_AND_INLINE_STYLE_TOO_LONG,
+            context->line_col(),
+            /*params=*/
+            {StrCat(bytes_used), StrCat(doc_css_spec.spec().max_bytes())},
+            /*spec_url=*/doc_css_spec.spec().max_bytes_spec_url(), result);
       }
     }
   }
@@ -5381,9 +5381,8 @@ constexpr std::string_view kASCIISpace = "\t\n\f\r ";
 
 // Child elements of <head> that allow non-ASCII whitespace, per
 // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inhead.
-const absl::flat_hash_set<std::string>&
-HeadChildrenAllowingExtendedWhitespace() {
-  static auto* ret = new absl::flat_hash_set<std::string>{
+const flat_hash_set<std::string>& HeadChildrenAllowingExtendedWhitespace() {
+  static auto* ret = new flat_hash_set<std::string>{
       "TITLE", "NOSCRIPT", "NOFRAMES", "STYLE", "SCRIPT", "TEMPLATE"};
   return *ret;
 }
@@ -5425,7 +5424,7 @@ class Validator {
     }
 
     parse_accounting_ = parser->Accounting();
-    if (absl::GetFlag(FLAGS_duplicate_html_body_elements_is_error) &&
+    if (GetFlag(FLAGS_duplicate_html_body_elements_is_error) &&
         parse_accounting_.duplicate_body_elements &&
         parse_accounting_.duplicate_body_element_location.has_value()) {
       auto [line, col] =
@@ -5433,7 +5432,7 @@ class Validator {
       context_.AddError(ValidationError::DUPLICATE_UNIQUE_TAG,
                         LineCol(line, col), {"BODY"}, "", &result_);
     }
-    if (absl::GetFlag(FLAGS_duplicate_html_body_elements_is_error) &&
+    if (GetFlag(FLAGS_duplicate_html_body_elements_is_error) &&
         parse_accounting_.duplicate_html_elements &&
         parse_accounting_.duplicate_html_element_location.has_value()) {
       auto [line, col] =
@@ -5462,7 +5461,7 @@ class Validator {
 
   // May return false if validation fails due to DOCUMENT_TOO_COMPLEX error.
   bool ValidateNode(htmlparser::Node* node, int stack_size = 1) {
-    if (stack_size > absl::GetFlag(FLAGS_max_node_recursion_depth)) {
+    if (stack_size > GetFlag(FLAGS_max_node_recursion_depth)) {
       context_.AddError(ValidationError::DOCUMENT_TOO_COMPLEX,
                         context_.encountered_body_line_col(),
                         /*params=*/{"BODY"},
@@ -5564,10 +5563,9 @@ class Validator {
         const CdataMatcher* cdata_matcher =
             context_.tag_stack().cdata_matcher();
         if (cdata_matcher) {
-          cdata_matcher->Match(
-              absl::string_view(node->FirstChild()->Data().data(),
-                                node->FirstChild()->Data().size()),
-              &context_, &result_);
+          cdata_matcher->Match(string_view(node->FirstChild()->Data().data(),
+                                           node->FirstChild()->Data().size()),
+                               &context_, &result_);
         }
       }
     }
