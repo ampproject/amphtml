@@ -28,7 +28,7 @@ import {
   VisibilityTracker,
   trackerTypeForTesting,
 } from '../events';
-import {AmpdocAnalyticsRoot} from '../analytics-root';
+import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from '../analytics-root';
 import {Deferred} from '../../../../src/utils/promise';
 import {Signals} from '../../../../src/utils/signals';
 import {macroTask} from '../../../../testing/yield';
@@ -2323,6 +2323,51 @@ describes.realWin('Events', {amp: 1}, (env) => {
           expect(handlerSpy).to.be.calledOnce;
           expect(event.type).to.equal('visible');
         });
+      });
+    });
+  });
+});
+
+// TODO(#22733): Unskip once "ampdoc-fie" is cleaned up.
+describes.realWin.skip('Events FIE', {amp: {ampdoc: 'fie'}}, (env) => {
+  let embed;
+  let win;
+  let ampdoc;
+  let root;
+  let analyticsElement;
+
+  beforeEach(() => {
+    embed = env.embed;
+    embed.host = env.iframe;
+    win = env.parentWin;
+    ampdoc = embed.ampdoc;
+    root = new EmbedAnalyticsRoot(ampdoc, embed);
+
+    analyticsElement = win.document.createElement('amp-analytics');
+    win.document.body.appendChild(analyticsElement);
+  });
+
+  describe('should create correct reportReadyPromise', () => {
+    it('with documentExit trigger on top window', function* () {
+      const config = {visibilitySpec: {reportWhen: 'documentExit'}};
+      const tracker = root.getTracker('visible', VisibilityTracker);
+      const deferred = new Deferred();
+      const handlerSpy = env.sandbox.spy();
+      const handler = (event) => {
+        deferred.resolve(event);
+        handlerSpy();
+      };
+      env.sandbox.stub(tracker, 'supportsPageHide_').returns(false);
+
+      tracker.add(tracker.root, 'visible', config, handler);
+
+      // Ensure unload event is dispatched after visibiltyModel is ready
+      yield macroTask();
+      expect(handlerSpy).to.not.be.called;
+      win.dispatchEvent(new Event('unload'));
+
+      return deferred.promise.then((event) => {
+        expect(event.type).to.equal('visible');
       });
     });
   });

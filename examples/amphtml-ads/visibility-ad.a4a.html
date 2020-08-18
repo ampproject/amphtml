@@ -38,6 +38,19 @@
         "activeview": "/activeview?id=ampim&d=${elementWidth},${elementHeight}&bs=${viewportWidth},${viewportHeight}"
       },
       "triggers": {
+        "hidden": {
+          "on": "hidden",
+          "request": "visibility",
+          "vars": { "type": "hidden" }
+        },
+        "endOfSession": {
+          "on": "visible",
+          "request": "visibility",
+          "vars": { "type": "EOS" },
+          "visibilitySpec": {
+            "reportWhen": "documentExit"
+          }
+        },
         "visible": {
           "on": "visible",
           "request": "visibility",

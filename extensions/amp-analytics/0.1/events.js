@@ -26,6 +26,7 @@ import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
+import {getTopWindow} from '../../../src/service';
 import {isArray, isEnumValue, isFiniteNumber} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 
@@ -1589,7 +1590,7 @@ export class VisibilityTracker extends EventTracker {
    */
   createReportReadyPromiseForDocumentExit_() {
     const deferred = new Deferred();
-    const {win} = this.root.ampdoc;
+    const win = getTopWindow(this.root.ampdoc.win);
     let unloadListener, pageHideListener;
 
     // Do not add an unload listener unless pagehide is not available.
