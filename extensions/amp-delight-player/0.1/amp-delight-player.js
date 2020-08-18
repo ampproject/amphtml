@@ -24,6 +24,12 @@ import {
   redispatch,
 } from '../../../src/iframe-video';
 import {dict} from '../../../src/utils/object';
+import {
+  getConsentMetadata,
+  getConsentPolicyInfo,
+  getConsentPolicySharedData,
+  getConsentPolicyState,
+} from '../../../src/consent';
 import {getData, listen, listenOncePromise} from '../../../src/event-helper';
 import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
@@ -65,6 +71,7 @@ const DelightEvent = {
   DISABLE_INTERFACE: 'x-dl8-to-iframe-disable-interface',
   SEEK: 'x-dl8-to-iframe-seek',
   CUSTOM_TICK: 'x-dl8-to-parent-amp-custom-tick',
+  CONSENT_DATA: 'x-dl8-to-iframe-consent-data',
 
   PING: 'x-dl8-ping',
   PONG: 'x-dl8-pong',
@@ -299,6 +306,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
       case DelightEvent.READY: {
         element.dispatchCustomEvent(VideoEvents.LOAD);
         this.playerReadyResolver_(this.iframe_);
+        this.sendConsentData_()
         break;
       }
       case DelightEvent.TIME_UPDATE: {
@@ -503,6 +511,43 @@ class AmpDelightPlayer extends AMP.BaseElement {
     if (this.unlistenDeviceMotion_) {
       this.unlistenDeviceMotion_();
     }
+  }
+
+  /**
+   * Requests consent data from consent module
+   * and forwards information to iframe
+   * @private
+   */
+  sendConsentData_() {
+    const consentPolicyId = super.getConsentPolicy() || 'default';
+
+    const consentStringPromise = getConsentPolicyInfo(
+      this.element,
+      consentPolicyId
+    );
+    const metadataPromise = getConsentMetadata(this.element, consentPolicyId);
+    const consentPolicyStatePromise = getConsentPolicyState(
+      this.element,
+      consentPolicyId
+    );
+    const consentPolicySharedDataPromise = getConsentPolicySharedData(
+      this.element,
+      consentPolicyId
+    );
+
+    Promise.all([
+      metadataPromise,
+      consentStringPromise,
+      consentPolicyStatePromise,
+      consentPolicySharedDataPromise,
+    ]).then((consents) => {
+      this.sendCommand_(DelightEvent.CONSENT_DATA, {
+        'consentMetadata': consents[0],
+        'consentString': consents[1],
+        'consentPolicyState': consents[2],
+        'consentPolicySharedData': consents[3],
+      })
+    });
   }
 
   // VideoInterface Implementation. See ../src/video-interface.VideoInterface
