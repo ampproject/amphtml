@@ -16,9 +16,6 @@
 
 /** @externs */
 
-/** @const */
-var SocialShareDef = {};
-
 /**
  * @typedef {{
  *   type: (string|undefined),
@@ -34,15 +31,4 @@ var SocialShareDef = {};
  *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
-SocialShareDef.Props;
-
-/**
- * @typedef {{
- *   shareEndpont: string,
- *   defaultParams: Object<string, string>,
- *   defaultColor: string,
- *   defaultBackgroundColor: string,
- *   bindings: (!Array<string>|undefined),
- * }}
- */
-SocialShareDef.Config;
+var SocialSharePropsDef;
