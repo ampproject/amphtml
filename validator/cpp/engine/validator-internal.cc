@@ -378,7 +378,7 @@ class ParsedAttrTriggerSpec {
 // (e.g., it's unique within the ParsedTagSpec).
 class ParsedAttrSpec {
  public:
-  ParsedAttrSpec(const AttrSpec* spec, int32 id)
+  ParsedAttrSpec(const AttrSpec* spec, int32_t id)
       : spec_(spec),
         id_(id),
         trigger_spec_(spec),
@@ -420,7 +420,7 @@ class ParsedAttrSpec {
 
   // A unique id for the given context (e.g., unique within a given
   // ParsedTagSpec).
-  int32 id() const { return id_; }
+  int32_t id() const { return id_; }
   const AttrSpec& spec() const { return *spec_; }
 
   bool has_value_regex() const { return value_regex_ != nullptr; }
@@ -462,7 +462,7 @@ class ParsedAttrSpec {
 
  private:
   const AttrSpec* spec_;
-  int32 id_;
+  int32_t id_;
   unique_ptr<RE2> value_regex_;
   unique_ptr<RE2> disallowed_value_regex_;
   // Name lookup for spec().value_properties().properties().
@@ -483,7 +483,7 @@ class ParsedAttrSpec {
 // id for the ParsedTagSpec with point->tag_spec_name().
 struct ParsedReferencePoint {
   const ReferencePoint* point;
-  int32 tag_spec_id;
+  int32_t tag_spec_id;
 };
 
 // Holds the reference points for a particular parent tag spec, including
@@ -494,7 +494,7 @@ class ParsedReferencePoints {
   ParsedReferencePoints() : parent_(nullptr) {}
   ParsedReferencePoints(
       const TagSpec& parent,
-      const unordered_map<std::string, int32>& tag_spec_ids_by_tag_spec_name)
+      const unordered_map<std::string, int32_t>& tag_spec_ids_by_tag_spec_name)
       : parent_(&parent) {
     for (const ReferencePoint& p : parent.reference_points()) {
       auto iter = tag_spec_ids_by_tag_spec_name.find(p.tag_spec_name());
@@ -505,7 +505,7 @@ class ParsedReferencePoints {
 
   bool empty() const { return parsed_.empty(); }
 
-  int32 size() const { return parsed_.size(); }
+  int32_t size() const { return parsed_.size(); }
 
   vector<ParsedReferencePoint>::const_iterator begin() const {
     return parsed_.begin();
@@ -718,7 +718,7 @@ class ParsedAttrSpecs {
     return OkStatus();
   }
 
-  const ParsedAttrSpec& GetById(int32 id) const {
+  const ParsedAttrSpec& GetById(int32_t id) const {
     return *parsed_attr_specs_[id];
   }
 
@@ -897,9 +897,9 @@ class ParsedTagSpec {
  public:
   ParsedTagSpec(
       ParsedAttrSpecs* parsed_attr_specs,
-      const unordered_map<std::string, int32>& tag_spec_ids_by_tag_spec_name,
+      const unordered_map<std::string, int32_t>& tag_spec_ids_by_tag_spec_name,
       RecordValidated should_record_tagspec_validated, const TagSpec* spec,
-      int32 id)
+      int32_t id)
       : spec_(spec),
         id_(id),
         reference_points_(*spec, tag_spec_ids_by_tag_spec_name),
@@ -971,7 +971,7 @@ class ParsedTagSpec {
 
   Status status() const { return status_; }
 
-  int32 id() const { return id_; }
+  int32_t id() const { return id_; }
   const TagSpec& spec() const { return *spec_; }
   const ParsedCdataSpec& parsed_cdata_spec() const {
     return parsed_cdata_spec_;
@@ -1036,7 +1036,7 @@ class ParsedTagSpec {
                        spec_->mandatory_parent());
   }
 
-  const vector<int32>& AlsoRequiresTagWarnings() const {
+  const vector<int32_t>& AlsoRequiresTagWarnings() const {
     return also_requires_tag_warnings_;
   }
   const vector<std::string>& Requires() const { return requires_; }
@@ -1068,9 +1068,9 @@ class ParsedTagSpec {
     return attr_ids_by_name_.find(name) != attr_ids_by_name_.end();
   }
 
-  const set<int32>& implicit_attrspecs() const { return implicit_attrspecs_; }
+  const set<int32_t>& implicit_attrspecs() const { return implicit_attrspecs_; }
 
-  const unordered_map<std::string, int32>& attr_ids_by_name() const {
+  const unordered_map<std::string, int32_t>& attr_ids_by_name() const {
     return attr_ids_by_name_;
   }
 
@@ -1082,20 +1082,20 @@ class ParsedTagSpec {
     return mandatory_anyofs_;
   }
 
-  vector<int32> mandatory_attr_ids() const { return mandatory_attr_ids_; }
+  vector<int32_t> mandatory_attr_ids() const { return mandatory_attr_ids_; }
 
  private:
   Status status_;
   const TagSpec* spec_;
-  int32 id_;
+  int32_t id_;
   ParsedReferencePoints reference_points_;
   bool is_reference_point_;
   bool is_type_json_ = false;
   bool contains_url_ = false;
-  unordered_map<std::string, int32> attr_ids_by_name_;
+  unordered_map<std::string, int32_t> attr_ids_by_name_;
   vector<TypeIdentifier> disabled_by_;
   vector<TypeIdentifier> enabled_by_;
-  vector<int32> mandatory_attr_ids_;
+  vector<int32_t> mandatory_attr_ids_;
   vector<std::string> mandatory_oneofs_;
   vector<std::string> mandatory_anyofs_;
   ParsedCdataSpec parsed_cdata_spec_;
@@ -1104,8 +1104,8 @@ class ParsedTagSpec {
   vector<std::string> requires_;
   vector<std::string> excludes_;
   vector<std::string> requires_extension_;
-  vector<int32> also_requires_tag_warnings_;
-  set<int32> implicit_attrspecs_;
+  vector<int32_t> also_requires_tag_warnings_;
+  set<int32_t> implicit_attrspecs_;
   const ParsedAttrSpec* dispatch_key_attr_spec_ = nullptr;
   ParsedTagSpec(const ParsedTagSpec&) = delete;
   ParsedTagSpec& operator=(const ParsedTagSpec&) = delete;
@@ -1176,12 +1176,13 @@ class ChildTagMatcher {
 // second is a list of all remaining non-dispatchable tagspecs.
 class TagSpecDispatch {
  public:
-  void RegisterDispatchKey(const std::string& dispatch_key, int32 tag_spec_id) {
+  void RegisterDispatchKey(const std::string& dispatch_key,
+                           int32_t tag_spec_id) {
     // Multiple TagSpecs may have the same dispatch key. These are added in the
     // order in which they are found.
     tagspecs_by_dispatch_[dispatch_key].push_back(tag_spec_id);
   }
-  void RegisterTagSpec(int32 tag_spec_id) {
+  void RegisterTagSpec(int32_t tag_spec_id) {
     all_tag_specs_.push_back(tag_spec_id);
   }
 
@@ -1192,12 +1193,12 @@ class TagSpecDispatch {
   // Looks up a dispatch key as previously registered, returning the
   // corresponding tag_spec_ids which are ordered by their specificity of match
   // (e.g. Name/Value/Parent, then Name/Value, and then Name).
-  vector<int32> MatchingDispatchKey(const std::string& attr_name,
+  vector<int32_t> MatchingDispatchKey(const std::string& attr_name,
                                     const std::string& attr_value,
                                     const std::string& parent) const {
     if (!HasDispatchKeys()) return {};
 
-    vector<int32> tag_spec_ids;
+    vector<int32_t> tag_spec_ids;
     // Try first to find a key with the given parent.
     const std::string dispatch_key = DispatchKey(
         AttrSpec::NAME_VALUE_PARENT_DISPATCH, attr_name, attr_value, parent);
@@ -1238,16 +1239,17 @@ class TagSpecDispatch {
   const vector<int>& AllTagSpecs() const { return all_tag_specs_; }
 
  private:
-  unordered_map<std::string /*dispatch key*/, vector<int32> /* tag_spec_ids */>
+  unordered_map<std::string /*dispatch key*/,
+      vector<int32_t> /* tag_spec_ids */>
       tagspecs_by_dispatch_;
-  vector<int32> all_tag_specs_;
+  vector<int32_t> all_tag_specs_;
 };
 
 // This wrapper class provides access to the validation rules.
 class ParsedValidatorRules {
  public:
   struct ErrorCodeMetaData {
-    int32 specificity = 0;
+    int32_t specificity = 0;
   };
 
   ParsedValidatorRules(const HtmlFormat::Code html_format);
@@ -1292,9 +1294,9 @@ class ParsedValidatorRules {
   void ValidateManufacturedBody(Context* context,
                                 ValidationResult* result) const;
 
-  int32 Specificity(ValidationError::Code code) const;
+  int32_t Specificity(ValidationError::Code code) const;
 
-  int32 MaxSpecificity(const RepeatedPtrField<ValidationError>& errors) const;
+  int32_t MaxSpecificity(const RepeatedPtrField<ValidationError>& errors) const;
 
   // Returns true iff resultA is a better result than resultB.
   bool BetterValidationResultThan(const ValidationResult& resultA,
@@ -1335,7 +1337,7 @@ class ParsedValidatorRules {
   }
   const vector<ParsedDocCssSpec>& css() const { return parsed_css_; }
 
-  int32 SpecFileRevision() const { return rules_.spec_file_revision(); }
+  int32_t SpecFileRevision() const { return rules_.spec_file_revision(); }
 
   const ParsedTagSpec* GetTagSpec(int id) const { return &tagspec_by_id_[id]; }
 
@@ -1363,7 +1365,7 @@ class ParsedValidatorRules {
   vector<ParsedTagSpec> tagspec_by_id_;
   unordered_map<std::string, TagSpecDispatch> tagspecs_by_tagname_;
   TagSpecDispatch empty_dispatch_;
-  vector<int32> mandatory_tagspecs_;
+  vector<int32_t> mandatory_tagspecs_;
   vector<ErrorCodeMetaData> error_codes_;
   unique_ptr<ParsedAttrSpecs> parsed_attr_specs_;
   vector<ParsedDocSpec> parsed_doc_;
@@ -1425,7 +1427,7 @@ class ReferencePointMatcher {
   const ParsedValidatorRules* parsed_rules_;
   const ParsedReferencePoints* parsed_reference_points_;
   LineCol line_col_;
-  vector<int32> reference_points_matched_;
+  vector<int32_t> reference_points_matched_;
 };
 
 class CdataMatcher;
@@ -1467,7 +1469,7 @@ class TagStack {
     const ParsedTagSpec* reference_point = nullptr;
 
     bool has_descendant_constraint_lists;
-    int32 num_children;
+    int32_t num_children;
     std::string only_child_tag_name;
     LineCol only_child_line_col;
     std::string last_child_tag_name;
@@ -1665,7 +1667,7 @@ class TagStack {
     return allowed_descendants_list_;
   }
 
-  int32 ParentChildCount() const { return ParentStackEntry().num_children; }
+  int32_t ParentChildCount() const { return ParentStackEntry().num_children; }
 
   bool IsDevMode() const {
     // We always recursively set dev mode to true on stack elements as we march
@@ -2143,7 +2145,7 @@ class Context {
     return TagSpecName(*first_url_seen_tag_);
   }
 
-  const set<int32>& TagspecsValidated() const { return tagspecs_validated_; }
+  const set<int32_t>& TagspecsValidated() const { return tagspecs_validated_; }
 
   const set<std::string>& MandatoryAlternativesSatisfied() const {
     return mandatory_alternatives_satisfied_;
@@ -2184,24 +2186,24 @@ class Context {
       AddError(to_merge.errors(i), merged);
   }
 
-  void SetDocByteSize(int32 byte_size) { doc_byte_size_ = byte_size; }
+  void SetDocByteSize(int32_t byte_size) { doc_byte_size_ = byte_size; }
 
-  const int32& doc_byte_size() const { return doc_byte_size_; }
+  const int32_t& doc_byte_size() const { return doc_byte_size_; }
 
   // These methods keep track of how much of the document is used towards
   // CSS style elements, via <style amp-custom> and inline styles (style
   // attribute on any tag).
-  void AddStyleTagByteSize(int32 byte_size) {
+  void AddStyleTagByteSize(int32_t byte_size) {
     style_tag_byte_size_ += byte_size;
   }
 
-  void AddInlineStyleByteSize(int32 byte_size) {
+  void AddInlineStyleByteSize(int32_t byte_size) {
     inline_style_byte_size_ += byte_size;
   }
 
-  const int32& style_tag_byte_size() const { return style_tag_byte_size_; }
+  const int32_t& style_tag_byte_size() const { return style_tag_byte_size_; }
 
-  const int32& inline_style_byte_size() const {
+  const int32_t& inline_style_byte_size() const {
     return inline_style_byte_size_;
   }
 
@@ -2360,7 +2362,7 @@ class Context {
     if (!tag_result.best_match_tag_spec) return;
     const ParsedTagSpec* parsed_tag_spec = tag_result.best_match_tag_spec;
     if (!parsed_tag_spec->AttrsCanSatisfyExtension()) return;
-    const unordered_map<std::string, int32>& attr_ids_by_name =
+    const unordered_map<std::string, int32_t>& attr_ids_by_name =
         parsed_tag_spec->attr_ids_by_name();
     ExtensionsContext* extensions_ctx = mutable_extensions();
     for (const ParsedHtmlTagAttr& attr : encountered_tag.Attributes()) {
@@ -2428,10 +2430,10 @@ class Context {
   std::string encountered_body_tag_;
   set<std::string> mandatory_alternatives_satisfied_;
   set<std::string> conditions_satisfied_;
-  set<int32> tagspecs_validated_;
-  int32 doc_byte_size_ = 0;
-  int32 style_tag_byte_size_ = 0;
-  int32 inline_style_byte_size_ = 0;
+  set<int32_t> tagspecs_validated_;
+  int32_t doc_byte_size_ = 0;
+  int32_t style_tag_byte_size_ = 0;
+  int32_t inline_style_byte_size_ = 0;
   bool exit_early_ = false;
   vector<TypeIdentifier> type_identifiers_;
   flat_hash_set<ValueSetProvision> value_sets_provided_;
@@ -3322,9 +3324,10 @@ void ValidateDescendantTags(const ParsedHtmlTag& encountered_tag,
                             const Context& context, ValidationResult* result) {
   const TagStack& tag_stack = context.tag_stack();
 
-  int32 allowed_descendants_lists = tag_stack.allowed_descendants_list().size();
+  int32_t allowed_descendants_lists =
+      tag_stack.allowed_descendants_list().size();
 
-  for (int32 ii = 0; ii < allowed_descendants_lists; ++ii) {
+  for (int32_t ii = 0; ii < allowed_descendants_lists; ++ii) {
     const vector<std::string>& allowed_descendant_tags =
         tag_stack.allowed_descendants_list()[ii]->allowed_tags();
 
@@ -4191,13 +4194,13 @@ void ValidateAttributes(const ParsedTagSpec& parsed_tag_spec,
   bool seen_extension_src_attr = false;
   bool has_template_ancestor = context.tag_stack().HasAncestor("TEMPLATE");
   bool is_html_tag = encountered_tag.UpperName() == "HTML";
-  vector<int32> mandatory_attrs_seen;
+  vector<int32_t> mandatory_attrs_seen;
   set<std::string_view> attr_seen;
   set<std::string_view> mandatory_oneofs_seen;
   set<std::string_view> mandatory_anyofs_seen;
   vector<const ParsedAttrTriggerSpec*> parsed_trigger_specs;
-  set<int32> attrspecs_validated;
-  const unordered_map<std::string, int32>& attr_ids_by_name =
+  set<int32_t> attrspecs_validated;
+  const unordered_map<std::string, int32_t>& attr_ids_by_name =
       parsed_tag_spec.attr_ids_by_name();
 
   for (const ParsedHtmlTagAttr& attr : encountered_tag.Attributes()) {
@@ -4408,7 +4411,7 @@ void ValidateAttributes(const ParsedTagSpec& parsed_tag_spec,
          trigger_spec->spec().also_requires_attr()) {
       auto it = attr_ids_by_name.find(also_requires_attr);
       if (it != attr_ids_by_name.end()) {
-        const int32 also_requires_attr_id = it->second;
+        const int32_t also_requires_attr_id = it->second;
         // If a tag has implicit attributes, we then consider these attributes
         // as validated. E.g. tag 'a' has implicit attributes 'role' and
         // 'tabindex'.
@@ -4429,12 +4432,12 @@ void ValidateAttributes(const ParsedTagSpec& parsed_tag_spec,
     }
   }
   SortAndUniquify(&mandatory_attrs_seen);
-  const vector<int32>& mandatory_attr_ids =
+  const vector<int32_t>& mandatory_attr_ids =
       parsed_tag_spec.mandatory_attr_ids();
   if (mandatory_attrs_seen == mandatory_attr_ids) return;
   vector<int> diff = Diff(mandatory_attr_ids, mandatory_attrs_seen);
   vector<std::string> missing_attrs;
-  for (const int32 attr_id : diff) {
+  for (const int32_t attr_id : diff) {
     const std::string& attr_name =
         context.rules().parsed_attr_specs().GetById(attr_id).spec().name();
     missing_attrs.push_back(attr_name);
@@ -4494,12 +4497,12 @@ ParsedValidatorRules::ParsedValidatorRules(HtmlFormat::Code html_format)
   // In validator.protoascii, tagspecs can identify other tagspecs
   // that are required by referencing their spec_name field (or
   // tag_name, if spec_name is not set). To implement this
-  // efficiently we map these TagSpecName() values to the int32 ids
+  // efficiently we map these TagSpecName() values to the int32_t ids
   // of the corresponding tagspecs and compute
   // |tag_spec_names_to_track| to identify those tagspecs that are
   // referenced by others via "also_requires_tag".  The ParsedTagSpec
   // constructor completes this translation to ids.
-  unordered_map<std::string, int32> tag_spec_ids_by_tag_spec_name;
+  unordered_map<std::string, int32_t> tag_spec_ids_by_tag_spec_name;
   unordered_set<std::string> tag_spec_names_to_track;
   for (int ii = 0; ii < rules_.tags_size(); ++ii) {
     const TagSpec& tag = rules_.tags(ii);
@@ -4659,7 +4662,7 @@ Status ParsedValidatorRules::status() const { return status_; }
 const ParsedTagSpec* ParsedValidatorRules::GetAuthorStylesheetTagSpec() const {
   const TagSpecDispatch& tagspec_dispatch = DispatchForTagName("STYLE");
   if (tagspec_dispatch.empty()) return nullptr;
-  for (int32 tag_id : tagspec_dispatch.AllTagSpecs()) {
+  for (int32_t tag_id : tagspec_dispatch.AllTagSpecs()) {
     const ParsedTagSpec* parsed_tag_spec = GetTagSpec(tag_id);
     if (parsed_tag_spec->spec().named_id() == TagSpec::STYLE_AMP_CUSTOM)
       return parsed_tag_spec;
@@ -4706,7 +4709,7 @@ void ParsedValidatorRules::ValidateTypeIdentifiers(
           std::string version;
           if (RE2::FullMatch(attr.value(), *transformed_value_regex,
                              &version)) {
-            int32 transformer_version;
+            int32_t transformer_version;
             if (absl::SimpleAtoi(version, &transformer_version)) {
               result->set_transformer_version(transformer_version);
             }
@@ -4802,16 +4805,16 @@ void ParsedValidatorRules::ValidateManufacturedBody(
                     result);
 }
 
-int32 ParsedValidatorRules::Specificity(ValidationError::Code code) const {
+int32_t ParsedValidatorRules::Specificity(ValidationError::Code code) const {
   return error_codes_[code].specificity;
 }
 
 // A helper function which allows us to compare two candidate results
 // in ParsedValidatorRules::ValidateTag to report the results which
 // have the most specific errors.
-int32 ParsedValidatorRules::MaxSpecificity(
+int32_t ParsedValidatorRules::MaxSpecificity(
     const RepeatedPtrField<ValidationError>& errors) const {
-  int32 max_specificity = 0;
+  int32_t max_specificity = 0;
   for (const ValidationError& error : errors) {
     max_specificity = std::max(max_specificity, Specificity(error.code()));
   }
@@ -4879,7 +4882,7 @@ bool ParsedValidatorRules::BetterValidationResultThan(
 // Emits errors for tags that are specified to be mandatory.
 void ParsedValidatorRules::MaybeEmitMandatoryTagValidationErrors(
     Context* context, ValidationResult* result) const {
-  for (int32 tag_spec_id : mandatory_tagspecs_) {
+  for (int32_t tag_spec_id : mandatory_tagspecs_) {
     const ParsedTagSpec* parsed_tag_spec = GetTagSpec(tag_spec_id);
     // Skip TagSpecs that aren't used for these type identifiers.
     if (!parsed_tag_spec->IsUsedForTypeIdentifiers(context->type_identifiers()))
@@ -4898,7 +4901,7 @@ void ParsedValidatorRules::MaybeEmitMandatoryTagValidationErrors(
 // a condition is required to be satisfied.
 void ParsedValidatorRules::MaybeEmitRequiresOrExcludesValidationErrors(
     Context* context, ValidationResult* result) const {
-  for (int32 tag_spec_id : context->TagspecsValidated()) {
+  for (int32_t tag_spec_id : context->TagspecsValidated()) {
     const ParsedTagSpec* parsed_tag_spec = GetTagSpec(tag_spec_id);
     // Skip TagSpecs that aren't used for these type identifiers.
     if (!parsed_tag_spec->IsUsedForTypeIdentifiers(context->type_identifiers()))
@@ -4921,7 +4924,7 @@ void ParsedValidatorRules::MaybeEmitRequiresOrExcludesValidationErrors(
         if (context->Progress(*result).complete) return;
       }
     }
-    for (int32 tag_spec_id : parsed_tag_spec->AlsoRequiresTagWarnings()) {
+    for (int32_t tag_spec_id : parsed_tag_spec->AlsoRequiresTagWarnings()) {
       if (context->TagspecsValidated().count(tag_spec_id) == 0) {
         const ParsedTagSpec* also_requires_tagspec = GetTagSpec(tag_spec_id);
         context->AddWarning(ValidationError::WARNING_TAG_REQUIRED_BY_MISSING,
@@ -4974,7 +4977,7 @@ void ParsedValidatorRules::MaybeEmitDocSizeErrors(
     Context* context, ValidationResult* result) const {
   if (auto maybe_doc_spec = context->MatchingDocSpec(); maybe_doc_spec) {
     const ParsedDocSpec& doc_spec = **maybe_doc_spec;
-    const int32 bytes_used = context->doc_byte_size();
+    const int32_t bytes_used = context->doc_byte_size();
     if (doc_spec.spec().has_max_bytes() && doc_spec.spec().max_bytes() != -2 &&
         bytes_used > doc_spec.spec().max_bytes()) {
       context->AddError(
@@ -4989,7 +4992,7 @@ void ParsedValidatorRules::MaybeEmitDocSizeErrors(
 // Emits errors for css size limitations across entire document.
 void ParsedValidatorRules::MaybeEmitCssLengthErrors(
     Context* context, ValidationResult* result) const {
-  const int32 bytes_used =
+  const int32_t bytes_used =
       context->inline_style_byte_size() + context->style_tag_byte_size();
 
   if (auto maybe_doc_css_spec = context->MatchingDocCssSpec();
@@ -5132,7 +5135,7 @@ ValidateTagResult ValidateTag(const ParsedHtmlTag& encountered_tag,
       context.rules().DispatchForTagName(encountered_tag.UpperName());
   // Filter TagSpecDispatch.AllTagSpecs by type identifiers.
   vector<const ParsedTagSpec*> filtered_tag_specs;
-  for (int32 tag_id : tagspec_dispatch.AllTagSpecs()) {
+  for (int32_t tag_id : tagspec_dispatch.AllTagSpecs()) {
     const ParsedTagSpec* parsed_tag_spec = context.rules().GetTagSpec(tag_id);
     // Keep TagSpecs that are used for these type identifiers.
     if (parsed_tag_spec->IsUsedForTypeIdentifiers(context.type_identifiers()))
@@ -5164,14 +5167,14 @@ ValidateTagResult ValidateTag(const ParsedHtmlTag& encountered_tag,
   // over encountered attributes in the case where we have no dispatches.
   if (tagspec_dispatch.HasDispatchKeys()) {
     for (const ParsedHtmlTagAttr& attr : encountered_tag.Attributes()) {
-      vector<int32> tag_spec_ids = tagspec_dispatch.MatchingDispatchKey(
+      vector<int32_t> tag_spec_ids = tagspec_dispatch.MatchingDispatchKey(
           attr.name(),
           // Attribute values are case-sensitive by default, but we
           // match dispatch keys in a case-insensitive manner and then
           // validate using whatever the tagspec requests.
           AsciiStrToLower(attr.value()), context.tag_stack().ParentTagName());
       ValidateTagResult ret;
-      for (int32 tag_spec_id : tag_spec_ids) {
+      for (int32_t tag_spec_id : tag_spec_ids) {
         const ParsedTagSpec* parsed_tag_spec =
             context.rules().GetTagSpec(tag_spec_id);
         // Skip TagSpecs that aren't used for these type identifiers.
@@ -5301,8 +5304,8 @@ void ReferencePointMatcher::RecordMatch(const ParsedTagSpec& reference_point) {
 
 void ReferencePointMatcher::ExitParentTag(const Context& context,
                                           ValidationResult* result) const {
-  absl::node_hash_map<int32, int32> reference_point_by_count;
-  for (int32 r : reference_points_matched_) ++reference_point_by_count[r];
+  absl::node_hash_map<int32_t, int32_t> reference_point_by_count;
+  for (int32_t r : reference_points_matched_) ++reference_point_by_count[r];
   for (const ParsedReferencePoint& p : *parsed_reference_points_) {
     if (p.point->mandatory() && reference_point_by_count.find(p.tag_spec_id) ==
                                     reference_point_by_count.end()) {
