@@ -22,19 +22,18 @@
 import {
   Action,
   StateProperty,
-  getStoreService,
 } from '../../../extensions/amp-story/1.0/amp-story-store-service';
 import {CSS} from '../../../build/amp-story-360-0.1.css';
 import {CommonSignals} from '../../../src/common-signals';
+import {LocalizedStringId} from '../../../src/localized-strings';
 import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
 import {Services} from '../../../src/services';
 import {dev, user, userAssert} from '../../../src/log';
+import {getLocalizationService} from '../../amp-story/1.0/amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
-import {LocalizedStringId} from '../../../src/localized-strings';
-import {getLocalizationService} from '../../amp-story/1.0/amp-story-localization-service';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_360';
@@ -237,7 +236,7 @@ export class AmpStory360 extends AMP.BaseElement {
     this.storeService_ = null;
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
-    this.timer = Services.timerFor(this.win);
+    this.timer_ = Services.timerFor(this.win);
   }
 
   /** @override */
@@ -334,10 +333,10 @@ export class AmpStory360 extends AMP.BaseElement {
 
     this.win.addEventListener('deviceorientation', (e) => {
       this.isReady_ && this.onDeviceOrientation_(e);
-      this.timer.cancel(checkNoMotion);
+      this.timer_.cancel(checkNoMotion);
     });
 
-    const checkNoMotion = this.timer.delay(() => {
+    const checkNoMotion = this.timer_.delay(() => {
       this.gyroscopeControls_ = false;
       if (this.isReady_ && this.isPlaying_) {
         this.animate_();
