@@ -26,6 +26,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   let win;
   let playerEl;
   let manager;
+  let fakeResponse;
 
   const fireHandler = [];
   const DEFAULT_CACHE_URL =
@@ -91,7 +92,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     win = env.win;
     fakeMessaging = {
       setDefaultHandler: () => {},
-      sendRequest: () => {},
+      sendRequest: () => Promise.resolve(fakeResponse),
       unregisterHandler: () => {},
       registerHandler: (event, handler) => {
         fireHandler[event] = handler;
@@ -864,6 +865,33 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         detail: {
           index: 4,
           remaining: 0,
+        },
+      });
+    });
+
+    it('should react to CURRENT_PAGE_ID events', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 1);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      const navigationSpy = env.sandbox.spy();
+      playerEl.addEventListener('storyNavigation', navigationSpy);
+
+      fakeResponse = {value: 0.12};
+      const fakeData = {state: 'CURRENT_PAGE_ID', value: 'page-2'};
+      fireHandler['documentStateUpdate']('documentStateUpdate', fakeData);
+
+      await nextTick();
+
+      expect(navigationSpy).to.have.been.calledWithMatch({
+        type: 'storyNavigation',
+        detail: {
+          pageId: 'page-2',
+          progress: 0.12,
         },
       });
     });

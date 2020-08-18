@@ -99,6 +99,8 @@ const STORY_STATE_TYPE = {
 const STORY_MESSAGE_STATE_TYPE = {
   PAGE_ATTACHMENT_STATE: 'PAGE_ATTACHMENT_STATE',
   MUTED_STATE: 'MUTED_STATE',
+  CURRENT_PAGE_ID: 'CURRENT_PAGE_ID',
+  STORY_PROGRESS: 'STORY_PROGRESS',
 };
 
 /** @typedef {{ state:string, value:boolean }} */
@@ -492,9 +494,16 @@ export class AmpStoryPlayer {
             false
           );
 
+          messaging.sendRequest(
+            'onDocumentState',
+            dict({'state': STORY_MESSAGE_STATE_TYPE.CURRENT_PAGE_ID}),
+            false
+          );
+
           messaging.registerHandler('documentStateUpdate', (event, data) => {
             this.onDocumentStateUpdate_(
-              /** @type {!DocumentStateTypeDef} */ (data)
+              /** @type {!DocumentStateTypeDef} */ (data),
+              messaging
             );
           });
 
@@ -999,16 +1008,47 @@ export class AmpStoryPlayer {
   /**
    * React to documentStateUpdate events.
    * @param {!DocumentStateTypeDef} data
+   * @param {Messaging} messaging
    * @private
    */
-  onDocumentStateUpdate_(data) {
+  onDocumentStateUpdate_(data, messaging) {
     switch (data.state) {
       case STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE:
         this.onPageAttachmentStateUpdate_(data.value);
         break;
+      case STORY_MESSAGE_STATE_TYPE.CURRENT_PAGE_ID:
+        this.onCurrentPageIdUpdate_(data.value, messaging);
+        break;
       default:
         break;
     }
+  }
+
+  /**
+   * Reacts to page id update events inside the story.
+   * @param {string} pageId
+   * @param {Messaging} messaging
+   * @private
+   */
+  onCurrentPageIdUpdate_(pageId, messaging) {
+    messaging
+      .sendRequest(
+        'getDocumentState',
+        {state: STORY_MESSAGE_STATE_TYPE.STORY_PROGRESS},
+        true
+      )
+      .then((progress) => {
+        this.element_.dispatchEvent(
+          createCustomEvent(
+            this.win_,
+            'storyNavigation',
+            dict({
+              'pageId': pageId,
+              'progress': progress.value,
+            })
+          )
+        );
+      });
   }
 
   /**
