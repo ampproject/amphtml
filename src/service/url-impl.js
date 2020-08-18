@@ -24,6 +24,7 @@ import {
   isProxyOrigin,
   isSecureUrlDeprecated,
   parseUrlWithA,
+  resolveRelativeUrl,
 } from '../url';
 import {
   installServiceInEmbedScope,
@@ -118,6 +119,16 @@ export class Url {
    */
   getSourceUrl(url) {
     return getSourceUrl(this.parse_(url));
+  }
+
+  /**
+   * Returns absolute URL resolved based on the relative URL and the base.
+   * @param {string} relativeUrlString
+   * @param {string|!Location} baseUrl
+   * @return {string}
+   */
+  resolveRelativeUrl(relativeUrlString, baseUrl) {
+    return resolveRelativeUrl(relativeUrlString, this.parse_(baseUrl));
   }
 
   /**
