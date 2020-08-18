@@ -579,7 +579,7 @@ export function resolveRelativeUrl(relativeUrlString, baseUrl) {
  * @param {string} relativeUrlString
  * @param {string|!Location} baseUrl
  * @return {string}
- * @private Visible for testing.
+ * @private @visibleForTesting
  */
 export function resolveRelativeUrlFallback_(relativeUrlString, baseUrl) {
   if (typeof baseUrl == 'string') {
