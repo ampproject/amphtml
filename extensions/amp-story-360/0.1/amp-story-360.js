@@ -33,6 +33,8 @@ import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
+import {LocalizedStringId} from '../../../src/localized-strings';
+import {getLocalizationService} from '../../amp-story/1.0/amp-story-localization-service';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_360';
@@ -47,7 +49,7 @@ const buildActivateButtonTemplate = (element) => {
   const html = htmlFor(element);
   return html`
     <button class="i-amphtml-story-360-activate-button" role="button">
-      Activate
+      <span class="activate-text"></span>
       <span class="i-amphtml-story-360-activate-button-icon"
         >360°
         <svg
@@ -204,6 +206,9 @@ export class AmpStory360 extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    /** @private {?../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = getLocalizationService(element);
+
     /** @private {!Array<!CameraOrientation>} */
     this.orientations_ = [];
 
@@ -229,7 +234,10 @@ export class AmpStory360 extends AMP.BaseElement {
     this.gyroscopeControls_ = false;
 
     /** @private @const {!../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
-    this.storeService_ = getStoreService(this.win);
+    this.storeService_ = null;
+
+    /** @private @const {!../../../src/service/timer-impl.Timer} */
+    this.timer = Services.timerFor(this.win);
   }
 
   /** @override */
@@ -269,19 +277,18 @@ export class AmpStory360 extends AMP.BaseElement {
     this.element.getAttribute('controls') === 'gyroscope' &&
       this.checkGyroscopePermissions_();
 
-    this.initializeListeners_();
-  }
+    Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
+      this.storeService_ = storeService;
 
-  /** @private */
-  initializeListeners_() {
-    this.storeService_.subscribe(
-      StateProperty.GYROSCOPE_PERMISSION_STATE,
-      (permissionState) => this.onPermissionState_(permissionState)
-    );
+      storeService.subscribe(StateProperty.PAGE_SIZE, () =>
+        this.resizeRenderer_()
+      );
 
-    this.storeService_.subscribe(StateProperty.PAGE_SIZE, () =>
-      this.resizeRenderer_()
-    );
+      storeService.subscribe(
+        StateProperty.GYROSCOPE_PERMISSION_STATE,
+        (permissionState) => this.onPermissionState_(permissionState)
+      );
+    });
   }
 
   /**
@@ -318,6 +325,7 @@ export class AmpStory360 extends AMP.BaseElement {
   /**
    * Creates a device orientation listener and sets gyroscopeControls_ state.
    * If listener is not called in 1000ms, remove listener and resume animation.
+   * This happens on desktop browsers that support deviceorientation but aren't in motion.
    * @private
    */
   enableGyroscope_() {
@@ -326,17 +334,19 @@ export class AmpStory360 extends AMP.BaseElement {
 
     this.win.addEventListener('deviceorientation', (e) => {
       this.isReady_ && this.onDeviceOrientation_(e);
-      clearTimeout(checkNoMotion);
+      this.timer.cancel(checkNoMotion);
     });
 
-    const checkNoMotion = setTimeout(() => {
+    const checkNoMotion = this.timer.delay(() => {
       this.gyroscopeControls_ = false;
-      this.animate_();
+      if (this.isReady_ && this.isPlaying_) {
+        this.animate_();
+      }
     }, 1000);
   }
 
   /**
-   * @param {Event} e
+   * @param {!Event} e
    * @private
    */
   onDeviceOrientation_(e) {
@@ -373,6 +383,13 @@ export class AmpStory360 extends AMP.BaseElement {
           // Render activate button if permissions aren't set yet.
           .catch(() => {
             const activateButton = buildActivateButtonTemplate(this.element);
+
+            activateButton.querySelector(
+              '.activate-text'
+            ).textContent = this.localizationService_.getLocalizedString(
+              LocalizedStringId.AMP_STORY_ACTIVATE_BUTTON_TEXT
+            );
+
             this.element.appendChild(activateButton);
 
             activateButton.addEventListener('click', () => {
@@ -432,32 +449,6 @@ export class AmpStory360 extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
-  /**
-   * Checks if the image is larger than the GPUs max texture size.
-   * Scales the image down if neededed.
-   * Returns the image element if image is within bounds.
-   * If image is out of bounds, returns a scaled canvas element.
-   * @param {!Element} imgEl
-   * @return {!Element}
-   * @private
-   */
-  checkImageReSize_(imgEl) {
-    const canvasForGL = document.createElement('canvas');
-    const gl = canvasForGL.getContext('webgl');
-    const MAX_TEXTURE_SIZE = gl.getParameter(gl.MAX_TEXTURE_SIZE);
-
-    if (imgEl.width > MAX_TEXTURE_SIZE || imgEl.height > MAX_TEXTURE_SIZE) {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      canvas.width = Math.min(imgEl.width, MAX_TEXTURE_SIZE);
-      canvas.height = Math.min(imgEl.height, MAX_TEXTURE_SIZE);
-      ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
-      return canvas;
-    } else {
-      return imgEl;
-    }
-  }
-
   /** @override */
   layoutCallback() {
     const ampImgEl = this.element.querySelector('amp-img');
@@ -472,11 +463,7 @@ export class AmpStory360 extends AMP.BaseElement {
       .then(
         () => {
           this.renderer_ = new Renderer(this.canvas_);
-          const img = this.checkImageReSize_(
-            dev().assertElement(this.element.querySelector('img'))
-          );
-          this.renderer_.setImage(img);
-          this.renderer_.resize();
+          this.renderer_.setImage(this.element.querySelector('img'));
           if (this.orientations_.length < 1) {
             return;
           }
