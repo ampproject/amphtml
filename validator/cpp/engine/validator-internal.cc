@@ -22,8 +22,9 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "glog/logging.h"
+#include "google/protobuf/repeated_field.h"
 #include "absl/algorithm/container.h"
-#include "absl/base/integral_types.h"
 #include "absl/base/thread_annotations.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
@@ -32,14 +33,12 @@
 #include "absl/flags/flag.h"
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
-#include "absl/strings/case.h"
 #include "absl/strings/cord.h"
 #include "absl/strings/match.h"
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
-#include "absl/strings/string_view_utils.h"
 #include "absl/strings/strip.h"
 #include "absl/strings/substitute.h"
 #include "absl/synchronization/mutex.h"
@@ -66,11 +65,13 @@
 #include "re2/re2.h"  // NOLINT(build/deprecated)
 #include "webutil/url/url.h"
 
+
 using absl::AsciiStrToLower;
 using absl::AsciiStrToUpper;
 using absl::c_find;
 using absl::c_linear_search;
 using absl::make_unique;
+using absl::EqualsIgnoreCase;
 using absl::StrAppend;
 using absl::StrCat;
 using absl::string_view;
@@ -105,7 +106,7 @@ using amp::validator::ValidatorRules;
 using amp::validator::parse_layout::CssLength;
 using htmlparser::css::BlockType;
 using htmlparser::css::CssParsingConfig;
-using proto2::RepeatedPtrField;
+using google::protobuf::RepeatedPtrField;
 using std::pair;
 using std::set;
 using std::shared_ptr;
@@ -262,7 +263,7 @@ class ParsedHtmlTag {
     std::string last_attr_name;
     std::string last_attr_value;
     for (const auto& attr_it : node_->Attributes()) {
-      if (CaseEqual(last_attr_name, attr_it.KeyPart()) &&
+      if (EqualsIgnoreCase(last_attr_name, attr_it.KeyPart()) &&
           last_attr_value != attr_it.value) {
         return attr_it.KeyPart();
       }
@@ -540,7 +541,7 @@ class ParsedDocSpec {
 class ParsedDocCssSpec {
  public:
   ParsedDocCssSpec(const DocCssSpec& spec,
-                   const proto2::RepeatedPtrField<DeclarationList>& decl_lists)
+                   const RepeatedPtrField<DeclarationList>& decl_lists)
       : spec_(spec) {
     // Store the enum of the TagSpec's type identifiers.
     for (const std::string& disabled_by : spec.disabled_by()) {
@@ -933,7 +934,7 @@ class ParsedTagSpec {
       if (parsed_attr_spec->spec().name() == "type" &&
           parsed_attr_spec->spec().value_casei_size() > 0) {
         for (const std::string& v : parsed_attr_spec->spec().value_casei()) {
-          if (CaseEqual("application/json", v)) {
+          if (EqualsIgnoreCase("application/json", v)) {
             is_type_json_ = true;
             break;
           }
@@ -2743,7 +2744,7 @@ class InvalidDeclVisitor : public htmlparser::css::RuleVisitor {
       bool has_valid_value = false;
       const std::string first_ident = declaration.FirstIdent();
       for (auto& value : css_declaration->value_casei()) {
-        if (CaseEqual(first_ident, value)) {
+        if (EqualsIgnoreCase(first_ident, value)) {
           has_valid_value = true;
           break;
         }
@@ -3244,7 +3245,7 @@ void ValidateNonTemplateAttrValueAgainstSpec(
         TagSpecUrl(tag_spec), result);
   } else if (spec.value_casei_size() > 0) {
     for (const std::string& v : spec.value_casei()) {
-      if (CaseEqual(attr_value, v)) return;
+      if (EqualsIgnoreCase(attr_value, v)) return;
     }
     context.AddError(
         ValidationError::INVALID_ATTR_VALUE, context.line_col(),
@@ -3540,7 +3541,7 @@ void ValidateSsrLayout(const TagSpec& spec,
   if (ssr_attr && !ssr_attr.value().empty()) {
     const std::string layout_name =
         amp::validator::parse_layout::GetLayoutName(layout);
-    if (!CaseEqual(layout_name, ssr_attr.value())) {
+    if (!EqualsIgnoreCase(layout_name, ssr_attr.value())) {
       context.AddError(ValidationError::ATTR_VALUE_REQUIRED_BY_LAYOUT,
                        context.line_col(),
                        /*params=*/
@@ -4007,7 +4008,7 @@ void ValidateAttrCss(const ParsedAttrSpec& parsed_attr_spec,
         bool has_valid_value = false;
         const std::string first_ident = declaration->FirstIdent();
         for (auto& value : css_declaration->value_casei()) {
-          if (CaseEqual(first_ident, value)) {
+          if (EqualsIgnoreCase(first_ident, value)) {
             has_valid_value = true;
             break;
           }
@@ -4130,7 +4131,7 @@ void ValidateAttrDeclaration(const ParsedAttrSpec& parsed_attr_spec,
       bool has_valid_value = false;
       const std::string first_ident = declaration->FirstIdent();
       for (auto& value : css_declaration->value_casei()) {
-        if (CaseEqual(first_ident, value)) {
+        if (EqualsIgnoreCase(first_ident, value)) {
           has_valid_value = true;
           break;
         }

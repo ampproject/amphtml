@@ -19,20 +19,25 @@
 #include <string>
 #include <unordered_map>
 
+#include "absl/strings/ascii.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_replace.h"
 #include "absl/strings/string_view.h"
+#include "google/protobuf/descriptor.pb.h"  // For GetEnumDescriptor
 #include "validator.pb.h"
 #include "re2/re2.h"  // NOLINT(build/deprecated)
 
 using absl::AsciiStrToLower;
 using absl::StrCat;
+using absl::StrReplaceAll;
 using absl::StrFormat;
 using absl::string_view;
 using amp::validator::AmpLayout;
 using std::unordered_map;
+
+namespace protocolbuffer = google::protobuf;
 
 namespace amp::validator::parse_layout {
 const char kUnitPx[] = "px";
@@ -111,11 +116,12 @@ AmpLayout::Layout ParseLayout(string_view layout) {
   static unordered_map<std::string, AmpLayout::Layout>* layouts_by_attr_val =
       [] {
         auto result = new unordered_map<std::string, AmpLayout::Layout>();
-        auto descriptor = proto2::GetEnumDescriptor<AmpLayout::Layout>();
+        auto descriptor =
+            protocolbuffer::GetEnumDescriptor<AmpLayout::Layout>();
         for (int i = 0; i < descriptor->value_count(); ++i) {
           auto l = descriptor->value(i);
-          (*result)[StringReplace(AsciiStrToLower(
-              l->name()),  "_", "-", /*replace_all=*/true)] =
+          (*result)[StrReplaceAll(AsciiStrToLower(
+              l->name()),  {{"_", "-"}})] =
               static_cast<AmpLayout::Layout>(l->number());
         }
         return result;
@@ -225,20 +231,21 @@ std::string GetCssLengthStyle(const CssLength& length,
                               const std::string& type) {
   if (!length.is_set) return "";
   if (length.is_auto) return StrCat(type, ":auto;");
-  return StrCat(type, ":", absl::LegacyPrecision(length.numeral), length.unit,
+  return StrCat(type, ":", absl::AlphaNum(length.numeral), length.unit,
                 ";");
 }
 
 std::string GetLayoutClass(AmpLayout::Layout layout) {
   static unordered_map<AmpLayout::Layout, std::string>* classes_by_layout = [] {
     auto result = new unordered_map<AmpLayout::Layout, std::string>();
-    auto descriptor = proto2::GetEnumDescriptor<AmpLayout::Layout>();
+    auto descriptor =
+        protocolbuffer::GetEnumDescriptor<AmpLayout::Layout>();
     for (int i = 0; i < descriptor->value_count(); ++i) {
       auto l = descriptor->value(i);
       (*result)[static_cast<AmpLayout::Layout>(l->number())] =
           StrCat("i-amphtml-layout-",
-                 StringReplace(AsciiStrToLower(l->name()),
-                               "_", "-", /*replace_all=*/true));
+                 StrReplaceAll(AsciiStrToLower(l->name()),
+                               {{"_", "-"}}));
     }
     return result;
   }();
@@ -255,12 +262,13 @@ std::string GetLayoutClass(AmpLayout::Layout layout) {
 std::string GetLayoutName(AmpLayout::Layout layout) {
   static unordered_map<AmpLayout::Layout, std::string>* classes_by_layout = [] {
     auto result = new unordered_map<AmpLayout::Layout, std::string>();
-    auto descriptor = proto2::GetEnumDescriptor<AmpLayout::Layout>();
+    auto descriptor =
+        protocolbuffer::GetEnumDescriptor<AmpLayout::Layout>();
     for (int i = 0; i < descriptor->value_count(); ++i) {
       auto l = descriptor->value(i);
       (*result)[static_cast<AmpLayout::Layout>(l->number())] =
-          StringReplace(AsciiStrToLower(l->name()),
-                                        "_", "-", /*replace_all=*/true);
+          StrReplaceAll(AsciiStrToLower(l->name()),
+                        {{"_", "-"}});
     }
     return result;
   }();

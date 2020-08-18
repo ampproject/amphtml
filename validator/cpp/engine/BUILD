@@ -21,6 +21,7 @@ cc_library(
     hdrs = [
         "validator_pb.h",
     ],
+    copts = ["-std=c++17"],
 )
 
 embed_data(
@@ -41,6 +42,7 @@ cc_library(
         "@com_googlesource_code_re2//:re2",
         "@validator//:validator_cc_proto",
     ],
+    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -63,6 +65,7 @@ cc_library(
         "@com_googlesource_code_re2//:re2",
         "@htmlparser//:strings",
     ],
+    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -85,6 +88,7 @@ cc_library(
         "@com_googlesource_code_re2//:re2",
         "@validator//:validator_cc_proto",
     ],
+    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -107,6 +111,7 @@ cc_library(
         "@com_google_absl//absl/strings",
         "@htmlparser//:strings",
     ],
+    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -129,6 +134,7 @@ cc_library(
         "@com_google_absl//absl/strings:cord",
         "@htmlparser//:strings",
     ],
+    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -152,6 +158,7 @@ cc_library(
         "@com_google_absl//absl/strings",
         "@htmlparser//css:parse-css",
     ],
+    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -174,6 +181,7 @@ cc_library(
         "@com_google_absl//absl/strings",
         "@validator//:validator_cc_proto",
     ],
+    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -197,6 +205,7 @@ cc_library(
         "@htmlparser//:strings",
         "@validator//:validator_cc_proto",
     ],
+    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -218,6 +227,7 @@ cc_binary(
         "@htmlparser//:fileutil",
         "@validator//:validator_cc_proto",
     ],
+    copts = ["-std=c++17"],
 )
 
 genrule(
@@ -273,6 +283,7 @@ cc_library(
         # TODO: determine correct dep for //webutil/url
         # "//webutil/url",
     ],
+    copts = ["-std=c++17"],
 )
 
 cc_library(
@@ -285,6 +296,7 @@ cc_library(
         "@validator//:validator_cc_proto",
     ],
     alwayslink = 1,
+    copts = ["-std=c++17"],
 )
 
 cc_library(
@@ -302,6 +314,7 @@ cc_library(
         "@htmlparser//:strings",
         "@validator//:validator_cc_proto",
     ],
+    copts = ["-std=c++17"],
 )
 
 bzl_library(
