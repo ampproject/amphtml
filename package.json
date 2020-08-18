@@ -182,7 +182,6 @@
     "sinon-chai": "3.5.0",
     "sleep-promise": "8.0.1",
     "sourcemap-codec": "1.4.8",
-    "style-loader": "1.2.1",
     "tar": "6.0.2",
     "tcp-port-used": "1.0.1",
     "tempy": "0.6.0",
