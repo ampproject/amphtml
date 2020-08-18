@@ -15,7 +15,11 @@
  */
 
 
- .i-amphtml-story-interactive-input-container {
+.i-amphtml-story-interactive-container {
+  overflow: hidden;
+}
+
+.i-amphtml-story-interactive-input-container {
   background-color: var(--i-amphtml-interactive-option-background-color);
   border-radius: 32px;
   color: var(--i-amphtml-interactive-strong-text-color);
@@ -63,6 +67,12 @@
   cursor: pointer;
   z-index: 1;
   pointer-events: all;
+  transform: translate(90px);
+  transition: transform 0.2s ease-in-out;
+}
+
+.i-amphtml-story-interactive-can-send .i-amphtml-story-interacive-text-send {
+  transform: translate(0px);
 }
 
 .i-amphtml-story-interacive-text-send svg {

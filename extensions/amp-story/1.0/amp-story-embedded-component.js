@@ -230,9 +230,11 @@ const buildExpandedViewOverlay = (element) => htmlFor(element)`
  * @param {!EmbedDataDef} embedData
  */
 function updateEmbedStyleEl(target, embedStyleEl, embedData) {
+  console.log(embedData);
   const embedId = embedData.id;
   embedStyleEl.textContent = `[${EMBED_ID_ATTRIBUTE_NAME}="${embedId}"]
   ${buildStringStyleFromEl(target, embedData)}`;
+  console.log(embedStyleEl.textContent);
 }
 
 /**
@@ -292,7 +294,14 @@ function buildDefaultStringStyle(embedData) {
 function measureStyleForEl(element, state, pageRect, elRect) {
   switch (element.tagName.toLowerCase()) {
     case EXPANDABLE_COMPONENTS['amp-twitter'].selector:
-      return measureStylesForTwitter(state, pageRect, elRect);
+      return measureStylesForCustomWidth(
+        state,
+        pageRect,
+        elRect,
+        MAX_TWEET_WIDTH_PX
+      );
+    case EXPANDABLE_COMPONENTS['amp-story-interactive-text'].selector:
+      return measureStylesForCustomWidth(state, pageRect, elRect, 400);
     default:
       return measureDefaultStyles(state, pageRect, elRect);
   }
@@ -304,16 +313,16 @@ function measureStyleForEl(element, state, pageRect, elRect) {
  * @param {!Object} state
  * @param {!DOMRect} pageRect
  * @param {!DOMRect} elRect
+ * @param {number} maxWidth
  * @return {!Object}
  */
-function measureStylesForTwitter(state, pageRect, elRect) {
+function measureStylesForCustomWidth(state, pageRect, elRect, maxWidth) {
   // If screen is very wide and story has supports-landscape attribute,
   // we don't want it to take the whole width. We take the maximum width
   // that the tweet can actually use instead.
-  state.newWidth = Math.min(pageRect.width, MAX_TWEET_WIDTH_PX);
+  state.newWidth = Math.min(pageRect.width, maxWidth);
 
-  state.scaleFactor =
-    Math.min(elRect.width, MAX_TWEET_WIDTH_PX) / state.newWidth;
+  state.scaleFactor = Math.min(elRect.width, maxWidth) / state.newWidth;
 
   state.horizontalMargin = -1 * ((state.newWidth - elRect.width) / 2);
 
@@ -329,6 +338,7 @@ function measureStylesForTwitter(state, pageRect, elRect) {
  * @return {!Object}
  */
 function measureDefaultStyles(state, pageRect, elRect) {
+  console.log(elRect, pageRect);
   if (elRect.width >= elRect.height) {
     state.newWidth = pageRect.width;
     state.scaleFactor = elRect.width / state.newWidth;
@@ -560,19 +570,24 @@ export class AmpStoryEmbeddedComponent {
               to ${component.state}`
           );
         }
-        this.setState_(EmbeddedComponentState.FOCUSED, component);
+        if (this.getEmbedConfigFor_(component.element).skipTooltip) {
+          this.componentPage_ = devAssert(
+            this.storyEl_.querySelector('amp-story-page[active]')
+          );
+          this.triggeringTarget_ = component.element;
+          this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
+            state: EmbeddedComponentState.EXPANDED,
+            element: component.element,
+          });
+        } else {
+          this.setState_(EmbeddedComponentState.FOCUSED, component);
+        }
         break;
       case EmbeddedComponentState.EXPANDED:
-        if (this.state_ === EmbeddedComponentState.FOCUSED) {
-          this.setState_(EmbeddedComponentState.EXPANDED, component);
-        } else if (this.state_ === EmbeddedComponentState.EXPANDED) {
+        if (this.state_ === EmbeddedComponentState.EXPANDED) {
           this.maybeCloseExpandedView_(component.element);
         } else {
-          dev().warn(
-            TAG,
-            `Invalid component update. Not possible to go from ${this.state_}
-               to ${component.state}`
-          );
+          this.setState_(EmbeddedComponentState.EXPANDED, component);
         }
         break;
     }
@@ -745,11 +760,12 @@ export class AmpStoryEmbeddedComponent {
     });
 
     this.toggleExpandedView_(null);
-    this.tooltip_.removeEventListener(
-      'click',
-      this.expandComponentHandler_,
-      true /** capture */
-    );
+    this.tooltip_ &&
+      this.tooltip_.removeEventListener(
+        'click',
+        this.expandComponentHandler_,
+        true /** capture */
+      );
   }
 
   /**
@@ -760,12 +776,16 @@ export class AmpStoryEmbeddedComponent {
    */
   onFocusedStateUpdate_(component) {
     if (!component) {
-      this.mutator_.mutateElement(
-        dev().assertElement(this.focusedStateOverlay_),
-        () => {
-          this.focusedStateOverlay_.classList.toggle('i-amphtml-hidden', true);
-        }
-      );
+      this.focusedStateOverlay_ &&
+        this.mutator_.mutateElement(
+          dev().assertElement(this.focusedStateOverlay_),
+          () => {
+            this.focusedStateOverlay_.classList.toggle(
+              'i-amphtml-hidden',
+              true
+            );
+          }
+        );
       return;
     }
 
@@ -929,6 +949,7 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   onExpandComponent_(event) {
+    console.log('onExpand');
     event.preventDefault();
     event.stopPropagation();
 
@@ -1330,6 +1351,9 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   clearTooltip_() {
+    if (!this.tooltip_) {
+      return;
+    }
     this.mutator_.mutateElement(dev().assertElement(this.tooltip_), () => {
       const actionIcon = this.tooltip_.querySelector(
         '.i-amphtml-tooltip-action-icon'

@@ -70,16 +70,12 @@ export class AmpStoryInteractiveText extends AmpStoryInteractive {
 
   /** @override */
   buildComponent() {
+    this.element.setAttribute('interactive', '');
     this.rootEl_ = buildPollTemplate(this.element);
     const textArea = this.rootEl_.querySelector('textarea');
     this.attachPrompt_(this.rootEl_);
     textArea.placeholder = this.element.getAttribute('placeholder-text');
-    textArea.onblur = (event) => {
-      console.log('BLURREDDDDD', event);
-    };
-    textArea.onfocus = () => {
-      console.log('FOCUSED');
-    };
+    textArea.onkeyup = () => this.toggleSendButton_(textArea.value);
     return this.rootEl_;
   }
 
@@ -100,5 +96,36 @@ export class AmpStoryInteractiveText extends AmpStoryInteractive {
       ).textContent = `${percentage}`;
       setStyle(currOption, '--option-percentage', percentages[index] + '%');
     });
+  }
+
+  /**
+   * Shows or hides the send button
+   * @param {string} inputText
+   * @private
+   */
+  toggleSendButton_(inputText) {
+    this.rootEl_.classList.toggle(
+      'i-amphtml-story-interactive-can-send',
+      inputText.length > 0
+    );
+  }
+
+  /**
+   * Sends the text and disables responses
+   * @param {string} unusedInputText
+   * @private
+   */
+  sendText_(unusedInputText) {
+    console.log('sending text');
+    this.rootEl_.classList.toggle(
+      'i-amphtml-story-interactive-can-send',
+      false
+    );
+    this.rootEl_.querySelector('textarea').disabled = true;
+  }
+
+  /** @override */
+  handleTap_(unusedEvent) {
+    console.log('tapped');
   }
 }
