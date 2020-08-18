@@ -394,6 +394,7 @@ exports.extensionBundles = [
     version: '1.0',
     latestVersion: '0.1',
     type: TYPES.MISC,
+    options: {hasJss: true},
   },
   {
     name: 'amp-beopinion',

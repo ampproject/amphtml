@@ -15,7 +15,7 @@
  */
 
 import * as Preact from '../../../src/preact';
-import {useStyles} from './base-carousel.jss';
+import {useStyles} from '../../../build/amp-base-carousel-1.0.jss.compiled';
 
 /**
  * @param {!BaseCarouselDef.ArrowProps} props

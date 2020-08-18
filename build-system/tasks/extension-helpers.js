@@ -24,6 +24,8 @@ const {
   extensionBundles,
   verifyExtensionBundles,
 } = require('../compile/bundles.config');
+const {create} = require('jss');
+const {default: preset} = require('jss-preset-default');
 const {endBuildStep, watchDebounceDelay} = require('./helpers');
 const {isTravisBuild} = require('../common/travis');
 const {jsifyCssAsync} = require('./jsify-css');
@@ -357,16 +359,7 @@ async function buildExtensions(options) {
  */
 async function doBuildExtension(extensions, extension, options) {
   const e = extensions[extension];
-  let o = {...options};
-  o = Object.assign(o, e);
-  await buildExtension(
-    e.name,
-    e.version,
-    e.latestVersion,
-    e.hasCss,
-    o,
-    e.extraGlobs
-  );
+  await buildExtension({...e, options: {...options, ...e}});
 }
 
 /**
@@ -405,25 +398,27 @@ function watchExtension(path, name, version, latestVersion, hasCss, options) {
  * Optionally copies the CSS at extensions/$name/$version/$name.css into
  * a generated JS file that can be required from the extensions as
  * `import {CSS} from '../../../build/$name-0.1.css';`
- *
- * @param {string} name Name of the extension. Must be the sub directory in
- *     the extensions directory and the name of the JS and optional CSS file.
- * @param {string} version Version of the extension. Must be identical to
- *     the sub directory inside the extension directory
- * @param {string} latestVersion Latest version of the extension.
- * @param {boolean} hasCss Whether there is a CSS file for this extension.
- * @param {?Object} options
- * @param {!Array=} extraGlobs
+ * @param {Object} opts
+ * @param {string} opts.name Name of the extension. Must be the sub directory in
+ * the extensions directory and the name of the JS and optional CSS file.
+ * @param {string} opts.version Version of the extension. Must be identical to
+ * the sub directory inside the extension directory
+ * @param {string} opts.latestVersion Latest version of the extension.
+ * @param {boolean} opts.hasCss Whether there is a CSS file for this extension.
+ * @param {boolean} opts.hasJss Whether there is a JSS file for this extension.
+ * @param {?Object} opts.options
+ * @param {!Array=} opts.extraGlobs
  * @return {!Promise}
  */
-async function buildExtension(
+async function buildExtension({
   name,
   version,
   latestVersion,
   hasCss,
+  hasJss,
   options,
-  extraGlobs
-) {
+  extraGlobs,
+}) {
   options = options || {};
   options.extraGlobs = extraGlobs;
   if (options.compileOnlyCss && !hasCss) {
@@ -436,6 +431,7 @@ async function buildExtension(
   // compileMinifiedJs, which only recompile JS.
   if (options.watch) {
     options.watch = false;
+    // TODO: add jss support.
     watchExtension(path, name, version, latestVersion, hasCss, options);
     // When an ad network extension is being watched, also watch amp-a4a.
     if (name.match(/amp-ad-network-.*-impl/)) {
@@ -450,6 +446,10 @@ async function buildExtension(
     if (options.compileOnlyCss) {
       return;
     }
+  }
+  if (hasJss) {
+    mkdirSync('build');
+    await buildExtensionJss(path, name, version);
   }
   if (name === 'amp-analytics') {
     await vendorConfigs(options);
@@ -506,6 +506,45 @@ function buildExtensionCss(path, name, version, options) {
   }
   promises.push(mainCssBinary);
   return Promise.all(promises);
+}
+
+/**
+ * @param {string} path
+ * @param {string} name
+ * @param {string} version
+ * @return {!Promise}
+ */
+async function buildExtensionJss(path, name, version) {
+  /**
+   * Returns the contents of the built .jss.js file.
+   * @param {string} css
+   * @param {!Object} classes
+   * @return {string}
+   */
+  function getCompiledJss(css, classes) {
+    return `
+export function useStyles() {
+  return ${JSON.stringify(classes)};
+}
+
+export const CSS = ${JSON.stringify(css)};
+    `.trim();
+  }
+
+  const jssInput = require('../../' +
+    path +
+    '/' +
+    name.replace('amp-', '') +
+    '.jss.js');
+  const jss = create();
+  jss.setup(preset());
+  const sheet = jss.createStyleSheet(jssInput);
+  const css = sheet.toString();
+
+  const jsName = `build/${name}-${version}.jss.compiled.js`;
+  const cssName = `build/css/${name}-${version}.css`;
+  fs.writeFileSync(jsName, getCompiledJss(css, sheet.classes), 'utf-8');
+  fs.writeFileSync(cssName, css, 'utf-8');
 }
 
 /**
