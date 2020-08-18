@@ -19,6 +19,7 @@
 
 #include <filesystem>
 
+#include "glog/logging.h"
 #include "testing-utils.h"
 #include "error-formatter.h"
 #include "absl/strings/substitute.h"

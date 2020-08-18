@@ -137,6 +137,7 @@ ABSL_FLAG(bool, duplicate_html_body_elements_is_error, false,
           "validation purposes. (Default is to allow, leaving it to HTML5 "
           "user-agent to treat them as per the spec).");
 
+
 namespace amp::validator {
 
 constexpr char kAmpCacheRootUrl[] = "https://cdn.ampproject.org/";
@@ -747,7 +748,7 @@ CssParsingConfig GenCssParsingConfig() {
 class ParsedCdataSpec {
  public:
   explicit ParsedCdataSpec(const TagSpec* parent_tag_spec)
-      : spec_(&ABSL_DIE_IF_NULL(parent_tag_spec)->cdata()),
+      : spec_(&CHECK_NOTNULL(parent_tag_spec)->cdata()),
         parent_tag_spec_(parent_tag_spec),
         css_parsing_config_(GenCssParsingConfig()) {
     RE2::Options options;
@@ -1400,8 +1401,8 @@ class ReferencePointMatcher {
       const ParsedReferencePoints* parsed_reference_points,
       const LineCol& line_col)
       // These checks are only used in initialization.
-      : parsed_rules_(ABSL_DIE_IF_NULL(parsed_rules)),
-        parsed_reference_points_(ABSL_DIE_IF_NULL(parsed_reference_points)),
+      : parsed_rules_(CHECK_NOTNULL(parsed_rules)),
+        parsed_reference_points_(CHECK_NOTNULL(parsed_reference_points)),
         line_col_(line_col) {
     CHECK(!parsed_reference_points->empty());
   }
@@ -1543,7 +1544,7 @@ class TagStack {
     if (reference_point_result.best_match_tag_spec) {
       const ParsedTagSpec* parsed_ref_point =
           reference_point_result.best_match_tag_spec;
-      ABSL_DIE_IF_NULL(MutableParentReferencePointMatcher())
+      CHECK_NOTNULL(MutableParentReferencePointMatcher())
           ->RecordMatch(*parsed_ref_point);
     }
 
@@ -2725,7 +2726,7 @@ class InvalidRuleVisitor : public htmlparser::css::RuleVisitor {
 class InvalidDeclVisitor : public htmlparser::css::RuleVisitor {
  public:
   InvalidDeclVisitor(const ParsedDocCssSpec& css_spec, Context* context,
-                     const string& tag_decriptive_name,
+                     const std::string& tag_decriptive_name,
                      ValidationResult* result)
       : css_spec_(css_spec),
         context_(context),
@@ -2782,7 +2783,7 @@ class InvalidDeclVisitor : public htmlparser::css::RuleVisitor {
  private:
   const ParsedDocCssSpec& css_spec_;
   Context* context_;
-  const string tag_descriptive_name_;
+  const std::string tag_descriptive_name_;
   ValidationResult* result_;
 };
 
@@ -5373,25 +5374,6 @@ class ParsedValidatorRulesProvider {
   }
 };
 
-namespace {
-
-// ASCII space, as defined in https://infra.spec.whatwg.org/#ascii-whitespace,
-// and in the various HTML parsing rules at
-// https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inhtml.
-//
-// Unlike absl::ascii_isspace, it lacks '\v' U+000B LINE TABULATION.
-constexpr std::string_view kASCIISpace = "\t\n\f\r ";
-
-// Child elements of <head> that allow non-ASCII whitespace, per
-// https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inhead.
-const flat_hash_set<std::string>& HeadChildrenAllowingExtendedWhitespace() {
-  static auto* ret = new flat_hash_set<std::string>{
-      "TITLE", "NOSCRIPT", "NOFRAMES", "STYLE", "SCRIPT", "TEMPLATE"};
-  return *ret;
-}
-
-}  // namespace
-
 class Validator {
  public:
   Validator(const ParsedValidatorRules* rules, int max_errors = -1)
@@ -5750,7 +5732,5 @@ int RulesSpecVersion() {
   auto rules = ParsedValidatorRulesProvider::Get(HtmlFormat::AMP);
   return rules->SpecFileRevision();
 }
-
-int ValidatorVersion() { return ValidatorRevision(); }
 
 }  // namespace amp::validator
