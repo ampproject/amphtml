@@ -139,10 +139,6 @@ def InstallNodeDependencies():
       ['npx', 'yarn', 'install'],
       stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
   logging.info('installing AMP Validator nodejs dependencies ...')
-  subprocess.check_call(
-      ['npx', 'yarn', 'install'],
-      cwd='js/nodejs',
-      stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
   subprocess.check_call(['npx', 'yarn', 'install'],
                         cwd='js/nodejs',
                         stdout=(open(os.devnull, 'wb')
