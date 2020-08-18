@@ -4,9 +4,7 @@
         "pageName": "",
         "trafficSegment": "",
         "pageType": "Main Group",
-        "AB": "Default",
         "datacenter":"Default",
-        "campaignName":"",
         "guid":"$SUBSTR(${random},0,19)",
         "sessionID":"$SUBSTR(${random},0,19)"
     },
@@ -27,5 +25,33 @@
                 "pageview"
             ]
         }
+    },
+    "extraUrlParams": {
+        "AB": "Default",
+        "CN1": "0",
+        "CN2": "0",
+        "CN3": "0",
+        "CN4": "0",
+        "CN5": "0",
+        "CN6": "0",
+        "CN7": "0",
+        "CN8": "0",
+        "CN9": "0",
+        "CN10": "0",
+        "CSID": "0",
+        "CV1": "",
+        "CV2": "",
+        "CV3": "",
+        "CV4": "",
+        "CV5": "",
+        "CV6": "",
+        "CV7": "",
+        "CV8": "",
+        "CV9": "",
+        "CV10": "",
+        "currencycode":"",
+        "c_count":"0",
+        "campaign":"",
+        "campaignName":""
     }
 }
