@@ -295,13 +295,16 @@ export class AmpScript extends AMP.BaseElement {
     ).then((workerDom) => {
       this.workerDom_ = workerDom;
       this.initialize_.resolve();
-      this.workerDom_.onerror = (errorEvent) => {
-        errorEvent.preventDefault();
-        user().error(
-          TAG,
-          `${errorEvent.message}\n    at (${errorEvent.filename}:${errorEvent.lineno})`
-        );
-      };
+      // workerDom will be null if it failed to init.
+      if (this.workerDom_) {
+        this.workerDom_.onerror = (errorEvent) => {
+          errorEvent.preventDefault();
+          user().error(
+            TAG,
+            `${errorEvent.message}\n    at (${errorEvent.filename}:${errorEvent.lineno})`
+          );
+        };
+      }
     });
     return workerAndAuthorScripts;
   }
