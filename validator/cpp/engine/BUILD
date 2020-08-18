@@ -253,8 +253,6 @@ cc_library(
         ":type-identifier",
         ":utf8-util",
         ":validator_pb",
-        # TODO: determine correct dep for //file/base
-        # "//file/base",
         "@com_google_absl//absl/algorithm:container",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/container:flat_hash_map",
@@ -280,8 +278,6 @@ cc_library(
         "@htmlparser//css:parse_css_cc_proto",
         "@htmlparser//json:parser",
         "@validator//:validator_cc_proto",
-        # TODO: determine correct dep for //webutil/url
-        # "//webutil/url",
     ],
     copts = ["-std=c++17"],
 )

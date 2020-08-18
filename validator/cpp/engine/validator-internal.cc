@@ -3336,7 +3336,6 @@ void ValidateDescendantTags(const ParsedHtmlTag& encountered_tag,
           {encountered_tag.LowerName(),
            AsciiStrToLower(
                tag_stack.allowed_descendants_list()[ii]->tag_name())},
-          // TODO: Add STAMP documentation URL when it exists.
           TagSpecUrl(parsed_tag_spec), result);
     }
   }
@@ -3932,8 +3931,6 @@ void ValidateAttrCss(const ParsedAttrSpec& parsed_attr_spec,
   // that any line/col values for tokens are also similarly offset incorrectly.
   // For error messages, this means we just use the line/col of the tag instead
   // of the token so as to minimize confusion. This could be improved further.
-  // TODO(https://github.com/ampproject/amphtml/issues/27507): Compute attribute
-  // offsets for use in CSS error messages.
   vector<unique_ptr<htmlparser::css::Token>> tokens =
       htmlparser::css::Tokenize(&codepoints, context.line_col().line(),
                                 context.line_col().col(), &css_errors);
@@ -4092,8 +4089,6 @@ void ValidateAttrDeclaration(const ParsedAttrSpec& parsed_attr_spec,
   // that any line/col values for tokens are also similarly offset incorrectly.
   // For error messages, this means we just use the line/col of the tag instead
   // of the token so as to minimize confusion. This could be improved further.
-  // TODO(https://github.com/ampproject/amphtml/issues/27507): Compute attribute
-  // offsets for use in CSS error messages.
   vector<unique_ptr<htmlparser::css::Token>> tokens =
       htmlparser::css::Tokenize(&codepoints, context.line_col().line(),
                                 context.line_col().col(), &css_errors);
