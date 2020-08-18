@@ -161,6 +161,8 @@ describes.realWin(
         });
 
         it('updates current time and duration from state', () => {
+          expect(impl.getCurrentTime()).to.equal(0);
+          expect(impl.getDuration()).to.equal(0);
           const mockTime = {currentTime: 10, duration: 20};
           mockMessage('time', mockTime);
           expect(impl.getCurrentTime()).to.equal(mockTime.currentTime);
