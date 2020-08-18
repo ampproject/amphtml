@@ -19,6 +19,7 @@ cc_library(
     hdrs = [
         "allocator.h",
     ],
+    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -38,6 +39,7 @@ cc_library(
     hdrs = [
         "atom.h",
     ],
+    copts = ["-std=c++17"],
 )
 
 # Helper functions to convert string to Atom and vice versa.
@@ -53,6 +55,7 @@ cc_library(
         ":atom",
         ":hash",
     ],
+    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -74,6 +77,7 @@ cc_library(
     hdrs = [
         "defer.h",
     ],
+    copts = ["-std=c++17"],
 )
 
 # Helper library decalres various doctype constants and a utility function to
@@ -90,6 +94,7 @@ cc_library(
         ":node",
         ":strings",
     ],
+    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -113,6 +118,7 @@ cc_library(
     hdrs = [
         "error.h",
     ],
+    copts = ["-std=c++17"],
 )
 
 cc_library(
@@ -120,6 +126,7 @@ cc_library(
     hdrs = [
         "comparators.h",
     ],
+    copts = ["-std=c++17"],
 )
 
 # File reading and parsing utility.
@@ -135,6 +142,7 @@ cc_library(
         ":defer",
         ":strings",
     ],
+    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -162,6 +170,7 @@ cc_library(
         ":node",
         ":strings",
     ],
+    copts = ["-std=c++17"],
 )
 
 # Various hashing utility functions.
@@ -170,6 +179,7 @@ cc_library(
     hdrs = [
         "hash.h",
     ],
+    copts = ["-std=c++17"],
 )
 
 cc_library(
@@ -177,6 +187,7 @@ cc_library(
     hdrs = [
         "logging.h",
     ],
+    copts = ["-std=c++17"],
 )
 
 # Defines token type and token structures, used during tokenization.
@@ -192,6 +203,7 @@ cc_library(
         ":atom",
         ":strings",
     ],
+    copts = ["-std=c++17"],
 )
 
 # Defines node and node stack.
@@ -213,6 +225,7 @@ cc_library(
         ":token",
         "@com_github_glog//:glog",
     ],
+    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -238,6 +251,7 @@ cc_library(
     deps = [
         ":comparators",
     ],
+    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -265,6 +279,7 @@ cc_library(
         ":token",
         "@com_google_absl//absl/flags:flag",
     ],
+    copts = ["-std=c++17"],
 )
 
 cc_library(
@@ -275,6 +290,7 @@ cc_library(
     deps = [
         ":comparators",
     ],
+    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -314,6 +330,7 @@ cc_library(
         "@com_google_absl//absl/flags:flag",
         "@com_github_glog//:glog",
     ],
+    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -347,6 +364,7 @@ cc_library(
         ":node",
         ":strings",
     ],
+    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -367,6 +385,7 @@ cc_library(
     hdrs = [
         "whitespacetable.h",
     ],
+    copts = ["-std=c++17"],
 )
 
 cc_library(
@@ -385,6 +404,7 @@ cc_library(
         "@com_google_absl//absl/base",
         "@com_github_glog//:glog",
     ],
+    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -414,6 +434,7 @@ cc_library(
         ":strings",
         ":token",
     ],
+    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -437,6 +458,7 @@ cc_library(
     hdrs = [
         "url.h",
     ],
+    copts = ["-std=c++17"],
 )
 
 cc_test(
@@ -455,6 +477,7 @@ cc_library(
     hdrs = [
         "testconstants.h",
     ],
+    copts = ["-std=c++17"],
 )
 
 filegroup(
