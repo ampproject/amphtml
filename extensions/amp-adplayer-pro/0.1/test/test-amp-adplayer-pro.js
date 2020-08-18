@@ -15,8 +15,8 @@
  */
 
 import '../amp-adplayer-pro';
+import {VideoEvents} from '../../../../src/video-interface';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {VideoEvents} from "../../../../src/video-interface";
 
 describes.realWin(
   'amp-adplayer-pro',
@@ -31,7 +31,7 @@ describes.realWin(
       'data-placement': 'caUcvGy0dPEMAR1oJizSGMlwDI5a4bBErmG2m_XCYrPFQbT79KXs',
       'width': '320',
       'height': '180',
-      'layout': 'responsive'
+      'layout': 'responsive',
     };
     let win, doc;
 
@@ -41,8 +41,11 @@ describes.realWin(
     });
 
     async function getAdPlayerPro(attributes) {
-
-      const element = createElementWithAttributes(doc, 'amp-adplayer-pro', attributes || defaultAttributes);
+      const element = createElementWithAttributes(
+        doc,
+        'amp-adplayer-pro',
+        attributes || defaultAttributes
+      );
       doc.body.appendChild(element);
       await element.build();
       await element.layoutCallback();
@@ -56,7 +59,9 @@ describes.realWin(
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
         expect(iframe.src).to.equal(
-          'https://serving.stat-rock.com/v1/placements/' + defaultAttributes['data-placement'] + '/code/amp/1#amp'
+          'https://serving.stat-rock.com/v1/placements/' +
+            defaultAttributes['data-placement'] +
+            '/code/amp/1#amp'
         );
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
       });
@@ -69,7 +74,7 @@ describes.realWin(
         impl.onMessage_({
           data: {event, params},
           origin: 'https://serving.stat-rock.com',
-          source: impl.iframe_.contentWindow
+          source: impl.iframe_.contentWindow,
         });
       }
 
@@ -163,6 +168,5 @@ describes.realWin(
         });
       });
     });
-
   }
 );
