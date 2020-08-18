@@ -19,7 +19,6 @@ import {URL} from 'url';
 import {isValidScript, ScriptNode} from '../utilities/script';
 import {CDNURLToLocalDistURL} from '../utilities/cdn';
 import minimist from 'minimist';
-
 const argv = minimist(process.argv.slice(2));
 
 /**
@@ -29,9 +28,9 @@ const argv = minimist(process.argv.slice(2));
  */
 function appendModuleScript(head: PostHTML.Node, script: ScriptNode): void {
 
-  let modulePath;
+  let modulePath, compiled;
 
-  if (argv.compiled) {
+  if (argv.compiled || compiled) {
     modulePath = CDNURLToLocalDistURL(
       new URL(script.attrs.src || ''),
       undefined,
