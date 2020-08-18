@@ -27,12 +27,12 @@ jobs:
           key: ${{ matrix.platform }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ matrix.platform }}-yarn-
+      - name: Install Gulp CLI
+        run: yarn global add gulp-cli
       - name: Install Dependencies
         run: yarn
       - name: Set Up Environment
         if: ${{ matrix.platform == 'macos-latest' }}
-        run: |
-          (sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share})
-          (yarn global add gulp-cli)
+        run: sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
       - name: Build and Test
         run: node build-system/pr-check/cross-browser-tests.js
