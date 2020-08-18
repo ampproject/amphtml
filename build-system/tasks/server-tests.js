@@ -78,23 +78,7 @@ async function getTransform(inputFile) {
   const transformPath = path.join(parsed.dir, 'dist', parsed.base);
   const transformFile = (await globby(path.resolve(transformPath, '*.js')))[0];
   // TODO(rsimha): Change require to import when node v14 is the active LTS.
-  const transformSource = require(transformFile).default;
-  console.log(transformSource.toString());
-
-  // Check for an options.json for optional arguments
-  const optionsPath = path.join(transformDir, 'test/options.json');
-  if(fs.existsSync(optionsPath)){
-    const optionsList = require(optionsPath);
-    const testName = path.basename(inputFile).replace('-input.html', '');
-    const options = optionsList[testName];
-    for (toReplace in options){
-      const replaceWith = options[toReplace];
-      transformSource.replaceAll(toReplace, replaceWith);
-    }
-    console.log(transformSource);
-  }
-
-  return transformSource;
+  return require(transformFile).default;
 }
 
 /**
@@ -102,10 +86,27 @@ async function getTransform(inputFile) {
  *
  * @param {string} transform
  * @param {string} input
+ * @param {dict} extraOptions 
  * @return {string}
  */
-async function getOutput(transform, input) {
-  return (await posthtml(transform).process(input)).html;
+async function getOutput(transform, input, extraOptions) {
+  return (await posthtml(transform).process(input, extraOptions)).html;
+}
+
+/**
+ * Loads optional arguments residing in a options.json file, if any.
+ * 
+ * @param {strings} inputFile 
+ */
+function loadOptions(inputFile){
+  const transformDir = path.dirname(path.dirname(inputFile));
+  const optionsPath = path.join(transformDir, 'test/options.json');
+  if(fs.existsSync(optionsPath)){
+    const optionsList = require(optionsPath);
+    const testName = path.basename(inputFile).replace('-input.html', '');
+    return optionsList[testName];
+  }
+  return {};
 }
 
 /**
@@ -151,7 +152,9 @@ function runTest() {
     const testName = getTestName(inputFile);
     const expectedOutput = await getExpectedOutput(inputFile);
     const transform = await getTransform(inputFile);
-    const output = await getOutput(transform, input);
+    const extraOptions = loadOptions(inputFile);
+    console.log(extraOptions);
+    const output = await getOutput(transform, input, extraOptions);
     try {
       assert.strictEqual(output, expectedOutput);
     } catch (err) {

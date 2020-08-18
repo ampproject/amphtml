@@ -26,9 +26,11 @@ const argv = minimist(process.argv.slice(2));
  * @param head
  * @param script
  */
-function appendModuleScript(head: PostHTML.Node, script: ScriptNode): void {
+function appendModuleScript(head: PostHTML.Node, script: ScriptNode, compiled: boolean): void {
 
-  let modulePath, compiled;
+  let modulePath;
+
+  console.log(`Compiled: ${compiled}`);
 
   if (argv.compiled || compiled) {
     modulePath = CDNURLToLocalDistURL(
@@ -58,8 +60,11 @@ function appendModuleScript(head: PostHTML.Node, script: ScriptNode): void {
 /**
  *
  */
-export default function(tree: PostHTML.Node): void {
+export default function(tree: PostHTML.Node, extraArgs: Record<string, boolean> = {}): void {
   let head: PostHTML.Node | undefined = undefined;
+  let compiled: boolean = extraArgs.compiled || false;
+  console.log("Inside transformer: ");
+  console.log(extraArgs);
   const scripts: Array<ScriptNode> = [];
   tree.walk(node => {
     if (node.tag === 'head') {
@@ -81,6 +86,6 @@ export default function(tree: PostHTML.Node): void {
   }
 
   for (const script of scripts) {
-    appendModuleScript(head, script);
+    appendModuleScript(head, script, compiled);
   }
 }
