@@ -72,6 +72,7 @@ const DelightEvent = {
   SEEK: 'x-dl8-to-iframe-seek',
   CUSTOM_TICK: 'x-dl8-to-parent-amp-custom-tick',
   CONSENT_DATA: 'x-dl8-to-iframe-consent-data',
+  PLAYER_READY: 'x-dl8-to-parent-player-ready',
 
   PING: 'x-dl8-ping',
   PONG: 'x-dl8-pong',
@@ -306,7 +307,10 @@ class AmpDelightPlayer extends AMP.BaseElement {
       case DelightEvent.READY: {
         element.dispatchCustomEvent(VideoEvents.LOAD);
         this.playerReadyResolver_(this.iframe_);
-        this.sendConsentData_()
+        break;
+      }
+      case DelightEvent.PLAYER_READY: {
+        this.sendConsentData_();
         break;
       }
       case DelightEvent.TIME_UPDATE: {
@@ -520,7 +524,6 @@ class AmpDelightPlayer extends AMP.BaseElement {
    */
   sendConsentData_() {
     const consentPolicyId = super.getConsentPolicy() || 'default';
-
     const consentStringPromise = getConsentPolicyInfo(
       this.element,
       consentPolicyId
