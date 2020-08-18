@@ -314,7 +314,7 @@ An `<amp-state>` element's JSON data has a maximum size of 100KB.
 
 ### Defining and initializing state with `<amp-state>`
 
-Expressions are not evaluates on page load, but you may define an initial state. The `<amp-state>` component contains different **states** and their **state variables**. While this defines a **states**, it will not reflect on the page until after a user interacts.
+Expressions are not evaluated on page load, but you may define an initial state. The `<amp-state>` component contains different **states** and their **state variables**. While this defines a **state**, it will not reflect on the page until after a user interacts.
 
 [example preview="inline" playground="true" imports="amp-bind"]
 
