@@ -595,6 +595,8 @@ export class AmpStoryPlayer {
 
     this.evictStoriesFromIframes_();
     this.assignIframesForStoryIdx_(storyIdx);
+
+    this.signalNavigation_();
   }
 
   /** Sends a message muting the current story. */
@@ -634,6 +636,7 @@ export class AmpStoryPlayer {
     evictedStories.forEach((storyIdx) => {
       const story = this.stories_[storyIdx];
       this.messagingPromises_[story[IFRAME_IDX]].then((messaging) => {
+        messaging.unregisterHandler('documentStateUpdate');
         messaging.unregisterHandler('selectDocument');
       });
       story[IFRAME_IDX] = undefined;
@@ -804,7 +807,6 @@ export class AmpStoryPlayer {
           ];
 
     this.show(currentStory.href);
-    this.signalNavigation_();
   }
 
   /**
@@ -860,6 +862,7 @@ export class AmpStoryPlayer {
     const nextStory = this.stories_[nextStoryIdx];
 
     this.messagingPromises_[detachedStory[IFRAME_IDX]].then((messaging) => {
+      messaging.unregisterHandler('documentStateUpdate');
       messaging.unregisterHandler('selectDocument');
     });
 
