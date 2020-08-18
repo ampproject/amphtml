@@ -37,7 +37,8 @@ Example:
   data-placement="caUcvGy0dPEMAR1oJizSGMlwDI5a4bBErmG2m_XCYrPFQbT79KXs"
   layout="responsive"
   width="16"
-  height="9">
+  height="9"
+>
 </amp-adplayer-pro>
 ```
 
