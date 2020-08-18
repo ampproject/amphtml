@@ -234,9 +234,6 @@ export class ConsentInstance {
     /** @private {Promise<!../../../src/service/storage-impl.Storage>} */
     this.storagePromise_ = Services.storageForDoc(ampdoc);
 
-    /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
-    this.viewer_ = Services.viewerForDoc(this.ampdoc_);
-
     /** @private {?ConsentInfoDef}*/
     this.localConsentInfo_ = null;
 
@@ -382,8 +379,10 @@ export class ConsentInstance {
         })
       ).length;
 
-      // Size restriction only applies to documents servered from a cache.
-      if (this.viewer_.isEmbedded() && size > CONSENT_STORAGE_MAX) {
+      // Size restriction only applies to documents servered from a viewer
+      // that implements the storage API.
+      const usesViewerStorage = storage.getOverrideStorage();
+      if (usesViewerStorage && size > CONSENT_STORAGE_MAX) {
         // 1200 * 4/3 (base64) = 1600 bytes
         user().error(
           TAG,

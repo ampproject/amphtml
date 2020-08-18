@@ -42,8 +42,9 @@ export class Storage {
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {!../service/viewer-interface.ViewerInterface} viewer
    * @param {!StorageBindingDef} binding
+   * @param {number} overrideStorage
    */
-  constructor(ampdoc, viewer, binding) {
+  constructor(ampdoc, viewer, binding, overrideStorage) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -52,6 +53,9 @@ export class Storage {
 
     /** @private @const {!StorageBindingDef} */
     this.binding_ = binding;
+
+    /** @private @const {number} */
+    this.overrideStorage_ = overrideStorage;
 
     /** @const @private {string} */
     this.origin_ = getSourceOrigin(this.ampdoc.win.location);
@@ -113,6 +117,14 @@ export class Storage {
    */
   remove(name) {
     return this.saveStore_((store) => store.remove(name));
+  }
+
+  /**
+   * Returns the parsed int of the viewer param `storage`
+   * @return {number}
+   */
+  getOverrideStorage() {
+    return this.overrideStorage_;
   }
 
   /**
@@ -424,7 +436,7 @@ export function installStorageServiceForDoc(ampdoc) {
       const binding = overrideStorage
         ? new ViewerStorageBinding(viewer)
         : new LocalStorageBinding(ampdoc.win);
-      return new Storage(ampdoc, viewer, binding).start_();
+      return new Storage(ampdoc, viewer, binding, overrideStorage).start_();
     },
     /* opt_instantiate */ true
   );

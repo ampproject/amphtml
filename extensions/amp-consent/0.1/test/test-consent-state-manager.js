@@ -39,6 +39,8 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
   let storageGetSpy;
   let storageSetSpy;
   let storageRemoveSpy;
+  let usesViewer;
+
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
@@ -46,6 +48,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
     storageGetSpy = env.sandbox.spy();
     storageSetSpy = env.sandbox.spy();
     storageRemoveSpy = env.sandbox.spy();
+    usesViewer = 0;
 
     resetServiceForTesting(win, 'storage');
     registerServiceBuilder(win, 'storage', function () {
@@ -64,6 +67,9 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
           storageRemoveSpy(name);
           return Promise.resolve();
         },
+        getOverrideStorage: () => {
+          return usesViewer;
+        }
       });
     });
   });
@@ -177,9 +183,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
       it('update consent string that exceeds max size', function* () {
         expectAsyncConsoleError(/Cannot store consent information/);
         manager.registerConsentInstance('test', {});
-        manager.instance_.viewer_ = {
-          isEmbedded: () => true,
-        };
+        usesViewer = 1;
         let testStr = 'a';
         // Reserve 26 chars to metadata size `"m":{"cst":1,"ac":"12345"}`
         // Reserve 36 chars to the storage key, `''` and `{}`
@@ -207,9 +211,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
       it('update consent string that exceeds max size', function* () {
         expectAsyncConsoleError(/Cannot store consent information/);
         manager.registerConsentInstance('test', {});
-        manager.instance_.viewer_ = {
-          isEmbedded: () => true,
-        };
+        usesViewer = 1;
         let testStr = 'a';
         // Reserve 26 chars to metadata size `"m":{"cst":1,"ac":"12345"}`
         // Reserve 36 chars to the storage key, `''` and `{}`
@@ -393,9 +395,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
 
         it('remove consentInfo when consentStr length exceeds', function* () {
           expectAsyncConsoleError(/Cannot store consent information/);
-          instance.viewer_ = {
-            isEmbedded: () => true,
-          };
+          usesViewer = 1;
           let testStr = 'a';
           // Reserve 26 chars to metadata size `"m":{"cst":1,"ac":"12345"}`
           // Reserve 36 chars to the storage key, `''` and `{}`
@@ -413,10 +413,8 @@ describes.realWin('ConsentStateManager', {amp: 1}, (env) => {
           expect(storageRemoveSpy).to.be.calledOnce;
         });
 
-        it('allows large consentInfo when not in a viewer', async () => {
-          instance.viewer_ = {
-            isEmbedded: () => false,
-          };
+        it('allows large consentInfo when not using viewer storage API', async () => {
+          // usesViewer is set to 0 by default above
           let testStr = 'a';
           for (let i = 0; i < CONSENT_STORAGE_MAX - 62; i++) {
             testStr += 'a';
