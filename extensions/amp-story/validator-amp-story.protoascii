@@ -541,6 +541,7 @@ descendant_tag_list: {
   tag: "AMP-FIT-TEXT"
   tag: "AMP-FONT"
   tag: "AMP-IMG"
+  tag: "amp-img (transformed)"  # Only allowed when document is transformed AMP
   tag: "AMP-TIMEAGO"
   tag: "B"
   tag: "BDI"
@@ -656,6 +657,7 @@ descendant_tag_list: {
   tag: "AMP-GIST"
   tag: "AMP-GOOGLE-VRVIEW-IMAGE"
   tag: "AMP-IMG"
+  tag: "amp-img (transformed)"  # Only allowed when document is transformed AMP
   tag: "AMP-INSTALL-SERVICEWORKER"
   tag: "AMP-LIST"
   tag: "AMP-LIVE-LIST"
@@ -910,6 +912,7 @@ descendant_tag_list {
   tag: "AMP-IMA-VIDEO"
   tag: "AMP-IMAGE-SLIDER"
   tag: "AMP-IMG"
+  tag: "amp-img (transformed)"  # Only allowed when document is transformed AMP
   tag: "AMP-IMGUR"
   tag: "AMP-INSTAGRAM"
   tag: "AMP-IZLESENE"

@@ -524,9 +524,11 @@ message HtmlFormat {
     AMP = 1;
     AMP4ADS = 2;
     AMP4EMAIL = 3;
-    ACTIONS = 5;       // Deprecated, do not use. Removal issue: b/162870645
     EXPERIMENTAL = 4;  // Currently unused
   }
+
+  // Deprecated fields, do not reuse.
+  // reserved 5;
 }
 
 // Tags that are not covered by at least one of these specs are disallowed.
