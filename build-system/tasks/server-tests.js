@@ -72,13 +72,13 @@ async function getExpectedOutput(inputFile) {
  * @param {string} inputFile
  * @return {string}
  */
-async function getTransform(inputFile) {
+async function getTransform(inputFile, extraOptions) {
   const transformDir = path.dirname(path.dirname(inputFile));
   const parsed = path.parse(transformDir);
   const transformPath = path.join(parsed.dir, 'dist', parsed.base);
   const transformFile = (await globby(path.resolve(transformPath, '*.js')))[0];
   // TODO(rsimha): Change require to import when node v14 is the active LTS.
-  return require(transformFile).default;
+  return require(transformFile).default(extraOptions);
 }
 
 /**
@@ -89,8 +89,8 @@ async function getTransform(inputFile) {
  * @param {dict} extraOptions 
  * @return {string}
  */
-async function getOutput(transform, input, extraOptions) {
-  return (await posthtml(transform).process(input, extraOptions)).html;
+async function getOutput(transform, input) {
+  return (await posthtml(transform).process(input)).html;
 }
 
 /**
@@ -151,10 +151,9 @@ function runTest() {
     const input = await getInput(inputFile);
     const testName = getTestName(inputFile);
     const expectedOutput = await getExpectedOutput(inputFile);
-    const transform = await getTransform(inputFile);
     const extraOptions = loadOptions(inputFile);
-    console.log(extraOptions);
-    const output = await getOutput(transform, input, extraOptions);
+    const transform = await getTransform(inputFile, extraOptions);
+    const output = await getOutput(transform, input);
     try {
       assert.strictEqual(output, expectedOutput);
     } catch (err) {

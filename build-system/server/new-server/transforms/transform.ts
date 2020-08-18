@@ -22,14 +22,15 @@ import transformScriptPaths from './scripts/scripts-transform';
 import transformStories from './stories/stories-transform';
 import transformCss from './css/css-transform';
 
-const transforms = [transformStories, transformScriptPaths, transformCss];
-
 const argv = minimist(process.argv.slice(2));
-if (argv.esm) {
-  transforms.unshift(transformModules);
-}
 
-export async function transform(fileLocation: string): Promise<string> {
+export async function transform(fileLocation: string, options: Record<string, boolean>): Promise<string> {
+  console.log(options);
+  const transforms = [transformStories, transformScriptPaths, transformCss];
+  if (argv.esm) {
+    transforms.unshift(transformModules(options));
+  }
+
   const source = await fsPromises.readFile(fileLocation, 'utf8');
   const result = await posthtml(transforms).process(source);
   return result.html;

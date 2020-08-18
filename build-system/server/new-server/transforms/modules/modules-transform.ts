@@ -30,8 +30,6 @@ function appendModuleScript(head: PostHTML.Node, script: ScriptNode, compiled: b
 
   let modulePath;
 
-  console.log(`Compiled: ${compiled}`);
-
   if (argv.compiled || compiled) {
     modulePath = CDNURLToLocalDistURL(
       new URL(script.attrs.src || ''),
@@ -60,32 +58,32 @@ function appendModuleScript(head: PostHTML.Node, script: ScriptNode, compiled: b
 /**
  *
  */
-export default function(tree: PostHTML.Node, extraArgs: Record<string, boolean> = {}): void {
-  let head: PostHTML.Node | undefined = undefined;
-  let compiled: boolean = extraArgs.compiled || false;
-  console.log("Inside transformer: ");
-  console.log(extraArgs);
-  const scripts: Array<ScriptNode> = [];
-  tree.walk(node => {
-    if (node.tag === 'head') {
-      head = node;
-    }
-    if (!isValidScript(node)) {
+export default function(options: any): (tree: PostHTML.Node) => void {
+  return function(tree: PostHTML.Node): void {
+    let head: PostHTML.Node | undefined = undefined;
+    let compiled: boolean = options.compiled || false;
+    const scripts: Array<ScriptNode> = [];
+    tree.walk(node => {
+      if (node.tag === 'head') {
+        head = node;
+      }
+      if (!isValidScript(node)) {
+        return node;
+      }
+
+      // Mark the existing valid scripts with `nomodule` attributes.
+      node.attrs.nomodule = '';
+      scripts.push(node);
       return node;
+    });
+
+    if (head === undefined) {
+      console.log('Could not find a head element in the document');
+      return;
     }
 
-    // Mark the existing valid scripts with `nomodule` attributes.
-    node.attrs.nomodule = '';
-    scripts.push(node);
-    return node;
-  });
-
-  if (head === undefined) {
-    console.log('Could not find a head element in the document');
-    return;
-  }
-
-  for (const script of scripts) {
-    appendModuleScript(head, script, compiled);
+    for (const script of scripts) {
+      appendModuleScript(head, script, compiled);
+    }
   }
 }
