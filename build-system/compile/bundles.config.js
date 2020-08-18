@@ -320,6 +320,12 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-adplayer-pro',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
+  },
+  {
     name: 'amp-analytics',
     version: '0.1',
     latestVersion: '0.1',
