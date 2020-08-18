@@ -196,6 +196,8 @@ std::optional<char32_t> Strings::DecodeUtf8Symbol(std::string_view* s) {
     s->remove_prefix(1);
     auto c2 = ReadContinuationByte(*(s->data()));
     s->remove_prefix(1);
+    // Invalid byte in the sequence.
+    if (c2 == 0) return L'\uFFFD';
     char32_t code_point = ((c & 0x1f) << 6) | c2;
     if (code_point < 0x80) {
       return std::nullopt;
@@ -211,6 +213,8 @@ std::optional<char32_t> Strings::DecodeUtf8Symbol(std::string_view* s) {
     s->remove_prefix(1);
     auto c3 = ReadContinuationByte(*(s->data()));
     s->remove_prefix(1);
+    // Invalid bytes in the sequence.
+    if (c2 == 0 || c3 == 0) return L'\uFFFD';
     char32_t code_point = ((c & 0x0f) << 12) | (c2 << 6) | c3;
     if (code_point < 0x0800) {
       return std::nullopt;
@@ -229,6 +233,8 @@ std::optional<char32_t> Strings::DecodeUtf8Symbol(std::string_view* s) {
     s->remove_prefix(1);
     auto c4 = ReadContinuationByte(*(s->data()) & 0xff);
     s->remove_prefix(1);
+    // Invalid bytes in the sequence.
+    if (c2 == 0 || c3 == 0 || c4 == 0) return L'\uFFFD';
     char32_t code_point =  ((c & 0x07) << 0x12) |
                            (c2 << 0x0c) |
                            (c3 << 0x06) | c4;
@@ -812,7 +818,7 @@ uint8_t ReadContinuationByte(uint8_t byte) {
     return byte & 0x3f;
   }
 
-  throw std::runtime_error("Invalid continuation byte.");
+  // Error, return null char.
   return 0;
 }
 
