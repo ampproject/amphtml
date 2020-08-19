@@ -127,7 +127,7 @@ export class Component {
 
   /**
    * Called when the component is completely discarded, for instance via
-   * `removeComponent` API.
+   * `unmountComponent` API.
    */
   dispose() {
     // Unsubscribe from all dependencies.
@@ -272,11 +272,11 @@ export class Component {
    * @param {!Node=} node
    * @package
    */
-  setComponent(id, factory, func, deps, input, node = undefined) {
+  mountComponent(id, factory, func, deps, input, node = undefined) {
     const contextNode = node ? ContextNode.get(node) : this.contextNode;
 
     // Set the component.
-    contextNode.setComponent(id, factory, func, deps, input);
+    contextNode.mountComponent(id, factory, func, deps, input);
 
     // Track the child component on the node.
     const childComps = this.childComps_ || (this.childComps_ = new Map());
@@ -294,17 +294,17 @@ export class Component {
   }
 
   /**
-   * Removes the child component previously set by the `setComponent`.
+   * Removes the child component previously set by the `mountComponent`.
    *
    * @param {*} id
    * @param {!Node=} node
    * @package
    */
-  removeComponent(id, node = undefined) {
+  unmountComponent(id, node = undefined) {
     const contextNode = node ? ContextNode.get(node) : this.contextNode;
 
     // Remove the component.
-    contextNode.removeComponent(id);
+    contextNode.unmountComponent(id);
 
     // Untrack the child component.
     const childComps = this.childComps_;
@@ -378,7 +378,7 @@ export class Component {
         this.childComps_ = null;
         childComps.forEach((comps, contextNode) => {
           comps.forEach((id) => {
-            contextNode.removeComponent(id);
+            contextNode.unmountComponent(id);
           });
         });
       }
@@ -444,7 +444,7 @@ export class Component {
     const comps = childComps && childComps.get(child);
     if (comps) {
       childComps.delete(child);
-      comps.forEach((id) => child.removeComponent(id));
+      comps.forEach((id) => child.unmountComponent(id));
     }
   }
 }

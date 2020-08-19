@@ -313,7 +313,7 @@ export class ContextNode {
    * @param {!Array<!ContextProp>} deps
    * @param {*} input
    */
-  setComponent(id, factory, func, deps, input) {
+  mountComponent(id, factory, func, deps, input) {
     const components = this.components_ || (this.components_ = new Map());
     let comp = components.get(id);
     if (!comp) {
@@ -324,11 +324,11 @@ export class ContextNode {
   }
 
   /**
-   * Removes the component previously set with `setComponent`.
+   * Removes the component previously set with `mountComponent`.
    *
    * @param {*} id
    */
-  removeComponent(id) {
+  unmountComponent(id) {
     const components = this.components_;
     const comp = components && components.get(id);
     if (comp) {

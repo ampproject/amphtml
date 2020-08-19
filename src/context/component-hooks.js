@@ -61,6 +61,10 @@ export function useRef(initialValue = undefined) {
 }
 
 /**
+ * Returns a callback with the component passed as the first argument. The
+ * returned function has a stable identity, i.e. it doesn't change in the
+ * lifetime of the component.
+ *
  * @param {function(!./component.Component, ...?):?} callback
  * @return {function(...?):?}
  * @package
@@ -165,29 +169,30 @@ export function useSyncEffect(callback, deps = undefined) {
 }
 
 /**
- * This hook returns a function that can be used to set a child property. A
- * child property can be set on the component's node or any other in the same
- * tree. When this component is removed, all child properties are also removed.
+ * This hook returns a function that can be used to set a managed property. A
+ * managed property can be set on the component's node or any other in the same
+ * tree. When this component is removed, all managed properties are also
+ * removed.
  *
  * See `setProp` for more info.
  *
  * @return {function(!ContextProp<T>, T, !Node=)}
  * @template T
  */
-export function useSetChildProp() {
-  return useComponentCallback(setChildProp);
+export function useSetProp() {
+  return useComponentCallback(setManagedProp);
 }
 
 /**
- * This hook returns a function that can be used to remove a child property,
- * that was previously set by the `useSetChildProp`.
+ * This hook returns a function that can be used to remove a managed property,
+ * that was previously set by the `useSetProp`.
  *
  * See `removeProp` for more info.
  *
  * @return {function(!ContextProp, !Node=)}
  */
-export function useRemoveChildProp() {
-  return useComponentCallback(removeChildProp);
+export function useRemoveProp() {
+  return useComponentCallback(removeManagedProp);
 }
 
 /**
@@ -197,7 +202,7 @@ export function useRemoveChildProp() {
  * @param {!Node|undefined} node
  * @template T
  */
-function setChildProp(component, prop, value, node) {
+function setManagedProp(component, prop, value, node) {
   component.setProp(prop, value, node);
 }
 
@@ -206,7 +211,7 @@ function setChildProp(component, prop, value, node) {
  * @param {!ContextProp} prop
  * @param {!Node|undefined} node
  */
-function removeChildProp(component, prop, node) {
+function removeManagedProp(component, prop, node) {
   component.removeProp(prop, node);
 }
 

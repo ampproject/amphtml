@@ -16,8 +16,8 @@
 
 import {Component} from './component';
 import {ContextNode} from './node';
+import {arrayOrSingleItemToArray} from '../types';
 import {getDeps, getId} from './component-meta';
-import {isArray} from '../types';
 import {useComponentCallback} from './component-hooks';
 
 const NO_INPUT = undefined;
@@ -36,23 +36,24 @@ const NO_INPUT = undefined;
  * @param {I} input
  * @template I
  */
-export function setComponent(node, func, input = undefined) {
+export function mountComponent(node, func, input = undefined) {
   const id = getId(func);
   const deps = getDeps(func);
   const contextNode = ContextNode.get(node);
-  contextNode.setComponent(id, componentWithInputFactory, func, deps, input);
+  contextNode.mountComponent(id, componentWithInputFactory, func, deps, input);
 }
 
 /**
- * Removes the component that has been previously installed with `setComponent`.
+ * Removes the component that has been previously installed with the
+ * `mountComponent`.
  *
  * @param {!Node} node
  * @param {function(...?)} func
  */
-export function removeComponent(node, func) {
+export function unmountComponent(node, func) {
   const id = getId(func);
   const contextNode = ContextNode.get(node);
-  contextNode.removeComponent(id);
+  contextNode.unmountComponent(id);
 }
 
 /**
@@ -68,10 +69,10 @@ export function removeComponent(node, func) {
  * @param {function(...?)} callback
  */
 export function subscribe(node, deps, callback) {
-  deps = isArray(deps) ? /** @type {!Array<!ContextProp>} */ (deps) : [deps];
+  deps = arrayOrSingleItemToArray(deps);
   const id = getId(callback);
   const contextNode = ContextNode.get(node);
-  contextNode.setComponent(id, subscriberFactory, callback, deps, NO_INPUT);
+  contextNode.mountComponent(id, subscriberFactory, callback, deps, NO_INPUT);
 }
 
 /**
@@ -81,58 +82,60 @@ export function subscribe(node, deps, callback) {
  * @param {function(...?)} callback
  */
 export function unsubscribe(node, callback) {
-  removeComponent(node, callback);
+  unmountComponent(node, callback);
 }
 
 /**
- * This hook returns a function that can be used to set a child component. A
- * child component can be set on this component's node or any other in the same
- * tree. When this component is removed, all child components are also removed.
+ * This hook returns a function that can be used to set a managed component. A
+ * managed component can be set on this component's node or any other in the
+ * same tree. When this component is removed, all managed components are also
+ * removed.
  *
- * See `setComponent` for more info.
+ * See `mountComponent` for more info.
  *
  * @return {function(function(!Node, I, ...?), I, !Node=)}
  * @template I
  */
-export function useSetChildComponent() {
-  return useComponentCallback(setChildComponent);
+export function useMountComponent() {
+  return useComponentCallback(mountManagedComponent);
 }
 
 /**
- * This hook returns a function that can be used to remove a child component,
- * that was previously set by the `useSetChildComponent`.
+ * This hook returns a function that can be used to remove a managed component,
+ * that was previously set by the `useMountComponent`.
  *
- * See `removeComponent` for more info.
+ * See `unmountComponent` for more info.
  *
  * @return {function(function(...?), !Node=)}
  */
-export function useRemoveChildComponent() {
-  return useComponentCallback(removeChildComponent);
+export function useUnmountComponent() {
+  return useComponentCallback(unmountManagedComponent);
 }
 
 /**
- * This hook returns a function that can be used to set a child subscriber. A
- * child subscriber can be set on this component's node or any other in the same
- * tree. When this component is removed, all child subscribers are also removed.
+ * This hook returns a function that can be used to set a managed subscriber. A
+ * managed subscriber can be set on this component's node or any other in the
+ * same tree. When this component is removed, all managed subscribers are also
+ * removed.
  *
  * See `subscribe` for more info.
  *
  * @return {function((!ContextProp|!Array<!ContextProp>), function(...?), !Node=)}
  */
-export function useSubscribeChild() {
-  return useComponentCallback(subscribeChild);
+export function useSubscribe() {
+  return useComponentCallback(subscribeManaged);
 }
 
 /**
- * This hook returns a function that can be used to remove a child subscriber,
- * that was previously set by the `useSubscribeChild`.
+ * This hook returns a function that can be used to remove a managed subscriber,
+ * that was previously set by the `useSubscribe`.
  *
  * See `unsubscribe` for more info.
  *
  * @return {function(function(...?), !Node=)}
  */
-export function useUnsubscribeChild() {
-  return useComponentCallback(removeChildComponent);
+export function useUnsubscribe() {
+  return useComponentCallback(unmountManagedComponent);
 }
 
 /**
@@ -142,10 +145,10 @@ export function useUnsubscribeChild() {
  * @param {!Node|undefined} node
  * @template I
  */
-function setChildComponent(component, func, input, node) {
+function mountManagedComponent(component, func, input, node) {
   const id = getId(func);
   const deps = getDeps(func);
-  component.setComponent(
+  component.mountComponent(
     id,
     componentWithInputFactory,
     func,
@@ -160,9 +163,9 @@ function setChildComponent(component, func, input, node) {
  * @param {function(...?)} func
  * @param {!Node} node
  */
-function removeChildComponent(component, func, node) {
+function unmountManagedComponent(component, func, node) {
   const id = getId(func);
-  component.removeComponent(id, node);
+  component.unmountComponent(id, node);
 }
 
 /**
@@ -171,10 +174,17 @@ function removeChildComponent(component, func, node) {
  * @param {function(...?)} callback
  * @param {!Node|undefined} node
  */
-function subscribeChild(component, deps, callback, node) {
-  deps = isArray(deps) ? /** @type {!Array<!ContextProp>} */ (deps) : [deps];
+function subscribeManaged(component, deps, callback, node) {
+  deps = arrayOrSingleItemToArray(deps);
   const id = getId(callback);
-  component.setComponent(id, subscriberFactory, callback, deps, NO_INPUT, node);
+  component.mountComponent(
+    id,
+    subscriberFactory,
+    callback,
+    deps,
+    NO_INPUT,
+    node
+  );
 }
 
 /**
