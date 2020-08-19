@@ -569,7 +569,7 @@ export class AmpScriptService {
    *
    * @param {string} script The script contents.
    * @param {string} debugId An element identifier for error messages.
-   * @return {Promise}
+   * @return {!Promise}
    */
   checkSha384(script, debugId) {
     const bytes = utf8Encode(script);
