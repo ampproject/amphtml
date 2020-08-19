@@ -24,7 +24,7 @@ import transformCss from './css/css-transform';
 
 const argv = minimist(process.argv.slice(2));
 
-export async function transform(fileLocation: string, options: Record<string, boolean>): Promise<string> {
+export async function transform(fileLocation: string): Promise<string> {
   const transforms = [transformStories, transformScriptPaths, transformCss];
   if (argv.esm) {
     transforms.unshift(transformModules);
