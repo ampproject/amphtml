@@ -42,9 +42,8 @@ export class Storage {
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {!../service/viewer-interface.ViewerInterface} viewer
    * @param {!StorageBindingDef} binding
-   * @param {number} overrideStorage
    */
-  constructor(ampdoc, viewer, binding, overrideStorage) {
+  constructor(ampdoc, viewer, binding) {
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -54,8 +53,8 @@ export class Storage {
     /** @private @const {!StorageBindingDef} */
     this.binding_ = binding;
 
-    /** @private @const {number} */
-    this.overrideStorage_ = overrideStorage;
+    /** @private @const {boolean} */
+    this.isViewerStorage_ = binding instanceof ViewerStorageBinding;
 
     /** @const @private {string} */
     this.origin_ = getSourceOrigin(this.ampdoc.win.location);
@@ -120,11 +119,11 @@ export class Storage {
   }
 
   /**
-   * Returns the parsed int of the viewer param `storage`
+   * Returns if this.binding is an instance of ViewerStorageBinding
    * @return {number}
    */
-  getOverrideStorage() {
-    return this.overrideStorage_;
+  getIsViewerStorage() {
+    return this.isViewerStorage_;
   }
 
   /**
@@ -436,7 +435,7 @@ export function installStorageServiceForDoc(ampdoc) {
       const binding = overrideStorage
         ? new ViewerStorageBinding(viewer)
         : new LocalStorageBinding(ampdoc.win);
-      return new Storage(ampdoc, viewer, binding, overrideStorage).start_();
+      return new Storage(ampdoc, viewer, binding).start_();
     },
     /* opt_instantiate */ true
   );

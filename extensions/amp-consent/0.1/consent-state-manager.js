@@ -381,7 +381,7 @@ export class ConsentInstance {
 
       // Size restriction only applies to documents servered from a viewer
       // that implements the storage API.
-      const usesViewerStorage = storage.getOverrideStorage();
+      const usesViewerStorage = storage.getIsViewerStorage();
       if (usesViewerStorage && size > CONSENT_STORAGE_MAX) {
         // 1200 * 4/3 (base64) = 1600 bytes
         user().error(

@@ -60,7 +60,7 @@ describes.sandboxed('Storage', {}, (env) => {
         };
         bindingMock = env.sandbox.mock(binding);
 
-        storage = new Storage(ampdoc, viewer, binding, 0);
+        storage = new Storage(ampdoc, viewer, binding);
         storage.start_();
       });
 
