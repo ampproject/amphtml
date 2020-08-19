@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  forceExperimentBranch,
-  isExperimentOn,
-} from './experiments';
+import {forceExperimentBranch, isExperimentOn} from './experiments';
 
 // TODO(#22733): Remove this file once "ampdoc-fie" is cleaned up.
 
@@ -31,17 +28,6 @@ const EXPERIMENT = {
   control: '21066823',
   experiment: '21066824',
 };
-
-/**
- * @const {!Array<!./experiments.ExperimentInfo>}
- */
-export const EXPERIMENT_INFO_LIST = [
-  {
-    experimentId: EXPERIMENT_ID,
-    isTrafficEligible: () => true,
-    branches: [EXPERIMENT.control, EXPERIMENT.experiment],
-  },
-];
 
 /**
  * @param {!Window} win
