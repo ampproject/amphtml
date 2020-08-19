@@ -215,7 +215,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     expect(registerHandlerSpy).to.have.been.calledWith('documentStateUpdate');
   });
 
-  it('should send request to get page attachment state at build time', async () => {
+  it('should set up onDocumentState listeners at at build time', async () => {
     const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
 
     buildStoryPlayer();
@@ -224,6 +224,9 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     expect(sendRequestSpy).to.have.been.calledWith('onDocumentState', {
       'state': 'PAGE_ATTACHMENT_STATE',
+    });
+    expect(sendRequestSpy).to.have.been.calledWith('onDocumentState', {
+      'state': 'CURRENT_PAGE_ID',
     });
   });
 
@@ -628,6 +631,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       buildStoryPlayer();
       await manager.loadPlayers();
 
+      fakeResponse = {value: true};
       await playerEl.getStoryState('page-attachment');
 
       await nextTick();
