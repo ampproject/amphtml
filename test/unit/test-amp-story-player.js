@@ -214,7 +214,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     expect(registerHandlerSpy).to.have.been.calledWith('documentStateUpdate');
   });
 
-  it('should send request at build time', async () => {
+  it('should send request to get page attachment state at build time', async () => {
     const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
 
     buildStoryPlayer();
