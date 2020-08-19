@@ -28,7 +28,7 @@ export async function transform(fileLocation: string, options: Record<string, bo
   console.log(options);
   const transforms = [transformStories, transformScriptPaths, transformCss];
   if (argv.esm) {
-    transforms.unshift(transformModules(options));
+    transforms.unshift(transformModules);
   }
 
   const source = await fsPromises.readFile(fileLocation, 'utf8');
