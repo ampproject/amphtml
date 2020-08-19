@@ -300,6 +300,13 @@ export class AbstractAmpContext {
   }
 
   /**
+   *  Make the ad interactive.
+   */
+  signalInteractive() {
+    this.client_.sendMessage(MessageType.SIGNAL_INTERACTIVE);
+  }
+
+  /**
    *  Takes the current name on the window, and attaches it to
    *  the name of the iframe.
    *  @param {HTMLIFrameElement} iframe The iframe we are adding the context to.
