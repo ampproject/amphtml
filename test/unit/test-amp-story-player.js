@@ -33,7 +33,6 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   const DEFAULT_ORIGIN_URL =
     'https://www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/';
   let fakeMessaging;
-  let messagingMock;
 
   const nextTick = () => new Promise((resolve) => win.setTimeout(resolve, 0));
 
@@ -98,14 +97,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         fireHandler[event] = handler;
       },
     };
-    messagingMock = env.sandbox.mock(fakeMessaging);
+
     env.sandbox
       .stub(Messaging, 'waitForHandshakeFromDocument')
       .resolves(fakeMessaging);
-  });
-
-  afterEach(() => {
-    messagingMock.verify();
   });
 
   it('should build an iframe for each story', async () => {
@@ -203,16 +198,32 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   );
 
   it('should register handlers at build time', async () => {
+    const registerHandlerSpy = env.sandbox.spy(
+      fakeMessaging,
+      'registerHandler'
+    );
+
     buildStoryPlayer();
-
-    messagingMock.expects('registerHandler').withArgs('selectDocument');
-    messagingMock.expects('registerHandler').withArgs('touchstart');
-    messagingMock.expects('registerHandler').withArgs('touchmove');
-    messagingMock.expects('registerHandler').withArgs('touchend');
-    messagingMock.expects('registerHandler').withArgs('documentStateUpdate');
-    messagingMock.expects('setDefaultHandler');
-
     await manager.loadPlayers();
+    await nextTick();
+
+    expect(registerHandlerSpy).to.have.been.calledWith('touchstart');
+    expect(registerHandlerSpy).to.have.been.calledWith('touchmove');
+    expect(registerHandlerSpy).to.have.been.calledWith('touchend');
+    expect(registerHandlerSpy).to.have.been.calledWith('selectDocument');
+    expect(registerHandlerSpy).to.have.been.calledWith('documentStateUpdate');
+  });
+
+  it('should send request to get page attachment state at build time', async () => {
+    const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
+
+    buildStoryPlayer();
+    await manager.loadPlayers();
+    await nextTick();
+
+    expect(sendRequestSpy).to.have.been.calledWith('onDocumentState', {
+      'state': 'PAGE_ATTACHMENT_STATE',
+    });
   });
 
   it('should navigate to next story when the last page of a story is tapped', async () => {
@@ -480,52 +491,58 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       }
     );
 
-    it('pauses programatically', async () => {
+    it('pauses programmatically', async () => {
+      const spy = env.sandbox.spy(fakeMessaging, 'sendRequest');
       buildStoryPlayer();
       await manager.loadPlayers();
-      messagingMock.expects('sendRequest');
 
       playerEl.pause();
+      await nextTick();
 
-      messagingMock
-        .expects('sendRequest')
-        .withArgs('visibilitychange', {state: 'paused'});
+      expect(spy).to.have.been.calledWith('visibilitychange', {
+        state: 'paused',
+      });
     });
 
-    it('plays programatically', async () => {
+    it('plays programmatically', async () => {
+      const spy = env.sandbox.spy(fakeMessaging, 'sendRequest');
       buildStoryPlayer();
       await manager.loadPlayers();
-      messagingMock.expects('sendRequest');
 
       playerEl.play();
+      await nextTick();
 
-      messagingMock
-        .expects('sendRequest')
-        .withArgs('visibilitychange', {state: 'visible'});
+      expect(spy).to.have.been.calledWith('visibilitychange', {
+        state: 'visible',
+      });
     });
 
     it('calling mute should set story muted state to true', async () => {
+      const spy = env.sandbox.spy(fakeMessaging, 'sendRequest');
       buildStoryPlayer();
       await manager.loadPlayers();
-      messagingMock.expects('sendRequest');
 
       await playerEl.mute();
+      await nextTick();
 
-      messagingMock
-        .expects('sendRequest')
-        .withArgs('setDocumentState', {state: 'MUTED_STATE', value: true});
+      expect(spy).to.have.been.calledWith('setDocumentState', {
+        state: 'MUTED_STATE',
+        value: true,
+      });
     });
 
     it('calling unmute should set the story muted state to false', async () => {
+      const spy = env.sandbox.spy(fakeMessaging, 'sendRequest');
       buildStoryPlayer();
       await manager.loadPlayers();
-      messagingMock.expects('sendRequest');
 
       await playerEl.unmute();
+      await nextTick();
 
-      messagingMock
-        .expects('sendRequest')
-        .withArgs('setDocumentState', {state: 'MUTED_STATE', value: false});
+      expect(spy).to.have.been.calledWith('setDocumentState', {
+        state: 'MUTED_STATE',
+        value: false,
+      });
     });
 
     it('back button should be created and close button should not', async () => {
@@ -606,16 +623,17 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     });
 
     it('get page attachment state should send message', async () => {
+      const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
       buildStoryPlayer();
       await manager.loadPlayers();
 
       await playerEl.getStoryState('page-attachment');
 
-      messagingMock.expects('sendRequest');
+      await nextTick();
 
-      messagingMock
-        .expects('sendRequest')
-        .withArgs('getDocumentState', {state: 'PAGE_ATTACHMENT_STATE'});
+      expect(sendRequestSpy).to.have.been.calledWith('getDocumentState', {
+        'state': 'PAGE_ATTACHMENT_STATE',
+      });
     });
 
     it('should display button when page attachment is closed', async () => {
