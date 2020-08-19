@@ -16,9 +16,7 @@
 
 import {
   forceExperimentBranch,
-  getExperimentBranch,
   isExperimentOn,
-  randomlySelectUnsetExperiments,
 } from './experiments';
 
 // TODO(#22733): Remove this file once "ampdoc-fie" is cleaned up.
@@ -59,9 +57,5 @@ export function toggleAmpdocFieForTesting(win, on) {
  * @return {boolean}
  */
 export function isInAmpdocFieExperiment(win) {
-  if (!isExperimentOn(win, 'ampdoc-fie')) {
-    return false;
-  }
-  randomlySelectUnsetExperiments(win, EXPERIMENT_INFO_LIST);
-  return getExperimentBranch(win, EXPERIMENT_ID) === EXPERIMENT.experiment;
+  return isExperimentOn(win, 'ampdoc-fie');
 }
