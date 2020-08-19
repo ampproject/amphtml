@@ -21,7 +21,6 @@ tags: {  # amp-adplayer-pro
     name: "amp-adplayer-pro"
     version: "0.1"
     version: "latest"
-    requires_usage: EXEMPTED
   }
   attr_lists: "common-extension-attrs"
 }
