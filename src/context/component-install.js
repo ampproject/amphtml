@@ -18,7 +18,7 @@ import {Component} from './component';
 import {ContextNode} from './node';
 import {arrayOrSingleItemToArray} from '../types';
 import {getDeps, getId} from './component-meta';
-import {useComponentCallback} from './component-hooks';
+import {useInternalCallbackWithComponent} from './component-hooks';
 
 const NO_INPUT = undefined;
 
@@ -97,7 +97,7 @@ export function unsubscribe(node, callback) {
  * @template I
  */
 export function useMountComponent() {
-  return useComponentCallback(mountManagedComponent);
+  return useInternalCallbackWithComponent(mountManagedComponent);
 }
 
 /**
@@ -109,7 +109,7 @@ export function useMountComponent() {
  * @return {function(function(...?), !Node=)}
  */
 export function useUnmountComponent() {
-  return useComponentCallback(unmountManagedComponent);
+  return useInternalCallbackWithComponent(unmountManagedComponent);
 }
 
 /**
@@ -123,7 +123,7 @@ export function useUnmountComponent() {
  * @return {function((!ContextProp|!Array<!ContextProp>), function(...?), !Node=)}
  */
 export function useSubscribe() {
-  return useComponentCallback(subscribeManaged);
+  return useInternalCallbackWithComponent(subscribeManaged);
 }
 
 /**
@@ -135,7 +135,7 @@ export function useSubscribe() {
  * @return {function(function(...?), !Node=)}
  */
 export function useUnsubscribe() {
-  return useComponentCallback(unmountManagedComponent);
+  return useInternalCallbackWithComponent(unmountManagedComponent);
 }
 
 /**

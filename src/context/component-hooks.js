@@ -69,7 +69,7 @@ export function useRef(initialValue = undefined) {
  * @return {function(...?):?}
  * @package
  */
-export function useComponentCallback(callback) {
+export function useInternalCallbackWithComponent(callback) {
   const ref = useRef();
   if (!ref.current) {
     const component = getComponent();
@@ -180,7 +180,7 @@ export function useSyncEffect(callback, deps = undefined) {
  * @template T
  */
 export function useSetProp() {
-  return useComponentCallback(setManagedProp);
+  return useInternalCallbackWithComponent(setManagedProp);
 }
 
 /**
@@ -192,7 +192,7 @@ export function useSetProp() {
  * @return {function(!ContextProp, !Node=)}
  */
 export function useRemoveProp() {
-  return useComponentCallback(removeManagedProp);
+  return useInternalCallbackWithComponent(removeManagedProp);
 }
 
 /**
