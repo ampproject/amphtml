@@ -313,6 +313,20 @@ cc_library(
     copts = ["-std=c++17"],
 )
 
+cc_test(
+    name = "validator_test",
+    srcs = ["validator_test.cc"],
+    shard_count = 2,
+    deps = [
+        ":testing-utils",
+        ":validator",
+        ":validator_pb",
+        "@com_google_absl//absl/strings",
+        "@htmlparser/css//:parse_css_cc_proto",
+        "@validator//:validator_cc_proto",
+    ],
+)
+
 bzl_library(
     name = "embed_data_bzl",
     srcs = ["embed_data.bzl"],

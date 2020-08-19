@@ -4,55 +4,10 @@
 
 #include "glog/logging.h"
 #include "validator_pb.h"
-#include "testing/base/public/googletest.h"
-#include "gtest/gtest.h"
-#include "absl/status/status.h"
-#include "absl/strings/cord.h"
-#include "absl/strings/str_cat.h"
-#include "absl/strings/str_join.h"
-#include "absl/strings/str_replace.h"
-#include "absl/strings/string_view_utils.h"
-#include "testing-utils.h"
-#include "validator.h"
-#include "css/parse-css.proto.h"
-#include "defer.h"
-#include "../../validator.proto.h"
-
-using absl::StartsWith;
-using absl::StrAppend;
-using absl::StrCat;
-using amp::validator::AtRuleSpec;
-using amp::validator::AttrList;
-using amp::validator::AttrSpec;
-using amp::validator::CdataSpec;
-using amp::validator::ErrorFormat;
-using amp::validator::ErrorSpecificity;
-using amp::validator::HtmlFormat;
-using amp::validator::PropertySpec;
-using amp::validator::PropertySpecList;
-using amp::validator::ReferencePoint;
-using amp::validator::TagSpec;
-using amp::validator::ValidationError;
-using amp::validator::ValidationResult;
-using amp::validator::ValidatorRules;
-using amp::validator::testing::TestCase;
-using amp::validator::testing::TestCases;
-using amp::validator::testing::RenderInlineResult;
-using amp::validator::testing::RenderResult;
-
-namespace fs = std::filesystem;
+namespace protocolbuffer = google::protobuf;
 
 namespace amp::validator {
 namespace {
-
-void WriteProtoToFile(const proto2::MessageLite& proto,
-                      const std::string& file_path) {
-  auto file = fs::path(file_path);
-  CHECK(proto.IsInitialized());
-  std::ofstream ofs(file);
-  htmlparser::defer(ofs.close());
-  proto.SerializeToOstream(&ofs);
-}
 
 TestCase FindOrDie(std::map<std::string, TestCase> cases,
                    std::string case_filename) {
@@ -112,7 +67,7 @@ TEST(ValidatorTest, TestVariousMaxErrorsSettings) {
   }
 
   struct MaxErrorsAndOutput {
-    int32 max_errors;
+    int32_t max_errors;
     std::string output;
   };
 
@@ -177,8 +132,7 @@ std::string RepeatString(const std::string& blob, int n_times) {
 
 std::string TestWithDocSize(absl::string_view test_content,
                             absl::string_view body) {
-  return StringReplace(test_content, "replace_body", body,
-                       /*replace_all=*/true);
+  return StrReplaceAll(test_content, {{"replace_body", body}});
 }
 
 TEST(ValidatorTest, TestDocSizeAmpEmail) {
@@ -227,10 +181,10 @@ TEST(ValidatorTest, TestDocSizeAmpEmail) {
 std::string TestWithCSS(const std::string& test_content,
                         const std::string& stylesheet,
                         const std::string& inline_style) {
-  return StringReplace(StringReplace(test_content, ".replace_amp_custom {}",
-                                     stylesheet, /*replace_all=*/true),
-                       "replace_inline_style", inline_style,
-                       /*replace_all=*/true);
+  return StrReplaceAll(StrReplaceAll(test_content,
+                                     {{".replace_amp_custom {}",
+                                       stylesheet}}),
+                       {{"replace_inline_style", inline_style}});
 }
 
 TEST(ValidatorTest, TestCssLengthAmp) {
@@ -1076,11 +1030,8 @@ TEST(ValidatorTest, Amp4AdsAmpAccess) {
 TEST(ValidatorTest, InvalidHyphenCharacter) {
   const TestCase& test_case =
       FindOrDie(TestCases(), "feature_tests/minimum_valid_amp.html");
-  std::string bad_html = test_case.input_content;
-  GlobalReplaceSubstring("amp-boilerplate",
-                         "amp\xE2\x80\x90"
-                         "boilerplate",
-                         &bad_html);
+  std::string bad_html = StrReplaceAll(test_case.input_content,
+                {{"amp-boilerplate", "amp\xE2\x80\x90 boilerplate"}});
   ValidationResult result = amp::validator::Validate(bad_html,
                                                      HtmlFormat::AMP);
   EXPECT_EQ(ValidationResult::FAIL, result.status());

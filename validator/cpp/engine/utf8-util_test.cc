@@ -16,7 +16,6 @@
 
 #include "utf8-util.h"
 
-#include <gmock/gmock.h>
 #include "gtest/gtest.h"
 #include "strings.h"
 
