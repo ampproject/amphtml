@@ -31,7 +31,7 @@ const DEFAULT_TARGET = '_blank';
 const WINDOW_FEATURES = 'resizable,scrollbars,width=640,height=480';
 
 /**
- * @param {!SocialShareDef.Props} props
+ * @param {!SocialSharePropsDef} props
  * @return {PreactDef.Renderable}
  */
 export function SocialShare({
@@ -63,12 +63,12 @@ export function SocialShare({
 
   return (
     <div
+      {...rest}
       role="button"
       tabindex={tabIndex}
       onKeyDown={(e) => handleKeyPress(e, finalEndpoint, checkedTarget)}
       onClick={() => handleActivation(finalEndpoint, checkedTarget)}
       style={{...size, ...style}}
-      {...rest}
     >
       {processChildren(
         /** @type {string} */ (type),

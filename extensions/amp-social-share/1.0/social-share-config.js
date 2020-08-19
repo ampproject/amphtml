@@ -19,7 +19,7 @@ import {dict} from '../../../src/utils/object';
 /**
  * Get social share configurations by supported type.
  * @param  {string} type
- * @return {SocialShareDef.Config|undefined}
+ * @return {SocialShareConfigDef|undefined}
  */
 export function getSocialConfig(type) {
   return BUILTINS[type];
@@ -40,11 +40,18 @@ export function getSocialConfig(type) {
  *   bindings {?Array<string>} - Used for email, allows passing in an
  *     attribute that can be used in the endpoint, but not as a search param
  *
- * See social-share.types.js for typedef of this type.
+ * @typedef {{
+ *   shareEndpont: string,
+ *   defaultParams: Object<string, string>,
+ *   defaultColor: string,
+ *   defaultBackgroundColor: string,
+ *   bindings: (!Array<string>|undefined),
+ * }}
  */
+let SocialShareConfigDef;
 
 /**
- * @type {Object<string, SocialShareDef.Config>}
+ * @type {Object<string, SocialShareConfigDef>}
  */
 const BUILTINS = {
   'twitter': {
