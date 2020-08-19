@@ -8,31 +8,31 @@ on:
       - master
 
 jobs:
-  ubuntu_tests:
-    name: Linux
-    runs-on: ubuntu-latest
+  build:
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, macos-latest]
+        node-version: [12.x]
+    runs-on: ${{ matrix.platform }}
     steps:
-      - name: Check out repository
+      - name: Checkout Repo
         uses: actions/checkout@v2
-      - name: Use Node.js
-        uses: actions/setup-node@v1
+      - name: Get yarn Cache Path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: Cache Dependencies
+        uses: actions/cache@v2
         with:
-          node-version: 12
-      - run: yarn
-      - name: Build and Test
-        run: node build-system/pr-check/cross-browser-tests.js
-  macos_tests:
-    name: Mac OS
-    runs-on: macos-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v2
-      - name: Use Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: 12
-      - run: yarn
-      - run: sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
-      - run: yarn global add gulp-cli
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ matrix.platform }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ matrix.platform }}-yarn-
+      - name: Install Gulp CLI
+        run: yarn global add gulp-cli
+      - name: Install Dependencies
+        run: yarn
+      - name: Set Up Environment
+        if: ${{ matrix.platform == 'macos-latest' }}
+        run: sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
       - name: Build and Test
         run: node build-system/pr-check/cross-browser-tests.js
