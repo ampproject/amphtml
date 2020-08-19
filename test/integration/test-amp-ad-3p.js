@@ -189,6 +189,7 @@ describe('amp-ad 3P', () => {
       })
       .then(async function () {
         lastIO = null;
+        // Ad is fully visible
         iframe.contentWindow.context.observeIntersection((changes) => {
           lastIO = changes[changes.length - 1];
         });
@@ -201,7 +202,8 @@ describe('amp-ad 3P', () => {
         });
         lastIO = null;
 
-        // Ad is fully visible
+        // Ad is still fully visible. observeIntersection fire when
+        // ads is fully visible with position change
         fixture.win.scrollTo(0, 1000);
         fixture.win.dispatchEvent(new Event('scroll'));
         await poll('wait for new IO entry when ad is fully visible', () => {
