@@ -280,7 +280,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     );
 
     await platform.getEntitlements();
-    expect(fetchStub).to.be.calledOnce;
+    expect(fetchStub).to.not.be.called;
   });
 
   it('should ignore enableLAA if url params have expired', async () => {

@@ -284,11 +284,10 @@ export class GoogleSubscriptionsPlatform {
 
     // Allow a publisher to turn off the entitlments check, needed
     // in the case where LAA is in use but no other Google service is configured
+    // defaults true for backward compatibility
     /** @private @const {boolean} */
     this.enableEntitlements_ =
-      this.serviceConfig_['enableEntitlements'] === undefined
-        ? true
-        : !!this.serviceConfig_['enableEntitlements'];
+      this.serviceConfig_['enableEntitlements'] === false ? false : true;
 
     userAssert(
       !(this.enableLAA_ && this.meteringEnable_),
