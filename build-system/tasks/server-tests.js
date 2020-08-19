@@ -68,8 +68,8 @@ async function getExpectedOutput(inputFile) {
 
 /**
  * Extracts the JS transform for a test from its transform file.
- *
  * @param {string} inputFile
+ * @param {JSON} extraOptions
  * @return {string}
  */
 async function getTransform(inputFile, extraOptions) {
@@ -86,7 +86,6 @@ async function getTransform(inputFile, extraOptions) {
  *
  * @param {string} transform
  * @param {string} input
- * @param {dict} extraOptions 
  * @return {string}
  */
 async function getOutput(transform, input) {
@@ -95,13 +94,14 @@ async function getOutput(transform, input) {
 
 /**
  * Loads optional arguments residing in a options.json file, if any.
- * 
- * @param {strings} inputFile 
+ *
+ * @param {strings} inputFile
+ * @return {JSON}
  */
-function loadOptions(inputFile){
+function loadOptions(inputFile) {
   const transformDir = path.dirname(path.dirname(inputFile));
   const optionsPath = path.join(transformDir, 'test/options.json');
-  if(fs.existsSync(optionsPath)){
+  if (fs.existsSync(optionsPath)) {
     const optionsList = require(optionsPath);
     const testName = path.basename(inputFile).replace('-input.html', '');
     return optionsList[testName];
