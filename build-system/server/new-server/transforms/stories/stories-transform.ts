@@ -36,6 +36,8 @@ function sidegradeStories(script: PostHTML.Node): PostHTML.Node {
 /**
  * Replace the src for every stories script tag.
  */
-export default function(tree: PostHTML.Node): void {
-  tree.match({tag: 'script'}, sidegradeStories);
+export default function(options: any): (tree: PostHTML.Node) => void {
+  return function(tree: PostHTML.Node){
+    tree.match({tag: 'script'}, sidegradeStories);
+  }
 }
