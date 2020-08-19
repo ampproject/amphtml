@@ -13,10 +13,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-registerServiceBuilder(win, 'story-analytics', function () {
-  return new StoryAnalyticsService();
-});
-geoDeferred = new Deferred();
-AMP.registerServiceForDoc('foo', function () {
-  return geoDeferred.promise;
-});
+
+import { useStyles } from './base-carousel.jss'; 

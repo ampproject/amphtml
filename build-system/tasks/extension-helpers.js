@@ -365,12 +365,12 @@ async function doBuildExtension(extensions, extension, options) {
 /**
  * Watches the contents of an extension directory. When a file in the given path
  * changes, the extension is rebuilt.
- *
  * @param {string} path
  * @param {string} name
  * @param {string} version
  * @param {string} latestVersion
  * @param {boolean} hasCss
+ * @param {boolean} hasJss
  * @param {?Object} options
  */
 function watchExtension(
