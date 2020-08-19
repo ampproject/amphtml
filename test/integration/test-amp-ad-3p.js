@@ -200,6 +200,8 @@ describe('amp-ad 3P', () => {
           );
         });
         lastIO = null;
+
+        // Ad is fully visible
         fixture.win.scrollTo(0, 1000);
         fixture.win.dispatchEvent(new Event('scroll'));
         await poll('wait for new IO entry when ad is fully visible', () => {
@@ -210,6 +212,8 @@ describe('amp-ad 3P', () => {
           );
         });
         lastIO = null;
+
+        // Ad is partially visible (around 50%)
         fixture.win.scrollTo(0, 1125);
         fixture.win.dispatchEvent(new Event('scroll'));
         await poll(
@@ -223,6 +227,8 @@ describe('amp-ad 3P', () => {
           }
         );
         lastIO = null;
+
+        // Ad becomes invisible
         fixture.win.scrollTo(0, 1251);
         fixture.win.dispatchEvent(new Event('scroll'));
         await poll('wait for new IO entry when ad exit viewport', () => {
