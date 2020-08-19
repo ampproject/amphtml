@@ -27,9 +27,12 @@ const {
 const {Base} = require('mocha').reporters;
 const {inherits} = require('mocha').utils;
 
-function writeOutput(output, filename) {
+function writeOutput(output, dir, filename) {
   try {
-    fs.writeFileSync(filename, JSON.stringify(output, null, 4));
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir);
+    }
+    fs.writeFileSync(`${dir}/${filename}`, JSON.stringify(output, null, 4));
     process.stdout.write(
       Base.color(
         'green',
@@ -40,10 +43,10 @@ function writeOutput(output, filename) {
     process.stdout.write(
       Base.color(
         'fail',
-        `Could not write test result report to file '${filename}'`
+        `Could not write test result report to file '${filename}'` +
+          `\n${error}`
       )
     );
-    process.stdout.write(Base.color('fail', error.toString()));
   }
 }
 
@@ -83,7 +86,7 @@ function JsonReporter(runner) {
       time: test.duration, // in milliseconds
     }));
 
-    writeOutput({testResults}, `result-reports/e2e.json`);
+    writeOutput({testResults}, 'result-reports', 'e2e.json');
   });
 }
 
