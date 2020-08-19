@@ -373,15 +373,24 @@ async function doBuildExtension(extensions, extension, options) {
  * @param {boolean} hasCss
  * @param {?Object} options
  */
-function watchExtension(path, name, version, latestVersion, hasCss, options) {
+function watchExtension(
+  path,
+  name,
+  version,
+  latestVersion,
+  hasCss,
+  hasJss,
+  options
+) {
   const watchFunc = function () {
-    const bundleComplete = buildExtension(
+    const bundleComplete = buildExtension({
       name,
       version,
       latestVersion,
       hasCss,
-      {...options, continueOnError: true}
-    );
+      hasJss,
+      options: {...options, continueOnError: true},
+    });
     if (options.onWatchBuild) {
       options.onWatchBuild(bundleComplete);
     }
@@ -431,8 +440,7 @@ async function buildExtension({
   // compileMinifiedJs, which only recompile JS.
   if (options.watch) {
     options.watch = false;
-    // TODO: add jss support.
-    watchExtension(path, name, version, latestVersion, hasCss, options);
+    watchExtension(path, name, version, latestVersion, hasCss, hasJss, options);
     // When an ad network extension is being watched, also watch amp-a4a.
     if (name.match(/amp-ad-network-.*-impl/)) {
       const a4aPath = `extensions/amp-a4a/${version}`;
