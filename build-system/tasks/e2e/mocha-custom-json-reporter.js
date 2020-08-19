@@ -23,7 +23,7 @@ const {
   EVENT_TEST_PENDING,
   EVENT_SUITE_BEGIN,
   EVENT_SUITE_END,
-} = require('mocha').Runner;
+} = require('mocha').Runner.constants;
 const {Base} = require('mocha').reporters;
 const {inherits} = require('mocha').utils;
 
