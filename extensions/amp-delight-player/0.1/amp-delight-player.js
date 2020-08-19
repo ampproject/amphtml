@@ -549,7 +549,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
         'consentString': consents[1],
         'consentPolicyState': consents[2],
         'consentPolicySharedData': consents[3],
-      })
+      });
     });
   }
 
