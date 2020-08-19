@@ -17,15 +17,21 @@
 import {ContextNode} from '../../../src/context/node';
 import {contextProp} from '../../../src/context/prop';
 import {
-  removeComponent,
-  setComponent,
+  mountComponent,
   subscribe,
+  unmountComponent,
   unsubscribe,
+  useMountComponent,
+  useSubscribe,
+  useUnmountComponent,
+  useUnsubscribe,
 } from '../../../src/context/component-install';
 import {
   useDisposableMemo,
   useMemo,
   useRef,
+  useRemoveProp,
+  useSetProp,
   useSyncEffect,
 } from '../../../src/context/component-hooks';
 import {withMetaData} from '../../../src/context/component-meta';
@@ -179,7 +185,7 @@ describes.realWin('ContextNode - components', {}, (env) => {
       });
 
       it('should only call component once w/o input', () => {
-        setComponent(parent.node, Component1);
+        mountComponent(parent.node, Component1);
         expect(component1Spy).to.not.be.called;
 
         clock.runAll();
@@ -188,29 +194,29 @@ describes.realWin('ContextNode - components', {}, (env) => {
           undefined
         );
 
-        setComponent(parent.node, Component1);
+        mountComponent(parent.node, Component1);
         clock.runAll();
         expect(component1Spy).to.be.calledOnce; // no changes.
       });
 
       it('should only call component once per input', () => {
-        setComponent(parent.node, Component1, 1);
+        mountComponent(parent.node, Component1, 1);
         clock.runAll();
         expect(component1Spy).to.be.calledOnce.calledWith(parent.node, 1);
 
         // Rerun the component due to the input change.
-        setComponent(parent.node, Component1, 2);
+        mountComponent(parent.node, Component1, 2);
         clock.runAll();
         expect(component1Spy).to.be.calledTwice.calledWith(parent.node, 2);
 
         // Input didn't change - do not rerun.
-        setComponent(parent.node, Component1, 2);
+        mountComponent(parent.node, Component1, 2);
         clock.runAll();
         expect(component1Spy).to.be.calledTwice;
       });
 
       it('should reconnect component when the node is reconnected', async () => {
-        setComponent(parent.node, Component1, 1);
+        mountComponent(parent.node, Component1, 1);
         clock.runAll();
         expect(component1Spy).to.be.calledOnce.calledWith(parent.node, 1);
 
@@ -218,7 +224,7 @@ describes.realWin('ContextNode - components', {}, (env) => {
         await rediscover(parent);
         clock.runAll();
 
-        setComponent(parent.node, Component1, 2);
+        mountComponent(parent.node, Component1, 2);
         clock.runAll();
         expect(component1Spy).to.be.calledOnce;
 
@@ -229,7 +235,7 @@ describes.realWin('ContextNode - components', {}, (env) => {
       });
 
       it('should wait until all deps satisfied', () => {
-        setComponent(parent.node, ComponentWithDeps, 1);
+        mountComponent(parent.node, ComponentWithDeps, 1);
 
         clock.runAll();
         expect(componentWithDepsSpy).to.not.be.called;
@@ -257,7 +263,7 @@ describes.realWin('ContextNode - components', {}, (env) => {
       });
 
       it('should cleanup on input change and removal', () => {
-        setComponent(parent.node, ComponentWithCleanup, 1);
+        mountComponent(parent.node, ComponentWithCleanup, 1);
 
         clock.runAll();
         expect(cleanupSpy).to.not.be.called;
@@ -266,7 +272,7 @@ describes.realWin('ContextNode - components', {}, (env) => {
           1
         );
 
-        setComponent(parent.node, ComponentWithCleanup, 2);
+        mountComponent(parent.node, ComponentWithCleanup, 2);
 
         clock.runAll();
         expect(cleanupSpy).to.be.calledOnce;
@@ -277,7 +283,7 @@ describes.realWin('ContextNode - components', {}, (env) => {
       });
 
       it('should cleanup on removal', () => {
-        setComponent(parent.node, ComponentWithCleanup, 1);
+        mountComponent(parent.node, ComponentWithCleanup, 1);
 
         clock.runAll();
         expect(cleanupSpy).to.not.be.called;
@@ -286,14 +292,14 @@ describes.realWin('ContextNode - components', {}, (env) => {
           1
         );
 
-        removeComponent(parent.node, ComponentWithCleanup);
+        unmountComponent(parent.node, ComponentWithCleanup);
         clock.runAll();
         expect(cleanupSpy).to.be.calledOnce;
         expect(componentWithCleanupSpy).to.be.calledOnce; // no change.
       });
 
       it('should cleanup on disconnect', async () => {
-        setComponent(parent.node, ComponentWithCleanup, 1);
+        mountComponent(parent.node, ComponentWithCleanup, 1);
 
         clock.runAll();
         expect(cleanupSpy).to.not.be.called;
@@ -434,13 +440,13 @@ describes.realWin('ContextNode - components', {}, (env) => {
         };
 
         // 1st call.
-        setComponent(parent.node, Comp, 1);
+        mountComponent(parent.node, Comp, 1);
         clock.runAll();
         expect(values).to.have.length(1);
         expect(values[0]).to.equal(11);
 
         // 2nd call.
-        setComponent(parent.node, Comp, 2);
+        mountComponent(parent.node, Comp, 2);
         clock.runAll();
         expect(values).to.have.length(2);
         expect(values[0]).to.equal(12);
@@ -459,21 +465,21 @@ describes.realWin('ContextNode - components', {}, (env) => {
         };
 
         // 1st call.
-        setComponent(parent.node, Comp, 1);
+        mountComponent(parent.node, Comp, 1);
         clock.runAll();
         expect(values).to.have.length(1);
         expect(values[0]).to.equal(0);
         expect(memoSpy).to.be.calledOnce;
 
         // 2nd call: no recompute.
-        setComponent(parent.node, Comp, 2);
+        mountComponent(parent.node, Comp, 2);
         clock.runAll();
         expect(values).to.have.length(2);
         expect(values[0]).to.equal(0);
         expect(memoSpy).to.be.calledOnce; // no change.
 
         // 3rd call: recompute.
-        setComponent(parent.node, Comp, 12);
+        mountComponent(parent.node, Comp, 12);
         clock.runAll();
         expect(values).to.have.length(3);
         expect(values[0]).to.equal(1);
@@ -496,7 +502,7 @@ describes.realWin('ContextNode - components', {}, (env) => {
         };
 
         // 1st call: init.
-        setComponent(parent.node, Comp, 1);
+        mountComponent(parent.node, Comp, 1);
         clock.runAll();
         expect(values).to.have.length(1);
         expect(values[0]).to.equal(0);
@@ -504,7 +510,7 @@ describes.realWin('ContextNode - components', {}, (env) => {
         expect(disposeSpy).to.not.be.called;
 
         // 2nd call: reuse.
-        setComponent(parent.node, Comp, 2);
+        mountComponent(parent.node, Comp, 2);
         clock.runAll();
         expect(values).to.have.length(2);
         expect(values[0]).to.equal(0);
@@ -512,7 +518,7 @@ describes.realWin('ContextNode - components', {}, (env) => {
         expect(disposeSpy).to.not.be.called; // no change.
 
         // 3rd call: re-init.
-        setComponent(parent.node, Comp, 12);
+        mountComponent(parent.node, Comp, 12);
         clock.runAll();
         expect(values).to.have.length(3);
         expect(values[0]).to.equal(1);
@@ -520,7 +526,7 @@ describes.realWin('ContextNode - components', {}, (env) => {
         expect(disposeSpy).to.be.calledOnce;
 
         // Remove.
-        removeComponent(parent.node, Comp);
+        unmountComponent(parent.node, Comp);
         clock.runAll();
         expect(disposeSpy).to.be.calledTwice;
         expect(values).to.have.length(3); // no change.
@@ -538,25 +544,25 @@ describes.realWin('ContextNode - components', {}, (env) => {
         };
 
         // 1st call.
-        setComponent(parent.node, Comp, 1);
+        mountComponent(parent.node, Comp, 1);
         clock.runAll();
         expect(effectSpy).to.be.calledOnce.calledWith(1);
         expect(cleanupSpy).to.not.be.called;
 
         // 2nd call: no-op.
-        setComponent(parent.node, Comp, 2);
+        mountComponent(parent.node, Comp, 2);
         clock.runAll();
         expect(effectSpy).to.be.calledOnce; // no change.
         expect(cleanupSpy).to.not.be.called; // no change.
 
         // 3rd call: re-run.
-        setComponent(parent.node, Comp, 12);
+        mountComponent(parent.node, Comp, 12);
         clock.runAll();
         expect(effectSpy).to.be.calledTwice.calledWith(12);
         expect(cleanupSpy).to.be.calledOnce;
 
         // Remove.
-        removeComponent(parent.node, Comp);
+        unmountComponent(parent.node, Comp);
         clock.runAll();
         expect(cleanupSpy).to.be.calledTwice;
         expect(effectSpy).to.be.calledTwice; // no change.
@@ -573,22 +579,476 @@ describes.realWin('ContextNode - components', {}, (env) => {
         };
 
         // 1st call.
-        setComponent(parent.node, Comp, 1);
+        mountComponent(parent.node, Comp, 1);
         clock.runAll();
         expect(effectSpy).to.be.calledOnce.calledWith(1);
         expect(cleanupSpy).to.not.be.called;
 
         // 2nd call: no-op.
-        setComponent(parent.node, Comp, 2);
+        mountComponent(parent.node, Comp, 2);
         clock.runAll();
         expect(effectSpy).to.be.calledOnce; // no change.
         expect(cleanupSpy).to.not.be.called; // no change.
 
         // Remove.
-        removeComponent(parent.node, Comp);
+        unmountComponent(parent.node, Comp);
         clock.runAll();
         expect(cleanupSpy).to.be.calledOnce;
         expect(effectSpy).to.be.calledOnce; // no change.
+      });
+    });
+
+    describe('autocleanup props', () => {
+      let ComponentSettingPropsOnSelf;
+      let ComponentSettingPropsOnOther;
+      let sibling1Stub;
+      let parentStub;
+      let grandparentStub;
+
+      beforeEach(() => {
+        ComponentSettingPropsOnSelf = (unusedNode, input) => {
+          const setProp = useSetProp();
+          const removeProp = useRemoveProp();
+          if (input) {
+            setProp(Concat, input);
+          } else {
+            removeProp(Concat);
+          }
+        };
+        ComponentSettingPropsOnOther = (unusedNode, input) => {
+          const setProp = useSetProp();
+          const removeProp = useRemoveProp();
+          if (input) {
+            setProp(Concat, input, parent.node);
+          } else {
+            removeProp(Concat, parent.node);
+          }
+        };
+
+        sibling1Stub = sandbox.stub();
+        parentStub = sandbox.stub();
+        grandparentStub = sandbox.stub();
+        sibling1.values.subscribe(Concat, sibling1Stub);
+        parent.values.subscribe(Concat, parentStub);
+        grandparent.values.subscribe(Concat, grandparentStub);
+        clock.runAll();
+        [sibling1Stub, parentStub, grandparentStub].forEach((stub) => {
+          stub.resetHistory();
+        });
+      });
+
+      it('should set props in components', () => {
+        mountComponent(grandparent.node, ComponentSettingPropsOnSelf, 'A');
+        clock.runAll();
+        expect(sibling1Stub).to.be.calledOnce.calledWith('A');
+        expect(parentStub).to.be.calledOnce.calledWith('A');
+        expect(grandparentStub).to.be.calledOnce.calledWith('A');
+
+        mountComponent(grandparent.node, ComponentSettingPropsOnOther, 'B');
+        clock.runAll();
+        expect(sibling1Stub).to.be.calledTwice.calledWith('AB');
+        expect(parentStub).to.be.calledTwice.calledWith('AB');
+        expect(grandparentStub).to.be.calledOnce; // no change.
+      });
+
+      it('should remove props', () => {
+        mountComponent(grandparent.node, ComponentSettingPropsOnSelf, 'A');
+        mountComponent(grandparent.node, ComponentSettingPropsOnOther, 'B');
+        clock.runAll();
+        expect(sibling1Stub).to.be.calledOnce.calledWith('AB');
+        expect(parentStub).to.be.calledOnce.calledWith('AB');
+        expect(grandparentStub).to.be.calledOnce.calledWith('A');
+
+        mountComponent(grandparent.node, ComponentSettingPropsOnSelf, null);
+        clock.runAll();
+        expect(sibling1Stub).to.be.calledTwice.calledWith('B');
+        expect(parentStub).to.be.calledTwice.calledWith('B');
+        expect(grandparentStub).to.be.calledTwice.calledWith('');
+
+        mountComponent(grandparent.node, ComponentSettingPropsOnOther, null);
+        clock.runAll();
+        expect(sibling1Stub).to.be.calledThrice.calledWith('');
+        expect(parentStub).to.be.calledThrice.calledWith('');
+        expect(grandparentStub).to.be.calledTwice; // no change.
+      });
+
+      it('should remove props when component is disconnected', () => {
+        mountComponent(grandparent.node, ComponentSettingPropsOnSelf, 'A');
+        mountComponent(grandparent.node, ComponentSettingPropsOnOther, 'B');
+        clock.runAll();
+        expect(sibling1Stub).to.be.calledOnce.calledWith('AB');
+        expect(parentStub).to.be.calledOnce.calledWith('AB');
+        expect(grandparentStub).to.be.calledOnce.calledWith('A');
+
+        unmountComponent(grandparent.node, ComponentSettingPropsOnSelf);
+        clock.runAll();
+        expect(sibling1Stub).to.be.calledTwice.calledWith('B');
+        expect(parentStub).to.be.calledTwice.calledWith('B');
+        expect(grandparentStub).to.be.calledTwice.calledWith('');
+
+        unmountComponent(grandparent.node, ComponentSettingPropsOnOther);
+        clock.runAll();
+        expect(sibling1Stub).to.be.calledThrice.calledWith('');
+        expect(parentStub).to.be.calledThrice.calledWith('');
+        expect(grandparentStub).to.be.calledTwice; // no change.
+      });
+
+      it('should remove props when child node is disconnected', async () => {
+        mountComponent(grandparent.node, ComponentSettingPropsOnSelf, 'A');
+        mountComponent(grandparent.node, ComponentSettingPropsOnOther, 'B');
+        clock.runAll();
+        expect(sibling1Stub).to.be.calledOnce.calledWith('AB');
+        expect(parentStub).to.be.calledOnce.calledWith('AB');
+        expect(grandparentStub).to.be.calledOnce.calledWith('A');
+
+        parent.node.remove();
+        await rediscover(parent);
+        clock.runAll();
+        expect(grandparent.values.has(Concat)).to.be.true;
+        expect(parent.values.has(Concat)).to.be.false;
+      });
+
+      it('should remove props when the node is disconnected', async () => {
+        mountComponent(grandparent.node, ComponentSettingPropsOnSelf, 'A');
+        mountComponent(grandparent.node, ComponentSettingPropsOnOther, 'B');
+        clock.runAll();
+        expect(sibling1Stub).to.be.calledOnce.calledWith('AB');
+        expect(parentStub).to.be.calledOnce.calledWith('AB');
+        expect(grandparentStub).to.be.calledOnce.calledWith('A');
+
+        grandparent.node.remove();
+        await rediscover(grandparent);
+        clock.runAll();
+        expect(grandparent.values.has(Concat)).to.be.false;
+        expect(parent.values.has(Concat)).to.be.false;
+      });
+    });
+
+    describe('subcomponents', () => {
+      let ComponentMountingSubcomponentsOnSelf;
+      let ComponentMountingSubcomponentsOnOther;
+      let Subcomponent, subcomponentSpy, subcomponentCleanupSpy;
+
+      beforeEach(() => {
+        ComponentMountingSubcomponentsOnSelf = (unusedNode, input) => {
+          const mountComponent = useMountComponent();
+          const unmountComponent = useUnmountComponent();
+          if (input) {
+            mountComponent(Subcomponent, input);
+          } else {
+            unmountComponent(Subcomponent);
+          }
+        };
+        ComponentMountingSubcomponentsOnOther = (unusedNode, input) => {
+          const mountComponent = useMountComponent();
+          const unmountComponent = useUnmountComponent();
+          if (input) {
+            mountComponent(Subcomponent, input, parent.node);
+          } else {
+            unmountComponent(Subcomponent, parent.node);
+          }
+        };
+
+        subcomponentSpy = sandbox.spy();
+        subcomponentCleanupSpy = sandbox.spy();
+        Subcomponent = function (...args) {
+          subcomponentSpy.apply(null, args);
+          useSyncEffect(() => subcomponentCleanupSpy);
+        };
+      });
+
+      it('should set a subcomponent', () => {
+        mountComponent(
+          grandparent.node,
+          ComponentMountingSubcomponentsOnSelf,
+          'A'
+        );
+        clock.runAll();
+        expect(subcomponentSpy).to.be.calledOnce.calledWith(
+          grandparent.node,
+          'A'
+        );
+
+        mountComponent(
+          grandparent.node,
+          ComponentMountingSubcomponentsOnOther,
+          'B'
+        );
+        clock.runAll();
+        expect(subcomponentSpy).to.be.calledTwice.calledWith(parent.node, 'B');
+
+        expect(subcomponentCleanupSpy).to.not.be.called;
+      });
+
+      it('should remove a subcomponent', () => {
+        mountComponent(
+          grandparent.node,
+          ComponentMountingSubcomponentsOnSelf,
+          'A'
+        );
+        clock.runAll();
+        expect(subcomponentSpy).to.be.calledOnce.calledWith(
+          grandparent.node,
+          'A'
+        );
+
+        mountComponent(
+          grandparent.node,
+          ComponentMountingSubcomponentsOnOther,
+          'B'
+        );
+        clock.runAll();
+        expect(subcomponentSpy).to.be.calledTwice.calledWith(parent.node, 'B');
+
+        // Null input removes the component.
+        mountComponent(
+          grandparent.node,
+          ComponentMountingSubcomponentsOnOther,
+          null
+        );
+        clock.runAll();
+        expect(subcomponentSpy).to.be.calledTwice; // no changes.
+        expect(subcomponentCleanupSpy).to.be.calledOnce;
+
+        mountComponent(
+          grandparent.node,
+          ComponentMountingSubcomponentsOnSelf,
+          null
+        );
+        clock.runAll();
+        expect(subcomponentSpy).to.be.calledTwice; // no changes.
+        expect(subcomponentCleanupSpy).to.be.calledTwice;
+      });
+
+      it('should update a subcomponent', () => {
+        mountComponent(
+          grandparent.node,
+          ComponentMountingSubcomponentsOnSelf,
+          'A'
+        );
+        clock.runAll();
+        expect(subcomponentSpy).to.be.calledOnce.calledWith(
+          grandparent.node,
+          'A'
+        );
+
+        mountComponent(
+          grandparent.node,
+          ComponentMountingSubcomponentsOnSelf,
+          'B'
+        );
+        clock.runAll();
+        expect(subcomponentSpy).to.be.calledTwice.calledWith(
+          grandparent.node,
+          'B'
+        );
+
+        expect(subcomponentCleanupSpy).to.not.be.called;
+      });
+
+      it('should remove a subcomponent on removal', () => {
+        mountComponent(
+          grandparent.node,
+          ComponentMountingSubcomponentsOnSelf,
+          'A'
+        );
+        mountComponent(
+          grandparent.node,
+          ComponentMountingSubcomponentsOnOther,
+          'B'
+        );
+        clock.runAll();
+        expect(subcomponentSpy)
+          .to.be.calledTwice.calledWith(grandparent.node, 'A')
+          .calledWith(parent.node, 'B');
+        expect(subcomponentCleanupSpy).to.not.be.called;
+
+        unmountComponent(
+          grandparent.node,
+          ComponentMountingSubcomponentsOnSelf
+        );
+        clock.runAll();
+        expect(subcomponentCleanupSpy).to.be.calledOnce;
+
+        unmountComponent(
+          grandparent.node,
+          ComponentMountingSubcomponentsOnOther
+        );
+        clock.runAll();
+        expect(subcomponentCleanupSpy).to.be.calledTwice;
+      });
+
+      it('should remove component when child node is disconnected', async () => {
+        mountComponent(
+          grandparent.node,
+          ComponentMountingSubcomponentsOnSelf,
+          'A'
+        );
+        mountComponent(
+          grandparent.node,
+          ComponentMountingSubcomponentsOnOther,
+          'B'
+        );
+        clock.runAll();
+        expect(subcomponentSpy)
+          .to.be.calledTwice.calledWith(grandparent.node, 'A')
+          .calledWith(parent.node, 'B');
+        expect(subcomponentCleanupSpy).to.not.be.called;
+
+        parent.node.remove();
+        await rediscover(parent);
+        clock.runAll();
+        expect(subcomponentSpy).to.be.calledTwice; // no changes.
+        expect(subcomponentCleanupSpy).to.be.calledOnce;
+      });
+
+      it('should remove component when the node is disconnected', async () => {
+        mountComponent(
+          grandparent.node,
+          ComponentMountingSubcomponentsOnSelf,
+          'A'
+        );
+        mountComponent(
+          grandparent.node,
+          ComponentMountingSubcomponentsOnOther,
+          'B'
+        );
+        clock.runAll();
+        expect(subcomponentSpy)
+          .to.be.calledTwice.calledWith(grandparent.node, 'A')
+          .calledWith(parent.node, 'B');
+        expect(subcomponentCleanupSpy).to.not.be.called;
+
+        grandparent.node.remove();
+        await rediscover(grandparent);
+        clock.runAll();
+        expect(subcomponentSpy).to.be.calledTwice; // no changes.
+        expect(subcomponentCleanupSpy).to.be.calledTwice;
+      });
+    });
+
+    describe('subcomponent subscriber', () => {
+      let ComponentSubscribingOnSelf;
+      let ComponentSubscribingOnParent;
+      let subscriber, subscriberSpy, subscriberCleanupSpy;
+
+      beforeEach(() => {
+        subscriberSpy = sandbox.spy();
+        subscriberCleanupSpy = sandbox.spy();
+
+        subscriber = (...args) => {
+          subscriberSpy.apply(null, args);
+          return subscriberCleanupSpy;
+        };
+
+        ComponentSubscribingOnSelf = (unusedNode, input) => {
+          const subscribe = useSubscribe();
+          const unsubscribe = useUnsubscribe();
+          if (input) {
+            subscribe([Concat], subscriber);
+          } else {
+            unsubscribe(subscriber);
+          }
+        };
+        ComponentSubscribingOnParent = (unusedNode, input) => {
+          const subscribe = useSubscribe();
+          const unsubscribe = useUnsubscribe();
+          if (input) {
+            subscribe([Concat], subscriber, parent.node);
+          } else {
+            unsubscribe(subscriber, parent.node);
+          }
+        };
+
+        grandparent.values.set(Concat, 'OWNER1', 'C');
+        clock.runAll();
+      });
+
+      it('should set subscriber', () => {
+        mountComponent(grandparent.node, ComponentSubscribingOnSelf, 'A');
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledOnce.calledWith('C');
+
+        mountComponent(grandparent.node, ComponentSubscribingOnParent, 'B');
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledTwice.calledWith('C');
+
+        expect(subscriberCleanupSpy).to.not.be.called;
+      });
+
+      it('should remove subscriber', () => {
+        mountComponent(grandparent.node, ComponentSubscribingOnSelf, 'A');
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledOnce.calledWith('C');
+
+        mountComponent(grandparent.node, ComponentSubscribingOnParent, 'B');
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledTwice.calledWith('C');
+
+        // Null input removes the subscriber.
+        mountComponent(grandparent.node, ComponentSubscribingOnParent, null);
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledTwice; // no changes.
+        expect(subscriberCleanupSpy).to.be.calledOnce;
+
+        mountComponent(grandparent.node, ComponentSubscribingOnSelf, null);
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledTwice; // no changes.
+        expect(subscriberCleanupSpy).to.be.calledTwice;
+      });
+
+      it('should update subscriber', () => {
+        mountComponent(grandparent.node, ComponentSubscribingOnSelf, 'A');
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledOnce.calledWith('C');
+
+        mountComponent(grandparent.node, ComponentSubscribingOnSelf, 'B');
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledOnce; // no changes.
+        expect(subscriberCleanupSpy).to.not.be.called;
+      });
+
+      it('should remove subscriber on removal', () => {
+        mountComponent(grandparent.node, ComponentSubscribingOnSelf, 'A');
+        mountComponent(grandparent.node, ComponentSubscribingOnParent, 'B');
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledTwice.calledWith('C');
+
+        unmountComponent(grandparent.node, ComponentSubscribingOnSelf);
+        clock.runAll();
+        expect(subscriberCleanupSpy).to.be.calledOnce;
+
+        unmountComponent(grandparent.node, ComponentSubscribingOnParent);
+        clock.runAll();
+        expect(subscriberCleanupSpy).to.be.calledTwice;
+      });
+
+      it('should remove subscriber when child node is disconnected', async () => {
+        mountComponent(grandparent.node, ComponentSubscribingOnSelf, 'A');
+        mountComponent(grandparent.node, ComponentSubscribingOnParent, 'B');
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledTwice.calledWith('C');
+        expect(subscriberCleanupSpy).to.not.be.called;
+
+        parent.node.remove();
+        await rediscover(parent);
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledTwice; // no changes.
+        expect(subscriberCleanupSpy).to.be.calledOnce;
+      });
+
+      it('should remove subscriber when the node is disconnected', async () => {
+        mountComponent(grandparent.node, ComponentSubscribingOnSelf, 'A');
+        mountComponent(grandparent.node, ComponentSubscribingOnParent, 'B');
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledTwice.calledWith('C');
+        expect(subscriberCleanupSpy).to.not.be.called;
+
+        grandparent.node.remove();
+        await rediscover(grandparent);
+        clock.runAll();
+        expect(subscriberSpy).to.be.calledTwice; // no changes.
+        expect(subscriberCleanupSpy).to.be.calledTwice;
       });
     });
   });
