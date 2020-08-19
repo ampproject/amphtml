@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const fs = require('fs').promises;
+const fs = require('fs');
 const {
   EVENT_TEST_PASS,
   EVENT_TEST_FAIL,
