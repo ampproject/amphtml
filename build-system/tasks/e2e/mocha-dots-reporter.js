@@ -25,7 +25,7 @@ const {
   EVENT_TEST_FAIL,
   EVENT_RUN_END,
   EVENT_TEST_PENDING,
-} = require('mocha').Runner;
+} = require('mocha').Runner.constants;
 
 /**
  * Custom Mocha reporter for CI builds.
