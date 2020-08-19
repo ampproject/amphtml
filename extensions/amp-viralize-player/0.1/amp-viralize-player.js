@@ -16,15 +16,23 @@
 
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
+import {VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
+import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
+import {isFullscreenElement, removeElement} from '../../../src/dom';
 import {parseJson} from '../../../src/json';
-import {removeElement} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
 
 /** @private @const {!string} */
 const TAG = 'amp-viralize-player';
 
-export class AmpViralizePlayer extends AMP.BaseElement {
+/** @private @const {!string} */
+const BASE_URL = 'https://content.viralize.tv/display/';
+
+/**
+ * @implements {../../../src/video-interface.VideoInterface}
+ */
+class AmpViralizePlayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -37,7 +45,14 @@ export class AmpViralizePlayer extends AMP.BaseElement {
 
     /** @private {Element} */
     this.container_ = null;
+
+    /** @private {Element} */
+    this.iframe_ = null;
   }
+
+  /**
+   * BaseElement overrides
+   */
 
   /** @override */
   buildCallback() {
@@ -49,17 +64,23 @@ export class AmpViralizePlayer extends AMP.BaseElement {
     this.extraParams_ = parseJson(
       this.element.getAttribute('data-extra') || '{}'
     );
+    this.extraParams_['activation'] = 'click';
     this.extraParams_['vip_mode'] = 'no';
     this.extraParams_['location'] = 'inline';
+    this.extraParams_['pub_platform'] = 'amp-viralize-player';
+
+    this.win.vpt = this.win.vpt || {};
+    this.win.vpt.queue = this.win.vpt.queue || [];
+
+    installVideoManagerForDoc(this.element);
+    Services.videoManagerForDoc(this.element).register(this);
+    this.element.dispatchCustomEvent(VideoEvents.REGISTERED);
   }
 
   /** @override */
   preconnectCallback(opt_onLayout) {
-    Services.preconnectFor(this.win).url(
-      this.getAmpDoc(),
-      this.getPlayerUrl_(this.zid_),
-      opt_onLayout
-    );
+    const ampDoc = this.getAmpDoc();
+    Services.preconnectFor(this.win).url(ampDoc, BASE_URL, opt_onLayout);
   }
 
   /** @override */
@@ -74,15 +95,66 @@ export class AmpViralizePlayer extends AMP.BaseElement {
     this.container_.appendChild(script);
 
     return new Promise((resolve) => {
-      const {win} = this.getAmpDoc();
-      win.vpt = win.vpt || {};
-      win.vpt.queue = win.vpt.queue || [];
+      this.win.vpt.queue.push(() => {
+        this.win.vpt.on(
+          {event: this.win.vpt.EVENTS.PLAYER_READY, zid: this.zid_},
+          () => {
+            this.iframe_ = Array.from(
+              this.element.ownerDocument.getElementsByTagName('iframe')
+            ).find((el) => el.id.match(/vr-[A-Za-z0-9]*-player-iframe/));
+            this.element.dispatchCustomEvent(VideoEvents.LOAD);
+            resolve();
+          }
+        );
 
-      win.vpt.queue.push(function () {
-        // This is always the first event emitted by the player
-        win.vpt.on(win.vpt.EVENTS.AD_SESSION_START, function () {
-          resolve();
-        });
+        this.win.vpt.on(
+          {event: this.win.vpt.EVENTS.START, zid: this.zid_},
+          () => {
+            this.element.dispatchCustomEvent(VideoEvents.AD_START);
+          }
+        );
+
+        this.win.vpt.on(
+          {event: this.win.vpt.EVENTS.COMPLETE, zid: this.zid_},
+          () => {
+            this.element.dispatchCustomEvent(VideoEvents.AD_END);
+          }
+        );
+
+        this.win.vpt.on(
+          {event: this.win.vpt.EVENTS.CONTENT_END, zid: this.zid_},
+          () => {
+            this.element.dispatchCustomEvent(VideoEvents.ENDED);
+          }
+        );
+
+        this.win.vpt.on(
+          {event: this.win.vpt.EVENTS.PLAYING, zid: this.zid_},
+          () => {
+            this.element.dispatchCustomEvent(VideoEvents.PLAYING);
+          }
+        );
+
+        this.win.vpt.on(
+          {event: this.win.vpt.EVENTS.PAUSED, zid: this.zid_},
+          () => {
+            this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+          }
+        );
+
+        this.win.vpt.on(
+          {event: this.win.vpt.EVENTS.MUTED, zid: this.zid_},
+          () => {
+            this.element.dispatchCustomEvent(VideoEvents.MUTED);
+          }
+        );
+
+        this.win.vpt.on(
+          {event: this.win.vpt.EVENTS.UNMUTED, zid: this.zid_},
+          () => {
+            this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
+          }
+        );
       });
     });
   }
@@ -101,6 +173,136 @@ export class AmpViralizePlayer extends AMP.BaseElement {
     return layout === Layout.RESPONSIVE;
   }
 
+  /** @override */
+  viewportCallback(visible) {
+    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
+  }
+
+  /** @override */
+  pauseCallback() {
+    this.pause();
+  }
+
+  /**
+   * VideoInterface implementations
+   */
+
+  /** @override */
+  supportsPlatform() {
+    return true;
+  }
+
+  /** @override */
+  isInteractive() {
+    return true;
+  }
+
+  /** @override */
+  getCurrentTime() {
+    // Not supported.
+    return 0;
+  }
+
+  /** @override */
+  getDuration() {
+    // Not supported.
+    return 1;
+  }
+
+  /** @override */
+  getPlayedRanges() {
+    // Not supported.
+    return [];
+  }
+
+  /** @override */
+  play(unusedIsAutoplay) {
+    this.win.vpt.queue.push(() => {
+      this.win.vpt.play(this.zid_);
+    });
+  }
+
+  /** @override */
+  pause() {
+    this.win.vpt.queue.push(() => {
+      this.win.vpt.pause(this.zid_);
+    });
+  }
+
+  /** @override */
+  mute() {
+    this.win.vpt.queue.push(() => {
+      this.win.vpt.mute(this.zid_);
+    });
+  }
+
+  /** @override */
+  unmute() {
+    this.win.vpt.queue.push(() => {
+      this.win.vpt.unmute(this.zid_);
+    });
+  }
+
+  /** @override */
+  showControls() {
+    this.win.vpt.queue.push(() => {
+      this.win.vpt.showControls(this.zid_);
+    });
+  }
+
+  /** @override */
+  hideControls() {
+    this.win.vpt.queue.push(() => {
+      this.win.vpt.hideControls(this.zid_);
+    });
+  }
+
+  /** @override */
+  getMetadata() {
+    // Not implemented
+  }
+
+  /** @override */
+  preimplementsAutoFullscreen() {
+    return false;
+  }
+
+  /** @override */
+  preimplementsMediaSessionAPI() {
+    return false;
+  }
+
+  /** @override */
+  fullscreenEnter() {
+    this.win.vpt.queue.push(() => {
+      this.win.vpt.enterFullscreen(this.zid_);
+    });
+  }
+
+  /** @override */
+  fullscreenExit() {
+    this.win.vpt.queue.push(() => {
+      this.win.vpt.exitFullscreen(this.zid_);
+    });
+  }
+
+  /** @override */
+  isFullscreen() {
+    if (this.iframe_) {
+      return isFullscreenElement(this.iframe_);
+    }
+    return false;
+  }
+
+  /** @override */
+  seekTo(unusedTimeSeconds) {
+    // Not implemented
+  }
+
+  /**
+   * Private methods
+   */
+
   /**
    * Evaluate the player url
    * @param {string} zid
@@ -108,10 +310,7 @@ export class AmpViralizePlayer extends AMP.BaseElement {
    * @private
    */
   getPlayerUrl_(zid) {
-    return addParamsToUrl(
-      `https://content.viralize.tv/display/?zid=${zid}`,
-      this.extraParams_
-    );
+    return addParamsToUrl(`${BASE_URL}?zid=${zid}`, this.extraParams_);
   }
 }
 
