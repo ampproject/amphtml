@@ -43,6 +43,7 @@ function writeOutput(output, filename) {
         `Could not write test result report to file '${filename}'`
       )
     );
+    process.stdout.write(Base.color('fail', error.toString()));
   }
 }
 
