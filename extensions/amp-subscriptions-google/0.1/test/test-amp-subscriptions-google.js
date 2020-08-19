@@ -234,6 +234,106 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     ]);
   });
 
+  it('should throw if enableLAA and enableMetering are set', () => {
+    expect(
+      () =>
+        new GoogleSubscriptionsPlatform(
+          ampdoc,
+          {enableLAA: true, enableMetering: true},
+          serviceAdapter
+        )
+    ).to.throw(/enableLAA and enableMetering are mutually exclusive/);
+  });
+
+  it('should ignore enableLAA and fallback if url params are missing', async () => {
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableLAA: true},
+      serviceAdapter
+    );
+    const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve({
+            entitlements: {},
+          }),
+      })
+    );
+
+    await platform.getEntitlements();
+    expect(fetchStub).to.be.calledOnce;
+  });
+
+  it('should ignore enableLAA and not fallback if url params are missing and enableEntitlements is false', async () => {
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableLAA: true, enableEntitlements: false},
+      serviceAdapter
+    );
+    const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve({
+            entitlements: {},
+          }),
+      })
+    );
+
+    await platform.getEntitlements();
+    expect(fetchStub).to.be.calledOnce;
+  });
+
+  it('should ignore enableLAA if url params have expired', async () => {
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableLAA: true},
+      serviceAdapter
+    );
+    env.sandbox.stub(platform, 'getLAAParams_').returns({
+      'glaa_ts': (Date.now() / 1000 - 10).toString(16),
+      'glaa_at': 'laa',
+      'glaa_sig': 'signature',
+      'glaa_n': 123456,
+    });
+
+    const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve({
+            entitlements: {},
+          }),
+      })
+    );
+    await platform.getEntitlements();
+    expect(fetchStub).to.be.calledOnce;
+  });
+
+  it('should return LAA if url params present and are in timestamp', async () => {
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableLAA: true},
+      serviceAdapter
+    );
+    env.sandbox.stub(platform, 'getLAAParams_').returns({
+      'glaa_ts': (Date.now() / 1000 + 10).toString(16),
+      'glaa_at': 'laa',
+      'glaa_sig': 'signature',
+      'glaa_n': 123456,
+    });
+    const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve({
+            entitlements: {},
+          }),
+      })
+    );
+
+    const ents = await platform.getEntitlements();
+    expect(ents.service).to.equal(PLATFORM_ID);
+    expect(fetchStub).to.not.be.called;
+  });
+
   it('should proxy fetch via AMP fetcher', async () => {
     const fetchStub = env.sandbox
       .stub(xhr, 'fetchJson')

@@ -37,7 +37,11 @@ import {Services} from '../../../src/services';
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/constants.js';
 import {UrlBuilder} from '../../amp-subscriptions/0.1/url-builder';
 import {WindowInterface} from '../../../src/window-interface';
-import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
+import {
+  assertHttpsUrl,
+  parseQueryString,
+  parseUrlDeprecated,
+} from '../../../src/url';
 import {experimentToggles, isExperimentOn} from '../../../src/experiments';
 import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
@@ -272,6 +276,25 @@ export class GoogleSubscriptionsPlatform {
     // Install styles.
     installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
 
+    /** @private @const {boolean} */
+    this.meteringEnable_ = !!this.serviceConfig_['enableMetering'] || false;
+
+    /** @private @const {boolean} */
+    this.enableLAA_ = !!this.serviceConfig_['enableLAA'] || false;
+
+    // Allow a publisher to turn off the entitlments check, needed
+    // in the case where LAA is in use but no other Google service is configured
+    /** @private @const {boolean} */
+    this.enableEntitlements_ =
+      this.serviceConfig_['enableEntitlements'] === undefined
+        ? true
+        : !!this.serviceConfig_['enableEntitlements'];
+
+    userAssert(
+      !(this.enableLAA_ && this.meteringEnable_),
+      'enableLAA and enableMetering are mutually exclusive.'
+    );
+
     /** @private @const {string} */
     this.skuMapUrl_ = this.serviceConfig_['skuMapUrl'] || null;
 
@@ -468,6 +491,47 @@ export class GoogleSubscriptionsPlatform {
     );
   }
 
+  /**
+   * get LAA params
+   * @return {Object<string>}
+   * @private
+   */
+  getLAAParams_() {
+    return parseQueryString(this.ampdoc_.win.location.search);
+  }
+  /**
+   * Checks enableLAA flag and LAA header params and if present
+   * and unexpired generates an LAA entitlement.
+   * @return {!Promise<?Entitlement>}
+   * @private
+   */
+  maybeGetLAAEntitlement_() {
+    if (this.enableLAA_) {
+      const parsedQuery = this.getLAAParams_();
+      if (
+        parsedQuery[`glaa_at`] == 'laa' &&
+        parsedQuery[`glaa_n`] &&
+        parsedQuery[`glaa_sig`] &&
+        parsedQuery[`glaa_ts`] &&
+        parseInt(parsedQuery[`glaa_ts`], 16) > Date.now() / 1000
+      ) {
+        // All the criteria are met to return an LAA entitlement
+        return Promise.resolve(
+          new Entitlement({
+            source: 'google:laa',
+            raw: '',
+            service: PLATFORM_ID,
+            granted: true,
+            grantReason: GrantReason.LAA,
+            dataObject: {},
+            decryptedDocumentKey: null,
+          })
+        );
+      }
+    }
+    return Promise.resolve(null);
+  }
+
   /** @override */
   isPrerenderSafe() {
     /**
@@ -485,45 +549,58 @@ export class GoogleSubscriptionsPlatform {
     const encryptedDocumentKey = this.serviceAdapter_.getEncryptedDocumentKey(
       'google.com'
     );
-    return this.runtime_
-      .getEntitlements(encryptedDocumentKey)
-      .then((swgEntitlements) => {
-        // Get and store the isReadyToPay signal which is independent of
-        // any entitlments existing.
-        if (swgEntitlements.isReadyToPay) {
-          this.isReadyToPay_ = true;
-        }
+    userAssert(
+      !(this.enableLAA_ && encryptedDocumentKey),
+      `enableLAA cannot be used when the document is encrypted`
+    );
 
-        // Get the specifc entitlement we're looking for
-        let swgEntitlement = swgEntitlements.getEntitlementForThis();
-        let granted = false;
-        if (swgEntitlement && swgEntitlement.source) {
-          granted = true;
-        } else if (
-          swgEntitlements.entitlements.length &&
-          swgEntitlements.entitlements[0].products.length
-        ) {
-          // We didn't find a grant so see if there is a non granting
-          // and return that. Note if we start returning multiple non
-          // granting we'll need to refactor to handle returning an
-          // array of Entitlement objects.
-          // #TODO(jpettitt) - refactor to handle multi entitlement case
-          swgEntitlement = swgEntitlements.entitlements[0];
-        } else {
-          return null;
-        }
-        swgEntitlements.ack();
-        return new Entitlement({
-          source: swgEntitlement.source,
-          raw: swgEntitlements.raw,
-          service: PLATFORM_ID,
-          granted,
-          // if it's granted it must be a subscriber
-          grantReason: granted ? GrantReason.SUBSCRIBER : null,
-          dataObject: swgEntitlement.json(),
-          decryptedDocumentKey: swgEntitlements.decryptedDocumentKey,
+    return this.maybeGetLAAEntitlement_().then((laaEntitlement) => {
+      if (laaEntitlement) {
+        return laaEntitlement;
+      }
+      if (!this.enableEntitlements_) {
+        return null;
+      }
+      return this.runtime_
+        .getEntitlements(encryptedDocumentKey)
+        .then((swgEntitlements) => {
+          // Get and store the isReadyToPay signal which is independent of
+          // any entitlments existing.
+          if (swgEntitlements.isReadyToPay) {
+            this.isReadyToPay_ = true;
+          }
+
+          // Get the specifc entitlement we're looking for
+          let swgEntitlement = swgEntitlements.getEntitlementForThis();
+          let granted = false;
+          if (swgEntitlement && swgEntitlement.source) {
+            granted = true;
+          } else if (
+            swgEntitlements.entitlements.length &&
+            swgEntitlements.entitlements[0].products.length
+          ) {
+            // We didn't find a grant so see if there is a non granting
+            // and return that. Note if we start returning multiple non
+            // granting we'll need to refactor to handle returning an
+            // array of Entitlement objects.
+            // #TODO(jpettitt) - refactor to handle multi entitlement case
+            swgEntitlement = swgEntitlements.entitlements[0];
+          } else {
+            return null;
+          }
+          swgEntitlements.ack();
+          return new Entitlement({
+            source: swgEntitlement.source,
+            raw: swgEntitlements.raw,
+            service: PLATFORM_ID,
+            granted,
+            // if it's granted it must be a subscriber
+            grantReason: granted ? GrantReason.SUBSCRIBER : null,
+            dataObject: swgEntitlement.json(),
+            decryptedDocumentKey: swgEntitlements.decryptedDocumentKey,
+          });
         });
-      });
+    });
   }
 
   /** @override */
