@@ -52,6 +52,37 @@
     kleur "3.0.3"
     mri "1.1.5"
 
+"@ampproject/google-closure-compiler-java@20200517.3.0":
+  version "20200517.3.0"
+  resolved "https://registry.yarnpkg.com/@ampproject/google-closure-compiler-java/-/google-closure-compiler-java-20200517.3.0.tgz#4924347004ac6cff1dec8acb31b13ac99eae7dca"
+  integrity sha512-sWrzXyQdEWYlK2jEAYmbeYU0nk4Omf3jMu36DRNjJ5FC3l5/Dxr7j8FspkRg0RwP7Nb/R1bBn/SyfL+SC4+wRA==
+
+"@ampproject/google-closure-compiler-linux@20200517.3.0":
+  version "20200517.3.0"
+  resolved "https://registry.yarnpkg.com/@ampproject/google-closure-compiler-linux/-/google-closure-compiler-linux-20200517.3.0.tgz#5aa8fa429d70f752bdbb8b0222de3468b5877014"
+  integrity sha512-BlAuYGBN9lbNY/E1gnD3lDE75YK5yu1WGHENxHkLWzmSpwCEBdG90C2Dt0c+eK+VZr37c/GkdkiIL56nw0bZgg==
+
+"@ampproject/google-closure-compiler-osx@20200517.3.0":
+  version "20200517.3.0"
+  resolved "https://registry.yarnpkg.com/@ampproject/google-closure-compiler-osx/-/google-closure-compiler-osx-20200517.3.0.tgz#a4893909312af55c557b01771fc78cf7992f48b3"
+  integrity sha512-S2iKP433xfvzzExenfxTDQtY/V4zV8pp5l4hAwizzA21rLQClW8KgT7Pud85M/fX6vR1XKg6WkO0ODMAu2hkHA==
+
+"@ampproject/google-closure-compiler-windows@20200517.3.0":
+  version "20200517.3.0"
+  resolved "https://registry.yarnpkg.com/@ampproject/google-closure-compiler-windows/-/google-closure-compiler-windows-20200517.3.0.tgz#b4fe8db2ad265c5b3d6a382feb31fa918004f617"
+  integrity sha512-p4aZ+OXfEskavecs53ru9RnvjesjA81zUwC1Y/ZiU8VhuN6Bf1gp0y/yTuub5tabR8XrhCUG4msC4wpqyf27yw==
+
+"@ampproject/google-closure-compiler@20200517.3.0":
+  version "20200517.3.0"
+  resolved "https://registry.yarnpkg.com/@ampproject/google-closure-compiler/-/google-closure-compiler-20200517.3.0.tgz#162b3a8f28a6a1637bda9dd9c78cf65eb42558e1"
+  integrity sha512-IjcIbXkMFCFPdrGSMxCfOZxrE17ZevOh2Gu/KwzDukeBO6rcJ8zwqlT8pqEtREHge1j0/ddShBLE0Bv/O3uxvA==
+  dependencies:
+    "@ampproject/google-closure-compiler-java" "20200517.3.0"
+  optionalDependencies:
+    "@ampproject/google-closure-compiler-linux" "20200517.3.0"
+    "@ampproject/google-closure-compiler-osx" "20200517.3.0"
+    "@ampproject/google-closure-compiler-windows" "20200517.3.0"
+
 "@ampproject/remapping@0.3.0":
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/@ampproject/remapping/-/remapping-0.3.0.tgz#5936f02c62ef991f0877a6ee1c3e6afb1cea14b2"
@@ -2200,35 +2231,6 @@
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@kristoferbaxter/async/-/async-1.0.0.tgz#33c8e8c6b055f15f4ee8a711b9594336a6fb1671"
   integrity sha512-CAQQQ8mUUBKI2P7stYojHwHb+ShdFN8SrC90/96V4m2XlDSctXAA+5PD5CqCICs0o5c/83cYJCeub+FSetKLrw==
-
-"@kristoferbaxter/google-closure-compiler-java@^20200517.2.1":
-  version "20200517.2.1"
-  resolved "https://registry.yarnpkg.com/@kristoferbaxter/google-closure-compiler-java/-/google-closure-compiler-java-20200517.2.1.tgz#8866ab3e0f68f97d23e0e697273e13295bca4004"
-  integrity sha512-F5fCeJRJU6Y7vAkwrul7tWYqrblYjv8yZPAtu6wGSIz7EAcHcDSKjjiEf+HnF2Ug7hDCqXIZ6TWLhESL8R+LmA==
-
-"@kristoferbaxter/google-closure-compiler-linux@^20200517.2.1":
-  version "20200517.2.1"
-  resolved "https://registry.yarnpkg.com/@kristoferbaxter/google-closure-compiler-linux/-/google-closure-compiler-linux-20200517.2.1.tgz#7662faa00bded6ecd9e92f6084464eb0d96489e8"
-  integrity sha512-GK3Lucxza4Qm631uqyADMkiy4Zsswi153cTCobCV6TR5znwCGxQL1VajoMvFH4DZ5R/qB0x1zTuczQO1/y8keA==
-
-"@kristoferbaxter/google-closure-compiler-osx@^20200517.2.1":
-  version "20200517.2.1"
-  resolved "https://registry.yarnpkg.com/@kristoferbaxter/google-closure-compiler-osx/-/google-closure-compiler-osx-20200517.2.1.tgz#1180752ed336bf52ae8ee1b4953909299bbc2351"
-  integrity sha512-BbfiuqYMqBaSq5SoB+poGBheiP/m0l6tH4Bbh0ytTipxUVCLw0MFqoFVBOiIfEWoUtAwcGTcCUBBalP0xe0BcA==
-
-"@kristoferbaxter/google-closure-compiler@20200517.2.1":
-  version "20200517.2.1"
-  resolved "https://registry.yarnpkg.com/@kristoferbaxter/google-closure-compiler/-/google-closure-compiler-20200517.2.1.tgz#d5b0f3231261139ac1ae32134052ce4515ba7751"
-  integrity sha512-2bI8PEob/vbadAw3+wMDjLmmllj5gw/+xiML/HjHyCOzxEh3UZaYRuFczy50BTYC99H+Odsh3RQ4Ulp0BFs2Kg==
-  dependencies:
-    "@kristoferbaxter/google-closure-compiler-java" "^20200517.2.1"
-    kleur "4.0.2"
-    minimist "1.x"
-    vinyl "2.x"
-    vinyl-sourcemaps-apply "^0.2.0"
-  optionalDependencies:
-    "@kristoferbaxter/google-closure-compiler-linux" "^20200517.2.1"
-    "@kristoferbaxter/google-closure-compiler-osx" "^20200517.2.1"
 
 "@nodelib/fs.scandir@2.1.2":
   version "2.1.2"
@@ -11697,11 +11699,6 @@ kleur@3.0.3, kleur@^3.0.3:
   resolved "https://registry.yarnpkg.com/kleur/-/kleur-3.0.3.tgz#a79c9ecc86ee1ce3fa6206d1216c501f147fc07e"
   integrity sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==
 
-kleur@4.0.2:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/kleur/-/kleur-4.0.2.tgz#57b36cc5235601f824c33e6e45db10cd5493dbf5"
-  integrity sha512-FGCCxczbrZuF5CtMeO0xfnjhzkVZSXfcWK90IPLucDWZwskrpYN7pmRIgvd8muU0mrPrzy4A2RBGuwCjLHI+nw==
-
 labeled-stream-splicer@^2.0.0:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/labeled-stream-splicer/-/labeled-stream-splicer-2.0.2.tgz#42a41a16abcd46fd046306cf4f2c3576fffb1c21"
@@ -12753,15 +12750,15 @@ minimist@1.2.5, minimist@^1.2.3, minimist@^1.2.5:
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.5.tgz#67d66014b66a6a8aaa0c083c5fd58df4e4e97602"
   integrity sha512-FM9nNUYrRBAELZQT3xeZQ7fmMOBg6nWNmJKTcgsJeaLstP/UODVpGsr5OhXhhXg6f+qtJ8uiZ+PUxkDWcgIXLw==
 
-minimist@1.x, minimist@^1.1.0, minimist@^1.1.1, minimist@^1.1.3, minimist@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.0.tgz#a35008b20f41383eec1fb914f4cd5df79a264284"
-  integrity sha1-o1AIsg9BOD7sH7kU9M1d95omQoQ=
-
 minimist@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-0.2.0.tgz#4dffe525dae2b864c66c2e23c6271d7afdecefce"
   integrity sha1-Tf/lJdriuGTGbC4jxicdev3s784=
+
+minimist@^1.1.0, minimist@^1.1.1, minimist@^1.1.3, minimist@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.0.tgz#a35008b20f41383eec1fb914f4cd5df79a264284"
+  integrity sha1-o1AIsg9BOD7sH7kU9M1d95omQoQ=
 
 minimist@~0.0.1:
   version "0.0.10"
@@ -18761,18 +18758,6 @@ vinyl-sourcemaps-apply@^0.1.4:
   dependencies:
     source-map "^0.1.39"
 
-vinyl@2.x, vinyl@^2.0.0, vinyl@^2.1.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/vinyl/-/vinyl-2.2.0.tgz#d85b07da96e458d25b2ffe19fece9f2caa13ed86"
-  integrity sha512-MBH+yP0kC/GQ5GwBqrTPTzEfiiLjta7hTtvQtbxBgTeSXsmKQRQecjibMbxIXzVT3Y9KJK+drOz1/k+vsu8Nkg==
-  dependencies:
-    clone "^2.1.1"
-    clone-buffer "^1.0.0"
-    clone-stats "^1.0.0"
-    cloneable-readable "^1.0.0"
-    remove-trailing-separator "^1.0.1"
-    replace-ext "^1.0.0"
-
 vinyl@^0.2.1:
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/vinyl/-/vinyl-0.2.3.tgz#bca938209582ec5a49ad538a00fa1f125e513252"
@@ -18788,6 +18773,18 @@ vinyl@^1.1.0:
     clone "^1.0.0"
     clone-stats "^0.0.1"
     replace-ext "0.0.1"
+
+vinyl@^2.0.0, vinyl@^2.1.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/vinyl/-/vinyl-2.2.0.tgz#d85b07da96e458d25b2ffe19fece9f2caa13ed86"
+  integrity sha512-MBH+yP0kC/GQ5GwBqrTPTzEfiiLjta7hTtvQtbxBgTeSXsmKQRQecjibMbxIXzVT3Y9KJK+drOz1/k+vsu8Nkg==
+  dependencies:
+    clone "^2.1.1"
+    clone-buffer "^1.0.0"
+    clone-stats "^1.0.0"
+    cloneable-readable "^1.0.0"
+    remove-trailing-separator "^1.0.1"
+    replace-ext "^1.0.0"
 
 vm-browserify@^1.0.0:
   version "1.1.0"
