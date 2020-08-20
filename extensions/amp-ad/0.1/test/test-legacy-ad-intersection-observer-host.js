@@ -16,11 +16,13 @@
 
 import {BaseElement} from '../../../../src/base-element';
 import {
-  IntersectionObserverHostForAd,
+  legacyAdIntersectionObserver,
   getIntersectionChangeEntry,
-} from '../intersection-observer-host';
+} from '../legacy-ad-intersection-observer-host';
 import {createAmpElementForTesting} from '../../../../src/custom-element';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
+import {deserializeMessage} from '../../../../src/3p-frame-messaging';
+
 
 describes.sandboxed('getIntersectionChangeEntry', {}, () => {
   beforeEach(() => {
@@ -284,47 +286,7 @@ describes.sandboxed('getIntersectionChangeEntry', {}, () => {
 });
 
 describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
-  let testElementCreatedCallback;
-  let testElementPreconnectCallback;
-  let testElementFirstAttachedCallback;
-  let testElementBuildCallback;
-  let testElementLayoutCallback;
-  let testElementFirstLayoutCompleted;
-  let testElementViewportCallback;
-
-  class TestElement extends BaseElement {
-    isLayoutSupported(unusedLayout) {
-      return true;
-    }
-    createdCallback() {
-      testElementCreatedCallback();
-    }
-    preconnectCallback(onLayout) {
-      testElementPreconnectCallback(onLayout);
-    }
-    firstAttachedCallback() {
-      testElementFirstAttachedCallback();
-    }
-    buildCallback() {
-      testElementBuildCallback();
-    }
-    layoutCallback() {
-      testElementLayoutCallback();
-      return Promise.resolve();
-    }
-    firstLayoutCompleted() {
-      testElementFirstLayoutCompleted();
-    }
-    viewportCallback(inViewport) {
-      testElementViewportCallback(inViewport);
-    }
-    getIntersectionElementLayoutBox() {
-      testElementGetInsersectionElementLayoutBox();
-      return {top: 10, left: 10, width: 11, height: 1};
-    }
-  }
-
-  const ElementClass = createAmpElementForTesting(window, TestElement);
+  const ElementClass = createAmpElementForTesting(window, BaseElement);
   customElements.define('amp-int', ElementClass);
 
   const iframeSrc =
@@ -338,7 +300,6 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
   let onScrollSpy;
   let onChangeSpy;
   let clock;
-  let testElementGetInsersectionElementLayoutBox;
 
   function getIframe(src) {
     const i = document.createElement('iframe');
@@ -352,13 +313,6 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
 
   beforeEach(() => {
     clock = window.sandbox.useFakeTimers();
-    testElementCreatedCallback = window.sandbox.spy();
-    testElementPreconnectCallback = window.sandbox.spy();
-    testElementFirstAttachedCallback = window.sandbox.spy();
-    testElementBuildCallback = window.sandbox.spy();
-    testElementLayoutCallback = window.sandbox.spy();
-    testElementFirstLayoutCompleted = window.sandbox.spy();
-    testElementViewportCallback = window.sandbox.spy();
     testElementGetInsersectionElementLayoutBox = window.sandbox.spy();
     getIntersectionChangeEntrySpy = window.sandbox.spy();
     onScrollSpy = window.sandbox.spy();
@@ -366,13 +320,6 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
     testIframe = getIframe(iframeSrc);
     element = new ElementClass();
     element.win = window;
-    element.getVsync = function () {
-      return {
-        measure(fn) {
-          fn();
-        },
-      };
-    };
     element.getViewport = function () {
       return {
         onScroll() {
@@ -385,15 +332,13 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
         },
       };
     };
-    element.element = {
-      getIntersectionChangeEntry() {
-        getIntersectionChangeEntrySpy();
+    element.element = document.createElement('amp-int');
+    element.element.getIntersectionChangeEntry = () => {
+      getIntersectionChangeEntrySpy();
         const rootBounds = layoutRectLtwh(198, 299, 100, 100);
         const layoutBox = layoutRectLtwh(50, 100, 150, 200);
         return getIntersectionChangeEntry(layoutBox, null, rootBounds);
-      },
     };
-    element.isInViewport = () => false;
   });
 
   afterEach(() => {
@@ -401,7 +346,7 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
   });
 
   it('should not send intersection', () => {
-    const ioInstance = new IntersectionObserverHostForAd(element, testIframe);
+    const ioInstance = new legacyAdIntersectionObserver(element, testIframe);
     insert(testIframe);
     const postMessageSpy = window.sandbox /*OK*/
       .spy(testIframe.contentWindow, 'postMessage');
@@ -412,11 +357,10 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
 
   it('should send intersection', () => {
     const messages = [];
-    const ioInstance = new IntersectionObserverHostForAd(element, testIframe);
+    const ioInstance = new legacyAdIntersectionObserver(element, testIframe);
     insert(testIframe);
     testIframe.contentWindow.postMessage = (message) => {
-      // Copy because arg is modified in place.
-      messages.push(JSON.parse(JSON.stringify(message)));
+      messages.push(deserializeMessage(message));
     };
     clock.tick(33);
     ioInstance.postMessageApi_.clientWindows_ = [
@@ -432,11 +376,10 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
 
   it('should send more intersections', () => {
     const messages = [];
-    const ioInstance = new IntersectionObserverHostForAd(element, testIframe);
+    const ioInstance = new legacyAdIntersectionObserver(element, testIframe);
     insert(testIframe);
     testIframe.contentWindow.postMessage = (message) => {
-      // Copy because arg is modified in place.
-      messages.push(JSON.parse(JSON.stringify(message)));
+      messages.push(deserializeMessage(message));
     };
     ioInstance.postMessageApi_.clientWindows_ = [
       {win: testIframe.contentWindow, origin: '*'},
@@ -478,12 +421,12 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
 
   it('should init listeners when element is in viewport', () => {
     const fireSpy = window.sandbox.spy(
-      IntersectionObserverHostForAd.prototype,
+      legacyAdIntersectionObserver.prototype,
       'fire'
     );
-    const ioInstance = new IntersectionObserverHostForAd(element, testIframe);
+    const ioInstance = new legacyAdIntersectionObserver(element, testIframe);
     insert(testIframe);
-    ioInstance.onViewportCallback(true);
+    ioInstance.onViewportCallback_(true);
     expect(fireSpy).to.be.calledOnce;
     expect(onScrollSpy).to.be.calledOnce;
     expect(onChangeSpy).to.be.calledOnce;
@@ -492,36 +435,24 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
 
   it('should unlisten listeners when element is out of viewport', () => {
     const fireSpy = window.sandbox.spy(
-      IntersectionObserverHostForAd.prototype,
+      legacyAdIntersectionObserver.prototype,
       'fire'
     );
-    const ioInstance = new IntersectionObserverHostForAd(element, testIframe);
+    const ioInstance = new legacyAdIntersectionObserver(element, testIframe);
     insert(testIframe);
-    ioInstance.onViewportCallback(true);
-    ioInstance.onViewportCallback();
+    ioInstance.onViewportCallback_(true);
+    ioInstance.onViewportCallback_();
     expect(fireSpy).to.have.callCount(2);
     expect(ioInstance.unlistenViewportChanges_).to.be.null;
   });
 
-  it('should go into in-viewport state for initially visible element', () => {
-    element.isInViewport = () => true;
-    const ioInstance = new IntersectionObserverHostForAd(element, testIframe);
-    insert(testIframe);
-    ioInstance.startSendingIntersectionChanges_();
-    expect(getIntersectionChangeEntrySpy).to.have.callCount(2);
-    expect(onScrollSpy).to.be.calledOnce;
-    expect(onChangeSpy).to.be.calledOnce;
-    expect(ioInstance.unlistenViewportChanges_).to.not.be.null;
-  });
-
   it('should not send intersection after destroy is called', () => {
     const messages = [];
-    const ioInstance = new IntersectionObserverHostForAd(element, testIframe);
+    const ioInstance = new legacyAdIntersectionObserver(element, testIframe);
     insert(testIframe);
-    ioInstance.onViewportCallback(true);
+    ioInstance.onViewportCallback_(true);
     testIframe.contentWindow.postMessage = (message) => {
-      // Copy because arg is modified in place.
-      messages.push(JSON.parse(JSON.stringify(message)));
+      messages.push(deserializeMessage(message));
     };
     ioInstance.postMessageApi_.clientWindows_ = [
       {win: testIframe.contentWindow, origin: '*'},
