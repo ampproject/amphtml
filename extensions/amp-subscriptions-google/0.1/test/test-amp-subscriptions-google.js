@@ -38,7 +38,6 @@ import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../../src/services';
 import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/constants';
 import {WindowInterface} from '../../../../src/window-interface';
-import {getMode} from '../../../../src/mode';
 import {toggleExperiment} from '../../../../src/experiments';
 
 const PLATFORM_ID = 'subscribe.google.com';
