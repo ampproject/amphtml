@@ -21,12 +21,14 @@
  * @example
  * In:
  * ```
- * const useStyles = createStyleSheet({button: { fileSize: 12 }});
+ * const useStyles = createStyleSheet({button: { fontSize: 12 }});
+ * const CSS = ''
  * ```
  *
  * Out:
  * ```
  * const useStyles = { button: 'button-1' }
+ * const CSS = `button-1 { fontSize: 12 }`
  * ```
  */
 
