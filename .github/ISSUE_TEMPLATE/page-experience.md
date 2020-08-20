@@ -23,20 +23,25 @@ This page is failing for the following reason:
 
 -->
 
-
 | Metric                  | Field data - Origin | Field data - Cache | Lab data - Origin | Lab data - Cache |
 |-------------------------|---------------------|--------------------|-------------------|------------------|
-| LCP                     |                     |                    |                   |                  |
-| FID                     |                     |                    |                   |                  |
-| CLS                     |                     |                    |                   |                  |
-| HTTPS                   |                     |                    |                   |                  |
-| Safe browsing           |                     |                    |                   |                  |
-| Mobile-friendliness     |                     |                    |                   |                  |
-| Intrusive Interstitials |                     |                    |                   |                  |
+| LCP                     | <pass/fail>         | <pass/fail>        | <pass/fail>       | <pass/fail>      |
+| FID                     | <pass/fail>         | <pass/fail>        | <pass/fail>       | <pass/fail>      |
+| CLS                     | <pass/fail>         | <pass/fail>        | <pass/fail>       | <pass/fail>      |
+| HTTPS                   | <pass/fail>         | <pass/fail>        | <pass/fail>       | <pass/fail>      |
+| Safe browsing           | <pass/fail>         | <pass/fail>        | <pass/fail>       | <pass/fail>      |
+| Mobile-friendliness     | <pass/fail>         | <pass/fail>        | <pass/fail>       | <pass/fail>      |
+| Intrusive Interstitials | <pass/fail>         | <pass/fail>        | <pass/fail>       | <pass/fail>      |
 
-<!--
 Notes
 ---
+
+Suspected components in use: 
+<!--
+List components on the page that may be cuasing these issues
+-->
+
+<!--
 <Additional notes>
 -->
 
