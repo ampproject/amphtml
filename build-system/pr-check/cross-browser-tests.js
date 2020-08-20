@@ -20,8 +20,8 @@ const {red, cyan} = require('ansi-colors');
 
 /**
  * @fileoverview
- * This script kicks off the unit and integration tests on Linux and Mac OS.
- * This is run on Github Actions CI stage = Linux | Mac OS.
+ * This script kicks off the unit and integration tests on Linux, Mac OS, and
+ * Windows. This is run on Github Actions CI stage = Cross-Browser Tests.
  */
 
 const {
