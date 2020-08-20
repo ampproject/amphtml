@@ -272,27 +272,30 @@ export class AmpStory360 extends AMP.BaseElement {
     container.appendChild(this.canvas_);
     this.applyFillContent(container, /* replacedContent */ true);
 
-    Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
-      this.storeService_ = storeService;
+    // Initialize all services before proceeding
+    return Promise.all([
+      Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
+        this.storeService_ = storeService;
 
-      storeService.subscribe(StateProperty.PAGE_SIZE, () =>
-        this.resizeRenderer_()
-      );
+        storeService.subscribe(StateProperty.PAGE_SIZE, () =>
+          this.resizeRenderer_()
+        );
 
-      storeService.subscribe(
-        StateProperty.GYROSCOPE_PERMISSION_STATE,
-        (permissionState) => this.onPermissionState_(permissionState)
-      );
-    });
+        storeService.subscribe(
+          StateProperty.GYROSCOPE_PERMISSION_STATE,
+          (permissionState) => this.onPermissionState_(permissionState)
+        );
+      }),
 
-    if (attr('controls') === 'gyroscope') {
       Services.localizationServiceForOrNull(this.element).then(
         (localizationService) => {
           this.localizationService_ = localizationService;
-          this.checkGyroscopePermissions_();
         }
-      );
-    }
+      ),
+    ]).then(() => {
+      attr('controls') === 'gyroscope' && this.checkGyroscopePermissions_();
+      return Promise.resolve;
+    });
   }
 
   /**
