@@ -288,31 +288,24 @@ export class AmpScript extends AMP.BaseElement {
     };
 
     // Create worker and hydrate.
-    WorkerDOM.upgrade(container || this.element, workerAndAuthorScripts, config)
-      .then((workerDom) => {
-        this.workerDom_ = workerDom;
-        this.initialize_.resolve();
-        // workerDom will be null if it failed to init.
-        if (this.workerDom_) {
-          this.workerDom_.onerror = (errorEvent) => {
-            errorEvent.preventDefault();
-            user().error(
-              TAG,
-              `${errorEvent.message}\n    at (${errorEvent.filename}:${errorEvent.lineno})`
-            );
-          };
-        }
-      })
-      .catch((err) => {
-        // Catch errors if due to an issue with workerAndAuthorScripts rejection.
-        return workerAndAuthorScripts
-          .then(() => {
-            throw err;
-          })
-          .catch(() => {});
-      });
-
-    return workerAndAuthorScripts;
+    return WorkerDOM.upgrade(
+      container || this.element,
+      workerAndAuthorScripts,
+      config
+    ).then((workerDom) => {
+      this.workerDom_ = workerDom;
+      this.initialize_.resolve();
+      // workerDom will be null if it failed to init.
+      if (this.workerDom_) {
+        this.workerDom_.onerror = (errorEvent) => {
+          errorEvent.preventDefault();
+          user().error(
+            TAG,
+            `${errorEvent.message}\n    at (${errorEvent.filename}:${errorEvent.lineno})`
+          );
+        };
+      }
+    });
   }
 
   /**
