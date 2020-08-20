@@ -36,7 +36,7 @@ function writeOutput(output, dir, filename) {
     process.stdout.write(
       Base.color(
         'green',
-        `Successfully wrote test result report to file '${filename}'`
+        `Successfully wrote test result report to file '${filename}'\n`
       )
     );
   } catch (error) {
