@@ -58,10 +58,6 @@ const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
 /** @const */
 const SERVICE_TIMEOUT = 3000;
 
-const ALLOWED_LAA_REF_RE = new RegExp(
-  '^(https://www\.google\.com|https://news\.google\.com|https?://localhost)$'
-);
-
 const SWG_EVENTS_TO_SUPPRESS = {
   [AnalyticsEvent.IMPRESSION_PAYWALL]: true,
   [AnalyticsEvent.IMPRESSION_PAGE_LOAD]: true,
@@ -517,7 +513,8 @@ export class GoogleSubscriptionsPlatform {
       return this.viewerPromise_.getReferrerUrl().then((referrer) => {
         const parsedQuery = this.getLAAParams_();
         if (
-          ALLOWED_LAA_REF_RE.test(parseUrlDeprecated(referrer).origin) &&
+          (GOOGLE_DOMAIN_RE.test(parseUrlDeprecated(referrer).origin) ||
+            getMode(this.win_).localDev) &&
           parsedQuery[`glaa_at`] == 'laa' &&
           parsedQuery[`glaa_n`] &&
           parsedQuery[`glaa_sig`] &&
