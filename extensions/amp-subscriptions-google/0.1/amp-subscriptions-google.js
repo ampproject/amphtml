@@ -59,7 +59,7 @@ const GOOGLE_DOMAIN_RE = /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/;
 const SERVICE_TIMEOUT = 3000;
 
 const ALLOWED_LAA_REF_RE = new RegExp(
-  '^(https://www.google.com|https://news.google.com|https?://localhost)$'
+  '^(https://www\.google\.com|https://news\.google\.com|https?://localhost)$'
 );
 
 const SWG_EVENTS_TO_SUPPRESS = {
@@ -284,10 +284,10 @@ export class GoogleSubscriptionsPlatform {
     installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
 
     /** @private @const {boolean} */
-    this.enableMetering_ = !!this.serviceConfig_['enableMetering'] || false;
+    this.enableMetering_ = !!this.serviceConfig_['enableMetering'];
 
     /** @private @const {boolean} */
-    this.enableLAA_ = !!this.serviceConfig_['enableLAA'] || false;
+    this.enableLAA_ = !!this.serviceConfig_['enableLAA'];
 
     // Allow a publisher to turn off the entitlments check, needed
     // in the case where LAA is in use but no other Google service is configured
