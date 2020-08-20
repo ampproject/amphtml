@@ -19,7 +19,7 @@ import {createAmpElementForTesting} from '../../../../src/custom-element';
 import {deserializeMessage} from '../../../../src/3p-frame-messaging';
 import {
   getIntersectionChangeEntry,
-  legacyAdIntersectionObserver,
+  LegacyAdIntersectionObserver,
 } from '../legacy-ad-intersection-observer-host';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 
@@ -344,7 +344,7 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
   });
 
   it('should not send intersection', () => {
-    const ioInstance = new legacyAdIntersectionObserver(element, testIframe);
+    const ioInstance = new LegacyAdIntersectionObserver(element, testIframe);
     insert(testIframe);
     const postMessageSpy = window.sandbox /*OK*/
       .spy(testIframe.contentWindow, 'postMessage');
@@ -355,7 +355,7 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
 
   it('should send intersection', () => {
     const messages = [];
-    const ioInstance = new legacyAdIntersectionObserver(element, testIframe);
+    const ioInstance = new LegacyAdIntersectionObserver(element, testIframe);
     insert(testIframe);
     testIframe.contentWindow.postMessage = (message) => {
       messages.push(deserializeMessage(message));
@@ -374,7 +374,7 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
 
   it('should send more intersections', () => {
     const messages = [];
-    const ioInstance = new legacyAdIntersectionObserver(element, testIframe);
+    const ioInstance = new LegacyAdIntersectionObserver(element, testIframe);
     insert(testIframe);
     testIframe.contentWindow.postMessage = (message) => {
       messages.push(deserializeMessage(message));
@@ -419,10 +419,10 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
 
   it('should init listeners when element is in viewport', () => {
     const fireSpy = window.sandbox.spy(
-      legacyAdIntersectionObserver.prototype,
+      LegacyAdIntersectionObserver.prototype,
       'fire'
     );
-    const ioInstance = new legacyAdIntersectionObserver(element, testIframe);
+    const ioInstance = new LegacyAdIntersectionObserver(element, testIframe);
     insert(testIframe);
     ioInstance.onViewportCallback_(true);
     expect(fireSpy).to.be.calledOnce;
@@ -433,10 +433,10 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
 
   it('should unlisten listeners when element is out of viewport', () => {
     const fireSpy = window.sandbox.spy(
-      legacyAdIntersectionObserver.prototype,
+      LegacyAdIntersectionObserver.prototype,
       'fire'
     );
-    const ioInstance = new legacyAdIntersectionObserver(element, testIframe);
+    const ioInstance = new LegacyAdIntersectionObserver(element, testIframe);
     insert(testIframe);
     ioInstance.onViewportCallback_(true);
     ioInstance.onViewportCallback_();
@@ -446,7 +446,7 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
 
   it('should not send intersection after destroy is called', () => {
     const messages = [];
-    const ioInstance = new legacyAdIntersectionObserver(element, testIframe);
+    const ioInstance = new LegacyAdIntersectionObserver(element, testIframe);
     insert(testIframe);
     ioInstance.onViewportCallback_(true);
     testIframe.contentWindow.postMessage = (message) => {
