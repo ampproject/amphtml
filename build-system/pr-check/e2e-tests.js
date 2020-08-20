@@ -42,7 +42,7 @@ async function main() {
   if (!isTravisPullRequestBuild()) {
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp e2e --nobuild --headless --compiled');
+    timedExecOrDie('gulp e2e --nobuild --headless --compiled --report');
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
