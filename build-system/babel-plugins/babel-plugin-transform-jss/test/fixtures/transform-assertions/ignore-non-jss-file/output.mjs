@@ -13,5 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import { useStyles } from './base-carousel.jss'; 
+import { createUseStyles } from "react-jss";
+const useStyles = createUseStyles({});
+export { useStyles };

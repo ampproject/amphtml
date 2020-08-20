@@ -15,64 +15,63 @@
  */
 
 /**
- * Takes the component imports of `useStyles`, and converts them to point to the compiled
- * jss file. Only applies to amp/bento modes.
+ * Takes a .jss.js file and transforms the `useStyles` export to remove side effects
+ * and directly return the classes map.
  *
  * @example
  * In:
  * ```
- * import {useStyles} from './base-carousel.jss';
+ * const useStyles = createStyleSheet({button: { fileSize: 12 }});
  * ```
  *
  * Out:
  * ```
- * import {useStyles} from '../../../build/amp-base-carousel-1.0.jss.compiled';
+ * const useStyles = { button: 'button-1' }
  * ```
  */
 
-const relative = require('path').relative;
+const {create} = require('jss');
+const {default: preset} = require('jss-preset-default');
 
 module.exports = function ({types: t}) {
-  function containsUseStyles(path) {
-    const importDeclaration = path.node;
-    for (let i = 0; i < importDeclaration.specifiers.length; i++) {
-      const spec = importDeclaration.specifiers[i];
-      if (spec.imported.name === 'useStyles') {
-        return true;
-      }
-    }
-    return false;
+  function isJssFile(filename) {
+    return filename.endsWith('.jss.js');
   }
 
-  function isImportFromJss(path) {
-    return path.node.source.value.endsWith('.jss');
+  function compileJss(filepath) {
+    const jss = create();
+    jss.setup(preset());
+    return jss.createStyleSheet(require(filepath).JSS);
   }
 
-  function extractJssPath(importDeclarationPath) {
-    const program = importDeclarationPath.parentPath;
-    let val;
-    program.traverse({
-      VariableDeclarator(path) {
-        if (path.node.id.name === 'COMPILED_JSS_PATH') {
-          val = path.node.init.value;
-          path.remove();
-        }
-      },
-    });
-    if (! val) {
-      throw new Error('Missing COMPILED_JSS_PATH');
-    }
-    return val;
-  }
+  const isIdent = (path, ident) => path.node.id && path.node.id.name === ident;
+  const replaceVal = (path, newValue) => {
+    const newNode = t.cloneNode(path.node);
+    newNode.init = t.identifier(newValue);
+    path.replaceWith(newNode);
+  };
 
+  const sheetMap = new WeakMap();
   return {
     visitor: {
-      ImportDeclaration(path, state) {
-        console.log(path);
-        if (isImportFromJss(path) && containsUseStyles(path)) {
-          const clone = t.cloneNode(path.node);
-          clone.source.value = extractJssPath(path);
-          path.replaceWith(clone);
+      VariableDeclarator(path, state) {
+        // TODO: Can I skip the whole file if not jss?
+        const {filename} = state.file.opts;
+        if (!isJssFile(filename)) {
+          return;
+        }
+        if (!sheetMap.has(state.file)) {
+          sheetMap.set(state.file, compileJss(filename));
+        }
+        const sheet = sheetMap.get(state.file);
+
+        if (isIdent(path, 'useStyles')) {
+          replaceVal(path, `() => (${JSON.stringify(sheet.classes)})`);
+          path.stop();
+        }
+        if (isIdent(path, 'CSS')) {
+          replaceVal(path, '`' + sheet.toString() + '`');
+          path.stop();
         }
       },
     },

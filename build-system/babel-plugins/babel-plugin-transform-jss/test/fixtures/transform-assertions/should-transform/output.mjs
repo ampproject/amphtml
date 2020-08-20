@@ -13,4 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { useStyles } from '../../../build/amp-base-carousel-1.0.jss.compiled';
+const JSS = {
+  button: {
+    fontSize: 12
+  }
+};
+const CSS = `.button-0-1-1 {
+  font-size: 12px;
+}`;
+const useStyles = () => ({"button":"button-0-1-1"});
+export { JSS, CSS, useStyles };

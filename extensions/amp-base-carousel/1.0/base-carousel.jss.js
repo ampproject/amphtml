@@ -174,8 +174,7 @@ const slideSizing = {
   ...hideScrollbarPseudo,
 };
 
-// eslint-disable-next-line
-module.exports = {
+const JSS = {
   slideElement,
   scrollContainer,
   arrowPlacement,
@@ -191,4 +190,17 @@ module.exports = {
   hideScrollbar,
   horizontalScroll,
   slideSizing,
+}; 
+
+// This gets replaced via `babel-plugin-transform-jss`.
+const CSS = ''; 
+
+// eslint-ignore-next-line no-undef
+const useStyles = require('react-jss').createUseStyles(JSS);
+
+// eslint-disable-next-line
+module.exports = {
+  CSS,
+  JSS,
+  useStyles,
 };

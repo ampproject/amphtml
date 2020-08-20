@@ -16,7 +16,7 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {BaseCarousel} from './base-carousel';
-import {CSS} from '../../../build/amp-base-carousel-1.0.jss.compiled';
+import {CSS} from './base-carousel.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';

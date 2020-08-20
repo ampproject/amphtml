@@ -25,7 +25,7 @@ import {
   useMemo,
   useRef,
 } from '../../../src/preact';
-import {useStyles} from '../../../build/amp-base-carousel-1.0.jss.compiled';
+import {useStyles} from './base-carousel.jss';
 
 /**
  * How long to wait prior to resetting the scrolling position after the last

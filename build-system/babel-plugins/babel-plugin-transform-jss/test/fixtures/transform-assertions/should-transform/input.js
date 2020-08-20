@@ -12,5 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-import { CSS } from './amp-base-carousel-1.0.jss';
+ */ 
+const JSS = {button: {fontSize: 12}};
+const CSS = '';
+const useStyles = require('react-jss').createUseStyles(JSS);
+
+export {JSS, CSS, useStyles};
