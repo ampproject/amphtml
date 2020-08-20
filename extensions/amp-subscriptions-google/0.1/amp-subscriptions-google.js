@@ -519,7 +519,7 @@ export class GoogleSubscriptionsPlatform {
           // Note we don't use the more generic this.isDev_ flag becuase that can ber triggered
           // by a hash value which would allow non gooogle origins to construst LAA urls.
           (GOOGLE_DOMAIN_RE.test(parseUrlDeprecated(referrer).origin) ||
-            getMode(this.win_).localDev) &&
+            getMode(this.ampdoc_.win).localDev) &&
           parsedQuery[`glaa_at`] == 'laa' &&
           parsedQuery[`glaa_n`] &&
           parsedQuery[`glaa_sig`] &&

@@ -38,6 +38,7 @@ import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../../src/services';
 import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/constants';
 import {WindowInterface} from '../../../../src/window-interface';
+import {getMode} from '../../../../src/mode';
 import {toggleExperiment} from '../../../../src/experiments';
 
 const PLATFORM_ID = 'subscribe.google.com';
@@ -356,6 +357,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
       {enableLAA: true, enableEntitlements: false},
       serviceAdapter
     );
+    ampdoc.win.__AMP_MODE.localDev = false;
     env.sandbox.stub(platform, 'getLAAParams_').returns({
       'glaa_ts': (Date.now() / 1000 + 10).toString(16),
       'glaa_at': 'laa',
