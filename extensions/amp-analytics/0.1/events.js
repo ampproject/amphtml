@@ -25,7 +25,7 @@ import {
 import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {getData} from '../../../src/event-helper';
-import {getDataParamsFromAttributes} from '../../../src/dom';
+import {getDataParamsFromAttributes, isAmpElement} from '../../../src/dom';
 import {isArray, isEnumValue, isFiniteNumber} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 
@@ -1518,10 +1518,7 @@ export class VisibilityTracker extends EventTracker {
             visibilityManager.listenElement(
               elements[i],
               visibilitySpec,
-              this.getReadyPromise(
-                this.setDefaultWaitForElement_(waitForSpec, elements[i]),
-                elements[i]
-              ),
+              this.getReadyPromise(waitForSpec, elements[i]),
               createReportReadyPromiseFunc,
               this.onEvent_.bind(this, eventType, listener, elements[i])
             )
@@ -1645,8 +1642,7 @@ export class VisibilityTracker extends EventTracker {
    */
   setDefaultWaitForElement_(waitForSpec, element) {
     if (!waitForSpec) {
-      const isAmpElement = element.classList.contains('i-amphtml-element');
-      waitForSpec = isAmpElement ? 'ini-load' : 'none';
+      waitForSpec = isAmpElement(element) ? 'ini-load' : 'none';
     }
     return waitForSpec;
   }
@@ -1658,15 +1654,17 @@ export class VisibilityTracker extends EventTracker {
    * @visibleForTesting
    */
   getReadyPromise(waitForSpec, opt_element) {
+    if (opt_element) {
+      waitForSpec = this.setDefaultWaitForElement_(waitForSpec, opt_element);
+    }
+
     if (!waitForSpec) {
       // Default case, waitFor selector is not defined, wait for nothing
       return null;
     }
 
     const trackerAllowlist = getTrackerTypesForParentType('visible');
-    const isAllowedWaitFor = opt_element
-      ? opt_element.classList.contains('i-amphtml-element')
-      : true;
+    const isAllowedWaitFor = opt_element ? isAmpElement(opt_element) : true;
     userAssert(
       waitForSpec == 'none' ||
         (trackerAllowlist[waitForSpec] !== undefined && isAllowedWaitFor),

@@ -839,8 +839,6 @@ not specified, it waits for element's [`ini-load`](#ini-load) signal. See
 for that signal before sending the event. This is useful, for example, in
 sending analytics events when the page is closed.
 
-Tracking non-AMP elements are best effort. For example, tracking a `<div>` element that contains an `<amp-iframe>`, may not accurately wait for the iframe to load before sending the signal out.
-
 ###### `"on": "hidden"` trigger
 
 Use the hidden trigger (`"on": "hidden"`) to fire a request when the page
@@ -1118,7 +1116,7 @@ Configuration properties supported in `visibilitySpec` are:
 - `waitFor`: This property indicates that the visibility trigger should wait
   for a certain signal before tracking visibility. The supported values are
   `none`, `ini-load`, and `render-start`. If `waitFor` is undefined, it is
-  defaulted to [`ini-load`](#ini-load) (for AMP elements) when selector is specified, or to `none` otherwise. When tracking non AMP elements, only `none` is supported, which is its default value.
+  defaulted to [`ini-load`](#ini-load) (for AMP elements) when selector is specified, or to `none` otherwise. When tracking non-AMP elements, only `none` is supported, which is its default value. Tracking non-AMP elements may not always work as intended. For example, tracking a `<div>` element that contains an `<amp-iframe>`, may not accurately wait for the iframe to load before sending the signal out.
 
 - `reportWhen`: This property indicates that the visibility trigger should
   wait for a certain signal before sending the trigger. The only supported

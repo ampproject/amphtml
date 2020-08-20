@@ -41,9 +41,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
   let handler;
   let analyticsElement;
   let target;
-  let target2;
   let child;
-  let child2;
 
   beforeEach(() => {
     win = env.win;
@@ -58,17 +56,9 @@ describes.realWin('Events', {amp: 1}, (env) => {
     target.classList.add('target');
     win.document.body.appendChild(target);
 
-    target2 = win.document.createElement('div');
-    target2.classList.add('target2');
-    win.document.body.appendChild(target2);
-
     child = win.document.createElement('div');
     child.classList.add('child');
     target.appendChild(child);
-
-    child2 = win.document.createElement('div');
-    child2.classList.add('child2');
-    target2.appendChild(child2);
   });
 
   describe('AnalyticsEvent', () => {
@@ -1834,6 +1824,16 @@ describes.realWin('Events', {amp: 1}, (env) => {
         tracker.waitForTrackers_['ini-load']
       );
 
+      target.parentNode.removeChild(target);
+
+      target = win.document.createElement('amp-list');
+      target.classList.add('target');
+      win.document.body.appendChild(target);
+
+      child = win.document.createElement('div');
+      child.classList.add('child');
+      target.appendChild(child);
+
       target.classList.add('i-amphtml-element');
       targetSignals = new Signals();
       target.signals = () => targetSignals;
@@ -1998,6 +1998,7 @@ describes.realWin('Events', {amp: 1}, (env) => {
         let eventsSpy;
         let res;
         let error;
+        let target2;
 
         beforeEach(() => {
           toggleExperiment(win, 'visibility-trigger-improvements', true);
@@ -2008,6 +2009,10 @@ describes.realWin('Events', {amp: 1}, (env) => {
 
           eventsSpy = env.sandbox.spy(tracker, 'onEvent_');
 
+          target2 = win.document.createElement('amp-list');
+          win.document.body.appendChild(target2);
+
+          target2.classList.add('target2');
           target2.classList.add('i-amphtml-element');
           targetSignals2 = new Signals();
           target2.signals = () => targetSignals2;
@@ -2242,17 +2247,13 @@ describes.realWin('Events', {amp: 1}, (env) => {
       });
 
       describe('non AMP elements', () => {
-        let element;
-
-        beforeEach(() => {
-          element = win.document.createElement('p');
-        });
-
         it('with non AMP element and waitFor NONE', () => {
+          const element = win.document.createElement('p');
           expect(tracker.getReadyPromise('none', element)).to.be.null;
         });
 
         it('error with non AMP element and waitFor not NONE', () => {
+          const element = win.document.createElement('p');
           expect(() => tracker.getReadyPromise('ini-load', element)).to.throw(
             /waitFor value ini-load not supported​​​/
           );
@@ -2260,20 +2261,15 @@ describes.realWin('Events', {amp: 1}, (env) => {
       });
 
       describe('default waitFor with element', () => {
-        let element;
-
-        beforeEach(() => {
-          element = win.document.createElement('p');
-        });
-
         it('should set default waitFor for non AMP element', () => {
+          const element = win.document.createElement('p');
           expect(tracker.setDefaultWaitForElement_(null, element)).to.equal(
             'none'
           );
         });
 
         it('should set default waitFor for AMP element', () => {
-          element.classList.add('i-amphtml-element');
+          const element = win.document.createElement('amp-list');
           expect(tracker.setDefaultWaitForElement_(null, element)).to.equal(
             'ini-load'
           );
