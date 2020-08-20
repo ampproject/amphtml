@@ -325,7 +325,7 @@ export class AmpStory360 extends AMP.BaseElement {
 
     // If DeviceOrientationEvent and permissions, build permission button.
     if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-      this.buildPermissionButton_();
+      this.checkPermissionOnLoad_();
     }
   }
 
@@ -380,38 +380,54 @@ export class AmpStory360 extends AMP.BaseElement {
   }
 
   /**
-   * Creates a "activate" button to request DeviceOrientation permissions.
-   * Simulates a click event to call this method on page load.
+   * Checks if permissions have been set by user on page load.
    * @private
    */
-  buildPermissionButton_() {
-    const tempButton = document.createElement('div');
-    tempButton.addEventListener('click', () => {
-      if (this.win.DeviceOrientationEvent.requestPermission) {
-        this.win.DeviceOrientationEvent.requestPermission()
-          // Render activate button if permissions aren't set yet.
-          .catch(() => {
-            const activateButton = buildActivateButtonTemplate(this.element);
+  checkPermissionOnLoad_() {
+    if (this.win.DeviceOrientationEvent.requestPermission) {
+      this.win.DeviceOrientationEvent.requestPermission()
+        // Render activate button if permissions aren't set yet.
+        .catch(() => {
+          this.renderActivateButton_();
+        })
+        // If permissions are already set, handle permission state.
+        .then((permissionState) => {
+          permissionState && this.setPermissionState_(permissionState);
+        });
+    }
+  }
 
-            activateButton.querySelector(
-              '.activate-text'
-            ).textContent = this.localizationService_.getLocalizedString(
-              LocalizedStringId.AMP_STORY_ACTIVATE_BUTTON_TEXT
-            );
+  /**
+   * A button to ask for permissons.
+   * @private
+   */
+  renderActivateButton_() {
+    const activateButton = buildActivateButtonTemplate(this.element);
 
-            this.element.appendChild(activateButton);
+    activateButton.querySelector(
+      '.activate-text'
+    ).textContent = this.localizationService_.getLocalizedString(
+      LocalizedStringId.AMP_STORY_ACTIVATE_BUTTON_TEXT
+    );
 
-            activateButton.addEventListener('click', () => {
-              this.requestGyroscopePermissions_();
-            });
-          })
-          // If permissions are already set, handle permission state.
-          .then((permissionState) => {
-            permissionState && this.setPermissionState_(permissionState);
-          });
-      }
-    });
-    tempButton.click();
+    activateButton.addEventListener('click', () =>
+      this.requestGyroscopePermissions_()
+    );
+
+    this.mutateElement(() => this.element.appendChild(activateButton));
+  }
+
+  /** @private */
+  requestGyroscopePermissions_() {
+    if (this.win.DeviceOrientationEvent.requestPermission) {
+      this.win.DeviceOrientationEvent.requestPermission()
+        .then((permissionState) => {
+          this.setPermissionState_(permissionState);
+        })
+        .catch((error) => {
+          dev().error(TAG, `Gyroscope permission error: ${error.message}`);
+        });
+    }
   }
 
   /**
@@ -438,19 +454,6 @@ export class AmpStory360 extends AMP.BaseElement {
         hidePermissionButton
       );
     });
-  }
-
-  /** @private */
-  requestGyroscopePermissions_() {
-    if (this.win.DeviceOrientationEvent.requestPermission) {
-      this.win.DeviceOrientationEvent.requestPermission()
-        .then((permissionState) => {
-          this.setPermissionState_(permissionState);
-        })
-        .catch((error) => {
-          dev().error(TAG, `Gyroscope permission error: ${error.message}`);
-        });
-    }
   }
 
   /** @override */
