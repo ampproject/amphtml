@@ -88,6 +88,7 @@ integration.flags = {
   'debug':
     '  Allow debug statements by auto opening devtools. NOTE: This only ' +
     'works in non headless mode.',
+  'edge': '  Runs tests on Edge',
   'firefox': '  Runs tests on Firefox',
   'files': '  Runs tests for specific files',
   'grep': '  Runs tests that match the pattern',

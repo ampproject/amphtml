@@ -230,10 +230,10 @@ module.exports = {
   // So we instantly have all the custom server endpoints available
   beforeMiddleware: ['custom'],
   plugins: [
+    '@chiragrupani/karma-chromium-edge-launcher',
     'karma-browserify',
     'karma-chai',
     'karma-chrome-launcher',
-    'karma-edge-launcher',
     'karma-firefox-launcher',
     'karma-fixture',
     'karma-html2js-preprocessor',
