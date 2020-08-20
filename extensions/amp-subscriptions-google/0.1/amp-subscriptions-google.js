@@ -121,7 +121,7 @@ export class GoogleSubscriptionsPlatform {
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(ampdoc.win);
 
-    /** @private {bool} */
+    /** @private @const {boolean} */
     this.isDev_ = getMode().development || getMode().localDev;
 
     /**
