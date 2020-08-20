@@ -21,11 +21,9 @@
 #include <functional>
 #include <sstream>
 #include <tuple>
-
-#include "logging.h"
+#include "glog/logging.h"
 #include "casetable.h"
 #include "entity.h"
-#include "error.h"
 #include "whitespacetable.h"
 
 namespace htmlparser {
@@ -198,6 +196,8 @@ std::optional<char32_t> Strings::DecodeUtf8Symbol(std::string_view* s) {
     s->remove_prefix(1);
     auto c2 = ReadContinuationByte(*(s->data()));
     s->remove_prefix(1);
+    // Invalid byte in the sequence.
+    if (c2 == 0) return L'\uFFFD';
     char32_t code_point = ((c & 0x1f) << 6) | c2;
     if (code_point < 0x80) {
       return std::nullopt;
@@ -213,6 +213,8 @@ std::optional<char32_t> Strings::DecodeUtf8Symbol(std::string_view* s) {
     s->remove_prefix(1);
     auto c3 = ReadContinuationByte(*(s->data()));
     s->remove_prefix(1);
+    // Invalid bytes in the sequence.
+    if (c2 == 0 || c3 == 0) return L'\uFFFD';
     char32_t code_point = ((c & 0x0f) << 12) | (c2 << 6) | c3;
     if (code_point < 0x0800) {
       return std::nullopt;
@@ -231,6 +233,8 @@ std::optional<char32_t> Strings::DecodeUtf8Symbol(std::string_view* s) {
     s->remove_prefix(1);
     auto c4 = ReadContinuationByte(*(s->data()) & 0xff);
     s->remove_prefix(1);
+    // Invalid bytes in the sequence.
+    if (c2 == 0 || c3 == 0 || c4 == 0) return L'\uFFFD';
     char32_t code_point =  ((c & 0x07) << 0x12) |
                            (c2 << 0x0c) |
                            (c3 << 0x06) | c4;
@@ -380,6 +384,16 @@ void Strings::Trim(std::string_view* s, std::string_view chars_to_trim) {
   TrimRight(s, chars_to_trim);
 }
 
+bool Strings::StripTrailingNewline(std::string* s) {
+  if (!s->empty() && (*s)[s->size() - 1] == '\n') {
+    if (s->size() > 1 && (*s)[s->size() - 2] == '\r')
+      s->resize(s->size() - 2);
+    else
+      s->resize(s->size() - 1);
+    return true;
+  }
+  return false;
+}
 
 void Strings::RemoveExtraSpaceChars(std::string* s) {
   int put_index = 0;
@@ -804,14 +818,14 @@ uint8_t ReadContinuationByte(uint8_t byte) {
     return byte & 0x3f;
   }
 
-  throw std::runtime_error("Invalid continuation byte.");
+  // Error, return null char.
   return 0;
 }
 
 void CheckScalarValue(char32_t code_point) {
-  CHECK((!(code_point >= 0xd800 && code_point <= 0xdfff)),
-        "Lone surrogaate U+" + Strings::ToHexString(code_point) +
-        " is not a valid scalar value.");
+  CHECK((!(code_point >= 0xd800 && code_point <= 0xdfff)))
+        << "Lone surrogaate U+" + Strings::ToHexString(code_point) +
+           " is not a valid scalar value.";
 }
 
 inline bool IsOneByteASCIIChar(uint8_t c) {

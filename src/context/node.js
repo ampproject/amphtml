@@ -209,6 +209,9 @@ export class ContextNode {
     /** @private {boolean} */
     this.parentOverridden_ = false;
 
+    /** @private {?Array<function(!ContextNode)>} */
+    this.cleanups_ = null;
+
     /** @const @private {function()} */
     this.scheduleDiscover_ = throttleTail(
       this.discover_.bind(this),
@@ -271,6 +274,13 @@ export class ContextNode {
     devAssert(!root || root.isRoot);
     const oldRoot = this.root;
     if (root != oldRoot) {
+      // Call root cleanups.
+      const cleanups = this.cleanups_;
+      if (cleanups) {
+        cleanups.forEach((cleanup) => cleanup(this));
+        this.cleanups_ = null;
+      }
+
       // The root has changed.
       this.root = root;
 
@@ -303,7 +313,7 @@ export class ContextNode {
    * @param {!Array<!ContextProp>} deps
    * @param {*} input
    */
-  setComponent(id, factory, func, deps, input) {
+  mountComponent(id, factory, func, deps, input) {
     const components = this.components_ || (this.components_ = new Map());
     let comp = components.get(id);
     if (!comp) {
@@ -314,16 +324,39 @@ export class ContextNode {
   }
 
   /**
-   * Removes the component previously set with `setComponent`.
+   * Removes the component previously set with `mountComponent`.
    *
    * @param {*} id
    */
-  removeComponent(id) {
+  unmountComponent(id) {
     const components = this.components_;
     const comp = components && components.get(id);
     if (comp) {
       comp.dispose();
       components.delete(id);
+    }
+  }
+
+  /**
+   * Registers a root cleanup handler that will be called each time the
+   * root has changed or the node has been disconnected.
+   *
+   * @param {function(!ContextNode)} cleanup
+   */
+  pushCleanup(cleanup) {
+    const cleanups = this.cleanups_ || (this.cleanups_ = []);
+    pushIfNotExist(cleanups, cleanup);
+  }
+
+  /**
+   * Unregisters a cleanup handler previously registered with `pushCleanup`.
+   *
+   * @param {function(!ContextNode)} cleanup
+   */
+  popCleanup(cleanup) {
+    const cleanups = this.cleanups_;
+    if (cleanups) {
+      removeItem(cleanups, cleanup);
     }
   }
 
