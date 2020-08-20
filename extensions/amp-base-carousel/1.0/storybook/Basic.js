@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import '../../../../build/css/amp-base-carousel-1.0.css';
 import * as Preact from '../../../../src/preact';
 import {BaseCarousel} from '../base-carousel';
 import {number, withKnobs} from '@storybook/addon-knobs';
