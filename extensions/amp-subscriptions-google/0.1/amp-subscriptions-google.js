@@ -121,6 +121,9 @@ export class GoogleSubscriptionsPlatform {
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(ampdoc.win);
 
+    /** @private {bool} */
+    this.isDev_ = getMode().development || getMode().localDev;
+
     /**
      * @private @const
      * {!../../amp-subscriptions/0.1/analytics.SubscriptionAnalytics}
@@ -424,7 +427,7 @@ export class GoogleSubscriptionsPlatform {
    */
   maybeFetchRealTimeConfig() {
     let timeout = SERVICE_TIMEOUT;
-    if (getMode().development || getMode().localDev) {
+    if (this.isDev_) {
       timeout = SERVICE_TIMEOUT * 2;
     }
 
@@ -513,6 +516,8 @@ export class GoogleSubscriptionsPlatform {
       return this.viewerPromise_.getReferrerUrl().then((referrer) => {
         const parsedQuery = this.getLAAParams_();
         if (
+          // Note we don't use the more generic this.isDev_ flag becuase that can ber triggered
+          // by a hash value which would allow non gooogle origins to construst LAA urls.
           (GOOGLE_DOMAIN_RE.test(parseUrlDeprecated(referrer).origin) ||
             getMode(this.win_).localDev) &&
           parsedQuery[`glaa_at`] == 'laa' &&
