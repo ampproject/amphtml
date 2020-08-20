@@ -32,7 +32,6 @@ function log(m) {
 
 window.addEventListener('message', function(event) {
   if (event.data) {
-    console.log(event.data);
     if (event.data.type == 'intersection') {
       log('Received intersection message');
       parent.parent./*OK*/postMessage({
