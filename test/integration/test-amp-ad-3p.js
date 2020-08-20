@@ -230,12 +230,21 @@ describe('amp-ad 3P', () => {
         );
         lastIO = null;
 
-        // Ad becomes invisible
+        // Ad first becomes invisible
         fixture.win.scrollTo(0, 1251);
         fixture.win.dispatchEvent(new Event('scroll'));
         await poll('wait for new IO entry when ad exit viewport', () => {
           return lastIO != null && lastIO.intersectionRatio == 0;
         });
+
+        lastIO = null
+        // Scroll when ad is invisible
+        fixture.win.scrollTo(0, 1451);
+        fixture.win.dispatchEvent(new Event('scroll'));
+        await new Promise(resolve => {
+          setTimeout(resolve, 100);
+        });
+        expect(lastIO).to.be.null;
       })
       .then(
         () =>
