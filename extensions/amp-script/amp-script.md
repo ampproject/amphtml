@@ -28,7 +28,7 @@ The `amp-script` component allows you to run custom JavaScript. To maintain AMP'
 
 ### Virtual DOM
 
-The `<amp-script>` component contains the area of the page to which your JavaScript will have access. `amp-script` copies the component's children to a virtual DOM. Your code can access that virtual DOM as `document.body`.
+Your JavaScript can access the area of the page wrapped within the `<amp-script>` component. `amp-script` copies the component's children to a virtual DOM. Your code can access that virtual DOM as `document.body`.
 
 For example, this `<amp-script>` component defines a DOM consisting of a single `<p>`.
 
@@ -63,7 +63,7 @@ An `amp-script` element can load JavaScript in two ways:
 - remotely, from a URL
 - locally, from a `<script>` element on the page
 
-#### from a remote URL
+#### From a remote URL
 
 Use the `src` attribute to load JavaScript from a URL:
 
@@ -73,7 +73,7 @@ Use the `src` attribute to load JavaScript from a URL:
 </amp-script>
 ```
 
-#### from a local element
+#### From a local element
 
 You can also include your JavaScript inline, in a `script` tag. You must:
 
@@ -111,7 +111,7 @@ For security reasons, `amp-script` elements with a `script` or cross-origin `src
 
 ### How does it work?
 
-`amp-script` runs your custom JavaScript in a [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers) that has access to a virtual DOM. When the real DOM changes, `amp-script` updates the virtual DOM to match it. Similarly, when your JavaScript modifies the virtual DOM, `amp-script` updates the real DOM. In this way, the real DOM and virtual DOM are kept in sync.
+`amp-script` runs your custom JavaScript in a [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers). Normally Web Workers don't have access to the DOM. But `amp-script` gives your code access to a virtual DOM. When your JavaScript modifies this virtual DOM, `amp-script` updates the real DOM.
 
 Under the hood, `amp-script` uses [@ampproject/worker-dom](https://github.com/ampproject/worker-dom/). For design details, see the ["Intent to Implement" issue](https://github.com/ampproject/amphtml/issues/13471).
 
@@ -121,7 +121,7 @@ Under the hood, `amp-script` uses [@ampproject/worker-dom](https://github.com/am
 
 DOM elements and their properties are generally supported, with a few limits. For example, your code can't add a new `<script>` or `<style>` tag to the DOM.
 
-`amp-script` recreates many commonly used DOM APIs and makes them available to your code. This "hello, world" example uses `getElementByID()`, `addEventListener()`, `createElement()`, `textContent`, and `appendChild()`:
+`amp-script` recreates many commonly used DOM APIs and makes them available to your code. This "hello world" example uses `getElementByID()`, `addEventListener()`, `createElement()`, `textContent`, and `appendChild()`:
 
 ```js
 const button = document.getElementById('textarea');
@@ -143,11 +143,13 @@ Supported DOM APIs include:
 * Element properties like `attributes`, `id`, `outerHTML`, `textContent`, `value`, `classList`, and `className`
 * And many more.
 
-`querySelector()` is supported for simple selectors - element, ID, class, and attribute. So, `document.querySelector('.class')` will work, but `document.querySelector('.class1 .class2')` will not. [See the code](https://github.com/ampproject/worker-dom/blob/main/src/worker-thread/dom/Element.ts#L159) for details.
+For a complete list of supported DOM APIs, see the [API compatibility table](https://github.com/ampproject/worker-dom/blob/master/web_compat_table.md).
 
-`amp-script` supports common Web APIs like `Fetch`, `Websockets`, `localStorage`, `sessionStorage`, and `Canvas`. Presently, the `History` API is not implemented, and neither are cookies.
+`querySelector()` is supported for simple selectors - element, id, class, and attribute. So, `document.querySelector('.class')` will work, but `document.querySelector('.class1 .class2')` will not. [See the code](https://github.com/ampproject/worker-dom/blob/main/src/worker-thread/dom/Element.ts#L159) for details.
 
-`amp-script` does not support the entire DOM API or Web API, as this would make `amp-script`'s own JavaScript too large and slow. If there's an API you'd like to see supported, please [file an issue](https://github.com/ampproject/amphtml/issues/new) or [suggest and contribute the change yourself](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md). For a complete list of supported DOM APIs, see the [API compatibility table](https://github.com/ampproject/worker-dom/blob/master/web_compat_table.md).
+`amp-script` supports common Web APIs like `Fetch`, `WebSockets`, `localStorage`, `sessionStorage`, and `Canvas`. Presently, the `History` API is not implemented, and neither are cookies.
+
+`amp-script` does not support the entire DOM API or Web API, as this would make `amp-script`'s own JavaScript too large and slow. If there's an API you'd like to see supported, please [file an issue](https://github.com/ampproject/amphtml/issues/new) or [suggest and contribute the change yourself](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md).
 
 [tip type="default"]
 For a set of samples showing `amp-script` in use, [see here](/documentation/examples/components/amp-script/).
@@ -159,7 +161,7 @@ Presently, libraries like [jQuery](https://jquery.com) will not work with `amp-s
 
 ### Creating AMP elements
 
-You can create an AMP element dynamically using an DOM API like `document.createElement()`. However, presently only `amp-img` and `amp-layout` are supported. If you need to create a different AMP element, please upvote on [&#35;25344](https://github.com/ampproject/amphtml/issues/25344) and add a comment describing your use case.
+You can use `amp-script` to add an `amp-img` or `amp-layout` component to the DOM. Other AMP components are presently unsupported. If you need to create a different AMP element, please upvote on [&#35;25344](https://github.com/ampproject/amphtml/issues/25344) and add a comment describing your use case.
 
 ### Referencing amp-state
 
@@ -217,6 +219,15 @@ Here's another example. `amp-state` doesn't support WebSocket URLs in its `src` 
 [tip type="default"]
 To use `AMP.setState()`, you must include the [`amp-bind`](https://amp.dev/documentation/components/amp-bind) extension script in the document head.
 [/tip]
+
+Note that if something else changes the DOM inside your `<amp-script>`, that change will not propagate to the virtual DOM. The syncing process is unidirectional. Thus it's best to avoid code like the following:
+
+```html
+<amp-script layout="container" script="myscript">
+  <p [text]="myText">Will I change?</p>
+</amp-script>
+<button on="tap:AMP.setState({myText: 'I changed'})">Change this and amp-script won't know</button>
+```
 
 ### Retrieving data for `<amp-list>`
 
@@ -412,7 +423,7 @@ This element includes [common attributes](https://amp.dev/documentation/guides-a
 
 A few runtime errors may be encountered when using `amp-script`.
 
-**Inline script is (...) bytes, which exceeds the limit of 10,000."**
+**Inline script is (...) bytes, which exceeds the limit of 10,000.**
 
 No inline script can exceed 10,000 bytes. See [Size of JavaScript code](#size-of-javascript-code) above. 
 
@@ -420,7 +431,7 @@ No inline script can exceed 10,000 bytes. See [Size of JavaScript code](#size-of
 
 The total of all scripts used by a page cannot exceed 150,000 bytes. See [Size of JavaScript code](#size-of-javascript-code) above.
 
-**"Script hash not found."**
+**Script hash not found.**
 
 For local scripts and cross-origin scripts, you need to add a [script hash](#script-hash) for security.
 
@@ -432,7 +443,7 @@ Again, you need the [script hash](#script-hash). Simply copy the value in this e
 
 To avoid undesirable content layout shift, `amp-script` disallows DOM mutations under certain conditions. See [User gestures](#user-gestures) above.
 
-**"amp-script... was terminated due to illegal mutation"**
+**amp-script... was terminated due to illegal mutation**
 
 If a script attempts too many disallowed DOM changes, `amp-script` may halt the script so that it doesn't get too far out of sync with the DOM.
 
@@ -444,6 +455,6 @@ If you modify a state variable in a variable-sized container before a user inter
 
 This attribute is required for security. 
 
-**"Sanitized node: (...)"**
+**Sanitized node: (...)**
 
-If your code adds a disallowed element (like `<script>` or `<style>`), `amp-script` will remove it.
+If your code adds a disallowed element (like `<script>`, `<style>`, or an unsupported AMP component), `amp-script` will remove it.
