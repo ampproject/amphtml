@@ -29,7 +29,6 @@ import {LocalizedStringId} from '../../../src/localized-strings';
 import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
 import {Services} from '../../../src/services';
 import {dev, user, userAssert} from '../../../src/log';
-import {getLocalizationService} from '../../amp-story/1.0/amp-story-localization-service';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
@@ -206,7 +205,7 @@ export class AmpStory360 extends AMP.BaseElement {
     super(element);
 
     /** @private {?../../../src/service/localization.LocalizationService} */
-    this.localizationService_ = getLocalizationService(element);
+    this.localizationService_ = null;
 
     /** @private {!Array<!CameraOrientation>} */
     this.orientations_ = [];
@@ -273,8 +272,6 @@ export class AmpStory360 extends AMP.BaseElement {
     container.appendChild(this.canvas_);
     this.applyFillContent(container, /* replacedContent */ true);
 
-    attr('controls') === 'gyroscope' && this.checkGyroscopePermissions_();
-
     Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
       this.storeService_ = storeService;
 
@@ -287,6 +284,15 @@ export class AmpStory360 extends AMP.BaseElement {
         (permissionState) => this.onPermissionState_(permissionState)
       );
     });
+
+    if (attr('controls') === 'gyroscope') {
+      Services.localizationServiceForOrNull(this.element).then(
+        (localizationService) => {
+          this.localizationService_ = localizationService;
+          this.checkGyroscopePermissions_();
+        }
+      );
+    }
   }
 
   /**
