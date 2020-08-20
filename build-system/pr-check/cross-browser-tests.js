@@ -52,6 +52,7 @@ async function main() {
     case 'win32':
       timedExecOrDie('gulp unit --nobuild --edge');
       timedExecOrDie('gulp integration --nobuild --compiled --edge');
+      timedExecOrDie('gulp integration --nobuild --compiled --ie');
       break;
     default:
       log(
