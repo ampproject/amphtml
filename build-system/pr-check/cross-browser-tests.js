@@ -53,8 +53,8 @@ async function main() {
       break;
     case 'win32':
       // TODO(rsimha): Fix these and make them fail on Windows.
-      timedExec('gulp unit --nobuild --edge');
-      timedExec('gulp integration --nobuild --compiled --edge');
+      timedExec('gulp unit --nobuild --headless --edge');
+      timedExec('gulp integration --nobuild --compiled --headless --edge');
       timedExec('gulp integration --nobuild --compiled --ie');
       break;
     default:
