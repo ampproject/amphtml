@@ -52,9 +52,9 @@ async function main() {
       timedExecOrDie('gulp integration --nobuild --compiled --safari');
       break;
     case 'win32':
-      // TODO(rsimha): Fix these and make them fail on Windows.
-      timedExec('gulp unit --nobuild --headless --edge');
-      timedExec('gulp integration --nobuild --compiled --headless --edge');
+      timedExecOrDie('gulp unit --nobuild --headless --edge');
+      timedExecOrDie('gulp integration --nobuild --compiled --headless --edge');
+      // TODO(rsimha): Fix all IE tests and make this task fail the build.
       timedExec('gulp integration --nobuild --compiled --ie');
       break;
     default:
