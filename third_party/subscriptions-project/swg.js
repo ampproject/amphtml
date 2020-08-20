@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.116 */
+/** Version: 0.1.22.118 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -1576,7 +1576,7 @@ class ClientEventManagerApi {
    * invoked unless the event is filtered.
    * @param {!function(!ClientEvent)} listener
    */
-  registerEventListener(listener) { }
+  registerEventListener(listener) {}
 
   /**
    * Register a filterer for events if you need to potentially prevent the
@@ -1585,7 +1585,7 @@ class ClientEventManagerApi {
    * event.
    * @param {!function(!ClientEvent):FilterResult} filterer
    */
-  registerEventFilterer(filterer) { }
+  registerEventFilterer(filterer) {}
 
   /**
    * Call this function to log an event.  It will immediately throw an error if
@@ -1594,7 +1594,7 @@ class ClientEventManagerApi {
    * listener asynchronously.
    * @param {!ClientEvent} event
    */
-  logEvent(event) { }
+  logEvent(event) {}
 }
 
 /**
@@ -4789,7 +4789,7 @@ class Entitlements {
     return new Entitlements(
       this.service,
       this.raw,
-      this.entitlements.map(ent => ent.clone()),
+      this.entitlements.map((ent) => ent.clone()),
       this.product_,
       this.ackHandler_,
       this.isReadyToPay,
@@ -4803,7 +4803,7 @@ class Entitlements {
   json() {
     return {
       'service': this.service,
-      'entitlements': this.entitlements.map(item => item.json()),
+      'entitlements': this.entitlements.map((item) => item.json()),
       'isReadyToPay': this.isReadyToPay,
     };
   }
@@ -4990,7 +4990,7 @@ class Entitlement {
     const jsonList = Array.isArray(json)
       ? /** @type {!Array<Object>} */ (json)
       : [json];
-    return jsonList.map(json => Entitlement.parseFromJson(json));
+    return jsonList.map((json) => Entitlement.parseFromJson(json));
   }
 
   /**
@@ -5001,12 +5001,10 @@ class Entitlement {
     if (this.source !== 'google') {
       return null;
     }
-    const sku = (
-        /** @type {?string} */ (getPropertyFromJsonString(
-            this.subscriptionToken,
-            'productId'
-        ) || null)
-    );
+    const sku = /** @type {?string} */ (getPropertyFromJsonString(
+      this.subscriptionToken,
+      'productId'
+    ) || null);
     if (!sku) {
       log_4('Unable to retrieve SKU from SwG subscription token');
     }
@@ -5030,11 +5028,9 @@ class Entitlement {
  * limitations under the License.
  */
 
-
 /**
  */
 class UserData {
-
   /**
    * @param {string} idToken
    * @param {!Object} data
@@ -5237,11 +5233,9 @@ class PurchaseData {
  * limitations under the License.
  */
 
-
 /**
  */
 class DeferredAccountCreationResponse {
-
   /**
    * @param {!Entitlements} entitlements
    * @param {!UserData} userData
@@ -5267,10 +5261,11 @@ class DeferredAccountCreationResponse {
    */
   clone() {
     return new DeferredAccountCreationResponse(
-        this.entitlements,
-        this.userData,
-        this.purchaseDataList,
-        this.completeHandler_);
+      this.entitlements,
+      this.userData,
+      this.purchaseDataList,
+      this.completeHandler_
+    );
   }
 
   /**
@@ -5280,7 +5275,7 @@ class DeferredAccountCreationResponse {
     return {
       'entitlements': this.entitlements.json(),
       'userData': this.userData.json(),
-      'purchaseDataList': this.purchaseDataList.map(pd => pd.json()),
+      'purchaseDataList': this.purchaseDataList.map((pd) => pd.json()),
       // TODO(dvoytenko): deprecate.
       'purchaseData': this.purchaseData.json(),
     };
@@ -5856,7 +5851,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.116',
+    '_client': 'SwG 0.1.22.118',
   });
 }
 
@@ -6975,7 +6970,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.116',
+        '_client': 'SwG 0.1.22.118',
         'supportsEventManager': true,
       },
       args || {}
@@ -7824,7 +7819,7 @@ class AnalyticsService {
       context.setTransactionId(getUuid());
     }
     context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.116');
+    context.setClientVersion('SwG 0.1.22.118');
     context.setUrl(getCanonicalUrl(this.doc_));
 
     const utmParams = parseQueryString$1(this.getQueryString_());
