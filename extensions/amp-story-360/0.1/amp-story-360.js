@@ -337,7 +337,9 @@ export class AmpStory360 extends AMP.BaseElement {
     this.togglePermissionClass_(true);
 
     this.win.addEventListener('deviceorientation', (e) => {
-      this.isReady_ && this.onDeviceOrientation_(e);
+      if (this.isReady_ && this.isPlaying_) {
+        this.onDeviceOrientation_(e);
+      }
       this.timer_.cancel(checkNoMotion);
     });
 
