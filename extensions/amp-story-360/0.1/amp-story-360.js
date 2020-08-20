@@ -273,8 +273,8 @@ export class AmpStory360 extends AMP.BaseElement {
     container.appendChild(this.canvas_);
     this.applyFillContent(container, /* replacedContent */ true);
 
-    this.element.getAttribute('controls') === 'gyroscope' &&
-      this.checkGyroscopePermissions_();
+    attr('controls') === 'gyroscope' && this.checkGyroscopePermissions_();
+    console.log(attr('controls'));
 
     Services.storyStoreServiceForOrNull(this.win).then((storeService) => {
       this.storeService_ = storeService;
