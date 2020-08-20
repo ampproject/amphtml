@@ -277,7 +277,7 @@ export class GoogleSubscriptionsPlatform {
     installStylesForDoc(ampdoc, CSS, () => {}, false, TAG);
 
     /** @private @const {boolean} */
-    this.meteringEnable_ = !!this.serviceConfig_['enableMetering'] || false;
+    this.enableMetering_ = !!this.serviceConfig_['enableMetering'] || false;
 
     /** @private @const {boolean} */
     this.enableLAA_ = !!this.serviceConfig_['enableLAA'] || false;
@@ -290,7 +290,7 @@ export class GoogleSubscriptionsPlatform {
       this.serviceConfig_['enableEntitlements'] === false ? false : true;
 
     userAssert(
-      !(this.enableLAA_ && this.meteringEnable_),
+      !(this.enableLAA_ && this.enableMetering_),
       'enableLAA and enableMetering are mutually exclusive.'
     );
 
@@ -491,13 +491,14 @@ export class GoogleSubscriptionsPlatform {
   }
 
   /**
-   * get LAA params
+   * get LAA params - in it's own method so we can stub it for test.
    * @return {Object<string>}
    * @private
    */
   getLAAParams_() {
     return parseQueryString(this.ampdoc_.win.location.search);
   }
+
   /**
    * Checks enableLAA flag and LAA header params and if present
    * and unexpired generates an LAA entitlement.
