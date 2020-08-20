@@ -120,9 +120,9 @@ export class Storage {
 
   /**
    * Returns if this.binding is an instance of ViewerStorageBinding
-   * @return {number}
+   * @return {boolean}
    */
-  getIsViewerStorage() {
+  isViewerStorage() {
     return this.isViewerStorage_;
   }
 
