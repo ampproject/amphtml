@@ -10,8 +10,9 @@
       body {
         font-family: 'Rubik', sans-serif;
       }
-      amp-story-interactive-quiz, amp-story-interactive-binary-poll, amp-story-interactive-poll, amp-story-interactive-results, amp-story-interactive-text {
+      amp-story-interactive-text {
         justify-self: center;
+        align-self: center;
       }
     </style>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -27,7 +28,7 @@
         publisher="AMP Story testing"
         publisher-logo-src="example.com/logo.png"
         poster-portrait-src="example.com/poster.jpg">
-        <amp-story-page id="text">
+        <amp-story-page id="text-1">
           <amp-story-grid-layer template="fill" style="background:linear-gradient(rgb(78, 167, 240), rgb(164, 227, 238)">
             <amp-img
                 src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
@@ -47,7 +48,7 @@
             </amp-story-interactive-text>
           </amp-story-grid-layer>
         </amp-story-page>
-        <amp-story-page id="twitter">
+        <amp-story-page id="text-2">
           <amp-story-grid-layer template="fill" style="background:linear-gradient(rgb(78, 167, 240), rgb(164, 227, 238)">
             <amp-img
                 src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
@@ -58,13 +59,55 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer template="center">
-            <amp-twitter interactive
-              width="375"
-              height="472"
-              layout="responsive"
-              data-tweetid="885634330868850689"
-            >
-            </amp-twitter>
+            <amp-story-interactive-text
+              style="--interactive-accent-color: #fa357d"
+              theme="dark"
+              prompt-text="What did you think about the interactive components?"
+              placeholder-text="Type here..."
+              response-text="Thanks for sending feedback!">
+            </amp-story-interactive-text>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="text-3">
+          <amp-story-grid-layer template="fill" style="background:linear-gradient(rgb(78, 167, 240), rgb(164, 227, 238)">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900"
+                style="opacity: 0.2">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-text
+              style="--interactive-accent-color: #fa357d"
+              theme="light"
+              chip-style="shadow"
+              prompt-text="What did you think about the interactive components?"
+              placeholder-text="Type here..."
+              response-text="Thanks for sending feedback!">
+            </amp-story-interactive-text>
+          </amp-story-grid-layer>
+        </amp-story-page>
+        <amp-story-page id="text-4">
+          <amp-story-grid-layer template="fill" style="background:linear-gradient(rgb(78, 167, 240), rgb(164, 227, 238)">
+            <amp-img
+                src="https://i.pinimg.com/474x/18/62/8e/18628e2d0d342e19bead8eead15fa8cb.jpg"
+                layout="responsive"
+                height="1600"
+                width="900"
+                style="opacity: 0.2">
+            </amp-img>
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="center">
+            <amp-story-interactive-text
+              style="--interactive-accent-color: #fa357d"
+              theme="dark"
+              chip-style="shadow"
+              prompt-text="What did you think about the interactive components?"
+              placeholder-text="Type here..."
+              response-text="Thanks for sending feedback!">
+            </amp-story-interactive-text>
           </amp-story-grid-layer>
         </amp-story-page>
     </amp-story>

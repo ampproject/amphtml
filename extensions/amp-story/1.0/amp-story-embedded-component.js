@@ -230,11 +230,9 @@ const buildExpandedViewOverlay = (element) => htmlFor(element)`
  * @param {!EmbedDataDef} embedData
  */
 function updateEmbedStyleEl(target, embedStyleEl, embedData) {
-  console.log(embedData);
   const embedId = embedData.id;
   embedStyleEl.textContent = `[${EMBED_ID_ATTRIBUTE_NAME}="${embedId}"]
   ${buildStringStyleFromEl(target, embedData)}`;
-  console.log(embedStyleEl.textContent);
 }
 
 /**
@@ -338,7 +336,6 @@ function measureStylesForCustomWidth(state, pageRect, elRect, maxWidth) {
  * @return {!Object}
  */
 function measureDefaultStyles(state, pageRect, elRect) {
-  console.log(elRect, pageRect);
   if (elRect.width >= elRect.height) {
     state.newWidth = pageRect.width;
     state.scaleFactor = elRect.width / state.newWidth;
@@ -600,6 +597,7 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   setState_(state, component) {
+    console.log('set state', state);
     switch (state) {
       case EmbeddedComponentState.FOCUSED:
         this.state_ = state;
@@ -612,6 +610,7 @@ export class AmpStoryEmbeddedComponent {
       case EmbeddedComponentState.HIDDEN:
         this.state_ = state;
         this.onFocusedStateUpdate_(null);
+        this.toggleExpandedView_(null);
         break;
       case EmbeddedComponentState.EXPANDED:
         this.state_ = state;
@@ -949,7 +948,6 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   onExpandComponent_(event) {
-    console.log('onExpand');
     event.preventDefault();
     event.stopPropagation();
 

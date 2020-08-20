@@ -240,7 +240,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     this.options_ = this.parseOptions_();
     this.element.classList.add('i-amphtml-story-interactive-component');
     this.adjustGridLayer_();
-    devAssert(this.element.children.length == 0, 'Too many children');
+    // devAssert(this.element.children.length == 0, 'Too many children');
 
     // Initialize all the services before proceeding, and update store with state
     return Promise.all([
@@ -402,7 +402,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout === 'container';
+    return layout === 'container' || layout === 'responsive';
   }
 
   /**
@@ -463,6 +463,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
    * @protected
    */
   handleTap_(e) {
+    console.log('here');
     if (this.hasUserSelection_) {
       return;
     }

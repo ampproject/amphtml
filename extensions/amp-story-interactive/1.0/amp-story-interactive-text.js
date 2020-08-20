@@ -15,6 +15,10 @@
  */
 
 import {
+  Action,
+  EmbeddedComponentState,
+} from '../../amp-story/1.0/amp-story-store-service';
+import {
   AmpStoryInteractive,
   InteractiveType,
 } from './amp-story-interactive-abstract';
@@ -39,6 +43,7 @@ const buildPollTemplate = (element) => {
           rows="1"
           oninput='this.style.height="0px";this.style.height = (this.scrollHeight) + "px"'
         ></textarea>
+        <div class="i-amphtml-story-interactive-text-response"></div>
         <div class="i-amphtml-story-interacive-text-send">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -75,8 +80,34 @@ export class AmpStoryInteractiveText extends AmpStoryInteractive {
     const textArea = this.rootEl_.querySelector('textarea');
     this.attachPrompt_(this.rootEl_);
     textArea.placeholder = this.element.getAttribute('placeholder-text');
-    textArea.onkeyup = () => this.toggleSendButton_(textArea.value);
+    textArea.onkeydown = (e) => {
+      if (e.keyCode == 13) {
+        this.sendText_(textArea.value);
+      }
+    };
+    textArea.onkeyup = (unusedEvent) => {
+      this.toggleSendButton_(textArea.value.length > 0);
+    };
+    this.rootEl_.querySelector(
+      '.i-amphtml-story-interactive-text-response'
+    ).textContent = this.element.getAttribute('response-text');
+    /iPhone/.test(navigator.platform) &&
+      this.rootEl_.classList.add('i-amphtml-story-interative-iphone');
     return this.rootEl_;
+  }
+
+  /**
+   * @override
+   */
+  layoutCallback() {
+    const sendButton = this.rootEl_.querySelector(
+      '.i-amphtml-story-interacive-text-send'
+    );
+    sendButton.onclick = () => {
+      console.log('clicked');
+    };
+    console.log(sendButton.onclick);
+    return super.layoutCallback();
   }
 
   /**
@@ -101,27 +132,34 @@ export class AmpStoryInteractiveText extends AmpStoryInteractive {
   /**
    * Shows or hides the send button
    * @param {string} inputText
+   * @param {boolean} toggle
    * @private
    */
-  toggleSendButton_(inputText) {
+  toggleSendButton_(toggle) {
     this.rootEl_.classList.toggle(
       'i-amphtml-story-interactive-can-send',
-      inputText.length > 0
+      toggle
     );
   }
 
   /**
    * Sends the text and disables responses
-   * @param {string} unusedInputText
+   * @param {string} inputText
    * @private
    */
-  sendText_(unusedInputText) {
-    console.log('sending text');
+  sendText_(inputText) {
+    if (inputText.length == 0) {
+      return;
+    }
     this.rootEl_.classList.toggle(
       'i-amphtml-story-interactive-can-send',
       false
     );
     this.rootEl_.querySelector('textarea').disabled = true;
+    this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
+      state: EmbeddedComponentState.HIDDEN,
+    });
+    this.updateToPostSelectionState_();
   }
 
   /** @override */
