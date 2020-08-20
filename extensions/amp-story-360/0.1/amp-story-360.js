@@ -231,7 +231,7 @@ export class AmpStory360 extends AMP.BaseElement {
     /** @private {boolean} */
     this.gyroscopeControls_ = false;
 
-    /** @private @const {!../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    /** @private {?../../../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = null;
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
