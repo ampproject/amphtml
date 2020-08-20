@@ -246,9 +246,7 @@ window.addEventListener('message', function (event) {
 });
 ```
 
-The intersection message would be sent by the parent to the iframe when the
-iframe moves in or out of the viewport (or is partially visible), when the
-iframe is scrolled or resized.
+The intersection message would be sent by the parent to the iframe in the format of IntersectionObserver entry wheneve there is intersectionRatio change across thresholds [0, 0.05, 0.1, ... 0.9, 0.95, 1].
 
 ## Attributes
 

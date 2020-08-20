@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {MessageType} from '../../../src/3p-frame-messaging';
 import {Services} from '../../../src/services';
 import {SubscriptionApi} from '../../../src/iframe-helper';
 import {devAssert} from '../../../src/log';
@@ -23,7 +24,6 @@ import {
   moveLayoutRect,
   rectIntersection,
 } from '../../../src/layout-rect';
-import {MessageType} from '../../../src/3p-frame-messaging';
 
 /**
  * The structure that defines the rectangle used in intersection observers.
@@ -204,12 +204,10 @@ export class legacyAdIntersectionObserver {
    */
   startSendingIntersectionChanges_() {
     if (!this.intersectionObserver_) {
-      this.intersectionObserver_ = new IntersectionObserver(
-        entries => {
-          const lastEntry = entries[entries.length -1];
-          this.onViewportCallback_(lastEntry.intersectionRatio != 0)
-        }
-      );
+      this.intersectionObserver_ = new IntersectionObserver((entries) => {
+        const lastEntry = entries[entries.length - 1];
+        this.onViewportCallback_(lastEntry.intersectionRatio != 0);
+      });
       this.intersectionObserver_.observe(this.baseElement_.element);
     }
     this.fire();

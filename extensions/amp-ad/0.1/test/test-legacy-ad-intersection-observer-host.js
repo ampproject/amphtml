@@ -15,14 +15,13 @@
  */
 
 import {BaseElement} from '../../../../src/base-element';
-import {
-  legacyAdIntersectionObserver,
-  getIntersectionChangeEntry,
-} from '../legacy-ad-intersection-observer-host';
 import {createAmpElementForTesting} from '../../../../src/custom-element';
-import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {deserializeMessage} from '../../../../src/3p-frame-messaging';
-
+import {
+  getIntersectionChangeEntry,
+  legacyAdIntersectionObserver,
+} from '../legacy-ad-intersection-observer-host';
+import {layoutRectLtwh} from '../../../../src/layout-rect';
 
 describes.sandboxed('getIntersectionChangeEntry', {}, () => {
   beforeEach(() => {
@@ -313,7 +312,6 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
 
   beforeEach(() => {
     clock = window.sandbox.useFakeTimers();
-    testElementGetInsersectionElementLayoutBox = window.sandbox.spy();
     getIntersectionChangeEntrySpy = window.sandbox.spy();
     onScrollSpy = window.sandbox.spy();
     onChangeSpy = window.sandbox.spy();
@@ -335,9 +333,9 @@ describes.sandboxed('IntersectionObserverHostForAd', {}, () => {
     element.element = document.createElement('amp-int');
     element.element.getIntersectionChangeEntry = () => {
       getIntersectionChangeEntrySpy();
-        const rootBounds = layoutRectLtwh(198, 299, 100, 100);
-        const layoutBox = layoutRectLtwh(50, 100, 150, 200);
-        return getIntersectionChangeEntry(layoutBox, null, rootBounds);
+      const rootBounds = layoutRectLtwh(198, 299, 100, 100);
+      const layoutBox = layoutRectLtwh(50, 100, 150, 200);
+      return getIntersectionChangeEntry(layoutBox, null, rootBounds);
     };
   });
 

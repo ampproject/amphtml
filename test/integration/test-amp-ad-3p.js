@@ -237,11 +237,11 @@ describe('amp-ad 3P', () => {
           return lastIO != null && lastIO.intersectionRatio == 0;
         });
 
-        lastIO = null
+        lastIO = null;
         // Scroll when ad is invisible
         fixture.win.scrollTo(0, 1451);
         fixture.win.dispatchEvent(new Event('scroll'));
-        await new Promise(resolve => {
+        await new Promise((resolve) => {
           setTimeout(resolve, 100);
         });
         expect(lastIO).to.be.null;

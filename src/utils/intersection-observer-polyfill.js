@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {MessageType} from '../3p-frame-messaging';
 import {SubscriptionApi} from '../iframe-helper';
 import {dict} from './object';
 import {layoutRectLtwh, moveLayoutRect, rectIntersection} from '../layout-rect';
@@ -93,9 +94,8 @@ export class IntersectionObserverHostApi {
   /**
    * @param {!AMP.BaseElement} baseElement
    * @param {!Element} iframe
-   * @param {boolean=} opt_is3p
    */
-  constructor(baseElement, iframe, opt_is3p) {
+  constructor(baseElement, iframe) {
     /** @private @const {!AMP.BaseElement} */
     this.baseElement_ = baseElement;
 
@@ -105,8 +105,8 @@ export class IntersectionObserverHostApi {
     /** @private {?SubscriptionApi} */
     this.subscriptionApi_ = new SubscriptionApi(
       iframe,
-      'send-intersections',
-      opt_is3p || false,
+      MessageType.SEND_INTERSECTIONS,
+      false, // is3P
       () => {
         this.startSendingIntersection_();
       }
@@ -115,7 +115,7 @@ export class IntersectionObserverHostApi {
     this.intersectionObserver_ = new IntersectionObserver(
       (entries) => {
         this.subscriptionApi_.send(
-          'intersection',
+          MessageType.INTERSECTION,
           dict({'changes': entries.map(cloneEntryForCrossOrigin)})
         );
       },
@@ -155,34 +155,6 @@ export function intersectionRatio(smaller, larger) {
 
   // Check for a divide by zero
   return largerBoxArea === 0 ? 0 : smallerBoxArea / largerBoxArea;
-}
-
-/**
- * Returns the slot number that the current ratio fills in.
- * @param {!Array} sortedThreshold valid sorted IoB threshold
- * @param {number} ratio Range from [0, 1]
- * @return {number} Range from [0, threshold.length]
- * @visibleForTesting
- */
-export function getThresholdSlot(sortedThreshold, ratio) {
-  let startIdx = 0;
-  let endIdx = sortedThreshold.length;
-  // 0 is a special case that does not fit into [small, large) range
-  if (ratio == 0) {
-    return 0;
-  }
-  let mid = ((startIdx + endIdx) / 2) | 0;
-  while (startIdx < mid) {
-    const midValue = sortedThreshold[mid];
-    // In the range of [small, large)
-    if (ratio < midValue) {
-      endIdx = mid;
-    } else {
-      startIdx = mid;
-    }
-    mid = ((startIdx + endIdx) / 2) | 0;
-  }
-  return endIdx;
 }
 
 /**
