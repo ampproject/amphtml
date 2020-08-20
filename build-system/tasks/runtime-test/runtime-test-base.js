@@ -67,7 +67,7 @@ function updateBrowsers(config) {
       customLaunchers: {
         IeNoAddOns: {
           base: 'IE',
-          flags: ['-extoff'],
+          flags: ['-extoff -noframemerging'],
         },
       },
     });
