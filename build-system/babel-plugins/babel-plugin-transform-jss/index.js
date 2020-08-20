@@ -49,6 +49,7 @@ module.exports = function ({types: t}) {
   const isIdent = (path, ident) => path.node.id && path.node.id.name === ident;
   const replaceVal = (path, newValue) => {
     const newNode = t.cloneNode(path.node);
+    // TODO: This line is definitely a hack. Fix when Justin notices.
     newNode.init = t.identifier(newValue);
     path.replaceWith(newNode);
   };
