@@ -21,7 +21,7 @@ import {Services} from '../../../src/services';
 import {StateProperty} from '../../../extensions/amp-story/1.0/amp-story-store-service';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
-import {user, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @const {string} */
@@ -258,7 +258,9 @@ export class AmpStory360 extends AMP.BaseElement {
       .then(
         () => {
           this.renderer_ = new Renderer(this.canvas_);
-          const img = this.checkImageReSize_(this.element.querySelector('img'));
+          const img = this.checkImageReSize_(
+            dev().assertElement(this.element.querySelector('img'))
+          );
           this.renderer_.setImage(img);
           this.renderer_.resize();
           if (this.orientations_.length < 1) {
