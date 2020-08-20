@@ -77,6 +77,30 @@ module.exports = function ({types: t}) {
           path.stop();
         }
       },
+
+      // Convert module.exports into es6 named exports.
+      // TODO: how can we get around this?
+      AssignmentExpression(path, state) {
+        const {filename} = state.file.opts;
+        if (!isJssFile(filename)) {
+          return;
+        }
+
+        const isModuleExport =
+          path.node.left.object &&
+          path.node.left.property &&
+          path.node.left.object.name === 'module' &&
+          path.node.left.property.name === 'exports';
+        if (!isModuleExport) {
+          return;
+        }
+        const exports = path.node.right.properties
+          .map((p) => p.key.name)
+          .map((ident) => {
+            return t.exportSpecifier(t.identifier(ident), t.identifier(ident));
+          });
+        path.parentPath.replaceWith(t.exportNamedDeclaration(null, exports));
+      },
     },
   };
 };

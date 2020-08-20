@@ -17,4 +17,4 @@ const JSS = {button: {fontSize: 12}};
 const CSS = '';
 const useStyles = require('react-jss').createUseStyles(JSS);
 
-export {JSS, CSS, useStyles};
+module.exports = {JSS, CSS, useStyles};
