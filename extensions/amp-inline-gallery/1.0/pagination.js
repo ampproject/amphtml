@@ -19,7 +19,7 @@
  */
 import * as Preact from '../../../src/preact';
 import * as styles from './pagination.css';
-import {InlineGalleryContext} from './inline-gallery';
+import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
 import {useContext} from '../../../src/preact';
 
 /**
@@ -28,7 +28,7 @@ import {useContext} from '../../../src/preact';
  */
 export function Pagination({inset, ...rest}) {
   const {slideCount, currentSlide, setCurrentSlide} = useContext(
-    InlineGalleryContext
+    CarouselContext
   );
   const Comp = slideCount <= 8 ? Dots : Numbers;
   const indicator = (

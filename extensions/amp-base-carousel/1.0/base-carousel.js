@@ -15,7 +15,7 @@
  */
 import * as Preact from '../../../src/preact';
 import {ArrowNext, ArrowPrev} from './arrow';
-import {InlineGalleryContext} from '../../amp-inline-gallery/1.0/inline-gallery';
+import {CarouselContext} from './carousel-context';
 import {Scroller} from './scroller';
 import {toChildArray, useContext, useRef, useState} from '../../../src/preact';
 import {useMountEffect} from '../../../src/preact/utils';
@@ -35,16 +35,16 @@ export function BaseCarousel({
 }) {
   const childrenArray = toChildArray(children);
   const {length} = childrenArray;
-  const inlineGalleryContext = useContext(InlineGalleryContext);
+  const carouselContext = useContext(CarouselContext);
   const [currentSlideState, setCurrentSlideState] = useState(0);
-  const currentSlide = inlineGalleryContext.currentSlide ?? currentSlideState;
+  const currentSlide = carouselContext.currentSlide ?? currentSlideState;
   const setCurrentSlide =
-    inlineGalleryContext.setCurrentSlide ?? setCurrentSlideState;
+    carouselContext.setCurrentSlide ?? setCurrentSlideState;
   const scrollRef = useRef(null);
   const advance = (by) => scrollRef.current.advance(by);
   useMountEffect(() => {
-    if (inlineGalleryContext.setSlideCount) {
-      inlineGalleryContext.setSlideCount(length);
+    if (carouselContext.setSlideCount) {
+      carouselContext.setSlideCount(length);
     }
     if (setAdvance) {
       setAdvance(advance);

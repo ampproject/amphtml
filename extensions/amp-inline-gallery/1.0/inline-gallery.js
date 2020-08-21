@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 import * as Preact from '../../../src/preact';
+import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
 import {ContainWrapper} from '../../../src/preact/component';
 import {useMemo, useState} from '../../../src/preact';
-
-const InlineGalleryContext = Preact.createContext(
-  /** @type {InlineGalleryDef.ContextProps} */ ({})
-);
-export {InlineGalleryContext};
 
 /**
  * @param {!InlineGalleryDef.Props} props
@@ -34,12 +30,10 @@ export function InlineGallery({children, ...rest}) {
     [currentSlide, slideCount]
   );
   return (
-    <ContainWrapper size={false} layout={true} paint={true} {...rest}>
-      <InlineGalleryContext.Provider value={carouselContext}>
-        <div class="i-amphtml-inline-gallery" {...rest}>
-          {children}
-        </div>
-      </InlineGalleryContext.Provider>
+    <ContainWrapper size={false} layout={true} {...rest}>
+      <CarouselContext.Provider value={carouselContext}>
+        {children}
+      </CarouselContext.Provider>
     </ContainWrapper>
   );
 }

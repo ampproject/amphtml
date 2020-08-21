@@ -41,13 +41,3 @@ InlineGalleryDef.Props;
  * }}
  */
 InlineGalleryDef.PaginationProps;
-
-/**
- * @typedef {{
- *   currentSlide: number,
- *   setCurrentSlide: (function(number):undefined),
- *   slideCount: (number|null),
- *   setSlideCount: (function(number):undefined),
- * }}
- */
-InlineGalleryDef.ContextProps;
