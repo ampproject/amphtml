@@ -244,18 +244,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     expect(registerHandlerSpy).to.have.been.calledWith('documentStateUpdate');
   });
 
-<<<<<<< HEAD
   it('should send request to get page attachment state at build time', async () => {
     const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
-=======
-    messagingMock.expects('registerHandler').withArgs('selectDocument');
-    messagingMock.expects('registerHandler').withArgs('touchstart');
-    messagingMock.expects('registerHandler').withArgs('touchmove');
-    messagingMock.expects('registerHandler').withArgs('touchend');
-    messagingMock.expects('registerHandler').withArgs('documentStateUpdate');
-    messagingMock.expects('setDefaultHandler');
-    messagingMock.expects('registerHandler').withArgs('storyContentLoaded');
->>>>>>> f3c5f2a18... renaming, clean up by calling cacheUrl once
 
     buildStoryPlayer();
     await manager.loadPlayers();
