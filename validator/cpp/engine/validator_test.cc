@@ -178,6 +178,55 @@ TEST(ValidatorTest, TestDocSizeAmpEmail) {
   }
 }
 
+std::string TestWithScript(const std::string& test_content,
+                           const std::string& inline_script) {
+  return StrReplaceAll(test_content,
+                       {{"replace_inline_script", inline_script}});
+}
+
+TEST(ValidatorTest, TestScriptLengthAmp) {
+  const TestCase& test_case =
+      FindOrDie(TestCases(), "feature_tests/inline_script_length.html");
+  const std::string test_template = test_case.input_content;
+
+  // This string is 10 bytes of inline script.
+  const std::string inline_10_bytes = "alert('');";
+  ASSERT_EQ(10, inline_10_bytes.length());
+
+  // 10000 bytes of inline script.
+  {
+    std::string test_case_name = StrCat(test_case.name, "[MaxBytesInlineTest]");
+    std::string inline_script = RepeatString(inline_10_bytes, /*n_times=*/1000);
+    EXPECT_EQ(10000, inline_script.length());
+    std::string test_html =
+        TestWithScript(test_case.input_content, inline_script);
+    std::string output = RenderResult(
+        /*filename=*/test_case_name, /*include_revisions*/ false,
+        amp::validator::Validate(test_html));
+    std::string expected_output = "PASS";
+    EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
+  }
+
+  // 10001 bytes of inline script.
+  {
+    std::string test_case_name = StrCat(test_case.name, "[OffByOneInlineTest]");
+    std::string inline_script =
+        StrCat(RepeatString(inline_10_bytes, /*n_times=*/1000), " ");
+    EXPECT_EQ(10001, inline_script.length());
+    std::string test_html =
+        TestWithScript(test_case.input_content, inline_script);
+    std::string output = RenderResult(
+        /*filename=*/test_case_name, /*include_revisions*/ false,
+        amp::validator::Validate(test_html));
+    std::string expected_output = StrCat(
+        "FAIL\n", test_case_name,
+        ":35:2 The inline script is 10001 bytes, which exceeds the limit of "
+        "10000 bytes. (see https://amp.dev/documentation/components/"
+        "amp-script/#faq)");
+    EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
+  }
+}
+
 std::string TestWithCSS(const std::string& test_content,
                         const std::string& stylesheet,
                         const std::string& inline_style) {

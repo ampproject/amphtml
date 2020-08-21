@@ -2847,11 +2847,20 @@ void CdataMatcher::Match(string_view cdata, Context* context,
   // Max CDATA Byte Length, specific to this CDATA (not the document limit).
   if (cdata_spec.has_max_bytes() &&
       adjusted_cdata_length > cdata_spec.max_bytes()) {
-    context->AddError(ValidationError::STYLESHEET_TOO_LONG, context->line_col(),
-                      /*params=*/
-                      {TagDescriptiveName(parsed_cdata_spec_->ParentTagSpec()),
-                       StrCat(cdata.length()), StrCat(cdata_spec.max_bytes())},
-                      cdata_spec.max_bytes_spec_url(), result);
+    if (parsed_cdata_spec_->ParentTagSpec().tag_name() == "SCRIPT") {
+      context->AddError(
+          ValidationError::INLINE_SCRIPT_TOO_LONG, context->line_col(),
+          /*params=*/
+          {StrCat(cdata.length()), StrCat(cdata_spec.max_bytes())},
+          cdata_spec.max_bytes_spec_url(), result);
+    } else {
+      context->AddError(
+          ValidationError::STYLESHEET_TOO_LONG, context->line_col(),
+          /*params=*/
+          {TagDescriptiveName(parsed_cdata_spec_->ParentTagSpec()),
+           StrCat(cdata.length()), StrCat(cdata_spec.max_bytes())},
+          cdata_spec.max_bytes_spec_url(), result);
+    }
     return;
   }
 
