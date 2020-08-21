@@ -240,22 +240,10 @@ function compile(
     }
     externs.push('build-system/externs/amp.multipass.extern.js');
 
-    // Normally setting this server-side experiment flag would be handled by
-    // the release process automatically. Since this experiment is actually on the
-    // build system instead of runtime, we never run it through babel and therefore
-    // must compute it here.
-    const isStrict = argv.define_experiment_constant === 'STRICT_COMPILATION';
+    // Do not transpile down to ES5 if running with `--esm`, since we do
+    // limited transpilation in Babel.
     const isEsm = argv.esm;
-    let language;
-    if (isEsm) {
-      // Do not transpile down to ES5 if running with `--esm`, since we do
-      // limited transpilation in Babel.
-      language = 'NO_TRANSPILE';
-    } else if (isStrict) {
-      language = 'ECMASCRIPT5_STRICT';
-    } else {
-      language = 'ECMASCRIPT5';
-    }
+    let language = isEsm ? 'NO_TRANSPILE' : 'ECMASCRIPT5_STRICT';
 
     /* eslint "google-camelcase/google-camelcase": 0*/
     const compilerOptions = {
