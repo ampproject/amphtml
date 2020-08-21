@@ -38,8 +38,5 @@ describes.sandboxed('InlineGallery preact component', {}, () => {
 
     const pagination = wrapper.find('Pagination');
     expect(pagination).to.have.lengthOf(1);
-    expect(pagination.props().children).to.have.ordered.members(
-      carousel.props().children
-    );
   });
 });

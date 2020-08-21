@@ -37,12 +37,9 @@ export function BaseCarousel({
   const {length} = childrenArray;
   const inlineGalleryContext = useContext(InlineGalleryContext);
   const [currentSlideState, setCurrentSlideState] = useState(0);
-  const currentSlide = inlineGalleryContext
-    ? inlineGalleryContext.currentSlide
-    : currentSlideState;
-  const setCurrentSlide = inlineGalleryContext
-    ? inlineGalleryContext.setCurrentSlide
-    : setCurrentSlideState;
+  const currentSlide = inlineGalleryContext.currentSlide ?? currentSlideState;
+  const setCurrentSlide =
+    inlineGalleryContext.setCurrentSlide ?? setCurrentSlideState;
   const scrollRef = useRef(null);
   const advance = (by) => scrollRef.current.advance(by);
   useMountEffect(() => {
@@ -53,7 +50,6 @@ export function BaseCarousel({
       setAdvance(advance);
     }
   });
-
   const setRestingIndex = (i) => {
     setCurrentSlide(i);
     if (onSlideChange) {
