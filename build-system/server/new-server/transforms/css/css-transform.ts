@@ -18,6 +18,14 @@ import minimist from 'minimist';
 import {PostHTML} from 'posthtml';
 import {readFileSync} from 'fs';
 
+/**
+ * A list of options to correspond with options.json for testing purposes.
+ * To add an option, add the corresponding key-value pair into the 
+ * options.json, then add the field to this interface.
+ */
+interface OptionSet{
+}
+
 const argv = minimist(process.argv.slice(2));
 const isTestMode: boolean = argv._.includes('server-tests');
 
@@ -64,7 +72,7 @@ function prependAmpStyles(head: PostHTML.Node): PostHTML.Node {
 /**
  * Replace the src for every stories script tag.
  */
-export default function(options: any): (tree: PostHTML.Node) => void {
+export default function(options: OptionSet): (tree: PostHTML.Node) => void {
   return function(tree: PostHTML.Node){
     tree.match({tag: 'head'}, prependAmpStyles);
   }

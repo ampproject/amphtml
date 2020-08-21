@@ -22,6 +22,15 @@ import minimist from 'minimist';
 const argv = minimist(process.argv.slice(2));
 
 /**
+ * A list of options to correspond with options.json for testing purposes.
+ * To add an option, add the corresponding key-value pair into the 
+ * options.json, then add the field to this interface.
+ */
+interface OptionSet{
+  compiled?: boolean;
+}
+
+/**
  * Append a Module Script for a ScriptNode.
  * @param head
  * @param script
@@ -56,9 +65,10 @@ function appendModuleScript(head: PostHTML.Node, script: ScriptNode, compiled: b
 }
 
 /**
- *
+ * Returns a function that will transform script node sources into module/nomodule pair.
+ * @param options
  */
-export default function(options: any): (tree: PostHTML.Node) => void {
+export default function(options: OptionSet): (tree: PostHTML.Node) => void {
   return function(tree: PostHTML.Node): void {
     let head: PostHTML.Node | undefined = undefined;
     let compiled: boolean = options.compiled || false;
