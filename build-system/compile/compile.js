@@ -243,7 +243,7 @@ function compile(
     // Do not transpile down to ES5 if running with `--esm`, since we do
     // limited transpilation in Babel.
     const isEsm = argv.esm;
-    let language = isEsm ? 'NO_TRANSPILE' : 'ECMASCRIPT5_STRICT';
+    const language = isEsm ? 'NO_TRANSPILE' : 'ECMASCRIPT5_STRICT';
 
     /* eslint "google-camelcase/google-camelcase": 0*/
     const compilerOptions = {
