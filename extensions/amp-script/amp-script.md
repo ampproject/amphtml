@@ -423,7 +423,7 @@ This element includes [common attributes](https://amp.dev/documentation/guides-a
 
 A few runtime errors may be encountered when using `amp-script`.
 
-**Inline script is (...) bytes, which exceeds the limit of 10,000.**
+**The inline script is (...) bytes, which exceeds the limit of 10,000.**
 
 No inline script can exceed 10,000 bytes. See [Size of JavaScript code](#size-of-javascript-code) above. 
 
