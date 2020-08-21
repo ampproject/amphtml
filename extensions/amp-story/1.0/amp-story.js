@@ -1186,7 +1186,7 @@ export class AmpStory extends AMP.BaseElement {
       {bubbles: true}
     );
     this.viewerMessagingHandler_ &&
-      this.viewerMessagingHandler_.send('storyLoaded', dict({}));
+      this.viewerMessagingHandler_.send('storyContentLoaded', dict({}));
     this.signals().signal(CommonSignals.INI_LOAD);
     this.mutateElement(() => {
       this.element.classList.add(STORY_LOADED_CLASS_NAME);

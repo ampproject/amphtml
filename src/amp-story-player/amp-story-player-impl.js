@@ -171,7 +171,7 @@ export class AmpStoryPlayer {
     };
 
     /** @private {?Promise} */
-    this.initialStoryLoaded_ = null;
+    this.currentStoryLoadPromise_ = null;
 
     this.attachCallbacksToElement_();
   }
@@ -579,7 +579,7 @@ export class AmpStoryPlayer {
   waitForStoryToLoadPromise_(iframeIdx) {
     return new Promise((resolve) => {
       this.messagingPromises_[iframeIdx].then((messaging) =>
-        messaging.registerHandler('storyLoaded', () => resolve())
+        messaging.registerHandler('storyContentLoaded', () => resolve())
       );
     });
   }
@@ -834,6 +834,7 @@ export class AmpStoryPlayer {
   updateCurrentIframe_(story) {
     const iframeIdx = story[IFRAME_IDX];
     const iframeEl = this.iframes_[iframeIdx];
+
     this.layoutIframe_(story, iframeEl, VisibilityState.VISIBLE).then(() => {
       this.updateVisibilityState_(iframeIdx, VisibilityState.VISIBLE);
       this.updateIframePosition_(iframeIdx, IframePosition.CURRENT);
@@ -895,27 +896,25 @@ export class AmpStoryPlayer {
    * @private
    */
   layoutIframe_(story, iframe, visibilityState) {
-    return this.hasSameHref_(story.href, iframe.src).then((hasBeenLaidOut) => {
-      if (hasBeenLaidOut) {
-        return Promise.resolve();
+    this.maybeGetCacheUrl_(story.href).then((storyUrl) => {
+      if (this.sanitizedUrlsAreEquals_(storyUrl, iframe.src)) {
+        return;
       }
 
-      let waitPromise;
+      let navigationPromise;
       if (visibilityState === VisibilityState.VISIBLE) {
-        waitPromise = Promise.resolve();
-        this.initialStoryLoaded_ = this.waitForStoryToLoadPromise_(
+        navigationPromise = Promise.resolve();
+        this.currentStoryLoadPromise_ = this.waitForStoryToLoadPromise_(
           story[IFRAME_IDX]
         );
       } else {
-        waitPromise = this.initialStoryLoaded_;
+        navigationPromise = this.currentStoryLoadPromise_;
       }
 
-      return waitPromise.then(() => {
-        return this.maybeGetCacheUrl_(story.href).then((url) => {
-          const {href} = this.getEncodedLocation_(url, visibilityState);
-          iframe.setAttribute('src', href);
-          iframe.setAttribute('title', story.textContent.trim());
-        });
+      return navigationPromise.then(() => {
+        const {href} = this.getEncodedLocation_(storyUrl, visibilityState);
+        iframe.setAttributeNode('src', href);
+        iframe.setAttribute('title', story.textContent.trim());
       });
     });
   }
@@ -924,20 +923,18 @@ export class AmpStoryPlayer {
    * Compares href from the story with the href in the iframe.
    * @param {string} storyHref
    * @param {string} iframeHref
-   * @return {Promise<boolean>}
+   * @return {boolean}
    * @private
    */
-  hasSameHref_(storyHref, iframeHref) {
+  sanitizedUrlsAreEquals_(storyHref, iframeHref) {
     if (iframeHref.length <= 0) {
-      return Promise.resolve(false);
+      return false;
     }
 
-    return this.maybeGetCacheUrl_(storyHref).then((url) => {
-      const sanitizedIframeHref = removeFragment(removeSearch(iframeHref));
-      const sanitizedStoryHref = removeFragment(removeSearch(url));
+    const sanitizedIframeHref = removeFragment(removeSearch(iframeHref));
+    const sanitizedStoryHref = removeFragment(removeSearch(storyHref));
 
-      return Promise.resolve(sanitizedIframeHref === sanitizedStoryHref);
-    });
+    return sanitizedIframeHref === sanitizedStoryHref;
   }
 
   /**
