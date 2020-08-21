@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-// This file must be written in a way compatible with our node version and cjs
-// since it is used at build time before babel transforms have been completed.
-
 const slideElement = {
   flex: '0 0 100%',
   height: '100%',
@@ -177,7 +174,7 @@ const slideSizing = {
   ...hideScrollbarPseudo,
 };
 
-const JSS = {
+export const JSS = {
   slideElement,
   scrollContainer,
   arrowPlacement,
@@ -195,15 +192,7 @@ const JSS = {
   slideSizing,
 };
 
-// This gets replaced via `babel-plugin-transform-jss`.
-const CSS = '';
-
+// The two exports below get replaced via `babel-plugin-transform-jss`.
+export const CSS = ''; 
 // eslint-disable-next-line no-undef
-const useStyles = require('react-jss').createUseStyles(JSS);
-
-// eslint-disable-next-line
-module.exports = {
-  CSS,
-  JSS,
-  useStyles,
-};
+export const useStyles = require('react-jss').createUseStyles(JSS); 

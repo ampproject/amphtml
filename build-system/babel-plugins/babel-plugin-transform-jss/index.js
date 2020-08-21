@@ -46,6 +46,20 @@ module.exports = function ({types: t}) {
     return jss.createStyleSheet(require(filepath).JSS);
   }
 
+  function multimapAdd(map, key, value) {
+    if (!map.has(key)) {
+      map.set(key, [value]);
+      return;
+    }
+    map.get(key).push(value);
+  }
+
+  function compileJssStatically(JSS) {
+    const jss = create();
+    jss.setup(preset());
+    return jss.createStyleSheet(JSS);
+  }
+
   const isIdent = (path, ident) => path.node.id && path.node.id.name === ident;
   const replaceVal = (path, newValue) => {
     const newNode = t.cloneNode(path.node);
@@ -55,6 +69,7 @@ module.exports = function ({types: t}) {
   };
 
   const sheetMap = new WeakMap();
+  const pendingUpdates = new WeakMap();
   return {
     visitor: {
       VariableDeclarator(path, state) {
@@ -66,15 +81,35 @@ module.exports = function ({types: t}) {
         if (!sheetMap.has(state.file)) {
           sheetMap.set(state.file, compileJss(filename));
         }
-        const sheet = sheetMap.get(state.file);
 
         if (isIdent(path, 'useStyles')) {
-          replaceVal(path, `() => (${JSON.stringify(sheet.classes)})`);
-          path.stop();
+          multimapAdd(pendingUpdates, state.file, () =>
+            replaceVal(
+              path,
+              `() => (${JSON.stringify(sheetMap.get(state.file))})`
+            )
+          );
+          // path.stop();
         }
+
         if (isIdent(path, 'CSS')) {
-          replaceVal(path, '`' + sheet.toString() + '`');
-          path.stop();
+          multimapAdd(pendingUpdates, state.file, () =>
+            replaceVal(path, '`' + sheetMap.get(state.file).toString() + '`')
+          );
+          // path.stop();
+        }
+
+        if (isIdent(path, 'JSS')) {
+          const jssVal = path.evaluate();
+          if (!jssVal.confident) {
+            throw new Error(`JSS Value must be statically evaluatable.`);
+          }
+          sheetMap.set(state.file, compileJssStatically(jssVal.val));
+        }
+
+        // Run all pending replacements.
+        if (sheetMap.has(state.file)) {
+          pendingUpdates.get(state.file).forEach((fn) => fn());
         }
       },
 
