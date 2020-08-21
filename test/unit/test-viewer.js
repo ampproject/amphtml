@@ -1793,4 +1793,88 @@ describes.sandboxed('Viewer', {}, (env) => {
       return result;
     });
   });
+
+  describe('onMessage', () => {
+    it('should fire observer on event', () => {
+      const onMessageSpy = env.sandbox.spy();
+      viewer.onMessage('event', onMessageSpy);
+      viewer.receiveMessage('event', {foo: 'bar'});
+      expect(onMessageSpy).to.have.been.calledOnceWithExactly({foo: 'bar'});
+    });
+
+    it('should not fire observer on other events', () => {
+      const onMessageSpy = env.sandbox.spy();
+      viewer.onMessage('event', onMessageSpy);
+      viewer.receiveMessage('otherevent', {foo: 'bar'});
+      expect(onMessageSpy).to.not.have.been.called;
+    });
+
+    it('should fire observer with queued messages on handler registration', () => {
+      const onMessageSpy = env.sandbox.spy();
+      viewer.receiveMessage('event', {foo: 'bar'});
+      viewer.onMessage('event', onMessageSpy);
+      expect(onMessageSpy).to.have.been.calledOnceWithExactly({foo: 'bar'});
+    });
+
+    it('should empty queued messages after first handler registration', () => {
+      const onMessageSpy = env.sandbox.spy();
+      viewer.receiveMessage('event', {foo: 'bar'});
+      viewer.onMessage('event', onMessageSpy);
+      viewer.onMessage('event', onMessageSpy);
+      expect(onMessageSpy).to.have.been.calledOnceWithExactly({foo: 'bar'});
+    });
+
+    it('should cap the max number of queued messages', () => {
+      const onMessageSpy = env.sandbox.spy();
+      for (let i = 0; i < 55; i++) {
+        viewer.receiveMessage('event', {foo: 'bar'});
+      }
+      viewer.onMessage('event', onMessageSpy);
+      expect(onMessageSpy).to.have.callCount(50);
+    });
+  });
+
+  describe('onMessageRespond', () => {
+    it('should call responder on event', () => {
+      const onMessageRespondStub = env.sandbox.stub().resolves();
+      viewer.onMessageRespond('event', onMessageRespondStub);
+      viewer.receiveMessage('event', {foo: 'bar'});
+      expect(onMessageRespondStub).to.have.been.calledOnceWithExactly({
+        foo: 'bar',
+      });
+    });
+
+    it('should not call responder on other events', () => {
+      const onMessageRespondStub = env.sandbox.stub().resolves();
+      viewer.onMessageRespond('event', onMessageRespondStub);
+      viewer.receiveMessage('otherevent', {foo: 'bar'});
+      expect(onMessageRespondStub).to.not.have.been.called;
+    });
+
+    it('should call responder with queued messages on responder registration', () => {
+      const onMessageRespondStub = env.sandbox.stub().resolves();
+      viewer.receiveMessage('event', {foo: 'bar'});
+      viewer.onMessageRespond('event', onMessageRespondStub);
+      expect(onMessageRespondStub).to.have.been.calledOnceWithExactly({
+        foo: 'bar',
+      });
+    });
+
+    it('should empty queued messages after first responder registration', () => {
+      const onMessageRespondStub = env.sandbox.stub().resolves();
+      viewer.receiveMessage('event', {foo: 'bar'});
+      viewer.onMessageRespond('event', onMessageRespondStub);
+      viewer.onMessageRespond('event', onMessageRespondStub);
+      expect(onMessageRespondStub).to.have.been.calledOnceWithExactly({
+        foo: 'bar',
+      });
+    });
+
+    it('should return responder response when enqueing message on responder registration', async () => {
+      const onMessageRespondStub = env.sandbox.stub().resolves('response');
+      const promise = viewer.receiveMessage('event', {foo: 'bar'});
+      viewer.onMessageRespond('event', onMessageRespondStub);
+      expect(await promise).to.equal('response');
+    });
+  });
 });
