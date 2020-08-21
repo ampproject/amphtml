@@ -61,7 +61,7 @@ export function revcontent(global, data) {
     'ampcreative',
     'gdpr',
     'gdprConsent',
-    'usPrivacy'
+    'usPrivacy',
   ];
 
   data.endpoint = data.endpoint ? data.endpoint : 'trends.revcontent.com';
