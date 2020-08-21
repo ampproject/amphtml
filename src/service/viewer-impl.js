@@ -51,6 +51,12 @@ export const Capability = {
 };
 
 /**
+ * Max length for each array of the received message queue.
+ * @const @private {number}
+ */
+const RECEIVED_MESSAGE_QUEUE_MAX_LENGTH = 50;
+
+/**
  * Duration in milliseconds to wait for viewerOrigin to be set before an empty
  * string is returned.
  * @const
@@ -131,7 +137,7 @@ export class ViewerImpl {
      *   deferred: !Deferred
      * }>>}
      */
-    this.receivedMessageQueue_ = {};
+    this.receivedMessageQueue_ = map();
 
     /**
      * Subset of this.params_ that only contains parameters in the URL hash,
@@ -719,6 +725,12 @@ export class ViewerImpl {
     if (!observable && !responder) {
       this.receivedMessageQueue_[eventType] =
         this.receivedMessageQueue_[eventType] || [];
+      if (
+        this.receivedMessageQueue_[eventType].length >
+        RECEIVED_MESSAGE_QUEUE_MAX_LENGTH
+      ) {
+        return undefined;
+      }
       const deferred = new Deferred();
       this.receivedMessageQueue_[eventType].push({data, deferred});
       return deferred.promise;
