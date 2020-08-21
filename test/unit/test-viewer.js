@@ -1823,6 +1823,15 @@ describes.sandboxed('Viewer', {}, (env) => {
       viewer.onMessage('event', onMessageSpy);
       expect(onMessageSpy).to.have.been.calledOnceWithExactly({foo: 'bar'});
     });
+
+    it('should cap the max number of queued messages', () => {
+      const onMessageSpy = env.sandbox.spy();
+      for (let i = 0; i < 55; i++) {
+        viewer.receiveMessage('event', {foo: 'bar'});
+      }
+      viewer.onMessage('event', onMessageSpy);
+      expect(onMessageSpy).to.have.callCount(50);
+    });
   });
 
   describe('onMessageRespond', () => {

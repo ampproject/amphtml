@@ -726,7 +726,7 @@ export class ViewerImpl {
       this.receivedMessageQueue_[eventType] =
         this.receivedMessageQueue_[eventType] || [];
       if (
-        this.receivedMessageQueue_[eventType].length >
+        this.receivedMessageQueue_[eventType].length >=
         RECEIVED_MESSAGE_QUEUE_MAX_LENGTH
       ) {
         return undefined;
