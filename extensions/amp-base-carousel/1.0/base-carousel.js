@@ -40,6 +40,8 @@ export function BaseCarousel({
   loop,
   onSlideChange,
   setAdvance,
+  snap = true,
+  snapAlign = 'center',
   ...rest
 }) {
   const childrenArray = toChildArray(children);
@@ -80,6 +82,8 @@ export function BaseCarousel({
         setRestingIndex={setRestingIndex}
         ref={scrollRef}
         onTouchStart={() => setHadTouch(true)}
+        snap={snap}
+        snapAlign={snapAlign}
       >
         {childrenArray}
       </Scroller>

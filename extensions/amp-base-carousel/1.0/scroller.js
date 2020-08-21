@@ -43,7 +43,10 @@ const RESET_SCROLL_REFERENCE_POINT_WAIT_MS = 200;
  * @return {PreactDef.Renderable}
  * @template T
  */
-function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
+function ScrollerWithRef(
+  {children, loop, restingIndex, setRestingIndex, snap, snapAlign},
+  ref
+) {
   // We still need our own ref that we can always rely on to be there.
   const containerRef = useRef(null);
   useImperativeHandle(ref, () => ({
@@ -76,6 +79,8 @@ function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
       offsetRef,
       pivotIndex,
       restingIndex,
+      snap,
+      snapAlign,
     },
     classes
   );
@@ -212,7 +217,7 @@ export {Scroller};
  * @return {PreactDef.Renderable}
  */
 function renderSlides(
-  {children, restingIndex, offsetRef, pivotIndex, loop},
+  {children, restingIndex, offsetRef, pivotIndex, loop, snap, snapAlign},
   classes
 ) {
   const {length} = children;
@@ -226,7 +231,11 @@ function renderSlides(
         renderable={index == restingIndex}
         playable={index == restingIndex}
       >
-        <div class={`${classes.slideSizing} ${classes.slideElement}`}>
+        <div
+          snap={snap}
+          snapAlign={snapAlign}
+          class={`${classes.slideSizing} ${classes.slideElement}`}
+        >
           {child}
         </div>
       </WithAmpContext>

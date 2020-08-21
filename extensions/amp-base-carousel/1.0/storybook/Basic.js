@@ -16,7 +16,7 @@
 
 import * as Preact from '../../../../src/preact';
 import {BaseCarousel} from '../base-carousel';
-import {number, withKnobs} from '@storybook/addon-knobs';
+import {boolean, number, select, withKnobs} from '@storybook/addon-knobs';
 import {withA11y} from '@storybook/addon-a11y';
 
 export default {
@@ -30,8 +30,14 @@ export const _default = () => {
   const height = number('height', 225);
   const slideCount = number('slide count', 5, {min: 0, max: 99});
   const colorIncrement = Math.floor(255 / (slideCount + 1));
+  const snap = boolean('snap', true);
+  const snapAlign = select('snap-align', ['start', 'center']);
   return (
-    <BaseCarousel style={{width, height, position: 'relative'}}>
+    <BaseCarousel
+      snap={snap}
+      snapAlign={snapAlign}
+      style={{width, height, position: 'relative'}}
+    >
       {Array.from({length: slideCount}, (x, i) => {
         const v = colorIncrement * (i + 1);
         return (
