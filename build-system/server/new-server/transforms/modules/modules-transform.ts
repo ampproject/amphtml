@@ -26,7 +26,7 @@ const argv = minimist(process.argv.slice(2));
  * To add an option, add the corresponding key-value pair into the 
  * options.json, then add the field to this interface.
  */
-interface OptionSet{
+interface OptionSet {
   compiled?: boolean;
 }
 

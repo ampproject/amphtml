@@ -23,7 +23,7 @@ import {readFileSync} from 'fs';
  * To add an option, add the corresponding key-value pair into the 
  * options.json, then add the field to this interface.
  */
-interface OptionSet{
+interface OptionSet {
 }
 
 const argv = minimist(process.argv.slice(2));

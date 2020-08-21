@@ -24,7 +24,7 @@ import {CDNURLToLocalDistURL} from '../utilities/cdn';
  * To add an option, add the corresponding key-value pair into the 
  * options.json, then add the field to this interface.
  */
-interface OptionSet{
+interface OptionSet {
 }
 
 function sidegradeStories(script: PostHTML.Node): PostHTML.Node {
