@@ -21,7 +21,6 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import '../../amp-a4a/0.1/real-time-config-manager';
-import {EXPERIMENT_INFO_LIST as AMPDOC_FIE_EXPERIMENT_INFO_LIST} from '../../../src/ampdoc-fie';
 import {
   AmpA4A,
   ConsentTupleDef,
@@ -486,7 +485,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           ROUND_LOCATION_PARAMS_HOLDBACK_EXP.EXPERIMENT,
         ],
       },
-    ]).concat(AMPDOC_FIE_EXPERIMENT_INFO_LIST);
+    ]);
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoList);
     Object.keys(setExps).forEach(
       (expName) => setExps[expName] && this.experimentIds.push(setExps[expName])
