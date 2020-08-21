@@ -99,7 +99,7 @@ async function getExpectedOutput(inputFile) {
 /**
  * Extracts the JS transform for a test from its transform file.
  * @param {string} inputFile
- * @param {JSON} extraOptions
+ * @param {!Object} extraOptions
  * @return {string}
  */
 async function getTransform(inputFile, extraOptions) {
