@@ -33,7 +33,7 @@ import {getData} from '../../../src/event-helper';
 import {getHtml} from '../../../src/get-html';
 import {isExperimentOn} from '../../../src/experiments';
 import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
-import {LegacyAdIntersectionObserver} from './legacy-ad-intersection-observer-host';
+import {LegacyAdIntersectionObserverHost} from './legacy-ad-intersection-observer-host';
 import {removeElement} from '../../../src/dom';
 import {reportErrorToAnalytics} from '../../../src/error';
 import {setStyle} from '../../../src/style';
@@ -66,7 +66,7 @@ export class AmpAdXOriginIframeHandler {
     /** @type {?HTMLIFrameElement} iframe instance */
     this.iframe = null;
 
-    /** @private {?LegacyAdIntersectionObserver} */
+    /** @private {?LegacyAdIntersectionObserverHost} */
     this.legacyIntersectionObserverApiHost_ = null;
 
     /** @private {SubscriptionApi} */
@@ -105,7 +105,7 @@ export class AmpAdXOriginIframeHandler {
 
     // Init the legacy observeInterection API service.
     // (Behave like position observer)
-    this.legacyIntersectionObserverApiHost_ = new LegacyAdIntersectionObserver(
+    this.legacyIntersectionObserverApiHost_ = new LegacyAdIntersectionObserverHost(
       this.baseInstance_,
       this.iframe
     );

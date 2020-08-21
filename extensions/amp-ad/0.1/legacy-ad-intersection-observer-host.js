@@ -109,11 +109,11 @@ export function getIntersectionChangeEntry(element, owner, viewport) {
 }
 
 /**
- * LegacyAdIntersectionObserver exists for backward compatibility to support
+ * LegacyAdIntersectionObserverHost exists for backward compatibility to support
  * the context.observeIntersect API in 3P ad.
- * Use IntersectionObserverHostApi instead.
+ * Use IntersectionObserver3pHost instead.
  *
- * The LegacyAdIntersectionObserver class lets a 3P ad share its viewport
+ * The LegacyAdIntersectionObserverHost class lets a 3P ad share its viewport
  * intersection data with an iframe of its choice (most likely contained within
  * the element itself.) in the format of IntersectionObserverEntry.
  * When instantiated the class will start listening for a
@@ -125,11 +125,11 @@ export function getIntersectionChangeEntry(element, owner, viewport) {
  * the viewport. It also exposes a `fire` method to allow AMP to send the
  * intersection data to the iframe at remeasure.
  *
- * Note: The LegacyAdIntersectionObserver would not send any data
+ * Note: The LegacyAdIntersectionObserverHost would not send any data
  * over to the iframe if it had not requested the intersection data already via
  * 'send-intersections' postMessage.
  */
-export class LegacyAdIntersectionObserver {
+export class LegacyAdIntersectionObserverHost {
   /**
    * @param {!AMP.BaseElement} baseElement
    * @param {!Element} adIframe Iframe element which requested the

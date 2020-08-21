@@ -90,7 +90,7 @@ export function getIntersectionChangeEntry(element, owner, hostViewport) {
  * A class to help amp-iframe and amp-ad nested iframe listen to intersection
  * change.
  */
-export class IntersectionObserverHostApi {
+export class IntersectionObserver3pHost {
   /**
    * @param {!AMP.BaseElement} baseElement
    * @param {!Element} iframe
