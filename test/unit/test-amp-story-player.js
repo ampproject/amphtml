@@ -352,8 +352,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       );
     });
 
-    // TODO(Enriqe): unksip this test.
-    it.skip('should throw error when invalid url is provided', async () => {
+    it('should throw error when invalid url is provided', async () => {
       buildStoryPlayer(1, DEFAULT_ORIGIN_URL, 'www.invalid.org');
 
       return expect(() => manager.loadPlayers()).to.throw(

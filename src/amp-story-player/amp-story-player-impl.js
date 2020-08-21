@@ -15,6 +15,7 @@
  */
 
 import * as ampToolboxCacheUrl from '@ampproject/toolbox-cache-url';
+import {Deferred} from '../utils/promise';
 import {IframePool} from './amp-story-player-iframe-pool';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {VisibilityState} from '../visibility-state';
@@ -172,6 +173,12 @@ export class AmpStoryPlayer {
 
     /** @private {?Promise} */
     this.currentStoryLoadPromise_ = null;
+
+    /** @private {?Function} */
+    this.currentStoryLoadResolveFn_ = null;
+
+    /** @private {?Function} */
+    this.currentStoryLoadRejectFn_ = null;
 
     this.attachCallbacksToElement_();
   }
@@ -570,18 +577,28 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Returns a promise that resolves when story in given iframe is finished
-   * loading.
+   * @private
+   */
+  initializeCurrentStoryLoadPromise_() {
+    const deferred = new Deferred();
+    this.currentStoryLoadPromise_ = deferred.promise;
+    this.currentStoryLoadResolveFn_ = deferred.resolve;
+    this.currentStoryLoadRejectFn_ = deferred.reject;
+  }
+
+  /**
+   * Resolves when story in given iframe is finished loading.
    * @param {number} iframeIdx
-   * @return {!Promise}
    * @private
    */
   waitForStoryToLoadPromise_(iframeIdx) {
-    return new Promise((resolve) => {
-      this.messagingPromises_[iframeIdx].then((messaging) =>
-        messaging.registerHandler('storyContentLoaded', () => resolve())
-      );
-    });
+    this.initializeCurrentStoryLoadPromise_();
+
+    this.messagingPromises_[iframeIdx].then((messaging) =>
+      messaging.registerHandler('storyContentLoaded', () => {
+        this.currentStoryLoadResolveFn_();
+      })
+    );
   }
 
   /**
@@ -896,27 +913,34 @@ export class AmpStoryPlayer {
    * @private
    */
   layoutIframe_(story, iframe, visibilityState) {
-    this.maybeGetCacheUrl_(story.href).then((storyUrl) => {
-      if (this.sanitizedUrlsAreEquals_(storyUrl, iframe.src)) {
-        return;
-      }
+    return this.maybeGetCacheUrl_(story.href)
+      .then((storyUrl) => {
+        if (this.sanitizedUrlsAreEquals_(storyUrl, iframe.src)) {
+          return Promise.resolve();
+        }
 
-      let navigationPromise;
-      if (visibilityState === VisibilityState.VISIBLE) {
-        navigationPromise = Promise.resolve();
-        this.currentStoryLoadPromise_ = this.waitForStoryToLoadPromise_(
-          story[IFRAME_IDX]
-        );
-      } else {
-        navigationPromise = this.currentStoryLoadPromise_;
-      }
+        let navigationPromise;
+        if (visibilityState === VisibilityState.VISIBLE) {
+          if (this.currentStoryLoadRejectFn_) {
+            // Reject previous navigation promise.
+            this.currentStoryLoadRejectFn_('Cancelling previous story load.');
+          }
+          navigationPromise = Promise.resolve();
+          this.waitForStoryToLoadPromise_(story[IFRAME_IDX]);
+        } else {
+          navigationPromise = this.currentStoryLoadPromise_;
+        }
 
-      return navigationPromise.then(() => {
-        const {href} = this.getEncodedLocation_(storyUrl, visibilityState);
-        iframe.setAttributeNode('src', href);
-        iframe.setAttribute('title', story.textContent.trim());
+        return navigationPromise.then(() => {
+          const {href} = this.getEncodedLocation_(storyUrl, visibilityState);
+          iframe.setAttribute('src', href);
+          iframe.setAttribute('title', story.textContent.trim());
+        });
+      })
+      .catch((reason) => {
+        console /*OK*/
+          .log({reason});
       });
-    });
   }
 
   /**
