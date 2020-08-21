@@ -17,7 +17,13 @@ import * as Preact from '../../../src/preact';
 import {ArrowNext, ArrowPrev} from './arrow';
 import {CarouselContext} from './carousel-context';
 import {Scroller} from './scroller';
-import {toChildArray, useContext, useRef, useState} from '../../../src/preact';
+import {
+  toChildArray,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from '../../../src/preact';
 import {useMountEffect} from '../../../src/preact/utils';
 
 /**
@@ -40,16 +46,19 @@ export function BaseCarousel({
   const currentSlide = carouselContext.currentSlide ?? currentSlideState;
   const setCurrentSlide =
     carouselContext.setCurrentSlide ?? setCurrentSlideState;
+  const {setSlideCount} = carouselContext;
   const scrollRef = useRef(null);
   const advance = (by) => scrollRef.current.advance(by);
   useMountEffect(() => {
-    if (carouselContext.setSlideCount) {
-      carouselContext.setSlideCount(length);
-    }
     if (setAdvance) {
       setAdvance(advance);
     }
   });
+  useEffect(() => {
+    if (setSlideCount) {
+      setSlideCount(length);
+    }
+  }, [setSlideCount, length]);
   const setRestingIndex = (i) => {
     setCurrentSlide(i);
     if (onSlideChange) {
