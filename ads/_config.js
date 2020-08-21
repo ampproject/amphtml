@@ -480,6 +480,13 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'firstimpression': {
+    prefetch: 'https://ecdn.firstimpression.io/static/js/fiamp.js',
+    preconnect: 'https://cdn.firstimpression.io',
+    renderStartImplemented: true,
+    consentHandlingOverride: true,
+  },
+
   'flite': {},
 
   'fluct': {
@@ -509,6 +516,10 @@ const adConfig = jsonConfiguration({
 
   'giraff': {
     renderStartImplemented: true,
+  },
+
+  'glomex': {
+    prefetch: 'https://player.glomex.com/integration/1/amp-embed.js',
   },
 
   'gmossp': {

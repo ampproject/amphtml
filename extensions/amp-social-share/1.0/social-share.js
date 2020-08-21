@@ -24,33 +24,37 @@ import {getSocialConfig} from './social-share-config';
 import {openWindowDialog} from '../../../src/dom';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
+const NAME = 'SocialShare';
 const DEFAULT_WIDTH = 60;
 const DEFAULT_HEIGHT = 44;
 const DEFAULT_TARGET = '_blank';
-const NAME = 'SocialShare';
+const WINDOW_FEATURES = 'resizable,scrollbars,width=640,height=480';
 
 /**
- * @param {!JsonObject} props
- *  type: !string,
- *  endpoint: ?string,
- *  params: ?JsonObject,
- *  target: ?string,
- *  width: ?string,
- *  height: ?string,
- *  color: ?string,
- *  background: ?string,
- *  tabIndex: ?string,
- *  style: ?string,
+ * @param {!SocialSharePropsDef} props
  * @return {PreactDef.Renderable}
  */
-export function SocialShare(props) {
+export function SocialShare({
+  type,
+  endpoint,
+  params,
+  target,
+  width,
+  height,
+  color,
+  background,
+  tabIndex = 0,
+  style,
+  children,
+  ...rest
+}) {
   useResourcesNotify();
   const {
     finalEndpoint,
     checkedWidth,
     checkedHeight,
     checkedTarget,
-  } = checkProps(props);
+  } = checkProps(type, endpoint, target, width, height, params);
 
   const size = dict({
     'width': checkedWidth,
@@ -59,53 +63,44 @@ export function SocialShare(props) {
 
   return (
     <div
+      {...rest}
       role="button"
-      tabindex={props['tabIndex'] || '0'}
+      tabindex={tabIndex}
       onKeyDown={(e) => handleKeyPress(e, finalEndpoint, checkedTarget)}
       onClick={() => handleActivation(finalEndpoint, checkedTarget)}
-      style={{...size, ...props['style']}}
+      style={{...size, ...style}}
     >
-      {processChildren(props, size)}
+      {processChildren(
+        /** @type {string} */ (type),
+        children,
+        color,
+        background,
+        size
+      )}
     </div>
   );
 }
 
 /**
- * If the specified type 'canCustomize' (see config file), allow children
- * to be rendered and color / background to be passed in via props.  If the
- * specified type cannot be customized (canCustomize = false), children
- * will not be rendered and color / background will always be set to default
- * values.
- * @param {!JsonObject} props
+ * If children exist, render the children instead of the icon.  Otherwise,
+ * render the icon associated with the specified type with specified color
+ * and background (or defaults if not specified).
+ * @param {string} type
+ * @param {?PreactDef.Renderable|undefined} children
+ * @param {string|undefined} color
+ * @param {string|undefined} background
  * @param {JsonObject} size
  * @return {PreactDef.Renderable}
  */
-function processChildren(props, size) {
-  const {
-    'type': type,
-    'children': children,
-    'color': propsColor,
-    'background': propsBackground,
-  } = props;
-  const typeConfig =
-    getSocialConfig(type) ||
-    dict({
-      'canCustomize': true,
-    });
-
-  if (typeConfig['canCustomize'] && children) {
+function processChildren(type, children, color, background, size) {
+  if (children) {
     return children;
   } else {
+    const typeConfig = getSocialConfig(type) || {};
     const baseStyle = CSS.BASE_STYLE;
     const iconStyle = dict({
-      'color':
-        typeConfig['canCustomize'] && propsColor
-          ? propsColor
-          : typeConfig['defaultColor'],
-      'backgroundColor':
-        typeConfig['canCustomize'] && propsBackground
-          ? propsBackground
-          : typeConfig['defaultBackgroundColor'],
+      'color': color || typeConfig.defaultColor,
+      'backgroundColor': background || typeConfig.defaultBackgroundColor,
     });
     return (
       <SocialShareIcon
@@ -117,24 +112,22 @@ function processChildren(props, size) {
 }
 
 /**
- * @param {!JsonObject} props
+ * Verify required props and throw error if necessary.  Set default values
+ * for optional props if no value specified.
+ * @param {string|undefined} type
+ * @param {string|undefined} endpoint
+ * @param {string|undefined} target
+ * @param {number|string|undefined} width
+ * @param {number|string|undefined} height
+ * @param {JsonObject|Object|undefined} params
  * @return {{
  *   finalEndpoint: string,
- *   checkedWidth: number,
- *   checkedHeight: number,
+ *   checkedWidth: (number|string),
+ *   checkedHeight: (number|string),
  *   checkedTarget: string,
  * }}
  */
-function checkProps(props) {
-  const {
-    'type': type,
-    'endpoint': endpoint,
-    'target': target,
-    'width': width,
-    'height': height,
-    'params': params,
-  } = props;
-
+function checkProps(type, endpoint, target, width, height, params) {
   // Verify type is provided
   if (type === undefined) {
     throw new Error(`The type attribute is required. ${NAME}`);
@@ -142,8 +135,8 @@ function checkProps(props) {
 
   // User must provide endpoint if they choose a type that is not
   // pre-configured
-  const typeConfig = getSocialConfig(type) || dict();
-  let baseEndpoint = endpoint || typeConfig['shareEndpoint'];
+  const typeConfig = getSocialConfig(/** @type {string} */ (type)) || {};
+  let baseEndpoint = endpoint || typeConfig.shareEndpoint;
   if (baseEndpoint === undefined) {
     throw new Error(
       `An endpoint is required if not using a pre-configured type. ${NAME}`
@@ -152,7 +145,7 @@ function checkProps(props) {
 
   // Special case when type is 'email'
   if (type === 'email' && !endpoint) {
-    baseEndpoint = `mailto:${params['recipient'] || ''}`;
+    baseEndpoint = `mailto:${(params && params['recipient']) || ''}`;
   }
 
   // Add params to baseEndpoint
@@ -189,7 +182,7 @@ function throwWarning(message) {
  */
 function handleActivation(finalEndpoint, target) {
   const protocol = finalEndpoint.split(':', 1)[0];
-  const windowFeatures = 'resizable,scrollbars,width=640,height=480';
+
   if (protocol === 'navigator-share') {
     if (window && window.navigator && window.navigator.share) {
       const data = parseQueryString(
@@ -208,10 +201,10 @@ function handleActivation(finalEndpoint, target) {
       window,
       protocol === 'sms' ? finalEndpoint.replace('?', '?&') : finalEndpoint,
       isIos() ? '_top' : target,
-      windowFeatures
+      WINDOW_FEATURES
     );
   } else {
-    openWindowDialog(window, finalEndpoint, target, windowFeatures);
+    openWindowDialog(window, finalEndpoint, target, WINDOW_FEATURES);
   }
 }
 

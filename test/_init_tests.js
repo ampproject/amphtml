@@ -378,7 +378,7 @@ function preventAsyncErrorThrows() {
 before(function () {
   // This is a more robust version of `this.skip()`. See #17245.
   this.skipTest = function () {
-    if (this._runnable.title != '"before all" hook') {
+    if (!this._runnable.title.startsWith('"before all" hook')) {
       throw new Error('skipTest() can only be called from within before()');
     }
     this.test.parent.pending = true; // Workaround for mochajs/mocha#2683.

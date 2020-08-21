@@ -637,15 +637,15 @@ describes.sandboxed('Navigation', {}, () => {
         });
 
         it('should navigate relative to source url', () => {
+          // URLs relative to root.
           win.location.href =
             'https://cdn.ampproject.org/c/s/www.pub.com/dir/page.html';
-          const urlService = Services.urlForDoc(doc.documentElement);
+          handler.navigateTo(win, '/abc.html');
+          expect(win.location.href).to.equal('https://www.pub.com/abc.html');
 
-          env.sandbox.stub(urlService, 'getSourceUrl').callsFake((url) => {
-            expect(url).to.equal('abc.html');
-            return 'https://www.pub.com/dir/abc.html';
-          });
-
+          // URLs relative to current directory.
+          win.location.href =
+            'https://cdn.ampproject.org/c/s/www.pub.com/dir/page.html';
           handler.navigateTo(win, 'abc.html');
           expect(win.location.href).to.equal(
             'https://www.pub.com/dir/abc.html'

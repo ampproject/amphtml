@@ -41,7 +41,6 @@ export const UrlReplacementPolicy = {
  * @param {UrlReplacementPolicy|undefined} options.urlReplacement If ALL, replaces all URL
  *     vars. If OPT_IN, replaces allowlisted URL vars. Otherwise, don't expand.
  * @param {boolean|undefined} options.refresh Forces refresh of browser cache.
- * @param {string|undefined} options.token Auth token that forces a POST request.
  * @param {string|undefined} options.xssiPrefix Prefix to optionally
  *     strip from the response before calling parseJson.
  * @return {!Promise<!JsonObject|!Array<JsonObject>>} Resolved with JSON
@@ -54,7 +53,6 @@ export function batchFetchJsonFor(
     expr = '.',
     urlReplacement = UrlReplacementPolicy.NONE,
     refresh = false,
-    token = undefined,
     xssiPrefix = undefined,
   } = {}
 ) {
@@ -62,15 +60,6 @@ export function batchFetchJsonFor(
   const xhr = Services.batchedXhrFor(ampdoc.win);
   return requestForBatchFetch(element, urlReplacement, refresh)
     .then((data) => {
-      if (token !== undefined) {
-        data.fetchOpt['method'] = 'POST';
-        data.fetchOpt['headers'] = {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        };
-        data.fetchOpt['body'] = {
-          'ampViewerAuthToken': token,
-        };
-      }
       return xhr.fetchJson(data.xhrUrl, data.fetchOpt);
     })
     .then((res) => Services.xhrFor(ampdoc.win).xssiJson(res, xssiPrefix))

@@ -116,7 +116,7 @@ describes.realWin('no signing', {amp: true}, (env) => {
       'meta[http-equiv=Content-Security-Policy]'
     );
     expect(cspMeta).to.be.ok;
-    expect(cspMeta.content).to.include('img-src *;');
+    expect(cspMeta.content).to.include('img-src * data:;');
     expect(cspMeta.content).to.include('media-src *;');
     expect(cspMeta.content).to.include('font-src *;');
     expect(cspMeta.content).to.include('connect-src *;');
@@ -135,6 +135,16 @@ describes.realWin('no signing', {amp: true}, (env) => {
         'https://use.typekit.net ' +
         "'unsafe-inline';"
     );
+  });
+
+  it('FIE should contain <base> with adurl', async () => {
+    await a4a.buildCallback();
+    a4a.onLayoutMeasure();
+    await a4a.layoutCallback();
+    const fie = doc.body.querySelector('iframe[srcdoc]');
+    const base = fie.contentDocument.querySelector('base');
+    expect(base).to.be.ok;
+    expect(base.href).to.equal('https://adnetwork.com/');
   });
 
   it('should complete the rendering FIE', async () => {

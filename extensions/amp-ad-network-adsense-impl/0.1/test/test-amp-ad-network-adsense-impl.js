@@ -40,6 +40,7 @@ import {
   forceExperimentBranch,
   toggleExperiment,
 } from '../../../../src/experiments';
+import {toWin} from '../../../../src/types';
 import {utf8Decode, utf8Encode} from '../../../../src/utils/bytes';
 
 function createAdsenseImplElement(attributes, doc, opt_tag) {
@@ -978,6 +979,8 @@ describes.realWin(
 
       let iframe;
       let didAttemptSizeChange;
+      let didMeasure;
+      let didMutate;
 
       function constructImpl(config) {
         config.type = 'adsense';
@@ -1005,6 +1008,20 @@ describes.realWin(
             },
           })
         );
+
+        didMeasure = false;
+        didMutate = false;
+        const vsyncMock = Services.vsyncFor(
+          toWin(element.ownerDocument.defaultView)
+        );
+        env.sandbox.stub(vsyncMock, 'runPromise').callsFake((task, state) => {
+          didMeasure = true;
+          didMutate = true;
+          task.measure(state);
+          task.mutate(state);
+          return Promise.resolve();
+        });
+
         return impl;
       }
 
@@ -1018,6 +1035,29 @@ describes.realWin(
         await promise;
 
         expect(didAttemptSizeChange).to.be.false;
+        expect(didMeasure).to.be.false;
+        expect(didMutate).to.be.false;
+      });
+
+      it('should not schedule a resize for desktop container width responsive', async () => {
+        const adsense = constructImpl({
+          width: '100vw',
+          height: '100',
+          'data-auto-format': 'rspv',
+        });
+        // Overwrite the viewport size to be wide viewport one.
+        adsense.getViewport().getSize = () => ({
+          width: 1400,
+          height: 1024,
+        });
+
+        const promise = adsense.buildCallback();
+        expect(promise).to.exist;
+        await promise;
+
+        expect(didAttemptSizeChange).to.be.false;
+        expect(didMeasure).to.be.true;
+        expect(didMutate).to.be.true;
       });
 
       it('should schedule a resize for responsive', async () => {
@@ -1032,6 +1072,8 @@ describes.realWin(
         await promise;
 
         expect(didAttemptSizeChange).to.be.true;
+        expect(didMeasure).to.be.false;
+        expect(didMutate).to.be.false;
       });
 
       it('should schedule a resize for matched content responsive', async () => {
@@ -1045,6 +1087,8 @@ describes.realWin(
         expect(promise).to.exist;
         await promise;
         expect(didAttemptSizeChange).to.be.true;
+        expect(didMeasure).to.be.false;
+        expect(didMutate).to.be.false;
       });
 
       describe('for publisher opted in to auto ad size optimization', () => {
