@@ -45,7 +45,7 @@ function modifySrc(script: PostHTML.Node): PostHTML.Node {
  * Replace the src for every script tag to the local value.
  */
 export default function(options: OptionSet): (tree: PostHTML.Node) => void {
-  return function(tree: PostHTML.Node){
+  return function(tree: PostHTML.Node) {
     tree.match({tag: 'script'}, modifySrc);
   }
 }
