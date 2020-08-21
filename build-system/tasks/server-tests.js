@@ -125,8 +125,8 @@ async function getOutput(transform, input) {
 /**
  * Loads optional arguments residing in a options.json file, if any.
  *
- * @param {strings} inputFile
- * @return {JSON}
+ * @param {string} inputFile
+ * @return {!Object}
  */
 function loadOptions(inputFile) {
   const transformDir = path.dirname(inputFile);
