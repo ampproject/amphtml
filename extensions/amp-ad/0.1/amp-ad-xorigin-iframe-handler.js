@@ -17,6 +17,7 @@
 import {CONSTANTS, MessageType} from '../../../src/3p-frame-messaging';
 import {CommonSignals} from '../../../src/common-signals';
 import {Deferred} from '../../../src/utils/promise';
+import {LegacyAdIntersectionObserverHost} from './legacy-ad-intersection-observer-host';
 import {Services} from '../../../src/services';
 import {
   SubscriptionApi,
@@ -33,7 +34,6 @@ import {getData} from '../../../src/event-helper';
 import {getHtml} from '../../../src/get-html';
 import {isExperimentOn} from '../../../src/experiments';
 import {isGoogleAdsA4AValidEnvironment} from '../../../ads/google/a4a/utils';
-import {LegacyAdIntersectionObserverHost} from './legacy-ad-intersection-observer-host';
 import {removeElement} from '../../../src/dom';
 import {reportErrorToAnalytics} from '../../../src/error';
 import {setStyle} from '../../../src/style';
