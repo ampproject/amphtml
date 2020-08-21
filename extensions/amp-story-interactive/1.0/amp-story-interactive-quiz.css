@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+/* 1em = 16px for interactive components, unless overriden by font-size */
 .i-amphtml-story-interactive-quiz-container {
   --correct-color: #5bba74 !important;
   --correct-color-shaded: #00600f !important;
