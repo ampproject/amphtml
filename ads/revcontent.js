@@ -59,6 +59,9 @@ export function revcontent(global, data) {
     'sizer',
     'debug',
     'ampcreative',
+    'gdpr',
+    'gdprConsent',
+    'usPrivacy'
   ];
 
   data.endpoint = data.endpoint ? data.endpoint : 'trends.revcontent.com';
