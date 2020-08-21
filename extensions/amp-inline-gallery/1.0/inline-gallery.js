@@ -14,45 +14,29 @@
  * limitations under the License.
  */
 import * as Preact from '../../../src/preact';
-import {cloneElement, toChildArray, useState} from '../../../src/preact';
+import {useMemo, useState} from '../../../src/preact';
+
+const InlineGalleryContext = Preact.createContext(
+  /** @type {InlineGalleryDef.ContextProps} */ ({})
+);
+export {InlineGalleryContext};
 
 /**
  * @param {!InlineGalleryDef.Props} props
  * @return {PreactDef.Renderable}
  */
 export function InlineGallery({children, ...rest}) {
-  const childrenArray = toChildArray(children);
-  const carousel = childrenArray.filter((child) => !!child.props.children);
-  if (carousel.length !== 1) {
-    throw new Error(
-      'Expected exactly 1 BaseCarousel but found: ',
-      carousel.length
-    );
-  }
-  const slides = carousel[0].props.children;
-  const [index, setIndex] = useState(0);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [slideCount, setSlideCount] = useState(null);
+  const carouselContext = useMemo(
+    () => ({currentSlide, setCurrentSlide, slideCount, setSlideCount}),
+    [currentSlide, slideCount]
+  );
   return (
-    <div class="i-amphtml-inline-gallery" {...rest}>
-      {childrenArray.map((child) => {
-        if (child == carousel[0]) {
-          const existingOnSlideChange = child.props.onSlideChange;
-          return cloneElement(child, {
-            onSlideChange: (i) => {
-              if (existingOnSlideChange) {
-                existingOnSlideChange(i);
-              }
-              setIndex(i);
-            },
-            slide: index,
-          });
-        } else {
-          return cloneElement(child, {
-            children: slides,
-            current: index,
-            goTo: setIndex,
-          });
-        }
-      })}
-    </div>
+    <InlineGalleryContext.Provider value={carouselContext}>
+      <div class="i-amphtml-inline-gallery" {...rest}>
+        {children}
+      </div>
+    </InlineGalleryContext.Provider>
   );
 }

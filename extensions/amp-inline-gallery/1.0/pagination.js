@@ -19,13 +19,18 @@
  */
 import * as Preact from '../../../src/preact';
 import * as styles from './pagination.css';
+import {InlineGalleryContext} from './inline-gallery';
+import {useContext} from '../../../src/preact';
 
 /**
  * @param {!InlineGalleryDef.PaginationProps} props
  * @return {PreactDef.Renderable}
  */
-export function Pagination({current, goTo, inset, children, ...rest}) {
-  const Comp = children.length <= 8 ? Dots : Numbers;
+export function Pagination({inset, ...rest}) {
+  const {slideCount, currentSlide, setCurrentSlide} = useContext(
+    InlineGalleryContext
+  );
+  const Comp = slideCount <= 8 ? Dots : Numbers;
   const indicator = (
     <div
       aria-hidden="true"
@@ -36,9 +41,12 @@ export function Pagination({current, goTo, inset, children, ...rest}) {
         height: 20,
       }}
     >
-      <Comp current={current} inset={inset} goTo={goTo}>
-        {children}
-      </Comp>
+      <Comp
+        currentSlide={currentSlide}
+        inset={inset}
+        goTo={(i) => setCurrentSlide(i)}
+        slideCount={slideCount}
+      />
     </div>
   );
   return inset ? (
@@ -55,7 +63,34 @@ export function Pagination({current, goTo, inset, children, ...rest}) {
  * @param {!BaseCarouselDef.PaginationProps} props
  * @return {PreactDef.Renderable}
  */
-function Dots({current, goTo, inset, children}) {
+function Dots({currentSlide, goTo, inset, slideCount}) {
+  const dotList = [];
+  for (let i = 0; i < slideCount; i++) {
+    dotList.push(
+      <div
+        class="i-amphtml-carousel-pagination-dot-container"
+        style={styles.paginationDotContainer}
+      >
+        <div
+          class="i-amphtml-carousel-pagination-dot"
+          style={{
+            ...styles.paginationDot,
+            ...(inset ? styles.insetPaginationDot : {}),
+          }}
+        >
+          <div
+            onClick={() => goTo(i)}
+            class="i-amphtml-carousel-pagination-dot-progress"
+            style={{
+              ...styles.paginationDotProgress,
+              ...(inset ? styles.insetPaginationDotProgress : {}),
+              opacity: i === currentSlide ? 1 : 0,
+            }}
+          ></div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div
       class="i-amphtml-carousel-pagination-dots"
@@ -65,30 +100,7 @@ function Dots({current, goTo, inset, children}) {
       }}
     >
       {inset && insetBaseStyles}
-      {children.map((_, i) => (
-        <div
-          class="i-amphtml-carousel-pagination-dot-container"
-          style={styles.paginationDotContainer}
-        >
-          <div
-            class="i-amphtml-carousel-pagination-dot"
-            style={{
-              ...styles.paginationDot,
-              ...(inset ? styles.insetPaginationDot : {}),
-            }}
-          >
-            <div
-              onClick={() => goTo(i)}
-              class="i-amphtml-carousel-pagination-dot-progress"
-              style={{
-                ...styles.paginationDotProgress,
-                ...(inset ? styles.insetPaginationDotProgress : {}),
-                opacity: i === current ? 1 : 0,
-              }}
-            ></div>
-          </div>
-        </div>
-      ))}
+      {dotList}
     </div>
   );
 }
@@ -97,7 +109,7 @@ function Dots({current, goTo, inset, children}) {
  * @param {!BaseCarouselDef.PaginationProps} props
  * @return {PreactDef.Renderable}
  */
-function Numbers({current, inset, children}) {
+function Numbers({currentSlide, inset, slideCount}) {
   return (
     <div
       style={{
@@ -107,11 +119,11 @@ function Numbers({current, inset, children}) {
     >
       {inset && insetBaseStyles}
       <div style={{zIndex: 1}}>
-        <span class="i-amphtml-carousel-pagination-index">{current + 1}</span>
-        <span> / </span>
-        <span class="i-amphtml-carousel-pagination-total">
-          {children.length}
+        <span class="i-amphtml-carousel-pagination-index">
+          {currentSlide + 1}
         </span>
+        <span> / </span>
+        <span class="i-amphtml-carousel-pagination-total">{slideCount}</span>
       </div>
     </div>
   );

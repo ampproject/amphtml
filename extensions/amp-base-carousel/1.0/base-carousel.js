@@ -15,8 +15,9 @@
  */
 import * as Preact from '../../../src/preact';
 import {ArrowNext, ArrowPrev} from './arrow';
+import {InlineGalleryContext} from '../../amp-inline-gallery/1.0/inline-gallery';
 import {Scroller} from './scroller';
-import {toChildArray, useRef, useState} from '../../../src/preact';
+import {toChildArray, useContext, useRef, useState} from '../../../src/preact';
 import {useMountEffect} from '../../../src/preact/utils';
 
 /**
@@ -30,34 +31,42 @@ export function BaseCarousel({
   loop,
   onSlideChange,
   setAdvance,
-  slide,
   ...rest
 }) {
   const childrenArray = toChildArray(children);
   const {length} = childrenArray;
-  const [curSlide, setCurSlide] = useState(slide || 0);
-  const current = slide ?? curSlide;
+  const inlineGalleryContext = useContext(InlineGalleryContext);
+  const [currentSlideState, setCurrentSlideState] = useState(0);
+  const currentSlide = inlineGalleryContext
+    ? inlineGalleryContext.currentSlide
+    : currentSlideState;
+  const setCurrentSlide = inlineGalleryContext
+    ? inlineGalleryContext.setCurrentSlide
+    : setCurrentSlideState;
   const scrollRef = useRef(null);
   const advance = (by) => scrollRef.current.advance(by);
   useMountEffect(() => {
+    if (inlineGalleryContext.setSlideCount) {
+      inlineGalleryContext.setSlideCount(length);
+    }
     if (setAdvance) {
       setAdvance(advance);
     }
   });
 
   const setRestingIndex = (i) => {
-    setCurSlide(i);
+    setCurrentSlide(i);
     if (onSlideChange) {
       onSlideChange(i);
     }
   };
   const disableForDir = (dir) =>
-    !loop && (current + dir < 0 || current + dir >= length);
+    !loop && (currentSlide + dir < 0 || currentSlide + dir >= length);
   return (
     <div {...rest}>
       <Scroller
         loop={loop}
-        restingIndex={current}
+        restingIndex={currentSlide}
         setRestingIndex={setRestingIndex}
         ref={scrollRef}
       >
