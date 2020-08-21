@@ -16,8 +16,17 @@
 import * as Preact from '../../../src/preact';
 import {ArrowNext, ArrowPrev} from './arrow';
 import {Scroller} from './scroller';
-import {toChildArray, useRef, useState} from '../../../src/preact';
+import {toChildArray, useMemo, useRef, useState} from '../../../src/preact';
 import {useMountEffect} from '../../../src/preact/utils';
+
+/**
+ * @enum {string}
+ */
+const Controls = {
+  ALWAYS: 'always',
+  NEVER: 'never',
+  AUTO: 'auto',
+};
 
 /**
  * @param {!BaseCarouselDef.Props} props
@@ -27,6 +36,7 @@ export function BaseCarousel({
   arrowPrev,
   arrowNext,
   children,
+  controls = Controls.AUTO,
   loop,
   onSlideChange,
   setAdvance,
@@ -51,6 +61,17 @@ export function BaseCarousel({
   };
   const disableForDir = (dir) =>
     !loop && (curSlide + dir < 0 || curSlide + dir >= length);
+
+  const [hadTouch, setHadTouch] = useState(false);
+  const hideControls = useMemo(() => {
+    if (controls === Controls.NEVER) {
+      return true;
+    }
+    if (controls === Controls.ALWAYS) {
+      return false;
+    }
+    return hadTouch;
+  }, [hadTouch, controls]);
   return (
     <div {...rest}>
       <Scroller
@@ -58,19 +79,24 @@ export function BaseCarousel({
         restingIndex={curSlide}
         setRestingIndex={setRestingIndex}
         ref={scrollRef}
+        onTouchStart={() => setHadTouch(true)}
       >
         {childrenArray}
       </Scroller>
-      <ArrowPrev
-        customArrow={arrowPrev}
-        disabled={disableForDir(-1)}
-        advance={advance}
-      />
-      <ArrowNext
-        customArrow={arrowNext}
-        disabled={disableForDir(1)}
-        advance={advance}
-      />
+      {!hideControls && (
+        <>
+          <ArrowPrev
+            customArrow={arrowPrev}
+            disabled={disableForDir(-1)}
+            advance={advance}
+          />
+          <ArrowNext
+            customArrow={arrowNext}
+            disabled={disableForDir(1)}
+            advance={advance}
+          />
+        </>
+      )}
     </div>
   );
 }

@@ -87,7 +87,7 @@ describes.realWin(
       toggleExperiment(win, 'amp-base-carousel-bento', false);
     });
 
-    it('should render slides and buttons when built', async () => {
+    it('should render slides and arrows when built', async () => {
       const userSuppliedChildren = setSlides(3);
       userSuppliedChildren.forEach((child) => element.appendChild(child));
       win.document.body.appendChild(element);
@@ -140,6 +140,30 @@ describes.realWin(
       expect(renderedSlides[0]).to.equal(userSuppliedChildren[2]);
       expect(renderedSlides[1]).to.equal(userSuppliedChildren[0]);
       expect(renderedSlides[2]).to.equal(userSuppliedChildren[1]);
+    });
+
+    it('should render arrows when controls=always', async () => {
+      element.setAttribute('controls', 'always');
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+
+      const renderedSlides = await getSlidesFromShadow();
+      expect(renderedSlides).to.have.ordered.members(userSuppliedChildren);
+      const buttons = element.shadowRoot.querySelectorAll('button');
+      expect(buttons).to.have.length(2);
+    });
+
+    it('should render not arrows when controls=never', async () => {
+      element.setAttribute('controls', 'never');
+      const userSuppliedChildren = setSlides(3);
+      userSuppliedChildren.forEach((child) => element.appendChild(child));
+      win.document.body.appendChild(element);
+
+      const renderedSlides = await getSlidesFromShadow();
+      expect(renderedSlides).to.have.ordered.members(userSuppliedChildren);
+      const buttons = element.shadowRoot.querySelectorAll('button');
+      expect(buttons).to.have.length(0);
     });
   }
 );
