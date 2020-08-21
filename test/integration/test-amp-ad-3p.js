@@ -200,6 +200,9 @@ describe('amp-ad 3P', () => {
             lastIO.intersectionRatio == 1
           );
         });
+        await new Promise((resolve) => {
+          setTimeout(resolve, 110);
+        });
         lastIO = null;
 
         // Ad is still fully visible. observeIntersection fire when
@@ -212,6 +215,9 @@ describe('amp-ad 3P', () => {
             lastIO.boundingClientRect.top == (platform.isIos() ? 1 : 0) &&
             lastIO.intersectionRatio == 1
           );
+        });
+        await new Promise((resolve) => {
+          setTimeout(resolve, 110);
         });
         lastIO = null;
 
@@ -228,6 +234,10 @@ describe('amp-ad 3P', () => {
             );
           }
         );
+
+        await new Promise((resolve) => {
+          setTimeout(resolve, 110);
+        });
         lastIO = null;
 
         // Ad first becomes invisible
@@ -237,7 +247,11 @@ describe('amp-ad 3P', () => {
           return lastIO != null && lastIO.intersectionRatio == 0;
         });
 
+        await new Promise((resolve) => {
+          setTimeout(resolve, 110);
+        });
         lastIO = null;
+
         // Scroll when ad is invisible
         fixture.win.scrollTo(0, 1451);
         fixture.win.dispatchEvent(new Event('scroll'));
