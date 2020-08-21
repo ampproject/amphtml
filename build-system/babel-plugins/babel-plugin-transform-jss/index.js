@@ -21,7 +21,8 @@
  * @example
  * In:
  * ```
- * const useStyles = createStyleSheet({button: { fontSize: 12 }});
+ * import {createUseStyles} from 'react-jss'
+ * const useStyles = createUseStyles({button: { fontSize: 12 }});
  * const CSS = ''
  * ```
  *
@@ -40,21 +41,7 @@ module.exports = function ({types: t}) {
     return filename.endsWith('.jss.js');
   }
 
-  function compileJss(filepath) {
-    const jss = create();
-    jss.setup(preset());
-    return jss.createStyleSheet(require(filepath).JSS);
-  }
-
-  function multimapAdd(map, key, value) {
-    if (!map.has(key)) {
-      map.set(key, [value]);
-      return;
-    }
-    map.get(key).push(value);
-  }
-
-  function compileJssStatically(JSS) {
+  function compileJss(JSS) {
     const jss = create();
     jss.setup(preset());
     return jss.createStyleSheet(JSS);
@@ -70,6 +57,21 @@ module.exports = function ({types: t}) {
 
   const sheetMap = new WeakMap();
   const pendingUpdates = new WeakMap();
+
+  // We need to queue updates until we find the JSS var.
+  // TODO: is there a cleaner way? i.e. ensuring the first thing we do is find the JSS Var and then continue.
+  function runOrQueueForLater(fn, state) {
+    if (sheetMap.has(state.file)) {
+      fn();
+      return;
+    }
+
+    if (!pendingUpdates.has(state.file)) {
+      pendingUpdates.set(state.file, []);
+    }
+    sheetMap.get(state.file).push(fn);
+  }
+
   return {
     visitor: {
       VariableDeclarator(path, state) {
@@ -78,63 +80,58 @@ module.exports = function ({types: t}) {
         if (!isJssFile(filename)) {
           return;
         }
-        if (!sheetMap.has(state.file)) {
-          sheetMap.set(state.file, compileJss(filename));
-        }
 
         if (isIdent(path, 'useStyles')) {
-          multimapAdd(pendingUpdates, state.file, () =>
+          const fn = () => {
             replaceVal(
               path,
-              `() => (${JSON.stringify(sheetMap.get(state.file))})`
-            )
-          );
-          // path.stop();
+              `() => (${JSON.stringify(sheetMap.get(state.file).classes)})`
+            );
+            path.stop();
+          };
+          runOrQueueForLater(fn, state);
         }
 
         if (isIdent(path, 'CSS')) {
-          multimapAdd(pendingUpdates, state.file, () =>
-            replaceVal(path, '`' + sheetMap.get(state.file).toString() + '`')
-          );
-          // path.stop();
-        }
-
-        if (isIdent(path, 'JSS')) {
-          const jssVal = path.evaluate();
-          if (!jssVal.confident) {
-            throw new Error(`JSS Value must be statically evaluatable.`);
-          }
-          sheetMap.set(state.file, compileJssStatically(jssVal.val));
-        }
-
-        // Run all pending replacements.
-        if (sheetMap.has(state.file)) {
-          pendingUpdates.get(state.file).forEach((fn) => fn());
+          const fn = () => {
+            replaceVal(path, '`' + sheetMap.get(state.file).toString() + '`');
+            path.stop();
+          };
+          runOrQueueForLater(fn, state);
         }
       },
 
-      // Convert module.exports into es6 named exports.
-      // TODO: how can we get around this?
-      AssignmentExpression(path, state) {
+      // Try to find 'JSS' var to then compile and add to sheetMap.
+      ObjectExpression(path, state) {
         const {filename} = state.file.opts;
         if (!isJssFile(filename)) {
           return;
         }
 
-        const isModuleExport =
-          path.node.left.object &&
-          path.node.left.property &&
-          path.node.left.object.name === 'module' &&
-          path.node.left.property.name === 'exports';
-        if (!isModuleExport) {
+        if (!isIdent(path.parentPath, 'JSS')) {
           return;
         }
-        const exports = path.node.right.properties
-          .map((p) => p.key.name)
-          .map((ident) => {
-            return t.exportSpecifier(t.identifier(ident), t.identifier(ident));
-          });
-        path.parentPath.replaceWith(t.exportNamedDeclaration(null, exports));
+
+        const {confident, value: JSS} = path.evaluate();
+        if (!confident) {
+          throw new Error(`JSS Value must be statically evaluatable.`);
+        }
+        sheetMap.set(state.file, compileJss(JSS));
+
+        // Run all pending replacements.
+        (pendingUpdates.get(state.file) || []).forEach((fn) => fn());
+      },
+
+      // Remove the import for react-jss
+      ImportDeclaration(path, state) {
+        const {filename} = state.file.opts;
+        if (!isJssFile(filename)) {
+          return;
+        }
+
+        if (path.node.source.value === 'react-jss') {
+          path.remove();
+        }
       },
     },
   };

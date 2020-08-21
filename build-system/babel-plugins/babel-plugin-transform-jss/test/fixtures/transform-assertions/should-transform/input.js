@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */ 
-const JSS = {button: {fontSize: 12}};
-const CSS = '';
-const useStyles = require('react-jss').createUseStyles(JSS);
+import {createUseStyles} from 'react-jss'
 
-module.exports = {JSS, CSS, useStyles};
+export const JSS = {button: {fontSize: 12}};
+
+export const CSS = '';
+
+export const useStyles = createUseStyles(JSS);

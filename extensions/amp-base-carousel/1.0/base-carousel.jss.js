@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {createUseStyles} from 'react-jss';
+
 const slideElement = {
   flex: '0 0 100%',
   height: '100%',
@@ -193,6 +195,7 @@ export const JSS = {
 };
 
 // The two exports below get replaced via `babel-plugin-transform-jss`.
-export const CSS = ''; 
-// eslint-disable-next-line no-undef
-export const useStyles = require('react-jss').createUseStyles(JSS); 
+export const CSS = '';
+
+// eslint-disable-next-line local/no-export-side-effect
+export const useStyles = createUseStyles(JSS);

@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const JSS = {
+export const JSS = {
   button: {
     fontSize: 12
   }
 };
-const CSS = `.button-0-1-1 {
+export const CSS = `.button-0-1-1 {
   font-size: 12px;
 }`;
-const useStyles = () => ({"button":"button-0-1-1"});
-export { JSS, CSS, useStyles };
+export const useStyles = () => ({"button":"button-0-1-1"});
