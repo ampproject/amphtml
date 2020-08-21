@@ -105,3 +105,12 @@ export const paginationNumbers = {
   height: '100%',
   padding: '0 8px',
 };
+
+export const frosting = {
+  backdropFilter: 'blur(3px)',
+};
+
+export const backdrop = {
+  backdropFilter: 'blur(12px) invert(1) grayscale(0.6) brightness(0.8)',
+  opacity: 0.5,
+};

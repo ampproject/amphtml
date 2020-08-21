@@ -19,7 +19,6 @@ import {BaseCarousel} from '../../../amp-base-carousel/1.0/base-carousel';
 import {InlineGallery} from '../inline-gallery';
 import {Pagination} from '../pagination';
 import {boolean, number, withKnobs} from '@storybook/addon-knobs';
-import {scrollerStyles} from '../../../amp-base-carousel/1.0/base-carousel.css';
 import {withA11y} from '@storybook/addon-a11y';
 
 export default {
@@ -38,26 +37,24 @@ export const _default = () => {
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   return (
     <>
-      <WithStyles>
-        <InlineGallery style={{width, position: 'relative'}}>
-          <Pagination inset={topInset} style={{height: paginationHeight}} />
-          <BaseCarousel style={{height, position: 'relative'}}>
-            {Array.from({length: slideCount}, (_, i) => {
-              const v = colorIncrement * (i + 1);
-              return (
-                <div
-                  style={{
-                    backgroundColor: `rgb(${v}, 100, 100)`,
-                    width,
-                    height,
-                  }}
-                ></div>
-              );
-            })}
-          </BaseCarousel>
-          <Pagination inset={bottomInset} />
-        </InlineGallery>
-      </WithStyles>
+      <InlineGallery style={{width, position: 'relative'}}>
+        <Pagination inset={topInset} style={{height: paginationHeight}} />
+        <BaseCarousel style={{height, position: 'relative'}}>
+          {Array.from({length: slideCount}, (_, i) => {
+            const v = colorIncrement * (i + 1);
+            return (
+              <div
+                style={{
+                  backgroundColor: `rgb(${v}, 100, 100)`,
+                  width,
+                  height,
+                }}
+              ></div>
+            );
+          })}
+        </BaseCarousel>
+        <Pagination inset={bottomInset} />
+      </InlineGallery>
       Content below carousel
     </>
   );
@@ -69,44 +66,31 @@ export const WithLooping = () => {
   const paginationHeight = number('indicator height', 20);
   const inset = boolean('inset?', false);
   return (
-    <WithStyles>
-      <InlineGallery style={{width, position: 'relative'}}>
-        <BaseCarousel loop style={{height, position: 'relative'}}>
-          {[
-            'lightpink',
-            'lightcoral',
-            'peachpuff',
-            'powderblue',
-            'lavender',
-            'thistle',
-          ].map((color, index) => (
-            <div
-              style={{
-                backgroundColor: color,
-                width,
-                height,
-                textAlign: 'center',
-                fontSize: '48pt',
-                lineHeight: height + 'px',
-              }}
-            >
-              {index + 1}
-            </div>
-          ))}
-        </BaseCarousel>
-        <Pagination inset={inset} style={{height: paginationHeight}} />
-      </InlineGallery>
-    </WithStyles>
-  );
-};
-
-const WithStyles = ({children}) => {
-  // TODO(wg-bento#7): remove this method once the stylesheet is bundled
-  // with the component.
-  return (
-    <div>
-      <style>${scrollerStyles}</style>
-      {children}
-    </div>
+    <InlineGallery style={{width, position: 'relative'}}>
+      <BaseCarousel loop style={{height, position: 'relative'}}>
+        {[
+          'lightpink',
+          'lightcoral',
+          'peachpuff',
+          'powderblue',
+          'lavender',
+          'thistle',
+        ].map((color, index) => (
+          <div
+            style={{
+              backgroundColor: color,
+              width,
+              height,
+              textAlign: 'center',
+              fontSize: '48pt',
+              lineHeight: height + 'px',
+            }}
+          >
+            {index + 1}
+          </div>
+        ))}
+      </BaseCarousel>
+      <Pagination inset={inset} style={{height: paginationHeight}} />
+    </InlineGallery>
   );
 };
