@@ -379,22 +379,31 @@ export class ConsentInstance {
         })
       ).length;
 
-      // Size restriction only applies to documents servered from a viewer
-      // that implements the storage API.
-      const usesViewerStorage = storage.isViewerStorage();
-      if (usesViewerStorage && size > CONSENT_STORAGE_MAX) {
-        // 1200 * 4/3 (base64) = 1600 bytes
-        user().error(
+      if (size > CONSENT_STORAGE_MAX) {
+        // Size restriction only applies to documents servered from a viewer
+        // that implements the storage API.
+        const usesViewerStorage = storage.isViewerStorage();
+        if (usesViewerStorage) {
+          // 1200 * 4/3 (base64) = 1600 bytes
+          user().error(
+            TAG,
+            'Cannot store consent information which length exceeds %s. ' +
+              'Previous stored consentInfo will be cleared',
+            CONSENT_STORAGE_MAX
+          );
+          // If new consentInfo value cannot be stored, need to remove previous
+          // value
+          storage.remove(this.storageKey_);
+          // TODO: Good to have a way to inform CMP service in this case
+          return;
+        }
+        user().info(
           TAG,
-          'Cannot store consent information which length exceeds %s. ' +
-            'Previous stored consentInfo will be cleared',
+          'Current consent information length exceeds %s ' +
+            'and will not be stored when the page is served ' +
+            'from a viewer that supports the Local Storage API.',
           CONSENT_STORAGE_MAX
         );
-        // If new consentInfo value cannot be stored, need to remove previous
-        // value
-        storage.remove(this.storageKey_);
-        // TODO: Good to have a way to inform CMP service in this case
-        return;
       }
       this.savedConsentInfo_ = consentInfo;
       storage.setNonBoolean(this.storageKey_, value);
