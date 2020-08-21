@@ -217,12 +217,14 @@ export class AmpStoryConsent extends AMP.BaseElement {
 
     const logoSrc = storyEl && storyEl.getAttribute('publisher-logo-src');
 
-    logoSrc
-      ? assertHttpsUrl(logoSrc, storyEl, 'publisher-logo-src')
-      : user().warn(
-          TAG,
-          'Expected "publisher-logo-src" attribute on <amp-story>'
-        );
+    if (logoSrc) {
+      assertHttpsUrl(logoSrc, storyEl, 'publisher-logo-src');
+    } else {
+      user().warn(
+        TAG,
+        'Expected "publisher-logo-src" attribute on <amp-story>'
+      );
+    }
 
     // Story consent config is set by the `assertAndParseConfig_` method.
     if (this.storyConsentConfig_) {
