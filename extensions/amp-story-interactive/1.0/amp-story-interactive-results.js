@@ -279,7 +279,7 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
 
   /**
    * Check score background has a color with alpha 0, used to adjust layout
-   * @return {bool}
+   * @return {boolean}
    * @private
    **/
   scoreBackgroundIsTransparent_() {
