@@ -23,7 +23,11 @@ function createFixture() {
   return createFixtureIframe('test/fixtures/3p-ad.html', 3000, () => {});
 }
 
-describe('amp-ad 3P', () => {
+// TODO: Unskip Safari after #29930 is fixed
+describe
+  .configure()
+  .skipSafari()
+  .run('amp-ad 3P', () => {
   let fixture;
 
   beforeEach(() => {
