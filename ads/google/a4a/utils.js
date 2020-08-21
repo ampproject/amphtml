@@ -864,6 +864,8 @@ export function getBinaryTypeNumericalCode(type) {
       'control': '1',
       'experimental': '2',
       'rc': '3',
+      'nightly': '4',
+      'nightly-control': '5',
       'experimentA': '10',
       'experimentB': '11',
       'experimentC': '12',
