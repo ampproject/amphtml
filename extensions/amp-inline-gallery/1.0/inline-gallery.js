@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import * as Preact from '../../../src/preact';
+import {ContainWrapper} from '../../../src/preact/component';
 import {useMemo, useState} from '../../../src/preact';
 
 const InlineGalleryContext = Preact.createContext(
@@ -33,10 +34,12 @@ export function InlineGallery({children, ...rest}) {
     [currentSlide, slideCount]
   );
   return (
-    <InlineGalleryContext.Provider value={carouselContext}>
-      <div class="i-amphtml-inline-gallery" {...rest}>
-        {children}
-      </div>
-    </InlineGalleryContext.Provider>
+    <ContainWrapper size={false} layout={true} paint={true} {...rest}>
+      <InlineGalleryContext.Provider value={carouselContext}>
+        <div class="i-amphtml-inline-gallery" {...rest}>
+          {children}
+        </div>
+      </InlineGalleryContext.Provider>
+    </ContainWrapper>
   );
 }

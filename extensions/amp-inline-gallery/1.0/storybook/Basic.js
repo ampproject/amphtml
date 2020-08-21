@@ -37,9 +37,9 @@ export const _default = () => {
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   return (
     <>
-      <InlineGallery style={{width, position: 'relative'}}>
+      <InlineGallery style={{width}}>
         <Pagination inset={topInset} style={{height: paginationHeight}} />
-        <BaseCarousel style={{height, position: 'relative'}}>
+        <BaseCarousel style={{height}}>
           {Array.from({length: slideCount}, (_, i) => {
             const v = colorIncrement * (i + 1);
             return (
