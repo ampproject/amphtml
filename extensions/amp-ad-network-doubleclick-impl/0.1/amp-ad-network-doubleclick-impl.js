@@ -98,14 +98,13 @@ import {
   waitFor3pThrottle,
 } from '../../amp-ad/0.1/concurrent-load';
 import {getCryptoRandomBytesArray, utf8Decode} from '../../../src/utils/bytes';
-import {
-  getExperimentBranch,
-  isExperimentOn,
-  randomlySelectUnsetExperiments,
-} from '../../../src/experiments';
 import {getMode} from '../../../src/mode';
 import {getMultiSizeDimensions} from '../../../ads/google/utils';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
+import {
+  isExperimentOn,
+  randomlySelectUnsetExperiments,
+} from '../../../src/experiments';
 
 import {insertAnalyticsElement} from '../../../src/extension-analytics';
 import {isArray} from '../../../src/types';
@@ -145,17 +144,6 @@ const ZINDEX_EXP = 'zIndexExp';
 const ZINDEX_EXP_BRANCHES = {
   NO_ZINDEX: '21065356',
   HOLDBACK: '21065357',
-};
-
-/**
- * @const @enum {string}
- * @visibleForTesting
- * TODO(#28555): Clean up experiment
- */
-export const EXPAND_JSON_TARGETING_EXP = {
-  ID: 'expand-json-targeting',
-  CONTROL: '21066261',
-  EXPERIMENT: '21066262',
 };
 
 /** @const @enum {string} */
@@ -447,14 +435,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         experimentId: ZINDEX_EXP,
         isTrafficEligible: () => true,
         branches: Object.values(ZINDEX_EXP_BRANCHES),
-      },
-      {
-        experimentId: EXPAND_JSON_TARGETING_EXP.ID,
-        isTrafficEligible: () => true,
-        branches: [
-          EXPAND_JSON_TARGETING_EXP.CONTROL,
-          EXPAND_JSON_TARGETING_EXP.EXPERIMENT,
-        ],
       },
       {
         experimentId: RENDER_ON_IDLE_FIX_EXP.id,
@@ -767,10 +747,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     });
 
     // TODO(#28555): Delete extra logic when 'expand-json-targeting' exp launches.
-    const isJsonTargetingExpOn =
-      isExperimentOn(this.win, 'expand-json-targeting') &&
-      getExperimentBranch(this.win, EXPAND_JSON_TARGETING_EXP.ID) ===
-        EXPAND_JSON_TARGETING_EXP.EXPERIMENT;
+    const isJsonTargetingExpOn = isExperimentOn(
+      this.win,
+      'expand-json-targeting'
+    );
 
     const targetingExpansionPromise = isJsonTargetingExpOn
       ? timerService
