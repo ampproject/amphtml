@@ -45,6 +45,11 @@ function appendModuleScript(head: PostHTML.Node, script: ScriptNode, compiled: b
       undefined,
       '.mjs'
     ).toString();
+    script.attrs.src = CDNURLToLocalDistURL(
+      new URL(script.attrs.src || ''),
+      undefined,
+      '.js'
+    ).toString();
   }
   else {
     const urlName = script.attrs.src.toString();
