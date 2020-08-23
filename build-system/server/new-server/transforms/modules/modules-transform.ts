@@ -36,9 +36,7 @@ interface OptionSet {
  * @param script
  */
 function appendModuleScript(head: PostHTML.Node, script: ScriptNode, compiled: boolean): void {
-
   let modulePath;
-
   if (argv.compiled || compiled) {
     modulePath = CDNURLToLocalDistURL(
       new URL(script.attrs.src || ''),
