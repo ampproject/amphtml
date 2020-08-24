@@ -55,9 +55,7 @@ export function BaseCarousel({
     }
   });
   useEffect(() => {
-    if (setSlideCount) {
-      setSlideCount(length);
-    }
+    setSlideCount(length);
   }, [setSlideCount, length]);
   const setRestingIndex = (i) => {
     setCurrentSlide(i);
