@@ -21,7 +21,7 @@ import {
 import {CSS} from '../../../build/amp-story-interactive-results-1.0.css';
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 import {computedStyle, setStyle} from '../../../src/style';
-import {dev} from '../../src/log';
+import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {startsWith} from '../../../src/string';
 
