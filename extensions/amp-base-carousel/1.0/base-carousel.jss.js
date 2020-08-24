@@ -163,20 +163,19 @@ const horizontalScroll = {
 
 /** Slides only have one child */
 const slideSizing = {
-  [`& > :first-child, & > ::slotted(*)`]: {
+  ['& > :first-child, & > ::slotted(*)']: {
     boxSizing: 'border-box !important',
     margin: '0 !important',
     flexShrink: '0 !important',
     maxHeight: '100%',
     maxWidth: '100%',
   },
-  [`& > ::slotted(*)`]: {
+  ['& > ::slotted(*)']: {
     width: '100%',
   },
-  ...hideScrollbarPseudo,
 };
 
-export const JSS = {
+const JSS = {
   slideElement,
   scrollContainer,
   arrowPlacement,
@@ -190,6 +189,7 @@ export const JSS = {
   arrowBackground,
   arrowIcon,
   hideScrollbar,
+  hideScrollbarPseudo,
   horizontalScroll,
   slideSizing,
 };
