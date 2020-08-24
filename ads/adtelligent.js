@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../3p/3p';
+import { loadScript, validateData } from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -29,17 +29,23 @@ export function adtelligent(global, data) {
 
   const doc = global.document;
   const container = doc.createElement('div');
+  const ctx = window.context;
   doc.body.appendChild(container);
   if (data.source) {
     const url =
       `https://s.adtelligent.com/?floor=${data.floor || 0}` +
-      `&content_page_url=${encodeURIComponent(window.context.location)}` +
+      `&content_page_url=${encodeURIComponent(ctx.location)}` +
       `&width=${data.width}` +
       `&height=${data.height}` +
       `&cb=${Date.now()}` +
       `&aid=${data.source}`;
     container.id = 'PDS' + data.source;
-    loadScript(global, url);
+    loadScript(global, url, () => {
+      ctx.renderStart({
+        width: data.width,
+        height: data.height,
+      });
+    });
   } else {
     const HTML_ELEMENT_ID = 'adt-placement';
     const vpbSrc = `//player.adtelligent.com/prebid/wrapper_hb_${data['hbmpPubId']}_${data['hbmpSiteId']}.js`;
@@ -61,6 +67,12 @@ export function adtelligent(global, data) {
         adUnitId: parseInt(data['hbmpUnitId'], 10),
         sizes: [[data.width, data.height]],
         render: true,
+        onEnd(winner) {
+          ctx.renderStart({
+            width: winner.width,
+            height: winner.height,
+          });
+        },
       });
     });
   }

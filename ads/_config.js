@@ -212,6 +212,7 @@ const adConfig = jsonConfiguration({
 
   'adtelligent': {
     preconnect: ['https://s.adtelligent.com'],
+    renderStartImplemented: true,
   },
 
   'adthrive': {
