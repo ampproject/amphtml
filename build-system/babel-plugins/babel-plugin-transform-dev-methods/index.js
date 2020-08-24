@@ -27,14 +27,14 @@ function defaultCalleeToPropertiesMap() {
       'dev',
       {
         detected: false,
-        removeable: ['info', 'fine', 'warn', 'error', 'expectedError'],
+        removeable: ['info', 'fine', 'warn'],
       },
     ],
     [
       'user',
       {
         detected: false,
-        removeable: ['info', 'fine', 'warn', 'error', 'expectedError'],
+        removeable: ['info', 'fine', 'warn'],
       },
     ],
   ]);
