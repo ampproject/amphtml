@@ -59,10 +59,11 @@ module.exports = function ({types: t}) {
       return;
     }
 
-    const topPath = path.findParent((p) => p.parent.type === 'File');
+    //TODO: @jridgewell, is there a better way to find module scope?
+    const moduleScopePath = path.findParent((p) => p.parent.type === 'File');
     // Try to find the createUseStyles. The first arg will be the JSS.
     // Compile the JSS and place into the sheetMap.
-    topPath.traverse({
+    moduleScopePath.traverse({
       CallExpression(path) {
         if (path.node.callee.name !== 'createUseStyles') {
           return;
@@ -93,7 +94,7 @@ module.exports = function ({types: t}) {
         findAndCompileJss(path, state);
 
         if (isIdent(path, 'useStyles')) {
-          // Convert classes map to json ast.
+          // Convert jss classes object to ast equivalent.
           const classesVal = t.objectExpression(
             Object.entries(sheetMap.get(state.file).classes).map(([k, v]) =>
               t.objectProperty(t.identifier(k), t.stringLiteral(v))
