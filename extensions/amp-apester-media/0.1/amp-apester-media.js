@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {CSS} from '../../../build/amp-apester-media-0.1.css';
-import {IntersectionObserverHostApi} from '../../../src/utils/intersection-observer-polyfill';
+import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {dev, userAssert} from '../../../src/log';
@@ -92,7 +92,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.mediaId_ = null;
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
-    /** @private {?IntersectionObserverHostApi} */
+    /** @private {?IntersectionObserver3pHost} */
     this.intersectionObserverHostApi_ = null;
   }
 
@@ -297,7 +297,7 @@ class AmpApesterMedia extends AMP.BaseElement {
         const usePlayer = media['usePlayer'];
         const src = this.constructUrlFromMedia_(interactionId, usePlayer);
         const iframe = this.constructIframe_(src);
-        this.intersectionObserverHostApi_ = new IntersectionObserverHostApi(
+        this.intersectionObserverHostApi_ = new IntersectionObserver3pHost(
           this,
           iframe
         );
