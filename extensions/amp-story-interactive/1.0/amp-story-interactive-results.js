@@ -285,7 +285,7 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
   scoreBackgroundIsTransparent_() {
     const bgColor = computedStyle(
       this.win,
-      this.rootEl_.querySelector('.i-amphtml-story-interactive-results-top')
+      !!this.rootEl_.querySelector('.i-amphtml-story-interactive-results-top')
     )['background'];
     // Check the background starts with rgba and doesn't contain other colors (no gradients)
     if (startsWith(bgColor, 'rgba') && bgColor.lastIndexOf('rgb') == 0) {
