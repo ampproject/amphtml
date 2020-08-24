@@ -21,6 +21,7 @@ import {
 import {CSS} from '../../../build/amp-story-interactive-results-1.0.css';
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 import {computedStyle, setStyle} from '../../../src/style';
+import {dev} from '../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {startsWith} from '../../../src/string';
 
@@ -285,7 +286,9 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
   scoreBackgroundIsTransparent_() {
     const bgColor = computedStyle(
       this.win,
-      !!this.rootEl_.querySelector('.i-amphtml-story-interactive-results-top')
+      dev().asssertElement(
+        this.rootEl_.querySelector('.i-amphtml-story-interactive-results-top')
+      )
     )['background'];
     // Check the background starts with rgba and doesn't contain other colors (no gradients)
     if (startsWith(bgColor, 'rgba') && bgColor.lastIndexOf('rgb') == 0) {
