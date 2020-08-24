@@ -160,7 +160,7 @@ async function verifySelectorsVisible(page, testName, selectors) {
 async function waitForLoaderDots(page, testName) {
   const allLoaderDotsGone = await waitForElementVisibility(
     page,
-    '.i-amphtml-loader-dot',
+    '[class~="i-amphtml-loader"], [class~="i-amphtml-loading"]',
     {hidden: true}
   );
   if (!allLoaderDotsGone) {
