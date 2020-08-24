@@ -691,10 +691,7 @@ export class ViewerImpl {
     this.messageResponders_[eventType] = responder;
     if (this.receivedMessageQueue_[eventType]) {
       this.receivedMessageQueue_[eventType].forEach((message) => {
-        responder(message.data).then(
-          message.deferred.resolve,
-          message.deferred.reject
-        );
+        message.deferred.resolve(responder(message.data));
       });
       this.receivedMessageQueue_[eventType] = [];
     }
