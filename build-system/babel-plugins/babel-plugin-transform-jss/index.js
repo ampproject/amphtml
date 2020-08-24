@@ -22,14 +22,18 @@
  * In:
  * ```
  * import {createUseStyles} from 'react-jss'
- * const useStyles = createUseStyles({button: { fontSize: 12 }});
- * const CSS = ''
+ *
+ * const JSS = { button: { fontSize: 12 }}
+ * export const CSS = ''
+ * export const useStyles = createUseStyles(JSS);
  * ```
  *
  * Out:
  * ```
- * const useStyles = { button: 'button-1' }
- * const CSS = `button-1 { fontSize: 12 }`
+ * const JSS = { button: { fontSize: 12 }}
+ * const classes = {button: 'button-1'}
+ * export const useStyles = () => classes;
+ * export const CSS = `button-1 { fontSize: 12 }`
  * ```
  */
 
@@ -48,28 +52,34 @@ module.exports = function ({types: t}) {
   }
 
   const isIdent = (path, ident) => path.node.id && path.node.id.name === ident;
-  const replaceVal = (path, newValue) => {
-    const newNode = t.cloneNode(path.node);
-    // TODO: This line is definitely a hack. Fix when Justin notices.
-    newNode.init = t.identifier(newValue);
-    path.replaceWith(newNode);
-  };
-
   const sheetMap = new WeakMap();
-  const pendingUpdates = new WeakMap();
 
-  // We need to queue updates until we find the JSS var.
-  // TODO: is there a cleaner way? i.e. ensuring the first thing we do is find the JSS Var and then continue.
-  function runOrQueueForLater(fn, state) {
+  function findAndCompileJss(path, state) {
     if (sheetMap.has(state.file)) {
-      fn();
       return;
     }
 
-    if (!pendingUpdates.has(state.file)) {
-      pendingUpdates.set(state.file, []);
+    const topPath = path.findParent((p) => p.parent.type === 'File');
+    // Try to find the createUseStyles. The first arg will be the JSS.
+    // Compile the JSS and place into the sheetMap.
+    topPath.traverse({
+      CallExpression(path) {
+        if (path.node.callee.name !== 'createUseStyles') {
+          return;
+        }
+
+        const {confident, value: JSS} = path.get('arguments')[0].evaluate();
+        if (!confident) {
+          throw new Error(
+            `First argument to createUseStyles must be statically evaluatable.`
+          );
+        }
+        sheetMap.set(state.file, compileJss(JSS));
+      },
+    });
+    if (!sheetMap.has(state.file)) {
+      throw new Error(`Could not find createUseStyles.`);
     }
-    sheetMap.get(state.file).push(fn);
   }
 
   return {
@@ -80,46 +90,38 @@ module.exports = function ({types: t}) {
         if (!isJssFile(filename)) {
           return;
         }
+        findAndCompileJss(path, state);
 
         if (isIdent(path, 'useStyles')) {
-          const fn = () => {
-            replaceVal(
-              path,
-              `() => (${JSON.stringify(sheetMap.get(state.file).classes)})`
+          // Convert classes map to json ast.
+          const classesVal = t.objectExpression(
+            Object.entries(sheetMap.get(state.file).classes).map(([k, v]) =>
+              t.objectProperty(t.identifier(k), t.stringLiteral(v))
+            )
+          );
+          path
+            .getStatementParent()
+            .insertBefore(
+              t.variableDeclaration('const', [
+                t.variableDeclarator(t.identifier('classes'), classesVal),
+              ])
             );
-            path.stop();
-          };
-          runOrQueueForLater(fn, state);
+          path
+            .get('init')
+            .replaceWith(
+              t.arrowFunctionExpression([], t.identifier('classes'))
+            );
+          path.stop();
         }
 
         if (isIdent(path, 'CSS')) {
-          const fn = () => {
-            replaceVal(path, '`' + sheetMap.get(state.file).toString() + '`');
-            path.stop();
-          };
-          runOrQueueForLater(fn, state);
+          path
+            .get('init')
+            .replaceWith(
+              t.stringLiteral('`' + sheetMap.get(state.file).toString() + '`')
+            );
+          path.stop();
         }
-      },
-
-      // Try to find 'JSS' var to then compile and add to sheetMap.
-      ObjectExpression(path, state) {
-        const {filename} = state.file.opts;
-        if (!isJssFile(filename)) {
-          return;
-        }
-
-        if (!isIdent(path.parentPath, 'JSS')) {
-          return;
-        }
-
-        const {confident, value: JSS} = path.evaluate();
-        if (!confident) {
-          throw new Error(`JSS Value must be statically evaluatable.`);
-        }
-        sheetMap.set(state.file, compileJss(JSS));
-
-        // Run all pending replacements.
-        (pendingUpdates.get(state.file) || []).forEach((fn) => fn());
       },
 
       // Remove the import for react-jss
