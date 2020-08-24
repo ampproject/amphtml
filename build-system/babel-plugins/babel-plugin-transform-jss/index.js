@@ -118,9 +118,7 @@ module.exports = function ({types: t}) {
         if (isIdent(path, 'CSS')) {
           path
             .get('init')
-            .replaceWith(
-              t.stringLiteral(sheetMap.get(state.file).toString())
-            );
+            .replaceWith(t.stringLiteral(sheetMap.get(state.file).toString()));
           path.stop();
         }
       },
