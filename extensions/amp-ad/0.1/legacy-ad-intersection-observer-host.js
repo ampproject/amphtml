@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {MessageType} from '../../../src/3p-frame-messaging';
 import {Services} from '../../../src/services';
 import {SubscriptionApi} from '../../../src/iframe-helper';
 import {devAssert} from '../../../src/log';
@@ -108,37 +109,42 @@ export function getIntersectionChangeEntry(element, owner, viewport) {
 }
 
 /**
- * The IntersectionObserver class lets any element share its viewport
+ * LegacyAdIntersectionObserverHost exists for backward compatibility to support
+ * the context.observeIntersect API in 3P ad.
+ * Use IntersectionObserver3pHost instead.
+ *
+ * The LegacyAdIntersectionObserverHost class lets a 3P ad share its viewport
  * intersection data with an iframe of its choice (most likely contained within
- * the element itself.). When instantiated the class will start listening for a
- * 'send-intersections' postMessage from the iframe, and only then  would start
+ * the element itself.) in the format of IntersectionObserverEntry.
+ * When instantiated the class will start listening for a
+ * 'send-intersections' postMessage from the iframe, and only then would start
  * sending intersection data to the iframe. The intersection data would be sent
- * when the element is moved inside or outside the viewport as well as on scroll
- * and resize. The element should create an IntersectionObserver instance once
- * the Iframe element is created. The IntersectionObserver class exposes a
- * `fire` method that would send the intersection data to the iframe. The
- * IntersectionObserver class exposes a `onViewportCallback` method that should
- * be called inside if the viewportCallback of the element. This would let the
- * element sent intersection data automatically when there element comes inside
- * or goes outside the viewport and also manage sending intersection data
- * onscroll and resize. Note: The IntersectionObserver would not send any data
+ * when the element enters/exits the viewport, as well as on scroll
+ * and resize when the element intersects with the viewport.
+ * The class uses IntersectionObserver to monitor the element's enter/exit of
+ * the viewport. It also exposes a `fire` method to allow AMP to send the
+ * intersection data to the iframe at remeasure.
+ *
+ * Note: The LegacyAdIntersectionObserverHost would not send any data
  * over to the iframe if it had not requested the intersection data already via
- * a postMessage.
+ * 'send-intersections' postMessage.
  */
-export class IntersectionObserverHostForAd {
+export class LegacyAdIntersectionObserverHost {
   /**
    * @param {!AMP.BaseElement} baseElement
-   * @param {!Element} iframe Iframe element which requested the
+   * @param {!Element} adIframe Iframe element which requested the
    *     intersection data.
-   * @param {?boolean} opt_is3p Set to `true` when the iframe is 3'rd party.
    */
-  constructor(baseElement, iframe, opt_is3p) {
+  constructor(baseElement, adIframe) {
     /** @private @const {!AMP.BaseElement} */
     this.baseElement_ = baseElement;
+
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(baseElement.win);
-    /** @private {boolean} */
-    this.shouldSendIntersectionChanges_ = false;
+
+    /** @private {?IntersectionObserver} */
+    this.intersectionObserver_ = null;
+
     /** @private {boolean} */
     this.inViewport_ = false;
 
@@ -159,9 +165,9 @@ export class IntersectionObserverHostForAd {
      * @private {!SubscriptionApi}
      */
     this.postMessageApi_ = new SubscriptionApi(
-      iframe,
-      'send-intersections',
-      opt_is3p || false,
+      adIframe,
+      MessageType.SEND_INTERSECTIONS,
+      true, // is3p
       // Each time someone subscribes we make sure that they
       // get an update.
       () => this.startSendingIntersectionChanges_()
@@ -199,21 +205,21 @@ export class IntersectionObserverHostForAd {
    * @private
    */
   startSendingIntersectionChanges_() {
-    this.shouldSendIntersectionChanges_ = true;
-    this.baseElement_.getVsync().measure(() => {
-      if (this.baseElement_.isInViewport()) {
-        this.onViewportCallback(true);
-      }
-      this.fire();
-    });
+    if (!this.intersectionObserver_) {
+      this.intersectionObserver_ = new IntersectionObserver((entries) => {
+        const lastEntry = entries[entries.length - 1];
+        this.onViewportCallback_(lastEntry.intersectionRatio != 0);
+      });
+      this.intersectionObserver_.observe(this.baseElement_.element);
+    }
+    this.fire();
   }
 
   /**
-   * Triggered by the AmpElement to when it either enters or exits the visible
-   * viewport.
+   * Triggered when the ad either enters or exits the visible viewport.
    * @param {boolean} inViewport true if the element is in viewport.
    */
-  onViewportCallback(inViewport) {
+  onViewportCallback_(inViewport) {
     if (this.inViewport_ == inViewport) {
       return;
     }
@@ -244,7 +250,7 @@ export class IntersectionObserverHostForAd {
    * @private
    */
   sendElementIntersection_() {
-    if (!this.shouldSendIntersectionChanges_) {
+    if (!this.intersectionObserver_) {
       return;
     }
     const change = this.baseElement_.element.getIntersectionChangeEntry();
@@ -273,7 +279,7 @@ export class IntersectionObserverHostForAd {
     }
     // Note that SubscribeApi multicasts the update to all interested windows.
     this.postMessageApi_.send(
-      'intersection',
+      MessageType.INTERSECTION,
       dict({
         'changes': this.pendingChanges_,
       })
@@ -285,6 +291,10 @@ export class IntersectionObserverHostForAd {
    * Provide a function to clear timeout before set this intersection to null.
    */
   destroy() {
+    if (this.intersectionObserver_) {
+      this.intersectionObserver_.disconnect();
+      this.intersectionObserver_ = null;
+    }
     this.timer_.cancel(this.flushTimeout_);
     this.unlistenOnOutViewport_();
     this.postMessageApi_.destroy();

@@ -20,6 +20,7 @@ export const GrantReason = {
   'SUBSCRIBER': 'SUBSCRIBER',
   'METERING': 'METERING',
   'UNLOCKED': 'UNLOCKED',
+  'LAA': 'LAA',
 };
 
 /**
