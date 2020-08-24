@@ -286,7 +286,7 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
   scoreBackgroundIsTransparent_() {
     const bgColor = computedStyle(
       this.win,
-      dev().asssertElement(
+      dev().assertElement(
         this.rootEl_.querySelector('.i-amphtml-story-interactive-results-top')
       )
     )['background'];
