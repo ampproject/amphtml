@@ -118,7 +118,7 @@ module.exports = function ({types: t}) {
           path
             .get('init')
             .replaceWith(
-              t.stringLiteral('`' + sheetMap.get(state.file).toString() + '`')
+              t.stringLiteral(sheetMap.get(state.file).toString())
             );
           path.stop();
         }
