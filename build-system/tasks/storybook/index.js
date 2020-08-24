@@ -19,17 +19,19 @@ const argv = require('minimist')(process.argv.slice(2));
 const {exec} = require('../../common/exec');
 const {installPackages} = require('../../common/utils');
 
-let storybookArgs = '--quiet';
-if (argv.port) {
-  storybookArgs += ` -p ${argv.port}`;
-}
+const DEFAULT_PORTS = {
+  'amp': 9001,
+  'preact': 9002,
+};
 
 function runStorybook(mode) {
   // install storybook-specific modules
   installPackages(__dirname);
 
+  const port = argv.port || DEFAULT_PORTS[mode];
+
   exec(
-    `./node_modules/.bin/start-storybook -c ./${mode}-env ${storybookArgs}`,
+    `./node_modules/.bin/start-storybook --quiet -c ./${mode}-env -p ${port} ${argv.ci ? '--ci' : ''}`,
     {
       'stdio': [null, process.stdout, process.stderr],
       cwd: __dirname,
@@ -43,14 +45,14 @@ function runStorybook(mode) {
  * for AMP components (HTML Environment)
  */
 function storybookAmp() {
-  runStorybook('amp' /** mode */);
+  runStorybook('amp' /* mode */);
 }
 
 /**
  * Simple wrapper around the storybook start script.
  */
 function storybookPreact() {
-  runStorybook('preact' /** mode */);
+  runStorybook('preact' /* mode */);
 }
 
 module.exports = {
@@ -65,4 +67,5 @@ storybookAmp.description =
 
 storybookPreact.flags = storybookAmp.flags = {
   'port': '  Change the port that the storybook dashboard is served from',
+  'ci': '  CI mode (skip interactive prompts, don\'t open browser)',
 };
