@@ -21,21 +21,21 @@ limitations under the License.
 ### For DSP/SSP Clients
 
 ```
-<amp-embed width="300" height="250"
+<amp-ad width="300" height="250"
     type="adtelligent"
     data-source="350975">
-</amp-embed>
+</amp-ad>
 ```
 
 ### For HBMP Clients
 
 ```
-<amp-embed width="300" height="250"
+<amp-ad width="300" height="250"
     type="adtelligent"
     data-hbmp-site-id="29"
     data-hbmp-pub-id="269911"
     data-hbmp-unit-id="58">
-</amp-embed>
+</amp-ad>
 ```
 
 ## Configuration
