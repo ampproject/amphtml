@@ -169,7 +169,8 @@ The `opt_hasOverflow` is an optional boolean value, ads can specify `opt_hasOver
 _Example:_
 
 ```javascript
-window.context.requestResize(requestedWidth, requestedHeight)
+window.context
+  .requestResize(requestedWidth, requestedHeight)
   .then(function () {
     // Hide any overflow elements that were shown.
     // The requestedHeight and requestedWidth arguments may be used to
