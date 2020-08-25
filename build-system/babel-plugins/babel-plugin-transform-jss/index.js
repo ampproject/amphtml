@@ -66,7 +66,7 @@ module.exports = function ({types: t, template}) {
 
         const {confident, value: JSS} = path.get('arguments.0').evaluate();
         if (!confident) {
-          throw new Error(
+          throw path.buildCodeFrameError(
             `First argument to createUseStyles must be statically evaluatable.`
           );
         }
