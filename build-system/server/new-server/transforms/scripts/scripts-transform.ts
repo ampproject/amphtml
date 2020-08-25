@@ -18,14 +18,7 @@ import {PostHTML} from 'posthtml';
 import {URL} from 'url';
 import {isValidScript} from '../utilities/script';
 import {CDNURLToLocalDistURL} from '../utilities/cdn';
-
-/**
- * A list of options to correspond with options.json for testing purposes.
- * To add an option, add the corresponding key-value pair into the 
- * options.json, then add the field to this interface.
- */
-interface OptionSet {
-}
+import {OptionSet} from '../utilities/option-set';
 
 /**
  * For any script, with a valid path to AMP Project CDN, replace it with a local value.

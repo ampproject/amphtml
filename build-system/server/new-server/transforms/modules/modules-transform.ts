@@ -18,17 +18,9 @@ import {PostHTML} from 'posthtml';
 import {URL} from 'url';
 import {isValidScript, ScriptNode} from '../utilities/script';
 import {CDNURLToLocalDistURL} from '../utilities/cdn';
+import {OptionSet} from '../utilities/option-set';
 import minimist from 'minimist';
 const argv = minimist(process.argv.slice(2));
-
-/**
- * A list of options to correspond with options.json for testing purposes.
- * To add an option, add the corresponding key-value pair into the 
- * options.json, then add the field to this interface.
- */
-interface OptionSet {
-  compiled?: boolean;
-}
 
 /**
  * Append a Module Script for a ScriptNode.

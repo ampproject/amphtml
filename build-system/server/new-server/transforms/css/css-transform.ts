@@ -17,14 +17,7 @@
 import minimist from 'minimist';
 import {PostHTML} from 'posthtml';
 import {readFileSync} from 'fs';
-
-/**
- * A list of options to correspond with options.json for testing purposes.
- * To add an option, add the corresponding key-value pair into the 
- * options.json, then add the field to this interface.
- */
-interface OptionSet {
-}
+import {OptionSet} from '../utilities/option-set';
 
 const argv = minimist(process.argv.slice(2));
 const isTestMode: boolean = argv._.includes('server-tests');
