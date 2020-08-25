@@ -878,9 +878,10 @@ amp-story .amp-video-eq,
   width: auto;
   height: auto !important;
   pointer-events: none !important;
-  /* 224px = the width of a narrow phone (320px) - tap-safe margins (48px * 2) */
-  min-width: 14em !important;
-  max-width: 25em !important;
+  min-width: 14em !important; /* 14em = 224px = the width of a narrow phone (320px) - tap-safe margins (48px * 2) */
+  max-width: min(25em, calc(var(--story-page-vw) * 80)) !important;
+  font-size: calc(var(--story-page-vw) * 3); /* override with ems for pixel perfect layout */
+  width: 100%;
   /* Properties overrideable by user */
   --interactive-accent-color: #005AF0;
   --interactive-prompt-background: var(--interactive-accent-color);
