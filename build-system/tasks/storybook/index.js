@@ -31,7 +31,9 @@ function runStorybook(mode) {
   const port = argv.port || DEFAULT_PORTS[mode];
 
   exec(
-    `./node_modules/.bin/start-storybook --quiet -c ./${mode}-env -p ${port} ${argv.ci ? '--ci' : ''}`,
+    `./node_modules/.bin/start-storybook --quiet -c ./${mode}-env -p ${port} ${
+      argv.ci ? '--ci' : ''
+    }`,
     {
       'stdio': [null, process.stdout, process.stderr],
       cwd: __dirname,
@@ -67,5 +69,5 @@ storybookAmp.description =
 
 storybookPreact.flags = storybookAmp.flags = {
   'port': '  Change the port that the storybook dashboard is served from',
-  'ci': '  CI mode (skip interactive prompts, don\'t open browser)',
+  'ci': "  CI mode (skip interactive prompts, don't open browser)",
 };
