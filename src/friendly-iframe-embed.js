@@ -760,8 +760,8 @@ function installPolyfillsInChildWindow(parentWin, childWin) {
   // transpiled classes.
   if(!IS_SXG){
     installCustomElements(childWin, class {});
+    installIntersectionObserver(parentWin, childWin);
   }
-  installIntersectionObserver(parentWin, childWin);
 }
 
 /**

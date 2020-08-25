@@ -54,6 +54,6 @@ if (self.document) {
   // transpiled classes.
   if(!IS_SXG){
     installCustomElements(self, class {});
+    installIntersectionObserver(self);
   }
-  installIntersectionObserver(self);
 }
