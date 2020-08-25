@@ -16,31 +16,30 @@
 
 /**
  * Takes a .jss.js file and transforms the `useStyles` export to remove side effects
- * and directly return the classes map.
+ * and directly return the classes map. Also includes special key 'CSS' in the classes
+ * object with the entire CSS string.
  *
  * @example
  * In:
  * ```
  * import {createUseStyles} from 'react-jss'
  *
- * const JSS = { button: { fontSize: 12 }}
- * export const CSS = ''
- * export const useStyles = createUseStyles(JSS);
+ * const jss = { button: { fontSize: 12 }}
+ * export const useStyles = createUseStyles(jss);
  * ```
  *
  * Out:
  * ```
- * const JSS = { button: { fontSize: 12 }}
- * const classes = {button: 'button-1'}
- * export const useStyles = () => classes;
- * export const CSS = `button-1 { fontSize: 12 }`
+ * const jss = { button: { fontSize: 12 }}
+ * const _classes = {button: 'button-1', CSS: 'button-1 { font-size: 12 }'}
+ * export const useStyles = () => _classes;
  * ```
  */
 
 const {create} = require('jss');
 const {default: preset} = require('jss-preset-default');
 
-module.exports = function ({types: t}) {
+module.exports = function ({types: t, template}) {
   function isJssFile(filename) {
     return filename.endsWith('.jss.js');
   }
@@ -51,76 +50,43 @@ module.exports = function ({types: t}) {
     return jss.createStyleSheet(JSS);
   }
 
-  const isIdent = (path, ident) => path.node.id && path.node.id.name === ident;
-  const sheetMap = new WeakMap();
-
-  function findAndCompileJss(path, state) {
-    if (sheetMap.has(state.file)) {
-      return;
-    }
-
-    //TODO: @jridgewell, is there a better way to find module scope?
-    const moduleScopePath = path.findParent((p) => p.parent.type === 'File');
-    // Try to find the createUseStyles. The first arg will be the JSS.
-    // Compile the JSS and place into the sheetMap.
-    moduleScopePath.traverse({
-      CallExpression(path) {
-        if (path.node.callee.name !== 'createUseStyles') {
-          return;
-        }
-
-        const {confident, value: JSS} = path.get('arguments')[0].evaluate();
-        if (!confident) {
-          throw new Error(
-            `First argument to createUseStyles must be statically evaluatable.`
-          );
-        }
-        sheetMap.set(state.file, compileJss(JSS));
-      },
-    });
-    if (!sheetMap.has(state.file)) {
-      throw new Error(`Could not find createUseStyles.`);
-    }
-  }
-
   return {
     visitor: {
-      VariableDeclarator(path, state) {
+      CallExpression(path, state) {
         // TODO: Can I skip the whole file if not jss?
         const {filename} = state.file.opts;
         if (!isJssFile(filename)) {
           return;
         }
-        findAndCompileJss(path, state);
 
-        if (isIdent(path, 'useStyles')) {
-          // Convert jss classes object to ast equivalent.
-          const classesVal = t.objectExpression(
-            Object.entries(sheetMap.get(state.file).classes).map(([k, v]) =>
-              t.objectProperty(t.identifier(k), t.stringLiteral(v))
-            )
+        const callee = path.get('callee');
+        if (!callee.isIdentifier({name: 'createUseStyles'})) {
+          return;
+        }
+
+        const {confident, value: JSS} = path.get('arguments.0').evaluate();
+        if (!confident) {
+          throw new Error(
+            `First argument to createUseStyles must be statically evaluatable.`
           );
-          path
-            .getStatementParent()
-            .insertBefore(
-              t.variableDeclaration('const', [
-                t.variableDeclarator(t.identifier('classes'), classesVal),
-              ])
-            );
-          path
-            .get('init')
-            .replaceWith(
-              t.arrowFunctionExpression([], t.identifier('classes'))
-            );
-          path.stop();
+        }
+        const sheet = compileJss(JSS);
+        if ('CSS' in sheet.classes) {
+          throw new Error('Cannot have class named CSS in your JSS object.');
         }
 
-        if (isIdent(path, 'CSS')) {
-          path
-            .get('init')
-            .replaceWith(t.stringLiteral(sheetMap.get(state.file).toString()));
-          path.stop();
-        }
+        const id = path.scope.generateUidIdentifier('classes');
+        path.scope.push({
+          id,
+          init: template.expression.ast`JSON.parse(${t.stringLiteral(
+            JSON.stringify({
+              ...sheet.classes,
+              'CSS': sheet.toString(),
+            })
+          )})`,
+        });
+
+        path.replaceWith(template.expression.ast`(() => ${id})`);
       },
 
       // Remove the import for react-jss

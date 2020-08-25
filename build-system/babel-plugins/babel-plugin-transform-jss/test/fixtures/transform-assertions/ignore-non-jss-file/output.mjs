@@ -19,5 +19,4 @@ const JSS = {
     fontSize: 12
   }
 };
-export const CSS = '';
 export const useStyles = createUseStyles(JSS);

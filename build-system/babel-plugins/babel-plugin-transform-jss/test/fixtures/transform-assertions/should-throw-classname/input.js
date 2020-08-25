@@ -12,9 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
-import {createUseStyles} from 'react-jss'
+ */
 
-const JSS = {button: {fontSize: 12}};
-
-export const useStyles = createUseStyles(JSS);
+// Throws because cant use classname "CSS", as it conflicts with this transform.
+import {createUseStyles} from 'react-jss'; 
+export const useStyles = createUseStyles({CSS: {fontSize: 12}});

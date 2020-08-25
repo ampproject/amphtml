@@ -194,8 +194,6 @@ const JSS = {
   slideSizing,
 };
 
-// The two exports below get replaced via `babel-plugin-transform-jss`.
-export const CSS = '';
-
+// useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.
 // eslint-disable-next-line local/no-export-side-effect
 export const useStyles = createUseStyles(JSS);

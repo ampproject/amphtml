@@ -16,5 +16,4 @@
 
 import {createUseStyles} from 'react-jss';
 
-export const CSS = '';
 export const useStyles = createUseStyles({button: {fontSize: 12}});

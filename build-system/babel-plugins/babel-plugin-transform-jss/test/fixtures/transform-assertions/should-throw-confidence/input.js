@@ -12,9 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
-import {createUseStyles} from 'react-jss'
+ */
 
-const JSS = {button: {fontSize: 12}};
-
+// Throws because object spread is not statically evaluable.
+import {createUseStyles} from 'react-jss';
+const foo = {foo: 7}
+const JSS =  {...foo} 
 export const useStyles = createUseStyles(JSS);

@@ -1,3 +1,5 @@
+var _classes = JSON.parse("{\"button\":\"button-0-3-1\",\"CSS\":\".button-0-3-1 {\\n  font-size: 12px;\\n}\"}");
+
 /**
  * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
@@ -13,8 +15,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export const CSS = "`.button-0-2-1 {\n  font-size: 12px;\n}`";
-const classes = {
-  button: "button-0-2-1"
-};
-export const useStyles = () => classes;
+export const useStyles = () => _classes;
