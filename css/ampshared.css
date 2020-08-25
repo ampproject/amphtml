@@ -264,10 +264,10 @@ i-amphtml-sizer {
  * [width][height][sizes] and [width][height][heights] imply layout=responsive
  * before the element has resolved.
  */
-.i-amphtml-notbuilt:not(.i-amphtml-layout-container) > * ,
-[layout]:not([layout=container]):not(.i-amphtml-element) > *,
-[width][height][sizes]:not([layout]):not(.i-amphtml-element) > *,
-[width][height][heights]:not([layout]):not(.i-amphtml-element) > *
+.i-amphtml-notbuilt:not(.i-amphtml-layout-container) > :not(.i-amphtml-fill-content) ,
+[layout]:not([layout=container]):not(.i-amphtml-element) > :not(.i-amphtml-fill-content),
+[width][height][sizes]:not([layout]):not(.i-amphtml-element) > :not(.i-amphtml-fill-content),
+[width][height][heights]:not([layout]):not(.i-amphtml-element) > :not(.i-amphtml-fill-content)
 {
   display: none;
 }
