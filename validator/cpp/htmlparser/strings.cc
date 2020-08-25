@@ -821,12 +821,14 @@ void CaseTransformInternal(bool to_upper, std::string* s) {
 }
 
 bool ReadContinuationByte(uint8_t byte, uint8_t* out) {
+  // Checks it is valid continuation byte. 0b10xxxxxx.
   if ((byte & 0xc0) == 0x80) {
+    // Mask last six bits 0b00xxxxxx.
     *out = byte & 0x3f;
     return true;
   }
 
-  // Error, return null char.
+  // Invalid continuation byte.
   return false;
 }
 
