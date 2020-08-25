@@ -364,6 +364,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 - [LockerDome](../../ads/lockerdome.md)
 - [LOGLY](../../ads/logly.md)
 - [LOKA](../../ads/loka.md)
+- [Macaw](../../ads/macaw.md)
 - [MADS](../../ads/mads.md)
 - [MANTIS](../../ads/mantis.md)
 - [Mediaad.org](../../ads/mediaad.md)
