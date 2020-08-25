@@ -25,35 +25,7 @@ import {userAssert} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-fit-text';
 
-const getFontSizeAttrs = (element) =>
-  dict({
-    'maxFontSize': getLengthNumeral(element.getAttribute('max-font-size')),
-    'minFontSize': getLengthNumeral(element.getAttribute('min-font-size')),
-  });
-
 class AmpFitText extends PreactBaseElement {
-  /** @override */
-  init() {
-    const attributeOb = new MutationObserver(() => {
-      this.mutateProps(getFontSizeAttrs(this.element));
-    });
-    attributeOb.observe(this.element, {
-      attributeFilter: ['min-font-size', 'max-font-size'],
-      attributes: true,
-    });
-
-    // Force render to resize to new contents.
-    const childOb = new MutationObserver(() => {
-      this.mutateProps(dict({}));
-    });
-    childOb.observe(this.element, {
-      childList: true,
-      subtree: true,
-    });
-
-    return getFontSizeAttrs(this.element);
-  }
-
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
@@ -66,6 +38,12 @@ class AmpFitText extends PreactBaseElement {
 
 /** @override */
 AmpFitText['Component'] = FitText;
+
+/** @override */
+AmpFitText['props'] = {
+  'minFontSize': {attr: 'min-font-size', type: 'number'},
+  'maxFontSize': {attr: 'max-font-size', type: 'number'},
+};
 
 /** @override */
 AmpFitText['passthrough'] = true;

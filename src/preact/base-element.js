@@ -23,6 +23,7 @@ import {hasOwn} from '../utils/object';
 import {installShadowStyle} from '../shadow-embed';
 import {matches} from '../dom';
 import {render} from './index';
+import {startsWith} from '../string';
 
 /**
  * @typedef {{
@@ -43,8 +44,15 @@ let AmpElementPropDef;
  */
 let ChildDef;
 
+const IGNORE_NAME = 'i-amphtml';
+
 /** @const {!MutationObserverInit} */
-const PASSTHROUGH_NON_EMPTY_MUTATION_INIT = {
+const CHILDREN_MUTATION_INIT = {
+  childList: true,
+};
+
+/** @const {!MutationObserverInit} */
+const PASSTHROUGH_MUTATION_INIT = {
   childList: true,
   characterData: true,
 };
@@ -100,11 +108,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     this.mounted_ = true;
 
     /** @private {?MutationObserver} */
-    this.observer_ = this.constructor['passthroughNonEmpty']
-      ? new MutationObserver(() => {
-          this.scheduleRender_();
-        })
-      : null;
+    this.observer_ = null;
   }
 
   /**
@@ -116,7 +120,24 @@ export class PreactBaseElement extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    const Ctor = this.constructor;
+
     this.defaultProps_ = this.init() || null;
+
+    this.observer_ = new MutationObserver(this.checkMutations_.bind(this));
+    this.observer_.observe(this.element, {
+      attributes: true,
+      ...(
+        Ctor['children'] ?
+        CHILDREN_MUTATION_INIT :
+        null
+      ),
+      ...(
+        (Ctor['passthrough'] || Ctor['passthroughNonEmpty']) ?
+        PASSTHROUGH_MUTATION_INIT :
+        null
+      ),
+    });
 
     this.scheduleRender_();
 
@@ -145,18 +166,11 @@ export class PreactBaseElement extends AMP.BaseElement {
     this.context_.renderable = true;
     this.context_.playable = true;
     this.scheduleRender_();
-    if (this.observer_) {
-      this.observer_.observe(this.element, PASSTHROUGH_NON_EMPTY_MUTATION_INIT);
-    }
     return deferred.promise;
   }
 
   /** @override */
   unlayoutCallback() {
-    if (this.observer_) {
-      this.observer_.disconnect();
-      return true;
-    }
     return false;
   }
 
@@ -177,6 +191,18 @@ export class PreactBaseElement extends AMP.BaseElement {
       ...props,
     });
     this.scheduleRender_();
+  }
+
+  /**
+   * @param {!Array<!MutationRecord>} records
+   * @private
+   */
+  checkMutations_(records) {
+    const Ctor = this.constructor;
+    const rerender = records.some((m) => shouldMutationBeRerendered(Ctor, m));
+    if (rerender) {
+      this.scheduleRender_();
+    }
   }
 
   /** @private */
@@ -384,11 +410,13 @@ function collectProps(Ctor, element, defaultProps) {
         ? element.hasAttribute(def.attr)
         : element.getAttribute(def.attr);
     if (value == null) {
-      props[name] = def.default;
+      if (def.default !== undefined) {
+        props[name] = def.default;
+      }
     } else {
       const v =
         def.type == 'number'
-          ? Number(value)
+          ? parseFloat(value)
           : def.type == 'Element'
           ? // TBD: what's the best way for element referencing compat between
             // React and AMP? Currently modeled as a Ref.
@@ -476,4 +504,56 @@ function matchChild(element, defs) {
     }
   }
   return null;
+}
+
+/**
+ * @param {!NodeList} nodeList
+ * @return {boolean}
+ */
+function shouldMutationForNodeListBeRerendered(nodeList) {
+  for (let i = 0; i < nodeList.length; i++) {
+    const node = nodeList[i];
+    if (node.nodeType == /* ELEMENT */ 1) {
+      // Ignore service elements, e.g. `<i-amphtml-svc>` or
+      // `<x slot="i-amphtml-svc">`.
+      if (
+        startsWith(node.tagName.toLowerCase(), IGNORE_NAME) ||
+        node.getAttribute('slot') == 'i-amphtml-svc'
+      ) {
+        continue;
+      }
+      return true;
+    }
+    if (node.nodeType == /* TEXT */ 3) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * @param {typeof PreactBaseElement} Ctor
+ * @param {!MutationRecord} record
+ * @return {boolean}
+ */
+function shouldMutationBeRerendered(Ctor, m) {
+  const {target, type} = m;
+  if (type == 'attributes') {
+    // Check if the attribute is mapped to one of the properties.
+    const props = Ctor['props'];
+    for (const name in props) {
+      const def = props[name];
+      if (m.attributeName == def.attr) {
+        return true;
+      }
+    }
+    return false;
+  }
+  if (type == 'childList') {
+    return (
+      shouldMutationForNodeListBeRerendered(m.addedNodes) ||
+      shouldMutationForNodeListBeRerendered(m.removedNodes)
+    );
+  }
+  return false;
 }
