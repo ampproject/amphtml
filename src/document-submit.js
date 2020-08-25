@@ -118,17 +118,12 @@ export function onDocumentFormSubmit_(e) {
   } else if (method == 'POST') {
     if (action) {
       const TAG = 'form';
-      user().error(
-        TAG,
-        'action attribute is invalid for method=POST: %s',
-        form
-      );
+      user().warn(TAG, 'action attribute is invalid for method=POST: %s', form);
     }
 
     if (!actionXhr) {
       e.preventDefault();
-      userAssert(
-        false,
+      user().warn(
         'Only XHR based (via action-xhr attribute) submissions are support ' +
           'for POST requests. %s',
         form

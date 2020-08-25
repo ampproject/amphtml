@@ -19,6 +19,7 @@ import {
   installGlobalSubmitListenerForDoc,
   onDocumentFormSubmit_,
 } from '../../src/document-submit';
+import {user} from '../../src/log';
 
 describes.sandboxed('test-document-submit', {}, (env) => {
   describe('installGlobalSubmitListenerForDoc', () => {
@@ -160,11 +161,16 @@ describes.sandboxed('test-document-submit', {}, (env) => {
     });
 
     it('should fail when POST and action-xhr is not set', () => {
+      const warnSpy = env.sandbox.spy(user(), 'warn');
       evt.target.removeAttribute('action');
       evt.target.setAttribute('method', 'post');
       allowConsoleError(() => {
-        expect(() => onDocumentFormSubmit_(evt)).to.throw(
-          /Only XHR based \(via action-xhr attribute\) submissions/
+        onDocumentFormSubmit_(evt);
+        expect(warnSpy).to.be.calledWith(
+          env.sandbox.match(
+            /Only XHR based \(via action-xhr attribute\) submissions/
+          ),
+          env.sandbox.match.any
         );
       });
       expect(preventDefaultSpy).to.have.been.called;
