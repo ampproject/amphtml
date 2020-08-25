@@ -72,7 +72,9 @@ module.exports = function ({types: t, template}) {
         }
         const sheet = compileJss(JSS);
         if ('CSS' in sheet.classes) {
-          throw path.buildCodeFrameError('Cannot have class named CSS in your JSS object.');
+          throw path.buildCodeFrameError(
+            'Cannot have class named CSS in your JSS object.'
+          );
         }
 
         const id = path.scope.generateUidIdentifier('classes');
