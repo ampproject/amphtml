@@ -56,8 +56,10 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
       .resolves({text: () => Promise.resolve('/* noop */')});
     env.sandbox.stub(Services, 'xhrFor').returns(xhr);
 
-    // Make @ampproject/worker-dom dependency a no-op for these unit tests.
-    env.sandbox.stub(WorkerDOM, 'upgrade').resolves();
+    // Make @ampproject/worker-dom dependency essentially a noop for these tests.
+    env.sandbox
+      .stub(WorkerDOM, 'upgrade')
+      .callsFake((unused, scriptsPromise) => scriptsPromise);
   });
 
   function stubFetch(url, headers, text, responseUrl) {
