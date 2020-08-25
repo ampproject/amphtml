@@ -403,8 +403,7 @@ export class ViewportImpl {
 
   /** @override */
   scrollIntoView(element) {
-    // should be IS_SXG
-    if (IS_ESM) {
+    if (IS_SXG) {
       return element.scrollIntoView();
     } else {
       return this.getScrollingContainerFor_(element).then((parent) =>
@@ -430,10 +429,9 @@ export class ViewportImpl {
 
   /** @override */
   animateScrollIntoView(element, pos = 'top', opt_duration, opt_curve) {
-    // should be IS_EXG
-    if (IS_ESM) {
-      //const posToBlock = {'top': 'start', 'center': 'center', 'bottom': 'end'};
-      return element.scrollIntoView({block: 'center'});
+    if (IS_SXG) {
+      const posToBlock = {'top': 'start', 'center': 'center', 'bottom': 'end'};
+      return element.scrollIntoView(posToBlock[pos]);
     } else {
       devAssert(
         !opt_curve || opt_duration !== undefined,
