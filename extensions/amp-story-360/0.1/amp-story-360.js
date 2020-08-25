@@ -28,8 +28,8 @@ import {CommonSignals} from '../../../src/common-signals';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
 import {Services} from '../../../src/services';
-import {dev, user, userAssert} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
+import {dev, user, userAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
@@ -472,6 +472,32 @@ export class AmpStory360 extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
+  /**
+   * Checks if the image is larger than the GPUs max texture size.
+   * Scales the image down if neededed.
+   * Returns the image element if image is within bounds.
+   * If image is out of bounds, returns a scaled canvas element.
+   * @param {!Element} imgEl
+   * @return {!Element}
+   * @private
+   */
+  checkImageReSize_(imgEl) {
+    const canvasForGL = document.createElement('canvas');
+    const gl = canvasForGL.getContext('webgl');
+    const MAX_TEXTURE_SIZE = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+
+    if (imgEl.width > MAX_TEXTURE_SIZE || imgEl.height > MAX_TEXTURE_SIZE) {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = Math.min(imgEl.width, MAX_TEXTURE_SIZE);
+      canvas.height = Math.min(imgEl.height, MAX_TEXTURE_SIZE);
+      ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
+      return canvas;
+    } else {
+      return imgEl;
+    }
+  }
+
   /** @override */
   layoutCallback() {
     const ampImgEl = this.element.querySelector('amp-img');
@@ -486,7 +512,11 @@ export class AmpStory360 extends AMP.BaseElement {
       .then(
         () => {
           this.renderer_ = new Renderer(this.canvas_);
-          this.renderer_.setImage(this.element.querySelector('img'));
+          const img = this.checkImageReSize_(
+            dev().assertElement(this.element.querySelector('img'))
+          );
+          this.renderer_.setImage(img);
+          this.renderer_.resize();
           if (this.orientations_.length < 1) {
             return;
           }
