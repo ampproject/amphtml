@@ -185,8 +185,8 @@ exports.jsBundles = {
       minifiedName: 'v0.js',
       includePolyfills: true,
       wrapper: wrappers.mainBinary,
-      esmPassCompilation: argv.esm,
-      includeOnlyESMLevelPolyfills: argv.esm,
+      esmPassCompilation: argv.esm || argv.sxg,
+      includeOnlyESMLevelPolyfills: argv.esm || argv.sxg,
     },
   },
   'amp-shadow.js': {

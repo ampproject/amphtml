@@ -58,7 +58,7 @@ async function terserMinify(code) {
  */
 exports.postClosureBabel = function () {
   return through.obj(async function (file, enc, next) {
-    if (!argv.esm || path.extname(file.path) === '.map') {
+    if ((!argv.esm && !argv.sxg) || path.extname(file.path) === '.map') {
       debug(
         CompilationLifecycles['complete'],
         file.path,
