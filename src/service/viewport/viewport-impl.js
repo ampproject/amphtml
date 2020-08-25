@@ -403,9 +403,14 @@ export class ViewportImpl {
 
   /** @override */
   scrollIntoView(element) {
-    return this.getScrollingContainerFor_(element).then((parent) =>
-      this.scrollIntoViewInternal_(element, parent)
-    );
+    // should be IS_SXG
+    if (IS_ESM) {
+      return element.scrollIntoView();
+    } else {
+      return this.getScrollingContainerFor_(element).then((parent) =>
+        this.scrollIntoViewInternal_(element, parent)
+      );
+    }
   }
 
   /**
@@ -425,20 +430,26 @@ export class ViewportImpl {
 
   /** @override */
   animateScrollIntoView(element, pos = 'top', opt_duration, opt_curve) {
-    devAssert(
-      !opt_curve || opt_duration !== undefined,
-      "Curve without duration doesn't make sense."
-    );
+    // should be IS_EXG
+    if (IS_ESM) {
+      const posToBlock = {'top': 'start', 'center': 'center', 'bottom': 'end'};
+      return element.scrollIntoView({block: posToBlock[pos]});
+    } else {
+      devAssert(
+        !opt_curve || opt_duration !== undefined,
+        "Curve without duration doesn't make sense."
+      );
 
-    return this.getScrollingContainerFor_(element).then((parent) =>
-      this.animateScrollWithinParent(
-        element,
-        parent,
-        dev().assertString(pos),
-        opt_duration,
-        opt_curve
-      )
-    );
+      return this.getScrollingContainerFor_(element).then((parent) =>
+        this.animateScrollWithinParent(
+          element,
+          parent,
+          dev().assertString(pos),
+          opt_duration,
+          opt_curve
+        )
+      );
+    }
   }
 
   /** @override */
