@@ -33,6 +33,7 @@ const sourcemapUrlMatcher =
 // Mapping related constants
 const expectedFirstLineFile = 'src/polyfills/array-includes.js';
 const expectedFirstLineCode = 'function includes(value, opt_fromIndex) {';
+const expectedColStart = 'use strict'.length; // Code begins after an initial 'use strict'.
 
 /**
  * Throws an error with the given message
@@ -164,7 +165,7 @@ function checkSourcemapMappings(sourcemapJson) {
     log(helpMessage);
     throwError('Found mapping for incorrect code');
   }
-  if (generatedCodeColumn != 0 || sourceCodeColumn != 0) {
+  if (generatedCodeColumn != 0 || sourceCodeColumn != expectedColStart) {
     log(red('ERROR:'), 'Found mapping for incorrect (non-zero) column.');
     log('generatedCodeColumn:', cyan(generatedCodeColumn));
     log('sourceCodeColumn:', cyan(sourceCodeColumn));
