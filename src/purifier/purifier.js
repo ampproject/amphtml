@@ -358,7 +358,7 @@ export class Purifier {
         }
       } else {
         data.keepAttr = false;
-        user().error(
+        user().warn(
           TAG,
           'Removed invalid attribute %s[%s="%s"].',
           tagName,
@@ -395,7 +395,7 @@ export class Purifier {
             !startsWith(element.getAttribute(attr), '#')
           ) {
             removeElement(element);
-            user().error(
+            user().warn(
               TAG,
               'Removed invalid <use>. use[href] must start with "#".'
             );
