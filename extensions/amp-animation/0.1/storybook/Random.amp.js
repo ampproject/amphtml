@@ -17,7 +17,7 @@
 import * as Preact from '../../../../src/preact';
 import {AnimationTemplate} from './template';
 import {storiesOf} from '@storybook/preact';
-import {withAmp} from 'storybook-addon-amp';
+import {withAmp} from '@ampproject/storybook-addon';
 import {withKnobs} from '@storybook/addon-knobs';
 
 const CONTAINER_STYLE = {

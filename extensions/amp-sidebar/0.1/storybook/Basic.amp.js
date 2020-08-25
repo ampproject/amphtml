@@ -19,7 +19,7 @@
 import * as Preact from '../../../../src/preact';
 import {storiesOf} from '@storybook/preact';
 import {withA11y} from '@storybook/addon-a11y';
-import {withAmp} from 'storybook-addon-amp';
+import {withAmp} from '@ampproject/storybook-addon';
 import {withKnobs} from '@storybook/addon-knobs';
 
 // eslint-disable-next-line

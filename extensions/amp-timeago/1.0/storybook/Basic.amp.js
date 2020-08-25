@@ -18,14 +18,17 @@ import * as Preact from '../../../../src/preact';
 import {date, withKnobs} from '@storybook/addon-knobs';
 import {storiesOf} from '@storybook/preact';
 import {withA11y} from '@storybook/addon-a11y';
-import {withAmp} from 'storybook-addon-amp';
+import {withAmp} from '@ampproject/storybook-addon';
 
 // eslint-disable-next-line
 storiesOf('amp-timeago', module)
   .addDecorator(withKnobs)
   .addDecorator(withA11y)
   .addDecorator(withAmp)
-  .addParameters({extensions: [{name: 'amp-timeago', version: '1.0'}]})
+  .addParameters({
+    extensions: [{name: 'amp-timeago', version: '1.0'}],
+    experiments: ['amp-timeago-bento'],
+  })
   .add('responsive', () => {
     const datetime = date('Date/Time', new Date());
     return (
