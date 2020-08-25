@@ -75,6 +75,7 @@ CMP_CONFIG['Ogury'] = {
 CMP_CONFIG['opencmp'] = {
   'consentInstanceId': 'opencmp',
   'checkConsentHref': 'https://amp.opencmp.net/consent/check',
+  'onUpdateHref': 'https://amp.opencmp.net/consent/update',
   'promptUISrc': 'https://cdn.opencmp.net/tcf-v2/amp/cmp.html',
 };
 
