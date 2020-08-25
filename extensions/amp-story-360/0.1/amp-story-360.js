@@ -292,7 +292,7 @@ export class AmpStory360 extends AMP.BaseElement {
       ),
     ]).then(() => {
       attr('controls') === 'gyroscope' && this.checkGyroscopePermissions_();
-      return Promise.resolve;
+      return Promise.resolve();
     });
   }
 
