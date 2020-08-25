@@ -47,7 +47,7 @@ const buildActivateButtonTemplate = (element) => {
   const html = htmlFor(element);
   return html`
     <button class="i-amphtml-story-360-activate-button" role="button">
-      <span class="activate-text"></span>
+      <span class="i-amphtml-story-360-activate-text"></span>
       <span class="i-amphtml-story-360-activate-button-icon"
         >360°
         <svg
