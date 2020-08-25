@@ -19,9 +19,9 @@ import {CommonSignals} from '../../../src/common-signals';
 import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
 import {Services} from '../../../src/services';
 import {StateProperty} from '../../../extensions/amp-story/1.0/amp-story-store-service';
+import {dev, user, userAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
-import {dev, user, userAssert} from '../../../src/log';
 import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @const {string} */
