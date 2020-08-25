@@ -541,7 +541,6 @@ descendant_tag_list: {
   tag: "AMP-FIT-TEXT"
   tag: "AMP-FONT"
   tag: "AMP-IMG"
-  tag: "amp-img (transformed)"  # Only allowed when document is transformed AMP
   tag: "AMP-TIMEAGO"
   tag: "B"
   tag: "BDI"
@@ -587,6 +586,7 @@ descendant_tag_list: {
   tag: "HKERN"
   tag: "HR"
   tag: "I"
+  tag: "IMG"  # Only allowed when document is transformed AMP
   tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
   tag: "IMAGE"
   tag: "INS"
@@ -657,7 +657,6 @@ descendant_tag_list: {
   tag: "AMP-GIST"
   tag: "AMP-GOOGLE-VRVIEW-IMAGE"
   tag: "AMP-IMG"
-  tag: "amp-img (transformed)"  # Only allowed when document is transformed AMP
   tag: "AMP-INSTALL-SERVICEWORKER"
   tag: "AMP-LIST"
   tag: "AMP-LIVE-LIST"
@@ -722,6 +721,7 @@ descendant_tag_list: {
   tag: "HR"
   tag: "I"
   tag: "IMAGE"
+  tag: "IMG"  # Only allowed when document is transformed AMP
   tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
   tag: "INS"
   tag: "KBD"
@@ -912,7 +912,6 @@ descendant_tag_list {
   tag: "AMP-IMA-VIDEO"
   tag: "AMP-IMAGE-SLIDER"
   tag: "AMP-IMG"
-  tag: "amp-img (transformed)"  # Only allowed when document is transformed AMP
   tag: "AMP-IMGUR"
   tag: "AMP-INSTAGRAM"
   tag: "AMP-IZLESENE"
@@ -998,6 +997,7 @@ descendant_tag_list {
   tag: "HR"
   tag: "I"
   tag: "IMAGE"
+  tag: "IMG"  # Only allowed when document is transformed AMP
   tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
   tag: "INS"
   tag: "KBD"
