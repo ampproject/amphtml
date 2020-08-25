@@ -185,8 +185,8 @@ exports.jsBundles = {
       minifiedName: 'v0.js',
       includePolyfills: true,
       wrapper: wrappers.mainBinary,
-      esmPassCompilation: argv.esm,
-      includeOnlyESMLevelPolyfills: argv.esm,
+      esmPassCompilation: argv.esm || argv.sxg,
+      includeOnlyESMLevelPolyfills: argv.esm || argv.sxg,
     },
   },
   'amp-shadow.js': {
@@ -1111,12 +1111,6 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-google-vrview-image',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.MISC,
-  },
-  {
-    name: 'amp-viewer-assistance',
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.MISC,

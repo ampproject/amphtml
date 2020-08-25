@@ -58,7 +58,7 @@ async function terserMinify(code) {
  */
 exports.postClosureBabel = function () {
   return through.obj(async function (file, enc, next) {
-    if (!argv.esm || path.extname(file.path) === '.map') {
+    if ((!argv.esm && !argv.sxg) || path.extname(file.path) === '.map') {
       debug(
         CompilationLifecycles['complete'],
         file.path,
@@ -87,13 +87,17 @@ exports.postClosureBabel = function () {
       file.sourceMap
     );
 
-    const {compressed, terserMap} = await terserMinify(code);
-    file.contents = Buffer.from(compressed, 'utf-8');
-    file.sourceMap = remapping(
-      [terserMap, babelMap, map],
-      () => null,
-      !argv.full_sourcemaps
-    );
+    try {
+      const {compressed, terserMap} = await terserMinify(code);
+      file.contents = Buffer.from(compressed, 'utf-8');
+      file.sourceMap = remapping(
+        [terserMap, babelMap, map],
+        () => null,
+        !argv.full_sourcemaps
+      );
+    } catch (e) {
+      return next(e);
+    }
 
     debug(
       CompilationLifecycles['complete'],
