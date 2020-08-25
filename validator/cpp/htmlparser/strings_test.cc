@@ -506,7 +506,25 @@ TEST(Utf8UtilTest, RoundTripsAndLengths) {
   EXPECT_EQ(12, amped.size());
   std::vector<char32_t> amped_codes =
       htmlparser::Strings::Utf8ToCodepoints(amped);
-  EXPECT_EQ(10, amped_codes.size());  // oh look there were multibyte chars.
+  EXPECT_EQ(10, amped_codes.size());
   EXPECT_EQ(amped,
             htmlparser::Strings::CodepointsToUtf8String(amped_codes));
+  std::string three_bytes_seq_second_byte_zero = "›";
+  auto decoded_bytes = htmlparser::Strings::DecodeUtf8Symbol(
+      three_bytes_seq_second_byte_zero);
+  EXPECT_TRUE(decoded_bytes.has_value());
+  // First byte 0xe2;
+  // 0bxxxxxxxx000000000000000000000000
+  EXPECT_EQ(0xe2, (*decoded_bytes >> 12) | 0xe0);
+  // Second byte 0x80;
+  // 0b00000000xxxxxxxx0000000000000000
+  EXPECT_EQ(0x80, ((*decoded_bytes >> 6) & 0x3f) | 0x80);
+  // Third byte 0xba;
+  // 0b0000000000000000xxxxxxxx00000000
+  EXPECT_EQ(0xba, (*decoded_bytes & 0x3f) | 0x80);
+  // Fourth byte is zero for three bytes sequence.
+  // 0b000000000000000000000000xxxxxxxx
+  EXPECT_EQ(0x00, *decoded_bytes & 0xffff0000);
+  // TODO(amaltas): In follow up change add test cases for byte sequences in
+  // which middle bytes are 0x80 which is zero decoded value.
 }
