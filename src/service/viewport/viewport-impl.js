@@ -403,9 +403,9 @@ export class ViewportImpl {
 
   /** @override */
   scrollIntoView(element) {
-    return this.getScrollingContainerFor_(element).then((parent) =>
-      this.scrollIntoViewInternal_(element, parent)
-    );
+      return this.getScrollingContainerFor_(element).then((parent) =>
+        this.scrollIntoViewInternal_(element, parent)
+      );
   }
 
   /**
