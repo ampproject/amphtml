@@ -541,6 +541,7 @@ descendant_tag_list: {
   tag: "AMP-FIT-TEXT"
   tag: "AMP-FONT"
   tag: "AMP-IMG"
+  tag: "amp-img (transformed)"  # Only allowed when document is transformed AMP
   tag: "AMP-TIMEAGO"
   tag: "B"
   tag: "BDI"
@@ -656,12 +657,17 @@ descendant_tag_list: {
   tag: "AMP-GIST"
   tag: "AMP-GOOGLE-VRVIEW-IMAGE"
   tag: "AMP-IMG"
+  tag: "amp-img (transformed)"  # Only allowed when document is transformed AMP
   tag: "AMP-INSTALL-SERVICEWORKER"
   tag: "AMP-LIST"
   tag: "AMP-LIVE-LIST"
   tag: "AMP-PIXEL"
   tag: "AMP-STATE"
   tag: "AMP-STORY-360"
+  tag: "AMP-STORY-INTERACTIVE-BINARY-POLL"
+  tag: "AMP-STORY-INTERACTIVE-POLL"
+  tag: "AMP-STORY-INTERACTIVE-QUIZ"
+  tag: "AMP-STORY-INTERACTIVE-RESULTS"
   tag: "AMP-TIMEAGO"
   tag: "AMP-TWITTER"
   tag: "AMP-VIDEO"
@@ -906,6 +912,7 @@ descendant_tag_list {
   tag: "AMP-IMA-VIDEO"
   tag: "AMP-IMAGE-SLIDER"
   tag: "AMP-IMG"
+  tag: "amp-img (transformed)"  # Only allowed when document is transformed AMP
   tag: "AMP-IMGUR"
   tag: "AMP-INSTAGRAM"
   tag: "AMP-IZLESENE"

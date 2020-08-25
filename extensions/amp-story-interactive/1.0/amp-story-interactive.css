@@ -59,13 +59,14 @@
     background-color: var(--i-amphtml-interactive-theme-shading-flash);
   }
   100% {
-    background-color: var(--i-amphtml-interactive-theme-shading);
+    background-color: var(--i-amphtml-interactive-theme-shading-base);
   }
 }
 
 .i-amphtml-story-interactive-container:not(.i-amphtml-story-interactive-post-selection) 
   .i-amphtml-story-interactive-option {
   cursor: pointer !important;
+  pointer-events: all;
 }
 
 .i-amphtml-story-interactive-confetti-wrapper {

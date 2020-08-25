@@ -338,6 +338,12 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-animation-polyfill',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-apester-media',
     version: '0.1',
     latestVersion: '0.1',
@@ -1105,12 +1111,6 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-google-vrview-image',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.MISC,
-  },
-  {
-    name: 'amp-viewer-assistance',
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.MISC,

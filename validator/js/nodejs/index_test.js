@@ -66,8 +66,10 @@ it('built validator rejects the empty file', function(done) {
 
 it('accepts the minimum valid AMP file', function(done) {
   // Note: This will use the validator that was built with build.py.
-  const mini = fs.readFileSync(
-      '../../testdata/feature_tests/minimum_valid_amp.html', 'utf-8').trim();
+  const mini =
+      fs.readFileSync(
+          '../../testdata/feature_tests/minimum_valid_amp.html', 'utf-8')
+        .trim();
   ampValidator.getInstance(/*validatorJs*/ '../../dist/validator_minified.js')
       .then(function(instance) {
         const validationResult = instance.validateString(mini);
@@ -83,9 +85,11 @@ it('accepts the minimum valid AMP file', function(done) {
 
 it('accepts the minimum valid AMP4ADS file', function(done) {
   // Note: This will use the validator that was built with build.py.
-  const mini = fs.readFileSync(
-      '../../testdata/amp4ads_feature_tests/min_valid_amp4ads.html', 'utf-8')
-      .trim();
+  const mini =
+      fs.readFileSync(
+          '../../testdata/amp4ads_feature_tests/min_valid_amp4ads.html',
+          'utf-8')
+        .trim();
   ampValidator.getInstance(/*validatorJs*/ '../../dist/validator_minified.js')
       .then(function(instance) {
         const validationResult = instance.validateString(mini, 'AMP4ADS');
@@ -112,13 +116,15 @@ function isErrorLine(line) {
 it('rejects a specific file that is known to have errors', function(done) {
   // Note: This will use the validator that was built with build.py.
   const severalErrorsHtml =
-      fs.readFileSync('../../testdata/feature_tests/several_errors.html', 'utf-8')
-          .trim();
+      fs.readFileSync(
+          '../../testdata/feature_tests/several_errors.html', 'utf-8')
+        .trim();
   const severalErrorsOut =
-      fs.readFileSync('../../testdata/feature_tests/several_errors.out', 'utf-8')
-          .split('\n')
-          .filter(isErrorLine)
-          .join('\n');
+      fs.readFileSync(
+          '../../testdata/feature_tests/several_errors.out', 'utf-8')
+        .split('\n')
+        .filter(isErrorLine)
+        .join('\n');
 
   ampValidator.getInstance(/*validatorJs*/ '../../dist/validator_minified.js')
       .then(function(instance) {
@@ -163,8 +169,10 @@ it('handles syntax errors in validator file', function(done) {
 });
 
 it('also works with newInstance', function() {
-  const mini = fs.readFileSync(
-      '../../testdata/feature_tests/minimum_valid_amp.html', 'utf-8').trim();
+  const mini =
+      fs.readFileSync(
+          '../../testdata/feature_tests/minimum_valid_amp.html', 'utf-8')
+        .trim();
   const validatorJsContents =
       fs.readFileSync('../../dist/validator_minified.js', 'utf-8');
   const resultForMini =
@@ -173,8 +181,9 @@ it('also works with newInstance', function() {
   expect(resultForMini.status).toBe('PASS');
 
   const severalErrorsHtml =
-      fs.readFileSync('../../testdata/feature_tests/several_errors.html', 'utf-8')
-          .trim();
+      fs.readFileSync(
+          '../../testdata/feature_tests/several_errors.html', 'utf-8')
+         .trim();
   const resultForSeveralErrors = ampValidator.newInstance(validatorJsContents)
       .validateString(severalErrorsHtml);
 
@@ -183,20 +192,22 @@ it('also works with newInstance', function() {
 
 it('emits text if --format=text is specified on command line', function(done) {
   const severalErrorsOut =
-      fs.readFileSync('../../testdata/feature_tests/several_errors.out', 'utf-8')
-          .split('\n')
-          .filter(isErrorLine)
-          .splice(1) // trim 1st line
-          .join('\n');
+      fs.readFileSync(
+          '../../testdata/feature_tests/several_errors.out', 'utf-8')
+        .split('\n')
+        .filter(isErrorLine)
+        .splice(1)  // trim 1st line
+        .join('\n');
   execFile(
       process.execPath,
       [
-        '../js/nodejs/cli.js', '--format=text',
+        '../js/nodejs/cli.js',
+        '--format=text',
         '--validator_js=../dist/validator_minified.js',
         'feature_tests/several_errors.html',
         'feature_tests/minimum_valid_amp.html',
       ],
-      {'cwd': '../../testdata'}, // Run inside the testdata dir to match paths.
+      {'cwd': '../../testdata'},  // Run inside the testdata dir to match paths.
       function(error, stdout, stderr) {
         expect(error).toBeDefined(); // At least one file had errors.
         expect(stderr).toBe(severalErrorsOut);
@@ -209,12 +220,13 @@ it('emits json if --format=json is specified on command line', function(done) {
   execFile(
       process.execPath,
       [
-        '../js/nodejs/cli.js', '--format=json',
+        '../js/nodejs/cli.js',
+        '--format=json',
         '--validator_js=../dist/validator_minified.js',
         'feature_tests/several_errors.html',
         'feature_tests/minimum_valid_amp.html',
       ],
-      {'cwd': '../../testdata'}, // Run inside the testdata dir to match paths.
+      {'cwd': '../../testdata'},  // Run inside the testdata dir to match paths.
       function(error, stdout, stderr) {
         expect(error).toBeDefined(); // At least one file had errors
         expect(stderr).toBe(''); // entire json results will be on stdout
@@ -240,21 +252,23 @@ it('emits json if --format=json is specified on command line', function(done) {
 it('supports AMP4ADS with --html_format command line option', function(done) {
   const severalErrorsOut =
       fs.readFileSync(
-          '../../testdata/amp4ads_feature_tests/style-amp-custom.out',
-          'utf-8')
+            '../../testdata/amp4ads_feature_tests/style-amp-custom.out',
+            'utf-8')
           .split('\n')
           .filter(isErrorLine)
-          .splice(1) // trim 1st line
+          .splice(1)  // trim 1st line
           .join('\n');
   execFile(
       process.execPath,
       [
-        '../js/nodejs/cli.js', '--format=text', '--html_format=AMP4ADS',
+        '../js/nodejs/cli.js',
+        '--format=text',
+        '--html_format=AMP4ADS',
         '--validator_js=../dist/validator_minified.js',
         'amp4ads_feature_tests/style-amp-custom.html',
         'amp4ads_feature_tests/min_valid_amp4ads.html',
       ],
-      {'cwd': '../../testdata'}, // Run inside the testdata dir to match paths.
+      {'cwd': '../../testdata'},  // Run inside the testdata dir to match paths.
       function(error, stdout, stderr) {
         expect(error).toBeDefined(); // At least one file had errors.
         expect(stderr).toBe(severalErrorsOut);

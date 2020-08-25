@@ -43,6 +43,7 @@ export const MessageType = {
   NO_CONTENT: 'no-content',
   GET_HTML: 'get-html',
   GET_CONSENT_STATE: 'get-consent-state',
+  SIGNAL_INTERACTIVE: 'signal-interactive',
 
   // For the frame to be placed in full overlay mode for lightboxes
   FULL_OVERLAY_FRAME: 'full-overlay-frame',

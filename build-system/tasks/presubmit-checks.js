@@ -71,7 +71,7 @@ const forbiddenTerms = {
       'extensions/amp-pinterest/0.1/follow-button.js',
       'extensions/amp-pinterest/0.1/pin-widget.js',
       'extensions/amp-pinterest/0.1/save-button.js',
-      'validator/engine/validator_test.js',
+      'validator/js/engine/validator_test.js',
     ],
   },
   '(^i-amp-|\\Wi-amp-)': {
@@ -142,9 +142,9 @@ const forbiddenTerms = {
       'build-system/tasks/prettify.js',
       'build-system/tasks/server-tests.js',
       'src/purifier/noop.js',
-      'validator/engine/parse-css.js',
-      'validator/engine/validator-in-browser.js',
-      'validator/engine/validator.js',
+      'validator/js/engine/parse-css.js',
+      'validator/js/engine/validator-in-browser.js',
+      'validator/js/engine/validator.js',
       'validator/js/nodejs/index.js', // NodeJs only.
     ],
     checkInTestFolder: true,
@@ -191,7 +191,6 @@ const forbiddenTerms = {
       'src/service/action-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-form/0.1/amp-form.js',
-      'extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.js',
     ],
   },
   'installActivityService': {
@@ -451,7 +450,6 @@ const forbiddenTerms = {
       'src/service/cid-impl.js',
       'src/impression.js',
       'src/ssr-template-helper.js',
-      'extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.js',
     ],
   },
   'prerenderSafe': {
@@ -757,13 +755,13 @@ const forbiddenTerms = {
       'test/_init_tests.js',
       'test/e2e/test-controller-promise.js',
       'test/e2e/test-expect.js',
-      'validator/engine/amp4ads-parse-css_test.js',
-      'validator/engine/htmlparser_test.js',
-      'validator/engine/keyframes-parse-css_test.js',
-      'validator/engine/parse-css_test.js',
-      'validator/engine/parse-srcset_test.js',
-      'validator/engine/parse-url_test.js',
-      'validator/engine/validator_test.js',
+      'validator/js/engine/amp4ads-parse-css_test.js',
+      'validator/js/engine/htmlparser_test.js',
+      'validator/js/engine/keyframes-parse-css_test.js',
+      'validator/js/engine/parse-css_test.js',
+      'validator/js/engine/parse-srcset_test.js',
+      'validator/js/engine/parse-url_test.js',
+      'validator/js/engine/validator_test.js',
       'validator/js/gulpjs/test/validate.js',
       // Test files. TODO(#24144): Fix these and remove from the allowlist.
       'ads/google/a4a/shared/test/test-content-recommendation.js',
@@ -1010,8 +1008,8 @@ const forbiddenTermsSrcInclusive = {
       '3p/integration.js',
       'dist.3p/current/integration.js',
       'examples/pwa/pwa.js',
-      'validator/engine/parse-url.js',
-      'validator/engine/validator.js',
+      'validator/js/engine/parse-url.js',
+      'validator/js/engine/validator.js',
       'validator/js/webui/webui.js',
       'extensions/amp-pinterest/0.1/util.js',
       'src/url.js',
@@ -1064,6 +1062,7 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js', // eslint-disable-line max-len
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js', // eslint-disable-line max-len
       'extensions/amp-lightbox-gallery/0.1/amp-lightbox-gallery.js',
+      'extensions/amp-animation/0.1/install-polyfill.js',
     ],
   },
   'loadElementClass': {
@@ -1174,8 +1173,8 @@ const forbiddenTermsSrcInclusive = {
       'testing/local-amp-chrome-extension/background.js',
       'tools/errortracker/errortracker.go',
       'tools/experiments/experiments.js',
-      'validator/engine/validator-in-browser.js',
-      'validator/engine/validator.js',
+      'validator/js/engine/validator-in-browser.js',
+      'validator/js/engine/validator.js',
       'validator/js/nodejs/index.js',
       'validator/js/webui/serve-standalone.go',
     ],
@@ -1197,7 +1196,7 @@ const forbiddenTermsSrcInclusive = {
   },
   '\\.trim(Left|Right)\\(\\)': {
     message: 'Unsupported on IE; use trim() or a helper instead.',
-    allowlist: ['validator/engine/validator.js'],
+    allowlist: ['validator/js/engine/validator.js'],
   },
   "process\\.env(\\.TRAVIS|\\[\\'TRAVIS)": {
     message:
