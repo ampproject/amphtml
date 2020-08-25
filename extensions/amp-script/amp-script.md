@@ -121,7 +121,7 @@ Under the hood, `amp-script` uses [@ampproject/worker-dom](https://github.com/am
 
 DOM elements and their properties are generally supported, with a few limits. For example, your code can't add a new `<script>` or `<style>` tag to the DOM.
 
-`amp-script` recreates many commonly used DOM APIs and makes them available to your code. This "hello world" example uses `getElementByID()`, `addEventListener()`, `createElement()`, `textContent`, and `appendChild()`:
+`amp-script` recreates many commonly used DOM APIs and makes them available to your code. This "hello world" example uses `getElementById()`, `addEventListener()`, `createElement()`, `textContent`, and `appendChild()`:
 
 ```js
 const button = document.getElementById('textarea');
@@ -152,7 +152,7 @@ For a complete list of supported DOM APIs, see the [API compatibility table](htt
 `amp-script` does not support the entire DOM API or Web API, as this would make `amp-script`'s own JavaScript too large and slow. If there's an API you'd like to see supported, please [file an issue](https://github.com/ampproject/amphtml/issues/new) or [suggest and contribute the change yourself](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md).
 
 [tip type="default"]
-For a set of samples showing `amp-script` in use, [see here](/documentation/examples/components/amp-script/).
+For a set of samples showing `amp-script` in use, [see here](https://amp.dev/documentation/examples/components/amp-script/).
 [/tip]
 
 ### Frameworks and libraries
@@ -169,7 +169,7 @@ You can use `amp-script` to add an `amp-img` or `amp-layout` component to the DO
 
 If you invoke `AMP.setState()` from `amp-script` after a user gesture, bindings can cause mutations to the DOM. Otherwise, state will be set, but binding will not occur (similar to [`amp-state` initialization](https://amp.dev/documentation/examples/components/amp-bind/?referrer=ampbyexample.com#initializing-state)). For more information, see [the section on user gestures](#user-gestures).
 
- `AMP.setState()` is synchronous. It works as described in the [`<amp-bind>` documentation](https://amp.dev/documentation/components/amp-bind/#updating-state-variables-with-amp.setstate()), merging an object literal into the specified state. This example shows how it can affect the DOM:
+ `AMP.setState()` works as described in the [`<amp-bind>` documentation](https://amp.dev/documentation/components/amp-bind/#updating-state-variables-with-amp.setstate()), merging an object literal into the specified state. This example shows how it can affect the DOM:
 
 ```html
 <script id="myscript" type="text/plain" target="amp-script">
@@ -231,7 +231,7 @@ Note that if something else changes the DOM inside your `<amp-script>`, that cha
 
 ### Retrieving data for `<amp-list>`
 
-You may export a function to act as the data source for an [`<amp-list>`](/documentation/components/amp-list/).
+You may export a function to act as the data source for an [`<amp-list>`](https://amp.dev/documentation/components/amp-list/).
 The exported function must return either JSON, or a Promise that resolves with JSON.
 
 The export API is available on the global scope and has the following signature:
@@ -248,14 +248,14 @@ function exportFunction(name, function) {}
 
 In order to maintain AMP's guarantees of performance and layout stability, `amp-script` imposes some restrictions.
 
-### Size of JavaScript code <a name="size-of-javascript-code"></a>
+### Size of JavaScript code
 
 `amp-script` has standards for the size of code:
 
 - Each inline script can contain up to 10,000 bytes
 - The scripts on a page can contain a total of up to 150,000 bytes
 
-### User gestures <a name="user-gestures"></a>
+### User gestures
 
 In some cases, `amp-script` will not apply DOM changes triggered by your JavaScript code unless the code was triggered by a user gesture - say, a button tap. This helps keep [content layout shift](https://web.dev/cls/) from causing a poor user experience.
 
@@ -300,7 +300,7 @@ DOM changes are permitted as follows:
 [See here](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/#layout) for more information about AMP's layout system.
 [/tip]
 
-## Calculating the script hash <a name="script-hash"></a>
+## Calculating the script hash
 
 Since custom JS run in `amp-script` is not subject to normal [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP), you need to add a script hash:
 
@@ -439,6 +439,10 @@ For local scripts and cross-origin scripts, you need to add a [script hash](#scr
 
 Again, you need the [script hash](#script-hash). Simply copy the value in this error into your `<meta>` tag.
 
+**JavaScript size and script hash requirements are disabled in development mode.**
+
+If your `<amp-script>` includes the `data-ampdevmode` attribute, AMP won't check your [script hash](#script-hash) or the size of your code.
+
 **Blocked (...) attempts to modify (...)**
 
 To avoid undesirable content layout shift, `amp-script` disallows DOM mutations under certain conditions. See [User gestures](#user-gestures) above.
@@ -453,7 +457,7 @@ If you modify a state variable in a variable-sized container before a user inter
 
 **Form elements (...) cannot be mutated unless your `<amp-script>` includes the attribute sandbox="allow-forms".**
 
-This attribute is required for security. 
+This attribute is required for security. See [common attributes](#common-attributes) above.
 
 **Sanitized node: (...)**
 
