@@ -52,7 +52,7 @@ if (self.document) {
   }
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
-  if(!IS_SXG){
+  if (!IS_SXG) {
     installCustomElements(self, class {});
     installIntersectionObserver(self);
   }
