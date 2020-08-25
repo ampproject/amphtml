@@ -47,7 +47,7 @@ const buildActivateButtonTemplate = (element) => {
   const html = htmlFor(element);
   return html`
     <button class="i-amphtml-story-360-activate-button" role="button">
-      <span class="activate-text"></span>
+      <span class="i-amphtml-story-360-activate-text"></span>
       <span class="i-amphtml-story-360-activate-button-icon"
         >360°
         <svg
@@ -59,26 +59,24 @@ const buildActivateButtonTemplate = (element) => {
           fill="none"
         >
           <defs>
-            <linearGradient id="gradient">
+            <linearGradient id="i-amphtml-story-360-activate-gradient">
               <stop stop-color="white" stop-opacity=".3"></stop>
               <stop offset="1" stop-color="white"></stop>
             </linearGradient>
+            <ellipse
+              id="i-amphtml-story-360-activate-ellipse"
+              ry="11.5"
+              rx="7.5"
+              cy="12"
+              cx="12"
+              stroke="url(#i-amphtml-story-360-activate-gradient)"
+            ></ellipse>
           </defs>
-          <ellipse
-            ry="11.5"
-            rx="7.5"
-            cy="12"
-            cx="12"
-            stroke="url(#gradient)"
-          ></ellipse>
-          <ellipse
-            ry="11.5"
-            rx="7.5"
-            cy="12"
-            cx="12"
-            stroke="url(#gradient)"
+          <use xlink:href="#i-amphtml-story-360-activate-ellipse" />
+          <use
+            xlink:href="#i-amphtml-story-360-activate-ellipse"
             transform="rotate(90, 12, 12)"
-          ></ellipse>
+          />
         </svg>
       </span>
     </button>
@@ -339,19 +337,19 @@ export class AmpStory360 extends AMP.BaseElement {
     this.gyroscopeControls_ = true;
     this.togglePermissionClass_(true);
 
-    this.win.addEventListener('deviceorientation', (e) => {
-      if (this.isReady_ && this.isPlaying_) {
-        this.onDeviceOrientation_(e);
-      }
-      this.timer_.cancel(checkNoMotion);
-    });
-
     const checkNoMotion = this.timer_.delay(() => {
       this.gyroscopeControls_ = false;
       if (this.isReady_ && this.isPlaying_) {
         this.animate_();
       }
     }, 1000);
+
+    this.win.addEventListener('deviceorientation', (e) => {
+      if (this.isReady_ && this.isPlaying_) {
+        this.onDeviceOrientation_(e);
+      }
+      this.timer_.cancel(checkNoMotion);
+    });
   }
 
   /**
@@ -405,7 +403,7 @@ export class AmpStory360 extends AMP.BaseElement {
     const activateButton = buildActivateButtonTemplate(this.element);
 
     activateButton.querySelector(
-      '.activate-text'
+      '.i-amphtml-story-360-activate-text'
     ).textContent = this.localizationService_.getLocalizedString(
       LocalizedStringId.AMP_STORY_ACTIVATE_BUTTON_TEXT
     );
