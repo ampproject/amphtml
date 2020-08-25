@@ -219,7 +219,7 @@ export class AmpStory360 extends AMP.BaseElement {
   }
 
   /**
-   * Checks if the images natural size is larger than the GPUs max texture size.
+   * Checks if the image is larger than the GPUs max texture size.
    * Scales the image down if neededed.
    * Returns the image element if image is within bounds.
    * If image is out of bounds, returns a scaled canvas element.
