@@ -475,6 +475,45 @@ describe('Validator.DocSizeAmpEmail', () => {
   });
 });
 
+describe('Validator.ScriptLength', () => {
+  if (process.env['UPDATE_VALIDATOR_TEST'] === '1') {
+    return;
+  }
+  // This string is 10 bytes of inline script.
+  const inlineScriptBlob = 'alert(\'\');';
+  assertStrictEqual(10, inlineScriptBlob.length);
+
+  it('accepts 10000 bytes of inline style',
+     () => {
+       const inlineScript = Array(1001).join(inlineScriptBlob);
+       assertStrictEqual(10000, inlineScript.length);
+       const test = new ValidatorTestCase('feature_tests/inline_script_length.html');
+       test.inlineOutput = false;
+       test.ampHtmlFileContents =
+           test.ampHtmlFileContents
+               .replace('replace_inline_script', inlineScript);
+       test.expectedOutput = 'PASS';
+       test.run();
+     });
+
+  it('will not accept 10010 bytes in inline script',
+     () => {
+       const inlineScript = Array(1001).join(inlineScriptBlob) + ' ';
+       assertStrictEqual(10001, inlineScript.length);
+       const test = new ValidatorTestCase('feature_tests/inline_script_length.html');
+       test.inlineOutput = false;
+       test.ampHtmlFileContents =
+           test.ampHtmlFileContents
+               .replace('replace_inline_script', inlineScript);
+       test.expectedOutputFile = null;
+       test.expectedOutput = 'FAIL\n' +
+           'feature_tests/inline_script_length.html:35:2 The inline script ' +
+           'is 10001 bytes, which exceeds the limit of 10000 bytes. ' +
+           '(see https://amp.dev/documentation/components/amp-script/#faq)';
+       test.run();
+     });
+});
+
 describe('Validator.CssLength', () => {
   if (process.env['UPDATE_VALIDATOR_TEST'] === '1') {
     return;
