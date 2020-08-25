@@ -509,8 +509,31 @@ TEST(Utf8UtilTest, RoundTripsAndLengths) {
   EXPECT_EQ(10, amped_codes.size());
   EXPECT_EQ(amped,
             htmlparser::Strings::CodepointsToUtf8String(amped_codes));
-  std::string three_bytes_seq_second_byte_zero = "›";
+
+  // Checks multi-byte sequences where one of the byte is 0x80.
+  // 0x80 is a special value in multi bytes sequence. In a multi byte sequence
+  // only the last 6 bits are computed. The first two bits are always 0b10.
+  // So if any byte in sequence is null value, its encoded value is 0x80 that
+  // is 010xxxxxx where all x are zero. So 0b10000000 = 128 = 0x80.
+  // Following tests ensures util decodes 0x80 byte correctly and do not treat
+  // the decoded 0th value as null byte.
+  //
+  // Second byte 0x80 in a two byte sequence.
+  std::string two_bytes_seq_second_byte_zero = "Ā";   // \xc4\x80
   auto decoded_bytes = htmlparser::Strings::DecodeUtf8Symbol(
+      two_bytes_seq_second_byte_zero);
+  EXPECT_TRUE(decoded_bytes.has_value());
+  // First byte 0xc4;
+  // 0bxxxxxxxx000000000000000000000000
+  EXPECT_EQ(0xc4, (*decoded_bytes >> 6) | 0xc0);
+  // Second byte 0x80;
+  EXPECT_EQ(0x80, (*decoded_bytes & 0x3f) | 0x80);
+  // Encode the bytes again.
+  EXPECT_EQ("Ā", htmlparser::Strings::EncodeUtf8Symbol(*decoded_bytes).value());
+
+  // Second byte 0x80 in a three byte sequence.
+  std::string three_bytes_seq_second_byte_zero = "›";
+  decoded_bytes = htmlparser::Strings::DecodeUtf8Symbol(
       three_bytes_seq_second_byte_zero);
   EXPECT_TRUE(decoded_bytes.has_value());
   // First byte 0xe2;
@@ -525,6 +548,66 @@ TEST(Utf8UtilTest, RoundTripsAndLengths) {
   // Fourth byte is zero for three bytes sequence.
   // 0b000000000000000000000000xxxxxxxx
   EXPECT_EQ(0x00, *decoded_bytes & 0xffff0000);
-  // TODO(amaltas): In follow up change add test cases for byte sequences in
-  // which middle bytes are 0x80 which is zero decoded value.
+  // Encode the bytes again.
+  EXPECT_EQ("›", htmlparser::Strings::EncodeUtf8Symbol(*decoded_bytes).value());
+
+  // Third byte 0x80 in a four byte sequence.
+  std::string four_bytes_seq_third_byte_zero = "𒀢";  // \xf0\x92\x80\xa2
+  decoded_bytes = htmlparser::Strings::DecodeUtf8Symbol(
+      four_bytes_seq_third_byte_zero);
+  EXPECT_TRUE(decoded_bytes.has_value());
+  // First byte 0xf0;
+  // 0bxxxxxxxx000000000000000000000000
+  EXPECT_EQ(0xf0, (*decoded_bytes >> 18) | 0xf0);
+  // Second byte 0x92;
+  // 0b00000000xxxxxxxx0000000000000000
+  EXPECT_EQ(0x92, ((*decoded_bytes >> 12) & 0x3f) | 0x80);
+  // Third byte 0xba;
+  // 0b0000000000000000xxxxxxxx00000000
+  EXPECT_EQ(0x80, ((*decoded_bytes >> 6) & 0x3f) | 0x80);
+  // Fourth byte 0xa2;
+  // 0b000000000000000000000000xxxxxxxx
+  EXPECT_EQ(0xa2, (*decoded_bytes & 0x3f) | 0x80);
+  // Encode the bytes again.
+  EXPECT_EQ("𒀢", htmlparser::Strings::EncodeUtf8Symbol(*decoded_bytes).value());
+
+  // Last two decoded bytes are 0x80.
+  std::string four_bytes_seqlast_two_zero = "𒀀";  // \xf0\x92\x80\x80
+  decoded_bytes = htmlparser::Strings::DecodeUtf8Symbol(
+      four_bytes_seqlast_two_zero);
+  EXPECT_TRUE(decoded_bytes.has_value());
+  // First byte 0xf0;
+  // 0bxxxxxxxx000000000000000000000000
+  EXPECT_EQ(0xf0, (*decoded_bytes >> 18) | 0xf0);
+  // Second byte 0x92;
+  // 0b00000000xxxxxxxx0000000000000000
+  EXPECT_EQ(0x92, ((*decoded_bytes >> 12) & 0x3f) | 0x80);
+  // Third byte 0xba;
+  // 0b0000000000000000xxxxxxxx00000000
+  EXPECT_EQ(0x80, ((*decoded_bytes >> 6) & 0x3f) | 0x80);
+  // Fourth byte 0x80;
+  // 0b000000000000000000000000xxxxxxxx
+  EXPECT_EQ(0x80, (*decoded_bytes & 0x3f) | 0x80);
+  // Encode the bytes again.
+  EXPECT_EQ("𒀀", htmlparser::Strings::EncodeUtf8Symbol(*decoded_bytes).value());
+
+  // Last byte is 0x80.
+  std::string four_bytes_seq_last_zero = "𒁀";  // \xf0\x92\x81\x80
+  decoded_bytes = htmlparser::Strings::DecodeUtf8Symbol(
+      four_bytes_seq_last_zero);
+  EXPECT_TRUE(decoded_bytes.has_value());
+  // First byte 0xf0;
+  // 0bxxxxxxxx000000000000000000000000
+  EXPECT_EQ(0xf0, (*decoded_bytes >> 18) | 0xf0);
+  // Second byte 0x92;
+  // 0b00000000xxxxxxxx0000000000000000
+  EXPECT_EQ(0x92, ((*decoded_bytes >> 12) & 0x3f) | 0x80);
+  // Third byte 0x81;
+  // 0b0000000000000000xxxxxxxx00000000
+  EXPECT_EQ(0x81, ((*decoded_bytes >> 6) & 0x3f) | 0x80);
+  // Fourth byte 0x80;
+  // 0b000000000000000000000000xxxxxxxx
+  EXPECT_EQ(0x80, (*decoded_bytes & 0x3f) | 0x80);
+  // Encode the bytes again.
+  EXPECT_EQ("𒁀", htmlparser::Strings::EncodeUtf8Symbol(*decoded_bytes).value());
 }
