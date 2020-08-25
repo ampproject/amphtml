@@ -586,6 +586,7 @@ descendant_tag_list: {
   tag: "HKERN"
   tag: "HR"
   tag: "I"
+  tag: "IMG"  # Only allowed when document is transformed AMP
   tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
   tag: "IMAGE"
   tag: "INS"
@@ -720,6 +721,7 @@ descendant_tag_list: {
   tag: "HR"
   tag: "I"
   tag: "IMAGE"
+  tag: "IMG"  # Only allowed when document is transformed AMP
   tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
   tag: "INS"
   tag: "KBD"
@@ -995,6 +997,7 @@ descendant_tag_list {
   tag: "HR"
   tag: "I"
   tag: "IMAGE"
+  tag: "IMG"  # Only allowed when document is transformed AMP
   tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
   tag: "INS"
   tag: "KBD"

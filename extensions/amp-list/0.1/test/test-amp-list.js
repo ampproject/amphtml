@@ -167,7 +167,7 @@ describes.repeated(
           // Mock the actual network request.
           listMock
             .expects('fetch_')
-            .withExactArgs(!!opts.refresh, /* token */ undefined)
+            .withExactArgs(!!opts.refresh)
             .returns(Promise.resolve(fetched))
             .atLeast(1);
 
@@ -1200,44 +1200,6 @@ describes.repeated(
               expect(element.getAttribute('src')).to.equal('');
             });
           });
-
-          it(
-            "should fetch with viewer auth token if 'crossorigin=" +
-              "amp-viewer-auth-token-via-post' attribute is present",
-            () => {
-              env.sandbox
-                .stub(Services, 'viewerAssistanceForDocOrNull')
-                .returns(
-                  Promise.resolve({
-                    getIdTokenPromise: () => Promise.resolve('idToken'),
-                  })
-                );
-              element.setAttribute(
-                'crossorigin',
-                'amp-viewer-auth-token-via-post'
-              );
-              const fetched = {items: DEFAULT_ITEMS};
-              const foo = doc.createElement('div');
-              const rendered = [foo];
-              const opts = DEFAULT_LIST_OPTS;
-
-              listMock
-                .expects('fetch_')
-                .withExactArgs(!!opts.refresh, 'idToken')
-                .returns(Promise.resolve(fetched))
-                .atLeast(1);
-
-              // Stub the rendering of the template.
-              const itemsToRender = fetched[opts.expr];
-              ssrTemplateHelper.applySsrOrCsrTemplate
-                .withArgs(element, itemsToRender)
-                .returns(Promise.resolve(rendered));
-
-              expectRender();
-
-              return list.layoutCallback().then(() => Promise.resolve());
-            }
-          );
 
           it('should reset if `reset-on-refresh` is set (new URL)', () => {
             element.setAttribute('reset-on-refresh', '');

@@ -29,6 +29,9 @@
   <style amp-custom>
     /* These declarations don't all make sense, this tests their validity, not the CSS itself. */
     a {
+      -moz-appearance: foo;
+      -webkit-appearance: foo;
+      -webkit-tap-highlight-color: foo;
       align-content: foo;
       align-items: foo;
       align-self: foo;
@@ -43,6 +46,8 @@
       animation-play-state: foo;
       animation-timing-function: foo;
       animation: foo;
+      appearance: foo;
+      azimuth: foo;
       backface-visibility: foo;
       background-attachment: foo;
       background-blend-mode: foo;
@@ -101,6 +106,7 @@
       clip-path: foo;
       clip-rule: foo;
       clip: foo;
+      color-adjust: foo;
       color-interpolation-filters: foo;
       color-interpolation: foo;
       color-profile: foo;
@@ -123,6 +129,7 @@
       direction: foo;
       display: foo;
       dominant-baseline: foo;
+      elevation: foo;
       empty-cells: foo;
       enable-background: foo;
       fill-opacity: foo;
@@ -155,8 +162,10 @@
       font-variant-numeric: foo;
       font-variant-position: foo;
       font-variant: foo;
+      font-variation-settings: foo;
       font-weight: foo;
       font: foo;
+      gap: foo;
       glyph-orientation-horizontal: foo;
       glyph-orientation-vertical: foo;
       grid-area: foo;
@@ -180,9 +189,14 @@
       hanging-punctuation: foo;
       height: foo;
       hyphens: foo;
+      image-orientation: foo;
       image-rendering: foo;
+      image-resolution: foo;
+      inline-size: foo;
       isolation: foo;
       justify-content: foo;
+      justify-items: foo;
+      justify-self: foo;
       kerning: foo;
       left: foo;
       letter-spacing: foo;
@@ -210,6 +224,7 @@
       mix-blend-mode: foo;
       object-fit: foo;
       object-position: foo;
+      offset-distance: foo;
       opacity: foo;
       order: foo;
       orphans: foo;
@@ -230,17 +245,31 @@
       page-break-after: foo;
       page-break-before: foo;
       page-break-inside: foo;
+      pause: foo;
+      pause-after: foo;
+      pause-before: foo;
       perspective-origin: foo;
       perspective: foo;
+      pitch: foo;
+      pitch-range: foo;
+      place-items: foo;
       pointer-events: foo;
       /* position has special rules. Don't use `foo` */
       position: initial;
       quotes: foo;
       resize: foo;
+      richness: foo;
       right: foo;
+      row-gap: foo;
       shape-rendering: foo;
+      speak-header: foo;
+      speak-numeral: foo;
+      speak-punctuation: foo;
+      speak: foo;
+      speech-rate: foo;
       stop-color: foo;
       stop-opacity: foo;
+      stress: foo;
       stroke-dasharray: foo;
       stroke-dashoffset: foo;
       stroke-linecap: foo;
@@ -258,8 +287,13 @@
       text-decoration-color: foo;
       text-decoration-line: foo;
       text-decoration-skip-ink: foo;
+      text-decoration-skip: foo;
       text-decoration-style: foo;
       text-decoration: foo;
+      text-emphasis-color: foo;
+      text-emphasis-position: foo;
+      text-emphasis-style: foo;
+      text-emphasis: foo;
       text-fill-color: foo;
       text-indent: foo;
       text-justify: foo;
@@ -273,6 +307,7 @@
       text-transform: foo;
       text-underline-position: foo;
       top: foo;
+      transform-box: foo;
       transform-origin: foo;
       transform-style: foo;
       transform: foo;
@@ -285,6 +320,7 @@
       user-select: foo;
       vertical-align: foo;
       visibility: foo;
+      voice-family: foo;
       white-space: foo;
       widows: foo;
       width: foo;
@@ -293,19 +329,21 @@
       word-wrap: foo;
       writing-mode: foo;
       z-index: foo;
+      z-index: auto;
+      z-index: -1;
     }
     madeupdecls {
       amplitude: foo;
       barometric-pressure: foo;
       degrees-celsius: foo;
     }
-    vendorprefix {
-      -webkit-user-select: foo;
-    }
   </style>
 </head>
 <body>
 <!-- Test these declaration's validity inside inline style attributes: -->
+<b style="-moz-appearance: foo;"></b>
+<b style="-webkit-appearance: foo;"></b>
+<b style="-webkit-tap-highlight-color: foo;"></b>
 <b style='align-content: foo'></b>
 <b style='align-items: foo'></b>
 <b style='align-self: foo'></b>
@@ -320,6 +358,8 @@
 <b style='animation-play-state: foo'></b>
 <b style='animation-timing-function: foo'></b>
 <b style='animation: foo'></b>
+<b style='appearance: foo'></b>
+<b style='azimuth: foo'></b>
 <b style='backface-visibility: foo'></b>
 <b style='background-attachment: foo'></b>
 <b style='background-blend-mode: foo'></b>
@@ -378,6 +418,7 @@
 <b style='clip-path: foo'></b>
 <b style='clip-rule: foo'></b>
 <b style='clip: foo'></b>
+<b style='color-adjust: foo'></b>
 <b style='color-interpolation-filters: foo'></b>
 <b style='color-interpolation: foo'></b>
 <b style='color-profile: foo'></b>
@@ -396,15 +437,18 @@
 <b style='content: foo'></b>
 <b style='counter-increment: foo'></b>
 <b style='counter-reset: foo'></b>
+<b style='cursor: initial'></b>
 <b style='cursor: foo'></b>
 <b style='direction: foo'></b>
 <b style='display: foo'></b>
 <b style='dominant-baseline: foo'></b>
+<b style='elevation: foo'></b>
 <b style='empty-cells: foo'></b>
 <b style='enable-background: foo'></b>
 <b style='fill-opacity: foo'></b>
 <b style='fill-rule: foo'></b>
 <b style='fill: foo'></b>
+<b style='filter: blur(5px)'></b>
 <b style='filter: foo'></b>
 <b style='flex-basis: foo'></b>
 <b style='flex-direction: foo'></b>
@@ -432,6 +476,7 @@
 <b style='font-variant-numeric: foo'></b>
 <b style='font-variant-position: foo'></b>
 <b style='font-variant: foo'></b>
+<b style='font-variation-settings: foo'></b>
 <b style='font-weight: foo'></b>
 <b style='font: foo'></b>
 <b style='glyph-orientation-horizontal: foo'></b>
@@ -457,9 +502,14 @@
 <b style='hanging-punctuation: foo'></b>
 <b style='height: foo'></b>
 <b style='hyphens: foo'></b>
+<b style='image-orientation: foo'></b>
 <b style='image-rendering: foo'></b>
+<b style='image-resolution: foo'></b>
+<b style='inline-size: foo'></b>
 <b style='isolation: foo'></b>
 <b style='justify-content: foo'></b>
+<b style='justify-items: foo'></b>
+<b style='justify-self: foo'></b>
 <b style='kerning: foo'></b>
 <b style='left: foo'></b>
 <b style='letter-spacing: foo'></b>
@@ -487,6 +537,7 @@
 <b style='mix-blend-mode: foo'></b>
 <b style='object-fit: foo'></b>
 <b style='object-position: foo'></b>
+<b style='offset-distance: foo'></b>
 <b style='opacity: foo'></b>
 <b style='order: foo'></b>
 <b style='orphans: foo'></b>
@@ -507,17 +558,31 @@
 <b style='page-break-after: foo'></b>
 <b style='page-break-before: foo'></b>
 <b style='page-break-inside: foo'></b>
+<b style='pause: foo'></b>
+<b style='pause-after: foo'></b>
+<b style='pause-before: foo'></b>
 <b style='perspective-origin: foo'></b>
 <b style='perspective: foo'></b>
+<b style='pitch: foo'></b>
+<b style='pitch-range: foo'></b>
+<b style='place-items: foo'></b>
 <b style='pointer-events: foo'></b>
 <!-- position has special rules. Don't use `foo` -->
 <b style='position: initial'></b>
 <b style='quotes: foo'></b>
 <b style='resize: foo'></b>
+<b style='richness: foo'></b>
 <b style='right: foo'></b>
+<b style='row-gap: foo'></b>
 <b style='shape-rendering: foo'></b>
+<b style='speak-header: foo'></b>
+<b style='speak-numeral: foo'></b>
+<b style='speak-punctuation: foo'></b>
+<b style='speak: foo'></b>
+<b style='speech-rate: foo'></b>
 <b style='stop-color: foo'></b>
 <b style='stop-opacity: foo'></b>
+<b style='stress: foo'></b>
 <b style='stroke-dasharray: foo'></b>
 <b style='stroke-dashoffset: foo'></b>
 <b style='stroke-linecap: foo'></b>
@@ -535,8 +600,13 @@
 <b style='text-decoration-color: foo'></b>
 <b style='text-decoration-line: foo'></b>
 <b style='text-decoration-skip-ink: foo'></b>
+<b style='text-decoration-skip: foo'></b>
 <b style='text-decoration-style: foo'></b>
 <b style='text-decoration: foo'></b>
+<b style='text-emphasis-color: foo'></b>
+<b style='text-emphasis-position: foo'></b>
+<b style='text-emphasis-style: foo'></b>
+<b style='text-emphasis: foo'></b>
 <b style='text-fill-color: foo'></b>
 <b style='text-indent: foo'></b>
 <b style='text-justify: foo'></b>
@@ -550,18 +620,23 @@
 <b style='text-transform: foo'></b>
 <b style='text-underline-position: foo'></b>
 <b style='top: foo'></b>
+<b style='transform-box: foo'></b>
 <b style='transform-origin: foo'></b>
 <b style='transform-style: foo'></b>
 <b style='transform: foo'></b>
 <b style='transition-delay: foo'></b>
 <b style='transition-duration: foo'></b>
 <b style='transition-property: foo'></b>
+<b style='transition-property: opacity, transform'></b>
 <b style='transition-timing-function: foo'></b>
 <b style='transition: foo'></b>
+<b style='transition: opacity 4s ease-in-out 1s;'></b>
 <b style='unicode-bidi: foo'></b>
 <b style='user-select: foo'></b>
 <b style='vertical-align: foo'></b>
 <b style='visibility: foo'></b>
+<b style='visibility: hidden'></b>
+<b style='voice-family: foo'></b>
 <b style='white-space: foo'></b>
 <b style='widows: foo'></b>
 <b style='width: foo'></b>
@@ -570,11 +645,14 @@
 <b style='word-wrap: foo'></b>
 <b style='writing-mode: foo'></b>
 <b style='z-index: foo'></b>
+<b style='z-index: auto'></b>
+<b style='z-index: 0'></b>
+<b style='z-index: +1'></b>
+<b style='z-index: -10'></b>
+<b style='z-index: -1000'></b>
 <!-- Made-up decls -->
 <b style='amplitude: foo'></b>
 <b style='barometric-pressure: foo'></b>
 <b style='degrees-celsius: foo'></b>
-<!-- Vendor Prefix -->
-<b style="-webkit-user-select: foo;"></b>
 </body>
 </html>

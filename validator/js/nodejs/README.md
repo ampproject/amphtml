@@ -4,7 +4,7 @@ This package is published and available at
 https://www.npmjs.com/package/amphtml-validator.
 
 The source code is available at
-https://github.com/ampproject/amphtml/tree/master/validator/nodejs.
+https://github.com/ampproject/amphtml/tree/master/validator/js/nodejs.
 
 ## Command Line Tool
 
@@ -52,6 +52,10 @@ line 1, col 0: The parent tag of tag 'html ⚡ for top-level html' is '$root', b
 As expected, this emits errors because the provided string in the example, `<html>Hello, world.</html>` is not a valid AMP HTML document.
 
 ## Release Notes
+
+### 1.0.33
+
+- Update repository location.
 
 ### 1.0.32
 

@@ -57,3 +57,13 @@ BaseCarouselDef.SlideProps;
  * }}
  */
 BaseCarouselDef.ArrowProps;
+
+/**
+ * @typedef {{
+ *   currentSlide: number,
+ *   setCurrentSlide: (function(number):undefined),
+ *   slideCount: (number|null),
+ *   setSlideCount: (function(number):undefined),
+ * }}
+ */
+BaseCarouselDef.ContextProps;

@@ -2087,28 +2087,62 @@ class InvalidRuleVisitor extends parse_css.RuleVisitor {
 /** @private */
 class InvalidDeclVisitor extends parse_css.RuleVisitor {
   /**
-   * @param {!ParsedDocCssSpec} spec
+   * @param {!ParsedDocCssSpec} cssSpec
    * @param {!Context} context
+   * @param {string} tagDescriptiveName
    * @param {!generated.ValidationResult} result
    */
-  constructor(spec, context, result) {
+  constructor(cssSpec, context, tagDescriptiveName, result) {
     super();
     /** @type {!ParsedDocCssSpec} */
-    this.spec = spec;
+    this.cssSpec = cssSpec;
     /** @type {!Context} */
     this.context = context;
+    /** @type {string} */
+    this.tagDescriptiveName = tagDescriptiveName;
     /** @type {!generated.ValidationResult} */
     this.result = result;
   }
 
   /** @inheritDoc */
   visitDeclaration(declaration) {
-    if (!this.spec.cssDeclarationByName(declaration.name)) {
+    const cssDeclaration = this.cssSpec.cssDeclarationByName(declaration.name);
+    const firstIdent = declaration.firstIdent();
+    const lineCol = new LineCol(declaration.line, declaration.col);
+    if (!cssDeclaration) {
       this.context.addError(
           generated.ValidationError.Code.CSS_SYNTAX_INVALID_PROPERTY_NOLIST,
-          new LineCol(declaration.line, declaration.col),
-          ['style amp-custom', declaration.name], this.spec.spec().specUrl,
-          this.result);
+          lineCol, [this.tagDescriptiveName, declaration.name],
+          this.cssSpec.spec().specUrl, this.result);
+      // Don't emit additional errors for this declaration
+      return;
+    }
+    if (cssDeclaration.valueCasei.length > 0) {
+      let hasValidValue = false;
+      for (const value of cssDeclaration.valueCasei) {
+        if (firstIdent.toLowerCase() == value) {
+          hasValidValue = true;
+          break;
+        }
+      }
+      if (!hasValidValue) {
+        // Declaration value not allowed.
+        this.context.addError(
+            generated.ValidationError.Code.CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+            lineCol, /* params */
+            [this.tagDescriptiveName, declaration.name, firstIdent],
+            this.cssSpec.spec().specUrl, this.result);
+      }
+    } else if (cssDeclaration.valueRegexCasei != null) {
+      const valueRegex = this.context.getRules().getFullMatchCaseiRegex(
+          /** @type {number} */ (cssDeclaration.valueRegexCasei));
+      if (!valueRegex.test(firstIdent)) {
+        this.context.addError(
+            generated.ValidationError.Code.CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+            lineCol, /* params */
+            [this.tagDescriptiveName, declaration.name, firstIdent],
+            this.cssSpec.spec().specUrl, this.result);
+      }
     }
   }
 }
@@ -2294,16 +2328,29 @@ class CdataMatcher {
 
     // Max CDATA Byte Length, specific to this CDATA (not the document limit).
     if (cdataSpec.maxBytes !== -2 && adjustedCdataLength > cdataSpec.maxBytes) {
-      context.addError(
-          generated.ValidationError.Code.STYLESHEET_TOO_LONG,
-          context.getLineCol(),
-          /* params */
-          [
-            getTagDescriptiveName(this.tagSpec_),
-            adjustedCdataLength.toString(),
-            cdataSpec.maxBytes.toString(),
-          ],
-          cdataSpec.maxBytesSpecUrl, validationResult);
+      if (this.tagSpec_.tagName == 'SCRIPT') {
+        context.addError(
+            generated.ValidationError.Code.INLINE_SCRIPT_TOO_LONG,
+            context.getLineCol(),
+            /* params */
+            [
+              adjustedCdataLength.toString(),
+              cdataSpec.maxBytes.toString(),
+            ],
+            cdataSpec.maxBytesSpecUrl, validationResult);
+
+      } else {
+        context.addError(
+            generated.ValidationError.Code.STYLESHEET_TOO_LONG,
+            context.getLineCol(),
+            /* params */
+            [
+              getTagDescriptiveName(this.tagSpec_),
+              adjustedCdataLength.toString(),
+              cdataSpec.maxBytes.toString(),
+            ],
+            cdataSpec.maxBytesSpecUrl, validationResult);
+      }
       return;
     }
 
@@ -2477,11 +2524,10 @@ class CdataMatcher {
       parse_css.extractImportantDeclarations(stylesheet, important);
       for (const decl of important) {
         context.addError(
-            generated.ValidationError.Code.CDATA_VIOLATES_DENYLIST,
+            generated.ValidationError.Code.CSS_SYNTAX_DISALLOWED_IMPORTANT,
             new LineCol(decl.important_line, decl.important_col),
-            /* params */
-            [getTagDescriptiveName(this.tagSpec_), 'CSS !important'],
-            getTagSpecUrl(this.tagSpec_), validationResult);
+            /* params */[], context.getRules().getStylesSpecUrl(),
+            validationResult);
       }
     }
 
@@ -2511,8 +2557,9 @@ class CdataMatcher {
     // Validate the allowed CSS declarations (eg: `background-color`)
     if (maybeDocCssSpec !== null &&
         !maybeDocCssSpec.spec().allowAllDeclarationInStyleTag) {
-      const invalidDeclVisitor =
-          new InvalidDeclVisitor(maybeDocCssSpec, context, validationResult);
+      const invalidDeclVisitor = new InvalidDeclVisitor(
+          maybeDocCssSpec, context, getTagDescriptiveName(this.tagSpec_),
+          validationResult);
       stylesheet.accept(invalidDeclVisitor);
     }
 
@@ -3493,7 +3540,8 @@ class UrlErrorInAttrAdapter {
     context.addError(
         generated.ValidationError.Code.INVALID_URL_PROTOCOL,
         context.getLineCol(),
-        /* params */[this.attrName_, getTagDescriptiveName(tagSpec), protocol],
+        /* params */
+        [this.attrName_, getTagDescriptiveName(tagSpec), protocol],
         getTagSpecUrl(tagSpec), result);
   }
 
@@ -3547,7 +3595,8 @@ function validateAttrValueUrl(parsedAttrSpec, context, attr, tagSpec, result) {
       } else {
         context.addError(
             parseResult.errorCode, context.getLineCol(),
-            /* params */[attr.name, getTagDescriptiveName(tagSpec), attr.value],
+            /* params */
+            [attr.name, getTagDescriptiveName(tagSpec), attr.value],
             getTagSpecUrl(tagSpec), result);
       }
       return;
@@ -4655,12 +4704,14 @@ function validateAttrNotFoundInSpec(parsedTagSpec, context, attrName, result) {
     context.addError(
         generated.ValidationError.Code.TEMPLATE_IN_ATTR_NAME,
         context.getLineCol(),
-        /* params */[attrName, getTagDescriptiveName(parsedTagSpec.getSpec())],
+        /* params */
+        [attrName, getTagDescriptiveName(parsedTagSpec.getSpec())],
         context.getRules().getTemplateSpecUrl(), result);
   } else {
     context.addError(
         generated.ValidationError.Code.DISALLOWED_ATTR, context.getLineCol(),
-        /* params */[attrName, getTagDescriptiveName(parsedTagSpec.getSpec())],
+        /* params */
+        [attrName, getTagDescriptiveName(parsedTagSpec.getSpec())],
         getTagSpecUrl(parsedTagSpec), result);
   }
 }
@@ -4902,6 +4953,7 @@ function validateAttrCss(
     // in the allowed list for this DocCssSpec, and have allowed values if
     // relevant.
     for (const declaration of declarations) {
+      const firstIdent = declaration.firstIdent();
       // Allowed declarations vary by context. SVG has its own set of CSS
       // declarations not supported generally in HTML.
       const cssDeclaration = parsedAttrSpec.getSpec().valueDocSvgCss === true ?
@@ -4919,7 +4971,6 @@ function validateAttrCss(
         continue;
       } else if (cssDeclaration.valueCasei.length > 0) {
         let hasValidValue = false;
-        const firstIdent = declaration.firstIdent();
         for (const value of cssDeclaration.valueCasei) {
           if (firstIdent.toLowerCase() == value) {
             hasValidValue = true;
@@ -4935,16 +4986,23 @@ function validateAttrCss(
               [getTagDescriptiveName(tagSpec), declaration.name, firstIdent],
               context.getRules().getStylesSpecUrl(), result.validationResult);
         }
+      } else if (cssDeclaration.valueRegexCasei != null) {
+        const valueRegex = context.getRules().getFullMatchCaseiRegex(
+            /** @type {number} */ (cssDeclaration.valueRegexCasei));
+        if (!valueRegex.test(firstIdent)) {
+          context.addError(
+              generated.ValidationError.Code
+                  .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+              context.getLineCol(), /* params */
+              [getTagDescriptiveName(tagSpec), declaration.name, firstIdent],
+              context.getRules().getStylesSpecUrl(), result.validationResult);
+        }
       }
       if (!maybeSpec.spec().allowImportant) {
         if (declaration.important)
-          // TODO(gregable): Use a more specific error message for
-          // `!important` errors.
           context.addError(
-              generated.ValidationError.Code.INVALID_ATTR_VALUE,
-              context.getLineCol(),
-              /* params */
-              [attrName, getTagDescriptiveName(tagSpec), 'CSS !important'],
+              generated.ValidationError.Code.CSS_SYNTAX_DISALLOWED_IMPORTANT,
+              context.getLineCol(), /* params */[],
               context.getRules().getStylesSpecUrl(), result.validationResult);
       }
       /** @type {!Array<!tokenize_css.ErrorToken>} */
@@ -5030,6 +5088,7 @@ function validateAttrDeclaration(
   const cssDeclarationByName = parsedAttrSpec.getCssDeclarationByName();
 
   for (const declaration of declarations) {
+    const firstIdent = declaration.firstIdent();
     const declarationName =
         parse_css.stripVendorPrefix(declaration.name.toLowerCase());
     if (!(declarationName in cssDeclarationByName)) {
@@ -5043,7 +5102,6 @@ function validateAttrDeclaration(
       const cssDeclaration = cssDeclarationByName[declarationName];
       if (cssDeclaration.valueCasei.length > 0) {
         let has_valid_value = false;
-        const firstIdent = declaration.firstIdent();
         for (const value of cssDeclaration.valueCasei) {
           if (firstIdent.toLowerCase() === value) {
             has_valid_value = true;
@@ -5056,6 +5114,17 @@ function validateAttrDeclaration(
               generated.ValidationError.Code
                   .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
               context.getLineCol(),
+              /* params */[tagSpecName, declaration.name, firstIdent],
+              context.getRules().getStylesSpecUrl(), validationResult);
+        }
+      } else if (cssDeclaration.valueRegexCasei != null) {
+        const valueRegex = context.getRules().getFullMatchCaseiRegex(
+            /** @type {number} */ (cssDeclaration.valueRegexCasei));
+        if (!valueRegex.test(firstIdent)) {
+          context.addError(
+              generated.ValidationError.Code
+                  .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE,
+              context.getLineCol(), /* params */
               /* params */[tagSpecName, declaration.name, firstIdent],
               context.getRules().getStylesSpecUrl(), validationResult);
         }
@@ -5134,7 +5203,8 @@ function validateAttributes(
         continue;
       }
     } else if (attr.name === 'class') {
-      // For non-transformed AMP, `class` must not contain 'i-amphtml-' prefix.
+      // For non-transformed AMP, `class` must not contain 'i-amphtml-'
+      // prefix.
       validateClassAttr(attr, spec, context, result.validationResult);
     }
 
@@ -6774,6 +6844,46 @@ const ValidationHandler =
   }
 
   /**
+   * Currently, the Javascript HTML parser considers Doctype to be another HTML
+   * tag, which is not technically accurate. We have special handling for
+   * doctype in Javascript which applies to all AMP formats, as this is strict
+   * handling for all HTML in general. Specifically "attributes" are not
+   * allowed, even things like `data-foo`.
+   * @param {!parserInterface.ParsedHtmlTag} encounteredTag
+   * @param {!Context} context
+   * @param {!generated.ValidationResult} validationResult
+   */
+  validateDocType(encounteredTag, context, validationResult) {
+    // <!doctype html> - OK
+    if (encounteredTag.attrs().length === 1 &&
+        encounteredTag.attrs()[0].name === 'html')
+      return;
+    // <!doctype html lang=...> OK
+    // This is technically invalid. The 'correct' way to do this is to emit the
+    // lang attribute on the `<html>` tag. However, we observe a number of
+    // websites incorrectly emitting `lang` as part of doctype, so this specific
+    // attribute is allowed to avoid breaking existing pages.
+    if (encounteredTag.attrs().length === 2) {
+      if (encounteredTag.attrs()[0].name === 'html' &&
+          encounteredTag.attrs()[1].name === 'lang')
+        return;
+      if (encounteredTag.attrs()[0].name === 'lang' &&
+          encounteredTag.attrs()[1].name === 'html')
+        return;
+    }
+    if (encounteredTag.attrs().length !== 1 ||
+        encounteredTag.attrs()[0].name !== 'html') {
+      this.context_.addError(
+          generated.ValidationError.Code.INVALID_DOCTYPE_HTML,
+          this.context_.getLineCol(),
+          /* params */[],
+          /* specUrl */ 'https://amp.dev/documentation/' +
+              'guides-and-tutorials/start/create/basic_markup/',
+          this.validationResult_);
+    }
+  }
+
+  /**
    * Callback for a start HTML tag.
    * @param {!parserInterface.ParsedHtmlTag} encounteredTag
    * @override
@@ -6782,6 +6892,14 @@ const ValidationHandler =
     if (encounteredTag.upperName() === 'HTML') {
       this.context_.getRules().validateHtmlTag(
           encounteredTag, this.context_, this.validationResult_);
+    }
+    if (encounteredTag.upperName() === '!DOCTYPE') {
+      this.validateDocType(
+          encounteredTag, this.context_, this.validationResult_);
+      // Even though validateDocType emits all necessary errors about the tag,
+      // we continue to process it further (validateTag and such) so that we can
+      // record the tag was present and record it as the root pseudo element for
+      // the document.
     }
     /** @type {?string} */
     const maybeDuplicateAttrName = encounteredTag.hasDuplicateAttrs();

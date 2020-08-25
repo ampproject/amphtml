@@ -160,10 +160,10 @@ function compile(
     // Instead of globbing all extensions, this will only add the actual
     // extension path for much quicker build times.
     entryModuleFilenames.forEach(function (filename) {
-      if (!filename.includes('extensions/')) {
+      if (!pathModule.normalize(filename).startsWith('extensions')) {
         return;
       }
-      const path = filename.replace(/\/[^/]+\.js$/, '/**/*.js');
+      const path = pathModule.join(pathModule.dirname(filename), '**', '*.js');
       srcs.push(path);
     });
     if (options.extraGlobs) {
@@ -245,7 +245,7 @@ function compile(
     // build system instead of runtime, we never run it through babel and therefore
     // must compute it here.
     const isStrict = argv.define_experiment_constant === 'STRICT_COMPILATION';
-    const isEsm = argv.esm;
+    const isEsm = argv.esm || argv.sxg;
     let language;
     if (isEsm) {
       // Do not transpile down to ES5 if running with `--esm`, since we do
