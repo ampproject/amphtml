@@ -43,6 +43,9 @@
 
   <button on="tap:AMP.setState({expandAc2: true})">Expand section 1</button>
   <button on="tap:AMP.setState({expandAc2: false})">Collapse section 1</button>
+
+  <button on="tap:AMP.setState({expandAcv: true})">Expand AMP-video headed section</button>
+  <button on="tap:AMP.setState({expandAcv: false})">Collapse AMP-video headed section</button>
   <header class="menu">
     <h3>MENU</h3>
     <nav>
@@ -112,6 +115,41 @@
     <section>
       <header>The header tag is supported as well.</header>
       <p>Even more awesome.</p>
+    </section>
+    <section>
+      <p>Section with p-tagged header</p>
+      <p>More awesome content</p>
+    </section>
+    <section>
+      <details>
+        <summary>
+          Clicking any child of an AMP-accordion header overrides the default
+          action and expands this section
+        </summary>
+        Viewers can't access the detail here.
+      </details>
+      <p>But they can see this section's content!!</p>
+    </section>
+    <section>
+      <p>Except if the header's child is an <a href="#">anchor</a></p>
+      <p>Clicking the anchor does not expand this section.</p>
+    </section>
+    <section [data-expand]="expandAcv" on="expand:AMP.setState({expandAcv: true});collapse:AMP.setState({expandAcv: false})">
+      <amp-video
+        id=myVideoHeader
+        title="Big Buck Bunny"
+        artist="Blender Foundation"
+        poster="img/bigbuckbunny.jpg"
+        album="The Peach Open Movie Project"
+        src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+        width="360"
+        height="202"
+        controls>
+      </amp-video>
+      <p>
+        Or if the header element has a tap target, like in an AMP-video. Clicking the video does
+        not expand this section.
+      </p>
     </section>
   </amp-accordion>
 </body>
