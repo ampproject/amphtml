@@ -17,7 +17,7 @@
 /** @externs */
 
 /** @const */
-var BaseCarouselDef = {};
+var InlineGalleryDef = {};
 
 /**
  * @typedef {{
@@ -29,41 +29,15 @@ var BaseCarouselDef = {};
  *   setAdvance: (function(function(number):undefined):undefined|undefined),
  * }}
  */
-BaseCarouselDef.Props;
+InlineGalleryDef.Props;
 
 /**
  * @typedef {{
- *   children: !Array<PreactDef.Renderable>,
- *   loop: (boolean|undefined),
- *   restingIndex: number,
- *   setRestingIndex: (function(number):undefined),
- * }}
- */
-BaseCarouselDef.ScrollerProps;
-
-/**
- * @typedef {{
+ *   current: number,
+ *   height: (number|undefined),
+ *   inset: (boolean|undefined),
+ *   goTo: (function(number):undefined),
  *   children: !Array<PreactDef.Renderable>
  * }}
  */
-BaseCarouselDef.SlideProps;
-
-/**
- * @typedef {{
- *   advance: (function(number):undefined|undefined),
- *   customArrow: (PreactDef.VNode|undefined),
- *   by: number,
- *   disabled: (boolean|undefined)
- * }}
- */
-BaseCarouselDef.ArrowProps;
-
-/**
- * @typedef {{
- *   currentSlide: number,
- *   setCurrentSlide: (function(number):undefined),
- *   slideCount: (number|null),
- *   setSlideCount: (function(number):undefined),
- * }}
- */
-BaseCarouselDef.ContextProps;
+InlineGalleryDef.PaginationProps;
