@@ -24,16 +24,6 @@ cc_library(
     ],
 )
 
-cc_library(
-    name = "types",
-    srcs = [
-        "types.cc",
-    ],
-    hdrs = [
-        "types.h",
-    ],
-)
-
 cc_test(
     name = "parser_test",
     srcs = [
@@ -42,6 +32,16 @@ cc_test(
     deps = [
         ":parser",
         "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "types",
+    srcs = [
+        "types.cc",
+    ],
+    hdrs = [
+        "types.h",
     ],
 )
 
