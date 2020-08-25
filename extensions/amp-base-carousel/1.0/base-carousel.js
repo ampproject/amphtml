@@ -15,8 +15,15 @@
  */
 import * as Preact from '../../../src/preact';
 import {ArrowNext, ArrowPrev} from './arrow';
+import {CarouselContext} from './carousel-context';
 import {Scroller} from './scroller';
-import {toChildArray, useRef, useState} from '../../../src/preact';
+import {
+  toChildArray,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from '../../../src/preact';
 import {useMountEffect} from '../../../src/preact/utils';
 
 /**
@@ -34,7 +41,12 @@ export function BaseCarousel({
 }) {
   const childrenArray = toChildArray(children);
   const {length} = childrenArray;
-  const [curSlide, setCurSlide] = useState(0);
+  const carouselContext = useContext(CarouselContext);
+  const [currentSlideState, setCurrentSlideState] = useState(0);
+  const currentSlide = carouselContext.currentSlide ?? currentSlideState;
+  const setCurrentSlide =
+    carouselContext.setCurrentSlide ?? setCurrentSlideState;
+  const {setSlideCount} = carouselContext;
   const scrollRef = useRef(null);
   const advance = (by) => scrollRef.current.advance(by);
   useMountEffect(() => {
@@ -42,20 +54,22 @@ export function BaseCarousel({
       setAdvance(advance);
     }
   });
-
+  useEffect(() => {
+    setSlideCount(length);
+  }, [setSlideCount, length]);
   const setRestingIndex = (i) => {
-    setCurSlide(i);
+    setCurrentSlide(i);
     if (onSlideChange) {
       onSlideChange(i);
     }
   };
   const disableForDir = (dir) =>
-    !loop && (curSlide + dir < 0 || curSlide + dir >= length);
+    !loop && (currentSlide + dir < 0 || currentSlide + dir >= length);
   return (
     <div {...rest}>
       <Scroller
         loop={loop}
-        restingIndex={curSlide}
+        restingIndex={currentSlide}
         setRestingIndex={setRestingIndex}
         ref={scrollRef}
       >

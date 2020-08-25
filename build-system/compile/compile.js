@@ -248,7 +248,7 @@ function compile(
       language_in: 'ECMASCRIPT_2020',
       // Do not transpile down to ES5 if running with `--esm`, since we do
       // limited transpilation in Babel.
-      language_out: argv.esm ? 'NO_TRANSPILE' : 'ECMASCRIPT5_STRICT',
+      language_out: (argv.esm || argv.sxg) ? 'NO_TRANSPILE' : 'ECMASCRIPT5_STRICT',
       // We do not use the polyfills provided by closure compiler.
       // If you need a polyfill. Manually include them in the
       // respective top level polyfills.js files.
