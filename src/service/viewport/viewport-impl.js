@@ -432,8 +432,8 @@ export class ViewportImpl {
   animateScrollIntoView(element, pos = 'top', opt_duration, opt_curve) {
     // should be IS_EXG
     if (IS_ESM) {
-      const posToBlock = {'top': 'start', 'center': 'center', 'bottom': 'end'};
-      return element.scrollIntoView({block: posToBlock[pos]});
+      //const posToBlock = {'top': 'start', 'center': 'center', 'bottom': 'end'};
+      return element.scrollIntoView({block: 'center'});
     } else {
       devAssert(
         !opt_curve || opt_duration !== undefined,

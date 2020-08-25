@@ -31,7 +31,6 @@ import {closest, domOrderComparator, matches} from '../dom';
 import {dev, user} from '../log';
 import {endsWith} from '../string';
 import {getMode} from '../mode';
-import {numeric} from '../transition';
 import {remove} from '../utils/array';
 
 const TAG = 'FixedLayer';
@@ -900,7 +899,9 @@ export class FixedLayer {
       return Promise.resolve();
     }
     // Add transit effect on position fixed element
-    const tr = numeric(lastPaddingTop - paddingTop, 0);
+    const tr = (time) => {
+      return lastPaddingTop - paddingTop + (paddingTop - lastPaddingTop) * time;
+    };
     return Animation.animate(
       this.ampdoc.getRootNode(),
       (time) => {
