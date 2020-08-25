@@ -880,7 +880,7 @@ amp-story .amp-video-eq,
   pointer-events: none !important;
   min-width: 14em !important; /* 14em = 224px = the width of a narrow phone (320px) - tap-safe margins (48px * 2) */
   max-width: min(25em, calc(var(--story-page-vw) * 80)) !important;
-  font-size: calc(var(--story-page-vw) * 3); /* override with ems for pixel perfect layout */
+  font-size: calc(var(--story-page-vmin) * 3); /* override with ems for pixel perfect layout */
   width: 100%;
   /* Properties overrideable by user */
   --interactive-accent-color: #005AF0;
