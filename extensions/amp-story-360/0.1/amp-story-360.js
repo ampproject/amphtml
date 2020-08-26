@@ -234,9 +234,6 @@ export class AmpStory360 extends AMP.BaseElement {
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
-
-    /** @private {number} To sync a debounce to the next frame animation */
-    this.rafTimeout_;
   }
 
   /** @override */
@@ -347,22 +344,18 @@ export class AmpStory360 extends AMP.BaseElement {
       }
     }, 1000);
 
+    let rafTimeout;
+
     this.win.addEventListener('deviceorientation', (e) => {
       if (this.isReady_ && this.isPlaying_) {
-        this.rafDebounce_(() => this.onDeviceOrientation_(e));
+        // debounce onDeviceOrientation_ to rAF
+        rafTimeout && this.win.cancelAnimationFrame(rafTimeout);
+        rafTimeout = this.win.requestAnimationFrame(() =>
+          this.onDeviceOrientation_(e)
+        );
       }
       this.timer_.cancel(checkNoMotion);
     });
-  }
-
-  /**
-   * Debounce a function to the next frame animation.
-   * @param {function} callback
-   * @private
-   */
-  rafDebounce_(callback) {
-    this.rafTimeout_ && this.win.cancelAnimationFrame(this.rafTimeout_);
-    this.rafTimeout_ = this.win.requestAnimationFrame(() => callback());
   }
 
   /**
