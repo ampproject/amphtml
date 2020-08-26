@@ -311,19 +311,26 @@ export class AmpStory360 extends AMP.BaseElement {
 
   /** @private */
   checkGyroscopePermissions_() {
-    //  Browser doesn't support DeviceOrientationEvent API.
-    if (typeof DeviceOrientationEvent === 'undefined') {
-      return;
-    }
+    //  If browser doesn't support DeviceOrientationEvent.
+    if (typeof DeviceOrientationEvent === 'undefined') return;
 
-    // If browser doesn't require permission, enable gyroscope.
-    if (typeof DeviceOrientationEvent.requestPermission === 'undefined') {
+    // If browser doesn't require permission for DeviceOrientationEvent.
+    if (typeof DeviceOrientationEvent.requestPermission === 'undefined')
       this.enableGyroscope_();
-    }
 
-    // If DeviceOrientationEvent and permissions, build permission button.
-    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-      this.checkPermissionOnLoad_();
+    // If permissions needed for DeviceOrientationEvent.
+    if (
+      typeof this.win.DeviceOrientationEvent.requestPermission === 'function'
+    ) {
+      this.win.DeviceOrientationEvent.requestPermission()
+        .catch(() => {
+          // If permissions weren't set, render activate button.
+          this.renderActivateButton_();
+        })
+        .then((permissionState) => {
+          // If permissions already set, set permission state.
+          permissionState && this.setPermissionState_(permissionState);
+        });
     }
   }
 
@@ -381,24 +388,6 @@ export class AmpStory360 extends AMP.BaseElement {
     );
     this.renderer_.setCamera(rot, 1);
     this.renderer_.render(true);
-  }
-
-  /**
-   * Checks if permissions have been set by user on page load.
-   * @private
-   */
-  checkPermissionOnLoad_() {
-    if (this.win.DeviceOrientationEvent.requestPermission) {
-      this.win.DeviceOrientationEvent.requestPermission()
-        // Render activate button if permissions aren't set yet.
-        .catch(() => {
-          this.renderActivateButton_();
-        })
-        // If permissions are already set, handle permission state.
-        .then((permissionState) => {
-          permissionState && this.setPermissionState_(permissionState);
-        });
-    }
   }
 
   /**
