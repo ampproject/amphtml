@@ -26,6 +26,7 @@ To use RTC, you must meet the following requirements:
 - Criteo
 - FLUX
 - [Freestar](https://freestar.com)
+- Future Plc
 - IndexExchange
 - Kargo
 - Lotame
