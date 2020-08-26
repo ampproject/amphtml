@@ -12,11 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-registerServiceBuilder(win, 'story-analytics', function () {
-  return new StoryAnalyticsService();
-});
-geoDeferred = new Deferred();
-AMP.registerServiceForDoc('foo', function () {
-  return geoDeferred.promise;
-});
+ */ 
+import {createUseStyles} from 'react-jss'
+
+const JSS = {button: {fontSize: 12}};
+
+export const useStyles = createUseStyles(JSS);
