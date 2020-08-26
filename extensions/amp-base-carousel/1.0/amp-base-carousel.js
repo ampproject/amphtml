@@ -38,7 +38,6 @@ class AmpBaseCarousel extends PreactBaseElement {
     return dict({
       'onSlideChange': (index) => {
         fireSlideChangeEvent(this.win, element, index, ActionTrust.HIGH);
-        this.mutateProps(dict({'slide': index}));
       },
       'setAdvance': (a) => (advance = a),
     });
