@@ -15,10 +15,10 @@
  */
 
 import * as Preact from '../../../../src/preact';
+import {number, text, withKnobs} from '@storybook/addon-knobs';
 import {storiesOf} from '@storybook/preact';
 import {withA11y} from '@storybook/addon-a11y';
 import {withAmp} from '@ampproject/storybook-addon';
-import {withKnobs} from '@storybook/addon-knobs';
 
 // eslint-disable-next-line
 storiesOf('amp-fit-text', module)
@@ -43,17 +43,23 @@ storiesOf('amp-fit-text', module)
     );
   })
   .add('Scale up + overflow + ellipsis', () => {
+    const minFontSize = number('minFontSize', 42);
+    const content = text(
+      'content',
+      `
+        Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
+        aeque inermis reprehendunt.
+      `
+    );
     return (
       <amp-fit-text
         width="300"
         height="200"
-        min-font-size="42"
+        min-font-size={minFontSize}
         style="border: 1px solid black;
       display: block;"
-      >
-        Lorem <i>ips</i>um dolor sit amet, has nisl nihil convenire et, vim at
-        aeque inermis reprehendunt.
-      </amp-fit-text>
+        dangerouslySetInnerHTML={{__html: content}}
+      />
     );
   })
   .add('Scale down', () => {
