@@ -31,6 +31,6 @@ export function playstream(global, data) {
   console.log(searchParams.toString());
   loadScript(
     global,
-    'http://dev.playstream.media/js/amp.js?' + searchParams.toString()
+    'https://app.playstream.media/js/amp.js?' + searchParams.toString()
   );
 }
