@@ -108,10 +108,7 @@ export const WithLooping = () => {
 
 export const WithCaptions = () => {
   return (
-    <BaseCarousel
-      loop
-      style={{width: '500px', height: '400px'}}
-    >
+    <BaseCarousel loop style={{width: '500px', height: '400px'}}>
       <figure>
         <img
           style={{width: '500px', height: '300px'}}

@@ -16,6 +16,7 @@
 import * as Preact from '../../../src/preact';
 import {ArrowNext, ArrowPrev} from './arrow';
 import {CarouselContext} from './carousel-context';
+import {ContainWrapper} from '../../../src/preact/component';
 import {Scroller} from './scroller';
 import {
   toChildArray,
@@ -25,7 +26,6 @@ import {
   useState,
 } from '../../../src/preact';
 import {useMountEffect} from '../../../src/preact/utils';
-import {ContainWrapper} from '../../../src/preact/component';
 
 /**
  * @param {!BaseCarouselDef.Props} props
@@ -67,12 +67,7 @@ export function BaseCarousel({
   const disableForDir = (dir) =>
     !loop && (currentSlide + dir < 0 || currentSlide + dir >= length);
   return (
-    <ContainWrapper
-      size={true}
-      layout={true}
-      paint={true}
-      {...rest}
-    >
+    <ContainWrapper size={true} layout={true} paint={true} {...rest}>
       <Scroller
         loop={loop}
         restingIndex={currentSlide}
