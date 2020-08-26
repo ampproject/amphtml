@@ -207,6 +207,19 @@ More details for adding INFOnline anonymous support can be found at [www.infonli
 
 Type attribute value: `iplabel`
 
+Adds support for ip-label Real User Monitoring (https://www.ip-label.com).
+This variable is mandatory, 
+- trackerId: to be initialized in ip-label configuration
+
+And the following variables are optional:
+- customdim
+- business
+- abtesting
+- infrastructure
+- customer
+- clientip
+- urlgroup
+
 ### Keen
 
 Type attribute value: `keen`
