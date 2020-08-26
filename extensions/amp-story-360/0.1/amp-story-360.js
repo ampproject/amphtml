@@ -355,7 +355,7 @@ export class AmpStory360 extends AMP.BaseElement {
 
     this.win.addEventListener('deviceorientation', (e) => {
       if (this.isReady_ && this.isPlaying_) {
-        // debounce onDeviceOrientation_ to rAF
+        // Debounce onDeviceOrientation_ to rAF.
         rafTimeout && this.win.cancelAnimationFrame(rafTimeout);
         rafTimeout = this.win.requestAnimationFrame(() =>
           this.onDeviceOrientation_(e)
@@ -599,7 +599,7 @@ export class AmpStory360 extends AMP.BaseElement {
     }
     this.animation_ = null;
     // Let the animation loop exit, then render the initial position and resume
-    // the animation (if applicable)
+    // the animation (if applicable).
     if (this.isReady_) {
       this.win.requestAnimationFrame(() => {
         this.renderInitialPosition_();
