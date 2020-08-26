@@ -32,7 +32,7 @@ import {htmlFor} from '../../../src/static-template';
 import {dev, user, userAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
-import {whenUpgradedToCustomElement} from '../../../src/dom';
+import {closest, whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_360';
@@ -234,6 +234,12 @@ export class AmpStory360 extends AMP.BaseElement {
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
+
+    /** @private {?string} */
+    this.pageId_ = null;
+
+    /** @private {boolean} */
+    this.isOnActivePage_ = false;
   }
 
   /** @override */
@@ -283,6 +289,11 @@ export class AmpStory360 extends AMP.BaseElement {
           StateProperty.GYROSCOPE_PERMISSION_STATE,
           (permissionState) => this.onPermissionState_(permissionState)
         );
+
+        storeService.subscribe(StateProperty.CURRENT_PAGE_ID, (currPageId) => {
+          this.isOnActivePage_ = currPageId === this.getPageId_();
+        }),
+          true; /* callToInitialize */
       }),
 
       Services.localizationServiceForOrNull(this.element).then(
@@ -294,6 +305,19 @@ export class AmpStory360 extends AMP.BaseElement {
       attr('controls') === 'gyroscope' && this.checkGyroscopePermissions_();
       return Promise.resolve();
     });
+  }
+
+  /**
+   * @private
+   * @return {string} the page id
+   */
+  getPageId_() {
+    if (this.pageId_ == null) {
+      this.pageId_ = closest(dev().assertElement(this.element), (el) => {
+        return el.tagName.toLowerCase() === 'amp-story-page';
+      }).getAttribute('id');
+    }
+    return this.pageId_;
   }
 
   /**
@@ -354,7 +378,7 @@ export class AmpStory360 extends AMP.BaseElement {
     let rafTimeout;
 
     this.win.addEventListener('deviceorientation', (e) => {
-      if (this.isReady_ && this.isPlaying_) {
+      if (this.isReady_ && this.isOnActivePage_) {
         // Debounce onDeviceOrientation_ to rAF.
         rafTimeout && this.win.cancelAnimationFrame(rafTimeout);
         rafTimeout = this.win.requestAnimationFrame(() =>
