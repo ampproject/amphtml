@@ -23,12 +23,10 @@ import {loadScript} from '../3p/3p';
 export function playstream(global, data) {
   /*eslint "google-camelcase/google-camelcase": 0*/
   global.playstream = {
-    unitData: data['unitid'],
+    unitData: data['id'],
     fluid: data['fluid'],
   };
-  console.log(data);
   const searchParams = new URLSearchParams(data);
-  console.log(searchParams.toString());
   loadScript(
     global,
     'https://app.playstream.media/js/amp.js?' + searchParams.toString()
