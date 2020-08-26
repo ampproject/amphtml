@@ -24,28 +24,6 @@ limitations under the License.
 
 # <a name="`amp-story-player`"></a> `amp-story-player`
 
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Embed and play stories in an AMP site.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Scripts</strong></td>
-    <td>
-    <code>&lt;script async src="https://cdn.ampproject.org/v0.js">&lt;/script></code>
-    <code>&lt;script custom-element="amp-story-player" src="https://cdn.ampproject.org/v0/amp-story-player-0.1.js">&lt;/script></code>
-    </td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>
-      <li>See <a href="https://github.com/ampproject/amphtml/blob/master/examples/amp-story/player-amp.html">code snippet</a>.</li>
-    </td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Usage
 
 <figure class="centered-fig">
