@@ -361,8 +361,8 @@ export class AmpStory360 extends AMP.BaseElement {
    * @private
    */
   rafDebounce_(callback) {
-    this.rafTimeout && window.cancelAnimationFrame(this.rafTimeout);
-    this.rafTimeout = window.requestAnimationFrame(() => callback());
+    this.rafTimeout && this.win.cancelAnimationFrame(this.rafTimeout);
+    this.rafTimeout = this.win.requestAnimationFrame(() => callback());
   }
 
   /**
