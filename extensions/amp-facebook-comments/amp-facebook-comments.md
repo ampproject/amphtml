@@ -62,7 +62,7 @@ You can use the `amp-facebook-comments` component to embed the [Facebook comment
   </tr>
   <tr>
     <td width="40%"><strong>data-colorscheme (optional)</strong></td>
-    <td>The color scheme. For details, see the <a href="https://developers.facebook.com/docs/plugins/comments">Facebook comments documentation</a>. <br><br><em>Note: This is not supported anymore by Facebook's SDK. See <a href="https://developers.facebook.com/support/bugs/1759174414250782/">this bug report</a> for more details.</em></td>
+    <td>The color scheme. For details, see the <a href="https://developers.facebook.com/docs/plugins/comments">Facebook comments documentation</a>. <br><br><em>Note: This is not supported anymore by Facebook's SDK. See <a href="https://developers.facebook.com/support/bugs/1759174414250782/">Facebook's bug report</a> or <a href="https://github.com/ampproject/amphtml/issues/29980">our issue tracking</a> for more details. </em></td>
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
