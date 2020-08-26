@@ -157,7 +157,7 @@ For a set of samples showing `amp-script` in use, [see here](https://amp.dev/doc
 
 ### Frameworks and libraries
 
-Presently, libraries like [jQuery](https://jquery.com) will not work with `amp-script` without modification, as they use unsupported DOM APIs. However, [@ampproject/worker-dom](https://github.com/ampproject/worker-dom/) was designed to support the APIs that popular JavaScript frameworks use. `amp-script` has been tested with frameworks like [React](http://reactjs.org/), [Preact](https://preactjs.com/), [Vue](https://vuejs.org/), [Angular](https://angularjs.org/), [Aurelia](https://aurelia.io/), and [lit-html](https://lit-html.polymer-project.org/). To keep bundle sizes small, we recommend using Preact.
+Presently, libraries like [jQuery](https://jquery.com) will not work with `amp-script` without modification, as they use unsupported DOM APIs. However, [@ampproject/worker-dom](https://github.com/ampproject/worker-dom/) was designed to support the APIs that popular JavaScript frameworks use. `amp-script` has been tested with [React](http://reactjs.org/) and [Preact](https://preactjs.com/). To keep bundle sizes small, we recommend using Preact. Other frameworks may work but have not been thoroughly tested; if you're looking for support, please file an issue or contribute [here](https://github.com/ampproject/worker-dom/).
 
 ### Creating AMP elements
 
