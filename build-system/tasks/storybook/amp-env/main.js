@@ -18,9 +18,9 @@
 module.exports = {
   stories: ['../../../../extensions/**/*.*/storybook/*.amp.js'],
   addons: [
-    '@storybook/addon-a11y/register',
-    '@storybook/addon-viewport/register',
-    '@storybook/addon-knobs/register',
-    'storybook-addon-amp/register.js',
+    '@storybook/addon-a11y',
+    '@storybook/addon-viewport',
+    '@storybook/addon-knobs',
+    '@ampproject/storybook-addon',
   ],
 };
