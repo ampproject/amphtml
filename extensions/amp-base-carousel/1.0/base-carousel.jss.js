@@ -80,16 +80,16 @@ const defaultArrowButton = {
   stroke: 'currentColor',
   transition: '200ms stroke',
   color: '#FFF',
-  ['&:hover']: {
+  '&:hover': {
     color: '#222',
   },
-  ['&:active']: {
+  '&:active': {
     transitionDuration: '0ms',
   },
-  ['&:hover $arrowBackground']: {
+  '&:hover $arrowBackground': {
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
   },
-  ['&:active $arrowBackground']: {
+  '&:active $arrowBackground': {
     backgroundColor: 'rgba(255, 255, 255, 1.0)',
     transitionDuration: '0ms',
   },
@@ -145,7 +145,7 @@ const hideScrollbar = {
 };
 /* Chrome, Safari */
 const hideScrollbarPseudo = {
-  [`& [hide-scrollbar]::-webkit-scrollbar`]: {
+  '& [hide-scrollbar]::-webkit-scrollbar': {
     display: 'none',
     'box-sizing': 'content-box !important',
   },
@@ -163,14 +163,14 @@ const horizontalScroll = {
 
 /** Slides only have one child */
 const slideSizing = {
-  ['& > :first-child, & > ::slotted(*)']: {
+  '& > :first-child, & > ::slotted(*)': {
     boxSizing: 'border-box !important',
     margin: '0 !important',
     flexShrink: '0 !important',
     maxHeight: '100%',
     maxWidth: '100%',
   },
-  ['& > ::slotted(*)']: {
+  '& > ::slotted(*)': {
     width: '100%',
   },
 };
