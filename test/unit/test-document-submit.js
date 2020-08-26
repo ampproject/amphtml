@@ -167,6 +167,7 @@ describes.sandboxed('test-document-submit', {}, (env) => {
       allowConsoleError(() => {
         onDocumentFormSubmit_(evt);
         expect(warnSpy).to.be.calledWith(
+          'form',
           env.sandbox.match(
             /Only XHR based \(via action-xhr attribute\) submissions/
           ),

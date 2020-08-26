@@ -123,7 +123,9 @@ export function onDocumentFormSubmit_(e) {
 
     if (!actionXhr) {
       e.preventDefault();
+      const TAG = 'form';
       user().warn(
+        TAG,
         'Only XHR based (via action-xhr attribute) submissions are support ' +
           'for POST requests. %s',
         form
