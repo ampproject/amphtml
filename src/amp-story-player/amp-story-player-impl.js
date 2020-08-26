@@ -103,7 +103,7 @@ const STORY_MESSAGE_STATE_TYPE = {
   STORY_PROGRESS: 'STORY_PROGRESS',
 };
 
-/** @typedef {{ state:string, value:boolean }} */
+/** @typedef {{ state:string, value:(boolean|string) }} */
 let DocumentStateTypeDef;
 
 /** @const {string} */
@@ -1017,10 +1017,13 @@ export class AmpStoryPlayer {
   onDocumentStateUpdate_(data, messaging) {
     switch (data.state) {
       case STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE:
-        this.onPageAttachmentStateUpdate_(data.value);
+        this.onPageAttachmentStateUpdate_(/** @type {boolean} */ (data.value));
         break;
       case STORY_MESSAGE_STATE_TYPE.CURRENT_PAGE_ID:
-        this.onCurrentPageIdUpdate_(data.value, messaging);
+        this.onCurrentPageIdUpdate_(
+          /** @type {string} */ (data.value),
+          messaging
+        );
         break;
       default:
         break;
@@ -1037,7 +1040,7 @@ export class AmpStoryPlayer {
     messaging
       .sendRequest(
         'getDocumentState',
-        {state: STORY_MESSAGE_STATE_TYPE.STORY_PROGRESS},
+        dict({'state': STORY_MESSAGE_STATE_TYPE.STORY_PROGRESS}),
         true
       )
       .then((progress) => {
