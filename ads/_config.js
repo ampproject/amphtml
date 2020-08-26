@@ -821,13 +821,13 @@ const adConfig = jsonConfiguration({
     clientIdCookieName: '__AF',
     renderStartImplemented: true,
   },
-
-  'plista': {},
-
   'playstream': {
     prefetch: 'http://dev.playstream.media/js/amp.js',
     renderStartImplemented: true,
   },
+
+  'plista': {},
+
   'polymorphicads': {
     prefetch: 'https://www.polymorphicads.jp/js/amp.js',
     preconnect: [
