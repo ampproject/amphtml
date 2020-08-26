@@ -18,16 +18,22 @@ import * as Preact from '../../../../src/preact';
 import {date, withKnobs} from '@storybook/addon-knobs';
 import {storiesOf} from '@storybook/preact';
 import {withA11y} from '@storybook/addon-a11y';
-import {withAmp} from 'storybook-addon-amp';
+import {withAmp} from '@ampproject/storybook-addon';
 
 // eslint-disable-next-line
-storiesOf('amp-date-display', module)
+storiesOf('amp-date-display-1_0', module)
   .addDecorator(withKnobs)
   .addDecorator(withA11y)
   .addDecorator(withAmp)
-  .addParameters({extensions: [{name: 'amp-date-display', version: '1.0'}]})
+  .addParameters({
+    extensions: [
+      {name: 'amp-date-display', version: '1.0'},
+      {name: 'amp-mustache', version: '0.1'},
+    ],
+    experiments: ['amp-date-display-bento'],
+  })
   .add('responsive', () => {
-    const datetime = date('Date/Time', new Date());
+    const datetime = new Date(date('Date/Time', new Date())).toISOString();
     return (
       <amp-date-display
         datetime={datetime}
