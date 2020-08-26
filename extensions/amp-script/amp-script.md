@@ -135,13 +135,13 @@ button.addEventListener('click', () => {
 
 Supported DOM APIs include:
 
-* Element getters like `getElementByName()`, `getElementsByClassName()`, `getElementsByTagName()`, `childNodes()`, `parentNode()`, and `lastChild()`
-* Mutators like `createTextNode()`, `appendChild()`, `insertBefore()`, `removeChild()`, and `replaceChild()`
-* Methods involving events like `addEventListener()`, `removeEventListener()`, and `createEvent()`
-* Property and attribute getters like `getAttribute()`, `hasAttribute()`
-* Event properties like `Event.target`, `Event.type`, and `Event.bubbles`
-* Element properties like `attributes`, `id`, `outerHTML`, `textContent`, `value`, `classList`, and `className`
-* And many more.
+- Element getters like `getElementByName()`, `getElementsByClassName()`, `getElementsByTagName()`, `childNodes()`, `parentNode()`, and `lastChild()`
+- Mutators like `createTextNode()`, `appendChild()`, `insertBefore()`, `removeChild()`, and `replaceChild()`
+- Methods involving events like `addEventListener()`, `removeEventListener()`, and `createEvent()`
+- Property and attribute getters like `getAttribute()`, `hasAttribute()`
+- Event properties like `Event.target`, `Event.type`, and `Event.bubbles`
+- Element properties like `attributes`, `id`, `outerHTML`, `textContent`, `value`, `classList`, and `className`
+- And many more.
 
 For a complete list of supported DOM APIs, see the [API compatibility table](https://github.com/ampproject/worker-dom/blob/master/web_compat_table.md).
 
@@ -169,7 +169,7 @@ You can use `amp-script` to add an `amp-img` or `amp-layout` component to the DO
 
 If you invoke `AMP.setState()` from `amp-script` after a user gesture, bindings can cause mutations to the DOM. Otherwise, state will be set, but binding will not occur (similar to [`amp-state` initialization](https://amp.dev/documentation/examples/components/amp-bind/?referrer=ampbyexample.com#initializing-state)). For more information, see [the section on user gestures](#user-gestures).
 
- `AMP.setState()` works as described in the [`<amp-bind>` documentation](https://amp.dev/documentation/components/amp-bind/#updating-state-variables-with-amp.setstate()), merging an object literal into the specified state. This example shows how it can affect the DOM:
+`AMP.setState()` works as described in the [`<amp-bind>` documentation](<https://amp.dev/documentation/components/amp-bind/#updating-state-variables-with-amp.setstate()>), merging an object literal into the specified state. This example shows how it can affect the DOM:
 
 ```html
 <script id="myscript" type="text/plain" target="amp-script">
@@ -226,7 +226,9 @@ Note that if something else changes the DOM inside your `<amp-script>`, that cha
 <amp-script layout="container" script="myscript">
   <p [text]="myText">Will I change?</p>
 </amp-script>
-<button on="tap:AMP.setState({myText: 'I changed'})">Change this and amp-script won't know</button>
+<button on="tap:AMP.setState({myText: 'I changed'})">
+  Change this and amp-script won't know
+</button>
 ```
 
 ### Retrieving data for `<amp-list>`
@@ -263,10 +265,11 @@ The rules are less restrictive for `amp-script` containers whose size cannot cha
 
 Here are some examples of fixed-size containers:
 
+<!-- prettier-ignore-start -->
 ```html
-<amp-script layout="fill" script="myscript" height="300" width="500"></amp-script>
+<amp-script layout="fill" height="300" width="500" script="myscript"></amp-script>
 
-<amp-script layout="fixed-height" script="myscript" height="300"></amp-script>
+<amp-script layout="fixed-height" height="300" script="myscript" ></amp-script>
 ```
 
 Here are some examples of variable-sized containers:
@@ -274,15 +277,16 @@ Here are some examples of variable-sized containers:
 ```html
 <amp-script layout="responsive" script="myscript"></amp-script>
 
-<amp-script layout="fixed" script="myscript" height="300"></amp-script>
+<amp-script layout="fixed" height="300" script="myscript"></amp-script>
 
-<amp-script layout="container" script="myscript" height="300" width="500"></amp-script>
+<amp-script layout="container" height="300" width="500" script="myscript"></amp-script>
 ```
+<!-- prettier-ignore-end -->
 
 DOM changes are permitted as follows:
 
-* in **fixed-size containers**, your code can make any change at any time.
-* in **variable-size containers**, your code can only make a change after a user gesture. It then has 5 seconds to make changes. If your code makes one or more `fetch()`'s, it can continue to make changes until 5 seconds after the last `fetch()` completes.
+- in **fixed-size containers**, your code can make any change at any time.
+- in **variable-size containers**, your code can only make a change after a user gesture. It then has 5 seconds to make changes. If your code makes one or more `fetch()`'s, it can continue to make changes until 5 seconds after the last `fetch()` completes.
 
 <table>
   <tr>
@@ -296,9 +300,11 @@ DOM changes are permitted as follows:
   </tr>
 </table>
 
+<!-- prettier-ignore-start -->
 [tip type="default"]
 [See here](https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/#layout) for more information about AMP's layout system.
 [/tip]
+<!-- prettier-ignore-end -->
 
 ## Calculating the script hash
 
@@ -351,7 +357,8 @@ This example shows how to use the script hash in HTML:
     content="
       sha384-fake_hash_of_remote_js
       sha384-fake_hash_of_local_script
-    ">
+    "
+  />
 </head>
 <body>
   <!--
@@ -361,8 +368,7 @@ This example shows how to use the script hash in HTML:
     we'll add "sha384-fake_hash_of_remote_js" to the <meta> tag above.
 
 -->
-<amp-script src="cross.origin/remote.js" layout="container">
-</amp-script>
+  <amp-script src="cross.origin/remote.js" layout="container"> </amp-script>
 
   <!--
     A "script" attribute also requires adding a script hash.
@@ -370,8 +376,7 @@ This example shows how to use the script hash in HTML:
     If the hash of #myScript's text contents is "fake_hash_of_local_script",
     we'll add "sha384-fake_hash_of_local_script" to the <meta> tag above.
   -->
-  <amp-script script="myScript" layout="container">
-  </amp-script>
+  <amp-script script="myScript" layout="container"> </amp-script>
   <script type="text/plain" target="amp-script" id="myScript">
     document.body.textContent += 'Hello world!';
   </script>
@@ -403,6 +408,7 @@ Applies extra restrictions to DOM that may be mutated by this `<amp-script>`. Si
 - `allow-forms`: Allows [form elements](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/elements) to be created and modified. AMP requires special handling to prevent unauthorized state changing requests from user input. See amp-form's [security considerations](https://amp.dev/documentation/components/amp-form#security-considerations) for more detail.
 
 ### max-age
+
 Requires the `script` attribute. This attribute is optional, but required for signed exchanges if `script` is specified.
 
 The `max-age` attribute specifies the maximum lifetime in seconds the local script is allowed to be served from the time of [signed exchange (SXG)](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/signed-exchange/) publishing. [AMP Packager](https://github.com/ampproject/amppackager) uses this value to compute the SXG `expires` time.
@@ -416,6 +422,7 @@ The value of `max-age` should be chosen carefully:
 If you don't publish signed exchanges, `max-age` does nothing.
 
 ### nodom
+
 The optional `nodom` attribute optimizes `<amp-script>` for use as a data-layer rather than as a UI layer. It removes the ability for the `<amp-script>` to make DOM modifications, in favor of a signficantly smaller bundle size and therefore better performance. It also automatically hides the `<amp-script>`, so you may omit the height and width attributes.
 
 ### common attributes
@@ -428,7 +435,7 @@ A few runtime errors may be encountered when using `amp-script`.
 
 **The inline script is (...) bytes, which exceeds the limit of 10,000.**
 
-No inline script can exceed 10,000 bytes. See [Size of JavaScript code](#size-of-javascript-code) above. 
+No inline script can exceed 10,000 bytes. See [Size of JavaScript code](#size-of-javascript-code) above.
 
 **Maximum total script size exceeded (...)**
 
