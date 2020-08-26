@@ -207,18 +207,9 @@ More details for adding INFOnline anonymous support can be found at [www.infonli
 
 Type attribute value: `iplabel`
 
-Adds support for ip-label Real User Monitoring (https://www.ip-label.com).
-This variable is mandatory, 
-- trackerId: to be initialized in ip-label configuration
+Adds support for ip-label Ekara Real User Monitoring (https://www.ip-label.com). Requires defining _var_ `trackerId` with ip-label provided _trackerId_.
 
-And the following variables are optional:
-- customdim
-- business
-- abtesting
-- infrastructure
-- customer
-- clientip
-- urlgroup
+Configuration details can be found at ip-label wiki.
 
 ### Keen
 
