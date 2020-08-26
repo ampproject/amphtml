@@ -44,8 +44,6 @@ let AmpElementPropDef;
  */
 let ChildDef;
 
-const IGNORE_NAME = 'i-amphtml';
-
 /** @const {!MutationObserverInit} */
 const CHILDREN_MUTATION_INIT = {
   childList: true,
@@ -107,8 +105,8 @@ export class PreactBaseElement extends AMP.BaseElement {
     /** @private {boolean} */
     this.mounted_ = true;
 
-    /** @private {?MutationObserver} */
-    this.observer_ = null;
+    /** @protected {?MutationObserver} */
+    this.observer = null;
   }
 
   /**
@@ -122,22 +120,19 @@ export class PreactBaseElement extends AMP.BaseElement {
   buildCallback() {
     const Ctor = this.constructor;
 
-    this.defaultProps_ = this.init() || null;
-
-    this.observer_ = new MutationObserver(this.checkMutations_.bind(this));
-    this.observer_.observe(this.element, {
+    this.observer = new MutationObserver(this.checkMutations_.bind(this));
+    const childrenInit = Ctor['children'] ? CHILDREN_MUTATION_INIT : null;
+    const passthroughInit =
+      Ctor['passthrough'] || Ctor['passthroughNonEmpty']
+        ? PASSTHROUGH_MUTATION_INIT
+        : null;
+    this.observer.observe(this.element, {
       attributes: true,
-      ...(
-        Ctor['children'] ?
-        CHILDREN_MUTATION_INIT :
-        null
-      ),
-      ...(
-        (Ctor['passthrough'] || Ctor['passthroughNonEmpty']) ?
-        PASSTHROUGH_MUTATION_INIT :
-        null
-      ),
+      ...childrenInit,
+      ...passthroughInit,
     });
+
+    this.defaultProps_ = this.init() || null;
 
     this.scheduleRender_();
 
@@ -517,7 +512,7 @@ function shouldMutationForNodeListBeRerendered(nodeList) {
       // Ignore service elements, e.g. `<i-amphtml-svc>` or
       // `<x slot="i-amphtml-svc">`.
       if (
-        startsWith(node.tagName.toLowerCase(), IGNORE_NAME) ||
+        startsWith(node.tagName, 'I-AMPHTML') ||
         node.getAttribute('slot') == 'i-amphtml-svc'
       ) {
         continue;
@@ -533,11 +528,11 @@ function shouldMutationForNodeListBeRerendered(nodeList) {
 
 /**
  * @param {typeof PreactBaseElement} Ctor
- * @param {!MutationRecord} record
+ * @param {!MutationRecord} m
  * @return {boolean}
  */
 function shouldMutationBeRerendered(Ctor, m) {
-  const {target, type} = m;
+  const {type} = m;
   if (type == 'attributes') {
     // Check if the attribute is mapped to one of the properties.
     const props = Ctor['props'];

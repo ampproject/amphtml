@@ -16,10 +16,8 @@
 
 import {FitText} from './fit-text';
 import {PreactBaseElement} from '../../../src/preact/base-element';
-import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {isExperimentOn} from '../../../src/experiments';
-
-import {dict} from '../../../src/utils/object';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */

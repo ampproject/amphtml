@@ -17,11 +17,9 @@
 import * as Preact from '../../../src/preact/index';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Slot} from '../../../src/preact/slot';
-import {
-  upgradeOrRegisterElement,
-} from '../../../src/service/custom-element-registry';
 import {htmlFor} from '../../../src/static-template';
 import {poll} from '../../../testing/iframe';
+import {upgradeOrRegisterElement} from '../../../src/service/custom-element-registry';
 
 describes.realWin('PreactBaseElement', {amp: true}, (env) => {
   let win, doc, html;
@@ -37,12 +35,10 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
         return true;
       }
     };
-    component =
-      env.sandbox.stub()
-        .callsFake((props) => {
-          lastProps = props;
-          return Preact.createElement('div', {id: 'component'});
-        });
+    component = env.sandbox.stub().callsFake((props) => {
+      lastProps = props;
+      return Preact.createElement('div', {id: 'component'});
+    });
     Impl['Component'] = component;
     upgradeOrRegisterElement(win, 'amp-preact', Impl);
   });
@@ -71,6 +67,9 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
         characterData: true,
       });
       callback();
+    }).then(() => {
+      // Skip couple more animation frames.
+      return new Promise((resolve) => setTimeout(resolve, 32));
     });
   }
 
@@ -87,11 +86,15 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
         'enabled': {attr: 'enabled', type: 'boolean'},
       };
       element = html`
-        <amp-preact layout="fixed" width="100" height="100"
-            prop-a="A"
-            min-font-size="72"
-            disabled
-            unknown="1">
+        <amp-preact
+          layout="fixed"
+          width="100"
+          height="100"
+          prop-a="A"
+          min-font-size="72"
+          disabled
+          unknown="1"
+        >
         </amp-preact>
       `;
       doc.body.appendChild(element);
@@ -135,6 +138,7 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     });
 
     it('should ignore non-declared attributes', async () => {
+      // Perform ignored mutations.
       await waitForMutation(element, () => {
         element.removeAttribute('unknown');
         element.setAttribute('unknown2', '2');
@@ -142,10 +146,13 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
         element.classList.add('class1');
       });
 
-      // Skip couple more animation frames.
-      await new Promise(resolve => setTimeout(resolve, 32));
-
-      expect(component).to.be.calledOnce;
+      // Execute a handled mutation and check that execution happened only
+      // twice.
+      element.setAttribute('prop-a', 'B');
+      await waitFor(() => component.callCount > 1, 'component re-rendered');
+      expect(component).to.be.calledTwice;
+      expect(lastProps).to.have.property('propA', 'B');
+      expect(lastProps).to.not.have.property('unknown2');
     });
   });
 
@@ -153,6 +160,9 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     let element;
 
     beforeEach(async () => {
+      Impl['props'] = {
+        'propA': {attr: 'prop-a'},
+      };
       Impl['children'] = {
         'special1': {
           name: 'special1',
@@ -197,7 +207,9 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       const {special1} = lastProps;
       expect(special1.type).to.equal(Slot);
       expect(special1.props).to.deep.equal({name: 'i-amphtml-special1'});
-      expect(element.querySelector('[special1]').slot).to.equal('i-amphtml-special1');
+      expect(element.querySelector('[special1]').slot).to.equal(
+        'i-amphtml-special1'
+      );
     });
 
     it('should pass children as prop slot array', () => {
@@ -206,10 +218,14 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       const {0: child1, 1: child2} = children;
       expect(child1.type).to.equal(Slot);
       expect(child1.props).to.deep.equal({name: 'i-amphtml-children-0'});
-      expect(element.querySelector('#child1').slot).to.equal('i-amphtml-children-0');
+      expect(element.querySelector('#child1').slot).to.equal(
+        'i-amphtml-children-0'
+      );
       expect(child2.type).to.equal(Slot);
       expect(child2.props).to.deep.equal({name: 'i-amphtml-children-1'});
-      expect(element.querySelector('#child2').slot).to.equal('i-amphtml-children-1');
+      expect(element.querySelector('#child2').slot).to.equal(
+        'i-amphtml-children-1'
+      );
     });
 
     it('should rerender on new children', async () => {
@@ -232,10 +248,14 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       // No changes.
       expect(child1.type).to.equal(Slot);
       expect(child1.props).to.deep.equal({name: 'i-amphtml-children-0'});
-      expect(element.querySelector('#child1').slot).to.equal('i-amphtml-children-0');
+      expect(element.querySelector('#child1').slot).to.equal(
+        'i-amphtml-children-0'
+      );
       expect(child2.type).to.equal(Slot);
       expect(child2.props).to.deep.equal({name: 'i-amphtml-children-1'});
-      expect(element.querySelector('#child2').slot).to.equal('i-amphtml-children-1');
+      expect(element.querySelector('#child2').slot).to.equal(
+        'i-amphtml-children-1'
+      );
     });
 
     it('should rerender when children are removed', async () => {
@@ -252,13 +272,15 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       // No changes.
       expect(child2.type).to.equal(Slot);
       expect(child2.props).to.deep.equal({name: 'i-amphtml-children-1'});
-      expect(element.querySelector('#child2').slot).to.equal('i-amphtml-children-1');
+      expect(element.querySelector('#child2').slot).to.equal(
+        'i-amphtml-children-1'
+      );
     });
 
     it('should rerender on reorder', async () => {
       element.insertBefore(
         element.querySelector('#child2'),
-        element.querySelector('#child1'),
+        element.querySelector('#child1')
       );
 
       await waitFor(() => component.callCount > 1, 'component re-rendered');
@@ -271,10 +293,14 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
       // No changes, except for ordering.
       expect(child1.type).to.equal(Slot);
       expect(child1.props).to.deep.equal({name: 'i-amphtml-children-0'});
-      expect(element.querySelector('#child1').slot).to.equal('i-amphtml-children-0');
+      expect(element.querySelector('#child1').slot).to.equal(
+        'i-amphtml-children-0'
+      );
       expect(child2.type).to.equal(Slot);
       expect(child2.props).to.deep.equal({name: 'i-amphtml-children-1'});
-      expect(element.querySelector('#child2').slot).to.equal('i-amphtml-children-1');
+      expect(element.querySelector('#child2').slot).to.equal(
+        'i-amphtml-children-1'
+      );
     });
 
     it('should ignore service children mutations', async () => {
@@ -287,10 +313,11 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
         element.appendChild(newChild2);
       });
 
-      // Skip couple more animation frames.
-      await new Promise(resolve => setTimeout(resolve, 32));
-
-      expect(component).to.be.calledOnce;
+      // Execute a handled mutation and check that execution happened only
+      // twice.
+      element.setAttribute('prop-a', 'B');
+      await waitFor(() => component.callCount > 1, 'component re-rendered');
+      expect(component).to.be.calledTwice;
     });
   });
 
@@ -298,6 +325,9 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     let element;
 
     beforeEach(async () => {
+      Impl['props'] = {
+        'propA': {attr: 'prop-a'},
+      };
       Impl['passthrough'] = true;
       element = html`
         <amp-preact layout="fixed" width="100" height="100">
@@ -363,10 +393,11 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
         element.appendChild(newChild2);
       });
 
-      // Skip couple more animation frames.
-      await new Promise(resolve => setTimeout(resolve, 32));
-
-      expect(component).to.be.calledOnce;
+      // Execute a handled mutation and check that execution happened only
+      // twice.
+      element.setAttribute('prop-a', 'B');
+      await waitFor(() => component.callCount > 1, 'component re-rendered');
+      expect(component).to.be.calledTwice;
     });
   });
 
@@ -374,6 +405,9 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     let element;
 
     beforeEach(async () => {
+      Impl['props'] = {
+        'propA': {attr: 'prop-a'},
+      };
       Impl['passthroughNonEmpty'] = true;
       element = html`
         <amp-preact layout="fixed" width="100" height="100">
@@ -432,11 +466,11 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
         element.appendChild(newChild2);
       });
 
-      // Skip couple more animation frames.
-      await new Promise(resolve => setTimeout(resolve, 32));
-
-      expect(component).to.be.calledOnce;
+      // Execute a handled mutation and check that execution happened only
+      // twice.
+      element.setAttribute('prop-a', 'B');
+      await waitFor(() => component.callCount > 1, 'component re-rendered');
+      expect(component).to.be.calledTwice;
     });
   });
-
 });
