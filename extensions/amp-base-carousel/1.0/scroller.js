@@ -141,8 +141,6 @@ function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
 
   return (
     <div
-      hide-scrollbar
-      key="container"
       ref={containerRef}
       onScroll={handleScroll}
       class={`${classes.scrollContainer} ${classes.hideScrollbar} ${classes.horizontalScroll}`}
@@ -227,7 +225,7 @@ function renderSlides(
         playable={index == restingIndex}
       >
         <div
-          class={`${classes.slideSizing} ${classes.slideElement} ${classes.hideScrollbarPseudo}`}
+          class={`${classes.slideSizing} ${classes.slideElement}`}
         >
           {child}
         </div>

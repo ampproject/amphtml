@@ -25,6 +25,7 @@ import {
   useState,
 } from '../../../src/preact';
 import {useMountEffect} from '../../../src/preact/utils';
+import {ContainWrapper} from '../../../src/preact/component';
 
 /**
  * @param {!BaseCarouselDef.Props} props
@@ -66,7 +67,12 @@ export function BaseCarousel({
   const disableForDir = (dir) =>
     !loop && (currentSlide + dir < 0 || currentSlide + dir >= length);
   return (
-    <div {...rest}>
+    <ContainWrapper
+      size={true}
+      layout={true}
+      paint={true}
+      {...rest}
+    >
       <Scroller
         loop={loop}
         restingIndex={currentSlide}
@@ -85,6 +91,6 @@ export function BaseCarousel({
         disabled={disableForDir(1)}
         advance={advance}
       />
-    </div>
+    </ContainWrapper>
   );
 }

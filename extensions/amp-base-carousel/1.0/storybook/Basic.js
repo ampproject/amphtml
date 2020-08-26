@@ -31,7 +31,7 @@ export const _default = () => {
   const slideCount = number('slide count', 5, {min: 0, max: 99});
   const colorIncrement = Math.floor(255 / (slideCount + 1));
   return (
-    <BaseCarousel style={{width, height, position: 'relative'}}>
+    <BaseCarousel style={{width, height}}>
       {Array.from({length: slideCount}, (x, i) => {
         const v = colorIncrement * (i + 1);
         return (
@@ -65,7 +65,7 @@ export const provideArrows = () => {
   };
   return (
     <BaseCarousel
-      style={{width, height, position: 'relative'}}
+      style={{width, height}}
       arrowPrev={<MyButton>←</MyButton>}
       arrowNext={<MyButton>→</MyButton>}
     >
@@ -80,7 +80,7 @@ export const WithLooping = () => {
   const width = number('width', 440);
   const height = number('height', 225);
   return (
-    <BaseCarousel loop style={{width, height, position: 'relative'}}>
+    <BaseCarousel loop style={{width, height}}>
       {[
         'lightpink',
         'lightcoral',
@@ -110,7 +110,7 @@ export const WithCaptions = () => {
   return (
     <BaseCarousel
       loop
-      style={{width: '500px', height: '400px', position: 'relative'}}
+      style={{width: '500px', height: '400px'}}
     >
       <figure>
         <img
