@@ -23,7 +23,7 @@ const klaw = require('klaw');
 const log = require('fancy-log');
 const path = require('path');
 const tar = require('tar');
-const {cyan, green, yellow} = require('ansi-colors');
+const {cyan, green} = require('ansi-colors');
 const {execOrDie} = require('../../common/exec');
 const {MINIFIED_TARGETS} = require('../helpers');
 const {VERSION} = require('../../compile/internal-version');
@@ -139,6 +139,7 @@ function discoverDistFlavors_() {
     BASE_FLAVOR_CONFIG,
     ...Object.entries(experimentsConfig)
       .filter(
+        // Only include experiments that have a `define_experiment_constant` field.
         ([, experimentConfig]) => experimentConfig.define_experiment_constant
       )
       .map(([flavorType, experimentConfig]) => ({
@@ -150,9 +151,10 @@ function discoverDistFlavors_() {
         ],
         ...experimentConfig,
       })),
-  ];
-  // TODO(#28168, danielrozenberg): if --flavor is defined, filter out the other
-  // flavors.
+  ].filter(
+    // If --flavor is defined, filter out the rest.
+    ({flavorType}) => !argv.flavor || flavorType == argv.flavor
+  );
 
   log(
     'The following',
@@ -275,19 +277,24 @@ async function populateOrgCdn_(distFlavors, tempDir, outputDir) {
   };
 
   const rtvCopyingPromises = [];
-  for (const {environment, flavorType, rtvPrefixes} of distFlavors) {
+  for (const {flavorType, rtvPrefixes} of distFlavors) {
     rtvCopyingPromises.push(
       ...rtvPrefixes.map((rtvPrefix) =>
         rtvCopyingPromise(rtvPrefix, flavorType)
       )
     );
 
-    // Special handling for INABOX experiments, which requires that their
-    // control population be created from the base flavor.
-    if (environment == 'INABOX') {
-      const rtvPrefix =
-        EXPERIMENTAL_RTV_PREFIXES['INABOX'][`${flavorType}-control`];
-      rtvCopyingPromises.push(rtvCopyingPromise(rtvPrefix, 'base'));
+    // Special handling for INABOX experiments when compiling the base flavor.
+    // INABOX experiments need to have their control population be created from
+    // the base flavor.
+    if (flavorType == 'base') {
+      Object.entries(experimentsConfig)
+        .filter(([, {environment}]) => environment == 'INABOX')
+        .forEach(([experimentFlavor]) => {
+          const rtvPrefix =
+            EXPERIMENTAL_RTV_PREFIXES['INABOX'][`${experimentFlavor}-control`];
+          rtvCopyingPromises.push(rtvCopyingPromise(rtvPrefix, 'base'));
+        });
     }
   }
   await Promise.all(rtvCopyingPromises);
@@ -399,18 +406,6 @@ async function cleanup_(tempDir) {
 }
 
 async function release() {
-  // TODO(#28168, danielrozenberg): remove when this is no longer
-  log.warn(Array(55).fill('*').join(''));
-  log.warn(
-    '* Work on the',
-    cyan('gulp release'),
-    'task is still',
-    `${yellow('in progress')}!`,
-    '*'
-  );
-  log.warn(Array(55).fill('*').join(''));
-  logSeparator_();
-
   // TODO(#27771, danielrozenberg): fail this release quickly if there are
   // commits in the tree that are not from the `master` branch.
 
@@ -423,7 +418,14 @@ async function release() {
   log('Discovering release', `${green('flavors')}...`);
   const distFlavors = await discoverDistFlavors_();
 
-  log('Compiling all', `${green('flavors')}...`);
+  if (argv.flavor && distFlavors.length == 0) {
+    log('Flavor', cyan(argv.flavor), 'is inactive. Quitting...');
+    return;
+  }
+
+  if (!argv.flavor) {
+    log('Compiling all', `${green('flavors')}...`);
+  }
   await compileDistFlavors_(distFlavors, tempDir);
 
   log('Fetching npm package', `${cyan('@ampproject/amp-sw')}...`);
@@ -438,10 +440,11 @@ async function release() {
   log('Prepending config to entry files...');
   await prependConfig_(outputDir);
 
-  log('Copying from temporary directory to', cyan('net-wildcard'));
-  // TODO(#28168, danielrozenberg): this should only be done if --flavor=base or
-  // if --flavor is not set.
-  await populateNetWildcard_(tempDir, outputDir);
+  if (!argv.flavor || argv.flavor == 'base') {
+    // Only populate the net-wildcard directory if --flavor=base or if --flavor is not set.
+    log('Copying from temporary directory to', cyan('net-wildcard'));
+    await populateNetWildcard_(tempDir, outputDir);
+  }
 
   log('Cleaning up temp dir...');
   await cleanup_(tempDir);
@@ -458,7 +461,6 @@ release.description = 'Generates a release build';
 release.flags = {
   'output_dir':
     '  Directory path to emplace release files (defaults to "./release")',
-  // TODO(#28168, danielrozenberg): implement a '--flavor' flag that will limit
-  // this release to a single flavor, so that multiple build servers can split
-  // the work between them.
+  'flavor':
+    '  Limit this release build to a single flavor. Can be used to split the release work between multiple build machines.',
 };

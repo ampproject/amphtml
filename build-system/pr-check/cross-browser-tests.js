@@ -20,18 +20,20 @@ const {red, cyan} = require('ansi-colors');
 
 /**
  * @fileoverview
- * This script kicks off the unit and integration tests on Linux and Mac OS.
- * This is run on Github Actions CI stage = Linux | Mac OS.
+ * This script kicks off the unit and integration tests on Linux, Mac OS, and
+ * Windows. This is run on Github Actions CI stage = Cross-Browser Tests.
  */
 
 const {
   startTimer,
   stopTimer,
   timedExecOrDie: timedExecOrDieBase,
+  timedExec: timedExecBase,
 } = require('./utils');
 
 const FILENAME = 'cross-browser-tests.js';
 const timedExecOrDie = (cmd) => timedExecOrDieBase(cmd, FILENAME);
+const timedExec = (cmd) => timedExecBase(cmd, FILENAME);
 
 async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
@@ -44,11 +46,17 @@ async function main() {
       timedExecOrDie(
         'gulp integration --nobuild --compiled --headless --firefox'
       );
+      break;
     case 'darwin':
       timedExecOrDie('gulp unit --nobuild --safari');
       timedExecOrDie('gulp integration --nobuild --compiled --safari');
       break;
-    // TODO(rsimha, #28208): Build on Windows with native closure compiler.
+    case 'win32':
+      timedExecOrDie('gulp unit --nobuild --headless --edge');
+      timedExecOrDie('gulp integration --nobuild --compiled --headless --edge');
+      // TODO(rsimha): Fix all IE tests and make this task fail the build.
+      timedExec('gulp integration --nobuild --compiled --ie');
+      break;
     default:
       log(
         red('ERROR:'),

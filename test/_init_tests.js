@@ -153,10 +153,6 @@ class TestConfig {
     return this.skip(this.runOnIos);
   }
 
-  skipSauceLabs() {
-    return this.skip(() => !!window.ampTestRuntimeConfig.saucelabs);
-  }
-
   skipIfPropertiesObfuscated() {
     return this.skip(function () {
       return window.__karma__.config.amp.propertiesObfuscated;
@@ -206,16 +202,6 @@ class TestConfig {
    */
   if(fn) {
     this.ifMatchers.push(fn);
-    return this;
-  }
-
-  retryOnSaucelabs(times = 4) {
-    if (!window.ampTestRuntimeConfig.saucelabs) {
-      return this;
-    }
-    this.configTasks.push((mocha) => {
-      mocha.retries(times);
-    });
     return this;
   }
 
@@ -392,7 +378,7 @@ function preventAsyncErrorThrows() {
 before(function () {
   // This is a more robust version of `this.skip()`. See #17245.
   this.skipTest = function () {
-    if (this._runnable.title != '"before all" hook') {
+    if (!this._runnable.title.startsWith('"before all" hook')) {
       throw new Error('skipTest() can only be called from within before()');
     }
     this.test.parent.pending = true; // Workaround for mochajs/mocha#2683.
@@ -490,7 +476,7 @@ afterEach(function () {
   cancelTimersForTesting();
 });
 
-chai.use(require('chai-as-promised')); // eslint-disable-line 
+chai.use(require('chai-as-promised')); // eslint-disable-line
 
 chai.Assertion.addMethod('attribute', function (attr) {
   const obj = this._obj;

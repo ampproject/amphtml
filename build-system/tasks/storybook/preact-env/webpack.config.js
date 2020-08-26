@@ -27,6 +27,10 @@ module.exports = {
       path.join(__dirname, '../node_modules'),
       path.join(__dirname, '../../../../node_modules'),
     ],
+    alias: {
+      'react': 'preact/compat',
+      'react-dom': 'preact/compat',
+    },
   },
   module: {
     rules: [
@@ -36,6 +40,13 @@ module.exports = {
         exclude: /node_modules/,
         query: {
           presets: [
+            [
+              '@babel/preset-env',
+              {
+                bugfixes: true,
+                targets: {'browsers': ['Last 2 versions']},
+              },
+            ],
             [
               '@babel/preset-react',
               {

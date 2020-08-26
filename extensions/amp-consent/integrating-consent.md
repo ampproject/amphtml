@@ -40,12 +40,18 @@ window.parent.postMessage(
   {
     type: 'consent-ui',
     action: 'ready',
+    initialHeight: (optional string, default `30vh`),
+    enableBorder: (optional boolean, default true),
   },
   '*'
 );
 ```
 
 Action `'ready'` informs the AMP runtime to hide the placeholder and show the consent prompt instead.
+
+The `initialHeight` property is used to set the size of consent prompt. Valid values are `30vh` to `80vh`. A valid value below `60vh` (inclusive) will result in amp-consent rendering the consent dialog as a bottom sheet, and a valid value above `60vh` will style the consent prompt as a modal.
+
+The `enableBorder` property determines if the top corners of the consent prompt will be rounded for consent prompts that have an `initialHeight` less than or equal to `60vh`.
 
 ##### enter-fullscreen
 
@@ -87,6 +93,7 @@ window.parent.postMessage(
     type: 'consent-response',
     action: 'accept',
     info: /string/ /* optional */,
+    consentMetadata: /object/ /* optional */,
   },
   '*'
 );
@@ -102,6 +109,7 @@ window.parent.postMessage(
     type: 'consent-response',
     action: 'reject',
     info: /string/ /* optional */,
+    consentMetadata: /object/ /* optional */,
   },
   '*'
 );
@@ -142,6 +150,18 @@ One can get access to the client information via the name attribute inside the i
  * };
  */
 info = JSON.parse(window.name);
+```
+
+#### consentMetadata
+
+`<amp-consent>` [caches](./amp-consent.md#Client-caching) and passes consent information to vendors via `consentMetadata` objects as well as a non-empty `consentString`. You can find and example of the `consentMetadata` object and its supported fields below.
+
+```
+{
+  "consentStringType": {enum} [1: TCF V1, 2: TCF V2, 3: US Privacy String] (optional),
+  "gdprApplies": {boolean} (optional),
+  "additionalConsent": {string} (optional)
+}
 ```
 
 ## Adding your configuration to AMP

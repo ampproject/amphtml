@@ -23,21 +23,15 @@ const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../../common/ctrlcHandler');
-const {
-  createKarmaServer,
-  getAdTypes,
-  runTestInSauceLabs,
-} = require('./helpers');
 const {app} = require('../../server/test-server');
+const {createKarmaServer, getAdTypes} = require('./helpers');
 const {getFilesFromArgv} = require('../../common/utils');
 const {green, yellow, cyan, red} = require('ansi-colors');
 const {isGithubActionsBuild} = require('../../common/github-actions');
-const {isTravisBuild, isTravisPushBuild} = require('../../common/travis');
+const {isTravisBuild} = require('../../common/travis');
 const {reportTestStarted} = require('.././report-test-status');
 const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');
-
-const JSON_REPORT_TEST_TYPES = new Set(['unit', 'integration']);
 
 /**
  * Updates the browsers based off of the test type
@@ -46,34 +40,10 @@ const JSON_REPORT_TEST_TYPES = new Set(['unit', 'integration']);
  * @param {!RuntimeTestConfig} config
  */
 function updateBrowsers(config) {
-  if (argv.saucelabs) {
-    if (config.testType == 'unit') {
-      Object.assign(config, {browsers: ['SL_Safari', 'SL_Firefox']});
-      return;
-    }
-
-    if (config.testType == 'integration') {
-      Object.assign(config, {
-        browsers: [
-          'SL_Chrome',
-          'SL_Firefox',
-          'SL_Edge',
-          'SL_Safari',
-          'SL_IE',
-          'SL_Chrome_Beta',
-          'SL_Firefox_Beta',
-        ],
-      });
-      return;
-    }
-
-    throw new Error(
-      'The --saucelabs flag is valid only for `gulp unit` and `gulp integration`.'
-    );
-  }
-
   if (argv.edge) {
-    Object.assign(config, {browsers: ['Edge']});
+    Object.assign(config, {
+      browsers: [argv.headless ? 'EdgeHeadless' : 'Edge'],
+    });
     return;
   }
 
@@ -158,7 +128,7 @@ function getFiles(testType) {
       if (argv.files) {
         return files.concat(getFilesFromArgv());
       }
-      if (argv.saucelabs || isGithubActionsBuild()) {
+      if (isGithubActionsBuild()) {
         return files.concat(testConfig.unitTestCrossBrowserPaths);
       }
       if (argv.local_changes) {
@@ -198,14 +168,10 @@ function updateReporters(config) {
     config.reporters.push('coverage-istanbul');
   }
 
-  if (argv.saucelabs) {
-    config.reporters.push('saucelabs');
-  }
-
-  if (isTravisPushBuild() && JSON_REPORT_TEST_TYPES.has(config.testType)) {
+  if (argv.report) {
     config.reporters.push('json-result');
     config.jsonResultReporter = {
-      outputFile: `results_${config.testType}.json`,
+      outputFile: `result-reports/${config.testType}.json`,
     };
   }
 }
@@ -234,7 +200,6 @@ class RuntimeTestConfig {
     // c.client is available in test browser via window.parent.karma.config
     this.client.amp = {
       useCompiledJs: !!argv.compiled,
-      saucelabs: !!argv.saucelabs,
       adTypes: getAdTypes(),
       mochaTimeout: this.client.mocha.timeout,
       testServerPort: this.client.testServerPort,
@@ -279,12 +244,7 @@ class RuntimeTestRunner {
 
   async run() {
     reportTestStarted();
-
-    if (argv.saucelabs) {
-      this.exitCode = await runTestInSauceLabs(this.config);
-    } else {
-      this.exitCode = await createKarmaServer(this.config);
-    }
+    this.exitCode = await createKarmaServer(this.config);
   }
 
   async teardown() {

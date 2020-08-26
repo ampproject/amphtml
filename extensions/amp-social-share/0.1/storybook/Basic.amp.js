@@ -18,7 +18,7 @@ import * as Preact from '../../../../src/preact';
 import {select, text, withKnobs} from '@storybook/addon-knobs';
 import {storiesOf} from '@storybook/preact';
 import {withA11y} from '@storybook/addon-a11y';
-import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
+import {withAmp} from '@ampproject/storybook-addon';
 
 // eslint-disable-next-line
 storiesOf('amp-social-share v1', module)

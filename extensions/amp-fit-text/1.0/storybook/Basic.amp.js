@@ -17,15 +17,18 @@
 import * as Preact from '../../../../src/preact';
 import {storiesOf} from '@storybook/preact';
 import {withA11y} from '@storybook/addon-a11y';
+import {withAmp} from '@ampproject/storybook-addon';
 import {withKnobs} from '@storybook/addon-knobs';
-import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
 
 // eslint-disable-next-line
 storiesOf('amp-fit-text', module)
   .addDecorator(withKnobs)
   .addDecorator(withA11y)
   .addDecorator(withAmp)
-  .addParameters({extensions: [{name: 'amp-fit-text', version: '1.0'}]})
+  .addParameters({
+    extensions: [{name: 'amp-fit-text', version: '1.0'}],
+    experiments: ['amp-fit-text-bento'],
+  })
   .add('Scale up to cover', () => {
     return (
       <amp-fit-text

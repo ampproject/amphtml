@@ -29,7 +29,6 @@ import {
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service';
-import {toggleExperiment} from '../../../../src/experiments';
 import {user} from '../../../../src/log';
 import {whenCalled} from '../../../../testing/test-helper.js';
 
@@ -314,14 +313,6 @@ describes.realWin(
       });
 
       describe('fullscreen user interaction experiment', () => {
-        beforeEach(() => {
-          toggleExperiment(win, 'amp-consent-restrict-fullscreen', true);
-        });
-
-        afterEach(() => {
-          toggleExperiment(win, 'amp-consent-restrict-fullscreen', false);
-        });
-
         it('should focus on the SR alert button', () => {
           consentUI = new ConsentUI(mockInstance, {
             'promptUISrc': 'https://promptUISrc',
@@ -524,7 +515,7 @@ describes.realWin(
             'requestAction': 'enter-fullscreen',
             'state': 'error',
             'info':
-              'Could not enter fullscreen. Fullscreen is only supported when the iframe is visible and after user interaction.',
+              'Could not enter fullscreen. Fullscreen is only supported when the iframe is visible as a bottom sheet and after user interaction.',
           });
 
           errorSpy.resetHistory();
@@ -655,6 +646,80 @@ describes.realWin(
         });
       });
 
+      it('should trigger modal with certain vh', async () => {
+        consentUI = new ConsentUI(mockInstance, {
+          'promptUISrc': 'https//promptUISrc',
+        });
+
+        expect(consentUI.initialHeight_).to.be.equal('30vh');
+        expect(consentUI.modalEnabled_).to.be.false;
+        expect(consentUI.overlayEnabled_).to.be.undefined;
+
+        consentUI.show(true);
+        consentUI.handleIframeMessages_({
+          source: consentUI.ui_.contentWindow,
+          data: {
+            type: 'consent-ui',
+            action: 'ready',
+            initialHeight: '80vh',
+          },
+        });
+        await macroTask();
+
+        expect(consentUI.initialHeight_).to.be.equal('80vh');
+        expect(consentUI.modalEnabled_).to.be.true;
+        expect(consentUI.overlayEnabled_).to.be.true;
+        expect(consentUI.parent_.classList.contains(consentUiClasses.modal)).to
+          .be.true;
+        expect(
+          consentUI.parent_.classList.contains(consentUiClasses.borderEnabled)
+        ).to.be.true;
+        expect(
+          consentUI.parent_.classList.contains(consentUiClasses.iframeActive)
+        ).to.be.true;
+        expect(
+          consentUI.parent_.style.getPropertyValue('--i-amphtml-modal-height')
+        ).to.equal('80vh');
+        expect(consentUI.maskElement_.classList.contains(consentUiClasses.mask))
+          .to.be.true;
+
+        // Hide
+        consentUI.hide();
+        expect(consentUI.parent_.classList.contains(consentUiClasses.modal)).to
+          .be.false;
+        expect(
+          consentUI.parent_.classList.contains(consentUiClasses.borderEnabled)
+        ).to.be.false;
+        expect(
+          consentUI.parent_.classList.contains(consentUiClasses.iframeActive)
+        ).to.be.false;
+        expect(consentUI.maskElement_.hasAttribute('hidden')).to.be.true;
+      });
+
+      it('should trigger modal view and force overlay and borders', async () => {
+        consentUI = new ConsentUI(mockInstance, {
+          'promptUISrc': 'https//promptUISrc',
+          'uiConfig': {},
+        });
+
+        consentUI.show(true);
+        consentUI.handleIframeMessages_({
+          source: consentUI.ui_.contentWindow,
+          data: {
+            type: 'consent-ui',
+            action: 'ready',
+            initialHeight: '80vh',
+            border: false,
+          },
+        });
+        await macroTask();
+
+        expect(consentUI.overlayEnabled_).to.be.true;
+        expect(
+          consentUI.parent_.classList.contains(consentUiClasses.borderEnabled)
+        ).to.be.true;
+      });
+
       it('should throw an error on an invalid initial height', () => {
         return getReadyIframeCmpConsentUi().then((consentUI) => {
           expect(consentUI.initialHeight_).to.be.equal('30vh');
@@ -676,7 +741,7 @@ describes.realWin(
 
       it('should handle a border value', () => {
         return getReadyIframeCmpConsentUi().then((consentUI) => {
-          expect(consentUI.enableBorder_).to.be.equal(true);
+          expect(consentUI.borderEnabled_).to.be.equal(true);
 
           consentUI.handleIframeMessages_({
             source: consentUI.ui_.contentWindow,
@@ -687,25 +752,12 @@ describes.realWin(
             },
           });
 
-          expect(consentUI.enableBorder_).to.be.equal(false);
+          expect(consentUI.borderEnabled_).to.be.equal(false);
         });
       });
     });
 
     describe('fullscreen', () => {
-      it('should respond to the fullscreen event', () => {
-        return getReadyIframeCmpConsentUi().then((consentUI) => {
-          const enterFullscreenStub = env.sandbox.stub(
-            consentUI,
-            'enterFullscreen_'
-          );
-
-          sendMessageConsentUi(consentUI, 'enter-fullscreen');
-
-          expect(enterFullscreenStub).to.be.calledOnce;
-        });
-      });
-
       it(
         'should not handle the fullscreen event, ' +
           "if the iframe wasn't visible",
@@ -724,81 +776,152 @@ describes.realWin(
         }
       );
 
-      describe('enterFullscreen', () => {
-        it('should add fullscreen classes and set fullscreen state', () => {
-          return getReadyIframeCmpConsentUi().then((consentUI) => {
-            consentUI.enterFullscreen_();
+      it('should not enter fullscreen in modal view', async () => {
+        const errorSpy = env.sandbox.spy(user(), 'warn');
 
-            expect(parent.classList.contains(consentUiClasses.iframeFullscreen))
-              .to.be.true;
-            expect(consentUI.isFullscreen_).to.be.true;
-          });
+        consentUI = new ConsentUI(mockInstance, {
+          'promptUISrc': 'https//promptUISrc',
         });
 
-        it('should not enter fullscreen if already fullscreen', () => {
-          return getReadyIframeCmpConsentUi().then((consentUI) => {
-            consentUI.isFullscreen_ = true;
-            consentUI.enterFullscreen_();
+        // trigger modal view
+        consentUI.show(true);
+        consentUI.handleIframeMessages_({
+          source: consentUI.ui_.contentWindow,
+          data: {
+            type: 'consent-ui',
+            action: 'ready',
+            initialHeight: '80vh',
+          },
+        });
+        await macroTask();
 
-            expect(parent.classList.contains(consentUiClasses.iframeFullscreen))
-              .to.be.false;
-          });
+        const windowSpy = env.sandbox.spy(
+          consentUI.ui_.contentWindow,
+          'postMessage'
+        );
+
+        sendMessageConsentUi(consentUI, 'enter-fullscreen');
+
+        expect(errorSpy).to.be.calledOnce;
+        expect(errorSpy.args[0][1]).to.match(/Could not enter fullscreen/);
+        expect(windowSpy).to.be.calledOnce;
+        expect(windowSpy.args[0][0]).to.deep.equal({
+          'type': 'amp-consent-response',
+          'requestType': 'consent-ui',
+          'requestAction': 'enter-fullscreen',
+          'state': 'error',
+          'info':
+            'Could not enter fullscreen. Fullscreen is only supported when the iframe is visible as a bottom sheet and after user interaction.',
+        });
+        expect(consentUI.isFullscreen_).to.be.false;
+      });
+    });
+
+    describe('enterFullscreen', () => {
+      it('should add fullscreen classes and set fullscreen state', () => {
+        return getReadyIframeCmpConsentUi().then((consentUI) => {
+          consentUI.enterFullscreen_();
+
+          expect(parent.classList.contains(consentUiClasses.iframeFullscreen))
+            .to.be.true;
+          expect(consentUI.isFullscreen_).to.be.true;
         });
       });
 
-      it('should disable scrolling', () => {
+      it('should not enter fullscreen if already fullscreen', () => {
         return getReadyIframeCmpConsentUi().then((consentUI) => {
-          expect(consentUI.scrollEnabled_).to.be.true;
+          consentUI.isFullscreen_ = true;
+          consentUI.enterFullscreen_();
+
+          expect(parent.classList.contains(consentUiClasses.iframeFullscreen))
+            .to.be.false;
+        });
+      });
+    });
+
+    it('should disable scrolling', () => {
+      return getReadyIframeCmpConsentUi().then((consentUI) => {
+        expect(consentUI.scrollEnabled_).to.be.true;
+
+        consentUI.enterFullscreen_();
+
+        expect(consentUI.scrollEnabled_).to.be.false;
+
+        env.sandbox
+          .stub(consentUI, 'baseInstance_')
+          .callsFake((callback) => callback());
+        consentUI.hide();
+        expect(consentUI.scrollEnabled_).to.be.true;
+      });
+    });
+
+    it(
+      'should hide the viewer on enterFullscreen, ' +
+        'and show the viewer on hide',
+      () => {
+        return getReadyIframeCmpConsentUi().then((consentUI) => {
+          const sendMessageStub = env.sandbox.stub(
+            consentUI.viewer_,
+            'sendMessage'
+          );
 
           consentUI.enterFullscreen_();
 
-          expect(consentUI.scrollEnabled_).to.be.false;
+          expect(sendMessageStub).to.be.calledOnce;
 
           env.sandbox
             .stub(consentUI, 'baseInstance_')
             .callsFake((callback) => callback());
           consentUI.hide();
-          expect(consentUI.scrollEnabled_).to.be.true;
+          expect(sendMessageStub).to.be.calledTwice;
         });
+      }
+    );
+
+    it('should hide the viewer when modal enabled and show the viewer on hide', async () => {
+      consentUI = new ConsentUI(mockInstance, {
+        'promptUISrc': 'https//promptUISrc',
       });
 
-      it(
-        'should hide the viewer on enterFullscreen, ' +
-          'and show the viewer on hide',
-        () => {
-          return getReadyIframeCmpConsentUi().then((consentUI) => {
-            const sendMessageStub = env.sandbox.stub(
-              consentUI.viewer_,
-              'sendMessage'
-            );
-
-            consentUI.enterFullscreen_();
-
-            expect(sendMessageStub).to.be.calledOnce;
-
-            env.sandbox
-              .stub(consentUI, 'baseInstance_')
-              .callsFake((callback) => callback());
-            consentUI.hide();
-            expect(sendMessageStub).to.be.calledTwice;
-          });
-        }
+      const enterLightboxStub = env.sandbox.stub(
+        consentUI.viewport_,
+        'enterLightboxMode'
       );
-    });
+      const leaveLightboxStub = env.sandbox.stub(
+        consentUI.viewport_,
+        'leaveLightboxMode'
+      );
 
-    /**\
-     * @param {!ConsentUI} consentUI
-     * @param {string} source
-     * @param {string} action
-     */
-    function sendMessageConsentUi(consentUI, action) {
+      consentUI.show(true);
       consentUI.handleIframeMessages_({
         source: consentUI.ui_.contentWindow,
         data: {
           type: 'consent-ui',
-          action,
+          action: 'ready',
+          initialHeight: '80vh',
         },
       });
-    }
+      await macroTask();
+      expect(enterLightboxStub).to.be.calledOnce;
+
+      // Hide
+      consentUI.hide();
+      expect(leaveLightboxStub).to.be.calledOnce;
+    });
   }
 );
+
+/**\
+ * @param {!ConsentUI} consentUI
+ * @param {string} source
+ * @param {string} action
+ */
+function sendMessageConsentUi(consentUI, action) {
+  consentUI.handleIframeMessages_({
+    source: consentUI.ui_.contentWindow,
+    data: {
+      type: 'consent-ui',
+      action,
+    },
+  });
+}

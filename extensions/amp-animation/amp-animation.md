@@ -111,8 +111,9 @@ Trigger the start of one or multiple animations via the `trigger` attribute or
 an [action](#actions).
 
 You may place `amp-animation` controlled via actions anywhere in the DOM. If the
-animation contains `trigger="visibility"` it must be a direct child of the
-`<body>`.
+animation contains `trigger="visibility"` it will be triggered when
+the parent element comes into the viewport, and paused when it leaves the
+viewport.
 
 ### Defining effects
 
@@ -227,7 +228,7 @@ with the following nuances:
   `-moz-transform` for broad-platform support. Vendor prefixes are not needed
   and not allowed in the JSON format, but in CSS they could be necessary.
 
-- In unsupported platforms, `amp-animation`'s pollyfills will fail when using
+- In unsupported platforms, `amp-animation`'s polyfills will fail when using
   `calc()` and `var()` with keyframes specified in CSS. Use fallback values in
   CSS to avoid this.
 
@@ -398,7 +399,7 @@ In the example above:
   It defaults to `0px` if the query does not find it defined as CSS
   within the `<amp style-custom>` tags.
 
-Pollyfills apply to both `var()` and `calc()` on supported platforms. As
+Polyfills apply to both `var()` and `calc()` on supported platforms. As
 a best practice, include default values for `var()`.
 
 ```html
@@ -500,7 +501,7 @@ The returned value is in pixels, e.g. `100px`.
 
 The `width()` and `height()` are especially useful for transforms. The `left`,
 `top` and similar CSS properties that can use `%` values to express animations
-proportional to container size. However, `transform` property interpretes `%`
+proportional to container size. However, `transform` property interprets `%`
 values differently - as a percent of the selected element. Thus, the `width()`
 and `height()` can be used to express transform animations in terms of container
 elements and similar.
@@ -584,7 +585,7 @@ CSS keyframe properties, with the following nuances:
   important on IE/Edge, it's recommended to duplicate it via
   [SVG `transform` attribute](https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform).
 
-- It is impossible to pollyfill `transform-origin` for IE/Edge. For
+- It is impossible to polyfill `transform-origin` for IE/Edge. For
   compatibility, use only the default `transform-origin`.
 
 - Use [CSS `transform-box`](https://developer.mozilla.org/en-US/docs/Web/CSS/transform-box)
@@ -741,6 +742,40 @@ For instance:
 </amp-animation>
 <button on="tap:anim1.start">Animate</button>
 ```
+
+### Accessibility considerations for animations
+
+If you are using animations to convey meaning or content, make sure that this is also conveyed in some other form for users who may not be able to see those animations. At the most basic level, make sure that your text content conveys the same information as the animation. For instance, if you're using an `<amp-animation>` to illustrate a sequence of steps in a process, make sure that there is also text (either on the same page, or in a linked page) that describes the same sequence of steps in words.
+
+Animations can't usually be paused/stopped by users. This can, depending on the type of animation, its size, and whether it loops/repeats or not, be a minor distraction, or a major problem for certain user groups - particularly, if the animation contains fast strobing color changes. In general, we recommend avoiding the use of large, infinitely repeating animations, unless you are certain that they won't have an adverse impact on users. Consider providing a control to allow users to pause an animation. Consider taking advantage of the [`prefers-reduced-motion`](https://www.w3.org/TR/mediaqueries-5/#prefers-reduced-motion) [media query](#media-queries), and only having an animation take effect if the user has <em>not</em> indicated a preference for reduced motion/animations.
+
+```html
+<amp-animation ... media="not (prefers-reduced-motion: reduce)">
+  <!-- this animation will only play if the user has *not*
+       expressed a preference for reduced motion -->
+  ...
+</amp-animation>
+```
+
+You can take this further and provide separate, more subtle fallback animations to take effect when `prefers-reduced-motion: reduce` does evaluate to true, or split out smaller animations that should happen in all cases, regardless of the media feature.
+
+```html
+<amp-animation ... media="(prefers-reduced-motion: reduce)">
+  <!-- fallback subtle animation effects that only play if the user
+       has expressed a preference for reduced motion -->
+  ...
+</amp-animation>
+
+<amp-animation ...>
+  <!-- general/common animation effects that will take effect
+       regardless of any user preference for reduced motion -->
+  ...
+</amp-animation>
+```
+
+See [MDN - `prefers-reduced-motion`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion) and this introductory article on [web.dev - prefers-reduced-motion: Sometimes less movement is more](https://web.dev/prefers-reduced-motion/) for further details.
+
+For animations that are not purely decorative/visual effects, but actually convey information, make sure that any important text and graphical/non-text elements have sufficient color contrast. See [web.dev color and contrast accessibility](https://web.dev/color-and-contrast-accessibility/) for an introduction (primarily around text contrast) and [Knowbility: Exploring WCAG 2.1 — 1.4.11 Non‑text Contrast](https://knowbility.org/blog/2018/WCAG21-1411Contrast/) for more details around non-text elements.
 
 ## Attributes
 

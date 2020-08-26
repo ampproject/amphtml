@@ -42,9 +42,10 @@ function main() {
   if (!isTravisPullRequestBuild()) {
     downloadBuildOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
-    timedExecOrDie('gulp integration --nobuild --headless --coverage');
-    timedExecOrDie('gulp unit --nobuild --headless --coverage');
+    timedExecOrDie('gulp integration --nobuild --headless --coverage --report');
+    timedExecOrDie('gulp unit --nobuild --headless --coverage --report');
     timedExecOrDie('gulp codecov-upload');
+    timedExecOrDie('gulp test-report-upload');
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
