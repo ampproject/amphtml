@@ -75,21 +75,21 @@ describes.realWin(
 
       win.vpt = win.vpt || {};
       win.vpt.EVENTS = {
-        AD_SESSION_START: 'AdSessionStart',
+        PLAYER_READY: 'VPT-EVENT::PLAYER_READY',
       };
       win.vpt.queue = win.vpt.queue || [];
-      win.vpt.on = (event, callback) => {
-        if (callbacks[event] == null) {
-          callbacks[event] = [];
+      win.vpt.on = (callbackCfg, callback) => {
+        if (callbacks[callbackCfg.event] == null) {
+          callbacks[callbackCfg.event] = [];
         }
-        callbacks[event].push(callback);
+        callbacks[callbackCfg.event].push(callback);
       };
       win.vpt.queue.forEach(function (fn) {
         fn();
       });
       win.vpt.queue = {
         push: function (fn) {
-          setTimeout(fn, 0);
+          fn();
         },
       };
 
@@ -104,6 +104,15 @@ describes.realWin(
       };
     }
 
+    /**
+     * AMP video manager expect an iframe or a video element to be created as child of the tag.
+     * Invoking this function create a mock element so as to cheat AMP
+     */
+    function mockViralizeIframe(element) {
+      const iframe = document.createElement('iframe');
+      element.appendChild(iframe);
+    }
+
     it('should contain Viralize script after first layout complete', async () => {
       const element = appendNewViralizeElement({
         layout: 'responsive',
@@ -112,9 +121,11 @@ describes.realWin(
         width: 320,
       });
       await element.build();
-      const layoutPromise = element.layoutCallback();
+      mockViralizeIframe(element);
       const simulateEvent = viralizeVPTMock(win);
-      simulateEvent(win.vpt.EVENTS.AD_SESSION_START);
+      const layoutPromise = element.layoutCallback();
+      await Promise.resolve();
+      simulateEvent(win.vpt.EVENTS.PLAYER_READY);
       await layoutPromise;
       expect(element.querySelector('script').src).to.match(
         /content.viralize.tv/
@@ -130,9 +141,11 @@ describes.realWin(
         width: 320,
       });
       await element.build();
-      const layoutPromise = element.layoutCallback();
+      mockViralizeIframe(element);
       const simulateEvent = viralizeVPTMock(win);
-      simulateEvent(win.vpt.EVENTS.AD_SESSION_START);
+      const layoutPromise = element.layoutCallback();
+      await Promise.resolve();
+      simulateEvent(win.vpt.EVENTS.PLAYER_READY);
       await layoutPromise;
       expect(element.querySelector('script').src).to.contain(
         `zid=${randomZidValue}`
@@ -147,9 +160,11 @@ describes.realWin(
         width: 320,
       });
       await element.build();
-      const layoutPromise = element.layoutCallback();
+      mockViralizeIframe(element);
       const simulateEvent = viralizeVPTMock(win);
-      simulateEvent(win.vpt.EVENTS.AD_SESSION_START);
+      const layoutPromise = element.layoutCallback();
+      await Promise.resolve();
+      simulateEvent(win.vpt.EVENTS.PLAYER_READY);
       await layoutPromise;
       await element.unlayoutCallback();
       expect(element.querySelector('script')).to.be.null;
@@ -164,9 +179,11 @@ describes.realWin(
         'data-extra': '{"u": "viralize.com"}',
       });
       await element.build();
-      const layoutPromise = element.layoutCallback();
+      mockViralizeIframe(element);
       const simulateEvent = viralizeVPTMock(win);
-      simulateEvent(win.vpt.EVENTS.AD_SESSION_START);
+      const layoutPromise = element.layoutCallback();
+      await Promise.resolve();
+      simulateEvent(win.vpt.EVENTS.PLAYER_READY);
       await layoutPromise;
       expect(element.querySelector('script').src).to.contain(`u=viralize.com`);
     });
@@ -179,9 +196,11 @@ describes.realWin(
         width: 320,
       });
       await element.build();
-      const layoutPromise = element.layoutCallback();
+      mockViralizeIframe(element);
       const simulateEvent = viralizeVPTMock(win);
-      simulateEvent(win.vpt.EVENTS.AD_SESSION_START);
+      const layoutPromise = element.layoutCallback();
+      await Promise.resolve();
+      simulateEvent(win.vpt.EVENTS.PLAYER_READY);
       await layoutPromise;
       expect(element.querySelector('script').src).to.contain(`vip_mode=no`);
     });
@@ -195,9 +214,11 @@ describes.realWin(
         'data-extra': '{"vip_mode": "always"}',
       });
       await element.build();
-      const layoutPromise = element.layoutCallback();
+      mockViralizeIframe(element);
       const simulateEvent = viralizeVPTMock(win);
-      simulateEvent(win.vpt.EVENTS.AD_SESSION_START);
+      const layoutPromise = element.layoutCallback();
+      await Promise.resolve();
+      simulateEvent(win.vpt.EVENTS.PLAYER_READY);
       await layoutPromise;
       expect(element.querySelector('script').src).to.contain(`vip_mode=no`);
     });
@@ -210,9 +231,11 @@ describes.realWin(
         width: 320,
       });
       await element.build();
-      const layoutPromise = element.layoutCallback();
+      mockViralizeIframe(element);
       const simulateEvent = viralizeVPTMock(win);
-      simulateEvent(win.vpt.EVENTS.AD_SESSION_START);
+      const layoutPromise = element.layoutCallback();
+      await Promise.resolve();
+      simulateEvent(win.vpt.EVENTS.PLAYER_READY);
       await layoutPromise;
       expect(element.querySelector('script').src).to.contain(`location=inline`);
     });
@@ -226,9 +249,11 @@ describes.realWin(
         'data-extra': '{"location": "auto"}',
       });
       await element.build();
-      const layoutPromise = element.layoutCallback();
+      mockViralizeIframe(element);
       const simulateEvent = viralizeVPTMock(win);
-      simulateEvent(win.vpt.EVENTS.AD_SESSION_START);
+      const layoutPromise = element.layoutCallback();
+      await Promise.resolve();
+      simulateEvent(win.vpt.EVENTS.PLAYER_READY);
       await layoutPromise;
       expect(element.querySelector('script').src).to.contain(`location=inline`);
     });

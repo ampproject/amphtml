@@ -16,18 +16,19 @@
 
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {VideoEvents} from '../../../src/video-interface';
+import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
 import {addParamsToUrl} from '../../../src/url';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isFullscreenElement, removeElement} from '../../../src/dom';
 import {parseJson} from '../../../src/json';
+import {setStyle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
 
 /** @private @const {!string} */
 const TAG = 'amp-viralize-player';
 
 /** @private @const {!string} */
-const BASE_URL = 'https://content.viralize.tv/display/';
+const BASE_URL = 'https://content.viralize.tv';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -48,6 +49,12 @@ class AmpViralizePlayer extends AMP.BaseElement {
 
     /** @private {Element} */
     this.iframe_ = null;
+
+    /** @private {Array} */
+    this.preloadCmdQueue_ = [];
+
+    /** @private {boolean} */
+    this.playerReady_ = false;
   }
 
   /**
@@ -64,7 +71,12 @@ class AmpViralizePlayer extends AMP.BaseElement {
     this.extraParams_ = parseJson(
       this.element.getAttribute('data-extra') || '{}'
     );
-    this.extraParams_['activation'] = 'click';
+    this.extraParams_['activation'] = 'click'; // Autoplay is handled through tag attribute
+    if (this.element.hasAttribute(VideoAttributes.AUTOPLAY)) {
+      // If autoplay, immediately force audio off otherwise AMP framework will assume that player
+      // want to start audio on and will not play it
+      this.extraParams_['sound'] = 'never';
+    }
     this.extraParams_['vip_mode'] = 'no';
     this.extraParams_['location'] = 'inline';
     this.extraParams_['pub_platform'] = 'amp-viralize-player';
@@ -74,7 +86,6 @@ class AmpViralizePlayer extends AMP.BaseElement {
 
     installVideoManagerForDoc(this.element);
     Services.videoManagerForDoc(this.element).register(this);
-    this.element.dispatchCustomEvent(VideoEvents.REGISTERED);
   }
 
   /** @override */
@@ -88,6 +99,10 @@ class AmpViralizePlayer extends AMP.BaseElement {
     this.container_ = this.element.ownerDocument.createElement('div');
     this.element.appendChild(this.container_);
     this.applyFillContent(this.container_);
+    // Required to force the creation of a new stacking context. This guarantee that user
+    // interaction are always caught by the amp mask instead that from an internal element with
+    // higher z-index
+    setStyle(this.container_, 'z-index', '0');
 
     const script = this.element.ownerDocument.createElement('script');
     script.src = this.getPlayerUrl_(this.zid_);
@@ -99,10 +114,12 @@ class AmpViralizePlayer extends AMP.BaseElement {
         this.win.vpt.on(
           {event: this.win.vpt.EVENTS.PLAYER_READY, zid: this.zid_},
           () => {
+            this.playerReady_ = true;
             this.iframe_ = Array.from(
               this.element.ownerDocument.getElementsByTagName('iframe')
             ).find((el) => el.id.match(/vr-[A-Za-z0-9]*-player-iframe/));
-            this.element.dispatchCustomEvent(VideoEvents.LOAD);
+            this.dispatchEvent_(VideoEvents.LOAD);
+            this.executeCmdQueue_();
             resolve();
           }
         );
@@ -110,49 +127,56 @@ class AmpViralizePlayer extends AMP.BaseElement {
         this.win.vpt.on(
           {event: this.win.vpt.EVENTS.START, zid: this.zid_},
           () => {
-            this.element.dispatchCustomEvent(VideoEvents.AD_START);
+            this.dispatchEvent_(VideoEvents.AD_START);
           }
         );
 
         this.win.vpt.on(
           {event: this.win.vpt.EVENTS.COMPLETE, zid: this.zid_},
           () => {
-            this.element.dispatchCustomEvent(VideoEvents.AD_END);
+            this.dispatchEvent_(VideoEvents.AD_END);
+          }
+        );
+
+        this.win.vpt.on(
+          {event: this.win.vpt.EVENTS.SKIP, zid: this.zid_},
+          () => {
+            this.dispatchEvent_(VideoEvents.AD_END);
           }
         );
 
         this.win.vpt.on(
           {event: this.win.vpt.EVENTS.CONTENT_END, zid: this.zid_},
           () => {
-            this.element.dispatchCustomEvent(VideoEvents.ENDED);
+            this.dispatchEvent_(VideoEvents.ENDED);
           }
         );
 
         this.win.vpt.on(
           {event: this.win.vpt.EVENTS.PLAYING, zid: this.zid_},
           () => {
-            this.element.dispatchCustomEvent(VideoEvents.PLAYING);
+            this.dispatchEvent_(VideoEvents.PLAYING);
           }
         );
 
         this.win.vpt.on(
           {event: this.win.vpt.EVENTS.PAUSED, zid: this.zid_},
           () => {
-            this.element.dispatchCustomEvent(VideoEvents.PAUSE);
+            this.dispatchEvent_(VideoEvents.PAUSE);
           }
         );
 
         this.win.vpt.on(
           {event: this.win.vpt.EVENTS.MUTED, zid: this.zid_},
           () => {
-            this.element.dispatchCustomEvent(VideoEvents.MUTED);
+            this.dispatchEvent_(VideoEvents.MUTED);
           }
         );
 
         this.win.vpt.on(
           {event: this.win.vpt.EVENTS.UNMUTED, zid: this.zid_},
           () => {
-            this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
+            this.dispatchEvent_(VideoEvents.UNMUTED);
           }
         );
       });
@@ -175,7 +199,7 @@ class AmpViralizePlayer extends AMP.BaseElement {
 
   /** @override */
   viewportCallback(visible) {
-    this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
+    this.dispatchEvent_(VideoEvents.VISIBILITY, {visible});
   }
 
   /** @override */
@@ -217,44 +241,32 @@ class AmpViralizePlayer extends AMP.BaseElement {
 
   /** @override */
   play(unusedIsAutoplay) {
-    this.win.vpt.queue.push(() => {
-      this.win.vpt.play(this.zid_);
-    });
+    this.VPTCmd_('play');
   }
 
   /** @override */
   pause() {
-    this.win.vpt.queue.push(() => {
-      this.win.vpt.pause(this.zid_);
-    });
+    this.VPTCmd_('pause');
   }
 
   /** @override */
   mute() {
-    this.win.vpt.queue.push(() => {
-      this.win.vpt.mute(this.zid_);
-    });
+    this.VPTCmd_('mute');
   }
 
   /** @override */
   unmute() {
-    this.win.vpt.queue.push(() => {
-      this.win.vpt.unmute(this.zid_);
-    });
+    this.VPTCmd_('unmute');
   }
 
   /** @override */
   showControls() {
-    this.win.vpt.queue.push(() => {
-      this.win.vpt.showControls(this.zid_);
-    });
+    this.VPTCmd_('showControls');
   }
 
   /** @override */
   hideControls() {
-    this.win.vpt.queue.push(() => {
-      this.win.vpt.hideControls(this.zid_);
-    });
+    this.VPTCmd_('hideControls');
   }
 
   /** @override */
@@ -274,16 +286,12 @@ class AmpViralizePlayer extends AMP.BaseElement {
 
   /** @override */
   fullscreenEnter() {
-    this.win.vpt.queue.push(() => {
-      this.win.vpt.enterFullscreen(this.zid_);
-    });
+    this.VPTCmd_('enterFullscreen');
   }
 
   /** @override */
   fullscreenExit() {
-    this.win.vpt.queue.push(() => {
-      this.win.vpt.exitFullscreen(this.zid_);
-    });
+    this.VPTCmd_('exitFullscreen');
   }
 
   /** @override */
@@ -310,7 +318,58 @@ class AmpViralizePlayer extends AMP.BaseElement {
    * @private
    */
   getPlayerUrl_(zid) {
-    return addParamsToUrl(`${BASE_URL}?zid=${zid}`, this.extraParams_);
+    return addParamsToUrl(`${BASE_URL}/display/?zid=${zid}`, this.extraParams_);
+  }
+
+  /**
+   * Ask player to execute specified command. If player is not yet ready to receive it,
+   * command will be enqueued waiting for player to be loaded
+   *
+   * @param {string} cmd the command to be executed
+   * @private
+   */
+  VPTCmd_(cmd) {
+    if (this.playerReady_) {
+      this.executeVPTCmd_(cmd);
+    } else {
+      this.preloadCmdQueue_.push(cmd);
+    }
+  }
+
+  /**
+   * Send all enqueued commands to the player
+   *
+   * @private
+   */
+  executeCmdQueue_() {
+    for (let i = 0; i < this.preloadCmdQueue_.length; i++) {
+      this.executeVPTCmd_(this.preloadCmdQueue_[i]);
+    }
+    this.preloadCmdQueue_ = [];
+  }
+
+  /**
+   * Immediately send the command to the player. This method assumes that the player is ready
+   * to receive commands
+   *
+   * @param {string} cmd the command to be executed
+   * @private
+   */
+  executeVPTCmd_(cmd) {
+    this.win.vpt.queue.push(() => {
+      this.win.vpt[cmd](this.zid_);
+    });
+  }
+
+  /**
+   * Dispatch an event from the element
+   *
+   * @param {string} event the event to be dispatched
+   * @param {string} opt_data optional event data
+   * @private
+   */
+  dispatchEvent_(event, opt_data) {
+    this.element.dispatchCustomEvent(event, opt_data);
   }
 }
 
