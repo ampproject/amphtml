@@ -236,7 +236,7 @@ export class AmpStory360 extends AMP.BaseElement {
     this.timer_ = Services.timerFor(this.win);
 
     /** @private {number} To sync a debounce to the next frame animation */
-    this.rafTimeout;
+    this.rafTimeout_;
   }
 
   /** @override */
@@ -361,8 +361,8 @@ export class AmpStory360 extends AMP.BaseElement {
    * @private
    */
   rafDebounce_(callback) {
-    this.rafTimeout && this.win.cancelAnimationFrame(this.rafTimeout);
-    this.rafTimeout = this.win.requestAnimationFrame(() => callback());
+    this.rafTimeout_ && this.win.cancelAnimationFrame(this.rafTimeout_);
+    this.rafTimeout_ = this.win.requestAnimationFrame(() => callback());
   }
 
   /**
