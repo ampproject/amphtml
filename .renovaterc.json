@@ -84,6 +84,16 @@
     },
 
     {
+      "packagePatterns": ["\\bbabel\\b"],
+
+      "groupName": "babel devDependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "babel-"
+      }
+    },
+
+    {
       "packagePatterns": ["renovate"],
       "depTypeList": ["devDependencies"],
       "groupName": "Renovate Bot"
