@@ -676,7 +676,7 @@ export function draw3p(win, data, configCallback) {
     isTagNameAllowed(type, win.context.tagName),
     'Embed type %s not allowed with tag %s',
     type,
-    win.context.tagName,
+    win.context.tagName
   );
   if (configCallback) {
     configCallback(data, (data) => {
@@ -700,10 +700,10 @@ export function draw3p(win, data, configCallback) {
  * @param {!Array<string>=} opt_allowedEmbeddingOrigins List of domain suffixes
  *     that are allowed to embed this frame.
  */
-window.draw3p = function(
+window.draw3p = function (
   opt_configCallback,
   opt_allowed3pTypes,
-  opt_allowedEmbeddingOrigins,
+  opt_allowedEmbeddingOrigins
 ) {
   try {
     const location = getLocation();
@@ -724,7 +724,7 @@ window.draw3p = function(
     draw3p(
       window,
       /** @type {!IntegrationAmpContext} */ (window.context).data || {},
-      opt_configCallback,
+      opt_configCallback
     );
 
     window.context.bootstrapLoaded();
@@ -765,7 +765,7 @@ export function validateParentOrigin(window, parentLocation) {
     ancestors[0] == parentLocation.origin,
     'Parent origin mismatch: %s, %s',
     ancestors[0],
-    parentLocation.origin,
+    parentLocation.origin
   );
 }
 
@@ -795,7 +795,7 @@ export function validateAllowedTypes(window, type, allowedTypes) {
   userAssert(
     allowedTypes && allowedTypes.indexOf(type) != -1,
     '3p type for custom iframe not allowed: %s',
-    type,
+    type
   );
 }
 
@@ -832,7 +832,7 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
     }
   }
   throw new Error(
-    'Invalid embedding hostname: ' + hostname + ' not in ' + allowedHostnames,
+    'Invalid embedding hostname: ' + hostname + ' not in ' + allowedHostnames
   );
 }
 
