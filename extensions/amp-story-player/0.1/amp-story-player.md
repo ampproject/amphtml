@@ -24,14 +24,6 @@ limitations under the License.
 
 # <a name="`amp-story-player`"></a> `amp-story-player`
 
-<figure class="centered-fig">
-  <amp-anim alt="amp-story-player example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/spec/img/amp-story-player.gif">
-    <noscript>
-    <img alt="amp-story-player example" src="https://github.com/ampproject/amphtml/raw/master/spec/img/amp-story-player.gif" />
-  </noscript>
-  </amp-anim>
-</figure>
-
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
@@ -55,6 +47,14 @@ limitations under the License.
 [TOC]
 
 ## Usage
+
+<figure class="centered-fig">
+  <amp-anim alt="amp-story-player example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/spec/img/amp-story-player.gif">
+    <noscript>
+    <img alt="amp-story-player example" src="https://github.com/ampproject/amphtml/raw/master/spec/img/amp-story-player.gif" />
+  </noscript>
+  </amp-anim>
+</figure>
 
 Use `amp-story-player` to embed and play stories within an AMP webpage.
 
@@ -85,14 +85,25 @@ The code snippet below demonstrates an embed of `<amp-story-player>` in a AMP we
 </body>
 ```
 
-### Attributes
-
-#### layout
-
-Supports any of the size-defined layouts (Fixed, Fixed Height, Responsive and Fill).
-
-## Specify embedded stories
+### Specify embedded stories
 
 The `<amp-story-player>` component contains one or more `<a>` tags. Point the href attribute of each to the story URL.
 
 Place the story's title within the `<a>` tag. This provides a better user experience and allows search engines to crawl embedded stories.
+
+## Attributes
+
+### layout
+
+Supports any of the size-defined layouts:
+
+<ul>
+  <li>fixed</li>
+  <li>fixed-height</li>
+  <li>responsive</li>
+  <li>fill</li>
+</ul>
+
+## Validation
+
+See [amp-story-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-story-player/validator-amp-story-player.protoascii) in the AMP validator specification.
