@@ -230,14 +230,17 @@ receive the intersection data.
 The following example shows an iframe `send-intersections` request:
 
 ```javascript
+function isAmpMessage(event, type) {
+  return (
+    event.source == window.parent &&
+    event.origin != window.location.origin &&
+    event.data &&
+    event.data.sentinel == 'amp' &&
+    event.data.type == type
+  );
+}
 window.addEventListener('message', function (event) {
-  if (
-    event.source != window.parent ||
-    event.origin == window.location.origin ||
-    !event.data ||
-    event.data.sentinel != 'amp' ||
-    event.data.type != 'intersection'
-  ) {
+  if (!isAmpMessage(event, 'intersection')) {
     return;
   }
   event.data.changes.forEach(function (change) {
@@ -278,14 +281,17 @@ The iframe can receive the consent data response by listening to the `consent-da
 _Example: iframe `send-consent-data` request_
 
 ```javascript
+function isAmpMessage(event, type) {
+  return (
+    event.source == window.parent &&
+    event.origin != window.location.origin &&
+    event.data &&
+    event.data.sentinel == 'amp' &&
+    event.data.type == type
+  );
+}
 window.addEventListener('message', function (event) {
-  if (
-    event.source != window.parent ||
-    event.origin == window.location.origin ||
-    !event.data ||
-    event.data.sentinel != 'amp' ||
-    event.data.type != 'consent-data'
-  ) {
+  if (!isAmpMessage(event, 'consent-data')) {
     return;
   }
   console.log(event.data.consentMetadata);
