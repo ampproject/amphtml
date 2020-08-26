@@ -84,7 +84,7 @@
     },
 
     {
-      "packagePatterns": ["\\bbabel\\b"],
+      "packagePatterns": ["\\bbabel"],
 
       "groupName": "babel devDependencies",
       "major": {
