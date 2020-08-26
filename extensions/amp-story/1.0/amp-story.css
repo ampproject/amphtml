@@ -907,6 +907,7 @@ amp-story .amp-video-eq,
   --i-amphtml-interactive-ease-out-curve: cubic-bezier(.3, 0, 0, 1) !important;
   --i-amphtml-interactive-animation-delay: 0s !important;
   --i-amphtml-interactive-component-shadow: 0px 4px 12px rgba(60, 64, 67, 0.08), 0px 2px 4px rgba(60, 64, 67, 0.12);
+  --i-amphtml-interactive-results-prompt-margin: 20px !important;
 }
 
 .i-amphtml-story-interactive-component[theme="dark"] {
@@ -925,7 +926,7 @@ amp-story .amp-video-eq,
   --i-amphtml-interactive-theme-border: rgba(0, 0, 0, 0) !important;
 }
 
-.i-amphtml-story-interactive-component[chip-style="transparent"] {
+.i-amphtml-story-interactive-component:not(amp-story-interactive-results)[chip-style="transparent"] {
   --i-amphtml-interactive-options-chip-background-color: transparent !important;
   --interactive-prompt-background: transparent !important;
   --interactive-prompt-alignment: center;
@@ -954,12 +955,25 @@ amp-story-interactive-binary-poll[theme="dark"], amp-story-interactive-poll[them
   --i-amphtml-interactive-option-accent-color: white !important;
 }
 
-amp-story-interactive-results[chip-style="transparent"] {
-  --i-amphtml-interactive-option-text-color: black !important;
+amp-story-interactive-results:not([chip-style="transparent"]) {
+  --interactive-prompt-text-color: var(--i-amphtml-interactive-strong-text-color);
 }
 
+amp-story-interactive-results[chip-style="transparent"] {
+  --i-amphtml-interactive-option-text-color: black !important;
+  --i-amphtml-interactive-options-chip-background-color: transparent !important;
+  --interactive-prompt-background: transparent;
+  --i-amphtml-interactive-component-shadow: none !important;
+}
+
+amp-story-interactive-results[chip-style="transparent"] {
+  --interactive-prompt-background: transparent;
+  --interactive-prompt-text-color: black;
+  --i-amphtml-interactive-results-prompt-margin: 0px !important;
+}
 amp-story-interactive-results[theme="dark"][chip-style="transparent"] {
   --i-amphtml-interactive-option-text-color: white !important;
+  --interactive-prompt-text-color: white;
 }
 
 amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-component {

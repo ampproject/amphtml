@@ -254,7 +254,7 @@ describes.realWin(
       });
       expect(
         ampStoryResults.rootEl_.querySelector(
-          '.i-amphtml-story-interactive-results-top-value'
+          '.i-amphtml-story-interactive-results-top-value-number'
         ).textContent
       ).to.equal('33');
     });

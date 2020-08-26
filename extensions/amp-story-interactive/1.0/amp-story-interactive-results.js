@@ -20,8 +20,10 @@ import {
 } from './amp-story-interactive-abstract';
 import {CSS} from '../../../build/amp-story-interactive-results-1.0.css';
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
+import {computedStyle, setStyle} from '../../../src/style';
+import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
-import {setStyle} from '../../../src/style';
+import {startsWith} from '../../../src/string';
 
 /**
  * @typedef {{
@@ -42,16 +44,15 @@ const buildResultsTemplate = (element) => {
   return html`
     <div class="i-amphtml-story-interactive-results-container">
       <div class="i-amphtml-story-interactive-results-top">
-        <div class="i-amphtml-story-interactive-results-top-score">SCORE</div>
-        <div class="i-amphtml-story-interactive-results-top-line"></div>
-        <div class="i-amphtml-story-interactive-results-top-value">100</div>
-      </div>
-      <div class="i-amphtml-story-interactive-results-visuals">
-        <div class="i-amphtml-story-interactive-results-dots"></div>
-        <div class="i-amphtml-story-interactive-results-image-border">
-          <div class="i-amphtml-story-interactive-results-image"></div>
+        <div class="i-amphtml-story-interactive-results-top-score">SCORE:</div>
+        <div class="i-amphtml-story-interactive-results-top-value">
+          <span class="i-amphtml-story-interactive-results-top-value-number"
+            >100</span
+          ><span>%</span>
         </div>
-        <div class="i-amphtml-story-interactive-results-dots"></div>
+      </div>
+      <div class="i-amphtml-story-interactive-results-image-border">
+        <div class="i-amphtml-story-interactive-results-image"></div>
       </div>
       <div class="i-amphtml-story-interactive-results-prompt"></div>
       <div class="i-amphtml-story-interactive-results-title"></div>
@@ -59,6 +60,9 @@ const buildResultsTemplate = (element) => {
     </div>
   `;
 };
+
+const HAS_IMAGE_CLASS = 'i-amphtml-story-interactive-has-image';
+const HAS_SCORE_CLASS = 'i-amphtml-story-interactive-has-score';
 
 /**
  * Processes the state and returns the condensed results.
@@ -214,12 +218,9 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
    */
   onInteractiveReactStateUpdate_(interactiveState) {
     const results = processResults(interactiveState, this.options_);
-    this.rootEl_.classList.toggle(
-      'i-amphtml-story-interactive-results-show-score',
-      results.percentage != null
-    );
+    this.rootEl_.classList.toggle(HAS_SCORE_CLASS, results.percentage != null);
     this.rootEl_.querySelector(
-      '.i-amphtml-story-interactive-results-top-value'
+      '.i-amphtml-story-interactive-results-top-value-number'
     ).textContent = (results.percentage || 0).toFixed(0);
     this.options_.forEach((e) => {
       if (e.resultscategory === results.category) {
@@ -237,17 +238,29 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
    * @private
    */
   updateCategory_(categorySelected) {
-    setStyle(
-      this.rootEl_.querySelector('.i-amphtml-story-interactive-results-image'),
-      'background',
-      'url(' + categorySelected.image + ')'
+    this.rootEl_.classList.toggle(
+      HAS_IMAGE_CLASS,
+      categorySelected.image != null
     );
+    if (categorySelected.image) {
+      setStyle(
+        this.rootEl_.querySelector(
+          '.i-amphtml-story-interactive-results-image'
+        ),
+        'background',
+        'url(' + categorySelected.image + ')'
+      );
+    }
     this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-results-title'
     ).textContent = categorySelected.resultscategory;
     this.rootEl_.querySelector(
       '.i-amphtml-story-interactive-results-description'
     ).textContent = categorySelected.text || '';
+    this.rootEl_.classList.toggle(
+      'i-amphtml-story-interactive-results-top-transparent',
+      this.scoreBackgroundIsTransparent_()
+    );
   }
 
   /** @override */
@@ -263,5 +276,25 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
   /** @override */
   updateStoryStoreState_(unusedOption) {
     // Prevent from updating the state.
+  }
+
+  /**
+   * Check score background has a color with alpha 0, used to adjust layout
+   * @return {boolean}
+   * @private
+   **/
+  scoreBackgroundIsTransparent_() {
+    const bgColor = computedStyle(
+      this.win,
+      dev().assertElement(
+        this.rootEl_.querySelector('.i-amphtml-story-interactive-results-top')
+      )
+    )['background'];
+    // Check the background starts with rgba and doesn't contain other colors (no gradients)
+    if (startsWith(bgColor, 'rgba') && bgColor.lastIndexOf('rgb') == 0) {
+      // If single rgba color, return alpha == 0
+      return parseFloat(bgColor.split(', ')[3].split(')')[0]) == 0;
+    }
+    return false;
   }
 }
