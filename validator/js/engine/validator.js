@@ -2328,16 +2328,29 @@ class CdataMatcher {
 
     // Max CDATA Byte Length, specific to this CDATA (not the document limit).
     if (cdataSpec.maxBytes !== -2 && adjustedCdataLength > cdataSpec.maxBytes) {
-      context.addError(
-          generated.ValidationError.Code.STYLESHEET_TOO_LONG,
-          context.getLineCol(),
-          /* params */
-          [
-            getTagDescriptiveName(this.tagSpec_),
-            adjustedCdataLength.toString(),
-            cdataSpec.maxBytes.toString(),
-          ],
-          cdataSpec.maxBytesSpecUrl, validationResult);
+      if (this.tagSpec_.tagName == 'SCRIPT') {
+        context.addError(
+            generated.ValidationError.Code.INLINE_SCRIPT_TOO_LONG,
+            context.getLineCol(),
+            /* params */
+            [
+              adjustedCdataLength.toString(),
+              cdataSpec.maxBytes.toString(),
+            ],
+            cdataSpec.maxBytesSpecUrl, validationResult);
+
+      } else {
+        context.addError(
+            generated.ValidationError.Code.STYLESHEET_TOO_LONG,
+            context.getLineCol(),
+            /* params */
+            [
+              getTagDescriptiveName(this.tagSpec_),
+              adjustedCdataLength.toString(),
+              cdataSpec.maxBytes.toString(),
+            ],
+            cdataSpec.maxBytesSpecUrl, validationResult);
+      }
       return;
     }
 
