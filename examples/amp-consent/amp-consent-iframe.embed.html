@@ -2,12 +2,17 @@
 <html>
 <body style="background-color:#EEEEEE">
   <script>
-    window.addEventListener('message', (event) => {
-      if (
-        event.origin !== 'http://localhost:8000' &&
+    function isAmpMessage(event, type) {
+      return (
+        event.source == window.parent &&
+        event.origin != window.location.origin &&
         event.data &&
-        event.data.type === 'consent-data'
-      ) {
+        event.data.sentinel == 'amp' &&
+        event.data.type == type
+      );
+    }
+    window.addEventListener('message', (event) => {
+      if (!isAmpMessage(event, 'consent-data')) {
         return;
       }
       console.log('message', event);

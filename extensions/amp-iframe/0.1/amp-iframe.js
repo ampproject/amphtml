@@ -565,6 +565,7 @@ export class AmpIframe extends AMP.BaseElement {
         source,
         origin,
         dict({
+          'sentinel': 'amp',
           'type': MessageType.CONSENT_DATA,
           'consentMetadata': consents[0],
           'consentString': consents[1],

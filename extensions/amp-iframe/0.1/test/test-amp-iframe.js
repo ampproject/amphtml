@@ -966,6 +966,7 @@ describes.realWin(
           );
         }).then((message) => {
           expect(message).to.deep.equal({
+            sentinel: 'amp',
             type: 'consent-data',
             consentString: {consentString: true},
             consentMetadata: {consentMetadata: true},
