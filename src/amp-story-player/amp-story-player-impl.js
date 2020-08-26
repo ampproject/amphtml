@@ -99,9 +99,11 @@ const STORY_STATE_TYPE = {
 const STORY_MESSAGE_STATE_TYPE = {
   PAGE_ATTACHMENT_STATE: 'PAGE_ATTACHMENT_STATE',
   MUTED_STATE: 'MUTED_STATE',
+  CURRENT_PAGE_ID: 'CURRENT_PAGE_ID',
+  STORY_PROGRESS: 'STORY_PROGRESS',
 };
 
-/** @typedef {{ state:string, value:boolean }} */
+/** @typedef {{ state:string, value:(boolean|string) }} */
 let DocumentStateTypeDef;
 
 /** @const {string} */
@@ -492,9 +494,16 @@ export class AmpStoryPlayer {
             false
           );
 
+          messaging.sendRequest(
+            'onDocumentState',
+            dict({'state': STORY_MESSAGE_STATE_TYPE.CURRENT_PAGE_ID}),
+            false
+          );
+
           messaging.registerHandler('documentStateUpdate', (event, data) => {
             this.onDocumentStateUpdate_(
-              /** @type {!DocumentStateTypeDef} */ (data)
+              /** @type {!DocumentStateTypeDef} */ (data),
+              messaging
             );
           });
 
@@ -586,6 +595,8 @@ export class AmpStoryPlayer {
 
     this.evictStoriesFromIframes_();
     this.assignIframesForStoryIdx_(storyIdx);
+
+    this.signalNavigation_();
   }
 
   /** Sends a message muting the current story. */
@@ -625,6 +636,7 @@ export class AmpStoryPlayer {
     evictedStories.forEach((storyIdx) => {
       const story = this.stories_[storyIdx];
       this.messagingPromises_[story[IFRAME_IDX]].then((messaging) => {
+        messaging.unregisterHandler('documentStateUpdate');
         messaging.unregisterHandler('selectDocument');
       });
       story[IFRAME_IDX] = undefined;
@@ -795,7 +807,6 @@ export class AmpStoryPlayer {
           ];
 
     this.show(currentStory.href);
-    this.signalNavigation_();
   }
 
   /**
@@ -851,6 +862,7 @@ export class AmpStoryPlayer {
     const nextStory = this.stories_[nextStoryIdx];
 
     this.messagingPromises_[detachedStory[IFRAME_IDX]].then((messaging) => {
+      messaging.unregisterHandler('documentStateUpdate');
       messaging.unregisterHandler('selectDocument');
     });
 
@@ -999,16 +1011,50 @@ export class AmpStoryPlayer {
   /**
    * React to documentStateUpdate events.
    * @param {!DocumentStateTypeDef} data
+   * @param {Messaging} messaging
    * @private
    */
-  onDocumentStateUpdate_(data) {
+  onDocumentStateUpdate_(data, messaging) {
     switch (data.state) {
       case STORY_MESSAGE_STATE_TYPE.PAGE_ATTACHMENT_STATE:
-        this.onPageAttachmentStateUpdate_(data.value);
+        this.onPageAttachmentStateUpdate_(/** @type {boolean} */ (data.value));
+        break;
+      case STORY_MESSAGE_STATE_TYPE.CURRENT_PAGE_ID:
+        this.onCurrentPageIdUpdate_(
+          /** @type {string} */ (data.value),
+          messaging
+        );
         break;
       default:
         break;
     }
+  }
+
+  /**
+   * Reacts to page id update events inside the story.
+   * @param {string} pageId
+   * @param {Messaging} messaging
+   * @private
+   */
+  onCurrentPageIdUpdate_(pageId, messaging) {
+    messaging
+      .sendRequest(
+        'getDocumentState',
+        dict({'state': STORY_MESSAGE_STATE_TYPE.STORY_PROGRESS}),
+        true
+      )
+      .then((progress) => {
+        this.element_.dispatchEvent(
+          createCustomEvent(
+            this.win_,
+            'storyNavigation',
+            dict({
+              'pageId': pageId,
+              'progress': progress.value,
+            })
+          )
+        );
+      });
   }
 
   /**
