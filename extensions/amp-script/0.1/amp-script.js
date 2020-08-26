@@ -288,7 +288,7 @@ export class AmpScript extends AMP.BaseElement {
     };
 
     // Create worker and hydrate.
-    WorkerDOM.upgrade(
+    return WorkerDOM.upgrade(
       container || this.element,
       workerAndAuthorScripts,
       config
@@ -306,7 +306,6 @@ export class AmpScript extends AMP.BaseElement {
         };
       }
     });
-    return workerAndAuthorScripts;
   }
 
   /**
@@ -573,8 +572,8 @@ export class AmpScriptService {
         // extraction is ready.
         throw user().createError(
           TAG,
-          `Script hash not found. ${debugId} must have "sha384-${hash}" in meta[name="amp-script-src"].` +
-            ' See https://amp.dev/documentation/components/amp-script/#security-features.'
+          `Script hash not found or incorrect for ${debugId}. You must include <meta name="amp-script-src" content="sha384-${hash}">. ` +
+            'See https://amp.dev/documentation/components/amp-script/#script-hash.'
         );
       }
     });

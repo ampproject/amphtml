@@ -102,7 +102,6 @@ export let InteractiveReactData;
  *    bookendState: boolean,
  *    desktopState: boolean,
  *    educationState: boolean,
- *    gyroscopeEnabledState: string,
  *    hasSidebarState: boolean,
  *    infoDialogState: boolean,
  *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
@@ -153,7 +152,6 @@ export const StateProperty = {
   AFFILIATE_LINK_STATE: 'affiliateLinkState',
   DESKTOP_STATE: 'desktopState',
   EDUCATION_STATE: 'educationState',
-  GYROSCOPE_PERMISSION_STATE: 'gyroscopePermissionState',
   HAS_SIDEBAR_STATE: 'hasSidebarState',
   INFO_DIALOG_STATE: 'infoDialogState',
   INTERACTIVE_COMPONENT_STATE: 'interactiveEmbeddedComponentState',
@@ -223,7 +221,6 @@ export const Action = {
   TOGGLE_STORY_HAS_PLAYBACK_UI: 'toggleStoryHasPlaybackUi',
   TOGGLE_SYSTEM_UI_IS_VISIBLE: 'toggleSystemUiIsVisible',
   TOGGLE_UI: 'toggleUi',
-  SET_GYROSCOPE_PERMISSION: 'setGyroscopePermission',
   TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
   ADD_NEW_PAGE_ID: 'addNewPageId',
   SET_PAGE_SIZE: 'updatePageSize',
@@ -439,11 +436,6 @@ const actions = (state, action, data) => {
         [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP_PANELS,
         [StateProperty.UI_STATE]: data,
       });
-    case Action.SET_GYROSCOPE_PERMISSION:
-      return /** @type {!State} */ ({
-        ...state,
-        [StateProperty.GYROSCOPE_PERMISSION_STATE]: data,
-      });
     case Action.TOGGLE_VIEWPORT_WARNING:
       return /** @type {!State} */ ({
         ...state,
@@ -588,7 +580,6 @@ export class AmpStoryStoreService {
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
       [StateProperty.EDUCATION_STATE]: false,
-      [StateProperty.GYROSCOPE_PERMISSION_STATE]: '',
       [StateProperty.HAS_SIDEBAR_STATE]: false,
       [StateProperty.INFO_DIALOG_STATE]: false,
       [StateProperty.INTERACTIVE_COMPONENT_STATE]: {

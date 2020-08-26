@@ -651,6 +651,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'macaw': {
+    renderStartImplemented: true,
+  },
+
   'mads': {
     prefetch: 'https://eu2.madsone.com/js/tags.js',
   },
