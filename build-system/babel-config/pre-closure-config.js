@@ -66,6 +66,7 @@ function getPreClosureConfig() {
     './build-system/babel-plugins/babel-plugin-is_minified-constant-transformer',
     './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
     './build-system/babel-plugins/babel-plugin-transform-html-template',
+    './build-system/babel-plugins/babel-plugin-transform-jss',
     './build-system/babel-plugins/babel-plugin-transform-version-call',
     './build-system/babel-plugins/babel-plugin-transform-simple-array-destructure',
     replacePlugin,

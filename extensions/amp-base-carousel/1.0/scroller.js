@@ -226,7 +226,9 @@ function renderSlides(
         renderable={index == restingIndex}
         playable={index == restingIndex}
       >
-        <div class={`${classes.slideSizing} ${classes.slideElement}`}>
+        <div
+          class={`${classes.slideSizing} ${classes.slideElement} ${classes.hideScrollbarPseudo}`}
+        >
           {child}
         </div>
       </WithAmpContext>
