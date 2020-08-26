@@ -824,6 +824,10 @@ const adConfig = jsonConfiguration({
 
   'plista': {},
 
+  'playstream': {
+    prefetch: 'http://dev.playstream.media/js/amp.js',
+    renderStartImplemented: true,
+  },
   'polymorphicads': {
     prefetch: 'https://www.polymorphicads.jp/js/amp.js',
     preconnect: [
