@@ -25,24 +25,20 @@
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
-  padding: 1.25em .25em !important;
+  padding-bottom: 1.25em !important;
 }
 
 .i-amphtml-story-interactive-results-container.i-amphtml-story-interactive-has-image:not(.i-amphtml-story-interactive-has-score) {
-  padding-top: 40px !important;
+  padding-top: 2.5em !important;
 }
 
 .i-amphtml-story-interactive-has-score .i-amphtml-story-interactive-results-top {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  padding: 15px 20px !important;
+  padding: 1em 1.5em !important;
   box-sizing: border-box !important;
   color: var(--interactive-prompt-text-color) !important;
-}
-
-.i-amphtml-story-interactive-has-score.i-amphtml-story-interactive-results-top-transparent .i-amphtml-story-interactive-results-top {
-  padding-bottom: 0px !important;
 }
 
 .i-amphtml-story-interactive-results-top {
@@ -72,7 +68,7 @@
 .i-amphtml-story-interactive-results-top-value {
   font-weight: bold !important;
   font-size: 1.75em !important;
-  line-height: 1em !important;
+  line-height: 1 !important;
 }
 
 .i-amphtml-story-interactive-results-top-value > span:nth-child(2) {
