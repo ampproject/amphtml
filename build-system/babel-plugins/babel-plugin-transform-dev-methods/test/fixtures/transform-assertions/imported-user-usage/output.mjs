@@ -15,21 +15,18 @@
  */
 import { user } from '../../../../../../../src/log';
 user().fine;
-user().info('Should not be removed');
+user().error('Should not be removed');
 
 function hello() {
-  user().info('Should not be removed');
   return false;
 }
 
 export function helloAgain() {
-  user().info('Should not be removed');
+  user().error('Should not be removed');
   return false;
 }
 
 class Foo {
-  method() {
-    user().info('Should not be removed');
-  }
+  method() {}
 
 }

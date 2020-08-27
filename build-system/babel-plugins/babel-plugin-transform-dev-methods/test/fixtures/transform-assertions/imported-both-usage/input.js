@@ -34,7 +34,8 @@ function hello() {
   );
   dev().fine(TAG, 'fine');
   user().fine(TAG, 'fine');
-  user().info('Should not be removed');
+  user().info('Should be removed');
+  user().error('Should not be removed');
   return false;
 }
 
@@ -45,8 +46,8 @@ export function helloAgain() {
     fromLocation.search
   );
   dev().fine(TAG, 'fine');
-  user().fine(TAG, 'fine');
-  user().info('Should not be removed');
+  user().warn(TAG, 'warn');
+  user().error('Should not be removed');
   return false;
 }
 
@@ -59,6 +60,7 @@ class Foo {
     );
     dev().fine(TAG, 'fine');
     user().fine(TAG, 'fine');
-    user().info('Should not be removed');
+    dev().error(TAG, 'Should not be removed');
+    user().error('Should not be removed');
   }
 }
