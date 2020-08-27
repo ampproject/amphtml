@@ -654,6 +654,13 @@ export class AmpStoryStoreService {
           [StateProperty.CAN_SHOW_AUDIO_UI]: false,
           [StateProperty.CAN_SHOW_SHARING_UIS]: false,
         };
+      case EmbedMode.NO_SHARING_NOR_AUDIO_UI_UNMUTED:
+        return {
+          [StateProperty.CAN_SHOW_PAGINATION_BUTTONS]: false,
+          [StateProperty.CAN_SHOW_AUDIO_UI]: false,
+          [StateProperty.CAN_SHOW_SHARING_UIS]: false,
+          [StateProperty.MUTED_STATE]: false,
+        };
       default:
         return {};
     }

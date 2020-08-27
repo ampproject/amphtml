@@ -72,6 +72,18 @@ export const EmbedMode = {
    * - Removes audio icon from system layer
    */
   NO_SHARING_NOR_AUDIO_UI: 4,
+
+  /**
+   * This mode is intended for embedders that natively handle the audio and
+   * sharing experiences, through native controls and viewer communication. It
+   * also unmutes audio by default.
+   *
+   * This differs from the NOT_EMBEDDED embed mode in the following ways:
+   * - Removes share icon from system layer
+   * - Removes sharing section from bookend
+   * - Removes audio icon from system layer
+   */
+  NO_SHARING_NOR_AUDIO_UI_UNMUTED: 5,
 };
 
 /**
