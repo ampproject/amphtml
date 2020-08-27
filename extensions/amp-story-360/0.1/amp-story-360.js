@@ -28,11 +28,11 @@ import {CommonSignals} from '../../../src/common-signals';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Matrix, Renderer} from '../../../third_party/zuho/zuho';
 import {Services} from '../../../src/services';
-import {htmlFor} from '../../../src/static-template';
+import {closest, whenUpgradedToCustomElement} from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
+import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {timeStrToMillis} from '../../../extensions/amp-story/1.0/utils';
-import {closest, whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @const {string} */
 const TAG = 'AMP_STORY_360';
@@ -72,11 +72,11 @@ const buildActivateButtonTemplate = (element) => {
               stroke="url(#i-amphtml-story-360-activate-gradient)"
             ></ellipse>
           </defs>
-          <use xlink:href="#i-amphtml-story-360-activate-ellipse" />
+          <use xlink:href="#i-amphtml-story-360-activate-ellipse"></use>
           <use
             xlink:href="#i-amphtml-story-360-activate-ellipse"
             transform="rotate(90, 12, 12)"
-          />
+          ></use>
         </svg>
       </span>
     </button>
@@ -339,11 +339,16 @@ export class AmpStory360 extends AMP.BaseElement {
   /** @private */
   checkGyroscopePermissions_() {
     //  If browser doesn't support DeviceOrientationEvent.
-    if (typeof DeviceOrientationEvent === 'undefined') return;
+    if (this.win.DeviceOrientationEvent === 'undefined') {
+      return;
+    }
 
     // If browser doesn't require permission for DeviceOrientationEvent.
-    if (typeof DeviceOrientationEvent.requestPermission === 'undefined')
+    if (
+      typeof this.win.DeviceOrientationEvent.requestPermission === 'undefined'
+    ) {
       this.enableGyroscope_();
+    }
 
     // If permissions needed for DeviceOrientationEvent.
     if (
