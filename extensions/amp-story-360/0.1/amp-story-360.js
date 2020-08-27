@@ -339,7 +339,7 @@ export class AmpStory360 extends AMP.BaseElement {
   /** @private */
   checkGyroscopePermissions_() {
     //  If browser doesn't support DeviceOrientationEvent.
-    if (this.win.DeviceOrientationEvent === 'undefined') {
+    if (typeof this.win.DeviceOrientationEvent === 'undefined') {
       return;
     }
 
