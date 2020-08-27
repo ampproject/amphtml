@@ -18,18 +18,29 @@ import {PostHTML} from 'posthtml';
 import {URL} from 'url';
 import {isValidScript, ScriptNode} from '../utilities/script';
 import {CDNURLToLocalDistURL} from '../utilities/cdn';
+import {OptionSet} from '../utilities/option-set';
+import minimist from 'minimist';
+const argv = minimist(process.argv.slice(2));
 
 /**
- * Append a Module Script for a ScriptNode.
  * @param head
  * @param script
+ * @param compiled 
  */
-function appendModuleScript(head: PostHTML.Node, script: ScriptNode): void {
-  const modulePath = CDNURLToLocalDistURL(
-    new URL(script.attrs.src || ''),
-    undefined,
-    '.mjs'
-  ).toString();
+function appendModuleScript(head: PostHTML.Node, script: ScriptNode, compiled: boolean): void {
+  let modulePath;
+  if (argv.compiled || compiled) {
+    modulePath = CDNURLToLocalDistURL(
+      new URL(script.attrs.src || ''),
+      undefined,
+      '.mjs'
+    ).toString();
+    script.attrs.src = modulePath.replace('.mjs', '.js');
+  }
+  else {
+    const urlName = script.attrs.src.toString();
+    modulePath = urlName.replace('.js', '.mjs');
+  }
 
   const insert: ScriptNode = {
     ...script,
@@ -45,31 +56,35 @@ function appendModuleScript(head: PostHTML.Node, script: ScriptNode): void {
 }
 
 /**
- *
+ * Returns a function that will transform script node sources into module/nomodule pair.
+ * @param options
  */
-export default function(tree: PostHTML.Node): void {
-  let head: PostHTML.Node | undefined = undefined;
-  const scripts: Array<ScriptNode> = [];
-  tree.walk(node => {
-    if (node.tag === 'head') {
-      head = node;
-    }
-    if (!isValidScript(node)) {
+export default function(options: OptionSet = {}): (tree: PostHTML.Node) => void {
+  return function(tree: PostHTML.Node): void {
+    let head: PostHTML.Node | undefined = undefined;
+    let compiled: boolean = options.compiled || false;
+    const scripts: Array<ScriptNode> = [];
+    tree.walk(node => {
+      if (node.tag === 'head') {
+        head = node;
+      }
+      if (!isValidScript(node)) {
+        return node;
+      }
+
+      // Mark the existing valid scripts with `nomodule` attributes.
+      node.attrs.nomodule = '';
+      scripts.push(node);
       return node;
+    });
+
+    if (head === undefined) {
+      console.log('Could not find a head element in the document');
+      return;
     }
 
-    // Mark the existing valid scripts with `nomodule` attributes.
-    node.attrs.nomodule = '';
-    scripts.push(node);
-    return node;
-  });
-
-  if (head === undefined) {
-    console.log('Could not find a head element in the document');
-    return;
-  }
-
-  for (const script of scripts) {
-    appendModuleScript(head, script);
+    for (const script of scripts) {
+      appendModuleScript(head, script, compiled);
+    }
   }
 }

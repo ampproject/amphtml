@@ -18,6 +18,7 @@ import {PostHTML} from 'posthtml';
 import {URL} from 'url';
 import {isValidScript} from '../utilities/script';
 import {CDNURLToLocalDistURL} from '../utilities/cdn';
+import {OptionSet} from '../utilities/option-set';
 
 /**
  * For any script, with a valid path to AMP Project CDN, replace it with a local value.
@@ -36,6 +37,8 @@ function modifySrc(script: PostHTML.Node): PostHTML.Node {
 /**
  * Replace the src for every script tag to the local value.
  */
-export default function(tree: PostHTML.Node): void {
-  tree.match({tag: 'script'}, modifySrc);
+export default function(options: OptionSet = {}): (tree: PostHTML.Node) => void {
+  return function(tree: PostHTML.Node) {
+    tree.match({tag: 'script'}, modifySrc);
+  }
 }
