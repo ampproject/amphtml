@@ -17,6 +17,7 @@
 import minimist from 'minimist';
 import {PostHTML} from 'posthtml';
 import {readFileSync} from 'fs';
+import {OptionSet} from '../utilities/option-set';
 
 const argv = minimist(process.argv.slice(2));
 const isTestMode: boolean = argv._.includes('server-tests');
@@ -64,6 +65,8 @@ function prependAmpStyles(head: PostHTML.Node): PostHTML.Node {
 /**
  * Replace the src for every stories script tag.
  */
-export default function(tree: PostHTML.Node): void {
-  tree.match({tag: 'head'}, prependAmpStyles);
+export default function(options: OptionSet = {}): (tree: PostHTML.Node) => void {
+  return function(tree: PostHTML.Node) {
+    tree.match({tag: 'head'}, prependAmpStyles);
+  }
 }
