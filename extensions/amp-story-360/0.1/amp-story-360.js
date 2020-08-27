@@ -290,13 +290,9 @@ export class AmpStory360 extends AMP.BaseElement {
           (permissionState) => this.onPermissionState_(permissionState)
         );
 
-        storeService.subscribe(
-          StateProperty.CURRENT_PAGE_ID,
-          (currPageId) => {
-            this.isOnActivePage_ = currPageId === this.getPageId_();
-          },
-          true /* callToInitialize */
-        );
+        storeService.subscribe(StateProperty.CURRENT_PAGE_ID, (currPageId) => {
+          this.isOnActivePage_ = currPageId === this.getPageId_();
+        });
       }),
 
       Services.localizationServiceForOrNull(this.element).then(
