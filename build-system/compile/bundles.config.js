@@ -185,8 +185,8 @@ exports.jsBundles = {
       minifiedName: 'v0.js',
       includePolyfills: true,
       wrapper: wrappers.mainBinary,
-      esmPassCompilation: argv.esm,
-      includeOnlyESMLevelPolyfills: argv.esm,
+      esmPassCompilation: argv.esm || argv.sxg,
+      includeOnlyESMLevelPolyfills: argv.esm || argv.sxg,
     },
   },
   'amp-shadow.js': {
@@ -333,6 +333,12 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-animation',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-animation-polyfill',
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.MISC,
@@ -885,11 +891,6 @@ exports.extensionBundles = [
         'amp-story-draggable-drawer-header',
         'amp-story-hint',
         'amp-story-info-dialog',
-        'amp-story-interactive',
-        'amp-story-interactive-binary-poll',
-        'amp-story-interactive-poll',
-        'amp-story-interactive-quiz',
-        'amp-story-interactive-results',
         'amp-story-share',
         'amp-story-share-menu',
         'amp-story-system-layer',
@@ -925,6 +926,21 @@ exports.extensionBundles = [
     version: '0.1',
     latestVersion: '0.1',
     options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-story-interactive',
+    version: '1.0',
+    latestVersion: '1.0',
+    options: {
+      hasCss: true,
+      cssBinaries: [
+        'amp-story-interactive-binary-poll',
+        'amp-story-interactive-poll',
+        'amp-story-interactive-quiz',
+        'amp-story-interactive-results',
+      ],
+    },
     type: TYPES.MISC,
   },
   {
@@ -1095,12 +1111,6 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-google-vrview-image',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.MISC,
-  },
-  {
-    name: 'amp-viewer-assistance',
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.MISC,

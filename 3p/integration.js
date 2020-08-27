@@ -143,6 +143,7 @@ import {ezoic} from '../ads/ezoic';
 import {f1e} from '../ads/f1e';
 import {f1h} from '../ads/f1h';
 import {felmat} from '../ads/felmat';
+import {firstimpression} from '../ads/firstimpression';
 import {flite} from '../ads/flite';
 import {fluct} from '../ads/fluct';
 import {forkmedia} from '../ads/forkmedia';
@@ -177,6 +178,7 @@ import {ligatus} from '../ads/ligatus';
 import {lockerdome} from '../ads/lockerdome';
 import {logly} from '../ads/logly';
 import {loka} from '../ads/loka';
+import {macaw} from '../ads/macaw';
 import {mads} from '../ads/mads';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
 import {marfeel} from '../ads/marfeel';
@@ -318,6 +320,7 @@ const AMP_EMBED_ALLOWED = {
   dable: true,
   engageya: true,
   epeex: true,
+  firstimpression: true,
   forkmedia: true,
   glomex: true,
   idealmedia: true,
@@ -451,6 +454,7 @@ register('f1e', f1e);
 register('f1h', f1h);
 register('facebook', facebook);
 register('felmat', felmat);
+register('firstimpression', firstimpression);
 register('flite', flite);
 register('fluct', fluct);
 register('forkmedia', forkmedia);
@@ -487,6 +491,7 @@ register('ligatus', ligatus);
 register('lockerdome', lockerdome);
 register('logly', logly);
 register('loka', loka);
+register('macaw', macaw);
 register('mads', mads);
 register('mantis-display', mantisDisplay);
 register('mantis-recommend', mantisRecommend);

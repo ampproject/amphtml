@@ -585,13 +585,13 @@ export class Values {
       if (inputValues && !compute) {
         newValue = inputValues[0];
       } else if (isRecursive(prop)) {
-        if (inputValues) {
+        if (inputValues || depValues.length > 0) {
           // The node specifies its own input values and they need to be
           // recomputed with parent and dep values.
           newValue = callRecursiveCompute(
             compute,
             node,
-            inputValues,
+            inputValues || EMPTY_ARRAY,
             parentValue,
             depValues
           );
