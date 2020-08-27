@@ -47,6 +47,19 @@ export class DenakopNetworkConfig {
   /** @override */
   getConfigUrl() {
     const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
+    const accountId = this.autoAmpAdsElement_.getAttribute('data-account-id');
+    if (accountId) {
+      return buildUrl(
+        'https://v3.denakop.com/ad-request',
+        {
+          'a': accountId,
+          'v': 'amp',
+          'u': docInfo.canonicalUrl,
+        },
+        /* maxLength */ 4096
+      );
+    }
+
     const publisherId = this.autoAmpAdsElement_.getAttribute(
       'data-publisher-id'
     );
