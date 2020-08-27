@@ -18,7 +18,10 @@ const globals = {};
 globals.ampCacheBgcolor = '#ffffff';
 globals.ampCacheIconPrefix = 'amp-link';
 globals.ampCacheTitle = chrome.i18n.getMessage('pageFromAmpCacheTitle');
-globals.invalidAmpBgcolor = '#8b0000';
+globals.devModeAmpBgcolor = '#fcba03';
+globals.devModeAmpIconPrefix = 'dev';
+globals.devModeAmpTitle = chrome.i18n.getMessage('pageInDevModeTitle');
+globals.invalidAmpBgcolor = '#f44336';
 globals.invalidAmpIconPrefix = 'invalid';
 globals.invalidAmpTitle = chrome.i18n.getMessage('pageFailsValidationTitle');
 globals.linkToAmpBgColor = '#ffffff';
@@ -96,6 +99,18 @@ function getNumberOfWarnings(errors) {
 }
 
 /**
+ * Inspects ValidationResults to discover if in Dev Mode.
+ *
+ * @param {!Object<!ValidationResult>} validationResult
+ */
+function isInDevMode(validationResult) {
+  if ((validationResult.errors.length === 1) &&
+      (validationResults.errors[0].code === 'DEV_MODE_ONLY'))
+    return true;
+  return false;
+}
+
+/**
  * Handles actions to be taken for pages that are on an AMP Cache.
  *
  * @param {integer} tabId ID of a tab.
@@ -114,6 +129,18 @@ function handleAmpCache(tabId, ampHref) {
         }
       }
   );
+}
+
+/**
+ * Handles actiosn to be taken for AMP pages that are in Dev Mode.
+ *
+ * @param {integer} tabId ID of a tab.
+ */
+funciton handleAmpDevMode(tabId) {
+  updateTabStatus(
+      tabId, glboals.devModeAmpIconPrefix, globals.devModeAmpTitle,
+      '' /*text*/, globals.devModeAmpBgColor);
+  updateTabPopup(tabId);
 }
 
 /**
@@ -159,8 +186,9 @@ function handleAmpLink(tabId, ampHref) {
  */
 function handleAmpPass(tabId, validationResult) {
   let badgeTitle = '';
-  const numWarnings = getNumberOfWarnings(validationResult.errors);
-  if (numWarnings > 0) {badgeTitle = numWarnings.toString();}
+  // No longer display number of warnings
+  // const numWarnings = getNumberOfWarnings(validationResult.errors);
+  // if (numWarnings > 0) {badgeTitle = numWarnings.toString();}
   updateTabStatus(
       tabId, globals.validAmpIconPrefix, globals.validAmpTitle,
       badgeTitle, globals.validAmpBgcolor);
@@ -300,6 +328,8 @@ function validateUrlFromTab(tab, userAgent) {
       window.sessionStorage.setItem(url, JSON.stringify(validationResult));
       if (validationResult.status == 'PASS') {
         handleAmpPass(tab.id, validationResult);
+      } else if (isInDevMode(validationResult)) {
+        handleAmpDevMode(tab.id);
       } else {
         handleAmpFail(tab.id, validationResult);
       }
