@@ -1,11 +1,5 @@
 {
   "experimentA": {},
   "experimentB": {},
-  "experimentC": {
-    "name": "StrictCompilation",
-    "environment": "AMP",
-    "issue": "https://github.com/ampproject/amphtml/issues/19380",
-    "expiration_date_utc": "2020-08-07",
-    "define_experiment_constant": "STRICT_COMPILATION"
-  }
+  "experimentC": {}
 }

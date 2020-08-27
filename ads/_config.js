@@ -842,6 +842,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'playstream': {
+    prefetch: 'https://app.playstream.media/js/amp.js',
+    renderStartImplemented: true,
+  },
+
   'plista': {},
 
   'polymorphicads': {
