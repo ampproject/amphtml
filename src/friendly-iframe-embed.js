@@ -754,8 +754,10 @@ export function installExtensionsInEmbed(
  * @param {!Window} childWin
  */
 function installPolyfillsInChildWindow(parentWin, childWin) {
-  installDocContains(childWin);
-  installDOMTokenList(childWin);
+  if (!IS_ESM) {
+    installDocContains(childWin);
+    installDOMTokenList(childWin);
+  }
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
   if (!IS_SXG) {
