@@ -41,7 +41,7 @@ export class DenakopNetworkConfig {
    * True if responsive is enabled for auto-ads
    */
   isResponsiveEnabled() {
-    return false;
+    return true;
   }
 
   /** @override */
@@ -78,7 +78,6 @@ export class DenakopNetworkConfig {
   /** @override */
   getAttributes() {
     const attributes = dict({
-      'layout': 'fixed',
       'data-multi-size-validation': 'false',
       'type': 'doubleclick',
       'data-ad': 'denakop',
