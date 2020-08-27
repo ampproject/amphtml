@@ -23,6 +23,11 @@ import {
  * @const {!LocalizedStringBundleDef}
  */
 const strings = {
+  [LocalizedStringId.AMP_STORY_ACTIVATE_BUTTON_TEXT]: {
+    string: 'Activate',
+    description:
+      'Label for the activate button to ask for device orientation permission',
+  },
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL]: {
     string: 'Mute story',
     description:
