@@ -22,7 +22,6 @@ import {CSS} from '../../../build/amp-story-interactive-results-1.0.css';
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 import {computedStyle, setStyle} from '../../../src/style';
 import {dev} from '../../../src/log';
-import {emojiConfetti} from './interactive-confetti';
 import {htmlFor} from '../../../src/static-template';
 import {startsWith} from '../../../src/string';
 
@@ -185,9 +184,6 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
    */
   constructor(element) {
     super(element, InteractiveType.RESULTS, [2, 4]);
-
-    /** @protected {?./amp-story-interactive-abstract.OptionConfigType} */
-    this.categorySelected_ = null;
   }
 
   /** @override */
@@ -213,7 +209,6 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
       (data) => this.onInteractiveReactStateUpdate_(data),
       true
     );
-    super.initializeListeners_();
   }
 
   /**
@@ -229,7 +224,6 @@ export class AmpStoryInteractiveResults extends AmpStoryInteractive {
     ).textContent = (results.percentage || 0).toFixed(0);
     this.options_.forEach((e) => {
       if (e.resultscategory === results.category) {
-        this.categorySelected_ = e;
         this.mutateElement(() => {
           this.updateCategory_(e);
           this.updateToPostSelectionState_(null);
