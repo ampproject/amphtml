@@ -37,7 +37,7 @@ async function babelPluginTests() {
   };
 
   const aggregatedResults = await jest.runCLI(options, projects);
-  if (!aggregatedResults.success) {
+  if (!aggregatedResults.results.success) {
     throw new Error('See the logs above for details.');
   }
 }
