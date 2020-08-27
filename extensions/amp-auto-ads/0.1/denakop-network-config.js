@@ -70,8 +70,6 @@ export class DenakopNetworkConfig {
         'p': publisherId,
         't': tagId,
         'u': docInfo.canonicalUrl,
-        'w': window.screen.width,
-        'h': window.screen.height,
       },
       /* maxLength */ 4096
     );
