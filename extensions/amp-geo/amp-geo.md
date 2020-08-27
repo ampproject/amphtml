@@ -313,7 +313,7 @@ Adding `#amp-geo=XX` to the document url forces the country to appear as the
 country `XX`. This allows you to test without having to VPN to a country. For
 security reasons, to prevent sharing of geo-spoofing urls, this feature is only
 available to users who have enabled the
-[Experimental Channel](https://amp.dev/documentation/guides-and-tutorials/learn/experimental)
+[`beta-channel`](https://amp.dev/documentation/guides-and-tutorials/learn/experimental)
 or who are testing locally (i.e., `amp-geo.js` is served in development mode via
 [`gulp serve`](https://github.com/ampproject/amphtml/blob/master/contributing/DEVELOPING.md)).
 
