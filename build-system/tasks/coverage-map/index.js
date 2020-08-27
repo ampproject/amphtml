@@ -22,10 +22,6 @@ const {dist} = require('../dist');
 const {installPackages} = require('../../common/utils');
 const {startServer, stopServer} = require('../serve');
 
-let puppeteer;
-let explore;
-let transform;
-
 const coverageJsonName = argv.json || 'coverage.json';
 const serverPort = argv.port || 8000;
 const outHtml = argv.outputhtml || 'coverage.html';
@@ -34,7 +30,7 @@ let testUrl = `http://localhost:${serverPort}/examples/${inputHtml}`;
 let inputJs = argv.file || 'v0.js';
 
 async function collectCoverage() {
-  puppeteer = require('puppeteer');
+  const puppeteer = require('puppeteer');
   log('Opening browser and navigating to', cyan(`${testUrl}`) + '...');
   const browser = await puppeteer.launch({
     defaultViewport: {width: 1200, height: 800},
@@ -88,8 +84,9 @@ async function autoScroll(page) {
 }
 
 async function htmlTransform() {
-  transform = require('../../server/new-server/transforms/dist/transform')
-    .transform;
+  const {
+    transform,
+  } = require('../../server/new-server/transforms/dist/transform');
   log('Transforming', cyan(`${inputHtml}`) + '...');
   const transformed = await transform(`examples/${inputHtml}`);
   const transformedName = `transformed.${inputHtml}`;
@@ -103,11 +100,11 @@ async function htmlTransform() {
 }
 
 async function generateMap() {
-  explore = require('source-map-explorer').explore;
+  const {explore} = require('source-map-explorer');
 
   // Change source map explorer to mjs file extension if needed
   if (argv.esm && inputJs.includes('.js')) {
-    inputJs = inputJs.replaceAll('.js', '.mjs');
+    inputJs = inputJs.replace(/\.js/g, '.mjs');
   }
 
   log(
