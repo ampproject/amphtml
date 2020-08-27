@@ -102,11 +102,13 @@ function getNumberOfWarnings(errors) {
  * Inspects ValidationResults to discover if in Dev Mode.
  *
  * @param {!Object<!ValidationResult>} validationResult
+ * @return {boolean}
  */
 function isInDevMode(validationResult) {
-  if ((validationResult.errors.length === 1) &&
-      (validationResults.errors[0].code === 'DEV_MODE_ONLY'))
+  if ((validationResult.errors.length == 1) &&
+      (validationResult.errors[0].code == 'DEV_MODE_ONLY')) {
     return true;
+  }
   return false;
 }
 
@@ -132,13 +134,13 @@ function handleAmpCache(tabId, ampHref) {
 }
 
 /**
- * Handles actiosn to be taken for AMP pages that are in Dev Mode.
+ * Handles actions to be taken for AMP pages that are in Dev Mode.
  *
  * @param {integer} tabId ID of a tab.
  */
-funciton handleAmpDevMode(tabId) {
+function handleAmpDevMode(tabId) {
   updateTabStatus(
-      tabId, glboals.devModeAmpIconPrefix, globals.devModeAmpTitle,
+      tabId, globals.devModeAmpIconPrefix, globals.devModeAmpTitle,
       '' /*text*/, globals.devModeAmpBgColor);
   updateTabPopup(tabId);
 }
@@ -186,8 +188,8 @@ function handleAmpLink(tabId, ampHref) {
  */
 function handleAmpPass(tabId, validationResult) {
   let badgeTitle = '';
+  const numWarnings = getNumberOfWarnings(validationResult.errors);
   // No longer display number of warnings
-  // const numWarnings = getNumberOfWarnings(validationResult.errors);
   // if (numWarnings > 0) {badgeTitle = numWarnings.toString();}
   updateTabStatus(
       tabId, globals.validAmpIconPrefix, globals.validAmpTitle,
