@@ -93,10 +93,10 @@ export class DenakopNetworkConfig {
     return {
       initialMinSpacing: viewportHeight,
       subsequentMinSpacing: [
-        {adCount: 3, spacing: viewportHeight * 2},
-        {adCount: 6, spacing: viewportHeight * 3},
+        {adCount: 4, spacing: viewportHeight * 2},
+        {adCount: 8, spacing: viewportHeight * 3},
       ],
-      maxAdCount: 8,
+      maxAdCount: 20,
     };
   }
 
