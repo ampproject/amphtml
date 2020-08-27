@@ -99,7 +99,11 @@ function getNumberOfWarnings(errors) {
 }
 
 /**
- * Inspects ValidationResults to discover if in Dev Mode.
+ * Inspects ValidationResult to discover if the document is in Dev Mode
+ * where any errors outside of being in Dev Mode are surpressed by the
+ * Validator. Those errors can be surpressed by including the attribute
+ * data-ampdevmode on tags that produce those errors. See #24176 for
+ * more context.
  *
  * @param {!Object<!ValidationResult>} validationResult
  * @return {boolean}
