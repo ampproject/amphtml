@@ -36,6 +36,8 @@ async function babelPluginTests() {
     transformIgnorePatterns: ['/node_modules/'],
   };
 
+  // The `jest.runCLI` command is undocumented. See the types file for object shape:
+  // https://github.com/facebook/jest/blob/bd76829f66c5c0f3c6907b80010f19893cb0fc8c/packages/jest-test-result/src/types.ts#L74-L91.
   const aggregatedResults = await jest.runCLI(options, projects);
   if (!aggregatedResults.results.success) {
     throw new Error('See the logs above for details.');
