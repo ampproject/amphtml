@@ -23,9 +23,9 @@ import minimist from 'minimist';
 const argv = minimist(process.argv.slice(2));
 
 /**
- * Append a Module Script for a ScriptNode.
  * @param head
  * @param script
+ * @param compiled 
  */
 function appendModuleScript(head: PostHTML.Node, script: ScriptNode, compiled: boolean): void {
   let modulePath;
