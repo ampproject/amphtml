@@ -442,14 +442,7 @@ export class AmpStoryInteractive extends AMP.BaseElement {
     // Check if the component page is active, and add class.
     this.storeService_.subscribe(
       StateProperty.CURRENT_PAGE_ID,
-      (currPageId) => {
-        this.mutateElement(() => {
-          this.rootEl_.classList.toggle(
-            INTERACTIVE_ACTIVE_CLASS,
-            currPageId === this.getPageId_()
-          );
-        });
-      },
+      (currPageId) => this.onPageActive_(currPageId == this.getPageId_()),
       true /** callToInitialize */
     );
 
@@ -783,5 +776,16 @@ export class AmpStoryInteractive extends AMP.BaseElement {
       type: this.interactiveType_,
     };
     this.storeService_.dispatch(Action.ADD_INTERACTIVE_REACT, update);
+  }
+
+  /**
+   * Callback for when the page active state changes
+   * @param {boolean} active
+   * @return {!Promise}
+   */
+  onPageActive_(active) {
+    return this.mutateElement(() => {
+      this.rootEl_.classList.toggle(INTERACTIVE_ACTIVE_CLASS, active);
+    });
   }
 }
