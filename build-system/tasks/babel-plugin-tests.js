@@ -35,7 +35,11 @@ async function babelPluginTests() {
     testRegex: '/babel-plugins/[^/]+/test/.+\\.m?js$',
     transformIgnorePatterns: ['/node_modules/'],
   };
-  await jest.runCLI(options, projects);
+
+  const aggregatedResults = await jest.runCLI(options, projects);
+  if (!aggregatedResults.success) {
+    throw new Error('See the logs above for details.');
+  }
 }
 
 module.exports = {
