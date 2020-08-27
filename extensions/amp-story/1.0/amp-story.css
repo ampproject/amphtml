@@ -959,6 +959,21 @@ amp-story-interactive-results:not([chip-style="transparent"]) {
   --interactive-prompt-text-color: var(--i-amphtml-interactive-strong-text-color);
 }
 
+amp-story-page[active] amp-story-interactive-results:not([animate-in]) {
+  animation: scale-fade-up 0.6s ease-out;
+}
+
+@keyframes scale-fade-up {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 amp-story-interactive-results[chip-style="transparent"] {
   --i-amphtml-interactive-option-text-color: black !important;
   --i-amphtml-interactive-options-chip-background-color: transparent !important;
