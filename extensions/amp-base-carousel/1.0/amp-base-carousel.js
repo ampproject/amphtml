@@ -16,13 +16,13 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {BaseCarousel} from './base-carousel';
-import {CSS} from './base-carousel.jss';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {useStyles} from './base-carousel.jss';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -38,7 +38,6 @@ class AmpBaseCarousel extends PreactBaseElement {
     return dict({
       'onSlideChange': (index) => {
         fireSlideChangeEvent(this.win, element, index, ActionTrust.HIGH);
-        this.mutateProps(dict({'slide': index}));
       },
       'setAdvance': (a) => (advance = a),
     });
@@ -82,7 +81,8 @@ AmpBaseCarousel['props'] = {
 };
 
 /** @override */
-AmpBaseCarousel['shadowCss'] = CSS;
+// eslint-disable-next-line
+AmpBaseCarousel['shadowCss'] = useStyles().CSS;
 
 /**
  * Triggers a 'slideChange' event with one data param:

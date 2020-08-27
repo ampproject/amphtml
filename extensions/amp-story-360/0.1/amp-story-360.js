@@ -500,11 +500,14 @@ export class AmpStory360 extends AMP.BaseElement {
     const gl = canvasForGL.getContext('webgl');
     const MAX_TEXTURE_SIZE = gl.getParameter(gl.MAX_TEXTURE_SIZE);
 
-    if (imgEl.width > MAX_TEXTURE_SIZE || imgEl.height > MAX_TEXTURE_SIZE) {
+    if (
+      imgEl.naturalWidth > MAX_TEXTURE_SIZE ||
+      imgEl.naturalHeight > MAX_TEXTURE_SIZE
+    ) {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      canvas.width = Math.min(imgEl.width, MAX_TEXTURE_SIZE);
-      canvas.height = Math.min(imgEl.height, MAX_TEXTURE_SIZE);
+      canvas.width = Math.min(imgEl.naturalWidth, MAX_TEXTURE_SIZE);
+      canvas.height = Math.min(imgEl.naturalHeight, MAX_TEXTURE_SIZE);
       ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
       return canvas;
     } else {
