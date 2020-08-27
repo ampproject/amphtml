@@ -15,6 +15,7 @@
  */
 
 import {Animation} from '../../animation';
+import {Deferred, tryResolve} from '../../utils/promise';
 import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
@@ -29,6 +30,7 @@ import {
   isIframed,
 } from '../../dom';
 import {computedStyle, setStyle} from '../../style';
+import {debounce} from '../../utils/rate-limit';
 import {dev, devAssert} from '../../log';
 import {dict} from '../../utils/object';
 import {getFriendlyIframeEmbedOptional} from '../../iframe-helper';
@@ -44,9 +46,9 @@ import {
   moveLayoutRect,
 } from '../../layout-rect';
 import {numeric} from '../../transition';
-import {tryResolve} from '../../utils/promise';
 
 const TAG_ = 'Viewport';
+const posToBlock_ = {'top': 'start', 'center': 'center', 'bottom': 'end'};
 
 /**
  * This object represents the viewport. It tracks scroll position, resize
@@ -404,7 +406,9 @@ export class ViewportImpl {
   /** @override */
   scrollIntoView(element) {
     if (IS_SXG) {
-      return tryResolve(() => element.scrollIntoView());
+      const {promise} = new Deferred();
+      element.scrollIntoView();
+      return promise;
     } else {
       return this.getScrollingContainerFor_(element).then((parent) =>
         this.scrollIntoViewInternal_(element, parent)
@@ -430,10 +434,18 @@ export class ViewportImpl {
   /** @override */
   animateScrollIntoView(element, pos = 'top', opt_duration, opt_curve) {
     if (IS_SXG) {
-      const posToBlock = {'top': 'start', 'center': 'center', 'bottom': 'end'};
-      return tryResolve(() =>
-        element.scrollIntoView({block: posToBlock[pos], behavior: 'smooth'})
+      const {promise, resolve} = new Deferred();
+      const waiter = debounce(
+        this.win,
+        () => {
+          this.removeEventListener('scroll', waiter);
+          resolve();
+        },
+        300
       );
+      this.addEventListener('scroll', waiter);
+      element.scrollIntoView({block: posToBlock_[pos], behavior: 'smooth'});
+      return promise;
     } else {
       devAssert(
         !opt_curve || opt_duration !== undefined,
@@ -886,20 +898,22 @@ export class ViewportImpl {
     this.lastPaddingTop_ = this.paddingTop_;
     this.paddingTop_ = paddingTop;
 
-    const animPromise = this.fixedLayer_.animateFixedElements(
-      this.paddingTop_,
-      this.lastPaddingTop_,
-      duration,
-      curve,
-      transient
-    );
-    if (paddingTop < this.lastPaddingTop_) {
-      this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
-      return;
+    if (this.fixedLayer_) {
+      const animPromise = this.fixedLayer_.animateFixedElements(
+        this.paddingTop_,
+        this.lastPaddingTop_,
+        duration,
+        curve,
+        transient
+      );
+      if (paddingTop < this.lastPaddingTop_) {
+        this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
+        return;
+      }
+      animPromise.then(() => {
+        this.binding_.showViewerHeader(transient, paddingTop);
+      });
     }
-    animPromise.then(() => {
-      this.binding_.showViewerHeader(transient, paddingTop);
-    });
   }
 
   /**
