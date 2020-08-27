@@ -23,11 +23,11 @@ import transformStories from './stories/stories-transform';
 import transformCss from './css/css-transform';
 
 const argv = minimist(process.argv.slice(2));
-const transforms = [transformStories, transformScriptPaths, transformCss];
+const transforms = [transformStories(), transformScriptPaths(), transformCss()];
 
 export async function transform(fileLocation: string): Promise<string> {
   if (argv.esm) {
-    transforms.unshift(transformModules);
+    transforms.unshift(transformModules());
   }
 
   const source = await fsPromises.readFile(fileLocation, 'utf8');

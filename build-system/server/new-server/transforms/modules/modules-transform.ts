@@ -35,11 +35,7 @@ function appendModuleScript(head: PostHTML.Node, script: ScriptNode, compiled: b
       undefined,
       '.mjs'
     ).toString();
-    script.attrs.src = CDNURLToLocalDistURL(
-      new URL(script.attrs.src || ''),
-      undefined,
-      '.js'
-    ).toString();
+    script.attrs.src = modulePath.replace('.mjs', '.js');
   }
   else {
     const urlName = script.attrs.src.toString();
@@ -63,7 +59,7 @@ function appendModuleScript(head: PostHTML.Node, script: ScriptNode, compiled: b
  * Returns a function that will transform script node sources into module/nomodule pair.
  * @param options
  */
-export default function(options: OptionSet): (tree: PostHTML.Node) => void {
+export default function(options: OptionSet = {}): (tree: PostHTML.Node) => void {
   return function(tree: PostHTML.Node): void {
     let head: PostHTML.Node | undefined = undefined;
     let compiled: boolean = options.compiled || false;
