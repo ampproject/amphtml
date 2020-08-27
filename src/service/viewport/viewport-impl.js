@@ -436,7 +436,7 @@ export class ViewportImpl {
     if (IS_SXG) {
       const {promise, resolve} = new Deferred();
       const waiter = debounce(
-        this.win,
+        this.ampdoc.win,
         () => {
           this.removeEventListener('scroll', waiter);
           resolve();
