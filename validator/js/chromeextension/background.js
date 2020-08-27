@@ -105,11 +105,8 @@ function getNumberOfWarnings(errors) {
  * @return {boolean}
  */
 function isInDevMode(validationResult) {
-  if ((validationResult.errors.length == 1) &&
-      (validationResult.errors[0].code == 'DEV_MODE_ONLY')) {
-    return true;
-  }
-  return false;
+  return ((validationResult.errors.length == 1) &&
+      (validationResult.errors[0].code == 'DEV_MODE_ONLY'));
 }
 
 /**
