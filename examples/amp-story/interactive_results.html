@@ -9,14 +9,21 @@
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
     <script async custom-element="amp-story-interactive" src="https://cdn.ampproject.org/v0/amp-story-interactive-1.0.js"></script>
+    <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
+    <script async custom-element="amp-animation-polyfill" src="https://cdn.ampproject.org/v0/amp-animation-polyfill-0.1.js"></script>
+    <script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js"></script>
     <style amp-custom>
     body {
       font-family: 'Poppins', sans-serif;
     }
 
-    amp-story-interactive-poll, amp-story-interactive-results {
+    .center {
       align-self: center;
+      display: inline;
       justify-self: center;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
     }
 
     amp-story-interactive-results[chip-style="transparent"] {
@@ -76,6 +83,7 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer>
+            <div class="center">
             <amp-story-interactive-results
                 style="--interactive-accent-color: #F34E4E"
                 animate-in="fade-in"
@@ -85,6 +93,7 @@
                 option-1-image="https://images.pexels.com/photos/104827/cat-pet-animal-domestic-104827.jpeg"
                 option-2-results-category="Dog">
             </amp-story-interactive-results>
+            </div>
           </amp-story-grid-layer>
         </amp-story-page>
         <amp-story-page id="quiz-results-dark">
@@ -97,6 +106,7 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer>
+            <div class="center">
             <amp-story-interactive-results
                 style="--interactive-accent-color: #F34E4E;"
                 animate-in="drop"
@@ -107,6 +117,7 @@
                 option-1-results-threshold="0"
                 option-2-results-category="Dog" option-2-results-threshold="100">
             </amp-story-interactive-results>
+            </div>
           </amp-story-grid-layer>
         </amp-story-page>
 
@@ -120,6 +131,7 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer>
+            <div class="center">
             <amp-story-interactive-results
                 style="--interactive-accent-color: #F34E4E"
                 animate-in="fly-in-bottom"
@@ -129,6 +141,7 @@
                 option-1-results-threshold="0"
                 option-2-results-category="Dog" option-2-results-threshold="100">
             </amp-story-interactive-results>
+            </div>
           </amp-story-grid-layer>
         </amp-story-page>
         <amp-story-page id="quiz-results-no-image-score" style="background-color:black">
@@ -141,6 +154,7 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer>
+            <div class="center">
             <amp-story-interactive-results
                 style="--interactive-accent-color: #FFAABB"
                 animate-in="rotate-in-left"
@@ -149,6 +163,7 @@
                 option-1-text="Everyone loves cats, and so do you! Cats are the best companion to WFH"
                 option-2-results-category="Dog">
             </amp-story-interactive-results>
+            </div>
           </amp-story-grid-layer>
         </amp-story-page>
 
@@ -162,6 +177,7 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer>
+            <div class="center">
             <amp-story-interactive-results
                 style="--interactive-accent-color: #531E2E"
                 animate-in="fly-in-top"
@@ -172,6 +188,7 @@
                 option-1-image="https://images.pexels.com/photos/104827/cat-pet-animal-domestic-104827.jpeg"
                 option-2-results-category="Dog">
             </amp-story-interactive-results>
+            </div>
           </amp-story-grid-layer>
         </amp-story-page>
         <amp-story-page id="quiz-results-dark-transparent" style="background-color:black">
@@ -184,6 +201,7 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer>
+            <div class="center">
             <amp-story-interactive-results
                 style="--interactive-accent-color: #FFAABB"
                 animate-in="twirl-in"
@@ -196,6 +214,7 @@
                 option-1-results-threshold="0"
                 option-2-results-category="Dog" option-2-results-threshold="100">
             </amp-story-interactive-results>
+            </div>
           </amp-story-grid-layer>
         </amp-story-page>
         <amp-story-page id="quiz-results-transparent-no-image" style="background-color:black">
@@ -208,6 +227,7 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer>
+            <div class="center">
             <amp-story-interactive-results
                 style="--interactive-accent-color: #F34E4E; --interactive-prompt-background: #ffffff33"
                 animate-in="pulse"
@@ -219,6 +239,7 @@
                 option-1-results-threshold="0"
                 option-2-results-category="Dog" option-2-results-threshold="100">
             </amp-story-interactive-results>
+            </div>
           </amp-story-grid-layer>
         </amp-story-page>
         <amp-story-page id="quiz-results-transparent-no-image-dark" style="background-color:white">
@@ -231,6 +252,7 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer>
+            <div class="center">
             <amp-story-interactive-results
                 style="--interactive-accent-color: #F34E4E"
                 animate-in="scale-fade-up"
@@ -241,6 +263,7 @@
                 option-1-results-threshold="0"
                 option-2-results-category="Dog" option-2-results-threshold="100">
             </amp-story-interactive-results>
+            </div>
           </amp-story-grid-layer>
         </amp-story-page>
 
@@ -254,6 +277,7 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer>
+            <div class="center">
             <amp-story-interactive-results
                 style="--interactive-accent-color: #F34E4E; --interactive-prompt-background:transparent"
                 animate-in="scale-fade-down"
@@ -263,6 +287,7 @@
                 option-1-results-threshold="0"
                 option-2-results-category="Dog" option-2-results-threshold="100">
             </amp-story-interactive-results>
+            </div>
           </amp-story-grid-layer>
         </amp-story-page>
 
@@ -276,6 +301,7 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer>
+            <div class="center">
             <amp-story-interactive-results
                 style="--interactive-accent-color: #F34E4E"
                 animate-in="whoosh-in-right"
@@ -286,6 +312,7 @@
                 option-1-results-threshold="0"
                 option-2-results-category="Dog" option-2-results-threshold="100">
             </amp-story-interactive-results>
+            </div>
           </amp-story-grid-layer>
         </amp-story-page>
 
@@ -299,6 +326,7 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer>
+            <div class="center">
             <amp-story-interactive-results
                 style="--interactive-accent-color: #F34E4E; --interactive-prompt-background:linear-gradient(orange, red);--interactive-prompt-text-color:black"
                 animate-in="fly-in-right"
@@ -308,6 +336,7 @@
                 option-1-results-threshold="0"
                 option-2-results-category="Dog" option-2-results-threshold="100">
             </amp-story-interactive-results>
+            </div>
           </amp-story-grid-layer>
         </amp-story-page>
 
@@ -321,6 +350,7 @@
             </amp-img>
           </amp-story-grid-layer>
           <amp-story-grid-layer>
+            <div class="center">
             <amp-story-interactive-results
                 animate-in="rotate-in-right"
                 prompt-text="You are a"
@@ -332,6 +362,7 @@
                 option-1-results-threshold="0"
                 option-2-results-category="Dog" option-2-results-threshold="100">
             </amp-story-interactive-results>
+            </div>
           </amp-story-grid-layer>
         </amp-story-page>
     </amp-story>
