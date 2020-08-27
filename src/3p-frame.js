@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as Preact from '../src/preact';
 import {assertHttpsUrl, parseUrlDeprecated} from './url';
 import {dev, devAssert, user, userAssert} from './log';
 import {dict} from './utils/object';
@@ -48,7 +49,7 @@ const TAG = '3p-frame';
  */
 function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
   const type = opt_type || element.getAttribute('type');
-  userAssert(type, 'Attribute type required for <amp-ad>: %s', element);
+  // userAssert(type, 'Attribute type required for <amp-ad>: %s', element);
   const sentinel = generateSentinel(parentWindow);
   let attributes = dict();
   // Do these first, as the other attributes have precedence.
@@ -160,6 +161,66 @@ export function getIframe(
   );
   return iframe;
 }
+
+export function getIframeProps(parentWindow, opt_type) {
+  const element = Preact.createElement('div');
+  const attributes = getFrameAttributes(window, element, opt_type);
+  if (!count[attributes['type']]) {
+    count[attributes['type']] = 0;
+  }
+  count[attributes['type']] += 1;
+
+  const baseUrl = getDevelopmentBootstrapBaseUrl(parentWindow, opt_type);
+  const host = parseUrlDeprecated(baseUrl).hostname;
+  const name = JSON.stringify(
+    dict({
+      'host': host,
+      'type': attributes['type'],
+      // https://github.com/ampproject/amphtml/pull/2955
+      'count': count[attributes['type']],
+      'attributes': attributes,
+    })
+  );
+
+  const iframe = {};
+  iframe.src = baseUrl;
+  iframe.ampLocation = parseUrlDeprecated(baseUrl);
+  iframe.name = name;
+  if (attributes['width']) {
+    iframe.width = attributes['width'];
+  }
+  if (attributes['height']) {
+    iframe.height = attributes['height'];
+  }
+  if (attributes['title']) {
+    iframe.title = attributes['title'];
+  }
+  if (allowFullscreen) {
+    iframe.setAttribute('allowfullscreen', 'true');
+  }
+  iframe.setAttribute('scrolling', 'no');
+  setStyle(iframe, 'border', 'none');
+
+  iframe.onload = function () {
+    // Chrome does not reflect the iframe readystate.
+    this.readyState = 'complete';
+  };
+  // Block synchronous XHR in ad. These are very rare, but super bad for UX
+  // as they block the UI thread for the arbitrary amount of time until the
+  // request completes.
+  iframe.setAttribute('allow', "sync-xhr 'none';");
+  const excludeFromSandbox = ['facebook'];
+  if (!excludeFromSandbox.includes(opt_type)) {
+    applySandbox(iframe);
+  }
+  iframe.setAttribute(
+    'data-amp-3p-sentinel',
+    attributes['_context']['sentinel']
+  );
+  return iframe;
+}
+
+
 
 /**
  * Copies data- attributes from the element into the attributes object.

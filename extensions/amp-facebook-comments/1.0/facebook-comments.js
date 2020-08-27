@@ -1,5 +1,6 @@
 import * as Preact from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
+import {getIframeProps} from '../../../src/3p-frame';
 
 const NAME = 'FacebookComments';
 
@@ -19,14 +20,8 @@ const NAME = 'FacebookComments';
  */
 export function FacebookComments(props) {
     useResourcesNotify();
-    // preconnectCallback(opt_onLayout
+    
 
-    return (
-        <iframe 
-        id="facebook-comments-iframe" 
-        width="200" 
-        height="200" 
-        src="http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html"></iframe>
-    )
+    return Preact.createElement('iframe', getIframeProps(window, 'facebook'));
 
 }
