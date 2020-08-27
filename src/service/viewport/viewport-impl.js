@@ -438,12 +438,12 @@ export class ViewportImpl {
       const waiter = debounce(
         this.ampdoc.win,
         () => {
-          this.removeEventListener('scroll', waiter);
+          this.ampdoc.win.removeEventListener('scroll', waiter);
           resolve();
         },
         300
       );
-      this.addEventListener('scroll', waiter);
+      this.ampdoc.win.addEventListener('scroll', waiter);
       element./* REVIEW */ scrollIntoView({
         block: posToBlock_[pos],
         behavior: 'smooth',
