@@ -407,7 +407,7 @@ export class ViewportImpl {
   scrollIntoView(element) {
     if (IS_SXG) {
       const {promise} = new Deferred();
-      element.scrollIntoView();
+      element./* REVIEW */ scrollIntoView();
       return promise;
     } else {
       return this.getScrollingContainerFor_(element).then((parent) =>
@@ -444,7 +444,10 @@ export class ViewportImpl {
         300
       );
       this.addEventListener('scroll', waiter);
-      element.scrollIntoView({block: posToBlock_[pos], behavior: 'smooth'});
+      element./* REVIEW */ scrollIntoView({
+        block: posToBlock_[pos],
+        behavior: 'smooth',
+      });
       return promise;
     } else {
       devAssert(
