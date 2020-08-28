@@ -73,6 +73,71 @@ describes.realWin('PreactBaseElement', {amp: true}, (env) => {
     });
   }
 
+  describe('shadow container rendering', () => {
+    let element;
+
+    beforeEach(() => {
+      Impl['children'] = {};
+      element = html`
+        <amp-preact layout="fixed" width="100" height="100">
+          <div id="child1"></div>
+        </amp-preact>
+      `;
+    });
+
+    it('should render from scratch', async () => {
+      doc.body.appendChild(element);
+      await element.build();
+      await waitFor(() => component.callCount > 0, 'component rendered');
+      expect(component).to.be.calledOnce;
+      const container = element.shadowRoot.querySelector(':scope > c');
+      expect(container).to.be.ok;
+      expect(container.style.display).to.equal('contents');
+      expect(container.querySelector(':scope > #component')).to.be.ok;
+      expect(
+        element.shadowRoot.querySelectorAll('slot[name="i-amphtml-svc"]')
+      ).to.have.lengthOf(1);
+    });
+
+    it('should hydrate SSR shadow root', async () => {
+      const shadowRoot = element.attachShadow({mode: 'open'});
+      const container = html`
+        <c>
+          <div id="component"></div>
+        </c>
+      `;
+      const componentEl = container.querySelector('#component');
+      expect(componentEl).to.be.ok;
+      shadowRoot.appendChild(container);
+
+      const serviceSlotEl = html`<slot name="i-amphtml-svc"></slot>`;
+      shadowRoot.appendChild(serviceSlotEl);
+
+      const styleEl = html`<style></style>`;
+      shadowRoot.appendChild(styleEl);
+
+      doc.body.appendChild(element);
+      await element.build();
+      await waitFor(() => component.callCount > 0, 'component rendered');
+      expect(component).to.be.calledOnce;
+      expect(element.shadowRoot.querySelector(':scope > c')).to.equal(
+        container
+      );
+      expect(
+        element.shadowRoot.querySelector(':scope > c > #component')
+      ).to.equal(componentEl);
+      expect(
+        element.shadowRoot.querySelectorAll('slot[name="i-amphtml-svc"]')
+      ).to.have.lengthOf(1);
+      expect(
+        element.shadowRoot.querySelector(':scope > slot[name="i-amphtml-svc"]')
+      ).to.equal(serviceSlotEl);
+      expect(element.shadowRoot.querySelector(':scope > style')).to.equal(
+        styleEl
+      );
+    });
+  });
+
   describe('no children mapping', () => {
     let element;
 
