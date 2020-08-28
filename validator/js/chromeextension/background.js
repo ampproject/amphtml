@@ -188,13 +188,10 @@ function handleAmpLink(tabId, ampHref) {
  * @param {!Object<!ValidationResult>} validationResult
  */
 function handleAmpPass(tabId, validationResult) {
-  let badgeTitle = '';
   const numWarnings = getNumberOfWarnings(validationResult.errors);
-  // No longer display number of warnings
-  // if (numWarnings > 0) {badgeTitle = numWarnings.toString();}
   updateTabStatus(
       tabId, globals.validAmpIconPrefix, globals.validAmpTitle,
-      badgeTitle, globals.validAmpBgcolor);
+      '' /*text*/, globals.validAmpBgcolor);
   if (numWarnings > 0) {updateTabPopup(tabId);}
 }
 
