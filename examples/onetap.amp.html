@@ -1,0 +1,60 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>Google One Tap Example</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <meta name="amp-experiments-opt-in" content="amp-onetap-google">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <script async custom-element="amp-onetap-google" src="https://cdn.ampproject.org/v0/amp-onetap-google-0.1.js"></script>
+  <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+  <script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <style type="text/css">
+    body {
+      font-family: sans-serif;
+      min-height: 100vh;
+      padding: 0;
+      margin: 0;
+    }
+    .main-lightbox {
+      background: #000;
+      color: #ccc;
+    }
+    .intermediate-iframe-card-mode {
+      border: none;
+      bottom: auto;
+      left: auto;
+      margin: 0;
+      padding: 0;
+      position: fixed;
+      right: 0;
+      top: 0;
+      width: 391px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Google One Tap</h2>
+
+<div on="tap:main-lightbox"
+     role="button"
+     class="button button-secondary play"
+     tabindex="0">
+  <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n"
+           width="400"
+           height="300"
+           layout="responsive">
+  </amp-img>
+</div>
+
+<amp-onetap-google
+  layout="nodisplay"
+  data-iframe-url = "https://gis-pay.appspot.com/onetap_iframe.html">
+</amp-onetap-google>
+</body>
+</html>

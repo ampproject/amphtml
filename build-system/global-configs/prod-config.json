@@ -2,7 +2,8 @@
   "allow-doc-opt-in": [
     "amp-next-page",
     "analytics-chunks",
-    "analytics-chunks-inabox"
+    "analytics-chunks-inabox",
+    "amp-onetap-google"
   ],
   "allow-url-opt-in": ["pump-early-frame"],
   "canary": 0,
