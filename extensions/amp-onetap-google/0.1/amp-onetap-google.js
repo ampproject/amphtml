@@ -36,9 +36,7 @@ import {
   toggle,
 } from '../../../src/style';
 import {assertHttpsUrl} from '../../../src/url';
-import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
-import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-onetap-google';
@@ -103,8 +101,6 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-
-    this.checkExperimentEnabled_();
 
     /** @private @const {string} */
     this.intermediateIframeUrl_ = assertHttpsUrl(
@@ -319,14 +315,6 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
       this.element.removeChild(this.intermediateIframe_);
       this.intermediateIframe_ = null;
     }
-  }
-
-  /** @private */
-  checkExperimentEnabled_() {
-    userAssert(
-      isExperimentOn(this.win, 'amp-onetap-google'),
-      `Experiment amp-onetap-google is not turned on.`
-    );
   }
 }
 
