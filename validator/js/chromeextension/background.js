@@ -18,7 +18,10 @@ const globals = {};
 globals.ampCacheBgcolor = '#ffffff';
 globals.ampCacheIconPrefix = 'amp-link';
 globals.ampCacheTitle = chrome.i18n.getMessage('pageFromAmpCacheTitle');
-globals.invalidAmpBgcolor = '#8b0000';
+globals.devModeAmpBgcolor = '#fcba03';
+globals.devModeAmpIconPrefix = 'dev';
+globals.devModeAmpTitle = chrome.i18n.getMessage('pageInDevModeTitle');
+globals.invalidAmpBgcolor = '#f44336';
 globals.invalidAmpIconPrefix = 'invalid';
 globals.invalidAmpTitle = chrome.i18n.getMessage('pageFailsValidationTitle');
 globals.linkToAmpBgColor = '#ffffff';
@@ -96,6 +99,18 @@ function getNumberOfWarnings(errors) {
 }
 
 /**
+ * Inspects ValidationResult to discover if the document has only one
+ * error which states DEV_MODE_ONLY. See #24176 for more context.
+ *
+ * @param {!Object<!ValidationResult>} validationResult
+ * @return {boolean}
+ */
+function onlyErrorIsDevMode(validationResult) {
+  return ((validationResult.errors.length == 1) &&
+      (validationResult.errors[0].code == 'DEV_MODE_ONLY'));
+}
+
+/**
  * Handles actions to be taken for pages that are on an AMP Cache.
  *
  * @param {integer} tabId ID of a tab.
@@ -114,6 +129,18 @@ function handleAmpCache(tabId, ampHref) {
         }
       }
   );
+}
+
+/**
+ * Handles actions to be taken for AMP pages that are in Dev Mode.
+ *
+ * @param {integer} tabId ID of a tab.
+ */
+function handleAmpDevMode(tabId) {
+  updateTabStatus(
+      tabId, globals.devModeAmpIconPrefix, globals.devModeAmpTitle,
+      '' /*text*/, globals.devModeAmpBgColor);
+  updateTabPopup(tabId);
 }
 
 /**
@@ -158,12 +185,10 @@ function handleAmpLink(tabId, ampHref) {
  * @param {!Object<!ValidationResult>} validationResult
  */
 function handleAmpPass(tabId, validationResult) {
-  let badgeTitle = '';
   const numWarnings = getNumberOfWarnings(validationResult.errors);
-  if (numWarnings > 0) {badgeTitle = numWarnings.toString();}
   updateTabStatus(
       tabId, globals.validAmpIconPrefix, globals.validAmpTitle,
-      badgeTitle, globals.validAmpBgcolor);
+      '' /*text*/, globals.validAmpBgcolor);
   if (numWarnings > 0) {updateTabPopup(tabId);}
 }
 
@@ -300,6 +325,8 @@ function validateUrlFromTab(tab, userAgent) {
       window.sessionStorage.setItem(url, JSON.stringify(validationResult));
       if (validationResult.status == 'PASS') {
         handleAmpPass(tab.id, validationResult);
+      } else if (onlyErrorIsDevMode(validationResult)) {
+        handleAmpDevMode(tab.id);
       } else {
         handleAmpFail(tab.id, validationResult);
       }
