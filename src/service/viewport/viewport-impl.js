@@ -48,7 +48,12 @@ import {
 import {numeric} from '../../transition';
 
 const TAG_ = 'Viewport';
-const posToBlock_ = {'top': 'start', 'center': 'center', 'bottom': 'end'};
+const SCROLL_POS_TO_BLOCK_ = {
+  'top': 'start',
+  'center': 'center',
+  'bottom': 'end',
+};
+const SCROLL_DELAY_ = 300;
 
 /**
  * This object represents the viewport. It tracks scroll position, resize
@@ -406,9 +411,9 @@ export class ViewportImpl {
   /** @override */
   scrollIntoView(element) {
     if (IS_SXG) {
-      const {promise} = new Deferred();
+      const {resolve} = new Deferred();
       element./* REVIEW */ scrollIntoView();
-      return promise;
+      return resolve();
     } else {
       return this.getScrollingContainerFor_(element).then((parent) =>
         this.scrollIntoViewInternal_(element, parent)
@@ -441,11 +446,11 @@ export class ViewportImpl {
           this.ampdoc.win.removeEventListener('scroll', waiter);
           resolve();
         },
-        300
+        SCROLL_DELAY_
       );
       this.ampdoc.win.addEventListener('scroll', waiter);
       element./* REVIEW */ scrollIntoView({
-        block: posToBlock_[pos],
+        block: SCROLL_POS_TO_BLOCK_[pos],
         behavior: 'smooth',
       });
       return promise;
@@ -893,6 +898,7 @@ export class ViewportImpl {
     const curve = data['curve'];
     /** @const {boolean} */
     const transient = data['transient'];
+    let animPromise;
 
     if (paddingTop == undefined || paddingTop == this.paddingTop_) {
       return;
@@ -902,17 +908,19 @@ export class ViewportImpl {
     this.paddingTop_ = paddingTop;
 
     if (this.fixedLayer_) {
-      const animPromise = this.fixedLayer_.animateFixedElements(
+      animPromise = this.fixedLayer_.animateFixedElements(
         this.paddingTop_,
         this.lastPaddingTop_,
         duration,
         curve,
         transient
       );
-      if (paddingTop < this.lastPaddingTop_) {
-        this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
-        return;
-      }
+    }
+
+    if (animPromise && paddingTop < this.lastPaddingTop_) {
+      this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
+      return;
+    } else if (animPromise) {
       animPromise.then(() => {
         this.binding_.showViewerHeader(transient, paddingTop);
       });
