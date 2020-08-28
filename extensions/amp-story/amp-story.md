@@ -290,6 +290,15 @@ These guidelines apply to the story poster image(s):
   - Landscape: 853px x 640px
   - Square: 640px x 640px
 
+### Story generator meta tags
+
+Optional HTML meta tags can be used to indicate which Story generator the document was created with. There are two meta tags, respectively indicating the generator name and its version.
+
+```html
+<meta name="amp-story-generator-name" content="Story generator name" />
+<meta name="amp-story-generator-version" content="0.1" />
+```
+
 ### Landscape orientation and full bleed desktop experience opt in
 
 If the `supports-landscape` attribute is specified on the `<amp-story>` element, it will:
