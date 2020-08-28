@@ -272,6 +272,12 @@ i-amphtml-sizer {
   display: none;
 }
 
+/**
+ * We special case the native <img> inside an SSR'd <amp-img>. We allow this to
+ * display using `block` defined by .i-amphtml-fill-content.
+ *
+ * As more elements get SSR, we'll need to add their special cases here.
+ */
 amp-img:not(.i-amphtml-element)[i-amphtml-ssr] > img.i-amphtml-fill-content
 {
   display: block;
