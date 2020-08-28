@@ -613,6 +613,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
         const value = item[key];
         userAssert(typeof value === 'string');
 
+        // TODO: Fix URL detection.
+        // TODO: Support highlight-user-entry.
         const isUrl = startsWith(value, 'http://');
         if (isUrl) {
           const image = this.element.ownerDocument.createElement('amp-img');

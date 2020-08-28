@@ -120,31 +120,16 @@
     style="width: 80%">
     <amp-autocomplete id="richInline" inline="@" filter="prefix" min-characters="0" filter-value="name" preset="rich" highlight-user-entry>
       <input type="search" id="inputInline" style="width: 300px">
-      <!-- <script type="application/json">
-      { 
-        "items" : [
-          {
-              "name" : "William Chou",
-              "email" : "willchou@google.com", 
-              "photo" : "http://localhost:8000/examples/willchou.webp"
-          }, {
-              "name" : "Bill Jiang",
-              "email" : "billjiang@google.com",
-              "photo" : "http://localhost:8000/examples/billjiang.webp"
-          }
-        ] 
-      }
-      </script> -->
       <div class="i-amphtml-autocomplete-results" role="listbox" id="richInline" hidden>
         <div class="i-amphtml-autocomplete-item" role="option" data-value="William Chou" dir="auto">
-          <p class="name" data-item-key="name">William Chou</p>
-          <p class="email" data-item-key="email">will@email.com</p>
-          <div class="photo" data-item-key="photo"><amp-img src="http://localhost:8000/examples/willchou.webp" layout="fill" class="i-amphtml-element i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img></div>
+          <p data-item-key="name">William Chou</p>
+          <p data-item-key="email">will@email.com</p>
+          <div data-item-key="photo"><amp-img src="http://localhost:8000/examples/willchou.webp" layout="fill"></amp-img></div>
         </div>
         <div class="i-amphtml-autocomplete-item" role="option" data-value="Bill Jiang" dir="auto">
-          <p class="name" data-item-key="name">Bill Jiang</p>
-          <p class="email" data-item-key="email">bill@email.com</p>
-          <div class="photo" data-item-key="photo"><amp-img src="http://localhost:8000/examples/billjiang.webp" layout="fill" class="i-amphtml-element i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img></div>
+          <p data-item-key="name">Bill Jiang</p>
+          <p data-item-key="email">bill@email.com</p>
+          <div data-item-key="photo"><amp-img src="http://localhost:8000/examples/billjiang.webp" layout="fill"></amp-img></div>
         </div>
       </div>
     </amp-autocomplete>
