@@ -302,6 +302,14 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
 
+    const audioDeferred = new Deferred();
+
+    /** @private @const {!Promise} */
+    this.backgroundAudioUpgradePromise_ = audioDeferred.promise;
+
+    /** @private @const {!function()} */
+    this.backgroundAudioUpgradeResolveFn_ = audioDeferred.resolve;
+
     /**
      * Whether the user agent matches a bot.  This is used to prevent resource
      * optimizations that make the document less useful at crawl time, e.g.
@@ -568,7 +576,9 @@ export class AmpStoryPage extends AMP.BaseElement {
         )
       );
     }
-    this.muteAllMedia();
+    this.muteAllMedia().then(() => {
+      this.backgroundAudioUpgradeResolveFn_();
+    });
     this.getViewport().onResize(
       debounce(this.win, () => this.onResize_(), RESIZE_TIMEOUT_MS)
     );
@@ -739,6 +749,11 @@ export class AmpStoryPage extends AMP.BaseElement {
         }
       });
     });
+
+    if (this.element.hasAttribute('background-audio')) {
+      mediaPromises.push(this.backgroundAudioUpgradePromise_);
+    }
+
     return Promise.all(mediaPromises);
   }
 
@@ -1108,7 +1123,11 @@ export class AmpStoryPage extends AMP.BaseElement {
       // happen after a user intent, and the media element was not "blessed".
       // On unmute, make sure this audio element is playing, at the expected
       // currentTime.
-      if (mediaEl.tagName === 'AUDIO' && mediaEl.paused) {
+      if (
+        mediaEl.tagName === 'AUDIO' &&
+        mediaEl.paused &&
+        this.playAudioElementFromTimestamp_
+      ) {
         const currentTime =
           (Date.now() - this.playAudioElementFromTimestamp_) / 1000;
         if (mediaEl.hasAttribute('loop') || currentTime < mediaEl.duration) {
