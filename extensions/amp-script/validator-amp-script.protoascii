@@ -185,6 +185,12 @@ tags: {  # <amp-script>
   disallowed_ancestor: "AMP-SCRIPT"
   requires_extension: "amp-script"
   attrs: {
+    # This attribute should always be invalid. See https://github.com/ampproject/amphtml/pull/27076
+    name: "data-ampdevmode"
+    value: "false"
+    disallowed_value_regex: "false"
+  }
+  attrs: {
     name: "max-age"
     value_regex: "[0-9]+"
     trigger: {
@@ -192,12 +198,7 @@ tags: {  # <amp-script>
       also_requires_attr: "script"
     }
   }
-  attrs: {
-    # This attribute should always be invalid. See https://github.com/ampproject/amphtml/pull/27076
-    name: "data-ampdevmode"
-    value: "false"
-    disallowed_value_regex: "false"
-  }
+  attrs: { name: "nodom" }
   attrs: { name: "sandbox" }
   attrs: {
     name: "script"
