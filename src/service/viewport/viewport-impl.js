@@ -898,7 +898,6 @@ export class ViewportImpl {
     const curve = data['curve'];
     /** @const {boolean} */
     const transient = data['transient'];
-    let animPromise;
 
     if (paddingTop == undefined || paddingTop == this.paddingTop_) {
       return;
@@ -908,22 +907,20 @@ export class ViewportImpl {
     this.paddingTop_ = paddingTop;
 
     if (this.fixedLayer_) {
-      animPromise = this.fixedLayer_.animateFixedElements(
+      const animPromise = this.fixedLayer_.animateFixedElements(
         this.paddingTop_,
         this.lastPaddingTop_,
         duration,
         curve,
         transient
       );
-    }
-
-    if (animPromise && paddingTop < this.lastPaddingTop_) {
-      this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
-      return;
-    } else if (animPromise) {
-      animPromise.then(() => {
-        this.binding_.showViewerHeader(transient, paddingTop);
-      });
+      if (paddingTop < this.lastPaddingTop_) {
+        this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
+      } else {
+        animPromise.then(() => {
+          this.binding_.showViewerHeader(transient, paddingTop);
+        });
+      }
     }
   }
 
