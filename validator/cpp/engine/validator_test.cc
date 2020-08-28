@@ -146,32 +146,32 @@ TEST(ValidatorTest, TestDocSizeAmpEmail) {
   const std::string valid_body_content = "<b>Hello, World</b>\n";
   ASSERT_EQ(20, valid_body_content.length());
 
-  // 100000 bytes in the tested document.
+  // 200000 bytes in the tested document.
   {
     std::string test_case_name = StrCat(test_case.name, "[MaxBytesTest]");
-    std::string body = RepeatString(valid_body_content, /*n_times=*/4945);
+    std::string body = RepeatString(valid_body_content, /*n_times=*/9945);
     std::string test_html = TestWithDocSize(test_case.input_content, body);
-    EXPECT_EQ(100000, test_html.length());
+    EXPECT_EQ(200000, test_html.length());
     EXPECT_EQ(
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL).status(),
         ValidationResult::PASS)
         << "test case " << test_case_name;
   }
 
-  // 100001 bytes in the tested document.
+  // 200001 bytes in the tested document.
   {
     std::string test_case_name = StrCat(test_case.name, "[OffByOneTest]");
     std::string body =
-        StrCat(RepeatString(valid_body_content, /*n_times=*/4945), " ");
+        StrCat(RepeatString(valid_body_content, /*n_times=*/9945), " ");
     std::string test_html = TestWithDocSize(test_case.input_content, body);
-    EXPECT_EQ(100001, test_html.length());
+    EXPECT_EQ(200001, test_html.length());
     std::string output = RenderResult(
         /*filename=*/test_case_name, /*include_revisions*/ false,
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
-        ":4978:6 "
-        "Document exceeded 100000 bytes limit. Actual size 100001 bytes. "
+        ":9978:6 "
+        "Document exceeded 200000 bytes limit. Actual size 200001 bytes. "
         "(see https://amp.dev/documentation/guides-and-tutorials/learn/"
         "email-spec/amp-email-format/?format=email)");
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
@@ -445,14 +445,7 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
     std::string output = RenderResult(
         /*filename=*/test_case_name, /*include_revisions*/ false,
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
-    // TODO(b/135278314): This test should pass but does not due to the doc
-    // byte size limit of 100k. When AMP Email increases limit to 200k then
-    // this test will go back to PASS.
-    std::string expected_output = StrCat(
-        "FAIL\n", test_case_name,
-        ":34:6 Document exceeded 100000 bytes limit. Actual size 196140 bytes. "
-        "(see https://amp.dev/documentation/guides-and-tutorials/learn/"
-        "email-spec/amp-email-format/?format=email)");
+    std::string expected_output = "PASS";
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
 
@@ -469,14 +462,8 @@ TEST(ValidatorTest, TestCssLengthAmpEmail) {
     // TODO(b/153099987): This should not pass as we have more than 75,000 bytes
     // of inline style. Right now, it is a warning until we have sorted out how
     // to make the transition.
-    // TODO(b/135278314): This test has a 100k error but should not once
-    // AMP Email increases the doc byte size limit to 200k.
     std::string expected_output = StrCat(
-        "FAIL\n", test_case_name,
-        ":34:6 Document exceeded 100000 bytes limit. Actual size 196167 bytes. "
-        "(see https://amp.dev/documentation/guides-and-tutorials/learn/"
-        "email-spec/amp-email-format/?format=email)\n",
-        test_case_name,
+        "PASS\n", test_case_name,
         ":34:6 The author stylesheet specified in tag 'style amp-custom' "
         "and the combined inline styles is too large - document contains 75010 "
         "bytes whereas the limit is 75000 bytes. (see https://amp.dev/"
@@ -601,11 +588,7 @@ TEST(ValidatorTest, TestCssLengthAmpEmailStrict) {
     std::string output = RenderResult(
         /*filename=*/test_case_name, /*include_revisions*/ false,
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
-    std::string expected_output = StrCat(
-        "FAIL\n", test_case_name,
-        ":34:6 Document exceeded 100000 bytes limit. Actual size 196156 bytes. "
-        "(see https://amp.dev/documentation/guides-and-tutorials/learn/"
-        "email-spec/amp-email-format/?format=email)");
+    std::string expected_output = "PASS";
     EXPECT_EQ(expected_output, output) << "test case " << test_case_name;
   }
 
@@ -620,10 +603,6 @@ TEST(ValidatorTest, TestCssLengthAmpEmailStrict) {
         amp::validator::Validate(test_html, HtmlFormat::AMP4EMAIL));
     std::string expected_output = StrCat(
         "FAIL\n", test_case_name,
-        ":34:6 Document exceeded 100000 bytes limit. Actual size 196182 bytes. "
-        "(see https://amp.dev/documentation/guides-and-tutorials/learn/"
-        "email-spec/amp-email-format/?format=email)\n",
-        test_case_name,
         ":34:6 The author stylesheet specified in tag 'style amp-custom' "
         "and the combined inline styles is too large - document contains 75010 "
         "bytes whereas the limit is 75000 bytes. (see https://amp.dev/"
