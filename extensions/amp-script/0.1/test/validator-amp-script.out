@@ -37,7 +37,7 @@ FAIL
 |    </amp-script>
 |
 |    <!-- Valid: 'nodom' attribute. -->
-|    <amp-script layout=container src="https://example.com/foo.js">
+|    <amp-script nodom layout=container src="https://example.com/foo.js">
 |    </amp-script>
 |
 |    <!-- Invalid: 'src' attribute with non-HTTPS protocol. -->
