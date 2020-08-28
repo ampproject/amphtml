@@ -198,7 +198,10 @@ tags: {  # <amp-script>
       also_requires_attr: "script"
     }
   }
-  attrs: { name: "nodom" }
+  attrs: {
+    name: "nodom"
+    value: ""
+  }
   attrs: { name: "sandbox" }
   attrs: {
     name: "script"
