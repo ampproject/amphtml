@@ -99,16 +99,13 @@ function getNumberOfWarnings(errors) {
 }
 
 /**
- * Inspects ValidationResult to discover if the document is in Dev Mode
- * where any errors outside of being in Dev Mode are surpressed by the
- * Validator. Those errors can be surpressed by including the attribute
- * data-ampdevmode on tags that produce those errors. See #24176 for
- * more context.
+ * Inspects ValidationResult to discover if the document has only one
+ * error which states DEV_MODE_ONLY. See #24176 for more context.
  *
  * @param {!Object<!ValidationResult>} validationResult
  * @return {boolean}
  */
-function isInDevMode(validationResult) {
+function onlyErrorIsDevMode(validationResult) {
   return ((validationResult.errors.length == 1) &&
       (validationResult.errors[0].code == 'DEV_MODE_ONLY'));
 }
@@ -328,7 +325,7 @@ function validateUrlFromTab(tab, userAgent) {
       window.sessionStorage.setItem(url, JSON.stringify(validationResult));
       if (validationResult.status == 'PASS') {
         handleAmpPass(tab.id, validationResult);
-      } else if (isInDevMode(validationResult)) {
+      } else if (onlyErrorIsDevMode(validationResult)) {
         handleAmpDevMode(tab.id);
       } else {
         handleAmpFail(tab.id, validationResult);
