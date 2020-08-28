@@ -1134,8 +1134,8 @@ export class AmpStoryPage extends AMP.BaseElement {
           promises.push(
             mediaPool.setCurrentTime(mediaEl, currentTime % mediaEl.duration)
           );
+          promises.push(mediaPool.play(mediaEl));
         }
-        promises.push(mediaPool.play(mediaEl));
 
         this.playAudioElementFromTimestamp_ = null;
       }
