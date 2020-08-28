@@ -13,6 +13,20 @@
       .country-info {
         font: 8pt 'Courier New', Courier, monospace;
       }
+      .autocomplete-partial {
+        font-weight: bold;
+      }
+
+      [data-item-key="name"], [data-item-key="email"] {
+        margin: 5px 0 5px 60px
+      }
+      [data-item-key="photo"] {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        width: 50px;
+        height: 50px;
+      }
   </style>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-autocomplete" src="https://cdn.ampproject.org/v0/amp-autocomplete-0.1.js"></script>
@@ -77,11 +91,62 @@
     action="/form/search-html/get"
     action-xhr="/form/search-json/get"
     target="_blank">
-    <amp-autocomplete id="autocompleteInline" inline="@" filter="prefix" min-characters="0">
+    <amp-autocomplete id="autocompleteInline" inline="@" filter="prefix" min-characters="0" highlight-user-entry>
       <input type="search" id="inputInline">
       <script type="application/json">
         { "items" : ["apple", "banana", "orange"] }
       </script>
+      <div class="i-amphtml-autocomplete-results" role="listbox" id="autocompleteInline" hidden="">
+        <div class="i-amphtml-autocomplete-item" role="option" data-value="apple" dir="auto">apple</div>
+        <div class="i-amphtml-autocomplete-item" role="option" data-value="banana" dir="auto">banana</div>
+        <div class="i-amphtml-autocomplete-item" role="option" data-value="orange" dir="auto">orange</div>
+      </div>
+    </amp-autocomplete>
+    <input type="submit" value="Submit">
+    <div submit-success>
+      <template type="amp-mustache">
+        Success!
+      </template>
+    </div>
+  </form>
+
+  <h2>Inline autocomplete + DOM data + [preset="rich"]</h2>
+  <form
+    id="form3"
+    method="get"
+    action="/form/search-html/get"
+    action-xhr="/form/search-json/get"
+    target="_blank"
+    style="width: 80%">
+    <amp-autocomplete id="richInline" inline="@" filter="prefix" min-characters="0" filter-value="name" preset="rich" highlight-user-entry>
+      <input type="search" id="inputInline" style="width: 300px">
+      <!-- <script type="application/json">
+      { 
+        "items" : [
+          {
+              "name" : "William Chou",
+              "email" : "willchou@google.com", 
+              "photo" : "http://localhost:8000/examples/willchou.webp"
+          }, {
+              "name" : "Bill Jiang",
+              "email" : "billjiang@google.com",
+              "photo" : "http://localhost:8000/examples/billjiang.webp"
+          }
+        ] 
+      }
+      </script> -->
+      <div class="i-amphtml-autocomplete-results" role="listbox" id="richInline" hidden>
+        <div class="i-amphtml-autocomplete-item" role="option" data-value="William Chou" dir="auto">
+          <p class="name" data-item-key="name">William Chou</p>
+          <p class="email" data-item-key="email">will@email.com</p>
+          <div class="photo" data-item-key="photo"><amp-img src="http://localhost:8000/examples/willchou.webp" layout="fill" class="i-amphtml-element i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img></div>
+        </div>
+        <div class="i-amphtml-autocomplete-item" role="option" data-value="Bill Jiang" dir="auto">
+          <p class="name" data-item-key="name">Bill Jiang</p>
+          <p class="email" data-item-key="email">bill@email.com</p>
+          <div class="photo" data-item-key="photo"><amp-img src="http://localhost:8000/examples/billjiang.webp" layout="fill" class="i-amphtml-element i-amphtml-layout-fill i-amphtml-layout-size-defined" i-amphtml-layout="fill"></amp-img></div>
+        </div>
+      </div>
     </amp-autocomplete>
     <input type="submit" value="Submit">
     <div submit-success>

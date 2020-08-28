@@ -35,7 +35,7 @@ import {dict, hasOwn, map, ownProperty} from '../../../src/utils/object';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {includes, startsWith} from '../../../src/string';
 import {isAmp4Email} from '../../../src/format';
-import {isArray, isEnumValue} from '../../../src/types';
+import {isArray, isEnumValue, toArray} from '../../../src/types';
 import {mod} from '../../../src/utils/math';
 import {once} from '../../../src/utils/function';
 import {removeChildren, tryFocus} from '../../../src/dom';
@@ -258,12 +258,56 @@ export class AmpAutocomplete extends AMP.BaseElement {
     );
     if (jsonScript) {
       this.sourceData_ = this.getInlineData_(jsonScript);
-    } else if (!this.element.hasAttribute('src')) {
-      user().warn(
-        TAG,
-        'Expected a <script type="application/json"> child or ' +
-          'a URL specified in "src".'
+    } else {
+      // Parse source data from DOM.
+      // TODO: Avoid "i-amphtml-*" class prefix to preserve validness.
+      // TODO: Only query direct children.
+      const domData = this.element.querySelector(
+        '.i-amphtml-autocomplete-results'
       );
+      if (domData) {
+        // amp-autocomplete already supports rendering of Array<String> to DOM.
+        // We'll call this the "text" rendering preset.
+        const preset = this.element.getAttribute('preset');
+        // TODO: Only query direct children.
+        const elements = toArray(
+          domData.querySelectorAll('.i-amphtml-autocomplete-item')
+        );
+        // The new "rich" preset supports rendering text and images. For example:
+        //
+        //   {"key1": "some text", "key2": "https://url_like_string"}
+        //
+        //   ...is rendered as...
+        //
+        //   <div class=".i-amphtml-autocomplete-item">
+        //     <p data-item-key="key1">some text</p>
+        //     <div data-item-key="key2"><amp-img src="https://url_like_string"></amp-img></div>
+        //   </div>
+        if (preset == 'rich') {
+          this.sourceData_ = elements.map((e) => {
+            const datum = {};
+            for (let c = e.firstElementChild; c; c = c.nextElementSibling) {
+              const key = c.getAttribute('data-item-key');
+              let value;
+              if (c.tagName == 'P') {
+                value = c.textContent;
+              } else if (c.tagName == 'DIV') {
+                value = c.firstElementChild.getAttribute('src');
+              }
+              datum[key] = value;
+            }
+            return datum;
+          });
+        } else if (!preset || preset == 'text') {
+          this.sourceData_ = elements.map((e) => e.textContent);
+        }
+      } else if (!this.element.hasAttribute('src')) {
+        user().warn(
+          TAG,
+          'Expected a <script type="application/json"> child or ' +
+            'a URL specified in "src".'
+        );
+      }
     }
 
     this.inputElement_.setAttribute('dir', 'auto');
@@ -331,8 +375,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     this.container_ = this.createContainer_();
     this.element.appendChild(this.container_);
-
-    return Promise.resolve();
   }
 
   /**
@@ -474,8 +516,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   createContainer_() {
-    const container = this.element.ownerDocument.createElement('div');
-    container.classList.add('i-amphtml-autocomplete-results');
+    // Use preexisting container, if available.
+    // TODO: Support "-up" variant.
+    let container = this.element.querySelector(
+      '.i-amphtml-autocomplete-results'
+    );
+    if (!container) {
+      container = this.element.ownerDocument.createElement('div');
+      container.classList.add('i-amphtml-autocomplete-results');
+    }
     if (this.shouldRenderAbove_()) {
       container.classList.add('i-amphtml-autocomplete-results-up');
     }
@@ -546,13 +595,57 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
-   * Create and return <div> element from given plan-text item.
+   * @param {!JsonObject} item
+   * @return {!Element}
+   * @private
+   */
+  createRichPresetElement_(item) {
+    const itemsExpr = this.element.getAttribute('filter-value') || 'value';
+
+    const container = this.element.ownerDocument.createElement('div');
+    container.classList.add('i-amphtml-autocomplete-item');
+    container.setAttribute('role', 'option');
+    container.setAttribute('data-value', item[itemsExpr]);
+    container.setAttribute('dir', 'auto');
+
+    Object.keys(item)
+      .map((key) => {
+        const value = item[key];
+        userAssert(typeof value === 'string');
+
+        const isUrl = startsWith(value, 'http://');
+        if (isUrl) {
+          const image = this.element.ownerDocument.createElement('amp-img');
+          // TODO: Sanitize src for DOM XSS.
+          image.setAttribute('src', value);
+          image.setAttribute('layout', 'fill');
+
+          const wrapper = this.element.ownerDocument.createElement('div');
+          wrapper.setAttribute('data-item-key', key);
+          wrapper.appendChild(image);
+          return wrapper;
+        } else {
+          const text = this.element.ownerDocument.createElement('p');
+          text.setAttribute('data-item-key', key);
+          text.textContent = value;
+          return text;
+        }
+      })
+      .forEach((child) => {
+        container.appendChild(child);
+      });
+
+    return container;
+  }
+
+  /**
+   * Create and return <div> element from given plaintext item.
    * @param {string} item
    * @param {string=} substring
    * @return {!Element}
    * @private
    */
-  createElementFromItem_(item, substring = '') {
+  createTextPresetElement_(item, substring = '') {
     const element = this.element.ownerDocument.createElement('div');
     element.classList.add('i-amphtml-autocomplete-item');
     element.setAttribute('role', 'option');
@@ -742,16 +835,35 @@ export class AmpAutocomplete extends AMP.BaseElement {
           });
         });
     } else {
+      const preset = this.element.getAttribute('preset');
       filteredData.forEach((item) => {
-        userAssert(
-          typeof item === 'string',
-          '%s data must provide template for non-string items. %s',
-          TAG,
-          this.element
-        );
-        container.appendChild(
-          this.createElementFromItem_(/** @type {string} */ (item), input)
-        );
+        if (!preset || preset == 'text') {
+          userAssert(
+            typeof item === 'string',
+            '[%s] "text" (default) preset expects data as an array of strings.',
+            TAG
+          );
+          const element = this.createTextPresetElement_(
+            /** @type {string} */ (item),
+            input
+          );
+          container.appendChild(element);
+        } else if (preset == 'rich') {
+          userAssert(
+            typeof item === 'object',
+            '[%s] "rich" preset expects data as an array of objects.'
+          );
+          const element = this.createRichPresetElement_(item);
+          container.appendChild(element);
+        } else {
+          userAssert(
+            false,
+            '[%s] Unrecognized preset "%s". %s',
+            TAG,
+            preset,
+            this.element
+          );
+        }
       });
     }
     return renderPromise;
