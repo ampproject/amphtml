@@ -399,13 +399,15 @@ function serializeItem_(key, value) {
  * @param {boolean} done
  * @param {!Array<function(?Response)>} sraRequestAdUrlResolvers
  * @param {string} sraUrl url of SRA request for error reporting
+ * @param {boolean=} isNoSigning
  */
 export function sraBlockCallbackHandler(
   creative,
   headersObj,
   done,
   sraRequestAdUrlResolvers,
-  sraUrl
+  sraUrl,
+  isNoSigning
 ) {
   const headerNames = Object.keys(headersObj);
   if (headerNames.length == 1 && isObject(headersObj[headerNames[0]])) {
@@ -435,12 +437,20 @@ export function sraBlockCallbackHandler(
       },
       has: (name) => !!headersObj[name.toLowerCase()],
     });
-  const fetchResponse =
-    /** @type {?Response} */
-    ({
-      headers,
-      arrayBuffer: () => tryResolve(() => utf8Encode(creative)),
-    });
+
+  let fetchResponse;
+  if (isNoSigning) {
+    const stringifiedHeaders = stringifyHeaderValues(headersObj);
+    fetchResponse = new Response(creative, {headers: stringifiedHeaders});
+  } else {
+    fetchResponse =
+      /** @type {?Response} */
+      ({
+        headers,
+        arrayBuffer: () => tryResolve(() => utf8Encode(creative)),
+      });
+  }
+
   // Pop head off of the array of resolvers as the response
   // should match the order of blocks declared in the ad url.
   // This allows the block to start rendering while the SRA
@@ -456,4 +466,22 @@ export function sraBlockCallbackHandler(
       sraUrl
     );
   }
+}
+
+/**
+ * Takes any parsed header values from the object that are not strings and
+ * converts them back to the orginal stringified version.
+ * TODO above indicates this might get fixed upstream at some point.
+ * @param {!Object} headersObj
+ * @return {!Object<string, string>}
+ */
+function stringifyHeaderValues(headersObj) {
+  return Object.keys(headersObj).reduce((stringifiedHeaders, headerName) => {
+    let headerValue = headersObj[headerName];
+    if (headerValue && typeof headerValue != 'string') {
+      headerValue = JSON.stringify(headerValue);
+    }
+    stringifiedHeaders[headerName] = headerValue;
+    return stringifiedHeaders;
+  }, {});
 }

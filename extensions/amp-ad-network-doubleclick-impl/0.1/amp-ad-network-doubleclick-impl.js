@@ -1714,7 +1714,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
                         headersObj,
                         done,
                         sraRequestAdUrlResolvers,
-                        sraUrl
+                        sraUrl,
+                        this.isInNoSigningExp()
                       );
                     }
                   );
