@@ -39,9 +39,11 @@ describes.realWin(
       await whenCalled(env.sandbox.spy(element, 'attachShadow'));
       const shadow = element.shadowRoot;
       await waitForChildPromise(shadow, (shadow) => {
-        return shadow.querySelectorAll('[hide-scrollbar]');
+        return shadow.querySelectorAll('[class*=hideScrollbar]');
       });
-      const slots = await shadow.querySelectorAll('[hide-scrollbar] slot');
+      const slots = await shadow.querySelectorAll(
+        '[class*=hideScrollbar] slot'
+      );
       return toArray(slots).reduce(
         (acc, slot) => acc.concat(slot.assignedElements()),
         []
