@@ -906,6 +906,11 @@ export class ViewportImpl {
     this.lastPaddingTop_ = this.paddingTop_;
     this.paddingTop_ = paddingTop;
 
+    if (paddingTop < this.lastPaddingTop_) {
+      this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
+      return;
+    }
+
     if (this.fixedLayer_) {
       const animPromise = this.fixedLayer_.animateFixedElements(
         this.paddingTop_,
@@ -914,13 +919,9 @@ export class ViewportImpl {
         curve,
         transient
       );
-      if (paddingTop < this.lastPaddingTop_) {
-        this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
-      } else {
-        animPromise.then(() => {
-          this.binding_.showViewerHeader(transient, paddingTop);
-        });
-      }
+      animPromise.then(() => {
+        this.binding_.showViewerHeader(transient, paddingTop);
+      });
     }
   }
 
