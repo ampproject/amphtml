@@ -272,12 +272,9 @@ i-amphtml-sizer {
   display: none;
 }
 
-.i-amphtml-notbuilt:not(.i-amphtml-layout-container) > .i-amphtml-fill-content,
-[layout]:not([layout=container]):not(.i-amphtml-element) > .i-amphtml-fill-content,
-[width][height][sizes]:not([layout]):not(.i-amphtml-element) > .i-amphtml-fill-content,
-[width][height][heights]:not([layout]):not(.i-amphtml-element) > .i-amphtml-fill-content
+amp-img:not(.i-amphtml-element)[i-amphtml-ssr] > img.i-amphtml-fill-content
 {
-  display: initial;
+  display: block;
 }
 
 /** Hide all text node children of non-container elements. */
