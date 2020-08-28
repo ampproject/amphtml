@@ -57,6 +57,9 @@ class AmpBaseCarousel extends PreactBaseElement {
 AmpBaseCarousel['Component'] = BaseCarousel;
 
 /** @override */
+AmpBaseCarousel['layoutSizeDefined'] = true;
+
+/** @override */
 AmpBaseCarousel['children'] = {
   'arrowPrev': {
     name: 'arrowPrev',
