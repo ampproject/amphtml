@@ -16,6 +16,64 @@
 
 import {createUseStyles} from 'react-jss';
 
+const scrollContainer = {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  boxSizing: 'content-box !important',
+  width: '100%',
+  height: '100%',
+  outline: 'none',
+
+  display: 'flex',
+  flexWrap: 'nowrap',
+
+  scrollBehavior: 'smooth',
+  WebkitOverflowScrolling: 'touch',
+};
+
+const horizontalScroll = {
+  flexDirection: 'row',
+  scrollSnapTypeX: 'mandatory', // Firefox/IE
+  scrollSnapType: 'x mandatory',
+  overflowX: 'auto',
+  overflowY: 'hidden',
+  // Hide scrollbar.
+  '&.$hideScrollbar': {
+    paddingBottom: '20px',
+  },
+};
+
+/*
+ * Styles to hide scrollbars, with three different methods:
+ *
+ * 1. scrollbar-width
+ *  - Note: this is actually scrollbar *thickness* and applies to horizontal
+ *    scrollbars as well
+ * 2. ::-webkit-scrollbar
+ * 3. Using padding to push scrollbar outside of the overflow
+ *
+ * The last method has side-effect of having the bottom of the slides being
+ * cut-off, since the height (or width) of the scrollbar is included when
+ * calculating the 100% height (or width) of the slide.
+ */
+const hideScrollbar = {
+  // Firefox.
+  scrollbarWidth: 'none',
+
+  boxSizing: '',
+  height: '100%',
+  paddingBottom: '20px',
+
+  // Chrome, Safari
+  '&::-webkit-scrollbar': {
+    display: 'none',
+    boxSizing: 'content-box !important',
+  },
+};
+
 const slideElement = {
   flex: '0 0 100%',
   height: '100%',
@@ -29,21 +87,18 @@ const slideElement = {
   scrollSnapStop: 'always',
 };
 
-const scrollContainer = {
-  height: '100%',
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  overflowX: 'auto',
-  overflowY: 'hidden',
-  display: 'flex',
-  flexDirection: 'row',
-  flexWrap: 'nowrap',
-  scrollBehavior: 'smooth',
-  WebkitOverflowScrolling: 'touch',
-  scrollSnapType: 'x mandatory',
+/** Slides only have one child */
+const slideSizing = {
+  '& > :first-child, & > ::slotted(*)': {
+    boxSizing: 'border-box !important',
+    margin: '0 !important',
+    flexShrink: '0 !important',
+    maxHeight: '100%',
+    maxWidth: '100%',
+  },
+  '& > ::slotted(*)': {
+    width: '100%',
+  },
 };
 
 const arrowPlacement = {
@@ -126,58 +181,12 @@ const arrowIcon = {
   height: '24px',
 };
 
-/*
- * Styles to hide scrollbars, with three different methods:
- *
- * 1. scrollbar-width
- *  - Note: this is actually scrollbar *thickness* and applies to horizontal
- *    scrollbars as well
- * 2. ::-webkit-scrollbar
- * 3. Using padding to push scrollbar outside of the overflow
- *
- * The last method has side-effect of having the bottom of the slides being
- * cut-off, since the height (or width) of the scrollbar is included when
- * calculating the 100% height (or width) of the slide.
- */
-/* Firefox */
-const hideScrollbar = {
-  scrollbarWidth: 'none',
-};
-/* Chrome, Safari */
-const hideScrollbarPseudo = {
-  '& [hide-scrollbar]::-webkit-scrollbar': {
-    display: 'none',
-    'box-sizing': 'content-box !important',
-  },
-};
-
-const horizontalScroll = {
-  flexDirection: 'row',
-  /* Firefox, IE */
-  scrollSnapTypeX: 'mandatory',
-  scrollSnapType: 'x mandatory',
-  /* Hide scrollbar */
-  paddingBottom: '20px',
-  overflowY: 'hidden',
-};
-
-/** Slides only have one child */
-const slideSizing = {
-  '& > :first-child, & > ::slotted(*)': {
-    boxSizing: 'border-box !important',
-    margin: '0 !important',
-    flexShrink: '0 !important',
-    maxHeight: '100%',
-    maxWidth: '100%',
-  },
-  '& > ::slotted(*)': {
-    width: '100%',
-  },
-};
-
 const JSS = {
-  slideElement,
   scrollContainer,
+  hideScrollbar,
+  horizontalScroll,
+  slideElement,
+  slideSizing,
   arrowPlacement,
   arrowPrev,
   arrowNext,
@@ -188,10 +197,6 @@ const JSS = {
   arrowBackdrop,
   arrowBackground,
   arrowIcon,
-  hideScrollbar,
-  hideScrollbarPseudo,
-  horizontalScroll,
-  slideSizing,
 };
 
 // useStyles gets replaced for AMP builds via `babel-plugin-transform-jss`.
