@@ -302,13 +302,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
 
-    const audioDeferred = new Deferred();
-
-    /** @private @const {!Promise} */
-    this.backgroundAudioUpgradePromise_ = audioDeferred.promise;
-
-    /** @private @const {!function()} */
-    this.backgroundAudioUpgradeResolveFn_ = audioDeferred.resolve;
+    /** @private {!Deferred} */
+    this.backgroundAudioDeferred_ = new Deferred();
 
     /**
      * Whether the user agent matches a bot.  This is used to prevent resource
@@ -571,14 +566,15 @@ export class AmpStoryPage extends AMP.BaseElement {
     const audioEl = upgradeBackgroundAudio(this.element, loop);
     if (audioEl) {
       this.mediaPoolPromise_.then((mediaPool) =>
-        this.registerMedia_(mediaPool, dev().assertElement(audioEl)).then(() =>
-          mediaPool.preload(dev().assertElement(audioEl))
+        this.registerMedia_(mediaPool, dev().assertElement(audioEl)).then(
+          () => {
+            mediaPool.preload(dev().assertElement(audioEl));
+            this.backgroundAudioDeferred_.resolve();
+          }
         )
       );
     }
-    this.muteAllMedia().then(() => {
-      this.backgroundAudioUpgradeResolveFn_();
-    });
+    this.muteAllMedia();
     this.getViewport().onResize(
       debounce(this.win, () => this.onResize_(), RESIZE_TIMEOUT_MS)
     );
@@ -751,7 +747,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     });
 
     if (this.element.hasAttribute('background-audio')) {
-      mediaPromises.push(this.backgroundAudioUpgradePromise_);
+      mediaPromises.push(this.backgroundAudioDeferred_.promise);
     }
 
     return Promise.all(mediaPromises);
