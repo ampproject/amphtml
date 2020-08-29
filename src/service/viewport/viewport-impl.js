@@ -411,7 +411,7 @@ export class ViewportImpl {
   /** @override */
   scrollIntoView(element) {
     if (IS_SXG) {
-      element. /* OK */ scrollIntoView();
+      element./* OK */ scrollIntoView();
       return Promise.resolve();
     } else {
       return this.getScrollingContainerFor_(element).then((parent) =>
