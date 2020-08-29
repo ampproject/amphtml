@@ -196,7 +196,6 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
     if (this.iframe_) {
       return;
     }
-    this.refreshAccess_();
     toggle(this.element, false);
     this.unlisteners_ = [
       listen(this.win, 'message', (event) => {
