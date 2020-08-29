@@ -910,11 +910,11 @@ export class ViewportImpl {
       );
       if (paddingTop < this.lastPaddingTop_) {
         this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
-      } else {
-        animPromise.then(() => {
-          this.binding_.showViewerHeader(transient, paddingTop);
-        });
+        return;
       }
+      animPromise.then(() => {
+        this.binding_.showViewerHeader(transient, paddingTop);
+      });
     }
   }
 
