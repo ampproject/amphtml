@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
  * <code>
  * <amp-onetap-google
  *   layout="nodisplay"
- *   data-iframe_url="https://www.example.com/onetap-login"
+ *   data-src="https://www.example.com/onetap-login"
  * </amp-onetap-google>
  * </code>
  */
