@@ -299,10 +299,4 @@ export const EXPERIMENTS = [
     name: 'Move ads placement into layoutCallback',
     spec: 'https://github.com/ampproject/amphtml/issues/27068',
   },
-  {
-    id: 'amp-onetap-google',
-    name: 'Enable Google OneTap for sign-in',
-    spec: 'TODO',
-    cleanupIssue: 'TODO',
-  },
 ];
