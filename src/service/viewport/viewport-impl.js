@@ -411,7 +411,7 @@ export class ViewportImpl {
   /** @override */
   scrollIntoView(element) {
     if (IS_SXG) {
-      element.scrollIntoView();
+      element. /* OK */ scrollIntoView();
       return Promise.resolve();
     } else {
       return this.getScrollingContainerFor_(element).then((parent) =>
@@ -448,7 +448,7 @@ export class ViewportImpl {
         SCROLL_DELAY_
       );
       this.ampdoc.win.addEventListener('scroll', waiter);
-      element.scrollIntoView({
+      element./* OK */ scrollIntoView({
         block: SCROLL_POS_TO_BLOCK_[pos],
         behavior: 'smooth',
       });
