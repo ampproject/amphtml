@@ -217,8 +217,10 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
       ),
     ];
     this.iframe_ = this.getAmpDoc().getRootNode().createElement('iframe');
+    this.iframe_.classList.add('i-amphtml-onetap-google-iframe');
     this.iframe_.src = this.iframeUrl_;
     this.element.appendChild(this.iframe_);
+    this.getViewport().addToFixedLayer(this.iframe_);
   }
 
   /** @private */

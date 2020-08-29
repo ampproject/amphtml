@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-amp-onetap-google > iframe {
+ .i-amphtml-onetap-google-iframe {
   z-index: 2147483647;
   border: none;
   position: fixed;
 }
 
-amp-onetap-google > iframe, /* default */
 /* 'card' as received in 'set_ui_mode' messages from iframe */
-amp-onetap-google > .i-amphtml-onetap-google-ui-card
+.i-amphtml-onetap-google-ui-card
 {
   width: 391px;
   right: 20px;
@@ -30,7 +29,7 @@ amp-onetap-google > .i-amphtml-onetap-google-ui-card
 }
 
 /* 'bottom_sheet' as received in 'set_ui_mode' messages from iframe */
-amp-onetap-google > .i-amphtml-onetap-google-ui-bottom_sheet {
+.i-amphtml-onetap-google-ui-bottom_sheet {
   right: auto;
   left: 0;
   top: auto;
