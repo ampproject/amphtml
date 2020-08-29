@@ -33,7 +33,8 @@ import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {listen} from '../../../src/event-helper';
+import {getData, listen} from '../../../src/event-helper';
+import {isObject} from '../../../src/types';
 import {px, setStyle, toggle} from '../../../src/style';
 import {removeElement} from '../../../src/dom';
 
@@ -105,12 +106,13 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
     ) {
       return;
     }
-    if (!event.data || event.data['sentinel'] != SENTINEL) {
+    const data = getData(event);
+    if (!isObject(data) || data['sentinel'] != SENTINEL) {
       return;
     }
-    switch (event.data['command']) {
+    switch (data['command']) {
       case ACTIONS.READY:
-        const nonce = event.data['nonce'];
+        const nonce = data['nonce'];
         if (!nonce) {
           return;
         }
@@ -124,13 +126,13 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
         );
         break;
       case ACTIONS.RESIZE:
-        const height = event.data['height'];
+        const height = data['height'];
         if (typeof height === 'number' && !isNaN(height) && height > 0) {
           this.mutateElement(() => {
             toggle(this.element, height > 0);
             // We resize indiscriminately since the iframe is always
             // position: fixed
-            setStyle(this.iframe_, 'height', px(event.data['height']));
+            setStyle(this.iframe_, 'height', px(data['height']));
           });
         }
         break;
@@ -146,17 +148,17 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
         });
         break;
       case ACTIONS.SET_UI_MODE:
-        const uiMode = event.data['mode'];
+        const uiMode = data['mode'];
         if (!uiMode) {
           return;
         }
         this.setUiMode_(uiMode);
         break;
       case ACTIONS.SET_TAP_OUTSIDE_MODE:
-        this.shouldCancelOnTapOutside_ = !!event.data['cancel'];
+        this.shouldCancelOnTapOutside_ = !!data['cancel'];
         break;
       default:
-        dev().warn(TAG, `Unknown action type: ${event.data.action}`);
+        dev().warn(TAG, `Unknown action type: ${data['command']}`);
     }
   }
 
