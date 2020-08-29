@@ -411,9 +411,8 @@ export class ViewportImpl {
   /** @override */
   scrollIntoView(element) {
     if (IS_SXG) {
-      const {resolve} = new Deferred();
-      element./* REVIEW */ scrollIntoView();
-      return resolve();
+      element.scrollIntoView();
+      return Promise.resolve();
     } else {
       return this.getScrollingContainerFor_(element).then((parent) =>
         this.scrollIntoViewInternal_(element, parent)
@@ -449,7 +448,7 @@ export class ViewportImpl {
         SCROLL_DELAY_
       );
       this.ampdoc.win.addEventListener('scroll', waiter);
-      element./* REVIEW */ scrollIntoView({
+      element.scrollIntoView({
         block: SCROLL_POS_TO_BLOCK_[pos],
         behavior: 'smooth',
       });
@@ -906,11 +905,6 @@ export class ViewportImpl {
     this.lastPaddingTop_ = this.paddingTop_;
     this.paddingTop_ = paddingTop;
 
-    if (paddingTop < this.lastPaddingTop_) {
-      this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
-      return;
-    }
-
     if (this.fixedLayer_) {
       const animPromise = this.fixedLayer_.animateFixedElements(
         this.paddingTop_,
@@ -919,9 +913,13 @@ export class ViewportImpl {
         curve,
         transient
       );
-      animPromise.then(() => {
-        this.binding_.showViewerHeader(transient, paddingTop);
-      });
+      if (paddingTop < this.lastPaddingTop_) {
+        this.binding_.hideViewerHeader(transient, this.lastPaddingTop_);
+      } else {
+        animPromise.then(() => {
+          this.binding_.showViewerHeader(transient, paddingTop);
+        });
+      }
     }
   }
 
