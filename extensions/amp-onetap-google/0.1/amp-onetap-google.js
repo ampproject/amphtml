@@ -26,29 +26,22 @@
  * </code>
  */
 
+import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-onetap-google-0.1.css';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
-import {
-  assertDoesNotContainDisplay,
-  setStyle,
-  setStyles,
-  toggle,
-} from '../../../src/style';
 import {assertHttpsUrl} from '../../../src/url';
-import {toWin} from '../../../src/types';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {listen} from '../../../src/event-helper';
+import {px, setStyle, toggle} from '../../../src/style';
+import {removeElement} from '../../../src/dom';
 
 /** @const {string} */
 const TAG = 'amp-onetap-google';
 
 /** @const {string} */
-const IFRAME_ID = 'amp-onetap-google-intermediate-iframe';
-
-/** @const {string} */
 const SENTINEL = 'onetap_google';
-
-/** @const {string} */
-const ATTRIBUTE_IFRAME_URL = 'data-iframe-url';
 
 /** @const {Object} */
 const ACTIONS = {
@@ -60,86 +53,28 @@ const ACTIONS = {
   SET_TAP_OUTSIDE_MODE: 'set_tap_outside_mode',
 };
 
-/** @const {Object} */
-const UI_MODES = {
-  BOTTOM_SHEET: 'bottom_sheet',
-  CARD: 'card',
-};
-
-/** @const {Object} */
-const cardIframeStyle = {
-  border: 'none',
-  padding: 0,
-  width: '391px',
-};
-
-/** @const {Object} */
-const bottomsheetIframeStyle = {
-  border: 'none',
-  margin: 0,
-  padding: 0,
-  position: 'fixed',
-  right: 'auto',
-  left: '0',
-  top: 'auto',
-  bottom: '0',
-  width: '100%',
-};
-
-/** @const {Object} */
-const elementStyle = {
-  height: '0',
-  width: '0',
-  'z-index': 2147483647,
-  border: 'none',
-  position: 'fixed',
-  left: '0',
-  bottom: '0',
-};
-
 export class AmpOnetapGoogle extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
     /** @private @const {string} */
-    this.intermediateIframeUrl_ = assertHttpsUrl(
-      this.element.getAttribute(ATTRIBUTE_IFRAME_URL),
-      ATTRIBUTE_IFRAME_URL
+    this.iframeUrl_ = assertHttpsUrl(
+      this.element.getAttribute('data-src'),
+      this.element
     );
 
     /** @private @const {string} */
-    this.intermediateIframeOrigin_ = new URL(
-      this.intermediateIframeUrl_
-    ).origin;
-
-    /** @private {!Element} */
-    this.doc_ = this.element.ownerDocument;
-
-    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = Services.vsyncFor(
-      toWin(this.element.ownerDocument.defaultView)
-    );
-
-    /** @private {?boolean} */
-    this.isBottomSheetUiMode_ = null;
+    this.iframeOrigin_ = new URL(this.iframeUrl_).origin;
 
     /** @private {?Element} */
-    this.intermediateIframe_ = null;
+    this.iframe_ = null;
 
     /** @private {boolean} */
-    this.isIntermediateIframeVisible_ = false;
+    this.shouldCancelOnTapOutside_ = true;
 
-    /** @private {boolean} */
-    this.cancelOnTapOutside_ = true;
-
-    /** @private */
-    this.onClickOutside_ = () => {
-      if (this.cancelOnTapOutside_ && this.isIntermediateIframeVisible_) {
-        this.doc_.removeEventListener('click', this.onClickOutside_);
-        this.removeIntermediateIframe_();
-      }
-    };
+    /** @private {?Array<!UnlistenDef>} */
+    this.unlisteners_ = null;
   }
 
   /** @override */
@@ -149,26 +84,11 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.win.addEventListener('message', (event) => {
-      // Make sure the postMessage comes from the iframe origin
-      if (this.validateMessageOrigin_(event.origin)) {
-        this.handleIntermediateIframeMessage_(event);
-      }
-    });
     this.getAmpDoc()
       .whenFirstVisible()
       .then(() => {
-        this.loadIntermediateIframe_();
+        this.loadIframe_();
       });
-  }
-
-  /**
-   * @private
-   * @param {string} origin
-   * @return {boolean} if the origin is valid.
-   */
-  validateMessageOrigin_(origin) {
-    return origin === this.intermediateIframeOrigin_;
   }
 
   /**
@@ -176,7 +96,13 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
    * @param {Event} event
    */
   handleIntermediateIframeMessage_(event) {
-    if (!this.intermediateIframe_) {
+    if (!this.iframe_) {
+      return;
+    }
+    if (
+      event.source != this.iframe_.contentWindow ||
+      event.origin !== this.iframeOrigin_
+    ) {
       return;
     }
     if (!event.data || event.data['sentinel'] != SENTINEL) {
@@ -188,132 +114,125 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
         if (!nonce) {
           return;
         }
-        event.source.postMessage(
-          {
-            sentinel: SENTINEL,
-            command: 'parent_frame_ready',
-            nonce,
-          },
+        event.source./*OK*/ postMessage(
+          dict({
+            'sentinel': SENTINEL,
+            'command': 'parent_frame_ready',
+            'nonce': nonce,
+          }),
           event.origin
         );
         break;
       case ACTIONS.RESIZE:
         const height = event.data['height'];
         if (typeof height === 'number' && !isNaN(height) && height > 0) {
-          this.vsync_.mutate(() => {
-            if (height > 0) {
-              setStyle(
-                this.intermediateIframe_,
-                'height',
-                event.data['height'] + 'px'
-              );
-              setStyle(this.element, 'height', event.data['height'] + 'px');
-              this.showAmpElement_();
-            } else {
-              this.showAmpElement_();
-            }
+          this.mutateElement(() => {
+            toggle(this.element, height > 0);
+            // We resize indiscriminately since the iframe is always
+            // position: fixed
+            setStyle(this.iframe_, 'height', px(event.data['height']));
           });
         }
         break;
       case ACTIONS.CLOSE:
-        this.doc_.removeEventListener('click', this.onClickOutside_);
-        this.vsync_.mutate(() => {
-          this.removeIntermediateIframe_();
+        this.mutateElement(() => {
+          this.removeIframe_();
         });
         break;
       case ACTIONS.DONE:
-        this.vsync_.mutate(() => {
-          this.removeIntermediateIframe_();
-          window.location.reload();
+        this.mutateElement(() => {
+          this.removeIframe_();
+          this.refreshAccess_();
         });
         break;
       case ACTIONS.SET_UI_MODE:
-        if (this.isBottomSheetUiMode_ !== null) {
-          return;
-        }
         const uiMode = event.data['mode'];
         if (!uiMode) {
           return;
         }
-        if (uiMode === UI_MODES.BOTTOM_SHEET) {
-          this.setBottomSheetUiMode_();
-          this.isBottomSheetUiMode_ = true;
-        } else if (uiMode === UI_MODES.CARD) {
-          this.setCardUiMode_();
-          this.isBottomSheetUiMode_ = false;
-        } else {
-          throw new Error(`Unknown UI mode: ${event.data.mode}`);
-        }
+        this.setUiMode_(uiMode);
         break;
       case ACTIONS.SET_TAP_OUTSIDE_MODE:
-        this.cancelOnTapOutside_ = !!event.data['cancel'];
+        this.shouldCancelOnTapOutside_ = !!event.data['cancel'];
         break;
       default:
-        throw new Error(`Unknown action type: ${event.data.action}`);
+        dev().warn(TAG, `Unknown action type: ${event.data.action}`);
     }
-  }
-
-  /** @private */
-  setBottomSheetUiMode_() {
-    setStyles(
-      this.intermediateIframe_,
-      assertDoesNotContainDisplay(bottomsheetIframeStyle)
-    );
-    setStyles(this.element, assertDoesNotContainDisplay(elementStyle));
-  }
-
-  /** @private */
-  setCardUiMode_() {
-    this.intermediateIframe_.classList.add('intermediate-iframe-card-mode');
-    setStyles(
-      this.intermediateIframe_,
-      assertDoesNotContainDisplay(cardIframeStyle)
-    );
-    setStyles(this.element, assertDoesNotContainDisplay(elementStyle));
-  }
-
-  /** @private */
-  showAmpElement_() {
-    if (this.isIntermediateIframeVisible_) {
-      return;
-    }
-    toggle(this.element, true);
-    this.isIntermediateIframeVisible_ = true;
-  }
-
-  /** @private */
-  hideAmpElement_() {
-    if (!this.isIntermediateIframeVisible_) {
-      return;
-    }
-    toggle(this.element, false);
-    this.isIntermediateIframeVisible_ = false;
   }
 
   /**
-   * @return {boolean}
+   * @param {string} mode
    * @private
    */
-  loadIntermediateIframe_() {
-    if (!this.intermediateIframe_) {
-      this.hideAmpElement_();
-      this.intermediateIframe_ = this.doc_.createElement('iframe');
-      this.intermediateIframe_.src = this.intermediateIframeUrl_;
-      this.intermediateIframe_.id = IFRAME_ID;
-      this.element.appendChild(this.intermediateIframe_);
-      this.doc_.addEventListener('click', this.onClickOutside_, false);
-      this.setCardUiMode_();
-      return true;
-    }
-    return false;
+  setUiMode_(mode) {
+    this.mutateElement(() => {
+      this.iframe_.classList.add(`i-amphtml-onetap-google-ui-${mode}`);
+    });
   }
 
   /** @private */
-  removeIntermediateIframe_() {
-    if (this.intermediateIframe_) {
-      this.hideAmpElement_();
-      this.element.removeChild(this.intermediateIframe_);
-      this.intermediateIframe_ = null;
+  refreshAccess_() {
+    const accessElement = this.getAmpDoc().getElementById('amp-access');
+    if (!accessElement) {
+      user().warn(TAG, 'No <script id="amp-access"> to refresh');
+      return;
+    }
+    Services.actionServiceForDoc(this.element).execute(
+      accessElement,
+      'refresh',
+      /* args */ null,
+      /* source */ null,
+      /* caller */ null,
+      /* event */ null,
+      ActionTrust.DEFAULT
+    );
+  }
+
+  /**
+   * @return {!HTMLIFrameElement}
+   * @private
+   */
+  loadIframe_() {
+    if (this.iframe_) {
+      return;
+    }
+    this.refreshAccess_();
+    toggle(this.element, false);
+    this.unlisteners_ = [
+      listen(this.win, 'message', (event) => {
+        this.handleIntermediateIframeMessage_(event);
+      }),
+      listen(
+        this.getAmpDoc().getRootNode(),
+        'click',
+        () => {
+          if (
+            this.shouldCancelOnTapOutside_ &&
+            !this.element.hasAttribute('hidden')
+          ) {
+            this.removeIframe_();
+          }
+        },
+        false
+      ),
+    ];
+    this.iframe_ = this.getAmpDoc().getRootNode().createElement('iframe');
+    this.iframe_.src = this.iframeUrl_;
+    this.element.appendChild(this.iframe_);
+  }
+
+  /** @private */
+  removeIframe_() {
+    if (!this.iframe_) {
+      return;
+    }
+    toggle(this.element, false);
+    removeElement(this.iframe_);
+    this.iframe_ = null;
+    if (this.unlisteners_) {
+      while (this.unlisteners_.length > 0) {
+        this.unlisteners_.pop()();
+      }
     }
   }
 }

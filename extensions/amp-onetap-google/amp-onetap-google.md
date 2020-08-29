@@ -30,18 +30,18 @@ You can use the `amp-onetap-google` component to embed a Google One Tap on the p
 
 #### Example
 
-[example preview="inline" playground="true" imports="amp-onetap-google"][sourcecode:html]
+```html
 <amp-onetap-google
-    layout="nodisplay"
-    data-iframe-url="https://rp.com/intermediate">
-</amp-facebook>
-[/sourcecode][/example]
+  layout="nodisplay"
+  data-src="https://rp.com/intermediate"
+></amp-onetap-google>
+```
 
 ## Attributes
 
 <table>
   <tr>
-    <td width="40%"><strong>data-iframe-url (required)</strong></td>
+    <td width="40%"><strong>data-src (required)</strong></td>
     <td>The URL of the intermediate iframe.</td>
   </tr>
   <tr>
