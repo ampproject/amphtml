@@ -191,7 +191,6 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
   }
 
   /**
-   * @return {!HTMLIFrameElement}
    * @private
    */
   loadIframe_() {
@@ -203,19 +202,14 @@ export class AmpOnetapGoogle extends AMP.BaseElement {
       listen(this.win, 'message', (event) => {
         this.handleIntermediateIframeMessage_(event);
       }),
-      listen(
-        this.getAmpDoc().getRootNode(),
-        'click',
-        () => {
-          if (
-            this.shouldCancelOnTapOutside_ &&
-            !this.element.hasAttribute('hidden')
-          ) {
-            this.removeIframe_();
-          }
-        },
-        false
-      ),
+      listen(this.getAmpDoc().getRootNode(), 'click', () => {
+        if (
+          this.shouldCancelOnTapOutside_ &&
+          !this.element.hasAttribute('hidden')
+        ) {
+          this.removeIframe_();
+        }
+      }),
     ];
     this.iframe_ = this.getAmpDoc().getRootNode().createElement('iframe');
     this.iframe_.classList.add('i-amphtml-onetap-google-iframe');
