@@ -49,7 +49,3 @@ You can use the `amp-onetap-google` component to embed a Google One Tap on the p
     <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
-
-## Validation
-
-See [amp-onetap-google rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-amp-google/validator-amp-onetap-google.protoascii) in the AMP validator specification.
