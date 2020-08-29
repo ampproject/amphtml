@@ -439,20 +439,15 @@ export class ViewportImpl {
   animateScrollIntoView(element, pos = 'top', opt_duration, opt_curve) {
     if (IS_SXG) {
       const {promise, resolve} = new Deferred();
-      const waiter = debounce(
-        this.ampdoc.win,
-        () => {
-          this.ampdoc.win.removeEventListener('scroll', waiter);
-          resolve();
-        },
-        SCROLL_DELAY_
-      );
+      const waiter = debounce(this.ampdoc.win, resolve, SCROLL_DELAY_);
       this.ampdoc.win.addEventListener('scroll', waiter);
       element./* OK */ scrollIntoView({
         block: SCROLL_POS_TO_BLOCK_[pos],
         behavior: 'smooth',
       });
-      return promise;
+      return promise.then(() => {
+        this.ampdoc.win.removeEventListener('scroll', waiter);
+      });
     } else {
       devAssert(
         !opt_curve || opt_duration !== undefined,
