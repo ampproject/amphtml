@@ -45,7 +45,7 @@ module.exports = function ({types: t, template}) {
   }
 
   // Naive string hashing function. For now we care more
-  // about simplicty than reducing collisions, as the number of
+  // about simplicity than reducing collisions, as the number of
   // unique documents is small, and we fail-fast on collision.
   function hashCode(str) {
     let hash = 0;
