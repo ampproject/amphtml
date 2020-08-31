@@ -259,6 +259,13 @@ Meanwhile, please use:
 
 The endpoint will return the JSON on a GET request, useful for testing. The public endpoint will be released before the public launch, and with it, this mock endpoint will be deprecated.
 
+## Sizing
+
+The component follows the container model. The size can be changed by overriding the element's font-size. The component has an inherited `min-width: 14ems` and `max-width: 25ems`, but it cannot be wider than `80 * --story-page-vmin`. The height will depend on the font-size and number of lines on the prompt. The width can be overridden as well, but it has to adhere to the min and max width.
+By default the component will take up `70 * --story-page-vmin` in width regardless of the screen size, so it will scale accordingly.
+
+Overriding the font-size in ems will make the component behave consistent with aspect-ratios.
+
 ## Demos
 
 With these components we wanted to help users create more entertaining and immersive experiences, and to facilitate that, we have created demos with good use cases of the components. Feel free to ~~steal~~ implement any ideas from these demos into your own stories (or check the source code).
@@ -290,7 +297,7 @@ Codepen with HTML and CSS of a quiz, and a simple panel that could show how the 
 <br><br>
 Note: not all properties can be modified on this Codepen. When integrating, take into account other fields and variants such as prompt-text-color, prompt-background (if users want it different from the accent color, or if users want gradients), etc.
 <br><br>
-<a href="https://codepen.io/mszylkowski/pen/pogGxbz">https://codepen.io/mszylkowski/pen/pogGxbz</a>
+<a href="https://codepen.io/mszylkowski/pen/qBZXmQj">https://codepen.io/mszylkowski/pen/qBZXmQj</a>
 </td>
 <td>
 <img src="https://user-images.githubusercontent.com/22420856/88303287-dd878280-ccd4-11ea-8238-1dcedf4c5bee.png">
@@ -305,7 +312,7 @@ Codepen with HTML and CSS of a poll, and a simple panel that could show how the 
 <br><br>
 Note: not all properties can be modified on this Codepen. When integrating, take into account other fields and variants such as prompt-text-color, prompt-background (if users want it different from the accent color, or if users want gradients), etc.
 <br><br>
-<a href="https://codepen.io/mszylkowski/pen/GRoeorr">https://codepen.io/mszylkowski/pen/GRoeorr</a>
+<a href="https://codepen.io/mszylkowski/pen/abNWzdb">https://codepen.io/mszylkowski/pen/abNWzdb</a>
 </td>
 </tr>
 </table>
