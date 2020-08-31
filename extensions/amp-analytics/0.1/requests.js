@@ -566,11 +566,15 @@ function reportErrorTemp(url, info) {
   }
   const elementSize = queryString['d'] && queryString['d'].split(',');
   const viewportSize = queryString['bs'] && queryString['bs'].split(',');
+  const REPORTING_THRESHOLD = 0.1;
   if (isArray(elementSize)) {
     const elementWidth = Number(elementSize[0]);
     const elementHeight = Number(elementSize[1]);
     if (elementWidth == 0 || elementHeight == 0) {
-      dev().error(
+      if (Math.random() > REPORTING_THRESHOLD) {
+        return;
+      }
+      dev().expectedError(
         GOOGLE_ACTIVEVIEW_ERROR_TAG,
         'Debugging: Activeview request with zero element size',
         elementWidth,
@@ -585,7 +589,10 @@ function reportErrorTemp(url, info) {
     const viewportHeight = Number(viewportSize[1]);
 
     if (viewportWidth == 0 || viewportHeight == 0) {
-      dev().error(
+      if (Math.random() > REPORTING_THRESHOLD) {
+        return;
+      }
+      dev().expectedError(
         GOOGLE_ACTIVEVIEW_ERROR_TAG,
         'Debugging: Activeview request with zero viewport size',
         viewportWidth,
