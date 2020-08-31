@@ -16,33 +16,14 @@
 
 #include "renderer.h"
 
-#include <fstream>
 #include <sstream>
 
 #include "gtest/gtest.h"
-#include "defer.h"
 #include "parser.h"
-#include "strings.h"
 
 using namespace std::string_literals;
 
 namespace htmlparser {
-
-std::string ReadFileContent(std::string file) {
-  std::ifstream fd(
-      FLAGS_test_srcdir +
-      "testdata/" +
-      file);
-  htmlparser::defer(fd.close());
-  EXPECT_TRUE(fd.good());
-  std::string str;
-  fd.seekg(0, std::ios::end);
-  str.reserve(fd.tellg());
-  fd.seekg(0, std::ios::beg);
-  str.assign((std::istreambuf_iterator<char>(fd)),
-              std::istreambuf_iterator<char>());
-  return str;
-}
 
 void CheckParseRenderOutput(std::string_view input,
                             std::string_view expected_output) {
@@ -203,15 +184,4 @@ TEST(RendererTest, NullCharsTest) {
     htmlparser::CheckParseRenderOutput(
         html_sources.at(i), rendered_outputs.at(i));
   }
-}
-
-TEST(RendererTest, DocWithInvalidBytes) {
-  std::string html_with_invalid_bytes = htmlparser::ReadFileContent(
-      "doc_with_invalid_utf8_byte.html");
-  std::string html_with_invalid_bytes_output =
-      htmlparser::ReadFileContent("doc_with_invalid_utf8_byte.html.out");
-  htmlparser::Strings::Trim(&html_with_invalid_bytes_output);
-  htmlparser::CheckParseRenderOutput(
-      html_with_invalid_bytes,
-      html_with_invalid_bytes_output);
-}
+};
