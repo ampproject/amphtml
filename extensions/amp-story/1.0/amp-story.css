@@ -998,7 +998,7 @@ amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-compo
   border: 1px solid red !important;
 }
 
-[dir=rtl] amp-story .i-amphtml-story-screen-reader-back-button {
+[dir=rtl] .i-amphtml-story-screen-reader-back-button {
   right: 0 !important;
   left: auto !important;
 }
