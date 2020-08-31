@@ -22,7 +22,7 @@ module.exports = {
     const screen = page.touchscreen;
     await screen.tap(200, 240);
     await page.waitFor('amp-story-page#page-2[active]');
-    await page.waitFor(500); // For animations to finish.
+    await page.waitFor(150); // For animations to finish.
     await page.tap('a.title-small.center');
     await page.waitFor(300); // For animations to finish.
     await verifySelectorsVisible(page, name, ['a.i-amphtml-story-tooltip']);
@@ -56,7 +56,7 @@ module.exports = {
     const screen = page.touchscreen;
     await screen.tap(200, 240);
     await page.waitFor('amp-story-page#page-2[active]');
-    await page.waitFor(150); // For animations to finish.
+    await page.waitFor(500); // For animations to finish.
     await page.tap('amp-twitter.interactive-embed');
     await page.waitFor('a.i-amphtml-story-tooltip');
     await page.waitFor(300); // For animations to finish.
@@ -69,7 +69,7 @@ module.exports = {
     await screen.tap(200, 240);
     await page.waitFor('amp-story-page#page-2[active]');
     await page.waitFor(150); // For animations to finish.
-    await screen.tap(200, 240);
+    await screen.tap(300, 400);
     await page.waitFor('amp-story-page#page-3[active]');
     await page.waitFor(150); // For animations to finish.
     await page.tap('amp-twitter.non-interactive-embed');
@@ -81,7 +81,7 @@ module.exports = {
     const screen = page.touchscreen;
     await screen.tap(200, 240);
     await page.waitFor('amp-story-page#page-2[active]');
-    await page.waitFor(150); // For animations to finish.
+    await page.waitFor(500); // For animations to finish.
     await page.tap('amp-twitter.interactive-embed');
     await page.waitFor('a.i-amphtml-story-tooltip');
     await page.waitFor(300); // For animations to finish.
