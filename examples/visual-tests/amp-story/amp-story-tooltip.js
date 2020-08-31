@@ -69,7 +69,7 @@ module.exports = {
     await screen.tap(200, 240);
     await page.waitFor('amp-story-page#page-2[active]');
     await page.waitFor(150); // For animations to finish.
-    await screen.tap(200, 240);
+    await screen.tap(300, 400);
     await page.waitFor('amp-story-page#page-3[active]');
     await page.waitFor(150); // For animations to finish.
     await page.tap('amp-twitter.non-interactive-embed');
