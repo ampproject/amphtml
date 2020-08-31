@@ -509,15 +509,16 @@ TEST(Utf8UtilTest, RoundTripsAndLengths) {
   EXPECT_EQ(10, amped_codes.size());
   EXPECT_EQ(amped,
             htmlparser::Strings::CodepointsToUtf8String(amped_codes));
+}
 
-  // Checks multi-byte sequences where one of the byte is 0x80.
-  // 0x80 is a special value in multi bytes sequence. In a multi byte sequence
-  // only the last 6 bits are computed. The first two bits are always 0b10.
-  // So if any byte in sequence is null value, its encoded value is 0x80 that
-  // is 010xxxxxx where all x are zero. So 0b10000000 = 128 = 0x80.
-  // Following tests ensures util decodes 0x80 byte correctly and do not treat
-  // the decoded 0th value as null byte.
-  //
+// Checks multi-byte sequences where one of the byte is 0x80.
+// 0x80 is a special value in multi bytes sequence. In a multi byte sequence
+// only the last 6 bits are computed. The first two bits are always 0b10.
+// So if any byte in sequence is null value, its encoded value is 0x80 that
+// is 010xxxxxx where all x are zero. So 0b10000000 = 128 = 0x80.
+// Following tests ensures util decodes 0x80 byte correctly and do not treat
+// the decoded 0th value as null byte.
+TEST(StringsTest, MultiByteSequenceWith0x80Byte) {
   // Second byte 0x80 in a two byte sequence.
   std::string two_bytes_seq_second_byte_zero = "Ā";   // \xc4\x80
   auto decoded_bytes = htmlparser::Strings::DecodeUtf8Symbol(
@@ -611,3 +612,16 @@ TEST(Utf8UtilTest, RoundTripsAndLengths) {
   // Encode the bytes again.
   EXPECT_EQ("𒁀", htmlparser::Strings::EncodeUtf8Symbol(*decoded_bytes).value());
 }
+
+TEST(StringsTest, CodePointNumBytes) {
+  auto num_bytes = [](std::string_view s) {
+    return htmlparser::Strings::CodePointNumBytes(
+        htmlparser::Strings::DecodeUtf8Symbol(s).value_or(0));
+  };
+
+  EXPECT_EQ(1, num_bytes("a"));
+  EXPECT_EQ(2, num_bytes("Ÿ"));
+  EXPECT_EQ(3, num_bytes("উ"));
+  EXPECT_EQ(4, num_bytes("𓂅'"));
+}
+
