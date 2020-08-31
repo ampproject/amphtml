@@ -26,7 +26,6 @@ var InlineGalleryDef = {};
  *   children: (!PreactDef.Renderable),
  *   loop: (boolean|undefined),
  *   onSlideChange: (function(number):undefined|undefined),
- *   setAdvance: (function(function(number):undefined):undefined|undefined),
  * }}
  */
 InlineGalleryDef.Props;
