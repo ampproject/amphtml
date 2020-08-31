@@ -158,7 +158,7 @@ describes.realWin(
       expect(renderedSlides[2]).to.equal(userSuppliedChildren[1]);
     });
 
-    describe.only('imperative api', () => {
+    describe('imperative api', () => {
       let scroller;
 
       beforeEach(async () => {

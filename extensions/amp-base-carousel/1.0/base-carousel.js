@@ -18,6 +18,7 @@ import {ArrowNext, ArrowPrev} from './arrow';
 import {CarouselContext} from './carousel-context';
 import {ContainWrapper} from '../../../src/preact/component';
 import {Scroller} from './scroller';
+import {clamp} from '../../../src/utils/math';
 import {forwardRef} from '../../../src/preact/compat';
 import {
   toChildArray,
@@ -50,13 +51,17 @@ function BaseCarouselWithRef(
 
   const advance = useCallback((by) => scrollRef.current.advance(by), []);
   const setRestingIndex = useCallback(
-    (i) => {
-      setCurrentSlide(i);
+    (index) => {
+      index = length > 0 ? clamp(index, 0, length - 1) : -1;
+      if (index < 0) {
+        return;
+      }
+      setCurrentSlide(index);
       if (onSlideChange) {
-        onSlideChange(i);
+        onSlideChange(index);
       }
     },
-    [setCurrentSlide, onSlideChange]
+    [length, setCurrentSlide, onSlideChange]
   );
 
   useImperativeHandle(

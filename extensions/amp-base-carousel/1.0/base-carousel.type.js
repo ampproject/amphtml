@@ -59,9 +59,9 @@ BaseCarouselDef.ArrowProps;
 
 /**
  * @typedef {{
- *   currentSlide: number,
+ *   currentSlide: (number|undefined),
  *   setCurrentSlide: (function(number):undefined),
- *   slideCount: (number|null),
+ *   slideCount: (number|undefined),
  *   setSlideCount: (function(number):undefined),
  * }}
  */
