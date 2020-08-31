@@ -447,28 +447,28 @@ describe('Validator.DocSizeAmpEmail', () => {
   const validBlob = '<b>Hello, World</b>\n';
   assertStrictEqual(20, validBlob.length);
 
-  it('accepts 100000 bytes in the test document', () => {
-    const body = Array(4946).join(validBlob);
+  it('accepts 200000 bytes in the test document', () => {
+    const body = Array(9946).join(validBlob);
     const test = new ValidatorTestCase('amp4email_feature_tests/doc_size.html');
     test.ampHtmlFileContents =
         test.ampHtmlFileContents.replace('replace_body', body);
-    assertStrictEqual(100000, htmlparser.byteLength(test.ampHtmlFileContents));
+    assertStrictEqual(200000, htmlparser.byteLength(test.ampHtmlFileContents));
     test.inlineOutput = false;
     test.expectedOutput = 'PASS';
     test.run();
   });
 
-  it('will not accept 100001 bytes in the test document', () => {
-    const body = Array(4946).join(validBlob) + ' ';
+  it('will not accept 200001 bytes in the test document', () => {
+    const body = Array(9946).join(validBlob) + ' ';
     const test = new ValidatorTestCase('amp4email_feature_tests/doc_size.html');
     test.ampHtmlFileContents =
         test.ampHtmlFileContents.replace('replace_body', body);
-    assertStrictEqual(100001, htmlparser.byteLength(test.ampHtmlFileContents));
+    assertStrictEqual(200001, htmlparser.byteLength(test.ampHtmlFileContents));
     test.inlineOutput = false;
     test.expectedOutputFile = null;
     test.expectedOutput = 'FAIL\n' +
-        'amp4email_feature_tests/doc_size.html:4978:6 ' +
-        'Document exceeded 100000 bytes limit. Actual size 100001 bytes. ' +
+        'amp4email_feature_tests/doc_size.html:9978:6 ' +
+        'Document exceeded 200000 bytes limit. Actual size 200001 bytes. ' +
         '(see https://amp.dev/documentation/guides-and-tutorials/learn/' +
         'email-spec/amp-email-format/?format=email)';
     test.run();
@@ -713,11 +713,7 @@ describe('Validator.CssLengthAmpEmail', () => {
        test.ampHtmlFileContents =
            test.ampHtmlFileContents.replace('.replace_amp_custom {}', '')
                .replace('replace_inline_style', inlineStyle);
-       test.expectedOutput = 'FAIL\n' +
-           'amp4email_feature_tests/css_length.html:34:6 Document exceeded ' +
-           '100000 bytes limit. Actual size 196140 bytes. ' +
-           '(see https://amp.dev/documentation/guides-and-tutorials/learn/' +
-           'email-spec/amp-email-format/?format=email)';
+       test.expectedOutput = 'PASS';
        test.run();
      });
 
@@ -733,13 +729,8 @@ describe('Validator.CssLengthAmpEmail', () => {
                .replace('replace_inline_style', inlineStyle);
        test.expectedOutputFile = null;
        // TODO(gregable): This should not pass for the case when there are more
-       // than 75,000 bytes of inline style. It fails for now due to the 100k
-       // doc size limit.
-       test.expectedOutput = 'FAIL\n' +
-           'amp4email_feature_tests/css_length.html:34:6 Document exceeded ' +
-           '100000 bytes limit. Actual size 196166 bytes. ' +
-           '(see https://amp.dev/documentation/guides-and-tutorials/learn/' +
-           'email-spec/amp-email-format/?format=email)\n' +
+       // than 75,000 bytes of inline style.
+       test.expectedOutput = 'PASS\n' +
            'amp4email_feature_tests/css_length.html:34:6 The author ' +
            'stylesheet specified in tag \'style amp-custom\' and the ' +
            'combined inline styles is too large - document contains 75010 ' +
