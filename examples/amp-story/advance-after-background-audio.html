@@ -13,27 +13,13 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet" nonce="1Cj0hIrd7TASSx52tMxlmQ">
     <style type="text/css" amp-custom>
       amp-story-page {
-        background: rgb(238, 174, 202);
-        background: radial-gradient(circle, rgba(238, 174, 202, 1) 0%, rgba(148, 187, 233, 1) 100%);
+        background: rgb(147, 218, 33);
+        background: radial-gradient(circle, rgb(53, 170, 23, 1) 0%, rgba(171, 148, 233, 1) 100%);
       }
-
-      amp-twitter {
-        margin-top: 40px;
-      }
-
-      .instructions {
+      .text {
         font-family: 'Roboto', sans-serif;
-        color: rgba(0, 0, 0, 0.87);
+        color: rgba(255, 255, 255, 0.87);
         align-content: end;
-      }
-
-      .instructions ol {
-        padding: 12px 8px 12px 30px;
-        background: #fff;
-        border-radius: 3px;
-        box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
-        font-size: 14px;
-        line-height: 1.4em;
       }
     </style>
   </head>
@@ -46,22 +32,14 @@
         poster-portrait-src="assets/poster.jpg">
 
       <amp-story-page id="page1" auto-advance-after="page1" background-audio="./video/p1.mp4">
-        <amp-story-grid-layer template="vertical" class="instructions">
-          <ol>
-            <li>amp-story-page background-audio</li>
-            <li>When clicking the “unmute” sound icon, the audio should play</li>
-            <li>The Story should auto advance to the next page at the end of the audio</li>
-          </ol>
+        <amp-story-grid-layer template="vertical" class="text">
+          <span>auto-advance after background-audio</span>
         </amp-story-grid-layer>
       </amp-story-page>
 
       <amp-story-page id="page2" background-audio="./video/p1.mp4">
-        <amp-story-grid-layer template="vertical" class="instructions">
-          <ol>
-            <li>amp-story-page background-audio</li>
-            <li>After auto-advancing to this page by waiting for the previous audio to finish, the new audio should autoplay</li>
-            <li>When clicking the “mute” sound icon, the audio should stop playing</li>
-          </ol>
+        <amp-story-grid-layer template="vertical" class="text">
+          <span>background-audio</span>
         </amp-story-grid-layer>
       </amp-story-page>
     </amp-story>
