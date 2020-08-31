@@ -20,13 +20,14 @@ import {getMode} from './mode';
  * Provides info about the current app. This return value may be cached and
  * passed around as it will always be DCE'd.
  * @param {?Window=} opt_win
+ * @param {?boolean} opt_preactmode
  * @return {!./mode.ModeDef}
  */
-export function getModeObject(opt_win) {
+export function getModeObject(opt_win, opt_preactmode) {
   return {
     localDev: getMode(opt_win).localDev,
     development: getMode(opt_win).development,
-    esm: IS_ESM,
+    esm: opt_preactmode ? null : IS_ESM,
     minified: getMode(opt_win).minified,
     lite: getMode(opt_win).lite,
     test: getMode(opt_win).test,

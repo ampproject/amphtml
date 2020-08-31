@@ -1,27 +1,33 @@
 import * as Preact from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
 import {getIframeProps} from '../../../src/3p-frame';
+import { ContainWrapper } from "../../../src/preact/component";
 
-const NAME = 'FacebookComments';
+export function FacebookComments(prop) {
+  const iframeProps = getIframeProps(
+    window,
+    document.body,
+    "facebook",
+    undefined,
+    undefined,
+    {
+      attributes: { _context: { tagName: "AMP-FACEBOOK-COMMENTS" } },
+    }
+  );
 
-/**
- * @param {!JsonObject} props
- *  type: ?string,
- *  endpoint: ?string,
- *  params: ?JsonObject,
- *  target: ?string,
- *  width: ?string,
- *  height: ?string,
- *  color: ?string,
- *  background: ?string,
- *  tabIndex: ?string,
- *  style: ?string,
- * @return {PreactDef.Renderable}
- */
-export function FacebookComments(props) {
-    useResourcesNotify();
-    
+  return (
+    <ContainWrapper size layout paint style={{ width: 600, height: 900 }}>
+      <iframe {...iframeProps} />
+    </ContainWrapper>
+  );
+}
 
-    return Preact.createElement('iframe', getIframeProps(window, 'facebook'));
-
+function datasetFromProps(props) {
+  const dataset = {};
+  for (const key in props) {
+    if (/^data-/.test(key)) {
+      dataset[key.replace(/^data-/, "")] = props[key];
+    }
+  }
+  return dataset;
 }

@@ -170,7 +170,7 @@ export function parseUrlWithA(a, url, opt_cache) {
   info.origin = origin;
 
   // Freeze during testing to avoid accidental mutation.
-  const frozen = getMode().test && Object.freeze ? Object.freeze(info) : info;
+  const frozen = false && Object.freeze ? Object.freeze(info) : info;
 
   if (opt_cache) {
     opt_cache.put(url, frozen);

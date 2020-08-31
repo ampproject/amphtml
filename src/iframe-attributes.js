@@ -21,6 +21,7 @@ import {getLengthNumeral} from './layout';
 import {getModeObject} from './mode-object';
 import {internalRuntimeVersion} from './internal-version';
 import {urls} from './config';
+import {getViewport} from './service/document-info-impl';
 
 /**
  * Produces the attributes for the ad template.
@@ -28,19 +29,23 @@ import {urls} from './config';
  * @param {!AmpElement} element
  * @param {string} sentinel
  * @param {!JsonObject=} attributes
+ * @param {!boolean} opt_preactmode
  * @return {!JsonObject}
  */
 export function getContextMetadata(
   parentWindow,
   element,
   sentinel,
-  attributes
+  attributes,
+  opt_preactmode
 ) {
   const startTime = Date.now();
   const width = element.getAttribute('width');
   const height = element.getAttribute('height');
   attributes = attributes ? attributes : dict();
+  console.log("here:", attributes);
   attributes['width'] = getLengthNumeral(width);
+  console.log("width attribute", attributes);
   attributes['height'] = getLengthNumeral(height);
   if (element.getAttribute('title')) {
     attributes['title'] = element.getAttribute('title');
@@ -53,14 +58,43 @@ export function getContextMetadata(
     locationHref = parentWindow.parent.location.href;
   }
 
-  const ampdoc = Services.ampdoc(element);
-  const docInfo = Services.documentInfoForDoc(element);
-  const viewer = Services.viewerForDoc(element);
-  const referrer = viewer.getUnconfirmedReferrerUrl();
+  let docInfo;
+  let referrer;
+  if (!opt_preactmode) {
+    const ampdoc = Services.ampdoc(element);
+    docInfo = Services.documentInfoForDoc(element);
+    const viewer = Services.viewerForDoc(element);
+    referrer = viewer.getUnconfirmedReferrerUrl();
+  } else {
+    docInfo = {
+      sourceUrl: parentWindow.location.href,
+      canonicalUrl: parentWindow.location.href,
+     pageViewId: Math.random().toString(),
+     pageViewId64: Promise.resolve(Math.random().toString()),
+     linkRels: {},
+     viewport: document.head.querySelector('meta[name="viewport"]') ? document.head.querySelector('meta[name="viewport"]').getAttribute('content') : null, // (get from src/service/document-info-impl.js#L175)
+     replaceParams: {},
+   };
+   referrer = document.referrer;
+  }
+  
+  
+  
 
   // TODO(alanorozco): Redesign data structure so that fields not exposed by
   // AmpContext are not part of this object.
-  const layoutRect = element.getPageLayoutBox();
+  let layoutRect;
+  if (!opt_preactmode) {
+    layoutRect = element.getPageLayoutBox();
+  } else {
+    layoutRect = {
+      left: 10,
+      top: 10,
+      width: 500,
+      height: 500
+    }
+  }
+  
 
   // Use JsonObject to preserve field names so that ampContext can access
   // values with name
@@ -84,9 +118,20 @@ export function getContextMetadata(
     },
     'startTime': startTime,
     'tagName': element.tagName,
-    'mode': getModeObject(),
+    // 'mode': getModeObject(opt_preactmode=true),
+    'mode': {
+      localDev: true,
+      development: true,
+      esm: false,
+      minified: false,
+      lite: false,
+      test: false,
+      log: null,
+      version: null,
+      rtvVersion: null,
+    },
     'canary': isCanary(parentWindow),
-    'hidden': !ampdoc.isVisible(),
+    'hidden': opt_preactmode ? false : !ampdoc.isVisible(),
     'initialLayoutRect': layoutRect
       ? {
           'left': layoutRect.left,
@@ -95,7 +140,41 @@ export function getContextMetadata(
           'height': layoutRect.height,
         }
       : null,
-    'initialIntersection': element.getIntersectionChangeEntry(),
+    // 'initialIntersection': element.getIntersectionChangeEntry(),
+    'initialIntersection': {
+      "time": 903.9600000032806,
+      "rootBounds": {
+        "left": 0,
+        "top": 0,
+        "width": 1680,
+        "height": 948,
+        "bottom": 948,
+        "right": 1680,
+        "x": 0,
+        "y": 0
+      },
+      "boundingClientRect": {
+        "left": 475,
+        "top": 780,
+        "width": 731,
+        "height": 988,
+        "bottom": 1768,
+        "right": 1206,
+        "x": 475,
+        "y": 780
+      },
+      "intersectionRect": {
+        "left": 475,
+        "top": 780,
+        "width": 731,
+        "height": 168,
+        "bottom": 948,
+        "right": 1206,
+        "x": 475,
+        "y": 780
+      },
+      "intersectionRatio": 0.1700404858299595
+    },
     'domFingerprint': DomFingerprint.generate(element),
     'experimentToggles': experimentToggles(parentWindow),
     'sentinel': sentinel,
@@ -104,5 +183,6 @@ export function getContextMetadata(
   if (adSrc) {
     attributes['src'] = adSrc;
   }
+  console.log(attributes);
   return attributes;
 }

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import * as Preact from '../src/preact';
 import {assertHttpsUrl, parseUrlDeprecated} from './url';
 import {dev, devAssert, user, userAssert} from './log';
 import {dict} from './utils/object';
@@ -49,7 +48,7 @@ const TAG = '3p-frame';
  */
 function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
   const type = opt_type || element.getAttribute('type');
-  // userAssert(type, 'Attribute type required for <amp-ad>: %s', element);
+  userAssert(type, 'Attribute type required for <amp-ad>: %s', element);
   const sentinel = generateSentinel(parentWindow);
   let attributes = dict();
   // Do these first, as the other attributes have precedence.
@@ -57,6 +56,30 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
   attributes = getContextMetadata(parentWindow, element, sentinel, attributes);
   attributes['type'] = type;
   Object.assign(attributes['_context'], opt_context);
+  return attributes;
+}
+
+/**
+ * Produces the attributes for the ad template.
+ * @param {!Window} parentWindow
+ * @param {!AmpElement} element
+ * @param {string=} opt_type
+ * @param {Object=} opt_context
+ * @return {!JsonObject} Contains
+ *     - type, width, height, src attributes of <amp-ad> tag. These have
+ *       precedence over the data- attributes.
+ *     - data-* attributes of the <amp-ad> tag with the "data-" removed.
+ *     - A _context object for internal use.
+ */
+function getPreactFrameAttributes(parentWindow, element, opt_type, opt_context) {
+  const type = opt_type;
+  const sentinel = generateSentinel(parentWindow);
+  let attributes = dict();
+  // Do these first, as the other attributes have precedence.
+  addDataAndJsonAttributes_(element, attributes);
+  attributes = getContextMetadata(parentWindow, element, sentinel, attributes, true);
+  attributes['type'] = type;
+  attributes['_context'] = opt_context;
   return attributes;
 }
 
@@ -162,16 +185,36 @@ export function getIframe(
   return iframe;
 }
 
-export function getIframeProps(parentWindow, opt_type) {
-  const element = Preact.createElement('div');
-  const attributes = getFrameAttributes(window, element, opt_type);
+export function getIframeProps(
+  parentWindow,
+  parentElement,
+  opt_type,
+  opt_context,
+  attributes_object
+) {
+  const attributes = getPreactFrameAttributes(
+    parentWindow,
+    parentElement,
+    opt_type,
+    opt_context
+  );
+
+  const iframe = /** @type {!HTMLIFrameElement} */ (parentWindow.document.createElement(
+    'iframe'
+  ));
+
   if (!count[attributes['type']]) {
     count[attributes['type']] = 0;
   }
   count[attributes['type']] += 1;
 
-  const baseUrl = getDevelopmentBootstrapBaseUrl(parentWindow, opt_type);
+  const baseUrl = getDevelopmentBootstrapBaseUrl(parentWindow, 'frame');
+
   const host = parseUrlDeprecated(baseUrl).hostname;
+  // This name attribute may be overwritten if this frame is chosen to
+  // be the master frame. That is ok, as we will read the name off
+  // for our uses before that would occur.
+  // @see https://github.com/ampproject/amphtml/blob/master/3p/integration.js
   const name = JSON.stringify(
     dict({
       'host': host,
@@ -182,45 +225,39 @@ export function getIframeProps(parentWindow, opt_type) {
     })
   );
 
-  const iframe = {};
-  iframe.src = baseUrl;
-  iframe.ampLocation = parseUrlDeprecated(baseUrl);
-  iframe.name = name;
+  let returnObj = {
+    src: baseUrl,
+    ampLocation: parseUrlDeprecated(baseUrl),
+    name: name
+  };
+  
   if (attributes['width']) {
-    iframe.width = attributes['width'];
+    returnObj.width = attributes['width'];
   }
   if (attributes['height']) {
-    iframe.height = attributes['height'];
+    returnObj.height = attributes['height'];
   }
   if (attributes['title']) {
-    iframe.title = attributes['title'];
+    returnObj.title = attributes['title'];
   }
-  if (allowFullscreen) {
-    iframe.setAttribute('allowfullscreen', 'true');
-  }
-  iframe.setAttribute('scrolling', 'no');
-  setStyle(iframe, 'border', 'none');
-
-  iframe.onload = function () {
+  
+  returnObj.scrolling = 'no';
+  returnObj.onload = function () {
     // Chrome does not reflect the iframe readystate.
     this.readyState = 'complete';
   };
-  // Block synchronous XHR in ad. These are very rare, but super bad for UX
-  // as they block the UI thread for the arbitrary amount of time until the
-  // request completes.
-  iframe.setAttribute('allow', "sync-xhr 'none';");
+
+  returnObj.allow = "sync-xhr 'none';";
   const excludeFromSandbox = ['facebook'];
   if (!excludeFromSandbox.includes(opt_type)) {
-    applySandbox(iframe);
+    applySandbox(returnObj);
   }
-  iframe.setAttribute(
-    'data-amp-3p-sentinel',
-    attributes['_context']['sentinel']
-  );
-  return iframe;
+
+  // returnObj["data-amp-3p-sentinel"] = attributes['_context']['sentinel'];
+
+  console.log(returnObj);
+  return returnObj;
 }
-
-
 
 /**
  * Copies data- attributes from the element into the attributes object.
@@ -341,7 +378,7 @@ export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
 export function getDevelopmentBootstrapBaseUrl(parentWindow, srcFileBasename) {
   return (
     overrideBootstrapBaseUrl ||
-    getAdsLocalhost(parentWindow) +
+    getAdsLocalhost(parentWindow, true) +
       '/dist.3p/' +
       (getMode().minified
         ? `${internalRuntimeVersion()}/${srcFileBasename}`
@@ -352,12 +389,16 @@ export function getDevelopmentBootstrapBaseUrl(parentWindow, srcFileBasename) {
 
 /**
  * @param {!Window} win
+ * @param {?boolean} opt_preactmode
  * @return {string}
  */
-function getAdsLocalhost(win) {
+function getAdsLocalhost(win, opt_preactmode) {
   let adsUrl = urls.thirdParty; // local dev with a non-localhost server
   if (adsUrl == 'https://3p.ampproject.net') {
     adsUrl = 'http://ads.localhost'; // local dev with a localhost server
+  }
+  if (opt_preactmode) {
+    return adsUrl + ":" + "8000";
   }
   return adsUrl + ':' + (win.location.port || win.parent.location.port);
 }
