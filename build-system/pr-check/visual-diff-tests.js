@@ -59,7 +59,7 @@ function main() {
       downloadDistOutput(FILENAME);
       timedExecOrDie('gulp update-packages');
       timedExecOrDie(
-        'gulp visual-diff --compiled --nobuild --master --grep "amp-story: tooltip"'
+        'gulp visual-diff --compiled --nobuild --grep "amp-story: tooltip"'
       );
     } else {
       timedExecOrDie('gulp visual-diff --empty');
