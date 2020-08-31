@@ -14,29 +14,25 @@
  * limitations under the License.
  */
 
-/** @externs */
+ .i-amphtml-onetap-google-iframe {
+  z-index: 2147483647;
+  border: none;
+  position: fixed;
+}
 
-/** @const */
-var InlineGalleryDef = {};
+/* 'card' as received in 'set_ui_mode' messages from iframe */
+.i-amphtml-onetap-google-ui-card
+{
+  width: 391px;
+  right: 20px;
+  top: 20px;
+}
 
-/**
- * @typedef {{
- *   arrowNext: (?PreactDef.VNode|undefined),
- *   arrowPrev: (?PreactDef.VNode|undefined),
- *   children: (!PreactDef.Renderable),
- *   loop: (boolean|undefined),
- *   onSlideChange: (function(number):undefined|undefined),
- * }}
- */
-InlineGalleryDef.Props;
-
-/**
- * @typedef {{
- *   current: number,
- *   height: (number|undefined),
- *   inset: (boolean|undefined),
- *   goTo: (function(number):undefined),
- *   children: !Array<PreactDef.Renderable>
- * }}
- */
-InlineGalleryDef.PaginationProps;
+/* 'bottom_sheet' as received in 'set_ui_mode' messages from iframe */
+.i-amphtml-onetap-google-ui-bottom_sheet {
+  right: auto;
+  left: 0;
+  top: auto;
+  bottom: 0;
+  width: 100%;
+}

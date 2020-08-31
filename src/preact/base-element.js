@@ -18,11 +18,11 @@ import * as Preact from './index';
 import {Deferred} from '../utils/promise';
 import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
+import {createRef, render} from './index';
 import {devAssert} from '../log';
 import {hasOwn} from '../utils/object';
 import {installShadowStyle} from '../shadow-embed';
 import {matches} from '../dom';
-import {render} from './index';
 import {startsWith} from '../string';
 
 /**
@@ -72,6 +72,8 @@ const SIZE_DEFINED_STYLE = {
  * subclass on purpose, you're not meant to do work in the subclass! There will
  * be very few exceptions, which is why we allow options to configure the
  * class.
+ *
+ * @template API_TYPE
  */
 export class PreactBaseElement extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -90,6 +92,9 @@ export class PreactBaseElement extends AMP.BaseElement {
       playable: false,
       notify: () => this.mutateElement(() => {}),
     };
+
+    /** @private {{current: ?API_TYPE}} */
+    this.ref_ = createRef();
 
     this.boundRerender_ = () => {
       this.scheduledRender_ = false;
@@ -189,6 +194,28 @@ export class PreactBaseElement extends AMP.BaseElement {
   }
 
   /**
+   * @return {!API_TYPE}
+   * @protected
+   */
+  api() {
+    return devAssert(this.ref_.current);
+  }
+
+  /**
+   * @param {string} alias
+   * @param {function(!API_TYPE, !../service/action-impl.ActionInvocation)} handler
+   * @param {../action-constants.ActionTrust} minTrust
+   * @protected
+   */
+  registerApiAction(alias, handler, minTrust) {
+    this.registerAction(
+      alias,
+      (invocation) => handler(this.api(), invocation),
+      minTrust
+    );
+  }
+
+  /**
    * @param {!Array<!MutationRecord>} records
    * @private
    */
@@ -212,7 +239,7 @@ export class PreactBaseElement extends AMP.BaseElement {
   unmount_() {
     this.mounted_ = false;
     if (this.container_) {
-      render(<></>, this.container_);
+      render(null, this.container_);
     }
   }
 
@@ -260,7 +287,12 @@ export class PreactBaseElement extends AMP.BaseElement {
       }
     }
 
-    const props = collectProps(Ctor, this.element, this.defaultProps_);
+    const props = collectProps(
+      Ctor,
+      this.element,
+      this.ref_,
+      this.defaultProps_
+    );
 
     // While this "creates" a new element, diffing will not create a second
     // instance of Component. Instead, the existing one already rendered into
@@ -371,11 +403,12 @@ PreactBaseElement['children'] = null;
 /**
  * @param {typeof PreactBaseElement} Ctor
  * @param {!AmpElement} element
+ * @param {{current: ?}} ref
  * @param {!JsonObject|null|undefined} defaultProps
  * @return {!JsonObject}
  */
-function collectProps(Ctor, element, defaultProps) {
-  const props = /** @type {!JsonObject} */ ({...defaultProps});
+function collectProps(Ctor, element, ref, defaultProps) {
+  const props = /** @type {!JsonObject} */ ({...defaultProps, ref});
 
   const {
     'className': className,

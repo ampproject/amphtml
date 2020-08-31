@@ -141,8 +141,6 @@ function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
 
   return (
     <div
-      hide-scrollbar
-      key="container"
       ref={containerRef}
       onScroll={handleScroll}
       class={`${classes.scrollContainer} ${classes.hideScrollbar} ${classes.horizontalScroll}`}
@@ -153,9 +151,7 @@ function ScrollerWithRef({children, loop, restingIndex, setRestingIndex}, ref) {
   );
 }
 
-const Scroller = forwardRef((props, ref) =>
-  ScrollerWithRef(/** @type {BaseCarouselDef.ScrollerProps} */ (props), ref)
-);
+const Scroller = forwardRef(ScrollerWithRef);
 Scroller.displayName = 'Scroller'; // Make findable for tests.
 export {Scroller};
 
@@ -226,9 +222,7 @@ function renderSlides(
         renderable={index == restingIndex}
         playable={index == restingIndex}
       >
-        <div
-          class={`${classes.slideSizing} ${classes.slideElement} ${classes.hideScrollbarPseudo}`}
-        >
+        <div class={`${classes.slideSizing} ${classes.slideElement}`}>
           {child}
         </div>
       </WithAmpContext>
