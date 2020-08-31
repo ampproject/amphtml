@@ -427,10 +427,7 @@ afterEach(function () {
   restoreConsoleError();
   restoreAsyncErrorThrows();
   this.timeout(BEFORE_AFTER_TIMEOUT);
-  const cleanupTagNames = ['link', 'meta'];
-  if (!Services.platformFor(window).isSafari()) {
-    cleanupTagNames.push('iframe');
-  }
+  const cleanupTagNames = ['link', 'meta', 'iframe'];
   const cleanup = document.querySelectorAll(cleanupTagNames.join(','));
   for (let i = 0; i < cleanup.length; i++) {
     try {
