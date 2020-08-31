@@ -995,7 +995,6 @@ amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-compo
      mobile screen readers such as TalkBack which add focus lines. */
   outline: none !important;
   pointer-events: none !important;
-  border: 1px solid red !important;
 }
 
 [dir=rtl] .i-amphtml-story-screen-reader-back-button {
