@@ -36,6 +36,7 @@
  * ```
  */
 
+const crypto = require('crypto');
 const {create} = require('jss');
 const {default: preset} = require('jss-preset-default');
 
@@ -44,20 +45,13 @@ module.exports = function ({types: t, template}) {
     return filename.endsWith('.jss.js');
   }
 
-  // Naive string hashing function. For now we care more
-  // about simplicity than reducing collisions, as the number of
-  // unique documents is small, and we fail-fast on collision.
-  function hashCode(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = (31 * hash + str.charCodeAt(i)) % Number.MAX_SAFE_INTEGER;
-    }
-    return hash.toString().slice(0, 7);
-  }
-
   let seen = new Set();
   function compileJss(JSS, filename) {
-    const filehash = hashCode(filename);
+    const filehash = crypto
+      .createHash('sha256')
+      .update(filename)
+      .digest('base64')
+      .slice(0, 7);
     const jss = create({
       ...preset(),
       createGenerateId: () => {

@@ -1,4 +1,4 @@
-var _classes = JSON.parse("{\"button\":\"button-5622871\",\"CSS\":\".button-5622871 {\\n  font-size: 12px;\\n}\"}");
+var _classes = JSON.parse("{\"button\":\"button-vRF4F5Y\",\"CSS\":\".button-vRF4F5Y {\\n  font-size: 12px;\\n}\"}");
 
 /**
  * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
