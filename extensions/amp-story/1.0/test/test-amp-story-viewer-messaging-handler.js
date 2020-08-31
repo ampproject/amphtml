@@ -20,9 +20,8 @@ import {
   getStoreService,
 } from '../amp-story-store-service';
 import {AmpStoryViewerMessagingHandler} from '../amp-story-viewer-messaging-handler';
-import {HistoryState, setHistoryState} from '../utils';
 
-describes.fakeWin('amp-story-viewer-messaging-handler', {}, env => {
+describes.fakeWin('amp-story-viewer-messaging-handler', {}, (env) => {
   let fakeViewerService;
   let storeService;
   let viewerMessagingHandler;
@@ -30,6 +29,9 @@ describes.fakeWin('amp-story-viewer-messaging-handler', {}, env => {
   beforeEach(() => {
     fakeViewerService = {
       responderMap: {},
+      onMessage(eventType, handler) {
+        this.responderMap[eventType] = handler;
+      },
       onMessageRespond(eventType, responder) {
         this.responderMap[eventType] = responder;
       },
@@ -39,6 +41,7 @@ describes.fakeWin('amp-story-viewer-messaging-handler', {}, env => {
         }
         return this.responderMap[eventType](data);
       },
+      sendMessage(unusedEventType, unusedData) {},
     };
     viewerMessagingHandler = new AmpStoryViewerMessagingHandler(
       env.win,
@@ -93,7 +96,7 @@ describes.fakeWin('amp-story-viewer-messaging-handler', {}, env => {
     });
 
     it('should return the PAGE_ATTACHMENT_STATE', async () => {
-      setHistoryState(env.win, HistoryState.ATTACHMENT_PAGE_ID, 'SOME_ID');
+      storeService.dispatch(Action.TOGGLE_PAGE_ATTACHMENT_STATE, true);
       const response = await fakeViewerService.receiveMessage(
         'getDocumentState',
         {state: 'PAGE_ATTACHMENT_STATE'}
@@ -102,7 +105,6 @@ describes.fakeWin('amp-story-viewer-messaging-handler', {}, env => {
         state: 'PAGE_ATTACHMENT_STATE',
         value: true,
       });
-      setHistoryState(env.win, HistoryState.ATTACHMENT_PAGE_ID, null);
     });
 
     it('should return the STORY_PROGRESS', async () => {
@@ -116,6 +118,58 @@ describes.fakeWin('amp-story-viewer-messaging-handler', {}, env => {
         state: 'STORY_PROGRESS',
         value: 0.5,
       });
+    });
+  });
+
+  describe('onDocumentState', () => {
+    it('should throw if no state', async () => {
+      expectAsyncConsoleError(/Invalid 'state' parameter/i, 1);
+      const subscribeStub = env.sandbox.stub(storeService, 'subscribe');
+
+      fakeViewerService.receiveMessage('onDocumentState', undefined);
+
+      expect(subscribeStub).to.not.have.been.called;
+    });
+
+    it('should throw if invalid state', async () => {
+      expectAsyncConsoleError(/Invalid 'state' parameter/i, 1);
+      const subscribeStub = env.sandbox.stub(storeService, 'subscribe');
+
+      fakeViewerService.receiveMessage('onDocumentState', {
+        state: 'UNEXISTING_STATE',
+      });
+
+      expect(subscribeStub).to.not.have.been.called;
+    });
+
+    it('should subscribe to state updates', async () => {
+      const subscribeStub = env.sandbox.stub(storeService, 'subscribe');
+
+      fakeViewerService.receiveMessage('onDocumentState', {
+        state: 'MUTED_STATE',
+      });
+
+      expect(subscribeStub).to.have.been.calledWith(StateProperty.MUTED_STATE);
+    });
+
+    it('should receive documentStateUpdate events', async () => {
+      storeService.dispatch(Action.TOGGLE_MUTED, false);
+      const sendMessageStub = env.sandbox.stub(
+        fakeViewerService,
+        'sendMessage'
+      );
+      const state = 'MUTED_STATE';
+
+      fakeViewerService.receiveMessage('onDocumentState', {state});
+      storeService.dispatch(Action.TOGGLE_MUTED, true);
+
+      expect(sendMessageStub).to.have.been.calledWithExactly(
+        'documentStateUpdate',
+        {
+          state,
+          value: true,
+        }
+      );
     });
   });
 

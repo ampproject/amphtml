@@ -70,7 +70,7 @@ export class AmpAdTemplate extends AmpAdNetworkBase {
     // We collect all fields in the dataset of the form
     // 'data-request-param-<field_name>=<val>`, and append &<field_name>=<val>
     // to the add request URL.
-    Object.keys(this.element.dataset).forEach(dataField => {
+    Object.keys(this.element.dataset).forEach((dataField) => {
       if (startsWith(dataField, DATA_REQUEST_PARAM_PREFIX)) {
         const requestParamName = dataField.slice(
           DATA_REQUEST_PARAM_PREFIX.length,
@@ -98,6 +98,6 @@ export class AmpAdTemplate extends AmpAdNetworkBase {
 
 const TAG = 'amp-ad-custom';
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpAdTemplate);
 });

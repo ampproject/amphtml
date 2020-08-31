@@ -156,14 +156,14 @@ function serialize(pairs) {
     return '';
   }
   return Object.keys(pairs)
-    .filter(key => {
+    .filter((key) => {
       const valid = KEY_VALIDATOR.test(key);
       if (!valid) {
         user().error(TAG, 'Invalid linker key: ' + key);
       }
       return valid;
     })
-    .map(key => key + DELIMITER + encode(pairs[key]))
+    .map((key) => key + DELIMITER + encode(pairs[key]))
     .join(DELIMITER);
 }
 

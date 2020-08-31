@@ -68,8 +68,8 @@ function noopMethods(
   ampdoc,
   sandbox,
   pageLayoutBox = {
-    top: 11,
-    left: 12,
+    top: 11.1,
+    left: 12.1,
     right: 0,
     bottom: 0,
     width: 0,
@@ -132,14 +132,59 @@ describe('Google A4A utils', () => {
       },
     };
 
+    const btrConfig = {
+      transport: {beacon: false, xhrpost: false},
+      requests: {
+        btr1: 'https://example.test?id=1',
+        btr2: 'https://example.test?id=2',
+      },
+      triggers: {
+        beginToRender: {
+          on: 'ini-load',
+          request: ['btr1', 'btr2'],
+          selector: 'amp-ad',
+          selectionMethod: 'closest',
+        },
+      },
+    };
+
+    const fullConfig = {
+      transport: {beacon: false, xhrpost: false},
+      requests: {
+        visibility1: 'https://foo.com?hello=world',
+        visibility2: 'https://bar.com?a=b',
+        btr1: 'https://example.test?id=1',
+        btr2: 'https://example.test?id=2',
+      },
+      triggers: {
+        continuousVisible: {
+          on: 'visible',
+          request: ['visibility1', 'visibility2'],
+          visibilitySpec: {
+            selector: 'amp-ad',
+            selectionMethod: 'closest',
+            visiblePercentageMin: 50,
+            continuousTimeMin: 1000,
+          },
+        },
+        beginToRender: {
+          on: 'ini-load',
+          request: ['btr1', 'btr2'],
+          selector: 'amp-ad',
+          selectionMethod: 'closest',
+        },
+      },
+    };
+
     it('should extract correct config from header', () => {
-      return createIframePromise().then(fixture => {
+      return createIframePromise().then((fixture) => {
         setupForAdTesting(fixture);
         let url;
+        let btrUrl;
         const headers = {
           get(name) {
             if (name == 'X-AmpAnalytics') {
-              return JSON.stringify({url});
+              return JSON.stringify({url, btrUrl});
             }
             if (name == 'X-QQID') {
               return 'qqid_string';
@@ -168,14 +213,28 @@ describe('Google A4A utils', () => {
         allowConsoleError(
           () => expect(extractAmpAnalyticsConfig(a4a, headers)).to.be.null
         );
+
         url = [];
+        btrUrl = [];
         expect(extractAmpAnalyticsConfig(a4a, headers)).to.not.be.ok;
         expect(extractAmpAnalyticsConfig(a4a, headers)).to.be.null;
 
         url = ['https://foo.com?hello=world', 'https://bar.com?a=b'];
-        const config = extractAmpAnalyticsConfig(a4a, headers);
+        btrUrl = [];
+        let config = extractAmpAnalyticsConfig(a4a, headers);
         expect(config).to.deep.equal(builtConfig);
-        headers.has = function(name) {
+
+        url = [];
+        btrUrl = ['https://example.test?id=1', 'https://example.test?id=2'];
+        config = extractAmpAnalyticsConfig(a4a, headers);
+        expect(config).to.deep.equal(btrConfig);
+
+        url = ['https://foo.com?hello=world', 'https://bar.com?a=b'];
+        btrUrl = ['https://example.test?id=1', 'https://example.test?id=2'];
+        config = extractAmpAnalyticsConfig(a4a, headers);
+        expect(config).to.deep.equal(fullConfig);
+
+        headers.has = function (name) {
           expect(name).to.equal('X-AmpAnalytics');
           return false;
         };
@@ -188,7 +247,7 @@ describe('Google A4A utils', () => {
         .stub(Services, 'documentInfoForDoc')
         .returns({pageViewId: 777});
       const mockElement = {
-        getAttribute: function(name) {
+        getAttribute: function (name) {
           switch (name) {
             case EXPERIMENT_ATTRIBUTE:
               return '00000001,00000002';
@@ -217,7 +276,7 @@ describe('Google A4A utils', () => {
       expect(newConfig.triggers.continuousVisibleRenderStart.request).to.equal(
         'renderStartCsi'
       );
-      const getRegExps = metricName => [
+      const getRegExps = (metricName) => [
         /^https:\/\/csi\.gstatic\.com\/csi\?/,
         /(\?|&)s=a4a(&|$)/,
         /(\?|&)c=[0-9]+(&|$)/,
@@ -229,13 +288,13 @@ describe('Google A4A utils', () => {
         /(\?|&)rls=\$internalRuntimeVersion\$(&|$)/,
         /(\?|&)adt.0=fake-type(&|$)/,
       ];
-      getRegExps('visibilityCsi').forEach(regExp => {
+      getRegExps('visibilityCsi').forEach((regExp) => {
         expect(newConfig.requests.visibilityCsi).to.match(regExp);
       });
-      getRegExps('iniLoadCsiFriendly').forEach(regExp => {
+      getRegExps('iniLoadCsiFriendly').forEach((regExp) => {
         expect(newConfig.requests.iniLoadCsi).to.match(regExp);
       });
-      getRegExps('renderStartCsiFriendly').forEach(regExp => {
+      getRegExps('renderStartCsiFriendly').forEach((regExp) => {
         expect(newConfig.requests.renderStartCsi).to.match(regExp);
       });
       newConfig = addCsiSignalsToAmpAnalyticsConfig(
@@ -247,10 +306,10 @@ describe('Google A4A utils', () => {
         /* lifecycle time events; not relevant here */ -1,
         -1
       );
-      getRegExps('iniLoadCsiCrossDomain').forEach(regExp => {
+      getRegExps('iniLoadCsiCrossDomain').forEach((regExp) => {
         expect(newConfig.requests.iniLoadCsi).to.match(regExp);
       });
-      getRegExps('renderStartCsiCrossDomain').forEach(regExp => {
+      getRegExps('renderStartCsiCrossDomain').forEach((regExp) => {
         expect(newConfig.requests.renderStartCsi).to.match(regExp);
       });
     });
@@ -307,10 +366,10 @@ describe('Google A4A utils', () => {
   });
 
   describe('#googleAdUrl', () => {
-    it('should set ad position', function() {
+    it('should set ad position', function () {
       // When ran locally, this test tends to exceed 2000ms timeout.
       this.timeout(5000);
-      return createIframePromise().then(fixture => {
+      return createIframePromise().then((fixture) => {
         setupForAdTesting(fixture);
         const {doc} = fixture;
         doc.win = window;
@@ -322,16 +381,20 @@ describe('Google A4A utils', () => {
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, fixture.ampdoc, window.sandbox);
         return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, [], []).then(url1 => {
-            expect(url1).to.match(/ady=11/);
-            expect(url1).to.match(/adx=12/);
+          return googleAdUrl(impl, '', 0, [], false, []).then((url1) => {
+            expect(url1).to.match(/ady=11.1/);
+            expect(url1).to.match(/adx=12.1/);
+            return googleAdUrl(impl, '', 0, [], true, []).then((url1) => {
+              expect(url1).to.match(/ady=11/);
+              expect(url1).to.match(/adx=12/);
+            });
           });
         });
       });
     });
 
-    it('should include scroll position', function() {
-      return createIframePromise().then(fixture => {
+    it('should include scroll position', function () {
+      return createIframePromise().then((fixture) => {
         setupForAdTesting(fixture);
         const {doc} = fixture;
         doc.win = window;
@@ -348,22 +411,25 @@ describe('Google A4A utils', () => {
         const getSize = () => {
           return {'width': 100, 'height': 200};
         };
-        const getScrollLeft = () => 12;
-        const getScrollTop = () => 34;
+        const getScrollLeft = () => 12.1;
+        const getScrollTop = () => 34.2;
         const viewportStub = window.sandbox.stub(Services, 'viewportForDoc');
         viewportStub.returns({getRect, getSize, getScrollTop, getScrollLeft});
         return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, {}, []).then(url1 => {
+          return googleAdUrl(impl, '', 0, {}, false, []).then((url1) => {
+            expect(url1).to.match(/scr_x=12.1&scr_y=34.2/);
+          });
+          return googleAdUrl(impl, '', 0, {}, true, []).then((url1) => {
             expect(url1).to.match(/scr_x=12&scr_y=34/);
           });
         });
       });
     });
 
-    it('should include all experiment ids', function() {
+    it('should include all experiment ids', function () {
       // When ran locally, this test tends to exceed 2000ms timeout.
       this.timeout(5000);
-      return createIframePromise().then(fixture => {
+      return createIframePromise().then((fixture) => {
         setupForAdTesting(fixture);
         const {doc} = fixture;
         doc.win = window;
@@ -376,15 +442,17 @@ describe('Google A4A utils', () => {
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, fixture.ampdoc, window.sandbox);
         return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, {}, ['789', '098']).then(url1 => {
-            expect(url1).to.match(/eid=123%2C456%2C789%2C098/);
-          });
+          return googleAdUrl(impl, '', 0, {}, false, ['789', '098']).then(
+            (url1) => {
+              expect(url1).to.match(/eid=123%2C456%2C789%2C098/);
+            }
+          );
         });
       });
     });
 
     it('should include debug_experiment_id if local mode w/ deid hash', () => {
-      return createIframePromise().then(fixture => {
+      return createIframePromise().then((fixture) => {
         setupForAdTesting(fixture);
         const {doc} = fixture;
         doc.win = fixture.win;
@@ -398,7 +466,7 @@ describe('Google A4A utils', () => {
         impl.win.AMP_CONFIG = {type: 'production'};
         impl.win.location.hash = 'foo,deid=123456,654321,bar';
         return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, [], []).then(url1 => {
+          return googleAdUrl(impl, '', 0, [], false, []).then((url1) => {
             expect(url1).to.match(/[&?]debug_experiment_id=123456%2C654321/);
           });
         });
@@ -406,7 +474,7 @@ describe('Google A4A utils', () => {
     });
 
     it('should include GA cid/hid', () => {
-      return createIframePromise().then(fixture => {
+      return createIframePromise().then((fixture) => {
         setupForAdTesting(fixture);
         const {doc} = fixture;
         doc.win = fixture.win;
@@ -419,7 +487,7 @@ describe('Google A4A utils', () => {
         noopMethods(impl, fixture.ampdoc, window.sandbox);
         impl.win.gaGlobal = {cid: 'foo', hid: 'bar'};
         return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', 0, [], []).then(url => {
+          return googleAdUrl(impl, '', 0, [], false, []).then((url) => {
             expect(url).to.match(/[&?]ga_cid=foo[&$]/);
             expect(url).to.match(/[&?]ga_hid=bar[&$]/);
           });
@@ -428,7 +496,7 @@ describe('Google A4A utils', () => {
     });
 
     it('should have correct bc value when everything supported', () => {
-      return createIframePromise().then(fixture => {
+      return createIframePromise().then((fixture) => {
         setupForAdTesting(fixture);
         const {doc} = fixture;
         doc.win = fixture.win;
@@ -449,15 +517,15 @@ describe('Google A4A utils', () => {
           },
         });
         return fixture.addElement(elem).then(() => {
-          return expect(googleAdUrl(impl, '', 0, {}, [])).to.eventually.match(
-            /[&?]bc=7[&$]/
-          );
+          return expect(
+            googleAdUrl(impl, '', 0, {}, false, [])
+          ).to.eventually.match(/[&?]bc=7[&$]/);
         });
       });
     });
 
     it('should have correct bc value when sandbox not supported', () => {
-      return createIframePromise().then(fixture => {
+      return createIframePromise().then((fixture) => {
         setupForAdTesting(fixture);
         const {doc} = fixture;
         doc.win = fixture.win;
@@ -476,15 +544,15 @@ describe('Google A4A utils', () => {
           sandbox: {},
         });
         return fixture.addElement(elem).then(() => {
-          return expect(googleAdUrl(impl, '', 0, {}, [])).to.eventually.match(
-            /[&?]bc=1[&$]/
-          );
+          return expect(
+            googleAdUrl(impl, '', 0, {}, false, [])
+          ).to.eventually.match(/[&?]bc=1[&$]/);
         });
       });
     });
 
     it('should not include bc when nothing supported', () => {
-      return createIframePromise().then(fixture => {
+      return createIframePromise().then((fixture) => {
         setupForAdTesting(fixture);
         const {doc} = fixture;
         doc.win = fixture.win;
@@ -507,14 +575,14 @@ describe('Google A4A utils', () => {
         });
         return fixture.addElement(elem).then(() => {
           return expect(
-            googleAdUrl(impl, '', 0, {}, [])
+            googleAdUrl(impl, '', 0, {}, false, [])
           ).to.eventually.not.match(/[&?]bc=1[&$]/);
         });
       });
     });
 
     it('should handle referrer url promise timeout', () => {
-      return createIframePromise().then(fixture => {
+      return createIframePromise().then((fixture) => {
         setupForAdTesting(fixture);
         const {doc} = fixture;
         doc.win = fixture.win;
@@ -540,14 +608,14 @@ describe('Google A4A utils', () => {
         expectAsyncConsoleError(/Referrer timeout/, 1);
         return fixture.addElement(elem).then(() => {
           return expect(
-            googleAdUrl(impl, '', 0, {}, [])
+            googleAdUrl(impl, '', 0, {}, false, [])
           ).to.eventually.not.match(/[&?]ref=[&$]/);
         });
       });
     });
 
     it('should include domLoading time', () => {
-      return createIframePromise().then(fixture => {
+      return createIframePromise().then((fixture) => {
         setupForAdTesting(fixture);
         const {doc} = fixture;
         doc.win = fixture.win;
@@ -555,9 +623,11 @@ describe('Google A4A utils', () => {
         const impl = new MockA4AImpl(elem);
         noopMethods(impl, fixture.ampdoc, window.sandbox);
         return fixture.addElement(elem).then(() => {
-          return googleAdUrl(impl, '', Date.now(), [], []).then(url => {
-            expect(url).to.match(/[&?]bdt=[1-9][0-9]*[&$]/);
-          });
+          return googleAdUrl(impl, '', Date.now(), [], false, []).then(
+            (url) => {
+              expect(url).to.match(/[&?]bdt=[1-9][0-9]*[&$]/);
+            }
+          );
         });
       });
     });
@@ -605,7 +675,7 @@ describe('Google A4A utils', () => {
     });
   });
 
-  describes.realWin('#getEnclosingContainerTypes', {}, env => {
+  describes.realWin('#getEnclosingContainerTypes', {}, (env) => {
     it('should return empty if no containers', () => {
       expect(
         getEnclosingContainerTypes(env.win.document.createElement('amp-ad'))
@@ -613,7 +683,7 @@ describe('Google A4A utils', () => {
       ).to.equal(0);
     });
 
-    Object.keys(ValidAdContainerTypes).forEach(container => {
+    Object.keys(ValidAdContainerTypes).forEach((container) => {
       it(`should return container: ${container}`, () => {
         const containerElem = env.win.document.createElement(container);
         env.win.document.body.appendChild(containerElem);
@@ -627,7 +697,7 @@ describe('Google A4A utils', () => {
 
     it('should include ALL containers', () => {
       let prevContainer;
-      Object.keys(ValidAdContainerTypes).forEach(container => {
+      Object.keys(ValidAdContainerTypes).forEach((container) => {
         const containerElem = env.win.document.createElement(container);
         (prevContainer || env.win.document.body).appendChild(containerElem);
         prevContainer = containerElem;
@@ -635,7 +705,7 @@ describe('Google A4A utils', () => {
       const ampAdElem = env.win.document.createElement('amp-ad');
       prevContainer.appendChild(ampAdElem);
       const ValidAdContainerTypeValues = Object.keys(ValidAdContainerTypes).map(
-        function(key) {
+        function (key) {
           return ValidAdContainerTypes[key];
         }
       );
@@ -645,7 +715,7 @@ describe('Google A4A utils', () => {
     });
   });
 
-  describes.fakeWin('#getIdentityTokenRequestUrl', {}, env => {
+  describes.fakeWin('#getIdentityTokenRequestUrl', {}, (env) => {
     let doc;
     let fakeWin;
     beforeEach(() => {
@@ -698,170 +768,181 @@ describe('Google A4A utils', () => {
     });
   });
 
-  describes.fakeWin('#getIdentityToken', {amp: true, mockFetch: true}, env => {
-    beforeEach(() => {
-      installXhrService(env.win);
-      const documentInfoStub = env.sandbox.stub(Services, 'documentInfoForDoc');
-      documentInfoStub
-        .withArgs(env.ampdoc)
-        .returns({canonicalUrl: 'http://f.blah.com?some_site'});
-    });
-
-    afterEach(() => {
-      // Verify fetch mocks are all consumed.
-      expect(env.fetchMock.done()).to.be.true;
-    });
-
-    const getUrl = domain => {
-      domain = domain || 'google.com';
-      return (
-        `https:\/\/adservice\.${domain}\/adsid\/integrator\.json\?` +
-        'domain=f.blah.com'
-      );
-    };
-
-    it('should ignore response if required fields are missing', () => {
-      env.expectFetch(getUrl(), JSON.stringify({newToken: 'abc'}));
-      return getIdentityToken(env.win, env.ampdoc).then(result => {
-        expect(result.token).to.not.be.ok;
-        expect(result.jar).to.not.be.ok;
-        expect(result.pucrd).to.not.be.ok;
-        expect(result.freshLifetimeSecs).to.not.be.ok;
-        expect(result.validLifetimeSecs).to.not.be.ok;
-        expect(result.fetchTimeMs).to.be.at.least(0);
+  describes.fakeWin(
+    '#getIdentityToken',
+    {amp: true, mockFetch: true},
+    (env) => {
+      beforeEach(() => {
+        installXhrService(env.win);
+        const documentInfoStub = env.sandbox.stub(
+          Services,
+          'documentInfoForDoc'
+        );
+        documentInfoStub
+          .withArgs(env.ampdoc)
+          .returns({canonicalUrl: 'http://f.blah.com?some_site'});
       });
-    });
 
-    it('should fetch full token as expected', () => {
-      env.expectFetch(
-        getUrl(),
-        JSON.stringify({
-          newToken: 'abc',
-          '1p_jar': 'some_jar',
-          pucrd: 'some_pucrd',
-          freshLifetimeSecs: '1234',
-          validLifetimeSecs: '5678',
-        })
-      );
-      return getIdentityToken(env.win, env.ampdoc).then(result => {
-        expect(result.token).to.equal('abc');
-        expect(result.jar).to.equal('some_jar');
-        expect(result.pucrd).to.equal('some_pucrd');
-        expect(result.freshLifetimeSecs).to.equal(1234);
-        expect(result.validLifetimeSecs).to.equal(5678);
-        expect(result.fetchTimeMs).to.be.at.least(0);
+      afterEach(() => {
+        // Verify fetch mocks are all consumed.
+        expect(env.fetchMock.done()).to.be.true;
       });
-    });
 
-    it('should redirect as expected', () => {
-      env.expectFetch(getUrl(), JSON.stringify({altDomain: '.google.fr'}));
-      env.expectFetch(
-        getUrl('google.fr'),
-        JSON.stringify({
-          newToken: 'abc',
-          freshLifetimeSecs: '1234',
-          validLifetimeSecs: '5678',
-        })
-      );
-      return getIdentityToken(env.win, env.ampdoc, '').then(result => {
-        expect(result.token).to.equal('abc');
-        expect(result.jar).to.equal('');
-        expect(result.pucrd).to.equal('');
-        expect(result.freshLifetimeSecs).to.equal(1234);
-        expect(result.validLifetimeSecs).to.equal(5678);
-        expect(result.fetchTimeMs).to.be.at.least(0);
-      });
-    });
-
-    it('should stop after 1 redirect', () => {
-      env.expectFetch(getUrl(), JSON.stringify({altDomain: '.google.fr'}));
-      env.expectFetch(
-        getUrl('google.fr'),
-        JSON.stringify({altDomain: '.google.com'})
-      );
-      return getIdentityToken(env.win, env.ampdoc).then(result => {
-        expect(result.token).to.not.be.ok;
-        expect(result.jar).to.not.be.ok;
-        expect(result.pucrd).to.not.be.ok;
-        expect(result.fetchTimeMs).to.be.at.least(0);
-      });
-    });
-
-    it('should use previous execution', () => {
-      const ident = {
-        newToken: 'foo',
-        freshLifetimeSecs: '1234',
-        validLifetimeSecs: '5678',
+      const getUrl = (domain) => {
+        domain = domain || 'google.com';
+        return (
+          `https:\/\/adservice\.${domain}\/adsid\/integrator\.json\?` +
+          'domain=f.blah.com'
+        );
       };
-      env.win['goog_identity_prom'] = Promise.resolve(ident);
-      return getIdentityToken(env.win, env.ampdoc).then(result =>
-        expect(result).to.jsonEqual(ident)
-      );
-    });
 
-    it('should handle fetch error', () => {
-      env.sandbox
-        .stub(Services, 'xhrFor')
-        .returns({fetchJson: () => Promise.reject('some network failure')});
-      return getIdentityToken(env.win, env.ampdoc).then(result =>
-        expect(result).to.jsonEqual({})
-      );
-    });
+      it('should ignore response if required fields are missing', () => {
+        env.expectFetch(getUrl(), JSON.stringify({newToken: 'abc'}));
+        return getIdentityToken(env.win, env.ampdoc).then((result) => {
+          expect(result.token).to.not.be.ok;
+          expect(result.jar).to.not.be.ok;
+          expect(result.pucrd).to.not.be.ok;
+          expect(result.freshLifetimeSecs).to.not.be.ok;
+          expect(result.validLifetimeSecs).to.not.be.ok;
+          expect(result.fetchTimeMs).to.be.at.least(0);
+        });
+      });
 
-    it('should fetch if SUFFICIENT consent', () => {
-      env.expectFetch(
-        getUrl(),
-        JSON.stringify({
-          newToken: 'abc',
-          '1p_jar': 'some_jar',
-          pucrd: 'some_pucrd',
+      it('should fetch full token as expected', () => {
+        env.expectFetch(
+          getUrl(),
+          JSON.stringify({
+            newToken: 'abc',
+            '1p_jar': 'some_jar',
+            pucrd: 'some_pucrd',
+            freshLifetimeSecs: '1234',
+            validLifetimeSecs: '5678',
+          })
+        );
+        return getIdentityToken(env.win, env.ampdoc).then((result) => {
+          expect(result.token).to.equal('abc');
+          expect(result.jar).to.equal('some_jar');
+          expect(result.pucrd).to.equal('some_pucrd');
+          expect(result.freshLifetimeSecs).to.equal(1234);
+          expect(result.validLifetimeSecs).to.equal(5678);
+          expect(result.fetchTimeMs).to.be.at.least(0);
+        });
+      });
+
+      it('should redirect as expected', () => {
+        env.expectFetch(getUrl(), JSON.stringify({altDomain: '.google.fr'}));
+        env.expectFetch(
+          getUrl('google.fr'),
+          JSON.stringify({
+            newToken: 'abc',
+            freshLifetimeSecs: '1234',
+            validLifetimeSecs: '5678',
+          })
+        );
+        return getIdentityToken(env.win, env.ampdoc, '').then((result) => {
+          expect(result.token).to.equal('abc');
+          expect(result.jar).to.equal('');
+          expect(result.pucrd).to.equal('');
+          expect(result.freshLifetimeSecs).to.equal(1234);
+          expect(result.validLifetimeSecs).to.equal(5678);
+          expect(result.fetchTimeMs).to.be.at.least(0);
+        });
+      });
+
+      it('should stop after 1 redirect', () => {
+        env.expectFetch(getUrl(), JSON.stringify({altDomain: '.google.fr'}));
+        env.expectFetch(
+          getUrl('google.fr'),
+          JSON.stringify({altDomain: '.google.com'})
+        );
+        return getIdentityToken(env.win, env.ampdoc).then((result) => {
+          expect(result.token).to.not.be.ok;
+          expect(result.jar).to.not.be.ok;
+          expect(result.pucrd).to.not.be.ok;
+          expect(result.fetchTimeMs).to.be.at.least(0);
+        });
+      });
+
+      it('should use previous execution', () => {
+        const ident = {
+          newToken: 'foo',
           freshLifetimeSecs: '1234',
           validLifetimeSecs: '5678',
-        })
-      );
-      env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
-        Promise.resolve({
-          whenPolicyResolved: () => CONSENT_POLICY_STATE.SUFFICIENT,
-        })
-      );
-      return getIdentityToken(env.win, env.ampdoc, 'default').then(result =>
-        expect(result.token).to.equal('abc')
-      );
-    });
-
-    it.configure()
-      .skipFirefox()
-      .run('should not fetch if INSUFFICIENT consent', () => {
-        env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
-          Promise.resolve({
-            whenPolicyResolved: () => CONSENT_POLICY_STATE.INSUFFICIENT,
-          })
+        };
+        env.win['goog_identity_prom'] = Promise.resolve(ident);
+        return getIdentityToken(env.win, env.ampdoc).then((result) =>
+          expect(result).to.jsonEqual(ident)
         );
-        return expect(
-          getIdentityToken(env.win, env.ampdoc, 'default')
-        ).to.eventually.jsonEqual({});
       });
 
-    it.configure()
-      .skipFirefox()
-      .run('should not fetch if UNKNOWN consent', () => {
-        env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
-          Promise.resolve({
-            whenPolicyResolved: () => CONSENT_POLICY_STATE.UNKNOWN,
+      it('should handle fetch error', () => {
+        env.sandbox
+          .stub(Services, 'xhrFor')
+          .returns({fetchJson: () => Promise.reject('some network failure')});
+        return getIdentityToken(env.win, env.ampdoc).then((result) =>
+          expect(result).to.jsonEqual({})
+        );
+      });
+
+      it('should fetch if SUFFICIENT consent', () => {
+        env.expectFetch(
+          getUrl(),
+          JSON.stringify({
+            newToken: 'abc',
+            '1p_jar': 'some_jar',
+            pucrd: 'some_pucrd',
+            freshLifetimeSecs: '1234',
+            validLifetimeSecs: '5678',
           })
         );
-        return expect(
-          getIdentityToken(env.win, env.ampdoc, 'default')
-        ).to.eventually.jsonEqual({});
+        env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+          Promise.resolve({
+            whenPolicyResolved: () => CONSENT_POLICY_STATE.SUFFICIENT,
+          })
+        );
+        return getIdentityToken(env.win, env.ampdoc, 'default').then((result) =>
+          expect(result.token).to.equal('abc')
+        );
       });
-  });
+
+      it.configure()
+        .skipFirefox()
+        .run('should not fetch if INSUFFICIENT consent', () => {
+          env.sandbox
+            .stub(Services, 'consentPolicyServiceForDocOrNull')
+            .returns(
+              Promise.resolve({
+                whenPolicyResolved: () => CONSENT_POLICY_STATE.INSUFFICIENT,
+              })
+            );
+          return expect(
+            getIdentityToken(env.win, env.ampdoc, 'default')
+          ).to.eventually.jsonEqual({});
+        });
+
+      it.configure()
+        .skipFirefox()
+        .run('should not fetch if UNKNOWN consent', () => {
+          env.sandbox
+            .stub(Services, 'consentPolicyServiceForDocOrNull')
+            .returns(
+              Promise.resolve({
+                whenPolicyResolved: () => CONSENT_POLICY_STATE.UNKNOWN,
+              })
+            );
+          return expect(
+            getIdentityToken(env.win, env.ampdoc, 'default')
+          ).to.eventually.jsonEqual({});
+        });
+    }
+  );
 
   describe('variables for amp-analytics', () => {
     let a4a;
     let ampdoc;
 
     beforeEach(() => {
-      return createIframePromise().then(fixture => {
+      return createIframePromise().then((fixture) => {
         setupForAdTesting(fixture);
         const element = createElementWithAttributes(fixture.doc, 'amp-a4a', {
           'width': '200',
@@ -935,12 +1016,12 @@ describe('Google A4A utils', () => {
       {in: 'foo.com?lj=fl', out: 'foo.com'},
       {in: 'hello.com', out: 'hello.com'},
       {in: '', out: ''},
-    ].forEach(test =>
+    ].forEach((test) =>
       it(test.in, () => expect(extractHost(test.in)).to.equal(test.out))
     );
   });
 
-  describes.realWin('#getCorrelator', {}, env => {
+  describes.realWin('#getCorrelator', {}, (env) => {
     let win;
 
     beforeEach(() => {
@@ -976,7 +1057,7 @@ describe('Google A4A utils', () => {
   });
 });
 
-describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
+describes.realWin('#groupAmpAdsByType', {amp: true}, (env) => {
   let doc, win, ampdoc;
   beforeEach(() => {
     win = env.win;
@@ -1001,11 +1082,11 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
       .stub(IniLoad, 'getMeasuredResources')
       .callsFake((doc, win, fn) => Promise.resolve(resources.filter(fn)));
     return groupAmpAdsByType(ampdoc, 'doubleclick', () => 'foo').then(
-      result => {
+      (result) => {
         expect(Object.keys(result).length).to.equal(1);
         expect(result['foo']).to.be.ok;
         expect(result['foo'].length).to.equal(1);
-        return result['foo'][0].then(baseElement =>
+        return result['foo'][0].then((baseElement) =>
           expect(baseElement.element.getAttribute('type')).to.equal(
             'doubleclick'
           )
@@ -1030,11 +1111,11 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
     env.sandbox
       .stub(IniLoad, 'getMeasuredResources')
       .callsFake((doc, win, fn) => Promise.resolve(resources.filter(fn)));
-    return groupAmpAdsByType(win, 'doubleclick', () => 'foo').then(result => {
+    return groupAmpAdsByType(win, 'doubleclick', () => 'foo').then((result) => {
       expect(Object.keys(result).length).to.equal(1);
       expect(result['foo']).to.be.ok;
       expect(result['foo'].length).to.equal(1);
-      return result['foo'][0].then(baseElement =>
+      return result['foo'][0].then((baseElement) =>
         expect(baseElement.element.getAttribute('type')).to.equal('doubleclick')
       );
     });
@@ -1061,9 +1142,9 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
     env.sandbox
       .stub(IniLoad, 'getMeasuredResources')
       .callsFake((doc, win, fn) => Promise.resolve(resources.filter(fn)));
-    return groupAmpAdsByType(win, 'doubleclick', element =>
+    return groupAmpAdsByType(win, 'doubleclick', (element) =>
       element.getAttribute('foo')
-    ).then(result => {
+    ).then((result) => {
       expect(Object.keys(result).length).to.equal(2);
       expect(result['bar']).to.be.ok;
       expect(result['bar'].length).to.equal(2);
@@ -1071,8 +1152,8 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
       expect(result['hello'].length).to.equal(1);
       return Promise.all(
         result['bar'].concat(result['hello'])
-      ).then(baseElements =>
-        baseElements.forEach(baseElement =>
+      ).then((baseElements) =>
+        baseElements.forEach((baseElement) =>
           expect(baseElement.element.getAttribute('type')).to.equal(
             'doubleclick'
           )

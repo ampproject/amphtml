@@ -77,7 +77,7 @@ export class TemplateValidator extends Validator {
 
     return getAmpAdTemplateHelper(context.win)
       .fetch(parsedResponseBody.templateUrl)
-      .then(template => {
+      .then((template) => {
         const creativeMetadata = getAmpAdMetadata(template);
         if (parsedResponseBody.analytics) {
           pushIfNotExist(
@@ -91,7 +91,7 @@ export class TemplateValidator extends Validator {
         );
 
         const extensions = Services.extensionsFor(context.win);
-        creativeMetadata.customElementExtensions.forEach(extensionId =>
+        creativeMetadata.customElementExtensions.forEach((extensionId) =>
           extensions./*OK*/ preloadExtension(extensionId)
         );
         // TODO(levitzky) Add preload logic for fonts / images.

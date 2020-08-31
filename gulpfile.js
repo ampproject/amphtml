@@ -25,29 +25,34 @@ const {
   checkExactVersions,
 } = require('./build-system/tasks/check-exact-versions');
 const {
-  generateVendorJsons,
-} = require('./build-system/tasks/generate-vendor-jsons');
+  checkRenovateConfig,
+} = require('./build-system/tasks/check-renovate-config');
 const {
   process3pGithubPr,
 } = require('./build-system/tasks/process-3p-github-pr');
 const {
-  processGithubIssues,
-} = require('./build-system/tasks/process-github-issues');
+  storybookAmp,
+  storybookPreact,
+} = require('./build-system/tasks/storybook');
 const {a4a} = require('./build-system/tasks/a4a');
 const {ava} = require('./build-system/tasks/ava');
 const {babelPluginTests} = require('./build-system/tasks/babel-plugin-tests');
-const {build, defaultTask, watch} = require('./build-system/tasks/build');
+const {build, watch} = require('./build-system/tasks/build');
 const {bundleSize} = require('./build-system/tasks/bundle-size');
 const {cachesJson} = require('./build-system/tasks/caches-json');
 const {checkLinks} = require('./build-system/tasks/check-links');
 const {checkOwners} = require('./build-system/tasks/check-owners');
+const {checkSourcemaps} = require('./build-system/tasks/check-sourcemaps');
 const {checkTypes} = require('./build-system/tasks/check-types');
+const {cherryPick} = require('./build-system/tasks/cherry-pick');
 const {clean} = require('./build-system/tasks/clean');
 const {codecovUpload} = require('./build-system/tasks/codecov-upload');
 const {compileJison} = require('./build-system/tasks/compile-jison');
+const {coverageMap} = require('./build-system/tasks/coverage-map');
 const {createGoldenCss} = require('./build-system/tasks/create-golden-css');
 const {css} = require('./build-system/tasks/css');
 const {csvifySize} = require('./build-system/tasks/csvify-size');
+const {defaultTask} = require('./build-system/tasks/default-task');
 const {depCheck} = require('./build-system/tasks/dep-check');
 const {devDashboardTests} = require('./build-system/tasks/dev-dashboard-tests');
 const {dist} = require('./build-system/tasks/dist');
@@ -57,14 +62,17 @@ const {getZindex} = require('./build-system/tasks/get-zindex');
 const {integration} = require('./build-system/tasks/integration');
 const {lint} = require('./build-system/tasks/lint');
 const {makeExtension} = require('./build-system/tasks/extension-generator');
-const {nailgunStart, nailgunStop} = require('./build-system/tasks/nailgun');
+const {performanceUrls} = require('./build-system/tasks/performance-urls');
 const {performance} = require('./build-system/tasks/performance');
 const {prCheck} = require('./build-system/tasks/pr-check');
 const {prependGlobal} = require('./build-system/tasks/prepend-global');
 const {presubmit} = require('./build-system/tasks/presubmit-checks');
 const {prettify} = require('./build-system/tasks/prettify');
+const {release} = require('./build-system/tasks/release');
+const {serverTests} = require('./build-system/tasks/server-tests');
 const {serve} = require('./build-system/tasks/serve.js');
 const {size} = require('./build-system/tasks/size');
+const {testReportUpload} = require('./build-system/tasks/test-report-upload');
 const {todosFindClosed} = require('./build-system/tasks/todos');
 const {unit} = require('./build-system/tasks/unit');
 const {updatePackages} = require('./build-system/tasks/update-packages');
@@ -89,13 +97,14 @@ function createTask(name, taskFunc) {
  * @param {function} taskFunc
  */
 function checkFlags(name, taskFunc) {
-  if (!argv._.includes(name)) {
+  const isDefaultTask = name == 'default' && argv._.length == 0;
+  if (!argv._.includes(name) && !isDefaultTask) {
     return; // This isn't the task being run.
   }
   const validFlags = taskFunc.flags ? Object.keys(taskFunc.flags) : [];
   const usedFlags = Object.keys(argv).slice(1); // Skip the '_' argument
   const invalidFlags = [];
-  usedFlags.forEach(flag => {
+  usedFlags.forEach((flag) => {
     if (!validFlags.includes(flag)) {
       invalidFlags.push(`--${flag}`);
     }
@@ -110,7 +119,7 @@ function checkFlags(name, taskFunc) {
     log('For detailed usage information, run', cyan('gulp help') + '.');
     if (validFlags.length > 0) {
       log('Valid flags for', cyan(`gulp ${name}`) + ':');
-      validFlags.forEach(key => {
+      validFlags.forEach((key) => {
         log(cyan(`\t--${key}`) + `: ${taskFunc.flags[key]}`);
       });
     }
@@ -130,10 +139,14 @@ createTask('caches-json', cachesJson);
 createTask('check-exact-versions', checkExactVersions);
 createTask('check-links', checkLinks);
 createTask('check-owners', checkOwners);
+createTask('check-renovate-config', checkRenovateConfig);
+createTask('check-sourcemaps', checkSourcemaps);
 createTask('check-types', checkTypes);
+createTask('cherry-pick', cherryPick);
 createTask('clean', clean);
 createTask('codecov-upload', codecovUpload);
 createTask('compile-jison', compileJison);
+createTask('coverage-map', coverageMap);
 createTask('create-golden-css', createGoldenCss);
 createTask('css', css);
 createTask('csvify-size', csvifySize);
@@ -143,22 +156,24 @@ createTask('dev-dashboard-tests', devDashboardTests);
 createTask('dist', dist);
 createTask('e2e', e2e);
 createTask('firebase', firebase);
-createTask('generate-vendor-jsons', generateVendorJsons);
 createTask('get-zindex', getZindex);
 createTask('integration', integration);
 createTask('lint', lint);
 createTask('make-extension', makeExtension);
-createTask('nailgun-start', nailgunStart);
-createTask('nailgun-stop', nailgunStop);
 createTask('performance', performance);
+createTask('performance-urls', performanceUrls);
 createTask('pr-check', prCheck);
 createTask('prepend-global', prependGlobal);
 createTask('presubmit', presubmit);
 createTask('prettify', prettify);
 createTask('process-3p-github-pr', process3pGithubPr);
-createTask('process-github-issues', processGithubIssues);
+createTask('release', release);
+createTask('test-report-upload', testReportUpload);
 createTask('serve', serve);
+createTask('server-tests', serverTests);
 createTask('size', size);
+createTask('storybook-amp', storybookAmp);
+createTask('storybook-preact', storybookPreact);
 createTask('todos:find-closed', todosFindClosed);
 createTask('unit', unit);
 createTask('update-packages', updatePackages);

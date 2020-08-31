@@ -17,7 +17,7 @@
 import {extractKeyframes} from '../parsers/keyframes-extractor';
 import {poll} from '../../../../testing/iframe';
 
-describes.realWin('extractKeyframes', {amp: 1}, env => {
+describes.realWin('extractKeyframes', {amp: 1}, (env) => {
   let win, doc;
 
   beforeEach(() => {

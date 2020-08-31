@@ -31,7 +31,7 @@ import {
 import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
 import {clamp} from '../../../src/utils/math';
-import {computedStyle, setStyle} from '../../../src/style';
+import {computedStyle, setStyle, setStyles} from '../../../src/style';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAdCid} from '../../../src/ad-cid';
@@ -201,6 +201,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (this.isFullWidthRequested_) {
       return this.attemptFullWidthSizeChange_();
     }
+
+    this.maybeSetStyleForSticky_();
   }
 
   /**
@@ -228,6 +230,19 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   /**
+   * Set sidekick ads
+   */
+  maybeSetStyleForSticky_() {
+    if (this.element.hasAttribute('sticky')) {
+      setStyles(this.element, {
+        position: 'fixed',
+        bottom: '0',
+        right: '0',
+      });
+    }
+  }
+
+  /**
    * Prefetches and preconnects URLs related to the ad.
    * @param {boolean=} opt_onLayout
    * @override
@@ -244,14 +259,14 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (typeof this.config.prefetch == 'string') {
       preconnect.preload(this.getAmpDoc(), this.config.prefetch, 'script');
     } else if (this.config.prefetch) {
-      this.config.prefetch.forEach(p => {
+      /** @type {!Array} */ (this.config.prefetch).forEach((p) => {
         preconnect.preload(this.getAmpDoc(), p, 'script');
       });
     }
     if (typeof this.config.preconnect == 'string') {
       preconnect.url(this.getAmpDoc(), this.config.preconnect, opt_onLayout);
     } else if (this.config.preconnect) {
-      this.config.preconnect.forEach(p => {
+      /** @type {!Array} */ (this.config.preconnect).forEach((p) => {
         preconnect.url(this.getAmpDoc(), p, opt_onLayout);
       });
     }
@@ -287,12 +302,12 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       // Nudge into the correct horizontal position by changing side margin.
       this.getVsync().run(
         {
-          measure: state => {
+          measure: (state) => {
             state.direction = computedStyle(this.win, this.element)[
               'direction'
             ];
           },
-          mutate: state => {
+          mutate: (state) => {
             if (state.direction == 'rtl') {
               setStyle(this.element, 'marginRight', layoutBox.left, 'px');
             } else {
@@ -346,9 +361,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       return this.layoutPromise_;
     }
     userAssert(
-      !this.isInFixedContainer_,
+      !this.isInFixedContainer_ || this.element.hasAttribute('sticky'),
       '<amp-ad> is not allowed to be placed in elements with ' +
-        'position:fixed: %s',
+        'position:fixed: %s unless it has sticky attribute',
       this.element
     );
 
@@ -366,7 +381,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       consentPromise,
       sharedDataPromise,
       consentStringPromise,
-    ]).then(consents => {
+    ]).then((consents) => {
       // Use JsonObject to preserve field names so that ampContext can access
       // values with name
       // ampcontext.js and this file are compiled in different compilation unit

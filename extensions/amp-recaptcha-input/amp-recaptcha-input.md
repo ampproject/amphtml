@@ -24,28 +24,19 @@ limitations under the License.
 
 # amp-recaptcha-input
 
-Appends a <a href="https://developers.google.com/recaptcha/docs/v3">reCAPTCHA v3</a> token to <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md">AMP form</a> submissions.
+## Usage
 
-<table>
-<tr>
-<td width="40%"><strong>Required Script</strong></td>
-<td><code>&lt;script async custom-element="amp-recaptcha-input" src="https://cdn.ampproject.org/v0/amp-recaptcha-input-0.1.js">&lt;/script></code></td>
-</tr>
-<tr>
-<td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-<td>nodisplay</td>
-</tr>
-<tr>
-<td width="40%"><strong>Examples</strong></td>
-<td><a href="https://amp.dev/documentation/examples/components/amp-recaptcha-input">Example on amp.dev</a></td>
-</tr>
-</table>
+This extension adds a parameter containing a reCAPTCHA response token when a parent `<form>` element submits. `amp-recaptcha-input` does this by creating an iframe to load the reCAPTCHA v3 api script using the provided site key, and calling `grecaptcha.execute` with the provided site key and action.
 
-[TOC]
+### Prerequisite
 
-## Behavior
+Integrating reCAPTCHA for any document on the internet requires several steps, as described in the [official documentation for reCATPCHA](https://developers.google.com/recaptcha/docs/v3).
+There are several steps, but generally this requires registering a sitekey, and setting up a server endpoint that can process the reCAPTCHA signal sent from an AMP or other HTML document.
 
-This extension adds a parameter containing a recaptcha response token when a parent `<form>` element submits. `amp-recaptcha-input` does this by creating an iframe to load the reCAPTCHA v3 api script using the provided site key, and calling `grecaptcha.execute` with the provided site key and action.
+One caveat to be aware when registering a sitekey: you will need to provide all the hostnames that you plan to use this sitekey. For instance, `your.com` and `www.your.com` are treated as different hostnames.
+Please note that this is different than the configuration for general HTML documents. See this [issue](https://github.com/ampproject/amphtml/issues/22279) for more details.
+
+This doc will focus more on how reCAPTCHA is configured on AMP.
 
 ### Example
 
@@ -79,25 +70,25 @@ grecaptcha.execute('reCAPTCHA_site_key', {action: 'reCAPTCHA_example_action'});
 
 ## Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>layout (required)</strong></td>
-    <td>Required value is <code>nodisplay</code>.
-</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>name (required)</strong></td>
-    <td>Name of the <code>&lt;amp-recaptcha-input&gt;</code>. Will be used as a parameter key in the AMP form body submission.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-sitekey (required)</strong></td>
-    <td><a href="https://developers.google.com/recaptcha/docs/v3">reCAPTCHA v3</a> site key for the registered website.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-action (required)</strong></td>
-    <td><a href="https://developers.google.com/recaptcha/docs/v3">reCAPTCHA v3</a> action to be executed on form submission.</td>
-  </tr>
-</table>
+### layout (required)
+
+Required value is `nodisplay`.
+
+### name (required)
+
+Name of the `<amp-recaptcha-input>`. Will be used as a parameter key in the AMP form body submission.
+
+### data-sitekey (required)
+
+[reCAPTCHA v3](https://developers.google.com/recaptcha/docs/v3) site key for the registered website.
+
+### data-action (required)
+
+[reCAPTCHA v3](https://developers.google.com/recaptcha/docs/v3) action to be executed on form submission.
+
+### data-global (optional)
+
+By default, the iframe loads the recaptcha api script using the `www.google.com` endpoint. There are some situations when this is not accessible. When the `data-global` attribute is included, the component will load the script from the `www.recaptcha.net` endpoint instead. More information can be found in the [reCAPTCHA FAQ](https://developers.google.com/recaptcha/docs/faq#can-i-use-recaptcha-globally).
 
 ## Validation
 

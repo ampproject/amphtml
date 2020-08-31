@@ -167,8 +167,8 @@ function installWrappers(chai, utils) {
 function overwriteAlwaysUseSuper(utils) {
   const {flag} = utils;
 
-  return function(_super) {
-    return function() {
+  return function (_super) {
+    return function () {
       const obj = this._obj;
       const isControllerPromise = obj instanceof ControllerPromise;
       if (!isControllerPromise) {
@@ -176,7 +176,7 @@ function overwriteAlwaysUseSuper(utils) {
       }
       const {waitForValue} = obj;
       if (!waitForValue) {
-        return obj.then(result => {
+        return obj.then((result) => {
           flag(this, 'object', result);
           return _super.apply(this, arguments);
         });
@@ -190,7 +190,7 @@ function overwriteAlwaysUseSuper(utils) {
        * @return {boolean} true if the ControllerPromise polling value
        * satisfies the `expect` chain.
        */
-      const valueSatisfiesExpectation = value => {
+      const valueSatisfiesExpectation = (value) => {
         try {
           // Tell chai to use value as the subject of the expect chain.
           flag(this, 'object', value);
@@ -220,13 +220,13 @@ function overwriteAlwaysUseSuper(utils) {
 }
 
 function inheritChainingBehavior(_super) {
-  return function() {
+  return function () {
     _super.apply(this, arguments);
   };
 }
 
 function overwriteUnsupported(_super) {
-  return function() {
+  return function () {
     const obj = this._obj;
     const isControllerPromise = obj instanceof ControllerPromise;
     if (isControllerPromise) {
@@ -248,7 +248,7 @@ function installBrowserWrappers(chai, utils) {
 
   // Assert that a request with a testUrl was sent
   // Example usage: await expect(testUrl).to.have.been.sent;
-  utils.addProperty(Assertion.prototype, 'sent', async function() {
+  utils.addProperty(Assertion.prototype, 'sent', async function () {
     const url = this._obj;
     const requests = await networkLogger.getSentRequests(url);
     this.assert(0 < requests.length, 'expected #{this} to have been sent');
@@ -257,7 +257,7 @@ function installBrowserWrappers(chai, utils) {
 
   // Assert that a request was sent n number of times
   // Example usage: await expect(testUrl).to.have.sentCount(n);
-  utils.addMethod(Assertion.prototype, 'sentCount', async function(count) {
+  utils.addMethod(Assertion.prototype, 'sentCount', async function (count) {
     const url = this._obj;
     const requests = await networkLogger.getSentRequests(url);
     this.assert(

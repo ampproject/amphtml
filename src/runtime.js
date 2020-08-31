@@ -41,6 +41,7 @@ import {
 import {internalRuntimeVersion} from './internal-version';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {reportErrorForWin} from './error';
+import {scheduleUpgradeIfNeeded as scheduleInObUpgradeIfNeeded} from './polyfillstub/intersection-observer-stub';
 import {setStyle} from './style';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
@@ -111,7 +112,7 @@ function adoptShared(global, callback) {
      * @param {function(!Object)} installer
      * @const
      */
-    global.AMP.extension = function(unusedName, unusedVersion, installer) {
+    global.AMP.extension = function (unusedName, unusedVersion, installer) {
       installer(global.AMP);
     };
   }
@@ -136,7 +137,7 @@ function adoptShared(global, callback) {
    * @param {string} name
    * @param {typeof BaseTemplate} implementationClass
    */
-  global.AMP.registerTemplate = function(name, implementationClass) {
+  global.AMP.registerTemplate = function (name, implementationClass) {
     registerExtendedTemplate(global, name, implementationClass);
   };
 
@@ -196,7 +197,7 @@ function adoptShared(global, callback) {
     // "intermediate" dependency that needs to be loaded before they
     // can execute.
     if (!(typeof fnOrStruct == 'function') && fnOrStruct.i) {
-      preloadDeps(extensions, fnOrStruct).then(function() {
+      preloadDeps(extensions, fnOrStruct).then(function () {
         return startRegisterOrChunk(global, fnOrStruct, register);
       });
     } else {
@@ -229,7 +230,7 @@ function adoptShared(global, callback) {
      * Registers a new custom element.
      * @param {function(!Object, !Object)|!ExtensionPayload} fnOrStruct
      */
-    global.AMP.push = function(fnOrStruct) {
+    global.AMP.push = function (fnOrStruct) {
       if (maybeLoadCorrectVersion(global, fnOrStruct)) {
         return;
       }
@@ -268,6 +269,9 @@ function adoptShared(global, callback) {
     setStyle(global.document.documentElement, 'cursor', 'pointer');
   }
 
+  // Some deferred polyfills.
+  scheduleInObUpgradeIfNeeded(global);
+
   return iniPromise;
 }
 
@@ -281,7 +285,7 @@ function preloadDeps(extensions, fnOrStruct) {
   // for an array if intermediate dependencies that needs to be
   // resolved first before executing this current extension.
   if (Array.isArray(fnOrStruct.i)) {
-    const promises = fnOrStruct.i.map(dep => {
+    const promises = fnOrStruct.i.map((dep) => {
       return extensions.preloadExtension(dep);
     });
     return Promise.all(promises);
@@ -326,7 +330,7 @@ function startRegisterOrChunk(global, fnOrStruct, register) {
  * @return {!Promise}
  */
 export function adopt(global) {
-  return adoptShared(global, global => {
+  return adoptShared(global, (global) => {
     // Shared runtimes variables between both multi-doc and single-doc pages
     adoptServicesAndResources(global);
 
@@ -344,7 +348,7 @@ export function adopt(global) {
  * @return {!Promise}
  */
 export function adoptWithMultidocDeps(global) {
-  return adoptShared(global, global => {
+  return adoptShared(global, (global) => {
     // Shared runtimes variables between both multi-doc and single-doc pages
     adoptServicesAndResources(global);
 

@@ -15,29 +15,33 @@
  */
 'use strict';
 
-const gulp = require('gulp');
-const jest = require('gulp-jest').default;
+const jest = require('@jest/core');
 const {isTravisBuild} = require('../common/travis');
 
 /**
- * Simple wrapper around the jest tests for custom babel plugins.
- * @return {!Vinyl}
+ * Entry point for `gulp babel-plugin-tests`. Runs the jest-based tests for
+ * AMP's custom babel plugins.
  */
-function babelPluginTests() {
-  return gulp.src('./build-system/babel-plugins/testSetupFile.js').pipe(
-    jest({
-      'testRegex': '/babel-plugins/[^/]+/test/.+\\.m?js$',
-      'testPathIgnorePatterns': ['/node_modules/'],
-      'testEnvironment': 'node',
-      'transformIgnorePatterns': ['/node_modules/'],
-      'coveragePathIgnorePatterns': ['/node_modules/'],
-      'modulePathIgnorePatterns': ['/test/fixtures/', '<rootDir>/build/'],
-      'reporters': [
-        isTravisBuild() ? 'jest-silent-reporter' : 'jest-dot-reporter',
-      ],
-      'automock': false,
-    })
-  );
+async function babelPluginTests() {
+  const projects = ['./build-system/babel-plugins'];
+  const options = {
+    automock: false,
+    coveragePathIgnorePatterns: ['/node_modules/'],
+    modulePathIgnorePatterns: ['/test/fixtures/', '<rootDir>/build/'],
+    reporters: [isTravisBuild() ? 'jest-silent-reporter' : 'jest-dot-reporter'],
+    setupFiles: ['./build-system/babel-plugins/testSetupFile.js'],
+    testEnvironment: 'node',
+    testPathIgnorePatterns: ['/node_modules/'],
+    testRegex: '/babel-plugins/[^/]+/test/.+\\.m?js$',
+    transformIgnorePatterns: ['/node_modules/'],
+  };
+
+  // The `jest.runCLI` command is undocumented. See the types file for object shape:
+  // https://github.com/facebook/jest/blob/bd76829f66c5c0f3c6907b80010f19893cb0fc8c/packages/jest-test-result/src/types.ts#L74-L91.
+  const aggregatedResults = await jest.runCLI(options, projects);
+  if (!aggregatedResults.results.success) {
+    throw new Error('See the logs above for details.');
+  }
 }
 
 module.exports = {

@@ -65,6 +65,7 @@
   width: 48px !important;
   cursor: pointer !important;
   border-radius: 50% !important;
+  border-width: 0 !important;
   box-sizing: border-box !important;
   position: relative !important;
   pointer-events: auto !important;
@@ -97,6 +98,17 @@
 }
 
 [ad-showing] .i-amphtml-story-progress-bar {
+  visibility: hidden !important;
+}
+
+[ad-showing] .i-amphtml-story-share-control {
+  display: none !important;
+}
+
+[ad-showing]:not([i-amphtml-current-page-has-audio])
+.i-amphtml-story-mute-audio-control,
+[ad-showing]:not([i-amphtml-current-page-has-audio])
+.i-amphtml-story-unmute-audio-control {
   visibility: hidden !important;
 }
 
@@ -154,19 +166,22 @@
 }
 
 [i-amphtml-story-messagedisplay="noshow"] .i-amphtml-message-container {
-  transition: opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1), transform 0.0s 0.2s !important;
-  transform: translateX(10px) !important;
+  transition: opacity 0.2s cubic-bezier(0.4, 0.0, 1, 1), visibility 0.2s, transform 0.0s 0.2s !important;
   opacity: 0 !important;
+  visibility: hidden !important;
+  transform: translateX(10px) !important;
 }
 
 [i-amphtml-story-has-new-page="noshow"] .i-amphtml-story-has-new-page-notification-container {
-  transition: opacity 1.5s !important;
+  transition: opacity 1.5s, visibility 1.5s !important;
   opacity: 0 !important;
+  visibility: hidden !important;
 }
 
 .i-amphtml-last-page-active[i-amphtml-story-has-new-page="show"] .i-amphtml-story-has-new-page-notification-container {
-  transition: opacity 1.5s !important;
+  transition: opacity 1.5s, visibility 1.5s !important;
   opacity: 1 !important;
+  visibility: visible !important;
 }
 
 [dir=rtl][i-amphtml-story-messagedisplay="noshow"] .i-amphtml-message-container {
@@ -174,8 +189,9 @@
 }
 
 [i-amphtml-story-messagedisplay="show"] .i-amphtml-message-container {
-  transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+  transition: opacity 0.2s cubic-bezier(0.0, 0.0, 0.2, 1), visibility 0.2s, transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
   opacity: 1 !important;
+  visibility: visible !important;
   transform: translateX(0px) !important;
 }
 
@@ -192,8 +208,15 @@
   position: relative !important;
 }
 
+.i-amphtml-story-no-audio-ui .i-amphtml-story-sound-display {
+  display: none !important;
+}
+
 .i-amphtml-story-mute-audio-control,
 .i-amphtml-story-unmute-audio-control,
+.i-amphtml-paused-display,
+.i-amphtml-story-pause-control,
+.i-amphtml-story-play-control,
 .i-amphtml-story-mute-text,
 .i-amphtml-story-unmute-sound-text,
 .i-amphtml-story-unmute-no-sound-text,
@@ -210,6 +233,19 @@
   display: block !important;
 }
 
+.i-amphtml-story-desktop-panels .i-amphtml-paused-display, .i-amphtml-story-desktop-fullbleed .i-amphtml-paused-display {
+  display: block !important;
+}
+
+.i-amphtml-paused-display button[disabled] {
+  opacity: 0.3 !important;
+  cursor: initial !important;
+}
+
+.i-amphtml-story-has-playback-ui:not([paused]) .i-amphtml-story-pause-control,
+.i-amphtml-story-has-playback-ui[paused] .i-amphtml-story-play-control {
+  display: block !important;
+}
 
 .i-amphtml-story-has-audio[muted] .i-amphtml-story-mute-text,
 [i-amphtml-current-page-has-audio].i-amphtml-story-has-audio:not([muted]) .i-amphtml-story-unmute-sound-text,
@@ -228,6 +264,14 @@
 
 .i-amphtml-story-mute-audio-control {
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+}
+
+.i-amphtml-story-pause-control {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+}
+
+.i-amphtml-story-play-control {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M8 5v14l11-7z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
 }
 
 .i-amphtml-story-sidebar-control {

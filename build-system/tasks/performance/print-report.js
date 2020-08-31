@@ -16,36 +16,12 @@
 
 const fs = require('fs');
 const {CONTROL, EXPERIMENT, RESULTS_PATH} = require('./helpers');
+const {cyan} = require('ansi-colors');
+const {percent, trimmedMean} = require('./stats');
 
-const HEADER_COLUMN = 22;
+const HEADER_COLUMN = 26;
 const BODY_COLUMN = 12;
 const FULL_TABLE = 68;
-
-/**
- * Computes an average for the specified key's values in the array of objects
- *
- * @param {Array<*>} arr
- * @param {string} key
- * @return {number} average
- */
-const average = (arr, key) =>
-  Math.round(arr.reduce((sum, result) => sum + result[key], 0) / arr.length);
-
-/**
- * Takes two numbers and generates a string representing the difference as
- * a percent for use in printing the results
- *
- * @param {number} a
- * @param {number} b
- * @return {string} String representing the change as a percent
- */
-function percent(a, b) {
-  if (a === 0) {
-    return b === 0 ? 'n/a' : `-${100 - Math.round((a / b) * 100)}`;
-  } else {
-    return `${100 - Math.round((b / a) * 100)}%`;
-  }
-}
 
 /**
  * Generates header lines to be printed to the console for url
@@ -53,9 +29,9 @@ function percent(a, b) {
  * @param {string} url
  * @return {Array<string>} lines
  */
-const headerLines = url => [
+const headerLines = (url) => [
   '\nPAGE LOAD METRICS\n',
-  `${url}\n\n`,
+  `${cyan(url)}\n\n`,
   [
     'METRIC'.padEnd(HEADER_COLUMN),
     'BRANCH'.padEnd(BODY_COLUMN),
@@ -73,15 +49,16 @@ const headerLines = url => [
  * @return {Array<string>} lines
  */
 function linesForMetric(metric, results) {
-  const control = average(results[CONTROL], metric);
-  const experiment = average(results[EXPERIMENT], metric);
+  const control = trimmedMean(results[CONTROL], metric);
+  const experiment = trimmedMean(results[EXPERIMENT], metric);
+  const percentage = percent(control, experiment);
 
   return [
     [
       metric.padEnd(HEADER_COLUMN),
-      control.toString().padEnd(BODY_COLUMN),
       experiment.toString().padEnd(BODY_COLUMN),
-      percent(control, experiment),
+      control.toString().padEnd(BODY_COLUMN),
+      percentage == null ? 'n/a' : `${percentage}%`,
     ].join(' | '),
     `\n${''.padEnd(FULL_TABLE, '-')}\n`,
   ];
@@ -90,14 +67,54 @@ function linesForMetric(metric, results) {
 function printReport(urls) {
   const results = JSON.parse(fs.readFileSync(RESULTS_PATH));
 
-  urls.forEach(url => {
+  urls.forEach((url) => {
     const keys = Object.keys(results[url][CONTROL][0]);
     let lines = [];
     lines = [...lines, ...headerLines(url)];
-    lines = [...lines, ...keys.flatMap(m => linesForMetric(m, results[url]))];
+    lines = [...lines, ...keys.flatMap((m) => linesForMetric(m, results[url]))];
     console /* OK */
       .log(...lines);
   });
 }
 
-module.exports = printReport;
+/**
+ * Organizes a page's metrics for getReport()
+ */
+class PageMetrics {
+  url;
+  metrics;
+
+  constructor(url) {
+    this.url = url;
+    this.metrics = new Map();
+  }
+
+  set(metric, experiment, control) {
+    this.metrics.set(metric, {experiment, control});
+  }
+}
+
+/**
+ * Gets report in the form of metrics per page
+ * @param {Array<string>} urls
+ * @return {Array<PageMetrics>} report
+ */
+function getReport(urls) {
+  const raw = JSON.parse(fs.readFileSync(RESULTS_PATH));
+  const report = [];
+  urls.forEach((url) => {
+    const results = raw[url];
+    const pageMetrics = new PageMetrics(url);
+    const metrics = Object.keys(results[CONTROL][0]);
+    metrics.forEach((metric) => {
+      const control = trimmedMean(results[CONTROL], metric);
+      const experiment = trimmedMean(results[EXPERIMENT], metric);
+      pageMetrics.set(metric, experiment, control);
+    });
+    report.push(pageMetrics);
+  });
+
+  return report;
+}
+
+module.exports = {getReport, printReport};

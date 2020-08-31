@@ -19,7 +19,7 @@ import {hasOwn} from '../../src/utils/object';
 
 describe('test-ads-config', () => {
   it('should have all ad networks configured', () => {
-    window.ampTestRuntimeConfig.adTypes.forEach(adType => {
+    window.ampTestRuntimeConfig.adTypes.forEach((adType) => {
       expect(adConfig, `Missing config for [${adType}]`).to.contain.key(adType);
     });
   });

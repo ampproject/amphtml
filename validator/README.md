@@ -24,7 +24,7 @@ If you just want to validate a page, please see
 
 ## Chrome Extension
 
-Please see [chromeextension/README.md](https://github.com/ampproject/amphtml/blob/master/validator/chromeextension/README.md).
+Please see [js/chromeextension/README.md](https://github.com/ampproject/amphtml/blob/master/validator/js/chromeextension/README.md).
 
 ## Visual Studio Code Extension
 
@@ -33,11 +33,11 @@ An extension for Visual Studio Code
 
 ## Command Line Tool and Node.js API
 
-Please see [nodejs/README.md](https://github.com/ampproject/amphtml/blob/master/validator/nodejs/README.md).
+Please see [js/nodejs/README.md](https://github.com/ampproject/amphtml/blob/master/validator/js/nodejs/README.md).
 
 ## Web UI
 
-Please see [webui/README.md](https://github.com/ampproject/amphtml/blob/master/validator/webui/README.md).
+Please see [js/webui/README.md](https://github.com/ampproject/amphtml/blob/master/validator/js/webui/README.md).
 
 ## JSON
 
@@ -49,8 +49,8 @@ rely on them in a production environment.
 ## Building a Custom Validator
 
 This is only useful for development - e.g. when making changes to
-`engine/validator.js` or when authoring an AMP extension, and it's rough around
-the edges. Below are instructions for Linux Ubuntu 14.
+`js/engine/validator.js` or when authoring an AMP extension, and it's rough
+around the edges. Below are instructions for Linux Ubuntu 14.
 
 ## Installation
 
@@ -88,7 +88,7 @@ Dependencies:
 
   - openjdk-7-jre
     ```sh
-    brew tap caskroom/cask
+    brew tap homebrew/cask
     brew install Caskroom/cask/java
     ```
 

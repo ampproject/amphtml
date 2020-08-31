@@ -19,7 +19,7 @@ import {VisibilityModel} from '../visibility-model';
 const NO_SPEC = {};
 const NO_CALC = () => 0;
 
-describes.sandboxed('VisibilityModel', {}, env => {
+describes.sandboxed('VisibilityModel', {}, (env) => {
   let startTime;
   let clock;
 
@@ -487,7 +487,7 @@ describes.sandboxed('VisibilityModel', {}, env => {
       let reportPromise;
       let promiseResolver;
       beforeEach(() => {
-        reportPromise = new Promise(resolve => {
+        reportPromise = new Promise((resolve) => {
           promiseResolver = resolve;
         });
         vh.setReportReady(() => reportPromise);
@@ -1134,7 +1134,7 @@ describes.sandboxed('VisibilityModel', {}, env => {
       );
       const eventSpy = (vh.eventResolver_ = env.sandbox.spy());
       env.sandbox.stub(vh, 'reset_').callsFake(() => {
-        vh.eventPromise_ = new Promise(unused => {
+        vh.eventPromise_ = new Promise((unused) => {
           vh.eventResolver_ = eventSpy;
         });
         vh.eventPromise_.then(() => {
@@ -1182,7 +1182,7 @@ describes.sandboxed('VisibilityModel', {}, env => {
       calcVisibility = () => visibility;
     });
 
-    it('should wait for repeat interval', function*() {
+    it('should wait for repeat interval', function* () {
       const vh = new VisibilityModel(
         {
           visiblePercentageMin: 49,
@@ -1207,7 +1207,7 @@ describes.sandboxed('VisibilityModel', {}, env => {
       expect(spy).to.be.calledOnce;
     });
 
-    it('should wait for not match to fire again w/o interval', function*() {
+    it('should wait for not match to fire again w/o interval', function* () {
       const vh = new VisibilityModel(
         {
           visiblePercentageMin: 49,

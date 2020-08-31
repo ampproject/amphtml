@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {CSS} from '../../../build/amp-apester-media-0.1.css';
-import {IntersectionObserverApi} from '../../../src/intersection-observer-polyfill';
+import {IntersectionObserver3pHost} from '../../../src/utils/intersection-observer-3p-host';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {dev, userAssert} from '../../../src/log';
@@ -92,8 +92,8 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.mediaId_ = null;
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
-    /** @private {?IntersectionObserverApi} */
-    this.intersectionObserverApi_ = null;
+    /** @private {?IntersectionObserver3pHost} */
+    this.intersectionObserverHostApi_ = null;
   }
 
   /**
@@ -114,9 +114,6 @@ class AmpApesterMedia extends AMP.BaseElement {
 
   /** @override */
   viewportCallback(inViewport) {
-    if (this.intersectionObserverApi_) {
-      this.intersectionObserverApi_.onViewportCallback(inViewport);
-    }
     if (inViewport && !this.seen_) {
       if (this.iframe_ && this.iframe_.contentWindow) {
         dev().fine(TAG, 'media seen');
@@ -152,7 +149,7 @@ class AmpApesterMedia extends AMP.BaseElement {
         'data-apester-channel-id'
       ),
       renderer: true,
-      tags: extractTags(this.getAmpDoc().getRootNode(), this.element),
+      tags: extractTags(this.getAmpDoc(), this.element),
     };
   }
 
@@ -160,15 +157,6 @@ class AmpApesterMedia extends AMP.BaseElement {
   firstLayoutCompleted() {
     this.viewportCallback(this.isInViewport());
     // Do not hide placeholder
-  }
-
-  /**
-   * @override
-   */
-  onLayoutMeasure() {
-    if (this.intersectionObserverApi_) {
-      this.intersectionObserverApi_.fire();
-    }
   }
 
   /**
@@ -215,7 +203,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     const url = this.buildUrl_();
     return Services.xhrFor(this.win)
       .fetchJson(url, {})
-      .then(res => {
+      .then((res) => {
         if (res.status === 200) {
           return res.json();
         }
@@ -294,7 +282,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.element.classList.add('amp-apester-container');
     const vsync = Services.vsyncFor(this.win);
     return this.queryMedia_().then(
-      response => {
+      (response) => {
         if (!response || response['status'] === 204) {
           dev().warn(TAG, 'Display', 'No Content for provided tag');
           return this.unlayoutCallback();
@@ -309,7 +297,7 @@ class AmpApesterMedia extends AMP.BaseElement {
         const usePlayer = media['usePlayer'];
         const src = this.constructUrlFromMedia_(interactionId, usePlayer);
         const iframe = this.constructIframe_(src);
-        this.intersectionObserverApi_ = new IntersectionObserverApi(
+        this.intersectionObserverHostApi_ = new IntersectionObserver3pHost(
           this,
           iframe
         );
@@ -349,20 +337,20 @@ class AmpApesterMedia extends AMP.BaseElement {
                 if (height != this.height_) {
                   this.height_ = height;
                   if (this.random_) {
-                    this./*OK*/ attemptChangeHeight(height);
+                    this.attemptChangeHeight(height);
                   } else {
-                    this./*OK*/ changeHeight(height);
+                    this.forceChangeHeight(height);
                   }
                 }
               });
             });
           })
-          .catch(error => {
+          .catch((error) => {
             dev().error(TAG, 'Display', error);
             return undefined;
           });
       },
-      error => {
+      (error) => {
         dev().error(TAG, 'Display', error);
         return undefined;
       }
@@ -401,9 +389,9 @@ class AmpApesterMedia extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     if (this.iframe_) {
-      this.intersectionObserverApi_.destroy();
-      this.intersectionObserverApi_ = null;
-      this.unlisteners_.forEach(unlisten => unlisten());
+      this.intersectionObserverHostApi_.destroy();
+      this.intersectionObserverHostApi_ = null;
+      this.unlisteners_.forEach((unlisten) => unlisten());
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
@@ -421,7 +409,7 @@ class AmpApesterMedia extends AMP.BaseElement {
   registerToApesterEvents_() {
     registerEvent(
       apesterEventNames.SET_FULL_SCREEN,
-      data => {
+      (data) => {
         // User clicked full screen button.
         if (this.mediaId_ === data.id) {
           setFullscreenOn(this.element);
@@ -433,7 +421,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     );
     registerEvent(
       apesterEventNames.REMOVE_FULL_SCREEN,
-      data => {
+      (data) => {
         // User clicked close full screen button.
         if (this.mediaId_ === data.id) {
           setFullscreenOff(this.element);
@@ -445,7 +433,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     );
     registerEvent(
       apesterEventNames.RESIZE_UNIT,
-      data => {
+      (data) => {
         if (this.mediaId_ === data.id && data.height) {
           this.attemptChangeHeight(data.height);
         }
@@ -457,6 +445,6 @@ class AmpApesterMedia extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpApesterMedia, CSS);
 });

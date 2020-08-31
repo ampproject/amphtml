@@ -24,7 +24,7 @@ import {ServiceAdapter} from '../service-adapter';
 import {UrlBuilder} from '../url-builder';
 import {localSubscriptionPlatformFactory} from '../local-subscription-platform';
 
-describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
+describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, (env) => {
   let ampdoc;
   let localSubscriptionPlatform;
   let serviceAdapter;

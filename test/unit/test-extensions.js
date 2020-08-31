@@ -21,19 +21,20 @@ import {Extensions} from '../../src/service/extensions-impl';
 import {Services} from '../../src/services';
 import {getServiceForDoc} from '../../src/service';
 import {installTimerService} from '../../src/service/timer-impl';
+import {user} from '../../src/log';
 
 class AmpTest extends BaseElement {}
 class AmpTestSub extends BaseElement {}
 
 describes.sandboxed('Extensions', {}, () => {
-  describes.fakeWin('registerExtension', {}, env => {
+  describes.fakeWin('registerExtension', {}, (env) => {
     let win;
     let extensions;
     let timeoutCallback;
 
     beforeEach(() => {
       win = env.win;
-      win.setTimeout = cb => {
+      win.setTimeout = (cb) => {
         timeoutCallback = cb;
       };
       installDocService(win, /* isSingleDoc */ true);
@@ -55,7 +56,7 @@ describes.sandboxed('Extensions', {}, () => {
       let currentHolder;
       extensions.registerExtension(
         'amp-ext',
-        arg => {
+        (arg) => {
           expect(factoryExecuted).to.be.false;
           expect(arg).to.equal(amp);
           expect(extensions.currentExtensionId_).to.equal('amp-ext');
@@ -78,7 +79,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(holder.scriptPresent).to.be.undefined;
 
       // However, the promise is created lazily.
-      return extensions.waitForExtension(win, 'amp-ext').then(extension => {
+      return extensions.waitForExtension(win, 'amp-ext').then((extension) => {
         expect(extension).to.exist;
         expect(extension.elements).to.exist;
       });
@@ -96,7 +97,7 @@ describes.sandboxed('Extensions', {}, () => {
       expect(holder.reject).to.exist;
       expect(holder.promise).to.exist;
 
-      return promise.then(extension => {
+      return promise.then((extension) => {
         expect(extension).to.exist;
         expect(extension.elements).to.exist;
       });
@@ -128,7 +129,7 @@ describes.sandboxed('Extensions', {}, () => {
         () => {
           throw new Error('must have been rejected');
         },
-        reason => {
+        (reason) => {
           expect(reason.message).to.equal('intentional');
         }
       );
@@ -160,7 +161,7 @@ describes.sandboxed('Extensions', {}, () => {
         () => {
           throw new Error('must have been rejected');
         },
-        reason => {
+        (reason) => {
           expect(reason.message).to.equal('intentional');
         }
       );
@@ -176,14 +177,14 @@ describes.sandboxed('Extensions', {}, () => {
         () => {
           throw new Error('must have been rejected');
         },
-        reason => {
+        (reason) => {
           expect(reason.message).to.match(/^Render timeout/);
         }
       );
     });
 
     it('should add element in registration', () => {
-      const ctor = function() {};
+      const ctor = function () {};
       extensions.registerExtension(
         'amp-ext',
         () => {
@@ -191,15 +192,15 @@ describes.sandboxed('Extensions', {}, () => {
         },
         {}
       );
-      return extensions.waitForExtension(win, 'amp-ext').then(extension => {
+      return extensions.waitForExtension(win, 'amp-ext').then((extension) => {
         expect(extension.elements['e1']).to.exist;
         expect(extension.elements['e1'].implementationClass).to.equal(ctor);
       });
     });
 
     it('should add element out of registration', () => {
-      const ctor = function() {};
-      extensions.addElement('e1', ctor);
+      const ctor = function () {};
+      allowConsoleError(() => extensions.addElement('e1', ctor));
       expect(Object.keys(extensions.extensions_)).to.deep.equal(['_UNKNOWN_']);
       const unknown = extensions.extensions_['_UNKNOWN_'];
       expect(unknown.extension.elements['e1']).to.exist;
@@ -374,7 +375,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should add doc factory in registration', () => {
-      const factory = function() {};
+      const factory = function () {};
       extensions.registerExtension(
         'amp-ext',
         () => {
@@ -390,8 +391,8 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should add doc factory out of registration', () => {
-      const factory = function() {};
-      extensions.addDocFactory(factory);
+      const factory = function () {};
+      allowConsoleError(() => extensions.addDocFactory(factory));
 
       const holder = extensions.getExtensionHolder_('_UNKNOWN_');
       expect(holder.docFactories).to.exist;
@@ -405,7 +406,7 @@ describes.sandboxed('Extensions', {}, () => {
         .stub(Services.ampdocServiceFor(win), 'isSingleDoc')
         .callsFake(() => false);
       const factory1 = env.sandbox.spy();
-      const factory2 = function() {
+      const factory2 = function () {
         throw new Error('intentional');
       };
       const factory3 = env.sandbox.spy();
@@ -432,7 +433,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should add service factory in registration', () => {
-      const factory = function() {};
+      const factory = function () {};
       extensions.registerExtension(
         'amp-ext',
         () => {
@@ -451,8 +452,8 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should add service factory out of registration', () => {
-      const factory = function() {};
-      extensions.addService('service1', factory);
+      const factory = function () {};
+      allowConsoleError(() => extensions.addService('service1', factory));
 
       const holder = extensions.getExtensionHolder_('_UNKNOWN_');
       expect(holder.extension.services).to.exist;
@@ -467,11 +468,11 @@ describes.sandboxed('Extensions', {}, () => {
       const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
       const factory1Spy = env.sandbox.spy();
       const factory2Spy = env.sandbox.spy();
-      const factory1 = function() {
+      const factory1 = function () {
         factory1Spy();
         return {a: 1};
       };
-      const factory2 = function() {
+      const factory2 = function () {
         factory2Spy();
         return {a: 2};
       };
@@ -528,11 +529,11 @@ describes.sandboxed('Extensions', {}, () => {
 
       const factory1Spy = env.sandbox.spy();
       const factory2Spy = env.sandbox.spy();
-      const factory1 = function() {
+      const factory1 = function () {
         factory1Spy();
         return {a: 1};
       };
-      const factory2 = function() {
+      const factory2 = function () {
         factory2Spy();
         return {a: 2};
       };
@@ -559,7 +560,7 @@ describes.sandboxed('Extensions', {}, () => {
         .callsFake(() => false);
       const factory1 = env.sandbox.spy();
       const factory2Spy = env.sandbox.spy();
-      const factory2 = function() {
+      const factory2 = function () {
         factory2Spy();
         throw new Error('intentional');
       };
@@ -589,7 +590,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should load extension class via load extension', () => {
-      const ctor = function() {};
+      const ctor = function () {};
       extensions.registerExtension(
         'amp-ext',
         () => {
@@ -597,7 +598,7 @@ describes.sandboxed('Extensions', {}, () => {
         },
         {}
       );
-      return extensions.loadElementClass('amp-ext').then(elementClass => {
+      return extensions.loadElementClass('amp-ext').then((elementClass) => {
         expect(elementClass).to.equal(ctor);
       });
     });
@@ -620,9 +621,9 @@ describes.sandboxed('Extensions', {}, () => {
       // Register extension.
       extensions.registerExtension('amp-ext', () => {}, {});
 
-      return reloadPromise.then(reloadedExtension => {
+      return reloadPromise.then((reloadedExtension) => {
         expect(reloadedExtension).to.exist;
-        return initialPromise.then(initialExtension => {
+        return initialPromise.then((initialExtension) => {
           expect(initialExtension).to.equal(reloadedExtension);
           const newScript = win.document.head.querySelector(
             'script[custom-element="amp-ext"]:not([i-amphtml-loaded-new-version])'
@@ -633,7 +634,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
   });
 
-  describes.fakeWin('reloadExtension', {}, env => {
+  describes.fakeWin('reloadExtension', {}, (env) => {
     let win;
     let extensions;
 
@@ -643,102 +644,294 @@ describes.sandboxed('Extensions', {}, () => {
       env.sandbox.stub(Services, 'ampdocServiceFor').returns(null);
       extensions = new Extensions(win);
       env.sandbox.stub(extensions, 'preloadExtension');
+      env.sandbox.stub(user(), 'error');
     });
 
-    it('should devAssert if script cannot be found', () => {
-      expect(() => {
+    describe('regular scripts', () => {
+      it('should devAssert if script cannot be found', () => {
         extensions.reloadExtension('amp-list');
-      }).to.throw('Cannot find script for extension: amp-list');
 
-      expect(extensions.preloadExtension).to.not.be.called;
-    });
+        expect(user().error).to.be.calledWith(
+          'reloadExtension',
+          'Extension script for "%s" is missing or was already reloaded.',
+          'amp-list'
+        );
+        expect(extensions.preloadExtension).to.not.be.called;
+      });
 
-    it('should ignore inserted scripts', () => {
-      const list = document.createElement('script');
-      list.setAttribute('custom-element', 'amp-list');
-      list.setAttribute('src', 'https://cdn.ampproject.org/v0/amp-list-0.1.js');
-      list.setAttribute('i-amphtml-inserted', '');
-      win.document.head.appendChild(list);
+      it('should ignore inserted scripts', () => {
+        const list = document.createElement('script');
+        list.setAttribute('custom-element', 'amp-list');
+        list.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-list-0.1.js'
+        );
+        list.setAttribute('i-amphtml-inserted', '');
+        win.document.head.appendChild(list);
 
-      expect(() => {
         extensions.reloadExtension('amp-list');
-      }).to.throw('Cannot find script for extension: amp-list');
 
-      expect(list.hasAttribute('i-amphtml-loaded-new-version')).to.be.false;
-      expect(extensions.preloadExtension).to.not.be.called;
+        expect(user().error).to.be.calledWith(
+          'reloadExtension',
+          'Extension script for "%s" is missing or was already reloaded.',
+          'amp-list'
+        );
+        expect(list.hasAttribute('i-amphtml-loaded-new-version')).to.be.false;
+        expect(extensions.preloadExtension).to.not.be.called;
+      });
+
+      it('should support [custom-element] scripts', () => {
+        const list = document.createElement('script');
+        list.setAttribute('custom-element', 'amp-list');
+        list.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-list-0.1.js'
+        );
+        win.document.head.appendChild(list);
+
+        extensions.reloadExtension('amp-list');
+
+        expect(list.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+          'amp-list'
+        );
+        expect(extensions.preloadExtension).to.be.calledWith('amp-list', '0.1');
+      });
+
+      it('should support "latest" version scripts', () => {
+        const list = document.createElement('script');
+        list.setAttribute('custom-element', 'amp-list');
+        list.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-list-latest.js'
+        );
+        win.document.head.appendChild(list);
+
+        extensions.reloadExtension('amp-list');
+
+        expect(list.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+          'amp-list'
+        );
+        expect(extensions.preloadExtension).to.be.calledWith(
+          'amp-list',
+          'latest'
+        );
+      });
+
+      it('should support [custom-template] scripts', () => {
+        const mustache = document.createElement('script');
+        mustache.setAttribute('custom-template', 'amp-mustache');
+        mustache.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-mustache-0.2.js'
+        );
+        win.document.head.appendChild(mustache);
+
+        extensions.reloadExtension('amp-mustache');
+
+        expect(mustache.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+          'amp-mustache'
+        );
+        expect(extensions.preloadExtension).to.be.calledWith(
+          'amp-mustache',
+          '0.2'
+        );
+      });
+
+      it('should support no-attribute scripts', () => {
+        const viewer = document.createElement('script');
+        viewer.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-viewer-integration-0.1.js'
+        );
+        win.document.head.appendChild(viewer);
+
+        extensions.reloadExtension('amp-viewer-integration');
+
+        expect(viewer.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+          'amp-viewer-integration'
+        );
+        expect(extensions.preloadExtension).to.be.calledWith(
+          'amp-viewer-integration',
+          '0.1'
+        );
+      });
     });
 
-    it('should support [custom-element] scripts', () => {
-      const list = document.createElement('script');
-      list.setAttribute('custom-element', 'amp-list');
-      list.setAttribute('src', 'https://cdn.ampproject.org/v0/amp-list-0.1.js');
-      win.document.head.appendChild(list);
+    describe('module/nomdule script pairs', () => {
+      it('should devAssert if script cannot be found', () => {
+        extensions.reloadExtension('amp-list');
 
-      extensions.reloadExtension('amp-list');
+        expect(user().error).to.be.calledWith(
+          'reloadExtension',
+          'Extension script for "%s" is missing or was already reloaded.',
+          'amp-list'
+        );
+        expect(extensions.preloadExtension).to.not.be.called;
+      });
 
-      expect(list.getAttribute('i-amphtml-loaded-new-version')).to.equal(
-        'amp-list'
-      );
-      expect(extensions.preloadExtension).to.be.calledWith('amp-list', '0.1');
-    });
+      it('should ignore inserted scripts', () => {
+        const mod = document.createElement('script');
+        mod.setAttribute('custom-element', 'amp-list');
+        mod.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-list-0.1.mjs'
+        );
+        mod.setAttribute('i-amphtml-inserted', '');
+        mod.setAttribute('type', 'module');
+        win.document.head.appendChild(mod);
 
-    it('should support "latest" version scripts', () => {
-      const list = document.createElement('script');
-      list.setAttribute('custom-element', 'amp-list');
-      list.setAttribute(
-        'src',
-        'https://cdn.ampproject.org/v0/amp-list-latest.js'
-      );
-      win.document.head.appendChild(list);
+        const nomod = document.createElement('script');
+        nomod.setAttribute('custom-element', 'amp-list');
+        nomod.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-list-0.1.js'
+        );
+        nomod.setAttribute('i-amphtml-inserted', '');
+        nomod.setAttribute('nomodule', '');
+        win.document.head.appendChild(nomod);
 
-      extensions.reloadExtension('amp-list');
+        extensions.reloadExtension('amp-list');
 
-      expect(list.getAttribute('i-amphtml-loaded-new-version')).to.equal(
-        'amp-list'
-      );
-      expect(extensions.preloadExtension).to.be.calledWith(
-        'amp-list',
-        'latest'
-      );
-    });
+        expect(user().error).to.be.calledWith(
+          'reloadExtension',
+          'Extension script for "%s" is missing or was already reloaded.',
+          'amp-list'
+        );
+        expect(mod.hasAttribute('i-amphtml-loaded-new-version')).to.be.false;
+        expect(nomod.hasAttribute('i-amphtml-loaded-new-version')).to.be.false;
+        expect(extensions.preloadExtension).to.not.be.called;
+      });
 
-    it('should support [custom-template] scripts', () => {
-      const mustache = document.createElement('script');
-      mustache.setAttribute('custom-template', 'amp-mustache');
-      mustache.setAttribute(
-        'src',
-        'https://cdn.ampproject.org/v0/amp-mustache-0.2.js'
-      );
-      win.document.head.appendChild(mustache);
+      it('should support [custom-element] scripts', () => {
+        const mod = document.createElement('script');
+        mod.setAttribute('custom-element', 'amp-list');
+        mod.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-list-0.1.mjs'
+        );
+        mod.setAttribute('type', 'module');
+        win.document.head.appendChild(mod);
 
-      extensions.reloadExtension('amp-mustache');
+        const nomod = document.createElement('script');
+        nomod.setAttribute('custom-element', 'amp-list');
+        nomod.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-list-0.1.js'
+        );
+        nomod.setAttribute('nomodule', '');
+        win.document.head.appendChild(nomod);
 
-      expect(mustache.getAttribute('i-amphtml-loaded-new-version')).to.equal(
-        'amp-mustache'
-      );
-      expect(extensions.preloadExtension).to.be.calledWith(
-        'amp-mustache',
-        '0.2'
-      );
-    });
+        extensions.reloadExtension('amp-list');
 
-    it('should support no-attribute scripts', () => {
-      const viewer = document.createElement('script');
-      viewer.setAttribute(
-        'src',
-        'https://cdn.ampproject.org/v0/amp-viewer-integration-0.1.js'
-      );
-      win.document.head.appendChild(viewer);
+        expect(mod.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+          'amp-list'
+        );
+        expect(nomod.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+          'amp-list'
+        );
+        expect(extensions.preloadExtension).to.be.calledOnce;
+        expect(extensions.preloadExtension).to.be.calledWith('amp-list', '0.1');
+      });
 
-      extensions.reloadExtension('amp-viewer-integration');
+      it('should support "latest" version scripts', () => {
+        const mod = document.createElement('script');
+        mod.setAttribute('custom-element', 'amp-list');
+        mod.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-list-latest.mjs'
+        );
+        mod.setAttribute('type', 'module');
+        win.document.head.appendChild(mod);
 
-      expect(viewer.getAttribute('i-amphtml-loaded-new-version')).to.equal(
-        'amp-viewer-integration'
-      );
-      expect(extensions.preloadExtension).to.be.calledWith(
-        'amp-viewer-integration',
-        '0.1'
-      );
+        const nomod = document.createElement('script');
+        nomod.setAttribute('custom-element', 'amp-list');
+        nomod.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-list-latest.js'
+        );
+        nomod.setAttribute('nomodule', '');
+        win.document.head.appendChild(nomod);
+
+        extensions.reloadExtension('amp-list');
+
+        expect(mod.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+          'amp-list'
+        );
+        expect(nomod.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+          'amp-list'
+        );
+        expect(extensions.preloadExtension).to.be.calledOnce;
+        expect(extensions.preloadExtension).to.be.calledWith(
+          'amp-list',
+          'latest'
+        );
+      });
+
+      it('should support [custom-template] scripts', () => {
+        const mod = document.createElement('script');
+        mod.setAttribute('custom-template', 'amp-mustache');
+        mod.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-mustache-0.2.mjs'
+        );
+        mod.setAttribute('type', 'module');
+        win.document.head.appendChild(mod);
+
+        const nomod = document.createElement('script');
+        nomod.setAttribute('custom-template', 'amp-mustache');
+        nomod.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-mustache-0.2.js'
+        );
+        nomod.setAttribute('nomodule', '');
+        win.document.head.appendChild(nomod);
+
+        extensions.reloadExtension('amp-mustache');
+
+        expect(mod.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+          'amp-mustache'
+        );
+        expect(nomod.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+          'amp-mustache'
+        );
+        expect(extensions.preloadExtension).to.be.calledOnce;
+        expect(extensions.preloadExtension).to.be.calledWith(
+          'amp-mustache',
+          '0.2'
+        );
+      });
+
+      it('should support no-attribute scripts', () => {
+        const mod = document.createElement('script');
+        mod.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-viewer-integration-0.1.mjs'
+        );
+        mod.setAttribute('type', 'module');
+        win.document.head.appendChild(mod);
+
+        const nomod = document.createElement('script');
+        nomod.setAttribute(
+          'src',
+          'https://cdn.ampproject.org/v0/amp-viewer-integration-0.1.js'
+        );
+        nomod.setAttribute('nomodule', '');
+        win.document.head.appendChild(nomod);
+
+        extensions.reloadExtension('amp-viewer-integration');
+
+        expect(mod.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+          'amp-viewer-integration'
+        );
+        expect(nomod.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+          'amp-viewer-integration'
+        );
+        expect(extensions.preloadExtension).to.be.calledOnce;
+        expect(extensions.preloadExtension).to.be.calledWith(
+          'amp-viewer-integration',
+          '0.1'
+        );
+      });
     });
   });
 
@@ -748,7 +941,7 @@ describes.sandboxed('Extensions', {}, () => {
       amp: true,
       fakeRegisterElement: true,
     },
-    env => {
+    (env) => {
       let win, doc, extensions;
 
       beforeEach(() => {
@@ -915,7 +1108,7 @@ describes.sandboxed('Extensions', {}, () => {
       amp: true,
       fakeRegisterElement: true,
     },
-    env => {
+    (env) => {
       let win, doc, ampdoc, extensions;
 
       beforeEach(() => {
@@ -956,7 +1149,7 @@ describes.sandboxed('Extensions', {}, () => {
         // Resolve the promise.
         extensions.registerExtension(
           'amp-test',
-          AMP => {
+          (AMP) => {
             // Main extension with CSS.
             AMP.registerElement('amp-test', AmpTest, 'a{}');
             // Secondary extension w/o CSS.
@@ -1000,11 +1193,11 @@ describes.sandboxed('Extensions', {}, () => {
       it('should install doc services', () => {
         const factory1Spy = env.sandbox.spy();
         const factory2Spy = env.sandbox.spy();
-        const factory1 = function() {
+        const factory1 = function () {
           factory1Spy();
           return {a: 1};
         };
-        const factory2 = function() {
+        const factory2 = function () {
           factory2Spy();
           return {a: 2};
         };
@@ -1030,7 +1223,7 @@ describes.sandboxed('Extensions', {}, () => {
         // Resolve the promise.
         extensions.registerExtension(
           'amp-test',
-          AMP => {
+          (AMP) => {
             AMP.registerServiceForDoc('service1', factory1);
             AMP.registerServiceForDoc('service2', factory2);
           },
@@ -1052,15 +1245,15 @@ describes.sandboxed('Extensions', {}, () => {
         const factory1Spy = env.sandbox.spy();
         const factory2Spy = env.sandbox.spy();
         const factory3Spy = env.sandbox.spy();
-        const factory1 = function() {
+        const factory1 = function () {
           factory1Spy();
           return {a: 1};
         };
-        const factory2 = function() {
+        const factory2 = function () {
           factory2Spy();
           throw new Error('intentional');
         };
-        const factory3 = function() {
+        const factory3 = function () {
           factory3Spy();
           return {a: 3};
         };
@@ -1070,7 +1263,7 @@ describes.sandboxed('Extensions', {}, () => {
         const promise = extensions.installExtensionForDoc(ampdoc, 'amp-test');
         extensions.registerExtension(
           'amp-test',
-          AMP => {
+          (AMP) => {
             AMP.registerServiceForDoc('service1', factory1);
             AMP.registerServiceForDoc('service2', factory2);
             AMP.registerServiceForDoc('service3', factory3);

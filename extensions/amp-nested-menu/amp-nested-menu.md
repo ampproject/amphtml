@@ -22,30 +22,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# `amp-nested-menu`
-
-Drilldown menu component with items that open nested submenus on tap.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a>; activated by the <code>amp-nested-menu</code> experiment.</div></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><div>None (<code>amp-sidebar</code> lazy loads the component)</div></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill</td>
-  </tr>
-</table>
-
-## Overview
-
-`<amp-nested-menu>` enables layered content organization within [`<amp-sidebar>`](../amp-sidebar/0.1/amp-sidebar.md). A sidebar with `<amp-nested-menu>` can be used jointly with [`<amp-mega-menu>`](../amp-mega-menu/amp-mega-menu.md) to create a responsive menu.
+# amp-nested-menu
 
 ## Usage
+
+`<amp-nested-menu>` enables layered content organization within [`<amp-sidebar>`](../amp-sidebar/0.1/amp-sidebar.md). A sidebar with `<amp-nested-menu>` can be used jointly with [`<amp-mega-menu>`](../amp-mega-menu/amp-mega-menu.md) to create a responsive menu.
 
 The `<amp-nested-menu>` component must be placed inside `<amp-sidebar>`. The component may contain the following AMP elements:
 
@@ -171,25 +152,19 @@ Here is the JSON file used:
 
 ## Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>side (optional)</strong></td>
-    <td>Optional attribute that indicates from which side the submenus open from, either `left` or `right`. Set to `right` by default, or `left` if the document is RTL.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
-  </tr>
-</table>
+### side (optional)
+
+Optional attribute that indicates from which side the submenus open from, either `left` or `right`. Set to `right` by default, or `left` if the document is RTL.
+
+### Common attributes
+
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
 ## Actions
 
-<table>
-  <tr>
-    <td width="40%"><strong><code>reset</code></strong></td>
-    <td>Closes any open submenus and returns to the root menu. Use this in conjunction with sidebar's <code>sidebarClose</code> event to reset the menu after sidebar is closed.</td>
-  </tr>
-</table>
+### reset
+
+Closes any open submenus and returns to the root menu. Use this in conjunction with sidebar's `sidebarClose` event to reset the menu after sidebar is closed.
 
 ## Styling
 

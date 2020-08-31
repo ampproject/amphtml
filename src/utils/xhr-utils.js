@@ -154,7 +154,7 @@ export function fromStructuredCloneable(response, responseType) {
   if (response['init']) {
     const init = response['init'];
     if (isArray(init.headers)) {
-      init.headers.forEach(entry => {
+      /** @type {!Array} */ (init.headers).forEach((entry) => {
         const headerName = entry[0];
         const headerValue = entry[1];
         lowercasedHeaders[String(headerName).toLowerCase()] = String(
@@ -218,7 +218,7 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
 
   return whenUnblocked
     .then(() => viewer.isTrustedViewer())
-    .then(viewerTrusted => {
+    .then((viewerTrusted) => {
       if (
         !(
           viewerTrusted ||
@@ -233,7 +233,9 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
       });
       return viewer
         .sendMessageAwaitResponse('xhr', messagePayload)
-        .then(response => fromStructuredCloneable(response, init.responseType));
+        .then((response) =>
+          fromStructuredCloneable(response, init.responseType)
+        );
     });
 }
 
@@ -315,7 +317,7 @@ export function setupJsonFetchInit(init) {
     // Assume JSON strict mode where only objects or arrays are allowed
     // as body.
     devAssert(
-      allowedJsonBodyTypes_.some(test => test(fetchInit.body)),
+      allowedJsonBodyTypes_.some((test) => test(fetchInit.body)),
       'body must be of type object or array. %s',
       fetchInit.body
     );
@@ -373,7 +375,7 @@ function isRetriable(status) {
  * @return {!Promise<!Response>}
  */
 export function assertSuccess(response) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     if (response.ok) {
       return resolve(response);
     }
@@ -386,36 +388,4 @@ export function assertSuccess(response) {
     err.response = response;
     throw err;
   });
-}
-
-/**
- * Returns a promise resolving to a string identity token if the element
- * contains the 'crossorigin' attribute and the amp-viewer-assistance extension
- * is present. Resolves to undefined otherwise.
- * @param {!Element} element
- * @return {!Promise<undefined>}
- */
-export function getViewerAuthTokenIfAvailable(element) {
-  const crossOriginAttr = element.getAttribute('crossorigin');
-  if (
-    crossOriginAttr &&
-    crossOriginAttr.trim() === 'amp-viewer-auth-token-via-post'
-  ) {
-    return (
-      Services.viewerAssistanceForDocOrNull(element)
-        .then(va => {
-          userAssert(
-            va,
-            'crossorigin="amp-viewer-auth-token-post" ' +
-              'requires amp-viewer-assistance extension.'
-          );
-          return va.getIdTokenPromise();
-        })
-        // If crossorigin attr is present, resolve with token or empty string.
-        .then(token => token || '')
-        .catch(() => '')
-    );
-  }
-  // If crossorigin attribute is missing, always resolve with undefined.
-  return Promise.resolve(undefined);
 }

@@ -20,7 +20,7 @@ import {LocalizationService} from '../../../../src/service/localization';
 import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
 
-describes.realWin('amp-story-consent', {amp: true}, env => {
+describes.realWin('amp-story-consent', {amp: true}, (env) => {
   const CONSENT_ID = 'CONSENT_ID';
   let win;
   let consentConfigEl;
@@ -31,14 +31,18 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
   let storyConsentEl;
   let storyEl;
 
-  const setConfig = config => {
+  const setConfig = (config) => {
     storyConsentConfigEl.textContent = JSON.stringify(config);
   };
 
   beforeEach(() => {
     win = env.win;
+    const localizationService = new LocalizationService(win.document.body);
+    env.sandbox
+      .stub(Services, 'localizationForDoc')
+      .returns(localizationService);
     const storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', function() {
+    registerServiceBuilder(win, 'story-store', function () {
       return storeService;
     });
 
@@ -58,11 +62,6 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     getComputedStyleStub = env.sandbox
       .stub(win, 'getComputedStyle')
       .returns(styles);
-
-    const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', function() {
-      return localizationService;
-    });
 
     // Test DOM structure:
     // <amp-story>
@@ -101,6 +100,16 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
   it('should parse the config', () => {
     storyConsent.buildCallback();
     expect(storyConsent.storyConsentConfig_).to.deep.equal(defaultConfig);
+  });
+
+  it('should parse and merge legacy consent config', () => {
+    const newConsentConfig = {
+      'consentInstanceId': 'ABC',
+      'checkConsentHref': 'https://example.com',
+      'promptIfUnknownForGeoGroup': undefined,
+    };
+    storyConsent.buildCallback();
+    expect(storyConsent.consentConfig_).to.deep.equal(newConsentConfig);
   });
 
   it('should require a story-consent title', () => {
@@ -246,11 +255,11 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     expect(linkEl).not.to.have.display('none');
   });
 
-  it('should whitelist the <amp-consent> actions', () => {
+  it('should allowlist the <amp-consent> actions', () => {
     storyConsent.buildCallback();
 
     const actions = storyConsent.storeService_.get(
-      StateProperty.ACTIONS_WHITELIST
+      StateProperty.ACTIONS_ALLOWLIST
     );
     expect(actions).to.deep.contain({
       tagOrTarget: 'AMP-CONSENT',

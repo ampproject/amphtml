@@ -15,6 +15,8 @@
  */
 
 import '../amp-delight-player';
+import {VideoEvents} from '../../../../src/video-interface';
+import {listenOncePromise} from '../../../../src/event-helper';
 
 describes.realWin(
   'amp-delight-player',
@@ -23,13 +25,21 @@ describes.realWin(
       extensions: ['amp-delight-player'],
     },
   },
-  env => {
+  function (env) {
+    this.timeout(4000);
     let win, doc;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
     });
+
+    function fakePostMessage(delightElement, info) {
+      delightElement.implementation_.handleDelightMessage_({
+        source: delightElement.querySelector('iframe').contentWindow,
+        data: {source: 'DelightPlayer', ...info},
+      });
+    }
 
     function getDelightPlayer(attributes) {
       const delight = doc.createElement('amp-delight-player');
@@ -49,7 +59,7 @@ describes.realWin(
     it('renders', () => {
       return getDelightPlayer({
         'data-content-id': '-LLoCCZqWi18O73b6M0w',
-      }).then(delight => {
+      }).then((delight) => {
         const iframe = delight.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -68,6 +78,92 @@ describes.realWin(
         }).should.eventually.be.rejectedWith(
           /The data-content-id attribute is required/
         );
+      });
+    });
+
+    it('should forward events', () => {
+      return getDelightPlayer({
+        'data-content-id': '-LLoCCZqWi18O73b6M0w',
+      }).then((delight) => {
+        return Promise.resolve()
+          .then(() => {
+            const p = listenOncePromise(delight, VideoEvents.LOAD);
+            fakePostMessage(delight, {
+              type: 'x-dl8-to-parent-ready',
+              payload: {},
+            });
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(delight, VideoEvents.PLAYING);
+            fakePostMessage(delight, {
+              type: 'x-dl8-to-parent-playing',
+              payload: {},
+            });
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(delight, VideoEvents.PAUSE);
+            fakePostMessage(delight, {
+              type: 'x-dl8-to-parent-paused',
+              payload: {},
+            });
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(delight, VideoEvents.MUTED);
+            fakePostMessage(delight, {
+              type: 'x-dl8-to-parent-muted',
+              payload: {},
+            });
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(delight, VideoEvents.UNMUTED);
+            fakePostMessage(delight, {
+              type: 'x-dl8-to-parent-unmuted',
+              payload: {},
+            });
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(delight, VideoEvents.ENDED);
+            fakePostMessage(delight, {
+              type: 'x-dl8-to-parent-ended',
+              payload: {},
+            });
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(delight, VideoEvents.AD_START);
+            fakePostMessage(delight, {
+              type: 'x-dl8-to-parent-amp-ad-start',
+              payload: {},
+            });
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(delight, VideoEvents.AD_END);
+            fakePostMessage(delight, {
+              type: 'x-dl8-to-parent-amp-ad-end',
+              payload: {},
+            });
+            return p;
+          })
+          .then(async () => {
+            const p = listenOncePromise(delight, VideoEvents.CUSTOM_TICK);
+            fakePostMessage(delight, {
+              type: 'x-dl8-to-parent-amp-custom-tick',
+              payload: {
+                type: 'delight-test-event',
+                testVar: 42,
+              },
+            });
+            const {data} = await p;
+            expect(data.eventType).to.equal('video-custom-delight-test-event');
+            expect(data.vars.testVar).to.equal(42);
+            return p;
+          });
       });
     });
   }

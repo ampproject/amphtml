@@ -30,7 +30,7 @@ describes.fakeWin(
     amp: true, // Extension will be installed manually in tests.
     location: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
   },
-  env => {
+  (env) => {
     let win, doc, ampdoc;
     let body;
     let viewer;

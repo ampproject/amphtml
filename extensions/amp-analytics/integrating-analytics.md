@@ -29,14 +29,14 @@ Before you can add your analytics service to AMP HTML runtime, you may need to:
       1. `"optout":` if needed. We currently don't have a great opt-out system, so please reach out to help us design one that works well for you.
       1. `"warningMessage":` if needed. Displays warning information from the vendor (such as deprecation or migration) in the console.
    1. If you are using iframe transport, also add a new line to ANALYTICS_IFRAME_TRANSPORT_CONFIG in iframe-transport-vendors.js containing `"*vendor-name*": "*url*"`
-   1. An example in the [examples/analytics-vendors.amp.html](../../examples/analytics-vendors.amp.html)
+   1. An example in the [examples/analytics-vendors.amp.html](../../examples/analytics-vendors.amp.html).
       reference.
    1. A test in the [extensions/amp-analytics/0.1/test/vendor-requests.json
       ](../../extensions/amp-analytics/0.1/test/vendor-requests.json) file.
+   1. Add your analytics service to the supported vendors list in the [extensions/amp-analytics/0.1/analytics-vendors-list.md](./analytics-vendors-list.md) file. Include the type, description, and link to your usage documentation.
 1. If a new batch plugin if required. Please refer to [Add Batch Plugin](#add-batch-plugin) for instructions.
 1. Test the new example you put in [examples/analytics-vendors.amp.html](../../examples/analytics-vendors.amp.html) to ensure the hits from the example are working as expected. For example, the data needed is being collected and displayed in your analytics dashboard.
 1. Submit a Pull Request with this patch, referencing the Intent-To-Implement issue.
-1. Add your analytics service to the [list of supported Analytics Vendors](https://github.com/ampproject/docs/blob/master/content/docs/analytics/analytics-vendors.md) by submitting a Pull Request to the [ampproject/docs](https://github.com/ampproject/docs) repo. Include the type, description, and link to your usage documentation.
 1. Update your service's usage documentation and inform your customers.
 1. It's highly recommended to maintain [an integration test outside AMP repo](../../3p/README.md#adding-proper-integration-tests).
 

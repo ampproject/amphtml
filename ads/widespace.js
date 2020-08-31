@@ -25,7 +25,7 @@ export function widespace(global, data) {
   // Optional demography parameters.
   let demo = [];
 
-  demo = ['Gender', 'Country', 'Region', 'City', 'Postal', 'Yob'].map(d => {
+  demo = ['Gender', 'Country', 'Region', 'City', 'Postal', 'Yob'].map((d) => {
     return 'demo' + d;
   });
 

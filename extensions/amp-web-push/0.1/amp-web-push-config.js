@@ -151,7 +151,7 @@ export class WebPushConfig extends AMP.BaseElement {
     this.validate();
     const config = this.parseConfig();
 
-    webPushServiceForDoc(this.element).then(service => {
+    webPushServiceForDoc(this.element).then((service) => {
       service.start(config).catch(() => {});
     });
 
@@ -207,7 +207,7 @@ export class WebPushConfig extends AMP.BaseElement {
 
     this.setWidgetDisabled_(widget, true);
 
-    webPushServiceForDoc(this.element).then(service => {
+    webPushServiceForDoc(this.element).then((service) => {
       service
         .subscribe(() => {
           // On popup closed
@@ -239,7 +239,7 @@ export class WebPushConfig extends AMP.BaseElement {
 
     this.setWidgetDisabled_(widget, true);
 
-    webPushServiceForDoc(this.element).then(service => {
+    webPushServiceForDoc(this.element).then((service) => {
       service.unsubscribe().then(() => {
         this.setWidgetDisabled_(widget, false);
       });

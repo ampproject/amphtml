@@ -20,7 +20,7 @@ import {AnalyticsEventType, CustomEventTracker} from '../events';
 import {InstrumentationService} from '../instrumentation.js';
 import {Services} from '../../../../src/services';
 
-describes.realWin('InstrumentationService', {amp: 1}, env => {
+describes.realWin('InstrumentationService', {amp: 1}, (env) => {
   let win;
   let ampdoc;
   let service;
@@ -72,7 +72,7 @@ describes.realWin(
   {
     amp: {ampdoc: 'fie'},
   },
-  env => {
+  (env) => {
     let win;
     let embed;
     let ampdoc;
@@ -115,7 +115,7 @@ describes.realWin(
     it('should create embed root for ampdoc-fie', () => {
       const parentAmpdoc = ampdoc;
       ampdoc = new AmpDocFie(win, 'https://example.org', parentAmpdoc);
-      env.sandbox.stub(Services, 'ampdoc').callsFake(context => {
+      env.sandbox.stub(Services, 'ampdoc').callsFake((context) => {
         if (context == win.document) {
           return ampdoc;
         }

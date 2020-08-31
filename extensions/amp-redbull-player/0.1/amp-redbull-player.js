@@ -66,7 +66,7 @@ class AmpRedBullPlayer extends AMP.BaseElement {
      * @return {undefined}
      * @private
      */
-    this.boundOnMessage_ = e => this.onMessage_(e);
+    this.boundOnMessage_ = (e) => this.onMessage_(e);
   }
 
   /** @override */
@@ -184,6 +184,10 @@ class AmpRedBullPlayer extends AMP.BaseElement {
 
     const data = objOrParseJson(eventData);
 
+    if (data == null) {
+      return; // we only process valid json
+    }
+
     if (data['id'] === `redbull-amp-video-tracking-${this.tagId_}`) {
       const type = ANALYTICS_EVENT_TYPE_PREFIX + data['type'];
       this.dispatchCustomAnalyticsEvent_(type, data);
@@ -298,6 +302,6 @@ class AmpRedBullPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpRedBullPlayer);
 });

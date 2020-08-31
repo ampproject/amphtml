@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-wistia-player'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -44,7 +44,7 @@ describes.realWin(
     }
 
     it('renders', () => {
-      return getWistiaEmbed('u8p9wq6mq8').then(wistiaEmbed => {
+      return getWistiaEmbed('u8p9wq6mq8').then((wistiaEmbed) => {
         const iframe = wistiaEmbed.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');

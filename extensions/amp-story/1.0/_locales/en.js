@@ -23,6 +23,11 @@ import {
  * @const {!LocalizedStringBundleDef}
  */
 const strings = {
+  [LocalizedStringId.AMP_STORY_ACTIVATE_BUTTON_TEXT]: {
+    string: 'Activate',
+    description:
+      'Label for the activate button to ask for device orientation permission',
+  },
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL]: {
     string: 'Mute story',
     description:
@@ -99,6 +104,41 @@ const strings = {
     description:
       'Label for a link to documentation on how AMP links are handled.',
   },
+  [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_SWIPE_PROGRESS]: {
+    string: 'Tip 2/2',
+    description:
+      'Label for a hint indicating progress on a multistep onboarding user education tutorial.',
+  },
+  [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_SWIPE_INSTRUCTIONS]: {
+    string: 'Swipe to go to the next story',
+    description:
+      'Instruction on how to use the product, within an onboarding user education tutorial.',
+  },
+  [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_SWIPE_DISMISS]: {
+    string: 'Got it',
+    description:
+      'Label for a button dismissing or advancing to the next step of an onboarding user education tutorial.',
+  },
+  [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS]: {
+    string: 'Tip 1/2',
+    description:
+      'Label for a hint indicating progress on a multistep onboarding user education tutorial.',
+  },
+  [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_PROGRESS_SINGLE]: {
+    string: 'Tip',
+    description:
+      'Label for a hint in the context of an onboarding user education tutorial.',
+  },
+  [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_INSTRUCTIONS]: {
+    string: 'Tap to go to the next screen',
+    description:
+      'Instruction on how to use the product, within an onboarding user education tutorial.',
+  },
+  [LocalizedStringId.AMP_STORY_EDUCATION_NAVIGATION_TAP_DISMISS]: {
+    string: 'Next',
+    description:
+      'Label for a button dismissing or advancing to the next step of an onboarding user education tutorial.',
+  },
   [LocalizedStringId.AMP_STORY_HAS_NEW_PAGE_TEXT]: {
     string: 'Updated',
     description:
@@ -127,6 +167,11 @@ const strings = {
     description:
       'Label for a button to open a drawer containing additional ' +
       'content via a "swipe up" user gesture.',
+  },
+  [LocalizedStringId.AMP_STORY_PAGINATION_BUTTON_PREVIOUS_PAGE_LABEL]: {
+    string: 'Previous page',
+    description:
+      'Label indicating that users can navigate to the previous page.',
   },
   [LocalizedStringId.AMP_STORY_PAGE_ERROR_VIDEO]: {
     string: 'Video failed to play',

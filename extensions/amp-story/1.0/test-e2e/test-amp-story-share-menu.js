@@ -21,47 +21,50 @@ describes.endtoend(
   'amp story share menu',
   {
     testUrl: 'http://localhost:8000/test/manual/amp-story/amp-story.amp.html',
-    browsers: ['chrome', 'firefox'],
+    browsers: ['chrome'],
     environments: ['single'],
+    deviceName: 'iPhone X',
   },
-  async env => {
+  async (env) => {
     /** @type {SeleniumWebDriverController} */
     let controller;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
-      await expect(
-        controller.findElement(
-          'a.i-amphtml-story-share-control.i-amphtml-story-button'
-        )
-      ).to.exist;
     });
 
     it('should copy the link using the browser share menu', async () => {
       // copy link
+      const systemLayerHost = await controller.findElement(
+        '.i-amphtml-system-layer-host'
+      );
+      await controller.switchToShadowRoot(systemLayerHost);
       const shareButton = await controller.findElement(
-        'a.i-amphtml-story-share-control.i-amphtml-story-button'
+        '.i-amphtml-story-share-control'
       );
       await controller.click(shareButton);
+      await controller.switchToLight();
+
+      const shareMenuHost = await controller.findElement(
+        '.i-amphtml-story-share-menu-host'
+      );
+      await controller.switchToShadowRoot(shareMenuHost);
       const getLinkButton = await controller.findElement(
-        'div.i-amphtml-story-share-icon.i-amphtml-story-share-icon-link'
+        '.i-amphtml-story-share-icon-link'
       );
       await controller.click(getLinkButton);
-
-      // go to amp bind page with form
-      await controller.navigateTo(
-        'http://localhost:8000/test/manual/amp-story/input-form.html'
-      );
+      await controller.switchToLight();
 
       // paste link
-      const input = await controller.findElement('#name-input');
-      await controller.type(input, Key.CtrlV);
-
-      // give amp-bind half a second to magic
+      const input = await controller.findElement('.input-field');
+      await controller.click(input);
       await sleep(500);
-      const div = await controller.findElement('#name-input-value');
-      await expect(controller.getElementText(div)).to.equal(
-        'Hello http://localhost:8000/test/manual/amp-story/amp-story.amp.html'
+      await controller.type(input, Key.CtrlV);
+      await sleep(500);
+
+      const output = await controller.getElementProperty(input, 'value');
+      await expect(output).to.equal(
+        'http://localhost:8000/test/manual/amp-story/amp-story.amp.html'
       );
     });
   }

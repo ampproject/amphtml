@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-import {AnalyticsEventType} from '../events';
 import {FIE_EMBED_PROP} from '../../../../src/iframe-helper';
-import {
-  IntersectionObserverPolyfill,
-  nativeIntersectionObserverSupported,
-} from '../../../../src/intersection-observer-polyfill';
 import {Services} from '../../../../src/services';
 import {
   VisibilityManagerForDoc,
@@ -66,7 +61,7 @@ class IntersectionObserverStub {
   }
 }
 
-describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
+describes.fakeWin('VisibilityManagerForDoc', {amp: true}, (env) => {
   let win;
   let ampdoc;
   let clock;
@@ -89,10 +84,10 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     root = new VisibilityManagerForDoc(ampdoc);
 
     win.IntersectionObserver = IntersectionObserverStub;
-    win.IntersectionObserverEntry = function() {};
+    win.IntersectionObserverEntry = function () {};
     win.IntersectionObserverEntry.prototype.intersectionRatio = 1;
 
-    eventPromise = new Promise(resolve => {
+    eventPromise = new Promise((resolve) => {
       eventResolver = resolve;
     });
   });
@@ -138,7 +133,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
 
   it('should resolve root layout box', () => {
     const rootElement = win.document.documentElement;
-    env.sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
+    env.sandbox.stub(viewport, 'getLayoutRect').callsFake((element) => {
       if (element == rootElement) {
         return layoutRectLtwh(0, 0, 101, 201);
       }
@@ -156,7 +151,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     win.__AMP_MODE = {runtime: 'inabox'};
     root = new VisibilityManagerForDoc(ampdoc);
     const rootElement = win.document.documentElement;
-    env.sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
+    env.sandbox.stub(viewport, 'getLayoutRect').callsFake((element) => {
       if (element == rootElement) {
         return layoutRectLtwh(11, 21, 101, 201);
       }
@@ -357,7 +352,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
       modelsCalled
     );
     expect(root.models_).to.have.length(3);
-    root.models_.forEach(model => {
+    root.models_.forEach((model) => {
       model.unsubscribe(modelsDisposed);
     });
     const otherUnsubscribes = env.sandbox.spy();
@@ -383,72 +378,6 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(inOb.disconnected).to.be.true;
     expect(root.intersectionObserver_).to.be.null;
     expect(inOb.elements).to.not.contain(otherTarget);
-  });
-
-  it('should polyfill and dispose intersection observer', () => {
-    delete win.IntersectionObserver;
-
-    const startScrollCount = viewport.scrollObservable_.getHandlerCount();
-    const startChangeCount = viewport.changeObservable_.getHandlerCount();
-
-    // Check observer is correctly set.
-    const inOb = root.getIntersectionObserver_();
-    expect(inOb).to.be.instanceOf(IntersectionObserverPolyfill);
-    expect(viewport.scrollObservable_.getHandlerCount()).to.equal(
-      startScrollCount + 1
-    );
-    expect(viewport.changeObservable_.getHandlerCount()).to.equal(
-      startChangeCount + 1
-    );
-
-    root.dispose();
-    expect(viewport.scrollObservable_.getHandlerCount()).to.equal(
-      startScrollCount
-    );
-    expect(viewport.changeObservable_.getHandlerCount()).to.equal(
-      startChangeCount
-    );
-  });
-
-  it('should support polyfill on non-amp root element', () => {
-    delete win.IntersectionObserver;
-    const inOb = root.getIntersectionObserver_();
-
-    const rootElement = win.document.documentElement;
-    root.listenElement(rootElement, {}, null, null, eventResolver);
-    expect(root.models_).to.have.length(1);
-    const model = root.models_[0];
-    expect(inOb.observeEntries_).to.have.length(1);
-
-    // AMP API is polyfilled.
-    expect(rootElement.getLayoutBox).to.be.a('function');
-    expect(rootElement.getOwner()).to.be.null;
-
-    // Starts as invisible.
-    expect(model.getVisibility_()).to.equal(0);
-
-    // Trigger tick.
-    env.sandbox.stub(viewport, 'getRect').callsFake(() => {
-      return layoutRectLtwh(0, 0, 100, 100);
-    });
-    env.sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
-      if (element == rootElement) {
-        return layoutRectLtwh(0, 50, 100, 100);
-      }
-      return null;
-    });
-    expect(rootElement.getLayoutBox()).to.contain({
-      left: 0,
-      top: 50,
-      width: 100,
-      height: 100,
-    });
-    viewport.scrollObservable_.fire({type: AnalyticsEventType.SCROLL});
-    expect(model.getVisibility_()).to.equal(0.5);
-
-    return eventPromise.then(() => {
-      expect(inOb.observeEntries_).to.have.length(0);
-    });
   });
 
   it('should listen on root', () => {
@@ -477,7 +406,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     env.sandbox.stub(model, 'reset_');
     // Fire event.
     clock.tick(11);
-    return eventPromise.then(state => {
+    return eventPromise.then((state) => {
       expect(disposed).to.be.calledOnce;
       expect(root.models_).to.have.length(0);
 
@@ -513,7 +442,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     expect(model.getVisibility_()).to.equal(0);
 
     // Fire event.
-    return eventPromise.then(state => {
+    return eventPromise.then((state) => {
       expect(model.getVisibility_()).to.equal(1);
       expect(disposed).to.be.calledOnce;
       expect(root.models_).to.have.length(0);
@@ -531,7 +460,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
   it('should pass func to create readyReportPromise to model', () => {
     let testPromiseResolver;
     const disposed = env.sandbox.spy();
-    const testPromise = new Promise(resolve => {
+    const testPromise = new Promise((resolve) => {
       testPromiseResolver = resolve;
     });
     root.listenRoot(
@@ -547,7 +476,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     model.unsubscribe(disposed);
     clock.tick(11);
     testPromiseResolver();
-    return eventPromise.then(state => {
+    return eventPromise.then((state) => {
       expect(disposed).to.be.calledOnce;
       expect(state.totalVisibleTime).to.equal(11);
       expect(state.totalTime).to.equal(11);
@@ -611,7 +540,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     env.sandbox.stub(model, 'reset_');
     // Fire event.
     clock.tick(11);
-    return eventPromise.then(state => {
+    return eventPromise.then((state) => {
       expect(disposed).to.be.calledOnce;
       expect(root.models_).to.have.length(0);
       expect(root.trackedElements_[target.__AMP_VIS_ID]).to.not.exist;
@@ -717,7 +646,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     const disposed2 = env.sandbox.spy();
     const spec2 = {totalTimeMin: 20};
     let eventResolver2;
-    const eventPromise2 = new Promise(resolve => {
+    const eventPromise2 = new Promise((resolve) => {
       eventResolver2 = resolve;
     });
     root.listenElement(target, spec2, null, null, eventResolver2);
@@ -734,7 +663,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     // Fire the first event.
     clock.tick(11);
     return eventPromise
-      .then(state => {
+      .then((state) => {
         // First event fired. The first model should be cleaned up, but not
         // the other.
         expect(state.totalVisibleTime).to.equal(10);
@@ -750,7 +679,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
         clock.tick(10);
         return eventPromise2;
       })
-      .then(state => {
+      .then((state) => {
         // Second event fired. Everything should be released now.
         expect(state.totalVisibleTime).to.equal(20);
         expect(disposed2).to.be.calledOnce;
@@ -792,7 +721,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
 
     // Fire event.
     clock.tick(11);
-    return eventPromise.then(state => {
+    return eventPromise.then((state) => {
       expect(state.totalVisibleTime).to.equal(10);
       expect(state.elementId).to.equal('targetElementId');
       expect(state.elementY).to.equal(10);
@@ -808,7 +737,7 @@ describes.realWin(
   {
     amp: {ampdoc: 'fie'},
   },
-  env => {
+  (env) => {
     let parentWin;
     let win;
     let ampdoc;
@@ -835,7 +764,7 @@ describes.realWin(
 
       parentRoot = new VisibilityManagerForDoc(ampdoc);
       parentWin.IntersectionObserver = IntersectionObserverStub;
-      parentWin.IntersectionObserverEntry = function() {};
+      parentWin.IntersectionObserverEntry = function () {};
       parentWin.IntersectionObserverEntry.prototype.intersectionRatio = 1;
 
       root = new VisibilityManagerForEmbed(parentRoot, embed);
@@ -893,7 +822,7 @@ describes.realWin(
     });
 
     it('should resolve root layout box', () => {
-      env.sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
+      env.sandbox.stub(viewport, 'getLayoutRect').callsFake((element) => {
         if (element == embed.iframe) {
           return layoutRectLtwh(11, 21, 101, 201);
         }
@@ -1037,7 +966,7 @@ describes.realWin(
   }
 );
 
-describes.realWin('VisibilityManager integrated', {amp: true}, env => {
+describes.realWin('VisibilityManager integrated', {amp: true}, (env) => {
   let win, doc;
   let ampdoc;
   let viewer;
@@ -1063,32 +992,25 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
 
     observeSpy = env.sandbox.stub();
     unobserveSpy = env.sandbox.stub();
-    const inob = callback => {
+    const inob = (callback) => {
       inObCallback = callback;
       return {
         observe: observeSpy,
         unobserve: unobserveSpy,
       };
     };
-    if (nativeIntersectionObserverSupported(ampdoc.win)) {
-      env.sandbox.stub(win, 'IntersectionObserver').callsFake(inob);
-    } else {
-      win.IntersectionObserver = inob;
-      win.IntersectionObserverEntry = function() {};
-      win.IntersectionObserverEntry.prototype.intersectionRatio = 0;
-      expect(nativeIntersectionObserverSupported(ampdoc.win)).to.be.true;
-    }
+    env.sandbox.stub(win, 'IntersectionObserver').callsFake(inob);
 
-    readyPromise = new Promise(resolve => {
+    readyPromise = new Promise((resolve) => {
       readyResolver = resolve;
     });
-    readyReportPromise = new Promise(resolve => {
+    readyReportPromise = new Promise((resolve) => {
       readyReportResolver = resolve;
     });
-    eventPromise = new Promise(resolve => {
+    eventPromise = new Promise((resolve) => {
       eventResolver = resolve;
     });
-    eventPromise2 = new Promise(resolve => {
+    eventPromise2 = new Promise((resolve) => {
       eventResolver2 = resolve;
     });
 
@@ -1100,7 +1022,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
     ampElement.setAttribute('height', '100');
     ampElement.style.opacity = 0.5;
     doc.body.appendChild(ampElement);
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (resources.getResourceForElementOptional(ampElement)) {
         resolve();
       } else {
@@ -1178,7 +1100,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
         readyReportResolver();
         return eventPromise;
       })
-      .then(state => {
+      .then((state) => {
         expect(state).to.contains({
           backgrounded: 0,
           backgroundedAtStart: 0,
@@ -1530,7 +1452,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
         clock.tick(100);
         fireIntersect(25); // above spec 1 min visible, trigger callback 1
         return eventPromise
-          .then(state => {
+          .then((state) => {
             expect(state).to.contains({
               backgrounded: 0,
               backgroundedAtStart: 0,
@@ -1553,7 +1475,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
             fireIntersect(35); // above spec 2 min visible, trigger callback 2
             return eventPromise2;
           })
-          .then(state => {
+          .then((state) => {
             expect(state).to.contains({
               backgrounded: 0,
               backgroundedAtStart: 0,
@@ -1623,7 +1545,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
       env.sandbox.stub(model, 'reset_');
       clock.tick(1); // now fire
       expect(isModelResolved(model)).to.be.true;
-      return eventPromise.then(state => {
+      return eventPromise.then((state) => {
         expect(state).to.contains({
           backgrounded: 1,
           backgroundedAtStart: 0,
@@ -1657,7 +1579,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
 
       clock.tick(100);
       fireIntersect(25); // visible
-      return eventPromise.then(state => {
+      return eventPromise.then((state) => {
         expect(state).to.contains({
           backgroundedAtStart: 1,
           backgrounded: 1,
@@ -1667,7 +1589,7 @@ describes.realWin('VisibilityManager integrated', {amp: true}, env => {
   });
 });
 
-describes.fakeWin('scroll depth', {amp: true}, env => {
+describes.fakeWin('scroll depth', {amp: true}, (env) => {
   let ampdoc;
   let root;
 
@@ -1687,7 +1609,7 @@ describes.fakeWin('scroll depth', {amp: true}, env => {
 describes.realWin(
   'VisibilityManager in shadow runtime',
   {amp: 'multi'},
-  env => {
+  (env) => {
     let top;
     let ampdocService;
     let host, shadowRoot, shadowDoc;
@@ -1716,7 +1638,7 @@ describes.realWin(
 
     it('should create a visibility manager for a FIE', async () => {
       const iframe = top.document.createElement('iframe');
-      await new Promise(resolve => {
+      await new Promise((resolve) => {
         iframe.onload = resolve;
         iframe.srcdoc = '<div id="div1"></div>';
         iframe[FIE_EMBED_PROP] = {host: iframe};

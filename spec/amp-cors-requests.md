@@ -143,13 +143,11 @@ Endpoints should only allow requests from: (1) the publisher's own origin; and
 For example, endpoints should allow requests from:
 
 - Google AMP Cache subdomain: `https://<publisher's domain>.cdn.ampproject.org` <br>(for example, `https://nytimes-com.cdn.ampproject.org`)
-- Cloudflare AMP Cache: `https://<publisher's domain>.amp.cloudflare.com`
 
 {% call callout('Read on', type='read') %}
 For information on AMP Cache URL formats, see these resources:
 
 - [Google AMP Cache Overview](https://developers.google.com/amp/cache/overview)
-- [Cloudflare AMP Cache](https://amp.cloudflare.com/)
   {% endcall %}
 
 #### 2) Allow same-origin requests
@@ -195,7 +193,6 @@ following:
     response:
 
     - `<publisher's domain>.cdn.ampproject.org`
-    - `<publisher's domain>.amp.cloudflare.com`
     - the publisher's origin (aka yours)
 
     where `*` represents a wildcard match, and not an actual asterisk ( \* ).
@@ -229,7 +226,6 @@ Based on what we know about CORS and AMP (from [Verify CORS requests](#verify-co
 
 - `example.com` --- Publisher's domain
 - `example-com.cdn.ampproject.org` --- Google AMP Cache subdomain
-- `example.com.amp.cloudflare.com`--- Cloudflare AMP Cache subdomain
 
 ### Response headers for allowed requests
 
@@ -276,7 +272,6 @@ function assertCors(req, res, opt_validMethods, opt_exposeHeaders) {
   var allowedOrigins = [
     'https://example.com',
     'https://example-com.cdn.ampproject.org',
-    'https://example.com.amp.cloudflare.com',
     'https://cdn.ampproject.org',
   ];
   var allowedSourceOrigin = 'https://example.com'; //publisher's origin

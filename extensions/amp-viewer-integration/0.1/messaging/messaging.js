@@ -78,7 +78,7 @@ export class WindowPortEmulator {
    * @param {function(!Event):*} handler
    */
   addEventListener(eventType, handler) {
-    this.win_.addEventListener('message', event => {
+    this.win_.addEventListener('message', (event) => {
       if (event.origin == this.origin_ && event.source == this.target_) {
         handler(event);
       }
@@ -118,7 +118,7 @@ export class Messaging {
    * @return {!Promise<!Messaging>}
    */
   static initiateHandshakeWithDocument(target, opt_token) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const intervalRef = setInterval(() => {
         const channel = new MessageChannel();
         const pollMessage = /** @type {JsonObject} */ ({
@@ -128,7 +128,7 @@ export class Messaging {
         target./*OK*/ postMessage(pollMessage, '*', [channel.port2]);
 
         const port = channel.port1;
-        const listener = event => {
+        const listener = (event) => {
           const message = parseMessage(event.data);
           if (!message) {
             return;
@@ -164,8 +164,8 @@ export class Messaging {
    * @return {!Promise<!Messaging>}
    */
   static waitForHandshakeFromDocument(source, target, origin, opt_token) {
-    return new Promise(resolve => {
-      const listener = event => {
+    return new Promise((resolve) => {
+      const listener = (event) => {
         const message = parseMessage(event.data);
         if (!message) {
           return;
@@ -433,10 +433,10 @@ export class Messaging {
         throw new Error('expected response but none given: ' + message.name);
       }
       promise.then(
-        data => {
+        (data) => {
           this.sendResponse_(requestId, message.name, data);
         },
-        reason => {
+        (reason) => {
           this.sendResponseError_(requestId, message.name, reason);
         }
       );

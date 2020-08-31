@@ -60,8 +60,8 @@ async function replace(filePath) {
 async function replaceUrls(dir) {
   const files = await walk(dir);
   const promises = files
-    .filter(fileName => path.extname(fileName) == '.html')
-    .map(file => replace(file));
+    .filter((fileName) => path.extname(fileName) == '.html')
+    .map((file) => replace(file));
   await Promise.all(promises);
 }
 

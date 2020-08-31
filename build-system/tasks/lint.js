@@ -18,6 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const config = require('../test-configs/config');
+const debounce = require('gulp-debounce');
 const eslint = require('gulp-eslint');
 const eslintIfFixed = require('gulp-eslint-if-fixed');
 const globby = require('globby');
@@ -26,55 +27,59 @@ const lazypipe = require('lazypipe');
 const log = require('fancy-log');
 const path = require('path');
 const watch = require('gulp-watch');
-const {getFilesChanged, logOnSameLine} = require('../common/utils');
+const {
+  getFilesChanged,
+  getFilesFromArgv,
+  logOnSameLine,
+} = require('../common/utils');
 const {gitDiffNameOnlyMaster} = require('../common/git');
 const {isTravisBuild} = require('../common/travis');
 const {maybeUpdatePackages} = require('./update-packages');
-
-const isWatching = argv.watch || argv.w || false;
-const options = {
-  fix: false,
-  quiet: argv.quiet || false,
-};
+const {watchDebounceDelay} = require('./helpers');
 
 const rootDir = path.dirname(path.dirname(__dirname));
 
 /**
  * Initializes the linter stream based on globs
+ *
  * @param {!Object} globs
  * @param {!Object} streamOptions
  * @return {!ReadableStream}
  */
 function initializeStream(globs, streamOptions) {
   let stream = gulp.src(globs, streamOptions);
-  if (isWatching) {
+  if (argv.watch) {
     const watcher = lazypipe().pipe(watch, globs);
-    stream = stream.pipe(watcher());
+    stream = stream.pipe(watcher()).pipe(debounce({wait: watchDebounceDelay}));
   }
   return stream;
 }
 
 /**
  * Runs the linter on the given stream using the given options.
+ *
  * @param {!ReadableStream} stream
- * @param {!Object} options
  * @return {boolean}
  */
-function runLinter(stream, options) {
+function runLinter(stream) {
   if (!isTravisBuild()) {
     log(colors.green('Starting linter...'));
   }
+  const options = {
+    fix: argv.fix,
+    quiet: argv.quiet,
+  };
   const fixedFiles = {};
   return stream
     .pipe(eslint(options))
     .pipe(
-      eslint.formatEach('stylish', function(msg) {
+      eslint.formatEach('stylish', function (msg) {
         logOnSameLine(msg.replace(`${rootDir}/`, '').trim() + '\n');
       })
     )
     .pipe(eslintIfFixed(rootDir))
     .pipe(
-      eslint.result(function(result) {
+      eslint.result(function (result) {
         const relativePath = path.relative(rootDir, result.filePath);
         if (!isTravisBuild()) {
           logOnSameLine(colors.green('Linted: ') + relativePath);
@@ -90,7 +95,7 @@ function runLinter(stream, options) {
       })
     )
     .pipe(
-      eslint.results(function(results) {
+      eslint.results(function (results) {
         if (results.errorCount == 0 && results.warningCount == 0) {
           if (!isTravisBuild()) {
             logOnSameLine(
@@ -136,7 +141,7 @@ function runLinter(stream, options) {
         }
         if (options.fix && Object.keys(fixedFiles).length > 0) {
           log(colors.green('INFO: ') + 'Summary of fixes:');
-          Object.keys(fixedFiles).forEach(file => {
+          Object.keys(fixedFiles).forEach((file) => {
             log(fixedFiles[file] + colors.cyan(file));
           });
         }
@@ -153,9 +158,9 @@ function runLinter(stream, options) {
  */
 function eslintRulesChanged() {
   return (
-    gitDiffNameOnlyMaster().filter(function(file) {
+    gitDiffNameOnlyMaster().filter(function (file) {
       return (
-        path.basename(file).includes('.eslintrc') ||
+        path.basename(file).includes('.eslintrc.js') ||
         path.dirname(file) === 'build-system/eslint-rules'
       );
     }).length > 0
@@ -172,7 +177,7 @@ function getFilesToLint(files) {
   const filesToLint = globby.sync(files, {gitignore: true});
   if (!isTravisBuild()) {
     log(colors.green('INFO: ') + 'Running lint on the following files:');
-    filesToLint.forEach(file => {
+    filesToLint.forEach((file) => {
       log(colors.cyan(file));
     });
   }
@@ -181,16 +186,14 @@ function getFilesToLint(files) {
 
 /**
  * Run the eslinter on the src javascript and log the output
- * @return {!Stream} Readable stream
+ *
+ * @return {!ReadableStream}
  */
 function lint() {
   maybeUpdatePackages();
-  if (argv.fix) {
-    options.fix = true;
-  }
   let filesToLint = config.lintGlobs;
   if (argv.files) {
-    filesToLint = getFilesToLint(argv.files.split(','));
+    filesToLint = getFilesToLint(getFilesFromArgv());
   } else if (!eslintRulesChanged() && argv.local_changes) {
     const lintableFiles = getFilesChanged(config.lintGlobs);
     if (lintableFiles.length == 0) {
@@ -199,8 +202,7 @@ function lint() {
     }
     filesToLint = getFilesToLint(lintableFiles);
   }
-  const stream = initializeStream(filesToLint, {base: rootDir});
-  return runLinter(stream, options);
+  return runLinter(initializeStream(filesToLint, {base: rootDir}));
 }
 
 module.exports = {

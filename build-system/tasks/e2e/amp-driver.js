@@ -22,6 +22,7 @@ const AmpdocEnvironment = {
 
   // AMPHTML ads environments
   A4A_FIE: 'a4a-fie',
+  A4A_FIE_NO_SIGNING: 'a4a-fie-no-signing',
   A4A_INABOX: 'a4a-inabox',
   A4A_INABOX_FRIENDLY: 'a4a-inabox-friendly',
   A4A_INABOX_SAFEFRAME: 'a4a-inabox-safeframe',
@@ -44,8 +45,8 @@ const EnvironmentBehaviorMap = {
   [AmpdocEnvironment.VIEWER_DEMO]: {
     ready(controller) {
       return controller
-        .findElement('#AMP_DOC_dynamic[data-loaded]')
-        .then(frame => controller.switchToFrame(frame));
+        .findElement('#viewer[data-loaded]')
+        .then((frame) => controller.switchToFrame(frame));
     },
 
     url(url) {
@@ -61,7 +62,7 @@ const EnvironmentBehaviorMap = {
       url = url.replace('#', '&');
       // TODO(estherkim): somehow allow non-8000 port and domain
       return (
-        `http://localhost:8000/examples/viewer.html#href=${url}` +
+        `http://localhost:8000/test/fixtures/e2e/amp-viewer-integration/viewer.html#href=${url}` +
         `&caps=${defaultCaps.join(',')}`
       );
     },
@@ -90,7 +91,7 @@ const EnvironmentBehaviorMap = {
     async ready(controller) {
       return controller
         .findElement('amp-ad > iframe')
-        .then(frame => controller.switchToFrame(frame));
+        .then((frame) => controller.switchToFrame(frame));
     },
 
     url(url) {
@@ -98,11 +99,26 @@ const EnvironmentBehaviorMap = {
     },
   },
 
+  [AmpdocEnvironment.A4A_FIE_NO_SIGNING]: {
+    async ready(controller) {
+      return controller
+        .findElement('amp-ad > iframe')
+        .then((frame) => controller.switchToFrame(frame));
+    },
+
+    url(url) {
+      const a4aUrl = url.replace(HOST, HOST + '/a4a');
+      // Exp value is from extensions/amp-a4a/0.1/amp-a4a.js
+      // NO_SIGNING_EXP.experiment
+      return `${a4aUrl}?eid=a4a-no-signing:21066325`;
+    },
+  },
+
   [AmpdocEnvironment.A4A_INABOX]: {
     async ready(controller) {
       return controller
         .findElement('#inabox-frame')
-        .then(frame => controller.switchToFrame(frame));
+        .then((frame) => controller.switchToFrame(frame));
     },
 
     url(url) {
@@ -114,7 +130,7 @@ const EnvironmentBehaviorMap = {
     async ready(controller) {
       return controller
         .findElement('#inabox-frame')
-        .then(frame => controller.switchToFrame(frame));
+        .then((frame) => controller.switchToFrame(frame));
     },
 
     url(url) {
@@ -126,7 +142,7 @@ const EnvironmentBehaviorMap = {
     async ready(controller) {
       return controller
         .findElement('#inabox-frame')
-        .then(frame => controller.switchToFrame(frame));
+        .then((frame) => controller.switchToFrame(frame));
     },
 
     url(url) {
@@ -156,7 +172,7 @@ class AmpDriver {
   async toggleExperiment(name, toggle) {
     await this.controller_.evaluate(
       (name, toggle) => {
-        (window.AMP = window.AMP || []).push(AMP => {
+        (window.AMP = window.AMP || []).push((AMP) => {
           AMP.toggleExperiment(name, toggle);
         });
       },

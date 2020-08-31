@@ -82,7 +82,7 @@ class AmpTwitter extends AMP.BaseElement {
     listenFor(
       iframe,
       MessageType.EMBED_SIZE,
-      data => {
+      (data) => {
         this.updateForSuccessState_(data['height']);
       },
       /* opt_is3P */ true
@@ -112,7 +112,7 @@ class AmpTwitter extends AMP.BaseElement {
       },
       () => {
         // Set an explicit height so we can animate it.
-        this./*OK*/ changeHeight(height);
+        this.forceChangeHeight(height);
       }
     );
   }
@@ -128,7 +128,7 @@ class AmpTwitter extends AMP.BaseElement {
       if (this.userPlaceholder_) {
         this.togglePlaceholder(false);
       }
-      this./*OK*/ changeHeight(height);
+      this.forceChangeHeight(height);
     });
   }
 
@@ -149,7 +149,7 @@ class AmpTwitter extends AMP.BaseElement {
       }
 
       if (content) {
-        this./*OK*/ changeHeight(content./*OK*/ offsetHeight);
+        this.forceChangeHeight(content./*OK*/ offsetHeight);
       }
     });
   }
@@ -201,12 +201,12 @@ class AmpTwitter extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     if (this.iframe_ && mutations['data-tweetid'] != null) {
       this.unlayoutCallback();
-      this.toggleLoading(true, /* opt_force */ true);
+      this.toggleLoading(true);
       this.layoutCallback();
     }
   }
 }
 
-AMP.extension('amp-twitter', '0.1', AMP => {
+AMP.extension('amp-twitter', '0.1', (AMP) => {
   AMP.registerElement('amp-twitter', AmpTwitter);
 });

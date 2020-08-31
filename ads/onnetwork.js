@@ -37,7 +37,7 @@ export function onnetwork(global, data) {
   // Custom movie url using "data-src" attribute
   if (src) {
     validateSrcPrefix(
-      Object.keys(hosts).map(type => hosts[type]),
+      Object.keys(hosts).map((type) => hosts[type]),
       src
     );
     url = src;

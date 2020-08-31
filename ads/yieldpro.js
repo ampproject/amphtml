@@ -47,7 +47,7 @@ export function yieldpro(global, data) {
   computeInMasterFrame(
     global,
     'yieldpro-request',
-    done => {
+    (done) => {
       let success = false;
       const masterWin = this;
       if (!masterWin.showadAMPAdapter) {
@@ -64,7 +64,7 @@ export function yieldpro(global, data) {
         done(true);
       }
     },
-    success => {
+    (success) => {
       if (success) {
         global.showadAMPAdapter = global.context.master.showadAMPAdapter;
         global.showadAMPAdapter.registerSlot(data, global);

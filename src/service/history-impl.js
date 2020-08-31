@@ -96,7 +96,7 @@ export class History {
    */
   push(opt_onPop, opt_stateUpdate) {
     return this.enque_(() => {
-      return this.binding_.push(opt_stateUpdate).then(historyState => {
+      return this.binding_.push(opt_stateUpdate).then((historyState) => {
         this.onStateUpdated_(historyState);
         if (opt_onPop) {
           this.stackOnPop_[historyState.stackIndex] = opt_onPop;
@@ -117,7 +117,7 @@ export class History {
    */
   pop(stateId) {
     return this.enque_(() => {
-      return this.binding_.pop(stateId).then(historyState => {
+      return this.binding_.pop(stateId).then((historyState) => {
         this.onStateUpdated_(historyState);
       });
     }, 'pop');
@@ -143,20 +143,21 @@ export class History {
   }
 
   /**
-   * Requests navigation one step back. This request is only satisifed
-   * when the history has at least one step to go back in the context
-   * of this document.
+   * Requests navigation one step back. This first attempts to go back within
+   * the context of this document.
+   *
+   * @param {boolean=} navigate
    * @return {!Promise}
    */
-  goBack() {
+  goBack(navigate) {
     return this.enque_(() => {
-      if (this.stackIndex_ <= 0) {
-        // Nothing left to pop.
+      if (this.stackIndex_ <= 0 && !navigate) {
         return Promise.resolve();
       }
+
       // Pop the current state. The binding will ignore the request if
       // it cannot satisfy it.
-      return this.binding_.pop(this.stackIndex_).then(historyState => {
+      return this.binding_.pop(this.stackIndex_).then((historyState) => {
         this.onStateUpdated_(historyState);
       });
     }, 'goBack');
@@ -275,10 +276,10 @@ export class History {
 
     promise
       .then(
-        result => {
+        (result) => {
           task.resolve(result);
         },
-        reason => {
+        (reason) => {
           dev().error(TAG_, 'failed to execute a task:', reason);
           // TODO(dvoytenko, #8785): cleanup after tracing.
           if (task.trace) {
@@ -475,7 +476,7 @@ export class HistoryBindingNatural_ {
     history.pushState = this.historyPushState_.bind(this);
     history.replaceState = this.historyReplaceState_.bind(this);
 
-    this.popstateHandler_ = e => {
+    this.popstateHandler_ = (e) => {
       const event = /** @type {!PopStateEvent} */ (e);
       const state = /** @type {!JsonObject} */ (event.state);
       dev().fine(
@@ -542,7 +543,7 @@ export class HistoryBindingNatural_ {
     stackIndex = Math.max(stackIndex, this.startIndex_);
     return this.whenReady_(() => {
       return this.back_(this.stackIndex_ - stackIndex + 1);
-    }).then(newStackIndex => {
+    }).then((newStackIndex) => {
       return this.mergeStateUpdate_(this.getState_(), {
         stackIndex: newStackIndex,
       });
@@ -871,7 +872,7 @@ export class HistoryBindingVirtual_ {
     /** @private {!UnlistenDef} */
     this.unlistenOnHistoryPopped_ = this.viewer_.onMessage(
       'historyPopped',
-      data => this.onHistoryPopped_(data)
+      (data) => this.onHistoryPopped_(data)
     );
   }
 
@@ -939,7 +940,7 @@ export class HistoryBindingVirtual_ {
     const push = 'pushHistory';
     return this.viewer_
       .sendMessageAwaitResponse(push, message)
-      .then(response => {
+      .then((response) => {
         const fallbackState = /** @type {!HistoryStateDef} */ (message);
         const newState = this.toHistoryState_(response, fallbackState, push);
         this.updateHistoryState_(newState);
@@ -963,7 +964,7 @@ export class HistoryBindingVirtual_ {
     const pop = 'popHistory';
     return this.viewer_
       .sendMessageAwaitResponse(pop, message)
-      .then(response => {
+      .then((response) => {
         const fallbackState = /** @type {!HistoryStateDef} */ (dict({
           'stackIndex': this.stackIndex_ - 1,
         }));
@@ -1004,7 +1005,7 @@ export class HistoryBindingVirtual_ {
     const replace = 'replaceHistory';
     return this.viewer_
       .sendMessageAwaitResponse(replace, message, /* cancelUnsent */ true)
-      .then(response => {
+      .then((response) => {
         const fallbackState = /** @type {!HistoryStateDef} */ (message);
         const newState = this.toHistoryState_(response, fallbackState, replace);
         this.updateHistoryState_(newState);
@@ -1081,7 +1082,7 @@ export class HistoryBindingVirtual_ {
         undefined,
         /* cancelUnsent */ true
       )
-      .then(data => {
+      .then((data) => {
         if (!data) {
           return '';
         }

@@ -24,28 +24,13 @@ limitations under the License.
 
 # amp-3d-gltf
 
-Displays GL Transmission Format (gITF) 3D models.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-3d-gltf" src="https://cdn.ampproject.org/v0/amp-3d-gltf-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, responsive</td>
-  </tr>
-  <tr>
-    <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-3d-gltf/">amp-3d-gltf example</a>.</td>
-  </tr>
-</table>
-
 ## Usage
 
 The `amp-3d-gltf` component displays 3D models that are in gITF format.
 
-**Note**: A WebGL capable browser is required to display these models.
+[tip type="note"]
+You must use a [WebGL](https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API)-capable browser to display 3D models.
+[/tip]
 
 ### Example
 
@@ -60,67 +45,90 @@ The `amp-3d-gltf` component displays 3D models that are in gITF format.
 ></amp-3d-gltf>
 ```
 
-### Limitations
+### Compatibility
 
-Currently, only works with glTF 2.0.
+The component supports [glTF 2.0](https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#cameras),
+with the following exceptions:
 
-Unsupported features:
+- Embedded cameras
+- Animation
 
-- embeded cameras
-- animation
+### Set CORS headers
 
-### CORS
-
-`amp-3d-gltf` makes a `fetch` request from the origin `https://<random>.ampproject.net` so `access-control-allow-origin: *.ampproject.net` must be set on the response header of the endpoint specified as `src`. Wildcard is needed since the origin has a random sub-domain component to it.
+The `amp-3d-gltf` component makes a fetch request to the origin from
+`https://<random>.ampproject.net` when it requests the gltf file. Set
+`access-control-allow-origin:*.ampproject.net` on the response header of the
+`src` endpoint to avoid
+[CORS issues when served from an AMP cache](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests/?format=websites).
+Use a wildcard character to address the `<random>` subdomain component.
 
 ## Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>src [required]</strong></td>
-    <td>A required attribute that specifies the URL to the gltf file.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>alpha [optional]</strong></td>
-    <td>A Boolean attribute that specifies whether free space on canvas is transparent. By default, free space is filled with black.
-Default value is <code>false</code>.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>antialiasing [optional]</strong></td>
-    <td>A Boolean attribute that specifies whether to turn on antialiasing. Default value is <code>false</code>.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>clearColor [optional]</strong></td>
-    <td>A string that must contain valid CSS color, that will be used to fill free space on canvas.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>maxPixelRatio [optional]</strong></td>
-    <td>A numeric value that specifies the upper limit for the pixelRatio render option. The default is <code>window.devicePixelRatio</code>.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>autoRotate [optional]</strong></td>
-    <td>A Boolean attribute that specifies whether to automatically rotate the camera around the model's center. Default value is <code>false</code>.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>enableZoom [optional]</strong></td>
-    <td>A Boolean attribute that specifies whether to turn on zoom. Default value is <code>true</code>.</td>
-  </tr>
-</table>
+### src
+
+The `src` attribute specifies the gltf file location.
+
+### alpha (optional)
+
+Use the `alpha` attribute to specify the behavior of the canvas background.
+This attribute takes a boolean value. To enable transparency instead of the
+default white, set the value to `true`.
+
+### antialiasing (optional)
+
+Use the `antialiasing` attribute to specify whether to enable antialiasing. To
+enable antialiasing, set the value to true.
+
+### clearColor (optional)
+
+The `clearColor` attribute specifies a CSS color, such as #FF8C00. This color
+fills free space on the canvas.
+
+### maxPixelRatio (optional)
+
+The `maxPixelRatio` attribute specifies an upper limit for the `pixelRatio`
+render option. It defaults to `window.devicePixelRatio`.
+
+### autoRotate (optional)
+
+Use the `autoRotate` attribute to enable automatic rotation around the model's
+center. To enable rotation, set the value to `true`. `autorotate` defaults to
+`false`.
+
+### enableZoom (optional)
+
+Use the `enableZoom` attribute to disable zooming in and out of the model. To
+disable zoom, set the value to `false`. `autororate` defaults to `true`.
 
 ## Actions
 
-<table>
-  <tr>
-    <td width="40%"><strong>setModelRotation(x, y, z, xMin, xMax, yMin, yMax, zMin, zMax)</strong></td>
-    <td>sets model rotation. rotation order is ZYX
-    <ul>
-      <li>x/y/z - number 0..1, defaults to previous value of model rotation.</li>
-      <li>min/max - angle in radians, defaults to 0 / pi * 2, defines target range</li>
-      </ul>
-    for example `setModelRotation(x=0.5, xMin=0, xMax=3.14)` will change `x` component of rotation to `1.57`.</td>
-  </tr>
-</table>
+### setModelRotation
+
+The `setModelRotation` action specifies the model's rotation. The rotation order
+is ZYX.
+
+- Specify the rotation value of the x, y, and/or z axis with `x`, `y`, and/or
+  `z` arguments. This action accepts a number between 0 and 1. It defaults to the
+  previous value.
+- Specify the angle of rotation in radians with `xMin`, `xMax`, `yMin`, `yMax`,
+  and/or `zMin`, `zMax` arguments. Use a min and a max to define the target range.
+  The angle range defaults to `0 / pi * 2`.
+
+The following action changes the x axis of the component’s rotation to 1.57 when fired.
+
+```json
+setModelRotation((x = 0.5), (xMin = 0), (xMax = 3.14))
+```
+
+## Styling
+
+Here are a few things to keep in mind for style:
+
+- The `alpha` attribute specifies transparency.
+- The `clearColor` attribute specifies the color of the background if it isn't transparent.
+- `amp-3d-gltf` defaults to a white background if you don't specify a background color.
 
 ## Validation
 
-See [amp-3d-gltf rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-3d-gltf/validator-amp-3d-gltf.protoascii) in the AMP validator specification.
+See [amp-3d-gltf rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-3d-gltf/validator-amp-3d-gltf.protoascii)
+in the AMP validator specification.

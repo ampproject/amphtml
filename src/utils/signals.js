@@ -101,7 +101,7 @@ export class Signals {
       // Do not duplicate signals.
       return;
     }
-    const time = opt_time || Date.now();
+    const time = opt_time == undefined ? Date.now() : opt_time;
     this.map_[name] = time;
     const promiseStruct = this.promiseMap_ && this.promiseMap_[name];
     if (promiseStruct && promiseStruct.resolve) {
@@ -126,6 +126,7 @@ export class Signals {
     const promiseStruct = this.promiseMap_ && this.promiseMap_[name];
     if (promiseStruct && promiseStruct.reject) {
       promiseStruct.reject(error);
+      promiseStruct.promise.catch(() => {});
       promiseStruct.resolve = undefined;
       promiseStruct.reject = undefined;
     }

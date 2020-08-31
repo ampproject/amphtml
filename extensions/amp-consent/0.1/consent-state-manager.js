@@ -17,6 +17,7 @@
 import {
   CONSENT_ITEM_STATE,
   ConsentInfoDef,
+  ConsentMetadataDef,
   calculateLegacyStateValue,
   composeStoreValue,
   constructConsentInfo,
@@ -30,9 +31,13 @@ import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, devAssert, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {expandConsentEndpointUrl, getConsentCID} from './consent-config';
 
 const TAG = 'CONSENT-STATE-MANAGER';
-const CID_SCOPE = 'AMP-CONSENT';
+
+/** @visibleForTesting */
+export const CONSENT_STORAGE_MAX = 1200;
 
 export class ConsentStateManager {
   /**
@@ -90,16 +95,19 @@ export class ConsentStateManager {
    * Update consent instance state
    * @param {CONSENT_ITEM_STATE} state
    * @param {string=} consentStr
+   * @param {ConsentMetadataDef=} opt_consentMetadata
    */
-  updateConsentInstanceState(state, consentStr) {
+  updateConsentInstanceState(state, consentStr, opt_consentMetadata) {
     if (!this.instance_) {
       dev().error(TAG, 'instance not registered');
       return;
     }
-    this.instance_.update(state, consentStr, false);
+    this.instance_.update(state, consentStr, opt_consentMetadata, false);
 
     if (this.consentChangeHandler_) {
-      this.consentChangeHandler_(constructConsentInfo(state, consentStr));
+      this.consentChangeHandler_(
+        constructConsentInfo(state, consentStr, opt_consentMetadata)
+      );
     }
   }
 
@@ -118,7 +126,7 @@ export class ConsentStateManager {
    */
   getConsentInstanceInfo() {
     devAssert(this.instance_, '%s: cannot find the instance', TAG);
-    return this.instance_.get().then(info => {
+    return this.instance_.get().then((info) => {
       if (hasDirtyBit(info)) {
         return constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN);
       }
@@ -142,7 +150,7 @@ export class ConsentStateManager {
     this.consentChangeHandler_ = handler;
 
     // Fire first consent instance state.
-    this.getConsentInstanceInfo().then(info => {
+    this.getConsentInstanceInfo().then((info) => {
       handler(info);
     });
   }
@@ -254,13 +262,18 @@ export class ConsentInstance {
     // Note: this.hasDirtyBitNext_ is only set to true when 'forcePromptNext'
     // is set to true and we need to set dirtyBit for next visit.
     this.hasDirtyBitNext_ = true;
-    return this.get().then(info => {
+    return this.get().then((info) => {
       if (hasDirtyBit(info)) {
         // Current stored value has dirtyBit and is no longer valid.
         // No need to update with dirtyBit
         return;
       }
-      this.update(info['consentState'], info['consentString'], true);
+      this.update(
+        info['consentState'],
+        info['consentString'],
+        info['consentMetadata'],
+        true
+      );
     });
   }
 
@@ -268,20 +281,24 @@ export class ConsentInstance {
    * Update the local consent state list
    * @param {!CONSENT_ITEM_STATE} state
    * @param {string=} consentString
+   * @param {ConsentMetadataDef=} opt_consentMetadata
    * @param {boolean=} opt_systemUpdate
    */
-  update(state, consentString, opt_systemUpdate) {
+  update(state, consentString, opt_consentMetadata, opt_systemUpdate) {
     const localState =
       this.localConsentInfo_ && this.localConsentInfo_['consentState'];
-    const localConsentStr =
-      this.localConsentInfo_ && this.localConsentInfo_['consentString'];
     const calculatedState = recalculateConsentStateValue(state, localState);
 
     if (state === CONSENT_ITEM_STATE.DISMISSED) {
-      // If state is dismissed, use the old consent string.
+      const localConsentStr =
+        this.localConsentInfo_ && this.localConsentInfo_['consentString'];
+      const localConsentMetadata =
+        this.localConsentInfo_ && this.localConsentInfo_['consentMetadata'];
+      // If state is dismissed, use the old consent string and metadata.
       this.localConsentInfo_ = constructConsentInfo(
         calculatedState,
-        localConsentStr
+        localConsentStr,
+        localConsentMetadata
       );
       return;
     }
@@ -293,6 +310,7 @@ export class ConsentInstance {
       this.localConsentInfo_ = constructConsentInfo(
         calculatedState,
         consentString,
+        opt_consentMetadata,
         true
       );
     } else {
@@ -300,19 +318,21 @@ export class ConsentInstance {
       // from localConsentInfo_
       this.localConsentInfo_ = constructConsentInfo(
         calculatedState,
-        consentString
+        consentString,
+        opt_consentMetadata
       );
     }
 
     const newConsentInfo = constructConsentInfo(
       calculatedState,
       consentString,
+      opt_consentMetadata,
       this.hasDirtyBitNext_
     );
 
     if (isConsentInfoStoredValueSame(newConsentInfo, this.savedConsentInfo_)) {
       // Only update/save to localstorage if it's not dismiss
-      // And the value is different from what is stored.
+      // and the value is different from what is stored.
       return;
     }
 
@@ -325,7 +345,7 @@ export class ConsentInstance {
    * @param {!ConsentInfoDef} consentInfo
    */
   updateStoredValue_(consentInfo) {
-    this.storagePromise_.then(storage => {
+    this.storagePromise_.then((storage) => {
       if (
         !isConsentInfoStoredValueSame(
           consentInfo,
@@ -345,27 +365,32 @@ export class ConsentInstance {
         return;
       }
 
-      const consentStr = consentInfo['consentString'];
-      if (consentStr && consentStr.length > 150) {
-        // Verify the length of consentString.
-        // 150 * 2 (utf8Encode) * 4/3 (base64) = 400 bytes.
-        // TODO: Need utf8Encode if necessary.
+      const value = composeStoreValue(consentInfo);
+      if (value == null) {
+        // Value can be false, do not use !value check
+        // Nothing to store to localStorage
+        return;
+      }
+
+      // Check size
+      const size = JSON.stringify(
+        dict({
+          [this.storageKey_]: value,
+        })
+      ).length;
+
+      if (size > CONSENT_STORAGE_MAX) {
+        // 1200 * 4/3 (base64) = 1600 bytes
         user().error(
           TAG,
-          'Cannot store consentString which length exceeds 150 ' +
-            'Previous stored consentInfo will be cleared'
+          'Cannot store consent information which length exceeds %s. ' +
+            'Previous stored consentInfo will be cleared',
+          CONSENT_STORAGE_MAX
         );
         // If new consentInfo value cannot be stored, need to remove previous
         // value
         storage.remove(this.storageKey_);
         // TODO: Good to have a way to inform CMP service in this case
-        return;
-      }
-
-      const value = composeStoreValue(consentInfo);
-      if (value == null) {
-        // Value can be false, do not use !value check
-        // Nothing to store to localStorage
         return;
       }
       this.savedConsentInfo_ = consentInfo;
@@ -386,11 +411,11 @@ export class ConsentInstance {
 
     let storage;
     return this.storagePromise_
-      .then(s => {
+      .then((s) => {
         storage = s;
         return storage.get(this.storageKey_);
       })
-      .then(storedValue => {
+      .then((storedValue) => {
         if (this.localConsentInfo_) {
           // If local value has been updated, return most updated value;
           return this.localConsentInfo_;
@@ -413,7 +438,7 @@ export class ConsentInstance {
         this.localConsentInfo_ = consentInfo;
         return this.localConsentInfo_;
       })
-      .catch(e => {
+      .catch((e) => {
         dev().error(TAG, 'Failed to read storage', e);
         return constructConsentInfo(CONSENT_ITEM_STATE.UNKNOWN);
       });
@@ -435,13 +460,7 @@ export class ConsentInstance {
     const legacyConsentState = calculateLegacyStateValue(
       consentInfo['consentState']
     );
-    const cidPromise = Services.cidForDoc(this.ampdoc_).then(cid => {
-      return cid.get(
-        {scope: CID_SCOPE, createCookieIfNotPresent: true},
-        Promise.resolve()
-      );
-    });
-    cidPromise.then(userId => {
+    getConsentCID(this.ampdoc_).then((userId) => {
       const request = /** @type {!JsonObject} */ ({
         // Unfortunately we need to keep the name to be backward compatible
         'consentInstanceId': this.id_,
@@ -456,6 +475,9 @@ export class ConsentInstance {
       if (consentInfo['consentString']) {
         request['consentString'] = consentInfo['consentString'];
       }
+      if (consentInfo['consentMetadata']) {
+        request['consentMetadata'] = consentInfo['consentMetadata'];
+      }
       const init = {
         credentials: 'include',
         method: 'POST',
@@ -463,10 +485,12 @@ export class ConsentInstance {
         ampCors: false,
       };
       this.ampdoc_.whenFirstVisible().then(() => {
-        Services.xhrFor(this.ampdoc_.win).fetchJson(
-          /** @type {string} */ (this.onUpdateHref_),
-          init
-        );
+        expandConsentEndpointUrl(
+          this.ampdoc_.getHeadNode(),
+          /** @type {string} */ (this.onUpdateHref_)
+        ).then((expandedUpdateHref) => {
+          Services.xhrFor(this.ampdoc_.win).fetchJson(expandedUpdateHref, init);
+        });
       });
     });
   }

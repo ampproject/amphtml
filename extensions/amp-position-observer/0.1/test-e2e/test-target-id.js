@@ -70,14 +70,14 @@ async function scrollParentWindowYBy(controller, px) {
   await controller.scrollBy(article, {top: px});
   await controller
     .findElement('iframe')
-    .then(frame => controller.switchToFrame(frame));
+    .then((frame) => controller.switchToFrame(frame));
 }
 
 async function verifyClockHandRect(controller, rect) {
   const clockHand = await controller.findElement('.clock-hand');
   const delta = controller
     .getElementRect(clockHand)
-    .then(clockRect =>
+    .then((clockRect) =>
       Math.max(
         Math.abs(clockRect.x - rect.x),
         Math.abs(clockRect.y - rect.y),

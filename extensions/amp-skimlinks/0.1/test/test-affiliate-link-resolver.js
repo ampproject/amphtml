@@ -33,7 +33,7 @@ describes.fakeWin(
       extensions: ['amp-skimlinks'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let xhr;
     let helpers;
@@ -297,7 +297,7 @@ describes.fakeWin(
           const twoStepsResponse = resolver.resolveUnknownAnchors(anchorList);
           // Replace all the unknown in the synchronous reponse,
           // asynchronous response will then overwrite it later.
-          const expectedSyncData = anchorList.map(a => {
+          const expectedSyncData = anchorList.map((a) => {
             return createAnchorReplacementObject(
               a,
               waypoint.getAffiliateUrl(a)
@@ -322,7 +322,7 @@ describes.fakeWin(
           ];
 
           expect(response.asyncResponse).to.be.an.instanceof(Promise);
-          return response.asyncResponse.then(anchorReplacementTuple => {
+          return response.asyncResponse.then((anchorReplacementTuple) => {
             expect(anchorReplacementTuple).to.deep.equal(expectedAsyncData);
           });
         });
@@ -391,7 +391,7 @@ describes.fakeWin(
             )
           );
           expect(response.asyncResponse).to.be.an.instanceof(Promise);
-          return response.asyncResponse.then(anchorReplacementTuple => {
+          return response.asyncResponse.then((anchorReplacementTuple) => {
             expect(anchorReplacementTuple).to.deep.equal(expectedAsyncData);
           });
         });

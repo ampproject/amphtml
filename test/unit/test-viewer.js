@@ -27,7 +27,7 @@ import {
   removeFragment,
 } from '../../src/url';
 
-describes.sandboxed('Viewer', {}, env => {
+describes.sandboxed('Viewer', {}, (env) => {
   let windowMock;
   let viewer;
   let windowApi;
@@ -69,7 +69,7 @@ describes.sandboxed('Viewer', {}, env => {
   beforeEach(() => {
     clock = env.sandbox.useFakeTimers();
     events = {};
-    const WindowApi = function() {};
+    const WindowApi = function () {};
     windowApi = new WindowApi();
     windowApi.Math = window.Math;
     windowApi.crypto = window.crypto;
@@ -81,6 +81,13 @@ describes.sandboxed('Viewer', {}, env => {
       href: '/test/viewer',
       ancestorOrigins: null,
       search: '',
+    };
+    windowApi.addEventListener = (type, listener) => {
+      events[type] = listener;
+    };
+    windowApi.removeEventListener = (type, listener) => {
+      expect(events[type]).to.equal(listener);
+      delete events[type];
     };
     windowApi.document = {
       nodeType: /* DOCUMENT */ 9,
@@ -100,6 +107,15 @@ describes.sandboxed('Viewer', {}, env => {
       querySelector() {
         return parseUrlDeprecated('http://www.example.com/');
       },
+      head: {
+        nodeType: /* ELEMENT */ 1,
+        querySelector() {
+          return null;
+        },
+        querySelectorAll() {
+          return [];
+        },
+      },
     };
     windowApi.navigator = window.navigator;
     windowApi.history = {
@@ -116,7 +132,7 @@ describes.sandboxed('Viewer', {}, env => {
     params = {'origin': 'g.com'};
     env.sandbox
       .stub(ampdoc, 'getParam')
-      .callsFake(name => (name in params ? params[name] : null));
+      .callsFake((name) => (name in params ? params[name] : null));
 
     installPlatformService(windowApi);
     installTimerService(windowApi);
@@ -164,7 +180,7 @@ describes.sandboxed('Viewer', {}, env => {
     expect(viewer.getParam('test')).to.equal('1');
   });
 
-  it('should set ampshare fragment within custom tab', function*() {
+  it('should set ampshare fragment within custom tab', function* () {
     windowApi.parent = windowApi;
     setUrl('http://www.example.com/?amp_gsa=1&amp_js_v=a0');
     // windowApi.location.href = 'http://www.example.com/';
@@ -180,7 +196,7 @@ describes.sandboxed('Viewer', {}, env => {
     );
   });
 
-  it('should merge fragments within custom tab', function*() {
+  it('should merge fragments within custom tab', function* () {
     windowApi.parent = windowApi;
     setUrl('http://www.example.com/?amp_gsa=1&amp_js_v=a0#test=1');
     const viewer = new ViewerImpl(ampdoc);
@@ -194,7 +210,7 @@ describes.sandboxed('Viewer', {}, env => {
     );
   });
 
-  it('should not duplicate ampshare when merging', function*() {
+  it('should not duplicate ampshare when merging', function* () {
     windowApi.parent = windowApi;
     setUrl(
       'http://www.example.com/' +
@@ -212,7 +228,7 @@ describes.sandboxed('Viewer', {}, env => {
     );
   });
 
-  it('should remove multiple ampshares when merging', function*() {
+  it('should remove multiple ampshares when merging', function* () {
     windowApi.parent = windowApi;
     setUrl(
       'http://www.example.com/?amp_gsa=1&amp_js_v=a0' +
@@ -229,7 +245,7 @@ describes.sandboxed('Viewer', {}, env => {
     );
   });
 
-  it("should remove extra ampshare even when it's first", function*() {
+  it("should remove extra ampshare even when it's first", function* () {
     windowApi.parent = windowApi;
     setUrl(
       'http://www.example.com/' +
@@ -252,7 +268,7 @@ describes.sandboxed('Viewer', {}, env => {
     );
   });
 
-  it("should remove extra ampshare even when it's sandwiched", function*() {
+  it("should remove extra ampshare even when it's sandwiched", function* () {
     windowApi.parent = windowApi;
     setUrl(
       'http://www.example.com/' +
@@ -281,7 +297,7 @@ describes.sandboxed('Viewer', {}, env => {
     expect(viewer.getParam('click')).to.equal('abc');
   });
 
-  it('should restore fragment within custom tab with click param', function*() {
+  it('should restore fragment within custom tab with click param', function* () {
     windowApi.parent = windowApi;
     setUrl('http://www.example.com/?amp_gsa=1&amp_js_v=a0#click=abc');
     const viewer = new ViewerImpl(ampdoc);
@@ -299,11 +315,7 @@ describes.sandboxed('Viewer', {}, env => {
     );
   });
 
-  it('should configure prerenderSize by default', () => {
-    expect(viewer.getPrerenderSize()).to.equal(1);
-  });
-
-  it('should return promise that resolve on visible', function*() {
+  it('should return promise that resolve on visible', function* () {
     const viewer = new ViewerImpl(ampdoc);
     expect(ampdoc.isVisible()).to.be.true;
     let promise = ampdoc.whenNextVisible();
@@ -320,7 +332,6 @@ describes.sandboxed('Viewer', {}, env => {
   });
 
   it('should initialize firstVisibleTime when doc becomes visible', () => {
-    params['prerenderSize'] = '3';
     const viewer = new ViewerImpl(ampdoc);
     expect(ampdoc.isVisible()).to.be.true;
     expect(ampdoc.getFirstVisibleTime()).to.equal(0);
@@ -354,15 +365,9 @@ describes.sandboxed('Viewer', {}, env => {
     expect(ampdoc.getLastVisibleTime()).to.equal(2);
   });
 
-  it('should configure prerenderSize', () => {
-    params['prerenderSize'] = '3';
-    const viewer = new ViewerImpl(ampdoc);
-    expect(viewer.getPrerenderSize()).to.equal(3);
-  });
-
   it('should receive viewport event', () => {
     let viewportEvent = null;
-    viewer.onMessage('viewport', event => {
+    viewer.onMessage('viewport', (event) => {
       viewportEvent = event;
     });
     viewer.receiveMessage('viewport', {
@@ -484,13 +489,6 @@ describes.sandboxed('Viewer', {}, env => {
   });
 
   describe('should receive the visibilitychange event', () => {
-    it('should change prerenderSize', () => {
-      viewer.receiveMessage('visibilitychange', {
-        prerenderSize: 4,
-      });
-      expect(viewer.getPrerenderSize()).to.equal(4);
-    });
-
     it('should change visibilityState', () => {
       viewer.receiveMessage('visibilitychange', {
         state: 'paused',
@@ -637,6 +635,45 @@ describes.sandboxed('Viewer', {}, env => {
     });
   });
 
+  describe('User action makes doc visible', () => {
+    const eventTest = (eventName) => {
+      ampdoc.overrideVisibilityState('prerender');
+      viewer = new ViewerImpl(ampdoc);
+      expect(ampdoc.getVisibilityState()).to.equal('prerender');
+
+      expect(events.touchstart).to.not.be.undefined;
+      expect(events.keydown).to.not.be.undefined;
+      expect(events.mousedown).to.not.be.undefined;
+
+      events[eventName]();
+      expect(ampdoc.getVisibilityState()).to.equal('visible');
+      expect(events.touchstart).to.be.undefined;
+      expect(events.keydown).to.be.undefined;
+      expect(events.mousedown).to.be.undefined;
+    };
+
+    it(
+      'should become visible on touchstart',
+      eventTest.bind(null, 'touchstart')
+    );
+
+    it('should become visible on mousedown', eventTest.bind(null, 'mousedown'));
+
+    it('should become visible on keydown', eventTest.bind(null, 'keydown'));
+
+    it('should not become visible when not a single doc', () => {
+      env.sandbox.stub(ampdoc, 'isSingleDoc').callsFake(() => false);
+      ampdoc.overrideVisibilityState('prerender');
+
+      viewer = new ViewerImpl(ampdoc);
+
+      expect(ampdoc.getVisibilityState()).to.equal('prerender');
+      expect(events.touchstart).to.be.undefined;
+      expect(events.keydown).to.be.undefined;
+      expect(events.mousedown).to.be.undefined;
+    });
+  });
+
   describe('Messaging not embedded', () => {
     it('should not expect messaging', () => {
       expect(viewer.messagingReadyPromise_).to.be.null;
@@ -647,7 +684,7 @@ describes.sandboxed('Viewer', {}, env => {
         () => {
           throw new Error('should not succeed');
         },
-        error => {
+        (error) => {
           expect(error.message).to.match(/No messaging channel/);
         }
       );
@@ -672,7 +709,7 @@ describes.sandboxed('Viewer', {}, env => {
 
     it('should receive broadcast event', () => {
       let broadcastMessage = null;
-      viewer.onBroadcast(message => {
+      viewer.onBroadcast((message) => {
         broadcastMessage = message;
       });
       viewer.receiveMessage('broadcast', {type: 'type1'});
@@ -697,6 +734,7 @@ describes.sandboxed('Viewer', {}, env => {
     });
 
     it('should post broadcast event but not fail w/o messaging', () => {
+      expectAsyncConsoleError(/No messaging channel/);
       const result = viewer.broadcast({type: 'type1'});
       expect(viewer.messageQueue_.length).to.equal(0);
       clock.tick(20001);
@@ -728,6 +766,7 @@ describes.sandboxed('Viewer', {}, env => {
     });
 
     it('should timeout messaging channel', () => {
+      expectAsyncConsoleError(/No messaging channel/);
       let mResolved = false;
       const m = viewer.sendMessageAwaitResponse('event', {}).then(() => {
         mResolved = true;
@@ -1002,7 +1041,7 @@ describes.sandboxed('Viewer', {}, env => {
     it('should consider non-trusted when not iframed', () => {
       windowApi.parent = windowApi;
       windowApi.location.ancestorOrigins = ['https://google.com'];
-      return new ViewerImpl(ampdoc).isTrustedViewer().then(res => {
+      return new ViewerImpl(ampdoc).isTrustedViewer().then((res) => {
         expect(res).to.be.false;
       });
     });
@@ -1010,7 +1049,7 @@ describes.sandboxed('Viewer', {}, env => {
     it('should consider trusted by ancestor', () => {
       windowApi.parent = {};
       windowApi.location.ancestorOrigins = ['https://google.com'];
-      return new ViewerImpl(ampdoc).isTrustedViewer().then(res => {
+      return new ViewerImpl(ampdoc).isTrustedViewer().then((res) => {
         expect(res).to.be.true;
       });
     });
@@ -1018,7 +1057,7 @@ describes.sandboxed('Viewer', {}, env => {
     it('should consider trusted by ancestor', () => {
       windowApi.parent = {};
       windowApi.location.ancestorOrigins = ['https://gmail.dev'];
-      return new ViewerImpl(ampdoc).isTrustedViewer().then(res => {
+      return new ViewerImpl(ampdoc).isTrustedViewer().then((res) => {
         expect(res).to.be.true;
       });
     });
@@ -1026,7 +1065,7 @@ describes.sandboxed('Viewer', {}, env => {
     it('should consider non-trusted without ancestor', () => {
       windowApi.parent = {};
       windowApi.location.ancestorOrigins = [];
-      return new ViewerImpl(ampdoc).isTrustedViewer().then(res => {
+      return new ViewerImpl(ampdoc).isTrustedViewer().then((res) => {
         expect(res).to.be.false;
       });
     });
@@ -1034,7 +1073,7 @@ describes.sandboxed('Viewer', {}, env => {
     it('should consider non-trusted with wrong ancestor', () => {
       windowApi.parent = {};
       windowApi.location.ancestorOrigins = ['https://untrusted.com'];
-      return new ViewerImpl(ampdoc).isTrustedViewer().then(res => {
+      return new ViewerImpl(ampdoc).isTrustedViewer().then((res) => {
         expect(res).to.be.false;
       });
     });
@@ -1044,7 +1083,7 @@ describes.sandboxed('Viewer', {}, env => {
       windowApi.location.ancestorOrigins = null;
       const viewer = new ViewerImpl(ampdoc);
       viewer.setMessageDeliverer(() => {}, 'https://google.com');
-      return viewer.isTrustedViewer().then(res => {
+      return viewer.isTrustedViewer().then((res) => {
         expect(res).to.be.true;
       });
     });
@@ -1072,7 +1111,7 @@ describes.sandboxed('Viewer', {}, env => {
       windowApi.location.ancestorOrigins = null;
       const viewer = new ViewerImpl(ampdoc);
       viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
-      return viewer.isTrustedViewer().then(res => {
+      return viewer.isTrustedViewer().then((res) => {
         expect(res).to.be.false;
       });
     });
@@ -1082,7 +1121,7 @@ describes.sandboxed('Viewer', {}, env => {
       windowApi.location.ancestorOrigins = ['https://google.com'];
       const viewer = new ViewerImpl(ampdoc);
       viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
-      return viewer.isTrustedViewer().then(res => {
+      return viewer.isTrustedViewer().then((res) => {
         expect(res).to.be.true;
       });
     });
@@ -1094,7 +1133,7 @@ describes.sandboxed('Viewer', {}, env => {
         windowApi.location.ancestorOrigins = [];
         const viewer = new ViewerImpl(ampdoc);
         viewer.setMessageDeliverer(() => {}, 'https://google.com');
-        return viewer.isTrustedViewer().then(res => {
+        return viewer.isTrustedViewer().then((res) => {
           expect(res).to.be.true;
         });
       });
@@ -1115,7 +1154,7 @@ describes.sandboxed('Viewer', {}, env => {
         windowApi.location.ancestorOrigins = [];
         const viewer = new ViewerImpl(ampdoc);
         viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
-        return viewer.isTrustedViewer().then(res => {
+        return viewer.isTrustedViewer().then((res) => {
           expect(res).to.be.false;
         });
       });
@@ -1126,7 +1165,7 @@ describes.sandboxed('Viewer', {}, env => {
         windowApi.location.ancestorOrigins = ['https://google.com'];
         const viewer = new ViewerImpl(ampdoc);
         viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
-        return viewer.isTrustedViewer().then(res => {
+        return viewer.isTrustedViewer().then((res) => {
           expect(res).to.be.false;
         });
       });
@@ -1139,7 +1178,7 @@ describes.sandboxed('Viewer', {}, env => {
         windowApi.location.ancestorOrigins = [];
         const viewer = new ViewerImpl(ampdoc);
         viewer.setMessageDeliverer(() => {}, 'https://google.com');
-        return viewer.isTrustedViewer().then(res => {
+        return viewer.isTrustedViewer().then((res) => {
           expect(res).to.be.true;
         });
       });
@@ -1160,7 +1199,7 @@ describes.sandboxed('Viewer', {}, env => {
         windowApi.location.ancestorOrigins = [];
         const viewer = new ViewerImpl(ampdoc);
         viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
-        return viewer.isTrustedViewer().then(res => {
+        return viewer.isTrustedViewer().then((res) => {
           expect(res).to.be.false;
         });
       });
@@ -1171,7 +1210,7 @@ describes.sandboxed('Viewer', {}, env => {
         windowApi.location.ancestorOrigins = ['https://google.com'];
         const viewer = new ViewerImpl(ampdoc);
         viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
-        return viewer.isTrustedViewer().then(res => {
+        return viewer.isTrustedViewer().then((res) => {
           expect(res).to.be.false;
         });
       });
@@ -1182,7 +1221,7 @@ describes.sandboxed('Viewer', {}, env => {
         windowApi.parent = {};
         params = {'origin': 'g.com', 'webview': '1'};
         windowApi.location.ancestorOrigins = ['https://google.com'];
-        return new ViewerImpl(ampdoc).isTrustedViewer().then(res => {
+        return new ViewerImpl(ampdoc).isTrustedViewer().then((res) => {
           expect(res).to.be.true;
         });
       });
@@ -1191,7 +1230,7 @@ describes.sandboxed('Viewer', {}, env => {
         windowApi.parent = {};
         params = {'origin': 'g.com', 'webview': '1'};
         windowApi.location.ancestorOrigins = [];
-        return new ViewerImpl(ampdoc).isTrustedViewer().then(res => {
+        return new ViewerImpl(ampdoc).isTrustedViewer().then((res) => {
           expect(res).to.be.false;
         });
       });
@@ -1200,7 +1239,7 @@ describes.sandboxed('Viewer', {}, env => {
         windowApi.parent = {};
         params = {'origin': 'g.com', 'webview': '1'};
         windowApi.location.ancestorOrigins = ['https://untrusted.com'];
-        return new ViewerImpl(ampdoc).isTrustedViewer().then(res => {
+        return new ViewerImpl(ampdoc).isTrustedViewer().then((res) => {
           expect(res).to.be.false;
         });
       });
@@ -1211,7 +1250,7 @@ describes.sandboxed('Viewer', {}, env => {
         windowApi.location.ancestorOrigins = null;
         const viewer = new ViewerImpl(ampdoc);
         viewer.setMessageDeliverer(() => {}, 'https://google.com');
-        return viewer.isTrustedViewer().then(res => {
+        return viewer.isTrustedViewer().then((res) => {
           expect(res).to.be.true;
         });
       });
@@ -1232,7 +1271,7 @@ describes.sandboxed('Viewer', {}, env => {
         windowApi.location.ancestorOrigins = null;
         const viewer = new ViewerImpl(ampdoc);
         viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
-        return viewer.isTrustedViewer().then(res => {
+        return viewer.isTrustedViewer().then((res) => {
           expect(res).to.be.false;
         });
       });
@@ -1243,7 +1282,7 @@ describes.sandboxed('Viewer', {}, env => {
         windowApi.location.ancestorOrigins = ['https://google.com'];
         const viewer = new ViewerImpl(ampdoc);
         viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
-        return viewer.isTrustedViewer().then(res => {
+        return viewer.isTrustedViewer().then((res) => {
           expect(res).to.be.true;
         });
       });
@@ -1401,7 +1440,7 @@ describes.sandboxed('Viewer', {}, env => {
       test('http://google.com', false);
     });
 
-    describe('should NOT trust wrong or non-whitelisted domain variations', () => {
+    describe('should NOT trust wrong or non-allowlisted domain variations', () => {
       test('https://google.net', false);
       test('https://google.other.com', false);
       test('https://www.google.other.com', false);
@@ -1421,7 +1460,7 @@ describes.sandboxed('Viewer', {}, env => {
       expect(viewer.getUnconfirmedReferrerUrl()).to.equal(
         'https://acme.org/docref'
       );
-      return viewer.getReferrerUrl().then(referrerUrl => {
+      return viewer.getReferrerUrl().then((referrerUrl) => {
         expect(referrerUrl).to.equal('https://acme.org/docref');
         expect(errorStub).to.have.not.been.called;
       });
@@ -1435,7 +1474,7 @@ describes.sandboxed('Viewer', {}, env => {
       expect(viewer.getUnconfirmedReferrerUrl()).to.equal(
         'https://acme.org/docref'
       );
-      return viewer.getReferrerUrl().then(referrerUrl => {
+      return viewer.getReferrerUrl().then((referrerUrl) => {
         expect(referrerUrl).to.equal('https://acme.org/docref');
         expect(errorStub).to.have.not.been.called;
       });
@@ -1452,7 +1491,7 @@ describes.sandboxed('Viewer', {}, env => {
       expect(viewer.getUnconfirmedReferrerUrl()).to.equal(
         'https://acme.org/docref'
       );
-      return viewer.getReferrerUrl().then(referrerUrl => {
+      return viewer.getReferrerUrl().then((referrerUrl) => {
         expect(referrerUrl).to.equal('https://acme.org/docref');
         expect(errorStub).to.have.not.been.called;
       });
@@ -1469,7 +1508,7 @@ describes.sandboxed('Viewer', {}, env => {
       expect(viewer.getUnconfirmedReferrerUrl()).to.equal(
         'https://acme.org/docref'
       );
-      return viewer.getReferrerUrl().then(referrerUrl => {
+      return viewer.getReferrerUrl().then((referrerUrl) => {
         expect(referrerUrl).to.equal('https://acme.org/docref');
         expect(errorStub).to.have.not.been.called;
       });
@@ -1488,7 +1527,7 @@ describes.sandboxed('Viewer', {}, env => {
         'https://acme.org/viewer'
       );
       viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
-      return viewer.getReferrerUrl().then(referrerUrl => {
+      return viewer.getReferrerUrl().then((referrerUrl) => {
         expect(referrerUrl).to.equal('https://acme.org/docref');
         // Unconfirmed referrer is reset. Async error is thrown.
         expect(viewer.getUnconfirmedReferrerUrl()).to.equal(
@@ -1498,7 +1537,7 @@ describes.sandboxed('Viewer', {}, env => {
         expect(
           expectedErrorStub.calledWith(
             'Viewer',
-            env.sandbox.match(arg => {
+            env.sandbox.match((arg) => {
               return !!arg.match(/Untrusted viewer referrer override/);
             })
           )
@@ -1519,7 +1558,7 @@ describes.sandboxed('Viewer', {}, env => {
         'https://acme.org/viewer'
       );
       viewer.setMessageDeliverer(() => {}, 'https://google.com');
-      return viewer.getReferrerUrl().then(referrerUrl => {
+      return viewer.getReferrerUrl().then((referrerUrl) => {
         expect(referrerUrl).to.equal('https://acme.org/viewer');
         // Unconfirmed is confirmed and kept.
         expect(viewer.getUnconfirmedReferrerUrl()).to.equal(
@@ -1541,7 +1580,7 @@ describes.sandboxed('Viewer', {}, env => {
       expect(viewer.getUnconfirmedReferrerUrl()).to.equal(
         'https://acme.org/viewer'
       );
-      return viewer.getReferrerUrl().then(referrerUrl => {
+      return viewer.getReferrerUrl().then((referrerUrl) => {
         expect(referrerUrl).to.equal('https://acme.org/viewer');
         expect(errorStub).to.have.not.been.called;
       });
@@ -1554,7 +1593,7 @@ describes.sandboxed('Viewer', {}, env => {
       windowApi.location.ancestorOrigins = ['https://google.com'];
       const viewer = new ViewerImpl(ampdoc);
       expect(viewer.getUnconfirmedReferrerUrl()).to.equal('');
-      return viewer.getReferrerUrl().then(referrerUrl => {
+      return viewer.getReferrerUrl().then((referrerUrl) => {
         expect(referrerUrl).to.equal('');
         expect(errorStub).to.have.not.been.called;
       });
@@ -1573,7 +1612,7 @@ describes.sandboxed('Viewer', {}, env => {
       setUrl('https://acme.org/doc1#hash');
       const viewer = new ViewerImpl(ampdoc);
       expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
-      return viewer.getViewerUrl().then(viewerUrl => {
+      return viewer.getViewerUrl().then((viewerUrl) => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
         expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
         expect(expectedErrorStub).to.have.not.been.called;
@@ -1588,7 +1627,7 @@ describes.sandboxed('Viewer', {}, env => {
       );
       const viewer = new ViewerImpl(ampdoc);
       expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
-      return viewer.getViewerUrl().then(viewerUrl => {
+      return viewer.getViewerUrl().then((viewerUrl) => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
         expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
         expect(expectedErrorStub).to.have.not.been.called;
@@ -1604,14 +1643,14 @@ describes.sandboxed('Viewer', {}, env => {
       windowApi.location.ancestorOrigins = ['https://untrusted.com'];
       const viewer = new ViewerImpl(ampdoc);
       expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
-      return viewer.getViewerUrl().then(viewerUrl => {
+      return viewer.getViewerUrl().then((viewerUrl) => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
         expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
         expect(expectedErrorStub).to.be.calledOnce;
         expect(
           expectedErrorStub.calledWith(
             'Viewer',
-            env.sandbox.match(arg => {
+            env.sandbox.match((arg) => {
               return !!arg.match(/Untrusted viewer url override/);
             })
           )
@@ -1628,14 +1667,14 @@ describes.sandboxed('Viewer', {}, env => {
       windowApi.location.ancestorOrigins = [];
       const viewer = new ViewerImpl(ampdoc);
       expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
-      return viewer.getViewerUrl().then(viewerUrl => {
+      return viewer.getViewerUrl().then((viewerUrl) => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
         expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
         expect(expectedErrorStub).to.be.calledOnce;
         expect(
           expectedErrorStub.calledWith(
             'Viewer',
-            env.sandbox.match(arg => {
+            env.sandbox.match((arg) => {
               return !!arg.match(/Untrusted viewer url override/);
             })
           )
@@ -1652,14 +1691,14 @@ describes.sandboxed('Viewer', {}, env => {
       const viewer = new ViewerImpl(ampdoc);
       expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
       viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
-      return viewer.getViewerUrl().then(viewerUrl => {
+      return viewer.getViewerUrl().then((viewerUrl) => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
         expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
         expect(expectedErrorStub).to.be.calledOnce;
         expect(
           expectedErrorStub.calledWith(
             'Viewer',
-            env.sandbox.match(arg => {
+            env.sandbox.match((arg) => {
               return !!arg.match(/Untrusted viewer url override/);
             })
           )
@@ -1676,7 +1715,7 @@ describes.sandboxed('Viewer', {}, env => {
       const viewer = new ViewerImpl(ampdoc);
       expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
       viewer.setMessageDeliverer(() => {}, 'https://google.com');
-      return viewer.getViewerUrl().then(viewerUrl => {
+      return viewer.getViewerUrl().then((viewerUrl) => {
         expect(viewerUrl).to.equal('https://acme.org/viewer');
         expect(viewer.getResolvedViewerUrl()).to.equal(
           'https://acme.org/viewer'
@@ -1694,7 +1733,7 @@ describes.sandboxed('Viewer', {}, env => {
       windowApi.location.ancestorOrigins = ['https://google.com'];
       const viewer = new ViewerImpl(ampdoc);
       expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
-      return viewer.getViewerUrl().then(viewerUrl => {
+      return viewer.getViewerUrl().then((viewerUrl) => {
         expect(viewerUrl).to.equal('https://acme.org/viewer');
         expect(viewer.getResolvedViewerUrl()).to.equal(
           'https://acme.org/viewer'
@@ -1709,7 +1748,7 @@ describes.sandboxed('Viewer', {}, env => {
       windowApi.location.ancestorOrigins = ['https://google.com'];
       const viewer = new ViewerImpl(ampdoc);
       expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
-      return viewer.getViewerUrl().then(viewerUrl => {
+      return viewer.getViewerUrl().then((viewerUrl) => {
         expect(viewerUrl).to.equal('https://acme.org/doc1');
         expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
         expect(expectedErrorStub).to.have.not.been.called;
@@ -1720,7 +1759,7 @@ describes.sandboxed('Viewer', {}, env => {
   describe('viewerOrigin', () => {
     it('should return empty string if origin is not known', () => {
       const viewer = new ViewerImpl(ampdoc);
-      return viewer.getViewerOrigin().then(viewerOrigin => {
+      return viewer.getViewerOrigin().then((viewerOrigin) => {
         expect(viewerOrigin).to.equal('');
       });
     });
@@ -1729,7 +1768,7 @@ describes.sandboxed('Viewer', {}, env => {
       windowApi.parent = {};
       windowApi.location.ancestorOrigins = ['https://google.com'];
       const viewer = new ViewerImpl(ampdoc);
-      return viewer.getViewerOrigin().then(viewerOrigin => {
+      return viewer.getViewerOrigin().then((viewerOrigin) => {
         expect(viewerOrigin).to.equal('https://google.com');
       });
     });
@@ -1737,7 +1776,7 @@ describes.sandboxed('Viewer', {}, env => {
     it('should return viewer origin if set via handshake', () => {
       windowApi.parent = {};
       const viewer = new ViewerImpl(ampdoc);
-      const result = viewer.getViewerOrigin().then(viewerOrigin => {
+      const result = viewer.getViewerOrigin().then((viewerOrigin) => {
         expect(viewerOrigin).to.equal('https://foobar.com');
       });
       viewer.setMessageDeliverer(() => {}, 'https://foobar.com');
@@ -1747,11 +1786,95 @@ describes.sandboxed('Viewer', {}, env => {
     it('should return empty string if handshake does not happen', () => {
       windowApi.parent = {};
       const viewer = new ViewerImpl(ampdoc);
-      const result = viewer.getViewerOrigin().then(viewerOrigin => {
+      const result = viewer.getViewerOrigin().then((viewerOrigin) => {
         expect(viewerOrigin).to.equal('');
       });
       clock.tick(1010);
       return result;
+    });
+  });
+
+  describe('onMessage', () => {
+    it('should fire observer on event', () => {
+      const onMessageSpy = env.sandbox.spy();
+      viewer.onMessage('event', onMessageSpy);
+      viewer.receiveMessage('event', {foo: 'bar'});
+      expect(onMessageSpy).to.have.been.calledOnceWithExactly({foo: 'bar'});
+    });
+
+    it('should not fire observer on other events', () => {
+      const onMessageSpy = env.sandbox.spy();
+      viewer.onMessage('event', onMessageSpy);
+      viewer.receiveMessage('otherevent', {foo: 'bar'});
+      expect(onMessageSpy).to.not.have.been.called;
+    });
+
+    it('should fire observer with queued messages on handler registration', () => {
+      const onMessageSpy = env.sandbox.spy();
+      viewer.receiveMessage('event', {foo: 'bar'});
+      viewer.onMessage('event', onMessageSpy);
+      expect(onMessageSpy).to.have.been.calledOnceWithExactly({foo: 'bar'});
+    });
+
+    it('should empty queued messages after first handler registration', () => {
+      const onMessageSpy = env.sandbox.spy();
+      viewer.receiveMessage('event', {foo: 'bar'});
+      viewer.onMessage('event', onMessageSpy);
+      viewer.onMessage('event', onMessageSpy);
+      expect(onMessageSpy).to.have.been.calledOnceWithExactly({foo: 'bar'});
+    });
+
+    it('should cap the max number of queued messages', () => {
+      const onMessageSpy = env.sandbox.spy();
+      for (let i = 0; i < 55; i++) {
+        viewer.receiveMessage('event', {foo: 'bar'});
+      }
+      viewer.onMessage('event', onMessageSpy);
+      expect(onMessageSpy).to.have.callCount(50);
+    });
+  });
+
+  describe('onMessageRespond', () => {
+    it('should call responder on event', () => {
+      const onMessageRespondStub = env.sandbox.stub().resolves();
+      viewer.onMessageRespond('event', onMessageRespondStub);
+      viewer.receiveMessage('event', {foo: 'bar'});
+      expect(onMessageRespondStub).to.have.been.calledOnceWithExactly({
+        foo: 'bar',
+      });
+    });
+
+    it('should not call responder on other events', () => {
+      const onMessageRespondStub = env.sandbox.stub().resolves();
+      viewer.onMessageRespond('event', onMessageRespondStub);
+      viewer.receiveMessage('otherevent', {foo: 'bar'});
+      expect(onMessageRespondStub).to.not.have.been.called;
+    });
+
+    it('should call responder with queued messages on responder registration', () => {
+      const onMessageRespondStub = env.sandbox.stub().resolves();
+      viewer.receiveMessage('event', {foo: 'bar'});
+      viewer.onMessageRespond('event', onMessageRespondStub);
+      expect(onMessageRespondStub).to.have.been.calledOnceWithExactly({
+        foo: 'bar',
+      });
+    });
+
+    it('should empty queued messages after first responder registration', () => {
+      const onMessageRespondStub = env.sandbox.stub().resolves();
+      viewer.receiveMessage('event', {foo: 'bar'});
+      viewer.onMessageRespond('event', onMessageRespondStub);
+      viewer.onMessageRespond('event', onMessageRespondStub);
+      expect(onMessageRespondStub).to.have.been.calledOnceWithExactly({
+        foo: 'bar',
+      });
+    });
+
+    it('should return responder response when enqueing message on responder registration', async () => {
+      const onMessageRespondStub = env.sandbox.stub().resolves('response');
+      const promise = viewer.receiveMessage('event', {foo: 'bar'});
+      viewer.onMessageRespond('event', onMessageRespondStub);
+      expect(await promise).to.equal('response');
     });
   });
 });

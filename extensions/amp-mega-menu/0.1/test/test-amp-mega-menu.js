@@ -26,7 +26,7 @@ describes.realWin(
       extensions: ['amp-mega-menu'],
     },
   },
-  env => {
+  (env) => {
     let win, doc, element;
 
     beforeEach(() => {

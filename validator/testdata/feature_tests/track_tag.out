@@ -48,29 +48,29 @@ FAIL
 |      <!-- Invalid: http URL -->
 |      <track src="http://example.com/track"></track>
 >>     ^~~~~~~~~
-feature_tests/track_tag.html:48:4 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-audio > track'.
+feature_tests/track_tag.html:48:4 Invalid URL protocol 'http:' for attribute 'src' in tag 'track'.
 |      <!-- Invalid: subtitles but no srclang -->
 |      <track src="https://example.com/track" kind="subtitles"></track>
 >>     ^~~~~~~~~
-feature_tests/track_tag.html:50:4 The mandatory attribute 'srclang' is missing in tag 'amp-audio > track[kind=subtitles]'.
+feature_tests/track_tag.html:50:4 The mandatory attribute 'srclang' is missing in tag 'track'.
 |    </amp-audio>
 |
 |    <!-- Invalid examples to make sure the error messages look right -->
 |    <noscript>
 |      <audio><track src="https://a.com/" kind="subtitles"></track></audio>
 >>            ^~~~~~~~~
-feature_tests/track_tag.html:55:11 The mandatory attribute 'srclang' is missing in tag 'audio > track[kind=subtitles]'.
+feature_tests/track_tag.html:55:11 The mandatory attribute 'srclang' is missing in tag 'track'.
 |      <video><track src="https://a.com/" kind="subtitles"></track></video>
 >>            ^~~~~~~~~
-feature_tests/track_tag.html:56:11 The mandatory attribute 'srclang' is missing in tag 'video > track[kind=subtitles]'.
+feature_tests/track_tag.html:56:11 The mandatory attribute 'srclang' is missing in tag 'track'.
 |    </noscript>
 |    <amp-video src="https://example.com/audio" layout="fixed" height=42 width=42>
 |      <track src="https://a.com/" kind="subtitles"></track>
 >>     ^~~~~~~~~
-feature_tests/track_tag.html:59:4 The mandatory attribute 'srclang' is missing in tag 'amp-video > track[kind=subtitles]'.
+feature_tests/track_tag.html:59:4 The mandatory attribute 'srclang' is missing in tag 'track'.
 |    </amp-video>
 |
 |  </body>
 |  </html>
 >>       ^~~~~~~~~
-feature_tests/track_tag.html:63:6 The tag 'amp-video extension .js script' is missing or incorrect, but required by 'amp-video'. This will soon be an error. (see https://amp.dev/documentation/components/amp-video)
+feature_tests/track_tag.html:63:6 The tag 'amp-video extension .js script' is missing or incorrect, but required by 'amp-video'. This will soon be an error. (see https://amp.dev/documentation/components/amp-video/)

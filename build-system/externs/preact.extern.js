@@ -17,40 +17,41 @@
 /** @externs */
 
 /** @const */
-var Preact = {};
+var PreactDef = {};
 
 /**
- * @typedef {function(!JsonObject):Preact.Renderable}
+ * @typedef {function(?):PreactDef.Renderable}
  */
-Preact.FunctionalComponent;
-
-/**
- * @interface
- */
-Preact.VNode = function() {};
+PreactDef.FunctionalComponent;
 
 /**
  * @interface
  */
-Preact.Context = function() {};
+PreactDef.VNode = function () {};
 
 /**
- * @param {!JsonObject} props
- * @return {Preact.Renderable}
+ * @interface
+ * @template T
  */
-Preact.Context.prototype.Provider = function(props) {};
+PreactDef.Context = function () {};
+
+/**
+ * @param {{value: T, children: (?PreactDef.Renderable|undefined)}} props
+ * @return {PreactDef.Renderable}
+ */
+PreactDef.Context.prototype.Provider = function (props) {};
 
 /**
  * @interface
  */
-Preact.Context.prototype.Consumer = function() {};
+PreactDef.Context.prototype.Consumer = function () {};
 
 /**
  * @typedef {string|number|boolean|null|undefined}
  */
-Preact.SimpleRenderable;
+PreactDef.SimpleRenderable;
 
 /**
- * @typedef {Preact.SimpleRenderable|!Preact.VNode|!Array<Preact.SimpleRenderable|!Preact.VNode|!Array<Preact.SimpleRenderable|!Preact.VNode>>}
+ * @typedef {PreactDef.SimpleRenderable|!PreactDef.VNode|!Array<PreactDef.SimpleRenderable|!PreactDef.VNode|!Array<PreactDef.SimpleRenderable|!PreactDef.VNode>>}
  */
-Preact.Renderable;
+PreactDef.Renderable;

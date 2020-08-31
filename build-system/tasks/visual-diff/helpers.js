@@ -42,7 +42,7 @@ const HTML_ESCAPE_REGEX = /(&|<|>|"|'|`)/g;
  * @return {string}
  */
 function escapeHtml(html) {
-  return html.replace(HTML_ESCAPE_REGEX, c => HTML_ESCAPE_CHARS[c]);
+  return html.replace(HTML_ESCAPE_REGEX, (c) => HTML_ESCAPE_CHARS[c]);
 }
 
 /**
@@ -91,7 +91,7 @@ async function verifySelectorsInvisible(page, testName, selectors) {
   );
   try {
     await Promise.all(
-      selectors.map(selector =>
+      selectors.map((selector) =>
         waitForElementVisibility(page, selector, {hidden: true})
       )
     );
@@ -121,7 +121,7 @@ async function verifySelectorsVisible(page, testName, selectors) {
   );
   try {
     await Promise.all(
-      selectors.map(selector => waitForSelectorExistence(page, selector))
+      selectors.map((selector) => waitForSelectorExistence(page, selector))
     );
   } catch (e) {
     throw new Error(
@@ -137,7 +137,7 @@ async function verifySelectorsVisible(page, testName, selectors) {
   );
   try {
     await Promise.all(
-      selectors.map(selector =>
+      selectors.map((selector) =>
         waitForElementVisibility(page, selector, {visible: true})
       )
     );
@@ -151,19 +151,19 @@ async function verifySelectorsVisible(page, testName, selectors) {
 }
 
 /**
- * Wait for all AMP loader dot to disappear.
+ * Wait for all AMP loader indicators to disappear.
  *
  * @param {!puppeteer.Page} page page to wait on.
  * @param {string} testName the full name of the test.
  * @throws {Error} an encountered error.
  */
-async function waitForLoaderDots(page, testName) {
-  const allLoaderDotsGone = await waitForElementVisibility(
+async function waitForPageLoad(page, testName) {
+  const allLoadersGone = await waitForElementVisibility(
     page,
-    '.i-amphtml-loader-dot',
+    '[class~="i-amphtml-loader"], [class~="i-amphtml-loading"]',
     {hidden: true}
   );
-  if (!allLoaderDotsGone) {
+  if (!allLoadersGone) {
     throw new Error(
       `${colors.cyan(testName)} still has the AMP loader dot ` +
         `after ${CSS_SELECTOR_TIMEOUT_MS} ms`
@@ -227,7 +227,7 @@ async function waitForElementVisibility(page, selector, options) {
     // to check equality to both waitForVisible and waitForHidden.
     if (
       elementsAreVisible.every(
-        elementIsVisible => elementIsVisible == waitForVisible
+        (elementIsVisible) => elementIsVisible == waitForVisible
       )
     ) {
       return true;
@@ -265,7 +265,7 @@ async function waitForSelectorExistence(page, selector) {
 module.exports = {
   escapeHtml,
   log,
-  waitForLoaderDots,
+  waitForPageLoad,
   verifySelectorsInvisible,
   verifySelectorsVisible,
 };

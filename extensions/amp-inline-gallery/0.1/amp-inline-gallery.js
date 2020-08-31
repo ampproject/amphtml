@@ -55,13 +55,13 @@ class AmpInlineGallery extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.element.addEventListener(CarouselEvents.OFFSET_CHANGE, event => {
+    this.element.addEventListener(CarouselEvents.OFFSET_CHANGE, (event) => {
       this.onOffsetChange_(event);
     });
-    this.element.addEventListener(CarouselEvents.INDEX_CHANGE, event => {
+    this.element.addEventListener(CarouselEvents.INDEX_CHANGE, (event) => {
       this.onIndexChange_(event);
     });
-    this.element.addEventListener(InlineGalleryEvents.GO_TO_SLIDE, event => {
+    this.element.addEventListener(InlineGalleryEvents.GO_TO_SLIDE, (event) => {
       this.onGoToSlide_(event);
     });
 
@@ -74,15 +74,20 @@ class AmpInlineGallery extends AMP.BaseElement {
       Promise.all(
         toArray(
           scopedQuerySelectorAll(this.element, THUMBNAILS_SELECTORS)
-        ).map(el => el.getImpl())
+        ).map((el) => el.getImpl())
       ),
-    ]).then(data => {
+    ]).then((data) => {
       const carouselImpl = data[0];
       const thumbnailsImpls = data[1];
       const slides = carouselImpl.getSlides();
 
-      thumbnailsImpls.forEach(impl => impl.setSlides(slides));
+      toArray(thumbnailsImpls).forEach((impl) => impl.setSlides(slides));
     });
+  }
+
+  /** @override */
+  prerenderAllowed() {
+    return true;
   }
 
   /** @override */
@@ -99,8 +104,8 @@ class AmpInlineGallery extends AMP.BaseElement {
   updateProgress_(total, index, offset) {
     iterateCursor(
       scopedQuerySelectorAll(this.element, CHILDREN_FOR_PROGRESS_SELECTOR),
-      el => {
-        el.getImpl().then(pagination => {
+      (el) => {
+        el.getImpl().then((pagination) => {
           pagination.updateProgress(total, index, offset);
         });
       }
@@ -142,8 +147,8 @@ class AmpInlineGallery extends AMP.BaseElement {
 
     iterateCursor(
       scopedQuerySelectorAll(this.element, CAROUSEL_SELECTOR),
-      el => {
-        el.getImpl().then(carousel => {
+      (el) => {
+        el.getImpl().then((carousel) => {
           carousel.goToSlide(index, {smoothScroll: true});
         });
       }
@@ -151,7 +156,7 @@ class AmpInlineGallery extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-inline-gallery', '0.1', AMP => {
+AMP.extension('amp-inline-gallery', '0.1', (AMP) => {
   AMP.registerElement(
     'amp-inline-gallery-pagination',
     AmpInlineGalleryPagination,

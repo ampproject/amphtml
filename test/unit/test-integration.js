@@ -34,7 +34,7 @@ describe('3p integration.js', () => {
   });
 
   it('should register integrations', () => {
-    window.ampTestRuntimeConfig.adTypes.forEach(adType => {
+    window.ampTestRuntimeConfig.adTypes.forEach((adType) => {
       expect(
         registrations,
         `Missing registration for [${adType}]`
@@ -148,7 +148,7 @@ describe('3p integration.js', () => {
       },
     };
     let called = false;
-    register('testAction', function(myWin, myData) {
+    register('testAction', function (myWin, myData) {
       called = true;
       expect(myWin).to.equal(win);
       expect(myData).to.equal(myData);
@@ -171,7 +171,7 @@ describe('3p integration.js', () => {
       },
     };
     let called = false;
-    register('testAction2', function(myWin, myData) {
+    register('testAction2', function (myWin, myData) {
       expect(called).to.be.false;
       called = true;
       expect(myWin).to.equal(win);
@@ -250,7 +250,7 @@ describe('3p integration.js', () => {
     allowConsoleError(() => {
       expect(() => {
         validateAllowedTypes(get('d-124.ampproject.net.com'), 'not present');
-      }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+      }).to.throw(/3p type for custom iframe not allowed/);
     });
   });
 
@@ -266,12 +266,12 @@ describe('3p integration.js', () => {
     allowConsoleError(() => {
       expect(() => {
         validateAllowedTypes(defaultHost, 'not present');
-      }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+      }).to.throw(/3p type for custom iframe not allowed/);
     });
     allowConsoleError(() => {
       expect(() => {
         validateAllowedTypes(defaultHost, 'adtech');
-      }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+      }).to.throw(/3p type for custom iframe not allowed/);
     });
     validateAllowedTypes(defaultHost, 'adtech', ['adtech']);
   });

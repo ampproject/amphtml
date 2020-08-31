@@ -22,7 +22,7 @@ import {
 
 const NOOP = () => {};
 
-describes.fakeWin('inabox-host:FrameOverlayManager', {}, env => {
+describes.fakeWin('inabox-host:FrameOverlayManager', {}, (env) => {
   let win;
   let addEventListenerSpy;
 

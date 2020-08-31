@@ -38,8 +38,8 @@ function fakeFocusEvent(type) {
   };
 }
 
-describes.fakeWin('FocusHandler', {}, env => {
-  describe('FocusHandler Unit Tests', function() {
+describes.fakeWin('FocusHandler', {}, (env) => {
+  describe('FocusHandler Unit Tests', function () {
     class WindowPortEmulator {
       constructor(win, origin) {
         /** @const {!Window} */
@@ -69,7 +69,7 @@ describes.fakeWin('FocusHandler', {}, env => {
       listeners = [];
       messages = [];
       win = env.win;
-      win.document.addEventListener = function(eventType, handler, options) {
+      win.document.addEventListener = function (eventType, handler, options) {
         listeners.push({
           type: eventType,
           handler,

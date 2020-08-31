@@ -41,7 +41,7 @@ async function prCheck(cb) {
     cb(err);
   };
 
-  const runCheck = cmd => {
+  const runCheck = (cmd) => {
     const {status} = timedExec(cmd, FILENAME);
     if (status != 0) {
       failTask();
@@ -85,9 +85,18 @@ async function prCheck(cb) {
     runCheck('gulp check-owners');
   }
 
+  if (buildTargets.has('RENOVATE_CONFIG')) {
+    runCheck('gulp check-renovate-config');
+  }
+
+  if (buildTargets.has('SERVER')) {
+    runCheck('gulp server-tests');
+  }
+
   if (buildTargets.has('RUNTIME')) {
     runCheck('gulp dep-check');
     runCheck('gulp check-types');
+    runCheck('gulp check-sourcemaps');
   }
 
   if (buildTargets.has('RUNTIME') || buildTargets.has('UNIT_TEST')) {

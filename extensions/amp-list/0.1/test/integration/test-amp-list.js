@@ -18,7 +18,7 @@ import {BrowserController} from '../../../../../testing/test-helper';
 
 const TIMEOUT = 15000;
 
-describe('amp-list (integration)', function() {
+describe('amp-list (integration)', function () {
   this.timeout(TIMEOUT);
 
   const basicBody = `<amp-list width=300 height=100 src="http://localhost:9876/list/fruit-data/get?cors=0">
@@ -33,7 +33,7 @@ describe('amp-list (integration)', function() {
     </script>
   '</amp-list>`;
 
-  const basicTests = env => {
+  const basicTests = (env) => {
     let browser;
     let doc;
     let win;
@@ -44,7 +44,7 @@ describe('amp-list (integration)', function() {
       doc = win.document;
     });
 
-    it('should build', function*() {
+    it('should build', function* () {
       const list = doc.querySelector('amp-list');
       expect(list).to.exist;
       yield browser.waitForElementBuild('amp-list', TIMEOUT);
@@ -53,7 +53,7 @@ describe('amp-list (integration)', function() {
     });
 
     // TODO(choumx): Frequent 10s timeout on Chrome 72.0.3626 (Linux 0.0.0).
-    it.skip('should render items', function*() {
+    it.skip('should render items', function* () {
       const list = doc.querySelector('amp-list');
       expect(list).to.exist;
 

@@ -17,7 +17,6 @@
 import {Deferred, tryResolve} from '../utils/promise';
 import {Observable} from '../observable';
 import {Services} from '../services';
-import {ViewerInterface} from './viewer-interface';
 import {VisibilityState} from '../visibility-state';
 import {
   dev,
@@ -25,6 +24,7 @@ import {
   duplicateErrorIfNecessary,
   stripUserError,
 } from '../log';
+import {endsWith, startsWith} from '../string';
 import {findIndex} from '../utils/array';
 import {
   getSourceOrigin,
@@ -35,11 +35,13 @@ import {
   serializeQueryString,
 } from '../url';
 import {isIframed} from '../dom';
+import {listen} from '../event-helper';
 import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
 import {reportError} from '../error';
-import {startsWith} from '../string';
 import {urls} from '../config';
+
+import {ViewerInterface} from './viewer-interface';
 
 const TAG_ = 'Viewer';
 
@@ -47,6 +49,12 @@ const TAG_ = 'Viewer';
 export const Capability = {
   VIEWER_RENDER_TEMPLATE: 'viewerRenderTemplate',
 };
+
+/**
+ * Max length for each array of the received message queue.
+ * @const @private {number}
+ */
+const RECEIVED_MESSAGE_QUEUE_MAX_LENGTH = 50;
 
 /**
  * Duration in milliseconds to wait for viewerOrigin to be set before an empty
@@ -91,9 +99,6 @@ export class ViewerImpl {
     /** @private {boolean} */
     this.overtakeHistory_ = false;
 
-    /** @private {number} */
-    this.prerenderSize_ = 1;
-
     /** @private {!Object<string, !Observable<!JsonObject>>} */
     this.messageObservables_ = map();
 
@@ -127,6 +132,14 @@ export class ViewerImpl {
     this.messageQueue_ = [];
 
     /**
+     * @private {!Object<string, !Array<!{
+     *   data: !JsonObject,
+     *   deferred: !Deferred
+     * }>>}
+     */
+    this.receivedMessageQueue_ = map();
+
+    /**
      * Subset of this.params_ that only contains parameters in the URL hash,
      * e.g. "#foo=bar".
      * @const @private {!Object<string, string>}
@@ -146,10 +159,6 @@ export class ViewerImpl {
     dev().fine(TAG_, '- history:', this.overtakeHistory_);
 
     dev().fine(TAG_, '- visibilityState:', this.ampdoc.getVisibilityState());
-
-    this.prerenderSize_ =
-      parseInt(ampdoc.getParam('prerenderSize'), 10) || this.prerenderSize_;
-    dev().fine(TAG_, '- prerenderSize:', this.prerenderSize_);
 
     /**
      * Whether the AMP document is embedded in a Chrome Custom Tab.
@@ -189,11 +198,11 @@ export class ViewerImpl {
         : this.win.document.referrer;
 
     /** @const @private {!Promise<string>} */
-    this.referrerUrl_ = new Promise(resolve => {
+    this.referrerUrl_ = new Promise((resolve) => {
       if (this.isEmbedded() && ampdoc.getParam('referrer') != null) {
-        // Viewer override, but only for whitelisted viewers. Only allowed for
+        // Viewer override, but only for allowlisted viewers. Only allowed for
         // iframed documents.
-        this.isTrustedViewer().then(isTrusted => {
+        this.isTrustedViewer().then((isTrusted) => {
           if (isTrusted) {
             resolve(ampdoc.getParam('referrer'));
           } else {
@@ -219,13 +228,13 @@ export class ViewerImpl {
     this.resolvedViewerUrl_ = removeFragment(this.win.location.href || '');
 
     /** @const @private {!Promise<string>} */
-    this.viewerUrl_ = new Promise(resolve => {
+    this.viewerUrl_ = new Promise((resolve) => {
       /** @const {?string} */
       const viewerUrlOverride = ampdoc.getParam('viewerUrl');
       if (this.isEmbedded() && viewerUrlOverride) {
-        // Viewer override, but only for whitelisted viewers. Only allowed for
+        // Viewer override, but only for allowlisted viewers. Only allowed for
         // iframed documents.
-        this.isTrustedViewer().then(isTrusted => {
+        this.isTrustedViewer().then((isTrusted) => {
           if (isTrusted) {
             this.resolvedViewerUrl_ = devAssert(viewerUrlOverride);
           } else {
@@ -265,6 +274,10 @@ export class ViewerImpl {
     this.ampdoc.whenFirstVisible().then(() => {
       this.maybeUpdateFragmentForCct();
     });
+
+    if (this.ampdoc.isSingleDoc()) {
+      this.visibleOnUserAction_();
+    }
   }
 
   /**
@@ -302,12 +315,16 @@ export class ViewerImpl {
     if (!isEmbedded) {
       return null;
     }
+    const timeoutMessage = 'initMessagingChannel timeout';
     return Services.timerFor(this.win)
-      .timeoutPromise(20000, messagingPromise, 'initMessagingChannel')
-      .catch(reason => {
-        const error = getChannelError(
+      .timeoutPromise(20000, messagingPromise, timeoutMessage)
+      .catch((reason) => {
+        let error = getChannelError(
           /** @type {!Error|string|undefined} */ (reason)
         );
+        if (error && endsWith(error.message, timeoutMessage)) {
+          error = dev().createExpectedError(error);
+        }
         reportError(error);
         throw error;
       });
@@ -395,7 +412,7 @@ export class ViewerImpl {
    * @private
    */
   hasRoughlySameOrigin_(first, second) {
-    const trimOrigin = origin => {
+    const trimOrigin = (origin) => {
       if (origin.split('.').length > 2) {
         return origin.replace(TRIM_ORIGIN_PATTERN_, '$1');
       }
@@ -537,11 +554,6 @@ export class ViewerImpl {
   }
 
   /** @override */
-  getPrerenderSize() {
-    return this.prerenderSize_;
-  }
-
-  /** @override */
   getResolvedViewerUrl() {
     return this.resolvedViewerUrl_;
   }
@@ -579,7 +591,7 @@ export class ViewerImpl {
       this.isTrustedViewer_ =
         isTrustedAncestorOrigins !== undefined
           ? Promise.resolve(isTrustedAncestorOrigins)
-          : this.messagingReadyPromise_.then(origin => {
+          : this.messagingReadyPromise_.then((origin) => {
               return origin ? this.isTrustedViewerOrigin_(origin) : false;
             });
     }
@@ -587,7 +599,7 @@ export class ViewerImpl {
   }
 
   /**
-   * Whether the viewer is has been whitelisted for more sensitive operations
+   * Whether the viewer is has been allowlisted for more sensitive operations
    * by looking at the ancestorOrigins.
    * @return {boolean|undefined}
    */
@@ -653,7 +665,7 @@ export class ViewerImpl {
       // Non-https origins are never trusted.
       return false;
     }
-    return urls.trustedViewerHosts.some(th => th.test(url.hostname));
+    return urls.trustedViewerHosts.some((th) => th.test(url.hostname));
   }
 
   /** @override */
@@ -663,12 +675,26 @@ export class ViewerImpl {
       observable = new Observable();
       this.messageObservables_[eventType] = observable;
     }
-    return observable.add(handler);
+    const unlistenFn = observable.add(handler);
+    if (this.receivedMessageQueue_[eventType]) {
+      this.receivedMessageQueue_[eventType].forEach((message) => {
+        observable.fire(message.data);
+        message.deferred.resolve();
+      });
+      this.receivedMessageQueue_[eventType] = [];
+    }
+    return unlistenFn;
   }
 
   /** @override */
   onMessageRespond(eventType, responder) {
     this.messageResponders_[eventType] = responder;
+    if (this.receivedMessageQueue_[eventType]) {
+      this.receivedMessageQueue_[eventType].forEach((message) => {
+        message.deferred.resolve(responder(message.data));
+      });
+      this.receivedMessageQueue_[eventType] = [];
+    }
     return () => {
       if (this.messageResponders_[eventType] === responder) {
         delete this.messageResponders_[eventType];
@@ -679,10 +705,6 @@ export class ViewerImpl {
   /** @override */
   receiveMessage(eventType, data, unusedAwaitResponse) {
     if (eventType == 'visibilitychange') {
-      if (data['prerenderSize'] !== undefined) {
-        this.prerenderSize_ = data['prerenderSize'];
-        dev().fine(TAG_, '- prerenderSize change:', this.prerenderSize_);
-      }
       this.setVisibilityState_(data['state']);
       return Promise.resolve();
     }
@@ -693,17 +715,31 @@ export class ViewerImpl {
       return Promise.resolve();
     }
     const observable = this.messageObservables_[eventType];
+    const responder = this.messageResponders_[eventType];
+
+    // Queue the message if there are no handlers. Returns a pending promise to
+    // be resolved once a handler/responder is registered.
+    if (!observable && !responder) {
+      this.receivedMessageQueue_[eventType] =
+        this.receivedMessageQueue_[eventType] || [];
+      if (
+        this.receivedMessageQueue_[eventType].length >=
+        RECEIVED_MESSAGE_QUEUE_MAX_LENGTH
+      ) {
+        return undefined;
+      }
+      const deferred = new Deferred();
+      this.receivedMessageQueue_[eventType].push({data, deferred});
+      return deferred.promise;
+    }
     if (observable) {
       observable.fire(data);
     }
-    const responder = this.messageResponders_[eventType];
     if (responder) {
       return responder(data);
     } else if (observable) {
       return Promise.resolve();
     }
-    dev().fine(TAG_, 'unknown message:', eventType);
-    return undefined;
   }
 
   /** @override */
@@ -722,7 +758,7 @@ export class ViewerImpl {
     if (this.messageQueue_.length > 0) {
       const queue = this.messageQueue_.slice(0);
       this.messageQueue_ = [];
-      queue.forEach(message => {
+      queue.forEach((message) => {
         const responsePromise = this.messageDeliverer_(
           message.eventType,
           message.data,
@@ -784,7 +820,10 @@ export class ViewerImpl {
       });
     }
 
-    const found = findIndex(this.messageQueue_, m => m.eventType == eventType);
+    const found = findIndex(
+      this.messageQueue_,
+      (m) => m.eventType == eventType
+    );
 
     let message;
     if (found != -1) {
@@ -857,6 +896,34 @@ export class ViewerImpl {
     } catch (e) {
       dev().error(TAG_, 'replaceUrl failed', e);
     }
+  }
+
+  /**
+   * Defense in-depth against viewer communication issues: Will make the
+   * document visible if it receives a user action without having been
+   * made visible by the viewer.
+   */
+  visibleOnUserAction_() {
+    if (this.ampdoc.getVisibilityState() == VisibilityState.VISIBLE) {
+      return;
+    }
+    const unlisten = [];
+    const doUnlisten = () => unlisten.forEach((fn) => fn());
+    const makeVisible = () => {
+      this.setVisibilityState_(VisibilityState.VISIBLE);
+      doUnlisten();
+      dev().expectedError(TAG_, 'Received user action in non-visible doc');
+    };
+    const options = {
+      capture: true,
+      passive: true,
+    };
+    unlisten.push(
+      listen(this.win, 'keydown', makeVisible, options),
+      listen(this.win, 'touchstart', makeVisible, options),
+      listen(this.win, 'mousedown', makeVisible, options)
+    );
+    this.whenFirstVisible().then(doUnlisten);
   }
 }
 

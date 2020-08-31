@@ -154,7 +154,7 @@ export class StandardActions {
       case 'setState':
         const element =
           node.nodeType === Node.DOCUMENT_NODE ? node.documentElement : node;
-        return Services.bindForDocOrNull(element).then(bind => {
+        return Services.bindForDocOrNull(element).then((bind) => {
           userAssert(bind, 'AMP-BIND is not installed.');
           return bind.invoke(invocation);
         });
@@ -174,7 +174,9 @@ export class StandardActions {
         return this.handleScrollTo_(invocation);
 
       case 'goBack':
-        Services.historyForDoc(this.ampdoc).goBack();
+        Services.historyForDoc(this.ampdoc).goBack(
+          /* navigate */ !!(args && args['navigate'] === true)
+        );
         return null;
 
       case 'print':
@@ -183,8 +185,8 @@ export class StandardActions {
 
       case 'optoutOfCid':
         return Services.cidForDoc(this.ampdoc)
-          .then(cid => cid.optOut())
-          .catch(reason => {
+          .then((cid) => cid.optOut())
+          .catch((reason) => {
             dev().error(TAG, 'Failed to opt out of CID', reason);
           });
     }
@@ -203,7 +205,7 @@ export class StandardActions {
     // Some components have additional constraints on allowing navigation.
     let permission = Promise.resolve();
     if (startsWith(caller.tagName, 'AMP-')) {
-      permission = caller.getImpl().then(impl => {
+      permission = caller.getImpl().then((impl) => {
         if (typeof impl.throwIfCannotNavigate == 'function') {
           impl.throwIfCannotNavigate();
         }
@@ -218,7 +220,7 @@ export class StandardActions {
           {target: args['target'], opener: args['opener']}
         );
       },
-      /* onrejected */ e => {
+      /* onrejected */ (e) => {
         user().error(TAG, e.message);
       }
     );
@@ -319,13 +321,18 @@ export class StandardActions {
   handleHide_(invocation) {
     const target = dev().assertElement(invocation.node);
 
-    this.mutator_.mutateElement(target, () => {
-      if (target.classList.contains('i-amphtml-element')) {
-        target./*OK*/ collapse();
-      } else {
-        toggle(target, false);
-      }
-    });
+    if (target.classList.contains('i-amphtml-element')) {
+      this.mutator_.mutateElement(
+        target,
+        () => target./*OK*/ collapse(),
+        // It is safe to skip measuring, because `mutator-impl.collapseElement`
+        // will set the size of the element as well as trigger a remeasure of
+        // everything below the collapsed element.
+        /* skipRemeasure */ true
+      );
+    } else {
+      this.mutator_.mutateElement(target, () => toggle(target, false));
+    }
 
     return null;
   }
@@ -370,6 +377,7 @@ export class StandardActions {
     // iOS only honors focus in sync operations.
     if (autofocusElOrNull && Services.platformFor(ownerWindow).isIos()) {
       this.handleShowSync_(target, autofocusElOrNull);
+      this.mutator_.mutateElement(target, () => {}); // force a remeasure
     } else {
       this.mutator_.mutateElement(target, () => {
         this.handleShowSync_(target, autofocusElOrNull);

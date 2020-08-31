@@ -25,15 +25,15 @@ export function navegg(global, data) {
   validateData(data, ['acc']);
   const {acc} = data;
   let seg,
-    nvg = function() {};
+    nvg = function () {};
   delete data.acc;
-  nvg.prototype.getProfile = function() {};
+  nvg.prototype.getProfile = function () {};
   data.targeting = data.targeting || {};
   loadScript(global, 'https://tag.navdmp.com/amp.1.0.0.min.js', () => {
     nvg = global[`nvg${acc}`] = new global['AMPNavegg']({
       acc,
     });
-    nvg.getProfile(nvgTargeting => {
+    nvg.getProfile((nvgTargeting) => {
       for (seg in nvgTargeting) {
         data.targeting[seg] = nvgTargeting[seg];
       }

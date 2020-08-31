@@ -24,6 +24,17 @@ tags: {  # amp-autocomplete
   }
   attr_lists: "common-extension-attrs"
 }
+tags: {  # amp-autocomplete
+  html_format: AMP4EMAIL
+  tag_name: "SCRIPT"
+  spec_name: "SCRIPT[custom-element=amp-autocomplete] (AMP4EMAIL)"
+  extension_spec: {
+    name: "amp-autocomplete"
+    # AMP4EMAIL doesn't allow version: "latest".
+    version: "0.1"
+  }
+  attr_lists: "common-extension-attrs"
+}
 tags: {  # <amp-autocomplete>
   html_format: AMP
   tag_name: "AMP-AUTOCOMPLETE"
@@ -52,6 +63,7 @@ tags: {  # <amp-autocomplete>
   attrs: { name: "inline" }
   attrs: { name: "items" }
   attrs: { name: "max-entries" }
+  attrs: { name: "max-items" }
   attrs: { name: "min-characters" }
   attrs: {
     name: "query"
@@ -76,7 +88,50 @@ tags: {  # <amp-autocomplete>
     name: "[src]"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-autocomplete"
+  spec_url: "https://amp.dev/documentation/components/amp-autocomplete/"
+  amp_layout: {
+    supported_layouts: CONTAINER
+  }
+}
+# AMP4EMAIL disallows mustache in src attribute, filter attribute.
+tags: {  # <amp-autocomplete>
+  html_format: AMP4EMAIL
+  tag_name: "AMP-AUTOCOMPLETE"
+  spec_name: "AMP-AUTOCOMPLETE (AMP4EMAIL)"
+  requires_extension: "amp-autocomplete"
+  disallowed_ancestor: "AMP-AUTOCOMPLETE"
+  disallowed_ancestor: "AMP-STATE"
+  disallowed_ancestor: "TEMPLATE"
+  attrs: { name: "highlight-user-entry" }
+  attrs: { name: "inline" }
+  attrs: { name: "items" }
+  attrs: { name: "max-items" }
+  attrs: { name: "min-characters" }
+  attrs: {
+    name: "query"
+    trigger: {
+      also_requires_attr: "src"
+    }
+  }
+  attrs: { name: "submit-on-enter" }
+  attrs: {
+    name: "suggest-first"
+  }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      protocol: "https"
+      allow_relative: false
+    }
+    disallowed_value_regex: "__amp_source_origin|"
+        "{{|}}"    # Mustache is disallowed in src.
+  }
+  attrs: {
+    name: "template"
+    value_oneof_set: TEMPLATE_IDS
+  }
+  attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: CONTAINER
   }
@@ -109,7 +164,7 @@ tags: {  # amp-autocomplete JSON
   }
   attr_lists: "nonce-attr"
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }

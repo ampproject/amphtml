@@ -32,11 +32,17 @@ import {EventType, dispatch} from './events';
 import {Keys} from '../../../src/utils/key-codes';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
-import {addAttributesToElement, closest, matches} from '../../../src/dom';
+import {
+  addAttributesToElement,
+  closest,
+  matches,
+  tryFocus,
+} from '../../../src/dom';
 import {createShadowRootWithStyle, getSourceOriginForElement} from './utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
+import {getLocalizationService} from './amp-story-localization-service';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 import {px, resetStyles, setImportantStyles, toggle} from '../../../src/style';
@@ -53,6 +59,17 @@ const ActionIcon = {
 
 /** @private @const {number} */
 const TOOLTIP_CLOSE_ANIMATION_MS = 100;
+
+/** @const {string} */
+const DARK_THEME_CLASS = 'i-amphtml-story-tooltip-theme-dark';
+
+/**
+ * @enum {string}
+ */
+const TooltipTheme = {
+  LIGHT: 'light', // default
+  DARK: 'dark',
+};
 
 /**
  * Since we don't know the actual width of the content inside the iframe
@@ -109,7 +126,7 @@ const INTERACTIVE_COMPONENTS = {
 function getComponentSelectors(components, opt_predicate) {
   const componentSelectors = {};
 
-  Object.keys(components).forEach(componentName => {
+  Object.keys(components).forEach((componentName) => {
     componentSelectors[componentName] = opt_predicate
       ? components[componentName].selector + opt_predicate
       : components[componentName].selector;
@@ -195,7 +212,7 @@ export const EMBED_ID_ATTRIBUTE_NAME = 'i-amphtml-embed-id';
  * @param {!Element} element
  * @return {!Element}
  */
-const buildExpandedViewOverlay = element => htmlFor(element)`
+const buildExpandedViewOverlay = (element) => htmlFor(element)`
     <div class="i-amphtml-story-expanded-view-overflow
         i-amphtml-story-system-reset">
       <span class="i-amphtml-expanded-view-close-button" role="button">
@@ -492,7 +509,7 @@ export class AmpStoryEmbeddedComponent {
 
     this.storeService_.subscribe(
       StateProperty.INTERACTIVE_COMPONENT_STATE,
-      /** @param {!InteractiveComponentDef} component */ component => {
+      /** @param {!InteractiveComponentDef} component */ (component) => {
         this.onComponentStateUpdate_(component);
       }
     );
@@ -584,7 +601,7 @@ export class AmpStoryEmbeddedComponent {
         this.toggleExpandedView_(component.element);
         this.historyService_
           .push(() => this.close_())
-          .then(historyId => {
+          .then((historyId) => {
             this.historyId_ = historyId;
           });
         break;
@@ -689,13 +706,13 @@ export class AmpStoryEmbeddedComponent {
     );
     createShadowRootWithStyle(this.shadowRoot_, this.focusedStateOverlay_, CSS);
 
-    this.focusedStateOverlay_.addEventListener('click', event =>
+    this.focusedStateOverlay_.addEventListener('click', (event) =>
       this.onOutsideTooltipClick_(event)
     );
 
     this.tooltip_.addEventListener(
       'click',
-      event => {
+      (event) => {
         event.stopPropagation();
         this.analyticsService_.triggerEvent(
           StoryAnalyticsEvent.CLICK_THROUGH,
@@ -779,6 +796,11 @@ export class AmpStoryEmbeddedComponent {
       dev().assertElement(this.focusedStateOverlay_),
       () => {
         this.focusedStateOverlay_.classList.toggle('i-amphtml-hidden', false);
+        tryFocus(
+          dev().assertElement(
+            this.focusedStateOverlay_.querySelector('a.i-amphtml-story-tooltip')
+          )
+        );
       }
     );
   }
@@ -790,7 +812,7 @@ export class AmpStoryEmbeddedComponent {
   initializeListeners_() {
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
-      uiState => {
+      (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
       true /** callToInitialize */
@@ -819,7 +841,7 @@ export class AmpStoryEmbeddedComponent {
       }
     });
 
-    this.win_.addEventListener('keyup', event => {
+    this.win_.addEventListener('keyup', (event) => {
       if (
         event.key === Keys.ESCAPE &&
         this.state_ === EmbeddedComponentState.EXPANDED
@@ -861,6 +883,11 @@ export class AmpStoryEmbeddedComponent {
       'Invalid embed config for target',
       component.element
     ));
+
+    const theme = this.triggeringTarget_.getAttribute('theme');
+    if (theme && TooltipTheme.DARK === theme.toLowerCase()) {
+      this.tooltip_.classList.add(DARK_THEME_CLASS);
+    }
 
     this.updateTooltipText_(component.element, embedConfig);
     this.updateTooltipComponentIcon_(component.element, embedConfig);
@@ -1066,9 +1093,7 @@ export class AmpStoryEmbeddedComponent {
         if (!element.hasAttribute(EMBED_ID_ATTRIBUTE_NAME)) {
           // First time creating <style> element for embed.
           const html = htmlFor(pageEl);
-          const embedStyleEl = html`
-            <style></style>
-          `;
+          const embedStyleEl = html` <style></style> `;
 
           element.setAttribute(EMBED_ID_ATTRIBUTE_NAME, elId);
           pageEl.insertBefore(embedStyleEl, pageEl.firstChild);
@@ -1097,7 +1122,7 @@ export class AmpStoryEmbeddedComponent {
   updateTooltipText_(target, embedConfig) {
     const tooltipText =
       target.getAttribute('data-tooltip-text') ||
-      Services.localizationService(this.win_).getLocalizedString(
+      getLocalizationService(this.storyEl_).getLocalizedString(
         embedConfig.localizedStringId
       ) ||
       getSourceOriginForElement(target, this.getElementHref_(target));
@@ -1288,7 +1313,7 @@ export class AmpStoryEmbeddedComponent {
    */
   onOutsideTooltipClick_(event) {
     if (
-      !closest(dev().assertElement(event.target), el => el == this.tooltip_)
+      !closest(dev().assertElement(event.target), (el) => el == this.tooltip_)
     ) {
       event.stopPropagation();
       this.close_();
@@ -1318,6 +1343,7 @@ export class AmpStoryEmbeddedComponent {
         this.expandComponentHandler_,
         true
       );
+      this.tooltip_.classList.remove(DARK_THEME_CLASS);
       this.tooltip_.removeAttribute('href');
     });
   }
@@ -1357,7 +1383,12 @@ export class AmpStoryEmbeddedComponent {
                     i-amphtml-story-tooltip-nav-button-right"
           ></button>
         </div>
-        <a class="i-amphtml-story-tooltip" target="_blank" ref="tooltip">
+        <a
+          class="i-amphtml-story-tooltip"
+          target="_blank"
+          ref="tooltip"
+          role="tooltip"
+        >
           <div class="i-amphtml-story-tooltip-custom-icon"></div>
           <p class="i-amphtml-tooltip-text" ref="text"></p>
           <div class="i-amphtml-tooltip-action-icon"></div>
@@ -1379,14 +1410,14 @@ export class AmpStoryEmbeddedComponent {
     this.buttonRight_ = buttonRight;
     const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
 
-    this.buttonLeft_.addEventListener('click', e =>
+    this.buttonLeft_.addEventListener('click', (e) =>
       this.onNavigationalClick_(
         e,
         rtlState ? EventType.NEXT_PAGE : EventType.PREVIOUS_PAGE
       )
     );
 
-    this.buttonRight_.addEventListener('click', e =>
+    this.buttonRight_.addEventListener('click', (e) =>
       this.onNavigationalClick_(
         e,
         rtlState ? EventType.PREVIOUS_PAGE : EventType.NEXT_PAGE

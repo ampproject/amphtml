@@ -85,7 +85,7 @@ class DefaultTransportSerializer {
       return {
         url: baseUrl.replace(EXTRA_URL_PARAM_VAR, ''),
         payload: JSON.stringify(
-          segments.map(segment => segment['extraUrlParams'])
+          segments.map((segment) => segment['extraUrlParams'])
         ),
       };
     }
@@ -114,8 +114,8 @@ export const TransportSerializers = {
  */
 export function defaultSerializer(baseUrl, batchSegments) {
   const extraUrlParamsStr = batchSegments
-    .map(item => serializeQueryString(item['extraUrlParams']))
-    .filter(queryString => !!queryString)
+    .map((item) => serializeQueryString(item['extraUrlParams']))
+    .filter((queryString) => !!queryString)
     .join('&');
   let requestUrl;
   if (baseUrl.indexOf(EXTRA_URL_PARAM_VAR) >= 0) {

@@ -24,28 +24,9 @@ limitations under the License.
 
 # amp-sticky-ad
 
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Provides a way to fix an ad to the bottom of a page. The sticky-ad serves as a container, with the ad as its child.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-sticky-ad" src="https://cdn.ampproject.org/v0/amp-sticky-ad-1.0.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-sticky-ad/">Annotated code example for amp-sticky-ad</a></td>
-  </tr>
-</table>
+## Usage
 
-[TOC]
-
-## Behavior
+Provides a way to display and stick ad content at the bottom of the page.
 
 - There can be only one `<amp-sticky-ad>` in an AMP document. The `<amp-sticky-ad>` should only have one direct child: `<amp-ad>`. **Note**: Make sure you include any required scripts for the `<amp-ad>` component.
 - The sticky ad appears at the bottom of a page.
@@ -76,12 +57,9 @@ Example:
 
 ## Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>layout (required)</strong></td>
-    <td>Must be set to <code>nodisplay</code>.</td>
-  </tr>
-</table>
+### layout (required)
+
+Must be set to `nodisplay`.
 
 ## Styling
 

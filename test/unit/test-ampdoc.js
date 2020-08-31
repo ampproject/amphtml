@@ -45,8 +45,8 @@ describes.sandboxed('AmpDocService', {}, () => {
       doc = {
         body: null,
         visibilityState: 'visible',
-        addEventListener: function() {},
-        removeEventListener: function() {},
+        addEventListener: function () {},
+        removeEventListener: function () {},
       };
       win = {
         location: {},
@@ -114,7 +114,7 @@ describes.sandboxed('AmpDocService', {}, () => {
     });
 
     it('should always yield the single document', () => {
-      expect(() => service.getAmpDoc(null)).to.throw;
+      expect(() => service.getAmpDoc(null)).to.throw();
       expect(service.getAmpDoc(document)).to.equal(service.getSingleDoc());
       const div = document.createElement('div');
       document.body.appendChild(div);
@@ -452,7 +452,7 @@ describes.sandboxed('AmpDocService', {}, () => {
       expect(service.getAmpDoc(shadowRoot2)).to.equal(ampDoc);
     });
 
-    describes.realWin('fie-doc', {}, env => {
+    describes.realWin('fie-doc', {}, (env) => {
       let childWin;
 
       beforeEach(() => {
@@ -482,7 +482,7 @@ describes.sandboxed('AmpDocService', {}, () => {
   });
 });
 
-describes.sandboxed('AmpDoc.visibilityState', {}, env => {
+describes.sandboxed('AmpDoc.visibilityState', {}, (env) => {
   const EMBED_URL = 'https://example.com/embed';
   let clock;
   let win, doc;
@@ -829,18 +829,6 @@ describes.sandboxed('AmpDoc.visibilityState', {}, env => {
     expect(embedChild.getVisibilityState()).to.equal('hidden');
   });
 
-  it('should configure visibilityState for prerender', () => {
-    top = new AmpDocSingle(win, {
-      params: {
-        'visibilityState': 'prerender',
-        'prerenderSize': '3',
-      },
-    });
-    expect(top.getVisibilityState()).to.equal('prerender');
-    expect(top.isVisible()).to.equal(false);
-    expect(top.getParam('prerenderSize')).to.equal('3');
-  });
-
   it('should be hidden when the browser document is unknown state', () => {
     updateDocumentVisibility(doc, 'what is this');
     expect(top.getVisibilityState()).to.equal('hidden');
@@ -851,14 +839,14 @@ describes.sandboxed('AmpDoc.visibilityState', {}, env => {
 
   it('should yield undefined for whenVisible methods', () => {
     return Promise.all([top.whenFirstVisible(), top.whenNextVisible()]).then(
-      results => {
+      (results) => {
         expect(results).to.deep.equal([undefined, undefined]);
       }
     );
   });
 });
 
-describes.sandboxed('AmpDocSingle', {}, env => {
+describes.sandboxed('AmpDocSingle', {}, (env) => {
   let ampdoc;
 
   beforeEach(() => {
@@ -889,7 +877,7 @@ describes.sandboxed('AmpDocSingle', {}, env => {
     expect(ampdoc.isBodyAvailable()).to.be.true;
     expect(ampdoc.isReady()).to.be.true;
     return Promise.all([ampdoc.waitForBodyOpen(), ampdoc.whenReady()]).then(
-      results => {
+      (results) => {
         expect(results[0]).to.equal(window.document.body);
         expect(ampdoc.getBody()).to.equal(window.document.body);
         expect(ampdoc.isBodyAvailable()).to.be.true;
@@ -901,14 +889,14 @@ describes.sandboxed('AmpDocSingle', {}, env => {
   it('should wait for body and ready state', () => {
     const doc = {
       body: null,
-      addEventListener: function() {},
-      removeEventListener: function() {},
+      addEventListener: function () {},
+      removeEventListener: function () {},
     };
     const win = {document: doc};
 
     let bodyCallback;
     env.sandbox.stub(dom, 'waitForBodyOpenPromise').callsFake(() => {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         bodyCallback = resolve;
       });
     });
@@ -918,7 +906,7 @@ describes.sandboxed('AmpDocSingle', {}, env => {
     });
     let readyCallback;
     env.sandbox.stub(docready, 'whenDocumentReady').callsFake(() => {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         readyCallback = resolve;
       });
     });
@@ -939,7 +927,7 @@ describes.sandboxed('AmpDocSingle', {}, env => {
     expect(ampdoc.isBodyAvailable()).to.be.true;
     expect(ampdoc.getBody()).to.equal(doc.body);
     expect(ampdoc.isReady()).to.be.true;
-    return Promise.all([bodyPromise, readyPromise]).then(results => {
+    return Promise.all([bodyPromise, readyPromise]).then((results) => {
       expect(results[0]).to.equal(doc.body);
       expect(ampdoc.isBodyAvailable()).to.be.true;
       expect(ampdoc.getBody()).to.equal(doc.body);
@@ -1072,7 +1060,7 @@ describes.sandboxed('AmpDocShadow', {}, () => {
   });
 });
 
-describes.realWin('AmpDocFie', {}, env => {
+describes.realWin('AmpDocFie', {}, (env) => {
   const URL = 'https://example.org/document';
 
   let service;
@@ -1125,7 +1113,7 @@ describes.realWin('AmpDocFie', {}, env => {
   it('should update when body is available', () => {
     expect(ampdoc.isBodyAvailable()).to.be.true;
     expect(ampdoc.getBody()).to.equal(childWin.document.body);
-    return ampdoc.waitForBodyOpen().then(body => {
+    return ampdoc.waitForBodyOpen().then((body) => {
       expect(body).to.equal(childWin.document.body);
     });
   });

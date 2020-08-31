@@ -15,6 +15,10 @@
  */
 
 /**
+ * @fileoverview CSS shared across AMP4ADS and other formats.
+ */
+
+/**
  * We intentionally break with HTML5's default [hidden] styling to apply
  * !important.
  */
@@ -30,6 +34,7 @@
 
 .i-amphtml-blurry-placeholder {
   transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+  pointer-events: none;
 }
 
 /* layout=nodisplay are automatically hidden until JS initializes. */
@@ -49,6 +54,11 @@
   /* Display is set/reset via the hidden attribute */
 }
 
+/**
+ * layout=fixed does not have a unresolved implicit style, due to conflicts
+ * with non-amp elements.
+ * https://github.com/ampproject/amphtml/pull/28115#discussion_r419843723
+ */
 .i-amphtml-layout-fixed,
 [layout=fixed][width][height]:not(.i-amphtml-layout-fixed)
 {
@@ -58,16 +68,22 @@
 
 .i-amphtml-layout-responsive,
 [layout=responsive][width][height]:not(.i-amphtml-layout-responsive),
-[width][height][sizes]:not(.i-amphtml-layout-responsive)
+[width][height][sizes]:not([layout]):not(.i-amphtml-layout-responsive),
+[width][height][heights]:not([layout]):not(.i-amphtml-layout-responsive)
 {
   display: block;
   position: relative;
 }
 
-.i-amphtml-layout-intrinsic
+.i-amphtml-layout-intrinsic,
+[layout=intrinsic][width][height]:not(.i-amphtml-layout-intrinsic)
 {
   display: inline-block;
   position: relative;
+  max-width: 100%;
+}
+
+.i-amphtml-layout-intrinsic .i-amphtml-sizer {
   max-width: 100%;
 }
 
@@ -76,13 +92,23 @@
   display: block !important;
 }
 
+/**
+ * layout=fixed-height does not have a unresolved implicit style, due to
+ * conflicts with non-amp elements.
+ * https://github.com/ampproject/amphtml/pull/28115#discussion_r419843723
+ */
 .i-amphtml-layout-fixed-height,
-[layout=fixed-height][height]
+[layout=fixed-height][height]:not(.i-amphtml-layout-fixed-height)
 {
   display: block;
   position: relative;
 }
 
+/**
+ * layout=container does not have a unresolved implicit style, due to conflicts
+ * with non-amp elements.
+ * https://github.com/ampproject/amphtml/pull/28115#discussion_r419843723
+ */
 .i-amphtml-layout-container,
 [layout=container]
 {
@@ -149,10 +175,6 @@ i-amphtml-sizer {
   left: 0;
   bottom: 0;
   right: 0;
-}
-
-.i-amphtml-layout-intrinsic .i-amphtml-sizer {
-  max-width: 100%;
 }
 
 .i-amphtml-replaced-content {
@@ -223,18 +245,51 @@ i-amphtml-sizer {
   /* For author styling. */
 }
 
+/**
+ * [width][height][sizes] and [width][height][heights] imply layout=responsive
+ * before the element has resolved.
+ */
 .i-amphtml-notbuilt,
-[layout]:not(.i-amphtml-element)
+[layout]:not(.i-amphtml-element),
+[width][height][sizes]:not([layout]):not(.i-amphtml-element),
+[width][height][heights]:not([layout]):not(.i-amphtml-element)
 {
   position: relative;
   overflow: hidden !important;
   color: transparent !important;
 }
 
-.i-amphtml-notbuilt:not(.i-amphtml-layout-container) > * ,
-[layout]:not([layout=container]):not(.i-amphtml-element) > *
+/**
+ * Hide all children of non-container elements.
+ * [width][height][sizes] and [width][height][heights] imply layout=responsive
+ * before the element has resolved.
+ */
+.i-amphtml-notbuilt:not(.i-amphtml-layout-container) > *,
+[layout]:not([layout=container]):not(.i-amphtml-element) > *,
+[width][height][sizes]:not([layout]):not(.i-amphtml-element) > *,
+[width][height][heights]:not([layout]):not(.i-amphtml-element) > *
 {
   display: none;
+}
+
+/**
+ * We special case the native <img> inside an SSR'd <amp-img>. We allow this to
+ * display using `block` defined by .i-amphtml-fill-content.
+ *
+ * As more elements get SSR, we'll need to add their special cases here.
+ */
+amp-img:not(.i-amphtml-element)[i-amphtml-ssr] > img.i-amphtml-fill-content
+{
+  display: block;
+}
+
+/** Hide all text node children of non-container elements. */
+.i-amphtml-notbuilt:not(.i-amphtml-layout-container),
+[layout]:not([layout='container']):not(.i-amphtml-element),
+[width][height][sizes]:not([layout]):not(.i-amphtml-element),
+[width][height][heights]:not([layout]):not(.i-amphtml-element) {
+  color: transparent !important;
+  line-height: 0 !important;
 }
 
 .i-amphtml-ghost {
@@ -249,8 +304,15 @@ i-amphtml-sizer {
   /* Just state. */
 }
 
+/**
+ * [width][height][sizes] and [width][height][heights] imply layout=responsive
+ * before the element has resolved.
+ */
 .i-amphtml-element > [placeholder],
-[layout]:not(.i-amphtml-element) > [placeholder] {
+[layout]:not(.i-amphtml-element) > [placeholder],
+[width][height][sizes]:not([layout]):not(.i-amphtml-element) > [placeholder],
+[width][height][heights]:not([layout]):not(.i-amphtml-element) > [placeholder]
+{
   display: block;
 }
 
@@ -350,6 +412,12 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
   position: relative;
   z-index: 2;
   visibility: hidden;
+  /* display:initial overrides display:none from the "hide all children of
+     non-container elements" rule. Similarly, line-height:normal overrides
+     line-height:0 for text node children. This avoids a minor content jump after
+     element build since overflows increase the height of their parents. */
+  display: initial;
+  line-height: normal;
 }
 
 .i-amphtml-element > [overflow].amp-visible {
@@ -380,7 +448,7 @@ amp-pixel {
 /**
  * Analytics & amp-story-auto-ads tags should never be visible. keep them hidden.
  */
-amp-analytics, amp-story-auto-ads {
+amp-analytics, amp-story-auto-ads, amp-auto-ads {
   /* Fixed to make position independent of page other elements. */
   position: fixed !important;
   top: 0 !important;
@@ -397,20 +465,12 @@ html.i-amphtml-fie > amp-analytics {
   position: initial !important;
 }
 
-
 /**
  * Forms error/success messaging containers should be hidden at first.
  */
 form [submitting],
 form [submit-success],
 form [submit-error] {
-  display: none;
-}
-
-/**
- * amp-list error messaging container should be hidden at first.
- */
-amp-list [fetch-error] {
   display: none;
 }
 

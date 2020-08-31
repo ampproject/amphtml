@@ -95,7 +95,7 @@ describe('Transition', () => {
 
   it('withCurve', () => {
     const func1 = (time, complete) => `${time * 2};${complete}`;
-    const curve = unusedTime => 0.2;
+    const curve = (unusedTime) => 0.2;
     const curved = tr.withCurve(func1, curve);
 
     expect(curved(0, false)).to.equal('0.4;false');
@@ -107,10 +107,10 @@ describe('Transition', () => {
   it('setStyles', () => {
     const element = document.createElement('div');
     const func = tr.setStyles(element, {
-      width: tr.px(function(n) {
+      width: tr.px(function (n) {
         return n * 100 + 1;
       }),
-      height: tr.px(function(n) {
+      height: tr.px(function (n) {
         return n * 100 + 2;
       }),
     });

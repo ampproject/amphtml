@@ -42,16 +42,12 @@ class AmpBeOpinion extends AMP.BaseElement {
     // Hosts the script that renders widgets.
     preconnect.preload(
       this.getAmpDoc(),
-      'https://widget.beopinion.com/sdk.js',
+      'https://widget.beop.io/sdk.js',
       'script'
     );
-    preconnect.url(this.getAmpDoc(), 'https://s.beopinion.com', opt_onLayout);
-    preconnect.url(this.getAmpDoc(), 'https://t.beopinion.com', opt_onLayout);
-    preconnect.url(
-      this.getAmpDoc(),
-      'https://data.beopinion.com',
-      opt_onLayout
-    );
+    preconnect.url(this.getAmpDoc(), 'https://s.beop.io', opt_onLayout);
+    preconnect.url(this.getAmpDoc(), 'https://t.beop.io', opt_onLayout);
+    preconnect.url(this.getAmpDoc(), 'https://data.beop.io', opt_onLayout);
   }
 
   /** @override */
@@ -77,11 +73,11 @@ class AmpBeOpinion extends AMP.BaseElement {
     listenFor(
       iframe,
       'embed-size',
-      data => {
+      (data) => {
         // We only get the message if and when there is a tweet to display,
         // so hide the placeholder
         this.togglePlaceholder(false);
-        this./*OK*/ changeHeight(data['height']);
+        this.forceChangeHeight(data['height']);
       },
       /* opt_is3P */ true
     );
@@ -117,6 +113,6 @@ class AmpBeOpinion extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpBeOpinion);
 });

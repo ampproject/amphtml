@@ -91,7 +91,7 @@ function addDynamicCssClasses(ampdoc, classes) {
   if (ampdoc.isBodyAvailable()) {
     addCssClassesToBody(ampdoc.getBody(), classes);
   } else {
-    ampdoc.waitForBodyOpen().then(body => addCssClassesToBody(body, classes));
+    ampdoc.waitForBodyOpen().then((body) => addCssClassesToBody(body, classes));
   }
 }
 
@@ -113,7 +113,7 @@ function addCssClassesToBody(body, classes) {
  */
 function addReferrerClasses(ampdoc) {
   const referrers = normalizedReferrers(ampdoc);
-  const classes = referrers.map(referrer => {
+  const classes = referrers.map((referrer) => {
     return `amp-referrer-${referrer.replace(/\./g, '-')}`;
   });
 
@@ -164,6 +164,6 @@ class AmpDynamicCssClasses {
 }
 
 // Register doc-service factory.
-AMP.extension('amp-dynamic-css-classes', '0.1', AMP => {
+AMP.extension('amp-dynamic-css-classes', '0.1', (AMP) => {
   AMP.registerServiceForDoc('amp-dynamic-css-classes', AmpDynamicCssClasses);
 });

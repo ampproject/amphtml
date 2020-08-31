@@ -261,7 +261,7 @@ describe('Linker', () => {
   });
 
   describe('createLinker', () => {
-    createLinkerTests.forEach(test => {
+    createLinkerTests.forEach((test) => {
       it(test.description, () => {
         if (test.expectErrors) {
           expectAsyncConsoleError(/Invalid linker key/, test.expectErrors);
@@ -272,7 +272,7 @@ describe('Linker', () => {
   });
 
   describe('parseLinker', () => {
-    parseLinkerTests.forEach(test => {
+    parseLinkerTests.forEach((test) => {
       it(test.description, () => {
         if (test.errorMsg) {
           expectAsyncConsoleError(TAG + ' ' + test.errorMsg);

@@ -61,36 +61,26 @@ MUST: This issue cannot be closed until the mini-PM is written and its action it
 
 ## Summary
 
-<!--
-TIP: A few sentences summarizing the problem and impact.
--->
+<_1-2 sentences summarizing the problem and root causes._>
 
-<_YOUR_SUMMARY_>
+## Impact
 
-| Users affected                                   | Impact                                                                       |
-| ------------------------------------------------ | ---------------------------------------------------------------------------- |
-| <_Which users were affected? Roughly how many?_> | <_How were users affected? E.g. partial or complete loss of functionality?_> |
-
-## Root Causes
-
-1.
+- <_Which users were affected? Roughly how many?_>
+- <_How were users affected? E.g. partial or complete loss of functionality?_>
 
 ## Action Items
 
-| Action Item                   |               Type               |     Owner     |      PR #      |
-| ----------------------------- | :------------------------------: | :-----------: | :------------: |
-| <_E.g. Add integration test_> | <_Investigate/Mitigate/Prevent_> | @<_USERNAME_> | #<_PR_NUMBER_> |
+<!--
+TIP: How can we:
+- Prevent this class of bugs in the future?
+- Mitigate impact by detecting them sooner?
+- Make investigating these issues easier?
+-->
 
-## Lessons Learned
-
-### Things that went well
-
--
-
-### Things that went wrong
-
--
+- #<_ISSUE_NUMBER_>: <_Add unit/integration/end-to-end test_>
+- #<_ISSUE_NUMBER_>: <_Add monitoring for edge case via error logging_>
+- #<_ISSUE_NUMBER_>: <_Refactor an easily misused API_>
 
 ---
 
-/cc @ampproject/wg-approvers @ampproject/cherry-pick-approvers
+/cc @ampproject/release-on-duty @ampproject/wg-approvers @ampproject/cherry-pick-approvers

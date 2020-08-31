@@ -8,8 +8,6 @@ teaser:
   text: Allows elements to mutate in response to user actions or data changes via data binding and simple JS-like expressions.
 ---
 
-# amp-bind
-
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -26,38 +24,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-[TOC]
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>
-        Adds custom interactivity with data binding and expressions.
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td>
-      <div>
-        <code>&lt;script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js">&lt;/script&gt;</code>
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td>
-      <ul>
-        <li><a href="https://amp.dev/documentation/examples/components/amp-bind/">Introductory code example with annotations</a></li>
-        <li><a href="https://amp.dev/documentation/examples/multimedia-animations/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">Linked image carousels example with annotations</a></li>
-        <li><a href="https://amp.dev/documentation/examples/e-commerce/product_page/">E-commerce product page example with annotations</a></li>
-      </ul>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Tutorials</strong></td>
-    <td><a href="https://amp.dev/documentation/guides-and-tutorials/develop/interactivity/">Create interactive AMP pages</a></td>
-  </tr>
-</table>
+# amp-bind
 
 ## Usage
 
@@ -111,7 +78,7 @@ Calling `AMP.setState()` in some examples may set or change states of other exam
 
 ### Example with declared state
 
-[filter formats="websites, stories, ads"]
+[filter formats="websites, ads"]
 
 [example preview="top-frame" playground="true" imports="amp-bind"]
 
@@ -189,7 +156,7 @@ Using `[class]="theFood[currentMeal].style"` as an example of **expression** syn
 - `currentMeal` is the state name. In the case of `theFood` it will be `cupcakes` or `sushi`.
 - `style` is the **state variable**. It corresponds to the matching JSON key, and sets the bound property to that key's value.
 
-[/filter] <!-- formats="websites, stories, ads" -->
+[/filter] <!-- formats="websites, ads" -->
 
 [filter formats="email"]
 
@@ -258,7 +225,7 @@ Using `[class]="theFood[currentMeal].style"` as an example of **expression** syn
 
 ### `<amp-state>` specification
 
-[filter formats="websites, stories, ads"]
+[filter formats="websites, ads"]
 An `amp-state` element may contain either a child `<script>` element **OR** a `src` attribute containing a CORS URL to a remote JSON endpoint, but not both.
 
 ```html
@@ -273,7 +240,7 @@ An `amp-state` element may contain either a child `<script>` element **OR** a `s
 <amp-state id="myRemoteState" src="https://data.com/articles.json"> </amp-state>
 ```
 
-[/filter] <!-- formats="websites, stories, ads" -->
+[/filter] <!-- formats="websites, ads" -->
 
 [filter formats="email"]
 An `amp-state` element must contain a child `<script>` element.
@@ -290,21 +257,23 @@ An `amp-state` element must contain a child `<script>` element.
 
 [/filter] <!-- formats="email" -->
 
-[filter formats="websites, stories, ads"]
+[filter formats="websites, ads"]
 
-#### Attributes
+## Attributes
 
-[filter formats="websites, stories, ads"]
-
-##### `src` (optional)
+### `src` (optional)
 
 The URL of the remote endpoint that must return JSON, which is used to this `amp-state`. This must be a HTTP service with a proper CORS configuration for the page. The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
+
+AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a single JSON data request as a data source for multiple consumers (e.g., multiple `amp-state` elements) on an AMP page.
+
+For example, if your `amp-state` element makes an XHR to an endpoint, while the XHR is in flight, all subsequent XHRs to the same endpoint won't trigger and will instead return the results from the first XHR.
 
 [tip type="important"]
 The endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
 [/tip]
 
-##### `credentials` (optional)
+### `credentials` (optional)
 
 Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
 
@@ -312,13 +281,10 @@ Defines a `credentials` option as specified by the [Fetch API](https://fetch.spe
 - Default: `omit`
 
 To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests/#cors-security-in-amp).
-[/filter] <!-- formats="websites, stories, ads" -->
 
-[filter formats="email"]
+## Actions
 
-#### Actions
-
-##### `refresh`
+### `refresh`
 
 The `refresh` action refetches data from data point the `src` attribute points to. This action will make a network request bypassing the browser's caching mechanisms.
 
@@ -336,13 +302,7 @@ The `refresh` action refetches data from data point the `src` attribute points t
 
 We recommend [`amp-script`](../amp-script/amp-script.md) for most use cases working with live content. In a subset of cases, `refresh` with `amp-bind` will work.
 
-#### XHR batching
-
-AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a single JSON data request as a data source for multiple consumers (e.g., multiple `amp-state` elements) on an AMP page.
-
-For example, if your `amp-state` element makes an XHR to an endpoint, while the XHR is in flight, all subsequent XHRs to the same endpoint won't trigger and will instead return the results from the first XHR.
-
-[/filter] <!-- formats="websites, stories, ads" -->
+[/filter] <!-- formats="websites, ads" -->
 
 ## State
 
@@ -354,7 +314,7 @@ An `<amp-state>` element's JSON data has a maximum size of 100KB.
 
 ### Defining and initializing state with `<amp-state>`
 
-Expressions are not evaluates on page load, but you may define an initial state. The `<amp-state>` component contains different **states** and their **state variables**. While this defines a **states**, it will not reflect on the page until after a user interacts.
+Expressions are not evaluated on page load, but you may define an initial state. The `<amp-state>` component contains different **states** and their **state variables**. While this defines a **state**, it will not reflect on the page until after a user interacts.
 
 [example preview="inline" playground="true" imports="amp-bind"]
 
@@ -550,6 +510,8 @@ Calling `AMP.setState()` deep-merges the provided object literal with the curren
 
 [/example]
 
+[filter formats="websites, ads"]
+
 ### Modifying history with `AMP.pushState()`
 
 `AMP.pushState()` writes state changes to the history. Navigating back, will restore the previous state. To test this, increase the count in the example below and use your browser's back button to decrease the count.
@@ -569,6 +531,8 @@ Calling `AMP.setState()` deep-merges the provided object literal with the curren
 [/example]
 
 Using `AMP.pushState()` sets the current state to the most recent pushed state.
+
+[/filter] <!-- formats="websites, ads" -->
 
 ## Expressions
 
@@ -646,7 +610,7 @@ Single-parameter arrow functions can't have parentheses, e.g. use `x => x + 1` i
     }
   </script>
 </amp-state>
-<p [text]="'concat: ' + myArrayState.foo.concat()">concat: 1, 2, 3</p>
+<p [text]="'concat: ' + myArrayState.foo.concat(4)">concat: 1, 2, 3</p>
 <p [text]="'filter: ' + myArrayState.bar.filter(word => word.length > 3)">
   filter: words with less than three letter
 </p>
@@ -947,37 +911,41 @@ Bind `Node.textContent` using the `[text]` attribute. The `[text]` attribute is 
 
 Bind an element's `class` using the `[class]` attribute. A `[class]` expression must result in a space-delimited string. Meaning, if you are binding multiple classes, use a space between names. A comma or dash will be evaluated as the class name.
 
-[example preview="inline" playground="true" imports="amp-bind"]
+[example preview="top-frame" playground="true" imports="amp-bind"]
 
 ```html
-<style amp-custom>
-  .background-green {
-    background: green;
-  }
-  .background-red {
-    background: red;
-  }
-  .border-red {
-    border-color: red;
-    border-width: 5px;
-    border-style: solid;
-  }
-</style>
-<div class="background-red" [class]="myClass">Hello World</div>
-<!-- This button adds both classes -->
-<button on="tap:AMP.setState({ myClass: 'background-green border-red' })">
-  Working: Change Class
-</button>
-<!-- String arrays also work -->
-<button
-  on="tap:AMP.setState({ myClass: ['background-green'], ['border-red'] })"
->
-  Working string array: Change Class
-</button>
-<!-- This expression evaluates to class="background-green,border-red" -->
-<button on="tap:AMP.setState({ myClass: 'background-green,border-red' })">
-  Broken: Change Class
-</button>
+<head>
+  <style amp-custom>
+    .background-green {
+      background: green;
+    }
+    .background-red {
+      background: red;
+    }
+    .border-red {
+      border-color: red;
+      border-width: 5px;
+      border-style: solid;
+    }
+  </style>
+</head>
+<body>
+  <div class="background-red" [class]="myClass">Hello World</div>
+  <!-- This button adds both classes -->
+  <button on="tap:AMP.setState({ myClass: 'background-green border-red' })">
+    Working: Change Class
+  </button>
+  <!-- String arrays also work -->
+  <button
+    on="tap:AMP.setState({ myClass: ['background-green', 'border-red'] })"
+  >
+    Working string array: Change Class
+  </button>
+  <!-- This expression evaluates to class="background-green,border-red" -->
+  <button on="tap:AMP.setState({ myClass: 'background-green,border-red' })">
+    Broken: Change Class
+  </button>
+</body>
 ```
 
 [/example]
@@ -1027,7 +995,7 @@ Change the `width` and `height` using the `[width]` and `[height]` attributes.
 
 **Accessibility states and properties**
 
-Use to dynamically update information available to assistive technologies, such as screen readers. All `[aria-*]` and `[data-*]` are bindable. See the [full list here](https://www.w3.org/WAI/PF/aria-1.1/states_and_properties).
+Use to dynamically update information available to assistive technologies, such as screen readers. [All `[aria-*]` attributes](https://www.w3.org/WAI/PF/aria-1.1/states_and_properties) are bindable.
 
 **AMP Component specific and HTML attributes**
 
@@ -1045,7 +1013,8 @@ Some AMP components and HTML elements have specific bindable attributes. They ar
 - `[data-player-id]`
 - `[data-playlist-id]`
 - `[data-video-id]` Changes the displayed Brightcove video.
-  [/filter] <!-- formats="websites" -->
+
+[/filter] <!-- formats="websites" -->
 
 **`<amp-carousel type=slides>`**
 
@@ -1087,7 +1056,8 @@ Bind to `[srcset]` instead of `[src]` to support responsive images. See correspo
 
 - `[alt]`
 - `[attribution]`
-  [/filter] <!-- formats="email" -->
+
+[/filter] <!-- formats="email" -->
 
 **`<amp-lightbox>`**
 
@@ -1097,14 +1067,15 @@ Bind to `[srcset]` instead of `[src]` to support responsive images. See correspo
 Use `on="lightboxClose: AMP.setState(...)"` to update variables when the lightbox is closed.
 [/tip]
 
-[filter formats="websites, stories"]
+[filter formats="websites"]
 
 **`<amp-list>`**
 
 - `[src]`
 
 If the expression is a string, it fetches and renders JSON from the string URL. If the expression is an object or array, it renders the expression data.
-[/filter] <!-- formats="websites, stories" -->
+
+[/filter] <!-- formats="websites" -->
 
 [filter formats="websites, email"]
 
@@ -1119,16 +1090,17 @@ If the expression is a string, it fetches and renders JSON from the string URL. 
 
 [/filter] <!-- formats="websites, email" -->
 
-[filter formats="websites, stories, ads"]
+[filter formats="websites, ads"]
 
 **`<amp-state>`**
 
 - `[src]`
 
 Fetches JSON from the new URL and merges it into the existing state. The following update will ignore `<amp-state>`elements to prevent cycles.
-[/filter] <!-- formats="websites, stories, ads" -->
 
-[filter formats="websites, stories"]
+[/filter] <!-- formats="websites, ads" -->
+
+[filter formats="websites"]
 
 **`<amp-twitter>`**
 
@@ -1136,7 +1108,7 @@ Fetches JSON from the new URL and merges it into the existing state. The followi
 
 [/filter] <!-- formats="websites" -->
 
-[filter formats="websites, stories, ads"]
+[filter formats="websites, ads"]
 
 **`<amp-video>`**
 
@@ -1149,7 +1121,7 @@ Fetches JSON from the new URL and merges it into the existing state. The followi
 - `[src]`
 
 See corresponding [`amp-video` attributes](../amp-video/amp-video.md#attributes).
-[/filter] <!-- formats="websites, stories, ads" -->
+[/filter] <!-- formats="websites, ads" -->
 
 [filter formats="websites, ads"]
 
@@ -1159,7 +1131,7 @@ See corresponding [`amp-video` attributes](../amp-video/amp-video.md#attributes)
 
 [/filter] <!-- formats="websites, ads" -->
 
-[filter formats="websites, stories, ads"]
+[filter formats="websites, ads"]
 
 ### HTML attributes
 
@@ -1173,7 +1145,7 @@ See corresponding [`amp-video` attributes](../amp-video/amp-video.md#attributes)
 - `[type]`
 - `[value]`
 
-[/filter] <!-- formats="websites, stories, ads" -->
+[/filter] <!-- formats="websites, ads" -->
 
 [filter formats="email"]
 
@@ -1202,7 +1174,7 @@ See corresponding [details attributes](https://developer.mozilla.org/en-US/docs/
 
 See corresponding [image attributes](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/image).
 
-[filter formats="websites, stories, ads"]
+[filter formats="websites, ads"]
 
 **`<input>`**
 
@@ -1230,7 +1202,7 @@ See corresponding [image attributes](https://developer.mozilla.org/en-US/docs/We
 
 See corresponding [input attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#Attributes).
 
-[/filter] <!-- formats="websites, stories, ads" -->
+[/filter] <!-- formats="websites, ads" -->
 
 [filter formats="email"]
 
@@ -1276,7 +1248,7 @@ See corresponding [optgroup attributes](https://developer.mozilla.org/en-US/docs
 
 - `[data-expand]` Changes the expansion of a `section` in an [`amp-accordion`](../amp-accordion/amp-accordion.md).
 
-[filter formats="websites, stories, ads"]
+[filter formats="websites, ads"]
 
 **`<select>`**
 
@@ -1288,7 +1260,7 @@ See corresponding [optgroup attributes](https://developer.mozilla.org/en-US/docs
 
 See corresponding [select attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select#Attributes).
 
-[/filter] <!-- formats="websites, stories, ads" -->
+[/filter] <!-- formats="websites, ads" -->
 
 [filter formats="email"]
 
@@ -1302,6 +1274,8 @@ See corresponding [select attributes](https://developer.mozilla.org/en-US/docs/W
 See corresponding [select attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select#Attributes).
 
 [/filter] <!-- formats="email" -->
+
+[filter formats="websites, ads"]
 
 **`<source>`**
 
@@ -1318,7 +1292,9 @@ See corresponding [source attributes](https://developer.mozilla.org/en-US/docs/W
 
 See corresponding [track attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/track#Attributes).
 
-[filter formats="websites, stories, ads"]
+[/filter] <!-- formats="websites, ads" -->
+
+[filter formats="websites, ads"]
 
 **`<textarea>`**
 
@@ -1341,7 +1317,7 @@ See corresponding [track attributes](https://developer.mozilla.org/en-US/docs/We
 
 Use `[defaultText]` to update initial text, and `[text]` to update current text. See corresponding [textarea attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#Attributes).
 
-[/filter] <!-- formats="websites, stories, ads" -->
+[/filter] <!-- formats="websites, ads" -->
 
 [filter formats="email"]
 
@@ -1370,22 +1346,11 @@ For security reasons, binding to `innerHTML` is disallowed.
 
 All attribute bindings are sanitized for unsafe values (e.g., `javascript:`).
 
-### Invalid AMP email attributes
-
-The AMP for Email spec disallows the use of the following attributes on the AMP email format.
-
-- `[src]`
-- `src`
-- `credentials`
-- `overridable`
-
-[/filter] <!-- formats="email" -->
-
 ## Debugging
 
-[filter formats="websites, stories, ads"]
+[filter formats="websites, ads"]
 Test in development mode. Enter development by adding the fragment `#development=1` to the end of the URL. This highlights warnings and errors in the browser console during development and grants access to special debugging functions.
-[/filter] <!-- formats="websites, stories, ads" -->
+[/filter] <!-- formats="websites, ads" -->
 
 [filter formats="email"]
 Test in development mode by saving the email as an HTML file. Test in the browser by adding the fragment `#development=1` to the end of the URL. This highlights warnings and errors in the browser console during development and grants access to special debugging functions.
@@ -1436,9 +1401,9 @@ Below outlines the types of errors that may arise when working with `amp-bind`.
     <td>Verify the expression for typos.</td>
   </tr>
   <tr>
-    <td>Non-whitelisted functions</td>
+    <td>Non-allowlisted functions</td>
     <td><em>alert is not a supported function.</em></td>
-    <td>Use only <a href="#white-listed-functions">white-listed functions</a>.</td>
+    <td>Use only <a href="#allow-listed-functions">allow-listed functions</a>.</td>
   </tr>
   <tr>
     <td>Sanitized result</td>
@@ -1454,7 +1419,7 @@ Below outlines the types of errors that may arise when working with `amp-bind`.
 
 ### Debugging State
 
-Use `AMP.printState()` to print the current state to the console.
+Use `AMP.printState()` to print the current state to the console. To make this work, you need to enable the [development mode](https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_amp/#browser-developer-console).
 
 ### Expression grammar
 

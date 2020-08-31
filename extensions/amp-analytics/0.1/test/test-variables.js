@@ -23,6 +23,7 @@ import {
   variableServiceForDoc,
 } from '../variables';
 import {Services} from '../../../../src/services';
+import {forceExperimentBranch} from '../../../../src/experiments';
 import {
   installLinkerReaderService,
   linkerReaderServiceFor,
@@ -30,7 +31,7 @@ import {
 
 const fakeElement = document.documentElement;
 
-describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
+describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
   let variables;
 
   beforeEach(() => {
@@ -214,13 +215,19 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
 
     it('handles array with no vars', () => {
-      check('${array}', 'foo,bar', {
-        'array': ['foo', 'bar'],
+      return check('${array}', 'foo,bar,3', {
+        'array': ['foo', 'bar', 3],
       });
     });
 
     it('handles empty var name', () => {
       return check('${}', '', {});
+    });
+
+    it('handles null and undefined vars', () => {
+      return check('${arr}', ',,notNull', {
+        'arr': [null, undefined, 'notNull'],
+      });
     });
 
     describe('should handle recursive vars', () => {
@@ -252,7 +259,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
   });
 
-  describes.fakeWin('macros', {amp: true}, env => {
+  describes.fakeWin('macros', {amp: true}, (env) => {
     let doc;
     let win;
     let urlReplacementService;
@@ -268,6 +275,11 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       urlReplacementService = Services.urlReplacementsForDoc(documentElement);
       analyticsElement = doc.createElement('amp-analytics');
       doc.body.appendChild(analyticsElement);
+      env.sandbox.stub(Services, 'performanceFor').returns({
+        getMetric(unused) {
+          return Promise.resolve(1);
+        },
+      });
     });
 
     function check(input, output, opt_bindings) {
@@ -463,30 +475,46 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
 
     it('should replace FIRST_CONTENTFUL_PAINT', () => {
-      env.sandbox.stub(Services, 'performanceFor').returns({
-        getFirstContentfulPaint() {
-          return Promise.resolve(1);
-        },
-      });
       return check('FIRST_CONTENTFUL_PAINT', '1');
     });
 
     it('should replace FIRST_VIEWPORT_READY', () => {
-      env.sandbox.stub(Services, 'performanceFor').returns({
-        getFirstViewportReady() {
-          return Promise.resolve(1);
-        },
-      });
       return check('FIRST_VIEWPORT_READY', '1');
     });
 
     it('should replace MAKE_BODY_VISIBLE', () => {
-      env.sandbox.stub(Services, 'performanceFor').returns({
-        getMakeBodyVisible() {
-          return Promise.resolve(1);
-        },
-      });
       return check('MAKE_BODY_VISIBLE', '1');
+    });
+
+    it('should replace LARGEST_CONTENTFUL_PAINT', () => {
+      return check('LARGEST_CONTENTFUL_PAINT', '1');
+    });
+
+    it('should replace FIRST_INPUT_DELAY', () => {
+      return check('FIRST_INPUT_DELAY', '1');
+    });
+
+    it('should replace CUMULATIVE_LAYOUT_SHIFT', () => {
+      return check('CUMULATIVE_LAYOUT_SHIFT', '1');
+    });
+
+    it('should expand EXPERIMENT_BRANCHES to name:value comma separated list', () => {
+      forceExperimentBranch(env.win, 'exp1', '1234');
+      forceExperimentBranch(env.win, 'exp2', '5678');
+      return check('EXPERIMENT_BRANCHES', 'exp1%3A1234%2Cexp2%3A5678');
+    });
+
+    it('EXPERIMENT_BRANCHES should be empty string if no branches', () => {
+      return check('EXPERIMENT_BRANCHES', '');
+    });
+
+    it('should expand EXPERIMENT_BRANCHES(expName) to experiment value', () => {
+      forceExperimentBranch(env.win, 'exp1', '1234');
+      return check('EXPERIMENT_BRANCHES(exp1)', '1234');
+    });
+
+    it('EXPERIMENT_BRANCHES(expName) should be empty string if not set', () => {
+      return check('EXPERIMENT_BRANCHES(exp1)', '');
     });
 
     describe('$MATCH', () => {
@@ -543,6 +571,20 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
         );
         return check('$MATCH(thisisatest, thisisatest, test)', 'thisisatest');
       });
+    });
+
+    it('SCROLL_TOP round to integer', async () => {
+      let scrollTopValue = 100;
+      env.sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
+        return {
+          getScrollTop: () => scrollTopValue,
+        };
+      });
+      await check('SCROLL_TOP', '100');
+      scrollTopValue = 99.4;
+      await check('SCROLL_TOP', '99');
+      scrollTopValue = 99.5;
+      await check('SCROLL_TOP', '100');
     });
   });
 

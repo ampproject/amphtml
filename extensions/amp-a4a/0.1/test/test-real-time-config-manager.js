@@ -31,7 +31,7 @@ import {createElementWithAttributes} from '../../../../src/dom';
 import {dev, user} from '../../../../src/log';
 import {isFiniteNumber} from '../../../../src/types';
 
-describes.realWin('real-time-config-manager', {amp: true}, env => {
+describes.realWin('real-time-config-manager', {amp: true}, (env) => {
   let element;
   let a4aElement;
   let fetchJsonStub;
@@ -148,10 +148,10 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       });
       const customMacros = args['customMacros'] || {};
       const rtcResponsePromiseArray = maybeExecuteRealTimeConfig_(customMacros);
-      return rtcResponsePromiseArray.then(rtcResponseArray => {
+      return rtcResponsePromiseArray.then((rtcResponseArray) => {
         expect(rtcResponseArray.length).to.equal(expectedRtcArray.length);
         expect(fetchJsonStub.callCount).to.equal(calloutCount);
-        (expectedCalloutUrls || []).forEach(url => {
+        (expectedCalloutUrls || []).forEach((url) => {
           expect(fetchJsonStub).to.have.been.calledWith(url);
         });
         rtcResponseArray.forEach((rtcResponse, i) => {
@@ -614,7 +614,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
             return rtcResult.then(() => expect(fetchJsonStub).to.be.calledOnce);
           case CONSENT_POLICY_STATE.UNKNOWN:
           case CONSENT_POLICY_STATE.INSUFFICIENT:
-            return rtcResult.then(result => {
+            return rtcResult.then((result) => {
               expect(result).to.deep.equal([]);
               expect(fetchJsonStub).to.not.be.called;
             });
@@ -712,7 +712,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       {'urls': []},
       {'vendors': {}, 'urls': []},
       {'vendors': 'incorrect', 'urls': 'incorrect'},
-    ].forEach(rtcConfig => {
+    ].forEach((rtcConfig) => {
       it('should return false for rtcConfig missing required values', () => {
         setRtcConfig(rtcConfig);
         allowConsoleError(() => {
@@ -748,7 +748,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         },
       };
       inflateAndSendRtc_(url, macros);
-      return rtc.promiseArray_[0].then(errorResponse => {
+      return rtc.promiseArray_[0].then((errorResponse) => {
         expect(errorResponse.error).to.equal(
           RTC_ERROR_ENUM.MACRO_EXPAND_TIMEOUT
         );
@@ -764,7 +764,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       // Simulate an unlayoutCallback call
       inflateAndSendRtc_(url, macros);
       a4aElement.promiseId_++;
-      return rtc.promiseArray_[0].then(errorResponse => {
+      return rtc.promiseArray_[0].then((errorResponse) => {
         expect(errorResponse).to.be.undefined;
       });
     });
@@ -806,25 +806,25 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
     it('should handle empty urls array', () => {
       rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
       rtc.rtcConfig_.urls = [];
-      expect(rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw;
+      expect(() => rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw();
     });
 
     it('should handle empty vendors object', () => {
       rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
       rtc.rtcConfig_.vendors = {};
-      expect(rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw;
+      expect(() => rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw();
     });
 
     it('should handle missing urls array', () => {
       rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
       rtc.rtcConfig_.urls = undefined;
-      expect(rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw;
+      expect(() => rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw();
     });
 
     it('should handle missing vendors object', () => {
       rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
       rtc.rtcConfig_.vendors = undefined;
-      expect(rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw;
+      expect(() => rtc.modifyRtcConfigForConsentStateSettings()).not.to.throw();
     });
 
     it('should clear just invalid custom URLs', () => {
@@ -977,7 +977,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
 
       errorType = RTC_ERROR_ENUM.TIMEOUT;
       errorReportingUrl = 'https://www.example.test?e=ERROR_TYPE&h=HREF';
-      const whitelist = {ERROR_TYPE: true, HREF: true};
+      const allowlist = {ERROR_TYPE: true, HREF: true};
       const macros = {
         ERROR_TYPE: errorType,
         HREF: env.win.location.href,
@@ -985,7 +985,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
 
       requestUrl = Services.urlReplacementsForDoc(
         a4aElement.element
-      ).expandUrlSync(errorReportingUrl, macros, whitelist);
+      ).expandUrlSync(errorReportingUrl, macros, allowlist);
     });
 
     it('should send error message pingback to correct url', () => {

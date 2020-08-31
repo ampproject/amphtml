@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-kaltura-player'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -55,12 +55,28 @@ describes.realWin(
         'data-partner': '1281471',
         'data-entryid': '1_3ts1ms9c',
         'data-uiconf': '33502051',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
         expect(iframe.src).to.equal(
           'https://cdnapisec.kaltura.com/p/1281471/sp/128147100/embedIframeJs/uiconf_id/33502051/partner_id/1281471?iframeembed=true&playerId=kaltura_player_amp&entry_id=1_3ts1ms9c'
+        );
+      });
+    });
+
+    it('renders with service-url', () => {
+      return getKaltura({
+        'data-service-url': 'front.video.funke.press',
+        'data-partner': '106',
+        'data-entryid': '0_b87xdluw',
+        'data-uiconf': '23464665',
+      }).then((bc) => {
+        const iframe = bc.querySelector('iframe');
+        expect(iframe).to.not.be.null;
+        expect(iframe.tagName).to.equal('IFRAME');
+        expect(iframe.src).to.equal(
+          'https://front.video.funke.press/p/106/sp/10600/embedIframeJs/uiconf_id/23464665/partner_id/106?iframeembed=true&playerId=kaltura_player_amp&entry_id=0_b87xdluw'
         );
       });
     });
@@ -73,7 +89,7 @@ describes.realWin(
           'data-uiconf': '33502051',
         },
         true
-      ).then(bc => {
+      ).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
@@ -83,7 +99,7 @@ describes.realWin(
     it('requires data-account', () => {
       return allowConsoleError(() => {
         return getKaltura({})
-          .then(kp => {
+          .then((kp) => {
             kp.build();
           })
           .should.eventually.be.rejectedWith(
@@ -98,7 +114,7 @@ describes.realWin(
         'data-entryid': '1_3ts1ms9c',
         'data-uiconf': '33502051',
         'data-param-my-param': 'hello world',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe.src).to.contain('flashvars%5BmyParam%5D=hello%20world');
       });
@@ -110,7 +126,7 @@ describes.realWin(
           'data-partner': '1281471',
           'data-entryid': '1_3ts1ms9c',
           'data-uiconf': '33502051',
-        }).then(kp => {
+        }).then((kp) => {
           const img = kp.querySelector('amp-img');
           expect(img).to.not.be.null;
           expect(img.getAttribute('src')).to.equal(
@@ -129,7 +145,7 @@ describes.realWin(
           'data-entryid': '1_3ts1ms9c',
           'data-uiconf': '33502051',
           'aria-label': 'great video',
-        }).then(kp => {
+        }).then((kp) => {
           const img = kp.querySelector('amp-img');
           expect(img).to.not.be.null;
           expect(img.hasAttribute('placeholder')).to.be.true;

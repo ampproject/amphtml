@@ -25,7 +25,7 @@ describes.realWin(
       extensions: ['amp-date-display'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let element;
     let impl;

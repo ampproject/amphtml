@@ -3,7 +3,7 @@
   <head>
     <link rel="stylesheet" type="text/css" href="https://raw.githack.com/ganapativs/bttn.css/master/dist/bttn.min.css">
     <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.0/animate.min.css">
     <style>
 html {
   width: 100%;
@@ -140,6 +140,21 @@ if (window && window.name) {
   }
 }
 
+
+window.addEventListener('message', (event) => {
+  const data = event.data;
+  if (data.reqestType === 'enter-fullscreen' && data.state === 'error') {
+    console.log('Could not complete fullscreen request:', data.message);
+  }
+  else if (data.reqestType === 'enter-fullscreen' && data.state === 'success') {
+    console.log('Fullscreen command successfuly sent:', data.message);
+  }
+  else {
+    console.log('Unknown request type:', data.reqestType);
+  }
+});
+
+
 // Add event listener for focus for a11y
 window.addEventListener('focus', () => {
   const headerElement = document.querySelector('h1');
@@ -180,9 +195,10 @@ setTimeout(() => {
   // Check if we should randomly do some custom stuff
   const shouldApplyCustom = Math.random() > 0.5;
   if (shouldApplyCustom) {
-    const initialHeight = 30 + Math.floor(Math.random() * 30);
+    // 30-60 is bottom pane, 60 > is modal
+    const initialHeight = 30 + Math.floor(Math.random() * 50);
     readyObject.initialHeight = `${initialHeight}vh`;
-    readyObject.border = Math.random() < 0.5
+    readyObject.border = Math.random() < 0.5;
   }
 
   console.log('diy-consent: Sending Ready Message!', readyObject);
@@ -190,28 +206,27 @@ setTimeout(() => {
   parent.postMessage(readyObject, '*');
 }, 2000);
 
-// Send fullscreen every 2.5 seconds
+// Send fullscreen request every 2.5 seconds
 setInterval(() => {
 
-  // Our ready object
-  const readyObject = {
+  // Our fullscreen object
+  const fullscreenObject = {
     type: 'consent-ui',
     action: 'enter-fullscreen'
   };
 
-  console.log('diy-consent: Sending Fullscreen Message!', readyObject);
-
-  parent.postMessage(readyObject, '*');
+  parent.postMessage(fullscreenObject, '*');
 }, 2500);
 
-function registerClickConsentMessage(querySelector, type, action, info, timeout) {
+function registerClickConsentMessage(querySelector, type, action, info, consentMetadata, timeout) {
   document.querySelector(querySelector).onclick = function () {
     // parent.postMessage("message to be sent", "http://the-website-that-will-receive-the-msg.com")
     setTimeout(() => {
       parent.postMessage({
         type,
         action,
-        info
+        info,
+        consentMetadata,
       }, '*');
     }, timeout);
   };
@@ -246,6 +261,7 @@ const consentObjects = [
     type: 'consent-response',
     action: 'accept',
     info: 'accept-str',
+    consentMetadata: {'consentStringType': 2, 'additionalConsent': '1~1.35.41.101', 'gdprApplies': true},
     timeout: 1000,
     onclick: () => {
       showConfirmation();
@@ -285,6 +301,7 @@ consentObjects.forEach(consentObject => {
     consentObject.type,
     consentObject.action,
     consentObject.info,
+    consentObject.consentMetadata,
     consentObject.timeout || 0
   );
 

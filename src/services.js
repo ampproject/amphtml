@@ -205,7 +205,19 @@ export class Services {
   }
 
   /**
-   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @param {!Element|!ShadowRoot} element
+   * @return {!Promise<?../extensions/amp-script/0.1/amp-script.AmpScriptService>}
+   */
+  static scriptForDocOrNull(element) {
+    return /** @type {!Promise<?../extensions/amp-script/0.1/amp-script.AmpScriptService>} */ (getElementServiceIfAvailableForDocInEmbedScope(
+      element,
+      'amp-script',
+      'amp-script'
+    ));
+  }
+
+  /**
+   * @param {!Element|!ShadowRoot|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!Promise<!./service/cid-impl.CidDef>}
    */
   static cidForDoc(elementOrAmpDoc) {
@@ -452,26 +464,12 @@ export class Services {
 
   /**
    * @param {!Window} win
-   * @return {?Promise<?{incomingFragment: string, outgoingFragment: string}>}
-   */
-  static shareTrackingForOrNull(win) {
-    return /** @type {!Promise<?{incomingFragment: string, outgoingFragment: string}>} */ (getElementServiceIfAvailable(
-      win,
-      'share-tracking',
-      'amp-share-tracking',
-      true
-    ));
-  }
-
-  /**
-   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
-   * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>}
+   * @return {?Promise<?../extensions/amp-story/1.0/variable-service.AmpStoryVariableService>}
    */
   static storyVariableServiceForOrNull(win) {
     return (
-      /** @type {!Promise<?../extensions/amp-story/1.0/variable-service.StoryVariableDef>} */
-      (getElementServiceIfAvailable(win, 'story-variable', 'amp-story', true))
+      /** @type {!Promise<?../extensions/amp-story/1.0/variable-service.AmpStoryVariableService>} */
+      (getElementServiceIfAvailable(win, 'story-variable', 'amp-story'))
     );
   }
 
@@ -490,11 +488,11 @@ export class Services {
    * Version of the story store service depends on which version of amp-story
    * the publisher is loading. They all have the same implementation.
    * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService|?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>}
+   * @return {?Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService>}
    */
   static storyStoreServiceForOrNull(win) {
     return (
-      /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService|?../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService>} */
+      /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-store-service.AmpStoryStoreService>} */
       (getElementServiceIfAvailable(win, 'story-store', 'amp-story'))
     );
   }
@@ -522,6 +520,18 @@ export class Services {
   }
 
   /**
+   * Get promise with story request service
+   * @param {!Window} win
+   * @return {?Promise<?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService>}
+   */
+  static storyRequestServiceForOrNull(win) {
+    return (
+      /** @type {!Promise<?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService>} */
+      (getElementServiceIfAvailable(win, 'story-request', 'amp-story'))
+    );
+  }
+
+  /**
    * @param {!Window} win
    * @return {?../extensions/amp-story/1.0/amp-story-request-service.AmpStoryRequestService}
    */
@@ -544,22 +554,25 @@ export class Services {
   }
 
   /**
-   * @param {!Window} win
-   * @return {!Promise<?./service/localization.LocalizationService>}
+   * @param {!Element} el
+   * @return {!Promise<./service/localization.LocalizationService>}
    */
-  static localizationServiceForOrNull(win) {
-    return (
-      /** @type {!Promise<?./service/localization.LocalizationService>} */
-      (getElementServiceIfAvailable(win, 'localization', 'amp-story', true))
-    );
+  static localizationServiceForOrNull(el) {
+    return /** @type {!Promise<?./service/localization.LocalizationService>} */ (getServicePromiseForDoc(
+      el,
+      'localization'
+    ));
   }
 
   /**
-   * @param {!Window} win
-   * @return {!./service/localization.LocalizationService}
+   * @param {!Element} element
+   * @return {?./service/localization.LocalizationService}
    */
-  static localizationService(win) {
-    return getService(win, 'localization');
+  static localizationForDoc(element) {
+    return /** @type {?./service/localization.LocalizationService} */ (getExistingServiceForDocInEmbedScope(
+      element,
+      'localization'
+    ));
   }
 
   /**
@@ -583,45 +596,6 @@ export class Services {
       /** @type {?../extensions/amp-story/1.0/story-analytics.StoryAnalyticsService} */
       (getExistingServiceOrNull(win, 'story-analytics'))
     );
-  }
-
-  /**
-   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
-   * @param {!Window} win
-   * @return {!../extensions/amp-story/0.1/amp-story-store-service.AmpStoryStoreService}
-   */
-  static storyStoreServiceV01(win) {
-    return getService(win, 'story-store');
-  }
-
-  /**
-   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
-   * @param {!Window} win
-   * @return {!../extensions/amp-story/0.1/amp-story-request-service.AmpStoryRequestService}
-   */
-  static storyRequestServiceV01(win) {
-    return getService(win, 'story-request-v01');
-  }
-
-  /**
-   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
-   * @param {!Window} win
-   * @return {!Promise<?./service/localization.LocalizationService>}
-   */
-  static localizationServiceForOrNullV01(win) {
-    return (
-      /** @type {!Promise<?./service/localization.LocalizationService>} */
-      (getElementServiceIfAvailable(win, 'localization-v01', 'amp-story', true))
-    );
-  }
-
-  /**
-   * TODO(#14357): Remove this when amp-story:0.1 is deprecated.
-   * @param {!Window} win
-   * @return {!./service/localization.LocalizationService}
-   */
-  static localizationServiceV01(win) {
-    return getService(win, 'localization-v01');
   }
 
   /**
@@ -764,21 +738,6 @@ export class Services {
       elementOrAmpDoc,
       'video-manager'
     ));
-  }
-
-  /**
-   * @param {!Element|!ShadowRoot} element
-   * @return {!Promise<?../extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.AmpViewerAssistance>}
-   */
-  static viewerAssistanceForDocOrNull(element) {
-    return (
-      /** @type {!Promise<?../extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.AmpViewerAssistance>} */
-      (getElementServiceIfAvailableForDoc(
-        element,
-        'amp-viewer-assistance',
-        'amp-viewer-assistance'
-      ))
-    );
   }
 
   /**

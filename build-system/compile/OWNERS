@@ -7,7 +7,7 @@
       owners: [{name: 'ampproject/wg-infra'}],
     },
     {
-      pattern: '{build.conf,bundles.config,sources}.js',
+      pattern: '{bundles.config,sources}.js',
       owners: [
         {name: 'ampproject/wg-infra'},
         {name: 'ampproject/wg-runtime'},
@@ -17,13 +17,6 @@
     {
       pattern: '{closure-compile,compile}.js',
       owners: [{name: 'rsimha', notify: true}],
-    },
-    {
-      pattern: 'single-pass.js',
-      owners: [
-        {name: 'erwinmombay', notify: true},
-        {name: 'rsimha', notify: true},
-      ],
     },
     {
       pattern: 'internal-version.js',

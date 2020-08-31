@@ -50,7 +50,7 @@ export function capirs(global, data) {
       },
     },
     block: {
-      draw: feed => {
+      draw: (feed) => {
         const banner = feed['banners']['graph'][0];
 
         global.context.renderStart({
@@ -61,7 +61,7 @@ export function capirs(global, data) {
         const reportId = 'capirs-' + banner['banner_id'];
         global.context.reportRenderedEntityIdentifier(reportId);
       },
-      unexist: function() {
+      unexist: function () {
         global.context.noContentAvailable();
       },
     },

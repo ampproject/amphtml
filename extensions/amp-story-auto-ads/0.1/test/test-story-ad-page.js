@@ -42,7 +42,7 @@ const pageImplMock = {
   delegateVideoAutoplay: NOOP,
 };
 
-describes.realWin('story-ad-page', {amp: true}, env => {
+describes.realWin('story-ad-page', {amp: true}, (env) => {
   let win;
   let doc;
   let storyAutoAdsEl;
@@ -60,7 +60,7 @@ describes.realWin('story-ad-page', {amp: true}, env => {
       storyAutoAdsEl.getAmpDoc(),
       baseConfig,
       1, // index
-      new StoryAdLocalization(win),
+      new StoryAdLocalization(storyAutoAdsEl),
       new ButtonTextFitter(env.ampdoc),
       storeService
     );
@@ -463,7 +463,7 @@ describes.realWin('story-ad-page', {amp: true}, env => {
         storyAutoAdsEl.getAmpDoc(),
         baseConfig,
         1, // index
-        new StoryAdLocalization(win),
+        new StoryAdLocalization(storyAutoAdsEl),
         new ButtonTextFitter(env.ampdoc)
       );
     });

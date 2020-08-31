@@ -11,11 +11,6 @@
     <script async custom-element="amp-next-page" src="https://cdn.ampproject.org/v0/amp-next-page-1.0.js"></script>
     <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
     <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
-    <script>
-      (self.AMP=self.AMP||[]).push(function(AMP){
-          AMP.toggleExperiment('amp-next-page-v2', true);
-      });
-    </script>    
     <style amp-custom>
       .content {
         padding: 20px;
@@ -34,6 +29,52 @@
     </style>
 </head>
   <body>
+  <amp-analytics>
+      <script type="application/json">
+      {
+        "requests": {
+          "scroll": "https://host-page/${eventId}/${eventLabel}/${account}",
+          "pageview": "https://host-page/${canonicalUrl}/${title}/${account}",
+          "imageview": "https://host-page/image-view/?initialScrollDepth=${initialScrollDepth}&maxScrollDepth=${maxScrollDepth}&totalTime=${totalTime}&totalVisibleTime=${totalVisibleTime}&maxContinuousVisibleTime=${maxContinuousVisibleTime}&minVisiblePercentage=${minVisiblePercentage}&maxVisiblePercentage=${maxVisiblePercentage}&firstVisibleTime=${firstVisibleTime}"
+        },
+        "vars": {
+          "account": "ABC123"
+        },
+        "triggers": {
+          "scrollPings": {
+            "on": "scroll",
+            "request": "scroll",
+            "scrollSpec": {
+              "verticalBoundaries": [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+              "horizontalBoundaries": [90],
+              "useInitialPageSize": true
+            },
+            "vars": {
+              "eventId": "scroll",
+              "eventLabel": "${verticalScrollBoundary}"
+            }
+          },
+          "trackPageview": {
+            "on": "visible",
+            "request": "pageview",
+            "vars": {
+              "eventCategory": "${canonicalUrl}",
+              "eventAction": "view"
+            }
+          },
+          "image_viewed": {
+            "on": "visible",
+            "request": ["imageview"],
+            "selector": "#target1",
+            "visibilitySpec": {
+              "visiblePercentageMin": "0",
+              "repeat": true
+            }
+          }  
+        }
+      }
+      </script>
+    </amp-analytics>          
     <div class="content">
       <h2>Host page</h2>
       <p>
@@ -50,6 +91,9 @@
         varius est suscipit vitae. Maecenas ut sapien diam. Vivamus viverra nisl
         at quam pellentesque posuere. Cras ut nibh non arcu dignissim elementum.
       </p>
+
+      <amp-img id="target1" layout=responsive width=1600 height=900 src="https://picsum.photos/1600/900?image=981"></amp-img>
+
       <p>
         Vestibulum a nisi est. Fusce consequat iaculis vehicula. Aliquam luctus
         nunc risus, ut congue augue tristique nec. In venenatis aliquam tristique.
@@ -306,11 +350,11 @@
             </div>
           </template>
         </div>
-        <div footer class="my-custom-footer">
+        <div recommendation-box class="my-custom-footer">
             Here are a few more articles ...
         </div>
       -->
-      <span class="my-footer">
+      <span class="my-footer" footer>
         more footer content here
       </span>
     </amp-next-page>

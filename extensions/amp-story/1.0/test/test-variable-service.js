@@ -18,7 +18,7 @@ import {Action, getStoreService} from '../amp-story-store-service';
 import {AdvancementMode} from '../story-analytics';
 import {AnalyticsVariable, getVariableService} from '../variable-service';
 
-describes.fakeWin('amp-story variable service', {}, env => {
+describes.fakeWin('amp-story variable service', {}, (env) => {
   let variableService;
   let storeService;
 

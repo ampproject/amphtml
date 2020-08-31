@@ -38,7 +38,7 @@ function log(...messages) {
   }
 }
 
-app.use('/compose-doc', function(req, res) {
+app.use('/compose-doc', function (req, res) {
   res.setHeader('X-XSS-Protection', '0');
 
   const {body, css, experiments, extensions, spec} = req.query;
@@ -75,7 +75,7 @@ app.use('/compose-doc', function(req, res) {
   res.send(doc);
 });
 
-app.use('/compose-html', function(req, res) {
+app.use('/compose-html', function (req, res) {
   res.setHeader('X-XSS-Protection', '0');
   res.send(`
 <!doctype html>
@@ -91,7 +91,7 @@ ${req.query.body}
   `);
 });
 
-app.use('/compose-shadow', function(req, res) {
+app.use('/compose-shadow', function (req, res) {
   const {docUrl} = req.query;
   const viewerHtml = renderShadowViewer({
     src: docUrl.replace(/^\//, ''),
@@ -144,7 +144,7 @@ app.use('/request-bank/:bid/withdraw/:id/', (req, res) => {
       .status(500)
       .send(`another client is withdrawing this ID [${key}]`);
   }
-  const callback = function(result) {
+  const callback = function (result) {
     if (result === undefined) {
       // This happens when tearDown is called but no request
       // of given ID has been received yet.
@@ -283,7 +283,7 @@ function composeDocument(config) {
   let extensionScripts = '';
   if (extensions) {
     extensionScripts = extensions
-      .map(extension => {
+      .map((extension) => {
         const tuple = extension.split(':');
         const name = tuple[0];
         const version = tuple[1] || '0.1';
@@ -325,8 +325,8 @@ function composeDocument(config) {
     if (extensions) {
       end = topHalfOfHtml.indexOf(extensionScripts) + extensionScripts.length;
       // Filter out extensions that are not custom elements, e.g. amp-mustache.
-      customElements = extensions.filter(e => !CUSTOM_TEMPLATES.includes(e));
-      extensionsMap = customElements.map(ce => {
+      customElements = extensions.filter((e) => !CUSTOM_TEMPLATES.includes(e));
+      extensionsMap = customElements.map((ce) => {
         return {
           'custom-element': ce,
           // TODO: Should this be a local URL i.e. /dist/v0/...?

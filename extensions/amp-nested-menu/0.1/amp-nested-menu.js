@@ -92,10 +92,12 @@ export class AmpNestedMenu extends AMP.BaseElement {
    * @private
    */
   registerSubmenuElements_() {
-    const submenuBtns = this.element.querySelectorAll(
-      '[amp-nested-submenu-open],[amp-nested-submenu-close]'
+    const submenuBtns = toArray(
+      this.element.querySelectorAll(
+        '[amp-nested-submenu-open],[amp-nested-submenu-close]'
+      )
     );
-    submenuBtns.forEach(submenuBtn => {
+    submenuBtns.forEach((submenuBtn) => {
       if (!submenuBtn.hasAttribute('tabindex')) {
         submenuBtn.setAttribute('tabindex', 0);
       }
@@ -116,6 +118,11 @@ export class AmpNestedMenu extends AMP.BaseElement {
     // If support is added for other layouts, we should ensure that
     // lazy loading by sidebar does not cause FOUC when sidebar first opens.
     return layout == Layout.FILL;
+  }
+
+  /** @override */
+  prerenderAllowed() {
+    return true;
   }
 
   /**
@@ -149,7 +156,7 @@ export class AmpNestedMenu extends AMP.BaseElement {
    * @private
    */
   shouldHandleClick_(target, submenuBtn) {
-    const hasAnchor = !!closest(target, e => e.tagName == 'A', submenuBtn);
+    const hasAnchor = !!closest(target, (e) => e.tagName == 'A', submenuBtn);
     const hasTapAction = this.action_.hasAction(target, 'tap', submenuBtn);
     return !hasAnchor && !hasTapAction;
   }
@@ -196,7 +203,7 @@ export class AmpNestedMenu extends AMP.BaseElement {
           submenu.querySelectorAll('[amp-nested-submenu-close]')
         );
         const submenuClose = submenuCloseCandidates.filter(
-          candidate => this.getParentMenu_(candidate) == submenu
+          (candidate) => this.getParentMenu_(candidate) == submenu
         )[0];
         userAssert(
           submenuClose,
@@ -317,7 +324,7 @@ export class AmpNestedMenu extends AMP.BaseElement {
   handleMenuItemNavigation_(e) {
     const target = dev().assertElement(e.target);
     const parentMenu = this.getParentMenu_(target);
-    const item = closest(target, e => e.tagName == 'LI', parentMenu);
+    const item = closest(target, (e) => e.tagName == 'LI', parentMenu);
     // active element is not in a li that is inside the current submenu.
     if (!item) {
       return;
@@ -363,6 +370,6 @@ export class AmpNestedMenu extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpNestedMenu, CSS);
 });

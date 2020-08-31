@@ -27,7 +27,7 @@ describes.endtoend(
     // TODO(cathyxz, cvializ): figure out why 'viewer-demo' only shows 'FALLBACK'
     environments: ['single'],
   },
-  async env => {
+  async (env) => {
     let controller;
 
     beforeEach(async () => {

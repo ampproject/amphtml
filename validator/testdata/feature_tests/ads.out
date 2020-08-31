@@ -381,7 +381,7 @@ PASS
 |        data-sizes="300x250">
 |    </amp-ad>
 |
-|    <h2>Ad Up Technology</h2>
+|    <h2>AdUp Technology</h2>
 |    <amp-ad width="500" height="250"
 |        type="aduptech"
 |        layout="fixed"
@@ -1163,7 +1163,7 @@ PASS
 |        data-iid="informerIDgoeshere"
 |        data-aid="affiliateIDgoeshere"
 |        data-testFlag="true"
-|        data-z="393900"><!-- this ID is only whitelisted for localhost:8000 -->
+|        data-z="393900"><!-- this ID is only allowlisted for localhost:8000 -->
 |    </amp-ad>
 |
 |    <h2>SpotX</h2>

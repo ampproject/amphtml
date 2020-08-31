@@ -50,12 +50,12 @@ export class ArticleComponent {
   assertValidity(articleJson, element) {
     const requiredFields = ['title', 'url'];
     const hasAllRequiredFields = !requiredFields.some(
-      field => !(field in articleJson)
+      (field) => !(field in articleJson)
     );
     userAssert(
       hasAllRequiredFields,
       'Small article component must contain ' +
-        requiredFields.map(field => '`' + field + '`').join(', ') +
+        requiredFields.map((field) => '`' + field + '`').join(', ') +
         ' fields, skipping invalid.'
     );
 

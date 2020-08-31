@@ -14,8 +14,23 @@
  * limitations under the License.
  */
 
+import {ChunkPriority, chunk} from '../../../src/chunk';
+import {Deferred} from '../../../src/utils/promise';
 import {dev, userAssert} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {getTrackerKeyName, getTrackerTypesForParentType} from './events';
+import {isExperimentOn} from '../../../src/experiments';
+import {toWin} from '../../../src/types';
+
+/**
+ * @const {number}
+ * We want to execute the first trigger immediately to reduce the viewability
+ * delay as much as possible.
+ */
+const IMMEDIATE_TRIGGER_THRES = 1;
+
+/** @const {number} */
+const HIGH_PRIORITY_TRIGGER_THRES = 3;
 
 /**
  * Represents the group of analytics triggers for a single config. All triggers
@@ -36,11 +51,17 @@ export class AnalyticsGroup {
 
     /** @private @const {!Array<!UnlistenDef>} */
     this.listeners_ = [];
+
+    /** @private {number} */
+    this.triggerCount_ = 0;
+
+    /** @private @const {!Window} */
+    this.win_ = toWin(analyticsElement.ownerDocument.defaultView);
   }
 
   /** @override */
   dispose() {
-    this.listeners_.forEach(listener => {
+    this.listeners_.forEach((listener) => {
       listener();
     });
   }
@@ -54,15 +75,16 @@ export class AnalyticsGroup {
    *
    * @param {!JsonObject} config
    * @param {function(!./events.AnalyticsEvent)} handler
+   * @return {!Promise}
    */
   addTrigger(config, handler) {
     const eventType = dev().assertString(config['on']);
     const trackerKey = getTrackerKeyName(eventType);
-    const trackerWhitelist = getTrackerTypesForParentType(this.root_.getType());
+    const trackerAllowlist = getTrackerTypesForParentType(this.root_.getType());
 
-    const tracker = this.root_.getTrackerForWhitelist(
+    const tracker = this.root_.getTrackerForAllowlist(
       trackerKey,
-      trackerWhitelist
+      trackerAllowlist
     );
     userAssert(
       !!tracker,
@@ -70,12 +92,43 @@ export class AnalyticsGroup {
       eventType,
       this.root_.getType()
     );
-    const unlisten = tracker.add(
-      this.analyticsElement_,
-      eventType,
-      config,
-      handler
-    );
-    this.listeners_.push(unlisten);
+    let unlisten;
+    const deferred = new Deferred();
+    const task = () => {
+      unlisten = tracker.add(
+        this.analyticsElement_,
+        eventType,
+        config,
+        handler
+      );
+      this.listeners_.push(unlisten);
+      deferred.resolve();
+    };
+    if (
+      this.triggerCount_ < IMMEDIATE_TRIGGER_THRES ||
+      !isAnalyticsChunksExperimentOn(this.win_)
+    ) {
+      task();
+    } else {
+      const priority =
+        this.triggerCount_ < HIGH_PRIORITY_TRIGGER_THRES
+          ? ChunkPriority.HIGH
+          : ChunkPriority.LOW;
+      chunk(this.analyticsElement_, task, priority);
+    }
+    this.triggerCount_++;
+    return deferred.promise;
   }
+}
+
+/**
+ * Determine if the analytics-chunks experiment should be applied
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function isAnalyticsChunksExperimentOn(win) {
+  if (getMode(win).runtime == 'inabox') {
+    return isExperimentOn(win, 'analytics-chunks-inabox');
+  }
+  return isExperimentOn(win, 'analytics-chunks');
 }

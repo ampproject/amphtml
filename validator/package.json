@@ -12,13 +12,14 @@
     "preinstall": "node ../build-system/common/check-package-manager.js"
   },
   "devDependencies": {
-    "google-closure-compiler": "20200204.0.0",
-    "google-closure-library": "20200204.0.0",
-    "jasmine": "3.5.0"
+    "google-closure-compiler": "20200719.0.0",
+    "google-closure-library": "20200719.0.0",
+    "jasmine": "3.6.1"
   },
   "resolutions": {
-    "**/**/diff": "^3.5.0",
-    "**/**/debug": "^2.6.9",
-    "**/**/growl": "^1.10.0"
+    "**/**/diff": "^4.0.0",
+    "**/**/debug": "^4.0.0",
+    "**/**/growl": "^1.10.0",
+    "**/**/minimist": "^1.2.3"
   }
 }

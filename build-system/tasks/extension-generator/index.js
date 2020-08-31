@@ -27,7 +27,7 @@ const year = new Date().getFullYear();
 function pascalCase(str) {
   return (
     str[0].toUpperCase() +
-    str.slice(1).replace(/-([a-z])/g, function(g) {
+    str.slice(1).replace(/-([a-z])/g, function (g) {
       return g[1].toUpperCase();
     })
   );
@@ -73,7 +73,7 @@ tags: {  # <${name}>
 `;
 }
 
-const getMarkdownDocFile = async name =>
+const getMarkdownDocFile = async (name) =>
   (await fs.readFile(`${__dirname}/extension-doc.template.md`))
     .toString('utf-8')
     .replace(/\\\$category/g, '$category')
@@ -98,27 +98,34 @@ function getJsTestExtensionFile(name) {
  */
 
 import '../${name}';
+import {createElementWithAttributes} from '../../../../src/dom';
 
-describes.realWin('${name}', {
-  amp: {
-    extensions: ['${name}'],
+describes.realWin(
+  '${name}',
+  {
+    amp: {
+      runtimeOn: true,
+      extensions: ['${name}'],
+    },
   },
-}, env => {
+  (env) => {
+    let win;
+    let element;
 
-  let win;
-  let element;
+    beforeEach(() => {
+      win = env.win;
+      element = createElementWithAttributes(win.document, '${name}', {
+        layout: 'responsive',
+      });
+      win.document.body.appendChild(element);
+    });
 
-  beforeEach(() => {
-    win = env.win;
-    element = win.document.createElement('${name}');
-    win.document.body.appendChild(element);
-  });
-
-  it('should have hello world when built', () => {
-    element.build();
-    expect(element.querySelector('div').textContent).to.equal('hello world');
-  });
-});
+    it('should contain "hello world" when built', async () => {
+      await element.whenBuilt();
+      expect(element.querySelector('div').textContent).to.equal('hello world');
+    });
+  }
+);
 `;
 }
 
@@ -231,7 +238,7 @@ async function makeExtension() {
   const examplesFileValidatorOut = examplesFile
     .trim()
     .split('\n')
-    .map(line => `|  ${line}`)
+    .map((line) => `|  ${line}`)
     .join('\n');
 
   fs.writeFileSync(

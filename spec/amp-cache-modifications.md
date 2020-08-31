@@ -286,7 +286,7 @@ Any `<link>` tag present with attribute `rel` equal to any of the following:
 
 </details>
 
-#### Remove non-whitelisted `<meta>` tags
+#### Remove non-allowlisted `<meta>` tags
 
 _Condition_:
 Remove any `<meta>` tags except for those that:
@@ -414,7 +414,6 @@ Remove unused custom-element extensions with the following exceptions:
 - amp-auto-ads
 - amp-dynamic-css-classes
 - amp-form
-- amp-share-tracking
 
 <details>
 <summary>example</summary>

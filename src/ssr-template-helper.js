@@ -71,7 +71,7 @@ export class SsrTemplateHelper {
    * @return {!Promise}
    */
   assertTrustedViewer(element) {
-    return this.viewer_.isTrustedViewer().then(trusted => {
+    return this.viewer_.isTrustedViewer().then((trusted) => {
       userAssert(
         trusted,
         'Refused to attempt SSR in untrusted viewer: ',
@@ -114,7 +114,7 @@ export class SsrTemplateHelper {
    * If SSR is supported, data is assumed to be from ssr() above.
    * @param {!Element} element
    * @param {(?JsonObject|string|undefined|!Array)} data
-   * @return {!Promise<!Element>}
+   * @return {!Promise<(!Element|!Array<!Element>)>}
    */
   applySsrOrCsrTemplate(element, data) {
     let renderTemplatePromise;

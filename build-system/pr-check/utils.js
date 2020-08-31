@@ -16,7 +16,6 @@
 'use strict';
 
 const colors = require('ansi-colors');
-const requestPromise = require('request-promise');
 const {
   gitBranchCreationPoint,
   gitBranchName,
@@ -40,8 +39,11 @@ const BUILD_OUTPUT_FILE = isTravisBuild()
 const DIST_OUTPUT_FILE = isTravisBuild()
   ? `amp_dist_${travisBuildNumber()}.zip`
   : '';
+const ESM_DIST_OUTPUT_FILE = isTravisBuild()
+  ? `amp_esm_dist_${travisBuildNumber()}.zip`
+  : '';
 
-const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/ EXTENSIONS_CSS_MAP';
+const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/';
 const APP_SERVING_DIRS = 'dist.tools/ examples/ test/manual/';
 
 const OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
@@ -109,41 +111,6 @@ function printChangeSummary(fileName) {
       colors.cyan(GIT_BRANCH_URL) + '.\n'
     );
   }
-}
-
-/**
- * Starts connection to Sauce Labs after getting account credentials
- * @param {string} functionName
- */
-async function startSauceConnect(functionName) {
-  process.env['SAUCE_USERNAME'] = 'amphtml';
-  const response = await requestPromise(
-    'https://amphtml-sauce-token-dealer.appspot.com/getJwtToken'
-  );
-  process.env['SAUCE_ACCESS_KEY'] = response.trim();
-  const startScCmd = 'build-system/sauce_connect/start_sauce_connect.sh';
-  const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
-  console.log(
-    '\n' + fileLogPrefix,
-    'Starting Sauce Connect Proxy:',
-    colors.cyan(startScCmd)
-  );
-  execOrDie(startScCmd);
-}
-
-/**
- * Stops connection to Sauce Labs
- * @param {string} functionName
- */
-function stopSauceConnect(functionName) {
-  const stopScCmd = 'build-system/sauce_connect/stop_sauce_connect.sh';
-  const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
-  console.log(
-    '\n' + fileLogPrefix,
-    'Stopping Sauce Connect Proxy:',
-    colors.cyan(stopScCmd)
-  );
-  execOrDie(stopScCmd);
 }
 
 /**
@@ -259,7 +226,7 @@ function downloadOutput_(functionName, outputFileName, outputDirs) {
     `${fileLogPrefix} Extracting ` + colors.cyan(outputFileName) + '...'
   );
   exec('echo travis_fold:start:unzip_results && echo');
-  dirsToUnzip.forEach(dir => {
+  dirsToUnzip.forEach((dir) => {
     execOrDie(`unzip ${outputFileName} '${dir.replace('/', '/*')}'`);
   });
   exec('echo travis_fold:end:unzip_results');
@@ -333,6 +300,14 @@ function downloadDistOutput(functionName) {
 }
 
 /**
+ * Downloads and unzips esm dist output from storage
+ * @param {string} functionName
+ */
+function downloadEsmDistOutput(functionName) {
+  downloadOutput_(functionName, ESM_DIST_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
+}
+
+/**
  * Zips and uploads the build output to a remote storage location
  * @param {string} functionName
  */
@@ -347,6 +322,15 @@ function uploadBuildOutput(functionName) {
 function uploadDistOutput(functionName) {
   const distOutputDirs = `${BUILD_OUTPUT_DIRS} ${APP_SERVING_DIRS}`;
   uploadOutput_(functionName, DIST_OUTPUT_FILE, distOutputDirs);
+}
+
+/**
+ * Zips and uploads the esm dist output to a remote storage location
+ * @param {string} functionName
+ */
+function uploadEsmDistOutput(functionName) {
+  const esmDistOutputDirs = `${BUILD_OUTPUT_DIRS} ${APP_SERVING_DIRS}`;
+  uploadOutput_(functionName, ESM_DIST_OUTPUT_FILE, esmDistOutputDirs);
 }
 
 /**
@@ -378,16 +362,16 @@ function decryptTravisKey_() {
 module.exports = {
   downloadBuildOutput,
   downloadDistOutput,
+  downloadEsmDistOutput,
   printChangeSummary,
   processAndUploadDistOutput,
   startTimer,
   stopTimer,
-  startSauceConnect,
-  stopSauceConnect,
   stopTimedJob,
   timedExec,
   timedExecOrDie,
   timedExecWithError,
   uploadBuildOutput,
   uploadDistOutput,
+  uploadEsmDistOutput,
 };

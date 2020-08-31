@@ -68,7 +68,7 @@ export class ScrollTimelineWorkletRunner extends AnimationRunner {
     const adjustedTimeRange = (1 - this.initialInViewPercent_) * timeRange;
     const initialElementOffset = this.initialInViewPercent_ * timeRange;
 
-    this.requests_.map(request => {
+    this.requests_.map((request) => {
       // Apply vars.
       if (request.vars) {
         setStyles(request.target, assertDoesNotContainDisplay(request.vars));
@@ -86,7 +86,7 @@ export class ScrollTimelineWorkletRunner extends AnimationRunner {
           const keyframeEffect = new KeyframeEffect(
             request.target,
             request.keyframes,
-            request.timing
+            /** @type {AnimationEffectTimingProperties} */ (request.timing)
           );
           const player = new this.win_.WorkletAnimation(
             `${moduleName}`,
@@ -99,7 +99,7 @@ export class ScrollTimelineWorkletRunner extends AnimationRunner {
           player.play();
           this.players_.push(player);
         },
-        e => {
+        (e) => {
           dev().error('AMP-ANIMATION', e);
         }
       );
@@ -124,7 +124,7 @@ export class ScrollTimelineWorkletRunner extends AnimationRunner {
     if (!this.players_) {
       return;
     }
-    this.players_.forEach(player => {
+    this.players_.forEach((player) => {
       player.cancel();
     });
   }

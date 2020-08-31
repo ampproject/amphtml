@@ -6,14 +6,6 @@ teaser:
   text: Provides an AMP paywall and subscription support.
 ---
 
-# amp-access
-
-AMP Access or “AMP paywall and subscription support” gives Publishers control over which content can be accessed by a Reader and with what restrictions, based on the Reader’s subscription status, number of views, and other factors.
-
-# <a name="amp-access-"></a> amp-access
-
-[TOC]
-
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -21,7 +13,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-      http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS-IS" BASIS,
@@ -30,25 +22,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<table>
-  <tr>
-    <td><strong>Availability</strong></td>
-    <td>Stable</td>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td>
-      <div>
-        <code>&lt;script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js">&lt;/script></code>
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-access/">Annotated code example for amp-access</a></td>
-  </tr>
-</table>
+# amp-access
 
-## Relationship to `amp-subscriptions`
+AMP Access or “AMP paywall and subscription support” gives Publishers control over which content can be accessed by a Reader and with what restrictions, based on the Reader’s subscription status, number of views, and other factors.
+
+## Relationship to amp-subscriptions
 
 The [`amp-subscriptions`](../amp-subscriptions/amp-subscriptions.md) extension offers
 similar features to `amp-access`. However, it supports a more specialized access
@@ -201,12 +179,9 @@ Here’s an example of the AMP Access configuration:
 ```html
 <script id="amp-access" type="application/json">
   {
-    "authorization":
-        "https://pub.com/amp-access?rid=READER_ID&url=SOURCE_URL",
-    "pingback":
-        "https://pub.com/amp-ping?rid=READER_ID&url=SOURCE_URL",
-    "login":
-        "https://pub.com/amp-login?rid=READER_ID&url=SOURCE_URL",
+    "authorization": "https://pub.com/amp-access?rid=READER_ID&url=SOURCE_URL",
+    "pingback": "https://pub.com/amp-ping?rid=READER_ID&url=SOURCE_URL",
+    "login": "https://pub.com/amp-login?rid=READER_ID&url=SOURCE_URL",
     "authorizationFallbackResponse": {"error": true}
   }
 </script>
@@ -225,7 +200,7 @@ It is possible to specify multiple access providers using an array instead of a 
       "namespace": value
     },
     ...
-  [
+  ]
 </script>
 ```
 

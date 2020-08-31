@@ -17,7 +17,7 @@
 import {StoryAdConfig} from '../story-ad-config';
 import {createStoryAdElementAndConfig} from './story-mock';
 
-describes.realWin('amp-story-auto-ads:config', {amp: true}, env => {
+describes.realWin('amp-story-auto-ads:config', {amp: true}, (env) => {
   let win;
   let doc;
 
@@ -44,6 +44,26 @@ describes.realWin('amp-story-auto-ads:config', {amp: true}, env => {
         'data-slot': '/30497360/a4a/amp_story_dfp_example',
         layout: 'fill',
         type: 'doubleclick',
+      });
+    });
+
+    it('handles valid adsense config', () => {
+      const config = {
+        type: 'adsense',
+        'data-ad-client': 'ca-pub-8588820008944775',
+      };
+      const storyAdEl = createStoryAdElementAndConfig(
+        doc,
+        doc.body, // Parent.
+        config
+      );
+      const result = new StoryAdConfig(storyAdEl).getConfig();
+      expect(result).to.eql({
+        'amp-story': '',
+        class: 'i-amphtml-story-ad',
+        layout: 'fill',
+        'data-ad-client': 'ca-pub-8588820008944775',
+        type: 'adsense',
       });
     });
 

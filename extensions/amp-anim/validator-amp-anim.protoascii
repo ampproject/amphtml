@@ -17,7 +17,6 @@
 tags: {  # amp-anim
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-anim"
@@ -42,7 +41,6 @@ tags: {  # amp-anim
 tags: {  # <amp-anim>
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "AMP-ANIM"
   requires_extension: "amp-anim"
   attrs: { name: "alt" }
@@ -51,7 +49,7 @@ tags: {  # <amp-anim>
   attrs: { name: "object-position" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-or-srcset"
-  spec_url: "https://amp.dev/documentation/components/amp-anim"
+  spec_url: "https://amp.dev/documentation/components/amp-anim/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -73,7 +71,7 @@ tags: {  # <amp-anim>
   attrs: { name: "attribution" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-amp4email"
-  spec_url: "https://amp.dev/documentation/components/amp-anim"
+  spec_url: "https://amp.dev/documentation/components/amp-anim/"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

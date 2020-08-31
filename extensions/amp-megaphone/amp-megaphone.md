@@ -24,25 +24,6 @@ limitations under the License.
 
 # amp-megaphone
 
-Displays a <a href="https://megaphone.fm/">Megaphone.fm</a> podcast episode or playlist.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-megaphone" src="https://cdn.ampproject.org/v0/amp-megaphone-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fixed, fixed-height</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-megaphone/">Annotated code example for amp-megaphone</a></td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Examples
 
 With the fixed height layout, the element will expand to fill the width of the page while keeping the `height` constant:

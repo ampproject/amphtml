@@ -53,6 +53,8 @@
       <option>atinternet</option>
       <option>afsanalytics</option>
       <option>baiduanalytics</option>
+      <option>blueconic</option>
+      <option>browsi</option>
       <option>burt</option>
       <option>byside</option>
       <option>captainmetrics</option>
@@ -67,21 +69,25 @@
       <option>euleriananalytics</option>
       <option>facebook-pixel</option>
       <option>gemius</option>
+      <option>gfksensic</option>
       <option>googleanalytics</option>
       <option>ibeatanalytics</option>
       <option>infonline</option>
+      <option>infonline_anonymous</option>
       <option>iplabel</option>
       <option>keen</option>
       <option>kenshoo</option>
       <option>krux</option>
       <option>linkpulse</option>
       <option>lotame</option>
+      <option>mapp_intelligence</option>
       <option>marinsoftware</option>
       <option>mediametrie</option>
       <option>mediarithmics</option>
       <option>mediator</option>
       <option>memo</option>
       <option>mobify</option>
+      <option>moengage</option>
       <option>mparticle</option>
       <option>mpulse</option>
       <option>newrelic</option>
@@ -100,6 +106,7 @@
       <option>rakam</option>
       <option>reppublika</option>
       <option>retargetly</option>
+      <option>rudderstack</option>
       <option>segment</option>
       <option>shinystat</option>
       <option>simplereach</option>
@@ -188,6 +195,10 @@ For complete documentation and additional examples please see: https://marketing
       "vars": {
         "eVar1": "button clicked"
       }
+    },
+    "linkers": {
+      "enabled": true,
+      "destinationDomains": ["localhost"]
     }
   }
 }
@@ -331,6 +342,40 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- Baidu stats example -->
 
+<!-- BlueConic analytics tracking -->
+<amp-analytics type="blueconic" id="blueconic">
+  <script type="application/json">
+    {
+      "triggers": {
+        "pageView": {
+          "on": "visible",
+          "request": "event",
+          "vars": {
+            "pixelId": "your-pixel-id"
+          }
+        }
+      },
+      "vars": {
+        "tenantId": "your-tenant-url",
+        "property": "your-property"
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End BlueConic analytics example -->
+
+<!-- Browsi prediction tracking example -->
+<amp-analytics type="browsi" id="browsi">
+  <script type="application/json">
+    {
+      "vars": {
+        "pubKey": "demo-pub",
+        "siteKey": "demo-site"
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End Browsi prediction tracking example -->
 
 <!-- Burt tracking -->
 <amp-analytics type="burt" id="burt">
@@ -650,6 +695,19 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Gemius  example -->
 
+<!-- GfK Sensic tracking -->
+<amp-analytics type="gfksensic" id="gfk">
+<script type="application/json">
+{
+  "vars": {
+    "regionID": "demo",
+    "mediaID": "demomedia"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End Sensic  example -->
+
 <amp-analytics type="googleanalytics" id="googleanalytics">
 <script type="application/json">
 {
@@ -714,6 +772,30 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End INFOnline example -->
+
+<!--
+  INFOnline anonymous example
+  Important: url needs to point to a copy of
+  amp-analytics-infonline-anonymous.html on a different subdomain
+  than your AMP files.
+-->
+<amp-analytics type="infonline_anonymous" id="infonline_anonymous">
+  <script type="application/json">
+    {
+      "vars": {
+        "st":  "site",
+        "co":  "comment",
+        "cp":  "code",
+        "cn": "de",
+        "dn": "relay domain name"
+      },
+      "requests": {
+        "url":  "https://3p.ampproject.net/custom/amp-analytics-infonline-anonymous.html"
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End INFOnline anonymous example -->
 
 <!-- iplabel rumbi. Ensure you replace "ampTrackerId" with your tracker id . -->
 <amp-analytics type="iplabel" id="iplabel" >
@@ -839,6 +921,25 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Lotame example -->
 
+<!-- Mapp Intelligence tracking -->
+<amp-analytics type="mapp_intelligence" id="mapp_intelligence">
+  <script type="application/json">
+    {
+      "vars": {
+        "trackDomain": "analytics.webtrekk.net",
+        "trackId": "111111111111111"
+      },
+      "triggers": {
+        "trackPageview": {
+          "on": "visible",
+          "request": "pageview"
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End Mapp Intelligence example -->
+
 <!-- Marin Software tracking.
   Configure tracker id (required)
   Configure anonymizeIp to "set" if ip should be anonymized (optional)
@@ -955,6 +1056,31 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Mobify example -->
+
+<!-- start MoEngage Analytics example -->
+<amp-analytics type="moengage" id="moengage" >
+  <script type="application/json">
+    {
+      "vars": {
+        "appId": "78FL7RI8NHROB3HLU4X42O44"
+      },
+      "triggers": {
+        "clickTrigger": {
+          "on": "click",
+          "selector": "#test1",
+          "request": "event",
+          "extraUrlParams": {
+            "a": {
+              "title": "${title}"
+            },
+            "e": "amp example button click"
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- end MoEngage Analytics example -->
 
 <!-- mParticle tracking
   Ensure you replace AppKey with your Application key
@@ -1280,6 +1406,33 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Retargetly example -->
 
+<!-- RudderStack example -->
+<amp-analytics type="rudderstack" id="rudderstack">
+<script type="application/json">
+{
+  "vars": {
+    "writeKey": "1XI9Niof0vuKt5XTLurbWh9KkXn",
+    "dataPlaneUrl": "https://hosted.rudderlabs.com",
+    "pageName": "My Page name"
+  },
+  "extraUrlParams": {
+    "properties.source": "RudderStack AMP"
+  },
+  "triggers": {
+    "click": {
+      "on": "click",
+      "selector": "#test1",
+      "request": "track",
+      "vars": {
+        "eventName": "click"
+      }
+    }
+  }
+}
+</script>
+</amp-analytics>
+<!-- End RudderStack example -->
+
 <!-- Segment analytics tracking -->
 <amp-analytics type="segment" id="segment">
 <script type="application/json">
@@ -1380,7 +1533,7 @@ For complete documentation and additional examples please see: https://marketing
   {
     "vars": {
       "collectorHost": "collector.snplow.net",
-      "appId": "amp-examples-v2.0.1",
+      "appId": "amp-examples-v2.0.2",
       "userId": "someUserId",
       "customContexts":  "{\"schema\":\"iglu:com.snowplowanalytics.snowplow/gdpr/jsonschema/1-0-0\",\"data\":{\"basisForProcessing\":\"legitimate_interests\"}}"
     },
@@ -1396,7 +1549,7 @@ For complete documentation and additional examples please see: https://marketing
       },
       "trackFirstPagePing": {
         "on": "timer",
-        "request": "pagePing",
+        "request": "ampPagePing",
         "timerSpec": {
           "interval": 10,
           "maxTimerLength": 9.99,
@@ -1413,7 +1566,7 @@ For complete documentation and additional examples please see: https://marketing
       },
       "trackPagePings": {
         "on": "timer",
-        "request": "pagePing",
+        "request": "ampPagePing",
         "timerSpec": {
           "interval": 30,
           "maxTimerLength": 1800,
@@ -1696,12 +1849,16 @@ For complete documentation and additional examples please see: https://marketing
 {
   "vars": {
     "aid": "99999999",
-    "ctIds": "1234,34343,564645",
     "ag": "agency",
     "au": "author1,author2",
     "pt": "publishTime",
     "ct": "1",
+    "hid": "153",
     "d":"m.ibeatdev.com",
+    "id":"123456",
+    "sec":"news",
+    "tgs":"modi,parliament",
+    "pc":"loggedin"
   }
 }
 </script>

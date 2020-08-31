@@ -154,8 +154,8 @@ class Amp3QPlayer extends AMP.BaseElement {
     }
 
     const data = objOrParseJson(getData(event));
-    if (data === undefined) {
-      return;
+    if (data == null) {
+      return; // we only process valid json
     }
 
     const eventType = data['data'];
@@ -294,6 +294,6 @@ class Amp3QPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, Amp3QPlayer);
 });

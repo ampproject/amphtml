@@ -24,11 +24,10 @@ import {
 } from '../src/service';
 import {getStyle} from '../src/style';
 import {poll} from './iframe';
-import {xhrServiceForTesting} from '../src/service/xhr-impl';
 
 export function stubService(sandbox, win, serviceId, method) {
   // Register if not already registered.
-  registerServiceBuilder(win, serviceId, function() {
+  registerServiceBuilder(win, serviceId, function () {
     return {
       [method]: () => {},
     };
@@ -39,7 +38,7 @@ export function stubService(sandbox, win, serviceId, method) {
 
 export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
   // Register if not already registered.
-  registerServiceBuilderForDoc(ampdoc, serviceId, function() {
+  registerServiceBuilderForDoc(ampdoc, serviceId, function () {
     return {
       [method]: () => {},
     };
@@ -51,14 +50,14 @@ export function stubServiceForDoc(sandbox, ampdoc, serviceId, method) {
 export function mockServiceForDoc(sandbox, ampdoc, serviceId, methods) {
   resetServiceForTesting(ampdoc.win, serviceId);
   const impl = {};
-  methods.forEach(method => {
+  methods.forEach((method) => {
     impl[method] = () => {};
   });
-  registerServiceBuilderForDoc(ampdoc, serviceId, function() {
+  registerServiceBuilderForDoc(ampdoc, serviceId, function () {
     return impl;
   });
   const mock = {};
-  methods.forEach(method => {
+  methods.forEach((method) => {
     mock[method] = sandbox.stub(impl, method);
   });
   return mock;
@@ -66,10 +65,10 @@ export function mockServiceForDoc(sandbox, ampdoc, serviceId, methods) {
 
 export function mockWindowInterface(sandbox) {
   const methods = Object.getOwnPropertyNames(WindowInterface).filter(
-    p => typeof WindowInterface[p] === 'function'
+    (p) => typeof WindowInterface[p] === 'function'
   );
   const mock = {};
-  methods.forEach(method => {
+  methods.forEach((method) => {
     mock[method] = sandbox.stub(WindowInterface, method);
   });
   return mock;
@@ -110,7 +109,7 @@ export function isAnimationNone(element) {
   for (const property in noneValues) {
     const value = getStyle(element, property);
     const expectedValues = noneValues[property];
-    if (!expectedValues.some(expectedValue => value == expectedValue)) {
+    if (!expectedValues.some((expectedValue) => value == expectedValue)) {
       return false;
     }
   }
@@ -144,8 +143,8 @@ export function assertScreenReaderElement(element, {index = 0} = {}) {
   expect(computedStyle.getPropertyValue('visibility')).to.equal('visible');
 }
 
-// Use a browserId to avoid cross-browser race conditions
-// when testing in Saucelabs.
+// Use a browserId to avoid cross-browser race conditions.
+// TODO(amphtml): Remove browserId now that we no longer test on Sauce Labs.
 /** @const {string} */
 const browserId = (Date.now() + Math.random()).toString(32);
 
@@ -184,30 +183,37 @@ export class RequestBank {
    */
   static withdraw(requestId) {
     const url = `${REQUEST_URL}/withdraw/${requestId}/`;
-    return this.fetch_(url).then(res => res.json());
+    return RequestBank.fetch_(url, `withdraw(${requestId ?? ''})`).then((res) =>
+      res.json()
+    );
   }
 
   static tearDown() {
     const url = `${REQUEST_URL}/teardown/`;
-    return this.fetch_(url);
+    return RequestBank.fetch_(url, 'tearDown');
   }
 
-  static fetch_(url) {
-    return xhrServiceForTesting(window)
-      .fetchJson(url, {
-        method: 'GET',
-        ampCors: false,
-        credentials: 'omit',
-      })
-      .catch(err => {
-        if (err.response != null) {
-          return err.response.text().then(msg => {
-            throw new Error(err.message + ': ' + msg);
-          });
-        } else {
-          throw err;
-        }
-      });
+  static fetch_(url, action, timeout = 10000) {
+    const xhr = fetch(url).then((response) => {
+      const {ok, status, statusText} = response;
+      if (!ok) {
+        throw new Error(
+          `RequestBank.${action}: HTTP ${status} error -- ${statusText}`
+        );
+      }
+      return response;
+    });
+    if (timeout <= 0) {
+      return xhr;
+    }
+    const timer = new Promise((_, reject) => {
+      setTimeout(() => {
+        reject(
+          new Error(`"RequestBank.${action}" timed out after ${timeout} ms.`)
+        );
+      }, timeout);
+    });
+    return Promise.race([xhr, timer]);
   }
 }
 
@@ -218,7 +224,7 @@ export class BrowserController {
   }
 
   wait(duration) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       setTimeout(resolve, duration);
     });
   }
@@ -254,7 +260,7 @@ export class BrowserController {
     return poll(
       `"${selector}" to build`,
       () => {
-        const someNotBuilt = [].some.call(elements, e =>
+        const someNotBuilt = [].some.call(elements, (e) =>
           e.classList.contains('i-amphtml-notbuilt')
         );
         return !someNotBuilt;
@@ -281,7 +287,7 @@ export class BrowserController {
         // layoutCallback() promise is resolved.
         const someNotReady = [].some.call(
           elements,
-          e => e.readyState !== 'complete'
+          (e) => e.readyState !== 'complete'
         );
         return !someNotReady;
       },
@@ -351,12 +357,20 @@ export class ImagePixelVerifier {
     }
     return this.imagePixels_[this.imagePixels_.length - 1].src;
   }
+
+  verifyAndRemoveRequestUrl(url) {
+    for (let i = this.imagePixels_.length - 1; i >= 0; i--) {
+      if (this.imagePixels_[i].src == url) {
+        this.imagePixels_.splice(i, 1);
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 export function measureMutateElementStub(measure, mutate) {
-  return Promise.resolve()
-    .then(measure)
-    .then(mutate);
+  return Promise.resolve().then(measure).then(mutate);
 }
 
 export function measureElementStub(measure) {

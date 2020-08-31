@@ -25,38 +25,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-sidebar"></a> `amp-sidebar`
+# amp-sidebar
 
-[TOC]
+## Usage
 
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>
-    A sidebar provides a way to display meta content intended for temporary access (navigation links, buttons, menus, etc.). The sidebar can be revealed by a button tap while the main content remains visually underneath.
-    </td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-sidebar/">amp-sidebar example</a>.</td>
-  </tr>
-</table>
-
-## Overview
+Provides a way to display meta content intended for temporary access such as navigation, links, buttons, menus. The sidebar can be revealed by a button tap while the main content remains visually underneath.
 
 `<amp-sidebar>` hides meta content intended for temporary access (navigation links, buttons, menus, etc.). `<amp-sidebar>` can be opened and closed by button taps, and tapping outside of amp-sidebar.
 However, optional attributes that accept media queries can be used to display meta content in other parts of the site. Child `<nav toolbar="(media query)" toolbar-target="elementID">` elements allow
 for content within the sidebar to be displayed on other parts of the main content.
-
-## Behavior
 
 - The sidebar can only appear on the left or right side of a page.
 - The `<amp-sidebar>` may contain any valid HTML elements (supported by AMP).
@@ -202,17 +179,95 @@ In the following example, we display a `toolbar` if the window width is less tha
 <div id="target-element"></div>
 ```
 
-{% call callout('Tip', type='success') %}
-See live demos at [AMP By Example](https://amp.dev/documentation/examples/components/amp-sidebar/).
-{% endcall %}
+### Auto scrolling within overflowing areas
+
+`amp-sidebar` can automatically scroll the overflowing container to first element that is decorated with `autoscroll` as an attribute in both sidebar and toolbar cases.
+
+This feature is useful when dealing with long navigation list and wanting the sidebar to scroll to the current navigation items when page loads.
+
+When using `toolbar` feature, `autoscroll` only works if the `<nav toolbar>` element is set to `overflow: auto` or `overflow: scroll`.
+
+```html
+<style amp-custom="">
+  nav [toolbar] {
+    overflow: auto;
+  }
+</style>
+
+<amp-sidebar id="sidebar1" layout="nodisplay" side="right">
+  <nav toolbar="(max-width: 767px)" toolbar-target="target-element">
+    <ul>
+      <li>Nav item 1</li>
+      <li>Nav item 2</li>
+      <li>Nav item 3</li>
+      <li autoscroll class="currentPage">Nav item 4</li>
+      <li>Nav item 5</li>
+      <li>Nav item 6</li>
+    </ul>
+  </nav>
+</amp-sidebar>
+
+<div id="target-element"></div>
+```
+
+Please see [this example file](https://github.com/ampproject/amphtml/blob/master/examples/amp-sidebar-autoscroll.amp.html) for a working example code.
+
+### Building Nested Menus
+
+`<amp-sidebar>` supports drilldown (nested) menus through a child component named [`<amp-nested-menu>`](../../amp-nested-menu/amp-nested-menu.md). With `<amp-nested-menu>`, `<amp-sidebar>` can support nesting one or more layers of submenus (and transition between them) as demonstrated by the following example:
+
+[tip type="note"]
+When using `amp-nested-menu`, wrap every menu item in a `li` element to improve accessibility and keyboard support.
+[/tip]
+
+[example playground="true" preview="top-frame" imports="amp-sidebar"]
+
+```html
+<button on="tap:sidebar1">Open Sidebar</button>
+<amp-sidebar id="sidebar1" layout="nodisplay" style="width:300px">
+  <amp-nested-menu layout="fill">
+    <ul>
+      <li>
+        <h4 amp-nested-submenu-open>Open Sub-Menu</h4>
+        <div amp-nested-submenu>
+          <ul>
+            <li>
+              <h4 amp-nested-submenu-close>Go back</h4>
+            </li>
+            <li>
+              <h4 amp-nested-submenu-open>Open Another Sub-Menu</h4>
+              <div amp-nested-submenu>
+                <h4 amp-nested-submenu-close>Go back</h4>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </li>
+      <li>
+        <a href="https://amp.dev/">Link</a>
+      </li>
+    </ul>
+  </amp-nested-menu>
+</amp-sidebar>
+```
+
+[/example]
+
+See [`<amp-nested-menu>`](../../amp-nested-menu/amp-nested-menu.md) for the full documentation on nested menus along with advanced feature such as dynamic content loading.
+
+### UX considerations
+
+When using `<amp-sidebar>`, keep in mind that your users will often view your page on mobile in an AMP viewer, which may display a fixed-position header. In addition, browsers often display their own fixed header at the top of the page. Adding another fixed-position element at the top of the screen would take up a large amount of mobile screen space with content that gives the user no new information.
+
+For this reason, we recommend that affordances to open the sidebar are not placed in a fixed, full-width header.
 
 [filter formats="stories"]
 
-## Sidebar for Stories
+### Sidebar for Stories
 
 Use of `amp-sidebar` is supported within the `amp-story` [component](https://www.ampproject.org/stories/).
 
-### Behavior
+#### Behavior
 
 - The `<amp-sidebar>` must be a direct child of `<amp-story>`.
 - The sidebar defaults to the "end" side, meaning right for left-right languages and left for right-to-left languages.
@@ -222,7 +277,7 @@ Use of `amp-sidebar` is supported within the `amp-story` [component](https://www
 
 There are certain restrictions on what attributes and features are allowed in order to provide a consistent UI experience across the story platform. The following are allowed attributes and features of an `amp-sidebar` within an `amp-story`.
 
-### Allowed Attributes
+#### Allowed Attributes
 
 - [layout](#layout)
 - [data-close-button-aria-label](#data)
@@ -293,91 +348,9 @@ The `amp-sidebar` component can be styled with standard CSS.
 - The height of the `amp-sidebar` may be set to adjust the height of the sidebar, if required. If the height exceeds 100vw, the sidebar will have a vertical scrollbar. The preset height of the sidebar is 100vw and can be overridden in CSS to make it shorter.
 - The current state of the sidebar is exposed via the `open` attribute that is set on the `amp-sidebar` tag when the side bar is open on the page.
 
-{% call callout('Tip', type='success') %}
+[tip type="read-on"]
 Visit [AMP Start](https://ampstart.com/components#navigation) for responsive, pre-styled navigation menus that you can use in your AMP pages.
-{% endcall %}
-
-## Auto scrolling within overflowing areas
-
-`amp-sidebar` can automatically scroll the overflowing container to first element that is decorated with `autoscroll` as an attribute in both sidebar and toolbar cases.
-
-This feature is useful when dealing with long navigation list and wanting the sidebar to scroll to the current navigation items when page loads.
-
-When using `toolbar` feature, `autoscroll` only works if the `<nav toolbar>` element is set to `overflow: auto` or `overflow: scroll`.
-
-```html
-<style amp-custom="">
-  nav [toolbar] {
-    overflow: auto;
-  }
-</style>
-
-<amp-sidebar id="sidebar1" layout="nodisplay" side="right">
-  <nav toolbar="(max-width: 767px)" toolbar-target="target-element">
-    <ul>
-      <li>Nav item 1</li>
-      <li>Nav item 2</li>
-      <li>Nav item 3</li>
-      <li autoscroll class="currentPage">Nav item 4</li>
-      <li>Nav item 5</li>
-      <li>Nav item 6</li>
-    </ul>
-  </nav>
-</amp-sidebar>
-
-<div id="target-element"></div>
-```
-
-Please see [this example file](https://github.com/ampproject/amphtml/blob/master/examples/amp-sidebar-autoscroll.amp.html) for a working example code.
-
-## Building Nested Menus
-
-`<amp-sidebar>` supports drilldown (nested) menus through a child component named [`<amp-nested-menu>`](../../amp-nested-menu/amp-nested-menu.md). With `<amp-nested-menu>`, `<amp-sidebar>` can support nesting one or more layers of submenus (and transition between them) as demonstrated by the following example:
-
-[tip type="note"]
-When using `amp-nested-menu`, wrap every menu item in a `li` element to improve accessibility and keyboard support.
 [/tip]
-
-[example playground="true" preview="top-frame" imports="amp-sidebar"]
-
-```html
-<button on="tap:sidebar1">Open Sidebar</button>
-<amp-sidebar id="sidebar1" layout="nodisplay" style="width:300px">
-  <amp-nested-menu layout="fill">
-    <ul>
-      <li>
-        <h4 amp-nested-submenu-open>Open Sub-Menu</h4>
-        <div amp-nested-submenu>
-          <ul>
-            <li>
-              <h4 amp-nested-submenu-close>Go back</h4>
-            </li>
-            <li>
-              <h4 amp-nested-submenu-open>Open Another Sub-Menu</h4>
-              <div amp-nested-submenu>
-                <h4 amp-nested-submenu-close>Go back</h4>
-              </div>
-            </li>
-          </ul>
-        </div>
-      </li>
-      <li>
-        <a href="https://amp.dev/">Link</a>
-      </li>
-    </ul>
-  </amp-nested-menu>
-</amp-sidebar>
-```
-
-[/example]
-
-See [`<amp-nested-menu>`](../../amp-nested-menu/amp-nested-menu.md) for the full documentation on nested menus along with advanced feature such as dynamic content loading.
-
-## UX considerations
-
-When using `<amp-sidebar>`, keep in mind that your users will often view your page on mobile in an AMP viewer, which may display a fixed-position header. In addition, browsers often display their own fixed header at the top of the page. Adding another fixed-position element at the top of the screen would take up a large amount of mobile screen space with content that gives the user no new information.
-
-For this reason, we recommend that affordances to open the sidebar are not placed in a fixed, full-width header.
 
 ## Validation
 

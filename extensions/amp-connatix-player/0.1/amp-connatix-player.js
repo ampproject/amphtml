@@ -20,6 +20,7 @@ import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
+import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
 
 export class AmpConnatixPlayer extends AMP.BaseElement {
@@ -34,7 +35,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     this.mediaId_ = '';
 
     /** @private {string} */
-    this.iframeDomain_ = 'https://cds.connatix.com';
+    this.iframeDomain_ = 'https://cdm.connatix.com';
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
@@ -65,7 +66,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
    * @private
    */
   bindToPlayerCommands_() {
-    this.win.addEventListener('message', e => {
+    this.win.addEventListener('message', (e) => {
       if (!this.iframe_ || e.source !== this.iframe_.contentWindow) {
         // Ignore messages from other iframes.
         return;
@@ -92,6 +93,8 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const {element} = this;
+
+    setIsMediaComponent(element);
 
     // Player id is mandatory
     this.playerId_ = userAssert(
@@ -132,7 +135,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
       'playerId': this.playerId_ || undefined,
       'mediaId': this.mediaId_ || undefined,
     });
-    const iframeUrl = this.iframeDomain_ + '/embed/index.html';
+    const iframeUrl = this.iframeDomain_ + '/amp-embed/index.html';
     const src = addParamsToUrl(iframeUrl, urlParams);
 
     const iframe = element.ownerDocument.createElement('iframe');
@@ -163,6 +166,6 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-connatix-player', '0.1', AMP => {
+AMP.extension('amp-connatix-player', '0.1', (AMP) => {
   AMP.registerElement('amp-connatix-player', AmpConnatixPlayer);
 });

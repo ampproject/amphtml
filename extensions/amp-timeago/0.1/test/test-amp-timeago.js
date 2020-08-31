@@ -22,11 +22,11 @@ describes.realWin(
       extensions: ['amp-timeago'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let element;
 
-    const timeout = ms => new Promise(res => setTimeout(res, ms));
+    const timeout = (ms) => new Promise((res) => setTimeout(res, ms));
 
     beforeEach(() => {
       win = env.win;
@@ -57,7 +57,7 @@ describes.realWin(
       expect(timeElement.textContent).to.equal('Sunday 1 January 2017');
     });
 
-    it('should update fuzzy timestamp on viewportCallback', async function() {
+    it('should update fuzzy timestamp on viewportCallback', async function () {
       const date = new Date();
       date.setSeconds(date.getSeconds() - 10);
       element.setAttribute('datetime', date.toISOString());

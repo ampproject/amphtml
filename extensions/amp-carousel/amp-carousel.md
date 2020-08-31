@@ -25,39 +25,33 @@ limitations under the License.
 
 # amp-carousel
 
-A generic carousel for displaying multiple similar pieces of content along a horizontal axis; meant to be flexible and performant.
+## Usage
 
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.2.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>
-      fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, and responsive.
-    </td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>AMP By Example's:<ul>
-      <li><a href="https://amp.dev/documentation/examples/components/amp-carousel/">amp-carousel example</a></li>
-      <li><a href="https://amp.dev/documentation/examples/multimedia-animations/image_galleries_with_amp-carousel/">Image galleries with amp-carousel</a></td>
-  </tr>
-</table>
+A generic carousel for displaying multiple similar pieces of content along a
+horizontal axis; meant to be flexible and performant.
 
-## Behavior
+Each of the `amp-carousel` component’s immediate children is considered an item
+in the carousel. Each of these nodes may also have arbitrary HTML children.
 
-Each of the `amp-carousel` component’s immediate children is considered an item in the carousel. Each of these nodes may also have arbitrary HTML children.
+The carousel consists of an arbitrary number of items, as well as optional
+navigational arrows to go forward or backwards. For `type="slides"`, the arrows
+moves one item at a time. For `type="carousel"`, the arrows move one carousel's
+width forwards or backwards at a time.
 
-The carousel consists of an arbitrary number of items, as well as optional navigational arrows to go forward or backwards. For `type="slides"`, the arrows moves one item at a time. For `type="carousel"`, the arrows move one carousel's width forwards or backwards at a time.
-
-The carousel advances between items if the user swipes or clicks an optional navigation arrow.
+The carousel advances between items if the user swipes or clicks an optional
+navigation arrow.
 
 [example preview="inline" playground="true" imports="amp-carousel"]
 
 ```html
-<amp-carousel width="450" height="300" layout="responsive" type="slides">
+<amp-carousel
+  width="450"
+  height="300"
+  layout="responsive"
+  type="slides"
+  role="region"
+  aria-label="Basic carousel"
+>
   <amp-img
     src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
     width="450"
@@ -78,11 +72,31 @@ The carousel advances between items if the user swipes or clicks an optional nav
 
 [/example]
 
+### Differences from `<amp-carousel>` 0.1
+
+- `autoplay` is allowed on `type="carousel"`
+- `loop` is allowed on `type="carousel"`
+
+#### Migration Notes
+
+- Update the required script from `amp-carousel-0.1` to `amp-carousel-0.2`.
+- Ensure any CSS for positioning next/previous arrows is still valid. See the
+  [styling](#styling) for more information on arrow positioning.
+- Ensure any CSS used to style the carousel is still valid. The internal DOM
+  structure of `<amp-carousel>` 0.2 differs from 0.1, effecting CSS selectors
+  targeting internal elements such as `amp-carousel > div`. Any selectors using
+  the `.amp-class-name` format should still work.
+
 ### Advancing to a specific slide
 
-Setting a method for the `on` attribute on an element to `tap:carousel-id.goToSlide(index=N)` will, on user tap or click, advance a carousel with the "carousel-id" ID to the slide at index=N (the first slide is at index=0, the second slide is at index=1, and so on).
+Setting a method for the `on` attribute on an element to
+`tap:carousel-id.goToSlide(index=N)` will, on user tap or click, advance a
+carousel with the "carousel-id" ID to the slide at index=N (the first slide is
+at index=0, the second slide is at index=1, and so on).
 
-In the following example, we have a carousel of three images with preview buttons below the carousel. When a user clicks one of the buttons, the corresponding carousel item displays.
+In the following example, we have a carousel of three images with preview
+buttons below the carousel. When a user clicks one of the buttons, the
+corresponding carousel item displays.
 
 [example preview="inline" playground="true" imports="amp-carousel"]
 
@@ -93,6 +107,8 @@ In the following example, we have a carousel of three images with preview button
   height="300"
   layout="responsive"
   type="slides"
+  role="region"
+  aria-label="Carousel with slide previews"
 >
   <amp-img
     src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
@@ -146,61 +162,80 @@ In the following example, we have a carousel of three images with preview button
 
 [/example]
 
+### Accessibility considerations for `amp-carousel`
+
+Autoplaying, and particularly infinitely looping, carousels can be very distracting and confusing for users - especially for users with cognitive impairments. In general, we recommend avoiding autoplaying carousels. While autoplaying carousels stop once the user has interacted with the carousel, consider also adding an explicit "Play/Pause" control.
+
+By default, the `<amp-carousel>` is programmatically identified as a list when rendered (using `role="list"` on the container element, and `role="listitem"` on each item). However, for `<amp-carousel type="slides">`, no specific `role` is currently provided. As a result, it will not be obvious for assistive technology users reading/navigating through a page when they reach a carousel. We recommend including an explicit `role="region"` and a descriptive `aria-label` (either a generic `aria-label="Carousel"` or a more descriptive label such as `aria-label="Latest news items"`) to `<amp-carousel>`.
+
+Currently, an `<amp-carousel type="slides">` carousel is declared as an ARIA live region (using `aria-live="polite"`), meaning that every time a new slide is shown, the entire content of the slide is announced by assistive technologies (such as screen readers). Due to the way carousels are initially rendered, this can also result in the carousel's content being announced in its entirety when a page is loaded. This also means that pages that contain an `autoplay` carousel will continuously announce whenever a slide auto-advances. There is currently no work-around for this issue.
+
 ## Attributes
 
 ### type
 
 Specifies the display type for the carousel items, which can be:
 
-<ul>
-  <li><strong><code>carousel</code></strong> (default): All slides are shown and are scrollable horizontally. Each slide may specify a different width using CSS.</li>
-  <li><strong><code>slides</code></strong>: Shows a single slide at a time, with each slide snapping into place as the user swipes.</li>
-</ul>
+- carousel (default): All slides are shown and are scrollable horizontally. Each
+  slide may specify a different width using CSS.
+- slides: Shows a single slide at a time, with each slide snapping into place as
+  the user swipes.
 
 ### controls (optional)
 
-Permanently displays left and right arrows for the user to navigate carousel items on mobile devices. By default, navigational arrows disappear after the user swipes to another slide on mobile.
+Permanently displays left and right arrows for the user to navigate carousel
+items on mobile devices. By default, navigational arrows disappear after the
+user swipes to another slide on mobile.
 
-The visibility of arrows can also be controlled via styling, and a media query can be used to only display arrows at certain screen widths. On desktop, arrows are always displayed unless only a single child is present.
+The visibility of arrows can also be controlled via styling, and a media query
+can be used to only display arrows at certain screen widths. On desktop, arrows
+are always displayed unless only a single child is present.
 
 ### data-next-button-aria-label (optional)
 
-Sets the aria-label for the `amp-carousel-button-next`. If no value is given, the aria-label defaults to 'Next item in carousel'.
+Sets the aria-label for the `amp-carousel-button-next`. If no value is given,
+the aria-label defaults to 'Next item in carousel'.
 
 ### data-prev-button-aria-label (optional)
 
-Sets the aria-label for the `amp-carousel-button-prev`. If no value is given, the aria-label defaults to 'Previous item in carousel'.
+Sets the aria-label for the `amp-carousel-button-prev`. If no value is given,
+the aria-label defaults to 'Previous item in carousel'.
 
 ### data-button-count-format (optional)
 
-A format string that looks like `(%s of %s)`, used as a suffix to the aria-label for `amp-carousel-button-next`/`amp-carousel-button-prev`. This provides information to users using a screen reader on their progress through the carousel. If no value is given, this defaults to `(%s of %s)`.
+A format string that looks like `(%s of %s)`, used as a suffix to the aria-label
+for `amp-carousel-button-next`/`amp-carousel-button-prev`. This provides
+information to users using a screen reader on their progress through the
+carousel. If no value is given, this defaults to `(%s of %s)`.
 
 ### autoplay (optional)
 
-Regularly advances to the next slide without user interaction. If the user manually changes slides, then autoplay is stopped.
+Regularly advances to the next slide without user interaction. If the user
+manually changes slides, then autoplay is stopped.
 
 If present without a value:
 
-<ul>
-  <li>By default, advances a slide in 5000 millisecond intervals (5 seconds); this can be overridden by the `delay` attribute.</li>
-  <li>Requires at least 2 slides for autoplay to occur.</li>
-</ul>
+- By default, advances a slide in 5000 millisecond intervals (5 seconds); this
+  can be overridden by the `delay` attribute.
+- Requires at least 2 slides for autoplay to occur.
 
 If present with a value:
 
-<ul>
-  <li>Stops autoplaying after the requisite number of loops are made.</li>
-</ul>
+- Stops autoplaying after the requisite number of loops are made.
 
 ### delay (optional)
 
-Specifies the duration (in milliseconds) to delay advancing to the next slide when `autoplay` is enabled.
+Specifies the duration (in milliseconds) to delay advancing to the next slide
+when `autoplay` is enabled. Note that the minimum allowed value for delay is
+1000 milliseconds.
 
 ### loop (optional)
 
-Allows the user to advance past the first item or the final item. There must be at least 3 slides for looping to occur.
+Allows the user to advance past the first item or the final item. There must be
+at least 3 slides for looping to occur.
 
-The example below displays a slide carousel with controls, looping, and delayed autoplay.
+The example below displays a slide carousel with controls, looping, and delayed
+autoplay.
 
 [example preview="inline" playground="true" imports="amp-carousel"]
 
@@ -213,7 +248,9 @@ The example below displays a slide carousel with controls, looping, and delayed 
   {% if not format=='email'%}  autoplay
   delay="3000"{% endif %}
   data-next-button-aria-label="Go to next slide"
-  data-previous-button-aria-label="Go to previous slide">
+  data-previous-button-aria-label="Go to previous slide"
+  role="region"
+  aria-label="Looping carousel">
   <amp-img src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
     width="450"
     height="300"></amp-img>
@@ -230,13 +267,35 @@ The example below displays a slide carousel with controls, looping, and delayed 
 
 ### slide (optional)
 
-Specifies what index should be shown when the carousel is first rendered. This can be updated with [`amp-bind`](https://amp.dev/documentation/components/amp-bind) to change which index is shown.
+Specifies what index should be shown when the carousel is first rendered. This
+can be updated with
+[`amp-bind`](../amp-bind/amp-bind.md) to change which
+index is shown.
 
 ### common attributes
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
-</table>
+## Actions
+
+### goToSlide(index=INTEGER)
+
+Advances the carousel to a specified slide index.
+
+### toggleAutoplay(toggleOn=true|false)
+
+Toggle the carousel's autoplay status. `toggleOn` is optional.
+
+## Events
+
+### slideChange
+
+Fired when the carousel's current slide changes.
+
+```
+// Slide number.
+Event.index
+```
 
 ## Styling
 
@@ -304,17 +363,6 @@ You can position the carousel buttons using align-self and/or relative positioni
 
 [/filter]<!-- formats="email" -->
 
-## Differences from `<amp-carousel>` 0.1
-
-- `autoplay` is allowed on `type="carousel"`
-- `loop` is allowed on `type="carousel"`
-
-### Migration Notes
-
-- Update the required script from `amp-carousel-0.1` to `amp-carousel-0.2`.
-- Ensure any CSS for positioning next/previous arrows is still valid. See the [styling](#styling) for more information on arrow positioning.
-- Ensure any CSS used to style the carousel is still valid. The internal DOM structure of `<amp-carousel>` 0.2 differs from 0.1, effecting CSS selectors targetting internal elements such as `amp-carousel > div`. Any selectors using the `.amp-class-name` format should still work.
-
 ## Validation
 
-See [amp-carousel rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/validator-amp-carousel.protoascii) in the AMP validator specification.
+See [amp-carousel rules](validator-amp-carousel.protoascii) in the AMP validator specification.

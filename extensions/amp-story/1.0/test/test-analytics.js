@@ -17,7 +17,7 @@ import {Action, getStoreService} from '../amp-story-store-service';
 import {getAnalyticsService} from '../story-analytics';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 
-describes.fakeWin('amp-story analytics', {}, env => {
+describes.fakeWin('amp-story analytics', {}, (env) => {
   let analytics;
   let rootEl;
   let storeService;

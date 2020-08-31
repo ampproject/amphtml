@@ -25,32 +25,32 @@ limitations under the License.
 
 # amp-lightbox-gallery
 
-Provides a "lightbox” experience. Upon user interaction, a UI component expands to fill the viewport until it is closed by the user.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-lightbox-gallery/">amp-lightbox-gallery</a> sample.</td>
-  </tr>
-</table>
-
-## Overview
-
-The `amp-lightbox-gallery` component provides a "lightbox” experience for AMP components (e.g., `amp-img`, `amp-carousel`). When the user interacts with the AMP element, a UI component expands to fill the viewport until it is closed by the user. Currently, only images are supported.
-
 ## Usage
 
-To use `amp-lightbox-gallery`, ensure the required script is included in your `<head>` section, then add the `lightbox` attribute on an `<amp-img>` or `<amp-carousel>` element. A typical usage looks like this:
+The `amp-lightbox-gallery` component provides a "lightbox" experience for AMP
+components (e.g., `amp-img`, `amp-carousel`). When the user interacts with the
+AMP element, a UI component expands to fill the viewport until it is closed by
+the user. Currently, only images are supported.
 
-### Lightbox with `<amp-img>`
+To use `amp-lightbox-gallery`, ensure the required script is included in your
+`<head>` section, then add the `lightbox` attribute on an `<amp-img>` or
+`<amp-carousel>` element.
+
+[tip type="read-on"]
+
+For showing individual images in a lightbox, there's also the
+[`<amp-image-lightbox>`](../amp-image-lightbox/amp-image-lightbox.md)
+component. To display other types of elements in a lightbox, use
+[`<amp-lightbox>`](../amp-lightbox/amp-lightbox.md).
+
+[/tip]
+
+### Display a lightbox with `<amp-img>`
+
+Tapping on any `<amp-img>` opens the image in a lightbox gallery. The lightbox
+gallery does image-handling (e.g., zoom and pan), enables swiping to navigate
+between images, and offers a thumbnail gallery view for browsing all picture
+thumbnails in a grid.
 
 ```html
 <amp-img src="cat.jpg" width="100" height="100" lightbox></amp-img>
@@ -58,9 +58,14 @@ To use `amp-lightbox-gallery`, ensure the required script is included in your `<
 <amp-img src="bird.jpg" width="100" height="100" lightbox></amp-img>
 ```
 
-Tapping on any `<amp-img>` opens the image in a lightbox gallery. The lightbox gallery does image-handling (e.g., zoom and pan), enables swiping to navigate between images, and offers a thumbnail gallery view for browsing all picture thumbnails in a grid.
+### Display a lightbox with `<amp-carousel>`
 
-### Lightbox with `<amp-carousel>`
+You can add the `lightbox` attribute on an `<amp-carousel>` to lightbox all of
+its children. Currently, the `<amp-lightbox-gallery>` component only supports
+carousels containing `<amp-img>` as children. As you navigate through the
+carousel items in the lightbox, the original carousel slides are synchronized so
+that when the lightbox is closed, the user ends up on the same slide as they
+were originally on. Currently, only the `type='slides'` carousel is supported.
 
 ```html
 <amp-carousel
@@ -76,11 +81,11 @@ Tapping on any `<amp-img>` opens the image in a lightbox gallery. The lightbox g
 </amp-carousel>
 ```
 
-You can add the `lightbox` attribute on an `<amp-carousel>` to lightbox all of its children. Currently, the `<amp-lightbox-gallery>` component only supports carousels containing `<amp-img>` as children. As you navigate through the carousel items in the lightbox, the original carousel slides are synchronized so that when the lightbox is closed, the user ends up on the same slide as the were originally on. Currently, only the `type='slides'` carousel is supported.
+### Add captions
 
-### Captions
-
-Optionally, you can specify a caption for each element in the lightbox. These fields are automatically read and displayed by the `<amp-lightbox-gallery>` in the following order of priority:
+Optionally, you can specify a caption for each element in the lightbox. These
+fields are automatically read and displayed by the `<amp-lightbox-gallery>` in
+the following order of priority:
 
 - `figcaption` (if the lightboxed element is the child of a figure)
 - `aria-describedby`
@@ -88,9 +93,8 @@ Optionally, you can specify a caption for each element in the lightbox. These fi
 - `aria-label`
 - `aria-labelledby`
 
-#### Example 1: Using figcaption for description
-
-In this example, `<amp-lightbox-gallery>` displays the `figcaption` value as its description, showing "Toront's CN tower was ....".
+In the following example, `<amp-lightbox-gallery>` displays the `figcaption`
+value as its description, showing "Toront's CN tower was ....".
 
 ```html
 <figure>
@@ -111,9 +115,8 @@ In this example, `<amp-lightbox-gallery>` displays the `figcaption` value as its
 </figure>
 ```
 
-#### Example 2: Using alt for description
-
-In this example, `<amp-lightbox-gallery>` displays the `alt` value as its description, showing "Picture of CN tower".
+In the following example, `<amp-lightbox-gallery>` displays the `alt` value as
+its description, showing "Picture of CN tower".
 
 ```html
 <amp-img
@@ -128,11 +131,12 @@ In this example, `<amp-lightbox-gallery>` displays the `alt` value as its descri
 </amp-img>
 ```
 
-## Thumbnail API
+### Implement thumbnail previews
 
-Lightboxed items have a thumbnail gallery view. You can optionally specify a thumbnail item for your lightboxed element via the attribute `lightbox-thumbnail-id` that references the `id` of an `<amp-img>` element with `layout="nodisplay"`.
-
-#### Example: using `lightbox-thumbnail-id` to specify a thumbnail
+Lightboxed items have a thumbnail gallery view. You can optionally specify a
+thumbnail item for your lightboxed element via the attribute
+`lightbox-thumbnail-id` that references the `id` of an `<amp-img>` element with
+`layout="nodisplay"`.
 
 ```html
 <amp-youtube
@@ -154,15 +158,27 @@ Lightboxed items have a thumbnail gallery view. You can optionally specify a thu
 </amp-img>
 ```
 
-If no thumbnail is specified, `<amp-img>` elements will be cropped per `object-fit: cover`, `<amp-video>` will use the image src specified in its `poster` attribute, and placeholder images will be used for lightboxed elements that have one.
+If no thumbnail is specified, `<amp-img>` elements will be cropped per
+`object-fit: cover`, `<amp-video>` will use the image `src` specified in its
+`poster` attribute, and placeholder images will be used for lightboxed elements
+that have one.
 
-## Analytics events
+## Actions
 
-To track usage of `amp-lightbox-gallery`, please use one of the following analytics events:
+### `open`
+
+Opens the lightbox gallery. Can be triggered by tapping another element, if you
+specify the image `id`: `on="tap:amp-lightbox-gallery.open(id='image-id')"`.
+
+## Analytics
+
+To track usage of `amp-lightbox-gallery`, please use one of the following
+analytics events:
 
 ### `lightboxOpened`
 
-This event tracks when the lightbox is opened when the user clicks on a lightboxed `<amp-img>`.
+This event tracks when the lightbox is opened when the user clicks on a
+lightboxed `<amp-img>`.
 
 You can track this event using the following code snippet:
 
@@ -171,7 +187,7 @@ You can track this event using the following code snippet:
   <script type="application/json">
     {
       "requests": {
-        "open": "https://foo.com/open",
+        "open": "https://foo.com/open"
       },
       "triggers": {
         "trackLightboxOpened": {
@@ -186,7 +202,8 @@ You can track this event using the following code snippet:
 
 ### `thumbnailsViewToggled`
 
-This event tracks when the thumbnails view is triggered by clicking on the trigger when the user is in the lightbox view.
+This event tracks when the thumbnails view is triggered by clicking on the
+trigger when the user is in the lightbox view.
 
 You can track this event using the following code snippet:
 
@@ -195,7 +212,7 @@ You can track this event using the following code snippet:
   <script type="application/json">
     {
       "requests": {
-        "thumb": "https://foo.com/thumb",
+        "thumb": "https://foo.com/thumb"
       },
       "triggers": {
         "trackThumbnailsViewToggled": {
@@ -210,7 +227,9 @@ You can track this event using the following code snippet:
 
 ### `descriptionOverflowToggled`
 
-This event tracks when the user toggles the description by clicking on the description to expand/collapse it, tracking engagement with the description for the lightboxed image.
+This event tracks when the user toggles the description by clicking on the
+description to expand/collapse it, tracking engagement with the description for
+the lightboxed image.
 
 You can track this event using the following code snippet:
 
@@ -231,3 +250,8 @@ You can track this event using the following code snippet:
   </script>
 </amp-analytics>
 ```
+
+## Validation
+
+See [`amp-image-lightbox-gallery` rules](validator-amp-lightbox-gallery.protoascii)
+in the AMP validator specification.

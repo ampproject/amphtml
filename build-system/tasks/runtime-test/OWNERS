@@ -4,10 +4,7 @@
 {
   rules: [
     {
-      owners: [
-        {name: 'ampproject/wg-infra'},
-        {name: 'estherkim', notify: true},
-      ],
+      owners: [{name: 'ampproject/wg-infra'}],
     },
   ],
 }

@@ -30,7 +30,7 @@ describes.endtoend(
     //TODO(spaharmi): fails on viewer and shadow demo
     environments: ['single'],
   },
-  async env => {
+  async (env) => {
     let controller;
 
     function prop(el, name) {

@@ -23,7 +23,7 @@ import {loadScript, validateData} from '../3p/3p';
 export function taboola(global, data) {
   // do not copy the following attributes from the 'data' object
   // to _tablloa global object
-  const blackList = ['height', 'type', 'width', 'placement', 'mode'];
+  const denylist = ['height', 'type', 'width', 'placement', 'mode'];
 
   // ensure we have vlid publisher, placement and mode
   // and exactly one page-type
@@ -40,9 +40,9 @@ export function taboola(global, data) {
     url: data.url || global.context.canonicalUrl,
   };
 
-  // copy none blacklisted attribute to the 'params' map
-  Object.keys(data).forEach(k => {
-    if (blackList.indexOf(k) === -1) {
+  // copy none denylisted attribute to the 'params' map
+  Object.keys(data).forEach((k) => {
+    if (denylist.indexOf(k) === -1) {
       params[k] = data[k];
     }
   });
@@ -62,8 +62,8 @@ export function taboola(global, data) {
   ]);
 
   // install observation on entering/leaving the view
-  global.context.observeIntersection(function(changes) {
-    changes.forEach(function(c) {
+  global.context.observeIntersection(function (changes) {
+    /** @type {!Array} */ (changes).forEach(function (c) {
       if (c.intersectionRect.height) {
         global._taboola.push({
           visible: true,

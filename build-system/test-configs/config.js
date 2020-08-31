@@ -18,7 +18,7 @@
 const initTestsPath = ['test/_init_tests.js'];
 
 const fixturesExamplesPaths = [
-  'test/fixtures/*.html',
+  'test-bin/test/fixtures/*.html',
   {
     pattern: 'test/fixtures/served/*.html',
     included: false,
@@ -73,8 +73,6 @@ const a4aTestPaths = initTestsPath.concat([
   'ads/google/a4a/test/*.js',
 ]);
 
-const chaiAsPromised = ['test/chai-as-promised/chai-as-promised.js'];
-
 const unitTestPaths = [
   'test/unit/**/*.js',
   'ads/**/test/test-*.js',
@@ -83,11 +81,8 @@ const unitTestPaths = [
   'extensions/**/test/unit/*.js',
 ];
 
-const unitTestOnSaucePaths = [
-  'test/unit/**/*.js',
-  'ads/**/test/test-*.js',
-  'ads/**/test/unit/test-*.js',
-];
+// TODO(rsimha, #28838): Refine this opt-in mechanism.
+const unitTestCrossBrowserPaths = ['test/unit/test-error.js'];
 
 const integrationTestPaths = [
   'test/integration/**/*.js',
@@ -117,20 +112,18 @@ const presubmitGlobs = [
   '!out/**/*.*',
   '!validator/validator.pb.go',
   '!validator/dist/**/*.*',
-  '!validator/node_modules/**/*.*',
-  '!validator/nodejs/node_modules/**/*.*',
-  '!validator/webui/dist/**/*.*',
-  '!validator/webui/node_modules/**/*.*',
-  '!build-system/tasks/e2e/node_modules/**/*.*',
+  '!validator/htmlparser/**/*.*',
+  '!validator/js/chromeextension/*.*',
+  '!validator/js/webui/dist/**/*.*',
+  '!build-system/server/new-server/transforms/dist/**/*.*',
+  '!build-system/tasks/performance/cache/**/*.*',
   '!build-system/tasks/presubmit-checks.js',
   '!build-system/runner/build/**/*.*',
-  '!build-system/tasks/visual-diff/node_modules/**/*.*',
   '!build-system/tasks/visual-diff/snippets/*.js',
   '!build/polyfills.js',
   '!build/polyfills/*.js',
   '!third_party/**/*.*',
-  '!validator/chromeextension/*.*',
-  '!src/purifier/node_modules/**/*.*',
+  '!**/node_modules/**/*.*',
   // Files in this testdata dir are machine-generated and are not part
   // of the AMP runtime, so shouldn't be checked.
   '!extensions/amp-a4a/*/test/testdata/*.js',
@@ -151,15 +144,15 @@ const prettifyGlobs = [
   '.lando.yml',
   '.lgtm.yml',
   '.travis.yml',
-  '**/.eslintrc',
   '.prettierrc',
   '.renovaterc.json',
   '.vscode/settings.json',
+  '.github/workflows/continuous-integration-workflow.yml',
   '**/*.json',
   '**/OWNERS',
   '**/*.md',
   '!.github/ISSUE_TEMPLATE/**',
-  '!**/{node_modules,build,dist,dist.3p,dist.tools}/**',
+  '!**/{node_modules,build,dist,dist.3p,dist.tools,.karma-cache}/**',
 ];
 
 /**
@@ -168,7 +161,7 @@ const prettifyGlobs = [
  */
 const linkCheckGlobs = [
   '**/*.md',
-  '!**/{examples,node_modules,build,dist,dist.3p,dist.tools}/**',
+  '!**/{examples,node_modules,build,dist,dist.3p,dist.tools,.karma-cache}/**',
 ];
 
 /**
@@ -204,7 +197,6 @@ const changelogIgnoreFileTypes = /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/;
 /** @const  */
 module.exports = {
   a4aTestPaths,
-  chaiAsPromised,
   changelogIgnoreFileTypes,
   commonIntegrationTestPaths,
   commonUnitTestPaths,
@@ -218,6 +210,6 @@ module.exports = {
   prettifyGlobs,
   testPaths,
   thirdPartyFrames,
-  unitTestOnSaucePaths,
+  unitTestCrossBrowserPaths,
   unitTestPaths,
 };

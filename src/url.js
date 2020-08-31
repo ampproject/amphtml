@@ -36,8 +36,6 @@ const SERVING_TYPE_PREFIX = dict({
   'a': true,
   // Ad
   'ad': true,
-  // Actions viewer
-  'action': true,
 });
 
 /**
@@ -581,7 +579,7 @@ export function resolveRelativeUrl(relativeUrlString, baseUrl) {
  * @param {string} relativeUrlString
  * @param {string|!Location} baseUrl
  * @return {string}
- * @private Visible for testing.
+ * @private @visibleForTesting
  */
 export function resolveRelativeUrlFallback_(relativeUrlString, baseUrl) {
   if (typeof baseUrl == 'string') {
@@ -649,4 +647,16 @@ export function checkCorsUrl(url) {
  */
 export function tryDecodeUriComponent(component, opt_fallback) {
   return tryDecodeUriComponent_(component, opt_fallback);
+}
+
+/**
+ * Adds the path to the given url.
+ *
+ * @param {!Location} url
+ * @param {string} path
+ * @return {string}
+ */
+export function appendPathToUrl(url, path) {
+  const pathname = url.pathname.replace(/\/?$/, '/') + path.replace(/^\//, '');
+  return url.origin + pathname + url.search + url.hash;
 }

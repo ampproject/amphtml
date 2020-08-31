@@ -36,7 +36,7 @@ describes.realWin(
       canonicalUrl: 'https://canonicalexample.com/',
     },
   },
-  env => {
+  (env) => {
     let win, doc;
     let platform;
     let isIos = false;
@@ -125,7 +125,7 @@ describes.realWin(
       );
       share.setAttribute('data-param-text', 'check out: CANONICAL_URL');
       doc.body.appendChild(share);
-      return loaded(share).then(el => {
+      return loaded(share).then((el) => {
         expect(el.implementation_.params_.text).to.be.equal(
           'check out: CANONICAL_URL'
         );
@@ -142,7 +142,7 @@ describes.realWin(
     });
 
     it('does not render obsolete provider', () => {
-      getShare('gplus', /* endpoint */ undefined, {}).then(el => {
+      getShare('gplus', /* endpoint */ undefined, {}).then((el) => {
         expect(el.style.display).to.be.equal('none');
       });
     });
@@ -152,21 +152,23 @@ describes.realWin(
         'url': STRINGS['url'],
         'via': STRINGS['attribution'],
       };
-      return getShare('twitter', /* endpoint */ undefined, params).then(el => {
-        expect(el.implementation_.params_.text).to.be.equal('TITLE');
-        expect(el.implementation_.params_.url).to.be.equal(
-          'https://example.com/'
-        );
-        expect(el.implementation_.params_.via).to.be.equal('AMPhtml');
-        expect(el.implementation_.shareEndpoint_).to.be.equal(
-          'https://twitter.com/intent/tweet'
-        );
+      return getShare('twitter', /* endpoint */ undefined, params).then(
+        (el) => {
+          expect(el.implementation_.params_.text).to.be.equal('TITLE');
+          expect(el.implementation_.params_.url).to.be.equal(
+            'https://example.com/'
+          );
+          expect(el.implementation_.params_.via).to.be.equal('AMPhtml');
+          expect(el.implementation_.shareEndpoint_).to.be.equal(
+            'https://twitter.com/intent/tweet'
+          );
 
-        expect(el.implementation_.href_).to.not.contain('TITLE');
-        expect(el.addEventListener).to.be.calledTwice;
-        expect(el.addEventListener).to.be.calledWith('click');
-        expect(el.addEventListener).to.be.calledWith('keydown');
-      });
+          expect(el.implementation_.href_).to.not.contain('TITLE');
+          expect(el.addEventListener).to.be.calledTwice;
+          expect(el.addEventListener).to.be.calledWith('click');
+          expect(el.addEventListener).to.be.calledWith('keydown');
+        }
+      );
     });
 
     it('adds a default value for url', () => {
@@ -177,7 +179,7 @@ describes.realWin(
       share.setAttribute('height', 44);
 
       doc.body.appendChild(share);
-      return loaded(share).then(el => {
+      return loaded(share).then((el) => {
         expect(el.implementation_.params_.url).to.be.equal('CANONICAL_URL');
         expect(el.implementation_.href_).to.not.contain(
           encodeURIComponent('CANONICAL_URL')
@@ -192,7 +194,7 @@ describes.realWin(
     });
 
     it('opens share window in _blank', () => {
-      return getShare('twitter').then(el => {
+      return getShare('twitter').then((el) => {
         el.implementation_.handleClick_();
         expect(el.implementation_.win.open).to.be.calledOnce;
         expect(el.implementation_.win.open).to.be.calledWith(
@@ -208,7 +210,7 @@ describes.realWin(
       const params = {
         'recipient': 'sample@xyz.com',
       };
-      return getShare('email', undefined, params, '_self').then(el => {
+      return getShare('email', undefined, params, '_self').then((el) => {
         el.implementation_.handleClick_();
         expect(el.implementation_.win.open).to.be.calledOnce;
         expect(el.implementation_.win.open).to.be.calledWith(
@@ -227,7 +229,7 @@ describes.realWin(
       };
       isIos = true;
       isSafari = true;
-      return getShare('email', undefined, params, '_top').then(el => {
+      return getShare('email', undefined, params, '_top').then((el) => {
         el.implementation_.handleClick_();
         expect(el.implementation_.win.open).to.be.calledOnce;
         expect(el.implementation_.win.open).to.be.calledWith(
@@ -249,7 +251,7 @@ describes.realWin(
         };
         isIos = true;
         isSafari = true;
-        return getShare('email', undefined, params, '_self').then(el => {
+        return getShare('email', undefined, params, '_self').then((el) => {
           el.implementation_.handleClick_();
           expect(el.implementation_.win.open).to.be.calledOnce;
           expect(el.implementation_.win.open).to.be.calledWith(
@@ -266,7 +268,7 @@ describes.realWin(
     it('opens mailto: window in _top on iOS Safari without recipient', () => {
       isIos = true;
       isSafari = true;
-      return getShare('email').then(el => {
+      return getShare('email').then((el) => {
         el.implementation_.handleClick_();
         expect(el.implementation_.win.open).to.be.calledOnce;
         expect(el.implementation_.win.open).to.be.calledWith(
@@ -284,7 +286,7 @@ describes.realWin(
       };
       isIos = true;
       isSafari = false;
-      return getShare('email', undefined, params, '_top').then(el => {
+      return getShare('email', undefined, params, '_top').then((el) => {
         el.implementation_.handleClick_();
         expect(el.implementation_.win.open).to.be.calledOnce;
         expect(el.implementation_.win.open).to.be.calledWith(
@@ -300,7 +302,7 @@ describes.realWin(
     it('opens sms: window in _top on iOS Safari', () => {
       isIos = true;
       isSafari = true;
-      return getShare('sms').then(el => {
+      return getShare('sms').then((el) => {
         el.implementation_.handleClick_();
         expect(el.implementation_.win.open).to.be.calledOnce;
         expect(el.implementation_.win.open).to.be.calledWith(
@@ -314,7 +316,7 @@ describes.realWin(
     it('opens sms: window in _top on iOS Webview', () => {
       isIos = true;
       isSafari = false;
-      return getShare('sms').then(el => {
+      return getShare('sms').then((el) => {
         el.implementation_.handleClick_();
         expect(el.implementation_.win.open).to.be.calledOnce;
         expect(el.implementation_.win.open).to.be.calledWith(
@@ -326,7 +328,7 @@ describes.realWin(
     });
 
     it('should handle key presses', () => {
-      return getShare('twitter').then(el => {
+      return getShare('twitter').then((el) => {
         const nonActivationEvent = {
           preventDefault: () => {},
           key: Keys.RIGHT_ARROW,
@@ -349,8 +351,20 @@ describes.realWin(
     });
 
     it('has tabindex set to 0 by default', () => {
-      return getShare('twitter').then(el => {
+      return getShare('twitter').then((el) => {
         expect(el.getAttribute('tabindex')).to.equal('0');
+      });
+    });
+
+    describe('[type=system]', () => {
+      it('should not throw if navigator.share fails', async () => {
+        Object.defineProperty(env.win, 'navigator', {
+          value: {share: env.sandbox.spy(() => Promise.reject())},
+        });
+        const element = await getShare('system');
+        const implementation = await element.getImpl();
+        expect(() => implementation.handleActivation_()).to.not.throw();
+        expect(env.win.navigator.share).to.have.been.calledOnce;
       });
     });
   }

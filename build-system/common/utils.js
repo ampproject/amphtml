@@ -18,9 +18,29 @@ const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs-extra');
 const globby = require('globby');
 const log = require('fancy-log');
-const {gitDiffNameOnlyMaster} = require('../common/git');
+const path = require('path');
+const {clean} = require('../tasks/clean');
+const {doBuild} = require('../tasks/build');
+const {doDist} = require('../tasks/dist');
+const {execOrDie} = require('./exec');
+const {gitDiffNameOnlyMaster} = require('./git');
 const {green, cyan, yellow} = require('ansi-colors');
-const {isTravisBuild} = require('../common/travis');
+const {isTravisBuild} = require('./travis');
+
+const ROOT_DIR = path.resolve(__dirname, '../../');
+
+/**
+ * Performs a clean build of the AMP runtime in testing mode.
+ * Used by `gulp e2e|integration|visual_diff`.
+ */
+async function buildRuntime() {
+  await clean();
+  if (argv.compiled) {
+    await doDist({fortesting: true});
+  } else {
+    await doBuild({fortesting: true});
+  }
+}
 
 /**
  * Logs a message on the same line to indicate progress
@@ -45,7 +65,7 @@ function logOnSameLine(message) {
  */
 function getFilesChanged(globs) {
   const allFiles = globby.sync(globs, {dot: true});
-  return gitDiffNameOnlyMaster().filter(changedFile => {
+  return gitDiffNameOnlyMaster().filter((changedFile) => {
     return fs.existsSync(changedFile) && allFiles.includes(changedFile);
   });
 }
@@ -67,6 +87,17 @@ function logFiles(files) {
 }
 
 /**
+ * Extracts the list of files from argv.files.
+ *
+ * @return {Array<string>}
+ */
+function getFilesFromArgv() {
+  return argv.files
+    ? globby.sync(argv.files.split(',').map((s) => s.trim()))
+    : [];
+}
+
+/**
  * Gets a list of files to be checked based on command line args and the given
  * file matching globs. Used by tasks like prettify, check-links, etc.
  *
@@ -76,7 +107,7 @@ function logFiles(files) {
  */
 function getFilesToCheck(globs, options = {}) {
   if (argv.files) {
-    return logFiles(globby.sync(argv.files.split(',')));
+    return logFiles(getFilesFromArgv());
   }
   if (argv.local_changes) {
     const filesChanged = getFilesChanged(globs);
@@ -117,9 +148,27 @@ function usesFilesOrLocalChanges(taskName) {
   return validUsage;
 }
 
+/**
+ * Runs 'yarn' to install packages in a given directory.
+ *
+ * @param {string} dir
+ */
+function installPackages(dir) {
+  log(
+    'Running',
+    cyan('yarn'),
+    'to install packages in',
+    cyan(path.relative(ROOT_DIR, dir)) + '...'
+  );
+  execOrDie(`npx yarn --cwd ${dir}`, {'stdio': 'ignore'});
+}
+
 module.exports = {
+  buildRuntime,
   getFilesChanged,
+  getFilesFromArgv,
   getFilesToCheck,
+  installPackages,
   logOnSameLine,
   usesFilesOrLocalChanges,
 };

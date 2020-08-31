@@ -35,6 +35,25 @@ const SCALE_HIGH_DEFAULT = 3;
 /** @const {number} */
 const SCALE_LOW_DEFAULT = 1;
 
+/** @const {string} */
+const SCALE_START_ATTRIBUTE_NAME = 'scale-start';
+/** @const {string} */
+const SCALE_END_ATTRIBUTE_NAME = 'scale-end';
+/** @const {string} */
+const TRANSLATE_X_ATTRIBUTE_NAME = 'translate-x';
+/** @const {string} */
+const TRANSLATE_Y_ATTRIBUTE_NAME = 'translate-y';
+/** @const {string} */
+const DEFAULT_CURVE = '0.4, 0.4, 0.0, 1';
+
+/** @const {!Array<string>} */
+export const PRESET_OPTION_ATTRIBUTES = [
+  SCALE_START_ATTRIBUTE_NAME,
+  SCALE_END_ATTRIBUTE_NAME,
+  TRANSLATE_X_ATTRIBUTE_NAME,
+  TRANSLATE_Y_ATTRIBUTE_NAME,
+];
+
 /**
  * A list of animations that are full bleed.
  * @private @const {!Array<string>}
@@ -80,274 +99,294 @@ export function setStyleForPreset(el, presetName) {
 }
 
 /**
- * @param {string} name
- * @param {!Object} options
- * @return {?StoryAnimationPresetDef}
+ * First keyframe will always be considered offset: 0 and will be applied to the
+ * element as the first frame before animation starts.
+ * @type {!Object<string, !StoryAnimationPresetDef>}
  */
-// First keyframe will always be considered offset: 0 and will be applied to the
-// element as the first frame before animation starts.
-export const getPresetDef = (name, options) => {
-  switch (name) {
-    case 'pulse':
-      return {
-        duration: 400,
-        easing: 'cubic-bezier(0.4, 0.0, 0.2, 1)',
-        keyframes: [
-          {
-            offset: 0,
-            transform: 'scale(1)',
-          },
-          {
-            offset: 0.25,
-            transform: 'scale(0.95)',
-          },
-          {
-            offset: 0.75,
-            transform: 'scale(1.05)',
-          },
-          {
-            offset: 1,
-            transform: 'scale(1)',
-          },
-        ],
-      };
-    case 'fly-in-left':
-      return {
-        duration: 400,
-        easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
-        keyframes(dimensions) {
-          const offsetX = -(dimensions.targetX + dimensions.targetWidth);
-          return translate2d(offsetX, 0, 0, 0);
-        },
-      };
-    case 'fly-in-right':
-      return {
-        duration: 400,
-        easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
-        keyframes(dimensions) {
-          const offsetX = dimensions.pageWidth - dimensions.targetX;
-          return translate2d(offsetX, 0, 0, 0);
-        },
-      };
-    case 'fly-in-top':
-      return {
-        duration: 400,
-        easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
-        keyframes(dimensions) {
-          const offsetY = -(dimensions.targetY + dimensions.targetHeight);
-          return translate2d(0, offsetY, 0, 0);
-        },
-      };
-    case 'fly-in-bottom':
-      return {
-        duration: 400,
-        easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
-        keyframes(dimensions) {
-          const offsetY = dimensions.pageHeight - dimensions.targetY;
-          return translate2d(0, offsetY, 0, 0);
-        },
-      };
-    case 'rotate-in-left':
-      return {
-        duration: 600,
-        easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
-        keyframes(dimensions) {
-          const offsetX = -(dimensions.targetX + dimensions.targetWidth);
-          return rotateAndTranslate(offsetX, 0, 0, 0, -1);
-        },
-      };
-    case 'rotate-in-right':
-      return {
-        duration: 600,
-        easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
-        keyframes(dimensions) {
-          const offsetX = dimensions.pageWidth - dimensions.targetX;
-          return rotateAndTranslate(offsetX, 0, 0, 0, 1);
-        },
-      };
-    case 'fade-in':
-      return {
-        duration: 400,
-        easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
-        keyframes: [
-          {
-            opacity: 0,
-          },
-          {
-            opacity: 1,
-          },
-        ],
-      };
-    case 'drop':
-      return {
-        duration: 1600,
-        keyframes(dimensions) {
-          const maxBounceHeight = Math.max(
-            160,
-            dimensions.targetY + dimensions.targetHeight
-          );
+export const presets = {
+  'pulse': {
+    duration: 600,
+    easing: 'cubic-bezier(0.3, 0.0, 0.0, 1)',
+    keyframes: [
+      {
+        offset: 0,
+        transform: 'scale(1)',
+      },
+      {
+        offset: 0.25,
+        transform: 'scale(0.95)',
+      },
+      {
+        offset: 0.75,
+        transform: 'scale(1.05)',
+      },
+      {
+        offset: 1,
+        transform: 'scale(1)',
+      },
+    ],
+  },
+  'fly-in-left': {
+    duration: 600,
+    easing: `cubic-bezier(0.2, 0.6, 0.0, 1)`,
+    keyframes(dimensions) {
+      const offsetX = -(dimensions.targetX + dimensions.targetWidth);
+      return translate2d(offsetX, 0, 0, 0);
+    },
+  },
+  'fly-in-right': {
+    duration: 600,
+    easing: `cubic-bezier(0.2, 0.6, 0.0, 1)`,
+    keyframes(dimensions) {
+      const offsetX = dimensions.pageWidth - dimensions.targetX;
+      return translate2d(offsetX, 0, 0, 0);
+    },
+  },
+  'fly-in-top': {
+    duration: 600,
+    easing: `cubic-bezier(0.2, 0.6, 0.0, 1)`,
+    keyframes(dimensions) {
+      const offsetY = -(dimensions.targetY + dimensions.targetHeight);
+      return translate2d(0, offsetY, 0, 0);
+    },
+  },
+  'fly-in-bottom': {
+    duration: 600,
+    easing: `cubic-bezier(0.2, 0.6, 0.0, 1)`,
+    keyframes(dimensions) {
+      const offsetY = dimensions.pageHeight - dimensions.targetY;
+      return translate2d(0, offsetY, 0, 0);
+    },
+  },
+  'rotate-in-left': {
+    duration: 1000,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
+    keyframes(dimensions) {
+      const offsetX = -(dimensions.targetX + dimensions.targetWidth);
+      return rotateAndTranslate(offsetX, 0, 0, 0, -1);
+    },
+  },
+  'rotate-in-right': {
+    duration: 1000,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
+    keyframes(dimensions) {
+      const offsetX = dimensions.pageWidth - dimensions.targetX;
+      return rotateAndTranslate(offsetX, 0, 0, 0, 1);
+    },
+  },
+  'fade-in': {
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
+    keyframes: [
+      {
+        opacity: 0,
+      },
+      {
+        opacity: 1,
+      },
+    ],
+  },
+  'scale-fade-up': {
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
+    keyframes: [
+      {
+        opacity: 0,
+        transform: 'scale(0.8)',
+      },
+      {
+        opacity: 1,
+        transform: 'scale(1)',
+      },
+    ],
+  },
+  'scale-fade-down': {
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
+    keyframes: [
+      {
+        opacity: 0,
+        transform: 'scale(1.4)',
+      },
+      {
+        opacity: 1,
+        transform: 'scale(1)',
+      },
+    ],
+  },
+  'drop': {
+    duration: 1600,
+    keyframes(dimensions) {
+      const maxBounceHeight = Math.max(
+        160,
+        dimensions.targetY + dimensions.targetHeight
+      );
 
-          return [
-            {
-              offset: 0,
-              transform: `translateY(${px(-maxBounceHeight)})`,
-              easing: 'cubic-bezier(.75,.05,.86,.08)',
-            },
-            {
-              offset: 0.3,
-              transform: 'translateY(0)',
-              easing: 'cubic-bezier(.22,.61,.35,1)',
-            },
-            {
-              offset: 0.52,
-              transform: `translateY(${px(-0.6 * maxBounceHeight)})`,
-              easing: 'cubic-bezier(.75,.05,.86,.08)',
-            },
-            {
-              offset: 0.74,
-              transform: 'translateY(0)',
-              easing: 'cubic-bezier(.22,.61,.35,1)',
-            },
-            {
-              offset: 0.83,
-              transform: `translateY(${px(-0.3 * maxBounceHeight)})`,
-              easing: 'cubic-bezier(.75,.05,.86,.08)',
-            },
-            {
-              offset: 1,
-              transform: 'translateY(0)',
-              easing: 'cubic-bezier(.22,.61,.35,1)',
-            },
-          ];
+      // Adapted from easings.net/#easeOutBounce
+      return [
+        {
+          offset: 0,
+          transform: `translateY(${px((1 - 0) * -maxBounceHeight)})`,
         },
-      };
-    case 'twirl-in':
-      return {
-        duration: 1000,
-        easing: 'cubic-bezier(.2,.75,.4,1)',
-        keyframes: [
-          {
-            transform: 'rotate(-540deg) scale(0.1)',
-            opacity: 0,
-          },
-          {
-            transform: 'none',
-            opacity: 1,
-          },
-        ],
-      };
-    case 'whoosh-in-left':
-      return {
-        duration: 400,
-        easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
-        keyframes(dimensions) {
-          const offsetX = -(dimensions.targetX + dimensions.targetWidth);
-          return whooshIn(offsetX, 0, 0, 0);
+        {
+          offset: 0.35,
+          transform: `translateY(${px((1 - 0.9801) * -maxBounceHeight)})`,
+          easing: 'cubic-bezier(0, 0.3, 0.3, 0)',
         },
-      };
-    case 'whoosh-in-right':
-      return {
-        duration: 400,
-        easing: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
-        keyframes(dimensions) {
-          const offsetX = dimensions.pageWidth - dimensions.targetX;
-          return whooshIn(offsetX, 0, 0, 0);
+        {
+          offset: 0.45,
+          transform: `translateY(${px((1 - 0.7502) * -maxBounceHeight)})`,
+          easing: 'cubic-bezier(0, 0.3, 0.3, 0)',
         },
-      };
-    case 'pan-left':
-      let {translateX} = options;
-
-      return {
-        duration: 1000,
-        easing: 'linear',
-        keyframes(dimensions) {
-          const scalingFactor = calculateTargetScalingFactor(dimensions);
-          dimensions.targetWidth *= scalingFactor;
-          dimensions.targetHeight *= scalingFactor;
-
-          const offsetX = dimensions.pageWidth - dimensions.targetWidth;
-          const offsetY = (dimensions.pageHeight - dimensions.targetHeight) / 2;
-
-          return scaleAndTranslate(
-            offsetX,
-            offsetY,
-            translateX ? offsetX + translateX : 0,
-            offsetY,
-            scalingFactor
-          );
+        {
+          offset: 0.75,
+          transform: `translateY(${px((1 - 0.9837) * -maxBounceHeight)})`,
+          easing: 'cubic-bezier(0, 0.3, 0.3, 0)',
         },
-      };
-    case 'pan-right':
-      translateX = options.translateX;
-
-      return {
-        duration: 1000,
-        easing: 'linear',
-        keyframes(dimensions) {
-          const scalingFactor = calculateTargetScalingFactor(dimensions);
-          dimensions.targetWidth *= scalingFactor;
-          dimensions.targetHeight *= scalingFactor;
-
-          const offsetX = dimensions.pageWidth - dimensions.targetWidth;
-          const offsetY = (dimensions.pageHeight - dimensions.targetHeight) / 2;
-
-          return scaleAndTranslate(
-            0,
-            offsetY,
-            -translateX || offsetX,
-            offsetY,
-            scalingFactor
-          );
+        {
+          offset: 0.82,
+          transform: `translateY(${px((1 - 0.9375) * -maxBounceHeight)})`,
+          easing: 'cubic-bezier(0, 0.3, 0.3, 0)',
         },
-      };
-    case 'pan-down':
-      let {translateY} = options;
-
-      return {
-        duration: 1000,
-        easing: 'linear',
-        keyframes(dimensions) {
-          const scalingFactor = calculateTargetScalingFactor(dimensions);
-          dimensions.targetWidth *= scalingFactor;
-          dimensions.targetHeight *= scalingFactor;
-
-          const offsetX = -dimensions.targetWidth / 2;
-          const offsetY = dimensions.pageHeight - dimensions.targetHeight;
-
-          return scaleAndTranslate(
-            offsetX,
-            0,
-            offsetX,
-            -translateY || offsetY,
-            scalingFactor
-          );
+        {
+          offset: 0.92,
+          transform: `translateY(${px((1 - 0.9934) * -maxBounceHeight)})`,
+          easing: 'cubic-bezier(0, 0.3, 0.3, 0)',
         },
-      };
-    case 'pan-up':
-      translateY = options.translateY;
-
-      return {
-        duration: 1000,
-        easing: 'linear',
-        keyframes(dimensions) {
-          const scalingFactor = calculateTargetScalingFactor(dimensions);
-          dimensions.targetWidth *= scalingFactor;
-          dimensions.targetHeight *= scalingFactor;
-
-          const offsetX = -dimensions.targetWidth / 2;
-          const offsetY = dimensions.pageHeight - dimensions.targetHeight;
-
-          return scaleAndTranslate(
-            offsetX,
-            offsetY,
-            offsetX,
-            translateY ? offsetY + translateY : 0,
-            scalingFactor
-          );
+        {
+          offset: 0.96,
+          transform: `translateY(${px((1 - 0.9846) * -maxBounceHeight)})`,
+          easing: 'cubic-bezier(0, 0.3, 0.3, 0)',
         },
-      };
-    case 'zoom-in':
-      let {scaleStart, scaleEnd} = options;
+        {
+          offset: 1,
+          transform: `translateY(0)`,
+          easing: 'cubic-bezier(0, 0.3, 0.3, 1)',
+        },
+      ];
+    },
+  },
+  'twirl-in': {
+    duration: 1000,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
+    keyframes: [
+      {
+        transform: 'rotate(-540deg) scale(0.1)',
+        opacity: 0,
+      },
+      {
+        transform: 'none',
+        opacity: 1,
+      },
+    ],
+  },
+  'whoosh-in-left': {
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
+    keyframes(dimensions) {
+      const offsetX = -(dimensions.targetX + dimensions.targetWidth);
+      return whooshIn(offsetX, 0, 0, 0);
+    },
+  },
+  'whoosh-in-right': {
+    duration: 600,
+    easing: `cubic-bezier(${DEFAULT_CURVE})`,
+    keyframes(dimensions) {
+      const offsetX = dimensions.pageWidth - dimensions.targetX;
+      return whooshIn(offsetX, 0, 0, 0);
+    },
+  },
+  'pan-left': {
+    duration: 1000,
+    easing: 'linear',
+    keyframes(dimensions, options) {
+      const translateX = options[TRANSLATE_X_ATTRIBUTE_NAME];
+      const scalingFactor = calculateTargetScalingFactor(dimensions);
+      dimensions.targetWidth *= scalingFactor;
+      dimensions.targetHeight *= scalingFactor;
+
+      const offsetX = dimensions.pageWidth - dimensions.targetWidth;
+      const offsetY = (dimensions.pageHeight - dimensions.targetHeight) / 2;
+
+      return scaleAndTranslate(
+        offsetX,
+        offsetY,
+        translateX ? offsetX + translateX : 0,
+        offsetY,
+        scalingFactor
+      );
+    },
+  },
+  'pan-right': {
+    duration: 1000,
+    easing: 'linear',
+    keyframes(dimensions, options) {
+      const translateX = options[TRANSLATE_X_ATTRIBUTE_NAME];
+
+      const scalingFactor = calculateTargetScalingFactor(dimensions);
+      dimensions.targetWidth *= scalingFactor;
+      dimensions.targetHeight *= scalingFactor;
+
+      const offsetX = dimensions.pageWidth - dimensions.targetWidth;
+      const offsetY = (dimensions.pageHeight - dimensions.targetHeight) / 2;
+
+      return scaleAndTranslate(
+        0,
+        offsetY,
+        -translateX || offsetX,
+        offsetY,
+        scalingFactor
+      );
+    },
+  },
+  'pan-down': {
+    duration: 1000,
+    easing: 'linear',
+    keyframes(dimensions, options) {
+      const translateY = options[TRANSLATE_Y_ATTRIBUTE_NAME];
+      const scalingFactor = calculateTargetScalingFactor(dimensions);
+      dimensions.targetWidth *= scalingFactor;
+      dimensions.targetHeight *= scalingFactor;
+
+      const offsetX = -dimensions.targetWidth / 2;
+      const offsetY = dimensions.pageHeight - dimensions.targetHeight;
+
+      return scaleAndTranslate(
+        offsetX,
+        0,
+        offsetX,
+        -translateY || offsetY,
+        scalingFactor
+      );
+    },
+  },
+  'pan-up': {
+    duration: 1000,
+    easing: 'linear',
+    keyframes(dimensions, options) {
+      const translateY = options[TRANSLATE_Y_ATTRIBUTE_NAME];
+      const scalingFactor = calculateTargetScalingFactor(dimensions);
+      dimensions.targetWidth *= scalingFactor;
+      dimensions.targetHeight *= scalingFactor;
+
+      const offsetX = -dimensions.targetWidth / 2;
+      const offsetY = dimensions.pageHeight - dimensions.targetHeight;
+
+      return scaleAndTranslate(
+        offsetX,
+        offsetY,
+        offsetX,
+        translateY ? offsetY + translateY : 0,
+        scalingFactor
+      );
+    },
+  },
+  'zoom-in': {
+    duration: 1000,
+    easing: 'linear',
+    keyframes(unusedDimensions, options) {
+      const scaleStart = options[SCALE_START_ATTRIBUTE_NAME];
+      const scaleEnd = options[SCALE_END_ATTRIBUTE_NAME];
 
       if (scaleStart) {
         userAssert(
@@ -357,17 +396,18 @@ export const getPresetDef = (name, options) => {
         );
       }
 
-      return {
-        duration: 1000,
-        easing: 'linear',
-        keyframes: [
-          {transform: `scale(${scaleStart || SCALE_LOW_DEFAULT})`},
-          {transform: `scale(${scaleEnd || SCALE_HIGH_DEFAULT})`},
-        ],
-      };
-    case 'zoom-out':
-      scaleStart = options.scaleStart;
-      scaleEnd = options.scaleEnd;
+      return [
+        {transform: `scale(${scaleStart || SCALE_LOW_DEFAULT})`},
+        {transform: `scale(${scaleEnd || SCALE_HIGH_DEFAULT})`},
+      ];
+    },
+  },
+  'zoom-out': {
+    duration: 1000,
+    easing: 'linear',
+    keyframes(unusedDimensions, options) {
+      const scaleStart = options[SCALE_START_ATTRIBUTE_NAME];
+      const scaleEnd = options[SCALE_END_ATTRIBUTE_NAME];
 
       if (scaleStart) {
         userAssert(
@@ -377,14 +417,10 @@ export const getPresetDef = (name, options) => {
         );
       }
 
-      return {
-        duration: 1000,
-        easing: 'linear',
-        keyframes: [
-          {transform: `scale(${scaleStart || SCALE_HIGH_DEFAULT})`},
-          {transform: `scale(${scaleEnd || SCALE_LOW_DEFAULT})`},
-        ],
-      };
-  }
-  return null;
+      return [
+        {transform: `scale(${scaleStart || SCALE_HIGH_DEFAULT})`},
+        {transform: `scale(${scaleEnd || SCALE_LOW_DEFAULT})`},
+      ];
+    },
+  },
 };

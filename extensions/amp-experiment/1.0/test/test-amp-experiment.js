@@ -27,7 +27,7 @@ describes.realWin(
       extensions: ['amp-experiment:1.0'],
     },
   },
-  env => {
+  (env) => {
     // Config has empty mutations
     // As mutation parser tests will handle this
     const config = {
@@ -104,17 +104,6 @@ describes.realWin(
       return stub;
     }
 
-    it('Rejects because experiment is not enabled', () => {
-      toggleExperiment(win, 'amp-experiment-1.0', false);
-
-      expectAsyncConsoleError(/Experiment/);
-      addConfigElement('script');
-      doc.body.appendChild(el);
-      return experiment
-        .buildCallback()
-        .should.eventually.be.rejectedWith(/Experiment/);
-    });
-
     it('should not throw on valid config', () => {
       expect(() => {
         addConfigElement('script');
@@ -163,8 +152,8 @@ describes.realWin(
         },
         () => {
           return Services.variantsForDocOrNull(ampdoc.getHeadNode())
-            .then(service => service.getVariants())
-            .then(variants => {
+            .then((service) => service.getVariants())
+            .then((variants) => {
               expect(variants).to.deep.equal({});
             });
         }
@@ -181,8 +170,8 @@ describes.realWin(
 
       experiment.buildCallback();
       return Services.variantsForDocOrNull(ampdoc.getHeadNode())
-        .then(variantsService => variantsService.getVariants())
-        .then(variants => {
+        .then((variantsService) => variantsService.getVariants())
+        .then((variants) => {
           expect(applyStub).to.be.calledOnce;
           expect(variants).to.jsonEqual({
             'experiment-1': 'variant-a',
@@ -207,8 +196,8 @@ describes.realWin(
 
         experiment.buildCallback();
         return Services.variantsForDocOrNull(ampdoc.getHeadNode())
-          .then(variantsService => variantsService.getVariants())
-          .then(variants => {
+          .then((variantsService) => variantsService.getVariants())
+          .then((variants) => {
             expect(variants).to.jsonEqual({
               'experiment-1': null,
               'experiment-2': null,

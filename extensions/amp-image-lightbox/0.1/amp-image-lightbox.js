@@ -196,7 +196,7 @@ export class ImageViewer {
    */
   reset() {
     this.image_.setAttribute('src', '');
-    ARIA_ATTRIBUTES.forEach(key => {
+    ARIA_ATTRIBUTES.forEach((key) => {
       this.image_.removeAttribute(key);
     });
     this.image_.removeAttribute('aria-describedby');
@@ -254,7 +254,7 @@ export class ImageViewer {
     this.setSourceDimensions_(sourceElement, sourceImage);
     this.srcset_ = srcsetFromElement(sourceElement);
 
-    sourceElement.getImpl().then(elem => {
+    sourceElement.getImpl().then((elem) => {
       elem.propagateAttributes(ARIA_ATTRIBUTES, this.image_);
     });
 
@@ -365,7 +365,7 @@ export class ImageViewer {
     });
 
     // Movable.
-    gestures.onGesture(SwipeXYRecognizer, e => {
+    gestures.onGesture(SwipeXYRecognizer, (e) => {
       this.onMove_(e.data.deltaX, e.data.deltaY, false);
       if (e.data.last) {
         this.onMoveRelease_(e.data.velocityX, e.data.velocityY);
@@ -378,7 +378,7 @@ export class ImageViewer {
     });
 
     // Zoomable.
-    gestures.onGesture(DoubletapRecognizer, e => {
+    gestures.onGesture(DoubletapRecognizer, (e) => {
       let newScale;
       if (this.scale_ == 1) {
         newScale = this.maxScale_;
@@ -391,7 +391,7 @@ export class ImageViewer {
         return this.onZoomRelease_(0, 0, 0, 0, 0, 0);
       });
     });
-    gestures.onGesture(TapzoomRecognizer, e => {
+    gestures.onGesture(TapzoomRecognizer, (e) => {
       this.onZoomInc_(
         e.data.centerClientX,
         e.data.centerClientY,
@@ -694,7 +694,7 @@ export class ImageViewer {
       const yFunc = tr.numeric(this.posY_, newPosY);
       promise = Animation.animate(
         this.image_,
-        time => {
+        (time) => {
           this.scale_ = scaleFunc(time);
           this.posX_ = xFunc(time);
           this.posY_ = yFunc(time);
@@ -781,7 +781,15 @@ class AmpImageLightbox extends AMP.BaseElement {
     /** @private {!Function} */
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
 
-    this.registerDefaultAction(invocation => this.open_(invocation), 'open');
+    this.registerDefaultAction((invocation) => this.open_(invocation), 'open');
+  }
+
+  /** @override */
+  buildCallback() {
+    /** If the element is in an email document, allow its `open` action. */
+    Services.actionServiceForDoc(
+      this.element
+    ).addToAllowlist('AMP-IMAGE-LIGHTBOX', 'open', ['email']);
   }
 
   /**
@@ -792,6 +800,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     if (this.container_) {
       return;
     }
+
     this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.classList.add('i-amphtml-image-lightbox-container');
     this.element.appendChild(this.container_);
@@ -834,7 +843,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.element.appendChild(screenReaderCloseButton);
 
     const gestures = Gestures.get(this.element);
-    this.element.addEventListener('click', e => {
+    this.element.addEventListener('click', (e) => {
       if (
         !this.entering_ &&
         !this.imageViewer_.getImage().contains(/** @type {?Node} */ (e.target))
@@ -906,7 +915,7 @@ class AmpImageLightbox extends AMP.BaseElement {
 
     this.getHistory_()
       .push(this.close.bind(this))
-      .then(historyId => {
+      .then((historyId) => {
         this.historyId_ = historyId;
       });
   }
@@ -1054,9 +1063,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     ) {
       transLayer = this.element.ownerDocument.createElement('div');
       transLayer.classList.add('i-amphtml-image-lightbox-trans');
-      this.getAmpDoc()
-        .getBody()
-        .appendChild(transLayer);
+      this.getAmpDoc().getBody().appendChild(transLayer);
 
       const rect = layoutRectFromDomRect(
         this.sourceImage_./*OK*/ getBoundingClientRect()
@@ -1123,9 +1130,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       setStyles(this.element, {opacity: ''});
       setStyles(dev().assertElement(this.container_), {opacity: ''});
       if (transLayer) {
-        this.getAmpDoc()
-          .getBody()
-          .removeChild(transLayer);
+        this.getAmpDoc().getBody().removeChild(transLayer);
       }
     });
   }
@@ -1156,9 +1161,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     if (isLoaded(image) && image.src && this.sourceImage_) {
       transLayer = this.element.ownerDocument.createElement('div');
       transLayer.classList.add('i-amphtml-image-lightbox-trans');
-      this.getAmpDoc()
-        .getBody()
-        .appendChild(transLayer);
+      this.getAmpDoc().getBody().appendChild(transLayer);
 
       const rect = layoutRectFromDomRect(
         this.sourceImage_./*OK*/ getBoundingClientRect()
@@ -1239,9 +1242,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       });
       setStyles(dev().assertElement(this.container_), {opacity: ''});
       if (transLayer) {
-        this.getAmpDoc()
-          .getBody()
-          .removeChild(transLayer);
+        this.getAmpDoc().getBody().removeChild(transLayer);
       }
       this.reset_();
     });
@@ -1256,6 +1257,6 @@ class AmpImageLightbox extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpImageLightbox, CSS);
 });

@@ -24,25 +24,6 @@ limitations under the License.
 
 # amp-hulu
 
-Displays a simple embedded <a href="http://www.hulu.com">Hulu</a> video.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-hulu" src="https://cdn.ampproject.org/v0/amp-hulu-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-hulu/">Annotated code example for amp-hulu</a></td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Example
 
 ```html

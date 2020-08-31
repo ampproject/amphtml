@@ -17,7 +17,7 @@
 /** @externs */
 
 /** @constructor */
-var DomPurifyConfig = function() {};
+var DomPurifyConfig = function () {};
 
 DomPurifyConfig.prototype.ALLOWED_TAGS;
 DomPurifyConfig.prototype.ALLOWED_ATTR;

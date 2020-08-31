@@ -18,12 +18,15 @@ const fs = require('fs-extra');
 const {transformCss} = require('../jsify-css');
 
 async function createGoldenCss() {
-  return transformCss('./build-system/tasks/create-golden-css/css/main.css', {
-    normalizeWhitespace: false,
-    discardComments: false,
-  }).then(function(result) {
-    fs.writeFileSync('./test/golden-files/main.css', result);
-  });
+  const result = await transformCss(
+    './build-system/tasks/create-golden-css/css/main.css',
+    {
+      normalizeWhitespace: false,
+      discardComments: false,
+    }
+  );
+
+  fs.writeFileSync('./test/golden-files/main.css', result);
 }
 
 module.exports = {

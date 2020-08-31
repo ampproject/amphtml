@@ -31,18 +31,18 @@ async function devDashboardTests() {
 
   // Add our files
   const allDevDashboardTests = globby.sync(config.devDashboardTestPaths);
-  allDevDashboardTests.forEach(file => {
+  allDevDashboardTests.forEach((file) => {
     mocha.addFile(file);
   });
 
   // Create our deffered
   let resolver;
-  const deferred = new Promise(resolverIn => {
+  const deferred = new Promise((resolverIn) => {
     resolver = resolverIn;
   });
 
   // Run the tests.
-  mocha.run(function(failures) {
+  mocha.run(function (failures) {
     if (failures) {
       process.exitCode = 1;
     }

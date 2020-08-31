@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Entitlement} from './entitlement';
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {evaluateExpr} from './expr';
@@ -49,7 +48,7 @@ export class LocalSubscriptionPlatformRenderer {
   /**
    *
    * @param {!JsonObject} renderState
-   * @return {*} TODO(#23582): Specify return type
+   * @return {!Promise}
    */
   render(renderState) {
     return Promise.all([
@@ -97,14 +96,14 @@ export class LocalSubscriptionPlatformRenderer {
           }
         }
       })
-      .then(candidate => {
+      .then((candidate) => {
         if (!candidate) {
           return;
         }
         if (candidate.tagName == 'TEMPLATE') {
           return this.templates_
             .renderTemplate(candidate, authResponse)
-            .then(element => {
+            .then((element) => {
               const renderState = /** @type {!JsonObject} */ (authResponse);
               return this.renderActionsInNode_(
                 renderState,
@@ -118,7 +117,7 @@ export class LocalSubscriptionPlatformRenderer {
         clone.removeAttribute('subscriptions-display');
         return clone;
       })
-      .then(element => {
+      .then((element) => {
         if (!element) {
           return;
         }
@@ -171,14 +170,4 @@ export class LocalSubscriptionPlatformRenderer {
       return rootNode;
     });
   }
-}
-
-/**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
- * @package
- * @visibleForTesting
- * @return {*} TODO(#23582): Specify return type
- */
-export function getEntitlementClassForTesting() {
-  return Entitlement;
 }

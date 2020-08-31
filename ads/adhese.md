@@ -70,3 +70,13 @@ For details on the configuration semantics, see the [Adhese website](https://www
 The following optional parameter is supported via the 'json' attribute:
 
 - `targeting`
+
+## User Consent Integration
+
+Adhese consent is linked to the window.context.consentSharedData object:
+
+- consentStateValue which contains the consent state
+- consentString which contains the IAB consent string
+
+If the consentStateValue is set to 'accepted', our consent parameter is set to 'all'.
+When avaiable, the consentString will always be send to the adserver.

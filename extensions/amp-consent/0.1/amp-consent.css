@@ -32,7 +32,7 @@
 
 amp-consent {
   /* Fixed to make position independent of page other elements. */
-  position: fixed;
+  position: fixed !important;
   bottom: 0;
   left: 0;
   overflow: hidden !important;
@@ -90,8 +90,8 @@ amp-consent.amp-hidden {
   position: absolute;
   height: 1px;
   width: 1px;
-  left: -10000px;
   top: auto;
+  left: auto;
 }
 
 .i-amphtml-consent-ui-fill {
@@ -108,7 +108,7 @@ iframe.i-amphtml-consent-ui-fill {
 
 amp-consent.i-amphtml-consent-ui-iframe-active {
   width: 100% !important;
-  height: 100vh !important;
+  height: 100% !important;
   padding: 0px !important;
   margin: 0px !important;
 
@@ -118,9 +118,26 @@ amp-consent.i-amphtml-consent-ui-iframe-active {
   transform: translate3d(0px, 100vh, 0px) !important;
 }
 
-amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-enable-border {
+amp-consent.i-amphtml-consent-ui-iframe-active.i-amphtml-consent-ui-modal {
+  box-sizing: border-box;
+  top: 0;
+  right: 0;
+  animation: 0.5s i-amphtml-modal-appear;
+  animation-fill-mode: forwards;
+  height: var(--i-amphtml-modal-height) !important;
+  width: 90vw !important;
+  margin: auto !important;
+  max-width: 760px;
+}
+
+amp-consent.i-amphtml-consent-ui-border-enabled {
   border-top-left-radius: 8px !important;
   border-top-right-radius: 8px !important;
+  box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2) !important;
+}
+
+amp-consent.i-amphtml-consent-ui-modal.i-amphtml-consent-ui-border-enabled {
+  border-radius: 8px !important;
   box-shadow: 0 0 5px 0 rgba(0,0,0, 0.2) !important;
 }
 
@@ -144,6 +161,17 @@ amp-consent.i-amphtml-consent-ui-in.i-amphtml-consent-ui-iframe-fullscreen > .i-
 @keyframes i-amphtml-consent-ui-mask {
   0% {opacity: 0.0;}
   100% {opacity: 0.2;}
+}
+
+@keyframes i-amphtml-modal-appear {
+  0% {
+    transform: translate(0, 100vh);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
 }
 
 .i-amphtml-consent-ui-mask {

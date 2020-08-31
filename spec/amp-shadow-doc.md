@@ -31,7 +31,7 @@ shell page as following:
 
 <!-- Wait for API to initialize -->
 <script>
-  (window.AMP = window.AMP || []).push(function(AMP) {
+  (window.AMP = window.AMP || []).push(function (AMP) {
     // AMP APIs can be used now via "AMP" object.
   });
 </script>
@@ -46,7 +46,7 @@ There are currently two ways how one can attach a shadow doc: using a `Document`
 Using the fully loaded `Document` object:
 
 ```javascript
-fetchDocumentViaXhr(url).then(fetchedDoc => {
+fetchDocumentViaXhr(url).then((fetchedDoc) => {
   const shadowDoc = AMP.attachShadowDoc(hostElement, fetchedDoc, url, options);
 });
 ```
@@ -55,11 +55,11 @@ Using the streaming API:
 
 ```javascript
 const shadowDoc = AMP.attachShadowDocAsStream(hostElement, url, options);
-fetch(url).then(response => {
+fetch(url).then((response) => {
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   function readChunk() {
-    return reader.read().then(chunk => {
+    return reader.read().then((chunk) => {
       const text = decoder.decode(chunk.value || new Uint8Array(), {
         stream: !chunk.done,
       });

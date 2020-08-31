@@ -25,7 +25,7 @@ describes.realWin(
     },
     allowExternalResources: true,
   },
-  env => {
+  (env) => {
     let win;
     let doc;
     let iframe;
@@ -41,8 +41,8 @@ describes.realWin(
       iframe.setAttribute('data-amp-3p-sentinel', sentinel);
       iframe.name = 'test_nomaster';
 
-      sendFakeMessage = type => {
-        return new Promise(resolve => {
+      sendFakeMessage = (type) => {
+        return new Promise((resolve) => {
           iframe.postMessageToParent({sentinel, type});
           setTimeout(resolve, 100);
         });

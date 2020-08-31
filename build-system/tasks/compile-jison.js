@@ -45,8 +45,8 @@ async function compileJison() {
   fs.mkdirSync('build/parsers', {recursive: true});
   const startTime = Date.now();
   const promises = [];
-  jisonPaths.forEach(jisonPath => {
-    glob.sync(jisonPath).forEach(jisonFile => {
+  jisonPaths.forEach((jisonPath) => {
+    glob.sync(jisonPath).forEach((jisonFile) => {
       const jsFile = path.basename(jisonFile, '.jison');
       const extension = jsFile.replace('-expr-impl', '');
       const parser = extension + 'Parser';

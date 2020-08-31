@@ -19,24 +19,6 @@
  */
  {
   /**
-  * An array of glob strings to use to load assets to Percy, relative to
-  * the base amphtml/ directory. All assets accessed by the test must be
-  * relative to the server path (i.e., use relative paths such as
-  * <amp-img src="/examples/visual-tests/..."> - never external domains such as
-  * <amp-img src="https://ampbyexample.com/...">)
-  *
-  * Note that if you add a new test from a sub-directory that is not matched
-  * by any glob string in this list, it will be missing its resources!
-  *
-  * See: glob primer https://github.com/isaacs/node-glob#glob-primer
-  */
-  "asset_globs": [
-    "examples/visual-tests/**",
-    "examples/amphtml-ads/ads-tag-integration.js",
-    "test/fixtures/e2e/amphtml-ads/**"
-  ],
-
-  /**
    * List of webpages used in tests.
    */
   "webpages": [
@@ -201,6 +183,10 @@
       "interactive_tests": "examples/visual-tests/font.amp.404/font.amp.js"
     },
     {
+      "url": "examples/visual-tests/css.amp/css.amp.html",
+      "name": "unbuilt css",
+    },
+    {
       "url": "examples/visual-tests/article.amp/article.amp.html",
       "name": "AMP Article",
       "loading_complete_selectors": [
@@ -213,8 +199,9 @@
       "url": "examples/visual-tests/amp-list/amp-list.amp.html",
       "name": "AMP List and Mustache",
       "loading_complete_selectors": [
-        ".list1",
-        ".list2"
+        "#list1 > div[role='list']",
+        "#list2 > div[role='list']",
+        "#list3 > div[role='list']",
       ],
       "interactive_tests": "examples/visual-tests/amp-list/amp-list.amp.js"
     },
@@ -232,19 +219,25 @@
       "name": "amp-sidebar",
       "viewport": {"width": 400, "height": 800},
       "interactive_tests": "examples/visual-tests/amp-sidebar/amp-sidebar.js",
+      "loading_incomplete_selectors": ["amp-sidebar.i-amphtml-element"]
     },
     {
       "url": "examples/visual-tests/amp-sidebar/amp-sidebar-toolbar-ol.amp.html",
       "name": "amp-sidebar toolbar > ol",
       "viewport": {"width": 400, "height": 800},
       "interactive_tests": "examples/visual-tests/amp-sidebar/amp-sidebar-toolbar.js",
-    },{
+      "loading_incomplete_selectors": ["amp-sidebar.i-amphtml-element"]
+    },
+    {
       "url": "examples/visual-tests/amp-sidebar/amp-sidebar-toolbar-ul.amp.html",
       "name": "amp-sidebar toolbar > ul",
       "viewport": {"width": 400, "height": 800},
       "interactive_tests": "examples/visual-tests/amp-sidebar/amp-sidebar-toolbar.js",
+      "loading_incomplete_selectors": ["amp-sidebar.i-amphtml-element"]
     },
     {
+      // TODO(#27455, @ampproject/wg-ads): see https://percy.io/ampproject/amphtml/builds/4672752
+      "flaky": true,
       "url": "examples/visual-tests/amp-sticky-ad/amp-sticky-ad.amp.html",
       "name": "AMP Sticky Ad",
       "viewport": {
@@ -373,7 +366,6 @@
       "name": "amp-story: unsupported browser",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
-        ".i-amphtml-story-fallback",
         ".i-amphtml-story-unsupported-browser-overlay"
       ]
     },
@@ -478,7 +470,6 @@
       "name": "amp-story: unsupported browser (desktop)",
       "viewport": {"width": 1440, "height": 900},
       "loading_complete_selectors": [
-        ".i-amphtml-story-fallback",
         ".i-amphtml-story-unsupported-browser-overlay"
       ]
     },
@@ -571,7 +562,7 @@
       ]
     },
     {
-      // TODO(zombifier): disabled in #21935 because this test is not hermetic.
+      // TODO(#27453, @ampproject/wg-ads): disabled in #21935 because this test is not hermetic.
       "flaky": true,
       "url": "examples/visual-tests/amp-inabox/amp-inabox-gpt.html",
       "name": "AMP Inabox GPT Ad",
@@ -590,7 +581,7 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip.js"
     },
     {
-      // TODO(#21665): Re-enable test.
+      // TODO(#21665, @ampproject/wg-stories): Re-enable test.
       "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-tooltip.html",
       "name": "amp-story: tooltip desktop",
@@ -601,7 +592,7 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-tooltip-desktop.js"
     },
     {
-      // TODO(#22070): Re-enable test.
+      // TODO(#22070, @ampproject/wg-stories): Re-enable test.
       "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-pagination-buttons.html",
       "name": "amp-story: pagination-buttons desktop",
@@ -612,7 +603,7 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-pagination-buttons.js"
     },
     {
-      // TODO(#22499): Re-enable this test once the animations run.
+      // TODO(#22499, @ampproject/wg-stories): Re-enable this test once the animations run.
       "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-sidebar.html",
       "name": "amp-story: sidebar",
@@ -642,7 +633,7 @@
       "interactive_tests": "examples/visual-tests/amp-story/amp-story-page-attachment-desktop.js"
     },
     {
-      // TODO(#21749): Re-enable test.
+      // TODO(#21749, @ampproject/wg-stories): Re-enable test.
       "flaky": true,
       "url": "examples/visual-tests/amp-story/amp-story-landscape-templates.html",
       "name": "amp-story: landscape templates",
@@ -679,8 +670,8 @@
       ],
     },
     {
-      "url": "examples/visual-tests/amp-story/amp-story-quiz-sizing-positioning.html",
-      "name": "amp-story-quiz: sizing and positioning",
+      "url": "examples/visual-tests/amp-story/amp-story-interactive-quiz-sizing-positioning.html",
+      "name": "amp-story-interactive-quiz: sizing and positioning",
       "viewport": {"width": 320, "height": 480},
       "loading_complete_selectors": [
         ".i-amphtml-story-loaded",
@@ -707,8 +698,6 @@
       "interactive_tests": "examples/visual-tests/amp-form/amp-form.js",
     },
     {
-      "flaky": true,
-      // TODO(#22162, cvializ): see https://percy.io/ampproject/amphtml/builds/1828636
       "url": "examples/visual-tests/amp-accordion/amp-accordion.html",
       "name": "amp-accordion: page loads",
       "loading_complete_delay_ms": 1000,
@@ -762,6 +751,8 @@
       "interactive_tests": "examples/visual-tests/amp-mega-menu/amp-mega-menu.js"
     },
     {
+      // TODO(#27454, @ampproject/wg-ui-and-a11y): see https://percy.io/ampproject/amphtml/builds/4672992/view/274790617/375?mode=diff&browser=firefox&snapshot=274790617
+      "flaky": true,
       "url": "examples/visual-tests/amp-mega-menu/amp-mega-menu-with-list.amp.html",
       "name": "amp-mega-menu: template render",
       "loading_complete_selectors": [".i-amphtml-mega-menu-heading"],
@@ -772,21 +763,44 @@
       "name": "amp-video-docking (left-to-right)",
       "viewport": {"width": 800, "height": 600},
       "interactive_tests": "examples/visual-tests/amp-video-docking/amp-video-docking.js",
-      "loading_complete_selectors": [".i-amphtml-video-component"],
+      "loading_complete_selectors": [".i-amphtml-video-interface"]
     },
     {
       "url": "examples/visual-tests/amp-video-docking/rtl.html",
       "name": "amp-video-docking (right-to-left)",
       "viewport": {"width": 800, "height": 600},
       "interactive_tests": "examples/visual-tests/amp-video-docking/amp-video-docking.js",
-      "loading_complete_selectors": [".i-amphtml-video-component"],
+      "loading_complete_selectors": [".i-amphtml-video-interface"]
     },
     {
       "url": "examples/visual-tests/amp-video-docking/slot.html",
       "name": "amp-video-docking (slot)",
       "viewport": {"width": 800, "height": 600},
       "interactive_tests": "examples/visual-tests/amp-video-docking/amp-video-docking.js",
-      "loading_complete_selectors": [".i-amphtml-video-component"],
+      "loading_complete_selectors": [".i-amphtml-video-interface"]
     },
+    {
+      "url": "examples/visual-tests/amp-story-player/back-button.html",
+      "name": "amp-story-player exit control back button",
+      "interactive_tests": "examples/visual-tests/amp-story-player/placeholder.js",
+      "loading_complete_selectors": [".i-amphtml-story-player-loaded"],
+      "loading_incomplete_selectors": [".i-amphtml-story-player-loading"],
+      "no_base_test": true
+    },
+    {
+      "url": "examples/visual-tests/amp-story-player/close-button.html",
+      "name": "amp-story-player exit control close button",
+      "interactive_tests": "examples/visual-tests/amp-story-player/placeholder.js",
+      "loading_complete_selectors": [".i-amphtml-story-player-loaded"],
+      "loading_incomplete_selectors": [".i-amphtml-story-player-loading"],
+      "no_base_test": true
+    },
+    {
+      "url": "examples/visual-tests/amp-story-player/player-local-story.html",
+      "name": "amp-story-player local story basic page",
+      "interactive_tests": "examples/visual-tests/amp-story-player/story-loaded.js",
+      "loading_incomplete_selectors": [".i-amphtml-story-player-loading"],
+      "no_base_test": true
+    }
   ]
 }

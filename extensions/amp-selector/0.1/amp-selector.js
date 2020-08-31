@@ -82,6 +82,11 @@ export class AmpSelector extends AMP.BaseElement {
   }
 
   /** @override */
+  prerenderAllowed() {
+    return true;
+  }
+
+  /** @override */
   buildCallback() {
     this.action_ = Services.actionServiceForDoc(this.element);
     this.isMultiple_ = this.element.hasAttribute('multiple');
@@ -121,7 +126,7 @@ export class AmpSelector extends AMP.BaseElement {
 
     this.registerAction(
       'selectUp',
-      invocation => {
+      (invocation) => {
         const {args, trust} = invocation;
         const delta = args && args['delta'] !== undefined ? -args['delta'] : -1;
         this.select_(delta, trust);
@@ -131,7 +136,7 @@ export class AmpSelector extends AMP.BaseElement {
 
     this.registerAction(
       'selectDown',
-      invocation => {
+      (invocation) => {
         const {args, trust} = invocation;
         const delta = args && args['delta'] !== undefined ? args['delta'] : 1;
         this.select_(delta, trust);
@@ -141,7 +146,7 @@ export class AmpSelector extends AMP.BaseElement {
 
     this.registerAction(
       'toggle',
-      invocation => {
+      (invocation) => {
         const {args, trust} = invocation;
         userAssert(args['index'] >= 0, "'index' must be greater than 0");
         userAssert(
@@ -156,6 +161,14 @@ export class AmpSelector extends AMP.BaseElement {
         }
       },
       ActionTrust.LOW
+    );
+
+    /** If the element is in an `email` document, allow its `clear`,
+     * `selectDown`, `selectUp`, and `toggle` actions. */
+    this.action_.addToAllowlist(
+      TAG,
+      ['clear', 'selectDown', 'selectUp', 'toggle'],
+      ['email']
     );
 
     // Triggers on DOM children updates
@@ -241,7 +254,7 @@ export class AmpSelector extends AMP.BaseElement {
       return;
     }
 
-    this.elements_.forEach(option => {
+    this.elements_.forEach((option) => {
       option.tabIndex = -1;
     });
 
@@ -282,7 +295,7 @@ export class AmpSelector extends AMP.BaseElement {
     const elements = opt_elements
       ? opt_elements
       : toArray(this.element.querySelectorAll('[option]'));
-    elements.forEach(el => {
+    elements.forEach((el) => {
       if (!el.hasAttribute('role')) {
         el.setAttribute('role', 'option');
       }
@@ -317,13 +330,13 @@ export class AmpSelector extends AMP.BaseElement {
     }
     const formId = this.element.getAttribute('form');
 
-    this.inputs_.forEach(input => {
+    this.inputs_.forEach((input) => {
       this.element.removeChild(input);
     });
     this.inputs_ = [];
     const doc = this.win.document;
     const fragment = doc.createDocumentFragment();
-    this.selectedElements_.forEach(option => {
+    this.selectedElements_.forEach((option) => {
       if (!option.hasAttribute('disabled')) {
         const hidden = doc.createElement('input');
         const value = option.getAttribute('option');
@@ -373,7 +386,7 @@ export class AmpSelector extends AMP.BaseElement {
    * @private
    */
   selectedOptions_() {
-    return this.selectedElements_.map(el => el.getAttribute('option'));
+    return this.selectedElements_.map((el) => el.getAttribute('option'));
   }
 
   /**
@@ -567,7 +580,7 @@ export class AmpSelector extends AMP.BaseElement {
     // Make currently selected option unfocusable
     this.elements_[this.focusedIndex_].tabIndex = -1;
 
-    return this.getElementsSizes_().then(sizes => {
+    return this.getElementsSizes_().then((sizes) => {
       const originalIndex = this.focusedIndex_;
 
       // For Home/End keys, start at end/beginning respectively and wrap around
@@ -692,7 +705,7 @@ export class AmpSelector extends AMP.BaseElement {
    */
   getElementsSizes_() {
     return this.measureElement(() => {
-      return this.elements_.map(element =>
+      return this.elements_.map((element) =>
         element./*OK*/ getBoundingClientRect()
       );
     });
@@ -710,6 +723,6 @@ function isElementHidden(element, rect) {
   return element.hidden || width == 0 || height == 0;
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpSelector, CSS);
 });

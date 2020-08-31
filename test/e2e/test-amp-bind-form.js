@@ -19,7 +19,7 @@ describes.endtoend(
   {
     testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-bind/bind-form.html',
   },
-  async env => {
+  async (env) => {
     let controller;
 
     beforeEach(async () => {
@@ -27,7 +27,7 @@ describes.endtoend(
     });
 
     describe('with <amp-form>', () => {
-      it('should NOT allow invalid bindings or values', async function() {
+      it('should NOT allow invalid bindings or values', async function () {
         const xhrText = await controller.findElement('#xhrText');
         const templatedText = await controller.findElement('#templatedText');
         const illegalHref = await controller.findElement('#illegalHref');

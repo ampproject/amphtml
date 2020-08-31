@@ -85,7 +85,7 @@ export class CacheCidApi {
       this.publisherCidPromise_ = this.fetchCid_(url);
     }
 
-    return this.publisherCidPromise_.then(publisherCid => {
+    return this.publisherCidPromise_.then((publisherCid) => {
       return publisherCid ? this.scopeCid_(publisherCid, scope) : null;
     });
   }
@@ -115,8 +115,8 @@ export class CacheCidApi {
         }),
         timeoutMessage
       )
-      .then(res => {
-        return res.json().then(response => {
+      .then((res) => {
+        return res.json().then((response) => {
           if (response['optOut']) {
             return null;
           }
@@ -130,9 +130,9 @@ export class CacheCidApi {
           return cid;
         });
       })
-      .catch(e => {
+      .catch((e) => {
         if (e && e.response) {
-          e.response.json().then(res => {
+          e.response.json().then((res) => {
             dev().error(TAG_, JSON.stringify(res));
           });
         } else {
@@ -157,7 +157,7 @@ export class CacheCidApi {
     const text = publisherCid + ';' + scope;
     return Services.cryptoFor(this.ampdoc_.win)
       .sha384Base64(text)
-      .then(enc => {
+      .then((enc) => {
         return 'amp-' + enc;
       });
   }

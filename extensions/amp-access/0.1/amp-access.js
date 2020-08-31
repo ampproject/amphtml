@@ -17,14 +17,15 @@
 import {AccessSource, AccessType} from './amp-access-source';
 import {AccessVars} from './access-vars';
 import {ActionTrust} from '../../../src/action-constants';
+import {AmpAccessEvaluator} from './access-expr';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
+import {TickLabel} from '../../../src/enums';
 import {cancellation} from '../../../src/error';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {evaluateAccessExpr} from './access-expr';
 import {getSourceOrigin} from '../../../src/url';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {installStylesForDoc} from '../../../src/style-installer';
@@ -101,10 +102,15 @@ export class AccessService {
     /** @private {?Promise<string>} */
     this.readerIdPromise_ = null;
 
+    /** @private {!./access-expr.AmpAccessEvaluator} */
+    this.evaluator_ = new AmpAccessEvaluator();
+
     /** @const */
     this.sources_ = this.parseConfig_();
 
-    const promises = this.sources_.map(source => source.whenFirstAuthorized());
+    const promises = this.sources_.map((source) =>
+      source.whenFirstAuthorized()
+    );
 
     /** @private {boolean} */
     this.firstAuthorizationsCompleted_ = false;
@@ -129,8 +135,10 @@ export class AccessService {
       this.firstAuthorizationsCompleted_ = true;
       this.analyticsEvent_('access-authorization-received');
       if (this.performance_) {
-        this.performance_.tick('aaa');
-        this.performance_.tickSinceVisible('aaav');
+        this.performance_.tick(TickLabel.ACCESS_AUTHORIZATION);
+        this.performance_.tickSinceVisible(
+          TickLabel.ACCESS_AUTHORIZATION_VISIBLE
+        );
         this.performance_.flush();
       }
     });
@@ -157,7 +165,7 @@ export class AccessService {
     if (!this.readerIdPromise_) {
       // No consent - an essential part of the access system.
       const consent = Promise.resolve();
-      this.readerIdPromise_ = this.cid_.then(cid => {
+      this.readerIdPromise_ = this.cid_.then((cid) => {
         return cid.get(
           {scope: 'amp-access', createCookieIfNotPresent: true},
           consent
@@ -192,7 +200,7 @@ export class AccessService {
       `${TAG} config should ` +
         'be inside a <script> tag with type="application/json"'
     );
-    const rawContent = tryParseJson(this.accessElement_.textContent, e => {
+    const rawContent = tryParseJson(this.accessElement_.textContent, (e) => {
       throw user().createError('Failed to parse "amp-access" JSON: ' + e);
     });
 
@@ -217,7 +225,7 @@ export class AccessService {
     const onReauthorizeFn = this.onReauthorize_.bind(this);
 
     return Object.keys(configMap).map(
-      key =>
+      (key) =>
         new AccessSource(
           this.ampdoc,
           configMap[key],
@@ -290,7 +298,12 @@ export class AccessService {
    * @private
    */
   analyticsEvent_(eventType) {
-    triggerAnalyticsEvent(this.getRootElement_(), eventType);
+    triggerAnalyticsEvent(
+      this.getRootElement_(),
+      eventType,
+      /** vars */ undefined,
+      /** enableDataVars */ false
+    );
   }
 
   /**
@@ -331,7 +344,7 @@ export class AccessService {
 
   /** @private */
   listenToBroadcasts_() {
-    this.viewer_.onBroadcast(message => {
+    this.viewer_.onBroadcast((message) => {
       if (
         message['type'] == 'amp-access-reauthorize' &&
         message['origin'] == this.pubOrigin_
@@ -385,7 +398,7 @@ export class AccessService {
 
     const authorizations = this.ampdoc.whenFirstVisible().then(() => {
       return Promise.all(
-        this.sources_.map(source => this.runOneAuthorization_(source))
+        this.sources_.map((source) => this.runOneAuthorization_(source))
       );
     });
 
@@ -452,7 +465,7 @@ export class AccessService {
    */
   applyAuthorizationToElement_(element, response) {
     const expr = element.getAttribute('amp-access');
-    const on = evaluateAccessExpr(expr, response);
+    const on = this.evaluator_.evaluate(expr, response);
     let renderPromise = null;
     if (on) {
       renderPromise = this.renderTemplates_(element, response);
@@ -501,7 +514,7 @@ export class AccessService {
           element,
           templateElements[i],
           response
-        ).catch(error => {
+        ).catch((error) => {
           // Ignore the error.
           dev().error(
             TAG,
@@ -536,7 +549,7 @@ export class AccessService {
     }
 
     const rendered = this.templates_.renderTemplate(template, response);
-    return rendered.then(element => {
+    return rendered.then((element) => {
       return this.vsync_.mutatePromise(() => {
         element.setAttribute('amp-access-template', '');
         element[TEMPLATE_PROP] = template;
@@ -554,7 +567,7 @@ export class AccessService {
    * @private
    */
   scheduleView_(timeToView) {
-    if (!this.sources_.some(s => s.getAdapter().isPingbackEnabled())) {
+    if (!this.sources_.some((s) => s.getAdapter().isPingbackEnabled())) {
       return;
     }
     this.reportViewPromise_ = null;
@@ -590,7 +603,7 @@ export class AccessService {
         this.analyticsEvent_('access-viewed');
         return this.reportViewToServer_();
       })
-      .catch(reason => {
+      .catch((reason) => {
         // Ignore - view has been canceled.
         dev().fine(TAG, 'view cancelled:', reason);
         this.reportViewPromise_ = null;
@@ -642,10 +655,10 @@ export class AccessService {
       unlistenSet.push(listenOnce(this.ampdoc.getRootNode(), 'click', resolve));
     }).then(
       () => {
-        unlistenSet.forEach(unlisten => unlisten());
+        unlistenSet.forEach((unlisten) => unlisten());
       },
-      reason => {
-        unlistenSet.forEach(unlisten => unlisten());
+      (reason) => {
+        unlistenSet.forEach((unlisten) => unlisten());
         throw reason;
       }
     );
@@ -732,7 +745,7 @@ export class AccessService {
 
     // Try to find a matching namespace
     const namespace = splitPoint > -1 ? type.substring(0, splitPoint) : type;
-    const match = this.sources_.filter(s => s.getNamespace() == namespace);
+    const match = this.sources_.filter((s) => s.getNamespace() == namespace);
     if (match.length) {
       // Matching namespace found
       const remaining = splitPoint > -1 ? type.substring(splitPoint + 1) : '';
@@ -751,29 +764,28 @@ export class AccessService {
    */
   combinedResponses() {
     if (this.sources_.length == 1 && !this.sources_[0].getNamespace()) {
-      return (
-        /** @type {!JsonObject} */ (this.sources_[0].getAuthResponse() || {})
-      );
+      return /** @type {!JsonObject} */ (this.sources_[0].getAuthResponse() ||
+        {});
     }
 
     const combined = /** @type {!JsonObject} */ ({});
     this.sources_.forEach(
-      source => (combined[source.getNamespace()] = source.getAuthResponse())
+      (source) => (combined[source.getNamespace()] = source.getAuthResponse())
     );
     return combined;
   }
 }
 
 // Register the extension services.
-AMP.extension(TAG, '0.1', function(AMP) {
-  AMP.registerServiceForDoc('access', function(ampdoc) {
+AMP.extension(TAG, '0.1', function (AMP) {
+  AMP.registerServiceForDoc('access', function (ampdoc) {
     return new AccessService(ampdoc).start_();
   });
 });
 
 /**
  * @package Visible for testing only.
- * @return {*} TODO(#23582): Specify return type
+ * @return {typeof AccessVars}
  */
 export function getAccessVarsClassForTesting() {
   return AccessVars;

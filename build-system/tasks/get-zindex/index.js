@@ -19,6 +19,7 @@ const fs = require('fs');
 const gulp = require('gulp');
 const PluginError = require('plugin-error');
 const postcss = require('postcss');
+const prettier = require('prettier');
 const table = require('text-table');
 const through = require('through2');
 
@@ -32,18 +33,20 @@ const tableOptions = {
   hsep: '   |   ',
 };
 
+const preamble = 'Run `gulp get-zindex` to generate this file.';
+
 /**
  * @param {!Object<string, !Array<number>} acc accumulator object for selectors
  * @param {!Rules} css post css rules object
  */
 function zIndexCollector(acc, css) {
-  css.walkRules(rule => {
-    rule.walkDecls(decl => {
+  css.walkRules((rule) => {
+    rule.walkDecls((decl) => {
       // Split out multi selector rules
       let selectorNames = rule.selector.replace('\n', '');
       selectorNames = selectorNames.split(',');
       if (decl.prop == 'z-index') {
-        selectorNames.forEach(selector => {
+        selectorNames.forEach((selector) => {
           // If multiple redeclaration of a selector and z index
           // are done in a single file, this will get overridden.
           acc[selector] = decl.value;
@@ -89,11 +92,11 @@ function createTable(filesData) {
   const rows = [];
   Object.keys(filesData)
     .sort()
-    .forEach(fileName => {
+    .forEach((fileName) => {
       const selectors = filesData[fileName];
       Object.keys(selectors)
         .sort()
-        .forEach(selectorName => {
+        .forEach((selectorName) => {
           const zIndex = selectors[selectorName];
           const row = [selectorName, zIndex, fileName];
           rows.push(row);
@@ -102,7 +105,19 @@ function createTable(filesData) {
   rows.sort((a, b) => {
     const aZIndex = parseInt(a[1], 10);
     const bZIndex = parseInt(b[1], 10);
-    return aZIndex - bZIndex;
+    // Word values sorted lexicographically.
+    if (isNaN(aZIndex) && isNaN(bZIndex)) {
+      return a[1].localeCompare(b[1]);
+    }
+    // Word values before length values.
+    if (isNaN(aZIndex)) {
+      return -1;
+    }
+    if (isNaN(bZIndex)) {
+      return 1;
+    }
+    // By length descending.
+    return bZIndex - aZIndex;
   });
   return rows;
 }
@@ -122,16 +137,24 @@ function getZindex(cb) {
   const filesData = Object.create(null);
   // Don't return the stream here since we do a `writeFileSync`
   getZindexStream('{css,src,extensions}/**/*.css')
-    .on('data', chunk => {
+    .on('data', (chunk) => {
       filesData[chunk.name] = chunk.selectors;
     })
-    .on('end', () => {
-      const rows = createTable(filesData);
-      rows.unshift.apply(rows, tableHeaders);
+    .on('end', async () => {
+      const filename = 'css/Z_INDEX.md';
+      const rows = [...tableHeaders, ...createTable(filesData)];
       const tbl = table(rows, tableOptions);
-      fs.writeFileSync('css/Z_INDEX.md', tbl);
+      const output = `${preamble}\n\n${tbl}`;
+      fs.writeFileSync(filename, await prettierFormat(filename, output));
       cb();
     });
+}
+
+async function prettierFormat(filename, output) {
+  return prettier.format(output, {
+    ...(await prettier.resolveConfig(filename)),
+    parser: 'markdown',
+  });
 }
 
 module.exports = {

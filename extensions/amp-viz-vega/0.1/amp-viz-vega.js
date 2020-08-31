@@ -151,7 +151,7 @@ export class AmpVizVega extends AMP.BaseElement {
     if (this.inlineData_) {
       this.data_ = /** @type {JsonObject} */ (tryParseJson(
         this.inlineData_,
-        err => {
+        (err) => {
           userAssert(
             !err,
             'data could not be parsed. Is it in a valid JSON format?: %s',
@@ -169,8 +169,8 @@ export class AmpVizVega extends AMP.BaseElement {
 
       return Services.xhrFor(this.win)
         .fetchJson(dev().assertString(this.src_), {})
-        .then(res => res.json())
-        .then(data => {
+        .then((res) => res.json())
+        .then((data) => {
           this.data_ = data;
         });
     }
@@ -224,7 +224,7 @@ export class AmpVizVega extends AMP.BaseElement {
        * @param {!VegaChartFactory} chartFactory
        * @return {*} TODO(#23582): Specify return type
        */
-      chartFactory => {
+      (chartFactory) => {
         return Services.vsyncFor(this.win).mutatePromise(() => {
           dom.removeChildren(dev().assertElement(this.container_));
           this.chart_ = chartFactory(dict({'el': this.container_}));
@@ -280,6 +280,6 @@ export class AmpVizVega extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-viz-vega', '0.1', AMP => {
+AMP.extension('amp-viz-vega', '0.1', (AMP) => {
   AMP.registerElement('amp-viz-vega', AmpVizVega, CSS);
 });

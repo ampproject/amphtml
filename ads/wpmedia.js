@@ -26,7 +26,7 @@ export function wpmedia(global, data) {
   // const url = 'http://localhost/wpjslib.js';
   const url = 'https://std.wpcdn.pl/wpjslib/wpjslib-amp.js';
 
-  writeScript(global, url, function() {
+  writeScript(global, url, function () {
     window.run(data);
   });
 }

@@ -16,17 +16,18 @@
 
 import * as WorkerDOM from '@ampproject/worker-dom/dist/amp/main.mjs';
 import {CSS} from '../../../build/amp-script-0.1.css';
+import {Deferred} from '../../../src/utils/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Purifier} from '../../../src/purifier/purifier';
 import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
 import {calculateExtensionScriptUrl} from '../../../src/service/extension-location';
 import {cancellation} from '../../../src/error';
-import {closestAncestorElementBySelector} from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
+import {getService, registerServiceBuilder} from '../../../src/service';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
@@ -34,6 +35,15 @@ import {utf8Encode} from '../../../src/utils/bytes';
 
 /** @const {string} */
 const TAG = 'amp-script';
+
+/**
+ * @typedef {{
+ *   terminate: function():void,
+ *   callFunction: function(string, ...*):Promise<*>,
+ *   onerror: ?function(!ErrorEvent):void
+ * }}
+ */
+let WorkerDOMWorkerDef;
 
 /**
  * Max cumulative size of author scripts from all amp-script elements on page.
@@ -72,7 +82,7 @@ export class AmpScript extends AMP.BaseElement {
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(this.win);
 
-    /** @private {?Worker} */
+    /** @private {?WorkerDOMWorkerDef} */
     this.workerDom_ = null;
 
     /** @private {?UserActivationTracker} */
@@ -87,15 +97,27 @@ export class AmpScript extends AMP.BaseElement {
     /** @private {boolean} */
     this.layoutCompleted_ = false;
 
+    /** @private {Deferred} */
+    this.initialize_ = new Deferred();
+
     /**
      * If true, most production constraints are disabled including script size,
      * script hash sum for local scripts, etc. Default is false.
      *
-     * Enabled by the "development" attribute which is intentionally invalid.
+     * Enabled by the "data-ampdevmode" attribute which is intentionally invalid.
      *
      * @private {boolean}
      */
     this.development_ = false;
+
+    /**
+     * If true, signals that the `nodom` variant of worker-dom should be used.
+     * The worker js will have a much smaller bundle size, but no access to dom
+     * functions.
+     *
+     * @private {boolean}
+     */
+    this.nodom_ = false;
   }
 
   /** @override */
@@ -105,16 +127,12 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /*
-     * Development mode is enabled by satisfying two constraints:
-     *   1. Root html element has 'data-ampdevmode'
-     *   2. The amp-script tag or any of its parents must also have 'data-ampdevmode'.
-     */
-    const htmlEl = this.element.ownerDocument.documentElement;
+    this.nodom_ = this.element.hasAttribute('nodom');
     this.development_ =
-      htmlEl.hasAttribute('data-ampdevmode') &&
-      closestAncestorElementBySelector(this.element, '[data-ampdevmode]') !=
-        htmlEl;
+      this.element.hasAttribute('data-ampdevmode') ||
+      this.element.ownerDocument.documentElement.hasAttribute(
+        'data-ampdevmode'
+      );
 
     if (this.development_) {
       user().warn(
@@ -122,16 +140,21 @@ export class AmpScript extends AMP.BaseElement {
         'JavaScript size and script hash requirements are disabled in development mode.',
         this.element
       );
-      if (this.element.hasAttribute('development')) {
-        user().warn(
-          TAG,
-          "The 'development' flag is deprecated. Please use 'data-ampdevmode' on the root html element instead",
-          this.element
-        );
-      }
     }
 
-    return getElementServiceForDoc(this.element, TAG, TAG).then(service => {
+    if (
+      this.nodom_ &&
+      (this.element.hasAttribute('width') ||
+        this.element.hasAttribute('height'))
+    ) {
+      user().warn(
+        TAG,
+        'Cannot set width or height of a nodom <amp-script>',
+        this.element
+      );
+    }
+
+    return getElementServiceForDoc(this.element, TAG, TAG).then((service) => {
       this.setService(/** @type {!AmpScriptService} */ (service));
     });
   }
@@ -168,6 +191,18 @@ export class AmpScript extends AMP.BaseElement {
    */
   getUserActivation() {
     return this.userActivation_;
+  }
+
+  /**
+   * Calls the specified function on this amp-script's worker-dom instance.
+   *
+   * @param {string} functionIdentifier
+   * @return {!Promise<*>}
+   */
+  callFunction(functionIdentifier) {
+    return this.initialize_.promise.then(() => {
+      return this.workerDom_.callFunction(functionIdentifier);
+    });
   }
 
   /** @override */
@@ -207,7 +242,7 @@ export class AmpScript extends AMP.BaseElement {
     const workerAndAuthorScripts = Promise.all([
       this.getWorkerScript_(),
       authorScriptPromise,
-    ]).then(results => {
+    ]).then((results) => {
       const workerScript = results[0];
       const authorScript = results[1];
 
@@ -229,38 +264,48 @@ export class AmpScript extends AMP.BaseElement {
     });
 
     const sandbox = this.element.getAttribute('sandbox') || '';
-    const sandboxTokens = sandbox.split(' ').map(s => s.trim());
+    const sandboxTokens = sandbox.split(' ').map((s) => s.trim());
 
     // @see src/main-thread/configuration.WorkerDOMConfiguration in worker-dom.
     const config = {
       authorURL: this.debugId_,
       mutationPump: this.mutationPump_.bind(this),
-      longTask: promise => {
+      longTask: (promise) => {
         this.userActivation_.expandLongTask(promise);
         // TODO(dvoytenko): consider additional "progress" UI.
       },
       sanitizer: new SanitizerImpl(this, sandboxTokens),
       // Callbacks.
-      onCreateWorker: data => {
+      onCreateWorker: (data) => {
         dev().info(TAG, 'Create worker:', data);
       },
-      onSendMessage: data => {
+      onSendMessage: (data) => {
         dev().info(TAG, 'To worker:', data);
       },
-      onReceiveMessage: data => {
+      onReceiveMessage: (data) => {
         dev().info(TAG, 'From worker:', data);
       },
     };
 
     // Create worker and hydrate.
-    WorkerDOM.upgrade(
+    return WorkerDOM.upgrade(
       container || this.element,
       workerAndAuthorScripts,
       config
-    ).then(workerDom => {
+    ).then((workerDom) => {
       this.workerDom_ = workerDom;
+      this.initialize_.resolve();
+      // workerDom will be null if it failed to init.
+      if (this.workerDom_) {
+        this.workerDom_.onerror = (errorEvent) => {
+          errorEvent.preventDefault();
+          user().error(
+            TAG,
+            `${errorEvent.message}\n    at (${errorEvent.filename}:${errorEvent.lineno})`
+          );
+        };
+      }
     });
-    return workerAndAuthorScripts;
   }
 
   /**
@@ -276,12 +321,12 @@ export class AmpScript extends AMP.BaseElement {
     const useLocal = getMode().localDev || getMode().test;
     const workerUrl = calculateExtensionScriptUrl(
       location,
-      'amp-script-worker',
+      this.nodom_ ? 'amp-script-worker-nodom' : 'amp-script-worker',
       '0.1',
       useLocal
     );
     const xhr = Services.xhrFor(this.win);
-    return xhr.fetchText(workerUrl, {ampCors: false}).then(r => r.text());
+    return xhr.fetchText(workerUrl, {ampCors: false}).then((r) => r.text());
   }
 
   /**
@@ -338,7 +383,7 @@ export class AmpScript extends AMP.BaseElement {
   fetchAuthorScript_(authorUrl, debugId) {
     return Services.xhrFor(this.win)
       .fetchText(authorUrl, {ampCors: false})
-      .then(response => {
+      .then((response) => {
         if (response.url && this.sameOrigin_(response.url)) {
           // Disallow non-JS content type for same-origin scripts.
           const contentType = response.headers.get('Content-Type');
@@ -349,17 +394,14 @@ export class AmpScript extends AMP.BaseElement {
               startsWith(contentType, 'text/javascript')
             )
           ) {
-            user().error(
+            // TODO(#24266): Refactor to %s interpolation when error string
+            // extraction is ready.
+            throw user().createError(
               TAG,
               'Same-origin "src" requires "Content-Type: text/javascript" or "Content-Type: application/javascript". ' +
-                'Fetched source for %s has "Content-Type: %s". ' +
-                'See https://amp.dev/documentation/components/amp-script/#security-features.',
-              debugId,
-              contentType
+                `Fetched source for ${debugId} has "Content-Type: ${contentType}". ` +
+                'See https://amp.dev/documentation/components/amp-script/#security-features.'
             );
-            // TODO(#24266): user().createError() messages are not extracted and
-            // don't perform string substitution.
-            throw new Error();
           }
           return response.text();
         } else {
@@ -368,7 +410,7 @@ export class AmpScript extends AMP.BaseElement {
           if (this.development_) {
             return response.text();
           } else {
-            return response.text().then(text => {
+            return response.text().then((text) => {
               return this.service_.checkSha384(text, debugId).then(() => text);
             });
           }
@@ -425,55 +467,63 @@ export class AmpScript extends AMP.BaseElement {
       const disallowedTypes = flush(allowMutation);
       // Count the number of mutations dropped by type.
       const errors = map();
-      disallowedTypes.forEach(type => {
+      /** @type {!Array} */ (disallowedTypes).forEach((type) => {
         errors[type] = errors[type] + 1 || 1;
       });
       // Emit an error message for each mutation type, including count.
-      Object.keys(errors).forEach(type => {
+      Object.keys(errors).forEach((type) => {
         const count = errors[type];
+        user().error(TAG, this.mutationTypeToErrorMessage_(type, count));
+      });
+
+      if (disallowedTypes.length > 0 && phase === Phase.MUTATING) {
+        this.workerDom_.terminate();
+
+        this.element.classList.remove('i-amphtml-hydrated');
+        this.element.classList.add('i-amphtml-broken');
+
         user().error(
           TAG,
-          'Dropped %sx "%s" mutation(s); user gesture is required with [layout=container].',
-          count,
-          this.mutationTypeToString_(type)
+          '%s was terminated due to illegal mutation.',
+          this.debugId_
         );
-      });
+      }
     });
-
-    // TODO(amphtml): flush(false) already filters all user-visible mutations,
-    // so we could just remove this code block for gentler failure mode.
-    if (!allowMutation && phase == Phase.MUTATING) {
-      this.workerDom_.terminate();
-
-      this.element.classList.remove('i-amphtml-hydrated');
-      this.element.classList.add('i-amphtml-broken');
-
-      user().error(
-        TAG,
-        '%s was terminated due to illegal mutation.',
-        this.debugId_
-      );
-    }
   }
 
   /**
    * @param {string} type
+   * @param {number} count
    * @return {string}
    */
-  mutationTypeToString_(type) {
+  mutationTypeToErrorMessage_(type, count) {
+    let target;
+
     // Matches TransferrableMutationType in worker-dom#src/transfer/TransferrableMutation.ts.
     switch (type) {
+      // Attributes and Properties
       case '0':
-        return 'ATTRIBUTES';
-      case '1':
-        return 'CHARACTER_DATA';
-      case '2':
-        return 'CHILD_LIST';
       case '3':
-        return 'PROPERTIES';
+        target = 'DOM element attributes or styles';
+        break;
+      // Character data
+      case '1':
+        target = 'textContent or the like';
+        break;
+      // Child list
+      case '2':
+        target = 'DOM element children, innerHTML, or the like';
+        break;
+      // Other
       default:
-        return 'OTHER';
+        target = 'the DOM';
+        break;
     }
+
+    return (
+      `Blocked ${count} attempts to modify ${target}.` +
+      ' For variable-sized <amp-script> containers, a user action has to happen first.'
+    );
   }
 }
 
@@ -498,8 +548,8 @@ export class AmpScriptService {
     if (allowedHashes) {
       this.sources_ = allowedHashes
         .split(' ')
-        .map(s => s.trim())
-        .filter(s => s.length);
+        .map((s) => s.trim())
+        .filter((s) => s.length);
     }
 
     /** @private @const {!../../../src/service/crypto-impl.Crypto} */
@@ -516,18 +566,15 @@ export class AmpScriptService {
    */
   checkSha384(script, debugId) {
     const bytes = utf8Encode(script);
-    return this.crypto_.sha384Base64(bytes).then(hash => {
+    return this.crypto_.sha384Base64(bytes).then((hash) => {
       if (!hash || !this.sources_.includes('sha384-' + hash)) {
-        user().error(
+        // TODO(#24266): Refactor to %s interpolation when error string
+        // extraction is ready.
+        throw user().createError(
           TAG,
-          'Script hash not found. %s must have "sha384-%s" in meta[name="amp-script-src"].' +
-            ' See https://amp.dev/documentation/components/amp-script/#security-features.',
-          debugId,
-          hash
+          `Script hash not found or incorrect for ${debugId}. You must include <meta name="amp-script-src" content="sha384-${hash}">. ` +
+            'See https://amp.dev/documentation/components/amp-script/#script-hash.'
         );
-        // TODO(#24266): user().createError() messages are not extracted and
-        // don't perform string substitution.
-        throw new Error();
       }
     });
   }
@@ -575,12 +622,16 @@ export class SanitizerImpl {
     /** @private @const {!Element} */
     this.element_ = ampScript.element;
 
+    registerServiceBuilder(this.win_, 'purifier-inplace', function () {
+      return new Purifier(
+        ampScript.win.document,
+        dict({'IN_PLACE': true}),
+        rewriteAttributeValue
+      );
+    });
+
     /** @private @const {!Purifier} */
-    this.purifier_ = new Purifier(
-      ampScript.win.document,
-      dict({'IN_PLACE': true}),
-      rewriteAttributeValue
-    );
+    this.purifier_ = getService(this.win_, 'purifier-inplace');
 
     /** @private @const {!Object<string, boolean>} */
     this.allowedTags_ = this.purifier_.getAllowedTags();
@@ -606,7 +657,7 @@ export class SanitizerImpl {
 
     /** @private @const {boolean} */
     this.allowForms_ = sandboxTokens.includes('allow-forms');
-    FORM_ELEMENTS.forEach(fe => {
+    FORM_ELEMENTS.forEach((fe) => {
       this.allowedTags_[fe] = this.allowForms_;
     });
   }
@@ -677,7 +728,7 @@ export class SanitizerImpl {
     if (!this.allowForms_ && FORM_ELEMENTS.includes(tag)) {
       user().warn(
         TAG,
-        'Form elements (%s) are not allowed without sandbox="allow-forms".',
+        'Form elements (%s) cannot be mutated unless your <amp-script> includes the attribute sandbox="allow-forms".',
         tag
       );
       return true;
@@ -711,7 +762,7 @@ export class SanitizerImpl {
    */
   getStorage(location, opt_key) {
     if (location === StorageLocation.AMP_STATE) {
-      return Services.bindForDocOrNull(this.element_).then(bind => {
+      return Services.bindForDocOrNull(this.element_).then((bind) => {
         if (bind) {
           return bind.getStateValue(opt_key || '.');
         }
@@ -739,7 +790,7 @@ export class SanitizerImpl {
    */
   setStorage(location, key, value) {
     if (location === StorageLocation.AMP_STATE) {
-      return Services.bindForDocOrNull(this.element_).then(bind => {
+      return Services.bindForDocOrNull(this.element_).then((bind) => {
         if (bind) {
           const state = tryParseJson(value, () => {
             dev().error(TAG, 'Invalid AMP.setState() argument: %s', value);
@@ -800,7 +851,7 @@ export class SanitizerImpl {
   }
 }
 
-AMP.extension(TAG, '0.1', function(AMP) {
+AMP.extension(TAG, '0.1', function (AMP) {
   AMP.registerServiceForDoc(TAG, AmpScriptService);
   AMP.registerElement(TAG, AmpScript, CSS);
 });

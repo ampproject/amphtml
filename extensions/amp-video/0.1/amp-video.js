@@ -19,9 +19,9 @@ import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
 import {VisibilityState} from '../../../src/visibility-state';
 import {
+  childElement,
   childElementByTag,
   childElementsByTag,
-  elementByTag,
   fullscreenEnter,
   fullscreenExit,
   insertAfterOrAtStart,
@@ -29,11 +29,11 @@ import {
   removeElement,
 } from '../../../src/dom';
 import {descendsFromStory} from '../../../src/utils/story';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
+import {getBitrateManager} from './flexible-bitrate';
 import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {mutedOrUnmutedEvent} from '../../../src/iframe-video';
@@ -104,15 +104,13 @@ class AmpVideo extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    const videoSrc = this.getVideoSourceForPreconnect_();
-    if (videoSrc) {
-      this.getUrlService_().assertHttpsUrl(videoSrc, this.element);
+    this.getVideoSourcesForPreconnect_().forEach((videoSrc) => {
       Services.preconnectFor(this.win).url(
         this.getAmpDoc(),
         videoSrc,
         opt_onLayout
       );
-    }
+    });
   }
 
   /**
@@ -168,21 +166,26 @@ class AmpVideo extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {?string}
+   * @return {!Array<string>}
    */
-  getVideoSourceForPreconnect_() {
-    if (this.getAmpDoc().getVisibilityState() === VisibilityState.PRERENDER) {
-      const source = this.getFirstCachedSource_();
-      return (source && source.getAttribute('src')) || null;
+  getVideoSourcesForPreconnect_() {
+    const videoSrc = this.element.getAttribute('src');
+    if (videoSrc) {
+      return [videoSrc];
     }
-    let videoSrc = this.element.getAttribute('src');
-    if (!videoSrc) {
-      const source = elementByTag(this.element, 'source');
-      if (source) {
-        videoSrc = source.getAttribute('src');
+    const srcs = [];
+    toArray(childElementsByTag(this.element, 'source')).forEach((source) => {
+      const src = source.getAttribute('src');
+      if (src) {
+        srcs.push(src);
       }
-    }
-    return videoSrc;
+      // We also want to preconnect to the origin src to make fallback faster.
+      const origSrc = source.getAttribute('amp-orig-src');
+      if (origSrc) {
+        srcs.push(origSrc);
+      }
+    });
+    return srcs;
   }
 
   /** @override */
@@ -197,6 +200,9 @@ class AmpVideo extends AMP.BaseElement {
     this.configure_();
 
     this.video_ = element.ownerDocument.createElement('video');
+    if (this.element.querySelector('source[data-bitrate]')) {
+      getBitrateManager(this.win).manage(this.video_);
+    }
 
     const poster = element.getAttribute('poster');
     if (!poster && getMode().development) {
@@ -244,7 +250,7 @@ class AmpVideo extends AMP.BaseElement {
       return;
     }
     ['i-amphtml-disable-mediasession', 'i-amphtml-poolbound'].forEach(
-      className => {
+      (className) => {
         element.classList.add(className);
       }
     );
@@ -262,7 +268,7 @@ class AmpVideo extends AMP.BaseElement {
       this.propagateAttributes(['src'], dev().assertElement(this.video_));
     }
     const attrs = ATTRS_TO_PROPAGATE.filter(
-      value => mutations[value] !== undefined
+      (value) => mutations[value] !== undefined
     );
     this.propagateAttributes(
       attrs,
@@ -322,30 +328,105 @@ class AmpVideo extends AMP.BaseElement {
     // If we are in prerender mode, only propagate cached sources and then
     // when document becomes visible propagate origin sources and other children
     // If not in prerender mode, propagate everything.
+    let pendingOriginPromise;
     if (this.getAmpDoc().getVisibilityState() == VisibilityState.PRERENDER) {
       if (!this.element.hasAttribute('preload')) {
         this.video_.setAttribute('preload', 'auto');
       }
-      this.getAmpDoc()
+      pendingOriginPromise = this.getAmpDoc()
         .whenFirstVisible()
         .then(() => {
           this.propagateLayoutChildren_();
+          // We need to yield to the event queue before listing for loadPromise
+          // because this element may still be in error state from the pre-render
+          // load.
+          return Services.timerFor(this.win)
+            .promise(1)
+            .then(() => {
+              // Don't wait for the source to load if media pool is taking over.
+              if (this.isManagedByPool_()) {
+                return;
+              }
+              return this.loadPromise(this.video_);
+            });
         });
     } else {
       this.propagateLayoutChildren_();
     }
 
     // loadPromise for media elements listens to `loadedmetadata`.
-    const promise = this.loadPromise(this.video_).then(() => {
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
-    });
+    const promise = this.loadPromise(this.video_)
+      .then(null, (reason) => {
+        if (pendingOriginPromise) {
+          return pendingOriginPromise;
+        }
+        throw reason;
+      })
+      .then(() => {
+        this.element.dispatchCustomEvent(VideoEvents.LOAD);
+      });
 
     // Resolve layoutCallback right away if the video won't preload.
     if (this.element.getAttribute('preload') === 'none') {
       return;
     }
 
+    // Resolve layoutCallback as soon as all sources are appended when within a
+    // story, so it can be handled by the media pool as soon as possible.
+    if (this.isManagedByPool_()) {
+      return pendingOriginPromise;
+    }
+
     return promise;
+  }
+
+  /**
+   * Gracefully handle media errors if possible.
+   * @param {!Event} event
+   */
+  handleMediaError_(event) {
+    if (
+      !this.video_.error ||
+      this.video_.error.code != MediaError.MEDIA_ERR_DECODE
+    ) {
+      return;
+    }
+    // HTMLMediaElements automatically fallback to the next source if a load fails
+    // but they don't try the next source upon a decode error.
+    // This code does this fallback manually.
+    user().error(
+      TAG,
+      `Decode error in ${this.video_.currentSrc}`,
+      this.element
+    );
+    // No fallback available for bare src.
+    if (this.video_.src) {
+      return;
+    }
+    // Find the source element that caused the decode error.
+    let sourceCount = 0;
+    const currentSource = childElement(this.video_, (source) => {
+      if (source.tagName != 'SOURCE') {
+        return false;
+      }
+      sourceCount++;
+      return source.src == this.video_.currentSrc;
+    });
+    if (sourceCount == 0) {
+      return;
+    }
+    dev().assertElement(
+      currentSource,
+      `Can't find source element for currentSrc ${this.video_.currentSrc}`
+    );
+    removeElement(dev().assertElement(currentSource));
+    // Resets the loading and will catch the new source if any.
+    event.stopImmediatePropagation();
+    this.video_.load();
+    // Unfortunately we don't know exactly what operation caused the decode to
+    // fail. But to help, we need to retry. Since play is most common, we're
+    // doing that.
+    this.play(false);
   }
 
   /**
@@ -373,11 +454,15 @@ class AmpVideo extends AMP.BaseElement {
 
     // Only cached sources are added during prerender.
     // Origin sources will only be added when document becomes visible.
-    sources.forEach(source => {
+    sources.forEach((source) => {
       if (this.isCachedByCDN_(source)) {
         this.video_.appendChild(source);
       }
     });
+
+    if (this.video_.changedSources) {
+      this.video_.changedSources();
+    }
   }
 
   /**
@@ -398,7 +483,7 @@ class AmpVideo extends AMP.BaseElement {
       this.propagateAttributes(['src'], dev().assertElement(this.video_));
     }
 
-    sources.forEach(source => {
+    sources.forEach((source) => {
       // Cached sources should have been moved from <amp-video> to <video>.
       devAssert(!this.isCachedByCDN_(source));
       urlService.assertHttpsUrl(source.getAttribute('src'), source);
@@ -408,10 +493,14 @@ class AmpVideo extends AMP.BaseElement {
     // To handle cases where cached source may 404 if not primed yet,
     // duplicate the `origin` Urls for cached sources and insert them after each
     const cached = toArray(this.video_.querySelectorAll('[amp-orig-src]'));
-    cached.forEach(cachedSource => {
+    cached.forEach((cachedSource) => {
       const origSrc = cachedSource.getAttribute('amp-orig-src');
       const origType = cachedSource.getAttribute('type');
       const origSource = this.createSourceElement_(origSrc, origType);
+      const bitrate = cachedSource.getAttribute('data-bitrate');
+      if (bitrate) {
+        origSource.setAttribute('data-bitrate', bitrate);
+      }
       insertAfterOrAtStart(
         dev().assertElement(this.video_),
         origSource,
@@ -420,9 +509,13 @@ class AmpVideo extends AMP.BaseElement {
     });
 
     const tracks = toArray(childElementsByTag(element, 'track'));
-    tracks.forEach(track => {
+    tracks.forEach((track) => {
       this.video_.appendChild(track);
     });
+
+    if (this.video_.changedSources) {
+      this.video_.changedSources();
+    }
   }
 
   /**
@@ -482,6 +575,7 @@ class AmpVideo extends AMP.BaseElement {
    */
   installEventHandlers_() {
     const video = dev().assertElement(this.video_);
+    video.addEventListener('error', (e) => this.handleMediaError_(e));
 
     const forwardEventsUnlisten = this.forwardEvents(
       [
@@ -489,6 +583,7 @@ class AmpVideo extends AMP.BaseElement {
         VideoEvents.LOADEDMETADATA,
         VideoEvents.PAUSE,
         VideoEvents.PLAYING,
+        VideoEvents.PLAY,
       ],
       video
     );
@@ -593,6 +688,7 @@ class AmpVideo extends AMP.BaseElement {
     setStyles(poster, {
       'background-image': `url(${src})`,
       'background-size': 'cover',
+      'background-position': 'center',
     });
     poster.classList.add('i-amphtml-android-poster-bug');
     this.applyFillContent(poster);
@@ -743,10 +839,7 @@ class AmpVideo extends AMP.BaseElement {
     const placeholder = this.getPlaceholder();
     // checks for the existence of a visible blurry placeholder
     if (placeholder) {
-      if (
-        placeholder.classList.contains('i-amphtml-blurry-placeholder') &&
-        isExperimentOn(this.win, 'blurry-placeholder')
-      ) {
+      if (placeholder.classList.contains('i-amphtml-blurry-placeholder')) {
         setImportantStyles(placeholder, {'opacity': 0.0});
         return true;
       }
@@ -778,6 +871,6 @@ class AmpVideo extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpVideo);
 });

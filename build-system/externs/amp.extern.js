@@ -51,12 +51,12 @@ var FetchInitDef;
 var FetchRequestDef;
 
 /** @constructor */
-var FormDataWrapperInterface = function() {};
+var FormDataWrapperInterface = function () {};
 
-FormDataWrapperInterface.prototype.entries = function() {};
-FormDataWrapperInterface.prototype.getFormData = function() {};
+FormDataWrapperInterface.prototype.entries = function () {};
+FormDataWrapperInterface.prototype.getFormData = function () {};
 
-FormData.prototype.entries = function() {};
+FormData.prototype.entries = function () {};
 
 /**
  * A type for Objects that can be JSON serialized or that come from
@@ -181,13 +181,13 @@ window.context.tagName;
 
 // Safeframe
 // TODO(bradfrizzell) Move to its own extern. Not relevant to all AMP.
-/* @type {?Object} */
+/** @type {?Object} */
 window.sf_ = {};
-/* @type {?Object} */
+/** @type {?Object} */
 window.sf_.cfg;
 
 // Exposed to custom ad iframes.
-/* @type {!Function} */
+/** @type {function(function(!Object, function(!Object)), !Array<string>=, !Array<string>=)} */
 window.draw3p;
 
 // AMP's globals
@@ -222,10 +222,10 @@ window.AMP.viewport.getScrollWidth;
 window.AMP.viewport.getWidth;
 
 /** @type {function(!HTMLElement, !Document, !string, Object)} */
-window.AMP.attachShadowDoc = function(element, document, url, options) {};
+window.AMP.attachShadowDoc = function (element, document, url, options) {};
 
 /** @type {function(!HTMLElement, !string, Object)} */
-window.AMP.attachShadowDocAsStream = function(element, url, options) {};
+window.AMP.attachShadowDocAsStream = function (element, url, options) {};
 
 /** @constructor */
 function AmpConfigType() {}
@@ -241,11 +241,15 @@ AmpConfigType.prototype.thirdPartyFrameRegex;
 /* @public {string} */
 AmpConfigType.prototype.errorReporting;
 /* @public {string} */
+AmpConfigType.prototype.betaErrorReporting;
+/* @public {string} */
 AmpConfigType.prototype.cdn;
 /* @public {string} */
 AmpConfigType.prototype.cdnUrl;
 /* @public {string} */
 AmpConfigType.prototype.errorReportingUrl;
+/* @public {string} */
+AmpConfigType.prototype.betaErrorReportingUrl;
 /* @public {string} */
 AmpConfigType.prototype.localDev;
 /* @public {string} */
@@ -260,6 +264,10 @@ AmpConfigType.prototype.test;
 AmpConfigType.prototype.spt;
 /* @public {boolean|undefined} */
 AmpConfigType.prototype.esm;
+/* @public {string} */
+AmpConfigType.prototype.geoApi;
+/* @public {string} */
+AmpConfigType.prototype.geoApiUrl;
 
 /** @type {!AmpConfigType}  */
 window.AMP_CONFIG;
@@ -306,14 +314,29 @@ let VegaParser;
  * @typedef {{parse: VegaParser}}
  */
 let VegaObject;
-/* @type {!VegaObject} */
+/** @type {!VegaObject} */
 window.vg;
 
 // amp-date-picker externs
 /**
  * @type {function(*)}
  */
-let ReactRender = function() {};
+let ReactRender = function () {};
+
+/** @constructor */
+let RRule;
+/**
+ * @param {Date} unusedDt
+ * @param {boolean=} unusedInc
+ * @return {?Date}
+ */
+RRule.prototype.before = function (unusedDt, unusedInc) {};
+/**
+ * @param {Date} unusedDt
+ * @param {boolean=} unusedInc
+ * @return {?Date}
+ */
+RRule.prototype.after = function (unusedDt, unusedInc) {};
 
 /**
  * @dict
@@ -358,15 +381,15 @@ ReactDatesConstants.HORIZONTAL_ORIENTATION;
 var Inputmask = class {};
 
 /** @param {!Object} unusedOpts */
-Inputmask.extendAliases = function(unusedOpts) {};
+Inputmask.extendAliases = function (unusedOpts) {};
 
 /** @param {!Object} unusedOpts */
-Inputmask.extendDefaults = function(unusedOpts) {};
+Inputmask.extendDefaults = function (unusedOpts) {};
 
 /** @param {!Element} unusedElement */
-Inputmask.prototype.mask = function(unusedElement) {};
+Inputmask.prototype.mask = function (unusedElement) {};
 
-Inputmask.prototype.remove = function() {};
+Inputmask.prototype.remove = function () {};
 
 /** @dict */
 window.AMP.dependencies = {};
@@ -375,7 +398,7 @@ window.AMP.dependencies = {};
  * @param {!Element} unusedElement
  * @return {!Inputmask}
  */
-window.AMP.dependencies.inputmaskFactory = function(unusedElement) {};
+window.AMP.dependencies.inputmaskFactory = function (unusedElement) {};
 
 // Should have been defined in the closure compiler's extern file for
 // IntersectionObserverEntry, but appears to have been omitted.
@@ -402,55 +425,48 @@ var UnlistenDef;
 var AmpElement;
 
 /** @return {!Signals} */
-AmpElement.prototype.signals = function() {};
-
-/**
- * Must be externed to avoid Closure DCE'ing this function on
- * custom-element.CustomAmpElement.prototype in single-pass compilation.
- * @return {string}
- */
-AmpElement.prototype.elementName = function() {};
+AmpElement.prototype.signals = function () {};
 
 var Signals = class {};
 /**
  * @param {string} unusedName
  * @return {number|!Error|null}
  */
-Signals.prototype.get = function(unusedName) {};
+Signals.prototype.get = function (unusedName) {};
 
 /**
  * @param {string} unusedName
  * @return {!Promise<time>}
  */
-Signals.prototype.whenSignal = function(unusedName) {};
+Signals.prototype.whenSignal = function (unusedName) {};
 
 /**
  * @param {string} unusedName
  * @param {time=} unusedOpt_time
  */
-Signals.prototype.signal = function(unusedName, unusedOpt_time) {};
+Signals.prototype.signal = function (unusedName, unusedOpt_time) {};
 
 /**
  * @param {string} unusedName
  * @param {!Error} unusedError
  */
-Signals.prototype.rejectSignal = function(unusedName, unusedError) {};
+Signals.prototype.rejectSignal = function (unusedName, unusedError) {};
 
 /** @param {string} unusedName */
-Signals.prototype.reset = function(unusedName) {};
+Signals.prototype.reset = function (unusedName) {};
 
 // Temp until we figure out forward declarations
 /** @constructor */
-var AccessService = function() {};
+var AccessService = function () {};
 /** @constructor @struct */
-var UserNotificationManager = function() {};
+var UserNotificationManager = function () {};
 UserNotificationManager.prototype.get;
 /** @constructor @struct */
-var Cid = function() {};
+var Cid = function () {};
 /** @constructor @struct */
-var Activity = function() {};
+var Activity = function () {};
 /** @constructor */
-var AmpStoryVariableService = function() {};
+var AmpStoryVariableService = function () {};
 
 // data
 var data;
@@ -530,14 +546,14 @@ grecaptcha.execute;
 // Validator
 var amp;
 amp.validator;
-amp.validator.validateUrlAndLog = function(string, doc) {};
+amp.validator.validateUrlAndLog = function (string, doc) {};
 
 // Temporary Access types (delete when amp-access is compiled
 // for type checking).
-Activity.prototype.getTotalEngagedTime = function() {};
-Activity.prototype.getIncrementalEngagedTime = function(name, reset) {};
-AccessService.prototype.getAccessReaderId = function() {};
-AccessService.prototype.getAuthdataField = function(field) {};
+Activity.prototype.getTotalEngagedTime = function () {};
+Activity.prototype.getIncrementalEngagedTime = function (name, reset) {};
+AccessService.prototype.getAccessReaderId = function () {};
+AccessService.prototype.getAuthdataField = function (field) {};
 // Same for amp-analytics
 
 /**
@@ -574,13 +590,13 @@ var GetCidDef;
  *      This promise may take a long time to resolve if consent isn't
  *      given.
  */
-Cid.prototype.get = function(
+Cid.prototype.get = function (
   externalCidScope,
   consent,
   opt_persistenceConsent
 ) {};
 
-AmpStoryVariableService.prototype.onStateChange = function(event) {};
+AmpStoryVariableService.prototype.onStateChange = function (event) {};
 AmpStoryVariableService.pageIndex;
 AmpStoryVariableService.pageId;
 
@@ -717,7 +733,7 @@ let BindEvaluateExpressionResultDef;
 
 /**
  * Options for Bind.rescan().
- * @typedef {{update: (boolean|undefined), fast: (boolean|undefined), timeout: (number|undefined)}}
+ * @typedef {{update: (boolean|string|undefined), fast: (boolean|undefined), timeout: (number|undefined)}}
  */
 let BindRescanOptionsDef;
 
@@ -889,3 +905,12 @@ class FeaturePolicy {
  * @type {?FeaturePolicy}
  */
 HTMLIFrameElement.prototype.featurePolicy;
+
+/**
+ * Going through the standardization process now.
+ *
+ * See https://developers.google.com/web/updates/2019/02/constructable-stylesheets.
+ *
+ * @param {string} cssText
+ */
+CSSStyleSheet.prototype.replaceSync = function (cssText) {};

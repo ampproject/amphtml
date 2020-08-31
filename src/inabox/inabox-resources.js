@@ -27,7 +27,24 @@ const TAG = 'inabox-resources';
 const FOUR_FRAME_DELAY = 70;
 
 /**
+ * Only a few components require viewportCallback.
+ * Allow them to observe intersections explicitly.
+ * @private @const {!Array<string>}
+ */
+const receivesViewportCallback = ['AMP-CAROUSEL'];
+
+/** @param {!IntersectionObserverEntry} entry */
+function triggerViewportCallbackFromIntersection(entry) {
+  const {target, isIntersecting} = entry;
+  if (!target.viewportCallback) {
+    return;
+  }
+  target.viewportCallback(isIntersecting);
+}
+
+/**
  * @implements {../service/resources-interface.ResourcesInterface}
+ * @implements {../service.Disposable}
  * @visibleForTesting
  */
 export class InaboxResources {
@@ -56,8 +73,19 @@ export class InaboxResources {
     /** @const @private {!Deferred} */
     this.firstPassDone_ = new Deferred();
 
+    /** @private {?IntersectionObserver} */
+    this.inViewportObserver_ = null;
+
     const input = Services.inputFor(this.win);
     input.setupInputModeClasses(ampdoc);
+  }
+
+  /** @override */
+  dispose() {
+    if (this.inViewportObserver_) {
+      this.inViewportObserver_.disconnect();
+      this.inViewportObserver_ = null;
+    }
   }
 
   /** @override */
@@ -89,6 +117,7 @@ export class InaboxResources {
   add(element) {
     const resource = new Resource(++this.resourceIdCounter_, element, this);
     this.resources_.push(resource);
+    this.maybeObserveInViewport_(element);
     dev().fine(TAG, 'resource added:', resource.debugid);
   }
 
@@ -107,6 +136,9 @@ export class InaboxResources {
     const resource = Resource.forElementOptional(element);
     if (!resource) {
       return;
+    }
+    if (this.inViewportObserver_) {
+      this.inViewportObserver_.unobserve(element);
     }
     const index = this.resources_.indexOf(resource);
     if (index !== -1) {
@@ -157,24 +189,31 @@ export class InaboxResources {
     return this.firstPassDone_.promise;
   }
 
+  /** @override */
+  isIntersectionExperimentOn() {
+    return false;
+  }
+
   /**
    * @private
    */
   doPass_() {
+    const now = Date.now();
     dev().fine(TAG, 'doPass');
     // measure in a batch
-    this.resources_.forEach(resource => {
+    this.resources_.forEach((resource) => {
       if (!resource.isLayoutPending()) {
         return;
       }
       resource.measure();
     });
     // mutation in a batch
-    this.resources_.forEach(resource => {
+    this.resources_.forEach((resource) => {
       if (
         resource.getState() === ResourceState.READY_FOR_LAYOUT &&
         resource.isDisplayed()
       ) {
+        resource.layoutScheduled(now);
         resource.startLayout();
       }
     });
@@ -182,6 +221,45 @@ export class InaboxResources {
     this.ampdoc_.signals().signal(READY_SCAN_SIGNAL);
     this.passObservable_.fire();
     this.firstPassDone_.resolve();
+  }
+
+  /**
+   * Instantiates an IntersectionObserver (if available) that triggers
+   * viewportCallbacks.
+   * @return {?IntersectionObserver}
+   * @private
+   */
+  maybeInitInViewportObserver_() {
+    const {IntersectionObserver} = this.win;
+    if (!IntersectionObserver) {
+      return null;
+    }
+    if (this.inViewportObserver_ === null) {
+      this.inViewportObserver_ = new IntersectionObserver((entries) =>
+        entries.forEach(triggerViewportCallbackFromIntersection)
+      );
+    }
+    return this.inViewportObserver_;
+  }
+
+  /**
+   * Observes an element so it will receive viewportCallbacks when allowed.
+   * @param {!Element} element
+   * @private
+   */
+  maybeObserveInViewport_(element) {
+    if (!receivesViewportCallback.includes(element.tagName)) {
+      return;
+    }
+    const observer = this.maybeInitInViewportObserver_();
+    if (observer) {
+      observer.observe(element);
+    }
+  }
+
+  /** @override */
+  getSlowElementRatio() {
+    return 0;
   }
 }
 

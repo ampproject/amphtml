@@ -144,7 +144,7 @@ describe('json', () => {
 
     it('should not throw and return null for invalid json', () => {
       const json = '{"key": "val';
-      expect(tryParseJson.bind(null, json)).to.not.throw;
+      expect(tryParseJson.bind(null, json)).to.not.throw();
       const result = tryParseJson(json);
       expect(result).to.be.null;
     });
@@ -158,7 +158,7 @@ describe('json', () => {
       expect(onFailedCalled).to.be.false;
 
       const invalidJson = '{"key": "val';
-      tryParseJson(invalidJson, err => {
+      tryParseJson(invalidJson, (err) => {
         onFailedCalled = true;
         expect(err).to.exist;
       });

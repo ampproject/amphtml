@@ -28,18 +28,13 @@ exports.mainBinary =
   's.animation="none";' +
   's.WebkitAnimation="none;"},1000);throw e};';
 
-exports.extension = function(
+exports.extension = function (
   name,
   loadPriority,
   intermediateDeps,
   opt_splitMarker
 ) {
   opt_splitMarker = opt_splitMarker || '';
-
-  // Single pass intermediate modules do not need an AMP.push wrapper.
-  if (name.startsWith('_base_')) {
-    return '(function() {<%= contents %>}());';
-  }
 
   let deps = '';
   if (intermediateDeps && intermediateDeps.length) {

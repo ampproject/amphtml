@@ -17,7 +17,7 @@ import {AutoFullscreenManager} from '../../src/service/video-manager-impl';
 import {PlayingStates} from '../../src/video-interface';
 import {Services} from '../../src/services';
 
-describes.fakeWin('Rotate-to-fullscreen', {amp: true}, env => {
+describes.fakeWin('Rotate-to-fullscreen', {amp: true}, (env) => {
   let ampdoc;
   let autoFullscreenManager;
 

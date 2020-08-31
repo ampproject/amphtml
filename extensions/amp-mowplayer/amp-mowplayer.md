@@ -24,34 +24,13 @@ limitations under the License.
 
 # amp-mowplayer
 
-Displays a cloud-hosted <a href="https://mowplayer.com/">Mow Player</a>.
+## Usage
 
-<table>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>The player is available as free player.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-mowplayer-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>Support responsive layout as well as fixed width and height is also supported</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>Example file is available at "/examples/amp-mowplayer.amp.html" </td>
-  </tr>
-</table>
-
-## Behavior
-
-FILL THIS IN. What does this extension do?
+Displays a [Mow Player](https://mowplayer.com/) video widget.
 
 ## Attributes
 
-##### data-mediaid
+### data-mediaid
 
 The Mowplayer media id. This is an alphanumeric sequence that can be found in the Content section in your Mowplayer platform.
 

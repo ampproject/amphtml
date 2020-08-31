@@ -228,12 +228,12 @@ export function facebook(global, data) {
 
   getFacebookSdk(
     global,
-    FB => {
+    (FB) => {
       // Dimensions are given by the parent frame.
       delete data.width;
       delete data.height;
 
-      FB.Event.subscribe('xfbml.resize', event => {
+      FB.Event.subscribe('xfbml.resize', (event) => {
         context.updateDimensions(
           parseInt(event.width, 10),
           parseInt(event.height, 10) + /* margins */ 20

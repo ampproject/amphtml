@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-if (isLongTaskApiSupported(self)) {
-  detectLongTasks(self);
-}
-
 /**
  * @param {!Window} win
  */
 function detectLongTasks(win) {
-  const observer = new win.PerformanceObserver(function(entryList) {
+  const observer = new win.PerformanceObserver(function (entryList) {
     const entries = entryList.getEntries();
     for (let i = 0; i < entries.length; i++) {
       if (
@@ -64,4 +60,8 @@ function isLongTaskApiSupported(win) {
     !!win.TaskAttributionTiming &&
     'containerName' in win.TaskAttributionTiming.prototype
   );
+}
+
+if (isLongTaskApiSupported(self)) {
+  detectLongTasks(self);
 }

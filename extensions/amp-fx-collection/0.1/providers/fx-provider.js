@@ -78,7 +78,7 @@ export function installScrollToggledFx(ampdoc, element, type) {
       return;
     }
 
-    dispatch.observe(isShown => {
+    dispatch.observe((isShown) => {
       scrollToggle(
         element,
         isShown,
@@ -215,7 +215,7 @@ export class FxElement {
     /** @public {boolean} */
     this.initialTrigger = false;
 
-    this.getAdjustedViewportHeight_().then(adjustedViewportHeight => {
+    this.getAdjustedViewportHeight_().then((adjustedViewportHeight) => {
       this.adjustedViewportHeight = adjustedViewportHeight;
 
       // start observing position of the element.
@@ -237,7 +237,7 @@ export class FxElement {
 
     this.viewport_.onResize(() => {
       this.updateViewportHeight_();
-      this.getAdjustedViewportHeight_().then(adjustedViewportHeight => {
+      this.getAdjustedViewportHeight_().then((adjustedViewportHeight) => {
         this.adjustedViewportHeight = adjustedViewportHeight;
       });
     });

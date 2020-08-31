@@ -29,7 +29,7 @@ describes.realWin(
       extensions: ['amp-mowplayer'],
     },
   },
-  function(env) {
+  function (env) {
     this.timeout(5000);
     let win, doc;
     let timer;
@@ -74,7 +74,7 @@ describes.realWin(
         .then(() => mp);
     }
 
-    describe('with data-mediaid', function() {
+    describe('with data-mediaid', function () {
       runTestsForDatasource(EXAMPLE_VIDEOID);
     });
 
@@ -86,7 +86,7 @@ describes.realWin(
     function runTestsForDatasource(datasource) {
       it('renders', () => {
         return getMowPlayer({'data-mediaid': EXAMPLE_VIDEOID}, true).then(
-          mp => {
+          (mp) => {
             const iframe = mp.querySelector('iframe');
             expect(iframe).to.not.be.null;
             expect(iframe.tagName).to.equal('IFRAME');
@@ -103,7 +103,7 @@ describes.realWin(
         ));
 
       it('should send events from mowplayer to the amp element', () => {
-        return getMowPlayer({'data-mediaid': datasource}).then(mp => {
+        return getMowPlayer({'data-mediaid': datasource}).then((mp) => {
           const iframe = mp.querySelector('iframe');
 
           return Promise.resolve()

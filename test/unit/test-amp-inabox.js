@@ -20,7 +20,7 @@ import {installAmpdocServices} from '../../src/service/core-services';
 import {installAmpdocServicesForInabox} from '../../src/inabox/inabox-services';
 
 describe('amp-inabox', () => {
-  describes.realWin('installAmpdocServicesForInabox', {amp: false}, env => {
+  describes.realWin('installAmpdocServicesForInabox', {amp: false}, (env) => {
     it('should install same services for inabox', () => {
       let installedServices = [];
       const ampdoc = new AmpDocSingle(env.win);
@@ -38,7 +38,6 @@ describe('amp-inabox', () => {
       installAmpdocServices(ampdoc);
 
       const installedServicesByRegularAmp = installedServices.slice(0);
-
       installedServices = [];
       installAmpdocServicesForInabox(ampdoc);
       expect(installedServices).to.deep.equal(installedServicesByRegularAmp);

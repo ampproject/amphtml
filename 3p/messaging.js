@@ -54,7 +54,7 @@ export function listenParent(win, type, callback) {
   };
   listeners.push(listener);
   startListening(win);
-  return function() {
+  return function () {
     const index = listeners.indexOf(listener);
     if (index > -1) {
       listeners.splice(index, 1);
@@ -72,7 +72,7 @@ function startListening(win) {
     return;
   }
   win.AMP_LISTENING = true;
-  win.addEventListener('message', function(event) {
+  win.addEventListener('message', function (event) {
     // Cheap operations first, so we don't parse JSON unless we have to.
     const eventData = getData(event);
     if (

@@ -25,7 +25,7 @@ const {matchIterator} = require('./regex');
 const componentTagNameRegex = /\<(amp-[^\s\>]+)/g;
 const templateTagTypeRegex = /\<template[^\>]+type="?([^\s"\>]+)/g;
 
-const containsTagRegex = tagName => new RegExp(`\\<${tagName}[\\s\\>]`);
+const containsTagRegex = (tagName) => new RegExp(`\\<${tagName}[\\s\\>]`);
 
 const containsByRegex = (str, re) => str.search(re) > -1;
 
@@ -92,7 +92,7 @@ const componentExtensionNameMapping = {
   'amp-state': 'amp-bind',
 };
 
-const componentExtensionName = tagName =>
+const componentExtensionName = (tagName) =>
   componentExtensionNameMapping[tagName] || tagName;
 
 const addRequiredExtensionsToHead = (
@@ -122,13 +122,13 @@ const addRequiredExtensionsToHead = (
     addExtension('amp-bind');
   }
 
-  if (formTypes.some(t => containsByRegex(docStr, containsTagRegex(t)))) {
+  if (formTypes.some((t) => containsByRegex(docStr, containsTagRegex(t)))) {
     addExtension('amp-form');
   }
 
   return docStr.replace(
     /\<\/head\>/i,
-    headClosingTag =>
+    (headClosingTag) =>
       joinFragments(Object.values(extensions), ExtensionScript) + headClosingTag
   );
 };

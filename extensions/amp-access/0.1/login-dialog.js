@@ -91,7 +91,7 @@ class ViewerLoginDialog {
     } else {
       urlPromise = this.urlOrPromise;
     }
-    return urlPromise.then(url => {
+    return urlPromise.then((url) => {
       return buildLoginUrl(url, 'RETURN_URL');
     });
   }
@@ -103,7 +103,7 @@ class ViewerLoginDialog {
    * @return {!Promise<string>}
    */
   open() {
-    return this.getLoginUrl().then(loginUrl => {
+    return this.getLoginUrl().then((loginUrl) => {
       dev().fine(TAG, 'Open viewer dialog: ', loginUrl);
       return this.viewer.sendMessageAwaitResponse(
         'openDialog',
@@ -167,11 +167,11 @@ export class WebLoginDialog {
       // Must always be called synchronously.
       this.openInternal_();
     }).then(
-      result => {
+      (result) => {
         this.cleanup_();
         return result;
       },
-      error => {
+      (error) => {
         this.cleanup_();
         throw error;
       }
@@ -213,7 +213,7 @@ export class WebLoginDialog {
     } else {
       urlPromise = this.urlOrPromise;
     }
-    return urlPromise.then(url => {
+    return urlPromise.then((url) => {
       return buildLoginUrl(url, this.getReturnUrl_());
     });
   }
@@ -242,12 +242,12 @@ export class WebLoginDialog {
       this.dialog_ = openWindowDialog(this.win, '', '_blank', options);
       if (this.dialog_) {
         this.dialogReadyPromise_ = this.urlOrPromise.then(
-          url => {
+          (url) => {
             const loginUrl = buildLoginUrl(url, returnUrl);
             dev().fine(TAG, 'Set dialog url: ', loginUrl);
             this.dialog_.location.replace(loginUrl);
           },
-          error => {
+          (error) => {
             throw new Error('failed to resolve url: ' + error);
           }
         );
@@ -259,7 +259,7 @@ export class WebLoginDialog {
         () => {
           this.setupDialog_(returnUrl);
         },
-        error => {
+        (error) => {
           this.loginDone_(/* result */ null, error);
         }
       );
@@ -287,7 +287,7 @@ export class WebLoginDialog {
       }
     }, 500);
 
-    this.messageUnlisten_ = listen(this.win, 'message', e => {
+    this.messageUnlisten_ = listen(this.win, 'message', (e) => {
       dev().fine(TAG, 'MESSAGE:', e);
       if (e.origin != returnOrigin) {
         return;

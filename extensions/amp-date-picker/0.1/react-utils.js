@@ -42,15 +42,15 @@ function createDeferred_() {
   DeferredType.prototype.constructor = DeferredType;
 
   /** @override */
-  DeferredType.prototype.componentWillReceiveProps = function(nextProps) {
+  DeferredType.prototype.componentWillReceiveProps = function (nextProps) {
     const promise = nextProps['promise'];
     if (promise) {
-      promise.then(value => this.setState({value}));
+      promise.then((value) => this.setState({value}));
     }
   };
 
   /** @override */
-  DeferredType.prototype.shouldComponentUpdate = function(props, state) {
+  DeferredType.prototype.shouldComponentUpdate = function (props, state) {
     const self = /** @type {!React.Component} */ (this);
     return Boolean(
       shallowDiffers(this.props, props) || shallowDiffers(self.state, state)
@@ -58,12 +58,12 @@ function createDeferred_() {
   };
 
   /** @override */
-  DeferredType.prototype.componentDidMount = function() {
-    this.props.promise.then(value => this.setState({value}));
+  DeferredType.prototype.componentDidMount = function () {
+    this.props.promise.then((value) => this.setState({value}));
   };
 
   /** @override */
-  DeferredType.prototype.render = function() {
+  DeferredType.prototype.render = function () {
     const self = /** @type {!React.Component} */ (this);
     return this.props.then(self.state.value);
   };

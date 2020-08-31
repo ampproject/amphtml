@@ -71,8 +71,8 @@ export function _ping_(global, data) {
       global.context.renderStart();
     }
     if (data.enableIo) {
-      global.context.observeIntersection(function(changes) {
-        changes.forEach(function(c) {
+      global.context.observeIntersection(function (changes) {
+        /** @type {!Array} */ (changes).forEach(function (c) {
           dev().info(
             'AMP-AD',
             'Intersection: (WxH)' +
@@ -83,10 +83,10 @@ export function _ping_(global, data) {
         global.ping.lastIO = changes[changes.length - 1];
       });
     }
-    global.context.getHtml('a', ['href'], function(html) {
+    global.context.getHtml('a', ['href'], function (html) {
       dev().info('GET-HTML', html);
     });
-    global.context.getConsentState(function(consentState) {
+    global.context.getConsentState(function (consentState) {
       dev().info('GET-CONSENT-STATE', consentState);
     });
     if (global.context.consentSharedData) {

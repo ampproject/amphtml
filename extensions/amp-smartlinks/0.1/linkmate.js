@@ -75,7 +75,7 @@ export class Linkmate {
     // If we don't have an API response or the anchor list has changed since
     // last API call then build a new payload and post to API
     if (!this.linkmateResponse_ || anchorListChanged) {
-      const asyncMappedLinks = this.postToLinkmate_(anchorList).then(res => {
+      const asyncMappedLinks = this.postToLinkmate_(anchorList).then((res) => {
         this.linkmateResponse_ = getData(res)[0]['smart_links'];
         this.anchorList_ = anchorList;
         return this.mapLinks_();
@@ -115,7 +115,7 @@ export class Linkmate {
       body: payload,
     };
 
-    return this.xhr_.fetchJson(fetchUrl, postOptions).then(res => res.json());
+    return this.xhr_.fetchJson(fetchUrl, postOptions).then((res) => res.json());
   }
 
   /**
@@ -129,7 +129,7 @@ export class Linkmate {
     // raw links needs to be stored as a global somewhere
     // for later association with the response
     const postLinks = [];
-    anchorList.forEach(anchor => {
+    anchorList.forEach((anchor) => {
       const link = anchor.getAttribute(this.linkAttribute_);
       // If a link is already a Narrativ link.
       if (/shop-links.co/.test(link)) {
@@ -178,8 +178,8 @@ export class Linkmate {
    */
   mapLinks_() {
     const mappings = [];
-    this.anchorList_.forEach(anchor => {
-      this.linkmateResponse_.forEach(smartLink => {
+    this.anchorList_.forEach((anchor) => {
+      this.linkmateResponse_.forEach((smartLink) => {
         if (
           anchor.getAttribute(this.linkAttribute_) === smartLink['url'] &&
           smartLink['auction_id']

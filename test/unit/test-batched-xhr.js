@@ -17,14 +17,14 @@
 import {Services} from '../../src/services';
 import {batchedXhrServiceForTesting} from '../../src/service/batched-xhr-impl';
 
-describes.sandboxed('BatchedXhr', {}, env => {
+describes.sandboxed('BatchedXhr', {}, (env) => {
   beforeEach(() => {
     env.sandbox.stub(Services, 'ampdocServiceFor').returns({
       isSingleDoc: () => false,
     });
   });
 
-  describes.fakeWin('#fetch', {}, env => {
+  describes.fakeWin('#fetch', {}, (env) => {
     const TEST_OBJECT = {a: {b: [{c: 2}, {d: 4}]}};
     const TEST_RESPONSE = JSON.stringify(TEST_OBJECT);
     const textInit = {headers: {'Accept': 'text/plain'}};
@@ -41,10 +41,10 @@ describes.sandboxed('BatchedXhr', {}, env => {
 
     it('should fetch a generic request once for identical URLs', () => {
       return Promise.all([
-        xhr.fetch('/get?k=v1').then(response => response.text()),
-        xhr.fetch('/get?k=v1').then(response => response.text()),
-        xhr.fetch('/get?k=v1').then(response => response.text()),
-      ]).then(results => {
+        xhr.fetch('/get?k=v1').then((response) => response.text()),
+        xhr.fetch('/get?k=v1').then((response) => response.text()),
+        xhr.fetch('/get?k=v1').then((response) => response.text()),
+      ]).then((results) => {
         expect(fetchStub).to.be.calledOnce;
         expect(results[0]).to.equal(TEST_RESPONSE);
         expect(results[1]).to.equal(TEST_RESPONSE);
@@ -71,11 +71,11 @@ describes.sandboxed('BatchedXhr', {}, env => {
         'but different "Accept" headers',
       () => {
         return Promise.all([
-          xhr.fetch('/get?k=v1', textInit).then(response => response.text()),
-          xhr.fetch('/get?k=v1', textInit).then(response => response.text()),
-          xhr.fetch('/get?k=v1', jsonInit).then(response => response.json()),
-          xhr.fetch('/get?k=v1', jsonInit).then(response => response.json()),
-        ]).then(results => {
+          xhr.fetch('/get?k=v1', textInit).then((response) => response.text()),
+          xhr.fetch('/get?k=v1', textInit).then((response) => response.text()),
+          xhr.fetch('/get?k=v1', jsonInit).then((response) => response.json()),
+          xhr.fetch('/get?k=v1', jsonInit).then((response) => response.json()),
+        ]).then((results) => {
           expect(fetchStub).to.be.calledTwice;
           expect(results[0]).to.equal(TEST_RESPONSE);
           expect(results[1]).to.equal(TEST_RESPONSE);
@@ -87,9 +87,9 @@ describes.sandboxed('BatchedXhr', {}, env => {
 
     it('should cache the same as the convenience methods', () => {
       return Promise.all([
-        xhr.fetch('/get?k=v1', jsonInit).then(response => response.json()),
-        xhr.fetchJson('/get?k=v1').then(res => res.json()),
-      ]).then(results => {
+        xhr.fetch('/get?k=v1', jsonInit).then((response) => response.json()),
+        xhr.fetchJson('/get?k=v1').then((res) => res.json()),
+      ]).then((results) => {
         expect(fetchStub).to.be.calledOnce;
         expect(results[0]).to.jsonEqual(TEST_OBJECT);
         expect(results[1]).to.jsonEqual(TEST_OBJECT);
@@ -97,7 +97,7 @@ describes.sandboxed('BatchedXhr', {}, env => {
     });
   });
 
-  describes.fakeWin('#fetchJson', {}, env => {
+  describes.fakeWin('#fetchJson', {}, (env) => {
     const TEST_OBJECT = {a: {b: [{c: 2}, {d: 4}]}};
     const TEST_RESPONSE = JSON.stringify(TEST_OBJECT);
     const init = {
@@ -118,9 +118,9 @@ describes.sandboxed('BatchedXhr', {}, env => {
 
     it('should fetch JSON GET requests once for identical URLs', () => {
       return Promise.all([
-        xhr.fetchJson('/get?k=v1').then(res => res.json()),
-        xhr.fetchJson('/get?k=v1').then(res => res.json()),
-      ]).then(results => {
+        xhr.fetchJson('/get?k=v1').then((res) => res.json()),
+        xhr.fetchJson('/get?k=v1').then((res) => res.json()),
+      ]).then((results) => {
         expect(fetchStub).to.be.calledOnce;
         expect(results[0]).to.jsonEqual(TEST_OBJECT);
         expect(results[1]).to.jsonEqual(TEST_OBJECT);
@@ -129,9 +129,9 @@ describes.sandboxed('BatchedXhr', {}, env => {
 
     it('should not be affected by fragments passed in the URL', () => {
       return Promise.all([
-        xhr.fetchJson('/get?k=v1#a.b[0].c').then(res => res.json()),
-        xhr.fetchJson('/get?k=v1#a.b[1].d').then(res => res.json()),
-      ]).then(results => {
+        xhr.fetchJson('/get?k=v1#a.b[0].c').then((res) => res.json()),
+        xhr.fetchJson('/get?k=v1#a.b[1].d').then((res) => res.json()),
+      ]).then((results) => {
         expect(fetchStub).to.be.calledOnce;
         expect(results[0]).to.jsonEqual(TEST_OBJECT);
         expect(results[1]).to.jsonEqual(TEST_OBJECT);
@@ -148,7 +148,7 @@ describes.sandboxed('BatchedXhr', {}, env => {
     });
   });
 
-  describes.fakeWin('#fetchText', {}, env => {
+  describes.fakeWin('#fetchText', {}, (env) => {
     const TEST_RESPONSE = 'Hello, world!';
     let xhr;
     let fetchStub;
@@ -162,9 +162,9 @@ describes.sandboxed('BatchedXhr', {}, env => {
 
     it('should fetch text GET requests once for identical URLs', () => {
       return Promise.all([
-        xhr.fetchText('/get?k=v1').then(res => res.text()),
-        xhr.fetchText('/get?k=v1').then(res => res.text()),
-      ]).then(results => {
+        xhr.fetchText('/get?k=v1').then((res) => res.text()),
+        xhr.fetchText('/get?k=v1').then((res) => res.text()),
+      ]).then((results) => {
         expect(fetchStub).to.be.calledOnce;
         expect(results[0]).to.equal(TEST_RESPONSE);
         expect(results[1]).to.equal(TEST_RESPONSE);

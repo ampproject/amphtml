@@ -20,7 +20,7 @@ import {
 } from '../../../ads/inabox/position-observer';
 import {layoutRectLtwh} from '../../../src/layout-rect';
 
-describes.realWin('inabox-host:position-observer', {}, env => {
+describes.realWin('inabox-host:position-observer', {}, (env) => {
   let win;
   let observer;
   let target1;
@@ -73,7 +73,7 @@ describes.realWin('inabox-host:position-observer', {}, env => {
     observer.observe(target2, callbackSpy21);
     expect(callbackSpy21).to.be.calledWith(position2);
     win.scrollTo(10, 20);
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       setTimeout(() => {
         position1 = {
           viewportRect: layoutRectLtwh(10, 20, 200, 300),

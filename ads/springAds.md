@@ -20,8 +20,7 @@ limitations under the License.
 
 ```html
 <amp-ad
-  width="0"
-  height="0"
+  height="fluid"
   type="springAds"
   data-adssetup='{
     "view": "amp",
@@ -30,7 +29,7 @@ limitations under the License.
     "adSlotSizes": {
       "banner": [{
         "minWidth": 1,
-        "sizes": [[320, 50], [320, 160]]
+        "sizes": [[320, 50]]
       }],
       "mrec": [{
         "minWidth": 1,
@@ -44,17 +43,20 @@ limitations under the License.
 >
 </amp-ad>
 <amp-ad width="320" height="50" type="springAds" data-adslot="banner"></amp-ad>
-<amp-ad width="300" height="250" type="springAds" data-adslot="mrec"></amp-ad>
+<amp-ad
+  width="100vW"
+  height="fluid"
+  type="springAds"
+  data-adslot="mrec"
+></amp-ad>
 ```
+
+For a maintenanced uptodate documentation please refer to our
+[official springAds document](https://github.com/spring-media/adsolutions-implementationReference/blob/master/publisher-amp-reference.md)
 
 ## Configuration
 
 for further information regarding this implementation, please contact adtechnology@axelspringer.de
-
-Supported parameters:
-
-- `data-site`: siteid given by mediaimpact
-- `data-page`: pageName given by mediaimpact
 
 ## Optional features
 

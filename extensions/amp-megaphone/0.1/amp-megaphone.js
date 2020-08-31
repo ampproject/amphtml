@@ -34,6 +34,7 @@ import {getData, listen} from '../../../src/event-helper';
 import {isLayoutSizeFixed} from '../../../src/layout';
 import {isObject} from '../../../src/types';
 import {removeElement} from '../../../src/dom';
+import {setIsMediaComponent} from '../../../src/video-interface';
 import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
 import {userAssert} from '../../../src/log';
@@ -78,6 +79,7 @@ class AmpMegaphone extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    setIsMediaComponent(this.element);
     this.updateBaseUrl_();
   }
 
@@ -208,6 +210,6 @@ class AmpMegaphone extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-megaphone', '0.1', AMP => {
+AMP.extension('amp-megaphone', '0.1', (AMP) => {
   AMP.registerElement('amp-megaphone', AmpMegaphone);
 });

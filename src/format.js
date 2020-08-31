@@ -22,7 +22,7 @@
  */
 function isAmpFormatType(formats, doc) {
   const html = doc.documentElement;
-  const isFormatType = formats.some(format => html.hasAttribute(format));
+  const isFormatType = formats.some((format) => html.hasAttribute(format));
   return isFormatType;
 }
 

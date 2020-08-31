@@ -18,19 +18,25 @@
 @import './amp-story-affiliate-link.css';
 @import './amp-story-desktop-panels.css';
 @import './amp-story-draggable-drawer.css';
+@import './amp-story-page-attachment.css';
 @import './amp-story-templates.css';
 @import './amp-story-user-overridable.css';
 @import './amp-story-vertical.css';
 @import './pagination-buttons.css';
 
 /** Common */
-amp-story, amp-story-page, amp-story-grid-layer, amp-story-cta-layer {
+amp-story, amp-story-page, amp-story-cta-layer {
   contain: strict !important;
   overflow: hidden !important;
   -webkit-touch-callout: none !important;
 }
 
-amp-consent {
+amp-story-grid-layer {
+  contain: size layout !important;
+  -webkit-touch-callout: none !important;
+}
+
+amp-story amp-consent {
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
@@ -201,6 +207,8 @@ amp-story-page {
   right: 0 !important;
   top: 0 !important;
   opacity: 1 !important;
+  /** Required by Chrome to consider touch events on story-pages as user gestures. */
+  touch-action: none !important;
   transition: none !important;
   z-index: 0 !important;
 }
@@ -233,10 +241,6 @@ amp-story-page[active] {
   animation-timing-function: cubic-bezier(0.4, 0.0, 1, 1)  !important;
   animation-duration: 0.2s !important;
   animation-name: i-amphtml-sidebar-slide-out-right;
-}
-
-.i-amphtml-story-fallback amp-story-page {
-  display: none !important;
 }
 
 /* Setting `translateY` distances as a trick so that the runtime schedules
@@ -374,6 +378,15 @@ amp-story-grid-layer {
 }
 
 /**
+ * Prevents pre-load placeholders from pushing content offscreen. 
+ * Prevents preload placeholders from pushing content offscreen. 
+ */
+.i-amphtml-story-grid-template-fill amp-img img,
+.i-amphtml-story-grid-template-fill amp-video video {
+  position: absolute !important;
+}
+
+/**
  * Prevents amp-video to layout until its element has been swapped by the media
  * pool. See #26718 for context.
  */
@@ -448,6 +461,13 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
   grid-template-areas: "upper-third"
                        "middle-third"
                        "lower-third" !important;
+}
+
+.i-amphtml-story-grid-template-aspect {
+  margin: auto;
+  width: var(--i-amphtml-story-layer-width, 100%);
+  height: var(--i-amphtml-story-layer-height, 100%);
+  font-size: calc(var(--i-amphtml-story-layer-height, 100vh) / 10);
 }
 
 /**
@@ -853,160 +873,135 @@ amp-story .amp-video-eq,
   background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 48 48" fill="#FFF"><path d="M0 0h48v48H0z" fill="none"/><path d="M24 4C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm-4 29V15l12 9-12 9z"/></svg>') !important;
 }
 
-/** amp-story-page open attachment message. */
-
-@keyframes open-attachment-fly-in {
-  0% {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes open-attachment-icon {
-  0% {
-    transform: translateY(14px);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-
-@keyframes open-attachment-icon-explode {
-  0% {
-    transform: scale(0);
-  }
-  to {
-    transform: scale(1);
-    box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.12);
-  }
-}
-
-@keyframes open-attachment-icon-color {
-  0% {
-    background: #fff;
-  }
-  to {
-    background: rgba(0, 0, 0, 0.87);
-    text-shadow: none;
-  }
-}
-
-@keyframes open-attachment-bar-left {
-  0% {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(-30deg);
-  }
-}
-
-@keyframes open-attachment-bar-right {
-  0% {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(30deg);
-  }
-}
-
-/**
- * Hiding the element and only showing it on the active page so the animation
- * triggers every time the page becomes active.
- */
-amp-story-page .i-amphtml-story-page-open-attachment {
-  display: none !important;
-}
-
-amp-story-page[active] .i-amphtml-story-page-open-attachment {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  flex-direction: column !important;
-  position: absolute !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  background: linear-gradient(0, rgba(0, 0, 0, 0.15), transparent) !important;
-  pointer-events: none !important;
-  z-index: 3 !important;
-  animation: open-attachment-fly-in 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
-}
-
-amp-story-page .i-amphtml-story-page-open-attachment > * {
-  cursor: pointer !important;
-  pointer-events: auto !important;
-}
-
-amp-story-page .i-amphtml-story-page-open-attachment-icon {
-  display: block !important;
-  height: 32px !important;
-  width: 32px !important;
-  cursor: pointer !important;
-  animation: open-attachment-icon 0.2s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both !important;
-}
-
-amp-story-page .i-amphtml-story-page-open-attachment-icon::after {
-  content: "" !important;
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  height: 100% !important;
-  width: 100% !important;
-  background: #FFF !important;
-  border-radius: 100% !important;
-  z-index: -1 !important;
-  animation: open-attachment-icon-explode 0.25s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both !important;
-}
-
-.i-amphtml-story-page-open-attachment-bar-left,
-.i-amphtml-story-page-open-attachment-bar-right {
-  position: absolute !important;
-  display: block !important;
-  height: 3px !important;
-  width: 12px !important;
-  border-radius: 3px !important;
-  top: 14px !important;
-}
-
-.i-amphtml-story-page-open-attachment-bar-left {
-  left: 6px !important;
-  animation: open-attachment-icon-color 0.25s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both,
-             open-attachment-bar-left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
-}
-
-.i-amphtml-story-page-open-attachment-bar-right {
-  right: 6px !important;
-  animation: open-attachment-icon-color 0.25s cubic-bezier(0.4, 0.0, 0.2, 1) 2s both,
-             open-attachment-bar-right 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) both !important;
-}
-
-amp-story-page .i-amphtml-story-page-open-attachment-label {
-  position: relative !important;
-  padding: 0 32px !important;
-  margin: 12px 0 20px !important;
-  height: 16px !important;
-  max-width: calc(100% - 64px) !important;
-  color: #FFF !important;
-  font-family: 'Roboto', sans-serif !important;
-  font-size: 16px !important;
-  font-weight: bold !important;
-  letter-spacing: 0.3px;
-  line-height: 16px !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
-  white-space: nowrap !important;
-}
-
-amp-story-quiz {
+.i-amphtml-story-interactive-component {
   align-self: center;
-  width: auto !important;
+  width: auto;
   height: auto !important;
+  pointer-events: none !important;
   /* 224px = the width of a narrow phone (320px) - tap-safe margins (48px * 2) */
   min-width: 224px !important;
   max-width: 400px !important;
+  /* Properties overrideable by user */
+  --interactive-accent-color: #005AF0;
+  --interactive-prompt-background: var(--interactive-accent-color);
+  --interactive-prompt-text-color: white;
+  --interactive-prompt-alignment: initial;
+  /* Shared properties by interactives (overrideable by themes) */
+  --i-amphtml-interactive-option-accent-color: var(--interactive-accent-color) !important;
+  --i-amphtml-interactive-option-background-color: white !important;
+  --i-amphtml-interactive-options-chip-background-color: var(--i-amphtml-interactive-option-background-color) !important;
+  --i-amphtml-interactive-option-text-color: #55595E !important;
+  --i-amphtml-interactive-theme-border: rgba(85, 89, 94, 0.2) !important;
+  --i-amphtml-interactive-theme-shading: rgba(85, 89, 94, 0.2) !important;
+  --i-amphtml-interactive-theme-shading-base: rgb(222, 222, 225) !important;
+  --i-amphtml-interactive-theme-shading-flash: rgba(85, 89, 94, 0.5) !important;
+  --i-amphtml-interactive-chip-radius: 32px !important;
+  --i-amphtml-interactive-chip-shadow: 0px 0px 0px transparent !important;
+  --i-amphtml-interactive-chip-shadow-inset: inset 0px 0px 0px transparent !important;
+  --i-amphtml-interactive-answer-choice-border: var(--interactive-accent-color) !important;
+  --i-amphtml-interactive-answer-choice-background: white !important;
+  --i-amphtml-interactive-prompt-text-size: 22px !important;
+  --i-amphtml-interactive-prompt-line-height: 28px !important;
+  --i-amphtml-interactive-strong-text-color: black !important;
+  --i-amphtml-interactive-animation-time: .3s !important;
+  --i-amphtml-interactive-ease-out-curve: cubic-bezier(.3, 0, 0, 1) !important;
+  --i-amphtml-interactive-animation-delay: 0s !important;
+  --i-amphtml-interactive-component-shadow: 0px 4px 12px rgba(60, 64, 67, 0.08), 0px 2px 4px rgba(60, 64, 67, 0.12);
+  --i-amphtml-interactive-results-prompt-margin: 20px !important;
+}
+
+.i-amphtml-story-interactive-component[theme="dark"] {
+  --i-amphtml-interactive-option-text-color: #A7ADB4 !important;
+  --i-amphtml-interactive-option-background-color: #202124 !important;
+  --i-amphtml-interactive-theme-border: rgba(167, 173, 180, 0.2) !important;
+  --i-amphtml-interactive-theme-shading: rgba(167, 173, 180, 0.2) !important;
+  --i-amphtml-interactive-theme-shading-base: rgb(60, 61, 63) !important;
+  --i-amphtml-interactive-theme-shading-flash: rgba(167, 173, 180, 0.5) !important;
+  --i-amphtml-interactive-strong-text-color: white !important;
+}
+
+.i-amphtml-story-interactive-component[chip-style="shadow"] {
+  --i-amphtml-interactive-chip-shadow: 0px 2px 8px rgba(60, 60, 60, 0.2) !important;
+  --i-amphtml-interactive-chip-shadow-inset: inset 4px 4px 8px rgba(0, 0, 0, 0.2) !important;
+  --i-amphtml-interactive-theme-border: rgba(0, 0, 0, 0) !important;
+}
+
+.i-amphtml-story-interactive-component:not(amp-story-interactive-results)[chip-style="transparent"] {
+  --i-amphtml-interactive-options-chip-background-color: transparent !important;
+  --interactive-prompt-background: transparent !important;
+  --interactive-prompt-alignment: center;
+  --i-amphtml-interactive-chip-shadow: 0px 2px 8px rgba(60, 60, 60, 0.2) !important;
+  --i-amphtml-interactive-chip-shadow-inset: inset 4px 4px 8px rgba(0, 0, 0, 0.2) !important;
+  --i-amphtml-interactive-theme-border: rgba(0, 0, 0, 0) !important;
+  --i-amphtml-interactive-component-shadow: none !important;
+}
+
+.i-amphtml-story-interactive-component[chip-style="shadow"][theme="dark"] {
+  --i-amphtml-interactive-chip-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.6) !important;
+  --i-amphtml-interactive-chip-shadow-inset: inset 4px 4px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+.i-amphtml-story-interactive-component[prompt-size="large"] {
+  --i-amphtml-interactive-prompt-text-size: 28px !important;
+  --i-amphtml-interactive-prompt-line-height: 36px !important;
+}
+
+.i-amphtml-story-interactive-component[prompt-size="small"] {
+  --i-amphtml-interactive-prompt-text-size: 18px !important;
+  --i-amphtml-interactive-prompt-line-height: 24px !important;
+}
+
+amp-story-interactive-binary-poll[theme="dark"], amp-story-interactive-poll[theme="dark"] {
+  --i-amphtml-interactive-option-accent-color: white !important;
+}
+
+amp-story-interactive-results:not([chip-style="transparent"]) {
+  --interactive-prompt-text-color: var(--i-amphtml-interactive-strong-text-color);
+}
+
+amp-story-interactive-results[chip-style="transparent"] {
+  --i-amphtml-interactive-option-text-color: black !important;
+  --i-amphtml-interactive-options-chip-background-color: transparent !important;
+  --interactive-prompt-background: transparent;
+  --i-amphtml-interactive-component-shadow: none !important;
+}
+
+amp-story-interactive-results[chip-style="transparent"] {
+  --interactive-prompt-background: transparent;
+  --interactive-prompt-text-color: black;
+  --i-amphtml-interactive-results-prompt-margin: 0px !important;
+}
+amp-story-interactive-results[theme="dark"][chip-style="transparent"] {
+  --i-amphtml-interactive-option-text-color: white !important;
+  --interactive-prompt-text-color: white;
+}
+
+amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-component {
+  --i-amphtml-interactive-animation-delay: 350ms !important;
+}
+
+.i-amphtml-story-screen-reader-back-button {
+  width: 10px !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0!important;
+  bottom: 0 !important;
+  z-index: 1 !important;
+  height: calc(100vh - 150px) !important;
+  margin: auto 0 !important;
+  background: none !important;
+  border: none !important;
+  /* Hiding the outline since this button is intended to be used with
+     mobile screen readers such as TalkBack which add focus lines. */
+  outline: none !important;
+  pointer-events: none !important;
+}
+
+[dir=rtl]amp-story .i-amphtml-story-screen-reader-back-button {
+  right: 0 !important;
+}
+
+.i-amphtml-story-desktop-panels .i-amphtml-story-screen-reader-back-button,
+.i-amphtml-story-screen-reader-back-button-hidden {
+  display: none !important;
 }

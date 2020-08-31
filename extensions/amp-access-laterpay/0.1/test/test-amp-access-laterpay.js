@@ -24,7 +24,7 @@ describes.fakeWin(
     amp: true,
     location: 'https://pub.com/doc1',
   },
-  env => {
+  (env) => {
     let win, document, ampdoc;
     let accessSource;
     let accessService;
@@ -131,7 +131,7 @@ describes.fakeWin(
             })
           )
           .once();
-        return vendor.authorize().then(resp => {
+        return vendor.authorize().then((resp) => {
           expect(resp.access).to.be.true;
           expect(emptyContainerStub.called).to.be.true;
         });
@@ -153,7 +153,7 @@ describes.fakeWin(
           })
           .returns(Promise.resolve({status: 204}))
           .once();
-        return vendor.authorize().catch(err => {
+        return vendor.authorize().catch((err) => {
           expect(err.message).to.exist;
         });
       });
@@ -184,7 +184,7 @@ describes.fakeWin(
           )
           .once();
         emptyContainerStub.returns(Promise.resolve());
-        return vendor.authorize().then(err => {
+        return vendor.authorize().then((err) => {
           expect(err.access).to.be.false;
         });
       });
@@ -273,7 +273,7 @@ describes.fakeWin(
         container.parentNode.removeChild(container);
       });
 
-      it('sends request for purchase', done => {
+      it('sends request for purchase', (done) => {
         const changeEv = new Event('change');
         container.querySelector('input').dispatchEvent(changeEv);
         accessSourceMock
@@ -288,7 +288,7 @@ describes.fakeWin(
         }, 500);
       });
 
-      it('sends request for already purchased', done => {
+      it('sends request for already purchased', (done) => {
         accessSourceMock
           .expects('buildUrl')
           .returns(Promise.resolve('https://apllink'))

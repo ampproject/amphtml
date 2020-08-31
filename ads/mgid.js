@@ -44,10 +44,17 @@ export function mgid(global, data) {
     `${encodeURIComponent(data.widget)}.js?t=` +
     Math.floor(Date.now() / 36e5);
 
-  window.context.observeIntersection(function(changes) {
-    changes.forEach(function(c) {
-      window['intersectionRect' + data.widget] = c.intersectionRect;
-      window['boundingClientRect' + data.widget] = c.boundingClientRect;
+  global.uniqId = (
+    '00000' + Math.round(Math.random() * 100000).toString(16)
+  ).slice(-5);
+  window['ampOptions' + data.widget + '_' + global.uniqId] = data.options;
+
+  global.context.observeIntersection(function (changes) {
+    /** @type {!Array} */ (changes).forEach(function (c) {
+      window['intersectionRect' + data.widget + '_' + global.uniqId] =
+        c.intersectionRect;
+      window['boundingClientRect' + data.widget + '_' + global.uniqId] =
+        c.boundingClientRect;
     });
   });
 

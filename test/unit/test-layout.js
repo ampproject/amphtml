@@ -48,7 +48,7 @@ describe('Layout', () => {
       tagName: 'hold',
     };
     const elementsValidTagNames = [
-      // in whitelist.
+      // in allowlist.
       'AMP-AD',
       'AMP-ANIM',
       'AMP-EMBED',
@@ -77,7 +77,7 @@ describe('Layout', () => {
       'AMP-BRIGHTCOVE',
       'AMP-DAILYMOTION',
     ];
-    elementsValidTagNames.forEach(function(tag) {
+    elementsValidTagNames.forEach(function (tag) {
       el.tagName = tag;
       expect(isLoadingAllowed(el)).to.be.true;
     });
@@ -91,7 +91,7 @@ describe('Layout', () => {
       'AMP-REDDIT',
       'AMP-GITHUB',
     ];
-    elementsInvalidTagNames.forEach(function(tag) {
+    elementsInvalidTagNames.forEach(function (tag) {
       el.tagName = tag;
       expect(isLoadingAllowed(el)).to.be.false;
     });
@@ -167,32 +167,32 @@ describe('Layout', () => {
     expect(assertLength('10.1vmin')).to.equal('10.1vmin');
 
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         assertLength('10%');
       }).to.throw(/Invalid length value/);
     });
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         assertLength(10);
       }).to.throw(/Invalid length value/);
     });
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         assertLength('10');
       }).to.throw(/Invalid length value/);
     });
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         assertLength(undefined);
       }).to.throw(/Invalid length value/);
     });
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         assertLength(null);
       }).to.throw(/Invalid length value/);
     });
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         assertLength('');
       }).to.throw(/Invalid length value/);
     });
@@ -209,27 +209,27 @@ describe('Layout', () => {
     expect(assertLengthOrPercent('10.1%')).to.equal('10.1%');
 
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         assertLengthOrPercent(10);
       }).to.throw(/Invalid length or percent value/);
     });
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         assertLengthOrPercent('10');
       }).to.throw(/Invalid length or percent value/);
     });
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         assertLengthOrPercent(undefined);
       }).to.throw(/Invalid length or percent value/);
     });
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         assertLengthOrPercent(null);
       }).to.throw(/Invalid length or percent value/);
     });
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         assertLengthOrPercent('');
       }).to.throw(/Invalid length or percent value/);
     });
@@ -316,7 +316,7 @@ describe('Layout', () => {
     div.setAttribute('height', 200);
     div.setAttribute('width', 300);
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         applyStaticLayout(div);
       }).to.throw(/The "width" attribute must be missing or "auto"/);
     });
@@ -357,6 +357,7 @@ describe('Layout', () => {
     expect(div).to.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(1);
     expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
+    expect(div.children[0].getAttribute('slot')).to.equal('i-amphtml-svc');
     expect(div.children[0].style.paddingTop).to.equal('200%');
   });
 
@@ -371,6 +372,7 @@ describe('Layout', () => {
     expect(div).to.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(1);
     expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
+    expect(div.children[0].getAttribute('slot')).to.equal('i-amphtml-svc');
     expect(div.children[0].style.paddingTop).to.equal('200%');
   });
 
@@ -385,6 +387,7 @@ describe('Layout', () => {
     expect(div).to.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(1);
     expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
+    expect(div.children[0].getAttribute('slot')).to.equal('i-amphtml-svc');
     expect(div.children[0].children.length).to.equal(1);
     expect(div.children[0].children[0].tagName.toLowerCase()).to.equal('img');
     expect(div.children[0].children[0].src).to.equal(
@@ -404,6 +407,7 @@ describe('Layout', () => {
     expect(div).to.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(1);
     expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
+    expect(div.children[0].getAttribute('slot')).to.equal('i-amphtml-svc');
     expect(div.children[0].children.length).to.equal(1);
     expect(div.children[0].children[0].tagName.toLowerCase()).to.equal('img');
     expect(div.children[0].children[0].src).to.equal(
@@ -464,7 +468,7 @@ describe('Layout', () => {
   it('layout=unknown', () => {
     div.setAttribute('layout', 'foo');
     allowConsoleError(() => {
-      expect(function() {
+      expect(function () {
         applyStaticLayout(div);
       }).to.throw(/Invalid "layout" value: foo/);
     });
@@ -574,6 +578,7 @@ describe('Layout', () => {
     div.appendChild(sizer);
     expect(applyStaticLayout(div)).to.equal(Layout.RESPONSIVE);
     expect(div.sizerElement).to.equal(sizer);
+    expect(div.sizerElement.getAttribute('slot')).to.equal('i-amphtml-svc');
   });
 
   it('should allow sizer to be missing', () => {

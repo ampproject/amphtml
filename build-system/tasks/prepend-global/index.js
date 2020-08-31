@@ -27,6 +27,11 @@ const exec = util.promisify(childProcess.exec);
 
 const {red, cyan} = colors;
 
+// custom-config.json overlays the active config. It is not part of checked-in
+// source (.gitignore'd). See:
+// https://github.com/ampproject/amphtml/blob/master/build-system/global-configs/README.md#custom-configjson
+const customConfigFile = 'build-system/global-configs/custom-config.json';
+
 /**
  * Returns the number of AMP_CONFIG matches in the given config string.
  *
@@ -59,20 +64,22 @@ function sanityCheck(str) {
  * @param {string=} opt_branch If not the local branch, which branch to use
  * @return {!Promise}
  */
-function checkoutBranchConfigs(filename, opt_localBranch, opt_branch) {
+async function checkoutBranchConfigs(filename, opt_localBranch, opt_branch) {
   if (opt_localBranch) {
-    return Promise.resolve();
+    return;
   }
   const branch = opt_branch || 'origin/master';
-  // One bad path here will fail the whole operation.
-  return exec(`git checkout ${branch} ${filename}`).catch(function(e) {
+
+  try {
+    return await exec(`git checkout ${branch} ${filename}`);
+  } catch (e) {
     // This means the files don't exist in master. Assume that it exists
     // in the current branch.
     if (/did not match any file/.test(e.message)) {
       return;
     }
     throw e;
-  });
+  }
 }
 
 /**
@@ -93,11 +100,11 @@ function prependConfig(configString, fileString) {
  * @param {boolean=} opt_dryrun If true, print the contents without writing them
  * @return {!Promise}
  */
-function writeTarget(filename, fileString, opt_dryrun) {
+async function writeTarget(filename, fileString, opt_dryrun) {
   if (opt_dryrun) {
     log(cyan(`overwriting: ${filename}`));
     log(fileString);
-    return Promise.resolve();
+    return;
   }
   return fs.promises.writeFile(filename, fileString);
 }
@@ -124,7 +131,7 @@ function valueOrDefault(value, defaultValue) {
  * @param {boolean=} opt_fortesting Whether to force getMode().test to be true
  * @return {!Promise}
  */
-function applyConfig(
+async function applyConfig(
   config,
   target,
   filename,
@@ -133,44 +140,50 @@ function applyConfig(
   opt_branch,
   opt_fortesting
 ) {
-  return checkoutBranchConfigs(filename, opt_localBranch, opt_branch)
-    .then(() => {
-      return Promise.all([
-        fs.promises.readFile(filename),
-        fs.promises.readFile(target),
-      ]);
-    })
-    .then(files => {
-      let configJson;
-      try {
-        configJson = JSON.parse(files[0].toString());
-      } catch (e) {
-        log(red(`Error parsing config file: ${filename}`));
-        throw e;
-      }
-      if (opt_localDev) {
-        configJson = enableLocalDev(config, target, configJson);
-      }
-      if (opt_fortesting) {
-        configJson = {test: true, ...configJson};
-      }
-      const targetString = files[1].toString();
-      const configString = JSON.stringify(configJson);
-      return prependConfig(configString, targetString);
-    })
-    .then(fileString => {
-      sanityCheck(fileString);
-      return writeTarget(target, fileString, argv.dryrun);
-    })
-    .then(() => {
-      const details =
-        '(' +
-        cyan(config) +
-        (opt_localDev ? ', ' + cyan('localDev') : '') +
-        (opt_fortesting ? ', ' + cyan('test') : '') +
-        ')';
-      log('Applied AMP config', details, 'to', cyan(path.basename(target)));
-    });
+  await checkoutBranchConfigs(filename, opt_localBranch, opt_branch);
+
+  let configString = await fs.promises.readFile(filename, 'utf8');
+  const [targetString, overlayString] = await Promise.all([
+    fs.promises.readFile(target, 'utf8'),
+    fs.promises.readFile(customConfigFile, 'utf8').catch(() => {}),
+  ]);
+
+  let configJson;
+  try {
+    configJson = JSON.parse(configString);
+  } catch (e) {
+    log(red(`Error parsing config file: ${filename}`));
+    throw e;
+  }
+  if (overlayString) {
+    try {
+      const overlayJson = JSON.parse(overlayString);
+      Object.assign(configJson, overlayJson);
+      log('Overlaid config with', cyan(path.basename(customConfigFile)));
+    } catch (e) {
+      log(
+        red('Could not apply overlay from'),
+        cyan(path.basename(customConfigFile))
+      );
+    }
+  }
+  if (opt_localDev) {
+    configJson = enableLocalDev(config, target, configJson);
+  }
+  if (opt_fortesting) {
+    configJson = {test: true, ...configJson};
+  }
+  configString = JSON.stringify(configJson);
+  const fileString = await prependConfig(configString, targetString);
+  sanityCheck(fileString);
+  await writeTarget(target, fileString, argv.dryrun);
+  const details =
+    '(' +
+    cyan(config) +
+    (opt_localDev ? ', ' + cyan('localDev') : '') +
+    (opt_fortesting ? ', ' + cyan('test') : '') +
+    ')';
+  log('Applied AMP config', details, 'to', cyan(path.basename(target)));
 }
 
 /**
@@ -209,19 +222,17 @@ function enableLocalDev(config, target, configJson) {
  * @param {string} target Target file from which to remove the AMP config
  * @return {!Promise}
  */
-function removeConfig(target) {
-  return fs.promises.readFile(target).then(file => {
-    let contents = file.toString();
-    if (numConfigs(contents) == 0) {
-      return Promise.resolve();
-    }
-    sanityCheck(contents);
-    const config = /self\.AMP_CONFIG\|\|\(self\.AMP_CONFIG=.*?\/\*AMP_CONFIG\*\//;
-    contents = contents.replace(config, '');
-    return writeTarget(target, contents, argv.dryrun).then(() => {
-      log('Removed existing config from', cyan(target));
-    });
-  });
+async function removeConfig(target) {
+  const file = await fs.promises.readFile(target);
+  let contents = file.toString();
+  if (numConfigs(contents) == 0) {
+    return;
+  }
+  sanityCheck(contents);
+  const config = /self\.AMP_CONFIG\|\|\(self\.AMP_CONFIG=.*?\/\*AMP_CONFIG\*\//;
+  contents = contents.replace(config, '');
+  await writeTarget(target, contents, argv.dryrun);
+  log('Removed existing config from', cyan(target));
 }
 
 async function prependGlobal() {
@@ -257,17 +268,16 @@ async function prependGlobal() {
       'build-system/global-configs/prod-config.json'
     );
   }
-  return removeConfig(target).then(() => {
-    return applyConfig(
-      config,
-      target,
-      filename,
-      argv.local_dev,
-      argv.local_branch,
-      argv.branch,
-      argv.fortesting
-    );
-  });
+  await removeConfig(target);
+  return applyConfig(
+    config,
+    target,
+    filename,
+    argv.local_dev,
+    argv.local_branch,
+    argv.branch,
+    argv.fortesting
+  );
 }
 
 module.exports = {

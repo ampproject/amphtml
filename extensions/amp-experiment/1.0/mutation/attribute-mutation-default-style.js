@@ -126,7 +126,7 @@ export class AttributeMutationDefaultStyle {
 
   /** @override */
   mutate() {
-    this.elements_.forEach(element => {
+    this.elements_.forEach((element) => {
       setStyles(
         dev().assertElement(element),
         assertDoesNotContainDisplay(this.styles_)

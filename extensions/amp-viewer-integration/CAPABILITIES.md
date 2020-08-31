@@ -27,7 +27,8 @@ Viewers can communicate their supported "capabilities" to documents through the
 | `fragment`             | `fragment`                            | URL fragment support for the history API.                                       |
 | `handshakepoll`        | `handshake-poll`                      | Mobile web handshake.                                                           |
 | `iframeScroll`         |                                       | Viewer platform supports and configures scrolling on the AMP document's iframe. |
-| `navigateTo`           | `navigateTo`                          | Support for navigating to external URLs.                                        |
+| `interceptNavigation`  | `navigateTo`                          | Support for navigating to external URLs.                                        |
+| `navigateTo`           | `navigateTo`                          | Support for navigating to external URLs within a native app.                    |
 | `replaceUrl`           | `getReplaceUrl`                       | Support for replacing the document URL with one provided by the viewer.         |
 | `swipe`                | `touchstart`, `touchmove`, `touchend` | Forwards touch events from the document to the viewer.                          |
 | `viewerRenderTemplate` | `viewerRenderTemplate`                | Proxies all mustache template rendering to the viewer.                          |

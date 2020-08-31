@@ -20,7 +20,7 @@
  * @param {Object} babelTypes
  * @return {!Object}
  */
-module.exports = function(babelTypes) {
+module.exports = function (babelTypes) {
   const {types: t} = babelTypes;
   return {
     visitor: {

@@ -16,14 +16,16 @@
 
 const minimist = require('minimist');
 const argv = minimist(process.argv.slice(2));
+const debounce = require('debounce');
 const globby = require('globby');
 const gulp = require('gulp');
 const gulpif = require('gulp-if');
-const gulpWatch = require('gulp-watch');
 const jsonlint = require('gulp-jsonlint');
 const jsonminify = require('gulp-jsonminify');
 const rename = require('gulp-rename');
 const {endBuildStep, toPromise} = require('./helpers');
+const {watchDebounceDelay} = require('./helpers');
+const {watch} = require('gulp');
 
 /**
  * Entry point for 'gulp vendor-configs'
@@ -38,21 +40,22 @@ async function vendorConfigs(opt_options) {
   const destPath = 'dist/v0/analytics-vendors/';
 
   // ignore test json if not fortesting
-  if (!argv.fortesting) {
+  if (!(argv.fortesting || options.fortesting)) {
     srcPath.push('!extensions/amp-analytics/0.1/vendors/_fake_.json');
   }
 
   if (options.watch) {
     // Do not set watchers again when we get called by the watcher.
     const copyOptions = {...options, watch: false, calledByWatcher: true};
-    gulpWatch(srcPath, function() {
+    const watchFunc = () => {
       vendorConfigs(copyOptions);
-    });
+    };
+    watch(srcPath).on('change', debounce(watchFunc, watchDebounceDelay));
   }
 
   const startTime = Date.now();
 
-  return toPromise(
+  await toPromise(
     gulp
       .src(srcPath)
       .pipe(gulpif(options.minify, jsonminify()))
@@ -65,21 +68,21 @@ async function vendorConfigs(opt_options) {
       .pipe(
         gulpif(
           !options.minify,
-          rename(function(path) {
+          rename(function (path) {
             path.basename += '.max';
           })
         )
       )
       .pipe(gulp.dest(destPath))
-  ).then(() => {
-    if (globby.sync(srcPath).length > 0) {
-      endBuildStep(
-        'Compiled all analytics vendor configs into',
-        destPath,
-        startTime
-      );
-    }
-  });
+  );
+
+  if (globby.sync(srcPath).length > 0) {
+    endBuildStep(
+      'Compiled all analytics vendor configs into',
+      destPath,
+      startTime
+    );
+  }
 }
 
 module.exports = {

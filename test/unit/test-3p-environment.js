@@ -27,7 +27,7 @@ describe('3p environment', () => {
 
   beforeEach(() => {
     iframeCount = 0;
-    return createIframePromise(true).then(iframe => {
+    return createIframePromise(true).then((iframe) => {
       testWin = iframe.win;
     });
   });
@@ -98,7 +98,7 @@ describe('3p environment', () => {
     });
   });
 
-  describe('timers', function() {
+  describe('timers', function () {
     let clock;
     let progress;
 
@@ -110,7 +110,7 @@ describe('3p environment', () => {
     });
 
     function add(p) {
-      return function(a, b) {
+      return function (a, b) {
         progress += p;
         if (a) {
           progress += a;

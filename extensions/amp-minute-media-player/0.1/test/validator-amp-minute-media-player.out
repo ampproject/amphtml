@@ -31,7 +31,7 @@ FAIL
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>
-|  <!-- Valid tag with 'curated' data-content-type -->
+|    <!-- Valid: tag with 'curated' data-content-type -->
 |    <amp-minute-media-player
 |      autoplay
 |      data-content-type="curated"
@@ -40,7 +40,7 @@ FAIL
 |      width="160" height="96">
 |    </amp-minute-media-player>
 |
-|  <!-- Valid tag with 'semantic' data-content-type -->
+|    <!-- Valid: tag with 'semantic' data-content-type -->
 |    <amp-minute-media-player
 |      data-content-type="semantic"
 |      data-minimum-date-factor="10"
@@ -49,31 +49,31 @@ FAIL
 |      layout="responsive" width="160" height="96">
 |    </amp-minute-media-player>
 |
-|  <!-- Valid tag with 'semantic' data-content-type (no attributes) -->
+|    <!-- Valid: tag with 'semantic' data-content-type (no attributes) -->
 |    <amp-minute-media-player
 |      data-content-type="semantic"
 |      layout="responsive" width="160" height="96">
 |    </amp-minute-media-player>
 |
-|  <!-- Invalid tag: data-content-type is mandatory! -->
+|    <!-- Invalid: data-content-type is mandatory! -->
 |    <amp-minute-media-player
 >>   ^~~~~~~~~
-amp-minute-media-player/0.1/test/validator-amp-minute-media-player.html:58:2 The mandatory attribute 'data-content-type' is missing in tag 'amp-minute-media-player'. (see https://amp.dev/documentation/components/amp-minute-media-player)
+amp-minute-media-player/0.1/test/validator-amp-minute-media-player.html:58:2 The mandatory attribute 'data-content-type' is missing in tag 'amp-minute-media-player'. (see https://amp.dev/documentation/components/amp-minute-media-player/)
 |      data-content-id="fSkmeWKF"
 |      layout="responsive" width="160" height="96">
 |    </amp-minute-media-player>
 |
-|  <!-- Invalid tag: data-content-type value must be one of the following: 'semantic', 'curated' or 'specific'  -->
+|    <!-- Invalid: data-content-type value must be one of the following: 'semantic', 'curated' or 'specific'  -->
 |    <amp-minute-media-player
 >>   ^~~~~~~~~
-amp-minute-media-player/0.1/test/validator-amp-minute-media-player.html:64:2 The attribute 'data-content-type' in tag 'amp-minute-media-player' is set to the invalid value 'none'. (see https://amp.dev/documentation/components/amp-minute-media-player)
+amp-minute-media-player/0.1/test/validator-amp-minute-media-player.html:64:2 The attribute 'data-content-type' in tag 'amp-minute-media-player' is set to the invalid value 'none'. (see https://amp.dev/documentation/components/amp-minute-media-player/)
 |      data-content-type="none"
 |      data-content-id="fSkmeWKF"
 |      layout="responsive"
 |      width="160" height="96">
 |    </amp-minute-media-player>
 |
-|  <!-- Invalid tag: 'dock' attribute without `amp-video-docking` extension -->
+|    <!-- Invalid: 'dock' attribute without `amp-video-docking` extension -->
 |    <amp-minute-media-player
 >>   ^~~~~~~~~
 amp-minute-media-player/0.1/test/validator-amp-minute-media-player.html:72:2 The attribute 'dock' requires including the 'amp-video-docking' extension JavaScript.
@@ -83,6 +83,5 @@ amp-minute-media-player/0.1/test/validator-amp-minute-media-player.html:72:2 The
 |      data-scoped-keywords="football"
 |      layout="responsive" width="160" height="96">
 |    </amp-minute-media-player>
-|
 |  </body>
 |  </html>

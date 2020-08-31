@@ -78,7 +78,7 @@ class AmpFacebookLike extends AMP.BaseElement {
     listenFor(
       iframe,
       'embed-size',
-      data => {
+      (data) => {
         this.attemptChangeHeight(data['height']).catch(() => {
           /* ignore failures */
         });
@@ -133,6 +133,6 @@ class AmpFacebookLike extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-facebook-like', '0.1', AMP => {
+AMP.extension('amp-facebook-like', '0.1', (AMP) => {
   AMP.registerElement('amp-facebook-like', AmpFacebookLike);
 });

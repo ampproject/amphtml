@@ -26,7 +26,7 @@ import {
 import {htmlFor} from '../../src/static-template';
 import {toArray} from '../../src/types';
 
-describes.fakeWin('modal', {}, env => {
+describes.fakeWin('modal', {}, (env) => {
   let win;
   let doc;
   let html;

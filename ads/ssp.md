@@ -16,16 +16,34 @@
 
 # SSP
 
-## Example
+## Example with one Ad
 
 ```html
 <amp-ad
-  width="300"
-  height="250"
-  data-id="cnt-1234"
-  data-width="300"
-  data-height="250"
-  data-zoneid="1234"
+  width="480"
+  height="300"
+  type="ssp"
+  data-position='{ "id": "id-1", "width": "480", "height": "300", "zoneId": "1234" }'
+>
+</amp-ad>
+```
+
+## Example with two Ads
+
+```html
+<amp-ad
+  width="480"
+  height="300"
+  type="ssp"
+  data-position='{ "id": "id-1", "width": "480", "height": "300", "zoneId": "1234" }'
+>
+</amp-ad>
+
+<amp-ad
+  width="480"
+  height="300"
+  type="ssp"
+  data-position='{ "id": "id-2", "width": "480", "height": "300", "zoneId": "1234" }'
 >
 </amp-ad>
 ```
@@ -34,11 +52,20 @@
 
 Required parameters:
 
-- `data-id`
-- `data-width`: Width of position (must be same as width attribute)
-- `data-width`: Height of position (must be same as height attribute)
-- `data-zoneid`: Id of zone
+| Attribute     | Description                          | Example                                                               |
+| ------------- | ------------------------------------ | --------------------------------------------------------------------- |
+| width         | Width of AMP Ad (grey fixed border)  | `200`                                                                 |
+| height        | Height of AMP Ad (grey fixed border) | `200`                                                                 |
+| type          | Type of amp-ad                       | `ssp`                                                                 |
+| data-position | JSON stringified position object     | `{ "id": "id-1", "width": "480", "height": "300", "zoneId": "1234" }` |
+
+### `data-position`
+
+- Object must have required keys `id`, `width`, `height`, `zoneId` (Watch out for uppercase "I" in "id").
+- Every position MUST have unique `id`, if you duplicate some id, Ad may be used from another position.
+- Attributes `width` and `height` are from AMP specification, and they will set fixed border around Ad.
+- Attributes `data-width` and `data-height` are used to fetch SSP Ads on the server (They can different).
 
 ## Contact
 
-reklama-pozadavky@firma.seznam.cz
+seznam.partner@firma.seznam.cz

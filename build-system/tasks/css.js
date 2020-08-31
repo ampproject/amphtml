@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
+const debounce = require('debounce');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
-const gulpWatch = require('gulp-watch');
-const {buildExtensions, extensions} = require('./extension-helpers');
-const {endBuildStep, mkdirSync, toPromise} = require('./helpers');
+const {
+  endBuildStep,
+  mkdirSync,
+  toPromise,
+  watchDebounceDelay,
+} = require('./helpers');
+const {buildExtensions} = require('./extension-helpers');
 const {jsifyCssAsync} = require('./jsify-css');
 const {maybeUpdatePackages} = require('./update-packages');
+const {watch} = require('gulp');
 
 /**
  * Entry point for 'gulp css'
@@ -55,13 +61,18 @@ const cssEntryPoints = [
     outCss: 'video-autoplay-out.css',
   },
   {
-    // Publisher imported CSS for `src/amp-story-player.js`.
+    path: 'amp-story-entry-point.css',
+    outJs: 'amp-story-entry-point.css.js',
+    outCss: 'amp-story-entry-point-v0.css',
+  },
+  {
+    // Publisher imported CSS for `src/amp-story-player/amp-story-player.js`.
     path: 'amp-story-player.css',
     outJs: 'amp-story-player.css.js',
     outCss: 'amp-story-player-v0.css',
   },
   {
-    // Internal CSS used for the iframes inside `src/amp-story-player.js`.
+    // Internal CSS used for the iframes inside `src/amp-story-player/amp-story-player.js`.
     path: 'amp-story-player-iframe.css',
     outJs: 'amp-story-player-iframe.css.js',
     outCss: 'amp-story-player-iframe-v0.css',
@@ -70,14 +81,16 @@ const cssEntryPoints = [
 
 /**
  * Compile all the css and drop in the build folder
- * @param {boolean} watch
+ *
+ * @param {Object=} options
  * @return {!Promise}
  */
-function compileCss(watch) {
-  if (watch) {
-    gulpWatch('css/**/*.css', function() {
+function compileCss(options = {}) {
+  if (options.watch) {
+    const watchFunc = () => {
       compileCss();
-    });
+    };
+    watch('css/**/*.css').on('change', debounce(watchFunc, watchDebounceDelay));
   }
 
   /**
@@ -99,7 +112,7 @@ function compileCss(watch) {
         }
       )
         .pipe(gulp.dest('build'))
-        .on('end', function() {
+        .on('end', function () {
           mkdirSync('build');
           mkdirSync('build/css');
           if (append) {
@@ -119,19 +132,16 @@ function compileCss(watch) {
    * @return {!Promise}
    */
   function writeCssEntryPoint(path, outJs, outCss, append) {
-    return jsifyCssAsync(`css/${path}`).then(css =>
+    return jsifyCssAsync(`css/${path}`).then((css) =>
       writeCss(css, outJs, outCss, append)
     );
   }
 
   const startTime = Date.now();
 
-  // Used by `gulp unit --local_changes` to map CSS files to JS files.
-  fs.writeFileSync('EXTENSIONS_CSS_MAP', JSON.stringify(extensions));
-
   let promise = Promise.resolve();
 
-  cssEntryPoints.forEach(entryPoint => {
+  cssEntryPoints.forEach((entryPoint) => {
     const {path, outJs, outCss, append} = entryPoint;
     promise = promise.then(() =>
       writeCssEntryPoint(path, outJs, outCss, append)

@@ -75,17 +75,17 @@ export class JwtHelper {
     if (!this.subtle_) {
       throw new Error('Crypto is not supported on this platform');
     }
-    const decodedPromise = new Promise(resolve =>
+    const decodedPromise = new Promise((resolve) =>
       resolve(this.decodeInternal_(encodedToken))
     );
-    return decodedPromise.then(decoded => {
+    return decodedPromise.then((decoded) => {
       const alg = decoded.header['alg'];
       if (!alg || alg != 'RS256') {
         // TODO(dvoytenko@): Support other RS* algos.
         throw new Error('Only alg=RS256 is supported');
       }
       return this.importKey_(pemPromise)
-        .then(key => {
+        .then((key) => {
           const sig = base64UrlDecodeToBytes(decoded.sig);
           return this.subtle_.verify(
             /* options */ {name: 'RSASSA-PKCS1-v1_5'},
@@ -94,7 +94,7 @@ export class JwtHelper {
             stringToBytes(decoded.verifiable)
           );
         })
-        .then(isValid => {
+        .then((isValid) => {
           if (isValid) {
             return decoded.payload;
           }
@@ -138,7 +138,7 @@ export class JwtHelper {
    * @return {!Promise<!webCrypto.CryptoKey>}
    */
   importKey_(pemPromise) {
-    return pemPromise.then(pem => {
+    return pemPromise.then((pem) => {
       return this.subtle_.importKey(
         /* format */ 'spki',
         pemToBytes(pem),

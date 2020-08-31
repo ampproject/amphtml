@@ -17,11 +17,8 @@
 import * as lolex from 'lolex';
 import {poll} from '../../../../../testing/iframe';
 
-const config = describe
-  .configure()
-  .ifChrome()
-  .skipSinglePass();
-config.skip('amp-date-picker', function() {
+const config = describe.configure().ifChrome();
+config.skip('amp-date-picker', function () {
   this.timeout(10000);
 
   const extensions = ['amp-date-picker'];
@@ -47,7 +44,7 @@ config.skip('amp-date-picker', function() {
       extensions,
       experiments,
     },
-    env => {
+    (env) => {
       let clock;
       let win;
       let document;
@@ -106,7 +103,7 @@ config.skip('amp-date-picker', function() {
       extensions,
       experiments,
     },
-    env => {
+    (env) => {
       let clock;
       let win;
       let document;
@@ -130,7 +127,7 @@ config.skip('amp-date-picker', function() {
 
         const promise = waitForAttribute(picker, 'date');
         today.click();
-        return promise.then(attribute => {
+        return promise.then((attribute) => {
           expect(attribute).to.equal('2018-01-01');
         });
       });
@@ -141,7 +138,7 @@ config.skip('amp-date-picker', function() {
 
         const promise = waitForAttribute(picker, 'date');
         tomorrow.click();
-        return promise.then(attribute => {
+        return promise.then((attribute) => {
           expect(attribute).to.equal('2018-01-02');
         });
       });
@@ -152,7 +149,7 @@ config.skip('amp-date-picker', function() {
 
         const promise = waitForAttribute(picker, 'date');
         yesterday.click();
-        return promise.then(attribute => {
+        return promise.then((attribute) => {
           expect(attribute).to.equal('2017-12-31');
         });
       });
@@ -174,7 +171,7 @@ config.skip('amp-date-picker', function() {
       extensions,
       experiments,
     },
-    env => {
+    (env) => {
       let win;
       let document;
       let clock;
@@ -198,7 +195,7 @@ config.skip('amp-date-picker', function() {
 
         const promise = waitForAttribute(picker, 'start-date');
         today.click();
-        return promise.then(attribute => {
+        return promise.then((attribute) => {
           expect(attribute).to.equal('2018-01-01');
           picker.removeAttribute('start-date');
         });
@@ -210,7 +207,7 @@ config.skip('amp-date-picker', function() {
 
         const promise = waitForAttribute(picker, 'start-date');
         tomorrow.click();
-        return promise.then(attribute => {
+        return promise.then((attribute) => {
           expect(attribute).to.equal('2018-01-02');
         });
       });
@@ -221,7 +218,7 @@ config.skip('amp-date-picker', function() {
 
         const promise = waitForAttribute(picker, 'start-date');
         yesterday.click();
-        return promise.then(attribute => {
+        return promise.then((attribute) => {
           expect(attribute).to.equal('2017-12-31');
         });
       });
@@ -243,7 +240,7 @@ config.skip('amp-date-picker', function() {
       extensions,
       experiments,
     },
-    env => {
+    (env) => {
       let win;
       let document;
       let clock;
@@ -267,7 +264,7 @@ config.skip('amp-date-picker', function() {
 
         const promise = waitForAttribute(picker, 'end-date');
         today.click();
-        return promise.then(attribute => {
+        return promise.then((attribute) => {
           expect(attribute).to.equal('2018-01-01');
         });
       });
@@ -278,7 +275,7 @@ config.skip('amp-date-picker', function() {
 
         const promise = waitForAttribute(picker, 'end-date');
         tomorrow.click();
-        return promise.then(attribute => {
+        return promise.then((attribute) => {
           expect(attribute).to.equal('2018-01-02');
         });
       });
@@ -289,7 +286,7 @@ config.skip('amp-date-picker', function() {
 
         const promise = waitForAttribute(picker, 'end-date');
         yesterday.click();
-        return promise.then(attribute => {
+        return promise.then((attribute) => {
           expect(attribute).to.equal('2017-12-31');
         });
       });

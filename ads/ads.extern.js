@@ -338,7 +338,15 @@ data.siteId;
 // aduptech.js
 window.uAd = {};
 window.uAd.embed;
+data.amp;
 data.responsive;
+data.placementkey;
+data.mincpc;
+data.query;
+data.pageurl;
+data.gdpr;
+data.gdpr_consent;
+data.adtest;
 data.onAds;
 data.onNoAds;
 
@@ -408,7 +416,7 @@ data.epl_e;
  * @param {!Window} global
  * @param {!Object} data
  */
-window.EzoicAmpAd = function(global, data) {};
+window.EzoicAmpAd = function (global, data) {};
 window.EzoicAmpAd.prototype.createAd;
 
 // flite.js
@@ -474,6 +482,10 @@ data.adslot;
 window.MADSAdrequest = {};
 window.MADSAdrequest.adrequest;
 data.adrequest;
+
+// marfeel.js
+data.tenant;
+data.version;
 
 // medianet.js
 data.crid;

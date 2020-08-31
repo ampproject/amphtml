@@ -21,7 +21,7 @@ import {RequestHandler, expandPostMessage} from '../requests';
 import {installLinkerReaderService} from '../linker-reader';
 import {macroTask} from '../../../../testing/yield';
 
-describes.realWin('Requests', {amp: 1}, env => {
+describes.realWin('Requests', {amp: 1}, (env) => {
   let ampdoc;
   let clock;
   let preconnect;
@@ -64,7 +64,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         spy = env.sandbox.spy();
       });
 
-      it('should prepend request origin', function*() {
+      it('should prepend request origin', function* () {
         const r = {'baseUrl': '/r1', 'origin': 'http://example.test'};
         const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({});
@@ -74,7 +74,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         expect(spy).to.be.calledWith('http://example.test/r1');
       });
 
-      it('handle trailing slash in request origin', function*() {
+      it('handle trailing slash in request origin', function* () {
         const r = {'baseUrl': '/r1', 'origin': 'http://example.test/'};
         const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({});
@@ -84,7 +84,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         expect(spy).to.be.calledWith('http://example.test/r1');
       });
 
-      it('handle trailing path in request origin', function*() {
+      it('handle trailing path in request origin', function* () {
         const r = {'baseUrl': '/r1', 'origin': 'http://example.test/test'};
         const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({});
@@ -94,7 +94,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         expect(spy).to.be.calledWith('http://example.test/r1');
       });
 
-      it('handle empty requestOrigin', function*() {
+      it('handle empty requestOrigin', function* () {
         const r = {'baseUrl': '/r1', 'origin': ''};
         const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({});
@@ -104,7 +104,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         expect(spy).to.be.calledWith('/r1');
       });
 
-      it('handle undefined requestOrigin', function*() {
+      it('handle undefined requestOrigin', function* () {
         const r = {'baseUrl': '/r1', 'origin': undefined};
         const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({});
@@ -114,7 +114,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         expect(spy).to.be.calledWith('/r1');
       });
 
-      it('handle baseUrl with no leading slash', function*() {
+      it('handle baseUrl with no leading slash', function* () {
         const r = {
           'baseUrl': 'r1',
           'origin': 'https://requestorigin.test',
@@ -127,7 +127,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         expect(spy).to.be.calledWith('https://requestorigin.testr1');
       });
 
-      it('prepend request origin to absolute baseUrl', function*() {
+      it('prepend request origin to absolute baseUrl', function* () {
         const r = {
           'baseUrl': 'https://baseurl.test',
           'origin': 'https://requestorigin.test',
@@ -142,7 +142,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         );
       });
 
-      it('handle relative request origin', function*() {
+      it('handle relative request origin', function* () {
         const r = {
           'baseUrl': '/r1',
           'origin': '/requestorigin',
@@ -157,7 +157,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         );
       });
 
-      it('should expand request origin', function*() {
+      it('should expand request origin', function* () {
         const r = {'baseUrl': '/r2', 'origin': '${documentReferrer}'};
         const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({
@@ -169,7 +169,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         expect(spy).to.be.calledWith('http://example.test/r2');
       });
 
-      it('should expand nested request origin', function*() {
+      it('should expand nested request origin', function* () {
         const r = {'baseUrl': '/r3', 'origin': '${a}'};
         const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({
@@ -184,7 +184,7 @@ describes.realWin('Requests', {amp: 1}, env => {
     });
 
     describe('batch', () => {
-      it('should batch multiple send', function*() {
+      it('should batch multiple send', function* () {
         const spy = env.sandbox.spy();
         const r = {'baseUrl': 'r2', 'batchInterval': 1};
         const handler = createRequestHandler(r, spy);
@@ -198,7 +198,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         expect(spy).to.be.calledOnce;
       });
 
-      it('should work properly with no batch', function*() {
+      it('should work properly with no batch', function* () {
         const spy = env.sandbox.spy();
         const r = {'baseUrl': 'r1'};
         const handler = createRequestHandler(r, spy);
@@ -209,7 +209,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         expect(spy).to.be.calledTwice;
       });
 
-      it('should preconnect', function*() {
+      it('should preconnect', function* () {
         const r = {'baseUrl': 'r2?cid=CLIENT_ID(scope)&var=${test}'};
         const handler = createRequestHandler(r, env.sandbox.spy());
         const expansionOptions = new ExpansionOptions({'test': 'expanded'});
@@ -285,7 +285,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         }
       });
 
-      it('should schedule send request with interval array', function*() {
+      it('should schedule send request with interval array', function* () {
         const r = {'baseUrl': 'r', 'batchInterval': [1, 2]};
         const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({});
@@ -313,7 +313,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         expect(spy).to.be.calledOnce;
       });
 
-      it('should not schedule send request w/o trigger', function*() {
+      it('should not schedule send request w/o trigger', function* () {
         const r = {'baseUrl': 'r', 'batchInterval': [1]};
         createRequestHandler(r, spy);
         clock.tick(1000);
@@ -321,7 +321,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         expect(spy).to.not.be.called;
       });
 
-      it('should schedule send independent of trigger immediate', function*() {
+      it('should schedule send independent of trigger immediate', function* () {
         const r = {'baseUrl': 'r', 'batchInterval': [1, 2]};
         const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({});
@@ -359,7 +359,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         expect(handler3.reportWindow_).to.be.null;
       });
 
-      it('should stop bathInterval outside batch report window', function*() {
+      it('should stop bathInterval outside batch report window', function* () {
         const r = {'baseUrl': 'r', 'batchInterval': 0.5, 'reportWindow': 1};
         const handler = createRequestHandler(r, spy);
 
@@ -377,7 +377,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         expect(spy).to.not.be.called;
       });
 
-      it('should stop send request outside batch report window', function*() {
+      it('should stop send request outside batch report window', function* () {
         const r = {'baseUrl': 'r', 'reportWindow': 1};
         const handler = createRequestHandler(r, spy);
 
@@ -392,7 +392,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         expect(spy).to.not.be.called;
       });
 
-      it('should flush batch queue after batch report window', function*() {
+      it('should flush batch queue after batch report window', function* () {
         const r = {'baseUrl': 'r', 'batchInterval': 5, 'reportWindow': 1};
         const handler = createRequestHandler(r, spy);
 
@@ -403,7 +403,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         expect(spy).to.be.calledOnce;
       });
 
-      it('should respect immediate trigger', function*() {
+      it('should respect immediate trigger', function* () {
         const r = {'baseUrl': 'r', 'batchInterval': 0.2, 'reportWindow': 0.5};
         const handler = createRequestHandler(r, spy);
 
@@ -418,7 +418,7 @@ describes.realWin('Requests', {amp: 1}, env => {
     });
 
     describe('batch segments', () => {
-      it('should respect config extraUrlParam', function*() {
+      it('should respect config extraUrlParam', function* () {
         const spy = env.sandbox.spy();
         const r = {'baseUrl': 'r1', 'batchInterval': 1};
         const handler = createRequestHandler(r, spy);
@@ -434,7 +434,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         ]);
       });
 
-      it('should respect trigger extraUrlParam', function*() {
+      it('should respect trigger extraUrlParam', function* () {
         const spy = env.sandbox.spy();
         const r = {'baseUrl': 'r1', 'batchInterval': 1};
         const handler = createRequestHandler(r, spy);
@@ -469,7 +469,65 @@ describes.realWin('Requests', {amp: 1}, env => {
         ]);
       });
 
-      it('should keep extraUrlParam', function*() {
+      it('should respect nested extraUrlParam', async () => {
+        const spy = env.sandbox.spy();
+        const r = {'baseUrl': 'r1', 'batchInterval': 1};
+        const handler = createRequestHandler(r, spy);
+
+        const expansionOptions = new ExpansionOptions({
+          'test1': 'TEST1',
+          'test2': 'TEST2',
+          'test3': 'TEST3',
+        });
+        const expansionOptions2 = new ExpansionOptions({
+          'test1': 'Test1',
+          'test2': 'Test2',
+          'test3': 'Test3',
+        });
+        const trigger = {
+          'extraUrlParams': {
+            'e1': {
+              'e2': {
+                'data': '${test1}',
+              },
+            },
+            'e3': [['${test2}'], '${test3}'],
+          },
+        };
+        handler.send({}, trigger, expansionOptions, {});
+        handler.send({}, trigger, expansionOptions2, {});
+
+        clock.tick(1000);
+        await macroTask();
+        expect(spy).to.be.calledWith('r1', [
+          {
+            extraUrlParams: {
+              e1: {
+                e2: {
+                  data: 'TEST1',
+                },
+              },
+              e3: [['TEST2'], 'TEST3'],
+            },
+            timestamp: 0,
+            trigger: undefined,
+          },
+          {
+            extraUrlParams: {
+              e1: {
+                e2: {
+                  data: 'Test1',
+                },
+              },
+              e3: [['Test2'], 'Test3'],
+            },
+            timestamp: 0,
+            trigger: undefined,
+          },
+        ]);
+      });
+
+      it('should keep extraUrlParam', function* () {
         const spy = env.sandbox.spy();
         const r = {'baseUrl': 'r1&${extraUrlParams}&r2', 'batchInterval': 1};
         const handler = createRequestHandler(r, spy);
@@ -525,7 +583,7 @@ describes.realWin('Requests', {amp: 1}, env => {
     });
   });
 
-  it('should replace dynamic bindings RESOURCE_TIMING', function*() {
+  it('should replace dynamic bindings RESOURCE_TIMING', function* () {
     const spy = env.sandbox.spy();
     const r = {'baseUrl': 'r1&${resourceTiming}'};
     const handler = createRequestHandler(r, spy);
@@ -540,7 +598,7 @@ describes.realWin('Requests', {amp: 1}, env => {
     expect(spy).to.be.calledWith('r1&resource-timing');
   });
 
-  it('should replace dynamic bindings CONSENT_STATE', function*() {
+  it('should replace dynamic bindings CONSENT_STATE', function* () {
     const spy = env.sandbox.spy();
     const r = {'baseUrl': 'r1&$CONSENT_STATEtest&${consentState}test2'};
     const handler = createRequestHandler(r, spy);
@@ -552,7 +610,7 @@ describes.realWin('Requests', {amp: 1}, env => {
     expect(spy).to.be.calledWith('r1&test&test2');
   });
 
-  it('COOKIE read cookie value', function*() {
+  it('COOKIE read cookie value', function* () {
     const spy = env.sandbox.spy();
     const r = {'baseUrl': 'r1&c1=COOKIE(test)&c2=${cookie(test)}'};
     let handler = createRequestHandler(r, spy);
@@ -579,10 +637,14 @@ describes.realWin('Requests', {amp: 1}, env => {
     beforeEach(() => {
       expansionOptions = new ExpansionOptions({
         'teste1': 'TESTE1',
+        'teste3': 3,
+        'teste4': true,
       });
       params = {
         'e1': '${teste1}',
         'e2': 'teste2',
+        'e3': '${teste3}',
+        'e4': '${teste4}',
       };
       // expandPostMessage() uses the URL replacements service scoped to the
       // passed element. Use the top-level service for testing.
@@ -597,7 +659,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         {},
         expansionOptions,
         element
-      ).then(msg => {
+      ).then((msg) => {
         expect(msg).to.equal('test foo 123 ... TESTE1');
       });
     });
@@ -619,8 +681,8 @@ describes.realWin('Requests', {amp: 1}, env => {
         expansionOptions,
         element
       );
-      return replacePromise.then(replace => {
-        expect(replace).to.equal('test e1=TESTE1&e2=teste2 foo');
+      return replacePromise.then((replace) => {
+        expect(replace).to.equal('test e1=TESTE1&e2=teste2&e3=3&e4=true foo');
         expect(appendPromise).to.eventually.equal('test foo');
       });
     });

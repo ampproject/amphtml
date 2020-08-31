@@ -96,13 +96,13 @@ export class Input {
    * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    */
   setupInputModeClasses(ampdoc) {
-    this.onTouchDetected(detected => {
+    this.onTouchDetected((detected) => {
       this.toggleInputClass_(ampdoc, 'amp-mode-touch', detected);
     }, true);
-    this.onMouseDetected(detected => {
+    this.onMouseDetected((detected) => {
       this.toggleInputClass_(ampdoc, 'amp-mode-mouse', detected);
     }, true);
-    this.onKeyboardStateChanged(active => {
+    this.onKeyboardStateChanged((active) => {
       this.toggleInputClass_(ampdoc, 'amp-mode-keyboard-active', active);
     }, true);
   }
@@ -177,7 +177,7 @@ export class Input {
    * @private
    */
   toggleInputClass_(ampdoc, clazz, on) {
-    ampdoc.waitForBodyOpen().then(body => {
+    ampdoc.waitForBodyOpen().then((body) => {
       const vsync = Services./*OK*/ vsyncFor(this.win);
       vsync.mutate(() => {
         body.classList.toggle(clazz, on);
@@ -249,7 +249,7 @@ export class Input {
       this.win.document,
       'click',
       /* capture */ undefined,
-      unlistener => {
+      (unlistener) => {
         unlisten = unlistener;
       }
     );

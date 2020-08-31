@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.93 */
+/** Version: 0.1.22.116 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -88,7 +88,7 @@ function onDocumentState(doc, condition, callback) {
  * @return {!Promise<!Document>}
  */
 function whenDocumentReady(doc) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     onDocumentReady(doc, resolve);
   });
 }
@@ -242,6 +242,172 @@ function resolveDoc(input) {
 }
 
 /**
+ * Copyright 2020 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Triple zero width space.
+ *
+ * This is added to user error messages, so that we can later identify
+ * them, when the only thing that we have is the message. This is the
+ * case in many browsers when the global exception handler is invoked.
+ *
+ * @const {string}
+ */
+const AMP_USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
+
+/**
+ * Some exceptions (DOMException, namely) have read-only message.
+ * @param {!Error} error
+ * @return {!Error}
+ */
+function duplicateErrorIfNecessary(error) {
+  const messageProperty = Object.getOwnPropertyDescriptor(error, 'message');
+  if (messageProperty && messageProperty.writable) {
+    return error;
+  }
+
+  const {message, stack} = error;
+  const e = new Error(message);
+  // Copy all the extraneous things we attach.
+  for (const prop in error) {
+    e[prop] = error[prop];
+  }
+  // Ensure these are copied.
+  e.stack = stack;
+  return e;
+}
+
+/**
+ * @param {...*} var_args
+ * @return {!Error}
+ */
+function createErrorVargs(var_args) {
+  let error = null;
+  let message = '';
+  for (let i = 0; i < arguments.length; i++) {
+    const arg = arguments[i];
+    if (arg instanceof Error && !error) {
+      error = duplicateErrorIfNecessary(arg);
+    } else {
+      if (message) {
+        message += ' ';
+      }
+      message += arg;
+    }
+  }
+
+  if (!error) {
+    error = new Error(message);
+  } else if (message) {
+    error.message = message + ': ' + error.message;
+  }
+  return error;
+}
+
+/** Helper class for throwing standardized errors. */
+class ErrorLogger {
+  /**
+   * Constructor.
+   *
+   * opt_suffix will be appended to error message to identify the type of the
+   * error message. We can't rely on the error object to pass along the type
+   * because some browsers do not have this param in its window.onerror API.
+   * See:
+   * https://blog.sentry.io/2016/01/04/client-javascript-reporting-window-onerror.html
+   *
+   * @param {string=} opt_suffix
+   */
+  constructor(opt_suffix = '') {
+    /** @private @const {string} */
+    this.suffix_ = opt_suffix;
+  }
+
+  /**
+   * Modifies an error before reporting, such as to add metadata.
+   * @param {!Error} error
+   * @private
+   */
+  prepareError_(error) {
+    if (this.suffix_) {
+      if (!error.message) {
+        error.message = this.suffix_;
+      } else if (error.message.indexOf(this.suffix_) === -1) {
+        error.message = this.suffix_;
+      }
+    }
+  }
+
+  /**
+   * Creates an error.
+   * @param {...*} var_args
+   * @return {!Error}
+   */
+  createError(var_args) {
+    const error = createErrorVargs.apply(
+      null,
+      Array.prototype.slice.call(arguments)
+    );
+    this.prepareError_(error);
+    return error;
+  }
+
+  /**
+   * Creates an error object with its expected property set to true. Used for
+   * expected failure states (ex. incorrect configuration, localStorage
+   * unavailable due to browser settings, etc.) as opposed to unexpected
+   * breakages/failures.
+   * @param {...*} var_args
+   * @return {!Error}
+   */
+  createExpectedError(var_args) {
+    const error = createErrorVargs.apply(
+      null,
+      Array.prototype.slice.call(arguments)
+    );
+    this.prepareError_(error);
+    error.expected = true;
+    return error;
+  }
+
+  /**
+   * Throws an error.
+   * @param {...*} var_args
+   * @throws {!Error}
+   */
+  error(var_args) {
+    throw this.createError.apply(this, arguments);
+  }
+
+  /**
+   * Throws an error and marks with an expected property.
+   * @param {...*} var_args
+   * @throws {!Error}
+   */
+  expectedError(var_args) {
+    throw this.createExpectedError.apply(this, arguments);
+  }
+}
+
+const userLogger = new ErrorLogger(
+  self.__AMP_TOP ? AMP_USER_ERROR_SENTINEL : ''
+);
+
+const user = () => userLogger;
+
+/**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -273,7 +439,7 @@ class PageConfig {
       publicationId = productId.substring(0, div);
       label = productId.substring(div + 1);
       if (label == '*') {
-        throw new Error('wildcard disallowed');
+        user().expectedError('wildcard disallowed');
       }
     } else {
       // The argument is a publication id.
@@ -577,7 +743,7 @@ class PageConfigResolver {
     this.configResolver_ = null;
 
     /** @private @const {!Promise<!PageConfig>} */
-    this.configPromise_ = new Promise(resolve => {
+    this.configPromise_ = new Promise((resolve) => {
       this.configResolver_ = resolve;
     });
 
@@ -620,7 +786,9 @@ class PageConfigResolver {
       this.configResolver_ = null;
     } else if (this.doc_.isReady()) {
       this.configResolver_(
-        Promise.reject(new Error('No config could be discovered in the page'))
+        Promise.reject(
+          user().createError('No config could be discovered in the page')
+        )
       );
       this.configResolver_ = null;
     }
@@ -665,7 +833,7 @@ class TypeChecker {
    */
   checkArray(typeArray, expectedTypes) {
     let found = false;
-    typeArray.forEach(candidateType => {
+    typeArray.forEach((candidateType) => {
       found =
         found ||
         expectedTypes.includes(
@@ -1001,7 +1169,7 @@ class MicrodataParser {
     // Grab all the nodes with an itemtype and filter for our allowed types
     const nodeList = Array.prototype.slice
       .call(this.doc_.getRootNode().querySelectorAll('[itemscope][itemtype]'))
-      .filter(node =>
+      .filter((node) =>
         this.checkType_.checkString(
           node.getAttribute('itemtype'),
           ALLOWED_TYPES

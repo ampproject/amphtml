@@ -26,7 +26,7 @@ describes.realWin(
       extensions: ['amp-autocomplete'],
     },
   },
-  env => {
+  (env) => {
     let win, doc, input;
 
     beforeEach(() => {
@@ -46,7 +46,7 @@ describes.realWin(
 
     describe('Single binding', () => {
       let binding;
-      const getBindingSingle = attributes =>
+      const getBindingSingle = (attributes) =>
         new AutocompleteBindingSingle(stubAmpAutocomplete(attributes));
 
       beforeEach(() => {
@@ -75,15 +75,14 @@ describes.realWin(
         expect(binding.shouldSuggestFirst()).to.be.false;
       });
 
-      it('should error when suggest first is present without prefix filter', () => {
-        expect(() => getBindingSingle({'suggest-first': 'true'})).to.throw(
-          /"suggest-first" requires "filter" type "prefix"/
-        );
+      it('should ignore when suggest first is present without prefix filter', () => {
+        binding = getBindingSingle({'suggest-first': ''});
+        expect(binding.shouldSuggestFirst()).to.be.false;
       });
 
-      it('should not suggest first when attribute is not present', () => {
+      it('should suggest first when attribute is present', () => {
         binding = getBindingSingle({
-          'suggest-first': 'true',
+          'suggest-first': '',
           'filter': 'prefix',
         });
         expect(binding.shouldSuggestFirst()).to.be.true;
@@ -130,7 +129,7 @@ describes.realWin(
 
     describe('Inline binding', () => {
       let pre, userInput, match, binding;
-      const getBindingInline = attributes =>
+      const getBindingInline = (attributes) =>
         new AutocompleteBindingInline(stubAmpAutocomplete(attributes));
 
       beforeEach(() => {

@@ -27,7 +27,7 @@ describes.endtoend(
     // TODO(cathyxz): figure out why shadow-demo doesn't work
     environments: ['single'],
   },
-  env => {
+  (env) => {
     let controller;
 
     beforeEach(async () => {

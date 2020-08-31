@@ -39,18 +39,23 @@ class AmpSocialShare extends AMP.BaseElement {
     /** @private {?../../../src/service/platform-impl.Platform} */
     this.platform_ = null;
 
-    /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
-    this.viewer_ = null;
-
     /** @private {?string} */
     this.href_ = null;
 
     /** @private {?string} */
     this.target_ = null;
+
+    /** @private {?Array<string>} */
+    this.bindingVars_ = null;
   }
 
   /** @override */
   isLayoutSupported() {
+    return true;
+  }
+
+  /** @override */
+  prerenderAllowed() {
     return true;
   }
 
@@ -69,18 +74,18 @@ class AmpSocialShare extends AMP.BaseElement {
     );
 
     this.platform_ = Services.platformFor(this.win);
-    this.viewer_ = Services.viewerForDoc(element);
 
+    const systemShareSupported = 'share' in this.win.navigator;
     if (typeAttr === 'system') {
       // Hide/ignore system component if navigator.share unavailable
-      if (!this.systemShareSupported_()) {
+      if (!systemShareSupported) {
         toggle(element, false);
         return;
       }
     } else {
       // Hide/ignore non-system component if system share wants to be unique
       const systemOnly =
-        this.systemShareSupported_() &&
+        systemShareSupported &&
         !!this.win.document.querySelectorAll(
           'amp-social-share[type=system][data-mode=replace]'
         ).length;
@@ -107,38 +112,7 @@ class AmpSocialShare extends AMP.BaseElement {
       getDataParamsFromAttributes(element)
     );
 
-    const hrefWithVars = addParamsToUrl(
-      dev().assertString(this.shareEndpoint_),
-      this.params_
-    );
-    const urlReplacements = Services.urlReplacementsForDoc(this.element);
-    const bindingVars = typeConfig['bindings'];
-    const bindings = {};
-    if (bindingVars) {
-      bindingVars.forEach(name => {
-        const bindingName = name.toUpperCase();
-        bindings[bindingName] = this.params_[name];
-      });
-    }
-
-    urlReplacements.expandUrlAsync(hrefWithVars, bindings).then(href => {
-      this.href_ = href;
-      // mailto:, sms: protocols breaks when opened in _blank on iOS Safari
-      const {protocol} = Services.urlForDoc(element).parse(href);
-      const isMailTo = protocol === 'mailto:';
-      const isSms = protocol === 'sms:';
-      this.target_ =
-        this.platform_.isIos() && (isMailTo || isSms)
-          ? '_top'
-          : this.element.hasAttribute('data-target')
-          ? this.element.getAttribute('data-target')
-          : '_blank';
-      if (isSms) {
-        // http://stackoverflow.com/a/19126326
-        // This code path seems to be stable for both iOS and Android.
-        this.href_ = this.href_.replace('?', '?&');
-      }
-    });
+    this.bindingVars_ = typeConfig['bindings'];
 
     element.setAttribute('role', 'button');
     if (!element.hasAttribute('tabindex')) {
@@ -147,6 +121,49 @@ class AmpSocialShare extends AMP.BaseElement {
     element.addEventListener('click', () => this.handleClick_());
     element.addEventListener('keydown', this.handleKeyPress_.bind(this));
     element.classList.add(`amp-social-share-${typeAttr}`);
+  }
+
+  /** @override */
+  layoutCallback() {
+    // Do not layout if the component returns before
+    // this.shareEndpoint_ is resolved from buildCallback.
+    if (!this.shareEndpoint_) {
+      return Promise.resolve();
+    }
+
+    const hrefWithVars = addParamsToUrl(
+      dev().assertString(this.shareEndpoint_),
+      this.params_
+    );
+    const urlReplacements = Services.urlReplacementsForDoc(this.element);
+    const bindings = {};
+    if (this.bindingVars_) {
+      this.bindingVars_.forEach((name) => {
+        const bindingName = name.toUpperCase();
+        bindings[bindingName] = this.params_[name];
+      });
+    }
+
+    return urlReplacements
+      .expandUrlAsync(hrefWithVars, bindings)
+      .then((href) => {
+        this.href_ = href;
+        // mailto:, sms: protocols breaks when opened in _blank on iOS Safari
+        const {protocol} = Services.urlForDoc(this.element).parse(href);
+        const isMailTo = protocol === 'mailto:';
+        const isSms = protocol === 'sms:';
+        this.target_ =
+          this.platform_.isIos() && (isMailTo || isSms)
+            ? '_top'
+            : this.element.hasAttribute('data-target')
+            ? this.element.getAttribute('data-target')
+            : '_blank';
+        if (isSms) {
+          // http://stackoverflow.com/a/19126326
+          // This code path seems to be stable for both iOS and Android.
+          this.href_ = this.href_.replace('?', '?&');
+        }
+      });
   }
 
   /**
@@ -176,29 +193,20 @@ class AmpSocialShare extends AMP.BaseElement {
     const href = dev().assertString(this.href_);
     const target = dev().assertString(this.target_);
     if (this.shareEndpoint_ === 'navigator-share:') {
-      devAssert(navigator.share !== undefined, 'navigator.share disappeared.');
-      // navigator.share() fails 'gulp check-types' validation on Travis
-      navigator['share'](parseQueryString(href.substr(href.indexOf('?'))));
+      const {navigator} = this.win;
+      devAssert(navigator.share);
+      const dataStr = href.substr(href.indexOf('?'));
+      const data = parseQueryString(dataStr);
+      navigator.share(data).catch((e) => {
+        user().warn(TAG, e.message, dataStr);
+      });
     } else {
       const windowFeatures = 'resizable,scrollbars,width=640,height=480';
       openWindowDialog(this.win, href, target, windowFeatures);
     }
   }
-
-  /**
-   * @private
-   * @return {*} TODO(#23582): Specify return type
-   */
-  systemShareSupported_() {
-    // Chrome exports navigator.share in WebView but does not implement it.
-    // See https://bugs.chromium.org/p/chromium/issues/detail?id=765923
-    const isChromeWebview =
-      this.viewer_.isWebviewEmbedded() && this.platform_.isChrome();
-
-    return 'share' in navigator && !isChromeWebview;
-  }
 }
 
-AMP.extension('amp-social-share', '0.1', AMP => {
+AMP.extension('amp-social-share', '0.1', (AMP) => {
   AMP.registerElement('amp-social-share', AmpSocialShare, CSS);
 });

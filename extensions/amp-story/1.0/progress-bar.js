@@ -146,6 +146,7 @@ export class ProgressBar {
     }
 
     this.root_ = this.win_.document.createElement('ol');
+    this.root_.setAttribute('aria-hidden', true);
     this.root_.classList.add('i-amphtml-story-progress-bar');
     this.storyEl_.addEventListener(EventType.REPLAY, () => {
       this.replay_();
@@ -153,7 +154,7 @@ export class ProgressBar {
 
     this.storeService_.subscribe(
       StateProperty.PAGE_IDS,
-      pageIds => {
+      (pageIds) => {
         if (this.isBuilt_) {
           this.clear_();
         }
@@ -161,7 +162,7 @@ export class ProgressBar {
         this.segmentsAddedPromise_ = this.mutator_.mutateElement(
           this.getRoot(),
           () => {
-            pageIds.forEach(id => {
+            /** @type {!Array} */ (pageIds).forEach((id) => {
               if (!(id in this.segmentIdMap_)) {
                 this.addSegment_(id);
               }
@@ -182,7 +183,7 @@ export class ProgressBar {
 
     this.storeService_.subscribe(
       StateProperty.RTL_STATE,
-      rtlState => {
+      (rtlState) => {
         this.onRtlStateUpdate_(rtlState);
       },
       true /** callToInitialize */
@@ -190,7 +191,7 @@ export class ProgressBar {
 
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
-      uiState => {
+      (uiState) => {
         this.onUIStateUpdate_(uiState);
       },
       true /** callToInitialize */
@@ -235,7 +236,7 @@ export class ProgressBar {
    * @private
    */
   render_(shouldAnimate = true) {
-    this.getSegmentWidth_().then(segmentWidth => {
+    this.getSegmentWidth_().then((segmentWidth) => {
       let translateX =
         -(this.firstExpandedSegmentIndex_ - this.getPrevEllipsisCount_()) *
         (ELLIPSE_WIDTH_PX + SEGMENTS_MARGIN_PX);
@@ -275,8 +276,9 @@ export class ProgressBar {
     // http://mir.aculo.us/2011/12/07/the-case-of-the-disappearing-element/
     segment.setAttribute(
       'style',
-      `transform: translate3d(${translateX}px, 0px, 0.00001px) scaleX(${width /
-        ELLIPSE_WIDTH_PX});`
+      `transform: translate3d(${translateX}px, 0px, 0.00001px) scaleX(${
+        width / ELLIPSE_WIDTH_PX
+      });`
     );
   }
 
@@ -291,7 +293,7 @@ export class ProgressBar {
     const totalEllipsisWidth =
       (nextEllipsisCount + prevEllipsisCount) *
       (ELLIPSE_WIDTH_PX + SEGMENTS_MARGIN_PX);
-    return this.getBarWidth_().then(barWidth => {
+    return this.getBarWidth_().then((barWidth) => {
       const totalSegmentsWidth = barWidth - totalEllipsisWidth;
 
       return (

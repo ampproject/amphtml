@@ -44,7 +44,7 @@ export function lineDelimitedStreamer(win, response, lineCallback) {
     }
   }
   if (!response.body || !win.TextDecoder) {
-    response.text().then(text => streamer(text, true));
+    response.text().then((text) => streamer(text, true));
     return;
   }
 
@@ -74,10 +74,10 @@ export function lineDelimitedStreamer(win, response, lineCallback) {
  */
 export function metaJsonCreativeGrouper(callback) {
   let first;
-  return function(line, done) {
+  return function (line, done) {
     if (first) {
-      const metadata =
-        /** @type {!Object<string, *>} */ (tryParseJson(first) || {});
+      const metadata = /** @type {!Object<string, *>} */ (tryParseJson(first) ||
+        {});
       const lowerCasedMetadata = Object.keys(metadata).reduce((newObj, key) => {
         newObj[key.toLowerCase()] = metadata[key];
         return newObj;

@@ -13,18 +13,18 @@
     },
     {
       pattern: '**/validator-*.{protoascii,html,out}',
-      owners: [{name: 'ampproject/wg-caching', notify: true}],
+      owners: [{name: 'ampproject/wg-caching', required: true}],
     },
     {
       pattern: '**/*.md',
-      owners: [{name: 'mrjoro'}, {name: 'ampproject/wg-outreach'}],
+      owners: [{name: '*'}],
     },
     {
-      pattern: '{.*,babel.config.js,gulpfile.js}',
+      pattern: '{.*,gulpfile.js}',
       owners: [{name: 'ampproject/wg-infra'}],
     },
     {
-      pattern: '{package.json,yarn.lock}',
+      pattern: '{babel.config.js,package.json,yarn.lock}',
       owners: [
         {name: 'ampproject/wg-infra'},
         {name: 'ampproject/wg-runtime'},

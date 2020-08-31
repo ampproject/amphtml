@@ -11,16 +11,20 @@
       owners: [{name: 'ampproject/wg-ui-and-a11y'}],
     },
     {
-      pattern: '{cid-*,*-cid-*,*-cid,consent,consent-state,extension-analytics}.js',
+      pattern: '{cid-*,*-cid-*,*-cid,extension-analytics,analytics}.js',
       owners: [{name: 'ampproject/wg-analytics'}],
     },
     {
-      pattern: '{amp-story-*}.js',
+      pattern: '{consent,consent-state}.js',
+      owners: [{name: 'ampproject/wg-analytics'}],
+    },
+    {
+      pattern: 'amp-story-*.js',
       owners: [{name: 'newmuis'}, {name: 'gmajoulet'}, {name: 'enriqe'}],
     },
     {
       pattern: 'friendly-iframe-embed.js',
-      owners: [{name: 'ampproject/wg-ads'}],
+      owners: [{name: 'ampproject/wg-ads-reviewers'}],
     },
   ],
 }

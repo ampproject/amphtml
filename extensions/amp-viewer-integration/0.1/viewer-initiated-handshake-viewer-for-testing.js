@@ -59,7 +59,7 @@ export class WebviewViewerForTesting {
     this.intervalCtr = 0;
 
     /** @private @const {!Promise} */
-    this.handshakeReceivedPromise_ = new Promise(resolve => {
+    this.handshakeReceivedPromise_ = new Promise((resolve) => {
       /** @private {?function()} */
       this.handshakeResponseResolve_ = resolve;
     });
@@ -75,7 +75,6 @@ export class WebviewViewerForTesting {
       width: this.containerEl./*OK*/ offsetWidth,
       height: this.containerEl./*OK*/ offsetHeight,
       visibilityState: this.visibilityState_,
-      prerenderSize: 1,
       origin: parseUrlDeprecated(window.location.href).origin,
       csi: 1,
       cap: 'foo,a2a,handshakepoll,iframeScroll',
@@ -112,7 +111,7 @@ export class WebviewViewerForTesting {
     if (!this.iframe) {
       return;
     }
-    const listener = function(e) {
+    const listener = function (e) {
       if (this.isChannelOpen_(e)) {
         //stop polling
         window.clearInterval(this.pollingIntervalIds_[intervalCtr]);
@@ -158,7 +157,6 @@ export class WebviewViewerForTesting {
 
     this.sendRequest_('visibilitychange', {
       state: this.visibilityState_,
-      prerenderSize: this.prerenderSize,
     });
 
     this.handshakeResponseResolve_();

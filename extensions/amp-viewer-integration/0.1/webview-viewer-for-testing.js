@@ -62,13 +62,13 @@ export class WebviewViewerForTesting {
     this.intervalCtr = 0;
 
     /** @private @const {!Promise} */
-    this.handshakeReceivedPromise_ = new Promise(resolve => {
+    this.handshakeReceivedPromise_ = new Promise((resolve) => {
       /** @private {?function()} */
       this.handshakeResponseResolve_ = resolve;
     });
 
     /** @private @const {!Promise} */
-    this.documentLoadedPromise_ = new Promise(resolve => {
+    this.documentLoadedPromise_ = new Promise((resolve) => {
       /** @private {?function()} */
       this.documentLoadedResolve_ = resolve;
     });
@@ -125,7 +125,7 @@ export class WebviewViewerForTesting {
         '*',
         [channel.port2]
       );
-      channel.port1.onmessage = function(e) {
+      channel.port1.onmessage = function (e) {
         if (this.isChannelOpen_(e)) {
           window.clearInterval(this.pollingIntervalIds_[intervalCtr]);
           const data = JSON.parse(e.data);

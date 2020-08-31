@@ -103,12 +103,12 @@ function ensureYarn() {
 // Check the node version and print a warning if it is not the latest LTS.
 function checkNodeVersion() {
   const nodeVersion = getStdout('node --version').trim();
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     https
-      .get(nodeDistributionsUrl, res => {
+      .get(nodeDistributionsUrl, (res) => {
         res.setEncoding('utf8');
         let distributions = '';
-        res.on('data', data => {
+        res.on('data', (data) => {
           distributions += data;
         });
         res.on('end', () => {
@@ -168,7 +168,7 @@ function checkNodeVersion() {
 function getNodeLatestLtsVersion(distributionsJson) {
   if (distributionsJson) {
     // Versions are in descending order, so the first match is the latest lts.
-    return distributionsJson.find(function(distribution) {
+    return distributionsJson.find(function (distribution) {
       return (
         distribution.hasOwnProperty('version') &&
         distribution.hasOwnProperty('lts') &&
@@ -244,7 +244,7 @@ function runGulpChecks() {
   const defaultGulpPath = getStdout('which gulp', {
     'env': {'PATH': getParentShellPath()},
   }).trim();
-  const wrongGulp = wrongGulpPaths.some(path =>
+  const wrongGulp = wrongGulpPaths.some((path) =>
     defaultGulpPath.startsWith(path)
   );
   if (globalGulp) {
@@ -310,13 +310,21 @@ function runGulpChecks() {
 }
 
 function checkPythonVersion() {
-  // Python prints its version to stderr: https://bugs.python.org/issue18338
-  const pythonVersionResult = getStderr(`${pythonExecutable} --version`).trim();
+  // Python 2.7 is EOL but still supported
+  // Python 3.5+ are still supported (TODO: deprecate 3.5 on 2020-09-13)
+  // https://devguide.python.org/#status-of-python-branches
+  const recommendedVersion = '2.7 or 3.5+';
+  const recommendedVersionRegex = /^2\.7|^3\.[5-9]/;
+
+  // Python2 prints its version to stderr (fixed in Python 3.4)
+  // See: https://bugs.python.org/issue18338
+  const pythonVersionResult =
+    getStderr(`${pythonExecutable} --version`).trim() ||
+    getStdout(`${pythonExecutable} --version`).trim();
   const pythonVersion = pythonVersionResult.match(/Python (.*?)$/);
   if (pythonVersion && pythonVersion.length == 2) {
-    const recommendedVersion = '2.7';
     const versionNumber = pythonVersion[1];
-    if (versionNumber.startsWith(recommendedVersion)) {
+    if (recommendedVersionRegex.test(versionNumber)) {
       console.log(
         green('Detected'),
         cyan('python'),
@@ -331,58 +339,60 @@ function checkPythonVersion() {
         cyan(recommendedVersion) + yellow('.')
       );
       console.log(
-        yellow('⤷ To fix this, install the correct version from'),
-        cyan(`https://www.python.org/download/releases/${recommendedVersion}`) +
-          yellow('.')
+        yellow('⤷ To fix this, install a supported version from'),
+        cyan('https://www.python.org/downloads/') + yellow('.')
       );
     }
   } else {
     console.log(
-      yellow(
-        'WARNING: ' +
-          'Could not determine the local version of python. ' +
-          'AMP development requires python 2.7.'
-      )
+      yellow('WARNING: Could not determine the local version of python.')
+    );
+    console.log(
+      yellow('⤷ To fix this, make sure'),
+      cyan(pythonExecutable),
+      yellow('is in your'),
+      cyan('PATH'),
+      yellow('and is version'),
+      cyan(recommendedVersion) + yellow('.')
     );
   }
 }
 
-function main() {
+async function main() {
   // Yarn is already used by default on Travis, so there is nothing more to do.
   if (process.env.TRAVIS) {
     return 0;
   }
   ensureYarn();
-  return checkNodeVersion().then(() => {
-    runGulpChecks();
-    checkPythonVersion();
-    checkYarnVersion();
-    if (!process.env.TRAVIS && updatesNeeded.size > 0) {
-      console.log(
-        yellow('\nWARNING: Detected problems with'),
-        cyan(Array.from(updatesNeeded).join(', '))
-      );
-      console.log(
-        yellow('⤷ Continuing install in'),
-        cyan(warningDelaySecs),
-        yellow('seconds...')
-      );
-      console.log(
-        yellow('⤷ Press'),
-        cyan('Ctrl + C'),
-        yellow('to abort and fix...')
-      );
-      let resolver;
-      const deferred = new Promise(resolverIn => {
-        resolver = resolverIn;
-      });
-      setTimeout(() => {
-        console.log(yellow('\nAttempting to install packages...'));
-        resolver();
-      }, warningDelaySecs * 1000);
-      return deferred;
-    }
-  });
+  await checkNodeVersion();
+  runGulpChecks();
+  checkPythonVersion();
+  checkYarnVersion();
+  if (!process.env.TRAVIS && updatesNeeded.size > 0) {
+    console.log(
+      yellow('\nWARNING: Detected problems with'),
+      cyan(Array.from(updatesNeeded).join(', '))
+    );
+    console.log(
+      yellow('⤷ Continuing install in'),
+      cyan(warningDelaySecs),
+      yellow('seconds...')
+    );
+    console.log(
+      yellow('⤷ Press'),
+      cyan('Ctrl + C'),
+      yellow('to abort and fix...')
+    );
+    let resolver;
+    const deferred = new Promise((resolverIn) => {
+      resolver = resolverIn;
+    });
+    setTimeout(() => {
+      console.log(yellow('\nAttempting to install packages...'));
+      resolver();
+    }, warningDelaySecs * 1000);
+    return deferred;
+  }
 }
 
 main();

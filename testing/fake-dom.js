@@ -62,6 +62,8 @@ export class FakeWindow {
     this.Math = window.Math;
     /** @const */
     this.Promise = window.Promise;
+    /** @const */
+    this./*OK*/ pageYOffset = window./*OK*/ pageYOffset;
 
     /** @const */
     this.crypto = window.crypto || window.msCrypto;
@@ -95,7 +97,7 @@ export class FakeWindow {
     let fontStatus = 'loaded';
     Object.defineProperty(this.document.fonts, 'status', {
       get: () => fontStatus,
-      set: val => (fontStatus = val),
+      set: (val) => (fontStatus = val),
     });
 
     EventListeners.intercept(this.document);
@@ -110,7 +112,7 @@ export class FakeWindow {
 
     Object.defineProperty(this.document, 'hidden', {
       get: () => this.documentHidden_,
-      set: value => {
+      set: (value) => {
         this.documentHidden_ = value;
         this.visibilityState_ = null;
         this.document.eventListeners.fire({type: 'visibilitychange'});
@@ -123,7 +125,7 @@ export class FakeWindow {
         }
         return this.documentHidden_ ? 'hidden' : 'visible';
       },
-      set: value => {
+      set: (value) => {
         this.visibilityState_ = value;
         this.documentHidden_ = value != 'visible';
         this.document.eventListeners.fire({type: 'visibilitychange'});
@@ -142,7 +144,7 @@ export class FakeWindow {
         }
         return cookie.join(';');
       },
-      set: value => {
+      set: (value) => {
         this.document.lastSetCookieRaw = value;
         let cookie = value.match(/^([^=]*)=([^;]*)/);
         if (!cookie) {
@@ -175,7 +177,7 @@ export class FakeWindow {
     // Create element to enhance test elements.
     const nativeDocumentCreate = this.document.createElement;
     /** @this {HTMLDocument} */
-    this.document.createElement = function() {
+    this.document.createElement = function () {
       const result = nativeDocumentCreate.apply(this, arguments);
       EventListeners.intercept(result);
       return result;
@@ -197,7 +199,7 @@ export class FakeWindow {
     );
     Object.defineProperty(this, 'location', {
       get: () => this.location_,
-      set: href => this.location_.assign(href),
+      set: (href) => this.location_.assign(href),
     });
 
     // Navigator.
@@ -220,22 +222,22 @@ export class FakeWindow {
     this.Date = window.Date;
 
     /** polyfill setTimeout. */
-    this.setTimeout = function() {
+    this.setTimeout = function () {
       return window.setTimeout.apply(window, arguments);
     };
 
     /** polyfill clearTimeout. */
-    this.clearTimeout = function() {
+    this.clearTimeout = function () {
       return window.clearTimeout.apply(window, arguments);
     };
 
     /** polyfill setInterval. */
-    this.setInterval = function() {
+    this.setInterval = function () {
       return window.setInterval.apply(window, arguments);
     };
 
     /** polyfill clearInterval. */
-    this.clearInterval = function() {
+    this.clearInterval = function () {
       return window.clearInterval.apply(window, arguments);
     };
 
@@ -244,7 +246,7 @@ export class FakeWindow {
     if (raf) {
       raf = raf.bind(window);
     } else {
-      raf = function(fn) {
+      raf = function (fn) {
         window.setTimeout(fn, 16);
       };
     }
@@ -255,7 +257,7 @@ export class FakeWindow {
     this.requestAnimationFrame = raf;
 
     // Styles.
-    this.getComputedStyle = function() {
+    this.getComputedStyle = function () {
       return window.getComputedStyle.apply(window, arguments);
     };
   }
@@ -291,13 +293,13 @@ class EventListeners {
       addEventListener: originalAdd,
       removeEventListener: originalRemove,
     } = target;
-    target.addEventListener = function(type, handler, captureOrOpts) {
+    target.addEventListener = function (type, handler, captureOrOpts) {
       target.eventListeners.add(type, handler, captureOrOpts);
       if (originalAdd) {
         originalAdd.apply(target, arguments);
       }
     };
-    target.removeEventListener = function(type, handler, captureOrOpts) {
+    target.removeEventListener = function (type, handler, captureOrOpts) {
       target.eventListeners.remove(type, handler, captureOrOpts);
       if (originalRemove) {
         originalRemove.apply(target, arguments);
@@ -365,7 +367,7 @@ class EventListeners {
    * @return {!Array<!EventListener>}
    */
   forType(type) {
-    return this.listeners.filter(listener => listener.type == type);
+    return this.listeners.filter((listener) => listener.type == type);
   }
 
   /**
@@ -380,7 +382,7 @@ class EventListeners {
    * @param {!Event} event
    */
   fire(event) {
-    this.forType(event.type).forEach(listener => {
+    this.forType(event.type).forEach((listener) => {
       listener.handler.call(null, event);
     });
   }
@@ -418,7 +420,7 @@ export class FakeLocation {
     // href
     Object.defineProperty(this, 'href', {
       get: () => this.url_.href,
-      set: href => this.assign(href),
+      set: (href) => this.assign(href),
       configurable: true,
     });
 
@@ -432,7 +434,7 @@ export class FakeLocation {
       'hash',
       'origin',
     ];
-    properties.forEach(property => {
+    properties.forEach((property) => {
       Object.defineProperty(this, property, {
         get: () => this.url_[property],
       });
@@ -656,7 +658,7 @@ export class FakeStorage {
   /**
    */
   clear() {
-    Object.keys(this.values).forEach(name => {
+    Object.keys(this.values).forEach((name) => {
       delete this.values[name];
     });
   }

@@ -132,7 +132,7 @@ describes.realWin(
       extensions: ['amp-ad-exit'],
     },
   },
-  env => {
+  (env) => {
     let win;
     let element;
     let clock;
@@ -200,7 +200,7 @@ describes.realWin(
       // TEST_3P_VENDOR must be in IFRAME_TRANSPORTS
       // *before* makeElementWithConfig
       IFRAME_TRANSPORTS[TEST_3P_VENDOR] = '/nowhere.html';
-      return makeElementWithConfig(EXIT_CONFIG).then(el => {
+      return makeElementWithConfig(EXIT_CONFIG).then((el) => {
         element = el;
       });
     });
@@ -283,7 +283,7 @@ describes.realWin(
             delay: 2000,
           },
         },
-      }).then(el => {
+      }).then((el) => {
         expect(el.implementation_.defaultFilters_.length).to.equal(2);
         let clickFilter = el.implementation_.defaultFilters_[0];
         expect(clickFilter.spec.type).to.equal(FilterType.CLICK_DELAY);
@@ -451,7 +451,7 @@ describes.realWin(
           beacon: false,
         },
       };
-      return makeElementWithConfig(config).then(el => {
+      return makeElementWithConfig(config).then((el) => {
         const open = env.sandbox.stub(win, 'open').callsFake(() => {
           return {name: 'fakeWin'};
         });
@@ -559,7 +559,7 @@ describes.realWin(
       win.innerHeight = 2000;
       // Replace the getVsync function so that the measure can happen at once.
       element.implementation_.getVsync = () => {
-        return {measure: callback => callback()};
+        return {measure: (callback) => callback()};
       };
       element.implementation_.onLayoutMeasure();
 
@@ -619,7 +619,7 @@ describes.realWin(
 
       // Replace the getVsync function so that the measure can happen at once.
       element.implementation_.getVsync = () => {
-        return {measure: callback => callback()};
+        return {measure: (callback) => callback()};
       };
       element.implementation_.onLayoutMeasure();
 

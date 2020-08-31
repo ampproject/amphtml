@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-soundcloud'],
     },
   },
-  env => {
+  (env) => {
     const trackEmbedUrl =
       'https://w.soundcloud.com/player/?url=https%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F243169232';
     const playlistEmbedUrl =
@@ -59,7 +59,7 @@ describes.realWin(
     }
 
     it('renders track', () => {
-      return getSCPlayer('243169232').then(scplayer => {
+      return getSCPlayer('243169232').then((scplayer) => {
         const iframe = scplayer.firstChild;
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -68,7 +68,7 @@ describes.realWin(
     });
 
     it('renders playlist', () => {
-      return getSCPlayer('1595551', true).then(scplayer => {
+      return getSCPlayer('1595551', true).then((scplayer) => {
         const iframe = scplayer.firstChild;
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -80,7 +80,7 @@ describes.realWin(
       return getSCPlayer('243169232', false, {
         'data-visual': true,
         'data-secret-token': 'c-af',
-      }).then(scplayer => {
+      }).then((scplayer) => {
         const iframe = scplayer.firstChild;
         expect(iframe.src).to.include(encodeURIComponent('?secret_token=c-af'));
       });
@@ -88,7 +88,7 @@ describes.realWin(
 
     it('renders fixed-height', () => {
       return getSCPlayer('243169232', false, {layout: 'fixed-height'}).then(
-        scplayer => {
+        (scplayer) => {
           expect(scplayer.className).to.match(/i-amphtml-layout-fixed-height/);
         }
       );
@@ -96,7 +96,7 @@ describes.realWin(
 
     it('renders responsively', () => {
       return getSCPlayer('243169232', false, {layout: 'responsive'}).then(
-        scplayer => {
+        (scplayer) => {
           const iframe = scplayer.firstChild;
           expect(iframe).to.not.be.null;
           expect(iframe.className).to.match(/i-amphtml-fill-content/);
@@ -108,7 +108,7 @@ describes.realWin(
       return getSCPlayer('243169232', false, {
         'data-visual': true,
         'data-color': '00FF00',
-      }).then(scplayer => {
+      }).then((scplayer) => {
         const iframe = scplayer.firstChild;
         expect(iframe.src).to.include('visual=true');
         expect(iframe.src).not.to.include('color=00FF00');
@@ -116,7 +116,7 @@ describes.realWin(
     });
 
     it('renders without optional params', () => {
-      return getSCPlayer('243169232').then(scplayer => {
+      return getSCPlayer('243169232').then((scplayer) => {
         const iframe = scplayer.firstChild;
         expect(iframe.src).not.to.include('&visual=true');
         expect(iframe.src).not.to.include('&color=FF0000');

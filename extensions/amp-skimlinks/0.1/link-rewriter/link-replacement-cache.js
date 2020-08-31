@@ -54,7 +54,7 @@ export class LinkReplacementCache {
    * @public
    */
   updateReplacementUrls(replacementList) {
-    replacementList.forEach(replacementItem => {
+    replacementList.forEach((replacementItem) => {
       const {anchor, replacementUrl} = replacementItem;
       const anchorIndex = this.anchorList_.indexOf(anchor);
       if (anchorIndex !== -1) {
@@ -91,7 +91,7 @@ export class LinkReplacementCache {
    * @public
    */
   getAnchorReplacementList() {
-    return this.anchorList_.map(anchor => {
+    return this.anchorList_.map((anchor) => {
       return /** @type {!{anchor: !HTMLElement, replacementUrl: ?string}} */ ({
         anchor,
         replacementUrl: this.getReplacementUrlForAnchor(anchor),

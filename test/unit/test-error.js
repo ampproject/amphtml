@@ -29,14 +29,14 @@ import {
   reportErrorToAnalytics,
   reportErrorToServerOrViewer,
 } from '../../src/error';
-import {getMode, getRtvVersionForTesting} from '../../src/mode';
+import {getRtvVersionForTesting} from '../../src/mode';
 import {
   resetExperimentTogglesForTesting,
   toggleExperiment,
 } from '../../src/experiments';
 import {user, userAssert} from '../../src/log';
 
-describes.fakeWin('installErrorReporting', {}, env => {
+describes.fakeWin('installErrorReporting', {}, (env) => {
   let win;
   let rejectedPromiseError;
   let rejectedPromiseEvent;
@@ -46,7 +46,7 @@ describes.fakeWin('installErrorReporting', {}, env => {
     win = env.win;
     installErrorReporting(win);
     rejectedPromiseEventCancelledSpy = env.sandbox.spy();
-    rejectedPromiseError = new Error('error');
+    rejectedPromiseError = new Error('error reason');
     rejectedPromiseEvent = {
       type: 'unhandledrejection',
       reason: rejectedPromiseError,
@@ -63,18 +63,21 @@ describes.fakeWin('installErrorReporting', {}, env => {
   });
 
   it('should report the normal promise rejection', () => {
+    expectAsyncConsoleError(/error reason/);
     win.eventListeners.fire(rejectedPromiseEvent);
     expect(rejectedPromiseError.reported).to.be.true;
     expect(rejectedPromiseEventCancelledSpy).to.not.be.called;
   });
 
   it('should allow null errors', () => {
+    expectAsyncConsoleError(/rejected promise/);
     rejectedPromiseEvent.reason = null;
     win.eventListeners.fire(rejectedPromiseEvent);
     expect(rejectedPromiseEventCancelledSpy).to.not.be.called;
   });
 
   it('should allow string errors', () => {
+    expectAsyncConsoleError(/string error/);
     rejectedPromiseEvent.reason = 'string error';
     win.eventListeners.fire(rejectedPromiseEvent);
     expect(rejectedPromiseEventCancelledSpy).to.not.be.called;
@@ -316,19 +319,19 @@ describe('getErrorReportData', () => {
     expect(data.m).to.equal('XYZ');
     expect(data.el).to.equal('FOO-BAR');
     expect(data.a).to.equal('0');
-    expect(data.v).to.equal(
-      getRtvVersionForTesting(window, getMode().localDev)
-    );
+    expect(data.v).to.equal(getRtvVersionForTesting(window));
     expect(data.noAmp).to.equal('0');
   });
 
   it('reportError mark asserts', () => {
     let e = '';
-    try {
-      userAssert(false, 'XYZ');
-    } catch (error) {
-      e = error;
-    }
+    allowConsoleError(() => {
+      try {
+        userAssert(false, 'XYZ');
+      } catch (error) {
+        e = error;
+      }
+    });
     const data = getErrorReportData(
       undefined,
       undefined,
@@ -338,24 +341,22 @@ describe('getErrorReportData', () => {
     );
     expect(data.m).to.equal('XYZ');
     expect(data.a).to.equal('1');
-    expect(data.v).to.equal(
-      getRtvVersionForTesting(window, getMode().localDev)
-    );
+    expect(data.v).to.equal(getRtvVersionForTesting(window));
   });
 
   it('reportError mark asserts without error object', () => {
     let e = '';
-    try {
-      userAssert(false, 'XYZ');
-    } catch (error) {
-      e = error;
-    }
+    allowConsoleError(() => {
+      try {
+        userAssert(false, 'XYZ');
+      } catch (error) {
+        e = error;
+      }
+    });
     const data = getErrorReportData(e.message, undefined, undefined, undefined);
     expect(data.m).to.equal('XYZ');
     expect(data.a).to.equal('1');
-    expect(data.v).to.equal(
-      getRtvVersionForTesting(window, getMode().localDev)
-    );
+    expect(data.v).to.equal(getRtvVersionForTesting(window));
   });
 
   it('reportError marks 3p', () => {
@@ -392,70 +393,6 @@ describe('getErrorReportData', () => {
     expect(data.m).to.equal('XYZ');
     expect(data['ca']).to.equal('1');
     expect(data['vs']).to.equal('some-state');
-  });
-
-  describe('reportError marks single pass type', () => {
-    it('reports single pass', () => {
-      window.AMP_CONFIG = {
-        spt: 'sp',
-      };
-      const e = new Error('XYZ');
-      e.fromAssert = true;
-      const data = getErrorReportData(
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        e
-      );
-      expect(data['spt']).to.equal('sp');
-    });
-
-    it('reports multi pass', () => {
-      window.AMP_CONFIG = {
-        spt: 'mp',
-      };
-      const e = new Error('XYZ');
-      e.fromAssert = true;
-      const data = getErrorReportData(
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        e
-      );
-      expect(data['spt']).to.equal('mp');
-    });
-
-    it('reports esm', () => {
-      window.AMP_CONFIG = {
-        spt: 'esm',
-      };
-      const e = new Error('XYZ');
-      e.fromAssert = true;
-      const data = getErrorReportData(
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        e
-      );
-      expect(data['spt']).to.equal('esm');
-    });
-
-    it('does nothing for undeclared single pass type', () => {
-      window.AMP_CONFIG = {};
-      const e = new Error('XYZ');
-      e.fromAssert = true;
-      const data = getErrorReportData(
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        e
-      );
-      expect(data['spt']).to.be.undefined;
-    });
   });
 
   it('reportError marks binary type', () => {
@@ -585,11 +522,13 @@ describe('getErrorReportData', () => {
   it('should throttle user errors', () => {
     nextRandomNumber = 0.2;
     let e = '';
-    try {
-      userAssert(false, 'XYZ');
-    } catch (error) {
-      e = error;
-    }
+    allowConsoleError(() => {
+      try {
+        userAssert(false, 'XYZ');
+      } catch (error) {
+        e = error;
+      }
+    });
     const data = getErrorReportData(
       undefined,
       undefined,
@@ -707,7 +646,7 @@ describe('getErrorReportData', () => {
       scripts = [];
       win = {
         document: {
-          querySelectorAll: selector => {
+          querySelectorAll: (selector) => {
             expect(selector).to.equal('script[src]');
             return scripts;
           },
@@ -751,7 +690,7 @@ describe('getErrorReportData', () => {
   });
 });
 
-describes.sandboxed('reportError', {}, env => {
+describes.sandboxed('reportError', {}, (env) => {
   let clock;
 
   beforeEach(() => {
@@ -760,7 +699,10 @@ describes.sandboxed('reportError', {}, env => {
 
   it('should accept Error type', () => {
     const error = new Error('error');
-    const result = reportError(error);
+    let result;
+    allowConsoleError(() => {
+      result = reportError(error);
+    });
     expect(result).to.equal(error);
     expect(result.origError).to.be.undefined;
     expect(result.reported).to.be.true;
@@ -769,7 +711,10 @@ describes.sandboxed('reportError', {}, env => {
 
   it('should accept string and report incorrect use', () => {
     window.__AMP_MODE = {localDev: true, test: false};
-    const result = reportError('error');
+    let result;
+    allowConsoleError(() => {
+      result = reportError('error');
+    });
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.contain('error');
     expect(result.origError).to.be.equal('error');
@@ -781,7 +726,10 @@ describes.sandboxed('reportError', {}, env => {
 
   it('should accept number and report incorrect use', () => {
     window.__AMP_MODE = {localDev: true, test: false};
-    const result = reportError(101);
+    let result;
+    allowConsoleError(() => {
+      result = reportError(101);
+    });
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.contain('101');
     expect(result.origError).to.be.equal(101);
@@ -793,7 +741,10 @@ describes.sandboxed('reportError', {}, env => {
 
   it('should accept null and report incorrect use', () => {
     window.__AMP_MODE = {localDev: true, test: false};
-    const result = reportError(null);
+    let result;
+    allowConsoleError(() => {
+      result = reportError(null);
+    });
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.contain('Unknown error');
     expect(result.origError).to.be.undefined;
@@ -804,10 +755,9 @@ describes.sandboxed('reportError', {}, env => {
   });
 });
 
-describe.configure().run('detectJsEngineFromStack', () => {
+describe('detectJsEngineFromStack', () => {
   // Note that these are not true of every case. You can emulate iOS Safari
-  // on Desktop Chrome and break this. These tests are explicitly for
-  // SauceLabs, which runs does not masquerade with UserAgent.
+  // on Desktop Chrome and break this.
   describe
     .configure()
     .ifIos()
@@ -838,7 +788,8 @@ describe.configure().run('detectJsEngineFromStack', () => {
       it.configure()
         .ifSafari()
         .run('detects safari as safari', () => {
-          expect(detectJsEngineFromStack()).to.equal('Safari');
+          // TODO(wg-runtime): Fix detection of Safari 13+.
+          expect(detectJsEngineFromStack()).to.equal('unknown');
         });
 
       it.configure()
@@ -861,7 +812,7 @@ describe.configure().run('detectJsEngineFromStack', () => {
     });
 });
 
-describes.fakeWin('user error reporting', {amp: true}, env => {
+describes.fakeWin('user error reporting', {amp: true}, (env) => {
   let win;
   const error = new Error('ERROR', 'user error');
   let analyticsEventSpy;

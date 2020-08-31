@@ -21,7 +21,7 @@ import {
   isFieldEmpty,
 } from '../../src/form.js';
 
-describes.realWin('getFormAsObject', {}, env => {
+describes.realWin('getFormAsObject', {}, (env) => {
   let form;
 
   beforeEach(() => {
@@ -368,7 +368,7 @@ describes.realWin('getFormAsObject', {}, env => {
   });
 });
 
-describes.fakeWin('isDisabled', {}, env => {
+describes.fakeWin('isDisabled', {}, (env) => {
   let doc;
 
   beforeEach(() => {
@@ -422,7 +422,7 @@ describes.fakeWin('isDisabled', {}, env => {
   });
 });
 
-describes.realWin('isFieldDefault', {}, env => {
+describes.realWin('isFieldDefault', {}, (env) => {
   let doc;
 
   beforeEach(() => {
@@ -573,7 +573,7 @@ describes.realWin('isFieldDefault', {}, env => {
   });
 });
 
-describes.fakeWin('isFieldEmpty', {}, env => {
+describes.fakeWin('isFieldEmpty', {}, (env) => {
   let doc;
 
   beforeEach(() => {

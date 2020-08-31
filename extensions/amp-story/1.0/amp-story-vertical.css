@@ -55,8 +55,11 @@ amp-story[i-amphtml-vertical].i-amphtml-element amp-story-page.i-amphtml-element
 [i-amphtml-vertical] amp-story-page-attachment {
   display: block !important;
   position: relative !important;
-  height: 178vw !important;
   transform: none !important;
+}
+
+[i-amphtml-vertical] .i-amphtml-story-page-attachment-remote-title {
+  overflow: visible !important;
 }
 
 [i-amphtml-vertical].i-amphtml-story-bookend-active amp-story-page[active]::after {

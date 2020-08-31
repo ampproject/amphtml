@@ -24,35 +24,6 @@ limitations under the License.
 
 # amp-user-notification
 
-[TOC]
-
-Displays a dismissable notification to the user.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td>
-      <div>
-        <code>&lt;script async custom-element="amp-user-notification" src="https://cdn.ampproject.org/v0/amp-user-notification-0.1.js">&lt;/script></code>
-      </div>
-      <small>Notice that  "amp-user-notification" script is required.</small>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>
-      <ul>
-        <li><a href="https://amp.dev/documentation/examples/components/amp-user-notification/#basic-usage-with-local-storage">Annotated code example for amp-user-notification (with local storage)</a></li>
-        <li><a href="https://amp.dev/documentation/examples/components/amp-user-notification/#advanced-usage-with-a-server-endpoint">Annotated code example for amp-user-notification (with Server Endpoint)</a></li>
-      </ul>
-    </td>
-  </tr>
-</table>
-
 ## Usage
 
 An `id` is required because multiple `amp-user-notification` elements are allowed and the `id` is used to differentiate them.
@@ -77,8 +48,6 @@ When multiple `amp-user-notification` elements are on a page, only one is shown
 at a single time (Once one is dismissed the next one is shown).
 The order of the notifications being shown is currently not deterministic.
 
-Example:
-
 ```html
 <amp-user-notification
   layout="nodisplay"
@@ -92,9 +61,41 @@ Example:
 </amp-user-notification>
 ```
 
+A notification is shown when:
+
+1. There's no record locally that the user has dismissed the notification with the
+   specified ID.
+2. When specified, `data-show-if-href` endpoint returns `{ "showNotification": true }`.
+
+When notification is dismissed:
+
+1. AMP stores the "dismiss" record locally for the specified ID. This will prevent the
+   notification from being shown again.
+2. When specified, `data-dismiss-href` is invoked and can be used to make the "dismiss"
+   record remotely.
+
+### JSON Fields
+
+- `elementId` (string): The HTML ID used on the `amp-user-notification` element.
+- `ampUserId` (string): This ID is passed to both the `data-show-if-href` GET request
+  (as a query string field) and the `data-dismiss-href` POST request (as a json field).
+  The ID will be the same for this user going forward, but no other requests
+  in AMP send the same ID.
+  You can use the ID on your side to lookup/store whether the user has
+  dismissed the notification before.
+- `showNotification` (boolean): Indicates whether the notification should be shown. If `false`, the promise associated to the element is resolved right away.
+
+### Delaying Client ID generation until the notification is acknowledged
+
+Optionally, you can delay generation of Client IDs used for analytics and similar purposes until an `amp-user-notification` is confirmed by the user. See these docs for how to implement this:
+
+- [CLIENT_ID URL substitution](../../spec/amp-var-substitutions.md#client-id)
+- [`amp-ad`](https://amp.dev/documentation/components/amp-ad)
+- [`amp-analytics`](https://amp.dev/documentation/components/amp-analytics)
+
 ## Attributes
 
-##### data-show-if-href (optional)
+### data-show-if-href (optional)
 
 When specified, AMP will make a CORS GET request with credentials to the specified URL to determine whether the notification should be shown. AMP appends the `elementId` and `ampUserId` query string fields to the href provided
 on the `data-show-if-href` attribute (see [#1228](https://github.com/ampproject/amphtml/issues/1228) on why this is a GET instead of a POST).
@@ -106,13 +107,11 @@ You can add it as a query string field (e.g.,
 
 If the `data-show-if-href` attribute is not specified, AMP will only check if the notification with the specified ID has been "dismissed" by the user locally. If not, the notification will be shown.
 
-{% call callout('Important', type='caution') %}
+[tip type="read-on"]
 For handling CORS requests and responses, see the [AMP CORS spec](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests).
-{% endcall %}
+[/tip]
 
 **CORS GET request** query string fields: `elementId`, `ampUserId`
-
-Example:
 
 ```http
 https://foo.com/api/show-api?timestamp=1234567890&elementId=notification1&ampUserId=cid-value
@@ -120,28 +119,24 @@ https://foo.com/api/show-api?timestamp=1234567890&elementId=notification1&ampUse
 
 **CORS GET response** JSON fields: `showNotification`. The response must contain a single JSON object with a `showNotification` field of type boolean. If this field is `true`, the notification will be shown, otherwise it won't.
 
-Example:
-
 ```json
 {"showNotification": true}
 ```
 
-##### data-show-if-geo
+### data-show-if-geo
 
 When specified `amp-user-notification` will only trigger if an `amp-geo` country group for matches one of the comma delimited list of country groups.
 
-Example:
-
-In this example if the user is located in Mexico (`mx`) the `amp-geo` will return the `nafta` country group. `nafta` is in the `data-show-if-geo` attribute so the notification will display.
+In the example below, if the user is located in Mexico (`mx`) the `amp-geo` will return the `nafta` country group. `nafta` is in the `data-show-if-geo` attribute so the notification will display.
 
 ```html
 <amp-geo layout="nodisplay">
   <script type="application/json">
     {
       "ISOCountryGroups": {
-      "nafta": [ "ca", "mx", "us" ],
-      "waldo": [ "unknown" ],
-      "anz": [ "au", "nz" ]
+        "nafta": ["ca", "mx", "us"],
+        "waldo": ["unknown"],
+        "anz": ["au", "nz"]
       }
     }
   </script>
@@ -158,11 +153,9 @@ In this example if the user is located in Mexico (`mx`) the `amp-geo` will retur
 </amp-user-notification>
 ```
 
-##### data-show-if-not-geo
+### data-show-if-not-geo
 
 This is the opposite of `data-show-if-geo`. When specified `amp-user-notification` will only trigger if the `amp-geo` country group does not match the supplied list.
-
-Example:
 
 In this example user in Mexico would not trigger the notification, but a user in an unknon country (assigned to the `whereIsWaldo` group) would trigger the notifcation.
 
@@ -171,9 +164,9 @@ In this example user in Mexico would not trigger the notification, but a user in
   <script type="application/json">
     {
       "ISOCountryGroups": {
-      "nafta": [ "ca", "mx", "us" ],
-      "whereIsWaldo": [ "unknown" ],
-      "anz": [ "au", "nz" ]
+        "nafta": ["ca", "mx", "us"],
+        "whereIsWaldo": ["unknown"],
+        "anz": ["au", "nz"]
       }
     }
   </script>
@@ -198,16 +191,14 @@ When specified, AMP will make a CORS POST request to the specified URL transmitt
 
 If this attribute is not specified, AMP will not send a request upon dismissal, and will only store the "dismissed" flag for the specified ID locally.
 
-{% call callout('Important', type='caution') %}
+[tip type="read-on"]
 For handling CORS requests and responses, see the [AMP CORS spec](https://www.ampproject.org/docs/fundamentals/amp-cors-requests).
-{% endcall %}
+[/tip]
 
 **POST request** JSON fields: `elementId`, `ampUserId`
 
 Use the `ampUserId` field to store that the user has seen the notification before, if you want to avoid showing it in the future. It's the same value that
 will be passed in future requests to `data-show-if-href`.
-
-Example:
 
 ```json
 {"elementId": "id-of-amp-user-notification", "ampUserId": "ampUserIdString"}
@@ -215,7 +206,7 @@ Example:
 
 **POST response** should be a 200 HTTP code and no data is expected back.
 
-##### data-persist-dismissal (optional)
+### data-persist-dismissal (optional)
 
 By default, this is set to `true`. If set to `false`, AMP will not remember the user's dismissal of the notification. The notification
 will always show if the `data-show-if-href` result is show notification. If no `data-show-if-href` is provided
@@ -252,11 +243,9 @@ Example 2:
 </amp-user-notification>
 ```
 
-##### enctype (optional)
+### enctype (optional)
 
 By default, this is set to `application/json;charset=utf-8`. But you can set it to `application/x-www-form-urlencoded`, AMP will send the post dismiss request using this content type instead.
-
-Example:
 
 ```html
 <amp-user-notification
@@ -274,31 +263,13 @@ Example:
 </amp-user-notification>
 ```
 
-## JSON Fields
+## Actions
 
-- `elementId` (string): The HTML ID used on the `amp-user-notification` element.
-- `ampUserId` (string): This ID is passed to both the `data-show-if-href` GET request
-  (as a query string field) and the `data-dismiss-href` POST request (as a json field).
-  The ID will be the same for this user going forward, but no other requests
-  in AMP send the same ID.
-  You can use the ID on your side to lookup/store whether the user has
-  dismissed the notification before.
-- `showNotification` (boolean): Indicates whether the notification should be shown. If `false`, the promise associated to the element is resolved right away.
+The `amp-user-notification` exposes the following actions that you can use [AMP on-syntax to trigger](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events):
 
-## Behavior
+### dismiss (default)
 
-A notification is shown when:
-
-1. There's no record locally that the user has dismissed the notification with the
-   specified ID.
-2. When specified, `data-show-if-href` endpoint returns `{ "showNotification": true }`.
-
-When notification is dismissed:
-
-1. AMP stores the "dismiss" record locally for the specified ID. This will prevent the
-   notification from being shown again.
-2. When specified, `data-dismiss-href` is invoked and can be used to make the "dismiss"
-   record remotely.
+Closes the user notification.
 
 ## Styling
 
@@ -329,29 +300,6 @@ amp-user-notification.amp-active {
   animation: fadeIn ease-in 1s 1 forwards;
 }
 ```
-
-## Actions
-
-The `amp-user-notification` exposes the following actions that you can use [AMP on-syntax to trigger](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events):
-
-<table>
-  <tr>
-    <th>Action</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td>dismiss (default)</td>
-    <td>Closes the user notification; see <a href="#usage">usage</a> for more details.</td>
-  </tr>
-</table>
-
-## Delaying Client ID generation until the notification is acknowledged
-
-Optionally, you can delay generation of Client IDs used for analytics and similar purposes until an `amp-user-notification` is confirmed by the user. See these docs for how to implement this:
-
-- [CLIENT_ID URL substitution](../../spec/amp-var-substitutions.md#client-id)
-- [`amp-ad`](https://amp.dev/documentation/components/amp-ad)
-- [`amp-analytics`](https://amp.dev/documentation/components/amp-analytics)
 
 ## Validation
 

@@ -25,6 +25,7 @@ limitations under the License.
   type="invibes"
   data-pid="placement1"
   data-ad-categ="infeed"
+  data-custom-endpoint="https://k.r66net.com/GetAmpLink"
 >
 </amp-ad>
 ```
@@ -37,6 +38,7 @@ Supported parameters:
 
 - `data-pid`
 - `data-ad-categ`
+- `data-custom-endpoint`
 
 ## User Consent Integration
 

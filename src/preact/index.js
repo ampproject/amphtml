@@ -18,20 +18,30 @@ import * as hooks from /*OK*/ 'preact/hooks';
 import * as preact from /*OK*/ 'preact';
 
 // Defines the type interfaces for the approved Preact APIs.
-// TODO: hydrate, isValidElement, Component, cloneElement, toChildArray
+// TODO: hydrate, isValidElement, Component
 
 /**
- * @param {!Preact.FunctionalComponent|string} unusedType
- * @param {(!Object|null)=} unusedProps
+ * @param {!PreactDef.FunctionalComponent|string} unusedType
+ * @param {?Object=} unusedProps
  * @param {...*} var_args
- * @return {!Preact.VNode}
+ * @return {!PreactDef.VNode}
  */
 export function createElement(unusedType, unusedProps, var_args) {
   return preact.createElement.apply(undefined, arguments);
 }
 
 /**
- * @param {!Preact.VNode} vnode
+ * @param {!PreactDef.VNode} unusedElement
+ * @param {?Object=} unusedProps
+ * @param {...PreactDef.Renderable} unusedChildren
+ * @return {!PreactDef.VNode}
+ */
+export function cloneElement(unusedElement, unusedProps, unusedChildren) {
+  return preact.cloneElement.apply(undefined, arguments);
+}
+
+/**
+ * @param {?PreactDef.VNode} vnode
  * @param {Node} container
  */
 export function render(vnode, container) {
@@ -39,8 +49,8 @@ export function render(vnode, container) {
 }
 
 /**
- * @param {!JsonObject} props
- * @return {Preact.Renderable}
+ * @param {?Object=} props
+ * @return {PreactDef.Renderable}
  */
 export function Fragment(props) {
   return preact.Fragment(props);
@@ -55,15 +65,16 @@ export function createRef() {
 }
 
 /**
- * @param {!Object} value
- * @return {!Preact.Context}
+ * @param {T} value
+ * @return {!PreactDef.Context<T>}
+ * @template T
  */
 export function createContext(value) {
   return preact.createContext(value);
 }
 
 // Defines the type interfaces for the approved Preact Hooks APIs.
-// TODO: useReducer, useImperativeHandle, useMemo, useCallback, useDebugValue, useErrorBoundary
+// TODO: useReducer, useImperativeHandle, useDebugValue, useErrorBoundary
 
 /**
  * @param {S|function():S} initial
@@ -100,9 +111,49 @@ export function useLayoutEffect(effect, opt_deps) {
 }
 
 /**
- * @param {Preact.Context} context
- * @return {!JsonObject}
+ * @param {PreactDef.Context<T>} context
+ * @return {T}
+ * @template T
  */
 export function useContext(context) {
   return hooks.useContext(context);
+}
+
+/**
+ * @param {function():T} cb
+ * @param {!Array<*>=} opt_deps
+ * @return {T}
+ * @template T
+ */
+export function useMemo(cb, opt_deps) {
+  return hooks.useMemo(cb, opt_deps);
+}
+
+/**
+ * @param {T} cb
+ * @param {!Array<*>=} opt_deps
+ * @return {T}
+ * @template T
+ */
+export function useCallback(cb, opt_deps) {
+  return hooks.useCallback(cb, opt_deps);
+}
+
+/**
+ * @param {{current: (T|null)}} ref
+ * @param {function():T} create
+ * @param {!Array<*>=} opt_deps
+ * @return {undefined}
+ * @template T
+ */
+export function useImperativeHandle(ref, create, opt_deps) {
+  return hooks.useImperativeHandle(ref, create, opt_deps);
+}
+
+/**
+ * @param {!PreactDef.Renderable} unusedChildren
+ * @return {!Array<PreactDef.Renderable>}
+ */
+export function toChildArray(unusedChildren) {
+  return preact.toChildArray.apply(undefined, arguments);
 }

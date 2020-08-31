@@ -23,7 +23,7 @@ describes.realWin(
       extensions: ['amp-springboard-player'],
     },
   },
-  env => {
+  (env) => {
     let win, doc;
 
     beforeEach(() => {
@@ -56,7 +56,7 @@ describes.realWin(
         'data-player-id': 'test401',
         'data-domain': 'test.com',
         'data-items': '10',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -75,7 +75,7 @@ describes.realWin(
         'data-player-id': 'test401',
         'data-domain': 'test.com',
         'data-items': '10',
-      }).then(bc => {
+      }).then((bc) => {
         const iframe = bc.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
@@ -151,7 +151,7 @@ describes.realWin(
           'data-player-id': 'test401',
           'data-domain': 'test.com',
           'data-items': '10',
-        }).then(kp => {
+        }).then((kp) => {
           const img = kp.querySelector('amp-img');
           expect(img).to.not.be.null;
           expect(img.getAttribute('src')).to.equal(
@@ -173,7 +173,7 @@ describes.realWin(
           'data-domain': 'test.com',
           'data-items': '10',
           'aria-label': 'sporty video',
-        }).then(kp => {
+        }).then((kp) => {
           const img = kp.querySelector('amp-img');
           expect(img).to.not.be.null;
           expect(img.getAttribute('src')).to.equal(
@@ -198,7 +198,7 @@ describes.realWin(
           'data-player-id': 'test401',
           'data-domain': 'test.com',
           'data-items': '10',
-        }).then(kp => {
+        }).then((kp) => {
           const img = kp.querySelector('amp-img');
           expect(img).to.not.be.null;
           expect(img.getAttribute('src')).to.equal(

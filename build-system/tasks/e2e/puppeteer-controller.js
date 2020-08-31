@@ -173,7 +173,7 @@ class PuppeteerController {
    */
   async evaluate(fn, ...args) {
     const frame = await this.getCurrentFrame_();
-    return await evaluate(frame, fn, ...args);
+    return evaluate(frame, fn, ...args);
   }
 
   /**
@@ -189,17 +189,18 @@ class PuppeteerController {
 
   /**
    * @param {string} selector
+   * @param {number=} timeout
    * @return {!Promise<!ElementHandle<!PuppeteerHandle>>}
    * @override
    */
-  async findElement(selector) {
+  async findElement(selector, timeout = DEFAULT_WAIT_TIMEOUT) {
     const frame = await this.getCurrentFrame_();
     const root = await this.getRoot_();
     const jsHandle = await frame.waitForFunction(
       (root, selector) => {
         return root./*OK*/ querySelector(selector);
       },
-      {timeout: DEFAULT_WAIT_TIMEOUT},
+      {timeout},
       root,
       selector
     );
@@ -317,7 +318,7 @@ class PuppeteerController {
    */
   async getDocumentElement() {
     const root = await this.getRoot_();
-    const getter = root => root.ownerDocument.documentElement;
+    const getter = (root) => root.ownerDocument.documentElement;
     const element = await this.evaluate(getter, root);
     return new ElementHandle(element);
   }
@@ -359,7 +360,7 @@ class PuppeteerController {
    */
   getElementText(handle) {
     const element = handle.getElement();
-    const getter = element => ({value: element./*OK*/ innerText.trim()});
+    const getter = (element) => ({value: element./*OK*/ innerText.trim()});
     return new ControllerPromise(
       this.evaluateValue_(getter, element),
       this.getWaitFn_(getter, element)
@@ -430,7 +431,7 @@ class PuppeteerController {
    */
   getElementRect(handle) {
     const element = handle.getElement();
-    const getter = element => {
+    const getter = (element) => {
       // Extracting the values seems to perform better than returning
       // the raw ClientRect from the element, in terms of flakiness.
       // The raw ClientRect also has hundredths of a pixel. We round to int.
@@ -456,7 +457,7 @@ class PuppeteerController {
       };
     };
     return new ControllerPromise(
-      this.evaluate(getter, element).then(handle => handle.jsonValue()),
+      this.evaluate(getter, element).then((handle) => handle.jsonValue()),
       this.getWaitFn_(getter, element)
     );
   }
@@ -553,10 +554,11 @@ class PuppeteerController {
    * @override
    */
   getTitle() {
-    const title = this.getCurrentFrame_().then(frame => frame.title());
-    return new ControllerPromise(title, () =>
-      this.getCurrentFrame_().then(frame => frame.title())
-    );
+    const title = this.getCurrentFrame_().then((frame) => frame.title());
+    return new ControllerPromise(title, async () => {
+      const frame = await this.getCurrentFrame_();
+      return frame.title();
+    });
   }
 
   /**
@@ -565,7 +567,7 @@ class PuppeteerController {
    */
   async getActiveElement() {
     const root = await this.getRoot_();
-    const getter = root =>
+    const getter = (root) =>
       root.activeElement || root.ownerDocument.activeElement;
     const element = await this.evaluate(getter, root);
     return new ElementHandle(element);
@@ -623,7 +625,7 @@ class PuppeteerController {
    */
   async takeScreenshot(path) {
     const root = new ElementHandle(await this.getRoot_());
-    return await this.takeElementScreenshot(root, path);
+    return this.takeElementScreenshot(root, path);
   }
 
   /**
@@ -647,7 +649,7 @@ class PuppeteerController {
       type: 'png',
     };
     const element = handle.getElement();
-    return await element.screenshot(options);
+    return element.screenshot(options);
   }
 
   /**
@@ -677,7 +679,7 @@ class PuppeteerController {
    * @return {!Promise}
    */
   switchToShadow(handle) {
-    const getter = shadowHost => shadowHost.shadowRoot.body;
+    const getter = (shadowHost) => shadowHost.shadowRoot.body;
     return this.switchToShadowInternal_(handle, getter);
   }
 
@@ -687,7 +689,7 @@ class PuppeteerController {
    * @return {!Promise}
    */
   switchToShadowRoot(handle) {
-    const getter = shadowHost => shadowHost.shadowRoot;
+    const getter = (shadowHost) => shadowHost.shadowRoot;
     return this.switchToShadowInternal_(handle, getter);
   }
 
@@ -714,7 +716,7 @@ class PuppeteerController {
       return this.shadowRoot_;
     }
 
-    return await this.evaluate(() => document.documentElement);
+    return this.evaluate(() => document.documentElement);
   }
 
   /**

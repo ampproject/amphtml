@@ -36,6 +36,8 @@ export function revcontent(global, data) {
 
   const required = ['id', 'height'];
   const optional = [
+    'wrapper',
+    'subIds',
     'revcontent',
     'env',
     'loadscript',
@@ -57,6 +59,9 @@ export function revcontent(global, data) {
     'sizer',
     'debug',
     'ampcreative',
+    'gdpr',
+    'gdprConsent',
+    'usPrivacy',
   ];
 
   data.endpoint = data.endpoint ? data.endpoint : 'trends.revcontent.com';

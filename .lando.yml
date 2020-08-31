@@ -16,8 +16,8 @@
 # 6. If using the Local AMP Chrome Extension, open the popup and configure the Base URL to be https://amphtml.lando.site/
 #
 # Now instead of running `gulp` commands directly, you instead run `lando gulp`. Additionally, some of the common gulp
-# commands have shortcuts, so you can run `lando watch` instead of `lando gulp watch`. For a full list of the shortcuts
-# run `lando help`.
+# commands have shortcuts, so you can run `lando watch` instead of `lando gulp build --watch`. For a full list of the
+# shortcuts run `lando help`.
 #
 # For details on the file format, see <https://docs.lando.dev/config/lando.html>.
 # For more context on this Lando environment for amphtml, see <https://github.com/ampproject/amphtml/pull/23213>.
@@ -46,8 +46,12 @@ tooling:
     cmd: 'yarn gulp'
   watch:
     service: appserver
-    cmd: 'yarn gulp watch'
-    description: 'Watches for changes in files, re-builds when detected'
+    cmd: 'yarn gulp build --watch'
+    description: 'Builds unminified code, watches for changes in files, re-builds when detected'
+  watch-minified:
+    service: appserver
+    cmd: 'yarn gulp dist --watch'
+    description: 'Builds minified code, watches for changes in files, re-builds when detected'
   lint:
     service: appserver
     cmd: 'yarn gulp lint'

@@ -17,10 +17,10 @@
 /**
  * Changes the values of IS_DEV to false and IS_MINIFIED to true.
  * The above said variables are in src/mode.js file.
- * @param {Object} babelTypes
+ * @param {{types: string}} options
  * @return {!Object}
  */
-module.exports = function({types: t}) {
+module.exports = function ({types: t}) {
   return {
     visitor: {
       VariableDeclarator(path) {

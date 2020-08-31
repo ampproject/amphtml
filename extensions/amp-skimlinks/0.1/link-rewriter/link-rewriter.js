@@ -148,18 +148,17 @@ export class LinkRewriter {
    * @public
    */
   onDomUpdated() {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const task = () => {
         return this.scanLinksOnPage_().then(() => {
           this.events.fire({type: EVENTS.PAGE_SCANNED});
           resolve();
         });
       };
-      const elementOrShadowRoot =
-        /** @type {!Element|!ShadowRoot} */ (this.rootNode_.nodeType ==
-        Node.DOCUMENT_NODE
-          ? this.rootNode_.documentElement
-          : this.rootNode_);
+      const elementOrShadowRoot = /** @type {!Element|!ShadowRoot} */ (this
+        .rootNode_.nodeType == Node.DOCUMENT_NODE
+        ? this.rootNode_.documentElement
+        : this.rootNode_);
       chunk(elementOrShadowRoot, task, ChunkPriority.LOW);
     });
   }
@@ -191,7 +190,7 @@ export class LinkRewriter {
     // handlers. (Other anchors are assumed to be the ones exluded by
     // linkSelector_)
     this.anchorReplacementCache_.updateReplacementUrls(
-      unknownAnchors.map(anchor => ({anchor, replacementUrl: null}))
+      unknownAnchors.map((anchor) => ({anchor, replacementUrl: null}))
     );
     const twoStepsResponse = this.resolveUnknownLinks_(unknownAnchors);
     userAssert(
@@ -207,7 +206,7 @@ export class LinkRewriter {
     }
     // Anchors for which the status needs to be resolved asynchronously
     if (twoStepsResponse.asyncResponse) {
-      return twoStepsResponse.asyncResponse.then(data => {
+      return twoStepsResponse.asyncResponse.then((data) => {
         this.anchorReplacementCache_.updateReplacementUrls(data);
       });
     }
@@ -224,7 +223,7 @@ export class LinkRewriter {
    */
   getUnknownAnchors_(anchorList) {
     const unknownAnchors = [];
-    anchorList.forEach(anchor => {
+    anchorList.forEach((anchor) => {
       // If link is not already in cache
       if (!this.isWatchingLink(anchor)) {
         unknownAnchors.push(anchor);

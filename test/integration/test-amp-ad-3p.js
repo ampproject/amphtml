@@ -23,17 +23,17 @@ function createFixture() {
   return createFixtureIframe('test/fixtures/3p-ad.html', 3000, () => {});
 }
 
-describe.configure().run('amp-ad 3P', () => {
+describe('amp-ad 3P', () => {
   let fixture;
 
   beforeEach(() => {
-    return createFixture().then(f => {
+    return createFixture().then((f) => {
       fixture = f;
       installPlatformService(fixture.win);
     });
   });
 
-  it('create an iframe with APIs', function() {
+  it('create an iframe with APIs', async function () {
     this.timeout(20000);
     let iframe;
     let lastIO = null;
@@ -46,9 +46,9 @@ describe.configure().run('amp-ad 3P', () => {
       undefined,
       5000
     )
-      .then(iframeElement => {
+      .then((iframeElement) => {
         iframe = iframeElement;
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           if (iframe.contentWindow.context) {
             resolve(iframe.contentWindow.context);
           }
@@ -58,7 +58,7 @@ describe.configure().run('amp-ad 3P', () => {
           };
         });
       })
-      .then(context => {
+      .then((context) => {
         expect(context.canary).to.be.a('boolean');
         expect(context.canonicalUrl).to.equal(
           'https://www.example.com/doubleclick.html'
@@ -187,21 +187,83 @@ describe.configure().run('amp-ad 3P', () => {
           5000
         );
       })
-      .then(() => {
+      .then(async function () {
         lastIO = null;
-        iframe.contentWindow.context.observeIntersection(changes => {
+        // Ad is fully visible
+        iframe.contentWindow.context.observeIntersection((changes) => {
           lastIO = changes[changes.length - 1];
         });
-        fixture.win.scrollTo(0, 1000);
-        fixture.win.document.body.dispatchEvent(new Event('scroll'));
-        return poll('wait for new IO entry', () => {
-          return lastIO != null;
+        await poll('wait for initial IO entry', () => {
+          return (
+            lastIO != null &&
+            lastIO.boundingClientRect.top == 1000 &&
+            lastIO.intersectionRatio == 1
+          );
         });
+        await new Promise((resolve) => {
+          setTimeout(resolve, 110);
+        });
+        lastIO = null;
+
+        // Ad is still fully visible. observeIntersection fire when
+        // ads is fully visible with position change
+        fixture.win.scrollTo(0, 1000);
+        fixture.win.dispatchEvent(new Event('scroll'));
+        await poll('wait for new IO entry when ad is fully visible', () => {
+          return (
+            lastIO != null &&
+            lastIO.boundingClientRect.top == (platform.isIos() ? 1 : 0) &&
+            lastIO.intersectionRatio == 1
+          );
+        });
+        await new Promise((resolve) => {
+          setTimeout(resolve, 110);
+        });
+        lastIO = null;
+
+        // Ad is partially visible (around 50%)
+        fixture.win.scrollTo(0, 1125);
+        fixture.win.dispatchEvent(new Event('scroll'));
+        await poll(
+          'wait for new IO entry when intersectionRatio changes',
+          () => {
+            return (
+              lastIO != null &&
+              lastIO.intersectionRatio > 0 &&
+              lastIO.intersectionRatio < 1
+            );
+          }
+        );
+
+        await new Promise((resolve) => {
+          setTimeout(resolve, 110);
+        });
+        lastIO = null;
+
+        // Ad first becomes invisible
+        fixture.win.scrollTo(0, 1251);
+        fixture.win.dispatchEvent(new Event('scroll'));
+        await poll('wait for new IO entry when ad exit viewport', () => {
+          return lastIO != null && lastIO.intersectionRatio == 0;
+        });
+
+        await new Promise((resolve) => {
+          setTimeout(resolve, 110);
+        });
+        lastIO = null;
+
+        // Scroll when ad is invisible
+        fixture.win.scrollTo(0, 1451);
+        fixture.win.dispatchEvent(new Event('scroll'));
+        await new Promise((resolve) => {
+          setTimeout(resolve, 100);
+        });
+        expect(lastIO).to.be.null;
       })
       .then(
         () =>
           new Promise((resolve, reject) => {
-            iframe.contentWindow.context.getHtml('a', ['href'], content => {
+            iframe.contentWindow.context.getHtml('a', ['href'], (content) => {
               if (content == '<a href="http://test.com/test">Test link</a>') {
                 resolve();
               } else {

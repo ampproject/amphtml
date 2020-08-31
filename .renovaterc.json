@@ -4,15 +4,127 @@
     "supportPolicy": ["lts_active"]
   },
   "statusCheckVerify": true,
+  "ignorePaths": [],
+
   "commitMessagePrefix": "📦",
-  "dependencies": {
-    "enabled": false
-  },
-  "includePaths": [
-    "package.json",
-    "build-system/tasks/e2e/package.json",
-    "build-system/tasks/visual-diff/package.json",
-    "src/purifier/package.json",
-    "validator/package.json"
+  "timezone": "America/Los_Angeles",
+  "schedule": "after 12am every weekday",
+
+  "masterIssue": true,
+  "prBodyColumns": ["Package", "Update", "Type", "Change", "Package file"],
+  "separateMinorPatch": true,
+  "prBodyNotes": [
+    "<details>",
+    "<summary>How to resolve breaking changes</summary>",
+    "This PR may introduce breaking changes that require manual intervention. In such cases, you will need to check out this branch, fix the cause of the breakage, and commit the fix to ensure a green Travis build. To check out and update this PR, follow the steps below:",
+    "```sh\n# Check out the PR branch (these steps are from GitHub)\ngit checkout -b renovate-bot-{{{branchName}}} master\ngit pull https://github.com/renovate-bot/amphtml.git {{{branchName}}}\n\n# Directly make fixes and commit them\ngulp lint --fix # For lint errors in JS files\ngulp prettify --fix # For prettier errors in non-JS files\n# Edit source code in case of new compiler warnings / errors\n\n# Push the changes to the branch\ngit push git@github.com:renovate-bot/amphtml.git renovate-bot-{{{branchName}}}:{{{branchName}}}\n```",
+    "</details>"
+  ],
+
+  "packageRules": [
+    {
+      "paths": ["**/*"],
+      "groupName": "subpackage devDependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "subpackage-"
+      }
+    },
+    {
+      "paths": ["src/**"],
+      "labels": ["WG: runtime"],
+
+      "groupName": "runtime devDependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "runtime-"
+      }
+    },
+
+    {
+      "paths": ["build-system/**"],
+      "labels": ["WG: infra"],
+
+      "groupName": "build system devDependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "build-system-"
+      }
+    },
+
+    {
+      "paths": ["validator/**"],
+      "labels": ["WG: caching"],
+
+      "groupName": "validator devDependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "validator-"
+      }
+    },
+
+    {
+      "paths": ["+(package.json)"],
+
+      "groupName": "core devDependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "core-"
+      }
+    },
+
+    {
+      "packagePatterns": ["\\b(prettier|eslint)\\b"],
+
+      "groupName": "linting devDependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "linting-"
+      }
+    },
+
+    {
+      "packagePatterns": ["\\bbabel"],
+
+      "groupName": "babel devDependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "babel-"
+      }
+    },
+
+    {
+      "packagePatterns": ["renovate"],
+      "depTypeList": ["devDependencies"],
+      "groupName": "Renovate Bot"
+    },
+
+    {
+      "excludePackagePatterns": ["^@ampproject/"],
+      "depTypeList": ["dependencies"],
+      "enabled": false
+    },
+
+    {
+      "packagePatterns": ["^@ampproject/"],
+      "depTypeList": ["devDependencies"],
+
+      "groupName": "ampproject devDependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "ampproject-"
+      }
+    },
+
+    {
+      "packagePatterns": ["^@ampproject/"],
+      "depTypeList": ["dependencies"],
+
+      "groupName": "ampproject dependencies",
+      "major": {
+        "groupName": null,
+        "managerBranchPrefix": "ampproject-"
+      }
+    }
   ]
 }

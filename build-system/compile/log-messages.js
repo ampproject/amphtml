@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs-extra');
 const log = require('fancy-log');
 const {cyan} = require('colors');
@@ -23,7 +24,9 @@ const pathPrefix = 'dist/log-messages';
  * Source of truth for extracted messages during build, but should not be
  * deployed. Shaped `{message: {id, message, ...}}`.
  */
-const extractedPath = `${pathPrefix}.by-message.json`;
+const extractedPath = `${pathPrefix}${
+  argv.esm ? '-mjs' : 'js'
+}.by-message.json`;
 
 const formats = {
   // Consumed by logging server. Format may allow further fields.
@@ -34,7 +37,8 @@ const formats = {
 };
 
 /** @return {!Promise<!Array<!Object>>} */
-const extractedItems = () => fs.readJson(extractedPath).then(Object.values);
+const extractedItems = async () =>
+  fs.readJson(extractedPath).then(Object.values);
 
 /**
  * Format extracted messages table in multiple outputs, keyed by id.
@@ -45,7 +49,7 @@ async function formatExtractedMessages() {
   return Promise.all(
     Object.entries(formats).map(async ([path, format]) => {
       const formatted = {};
-      items.forEach(item => (formatted[item.id] = format(item)));
+      items.forEach((item) => (formatted[item.id] = format(item)));
       await fs.outputJson(path, formatted);
       log('Formatted', cyan(path));
     })

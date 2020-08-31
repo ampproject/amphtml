@@ -28,7 +28,7 @@ describes.fakeWin(
   {
     amp: false,
   },
-  env => {
+  (env) => {
     const interval = PERCENTAGE_INTERVAL;
 
     let mockTimer;
@@ -80,7 +80,7 @@ describes.fakeWin(
       const {win, sandbox} = env;
 
       mockTimer = {
-        delay: sandbox.stub().callsFake(fn => {
+        delay: sandbox.stub().callsFake((fn) => {
           mockTimerCallback = fn;
         }),
       };
@@ -135,7 +135,7 @@ describes.fakeWin(
         expect(mockTimer.delay).to.have.been.calledOnce;
       });
 
-      [0, NaN, -1, undefined, null].forEach(invalidDuration => {
+      [0, NaN, -1, undefined, null].forEach((invalidDuration) => {
         it(`aborts if duration is invalid (${invalidDuration})`, () => {
           const {video} = mockEntry;
           const {element} = video;
@@ -152,7 +152,7 @@ describes.fakeWin(
       // TODO(#25954): This test is a bit specific and odd, but replicates
       // what we see in prod. Possibly remove when root cause for video with
       // duration => no duration is found.
-      [0, NaN, -1, undefined, null].forEach(invalidDuration => {
+      [0, NaN, -1, undefined, null].forEach((invalidDuration) => {
         it(`aborts if duration is ${invalidDuration} after initially valid`, () => {
           const {video} = mockEntry;
           const durationStub = env.sandbox.stub(video, 'getDuration');

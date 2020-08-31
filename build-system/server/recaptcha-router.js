@@ -32,7 +32,7 @@ window.grecaptcha = {
 
 const recaptchaFrameRequestHandler = (req, res, next) => {
   if (argv._.includes('unit') || argv._.includes('integration')) {
-    fs.promises.readFile(pc.cwd() + req.path, 'utf8').then(file => {
+    fs.promises.readFile(pc.cwd() + req.path, 'utf8').then((file) => {
       file = file.replace(
         /initRecaptcha\(.*\)/g,
         'initRecaptcha("/recaptcha/mock.js?sitekey=")'
@@ -55,12 +55,12 @@ recaptchaRouter.post('/submit', upload.array(), (req, res) => {
     message: 'Success!',
   };
 
-  Object.keys(req.body).forEach(bodyKey => {
+  Object.keys(req.body).forEach((bodyKey) => {
     responseJson[bodyKey] = req.body[bodyKey];
   });
 
   const containsRecaptchaInResponse = Object.keys(responseJson).some(
-    responseJsonKey => {
+    (responseJsonKey) => {
       return responseJsonKey.toLowerCase().includes('recaptcha');
     }
   );

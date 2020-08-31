@@ -15,6 +15,10 @@
  */
 
 /**
+ * @fileoverview CSS specifically for non-AMP4ADS formats.
+ */
+
+/**
  * Horizontal scrolling interferes with embedded scenarios and predominantly
  * the result of the non-responsive design.
  *
@@ -241,7 +245,7 @@ amp-live-list > [update] {
 /**
  * Display none elements
  */
-amp-experiment, amp-share-tracking {
+amp-experiment {
   display: none;
 }
 
@@ -277,6 +281,20 @@ amp-list[load-more] [load-more-end]
 }
 
 /**
+ * amp-list error messaging container should be hidden at first.
+ */
+ amp-list [fetch-error] {
+  display: none;
+}
+
+/**
+ * amp-list initial content should be displayed (similar to placeholder).
+ */
+amp-list[diffable] div[role="list"] {
+  display: block;
+}
+
+/**
  * amp-story
  */
 amp-story[standalone], amp-story-page {
@@ -299,7 +317,11 @@ amp-story-page {
   background-color: #757575;
 }
 
-amp-story .amp-active > div {
+/* Hide amp-loader in stories
+ * TODO(maxbittker): remove after amp-loader is no longer imported in stories
+ */
+amp-story .amp-active > div,
+amp-story .i-amphtml-loader-background {
   display: none !important;
 }
 
@@ -343,5 +365,18 @@ amp-autocomplete > textarea,
  * doesn't push the preset's defaults into v0.js making it larger.
  */
 [amp-fx^="fly-in"] {
+  visibility: hidden;
+}
+
+/**
+ * amp-script[nodom] is an element with no UI, similar to amp-analytics.
+ */
+amp-script[nodom] {
+  /* Fixed to make position independent of page other elements. */
+  position: fixed !important;
+  top: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
   visibility: hidden;
 }

@@ -32,7 +32,7 @@ describes.endtoend(
     //TODO(spaharmi): fails on shadow demo
     environments: ['single', 'viewer-demo'],
   },
-  async function(env) {
+  async function (env) {
     let controller;
     let prevArrow;
     let nextArrow;

@@ -23,9 +23,13 @@ import {
 } from '../../amp-script';
 import {FakeWindow} from '../../../../../testing/fake-dom';
 import {Services} from '../../../../../src/services';
+import {
+  registerServiceBuilderForDoc,
+  resetServiceForTesting,
+} from '../../../../../src/service';
 import {user} from '../../../../../src/log';
 
-describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
+describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, (env) => {
   let element;
   let script;
   let service;
@@ -52,14 +56,16 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
       .resolves({text: () => Promise.resolve('/* noop */')});
     env.sandbox.stub(Services, 'xhrFor').returns(xhr);
 
-    // Make @ampproject/worker-dom dependency a no-op for these unit tests.
-    env.sandbox.stub(WorkerDOM, 'upgrade').resolves();
+    // Make @ampproject/worker-dom dependency essentially a noop for these tests.
+    env.sandbox
+      .stub(WorkerDOM, 'upgrade')
+      .callsFake((unused, scriptsPromise) => scriptsPromise);
   });
 
   function stubFetch(url, headers, text, responseUrl) {
     xhr.fetchText.withArgs(url).resolves({
       headers: {
-        get: h => headers[h],
+        get: (h) => headers[h],
       },
       text: () => Promise.resolve(text),
       url: responseUrl || url,
@@ -76,7 +82,35 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
       'alert(1)'
     );
 
+    expectAsyncConsoleError(/Same-origin "src" requires/);
     return script.layoutCallback().should.be.rejected;
+  });
+
+  it('should support nodom variant', async () => {
+    element.setAttribute('nodom', '');
+    element.setAttribute('src', 'https://foo.example/foo.txt');
+    env.sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
+    stubFetch(
+      'https://foo.example/foo.txt',
+      {'Content-Type': 'text/javascript; charset=UTF-8'}, // Valid content-type.
+      'alert(1)'
+    );
+
+    xhr.fetchText
+      .withArgs(env.sandbox.match(/amp-script-worker-0.1.js/))
+      .rejects();
+    xhr.fetchText
+      .withArgs(env.sandbox.match(/amp-script-worker-nodom-0.1.js/))
+      .resolves({text: () => Promise.resolve('/* noop */')});
+    registerServiceBuilderForDoc(
+      env.win.document,
+      'amp-script',
+      AmpScriptService
+    );
+
+    await script.buildCallback();
+    await script.layoutCallback();
+    resetServiceForTesting(env.win, 'amp-script');
   });
 
   it('should work with "text/javascript" content-type for same-origin src', () => {
@@ -89,6 +123,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
       'alert(1)'
     );
 
+    expectAsyncConsoleError(/should require JS content-type/);
     return script.layoutCallback().should.be.fulfilled;
   });
 
@@ -105,6 +140,21 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
     service.checkSha384.withArgs('alert(1)').resolves();
     await script.layoutCallback();
     expect(service.checkSha384).to.be.called;
+  });
+
+  it('callFunction waits for initialization to complete before returning', async () => {
+    element.setAttribute('script', 'local-script');
+    const result = script.callFunction('fetchData');
+    script.workerDom_ = {
+      callFunction(fnIdent) {
+        if (fnIdent === 'fetchData') {
+          return Promise.resolve(42);
+        }
+        return Promise.reject();
+      },
+    };
+    script.initialize_.resolve();
+    expect(await result).to.equal(42);
   });
 
   describe('Initialization skipped warning due to zero height/width', () => {
@@ -197,45 +247,31 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
   });
 
   describe('development mode', () => {
+    beforeEach(() => {
+      registerServiceBuilderForDoc(
+        env.win.document,
+        'amp-script',
+        AmpScriptService
+      );
+    });
+    afterEach(() => {
+      resetServiceForTesting(env.win, 'amp-script');
+    });
+
     it('should not be in dev mode by default', () => {
       script.buildCallback();
       expect(script.development_).false;
     });
 
-    it('data-ampdevmode on just the element should not enable dev mode', () => {
-      element.setAttribute('data-ampdevmode', true);
-      script = new AmpScript(element);
-      script.buildCallback();
-      expect(script.development_).false;
-    });
-
-    it('data-ampdevmode on just the root html element should not enable dev mode', () => {
-      element.ownerDocument.documentElement.setAttribute(
-        'data-ampdevmode',
-        true
-      );
-      script = new AmpScript(element);
-      script.buildCallback();
-      expect(script.development_).false;
-    });
-
-    it('data-ampdevmode on both the element and root html element should enable dev mode', () => {
-      element.setAttribute('data-ampdevmode', true);
-      element.ownerDocument.documentElement.setAttribute(
-        'data-ampdevmode',
-        true
-      );
+    it('data-ampdevmode on just the element should enable dev mode', () => {
+      element.setAttribute('data-ampdevmode', '');
       script = new AmpScript(element);
       script.buildCallback();
       expect(script.development_).true;
     });
 
-    it('data-ampdevmode on both the element and a parent element should enable dev mode', () => {
-      element.ownerDocument.documentElement.setAttribute(
-        'data-ampdevmode',
-        true
-      );
-      element.ownerDocument.body.setAttribute('data-ampdevmode', true);
+    it('data-ampdevmode on just the root html element should enable dev mode', () => {
+      element.ownerDocument.documentElement.setAttribute('data-ampdevmode', '');
       script = new AmpScript(element);
       script.buildCallback();
       expect(script.development_).true;
@@ -258,7 +294,7 @@ describes.repeated(
           ampdoc: variant.ampdoc,
         },
       },
-      env => {
+      (env) => {
         let crypto;
         let service;
 
@@ -291,6 +327,7 @@ describes.repeated(
           });
 
           it('should reject if hash does not exist in meta tag', () => {
+            expectAsyncConsoleError(/Script hash not found/);
             createMetaHash('amp-script-src', 'sha384-another_fake_hash');
 
             service = new AmpScriptService(env.ampdoc);
@@ -566,6 +603,7 @@ describe('SanitizerImpl', () => {
     });
 
     it('AMP.setState(not_json)', async () => {
+      expectAsyncConsoleError(/Invalid AMP.setState/);
       await s.setStorage(
         StorageLocation.AMP_STATE,
         /* key */ null,

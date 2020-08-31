@@ -2,7 +2,6 @@
 $category@: social
 formats:
   - websites
-  - stories
 teaser:
   text: Displays a Gfycat video GIF.
 ---
@@ -24,31 +23,6 @@ limitations under the License.
 -->
 
 # amp-gfycat
-
-Displays a <a href="https://gfycat.com/">Gfycat</a> video GIF.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-gfycat" src="https://cdn.ampproject.org/v0/amp-gfycat-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, responsive</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td>
-      <ul>
-      <li><a href="https://amp.dev/documentation/examples/components/amp-gfycat/">Annotated code example for amp-gfycat</a></li>
-      <li>Other example: <a href="https://github.com/ampproject/amphtml/blob/master/examples/gfycat.amp.html">Source</a>,
-      <a href="https://raw.githack.com/ampproject/amphtml/master/examples/gfycat.amp.html">Rendered</a></li>
-    </ul>
-    </td>
-  </tr>
-</table>
-
-[TOC]
 
 ## Example
 

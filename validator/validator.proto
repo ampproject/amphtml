@@ -20,6 +20,7 @@ package amp.validator;
 // Used for validating attributes that require another attribute for some
 // given set of conditions.
 // E.g. attr name: "on" if_value_regex: "tap:.*" also_require_attr: "role"
+// NEXT AVAILABLE TAG: 3
 message AttrTriggerSpec {
   // If set, attribute's value must match to also require attribute(s).
   // If not set, attribute automatically also require attribute(s).
@@ -33,6 +34,7 @@ message AttrTriggerSpec {
 // Used for validating properties in attribute values. Our validator
 // (via parse-viewport.h) implements the parsing algorithm as described here:
 // https://drafts.csswg.org/css-device-adapt/#parsing-algorithm
+// NEXT AVAILABLE TAG: 5
 message PropertySpec {
   // Must be lowercase, and will be matched case-insensitively.
   optional string name = 1;
@@ -47,11 +49,13 @@ message PropertySpec {
   // } end oneof
 }
 
+// NEXT AVAILABLE TAG: 2
 message PropertySpecList {
   repeated PropertySpec properties = 1;
 }
 
 // Used for validating urls in attribute values (such as href/src/srcset).
+// NEXT AVAILABLE TAG: 5
 message UrlSpec {
   // protocol must be in lowercase (e.g. "javascript" not "JavaScript").
   repeated string protocol = 1;
@@ -63,19 +67,24 @@ message UrlSpec {
   // reserved 4;
 }
 
-// NEXT AVAILABLE TAG: 3
+// NEXT AVAILABLE TAG: 4
 message CssDeclaration {
   // The name of the declaration (e.g. display). Use lower-case attribute names
   // only.
   optional string name = 1;
+
+  // This would be a oneof, but this file only uses features in protobuf 2.5.0.
+  // begin oneof {
   // The valid values of the declaration (e.g. block).
   repeated string value_casei = 2;
+  optional string value_regex_casei = 3;
+  // } end oneof
 }
 
 // Attributes that are not covered by at least one of these specs are
 // disallowed. Within a given context (e.g., for a given TagSpec),
 // names are unique.
-// NEXT AVAILABLE TAG: 27
+// NEXT AVAILABLE TAG: 29
 message AttrSpec {
   // If provided, the Type Identifier(s) that either enable or disable
   // this AttrSpec. If a Type Identifier is in enabled_by then this
@@ -106,7 +115,7 @@ message AttrSpec {
   // begin oneof {
 
   // If none of these are set, any value is accepted unless
-  // blacklisted_value_regex is set. Note that prior to comparing, the
+  // disallowed_value_regex is set. Note that prior to comparing, the
   // attributes in a given HTML document will be unescaped.
 
   // The attribute value must be equal to the value in this field.
@@ -117,6 +126,12 @@ message AttrSpec {
   optional UrlSpec value_url = 14;
   // validates against a list of properties (see PropertySpec).
   optional PropertySpecList value_properties = 11;
+  // If set, the attribute value will be evaluated using the matching document
+  // level CSS rules. This flag is used for `style` attributes. If
+  // `value_doc_css` is set, only non-SVG css is applied. If `value_doc_css_svg`
+  // is set, SVG-specific CSS rules are also allowed for this attribute value.
+  optional bool value_doc_css = 27;
+  optional bool value_doc_svg_css = 28;
   // } end oneof
 
   // These two fields specify that values from one AttrSpec refer to values from
@@ -128,6 +143,7 @@ message AttrSpec {
   //   add_value_to_set: TEMPLATE_IDS
   // and in any "template" AttrSpec, we have:
   //   value_oneof_set: TEMPLATE_IDS
+  // NEXT AVAILABLE TAG: 3
   enum ValueSet {
     UNKNOWN_VALUESET = 0;  // Never used
     TEMPLATE_IDS = 1;      // <template id> values
@@ -140,7 +156,7 @@ message AttrSpec {
 
   // If set, then the attribute value may not match this regex, which is
   // always applied case-insensitively and as a partial match.
-  optional string blacklisted_value_regex = 6;
+  optional string disallowed_value_regex = 6;
   // If set, generates a DEPRECATED_ATTR error with severity WARNING.
   // The value of the deprecation field indicates what to use instead,
   // e.g. the name of an attribute or tag.
@@ -183,6 +199,7 @@ message AttrSpec {
 
 // Some tags share several attributes, so they're identified by unique key
 // (see the attr_lists map in ValidatorRules).
+// NEXT AVAILABLE TAG: 3
 message AttrList {
   optional string name = 1;
   repeated AttrSpec attrs = 2;
@@ -190,20 +207,31 @@ message AttrList {
 
 // A list of allowed tags for descendants of any level (children, grandchildren,
 // great-grandchildren, etc).
+// NEXT AVAILABLE TAG: 3
 message DescendantTagList {
   optional string name = 1;
   repeated string tag = 2;
 }
 
+// Some style blocks share long lists of declarations, so they're identified by
+// unique key.
+// NEXT AVAILABLE TAG: 3
+message DeclarationList {
+  optional string name = 1;
+  repeated CssDeclaration declaration = 2;
+}
+
 // Regex which, if matches the cdata of a tag, causes the tag validation to
 // fail.
-message BlackListedCDataRegex {
+// NEXT AVAILABLE TAG: 3
+message DisallowedCDataRegex {
   // Syntax is partial match, use ^ and $ if you want global match.
   optional string regex = 1;
   optional string error_message = 2;
 }
 
 // This spec is used when parsing a media query inside a CSS @media rule.
+// NEXT AVAILABLE TAG: 5
 message MediaQuerySpec {
   // If issues_as_error is true, then parsing errors and invalid
   // types / features will be treated as validator errors, otherwise warnings.
@@ -214,25 +242,35 @@ message MediaQuerySpec {
   repeated string feature = 3;
 }
 
-// This spec is used by our CSS parser to determine how the contents of a given
-// AT rule should be parsed, if at all. The term 'rule' here refers to the AT
-// Rule in CSS, not a validation rule.
+// This spec is used when parsing a CSS selector group as the prelude of a CSS
+// qualified rule. For example "div.foo span.bar". If no SelectorSpec is
+// provided, the selector groups are unconstrained.
+// NEXT AVAILABLE TAG: 4
+message SelectorSpec {
+  // For each SelectorSpec list provided a single list element value of "*"
+  // indicates that any value is allowed (ie: that feature is unconstrained).
+  // An empty list indicates that no value is allowed (ie: that feature is
+  // disallowed). Otherwise, the list values are the only allowed values.
+
+  // Allowed attribute selector names. For example `foo` in the selector
+  // `.a[foo=bar]`.
+  repeated string attribute_name = 1;
+
+  // Allowed pseudo class names. For example `checked` in `.a:checked`.
+  repeated string pseudo_class = 2;
+
+  // Allowed pseudo element names. For example `before` in `.a::before`.
+  repeated string pseudo_element = 3;
+}
+
+// This spec is used by our CSS parser to determine what AT rules are allowed
+// in the CSS spec. The term 'rule' here refers to the AT Rule in CSS, not a
+// validation rule.
+// NEXT AVAILABLE TAG: 4
 message AtRuleSpec {
-  enum BlockType {
-    // Invalid, ignore contents.
-    PARSE_AS_ERROR = 0;
-    // Valid, ignore contents.
-    PARSE_AS_IGNORE = 1;
-    // Valid, parse contents (as CSS rules).
-    PARSE_AS_RULES = 2;
-    // Valid, parse contents (as CSS declarations).
-    PARSE_AS_DECLARATIONS = 3;
-  }
   // Name of the AT rule to parse. Do not include the '@' symbol (e.g. '@media'
-  // should be encoded as 'media'. A value of '$DEFAULT' indicates the default
-  // AT rule which will match any AT rule not present in any other AtRuleSpec.
+  // should be encoded as 'media'.
   optional string name = 1;
-  optional BlockType type = 2 [default = PARSE_AS_ERROR];
 
   // A MediaQuerySpec may only be set for an AtRuleSpec with the name
   // "media". If not set, media queries will be left unparsed, so no errors or
@@ -240,14 +278,11 @@ message AtRuleSpec {
   optional MediaQuerySpec media_query_spec = 3;
 }
 
-// NEXT AVAILABLE TAG: 8
+// NEXT AVAILABLE TAG: 10
 message CssSpec {
   // Spec for how to parse CSS AT rules, one per AT rule. Must not contain
   // duplicate names, and must contain at least one entry for the default.
   repeated AtRuleSpec at_rule_spec = 1;
-  // urls within the CSS are checked against this spec.
-  optional UrlSpec image_url_spec = 3;
-  optional UrlSpec font_url_spec = 4;
 
   // Enables checks specific to the draft A4A specification.
   // TODO(powdercloud): Make this more generic.
@@ -259,17 +294,26 @@ message CssSpec {
 
   // Any declaration listed here are allowed.
   repeated string declaration = 7;
+
+  // If fase, declarations tagged with `!important` are considered errors.
+  // Most AMP stylesheets disallow `!important` to reserve this override
+  // for AMP's own styles.
+  optional bool allow_important = 8 [default = false];
+
+  optional SelectorSpec selector_spec = 9;
+
+  // Deprecated fields, do not reuse.
+  // reserved 3, 4;
 }
 
-// NEXT AVAILABLE TAG: 10
+// NEXT AVAILABLE TAG: 12
 message CdataSpec {
-  // If set, the cdata contents cannot be greater than this length, in bytes.
+  // If set, the cdata contents cannot be greater than this length, in bytes. A
+  // value of -2 (default) indicates that there is no limit (unlimited). A value
+  // of -1 will always cause validation failure on match. -1 is used to
+  // implement the `amp-custom-length-check` attribute:
+  // (https://github.com/ampproject/amphtml/issues/22315#issuecomment-496681165)
   optional int32 max_bytes = 1 [default = -2];
-  // If false, bytes inside URLs are not included in the byte calculation for
-  // max_bytes. This is used for handling signed exchange transformations which
-  // can potentially take the number of bytes over the 75,000 byte limit due
-  // to rewriting URLs to point at an AMP Cache.
-  optional bool url_bytes_included = 9 [default = true];
   // If provided, a URL which linking to a section / sentence in the
   // AMP HTML spec.
   optional string max_bytes_spec_url = 2;
@@ -290,10 +334,14 @@ message CdataSpec {
   // } end oneof
 
   // If any of these regexes match, then this cdata spec does not validate.
-  repeated BlackListedCDataRegex blacklisted_cdata_regex = 4;
+  repeated DisallowedCDataRegex disallowed_cdata_regex = 4;
+
+  // If true, the contents of this tag's CDATA text will be counted against the
+  // document level DocCssSpec CSS lengths.
+  optional bool doc_css_bytes = 11;
 
   // Deprecated fields, do not reuse.
-  // reserved 5;
+  // reserved 5, 9;
 }
 
 // Specifies which AMP Layouts are supported by a given element.
@@ -305,7 +353,9 @@ message CdataSpec {
 // so that a user gets more clearly informed about which layouts are
 // applicable to a given tag, what happens when layout attribute or other
 // attributes are not set, etc.
+// NEXT AVAILABLE TAG: 4
 message AmpLayout {
+  // NEXT AVAILABLE TAG: 10
   enum Layout {
     UNKNOWN = 0;
     NODISPLAY = 1;
@@ -321,7 +371,7 @@ message AmpLayout {
   // Specifies which layouts are supported by this element.
   repeated Layout supported_layouts = 1;
   // Specifies whether this element has default dimensions. This corresponds
-  // to being whitelisted in naturalDimensions_ in
+  // to being allowlisted in naturalDimensions_ in
   // https://github.com/ampproject/amphtml/blob/master/src/layout.js.
   optional bool defines_default_width = 2;
   optional bool defines_default_height = 3;
@@ -331,7 +381,9 @@ message AmpLayout {
 // When a TagSpec with an AncestorMarker matches, this Marker is placed on the
 // stack until the matched html tag is popped from the stack. Other rules may be
 // triggered by the presence of a specific AncestorMarker on the stack.
+// NEXT AVAILABLE TAG: 2
 message AncestorMarker {
+  // NEXT AVAILABLE TAG: 2
   enum Marker {
     UNKNOWN = 0;
     // Set by <amp-sidebar> tags to allow autoscroll attributes on descendants.
@@ -351,6 +403,7 @@ message AncestorMarker {
 // could not be determined because the enclosed child tag is invalid
 // (no TagSpec matches). By doing a tag name match, we can produce a
 // reasonable error regardless if a child tag was misplaced.
+// NEXT AVAILABLE TAG: 5
 message ChildTagSpec {
   // Unless set to -1 (the default), the parent tag must have exactly
   // |mandatory_num_child_tags| immediate child tags.
@@ -387,6 +440,7 @@ message ChildTagSpec {
 // The complexity of this mechanism is unfortunate but reduces the markup
 // required and makes CSS styling more convenient. Please see
 // the amp-live-list specification for an example.
+// NEXT AVAILABLE TAG: 4
 message ReferencePoint {
   // A tag spec identified by its TagSpec::spec_name which specifies how
   // a specific functionality for the parent tag is assigned.
@@ -415,6 +469,7 @@ message ExtensionSpec {
 
   // Most extensions are custom-elements. For custom-template extensions, this
   // value needs to be set true. E.g: amp-mustache.
+  // NEXT AVAILABLE TAG: 4
   enum ExtensionType {
     UNKNOWN = 0;
     CUSTOM_ELEMENT = 1;
@@ -444,6 +499,7 @@ message ExtensionSpec {
   //   2) Some extensions, such as `amp-dynamic-css-classes`, do not have any
   //      associated tag in the document indicating usage. These extensions do
   //      not trigger warnings or errors.
+  // NEXT AVAILABLE TAG: 4
   enum ExtensionUsageRequirement {
     ERROR = 1;
     // Exception for exempted extensions. #1 above.
@@ -462,21 +518,24 @@ message ExtensionSpec {
 // with Request.HtmlFormat in
 // github.com/ampproject/amppackager/transformer/request/request.proto.
 message HtmlFormat {
+  // NEXT AVAILABLE TAG: 6
   enum Code {
     UNKNOWN_CODE = 0;  // Never used
     AMP = 1;
     AMP4ADS = 2;
     AMP4EMAIL = 3;
-    ACTIONS = 5;
     EXPERIMENTAL = 4;  // Currently unused
   }
+
+  // Deprecated fields, do not reuse.
+  // reserved 5;
 }
 
 // Tags that are not covered by at least one of these specs are disallowed.
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 39
+// NEXT AVAILABLE TAG: 40
 message TagSpec {
   // The html_format field tells the validator for which html formats
   // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is allowed to validate.
@@ -485,11 +544,11 @@ message TagSpec {
   repeated HtmlFormat.Code html_format = 21;
 
   // If provided, the Type Identifier(s) that either enable or disable
-  // this TagSpec. If a Type Identifier is in enabled_by then this
-  // TagSpec will be used in validating parsed documents with that Type
-  // Identifier. If a Type Identifier is in disabled_by then this
-  // TagSpec will not be used in validating parsed documents with that
-  // Type Identifier. A TagSpec can not have both enabled_by and disabled_by
+  // this TagSpec. If a Type Identifier is in `enabled_by` then this
+  // TagSpec will be used in validating parsed documents which include that Type
+  // Identifier. If a Type Identifier is in `disabled_by` then this
+  // TagSpec will not be used in validating parsed documents which include that
+  // Type Identifier. A TagSpec can not have both `enabled_by` and `disabled_by`
   // set.
   repeated string enabled_by = 35;
   repeated string disabled_by = 36;
@@ -502,10 +561,18 @@ message TagSpec {
   optional string tag_name = 1;
 
   // If provided, the spec_name must be unique within the validator
-  // rules. It will be used with preference over the tag_name in
-  // parameters for error messages and other usages that require or
-  // benefit from a unique identifier.
+  // rules. This string forms a a unique id for this TagSpec. If not set, the
+  // tag_name field is used as the unique id. This string is not used in error
+  // messages, see descriptive_name for that.
   optional string spec_name = 2;
+
+  // If `tag_name` is not a sufficient descriptor for error messages having to
+  // do with this tag spec, provide a `descriptive_name` value, which if present
+  // will be used in place of `tag_name`. Typically `descriptive_name` should
+  // include the tag_name in it, and should avoid using < and > in case
+  // downstream libraries of the validator fail to properly HTML escape rendered
+  // error strings.
+  optional string descriptive_name = 39;
 
   // NamedId's are used to uniquely identify specific TagSpecs in the
   // validator rules in a stable manner. Most TagSpecs have no set NamedId.
@@ -632,31 +699,99 @@ message TagSpec {
   // reserved 14, 26;
 }
 
-// Defines how much css is allowed on the document including inline styles.
-// If a CssLengthSpec is not defined for a particular html_format, then
-// no limit is enforced for inline styles but a limit may be enforced on
-// particular style tags. Those would be defined in that tag's CdataSpec.
-message CssLengthSpec {
+// Exactly one DocSpec will match each AMP document. This spec defines some
+// default rules for the entire document scoped by it's HtmlFormat and any
+// Type Identifiers.
+// NEXT AVAILABLE TAG: 6
+message DocSpec {
   // The html_format field tells the validator for which html formats
-  // (ie: (<html ⚡> vs <html a4⚡>) this CssLengthSpec is defined for.
-  optional HtmlFormat.Code html_format = 1;
+  // (ie: (<html ⚡> vs <html a4⚡>) this DocSpec is defined for.
+  repeated HtmlFormat.Code html_format = 1;
+  // If a Type Identifier is in enabled_by then this DocSpec will be used
+  // in validating parsed documents with that Type Identifier. If a Type
+  // Identifier is in disabled_by then this DocSpec will not be used in
+  // validating parsed documents with that Type Identifier. An DocSpec can
+  // not have both enabled_by and disabled_by set.
+  repeated string enabled_by = 2;
+  repeated string disabled_by = 3;
+  // If set, the entire document's content cannot be greater than this length,
+  // in bytes. A value of -2 (default) indicates that there is no limit
+  // (unlimited).
+  optional int32 max_bytes = 4 [default = -2];
+  // If provided, a URL linking to a section / sentence in the AMP HTML spec.
+  optional string max_bytes_spec_url = 5;
+}
 
+// Exactly one DocCssSpec will match each AMP document. This spec defines the
+// default css rules for style attributes and publisher style tags across the
+// entire document. Rules for specific tags may be overridden by those tags.
+// NEXT AVAILABLE TAG: 20
+message DocCssSpec {
+  // The html_format field tells the validator for which html formats
+  // (ie: (<html ⚡> vs <html a4⚡>) this DocCssSpec is defined for.
+  repeated HtmlFormat.Code html_format = 1;
+  // If a Type Identifier is in enabled_by then this DocCssSpec will be used
+  // in validating parsed documents with that Type Identifier. If a Type
+  // Identifier is in disabled_by then this DocCssSpec will not be used in
+  // validating parsed documents;: with that Type Identifier. An DocCssSpec can
+  // not have both enabled_by and disabled_by set.
+  repeated string enabled_by = 2;
+  repeated string disabled_by = 3;
+  // If provided, a URL linking to a section / sentence in the AMP HTML spec.
+  optional string spec_url = 4;
+
+  // Due to a bug, we allowed unlimited doc-level and per-inline-style bytes
+  // for CSS in non-AMP formats. To avoid breaking pages, some formats will
+  // only emit a warning for exceeding `max_bytes` and
+  // `max_bytes_per_inline_style`.
+  optional bool max_bytes_is_warning = 18 [default = false];
   // If set, the combined style amp-custom cdata contents and all inline style
-  // contents cannot be greater than this length, in bytes.
-  optional int32 max_bytes = 2 [default = -1];
-
+  // contents cannot be greater than this length, in bytes. A value of -2
+  // (default) indicates that there is no limit (unlimited). A value of -1 will
+  // always cause validation failure.
+  optional int32 max_bytes = 5 [default = -2];
   // If set, the inline style content (per use) cannot be greater than this
   // length, in bytes.
-  optional int32 max_bytes_per_inline_style = 4 [default = -1];
+  optional int32 max_bytes_per_inline_style = 6 [default = -1];
+  // If false, bytes inside URLs are not included in the byte calculation for
+  // `max_bytes`. This is used for handling signed exchange transformations
+  // which can potentially take the number of bytes over the 75,000 byte limit
+  // due to rewriting URLs to point at an AMP Cache.
+  optional bool url_bytes_included = 7 [default = true];
+  // If provided, a URL linking to a section / sentence in the AMP HTML spec.
+  optional string max_bytes_spec_url = 8;
 
-  // If provided, a URL which linking to a section / sentence in the
-  // AMP HTML spec.
-  optional string spec_url = 3;
+  // Declaration allow-lists were added when style attribute validation was
+  // implementented. Therefore older style tags do not enforce an allow list
+  // of declarations. If true, all declarations are allowed in style tags,
+  // regardless of the contents of the `declaration` list.
+  optional bool allow_all_declaration_in_style_tag = 10 [default = false];
+  // If true, all variants of declarations that are vendor prefixes are allowed.
+  // for example, if `gradient` is an allowed declaration and this is true, then
+  // `-webkit-gradient` is also an allowed declaration.
+  optional bool expand_vendor_prefixes = 19;
+  // Any declaration listed here is allowed in custom style tags and style
+  // attributes in any tag.
+  repeated CssDeclaration declaration = 11;
+  // In addition to those listed in 'declaration', any declaration listed here
+  // is allowed in style attributes for SVG elements.
+  repeated CssDeclaration declaration_svg = 12;
+  // Top level lists of shared declarations, identified by unique key.
+  repeated string declaration_list = 13;
+  // Top level lists of shared declarations, identified by unique key.
+  repeated string declaration_list_svg = 14;
+  // URLs found within CSS are checked against this spec.
+  optional UrlSpec image_url_spec = 15;
+  optional UrlSpec font_url_spec = 16;
+  // If false, declarations tagged with `!important` are considered errors.
+  // Most AMP stylesheets disallow `!important` to reserve this override
+  // for AMP's own styles.
+  optional bool allow_important = 17 [default = false];
 }
 
 // Top level message - start reading here.
 // The validator knows about a set of tag specifications.
-// NEXT AVAILABLE TAG: 19
+// NEXT AVAILABLE TAG: 22
 message ValidatorRules {
   repeated TagSpec tags = 1;
   repeated AttrList attr_lists = 7;
@@ -679,10 +814,14 @@ message ValidatorRules {
 
   repeated DescendantTagList descendant_tag_list = 16;
 
-  repeated CssLengthSpec css_length_spec = 18;
+  // The DocSpec rules are scoped by the document's HtmlFormat and Type
+  // Identifiers and defined within each DocSpec.
+  repeated DocSpec doc = 21;
+  repeated DocCssSpec css = 19;
+  repeated DeclarationList declaration_list = 20;
 
   // Deprecated fields, do not reuse.
-  // reserved 2, 5, 11, 12, 14;
+  // reserved 2, 5, 11, 12, 14, 18;
 }
 
 // This feature was removed in October 2019, however there are still
@@ -690,9 +829,7 @@ message ValidatorRules {
 // on this in new code.
 // TODO(#25188): Remove ErrorCategory completely.
 message ErrorCategory {
-  enum Code {
-    UNKNOWN = 0;
-  }
+  enum Code { UNKNOWN = 0; }
 }
 
 // We record validation errors in a structured form, so that they can be
@@ -702,7 +839,9 @@ message ErrorCategory {
 // human-readable string from the structured form. It should be easy to port
 // this to other languages as needed; for instance Google has implementations
 // in C++, Java, and for templates used in some frontends.
+// NEXT AVAILABLE TAG: 10
 message ValidationError {
+  // NEXT AVAILABLE TAG: 5
   enum Severity {
     UNKNOWN_SEVERITY = 0;
     // A document with at least one error of this severity fails validation.
@@ -712,7 +851,7 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [default = ERROR];
-  // NEXT AVAILABLE TAG: 114
+  // NEXT AVAILABLE TAG: 119
   enum Code {
     UNKNOWN_CODE = 0;
     INVALID_DOCTYPE_HTML = 111;
@@ -747,8 +886,9 @@ message ValidationError {
     STYLESHEET_TOO_LONG = 50;
     STYLESHEET_AND_INLINE_STYLE_TOO_LONG = 102;
     INLINE_STYLE_TOO_LONG = 103;
+    INLINE_SCRIPT_TOO_LONG = 118;
     MANDATORY_CDATA_MISSING_OR_INCORRECT = 9;
-    CDATA_VIOLATES_BLACKLIST = 30;
+    CDATA_VIOLATES_DENYLIST = 30;
     NON_WHITESPACE_CDATA_ENCOUNTERED = 82;
     INVALID_JSON_CDATA = 106;
     DEPRECATED_ATTR = 11;
@@ -783,6 +923,7 @@ message ValidationError {
     TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS = 87;
     TAG_REFERENCE_POINT_CONFLICT = 69;
     CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR = 70;
+    // TODO(gregable): Fix this spelling error: 'precede'
     BASE_TAG_MUST_PRECEED_ALL_URLS = 78;
     MISSING_REQUIRED_EXTENSION = 83;
     ATTR_MISSING_REQUIRED_EXTENSION = 97;
@@ -818,7 +959,11 @@ message ValidationError {
     CSS_SYNTAX_MALFORMED_MEDIA_QUERY = 98;
     CSS_SYNTAX_DISALLOWED_MEDIA_TYPE = 99;
     CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE = 100;
+    CSS_SYNTAX_DISALLOWED_ATTR_SELECTOR = 114;
+    CSS_SYNTAX_DISALLOWED_PSEUDO_CLASS = 115;
+    CSS_SYNTAX_DISALLOWED_PSEUDO_ELEMENT = 116;
     CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE = 71;
+    CSS_SYNTAX_DISALLOWED_IMPORTANT = 117;
     CSS_EXCESSIVELY_NESTED = 107;
 
     // The following codes are currently used only by A4A CSS validation.
@@ -852,11 +997,13 @@ message ValidationError {
 // Used in the verbose validator to select between multiple generated error
 // types for a failing error. A higher number means that the error is more
 // specific, ie: more helpful, preferred.
+// NEXT AVAILABLE TAG: 3
 message ErrorSpecificity {
   optional ValidationError.Code code = 1;
   optional int32 specificity = 2;
 }
 
+// NEXT AVAILABLE TAG: 3
 message ErrorFormat {
   optional ValidationError.Code code = 1;
   optional string format = 2;
@@ -864,6 +1011,7 @@ message ErrorFormat {
 
 // A value to be added to a particular ValueSet, as found when scanning the
 // document (i.e. AttrSpec.add_value_to_set).
+// NEXT AVAILABLE TAG: 3
 message ValueSetProvision {
   // The collection to add the attribute value to.
   optional AttrSpec.ValueSet set = 1;
@@ -875,6 +1023,7 @@ message ValueSetProvision {
 // until the document has been fully scanned, and then compared to ensure that
 // all requirements are met. This allows provisions to appear after (or even
 // alongside) requirements.
+// NEXT AVAILABLE TAG: 3
 message ValueSetRequirement {
   // The provision that is required.
   optional ValueSetProvision provision = 1;
@@ -885,7 +1034,9 @@ message ValueSetRequirement {
 
 // The validation result provided by Validator instances (see Validator::Result
 // in validator.h). To render such a proto see RenderValidationResult.
+// NEXT AVAILABLE TAG: 9
 message ValidationResult {
+  // NEXT AVAILABLE TAG: 3
   enum Status {
     UNKNOWN = 0;
     PASS = 1;
@@ -893,6 +1044,8 @@ message ValidationResult {
   }
   optional Status status = 2;
   repeated ValidationError errors = 1;
+  // The following field is deprecated and can return any value. Do not depend
+  // on this.
   optional int32 validator_revision = 3 [default = -1];
   optional int32 spec_file_revision = 4 [default = -1];
   // If the AMP document is a transformed AMP document, then this is the
@@ -915,15 +1068,4 @@ message ValidationResult {
   // If the TagSpec is selected, these will be added to the final set of
   // requirements.
   repeated ValueSetRequirement value_set_requirements = 8;
-}
-
-// Information about the validator returned by ValidatorFactory
-// (see validator.h).
-message ValidatorInfo {
-  // Path from which the spec file was loaded.
-  optional string rules_path = 1;
-  // The file revision of validator.cc.
-  optional int32 validator_revision = 2 [default = -1];
-  // The file revision of the spec file (validator.protoascii).
-  optional int32 spec_file_revision = 3 [default = -1];
 }

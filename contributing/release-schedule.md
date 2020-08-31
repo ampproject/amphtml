@@ -1,9 +1,10 @@
 # Release Schedule
 
 - [Release Channels](#release-channels)
+  - [Nightly](#nightly)
   - [Weekly](#weekly)
+    - [Experimental and Beta channels](#experimental-and-beta-channels)
   - [Long-Term Stable (lts)](#long-term-stable-lts)
-  - [AMP Experimental and Beta Channels](#amp-experimental-and-beta-channels)
 - [Determining if your change is in a release](#determining-if-your-change-is-in-a-release)
 - [Release Cadence](#release-cadence)
   - [Detailed schedule](#detailed-schedule)
@@ -17,19 +18,45 @@ The AMP runtime and extensions are provided through a variety of different _rele
 
 To determine if a PR has been included in any of the following release channels, look for the GitHub labels _PR Use: In Canary_, _PR Use: In Production_, or _PR Use: In LTS_ (see the section on [determining if your change is in a release](#Determining-if-your-change-is-in-a-release) for more details).
 
+### Nightly
+
+The **nightly** release channel is updated (as its name indicates) every weeknight. This process is automated, and there is no guarantee that any given nightly release is free of bugs or other issues. Each night after midnight (Pacific Time), the last "green" commit from the day is selected to be the release cutoff point. A green build indicates that all automated tests have passed on that build.
+
+The nightly release provides a mechanism to detect and resolve issues quickly and before they reach the more traffic-heavy _weekly_ release channels. It also serves to reduce the number of users affected by newly introduced issues.
+
+It is possible to opt into the **nightly** channel, to test pull requests that were merged in the past few days. See the [opt-in section](DEVELOPING.md#opting-in-to-pre-release-channels) in [DEVELOPING.md] for details.
+
 ### Weekly
 
-The _weekly_ release channels are considered to be the primary "evergreen" release channels. A green build from the `master` branch is used to build the **experimental** and **beta** release channels; the **beta** release from the previous week is promoted to the **stable** release channel (see the [detailed schedule](#detailed-schedule)).
+The _weekly_ release channels are considered to be the primary "evergreen" release channels. Each week the **beta** release from the previous week is promoted to the **stable** release channel, and the last **nightly** release from the previous week is promoted to the **experimental** and **beta** release channels (see the [detailed schedule](#detailed-schedule)).
 
 There are two sets of build configurations used in creating release builds: the _canary_ configuration and the _production_ configuration. The **experimental** and **beta** release channels are built off of the same commit. However, the **experimental** channel uses the _canary_ configuration while the **beta** channel uses the _production_ configuration. The _canary_ configuration enables experimental components and features that may be turned off in _production_. It is possible to opt into the **experimental** or **beta** channels via the [experiments page](https://cdn.ampproject.org/experiments.html).
 
-The **stable** release channel is built with the _production_ configuration and served to most AMP traffic. Since the **beta** release channel is also built from the _production_ configuration, it represents the exact build which will become **stable** the following week (modulo the possibility of cherry-picks; see [Contributing Code](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#Cherry-picks)).
+The **stable** release channel is built with the _production_ configuration and served to most AMP traffic. Since the **beta** release channel is also built from the _production_ configuration, it represents the exact build which will become **stable** the following week (with the possibility of cherry-picks to fix last-minute issues; see [Contributing Code](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#Cherry-picks)).
+
+#### Beta and Experimental channels
+
+The _Beta_ and _Experimental Channels_ are pre-release candidates for the next Stable release of AMP. Every Tuesday (except for weeks where there is a [release freeze](#release-freezes)), last week's **nightly** is promoted to the developer opt-in channels for **beta** and **experimental**. Following a 1-day period where we verify that no feature or performance regressions were introduced in these channels, we promote this release on Wednesday to a small portion of traffic. This same release is then promoted to the **stable** channel on Tuesday the following week.
+
+It is possible to opt into these channels. See the [opt-in section](DEVELOPING.md#opting-in-to-pre-release-channels) in [DEVELOPING.md] for details.
+
+Opting into the _Beta Channel_ is intended for:
+
+- testing and playing with the version of the AMP runtime that will be released soon
+- using in Quality Assurance (QA) to ensure that your site is compatible with the next version of AMP
+
+The _Experimental Channel_ is intended for:
+
+- testing and playing with new features not yet available to all users
+- using in Quality Assurance (QA) to ensure that your site is compatible with upcoming features of AMP that are still under development
+
+The _Experimental Channel_ **may be less stable** and it may contain features not yet available to all users.
 
 ### Long-Term Stable (lts)
 
 The **lts** release channel provides a previous **stable** build for one-month intervals. On the second Monday of each month, the current **stable** release is promoted to **lts**. This channel is not recommended for all AMP publishers. It is provided so that publishers who wish to perform a QA cycle on their website less frequently may do so by opting specific web pages into the **lts** channel (see the [**lts** readme](https://github.com/ampproject/amphtml/blob/master/contributing/lts-release.md)).
 
-In the event that the second Monday of the month falls on a holiday, the promotion will be performed after the end of the release freeze.
+In the event that the second Monday of the month falls on a holiday, the promotion will be performed after the end of the [release freeze](#release-freezes).
 
 Important: Publishers using the **lts** release channel should not use newly introduced features. Because of the longer cycle, the **lts** release may be as much as seven weeks behind the `HEAD` of [`ampproject/amphtml`](https://github.com/ampproject/amphtml). See the section on [determining if your change is in a release](#Determining-if-your-change-is-in-a-release) to validate if a change will be ready with your chosen release cycle.
 
@@ -40,38 +67,7 @@ Important: Publishers using the **lts** release channel should not use newly int
 You can determine what changes are in a given build using one of the following:
 
 - The [_Type: Release_ GitHub issues](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) for each release build will include a link to the specific [release page](https://github.com/ampproject/amphtml/releases) listing the changes contained in that release.
-- The [_PR Use: In Canary_](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=label%3A%22PR%20use%3A%20In%20Canary%22), [_PR Use: In Production_](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=label%3A%22PR%20use%3A%20In%20Production%22), and [_PR Use: In LTS_](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=label%3A%22PR%20use%3A%20In%20LTS%22) labels are added to PRs when they've made it into a _weekly_ or **lts** build. There may be a delay between when the build is created and when the label is added.
-
-> Note: These labels still use legacy release names. They will be renamed soon to reflect the new release channel names (**beta** and **stable**).
-
-### AMP Experimental and Beta Channels
-
-The _AMP Experimental Channel_ is a way to opt a browser into using the **experimental** release build of the AMP JS libraries. The _Experimental Channel_ **may be less stable** and it may contain features not yet available to all users.
-
-Opting into the _Experimental Channel_ is intended for:
-
-- testing and playing with new features not yet available to all users
-- using in Quality Assurance (QA) to ensure that your site is compatible with upcoming features of AMP that are still under development
-
-To opt your browser into the _AMP Experimental Channel_, go to [the AMP experiments page](https://cdn.ampproject.org/experiments.html) and activate the "AMP Experimental Channel" experiment. Please subscribe to our [low-volume announcements](https://groups.google.com/forum/#!forum/amphtml-announce) mailing list to get notified about important/breaking changes about AMP.
-
-The _AMP Beta Channel_ is a way to opt a browser into using the **beta** release build of the AMP JS libraries that will be promoted to **stable** during the subsequent release cycle (typically, a week later). It is similar to the _Experimental Channel_ described above, but it will not contain the experimental features that are still under development.
-
-Opting into the _Beta Channel_ is intended for:
-
-- testing and playing with the version of the AMP runtime that will be released soon
-- using in Quality Assurance (QA) to ensure that your site is compatible with the next version of AMP
-
-When you opt into the _Experimental_ or _Beta_ channel, you are only affecting the AMP JS libraries in your browser; there is no way to force visitors to your site to use the _AMP Experimental/Beta Channel_ version of AMP.
-
-To opt your browser into one of these channels, go to [the AMP experiments page](https://cdn.ampproject.org/experiments.html) and activate the "AMP Experimental Channel" or "AMP Beta Channel" experiment. Please subscribe to our [low-volume announcements](https://groups.google.com/forum/#!forum/amphtml-announce) mailing list to get notified about important/breaking changes about AMP.
-
-**If you find an issue that appears to only occur in the _Experimental/Beta Channel_ version of AMP**:
-
-- please [file an issue](https://github.com/ampproject/amphtml/issues/new) with a description of the problem
-  - include a note that the problem is new to the _Experimental/Beta Channel_ build so that it can be properly prioritized
-  - include a URL to a page that reproduces the problem
-- ping the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)) with the issue you filed so we can delay the push of the _Experimental/Beta Channel_ version to production if needed
+- The [_PR Use: In Beta / Experimental_](https://github.com/ampproject/amphtml/issues?q=label%3A%22PR+use%3A+In+Beta+%2F+Experimental%22), [_PR Use: In Stable_](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=label%3A%22PR%20use%3A%20In%20Production%22), and [_PR Use: In LTS_](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=label%3A%22PR%20use%3A%20In%20LTS%22) labels are added to PRs when they've made it into a _weekly_ or **lts** build. There may be a delay between when the build is created and when the label is added.
 
 ## Release Cadence
 
@@ -104,6 +100,7 @@ If a one week release freeze is announced for Week N:
 - A new release build is _not_ made in the freeze week (Week N).
 - The normal schedule will resume in Week N+1, i.e. **experimental**/**beta** are cut in Week N+1 and promoted to **stable** in Week N+2.
 - If the **stable** release promoted during Week N-1 was originally scheduled to be promoted to **lts** during Week N, it will now be promoted to **lts** on the Monday of Week N+1.
+- **nightly** releases are still generated and promoted, as they are fully automated.
 
 A release freeze may happen due to:
 
