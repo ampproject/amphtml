@@ -45,8 +45,7 @@ module.exports = function ({types: t, template}) {
   }
 
   function compileJss(JSS) {
-    const jss = create();
-    jss.setup(preset());
+    const jss = create(preset());
     return jss.createStyleSheet(JSS);
   }
 
