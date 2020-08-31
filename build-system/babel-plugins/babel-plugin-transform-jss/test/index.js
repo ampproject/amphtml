@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const path = require('path');
 const runner = require('@babel/helper-plugin-test-runner').default;
 const babel = require('@babel/core');
 
@@ -24,11 +25,12 @@ test('throws when duplicate classname is found', () => {
 import {createUseStyles} from 'react-jss';
 export const useStyles = createUseStyles({button: {fontSize: 12}});
     `;
+  const filename = 'test.jss.js';
+  const plugins = [path.join(__dirname, '..')];
 
-  // Transforming the same file twice should yield the same classnames,
-  // resulting in an error
-  babel.transform(fileContents, {filename: 'test.jss.js', plugins:[__dirname + '/../'] });
-  expect(() =>
-    babel.transform(fileContents, {filename: 'test.jss.js', plugins: [__dirname + '/../']})
-  ).toThrow(/Classnames must be unique across all files/);
+  // Transforming the same file twice should yield the same classnames, resulting in an error
+  babel.transform(fileContents, {filename, plugins});
+  expect(() => babel.transform(fileContents, {filename, plugins})).toThrow(
+    /Classnames must be unique across all files/
+  );
 });
