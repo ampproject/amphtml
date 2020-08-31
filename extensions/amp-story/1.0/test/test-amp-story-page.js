@@ -299,6 +299,10 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     const mediaPoolRegister = env.sandbox.stub(mediaPool, 'register');
     await page.layoutCallback();
 
+    page.setState(PageState.PLAYING);
+
+    await nextTick();
+
     const audioEl = scopedQuerySelectorAll(
       element,
       Selectors.ALL_PLAYBACK_MEDIA
@@ -343,6 +347,10 @@ describes.realWin('amp-story-page', {amp: {extensions}}, (env) => {
     const mediaPool = await page.mediaPoolPromise_;
     const mediaPoolPreload = env.sandbox.stub(mediaPool, 'preload');
     await page.layoutCallback();
+
+    page.setState(PageState.PLAYING);
+
+    await nextTick();
 
     const audioEl = scopedQuerySelectorAll(
       element,
