@@ -44,7 +44,9 @@ function main() {
     downloadDistOutput(FILENAME);
     timedExecOrDie('gulp update-packages');
     process.env['PERCY_TOKEN'] = atob(process.env.PERCY_TOKEN_ENCODED);
-    timedExecOrDie('gulp visual-diff --compiled --nobuild --master');
+    timedExecOrDie(
+      'gulp visual-diff --compiled --nobuild --master --grep "amp-story: tooltip"'
+    );
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
@@ -56,7 +58,9 @@ function main() {
     ) {
       downloadDistOutput(FILENAME);
       timedExecOrDie('gulp update-packages');
-      timedExecOrDie('gulp visual-diff --compiled --nobuild');
+      timedExecOrDie(
+        'gulp visual-diff --compiled --nobuild --master --grep "amp-story: tooltip"'
+      );
     } else {
       timedExecOrDie('gulp visual-diff --empty');
       console.log(

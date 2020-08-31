@@ -51,58 +51,58 @@ stages:
     if: type = push
 jobs:
   include:
-    - stage: build
-      name: 'Build'
-      script:
-        - unbuffer node build-system/pr-check/build.js
-    - stage: build
-      name: 'Checks'
-      script:
-        - unbuffer node build-system/pr-check/checks.js
-    - stage: build
-      name: 'Validator Tests'
-      script:
-        - unbuffer node build-system/pr-check/validator-tests.js
+    # - stage: build
+    #   name: 'Build'
+    #   script:
+    #     - unbuffer node build-system/pr-check/build.js
+    # - stage: build
+    #   name: 'Checks'
+    #   script:
+    #     - unbuffer node build-system/pr-check/checks.js
+    # - stage: build
+    #   name: 'Validator Tests'
+    #   script:
+    #     - unbuffer node build-system/pr-check/validator-tests.js
     - stage: build
       name: 'Dist, Bundle Size'
       script:
         - unbuffer node build-system/pr-check/dist-bundle-size.js
-    - stage: build
-      name: 'Module Dist, Bundle Size'
-      script:
-        - unbuffer node build-system/pr-check/module-dist-bundle-size.js
+    # - stage: build
+    #   name: 'Module Dist, Bundle Size'
+    #   script:
+    #     - unbuffer node build-system/pr-check/module-dist-bundle-size.js
     - stage: test
       name: 'Visual Diff Tests'
       script:
         - unbuffer node build-system/pr-check/visual-diff-tests.js
-    - stage: test
-      name: 'Local Tests'
-      script:
-        - unbuffer node build-system/pr-check/local-tests.js
-    - stage: test
-      name: 'Dist Tests'
-      script:
-        - unbuffer node build-system/pr-check/dist-tests.js
-    - stage: test
-      name: 'End to End Tests'
-      script:
-        - unbuffer node build-system/pr-check/e2e-tests.js
-    - stage: experiment
-      name: 'Experiment A Tests'
-      script:
-        - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentA
-    - stage: experiment
-      name: 'Experiment B Tests'
-      script:
-        - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentB
-    - stage: experiment
-      name: 'Experiment C Tests'
-      script:
-        - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentC
-    - stage: experiment
-      name: 'Performance Tests'
-      script:
-        - unbuffer node build-system/pr-check/performance-tests.js
+    # - stage: test
+    #   name: 'Local Tests'
+    #   script:
+    #     - unbuffer node build-system/pr-check/local-tests.js
+    # - stage: test
+    #   name: 'Dist Tests'
+    #   script:
+    #     - unbuffer node build-system/pr-check/dist-tests.js
+    # - stage: test
+    #   name: 'End to End Tests'
+    #   script:
+    #     - unbuffer node build-system/pr-check/e2e-tests.js
+    # - stage: experiment
+    #   name: 'Experiment A Tests'
+    #   script:
+    #     - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentA
+    # - stage: experiment
+    #   name: 'Experiment B Tests'
+    #   script:
+    #     - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentB
+    # - stage: experiment
+    #   name: 'Experiment C Tests'
+    #   script:
+    #     - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentC
+    # - stage: experiment
+    #   name: 'Performance Tests'
+    #   script:
+    #     - unbuffer node build-system/pr-check/performance-tests.js
   allow_failures:
     - script: unbuffer node build-system/pr-check/performance-tests.js # See #28148
   fast_finish: true

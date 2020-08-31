@@ -66,7 +66,10 @@ async function main() {
     ) {
       timedExecOrDie('gulp update-packages');
 
-      const process = timedExecWithError('gulp dist --fortesting', FILENAME);
+      const process = timedExecWithError(
+        'gulp dist --fortesting --extensions=amp-story',
+        FILENAME
+      );
       if (process.status !== 0) {
         const error = process.error || new Error('unknown error, check logs');
         console.log(colors.red('ERROR'), colors.yellow(error.message));
