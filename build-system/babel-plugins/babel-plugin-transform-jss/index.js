@@ -44,8 +44,35 @@ module.exports = function ({types: t, template}) {
     return filename.endsWith('.jss.js');
   }
 
-  function compileJss(JSS) {
-    const jss = create(preset());
+  // Naive string hashing function. For now we care more
+  // about simplicty than reducing collisions, as the number of
+  // unique documents is small, and we fail-fast on collision.
+  function hashCode(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = (31 * hash + str.charCodeAt(i)) % Number.MAX_SAFE_INTEGER;
+    }
+    return hash.toString().slice(0, 7);
+  }
+
+  let seen = new Set();
+  function compileJss(JSS, filename) {
+    const filehash = hashCode(filename);
+    const jss = create({
+      ...preset(),
+      createGenerateId: () => {
+        return (rule) => {
+          const className = `${rule.key}-${filehash}`;
+          if (seen.has(className)) {
+            throw new Error(
+              `Classnames must be unique across all files. Found a duplicate: ${className}`
+            );
+          }
+          seen.add(className);
+          return className;
+        };
+      },
+    });
     return jss.createStyleSheet(JSS);
   }
 
@@ -69,7 +96,7 @@ module.exports = function ({types: t, template}) {
             `First argument to createUseStyles must be statically evaluatable.`
           );
         }
-        const sheet = compileJss(JSS);
+        const sheet = compileJss(JSS, filename);
         if ('CSS' in sheet.classes) {
           throw path.buildCodeFrameError(
             'Cannot have class named CSS in your JSS object.'

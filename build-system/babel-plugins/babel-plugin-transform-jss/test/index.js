@@ -15,5 +15,20 @@
  */
 
 const runner = require('@babel/helper-plugin-test-runner').default;
+const babel = require('@babel/core');
 
 runner(__dirname);
+
+test('throws when duplicate classname is found', () => {
+  const fileContents = `
+import {createUseStyles} from 'react-jss';
+export const useStyles = createUseStyles({button: {fontSize: 12}});
+    `;
+
+  // Transforming the same file twice should yield the same classnames,
+  // resulting in an error
+  babel.transform(fileContents, {filename: 'test.jss.js', plugins:[__dirname + '/../'] });
+  expect(() =>
+    babel.transform(fileContents, {filename: 'test.jss.js', plugins: [__dirname + '/../']})
+  ).toThrow(/Classnames must be unique across all files/);
+});
