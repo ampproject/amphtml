@@ -372,7 +372,12 @@ cc_test(
     srcs = [
         "renderer_test.cc",
     ],
+    data = [
+        "testdata/doc_with_invalid_utf8_byte.html",
+        "testdata/doc_with_invalid_utf8_byte.html.out",
+    ],
     deps = [
+        ":defer",
         ":parser",
         ":renderer",
         "@com_google_googletest//:gtest_main",

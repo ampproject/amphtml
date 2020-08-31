@@ -23,6 +23,9 @@
 
 namespace htmlparser {
 
+constexpr std::string_view kScriptClosingTag = "</script>";
+constexpr char32_t kReplacementChar = 0xfffd;
+
 Tokenizer::Tokenizer(std::string_view html, std::string context_tag) :
     buffer_(html), lines_cols_{{1, 0}}, current_line_col_{1, 0},
     token_line_col_{1, 0} {
@@ -37,22 +40,20 @@ Tokenizer::Tokenizer(std::string_view html, std::string context_tag) :
   }
 }
 
-inline char Tokenizer::ReadByte() {
+inline char32_t Tokenizer::ReadChar() {
   if (raw_.end >= buffer_.size()) {
     eof_ = true;
     return 0;
   }
 
-  char c = buffer_.at(raw_.end++);
-  current_line_col_.second++;
-  int multi_byte = Strings::CodePointByteSequenceCount(c);
-  if (multi_byte > 1) {
-    current_line_col_.second -= (multi_byte - 1);
-  }
+  current_char_ = Strings::DecodeUtf8Symbol(buffer_.substr(raw_.end)).value_or(
+      kReplacementChar);
 
-  if (c == '\n' || (c == '\r' &&
+  current_line_col_.second++;
+  raw_.end += Strings::CodePointNumBytes(current_char_);
+  if (current_char_ == '\n' || (current_char_ == '\r' &&
                     raw_.end < buffer_.size() &&
-                    buffer_.at(raw_.end) != '\n')) {
+                    buffer_.at(raw_.end) == '\n')) {
     lines_cols_.back() = current_line_col_;
     // Increment line number and reset column number.
     current_line_col_.first++;
@@ -60,11 +61,11 @@ inline char Tokenizer::ReadByte() {
     lines_cols_.push_back({current_line_col_.first + 1, 0});
   }
 
-  return c;
+  return current_char_;
 }
 
-inline void Tokenizer::UnreadByte() {
-  raw_.end--;
+inline void Tokenizer::UnreadChar() {
+  raw_.end = raw_.end - Strings::CodePointNumBytes(current_char_);
   if (current_line_col_.second == 0) {
     lines_cols_.pop_back();
     current_line_col_ = lines_cols_.back();
@@ -76,7 +77,7 @@ inline void Tokenizer::UnreadByte() {
 
 void Tokenizer::SkipWhiteSpace() {
   while (!eof_) {
-    char c = ReadByte();
+    auto c = ReadChar();
     switch (c) {
       case ' ':
       case '\n':
@@ -85,7 +86,7 @@ void Tokenizer::SkipWhiteSpace() {
       case '\f':
         break;
       default:
-        UnreadByte();
+        UnreadChar();
         return;
     }
   }
@@ -108,10 +109,10 @@ void Tokenizer::ReadRawOrRCDATA() {
   }
 
   while (!eof_) {
-    char c = ReadByte();
+    auto c = ReadChar();
     if (eof_) break;
     if (c != '<') continue;
-    c = ReadByte();
+    c = ReadChar();
     if (eof_) break;
     if (c != '/') continue;
     if (ReadRawEndTag() || eof_) break;
@@ -125,15 +126,15 @@ void Tokenizer::ReadRawOrRCDATA() {
 
 bool Tokenizer::ReadRawEndTag() {
   for (std::size_t i = 0; i < raw_tag_.size(); ++i) {
-    char c = ReadByte();
+    auto c = ReadChar();
     if (eof_) return false;
     if (c != raw_tag_.at(i) && c != (raw_tag_.at(i) - ('a' - 'A'))) {
-      UnreadByte();
+      UnreadChar();
       return false;
     }
   }
 
-  char c = ReadByte();
+  auto c = ReadChar();
   if (eof_) return false;
   switch (c) {
     case ' ':
@@ -143,11 +144,11 @@ bool Tokenizer::ReadRawEndTag() {
     case '/':
     case '>':
       // The 3 is 2 for the leading "</" plus 1 for the trailing character c.
-      raw_.end -= (3 /* <, /, and > */+ raw_tag_.size());
+      raw_.end -= (3 /* <, /, and > */ + raw_tag_.size());
       current_line_col_.second -= (3 /* <, /, and > */ + raw_tag_.size());
       return true;
   }
-  UnreadByte();
+  UnreadChar();
   return false;
 }
 
@@ -177,7 +178,7 @@ void Tokenizer::ReadScript() {
   while (!eof_ && state != ScriptDataState::DONE) {
     switch (state) {
       case ScriptDataState::SCRIPT_DATA: {
-        char c = ReadByte();
+        auto c = ReadChar();
         if (eof_) return;
         if (c == '<') {
           state = ScriptDataState::SCRIPT_DATA_LESS_THAN_SIGN;
@@ -187,14 +188,14 @@ void Tokenizer::ReadScript() {
         break;
       }
       case ScriptDataState::SCRIPT_DATA_LESS_THAN_SIGN: {
-        char c = ReadByte();
+        auto c = ReadChar();
         if (eof_) return;
         if (c == '/') {
           state = ScriptDataState::SCRIPT_DATA_END_TAG_OPEN;
         } else if (c == '!') {
           state = ScriptDataState::SCRIPT_DATA_ESCAPE_START;
         } else {
-          UnreadByte();
+          UnreadChar();
           state = ScriptDataState::SCRIPT_DATA;
         }
         break;
@@ -207,29 +208,29 @@ void Tokenizer::ReadScript() {
         break;
       }
       case ScriptDataState::SCRIPT_DATA_ESCAPE_START: {
-        char c = ReadByte();
+        auto c = ReadChar();
         if (eof_) return;
         if (c == '-') {
           state = ScriptDataState::SCRIPT_DATA_ESCAPE_START_DASH;
         } else {
-          UnreadByte();
+          UnreadChar();
           state = ScriptDataState::SCRIPT_DATA;
         }
         break;
       }
       case ScriptDataState::SCRIPT_DATA_ESCAPE_START_DASH: {
-        char c = ReadByte();
+        auto c = ReadChar();
         if (eof_) return;
         if (c == '-') {
           state = SCRIPT_DATA_ESCAPED_DASH_DASH;
         } else {
-          UnreadByte();
+          UnreadChar();
           state = ScriptDataState::SCRIPT_DATA;
         }
         break;
       }
       case ScriptDataState::SCRIPT_DATA_ESCAPED: {
-        char c = ReadByte();
+        auto c = ReadChar();
         if (eof_) return;
         if (c == '-') {
           state = ScriptDataState::SCRIPT_DATA_ESCAPED_DASH;
@@ -241,7 +242,7 @@ void Tokenizer::ReadScript() {
         break;
       }
       case ScriptDataState::SCRIPT_DATA_ESCAPED_DASH: {
-        char c = ReadByte();
+        auto c = ReadChar();
         if (eof_) return;
         if (c == '-') {
           state = ScriptDataState::SCRIPT_DATA_ESCAPED_DASH_DASH;
@@ -253,7 +254,7 @@ void Tokenizer::ReadScript() {
         break;
       }
       case ScriptDataState::SCRIPT_DATA_ESCAPED_DASH_DASH: {
-        char c = ReadByte();
+        auto c = ReadChar();
         if (eof_) return;
         if (c == '-') {
           state = ScriptDataState::SCRIPT_DATA_ESCAPED_DASH_DASH;
@@ -267,14 +268,14 @@ void Tokenizer::ReadScript() {
         break;
       }
       case ScriptDataState::SCRIPT_DATA_ESCAPED_LESS_THAN_SIGN: {
-        char c = ReadByte();
+        auto c = ReadChar();
         if (eof_) return;
         if (c == '/') {
           state = ScriptDataState::SCRIPT_DATA_ESCAPED_END_TAG_OPEN;
         } else if (('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z')) {
           state = ScriptDataState::SCRIPT_DATA_DOUBLE_ESCAPE_START;
         } else {
-          UnreadByte();
+          UnreadChar();
           state = ScriptDataState::SCRIPT_DATA;
         }
         break;
@@ -288,30 +289,30 @@ void Tokenizer::ReadScript() {
         break;
       }
       case ScriptDataState::SCRIPT_DATA_DOUBLE_ESCAPE_START: {
-        UnreadByte();
+        UnreadChar();
         static std::string script_tag_l = "script";
         static std::string script_tag_u = "SCRIPT";
         for (int8_t i = 0; i < 6 /*script*/; ++i) {
-          char c = ReadByte();
+          auto c = ReadChar();
           if (eof_) return;
           if (c != script_tag_l[i] && c != script_tag_u[i]) {
-            UnreadByte();
+            UnreadChar();
             state = ScriptDataState::SCRIPT_DATA_ESCAPED;
           }
         }
-        char c = ReadByte();
+        auto c = ReadChar();
         if (eof_) return;
         if (c == ' ' || c == '\n' || c == '\r' || c == '\t'  || c == '\f'
             || c == '/' || c == '>') {
           state = ScriptDataState::SCRIPT_DATA_DOUBLE_ESCAPED;
         } else {
-          UnreadByte();
+          UnreadChar();
           state = ScriptDataState::SCRIPT_DATA_ESCAPED;
         }
         break;
       }
       case ScriptDataState::SCRIPT_DATA_DOUBLE_ESCAPED: {
-        char c = ReadByte();
+        auto c = ReadChar();
         if (eof_) return;
         if (c == '-') {
           state = ScriptDataState::SCRIPT_DATA_DOUBLE_ESCAPED_DASH;
@@ -323,7 +324,7 @@ void Tokenizer::ReadScript() {
         break;
       }
       case ScriptDataState::SCRIPT_DATA_DOUBLE_ESCAPED_DASH: {
-        char c = ReadByte();
+        auto c = ReadChar();
         if (eof_) return;
         if (c == '-') {
           state = ScriptDataState::SCRIPT_DATA_DOUBLE_ESCAPED_DASH_DASH;
@@ -337,7 +338,7 @@ void Tokenizer::ReadScript() {
         break;
       }
       case ScriptDataState::SCRIPT_DATA_DOUBLE_ESCAPED_DASH_DASH: {
-        char c = ReadByte();
+        auto c = ReadChar();
         if (eof_) return;
         if (c == '-') {
           state = ScriptDataState::SCRIPT_DATA_DOUBLE_ESCAPED_DASH_DASH;
@@ -351,19 +352,19 @@ void Tokenizer::ReadScript() {
         break;
       }
       case ScriptDataState::SCRIPT_DATA_DOUBLE_ESCAPED_LESS_THAN_SIGN: {
-        char c = ReadByte();
+        auto c = ReadChar();
         if (eof_) return;
         if (c == '/') {
           state = ScriptDataState::SCRIPT_DATA_DOUBLE_ESCAPED_END;
         } else {
-          UnreadByte();
+          UnreadChar();
           state = ScriptDataState::SCRIPT_DATA_DOUBLE_ESCAPED;
         }
         break;
       }
       case ScriptDataState::SCRIPT_DATA_DOUBLE_ESCAPED_END: {
         if (ReadRawEndTag()) {
-          raw_.end += std::string("</script>").size();
+          raw_.end += kScriptClosingTag.size();
           state = ScriptDataState::SCRIPT_DATA_ESCAPED;
         } else {
           if (eof_) return;
@@ -387,7 +388,7 @@ void Tokenizer::ReadComment() {
   });
   int dash_count = 2;
   while (!eof_) {
-    char c = ReadByte();
+    auto c = ReadChar();
     if (eof_) {
       // Ignore up to two dashes at EOF.
       if (dash_count > 2) {
@@ -406,7 +407,7 @@ void Tokenizer::ReadComment() {
       }
     } else if (c == '!') {
       if (dash_count >= 2) {
-        char c = ReadByte();
+        auto c = ReadChar();
         if (eof_) {
           data_.end = raw_.end;
           return;
@@ -424,7 +425,7 @@ void Tokenizer::ReadComment() {
 void Tokenizer::ReadUntilCloseAngle() {
   data_.start = raw_.end;
   while (!eof_) {
-    char c = ReadByte();
+    auto c = ReadChar();
     if (eof_) {
       data_.end = raw_.end;
       return;
@@ -438,9 +439,9 @@ void Tokenizer::ReadUntilCloseAngle() {
 
 TokenType Tokenizer::ReadMarkupDeclaration() {
   data_.start = raw_.end;
-  char c[2];
+  char32_t c[2];
   for (int i = 0; i < 2; ++i) {
-    c[i] = ReadByte();
+    c[i] = ReadChar();
     if (eof_) {
       data_.end = raw_.end;
       return TokenType::COMMENT_TOKEN;
@@ -473,7 +474,7 @@ bool Tokenizer::ReadDoctype() {
 
   static const std::string kDoctype = "DOCTYPE";
   for (std::size_t i = 0; i < kDoctype.size(); ++i) {
-    char c = ReadByte();
+    auto c = ReadChar();
     if (eof_) {
       data_.end = raw_.end;
       return false;
@@ -499,7 +500,7 @@ bool Tokenizer::ReadDoctype() {
 bool Tokenizer::ReadCDATA() {
   static const std::string kCData = "[CDATA[";
   for (std::size_t i = 0; i < kCData.size(); ++i) {
-    char c = ReadByte();
+    auto c = ReadChar();
     if (eof_) {
       data_.end = raw_.end;
       return false;
@@ -513,7 +514,7 @@ bool Tokenizer::ReadCDATA() {
   data_.start = raw_.end;
   int brackets = 0;
   while (!eof_) {
-    char c = ReadByte();
+    auto c = ReadChar();
     if (eof_) {
       data_.end = raw_.end;
       return true;
@@ -619,17 +620,14 @@ void Tokenizer::ReadTag(bool save_attr, bool template_mode) {
   ReadTagName();
   SkipWhiteSpace();
 
-  if (eof_) {
-    return;
-  }
   while (!eof_) {
-    char c = ReadByte();
+    auto c = ReadChar();
     if (eof_ || c == '>') {
       break;
     }
 
     // Undo previous > read.
-    UnreadByte();
+    UnreadChar();
 
     ReadTagAttributeKey(template_mode);
     ReadTagAttributeValue();
@@ -645,9 +643,9 @@ void Tokenizer::ReadTag(bool save_attr, bool template_mode) {
 }
 
 void Tokenizer::ReadTagName() {
-  data_.start = raw_.end - 1;
+  data_.start = raw_.end - Strings::CodePointNumBytes(current_char_);
   while (!eof_) {
-    char c = ReadByte();
+    auto c = ReadChar();
     if (eof_) {
       data_.end = raw_.end;
       return;
@@ -662,7 +660,7 @@ void Tokenizer::ReadTagName() {
         return;
       case '/':
       case '>':
-        UnreadByte();
+        UnreadChar();
         data_.end = raw_.end;
         return;
     }
@@ -682,7 +680,7 @@ void Tokenizer::ReadTagAttributeKey(bool template_mode) {
   std::string mustache_section_name = "";
 
   while (!eof_) {
-    char c = ReadByte();
+    auto c = ReadChar();
     if (eof_) {
       std::get<0>(pending_attribute_).start = raw_.end;
       return;
@@ -694,12 +692,12 @@ void Tokenizer::ReadTagAttributeKey(bool template_mode) {
     // {{^section}}...{{/section}}
     // {{variable}}
     if (template_mode) {
-      UnreadByte();
-      UnreadByte();
-      UnreadByte();
-      char c1 = ReadByte();
-      char c2 = ReadByte();
-      c = ReadByte();
+      UnreadChar();
+      UnreadChar();
+      UnreadChar();
+      auto c1 = ReadChar();
+      auto c2 = ReadChar();
+      c = ReadChar();
       if (mustache_inside_section_block && c1 == '{' && c2 == '{' && c == '/') {
         // Look for closing section name. If not resort to default behavior.
         // Reason for this logic is to differentiate between:
@@ -711,8 +709,8 @@ void Tokenizer::ReadTagAttributeKey(bool template_mode) {
         bool section_name_match = close_section == mustache_section_name;
         if (section_name_match) {
           raw_.end += mustache_section_name.size();
-          char e1 = ReadByte();
-          char e2 = ReadByte();
+          auto e1 = ReadChar();
+          auto e2 = ReadChar();
           if (e1 == '}' && e2 == '}') {
             mustache_inside_section_block = false;
             continue;
@@ -744,7 +742,7 @@ void Tokenizer::ReadTagAttributeKey(bool template_mode) {
       }
       case '=':
       case '>': {
-        UnreadByte();
+        UnreadChar();
         std::get<0>(pending_attribute_).end = raw_.end;
         return;
       }
@@ -760,13 +758,13 @@ void Tokenizer::ReadTagAttributeValue() {
   if (eof_) {
     return;
   }
-  char c = ReadByte();
+  auto c = ReadChar();
   if (eof_) {
     return;
   }
 
   if (c != '=') {
-    UnreadByte();
+    UnreadChar();
     return;
   }
 
@@ -775,20 +773,20 @@ void Tokenizer::ReadTagAttributeValue() {
     return;
   }
 
-  char quote = ReadByte();
+  auto quote = ReadChar();
   if (eof_) {
     return;
   }
 
   switch (quote) {
     case '>':
-      UnreadByte();
+      UnreadChar();
       return;
     case '\'':
     case '"':
       std::get<1>(pending_attribute_).start = raw_.end;
       while (!eof_) {
-        c = ReadByte();
+        c = ReadChar();
         if (eof_) {
           std::get<1>(pending_attribute_).end = raw_.end;
           return;
@@ -802,7 +800,7 @@ void Tokenizer::ReadTagAttributeValue() {
     default: {
       std::get<1>(pending_attribute_).start = raw_.end - 1;
       while (!eof_) {
-        c = ReadByte();
+        c = ReadChar();
         if (eof_) {
           std::get<1>(pending_attribute_).end = raw_.end;
           return;
@@ -816,7 +814,7 @@ void Tokenizer::ReadTagAttributeValue() {
             std::get<1>(pending_attribute_).end = raw_.end - 1;
             return;
           case '>':
-            UnreadByte();
+            UnreadChar();
             std::get<1>(pending_attribute_).end = raw_.end;
             return;
         }
@@ -841,7 +839,7 @@ TokenType Tokenizer::Next(bool template_mode) {
     if (raw_tag_ == "plaintext") {
       // Read everything up to EOF.
       while (!eof_) {
-        ReadByte();
+        ReadChar();
       }
       data_.end = raw_.end;
       text_is_raw_ = true;
@@ -860,7 +858,7 @@ TokenType Tokenizer::Next(bool template_mode) {
   convert_null_ = false;
 
   while (!eof_) {
-    char c = ReadByte();
+    auto c = ReadChar();
 
     if (eof_) {
       break;
@@ -876,14 +874,15 @@ TokenType Tokenizer::Next(bool template_mode) {
     //
     // <space><space><mytag>, returns two spaces before processing the mytag
     // token in the next call.
-    if (data_.start < raw_.end - 1) {
+    if (data_.start < raw_.end - Strings::CodePointNumBytes(c)) {
+      raw_.end -= Strings::CodePointNumBytes(c);
       current_line_col_.second--;
-      data_.end = --raw_.end;
+      data_.end = raw_.end;
       token_type_ = TokenType::TEXT_TOKEN;
       return token_type_;
     }
 
-    c = ReadByte();
+    c = ReadChar();
     if (eof_) break;
 
     // Check if the '<' we have just read is part of a tag, comment or
@@ -896,7 +895,7 @@ TokenType Tokenizer::Next(bool template_mode) {
     } else if (c == '!' || c == '?') {
       token_type = TokenType::COMMENT_TOKEN;
     } else {
-      UnreadByte();
+      UnreadChar();
       continue;
     }
 
@@ -905,7 +904,7 @@ TokenType Tokenizer::Next(bool template_mode) {
         token_type_ = ReadStartTag(template_mode);
         return token_type_;
       case TokenType::END_TAG_TOKEN:
-        c = ReadByte();
+        c = ReadChar();
         if (eof_) break;
         if (c == '>') {
           // "</> does not generate a token at all. Generate an empty comment
@@ -933,8 +932,8 @@ TokenType Tokenizer::Next(bool template_mode) {
         }
         is_token_manufactured_ = true;
         // <? is part of the comment text.
-        UnreadByte();
-        UnreadByte();
+        UnreadChar();
+        UnreadChar();
         ReadUntilCloseAngle();
         token_type_ = TokenType::COMMENT_TOKEN;
         return token_type_;

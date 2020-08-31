@@ -71,6 +71,7 @@ class Strings {
 
   // byte is in the range 0x41-0x5A or 0x61-0x7A (A-Z or a-z).
   static bool IsCharAlphabet(char c);
+  static bool IsCharAlphabet(char32_t c);
 
   // byte is in the range 0x30-0x39 (chars: 0-9)
   static bool IsDigit(char c);
@@ -93,7 +94,7 @@ class Strings {
 
   // Similar to CodePointByteSequenceCount except that it accepts entire
   // codepoint and tells how many bytes the codepoint contains.
-  static int8_t CodePointNumBytes(char32_t c);
+  static int CodePointNumBytes(char32_t c);
 
   // Decodes byte sequence to utf-8 codepoint.
   // The s points to the first byte in the sequence. Moves the cursor past

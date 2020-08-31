@@ -144,18 +144,16 @@ class Tokenizer {
       Atom::XMP,
   };
 
-  // Returns the next byte from the input stream, doing a buffered read
+  // Returns the next char from the input stream, doing a buffered read
   // from z.r into z.buf if necessary. z.buf[z.raw.start:z.raw.end] remains a
-  // contiguous byte slice that holds all the bytes read so far for the current
+  // contiguous char slice that holds all the chars read so far for the current
   // token.
   // It sets z.err if the underlying reader returns an error.
   // Pre-condition: z.err == nil.
-  char ReadByte();
+  char32_t ReadChar();
 
-  // Moves cursor back past one byte.
-  // TODO: Consider implementing peek after checking performance
-  // impact.
-  void UnreadByte();
+  // Moves cursor back past one character.
+  void UnreadChar();
 
   // Reads until next ">".
   void ReadUntilCloseAngle();
@@ -279,6 +277,8 @@ class Tokenizer {
 
   // Current token's line col record. One line can have several tokens.
   LineCol token_line_col_;
+
+  char32_t current_char_;
 };
 
 }  // namespace htmlparser

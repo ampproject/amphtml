@@ -102,6 +102,10 @@ bool Strings::IsCharAlphabet(char c) {
   return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
 }
 
+bool Strings::IsCharAlphabet(char32_t c) {
+  return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
+}
+
 // Returns true if character is char 0-9.
 bool Strings::IsDigit(char c) {
   return '0' <= c && c <= '9';
@@ -163,11 +167,15 @@ int8_t Strings::CodePointByteSequenceCount(uint8_t c) {
   return 1;
 }
 
-int8_t Strings::CodePointNumBytes(char32_t c) {
-  if (c & 0xffffff80) return 1;
-  if (c & 0xfffff800) return 2;
-  if (c & 0xffff0000) return 3;
-  if (c & 0xffe00000) return 4;
+int Strings::CodePointNumBytes(char32_t c) {
+  // 0b0xxxxxxx
+  if ((c & 0xffffff80) == 0) return 1;
+  // 0b11xxxxxx
+  if ((c & 0xfffff800) == 0) return 2;
+  // 0b111xxxxx
+  if ((c & 0xffff0000) == 0) return 3;
+  // 0b1111xxxx
+  if ((c & 0xffe00000) == 0) return 4;
 
   // Defaults to 1 byte ascii.
   return 1;
