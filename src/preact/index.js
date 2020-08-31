@@ -41,7 +41,7 @@ export function cloneElement(unusedElement, unusedProps, unusedChildren) {
 }
 
 /**
- * @param {!PreactDef.VNode} vnode
+ * @param {?PreactDef.VNode} vnode
  * @param {Node} container
  */
 export function render(vnode, container) {
@@ -130,9 +130,9 @@ export function useMemo(cb, opt_deps) {
 }
 
 /**
- * @param {function(...*):T|undefined} cb
+ * @param {T} cb
  * @param {!Array<*>=} opt_deps
- * @return {function(...*):T|undefined}
+ * @return {T}
  * @template T
  */
 export function useCallback(cb, opt_deps) {
