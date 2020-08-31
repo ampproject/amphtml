@@ -563,17 +563,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     const loop =
       this.element.getAttribute('id') !==
       this.element.getAttribute('auto-advance-after');
-    const audioEl = upgradeBackgroundAudio(this.element, loop);
-    if (audioEl) {
-      this.mediaPoolPromise_.then((mediaPool) =>
-        this.registerMedia_(mediaPool, dev().assertElement(audioEl)).then(
-          () => {
-            mediaPool.preload(dev().assertElement(audioEl));
-            this.backgroundAudioDeferred_.resolve();
-          }
-        )
-      );
-    }
+    upgradeBackgroundAudio(this.element, loop);
+    this.backgroundAudioDeferred_.resolve();
+
     this.muteAllMedia();
     this.getViewport().onResize(
       debounce(this.win, () => this.onResize_(), RESIZE_TIMEOUT_MS)
