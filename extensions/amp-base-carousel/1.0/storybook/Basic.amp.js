@@ -42,4 +42,30 @@ storiesOf('amp-base-carousel', module)
         ))}
       </amp-base-carousel>
     );
+  })
+  .add('customize button CSS', () => {
+    return (
+      <>
+        <style jsx global>
+          {`
+            amp-base-carousel::part(arrow next) {
+              color: green;
+            }
+            amp-base-carousel::part(arrow next):hover {
+              color: blue;
+            }
+          `}
+        </style>
+        <amp-base-carousel width="440" height="225">
+          {['lightcoral', 'peachpuff', 'lavender'].map((color) => (
+            <amp-layout width="440" height="225">
+              <svg viewBox="0 0 440 225">
+                <rect style={{fill: color}} width="440" height="225" />
+                Sorry, your browser does not support inline SVG.
+              </svg>
+            </amp-layout>
+          ))}
+        </amp-base-carousel>
+      </>
+    );
   });

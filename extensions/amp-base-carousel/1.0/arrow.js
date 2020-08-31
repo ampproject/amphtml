@@ -85,6 +85,7 @@ function DefaultArrow({by, ...rest}) {
   const classes = useStyles();
   return (
     <button
+      part={`arrow ${by > 0 ? 'next' : 'prev'}`}
       class={classes.defaultArrowButton}
       aria-label={
         by < 0 ? 'Previous item in carousel' : 'Next item in carousel'
