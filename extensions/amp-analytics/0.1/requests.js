@@ -570,7 +570,7 @@ function reportErrorTemp(url, info) {
     const elementWidth = Number(elementSize[0]);
     const elementHeight = Number(elementSize[1]);
     if (elementWidth == 0 || elementHeight == 0) {
-      dev().error(
+      dev().expectedError(
         GOOGLE_ACTIVEVIEW_ERROR_TAG,
         'Debugging: Activeview request with zero element size',
         elementWidth,
@@ -585,7 +585,7 @@ function reportErrorTemp(url, info) {
     const viewportHeight = Number(viewportSize[1]);
 
     if (viewportWidth == 0 || viewportHeight == 0) {
-      dev().error(
+      dev().expectedError(
         GOOGLE_ACTIVEVIEW_ERROR_TAG,
         'Debugging: Activeview request with zero viewport size',
         viewportWidth,
