@@ -39,7 +39,7 @@ import {withMetaData} from '../../../src/context/component-meta';
 const NonRecursive = contextProp('NonRecursive');
 
 const Concat = contextProp('Concat', {
-  needsParent: true,
+  recursive: true,
   compute: (contextNode, inputs, parentValue) =>
     `${parentValue}${inputs.join('|')}`,
   defaultValue: '',

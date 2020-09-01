@@ -20,10 +20,10 @@ import {contextProp} from '../../../src/context/prop';
 
 const NonRecursive = contextProp('NonRecursive');
 
-const Recursive = contextProp('Recursive', {needsParent: true});
+const Recursive = contextProp('Recursive', {recursive: true});
 
 const Concat = contextProp('Concat', {
-  needsParent: true,
+  recursive: true,
   compute: (contextNode, inputs, parentValue) =>
     `${parentValue}${inputs.length > 1 ? `(${inputs.join('|')})` : inputs[0]}`,
   defaultValue: '',
@@ -37,7 +37,7 @@ const Computed = contextProp('Computed', {
 
 const ComputedRecursiveWithDeps = contextProp('Computed', {
   deps: [Recursive],
-  needsParent: true,
+  recursive: true,
   defaultValue: 'DEF',
   compute: (contextNode, inputs, parentValue, recursive) =>
     `${inputs[0] ?? 'no-input'}/${parentValue}/${recursive}`,
