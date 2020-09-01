@@ -52,13 +52,17 @@ module.exports = function ({types: t, template}) {
     const filehash = crypto
       .createHash('sha256')
       .update(relativeFilepath)
-      .digest('base64')
+      .digest('hex')
       .slice(0, 7);
     const jss = create({
       ...preset(),
       createGenerateId: () => {
         return (rule) => {
-          const className = `${rule.key}-${filehash}`;
+          const dashCaseKey = rule.key.replace(
+            /([A-Z])/g,
+            (c) => `-${c.toLowerCase()}`
+          );
+          const className = `${dashCaseKey}-${filehash}`;
           if (seen.has(className)) {
             throw new Error(
               `Classnames must be unique across all files. Found a duplicate: ${className}`

@@ -28,10 +28,11 @@ export const useStyles = createUseStyles({button: {fontSize: 12}});
     `;
   const filename = 'test.jss.js';
   const plugins = [path.join(__dirname, '..')];
+  const caller = {name: 'babel-jest'};
 
   // Transforming the same file twice should yield the same classnames, resulting in an error
-  babel.transform(fileContents, {filename, plugins});
-  expect(() => babel.transform(fileContents, {filename, plugins})).toThrow(
-    /Classnames must be unique across all files/
-  );
+  babel.transformSync(fileContents, {filename, plugins, caller});
+  expect(() =>
+    babel.transformSync(fileContents, {filename, plugins, caller})
+  ).toThrow(/Classnames must be unique across all files/);
 });
