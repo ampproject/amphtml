@@ -336,7 +336,8 @@ export class PreactBaseElement extends AMP.BaseElement {
     // `contextValues` until available.
     const useContexts = Ctor['useContexts'];
     const contextValues = this.contextValues_;
-    const isReady = toHydrate || useContexts.length == 0 || contextValues != null;
+    const isReady =
+      toHydrate || useContexts.length == 0 || contextValues != null;
     if (!isReady) {
       return;
     }
