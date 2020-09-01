@@ -18,11 +18,12 @@ import * as Preact from './index';
 import {Deferred} from '../utils/promise';
 import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
+import {createRef, render} from './index';
 import {devAssert} from '../log';
 import {hasOwn} from '../utils/object';
 import {installShadowStyle} from '../shadow-embed';
 import {matches} from '../dom';
-import {render} from './index';
+import {startsWith} from '../string';
 
 /**
  * @typedef {{
@@ -44,7 +45,12 @@ let AmpElementPropDef;
 let ChildDef;
 
 /** @const {!MutationObserverInit} */
-const PASSTHROUGH_NON_EMPTY_MUTATION_INIT = {
+const CHILDREN_MUTATION_INIT = {
+  childList: true,
+};
+
+/** @const {!MutationObserverInit} */
+const PASSTHROUGH_MUTATION_INIT = {
   childList: true,
   characterData: true,
 };
@@ -66,6 +72,8 @@ const SIZE_DEFINED_STYLE = {
  * subclass on purpose, you're not meant to do work in the subclass! There will
  * be very few exceptions, which is why we allow options to configure the
  * class.
+ *
+ * @template API_TYPE
  */
 export class PreactBaseElement extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -85,6 +93,9 @@ export class PreactBaseElement extends AMP.BaseElement {
       notify: () => this.mutateElement(() => {}),
     };
 
+    /** @private {{current: ?API_TYPE}} */
+    this.ref_ = createRef();
+
     this.boundRerender_ = () => {
       this.scheduledRender_ = false;
       this.rerender_();
@@ -99,12 +110,8 @@ export class PreactBaseElement extends AMP.BaseElement {
     /** @private {boolean} */
     this.mounted_ = true;
 
-    /** @private {?MutationObserver} */
-    this.observer_ = this.constructor['passthroughNonEmpty']
-      ? new MutationObserver(() => {
-          this.scheduleRender_();
-        })
-      : null;
+    /** @protected {?MutationObserver} */
+    this.observer = null;
   }
 
   /**
@@ -116,6 +123,20 @@ export class PreactBaseElement extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    const Ctor = this.constructor;
+
+    this.observer = new MutationObserver(this.checkMutations_.bind(this));
+    const childrenInit = Ctor['children'] ? CHILDREN_MUTATION_INIT : null;
+    const passthroughInit =
+      Ctor['passthrough'] || Ctor['passthroughNonEmpty']
+        ? PASSTHROUGH_MUTATION_INIT
+        : null;
+    this.observer.observe(this.element, {
+      attributes: true,
+      ...childrenInit,
+      ...passthroughInit,
+    });
+
     this.defaultProps_ = this.init() || null;
 
     this.scheduleRender_();
@@ -145,18 +166,11 @@ export class PreactBaseElement extends AMP.BaseElement {
     this.context_.renderable = true;
     this.context_.playable = true;
     this.scheduleRender_();
-    if (this.observer_) {
-      this.observer_.observe(this.element, PASSTHROUGH_NON_EMPTY_MUTATION_INIT);
-    }
     return deferred.promise;
   }
 
   /** @override */
   unlayoutCallback() {
-    if (this.observer_) {
-      this.observer_.disconnect();
-      return true;
-    }
     return false;
   }
 
@@ -179,6 +193,40 @@ export class PreactBaseElement extends AMP.BaseElement {
     this.scheduleRender_();
   }
 
+  /**
+   * @return {!API_TYPE}
+   * @protected
+   */
+  api() {
+    return devAssert(this.ref_.current);
+  }
+
+  /**
+   * @param {string} alias
+   * @param {function(!API_TYPE, !../service/action-impl.ActionInvocation)} handler
+   * @param {../action-constants.ActionTrust} minTrust
+   * @protected
+   */
+  registerApiAction(alias, handler, minTrust) {
+    this.registerAction(
+      alias,
+      (invocation) => handler(this.api(), invocation),
+      minTrust
+    );
+  }
+
+  /**
+   * @param {!Array<!MutationRecord>} records
+   * @private
+   */
+  checkMutations_(records) {
+    const Ctor = this.constructor;
+    const rerender = records.some((m) => shouldMutationBeRerendered(Ctor, m));
+    if (rerender) {
+      this.scheduleRender_();
+    }
+  }
+
   /** @private */
   scheduleRender_() {
     if (!this.scheduledRender_) {
@@ -191,7 +239,7 @@ export class PreactBaseElement extends AMP.BaseElement {
   unmount_() {
     this.mounted_ = false;
     if (this.container_) {
-      render(<></>, this.container_);
+      render(null, this.container_);
     }
   }
 
@@ -239,7 +287,12 @@ export class PreactBaseElement extends AMP.BaseElement {
       }
     }
 
-    const props = collectProps(Ctor, this.element, this.defaultProps_);
+    const props = collectProps(
+      Ctor,
+      this.element,
+      this.ref_,
+      this.defaultProps_
+    );
 
     // While this "creates" a new element, diffing will not create a second
     // instance of Component. Instead, the existing one already rendered into
@@ -350,11 +403,12 @@ PreactBaseElement['children'] = null;
 /**
  * @param {typeof PreactBaseElement} Ctor
  * @param {!AmpElement} element
+ * @param {{current: ?}} ref
  * @param {!JsonObject|null|undefined} defaultProps
  * @return {!JsonObject}
  */
-function collectProps(Ctor, element, defaultProps) {
-  const props = /** @type {!JsonObject} */ ({...defaultProps});
+function collectProps(Ctor, element, ref, defaultProps) {
+  const props = /** @type {!JsonObject} */ ({...defaultProps, ref});
 
   const {
     'className': className,
@@ -384,11 +438,13 @@ function collectProps(Ctor, element, defaultProps) {
         ? element.hasAttribute(def.attr)
         : element.getAttribute(def.attr);
     if (value == null) {
-      props[name] = def.default;
+      if (def.default !== undefined) {
+        props[name] = def.default;
+      }
     } else {
       const v =
         def.type == 'number'
-          ? Number(value)
+          ? parseFloat(value)
           : def.type == 'Element'
           ? // TBD: what's the best way for element referencing compat between
             // React and AMP? Currently modeled as a Ref.
@@ -476,4 +532,56 @@ function matchChild(element, defs) {
     }
   }
   return null;
+}
+
+/**
+ * @param {!NodeList} nodeList
+ * @return {boolean}
+ */
+function shouldMutationForNodeListBeRerendered(nodeList) {
+  for (let i = 0; i < nodeList.length; i++) {
+    const node = nodeList[i];
+    if (node.nodeType == /* ELEMENT */ 1) {
+      // Ignore service elements, e.g. `<i-amphtml-svc>` or
+      // `<x slot="i-amphtml-svc">`.
+      if (
+        startsWith(node.tagName, 'I-AMPHTML') ||
+        node.getAttribute('slot') == 'i-amphtml-svc'
+      ) {
+        continue;
+      }
+      return true;
+    }
+    if (node.nodeType == /* TEXT */ 3) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * @param {typeof PreactBaseElement} Ctor
+ * @param {!MutationRecord} m
+ * @return {boolean}
+ */
+function shouldMutationBeRerendered(Ctor, m) {
+  const {type} = m;
+  if (type == 'attributes') {
+    // Check if the attribute is mapped to one of the properties.
+    const props = Ctor['props'];
+    for (const name in props) {
+      const def = props[name];
+      if (m.attributeName == def.attr) {
+        return true;
+      }
+    }
+    return false;
+  }
+  if (type == 'childList') {
+    return (
+      shouldMutationForNodeListBeRerendered(m.addedNodes) ||
+      shouldMutationForNodeListBeRerendered(m.removedNodes)
+    );
+  }
+  return false;
 }

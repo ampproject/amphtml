@@ -28,19 +28,25 @@ import {userAssert} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-base-carousel';
 
+/** @extends {PreactBaseElement<BaseCarouselDef.CarouselApi>} */
 class AmpBaseCarousel extends PreactBaseElement {
   /** @override */
   init() {
     const {element} = this;
-    let advance = () => {};
-    this.registerAction('prev', () => advance(-1), ActionTrust.LOW);
-    this.registerAction('next', () => advance(1), ActionTrust.LOW);
+    this.registerApiAction('prev', (api) => api.advance(-1), ActionTrust.LOW);
+    this.registerApiAction('next', (api) => api.advance(1), ActionTrust.LOW);
+    this.registerApiAction(
+      'goToSlide',
+      (api, invocation) => {
+        const {args} = invocation;
+        api.goToSlide(args['index'] || -1);
+      },
+      ActionTrust.LOW
+    );
     return dict({
       'onSlideChange': (index) => {
         fireSlideChangeEvent(this.win, element, index, ActionTrust.HIGH);
-        this.mutateProps(dict({'slide': index}));
       },
-      'setAdvance': (a) => (advance = a),
     });
   }
 
@@ -56,6 +62,9 @@ class AmpBaseCarousel extends PreactBaseElement {
 
 /** @override */
 AmpBaseCarousel['Component'] = BaseCarousel;
+
+/** @override */
+AmpBaseCarousel['layoutSizeDefined'] = true;
 
 /** @override */
 AmpBaseCarousel['children'] = {

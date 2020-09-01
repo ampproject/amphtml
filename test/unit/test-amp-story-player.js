@@ -26,6 +26,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   let win;
   let playerEl;
   let manager;
+  let fakeResponse;
 
   const fireHandler = [];
   const DEFAULT_CACHE_URL =
@@ -91,7 +92,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     win = env.win;
     fakeMessaging = {
       setDefaultHandler: () => {},
-      sendRequest: () => {},
+      sendRequest: () => Promise.resolve(fakeResponse),
       unregisterHandler: () => {},
       registerHandler: (event, handler) => {
         fireHandler[event] = handler;
@@ -113,6 +114,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   it('should correctly append params at the end of the story url', async () => {
     buildStoryPlayer();
     await manager.loadPlayers();
+    await nextTick();
 
     const storyIframe = playerEl.querySelector('iframe');
 
@@ -127,6 +129,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     const existingParams = '?testParam=true#myhash=hashValue';
     buildStoryPlayer(1, DEFAULT_CACHE_URL + existingParams);
     await manager.loadPlayers();
+    await nextTick();
 
     const storyIframe = playerEl.querySelector('iframe');
 
@@ -141,6 +144,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   it('should set first story as visible', async () => {
     buildStoryPlayer(3);
     await manager.loadPlayers();
+    await nextTick();
 
     const storyIframes = playerEl.querySelectorAll('iframe');
     expect(storyIframes[0].getAttribute('src')).to.include(
@@ -148,14 +152,41 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     );
   });
 
-  it('should prerender next stories', async () => {
+  it('should prerender next story after first one is loaded', async () => {
     buildStoryPlayer(3);
     await manager.loadPlayers();
+    await nextTick();
+
+    fireHandler['storyContentLoaded']('storyContentLoaded', {});
+    await nextTick();
 
     const storyIframes = playerEl.querySelectorAll('iframe');
     expect(storyIframes[1].getAttribute('src')).to.include(
       '#visibilityState=prerender'
     );
+  });
+
+  it('should not load next story if first one has not finished loading', async () => {
+    buildStoryPlayer(3);
+    await manager.loadPlayers();
+    await nextTick();
+
+    const storyIframes = playerEl.querySelectorAll('iframe');
+
+    expect(storyIframes[1].getAttribute('src')).to.not.exist;
+  });
+
+  it('should load new story if user navigated before first finished loading', async () => {
+    buildStoryPlayer(3);
+    await manager.loadPlayers();
+    await nextTick();
+
+    // Swiping without waiting for story loaded event.
+    swipeLeft();
+    await nextTick();
+
+    const storyIframes = playerEl.querySelectorAll('iframe');
+    expect(storyIframes[1].getAttribute('src')).to.exist;
   });
 
   it(
@@ -214,7 +245,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     expect(registerHandlerSpy).to.have.been.calledWith('documentStateUpdate');
   });
 
-  it('should send request to get page attachment state at build time', async () => {
+  it('should set up onDocumentState listeners at at build time', async () => {
     const sendRequestSpy = env.sandbox.spy(fakeMessaging, 'sendRequest');
 
     buildStoryPlayer();
@@ -223,6 +254,9 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
     expect(sendRequestSpy).to.have.been.calledWith('onDocumentState', {
       'state': 'PAGE_ATTACHMENT_STATE',
+    });
+    expect(sendRequestSpy).to.have.been.calledWith('onDocumentState', {
+      'state': 'CURRENT_PAGE_ID',
     });
   });
 
@@ -627,6 +661,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       buildStoryPlayer();
       await manager.loadPlayers();
 
+      fakeResponse = {value: true};
       await playerEl.getStoryState('page-attachment');
 
       await nextTick();
@@ -864,6 +899,33 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
         detail: {
           index: 4,
           remaining: 0,
+        },
+      });
+    });
+
+    it('should react to CURRENT_PAGE_ID events', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      appendStoriesToPlayer(playerEl, 1);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await nextTick();
+
+      const navigationSpy = env.sandbox.spy();
+      playerEl.addEventListener('storyNavigation', navigationSpy);
+
+      fakeResponse = {value: 0.12};
+      const fakeData = {state: 'CURRENT_PAGE_ID', value: 'page-2'};
+      fireHandler['documentStateUpdate']('documentStateUpdate', fakeData);
+
+      await nextTick();
+
+      expect(navigationSpy).to.have.been.calledWithMatch({
+        type: 'storyNavigation',
+        detail: {
+          pageId: 'page-2',
+          progress: 0.12,
         },
       });
     });
