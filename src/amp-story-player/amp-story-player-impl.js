@@ -171,14 +171,8 @@ export class AmpStoryPlayer {
       isSwipeX: null,
     };
 
-    /** @private {?Promise} */
-    this.currentStoryLoadPromise_ = null;
-
-    /** @private {?Function} */
-    this.currentStoryLoadResolveFn_ = null;
-
-    /** @private {?Function} */
-    this.currentStoryLoadRejectFn_ = null;
+    /** @private {?Deferred} */
+    this.currentStoryLoadDeferred_ = null;
 
     this.attachCallbacksToElement_();
   }
@@ -577,26 +571,16 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * @private
-   */
-  initializeCurrentStoryLoadPromise_() {
-    const deferred = new Deferred();
-    this.currentStoryLoadPromise_ = deferred.promise;
-    this.currentStoryLoadResolveFn_ = deferred.resolve;
-    this.currentStoryLoadRejectFn_ = deferred.reject;
-  }
-
-  /**
    * Resolves when story in given iframe is finished loading.
    * @param {number} iframeIdx
    * @private
    */
   waitForStoryToLoadPromise_(iframeIdx) {
-    this.initializeCurrentStoryLoadPromise_();
+    this.currentStoryLoadDeferred_ = new Deferred();
 
     this.messagingPromises_[iframeIdx].then((messaging) =>
       messaging.registerHandler('storyContentLoaded', () => {
-        this.currentStoryLoadResolveFn_();
+        this.currentStoryLoadDeferred_.resolve();
       })
     );
   }
@@ -921,14 +905,16 @@ export class AmpStoryPlayer {
 
         let navigationPromise;
         if (visibilityState === VisibilityState.VISIBLE) {
-          if (this.currentStoryLoadRejectFn_) {
+          if (this.currentStoryLoadDeferred_) {
             // Reject previous navigation promise.
-            this.currentStoryLoadRejectFn_('Cancelling previous story load.');
+            this.currentStoryLoadDeferred_.reject(
+              'Cancelling previous story load.'
+            );
           }
           navigationPromise = Promise.resolve();
           this.waitForStoryToLoadPromise_(story[IFRAME_IDX]);
         } else {
-          navigationPromise = this.currentStoryLoadPromise_;
+          navigationPromise = this.currentStoryLoadDeferred_.promise;
         }
 
         return navigationPromise.then(() => {
