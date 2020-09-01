@@ -36,7 +36,7 @@ class AmpInlineGallery extends PreactBaseElement {
   /** @override */
   init() {
     return dict({
-      'children': <GalleryShim shimDomElement={this.element} />,
+      'children': <ContextExporter shimDomElement={this.element} />,
     });
   }
 
@@ -70,12 +70,12 @@ AMP.extension(TAG, '1.0', (AMP) => {
  * @param {!SelectorDef.OptionProps} props
  * @return {PreactDef.Renderable}
  */
-function GalleryShim({shimDomElement}) {
+function ContextExporter({shimDomElement}) {
   // Consume the `CarouselContext` produced by the `InlineGallery` component
   // and propagate it as a context prop.
   const context = useContext(CarouselContextProp.type);
   useEffect(() => {
-    setProp(shimDomElement, CarouselContextProp, GalleryShim, context);
+    setProp(shimDomElement, CarouselContextProp, ContextExporter, context);
   }, [shimDomElement, context]);
   return <div />;
 }

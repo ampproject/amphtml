@@ -19,7 +19,7 @@ import {contextProp} from '../../../src/context';
 
 const CarouselContextProp = contextProp('base-carousel:0.1:context', {
   type: CarouselContext,
-  needsParent: true,
+  recursive: true,
   defaultValue: null,
 });
 

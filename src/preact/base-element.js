@@ -151,7 +151,7 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     const useContexts = Ctor['useContexts'];
     if (useContexts.length != 0) {
-      subscribe(this.element, Ctor['useContexts'], (...contexts) => {
+      subscribe(this.element, useContexts, (...contexts) => {
         this.contextValues_ = contexts.slice(0);
         this.scheduleRender_();
       });
