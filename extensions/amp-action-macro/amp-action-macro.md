@@ -68,7 +68,7 @@ is allowed here.
 ```html
 <amp-action-macro
   id="navigate-action"
-  execute="AMP.navigateTo('http://www.ampproject.org')"
+  execute="AMP.navigateTo(url='http://www.ampproject.org')"
 ></amp-action-macro>
 
 <amp-action-macro
@@ -77,9 +77,9 @@ is allowed here.
 ></amp-action-macro>
 <amp-list id="ampList" src="...">...</amp-list>
 
-<button on="tap:navigate-action"></button>
+<button on="tap:navigate-action.execute()"></button>
 
-<button on="tap:refresh-amp-list"></button>
+<button on="tap:refresh-amp-list.execute()"></button>
 ```
 
 ### arguments
