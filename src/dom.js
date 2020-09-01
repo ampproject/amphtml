@@ -415,7 +415,7 @@ export function childNodes(parent, callback) {
 
 /**
  * Finds the first child element that has the specified attribute.
- * @param {!Element} parent
+ * @param {!Element|!ShadowRoot} parent
  * @param {string} attr
  * @return {?Element}
  */
@@ -439,7 +439,7 @@ export function lastChildElementByAttr(parent, attr) {
 
 /**
  * Finds all child elements that has the specified attribute.
- * @param {!Element} parent
+ * @param {!Element|!ShadowRoot} parent
  * @param {string} attr
  * @return {!NodeList<!Element>}
  */
@@ -450,7 +450,7 @@ export function childElementsByAttr(parent, attr) {
 
 /**
  * Finds the first child element that has the specified tag name.
- * @param {!Element} parent
+ * @param {!Element|!ShadowRoot} parent
  * @param {string} tagName
  * @return {?Element}
  */
@@ -461,7 +461,7 @@ export function childElementByTag(parent, tagName) {
 
 /**
  * Finds all child elements with the specified tag name.
- * @param {!Element} parent
+ * @param {!Element|!ShadowRoot} parent
  * @param {string} tagName
  * @return {!NodeList<!Element>}
  */
@@ -506,7 +506,7 @@ export function elementByTag(element, tagName) {
  *
  * This method isn't required for modern builds, can be removed.
  *
- * @param {!Element} root
+ * @param {!Element|!ShadowRoot} root
  * @param {string} selector
  * @return {!NodeList<!Element>}
  */
@@ -522,7 +522,7 @@ function scopedQuerySelectionFallback(root, selector) {
 /**
  * Finds the first element that matches `selector`, scoped inside `root`.
  * Note: in IE, this causes a quick mutation of the element's class list.
- * @param {!Element} root
+ * @param {!Element|!ShadowRoot} root
  * @param {string} selector
  * @return {?Element}
  */
@@ -539,7 +539,7 @@ export function scopedQuerySelector(root, selector) {
 /**
  * Finds every element that matches `selector`, scoped inside `root`.
  * Note: in IE, this causes a quick mutation of the element's class list.
- * @param {!Element} root
+ * @param {!Element|!ShadowRoot} root
  * @param {string} selector
  * @return {!NodeList<!Element>}
  */

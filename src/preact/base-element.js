@@ -18,11 +18,11 @@ import * as Preact from './index';
 import {Deferred} from '../utils/promise';
 import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
-import {createRef, render} from './index';
+import {childElementByTag, createElementWithAttributes, matches} from '../dom';
+import {createRef, hydrate, render} from './index';
 import {devAssert} from '../log';
-import {hasOwn} from '../utils/object';
+import {dict, hasOwn} from '../utils/object';
 import {installShadowStyle} from '../shadow-embed';
-import {matches} from '../dom';
 import {startsWith} from '../string';
 
 /**
@@ -54,6 +54,12 @@ const PASSTHROUGH_MUTATION_INIT = {
   childList: true,
   characterData: true,
 };
+
+/** @const {!JsonObject<string, string>} */
+const SHADOW_CONTAINER_ATTRS = dict({'style': 'display: contents'});
+
+/** @const {!JsonObject<string, string>} */
+const SERVICE_SLOT_ATTRS = dict({'name': 'i-amphtml-svc'});
 
 /**
  * The same as `applyFillContent`, but inside the shadow.
@@ -253,7 +259,9 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     const Ctor = this.constructor;
 
+    let toHydrate = false;
     if (!this.container_) {
+      const doc = this.win.document;
       if (
         Ctor['children'] ||
         Ctor['passthrough'] ||
@@ -265,20 +273,43 @@ export class PreactBaseElement extends AMP.BaseElement {
             'when configured with "children", "passthrough", or ' +
             '"passthroughNonEmpty" properties.'
         );
-        const shadowRoot = this.element.attachShadow({mode: 'open'});
-        this.container_ = shadowRoot;
+        // Check if there's a pre-constructed shadow DOM.
+        let {shadowRoot} = this.element;
+        let container = shadowRoot && childElementByTag(shadowRoot, 'c');
+        if (container) {
+          toHydrate = true;
+        } else {
+          // Create new shadow root.
+          shadowRoot = this.element.attachShadow({mode: 'open'});
 
-        const shadowCss = Ctor['shadowCss'];
-        if (shadowCss) {
-          installShadowStyle(shadowRoot, this.element.tagName, shadowCss);
+          // The pre-constructed shadow root is required to have the stylesheet
+          // inline. Thus, only the new shadow roots share the stylesheets.
+          const shadowCss = Ctor['shadowCss'];
+          if (shadowCss) {
+            installShadowStyle(shadowRoot, this.element.tagName, shadowCss);
+          }
+
+          // Create container.
+          // The pre-constructed shadow root is required to have this container.
+          container = createElementWithAttributes(
+            doc,
+            'c',
+            SHADOW_CONTAINER_ATTRS
+          );
+          shadowRoot.appendChild(container);
+
+          // Create a slot for internal service elements i.e. "i-amphtml-sizer".
+          // The pre-constructed shadow root is required to have this slot.
+          const serviceSlot = createElementWithAttributes(
+            doc,
+            'slot',
+            SERVICE_SLOT_ATTRS
+          );
+          shadowRoot.appendChild(serviceSlot);
         }
-
-        // Create a slot for internal service elements i.e. "i-amphtml-sizer"
-        const serviceSlot = this.win.document.createElement('slot');
-        serviceSlot.setAttribute('name', 'i-amphtml-svc');
-        this.container_.appendChild(serviceSlot);
+        this.container_ = container;
       } else {
-        const container = this.win.document.createElement('i-amphtml-c');
+        const container = doc.createElement('i-amphtml-c');
         this.container_ = container;
         this.applyFillContent(container);
         if (!Ctor['detached']) {
@@ -303,7 +334,11 @@ export class PreactBaseElement extends AMP.BaseElement {
       </WithAmpContext>
     );
 
-    render(v, this.container_);
+    if (toHydrate) {
+      hydrate(v, this.container_);
+    } else {
+      render(v, this.container_);
+    }
 
     const deferred = this.scheduledRenderDeferred_;
     if (deferred) {
