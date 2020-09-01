@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+const babel = require('@babel/core');
 const path = require('path');
 const runner = require('@babel/helper-plugin-test-runner').default;
-const babel = require('@babel/core');
 
 runner(__dirname);
 
+// eslint-disable-next-line no-undef
 test('throws when duplicate classname is found', () => {
   const fileContents = `
 import {createUseStyles} from 'react-jss';

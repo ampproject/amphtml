@@ -45,7 +45,7 @@ module.exports = function ({types: t, template}) {
     return filename.endsWith('.jss.js');
   }
 
-  let seen = new Set();
+  const seen = new Set();
   function compileJss(JSS, filename) {
     const filehash = crypto
       .createHash('sha256')
