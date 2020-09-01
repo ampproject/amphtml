@@ -421,9 +421,9 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
       expect(stories[0][IFRAME_IDX]).to.eql(undefined);
       expect(stories[1][IFRAME_IDX]).to.eql(undefined);
-      expect(stories[2][IFRAME_IDX]).to.eql(0);
-      expect(stories[3][IFRAME_IDX]).to.eql(1);
-      expect(stories[4][IFRAME_IDX]).to.eql(2);
+      expect(stories[2][IFRAME_IDX]).to.eql(2);
+      expect(stories[3][IFRAME_IDX]).to.eql(0);
+      expect(stories[4][IFRAME_IDX]).to.eql(1);
     });
 
     // TODO(proyectoramirez): delete once add() is implemented.
