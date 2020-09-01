@@ -601,6 +601,7 @@ export class AmpStoryPlayer {
   show(storyUrl) {
     const storyIdx = findIndex(this.stories_, ({href}) => href === storyUrl);
 
+    // TODO(Enriqe): replace for add() once implemented.
     if (!this.stories_[storyIdx]) {
       throw new Error(`Story URL not found in the player: ${storyUrl}`);
     }
