@@ -16,54 +16,55 @@
 
  amp-rush-flow {
     overflow: hidden !important;
-    background: rgba(81, 255, 0, 0.7);
  }
 
- amp-rush-flow.top {
+ amp-rush-flow.__top {
     top: 0;
     position: fixed;
     z-index: 99;
 }
 
-amp-rush-flow.top-right {
+amp-rush-flow.__top-right {
     top: 0;
     right: 0;
     position: fixed;
     z-index: 99;
 }
 
-amp-rush-flow.top-center {
+amp-rush-flow.__top-center {
     top: 0;
     width: 100%;
     position: fixed;
+    text-align: center;
     z-index: 99;
 }
 
-amp-rush-flow.bottom {
+amp-rush-flow.__bottom {
     bottom: 0;
     position: fixed;
     z-index: 99;
 }
 
-amp-rush-flow.bottom-right {
+amp-rush-flow.__bottom-right {
     bottom: 0;
     right:0;
     position: fixed;
     z-index: 99;
 }
 
-amp-rush-flow.bottom-center {
+amp-rush-flow.__bottom-center {
     bottom: 0;
     width: 100%;
     position: fixed;
+    text-align: center;
     z-index: 99;
 }
 
-amp-rush-flow.hidden {
+amp-rush-flow.__hidden {
     display: none;
 }
 
-amp-rush-flow.visible {
+amp-rush-flow.__visible {
     display: block;
 }
 

@@ -23,3 +23,19 @@ limitations under the License.
 -->
 
 # amp-rush-flow
+
+## Examples
+
+Use the `amp-rush-flow` component to embed a Publisher media features.
+
+**Example: Embedding a Reddit post**
+
+```html
+<amp-rush-flow
+  data-cid="103" 
+  width="1px" 
+  height="1px" 
+  layout="flex-item"
+>
+</amp-rush-flow>
+```
