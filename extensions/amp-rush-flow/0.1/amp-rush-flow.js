@@ -46,7 +46,6 @@ import {CSS} from '../../../build/amp-rush-flow-0.1.css';
 import {userAssert} from '../../../src/log';
 import {setStyles, resetStyles} from '../../../src/style';
 import {Services} from '../../../src/services';
-import {getIframe} from '../../../src/3p-frame';
 
 export class AmpRushFlow extends AMP.BaseElement {
   /** @param {!AmpElement} element */
