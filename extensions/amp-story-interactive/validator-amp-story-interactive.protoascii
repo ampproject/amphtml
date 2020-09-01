@@ -19,7 +19,7 @@ tags: {  # amp-story-interactive
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-story-interactive"
-    version: "1.0"
+    version: "0.1"
     version: "latest"
   }
   attr_lists: "common-extension-attrs"
