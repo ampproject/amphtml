@@ -984,7 +984,7 @@ amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-compo
   width: 10px !important;
   position: absolute !important;
   top: 0 !important;
-  left: 0!important;
+  left: 0 !important;
   bottom: 0 !important;
   z-index: 1 !important;
   height: calc(100vh - 150px) !important;
@@ -997,8 +997,9 @@ amp-story-page.i-amphtml-story-desktop-panels .i-amphtml-story-interactive-compo
   pointer-events: none !important;
 }
 
-[dir=rtl]amp-story .i-amphtml-story-screen-reader-back-button {
+[dir=rtl] .i-amphtml-story-screen-reader-back-button {
   right: 0 !important;
+  left: auto !important;
 }
 
 .i-amphtml-story-desktop-panels .i-amphtml-story-screen-reader-back-button,
