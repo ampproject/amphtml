@@ -614,6 +614,10 @@ export class AmpStoryPlayer {
       this.stories_.length - 1
     );
 
+    // Place current story index first to prioritize loading over adjacent ones.
+    adjacentStoriesIdx.splice(adjacentStoriesIdx.indexOf(storyIdx), 1);
+    adjacentStoriesIdx.unshift(storyIdx);
+
     adjacentStoriesIdx.forEach((idx) => {
       const story = this.stories_[idx];
       let iframe = story[IFRAME_IDX];
