@@ -79,23 +79,6 @@ export class IframePool {
   }
 
   /**
-   * Clears stored story indices.
-   * @return {!Array<number>}
-   */
-  evictStories() {
-    const evictedStories = this.storyIdsWithIframe_;
-    this.storyIdsWithIframe_ = [];
-    return evictedStories;
-  }
-
-  /**
-   * @return {!Array<number>}
-   */
-  getAvailableIframeIdx() {
-    return this.iframePool_;
-  }
-
-  /**
    * Finds adjacent iframe indices given an index.
    * Examples of resulting adjacent arrays:
    * 0 -> [0] [1] [2] [] []
