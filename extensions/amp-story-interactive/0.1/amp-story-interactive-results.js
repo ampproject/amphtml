@@ -18,7 +18,7 @@ import {
   AmpStoryInteractive,
   InteractiveType,
 } from './amp-story-interactive-abstract';
-import {CSS} from '../../../build/amp-story-interactive-results-1.0.css';
+import {CSS} from '../../../build/amp-story-interactive-results-0.1.css';
 import {StateProperty} from '../../amp-story/1.0/amp-story-store-service';
 import {computedStyle, setStyle} from '../../../src/style';
 import {dev} from '../../../src/log';
