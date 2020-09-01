@@ -23,7 +23,7 @@ import {AmpStoryInteractiveResults} from './amp-story-interactive-results';
  * This extension imports the interactive components into amp-story.
  */
 
-AMP.extension('amp-story-interactive', '1.0', (AMP) => {
+AMP.extension('amp-story-interactive', '0.1', (AMP) => {
   AMP.registerElement(
     'amp-story-interactive-binary-poll',
     AmpStoryInteractiveBinaryPoll
