@@ -43,9 +43,7 @@ export function getContextMetadata(
   const width = element.getAttribute('width');
   const height = element.getAttribute('height');
   attributes = attributes ? attributes : dict();
-  console.log("here:", attributes);
   attributes['width'] = getLengthNumeral(width);
-  console.log("width attribute", attributes);
   attributes['height'] = getLengthNumeral(height);
   if (element.getAttribute('title')) {
     attributes['title'] = element.getAttribute('title');
@@ -104,7 +102,7 @@ export function getContextMetadata(
   // perserved name to extern. We are doing both right now.
   // Please also add new introduced variable
   // name to the extern list.
-  attributes['_context'] = dict({
+  const _context = dict({
     'ampcontextVersion': internalRuntimeVersion(),
     'ampcontextFilepath': `${
       urls.thirdParty
@@ -178,11 +176,18 @@ export function getContextMetadata(
     'domFingerprint': DomFingerprint.generate(element),
     'experimentToggles': experimentToggles(parentWindow),
     'sentinel': sentinel,
+    'tagName': "AMP-FACEBOOK-COMMENTS"
   });
   const adSrc = element.getAttribute('src');
   if (adSrc) {
     attributes['src'] = adSrc;
   }
-  console.log(attributes);
+  attributes = {
+    href: "http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html",
+    width: layoutRect.width,
+    height: layoutRect.height,
+    type: "facebook",
+    _context: JSON.parse(JSON.stringify(_context))
+  };
   return attributes;
 }

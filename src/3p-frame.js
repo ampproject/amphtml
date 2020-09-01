@@ -79,7 +79,8 @@ function getPreactFrameAttributes(parentWindow, element, opt_type, opt_context) 
   addDataAndJsonAttributes_(element, attributes);
   attributes = getContextMetadata(parentWindow, element, sentinel, attributes, true);
   attributes['type'] = type;
-  attributes['_context'] = opt_context;
+  // attributes['_context'] = opt_context;
+  console.log("Frame Attributes", attributes);
   return attributes;
 }
 
@@ -192,16 +193,12 @@ export function getIframeProps(
   opt_context,
   attributes_object
 ) {
-  const attributes = getPreactFrameAttributes(
+  let attributes = getPreactFrameAttributes(
     parentWindow,
     parentElement,
     opt_type,
     opt_context
   );
-
-  const iframe = /** @type {!HTMLIFrameElement} */ (parentWindow.document.createElement(
-    'iframe'
-  ));
 
   if (!count[attributes['type']]) {
     count[attributes['type']] = 0;
@@ -253,9 +250,8 @@ export function getIframeProps(
     applySandbox(returnObj);
   }
 
-  // returnObj["data-amp-3p-sentinel"] = attributes['_context']['sentinel'];
-
-  console.log(returnObj);
+  returnObj["data-amp-3p-sentinel"] = attributes['_context']['sentinel'];
+  console.log("returnObj", returnObj);
   return returnObj;
 }
 

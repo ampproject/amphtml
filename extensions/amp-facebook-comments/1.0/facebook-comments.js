@@ -3,6 +3,19 @@ import {useResourcesNotify} from '../../../src/preact/utils';
 import {getIframeProps} from '../../../src/3p-frame';
 import { ContainWrapper } from "../../../src/preact/component";
 
+
+/**
+ * @param {!JsonObject} props
+ *  type: !string,
+ *  href: ?string,
+ *  target: ?string,
+ *  width: ?string,
+ *  height: ?string,
+ *  background: ?string,
+ *  tabIndex: ?string,
+ *  style: ?string,
+ * @return {PreactDef.Renderable}
+ */
 export function FacebookComments(prop) {
   const iframeProps = getIframeProps(
     window,
@@ -16,9 +29,12 @@ export function FacebookComments(prop) {
   );
 
   return (
+    <div>
+      <script src='https://connect.facebook.net/EN_US/sdk.js'></script>
     <ContainWrapper size layout paint style={{ width: 600, height: 900 }}>
       <iframe {...iframeProps} />
     </ContainWrapper>
+    </div>
   );
 }
 
