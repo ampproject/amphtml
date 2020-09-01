@@ -27,9 +27,6 @@ export const TAG = 'amp-inline-gallery-pagination';
 /** @extends {PreactBaseElement<BaseCarouselDef.CarouselApi>} */
 export class AmpInlineGalleryPagination extends PreactBaseElement {
   /** @override */
-  init() {}
-
-  /** @override */
   isLayoutSupported(layout) {
     userAssert(
       isExperimentOn(this.win, 'amp-base-carousel-bento'),
