@@ -18,7 +18,7 @@ import {
   AmpStoryInteractive,
   InteractiveType,
 } from './amp-story-interactive-abstract';
-import {CSS} from '../../../build/amp-story-interactive-poll-1.0.css';
+import {CSS} from '../../../build/amp-story-interactive-poll-0.1.css';
 import {htmlFor} from '../../../src/static-template';
 import {setStyle} from '../../../src/style';
 

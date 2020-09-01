@@ -78,9 +78,9 @@ export let InteractiveComponentDef;
 
 /**
  * @typedef {{
- *    option: ?../../amp-story-interactive/1.0/amp-story-interactive-abstract.OptionConfigType,
+ *    option: ?../../amp-story-interactive/0.1/amp-story-interactive-abstract.OptionConfigType,
  *    interactiveId: string,
- *    type: ../../amp-story-interactive/1.0/amp-story-interactive-abstract.InteractiveType
+ *    type: ../../amp-story-interactive/0.1/amp-story-interactive-abstract.InteractiveType
  * }}
  */
 export let InteractiveReactData;
