@@ -369,3 +369,27 @@ TEST(TokenizerTest, TestMustangTemplateCase) {
   }
   EXPECT_EQ(tokens.size(), 11);
 }
+
+TEST(TokenizerTest, InvalidBytes) {
+  htmlparser::Tokenizer t1("\xd8--abc");
+  htmlparser::TokenType tt = t1.Next(false);
+  EXPECT_EQ(tt, htmlparser::TokenType::TEXT_TOKEN);
+  auto token = t1.token();
+  EXPECT_EQ(token.data, "\xd8--abc");
+  EXPECT_TRUE(t1.IsEOF());
+
+  // Missing 2 bytes in 4 bytes sequence.
+  htmlparser::Tokenizer t2("\xf0\x90<div>");
+  htmlparser::TokenType tt2 = t2.Next(false);
+  EXPECT_EQ(tt2, htmlparser::TokenType::TEXT_TOKEN);
+  auto token2 = t2.token();
+  EXPECT_EQ(token2.data, "\xf0\x90");
+  auto tt3 = t2.Next(false);
+  EXPECT_EQ(tt3, htmlparser::TokenType::START_TAG_TOKEN);
+  auto token3 = t2.token();
+  EXPECT_EQ(token3.atom, htmlparser::Atom::DIV);
+  auto tt4 = t2.Next(false);
+  // EOF leads to ERROR_TOKEN.
+  EXPECT_EQ(tt4, htmlparser::TokenType::ERROR_TOKEN);
+  EXPECT_TRUE(t2.IsEOF());
+}

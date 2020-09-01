@@ -51,8 +51,20 @@ inline char32_t Tokenizer::ReadChar() {
     current_char_ = *c;
     bytes_skipped_ = Strings::CodePointNumBytes(current_char_);
   } else {
-    current_char_ = kReplacementChar;
+    auto sequence_count = Strings::CodePointByteSequenceCount(
+        buffer_.at(raw_.end));
     bytes_skipped_ = 1;
+    // Skip all the remaining continuation bytes that may be part of this
+    // codepoint.
+    for (int i = 1; (raw_.end + i) < buffer_.size() && i < sequence_count;
+         ++i) {
+      if (Strings::IsContinuationByte(buffer_.at(raw_.end + i))) {
+        bytes_skipped_++;
+      } else {
+        break;
+      }
+    }
+    current_char_ = kReplacementChar;
   }
 
   raw_.end += bytes_skipped_;
