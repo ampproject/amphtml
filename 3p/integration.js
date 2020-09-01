@@ -350,7 +350,6 @@ const AMP_EMBED_ALLOWED = {
   speakol: true,
   strossle: true,
   svknative: true,
-  strossle: true,
   taboola: true,
   temedya: true,
   whopainfeed: true,
