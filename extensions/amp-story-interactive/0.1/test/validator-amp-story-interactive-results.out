@@ -28,7 +28,7 @@ FAIL
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
-|    <script async custom-element="amp-story-interactive" src="https://cdn.ampproject.org/v0/amp-story-interactive-1.0.js"></script>
+|    <script async custom-element="amp-story-interactive" src="https://cdn.ampproject.org/v0/amp-story-interactive-0.1.js"></script>
 |  </head>
 |  <body>
 |    <amp-story standalone title="My Story" publisher="Me" publisher-logo-src="http://me.com/logo.png" poster-portrait-src="http://me.com/portrait.jpg" poster-square-src="http://me.com/square.jpg" poster-landscape-src="http://me.com/landscape.jpg" background-audio="http://me.com/path/to/my.mp3" entity="Someone else" entity-logo-src="http://someoneelse.com/logo.png" entity-url="http://someoneelse.com/profile">
@@ -46,9 +46,9 @@ FAIL
 |          </amp-story-interactive-results>
 |          <amp-story-interactive-results
 >>         ^~~~~~~~~
-amp-story-interactive/1.0/test/validator-amp-story-interactive-results.html:46:8 The mandatory attribute 'option-1-results-category' is missing in tag 'amp-story-interactive-results'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-results.html:46:8 The mandatory attribute 'option-1-results-category' is missing in tag 'amp-story-interactive-results'. (see https://amp.dev/documentation/components/amp-story-interactive)
 >>         ^~~~~~~~~
-amp-story-interactive/1.0/test/validator-amp-story-interactive-results.html:46:8 The mandatory attribute 'option-2-results-category' is missing in tag 'amp-story-interactive-results'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-results.html:46:8 The mandatory attribute 'option-2-results-category' is missing in tag 'amp-story-interactive-results'. (see https://amp.dev/documentation/components/amp-story-interactive)
 |          id="missing-results-category"
 |          prompt-text="What country do you like the most?"
 |          option-1-text="France" option-1-image="./dog.png"
@@ -58,7 +58,7 @@ amp-story-interactive/1.0/test/validator-amp-story-interactive-results.html:46:8
 |          </amp-story-interactive-results>
 |          <amp-story-interactive-results
 >>         ^~~~~~~~~
-amp-story-interactive/1.0/test/validator-amp-story-interactive-results.html:54:8 The attribute 'endpoint' may not appear in tag 'amp-story-interactive-results'. (see https://amp.dev/documentation/components/amp-story-interactive)
+amp-story-interactive/0.1/test/validator-amp-story-interactive-results.html:54:8 The attribute 'endpoint' may not appear in tag 'amp-story-interactive-results'. (see https://amp.dev/documentation/components/amp-story-interactive)
 |            id="no-endpoint-results"
 |            endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
 |            option-1-text="France" option-1-results-category="Dog"
