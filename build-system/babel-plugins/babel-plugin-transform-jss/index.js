@@ -39,6 +39,7 @@
 const crypto = require('crypto');
 const {create} = require('jss');
 const {default: preset} = require('jss-preset-default');
+const {relative, join} = require('path');
 
 module.exports = function ({types: t, template}) {
   function isJssFile(filename) {
@@ -47,9 +48,10 @@ module.exports = function ({types: t, template}) {
 
   const seen = new Set();
   function compileJss(JSS, filename) {
+    const relativeFilepath = relative(join(__dirname, '../../..'), filename);
     const filehash = crypto
       .createHash('sha256')
-      .update(filename)
+      .update(relativeFilepath)
       .digest('base64')
       .slice(0, 7);
     const jss = create({
