@@ -46,7 +46,6 @@ import {ResponsiveState} from './responsive-state';
 import {Services} from '../../../src/services';
 import {
   addExperimentIdToElement,
-  isInExperiment,
   isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {computedStyle, setStyles} from '../../../src/style';
@@ -67,13 +66,6 @@ const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
 
 /** @const {string} */
 const TAG = 'amp-ad-network-adsense-impl';
-
-/** @const @enum {string} */
-const ROUND_LOCATION_PARAMS_HOLDBACK_EXP = {
-  ID: 'ad-adsense-gam-round-params',
-  CONTROL: '21067039',
-  EXPERIMENT: '21067040',
-};
 
 /**
  * Shared state for AdSense ad slots. This is used primarily for ad request url
@@ -251,14 +243,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           STICKY_AD_PADDING_BOTTOM_EXP.experiment,
         ],
       },
-      {
-        experimentId: ROUND_LOCATION_PARAMS_HOLDBACK_EXP.ID,
-        isTrafficEligible: () => true,
-        branches: [
-          ROUND_LOCATION_PARAMS_HOLDBACK_EXP.CONTROL,
-          ROUND_LOCATION_PARAMS_HOLDBACK_EXP.EXPERIMENT,
-        ],
-      },
     ]);
     const setExps = randomlySelectUnsetExperiments(
       this.win,
@@ -423,10 +407,6 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           'pucrd': identity.pucrd || null,
           ...parameters,
         },
-        !isInExperiment(
-          this.element,
-          ROUND_LOCATION_PARAMS_HOLDBACK_EXP.EXPERIMENT
-        ),
         experimentIds
       );
     });
