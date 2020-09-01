@@ -937,8 +937,8 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-story-interactive',
-    version: '1.0',
-    latestVersion: '1.0',
+    version: '0.1',
+    latestVersion: '0.1',
     options: {
       hasCss: true,
       cssBinaries: [

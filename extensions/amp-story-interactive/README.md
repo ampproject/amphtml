@@ -61,7 +61,7 @@ Also add the following import to your AMP documents:
 <script
   async
   custom-element="amp-story-interactive"
-  src="https://cdn.ampproject.org/v0/amp-story-interactive-1.0.js"
+  src="https://cdn.ampproject.org/v0/amp-story-interactive-0.1.js"
 ></script>
 ```
 
