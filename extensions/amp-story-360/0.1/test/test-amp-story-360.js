@@ -15,7 +15,13 @@
  */
 
 import '../amp-story-360';
+import {AmpStoryStoreService} from '../../../amp-story/1.0/amp-story-store-service';
+import {LocalizationService} from '../../../../src/service/localization';
 import {createElementWithAttributes} from '../../../../src/dom';
+import {
+  registerServiceBuilder,
+  registerServiceBuilderForDoc,
+} from '../../../../src/service';
 
 describes.realWin(
   'amp-story-360',
@@ -50,15 +56,28 @@ describes.realWin(
         appendAmpImg(element, imagePath);
       }
       win.document.body.appendChild(element);
+
+      const localizationService = new LocalizationService(win.document.body);
+      registerServiceBuilderForDoc(element, 'localization', function () {
+        return localizationService;
+      });
+
       threesixty = await element.getImpl();
     }
 
     beforeEach(() => {
       win = env.win;
+
+      const storeService = new AmpStoryStoreService(win);
+      registerServiceBuilder(win, 'story-store', function () {
+        return storeService;
+      });
     });
 
     it('should build', async () => {
-      await createAmpStory360('/examples/img/panorama1.jpg');
+      await createAmpStory360(
+        '/examples/img/SeanDoran-Quela-sol1462-edited_ver2-sm.png'
+      );
       expect(() => {
         threesixty.layoutCallback();
       }).to.not.throw();
@@ -74,7 +93,9 @@ describes.realWin(
     });
 
     it('parse orientation attributes', async () => {
-      await createAmpStory360('/examples/img/panorama1.jpg');
+      await createAmpStory360(
+        '/examples/img/SeanDoran-Quela-sol1462-edited_ver2-sm.png'
+      );
       await threesixty.layoutCallback();
       expect(threesixty.canAnimate).to.be.true;
     });

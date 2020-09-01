@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  forceExperimentBranch,
-  getExperimentBranch,
-  isExperimentOn,
-  randomlySelectUnsetExperiments,
-} from './experiments';
+import {forceExperimentBranch, isExperimentOn} from './experiments';
 
 // TODO(#22733): Remove this file once "ampdoc-fie" is cleaned up.
 
@@ -30,18 +25,8 @@ const EXPERIMENT_ID = 'ampdoc-fie';
  */
 const EXPERIMENT = {
   branch: EXPERIMENT_ID,
-  control: '21065001',
-  experiment: '21065002',
-};
-
-/**
- * @const {!Object<string, !./experiments.ExperimentInfo>}
- */
-export const EXPERIMENT_INFO_MAP = {
-  [EXPERIMENT_ID]: {
-    isTrafficEligible: () => true,
-    branches: [EXPERIMENT.control, EXPERIMENT.experiment],
-  },
+  control: '21066823',
+  experiment: '21066824',
 };
 
 /**
@@ -58,9 +43,5 @@ export function toggleAmpdocFieForTesting(win, on) {
  * @return {boolean}
  */
 export function isInAmpdocFieExperiment(win) {
-  if (!isExperimentOn(win, 'ampdoc-fie')) {
-    return false;
-  }
-  randomlySelectUnsetExperiments(win, EXPERIMENT_INFO_MAP);
-  return getExperimentBranch(win, EXPERIMENT_ID) === EXPERIMENT.experiment;
+  return isExperimentOn(win, 'ampdoc-fie');
 }

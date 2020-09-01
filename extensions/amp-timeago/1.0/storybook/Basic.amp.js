@@ -18,14 +18,17 @@ import * as Preact from '../../../../src/preact';
 import {date, withKnobs} from '@storybook/addon-knobs';
 import {storiesOf} from '@storybook/preact';
 import {withA11y} from '@storybook/addon-a11y';
-import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
+import {withAmp} from '@ampproject/storybook-addon';
 
 // eslint-disable-next-line
 storiesOf('amp-timeago', module)
   .addDecorator(withKnobs)
   .addDecorator(withA11y)
   .addDecorator(withAmp)
-  .addParameters({extensions: [{name: 'amp-timeago', version: '1.0'}]})
+  .addParameters({
+    extensions: [{name: 'amp-timeago', version: '1.0'}],
+    experiments: ['amp-timeago-bento'],
+  })
   .add('responsive', () => {
     const datetime = date('Date/Time', new Date());
     return (
@@ -33,7 +36,7 @@ storiesOf('amp-timeago', module)
         layout="responsive"
         width="100"
         height="100"
-        datetime={datetime}
+        datetime={String(datetime)}
         locale="en"
       >
         Saturday 11 April 2018 00.37

@@ -254,6 +254,10 @@ const EnvironmentVariantMap = {
     name: 'AMPHTML ads FIE environment',
     value: {environment: 'a4a-fie'},
   },
+  [AmpdocEnvironment.A4A_FIE_NO_SIGNING]: {
+    name: 'AMPHTML ads FIE environment with no-signing exp enabled',
+    value: {environment: 'a4a-fie-no-signing'},
+  },
   [AmpdocEnvironment.A4A_INABOX]: {
     name: 'AMPHTML ads inabox environment',
     value: {environment: 'a4a-inabox'},
@@ -276,6 +280,7 @@ const envPresets = {
   ],
   'amp4ads-preset': [
     AmpdocEnvironment.A4A_FIE,
+    AmpdocEnvironment.A4A_FIE_NO_SIGNING,
     AmpdocEnvironment.A4A_INABOX,
     AmpdocEnvironment.A4A_INABOX_FRIENDLY,
     AmpdocEnvironment.A4A_INABOX_SAFEFRAME,

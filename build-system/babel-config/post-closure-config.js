@@ -23,7 +23,7 @@ const argv = require('minimist')(process.argv.slice(2));
  * @return {!Object}
  */
 function getPostClosureConfig() {
-  if (!argv.esm) {
+  if (!argv.esm && !argv.sxg) {
     return {};
   }
 

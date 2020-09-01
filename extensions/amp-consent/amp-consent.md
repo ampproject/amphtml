@@ -313,7 +313,7 @@ _Example_: Displays a prompt user interface
 
 AMP displays prompt UI on page load or by user interaction. The prompt UI is hidden based on the three user actions described below.
 
-AMP also supports external consent UI flow with the usage of `<amp-iframe>`. More information about the communication of user actions can be found [below](#prompt-actions-from-external-consent-ui).
+AMP also supports external consent UI flow via `promptUiSrc` which will load your custom iframe. More information about the communication of user actions can be found [here](./integrating-consent.md#Informing-Consent-response).
 
 #### Prompt UI for Stories
 
@@ -356,27 +356,9 @@ following value scheme `on="event:idOfAmpConsentElement.accept/reject/dismiss"`
 
 - `dismiss`: instruct AMP to cancel `buildCallback` of components waiting for the consent, and hides the prompt UI.
 
-##### Prompt Actions from External Consent UI
-
-When using iframes as consent prompt UI. Iframes can send a `consent-response` message to the parent AMP page to inform [prompt actions](#prompt-actions) on the current consent. Note the message must come from the `<amp-iframe>` created iframe. Messages from nested iframes will be ignored.
-
-_Example: iframe `consent-response` request_
-
-```javascript
-window.parent.postMessage(
-  {
-    type: 'consent-response',
-    action: 'accept/reject/dismiss',
-  },
-  '*'
-);
-```
-
-<a name="post-prompt"></a>
-
 ### Post-prompt UI (optional)
 
-You can provide a UI after collecting the initial consent. For example, you can provide a UI for the user to manage their consent (e.g., change their "reject" to "accept"). The post-prompt UI is defined with the `<amp-consent>` JSON configuration object. The `postPromptUI` refers to a child element of `<amp-consent>` by id.
+You can provide a UI after collecting the initial consent. For example, you can provide a UI for the user to manage their consent (e.g., change their "reject" to "accept"). The post-prompt UI is defined with the `<amp-consent>` JSON configuration object. The `postPromptUI` refers to an element by id. If the element is a child element of the `<amp-consent>`, it will be fixed to the bottom of the page same as prompt UIs. You can also inline the `postPromptUI` in the document, but please be aware of the potential layout shift caused by toggling the display of this element.
 
 When defined, the post-prompt UI is shown when all prompt UIs have been hidden, or initially on page load if no prompt UI was triggered.
 
@@ -634,6 +616,7 @@ Join in on the discussion where we are discussing [upcoming potential features](
 
 - AppConsent : [Website](https://appconsent.io/en) - [Documentation](./cmps/appconsent.md)
 - Didomi : [Website](https://www.didomi.io/) - [Documentation](https://developers.didomi.io/cmp/amp)
+- iubenda : [Website](https://www.iubenda.com/) - [Documentation](./cmps/iubenda.md)
 - Sirdata : [Website](http://www.sirdata.com/) - [Documentation](https://cmp.sirdata.com/#/docs)
 - Marfeel : [Website](https://www.marfeel.com/) - [Documentation](./cmps/marfeel.md)
 - Ogury : [Website](https://www.ogury.com/) - [Documentation](./cmps/ogury.md)

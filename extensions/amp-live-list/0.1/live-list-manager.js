@@ -299,7 +299,7 @@ export class LiveListManager {
   setupVisibilityHandler_() {
     // Polling should always be stopped when document is no longer visible.
     this.ampdoc.onVisibilityChanged(() => {
-      if (this.ampdoc.isVisible()) {
+      if (this.ampdoc.isVisible() && this.hasActiveLiveLists_()) {
         // We use immediate so that the user starts getting updates
         // right away when they've switched back to the page.
         this.poller_.start(/** immediate */ true);

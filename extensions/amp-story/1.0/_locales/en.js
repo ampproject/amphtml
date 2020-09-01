@@ -23,6 +23,11 @@ import {
  * @const {!LocalizedStringBundleDef}
  */
 const strings = {
+  [LocalizedStringId.AMP_STORY_ACTIVATE_BUTTON_TEXT]: {
+    string: 'Activate',
+    description:
+      'Label for the activate button to ask for device orientation permission',
+  },
   [LocalizedStringId.AMP_STORY_AUDIO_MUTE_BUTTON_LABEL]: {
     string: 'Mute story',
     description:
@@ -162,6 +167,11 @@ const strings = {
     description:
       'Label for a button to open a drawer containing additional ' +
       'content via a "swipe up" user gesture.',
+  },
+  [LocalizedStringId.AMP_STORY_PAGINATION_BUTTON_PREVIOUS_PAGE_LABEL]: {
+    string: 'Previous page',
+    description:
+      'Label indicating that users can navigate to the previous page.',
   },
   [LocalizedStringId.AMP_STORY_PAGE_ERROR_VIDEO]: {
     string: 'Video failed to play',

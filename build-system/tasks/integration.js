@@ -88,6 +88,7 @@ integration.flags = {
   'debug':
     '  Allow debug statements by auto opening devtools. NOTE: This only ' +
     'works in non headless mode.',
+  'edge': '  Runs tests on Edge',
   'firefox': '  Runs tests on Firefox',
   'files': '  Runs tests for specific files',
   'grep': '  Runs tests that match the pattern',
@@ -95,6 +96,7 @@ integration.flags = {
   'ie': '  Runs tests on IE',
   'nobuild': '  Skips build step',
   'nohelp': '  Silence help messages that are printed prior to test run',
+  'report': '  Write test result report to a local file',
   'safari': '  Runs tests on Safari',
   'testnames': '  Lists the name of each test being run',
   'verbose': '  With logging enabled',

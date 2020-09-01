@@ -18,10 +18,12 @@ import * as Preact from './index';
 import {Deferred} from '../utils/promise';
 import {Slot, createSlot} from './slot';
 import {WithAmpContext} from './context';
+import {createRef, render} from './index';
 import {devAssert} from '../log';
 import {hasOwn} from '../utils/object';
+import {installShadowStyle} from '../shadow-embed';
 import {matches} from '../dom';
-import {render} from './index';
+import {startsWith} from '../string';
 
 /**
  * @typedef {{
@@ -42,6 +44,27 @@ let AmpElementPropDef;
  */
 let ChildDef;
 
+/** @const {!MutationObserverInit} */
+const CHILDREN_MUTATION_INIT = {
+  childList: true,
+};
+
+/** @const {!MutationObserverInit} */
+const PASSTHROUGH_MUTATION_INIT = {
+  childList: true,
+  characterData: true,
+};
+
+/**
+ * The same as `applyFillContent`, but inside the shadow.
+ * @const {!Object}
+ */
+const SIZE_DEFINED_STYLE = {
+  'position': 'absolute',
+  'width': '100%',
+  'height': '100%',
+};
+
 /**
  * Wraps a Preact Component in a BaseElement class.
  *
@@ -49,6 +72,8 @@ let ChildDef;
  * subclass on purpose, you're not meant to do work in the subclass! There will
  * be very few exceptions, which is why we allow options to configure the
  * class.
+ *
+ * @template API_TYPE
  */
 export class PreactBaseElement extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -68,6 +93,9 @@ export class PreactBaseElement extends AMP.BaseElement {
       notify: () => this.mutateElement(() => {}),
     };
 
+    /** @private {{current: ?API_TYPE}} */
+    this.ref_ = createRef();
+
     this.boundRerender_ = () => {
       this.scheduledRender_ = false;
       this.rerender_();
@@ -81,6 +109,9 @@ export class PreactBaseElement extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.mounted_ = true;
+
+    /** @protected {?MutationObserver} */
+    this.observer = null;
   }
 
   /**
@@ -92,6 +123,20 @@ export class PreactBaseElement extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    const Ctor = this.constructor;
+
+    this.observer = new MutationObserver(this.checkMutations_.bind(this));
+    const childrenInit = Ctor['children'] ? CHILDREN_MUTATION_INIT : null;
+    const passthroughInit =
+      Ctor['passthrough'] || Ctor['passthroughNonEmpty']
+        ? PASSTHROUGH_MUTATION_INIT
+        : null;
+    this.observer.observe(this.element, {
+      attributes: true,
+      ...childrenInit,
+      ...passthroughInit,
+    });
+
     this.defaultProps_ = this.init() || null;
 
     this.scheduleRender_();
@@ -125,6 +170,11 @@ export class PreactBaseElement extends AMP.BaseElement {
   }
 
   /** @override */
+  unlayoutCallback() {
+    return false;
+  }
+
+  /** @override */
   mutatedAttributesCallback() {
     if (this.container_) {
       this.scheduleRender_();
@@ -143,6 +193,40 @@ export class PreactBaseElement extends AMP.BaseElement {
     this.scheduleRender_();
   }
 
+  /**
+   * @return {!API_TYPE}
+   * @protected
+   */
+  api() {
+    return devAssert(this.ref_.current);
+  }
+
+  /**
+   * @param {string} alias
+   * @param {function(!API_TYPE, !../service/action-impl.ActionInvocation)} handler
+   * @param {../action-constants.ActionTrust} minTrust
+   * @protected
+   */
+  registerApiAction(alias, handler, minTrust) {
+    this.registerAction(
+      alias,
+      (invocation) => handler(this.api(), invocation),
+      minTrust
+    );
+  }
+
+  /**
+   * @param {!Array<!MutationRecord>} records
+   * @private
+   */
+  checkMutations_(records) {
+    const Ctor = this.constructor;
+    const rerender = records.some((m) => shouldMutationBeRerendered(Ctor, m));
+    if (rerender) {
+      this.scheduleRender_();
+    }
+  }
+
   /** @private */
   scheduleRender_() {
     if (!this.scheduledRender_) {
@@ -155,7 +239,7 @@ export class PreactBaseElement extends AMP.BaseElement {
   unmount_() {
     this.mounted_ = false;
     if (this.container_) {
-      render(<></>, this.container_);
+      render(null, this.container_);
     }
   }
 
@@ -170,13 +254,24 @@ export class PreactBaseElement extends AMP.BaseElement {
     const Ctor = this.constructor;
 
     if (!this.container_) {
-      if (Ctor['children'] || Ctor['passthrough']) {
+      if (
+        Ctor['children'] ||
+        Ctor['passthrough'] ||
+        Ctor['passthroughNonEmpty']
+      ) {
         devAssert(
           !Ctor['detached'],
           'The AMP element cannot be rendered in detached mode ' +
-            'when configured with "children" or "passthrough" properties.'
+            'when configured with "children", "passthrough", or ' +
+            '"passthroughNonEmpty" properties.'
         );
-        this.container_ = this.element.attachShadow({mode: 'open'});
+        const shadowRoot = this.element.attachShadow({mode: 'open'});
+        this.container_ = shadowRoot;
+
+        const shadowCss = Ctor['shadowCss'];
+        if (shadowCss) {
+          installShadowStyle(shadowRoot, this.element.tagName, shadowCss);
+        }
 
         // Create a slot for internal service elements i.e. "i-amphtml-sizer"
         const serviceSlot = this.win.document.createElement('slot');
@@ -192,7 +287,12 @@ export class PreactBaseElement extends AMP.BaseElement {
       }
     }
 
-    const props = collectProps(Ctor, this.element, this.defaultProps_);
+    const props = collectProps(
+      Ctor,
+      this.element,
+      this.ref_,
+      this.defaultProps_
+    );
 
     // While this "creates" a new element, diffing will not create a second
     // instance of Component. Instead, the existing one already rendered into
@@ -238,6 +338,15 @@ PreactBaseElement['Component'] = function () {
 };
 
 /**
+ * An override to specify that the component requires `layoutSizeDefined`.
+ * This typically means that the element's `isLayoutSupported()` is
+ * implemented via `isLayoutSizeDefined()`.
+ *
+ * @protected {string}
+ */
+PreactBaseElement['layoutSizeDefined'] = false;
+
+/**
  * An override to specify an exact className prop to Preact.
  *
  * @protected {string}
@@ -252,6 +361,24 @@ PreactBaseElement['className'] = '';
  * @protected {boolean}
  */
 PreactBaseElement['passthrough'] = false;
+
+/**
+ * Handling children with passthroughNonEmpty mode is similar to passthrough
+ * mode except that when there are no children elements, the returned
+ * prop['children'] will be null instead of the unnamed <slot>.  This allows
+ * the Preact environment to have conditional behavior depending on whether
+ * or not there are children.
+ *
+ * @protected {boolean}
+ */
+PreactBaseElement['passthroughNonEmpty'] = false;
+
+/**
+ * The CSS for shadow stylesheets.
+ *
+ * @protected {?string}
+ */
+PreactBaseElement['shadowCss'] = null;
 
 /**
  * Enabling detached mode alters the children to be rendered in an
@@ -276,22 +403,31 @@ PreactBaseElement['children'] = null;
 /**
  * @param {typeof PreactBaseElement} Ctor
  * @param {!AmpElement} element
+ * @param {{current: ?}} ref
  * @param {!JsonObject|null|undefined} defaultProps
  * @return {!JsonObject}
  */
-function collectProps(Ctor, element, defaultProps) {
-  const props = /** @type {!JsonObject} */ ({...defaultProps});
+function collectProps(Ctor, element, ref, defaultProps) {
+  const props = /** @type {!JsonObject} */ ({...defaultProps, ref});
 
   const {
     'className': className,
+    'layoutSizeDefined': layoutSizeDefined,
     'props': propDefs,
     'passthrough': passthrough,
+    'passthroughNonEmpty': passthroughNonEmpty,
     'children': childrenDefs,
   } = Ctor;
 
   // Class.
   if (className) {
     props['className'] = className;
+  }
+
+  // Common styles.
+  if (layoutSizeDefined) {
+    props['style'] = SIZE_DEFINED_STYLE;
+    props['containSize'] = true;
   }
 
   // Props.
@@ -302,11 +438,13 @@ function collectProps(Ctor, element, defaultProps) {
         ? element.hasAttribute(def.attr)
         : element.getAttribute(def.attr);
     if (value == null) {
-      props[name] = def.default;
+      if (def.default !== undefined) {
+        props[name] = def.default;
+      }
     } else {
       const v =
         def.type == 'number'
-          ? Number(value)
+          ? parseFloat(value)
           : def.type == 'Element'
           ? // TBD: what's the best way for element referencing compat between
             // React and AMP? Currently modeled as a Ref.
@@ -321,12 +459,25 @@ function collectProps(Ctor, element, defaultProps) {
   // as separate properties. Thus in a carousel the plain "children" are
   // slides, and the "arrowNext" children are passed via a "arrowNext"
   // property.
+  const errorMessage =
+    'only one of "passthrough", "passthroughNonEmpty"' +
+    ' or "children" may be given';
   if (passthrough) {
-    devAssert(
-      !childrenDefs,
-      'only one of "passthrough" or "children" may be given'
-    );
+    devAssert(!childrenDefs && !passthroughNonEmpty, errorMessage);
     props['children'] = [<Slot />];
+  } else if (passthroughNonEmpty) {
+    devAssert(!childrenDefs, errorMessage);
+    // If all children are whitespace text nodes, consider the element as
+    // having no children
+    props['children'] = element
+      .getRealChildNodes()
+      .every(
+        (node) =>
+          node.nodeType === /* TEXT_NODE */ 3 &&
+          node.nodeValue.trim().length === 0
+      )
+      ? null
+      : [<Slot />];
   } else if (childrenDefs) {
     const children = [];
     props['children'] = children;
@@ -343,14 +494,19 @@ function collectProps(Ctor, element, defaultProps) {
 
       // TBD: assign keys, reuse slots, etc.
       if (single) {
-        props[name] = createSlot(childElement, `i-amphtml-${name}`, slotProps);
+        props[name] = createSlot(
+          childElement,
+          childElement.getAttribute('slot') || `i-amphtml-${name}`,
+          slotProps
+        );
       } else {
         const list =
           name == 'children' ? children : props[name] || (props[name] = []);
         list.push(
           createSlot(
             childElement,
-            `i-amphtml-${name}-${list.length}`,
+            childElement.getAttribute('slot') ||
+              `i-amphtml-${name}-${list.length}`,
             slotProps
           )
         );
@@ -376,4 +532,56 @@ function matchChild(element, defs) {
     }
   }
   return null;
+}
+
+/**
+ * @param {!NodeList} nodeList
+ * @return {boolean}
+ */
+function shouldMutationForNodeListBeRerendered(nodeList) {
+  for (let i = 0; i < nodeList.length; i++) {
+    const node = nodeList[i];
+    if (node.nodeType == /* ELEMENT */ 1) {
+      // Ignore service elements, e.g. `<i-amphtml-svc>` or
+      // `<x slot="i-amphtml-svc">`.
+      if (
+        startsWith(node.tagName, 'I-AMPHTML') ||
+        node.getAttribute('slot') == 'i-amphtml-svc'
+      ) {
+        continue;
+      }
+      return true;
+    }
+    if (node.nodeType == /* TEXT */ 3) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * @param {typeof PreactBaseElement} Ctor
+ * @param {!MutationRecord} m
+ * @return {boolean}
+ */
+function shouldMutationBeRerendered(Ctor, m) {
+  const {type} = m;
+  if (type == 'attributes') {
+    // Check if the attribute is mapped to one of the properties.
+    const props = Ctor['props'];
+    for (const name in props) {
+      const def = props[name];
+      if (m.attributeName == def.attr) {
+        return true;
+      }
+    }
+    return false;
+  }
+  if (type == 'childList') {
+    return (
+      shouldMutationForNodeListBeRerendered(m.addedNodes) ||
+      shouldMutationForNodeListBeRerendered(m.removedNodes)
+    );
+  }
+  return false;
 }

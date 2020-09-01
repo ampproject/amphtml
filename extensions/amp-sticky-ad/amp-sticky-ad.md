@@ -24,7 +24,9 @@ limitations under the License.
 
 # amp-sticky-ad
 
-## Behavior
+## Usage
+
+Provides a way to display and stick ad content at the bottom of the page.
 
 - There can be only one `<amp-sticky-ad>` in an AMP document. The `<amp-sticky-ad>` should only have one direct child: `<amp-ad>`. **Note**: Make sure you include any required scripts for the `<amp-ad>` component.
 - The sticky ad appears at the bottom of a page.
@@ -55,12 +57,9 @@ Example:
 
 ## Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>layout (required)</strong></td>
-    <td>Must be set to <code>nodisplay</code>.</td>
-  </tr>
-</table>
+### layout (required)
+
+Must be set to `nodisplay`.
 
 ## Styling
 

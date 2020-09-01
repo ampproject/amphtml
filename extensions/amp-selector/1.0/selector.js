@@ -18,26 +18,27 @@ import * as CSS from './selector.css';
 import * as Preact from '../../../src/preact';
 import {useContext, useMemo, useState} from '../../../src/preact';
 
-const SelectorContext = Preact.createContext({});
+const SelectorContext = Preact.createContext(
+  /** @type {SelectorDef.ContextProps} */ ({})
+);
 
 /**
- * @param {!JsonObject} props
+ * @param {!SelectorDef.Props} props
  * @return {PreactDef.Renderable}
  */
-export function Selector(props) {
-  const {
-    'as': Comp = 'div',
-    'children': children,
-    'disabled': disabled,
-    'value': value,
-    'multiple': multiple,
-    'onChange': onChange,
-    'role': role = 'listbox',
-    ...rest
-  } = props;
+export function Selector({
+  as: Comp = 'div',
+  disabled,
+  value,
+  multiple,
+  onChange,
+  role = 'listbox',
+  children,
+  ...rest
+}) {
   const [selectedState, setSelectedState] = useState(value ? value : []);
   // TBD: controlled values require override of properties.
-  const selected = /** @type {!Array} */ (value ? value : selectedState);
+  const selected = value ? value : selectedState;
   const context = useMemo(
     () => ({
       selected,
@@ -83,31 +84,30 @@ export function Selector(props) {
 }
 
 /**
- * @param {!JsonObject} props
+ * @param {!SelectorDef.OptionProps} props
  * @return {PreactDef.Renderable}
  */
-export function Option(props) {
+export function Option({
+  as: Comp = 'div',
+  disabled,
+  onClick,
+  option,
+  role = 'option',
+  style,
+  ...rest
+}) {
   const {
-    'as': Comp = 'div',
-    'disabled': disabled,
-    'onClick': onClick,
-    'option': option,
-    'role': role = 'option',
-    'style': style,
-  } = props;
-  const selectorContext = useContext(SelectorContext);
-  const {
-    'selected': selected,
-    'selectOption': selectOption,
-    'disabled': selectorDisabled,
-    'multiple': selectorMultiple,
-  } = selectorContext;
-  const clickHandler = () => {
+    selected,
+    selectOption,
+    disabled: selectorDisabled,
+    multiple: selectorMultiple,
+  } = useContext(SelectorContext);
+  const clickHandler = (e) => {
     if (selectorDisabled || disabled) {
       return;
     }
     if (onClick) {
-      onClick();
+      onClick(e);
     }
     selectOption(option);
   };
@@ -121,7 +121,8 @@ export function Option(props) {
         : CSS.SELECTED
       : CSS.OPTION;
   const optionProps = {
-    ...props,
+    ...rest,
+    disabled,
     'aria-disabled': disabled,
     onClick: clickHandler,
     option,

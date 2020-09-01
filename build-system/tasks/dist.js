@@ -168,7 +168,7 @@ function buildExperiments() {
       minify: true,
       includePolyfills: true,
       minifiedName: maybeToEsmName('experiments.js'),
-      esmPassCompilation: argv.esm || false,
+      esmPassCompilation: argv.esm || argv.sxg || false,
     }
   );
 }
@@ -190,7 +190,7 @@ function buildLoginDone(version) {
     minify: true,
     minifiedName,
     latestName,
-    esmPassCompilation: argv.esm || false,
+    esmPassCompilation: argv.esm || argv.sxg || false,
     extraGlobs: [
       buildDir + 'amp-login-done-0.1.max.js',
       buildDir + 'amp-login-done-dialog.js',
@@ -213,7 +213,7 @@ async function buildWebPushPublisherFiles() {
         watch: argv.watch,
         includePolyfills: true,
         minify: true,
-        esmPassCompilation: argv.esm || false,
+        esmPassCompilation: argv.esm || argv.sxg || false,
         minifiedName,
         extraGlobs: [tempBuildDir + '*.js'],
       });
@@ -436,4 +436,5 @@ dist.flags = {
     '  Builds runtime with the EXPERIMENT constant set to true',
   sanitize_vars_for_diff:
     '  Sanitize the output to diff build results. Requires --pseudo_names',
+  sxg: '  Outputs the compiled code for the SxG build',
 };

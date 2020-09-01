@@ -1,11 +1,5 @@
 {
   "experimentA": {},
-  "experimentB": {
-    "name": "MoveFixedLayer",
-    "environment": "AMP",
-    "issue": "https://github.com/ampproject/amphtml/issues/27120",
-    "expiration_date_utc": "2021-01-01",
-    "define_experiment_constant": "MOVE_FIXED_LAYER"
-  },
+  "experimentB": {},
   "experimentC": {}
 }
