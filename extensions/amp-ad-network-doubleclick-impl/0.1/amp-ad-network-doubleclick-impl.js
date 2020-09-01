@@ -146,13 +146,6 @@ const ZINDEX_EXP_BRANCHES = {
   HOLDBACK: '21065357',
 };
 
-/** @const @enum {string} */
-const ROUND_LOCATION_PARAMS_HOLDBACK_EXP = {
-  ID: 'ad-adsense-gam-round-params',
-  CONTROL: '21067041',
-  EXPERIMENT: '21067042',
-};
-
 /**
  * Required size to be sent with fluid requests.
  * @const {string}
@@ -457,14 +450,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           STICKY_AD_PADDING_BOTTOM_EXP.experiment,
         ],
       },
-      {
-        experimentId: ROUND_LOCATION_PARAMS_HOLDBACK_EXP.ID,
-        isTrafficEligible: () => true,
-        branches: [
-          ROUND_LOCATION_PARAMS_HOLDBACK_EXP.CONTROL,
-          ROUND_LOCATION_PARAMS_HOLDBACK_EXP.EXPERIMENT,
-        ],
-      },
     ]);
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoList);
     Object.keys(setExps).forEach(
@@ -659,12 +644,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       'spsa': this.isSinglePageStoryAd
         ? `${pageLayoutBox.width}x${pageLayoutBox.height}`
         : null,
-      ...googleBlockParameters(
-        this,
-        !this.experimentIds.includes(
-          ROUND_LOCATION_PARAMS_HOLDBACK_EXP.EXPERIMENT
-        )
-      ),
+      ...googleBlockParameters(this),
     };
   }
 
@@ -777,9 +757,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           this.buildIdentityParams(),
           this.getPageParameters(consentTuple, /* instances= */ undefined),
           rtcParams
-        ),
-        !this.experimentIds.includes(
-          ROUND_LOCATION_PARAMS_HOLDBACK_EXP.EXPERIMENT
         ),
         this.experimentIds
       ).then((adUrl) => this.getAdUrlDeferred.resolve(adUrl));
@@ -1993,15 +1970,7 @@ function constructSRARequest_(a4a, instances) {
   return Promise.all(
     instances.map((instance) => instance.getAdUrlDeferred.promise)
   )
-    .then(() =>
-      googlePageParameters(
-        a4a,
-        startTime,
-        !instances[0].experimentIds.includes(
-          ROUND_LOCATION_PARAMS_HOLDBACK_EXP.EXPERIMENT
-        )
-      )
-    )
+    .then(() => googlePageParameters(a4a, startTime))
     .then((googPageLevelParameters) => {
       const blockParameters = constructSRABlockParameters(instances);
       return truncAndTimeUrl(
