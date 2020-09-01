@@ -22,6 +22,7 @@ import {childElementByTag, createElementWithAttributes, matches} from '../dom';
 import {createRef, hydrate, render} from './index';
 import {devAssert} from '../log';
 import {dict, hasOwn} from '../utils/object';
+import {getMode} from '../mode';
 import {installShadowStyle} from '../shadow-embed';
 import {startsWith} from '../string';
 import {subscribe} from '../context';
@@ -152,7 +153,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     const useContexts = Ctor['useContexts'];
     if (useContexts.length != 0) {
       subscribe(this.element, useContexts, (...contexts) => {
-        this.contextValues_ = contexts.slice(0);
+        this.contextValues_ = contexts;
         this.scheduleRender_();
       });
     }
@@ -335,7 +336,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     // `contextValues` until available.
     const useContexts = Ctor['useContexts'];
     const contextValues = this.contextValues_;
-    const isReady = useContexts.length == 0 || contextValues != null;
+    const isReady = toHydrate || useContexts.length == 0 || contextValues != null;
     if (!isReady) {
       return;
     }
@@ -354,13 +355,11 @@ export class PreactBaseElement extends AMP.BaseElement {
     let comp = Preact.createElement(Ctor['Component'], props);
 
     // Add contexts.
-    if (useContexts.length != 0) {
-      for (let i = 0; i < useContexts.length; i++) {
-        const Context = useContexts[i].type;
-        const value = contextValues[i];
-        if (value) {
-          comp = <Context.Provider value={value}>{comp}</Context.Provider>;
-        }
+    for (let i = 0; i < useContexts.length; i++) {
+      const Context = useContexts[i].type;
+      const value = contextValues[i];
+      if (value) {
+        comp = <Context.Provider value={value}>{comp}</Context.Provider>;
       }
     }
 
@@ -408,7 +407,7 @@ PreactBaseElement['Component'] = function () {
 /**
  * @protected {!Array<!ContextProp>}
  */
-PreactBaseElement['useContexts'] = [];
+PreactBaseElement['useContexts'] = getMode().localDev ? Object.freeze([]) : [];
 
 /**
  * An override to specify that the component requires `layoutSizeDefined`.

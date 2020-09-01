@@ -96,9 +96,7 @@ export function whenCalled(spy, opt_callCount = 1) {
 export function waitFor(callback, errorMessage) {
   return poll(
     errorMessage,
-    () => {
-      return callback();
-    },
+    callback,
     undefined /* opt_onError */,
     200 /* opt_timeout */
   );
