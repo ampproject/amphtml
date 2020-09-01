@@ -114,6 +114,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   it('should correctly append params at the end of the story url', async () => {
     buildStoryPlayer();
     await manager.loadPlayers();
+    await nextTick();
 
     const storyIframe = playerEl.querySelector('iframe');
 
@@ -128,6 +129,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     const existingParams = '?testParam=true#myhash=hashValue';
     buildStoryPlayer(1, DEFAULT_CACHE_URL + existingParams);
     await manager.loadPlayers();
+    await nextTick();
 
     const storyIframe = playerEl.querySelector('iframe');
 
@@ -142,6 +144,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   it('should set first story as visible', async () => {
     buildStoryPlayer(3);
     await manager.loadPlayers();
+    await nextTick();
 
     const storyIframes = playerEl.querySelectorAll('iframe');
     expect(storyIframes[0].getAttribute('src')).to.include(
@@ -149,14 +152,41 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     );
   });
 
-  it('should prerender next stories', async () => {
+  it('should prerender next story after first one is loaded', async () => {
     buildStoryPlayer(3);
     await manager.loadPlayers();
+    await nextTick();
+
+    fireHandler['storyContentLoaded']('storyContentLoaded', {});
+    await nextTick();
 
     const storyIframes = playerEl.querySelectorAll('iframe');
     expect(storyIframes[1].getAttribute('src')).to.include(
       '#visibilityState=prerender'
     );
+  });
+
+  it('should not load next story if first one has not finished loading', async () => {
+    buildStoryPlayer(3);
+    await manager.loadPlayers();
+    await nextTick();
+
+    const storyIframes = playerEl.querySelectorAll('iframe');
+
+    expect(storyIframes[1].getAttribute('src')).to.not.exist;
+  });
+
+  it('should load new story if user navigated before first finished loading', async () => {
+    buildStoryPlayer(3);
+    await manager.loadPlayers();
+    await nextTick();
+
+    // Swiping without waiting for story loaded event.
+    swipeLeft();
+    await nextTick();
+
+    const storyIframes = playerEl.querySelectorAll('iframe');
+    expect(storyIframes[1].getAttribute('src')).to.exist;
   });
 
   it(

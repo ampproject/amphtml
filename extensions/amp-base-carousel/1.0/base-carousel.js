@@ -16,29 +16,28 @@
 import * as Preact from '../../../src/preact';
 import {ArrowNext, ArrowPrev} from './arrow';
 import {CarouselContext} from './carousel-context';
+import {ContainWrapper} from '../../../src/preact/component';
 import {Scroller} from './scroller';
+import {forwardRef} from '../../../src/preact/compat';
 import {
   toChildArray,
+  useCallback,
   useContext,
   useEffect,
+  useImperativeHandle,
   useRef,
   useState,
 } from '../../../src/preact';
-import {useMountEffect} from '../../../src/preact/utils';
 
 /**
  * @param {!BaseCarouselDef.Props} props
+ * @param {{current: (!BaseCarouselDef.CarouselApi|null)}} ref
  * @return {PreactDef.Renderable}
  */
-export function BaseCarousel({
-  arrowPrev,
-  arrowNext,
-  children,
-  loop,
-  onSlideChange,
-  setAdvance,
-  ...rest
-}) {
+function BaseCarouselWithRef(
+  {arrowPrev, arrowNext, children, loop, onSlideChange, ...rest},
+  ref
+) {
   const childrenArray = toChildArray(children);
   const {length} = childrenArray;
   const carouselContext = useContext(CarouselContext);
@@ -48,25 +47,40 @@ export function BaseCarousel({
     carouselContext.setCurrentSlide ?? setCurrentSlideState;
   const {setSlideCount} = carouselContext;
   const scrollRef = useRef(null);
-  const advance = (by) => scrollRef.current.advance(by);
-  useMountEffect(() => {
-    if (setAdvance) {
-      setAdvance(advance);
-    }
-  });
+
+  const advance = useCallback((by) => scrollRef.current.advance(by), []);
+  const setRestingIndex = useCallback(
+    (index) => {
+      index = length > 0 ? Math.min(Math.max(index, 0), length - 1) : -1;
+      if (index < 0) {
+        return;
+      }
+      setCurrentSlide(index);
+      if (onSlideChange) {
+        onSlideChange(index);
+      }
+    },
+    [length, setCurrentSlide, onSlideChange]
+  );
+
+  useImperativeHandle(
+    ref,
+    () =>
+      /** @type {!BaseCarouselDef.CarouselApi} */ ({
+        advance,
+        goToSlide: (index) => setRestingIndex(index),
+      }),
+    [advance, setRestingIndex]
+  );
+
   useEffect(() => {
     setSlideCount(length);
   }, [setSlideCount, length]);
-  const setRestingIndex = (i) => {
-    setCurrentSlide(i);
-    if (onSlideChange) {
-      onSlideChange(i);
-    }
-  };
+
   const disableForDir = (dir) =>
     !loop && (currentSlide + dir < 0 || currentSlide + dir >= length);
   return (
-    <div {...rest}>
+    <ContainWrapper size={true} layout={true} paint={true} {...rest}>
       <Scroller
         loop={loop}
         restingIndex={currentSlide}
@@ -85,6 +99,10 @@ export function BaseCarousel({
         disabled={disableForDir(1)}
         advance={advance}
       />
-    </div>
+    </ContainWrapper>
   );
 }
+
+const BaseCarousel = forwardRef(BaseCarouselWithRef);
+BaseCarousel.displayName = 'BaseCarousel'; // Make findable for tests.
+export {BaseCarousel};
