@@ -79,7 +79,7 @@ is allowed here.
 
 <button on="tap:navigate-action.execute()"></button>
 
-<button on="tap:refresh-amp-listexecute()"></button>
+<button on="tap:refresh-amp-list.execute()"></button>
 ```
 
 ### arguments
