@@ -77,5 +77,5 @@ function ContextExporter({shimDomElement}) {
   useEffect(() => {
     setProp(shimDomElement, CarouselContextProp, ContextExporter, context);
   }, [shimDomElement, context]);
-  return <div />;
+  return <></>;
 }
