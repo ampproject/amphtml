@@ -56,12 +56,12 @@ module.exports = {
     const screen = page.touchscreen;
     await screen.tap(200, 240);
     await page.waitFor('amp-story-page#page-2[active]');
-    await page.waitFor(500); // For animations to finish.
+    await page.waitFor(800); // For animations to finish.
     await page.tap('amp-twitter.interactive-embed');
     await page.waitFor('a.i-amphtml-story-tooltip');
-    await page.waitFor(300); // For animations to finish.
+    await page.waitFor(500); // For animations to finish.
     await page.tap('a.i-amphtml-story-tooltip');
-    await page.waitFor(800); // For animations to finish.
+    await page.waitFor(1000); // For animations to finish.
     await verifySelectorsVisible(page, name, ['amp-story-page.i-amphtml-expanded-mode']);
   },
   'tapping on non-interactive embed should not show tooltip or block navigation': async (page, name) => {
