@@ -30,7 +30,7 @@ storiesOf('amp-inline-gallery-1_0', module)
       {name: 'amp-inline-gallery', version: '1.0'},
       {name: 'amp-base-carousel', version: '1.0'},
     ],
-    experiments: ['amp-base-carousel-bento'],
+    experiments: ['amp-inline-gallery-bento', 'amp-base-carousel-bento'],
   })
   .add('default', () => {
     return (

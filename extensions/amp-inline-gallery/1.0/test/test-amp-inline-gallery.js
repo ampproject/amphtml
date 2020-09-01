@@ -19,10 +19,10 @@ import {ActionInvocation} from '../../../../src/service/action-impl';
 import {ActionTrust} from '../../../../src/action-constants';
 import {CarouselContextProp} from '../../../amp-base-carousel/1.0/carousel-props';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {poll} from '../../../../testing/iframe';
 import {setStyles} from '../../../../src/style';
 import {subscribe} from '../../../../src/context';
 import {toggleExperiment} from '../../../../src/experiments';
+import {waitFor} from '../../../../testing/test-helper';
 
 describes.realWin(
   'amp-inline-gallery',
@@ -39,7 +39,8 @@ describes.realWin(
 
     beforeEach(async () => {
       win = env.win;
-      toggleExperiment(win, 'amp-base-carousel-bento', true);
+      toggleExperiment(win, 'amp-inline-gallery-bento', true, true);
+      toggleExperiment(win, 'amp-base-carousel-bento', true, true);
       carousel = createElementWithAttributes(
         win.document,
         'amp-base-carousel',
@@ -87,7 +88,8 @@ describes.realWin(
     });
 
     afterEach(() => {
-      toggleExperiment(win, 'amp-base-carousel-bento', false);
+      toggleExperiment(win, 'amp-inline-gallery-bento', false, true);
+      toggleExperiment(win, 'amp-base-carousel-bento', false, true);
     });
 
     function newSlide(id) {
@@ -126,17 +128,6 @@ describes.realWin(
         caller,
         event,
         trust
-      );
-    }
-
-    function waitFor(callback, errorMessage) {
-      return poll(
-        errorMessage,
-        () => {
-          return callback();
-        },
-        undefined /** opt_onError */,
-        200 /** opt_timeout */
       );
     }
 

@@ -87,6 +87,23 @@ export function whenCalled(spy, opt_callCount = 1) {
   );
 }
 
+/**
+ * Resolves a promise when the callback returns a truthy value.
+ * @param {function():?} callback
+ * @param {string} errorMessage
+ * @return {!Promise}
+ */
+export function waitFor(callback, errorMessage) {
+  return poll(
+    errorMessage,
+    () => {
+      return callback();
+    },
+    undefined /* opt_onError */,
+    200 /* opt_timeout */
+  );
+}
+
 const noneValues = {
   'animation-name': ['none', 'initial'],
   'animation-duration': ['0s', 'initial'],

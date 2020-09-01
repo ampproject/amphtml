@@ -43,8 +43,8 @@ class AmpInlineGallery extends PreactBaseElement {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
-      isExperimentOn(this.win, 'amp-base-carousel-bento'),
-      'expected amp-base-carousel-bento experiment to be enabled'
+      isExperimentOn(this.win, 'amp-inline-gallery-bento'),
+      'expected amp-inline-gallery-bento experiment to be enabled'
     );
     return layout == Layout.CONTAINER;
   }
