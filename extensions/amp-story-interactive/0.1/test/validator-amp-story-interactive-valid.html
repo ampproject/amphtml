@@ -15,7 +15,7 @@
 -->
 <!--
   Test Description:
-  Correct poll, as well as 2 incorrect polls and a correct binary poll
+  One correct component of each type: binary-poll, poll, quiz, results
 -->
 <!doctype html>
 <html ⚡>
@@ -34,7 +34,7 @@
     <amp-story-page id="1">
       <amp-story-grid-layer template="fill">
         <amp-story-interactive-poll
-          id="complete-poll"
+          id="correct-poll"
           endpoint="https://webstoriesinteractivity-beta.web.app/api/v1"
           theme="dark"
           chip-style="shadow"
@@ -75,9 +75,8 @@
     <amp-story-page id="4">
       <amp-story-grid-layer template="fill">
       <amp-story-interactive-results
-          id="correct-quiz"
           theme="dark"
-          class="cool-quiz"
+          class="cool-results"
           prompt-text="You should go to"
           option-1-results-category="Dog" option-1-text="Uruguay"
           option-2-results-category="Cat" option-2-text="Spain">
