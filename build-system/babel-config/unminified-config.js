@@ -15,6 +15,7 @@
  */
 'use strict';
 
+const argv = require('minimist')(process.argv.slice(2));
 const {getReplacePlugin} = require('./helpers');
 
 /**
@@ -42,6 +43,7 @@ function getUnminifiedConfig() {
   ];
   const replacePlugin = getReplacePlugin();
   const unminifiedPlugins = [
+    argv.coverage ? 'babel-plugin-istanbul' : null,
     replacePlugin,
     './build-system/babel-plugins/babel-plugin-transform-json-configuration',
     './build-system/babel-plugins/babel-plugin-transform-jss',

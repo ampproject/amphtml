@@ -358,18 +358,11 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     fast: true,
     ...options.browserifyOptions,
   };
-  const babelifyOptions = {
+
+  let bundler = browserify(browserifyOptions).transform(babelify, {
     caller: {name: 'unminified'},
     global: true,
-  };
-  if (argv.coverage) {
-    babelifyOptions['plugins'] = ['babel-plugin-istanbul'];
-  }
-
-  let bundler = browserify(browserifyOptions).transform(
-    babelify,
-    babelifyOptions
-  );
+  });
 
   if (options.watch) {
     const watchFunc = () => {
