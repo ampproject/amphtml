@@ -79,7 +79,6 @@ The ID of the BeOpinion content to be displayed on the page.
 
 The name of the BeOpinion slot on the page.
 
-
 [filter formats="ads"]
 
 ### `data-my-content` (optional)

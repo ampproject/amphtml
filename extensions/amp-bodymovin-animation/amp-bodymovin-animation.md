@@ -47,7 +47,6 @@ The `width` and `height` attributes determine the aspect ratio of the animation 
 
 The path to the exported Bodymovin animation object. Must be `https` protocol.
 
-
 ### `loop` (optional)
 
 Indicates whether the animation should be looping or not. By default, this

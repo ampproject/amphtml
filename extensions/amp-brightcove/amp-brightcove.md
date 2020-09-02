@@ -96,9 +96,9 @@ such as ad parameters or video ids for Perform players.
 
 Keys and values will be URI encoded. Keys will be camel cased.
 
--   `data-param-language="de"` becomes `&language=de`
--   `data-param-custom-ad-data="key:value;key2:value2"` becomes
-    `&customAdData=key%3Avalue%3Bkey2%3Avalue2`
+- `data-param-language="de"` becomes `&language=de`
+- `data-param-custom-ad-data="key:value;key2:value2"` becomes
+  `&customAdData=key%3Avalue%3Bkey2%3Avalue2`
 
 ### `autoplay`
 
