@@ -75,8 +75,7 @@ function getPreClosureConfig() {
     argv.esm || argv.sxg ? filterImportsPlugin : null,
     // TODO(erwinm, #28698): fix this in fixit week
     // argv.esm
-    //?
-    //'./build-system/babel-plugins/babel-plugin-transform-function-declarations'
+    //? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
     //: null,
     !isCheckTypes
       ? './build-system/babel-plugins/babel-plugin-transform-json-configuration'
