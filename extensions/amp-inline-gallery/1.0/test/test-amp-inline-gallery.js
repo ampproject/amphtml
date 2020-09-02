@@ -75,6 +75,7 @@ describes.realWin(
 
       // Wait until ready.
       win.document.body.appendChild(element);
+      lastContext = null;
       subscribe(element, [CarouselContextProp], (context) => {
         lastContext = context;
       });
