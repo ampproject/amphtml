@@ -574,7 +574,9 @@ export class GoogleSubscriptionsPlatform {
         return null;
       }
       return this.runtime_
-        .getEntitlements(encryptedDocumentKey)
+        .getEntitlements({
+          encryption: {encryptedDocumentKey},
+        })
         .then((swgEntitlements) => {
           // Get and store the isReadyToPay signal which is independent of
           // any entitlments existing.
