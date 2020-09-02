@@ -1,17 +1,5 @@
 {
-  "experimentA": {
-    "name": "IntersectionObserverPolyfillInabox",
-    "environment": "INABOX",
-    "issue": "https://github.com/ampproject/amphtml/issues/27807",
-    "expiration_date_utc": "2020-07-31",
-    "define_experiment_constant": "INTERSECTION_OBSERVER_POLYFILL_INABOX"
-  },
-  "experimentB": {
-    "name": "MoveFixedLayer",
-    "environment": "AMP",
-    "issue": "https://github.com/ampproject/amphtml/issues/27120",
-    "expiration_date_utc": "2021-01-01",
-    "define_experiment_constant": "MOVE_FIXED_LAYER"
-  },
+  "experimentA": {},
+  "experimentB": {},
   "experimentC": {}
 }

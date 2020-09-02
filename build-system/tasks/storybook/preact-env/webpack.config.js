@@ -27,6 +27,10 @@ module.exports = {
       path.join(__dirname, '../node_modules'),
       path.join(__dirname, '../../../../node_modules'),
     ],
+    alias: {
+      'react': 'preact/compat',
+      'react-dom': 'preact/compat',
+    },
   },
   module: {
     rules: [
@@ -37,6 +41,13 @@ module.exports = {
         query: {
           presets: [
             [
+              '@babel/preset-env',
+              {
+                bugfixes: true,
+                targets: {'browsers': ['Last 2 versions']},
+              },
+            ],
+            [
               '@babel/preset-react',
               {
                 pragma: 'Preact.createElement',
@@ -46,6 +57,10 @@ module.exports = {
             ],
           ],
         },
+      },
+      {
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader'],
       },
     ],
   },

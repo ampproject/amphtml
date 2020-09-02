@@ -30,22 +30,31 @@
   <script type="application/json">
     {
       "requests": {
-        "endpoint": "/analytics/no-referrer"
+        "endpoint": "/analytics/no-referrer?trigger=${trigger}"
       },
       "triggers": {
         "pageview": {
           "on": "visible",
-          "request": "endpoint"
+          "request": "endpoint",
+          "vars": {
+            "trigger": "pageview"
+          }
         },
         "root": {
           "on": "visible",
           "request": "endpoint",
-          "selector": ":root"
+          "selector": ":root",
+          "vars": {
+            "trigger": "root"
+          }
         },
         "img1": {
           "on": "visible",
           "request": "endpoint",
-          "selector": "#img1"
+          "selector": "#img1",
+          "vars": {
+            "trigger": "img1"
+          }
         },
         "img1_with_spec": {
           "on": "visible",
@@ -57,12 +66,18 @@
             "totalTimeMin": 5000,
             "continuousTimeMin": 2000,
             "waitFor": "ini-load"
+          },
+          "vars": {
+            "trigger": "img1_with_spec"
           }
         },
         "img2": {
           "on": "visible",
           "request": "endpoint",
-          "selector": "#img2"
+          "selector": "#img2",
+          "vars": {
+            "trigger": "img2"
+          }
         }
       },
       "transport": {

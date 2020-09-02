@@ -54,7 +54,7 @@ function getPreClosureConfig() {
     '@babel/plugin-transform-react-constant-elements',
     reactJsxPlugin,
     './build-system/babel-plugins/babel-plugin-transform-inline-configure-component',
-    argv.esm
+    argv.esm || argv.sxg
       ? './build-system/babel-plugins/babel-plugin-transform-dev-methods'
       : null,
     // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
@@ -66,11 +66,12 @@ function getPreClosureConfig() {
     './build-system/babel-plugins/babel-plugin-is_minified-constant-transformer',
     './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
     './build-system/babel-plugins/babel-plugin-transform-html-template',
+    './build-system/babel-plugins/babel-plugin-transform-jss',
     './build-system/babel-plugins/babel-plugin-transform-version-call',
     './build-system/babel-plugins/babel-plugin-transform-simple-array-destructure',
     replacePlugin,
     './build-system/babel-plugins/babel-plugin-transform-amp-asserts',
-    argv.esm ? filterImportsPlugin : null,
+    argv.esm || argv.sxg ? filterImportsPlugin : null,
     // TODO(erwinm, #28698): fix this in fixit week
     //argv.esm
     //? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
@@ -96,7 +97,7 @@ function getPreClosureConfig() {
       targets: {esmodules: true},
     },
   ];
-  const preClosurePresets = argv.esm ? [presetEnv] : [];
+  const preClosurePresets = argv.esm || argv.sxg ? [presetEnv] : [];
   const preClosureConfig = {
     compact: false,
     plugins: preClosurePlugins,

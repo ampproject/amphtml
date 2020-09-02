@@ -17,18 +17,19 @@
 import * as Preact from '../../../../src/preact';
 import {select, text, withKnobs} from '@storybook/addon-knobs';
 import {storiesOf} from '@storybook/preact';
-import {toggleExperiment} from '../../../../src/experiments';
 import {withA11y} from '@storybook/addon-a11y';
-import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
+import {withAmp} from '@ampproject/storybook-addon';
 
 // eslint-disable-next-line
-storiesOf('amp-social-share v2', module)
+storiesOf('amp-social-share 1_0', module)
   .addDecorator(withKnobs)
   .addDecorator(withA11y)
   .addDecorator(withAmp)
-  .addParameters({extensions: [{name: 'amp-social-share', version: 0.2}]})
+  .addParameters({
+    extensions: [{name: 'amp-social-share', version: '1.0'}],
+    experiments: ['amp-social-share-bento'],
+  })
   .add('default', () => {
-    toggleExperiment(window, 'amp-social-share-v2', true);
     /*
      * Knob and Component Details -
      * amp-social-share allows the user to set various parameters to configure
@@ -92,7 +93,6 @@ storiesOf('amp-social-share v2', module)
     );
   })
   .add('responsive', () => {
-    toggleExperiment(window, 'amp-social-share-v2', true);
     const typeConfigurations = [
       'email',
       'facebook',

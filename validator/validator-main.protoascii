@@ -20,13 +20,13 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii, etc) are always released together.
-min_validator_revision_required: 474
+min_validator_revision_required: 475
 
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 1060
+spec_file_revision: 1099
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validation_errors/#custom-javascript-is-not-allowed"
@@ -41,10 +41,15 @@ script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/valid
 # Rules for AMP HTML
 # https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml
 
+doc: {
+  html_format: AMP4EMAIL
+  max_bytes: 200000
+  max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/email-spec/amp-email-format/?format=email"
+}
+
 tags: {
   html_format: AMP
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "!DOCTYPE"
   spec_name: "html doctype"
   descriptive_name: "html !doctype"
@@ -92,7 +97,6 @@ tags: {  # HTML tag for non-transformed AMP.
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   disabled_by: "transformed"
   tag_name: "HTML"
   mandatory: true
@@ -110,7 +114,6 @@ tags: {  # HTML tag for non-transformed AMP.
 }
 tags: {  # HTML tag for transformed AMP.
   html_format: AMP
-  html_format: ACTIONS
   enabled_by: "transformed"
   tag_name: "HTML"
   spec_name: "html (transformed)"
@@ -134,7 +137,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "HEAD"
   mandatory: true
   mandatory_parent: "HTML"
@@ -145,7 +147,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "TITLE"
   spec_name: "title"
   attrs: { name: "[text]" }
@@ -163,7 +164,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "BASE"
   unique: true
   mandatory_parent: "HEAD"
@@ -197,7 +197,6 @@ attr_lists: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link rel="
   disallowed_ancestor: "TEMPLATE"
@@ -237,7 +236,6 @@ tags: {
 }
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link rel=canonical"
   descriptive_name: "link rel=canonical"
@@ -291,7 +289,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link rel=preload"
   descriptive_name: "link rel=preload"
@@ -304,6 +301,15 @@ tags: {
     value_casei: "preload"
     dispatch_key: NAME_VALUE_DISPATCH
   }
+  attrs: {
+    name: "imagesrcset"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+    disallowed_value_regex: "__amp_source_origin"
+  }
+  attrs: { name: "imagesizes" }
   attr_lists: "common-link-attrs"
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#html-tags"
 }
@@ -311,7 +317,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link rel=stylesheet for fonts"
   descriptive_name: "link rel=stylesheet for fonts"
@@ -356,7 +361,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link itemprop=sameAs"
   descriptive_name: "link itemprop=sameAs"
@@ -377,7 +381,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link itemprop="
   descriptive_name: "link itemprop="
@@ -396,7 +399,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "LINK"
   spec_name: "link property="
   descriptive_name: "link property="
@@ -417,7 +419,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta charset=utf-8"
   descriptive_name: "meta charset=utf-8"
@@ -435,7 +436,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta name=viewport"
   descriptive_name: "meta name=viewport"
@@ -469,7 +469,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta http-equiv=X-UA-Compatible"
   descriptive_name: "meta http-equiv=X-UA-Compatible"
@@ -714,7 +713,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta name= and content="
   attrs: { name: "content" }
@@ -742,7 +740,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta http-equiv=Content-Type"
   mandatory_ancestor: "HEAD"
@@ -763,7 +760,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta http-equiv=content-language"
   mandatory_ancestor: "HEAD"
@@ -784,7 +780,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta http-equiv=pics-label"
   mandatory_ancestor: "HEAD"
@@ -805,7 +800,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta http-equiv=imagetoolbar"
   mandatory_ancestor: "HEAD"
@@ -826,7 +820,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta http-equiv=Content-Style-Type"
   mandatory_ancestor: "HEAD"
@@ -848,7 +841,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta http-equiv=Content-Script-Type"
   mandatory_ancestor: "HEAD"
@@ -869,7 +861,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta http-equiv=origin-trial"
   mandatory_ancestor: "HEAD"
@@ -890,7 +881,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta http-equiv=resource-type"
   mandatory_ancestor: "HEAD"
@@ -950,7 +940,6 @@ tags: {
 # Enables AMP-to-AMP navigation
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "META"
   spec_name: "meta name=amp-to-amp-navigation"
   mandatory_parent: "HEAD"
@@ -1053,7 +1042,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "BODY"
   mandatory: true
   unique: true
@@ -1065,7 +1053,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "ARTICLE"
 }
 # 4.3.3 The section element
@@ -1083,7 +1070,6 @@ attr_lists: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "SECTION"
   disallowed_ancestor: "AMP-ACCORDION"
   attr_lists: "poool-access-attrs"
@@ -1099,7 +1085,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "NAV"
 }
 # 4.3.5 The aside element
@@ -1107,7 +1092,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "ASIDE"
 }
 # 4.3.6 The h1, h2, h3, h4, h5, and h6 elements
@@ -1115,7 +1099,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "H1"
   attrs: { name: "align" }
 }
@@ -1123,7 +1106,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "H2"
   attrs: { name: "align" }
 }
@@ -1131,7 +1113,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "H3"
   attrs: { name: "align" }
 }
@@ -1139,7 +1120,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "H4"
   attrs: { name: "align" }
 }
@@ -1147,7 +1127,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "H5"
   attrs: { name: "align" }
 }
@@ -1155,7 +1134,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "H6"
   attrs: { name: "align" }
 }
@@ -1164,7 +1142,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "HEADER"
 }
 # 4.3 7 The footer element
@@ -1172,7 +1149,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "FOOTER"
 }
 # 4.3 7 The address element
@@ -1180,7 +1156,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "ADDRESS"
 }
 
@@ -1190,7 +1165,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "P"
   attrs: { name: "align" }
 }
@@ -1199,7 +1173,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "HR"
 }
 # 4.4.3 The pre element
@@ -1207,7 +1180,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "PRE"
 }
 # 4.4.4 The blockquote element
@@ -1227,7 +1199,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "BLOCKQUOTE"
   attrs: { name: "align" }
   attr_lists: "cite-attr"
@@ -1237,7 +1208,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "OL"
   attrs: {
     name: "reversed"
@@ -1257,7 +1227,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "UL"
 }
 # 4.4.7 The li element
@@ -1265,7 +1234,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "LI"
   attrs: {
     name: "value"
@@ -1277,7 +1245,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "DL"
 }
 # 4.4.9 The dt element
@@ -1285,7 +1252,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "DT"
 }
 # 4.4.10 The dd element
@@ -1293,7 +1259,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "DD"
 }
 # 4.4.11 The figure element
@@ -1301,7 +1266,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "FIGURE"
 }
 # 4.4.12 The figcaption element
@@ -1309,7 +1273,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "FIGCAPTION"
 }
 # 4.4.13 The div element
@@ -1317,7 +1280,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "DIV"
   attrs: { name: "align" }
 }
@@ -1326,7 +1288,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "MAIN"
 }
 
@@ -1335,7 +1296,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "A"
   attrs: { name: "border" }  # Not valid html5 but commonly used and supported.
   attrs: { name: "download" }
@@ -1502,7 +1462,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "EM"
 }
 # 4.5.3 The strong element
@@ -1510,7 +1469,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "STRONG"
 }
 # 4.5.4 The small element
@@ -1518,7 +1476,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "SMALL"
 }
 # 4.5.5 The s element
@@ -1526,7 +1483,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "S"
 }
 # 4.5.6 The cite element
@@ -1534,7 +1490,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "CITE"
 }
 # 4.5.7 The q element
@@ -1542,7 +1497,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "Q"
   attr_lists: "cite-attr"
 }
@@ -1551,7 +1505,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "DFN"
 }
 # 4.5.9 The abbr element
@@ -1559,7 +1512,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "ABBR"
 }
 # 4.5.10 The data element
@@ -1567,7 +1519,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "DATA"
 }
 # 4.5.11 The time element
@@ -1575,7 +1526,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "TIME"
   attrs: {
     name: "datetime"
@@ -1590,7 +1540,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "CODE"
 }
 # 4.5.13 The var element
@@ -1598,7 +1547,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "VAR"
 }
 # 4.5.14 The samp element
@@ -1606,7 +1554,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "SAMP"
 }
 # 4.5.15 The kbd element
@@ -1614,7 +1561,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "KBD"
 }
 # 4.5.16 The sub and sup elements
@@ -1622,14 +1568,12 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "SUB"
 }
 tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "SUP"
 }
 # 4.5.17 The i element
@@ -1637,7 +1581,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "I"
 }
 # 4.5.18 The b element
@@ -1645,7 +1588,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "B"
 }
 # 4.5.19 The u element
@@ -1653,7 +1595,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "U"
 }
 # 4.5.20 The mark element
@@ -1661,7 +1602,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "MARK"
 }
 # 4.5.21 The ruby element
@@ -1669,7 +1609,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "RUBY"
 }
 # 4.5.22 The rb element
@@ -1677,7 +1616,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "RB"
 }
 # 4.5.23 The rt element
@@ -1685,14 +1623,12 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "RT"
 }
 # 4.5.24 The rtc element
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "RTC"
 }
 # 4.5.25 The rp element
@@ -1700,14 +1636,12 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "RP"
 }
 # 4.5.26 The bdi element
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "BDI"
 }
 # 4.5.27 The bdo element
@@ -1715,7 +1649,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "BDO"
   attrs: { name: "dir" }
 }
@@ -1724,7 +1657,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "SPAN"
 }
 # 4.5.29 The br element
@@ -1732,7 +1664,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "BR"
 }
 # 4.5.30 The wbr element
@@ -1740,7 +1671,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "WBR"
 }
 
@@ -1750,7 +1680,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "INS"
   # https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ins
   # These attributes have specific formatting, but as they are metadata
@@ -1764,7 +1693,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "DEL"
   # https://developer.mozilla.org/en-US/docs/Web/HTML/Element/del
   # These attributes have specific formatting, but as they are metadata
@@ -1776,7 +1704,7 @@ tags: {
 
 # 4.7 Embedded Content
 # AMP HTML allows embedded content only via its own tags (e.g. amp-img), with
-# the exception of tags inside of a <noscript> ancestor.
+# the exception of tags inside of a <noscript> ancestor and transformed amp-img.
 # 4.7.1 The img element
 tags: {
   html_format: AMP  # Disallowed in AMP4ADS because <noscript> is disallowed.
@@ -1953,7 +1881,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "SOURCE"
   spec_name: "amp-video > source"
   mandatory_parent: "AMP-VIDEO"
@@ -1975,7 +1902,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "SOURCE"
   spec_name: "amp-audio > source"
   mandatory_parent: "AMP-AUDIO"
@@ -1997,7 +1923,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "SOURCE"
   spec_name: "audio > source"
   mandatory_parent: "AUDIO"
@@ -2020,7 +1945,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "SOURCE"
   spec_name: "video > source"
   mandatory_parent: "VIDEO"
@@ -2043,7 +1967,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "SOURCE"
   spec_name: "amp-ima-video > source"
   mandatory_parent: "AMP-IMA-VIDEO"
@@ -2122,7 +2045,6 @@ attr_lists: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "TRACK"
   spec_name: "audio > track"
   mandatory_parent: "AUDIO"
@@ -2131,7 +2053,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "TRACK"
   spec_name: "audio > track[kind=subtitles]"
   mandatory_parent: "AUDIO"
@@ -2140,7 +2061,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "TRACK"
   spec_name: "video > track"
   mandatory_parent: "VIDEO"
@@ -2149,7 +2069,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "TRACK"
   spec_name: "video > track[kind=subtitles]"
   mandatory_parent: "VIDEO"
@@ -2158,7 +2077,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "TRACK"
   spec_name: "amp-audio > track"
   mandatory_parent: "AMP-AUDIO"
@@ -2171,7 +2089,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "TRACK"
   spec_name: "amp-audio > track[kind=subtitles]"
   mandatory_parent: "AMP-AUDIO"
@@ -2184,7 +2101,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "TRACK"
   spec_name: "amp-video > track"
   mandatory_parent: "AMP-VIDEO"
@@ -2197,7 +2113,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "TRACK"
   spec_name: "amp-video > track[kind=subtitles]"
   mandatory_parent: "AMP-VIDEO"
@@ -2366,7 +2281,6 @@ attr_lists: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "G"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2380,7 +2294,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "GLYPH"
   mandatory_ancestor: "SVG"
   attrs: { name: "arabic-form" }
@@ -2400,7 +2313,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "GLYPHREF"
   mandatory_ancestor: "SVG"
   attrs: { name: "dx" }
@@ -2418,7 +2330,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "IMAGE"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2456,7 +2367,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "MARKER"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2477,7 +2387,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "METADATA"
   mandatory_ancestor: "SVG"
   attr_lists: "svg-core-attributes"
@@ -2487,7 +2396,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "PATH"
   mandatory_ancestor: "SVG"
   attrs: { name: "d" }
@@ -2504,7 +2412,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "SOLIDCOLOR"
   mandatory_ancestor: "SVG"
   attrs: { name: "solid-color" }
@@ -2517,7 +2424,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "SVG"
   attrs: { name: "contentscripttype" }
   attrs: { name: "contentstyletype" }
@@ -2543,7 +2449,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "SWITCH"
   mandatory_ancestor: "SVG"
   attr_lists: "svg-conditional-processing-attributes"
@@ -2555,7 +2460,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "VIEW"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2571,7 +2475,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "CIRCLE"
   mandatory_ancestor: "SVG"
   attrs: { name: "cx" }
@@ -2589,7 +2492,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "ELLIPSE"
   mandatory_ancestor: "SVG"
   attrs: { name: "cx" }
@@ -2608,7 +2510,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "LINE"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2627,7 +2528,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "POLYGON"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2643,7 +2543,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "POLYLINE"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2659,7 +2558,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "RECT"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2681,7 +2579,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "TEXT"
   mandatory_ancestor: "SVG"
   attrs: { name: "dx" }
@@ -2703,7 +2600,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "TEXTPATH"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2720,7 +2616,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "TREF"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2734,7 +2629,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "TSPAN"
   mandatory_ancestor: "SVG"
   attrs: { name: "dx" }
@@ -2755,7 +2649,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "CLIPPATH"
   mandatory_ancestor: "SVG"
   attrs: { name: "clippathunits" }
@@ -2770,7 +2663,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "FILTER"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2790,7 +2682,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "HKERN"
   mandatory_ancestor: "SVG"
   attrs: { name: "g1" }
@@ -2805,7 +2696,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "LINEARGRADIENT"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2825,7 +2715,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "MASK"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2844,7 +2733,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "PATTERN"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2867,7 +2755,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "RADIALGRADIENT"
   mandatory_ancestor: "SVG"
   attrs: { name: "cx" }
@@ -2889,7 +2776,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "STOP"
   spec_name: "lineargradient > stop"
   mandatory_ancestor: "LINEARGRADIENT"
@@ -2902,7 +2788,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "STOP"
   spec_name: "radialgradient > stop"
   mandatory_ancestor: "RADIALGRADIENT"
@@ -2915,7 +2800,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "VKERN"
   mandatory_ancestor: "SVG"
   attrs: { name: "g1" }
@@ -2931,7 +2815,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "DEFS"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2945,7 +2828,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "SYMBOL"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2961,7 +2843,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "USE"
   mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
@@ -2981,7 +2862,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "FECOLORMATRIX"
   mandatory_ancestor: "SVG"
   attrs: { name: "in" }
@@ -2996,7 +2876,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "FECOMPOSITE"
   mandatory_ancestor: "SVG"
   attrs: { name: "in" }
@@ -3015,7 +2894,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "FEFLOOD"
   mandatory_ancestor: "SVG"
   attr_lists: "svg-core-attributes"
@@ -3027,7 +2905,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "FEGAUSSIANBLUR"
   mandatory_ancestor: "SVG"
   attrs: { name: "edgemode" }
@@ -3042,7 +2919,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "FEMERGE"
   mandatory_ancestor: "SVG"
   attr_lists: "svg-core-attributes"
@@ -3054,7 +2930,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "FEMERGENODE"
   mandatory_ancestor: "SVG"
   attrs: { name: "in" }
@@ -3065,7 +2940,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "FEOFFSET"
   mandatory_ancestor: "SVG"
   attrs: { name: "dx" }
@@ -3081,7 +2955,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "DESC"
   mandatory_ancestor: "SVG"
   attr_lists: "svg-core-attributes"
@@ -3091,7 +2964,6 @@ tags: {
 tags: {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "TITLE"
   spec_name: "svg title"
   mandatory_ancestor: "SVG"
@@ -3112,7 +2984,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "TABLE"
   attrs: { name: "align" }  # Not valid html5 but commonly used and supported.
   attrs: { name: "bgcolor" }  # Not valid html5 but commonly used and supported.
@@ -3134,7 +3005,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "CAPTION"
 }
 # 4.9.3 The colgroup element
@@ -3142,7 +3012,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "COLGROUP"
   attrs: { name: "span" }
 }
@@ -3151,7 +3020,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "COL"
   attrs: { name: "span" }
 }
@@ -3160,7 +3028,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "TBODY"
 }
 # 4.9.6 The thead element
@@ -3168,7 +3035,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "THEAD"
 }
 # 4.9.7 The tfoot element
@@ -3176,7 +3042,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "TFOOT"
 }
 # 4.9.8 The tr element
@@ -3184,7 +3049,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "TR"
   # These attributes are not supported in HTML5, but are widely supported and
   # commonly found.
@@ -3198,7 +3062,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "TD"
   attrs: { name: "align" }  # Not valid html5 but commonly used and supported.
   attrs: { name: "bgcolor" }  # Not valid html5 but commonly used and supported.
@@ -3214,7 +3077,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "TH"
   attrs: { name: "abbr" }
   attrs: { name: "align" }  # Not valid html5 but commonly used and supported.
@@ -3239,7 +3101,6 @@ tags: {
 tags {  # <form method=GET ...>
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "FORM"
   spec_name: "FORM [method=GET]"
   requires_extension: "amp-form"
@@ -3344,66 +3205,6 @@ tags {  # <form method=POST ...>
   }
   attr_lists: "form-name-attr"
 }
-# ACTIONS <form method=POST ...> for POST identity token
-tags: {  # <form method=POST ...>
-  html_format: ACTIONS
-  tag_name: "FORM"
-  spec_name: "FORM [method=POST] (ACTIONS)"
-  requires_extension: "amp-form"
-  disallowed_ancestor: "AMP-APP-BANNER"
-  attrs: { name: "accept" }
-  attrs: { name: "accept-charset" }
-  # For method=POST forms, we require `action-xhr` and disallow `action`.
-  attrs: {
-    name: "action-xhr"
-    mandatory: true
-    value_url: {
-      protocol: "https"
-      allow_relative: false
-    }
-    disallowed_value_regex: "__amp_source_origin|"
-        "{{|}}"    # Mustache is disallowed in action-xhr.
-  }
-  attrs: { name: "autocomplete" }
-  attrs: {
-    name: "crossorigin"
-    value: "amp-viewer-auth-token-via-post"
-    trigger: {
-      also_requires_attr: "action-xhr"
-    }
-  }
-  attrs: {
-    name: "custom-validation-reporting"
-    value: "as-you-go"
-    value: "interact-and-submit"
-    value: "show-all-on-submit"
-    value: "show-first-on-submit"
-  }
-  attrs: { name: "enctype" }
-  attrs: {
-    name: "method"
-    mandatory: true
-    value_casei: "post"
-    dispatch_key: NAME_VALUE_DISPATCH
-  }
-  attrs: { name: "novalidate" }
-  # The target attribute has no effect, and should not be in POST forms.
-  # However, in the past it was required, so disallowing it would break many
-  # pages. See: https://github.com/ampproject/amphtml/issues/5607
-  attrs: {
-    name: "target"
-    value_casei: "_blank"
-    value_casei: "_top"
-  }
-  attrs: {
-    name: "verify-xhr"
-    value_url: {
-      protocol: "https"
-    }
-    disallowed_value_regex: "__amp_source_origin"
-  }
-  attr_lists: "form-name-attr"
-}
 # AMP4EMAIL allows action-xhr and disallows action attribute. It also disallows
 # the use of mustache templates in action-xhr. The only allowed
 # protocol for action-xhr is https. Relative urls are disallowed. It also
@@ -3441,6 +3242,7 @@ tags {  # <form method=GET ...>
     value_casei: "get"
   }
   attrs: { name: "novalidate" }
+  attrs: { name: "xssi-prefix" }
 }
 tags {  # <form method=POST ...>
   html_format: AMP4EMAIL
@@ -3476,12 +3278,12 @@ tags {  # <form method=POST ...>
     dispatch_key: NAME_VALUE_DISPATCH
   }
   attrs: { name: "novalidate" }
+  attrs: { name: "xssi-prefix" }
 }
 # Will add verify state template if requested by users
 tags {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "DIV"
   spec_name: "FORM DIV [verify-error]"
   mandatory_ancestor: "FORM"
@@ -3494,7 +3296,6 @@ tags {
 tags {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "DIV"
   spec_name: "FORM DIV [verify-error][template]"
   mandatory_ancestor: "FORM"
@@ -3512,7 +3313,6 @@ tags {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "DIV"
   spec_name: "FORM DIV [submitting]"
   mandatory_ancestor: "FORM"
@@ -3525,7 +3325,6 @@ tags {
 tags {
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   # AMP4EMAIL is omitted. There is additional latency in rendering A4E
   # templates, which reduces the time available to render the template during
   # the submitting state.
@@ -3546,7 +3345,6 @@ tags {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "DIV"
   spec_name: "FORM DIV [submit-success]"
   mandatory_ancestor: "FORM"
@@ -3560,7 +3358,6 @@ tags {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "DIV"
   spec_name: "FORM DIV [submit-success][template]"
   mandatory_ancestor: "FORM"
@@ -3578,7 +3375,6 @@ tags {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "DIV"
   spec_name: "FORM DIV [submit-error]"
   mandatory_ancestor: "FORM"
@@ -3592,7 +3388,6 @@ tags {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "DIV"
   spec_name: "FORM DIV [submit-error][template]"
   mandatory_ancestor: "FORM"
@@ -3694,7 +3489,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "LABEL"
   attrs: { name: "for" }
   spec_url: "https://amp.dev/documentation/components/amp-form/"
@@ -3705,7 +3499,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "INPUT"
   attrs: {
     disabled_by: "amp4email"
@@ -3776,7 +3569,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "BUTTON"
   attrs: {
     name: "disabled"
@@ -3831,7 +3623,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "SELECT"
   attrs: {
     disabled_by: "amp4email"
@@ -3863,7 +3654,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "DATALIST"
   spec_url: "https://amp.dev/documentation/components/amp-form/"
 }
@@ -3872,7 +3662,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "OPTGROUP"
   mandatory_parent: "SELECT"
   attrs: { name: "disabled" }
@@ -3887,7 +3676,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "OPTION"
   attrs: { name: "disabled" }
   attrs: { name: "label" }
@@ -3905,7 +3693,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "TEXTAREA"
   attrs: { name: "autocomplete" }
   attrs: {
@@ -3982,7 +3769,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "OUTPUT"
   attrs: { name: "for" }
   attrs: { name: "form" }
@@ -3993,7 +3779,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "PROGRESS"
   attrs: { name: "max" }
   attrs: { name: "value" }
@@ -4003,7 +3788,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "METER"
   attrs: { name: "high" }
   attrs: { name: "low" }
@@ -4017,7 +3801,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "FIELDSET"
   attrs: { name: "disabled" }
   # <amp-bind>
@@ -4029,7 +3812,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "LEGEND"
 }
 
@@ -4039,7 +3821,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "DETAILS"
   attrs: {
     name: "open"
@@ -4052,7 +3833,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "SUMMARY"
   mandatory_parent: "DETAILS"
 }
@@ -4068,7 +3848,7 @@ tags: {
 # enforce that exactly one runtime script must be included. This tagspec is
 # for the standard runtime, while the one below it is an identical spec but for
 # the LTS runtime, with the only difference being the src attribute. The third
-# is the corresponding spec for AMP4EMAIL and ACTIONS.
+# is the corresponding spec for AMP4EMAIL.
 attr_lists: {
   name: "amphtml-engine-attrs"
   attrs: {
@@ -4135,9 +3915,8 @@ tags: {
 }
 tags: {
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "SCRIPT"
-  spec_name: "amphtml engine v0.js script [AMP4EMAIL,ACTIONS]"
+  spec_name: "amphtml engine v0.js script [AMP4EMAIL]"
   descriptive_name: "amphtml engine v0.js script"
   mandatory: true
   unique: true
@@ -4187,7 +3966,6 @@ tags: {
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "script type=application/ld+json"
   descriptive_name: "script type=application/ld+json"
@@ -4208,7 +3986,6 @@ tags: {
 # AMP RTC (Real Time Config)
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "script id=amp-rtc"
   unique: true
@@ -4235,7 +4012,6 @@ tags: {
 # AMP IMA VIDEO
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "amp-ima-video > script[type=application/json]"
   descriptive_name: "script type=application/ld+json"
@@ -4257,7 +4033,6 @@ tags: {
 # 4.11.2 The noscript element
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   disabled_by: "transformed"
   tag_name: "NOSCRIPT"
   spec_name: "noscript enclosure for boilerplate"
@@ -4269,7 +4044,6 @@ tags: {
 }
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   enabled_by: "transformed"
   tag_name: "NOSCRIPT"
   spec_name: "noscript enclosure for boilerplate (transformed)"
@@ -4294,62 +4068,50 @@ tags: {
 # 11.2 Non-conforming features
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "ACRONYM"
 }
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "BIG"
 }
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "CENTER"
 }
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "DIR"
 }
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "HGROUP"
 }
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "LISTING"
 }
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "MULTICOL"
 }
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "NEXTID"
 }
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "NOBR"
 }
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "SPACER"
 }
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "STRIKE"
 }
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "TT"
 }
 
@@ -4359,7 +4121,6 @@ tags: {
 # https://developer.mozilla.org/en-US/docs/Web/HTML/Element/slot
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "SLOT"
   attr_lists: "name-attr"
 }
@@ -4472,11 +4233,46 @@ attr_lists: {
 tags: {  # <amp-img>
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "AMP-IMG"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "crossorigin" }
+  attrs: { name: "object-fit" }
+  attrs: { name: "object-position" }
+  attrs: { name: "placeholder" }
+  attrs: { name: "referrerpolicy" }
+  # <amp-bind>
+  attrs: { name: "[alt]" }
+  attrs: { name: "[attribution]" }
+  attrs: { name: "[src]" }
+  attrs: { name: "[srcset]" }
+  attr_lists: "extended-amp-global"
+  attr_lists: "lightboxable-elements"
+  attr_lists: "mandatory-src-or-srcset"
+  spec_url: "https://amp.dev/documentation/components/amp-img/"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
+    supported_layouts: INTRINSIC
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+# A duplicate of amp-img, but requires i-amphtml-ssr flag.
+tags: {  # <amp-img i-amphtml-ssr>
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "AMP-IMG"
+  spec_name: "amp-img (transformed)"
+  attrs: {
+    dispatch_key: NAME_DISPATCH
+    name: "i-amphtml-ssr"
+    mandatory: true
+  }
+  attrs: { name: "alt" }
+  attrs: { name: "attribution" }
   attrs: { name: "object-fit" }
   attrs: { name: "object-position" }
   attrs: { name: "placeholder" }
@@ -4509,7 +4305,6 @@ tags: {  # <amp-img>
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "placeholder" }
-  attrs: { name: "referrerpolicy" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-amp4email"
   # <amp-bind>
@@ -4529,7 +4324,6 @@ tags: {  # <amp-layout>
   html_format: AMP
   html_format: AMP4ADS
   html_format: AMP4EMAIL
-  html_format: ACTIONS
   tag_name: "AMP-LAYOUT"
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-layout/"
@@ -4547,7 +4341,6 @@ tags: {  # <amp-layout>
 tags: {  # <amp-pixel>
   html_format: AMP
   html_format: AMP4ADS
-  html_format: ACTIONS
   tag_name: "AMP-PIXEL"
   attrs: { name: "allow-ssr-img" }
   attrs: {
@@ -4577,7 +4370,6 @@ tags: {  # <amp-pixel>
 # Transformed AMP specific tags.
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   enabled_by: "transformed"
   tag_name: "I-AMPHTML-SIZER"
   spec_name: "I-AMPHTML-SIZER-RESPONSIVE"
@@ -4597,7 +4389,6 @@ tags: {
 
 tags: {
   html_format: AMP
-  html_format: ACTIONS
   enabled_by: "transformed"
   tag_name: "I-AMPHTML-SIZER"
   spec_name: "I-AMPHTML-SIZER-INTRINSIC"
@@ -4627,6 +4418,11 @@ tags: {
     mandatory: true
   }
   attrs: {
+    name: "class"
+    value: "i-amphtml-intrinsic-sizer"
+    mandatory: true
+  }
+  attrs: {
     name: "role"
     value: "presentation"
     mandatory: true
@@ -4634,6 +4430,37 @@ tags: {
   attrs: {
     name: "src"
     value_regex: "data:image\\/svg\\+xml;charset=utf-8,\\s*<svg height=\"\\d+(\\.\\d+)?\" width=\"\\d+(\\.\\d+)?\" xmlns=\"http:\\/\\/www\\.w3\\.org\\/2000\\/svg\" version=\"1\\.1\"\\/>|data:image\\/svg\\+xml;charset=utf-8,\\s*<svg height='\\d+(\\.\\d+)?\' width='\\d+(\\.\\d+)?\' xmlns='http:\\/\\/www\\.w3\\.org\\/2000\\/svg' version='1\\.1'\\/>|data:image\\/svg\\+xml;base64,[a-zA-Z0-9+\\/=]+"
+    mandatory: true
+  }
+}
+
+tags: {
+  html_format: AMP
+  enabled_by: "transformed"
+  tag_name: "IMG"
+  spec_name: "amp-img > img (transformed)"
+  # Ideally we'd be able to use regular amp-img parent, but runtime currently
+  # requires an i-amphtml-ssr attribute on the amp-img. We could do away with
+  # that, though.
+  mandatory_parent: "amp-img (transformed)"
+  attrs: { name: "alt" }
+  attrs: { name: "attribution" }
+  attrs: { name: "object-fit" }
+  attrs: { name: "object-position" }
+  attrs: { name: "referrerpolicy" }
+  attrs: { name: "sizes" }
+  attrs: { name: "title" }
+  attr_lists: "mandatory-src-or-srcset"
+  # SSR requires these explicit attributes
+  attrs: {
+    name: "class"
+    value_regex: "i-amphtml-fill-content\\s+i-amphtml-replaced-content|"
+        "i-amphtml-replaced-content\\s+i-amphtml-fill-content"
+    mandatory: true
+  }
+  attrs: {
+    name: "decoding"
+    value: "async"
     mandatory: true
   }
 }
@@ -4666,7 +4493,6 @@ attr_lists: {
   name: "nonce-attr"
   attrs: {
     disabled_by: "amp4email"
-    disabled_by: "transformed"
     name: "nonce"
   }
 }
@@ -4685,7 +4511,6 @@ attr_lists: {
     value: "anonymous"
   }
   attrs: {
-    disabled_by: "transformed"
     disabled_by: "amp4email"
     name: "nonce"
   }
@@ -5478,12 +5303,11 @@ attr_lists: {
   # 3.2.5 HTML5 Global attributes.
   attrs: { name: "accesskey" }
   attrs: {
-    # attribute "class" for transformed is handled within the Validator engine.
-    # If this changes, please be sure to also update:
-    # amp-experiment 1.0 implementation.
-    disabled_by: "transformed"
     name: "class"
-    disallowed_value_regex: "(^|\\W)i-amphtml-"
+    # attribute "class" is handled within the Validator engine, since we need to
+    # handle transformed and non-transformed cases while still allowing "class"
+    # attribute generically.
+    # disallowed_value_regex: "(^|[\t\n\f\r ])i-amphtml-"
   }
   attrs: { name: "dir" }
   attrs: { name: "draggable" }
@@ -5778,6 +5602,12 @@ attr_lists: {
     name: "subscriptions-service"
     requires_extension: "amp-subscriptions"
   }
+  # amp-subscriptions-google specific attributes, see
+  # https://amp.dev/documentation/components/amp-subscriptions-google
+  attrs: {
+    name: "subscriptions-google-rtc"
+    requires_extension: "amp-subscriptions-google"
+  }
   # amp-next-page specific attributes, see
   # https://amp.dev/documentation/components/amp-next-page
   attrs: {
@@ -5873,85 +5703,86 @@ error_specificity { code: DUPLICATE_UNIQUE_TAG_WARNING specificity: 30 }
 error_specificity { code: STYLESHEET_TOO_LONG specificity: 31 }
 error_specificity { code: STYLESHEET_AND_INLINE_STYLE_TOO_LONG specificity: 32 }
 error_specificity { code: INLINE_STYLE_TOO_LONG specificity: 33 }
-error_specificity { code: CSS_SYNTAX_INVALID_AT_RULE specificity: 34 }
+error_specificity { code: INLINE_SCRIPT_TOO_LONG specificity: 34 }
+error_specificity { code: CSS_SYNTAX_INVALID_AT_RULE specificity: 35 }
 error_specificity {
-  code: MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE specificity: 35
+  code: MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE specificity: 36
 }
-error_specificity { code: INVALID_PROPERTY_VALUE_IN_ATTR_VALUE specificity: 36 }
-error_specificity { code: DISALLOWED_PROPERTY_IN_ATTR_VALUE specificity: 37 }
-error_specificity { code: MUTUALLY_EXCLUSIVE_ATTRS specificity: 38 }
-error_specificity { code: UNESCAPED_TEMPLATE_IN_ATTR_VALUE specificity: 39 }
-error_specificity { code: TEMPLATE_PARTIAL_IN_ATTR_VALUE specificity: 40 }
-error_specificity { code: TEMPLATE_IN_ATTR_NAME specificity: 41 }
+error_specificity { code: INVALID_PROPERTY_VALUE_IN_ATTR_VALUE specificity: 37 }
+error_specificity { code: DISALLOWED_PROPERTY_IN_ATTR_VALUE specificity: 38 }
+error_specificity { code: MUTUALLY_EXCLUSIVE_ATTRS specificity: 39 }
+error_specificity { code: UNESCAPED_TEMPLATE_IN_ATTR_VALUE specificity: 40 }
+error_specificity { code: TEMPLATE_PARTIAL_IN_ATTR_VALUE specificity: 41 }
+error_specificity { code: TEMPLATE_IN_ATTR_NAME specificity: 42 }
 error_specificity {
-  code: INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT specificity: 42
+  code: INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT specificity: 43
 }
-error_specificity { code: MISSING_LAYOUT_ATTRIBUTES specificity: 43 }
-error_specificity { code: IMPLIED_LAYOUT_INVALID specificity: 44 }
-error_specificity { code: SPECIFIED_LAYOUT_INVALID specificity: 45 }
-error_specificity { code: ATTR_DISALLOWED_BY_IMPLIED_LAYOUT specificity: 46 }
-error_specificity { code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT specificity: 47 }
-error_specificity { code: DUPLICATE_DIMENSION specificity: 48 }
-error_specificity { code: DISALLOWED_RELATIVE_URL specificity: 49 }
-error_specificity { code: MISSING_URL specificity: 50 }
-error_specificity { code: DISALLOWED_DOMAIN specificity: 51 }
-error_specificity { code: INVALID_URL_PROTOCOL specificity: 52 }
-error_specificity { code: INVALID_URL specificity: 53 }
-error_specificity { code: DISALLOWED_STYLE_ATTR specificity: 54 }
-error_specificity { code: CSS_SYNTAX_STRAY_TRAILING_BACKSLASH specificity: 55 }
-error_specificity { code: CSS_SYNTAX_UNTERMINATED_COMMENT specificity: 56 }
-error_specificity { code: CSS_SYNTAX_UNTERMINATED_STRING specificity: 57 }
-error_specificity { code: CSS_SYNTAX_BAD_URL specificity: 58 }
+error_specificity { code: MISSING_LAYOUT_ATTRIBUTES specificity: 44 }
+error_specificity { code: IMPLIED_LAYOUT_INVALID specificity: 45 }
+error_specificity { code: SPECIFIED_LAYOUT_INVALID specificity: 46 }
+error_specificity { code: ATTR_DISALLOWED_BY_IMPLIED_LAYOUT specificity: 47 }
+error_specificity { code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT specificity: 48 }
+error_specificity { code: DUPLICATE_DIMENSION specificity: 49 }
+error_specificity { code: DISALLOWED_RELATIVE_URL specificity: 50 }
+error_specificity { code: MISSING_URL specificity: 51 }
+error_specificity { code: DISALLOWED_DOMAIN specificity: 52 }
+error_specificity { code: INVALID_URL_PROTOCOL specificity: 53 }
+error_specificity { code: INVALID_URL specificity: 54 }
+error_specificity { code: DISALLOWED_STYLE_ATTR specificity: 55 }
+error_specificity { code: CSS_SYNTAX_STRAY_TRAILING_BACKSLASH specificity: 56 }
+error_specificity { code: CSS_SYNTAX_UNTERMINATED_COMMENT specificity: 57 }
+error_specificity { code: CSS_SYNTAX_UNTERMINATED_STRING specificity: 58 }
+error_specificity { code: CSS_SYNTAX_BAD_URL specificity: 59 }
 error_specificity {
-  code: CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE specificity: 59
+  code: CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE specificity: 60
 }
-error_specificity { code: CSS_SYNTAX_INVALID_DECLARATION specificity: 60 }
-error_specificity { code: CSS_SYNTAX_INCOMPLETE_DECLARATION specificity: 61 }
-error_specificity { code: CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR specificity: 62 }
-error_specificity { code: CSS_SYNTAX_MISSING_SELECTOR specificity: 63 }
-error_specificity { code: CSS_SYNTAX_NOT_A_SELECTOR_START specificity: 64 }
+error_specificity { code: CSS_SYNTAX_INVALID_DECLARATION specificity: 61 }
+error_specificity { code: CSS_SYNTAX_INCOMPLETE_DECLARATION specificity: 62 }
+error_specificity { code: CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR specificity: 63 }
+error_specificity { code: CSS_SYNTAX_MISSING_SELECTOR specificity: 64 }
+error_specificity { code: CSS_SYNTAX_NOT_A_SELECTOR_START specificity: 65 }
 error_specificity {
-  code: CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR specificity: 65
+  code: CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR specificity: 66
 }
-error_specificity { code: CSS_SYNTAX_MISSING_URL specificity: 66 }
-error_specificity { code: CSS_SYNTAX_DISALLOWED_DOMAIN specificity: 67 }
-error_specificity { code: CSS_SYNTAX_INVALID_URL specificity: 68 }
-error_specificity { code: CSS_SYNTAX_INVALID_URL_PROTOCOL specificity: 69 }
-error_specificity { code: CSS_SYNTAX_DISALLOWED_RELATIVE_URL specificity: 70 }
-error_specificity { code: INCORRECT_NUM_CHILD_TAGS specificity: 71 }
-error_specificity { code: DISALLOWED_CHILD_TAG_NAME specificity: 72 }
-error_specificity { code: DISALLOWED_FIRST_CHILD_TAG_NAME specificity: 73 }
-error_specificity { code: CSS_SYNTAX_INVALID_ATTR_SELECTOR specificity: 74 }
+error_specificity { code: CSS_SYNTAX_MISSING_URL specificity: 67 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_DOMAIN specificity: 68 }
+error_specificity { code: CSS_SYNTAX_INVALID_URL specificity: 69 }
+error_specificity { code: CSS_SYNTAX_INVALID_URL_PROTOCOL specificity: 70 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_RELATIVE_URL specificity: 71 }
+error_specificity { code: INCORRECT_NUM_CHILD_TAGS specificity: 72 }
+error_specificity { code: DISALLOWED_CHILD_TAG_NAME specificity: 73 }
+error_specificity { code: DISALLOWED_FIRST_CHILD_TAG_NAME specificity: 74 }
+error_specificity { code: CSS_SYNTAX_INVALID_ATTR_SELECTOR specificity: 75 }
 error_specificity {
-  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT specificity: 75
+  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT specificity: 76
 }
-error_specificity { code: MANDATORY_REFERENCE_POINT_MISSING specificity: 76 }
-error_specificity { code: DUPLICATE_REFERENCE_POINT specificity: 77 }
-error_specificity { code: TAG_REFERENCE_POINT_CONFLICT specificity: 78 }
+error_specificity { code: MANDATORY_REFERENCE_POINT_MISSING specificity: 77 }
+error_specificity { code: DUPLICATE_REFERENCE_POINT specificity: 78 }
+error_specificity { code: TAG_REFERENCE_POINT_CONFLICT specificity: 79 }
 error_specificity {
   code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR
-  specificity: 79
+  specificity: 80
 }
-error_specificity { code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE specificity: 80 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE specificity: 81 }
 error_specificity {
   code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT
-  specificity: 81
-}
-error_specificity {
-  code: CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE
   specificity: 82
 }
 error_specificity {
-  code: CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH
+  code: CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE
   specificity: 83
 }
 error_specificity {
-  code: CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION
+  code: CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH
   specificity: 84
 }
 error_specificity {
-  code: BASE_TAG_MUST_PRECEED_ALL_URLS
+  code: CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION
   specificity: 85
+}
+error_specificity {
+  code: BASE_TAG_MUST_PRECEED_ALL_URLS
+  specificity: 86
 }
 error_specificity { code: DISALLOWED_SCRIPT_TAG specificity: 102 }
 error_specificity { code: GENERAL_DISALLOWED_TAG specificity: 103 }
@@ -6006,26 +5837,29 @@ error_specificity {
   code: CSS_SYNTAX_DISALLOWED_PSEUDO_ELEMENT
   specificity: 122
 }
-
 error_specificity {
-  code: INVALID_UTF8
+  code: CSS_SYNTAX_DISALLOWED_IMPORTANT
   specificity: 123
 }
 error_specificity {
-  code: CSS_EXCESSIVELY_NESTED
+  code: INVALID_UTF8
   specificity: 124
 }
 error_specificity {
-  code: DOCUMENT_SIZE_LIMIT_EXCEEDED
+  code: CSS_EXCESSIVELY_NESTED
   specificity: 125
 }
 error_specificity {
-  code: VALUE_SET_MISMATCH
+  code: DOCUMENT_SIZE_LIMIT_EXCEEDED
   specificity: 126
 }
 error_specificity {
-  code: INVALID_DOCTYPE_HTML
+  code: VALUE_SET_MISMATCH
   specificity: 127
+}
+error_specificity {
+  code: INVALID_DOCTYPE_HTML
+  specificity: 128
 }
 error_specificity {
   code: DEV_MODE_ONLY
@@ -6042,8 +5876,7 @@ error_formats {
 }
 error_formats {
   code: INVALID_DOCTYPE_HTML
-  format: "Invalid or missing doctype declaration. Should be <!doctype html>. "
-          "See https://amp.dev/documentation/guides-and-tutorials/start/create/basic_markup/"
+  format: "Invalid or missing doctype declaration. Should be '!doctype html'."
 }
 error_formats {
   code: MANDATORY_TAG_MISSING
@@ -6167,6 +6000,10 @@ error_formats {
   code: INLINE_STYLE_TOO_LONG
   format: "The inline style specified in tag '%1' is too long - it "
           "contains %2 bytes whereas the limit is %3 bytes."
+}
+error_formats {
+  code: INLINE_SCRIPT_TOO_LONG
+  format: "The inline script is %1 bytes, which exceeds the limit of %2 bytes."
 }
 error_formats {
   code: MANDATORY_CDATA_MISSING_OR_INCORRECT
@@ -6479,6 +6316,10 @@ error_formats {
   code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT
   format: "CSS syntax error in tag '%1' - the property '%2' is set "
           "to the disallowed value '%3'. Allowed values: %4."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_IMPORTANT
+  format: "Usage of the !important CSS qualifier is not allowed."
 }
 error_formats {
   code: CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE

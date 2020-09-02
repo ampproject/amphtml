@@ -17,6 +17,8 @@
 import {
   RANDOM_NUMBER_GENERATORS,
   experimentToggles,
+  forceExperimentBranch,
+  getActiveExperimentBranches,
   getBinaryType,
   getExperimentBranch,
   getExperimentTogglesForTesting,
@@ -568,16 +570,17 @@ describe('experiment branch tests', () => {
   describe('#randomlySelectUnsetExperiments', () => {
     let accurateRandomStub;
     let cachedAccuratePrng;
-    let testExperimentSet;
+    let testExperimentList;
 
     beforeEach(() => {
       const experimentFrequency = 1.0;
-      testExperimentSet = {
-        testExperimentId: {
+      testExperimentList = [
+        {
+          experimentId: 'testExperimentId',
           isTrafficEligible: () => true,
           branches: ['branch1_id', 'branch2_id'],
         },
-      };
+      ];
       window.sandbox.win = {
         location: {
           hostname: 'test.server.name.com',
@@ -613,7 +616,7 @@ describe('experiment branch tests', () => {
     it('handles experiment not diverted path', () => {
       // Opt out of experiment.
       toggleExperiment(window.sandbox.win, 'testExperimentId', false, true);
-      randomlySelectUnsetExperiments(window.sandbox.win, testExperimentSet);
+      randomlySelectUnsetExperiments(window.sandbox.win, testExperimentList);
       expect(
         isExperimentOn(window.sandbox.win, 'testExperimentId'),
         'experiment is on'
@@ -628,7 +631,7 @@ describe('experiment branch tests', () => {
       // force the control branch to be chosen by making the accurate PRNG
       // return a value < 0.5.
       RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.3);
-      randomlySelectUnsetExperiments(window.sandbox.win, testExperimentSet);
+      randomlySelectUnsetExperiments(window.sandbox.win, testExperimentList);
       expect(
         isExperimentOn(window.sandbox.win, 'testExperimentId'),
         'experiment is on'
@@ -644,7 +647,7 @@ describe('experiment branch tests', () => {
       // Force the experiment branch to be chosen by making the accurate PRNG
       // return a value > 0.5.
       RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.6);
-      randomlySelectUnsetExperiments(window.sandbox.win, testExperimentSet);
+      randomlySelectUnsetExperiments(window.sandbox.win, testExperimentList);
       expect(
         isExperimentOn(window.sandbox.win, 'testExperimentId'),
         'experiment is on'
@@ -657,14 +660,15 @@ describe('experiment branch tests', () => {
     it('picks a branch if traffic eligible', () => {
       toggleExperiment(window.sandbox.win, 'expt_0', true, true);
       window.sandbox.win.trafficEligible = true;
-      const experimentInfo = {
-        'expt_0': {
+      const experimentInfo = [
+        {
+          experimentId: 'expt_0',
           isTrafficEligible: (win) => {
             return win.trafficEligible;
           },
           branches: ['0_0', '0_1'],
         },
-      };
+      ];
       RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.3);
       randomlySelectUnsetExperiments(window.sandbox.win, experimentInfo);
       expect(isExperimentOn(window.sandbox.win, 'expt_0')).to.be.true;
@@ -674,14 +678,15 @@ describe('experiment branch tests', () => {
     it("doesn't pick a branch if traffic ineligible", () => {
       toggleExperiment(window.sandbox.win, 'expt_0', true, true);
       window.sandbox.win.trafficEligible = false;
-      const experimentInfo = {
-        'expt_0': {
+      const experimentInfo = [
+        {
+          experimentId: 'expt_0',
           isTrafficEligible: (win) => {
             return win.trafficEligible;
           },
           branches: ['0_0', '0_1'],
         },
-      };
+      ];
       RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.3);
       randomlySelectUnsetExperiments(window.sandbox.win, experimentInfo);
       expect(isExperimentOn(window.sandbox.win, 'expt_0')).to.be.true;
@@ -690,12 +695,13 @@ describe('experiment branch tests', () => {
 
     it("doesn't pick a branch if no traffic eligibility function", () => {
       toggleExperiment(window.sandbox.win, 'expt_0', true, true);
-      const experimentInfo = {
-        'expt_0': {
+      const experimentInfo = [
+        {
+          experimentId: 'expt_0',
           isTrafficEligible: undefined,
           branches: ['0_0', '0_1'],
         },
-      };
+      ];
       RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.3);
       randomlySelectUnsetExperiments(window.sandbox.win, experimentInfo);
       expect(isExperimentOn(window.sandbox.win, 'expt_0')).to.be.true;
@@ -708,14 +714,15 @@ describe('experiment branch tests', () => {
       () => {
         toggleExperiment(window.sandbox.win, 'expt_0', true, true);
         window.sandbox.win.trafficEligible = false;
-        const experimentInfo = {
-          'expt_0': {
+        const experimentInfo = [
+          {
+            experimentId: 'expt_0',
             isTrafficEligible: (win) => {
               return win.trafficEligible;
             },
             branches: ['0_0', '0_1'],
           },
-        };
+        ];
         RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.3);
 
         randomlySelectUnsetExperiments(window.sandbox.win, experimentInfo);
@@ -736,21 +743,24 @@ describe('experiment branch tests', () => {
       toggleExperiment(window.sandbox.win, 'expt_2', true, true);
       toggleExperiment(window.sandbox.win, 'expt_3', true, true);
 
-      const experimentInfo = {
-        'expt_0': {
+      const experimentInfo = [
+        {
+          experimentId: 'expt_0',
           isTrafficEligible: () => true,
           branches: ['0_c', '0_e'],
         },
-        'expt_1': {
+        {
+          experimentId: 'expt_1',
           isTrafficEligible: () => true,
           branches: ['1_c', '1_e'],
         },
-        'expt_2': {
+        {
+          experimentId: 'expt_2',
           isTrafficEligible: () => true,
           branches: ['2_c', '2_e'],
         },
         // expt_3 omitted.
-      };
+      ];
       RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.6);
       randomlySelectUnsetExperiments(window.sandbox.win, experimentInfo);
       expect(isExperimentOn(window.sandbox.win, 'expt_0'), 'expt_0 is on').to.be
@@ -770,12 +780,13 @@ describe('experiment branch tests', () => {
 
     it('handles multi-way branches', () => {
       toggleExperiment(window.sandbox.win, 'expt_0', true, true);
-      const experimentInfo = {
-        'expt_0': {
+      const experimentInfo = [
+        {
+          experimentId: 'expt_0',
           isTrafficEligible: () => true,
           branches: ['0_0', '0_1', '0_2', '0_3', '0_4'],
         },
-      };
+      ];
       RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.7);
       randomlySelectUnsetExperiments(window.sandbox.win, experimentInfo);
       expect(isExperimentOn(window.sandbox.win, 'expt_0'), 'expt_0 is on').to.be
@@ -789,20 +800,23 @@ describe('experiment branch tests', () => {
       toggleExperiment(window.sandbox.win, 'expt_2', true, true);
       toggleExperiment(window.sandbox.win, 'expt_3', true, true);
 
-      const experimentInfo = {
-        'expt_0': {
+      const experimentInfo = [
+        {
+          experimentId: 'expt_0',
           isTrafficEligible: () => true,
           branches: ['0_0', '0_1', '0_2', '0_3', '0_4'],
         },
-        'expt_1': {
+        {
+          experimentId: 'expt_1',
           isTrafficEligible: () => true,
           branches: ['1_0', '1_1', '1_2', '1_3', '1_4'],
         },
-        'expt_2': {
+        {
+          experimentId: 'expt_2',
           isTrafficEligible: () => true,
           branches: ['2_0', '2_1', '2_2', '2_3', '2_4'],
         },
-      };
+      ];
       RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.7);
       RANDOM_NUMBER_GENERATORS.accuratePrng.onSecondCall().returns(0.3);
       randomlySelectUnsetExperiments(window.sandbox.win, experimentInfo);
@@ -822,18 +836,20 @@ describe('experiment branch tests', () => {
     });
 
     it('should not process the same experiment twice', () => {
-      const exptAInfo = {
-        'fooExpt': {
+      const exptAInfo = [
+        {
+          experimentId: 'fooExpt',
           isTrafficEligible: () => true,
           branches: ['012345', '987654'],
         },
-      };
-      const exptBInfo = {
-        'fooExpt': {
+      ];
+      const exptBInfo = [
+        {
+          experimentId: 'fooExpt',
           isTrafficEligible: () => true,
           branches: ['246810', '108642'],
         },
-      };
+      ];
       toggleExperiment(window.sandbox.win, 'fooExpt', false, true);
       randomlySelectUnsetExperiments(window.sandbox.win, exptAInfo);
       randomlySelectUnsetExperiments(window.sandbox.win, exptBInfo);
@@ -860,7 +876,7 @@ describe('experiment branch tests', () => {
       RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.3);
       const exps = randomlySelectUnsetExperiments(
         window.sandbox.win,
-        testExperimentSet
+        testExperimentList
       );
       expect(exps).to.deep.equal({'testExperimentId': 'branch1_id'});
     });
@@ -871,20 +887,23 @@ describe('experiment branch tests', () => {
       toggleExperiment(window.sandbox.win, 'expt_2', true, true);
       toggleExperiment(window.sandbox.win, 'expt_3', true, true);
 
-      const experimentInfo = {
-        'expt_0': {
+      const experimentInfo = [
+        {
+          experimentId: 'expt_0',
           isTrafficEligible: () => true,
           branches: ['0_0', '0_1', '0_2', '0_3', '0_4'],
         },
-        'expt_1': {
+        {
+          experimentId: 'expt_1',
           isTrafficEligible: () => true,
           branches: ['1_0', '1_1', '1_2', '1_3', '1_4'],
         },
-        'expt_2': {
+        {
+          experimentId: 'expt_2',
           isTrafficEligible: () => true,
           branches: ['2_0', '2_1', '2_2', '2_3', '2_4'],
         },
-      };
+      ];
       RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.7);
       RANDOM_NUMBER_GENERATORS.accuratePrng.onSecondCall().returns(0.3);
       const exps = randomlySelectUnsetExperiments(
@@ -896,6 +915,21 @@ describe('experiment branch tests', () => {
         'expt_0': '0_3',
         'expt_2': '2_1',
       });
+    });
+  });
+});
+
+describes.fakeWin('getActiveExperimentBranches', {}, (env) => {
+  it('should return an empty object if no active branches', () => {
+    expect(getActiveExperimentBranches(env.win)).to.eql({});
+  });
+
+  it('should return obj containing all branches', () => {
+    forceExperimentBranch(env.win, 'exp1', '1234');
+    forceExperimentBranch(env.win, 'exp2', '5678');
+    expect(getActiveExperimentBranches(env.win)).to.eql({
+      exp1: '1234',
+      exp2: '5678',
     });
   });
 });

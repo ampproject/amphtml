@@ -53,27 +53,15 @@ function cherryPickBranchName(version) {
  * Updates tags from the remote and creates a branch at the release commit.
  *
  * @param {string} ref
- * @param {!Array<string>} commits
  * @param {string} branch
  * @param {string} remote
  */
-function prepareBranch(ref, commits, branch, remote) {
-  const needsFetch = [ref]
-    .concat(commits)
-    .some((r) => getOutput(`git rev-parse ${r}`).status);
-
-  if (needsFetch) {
-    log(green('INFO:'), 'Fetching latest tags and commits from', cyan(remote));
-    execOrThrow(
-      `git fetch ${remote}`,
-      `Failed to fetch updates from remote ${cyan(remote)}`
-    );
-  } else {
-    log(
-      green('INFO:'),
-      'Identified tag and all commits available in local repository'
-    );
-  }
+function prepareBranch(ref, branch, remote) {
+  log(green('INFO:'), 'Pulling latest from', cyan(remote));
+  execOrThrow(
+    `git pull ${remote}`,
+    `Failed to pull latest from remote ${cyan(remote)}`
+  );
 
   execOrThrow(
     `git checkout -b ${branch} ${ref}`,
@@ -102,20 +90,20 @@ function performCherryPick(sha) {
   }
 }
 
-function cherryPick() {
+async function cherryPick() {
   const {push, remote = 'origin'} = argv;
   const commits = (argv.commits || '').split(',').filter(Boolean);
   let onto = String(argv.onto || '');
 
   if (!commits.length) {
-    log(red('ERROR:'), 'Must provide commit list with --commits');
-    process.exitCode = 1;
-    return;
+    const error = new Error('Must provide commit list with --commits');
+    error.showStack = false;
+    throw error;
   }
   if (!onto) {
-    log(red('ERROR:'), 'Must provide 13-digit AMP version with --onto');
-    process.exitCode = 1;
-    return;
+    const error = new Error('Must provide 13-digit AMP version with --onto');
+    error.showStack = false;
+    throw error;
   }
   if (onto.length === 15) {
     log(
@@ -127,14 +115,14 @@ function cherryPick() {
     onto = onto.substr(2);
   }
   if (onto.length !== 13) {
-    log(red('ERROR:'), 'Expected 13-digit AMP version; got', cyan(onto));
-    process.exitCode = 1;
-    return;
+    const error = new Error('Expected 13-digit AMP version');
+    error.showStack = false;
+    throw error;
   }
 
   const branch = cherryPickBranchName(onto);
   try {
-    prepareBranch(onto, commits, branch, remote);
+    prepareBranch(onto, branch, remote);
     commits.forEach(performCherryPick);
 
     if (push) {
@@ -155,12 +143,11 @@ function cherryPick() {
       green('SUCCESS:'),
       `Cherry-picked ${commits.length} commits onto release ${onto}`
     );
-    process.exitCode = 0;
   } catch (e) {
     log(red('ERROR:'), e.message);
     log('Deleting branch', cyan(branch));
     getOutput(`git checkout master && git branch -d ${branch}`);
-    process.exitCode = 1;
+    throw e;
   }
 }
 

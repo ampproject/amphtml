@@ -42,6 +42,23 @@ tags: {  # <amp-story>
     }
   }
   attrs: {
+    name: "entity"
+  }
+  attrs: {
+    name: "entity-logo-src"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "entity-url"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
     name: "poster-landscape-src"
     value_url: {
       protocol: "http"
@@ -219,6 +236,8 @@ tags: {
     value: "pulse"
     value: "rotate-in-left"
     value: "rotate-in-right"
+    value: "scale-fade-down"
+    value: "scale-fade-up"
     value: "twirl-in"
     value: "whoosh-in-left"
     value: "whoosh-in-right"
@@ -300,6 +319,8 @@ tags: {
     value: "pulse"
     value: "rotate-in-left"
     value: "rotate-in-right"
+    value: "scale-fade-down"
+    value: "scale-fade-up"
     value: "twirl-in"
     value: "whoosh-in-left"
     value: "whoosh-in-right"
@@ -438,7 +459,6 @@ tags: {  # <amp-story-cta-layer>
 }
 tags: {  # amp-experiment (json)
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "amp-experiment story extension .json script"
   mandatory_parent: "AMP-EXPERIMENT"
@@ -478,6 +498,8 @@ tags: {
     value: "pulse"
     value: "rotate-in-left"
     value: "rotate-in-right"
+    value: "scale-fade-down"
+    value: "scale-fade-up"
     value: "twirl-in"
     value: "whoosh-in-left"
     value: "whoosh-in-right"
@@ -564,6 +586,7 @@ descendant_tag_list: {
   tag: "HKERN"
   tag: "HR"
   tag: "I"
+  tag: "IMG"  # Only allowed when document is transformed AMP
   tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
   tag: "IMAGE"
   tag: "INS"
@@ -639,6 +662,11 @@ descendant_tag_list: {
   tag: "AMP-LIVE-LIST"
   tag: "AMP-PIXEL"
   tag: "AMP-STATE"
+  tag: "AMP-STORY-360"
+  tag: "AMP-STORY-INTERACTIVE-BINARY-POLL"
+  tag: "AMP-STORY-INTERACTIVE-POLL"
+  tag: "AMP-STORY-INTERACTIVE-QUIZ"
+  tag: "AMP-STORY-INTERACTIVE-RESULTS"
   tag: "AMP-TIMEAGO"
   tag: "AMP-TWITTER"
   tag: "AMP-VIDEO"
@@ -693,6 +721,7 @@ descendant_tag_list: {
   tag: "HR"
   tag: "I"
   tag: "IMAGE"
+  tag: "IMG"  # Only allowed when document is transformed AMP
   tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
   tag: "INS"
   tag: "KBD"
@@ -846,6 +875,40 @@ tags: {  # <amp-story-animation>
     supported_layouts: NODISPLAY
   }
 }
+# AMP Story metadata, name=amp-story-generator-name
+tags: {
+  html_format: AMP
+  tag_name: "META"
+  spec_name: "meta name=amp-story-generator-name"
+  mandatory_parent: "HEAD"
+  unique: true
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-story-generator-name"
+  }
+}
+# AMP Story metadata, name=amp-story-generator-version
+tags: {
+  html_format: AMP
+  tag_name: "META"
+  spec_name: "meta name=amp-story-generator-version"
+  mandatory_parent: "HEAD"
+  unique: true
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-story-generator-version"
+  }
+}
 descendant_tag_list {
   # Allowlisting as many components as possible, unless they could result in a
   # bad UX (ie: modal in a modal with amp-lightbox), or potential security
@@ -968,6 +1031,7 @@ descendant_tag_list {
   tag: "HR"
   tag: "I"
   tag: "IMAGE"
+  tag: "IMG"  # Only allowed when document is transformed AMP
   tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
   tag: "INS"
   tag: "KBD"

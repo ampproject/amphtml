@@ -38,7 +38,7 @@ async function validator() {
  */
 async function validatorWebui() {
   execOrDie('python build.py' + validatorArgs, {
-    cwd: 'validator/webui',
+    cwd: 'validator/js/webui',
     stdio: 'inherit',
   });
 }

@@ -129,17 +129,19 @@ The `errorReportingUrl` property is optional. The only available macros are ERRO
 - Browsi
 - Criteo
 - FLUX
+- Freestar
+- Galaxie Media
 - IndexExchange
+- Kargo
 - Lotame
 - Media.net
-- The Ozone Project
 - PubMatic OpenWrap
 - Purch
-- Galaxie Media
 - Rubicon
 - Salesforce
+- T13
+- The Ozone Project
 - Yieldbot
-- Kargo
 - Yieldlab
 
 ### RTC Callout Request Specification

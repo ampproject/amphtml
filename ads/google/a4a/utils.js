@@ -209,8 +209,8 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
     'adf': DomFingerprint.generate(adElement),
     'nhd': iframeDepth,
     'eid': eids,
-    'adx': slotRect.left,
-    'ady': slotRect.top,
+    'adx': Math.round(slotRect.left),
+    'ady': Math.round(slotRect.top),
     'oid': '2',
     'act': enclosingContainers.length ? enclosingContainers.join() : null,
   };
@@ -328,8 +328,8 @@ export function googlePageParameters(a4a, startTime) {
       'ish': win != win.top ? viewportSize.height : null,
       'art': getAmpRuntimeTypeParameter(win),
       'vis': visibilityStateCodes[visibilityState] || '0',
-      'scr_x': viewport.getScrollLeft(),
-      'scr_y': viewport.getScrollTop(),
+      'scr_x': Math.round(viewport.getScrollLeft()),
+      'scr_y': Math.round(viewport.getScrollTop()),
       'bc': getBrowserCapabilitiesBitmap(win) || null,
       'debug_experiment_id':
         (/(?:#|,)deid=([\d,]+)/i.exec(win.location.hash) || [])[1] || null,
@@ -647,7 +647,8 @@ export function getCsiAmpAnalyticsVariables(analyticsTrigger, a4a, qqid) {
 }
 
 /**
- * Extracts configuration used to build amp-analytics element for active view.
+ * Extracts configuration used to build amp-analytics element for active view
+ * and begin to render.
  *
  * @param {!../../../extensions/amp-a4a/0.1/amp-a4a.AmpA4A} a4a
  * @param {!Headers} responseHeaders
@@ -663,36 +664,35 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
     const analyticsConfig = parseJson(
       responseHeaders.get(AMP_ANALYTICS_HEADER)
     );
-    devAssert(Array.isArray(analyticsConfig['url']));
-    const urls = analyticsConfig['url'];
-    if (!urls.length) {
+
+    const acUrls = analyticsConfig['url'];
+    const btrUrls = analyticsConfig['btrUrl'];
+    if (
+      (acUrls && !Array.isArray(acUrls)) ||
+      (btrUrls && !Array.isArray(btrUrls))
+    ) {
+      dev().error(
+        'AMP-A4A',
+        'Invalid analytics',
+        responseHeaders.get(AMP_ANALYTICS_HEADER)
+      );
+    }
+    const hasActiveViewRequests = Array.isArray(acUrls) && acUrls.length;
+    const hasBeginToRenderRequests = Array.isArray(btrUrls) && btrUrls.length;
+    if (!hasActiveViewRequests && !hasBeginToRenderRequests) {
       return null;
     }
-
-    const config = /** @type {JsonObject}*/ ({
+    const config = dict({
       'transport': {'beacon': false, 'xhrpost': false},
-      'triggers': {
-        'continuousVisible': {
-          'on': 'visible',
-          'visibilitySpec': {
-            'selector': 'amp-ad',
-            'selectionMethod': 'closest',
-            'visiblePercentageMin': 50,
-            'continuousTimeMin': 1000,
-          },
-        },
-      },
+      'requests': {},
+      'triggers': {},
     });
-
-    // Discover and build visibility endpoints.
-    const requests = dict();
-    for (let idx = 1; idx <= urls.length; idx++) {
-      // TODO: Ensure url is valid and not freeform JS?
-      requests[`visibility${idx}`] = `${urls[idx - 1]}`;
+    if (hasActiveViewRequests) {
+      generateActiveViewRequest(config, acUrls);
     }
-    // Security review needed here.
-    config['requests'] = requests;
-    config['triggers']['continuousVisible']['request'] = Object.keys(requests);
+    if (hasBeginToRenderRequests) {
+      generateBeginToRenderRequest(config, btrUrls);
+    }
     return config;
   } catch (err) {
     dev().error(
@@ -703,6 +703,49 @@ export function extractAmpAnalyticsConfig(a4a, responseHeaders) {
     );
   }
   return null;
+}
+
+/**
+ * @param {!JsonObject} config
+ * @param {!Array<string>} urls
+ */
+function generateActiveViewRequest(config, urls) {
+  config['triggers']['continuousVisible'] = dict({
+    'request': [],
+    'on': 'visible',
+    'visibilitySpec': {
+      'selector': 'amp-ad',
+      'selectionMethod': 'closest',
+      'visiblePercentageMin': 50,
+      'continuousTimeMin': 1000,
+    },
+  });
+  for (let idx = 0; idx < urls.length; idx++) {
+    // TODO: Ensure url is valid and not freeform JS?
+    config['requests'][`visibility${idx + 1}`] = `${urls[idx]}`;
+    config['triggers']['continuousVisible']['request'].push(
+      `visibility${idx + 1}`
+    );
+  }
+}
+
+/**
+ * @param {!JsonObject} config
+ * @param {!Array<string>} urls
+ */
+function generateBeginToRenderRequest(config, urls) {
+  config['triggers']['beginToRender'] = dict({
+    'request': [],
+    'on': 'ini-load',
+    'selector': 'amp-ad',
+    'selectionMethod': 'closest',
+  });
+
+  for (let idx = 0; idx < urls.length; idx++) {
+    // TODO: Ensure url is valid and not freeform JS?
+    config['requests'][`btr${idx + 1}`] = `${urls[idx]}`;
+    config['triggers']['beginToRender']['request'].push(`btr${idx + 1}`);
+  }
 }
 
 /**
@@ -850,6 +893,8 @@ export function getBinaryTypeNumericalCode(type) {
       'control': '1',
       'experimental': '2',
       'rc': '3',
+      'nightly': '4',
+      'nightly-control': '5',
       'experimentA': '10',
       'experimentB': '11',
       'experimentC': '12',

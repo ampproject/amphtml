@@ -227,8 +227,13 @@ const adConfig = jsonConfiguration({
 
   'aduptech': {
     prefetch: 'https://s.d.adup-tech.com/jsapi',
-    preconnect: ['https://d.adup-tech.com', 'https://m.adup-tech.com'],
+    preconnect: [
+      'https://d.adup-tech.com',
+      'https://m.adup-tech.com',
+      'https://v.adup-tech.com',
+    ],
     renderStartImplemented: true,
+    consentHandlingOverride: true,
   },
 
   'adventive': {
@@ -475,6 +480,13 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'firstimpression': {
+    prefetch: 'https://ecdn.firstimpression.io/static/js/fiamp.js',
+    preconnect: 'https://cdn.firstimpression.io',
+    renderStartImplemented: true,
+    consentHandlingOverride: true,
+  },
+
   'flite': {},
 
   'fluct': {
@@ -504,6 +516,10 @@ const adConfig = jsonConfiguration({
 
   'giraff': {
     renderStartImplemented: true,
+  },
+
+  'glomex': {
+    prefetch: 'https://player.glomex.com/integration/1/amp-embed.js',
   },
 
   'gmossp': {
@@ -635,7 +651,12 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+
   'luckyads': {
+    renderStartImplemented: true,
+  },
+
+  'macaw': {
     renderStartImplemented: true,
   },
 
@@ -823,6 +844,11 @@ const adConfig = jsonConfiguration({
   'pixels': {
     prefetch: 'https://cdn.adsfactor.net/amp/pixels-amp.min.js',
     clientIdCookieName: '__AF',
+    renderStartImplemented: true,
+  },
+
+  'playstream': {
+    prefetch: 'https://app.playstream.media/js/amp.js',
     renderStartImplemented: true,
   },
 
@@ -1039,6 +1065,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'sona': {
+    renderStartImplemented: true,
+  },
+
   'sovrn': {
     prefetch: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
   },
@@ -1053,7 +1083,6 @@ const adConfig = jsonConfiguration({
   },
 
   'springAds': {
-    prefetch: 'https://www.asadcdn.com/adlib/adlib_seq.js',
     preconnect: ['https://ib.adnxs.com'],
     renderStartImplemented: true,
   },
@@ -1236,6 +1265,19 @@ const adConfig = jsonConfiguration({
 
   'yandex': {
     prefetch: 'https://an.yandex.ru/system/context_amp.js',
+    renderStartImplemented: true,
+  },
+
+  'yektanet': {
+    preconnect: [
+      'https://cdn.yektanet.com',
+      'https://cg-sc.yektanet.com',
+      'https://native.yektanet.com',
+      'https://nfetch.yektanet.net',
+      'https://rfetch.yektanet.net',
+      'https://scrapper.yektanet.com',
+      'https://ua.yektanet.com',
+    ],
     renderStartImplemented: true,
   },
 

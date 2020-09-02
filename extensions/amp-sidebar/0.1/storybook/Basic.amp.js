@@ -19,8 +19,8 @@
 import * as Preact from '../../../../src/preact';
 import {storiesOf} from '@storybook/preact';
 import {withA11y} from '@storybook/addon-a11y';
+import {withAmp} from '@ampproject/storybook-addon';
 import {withKnobs} from '@storybook/addon-knobs';
-import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
 
 // eslint-disable-next-line
 storiesOf('amp-sidebar', module)
