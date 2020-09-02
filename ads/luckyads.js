@@ -1,5 +1,3 @@
-var _classes = JSON.parse("{\"floatLeft\":\"float-left-a6c6677\",\"CSS\":\".float-left-a6c6677 {\\n  float: left;\\n}\"}");
-
 /**
  * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
@@ -15,4 +13,26 @@ var _classes = JSON.parse("{\"floatLeft\":\"float-left-a6c6677\",\"CSS\":\".floa
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export const useStyles = () => _classes;
+
+import {loadScript, validateData} from '../3p/3p';
+
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function luckyads(global, data) {
+  validateData(data, ['src', 'laBlock']);
+  const {src} = data;
+  createContainer(global, data);
+  loadScript(global, src);
+}
+
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+function createContainer(global, data) {
+  const d = global.document.createElement('div');
+  d.setAttribute('data-la-block', data['laBlock']);
+  global.document.getElementById('c').appendChild(d);
+}

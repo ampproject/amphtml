@@ -22,8 +22,10 @@ import {childElementByTag, createElementWithAttributes, matches} from '../dom';
 import {createRef, hydrate, render} from './index';
 import {devAssert} from '../log';
 import {dict, hasOwn} from '../utils/object';
+import {getMode} from '../mode';
 import {installShadowStyle} from '../shadow-embed';
 import {startsWith} from '../string';
+import {subscribe} from '../context';
 
 /**
  * @typedef {{
@@ -102,6 +104,9 @@ export class PreactBaseElement extends AMP.BaseElement {
     /** @private {{current: ?API_TYPE}} */
     this.ref_ = createRef();
 
+    /** @private {?Array} */
+    this.contextValues_ = null;
+
     this.boundRerender_ = () => {
       this.scheduledRender_ = false;
       this.rerender_();
@@ -144,6 +149,14 @@ export class PreactBaseElement extends AMP.BaseElement {
     });
 
     this.defaultProps_ = this.init() || null;
+
+    const useContexts = Ctor['useContexts'];
+    if (useContexts.length != 0) {
+      subscribe(this.element, useContexts, (...contexts) => {
+        this.contextValues_ = contexts;
+        this.scheduleRender_();
+      });
+    }
 
     this.scheduleRender_();
 
@@ -318,6 +331,18 @@ export class PreactBaseElement extends AMP.BaseElement {
       }
     }
 
+    // Exit early if contexts are not ready. Optional contexts will yield
+    // right away, even when `null`. The required contexts will block the
+    // `contextValues` until available.
+    const useContexts = Ctor['useContexts'];
+    const contextValues = this.contextValues_;
+    const isReady =
+      toHydrate || useContexts.length == 0 || contextValues != null;
+    if (!isReady) {
+      return;
+    }
+
+    // Process attributes and children.
     const props = collectProps(
       Ctor,
       this.element,
@@ -328,11 +353,19 @@ export class PreactBaseElement extends AMP.BaseElement {
     // While this "creates" a new element, diffing will not create a second
     // instance of Component. Instead, the existing one already rendered into
     // this element will be reused.
-    const v = (
-      <WithAmpContext {...this.context_}>
-        {Preact.createElement(Ctor['Component'], props)}
-      </WithAmpContext>
-    );
+    let comp = Preact.createElement(Ctor['Component'], props);
+
+    // Add contexts.
+    for (let i = 0; i < useContexts.length; i++) {
+      const Context = useContexts[i].type;
+      const value = contextValues[i];
+      if (value) {
+        comp = <Context.Provider value={value}>{comp}</Context.Provider>;
+      }
+    }
+
+    // Add AmpContext with renderable/playable proeprties.
+    const v = <WithAmpContext {...this.context_}>{comp}</WithAmpContext>;
 
     if (toHydrate) {
       hydrate(v, this.container_);
@@ -371,6 +404,11 @@ export class PreactBaseElement extends AMP.BaseElement {
 PreactBaseElement['Component'] = function () {
   devAssert(false, 'Must provide Component');
 };
+
+/**
+ * @protected {!Array<!ContextProp>}
+ */
+PreactBaseElement['useContexts'] = getMode().localDev ? Object.freeze([]) : [];
 
 /**
  * An override to specify that the component requires `layoutSizeDefined`.

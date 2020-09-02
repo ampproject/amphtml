@@ -23,9 +23,11 @@ import {
   addParamsToUrl,
   getFragment,
   isProxyOrigin,
+  parseQueryString,
   parseUrlWithA,
   removeFragment,
   removeSearch,
+  serializeQueryString,
 } from '../url';
 import {applySandbox} from '../3p-frame';
 import {createCustomEvent} from '../event-helper';
@@ -993,25 +995,31 @@ export class AmpStoryPlayer {
    * @private
    */
   getEncodedLocation_(href, visibilityState = VisibilityState.INACTIVE) {
-    const params = dict({
-      'amp_js_v': '0.1',
+    const playerFragmentParams = {
       'visibilityState': visibilityState,
       'origin': this.win_.origin,
       'showStoryUrlInfo': '0',
       'storyPlayer': 'v0',
       'cap': 'swipe',
+    };
+
+    const originalFragmentString = getFragment(href);
+    const originalFragments = parseQueryString(originalFragmentString);
+
+    const fragmentParams = /** @type {!JsonObject} */ ({
+      ...originalFragments,
+      ...playerFragmentParams,
     });
 
-    const fragmentParam = getFragment(href);
-    const noFragmentUrl = removeFragment(href);
-    let inputUrl = addParamsToUrl(noFragmentUrl, params);
+    const ampJsQueryParam = dict({
+      'amp_js_v': '0.1',
+    });
 
-    // Prepend fragment of original url.
-    const prependFragment = (match) => {
-      // Remove the last '&' after amp_js_v=0.1 and replace with a '#'.
-      return fragmentParam + match.slice(0, -1) + '#';
-    };
-    inputUrl = inputUrl.replace(/[?&]amp_js_v=0.1&/, prependFragment);
+    const noFragmentUrl = removeFragment(href);
+    const inputUrl =
+      addParamsToUrl(noFragmentUrl, ampJsQueryParam) +
+      '#' +
+      serializeQueryString(fragmentParams);
 
     return parseUrlWithA(
       /** @type {!HTMLAnchorElement} */ (this.cachedA_),
@@ -1173,6 +1181,14 @@ export class AmpStoryPlayer {
    * @private
    */
   onSelectDocument_(data) {
+    if (
+      !this.isCircularWrappingEnabled_() &&
+      this.currentIdx_ + 1 === this.stories_.length
+    ) {
+      this.element_.dispatchEvent(
+        createCustomEvent(this.win_, 'noNextStory', dict({}))
+      );
+    }
     if (data.next) {
       this.next_();
     } else if (data.previous) {
