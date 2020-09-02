@@ -1181,6 +1181,14 @@ export class AmpStoryPlayer {
    * @private
    */
   onSelectDocument_(data) {
+    if (
+      !this.isCircularWrappingEnabled_() &&
+      this.currentIdx_ + 1 === this.stories_.length
+    ) {
+      this.element_.dispatchEvent(
+        createCustomEvent(this.win_, 'noNextStory', dict({}))
+      );
+    }
     if (data.next) {
       this.next_();
     } else if (data.previous) {
