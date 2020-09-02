@@ -38,25 +38,27 @@ The `width` and `height` attributes determine the aspect ratio of the Gfycat emb
 </amp-gfycat>
 ```
 
-## Attributes
+# Attributes
 
-##### data-gfyid
+### `data-gfyid`
 
-The Gfycat ID found in any Gfycat url. For example, `TautWhoppingCougar` is the id in the following url: https://gfycat.com/TautWhoppingCougar.
+The Gfycat ID found in any Gfycat url. For example, `TautWhoppingCougar` is the
+id in the following url: `https://gfycat.com/TautWhoppingCougar`.
 
-##### width and height
+### `width` and `height`
 
-The width and height attributes are special for the Gfycat embed. These should be the actual width and height of the Gfycat. The system automatically adds space for the "chrome" that Gfycat adds around the GIF.
+The `width` and `height` attributes are special for the Gfycat embed. These
+should be the actual width and height of the Gfycat. The system automatically
+adds space for the "chrome" that Gfycat adds around the GIF.
 
 Gfycat allows many aspect ratios.
 
 To specify the width and height in the code, copy it from the embed URL:
 
-1. Go to [https://gfycat.com/](https://gfycat.com/)`name`, where name is the Gfycat ID.
-2. Click the embed link icon (`</>`).
-3. Copy the width and height specified in the "Fixed iFRAME" field.
-
-Example: Finding the actual width and height
+1.  Go to [https://gfycat.com/](https://gfycat.com/)`name`, where `name` is the
+    Gfycat ID.
+2.  Click the embed link icon (`</>`).
+3.  Copy the width and height specified in the "Fixed iFRAME" field.
 
 ```html
 <iframe
@@ -70,26 +72,28 @@ Example: Finding the actual width and height
 </iframe>
 ```
 
-##### noautoplay
+### `noautoplay`
 
 By default, a video autoplays.
 
 - when the video is scrolled out of view, the video is paused
 - when the video is scrolled into view, the video resumes playback
-- if the user has interacted with the video (e.g., pauses/resumes), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.
+- if the user has interacted with the video (e.g., pauses/resumes), and the
+  video is scrolled in or out of view, the state of the video remains as how
+  the user left it. For example, if the user pauses the video, then scrolls
+  the video out of view and returns to the video, the video is still paused.
 
 You can turn off autoplay by setting the `noautoplay` attribute.
-
-Example: Turning off autoplay
 
 ```html
 <amp-gfycat data-gfyid="TautWhoppingCougar" width="640" height="360" noautoplay>
 </amp-gfycat>
 ```
 
-##### common attributes
+### Common attributes
 
-This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)
+extended to AMP components.
 
 ## Validation
 
