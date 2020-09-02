@@ -34,6 +34,7 @@ import {createCustomEvent} from '../event-helper';
 import {dict, map} from '../utils/object';
 // Source for this constant is css/amp-story-player-iframe.css
 import {cssText} from '../../build/amp-story-player-iframe.css';
+import {data} from 'autoprefixer';
 import {dev} from '../log';
 import {findIndex} from '../utils/array';
 import {getMode} from '../../src/mode';
@@ -1181,18 +1182,35 @@ export class AmpStoryPlayer {
    * @private
    */
   onSelectDocument_(data) {
-    if (
-      !this.isCircularWrappingEnabled_() &&
-      this.currentIdx_ + 1 === this.stories_.length
-    ) {
-      this.element_.dispatchEvent(
-        createCustomEvent(this.win_, 'noNextStory', dict({}))
-      );
-    }
+    this.dispatchEndOfStoriesEvent_(data);
     if (data.next) {
       this.next_();
     } else if (data.previous) {
       this.previous_();
+    }
+  }
+
+  /**
+   * Dispatches end of stories event when appropiate.
+   * @param {!Object} data
+   * @private
+   */
+  dispatchEndOfStoriesEvent_(data) {
+    if (this.isCircularWrappingEnabled_() || (!data.next && !data.previous)) {
+      return;
+    }
+
+    let endOfStories, name;
+    if (data.next) {
+      endOfStories = this.currentIdx_ + 1 === this.stories_.length;
+      name = 'noNextStory';
+    } else {
+      endOfStories = this.currentIdx_ === 0;
+      name = 'noPreviousStory';
+    }
+
+    if (endOfStories) {
+      this.element_.dispatchEvent(createCustomEvent(this.win_, name, dict({})));
     }
   }
 
