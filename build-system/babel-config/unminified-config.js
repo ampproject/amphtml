@@ -52,7 +52,7 @@ function getUnminifiedConfig() {
     '@babel/plugin-transform-react-constant-elements',
     '@babel/plugin-transform-classes',
     reactJsxPlugin,
-  ];
+  ].filter(Boolean);
   const unminifiedPresets = [presetEnv];
   return {
     compact: false,
