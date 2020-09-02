@@ -651,6 +651,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'luckyads': {
+    renderStartImplemented: true,
+  },
+
   'macaw': {
     renderStartImplemented: true,
   },
