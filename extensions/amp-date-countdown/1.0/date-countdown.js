@@ -101,6 +101,8 @@ export function DateCountdown({
 }
 
 /**
+ * Calculate the epoch time that this component should countdown to from
+ * one of multiple input options.
  * @param {string|undefined} endDate
  * @param {number|undefined} timeleftMs
  * @param {number|undefined} timestampMs
@@ -130,6 +132,8 @@ function getEpoch(endDate, timeleftMs, timestampMs, timestampSeconds) {
 }
 
 /**
+ * Return an object with a label for 'years', 'months', etc. based on the
+ * user provided locale string.
  * @param {string} locale
  * @return {!Object}
  */
@@ -152,6 +156,8 @@ function getLocaleWord(locale) {
 }
 
 /**
+ * Converts a time represented in milliseconds (ms) into a representation with
+ * days, hours, minutes, etc. and returns formatted strings in an object.
  * @param {number} ms
  * @param {string} biggestUnit
  * @return {Object}
@@ -205,6 +211,8 @@ function getYDHMSFromMs(ms, biggestUnit) {
 }
 
 /**
+ * Format a number for output to the template.  Adds a leading zero if the
+ * input is only one digit and a negative sign for inputs less than 0.
  * @param {number} input
  * @return {string}
  */
