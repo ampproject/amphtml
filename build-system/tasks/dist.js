@@ -420,6 +420,7 @@ dist.flags = {
   fortesting: '  Compiles production binaries for local testing',
   noconfig: '  Compiles production binaries without applying AMP_CONFIG',
   config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+  coverage: '  Instruments compiled code for collecting coverage information',
   extensions: '  Builds only the listed extensions.',
   extensions_from: '  Builds only the extensions from the listed AMP(s).',
   noextensions: '  Builds with no extensions.',
