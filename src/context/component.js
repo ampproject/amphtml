@@ -130,6 +130,13 @@ export class Component {
    * `unmountComponent` API.
    */
   dispose() {
+    const node = this.contextNode.node;
+    const func = this.func_;
+    console.log('context: dispose component: ',
+      node.nodeName.toLowerCase() + (node.id ? '#' + node.id : '') +
+      (this.contextNode.name ? '::' + this.contextNode.name : ''),
+      func.displayName || func.name, this.deps_.map(d => d.key));
+
     // Unsubscribe from all dependencies.
     if (this.deps_.length > 0) {
       const {values} = this.contextNode;
@@ -353,6 +360,17 @@ export class Component {
 
     // Run the component.
     const func = this.func_;
+
+    const node = this.contextNode.node;
+    console.log('context: run component: ',
+      node.nodeName.toLowerCase() + (node.id ? '#' + node.id : '') +
+      (this.contextNode.name ? '::' + this.contextNode.name : ''),
+      func.displayName || func.name,
+      this.input_,
+      Object.fromEntries(
+        this.deps_.map((d, i) => [d.key, this.depValues_[i]])
+      ));
+
     this.runCleanup_ = func(this, this.input_, this.depValues_);
   }
 

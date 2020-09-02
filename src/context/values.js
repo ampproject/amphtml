@@ -531,6 +531,11 @@ export class Values {
       return;
     }
 
+    const node = this.contextNode_.node;
+    console.log('context: prop updated: ',
+      node.nodeName.toLowerCase() + (node.id ? '#' + node.id : '') +
+      (this.contextNode_.name ? '::' + this.contextNode_.name : ''),
+      key, value);
     used.value = value;
 
     // Notify subscribers.

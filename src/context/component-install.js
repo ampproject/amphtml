@@ -212,6 +212,7 @@ function componentWithInputFactory(id, contextNode, func, deps) {
         return func.apply(null, [node, input].concat(deps));
     }
   };
+  comp.displayName = func.displayName || func.name;
   return new Component(id, contextNode, comp, deps);
 }
 
@@ -239,5 +240,6 @@ function subscriberFactory(id, contextNode, callback, deps) {
         return callback.apply(null, deps);
     }
   };
+  comp.displayName = 'subscriber:' + (callback.displayName || callback.name);
   return new Component(id, contextNode, comp, deps);
 }

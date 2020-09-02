@@ -36,6 +36,7 @@ export {
   useSetProp,
   useRemoveProp,
 } from './component-hooks';
+export {observeInput} from './input-observer';
 
 /**
  * Direct slot assignment. Works the same way as shadow slots, but does not
@@ -91,6 +92,16 @@ export function setIsRoot(node, isRoot) {
  */
 export function rediscoverChildren(node) {
   ContextNode.rediscoverChildren(node);
+}
+
+/**
+ * Requests the discovery phase. Asynchronously finds the nearest parent for
+ * this node and its root. Roots and parents set directly via `setParent()`
+ * API are not discoverable.
+ * @param {!Node} node
+ */
+export function discover(node) {
+  ContextNode.get(node).discover();
 }
 
 /**

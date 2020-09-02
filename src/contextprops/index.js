@@ -75,6 +75,14 @@ const LoadingProp = contextProp('Loading', {
     ),
 });
 
+// QQQ: consider a 3-state: `true`, `false`, `none`. Or combined with the
+// LoadedState.
+/** @type {!ContextProp<boolean>} */
+const LoadPendingState = contextProp('LoadPending');
+
+/** @type {!ContextProp<boolean>} */
+const LoadedState = contextProp('LoadedState', {defaultValue: false});
+
 /**
  * @param {T} acc
  * @param {T} value
@@ -83,4 +91,4 @@ const LoadingProp = contextProp('Loading', {
  */
 const andReducer = (acc, value) => acc && value;
 
-export {CanRender, CanPlay, LoadingProp};
+export {CanRender, CanPlay, LoadingProp, LoadPendingState, LoadedState};

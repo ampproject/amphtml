@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {devAssert} from '../log';
+// import {devAssert} from '../log';
 
 const EMPTY_DEPS = [];
 
@@ -44,6 +44,6 @@ export function contextProp(key, opt_spec) {
     // Overrides.
     ...opt_spec,
   });
-  devAssert(prop.deps.length == 0 || prop.compute);
+  // devAssert(prop.deps.length == 0 || prop.compute);
   return prop;
 }
