@@ -878,7 +878,7 @@ amp-story .amp-video-eq,
   height: auto !important;
   pointer-events: none !important;
   min-width: 14em !important; /* 14em = 224px = the width of a narrow phone (320px) - tap-safe margins (48px * 2) */
-  max-width: min(25em, calc(var(--story-page-vw) * 80)) !important;
+  max-width: 25em !important;
   font-size: calc(var(--story-page-vmin) * 3); /* override with ems for pixel perfect layout */
   width: 100%;
   /* Properties overrideable by user */
@@ -951,11 +951,7 @@ amp-story .amp-video-eq,
   --i-amphtml-interactive-prompt-text-size: 1.125em !important;
 }
 
-amp-story-interactive-binary-poll.i-amphtml-story-interactive-component {
-  max-width: 18em !important;
-}
-
-amp-story-interactive-results.i-amphtml-story-interactive-component {
+amp-story-interactive-binary-poll.i-amphtml-story-interactive-component, amp-story-interactive-results.i-amphtml-story-interactive-component {
   max-width: 18em !important;
 }
 
