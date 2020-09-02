@@ -24,10 +24,10 @@ limitations under the License.
 
 # amp-embedly-card
 
-## Behavior
+## Usage
 
 The `amp-embedly-card` component provides you with responsive and shareable embeds to drive the reach of your websites,
-blog posts, and articles from any URL using <a href="http://docs.embed.ly/docs/cards">Embedly cards</a>.
+blog posts, and articles from any URL using [Embedly cards](http://docs.embed.ly/docs/cards).
 
 Cards are the easiest way to leverage Embedly. For any media, cards provide a responsive embed with built-in embed analytics.
 
@@ -67,56 +67,61 @@ Within your AMP page, you can include one or multiple `amp-embedly-card` compone
 
 ## Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>data-url (required)</strong></td>
-    <td>The URL to retrieve embedding information.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-card-via</strong></td>
-    <td>Specifies the via content in the card. This is a a great way to do attribution. This is an optional attribute.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-card-theme</strong></td>
-    <td>Allows settings the <code>dark</code> theme which changes the background color of the main card container. Use <code>dark</code> to set this theme. For dark backgrounds it's better to specify this. The default is <code>light</code>, which sets no background color of the main card container.</td>
-  </tr>
-  <tr>
-     <td width="40%"><strong>data-card-embed</strong></td>
-     <td>The URL to a video or rich media. Use with static embeds like articles, instead of using the static page content in the card, the card will embed the video or rich media.
-</td>
-   </tr>
-   <tr>
-     <td width="40%"><strong>data-card-image</strong></td>
-     <td>The URL to an image. Specifies which image to use in article cards when <code>data-url</code> points to an article.
-Not all image URLs are supported, if the image is not loaded, try a different image or domain.</td>
-   </tr>
-   <tr>
-     <td width="40%"><strong>data-card-controls</strong></td>
-     <td><p>Enables share icons.</p>
-<ul>
-  <li>`0`: Disable share icons.</li>
-  <li>`1`: Enable share icons</li>
-</ul>
-<p>The default is <code>1</code>.</p></td>
-   </tr>
-   <tr>
-      <td width="40%"><strong>data-card-align</strong></td>
-      <td>Aligns the card. The possible values are <code>left</code>, <code>center</code> and <code>right</code>. The default value is <code>center</code>.</td>
-    </tr>
-    <tr>
-      <td width="40%"><strong>data-card-recommend</strong></td>
-      <td><p>When recommendations are supported, it disables embedly recommendations on video and rich cards.<br>These are recommendations created by embedly.</p>
-<ul>
-  <li>`0`: Disables embedly recommendations.</li>
-  <li>`1`: Enables embedly recommendations.</li>
-</ul>
-<p>The default value is <code>1</code>.</p></td>
-    </tr>
-    <tr>
-      <td width="40%"><strong>common attributes</strong></td>
-      <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
-    </tr>
-</table>
+### `data-url`
+
+The URL to retrieve embedding information.
+
+### `data-card-embed`
+
+The URL to a video or rich media. Use with static embeds like articles, instead
+of using the static page content in the card, the card will embed the video or
+rich media.
+
+### `data-card-image`
+
+The URL to an image. Specifies which image to use in article cards when
+`data-url` points to an article. Not all image URLs are supported, if the image
+is not loaded, try a different image or domain.
+
+### `data-card-controls`
+
+Enables share icons.
+
+- `0`: Disable share icons.
+- `1`: Enable share icons
+
+The default is `1`.
+
+### `data-card-align`
+
+Aligns the card. The possible values are `left`, `center` and `right`. The
+default value is `center`.
+
+### `data-card-recommend`
+
+When recommendations are supported, it disables embedly recommendations on video
+and rich cards. These are recommendations created by embedly.
+
+- `0`: Disables embedly recommendations.
+- `1`: Enables embedly recommendations.
+
+The default value is `1`.
+
+### `data-card-via` (optional)
+
+Specifies the via content in the card. This is a great way to do attribution.
+
+### `data-card-theme` (optional)
+
+Allows settings the `dark` theme which changes the background color of the main
+card container. Use `dark` to set this theme. For dark backgrounds it's better
+to specify this. The default is `light`, which sets no background color of the
+main card container.
+
+### Common attributes
+
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)
+extended to AMP components.
 
 ## Validation
 
