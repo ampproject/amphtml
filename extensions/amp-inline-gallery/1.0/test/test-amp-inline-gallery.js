@@ -149,8 +149,10 @@ describes.realWin(
       await waitFor(() => lastContext.currentSlide == 1, 'currentSlide == 1');
 
       // Carousel updated.
-      const scroller = getScroller();
-      await waitFor(() => scroller.scrollLeft > 0, 'advanced to next slide');
+      await waitFor(() => {
+        const scroller = getScroller();
+        return scroller && scroller.scrollLeft > 0;
+      }, 'advanced to next slide');
     });
 
     it('should navigate pagination using carousel', async () => {
