@@ -573,47 +573,49 @@ export class GoogleSubscriptionsPlatform {
       if (!this.enableEntitlements_) {
         return null;
       }
-      return this.runtime_
-        .getEntitlements({
+      let params = {};
+      if (encryptedDocumentKey) {
+        params = {
           encryption: {encryptedDocumentKey},
-        })
-        .then((swgEntitlements) => {
-          // Get and store the isReadyToPay signal which is independent of
-          // any entitlments existing.
-          if (swgEntitlements.isReadyToPay) {
-            this.isReadyToPay_ = true;
-          }
+        };
+      }
+      return this.runtime_.getEntitlements(params).then((swgEntitlements) => {
+        // Get and store the isReadyToPay signal which is independent of
+        // any entitlments existing.
+        if (swgEntitlements.isReadyToPay) {
+          this.isReadyToPay_ = true;
+        }
 
-          // Get the specifc entitlement we're looking for
-          let swgEntitlement = swgEntitlements.getEntitlementForThis();
-          let granted = false;
-          if (swgEntitlement && swgEntitlement.source) {
-            granted = true;
-          } else if (
-            swgEntitlements.entitlements.length &&
-            swgEntitlements.entitlements[0].products.length
-          ) {
-            // We didn't find a grant so see if there is a non granting
-            // and return that. Note if we start returning multiple non
-            // granting we'll need to refactor to handle returning an
-            // array of Entitlement objects.
-            // #TODO(jpettitt) - refactor to handle multi entitlement case
-            swgEntitlement = swgEntitlements.entitlements[0];
-          } else {
-            return null;
-          }
-          swgEntitlements.ack();
-          return new Entitlement({
-            source: swgEntitlement.source,
-            raw: swgEntitlements.raw,
-            service: PLATFORM_ID,
-            granted,
-            // if it's granted it must be a subscriber
-            grantReason: granted ? GrantReason.SUBSCRIBER : null,
-            dataObject: swgEntitlement.json(),
-            decryptedDocumentKey: swgEntitlements.decryptedDocumentKey,
-          });
+        // Get the specifc entitlement we're looking for
+        let swgEntitlement = swgEntitlements.getEntitlementForThis();
+        let granted = false;
+        if (swgEntitlement && swgEntitlement.source) {
+          granted = true;
+        } else if (
+          swgEntitlements.entitlements.length &&
+          swgEntitlements.entitlements[0].products.length
+        ) {
+          // We didn't find a grant so see if there is a non granting
+          // and return that. Note if we start returning multiple non
+          // granting we'll need to refactor to handle returning an
+          // array of Entitlement objects.
+          // #TODO(jpettitt) - refactor to handle multi entitlement case
+          swgEntitlement = swgEntitlements.entitlements[0];
+        } else {
+          return null;
+        }
+        swgEntitlements.ack();
+        return new Entitlement({
+          source: swgEntitlement.source,
+          raw: swgEntitlements.raw,
+          service: PLATFORM_ID,
+          granted,
+          // if it's granted it must be a subscriber
+          grantReason: granted ? GrantReason.SUBSCRIBER : null,
+          dataObject: swgEntitlement.json(),
+          decryptedDocumentKey: swgEntitlements.decryptedDocumentKey,
         });
+      });
     });
   }
 
