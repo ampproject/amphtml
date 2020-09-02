@@ -87,7 +87,7 @@ describes.realWin(
         () => lastContext && lastContext.slideCount > 0,
         'context and slideCount set'
       );
-      await waitFor(() => carousel.shadowRoot, 'carousel rendered');
+      await waitFor(() => getScroller(), 'carousel rendered');
       await waitFor(() => getDots().length > 0, 'pagination rendered');
     });
 
@@ -116,7 +116,10 @@ describes.realWin(
     }
 
     function getScroller() {
-      return carousel.shadowRoot.querySelector('[class*=scrollContainer]');
+      const {shadowRoot} = carousel;
+      return (
+        shadowRoot && shadowRoot.querySelector('[class*=scroll-container]')
+      );
     }
 
     function invocation(method, args = {}) {
@@ -149,10 +152,8 @@ describes.realWin(
       await waitFor(() => lastContext.currentSlide == 1, 'currentSlide == 1');
 
       // Carousel updated.
-      await waitFor(() => {
-        const scroller = getScroller();
-        return scroller && scroller.scrollLeft > 0;
-      }, 'advanced to next slide');
+      const scroller = getScroller();
+      await waitFor(() => scroller.scrollLeft > 0, 'advanced to next slide');
     });
 
     it('should navigate pagination using carousel', async () => {
