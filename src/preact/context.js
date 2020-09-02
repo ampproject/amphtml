@@ -77,3 +77,11 @@ export function useAmpContext() {
   const AmpContext = getAmpContext();
   return useContext(AmpContext);
 }
+
+/**
+ *
+ */
+export function useAmpContext() {
+  const AmpContext = getAmpContext();
+  return useContext(AmpContext);
+}
