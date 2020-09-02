@@ -50,7 +50,7 @@ CMP_CONFIG['didomi'] = {
 
 CMP_CONFIG['iubenda'] = {
   'consentInstanceId': 'iubenda',
-  'checkConsentHref': 'https://cdn.iubenda.com/cs/amp/checkConsent',
+  'checkConsentHref': 'https://amp.iubenda.com/cs/amp/checkConsent',
   'promptUISrc': 'https://www.iubenda.com/en/help/22135-cookie-solution-amp',
 };
 
