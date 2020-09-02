@@ -5,7 +5,7 @@
   "description": "Dev dependencies used by `gulp performance`",
   "devDependencies": {
     "chai": "4.2.0",
-    "mocha": "7.1.2",
-    "puppeteer": "3.1.0"
+    "mocha": "8.1.2",
+    "puppeteer": "5.2.1"
   }
 }

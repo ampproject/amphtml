@@ -87,7 +87,6 @@ import {
   FakeWindow,
   interceptEventListeners,
 } from './fake-dom';
-import {RequestBank, stubService} from './test-helper';
 import {Services} from '../src/services';
 import {addParamsToUrl} from '../src/url';
 import {adopt, adoptShadowMode} from '../src/runtime';
@@ -101,6 +100,7 @@ import {
   installBuiltinElements,
   installRuntimeServices,
 } from '../src/service/core-services';
+import {stubService} from './test-helper';
 
 import {install as installCustomElements} from '../src/polyfills/custom-elements';
 import {installDocService} from '../src/service/ampdoc-impl';
@@ -220,7 +220,6 @@ export const realWin = describeEnv((spec) => [
  *   hash: (string|undefined),
  *   amp: (boolean),
  *   timeout: (number),
- *   retryOnSaucelabs: (number)
  * }} spec
  * @param {function({
  *   win: !Window,
@@ -349,9 +348,6 @@ function describeEnv(factory) {
       });
 
       let d = describe.configure();
-      if (spec.retryOnSaucelabs) {
-        d = d.retryOnSaucelabs(spec.retryOnSaucelabs);
-      }
       if (spec.ifIe) {
         d = d.ifIe();
       }
@@ -482,10 +478,6 @@ class IntegrationFixture {
     if (this.spec.timeout === undefined) {
       this.spec.timeout = 15000;
     }
-    if (this.spec.retryOnSaucelabs === undefined) {
-      this.spec.retryOnSaucelabs = 4;
-    }
-
     /** @const {string} */
     this.hash = spec.hash || '';
     delete spec.hash;
@@ -551,7 +543,6 @@ class IntegrationFixture {
     if (env.iframe.parentNode) {
       env.iframe.parentNode.removeChild(env.iframe);
     }
-    return RequestBank.tearDown();
   }
 }
 

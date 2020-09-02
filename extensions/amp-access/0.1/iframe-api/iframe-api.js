@@ -68,7 +68,7 @@ export class AmpAccessIframeApi {
   }
 
   /**
-   * @return {*} TODO(#23582): Specify return type
+   * @return {!Promise} Promise that resolves when connection completes.
    */
   connect() {
     this.messenger_.connect(this.handleCommand_.bind(this));
@@ -127,7 +127,7 @@ export class AmpAccessIframeApi {
 
 /**
  * @package Visible for testing.
- * @return {*} TODO(#23582): Specify return type
+ * @return {typeof AccessController}
  */
 export function getAccessControllerForTesting() {
   return AccessController;

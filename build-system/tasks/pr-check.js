@@ -85,6 +85,10 @@ async function prCheck(cb) {
     runCheck('gulp check-owners');
   }
 
+  if (buildTargets.has('RENOVATE_CONFIG')) {
+    runCheck('gulp check-renovate-config');
+  }
+
   if (buildTargets.has('SERVER')) {
     runCheck('gulp server-tests');
   }
@@ -114,11 +118,6 @@ async function prCheck(cb) {
   if (buildTargets.has('RUNTIME') || buildTargets.has('VALIDATOR')) {
     runCheck('gulp validator');
   }
-
-  // #28497: Java Validator tests are broken due to Ubuntu keyserver outage.
-  // if (buildTargets.has('VALIDATOR_JAVA')) {
-  //   runCheck('gulp validator-java');
-  // }
 
   if (buildTargets.has('VALIDATOR_WEBUI')) {
     runCheck('gulp validator-webui');

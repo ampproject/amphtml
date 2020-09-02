@@ -245,7 +245,7 @@ amp-live-list > [update] {
 /**
  * Display none elements
  */
-amp-experiment, amp-share-tracking {
+amp-experiment {
   display: none;
 }
 
@@ -317,7 +317,11 @@ amp-story-page {
   background-color: #757575;
 }
 
-amp-story .amp-active > div {
+/* Hide amp-loader in stories
+ * TODO(maxbittker): remove after amp-loader is no longer imported in stories
+ */
+amp-story .amp-active > div,
+amp-story .i-amphtml-loader-background {
   display: none !important;
 }
 
@@ -361,5 +365,18 @@ amp-autocomplete > textarea,
  * doesn't push the preset's defaults into v0.js making it larger.
  */
 [amp-fx^="fly-in"] {
+  visibility: hidden;
+}
+
+/**
+ * amp-script[nodom] is an element with no UI, similar to amp-analytics.
+ */
+amp-script[nodom] {
+  /* Fixed to make position independent of page other elements. */
+  position: fixed !important;
+  top: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
   visibility: hidden;
 }

@@ -19,7 +19,7 @@ import {Layout} from '../layout';
 import {Services} from '../services';
 import {computedStyle, toggle} from '../style';
 import {dev, devAssert} from '../log';
-import {isBlockedByConsent} from '../error';
+import {isBlockedByConsent, reportError} from '../error';
 import {
   layoutRectLtwh,
   layoutRectSizeEquals,
@@ -498,13 +498,19 @@ export class Resource {
       oldBox.top != newBox.top ||
       sizeChanges
     ) {
-      if (
-        this.element.isUpgraded() &&
-        this.state_ != ResourceState.NOT_BUILT &&
-        (this.state_ == ResourceState.NOT_LAID_OUT ||
-          this.element.isRelayoutNeeded())
-      ) {
-        this.state_ = ResourceState.READY_FOR_LAYOUT;
+      if (this.element.isUpgraded()) {
+        if (this.state_ == ResourceState.NOT_LAID_OUT) {
+          // If the element isn't laid out yet, then we're now ready for layout.
+          this.state_ = ResourceState.READY_FOR_LAYOUT;
+        } else if (
+          (this.state_ == ResourceState.LAYOUT_COMPLETE ||
+            this.state_ == ResourceState.LAYOUT_FAILED) &&
+          this.element.isRelayoutNeeded()
+        ) {
+          // If the element was already laid out and we need to relayout, then
+          // go back to ready for layout.
+          this.state_ = ResourceState.READY_FOR_LAYOUT;
+        }
       }
     }
 
@@ -620,6 +626,10 @@ export class Resource {
    * Returns a previously measured layout box adjusted to the viewport. This
    * mainly affects fixed-position elements that are adjusted to be always
    * relative to the document position in the viewport.
+   * The returned layoutBox is:
+   * - relative to the top of the document for non fixed element,
+   * - relative to the top of the document at current scroll position
+   *   for fixed element.
    * @return {!../layout-rect.LayoutRectDef}
    */
   getLayoutBox() {
@@ -677,17 +687,18 @@ export class Resource {
    * @return {boolean}
    */
   isDisplayed(usePremeasuredRect = false) {
+    const isConnected =
+      this.element.ownerDocument && this.element.ownerDocument.defaultView;
+    if (!isConnected) {
+      return false;
+    }
     devAssert(!usePremeasuredRect || this.intersect_);
     const isFluid = this.element.getLayout() == Layout.FLUID;
     const box = usePremeasuredRect
       ? devAssert(this.premeasuredRect_)
       : this.getLayoutBox();
     const hasNonZeroSize = box.height > 0 && box.width > 0;
-    return (
-      (isFluid || hasNonZeroSize) &&
-      !!this.element.ownerDocument &&
-      !!this.element.ownerDocument.defaultView
-    );
+    return isFluid || hasNonZeroSize;
   }
 
   /**
@@ -895,6 +906,17 @@ export class Resource {
     );
     devAssert(this.isDisplayed(), 'Not displayed for layout: %s', this.debugid);
 
+    if (this.state_ != ResourceState.LAYOUT_SCHEDULED) {
+      const err = dev().createError(
+        'startLayout called but not LAYOUT_SCHEDULED',
+        'currently: ',
+        this.state_
+      );
+      err.associatedElement = this.element;
+      reportError(err);
+      return Promise.reject(err);
+    }
+
     // Unwanted re-layouts are ignored.
     if (this.layoutCount_ > 0 && !this.element.isRelayoutNeeded()) {
       dev().fine(
@@ -1015,7 +1037,13 @@ export class Resource {
     this.setInViewport(false);
     if (this.element.unlayoutCallback()) {
       this.element.togglePlaceholder(true);
-      this.state_ = ResourceState.NOT_LAID_OUT;
+      // With IntersectionObserver, the element won't receive another
+      // measurement if/when the document becomes active again.
+      // Therefore, its post-unlayout state must be READY_FOR_LAYOUT
+      // (built and measured) to become eligible for relayout later.
+      this.state_ = this.intersect_
+        ? ResourceState.READY_FOR_LAYOUT
+        : ResourceState.NOT_LAID_OUT;
       this.layoutCount_ = 0;
       this.layoutPromise_ = null;
     }

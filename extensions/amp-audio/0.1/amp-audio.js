@@ -103,14 +103,13 @@ export class AmpAudio extends AMP.BaseElement {
   }
 
   /**
-   * Builds the internal <audio> element
-   * @return {*} TODO(#23582): Specify return type
+   * Builds the internal <audio> element.
    */
   buildAudioElement() {
     const audio = this.element.ownerDocument.createElement('audio');
     if (!audio.play) {
       this.toggleFallback(true);
-      return Promise.resolve();
+      return;
     }
 
     // Force controls otherwise there is no player UI.

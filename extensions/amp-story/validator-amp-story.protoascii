@@ -42,6 +42,23 @@ tags: {  # <amp-story>
     }
   }
   attrs: {
+    name: "entity"
+  }
+  attrs: {
+    name: "entity-logo-src"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
+    name: "entity-url"
+    value_url: {
+      protocol: "http"
+      protocol: "https"
+    }
+  }
+  attrs: {
     name: "poster-landscape-src"
     value_url: {
       protocol: "http"
@@ -219,6 +236,8 @@ tags: {
     value: "pulse"
     value: "rotate-in-left"
     value: "rotate-in-right"
+    value: "scale-fade-down"
+    value: "scale-fade-up"
     value: "twirl-in"
     value: "whoosh-in-left"
     value: "whoosh-in-right"
@@ -277,7 +296,7 @@ tags: {
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
   }
-  spec_url: "https://amp.dev/documentation/components/amp-story"
+  spec_url: "https://amp.dev/documentation/components/amp-story/"
 }
 tags: {
   html_format: AMP
@@ -300,6 +319,8 @@ tags: {
     value: "pulse"
     value: "rotate-in-left"
     value: "rotate-in-right"
+    value: "scale-fade-down"
+    value: "scale-fade-up"
     value: "twirl-in"
     value: "whoosh-in-left"
     value: "whoosh-in-right"
@@ -345,7 +366,7 @@ tags: {
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER animate-in"
   }
-  spec_url: "https://amp.dev/documentation/components/amp-story"
+  spec_url: "https://amp.dev/documentation/components/amp-story/"
 }
 tags: {  # <amp-story-bookend>
   html_format: AMP
@@ -404,7 +425,7 @@ tags: {  # amp-story-consent (json)
   }
   attr_lists: "nonce-attr"
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
@@ -438,7 +459,6 @@ tags: {  # <amp-story-cta-layer>
 }
 tags: {  # amp-experiment (json)
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "amp-experiment story extension .json script"
   mandatory_parent: "AMP-EXPERIMENT"
@@ -451,13 +471,13 @@ tags: {  # amp-experiment (json)
   attr_lists: "nonce-attr"
   cdata: {
     max_bytes: 15000
-    max_bytes_spec_url: "https://amp.dev/documentation/components/amp-experiment#configuration"
-    blacklisted_cdata_regex: {
+    max_bytes_spec_url: "https://amp.dev/documentation/components/amp-experiment/#configuration"
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
   }
-  spec_url: "https://amp.dev/documentation/components/amp-experiment"
+  spec_url: "https://amp.dev/documentation/components/amp-experiment/"
 }
 tags: {
   html_format: AMP
@@ -478,6 +498,8 @@ tags: {
     value: "pulse"
     value: "rotate-in-left"
     value: "rotate-in-right"
+    value: "scale-fade-down"
+    value: "scale-fade-up"
     value: "twirl-in"
     value: "whoosh-in-left"
     value: "whoosh-in-right"
@@ -507,7 +529,7 @@ tags: {
   reference_points: {
     tag_spec_name: "AMP-STORY-CTA-LAYER animate-in"
   }
-  spec_url: "https://amp.dev/documentation/components/amp-story"
+  spec_url: "https://amp.dev/documentation/components/amp-story/"
 }
 descendant_tag_list: {
   name: "amp-story-cta-layer-allowed-descendants"
@@ -564,6 +586,7 @@ descendant_tag_list: {
   tag: "HKERN"
   tag: "HR"
   tag: "I"
+  tag: "IMG"  # Only allowed when document is transformed AMP
   tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
   tag: "IMAGE"
   tag: "INS"
@@ -622,7 +645,7 @@ descendant_tag_list: {
 }
 descendant_tag_list: {
   name: "amp-story-grid-layer-allowed-descendants"
-  tag: "A" # `show-tooltip` attribute is whitelisted in validator-main.protoascii.
+  tag: "A" # `show-tooltip` attribute is allowlisted in validator-main.protoascii.
   tag: "ABBR"
   tag: "ADDRESS"
   tag: "AMP-ANALYTICS"
@@ -639,6 +662,11 @@ descendant_tag_list: {
   tag: "AMP-LIVE-LIST"
   tag: "AMP-PIXEL"
   tag: "AMP-STATE"
+  tag: "AMP-STORY-360"
+  tag: "AMP-STORY-INTERACTIVE-BINARY-POLL"
+  tag: "AMP-STORY-INTERACTIVE-POLL"
+  tag: "AMP-STORY-INTERACTIVE-QUIZ"
+  tag: "AMP-STORY-INTERACTIVE-RESULTS"
   tag: "AMP-TIMEAGO"
   tag: "AMP-TWITTER"
   tag: "AMP-VIDEO"
@@ -693,6 +721,7 @@ descendant_tag_list: {
   tag: "HR"
   tag: "I"
   tag: "IMAGE"
+  tag: "IMG"  # Only allowed when document is transformed AMP
   tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
   tag: "INS"
   tag: "KBD"
@@ -818,7 +847,7 @@ tags: {  # <amp-story-animation> <script>
   }
   attr_lists: "nonce-attr"
   cdata: {
-    blacklisted_cdata_regex: {
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
@@ -846,8 +875,42 @@ tags: {  # <amp-story-animation>
     supported_layouts: NODISPLAY
   }
 }
+# AMP Story metadata, name=amp-story-generator-name
+tags: {
+  html_format: AMP
+  tag_name: "META"
+  spec_name: "meta name=amp-story-generator-name"
+  mandatory_parent: "HEAD"
+  unique: true
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-story-generator-name"
+  }
+}
+# AMP Story metadata, name=amp-story-generator-version
+tags: {
+  html_format: AMP
+  tag_name: "META"
+  spec_name: "meta name=amp-story-generator-version"
+  mandatory_parent: "HEAD"
+  unique: true
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+  attrs: {
+    name: "name"
+    mandatory: true
+    value_casei: "amp-story-generator-version"
+  }
+}
 descendant_tag_list {
-  # Whitelisting as many components as possible, unless they could result in a
+  # Allowlisting as many components as possible, unless they could result in a
   # bad UX (ie: modal in a modal with amp-lightbox), or potential security
   # issues (ie: amp-form).
   name: "amp-story-page-attachment-allowed-descendants"
@@ -968,6 +1031,7 @@ descendant_tag_list {
   tag: "HR"
   tag: "I"
   tag: "IMAGE"
+  tag: "IMG"  # Only allowed when document is transformed AMP
   tag: "I-AMPHTML-SIZER"  # Only allowed when document is transformed AMP
   tag: "INS"
   tag: "KBD"

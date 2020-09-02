@@ -22,7 +22,7 @@ import {getScopeElements} from './scope';
 const WL_ANCHOR_ATTR = ['href', 'id', 'rel', 'rev'];
 const PREFIX_DATA_ATTR = /^vars(.+)/;
 const REG_DOMAIN_URL = /^(?:https?:)?(?:\/\/)?([^\/?]+)/i;
-const PAGE_PROP_WHITELIST = {
+const PAGE_PROP_ALLOWLIST = {
   'SOURCE_URL': true,
   'DOCUMENT_REFERRER': true,
 };
@@ -162,7 +162,7 @@ export class LinkRewriter {
       this.rewrittenUrl_,
       /** expandUrlSync doesn't fill DOCUMENT_REFERRER so we pass it*/
       {DOCUMENT_REFERRER: this.referrer_},
-      PAGE_PROP_WHITELIST
+      PAGE_PROP_ALLOWLIST
     );
   }
 

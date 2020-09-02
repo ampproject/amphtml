@@ -36,12 +36,14 @@ const COMMON_GLOBS = [
   'third_party/timeagojs/**/*.js',
   'third_party/vega/**/*.js',
   'third_party/webcomponentsjs/ShadowCSS.js',
+  'third_party/zuho/**/*.js',
   'node_modules/dompurify/package.json',
   'node_modules/dompurify/dist/purify.es.js',
   'node_modules/intersection-observer/package.json',
   'node_modules/intersection-observer/intersection-observer.install.js',
   'node_modules/promise-pjs/package.json',
   'node_modules/promise-pjs/promise.mjs',
+  'node_modules/rrule/dist/es5/rrule.min.js',
   'node_modules/web-animations-js/package.json',
   'node_modules/web-animations-js/web-animations.install.js',
   'node_modules/web-activities/package.json',
@@ -58,6 +60,8 @@ const COMMON_GLOBS = [
   'node_modules/preact/dist/*.js',
   'node_modules/preact/hooks/package.json',
   'node_modules/preact/hooks/dist/*.js',
+  'node_modules/preact/compat/package.json',
+  'node_modules/preact/compat/dist/*.js',
 ];
 
 /**
@@ -126,8 +130,6 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-consent/**/*.js',
   // Needed to access AmpGeo type for service locator
   'extensions/amp-geo/**/*.js',
-  // Needed for AmpViewerAssistanceService
-  'extensions/amp-viewer-assistance/**/*.js',
   // Needed for amp-smartlinks dep on amp-skimlinks
   'extensions/amp-skimlinks/0.1/**/*.js',
   'src/*.js',

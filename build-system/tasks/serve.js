@@ -23,7 +23,10 @@ const log = require('fancy-log');
 const minimist = require('minimist');
 const morgan = require('morgan');
 const path = require('path');
-const watch = require('gulp-watch');
+const {
+  buildNewServer,
+  SERVER_TRANSFORM_PATH,
+} = require('../server/typescript-compile');
 const {
   lazyBuildExtensions,
   lazyBuildJs,
@@ -32,16 +35,11 @@ const {
 } = require('../server/lazy-build');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green, red} = require('ansi-colors');
-const {distNailgunPort, stopNailgunServer} = require('./nailgun');
-const {exec} = require('../common/exec');
 const {logServeMode, setServeMode} = require('../server/app-utils');
 const {watchDebounceDelay} = require('./helpers');
+const {watch} = require('gulp');
 
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
-
-// Used by new server implementation
-const typescriptBinary = './node_modules/typescript/bin/tsc';
-const transformsPath = 'build-system/server/new-server/transforms';
 
 // Used for logging.
 let url = null;
@@ -50,7 +48,7 @@ let quiet = !!argv.quiet;
 // Used for live reload.
 const serverFiles = globby.sync([
   'build-system/server/**',
-  `!${transformsPath}/dist/**`,
+  `!${SERVER_TRANSFORM_PATH}/dist/**`,
 ]);
 
 // Used to enable / disable lazy building.
@@ -118,25 +116,6 @@ async function startServer(
 }
 
 /**
- * Builds the new server by converting typescript transforms to JS
- */
-function buildNewServer() {
-  const buildCmd = `${typescriptBinary} -p ${transformsPath}/tsconfig.json`;
-  log(
-    green('Building'),
-    cyan('AMP Dev Server'),
-    green('at'),
-    cyan(`${transformsPath}/dist`) + green('...')
-  );
-  const result = exec(buildCmd, {'stdio': ['inherit', 'inherit', 'pipe']});
-  if (result.status != 0) {
-    const err = new Error('Could not build AMP Dev Server');
-    err.showStack = false;
-    throw err;
-  }
-}
-
-/**
  * Clears server files from the require cache to allow for in-process server
  * live-reload.
  */
@@ -150,9 +129,6 @@ function resetServerFiles() {
  * Stops the currently running server
  */
 async function stopServer() {
-  if (lazyBuild && argv.compiled) {
-    await stopNailgunServer(distNailgunPort);
-  }
   if (url) {
     connect.serverClose();
     log(green('Stopped server at'), cyan(url));
@@ -164,7 +140,6 @@ async function stopServer() {
  * Closes the existing server and restarts it
  */
 async function restartServer() {
-  await stopServer();
   if (argv.new_server) {
     try {
       buildNewServer();
@@ -201,7 +176,7 @@ async function doServe(lazyBuild = false) {
   const watchFunc = async () => {
     await restartServer();
   };
-  watch(serverFiles, debounce(watchFunc, watchDebounceDelay));
+  watch(serverFiles).on('change', debounce(watchFunc, watchDebounceDelay));
   if (argv.new_server) {
     buildNewServer();
   }
@@ -212,7 +187,6 @@ async function doServe(lazyBuild = false) {
 }
 
 module.exports = {
-  buildNewServer,
   serve,
   doServe,
   startServer,

@@ -73,13 +73,11 @@ describes.realWin(
 
     function getRenderedSuggestions() {
       const html = htmlFor(doc);
-      return html`
-        <div>
-          <div data-value="apple"></div>
-          <div data-value="mango"></div>
-          <div data-value="pear"></div>
-        </div>
-      `;
+      return [
+        html`<div data-value="apple"></div>`,
+        html`<div data-value="mango"></div>`,
+        html`<div data-value="pear"></div>`,
+      ];
     }
 
     describe('mutatedAttributesCallback_()', () => {
@@ -123,6 +121,29 @@ describes.realWin(
             expect(autocompleteSpy).to.have.been.calledWith(
               ['a', 'b', 'c'],
               ''
+            );
+          });
+      });
+
+      it('should mutate expected src value with "query" attribute', () => {
+        return impl
+          .layoutCallback()
+          .then(() => {
+            impl.queryKey_ = 'q';
+            impl.srcBase_ = 'https://www.data.com/';
+            expect(impl.generateSrc_('')).to.equal('https://www.data.com/?q=');
+            expect(impl.generateSrc_('abc')).to.equal(
+              'https://www.data.com/?q=abc'
+            );
+            return impl.mutatedAttributesCallback({
+              'src': 'https://example.com',
+            });
+          })
+          .then(() => {
+            expect(impl.srcBase_).to.equal('https://example.com');
+            expect(impl.generateSrc_('')).to.equal('https://example.com?q=');
+            expect(impl.generateSrc_('abc')).to.equal(
+              'https://example.com?q=abc'
             );
           });
       });
@@ -422,18 +443,18 @@ describes.realWin(
       expect(impl.tokenPrefixMatch_(item, 'd c')).to.be.false;
     });
 
-    it('truncateToMaxEntries_() should truncate given data', () => {
+    it('truncateToMaxItems_() should truncate given data', () => {
       expect(
-        impl.truncateToMaxEntries_(['a', 'b', 'c', 'd'])
+        impl.truncateToMaxItems_(['a', 'b', 'c', 'd'])
       ).to.have.ordered.members(['a', 'b', 'c', 'd']);
-      impl.maxEntries_ = 3;
+      impl.maxItems_ = 3;
       expect(
-        impl.truncateToMaxEntries_(['a', 'b', 'c', 'd'])
+        impl.truncateToMaxItems_(['a', 'b', 'c', 'd'])
       ).to.have.ordered.members(['a', 'b', 'c']);
       expect(
-        impl.truncateToMaxEntries_(['a', 'b', 'c'])
+        impl.truncateToMaxItems_(['a', 'b', 'c'])
       ).to.have.ordered.members(['a', 'b', 'c']);
-      expect(impl.truncateToMaxEntries_(['a', 'b'])).to.have.ordered.members([
+      expect(impl.truncateToMaxItems_(['a', 'b'])).to.have.ordered.members([
         'a',
         'b',
       ]);
@@ -933,8 +954,8 @@ describes.realWin(
       impl = await buildAmpAutocomplete(true);
       const sourceData = ['apple', 'mango', 'pear'];
       const rendered = getRenderedSuggestions();
-      rendered.children[2].removeAttribute('data-value', '');
-      rendered.children[2].setAttribute('data-disabled', '');
+      rendered[2].removeAttribute('data-value', '');
+      rendered[2].setAttribute('data-disabled', '');
       env.sandbox
         .stub(impl.getSsrTemplateHelper(), 'applySsrOrCsrTemplate')
         .returns(Promise.resolve(rendered));

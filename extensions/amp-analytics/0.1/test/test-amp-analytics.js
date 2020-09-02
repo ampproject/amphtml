@@ -1476,9 +1476,9 @@ describes.realWin(
         doc.body.classList.remove('i-amphtml-element');
       });
 
-      it('should not add listener when eventType is not whitelist', function () {
+      it('should not add listener when eventType is not allowlist', function () {
         expectAsyncConsoleError(clickTrackerNotSupportedError);
-        // Right now we only whitelist VISIBLE & HIDDEN
+        // Right now we only allowlist VISIBLE & HIDDEN
         const tracker = ins.root_.getTracker('click', ClickEventTracker);
         const addStub = env.sandbox.stub(tracker, 'add');
         const analytics = getAnalyticsTag(
@@ -1519,7 +1519,7 @@ describes.realWin(
         });
       });
 
-      it('expand vendor vars but not replace non whitelist variables', () => {
+      it('expand vendor vars but not replace non allowlist variables', () => {
         const analytics = getAnalyticsTag(
           {
             'requests': {
@@ -1549,7 +1549,7 @@ describes.realWin(
         });
       });
 
-      it('should not replace non whitelist variable', () => {
+      it('should not replace non allowlist variable', () => {
         const analytics = getAnalyticsTag(
           {
             'requests': {
@@ -1569,7 +1569,7 @@ describes.realWin(
         });
       });
 
-      it('should replace whitelist variable', () => {
+      it('should replace allowlist variable', () => {
         const analytics = getAnalyticsTag(
           {
             'requests': {'foo': 'https://example.test/random=${random}'},
@@ -1588,7 +1588,7 @@ describes.realWin(
         });
       });
 
-      it('should replace for multi whitelisted(or not) variables', () => {
+      it('should replace for multi allowlisted(or not) variables', () => {
         const analytics = getAnalyticsTag(
           {
             'requests': {
@@ -1644,7 +1644,7 @@ describes.realWin(
         });
       });
 
-      it('allow a request sample through on non whitelist url variables', () => {
+      it('allow a request sample through on non allowlist url variables', () => {
         const config = {
           'requests': {
             'pageview1': '/test1=${requestCount}',

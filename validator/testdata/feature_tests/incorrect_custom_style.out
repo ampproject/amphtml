@@ -34,10 +34,10 @@ feature_tests/incorrect_custom_style.html:29:4 CSS syntax error in tag 'style am
 |      foo.amp-class {}
 |      foo { b: red !important; }
 >>                  ^~~~~~~~~
-feature_tests/incorrect_custom_style.html:32:17 The text inside tag 'style amp-custom' contains 'CSS !important', which is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets)
+feature_tests/incorrect_custom_style.html:32:17 Usage of the !important CSS qualifier is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |      foo { b: red ! important; }
 >>                  ^~~~~~~~~
-feature_tests/incorrect_custom_style.html:33:17 The text inside tag 'style amp-custom' contains 'CSS !important', which is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets)
+feature_tests/incorrect_custom_style.html:33:17 Usage of the !important CSS qualifier is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |      /* This is ok though, since it's a comment: { b: red !important } */
 |
 |      @viewport (mumble mumble) { }
@@ -51,7 +51,7 @@ feature_tests/incorrect_custom_style.html:37:24 CSS syntax error in tag 'style a
 |      foo { background-image: url('') }  /* allowed for now */
 |      foo { background-image: url('invalid://invalid.com/1.jpg') }
 >>                             ^~~~~~~~~
-feature_tests/incorrect_custom_style.html:41:28 CSS syntax error in tag 'style amp-custom' - invalid url protocol 'invalid:'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets)
+feature_tests/incorrect_custom_style.html:41:28 CSS syntax error in tag 'style amp-custom' - invalid url protocol 'invalid:'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
 |      foo { background-image: url('https://valid.com/1.jpg') }
 |      foo { background-image: url('http://valid.com/1.jpg') }
 |      foo { background-image: url('://valid.jpg') }
@@ -61,7 +61,7 @@ feature_tests/incorrect_custom_style.html:41:28 CSS syntax error in tag 'style a
 |      @font-face { src: url(''); } /* allowed for now */
 |      @font-face { src: url('invalid://invalid.com/1.ttf') }
 >>                       ^~~~~~~~~
-feature_tests/incorrect_custom_style.html:49:22 CSS syntax error in tag 'style amp-custom' - invalid url protocol 'invalid:'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#stylesheets)
+feature_tests/incorrect_custom_style.html:49:22 CSS syntax error in tag 'style amp-custom' - invalid url protocol 'invalid:'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#stylesheets)
 |      @font-face { src: url('https://valid.com/1.ttf') }
 |      @font-face { src: url('http://valid.com/1.ttf') }
 |      @font-face { src: url('://valid.ttf') }
@@ -74,6 +74,6 @@ feature_tests/incorrect_custom_style.html:49:22 CSS syntax error in tag 'style a
 |    <!-- Invalid due to !important -->
 |    <b style="color: red !important"></div>
 >>   ^~~~~~~~~
-feature_tests/incorrect_custom_style.html:60:2 The attribute 'style' in tag 'b' is set to the invalid value 'CSS !important'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+feature_tests/incorrect_custom_style.html:60:2 Usage of the !important CSS qualifier is not allowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |  </body>
 |  </html>

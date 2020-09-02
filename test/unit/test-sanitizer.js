@@ -293,7 +293,7 @@ function runSanitizerTests() {
       });
     });
 
-    it('should NOT output blacklisted values for class attributes', () => {
+    it('should NOT output denylisted values for class attributes', () => {
       allowConsoleError(() => {
         expect(sanitize('<p class="i-amphtml-">hello</p>')).to.be.equal(
           '<p>hello</p>'
@@ -416,7 +416,7 @@ function runSanitizerTests() {
       });
     });
 
-    it('should only allow whitelisted AMP elements in AMP4EMAIL', () => {
+    it('should only allow allowlisted AMP elements in AMP4EMAIL', () => {
       html.setAttribute('amp4email', '');
       expect(sanitize('<amp-analytics>')).to.equal('');
       expect(sanitize('<amp-iframe>')).to.equal('');
@@ -469,7 +469,7 @@ function runSanitizerTests() {
       );
     });
 
-    it('should NOT output non-whitelisted markup', () => {
+    it('should NOT output non-allowlisted markup', () => {
       expect(sanitizeTagsForTripleMustache('a<style>b</style>c')).to.be.equal(
         'ac'
       );

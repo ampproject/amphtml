@@ -17,15 +17,18 @@
 import * as Preact from '../../../../src/preact';
 import {storiesOf} from '@storybook/preact';
 import {withA11y} from '@storybook/addon-a11y';
+import {withAmp} from '@ampproject/storybook-addon';
 import {withKnobs} from '@storybook/addon-knobs';
-import withAmp from '../../../../build-system/tasks/storybook/amp-env/decorator.js';
 
 // eslint-disable-next-line
 storiesOf('amp-selector', module)
   .addDecorator(withKnobs)
   .addDecorator(withA11y)
   .addDecorator(withAmp)
-  .addParameters({extensions: [{name: 'amp-selector', version: 1.0}]})
+  .addParameters({
+    extensions: [{name: 'amp-selector', version: '1.0'}],
+    experiments: ['amp-selector-bento'],
+  })
   .add('with <amp-img>', () => {
     return (
       <amp-selector class="sample-selector" layout="container">
@@ -102,5 +105,17 @@ storiesOf('amp-selector', module)
           toggle(index=1, value=true)
         </button>
       </>
+    );
+  })
+  .add('responsive', () => {
+    return (
+      <amp-selector layout="responsive" width="100" height="100">
+        <ul>
+          <li option="1">Option 1</li>
+          <li option="2">Option 2</li>
+          <li option="3">Option 3</li>
+          <li option="4">Option 4</li>
+        </ul>
+      </amp-selector>
     );
   });

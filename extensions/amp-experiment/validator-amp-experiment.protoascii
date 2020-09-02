@@ -17,7 +17,6 @@
 # Specific script tags for custom elements and runtime imports.
 tags: {  # amp-experiment
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   extension_spec: {
     name: "amp-experiment"
@@ -31,7 +30,6 @@ tags: {  # amp-experiment
 }
 tags: {  # amp-experiment (json)
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "SCRIPT"
   spec_name: "amp-experiment extension .json script"
   mandatory_parent: "AMP-EXPERIMENT"
@@ -44,19 +42,18 @@ tags: {  # amp-experiment (json)
   attr_lists: "nonce-attr"
   cdata: {
     max_bytes: 15000
-    max_bytes_spec_url: "https://amp.dev/documentation/components/amp-experiment#configuration"
-    blacklisted_cdata_regex: {
+    max_bytes_spec_url: "https://amp.dev/documentation/components/amp-experiment/#configuration"
+    disallowed_cdata_regex: {
       regex: "<!--"
       error_message: "html comments"
     }
   }
-  spec_url: "https://amp.dev/documentation/components/amp-experiment"
+  spec_url: "https://amp.dev/documentation/components/amp-experiment/"
 }
 tags: {  # <amp-experiment>
   html_format: AMP
-  html_format: ACTIONS
   tag_name: "AMP-EXPERIMENT"
   requires_extension: "amp-experiment"
   unique: true
-  spec_url: "https://amp.dev/documentation/components/amp-experiment"
+  spec_url: "https://amp.dev/documentation/components/amp-experiment/"
 }

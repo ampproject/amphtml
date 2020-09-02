@@ -22,7 +22,6 @@ import {
   Layout,
   applyStaticLayout,
   isInternalElement,
-  isLayoutSizeDefined,
   isLoadingAllowed,
 } from './layout';
 import {LayoutDelayMeter} from './layout-delay-meter';
@@ -32,7 +31,7 @@ import {Signals} from './utils/signals';
 import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
 import {createLoaderElement} from '../src/loader.js';
 import {dev, devAssert, rethrowAsync, user, userAssert} from './log';
-import {getIntersectionChangeEntry} from '../src/utils/intersection-observer-polyfill';
+import {getIntersectionChangeEntry} from './utils/intersection-observer-3p-host';
 import {getMode} from './mode';
 import {htmlFor} from './static-template';
 import {parseSizeList} from './size-list';
@@ -823,7 +822,10 @@ function createBaseCustomElementClass(win) {
         this.everAttached = true;
 
         try {
-          this.layout_ = applyStaticLayout(this);
+          this.layout_ = applyStaticLayout(
+            this,
+            Services.platformFor(toWin(this.ownerDocument.defaultView)).isIe()
+          );
         } catch (e) {
           reportError(e, this);
         }
@@ -1526,7 +1528,7 @@ function createBaseCustomElementClass(win) {
       return dom.lastChildElement(this, (el) => {
         return (
           el.hasAttribute('placeholder') &&
-          // Blacklist elements that has a native placeholder property
+          // Denylist elements that has a native placeholder property
           // like input and textarea. These are not allowed to be AMP
           // placeholders.
           !isInputPlaceholder(el)
@@ -1626,9 +1628,9 @@ function createBaseCustomElementClass(win) {
       // 3. The element has already been laid out, and does not support reshowing the indicator (include having loading
       //    error);
       // 4. The element is too small or has not yet been measured;
-      // 5. The element has not been whitelisted;
+      // 5. The element has not been allowlisted;
       // 6. The element is an internal node (e.g. `placeholder` or `fallback`);
-      // 7. The element's layout is not a size-defining layout.
+      // 7. The element's layout is not nodisplay.
       if (this.isInA4A()) {
         return false;
       }
@@ -1644,7 +1646,7 @@ function createBaseCustomElementClass(win) {
         this.layoutWidth_ <= 0 || // Layout is not ready or invisible
         !isLoadingAllowed(this) ||
         isInternalOrServiceNode(this) ||
-        !isLayoutSizeDefined(this.layout_)
+        this.layout_ == Layout.NODISPLAY
       ) {
         return false;
       }

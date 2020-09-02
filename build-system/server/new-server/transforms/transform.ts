@@ -20,15 +20,16 @@ import posthtml from 'posthtml';
 import transformModules from './modules/modules-transform';
 import transformScriptPaths from './scripts/scripts-transform';
 import transformStories from './stories/stories-transform';
-
-const transforms = [transformStories, transformScriptPaths];
+import transformCss from './css/css-transform';
 
 const argv = minimist(process.argv.slice(2));
-if (argv.esm) {
-  transforms.unshift(transformModules);
-}
+const transforms = [transformStories(), transformScriptPaths(), transformCss()];
 
 export async function transform(fileLocation: string): Promise<string> {
+  if (argv.esm) {
+    transforms.unshift(transformModules());
+  }
+
   const source = await fsPromises.readFile(fileLocation, 'utf8');
   const result = await posthtml(transforms).process(source);
   return result.html;

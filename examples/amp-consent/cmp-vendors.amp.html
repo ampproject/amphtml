@@ -97,9 +97,11 @@
           <option>_ping_</option>
           <option>appconsent</option>
           <option>didomi</option>
+          <option>iubenda</option>
           <option>sirdata</option>
           <option>Marfeel</option>
           <option>Ogury</option>
+          <option>opencmp</option>
           <option>SourcePoint</option>
           <option>Usercentrics</option>
         </select>
@@ -185,6 +187,21 @@
         </amp-consent>
         <!-- End didomi example -->
 
+      <!-- iubenda example -->
+      <amp-consent id="iubenda" layout="nodisplay" type="iubenda">
+        <script type="application/json">
+          {
+            "promptUISrc": "https://cdn.iubenda.com/cs/test/cs-for-amp.html",
+            "postPromptUI": "iubendaPostPromptUI"
+          }
+        </script>
+        <div id="iubendaPostPromptUI">
+          Post Prompt UI
+          <button on="tap:iubenda.prompt(consent=iubenda)" role="button">Manage</button>
+        </div>
+      </amp-consent>
+      <!-- End iubenda example -->
+
       <!-- sirdata example -->
       <amp-consent id="consent" layout="nodisplay" type="sirdata">
         <script type="application/json">
@@ -246,6 +263,21 @@
       </amp-consent>
       <!-- End Ogury example -->
 
+      <!-- opencmp example -->
+      <amp-consent id='consent' layout='nodisplay' type='opencmp'>
+        <script type="application/json">
+          {
+            "postPromptUI": "opencmp-consent-prompt-ui",
+            "clientConfig": {}
+          }
+        </script>
+        <div id="opencmp-consent-prompt-ui">
+          Post Prompt UI
+          <button on="tap:consent.prompt(consent=opencmp)" role="button">Privacy Settings</button>
+        </div>
+      </amp-consent>
+      <!-- End opencmp example -->
+
       <!-- SourcePoint example -->
       <amp-consent id='consent' layout='nodisplay' type='SourcePoint'>
         <script type="application/json">
@@ -287,6 +319,7 @@
         </div>
       </amp-consent>
       <!-- End Usercentrics example -->
+
     </div>
   </body>
 </html>

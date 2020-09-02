@@ -1,5 +1,4 @@
 {
-  "headless": true,
   "runs": 50,
   "handlers": [
     {
@@ -29,6 +28,14 @@
       "extraUrlParam": {
         "intercept": true
       }
+    },
+    {
+      "handlerName": "runtimeHandler",
+      "urls": [
+        "http://localhost:8000/examples/runtime/article.html",
+        "http://localhost:8000/examples/runtime/images.html",
+        "http://localhost:8000/examples/runtime/list-always.html"
+      ]
     }
   ]
 }

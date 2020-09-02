@@ -58,8 +58,8 @@ Review the [ads/README](../ads/README.md) for further details on ad integration.
 - AMP allows inclusion of fonts via the `@font-face` directive.
 - JavaScript can not be involved with the initiation of font loading.
 - Font loading gets controlled (but not initiated) by [`<amp-font>`](https://github.com/ampproject/amphtml/issues/648).
-- AMP by default does not allow inclusion of external stylesheets, but it is happy to whitelist URL prefixes of font providers for font inclusion via link tags. These link tags and their fonts must be served via HTTPS.
-- If a font provider does referrer based "security" it needs to whitelist the AMP proxy origins before being included in the link tag whitelist. AMP proxy sends the appropriate referrer header such as `https://cdn.ampproject.org`.
+- AMP by default does not allow inclusion of external stylesheets, but it is happy to allow URL prefixes of font providers for font inclusion via link tags. These link tags and their fonts must be served via HTTPS.
+- If a font provider does referrer based "security" it needs to allow the AMP proxy origins before being included in the link tag allowlist. AMP proxy sends the appropriate referrer header such as `https://cdn.ampproject.org`.
 
 # Adding proper integration tests
 

@@ -48,49 +48,59 @@ FAIL
 |    <amp-img src="image.png" height="200.1" width="400.15" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic">
 |      <i-amphtml-sizer class="i-amphtml-sizer"><img alt="" aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;charset=utf-8,<svg height='200.1' width='400.15' xmlns='http://www.w3.org/2000/svg' version='1.1'/>"></i-amphtml-sizer>
 |    </amp-img>
+|    <!-- Valid -->
+|    <amp-img src="image.png" height="100" width="300" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic">
+|      <i-amphtml-sizer class="i-amphtml-sizer"><img alt="" aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9Ijc1IiB3aWR0aD0iNzUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmVyc2lvbj0iMS4xIi8+"></i-amphtml-sizer>
+|    </amp-img>
 |    <!-- Invalid i-amphtml-sizer > img does not specify an svg -->
 |    <amp-img src="image.png" height="100" width="300" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic">
 |      <i-amphtml-sizer class="i-amphtml-sizer"><img alt="" aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="image.png"></i-amphtml-sizer>
 >>                                              ^~~~~~~~~
-transformed_feature_tests/server_side_rendering.html:52:45 The attribute 'src' in tag 'IMG-I-AMPHTML-INTRINSIC-SIZER' is set to the invalid value 'image.png'.
+transformed_feature_tests/server_side_rendering.html:56:45 The attribute 'src' in tag 'img' is set to the invalid value 'image.png'.
 |    </amp-img>
 |    <!-- Invalid intrinsic i-amphtml-sizer inside responsive sizer  -->
 |    <amp-img src="image.png" height="100" width="300" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic">
 |      <i-amphtml-sizer style=display:block;padding-top:171.4370%;>
 |      <img alt="" aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;charset=utf-8,<svg height='100' width='300' xmlns='http://www.w3.org/2000/svg' version='1.1'/>">
 >>     ^~~~~~~~~
-transformed_feature_tests/server_side_rendering.html:57:4 The parent tag of tag 'IMG-I-AMPHTML-INTRINSIC-SIZER' is 'i-amphtml-sizer', but it can only be 'i-amphtml-sizer-intrinsic'.
+transformed_feature_tests/server_side_rendering.html:61:4 The parent tag of tag 'img' is 'i-amphtml-sizer', but it can only be 'i-amphtml-sizer-intrinsic'.
 |      </i-amphtml-sizer>
+|    </amp-img>
+|    <!-- Invalid i-amphtml-sizer > img  does not specify class -->
+|    <amp-img src="image.png" height="100" width="300" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic">
+|      <i-amphtml-sizer class="i-amphtml-sizer"><img alt="" aria-hidden="true" role="presentation" src="data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9Ijc1IiB3aWR0aD0iNzUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmVyc2lvbj0iMS4xIi8+"></i-amphtml-sizer>
+>>                                              ^~~~~~~~~
+transformed_feature_tests/server_side_rendering.html:66:45 The mandatory attribute 'class' is missing in tag 'img'.
 |    </amp-img>
 |    <!-- Valid -->
 |    <amp-social-share class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" i-amphtml-layout=fixed style=width:60px;height:44px; type=test></amp-social-share>
 |    <!-- Invalid i-amphtml-layout attribute value does not match layout value -->
 |    <amp-img class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" height=2911 i-amphtml-layout=nodisplay layout=responsive src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg srcset="https://example-com.cdn.ampproject.org/i/s/example.com/lemur-wide.jpg 640w, https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg 320w" width=1698>
 >>   ^~~~~~~~~
-transformed_feature_tests/server_side_rendering.html:63:2 Invalid value 'nodisplay' for attribute 'i-amphtml-layout' in tag 'amp-img' - for layout 'RESPONSIVE', set the attribute 'i-amphtml-layout' to value 'responsive'. (see https://amp.dev/documentation/components/amp-img)
+transformed_feature_tests/server_side_rendering.html:71:2 Invalid value 'nodisplay' for attribute 'i-amphtml-layout' in tag 'amp-img' - for layout 'RESPONSIVE', set the attribute 'i-amphtml-layout' to value 'responsive'. (see https://amp.dev/documentation/components/amp-img/)
 |      <i-amphtml-sizer style=display:block;padding-top:171.4370%;></i-amphtml-sizer>
 |    </amp-img>
 |    <!-- Invalid class attribute value due to not matching layout value -->
 |    <amp-img class="i-amphtml-layout-nodisplay i-amphtml-layout-size-defined" height=2911 i-amphtml-layout=responsive layout=responsive src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg srcset="https://example-com.cdn.ampproject.org/i/s/example.com/lemur-wide.jpg 640w, https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg 320w" width=1698>
 >>   ^~~~~~~~~
-transformed_feature_tests/server_side_rendering.html:67:2 The attribute 'class' in tag 'amp-img' is set to the invalid value 'i-amphtml-layout-nodisplay i-amphtml-layout-size-defined'. (see https://amp.dev/documentation/components/amp-img)
+transformed_feature_tests/server_side_rendering.html:75:2 The attribute 'class' in tag 'amp-img' is set to the invalid value 'i-amphtml-layout-nodisplay i-amphtml-layout-size-defined'. (see https://amp.dev/documentation/components/amp-img/)
 |      <i-amphtml-sizer style=display:block;padding-top:171.4370%;></i-amphtml-sizer>
 |    </amp-img>
 |    <!-- Invalid class attribute value due to layout not being size defined (spaces) -->
 |    <amp-img class="i-amphtml-layout-nodisplay i-amphtml-layout-size-defined" i-amphtml-layout=nodisplay layout=nodisplay></amp-img>
 >>   ^~~~~~~~~
-transformed_feature_tests/server_side_rendering.html:71:2 The attribute 'class' in tag 'amp-img' is set to the invalid value 'i-amphtml-layout-nodisplay i-amphtml-layout-size-defined'. (see https://amp.dev/documentation/components/amp-img)
+transformed_feature_tests/server_side_rendering.html:79:2 The attribute 'class' in tag 'amp-img' is set to the invalid value 'i-amphtml-layout-nodisplay i-amphtml-layout-size-defined'. (see https://amp.dev/documentation/components/amp-img/)
 |    <!-- Invalid class attribute value due to layout not being size defined (tabs) -->
 |    <amp-img class="i-amphtml-layout-nodisplay  i-amphtml-layout-size-defined" i-amphtml-layout=nodisplay layout=nodisplay></amp-img>
 >>   ^~~~~~~~~
-transformed_feature_tests/server_side_rendering.html:73:2 The attribute 'class' in tag 'amp-img' is set to the invalid value 'i-amphtml-layout-nodisplay i-amphtml-layout-size-defined'. (see https://amp.dev/documentation/components/amp-img)
+transformed_feature_tests/server_side_rendering.html:81:2 The attribute 'class' in tag 'amp-img' is set to the invalid value 'i-amphtml-layout-nodisplay i-amphtml-layout-size-defined'. (see https://amp.dev/documentation/components/amp-img/)
 |    <!-- Invalid i-amphtml-sizer due to css declarations -->
 |    <amp-img class="i-amphtml-layout-responsive i-amphtml-layout-size-defined" height=2911 i-amphtml-layout=responsive layout=responsive src=https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg srcset="https://example-com.cdn.ampproject.org/i/s/example.com/lemur-wide.jpg 640w, https://example-com.cdn.ampproject.org/i/s/example.com/lemur-narrow.jpg 320w" width=1698>
 |      <i-amphtml-sizer style=display:none;padding-bottom:171.4370%;></i-amphtml-sizer>
 >>     ^~~~~~~~~
-transformed_feature_tests/server_side_rendering.html:76:4 CSS syntax error in tag 'I-AMPHTML-SIZER-RESPONSIVE' - the property 'display' is set to the disallowed value 'none'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+transformed_feature_tests/server_side_rendering.html:84:4 CSS syntax error in tag 'i-amphtml-sizer' - the property 'display' is set to the disallowed value 'none'. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 >>     ^~~~~~~~~
-transformed_feature_tests/server_side_rendering.html:76:4 The property 'padding-bottom' in attribute 'style' in tag 'I-AMPHTML-SIZER-RESPONSIVE' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages)
+transformed_feature_tests/server_side_rendering.html:84:4 The property 'padding-bottom' in attribute 'style' in tag 'i-amphtml-sizer' is disallowed. (see https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages/)
 |    </amp-img>
 |
 |  </body>

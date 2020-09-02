@@ -21,20 +21,26 @@ import {requireExternal} from '../../../../src/module';
 describes.sandboxed('DatesList', {}, () => {
   const moment = requireExternal('moment');
 
-  it('should accept date strings', function () {
+  it('should accept date strings and RRule strings', function () {
     this.timeout(3000);
     const containedDate = '09/04/1998';
     const notContainedDate = '09/03/1998';
-    const datesList = new DatesList([containedDate]);
+    const containedRrule =
+      'FREQ=WEEKLY;COUNT=10;DTSTART=20180101T000000Z;WKST=SU;BYDAY=TU,SA';
+    const matchesRrule = '01/02/2018';
+    const datesList = new DatesList([containedDate, containedRrule]);
 
     expect(datesList.contains(containedDate)).to.be.true;
     expect(datesList.contains(notContainedDate)).to.be.false;
+    expect(datesList.contains(matchesRrule)).to.be.true;
   });
 
   it('should accept moment objects', () => {
     const containedDate = '09/04/1998';
     const containedMoment = moment(containedDate);
-    const datesList = new DatesList([containedMoment]);
+    const containedRrule =
+      'FREQ=WEEKLY;COUNT=10;DTSTART=20180101T000000Z;WKST=SU;BYDAY=TU,SA';
+    const datesList = new DatesList([containedMoment, containedRrule]);
 
     expect(datesList.contains(containedDate)).to.be.true;
     expect(datesList.contains(containedMoment)).to.be.true;
@@ -62,8 +68,10 @@ describes.sandboxed('DatesList', {}, () => {
     const containedDate = '09/04/1998';
     const dateBefore = '01/01/1998';
     // const notContainedDate = '09/03/1998';
+    const containedRrule =
+      'FREQ=WEEKLY;COUNT=10;DTSTART=20180101T000000Z;WKST=SU;BYDAY=TU,SA';
     // const matchesRrule = '01/02/2018';
-    const datesList = new DatesList([containedDate]);
+    const datesList = new DatesList([containedDate, containedRrule]);
 
     const result = datesList.firstDateAfter(dateBefore);
 

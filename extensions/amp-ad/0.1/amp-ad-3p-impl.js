@@ -31,7 +31,7 @@ import {
 import {Services} from '../../../src/services';
 import {adConfig} from '../../../ads/_config';
 import {clamp} from '../../../src/utils/math';
-import {computedStyle, setStyle} from '../../../src/style';
+import {computedStyle, setStyle, setStyles} from '../../../src/style';
 import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAdCid} from '../../../src/ad-cid';
@@ -201,6 +201,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (this.isFullWidthRequested_) {
       return this.attemptFullWidthSizeChange_();
     }
+
+    this.maybeSetStyleForSticky_();
   }
 
   /**
@@ -225,6 +227,19 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       '#${this.getResource().getId()} Full width requested'
     );
     return true;
+  }
+
+  /**
+   * Set sidekick ads
+   */
+  maybeSetStyleForSticky_() {
+    if (this.element.hasAttribute('sticky')) {
+      setStyles(this.element, {
+        position: 'fixed',
+        bottom: '0',
+        right: '0',
+      });
+    }
   }
 
   /**
@@ -346,9 +361,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       return this.layoutPromise_;
     }
     userAssert(
-      !this.isInFixedContainer_,
+      !this.isInFixedContainer_ || this.element.hasAttribute('sticky'),
       '<amp-ad> is not allowed to be placed in elements with ' +
-        'position:fixed: %s',
+        'position:fixed: %s unless it has sticky attribute',
       this.element
     );
 

@@ -20,7 +20,6 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AnalyticsVariable, getVariableService} from './variable-service';
-import {HistoryState, getHistoryState} from './utils';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 
@@ -30,14 +29,13 @@ const TAG = 'amp-story-viewer-messaging-handler';
 /** @enum {number} */
 const DataSources = {
   STORE_SERVICE: 0,
-  HISTORY: 1,
   VARIABLE_SERVICE: 2,
 };
 
 /**
  * @typedef {{
  *   dataSource: !DataSources,
- *   property: (!StateProperty|!HistoryState|!AnalyticsVariable)
+ *   property: (!StateProperty|!AnalyticsVariable)
  * }}
  */
 let GetStateConfigurationDef;
@@ -57,8 +55,8 @@ const GET_STATE_CONFIGURATIONS = {
     property: StateProperty.MUTED_STATE,
   },
   'PAGE_ATTACHMENT_STATE': {
-    dataSource: DataSources.HISTORY,
-    property: HistoryState.ATTACHMENT_PAGE_ID,
+    dataSource: DataSources.STORE_SERVICE,
+    property: StateProperty.PAGE_ATTACHMENT_STATE,
   },
   'STORY_PROGRESS': {
     dataSource: DataSources.VARIABLE_SERVICE,
@@ -94,9 +92,6 @@ export class AmpStoryViewerMessagingHandler {
 
     /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = viewer;
-
-    /** @private @const {!Window} */
-    this.win_ = win;
   }
 
   /**
@@ -140,9 +135,6 @@ export class AmpStoryViewerMessagingHandler {
     let value;
 
     switch (config.dataSource) {
-      case DataSources.HISTORY:
-        value = !!getHistoryState(this.win_, config.property);
-        break;
       case DataSources.STORE_SERVICE:
         value = this.storeService_.get(config.property);
         break;

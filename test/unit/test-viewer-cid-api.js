@@ -86,19 +86,19 @@ describes.realWin('viewerCidApi', {amp: true}, (env) => {
       return verifyClientIdApiInUse(false);
     });
 
-    it('should not use client ID API if scope not whitelisted', () => {
+    it('should not use client ID API if scope not allowlisted', () => {
       viewerMock.sendMessageAwaitResponse
         .withArgs(
           'cid',
           dict({
-            'scope': 'NON_WHITELISTED_SCOPE',
+            'scope': 'NON_ALLOWLISTED_SCOPE',
             'clientIdApi': false,
             'canonicalOrigin': 'http://localhost:9876',
           })
         )
         .returns(Promise.resolve('client-id-from-viewer'));
       return expect(
-        api.getScopedCid(undefined, 'NON_WHITELISTED_SCOPE')
+        api.getScopedCid(undefined, 'NON_ALLOWLISTED_SCOPE')
       ).to.eventually.equal('client-id-from-viewer');
     });
 

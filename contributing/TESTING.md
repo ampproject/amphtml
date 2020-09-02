@@ -28,7 +28,6 @@ This document provides details for testing and building your AMP code.
   - [A4A envelope (/a4a/, /a4a-3p/)](#a4a-envelope-a4a-a4a-3p)
   - [In-a-box envelope (/inabox/)](#in-a-box-envelope-inabox)
   - [Chrome extension](#chrome-extension)
-- [Testing on Sauce Labs](#testing-on-sauce-labs)
 - [Visual Diff Tests](#visual-diff-tests)
   - [Failing Tests](#failing-tests)
   - [Running Visual Diff Tests Locally](#running-visual-diff-tests-locally)
@@ -97,7 +96,6 @@ Before running these commands, make sure you have Node.js, yarn, and Gulp instal
 | `gulp [unit\|integration] --coverage`                     | Runs code coverage tests. After running, the report will be available at test/coverage/index.html                                                                                                                                                        |
 | `gulp [unit\|integration] --watch`                        | Watches for changes in files, runs corresponding test(s) in Chrome.                                                                                                                                                                                      |
 | `gulp [unit\|integration] --watch --verbose`              | Same as `watch`, with logging enabled.                                                                                                                                                                                                                   |
-| `gulp [unit\|integration] --saucelabs`                    | Runs tests on saucelabs browsers (requires [setup](#testing-on-sauce-labs)).                                                                                                                                                                             |
 | `gulp [unit\|integration] --safari`                       | Runs tests in Safari.                                                                                                                                                                                                                                    |
 | `gulp [unit\|integration] --firefox`                      | Runs tests in Firefox.                                                                                                                                                                                                                                   |
 | `gulp [unit\|integration] --edge`                         | Runs tests in Edge.                                                                                                                                                                                                                                      |
@@ -233,38 +231,6 @@ Additionally, the following query parameters can be provided:
 ### Chrome extension
 
 For testing documents on arbitrary URLs with your current local version of the AMP runtime we created a [Chrome extension](../testing/local-amp-chrome-extension/README.md).
-
-## Testing on Sauce Labs
-
-We use [Sauce Labs](https://saucelabs.com) to perform cross-browser testing (thanks Sauce Labs!). In general local testing (i.e. gulp [unit|integration]) and the automatic test run on [Travis](https://travis-ci.org/ampproject/amphtml/pull_requests) that happens when you send a pull request are sufficient, but if you want to run your tests across multiple environments/browsers before sending your PR we recommend using Sauce Labs as well.
-
-To run the tests on Sauce Labs:
-
-- Create a Sauce Labs account. If you are only going to use your account for open source projects like this one you can sign up for a free [Open Sauce](https://saucelabs.com/solutions/open-source) account. (If you create an account through the normal account creation mechanism you'll be signing up for a free trial that expires; you can contact Sauce Labs customer service to switch your account to Open Sauce if you did this accidentally.)
-- Set the `SAUCE_USERNAME` and `SAUCE_ACCESS_KEY` environment variables. On Linux add this to your `.bashrc`:
-
-  ```sh
-  export SAUCE_USERNAME=<Sauce Labs username>
-  export SAUCE_ACCESS_KEY=<Sauce Labs access key>
-  ```
-
-  You can find your Sauce Labs access key on the [User Settings](https://saucelabs.com/beta/user-settings) page.
-
-- Run the proxy and then run the tests:
-
-  ```sh
-  # Start the proxy
-  ./build-system/sauce_connect/start_sauce_connect.sh
-
-  # Run tests
-  gulp [unit|integration] --saucelabs
-
-  # Stop the proxy
-  ./build-system/sauce_connect/stop_sauce_connect.sh
-  ```
-
-- It may take several seconds for the proxy to start and for the tests to start. You can see the status of your tests on the Sauce Labs [Automated Tests](https://saucelabs.com/beta/dashboard/tests) dashboard. (You can also see the status of your proxy on the [Tunnels](https://saucelabs.com/beta/tunnels) dashboard.
-- The tunnel ID used during local development is the email address of the author of the latest commit on the local branch.
 
 ## Visual Diff Tests
 
@@ -413,7 +379,7 @@ Additionally, you can create multiple projects and switch between them in the CL
 
 #### Testing Ads
 
-Testing ads in deployed demos requires whitelisting of 3p urls. You can do this by adding your intended deployment hostname as an environemnt variable `AMP_TESTING_HOST` and using the `fortesting` flag. For example:
+Testing ads in deployed demos requires allowlisting of 3p urls. You can do this by adding your intended deployment hostname as an environemnt variable `AMP_TESTING_HOST` and using the `fortesting` flag. For example:
 
 ```sh
 export AMP_TESTING_HOST="my-project.firebaseapp.com"
@@ -436,3 +402,15 @@ gulp e2e
 The task will kick off `gulp build` and then `gulp serve` before running the tests. To skip building the runtime, use `--nobuild`.
 
 [Consult the E2E testing documentation](../build-system/tasks/e2e/README.md) to learn how to create your own end-to-end tests.
+
+## Performance Testing Node Build Tools
+
+You can create flamecharts for any node process used by the build system by leveraging `0x` which is included as a `devDepenendency`.
+
+Here's an example for `gulp dist --closure_concurrency=1`:
+
+```sh
+yarn 0x -o node_modules/.bin/gulp dist --closure_concurrency=1
+```
+
+Important to node is `0x` will automatically create a flamechart and a serving folder locally within the repository, please don't add them to PRs!

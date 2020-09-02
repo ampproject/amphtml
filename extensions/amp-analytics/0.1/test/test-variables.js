@@ -23,6 +23,7 @@ import {
   variableServiceForDoc,
 } from '../variables';
 import {Services} from '../../../../src/services';
+import {forceExperimentBranch} from '../../../../src/experiments';
 import {
   installLinkerReaderService,
   linkerReaderServiceFor,
@@ -497,6 +498,25 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
       return check('CUMULATIVE_LAYOUT_SHIFT', '1');
     });
 
+    it('should expand EXPERIMENT_BRANCHES to name:value comma separated list', () => {
+      forceExperimentBranch(env.win, 'exp1', '1234');
+      forceExperimentBranch(env.win, 'exp2', '5678');
+      return check('EXPERIMENT_BRANCHES', 'exp1%3A1234%2Cexp2%3A5678');
+    });
+
+    it('EXPERIMENT_BRANCHES should be empty string if no branches', () => {
+      return check('EXPERIMENT_BRANCHES', '');
+    });
+
+    it('should expand EXPERIMENT_BRANCHES(expName) to experiment value', () => {
+      forceExperimentBranch(env.win, 'exp1', '1234');
+      return check('EXPERIMENT_BRANCHES(exp1)', '1234');
+    });
+
+    it('EXPERIMENT_BRANCHES(expName) should be empty string if not set', () => {
+      return check('EXPERIMENT_BRANCHES(exp1)', '');
+    });
+
     describe('$MATCH', () => {
       it('handles default index', () => {
         return check('$MATCH(thisisatest, thisisatest)', 'thisisatest');
@@ -551,6 +571,20 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, (env) => {
         );
         return check('$MATCH(thisisatest, thisisatest, test)', 'thisisatest');
       });
+    });
+
+    it('SCROLL_TOP round to integer', async () => {
+      let scrollTopValue = 100;
+      env.sandbox.stub(Services, 'viewportForDoc').callsFake(() => {
+        return {
+          getScrollTop: () => scrollTopValue,
+        };
+      });
+      await check('SCROLL_TOP', '100');
+      scrollTopValue = 99.4;
+      await check('SCROLL_TOP', '99');
+      scrollTopValue = 99.5;
+      await check('SCROLL_TOP', '100');
     });
   });
 

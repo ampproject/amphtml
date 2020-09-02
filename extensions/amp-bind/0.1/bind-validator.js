@@ -35,7 +35,7 @@ let PropertyRulesDef;
  */
 const GLOBAL_PROPERTY_RULES = {
   'class': {
-    blacklistedValueRegex: '(^|\\W)i-amphtml-',
+    denylistedValueRegex: '(^|\\W)i-amphtml-',
   },
   'hidden': null,
   'text': null,
@@ -139,10 +139,10 @@ export class BindValidator {
         }
       }
     }
-    // @see validator/engine/validator.ParsedTagSpec.validateAttributes()
-    const {blacklistedValueRegex} = rules;
-    if (value && blacklistedValueRegex) {
-      const re = new RegExp(blacklistedValueRegex, 'i');
+    // @see validator/js/engine/validator.ParsedTagSpec.validateAttributes()
+    const {denylistedValueRegex} = rules;
+    if (value && denylistedValueRegex) {
+      const re = new RegExp(denylistedValueRegex, 'i');
       if (re.test(value)) {
         return false;
       }
@@ -159,7 +159,7 @@ export class BindValidator {
    * @private
    */
   isUrlValid_(url, rules) {
-    // @see validator/engine/validator.js#validateUrlAndProtocol()
+    // @see validator/js/engine/validator.js#validateUrlAndProtocol()
     if (url) {
       if (/__amp_source_origin/.test(url)) {
         return false;
@@ -427,7 +427,7 @@ function createElementRules_() {
       'spellcheck': null,
       'step': null,
       'type': {
-        blacklistedValueRegex: '(^|\\s)(button|image|)(\\s|$)',
+        denylistedValueRegex: '(^|\\s)(button|image|)(\\s|$)',
       },
       'value': null,
       'width': null,

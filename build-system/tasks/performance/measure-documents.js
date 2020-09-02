@@ -220,6 +220,7 @@ async function setupAdditionalHandlers(
       setupAnalyticsHandler(handlersList, handlerOptions, resolve);
       break;
     case 'defaultHandler':
+    default:
       await setupMeasurement(page);
       break;
   }
@@ -259,7 +260,8 @@ async function addHandlerMetric(handlerOptions, page) {
     case 'analyticsHandler':
       return getAnalyticsMetrics(handlerOptions);
     case 'defaultHandler':
-      return await readMetrics(page);
+    default:
+      return readMetrics(page);
   }
 }
 
@@ -298,6 +300,7 @@ function writeMetrics(url, version, metrics) {
 async function measureDocument(url, version, config) {
   const browser = await puppeteer.launch({
     headless: config.headless,
+    devtools: config.devtools,
     args: [
       '--allow-file-access-from-files',
       '--enable-blink-features=LayoutInstabilityAPI',

@@ -46,7 +46,10 @@ const COLLAPSE_CURVE_ = bezierCurve(0.39, 0.575, 0.565, 1);
 const isDisplayLockingEnabledForAccordion = (win) => {
   return (
     isExperimentOn(win, 'amp-accordion-display-locking') &&
-    ('renderSubtree' in Element.prototype || getMode().test)
+    (('CSS' in window &&
+      window.CSS.supports &&
+      window.CSS.supports('content-visibility', 'hidden-matchable')) ||
+      getMode().test)
   );
 };
 
@@ -129,6 +132,12 @@ class AmpAccordion extends AMP.BaseElement {
       this.registerAction('toggle', (i) => this.handleAction_(i));
       this.registerAction('expand', (i) => this.handleAction_(i));
       this.registerAction('collapse', (i) => this.handleAction_(i));
+      /** If the element is in an email document, allow its `open` and `close` actions. */
+      this.action_.addToAllowlist(
+        TAG,
+        ['toggle', 'expand', 'collapse'],
+        ['email']
+      );
 
       // Listen for mutations on the 'data-expand' attribute.
       const expandObserver = new this.win.MutationObserver((mutations) => {
@@ -160,10 +169,6 @@ class AmpAccordion extends AMP.BaseElement {
       header.setAttribute('role', 'button');
       header.setAttribute('aria-controls', contentId);
       header.setAttribute('aria-expanded', String(isExpanded));
-      this.setRenderSubtreeIfEnabled_(
-        content,
-        isExpanded ? '' : 'invisible skip-viewport-activation'
-      );
       if (!header.hasAttribute('tabindex')) {
         header.setAttribute('tabindex', 0);
       }
@@ -178,10 +183,9 @@ class AmpAccordion extends AMP.BaseElement {
       header.addEventListener('keydown', this.keyDownHandler_.bind(this));
 
       if (isDisplayLockingEnabledForAccordion(this.win)) {
-        content.addEventListener('rendersubtreeactivation', (event) => {
-          // Event occurs on the content element whose parent is the section to open.
-          const parentSection = dev().assertElement(event.target.parentElement);
-          this.toggle_(parentSection, ActionTrust.LOW, /* force expand */ true);
+        this.element.classList.add('i-amphtml-display-locking');
+        content.addEventListener('beforematch', () => {
+          this.toggle_(section, ActionTrust.HIGH, /* force expand */ true);
         });
       }
     });
@@ -327,26 +331,17 @@ class AmpAccordion extends AMP.BaseElement {
     if (this.element.hasAttribute('animate')) {
       if (toExpand) {
         header.setAttribute('aria-expanded', 'true');
-        this.setRenderSubtreeIfEnabled_(content, '');
         this.animateExpand_(section, trust);
         if (this.element.hasAttribute('expand-single-section')) {
           this.sections_.forEach((sectionIter) => {
             if (sectionIter != section) {
               this.animateCollapse_(sectionIter, trust);
               sectionIter.children[0].setAttribute('aria-expanded', 'false');
-              this.setRenderSubtreeIfEnabled_(
-                sectionIter.children[1],
-                'invisible skip-viewport-activation'
-              );
             }
           });
         }
       } else {
         header.setAttribute('aria-expanded', 'false');
-        this.setRenderSubtreeIfEnabled_(
-          content,
-          'invisible skip-viewport-activation'
-        );
         this.animateCollapse_(section, trust);
       }
     } else {
@@ -355,7 +350,6 @@ class AmpAccordion extends AMP.BaseElement {
         if (toExpand) {
           this.triggerEvent_('expand', section, trust);
           section.setAttribute('expanded', '');
-          this.setRenderSubtreeIfEnabled_(content, '');
           header.setAttribute('aria-expanded', 'true');
           // if expand-single-section is set, only allow one <section> to be
           // expanded at a time
@@ -367,10 +361,6 @@ class AmpAccordion extends AMP.BaseElement {
                   sectionIter.removeAttribute('expanded');
                 }
                 sectionIter.children[0].setAttribute('aria-expanded', 'false');
-                this.setRenderSubtreeIfEnabled_(
-                  sectionIter.children[1],
-                  'invisible skip-viewport-activation'
-                );
               }
             });
           }
@@ -378,29 +368,11 @@ class AmpAccordion extends AMP.BaseElement {
           this.triggerEvent_('collapse', section, trust);
           section.removeAttribute('expanded');
           header.setAttribute('aria-expanded', 'false');
-          this.setRenderSubtreeIfEnabled_(
-            content,
-            'invisible skip-viewport-activation'
-          );
         }
       }, section);
     }
     this.currentState_[contentId] = !isSectionClosedAfterClick;
     this.setSessionState_();
-  }
-
-  /**
-   * If Display Locking API is enabled, set the renderSubtree attribute
-   * on the given element with the given value.
-   * @param {Element} element
-   * @param {string} value
-   * @private
-   */
-  setRenderSubtreeIfEnabled_(element, value) {
-    if (!isDisplayLockingEnabledForAccordion(this.win) || !element) {
-      return;
-    }
-    element['renderSubtree'] = value;
   }
 
   /**
@@ -431,7 +403,6 @@ class AmpAccordion extends AMP.BaseElement {
           'opacity': '0',
         });
         if (!section.hasAttribute('expanded')) {
-          this.triggerEvent_('expand', section, trust);
           section.setAttribute('expanded', '');
         }
       }
@@ -483,6 +454,7 @@ class AmpAccordion extends AMP.BaseElement {
         );
         return animation.start(duration).thenAlways(() => {
           this.mutateElement(() => {
+            this.triggerEvent_('expand', section, trust);
             setStyles(section, {
               'overflow': '',
               'height': '',

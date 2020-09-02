@@ -62,12 +62,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
-    id: 'amp-consent-restrict-fullscreen',
-    name: 'AMP consent restrict fullscreen API before user interaction',
-    spec: 'https://github.com/ampproject/amphtml/issues/26432',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26432',
-  },
-  {
     id: 'amp-sidebar-v2',
     name: 'Updated sidebar component with nested menu and animations',
     spec: 'https://github.com/ampproject/amphtml/issues/25049',
@@ -86,12 +80,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3824',
   },
   {
-    id: 'amp-share-tracking',
-    name: 'AMP Share Tracking',
-    spec: 'https://github.com/ampproject/amphtml/issues/3135',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/5167',
-  },
-  {
     id: 'amp-viz-vega',
     name: 'AMP Visualization using Vega grammar',
     spec: 'https://github.com/ampproject/amphtml/issues/3991',
@@ -106,11 +94,6 @@ export const EXPERIMENTS = [
     id: 'amp-lightbox-a4a-proto',
     name: 'Allows the new lightbox experience to be used in A4A (prototype).',
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
-  },
-  {
-    id: 'amp-list-init-from-state',
-    name: 'Allows amp-list to initialize off of amp-state',
-    spec: 'https://github.com/ampproject/amphtml/issues/26009',
   },
   {
     id: 'amp-playbuzz',
@@ -157,10 +140,6 @@ export const EXPERIMENTS = [
   {
     id: 'jank-meter',
     name: 'Display jank meter',
-  },
-  {
-    id: 'as-use-attr-for-format',
-    name: 'Use slot width/height attribute for AdSense size format',
   },
   {
     id: 'input-debounced',
@@ -214,12 +193,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/14263',
   },
   {
-    id: 'blurry-placeholder',
-    name: 'Enables a blurred image placeholder as an amp-img loads',
-    spec: 'https://github.com/ampproject/amphtml/issues/15146',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17107',
-  },
-  {
     id: 'amp-carousel-chrome-scroll-snap',
     name: 'Enables scroll snap on carousel on Chrome browsers',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/16508',
@@ -234,12 +207,6 @@ export const EXPERIMENTS = [
     name: 'Enables <amp-video dock>',
     spec: 'https://github.com/ampproject/amphtml/issues/14061',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17161',
-  },
-  {
-    id: 'hidden-mutation-observer',
-    name: "Enables FixedLayer's hidden-attribute mutation observer",
-    spec: 'https://github.com/ampproject/amphtml/issues/17475',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
   },
   {
     id: 'amp-user-location',
@@ -264,6 +231,11 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24113',
   },
   {
+    id: 'protocol-adapters',
+    name: 'Allow amp-list to get its data from amp-script functions.',
+    spec: 'https://github.com/ampproject/amphtml/issues/26474',
+  },
+  {
     id: 'adsense-ad-size-optimization',
     name:
       'Per publisher server side settings for changing the ad size ' +
@@ -284,14 +256,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26233',
   },
   {
-    id: 'layoutbox-invalidate-on-scroll',
-    name:
-      'Invalidate the cached layoutboxes of elements nested in a scroller ' +
-      'after that scroller scrolls.',
-    spec: 'https://github.com/ampproject/amphtml/issues/24929',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25203',
-  },
-  {
     id: 'amp-stream-gallery',
     name: 'Enables component',
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
@@ -302,10 +266,6 @@ export const EXPERIMENTS = [
     name: 'AMP Analytics Visibility Trigger Improvements',
     spec: 'https://github.com/ampproject/amphtml/issues/26823',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26823',
-  },
-  {
-    id: 'random-subdomains-for-safeframe',
-    name: 'Enable Random Subdomains for SafeFrame',
   },
   {
     id: 'analytics-chunks',
@@ -320,13 +280,23 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/28435',
   },
   {
-    id: 'amp-ad-no-center-css',
-    name: 'Removing the centering css rule for amp-ad',
-    spec: 'https://github.com/ampproject/amphtml/issues/27095',
+    id: 'a4a-no-signing',
+    name: 'Remove signing requirement for AMPHTML ads',
+    spec: 'https://github.com/ampproject/amphtml/issues/27189',
   },
   {
-    id: 'fie-init-chunking',
-    name: 'More chunking for friendly iframe initialization',
-    spec: 'https://github.com/ampproject/amphtml/issues/27584',
+    id: 'sticky-ad-padding-bottom',
+    name: 'Add a bottom padding for edgeless iPhones',
+    spec: 'https://github.com/ampproject/amphtml/issues/22251',
+  },
+  {
+    id: 'expand-json-targeting',
+    name: 'Allow CLIENT_ID in doubleclick json targeting feature',
+    spec: 'https://github.com/ampproject/amphtml/issues/25190',
+  },
+  {
+    id: 'auto-ads-layout-callback',
+    name: 'Move ads placement into layoutCallback',
+    spec: 'https://github.com/ampproject/amphtml/issues/27068',
   },
 ];

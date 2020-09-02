@@ -18,6 +18,7 @@ import {Services} from '../services';
 import {Signals} from '../utils/signals';
 import {TickLabel} from '../enums';
 import {VisibilityState} from '../visibility-state';
+import {createCustomEvent} from '../event-helper';
 import {dev, devAssert} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
@@ -107,6 +108,12 @@ export class Performance {
      */
     this.aggregateShiftScore_ = 0;
 
+    /**
+     * True if the ratios have already been ticked.
+     * @private {boolean}
+     */
+    this.slowElementRatioTicked_ = false;
+
     const supportedEntryTypes =
       (this.win.PerformanceObserver &&
         this.win.PerformanceObserver.supportedEntryTypes) ||
@@ -116,7 +123,7 @@ export class Performance {
     if (!supportedEntryTypes.includes('paint')) {
       this.metrics_.rejectSignal(
         TickLabel.FIRST_CONTENTFUL_PAINT,
-        new Error('First Contentful Paint not supported')
+        dev().createExpectedError('First Contentful Paint not supported')
       );
     }
 
@@ -131,7 +138,7 @@ export class Performance {
     if (!this.supportsLayoutShift_) {
       this.metrics_.rejectSignal(
         TickLabel.CUMULATIVE_LAYOUT_SHIFT,
-        new Error('Cumulative Layout Shift not supported')
+        dev().createExpectedError('Cumulative Layout Shift not supported')
       );
     }
 
@@ -146,7 +153,7 @@ export class Performance {
     if (!this.supportsEventTiming_) {
       this.metrics_.rejectSignal(
         TickLabel.FIRST_INPUT_DELAY,
-        new Error('First Input Delay not supported')
+        dev().createExpectedError('First Input Delay not supported')
       );
     }
 
@@ -162,7 +169,7 @@ export class Performance {
     if (!this.supportsLargestContentfulPaint_) {
       this.metrics_.rejectSignal(
         TickLabel.LARGEST_CONTENTFUL_PAINT_VISIBLE,
-        new Error('Largest Contentful Paint not supported')
+        dev().createExpectedError('Largest Contentful Paint not supported')
       );
     }
 
@@ -317,11 +324,8 @@ export class Performance {
       return;
     }
 
-    // Chromium doesn't implement the buffered flag for PerformanceObserver.
-    // That means we need to read existing entries and maintain state
-    // as to whether we have reported a value yet, since in the future it may
-    // be reported twice.
-    // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
+    // These state vars ensure that we only report a given value once, because
+    // the backend doesn't support updates.
     let recordedFirstPaint = false;
     let recordedFirstContentfulPaint = false;
     let recordedFirstInputDelay = false;
@@ -344,7 +348,6 @@ export class Performance {
       ) {
         const value = entry.processingStart - entry.startTime;
         this.tickDelta(TickLabel.FIRST_INPUT_DELAY, value);
-        this.tickSinceVisible(TickLabel.FIRST_INPUT_DELAY_VISIBLE, value);
         recordedFirstInputDelay = true;
       } else if (entry.entryType === 'layout-shift') {
         // Ignore layout shift that occurs within 500ms of user input, as it is
@@ -455,12 +458,7 @@ export class Performance {
    */
   onVisibilityChange_() {
     if (this.win.document.visibilityState === 'hidden') {
-      if (this.supportsLayoutShift_) {
-        this.tickLayoutShiftScore_();
-      }
-      if (this.supportsLargestContentfulPaint_) {
-        this.tickLargestContentfulPaint_();
-      }
+      this.tickCumulativeMetrics_();
     }
   }
 
@@ -471,13 +469,22 @@ export class Performance {
    */
   onAmpDocVisibilityChange_() {
     if (this.ampdoc_.getVisibilityState() === VisibilityState.INACTIVE) {
-      if (this.supportsLayoutShift_) {
-        this.tickLayoutShiftScore_();
-      }
-      if (this.supportsLargestContentfulPaint_) {
-        this.tickLargestContentfulPaint_();
-      }
+      this.tickCumulativeMetrics_();
     }
+  }
+
+  /**
+   * Tick the metrics whose values change over time.
+   * @private
+   */
+  tickCumulativeMetrics_() {
+    if (this.supportsLayoutShift_) {
+      this.tickLayoutShiftScore_();
+    }
+    if (this.supportsLargestContentfulPaint_) {
+      this.tickLargestContentfulPaint_();
+    }
+    this.tickSlowElementRatio_();
   }
 
   /**
@@ -515,6 +522,27 @@ export class Performance {
         {capture: true}
       );
     }
+  }
+
+  /**
+   * Tick the slow element ratio.
+   */
+  tickSlowElementRatio_() {
+    if (this.slowElementRatioTicked_) {
+      return;
+    }
+    if (!this.resources_) {
+      const TAG = 'Performance';
+      dev().error(TAG, 'Failed to tick ser due to null resources');
+      return;
+    }
+
+    this.slowElementRatioTicked_ = true;
+    this.tickDelta(
+      TickLabel.SLOW_ELEMENT_RATIO,
+      this.resources_.getSlowElementRatio()
+    );
+    this.flush();
   }
 
   /**
@@ -665,6 +693,15 @@ export class Performance {
       data['value'] = this.timeOrigin_ + delta;
     }
 
+    // Emit events. Used by `gulp performance`.
+    this.win.dispatchEvent(
+      createCustomEvent(
+        this.win,
+        'perf',
+        /** @type {JsonObject} */ ({label, delta})
+      )
+    );
+
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
       this.viewer_.sendMessage('tick', data);
     } else {
@@ -703,11 +740,15 @@ export class Performance {
   /**
    * Tick time delta since the document has become visible.
    * @param {TickLabel} label The variable name as it will be reported.
-   * @param {number=} opt_end If present, use this value for end time instead of now()
+   * @param {number=} opt_delta The optional delta value in milliseconds.
    */
-  tickSinceVisible(label, opt_end) {
-    const end = opt_end || this.timeOrigin_ + this.win.performance.now();
-    const visibleTime = this.ampdoc_ ? this.ampdoc_.getFirstVisibleTime() : 0;
+  tickSinceVisible(label, opt_delta) {
+    const delta =
+      opt_delta == undefined ? this.win.performance.now() : opt_delta;
+    const end = this.timeOrigin_ + delta;
+
+    // Order is timeOrigin -> firstVisibleTime -> end.
+    const visibleTime = this.ampdoc_ && this.ampdoc_.getFirstVisibleTime();
     const v = visibleTime ? Math.max(end - visibleTime, 0) : 0;
     this.tickDelta(label, v);
   }

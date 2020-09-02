@@ -67,12 +67,6 @@ export function ssp(global, data) {
 
   parentElement.id = position['id'];
 
-  if (!mW.positions) {
-    mW.positions = [];
-  }
-
-  mW.positions.push(position);
-
   // https://github.com/ampproject/amphtml/tree/master/ads#the-iframe-sandbox
   global.document.getElementById('c').appendChild(parentElement);
 
@@ -85,7 +79,7 @@ export function ssp(global, data) {
         // This callback is run just once for amp-ad with same type
         // Script will inject "sssp" object on Window
         if (!global['sssp']) {
-          done([]);
+          done(false);
 
           return;
         }
@@ -93,33 +87,54 @@ export function ssp(global, data) {
         /** @type {{config: Function, getAds: Function, writeAd: Function}} */
         const ssp = global['sssp'];
 
-        mW.ssp = ssp;
-
         ssp.config({
           site: data.site || global.context.canonicalUrl,
         });
 
-        ssp.getAds(mW.positions, {
-          requestErrorCallback: () => done([]),
-          AMPcallback: done,
-        });
+        mW.ssp = ssp;
+
+        done(true);
       });
     },
-    (ads) => {
-      /** @suppress {checkTypes} */
-      const adById = keyBy(ads, (item) => item.id);
-      const ad = adById[position['id']];
-
-      if (!ad || ['error', 'empty'].includes(ad.type)) {
+    (loaded) => {
+      if (!loaded) {
         global.context.noContentAvailable();
 
         return;
       }
 
-      // SSP need parentElement as value in "position.id"
-      mW.ssp.writeAd(ad, {...position, id: parentElement});
+      mW.ssp.getAds([position], {
+        requestErrorCallback: () => global.context.noContentAvailable(),
+        AMPcallback: (ads) => {
+          /** @suppress {checkTypes} */
+          const adById = keyBy(ads, (item) => item.id);
+          const ad = adById[position['id']];
 
-      global.context.renderStart();
+          if (!ad || ['error', 'empty'].includes(ad.type)) {
+            global.context.noContentAvailable();
+
+            return;
+          }
+
+          // SSP need parentElement as value in "position.id"
+          mW.ssp.writeAd(ad, {...position, id: parentElement});
+
+          parentElement.setAttribute(
+            'style',
+            [
+              'position: absolute',
+              'top: 50%',
+              'left: 50%',
+              'transform: translate(-50%, -50%)',
+              '-ms-transform: translate(-50%, -50%)',
+            ].join('; ')
+          );
+
+          const {width, height} = ad;
+
+          global.context.renderStart({width, height});
+        },
+      });
     }
   );
 }

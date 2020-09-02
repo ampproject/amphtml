@@ -31,8 +31,9 @@ const sourcemapUrlMatcher =
   'https://raw.githubusercontent.com/ampproject/amphtml/\\d{13}/';
 
 // Mapping related constants
-const expectedFirstLineFile = 'src/internal-version.js';
-const expectedFirstLineCode = 'export function internalRuntimeVersion() {';
+const expectedFirstLineFile = 'src/polyfills/array-includes.js'; // First file that is compiled into v0.js.
+const expectedFirstLineCode = 'function includes(value, opt_fromIndex) {'; // First line of code in that file.
+const expectedFirstLineColumn = "'use strict;'".length; // Column at which the first line is found (after an initial 'use strict;')
 
 /**
  * Throws an error with the given message
@@ -114,15 +115,15 @@ function checkSourcemapSources(sourcemapJson) {
  * Performs a sanity check on the mappings field in the sourcemap file.
  *
  * Today, the first line of amp.js after resolving imports comes from
- * src/internal-version.js. (The import chain is src/amp.js -> src/polyfills.js
- * -> src/mode.js -> src/internal-version.js.) This sequence is unlikely to
- * change, so we can use it as a sentinel value. Here is the process:
+ * src/polyfills/array-includes.js. (The import chain is src/amp.js -> src/polyfills.js
+ * -> src/polyfills/array-includes.js.) This sequence changes rarely, so we can
+ * use it as a sentinel value. Here is the process:
  *
  * 1. Decode the 'mappings' field into a 3d array using 'sourcemap-codec'.
  * 2. Extract the mapping for the first line of code in minified v0.js.
  * 3. Compute the name of the source file that corresponds to this line.
  * 4. Read the source file and extract the corresponding line of code.
- * 5. Check if the filename and the line of code match expected sentinel values.
+ * 5. Check if the filename, line of code, and column match expected sentinel values.
  *
  * @param {!Object} sourcemapJson
  */
@@ -146,20 +147,26 @@ function checkSourcemapMappings(sourcemapJson) {
   const firstLineFile = sourcemapJson.sources[sourceIndex];
   const contents = fs.readFileSync(firstLineFile, 'utf8').split('\n');
   const firstLineCode = contents[sourceCodeLine];
+  const helpMessage =
+    'If this change is intentional, update the mapping related constants in ' +
+    cyan('build-system/tasks/check-sourcemaps.js') +
+    '.';
   if (firstLineFile != expectedFirstLineFile) {
     log(red('ERROR:'), 'Found mapping for incorrect file.');
     log('Actual:', cyan(firstLineFile));
     log('Expected:', cyan(expectedFirstLineFile));
+    log(helpMessage);
     throwError('Found mapping for incorrect file');
   }
   if (firstLineCode != expectedFirstLineCode) {
     log(red('ERROR:'), 'Found mapping for incorrect code.');
     log('Actual:', cyan(firstLineCode));
     log('Expected:', cyan(expectedFirstLineCode));
+    log(helpMessage);
     throwError('Found mapping for incorrect code');
   }
-  if (generatedCodeColumn != 0 || sourceCodeColumn != 0) {
-    log(red('ERROR:'), 'Found mapping for incorrect (non-zero) column.');
+  if (generatedCodeColumn != expectedFirstLineColumn || sourceCodeColumn != 0) {
+    log(red('ERROR:'), 'Found mapping for incorrect column.');
     log('generatedCodeColumn:', cyan(generatedCodeColumn));
     log('sourceCodeColumn:', cyan(sourceCodeColumn));
     throwError('Found mapping for incorrect column');

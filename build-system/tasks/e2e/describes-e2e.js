@@ -254,6 +254,10 @@ const EnvironmentVariantMap = {
     name: 'AMPHTML ads FIE environment',
     value: {environment: 'a4a-fie'},
   },
+  [AmpdocEnvironment.A4A_FIE_NO_SIGNING]: {
+    name: 'AMPHTML ads FIE environment with no-signing exp enabled',
+    value: {environment: 'a4a-fie-no-signing'},
+  },
   [AmpdocEnvironment.A4A_INABOX]: {
     name: 'AMPHTML ads inabox environment',
     value: {environment: 'a4a-inabox'},
@@ -276,6 +280,7 @@ const envPresets = {
   ],
   'amp4ads-preset': [
     AmpdocEnvironment.A4A_FIE,
+    AmpdocEnvironment.A4A_FIE_NO_SIGNING,
     AmpdocEnvironment.A4A_INABOX,
     AmpdocEnvironment.A4A_INABOX_FRIENDLY,
     AmpdocEnvironment.A4A_INABOX_SAFEFRAME,
@@ -513,12 +518,7 @@ class EndToEndFixture {
       // Set env props that require the fixture to be set up.
       if (env.environment === AmpdocEnvironment.VIEWER_DEMO) {
         env.receivedMessages = await controller.evaluate(() => {
-          // The viewer.html file will launch 10 test viewers, only one of which is the requested url.
-          // TODO(gh/amphtml/28200): only load the one viewer.
-          const viewer = window.parent.allViewers.find((v) =>
-            v.id.includes('dynamic')
-          );
-          return viewer.receivedMessages;
+          return window.parent.viewer.receivedMessages;
         });
       }
     } catch (ex) {

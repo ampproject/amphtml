@@ -79,6 +79,10 @@ describe.skip('amp-skimlinks', function () {
       return browser.waitForElementBuild('amp-skimlinks');
     });
 
+    afterEach(() => {
+      return RequestBank.tearDown();
+    });
+
     it('Should send the page impression tracking request', () => {
       return RequestBank.withdraw('pageTrackingUrl').then((req) => {
         const regex = /^\/track\.php\?data=([^&]*)&?.*$/;

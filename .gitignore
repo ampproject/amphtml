@@ -7,6 +7,8 @@ c
 /dist
 dist.3p
 dist.tools
+test-bin
+/release
 examples.min
 node_modules
 npm-debug.log
@@ -15,16 +17,12 @@ npm-debug.log
 .settings
 typings
 typings.json
-build-system/runner/dist
 /test/manual/amp-ad.adtech.html
 test/coverage
 ./package-lock.json
 *.swp
 *.swo
 yarn-error.log
-sc-*-linux*
-sc-*-osx*
-sauce_connect_*
 deps.txt
 firebase
 .firebaserc
@@ -35,3 +33,6 @@ build-system/server/new-server/transforms/dist
 build-system/tasks/performance/cache
 build-system/tasks/performance/results.json
 build-system/global-configs/custom-config.json
+export
+validator/export
+result-reports/**

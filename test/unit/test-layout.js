@@ -48,7 +48,7 @@ describe('Layout', () => {
       tagName: 'hold',
     };
     const elementsValidTagNames = [
-      // in whitelist.
+      // in allowlist.
       'AMP-AD',
       'AMP-ANIM',
       'AMP-EMBED',
@@ -357,6 +357,7 @@ describe('Layout', () => {
     expect(div).to.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(1);
     expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
+    expect(div.children[0].getAttribute('slot')).to.equal('i-amphtml-svc');
     expect(div.children[0].style.paddingTop).to.equal('200%');
   });
 
@@ -371,6 +372,7 @@ describe('Layout', () => {
     expect(div).to.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(1);
     expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
+    expect(div.children[0].getAttribute('slot')).to.equal('i-amphtml-svc');
     expect(div.children[0].style.paddingTop).to.equal('200%');
   });
 
@@ -385,6 +387,7 @@ describe('Layout', () => {
     expect(div).to.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(1);
     expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
+    expect(div.children[0].getAttribute('slot')).to.equal('i-amphtml-svc');
     expect(div.children[0].children.length).to.equal(1);
     expect(div.children[0].children[0].tagName.toLowerCase()).to.equal('img');
     expect(div.children[0].children[0].src).to.equal(
@@ -404,6 +407,7 @@ describe('Layout', () => {
     expect(div).to.have.class('i-amphtml-layout-size-defined');
     expect(div.children.length).to.equal(1);
     expect(div.children[0].tagName.toLowerCase()).to.equal('i-amphtml-sizer');
+    expect(div.children[0].getAttribute('slot')).to.equal('i-amphtml-svc');
     expect(div.children[0].children.length).to.equal(1);
     expect(div.children[0].children[0].tagName.toLowerCase()).to.equal('img');
     expect(div.children[0].children[0].src).to.equal(
@@ -574,6 +578,7 @@ describe('Layout', () => {
     div.appendChild(sizer);
     expect(applyStaticLayout(div)).to.equal(Layout.RESPONSIVE);
     expect(div.sizerElement).to.equal(sizer);
+    expect(div.sizerElement.getAttribute('slot')).to.equal('i-amphtml-svc');
   });
 
   it('should allow sizer to be missing', () => {

@@ -16,7 +16,6 @@
 'use strict';
 
 const colors = require('ansi-colors');
-const requestPromise = require('request-promise');
 const {
   gitBranchCreationPoint,
   gitBranchName,
@@ -112,41 +111,6 @@ function printChangeSummary(fileName) {
       colors.cyan(GIT_BRANCH_URL) + '.\n'
     );
   }
-}
-
-/**
- * Starts connection to Sauce Labs after getting account credentials
- * @param {string} functionName
- */
-async function startSauceConnect(functionName) {
-  process.env['SAUCE_USERNAME'] = 'amphtml';
-  const response = await requestPromise(
-    'https://amphtml-sauce-token-dealer.appspot.com/getJwtToken'
-  );
-  process.env['SAUCE_ACCESS_KEY'] = response.trim();
-  const startScCmd = 'build-system/sauce_connect/start_sauce_connect.sh';
-  const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
-  console.log(
-    '\n' + fileLogPrefix,
-    'Starting Sauce Connect Proxy:',
-    colors.cyan(startScCmd)
-  );
-  execOrDie(startScCmd);
-}
-
-/**
- * Stops connection to Sauce Labs
- * @param {string} functionName
- */
-function stopSauceConnect(functionName) {
-  const stopScCmd = 'build-system/sauce_connect/stop_sauce_connect.sh';
-  const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
-  console.log(
-    '\n' + fileLogPrefix,
-    'Stopping Sauce Connect Proxy:',
-    colors.cyan(stopScCmd)
-  );
-  execOrDie(stopScCmd);
 }
 
 /**
@@ -403,8 +367,6 @@ module.exports = {
   processAndUploadDistOutput,
   startTimer,
   stopTimer,
-  startSauceConnect,
-  stopSauceConnect,
   stopTimedJob,
   timedExec,
   timedExecOrDie,

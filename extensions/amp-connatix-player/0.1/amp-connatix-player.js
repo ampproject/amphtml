@@ -35,7 +35,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
     this.mediaId_ = '';
 
     /** @private {string} */
-    this.iframeDomain_ = 'https://cds.connatix.com';
+    this.iframeDomain_ = 'https://cdm.connatix.com';
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
@@ -135,7 +135,7 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
       'playerId': this.playerId_ || undefined,
       'mediaId': this.mediaId_ || undefined,
     });
-    const iframeUrl = this.iframeDomain_ + '/embed/index.html';
+    const iframeUrl = this.iframeDomain_ + '/amp-embed/index.html';
     const src = addParamsToUrl(iframeUrl, urlParams);
 
     const iframe = element.ownerDocument.createElement('iframe');

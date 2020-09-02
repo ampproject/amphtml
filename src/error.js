@@ -215,14 +215,7 @@ export function reportError(error, opt_associatedElement) {
 
     // 'call' to make linter happy. And .call to make compiler happy
     // that expects some @this.
-    onError['call'](
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      error
-    );
+    onError['call'](self, undefined, undefined, undefined, undefined, error);
   } catch (errorReportingError) {
     setTimeout(function () {
       throw errorReportingError;
@@ -311,8 +304,8 @@ export function installErrorReporting(win) {
  * @this {!Window|undefined}
  */
 function onError(message, filename, line, col, error) {
-  // Make an attempt to unhide the body.
-  if (this && this.document) {
+  // Make an attempt to unhide the body but don't if the error is actually expected.
+  if (this && this.document && (!error || !error.expected)) {
     makeBodyVisibleRecovery(this.document);
   }
   if (getMode().localDev || getMode().development || getMode().test) {
@@ -558,10 +551,6 @@ export function getErrorReportData(
     runtime = getMode().runtime;
   }
 
-  if (getMode().singlePassType) {
-    data['spt'] = getMode().singlePassType;
-  }
-
   data['rt'] = runtime;
 
   // Add our a4a id if we are inabox
@@ -699,7 +688,7 @@ export function detectJsEngineFromStack() {
   } catch (e) {
     const {stack} = e;
 
-    // Safari only mentions the method name.
+    // Safari 12 and under only mentions the method name.
     if (startsWith(stack, 't@')) {
       return 'Safari';
     }
@@ -741,7 +730,12 @@ export function reportErrorToAnalytics(error, win) {
       'errorName': error.name,
       'errorMessage': error.message,
     });
-    triggerAnalyticsEvent(getRootElement_(win), 'user-error', vars);
+    triggerAnalyticsEvent(
+      getRootElement_(win),
+      'user-error',
+      vars,
+      /** enableDataVars */ false
+    );
   }
 }
 

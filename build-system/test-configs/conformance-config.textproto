@@ -191,6 +191,108 @@ requirement: {
   value: 'Array.prototype.flatMap'
 }
 
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Array.prototype.keys is not allowed'
+  value: 'Array.prototype.keys'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Array.prototype.values is not allowed'
+  value: 'Array.prototype.values'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Array.prototype.entries is not allowed'
+  value: 'Array.prototype.entries'
+}
+
+# Map
+
+requirement: {
+  type: BANNED_CODE_PATTERN
+  error_message: 'Cannot construct Map with Iterable'
+  value: '/** @param {Array|Object} a */function template(a) {new Map(a)}'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Map.prototype.keys is not allowed'
+  value: 'Map.prototype.keys'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Map.prototype.values is not allowed'
+  value: 'Map.prototype.values'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Map.prototype.entries is not allowed'
+  value: 'Map.prototype.entries'
+}
+
+# WeakMap
+
+requirement: {
+  type: BANNED_CODE_PATTERN
+  error_message: 'Cannot construct WeakMap with Iterable'
+  value: '/** @param {Array|Object} a */function template(a) {new WeakMap(a)}'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'WeakMap.prototype.keys is not allowed'
+  value: 'WeakMap.prototype.keys'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'WeakMap.prototype.values is not allowed'
+  value: 'WeakMap.prototype.values'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'WeakMap.prototype.entries is not allowed'
+  value: 'WeakMap.prototype.entries'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'WeakMap.prototype.clear is not allowed'
+  value: 'WeakMap.prototype.clear'
+}
+
+# Set
+
+requirement: {
+  type: BANNED_CODE_PATTERN
+  error_message: 'Cannot construct Set with Iterable'
+  value: '/** @param {Array|Object} a */function template(a) {new Set(a)}'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Set.prototype.keys is not allowed'
+  value: 'Set.prototype.keys'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Set.prototype.values is not allowed'
+  value: 'Set.prototype.values'
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  error_message: 'Set.prototype.entries is not allowed'
+  value: 'Set.prototype.entries'
+}
+
 # Math
 
 requirement: {
@@ -267,25 +369,7 @@ requirement: {
 
 requirement: {
   type: BANNED_NAME
-  error_message: 'Map is not allowed'
-  value: 'Map'
-}
-
-requirement: {
-  type: BANNED_NAME
-  error_message: 'WeakMap is not allowed'
-  value: 'WeakMap'
-}
-
-requirement: {
-  type: BANNED_NAME
-  error_message: 'Set is not allowed'
-  value: 'Set'
-}
-
-requirement: {
-  type: BANNED_NAME
-  error_message: 'WeakSet is not allowed'
+  error_message: 'WeakSet is not allowed. You can use a WeakMap instead'
   value: 'WeakSet'
 }
 
@@ -314,6 +398,7 @@ requirement: {
   whitelist: 'ads/zen.js'
   whitelist: 'extensions/amp-viewer-integration/0.1/messaging/messaging.js' # published as standalone library
   whitelist: 'src/json.js' # Where parseJson itself is implemented.
+  whitelist_regexp: '.*\\.jss\\.js'
 }
 
 requirement: {
