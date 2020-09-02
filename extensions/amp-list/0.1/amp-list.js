@@ -806,7 +806,17 @@ export class AmpList extends AMP.BaseElement {
     if (!this.element.getAttribute('src')) {
       return Promise.resolve();
     }
-    return this.prepareAndSendFetch_().then((data) => {
+
+    let fetch;
+    if (this.isAmpStateSrc_(elementSrc)) {
+      fetch = this.getAmpStateJson_(elementSrc);
+    } else if (this.isAmpScriptSrc_(elementSrc)) {
+      fetch = this.getAmpScriptJson_(elementSrc);
+    } else {
+      fetch = this.prepareAndSendFetch_();
+    }
+
+    return fetch.then((data) => {
       const items = this.computeListItems_(data);
       this.updateLoadMoreSrc_(/** @type {!JsonObject} */ (data));
       return this.scheduleRender_(
