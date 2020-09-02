@@ -651,7 +651,6 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
-
   'luckyads': {
     renderStartImplemented: true,
   },
