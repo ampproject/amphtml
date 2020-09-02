@@ -36,17 +36,43 @@
  * ```
  */
 
+const crypto = require('crypto');
 const {create} = require('jss');
 const {default: preset} = require('jss-preset-default');
+const {relative, join} = require('path');
 
 module.exports = function ({types: t, template}) {
   function isJssFile(filename) {
     return filename.endsWith('.jss.js');
   }
 
-  function compileJss(JSS) {
-    const jss = create();
-    jss.setup(preset());
+  const seen = new Set();
+  function compileJss(JSS, filename) {
+    const relativeFilepath = relative(join(__dirname, '../../..'), filename);
+    const filehash = crypto
+      .createHash('sha256')
+      .update(relativeFilepath)
+      .digest('hex')
+      .slice(0, 7);
+    const jss = create({
+      ...preset(),
+      createGenerateId: () => {
+        return (rule) => {
+          const dashCaseKey = rule.key.replace(
+            /([A-Z])/g,
+            (c) => `-${c.toLowerCase()}`
+          );
+          const className = `${dashCaseKey}-${filehash}`;
+          if (seen.has(className)) {
+            throw new Error(
+              `Classnames must be unique across all files. Found a duplicate: ${className}`
+            );
+          }
+          seen.add(className);
+          return className;
+        };
+      },
+    });
     return jss.createStyleSheet(JSS);
   }
 
@@ -70,7 +96,7 @@ module.exports = function ({types: t, template}) {
             `First argument to createUseStyles must be statically evaluatable.`
           );
         }
-        const sheet = compileJss(JSS);
+        const sheet = compileJss(JSS, filename);
         if ('CSS' in sheet.classes) {
           throw path.buildCodeFrameError(
             'Cannot have class named CSS in your JSS object.'

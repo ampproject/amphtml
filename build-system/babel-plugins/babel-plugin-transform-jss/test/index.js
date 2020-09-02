@@ -14,6 +14,25 @@
  * limitations under the License.
  */
 
+const babel = require('@babel/core');
+const path = require('path');
 const runner = require('@babel/helper-plugin-test-runner').default;
 
 runner(__dirname);
+
+// eslint-disable-next-line no-undef
+test('throws when duplicate classname is found', () => {
+  const fileContents = `
+import {createUseStyles} from 'react-jss';
+export const useStyles = createUseStyles({button: {fontSize: 12}});
+    `;
+  const filename = 'test.jss.js';
+  const plugins = [path.join(__dirname, '..')];
+  const caller = {name: 'babel-jest'};
+
+  // Transforming the same file twice should yield the same classnames, resulting in an error
+  babel.transformSync(fileContents, {filename, plugins, caller});
+  expect(() =>
+    babel.transformSync(fileContents, {filename, plugins, caller})
+  ).toThrow(/Classnames must be unique across all files/);
+});
