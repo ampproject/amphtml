@@ -50,8 +50,8 @@ function getAmpContext() {
 export function WithAmpContext({renderable, playable, notify, children}) {
   const parent = useAmpContext();
   const current = /** @type {!AmpContextDef.ContextType} */ ({
-    renderable: parent.renderable && renderable,
-    playable: parent.playable && playable,
+    renderable: renderable && parent.renderable,
+    playable: playable && parent.playable,
     notify: notify || parent.notify,
   });
   const AmpContext = getAmpContext();
