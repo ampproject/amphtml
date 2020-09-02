@@ -20,12 +20,11 @@ import {
   createElementWithAttributes,
   waitForChildPromise,
 } from '../../../../src/dom';
-import {poll} from '../../../../testing/iframe';
 import {setStyles} from '../../../../src/style';
 import {toArray} from '../../../../src/types';
 import {toggleExperiment} from '../../../../src/experiments';
 import {useStyles} from '../base-carousel.jss';
-import {whenCalled} from '../../../../testing/test-helper';
+import {waitFor, whenCalled} from '../../../../testing/test-helper';
 
 describes.realWin(
   'amp-base-carousel',
@@ -48,7 +47,13 @@ describes.realWin(
       await waitForChildPromise(shadow, (shadow) => {
         return shadow.querySelectorAll('[class*=hideScrollbar]');
       });
-      const slots = await shadow.querySelectorAll(
+      await waitFor(
+        () =>
+          shadow.querySelectorAll(`[class*=${styles.hideScrollbar}] slot`)
+            .length > 0,
+        'slots rendered'
+      );
+      const slots = shadow.querySelectorAll(
         `[class*=${styles.hideScrollbar}] slot`
       );
       return toArray(slots).reduce(
@@ -80,17 +85,6 @@ describes.realWin(
 
       slides.forEach((slide) => element.appendChild(slide));
       return slides;
-    }
-
-    function waitFor(callback, errorMessage) {
-      return poll(
-        errorMessage,
-        () => {
-          return callback();
-        },
-        undefined /** opt_onError */,
-        200 /** opt_timeout */
-      );
     }
 
     beforeEach(() => {

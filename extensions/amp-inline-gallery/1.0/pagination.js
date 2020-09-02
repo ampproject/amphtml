@@ -13,10 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * @param {!BaseCarouselDef.PaginationProps} props
- * @return {PreactDef.Renderable}
- */
+
 import * as Preact from '../../../src/preact';
 import * as styles from './pagination.css';
 import {CarouselContext} from '../../amp-base-carousel/1.0/carousel-context';
@@ -60,7 +57,7 @@ export function Pagination({inset, ...rest}) {
 }
 
 /**
- * @param {!BaseCarouselDef.PaginationProps} props
+ * @param {!InlineGalleryDef.PaginationProps} props
  * @return {PreactDef.Renderable}
  */
 function Dots({currentSlide, goTo, inset, slideCount}) {
@@ -68,6 +65,7 @@ function Dots({currentSlide, goTo, inset, slideCount}) {
   for (let i = 0; i < slideCount; i++) {
     dotList.push(
       <div
+        key={i}
         class="i-amphtml-carousel-pagination-dot-container"
         style={styles.paginationDotContainer}
       >
@@ -79,6 +77,8 @@ function Dots({currentSlide, goTo, inset, slideCount}) {
           }}
         >
           <div
+            role="button"
+            aria-selected={String(i === currentSlide)}
             onClick={() => goTo(i)}
             class="i-amphtml-carousel-pagination-dot-progress"
             style={{
@@ -106,7 +106,7 @@ function Dots({currentSlide, goTo, inset, slideCount}) {
 }
 
 /**
- * @param {!BaseCarouselDef.PaginationProps} props
+ * @param {!InlineGalleryDef.PaginationProps} props
  * @return {PreactDef.Renderable}
  */
 function Numbers({currentSlide, inset, slideCount}) {
