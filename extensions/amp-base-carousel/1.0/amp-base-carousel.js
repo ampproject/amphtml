@@ -16,6 +16,7 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {BaseCarousel} from './base-carousel';
+import {CarouselContextProp} from './carousel-props';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
@@ -93,6 +94,9 @@ AmpBaseCarousel['props'] = {
 /** @override */
 // eslint-disable-next-line
 AmpBaseCarousel['shadowCss'] = useStyles().CSS;
+
+/** @override */
+AmpBaseCarousel['useContexts'] = [CarouselContextProp];
 
 /**
  * Triggers a 'slideChange' event with one data param:

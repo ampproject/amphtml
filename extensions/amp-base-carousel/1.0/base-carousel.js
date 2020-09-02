@@ -23,8 +23,8 @@ import {
   toChildArray,
   useCallback,
   useContext,
-  useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useRef,
   useState,
 } from '../../../src/preact';
@@ -73,7 +73,7 @@ function BaseCarouselWithRef(
     [advance, setRestingIndex]
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setSlideCount(length);
   }, [setSlideCount, length]);
 
