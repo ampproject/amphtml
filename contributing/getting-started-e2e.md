@@ -468,7 +468,7 @@ For more help, see [How to get help](#how-to-get-help).
 
 Beyond technical/automated tests, manually test your changes and make sure that they work as expected, and that they follow AMP's [design principles](https://github.com/ampproject/amphtml/blob/master/contributing/DESIGN_PRINCIPLES.md). In particular, make sure that your changes are accessible - see [W3C WAI Easy Checks](https://www.w3.org/WAI/test-evaluate/preliminary/) for an initial set of suggested manual tests. Some aspects of manual testing can be semi-automated, using tools such as [Lighthouse](https://developers.google.com/web/tools/lighthouse) (which includes an accessibility audit report) and [Microsoft's Accessibility Insights](https://accessibilityinsights.io/).
 
-Note that for more extensive automated accessibility testing, there are further options available that integrate directly within existing test/integration workflows, such as see [Deque's axe-core](https://github.com/dequelabs/axe-core).
+Note that for more extensive automated accessibility testing, there are further options available that integrate directly within existing test/integration workflows, such as [Deque's axe-core](https://github.com/dequelabs/axe-core).
 
 # Push your changes to your GitHub fork
 
