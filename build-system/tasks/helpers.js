@@ -23,8 +23,6 @@ const del = require('del');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
-const gulpIf = require('gulp-if');
-const istanbul = require('gulp-istanbul');
 const log = require('fancy-log');
 const path = require('path');
 const regexpSourcemaps = require('gulp-regexp-sourcemaps');
@@ -360,11 +358,18 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
     fast: true,
     ...options.browserifyOptions,
   };
-
-  let bundler = browserify(browserifyOptions).transform(babelify, {
+  const babelifyOptions = {
     caller: {name: 'unminified'},
     global: true,
-  });
+  };
+  if (argv.coverage) {
+    babelifyOptions['plugins'] = ['babel-plugin-istanbul'];
+  }
+
+  let bundler = browserify(browserifyOptions).transform(
+    babelify,
+    babelifyOptions
+  );
 
   if (options.watch) {
     const watchFunc = () => {
@@ -392,7 +397,6 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
         )
         .pipe(source(srcFilename))
         .pipe(buffer())
-        .pipe(gulpIf(argv.coverage, istanbul()))
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(
           regexpSourcemaps(

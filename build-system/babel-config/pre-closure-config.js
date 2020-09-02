@@ -49,7 +49,7 @@ function getPreClosureConfig() {
   ];
   const replacePlugin = getReplacePlugin();
   const preClosurePlugins = [
-    argv.coverage ? '@babel/babel-plugin-istanbul' : null,
+    argv.coverage ? 'babel-plugin-istanbul' : null,
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
     '@babel/plugin-transform-react-constant-elements',
