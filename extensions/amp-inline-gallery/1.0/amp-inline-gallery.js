@@ -26,7 +26,7 @@ import {PreactBaseElement} from '../../../src/preact/base-element';
 import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {setProp} from '../../../src/context';
-import {useContext, useEffect} from '../../../src/preact';
+import {useContext, useLayoutEffect} from '../../../src/preact';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -74,7 +74,7 @@ function ContextExporter({shimDomElement}) {
   // Consume the `CarouselContext` produced by the `InlineGallery` component
   // and propagate it as a context prop.
   const context = useContext(CarouselContextProp.type);
-  useEffect(() => {
+  useLayoutEffect(() => {
     setProp(shimDomElement, CarouselContextProp, ContextExporter, context);
   }, [shimDomElement, context]);
   return <></>;

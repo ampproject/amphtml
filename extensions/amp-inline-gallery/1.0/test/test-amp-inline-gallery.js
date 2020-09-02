@@ -75,6 +75,10 @@ describes.realWin(
 
       // Wait until ready.
       win.document.body.appendChild(element);
+      await element.build();
+      await carousel.build();
+      await pagination.build();
+
       lastContext = null;
       subscribe(element, [CarouselContextProp], (context) => {
         lastContext = context;
