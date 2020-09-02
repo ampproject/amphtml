@@ -75,14 +75,13 @@ describes.realWin(
 
       // Wait until ready.
       win.document.body.appendChild(element);
-      await new Promise((resolve) => {
-        subscribe(element, [CarouselContextProp], (context) => {
-          lastContext = context;
-          if (context && context.slideCount > 0) {
-            resolve(context);
-          }
-        });
+      subscribe(element, [CarouselContextProp], (context) => {
+        lastContext = context;
       });
+      await waitFor(
+        () => lastContext && lastContext.slideCount > 0,
+        'context and slideCount set'
+      );
       await waitFor(() => carousel.shadowRoot, 'carousel rendered');
       await waitFor(() => getDots().length > 0, 'pagination rendered');
     });
