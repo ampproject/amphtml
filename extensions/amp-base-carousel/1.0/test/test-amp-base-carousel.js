@@ -24,6 +24,7 @@ import {poll} from '../../../../testing/iframe';
 import {setStyles} from '../../../../src/style';
 import {toArray} from '../../../../src/types';
 import {toggleExperiment} from '../../../../src/experiments';
+import {useStyles} from '../base-carousel.jss';
 import {whenCalled} from '../../../../testing/test-helper';
 
 describes.realWin(
@@ -38,6 +39,9 @@ describes.realWin(
     let win;
     let element;
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const styles = useStyles();
+
     async function getSlidesFromShadow() {
       await whenCalled(env.sandbox.spy(element, 'attachShadow'));
       const shadow = element.shadowRoot;
@@ -45,7 +49,7 @@ describes.realWin(
         return shadow.querySelectorAll('[class*=hideScrollbar]');
       });
       const slots = await shadow.querySelectorAll(
-        '[class*=hideScrollbar] slot'
+        `[class*=${styles.hideScrollbar}] slot`
       );
       return toArray(slots).reduce(
         (acc, slot) => acc.concat(slot.assignedElements()),
@@ -167,7 +171,9 @@ describes.realWin(
         win.document.body.appendChild(element);
         await getSlidesFromShadow();
 
-        scroller = element.shadowRoot.querySelector('[class*=scrollContainer]');
+        scroller = element.shadowRoot.querySelector(
+          `[class*=${styles.scrollContainer}]`
+        );
       });
 
       function invocation(method, args = {}) {
