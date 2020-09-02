@@ -285,6 +285,36 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     });
   });
 
+  it('dispatch noNextStory when in last story', async () => {
+    buildStoryPlayer(1);
+
+    await manager.loadPlayers();
+    await nextTick();
+
+    const noNextSpy = env.sandbox.spy();
+    playerEl.addEventListener('noNextStory', noNextSpy);
+
+    const fakeData = {next: true};
+    fireHandler['selectDocument']('selectDocument', fakeData);
+
+    expect(noNextSpy).to.have.been.called;
+  });
+
+  it('should not dispatch noNextStory when not in last story', async () => {
+    buildStoryPlayer(2);
+
+    await manager.loadPlayers();
+    await nextTick();
+
+    const noNextSpy = env.sandbox.spy();
+    playerEl.addEventListener('noNextStory', noNextSpy);
+
+    const fakeData = {next: true};
+    fireHandler['selectDocument']('selectDocument', fakeData);
+
+    expect(noNextSpy).to.not.have.been.called;
+  });
+
   it('should navigate when swiping', async () => {
     buildStoryPlayer(4);
     await manager.loadPlayers();
