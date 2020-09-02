@@ -123,7 +123,7 @@ const INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS = Object.values(
 ).join(',');
 
 /** @private @const {number} */
-const RESIZE_TIMEOUT_MS = 350;
+const RESIZE_TIMEOUT_MS = 1000;
 
 /** @private @const {string} */
 const TAG = 'amp-story-page';
