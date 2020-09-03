@@ -217,6 +217,16 @@ export class PreactBaseElement extends AMP.BaseElement {
       }
     );
 
+    // Unblock rendering on first `CanRender` response. And keep the context
+    // in-sync.
+    subscribe(this.element, [CanRender, CanPlay], (canRender, canPlay) => {
+      this.context_.renderable = canRender;
+      this.context_.playable = canPlay;
+      this.mounted_ = true;
+      this.scheduleRender_();
+    });
+
+    // Subscribe to dependent contexts.
     const useContexts = Ctor['useContexts'];
     if (useContexts.length != 0) {
       subscribe(this.element, useContexts, (...contexts) => {
@@ -337,6 +347,12 @@ export class PreactBaseElement extends AMP.BaseElement {
       this.checkPropsPostMutations();
       this.scheduleRender_();
     }
+  }
+
+  // QQQ: remove
+  /** @override */
+  mutateElement(callback) {
+    setTimeout(callback);
   }
 
   /** @private */
