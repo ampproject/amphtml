@@ -520,11 +520,11 @@ export class GoogleSubscriptionsPlatform {
           // by a hash value which would allow non gooogle origins to construst LAA urls.
           (GOOGLE_DOMAIN_RE.test(parseUrlDeprecated(referrer).origin) ||
             getMode(this.ampdoc_.win).localDev) &&
-          parsedQuery[`glaa_at`] == 'laa' &&
-          parsedQuery[`glaa_n`] &&
-          parsedQuery[`glaa_sig`] &&
-          parsedQuery[`glaa_ts`] &&
-          parseInt(parsedQuery[`glaa_ts`], 16) > Date.now() / 1000
+          parsedQuery[`gaa_at`] == 'laa' &&
+          parsedQuery[`gaa_n`] &&
+          parsedQuery[`gaa_sig`] &&
+          parsedQuery[`gaa_ts`] &&
+          parseInt(parsedQuery[`gaa_ts`], 16) > Date.now() / 1000
         ) {
           // All the criteria are met to return an LAA entitlement
           return Promise.resolve(
