@@ -16,11 +16,11 @@
 
 import * as Preact from './index';
 import {dev} from '../log';
-import {getAmpContext} from './context';
 import {matches, toggleAttribute} from '../dom';
 import {objectsEqualShallow} from '../utils/object';
 import {toArray} from '../types';
-import {useContext, useEffect, useRef} from './index';
+import {useAmpContext} from './context';
+import {useEffect, useRef} from './index';
 import {useMountEffect} from './utils';
 
 /**
@@ -41,7 +41,7 @@ export function createSlot(element, name, props) {
  * @return {!PreactDef.VNode}
  */
 export function Slot(props) {
-  const context = useContext(getAmpContext());
+  const context = useAmpContext();
   const ref = useRef(/** @type {?Element} */ (null));
   const slotProps = {...props, ref};
   useEffect(() => {
@@ -50,11 +50,14 @@ export function Slot(props) {
     slot.__assignedElements = assignedElements;
 
     // TBD: Just for debug for now. but maybe can also be used for hydration?
-    slot.setAttribute('i-amphtml-context', JSON.stringify(context));
+    const serializedContext = JSON.stringify(
+      /** @type {!JsonObject} */ (context)
+    );
+    slot.setAttribute('i-amphtml-context', serializedContext);
     // TODO: remove debug info.
     assignedElements.forEach((node) => {
       node.__assignedSlot = slot;
-      node.setAttribute('i-amphtml-context', JSON.stringify(context));
+      node.setAttribute('i-amphtml-context', serializedContext);
     });
 
     // Retarget slots and content.

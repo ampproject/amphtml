@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {getAmpContext} from './context';
-import {useContext, useEffect, useLayoutEffect} from './index';
+import {useAmpContext} from './context';
+import {useEffect, useLayoutEffect} from './index';
 
 /**
  * @param {function()} callback
@@ -42,7 +42,7 @@ export function useMountLayoutEffect(callback) {
  * Every functional component **must** use this helper.
  */
 export function useResourcesNotify() {
-  const {'notify': notify} = useContext(getAmpContext());
+  const {notify} = useAmpContext();
   useLayoutEffect(() => {
     if (notify) {
       notify();

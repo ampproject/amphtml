@@ -15,7 +15,7 @@
  */
 
 import * as Preact from './index';
-import {createContext, useContext} from './index';
+import {createContext, useContext, useMemo} from './index';
 
 /** @type {PreactDef.Context} */
 let context;
@@ -29,14 +29,14 @@ let context;
  * - playable: whether the playback is allowed in this vDOM area. If playback
  *   is not allow, the component must immediately stop the playback.
  *
- * @return {!PreactDef.Context}
+ * @return {!PreactDef.Context<AmpContextDef.ContextType>}
  */
-export function getAmpContext() {
+function getAmpContext() {
   return (
     context ||
     (context = createContext({
-      'renderable': true,
-      'playable': true,
+      renderable: true,
+      playable: true,
     }))
   );
 }
@@ -44,18 +44,36 @@ export function getAmpContext() {
 /**
  * A wrapper-component that recalculates and propagates AmpContext properties.
  *
- * @param {!JsonObject} props
+ * @param {!AmpContextDef.ProviderProps} props
  * @return {!PreactDef.VNode}
  */
-export function WithAmpContext(props) {
+export function WithAmpContext({
+  renderable: renderableProp,
+  playable: playableProp,
+  notify: notifyProp,
+  children,
+}) {
+  const parent = useAmpContext();
+  const renderable = renderableProp && parent.renderable;
+  const playable = playableProp && parent.playable;
+  const notify = notifyProp || parent.notify;
+  const current = useMemo(
+    () =>
+      /** @type {!AmpContextDef.ContextType} */ ({
+        renderable,
+        playable,
+        notify,
+      }),
+    [renderable, playable, notify]
+  );
   const AmpContext = getAmpContext();
-  const parent = useContext(AmpContext);
-  const current = {
-    ...props,
-    'renderable': parent['renderable'] && props['renderable'],
-    'playable': parent['playable'] && props['playable'],
-    'children': undefined,
-  };
+  return <AmpContext.Provider children={children} value={current} />;
+}
 
-  return <AmpContext.Provider children={props['children']} value={current} />;
+/**
+ * @return {!AmpContextDef.ContextType}
+ */
+export function useAmpContext() {
+  const AmpContext = getAmpContext();
+  return useContext(AmpContext);
 }
