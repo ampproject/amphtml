@@ -66,13 +66,16 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
 
 .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="-1"],
 [dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[active] + amp-story-page:not([i-amphtml-desktop-position]):not([distance]), /** Position n+1 page on load, before attributes are set. */
-[dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="1"],
-[dir=rtl] .i-amphtml-story-desktop-panels .next-container {
+[dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="1"] {
   transform: perspective(1px) scale(0.9) translateX(calc(-3 * var(--i-amphtml-story-page-50vw, 50%) - 64px)) translateY(0%) !important;
 }
 
 .i-amphtml-story-desktop-panels .prev-container {
   left: calc(50% - var(--i-amphtml-story-page-50vw, 50%) * .9 * 3 - 64px) !important;
+}
+
+[dir=rtl] .i-amphtml-story-desktop-panels .prev-container {
+  left: calc(var(--i-amphtml-story-page-50vw, 50%) * .9 + 50% + 64px) !important;
 }
 
 .i-amphtml-story-desktop-panels amp-story-page[active],
@@ -85,15 +88,17 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
 
 .i-amphtml-story-desktop-panels amp-story-page[active] + amp-story-page:not([i-amphtml-desktop-position]):not([distance]), /** Position n+1 page on load, before attributes are set. */
 .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="1"],
-[dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="-1"],
-[dir=rtl] .i-amphtml-story-desktop-panels .prev-container {
+[dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="-1"] {
   transform: perspective(1px) scale(0.9) translate(calc(var(--i-amphtml-story-page-50vw, 50%) + 64px), 0%) !important;
 }
 
 .i-amphtml-story-desktop-panels .next-container {
-  left: calc(var(--i-amphtml-story-page-50vw, 50%) * .9 + 50% + 64px) !important
+  left: calc(var(--i-amphtml-story-page-50vw, 50%) * .9 + 50% + 64px) !important;
 }
 
+[dir=rtl] .i-amphtml-story-desktop-panels .next-container {
+  left: calc(50% - var(--i-amphtml-story-page-50vw, 50%) * .9 * 3 - 64px) !important;
+}
 .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="2"],
 [dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="-2"] {
   transform: perspective(1px) scale(0.9) translate(calc(3 * var(--i-amphtml-story-page-50vw, 50%) + 128px), 0%) !important;
