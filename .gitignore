@@ -36,3 +36,4 @@ build-system/global-configs/custom-config.json
 export
 validator/export
 result-reports/**
+/sxg

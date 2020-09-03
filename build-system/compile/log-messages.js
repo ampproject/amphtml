@@ -18,7 +18,7 @@ const fs = require('fs-extra');
 const log = require('fancy-log');
 const {cyan} = require('colors');
 
-const pathPrefix = 'dist/log-messages';
+const pathPrefix = argv.sxg ? 'sxg/log-messages' : 'dist/log-messages';
 
 /**
  * Source of truth for extracted messages during build, but should not be

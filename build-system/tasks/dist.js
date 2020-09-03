@@ -26,6 +26,7 @@ const {
   compileJs,
   endBuildStep,
   maybeToEsmName,
+  getOutputDir,
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,
@@ -184,7 +185,7 @@ function buildLoginDone(version) {
   const builtName = `amp-login-done-${version}.max.js`;
   const minifiedName = `amp-login-done-${version}.js`;
   const latestName = 'amp-login-done-latest.js';
-  return compileJs('./' + buildDir, builtName, './dist/v0/', {
+  return compileJs('./' + buildDir, builtName, `./${getOutputDir()}/v0/`, {
     watch: argv.watch,
     includePolyfills: true,
     minify: true,
@@ -202,7 +203,7 @@ function buildLoginDone(version) {
  * Build amp-web-push publisher files HTML page.
  */
 async function buildWebPushPublisherFiles() {
-  const distDir = 'dist/v0';
+  const distDir = `${getOutputDir()}/v0`;
   const promises = [];
   WEB_PUSH_PUBLISHER_VERSIONS.forEach((version) => {
     WEB_PUSH_PUBLISHER_FILES.forEach((fileName) => {
@@ -238,15 +239,15 @@ function copyCss() {
   const startTime = Date.now();
 
   cssEntryPoints.forEach(({outCss}) => {
-    fs.copySync(`build/css/${outCss}`, `dist/${outCss}`);
+    fs.copySync(`build/css/${outCss}`, `${getOutputDir()}/${outCss}`);
   });
 
   return toPromise(
     gulp
       .src('build/css/amp-*.css', {base: 'build/css/'})
-      .pipe(gulp.dest('dist/v0'))
+      .pipe(gulp.dest(`${getOutputDir()}/v0`))
   ).then(() => {
-    endBuildStep('Copied', 'build/css/*.css to dist/v0/*.css', startTime);
+    endBuildStep('Copied', `build/css/*.css to ${getOutputDir()}/v0/*.css`, startTime);
   });
 }
 
@@ -256,8 +257,8 @@ function copyCss() {
  */
 function copyParsers() {
   const startTime = Date.now();
-  return fs.copy('build/parsers', 'dist/v0').then(() => {
-    endBuildStep('Copied', 'build/parsers/ to dist/v0', startTime);
+  return fs.copy('build/parsers', `${getOutputDir()}/v0`).then(() => {
+    endBuildStep('Copied', `build/parsers/ to ${getOutputDir()}/v0`, startTime);
   });
 }
 
@@ -267,8 +268,8 @@ function copyParsers() {
  * @return {!Promise<!Array>}
  */
 async function preBuildWebPushPublisherFiles() {
-  mkdirSync('dist');
-  mkdirSync('dist/v0');
+  mkdirSync(`${getOutputDir()}`);
+  mkdirSync(`${getOutputDir()}/v0`);
   const promises = [];
 
   WEB_PUSH_PUBLISHER_VERSIONS.forEach((version) => {
@@ -295,7 +296,7 @@ async function preBuildWebPushPublisherFiles() {
  * post Build amp-web-push publisher files HTML page.
  */
 function postBuildWebPushPublisherFilesVersion() {
-  const distDir = 'dist/v0';
+  const distDir = `${getOutputDir()}/v0`;
   WEB_PUSH_PUBLISHER_VERSIONS.forEach((version) => {
     const basePath = `extensions/amp-web-push/${version}/`;
     WEB_PUSH_PUBLISHER_FILES.forEach((fileName) => {
@@ -313,7 +314,7 @@ function postBuildWebPushPublisherFilesVersion() {
           '</script>'
       );
 
-      fs.writeFileSync('dist/v0/' + fileName + '.html', fileContents);
+      fs.writeFileSync(`${getOutputDir()}/v0/${fileName}.html`, fileContents);
     });
   });
 }
@@ -378,16 +379,20 @@ function preBuildLoginDoneVersion(version) {
   const html = fs.readFileSync(htmlPath, 'utf8');
   const minJs = `https://${hostname}/v0/amp-login-done-${version}.js`;
   const minHtml = html
+  /*
+    .replace(`../../../${getOutputDir()}/v0/amp-login-done-${version}.max.js`, minJs)
+    .replace(`../../../${getOutputDir()}/v0/amp-login-done-${version}.js`, minJs);
+    */
     .replace(`../../../dist/v0/amp-login-done-${version}.max.js`, minJs)
     .replace(`../../../dist/v0/amp-login-done-${version}.js`, minJs);
   if (minHtml.indexOf(minJs) == -1) {
     throw new Error('Failed to correctly set JS in login-done.html');
   }
 
-  mkdirSync('dist');
-  mkdirSync('dist/v0');
+  mkdirSync(`${getOutputDir()}`);
+  mkdirSync(`${getOutputDir()}/v0`);
 
-  fs.writeFileSync('dist/v0/amp-login-done-' + version + '.html', minHtml);
+  fs.writeFileSync(`${getOutputDir()}/v0/amp-login-done-${version}.html`, minHtml);
 
   // Build JS.
   const js = fs.readFileSync(jsPath, 'utf8');

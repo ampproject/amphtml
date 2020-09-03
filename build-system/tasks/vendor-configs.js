@@ -23,7 +23,7 @@ const gulpif = require('gulp-if');
 const jsonlint = require('gulp-jsonlint');
 const jsonminify = require('gulp-jsonminify');
 const rename = require('gulp-rename');
-const {endBuildStep, toPromise} = require('./helpers');
+const {endBuildStep, toPromise, getOutputDir} = require('./helpers');
 const {watchDebounceDelay} = require('./helpers');
 const {watch} = require('gulp');
 
@@ -37,7 +37,7 @@ async function vendorConfigs(opt_options) {
   const options = opt_options || {};
 
   const srcPath = ['extensions/amp-analytics/0.1/vendors/*.json'];
-  const destPath = 'dist/v0/analytics-vendors/';
+  const destPath = `${getOutputDir()}/v0/analytics-vendors/`;
 
   // ignore test json if not fortesting
   if (!(argv.fortesting || options.fortesting)) {

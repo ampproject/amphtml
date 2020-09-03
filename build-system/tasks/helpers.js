@@ -228,6 +228,10 @@ function maybeToEsmName(name) {
   return argv.esm ? toEsmName(name) : name;
 }
 
+function getOutputDir(name){
+  return argv.sxg ? 'sxg' : 'dist';
+}
+
 /**
  * Minifies a given JavaScript file entry point.
  * @param {string} srcDir
@@ -655,6 +659,7 @@ module.exports = {
   doBuildJs,
   endBuildStep,
   maybeToEsmName,
+  getOutputDir,
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,

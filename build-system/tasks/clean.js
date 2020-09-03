@@ -37,6 +37,7 @@ async function clean() {
     'dist.3p',
     'dist.tools',
     'test-bin',
+    'sxg',
   ];
   if (argv.include_subpackages) {
     pathsToDelete.push('**/node_modules', '!node_modules');
