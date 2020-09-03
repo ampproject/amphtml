@@ -929,13 +929,8 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   buildPaginationButtons_() {
-    if (this.storeService_.get(StateProperty.CAN_SHOW_PAGINATION_BUTTONS)) {
-      // TODO(#19768): Avoid passing a private function here.
-      const paginationButtons = PaginationButtons.create(this, () =>
-        this.hasBookend_()
-      );
-      // paginationButtons.attach(this.element);
-    }
+    this.storeService_.get(StateProperty.CAN_SHOW_PAGINATION_BUTTONS) &&
+      new PaginationButtons(this);
   }
 
   /** @visibleForTesting */

@@ -178,9 +178,8 @@ class PaginationButton {
 export class PaginationButtons {
   /**
    * @param {!./amp-story.AmpStory} ampStory
-   * @param {function():Promise<boolean>} hasBookend
    */
-  constructor(ampStory, hasBookend) {
+  constructor(ampStory) {
     /** @private @const {!./amp-story.AmpStory} */
     this.ampStory_ = ampStory;
 
@@ -213,21 +212,9 @@ export class PaginationButtons {
     /** @private {?ButtonState_1_0_Def} */
     this.forwardButtonStateToRestore_ = null;
 
-    /** @private {function():Promise<boolean>} */
-    this.hasBookend_ = hasBookend;
-
     this.initializeListeners_();
 
     this.attach_();
-  }
-
-  /**
-   * @param {!./amp-story.AmpStory} ampStory
-   * @param {function():Promise<boolean>} hasBookend
-   * @return {!PaginationButtons}
-   */
-  static create(ampStory, hasBookend) {
-    return new PaginationButtons(ampStory, hasBookend);
   }
 
   /** @param {!Element} element */
@@ -331,7 +318,7 @@ export class PaginationButtons {
     }
 
     if (pageIndex === totalPages - 1) {
-      this.hasBookend_().then((hasBookend) => {
+      this.ampStory_.hasBookend_().then((hasBookend) => {
         if (!hasBookend) {
           this.forwardButton_.updateState(ForwardButtonStates.REPLAY);
         }
