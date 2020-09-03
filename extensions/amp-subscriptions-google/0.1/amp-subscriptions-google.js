@@ -515,10 +515,12 @@ export class GoogleSubscriptionsPlatform {
     if (this.enableLAA_) {
       return this.viewerPromise_.getReferrerUrl().then((referrer) => {
         const parsedQuery = this.getLAAParams_();
+        const parsedReferrer = parseUrlDeprecated(referrer);
         if (
           // Note we don't use the more generic this.isDev_ flag because that can be triggered
           // by a hash value which would allow non gooogle hostnames to construct LAA urls.
-          (GOOGLE_DOMAIN_RE.test(parseUrlDeprecated(referrer).hostname) ||
+          ((parsedReferrer.protocol === 'https' &&
+            GOOGLE_DOMAIN_RE.test(parsedReferrer.hostname)) ||
             getMode(this.ampdoc_.win).localDev) &&
           parsedQuery[`gaa_at`] == 'laa' &&
           parsedQuery[`gaa_n`] &&
