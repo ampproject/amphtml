@@ -164,6 +164,21 @@ module.exports = {
     'local/prefer-unnested-spread-objects': 2,
     'local/private-prop-names': 2,
     'local/query-selector': 2,
+    'local/restrict-this-access': [
+      2,
+      {
+        className: 'PreactBaseElement',
+        allowed: [
+          'element',
+          'getProp',
+          'mutateElement',
+          'mutateProps',
+          'registerAction',
+          'registerApiAction',
+          'win',
+        ],
+      },
+    ],
     'local/todo-format': 0,
     'local/unused-private-field': 2,
     'local/vsync': 0,

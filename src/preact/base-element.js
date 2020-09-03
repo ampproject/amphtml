@@ -136,7 +136,7 @@ export class PreactBaseElement extends AMP.BaseElement {
   buildCallback() {
     const Ctor = this.constructor;
 
-    this.observer = new MutationObserver(this.checkMutations_.bind(this));
+    this.observer = new MutationObserver((rs) => this.checkMutations_(rs));
     const childrenInit = Ctor['children'] ? CHILDREN_MUTATION_INIT : null;
     const passthroughInit =
       Ctor['passthrough'] || Ctor['passthroughNonEmpty']
@@ -324,7 +324,7 @@ export class PreactBaseElement extends AMP.BaseElement {
       } else {
         const container = doc.createElement('i-amphtml-c');
         this.container_ = container;
-        this.applyFillContent(container);
+        container.classList.add('i-amphtml-fill-content');
         if (!Ctor['detached']) {
           this.element.appendChild(container);
         }
