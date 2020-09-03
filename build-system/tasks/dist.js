@@ -383,10 +383,6 @@ function preBuildLoginDoneVersion(version) {
   const html = fs.readFileSync(htmlPath, 'utf8');
   const minJs = `https://${hostname}/v0/amp-login-done-${version}.js`;
   const minHtml = html
-    /*
-    .replace(`../../../${getOutputDir()}/v0/amp-login-done-${version}.max.js`, minJs)
-    .replace(`../../../${getOutputDir()}/v0/amp-login-done-${version}.js`, minJs);
-    */
     .replace(`../../../dist/v0/amp-login-done-${version}.max.js`, minJs)
     .replace(`../../../dist/v0/amp-login-done-${version}.js`, minJs);
   if (minHtml.indexOf(minJs) == -1) {
