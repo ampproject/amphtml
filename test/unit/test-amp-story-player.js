@@ -285,7 +285,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     });
   });
 
-  it('dispatch noNextStory when in last story', async () => {
+  it('should dispatch noNextStory when in last story', async () => {
     buildStoryPlayer(1);
 
     await manager.loadPlayers();
@@ -294,8 +294,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     const noNextSpy = env.sandbox.spy();
     playerEl.addEventListener('noNextStory', noNextSpy);
 
-    const fakeData = {next: true};
-    fireHandler['selectDocument']('selectDocument', fakeData);
+    fireHandler['selectDocument']('selectDocument', {next: true});
 
     expect(noNextSpy).to.have.been.called;
   });
@@ -309,10 +308,68 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     const noNextSpy = env.sandbox.spy();
     playerEl.addEventListener('noNextStory', noNextSpy);
 
-    const fakeData = {next: true};
-    fireHandler['selectDocument']('selectDocument', fakeData);
+    fireHandler['selectDocument']('selectDocument', {next: true});
 
     expect(noNextSpy).to.not.have.been.called;
+  });
+
+  it('should not dispatch noNextStory when circular wrapping is enabled', async () => {
+    buildStoryPlayer(1);
+    playerEl.setAttribute('enable-circular-wrapping', '');
+
+    await manager.loadPlayers();
+    await nextTick();
+
+    const noNextSpy = env.sandbox.spy();
+    playerEl.addEventListener('noNextStory', noNextSpy);
+
+    fireHandler['selectDocument']('selectDocument', {next: true});
+
+    expect(noNextSpy).to.not.have.been.called;
+  });
+
+  it('should dispatch noPreviousStory when in first story', async () => {
+    buildStoryPlayer(1);
+
+    await manager.loadPlayers();
+    await nextTick();
+
+    const noPreviousSpy = env.sandbox.spy();
+    playerEl.addEventListener('noPreviousStory', noPreviousSpy);
+
+    fireHandler['selectDocument']('selectDocument', {previous: true});
+
+    expect(noPreviousSpy).to.have.been.called;
+  });
+
+  it('should not dispatch noPreviousStory when not in first story', async () => {
+    buildStoryPlayer(2);
+
+    await manager.loadPlayers();
+    await nextTick();
+
+    const noPreviousSpy = env.sandbox.spy();
+    playerEl.addEventListener('noPreviousStory', noPreviousSpy);
+
+    fireHandler['selectDocument']('selectDocument', {next: true});
+    fireHandler['selectDocument']('selectDocument', {previous: true});
+
+    expect(noPreviousSpy).to.not.have.been.called;
+  });
+
+  it('should not dispatch noPreviousStory when circular wrapping is enabled', async () => {
+    buildStoryPlayer(2);
+    playerEl.setAttribute('enable-circular-wrapping', '');
+
+    await manager.loadPlayers();
+    await nextTick();
+
+    const noPreviousSpy = env.sandbox.spy();
+    playerEl.addEventListener('noPreviousStory', noPreviousSpy);
+
+    fireHandler['selectDocument']('selectDocument', {previous: true});
+
+    expect(noPreviousSpy).to.not.have.been.called;
   });
 
   it('should navigate when swiping', async () => {
