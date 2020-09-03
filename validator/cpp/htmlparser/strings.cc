@@ -99,10 +99,6 @@ bool Strings::IsCharAlphabet(char c) {
   return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
 }
 
-bool Strings::IsCharAlphabet(char32_t c) {
-  return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
-}
-
 // Returns true if character is char 0-9.
 bool Strings::IsDigit(char c) {
   return '0' <= c && c <= '9';
@@ -164,15 +160,11 @@ int8_t Strings::CodePointByteSequenceCount(uint8_t c) {
   return 1;
 }
 
-int Strings::CodePointNumBytes(char32_t c) {
-  // 0b0xxxxxxx
-  if ((c & 0xffffff80) == 0) return 1;
-  // 0b11xxxxxx
-  if ((c & 0xfffff800) == 0) return 2;
-  // 0b111xxxxx
-  if ((c & 0xffff0000) == 0) return 3;
-  // 0b1111xxxx
-  if ((c & 0xffe00000) == 0) return 4;
+int8_t Strings::CodePointNumBytes(char32_t c) {
+  if (c & 0xffffff80) return 1;
+  if (c & 0xfffff800) return 2;
+  if (c & 0xffff0000) return 3;
+  if (c & 0xffe00000) return 4;
 
   // Defaults to 1 byte ascii.
   return 1;
@@ -204,7 +196,7 @@ std::optional<char32_t> Strings::DecodeUtf8Symbol(std::string_view* s) {
     bool c2_ok = ReadContinuationByte(*(s->data()), &c2);
     s->remove_prefix(1);
     // Invalid byte in the sequence.
-    if (!c2_ok) return std::nullopt;
+    if (!c2_ok) return L'\uFFFD';
     char32_t code_point = ((c & 0x1f) << 6) | c2;
     if (code_point < 0x80) {
       return std::nullopt;
@@ -223,7 +215,7 @@ std::optional<char32_t> Strings::DecodeUtf8Symbol(std::string_view* s) {
     bool c3_ok = ReadContinuationByte(*(s->data()), &c3);
     s->remove_prefix(1);
     // Invalid bytes in the sequence.
-    if (!(c2_ok && c3_ok)) return std::nullopt;
+    if (!(c2_ok && c3_ok)) return L'\uFFFD';
     char32_t code_point = ((c & 0x0f) << 12) | (c2 << 6) | c3;
     if (code_point < 0x0800) {
       return std::nullopt;
@@ -250,7 +242,7 @@ std::optional<char32_t> Strings::DecodeUtf8Symbol(std::string_view* s) {
     bool c4_ok = ReadContinuationByte(*(s->data()), &c4);
     s->remove_prefix(1);
     // Invalid bytes in the sequence.
-    if (!(c2_ok && c3_ok && c4_ok)) return std::nullopt;
+    if (!(c2_ok && c3_ok && c4_ok)) return L'\uFFFD';
     char32_t code_point =  ((c & 0x07) << 0x12) |
                            (c2 << 0x0c) |
                            (c3 << 0x06) | c4;
