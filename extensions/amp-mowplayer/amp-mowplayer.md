@@ -26,7 +26,7 @@ limitations under the License.
 
 ## Usage
 
-Displays a [Mow Player](https://mowplayer.com/) video widget.
+Use `amp-mowplater` to display a [Mow Player](https://mowplayer.com/) video widget.
 
 ## Attributes
 

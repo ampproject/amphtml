@@ -24,15 +24,15 @@ limitations under the License.
 
 # amp-instagram
 
-## Behavior
+## Usage
+
+Use `amp-instagram` to display an [Instagram](https://www.instagram.com/) embed.
 
 The `width` and `height` attributes are special for the Instagram embed.
 These should be the actual width and height of the Instagram image.
 The system automatically adds space for the "chrome" that Instagram adds around the image.
 
 Many Instagrams are square. When you set `layout="responsive"` any value where `width` and `height` are the same will work.
-
-Example:
 
 ```html
 <amp-instagram
@@ -51,23 +51,20 @@ When using non-responsive layout you will need to account for the extra space ad
 
 ## Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>data-shortcode</strong></td>
-    <td>The instagram data-shortcode is found in every instagram photo URL.
-<br>
-For example, in https://instagram.com/p/fBwFP, <code>fBwFP</code> is the data-shortcode.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-captioned</strong></td>
-    <td>Include the Instagram caption. <code>amp-instagram</code> will attempt to resize to the correct height including the caption.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
-  </tr>
-</table>
+### data-shortcode
+
+The instagram data-shortcode is found in every instagram photo URL.
+
+For example, in `https://instagram.com/p/fBwFP`, `fBwFP` is the data-shortcode.
+
+### data-captioned
+
+Include the Instagram caption. `amp-instagram` will attempt to resize to the correct height including the caption.
+
+### Common attributes
+
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
 ## Validation
 
-See [amp-instagram rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/validator-amp-instagram.protoascii) in the AMP validator specification.
+See [amp-instagram rules](validator-amp-instagram.protoascii) in the AMP validator specification.

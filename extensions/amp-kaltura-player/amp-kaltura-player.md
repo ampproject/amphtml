@@ -24,11 +24,11 @@ limitations under the License.
 
 # amp-kaltura-player
 
-## Example
+## Usage
+
+Use the `amp-kaltura-player` component to display a [Kaltura Player](http://player.kaltura.com/docs/).
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
-
-Example:
 
 ```html
 <amp-kaltura-player
@@ -46,37 +46,32 @@ Example:
 
 ## Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>data-serviceUrl</strong></td>
-    <td>The Kaltura service url. This attribute is optional.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-partner</strong></td>
-    <td>The Kaltura partner id. This attribute is mandatory.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-uiconf</strong></td>
-    <td>The Kaltura player id - uiconf id.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-entryid</strong></td>
-    <td>The Kaltura entry id.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-param-*</strong></td>
-    <td><p>All <code>data-param-*</code> attributes will be added as query parameter to the player iframe src. This may be used to pass custom values through to player plugins, such as ad parameters or video ids for Perform players.</p>
-<p>Keys and values will be URI encoded. Keys will be camel cased.</p>
-<ul>
-  <li>`data-param-streamerType="auto"` becomes `&flashvars[streamerType]=auto`</li>
-</ul></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
-  </tr>
-</table>
+### data-partner (required)
+
+The Kaltura partner id. This attribute is required.
+
+### data-serviceUrl
+
+The Kaltura service url. This attribute is optional.
+
+### data-uiconf
+
+The Kaltura player id - uiconf id.
+
+### data-entryid
+
+The Kaltura entry id.
+
+### data-param-\*
+
+All `data-param-*` attributes will be added as query parameter to the player iframe src. This may be used to pass custom values through to player plugins, such as ad parameters or video ids for Perform players.
+
+Keys and values will be URI encoded. Keys will be camel cased: `data-param-streamerType="auto"` becomes `&flashvars[streamerType]=auto`
+
+### Common attributes
+
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
 ## Validation
 
-See [amp-kaltura-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-kaltura-player/validator-amp-kaltura-player.protoascii) in the AMP validator specification.
+See [amp-kaltura-player rules](validator-amp-kaltura-player.protoascii) in the AMP validator specification.

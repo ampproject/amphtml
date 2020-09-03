@@ -24,10 +24,9 @@ limitations under the License.
 
 # amp-mraid
 
-## Overview
+## Usage
 
-When the `amp-mraid` extension is included in an AMPHTML ad it will load
-`mraid.js` and register MRAID functions as host services. This allows
+Use the `amp-mraid` component to load and register `mraid.js` functions and host services in an AMPHTML ad. This component allows
 `amp-analytics`, `amp-ad-exit`, and `amp-lightbox` to operate in mobile app ads.
 
 ## Validation
