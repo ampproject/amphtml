@@ -15,18 +15,14 @@
  */
 
 import * as Preact from '../../../src/preact';
+import {getLocaleStrings} from './date-countdown-config';
 import {useAmpContext} from '../../../src/preact/context';
-import {useEffect, useState} from '../../../src/preact';
+import {useEffect, useRef, useState} from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
 const NAME = 'DateCountdown';
 
-const DEFAULT_OFFSET_SECONDS = 0;
-const DEFAULT_LOCALE = 'en';
-const DEFAULT_WHEN_ENDED = 'stop';
-const DEFAULT_BIGGEST_UNIT = 'DAYS';
-const DELAY = 1000;
-
+// Constants
 /** @const {number} */
 const MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000;
 
@@ -39,24 +35,22 @@ const MILLISECONDS_IN_MINUTE = 60 * 1000;
 /** @const {number} */
 const MILLISECONDS_IN_SECOND = 1000;
 
-const LOCALE_WORD = {
-  'de': ['Jahren', 'Monaten', 'Tagen', 'Stunden', 'Minuten', 'Sekunden'],
-  'en': ['Years', 'Months', 'Days', 'Hours', 'Minutes', 'Seconds'],
-  'es': ['años', 'meses', 'días', 'horas', 'minutos', 'segundos'],
-  'fr': ['ans', 'mois', 'jours', 'heures', 'minutes', 'secondes'],
-  'id': ['tahun', 'bulan', 'hari', 'jam', 'menit', 'detik'],
-  'it': ['anni', 'mesi', 'giorni', 'ore', 'minuti', 'secondi'],
-  'ja': ['年', 'ヶ月', '日', '時間', '分', '秒'],
-  'ko': ['년', '달', '일', '시간', '분', '초'],
-  'nl': ['jaar', 'maanden', 'dagen', 'uur', 'minuten', 'seconden'],
-  'pt': ['anos', 'meses', 'dias', 'horas', 'minutos', 'segundos'],
-  'ru': ['год', 'месяц', 'день', 'час', 'минута', 'секунда'],
-  'th': ['ปี', 'เดือน', 'วัน', 'ชั่วโมง', 'นาที', 'วินาที'],
-  'tr': ['yıl', 'ay', 'gün', 'saat', 'dakika', 'saniye'],
-  'vi': ['năm', 'tháng', 'ngày', 'giờ', 'phút', 'giây'],
-  'zh-cn': ['年', '月', '天', '小时', '分钟', '秒'],
-  'zh-tw': ['年', '月', '天', '小時', '分鐘', '秒'],
+/** @const {number} */
+const DELAY = 1000;
+
+/** @const {Object<string, number>} */
+const TimeUnit = {
+  DAYS: 1,
+  HOURS: 2,
+  MINUTES: 3,
+  SECONDS: 4,
 };
+
+// Default prop values
+const DEFAULT_OFFSET_SECONDS = 0;
+const DEFAULT_LOCALE = 'en';
+const DEFAULT_WHEN_ENDED = 'stop';
+const DEFAULT_BIGGEST_UNIT = 'DAYS';
 
 /**
  * @param {!DateCountdownPropsDef} props
@@ -83,6 +77,7 @@ export function DateCountdown({
     )
   );
   const [timeLeft, setTimeLeft] = useState(epoch - Date.now());
+  const [localeStrings] = useState(getLocaleWord(locale));
 
   useEffect(() => {
     if (!playable) {
@@ -100,7 +95,7 @@ export function DateCountdown({
 
   const data = {
     ...getYDHMSFromMs(timeLeft, biggestUnit),
-    ...getLocaleWord(locale),
+    ...localeStrings,
   };
   return render(data, children);
 }
@@ -120,7 +115,7 @@ function getEpoch(endDate, timeleftMs, timestampMs, timestampSeconds) {
   if (endDate) {
     epoch = Date.parse(endDate);
   } else if (timeleftMs) {
-    epoch = Number(new Date()) + timeleftMs;
+    epoch = Date.now() + timeleftMs;
   } else if (timestampMs) {
     epoch = timestampMs;
   } else if (timestampSeconds) {
@@ -143,13 +138,13 @@ function getEpoch(endDate, timeleftMs, timestampMs, timestampSeconds) {
  * @return {!JsonObject}
  */
 function getLocaleWord(locale) {
-  if (LOCALE_WORD[locale] === undefined) {
+  if (getLocaleStrings(locale) === undefined) {
     displayWarning(
       `Invalid locale ${locale}, defaulting to ${DEFAULT_LOCALE}. ${NAME}`
     );
     locale = DEFAULT_LOCALE;
   }
-  const localeWordList = LOCALE_WORD[locale];
+  const localeWordList = getLocaleStrings(locale);
   return {
     'years': localeWordList[0],
     'months': localeWordList[1],
@@ -168,13 +163,6 @@ function getLocaleWord(locale) {
  * @return {Object}
  */
 function getYDHMSFromMs(ms, biggestUnit) {
-  /** @enum {number} */
-  const TimeUnit = {
-    DAYS: 1,
-    HOURS: 2,
-    MINUTES: 3,
-    SECONDS: 4,
-  };
   //Math.trunc is used instead of Math.floor to support negative past date
   const d =
     TimeUnit[biggestUnit] == TimeUnit.DAYS
