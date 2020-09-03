@@ -195,7 +195,9 @@ export function getPreactContextMetadata(
     'initialLayoutRect': {},
     'canary': isCanary(parentWindow),
     'hidden': false,
+    // TODO: look into IntersectionObserverEntry
     'initialIntersection': {},
+    // TODO: How to read these without a DOM?
     'domFingerprint': DomFingerprint.generate(element),
     'experimentToggles': experimentToggles(parentWindow),
     'sentinel': sentinel,
