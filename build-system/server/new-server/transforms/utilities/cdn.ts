@@ -16,8 +16,10 @@
 
 import {URL} from 'url';
 import {parse, format} from 'path';
+import minimist from 'minimist';
 
 export const VALID_CDN_ORIGIN = 'https://cdn.ampproject.org';
+const argv = minimist(process.argv.slice(2));
 
 /**
  * Convert an existing URL to one from the local `serve` command.
@@ -32,11 +34,12 @@ export function CDNURLToLocalDistURL(
   url.port = '8000';
 
   const [overwriteablePathname, newPathname] = pathnames;
+  const outputDir = argv.sxg ? 'sxg' : 'dist'
   if (url.pathname === overwriteablePathname && newPathname !== null) {
     url.pathname = newPathname;
   }
 
-  const parsedPath = parse('/dist' + url.pathname);
+  const parsedPath = parse(`/${outputDir}${url.pathname}`);
   if (parsedPath.ext !== extension) {
     parsedPath.base = parsedPath.base.replace(parsedPath.ext, extension);
     parsedPath.ext = extension;

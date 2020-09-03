@@ -15,8 +15,8 @@
  */
 
 import {getMode} from '../mode';
-import {urls} from '../config';
 import {getOutputDir} from '../../build-system/tasks/helpers';
+import {urls} from '../config';
 
 /**
  * Internal structure that maintains the state of an extension through loading.

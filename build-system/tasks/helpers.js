@@ -228,7 +228,7 @@ function maybeToEsmName(name) {
   return argv.esm ? toEsmName(name) : name;
 }
 
-function getOutputDir(name){
+function getOutputDir() {
   return argv.sxg ? 'sxg' : 'dist';
 }
 

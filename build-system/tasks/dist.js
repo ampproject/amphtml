@@ -247,7 +247,11 @@ function copyCss() {
       .src('build/css/amp-*.css', {base: 'build/css/'})
       .pipe(gulp.dest(`${getOutputDir()}/v0`))
   ).then(() => {
-    endBuildStep('Copied', `build/css/*.css to ${getOutputDir()}/v0/*.css`, startTime);
+    endBuildStep(
+      'Copied',
+      `build/css/*.css to ${getOutputDir()}/v0/*.css`,
+      startTime
+    );
   });
 }
 
@@ -379,7 +383,7 @@ function preBuildLoginDoneVersion(version) {
   const html = fs.readFileSync(htmlPath, 'utf8');
   const minJs = `https://${hostname}/v0/amp-login-done-${version}.js`;
   const minHtml = html
-  /*
+    /*
     .replace(`../../../${getOutputDir()}/v0/amp-login-done-${version}.max.js`, minJs)
     .replace(`../../../${getOutputDir()}/v0/amp-login-done-${version}.js`, minJs);
     */
@@ -392,7 +396,10 @@ function preBuildLoginDoneVersion(version) {
   mkdirSync(`${getOutputDir()}`);
   mkdirSync(`${getOutputDir()}/v0`);
 
-  fs.writeFileSync(`${getOutputDir()}/v0/amp-login-done-${version}.html`, minHtml);
+  fs.writeFileSync(
+    `${getOutputDir()}/v0/amp-login-done-${version}.html`,
+    minHtml
+  );
 
   // Build JS.
   const js = fs.readFileSync(jsPath, 'utf8');

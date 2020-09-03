@@ -26,7 +26,7 @@ const argv = minimist(process.argv.slice(2));
 const transforms = [transformStories(), transformScriptPaths(), transformCss()];
 
 export async function transform(fileLocation: string): Promise<string> {
-  if (argv.esm) {
+  if (argv.esm || argv.sxg) {
     transforms.unshift(transformModules());
   }
 
