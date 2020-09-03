@@ -46,10 +46,6 @@ async function launchWebServer_() {
   );
 }
 
-async function cleanUp_() {
-  await stopServer();
-}
-
 function createMocha_() {
   let reporter;
   if (argv.testnames || argv.watch) {
@@ -60,7 +56,7 @@ function createMocha_() {
     reporter = dotsReporter;
   }
 
-  const mocha = new Mocha({
+  return new Mocha({
     // e2e tests have a different standard for when a test is too slow,
     // so we set a non-default threshold.
     slow: SLOW_TEST_THRESHOLD_MS,
@@ -68,19 +64,17 @@ function createMocha_() {
     retries: TEST_RETRIES,
     fullStackTrace: true,
   });
+}
 
-  return mocha;
+// Refreshes require cache and adds file to a Mocha instance.
+function addMochaFile(mocha, file) {
+  delete require.cache[path.resolve(file)];
+  mocha.addFile(file);
 }
 
 async function e2e() {
   // install e2e-specific modules
   installPackages(__dirname);
-
-  // set up promise to return to gulp.task()
-  let resolver;
-  const deferred = new Promise((resolverIn) => {
-    resolver = resolverIn;
-  });
 
   require('@babel/register')({caller: {name: 'test'}});
   const {describes} = require('./helper');
@@ -98,48 +92,47 @@ async function e2e() {
   // start up web server
   await launchWebServer_();
 
+  // set up promise to return to gulp.task()
+  let resolve;
+  const deferred = new Promise((res) => {
+    resolve = res;
+  });
+
   // run tests
   if (!argv.watch) {
-    log('Running tests...');
     const mocha = createMocha_();
+    const addFile = addMochaFile.bind(null, mocha);
 
     // specify tests to run
     if (argv.files) {
-      getFilesFromArgv().forEach((file) => {
-        delete require.cache[file];
-        mocha.addFile(file);
-      });
+      getFilesFromArgv().forEach(addFile);
     } else {
       config.e2eTestPaths.forEach((path) => {
-        glob.sync(path).forEach((file) => {
-          delete require.cache[file];
-          mocha.addFile(file);
-        });
+        glob.sync(path).forEach(addFile);
       });
     }
 
+    log('Running tests...');
     await reportTestStarted();
     mocha.run(async (failures) => {
       // end web server
-      await cleanUp_();
+      await stopServer();
 
       // end task
       process.exitCode = failures ? 1 : 0;
-      await resolver();
+      resolve();
     });
   } else {
     const filesToWatch = argv.files
       ? getFilesFromArgv()
       : [config.e2eTestPaths];
-    const watcher = watch(filesToWatch);
+
     log('Watching', cyan(filesToWatch), 'for changes...');
-    watcher.on('change', (file) => {
+    watch(filesToWatch).on('change', (file) => {
       log('Detected a change in', cyan(file));
       log('Running tests...');
-      // clear file from node require cache if running test again
-      delete require.cache[path.resolve(file)];
       const mocha = createMocha_();
-      mocha.files = [file];
+      addMochaFile(mocha, file);
       mocha.run();
     });
   }
