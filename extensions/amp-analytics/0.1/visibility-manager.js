@@ -872,7 +872,6 @@ export class VisibilityManagerForDoc extends VisibilityManager {
         Number(intersection.width),
         Number(intersection.height)
       );
-      // TODO(#29618): Remove after ampim investigation
       let {boundingClientRect} = change;
       boundingClientRect =
         boundingClientRect &&
@@ -892,7 +891,6 @@ export class VisibilityManagerForDoc extends VisibilityManager {
   }
 
   /**
-   * TODO(#29618): Clean up boundingClientRect after ampim investigation
    * @param {!Element} target
    * @param {number} intersectionRatio
    * @param {!../../../src/layout-rect.LayoutRectDef} intersectionRect
@@ -908,6 +906,12 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     intersectionRatio = Math.min(Math.max(intersectionRatio, 0), 1);
     const id = getElementId(target);
     const trackedElement = this.trackedElements_[id];
+    if (boundingClientRect.width < 1 || boundingClientRect.height < 1) {
+      // Set intersectionRatio to 0 when the element is not visible.
+      // Use < 1 because the width/height can
+      // be a double value on high resolution screen
+      intersectionRatio = 0;
+    }
     if (trackedElement) {
       trackedElement.intersectionRatio = intersectionRatio;
       trackedElement.intersectionRect = intersectionRect;
