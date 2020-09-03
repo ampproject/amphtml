@@ -300,10 +300,10 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     );
 
     env.sandbox.stub(platform, 'getLAAParams_').returns({
-      'glaa_ts': (Date.now() / 1000 - 10).toString(16),
-      'glaa_at': 'laa',
-      'glaa_sig': 'signature',
-      'glaa_n': 123456,
+      'gaa_ts': (Date.now() / 1000 - 10).toString(16),
+      'gaa_at': 'laa',
+      'gaa_sig': 'signature',
+      'gaa_n': 123456,
     });
 
     const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
@@ -328,10 +328,10 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
       serviceAdapter
     );
     env.sandbox.stub(platform, 'getLAAParams_').returns({
-      'glaa_ts': (Date.now() / 1000 + 10).toString(16),
-      'glaa_at': 'laa',
-      'glaa_sig': 'signature',
-      'glaa_n': 123456,
+      'gaa_ts': (Date.now() / 1000 + 10).toString(16),
+      'gaa_at': 'laa',
+      'gaa_sig': 'signature',
+      'gaa_n': 123456,
     });
     const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
       Promise.resolve({
@@ -347,7 +347,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     expect(fetchStub).to.not.be.called;
   });
 
-  it('should ingore valid LAA if referrer is not allowed', async () => {
+  it('should ignore valid LAA if referrer domain is not allowed', async () => {
     env.sandbox
       .stub(viewer, 'getReferrerUrl')
       .callsFake(() => Promise.resolve('http://www.example.com'));
@@ -358,10 +358,40 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     );
     ampdoc.win.__AMP_MODE.localDev = false;
     env.sandbox.stub(platform, 'getLAAParams_').returns({
-      'glaa_ts': (Date.now() / 1000 + 10).toString(16),
-      'glaa_at': 'laa',
-      'glaa_sig': 'signature',
-      'glaa_n': 123456,
+      'gaa_ts': (Date.now() / 1000 + 10).toString(16),
+      'gaa_at': 'laa',
+      'gaa_sig': 'signature',
+      'gaa_n': 123456,
+    });
+    const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve({
+            entitlements: {},
+          }),
+      })
+    );
+
+    const ents = await platform.getEntitlements();
+    expect(ents).to.be.null;
+    expect(fetchStub).to.not.be.called;
+  });
+
+  it('should ignore valid LAA if referrer protocol is not allowed', async () => {
+    env.sandbox
+      .stub(viewer, 'getReferrerUrl')
+      .callsFake(() => Promise.resolve('http://google.com'));
+    platform = new GoogleSubscriptionsPlatform(
+      ampdoc,
+      {enableLAA: true, enableEntitlements: false},
+      serviceAdapter
+    );
+    ampdoc.win.__AMP_MODE.localDev = false;
+    env.sandbox.stub(platform, 'getLAAParams_').returns({
+      'gaa_ts': (Date.now() / 1000 + 10).toString(16),
+      'gaa_at': 'laa',
+      'gaa_sig': 'signature',
+      'gaa_n': 123456,
     });
     const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
       Promise.resolve({
