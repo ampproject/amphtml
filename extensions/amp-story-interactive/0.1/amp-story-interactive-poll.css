@@ -14,32 +14,32 @@
  * limitations under the License.
  */
 
-
+/* 1em = 16px for interactive components, unless overriden by font-size */
 .i-amphtml-story-interactive-option-container {
   background-color: var(--i-amphtml-interactive-options-chip-background-color) !important;
-  border-radius: 16px !important;
+  border-radius: 1em !important;
   color: var(--i-amphtml-interactive-strong-text-color) !important;
   font-weight: bold !important;
-  padding: 8px !important;
+  padding: .5em !important;
 }
 
 .i-amphtml-story-interactive-option {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  height: 58px !important;
+  height: 3.5em !important;
   overflow: hidden !important;
-  padding: 0px 12px !important;
+  padding: 0px .75em !important;
   position: relative !important;
   box-shadow: var(--i-amphtml-interactive-chip-shadow), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
   -webkit-box-shadow: var(--i-amphtml-interactive-chip-shadow), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
   -moz-box-shadow: var(--i-amphtml-interactive-chip-shadow), inset 0px 0px 0px 1px var(--i-amphtml-interactive-theme-border) !important;
-  border-radius: 8px !important;
+  border-radius: .5em !important;
   background-color: var(--i-amphtml-interactive-option-background-color);
 }
 
 .i-amphtml-story-interactive-option:not(:first-child) {
-  margin-top: 8px !important;
+  margin-top: .5em !important;
 }
 
 .i-amphtml-story-interactive-option.i-amphtml-story-interactive-option-selected {
@@ -79,7 +79,7 @@
 }
 
 .i-amphtml-story-interactive-option-text {
-  font-size: 22px !important;
+  font-size: 1.375em !important;
   margin: 0 !important;
   z-index: 1 !important;
   transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
@@ -99,18 +99,18 @@
 
 .i-amphtml-story-interactive-option-percentage {
   font-weight: 700 !important;
-  font-size: 28px !important;
+  font-size: 1.75em !important;
   margin: 0 !important;
   opacity: 0 !important;
   transition: transform var(--i-amphtml-interactive-animation-time) var(--i-amphtml-interactive-ease-out-curve) !important;
-  transform: translateX(60px) !important;
+  transform: translateX(2em) !important;
   flex-shrink: 0 !important;
   /* Percentage sign always goes to the right of the number, regardless of language. TODO(mszylkowski): rtl for arabic */
   direction: ltr !important;
 }
 
 .i-amphtml-story-interactive-poll-container[dir="rtl"] .i-amphtml-story-interactive-option-percentage {
-  transform: translateX(-60px) !important;
+  transform: translateX(-2em) !important;
 }
 
 .i-amphtml-story-interactive-has-data.i-amphtml-story-interactive-post-selection[dir="rtl"] .i-amphtml-story-interactive-option-percentage,
@@ -120,8 +120,8 @@
 }
 
 .i-amphtml-story-interactive-option-percentage-sign {
-  font-size: 16px !important;
-  margin-left: -5px !important;
+  font-size: .6em !important;
+  margin-left: -.25em !important;
   display: inline-block !important;
 }
 
@@ -185,6 +185,6 @@
 
 @keyframes i-amphtml-story-interactive-option-text-landing-text {
   33% {
-    transform: translateY(3px);
+    transform: translateY(.2em);
   }
 }
