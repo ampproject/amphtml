@@ -75,10 +75,6 @@ const BUTTON = {
       tag: 'button',
       attrs: dict({'class': 'i-amphtml-story-button-move'}),
     },
-    // {
-    //   tag: 'div',
-    //   attrs: dict({'class': 'i-amphtml-story-page-sentinel'}),
-    // },
   ],
 };
 

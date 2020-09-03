@@ -20,9 +20,9 @@
   height: 100vh !important;
   top: 0 !important;
   bottom: 0 !important;
-  /* margin-left: -32px !important; */
   z-index: 100002 !important;
   cursor: pointer;
+  border: 1px solid red;
 }
 
 .i-amphtml-story-button-move {
