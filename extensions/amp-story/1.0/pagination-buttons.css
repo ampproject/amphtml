@@ -56,7 +56,7 @@
 
 /* Navigation buttons */
 .i-amphtml-story-button-move {
-  position: absolute!important;
+  position: fixed!important;
   top: 0!important;
   bottom: 0!important;
   margin: auto 40px!important;
