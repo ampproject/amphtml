@@ -67,6 +67,7 @@ export function DateCountdown({
   biggestUnit = DEFAULT_BIGGEST_UNIT,
   render,
   children,
+  ...rest
 }) {
   useResourcesNotify();
   const {'playable': playable} = useAmpContext();
@@ -78,26 +79,32 @@ export function DateCountdown({
   );
   const [timeLeft, setTimeLeft] = useState(epoch - Date.now());
   const [localeStrings] = useState(getLocaleWord(locale));
+  const rootRef = useRef(null);
 
   useEffect(() => {
     if (!playable) {
       return;
     }
-    const interval = setInterval(() => {
+    const win = rootRef.current.ownerDocument.defaultView;
+    const interval = win.setInterval(() => {
       const newTimeLeft = epoch - Date.now() + DELAY;
       setTimeLeft(newTimeLeft);
       if (whenEnded === DEFAULT_WHEN_ENDED && newTimeLeft < 1000) {
-        clearInterval(interval);
+        win.clearInterval(interval);
       }
     }, DELAY);
-    return () => clearInterval(interval);
+    return () => win.clearInterval(interval);
   }, [playable, epoch, whenEnded]);
 
   const data = {
     ...getYDHMSFromMs(timeLeft, biggestUnit),
     ...localeStrings,
   };
-  return render(data, children);
+  return (
+    <div ref={rootRef} {...rest}>
+      {render(data, children)}
+    </div>
+  );
 }
 
 /**
