@@ -178,11 +178,6 @@ int Strings::CodePointNumBytes(char32_t c) {
   return 1;
 }
 
-bool Strings::IsContinuationByte(uint8_t byte) {
-  // 0b10xxxxxx.
-  return (byte & 0xc0) == 0x80;
-}
-
 std::optional<char32_t> Strings::DecodeUtf8Symbol(std::string_view* s) {
   if (s->empty()) {
     return std::nullopt;

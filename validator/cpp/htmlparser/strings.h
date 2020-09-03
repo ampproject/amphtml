@@ -96,9 +96,6 @@ class Strings {
   // codepoint and tells how many bytes the codepoint contains.
   static int CodePointNumBytes(char32_t c);
 
-  // Checks if the byte is a continuation byte.
-  static bool IsContinuationByte(uint8_t byte);
-
   // Decodes byte sequence to utf-8 codepoint.
   // The s points to the first byte in the sequence. Moves the cursor past
   // the byte sequence if decoding is successful.
