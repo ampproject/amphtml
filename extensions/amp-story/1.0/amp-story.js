@@ -312,9 +312,6 @@ export class AmpStory extends AMP.BaseElement {
     /** @private {?HTMLMediaElement} */
     this.backgroundAudioEl_ = null;
 
-    /** @private {?./pagination-buttons.PaginationButtons} */
-    this.paginationButtons_ = null;
-
     /** @private {!AmpStoryHint} */
     this.ampStoryHint_ = new AmpStoryHint(this.win, this.element);
 
@@ -460,6 +457,8 @@ export class AmpStory extends AMP.BaseElement {
         );
       });
     }
+
+    this.buildPaginationButtons_();
   }
 
   /**
@@ -930,19 +929,13 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   buildPaginationButtons_() {
-    if (
-      this.paginationButtons_ ||
-      !this.storeService_.get(StateProperty.CAN_SHOW_PAGINATION_BUTTONS)
-    ) {
-      return;
+    if (this.storeService_.get(StateProperty.CAN_SHOW_PAGINATION_BUTTONS)) {
+      // TODO(#19768): Avoid passing a private function here.
+      const paginationButtons = PaginationButtons.create(this, () =>
+        this.hasBookend_()
+      );
+      paginationButtons.attach(this.element);
     }
-
-    // TODO(#19768): Avoid passing a private function here.
-    this.paginationButtons_ = PaginationButtons.create(this, () =>
-      this.hasBookend_()
-    );
-
-    this.paginationButtons_.attach(this.element);
   }
 
   /** @visibleForTesting */
@@ -1869,7 +1862,6 @@ export class AmpStory extends AMP.BaseElement {
         break;
       case UIType.DESKTOP_PANELS:
         this.setDesktopPositionAttributes_(this.activePage_);
-        this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
           this.element.classList.add('i-amphtml-story-desktop-panels');
@@ -1877,7 +1869,6 @@ export class AmpStory extends AMP.BaseElement {
         });
         break;
       case UIType.DESKTOP_FULLBLEED:
-        this.buildPaginationButtons_();
         this.vsync_.mutate(() => {
           this.element.setAttribute('desktop', '');
           this.element.classList.add('i-amphtml-story-desktop-fullbleed');
