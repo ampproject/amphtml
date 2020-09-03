@@ -40,6 +40,34 @@ describes.endtoend(
   }
 );
 
+describes.endtoend(
+  'amp-list "amp-script:" with load-more',
+  {
+    testUrl:
+      'http://localhost:8000/test/fixtures/e2e/amp-list/amp-list-function-load-more.html',
+    experiments: ['protocol-adapters'],
+    environments: ['single'],
+  },
+  async (env) => {
+    let controller;
+
+    beforeEach(async () => {
+      controller = env.controller;
+    });
+
+    it('should load more when button is clicked until no more load-more-src', async function () {
+      const loadMore = await controller.findElement('[load-more-button]');
+      await controller.click(loadMore)
+
+      return poll(25, async () => {
+        const listItems = await getListItems(controller);
+        return listItems.length === 15;
+      }); 
+    });
+  }
+);
+
+
 function getListContainer(controller) {
   return controller.findElement('div[role=list]');
 }
