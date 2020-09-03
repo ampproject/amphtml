@@ -29,17 +29,14 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it.configure().run(
-      'should render list backed by amp-script data',
-      async function () {
-        const container = await getListContainer(controller);
-        await verifyContainer(controller, container);
+    it('should render list backed by amp-script data', async function () {
+      const container = await getListContainer(controller);
+      await verifyContainer(controller, container);
 
-        // Verify that all items rendered.
-        const listItems = await getListItems(controller);
-        await expect(listItems).to.have.length(2);
-      }
-    );
+      // Verify that all items rendered.
+      const listItems = await getListItems(controller);
+      await expect(listItems).to.have.length(2);
+    });
   }
 );
 
