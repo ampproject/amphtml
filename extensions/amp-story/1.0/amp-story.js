@@ -934,7 +934,7 @@ export class AmpStory extends AMP.BaseElement {
       const paginationButtons = PaginationButtons.create(this, () =>
         this.hasBookend_()
       );
-      paginationButtons.attach(this.element);
+      // paginationButtons.attach(this.element);
     }
   }
 
@@ -1039,41 +1039,8 @@ export class AmpStory extends AMP.BaseElement {
       });
     }
 
-    this.buildScreenReaderBackButton_();
-
     // Will resolve when all pages are built.
     return storyLayoutPromise;
-  }
-
-  /**
-   * Creates a focusable button for screen readers to navigate back.
-   * @private
-   */
-  buildScreenReaderBackButton_() {
-    const backButton = document.createElement('button');
-
-    const label = this.localizationService_.getLocalizedString(
-      LocalizedStringId.AMP_STORY_PAGINATION_BUTTON_PREVIOUS_PAGE_LABEL
-    );
-
-    backButton.classList.add('i-amphtml-story-screen-reader-back-button');
-    label && backButton.setAttribute('aria-label', label);
-    this.mutateElement(() => {
-      this.element.appendChild(backButton);
-    });
-
-    // Append class to hide button if on first page.
-    this.storeService_.subscribe(
-      StateProperty.CURRENT_PAGE_INDEX,
-      (pageIndex) =>
-        this.mutateElement(() =>
-          backButton.classList.toggle(
-            'i-amphtml-story-screen-reader-back-button-hidden',
-            pageIndex === 0 && !this.viewer_.hasCapability('swipe')
-          )
-        ),
-      true /** callToInitialize */
-    );
   }
 
   /**

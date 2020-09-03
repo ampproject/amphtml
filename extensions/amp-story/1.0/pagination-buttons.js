@@ -17,6 +17,7 @@ import {
   Action,
   StateProperty,
   getStoreService,
+  UIType,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
 import {CommonSignals} from '../../../src/common-signals';
@@ -216,6 +217,8 @@ export class PaginationButtons {
     this.hasBookend_ = hasBookend;
 
     this.initializeListeners_();
+
+    this.attach_();
   }
 
   /**
@@ -228,21 +231,27 @@ export class PaginationButtons {
   }
 
   /** @param {!Element} element */
-  attach(element) {
+  /** @private */
+  attach_() {
+    this.storeService_.get(StateProperty.UI_STATE) === UIType.DESKTOP_PANELS &&
+      this.addHoverListeners_();
+
+    this.ampStory_.element.appendChild(this.forwardButton_.element);
+    this.ampStory_.element.appendChild(this.backButton_.element);
+  }
+
+  addHoverListeners_() {
     setClassOnHover(
       this.forwardButton_.element,
-      element,
+      this.ampStory_.element,
       'i-amphtml-story-next-hover'
     );
 
     setClassOnHover(
       this.backButton_.element,
-      element,
+      this.ampStory_.element,
       'i-amphtml-story-prev-hover'
     );
-
-    element.appendChild(this.forwardButton_.element);
-    element.appendChild(this.backButton_.element);
   }
 
   /**
