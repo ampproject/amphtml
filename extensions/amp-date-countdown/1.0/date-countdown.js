@@ -17,7 +17,7 @@
 import * as Preact from '../../../src/preact';
 import {getLocaleStrings} from './date-countdown-config';
 import {useAmpContext} from '../../../src/preact/context';
-import {useEffect, useRef, useState} from '../../../src/preact';
+import {useEffect, useMemo, useRef, useState} from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
 const NAME = 'DateCountdown';
@@ -71,14 +71,16 @@ export function DateCountdown({
 }) {
   useResourcesNotify();
   const {'playable': playable} = useAmpContext();
-  const [epoch] = useState(
-    new Date(
-      getEpoch(endDate, timeleftMs, timestampMs, timestampSeconds) +
-        offsetSeconds * DELAY
-    )
+  const epoch = useMemo(
+    () =>
+      new Date(
+        getEpoch(endDate, timeleftMs, timestampMs, timestampSeconds) +
+          offsetSeconds * DELAY
+      ),
+    [endDate, timeleftMs, timestampMs, timestampSeconds, offsetSeconds]
   );
   const [timeLeft, setTimeLeft] = useState(epoch - Date.now());
-  const [localeStrings] = useState(getLocaleWord(locale));
+  const localeStrings = useMemo(() => getLocaleWord(locale), [locale]);
   const rootRef = useRef(null);
 
   useEffect(() => {
