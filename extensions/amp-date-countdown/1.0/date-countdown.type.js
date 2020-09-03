@@ -18,16 +18,16 @@
 
 /**
  * @typedef {{
- *   endDate (string|undefined),
- *   timeleftMs (number|undefined),
- *   timestampMs (number|undefined),
- *   timestampSeconds (number|undefined),
- *   offsetSeconds (number|undefined),
- *   whenEnded (string|undefined),
- *   locale (string|undefined),
- *   biggestUnit (string|undefined),
- *   render (function(!JsonObject, (?PreactDef.Renderable|undefined)):PreactDef.Renderable),
- *   children (?PreactDef.Renderable|undefined),
+ *   endDate: (string|undefined),
+ *   timeleftMs: (number|undefined),
+ *   timestampMs: (number|undefined),
+ *   timestampSeconds: (number|undefined),
+ *   offsetSeconds: (number|undefined),
+ *   whenEnded: (string|undefined),
+ *   locale: (string|undefined),
+ *   biggestUnit: (string|undefined),
+ *   render: (function(!JsonObject, (?PreactDef.Renderable|undefined)):PreactDef.Renderable),
+ *   children: (?PreactDef.Renderable|undefined),
  * }}
  */
 var DateCountdownPropsDef;

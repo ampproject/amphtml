@@ -15,9 +15,9 @@
  */
 
 import * as Preact from '../../../src/preact';
+import {useAmpContext} from '../../../src/preact/context';
 import {useEffect, useState} from '../../../src/preact';
 import {useResourcesNotify} from '../../../src/preact/utils';
-import {useAmpContext} from '../../../src/preact/context';
 
 const NAME = 'DateCountdown';
 
@@ -75,28 +75,33 @@ export function DateCountdown({
   children,
 }) {
   useResourcesNotify();
-  const {playable} = useAmpContext();
-  const [epoch, setEpoch] = useState(
-    getEpoch(endDate, timeleftMs, timestampMs, timestampSeconds) +
-      offsetSeconds * DELAY
+  const {'playable': playable} = useAmpContext();
+  const [epoch] = useState(
+    new Date(
+      getEpoch(endDate, timeleftMs, timestampMs, timestampSeconds) +
+        offsetSeconds * DELAY
+    )
   );
-  const [timeLeft, setTimeLeft] = useState(new Date(epoch) - new Date());
+  const [timeLeft, setTimeLeft] = useState(epoch - Date.now());
 
   useEffect(() => {
+    if (!playable) {
+      return;
+    }
     const interval = setInterval(() => {
-      const newTimeLeft = new Date(epoch) - new Date();
-      setTimeLeft(() => newTimeLeft);
+      const newTimeLeft = epoch - Date.now() + DELAY;
+      setTimeLeft(newTimeLeft);
       if (whenEnded === DEFAULT_WHEN_ENDED && newTimeLeft < 1000) {
         clearInterval(interval);
       }
     }, DELAY);
     return () => clearInterval(interval);
-  }, [playable]);
+  }, [playable, epoch, whenEnded]);
 
-  const data = Object.assign(
-    getYDHMSFromMs(timeLeft, biggestUnit),
-    getLocaleWord(locale)
-  );
+  const data = {
+    ...getYDHMSFromMs(timeLeft, biggestUnit),
+    ...getLocaleWord(locale),
+  };
   return render(data, children);
 }
 
@@ -135,11 +140,11 @@ function getEpoch(endDate, timeleftMs, timestampMs, timestampSeconds) {
  * Return an object with a label for 'years', 'months', etc. based on the
  * user provided locale string.
  * @param {string} locale
- * @return {!Object}
+ * @return {!JsonObject}
  */
 function getLocaleWord(locale) {
   if (LOCALE_WORD[locale] === undefined) {
-    throwWarning(
+    displayWarning(
       `Invalid locale ${locale}, defaulting to ${DEFAULT_LOCALE}. ${NAME}`
     );
     locale = DEFAULT_LOCALE;
@@ -220,7 +225,7 @@ function padStart(input) {
   if (input < -9 || input > 9) {
     return String(input);
   } else if (input >= -9 && input < 0) {
-    return '-0' + Math.abs(input);
+    return '-0' + -input;
   }
   return '0' + input;
 }
@@ -239,7 +244,7 @@ function supportBackDate(input) {
 /**
  * @param {?string} message
  */
-function throwWarning(message) {
+function displayWarning(message) {
   console /*OK*/
     .warn(message);
 }

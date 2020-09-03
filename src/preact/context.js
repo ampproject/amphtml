@@ -79,7 +79,7 @@ export function useAmpContext() {
 }
 
 /**
- *
+ * @return {JsonObject}
  */
 export function useAmpContext() {
   const AmpContext = getAmpContext();
