@@ -272,7 +272,7 @@ function copyParsers() {
  * @return {!Promise<!Array>}
  */
 async function preBuildWebPushPublisherFiles() {
-  mkdirSync(`${getOutputDir()}`);
+  mkdirSync(getOutputDir());
   mkdirSync(`${getOutputDir()}/v0`);
   const promises = [];
 
@@ -393,7 +393,7 @@ function preBuildLoginDoneVersion(version) {
     throw new Error('Failed to correctly set JS in login-done.html');
   }
 
-  mkdirSync(`${getOutputDir()}`);
+  mkdirSync(getOutputDir());
   mkdirSync(`${getOutputDir()}/v0`);
 
   fs.writeFileSync(
