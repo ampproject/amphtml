@@ -28,7 +28,7 @@ limitations under the License.
 
 ## Usage
 
-See [Google VR View](https://developers.google.com/vr/concepts/vrview) for more details.
+See [Google VR View](https://developers.google.com/vr/develop/web/vrview-web) for more details.
 
 VR view supports mono and stereo 360 images. Note:
 
