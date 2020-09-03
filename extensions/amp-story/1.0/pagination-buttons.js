@@ -216,15 +216,6 @@ export class PaginationButtons {
 
     this.initializeListeners_();
 
-    this.attach_();
-  }
-
-  /** @param {!Element} element */
-  /** @private */
-  attach_() {
-    this.storeService_.get(StateProperty.UI_STATE) === UIType.DESKTOP_PANELS &&
-      this.addHoverListeners_();
-
     this.ampStory_.element.appendChild(this.forwardButton_.element);
     this.ampStory_.element.appendChild(this.backButton_.element);
   }
