@@ -26,13 +26,20 @@ test('throws when duplicate classname is found', () => {
 import {createUseStyles} from 'react-jss';
 export const useStyles = createUseStyles({button: {fontSize: 12}});
     `;
-  const filename = 'test.jss.js';
   const plugins = [path.join(__dirname, '..')];
   const caller = {name: 'babel-jest'};
+  let filename;
 
-  // Transforming the same file twice should yield the same classnames, resulting in an error
+  // Transforming the same file contents twice should yield the same classnames, resulting in an error.
+  expect(() => {
+    filename = 'test1.jss.js';
+    babel.transformSync(fileContents, {filename, plugins, caller});
+    filename = 'test2.jss.js';
+    babel.transformSync(fileContents, {filename, plugins, caller});
+  }).toThrow(/Classnames must be unique across all files/);
+
+  // Transforming the actual same file twice should work (e.g. watch mode).
+  filename = 'test.jss.js';
   babel.transformSync(fileContents, {filename, plugins, caller});
-  expect(() =>
-    babel.transformSync(fileContents, {filename, plugins, caller})
-  ).toThrow(/Classnames must be unique across all files/);
+  babel.transformSync(fileContents, {filename, plugins, caller});
 });
