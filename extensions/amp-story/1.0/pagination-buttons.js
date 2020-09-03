@@ -16,8 +16,8 @@
 import {
   Action,
   StateProperty,
-  getStoreService,
   UIType,
+  getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
 import {CommonSignals} from '../../../src/common-signals';
@@ -108,11 +108,6 @@ class PaginationButton {
 
     /** @public @const {!Element} */
     this.element = renderAsElement(doc, BUTTON);
-    /** @public @const {!Element} */
-    this.button_ = devAssert(
-      this.element.querySelector('button'),
-      'Expect to find a button'
-    );
 
     this.element.classList.add(initialState.className);
     this.element.setAttribute('aria-label', initialState.label);
@@ -220,8 +215,11 @@ export class PaginationButtons {
     this.ampStory_.element.appendChild(this.backButton_.element);
   }
 
+  /** @private */
   addHoverListeners_() {
-    if (this.hoverListeners_) return;
+    if (this.hoverListeners_) {
+      return;
+    }
 
     const forwardButtonListeners = setClassOnHover(
       this.forwardButton_.element,
@@ -238,9 +236,7 @@ export class PaginationButtons {
     this.hoverListeners_ = forwardButtonListeners.concat(backButtonListeners);
   }
 
-  /**
-   * @private
-   */
+  /** @private */
   initializeListeners_() {
     this.storeService_.subscribe(StateProperty.BOOKEND_STATE, (isActive) => {
       this.onBookendStateUpdate_(isActive);
@@ -356,6 +352,11 @@ export class PaginationButtons {
     }
   }
 
+  /**
+   * Reacts to UI state updates.
+   * @param {!UIType} uiState
+   * @private
+   */
   onUIStateUpdate_(uiState) {
     if (
       uiState === UIType.DESKTOP_PANELS ||
