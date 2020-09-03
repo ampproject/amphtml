@@ -14,20 +14,20 @@
 # limitations under the license.
 #
 
-tags: {  # amp-playbuzz
+tags: {  # amp-exco
   html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
-    name: "amp-playbuzz"
+    name: "amp-exco"
     version: "0.1"
     version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-playbuzz>
+tags: {  # <amp-exco>
   html_format: AMP
-  tag_name: "AMP-PLAYBUZZ"
-  requires_extension: "amp-playbuzz"
+  tag_name: "AMP-EXCO"
+  requires_extension: "amp-exco"
   attrs: {
     name: "data-comments"
     value_casei: "false"

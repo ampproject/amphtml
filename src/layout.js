@@ -96,6 +96,7 @@ export const LOADING_ELEMENTS_ = {
   'AMP-AD': true,
   'AMP-ANIM': true,
   'AMP-EMBED': true,
+  'AMP-EXCO': true,
   'AMP-FACEBOOK': true,
   'AMP-FACEBOOK-COMMENTS': true,
   'AMP-FACEBOOK-PAGE': true,
@@ -105,7 +106,6 @@ export const LOADING_ELEMENTS_ = {
   'AMP-INSTAGRAM': true,
   'AMP-LIST': true,
   'AMP-PINTEREST': true,
-  'AMP-PLAYBUZZ': true,
   'AMP-TWITTER': true,
 };
 /**

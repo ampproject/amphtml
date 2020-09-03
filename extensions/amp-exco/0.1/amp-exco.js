@@ -15,14 +15,14 @@
  */
 
 /**
- * @fileoverview Embeds an playbuzz item.
- * The src attribute can be easily copied from a normal playbuzz URL.
+ * @fileoverview Embeds an Ex.Co item.
+ * The src attribute can be easily copied from a normal playbuzz or Ex.Co URL.
  * data-item supports item id which can be taken from the item's embed code
  * in case both are present data-item will be used
  * Example:
  * <code>
-    <amp-playbuzz
-        src="http://www.playbuzz.com/perezhilton/poll-which-presidential-candidate-did-ken-bone-vote-for"
+    <amp-exco
+        src="http://app.ex.co/stories/perezhilton/poll-which-presidential-candidate-did-ken-bone-vote-for"
         data-item="a6aa5a14-8888-4618-b2e3-fe6a30d8c51b"
         layout="responsive"
         height="300"
@@ -30,7 +30,7 @@
         data-item-info="true"
         data-share-buttons="true"
         data-comments="true">
-    </amp-playbuzz>
+    </amp-exco>
  * </code>
  *
  * For responsive embedding the width and height can be left unchanged from
@@ -39,7 +39,7 @@
 
 import * as events from '../../../src/event-helper';
 import * as utils from './utils';
-import {CSS} from '../../../build/amp-playbuzz-0.1.css.js';
+import {CSS} from '../../../build/amp-exco-0.1.css.js';
 import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {
@@ -53,7 +53,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {logo, showMoreArrow} from './images';
 import {removeElement} from '../../../src/dom';
 
-class AmpPlaybuzz extends AMP.BaseElement {
+class AmpExco extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -102,8 +102,8 @@ class AmpPlaybuzz extends AMP.BaseElement {
     // EXPERIMENT
     // AMP.toggleExperiment(EXPERIMENT, true); //for dev
     userAssert(
-      isExperimentOn(this.win, 'amp-playbuzz'),
-      'Enable amp-playbuzz experiment'
+      isExperimentOn(this.win, 'amp-exco'),
+      'Enable amp-exco experiment'
     );
 
     const e = this.element;
@@ -112,7 +112,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
 
     userAssert(
       src || itemId,
-      'Either src or data-item attribute is required for <amp-playbuzz> %s',
+      'Either src or data-item attribute is required for <amp-exco> %s',
       this.element
     );
 
@@ -146,7 +146,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
       placeholder.setAttribute('aria-label', 'Loading interactive element');
     }
     placeholder.setAttribute('placeholder', '');
-    placeholder.appendChild(this.createPlaybuzzLoader_());
+    placeholder.appendChild(this.createExcoLoader_());
     return placeholder;
   }
 
@@ -189,7 +189,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = this.generateEmbedSourceUrl_();
 
-    this.listenToPlaybuzzItemMessage_(
+    this.listenToExcoItemMessage_(
       'resize_height',
       utils.debounce(this.itemHeightChanged_.bind(this), 100)
     );
@@ -217,7 +217,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
   }
 
   /** @return {!Element} @private */
-  createPlaybuzzLoader_() {
+  createExcoLoader_() {
     const doc = this.element.ownerDocument;
     const createElement = utils.getElementCreator(doc);
 
@@ -262,7 +262,7 @@ class AmpPlaybuzz extends AMP.BaseElement {
    * @param {string} messageName
    * @param {Function} handler
    */
-  listenToPlaybuzzItemMessage_(messageName, handler) {
+  listenToExcoItemMessage_(messageName, handler) {
     const unlisten = events.listen(this.win, 'message', (event) =>
       utils.handleMessageByName(this.iframe_, event, messageName, handler)
     );
@@ -333,6 +333,6 @@ class AmpPlaybuzz extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-playbuzz', '0.1', (AMP) => {
-  AMP.registerElement('amp-playbuzz', AmpPlaybuzz, CSS);
+AMP.extension('amp-exco', '0.1', (AMP) => {
+  AMP.registerElement('amp-exco', AmpExco, CSS);
 });

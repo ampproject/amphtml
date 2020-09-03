@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-playbuzz';
+import '../amp-exco';
 import {toggleExperiment} from '../../../../src/experiments';
 
 function startsWith(string, searchString) {
@@ -22,10 +22,10 @@ function startsWith(string, searchString) {
 }
 
 describes.realWin(
-  'amp-playbuzz',
+  'amp-exco',
   {
     amp: {
-      extensions: ['amp-playbuzz'],
+      extensions: ['amp-exco'],
     },
   },
   (env) => {
@@ -34,7 +34,7 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      toggleExperiment(win, 'amp-playbuzz', true);
+      toggleExperiment(win, 'amp-exco', true);
     });
 
     function createOptionalParams(
@@ -63,7 +63,7 @@ describes.realWin(
     }
 
     function getIns(itemSrc, params, opt_responsive, opt_beforeLayoutCallback) {
-      const ins = doc.createElement('amp-playbuzz');
+      const ins = doc.createElement('amp-exco');
       if (itemSrc.itemUrl) {
         ins.setAttribute('src', itemSrc.itemUrl);
       }

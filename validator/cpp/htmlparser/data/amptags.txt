@@ -52,6 +52,7 @@ amp-delight-player
 amp-dynamic-css-classes
 amp-embed
 amp-embedly-card
+amp-exco
 amp-experiment
 amp-facebook
 amp-facebook-comments
@@ -97,7 +98,6 @@ amp-orientation-observer
 amp-pan-zoom
 amp-pinterest
 amp-pixel
-amp-playbuzz
 amp-position-observer
 amp-powr-player
 amp-reach-player

@@ -91,7 +91,7 @@ export function handleMessageByName(element, event, messageName, handler) {
   const isMessageFromElement = element.contentWindow === event.source;
 
   if (isMessageFromElement) {
-    handlePlaybuzzItemEvent(event, messageName, handler);
+    handleExcoItemEvent(event, messageName, handler);
   }
 }
 
@@ -100,40 +100,40 @@ export function handleMessageByName(element, event, messageName, handler) {
  * @param {string} eventName
  * @param {Function} handler
  */
-function handlePlaybuzzItemEvent(event, eventName, handler) {
-  const data = parsePlaybuzzEventData(getData(event));
+function handleExcoItemEvent(event, eventName, handler) {
+  const data = parseExcoEventData(getData(event));
   if (data[eventName]) {
     handler(data[eventName]);
   }
 }
 
 /**
- * Parses Playbuzz Event Data
+ * Parses Ex.Co Event Data
  *
  * @param {?JsonObject|string|undefined} data
  * @return {?JsonObject|undefined} parsedObject
  */
-function parsePlaybuzzEventData(data) {
+function parseExcoEventData(data) {
   if (typeof data === 'object') {
     return data;
   }
-  const err = 'error parsing json message from playbuzz item: ' + data;
+  const err = 'error parsing json message from exco item: ' + data;
   try {
     if (typeof data === 'string') {
       return parseJson(/** @type {string} */ (data));
     }
   } catch (e) {
-    rethrowAsync('amp-playbuzz', err, e);
+    rethrowAsync('amp-exco', err, e);
     return dict({});
   }
 
-  rethrowAsync('amp-playbuzz', err, data);
+  rethrowAsync('amp-exco', err, data);
   return dict({});
 }
 
 /**
  * @param {Object} options
- * @return {string} playbuzzEmbedUrl
+ * @return {string} excoEmbedUrl
  */
 export function composeEmbedUrl(options) {
   const embedUrl =

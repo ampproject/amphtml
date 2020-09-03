@@ -96,8 +96,8 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
   },
   {
-    id: 'amp-playbuzz',
-    name: 'AMP extension for playbuzz items (launched)',
+    id: 'amp-exco',
+    name: 'AMP extension for exco items (launched)',
     spec: 'https://github.com/ampproject/amphtml/issues/6106',
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/6351',
   },

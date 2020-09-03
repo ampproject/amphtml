@@ -52,6 +52,7 @@ describe('Layout', () => {
       'AMP-AD',
       'AMP-ANIM',
       'AMP-EMBED',
+      'AMP-EXCO',
       'AMP-FACEBOOK',
       'AMP-FACEBOOK-COMMENTS',
       'AMP-FACEBOOK-PAGE',
@@ -61,7 +62,6 @@ describe('Layout', () => {
       'AMP-INSTAGRAM',
       'AMP-LIST',
       'AMP-PINTEREST',
-      'AMP-PLAYBUZZ',
       'AMP-TWITTER',
 
       // matched by video player naming convention (fake)

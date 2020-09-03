@@ -83,6 +83,7 @@ enum class Atom {
   AMP_DYNAMIC_CSS_CLASSES = 0x49f17,
   AMP_EMBED = 0x4c509,
   AMP_EMBEDLY_CARD = 0x4c510,
+  AMP_EXCO = 0x80e0c,
   AMP_EXPERIMENT = 0x4d50e,
   AMP_FACEBOOK = 0x4e30c,
   AMP_FACEBOOK_COMMENTS = 0x4e315,
@@ -128,7 +129,6 @@ enum class Atom {
   AMP_PAN_ZOOM = 0x7c80c,
   AMP_PINTEREST = 0x7e40d,
   AMP_PIXEL = 0x80509,
-  AMP_PLAYBUZZ = 0x80e0c,
   AMP_POSITION_OBSERVER = 0x82d15,
   AMP_POWR_PLAYER = 0x8420f,
   AMP_REACH_PLAYER = 0x85110,
@@ -2127,7 +2127,7 @@ inline constexpr std::array<uint32_t, 1 << 11> kNamesHashTable = {
   0x54c0c,   // ontimeupdate
   0x0,
   0x62305,   // image
-  0x80e0c,   // amp-playbuzz
+  0x80e0c,   // amp-exco
   0x0,
   0x0,
   0x0,

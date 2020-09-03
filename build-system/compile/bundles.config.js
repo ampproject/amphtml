@@ -819,7 +819,7 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
-    name: 'amp-playbuzz',
+    name: 'amp-exco',
     version: '0.1',
     latestVersion: '0.1',
     options: {hasCss: true},

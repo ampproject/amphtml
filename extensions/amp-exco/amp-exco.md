@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays any Playbuzz item content (e.g., list, poll, etc.).
+  text: Displays any Ex.Co or Playbuzz item content (e.g., list, poll, etc.).
 ---
 
 <!---
@@ -22,40 +22,40 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# amp-playbuzz
+# amp-exco
 
-Can be any item URL taken from [playbuzz.com](http://www.playbuzz.com).
+Can be any item URL taken from [ex.co](http://ex.co) or [playbuzz.com](http://www.playbuzz.com).
 
 ## Examples
 
-Playbuzz Item by plain url (without info, share-buttons, comments)
+Ex.Co Item by plain url (without info, share-buttons, comments)
 
 ```html
-<amp-playbuzz
-  src="https://www.playbuzz.com/HistoryUK/10-classic-christmas-movies"
+<amp-exco
+  src="https://app.ex.co/stories/HistoryUK/10-classic-christmas-movies"
   height="500"
 >
-</amp-playbuzz>
+</amp-exco>
 ```
 
-Playbuzz Item by item-id (can be found in the item's embed code)
+Ex.Co Item by item-id (can be found in the item's embed code)
 
 ```html
-<amp-playbuzz data-item="a6aa5a14-8888-4618-b2e3-fe6a30d8c51b" height="500">
-</amp-playbuzz>
+<amp-exco data-item="a6aa5a14-8888-4618-b2e3-fe6a30d8c51b" height="500">
+</amp-exco>
 ```
 
 With optional parameters (info, share-buttons, comments):
 
 ```html
-<amp-playbuzz
+<amp-exco
   src="https://www.playbuzz.com/HistoryUK/10-classic-christmas-movies"
   height="500"
   data-item-info="true"
   data-share-buttons="true"
   data-comments="true"
 >
-</amp-playbuzz>
+</amp-exco>
 ```
 
 ## Required attributes
@@ -65,13 +65,13 @@ With optional parameters (info, share-buttons, comments):
 <table>
   <tr>
     <td width="40%"><strong>src</strong></td>
-    <td>The URL for the Playbuzz item.
-    Can be any item URL taken from <a href="http://www.playbuzz.com">playbuzz.com</a></td>
+    <td>The URL for the Ex.Co item.
+    Can be any item URL taken from <a href="http://ex.co">ex.co</a> or <a href="http://www.playbuzz.com">playbuzz.com</a></td>
   </tr>
   <tr>
     <td width="40%"><strong>data-item</strong></td>
-    <td>The item id for the Playbuzz item.
-    Can be taken from the item's embed code (at the item's page at playbuzz website)</td>
+    <td>The item id for the Ex.Co item.
+    Can be taken from the item's embed code (at the item's page at Ex.Co website)</td>
   </tr>
 </table>
 
@@ -100,4 +100,4 @@ With optional parameters (info, share-buttons, comments):
 
 ## Validation
 
-See [amp-playbuzz rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-playbuzz/validator-amp-playbuzz.protoascii) in the AMP validator specification.
+See [amp-exco rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-exco/validator-amp-exco.protoascii) in the AMP validator specification.
