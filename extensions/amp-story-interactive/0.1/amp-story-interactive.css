@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
+/* 1em = 16px for interactive components, unless overriden by font-size */
 .i-amphtml-story-interactive-container {
   font-family: 'Poppins', sans-serif !important;
 }
 
 .i-amphtml-story-interactive-container {
   background: var(--interactive-prompt-background) !important;
-  border-radius: 32px !important;
+  border-radius: 2em !important;
 }
 
 .i-amphtml-story-interactive-prompt-container {
   display: flex !important;
   justify-items: center !important;
-  padding: 20px !important;
+  padding: 1.25em !important;
   color: var(--interactive-prompt-text-color) !important;
 }
 
@@ -35,12 +36,11 @@
   overflow : hidden !important;
   text-overflow: ellipsis !important;
   display: -webkit-box !important;
-  -webkit-line-clamp: 4 !important;
+  -webkit-line-clamp: var(--i-amphtml-interactive-prompt-clamp) !important;
   -webkit-box-orient: vertical !important;
   visibility: visible !important;
   font-size: var(--i-amphtml-interactive-prompt-text-size) !important;
   line-height: var(--i-amphtml-interactive-prompt-line-height) !important;
-  max-height: 112px !important;
   font-weight: bold !important;
   text-align: var(--interactive-prompt-alignment) !important;
 }
