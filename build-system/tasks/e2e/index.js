@@ -85,60 +85,58 @@ function createMocha_() {
 }
 
 // Refreshes require cache and adds file to a Mocha instance.
-function addMochaFile(mocha, file) {
+function addMochaFile_(mocha, file) {
   delete require.cache[path.resolve(file)];
   mocha.addFile(file);
 }
 
-async function e2e() {
-  await setUpTesting_();
+// Runs e2e tests on all files under test.
+async function runTests_() {
+  const mocha = createMocha_();
+  const addFile = addMochaFile_.bind(null, mocha);
 
-  // set up promise to return to gulp.task()
-  let resolve;
-  const deferred = new Promise((res) => {
-    resolve = res;
-  });
-
-  // run tests
-  if (!argv.watch) {
-    const mocha = createMocha_();
-    const addFile = addMochaFile.bind(null, mocha);
-
-    // specify tests to run
-    if (argv.files) {
-      getFilesFromArgv().forEach(addFile);
-    } else {
-      config.e2eTestPaths.forEach((path) => {
-        glob.sync(path).forEach(addFile);
-      });
-    }
-
-    log('Running tests...');
-    await reportTestStarted();
-    mocha.run(async (failures) => {
-      // end web server
-      await stopServer();
-
-      // end task
-      process.exitCode = failures ? 1 : 0;
-      resolve();
-    });
+  // specify tests to run
+  if (argv.files) {
+    getFilesFromArgv().forEach(addFile);
   } else {
-    const filesToWatch = argv.files
-      ? getFilesFromArgv()
-      : [config.e2eTestPaths];
-
-    log('Watching', cyan(filesToWatch), 'for changes...');
-    watch(filesToWatch).on('change', (file) => {
-      log('Detected a change in', cyan(file));
-      log('Running tests...');
-      const mocha = createMocha_();
-      addMochaFile(mocha, file);
-      mocha.run();
+    config.e2eTestPaths.forEach((path) => {
+      glob.sync(path).forEach(addFile);
     });
   }
 
-  return deferred;
+  log('Running tests...');
+  await reportTestStarted();
+
+  // return promise to gulp that resolves when there's an error.
+  return new Promise((resolve) => {
+    mocha.run(async (failures) => {
+      await stopServer();
+      process.exitCode = failures ? 1 : 0;
+      resolve();
+    });
+  });
+}
+
+// Watches files a under test, running affected e2e tests on changes.
+async function runWatch_() {
+  const filesToWatch = argv.files ? getFilesFromArgv() : config.e2eTestPaths;
+
+  log('Watching', cyan(filesToWatch), 'for changes...');
+  watch(filesToWatch).on('change', (file) => {
+    log('Detected a change in', cyan(file));
+    log('Running tests...');
+    const mocha = createMocha_();
+    addMochaFile_(mocha, file);
+    mocha.run();
+  });
+
+  // return non-resolving promise to gulp.
+  return new Promise();
+}
+
+async function e2e() {
+  await setUpTesting_();
+  return argv.watch ? runWatch_() : runTests_();
 }
 
 module.exports = {
