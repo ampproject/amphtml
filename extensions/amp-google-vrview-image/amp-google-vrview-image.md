@@ -65,7 +65,3 @@ Initial yaw of viewer, in degrees. Defaults to 0.
 ### yaw-only
 
 Can be specified to restrict motion to yaw only.
-
-## Validation
-
-See [amp-google-vrview-image rules](validator-amp-google-vrview-image.protoascii) in the AMP validator specification.
