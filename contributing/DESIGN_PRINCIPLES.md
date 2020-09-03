@@ -28,6 +28,10 @@ Don’t introduce components or features to AMP that can’t reliably run at 60f
 
 Some things can be made fast and are still a terrible user experience. AMPs should deliver a fantastic user experience and speed is just one part of that. Only compromise when lack of support for something would stop AMP from being widely used and deployed.
 
+## Be inclusive
+
+Remember that people have different abilities and use AMP in different ways, on different devices, and sometimes with assistive technologies. Make sure that AMP is accessible and usable by everyone.
+
 ## No "nicelists" or "allowed lists".
 
 We won’t give any special treatment to specific sites, domains or origins except where needed for security or performance reasons.

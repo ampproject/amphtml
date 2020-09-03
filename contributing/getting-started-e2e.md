@@ -464,6 +464,12 @@ Testing tips:
 
 For more help, see [How to get help](#how-to-get-help).
 
+# Perform manual tests
+
+Beyond technical/automated tests, manually test your changes and make sure that they work as expected, and that they follow AMP's [design principles](https://github.com/ampproject/amphtml/blob/master/contributing/DESIGN_PRINCIPLES.md). In particular, make sure that your changes are accessible - see [W3C WAI Easy Checks](https://www.w3.org/WAI/test-evaluate/preliminary/) for an initial set of suggested manual tests. Some aspects of manual testing can be semi-automated, using tools such as [Lighthouse](https://developers.google.com/web/tools/lighthouse) (which includes an accessibility audit report) and [Microsoft's Accessibility Insights](https://accessibilityinsights.io/).
+
+Note that for more extensive automated accessibility testing, there are further options available that integrate directly within existing test/integration workflows, such as [Deque's axe-core](https://github.com/dequelabs/axe-core).
+
 # Push your changes to your GitHub fork
 
 Up to this point you've been making changes in a branch on your local repository. Those changes aren't visible anywhere else--not even your GitHub fork--so if you want other people to see your changes you will need to push your branch to your GitHub fork. This is a necessary step to request a code review (known as a pull request) and to ultimately get your changes added to the amphtml repository.
