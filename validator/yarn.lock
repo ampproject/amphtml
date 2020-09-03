@@ -352,10 +352,10 @@ google-closure-compiler@20200830.0.0:
     google-closure-compiler-osx "^20200830.0.0"
     google-closure-compiler-windows "^20200830.0.0"
 
-google-closure-library@20200719.0.0:
-  version "20200719.0.0"
-  resolved "https://registry.yarnpkg.com/google-closure-library/-/google-closure-library-20200719.0.0.tgz#6d83ce2c7476da869d78cb93c8c0050e5ee8d3e3"
-  integrity sha512-QS+BJ+pHWdKhZVU9iMfL2+QtNxd0E9dcsmgcD+2+YXo5hjD+z+VvdwAbJtunuoR8ap4XzD6cWytwW5r+h+vcYQ==
+google-closure-library@20200830.0.0:
+  version "20200830.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-library/-/google-closure-library-20200830.0.0.tgz#9f3807e5a4af55ebf2c8a22853d53b8da39a48e8"
+  integrity sha512-s4ma73K+FTeVywSMjVOxQ435t6kPfSlxEtIflq7Gabp2fxAnc9i8vUpvT8ZP/GH89LwSJReIaBGtrn72rfNC5Q==
 
 growl@^1.10.0:
   version "1.10.5"
