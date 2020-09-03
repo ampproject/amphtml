@@ -344,7 +344,7 @@ Codepen with HTML and CSS of a poll, and a simple panel that could show how the 
 <br><br>
 Note: not all properties can be modified on this Codepen. When integrating, take into account other fields and variants such as prompt-text-color, prompt-background (if users want it different from the accent color, or if users want gradients), etc.
 <br><br>
-<a href="https://codepen.io/mszylkowski/pen/abNWzdb">https://codepen.io/mszylkowski/pen/abNWzdb</a>
+<a href="https://codepen.io/mszylkowski/pen/ZEWaBoZ">https://codepen.io/mszylkowski/pen/ZEWaBoZ</a>
 </td>
 </tr>
 <tr>
