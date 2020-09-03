@@ -46,7 +46,7 @@ module.exports = function ({types: t, template}) {
     return filename.endsWith('.jss.js');
   }
 
-  const seen = new Set();
+  const seen = new Map();
   function compileJss(JSS, filename) {
     const relativeFilepath = relative(join(__dirname, '../../..'), filename);
     const filehash = crypto
@@ -63,12 +63,12 @@ module.exports = function ({types: t, template}) {
             (c) => `-${c.toLowerCase()}`
           );
           const className = `${dashCaseKey}-${filehash}`;
-          if (seen.has(className)) {
+          if (seen.has(className) && seen.get(className) !== filename) {
             throw new Error(
               `Classnames must be unique across all files. Found a duplicate: ${className}`
             );
           }
-          seen.add(className);
+          seen.set(className, filename);
           return className;
         };
       },
