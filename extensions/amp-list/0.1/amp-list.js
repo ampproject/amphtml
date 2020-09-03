@@ -763,7 +763,7 @@ export class AmpList extends AMP.BaseElement {
 
     let fetch;
     if (this.ssrTemplateHelper_.isEnabled()) {
-      fetch = this.ssrTemplate_(opt_refresh);
+      fetch = this.ssrTemplate_(refresh);
     } else {
       if (this.isAmpStateSrc_(elementSrc)) {
         fetch = this.getAmpStateJson_(elementSrc);

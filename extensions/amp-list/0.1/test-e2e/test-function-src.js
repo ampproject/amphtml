@@ -56,17 +56,23 @@ describes.endtoend(
     });
 
     it('should load more when button is clicked until no more load-more-src', async function () {
-      const loadMore = await controller.findElement('[load-more-button]');
-      await controller.click(loadMore)
+      // These two assertions are just to create a wait period ensuring the loadMore button
+      // is "clickable".
+      // TODO(samouri): expose a method on controller to wait for an element to be interactable.
+      await controller.findElement('[role=listitem]:nth-child(3)');
+      const loadMore = await controller.findElement('[load-more-clickable]');
 
-      return poll(25, async () => {
-        const listItems = await getListItems(controller);
-        return listItems.length === 15;
-      }); 
+      await controller.click(loadMore);
+
+      const fifteenthItem = await controller.findElement(
+        '[role=listitem]:nth-child(15)'
+      );
+      await expect(fifteenthItem).to.be.ok;
+      const items = await getListItems(controller);
+      await expect(items.length).equal(15);
     });
   }
 );
-
 
 function getListContainer(controller) {
   return controller.findElement('div[role=list]');
