@@ -85,12 +85,11 @@ const BUTTON = {
  * @param {string} className
  */
 function setClassOnHover(hoverEl, targetEl, className) {
-  hoverEl.addEventListener('mouseenter', () => {
-    targetEl.classList.add(className);
-  });
-  hoverEl.addEventListener('mouseleave', () => {
-    targetEl.classList.remove(className);
-  });
+  const enterListener = () => targetEl.classList.add(className);
+  const exitListener = () => targetEl.classList.remove(className);
+  hoverEl.addEventListener('mouseenter', enterListener);
+  hoverEl.addEventListener('mouseleave', exitListener);
+  return [enterListener, exitListener];
 }
 
 /**
@@ -212,6 +211,9 @@ export class PaginationButtons {
     /** @private {?ButtonState_1_0_Def} */
     this.forwardButtonStateToRestore_ = null;
 
+    /** @private {?Array<function(!Event)>} */
+    this.hoverListeners_ = null;
+
     this.initializeListeners_();
 
     this.attach_();
@@ -228,17 +230,21 @@ export class PaginationButtons {
   }
 
   addHoverListeners_() {
-    setClassOnHover(
+    if (this.hoverListeners_) return;
+
+    const forwardButtonListeners = setClassOnHover(
       this.forwardButton_.element,
       this.ampStory_.element,
       'i-amphtml-story-next-hover'
     );
 
-    setClassOnHover(
+    const backButtonListeners = setClassOnHover(
       this.backButton_.element,
       this.ampStory_.element,
       'i-amphtml-story-prev-hover'
     );
+
+    this.hoverListeners_ = forwardButtonListeners.concat(backButtonListeners);
   }
 
   /**
@@ -276,6 +282,14 @@ export class PaginationButtons {
       (isVisible) => {
         this.onSystemUiIsVisibleStateUpdate_(isVisible);
       }
+    );
+
+    this.storeService_.subscribe(
+      StateProperty.UI_STATE,
+      (uiState) => {
+        this.onUIStateUpdate_(uiState);
+      },
+      true /** callToInitialize */
     );
   }
 
@@ -348,6 +362,15 @@ export class PaginationButtons {
       this.backButton_.updateState(BackButtonStates.HIDDEN);
       this.forwardButtonStateToRestore_ = this.forwardButton_.getState();
       this.forwardButton_.updateState(ForwardButtonStates.HIDDEN);
+    }
+  }
+
+  onUIStateUpdate_(uiState) {
+    if (
+      uiState === UIType.DESKTOP_PANELS ||
+      uiState === UIType.DESKTOP_FULLBLEED
+    ) {
+      this.addHoverListeners_();
     }
   }
 }
