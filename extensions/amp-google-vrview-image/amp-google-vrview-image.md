@@ -26,7 +26,7 @@ limitations under the License.
 
 # amp-google-vrview-image
 
-## Overview
+## Usage
 
 See [Google VR View](https://developers.google.com/vr/concepts/vrview) for more details.
 
@@ -36,8 +36,6 @@ VR view supports mono and stereo 360 images. Note:
 - For maximum compatibility and performance, image dimensions should be powers of two (e.g., 2048 or 4096).
 - Mono images should be 2:1 aspect ratio (e.g. 4096 x 2048).
 - Stereo images should be 1:1 aspect ratio (e.g. 4096 x 4096).
-
-## Example
 
 ```html
 <amp-google-vrview-image
@@ -52,23 +50,22 @@ VR view supports mono and stereo 360 images. Note:
 
 ## Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>src</strong></td>
-    <td>The source URL of a stereo image. Must resolve to https. See notes above on what
-kind of image can be passed here.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>stereo</strong></td>
-    <td>If specified, the image provided by the <code>src</code> attribute is considered to be a stereo
-image (see above), otherwise it's a mono image.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>yaw</strong></td>
-    <td>Initial yaw of viewer, in degrees. Defaults to 0.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>yaw-only</strong></td>
-    <td>Can be specified to restrict motion to yaw only.</td>
-  </tr>
-</table>
+### src
+
+The source URL of a stereo image. Must resolve to https. See notes above on what kind of image can be passed here.
+
+### stereo
+
+If specified, the image provided by the `src` attribute is considered to be a stereo image (see above), otherwise it's a mono image.
+
+### yaw
+
+Initial yaw of viewer, in degrees. Defaults to 0.
+
+### yaw-only
+
+Can be specified to restrict motion to yaw only.
+
+## Validation
+
+See [amp-google-vrview-image rules](validator-amp-google-vrview-image.protoascii) in the AMP validator specification.
