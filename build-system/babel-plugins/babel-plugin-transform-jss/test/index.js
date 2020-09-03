@@ -21,25 +21,45 @@ const runner = require('@babel/helper-plugin-test-runner').default;
 runner(__dirname);
 
 // eslint-disable-next-line no-undef
-test('throws when duplicate classname is found', () => {
+describe('jss transform tests', () => {
   const fileContents = `
 import {createUseStyles} from 'react-jss';
-export const useStyles = createUseStyles({button: {fontSize: 12}});
-    `;
+export const useStyles = createUseStyles({button: {fontSize: 12}});`;
+
   const plugins = [path.join(__dirname, '..')];
   const caller = {name: 'babel-jest'};
-  let filename;
 
-  // Transforming the same file contents twice should yield the same classnames, resulting in an error.
-  expect(() => {
-    filename = 'test1.jss.js';
-    babel.transformSync(fileContents, {filename, plugins, caller});
-    filename = 'test2.jss.js';
-    babel.transformSync(fileContents, {filename, plugins, caller});
-  }).toThrow(/Classnames must be unique across all files/);
+  // eslint-disable-next-line no-undef
+  test.only('transforming the same file contents twice should throw if there is a hash collision with filename', () => {
+    let filename;
+    expect(() => {
+      stubCreateHash(() => {
+        filename = 'test1.jss.js';
+        babel.transformSync(fileContents, {filename, plugins, caller});
+        filename = 'test2.jss.js';
+        babel.transformSync(fileContents, {filename, plugins, caller});
+      });
+    }).toThrow(/Classnames must be unique across all files/);
+  });
 
-  // Transforming the actual same file twice should work (e.g. watch mode).
-  filename = 'test.jss.js';
-  babel.transformSync(fileContents, {filename, plugins, caller});
-  babel.transformSync(fileContents, {filename, plugins, caller});
+  // eslint-disable-next-line no-undef
+  test('transforming same exact file twice is fine (e.g. watch mode)', () => {
+    const filename = 'test.jss.js';
+    babel.transformSync(fileContents, {filename, plugins, caller});
+    babel.transformSync(fileContents, {filename, plugins, caller});
+  });
 });
+
+function stubCreateHash(fn) {
+  const hash = require('../create-hash');
+  const originalCreateHash = hash.createHash;
+  hash.createHash = () => 'abcedf';
+
+  try {
+    fn();
+    hash.createHash = originalCreateHash;
+  } catch (err) {
+    hash.createHash = originalCreateHash;
+    throw err;
+  }
+}

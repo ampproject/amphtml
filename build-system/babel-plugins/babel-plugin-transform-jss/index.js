@@ -36,7 +36,7 @@
  * ```
  */
 
-const crypto = require('crypto');
+const hash = require('./create-hash');
 const {create} = require('jss');
 const {default: preset} = require('jss-preset-default');
 const {relative, join} = require('path');
@@ -49,11 +49,7 @@ module.exports = function ({types: t, template}) {
   const seen = new Map();
   function compileJss(JSS, filename) {
     const relativeFilepath = relative(join(__dirname, '../../..'), filename);
-    const filehash = crypto
-      .createHash('sha256')
-      .update(relativeFilepath)
-      .digest('hex')
-      .slice(0, 7);
+    const filehash = hash.createHash(relativeFilepath);
     const jss = create({
       ...preset(),
       createGenerateId: () => {
@@ -79,7 +75,6 @@ module.exports = function ({types: t, template}) {
   return {
     visitor: {
       CallExpression(path, state) {
-        // TODO: Can I skip the whole file if not jss?
         const {filename} = state.file.opts;
         if (!isJssFile(filename)) {
           return;
