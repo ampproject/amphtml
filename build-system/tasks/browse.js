@@ -80,7 +80,7 @@ function doBrowse(url) {
   return exec(`${browseCmd} ${url}`);
 }
 
-module.exports = {browse};
+module.exports = {browse, doBrowse};
 
 browse.description = 'Open a URL in the browser';
 browse.flags = {
