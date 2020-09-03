@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {FitText} from './fit-text';
+import {FacebookComments} from './facebook-comments';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {isExperimentOn} from '../../../src/experiments';
@@ -23,16 +23,13 @@ import {dict} from '../../../src/utils/object';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
-const TAG = 'amp-fit-text';
+const TAG = 'amp-facebook-comments';
 
-const getFontSizeAttrs = (element) =>
-  dict({
-    'maxFontSize': getLengthNumeral(element.getAttribute('max-font-size')),
-    'minFontSize': getLengthNumeral(element.getAttribute('min-font-size')),
-  });
+// const getPropsObject by doing element.getAttribute or element.attributes
 
-class AmpFitText extends PreactBaseElement {
+class AmpFacebookComments extends PreactBaseElement {
   /** @override */
+  // TODO
   init() {
     const attributeOb = new MutationObserver(() => {
       this.mutateProps(getFontSizeAttrs(this.element));
@@ -56,23 +53,19 @@ class AmpFitText extends PreactBaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    userAssert(
-      isExperimentOn(this.win, 'amp-fit-text-bento'),
-      'expected amp-fit-text-bento experiment to be enabled'
-    );
     return isLayoutSizeDefined(layout);
   }
 }
 
 /** @override */
-AmpFitText['Component'] = FitText;
+AmpFacebookComments['Component'] = FacebookComments;
 
 /** @override */
-AmpFitText['passthrough'] = true;
+AmpFacebookComments['passthrough'] = false; // TODO: remove this comment later. Only true if have children
 
 /** @override */
-AmpFitText['layoutSizeDefined'] = true;
+AmpFacebookComments['layoutSizeDefined'] = true;
 
 AMP.extension(TAG, '1.0', (AMP) => {
-  AMP.registerElement(TAG, AmpFitText);
+  AMP.registerElement(TAG, AmpFacebookComments);
 });

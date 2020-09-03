@@ -17,7 +17,7 @@
 import {assertHttpsUrl, parseUrlDeprecated} from './url';
 import {dev, devAssert, user, userAssert} from './log';
 import {dict} from './utils/object';
-import {getContextMetadata} from '../src/iframe-attributes';
+import {getContextMetadata, getPreactContextMetadata} from '../src/iframe-attributes';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
 import {setStyle} from './style';
@@ -63,7 +63,7 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
  * Produces the attributes for the ad template.
  * @param {!Window} parentWindow
  * @param {!AmpElement} element
- * @param {string=} opt_type
+ * @param {string=} type
  * @param {Object=} opt_context
  * @return {!JsonObject} Contains
  *     - type, width, height, src attributes of <amp-ad> tag. These have
@@ -71,16 +71,19 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
  *     - data-* attributes of the <amp-ad> tag with the "data-" removed.
  *     - A _context object for internal use.
  */
-function getPreactFrameAttributes(parentWindow, element, opt_type, opt_context) {
-  const type = opt_type;
+function getPreactFrameAttributes(parentWindow, element, passedProps, type, opt_context) {
   const sentinel = generateSentinel(parentWindow);
   let attributes = dict();
-  // Do these first, as the other attributes have precedence.
-  addDataAndJsonAttributes_(element, attributes);
-  attributes = getContextMetadata(parentWindow, element, sentinel, attributes, true);
+  attributes = getPreactContextMetadata(parentWindow, element, sentinel, attributes, true);
+  for (const name in passedProps) {
+    // data-vars- is reserved for amp-analytics
+    // see https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/analytics-vars.md#variables-as-data-attribute
+    if (!startsWith(name, 'vars')) {
+      attributes[name] = passedProps[name];
+    }
+  }
   attributes['type'] = type;
-  // attributes['_context'] = opt_context;
-  console.log("Frame Attributes", attributes);
+  attributes['_context'] = opt_context ? opt_context : attributes['_context'];
   return attributes;
 }
 
@@ -186,19 +189,34 @@ export function getIframe(
   return iframe;
 }
 
+/**
+ * Creates the iframe props for the embed. Applies correct size and passes the embed
+ * attributes to the frame via JSON inside the fragment.
+ * @param {!Window} parentWindow
+ * @param {!AmpElement} parentElement
+ * @param {!Object=} passedProps
+ * @param {string=} opt_type
+ * @param {Object=} opt_context
+ * @param {string=} opt_tagname
+  * @return {!HTMLIFrameElement} The iframe.
+  */
 export function getIframeProps(
   parentWindow,
   parentElement,
+  passedProps,
   opt_type,
   opt_context,
-  attributes_object
+  opt_tagname,
 ) {
   let attributes = getPreactFrameAttributes(
     parentWindow,
     parentElement,
+    passedProps,
     opt_type,
     opt_context
   );
+
+  attributes._context.tagName = opt_tagname ? opt_tagname : attributes['_context']['tagName'];
 
   if (!count[attributes['type']]) {
     count[attributes['type']] = 0;
@@ -251,7 +269,6 @@ export function getIframeProps(
   }
 
   returnObj["data-amp-3p-sentinel"] = attributes['_context']['sentinel'];
-  console.log("returnObj", returnObj);
   return returnObj;
 }
 
@@ -264,6 +281,7 @@ export function getIframeProps(
  * @param {!JsonObject} attributes The destination.
  * visibleForTesting
  */
+
 export function addDataAndJsonAttributes_(element, attributes) {
   const {dataset} = element;
   for (const name in dataset) {
@@ -273,6 +291,7 @@ export function addDataAndJsonAttributes_(element, attributes) {
       attributes[name] = dataset[name];
     }
   }
+
   const json = element.getAttribute('json');
   if (json) {
     const obj = tryParseJson(json);

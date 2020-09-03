@@ -26,11 +26,13 @@ export default {
 };
 
 export const _default = () => {
-  const minFontSize = number('minFontSize', 6);
-  const maxFontSize = number('maxFontSize', 72);
-  const width = number('width', 300);
-  const height = number('height', 200);
+  const width = number('width', 900);
+  const height = number('height', 900);
   return (
-    <FacebookComments></FacebookComments>
+    <FacebookComments 
+    data-href="http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html" 
+    width={width}
+    height={height}
+    ></FacebookComments>
   );
 };

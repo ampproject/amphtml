@@ -81,17 +81,7 @@ export function getContextMetadata(
 
   // TODO(alanorozco): Redesign data structure so that fields not exposed by
   // AmpContext are not part of this object.
-  let layoutRect;
-  if (!opt_preactmode) {
-    layoutRect = element.getPageLayoutBox();
-  } else {
-    layoutRect = {
-      left: 10,
-      top: 10,
-      width: 500,
-      height: 500
-    }
-  }
+    const layoutRect = element.getPageLayoutBox();
   
 
   // Use JsonObject to preserve field names so that ampContext can access
@@ -116,20 +106,9 @@ export function getContextMetadata(
     },
     'startTime': startTime,
     'tagName': element.tagName,
-    // 'mode': getModeObject(opt_preactmode=true),
-    'mode': {
-      localDev: true,
-      development: true,
-      esm: false,
-      minified: false,
-      lite: false,
-      test: false,
-      log: null,
-      version: null,
-      rtvVersion: null,
-    },
+    'mode': getModeObject(opt_preactmode=true),
     'canary': isCanary(parentWindow),
-    'hidden': opt_preactmode ? false : !ampdoc.isVisible(),
+    'hidden': !ampdoc.isVisible(),
     'initialLayoutRect': layoutRect
       ? {
           'left': layoutRect.left,
@@ -138,56 +117,94 @@ export function getContextMetadata(
           'height': layoutRect.height,
         }
       : null,
-    // 'initialIntersection': element.getIntersectionChangeEntry(),
-    'initialIntersection': {
-      "time": 903.9600000032806,
-      "rootBounds": {
-        "left": 0,
-        "top": 0,
-        "width": 1680,
-        "height": 948,
-        "bottom": 948,
-        "right": 1680,
-        "x": 0,
-        "y": 0
-      },
-      "boundingClientRect": {
-        "left": 475,
-        "top": 780,
-        "width": 731,
-        "height": 988,
-        "bottom": 1768,
-        "right": 1206,
-        "x": 475,
-        "y": 780
-      },
-      "intersectionRect": {
-        "left": 475,
-        "top": 780,
-        "width": 731,
-        "height": 168,
-        "bottom": 948,
-        "right": 1206,
-        "x": 475,
-        "y": 780
-      },
-      "intersectionRatio": 0.1700404858299595
-    },
+    'initialIntersection': element.getIntersectionChangeEntry(),
     'domFingerprint': DomFingerprint.generate(element),
     'experimentToggles': experimentToggles(parentWindow),
     'sentinel': sentinel,
-    'tagName': "AMP-FACEBOOK-COMMENTS"
   });
   const adSrc = element.getAttribute('src');
   if (adSrc) {
     attributes['src'] = adSrc;
   }
-  attributes = {
-    href: "http://www.directlyrics.com/adele-25-complete-album-lyrics-news.html",
-    width: layoutRect.width,
-    height: layoutRect.height,
-    type: "facebook",
+  return attributes;
+}
+
+/**
+ * Produces the attributes for the ad template for Preact components.
+ * @param {!Window} parentWindow
+ * @param {!AmpElement} element
+ * @param {string} sentinel
+ * @param {!JsonObject=} attributes
+ * @param {!boolean} opt_preactmode
+ * @return {!JsonObject}
+ */
+export function getPreactContextMetadata(
+  parentWindow,
+  element,
+  sentinel,
+  attributes,
+) {
+  const startTime = Date.now();
+  attributes = attributes ? attributes : dict();
+  if (element.getAttribute('title')) {
+    attributes['title'] = element.getAttribute('title');
+  }
+  let locationHref = parentWindow.location.href;
+  // This is really only needed for tests, but whatever. Children
+  // see us as the logical origin, so telling them we are about:srcdoc
+  // will fail ancestor checks.
+  if (locationHref == 'about:srcdoc') {
+    locationHref = parentWindow.parent.location.href;
+  }
+
+  const docInfo = {
+      sourceUrl: parentWindow.location.href,
+      canonicalUrl: parentWindow.location.href,
+      pageViewId: Math.random().toString(),
+      pageViewId64: Promise.resolve(Math.random().toString()),
+      linkRels: {},
+      // (from src/service/document-info-impl.js#L175)
+      viewport: document.head.querySelector('meta[name="viewport"]') ? document.head.querySelector('meta[name="viewport"]').getAttribute('content') : null,
+      replaceParams: {},
+   };
+   const referrer = document.referrer;
+
+  // Use JsonObject to preserve field names so that ampContext can access
+  // values with name
+  // ampcontext.js and this file are compiled in different compilation unit
+
+  // Note: Field names can by perserved by using JsonObject, or by adding
+  // perserved name to extern. We are doing both right now.
+  // Please also add new introduced variable
+  // name to the extern list.
+  const _context = dict({
+    'ampcontextVersion': internalRuntimeVersion(),
+    'ampcontextFilepath': `${
+      urls.thirdParty
+    }/${internalRuntimeVersion()}/ampcontext-v0.js`,
+    'sourceUrl': docInfo.sourceUrl,
+    'referrer': referrer,
+    'canonicalUrl': docInfo.canonicalUrl,
+    'pageViewId': docInfo.pageViewId,
+    'location': {
+      'href': locationHref,
+    },
+    'startTime': startTime,
+    'tagName': element.tagName,
+    'mode': {},
+    'initialLayoutRect': {},
+    'canary': isCanary(parentWindow),
+    'hidden': false,
+    'initialIntersection': {},
+    'domFingerprint': DomFingerprint.generate(element),
+    'experimentToggles': experimentToggles(parentWindow),
+    'sentinel': sentinel,
+  });
+  const adSrc = element.getAttribute('src');
+  if (adSrc) {
+    attributes['src'] = adSrc;
+  }
+  return {
     _context: JSON.parse(JSON.stringify(_context))
   };
-  return attributes;
 }

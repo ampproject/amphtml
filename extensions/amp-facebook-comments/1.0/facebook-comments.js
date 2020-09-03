@@ -3,38 +3,34 @@ import {useResourcesNotify} from '../../../src/preact/utils';
 import {getIframeProps} from '../../../src/3p-frame';
 import { ContainWrapper } from "../../../src/preact/component";
 
+const TAG = "AMP-FACEBOOK-COMMENTS";
 
+
+// TODO: After adding to type, do FB comments props
 /**
- * @param {!JsonObject} props
- *  type: !string,
- *  href: ?string,
- *  target: ?string,
- *  width: ?string,
- *  height: ?string,
- *  background: ?string,
- *  tabIndex: ?string,
- *  style: ?string,
+ * @param {!FacebookCommentsProps} props
  * @return {PreactDef.Renderable}
  */
-export function FacebookComments(prop) {
+export function FacebookComments(props) {
+  useResourcesNotify();
+  const locale = props['data-locale'] ? props['data-locale'] : 'EN_US';
+  let passedAttributes = Object.assign({}, datasetFromProps(props));
+  passedAttributes['width'] = props['width'];
+  passedAttributes['height'] = props['height'];
   const iframeProps = getIframeProps(
     window,
     document.body,
+    passedAttributes,
     "facebook",
     undefined,
-    undefined,
-    {
-      attributes: { _context: { tagName: "AMP-FACEBOOK-COMMENTS" } },
-    }
+    TAG,
   );
 
+  document.body.append(document.createElement('script').setAttribute('src', 'https://connect.facebook.net/' + locale + '/sdk.js'));
   return (
-    <div>
-      <script src='https://connect.facebook.net/EN_US/sdk.js'></script>
-    <ContainWrapper size layout paint style={{ width: 600, height: 900 }}>
+    <ContainWrapper size layout paint style={{ width: props['width'], height: props['height'] }}>
       <iframe {...iframeProps} />
     </ContainWrapper>
-    </div>
   );
 }
 

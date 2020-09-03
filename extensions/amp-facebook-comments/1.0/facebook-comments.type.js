@@ -16,11 +16,15 @@
 
 /** @externs */
 
-/**
+ /**
  * @typedef {{
- *   minFontSize: number,
- *   maxFontSize: number,
- *   children: (?PreactDef.Renderable|undefined),
+ *  data-href: string,
+ *  data-locale: ?string,
+ *  data-numposts: ?number,
+ *  data-order-by: ?string,
+ *  width: ?number,
+ *  height: ?number,
+ * @return {PreactDef.Renderable}
  * }}
  */
-var FitTextProps;
+var FacebookCommentsProps;
