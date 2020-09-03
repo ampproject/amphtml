@@ -15,7 +15,7 @@
  */
 
 import * as Preact from './index';
-import {createContext, useContext} from './index';
+import {createContext, useContext, useMemo} from './index';
 
 /** @type {PreactDef.Context} */
 let context;
@@ -47,13 +47,25 @@ function getAmpContext() {
  * @param {!AmpContextDef.ProviderProps} props
  * @return {!PreactDef.VNode}
  */
-export function WithAmpContext({renderable, playable, notify, children}) {
+export function WithAmpContext({
+  renderable: renderableProp,
+  playable: playableProp,
+  notify: notifyProp,
+  children,
+}) {
   const parent = useAmpContext();
-  const current = /** @type {!AmpContextDef.ContextType} */ ({
-    renderable: renderable && parent.renderable,
-    playable: playable && parent.playable,
-    notify: notify || parent.notify,
-  });
+  const renderable = renderableProp && parent.renderable;
+  const playable = playableProp && parent.playable;
+  const notify = notifyProp || parent.notify;
+  const current = useMemo(
+    () =>
+      /** @type {!AmpContextDef.ContextType} */ ({
+        renderable,
+        playable,
+        notify,
+      }),
+    [renderable, playable, notify]
+  );
   const AmpContext = getAmpContext();
   return <AmpContext.Provider children={children} value={current} />;
 }
