@@ -16,6 +16,7 @@
 
 import {getMode} from '../mode';
 import {urls} from '../config';
+import {getOutputDir} from '../../build-system/tasks/helpers';
 
 /**
  * Internal structure that maintains the state of an extension through loading.
@@ -40,7 +41,7 @@ export function calculateScriptBaseUrl(location, opt_isLocalDev) {
     if (location.protocol == 'about:') {
       prefix = '';
     }
-    return `${prefix}/dist`;
+    return `${prefix}/${getOutputDir()}`;
   }
   return urls.cdn;
 }
