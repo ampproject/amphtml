@@ -20,7 +20,9 @@ const argv = require('minimist')(process.argv.slice(2));
 const ciReporter = require('./mocha-ci-reporter');
 const config = require('../../test-configs/config');
 const dotsReporter = require('./mocha-dots-reporter');
+const fs = require('fs');
 const glob = require('glob');
+const http = require('http');
 const log = require('fancy-log');
 const Mocha = require('mocha');
 const path = require('path');
@@ -30,6 +32,8 @@ const {
   installPackages,
 } = require('../../common/utils');
 const {cyan} = require('ansi-colors');
+const {doBrowse} = require('../browse');
+const {execOrDie} = require('../../common/exec');
 const {HOST, PORT, startServer, stopServer} = require('../serve');
 const {isTravisBuild} = require('../../common/travis');
 const {reportTestStarted} = require('../report-test-status');
@@ -37,6 +41,10 @@ const {watch} = require('gulp');
 
 const SLOW_TEST_THRESHOLD_MS = 2500;
 const TEST_RETRIES = isTravisBuild() ? 2 : 0;
+
+const COV_DOWNLOAD_PATH = '/coverage/download';
+const COV_OUTPUT_DIR = './test/coverage-e2e';
+const COV_OUTPUT_HTML = path.resolve(COV_OUTPUT_DIR, 'lcov-report/index.html');
 
 // Set up the e2e testing environment.
 async function setUpTesting_() {
@@ -90,6 +98,43 @@ function addMochaFile_(mocha, file) {
   mocha.addFile(file);
 }
 
+/**
+ * Fetch aggregated coverage data from server.
+ * @param {string} outDir relative path to coverage files directory.
+ */
+async function fetchCoverage_(outDir) {
+  // Note: We could access the coverage UI directly through the server started
+  // for the e2e tests, but then that coverage data would vanish once that
+  // server instance was closed. This method will persist the coverage data so
+  // it can be accessed separately.
+
+  // Clear out previous coverage data.
+  fs.rmdirSync(outDir, {recursive: true});
+  fs.mkdirSync(outDir);
+
+  const zipFilename = path.join(outDir, 'coverage.zip');
+  const zipFile = fs.createWriteStream(zipFilename);
+  await new Promise((resolve, reject) => {
+    http
+      .get(
+        {
+          host: HOST,
+          port: PORT,
+          path: COV_DOWNLOAD_PATH,
+        },
+        (response) => {
+          response.pipe(zipFile);
+          zipFile.on('finish', () => zipFile.close(resolve));
+        }
+      )
+      .on('error', (err) => {
+        fs.unlinkSync(zipFilename);
+        reject(err);
+      });
+  });
+  execOrDie(`unzip -o ${zipFilename} -d ${outDir}`);
+}
+
 // Runs e2e tests on all files under test.
 async function runTests_() {
   const mocha = createMocha_();
@@ -110,6 +155,12 @@ async function runTests_() {
   // return promise to gulp that resolves when there's an error.
   return new Promise((resolve) => {
     mocha.run(async (failures) => {
+      if (argv.coverage) {
+        await fetchCoverage_(COV_OUTPUT_DIR);
+        if (!isTravisBuild()) {
+          doBrowse(`file://${COV_OUTPUT_HTML}`);
+        }
+      }
       await stopServer();
       process.exitCode = failures ? 1 : 0;
       resolve();
