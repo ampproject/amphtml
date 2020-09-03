@@ -411,8 +411,32 @@ export class ViewportImpl {
   /** @override */
   scrollIntoView(element) {
     if (IS_SXG) {
-      element./* OK */ scrollIntoView();
-      return Promise.resolve();
+      //element./* OK */ scrollIntoView();
+      //return Promise.resolve();
+      
+      /*
+      const {promise, resolve} = new Deferred();
+      const waiter = debounce(this.ampdoc.win, resolve, SCROLL_DELAY_);
+      this.ampdoc.win.addEventListener('scroll', waiter);
+      */
+      //element./* OK */ scrollIntoView({
+      /*  block: SCROLL_POS_TO_BLOCK_[pos],
+        behavior: 'smooth',
+      });
+      return promise.then(() => {
+        this.ampdoc.win.removeEventListener('scroll', waiter);
+      });
+      */
+      return new Promise((resolve, reject) => {
+        const waiter = debounce(this.ampdoc.win, resolve, SCROLL_DELAY_);
+        this.ampdoc.win.addEventListener('scroll', waiter);
+        element./* OK */ scrollIntoView({
+          block: 'center',
+          behavior: 'smooth',});
+      }).then(() => {
+        console.log("Removing listener");
+        this.ampdoc.win.removeEventListener('scroll', waiter);
+      });
     } else {
       return this.getScrollingContainerFor_(element).then((parent) =>
         this.scrollIntoViewInternal_(element, parent)
