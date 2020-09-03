@@ -276,10 +276,14 @@ function copyBuiltinElementsToChildWindow(parentWin, childWin) {
  * @param {!Window} childWin
  */
 function installPolyfillsInChildWindow(parentWin, childWin) {
-  installDocContains(childWin);
-  installDOMTokenList(childWin);
+  if (!IS_ESM) {
+    installDocContains(childWin);
+    installDOMTokenList(childWin);
+  }
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
-  installCustomElements(childWin, class {});
-  installIntersectionObserver(parentWin, childWin);
+  if (!IS_SXG) {
+    installCustomElements(childWin, class {});
+    installIntersectionObserver(parentWin, childWin);
+  }
 }

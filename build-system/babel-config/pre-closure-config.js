@@ -49,6 +49,7 @@ function getPreClosureConfig() {
   ];
   const replacePlugin = getReplacePlugin();
   const preClosurePlugins = [
+    argv.coverage ? 'babel-plugin-istanbul' : null,
     './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
     './build-system/babel-plugins/babel-plugin-transform-promise-resolve',
     '@babel/plugin-transform-react-constant-elements',
@@ -66,13 +67,14 @@ function getPreClosureConfig() {
     './build-system/babel-plugins/babel-plugin-is_minified-constant-transformer',
     './build-system/babel-plugins/babel-plugin-transform-amp-extension-call',
     './build-system/babel-plugins/babel-plugin-transform-html-template',
+    './build-system/babel-plugins/babel-plugin-transform-jss',
     './build-system/babel-plugins/babel-plugin-transform-version-call',
     './build-system/babel-plugins/babel-plugin-transform-simple-array-destructure',
     replacePlugin,
     './build-system/babel-plugins/babel-plugin-transform-amp-asserts',
     argv.esm || argv.sxg ? filterImportsPlugin : null,
     // TODO(erwinm, #28698): fix this in fixit week
-    //argv.esm
+    // argv.esm
     //? './build-system/babel-plugins/babel-plugin-transform-function-declarations'
     //: null,
     !isCheckTypes

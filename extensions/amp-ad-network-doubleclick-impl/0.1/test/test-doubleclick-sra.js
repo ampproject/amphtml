@@ -800,6 +800,40 @@ describes.realWin('Doubleclick SRA', config, (env) => {
       });
     });
 
+    it('should return a real response in no-siging exp', async () => {
+      const headerObj = {a: 'b', c: 123};
+      const slotDeferred = new Deferred();
+      const sraRequestAdUrlResolvers = [
+        slotDeferred.resolve,
+        {
+          resolve: () => {
+            throw new Error();
+          },
+        },
+      ];
+      sraBlockCallbackHandler(
+        creative,
+        headerObj,
+        /* done */ false,
+        sraRequestAdUrlResolvers,
+        /* sraUrl */ 'http://www.example.com',
+        /* isNoSigning */ true
+      );
+      expect(sraRequestAdUrlResolvers.length).to.equal(1);
+      const fetchResponse = await slotDeferred.promise;
+      expect(fetchResponse).to.be.an.instanceof(Response);
+      expect(fetchResponse.body).to.be.an.instanceof(ReadableStream);
+      expect(fetchResponse.headers.get('a')).to.equal('b');
+      expect(fetchResponse.headers.get('c')).to.equal('123');
+      expect(
+        fetchResponse.headers.get(RENDERING_TYPE_HEADER.toLowerCase())
+      ).to.equal(XORIGIN_MODE.SAFEFRAME);
+      expect(fetchResponse.headers.has('unknown')).to.be.false;
+
+      const text = await fetchResponse.text();
+      expect(text).to.equal(creative);
+    });
+
     it('should handle multiple blocks', () => {
       const blocks = [
         {
