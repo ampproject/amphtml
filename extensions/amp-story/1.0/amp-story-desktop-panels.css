@@ -72,8 +72,7 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
 }
 
 .i-amphtml-story-desktop-panels .prev-container {
-  border: 1px solid red;
-  left: calc(50% - var(--i-amphtml-story-page-50vw, 50%) * 3 - 32px) !important;
+  left: calc(50% - var(--i-amphtml-story-page-50vw, 50%) * .9 * 3 - 64px) !important;
 }
 
 .i-amphtml-story-desktop-panels amp-story-page[active],
@@ -86,15 +85,13 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
 
 .i-amphtml-story-desktop-panels amp-story-page[active] + amp-story-page:not([i-amphtml-desktop-position]):not([distance]), /** Position n+1 page on load, before attributes are set. */
 .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="1"],
-/* .i-amphtml-story-desktop-panels .next-container, */
 [dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="-1"],
 [dir=rtl] .i-amphtml-story-desktop-panels .prev-container {
   transform: perspective(1px) scale(0.9) translate(calc(var(--i-amphtml-story-page-50vw, 50%) + 64px), 0%) !important;
 }
 
 .i-amphtml-story-desktop-panels .next-container {
-  border: 1px solid green;
-  left: calc(var(--i-amphtml-story-page-50vw, 50%) + 50% + 32px ) !important
+  left: calc(var(--i-amphtml-story-page-50vw, 50%) * .9 + 50% + 64px) !important
 }
 
 .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="2"],
@@ -143,9 +140,9 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
 
 .i-amphtml-story-desktop-panels .i-amphtml-story-button-container {
   right: auto !important;
-  margin: auto !important;
-  max-height: 75vh !important;
-  max-width: calc(3/5 * 75vh) !important;
-  min-width: 320px !important;
-  min-height: 533px !important;
+  max-height: calc(75vh * .9) !important;
+  max-width: calc(3/5 * 75vh * .9) !important;
+  min-width: calc(320px * .9)!important;
+  min-height: calc(533px * .9)!important;
+  pointer-events: all !important;
 }
