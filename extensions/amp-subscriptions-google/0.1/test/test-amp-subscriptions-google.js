@@ -347,7 +347,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, (env) => {
     expect(fetchStub).to.not.be.called;
   });
 
-  it('should ingore valid LAA if referrer is not allowed', async () => {
+  it('should ignore valid LAA if referrer is not allowed', async () => {
     env.sandbox
       .stub(viewer, 'getReferrerUrl')
       .callsFake(() => Promise.resolve('http://www.example.com'));
