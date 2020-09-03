@@ -30,13 +30,11 @@ const {
   installPackages,
 } = require('../../common/utils');
 const {cyan} = require('ansi-colors');
+const {HOST, PORT, startServer, stopServer} = require('../serve');
 const {isTravisBuild} = require('../../common/travis');
 const {reportTestStarted} = require('../report-test-status');
-const {startServer, stopServer} = require('../serve');
 const {watch} = require('gulp');
 
-const HOST = 'localhost';
-const PORT = 8000;
 const SLOW_TEST_THRESHOLD_MS = 2500;
 const TEST_RETRIES = isTravisBuild() ? 2 : 0;
 
