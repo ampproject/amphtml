@@ -261,15 +261,15 @@ The endpoint will return the JSON on a GET request, useful for testing. The publ
 
 ## Sizing
 
-The component follows the container model. The size can be changed by overriding the element's font-size, which by default will be set to `3*var(--story-page-vmin)`. The component has an inherited `min-width: 14ems` and `max-width: 25ems`, unless it's a binary-poll or results, in which case it will have `max-width:18em`. This makes it occupy 75% of the width on portrait stories by default. The height will depend on the font-size and number of lines on the prompt. The width can be overridden as well, but it has to adhere to the min and max width.
-
-Overriding the font-size in ems will make the component behave consistent with aspect-ratios.
+The component follows the container model. The size can be changed by overriding the element's font-size, which by default will be set to `3*var(--story-page-vmin)`. The component has a `min-width: 14ems` and `max-width: 25ems`, unless it's a binary-poll or results, in which case it will have `max-width:18em`. This makes it occupy 75% of the width on portrait stories by default, but the width can be overridden with a CSS rule to any value in between the min and max. The height will depend on the font-size and number of lines on the prompt, so it cannot be specified.
 
 The demos section contains updated CSS to reflect all the mesurements in ems.
 
-## Creating pixel-perfect layouts with interactive components
+### Creating pixel-perfect layouts with interactive components using aspect-ratio
 
 While the component by default adapts to the screen size with the variable font-size, it doesn't stay perfectly consistent across screen sizes. It's possible to use the aspect-ratio layer in order to create layouts that will scale perfectly with different screen sizes, by using the `em` units on the component.
+
+The width can be set either in ems or percentages of the parent width, and it will behave perfectly consistent (while keeping it between the min and max widths).
 
 <table>
 <tr>
@@ -289,6 +289,14 @@ While the component by default adapts to the screen size with the variable font-
 
   <td><img src="https://user-images.githubusercontent.com/22420856/92150262-26ab1600-eded-11ea-9b16-0e482c2f7d58.png" width="300"></td></tr>
 </table>
+
+### Resizing components without aspect-ratio
+
+By default the component will take 75% of the width, but publishers can set a `font-size` rule on the component, overriding the initial value. The `font-size` can take em, rem, px, var(--story-page-vmin) or any other units, but responsive units are recommended to have a component that scales with the screen size.
+
+The `width` can also be overriden to any value between the min and max using ems, percentages or any other unit available. It is important to consider that by default the component will take 25ems of width, which resizes with the component helping it keep the same look. If the width is specified in different units from the font-size, the component could shift the contents on different screen sizes (specially the prompt and option titles), so it's recommended to keep in mind the units used (or keep the width untouched).
+
+The `height` is always auto and will adapt to fit the prompt and options with the given font-size and width.
 
 ## Demos
 
