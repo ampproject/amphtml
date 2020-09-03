@@ -46,8 +46,8 @@ exports.jsBundles = {
   'alp.max.js': {
     srcDir: './ads/alp/',
     srcFilename: 'install-alp.js',
-    destDir: `${outputDir}`,
-    minifiedDestDir: `${outputDir}`,
+    destDir: outputDir,
+    minifiedDestDir: outputDir,
     options: {
       toName: 'alp.max.js',
       includePolyfills: true,
@@ -57,8 +57,8 @@ exports.jsBundles = {
   'examiner.max.js': {
     srcDir: './src/examiner/',
     srcFilename: 'examiner.js',
-    destDir: `${outputDir}`,
-    minifiedDestDir: `${outputDir}`,
+    destDir: outputDir,
+    minifiedDestDir: outputDir,
     options: {
       toName: 'examiner.max.js',
       includePolyfills: true,
@@ -68,8 +68,8 @@ exports.jsBundles = {
   'ww.max.js': {
     srcDir: './src/web-worker/',
     srcFilename: 'web-worker.js',
-    destDir: `${outputDir}`,
-    minifiedDestDir: `${outputDir}`,
+    destDir: outputDir,
+    minifiedDestDir: outputDir,
     options: {
       toName: 'ww.max.js',
       minifiedName: 'ww.js',
@@ -140,8 +140,8 @@ exports.jsBundles = {
   'video-iframe-integration.js': {
     srcDir: './src/',
     srcFilename: 'video-iframe-integration.js',
-    destDir: `${outputDir}`,
-    minifiedDestDir: `${outputDir}`,
+    destDir: outputDir,
+    minifiedDestDir: outputDir,
     options: {
       minifiedName: 'video-iframe-integration-v0.js',
       includePolyfills: false,
@@ -150,8 +150,8 @@ exports.jsBundles = {
   'amp-story-entry-point.js': {
     srcDir: './src/amp-story-player/amp-story-entry-point/',
     srcFilename: 'amp-story-entry-point.js',
-    destDir: `${outputDir}`,
-    minifiedDestDir: `${outputDir}`,
+    destDir: outputDir,
+    minifiedDestDir: outputDir,
     options: {
       minifiedName: 'amp-story-entry-point-v0.js',
       includePolyfills: false,
@@ -160,8 +160,8 @@ exports.jsBundles = {
   'amp-story-player.js': {
     srcDir: './src/amp-story-player/',
     srcFilename: 'amp-story-player.js',
-    destDir: `${outputDir}`,
-    minifiedDestDir: `${outputDir}`,
+    destDir: outputDir,
+    minifiedDestDir: outputDir,
     options: {
       minifiedName: 'amp-story-player-v0.js',
       includePolyfills: false,
@@ -170,8 +170,8 @@ exports.jsBundles = {
   'amp-inabox-host.js': {
     srcDir: './ads/inabox/',
     srcFilename: 'inabox-host.js',
-    destDir: `${outputDir}`,
-    minifiedDestDir: `${outputDir}`,
+    destDir: outputDir,
+    minifiedDestDir: outputDir,
     options: {
       toName: 'amp-inabox-host.js',
       minifiedName: 'amp4ads-host-v0.js',
@@ -181,8 +181,8 @@ exports.jsBundles = {
   'amp.js': {
     srcDir: './src/',
     srcFilename: 'amp.js',
-    destDir: `${outputDir}`,
-    minifiedDestDir: `${outputDir}`,
+    destDir: outputDir,
+    minifiedDestDir: outputDir,
     options: {
       minifiedName: 'v0.js',
       includePolyfills: true,
@@ -194,8 +194,8 @@ exports.jsBundles = {
   'amp-shadow.js': {
     srcDir: './src/',
     srcFilename: 'amp-shadow.js',
-    destDir: `${outputDir}`,
-    minifiedDestDir: `${outputDir}`,
+    destDir: outputDir,
+    minifiedDestDir: outputDir,
     options: {
       minifiedName: 'shadow-v0.js',
       includePolyfills: true,
@@ -204,8 +204,8 @@ exports.jsBundles = {
   'amp-inabox.js': {
     srcDir: './src/inabox/',
     srcFilename: 'amp-inabox.js',
-    destDir: `${outputDir}`,
-    minifiedDestDir: `${outputDir}`,
+    destDir: outputDir,
+    minifiedDestDir: outputDir,
     options: {
       toName: 'amp-inabox.js',
       minifiedName: 'amp4ads-v0.js',
