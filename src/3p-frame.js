@@ -95,99 +95,99 @@ function getPreactFrameAttributes(parentWindow, element, passedProps, type, opt_
  * @param {string=} opt_type
  * @param {Object=} opt_context
  * @param {!{
- *   disallowCustom,
- *   allowFullscreen,
- * }=} opt_options Options for the created iframe.
- * @return {!HTMLIFrameElement} The iframe.
- */
-export function getIframe(
-  parentWindow,
-  parentElement,
-  opt_type,
-  opt_context,
-  {disallowCustom, allowFullscreen} = {}
-) {
-  // Check that the parentElement is already in DOM. This code uses a new and
-  // fast `isConnected` API and thus only used when it's available.
-  devAssert(
-    parentElement['isConnected'] === undefined ||
-      parentElement['isConnected'] === true,
-    'Parent element must be in DOM'
-  );
-  const attributes = getFrameAttributes(
-    parentWindow,
-    parentElement,
-    opt_type,
-    opt_context
-  );
-  const iframe = /** @type {!HTMLIFrameElement} */ (parentWindow.document.createElement(
-    'iframe'
-  ));
-
-  if (!count[attributes['type']]) {
-    count[attributes['type']] = 0;
-  }
-  count[attributes['type']] += 1;
-
-  const ampdoc = parentElement.getAmpDoc();
-  const baseUrl = getBootstrapBaseUrl(
-    parentWindow,
-    ampdoc,
-    undefined,
-    disallowCustom
-  );
-  const host = parseUrlDeprecated(baseUrl).hostname;
-  // This name attribute may be overwritten if this frame is chosen to
-  // be the master frame. That is ok, as we will read the name off
-  // for our uses before that would occur.
-  // @see https://github.com/ampproject/amphtml/blob/master/3p/integration.js
-  const name = JSON.stringify(
-    dict({
-      'host': host,
-      'type': attributes['type'],
-      // https://github.com/ampproject/amphtml/pull/2955
-      'count': count[attributes['type']],
-      'attributes': attributes,
-    })
-  );
-
-  iframe.src = baseUrl;
-  iframe.ampLocation = parseUrlDeprecated(baseUrl);
-  iframe.name = name;
-  // Add the check before assigning to prevent IE throw Invalid argument error
-  if (attributes['width']) {
-    iframe.width = attributes['width'];
-  }
-  if (attributes['height']) {
-    iframe.height = attributes['height'];
-  }
-  if (attributes['title']) {
-    iframe.title = attributes['title'];
-  }
-  if (allowFullscreen) {
-    iframe.setAttribute('allowfullscreen', 'true');
-  }
-  iframe.setAttribute('scrolling', 'no');
-  setStyle(iframe, 'border', 'none');
-  /** @this {!Element} */
-  iframe.onload = function () {
-    // Chrome does not reflect the iframe readystate.
-    this.readyState = 'complete';
-  };
-  // Block synchronous XHR in ad. These are very rare, but super bad for UX
-  // as they block the UI thread for the arbitrary amount of time until the
-  // request completes.
-  iframe.setAttribute('allow', "sync-xhr 'none';");
-  const excludeFromSandbox = ['facebook'];
-  if (!excludeFromSandbox.includes(opt_type)) {
-    applySandbox(iframe);
-  }
-  iframe.setAttribute(
-    'data-amp-3p-sentinel',
-    attributes['_context']['sentinel']
-  );
-  return iframe;
-}
+  *   disallowCustom,
+  *   allowFullscreen,
+  * }=} opt_options Options for the created iframe.
+  * @return {!HTMLIFrameElement} The iframe.
+  */
+ export function getIframe(
+   parentWindow,
+   parentElement,
+   opt_type,
+   opt_context,
+   {disallowCustom, allowFullscreen} = {}
+ ) {
+   // Check that the parentElement is already in DOM. This code uses a new and
+   // fast `isConnected` API and thus only used when it's available.
+   devAssert(
+     parentElement['isConnected'] === undefined ||
+       parentElement['isConnected'] === true,
+     'Parent element must be in DOM'
+   );
+   const attributes = getFrameAttributes(
+     parentWindow,
+     parentElement,
+     opt_type,
+     opt_context
+   );
+   const iframe = /** @type {!HTMLIFrameElement} */ (parentWindow.document.createElement(
+     'iframe'
+   ));
+ 
+   if (!count[attributes['type']]) {
+     count[attributes['type']] = 0;
+   }
+   count[attributes['type']] += 1;
+ 
+   const ampdoc = parentElement.getAmpDoc();
+   const baseUrl = getBootstrapBaseUrl(
+     parentWindow,
+     ampdoc,
+     undefined,
+     disallowCustom
+   );
+   const host = parseUrlDeprecated(baseUrl).hostname;
+   // This name attribute may be overwritten if this frame is chosen to
+   // be the master frame. That is ok, as we will read the name off
+   // for our uses before that would occur.
+   // @see https://github.com/ampproject/amphtml/blob/master/3p/integration.js
+   const name = JSON.stringify(
+     dict({
+       'host': host,
+       'type': attributes['type'],
+       // https://github.com/ampproject/amphtml/pull/2955
+       'count': count[attributes['type']],
+       'attributes': attributes,
+     })
+   );
+ 
+   iframe.src = baseUrl;
+   iframe.ampLocation = parseUrlDeprecated(baseUrl);
+   iframe.name = name;
+   // Add the check before assigning to prevent IE throw Invalid argument error
+   if (attributes['width']) {
+     iframe.width = attributes['width'];
+   }
+   if (attributes['height']) {
+     iframe.height = attributes['height'];
+   }
+   if (attributes['title']) {
+     iframe.title = attributes['title'];
+   }
+   if (allowFullscreen) {
+     iframe.setAttribute('allowfullscreen', 'true');
+   }
+   iframe.setAttribute('scrolling', 'no');
+   setStyle(iframe, 'border', 'none');
+   /** @this {!Element} */
+   iframe.onload = function () {
+     // Chrome does not reflect the iframe readystate.
+     this.readyState = 'complete';
+   };
+   // Block synchronous XHR in ad. These are very rare, but super bad for UX
+   // as they block the UI thread for the arbitrary amount of time until the
+   // request completes.
+   iframe.setAttribute('allow', "sync-xhr 'none';");
+   const excludeFromSandbox = ['facebook'];
+   if (!excludeFromSandbox.includes(opt_type)) {
+     applySandbox(iframe);
+   }
+   iframe.setAttribute(
+     'data-amp-3p-sentinel',
+     attributes['_context']['sentinel']
+   );
+   return iframe;
+ }
 
 /**
  * Creates the iframe props for the embed. Applies correct size and passes the embed
